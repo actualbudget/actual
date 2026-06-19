@@ -578,10 +578,10 @@ export function BudgetFileSelection({
       }
     : {};
 
-  const onCreate = ({ testMode = false } = {}) => {
+  const onCreate = ({ testMode = false, scrollTestMode = false } = {}) => {
     if (!creating) {
       setCreating(true);
-      void dispatch(createBudget({ testMode }));
+      void dispatch(createBudget({ testMode, scrollTestMode }));
     }
   };
 
@@ -711,6 +711,18 @@ export function BudgetFileSelection({
               }}
             >
               <Trans>Create test file</Trans>
+            </Button>
+          )}
+          {isNonProductionEnvironment() && (
+            <Button
+              variant="primary"
+              onPress={() => onCreate({ scrollTestMode: true })}
+              style={{
+                ...narrowButtonStyle,
+                marginLeft: 10,
+              }}
+            >
+              <Trans>Create scroll test file</Trans>
             </Button>
           )}
         </View>

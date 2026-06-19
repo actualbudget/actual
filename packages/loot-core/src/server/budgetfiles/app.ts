@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import * as CRDT from '@actual-app/crdt';
 
-import { createTestBudget } from '#mocks/budget';
+import { createScrollTestBudget, createTestBudget } from '#mocks/budget';
 import { captureBreadcrumb, captureException } from '#platform/exceptions';
 import * as asyncStorage from '#platform/server/asyncStorage';
 import * as connection from '#platform/server/connection';
@@ -47,6 +47,7 @@ import {
 
 const DEMO_BUDGET_ID = '_demo-budget';
 const TEST_BUDGET_ID = '_test-budget';
+const SCROLL_TEST_BUDGET_ID = '_scroll-test-budget';
 
 export type BudgetFileHandlers = {
   'validate-budget-name': typeof handleValidateBudgetName;
@@ -59,6 +60,7 @@ export type BudgetFileHandlers = {
   'sync-budget': typeof syncBudget;
   'load-budget': typeof loadBudget;
   'create-demo-budget': typeof createDemoBudget;
+  'create-scroll-test-budget': typeof createScrollTestBudgetFile;
   'close-budget': typeof closeBudget;
   'delete-budget': typeof deleteBudget;
   'duplicate-budget': typeof duplicateBudget;
@@ -83,6 +85,7 @@ app.method('download-budget', downloadBudget);
 app.method('sync-budget', syncBudget);
 app.method('load-budget', loadBudget);
 app.method('create-demo-budget', createDemoBudget);
+app.method('create-scroll-test-budget', createScrollTestBudgetFile);
 app.method('close-budget', closeBudget);
 app.method('delete-budget', deleteBudget);
 app.method('duplicate-budget', duplicateBudget);
@@ -410,7 +413,9 @@ async function createBudget({
 } = {}) {
   let id;
   if (testMode) {
-    budgetName = budgetName || 'Test Budget';
+    const isScrollTest = testBudgetId === SCROLL_TEST_BUDGET_ID;
+    budgetName =
+      budgetName || (isScrollTest ? 'Scroll Test Budget' : 'Test Budget');
     id = testBudgetId || TEST_BUDGET_ID;
 
     if (await fs.exists(fs.getBudgetDir(id))) {
@@ -459,10 +464,22 @@ async function createBudget({
   }
 
   if (testMode) {
-    await createTestBudget(mainApp.handlers);
+    if (testBudgetId === SCROLL_TEST_BUDGET_ID) {
+      await createScrollTestBudget(mainApp.handlers);
+    } else {
+      await createTestBudget(mainApp.handlers);
+    }
   }
 
   return {};
+}
+
+function createScrollTestBudgetFile() {
+  return createBudget({
+    budgetName: 'Scroll Test Budget',
+    testMode: true,
+    testBudgetId: SCROLL_TEST_BUDGET_ID,
+  });
 }
 
 async function importBudget({

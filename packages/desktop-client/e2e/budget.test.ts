@@ -66,6 +66,26 @@ test.describe('Budget', () => {
     expect(await accountPage.accountName.textContent()).toMatch('All Accounts');
     await page.getByRole('button', { name: 'Back' }).click();
   });
+});
+
+test.describe('Budget scroll position', () => {
+  let page: Page;
+  let configurationPage: ConfigurationPage;
+  let budgetPage: BudgetPage;
+
+  test.beforeEach(async ({ browser }) => {
+    page = await browser.newPage();
+    configurationPage = new ConfigurationPage(page);
+
+    await page.goto('/');
+    budgetPage = await configurationPage.createScrollTestFile();
+
+    await page.mouse.move(0, 0);
+  });
+
+  test.afterEach(async () => {
+    await page?.close();
+  });
 
   test('scroll position is restored when navigating back from spent transactions page', async () => {
     await budgetPage.scrollToBottom();

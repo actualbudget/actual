@@ -70,24 +70,6 @@ function extractCommonThings(
         'General',
         'Gift',
         'Medical',
-        'Transportation',
-        'Gas',
-        'Parking & Tolls',
-        'Personal Care',
-        'Hair & Grooming',
-        'Subscriptions',
-        'Streaming Services',
-        'Software & Apps',
-        'Home Maintenance',
-        'Furniture & Decor',
-        'Fitness',
-        'Gym Membership',
-        'Education',
-        'Books',
-        'Pets',
-        'Vet & Pet Care',
-        'Travel',
-        'Hobbies',
       ].indexOf(c.name) !== -1,
   );
 
@@ -535,24 +517,6 @@ async function createBudget(accounts, payees, groups) {
           void setBudget(month, category('General'), 50000);
           void setBudget(month, category('Gift'), 7500);
           void setBudget(month, category('Medical'), 10000);
-          void setBudget(month, category('Transportation'), 25000);
-          void setBudget(month, category('Gas'), 15000);
-          void setBudget(month, category('Parking & Tolls'), 5000);
-          void setBudget(month, category('Personal Care'), 8000);
-          void setBudget(month, category('Hair & Grooming'), 6000);
-          void setBudget(month, category('Subscriptions'), 5000);
-          void setBudget(month, category('Streaming Services'), 4000);
-          void setBudget(month, category('Software & Apps'), 2000);
-          void setBudget(month, category('Home Maintenance'), 15000);
-          void setBudget(month, category('Furniture & Decor'), 10000);
-          void setBudget(month, category('Fitness'), 6000);
-          void setBudget(month, category('Gym Membership'), 4500);
-          void setBudget(month, category('Education'), 10000);
-          void setBudget(month, category('Books'), 3000);
-          void setBudget(month, category('Pets'), 8000);
-          void setBudget(month, category('Vet & Pet Care'), 5000);
-          void setBudget(month, category('Travel'), 20000);
-          void setBudget(month, category('Hobbies'), 7500);
 
           void setBudget(month, category('Cell'), 7500);
           void setBudget(month, category('Internet'), 6000);
@@ -567,24 +531,6 @@ async function createBudget(accounts, payees, groups) {
           setBudgetIfSpent(month, category('General'));
           setBudgetIfSpent(month, category('Gift'));
           setBudgetIfSpent(month, category('Medical'));
-          setBudgetIfSpent(month, category('Transportation'));
-          setBudgetIfSpent(month, category('Gas'));
-          setBudgetIfSpent(month, category('Parking & Tolls'));
-          setBudgetIfSpent(month, category('Personal Care'));
-          setBudgetIfSpent(month, category('Hair & Grooming'));
-          setBudgetIfSpent(month, category('Subscriptions'));
-          setBudgetIfSpent(month, category('Streaming Services'));
-          setBudgetIfSpent(month, category('Software & Apps'));
-          setBudgetIfSpent(month, category('Home Maintenance'));
-          setBudgetIfSpent(month, category('Furniture & Decor'));
-          setBudgetIfSpent(month, category('Fitness'));
-          setBudgetIfSpent(month, category('Gym Membership'));
-          setBudgetIfSpent(month, category('Education'));
-          setBudgetIfSpent(month, category('Books'));
-          setBudgetIfSpent(month, category('Pets'));
-          setBudgetIfSpent(month, category('Vet & Pet Care'));
-          setBudgetIfSpent(month, category('Travel'));
-          setBudgetIfSpent(month, category('Hobbies'));
 
           setBudgetIfSpent(month, category('Cell'));
           setBudgetIfSpent(month, category('Internet'));
@@ -710,24 +656,6 @@ export async function createTestBudget(handlers: Handlers) {
     {
       name: 'Usual Expenses',
       categories: [
-        { name: 'Transportation' },
-        { name: 'Gas' },
-        { name: 'Parking & Tolls' },
-        { name: 'Personal Care' },
-        { name: 'Hair & Grooming' },
-        { name: 'Subscriptions' },
-        { name: 'Streaming Services' },
-        { name: 'Software & Apps' },
-        { name: 'Home Maintenance' },
-        { name: 'Furniture & Decor' },
-        { name: 'Fitness' },
-        { name: 'Gym Membership' },
-        { name: 'Education' },
-        { name: 'Books' },
-        { name: 'Pets' },
-        { name: 'Vet & Pet Care' },
-        { name: 'Travel' },
-        { name: 'Hobbies' },
         { name: 'Savings' },
         { name: 'Medical' },
         { name: 'Gift' },
@@ -970,4 +898,185 @@ export async function createTestBudget(handlers: Handlers) {
 
   // Create a budget
   await createBudget(accounts, payees, allGroups);
+}
+
+export async function createScrollTestBudget(handlers: Handlers) {
+  setSyncingMode('import');
+  db.execQuery('PRAGMA journal_mode = OFF');
+
+  db.runQuery('DELETE FROM categories;');
+  db.runQuery('DELETE FROM category_groups');
+
+  const accounts: { name: string; id?: string }[] = [{ name: 'Checking' }];
+
+  await runMutator(async () => {
+    for (const account of accounts) {
+      account.id = await handlers['account-create'](account);
+    }
+  });
+
+  const depositPayeeId = await runMutator(() =>
+    handlers['payee-create']({ name: 'Deposit' }),
+  );
+
+  const newCategoryGroups: Array<CategoryGroupDefinition> = [
+    {
+      name: 'Housing',
+      categories: [
+        { name: 'Rent' },
+        { name: 'Mortgage' },
+        { name: 'Property Tax' },
+        { name: 'Home Insurance' },
+        { name: 'HOA Fees' },
+        { name: 'Home Maintenance' },
+        { name: 'Furniture & Decor' },
+        { name: 'Cleaning Supplies' },
+        { name: 'Lawn & Garden' },
+        { name: 'Home Improvement' },
+      ],
+    },
+    {
+      name: 'Transportation',
+      categories: [
+        { name: 'Car Payment' },
+        { name: 'Car Insurance' },
+        { name: 'Gas' },
+        { name: 'Parking & Tolls' },
+        { name: 'Public Transit' },
+        { name: 'Car Maintenance' },
+        { name: 'Ride Shares' },
+        { name: 'Car Registration' },
+        { name: 'Car Wash' },
+        { name: 'Road Trips' },
+      ],
+    },
+    {
+      name: 'Food & Dining',
+      categories: [
+        { name: 'Groceries' },
+        { name: 'Restaurants' },
+        { name: 'Fast Food' },
+        { name: 'Coffee Shops' },
+        { name: 'Bars' },
+        { name: 'Meal Kits' },
+        { name: 'Work Lunches' },
+        { name: 'Snacks' },
+        { name: 'Alcohol' },
+        { name: 'Special Dinners' },
+      ],
+    },
+    {
+      name: 'Health & Wellness',
+      categories: [
+        { name: 'Health Insurance' },
+        { name: 'Dental' },
+        { name: 'Vision' },
+        { name: 'Gym Membership' },
+        { name: 'Prescriptions' },
+        { name: 'Doctor Visits' },
+        { name: 'Mental Health' },
+        { name: 'Personal Care' },
+        { name: 'Hair & Grooming' },
+        { name: 'Vitamins & Supplements' },
+      ],
+    },
+    {
+      name: 'Entertainment',
+      categories: [
+        { name: 'Streaming Services' },
+        { name: 'Movies & Events' },
+        { name: 'Books' },
+        { name: 'Hobbies' },
+        { name: 'Sports & Recreation' },
+        { name: 'Games' },
+        { name: 'Music' },
+        { name: 'Travel' },
+        { name: 'Vacations' },
+        { name: 'Date Nights' },
+      ],
+    },
+    {
+      name: 'Income',
+      is_income: true,
+      categories: [
+        { name: 'Salary', is_income: true },
+        { name: 'Starting Balances', is_income: true },
+      ],
+    },
+  ];
+
+  const categoryGroups: Array<CategoryGroupEntity> = [];
+
+  await runMutator(async () => {
+    for (const group of newCategoryGroups) {
+      const groupId = await handlers['category-group-create']({
+        name: group.name,
+        isIncome: group.is_income,
+      });
+
+      categoryGroups.push({ ...group, id: groupId, categories: [] });
+
+      for (const category of group.categories) {
+        const categoryId = await handlers['category-create']({
+          ...category,
+          isIncome: category.is_income,
+          groupId,
+        });
+
+        categoryGroups[categoryGroups.length - 1].categories.push({
+          ...category,
+          id: categoryId,
+          group: groupId,
+        });
+      }
+    }
+  });
+
+  const allGroups = (await runHandler(handlers['get-categories'])).grouped;
+
+  function findCategory(name: string) {
+    for (const group of allGroups) {
+      const cat = group.categories.find(c => c.name === name);
+      if (cat) return cat;
+    }
+    return null;
+  }
+
+  const checkingAccount = accounts[0];
+  const today = monthUtils.currentMonth();
+
+  // Seed the account with a starting balance and one expense per
+  // expense category so every row shows a non-zero spent amount.
+  await runMutator(() =>
+    batchMessages(async () => {
+      const startingBalancesCat = findCategory('Starting Balances');
+      await addTransactions(checkingAccount.id, [
+        {
+          amount: 1000000,
+          payee: depositPayeeId,
+          category: startingBalancesCat?.id,
+          date: today + '-01',
+        },
+      ]);
+
+      const expenseCategories = allGroups
+        .filter(g => !g.is_income)
+        .flatMap(g => g.categories);
+
+      for (const cat of expenseCategories) {
+        await addTransactions(checkingAccount.id, [
+          {
+            amount: -5000,
+            category: cat.id,
+            date: today + '-15',
+          },
+        ]);
+      }
+    }),
+  );
+
+  setSyncingMode('import');
+  await sheet.reloadSpreadsheet(db);
+  await budget.createAllBudgets();
+  await sheet.waitOnSpreadsheet();
 }

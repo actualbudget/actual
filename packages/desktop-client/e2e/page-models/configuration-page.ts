@@ -23,6 +23,15 @@ export class ConfigurationPage {
     return budgetPage;
   }
 
+  async createScrollTestFile() {
+    await this.page
+      .getByRole('button', { name: 'Create scroll test file' })
+      .click();
+    const budgetPage = new BudgetPage(this.page);
+    await budgetPage.waitFor();
+    return budgetPage;
+  }
+
   async createDemoFile() {
     await this.page.getByRole('button', { name: 'View demo' }).click();
     const budgetPage = new BudgetPage(this.page);
