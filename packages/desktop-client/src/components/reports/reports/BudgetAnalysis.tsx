@@ -381,13 +381,19 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
           <Tooltip
             content={
               showHiddenCategories
-                ? t('Hide hidden categories')
-                : t('Show hidden categories')
+                ? t('Click to hide hidden categories')
+                : t('Click to show hidden categories')
             }
           >
             <Button
               variant="bare"
+              aria-pressed={showHiddenCategories}
               onPress={() => setShowHiddenCategories(state => !state)}
+              style={
+                showHiddenCategories
+                  ? { backgroundColor: theme.buttonBareBackgroundActive }
+                  : undefined
+              }
             >
               {showHiddenCategories ? (
                 <SvgViewHide style={{ width: 16, height: 16 }} />
