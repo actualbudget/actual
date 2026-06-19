@@ -19,6 +19,8 @@ packages/api/app/bundle.api.js
 packages/api/app/stats.json
 packages/api/dist
 packages/api/@types
+packages/api/test-results
+packages/api/playwright-report
 packages/crdt/dist
 packages/desktop-client/build-stats
 packages/desktop-client/dev-dist
