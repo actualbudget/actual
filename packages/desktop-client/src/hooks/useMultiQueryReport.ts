@@ -12,7 +12,6 @@ import {
 
 import { aqlQuery, AqlQueryError } from '@desktop-client/queries/aqlQuery';
 import { mergeQueryResults } from '@desktop-client/queries/mergeQueryResults';
-import type { MergeError } from '@desktop-client/queries/mergeQueryResults';
 import { processQueryResult } from '@desktop-client/queries/processQueryResult';
 import type { QueryResult } from '@desktop-client/queries/processQueryResult';
 
@@ -22,6 +21,7 @@ export type UseMultiQueryReportResult = {
   mergeError: string | null;
   perQueryErrors: (AqlErrorDetail | null)[];
   isLoading: boolean;
+  autoMergeKey: string | null;
 };
 
 function getCompileError(
@@ -62,6 +62,7 @@ export function useMultiQueryReport(
     (AqlErrorDetail | null)[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [autoMergeKey, setAutoMergeKey] = useState<string | null>(null);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const sourcesKey = querySources.join('|||');
@@ -107,7 +108,7 @@ export function useMultiQueryReport(
       try {
         const evaluations = resolvedSources.map(s => evaluateQuerySource(s));
 
-        const queries = evaluations.map((e, i) => {
+        const queries = evaluations.map(e => {
           if (e.success) return e.query;
           return null;
         });
@@ -139,8 +140,10 @@ export function useMultiQueryReport(
 
         if (processedResults.length === 0) {
           setMerged(null);
+          setAutoMergeKey(null);
         } else if (processedResults.length === 1) {
           setMerged(processedResults[0]);
+          setAutoMergeKey(null);
         } else {
           const mergeResult = mergeQueryResults(processedResults, {
             mergeKey,
@@ -150,9 +153,11 @@ export function useMultiQueryReport(
             setMergeError(mergeResult.message);
             const firstValid = processedResults.find(r => r.rows.length > 0);
             setMerged(firstValid ?? processedResults[0]);
+            setAutoMergeKey(null);
           } else {
             setMergeError(null);
             setMerged(mergeResult.result);
+            setAutoMergeKey(mergeKey ? null : mergeResult.mergeKey);
           }
         }
       } catch (e) {
@@ -185,5 +190,12 @@ export function useMultiQueryReport(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sourcesKey, timeFrame, mergeKey, t]);
 
-  return { results, merged, mergeError, perQueryErrors, isLoading };
+  return {
+    results,
+    merged,
+    mergeError,
+    perQueryErrors,
+    isLoading,
+    autoMergeKey,
+  };
 }

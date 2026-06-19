@@ -130,6 +130,7 @@ const NUMERIC_FORMAT_OPTIONS: Array<readonly [string, string]> = [
   ['financial', 'Financial'],
   ['financial-no-decimals', 'Financial (no decimals)'],
   ['number', 'Number'],
+  ['number-no-decimals', 'Number (no decimals)'],
   ['percent', 'Percent'],
 ];
 

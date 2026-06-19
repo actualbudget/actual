@@ -48,6 +48,8 @@ export function channelFormatType(
       return 'financial-with-sign';
     case 'number':
       return 'number';
+    case 'number-no-decimals':
+      return 'number-no-decimals';
     case 'percent':
       return 'percentage';
     default:

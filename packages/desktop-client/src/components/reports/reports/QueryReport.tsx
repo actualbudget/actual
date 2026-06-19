@@ -219,6 +219,11 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
       : [DEFAULT_QUERY_SOURCE];
 
   const [querySources, setQuerySources] = useState<string[]>(defaultSources);
+  const [queryNames, setQueryNames] = useState<string[]>(() =>
+    (widget?.meta?.queries || []).length > 0
+      ? widget.meta!.queries.map(q => q.label ?? '')
+      : [''],
+  );
   const [activeQueryIndex, setActiveQueryIndex] = useState(0);
   const [chartSpec, setChartSpec] = useState<ChartSpec>(
     widget?.meta?.chartSpec ?? DEFAULT_CHART_SPEC,
@@ -244,6 +249,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
     mergeError,
     perQueryErrors,
     results,
+    autoMergeKey,
   } = useMultiQueryReport(
     querySources,
     activeTimeFrame ?? widget?.meta?.defaultTimeFrame,
@@ -339,8 +345,9 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
       return;
     }
 
-    const updatedQueries = querySources.map(source => ({
+    const updatedQueries = querySources.map((source, i) => ({
       source,
+      ...(queryNames[i] ? { label: queryNames[i] } : {}),
     }));
 
     const currentDefaultTimeFrame =
@@ -376,6 +383,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
   }, [
     widget,
     querySources,
+    queryNames,
     mergeKey,
     chartSpec,
     updateDashboardWidgetMutation,
@@ -577,18 +585,28 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               count={querySources.length}
               activeIndex={activeQueryIndex}
               onSelect={setActiveQueryIndex}
+              names={queryNames}
               onAdd={() => {
                 setQuerySources(prev => [
                   ...prev,
                   `q('transactions')\n  .select('*')\n  .limit(100)`,
                 ]);
+                setQueryNames(prev => [...prev, '']);
                 setActiveQueryIndex(querySources.length);
               }}
               onRemove={index => {
                 setQuerySources(prev => prev.filter((_, i) => i !== index));
+                setQueryNames(prev => prev.filter((_, i) => i !== index));
                 if (activeQueryIndex >= index) {
                   setActiveQueryIndex(Math.max(0, index - 1));
                 }
+              }}
+              onRename={(index, name) => {
+                setQueryNames(prev => {
+                  const next = [...prev];
+                  next[index] = name;
+                  return next;
+                });
               }}
             />
             <div
@@ -646,11 +664,19 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
                 </Suspense>
               </View>
             </Resizable>
+            <View
+              style={{
+                borderTop: `1px solid ${theme.tableBorder}`,
+                marginTop: 16,
+                marginBottom: 4,
+              }}
+            />
             <div
               style={{
                 fontSize: 13,
                 color: theme.pageTextSubdued,
-                marginTop: 16,
+                marginTop: 12,
+                marginBottom: 8,
               }}
             >
               <Trans>Time range</Trans>
@@ -694,7 +720,14 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
                 <Select
                   value={mergeKey || ''}
                   options={[
-                    ['', mergeKey ? `Auto (${mergeKey})` : t('Auto')],
+                    [
+                      '',
+                      mergeKey
+                        ? t('Auto')
+                        : autoMergeKey
+                          ? `Auto (${autoMergeKey})`
+                          : t('Auto'),
+                    ],
                     ...mergeKeyOptions.map(o => [o.value, o.label] as const),
                   ]}
                   onChange={v => setMergeKey(v || undefined)}
@@ -729,6 +762,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
                 fontSize: 13,
                 color: theme.pageTextSubdued,
                 marginTop: 16,
+                marginBottom: 8,
               }}
             >
               <Trans>Visualization</Trans>
@@ -738,7 +772,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               style={{
                 flexDirection: 'row',
                 gap: 8,
-                marginTop: 4,
+                marginTop: 12,
               }}
             >
               <Button

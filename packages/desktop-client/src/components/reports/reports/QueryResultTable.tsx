@@ -99,7 +99,8 @@ export function QueryResultTable({
           formatOverride === 'financial' ||
           formatOverride === 'financial-no-decimals' ||
           formatOverride === 'financial-with-sign' ||
-          formatOverride === 'number'
+          formatOverride === 'number' ||
+          formatOverride === 'number-no-decimals'
         ) {
           return format(value, formatOverride);
         }

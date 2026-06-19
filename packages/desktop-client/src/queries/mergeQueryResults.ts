@@ -189,7 +189,13 @@ export function mergeQueryResults(
   const outputRows: Record<string, unknown>[] = [];
 
   for (const key of sortedKeys) {
-    const row: Record<string, unknown> = { [mergeKey]: key };
+    const typedKey =
+      mergeKeyCol.type === 'integer' ||
+      mergeKeyCol.type === 'number' ||
+      mergeKeyCol.type === 'float'
+        ? Number(key)
+        : key;
+    const row: Record<string, unknown> = { [mergeKey]: typedKey };
 
     for (let i = 0; i < results.length; i++) {
       const existing = indices[i].get(key);
