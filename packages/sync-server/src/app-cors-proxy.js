@@ -91,7 +91,8 @@ function isUrlAllowed(targetUrl) {
           targetUrl === repoUrl ||
           targetUrl.startsWith(repoUrl + '/') ||
           (hostname === 'api.github.com' &&
-            url.pathname.startsWith(`/repos/${repoOwner}/${repoName}`)) ||
+            (url.pathname === `/repos/${repoOwner}/${repoName}` ||
+              url.pathname.startsWith(`/repos/${repoOwner}/${repoName}/`))) ||
           (hostname === 'raw.githubusercontent.com' &&
             url.pathname.startsWith(`/${repoOwner}/${repoName}/`)) ||
           (hostname === 'github.com' &&

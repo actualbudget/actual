@@ -28,7 +28,7 @@ export function useInputRefValue(
     // and when you go to fire an event, it will see that nothing has
     // changed since it last saw a value (it just updated it itself)
     // meaning no event will get fired. Or Something.
-    // eslint-disable-next-line typescript-eslint(unbound-method)
+    // oxlint-disable-next-line typescript/unbound-method
     const nativeSetter = Object.getOwnPropertyDescriptor(
       window.HTMLInputElement.prototype,
       'value',
