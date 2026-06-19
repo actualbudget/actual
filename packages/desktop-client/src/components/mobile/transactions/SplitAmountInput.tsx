@@ -1,3 +1,4 @@
+import type { FocusEvent, ReactNode } from 'react';
 import { memo, useEffect, useState } from 'react';
 
 import { styles } from '@actual-app/components/styles';
@@ -8,21 +9,29 @@ import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import { CalculatorAmountInput } from './CalculatorAmountInput';
-import type { CalculatorAmountInputProps } from './CalculatorAmountInput';
 
-export type SplitAmountInputProps = CalculatorAmountInputProps;
+export type SplitAmountInputProps = {
+  value: number;
+  negate?: boolean;
+  onEnter?: () => void;
+  onChange?: (value: number) => void;
+  onFocus?: (event: FocusEvent<HTMLInputElement>) => void;
+  onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
+  keyboardHeader?: ReactNode;
+  autoFocus?: boolean;
+  disabled?: boolean;
+};
 
 export const SplitAmountInput = memo(function SplitAmountInput({
   autoFocus = false,
   disabled,
-  inputRef,
   negate = false,
   onBlur,
   onChange,
   onEnter,
   onFocus,
   value,
-  ...props
+  keyboardHeader,
 }: SplitAmountInputProps) {
   const mobileCalculatorEnabled = useFeatureFlag('mobileCalculator');
   const [hideFraction] = useSyncedPref('hideFraction');
@@ -37,10 +46,9 @@ export const SplitAmountInput = memo(function SplitAmountInput({
   if (mobileCalculatorEnabled) {
     return (
       <CalculatorAmountInput
-        {...props}
         autoFocus={autoFocus}
         disabled={disabled}
-        inputRef={inputRef}
+        keyboardHeader={keyboardHeader}
         negate={negate}
         onBlur={onBlur}
         onChange={onChange}
@@ -51,7 +59,6 @@ export const SplitAmountInput = memo(function SplitAmountInput({
           marginRight: 8,
           textAlign: 'right',
           minWidth: 0,
-          ...props.style,
         }}
         value={value}
       />
@@ -60,7 +67,6 @@ export const SplitAmountInput = memo(function SplitAmountInput({
 
   return (
     <LegacyAmountInput
-      ref={inputRef}
       autoDecimals={String(hideFraction) !== 'true'}
       disabled={disabled}
       focused={focused}
