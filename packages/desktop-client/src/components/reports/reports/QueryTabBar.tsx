@@ -1,7 +1,9 @@
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { theme } from '@actual-app/components/theme';
+import { SvgAdd } from '@actual-app/components/icons/v1';
+import { SvgCloseOutline } from '@actual-app/components/icons/v1';
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 type QueryTabBarProps = {
@@ -46,21 +48,18 @@ export function QueryTabBar({
           </Button>
           {count > 1 && (
             <Button
-              variant="normal"
+              variant="bare"
               onPress={() => onRemove(i)}
-              style={{
-                color: theme.errorText,
-                padding: '2px 6px',
-                minWidth: 0,
-              }}
+              aria-label={`Remove Query ${i + 1}`}
             >
-              ×
+              <SvgCloseOutline width={10} height={10} />
             </Button>
           )}
         </View>
       ))}
-      <Button variant="normal" onPress={onAdd}>
-        + <Trans>Add</Trans>
+      <Button variant="bare" onPress={onAdd}>
+        <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
+        <Trans>Add new</Trans>
       </Button>
     </View>
   );

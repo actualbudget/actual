@@ -154,12 +154,6 @@ export function mergeQueryResults(
     }
   }
 
-  const sortedKeys = [...allKeys].sort((a, b) => {
-    if (a < b) return -1;
-    if (a > b) return 1;
-    return 0;
-  });
-
   const mergeKeyCol: QueryResultColumn = (() => {
     const types = results.map(
       r => r.columns.find(c => c.name === mergeKey)!.type,
@@ -167,6 +161,17 @@ export function mergeQueryResults(
     const finalType = types.reduce((acc, t) => mostGeneralType(acc, t));
     return { name: mergeKey, type: finalType };
   })();
+
+  const sortedKeys = [...allKeys].sort((a, b) => {
+    if (
+      mergeKeyCol.type === 'integer' ||
+      mergeKeyCol.type === 'number' ||
+      mergeKeyCol.type === 'float'
+    ) {
+      return Number(a) - Number(b);
+    }
+    return String(a).localeCompare(String(b));
+  });
 
   const outputColumns: QueryResultColumn[] = [mergeKeyCol];
   const sourceIndex: Record<string, number> = {};
