@@ -85,6 +85,11 @@
     "#platform/server/*": "./src/platform/server/*.ts",
     "#platform/*": "./src/platform/*.ts",
     "#server/*": "./src/server/*.ts",
+    "#shared/environment": {
+      "electron": "./src/shared/environment.ts",
+      "api": "./src/shared/environment.ts",
+      "default": "./src/shared/environment.browser.ts"
+    },
     "#shared/*": "./src/shared/*.ts",
     "#types/*": "./src/types/*.ts",
     "#mocks/*": "./src/mocks/*.ts",
@@ -114,10 +119,12 @@
     "./client/transfer": "./src/client/transfer.ts",
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
+    "./platform/client/backend-worker": "./src/platform/client/backend-worker.ts",
     "./platform/client/browser-preload": "./src/platform/client/browser-preload/index.ts",
     "./platform/client/browser-server/coordinator": "./src/platform/client/browser-server/coordinator.ts",
     "./platform/client/connection": {
       "electron-renderer": "./src/platform/client/connection/index.electron.ts",
+      "api": "./src/platform/client/connection/index.api.ts",
       "default": "./src/platform/client/connection/index.ts"
     },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",
@@ -154,6 +161,11 @@
       "electron": "./src/shared/platform.electron.ts",
       "api": "./src/shared/platform.api.ts",
       "default": "./src/shared/platform.ts"
+    },
+    "./shared/environment": {
+      "electron": "./src/shared/environment.ts",
+      "api": "./src/shared/environment.ts",
+      "default": "./src/shared/environment.browser.ts"
     },
     "./shared/*": "./src/shared/*.ts",
     "./types/models": "./src/types/models/index.ts",

@@ -1,4 +1,10 @@
-import React, { createRef, PureComponent, useEffect, useMemo } from 'react';
+import React, {
+  createRef,
+  PureComponent,
+  startTransition,
+  useEffect,
+  useMemo,
+} from 'react';
 import type { ReactElement, RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Trans } from 'react-i18next';
@@ -298,6 +304,7 @@ class AccountInternal extends PureComponent<
   table: TableRef;
   unlisten?: () => void;
   dispatchSelected?: (action: Actions) => void;
+  _isOptimisticUpdate: boolean = false;
 
   constructor(props: AccountInternalProps) {
     super(props);
@@ -479,6 +486,26 @@ class AccountInternal extends PureComponent<
         const data = ungroupTransactions([...groupedData]);
         const firstLoad = prevData == null;
 
+        // Fast path for optimistic updates (e.g. field edits): skip the
+        // expensive aggregate DB queries (calculateBalances, getFilteredAmount)
+        // and just update the transaction list in state directly. Balances and
+        // filteredAmount will be refreshed on the next full DB-driven onData.
+        if (this._isOptimisticUpdate) {
+          this._isOptimisticUpdate = false;
+          const transactionsSnapshot = data;
+          // Wrap in startTransition so React treats this as a low-priority
+          // update. Without this, setState blocks the main thread for the
+          // full duration of the re-render (~40–220ms with large transaction
+          // lists), preventing input events from being processed and making
+          // the UI feel frozen. startTransition lets React break the render
+          // into chunks and yield to the browser between them, keeping the
+          // UI responsive while the row update happens in the background.
+          startTransition(() => {
+            this.setState({ transactions: transactionsSnapshot });
+          });
+          return;
+        }
+
         if (firstLoad) {
           this.table.current?.setRowAnimation(false);
 
@@ -629,7 +656,9 @@ class AccountInternal extends PureComponent<
   };
 
   onTransactionsChange = (updatedTransaction: TransactionEntity) => {
-    // Apply changes to pagedQuery data
+    // Apply changes to pagedQuery data optimistically. Set the flag so that
+    // onData skips the expensive aggregate DB queries for this update.
+    this._isOptimisticUpdate = true;
     this.paged?.optimisticUpdate(data => {
       if (updatedTransaction._deleted) {
         return data.filter(t => t.id !== updatedTransaction.id);

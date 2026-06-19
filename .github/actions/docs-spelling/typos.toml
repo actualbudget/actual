@@ -1,0 +1,41 @@
+# Configuration for `crate-ci/typos`, used by the "Check Spelling (Docs)"
+# workflow (.github/workflows/docs-spelling.yml) to spell-check the
+# documentation under packages/docs.
+#
+# Unlike the previous check-spelling action, typos only reports
+# high-confidence misspellings (drawn from its built-in correction
+# dictionary) rather than every unknown word, so proper nouns, bank codes,
+# and abbreviations generally do not need an allowlist entry. Only words
+# that typos *incorrectly* flags need to be listed below.
+
+[files]
+extend-exclude = [
+  # Aggregated, auto-generated release notes. These mirror the upstream
+  # GitHub release notes verbatim (contributor handles, PR titles, and any
+  # historical typos baked into them), so they are not spell-checked.
+  "releases.md",
+  "*-release-*.md",
+  # Binary / non-prose assets.
+  "*.webp",
+  "*.png",
+  "*.jpg",
+  "*.jpeg",
+  "*.gif",
+  "*.svg",
+  "*.ico",
+  "*.pdf",
+  # Lockfiles and generated data.
+  "*.lock",
+  "package-lock.json",
+]
+
+# Words typos flags by default but that are valid here. Each is mapped to
+# itself, which tells typos to accept it.
+[default.extend-words]
+# Health Savings Account.
+HSA = "HSA"
+# The monorepo task runner (https://microsoft.github.io/lage/).
+Lage = "Lage"
+lage = "lage"
+# Hex color component (e.g. "FB BA 00" in the theming docs).
+BA = "BA"
