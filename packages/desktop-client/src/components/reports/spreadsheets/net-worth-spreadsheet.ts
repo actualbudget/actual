@@ -7,7 +7,7 @@ import type {
 } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 import type { Locale } from 'date-fns';
-import keyBy from 'lodash/keyBy';
+import { keyBy } from 'es-toolkit/compat';
 
 import { ReportOptions } from '#components/reports/ReportOptions';
 import type { FormatType } from '#hooks/useFormat';

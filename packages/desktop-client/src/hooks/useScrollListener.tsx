@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import type { ReactNode, RefObject } from 'react';
 
-import debounce from 'lodash/debounce';
+import { debounce } from 'es-toolkit/compat';
 
 type ScrollDirection = 'up' | 'down' | 'left' | 'right';
 
