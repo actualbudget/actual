@@ -1,7 +1,11 @@
 import type { Handlers } from '#types/handlers';
 import type { ServerEvents } from '#types/server-events';
 
-export declare function init(): Promise<unknown>;
+/**
+ * Connect to the backend. Reads the socket from
+ * `global.Actual.getServerSocket()` unless one is passed directly.
+ */
+export declare function init(socket?: Worker | MessagePort): Promise<unknown>;
 export type Init = typeof init;
 
 /**

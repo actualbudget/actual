@@ -18,6 +18,7 @@ __metadata:
   dependencies:
     "@actual-app/core": "workspace:*"
     "@actual-app/crdt": "workspace:*"
+    "@playwright/test": "npm:1.59.1"
     "@typescript/native-preview": "npm:beta"
     better-sqlite3: "npm:^12.10.0"
     compare-versions: "npm:^6.1.1"
@@ -25,6 +26,7 @@ __metadata:
     typescript-strict-plugin: "npm:^2.4.4"
     uuid: "npm:^14.0.0"
     vite: "npm:^8.0.16"
+    vite-plugin-node-polyfills: "npm:^0.28.0"
     vite-plugin-peggy-loader: "npm:^2.0.1"
     vitest: "npm:^4.1.8"
   languageName: unknown
