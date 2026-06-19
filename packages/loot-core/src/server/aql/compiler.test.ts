@@ -987,6 +987,150 @@ describe('$week date bucketing', () => {
   });
 });
 
+describe('Date extraction functions', () => {
+  it('$monthNum extracts month number from date column', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ month: { $monthNum: '$date' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch(
+      'CAST(SUBSTR(transactions.date, 5, 2) AS integer) AS month',
+    );
+  });
+
+  it('$monthNum evaluates literal at compile time', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ month: { $monthNum: '2025-06-15' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch('6 AS month');
+  });
+
+  it('$dayOfMonth extracts day number from date column', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ day: { $dayOfMonth: '$date' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch(
+      'CAST(SUBSTR(transactions.date, 7, 2) AS integer) AS day',
+    );
+  });
+
+  it('$dayOfMonth evaluates literal at compile time', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ day: { $dayOfMonth: '2025-06-15' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch('15 AS day');
+  });
+
+  it('$quarter extracts quarter from date column', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ q: { $quarter: '$date' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch(
+      'CAST((CAST(SUBSTR(transactions.date, 5, 2) AS integer) + 2) / 3 AS integer) AS q',
+    );
+  });
+
+  it('$quarter evaluates literal at compile time', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ q: { $quarter: '2025-04-01' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch('2 AS q');
+  });
+
+  it('$monthName returns short month name from date column', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ name: { $monthName: '$date' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch(
+      "SUBSTR('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(SUBSTR(transactions.date, 5, 2) AS integer) - 1) * 3 + 1, 3) AS name",
+    );
+  });
+
+  it('$monthName evaluates literal at compile time', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ name: { $monthName: '2025-03-15' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch("'Mar' AS name");
+  });
+
+  it('$dayOfWeek returns day of week from date column', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ dow: { $dayOfWeek: '$date' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch(
+      "CAST(strftime('%w', SUBSTR(transactions.date, 1, 4) || '-' || SUBSTR(transactions.date, 5, 2) || '-' || SUBSTR(transactions.date, 7, 2)) AS integer) AS dow",
+    );
+  });
+
+  it('$dayOfWeek evaluates literal at compile time', () => {
+    // 2025-03-15 is a Saturday = 6
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ dow: { $dayOfWeek: '2025-03-15' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch('6 AS dow');
+  });
+
+  it('$monthNum and $dayOfMonth work together in groupBy and select', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .groupBy({ $monthNum: '$date' })
+        .select([
+          { month: { $monthNum: '$date' } },
+          { total: { $sum: '$amount' } },
+        ])
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch(
+      'GROUP BY CAST(SUBSTR(transactions.date, 5, 2) AS integer)',
+    );
+    expect(result.sql).toMatch(
+      'CAST(SUBSTR(transactions.date, 5, 2) AS integer) AS month',
+    );
+  });
+
+  it('$quarter works in groupBy with aggregate', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .groupBy({ $quarter: '$date' })
+        .select([{ q: { $quarter: '$date' } }, { total: { $sum: '$amount' } }])
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch('GROUP BY');
+    expect(result.sql).toMatch('CAST((CAST(SUBSTR(transactions.date, 5, 2)');
+  });
+});
+
 describe('Type conversions', () => {
   it('date literals are converted to ints on input', () => {
     let result = generateSQLWithState(

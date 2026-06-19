@@ -678,6 +678,91 @@ const compileFunction = saveStack('function', (state, func) => {
       validateArgLength(args, 1);
       return castInput(state, args[0], 'date-year');
     }
+    case '$monthNum': {
+      validateArgLength(args, 1);
+      const monthNumExpr = castInput(state, args[0], 'date');
+      if (monthNumExpr.literal) {
+        const dateStr = String(monthNumExpr.value);
+        return typed(parseInt(dateStr.slice(4, 6), 10), 'integer', {
+          literal: true,
+        });
+      }
+      return typed(
+        `CAST(SUBSTR(${monthNumExpr.value}, 5, 2) AS integer)`,
+        'integer',
+      );
+    }
+    case '$dayOfMonth': {
+      validateArgLength(args, 1);
+      const dayOfMonthExpr = castInput(state, args[0], 'date');
+      if (dayOfMonthExpr.literal) {
+        const dateStr = String(dayOfMonthExpr.value);
+        return typed(parseInt(dateStr.slice(6, 8), 10), 'integer', {
+          literal: true,
+        });
+      }
+      return typed(
+        `CAST(SUBSTR(${dayOfMonthExpr.value}, 7, 2) AS integer)`,
+        'integer',
+      );
+    }
+    case '$quarter': {
+      validateArgLength(args, 1);
+      const quarterExpr = castInput(state, args[0], 'date');
+      if (quarterExpr.literal) {
+        const dateStr = String(quarterExpr.value);
+        const month = parseInt(dateStr.slice(4, 6), 10);
+        return typed(Math.ceil(month / 3), 'integer', { literal: true });
+      }
+      return typed(
+        `CAST((CAST(SUBSTR(${quarterExpr.value}, 5, 2) AS integer) + 2) / 3 AS integer)`,
+        'integer',
+      );
+    }
+    case '$monthName': {
+      validateArgLength(args, 1);
+      const monthNameExpr = castInput(state, args[0], 'date');
+      if (monthNameExpr.literal) {
+        const dateStr = String(monthNameExpr.value);
+        const month = parseInt(dateStr.slice(4, 6), 10);
+        const names = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ];
+        return typed(`'${names[month - 1]}'`, 'string');
+      }
+      return typed(
+        `SUBSTR('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(SUBSTR(${monthNameExpr.value}, 5, 2) AS integer) - 1) * 3 + 1, 3)`,
+        'string',
+      );
+    }
+    case '$dayOfWeek': {
+      validateArgLength(args, 1);
+      const dayOfWeekExpr = castInput(state, args[0], 'date');
+      if (dayOfWeekExpr.literal) {
+        const dateStr = String(dayOfWeekExpr.value);
+        const d = new Date(
+          parseInt(dateStr.slice(0, 4), 10),
+          parseInt(dateStr.slice(4, 6), 10) - 1,
+          parseInt(dateStr.slice(6, 8), 10),
+        );
+        return typed(d.getDay(), 'integer', { literal: true });
+      }
+      return typed(
+        `CAST(strftime('%w', SUBSTR(${dayOfWeekExpr.value}, 1, 4) || '-' || SUBSTR(${dayOfWeekExpr.value}, 5, 2) || '-' || SUBSTR(${dayOfWeekExpr.value}, 7, 2)) AS integer)`,
+        'integer',
+      );
+    }
     case '$week': {
       validateArgLength(args, 1);
       const dateExpr = castInput(state, args[0], 'date');

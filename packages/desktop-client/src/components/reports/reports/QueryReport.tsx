@@ -20,6 +20,8 @@ import * as monthUtils from 'loot-core/shared/months';
 import type { ChartSpec } from 'loot-core/types/chart-spec';
 import type { QueryReportWidget, TimeFrame } from 'loot-core/types/models';
 
+import { QueryTabBar } from './QueryTabBar';
+
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
@@ -32,7 +34,6 @@ import { EncodingConfig } from '@desktop-client/components/query-report/Encoding
 import { MarkSelector } from '@desktop-client/components/query-report/MarkSelector';
 import { ChartRenderer } from '@desktop-client/components/query-report/visualizations/ChartRenderer';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { QueryTabBar } from './QueryTabBar';
 import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useMultiQueryReport } from '@desktop-client/hooks/useMultiQueryReport';

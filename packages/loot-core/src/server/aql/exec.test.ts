@@ -113,6 +113,134 @@ describe('compileAndRunQuery', () => {
     expect(data[1].is_parent).toBe(false);
   });
 
+  it('$monthNum extracts month number 1-12', async () => {
+    await insertTransactions();
+    const { data } = await compileAndRunAqlQuery(
+      q('transactions')
+        .select({ month: { $monthNum: '$date' } })
+        .serialize(),
+    );
+    expect(data[0].month).toBe(1);
+  });
+
+  it('$dayOfMonth extracts day number 1-31', async () => {
+    await insertTransactions();
+    const { data } = await compileAndRunAqlQuery(
+      q('transactions')
+        .select(['date', { day: { $dayOfMonth: '$date' } }])
+        .serialize(),
+    );
+    for (const row of data) {
+      const expectedDay = parseInt(row.date.slice(8, 10), 10);
+      expect(row.day).toBe(expectedDay);
+    }
+  });
+
+  it('$quarter extracts quarter 1-4', async () => {
+    await insertTransactions();
+    const { data } = await compileAndRunAqlQuery(
+      q('transactions')
+        .select({ q: { $quarter: '$date' } })
+        .serialize(),
+    );
+    // January → Q1
+    expect(data[0].q).toBe(1);
+  });
+
+  it('$monthName returns short month name', async () => {
+    await insertTransactions();
+    const { data } = await compileAndRunAqlQuery(
+      q('transactions')
+        .select(['date', { name: { $monthName: '$date' } }])
+        .serialize(),
+    );
+    for (const row of data) {
+      const expectedName = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ][parseInt(row.date.slice(5, 7), 10) - 1];
+      expect(row.name).toBe(expectedName);
+    }
+  });
+
+  it('$dayOfWeek returns day of week 0-6', async () => {
+    await insertTransactions();
+    const { data } = await compileAndRunAqlQuery(
+      q('transactions')
+        .select(['date', { dow: { $dayOfWeek: '$date' } }])
+        .serialize(),
+    );
+    for (const row of data) {
+      const expectedDow = new Date(row.date).getDay();
+      expect(row.dow).toBe(expectedDow);
+    }
+  });
+
+  it('groups by $monthNum and aggregates across months', async () => {
+    await db.insertAccount({ id: 'acct', name: 'acct' });
+    await db.insertTransaction({
+      account: 'acct',
+      date: '2020-01-15',
+      amount: -1000,
+    });
+    await db.insertTransaction({
+      account: 'acct',
+      date: '2020-02-15',
+      amount: -2000,
+    });
+    await db.insertTransaction({
+      account: 'acct',
+      date: '2020-03-10',
+      amount: -3000,
+    });
+    const { data } = await compileAndRunAqlQuery(
+      q('transactions')
+        .groupBy({ $monthNum: '$date' })
+        .select([
+          { month: { $monthNum: '$date' } },
+          { total: { $sum: '$amount' } },
+        ])
+        .serialize(),
+    );
+    expect(data).toHaveLength(3);
+    expect(data.find(r => r.month === 1).total).toBe(-1000);
+    expect(data.find(r => r.month === 2).total).toBe(-2000);
+    expect(data.find(r => r.month === 3).total).toBe(-3000);
+  });
+
+  it('groups by $quarter and aggregates across months', async () => {
+    await db.insertAccount({ id: 'acct', name: 'acct' });
+    await db.insertTransaction({
+      account: 'acct',
+      date: '2020-01-15',
+      amount: -1000,
+    });
+    await db.insertTransaction({
+      account: 'acct',
+      date: '2020-04-10',
+      amount: -4000,
+    });
+    const { data } = await compileAndRunAqlQuery(
+      q('transactions')
+        .groupBy({ $quarter: '$date' })
+        .select([{ q: { $quarter: '$date' } }, { total: { $sum: '$amount' } }])
+        .serialize(),
+    );
+    expect(data).toHaveLength(2);
+    expect(data.find(r => r.q === 1).total).toBe(-1000);
+    expect(data.find(r => r.q === 2).total).toBe(-4000);
+  });
+
   it('provides named parameters and converts types', async () => {
     const transId = uuidv4();
     await db.insertTransaction({

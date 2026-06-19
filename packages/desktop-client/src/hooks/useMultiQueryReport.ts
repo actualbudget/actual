@@ -9,6 +9,7 @@ import {
   evaluateQuerySource,
   resolveTimeFrameParams,
 } from './useQueryReport';
+
 import { aqlQuery, AqlQueryError } from '@desktop-client/queries/aqlQuery';
 import { mergeQueryResults } from '@desktop-client/queries/mergeQueryResults';
 import type { MergeError } from '@desktop-client/queries/mergeQueryResults';
