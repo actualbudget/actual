@@ -1797,6 +1797,7 @@ class AccountInternal extends PureComponent<
         showBalances={showBalances}
         filtered={transactionsFiltered}
       >
+        <div>HELLLOOOOOOOO</div>
         {(allTransactions, allBalances) => (
           <SelectedProviderWithItems
             name="transactions"
