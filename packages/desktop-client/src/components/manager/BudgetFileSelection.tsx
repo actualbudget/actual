@@ -700,41 +700,41 @@ export function BudgetFileSelection({
           >
             <Trans>Create new file</Trans>
           </Button>
-        </View>)
-      }
+        </View>
+      )}
 
-        {!quickSwitchMode && isNonProductionEnvironment() && (
-          <View
+      {!quickSwitchMode && isNonProductionEnvironment() && (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            alignItems: 'stretch',
+            margin: 10,
+            minHeight: 39,
+          }}
+        >
+          <Button
+            variant="primary"
+            onPress={() => onCreate({ testMode: true })}
             style={{
-              flexDirection: 'row',
-              justifyContent: 'flex-end',
-              alignItems: 'stretch',
-              margin: 10,
-              minHeight: 39,
+              ...narrowButtonStyle,
+              marginLeft: 10,
             }}
           >
-            <Button
-              variant="primary"
-              onPress={() => onCreate({ testMode: true })}
-              style={{
-                ...narrowButtonStyle,
-                marginLeft: 10,
-              }}
-            >
-              <Trans>Create test file</Trans>
-            </Button>
-            <Button
-              variant="primary"
-              onPress={() => onCreate({ scrollTestMode: true })}
-              style={{
-                ...narrowButtonStyle,
-                marginLeft: 10,
-              }}
-            >
-              <Trans>Create test file (many categories)</Trans>
-            </Button>
-          </View>)
-        }
+            <Trans>Create test file</Trans>
+          </Button>
+          <Button
+            variant="primary"
+            onPress={() => onCreate({ scrollTestMode: true })}
+            style={{
+              ...narrowButtonStyle,
+              marginLeft: 10,
+            }}
+          >
+            <Trans>Create test file (many categories)</Trans>
+          </Button>
+        </View>
+      )}
     </View>
   );
 }
