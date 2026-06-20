@@ -15,7 +15,7 @@ import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidg
 import { useAutomationOverview } from '#hooks/useAutomationOverview';
 import { useLocale } from '#hooks/useLocale';
 
-import { getMonthlyBudgetOverviewRange } from './monthlyBudgetOverviewPeriods';
+import { getMonthlyBudgetOverviewMonth, MONTHLY_BUDGET_OVERVIEW_PERIODS } from './monthlyBudgetOverviewPeriods';
 
 type MonthlyBudgetOverviewCardProps = {
   widgetId: string;
@@ -26,18 +26,25 @@ type MonthlyBudgetOverviewCardProps = {
   onCopy: (targetDashboardId: string) => void;
 };
 
-function getCardDateRange(meta: MonthlyBudgetOverviewWidget['meta']) {
+function getCardMonth(meta: MonthlyBudgetOverviewWidget['meta']) {
   const currentMonth = monthUtils.currentMonth();
 
-  if (meta?.startMonth && meta?.endMonth) {
-    return { startMonth: meta.startMonth, endMonth: meta.endMonth };
+  if (meta?.month) {
+    return meta.month;
   }
 
-  if (meta?.month && meta?.period) {
-    return getMonthlyBudgetOverviewRange(meta.month, meta.period);
+  if (meta?.startMonth) {
+    return meta.startMonth;
   }
 
-  return { startMonth: currentMonth, endMonth: currentMonth };
+  if (
+    meta?.period &&
+    MONTHLY_BUDGET_OVERVIEW_PERIODS.includes(meta.period)
+  ) {
+    return getMonthlyBudgetOverviewMonth(meta.period);
+  }
+
+  return currentMonth;
 }
 
 export function MonthlyBudgetOverviewCard({
@@ -55,15 +62,13 @@ export function MonthlyBudgetOverviewCard({
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
     useDashboardWidgetCopyMenu(onCopy);
 
-  const { startMonth, endMonth } = getCardDateRange(meta);
-  const { data, loading } = useAutomationOverview(startMonth, endMonth);
+  const month = getCardMonth(meta);
+  const { data, loading } = useAutomationOverview(month, month);
 
-  const periodLabel = useMemo(() => {
-    if (startMonth === endMonth) {
-      return monthUtils.format(startMonth, 'MMMM yyyy', locale);
-    }
-    return `${monthUtils.format(startMonth, 'MMM yyyy', locale)} – ${monthUtils.format(endMonth, 'MMM yyyy', locale)}`;
-  }, [startMonth, endMonth, locale]);
+  const periodLabel = useMemo(
+    () => monthUtils.format(month, 'MMMM yyyy', locale),
+    [month, locale],
+  );
 
   const hasCategories =
     data != null && data.groups.some(group => group.categories.length > 0);

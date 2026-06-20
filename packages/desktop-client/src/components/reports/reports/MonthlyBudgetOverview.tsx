@@ -36,26 +36,30 @@ import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 import { filterAutomationOverview } from './filterAutomationOverview';
 import {
-  applyMonthlyBudgetOverviewPeriod,
   detectMonthlyBudgetOverviewPeriod,
-  getMonthlyBudgetOverviewRange,
+  getMonthlyBudgetOverviewMonth,
+  MONTHLY_BUDGET_OVERVIEW_PERIODS,
 } from './monthlyBudgetOverviewPeriods';
 
-function getInitialDateRange(widget?: MonthlyBudgetOverviewWidget) {
+function getInitialMonth(widget?: MonthlyBudgetOverviewWidget) {
   const currentMonth = monthUtils.currentMonth();
 
-  if (widget?.meta?.startMonth && widget?.meta?.endMonth) {
-    return {
-      startMonth: widget.meta.startMonth,
-      endMonth: widget.meta.endMonth,
-    };
+  if (widget?.meta?.month) {
+    return widget.meta.month;
   }
 
-  if (widget?.meta?.month && widget?.meta?.period) {
-    return getMonthlyBudgetOverviewRange(widget.meta.month, widget.meta.period);
+  if (widget?.meta?.startMonth) {
+    return widget.meta.startMonth;
   }
 
-  return { startMonth: currentMonth, endMonth: currentMonth };
+  if (
+    widget?.meta?.period &&
+    MONTHLY_BUDGET_OVERVIEW_PERIODS.includes(widget.meta.period)
+  ) {
+    return getMonthlyBudgetOverviewMonth(widget.meta.period);
+  }
+
+  return currentMonth;
 }
 
 export function MonthlyBudgetOverview() {
@@ -87,17 +91,19 @@ function MonthlyBudgetOverviewInternal({
   const { isNarrowWidth } = useResponsive();
   const { data: categories = { grouped: [], list: [] } } = useCategories();
 
-  const initialRange = getInitialDateRange(widget);
-  const [startMonth, setStartMonth] = useState(initialRange.startMonth);
-  const [endMonth, setEndMonth] = useState(initialRange.endMonth);
-  const [period, setPeriod] = useState<MonthlyBudgetOverviewPeriod | 'custom'>(
-    () =>
-      widget?.meta?.period ??
-      detectMonthlyBudgetOverviewPeriod(
-        initialRange.startMonth,
-        initialRange.endMonth,
-        initialRange.startMonth,
-      ),
+  const initialMonth = getInitialMonth(widget);
+  const [month, setMonth] = useState(initialMonth);
+  const [period, setPeriod] = useState<MonthlyBudgetOverviewPeriod | null>(
+    () => {
+      if (
+        widget?.meta?.period &&
+        MONTHLY_BUDGET_OVERVIEW_PERIODS.includes(widget.meta.period)
+      ) {
+        return widget.meta.period;
+      }
+
+      return detectMonthlyBudgetOverviewPeriod(initialMonth);
+    },
   );
   const [selectedCategories, setSelectedCategories] = useState<
     CategoryEntity[]
@@ -123,9 +129,9 @@ function MonthlyBudgetOverviewInternal({
               : monthUtils.subMonths(currentMonth, 24),
             latestMonth,
           )
-          .map(month => ({
-            name: month,
-            pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
+          .map(item => ({
+            name: item,
+            pretty: monthUtils.format(item, 'MMMM, yyyy', locale),
           }))
           .reverse(),
       );
@@ -153,7 +159,7 @@ function MonthlyBudgetOverviewInternal({
     );
   }, [categories.list, widget?.meta?.categoryIds]);
 
-  const { data, loading } = useAutomationOverview(startMonth, endMonth);
+  const { data, loading } = useAutomationOverview(month, month);
 
   const filteredData = useMemo(() => {
     if (!data || selectedCategories.length === 0) {
@@ -180,53 +186,27 @@ function MonthlyBudgetOverviewInternal({
     });
   }
 
-  function updateDateRange(nextStart: string, nextEnd: string) {
-    setStartMonth(nextStart);
-    setEndMonth(nextEnd);
-    const nextPeriod = detectMonthlyBudgetOverviewPeriod(
-      nextStart,
-      nextEnd,
-      nextStart,
-    );
+  function onMonthChange(nextMonth: string) {
+    setMonth(nextMonth);
+    const nextPeriod = detectMonthlyBudgetOverviewPeriod(nextMonth);
     setPeriod(nextPeriod);
     persistMeta({
-      startMonth: nextStart,
-      endMonth: nextEnd,
-      period: nextPeriod === 'custom' ? undefined : nextPeriod,
-      month: nextStart,
+      month: nextMonth,
+      startMonth: nextMonth,
+      endMonth: nextMonth,
+      period: nextPeriod ?? undefined,
     });
   }
 
-  function onStartMonthChange(nextStart: string) {
-    const nextEnd = nextStart > endMonth ? nextStart : endMonth;
-    updateDateRange(nextStart, nextEnd);
-  }
-
-  function onEndMonthChange(nextEnd: string) {
-    const nextStart = nextEnd < startMonth ? nextEnd : startMonth;
-    updateDateRange(nextStart, nextEnd);
-  }
-
-  function onPeriodChange(nextPeriod: MonthlyBudgetOverviewPeriod | 'custom') {
+  function onPeriodChange(nextPeriod: MonthlyBudgetOverviewPeriod) {
+    const nextMonth = getMonthlyBudgetOverviewMonth(nextPeriod);
+    setMonth(nextMonth);
     setPeriod(nextPeriod);
-
-    if (nextPeriod === 'custom') {
-      persistMeta({ period: undefined });
-      return;
-    }
-
-    const range = applyMonthlyBudgetOverviewPeriod(startMonth, nextPeriod);
-    if (!range) {
-      return;
-    }
-
-    setStartMonth(range.startMonth);
-    setEndMonth(range.endMonth);
     persistMeta({
-      startMonth: range.startMonth,
-      endMonth: range.endMonth,
+      month: nextMonth,
+      startMonth: nextMonth,
+      endMonth: nextMonth,
       period: nextPeriod,
-      month: range.startMonth,
     });
   }
 
@@ -248,10 +228,10 @@ function MonthlyBudgetOverviewInternal({
           id: widget.id,
           meta: {
             ...(widget.meta ?? {}),
-            startMonth,
-            endMonth,
-            period: period === 'custom' ? undefined : period,
-            month: startMonth,
+            month,
+            startMonth: month,
+            endMonth: month,
+            period: period ?? undefined,
             categoryIds: selectedCategories.map(category => category.id),
           },
         },
@@ -295,14 +275,12 @@ function MonthlyBudgetOverviewInternal({
 
   const sidebar = monthOptions.length > 0 && (
     <MonthlyBudgetOverviewSidebar
-      startMonth={startMonth}
-      endMonth={endMonth}
+      month={month}
       period={period}
       monthOptions={monthOptions}
       categoryGroups={categories.grouped}
       selectedCategories={selectedCategories}
-      onStartMonthChange={onStartMonthChange}
-      onEndMonthChange={onEndMonthChange}
+      onMonthChange={onMonthChange}
       onPeriodChange={onPeriodChange}
       onSelectedCategoriesChange={onSelectedCategoriesChange}
     />
@@ -408,11 +386,11 @@ function MonthlyBudgetOverviewInternal({
                     <Paragraph>
                       <Trans>
                         This report compares what your budget automations
-                        project for the selected period against what is
-                        currently budgeted in those same categories. Categories
-                        without automations are excluded. Remainder automations
-                        are shown as zero needed, and negative budgeted amounts
-                        in those categories are ignored.
+                        project for the selected month against what is currently
+                        budgeted in those same categories. Categories without
+                        automations are excluded. Remainder automations are
+                        shown as zero needed, and negative budgeted amounts in
+                        those categories are ignored.
                       </Trans>
                     </Paragraph>
                   </View>

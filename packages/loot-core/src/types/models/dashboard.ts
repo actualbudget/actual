@@ -148,10 +148,7 @@ export type MonthlyBudgetOverviewWidget = AbstractWidget<
 export type MonthlyBudgetOverviewPeriod =
   | 'this-month'
   | 'next-month'
-  | 'year-to-date'
-  | 'to-end-of-year'
-  | 'next-three-months'
-  | 'next-six-months';
+  | 'last-month';
 
 type SpecializedWidget =
   | NetWorthWidget

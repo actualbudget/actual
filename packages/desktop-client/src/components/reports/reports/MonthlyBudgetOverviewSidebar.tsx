@@ -17,31 +17,27 @@ import { useLocale } from '#hooks/useLocale';
 
 import {
   getMonthlyBudgetOverviewPeriodLabel,
-  MONTHLY_BUDGET_OVERVIEW_PERIOD_OPTIONS,
+  MONTHLY_BUDGET_OVERVIEW_PERIODS,
 } from './monthlyBudgetOverviewPeriods';
 
 type MonthlyBudgetOverviewSidebarProps = {
-  startMonth: string;
-  endMonth: string;
-  period: MonthlyBudgetOverviewPeriod | 'custom';
+  month: string;
+  period: MonthlyBudgetOverviewPeriod | null;
   monthOptions: Array<{ name: string; pretty: string }>;
   categoryGroups: CategoryGroupEntity[];
   selectedCategories: CategoryEntity[];
-  onStartMonthChange: (month: string) => void;
-  onEndMonthChange: (month: string) => void;
-  onPeriodChange: (period: MonthlyBudgetOverviewPeriod | 'custom') => void;
+  onMonthChange: (month: string) => void;
+  onPeriodChange: (period: MonthlyBudgetOverviewPeriod) => void;
   onSelectedCategoriesChange: (categories: CategoryEntity[]) => void;
 };
 
 export function MonthlyBudgetOverviewSidebar({
-  startMonth,
-  endMonth,
+  month,
   period,
   monthOptions,
   categoryGroups,
   selectedCategories,
-  onStartMonthChange,
-  onEndMonthChange,
+  onMonthChange,
   onPeriodChange,
   onSelectedCategoriesChange,
 }: MonthlyBudgetOverviewSidebarProps) {
@@ -50,9 +46,12 @@ export function MonthlyBudgetOverviewSidebar({
 
   const periodOptions = useMemo(
     () =>
-      MONTHLY_BUDGET_OVERVIEW_PERIOD_OPTIONS.map(
+      MONTHLY_BUDGET_OVERVIEW_PERIODS.map(
         option =>
-          [option, getMonthlyBudgetOverviewPeriodLabel(option, t)] as const,
+          [
+            option,
+            getMonthlyBudgetOverviewPeriodLabel(option, t),
+          ] as const,
       ),
     [t],
   );
@@ -78,7 +77,7 @@ export function MonthlyBudgetOverviewSidebar({
         >
           <Text>
             <strong>
-              <Trans>Date range</Trans>
+              <Trans>Date</Trans>
             </strong>
           </Text>
         </View>
@@ -90,29 +89,12 @@ export function MonthlyBudgetOverviewSidebar({
           }}
         >
           <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
-            <Trans>From:</Trans>
+            <Trans>Month:</Trans>
           </Text>
           <Select
-            value={startMonth}
-            onChange={onStartMonthChange}
-            defaultLabel={monthUtils.format(startMonth, 'MMMM, yyyy', locale)}
-            options={monthOptions.map(({ name, pretty }) => [name, pretty])}
-          />
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: 5,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
-            <Trans>To:</Trans>
-          </Text>
-          <Select
-            value={endMonth}
-            onChange={onEndMonthChange}
-            defaultLabel={monthUtils.format(endMonth, 'MMMM, yyyy', locale)}
+            value={month}
+            onChange={onMonthChange}
+            defaultLabel={monthUtils.format(month, 'MMMM, yyyy', locale)}
             options={monthOptions.map(({ name, pretty }) => [name, pretty])}
           />
         </View>
@@ -127,7 +109,8 @@ export function MonthlyBudgetOverviewSidebar({
             <Trans>Range:</Trans>
           </Text>
           <Select
-            value={period}
+            value={(period ?? '') as MonthlyBudgetOverviewPeriod}
+            defaultLabel={t('Custom month')}
             onChange={onPeriodChange}
             options={periodOptions}
           />
