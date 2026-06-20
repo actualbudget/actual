@@ -10,7 +10,7 @@ import type { MonthlyBudgetOverviewWidget } from '@actual-app/core/types/models'
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
-import { getMonthlyBudgetOverviewRange } from '#components/reports/reports/monthlyBudgetOverviewPeriods';
+import { getMonthlyBudgetOverviewRange } from './monthlyBudgetOverviewPeriods';
 import { MonthlyBudgetOverviewSummary } from '#components/reports/reports/MonthlyBudgetOverviewSummary';
 import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useAutomationOverview } from '#hooks/useAutomationOverview';

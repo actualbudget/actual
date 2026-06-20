@@ -19,7 +19,7 @@ import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { MonthlyBudgetOverviewControls } from '#components/reports/reports/MonthlyBudgetOverviewControls';
-import { getMonthlyBudgetOverviewRange } from '#components/reports/reports/monthlyBudgetOverviewPeriods';
+import { getMonthlyBudgetOverviewRange } from './monthlyBudgetOverviewPeriods';
 import { MonthlyBudgetOverviewSummary } from '#components/reports/reports/MonthlyBudgetOverviewSummary';
 import { MonthlyBudgetOverviewTable } from '#components/reports/reports/MonthlyBudgetOverviewTable';
 import { useAutomationOverview } from '#hooks/useAutomationOverview';

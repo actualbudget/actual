@@ -14,7 +14,7 @@ import type { MonthlyBudgetOverviewPeriod } from '@actual-app/core/types/models'
 import {
   getMonthlyBudgetOverviewPeriodLabel,
   MONTHLY_BUDGET_OVERVIEW_PERIODS,
-} from '#components/reports/reports/monthlyBudgetOverviewPeriods';
+} from './monthlyBudgetOverviewPeriods';
 import { useLocale } from '#hooks/useLocale';
 
 type MonthlyBudgetOverviewControlsProps = {
