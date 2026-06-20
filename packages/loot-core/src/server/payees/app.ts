@@ -85,7 +85,8 @@ async function getPayeeRuleCounts() {
   );
 
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
-    if (completedScheduleRules.has(rule.id)) {
+    const ruleId = rule.getId();
+    if (ruleId != null && completedScheduleRules.has(ruleId)) {
       return;
     }
 
