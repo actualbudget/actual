@@ -35,7 +35,10 @@ export function ManagePayeesWithData({
   useEffect(() => {
     const unlisten = listen('sync-event', async event => {
       if (event.type === 'applied') {
-        if (event.tables.includes('rules') || event.tables.includes('schedules')) {
+        if (
+          event.tables.includes('rules') ||
+          event.tables.includes('schedules')
+        ) {
           await refetchRuleCounts();
         }
       }
