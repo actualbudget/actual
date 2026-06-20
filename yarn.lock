@@ -18,6 +18,7 @@ __metadata:
   dependencies:
     "@actual-app/core": "workspace:*"
     "@actual-app/crdt": "workspace:*"
+    "@actual-app/vite-plugin-peggy": "workspace:*"
     "@playwright/test": "npm:1.59.1"
     "@typescript/native-preview": "npm:beta"
     better-sqlite3: "npm:^12.10.0"
@@ -98,6 +99,7 @@ __metadata:
   resolution: "@actual-app/core@workspace:packages/loot-core"
   dependencies:
     "@actual-app/crdt": "workspace:*"
+    "@actual-app/vite-plugin-peggy": "workspace:*"
     "@jlongster/sql.js": "npm:^1.6.7"
     "@rschedule/core": "npm:^1.5.0"
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
@@ -130,7 +132,6 @@ __metadata:
     mockdate: "npm:^3.0.5"
     npm-run-all: "npm:^4.1.5"
     path-browserify: "npm:^1.0.1"
-    peggy: "npm:5.1.0"
     promise-retry: "npm:^2.0.1"
     rollup-plugin-visualizer: "npm:^7.0.1"
     stream-browserify: "npm:^3.0.0"
@@ -204,6 +205,16 @@ __metadata:
     winston: "npm:^3.19.0"
   bin:
     actual-server: ./build/bin/actual-server.js
+  languageName: unknown
+  linkType: soft
+
+"@actual-app/vite-plugin-peggy@workspace:*, @actual-app/vite-plugin-peggy@workspace:packages/vite-plugin-peggy":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/vite-plugin-peggy@workspace:packages/vite-plugin-peggy"
+  dependencies:
+    peggy: "npm:5.1.0"
+  peerDependencies:
+    vite: "*"
   languageName: unknown
   linkType: soft
 

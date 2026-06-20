@@ -1,6 +1,5 @@
+import { peggyLoader } from '@actual-app/vite-plugin-peggy';
 import { defineConfig } from 'vitest/config';
-
-import { peggyLoader } from './scripts/peggy.mts';
 
 export default defineConfig({
   test: {

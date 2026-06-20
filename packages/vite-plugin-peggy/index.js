@@ -1,13 +1,16 @@
 import peggy from 'peggy';
-import type { Plugin } from 'vite';
 
 // Matches the grammar files imported across the codebase (`.pegjs`/`.peggy`).
 const GRAMMAR_RE = /\.peg(js|gy)$/;
 
-// In-repo replacement for the third-party `vite-plugin-peggy-loader`. Compiles
-// imported Peggy grammars into an ES module that exports the generated parser
-// (notably its `parse` function), using the `peggy` dependency directly.
-export function peggyLoader(): Plugin {
+/**
+ * In-repo replacement for the third-party `vite-plugin-peggy-loader`. Compiles
+ * imported Peggy grammars into an ES module that exports the generated parser
+ * (notably its `parse` function), using the `peggy` dependency directly.
+ *
+ * @returns {import('vite').Plugin}
+ */
+export function peggyLoader() {
   return {
     name: 'peggy-loader',
     transform(grammar, id) {

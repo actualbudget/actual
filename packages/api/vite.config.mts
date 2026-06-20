@@ -1,11 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 
+import { peggyLoader } from '@actual-app/vite-plugin-peggy';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import { configDefaults } from 'vitest/config';
-
-import { peggyLoader } from '../loot-core/scripts/peggy.mts';
 
 const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 const distDir = path.resolve(__dirname, 'dist');
