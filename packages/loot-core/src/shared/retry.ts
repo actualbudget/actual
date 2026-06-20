@@ -39,21 +39,23 @@ export function retry<T>(
 
     const run = () => {
       attempt += 1;
-      fn(onRetry, attempt).then(resolve, error => {
-        if (!(error instanceof RetrySignal)) {
-          reject(error);
-          return;
-        }
-        if (attempt > retries) {
-          reject(error.error);
-          return;
-        }
-        const timeout = Math.min(
-          minTimeout * factor ** (attempt - 1),
-          maxTimeout,
-        );
-        setTimeout(run, timeout);
-      });
+      Promise.resolve()
+        .then(() => fn(onRetry, attempt))
+        .then(resolve, error => {
+          if (!(error instanceof RetrySignal)) {
+            reject(error);
+            return;
+          }
+          if (attempt > retries) {
+            reject(error.error);
+            return;
+          }
+          const timeout = Math.min(
+            minTimeout * factor ** (attempt - 1),
+            maxTimeout,
+          );
+          setTimeout(run, timeout);
+        });
     };
 
     run();

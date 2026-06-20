@@ -16,20 +16,15 @@ function areInputsEqual(newArgs: unknown[], lastArgs: unknown[]): boolean {
  * Minimal drop-in replacement for the `memoize-one` package: caches the result
  * of the most recent call and returns it again when called with equal arguments
  * (shallow equality by default), preserving referential stability of the result.
- *
- * Like `memoize-one`, the returned function keeps the exact type of `fn`.
  */
 // oxlint-disable-next-line typescript/no-explicit-any
-export function memoizeOne<T extends (...args: any[]) => any>(
-  fn: T,
+export function memoizeOne<Args extends any[], Result>(
+  fn: (...args: Args) => Result,
   isEqual: EqualityFn = areInputsEqual,
-): T {
-  let cache: { args: Parameters<T>; result: ReturnType<T> } | null = null;
+): (...args: Args) => Result {
+  let cache: { args: Args; result: Result } | null = null;
 
-  const memoized = function (
-    this: unknown,
-    ...args: Parameters<T>
-  ): ReturnType<T> {
+  return function (this: unknown, ...args: Args): Result {
     if (cache && isEqual(args, cache.args)) {
       return cache.result;
     }
@@ -37,6 +32,4 @@ export function memoizeOne<T extends (...args: any[]) => any>(
     cache = { args, result };
     return result;
   };
-
-  return memoized as T;
 }
