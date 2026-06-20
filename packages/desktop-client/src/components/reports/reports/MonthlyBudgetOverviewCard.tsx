@@ -15,7 +15,10 @@ import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidg
 import { useAutomationOverview } from '#hooks/useAutomationOverview';
 import { useLocale } from '#hooks/useLocale';
 
-import { getMonthlyBudgetOverviewMonth, MONTHLY_BUDGET_OVERVIEW_PERIODS } from './monthlyBudgetOverviewPeriods';
+import {
+  getMonthlyBudgetOverviewMonth,
+  MONTHLY_BUDGET_OVERVIEW_PERIODS,
+} from './monthlyBudgetOverviewPeriods';
 
 type MonthlyBudgetOverviewCardProps = {
   widgetId: string;
@@ -37,10 +40,7 @@ function getCardMonth(meta: MonthlyBudgetOverviewWidget['meta']) {
     return meta.startMonth;
   }
 
-  if (
-    meta?.period &&
-    MONTHLY_BUDGET_OVERVIEW_PERIODS.includes(meta.period)
-  ) {
+  if (meta?.period && MONTHLY_BUDGET_OVERVIEW_PERIODS.includes(meta.period)) {
     return getMonthlyBudgetOverviewMonth(meta.period);
   }
 

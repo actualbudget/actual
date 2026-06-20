@@ -48,10 +48,7 @@ export function MonthlyBudgetOverviewSidebar({
     () =>
       MONTHLY_BUDGET_OVERVIEW_PERIODS.map(
         option =>
-          [
-            option,
-            getMonthlyBudgetOverviewPeriodLabel(option, t),
-          ] as const,
+          [option, getMonthlyBudgetOverviewPeriodLabel(option, t)] as const,
       ),
     [t],
   );
