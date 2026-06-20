@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { RefObject } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
@@ -37,7 +37,6 @@ import { send } from '@actual-app/core/platform/client/connection';
 import { DEFAULT_MAX_DISTANCE_METERS } from '@actual-app/core/shared/constants';
 import { calculateDistance } from '@actual-app/core/shared/location-utils';
 import * as monthUtils from '@actual-app/core/shared/months';
-import * as Platform from '@actual-app/core/shared/platform';
 import { q } from '@actual-app/core/shared/query';
 import { getUpcomingDays } from '@actual-app/core/shared/schedules';
 import {
@@ -83,13 +82,11 @@ import {
 import { getPrettyPayee } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import { createSingleTimeScheduleFromTransaction } from '#components/transactions/TransactionList';
-import { AmountInput } from '#components/util/AmountInput';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
 import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useDateFormat } from '#hooks/useDateFormat';
-import { useInitialMount } from '#hooks/useInitialMount';
 import { useInputRefValue } from '#hooks/useInputRefValue';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
@@ -112,7 +109,8 @@ import { useDispatch, useSelector } from '#redux';
 import { setLastTransaction } from '#transactions/transactionsSlice';
 import { getStatusLabel } from '#util/schedule';
 
-import { FocusableAmountInput } from './FocusableAmountInput';
+import { AmountInput } from './AmountInput';
+import { SplitAmountInput } from './SplitAmountInput';
 
 function getFieldName(transactionId: TransactionEntity['id'], field: string) {
   return `${field}-${transactionId}`;
@@ -378,9 +376,10 @@ function Footer({
 }
 
 type ChildTransactionEditProps = {
+  keyboardHeader: ReactNode;
   transaction: TransactionEntity;
+  negate: boolean;
   amountFocused: boolean;
-  amountSign: '+' | '-';
   getCategory: (transaction: TransactionEntity, isOffBudget: boolean) => string;
   getPayee: (transaction: TransactionEntity) => PayeeEntity | undefined;
   getTransferAccount: (
@@ -407,8 +406,8 @@ const ChildTransactionEdit = forwardRef<
   (
     {
       transaction,
+      negate,
       amountFocused,
-      amountSign,
       getCategory,
       getPayee,
       getTransferAccount,
@@ -417,13 +416,13 @@ const ChildTransactionEdit = forwardRef<
       onEditField,
       onUpdate,
       onDelete,
+      keyboardHeader,
     },
     ref,
   ) => {
     const { t } = useTranslation();
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
-    const [hideFraction, _] = useSyncedPref('hideFraction');
     const noteRef = useRef<HTMLInputElement | null>(null);
 
     const prettyPayee = getPrettyPayee({
@@ -469,32 +468,25 @@ const ChildTransactionEdit = forwardRef<
             }}
           >
             <FieldLabel title={t('Amount')} style={{ padding: 0 }} />
-            <AmountInput
+            <SplitAmountInput
+              keyboardHeader={keyboardHeader}
               disabled={
                 !!editingField &&
                 editingField !== getFieldName(transaction.id, 'amount')
               }
-              focused={amountFocused}
-              value={amountToInteger(transaction.amount)}
-              zeroSign={amountSign}
-              style={{ marginRight: 8 }}
-              inputStyle={{
-                ...styles.smallText,
-                textAlign: 'right',
-                minWidth: 0,
+              value={transaction.amount}
+              negate={negate}
+              autoFocus={amountFocused}
+              onFocus={event => {
+                onRequestActiveEdit(getFieldName(transaction.id, 'amount'));
+
+                const input = event.currentTarget as HTMLInputElement;
+                input.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }}
-              onFocus={() =>
-                onRequestActiveEdit(getFieldName(transaction.id, 'amount'))
-              }
-              onUpdate={value => {
-                const amount = integerToAmount(value);
-                if (transaction.amount !== amount) {
-                  onUpdate(transaction, 'amount', amount);
-                } else {
-                  onClearActiveEdit();
-                }
+              onBlur={() => onClearActiveEdit()}
+              onChange={amount => {
+                onUpdate(transaction, 'amount', amount);
               }}
-              autoDecimals={String(hideFraction) !== 'true'}
             />
           </View>
         </View>
@@ -650,11 +642,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
-    const [totalAmountFocused, setTotalAmountFocused] = useState(
-      // iOS does not support automatically opening up the keyboard for the
-      // total amount field. Hence we should not focus on it on page render.
-      !Platform.isIOSAgent,
-    );
     const childTransactionElementRefMap = useRef<
       Record<TransactionEntity['id'], HTMLDivElement | null>
     >({});
@@ -662,21 +649,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const payeesById = useMemo(() => groupById(payees), [payees]);
     const accountsById = useMemo(() => groupById(accounts), [accounts]);
-
-    const onTotalAmountEdit = useCallback(() => {
-      onRequestActiveEdit?.(getFieldName(transaction.id, 'amount'), () => {
-        setTotalAmountFocused(true);
-        return () => setTotalAmountFocused(false);
-      });
-    }, [onRequestActiveEdit, transaction.id]);
-
-    const isInitialMount = useInitialMount();
-
-    useEffect(() => {
-      if (isInitialMount && isAdding && !Platform.isIOSAgent) {
-        onTotalAmountEdit();
-      }
-    }, [isAdding, isInitialMount, onTotalAmountEdit]);
 
     const getAccount = useCallback(
       (trans: TransactionEntity) => {
@@ -1114,10 +1086,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       [scrollChildTransactionIntoView],
     );
 
-    // Child transactions should always default to the signage
-    // of the parent transaction
-    const childAmountSign = transaction.amount <= 0 ? '-' : '+';
-
     const account = getAccount(transaction);
     const isOffBudget = account ? !!account.offbudget : false;
     const title = getPrettyPayee({
@@ -1129,6 +1097,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const transactionDate = parseDate(transaction.date, dateFormat, new Date());
     const dateDefaultValue = monthUtils.dayFromDate(transactionDate);
+
+    const remaining = transaction.error?.difference ?? 0;
 
     return (
       <Page
@@ -1169,21 +1139,21 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             }}
           >
             <FieldLabel title={t('Amount')} flush style={{ marginBottom: 0 }} />
-            <FocusableAmountInput
+            <AmountInput
               value={transaction.amount}
-              zeroSign="-"
-              focused={totalAmountFocused}
-              onFocus={onTotalAmountEdit}
-              onBlur={() => onClearActiveEdit()}
-              onUpdateAmount={onTotalAmountUpdate}
-              focusedStyle={{
-                width: 'auto',
-                padding: '5px',
-                paddingLeft: '20px',
-                paddingRight: '20px',
-                minWidth: '100%',
+              negate
+              disabled={
+                !!editingField &&
+                editingField !== getFieldName(transaction.id, 'amount')
+              }
+              autoFocus={isAdding}
+              disableNativeAutoFocusOnIOS
+              onFocus={() => {
+                onRequestActiveEdit(getFieldName(transaction.id, 'amount'));
               }}
-              textStyle={{ ...styles.veryLargeText, textAlign: 'center' }}
+              onBlur={() => onClearActiveEdit()}
+              onChange={onTotalAmountUpdate}
+              variant="large"
             />
           </View>
 
@@ -1316,8 +1286,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             <ChildTransactionEdit
               key={childTrans.id}
               transaction={childTrans}
+              negate={transaction.amount <= 0}
               amountFocused={arr.findIndex(c => c.amount === 0) === i}
-              amountSign={childAmountSign}
               ref={r => {
                 childTransactionElementRefMap.current = {
                   ...childTransactionElementRefMap.current,
@@ -1332,6 +1302,18 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               onUpdate={onUpdateInner}
               onEditField={onEditFieldInner}
               onDelete={onDeleteInner}
+              keyboardHeader={
+                <FillRemainingButton
+                  remaining={remaining}
+                  onPress={() => {
+                    void onUpdateInner(
+                      childTrans,
+                      'amount',
+                      integerToAmount(remaining),
+                    );
+                  }}
+                />
+              }
             />
           ))}
 
@@ -2134,3 +2116,35 @@ export const TransactionEdit = (props: TransactionEditProps) => {
     </SingleActiveEditFormProvider>
   );
 };
+
+function FillRemainingButton({
+  remaining,
+  onPress,
+}: {
+  readonly remaining: number;
+  readonly onPress: () => void;
+}) {
+  return (
+    <Button
+      variant="primary"
+      style={{ height: styles.mobileMinHeight }}
+      onPress={onPress}
+      isDisabled={remaining === 0}
+    >
+      <SvgSplit width={17} height={17} />
+      <Text
+        style={{
+          ...styles.text,
+          marginLeft: 6,
+        }}
+      >
+        <Trans>
+          Use remaining:{' '}
+          {{
+            amount: integerToCurrency(Math.abs(remaining)),
+          }}
+        </Trans>
+      </Text>
+    </Button>
+  );
+}
