@@ -259,9 +259,6 @@ function normalizeScheduleName(name) {
 export async function createSchedule({
   schedule = null,
   conditions = [],
-}: {
-  schedule?: Partial<ScheduleEntity> | null;
-  conditions?: RuleConditionEntity[];
 } = {}): Promise<ScheduleEntity['id']> {
   const scheduleId = schedule?.id || uuidv4();
 
