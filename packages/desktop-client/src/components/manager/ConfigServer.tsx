@@ -556,7 +556,6 @@ export function ConfigServer() {
                     style={{ marginLeft: 15 }}
                     onPress={async () => {
                       await onCreateScrollTestFile();
-                      void navigate('/');
                     }}
                   >
                     <Trans>Create scroll test file</Trans>
