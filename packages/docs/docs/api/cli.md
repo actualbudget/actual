@@ -53,12 +53,21 @@ Global flags override environment variables:
 
 ### Config File
 
-The CLI uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) for configuration. You can create a config file in any of these formats:
+The CLI uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) for configuration. The config file can be anywhere between the current working directory and your home directory.
+
+You can create a config file in any of these formats:
 
 - `.actualrc` (JSON or YAML)
 - `.actualrc.json`, `.actualrc.yaml`, `.actualrc.yml`
 - `actual.config.json`, `actual.config.yaml`, `actual.config.yml`
 - An `"actual"` key in your `package.json`
+
+You can instead store your configuration in the `actual` subdirectory of the global configuration directory (e.g. `~/.config/actual/` on Linux) in any of these formats:
+
+- `config` (JSON or YAML)
+- `config.json`
+- `config.yaml`
+- `config.yml`
 
 Example `.actualrc.json`:
 
@@ -66,12 +75,15 @@ Example `.actualrc.json`:
 {
   "serverUrl": "http://localhost:5006",
   "password": "your-password",
-  "syncId": "1cfdbb80-6274-49bf-b0c2-737235a4c81f"
+  "syncId": "1cfdbb80-6274-49bf-b0c2-737235a4c81f",
+  "cacheTtl": 60,
+  "lockTimeout": 10,
+  "noLock": false
 }
 ```
 
 :::caution Security
-Avoid storing plaintext passwords in config files (including the `password` key above). Prefer environment variables such as `ACTUAL_PASSWORD` or `ACTUAL_SESSION_TOKEN`, or use a session token in config instead of a password.
+Avoid storing plaintext passwords in config files (including the `password` key above). If these files do contain passwords, set restrictive permissions (e.g. 600 on Linux), and, if they are in a git repo, add them to `.gitignore`. Prefer environment variables such as `ACTUAL_PASSWORD` or `ACTUAL_SESSION_TOKEN`, or use a session token in config instead of a password. See [Environment Variables](#environment-variables) for details.
 :::
 
 ## Usage
@@ -420,7 +432,9 @@ actual transactions add --account <id> --data '[{"date":"2026-03-14","amount":-2
 
 ## Self-Signed SSL Certificates
 
-If your Actual sync server uses a self-signed SSL certificate, the CLI will reject the connection by default. To allow connections with self-signed certificates, set the `NODE_TLS_REJECT_UNAUTHORIZED` environment variable:
+If your Actual sync server uses a self-signed SSL certificate, the CLI will reject the connection by default. You can address this by adding your CA certificate to the system's trusted certificates, though the details are beyond the scope of this document.
+
+Alternatively, you can allow connections to a server that uses a self-signed certificate by setting the `NODE_TLS_REJECT_UNAUTHORIZED` environment variable:
 
 ```bash
 NODE_TLS_REJECT_UNAUTHORIZED=0 actual budgets list

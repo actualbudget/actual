@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   publish-flathub:
-    runs-on: ubuntu-22.04
+    runs-on: depot-ubuntu-22.04
     environment: release
     steps:
       - name: Resolve version
