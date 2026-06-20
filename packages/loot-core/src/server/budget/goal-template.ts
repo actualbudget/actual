@@ -384,7 +384,8 @@ function categoryHasAutomations(templates: Template[]): boolean {
 
 function categoryHasRemainder(templates: Template[]): boolean {
   return templates.some(
-    template => template.directive === 'template' && template.type === 'remainder',
+    template =>
+      template.directive === 'template' && template.type === 'remainder',
   );
 }
 
@@ -396,7 +397,8 @@ function computeProjectedNeeded(
   let remainderContribution = 0;
   for (const template of templates) {
     if (template.type === 'remainder') {
-      remainderContribution += values.perTemplateContribution.get(template) ?? 0;
+      remainderContribution +=
+        values.perTemplateContribution.get(template) ?? 0;
     }
   }
   return Math.max(0, values.budgeted - remainderContribution);
@@ -415,7 +417,7 @@ async function getCarriedOver(
 ): Promise<number> {
   const lastMonth = monthUtils.subMonths(month, 1);
   const lastMonthSheet = monthUtils.sheetForMonth(lastMonth);
-  let fromLastMonth = await getSheetValue(
+  const fromLastMonth = await getSheetValue(
     lastMonthSheet,
     `leftover-${category.id}`,
   );
@@ -555,10 +557,8 @@ export async function getAutomationOverview({
     categoryHasAutomations(categoryTemplates[id]),
   );
 
-  const monthCount = monthUtils.differenceInCalendarMonths(
-    endMonth,
-    startMonth,
-  ) + 1;
+  const monthCount =
+    monthUtils.differenceInCalendarMonths(endMonth, startMonth) + 1;
 
   if (automationCategoryIds.length === 0) {
     return {
@@ -601,8 +601,13 @@ export async function getAutomationOverview({
     }
   }
 
-  const categoryById = new Map(categoryData.map(category => [category.id, category]));
-  const categoryRows = new Map<CategoryEntity['id'], AutomationOverviewCategoryRow>();
+  const categoryById = new Map(
+    categoryData.map(category => [category.id, category]),
+  );
+  const categoryRows = new Map<
+    CategoryEntity['id'],
+    AutomationOverviewCategoryRow
+  >();
 
   for (const categoryId of automationCategoryIds) {
     const category = categoryById.get(categoryId);

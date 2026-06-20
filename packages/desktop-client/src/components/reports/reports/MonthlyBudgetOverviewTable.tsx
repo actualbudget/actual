@@ -72,7 +72,9 @@ function AmountColumns({
   );
 }
 
-export function MonthlyBudgetOverviewTable({ data }: MonthlyBudgetOverviewTableProps) {
+export function MonthlyBudgetOverviewTable({
+  data,
+}: MonthlyBudgetOverviewTableProps) {
   const headerStyle = {
     borderBottom: `1px solid ${theme.tableBorder}`,
     paddingBottom: 8,
@@ -115,7 +117,9 @@ export function MonthlyBudgetOverviewTable({ data }: MonthlyBudgetOverviewTableP
               marginTop: 8,
             }}
           >
-            <Block style={{ flex: 1, fontWeight: 600 }}>{group.groupName}</Block>
+            <Block style={{ flex: 1, fontWeight: 600 }}>
+              {group.groupName}
+            </Block>
             <AmountColumns
               amounts={group.subtotal}
               monthCount={data.monthCount}

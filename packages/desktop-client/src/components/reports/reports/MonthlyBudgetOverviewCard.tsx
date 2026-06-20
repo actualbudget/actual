@@ -8,10 +8,10 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import type { MonthlyBudgetOverviewWidget } from '@actual-app/core/types/models';
 
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
-import { getMonthlyBudgetOverviewRange } from '#components/reports/reports/monthlyBudgetOverviewPeriods';
-import { MonthlyBudgetOverviewSummary } from '#components/reports/reports/MonthlyBudgetOverviewSummary';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
+import { getMonthlyBudgetOverviewRange } from '#components/reports/reports/monthlyBudgetOverviewPeriods';
+import { MonthlyBudgetOverviewSummary } from '#components/reports/reports/MonthlyBudgetOverviewSummary';
 import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useAutomationOverview } from '#hooks/useAutomationOverview';
 import { useLocale } from '#hooks/useLocale';
