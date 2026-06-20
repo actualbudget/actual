@@ -35,8 +35,8 @@ describe('payees app', () => {
         conditions: [
           { op: 'is', field: 'payee', value: completedPayeeId },
           { op: 'is', field: 'date', value: '2020-12-20' },
-        ] satisfies RuleConditionEntity[],
-      });
+        ],
+      } as { conditions: RuleConditionEntity[] });
       await updateSchedule({
         schedule: { id: scheduleId, completed: true },
       });
