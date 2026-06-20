@@ -150,13 +150,16 @@ describe('getAutomationOverview', () => {
         sort_order: 0,
         tombstone: 0,
         categories: categories.map(category => ({
-          ...category,
+          id: category.id,
+          name: category.name,
+          is_income: category.is_income ? 1 : 0,
+          cat_group: category.group,
           sort_order: 0,
           hidden: 0,
           tombstone: 0,
         })),
       },
-    ] as Awaited<ReturnType<typeof db.getCategoriesGrouped>>);
+    ]);
   }
 
   beforeEach(() => {

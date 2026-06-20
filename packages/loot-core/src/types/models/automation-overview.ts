@@ -1,4 +1,5 @@
-import type { CategoryEntity, CategoryGroupEntity } from './category';
+import type { CategoryEntity } from './category';
+import type { CategoryGroupEntity } from './category-group';
 
 export type AutomationOverviewAmounts = {
   carriedOver: number;
