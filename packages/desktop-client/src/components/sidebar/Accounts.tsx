@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { SvgAdd } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
@@ -13,7 +14,8 @@ import { useLocalPref } from '#hooks/useLocalPref';
 import { useOffBudgetAccounts } from '#hooks/useOffBudgetAccounts';
 import { useOnBudgetAccounts } from '#hooks/useOnBudgetAccounts';
 import { useUpdatedAccounts } from '#hooks/useUpdatedAccounts';
-import { useSelector } from '#redux';
+import { replaceModal } from '#modals/modalsSlice';
+import { useDispatch, useSelector } from '#redux';
 import * as bindings from '#spreadsheet/bindings';
 
 import { Account } from './Account';
@@ -23,6 +25,7 @@ const fontWeight = 600;
 
 export function Accounts() {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const [isDragging, setIsDragging] = useState(false);
   const { data: accounts = [] } = useAccounts();
   const updatedAccounts = useUpdatedAccounts();
@@ -69,6 +72,10 @@ export function Accounts() {
 
   const onToggleClosedAccounts = () => {
     setShowClosedAccountsPref(!showClosedAccounts);
+  };
+
+  const onAddAccount = () => {
+    dispatch(replaceModal({ modal: { name: 'add-account', options: {} } }));
   };
 
   return (
@@ -189,6 +196,13 @@ export function Accounts() {
             />
           ))}
       </View>
+
+      <SecondaryItem
+        style={{ marginTop: 15 }}
+        title={t('Add account')}
+        Icon={SvgAdd}
+        onClick={onAddAccount}
+      />
     </View>
   );
 }
