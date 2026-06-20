@@ -66,6 +66,7 @@ import { CustomReportListCards } from './reports/CustomReportListCards';
 import { FormulaCard } from './reports/FormulaCard';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { MissingReportCard } from './reports/MissingReportCard';
+import { MonthlyBudgetOverviewCard } from './reports/MonthlyBudgetOverviewCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
 import { SpendingCard } from './reports/SpendingCard';
@@ -116,6 +117,9 @@ export function Overview({ dashboard }: OverviewProps) {
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
+  const monthlyBudgetOverviewReportEnabled = useFeatureFlag(
+    'monthlyBudgetOverviewReport',
+  );
   const balanceForecastReportEnabled = useFeatureFlag('balanceForecastReport');
 
   const formulaMode = useFeatureFlag('formulaMode');
@@ -626,6 +630,14 @@ export function Overview({ dashboard }: OverviewProps) {
                                   },
                                 ]
                               : []),
+                            ...(monthlyBudgetOverviewReportEnabled
+                              ? [
+                                  {
+                                    name: 'monthly-budget-overview-card' as const,
+                                    text: t('Monthly budget overview'),
+                                  },
+                                ]
+                              : []),
                             ...(balanceForecastReportEnabled
                               ? [
                                   {
@@ -884,6 +896,20 @@ export function Overview({ dashboard }: OverviewProps) {
                         ) : widget.type === 'budget-analysis-card' &&
                           budgetAnalysisReportEnabled ? (
                           <BudgetAnalysisCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : widget.type === 'monthly-budget-overview-card' &&
+                          monthlyBudgetOverviewReportEnabled ? (
+                          <MonthlyBudgetOverviewCard
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}

@@ -11,6 +11,7 @@ import {
   applyMultipleCategoryTemplates,
   applyTemplate,
   dryRunCategoryTemplate,
+  getAutomationOverview,
 } from './goal-template';
 import * as statements from './statements';
 
@@ -111,9 +112,121 @@ function setupAqlForWideScope(
         dependencies: [],
       };
     }
+    if (queryStr.includes('categories')) {
+      return { data: categoriesInGroup, dependencies: [] };
+    }
     return { data: [], dependencies: [] };
   });
 }
+
+describe('getAutomationOverview', () => {
+  const cat1: CategoryEntity = {
+    id: 'cat-1',
+    name: 'Groceries',
+    group: 'g1',
+    is_income: false,
+  };
+  const cat2: CategoryEntity = {
+    id: 'cat-2',
+    name: 'Rent',
+    group: 'g1',
+    is_income: false,
+  };
+  const cat3: CategoryEntity = {
+    id: 'cat-3',
+    name: 'Manual',
+    group: 'g1',
+    is_income: false,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(statements.getActiveSchedules).mockResolvedValue(
+      [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
+    );
+    vi.mocked(db.getCategories).mockResolvedValue([] as DbCategory[]);
+  });
+
+  it('sums projected and budgeted amounts for automation categories only', async () => {
+    setupSheetMock({
+      'to-budget': 100000,
+      'budget-cat-1': 5000,
+      'budget-cat-2': 20000,
+      'budget-cat-3': 50000,
+    });
+    setupAqlForWideScope(
+      [
+        {
+          category: cat1,
+          templates: [
+            {
+              type: 'periodic',
+              amount: 100,
+              period: { period: 'month', amount: 1 },
+              starting: '2024-01-01',
+              directive: 'template',
+              priority: 1,
+            },
+          ],
+        },
+        {
+          category: cat2,
+          templates: [
+            {
+              type: 'periodic',
+              amount: 200,
+              period: { period: 'month', amount: 1 },
+              starting: '2024-01-01',
+              directive: 'template',
+              priority: 1,
+            },
+          ],
+        },
+      ],
+      [cat1, cat2, cat3],
+    );
+
+    const result = await getAutomationOverview({ month: '2024-01' });
+
+    expect(result.totalNeeded).toBe(30000);
+    expect(result.totalBudgeted).toBe(25000);
+    expect(result.remaining).toBe(5000);
+    expect(result.categories).toHaveLength(2);
+    expect(result.categories.map(c => c.categoryId).sort()).toEqual([
+      cat1.id,
+      cat2.id,
+    ]);
+  });
+
+  it('ignores categories that only have goal markers', async () => {
+    setupSheetMock({
+      'to-budget': 100000,
+      'budget-cat-1': 10000,
+    });
+    setupAqlForWideScope(
+      [
+        {
+          category: cat1,
+          templates: [
+            {
+              type: 'goal',
+              amount: 500,
+              directive: 'goal',
+            },
+          ],
+        },
+      ],
+      [cat1],
+    );
+
+    const result = await getAutomationOverview({ month: '2024-01' });
+
+    expect(result.totalNeeded).toBe(0);
+    expect(result.totalBudgeted).toBe(0);
+    expect(result.remaining).toBe(0);
+    expect(result.categories).toEqual([]);
+  });
+});
 
 describe('dryRunCategoryTemplate', () => {
   beforeEach(() => {

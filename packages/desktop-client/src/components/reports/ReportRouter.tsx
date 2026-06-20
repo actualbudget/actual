@@ -13,6 +13,7 @@ import { CashFlow } from './reports/CashFlow';
 import { Crossover } from './reports/Crossover';
 import { CustomReport } from './reports/CustomReport';
 import { Formula } from './reports/Formula';
+import { MonthlyBudgetOverview } from './reports/MonthlyBudgetOverview';
 import { NetWorth } from './reports/NetWorth';
 import { Sankey } from './reports/Sankey';
 import { Spending } from './reports/Spending';
@@ -35,6 +36,9 @@ export function ReportRouter() {
   const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
   const balanceForecastReportEnabled = useFeatureFlag('balanceForecastReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
+  const monthlyBudgetOverviewReportEnabled = useFeatureFlag(
+    'monthlyBudgetOverviewReport',
+  );
   const sankeyReportEnabled = useFeatureFlag('sankeyReport');
 
   return (
@@ -156,6 +160,26 @@ export function ReportRouter() {
             element={
               <ReportBoundary>
                 <BudgetAnalysis />
+              </ReportBoundary>
+            }
+          />
+        </>
+      )}
+      {monthlyBudgetOverviewReportEnabled && (
+        <>
+          <Route
+            path="/monthly-budget-overview"
+            element={
+              <ReportBoundary>
+                <MonthlyBudgetOverview />
+              </ReportBoundary>
+            }
+          />
+          <Route
+            path="/monthly-budget-overview/:id"
+            element={
+              <ReportBoundary>
+                <MonthlyBudgetOverview />
               </ReportBoundary>
             }
           />

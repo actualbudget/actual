@@ -14,12 +14,14 @@ type GetDashboardWidgetItemsParams = {
   formulaMode: boolean;
   crossoverReportEnabled: boolean;
   budgetAnalysisReportEnabled: boolean;
+  monthlyBudgetOverviewReportEnabled: boolean;
   balanceForecastReportEnabled: boolean;
 };
 
 type DashboardWidgetMenuName =
   | 'balance-forecast-card'
   | 'budget-analysis-card'
+  | 'monthly-budget-overview-card'
   | 'calendar-card'
   | 'cash-flow-card'
   | 'crossover-card'
@@ -47,6 +49,7 @@ export function getDashboardWidgetItems({
   formulaMode,
   crossoverReportEnabled,
   budgetAnalysisReportEnabled,
+  monthlyBudgetOverviewReportEnabled,
   balanceForecastReportEnabled,
 }: GetDashboardWidgetItemsParams): MenuItem<DashboardWidgetMenuName>[] {
   const items: MenuItem<DashboardWidgetMenuName>[] = [
@@ -91,6 +94,13 @@ export function getDashboardWidgetItems({
     items.splice(findItemIndex(items, 'markdown-card'), 0, {
       name: 'budget-analysis-card',
       text: t('Budget analysis'),
+    });
+  }
+
+  if (monthlyBudgetOverviewReportEnabled) {
+    items.splice(findItemIndex(items, 'markdown-card'), 0, {
+      name: 'monthly-budget-overview-card',
+      text: t('Monthly budget overview'),
     });
   }
 

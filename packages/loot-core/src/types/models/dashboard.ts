@@ -133,11 +133,20 @@ export type AgeOfMoneyWidget = AbstractWidget<
   } | null
 >;
 
+export type MonthlyBudgetOverviewWidget = AbstractWidget<
+  'monthly-budget-overview-card',
+  {
+    name?: string;
+    month?: string;
+  } | null
+>;
+
 type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
   | SpendingWidget
   | BudgetAnalysisWidget
+  | MonthlyBudgetOverviewWidget
   | CrossoverWidget
   | MarkdownWidget
   | SummaryWidget

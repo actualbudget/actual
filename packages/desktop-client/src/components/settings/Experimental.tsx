@@ -232,6 +232,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Budget Analysis Report</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="monthlyBudgetOverviewReport">
+              <Trans>Monthly Budget Overview Report</Trans>
+            </FeatureToggle>
             <FeatureToggle
               flag="payeeLocations"
               feedbackLink="https://github.com/actualbudget/actual/issues/6706"

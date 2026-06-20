@@ -15,6 +15,7 @@ describe('getDashboardWidgetItems', () => {
       formulaMode: false,
       crossoverReportEnabled: false,
       budgetAnalysisReportEnabled: false,
+      monthlyBudgetOverviewReportEnabled: false,
       balanceForecastReportEnabled: false,
     });
 
@@ -24,6 +25,7 @@ describe('getDashboardWidgetItems', () => {
       formulaMode: false,
       crossoverReportEnabled: false,
       budgetAnalysisReportEnabled: false,
+      monthlyBudgetOverviewReportEnabled: false,
       balanceForecastReportEnabled: true,
     });
 
@@ -38,6 +40,7 @@ describe('getDashboardWidgetItems', () => {
       formulaMode: false,
       crossoverReportEnabled: false,
       budgetAnalysisReportEnabled: false,
+      monthlyBudgetOverviewReportEnabled: false,
       balanceForecastReportEnabled: false,
     });
 

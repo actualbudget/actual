@@ -5,6 +5,10 @@ import { batchMessages } from '#server/sync';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
+import type {
+  AutomationOverview,
+  AutomationOverviewCategory,
+} from '#types/models/automation-overview';
 import type { CleanupTemplate } from '#types/models/cleanup-templates';
 import type { Template } from '#types/models/templates';
 
@@ -356,6 +360,99 @@ async function processTemplate(
   return {
     type: 'message',
     message: `Successfully applied templates to ${contexts.length} categories`,
+  };
+}
+
+function categoryHasAutomations(templates: Template[]): boolean {
+  return templates.some(template => template.directive === 'template');
+}
+
+export type { AutomationOverview, AutomationOverviewCategory };
+
+export async function getAutomationOverview({
+  month,
+}: {
+  month: string;
+}): Promise<AutomationOverview> {
+  await storeNoteTemplates();
+  const categoryTemplates = await getTemplates();
+  const automationCategoryIds = Object.keys(categoryTemplates).filter(id =>
+    categoryHasAutomations(categoryTemplates[id]),
+  );
+
+  if (automationCategoryIds.length === 0) {
+    return {
+      month,
+      totalNeeded: 0,
+      totalBudgeted: 0,
+      remaining: 0,
+      categories: [],
+    };
+  }
+
+  const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
+    q('categories')
+      .filter({ id: { $oneof: automationCategoryIds } })
+      .select('*'),
+  );
+
+  const filteredTemplates: Record<CategoryEntity['id'], Template[]> = {};
+  for (const id of automationCategoryIds) {
+    filteredTemplates[id] = categoryTemplates[id];
+  }
+
+  const { contexts } = await computeTemplates(
+    month,
+    true,
+    filteredTemplates,
+    categoryData,
+    true,
+  );
+
+  const contextByCategoryId = new Map(
+    contexts.map(context => [context.category.id, context]),
+  );
+  const sheetName = monthUtils.sheetForMonth(month);
+
+  const categories: AutomationOverviewCategory[] = [];
+  let totalNeeded = 0;
+  let totalBudgeted = 0;
+
+  for (const category of categoryData) {
+    const templates = categoryTemplates[category.id];
+    if (!templates || !categoryHasAutomations(templates)) {
+      continue;
+    }
+
+    const context = contextByCategoryId.get(category.id);
+    const needed = context ? context.getValues().budgeted : 0;
+    const budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
+    const remaining = Math.max(0, needed - budgeted);
+
+    totalNeeded += needed;
+    totalBudgeted += budgeted;
+
+    categories.push({
+      categoryId: category.id,
+      categoryName: category.name,
+      needed,
+      budgeted,
+      remaining,
+    });
+  }
+
+  categories.sort((a, b) =>
+    a.categoryName.localeCompare(b.categoryName, undefined, {
+      sensitivity: 'base',
+    }),
+  );
+
+  return {
+    month,
+    totalNeeded,
+    totalBudgeted,
+    remaining: Math.max(0, totalNeeded - totalBudgeted),
+    categories,
   };
 }
 
