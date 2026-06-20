@@ -539,27 +539,35 @@ export function ConfigServer() {
                 </Button>
 
                 {isNonProductionEnvironment() && (
-                  <Button
-                    variant="primary"
-                    style={{ marginLeft: 15 }}
-                    onPress={async () => {
-                      await onCreateTestFile();
-                      void navigate('/');
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'flex-end',
+                      alignItems: 'stretch',
+                      margin: 10,
+                      minHeight: 39,
                     }}
                   >
-                    <Trans>Create test file</Trans>
-                  </Button>
-                )}
-                {isNonProductionEnvironment() && (
-                  <Button
-                    variant="primary"
-                    style={{ marginLeft: 15 }}
-                    onPress={async () => {
-                      await onCreateScrollTestFile();
-                    }}
-                  >
-                    <Trans>Create scroll test file</Trans>
-                  </Button>
+                    <Button
+                      variant="primary"
+                      style={{ marginLeft: 15 }}
+                      onPress={async () => {
+                        await onCreateTestFile();
+                        void navigate('/');
+                      }}
+                    >
+                      <Trans>Create test file</Trans>
+                    </Button>
+                    <Button
+                      variant="primary"
+                      style={{ marginLeft: 15 }}
+                      onPress={async () => {
+                        await onCreateScrollTestFile();
+                      }}
+                    >
+                      <Trans>Create test file (many categories)</Trans>
+                    </Button>
+                  </View>
                 )}
               </>
             )}

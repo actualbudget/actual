@@ -700,8 +700,19 @@ export function BudgetFileSelection({
           >
             <Trans>Create new file</Trans>
           </Button>
+        </View>)
+      }
 
-          {isNonProductionEnvironment() && (
+        {!quickSwitchMode && isNonProductionEnvironment() && (
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+              alignItems: 'stretch',
+              margin: 10,
+              minHeight: 39,
+            }}
+          >
             <Button
               variant="primary"
               onPress={() => onCreate({ testMode: true })}
@@ -712,8 +723,6 @@ export function BudgetFileSelection({
             >
               <Trans>Create test file</Trans>
             </Button>
-          )}
-          {isNonProductionEnvironment() && (
             <Button
               variant="primary"
               onPress={() => onCreate({ scrollTestMode: true })}
@@ -722,11 +731,10 @@ export function BudgetFileSelection({
                 marginLeft: 10,
               }}
             >
-              <Trans>Create scroll test file</Trans>
+              <Trans>Create test file (many categories)</Trans>
             </Button>
-          )}
-        </View>
-      )}
+          </View>)
+        }
     </View>
   );
 }
