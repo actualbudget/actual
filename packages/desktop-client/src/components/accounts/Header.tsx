@@ -78,6 +78,8 @@ type AccountHeaderProps = {
   isFiltered: boolean;
   filteredAmount?: number | null;
   isSorted: boolean;
+  hasUpcomingTransactions: boolean;
+  showUpcomingTransactions: boolean;
   search: string;
   filterConditions: RuleConditionEntity[];
   filterConditionsOp: 'and' | 'or';
@@ -153,6 +155,8 @@ export function AccountHeader({
   isFiltered,
   filteredAmount,
   isSorted,
+  hasUpcomingTransactions,
+  showUpcomingTransactions,
   search,
   filterConditions,
   filterConditionsOp,
@@ -516,6 +520,8 @@ export function AccountHeader({
                       showBalances={showBalances}
                       showCleared={showCleared}
                       showReconciled={showReconciled}
+                      hasUpcomingTransactions={hasUpcomingTransactions}
+                      showUpcomingTransactions={showUpcomingTransactions}
                       onMenuSelect={onMenuSelect}
                     />
                   </Dialog>
@@ -554,6 +560,16 @@ export function AccountHeader({
                             ? t('Hide balance chart')
                             : t('Show balance chart'),
                         },
+                        ...(hasUpcomingTransactions
+                          ? [
+                              {
+                                name: 'toggle-upcoming',
+                                text: showUpcomingTransactions
+                                  ? t('Hide upcoming transactions')
+                                  : t('Show upcoming transactions'),
+                              } as const,
+                            ]
+                          : []),
                       ]}
                     />
                   </Dialog>
@@ -731,6 +747,8 @@ type AccountMenuProps = {
   canShowBalances: boolean;
   showCleared: boolean;
   showReconciled: boolean;
+  hasUpcomingTransactions: boolean;
+  showUpcomingTransactions: boolean;
   isSorted: boolean;
   onMenuSelect: (
     item:
@@ -743,6 +761,7 @@ type AccountMenuProps = {
       | 'remove-sorting'
       | 'toggle-cleared'
       | 'toggle-reconciled'
+      | 'toggle-upcoming'
       | 'toggle-net-worth-chart',
   ) => void;
 };
@@ -755,6 +774,8 @@ function AccountMenu({
   canShowBalances,
   showCleared,
   showReconciled,
+  hasUpcomingTransactions,
+  showUpcomingTransactions,
   isSorted,
   onMenuSelect,
 }: AccountMenuProps) {
@@ -804,6 +825,16 @@ function AccountMenu({
             ? t('Hide reconciled transactions')
             : t('Show reconciled transactions'),
         },
+        ...(hasUpcomingTransactions
+          ? [
+              {
+                name: 'toggle-upcoming',
+                text: showUpcomingTransactions
+                  ? t('Hide upcoming transactions')
+                  : t('Show upcoming transactions'),
+              } as const,
+            ]
+          : []),
         { name: 'export', text: t('Export') },
         ...(account && !account.closed
           ? canSync

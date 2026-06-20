@@ -104,18 +104,25 @@ type AllTransactionsProps = {
   transactions: TransactionEntity[];
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances?: boolean | undefined;
+  showUpcomingTransactions: boolean;
   filtered?: boolean | undefined;
   children: (
     transactions: TransactionEntity[],
     balances: Record<TransactionEntity['id'], IntegerAmount> | null,
+    hasUpcomingTransactions: boolean,
   ) => ReactElement;
 };
+
+function isUpcomingPreviewTransaction(transaction: TransactionEntity) {
+  return transaction.category === 'upcoming';
+}
 
 function AllTransactions({
   account,
   transactions,
   balances,
   showBalances,
+  showUpcomingTransactions,
   filtered,
   children,
 }: AllTransactionsProps) {
@@ -139,6 +146,13 @@ function AllTransactions({
 
   transactions ??= [];
 
+  const visiblePreviewTransactions = showUpcomingTransactions
+    ? previewTransactions
+    : previewTransactions.filter(t => !isUpcomingPreviewTransaction(t));
+
+  const hasUpcomingTransactions =
+    !filtered && previewTransactions.some(isUpcomingPreviewTransaction);
+
   const runningBalance = useMemo(() => {
     if (!showBalances) {
       return 0;
@@ -156,20 +170,20 @@ function AllTransactions({
 
     return Object.fromEntries(
       calculateRunningBalancesBottomUp(
-        previewTransactions,
+        visiblePreviewTransactions,
         'all',
         runningBalance,
       ),
     );
-  }, [showBalances, previewTransactions, runningBalance]);
+  }, [showBalances, visiblePreviewTransactions, runningBalance]);
 
   const allTransactions = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
-    if (!filtered && previewTransactions.length > 0) {
-      return previewTransactions.concat(transactions);
+    if (!filtered && visiblePreviewTransactions.length > 0) {
+      return visiblePreviewTransactions.concat(transactions);
     }
     return transactions;
-  }, [filtered, previewTransactions, transactions]);
+  }, [filtered, visiblePreviewTransactions, transactions]);
 
   const allBalances = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
@@ -180,9 +194,9 @@ function AllTransactions({
   }, [filtered, prependBalances, balances]);
 
   if (!previewTransactions?.length || filtered) {
-    return children(transactions, balances);
+    return children(transactions, balances, hasUpcomingTransactions);
   }
-  return children(allTransactions, allBalances);
+  return children(allTransactions, allBalances, hasUpcomingTransactions);
 }
 
 function getField(field?: string) {
@@ -222,6 +236,8 @@ type AccountInternalProps = {
   setShowCleared: (newValue: boolean) => void;
   showReconciled: boolean;
   setShowReconciled: (newValue: boolean) => void;
+  showUpcomingTransactions: boolean;
+  setShowUpcomingTransactions: (newValue: boolean) => void;
   showExtraBalances?: boolean;
   setShowExtraBalances: (newValue: boolean) => void;
   modalShowing?: boolean;
@@ -807,6 +823,7 @@ class AccountInternal extends PureComponent<
       | 'remove-sorting'
       | 'toggle-cleared'
       | 'toggle-reconciled'
+      | 'toggle-upcoming'
       | 'toggle-net-worth-chart',
   ) => {
     const accountId = this.props.accountId!;
@@ -908,6 +925,9 @@ class AccountInternal extends PureComponent<
             this.fetchTransactions(this.state.filterConditions),
           );
         }
+        break;
+      case 'toggle-upcoming':
+        this.onToggleUpcomingTransactions();
         break;
       case 'toggle-net-worth-chart':
         if (this.props.showNetWorthChart) {
@@ -1731,6 +1751,12 @@ class AccountInternal extends PureComponent<
     }
   };
 
+  onToggleUpcomingTransactions = () => {
+    this.props.setShowUpcomingTransactions(
+      !this.props.showUpcomingTransactions,
+    );
+  };
+
   render() {
     const {
       accounts,
@@ -1756,6 +1782,7 @@ class AccountInternal extends PureComponent<
       showReconciled,
       filteredAmount,
     } = this.state;
+    const { showUpcomingTransactions } = this.props;
 
     const account = accounts.find(account => account.id === accountId);
     const accountName = this.getAccountTitle(account, accountId);
@@ -1794,9 +1821,10 @@ class AccountInternal extends PureComponent<
         transactions={transactions}
         balances={balances}
         showBalances={showBalances}
+        showUpcomingTransactions={showUpcomingTransactions}
         filtered={transactionsFiltered}
       >
-        {(allTransactions, allBalances) => (
+        {(allTransactions, allBalances, hasUpcomingTransactions) => (
           <SelectedProviderWithItems
             name="transactions"
             // When reconciled transactions are hidden they are still
@@ -1836,6 +1864,8 @@ class AccountInternal extends PureComponent<
                 filteredAmount={filteredAmount}
                 isFiltered={transactionsFiltered ?? false}
                 isSorted={this.state.sort !== null}
+                hasUpcomingTransactions={hasUpcomingTransactions}
+                showUpcomingTransactions={showUpcomingTransactions}
                 reconcileAmount={reconcileAmount}
                 search={this.state.search}
                 // @ts-expect-error fix me
@@ -1894,6 +1924,8 @@ class AccountInternal extends PureComponent<
                   showBalances={!!allBalances}
                   showReconciled={showReconciled}
                   showCleared={!!showCleared}
+                  hasUpcomingTransactions={hasUpcomingTransactions}
+                  showUpcomingTransactions={showUpcomingTransactions}
                   showAccount={
                     !accountId ||
                     accountId === 'offbudget' ||
@@ -2033,6 +2065,9 @@ export function Account() {
   const [hideReconciled, setHideReconciled] = useSyncedPref(
     `hide-reconciled-${params.id}`,
   );
+  const [showUpcomingTransactions, setShowUpcomingTransactions] = useSyncedPref(
+    `show-upcoming-transactions-${params.id || 'all-accounts'}`,
+  );
   const [showExtraBalances, setShowExtraBalances] = useSyncedPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
@@ -2088,6 +2123,12 @@ export function Account() {
             setShowCleared={val => setHideCleared(String(!val))}
             showReconciled={String(hideReconciled) !== 'true'}
             setShowReconciled={val => setHideReconciled(String(!val))}
+            showUpcomingTransactions={
+              String(showUpcomingTransactions) !== 'false'
+            }
+            setShowUpcomingTransactions={val =>
+              setShowUpcomingTransactions(String(val))
+            }
             showExtraBalances={String(showExtraBalances) === 'true'}
             setShowExtraBalances={extraBalances =>
               setShowExtraBalances(String(extraBalances))
