@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
-import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -273,43 +272,34 @@ function MonthlyBudgetOverviewInternal({
                     }}
                   >
                     <Block style={{ flex: 1 }}>{category.categoryName}</Block>
-                    <AlignedText
-                      style={{ width: 120 }}
-                      right={
-                        <FinancialText>
-                          <PrivacyFilter>
-                            {format(category.needed, 'financial')}
-                          </PrivacyFilter>
-                        </FinancialText>
-                      }
-                    />
-                    <AlignedText
-                      style={{ width: 120 }}
-                      right={
-                        <FinancialText>
-                          <PrivacyFilter>
-                            {format(category.budgeted, 'financial')}
-                          </PrivacyFilter>
-                        </FinancialText>
-                      }
-                    />
-                    <AlignedText
-                      style={{ width: 120 }}
-                      right={
-                        <FinancialText
-                          style={{
-                            color:
-                              category.remaining > 0
-                                ? theme.errorText
-                                : undefined,
-                          }}
-                        >
-                          <PrivacyFilter>
-                            {format(category.remaining, 'financial')}
-                          </PrivacyFilter>
-                        </FinancialText>
-                      }
-                    />
+                    <Block style={{ width: 120, textAlign: 'right' }}>
+                      <FinancialText>
+                        <PrivacyFilter>
+                          {format(category.needed, 'financial')}
+                        </PrivacyFilter>
+                      </FinancialText>
+                    </Block>
+                    <Block style={{ width: 120, textAlign: 'right' }}>
+                      <FinancialText>
+                        <PrivacyFilter>
+                          {format(category.budgeted, 'financial')}
+                        </PrivacyFilter>
+                      </FinancialText>
+                    </Block>
+                    <Block style={{ width: 120, textAlign: 'right' }}>
+                      <FinancialText
+                        style={{
+                          color:
+                            category.remaining > 0
+                              ? theme.errorText
+                              : undefined,
+                        }}
+                      >
+                        <PrivacyFilter>
+                          {format(category.remaining, 'financial')}
+                        </PrivacyFilter>
+                      </FinancialText>
+                    </Block>
                   </View>
                 ))}
               </View>
