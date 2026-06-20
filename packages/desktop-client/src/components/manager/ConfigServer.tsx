@@ -376,6 +376,12 @@ export function ConfigServer() {
     void navigate('/');
   }
 
+  async function onCreateScrollTestFile() {
+    await setServerUrl(null);
+    await dispatch(createBudget({ scrollTestMode: true }));
+    void navigate('/');
+  }
+
   const [syncServerConfig] = useGlobalPref('syncServerConfig');
 
   const hasExternalServerConfig = !syncServerConfig?.port && !!currentUrl;
@@ -542,6 +548,18 @@ export function ConfigServer() {
                     }}
                   >
                     <Trans>Create test file</Trans>
+                  </Button>
+                )}
+                {isNonProductionEnvironment() && (
+                  <Button
+                    variant="primary"
+                    style={{ marginLeft: 15 }}
+                    onPress={async () => {
+                      await onCreateScrollTestFile();
+                      void navigate('/');
+                    }}
+                  >
+                    <Trans>Create scroll test file</Trans>
                   </Button>
                 )}
               </>
