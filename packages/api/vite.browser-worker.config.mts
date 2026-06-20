@@ -2,7 +2,8 @@ import path from 'path';
 
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
-import peggyLoader from 'vite-plugin-peggy-loader';
+
+import { peggyLoader } from '../loot-core/scripts/peggy.mts';
 
 const distDir = path.resolve(__dirname, 'dist');
 

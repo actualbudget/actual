@@ -3,7 +3,8 @@ import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
-import peggyLoader from 'vite-plugin-peggy-loader';
+
+import { peggyLoader } from './scripts/peggy.mts';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {

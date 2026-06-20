@@ -3,8 +3,9 @@ import path from 'path';
 
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
-import peggyLoader from 'vite-plugin-peggy-loader';
 import { configDefaults } from 'vitest/config';
+
+import { peggyLoader } from '../loot-core/scripts/peggy.mts';
 
 const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 const distDir = path.resolve(__dirname, 'dist');

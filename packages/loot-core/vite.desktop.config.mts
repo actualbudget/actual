@@ -2,7 +2,8 @@ import path from 'path';
 
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
-import peggyLoader from 'vite-plugin-peggy-loader';
+
+import { peggyLoader } from './scripts/peggy.mts';
 
 export default defineConfig(({ mode }) => {
   const outDir = path.resolve(__dirname, 'lib-dist/electron');

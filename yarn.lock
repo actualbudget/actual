@@ -27,7 +27,6 @@ __metadata:
     uuid: "npm:^14.0.0"
     vite: "npm:^8.0.16"
     vite-plugin-node-polyfills: "npm:^0.28.0"
-    vite-plugin-peggy-loader: "npm:^2.0.1"
     vitest: "npm:^4.1.8"
   languageName: unknown
   linkType: soft
@@ -143,7 +142,6 @@ __metadata:
     uuid: "npm:^14.0.0"
     vite: "npm:^8.0.16"
     vite-plugin-node-polyfills: "npm:^0.28.0"
-    vite-plugin-peggy-loader: "npm:^2.0.1"
     vitest: "npm:^4.1.8"
     xml2js: "npm:^0.6.2"
     yargs: "npm:^18.0.0"
@@ -26858,15 +26856,6 @@ __metadata:
   peerDependencies:
     vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
   checksum: 10/5cd0747888748f91041ddc90a8bafa8b6e7a8539ee45a547319e4b1c97fb08c473e449cc31563f6f4e9c405cc93830be183a67dfe367abdbbbb0e8ce4b850985
-  languageName: node
-  linkType: hard
-
-"vite-plugin-peggy-loader@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "vite-plugin-peggy-loader@npm:2.0.1"
-  peerDependencies:
-    peggy: ^1.2.0 || ^3.0.2 || ^4.0.0
-  checksum: 10/55460efe15fe84774907a0f46b4351bc3d5e672c32575af3142aca27b99b64c45727e3159bfb191fdc9b890fba4a08eb306e4a8ce4823b1cfcfaa4bf79fa62ff
   languageName: node
   linkType: hard
 
