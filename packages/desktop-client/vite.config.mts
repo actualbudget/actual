@@ -237,6 +237,7 @@ const pluginsServiceAssets = (): Plugin => ({
 
 export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const isVitest = process.env.VITEST === 'true';
   const devHeaders = {
     'Cross-Origin-Opener-Policy': 'same-origin',
     'Cross-Origin-Embedder-Policy': 'require-corp',
@@ -382,7 +383,7 @@ export default defineConfig(async ({ mode, command }) => {
           }),
       injectShims(),
       addWatchers(),
-      mode === 'desktop' ? undefined : lootCoreBackend(),
+      mode === 'desktop' || isVitest ? undefined : lootCoreBackend(),
       mode === 'desktop' ? undefined : pluginsServiceAssets(),
       react(),
       babel({
