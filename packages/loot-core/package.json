@@ -201,7 +201,6 @@
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
     "promise-retry": "^2.0.1",
-    "typescript-strict-plugin": "^2.4.4",
     "ua-parser-js": "^2.0.10",
     "uuid": "^14.0.0",
     "xml2js": "^0.6.2"
@@ -230,6 +229,7 @@
     "stream-browserify": "^3.0.0",
     "timers-browserify": "^2.0.12",
     "ts-node": "^10.9.2",
+    "typescript-strict-plugin": "^2.4.4",
     "util": "^0.12.5",
     "vite": "^8.0.16",
     "vite-plugin-node-polyfills": "^0.28.0",
