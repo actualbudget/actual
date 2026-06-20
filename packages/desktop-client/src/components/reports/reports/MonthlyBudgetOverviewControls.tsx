@@ -11,11 +11,12 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { MonthlyBudgetOverviewPeriod } from '@actual-app/core/types/models';
 
+import { useLocale } from '#hooks/useLocale';
+
 import {
   getMonthlyBudgetOverviewPeriodLabel,
   MONTHLY_BUDGET_OVERVIEW_PERIODS,
 } from './monthlyBudgetOverviewPeriods';
-import { useLocale } from '#hooks/useLocale';
 
 type MonthlyBudgetOverviewControlsProps = {
   anchorMonth: string;
