@@ -65,14 +65,10 @@ export function MonthlyBudgetOverviewSummary({
             style={{
               fontWeight: 600,
               color:
-                data.remaining > 0
-                  ? theme.errorText
-                  : theme.noticeTextLight,
+                data.remaining > 0 ? theme.errorText : theme.noticeTextLight,
             }}
           >
-            <PrivacyFilter>
-              {format(data.remaining, 'financial')}
-            </PrivacyFilter>
+            <PrivacyFilter>{format(data.remaining, 'financial')}</PrivacyFilter>
           </FinancialText>
         }
       />

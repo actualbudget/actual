@@ -171,10 +171,7 @@ app.method(
   'budget/dry-run-category-template',
   goalActions.dryRunCategoryTemplate,
 );
-app.method(
-  'budget/get-automation-overview',
-  goalActions.getAutomationOverview,
-);
+app.method('budget/get-automation-overview', goalActions.getAutomationOverview);
 app.method(
   'budget/store-note-templates',
   mutator(goalNoteActions.storeNoteTemplates),

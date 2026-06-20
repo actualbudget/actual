@@ -230,7 +230,9 @@ function MonthlyBudgetOverviewInternal({
                 gap: 20,
               }}
             >
-              <Block style={{ color: theme.pageTextSubdued }}>{monthLabel}</Block>
+              <Block style={{ color: theme.pageTextSubdued }}>
+                {monthLabel}
+              </Block>
               <MonthlyBudgetOverviewSummary data={data} />
             </View>
 
