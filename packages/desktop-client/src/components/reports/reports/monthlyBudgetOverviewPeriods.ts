@@ -12,6 +12,43 @@ export const MONTHLY_BUDGET_OVERVIEW_PERIODS: MonthlyBudgetOverviewPeriod[] = [
   'next-six-months',
 ];
 
+export const MONTHLY_BUDGET_OVERVIEW_PERIOD_OPTIONS: Array<
+  MonthlyBudgetOverviewPeriod | 'custom'
+> = ['custom', ...MONTHLY_BUDGET_OVERVIEW_PERIODS];
+
+export function detectMonthlyBudgetOverviewPeriod(
+  startMonth: string,
+  endMonth: string,
+  anchorMonth: string,
+): MonthlyBudgetOverviewPeriod | 'custom' {
+  for (const period of MONTHLY_BUDGET_OVERVIEW_PERIODS) {
+    const range = getMonthlyBudgetOverviewRange(anchorMonth, period);
+    if (range.startMonth === startMonth && range.endMonth === endMonth) {
+      return period;
+    }
+  }
+
+  for (const period of MONTHLY_BUDGET_OVERVIEW_PERIODS) {
+    const range = getMonthlyBudgetOverviewRange(startMonth, period);
+    if (range.startMonth === startMonth && range.endMonth === endMonth) {
+      return period;
+    }
+  }
+
+  return 'custom';
+}
+
+export function applyMonthlyBudgetOverviewPeriod(
+  anchorMonth: string,
+  period: MonthlyBudgetOverviewPeriod | 'custom',
+): { startMonth: string; endMonth: string } | null {
+  if (period === 'custom') {
+    return null;
+  }
+
+  return getMonthlyBudgetOverviewRange(anchorMonth, period);
+}
+
 export function getMonthlyBudgetOverviewRange(
   anchorMonth: string,
   period: MonthlyBudgetOverviewPeriod,
@@ -46,10 +83,12 @@ export function getMonthlyBudgetOverviewRange(
 }
 
 export function getMonthlyBudgetOverviewPeriodLabel(
-  period: MonthlyBudgetOverviewPeriod,
+  period: MonthlyBudgetOverviewPeriod | 'custom',
   t: (key: string) => string,
 ): string {
   switch (period) {
+    case 'custom':
+      return t('Custom');
     case 'this-month':
       return t('This month');
     case 'next-month':

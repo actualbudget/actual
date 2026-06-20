@@ -138,7 +138,10 @@ export type MonthlyBudgetOverviewWidget = AbstractWidget<
   {
     name?: string;
     month?: string;
+    startMonth?: string;
+    endMonth?: string;
     period?: MonthlyBudgetOverviewPeriod;
+    categoryIds?: string[];
   } | null
 >;
 

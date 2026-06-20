@@ -26,6 +26,20 @@ type MonthlyBudgetOverviewCardProps = {
   onCopy: (targetDashboardId: string) => void;
 };
 
+function getCardDateRange(meta: MonthlyBudgetOverviewWidget['meta']) {
+  const currentMonth = monthUtils.currentMonth();
+
+  if (meta?.startMonth && meta?.endMonth) {
+    return { startMonth: meta.startMonth, endMonth: meta.endMonth };
+  }
+
+  if (meta?.month && meta?.period) {
+    return getMonthlyBudgetOverviewRange(meta.month, meta.period);
+  }
+
+  return { startMonth: currentMonth, endMonth: currentMonth };
+}
+
 export function MonthlyBudgetOverviewCard({
   widgetId,
   isEditing,
@@ -41,12 +55,7 @@ export function MonthlyBudgetOverviewCard({
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
     useDashboardWidgetCopyMenu(onCopy);
 
-  const anchorMonth = meta?.month ?? monthUtils.currentMonth();
-  const period = meta?.period ?? 'this-month';
-  const { startMonth, endMonth } = getMonthlyBudgetOverviewRange(
-    anchorMonth,
-    period,
-  );
+  const { startMonth, endMonth } = getCardDateRange(meta);
   const { data, loading } = useAutomationOverview(startMonth, endMonth);
 
   const periodLabel = useMemo(() => {

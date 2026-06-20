@@ -8,7 +8,9 @@ import type {
   AutomationOverviewAmounts,
 } from '@actual-app/core/types/models';
 
-import { MonthlyBudgetOverviewAmountCell } from '#components/reports/reports/MonthlyBudgetOverviewAmountCell';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useFormat } from '#hooks/useFormat';
 
 const COLUMN_WIDTH = 120;
 
@@ -16,50 +18,62 @@ type MonthlyBudgetOverviewTableProps = {
   data: AutomationOverview;
 };
 
+function AmountCell({
+  amount,
+  emphasize = false,
+  errorColor,
+}: {
+  amount: number;
+  emphasize?: boolean;
+  errorColor?: string;
+}) {
+  const format = useFormat();
+
+  return (
+    <FinancialText
+      style={{
+        fontWeight: emphasize ? 600 : undefined,
+        color: errorColor,
+      }}
+    >
+      <PrivacyFilter>{format(amount, 'financial')}</PrivacyFilter>
+    </FinancialText>
+  );
+}
+
 function AmountColumns({
   amounts,
-  monthCount,
+  showAverageNeeded,
   emphasize = false,
   highlightRemaining = false,
 }: {
   amounts: AutomationOverviewAmounts;
-  monthCount: number;
+  showAverageNeeded: boolean;
   emphasize?: boolean;
   highlightRemaining?: boolean;
 }) {
-  const showAverage = monthCount > 1;
-
   return (
     <>
       <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-        <MonthlyBudgetOverviewAmountCell
-          amount={amounts.carriedOver}
-          average={amounts.averageCarriedOver}
-          showAverage={showAverage}
-          emphasize={emphasize}
-        />
+        <AmountCell amount={amounts.carriedOver} emphasize={emphasize} />
       </View>
       <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-        <MonthlyBudgetOverviewAmountCell
-          amount={amounts.needed}
-          average={amounts.averageNeeded}
-          showAverage={showAverage}
-          emphasize={emphasize}
-        />
+        <AmountCell amount={amounts.needed} emphasize={emphasize} />
+      </View>
+      {showAverageNeeded && (
+        <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
+          <AmountCell
+            amount={amounts.averageNeeded ?? 0}
+            emphasize={emphasize}
+          />
+        </View>
+      )}
+      <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
+        <AmountCell amount={amounts.budgeted} emphasize={emphasize} />
       </View>
       <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-        <MonthlyBudgetOverviewAmountCell
-          amount={amounts.budgeted}
-          average={amounts.averageBudgeted}
-          showAverage={showAverage}
-          emphasize={emphasize}
-        />
-      </View>
-      <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-        <MonthlyBudgetOverviewAmountCell
+        <AmountCell
           amount={amounts.remaining}
-          average={amounts.averageRemaining}
-          showAverage={showAverage}
           emphasize={emphasize}
           errorColor={
             highlightRemaining && amounts.remaining > 0
@@ -75,6 +89,7 @@ function AmountColumns({
 export function MonthlyBudgetOverviewTable({
   data,
 }: MonthlyBudgetOverviewTableProps) {
+  const showAverageNeeded = data.monthCount > 1;
   const headerStyle = {
     borderBottom: `1px solid ${theme.tableBorder}`,
     paddingBottom: 8,
@@ -100,6 +115,11 @@ export function MonthlyBudgetOverviewTable({
         <Block style={{ width: COLUMN_WIDTH, textAlign: 'right' }}>
           <Trans>Needed</Trans>
         </Block>
+        {showAverageNeeded && (
+          <Block style={{ width: COLUMN_WIDTH, textAlign: 'right' }}>
+            <Trans>Avg needed</Trans>
+          </Block>
+        )}
         <Block style={{ width: COLUMN_WIDTH, textAlign: 'right' }}>
           <Trans>Budgeted</Trans>
         </Block>
@@ -122,7 +142,7 @@ export function MonthlyBudgetOverviewTable({
             </Block>
             <AmountColumns
               amounts={group.subtotal}
-              monthCount={data.monthCount}
+              showAverageNeeded={showAverageNeeded}
               emphasize
             />
           </View>
@@ -133,7 +153,7 @@ export function MonthlyBudgetOverviewTable({
               </Block>
               <AmountColumns
                 amounts={category}
-                monthCount={data.monthCount}
+                showAverageNeeded={showAverageNeeded}
                 highlightRemaining
               />
             </View>
