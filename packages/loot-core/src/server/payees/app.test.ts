@@ -7,7 +7,6 @@ import {
   loadRules,
   resetState,
 } from '#server/transactions/transaction-rules';
-import type { RuleConditionEntity } from '#types/models';
 
 beforeEach(async () => {
   await global.emptyDatabase()();
@@ -36,7 +35,7 @@ describe('payees app', () => {
           { op: 'is', field: 'payee', value: completedPayeeId },
           { op: 'is', field: 'date', value: '2020-12-20' },
         ],
-      } as { conditions: RuleConditionEntity[] });
+      });
       await updateSchedule({
         schedule: { id: scheduleId, completed: true },
       });
