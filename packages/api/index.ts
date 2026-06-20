@@ -12,7 +12,12 @@ export let internal: typeof lib | null = null;
 export async function init(config: InitConfig = {}) {
   validateNodeVersion();
 
-  internal = await initLootCore(config);
+  const initConfig =
+    'password' in config && config.password
+      ? { ...config, loginMethod: 'password' as const }
+      : config;
+
+  internal = await initLootCore(initConfig);
   return internal;
 }
 

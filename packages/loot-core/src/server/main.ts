@@ -237,6 +237,7 @@ type ServerInitConfig = BaseInitConfig & {
 
 type PasswordAuthConfig = ServerInitConfig & {
   password: string;
+  loginMethod?: 'password';
   sessionToken?: never;
 };
 
