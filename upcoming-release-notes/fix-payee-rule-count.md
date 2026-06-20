@@ -1,5 +1,5 @@
 ---
-category: Bugfix
+category: Bugfixes
 authors: [Juulz]
 ---
 
