@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { send } from '@actual-app/core/platform/client/connection';
 import type { AutomationOverview } from '@actual-app/core/types/models';
 
-export function useAutomationOverview(month: string) {
+export function useAutomationOverview(startMonth: string, endMonth: string) {
   const [data, setData] = useState<AutomationOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -15,7 +15,10 @@ export function useAutomationOverview(month: string) {
       setLoading(true);
       setError(null);
       try {
-        const result = await send('budget/get-automation-overview', { month });
+        const result = await send('budget/get-automation-overview', {
+          startMonth,
+          endMonth,
+        });
         if (!cancelled) {
           setData(result);
         }
@@ -36,7 +39,7 @@ export function useAutomationOverview(month: string) {
     return () => {
       cancelled = true;
     };
-  }, [month]);
+  }, [startMonth, endMonth]);
 
   return { data, loading, error };
 }

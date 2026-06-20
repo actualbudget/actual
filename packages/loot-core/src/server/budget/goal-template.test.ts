@@ -25,6 +25,7 @@ vi.mock('./actions', () => ({
 
 vi.mock('#server/db', () => ({
   getCategories: vi.fn(),
+  getCategoriesGrouped: vi.fn(),
   first: vi.fn(),
 }));
 
@@ -139,12 +140,32 @@ describe('getAutomationOverview', () => {
     is_income: false,
   };
 
+  function setupGroupedCategories(categories: CategoryEntity[]) {
+    vi.mocked(db.getCategoriesGrouped).mockResolvedValue([
+      {
+        id: 'g1',
+        name: 'Monthly Bills',
+        is_income: 0,
+        hidden: 0,
+        sort_order: 0,
+        tombstone: 0,
+        categories: categories.map(category => ({
+          ...category,
+          sort_order: 0,
+          hidden: 0,
+          tombstone: 0,
+        })),
+      },
+    ] as Awaited<ReturnType<typeof db.getCategoriesGrouped>>);
+  }
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(statements.getActiveSchedules).mockResolvedValue(
       [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
     );
     vi.mocked(db.getCategories).mockResolvedValue([] as DbCategory[]);
+    setupGroupedCategories([cat1, cat2, cat3]);
   });
 
   it('sums projected and budgeted amounts for automation categories only', async () => {
@@ -186,13 +207,18 @@ describe('getAutomationOverview', () => {
       [cat1, cat2, cat3],
     );
 
-    const result = await getAutomationOverview({ month: '2024-01' });
+    const result = await getAutomationOverview({
+      startMonth: '2024-01',
+      endMonth: '2024-01',
+    });
 
-    expect(result.totalNeeded).toBe(30000);
-    expect(result.totalBudgeted).toBe(25000);
-    expect(result.remaining).toBe(5000);
-    expect(result.categories).toHaveLength(2);
-    expect(result.categories.map(c => c.categoryId).sort()).toEqual([
+    expect(result.totals.needed).toBe(30000);
+    expect(result.totals.budgeted).toBe(25000);
+    expect(result.totals.remaining).toBe(5000);
+    expect(result.monthCount).toBe(1);
+    expect(result.groups).toHaveLength(1);
+    expect(result.groups[0].categories).toHaveLength(2);
+    expect(result.groups[0].categories.map(c => c.categoryId).sort()).toEqual([
       cat1.id,
       cat2.id,
     ]);
@@ -219,12 +245,49 @@ describe('getAutomationOverview', () => {
       [cat1],
     );
 
-    const result = await getAutomationOverview({ month: '2024-01' });
+    const result = await getAutomationOverview({
+      startMonth: '2024-01',
+      endMonth: '2024-01',
+    });
 
-    expect(result.totalNeeded).toBe(0);
-    expect(result.totalBudgeted).toBe(0);
-    expect(result.remaining).toBe(0);
-    expect(result.categories).toEqual([]);
+    expect(result.totals.needed).toBe(0);
+    expect(result.totals.budgeted).toBe(0);
+    expect(result.totals.remaining).toBe(0);
+    expect(result.groups).toEqual([]);
+  });
+
+  it('projects remainder automations as zero needed and ignores negative budgeted', async () => {
+    setupSheetMock({
+      'to-budget': 50000,
+      'budget-cat-1': -3000,
+    });
+    setupAqlForWideScope(
+      [
+        {
+          category: cat1,
+          templates: [
+            {
+              type: 'remainder',
+              weight: 1,
+              directive: 'template',
+              priority: null,
+            },
+          ],
+        },
+      ],
+      [cat1],
+    );
+    setupGroupedCategories([cat1]);
+
+    const result = await getAutomationOverview({
+      startMonth: '2024-01',
+      endMonth: '2024-01',
+    });
+
+    expect(result.totals.needed).toBe(0);
+    expect(result.totals.budgeted).toBe(0);
+    expect(result.groups[0].categories[0].needed).toBe(0);
+    expect(result.groups[0].categories[0].budgeted).toBe(0);
   });
 });
 

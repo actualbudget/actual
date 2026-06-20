@@ -138,8 +138,17 @@ export type MonthlyBudgetOverviewWidget = AbstractWidget<
   {
     name?: string;
     month?: string;
+    period?: MonthlyBudgetOverviewPeriod;
   } | null
 >;
+
+export type MonthlyBudgetOverviewPeriod =
+  | 'this-month'
+  | 'next-month'
+  | 'year-to-date'
+  | 'to-end-of-year'
+  | 'next-three-months'
+  | 'next-six-months';
 
 type SpecializedWidget =
   | NetWorthWidget

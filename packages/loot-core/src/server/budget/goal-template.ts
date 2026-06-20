@@ -7,12 +7,20 @@ import { q } from '#shared/query';
 import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
 import type {
   AutomationOverview,
-  AutomationOverviewCategory,
+  AutomationOverviewAmounts,
+  AutomationOverviewCategoryRow,
+  AutomationOverviewGroup,
 } from '#types/models/automation-overview';
 import type { CleanupTemplate } from '#types/models/cleanup-templates';
 import type { Template } from '#types/models/templates';
 
-import { getSheetValue, isTrackingBudget, setBudget, setGoal } from './actions';
+import {
+  getSheetBoolean,
+  getSheetValue,
+  isTrackingBudget,
+  setBudget,
+  setGoal,
+} from './actions';
 import { CategoryTemplateContext } from './category-template-context';
 import { tombstoneOrphanCleanupGroups } from './cleanup-groups';
 import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
@@ -363,39 +371,137 @@ async function processTemplate(
   };
 }
 
+export type {
+  AutomationOverview,
+  AutomationOverviewAmounts,
+  AutomationOverviewCategoryRow,
+  AutomationOverviewGroup,
+};
+
 function categoryHasAutomations(templates: Template[]): boolean {
   return templates.some(template => template.directive === 'template');
 }
 
-export type { AutomationOverview, AutomationOverviewCategory };
+function categoryHasRemainder(templates: Template[]): boolean {
+  return templates.some(
+    template => template.directive === 'template' && template.type === 'remainder',
+  );
+}
 
-export async function getAutomationOverview({
-  month,
-}: {
-  month: string;
-}): Promise<AutomationOverview> {
-  await storeNoteTemplates();
-  const categoryTemplates = await getTemplates();
-  const automationCategoryIds = Object.keys(categoryTemplates).filter(id =>
-    categoryHasAutomations(categoryTemplates[id]),
+function computeProjectedNeeded(
+  context: CategoryTemplateContext,
+  templates: Template[],
+): number {
+  const values = context.getValues();
+  let remainderContribution = 0;
+  for (const template of templates) {
+    if (template.type === 'remainder') {
+      remainderContribution += values.perTemplateContribution.get(template) ?? 0;
+    }
+  }
+  return Math.max(0, values.budgeted - remainderContribution);
+}
+
+function normalizeBudgeted(budgeted: number, templates: Template[]): number {
+  if (categoryHasRemainder(templates)) {
+    return Math.max(0, budgeted);
+  }
+  return budgeted;
+}
+
+async function getCarriedOver(
+  category: CategoryEntity,
+  month: string,
+): Promise<number> {
+  const lastMonth = monthUtils.subMonths(month, 1);
+  const lastMonthSheet = monthUtils.sheetForMonth(lastMonth);
+  let fromLastMonth = await getSheetValue(
+    lastMonthSheet,
+    `leftover-${category.id}`,
+  );
+  const carryover = await getSheetBoolean(
+    lastMonthSheet,
+    `carryover-${category.id}`,
   );
 
-  if (automationCategoryIds.length === 0) {
-    return {
-      month,
-      totalNeeded: 0,
-      totalBudgeted: 0,
-      remaining: 0,
-      categories: [],
-    };
+  if (
+    (fromLastMonth < 0 && !carryover) ||
+    category.is_income ||
+    (isTrackingBudget() && !carryover)
+  ) {
+    return 0;
   }
 
-  const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
-    q('categories')
-      .filter({ id: { $oneof: automationCategoryIds } })
-      .select('*'),
+  return fromLastMonth;
+}
+
+type MonthCategoryAmounts = {
+  carriedOver: number;
+  needed: number;
+  budgeted: number;
+  remaining: number;
+};
+
+function sumMonthlyAmounts(
+  rows: MonthCategoryAmounts[],
+): AutomationOverviewAmounts {
+  const totals = rows.reduce(
+    (acc, row) => ({
+      carriedOver: acc.carriedOver + row.carriedOver,
+      needed: acc.needed + row.needed,
+      budgeted: acc.budgeted + row.budgeted,
+      remaining: acc.remaining + row.remaining,
+    }),
+    { carriedOver: 0, needed: 0, budgeted: 0, remaining: 0 },
   );
 
+  if (rows.length <= 1) {
+    return totals;
+  }
+
+  const count = rows.length;
+  return {
+    ...totals,
+    averageCarriedOver: Math.round(totals.carriedOver / count),
+    averageNeeded: Math.round(totals.needed / count),
+    averageBudgeted: Math.round(totals.budgeted / count),
+    averageRemaining: Math.round(totals.remaining / count),
+  };
+}
+
+function sumPeriodAmounts(
+  rows: AutomationOverviewAmounts[],
+  monthCount: number,
+): AutomationOverviewAmounts {
+  const totals = rows.reduce(
+    (acc, row) => ({
+      carriedOver: acc.carriedOver + row.carriedOver,
+      needed: acc.needed + row.needed,
+      budgeted: acc.budgeted + row.budgeted,
+      remaining: acc.remaining + row.remaining,
+    }),
+    { carriedOver: 0, needed: 0, budgeted: 0, remaining: 0 },
+  );
+
+  if (monthCount <= 1) {
+    return totals;
+  }
+
+  return {
+    ...totals,
+    averageCarriedOver: Math.round(totals.carriedOver / monthCount),
+    averageNeeded: Math.round(totals.needed / monthCount),
+    averageBudgeted: Math.round(totals.budgeted / monthCount),
+    averageRemaining: Math.round(totals.remaining / monthCount),
+  };
+}
+
+async function getAutomationOverviewForMonth(
+  month: string,
+  categoryTemplates: Record<CategoryEntity['id'], Template[]>,
+  automationCategoryIds: CategoryEntity['id'][],
+  categoryData: CategoryEntity[],
+): Promise<Map<CategoryEntity['id'], MonthCategoryAmounts>> {
   const filteredTemplates: Record<CategoryEntity['id'], Template[]> = {};
   for (const id of automationCategoryIds) {
     filteredTemplates[id] = categoryTemplates[id];
@@ -413,10 +519,7 @@ export async function getAutomationOverview({
     contexts.map(context => [context.category.id, context]),
   );
   const sheetName = monthUtils.sheetForMonth(month);
-
-  const categories: AutomationOverviewCategory[] = [];
-  let totalNeeded = 0;
-  let totalBudgeted = 0;
+  const result = new Map<CategoryEntity['id'], MonthCategoryAmounts>();
 
   for (const category of categoryData) {
     const templates = categoryTemplates[category.id];
@@ -425,34 +528,130 @@ export async function getAutomationOverview({
     }
 
     const context = contextByCategoryId.get(category.id);
-    const needed = context ? context.getValues().budgeted : 0;
-    const budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
+    const needed = context ? computeProjectedNeeded(context, templates) : 0;
+    const budgeted = normalizeBudgeted(
+      await getSheetValue(sheetName, `budget-${category.id}`),
+      templates,
+    );
+    const carriedOver = await getCarriedOver(category, month);
     const remaining = Math.max(0, needed - budgeted);
 
-    totalNeeded += needed;
-    totalBudgeted += budgeted;
+    result.set(category.id, { carriedOver, needed, budgeted, remaining });
+  }
 
-    categories.push({
-      categoryId: category.id,
+  return result;
+}
+
+export async function getAutomationOverview({
+  startMonth,
+  endMonth,
+}: {
+  startMonth: string;
+  endMonth: string;
+}): Promise<AutomationOverview> {
+  await storeNoteTemplates();
+  const categoryTemplates = await getTemplates();
+  const automationCategoryIds = Object.keys(categoryTemplates).filter(id =>
+    categoryHasAutomations(categoryTemplates[id]),
+  );
+
+  const monthCount = monthUtils.differenceInCalendarMonths(
+    endMonth,
+    startMonth,
+  ) + 1;
+
+  if (automationCategoryIds.length === 0) {
+    return {
+      startMonth,
+      endMonth,
+      monthCount,
+      totals: {
+        carriedOver: 0,
+        needed: 0,
+        budgeted: 0,
+        remaining: 0,
+      },
+      groups: [],
+    };
+  }
+
+  const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
+    q('categories')
+      .filter({ id: { $oneof: automationCategoryIds } })
+      .select('*'),
+  );
+
+  const months = monthUtils.rangeInclusive(startMonth, endMonth);
+  const monthlyByCategory = new Map<
+    CategoryEntity['id'],
+    MonthCategoryAmounts[]
+  >();
+
+  for (const month of months) {
+    const monthAmounts = await getAutomationOverviewForMonth(
+      month,
+      categoryTemplates,
+      automationCategoryIds,
+      categoryData,
+    );
+    for (const [categoryId, amounts] of monthAmounts) {
+      const existing = monthlyByCategory.get(categoryId) ?? [];
+      existing.push(amounts);
+      monthlyByCategory.set(categoryId, existing);
+    }
+  }
+
+  const categoryById = new Map(categoryData.map(category => [category.id, category]));
+  const categoryRows = new Map<CategoryEntity['id'], AutomationOverviewCategoryRow>();
+
+  for (const categoryId of automationCategoryIds) {
+    const category = categoryById.get(categoryId);
+    const monthlyAmounts = monthlyByCategory.get(categoryId);
+    if (!category || !monthlyAmounts || monthlyAmounts.length === 0) {
+      continue;
+    }
+
+    const amounts = sumMonthlyAmounts(monthlyAmounts);
+    categoryRows.set(categoryId, {
+      categoryId,
       categoryName: category.name,
-      needed,
-      budgeted,
-      remaining,
+      ...amounts,
     });
   }
 
-  categories.sort((a, b) =>
-    a.categoryName.localeCompare(b.categoryName, undefined, {
-      sensitivity: 'base',
-    }),
-  );
+  const groupedCategories = await db.getCategoriesGrouped();
+  const groups: AutomationOverviewGroup[] = [];
+
+  for (const group of groupedCategories) {
+    const categories: AutomationOverviewCategoryRow[] = [];
+    for (const category of group.categories ?? []) {
+      const row = categoryRows.get(category.id);
+      if (row) {
+        categories.push(row);
+      }
+    }
+
+    if (categories.length === 0) {
+      continue;
+    }
+
+    groups.push({
+      groupId: group.id,
+      groupName: group.name,
+      categories,
+      subtotal: sumPeriodAmounts(categories, monthCount),
+    });
+  }
+
+  const allRows = groups.flatMap(group => group.categories);
+  const totals = sumPeriodAmounts(allRows, monthCount);
 
   return {
-    month,
-    totalNeeded,
-    totalBudgeted,
-    remaining: Math.max(0, totalNeeded - totalBudgeted),
-    categories,
+    startMonth,
+    endMonth,
+    monthCount,
+    totals,
+    groups,
   };
 }
 

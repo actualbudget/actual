@@ -8,9 +8,10 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import type { MonthlyBudgetOverviewWidget } from '@actual-app/core/types/models';
 
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { getMonthlyBudgetOverviewRange } from '#components/reports/reports/monthlyBudgetOverviewPeriods';
+import { MonthlyBudgetOverviewSummary } from '#components/reports/reports/MonthlyBudgetOverviewSummary';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
-import { MonthlyBudgetOverviewSummary } from '#components/reports/reports/MonthlyBudgetOverviewSummary';
 import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useAutomationOverview } from '#hooks/useAutomationOverview';
 import { useLocale } from '#hooks/useLocale';
@@ -39,13 +40,23 @@ export function MonthlyBudgetOverviewCard({
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
     useDashboardWidgetCopyMenu(onCopy);
 
-  const month = meta?.month ?? monthUtils.currentMonth();
-  const { data, loading } = useAutomationOverview(month);
-
-  const monthLabel = useMemo(
-    () => monthUtils.format(month, 'MMMM yyyy', locale),
-    [month, locale],
+  const anchorMonth = meta?.month ?? monthUtils.currentMonth();
+  const period = meta?.period ?? 'this-month';
+  const { startMonth, endMonth } = getMonthlyBudgetOverviewRange(
+    anchorMonth,
+    period,
   );
+  const { data, loading } = useAutomationOverview(startMonth, endMonth);
+
+  const periodLabel = useMemo(() => {
+    if (startMonth === endMonth) {
+      return monthUtils.format(startMonth, 'MMMM yyyy', locale);
+    }
+    return `${monthUtils.format(startMonth, 'MMM yyyy', locale)} – ${monthUtils.format(endMonth, 'MMM yyyy', locale)}`;
+  }, [startMonth, endMonth, locale]);
+
+  const hasCategories =
+    data != null && data.groups.some(group => group.categories.length > 0);
 
   return (
     <ReportCard
@@ -97,11 +108,11 @@ export function MonthlyBudgetOverviewCard({
             color: theme.pageTextSubdued,
           }}
         >
-          {monthLabel}
+          {periodLabel}
         </Block>
         {loading || !data ? (
           <LoadingIndicator />
-        ) : data.categories.length === 0 ? (
+        ) : !hasCategories ? (
           <Block style={{ color: theme.pageTextSubdued }}>
             <Trans>No categories have budget automations.</Trans>
           </Block>
