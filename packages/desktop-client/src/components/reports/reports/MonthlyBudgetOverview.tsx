@@ -318,7 +318,7 @@ function MonthlyBudgetOverviewInternal({
           style={{
             padding: 15,
             paddingBottom: 0,
-            backgroundColor: theme.tableBackground,
+            backgroundColor: theme.pageBackground,
             alignItems: 'flex-end',
           }}
         >

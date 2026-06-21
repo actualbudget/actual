@@ -134,11 +134,15 @@ export function MonthlyBudgetOverviewSummary({
             alignItems: 'center',
             marginBottom: 2,
             color:
-              amounts.remaining > 0 ? theme.errorText : theme.noticeTextLight,
+              amounts.remaining > 0
+                ? theme.reportsNumberNegative
+                : theme.noticeTextLight,
           }}
         >
           <PrivacyFilter>
-            {format(amounts.remaining, 'financial')}
+            {amounts.remaining > 0
+              ? format(-amounts.remaining, 'financial')
+              : format(0, 'financial')}
           </PrivacyFilter>
         </FinancialText>
         <Text style={{ fontWeight: 600, fontSize: compact ? 12 : undefined }}>

@@ -12,6 +12,11 @@ import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
 
+import {
+  getFundingStatusAmount,
+  getFundingStatusColor,
+} from './monthlyBudgetOverviewFundingStatus';
+
 const COLUMN_WIDTH = 120;
 
 type MonthlyBudgetOverviewTableProps = {
@@ -41,7 +46,7 @@ function AmountCell({
   );
 }
 
-function GoalBalanceCell({
+function FundingStatusCell({
   amounts,
   emphasize = false,
   highlight = false,
@@ -50,16 +55,8 @@ function GoalBalanceCell({
   emphasize?: boolean;
   highlight?: boolean;
 }) {
-  const isUnderfunded = amounts.remaining > 0;
-  const isOverfunded = amounts.overfunded > 0;
-  const amount = isOverfunded ? amounts.overfunded : amounts.remaining;
-  const color = highlight
-    ? isUnderfunded
-      ? theme.errorText
-      : isOverfunded
-        ? theme.reportsNumberPositive
-        : undefined
-    : undefined;
+  const amount = getFundingStatusAmount(amounts);
+  const color = highlight ? getFundingStatusColor(amount) : undefined;
 
   return (
     <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
@@ -71,11 +68,11 @@ function GoalBalanceCell({
 function AmountColumns({
   amounts,
   emphasize = false,
-  highlightGoalBalance = false,
+  highlightFundingStatus = false,
 }: {
   amounts: AutomationOverviewAmounts;
   emphasize?: boolean;
-  highlightGoalBalance?: boolean;
+  highlightFundingStatus?: boolean;
 }) {
   return (
     <>
@@ -88,10 +85,10 @@ function AmountColumns({
       <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
         <AmountCell amount={amounts.budgeted} emphasize={emphasize} />
       </View>
-      <GoalBalanceCell
+      <FundingStatusCell
         amounts={amounts}
         emphasize={emphasize}
-        highlight={highlightGoalBalance}
+        highlight={highlightFundingStatus}
       />
     </>
   );
@@ -129,7 +126,7 @@ export function MonthlyBudgetOverviewTable({
           <Trans>Budgeted</Trans>
         </Block>
         <Block style={{ width: COLUMN_WIDTH, textAlign: 'right' }}>
-          <Trans>Goal Shortfall</Trans>
+          <Trans>Funding status</Trans>
         </Block>
       </View>
 
@@ -145,14 +142,21 @@ export function MonthlyBudgetOverviewTable({
             <Block style={{ flex: 1, fontWeight: 600 }}>
               {group.groupName}
             </Block>
-            <AmountColumns amounts={group.subtotal} emphasize />
+            <AmountColumns
+              amounts={group.subtotal}
+              emphasize
+              highlightFundingStatus
+            />
           </View>
           {group.categories.map(category => (
             <View key={category.categoryId} style={rowStyle}>
               <Block style={{ flex: 1, paddingLeft: 16 }}>
                 {category.categoryName}
               </Block>
-              <AmountColumns amounts={category} highlightGoalBalance />
+              <AmountColumns
+                amounts={category}
+                highlightFundingStatus
+              />
             </View>
           ))}
         </View>
