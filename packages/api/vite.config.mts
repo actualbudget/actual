@@ -6,8 +6,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import { configDefaults } from 'vitest/config';
 
-import { writeEmbeddedAssetsToDist } from './scripts/embedded-assets.mjs';
-
+const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 const distDir = path.resolve(__dirname, 'dist');
 const typesDir = path.resolve(__dirname, '@types');
 
@@ -21,13 +20,23 @@ function cleanOutputDirs() {
   };
 }
 
-function copyMigrationsAndDefaultDb() {
+// The Node build reads migrations + the default DB from disk at runtime (see
+// fs.migrationsPath / bundledDatabasePath in loot-core), so copy them straight
+// from loot-core next to the bundle. The browser build embeds its own copies
+// via `?inline`/`?raw`, so nothing else needs to be on disk.
+function copyNodeRuntimeAssets() {
   return {
-    name: 'copy-migrations-and-default-db',
+    name: 'copy-node-runtime-assets',
     closeBundle() {
-      // Migrations, default DB, wasm, and the data/ index. Shared with the
-      // browser worker's embedded-assets plugin so the two never drift.
-      writeEmbeddedAssetsToDist(distDir);
+      fs.cpSync(
+        path.join(lootCoreRoot, 'migrations'),
+        path.join(distDir, 'migrations'),
+        { recursive: true },
+      );
+      fs.copyFileSync(
+        path.join(lootCoreRoot, 'default-db.sqlite'),
+        path.join(distDir, 'default-db.sqlite'),
+      );
     },
   };
 }
@@ -56,7 +65,7 @@ export default defineConfig({
   plugins: [
     cleanOutputDirs(),
     peggyLoader(),
-    copyMigrationsAndDefaultDb(),
+    copyNodeRuntimeAssets(),
     visualizer({ template: 'raw-data', filename: 'app/stats.json' }),
   ],
   resolve: {
