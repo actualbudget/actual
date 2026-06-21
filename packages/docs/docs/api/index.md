@@ -108,6 +108,12 @@ await api.shutdown();
 
 Behind the scenes, `init` starts a Web Worker running the same budget engine the Actual web app uses, backed by SQLite compiled to WebAssembly. Your budget data is stored in the browser's IndexedDB and stays on the device.
 
+The browser build is fully self-contained: the Web Worker and its WebAssembly and data files are inlined into the package. There are no extra files to copy or serve, and no bundler configuration is required (no `optimizeDeps` tweaks, no worker or asset plugins). Importing the package and calling `init()` is all that's needed.
+
+:::caution Cross-origin isolation is required
+The engine uses `SharedArrayBuffer`, so the page that runs the API must be served **cross-origin isolated**: over HTTPS, with `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`. This is a hosting/server requirement (it cannot be bundled away). See [Enabling SharedArrayBuffer Access](../troubleshooting/shared-array-buffer.md). In local development, set the same headers on your dev server (for example via a small Vite middleware plugin).
+:::
+
 ## Writing Data Importers
 
 If you are using another app, like YNAB or Mint, you might want to migrate your data into Actual. Right now, Actual officially supports [importing YNAB4 data](../migration/ynab4.md) and [importing nYNAB data](../migration/nynab.mdx) (and it works very well). But if you want to import all of your data into Actual, you can write a custom importer.

@@ -8,13 +8,13 @@ import type { InitConfig } from '#server/main';
 export async function startBackendWorker(
   worker: Worker,
   config: InitConfig,
-  assetsBaseUrl: string,
 ): Promise<void> {
   initBackend(worker);
   await connection.init(worker);
-  // Worker-local handler, not part of the shared Handlers union.
+  // Worker-local handler, not part of the shared Handlers union. The worker is
+  // self-contained (wasm + data embedded), so no asset base URL is needed.
   await (connection.send as (name: string, args?: unknown) => Promise<unknown>)(
     'api-browser/init',
-    { config, assetsBaseUrl },
+    { config },
   );
 }

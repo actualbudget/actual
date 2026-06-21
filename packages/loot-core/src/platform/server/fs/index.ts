@@ -235,7 +235,10 @@ async function _removeFile(filepath: string) {
   FS.unlink(filepath);
 }
 
-// Load files from the server that should exist by default
+// Load files from the server that should exist by default.
+// NOTE: @actual-app/api's self-contained browser worker serves these exact
+// requests (`PUBLIC_URL + 'data-file-index.txt'` and `PUBLIC_URL + 'data/' + file`)
+// from embedded bytes via a fetch shim. Keep those URL shapes in sync.
 async function populateDefaultFilesystem() {
   const index = await (
     await fetch(process.env.PUBLIC_URL + 'data-file-index.txt')

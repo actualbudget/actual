@@ -2,9 +2,40 @@ import path from 'path';
 
 import { peggyLoader } from '@actual-app/vite-plugin-peggy';
 import { defineConfig } from 'vite';
+import type { Plugin } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
+import { collectEmbeddedAssets } from './scripts/embedded-assets.mjs';
+
 const distDir = path.resolve(__dirname, 'dist');
+
+// Inline the wasm + default-filesystem data into the worker so the browser
+// build performs no PUBLIC_URL asset fetches and consumers serve no extra files.
+function embeddedAssets(): Plugin {
+  const id = 'virtual:actual-embedded-assets';
+  const resolved = '\0' + id;
+  return {
+    name: 'actual-embedded-assets',
+    resolveId(source) {
+      return source === id ? resolved : undefined;
+    },
+    load(thisId) {
+      if (thisId !== resolved) return undefined;
+      const { wasm, dataFiles, index } = collectEmbeddedAssets();
+      const filesB64 = Object.fromEntries(
+        Object.entries(dataFiles).map(([k, buf]) => [
+          k,
+          (buf as Buffer).toString('base64'),
+        ]),
+      );
+      return [
+        `export const wasmBase64 = ${JSON.stringify((wasm as Buffer).toString('base64'))};`,
+        `export const dataIndex = ${JSON.stringify(index)};`,
+        `export const dataFiles = ${JSON.stringify(filesB64)};`,
+      ].join('\n');
+    },
+  };
+}
 
 // Worker bundle: full loot-core + sql.js + absurd-sql.
 export default defineConfig({
@@ -19,7 +50,11 @@ export default defineConfig({
     sourcemap: true,
     lib: {
       entry: path.resolve(__dirname, 'browser-worker.ts'),
-      formats: ['es'],
+      // IIFE (classic worker) so browser.js can inline it as a Blob URL and
+      // consumer bundlers never see a worker entry to re-bundle. Mirrors the
+      // web app's `kcab.worker` and avoids module-worker-from-blob pitfalls.
+      formats: ['iife'],
+      name: 'ActualBrowserWorker',
       fileName: () => 'worker.js',
     },
     rollupOptions: {
@@ -29,6 +64,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    embeddedAssets(),
     peggyLoader(),
     nodePolyfills({
       include: [

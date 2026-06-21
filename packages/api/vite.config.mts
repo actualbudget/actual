@@ -6,7 +6,8 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import { configDefaults } from 'vitest/config';
 
-const lootCoreRoot = path.resolve(__dirname, '../loot-core');
+import { writeEmbeddedAssetsToDist } from './scripts/embedded-assets.mjs';
+
 const distDir = path.resolve(__dirname, 'dist');
 const typesDir = path.resolve(__dirname, '@types');
 
@@ -24,59 +25,9 @@ function copyMigrationsAndDefaultDb() {
   return {
     name: 'copy-migrations-and-default-db',
     closeBundle() {
-      const migrationsSrc = path.join(lootCoreRoot, 'migrations');
-      const defaultDbPath = path.join(lootCoreRoot, 'default-db.sqlite');
-
-      if (!fs.existsSync(migrationsSrc)) {
-        throw new Error(`migrations directory not found at ${migrationsSrc}`);
-      }
-      const migrationsStat = fs.statSync(migrationsSrc);
-      if (!migrationsStat.isDirectory()) {
-        throw new Error(`migrations path is not a directory: ${migrationsSrc}`);
-      }
-
-      const migrationsDest = path.join(distDir, 'migrations');
-      fs.mkdirSync(migrationsDest, { recursive: true });
-      for (const name of fs.readdirSync(migrationsSrc)) {
-        if (name.endsWith('.sql') || name.endsWith('.js')) {
-          fs.copyFileSync(
-            path.join(migrationsSrc, name),
-            path.join(migrationsDest, name),
-          );
-        }
-      }
-
-      if (!fs.existsSync(defaultDbPath)) {
-        throw new Error(`default-db.sqlite not found at ${defaultDbPath}`);
-      }
-      fs.copyFileSync(defaultDbPath, path.join(distDir, 'default-db.sqlite'));
-
-      // Ship sql.js' WASM next to the bundle so consumers serve it same-origin.
-      const sqlJsWasm = require.resolve('@jlongster/sql.js/dist/sql-wasm.wasm');
-      fs.copyFileSync(sqlJsWasm, path.join(distDir, 'sql-wasm.wasm'));
-
-      // Runtime data files for the browser worker. JS migrations get a `.data`
-      // suffix so consumer bundlers don't import-analyze them.
-      const dataDir = path.join(distDir, 'data');
-      const dataMigrationsDir = path.join(dataDir, 'migrations');
-      fs.mkdirSync(dataMigrationsDir, { recursive: true });
-
-      fs.copyFileSync(defaultDbPath, path.join(dataDir, 'default-db.sqlite'));
-      const migrationNames: string[] = [];
-      for (const name of fs.readdirSync(migrationsDest)) {
-        const wireName = name.endsWith('.js') ? `${name}.data` : name;
-        fs.copyFileSync(
-          path.join(migrationsDest, name),
-          path.join(dataMigrationsDir, wireName),
-        );
-        migrationNames.push(`migrations/${wireName}`);
-      }
-      migrationNames.sort();
-
-      fs.writeFileSync(
-        path.join(distDir, 'data-file-index.txt'),
-        ['default-db.sqlite', ...migrationNames].join('\n') + '\n',
-      );
+      // Migrations, default DB, wasm, and the data/ index. Shared with the
+      // browser worker's embedded-assets plugin so the two never drift.
+      writeEmbeddedAssetsToDist(distDir);
     },
   };
 }
