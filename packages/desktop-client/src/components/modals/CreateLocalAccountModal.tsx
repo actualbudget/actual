@@ -47,7 +47,11 @@ export function CreateLocalAccountModal() {
 
   // Strips the sign and updates the sign toggle
   const updateBalance = (value: string) => {
-    setIsNegative(value.includes('-'));
+    if (value.includes('-')) {
+      setIsNegative(true);
+    } else if (value.includes('+')) {
+      setIsNegative(false);
+    }
 
     const unsignedValue = value.replace(/[-+]/g, '');
     setBalance(unsignedValue);
