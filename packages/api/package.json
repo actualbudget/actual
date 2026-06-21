@@ -59,7 +59,7 @@
     "@actual-app/crdt": "workspace:*",
     "better-sqlite3": "^12.10.0",
     "compare-versions": "^6.1.1",
-    "uuid": "^14.0.0"
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "@playwright/test": "1.59.1",
