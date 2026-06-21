@@ -218,6 +218,7 @@ describe('getAutomationOverview', () => {
     expect(result.totals.needed).toBe(30000);
     expect(result.totals.budgeted).toBe(25000);
     expect(result.totals.remaining).toBe(5000);
+    expect(result.totals.overfunded).toBe(0);
     expect(result.monthCount).toBe(1);
     expect(result.groups).toHaveLength(1);
     expect(result.groups[0].categories).toHaveLength(2);
@@ -256,7 +257,63 @@ describe('getAutomationOverview', () => {
     expect(result.totals.needed).toBe(0);
     expect(result.totals.budgeted).toBe(0);
     expect(result.totals.remaining).toBe(0);
+    expect(result.totals.overfunded).toBe(0);
     expect(result.groups).toEqual([]);
+  });
+
+  it('tracks overfunded amounts when budgeted exceeds projected need', async () => {
+    setupSheetMock({
+      'to-budget': 100000,
+      'budget-cat-1': 15000,
+      'budget-cat-2': 10000,
+    });
+    setupAqlForWideScope(
+      [
+        {
+          category: cat1,
+          templates: [
+            {
+              type: 'periodic',
+              amount: 100,
+              period: { period: 'month', amount: 1 },
+              starting: '2024-01-01',
+              directive: 'template',
+              priority: 1,
+            },
+          ],
+        },
+        {
+          category: cat2,
+          templates: [
+            {
+              type: 'periodic',
+              amount: 200,
+              period: { period: 'month', amount: 1 },
+              starting: '2024-01-01',
+              directive: 'template',
+              priority: 1,
+            },
+          ],
+        },
+      ],
+      [cat1, cat2],
+    );
+
+    const result = await getAutomationOverview({
+      startMonth: '2024-01',
+      endMonth: '2024-01',
+    });
+
+    expect(result.totals.needed).toBe(30000);
+    expect(result.totals.budgeted).toBe(25000);
+    expect(result.totals.remaining).toBe(10000);
+    expect(result.totals.overfunded).toBe(5000);
+    expect(
+      result.groups[0].categories.find(c => c.categoryId === cat1.id)?.overfunded,
+    ).toBe(5000);
+    expect(
+      result.groups[0].categories.find(c => c.categoryId === cat2.id)?.remaining,
+    ).toBe(10000);
   });
 
   it('projects remainder automations as zero needed and ignores negative budgeted', async () => {

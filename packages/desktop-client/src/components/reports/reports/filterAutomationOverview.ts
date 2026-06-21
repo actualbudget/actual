@@ -16,8 +16,9 @@ function sumCategoryRows(
       needed: acc.needed + row.needed,
       budgeted: acc.budgeted + row.budgeted,
       remaining: acc.remaining + row.remaining,
+      overfunded: acc.overfunded + row.overfunded,
     }),
-    { carriedOver: 0, needed: 0, budgeted: 0, remaining: 0 },
+    { carriedOver: 0, needed: 0, budgeted: 0, remaining: 0, overfunded: 0 },
   );
 
   if (monthCount <= 1) {

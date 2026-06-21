@@ -6,10 +6,12 @@ export type AutomationOverviewAmounts = {
   needed: number;
   budgeted: number;
   remaining: number;
+  overfunded: number;
   averageCarriedOver?: number;
   averageNeeded?: number;
   averageBudgeted?: number;
   averageRemaining?: number;
+  averageOverfunded?: number;
 };
 
 export type AutomationOverviewCategoryRow = {

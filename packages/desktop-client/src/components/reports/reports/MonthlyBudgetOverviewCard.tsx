@@ -96,7 +96,7 @@ export function MonthlyBudgetOverviewCard({
         }
       }}
     >
-      <View style={{ flex: 1, padding: 20 }}>
+      <View style={{ flex: 1, padding: 12 }}>
         <ReportCardName
           name={meta?.name || t('Monthly Budget Overview')}
           isEditing={nameMenuOpen}
@@ -121,8 +121,8 @@ export function MonthlyBudgetOverviewCard({
             <Trans>No categories have budget automations.</Trans>
           </Block>
         ) : (
-          <View style={{ marginTop: 16 }}>
-            <MonthlyBudgetOverviewSummary data={data} />
+          <View style={{ marginTop: 8 }}>
+            <MonthlyBudgetOverviewSummary data={data} compact />
           </View>
         )}
       </View>

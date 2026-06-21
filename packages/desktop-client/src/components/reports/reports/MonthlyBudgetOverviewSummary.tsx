@@ -16,45 +16,69 @@ import { useLocale } from '#hooks/useLocale';
 
 type MonthlyBudgetOverviewSummaryProps = {
   data: AutomationOverview;
+  compact?: boolean;
 };
 
 export function MonthlyBudgetOverviewSummary({
   data,
+  compact = false,
 }: MonthlyBudgetOverviewSummaryProps) {
   const format = useFormat();
   const locale = useLocale();
   const { totals: amounts } = data;
 
+  const sectionPadding = compact ? 10 : 15;
+  const sectionGap = compact ? 6 : 10;
+  const headerTextStyle = compact
+    ? { fontSize: 16, fontWeight: 600, letterSpacing: 0.5 }
+    : styles.largeText;
+  const labelTextStyle = compact
+    ? { fontSize: 13, fontWeight: 400 }
+    : styles.mediumText;
+  const valueTextStyle = compact
+    ? { fontSize: 22, fontWeight: 800 }
+    : styles.veryLargeText;
+  const subtitleTextStyle = compact
+    ? { fontSize: 13, fontWeight: 600 }
+    : { ...styles.mediumText, fontWeight: 600 };
+
   const renderAmount = (
     value: number,
-    options?: { emphasize?: boolean; errorColor?: string },
+    options?: { emphasize?: boolean; color?: string },
   ) => (
     <FinancialText
       style={{
         fontWeight: options?.emphasize ? 600 : undefined,
-        color: options?.errorColor,
+        color: options?.color,
       }}
     >
       <PrivacyFilter>{format(value, 'financial')}</PrivacyFilter>
     </FinancialText>
   );
 
+  const summarySectionStyle = {
+    backgroundColor: theme.pageBackground,
+    padding: sectionPadding,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    marginTop: sectionGap,
+  };
+
   return (
-    <View style={{ flexDirection: 'column', marginBottom: 10 }}>
+    <View style={{ flexDirection: 'column', marginBottom: compact ? 0 : 10 }}>
       <View
         style={{
           backgroundColor: theme.pageBackground,
-          padding: 15,
+          padding: sectionPadding,
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
         <Text
           style={{
-            ...styles.largeText,
+            ...headerTextStyle,
             alignItems: 'center',
             marginBottom: 2,
-            fontWeight: 600,
           }}
         >
           {monthUtils.format(data.startMonth, 'MMMM yyyy', locale)}
@@ -63,86 +87,96 @@ export function MonthlyBudgetOverviewSummary({
         </Text>
         <Text
           style={{
-            ...styles.mediumText,
+            ...subtitleTextStyle,
             alignItems: 'center',
-            marginTop: 8,
-            fontWeight: 600,
+            marginTop: compact ? 4 : 8,
           }}
         >
           <Trans>Goal Automation Summary</Trans>
         </Text>
       </View>
-      <View
-        style={{
-          backgroundColor: theme.pageBackground,
-          padding: 15,
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: 10,
-        }}
-      >
+      <View style={summarySectionStyle}>
         <Text
           style={{
-            ...styles.mediumText,
+            ...labelTextStyle,
             alignItems: 'center',
             marginBottom: 2,
-            fontWeight: 400,
           }}
         >
           <Trans>TOTAL PROJECTED</Trans>
         </Text>
         <FinancialText
           style={{
-            ...styles.veryLargeText,
+            ...valueTextStyle,
             alignItems: 'center',
             marginBottom: 2,
-            fontWeight: 800,
           }}
         >
           <PrivacyFilter>{format(amounts.needed, 'financial')}</PrivacyFilter>
         </FinancialText>
-        <Text style={{ fontWeight: 600 }}>
+        <Text style={{ fontWeight: 600, fontSize: compact ? 12 : undefined }}>
           <Trans>For this time period</Trans>
         </Text>
       </View>
-      <View
-        style={{
-          backgroundColor: theme.pageBackground,
-          padding: 15,
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: 10,
-        }}
-      >
+      <View style={summarySectionStyle}>
         <Text
           style={{
-            ...styles.mediumText,
+            ...labelTextStyle,
             alignItems: 'center',
             marginBottom: 2,
-            fontWeight: 400,
           }}
         >
-          <Trans>CURRENT GOAL SHORTFALL</Trans>
+          <Trans>GOALS UNDERFUNDED</Trans>
         </Text>
         <FinancialText
           style={{
-            ...styles.veryLargeText,
+            ...valueTextStyle,
             alignItems: 'center',
             marginBottom: 2,
-            fontWeight: 800,
             color:
-              amounts.remaining > 0 ? theme.errorText : theme.noticeTextLight,
+              amounts.remaining > 0
+                ? theme.errorText
+                : theme.noticeTextLight,
           }}
         >
           <PrivacyFilter>
             {format(amounts.remaining, 'financial')}
           </PrivacyFilter>
         </FinancialText>
-        <Text style={{ fontWeight: 600 }}>
+        <Text style={{ fontWeight: 600, fontSize: compact ? 12 : undefined }}>
           <Trans>For this time period</Trans>
         </Text>
       </View>
-      <View style={{ gap: 12, marginTop: 16 }}>
+      <View style={summarySectionStyle}>
+        <Text
+          style={{
+            ...labelTextStyle,
+            alignItems: 'center',
+            marginBottom: 2,
+          }}
+        >
+          <Trans>GOALS OVERFUNDED</Trans>
+        </Text>
+        <FinancialText
+          style={{
+            ...valueTextStyle,
+            alignItems: 'center',
+            marginBottom: 2,
+            color:
+              amounts.overfunded > 0
+                ? theme.reportsNumberPositive
+                : theme.noticeTextLight,
+          }}
+        >
+          <PrivacyFilter>
+            {format(amounts.overfunded, 'financial')}
+          </PrivacyFilter>
+        </FinancialText>
+        <Text style={{ fontWeight: 600, fontSize: compact ? 12 : undefined }}>
+          <Trans>For this time period</Trans>
+        </Text>
+      </View>
+      <View style={{ gap: compact ? 8 : 12, marginTop: compact ? 10 : 16 }}>
         <AlignedText
           left={
             <Block>

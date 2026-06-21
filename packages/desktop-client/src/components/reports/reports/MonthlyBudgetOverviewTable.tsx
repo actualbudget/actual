@@ -21,11 +21,11 @@ type MonthlyBudgetOverviewTableProps = {
 function AmountCell({
   amount,
   emphasize = false,
-  errorColor,
+  color,
 }: {
   amount: number;
   emphasize?: boolean;
-  errorColor?: string;
+  color?: string;
 }) {
   const format = useFormat();
 
@@ -33,7 +33,7 @@ function AmountCell({
     <FinancialText
       style={{
         fontWeight: emphasize ? 600 : undefined,
-        color: errorColor,
+        color,
       }}
     >
       <PrivacyFilter>{format(amount, 'financial')}</PrivacyFilter>
@@ -41,14 +41,41 @@ function AmountCell({
   );
 }
 
-function AmountColumns({
+function GoalBalanceCell({
   amounts,
   emphasize = false,
-  highlightRemaining = false,
+  highlight = false,
 }: {
   amounts: AutomationOverviewAmounts;
   emphasize?: boolean;
-  highlightRemaining?: boolean;
+  highlight?: boolean;
+}) {
+  const isUnderfunded = amounts.remaining > 0;
+  const isOverfunded = amounts.overfunded > 0;
+  const amount = isOverfunded ? amounts.overfunded : amounts.remaining;
+  const color = highlight
+    ? isUnderfunded
+      ? theme.errorText
+      : isOverfunded
+        ? theme.reportsNumberPositive
+        : undefined
+    : undefined;
+
+  return (
+    <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
+      <AmountCell amount={amount} emphasize={emphasize} color={color} />
+    </View>
+  );
+}
+
+function AmountColumns({
+  amounts,
+  emphasize = false,
+  highlightGoalBalance = false,
+}: {
+  amounts: AutomationOverviewAmounts;
+  emphasize?: boolean;
+  highlightGoalBalance?: boolean;
 }) {
   return (
     <>
@@ -61,17 +88,11 @@ function AmountColumns({
       <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
         <AmountCell amount={amounts.budgeted} emphasize={emphasize} />
       </View>
-      <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-        <AmountCell
-          amount={amounts.remaining}
-          emphasize={emphasize}
-          errorColor={
-            highlightRemaining && amounts.remaining > 0
-              ? theme.errorText
-              : undefined
-          }
-        />
-      </View>
+      <GoalBalanceCell
+        amounts={amounts}
+        emphasize={emphasize}
+        highlight={highlightGoalBalance}
+      />
     </>
   );
 }
@@ -131,7 +152,10 @@ export function MonthlyBudgetOverviewTable({
               <Block style={{ flex: 1, paddingLeft: 16 }}>
                 {category.categoryName}
               </Block>
-              <AmountColumns amounts={category} highlightRemaining />
+              <AmountColumns
+                amounts={category}
+                highlightGoalBalance
+              />
             </View>
           ))}
         </View>

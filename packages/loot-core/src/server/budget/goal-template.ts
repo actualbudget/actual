@@ -442,6 +442,7 @@ type MonthCategoryAmounts = {
   needed: number;
   budgeted: number;
   remaining: number;
+  overfunded: number;
 };
 
 function sumMonthlyAmounts(
@@ -453,8 +454,9 @@ function sumMonthlyAmounts(
       needed: acc.needed + row.needed,
       budgeted: acc.budgeted + row.budgeted,
       remaining: acc.remaining + row.remaining,
+      overfunded: acc.overfunded + row.overfunded,
     }),
-    { carriedOver: 0, needed: 0, budgeted: 0, remaining: 0 },
+    { carriedOver: 0, needed: 0, budgeted: 0, remaining: 0, overfunded: 0 },
   );
 
   if (rows.length <= 1) {
@@ -468,6 +470,7 @@ function sumMonthlyAmounts(
     averageNeeded: Math.round(totals.needed / count),
     averageBudgeted: Math.round(totals.budgeted / count),
     averageRemaining: Math.round(totals.remaining / count),
+    averageOverfunded: Math.round(totals.overfunded / count),
   };
 }
 
@@ -481,8 +484,9 @@ function sumPeriodAmounts(
       needed: acc.needed + row.needed,
       budgeted: acc.budgeted + row.budgeted,
       remaining: acc.remaining + row.remaining,
+      overfunded: acc.overfunded + row.overfunded,
     }),
-    { carriedOver: 0, needed: 0, budgeted: 0, remaining: 0 },
+    { carriedOver: 0, needed: 0, budgeted: 0, remaining: 0, overfunded: 0 },
   );
 
   if (monthCount <= 1) {
@@ -495,6 +499,7 @@ function sumPeriodAmounts(
     averageNeeded: Math.round(totals.needed / monthCount),
     averageBudgeted: Math.round(totals.budgeted / monthCount),
     averageRemaining: Math.round(totals.remaining / monthCount),
+    averageOverfunded: Math.round(totals.overfunded / monthCount),
   };
 }
 
@@ -537,8 +542,15 @@ async function getAutomationOverviewForMonth(
     );
     const carriedOver = await getCarriedOver(category, month);
     const remaining = Math.max(0, needed - budgeted);
+    const overfunded = Math.max(0, budgeted - needed);
 
-    result.set(category.id, { carriedOver, needed, budgeted, remaining });
+    result.set(category.id, {
+      carriedOver,
+      needed,
+      budgeted,
+      remaining,
+      overfunded,
+    });
   }
 
   return result;
@@ -570,6 +582,7 @@ export async function getAutomationOverview({
         needed: 0,
         budgeted: 0,
         remaining: 0,
+        overfunded: 0,
       },
       groups: [],
     };
