@@ -1,6 +1,5 @@
-import { describe, expect, it } from 'vitest';
-
 import { getLocale } from '@actual-app/core/shared/locale';
+import { describe, expect, it } from 'vitest';
 
 import { exportMonthlyBudgetOverviewCsv } from './monthlyBudgetOverviewCsv';
 
@@ -46,7 +45,9 @@ describe('exportMonthlyBudgetOverviewCsv', () => {
       { locale: getLocale('en-US') },
     );
 
-    expect(csv).toContain('Category group,Category,Carried over,Projected,Budgeted,Funding status');
+    expect(csv).toContain(
+      'Category group,Category,Carried over,Projected,Budgeted,Funding status',
+    );
     expect(csv).toContain('Monthly Bills,,10.00,200.00,150.00,-50.00');
     expect(csv).toContain('Monthly Bills,Groceries,10.00,200.00,150.00,-50.00');
     expect(csv).toContain('Total projected,,,200.00');

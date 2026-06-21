@@ -34,7 +34,11 @@ function FundingStatusCell({
 
   return (
     <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-      <MonthlyBudgetOverviewAmountCell amount={amount} emphasize={emphasize} color={color} />
+      <MonthlyBudgetOverviewAmountCell
+        amount={amount}
+        emphasize={emphasize}
+        color={color}
+      />
     </View>
   );
 }
@@ -51,13 +55,22 @@ function AmountColumns({
   return (
     <>
       <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-        <MonthlyBudgetOverviewAmountCell amount={amounts.carriedOver} emphasize={emphasize} />
+        <MonthlyBudgetOverviewAmountCell
+          amount={amounts.carriedOver}
+          emphasize={emphasize}
+        />
       </View>
       <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-        <MonthlyBudgetOverviewAmountCell amount={amounts.needed} emphasize={emphasize} />
+        <MonthlyBudgetOverviewAmountCell
+          amount={amounts.needed}
+          emphasize={emphasize}
+        />
       </View>
       <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-        <MonthlyBudgetOverviewAmountCell amount={amounts.budgeted} emphasize={emphasize} />
+        <MonthlyBudgetOverviewAmountCell
+          amount={amounts.budgeted}
+          emphasize={emphasize}
+        />
       </View>
       <FundingStatusCell
         amounts={amounts}

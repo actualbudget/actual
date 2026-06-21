@@ -1,4 +1,3 @@
-import i18n from 'i18next';
 import { Trans } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
@@ -11,6 +10,7 @@ import type {
   CategoryGroupEntity,
   MonthlyBudgetOverviewPeriod,
 } from '@actual-app/core/types/models';
+import i18n from 'i18next';
 
 import { CategorySelector } from '#components/reports/CategorySelector';
 import { useLocale } from '#hooks/useLocale';

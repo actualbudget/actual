@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import i18n from 'i18next';
 import { Trans } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -18,6 +17,7 @@ import type {
   MonthlyBudgetOverviewWidget,
 } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
+import i18n from 'i18next';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';

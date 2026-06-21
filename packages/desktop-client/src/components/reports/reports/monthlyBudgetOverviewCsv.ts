@@ -1,9 +1,8 @@
-import type { Locale } from 'date-fns';
-import i18n from 'i18next';
-
 import * as monthUtils from '@actual-app/core/shared/months';
 import { integerToAmount } from '@actual-app/core/shared/util';
 import type { AutomationOverview } from '@actual-app/core/types/models';
+import type { Locale } from 'date-fns';
+import i18n from 'i18next';
 
 import { getFundingStatusAmount } from './monthlyBudgetOverviewFundingStatus';
 
@@ -129,7 +128,9 @@ export function exportMonthlyBudgetOverviewCsv(
   const headers = Object.values(columns);
   const lines = [
     headers.map(formatCsvCell).join(','),
-    ...rows.map(row => headers.map(header => formatCsvCell(row[header] ?? '')).join(',')),
+    ...rows.map(row =>
+      headers.map(header => formatCsvCell(row[header] ?? '')).join(','),
+    ),
   ];
 
   return lines.join('\n');

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import i18n from 'i18next';
 import { Trans } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -7,6 +6,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { MonthlyBudgetOverviewWidget } from '@actual-app/core/types/models';
+import i18n from 'i18next';
 
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
@@ -118,9 +118,7 @@ export function MonthlyBudgetOverviewCard({
               color: theme.errorText,
             }}
           >
-            {error.message || (
-              <Trans>Failed to load automation overview</Trans>
-            )}
+            {error.message || <Trans>Failed to load automation overview</Trans>}
           </Block>
         ) : !data ? (
           <LoadingIndicator />
