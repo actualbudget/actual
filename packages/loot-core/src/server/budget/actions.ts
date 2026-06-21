@@ -64,12 +64,30 @@ function monthFromDbMonth(month: number): string {
   return `${monthString.slice(0, 4)}-${monthString.slice(4)}`;
 }
 
+function getCreatedMonths(): string[] {
+  const { createdMonths } = sheet.get().meta();
+  return [...(createdMonths as Set<string>)].sort();
+}
+
 // TODO: complete list of fields.
 type BudgetData = {
   is_income: 1 | 0;
   hidden: 1 | 0;
   group_hidden: 1 | 0;
   category: string;
+  amount: number;
+};
+
+export type AutoHoldMonth = {
+  month: string;
+  income: number;
+  budgeted: number;
+  overspent: number;
+  toBudgetCapacity: number;
+};
+
+export type AutoHoldPlanItem = {
+  month: string;
   amount: number;
 };
 
@@ -509,6 +527,205 @@ export async function holdForNextMonth({
     return true;
   }
   return false;
+}
+
+async function getDefaultAutoHoldMonths(month: string): Promise<number> {
+  let lastBudgetedMonth: string | null = null;
+
+  for (const futureMonth of getCreatedMonths()) {
+    if (futureMonth <= month) {
+      continue;
+    }
+
+    if (
+      (await getMonthBudgetedExpense(futureMonth)) > 0 ||
+      (await getMonthOverspentAmount(futureMonth)) > 0
+    ) {
+      lastBudgetedMonth = futureMonth;
+    }
+  }
+
+  return lastBudgetedMonth == null
+    ? 0
+    : monthUtils.differenceInCalendarMonths(lastBudgetedMonth, month);
+}
+
+export async function getAutoHoldMonthsToInspect({
+  month,
+}: {
+  month: string;
+}): Promise<number> {
+  return getDefaultAutoHoldMonths(month);
+}
+
+async function getAutoHoldMonths({
+  month,
+  months,
+}: {
+  month: string;
+  months: number;
+}): Promise<AutoHoldMonth[]> {
+  const createdMonths = new Set(getCreatedMonths());
+  const inspectedMonths: AutoHoldMonth[] = [];
+
+  for (let i = 0; i <= months; i++) {
+    const inspectedMonth = monthUtils.addMonths(month, i);
+
+    if (!createdMonths.has(inspectedMonth)) {
+      break;
+    }
+
+    inspectedMonths.push({
+      month: inspectedMonth,
+      income: await getMonthIncomeAmount(inspectedMonth),
+      budgeted: await getMonthBudgetedExpense(inspectedMonth),
+      overspent: await getMonthOverspentAmount(inspectedMonth),
+      toBudgetCapacity: await getMonthToBudgetCapacity(inspectedMonth),
+    });
+  }
+
+  let lastBudgetedIndex = -1;
+  for (let i = inspectedMonths.length - 1; i > 0; i--) {
+    const month = inspectedMonths[i];
+    const monthNeed = month.budgeted + month.overspent;
+    if (monthNeed > 0) {
+      lastBudgetedIndex = i;
+      break;
+    }
+  }
+
+  return lastBudgetedIndex === -1
+    ? inspectedMonths.slice(0, 1)
+    : inspectedMonths.slice(0, lastBudgetedIndex + 1);
+}
+
+export function calculateAutoHoldPlan({
+  surplus,
+  months,
+  allowNegativeToBudget = false,
+}: {
+  surplus: number;
+  months: AutoHoldMonth[];
+  allowNegativeToBudget?: boolean;
+}): AutoHoldPlanItem[] {
+  if (months.length < 2) {
+    return [];
+  }
+
+  const requiredFromPrevious = getAutoHoldRequiredFromPrevious(months);
+  let amountToHold = allowNegativeToBudget
+    ? requiredFromPrevious[1]
+    : Math.min(surplus, requiredFromPrevious[1]);
+
+  return months.slice(0, -1).map(({ month, toBudgetCapacity }, index) => {
+    const amount = Math.max(
+      0,
+      allowNegativeToBudget
+        ? amountToHold
+        : Math.min(
+            amountToHold,
+            requiredFromPrevious[index + 1],
+            toBudgetCapacity,
+          ),
+    );
+
+    const nextMonth = months[index + 1];
+    const nextMonthNeed = nextMonth.budgeted + nextMonth.overspent;
+
+    amountToHold = Math.min(
+      requiredFromPrevious[index + 2] || 0,
+      amount + nextMonth.income - nextMonthNeed,
+    );
+
+    return { month, amount };
+  });
+}
+
+export async function autoHoldForNextMonth({
+  month,
+  months,
+  allowNegativeToBudget = false,
+}: {
+  month: string;
+  months: number;
+  allowNegativeToBudget?: boolean;
+}): Promise<AutoHoldPlanItem[]> {
+  if (!Number.isInteger(months) || months < 0) {
+    return [];
+  }
+
+  if (months === 0) {
+    return [];
+  }
+
+  const surplus = await getMonthToBudgetCapacity(month);
+
+  const plan = calculateAutoHoldPlan({
+    surplus,
+    months: await getAutoHoldMonths({ month, months }),
+    allowNegativeToBudget,
+  });
+
+  if (plan.length === 0) {
+    return plan;
+  }
+
+  if (plan.every(({ amount }) => amount === 0)) {
+    return [];
+  }
+
+  await resetIncomeCarryover({ month });
+
+  await batchMessages(async () => {
+    for (const { month, amount } of plan) {
+      await setBuffer(month, amount);
+    }
+  });
+
+  return plan;
+}
+
+function getAutoHoldRequiredFromPrevious(months: AutoHoldMonth[]): number[] {
+  const requiredFromPrevious = Array(months.length).fill(0);
+
+  for (let i = months.length - 1; i > 0; i--) {
+    const month = months[i];
+    const monthNeed = month.budgeted + month.overspent;
+    requiredFromPrevious[i] =
+      monthNeed + (requiredFromPrevious[i + 1] || 0) - month.income;
+  }
+
+  return requiredFromPrevious;
+}
+
+async function getMonthBudgetedExpense(month: string): Promise<number> {
+  return -safeNumber(
+    await getSheetValue(monthUtils.sheetForMonth(month), 'total-budgeted'),
+  );
+}
+
+async function getMonthIncomeAmount(month: string): Promise<number> {
+  return safeNumber(
+    await getSheetValue(monthUtils.sheetForMonth(month), 'total-income'),
+  );
+}
+
+async function getMonthOverspentAmount(month: string): Promise<number> {
+  return -safeNumber(
+    await getSheetValue(
+      monthUtils.sheetForMonth(month),
+      'last-month-overspent',
+    ),
+  );
+}
+
+async function getMonthToBudgetCapacity(month: string): Promise<number> {
+  const sheetName = monthUtils.sheetForMonth(month);
+  const available = await getSheetValue(sheetName, 'available-funds');
+  const lastOverspent = await getSheetValue(sheetName, 'last-month-overspent');
+  const budgeted = await getMonthBudgetedExpense(month);
+
+  return available + lastOverspent - budgeted;
 }
 
 export async function resetHold({ month }: { month: string }): Promise<void> {

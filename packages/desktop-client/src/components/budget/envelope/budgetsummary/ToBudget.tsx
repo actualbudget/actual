@@ -61,6 +61,10 @@ export function ToBudget({
     position,
     asContextMenu,
   } = useContextMenu();
+  const closeMenu = useCallback(() => {
+    setMenuStep('actions');
+    setMenuOpen(false);
+  }, [setMenuOpen, setMenuStep]);
 
   return (
     <>
@@ -82,10 +86,7 @@ export function ToBudget({
         triggerRef={triggerRef}
         placement={asContextMenu ? 'bottom start' : 'bottom'}
         isOpen={menuOpen}
-        onOpenChange={() => {
-          setMenuStep('actions');
-          setMenuOpen(false);
-        }}
+        onOpenChange={closeMenu}
         style={{ width: 200, margin: 1 }}
         isNonModal
         {...position}
@@ -98,7 +99,7 @@ export function ToBudget({
               onHoldBuffer={() => setMenuStep('buffer')}
               onResetHoldBuffer={() => {
                 onBudgetAction(month, 'reset-hold');
-                setMenuOpen(false);
+                closeMenu();
               }}
               month={month}
               onBudgetAction={onBudgetAction}
@@ -106,16 +107,23 @@ export function ToBudget({
           )}
           {menuStep === 'buffer' && (
             <HoldMenu
-              onClose={() => setMenuOpen(false)}
+              month={month}
+              onClose={closeMenu}
               onSubmit={amount => {
                 onBudgetAction(month, 'hold', { amount });
+              }}
+              onAutoHold={(months, allowNegativeToBudget) => {
+                onBudgetAction(month, 'auto-hold', {
+                  months,
+                  allowNegativeToBudget,
+                });
               }}
             />
           )}
           {menuStep === 'transfer' && (
             <TransferMenu
               initialAmount={availableValue}
-              onClose={() => setMenuOpen(false)}
+              onClose={closeMenu}
               onSubmit={(amount, categoryId) => {
                 onBudgetAction(month, 'transfer-available', {
                   amount,
@@ -128,7 +136,7 @@ export function ToBudget({
             <CoverMenu
               showToBeBudgeted={false}
               initialAmount={availableValue}
-              onClose={() => setMenuOpen(false)}
+              onClose={closeMenu}
               onSubmit={(amount, categoryId) => {
                 onBudgetAction(month, 'cover-overbudgeted', {
                   category: categoryId,

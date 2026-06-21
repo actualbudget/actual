@@ -31,11 +31,24 @@ export function ToBudgetMenu({
   const { t } = useTranslation();
 
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
+  const availableFunds =
+    useEnvelopeSheetValue(envelopeBudget.incomeAvailable) ?? 0;
+  const totalBudgeted =
+    useEnvelopeSheetValue(envelopeBudget.totalBudgeted) ?? 0;
+  const budgeted = Math.max(0, -totalBudgeted);
   const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth) ?? 0;
   const manualBuffered =
     useEnvelopeSheetValue(envelopeBudget.manualBuffered) ?? 0;
-  const autoBuffered = useEnvelopeSheetValue(envelopeBudget.autoBuffered) ?? 0;
+  const hasSurplus = availableFunds > budgeted;
   const items = [
+    ...(toBudget < 0
+      ? [
+          {
+            name: 'cover',
+            text: t('Cover from a category'),
+          },
+        ]
+      : []),
     ...(toBudget > 0
       ? [
           {
@@ -44,19 +57,11 @@ export function ToBudgetMenu({
           },
         ]
       : []),
-    ...(autoBuffered === 0 && toBudget > 0
+    ...(hasSurplus
       ? [
           {
             name: 'buffer',
             text: t('Hold for next month'),
-          },
-        ]
-      : []),
-    ...(toBudget < 0
-      ? [
-          {
-            name: 'cover',
-            text: t('Cover from a category'),
           },
         ]
       : []),

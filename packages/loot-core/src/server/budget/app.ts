@@ -37,6 +37,8 @@ export type BudgetHandlers = {
   'budget/apply-single-template': typeof goalActions.applySingleCategoryTemplate;
   'budget/cleanup-goal-template': typeof cleanupActions.cleanupTemplate;
   'budget/hold-for-next-month': typeof actions.holdForNextMonth;
+  'budget/auto-hold-for-next-month': typeof actions.autoHoldForNextMonth;
+  'budget/get-auto-hold-months': typeof actions.getAutoHoldMonthsToInspect;
   'budget/reset-hold': typeof actions.resetHold;
   'budget/cover-overspending': typeof actions.coverOverspending;
   'budget/transfer-available': typeof actions.transferAvailable;
@@ -113,6 +115,11 @@ app.method(
   'budget/hold-for-next-month',
   mutator(undoable(actions.holdForNextMonth)),
 );
+app.method(
+  'budget/auto-hold-for-next-month',
+  mutator(undoable(actions.autoHoldForNextMonth)),
+);
+app.method('budget/get-auto-hold-months', actions.getAutoHoldMonthsToInspect);
 app.method('budget/reset-hold', mutator(undoable(actions.resetHold)));
 app.method(
   'budget/cover-overspending',

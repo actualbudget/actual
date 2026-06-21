@@ -5,8 +5,12 @@ import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 
 import {
+  autoHoldForNextMonth,
+  calculateAutoHoldPlan,
   copyUntilYearEnd,
   coverOverbudgeted,
+  getAutoHoldMonthsToInspect,
+  getSheetBoolean,
   getSheetValue,
   set3MonthAvg,
   setBudget,
@@ -14,6 +18,542 @@ import {
   setNMonthAvg,
 } from './actions';
 import * as budget from './base';
+
+describe('calculateAutoHoldPlan', () => {
+  it('sets cumulative hold amounts needed to cover future budgets', () => {
+    expect(
+      calculateAutoHoldPlan({
+        surplus: 700,
+        months: [
+          {
+            month: '2024-01',
+            income: 0,
+            budgeted: 300,
+            overspent: 0,
+            toBudgetCapacity: 700,
+          },
+          {
+            month: '2024-02',
+            income: 0,
+            budgeted: 200,
+            overspent: 0,
+            toBudgetCapacity: 500,
+          },
+          {
+            month: '2024-03',
+            income: 0,
+            budgeted: 400,
+            overspent: 0,
+            toBudgetCapacity: 100,
+          },
+          {
+            month: '2024-04',
+            income: 0,
+            budgeted: 100,
+            overspent: 0,
+            toBudgetCapacity: 0,
+          },
+        ],
+      }),
+    ).toEqual([
+      { month: '2024-01', amount: 700 },
+      { month: '2024-02', amount: 500 },
+      { month: '2024-03', amount: 100 },
+    ]);
+  });
+
+  it('prioritizes earlier months when surplus is exhausted', () => {
+    expect(
+      calculateAutoHoldPlan({
+        surplus: 500,
+        months: [
+          {
+            month: '2024-01',
+            income: 0,
+            budgeted: 300,
+            overspent: 0,
+            toBudgetCapacity: 700,
+          },
+          {
+            month: '2024-02',
+            income: 0,
+            budgeted: 200,
+            overspent: 0,
+            toBudgetCapacity: 300,
+          },
+          {
+            month: '2024-03',
+            income: 0,
+            budgeted: 400,
+            overspent: 0,
+            toBudgetCapacity: 0,
+          },
+          {
+            month: '2024-04',
+            income: 0,
+            budgeted: 100,
+            overspent: 0,
+            toBudgetCapacity: 0,
+          },
+        ],
+      }),
+    ).toEqual([
+      { month: '2024-01', amount: 500 },
+      { month: '2024-02', amount: 300 },
+      { month: '2024-03', amount: 0 },
+    ]);
+  });
+
+  it('leaves surplus beyond future budgets in the selected month', () => {
+    expect(
+      calculateAutoHoldPlan({
+        surplus: 900,
+        months: [
+          {
+            month: '2024-01',
+            income: 0,
+            budgeted: 300,
+            overspent: 0,
+            toBudgetCapacity: 700,
+          },
+          {
+            month: '2024-02',
+            income: 0,
+            budgeted: 200,
+            overspent: 0,
+            toBudgetCapacity: 500,
+          },
+          {
+            month: '2024-03',
+            income: 0,
+            budgeted: 400,
+            overspent: 0,
+            toBudgetCapacity: 100,
+          },
+          {
+            month: '2024-04',
+            income: 0,
+            budgeted: 100,
+            overspent: 0,
+            toBudgetCapacity: 0,
+          },
+        ],
+      }),
+    ).toEqual([
+      { month: '2024-01', amount: 700 },
+      { month: '2024-02', amount: 500 },
+      { month: '2024-03', amount: 100 },
+    ]);
+  });
+
+  it('caps each hold amount so To Budget does not drop below zero', () => {
+    expect(
+      calculateAutoHoldPlan({
+        surplus: 700,
+        months: [
+          {
+            month: '2024-01',
+            income: 0,
+            budgeted: 300,
+            overspent: 0,
+            toBudgetCapacity: 700,
+          },
+          {
+            month: '2024-02',
+            income: 0,
+            budgeted: 200,
+            overspent: 0,
+            toBudgetCapacity: 300,
+          },
+          {
+            month: '2024-03',
+            income: 0,
+            budgeted: 400,
+            overspent: 0,
+            toBudgetCapacity: 100,
+          },
+          {
+            month: '2024-04',
+            income: 0,
+            budgeted: 100,
+            overspent: 0,
+            toBudgetCapacity: 0,
+          },
+        ],
+      }),
+    ).toEqual([
+      { month: '2024-01', amount: 700 },
+      { month: '2024-02', amount: 300 },
+      { month: '2024-03', amount: 0 },
+    ]);
+  });
+
+  it('includes overspending in the last inspected month', () => {
+    expect(
+      calculateAutoHoldPlan({
+        surplus: 1000,
+        months: [
+          {
+            month: '2024-01',
+            income: 0,
+            budgeted: 300,
+            overspent: 0,
+            toBudgetCapacity: 1000,
+          },
+          {
+            month: '2024-02',
+            income: 0,
+            budgeted: 200,
+            overspent: 0,
+            toBudgetCapacity: 800,
+          },
+          {
+            month: '2024-03',
+            income: 0,
+            budgeted: 400,
+            overspent: 0,
+            toBudgetCapacity: 400,
+          },
+          {
+            month: '2024-04',
+            income: 0,
+            budgeted: 100,
+            overspent: 300,
+            toBudgetCapacity: 0,
+          },
+        ],
+      }),
+    ).toEqual([
+      { month: '2024-01', amount: 1000 },
+      { month: '2024-02', amount: 800 },
+      { month: '2024-03', amount: 400 },
+    ]);
+  });
+
+  it('reduces required hold amounts by future income', () => {
+    expect(
+      calculateAutoHoldPlan({
+        surplus: 700,
+        months: [
+          {
+            month: '2024-01',
+            income: 0,
+            budgeted: 300,
+            overspent: 0,
+            toBudgetCapacity: 700,
+          },
+          {
+            month: '2024-02',
+            income: 100,
+            budgeted: 200,
+            overspent: 0,
+            toBudgetCapacity: 500,
+          },
+          {
+            month: '2024-03',
+            income: 0,
+            budgeted: 400,
+            overspent: 0,
+            toBudgetCapacity: 100,
+          },
+          {
+            month: '2024-04',
+            income: 0,
+            budgeted: 100,
+            overspent: 0,
+            toBudgetCapacity: 0,
+          },
+        ],
+      }),
+    ).toEqual([
+      { month: '2024-01', amount: 600 },
+      { month: '2024-02', amount: 500 },
+      { month: '2024-03', amount: 100 },
+    ]);
+  });
+
+  it('can ignore surplus and To Budget capacity limits', () => {
+    expect(
+      calculateAutoHoldPlan({
+        surplus: 100,
+        allowNegativeToBudget: true,
+        months: [
+          {
+            month: '2024-01',
+            income: 0,
+            budgeted: 300,
+            overspent: 0,
+            toBudgetCapacity: 100,
+          },
+          {
+            month: '2024-02',
+            income: 0,
+            budgeted: 200,
+            overspent: 0,
+            toBudgetCapacity: 50,
+          },
+          {
+            month: '2024-03',
+            income: 0,
+            budgeted: 400,
+            overspent: 0,
+            toBudgetCapacity: 0,
+          },
+          {
+            month: '2024-04',
+            income: 0,
+            budgeted: 100,
+            overspent: 0,
+            toBudgetCapacity: 0,
+          },
+        ],
+      }),
+    ).toEqual([
+      { month: '2024-01', amount: 700 },
+      { month: '2024-02', amount: 500 },
+      { month: '2024-03', amount: 100 },
+    ]);
+  });
+});
+
+describe('autoHoldForNextMonth', () => {
+  beforeEach(global.emptyDatabase());
+  afterEach(global.emptyDatabase());
+
+  it('sets hold amounts for the selected and future months', async () => {
+    await setupAutoHoldDatabase({
+      income: 1000,
+      budgetedByMonth: {
+        '2024-01': 300,
+        '2024-02': 200,
+        '2024-03': 400,
+        '2024-04': 100,
+      },
+    });
+
+    const plan = await autoHoldForNextMonth({ month: '2024-01', months: 3 });
+    await sheet.waitOnSpreadsheet();
+
+    expect(plan).toEqual([
+      { month: '2024-01', amount: 700 },
+      { month: '2024-02', amount: 500 },
+      { month: '2024-03', amount: 100 },
+    ]);
+    expect(await getSheetValue('budget202401', 'buffered')).toBe(700);
+    expect(await getSheetValue('budget202402', 'buffered')).toBe(500);
+    expect(await getSheetValue('budget202403', 'buffered')).toBe(100);
+    expect(await getSheetValue('budget202404', 'buffered')).toBe(0);
+    expect(await getSheetValue('budget202401', 'to-budget')).toBe(0);
+    expect(await getSheetValue('budget202402', 'to-budget')).toBe(0);
+    expect(await getSheetValue('budget202403', 'to-budget')).toBe(0);
+    expect(await getSheetValue('budget202404', 'to-budget')).toBe(0);
+  });
+
+  it('can use the default horizon through the last future budgeted month', async () => {
+    await setupAutoHoldDatabase({
+      income: 1000,
+      budgetedByMonth: {
+        '2024-01': 300,
+        '2024-02': 200,
+        '2024-04': 100,
+      },
+    });
+
+    const months = await getAutoHoldMonthsToInspect({ month: '2024-01' });
+    const plan = await autoHoldForNextMonth({ month: '2024-01', months });
+    await sheet.waitOnSpreadsheet();
+
+    expect(plan).toEqual([
+      { month: '2024-01', amount: 300 },
+      { month: '2024-02', amount: 100 },
+      { month: '2024-03', amount: 100 },
+    ]);
+    expect(await getSheetValue('budget202401', 'buffered')).toBe(300);
+    expect(await getSheetValue('budget202402', 'buffered')).toBe(100);
+    expect(await getSheetValue('budget202403', 'buffered')).toBe(100);
+    expect(await getSheetValue('budget202404', 'buffered')).toBe(0);
+  });
+
+  it('does not reset income carryover when no plan is produced', async () => {
+    await setupAutoHoldDatabase({
+      income: 1000,
+      budgetedByMonth: {
+        '2024-01': 300,
+      },
+      months: ['2024-01'],
+    });
+    await setCategoryCarryover({
+      startMonth: '2024-01',
+      category: 'income-cat',
+      flag: true,
+    });
+    await sheet.waitOnSpreadsheet();
+
+    const plan = await autoHoldForNextMonth({ month: '2024-01', months: 1 });
+    await sheet.waitOnSpreadsheet();
+
+    expect(plan).toEqual([]);
+    expect(await getSheetBoolean('budget202401', 'carryover-income-cat')).toBe(
+      true,
+    );
+  });
+
+  it('does not reset income carryover when the plan only has zero amounts', async () => {
+    await setupAutoHoldDatabase({
+      income: 300,
+      budgetedByMonth: {
+        '2024-01': 300,
+        '2024-02': 200,
+      },
+    });
+    await setCategoryCarryover({
+      startMonth: '2024-01',
+      category: 'income-cat',
+      flag: true,
+    });
+    await sheet.waitOnSpreadsheet();
+
+    const plan = await autoHoldForNextMonth({ month: '2024-01', months: 1 });
+    await sheet.waitOnSpreadsheet();
+
+    expect(plan).toEqual([]);
+    expect(await getSheetBoolean('budget202401', 'carryover-income-cat')).toBe(
+      true,
+    );
+  });
+
+  it('accounts for overspending when setting future hold amounts', async () => {
+    await setupAutoHoldDatabase({
+      income: 1000,
+      budgetedByMonth: {
+        '2024-01': 300,
+        '2024-02': 200,
+        '2024-03': 400,
+        '2024-04': 100,
+      },
+      spendingByMonth: {
+        '2024-01': 500,
+      },
+    });
+
+    const plan = await autoHoldForNextMonth({ month: '2024-01', months: 3 });
+    await sheet.waitOnSpreadsheet();
+
+    expect(plan).toEqual([
+      { month: '2024-01', amount: 700 },
+      { month: '2024-02', amount: 300 },
+      { month: '2024-03', amount: 0 },
+    ]);
+    expect(await getSheetValue('budget202402', 'buffered')).toBe(300);
+    expect(await getSheetValue('budget202402', 'to-budget')).toBe(0);
+  });
+
+  it('covers overspending in the last inspected month', async () => {
+    await setupAutoHoldDatabase({
+      income: 1300,
+      budgetedByMonth: {
+        '2024-01': 300,
+        '2024-02': 200,
+        '2024-03': 400,
+        '2024-04': 100,
+      },
+      spendingByMonth: {
+        '2024-03': 1200,
+      },
+    });
+
+    const plan = await autoHoldForNextMonth({ month: '2024-01', months: 3 });
+    await sheet.waitOnSpreadsheet();
+
+    expect(plan).toEqual([
+      { month: '2024-01', amount: 1000 },
+      { month: '2024-02', amount: 800 },
+      { month: '2024-03', amount: 400 },
+    ]);
+    expect(await getSheetValue('budget202404', 'to-budget')).toBe(0);
+  });
+
+  it('can set holds beyond surplus when negative To Budget is allowed', async () => {
+    await setupAutoHoldDatabase({
+      income: 500,
+      budgetedByMonth: {
+        '2024-01': 300,
+        '2024-02': 200,
+        '2024-03': 400,
+        '2024-04': 100,
+      },
+    });
+
+    const plan = await autoHoldForNextMonth({
+      month: '2024-01',
+      months: 3,
+      allowNegativeToBudget: true,
+    });
+    await sheet.waitOnSpreadsheet();
+
+    expect(plan).toEqual([
+      { month: '2024-01', amount: 700 },
+      { month: '2024-02', amount: 500 },
+      { month: '2024-03', amount: 100 },
+    ]);
+    expect(await getSheetValue('budget202401', 'to-budget')).toBe(-500);
+  });
+
+  it('uses future income to reduce current hold amounts', async () => {
+    await setupAutoHoldDatabase({
+      income: 1000,
+      incomeByMonth: {
+        '2024-02': 200,
+      },
+      budgetedByMonth: {
+        '2024-01': 300,
+        '2024-02': 200,
+        '2024-03': 400,
+        '2024-04': 100,
+      },
+    });
+
+    const plan = await autoHoldForNextMonth({ month: '2024-01', months: 3 });
+    await sheet.waitOnSpreadsheet();
+
+    expect(plan).toEqual([
+      { month: '2024-01', amount: 500 },
+      { month: '2024-02', amount: 500 },
+      { month: '2024-03', amount: 100 },
+    ]);
+    expect(await getSheetValue('budget202401', 'buffered')).toBe(500);
+    expect(await getSheetValue('budget202402', 'buffered')).toBe(500);
+    expect(await getSheetValue('budget202403', 'buffered')).toBe(100);
+    expect(await getSheetValue('budget202401', 'to-budget')).toBe(200);
+  });
+
+  it('sets future holds from future income when current surplus is zero', async () => {
+    await setupAutoHoldDatabase({
+      income: 300,
+      incomeByMonth: {
+        '2024-02': 700,
+      },
+      budgetedByMonth: {
+        '2024-01': 300,
+        '2024-02': 200,
+        '2024-03': 400,
+        '2024-04': 100,
+      },
+    });
+
+    const plan = await autoHoldForNextMonth({ month: '2024-01', months: 3 });
+    await sheet.waitOnSpreadsheet();
+
+    expect(plan).toEqual([
+      { month: '2024-01', amount: 0 },
+      { month: '2024-02', amount: 500 },
+      { month: '2024-03', amount: 100 },
+    ]);
+    expect(await getSheetValue('budget202401', 'buffered')).toBe(0);
+    expect(await getSheetValue('budget202402', 'buffered')).toBe(500);
+    expect(await getSheetValue('budget202403', 'buffered')).toBe(100);
+  });
+});
 
 describe('copyUntilYearEnd', () => {
   beforeEach(global.emptyDatabase());
@@ -337,6 +877,75 @@ async function setupAverageDatabase() {
     account: 'account1',
     category: 'cat1',
   });
+
+  await sheet.waitOnSpreadsheet();
+}
+
+async function setupAutoHoldDatabase({
+  income,
+  incomeByMonth = {},
+  budgetedByMonth,
+  spendingByMonth = {},
+  months = ['2024-01', '2024-02', '2024-03', '2024-04', '2024-05'],
+}: {
+  income: number;
+  incomeByMonth?: Record<string, number>;
+  budgetedByMonth: Record<string, number>;
+  spendingByMonth?: Record<string, number>;
+  months?: string[];
+}) {
+  await db.insertAccount({ id: 'account1', name: 'Account 1' });
+
+  await db.insertCategoryGroup({
+    id: 'income-group',
+    name: 'Income',
+    is_income: 1,
+  });
+  await db.insertCategory({
+    id: 'income-cat',
+    name: 'Income',
+    cat_group: 'income-group',
+    is_income: 1,
+  });
+  await db.insertCategoryGroup({ id: 'group1', name: 'group1', is_income: 0 });
+  await db.insertCategory({
+    id: 'cat1',
+    name: 'cat1',
+    cat_group: 'group1',
+    is_income: 0,
+  });
+
+  await sheet.loadSpreadsheet(db);
+  await budget.createBudget(months);
+
+  await db.insertTransaction({
+    date: '2024-01-15',
+    amount: income,
+    account: 'account1',
+    category: 'income-cat',
+  });
+
+  for (const [month, amount] of Object.entries(incomeByMonth)) {
+    await db.insertTransaction({
+      date: `${month}-15`,
+      amount,
+      account: 'account1',
+      category: 'income-cat',
+    });
+  }
+
+  for (const [month, amount] of Object.entries(budgetedByMonth)) {
+    await setBudget({ category: 'cat1', month, amount });
+  }
+
+  for (const [month, amount] of Object.entries(spendingByMonth)) {
+    await db.insertTransaction({
+      date: `${month}-15`,
+      amount: -amount,
+      account: 'account1',
+      category: 'cat1',
+    });
+  }
 
   await sheet.waitOnSpreadsheet();
 }

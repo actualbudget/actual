@@ -120,6 +120,13 @@ export function EnvelopeBudgetSummaryModal({
               void onBudgetAction(month, 'hold', { amount });
               dispatch(collapseModals({ rootModalName: 'hold-buffer' }));
             },
+            onAutoHold: (months, allowNegativeToBudget) => {
+              void onBudgetAction(month, 'auto-hold', {
+                months,
+                allowNegativeToBudget,
+              });
+              dispatch(collapseModals({ rootModalName: 'hold-buffer' }));
+            },
           },
         },
       }),

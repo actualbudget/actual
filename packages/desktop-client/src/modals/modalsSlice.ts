@@ -524,6 +524,7 @@ export type Modal =
       options: {
         month: string;
         onSubmit: (amount: number) => void;
+        onAutoHold: (months: number, allowNegativeToBudget: boolean) => void;
       };
     }
   | {

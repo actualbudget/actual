@@ -584,6 +584,14 @@ type ApplyBudgetActionPayload =
       args?: never;
     }
   | {
+      type: 'auto-hold';
+      month: string;
+      args: {
+        months: number;
+        allowNegativeToBudget?: boolean;
+      };
+    }
+  | {
       type: 'cover-overspending';
       month: string;
       args: {
@@ -733,6 +741,13 @@ export function useBudgetActions() {
           return null;
         case 'reset-hold':
           await send('budget/reset-hold', { month });
+          return null;
+        case 'auto-hold':
+          await send('budget/auto-hold-for-next-month', {
+            month,
+            months: args.months,
+            allowNegativeToBudget: args.allowNegativeToBudget,
+          });
           return null;
         case 'cover-overspending':
           await send('budget/cover-overspending', {

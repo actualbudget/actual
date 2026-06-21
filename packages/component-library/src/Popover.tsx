@@ -14,24 +14,39 @@ export const Popover = ({
   ...props
 }: PopoverProps) => {
   const ref = useRef<HTMLElement>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { isNonModal, isOpen, onOpenChange } = props;
 
   const handleFocus = useCallback(
     (e: FocusEvent) => {
-      if (!ref.current?.contains(e.relatedTarget as Node)) {
-        props.onOpenChange?.(false);
+      if (ref.current?.contains(e.relatedTarget as Node | null)) {
+        return;
       }
+
+      closeTimeoutRef.current = setTimeout(() => {
+        if (!ref.current?.contains(document.activeElement)) {
+          onOpenChange?.(false);
+        }
+      }, 0);
     },
-    [props],
+    [onOpenChange],
   );
 
   useEffect(() => {
-    if (!props.isNonModal) return;
-    if (props.isOpen) {
+    if (!isNonModal) return;
+    if (isOpen) {
       ref.current?.addEventListener('focusout', handleFocus);
     } else {
       ref.current?.removeEventListener('focusout', handleFocus);
     }
-  }, [handleFocus, props.isNonModal, props.isOpen]);
+
+    return () => {
+      ref.current?.removeEventListener('focusout', handleFocus);
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, [handleFocus, isNonModal, isOpen]);
 
   return (
     <ReactAriaPopover
