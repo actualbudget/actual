@@ -18,6 +18,7 @@ __metadata:
   dependencies:
     "@actual-app/core": "workspace:*"
     "@actual-app/crdt": "workspace:*"
+    "@actual-app/vite-plugin-peggy": "workspace:*"
     "@playwright/test": "npm:1.59.1"
     "@typescript/native-preview": "npm:beta"
     better-sqlite3: "npm:^12.10.0"
@@ -27,7 +28,6 @@ __metadata:
     uuid: "npm:^14.0.0"
     vite: "npm:^8.0.16"
     vite-plugin-node-polyfills: "npm:^0.28.0"
-    vite-plugin-peggy-loader: "npm:^2.0.1"
     vitest: "npm:^4.1.8"
   languageName: unknown
   linkType: soft
@@ -99,6 +99,7 @@ __metadata:
   resolution: "@actual-app/core@workspace:packages/loot-core"
   dependencies:
     "@actual-app/crdt": "workspace:*"
+    "@actual-app/vite-plugin-peggy": "workspace:*"
     "@jlongster/sql.js": "npm:^1.6.7"
     "@rschedule/core": "npm:^1.5.0"
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
@@ -131,7 +132,6 @@ __metadata:
     mockdate: "npm:^3.0.5"
     npm-run-all: "npm:^4.1.5"
     path-browserify: "npm:^1.0.1"
-    peggy: "npm:5.1.0"
     promise-retry: "npm:^2.0.1"
     rollup-plugin-visualizer: "npm:^7.0.1"
     stream-browserify: "npm:^3.0.0"
@@ -143,7 +143,6 @@ __metadata:
     uuid: "npm:^14.0.0"
     vite: "npm:^8.0.16"
     vite-plugin-node-polyfills: "npm:^0.28.0"
-    vite-plugin-peggy-loader: "npm:^2.0.1"
     vitest: "npm:^4.1.8"
     xml2js: "npm:^0.6.2"
     yargs: "npm:^18.0.0"
@@ -206,6 +205,16 @@ __metadata:
     winston: "npm:^3.19.0"
   bin:
     actual-server: ./build/bin/actual-server.js
+  languageName: unknown
+  linkType: soft
+
+"@actual-app/vite-plugin-peggy@workspace:*, @actual-app/vite-plugin-peggy@workspace:packages/vite-plugin-peggy":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/vite-plugin-peggy@workspace:packages/vite-plugin-peggy"
+  dependencies:
+    peggy: "npm:5.1.0"
+  peerDependencies:
+    vite: "*"
   languageName: unknown
   linkType: soft
 
@@ -26858,15 +26867,6 @@ __metadata:
   peerDependencies:
     vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
   checksum: 10/5cd0747888748f91041ddc90a8bafa8b6e7a8539ee45a547319e4b1c97fb08c473e449cc31563f6f4e9c405cc93830be183a67dfe367abdbbbb0e8ce4b850985
-  languageName: node
-  linkType: hard
-
-"vite-plugin-peggy-loader@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "vite-plugin-peggy-loader@npm:2.0.1"
-  peerDependencies:
-    peggy: ^1.2.0 || ^3.0.2 || ^4.0.0
-  checksum: 10/55460efe15fe84774907a0f46b4351bc3d5e672c32575af3142aca27b99b64c45727e3159bfb191fdc9b890fba4a08eb306e4a8ce4823b1cfcfaa4bf79fa62ff
   languageName: node
   linkType: hard
 

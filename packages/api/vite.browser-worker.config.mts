@@ -1,8 +1,8 @@
 import path from 'path';
 
+import { peggyLoader } from '@actual-app/vite-plugin-peggy';
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
-import peggyLoader from 'vite-plugin-peggy-loader';
 
 const distDir = path.resolve(__dirname, 'dist');
 
