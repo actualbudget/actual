@@ -1,8 +1,24 @@
 {
   "name": "@actual-app/api",
   "version": "26.6.0",
-  "description": "An API for Actual",
+  "description": "An API for Actual, a local-first personal finance tool",
+  "keywords": [
+    "actual",
+    "actual-budget",
+    "budget",
+    "budgeting",
+    "personal-finance",
+    "finance",
+    "money",
+    "envelope-budgeting",
+    "api"
+  ],
+  "homepage": "https://actualbudget.org/docs/api/",
+  "bugs": {
+    "url": "https://github.com/actualbudget/actual/issues"
+  },
   "license": "MIT",
+  "author": "Actual Budget",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/actualbudget/actual.git",
