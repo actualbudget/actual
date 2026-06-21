@@ -3,4 +3,4 @@ category: Bugfix
 authors: [MatissJanis]
 ---
 
-api: fix the browser build so it works in production bundles (Vite, webpack, etc.) with no extra configuration.
+api: the browser version of the API now works out of the box in any web app, with no extra setup.

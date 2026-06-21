@@ -15,7 +15,7 @@ import {
   wasmBase64,
 } from 'virtual:actual-embedded-assets';
 
-function base64ToBytes(b64: string): Uint8Array {
+function base64ToBytes(b64: string): Uint8Array<ArrayBuffer> {
   const bin = atob(b64);
   const bytes = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
@@ -50,7 +50,7 @@ self.fetch = function patchedFetch(
     if (rel.startsWith('data/')) {
       const b64 = dataFiles[rel.slice('data/'.length)];
       if (b64 != null) {
-        return Promise.resolve(new Response(base64ToBytes(b64) as BodyInit));
+        return Promise.resolve(new Response(base64ToBytes(b64)));
       }
     }
     return Promise.resolve(new Response(null, { status: 404 }));
