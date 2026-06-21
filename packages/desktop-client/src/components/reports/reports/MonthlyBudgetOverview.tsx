@@ -371,7 +371,7 @@ function MonthlyBudgetOverviewInternal({
               ) : (
                 <View style={{ gap: 24 }}>
                   {isNarrowWidth && (
-                    <MonthlyBudgetOverviewSummary data={filteredData} compact />
+                    <MonthlyBudgetOverviewSummary data={filteredData} />
                   )}
 
                   {!hasCategories ? (

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -13,7 +13,6 @@ import { ReportCardName } from '#components/reports/ReportCardName';
 import { MonthlyBudgetOverviewSummary } from '#components/reports/reports/MonthlyBudgetOverviewSummary';
 import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useAutomationOverview } from '#hooks/useAutomationOverview';
-import { useLocale } from '#hooks/useLocale';
 
 import {
   getMonthlyBudgetOverviewMonth,
@@ -56,7 +55,6 @@ export function MonthlyBudgetOverviewCard({
   onCopy,
 }: MonthlyBudgetOverviewCardProps) {
   const { t } = useTranslation();
-  const locale = useLocale();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
@@ -64,11 +62,6 @@ export function MonthlyBudgetOverviewCard({
 
   const month = getCardMonth(meta);
   const { data, loading } = useAutomationOverview(month, month);
-
-  const periodLabel = useMemo(
-    () => monthUtils.format(month, 'MMMM yyyy', locale),
-    [month, locale],
-  );
 
   const hasCategories =
     data != null && data.groups.some(group => group.categories.length > 0);
@@ -116,23 +109,21 @@ export function MonthlyBudgetOverviewCard({
           }}
           onClose={() => setNameMenuOpen(false)}
         />
-        <Block
-          style={{
-            marginTop: 8,
-            marginBottom: 16,
-            color: theme.pageTextSubdued,
-          }}
-        >
-          {periodLabel}
-        </Block>
         {loading || !data ? (
           <LoadingIndicator />
         ) : !hasCategories ? (
-          <Block style={{ color: theme.pageTextSubdued }}>
+          <Block
+            style={{
+              marginTop: 16,
+              color: theme.pageTextSubdued,
+            }}
+          >
             <Trans>No categories have budget automations.</Trans>
           </Block>
         ) : (
-          <MonthlyBudgetOverviewSummary data={data} compact />
+          <View style={{ marginTop: 16 }}>
+            <MonthlyBudgetOverviewSummary data={data} />
+          </View>
         )}
       </View>
     </ReportCard>

@@ -16,16 +16,13 @@ import { useLocale } from '#hooks/useLocale';
 
 type MonthlyBudgetOverviewSummaryProps = {
   data: AutomationOverview;
-  compact?: boolean;
 };
 
 export function MonthlyBudgetOverviewSummary({
   data,
-  compact = false,
 }: MonthlyBudgetOverviewSummaryProps) {
   const format = useFormat();
   const locale = useLocale();
-  const showAverageNeeded = data.monthCount > 1;
   const { totals: amounts } = data;
 
   const renderAmount = (
@@ -41,35 +38,6 @@ export function MonthlyBudgetOverviewSummary({
       <PrivacyFilter>{format(value, 'financial')}</PrivacyFilter>
     </FinancialText>
   );
-
-  if (compact) {
-    return (
-      <View style={{ gap: 8 }}>
-        <AlignedText
-          style={{ minWidth: 180 }}
-          left={
-            <Block>
-              <Trans>Total needed</Trans>
-            </Block>
-          }
-          right={renderAmount(amounts.needed, { emphasize: true })}
-        />
-        <AlignedText
-          style={{ minWidth: 180 }}
-          left={
-            <Block>
-              <Trans>Still needed</Trans>
-            </Block>
-          }
-          right={renderAmount(amounts.remaining, {
-            emphasize: true,
-            errorColor:
-              amounts.remaining > 0 ? theme.errorText : theme.noticeTextLight,
-          })}
-        />
-      </View>
-    );
-  }
 
   return (
     <View style={{ flexDirection: 'column', marginBottom: 10 }}>
@@ -93,6 +61,16 @@ export function MonthlyBudgetOverviewSummary({
           {data.startMonth !== data.endMonth &&
             ` – ${monthUtils.format(data.endMonth, 'MMMM yyyy', locale)}`}
         </Text>
+        <Text
+          style={{
+            ...styles.mediumText,
+            alignItems: 'center',
+            marginTop: 8,
+            fontWeight: 600,
+          }}
+        >
+          <Trans>Goal Automation Summary</Trans>
+        </Text>
       </View>
       <View
         style={{
@@ -111,7 +89,7 @@ export function MonthlyBudgetOverviewSummary({
             fontWeight: 400,
           }}
         >
-          <Trans>TOTAL NEEDED</Trans>
+          <Trans>TOTAL PROJECTED</Trans>
         </Text>
         <FinancialText
           style={{
@@ -127,43 +105,6 @@ export function MonthlyBudgetOverviewSummary({
           <Trans>For this time period</Trans>
         </Text>
       </View>
-      {showAverageNeeded && amounts.averageNeeded != null && (
-        <View
-          style={{
-            backgroundColor: theme.pageBackground,
-            padding: 15,
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: 10,
-          }}
-        >
-          <Text
-            style={{
-              ...styles.mediumText,
-              alignItems: 'center',
-              marginBottom: 2,
-              fontWeight: 400,
-            }}
-          >
-            <Trans>AVERAGE NEEDED</Trans>
-          </Text>
-          <FinancialText
-            style={{
-              ...styles.veryLargeText,
-              alignItems: 'center',
-              marginBottom: 2,
-              fontWeight: 800,
-            }}
-          >
-            <PrivacyFilter>
-              {format(amounts.averageNeeded, 'financial')}
-            </PrivacyFilter>
-          </FinancialText>
-          <Text style={{ fontWeight: 600 }}>
-            <Trans>Per month</Trans>
-          </Text>
-        </View>
-      )}
       <View
         style={{
           backgroundColor: theme.pageBackground,
@@ -181,7 +122,7 @@ export function MonthlyBudgetOverviewSummary({
             fontWeight: 400,
           }}
         >
-          <Trans>STILL NEEDED</Trans>
+          <Trans>CURRENT GOAL SHORTFALL</Trans>
         </Text>
         <FinancialText
           style={{
@@ -213,7 +154,7 @@ export function MonthlyBudgetOverviewSummary({
         <AlignedText
           left={
             <Block>
-              <Trans>Total budgeted</Trans>
+              <Trans>Total budgeted toward goals</Trans>
             </Block>
           }
           right={renderAmount(amounts.budgeted, { emphasize: true })}

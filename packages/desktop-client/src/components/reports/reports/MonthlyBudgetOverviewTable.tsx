@@ -43,12 +43,10 @@ function AmountCell({
 
 function AmountColumns({
   amounts,
-  showAverageNeeded,
   emphasize = false,
   highlightRemaining = false,
 }: {
   amounts: AutomationOverviewAmounts;
-  showAverageNeeded: boolean;
   emphasize?: boolean;
   highlightRemaining?: boolean;
 }) {
@@ -60,14 +58,6 @@ function AmountColumns({
       <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
         <AmountCell amount={amounts.needed} emphasize={emphasize} />
       </View>
-      {showAverageNeeded && (
-        <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-          <AmountCell
-            amount={amounts.averageNeeded ?? 0}
-            emphasize={emphasize}
-          />
-        </View>
-      )}
       <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
         <AmountCell amount={amounts.budgeted} emphasize={emphasize} />
       </View>
@@ -89,7 +79,6 @@ function AmountColumns({
 export function MonthlyBudgetOverviewTable({
   data,
 }: MonthlyBudgetOverviewTableProps) {
-  const showAverageNeeded = data.monthCount > 1;
   const headerStyle = {
     borderBottom: `1px solid ${theme.tableBorder}`,
     paddingBottom: 8,
@@ -113,18 +102,13 @@ export function MonthlyBudgetOverviewTable({
           <Trans>Carried over</Trans>
         </Block>
         <Block style={{ width: COLUMN_WIDTH, textAlign: 'right' }}>
-          <Trans>Needed</Trans>
+          <Trans>Projected</Trans>
         </Block>
-        {showAverageNeeded && (
-          <Block style={{ width: COLUMN_WIDTH, textAlign: 'right' }}>
-            <Trans>Avg needed</Trans>
-          </Block>
-        )}
         <Block style={{ width: COLUMN_WIDTH, textAlign: 'right' }}>
           <Trans>Budgeted</Trans>
         </Block>
         <Block style={{ width: COLUMN_WIDTH, textAlign: 'right' }}>
-          <Trans>Still needed</Trans>
+          <Trans>Goal Shortfall</Trans>
         </Block>
       </View>
 
@@ -140,22 +124,14 @@ export function MonthlyBudgetOverviewTable({
             <Block style={{ flex: 1, fontWeight: 600 }}>
               {group.groupName}
             </Block>
-            <AmountColumns
-              amounts={group.subtotal}
-              showAverageNeeded={showAverageNeeded}
-              emphasize
-            />
+            <AmountColumns amounts={group.subtotal} emphasize />
           </View>
           {group.categories.map(category => (
             <View key={category.categoryId} style={rowStyle}>
               <Block style={{ flex: 1, paddingLeft: 16 }}>
                 {category.categoryName}
               </Block>
-              <AmountColumns
-                amounts={category}
-                showAverageNeeded={showAverageNeeded}
-                highlightRemaining
-              />
+              <AmountColumns amounts={category} highlightRemaining />
             </View>
           ))}
         </View>
