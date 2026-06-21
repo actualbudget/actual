@@ -229,6 +229,10 @@ export async function initApp(isDev, socketName) {
 type BaseInitConfig = {
   dataDir?: string;
   verbose?: boolean;
+  // Browser build only: base URL the worker fetches its wasm and runtime data
+  // files from. Defaults to the location of the built `browser.js`. Ignored by
+  // the Node build.
+  assetsBaseUrl?: string;
 };
 
 type ServerInitConfig = BaseInitConfig & {

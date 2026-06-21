@@ -108,6 +108,116 @@ await api.shutdown();
 
 Behind the scenes, `init` starts a Web Worker running the same budget engine the Actual web app uses, backed by SQLite compiled to WebAssembly. Your budget data is stored in the browser's IndexedDB and stays on the device.
 
+### Cross-origin isolation
+
+The worker runs SQLite through [`absurd-sql`](https://github.com/jlongster/absurd-sql), which relies on `SharedArrayBuffer`. That global only exists when the document is [cross-origin isolated](https://developer.mozilla.org/en-US/docs/Web/API/Window/crossOriginIsolated), so the server hosting your app **must** send these two response headers:
+
+```
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+Once the document is isolated, any cross-origin resource it embeds needs a matching `Cross-Origin-Resource-Policy` (or CORP/CORS) header of its own. If the headers are missing, `init` throws an error telling you exactly which headers to add instead of failing later with a cryptic `SharedArrayBuffer is not defined`.
+
+### Bundler setup
+
+The package ships a prebuilt worker (`worker.js`), the SQLite WebAssembly (`sql-wasm.wasm`), and a small set of runtime data files. The worker resolves all of these at runtime relative to the built `browser.js`, so two things are required of your bundler.
+
+First, **do not pre-bundle the package** — that rewrites the worker/wasm URLs. In Vite:
+
+```ts
+optimizeDeps: {
+  exclude: ['@actual-app/api'];
+}
+```
+
+Second, in a production build the worker and its assets are referenced by runtime-computed URLs that bundlers can't see, so they must be **copied next to your output** and served same-origin. The Vite config below handles the headers (dev and preview) and copies the assets on build:
+
+```ts
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
+
+import { defineConfig } from 'vite';
+import type { Plugin } from 'vite';
+
+const require = createRequire(import.meta.url);
+// `@actual-app/api` blocks deep subpaths, so resolve the entry and read the
+// prebuilt assets from the same `dist` directory.
+const apiDistDir = dirname(require.resolve('@actual-app/api'));
+
+function setIsolationHeaders(res: {
+  setHeader: (key: string, value: string) => void;
+}) {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+}
+
+const crossOriginIsolation: Plugin = {
+  name: 'cross-origin-isolation',
+  configureServer(server) {
+    server.middlewares.use((_req, res, next) => {
+      setIsolationHeaders(res);
+      next();
+    });
+  },
+  configurePreviewServer(server) {
+    server.middlewares.use((_req, res, next) => {
+      setIsolationHeaders(res);
+      next();
+    });
+  },
+};
+
+const emitActualAssets: Plugin = {
+  name: 'emit-actual-assets',
+  apply: 'build',
+  generateBundle() {
+    const emit = (relPath: string) => {
+      this.emitFile({
+        type: 'asset',
+        fileName: `assets/${relPath}`,
+        source: readFileSync(join(apiDistDir, relPath)),
+      });
+    };
+    const walk = (rel: string) => {
+      for (const name of readdirSync(join(apiDistDir, rel))) {
+        const childRel = `${rel}/${name}`;
+        if (statSync(join(apiDistDir, childRel)).isDirectory()) {
+          walk(childRel);
+        } else {
+          emit(childRel);
+        }
+      }
+    };
+
+    emit('worker.js');
+    emit('sql-wasm.wasm');
+    emit('data-file-index.txt');
+    walk('data');
+  },
+};
+
+export default defineConfig({
+  optimizeDeps: { exclude: ['@actual-app/api'] },
+  plugins: [crossOriginIsolation, emitActualAssets],
+});
+```
+
+:::note
+
+This emits the assets under `assets/`, next to the entry chunk Vite generates there, which is where `browser.js` looks for them. If your bundler places the entry chunk elsewhere, copy the assets next to that chunk instead. The same config is exercised by the package's bundled-build end-to-end test, so it stays in sync with the build.
+
+:::
+
+By default the wasm and data files are fetched from the directory `browser.js` is served from. If you host them somewhere else, point the worker at them with the `assetsBaseUrl` option:
+
+```js
+await api.init({ dataDir: '/documents', assetsBaseUrl: '/actual-assets/' });
+```
+
+`assetsBaseUrl` only governs the wasm and data files. `worker.js` is always loaded next to `browser.js`, because it is spawned before any configuration is read.
+
 ## Writing Data Importers
 
 If you are using another app, like YNAB or Mint, you might want to migrate your data into Actual. Right now, Actual officially supports [importing YNAB4 data](../migration/ynab4.md) and [importing nYNAB data](../migration/nynab.mdx) (and it works very well). But if you want to import all of your data into Actual, you can write a custom importer.
