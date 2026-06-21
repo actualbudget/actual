@@ -33,17 +33,18 @@ function dataUrlToBytes(dataUrl: string): Uint8Array<ArrayBuffer> {
 // `data/<wireName>`. JS migrations get a `.data` suffix so consumer bundlers
 // don't import-analyze them (loot-core strips it when writing into the worker
 // FS). Build that wire format from the embedded sources.
-const binData: Record<string, Uint8Array<ArrayBuffer>> = {
+const dataFiles: Record<string, Uint8Array<ArrayBuffer> | string> = {
   'default-db.sqlite': dataUrlToBytes(defaultDbDataUrl),
 };
-const textData: Record<string, string> = {};
+const migrationNames: string[] = [];
 for (const [filePath, contents] of Object.entries(migrationSources)) {
   const name = filePath.slice(filePath.lastIndexOf('/') + 1);
-  const wireName = name.endsWith('.js') ? `${name}.data` : name;
-  textData[`migrations/${wireName}`] = contents;
+  const wireName = `migrations/${name.endsWith('.js') ? `${name}.data` : name}`;
+  dataFiles[wireName] = contents;
+  migrationNames.push(wireName);
 }
 const dataIndex =
-  ['default-db.sqlite', ...Object.keys(textData).sort()].join('\n') + '\n';
+  ['default-db.sqlite', ...migrationNames.sort()].join('\n') + '\n';
 
 setWasmBinary(dataUrlToBytes(wasmDataUrl));
 
@@ -71,12 +72,9 @@ self.fetch = function patchedFetch(
       return Promise.resolve(new Response(dataIndex));
     }
     if (rel.startsWith('data/')) {
-      const key = rel.slice('data/'.length);
-      if (key in binData) {
-        return Promise.resolve(new Response(binData[key]));
-      }
-      if (key in textData) {
-        return Promise.resolve(new Response(textData[key]));
+      const body = dataFiles[rel.slice('data/'.length)];
+      if (body != null) {
+        return Promise.resolve(new Response(body));
       }
     }
     return Promise.resolve(new Response(null, { status: 404 }));

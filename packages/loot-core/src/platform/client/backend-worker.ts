@@ -11,8 +11,7 @@ export async function startBackendWorker(
 ): Promise<void> {
   initBackend(worker);
   await connection.init(worker);
-  // Worker-local handler, not part of the shared Handlers union. The worker is
-  // self-contained (wasm + data embedded), so no asset base URL is needed.
+  // Worker-local handler, not part of the shared Handlers union.
   await (connection.send as (name: string, args?: unknown) => Promise<unknown>)(
     'api-browser/init',
     { config },
