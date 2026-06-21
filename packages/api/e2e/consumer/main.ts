@@ -4,7 +4,10 @@
 // global-setup.ts, exercising a consumer bundler processing dist/browser.js.
 import * as api from '@actual-app/api';
 
-const out = document.getElementById('out')!;
+const out = document.getElementById('out');
+if (out == null) {
+  throw new Error('Missing `#out` element in consumer fixture');
+}
 function report(state: 'ok' | 'error', detail: unknown) {
   out.textContent = JSON.stringify(detail);
   out.setAttribute('data-state', state);

@@ -19,8 +19,11 @@ export async function init(
   const blobUrl = URL.createObjectURL(
     new Blob([workerCode], { type: 'text/javascript' }),
   );
-  worker = new Worker(blobUrl);
-  URL.revokeObjectURL(blobUrl);
+  try {
+    worker = new Worker(blobUrl);
+  } finally {
+    URL.revokeObjectURL(blobUrl);
+  }
 
   try {
     await startBackendWorker(worker, config);
