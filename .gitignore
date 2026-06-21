@@ -18,7 +18,7 @@ node_modules
 packages/api/app/bundle.api.js
 packages/api/app/stats.json
 packages/api/dist
-packages/api/e2e/consumer-dist
+packages/api/e2e/consumer/dist
 packages/api/@types
 packages/api/test-results
 packages/api/playwright-report

@@ -7,7 +7,7 @@ import { expect, test } from '@playwright/test';
 test('a consumer production build boots the worker and seeds a budget', async ({
   page,
 }) => {
-  await page.goto('/e2e/consumer-dist/index.html');
+  await page.goto('/e2e/consumer/dist/index.html');
   const out = page.locator('#out');
   await expect(out).toHaveAttribute('data-state', 'ok', { timeout: 60_000 });
   await expect(out).toContainText('Checking');
