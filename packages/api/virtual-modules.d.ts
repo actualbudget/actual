@@ -10,8 +10,8 @@ declare module 'virtual:actual-embedded-assets' {
   export const dataFiles: Record<string, string>;
 }
 
-// The built worker.js, inlined into browser.js (vite.browser.config.mts).
-declare module 'virtual:actual-worker-code' {
-  const workerCode: string;
-  export default workerCode;
+// Vite's inlined-worker import (`?worker&inline`): a Blob-URL Worker ctor.
+declare module '*?worker&inline' {
+  const workerConstructor: new () => Worker;
+  export default workerConstructor;
 }

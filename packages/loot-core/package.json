@@ -232,7 +232,7 @@
     "typescript-strict-plugin": "^2.4.4",
     "util": "^0.12.5",
     "vite": "^8.0.16",
-    "vite-plugin-node-polyfills": "^0.28.0",
+    "vite-plugin-node-polyfills": "patch:vite-plugin-node-polyfills@npm%3A0.28.0#~/.yarn/patches/vite-plugin-node-polyfills-npm-0.28.0-bac39616ee.patch",
     "vitest": "^4.1.8",
     "yargs": "^18.0.0"
   }

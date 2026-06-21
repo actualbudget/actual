@@ -1,40 +1,76 @@
-import fs from 'fs';
 import path from 'path';
 
+import { peggyLoader } from '@actual-app/vite-plugin-peggy';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
+
+import { collectEmbeddedAssets } from './scripts/embedded-assets.mjs';
 
 const distDir = path.resolve(__dirname, 'dist');
 
-// Inline the already-built worker (IIFE) into the facade as a string, so
-// index.browser.ts can spawn it from a Blob URL. This keeps consumer bundlers
-// from ever seeing a worker entry to re-bundle (the bug this build fixes). The
-// worker is built immediately before this config in the package build script.
-function inlineWorker(): Plugin {
-  const id = 'virtual:actual-worker-code';
+// Inline the wasm + default-filesystem data into the worker so the browser
+// build performs no PUBLIC_URL asset fetches and consumers serve no extra files.
+function embeddedAssets(): Plugin {
+  const id = 'virtual:actual-embedded-assets';
   const resolved = '\0' + id;
   return {
-    name: 'actual-inline-worker',
+    name: 'actual-embedded-assets',
     resolveId(source) {
       return source === id ? resolved : undefined;
     },
     load(thisId) {
       if (thisId !== resolved) return undefined;
-      const workerPath = path.join(distDir, 'worker.js');
-      if (!fs.existsSync(workerPath)) {
-        throw new Error(
-          `worker.js not found at ${workerPath}; build the worker (vite.browser-worker.config.mts) before browser.js`,
-        );
-      }
-      const code = fs.readFileSync(workerPath, 'utf8');
-      return `export default ${JSON.stringify(code)};`;
+      const { wasm, dataFiles, index } = collectEmbeddedAssets();
+      const filesB64 = Object.fromEntries(
+        Object.entries(dataFiles).map(([k, buf]) => [
+          k,
+          (buf as Buffer).toString('base64'),
+        ]),
+      );
+      return [
+        `export const wasmBase64 = ${JSON.stringify((wasm as Buffer).toString('base64'))};`,
+        `export const dataIndex = ${JSON.stringify(index)};`,
+        `export const dataFiles = ${JSON.stringify(filesB64)};`,
+      ].join('\n');
     },
   };
 }
 
-// Main-thread facade bundle — the backend never enters it.
+// Main-thread facade bundle. The worker (browser-worker.ts) is imported with
+// `?worker&inline`, so Vite builds it as an IIFE sub-bundle and inlines it as a
+// Blob URL inside browser.js — consumer bundlers never see a worker entry to
+// re-bundle. `nodePolyfills` sits at the top level so its node-stdlib aliases
+// and (via our patch) its global-shim injection reach the worker sub-build.
 export default defineConfig({
-  plugins: [inlineWorker()],
+  define: {
+    'process.env.NODE_ENV': JSON.stringify('production'),
+  },
+  plugins: [
+    nodePolyfills({
+      include: [
+        'process',
+        'buffer',
+        'stream',
+        'path',
+        'crypto',
+        'timers',
+        'util',
+        'zlib',
+        'fs',
+        'assert',
+      ],
+      globals: {
+        process: true,
+        Buffer: true,
+        global: true,
+      },
+    }),
+  ],
+  worker: {
+    format: 'iife',
+    plugins: () => [embeddedAssets(), peggyLoader()],
+  },
   build: {
     target: 'esnext',
     outDir: distDir,
