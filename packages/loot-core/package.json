@@ -202,7 +202,7 @@
     "mitt": "^3.0.1",
     "promise-retry": "^2.0.1",
     "ua-parser-js": "^2.0.10",
-    "uuid": "^14.0.0",
+    "uuid": "^14.0.1",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {

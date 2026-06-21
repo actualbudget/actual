@@ -205,7 +205,7 @@
     "sass": "^1.101.0",
     "typescript-strict-plugin": "^2.4.4",
     "usehooks-ts": "^3.1.1",
-    "uuid": "^14.0.0",
+    "uuid": "^14.0.1",
     "vite": "^8.0.16",
     "vite-plugin-pwa": "^1.3.0",
     "vitest": "^4.1.8"
