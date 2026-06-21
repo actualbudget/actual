@@ -32,10 +32,8 @@ function migrationFileNames() {
  * The newline-delimited manifest fetched from
  * `PUBLIC_URL + 'data-file-index.txt'`, listing every file under `data/`.
  */
-export function buildDataFileIndex() {
-  const migrations = migrationFileNames()
-    .map(name => `migrations/${name}`)
-    .sort();
+export function buildDataFileIndex(names = migrationFileNames()) {
+  const migrations = names.map(name => `migrations/${name}`).sort();
   return ['default-db.sqlite', ...migrations].join('\n') + '\n';
 }
 
@@ -44,10 +42,11 @@ export function buildDataFileIndex() {
  * string. `dataFiles` is keyed by the `data/<key>` name fetched at runtime.
  */
 export function collectEmbeddedAssets() {
+  const names = migrationFileNames();
   const dataFiles = {
     'default-db.sqlite': fs.readFileSync(defaultDbPath).toString('base64'),
   };
-  for (const name of migrationFileNames()) {
+  for (const name of names) {
     dataFiles[`migrations/${name}`] = fs
       .readFileSync(path.join(migrationsDir, name))
       .toString('base64');
@@ -55,6 +54,6 @@ export function collectEmbeddedAssets() {
   return {
     wasmBase64: fs.readFileSync(sqlWasmPath).toString('base64'),
     dataFiles,
-    index: buildDataFileIndex(),
+    index: buildDataFileIndex(names),
   };
 }
