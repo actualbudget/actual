@@ -101,7 +101,7 @@ jobs:
         run: yarn test
       - name: Report test results to Depot
         uses: depot/test-report-action@2ad5779840a9c63e884fa26f11d019768a27a941 # v1.0.1
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && github.event_name == 'push' }}
         with:
           path: |
             bin/test-results/junit*.xml

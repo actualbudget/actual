@@ -105,7 +105,7 @@ jobs:
     name: Report E2E results to Depot
     needs: functional
     runs-on: depot-ubuntu-latest
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && github.event_name == 'merge_group' }}
     permissions:
       contents: read
       id-token: write # Authenticate to Depot via GitHub OIDC for test reporting
@@ -157,7 +157,7 @@ jobs:
           overwrite: true
       - name: Report test results to Depot
         uses: depot/test-report-action@2ad5779840a9c63e884fa26f11d019768a27a941 # v1.0.1
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && github.event_name == 'merge_group' }}
         with:
           path: packages/desktop-electron/e2e/test-results/junit.xml
 
@@ -233,7 +233,7 @@ jobs:
           pattern: vrt-junit-*
       - name: Report test results to Depot
         uses: depot/test-report-action@2ad5779840a9c63e884fa26f11d019768a27a941 # v1.0.1
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && github.event_name == 'merge_group' }}
         with:
           path: vrt-junit
       - name: Merge reports
