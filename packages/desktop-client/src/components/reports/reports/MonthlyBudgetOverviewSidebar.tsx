@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import i18n from 'i18next';
 import { Trans } from 'react-i18next';
 
@@ -44,12 +43,8 @@ export function MonthlyBudgetOverviewSidebar({
 }: MonthlyBudgetOverviewSidebarProps) {
   const locale = useLocale();
 
-  const periodOptions = useMemo(
-    () =>
-      MONTHLY_BUDGET_OVERVIEW_PERIODS.map(
-        option => [option, getMonthlyBudgetOverviewPeriodLabel(option)] as const,
-      ),
-    [],
+  const periodOptions = MONTHLY_BUDGET_OVERVIEW_PERIODS.map(
+    option => [option, getMonthlyBudgetOverviewPeriodLabel(option)] as const,
   );
 
   return (

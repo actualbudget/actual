@@ -14,6 +14,8 @@ import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 
+import { MonthlyBudgetOverviewAmountCell } from './MonthlyBudgetOverviewAmountCell';
+
 type MonthlyBudgetOverviewSummaryProps = {
   data: AutomationOverview;
   compact?: boolean;
@@ -41,20 +43,6 @@ export function MonthlyBudgetOverviewSummary({
   const subtitleTextStyle = compact
     ? { fontSize: 13, fontWeight: 600 }
     : { ...styles.mediumText, fontWeight: 600 };
-
-  const renderAmount = (
-    value: number,
-    options?: { emphasize?: boolean; color?: string },
-  ) => (
-    <FinancialText
-      style={{
-        fontWeight: options?.emphasize ? 600 : undefined,
-        color: options?.color,
-      }}
-    >
-      <PrivacyFilter>{format(value, 'financial')}</PrivacyFilter>
-    </FinancialText>
-  );
 
   const summarySectionStyle = {
     backgroundColor: theme.pageBackground,
@@ -185,7 +173,12 @@ export function MonthlyBudgetOverviewSummary({
               <Trans>Total carried over</Trans>
             </Block>
           }
-          right={renderAmount(amounts.carriedOver, { emphasize: true })}
+          right={
+            <MonthlyBudgetOverviewAmountCell
+              amount={amounts.carriedOver}
+              emphasize
+            />
+          }
         />
         <AlignedText
           left={
@@ -193,7 +186,12 @@ export function MonthlyBudgetOverviewSummary({
               <Trans>Total budgeted toward goals</Trans>
             </Block>
           }
-          right={renderAmount(amounts.budgeted, { emphasize: true })}
+          right={
+            <MonthlyBudgetOverviewAmountCell
+              amount={amounts.budgeted}
+              emphasize
+            />
+          }
         />
       </View>
     </View>

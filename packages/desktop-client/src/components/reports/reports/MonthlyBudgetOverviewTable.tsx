@@ -8,10 +8,7 @@ import type {
   AutomationOverviewAmounts,
 } from '@actual-app/core/types/models';
 
-import { FinancialText } from '#components/FinancialText';
-import { PrivacyFilter } from '#components/PrivacyFilter';
-import { useFormat } from '#hooks/useFormat';
-
+import { MonthlyBudgetOverviewAmountCell } from './MonthlyBudgetOverviewAmountCell';
 import {
   getFundingStatusAmount,
   getFundingStatusColor,
@@ -22,29 +19,6 @@ const COLUMN_WIDTH = 120;
 type MonthlyBudgetOverviewTableProps = {
   data: AutomationOverview;
 };
-
-function AmountCell({
-  amount,
-  emphasize = false,
-  color,
-}: {
-  amount: number;
-  emphasize?: boolean;
-  color?: string;
-}) {
-  const format = useFormat();
-
-  return (
-    <FinancialText
-      style={{
-        fontWeight: emphasize ? 600 : undefined,
-        color,
-      }}
-    >
-      <PrivacyFilter>{format(amount, 'financial')}</PrivacyFilter>
-    </FinancialText>
-  );
-}
 
 function FundingStatusCell({
   amounts,
@@ -60,7 +34,7 @@ function FundingStatusCell({
 
   return (
     <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-      <AmountCell amount={amount} emphasize={emphasize} color={color} />
+      <MonthlyBudgetOverviewAmountCell amount={amount} emphasize={emphasize} color={color} />
     </View>
   );
 }
@@ -77,13 +51,13 @@ function AmountColumns({
   return (
     <>
       <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-        <AmountCell amount={amounts.carriedOver} emphasize={emphasize} />
+        <MonthlyBudgetOverviewAmountCell amount={amounts.carriedOver} emphasize={emphasize} />
       </View>
       <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-        <AmountCell amount={amounts.needed} emphasize={emphasize} />
+        <MonthlyBudgetOverviewAmountCell amount={amounts.needed} emphasize={emphasize} />
       </View>
       <View style={{ width: COLUMN_WIDTH, alignItems: 'flex-end' }}>
-        <AmountCell amount={amounts.budgeted} emphasize={emphasize} />
+        <MonthlyBudgetOverviewAmountCell amount={amounts.budgeted} emphasize={emphasize} />
       </View>
       <FundingStatusCell
         amounts={amounts}

@@ -50,19 +50,19 @@ import {
 function getInitialMonth(widget?: MonthlyBudgetOverviewWidget) {
   const currentMonth = monthUtils.currentMonth();
 
+  if (
+    widget?.meta?.period &&
+    MONTHLY_BUDGET_OVERVIEW_PERIODS.includes(widget.meta.period)
+  ) {
+    return getMonthlyBudgetOverviewMonth(widget.meta.period);
+  }
+
   if (widget?.meta?.month) {
     return widget.meta.month;
   }
 
   if (widget?.meta?.startMonth) {
     return widget.meta.startMonth;
-  }
-
-  if (
-    widget?.meta?.period &&
-    MONTHLY_BUDGET_OVERVIEW_PERIODS.includes(widget.meta.period)
-  ) {
-    return getMonthlyBudgetOverviewMonth(widget.meta.period);
   }
 
   return currentMonth;
@@ -150,7 +150,7 @@ function MonthlyBudgetOverviewInternal({
       return;
     }
 
-    if (widget?.meta?.categoryIds?.length) {
+    if (widget?.meta?.categoryIds !== undefined) {
       setSelectedCategories(
         categories.list.filter(category =>
           widget.meta?.categoryIds?.includes(category.id),
@@ -164,10 +164,10 @@ function MonthlyBudgetOverviewInternal({
     );
   }, [categories.list, widget?.meta?.categoryIds]);
 
-  const { data, loading } = useAutomationOverview(month, month);
+  const { data, loading, error } = useAutomationOverview(month, month);
 
   const filteredData = useMemo(() => {
-    if (!data || selectedCategories.length === 0) {
+    if (!data) {
       return data;
     }
 
@@ -407,7 +407,15 @@ function MonthlyBudgetOverviewInternal({
                 overflowY: 'auto',
               }}
             >
-              {loading || !filteredData ? (
+              {loading ? (
+                <LoadingIndicator />
+              ) : error ? (
+                <Block style={{ color: theme.errorText }}>
+                  {error.message || (
+                    <Trans>Failed to load automation overview</Trans>
+                  )}
+                </Block>
+              ) : !filteredData ? (
                 <LoadingIndicator />
               ) : (
                 <View style={{ gap: 24 }}>
@@ -438,7 +446,7 @@ function MonthlyBudgetOverviewInternal({
                 </View>
               )}
             </View>
-            {!isNarrowWidth && filteredData && !loading && (
+            {!isNarrowWidth && filteredData && !loading && !error && (
               <View style={{ padding: 10, minWidth: 300 }}>
                 <MonthlyBudgetOverviewSummary data={filteredData} />
               </View>

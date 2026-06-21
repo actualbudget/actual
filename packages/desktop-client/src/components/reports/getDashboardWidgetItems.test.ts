@@ -33,6 +33,36 @@ describe('getDashboardWidgetItems', () => {
     expect(getNames(enabled)).toContain('balance-forecast-card');
   });
 
+  it('includes the monthly budget overview card only when the flag is enabled', () => {
+    const disabled = getDashboardWidgetItems({
+      t: value => value,
+      customReports: [],
+      formulaMode: false,
+      crossoverReportEnabled: false,
+      budgetAnalysisReportEnabled: false,
+      monthlyBudgetOverviewReportEnabled: false,
+      balanceForecastReportEnabled: false,
+    });
+
+    const enabled = getDashboardWidgetItems({
+      t: value => value,
+      customReports: [],
+      formulaMode: false,
+      crossoverReportEnabled: false,
+      budgetAnalysisReportEnabled: false,
+      monthlyBudgetOverviewReportEnabled: true,
+      balanceForecastReportEnabled: false,
+    });
+
+    const enabledNames = getNames(enabled);
+
+    expect(getNames(disabled)).not.toContain('monthly-budget-overview-card');
+    expect(enabledNames).toContain('monthly-budget-overview-card');
+    expect(enabledNames.indexOf('monthly-budget-overview-card')).toBeLessThan(
+      enabledNames.indexOf('markdown-card'),
+    );
+  });
+
   it('keeps custom report entries after a divider', () => {
     const items = getDashboardWidgetItems({
       t: value => value,

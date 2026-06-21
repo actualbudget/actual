@@ -32,16 +32,16 @@ type MonthlyBudgetOverviewCardProps = {
 function getCardMonth(meta: MonthlyBudgetOverviewWidget['meta']) {
   const currentMonth = monthUtils.currentMonth();
 
+  if (meta?.period && MONTHLY_BUDGET_OVERVIEW_PERIODS.includes(meta.period)) {
+    return getMonthlyBudgetOverviewMonth(meta.period);
+  }
+
   if (meta?.month) {
     return meta.month;
   }
 
   if (meta?.startMonth) {
     return meta.startMonth;
-  }
-
-  if (meta?.period && MONTHLY_BUDGET_OVERVIEW_PERIODS.includes(meta.period)) {
-    return getMonthlyBudgetOverviewMonth(meta.period);
   }
 
   return currentMonth;
@@ -61,7 +61,7 @@ export function MonthlyBudgetOverviewCard({
     useDashboardWidgetCopyMenu(onCopy);
 
   const month = getCardMonth(meta);
-  const { data, loading } = useAutomationOverview(month, month);
+  const { data, loading, error } = useAutomationOverview(month, month);
 
   const hasCategories =
     data != null && data.groups.some(group => group.categories.length > 0);
@@ -109,7 +109,20 @@ export function MonthlyBudgetOverviewCard({
           }}
           onClose={() => setNameMenuOpen(false)}
         />
-        {loading || !data ? (
+        {loading ? (
+          <LoadingIndicator />
+        ) : error ? (
+          <Block
+            style={{
+              marginTop: 16,
+              color: theme.errorText,
+            }}
+          >
+            {error.message || (
+              <Trans>Failed to load automation overview</Trans>
+            )}
+          </Block>
+        ) : !data ? (
           <LoadingIndicator />
         ) : !hasCategories ? (
           <Block
