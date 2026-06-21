@@ -91,6 +91,22 @@ function getWidgetMinHeight(widget: DashboardWidgetEntity) {
     return 3;
   }
 
+  if (widget.type === 'monthly-budget-overview-card') {
+    return 4;
+  }
+
+  return 2;
+}
+
+function getDefaultWidgetHeight(type: DashboardWidgetEntity['type']) {
+  if (type === 'sankey-card') {
+    return 3;
+  }
+
+  if (type === 'monthly-budget-overview-card') {
+    return 4;
+  }
+
   return 2;
 }
 
@@ -303,7 +319,7 @@ export function Overview({ dashboard }: OverviewProps) {
       widget: {
         type,
         width: 4,
-        height: type === 'sankey-card' ? 3 : 2,
+        height: getDefaultWidgetHeight(type),
         meta,
         dashboard_page_id: dashboard.id,
       },
