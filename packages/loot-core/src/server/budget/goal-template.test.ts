@@ -74,6 +74,9 @@ function setupAqlForCategoryLookup(cat: CategoryEntity) {
         dependencies: [],
       };
     }
+    if (queryStr.includes('categories')) {
+      return { data: [cat], dependencies: [] };
+    }
     return { data: [], dependencies: [] };
   });
 }
@@ -216,98 +219,39 @@ describe('dryRunCategoryTemplate', () => {
     expect(result).toEqual({ budgeted: 0, perTemplate: [0] });
   });
 
-  it('competes with sibling remainder templates under wide scope', async () => {
-    // Remainder triggers wide scope: the engine must see the sibling so
-    // weights divide the leftover proportionally instead of giving it all
-    // to the target.
-    const sibling: CategoryEntity = {
-      id: 'cat-sibling',
-      name: 'Other',
-      group: 'g1',
-      is_income: false,
-    };
-    setupSheetMock({ 'to-budget': 20000 });
-    setupAqlForWideScope(
-      [
-        {
-          category: sibling,
-          templates: [
-            {
-              type: 'remainder',
-              weight: 1,
-              directive: 'template',
-              priority: null,
-            },
-          ],
-        },
-      ],
-      [category, sibling],
-    );
+  it('shows full demand even when To Budget cannot cover it', async () => {
+    // With priority>0 and a constrained To Budget, the engine clamps the
+    // actual budgeted amount to fit. The dry run should still report the
+    // templates' full demand so the user sees what the rules want, not
+    // what would survive clamping.
+    setupSheetMock({ 'to-budget': 5000 });
+    setupAqlForCategoryLookup(category);
 
     const templates: Template[] = [
       {
-        type: 'remainder',
-        weight: 3,
+        type: 'periodic',
+        amount: 1800,
+        period: { period: 'month', amount: 1 },
+        starting: '2026-05-01',
         directive: 'template',
-        priority: null,
+        priority: 150,
       },
-    ];
-    const result = await dryRunCategoryTemplate({
-      month: '2024-01',
-      categoryId: category.id,
-      templates,
-    });
-    expect(result.budgeted).toBe(15000);
-    expect(result.perTemplate).toEqual([15000]);
-  });
-
-  it('reads availBudget consumed by siblings for percentage of available funds', async () => {
-    // Sibling at priority 1 spends $50 of $200 first, leaving $150. The
-    // target's 50%-of-available-funds at priority 2 should then resolve to
-    // $75, not the $100 a narrow-scope run would produce.
-    const sibling: CategoryEntity = {
-      id: 'cat-sibling',
-      name: 'Other',
-      group: 'g1',
-      is_income: false,
-    };
-    setupSheetMock({ 'to-budget': 20000 });
-    setupAqlForWideScope(
-      [
-        {
-          category: sibling,
-          templates: [
-            {
-              type: 'periodic',
-              amount: 50,
-              period: { period: 'month', amount: 1 },
-              starting: '2024-01-01',
-              directive: 'template',
-              priority: 1,
-            },
-          ],
-        },
-      ],
-      [sibling, category],
-    );
-
-    const templates: Template[] = [
       {
-        type: 'percentage',
-        percent: 50,
-        previous: false,
-        category: 'available funds',
+        type: 'periodic',
+        amount: 3200,
+        period: { period: 'month', amount: 3 },
+        starting: '2026-06-01',
         directive: 'template',
-        priority: 2,
+        priority: 150,
       },
     ];
     const result = await dryRunCategoryTemplate({
-      month: '2024-01',
+      month: '2026-06',
       categoryId: category.id,
       templates,
     });
-    expect(result.budgeted).toBe(7500);
-    expect(result.perTemplate).toEqual([7500]);
+    expect(result.budgeted).toBe(500000);
+    expect(result.perTemplate).toEqual([180000, 320000]);
   });
 });
 

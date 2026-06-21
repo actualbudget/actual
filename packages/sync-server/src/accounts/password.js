@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 import { clearExpiredSessions, getAccountDb } from '#account-db';
 import { config } from '#load-config';
@@ -57,14 +58,14 @@ export function loginWithPassword(password) {
     ['password'],
   );
 
-  const token = sessionRow ? sessionRow.token : crypto.randomUUID();
+  const token = sessionRow ? sessionRow.token : uuidv4();
 
   const { totalOfUsers } = accountDb.first(
     'SELECT count(*) as totalOfUsers FROM users',
   );
   let userId = null;
   if (totalOfUsers === 0) {
-    userId = crypto.randomUUID();
+    userId = uuidv4();
     accountDb.mutate(
       'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, 1, ?)',
       [userId, '', '', 'ADMIN'],

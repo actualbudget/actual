@@ -33,6 +33,14 @@ import { LegendItem } from '#components/reports/LegendItem';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ModeButton } from '#components/reports/ModeButton';
 import { calculateSpendingReportTimeRange } from '#components/reports/reportRanges';
+import {
+  getSpendingAverageRangeLabel,
+  getSpendingAverageRangeOptions,
+  getSpendingAverageSummaryLabel,
+  normalizeSpendingAverageRange,
+  spendingAverageRangeFromKey,
+  spendingAverageRangeToKey,
+} from '#components/reports/spendingAverageRange';
 import { createSpendingSpreadsheet } from '#components/reports/spreadsheets/spending-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
@@ -94,6 +102,9 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   );
   const [compare, setCompare] = useState(initialCompare);
   const [compareTo, setCompareTo] = useState(initialCompareTo);
+  const [averageRange, setAverageRange] = useState(
+    normalizeSpendingAverageRange(widget?.meta?.averageRange),
+  );
   const [isLive, setIsLive] = useState(widget?.meta?.isLive ?? true);
 
   const [reportMode, setReportMode] = useState(initialReportMode);
@@ -144,9 +155,10 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         conditionsOp,
         compare,
         compareTo,
+        averageRange,
         budgetType,
       }),
-    [conditions, conditionsOp, compare, compareTo, budgetType],
+    [conditions, conditionsOp, compare, compareTo, averageRange, budgetType],
   );
 
   const data = useReport('default', getGraphData);
@@ -170,6 +182,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             conditionsOp,
             compare,
             compareTo,
+            averageRange,
             isLive,
             mode: reportMode,
           },
@@ -195,10 +208,8 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   }
 
   const showAverage =
-    data.intervalData[27].months[monthUtils.subMonths(compare, 3)] &&
-    Math.abs(
-      data.intervalData[27].months[monthUtils.subMonths(compare, 3)].cumulative,
-    ) > 0;
+    (data.averageRange?.months.length ?? 0) > 0 &&
+    data.intervalData.some(interval => Math.abs(interval.average) > 0);
 
   const todayDay =
     compare !== monthUtils.currentMonth()
@@ -213,6 +224,27 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const showCompare =
     compare === monthUtils.currentMonth() ||
     Math.abs(data.intervalData[27].compare) > 0;
+  const averageRangeLabel = getSpendingAverageRangeLabel(averageRange, t);
+  const averageRangeOptions = getSpendingAverageRangeOptions(t);
+  const comparisonValue =
+    reportMode === 'single-month'
+      ? compareTo
+      : reportMode === 'average'
+        ? spendingAverageRangeToKey(averageRange)
+        : 'label';
+  const comparisonOptions =
+    reportMode === 'single-month'
+      ? allIntervals.map(({ name, pretty }) => [name, pretty] as const)
+      : reportMode === 'average'
+        ? averageRangeOptions
+        : [['label', t('Budgeted')] as const];
+  const onComparisonChange = (value: string) => {
+    if (reportMode === 'single-month') {
+      setCompareTo(value);
+    } else if (reportMode === 'average') {
+      setAverageRange(spendingAverageRangeFromKey(value));
+    }
+  };
 
   const title = widget?.meta?.name || t('Monthly Spending');
   const onSaveWidgetName = async (newName: string) => {
@@ -304,21 +336,10 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 <Trans>to</Trans>
               </Text>
               <Select
-                value={reportMode === 'single-month' ? compareTo : 'label'}
-                onChange={setCompareTo}
-                options={
-                  reportMode === 'single-month'
-                    ? allIntervals.map(({ name, pretty }) => [name, pretty])
-                    : [
-                        [
-                          'label',
-                          reportMode === 'budget'
-                            ? t('Budgeted')
-                            : t('Average spent'),
-                        ],
-                      ]
-                }
-                disabled={reportMode !== 'single-month'}
+                value={comparisonValue}
+                onChange={onComparisonChange}
+                options={comparisonOptions}
+                disabled={reportMode === 'budget'}
                 style={{ width: 150 }}
                 popoverStyle={{ width: 150 }}
               />
@@ -493,7 +514,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         ? monthUtils.format(compareTo, 'MMM yyyy', locale)
                         : reportMode === 'budget'
                           ? t('Budgeted')
-                          : t('Average')
+                          : averageRangeLabel
                     }
                     style={{ padding: 0, paddingBottom: 10 }}
                   />
@@ -607,21 +628,12 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       style={{ marginBottom: 5, minWidth: 210 }}
                       left={
                         <Block>
-                          {compare === monthUtils.currentMonth()
-                            ? t('Spent Average {{monthYearFormatted}} MTD:', {
-                                monthYearFormatted: monthUtils.format(
-                                  compare,
-                                  'MMM yyyy',
-                                  locale,
-                                ),
-                              })
-                            : t('Spent Average {{monthYearFormatted}}:', {
-                                monthYearFormatted: monthUtils.format(
-                                  compare,
-                                  'MMM yyyy',
-                                  locale,
-                                ),
-                              })}
+                          {getSpendingAverageSummaryLabel({
+                            averageRange,
+                            isCurrentMonth:
+                              compare === monthUtils.currentMonth(),
+                            t,
+                          })}
                         </Block>
                       }
                       right={
@@ -660,7 +672,8 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                     </Paragraph>
                     <Paragraph>
                       They are both the average cumulative spending by day for
-                      the three months before the selected "compare" month.
+                      the selected average range before the selected "compare"
+                      month.
                     </Paragraph>
                   </Trans>
                 </View>

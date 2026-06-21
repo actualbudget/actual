@@ -12,13 +12,16 @@ export function registerCategoryGroupsCommand(program: Command) {
 
   groups
     .command('list')
-    .description('List all category groups')
-    .action(async () => {
+    .description('List category groups (excludes hidden by default)')
+    .option('--include-hidden', 'Include hidden groups and categories', false)
+    .action(async cmdOpts => {
       const opts = program.opts();
       await withConnection(
         opts,
         async () => {
-          const result = await api.getCategoryGroups();
+          const result = await api.getCategoryGroups(
+            cmdOpts.includeHidden ? {} : { hidden: false },
+          );
           printOutput(result, opts.format);
         },
         { mutates: false },

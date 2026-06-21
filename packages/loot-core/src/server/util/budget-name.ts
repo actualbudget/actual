@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import * as fs from '#platform/server/fs';
 import { handlers } from '#server/main';
 
@@ -37,10 +39,7 @@ export async function validateBudgetName(
 }
 
 export async function idFromBudgetName(name: string): Promise<string> {
-  let id =
-    name.replace(/( |[^A-Za-z0-9])/g, '-') +
-    '-' +
-    crypto.randomUUID().slice(0, 7);
+  let id = name.replace(/( |[^A-Za-z0-9])/g, '-') + '-' + uuidv4().slice(0, 7);
 
   // Make sure the id is unique. There's a chance one could already
   // exist (although very unlikely now that we append unique

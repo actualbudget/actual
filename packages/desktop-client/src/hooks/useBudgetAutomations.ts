@@ -5,9 +5,11 @@ import type { Template } from '@actual-app/core/types/models/templates';
 
 export function useBudgetAutomations({
   categoryId,
+  source,
   onLoaded,
 }: {
   categoryId: string;
+  source: 'notes' | 'ui';
   onLoaded: (automations: Record<string, Template[]>) => void;
 }) {
   const [automations, setAutomations] = useState<Record<string, Template[]>>(
@@ -20,8 +22,11 @@ export function useBudgetAutomations({
     async function fetchAutomations() {
       setLoading(true);
 
-      // Always import notes first; the query will automatically ignore UI-based categories.
-      await send('budget/store-note-templates');
+      // notes based #template/#goal lines may have been edited since they were
+      // last parsed into the DB. ui-managed categories own goal_def directly, so skip.
+      if (source !== 'ui') {
+        await send('budget/store-note-templates', [categoryId]);
+      }
 
       const result = await send('budget/get-category-automations', categoryId);
       if (mounted) {
@@ -34,7 +39,7 @@ export function useBudgetAutomations({
     return () => {
       mounted = false;
     };
-  }, [categoryId, onLoaded]);
+  }, [categoryId, source, onLoaded]);
 
   return { automations, loading };
 }

@@ -16,6 +16,8 @@ export const BUILT_IN_BANK_SYNC_PROVIDERS = [
 
 const SYNC_PROVIDER_KEYS = [
   ...BUILT_IN_BANK_SYNC_PROVIDERS,
+  'enableBanking',
+  'akahu',
   'unlinked',
 ] as const satisfies readonly SyncProviders[];
 
@@ -32,6 +34,8 @@ export function getSyncSourceReadable(
     goCardless: 'GoCardless',
     simpleFin: 'SimpleFIN',
     pluggyai: 'Pluggy.ai',
+    enableBanking: 'Enable Banking',
+    akahu: 'Akahu',
     unlinked: translate('Unlinked'),
   };
 }

@@ -9,6 +9,7 @@ import { BySaveAutomation } from './editor/BySaveAutomation';
 import { FixedAutomation } from './editor/FixedAutomation';
 import { HistoricalAutomation } from './editor/HistoricalAutomation';
 import { LimitAutomation } from './editor/LimitAutomation';
+import { LongTermGoalAutomation } from './editor/LongTermGoalAutomation';
 import { PercentageAutomation } from './editor/PercentageAutomation';
 import { RefillAutomation } from './editor/RefillAutomation';
 import { RemainderAutomation } from './editor/RemainderAutomation';
@@ -21,6 +22,7 @@ type ActiveEditorProps = {
   categories: CategoryGroupEntity[];
   hasLimitAutomation: boolean;
   onAddLimitAutomation: () => void;
+  defaultWeeklyStart: string;
 };
 
 export function ActiveEditor({
@@ -30,10 +32,17 @@ export function ActiveEditor({
   categories,
   hasLimitAutomation,
   onAddLimitAutomation,
+  defaultWeeklyStart,
 }: ActiveEditorProps) {
   switch (state.displayType) {
     case 'limit':
-      return <LimitAutomation template={state.template} dispatch={dispatch} />;
+      return (
+        <LimitAutomation
+          template={state.template}
+          dispatch={dispatch}
+          defaultWeeklyStart={defaultWeeklyStart}
+        />
+      );
     case 'refill':
       return (
         <RefillAutomation
@@ -68,6 +77,10 @@ export function ActiveEditor({
     case 'remainder':
       return (
         <RemainderAutomation template={state.template} dispatch={dispatch} />
+      );
+    case 'goal':
+      return (
+        <LongTermGoalAutomation template={state.template} dispatch={dispatch} />
       );
     default:
       state satisfies never;

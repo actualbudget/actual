@@ -5,6 +5,8 @@ import type { SyncResponseWithErrors } from '@actual-app/core/server/accounts/ap
 import type {
   AccountEntity,
   CategoryEntity,
+  SyncServerAkahuAccount,
+  SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
@@ -12,6 +14,7 @@ import type {
 } from '@actual-app/core/types/models';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
+import { v4 as uuidv4 } from 'uuid';
 
 import { sync } from '#app/appSlice';
 import { useAccounts } from '#hooks/useAccounts';
@@ -43,7 +46,7 @@ const dispatchErrorNotification = (
   dispatch(
     addNotification({
       notification: {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         type: 'error',
         message,
         pre: error ? error.message : undefined,
@@ -498,6 +501,88 @@ export function useLinkAccountPluggyAiMutation() {
   });
 }
 
+type LinkAccountAkahuPayload = LinkAccountBasePayload & {
+  externalAccount: SyncServerAkahuAccount;
+};
+
+export function useLinkAccountAkahuMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountAkahuPayload) => {
+      await send('akahu-accounts-link', {
+        externalAccount,
+        upgradingId,
+        offBudget,
+        startingDate,
+        startingBalance,
+      });
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateQueries(queryClient, payeeQueries.lists());
+    },
+    onError: error => {
+      console.error('Error linking account to Akahu:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error linking the account to Akahu. Please try again.'),
+        error,
+      );
+    },
+  });
+}
+
+type LinkAccountEnableBankingPayload = LinkAccountBasePayload & {
+  externalAccount: SyncServerEnableBankingAccount;
+};
+
+export function useLinkAccountEnableBankingMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountEnableBankingPayload) => {
+      await send('enablebanking-accounts-link', {
+        externalAccount,
+        upgradingId,
+        offBudget,
+        startingDate,
+        startingBalance,
+      });
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateQueries(queryClient, payeeQueries.lists());
+    },
+    onError: error => {
+      console.error('Error linking account to Enable Banking:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t(
+          'There was an error linking the account to Enable Banking. Please try again.',
+        ),
+        error,
+      );
+    },
+  });
+}
+
 type SyncAccountsPayload = {
   id?: AccountEntity['id'] | undefined;
 };
@@ -589,6 +674,8 @@ export function useSyncAccountsMutation() {
         accountIdsToSync = accountIdsToSync.filter(
           id => !simpleFinAccounts.find(sfa => sfa.id === id),
         );
+
+        dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
       }
 
       // Loop through the accounts and perform sync operation.. one by one

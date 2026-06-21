@@ -13,6 +13,9 @@ defaults:
 env:
   CI: true
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -22,11 +25,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-22.04
-          - windows-latest
-          - macos-latest
-    runs-on: ${{ matrix.os }}
+        include:
+          - os: ubuntu-22.04
+            runner: depot-ubuntu-22.04-4
+          - os: windows-latest
+            runner: depot-windows-2022
+          - os: macos-latest
+            runner: depot-macos-latest
+    runs-on: ${{ matrix.runner }}
+    environment: release
     if: github.event.repository.fork == false
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -44,6 +51,9 @@ jobs:
 
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
 
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
         name: Setup Flatpak dependencies

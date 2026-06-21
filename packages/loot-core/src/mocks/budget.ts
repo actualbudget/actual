@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { v4 as uuidv4 } from 'uuid';
 
 import { addTransactions } from '#server/accounts/sync';
 import { aqlQuery } from '#server/aql';
@@ -127,7 +128,7 @@ async function fillPrimaryChecking(
     );
 
     const transaction: TransactionEntity = {
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       amount,
       payee: payee.id,
       account: account.id,
@@ -144,21 +145,21 @@ async function fillPrimaryChecking(
           : pickRandom(expenseCategories).id;
       transaction.subtransactions = [
         {
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           date: currentDate,
           account: account.id,
           amount: a,
           category: pick(),
         },
         {
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           date: currentDate,
           account: account.id,
           amount: a,
           category: pick(),
         },
         {
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           date: currentDate,
           account: account.id,
           amount: transaction.amount - a * 2,
@@ -428,7 +429,7 @@ async function fillOther(handlers, account, payees, groups) {
 
   const transactions: TransactionEntity[] = [
     {
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       amount: integer(3250, 3700) * 100 * 100,
       payee: payees.find(p => p.name === 'Starting Balance').id,
       account: account.id,
@@ -443,7 +444,7 @@ async function fillOther(handlers, account, payees, groups) {
     const amount = integer(4, 9) * 100 * 100;
 
     transactions.push({
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       amount,
       payee: payee.id,
       account: account.id,

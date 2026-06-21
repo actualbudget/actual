@@ -273,6 +273,50 @@ describe('runSchedule', () => {
       defaultCurrency,
     );
     expect(result.to_budget).toBe(0);
+    expect(result.perScheduleMonthly.get('Insurance')).toBeUndefined();
+  });
+
+  it('only attributes contribution to schedules occurring this month when full: true is used', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'Schedule A',
+        full: true,
+        directive: 'template',
+        priority: 0,
+      } as const,
+      {
+        type: 'schedule',
+        name: 'Schedule B',
+        full: true,
+        directive: 'template',
+        priority: 0,
+      } as const,
+    ];
+    mockSchedulesByName({
+      'Schedule A': {
+        spec: { start: '2024-08-01', amount: -10000, frequency: 'monthly' },
+      },
+      'Schedule B': {
+        spec: { start: '2024-09-01', amount: -20000, frequency: 'monthly' },
+      },
+    });
+
+    const result = await runSchedule(
+      template_lines,
+      '2024-08-01',
+      0,
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.to_budget).toBe(10000);
+    expect(result.perScheduleMonthly.get('Schedule A')).toBe(10000);
+    expect(result.perScheduleMonthly.get('Schedule B')).toBeUndefined();
   });
 
   it('applies a percent adjustment to the schedule amount', async () => {

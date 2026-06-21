@@ -87,6 +87,11 @@ import APIList from './APIList';
 "deleteSchedule"
 ]} />
 
+<APIList title="Notes" sections={[
+"getNote",
+"updateNote"
+]} />
+
 <APIList title="Misc" sections={[
 "BudgetFile",
 "initConfig",
@@ -271,7 +276,7 @@ This method has the following optional flags (passed as the `opts` object):
 
 - `defaultCleared`: whether imported transactions should be marked as cleared (defaults to `true`)
 - `dryRun`: if `true`, returns what would be added/updated without actually modifying the database (defaults to `false`)
-- `reimportDeleted`: if `true`, transactions that were previously imported and then deleted will be reimported; if `false`, they will be skipped (defaults to `true` for backward compatibility — note that the [file import UI](/docs/transactions/importing#avoiding-duplicate-transactions) defaults to `false`)
+- `reimportDeleted`: if `true`, transactions that were previously imported and then deleted will be reimported; if `false`, they will be skipped (defaults to `true` for backward compatibility — note that the [file import UI](../transactions/importing.md#avoiding-duplicate-transactions) defaults to `false`)
 
 Example using opts:
 
@@ -440,9 +445,13 @@ let accounts = await getAccounts();
 
 #### `getCategories`
 
-<Method name="getCategories" args={[]} returns="Promise<Category[]>" />
+<Method name="getCategories" args={[{ name: 'options = {}', type: 'object?' }]} returns="Promise<Category[]>" />
 
-Get all categories.
+Get categories. By default, returns every category.
+
+The `options` object supports:
+
+- `hidden`: filter by hidden status. Pass `false` to return only visible categories, or `true` to return only hidden ones. Omit to return both.
 
 #### `createCategory`
 
@@ -495,9 +504,13 @@ There should only ever be one income category group,
 
 #### `getCategoryGroups`
 
-<Method name="getCategoryGroups" args={[]} returns="Promise<CategoryGroup[]>" />
+<Method name="getCategoryGroups" args={[{ name: 'options = {}', type: 'object?' }]} returns="Promise<CategoryGroup[]>" />
 
-Get all category groups.
+Get category groups. By default, returns every group with all of its categories nested under it.
+
+The `options` object supports:
+
+- `hidden`: filter by hidden status, applied to both groups and their nested categories. Pass `false` to return only visible groups and categories, or `true` to return only hidden ones. Omit to return both.
 
 #### `createCategoryGroup`
 
@@ -509,7 +522,7 @@ Create a category group. Returns the `id` of the new group.
 
 <Method name="updateCategoryGroup" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<id>" />
 
-Update fields of a category group. `fields` can specify any field described in [`CategoryGroup`](#categorygroup).
+Update fields of a category group. `fields` can specify any field described in [`CategoryGroup`](#category-group).
 
 #### `deleteCategoryGroup`
 
@@ -724,11 +737,27 @@ Create schedule based on information filled in the schedule object. Please refer
 
 <Method name="updateSchedule" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<schedule>" />
 
-Update fields of a rule. `fields` can specify any field described in [`Schedule`](#Schedule). Returns the updated rule.
+Update fields of a rule. `fields` can specify any field described in [`Schedule`](#schedule). Returns the updated rule.
 
 #### `deleteSchedule`
 
 <Method name="deleteSchedule" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
+
+## Notes
+
+Notes can be attached to any entity (categories, budget months, etc.) by ID. They are also used to define budget templates and savings goals (e.g. `#template 250`, `#goal 1000`).
+
+#### `getNote`
+
+<Method name="getNote" args={[{ name: 'id', type: 'id' }]} returns="Promise<Note | null>" />
+
+Returns the note for the given entity ID, or `null` if no note has been set.
+
+#### `updateNote`
+
+<Method name="updateNote" args={[{ name: 'id', type: 'id' }, { name: 'note', type: 'string' }]} returns="Promise<void>" />
+
+Sets the note on the entity with the given ID. Pass an empty string to clear the note.
 
 ## Misc
 

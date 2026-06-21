@@ -458,6 +458,7 @@ function DateSelectDesktop({
 }
 
 function DateSelectMobile(props: DateSelectProps) {
+  const { style: inputStyle, ...restInputProps } = props.inputProps ?? {};
   return (
     <InputField
       id={props.id}
@@ -466,8 +467,8 @@ function DateSelectMobile(props: DateSelectProps) {
       onChange={event => {
         props.onSelect(event.target.value);
       }}
-      style={{ height: 28 }}
-      {...props.inputProps}
+      style={{ height: 28, ...inputStyle }}
+      {...restInputProps}
     />
   );
 }

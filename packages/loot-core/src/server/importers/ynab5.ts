@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '#platform/server/log';
 import { send } from '#server/main-app';
@@ -77,9 +78,9 @@ function getDayOfMonth(date: string) {
   return monthUtils.parseDate(date).getDate();
 }
 
-function getYnabMonthlyPatterns(dateFirst: string): RecurPattern[] | undefined {
+function getYnabMonthlyPatterns(dateFirst: string): RecurPattern[] {
   if (getDayOfMonth(dateFirst) !== 31) {
-    return undefined;
+    return [];
   }
 
   return [
@@ -599,7 +600,7 @@ async function importTransactions(
   // reliably resolve transfers
   // Also identify orphan transfer transactions and subtransactions.
   for (const transaction of data.subtransactions) {
-    entityIdMap.set(transaction.id, crypto.randomUUID());
+    entityIdMap.set(transaction.id, uuidv4());
 
     if (transaction.transfer_account_id) {
       orphanSubtransfer.push(transaction);
@@ -608,7 +609,7 @@ async function importTransactions(
   }
 
   for (const transaction of data.transactions) {
-    entityIdMap.set(transaction.id, crypto.randomUUID());
+    entityIdMap.set(transaction.id, uuidv4());
 
     if (
       transaction.transfer_account_id &&
@@ -1149,7 +1150,11 @@ export function parseFile(buffer: Buffer): Budget {
   if (data.data) {
     data = data.data;
   }
-  if (data.budget) {
+  // YNAB renamed the top-level wrapper from `budget` to `plan` (API v1.78+).
+  // Older exports and third-party tools still emit `budget`, so accept both.
+  if (data.plan) {
+    data = data.plan;
+  } else if (data.budget) {
     data = data.budget;
   }
 

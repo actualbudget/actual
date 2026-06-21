@@ -5,11 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import {
-  friendlyOp,
-  getAllocationMethods,
-  mapField,
-} from '@actual-app/core/shared/rules';
 import type {
   AppendNoteRuleActionEntity,
   DeleteTransactionRuleActionEntity,
@@ -19,6 +14,8 @@ import type {
   SetRuleActionEntity,
   SetSplitAmountRuleActionEntity,
 } from '@actual-app/core/types/models';
+
+import { friendlyOp, getAllocationMethods, mapField } from '#util/rule';
 
 import { ScheduleValue } from './ScheduleValue';
 import { Value } from './Value';

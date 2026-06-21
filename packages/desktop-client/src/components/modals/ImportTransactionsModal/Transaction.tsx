@@ -32,6 +32,7 @@ type TransactionProps = {
   categories: CategoryEntity[];
   onCheckTransaction: (transactionId: string) => void;
   reconcile: boolean;
+  index: number;
 };
 
 export function Transaction({
@@ -48,6 +49,7 @@ export function Transaction({
   categories,
   onCheckTransaction,
   reconcile,
+  index,
 }: TransactionProps) {
   const { t } = useTranslation();
 
@@ -92,7 +94,10 @@ export function Transaction({
   return (
     <Row
       style={{
-        backgroundColor: theme.tableBackground,
+        backgroundColor:
+          index % 2 === 0
+            ? theme.tableBackground
+            : theme.tableRowBackgroundAlternate,
         textDecoration: transaction.tombstone ? 'line-through' : 'none',
         color:
           (transaction.isMatchedTransaction && !transaction.selected_merge) ||

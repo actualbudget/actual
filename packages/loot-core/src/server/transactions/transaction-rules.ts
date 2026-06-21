@@ -12,6 +12,7 @@ import {
 } from '#server/db';
 import { getMappings } from '#server/db/mappings';
 import { RuleError } from '#server/errors';
+import { ensureFormulaPreferencesLoaded } from '#server/formulas/bootstrap';
 import { requiredFields, toDateRepr } from '#server/models';
 import {
   Action,
@@ -38,6 +39,7 @@ import {
 } from '#shared/months';
 import { q } from '#shared/query';
 import { getApproxNumberThreshold, sortNumbers } from '#shared/rules';
+import { extractTagsForFilter } from '#shared/tags';
 import { ungroupTransaction } from '#shared/transactions';
 import { fastSetMerge, partitionByField } from '#shared/util';
 import type {
@@ -320,6 +322,8 @@ export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
 ) {
+  await ensureFormulaPreferencesLoaded();
+
   let accountsMap: Map<string, db.DbAccount> = null;
   if (accounts === null) {
     accountsMap = new Map(
@@ -490,7 +494,9 @@ export function conditionsToAQL(
       } else if (type === 'string') {
         return {
           [field]: {
-            $transform: op !== 'hasTags' ? '$lower' : undefined,
+            $transform: !['hasTags', 'hasAnyTag'].includes(op)
+              ? '$lower'
+              : undefined,
             [aqlOp]: value,
           },
         };
@@ -614,17 +620,32 @@ export function conditionsToAQL(
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
       case 'hasTags': {
-        const tagValues = [];
-        const seenTags = new Set();
-        for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
-          if (!seenTags.has(tag)) {
-            seenTags.add(tag);
-            tagValues.push(tag);
-          }
+        const tagValues = extractTagsForFilter(value);
+
+        if (tagValues.length === 0) {
+          // No `#tag` patterns in the input — match nothing rather than
+          // returning an empty `$and` (which would match every row).
+          return { id: null };
         }
 
         return {
           $and: tagValues.map(v => {
+            const escapedTag = v
+              .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+              .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
+            const pattern = `(?<!#)${escapedTag}([\\s#]|$)`;
+            return apply(field, '$regexp', pattern);
+          }),
+        };
+      }
+
+      case 'hasAnyTag': {
+        const tagValues = extractTagsForFilter(value);
+        if (tagValues.length === 0) {
+          return { id: null };
+        }
+        return {
+          $or: tagValues.map(v => {
             const escapedTag = v
               .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
               .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
@@ -676,6 +697,8 @@ export async function applyActions(
   transactions: TransactionEntity[],
   actions: Array<Action | RuleActionEntity>,
 ) {
+  await ensureFormulaPreferencesLoaded();
+
   const parsedActions = actions
     .map(action => {
       if (action instanceof Action) {
@@ -782,7 +805,6 @@ function* getIsSetterRules(
 
   return null;
 }
-
 function* getOneOfSetterRules(
   stage,
   condField,

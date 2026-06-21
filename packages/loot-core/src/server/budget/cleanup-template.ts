@@ -1,9 +1,10 @@
 import * as db from '#server/db';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
+import type { CleanupTemplate } from '#types/models/cleanup-templates';
 
 import { getSheetValue, setBudget, setGoal } from './actions';
-import { parse } from './cleanup-template.pegjs';
+import { storeNoteCleanups } from './cleanup-template-notes';
 
 type Notification = {
   type?: 'message' | 'error' | 'warning' | undefined;
@@ -13,15 +14,21 @@ type Notification = {
   sticky?: boolean | undefined;
 };
 
-export function cleanupTemplate({ month }: { month: string }) {
+export async function cleanupTemplate({ month }: { month: string }) {
+  await storeNoteCleanups();
   return processCleanup(month);
 }
 
+type GroupSourceRow = { category: string; groupId: string };
+type GroupSinkRow = { category: string; groupId: string; weight: number };
+type GroupOverspendRow = { category: string; groupId: string };
+
 async function applyGroupCleanups(
   month: string,
-  sourceGroups,
-  sinkGroups,
-  generalGroups,
+  sourceGroups: GroupSourceRow[],
+  sinkGroups: GroupSinkRow[],
+  overspendGroups: GroupOverspendRow[],
+  groupNamesById: Map<string, string>,
 ) {
   const sheetName = monthUtils.sheetForMonth(month);
   const warnings = [];
@@ -29,16 +36,16 @@ async function applyGroupCleanups(
   let groupLength = sourceGroups.length;
   while (groupLength > 0) {
     //function for each unique group
-    const groupName = sourceGroups[0].group;
-    const tempSourceGroups = sourceGroups.filter(c => c.group === groupName);
-    const sinkGroup = sinkGroups.filter(c => c.group === groupName);
-    const generalGroup = generalGroups.filter(c => c.group === groupName);
+    const groupId = sourceGroups[0].groupId;
+    const tempSourceGroups = sourceGroups.filter(c => c.groupId === groupId);
+    const sinkGroup = sinkGroups.filter(c => c.groupId === groupId);
+    const overspendGroup = overspendGroups.filter(c => c.groupId === groupId);
     let total_weight = 0;
     // We track how mouch amount was produced by all group sinks and only
     // distribute this instead of the "to-budget" amount.
     let available_amount = 0;
 
-    if (sinkGroup.length > 0 || generalGroup.length > 0) {
+    if (sinkGroup.length > 0 || overspendGroup.length > 0) {
       //only return group source funds to To Budget if there are corresponding sinking groups or underfunded included groups
       for (let ii = 0; ii < tempSourceGroups.length; ii++) {
         const balance = await getSheetValue(
@@ -63,17 +70,21 @@ async function applyGroupCleanups(
       }
 
       //fill underfunded categories within the group first
-      for (let ii = 0; ii < generalGroup.length && available_amount > 0; ii++) {
+      for (
+        let ii = 0;
+        ii < overspendGroup.length && available_amount > 0;
+        ii++
+      ) {
         const balance = await getSheetValue(
           sheetName,
-          `leftover-${generalGroup[ii].category}`,
+          `leftover-${overspendGroup[ii].category}`,
         );
         const budgeted = await getSheetValue(
           sheetName,
-          `budget-${generalGroup[ii].category}`,
+          `budget-${overspendGroup[ii].category}`,
         );
         const to_budget = budgeted + Math.abs(balance);
-        const categoryId = generalGroup[ii].category;
+        const categoryId = overspendGroup[ii].category;
         let carryover = await db.first<Pick<db.DbZeroBudget, 'carryover'>>(
           `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
           [db_month, categoryId],
@@ -87,11 +98,10 @@ async function applyGroupCleanups(
           // We have enough to fully cover the overspent.
           balance < 0 &&
           Math.abs(balance) <= available_amount &&
-          !generalGroup[ii].category.is_income &&
           carryover.carryover === 0
         ) {
           await setBudget({
-            category: generalGroup[ii].category,
+            category: categoryId,
             month,
             amount: to_budget,
           });
@@ -99,12 +109,11 @@ async function applyGroupCleanups(
         } else if (
           // We can only cover this category partially.
           balance < 0 &&
-          !generalGroup[ii].category.is_income &&
           carryover.carryover === 0 &&
           Math.abs(balance) > available_amount
         ) {
           await setBudget({
-            category: generalGroup[ii].category,
+            category: categoryId,
             month,
             amount: budgeted + available_amount,
           });
@@ -126,9 +135,12 @@ async function applyGroupCleanups(
         });
       }
     } else {
-      warnings.push(groupName + ' has no matching sink categories.');
+      const groupName = groupNamesById.get(groupId) ?? groupId;
+      warnings.push(
+        `Cleanup group "${groupName}" has no matching sink categories.`,
+      );
     }
-    sourceGroups = sourceGroups.filter(c => c.group !== groupName);
+    sourceGroups = sourceGroups.filter(c => c.groupId !== groupId);
     groupLength = sourceGroups.length;
   }
   return warnings;
@@ -140,123 +152,93 @@ async function processCleanup(month: string): Promise<Notification> {
   let total_weight = 0;
   const errors = [];
   const warnings = [];
-  const sinkCategory = [];
-  const sourceWithRollover = [];
+  type SinkCategoryRow = {
+    cat: db.DbViewCategory;
+    weight: number;
+  };
+  const sinkCategory: SinkCategoryRow[] = [];
   const db_month = parseInt(month.replace('-', ''));
 
-  const category_templates = await getCategoryTemplates();
   const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
   const sheetName = monthUtils.sheetForMonth(month);
-  const groupSource = [];
-  const groupSink = [];
-  const groupGeneral = [];
+  const groupSource: GroupSourceRow[] = [];
+  const groupSink: GroupSinkRow[] = [];
+  const groupOverspend: GroupOverspendRow[] = [];
 
-  //filter out category groups
-  for (let c = 0; c < categories.length; c++) {
-    const category = categories[c];
-    const template = category_templates[category.id];
+  for (const category of categories) {
+    const def = parseCleanupDef(category.cleanup_def);
+    if (!def) continue;
 
-    //filter out source and sink groups for processing
-    if (template) {
-      if (
-        template.filter(t => t.type === 'source' && t.group !== null).length > 0
-      ) {
-        groupSource.push({
-          category: category.id,
-          group: template.filter(
-            t => t.type === 'source' && t.group !== null,
-          )[0].group,
-        });
-      }
-      if (
-        template.filter(t => t.type === 'sink' && t.group !== null).length > 0
-      ) {
-        //only supports 1 sink reference per category.  Need more?
+    for (const row of def) {
+      if (row.role === 'source' && row.groupId !== null) {
+        groupSource.push({ category: category.id, groupId: row.groupId });
+      } else if (row.role === 'sink' && row.groupId !== null) {
         groupSink.push({
           category: category.id,
-          group: template.filter(t => t.type === 'sink' && t.group !== null)[0]
-            .group,
-          weight: template.filter(t => t.type === 'sink' && t.group !== null)[0]
-            .weight,
+          groupId: row.groupId,
+          weight: row.weight,
         });
-      }
-      if (
-        template.filter(t => t.type === null && t.group !== null).length > 0
-      ) {
-        groupGeneral.push({ category: category.id, group: template[0].group });
+      } else if (row.role === 'overspend') {
+        groupOverspend.push({ category: category.id, groupId: row.groupId });
       }
     }
   }
+
+  const groupRows = await db.all<{ id: string; name: string }>(
+    'SELECT id, name FROM cleanup_groups WHERE tombstone = 0',
+  );
+  const groupNamesById = new Map(groupRows.map(g => [g.id, g.name]));
+
   //run category groups
   const newWarnings = await applyGroupCleanups(
     month,
     groupSource,
     groupSink,
-    groupGeneral,
+    groupOverspend,
+    groupNamesById,
   );
   warnings.splice(1, 0, ...newWarnings);
 
-  for (let c = 0; c < categories.length; c++) {
-    const category = categories[c];
-    const template = category_templates[category.id];
-    if (template) {
-      if (
-        template.filter(t => t.type === 'source' && t.group === null).length > 0
-      ) {
-        const balance = await getSheetValue(
-          sheetName,
-          `leftover-${category.id}`,
-        );
-        const budgeted = await getSheetValue(
-          sheetName,
-          `budget-${category.id}`,
-        );
-        if (balance >= 0) {
-          // const spent = await getSheetValue(
-          //   sheetName,
-          //   `sum-amount-${category.id}`,
-          // );
-          await setBudget({
-            category: category.id,
-            month,
-            amount: budgeted - balance,
-          });
-          await setGoal({
-            category: category.id,
-            month,
-            goal: budgeted - balance,
-            long_goal: 0,
-          });
-          num_sources += 1;
-        } else {
-          warnings.push(category.name + ' does not have available funds.');
-        }
-        const carryover = await db.first<Pick<db.DbZeroBudget, 'carryover'>>(
-          `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
-          [db_month, category.id],
-        );
-        if (carryover !== null) {
-          //keep track of source categories with rollover enabled
-          if (carryover.carryover === 1) {
-            sourceWithRollover.push({ cat: category, temp: template });
-          }
-        }
+  for (const category of categories) {
+    const def = parseCleanupDef(category.cleanup_def);
+    if (!def) continue;
+
+    const globalSource = def.find(
+      r => r.role === 'source' && r.groupId === null,
+    );
+    if (globalSource) {
+      const balance = await getSheetValue(sheetName, `leftover-${category.id}`);
+      const budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
+      if (balance >= 0) {
+        await setBudget({
+          category: category.id,
+          month,
+          amount: budgeted - balance,
+        });
+        await setGoal({
+          category: category.id,
+          month,
+          goal: budgeted - balance,
+          long_goal: 0,
+        });
+        num_sources += 1;
+      } else {
+        warnings.push(category.name + ' does not have available funds.');
       }
-      if (
-        template.filter(t => t.type === 'sink' && t.group === null).length > 0
-      ) {
-        sinkCategory.push({ cat: category, temp: template });
-        num_sinks += 1;
-        total_weight += template.filter(w => w.type === 'sink')[0].weight;
-      }
+    }
+
+    const globalSink = def.find(r => r.role === 'sink' && r.groupId === null);
+    if (globalSink && globalSink.role === 'sink') {
+      sinkCategory.push({ cat: category, weight: globalSink.weight });
+      num_sinks += 1;
+      total_weight += globalSink.weight;
     }
   }
 
   //funds all underfunded categories first unless the overspending rollover is checked
-  for (let c = 0; c < categories.length; c++) {
-    const category = categories[c];
+  for (const category of categories) {
     const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
     const balance = await getSheetValue(sheetName, `leftover-${category.id}`);
     const budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
@@ -303,13 +285,8 @@ async function processCleanup(month: string): Promise<Notification> {
 
   //fill sinking categories
   for (let c = 0; c < sinkCategory.length; c++) {
-    const budgeted = await getSheetValue(
-      sheetName,
-      `budget-${sinkCategory[c].cat.id}`,
-    );
-    const categoryId = sinkCategory[c].cat.id;
-    const weight = sinkCategory[c].temp.filter(w => w.type === 'sink')[0]
-      .weight;
+    const { cat, weight } = sinkCategory[c];
+    const budgeted = await getSheetValue(sheetName, `budget-${cat.id}`);
     let to_budget =
       budgeted + Math.round((weight / total_weight) * budgetAvailable);
     if (c === sinkCategory.length - 1) {
@@ -322,7 +299,7 @@ async function processCleanup(month: string): Promise<Notification> {
       }
     }
     await setBudget({
-      category: categoryId,
+      category: cat.id,
       month,
       amount: to_budget,
     });
@@ -378,31 +355,14 @@ async function processCleanup(month: string): Promise<Notification> {
   }
 }
 
-const TEMPLATE_PREFIX = '#cleanup ';
-async function getCategoryTemplates() {
-  const templates = {};
-
-  const notes = await db.all<db.DbNote>(
-    `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
-  );
-
-  for (let n = 0; n < notes.length; n++) {
-    const lines = notes[n].note.split('\n');
-    const template_lines = [];
-    for (let l = 0; l < lines.length; l++) {
-      const line = lines[l].trim();
-      if (!line.toLowerCase().startsWith(TEMPLATE_PREFIX)) continue;
-      const expression = line.slice(TEMPLATE_PREFIX.length);
-      try {
-        const parsed = parse(expression);
-        template_lines.push(parsed);
-      } catch (e) {
-        template_lines.push({ type: 'error', line, error: e });
-      }
-    }
-    if (template_lines.length) {
-      templates[notes[n].id] = template_lines;
-    }
+function parseCleanupDef(
+  raw: string | null | undefined,
+): CleanupTemplate[] | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as CleanupTemplate[];
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
+  } catch {
+    return null;
   }
-  return templates;
 }

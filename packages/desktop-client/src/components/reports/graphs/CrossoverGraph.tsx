@@ -160,7 +160,7 @@ export function CrossoverGraph({
 }: CrossoverGraphProps) {
   const privacyMode = usePrivacyMode();
   const format = useFormat();
-  const animationProps = useRechartsAnimation({ isAnimationActive: false });
+  const animationProps = useRechartsAnimation({ animationDuration: 1000 });
 
   const tickFormatter = (tick: number) => {
     if (privacyMode) {

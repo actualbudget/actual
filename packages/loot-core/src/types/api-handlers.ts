@@ -19,6 +19,7 @@ import type {
   ImportTransactionEntity,
   NearbyPayeeEntity,
   NewRuleEntity,
+  NoteEntity,
   PayeeEntity,
   PayeeLocationEntity,
   RuleEntity,
@@ -70,7 +71,9 @@ export type ApiHandlers = {
     totalIncome: number;
     totalSpent: number;
     totalBalance: number;
-    categoryGroups: Record<string, unknown>[];
+    categoryGroups: Array<
+      Record<string, unknown> & { categories?: Record<string, unknown>[] }
+    >;
   }>;
 
   'api/budget-set-amount': (arg: {
@@ -163,9 +166,12 @@ export type ApiHandlers = {
 
   'api/categories-get': (arg: {
     grouped?: boolean;
+    hidden?: boolean;
   }) => Promise<Array<APICategoryGroupEntity | APICategoryEntity>>;
 
-  'api/category-groups-get': () => Promise<APICategoryGroupEntity[]>;
+  'api/category-groups-get': (arg?: {
+    hidden?: boolean;
+  }) => Promise<APICategoryGroupEntity[]>;
 
   'api/category-group-create': (arg: {
     group: Omit<APICategoryGroupEntity, 'id'>;
@@ -194,6 +200,10 @@ export type ApiHandlers = {
     id: APICategoryEntity['id'];
     transferCategoryId?: APICategoryEntity['id'];
   }) => Promise<void>;
+
+  'api/note-get': (arg: Pick<NoteEntity, 'id'>) => Promise<NoteEntity | null>;
+
+  'api/note-update': (arg: NoteEntity) => Promise<void>;
 
   'api/payees-get': () => Promise<APIPayeeEntity[]>;
 

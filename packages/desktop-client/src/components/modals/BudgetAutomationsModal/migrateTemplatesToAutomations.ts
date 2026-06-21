@@ -22,12 +22,13 @@ function getDisplayTypeFromTemplate(template: Template): DisplayTemplateType {
     case 'copy':
       return 'historical';
     case 'by':
+    case 'spend':
       return 'by';
     case 'remainder':
       return 'remainder';
     case 'goal':
+      return 'goal';
     case 'error':
-    case 'spend':
       // filtered upstream by hasUnsupportedDirective; surface if it ever isn't
       throw new Error(`Unsupported template type reached migration`);
     default: {
@@ -47,6 +48,7 @@ export function migrateTemplatesToAutomations(
     if (template.type === 'simple') {
       const monthly = template.monthly;
       const hasMonthly = monthly != null && monthly !== 0;
+      const { description } = template;
 
       if (template.limit) {
         entries.push(
@@ -59,15 +61,15 @@ export function migrateTemplatesToAutomations(
               start: template.limit.start,
               directive: 'template',
               priority: null,
+              // a description on a limit-only simple template belongs to the
+              // limit; with a monthly amount it goes on that instead
+              ...(description && !hasMonthly ? { description } : {}),
             },
             'limit',
           ),
         );
-        // The implicit refill only applies to a limit-only simple template
-        // (e.g. `#template up to 200`). When a monthly amount is also set
-        // (`#template 50 up to 200`), the engine just budgets the monthly
-        // amount and clamps to the cap — no top-up to the limit.
-        if (!hasMonthly) {
+
+        if (monthly == null) {
           entries.push(
             createAutomationEntry(
               {
@@ -80,16 +82,23 @@ export function migrateTemplatesToAutomations(
           );
         }
       }
-      if (hasMonthly) {
+
+      const contribution =
+        hasMonthly || (monthly === 0 && template.limit == null)
+          ? monthly
+          : null;
+
+      if (contribution != null) {
         entries.push(
           createAutomationEntry(
             {
               type: 'periodic',
-              amount: monthly,
+              amount: contribution,
               period: { period: 'month', amount: 1 },
               starting: dayFromDate(firstDayOfMonth(new Date())),
               directive: 'template',
               priority: template.priority,
+              ...(description ? { description } : {}),
             },
             'fixed',
           ),
@@ -99,6 +108,31 @@ export function migrateTemplatesToAutomations(
       // a simple template with neither monthly nor limit is a no-op; drop it
       // rather than passing through as a phantom 'fixed' entry that would
       // crash FixedAutomationReadOnly (no .amount, no .period)
+      return;
+    }
+
+    if (
+      (template.type === 'periodic' || template.type === 'remainder') &&
+      template.limit
+    ) {
+      const { limit, ...base } = template;
+      entries.push(
+        createAutomationEntry(base, getDisplayTypeFromTemplate(base)),
+      );
+      entries.push(
+        createAutomationEntry(
+          {
+            type: 'limit',
+            amount: limit.amount,
+            hold: limit.hold,
+            period: limit.period,
+            start: limit.start,
+            directive: 'template',
+            priority: null,
+          },
+          'limit',
+        ),
+      );
       return;
     }
 

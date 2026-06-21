@@ -6,7 +6,7 @@ const isWindows =
 const isMac =
   navigator.platform && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
-export const isPlaywright = navigator.userAgent === 'playwright';
+export const isPlaywright = navigator.userAgent.includes('playwright');
 
 export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = isWindows
   ? 'windows'
@@ -18,3 +18,5 @@ export const isBrowser: boolean = true;
 
 const agent = UAParser(navigator.userAgent);
 export const isIOSAgent = agent.browser.name === 'Mobile Safari';
+// True for all browsers on iOS (iPhone/iPad/iPod) — not macOS.
+export const isIOS = agent.os.name === 'iOS';

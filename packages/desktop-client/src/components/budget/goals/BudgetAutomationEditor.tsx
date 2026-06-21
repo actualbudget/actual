@@ -23,6 +23,7 @@ import { BySaveAutomation } from './editor/BySaveAutomation';
 import { FixedAutomation } from './editor/FixedAutomation';
 import { HistoricalAutomation } from './editor/HistoricalAutomation';
 import { LimitAutomation } from './editor/LimitAutomation';
+import { LongTermGoalAutomation } from './editor/LongTermGoalAutomation';
 import { PercentageAutomation } from './editor/PercentageAutomation';
 import { RefillAutomation } from './editor/RefillAutomation';
 import { RemainderAutomation } from './editor/RemainderAutomation';
@@ -95,6 +96,13 @@ const displayTypeToDescription = {
       Higher weights take a larger share of the leftover funds.
     </Trans>
   ),
+  goal: (
+    <Trans>
+      Set a long-term savings target. This changes the coloring of the balance
+      on the budget page to be based on progress towards the target rather than
+      the current month funding progress.
+    </Trans>
+  ),
 };
 
 export function BudgetAutomationEditor({
@@ -159,6 +167,11 @@ export function BudgetAutomationEditor({
     case 'remainder':
       automationEditor = (
         <RemainderAutomation template={state.template} dispatch={dispatch} />
+      );
+      break;
+    case 'goal':
+      automationEditor = (
+        <LongTermGoalAutomation template={state.template} dispatch={dispatch} />
       );
       break;
     default:

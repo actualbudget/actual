@@ -13,6 +13,7 @@ for it to be added, your project must have a proper README file.
 The following are implementations of bank syncing using the Actual API. For instructions on using them, see the respective repositories.
 
 - **Akahu and Up bank sync to Actual Budget** - https://github.com/tim-smart/actualbudget-sync
+- **Enable Actual: Import transactions from European banks using Enable Banking** - https://github.com/2manyvcos/enable-actual
 - **ICS Cards Holland CVS exporter** - https://github.com/IeuanK/ICS-Exporter/
 - **Lunch Flow: Import transactions from GoCardless, MX, Finicity, Finverse, and more** - https://github.com/lunchflow/actual-flow
 - **MoneyMan an israel banks importer** - https://github.com/daniel-hauser/moneyman
@@ -56,6 +57,8 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
   - _A collection of JavaScript/CSS Userscripts for Actual Budget._
 - **Actual Budget iOS Widget** - https://github.com/TaylorJns/Actual-Budget-iOS-Widget
   - _An iOS widget to display your Actual Budget category balances for the current month. Requires your Actual server to be accessible via HTTPS, and the **Local REST API** community project to be installed._
+- **Actual Bench** - https://github.com/x-rous/actual-bench
+  - _Admin and workbench companion for Actual Budget. Bulk-edit data, manage, merge and diagnose rules, 12-month budget view, snapshot inspection, and ActualQL queries - all changes staged until you save._
 
 ## Others
 

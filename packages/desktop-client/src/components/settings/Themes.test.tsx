@@ -16,14 +16,6 @@ let mockTheme: string = 'light';
 let mockInstalledLight: string | undefined = undefined;
 let mockInstalledDark: string | undefined = undefined;
 let mockCustomCssOverride: string | undefined = undefined;
-let mockCustomThemesEnabled = true;
-
-vi.mock('#hooks/useFeatureFlag', () => ({
-  useFeatureFlag: (flag: string) => {
-    if (flag === 'customThemes') return mockCustomThemesEnabled;
-    return false;
-  },
-}));
 
 vi.mock('#hooks/useGlobalPref', () => ({
   useGlobalPref: (key: string) => {
@@ -64,7 +56,6 @@ describe('ThemeSettings', () => {
     mockInstalledLight = undefined;
     mockInstalledDark = undefined;
     mockCustomCssOverride = undefined;
-    mockCustomThemesEnabled = true;
   });
 
   describe('custom CSS override indicator', () => {
@@ -97,15 +88,6 @@ describe('ThemeSettings', () => {
       expect(
         screen.getByLabelText('Custom CSS override active — click to edit'),
       ).toBeVisible();
-    });
-
-    it('is hidden when customThemes feature flag is off', () => {
-      mockCustomThemesEnabled = false;
-      mockCustomCssOverride = ':root { --color-accent: #ff00aa; }';
-      render(<ThemeSettings />);
-      expect(
-        screen.queryByLabelText('Custom CSS override active — click to edit'),
-      ).toBeNull();
     });
 
     it('opens the installer when clicked', async () => {

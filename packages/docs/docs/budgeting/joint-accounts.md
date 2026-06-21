@@ -11,7 +11,7 @@ One approach is maintaining a common budget where both partners share a single b
 This method promotes transparency and ensures both parties agree regarding financial goals, expenses, and income.
 A shared budget fosters collaboration but requires consistent communication to keep everything current. It will help
 you both set clear boundaries for individual and shared expenses while working together toward common financial objectives.
-See [Multi-user](/docs/getting-started/sync#multi-user-support) regarding simultaneous edits.
+See [Multi-user](../getting-started/sync.md#multi-user-support) regarding simultaneous edits.
 
 Alternatively, you can track your partner's contributions within your personal Actual Budget file. This allows you to
 maintain individual control over your finances while still acknowledging and accounting for your partner's financial
@@ -31,7 +31,7 @@ budgeting in particular. Not everyone is prepared for this kind of visibility an
 
 Also, stop using cash for common expenses, as this makes tracking so much more complicated.
 
-When your partner is ready to embrace your true joint expenses, use our [Starting Fresh guide](/docs/getting-started/starting-fresh) to get
+When your partner is ready to embrace your true joint expenses, use our [Starting Fresh guide](../getting-started/starting-fresh.md) to get
 started. If your partner is new to budgeting, consider skipping the part about using historical data to find
 your initial budget numbers. Another tip is to set aside time each week by going through last week's spending; avoid doing
 this late in the evening when your energies are low.
@@ -44,7 +44,7 @@ Another tip is to let your partner be the primary account holder for your joint 
 2. Get two debit cards attached to the joint account, one for you and one for your partner.
 3. Create a joint Actual Budget file on a server that is also reachable by your partner.
 4. Decide how big each partner's contribution to the joint account should be (see below).
-5. Follow the [Starting Fresh guide](/docs/getting-started/starting-fresh) with your partner.
+5. Follow the [Starting Fresh guide](../getting-started/starting-fresh.md) with your partner.
 
 ### Deciding on how big each partner's contribution should be
 
@@ -72,7 +72,7 @@ Both will then contribute their share of the joint expenses. This is called _pla
 
 But how do you find your just share? The most just way to do this is by percentage of normal income per partner.
 If Bob makes $ 4,000 a month and Alice makes $ 6,000, the total income is $ 10,000. Out of
-this, Bob will contribute 40% to the joint expenses. To compute the percentage for Bob: 400 (Bob's income) \* 100 / 10000
+this, Bob will contribute 40% to the joint expenses. To compute the percentage for Bob: 4000 (Bob's income) \* 100 / 10000
 (total income). Alice's percentage is 60%, found by subtracting Bob's percentage from 100.
 
 ### Tracking personal spending in the budget

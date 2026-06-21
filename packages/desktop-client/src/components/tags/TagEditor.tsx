@@ -13,7 +13,7 @@ type TagEditorProps = {
 };
 
 export const TagEditor = ({ tag, ref }: TagEditorProps) => {
-  const getTagCSS = useTagCSS();
+  const getTagCSS = useTagCSS({ ellipsis: true });
   const { mutate: updateTag } = useUpdateTagMutation();
 
   const formattedTag = <>#{tag.tag}</>;

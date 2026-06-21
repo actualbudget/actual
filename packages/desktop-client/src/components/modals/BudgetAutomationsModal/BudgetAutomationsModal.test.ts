@@ -15,7 +15,7 @@ describe('migrateTemplatesToAutomations', () => {
     expect(migrateTemplatesToAutomations([simpleTemplate])).toEqual([]);
   });
 
-  it('drops simple templates whose monthly amount is zero with no limit', () => {
+  it('migrates a standalone `#template 0` (no limit) into a $0 fixed entry', () => {
     const simpleTemplate = {
       type: 'simple',
       directive: 'template',
@@ -23,19 +23,30 @@ describe('migrateTemplatesToAutomations', () => {
       monthly: 0,
     } satisfies Template;
 
-    expect(migrateTemplatesToAutomations([simpleTemplate])).toEqual([]);
+    const result = migrateTemplatesToAutomations([simpleTemplate]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].displayType).toBe('fixed');
+    expect(result[0].template).toMatchObject({
+      type: 'periodic',
+      amount: 0,
+      period: { period: 'month', amount: 1 },
+      directive: 'template',
+      priority: 5,
+    });
   });
 
-  it('throws when a goal directive reaches migration', () => {
+  it('migrates a goal directive to a long-term goal entry', () => {
     const goalTemplate = {
       type: 'goal',
       amount: 1000,
       directive: 'goal',
     } satisfies Template;
 
-    expect(() => migrateTemplatesToAutomations([goalTemplate])).toThrow(
-      /Unsupported template type/,
-    );
+    const [entry, ...rest] = migrateTemplatesToAutomations([goalTemplate]);
+    expect(rest).toHaveLength(0);
+    expect(entry.displayType).toBe('goal');
+    expect(entry.template).toEqual(goalTemplate);
   });
 
   it('expands a simple template with limit into limit and refill entries', () => {
@@ -99,6 +110,30 @@ describe('migrateTemplatesToAutomations', () => {
     });
   });
 
+  it('expands `#template 0 up to N` into a standalone limit (no refill, no $0 contribution)', () => {
+    const simpleTemplate = {
+      type: 'simple',
+      directive: 'template',
+      priority: 4,
+      monthly: 0,
+      limit: {
+        amount: 1000,
+        hold: false,
+        period: 'monthly',
+      },
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations([simpleTemplate]);
+
+    expect(result).toHaveLength(1);
+    expect(result.map(entry => entry.displayType)).toEqual(['limit']);
+    expect(result[0].template).toMatchObject({
+      type: 'limit',
+      amount: 1000,
+      directive: 'template',
+    });
+  });
+
   it('expands a simple template with both limit and monthly into limit + periodic (no implicit refill)', () => {
     // `#template 20 up to 200 per week` budgets 20/month and caps at the
     // limit — the engine's runSimple returns just the monthly value, so
@@ -125,6 +160,98 @@ describe('migrateTemplatesToAutomations', () => {
       directive: 'template',
       priority: 11,
     });
+  });
+
+  it('splits a periodic template with an `up to` limit into fixed + limit entries', () => {
+    // `#template 32.5 repeat every 1 days starting 2025-02-01 up to 2500`: the
+    // fixed editor can't show the inline cap, so the limit must become its own
+    // entry rather than vanishing and re-serialising as a duplicate `up to`.
+    const periodicTemplate = {
+      type: 'periodic',
+      directive: 'template',
+      priority: 2,
+      amount: 32.5,
+      period: { period: 'day', amount: 1 },
+      starting: '2025-02-01',
+      limit: {
+        amount: 2500,
+        hold: false,
+        period: 'monthly',
+      },
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations([periodicTemplate]);
+
+    expect(result).toHaveLength(2);
+    expect(result.map(entry => entry.displayType)).toEqual(['fixed', 'limit']);
+    expect(result[0].template).toEqual({
+      type: 'periodic',
+      directive: 'template',
+      priority: 2,
+      amount: 32.5,
+      period: { period: 'day', amount: 1 },
+      starting: '2025-02-01',
+    });
+    expect(result[1].template).toEqual({
+      type: 'limit',
+      amount: 2500,
+      hold: false,
+      period: 'monthly',
+      start: undefined,
+      directive: 'template',
+      priority: null,
+    });
+  });
+
+  it('splits a remainder template with an `up to` limit into remainder + limit entries', () => {
+    const remainderTemplate = {
+      type: 'remainder',
+      directive: 'template',
+      priority: null,
+      weight: 2,
+      limit: {
+        amount: 500,
+        hold: true,
+        period: 'monthly',
+      },
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations([remainderTemplate]);
+
+    expect(result).toHaveLength(2);
+    expect(result.map(entry => entry.displayType)).toEqual([
+      'remainder',
+      'limit',
+    ]);
+    expect(result[0].template).toEqual({
+      type: 'remainder',
+      directive: 'template',
+      priority: null,
+      weight: 2,
+    });
+    expect(result[1].template).toMatchObject({
+      type: 'limit',
+      amount: 500,
+      hold: true,
+      period: 'monthly',
+    });
+  });
+
+  it('leaves a periodic template without a limit as a single fixed entry', () => {
+    const periodicTemplate = {
+      type: 'periodic',
+      directive: 'template',
+      priority: 2,
+      amount: 10,
+      period: { period: 'month', amount: 1 },
+      starting: '2025-02-01',
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations([periodicTemplate]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].displayType).toBe('fixed');
+    expect(result[0].template).toEqual(periodicTemplate);
   });
 
   it('creates a single entry for non-simple templates', () => {

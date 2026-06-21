@@ -1,3 +1,4 @@
+import type { ForecastSource } from './forecast';
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
 
@@ -57,6 +58,19 @@ export type CashFlowWidget = AbstractWidget<
     showBalance?: boolean;
   } | null
 >;
+
+export type SpendingAverageRange =
+  | {
+      mode: 'last-n-months';
+      months: 3 | 6 | 12;
+    }
+  | {
+      mode: 'year-to-date';
+    }
+  | {
+      mode: 'all-time';
+    };
+
 export type SpendingWidget = AbstractWidget<
   'spending-card',
   {
@@ -67,6 +81,7 @@ export type SpendingWidget = AbstractWidget<
     compareTo?: string;
     isLive?: boolean;
     mode?: 'single-month' | 'budget' | 'average';
+    averageRange?: SpendingAverageRange;
   } | null
 >;
 export type BudgetAnalysisWidget = AbstractWidget<
@@ -129,7 +144,8 @@ type SpecializedWidget =
   | CalendarWidget
   | FormulaWidget
   | SankeyWidget
-  | AgeOfMoneyWidget;
+  | AgeOfMoneyWidget
+  | BalanceForecastWidget;
 export type DashboardWidgetEntity = SpecializedWidget | CustomReportWidget;
 export type NewDashboardWidgetEntity = Omit<
   DashboardWidgetEntity,
@@ -199,6 +215,7 @@ export type FormulaWidget = AbstractWidget<
     fontSize?: number;
     fontSizeMode?: 'dynamic' | 'static';
     staticFontSize?: number;
+    showTitle?: boolean;
     colorFormula?: string;
     queriesVersion?: number;
     queries?: Record<
@@ -223,7 +240,23 @@ export type SankeyWidget = AbstractWidget<
     topNcategories?: number;
     categorySort?: 'per-group' | 'global' | 'budget-order';
     showPercentages?: boolean;
+    groupAccounts?: boolean;
     layerFrom?: string;
     layerTo?: string;
+  } | null
+>;
+
+export type BalanceForecastWidget = AbstractWidget<
+  'balance-forecast-card',
+  {
+    name?: string;
+    startDate?: string;
+    endDate?: string;
+    accounts?: string[];
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+    granularity?: 'Daily' | 'Monthly';
+    source?: ForecastSource;
   } | null
 >;

@@ -47,11 +47,13 @@ export const getInitialState = (template: Template | null): ReducerState => {
         template,
         displayType: 'fixed',
       };
-    case 'spend':
-      throw new Error('Goal is not yet supported');
     case 'by':
+    case 'spend':
       return {
-        template,
+        template:
+          template.annual !== undefined && template.repeat == null
+            ? { ...template, repeat: 1 }
+            : template,
         displayType: 'by',
       };
     case 'remainder':
@@ -76,7 +78,10 @@ export const getInitialState = (template: Template | null): ReducerState => {
         displayType: 'historical',
       };
     case 'goal':
-      throw new Error('Goal is not yet supported');
+      return {
+        template,
+        displayType: 'goal',
+      };
     case 'error':
       throw new Error('An error occurred while parsing the template');
     default:
@@ -181,7 +186,11 @@ const changeType = (
         },
       };
     case 'by':
-      if (prevState.template.type === 'by') {
+      // 'spend' shares displayType 'by'; preserve it instead of discarding
+      if (
+        prevState.template.type === 'by' ||
+        prevState.template.type === 'spend'
+      ) {
         return prevState;
       }
       return {
@@ -207,6 +216,18 @@ const changeType = (
           type: 'remainder',
           weight: 1,
           priority: null,
+        },
+      };
+    case 'goal':
+      if (prevState.template.type === 'goal') {
+        return prevState;
+      }
+      return {
+        displayType: visualType,
+        template: {
+          directive: 'goal',
+          type: 'goal',
+          amount: 1000,
         },
       };
     default:
@@ -254,6 +275,50 @@ function mapTemplateTypesForUpdate(
               priority: state.template.priority,
             },
           };
+        default:
+          break;
+      }
+      break;
+    case 'by':
+      switch (template.type) {
+        case 'spend': {
+          // toggling spend-down on: carry the by template's fields into a
+          // spend template; default `from` to the target month if not given
+          const from =
+            'from' in template && typeof template.from === 'string'
+              ? template.from
+              : state.template.month;
+          return {
+            ...state,
+            displayType: 'by',
+            template: {
+              ...state.template,
+              ...template,
+              type: 'spend',
+              from,
+            },
+          };
+        }
+        default:
+          break;
+      }
+      break;
+    case 'spend':
+      switch (template.type) {
+        case 'by': {
+          // toggling spend-down off: drop `from`, keep everything else
+          const { from: _from, ...rest } = state.template;
+          void _from;
+          return {
+            ...state,
+            displayType: 'by',
+            template: {
+              ...rest,
+              ...template,
+              type: 'by',
+            },
+          };
+        }
         default:
           break;
       }

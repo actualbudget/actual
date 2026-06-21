@@ -1,9 +1,9 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import ipaddr from 'ipaddr.js';
 
 import { config } from './load-config';
 import { requestLoggerMiddleware } from './util/middlewares';
+import { isBlockedIp } from './util/ssrf';
 import { validateSession } from './util/validate-user';
 
 const app = express();
@@ -68,20 +68,9 @@ function isUrlAllowed(targetUrl) {
     const hostname = url.hostname;
 
     // Block private/local IP addresses
-    if (ipaddr.isValid(hostname)) {
-      const ip = ipaddr.parse(hostname);
-      if (
-        [
-          'private',
-          'loopback',
-          'linkLocal',
-          'uniqueLocal',
-          'unspecified',
-        ].includes(ip.range())
-      ) {
-        console.warn(`Blocked request to private/localhost IP: ${hostname}`);
-        return false;
-      }
+    if (isBlockedIp(hostname)) {
+      console.warn(`Blocked request to private/localhost IP: ${hostname}`);
+      return false;
     }
 
     // Always allow the specific plugin-store URL
@@ -102,7 +91,8 @@ function isUrlAllowed(targetUrl) {
           targetUrl === repoUrl ||
           targetUrl.startsWith(repoUrl + '/') ||
           (hostname === 'api.github.com' &&
-            url.pathname.startsWith(`/repos/${repoOwner}/${repoName}`)) ||
+            (url.pathname === `/repos/${repoOwner}/${repoName}` ||
+              url.pathname.startsWith(`/repos/${repoOwner}/${repoName}/`))) ||
           (hostname === 'raw.githubusercontent.com' &&
             url.pathname.startsWith(`/${repoOwner}/${repoName}/`)) ||
           (hostname === 'github.com' &&
@@ -177,15 +167,12 @@ app.use('/', async (req, res) => {
   }
 
   try {
-    // Extract method, body, and headers from the request body (sent by loot-core)
-    const {
-      method = 'GET',
-      body,
-      headers: customHeaders = {},
-    } = req.body || {};
+    const { method = 'GET', headers: customHeaders = {} } = req.body || {};
 
-    const methodNormalized =
-      typeof method === 'string' ? method.toUpperCase() : 'GET';
+    if (typeof method !== 'string') {
+      return res.status(400).json({ error: 'Invalid method parameter' });
+    }
+    const methodNormalized = method.toUpperCase();
     if (!['GET', 'HEAD'].includes(methodNormalized)) {
       return res.status(405).json({ error: 'Method not allowed' });
     }
@@ -218,13 +205,8 @@ app.use('/', async (req, res) => {
     }
 
     const response = await fetch(url.href, {
-      method,
+      method: methodNormalized,
       headers: requestHeaders,
-      body: ['GET', 'HEAD'].includes(method)
-        ? undefined
-        : typeof body === 'string'
-          ? body
-          : JSON.stringify(body),
     });
 
     const contentType =

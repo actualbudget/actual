@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import * as asyncStorage from '#platform/server/asyncStorage';
 import { logger } from '#platform/server/log';
 import { createApp } from '#server/app';
@@ -28,7 +30,7 @@ async function keyMake({ password }: { password: string }) {
   }
 
   const salt = encryption.randomBytes(32).toString('base64');
-  const id = crypto.randomUUID();
+  const id = uuidv4();
   const key = await encryption.createKey({ id, password, salt });
 
   // Load the key

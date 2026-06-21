@@ -15,7 +15,8 @@
     "vi": "readonly",
     "backend": "readonly",
     "importScripts": "readonly",
-    "FS": "readonly"
+    "FS": "readonly",
+    "__APP_VERSION__": "readonly"
   },
   "rules": {
     // Import sorting
@@ -338,6 +339,11 @@
             "message": "Don't directly reference imports from other platforms"
           },
           {
+            "group": ["uuid"],
+            "importNames": ["*"],
+            "message": "Use `import { v4 as uuidv4 } from 'uuid'` instead"
+          },
+          {
             "group": ["**/style", "**/colors"],
             "importNames": ["colors"],
             "message": "Please use themes instead of colors"
@@ -353,6 +359,7 @@
         ]
       }
     ],
+    "actual/no-enum": "error",
     "eslint/no-useless-constructor": "error",
     "eslint/no-undef": "error",
     "eslint/no-unused-expressions": "error",
@@ -364,6 +371,16 @@
       "files": ["packages/desktop-electron/**/*"],
       "rules": {
         "react/rules-of-hooks": "off"
+      }
+    },
+    {
+      // Grandfathered pre-existing enums; new enums are disallowed everywhere else.
+      "files": [
+        "packages/component-library/src/tokens.ts",
+        "packages/desktop-client/src/auth/types.ts"
+      ],
+      "rules": {
+        "actual/no-enum": "off"
       }
     },
     {
@@ -384,7 +401,7 @@
       "files": [
         "packages/api/migrations/*",
         "packages/loot-core/migrations/*",
-        "packages/sync-server/src/app-gocardless/banks/*.js",
+        "packages/sync-server/src/app-gocardless/banks/*.ts",
         "*.config.{ts,mts,mjs}"
       ],
       "rules": {

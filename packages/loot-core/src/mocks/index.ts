@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import * as monthUtils from '#shared/months';
 import type {
   AccountEntity,
@@ -14,7 +16,7 @@ export function generateAccount(
   offbudget?: boolean,
 ): AccountEntity {
   const offlineAccount: AccountEntity = {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name,
     offbudget: offbudget ? 1 : 0,
     sort_order: 0,
@@ -38,6 +40,7 @@ export function generateAccount(
       balance_limit: 0,
       account_sync_source: 'goCardless',
       last_sync: new Date().getTime().toString(),
+      bank_sync_status: 'ok',
     };
   }
 
@@ -57,6 +60,7 @@ function emptySyncFields(): Pick<
   | 'balance_limit'
   | 'account_sync_source'
   | 'last_sync'
+  | 'bank_sync_status'
 > {
   return {
     account_id: null,
@@ -70,6 +74,7 @@ function emptySyncFields(): Pick<
     balance_limit: null,
     account_sync_source: null,
     last_sync: null,
+    bank_sync_status: null,
   };
 }
 
@@ -80,7 +85,7 @@ export function generateCategory(
   isIncome: boolean = false,
 ): CategoryEntity {
   return {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name,
     group,
     is_income: isIncome,
@@ -94,7 +99,7 @@ export function generateCategoryGroup(
   isIncome: boolean = false,
 ): CategoryGroupEntity {
   return {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name,
     is_income: isIncome,
     sort_order: groupSortOrder++,
@@ -131,7 +136,7 @@ function _generateTransaction(
   data: Partial<TransactionEntity> & Pick<TransactionEntity, 'account'>,
 ): TransactionEntity {
   return {
-    id: data.id || crypto.randomUUID(),
+    id: data.id || uuidv4(),
     amount: data.amount || Math.floor(random() * 10000 - 7000),
     payee: data.payee || 'payed-to',
     notes: 'Notes',
@@ -160,14 +165,14 @@ export function generateTransaction(
 
     result.push(
       {
-        id: parent.id + '/' + crypto.randomUUID(),
+        id: parent.id + '/' + uuidv4(),
         amount: trans.amount - splitAmount,
         account: parent.account,
         date: parent.date,
         is_child: true,
       },
       {
-        id: parent.id + '/' + crypto.randomUUID(),
+        id: parent.id + '/' + uuidv4(),
         amount: splitAmount,
         account: parent.account,
         date: parent.date,

@@ -3,4 +3,5 @@ export type TagEntity = {
   tag: string;
   color?: string | null;
   description?: string | null;
+  hidden?: boolean;
 };

@@ -1,12 +1,15 @@
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgDelete } from '@actual-app/components/icons/v0';
 import { SvgAlertTriangle } from '@actual-app/components/icons/v2';
 import { Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { dayFromDate, firstDayOfMonth } from '@actual-app/core/shared/months';
 import type {
   CategoryGroupEntity,
   ScheduleEntity,
@@ -20,13 +23,14 @@ import {
   AutomationErrorTitle,
 } from '#components/budget/goals/automationMessages';
 import type { DisplayTemplateType } from '#components/budget/goals/constants';
+import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplateMeta';
 import {
   getInitialState,
   templateReducer,
 } from '#components/budget/goals/reducer';
 import type { AutomationErrorKind } from '#components/budget/goals/validateAutomation';
 
-import { TypePicker } from './TypePicker';
+import { NON_CONTRIBUTION_TYPES, TypePicker } from './TypePicker';
 
 const CONFIG_PANEL_CLASS = css({
   '& > *:first-child': {
@@ -35,7 +39,7 @@ const CONFIG_PANEL_CLASS = css({
   '& span > label': {
     fontSize: 11,
     fontWeight: 600,
-    color: theme.pageTextSubdued,
+    color: theme.pageTextLight,
     letterSpacing: '0.04em',
     textTransform: 'uppercase',
   },
@@ -46,11 +50,45 @@ const CONFIG_PANEL_CLASS = css({
   },
 });
 
+// on mobile, size fields to the touch-friendly standard, not the desktop height
+const MOBILE_TOUCH_FIELDS_CLASS = css({
+  [`@media (max-width: ${parseInt(tokens.breakpoint_small, 10) - 1}px)`]: {
+    '& input:not([type="checkbox"]):not([type="radio"]), & button[type="button"]:not([aria-pressed])':
+      {
+        minHeight: styles.mobileMinHeight,
+        boxSizing: 'border-box',
+      },
+    '& input[type="date"], & input[type="month"]': {
+      width: '100%',
+    },
+  },
+});
+
 const SINGLETON_TYPES: ReadonlySet<DisplayTemplateType> = new Set([
   'limit',
   'refill',
   'remainder',
 ]);
+
+function getDefaultWeeklyStart(entries: AutomationEntry[]): string {
+  const starts: string[] = [];
+
+  for (const { template } of entries) {
+    if (template.type === 'periodic' && template.starting) {
+      starts.push(template.starting);
+    } else if (
+      (template.type === 'by' || template.type === 'spend') &&
+      template.month
+    ) {
+      starts.push(`${template.month}-01`);
+    }
+  }
+
+  const earliest =
+    starts.length > 0 ? starts.reduce((a, b) => (a < b ? a : b)) : null;
+
+  return earliest ?? dayFromDate(firstDayOfMonth(new Date()));
+}
 
 type AutomationEditorPaneProps = {
   entries: AutomationEntry[];
@@ -75,10 +113,12 @@ export function AutomationEditorPane({
   setEntries,
   onDelete,
 }: AutomationEditorPaneProps) {
+  const { t } = useTranslation();
   const active = entries[activeIdx];
   const activeError = automationErrors[activeIdx];
 
   const state = active ? getInitialState(active.template) : null;
+  const defaultWeeklyStart = getDefaultWeeklyStart(entries);
 
   const dispatch = (action: Parameters<typeof templateReducer>[1]) => {
     setEntries(prev =>
@@ -88,10 +128,30 @@ export function AutomationEditorPane({
         const next = templateReducer(current, action);
         return {
           id: entry.id,
-          template: next.template,
+          template: {
+            ...next.template,
+            description: entry.template.description,
+          },
           displayType: next.displayType,
         };
       }),
+    );
+  };
+
+  const setDescription = (description: string) => {
+    setEntries(prev =>
+      prev.map((entry, i) =>
+        i === activeIdx
+          ? {
+              ...entry,
+              template: {
+                ...entry.template,
+                description:
+                  description.trim() === '' ? undefined : description,
+              },
+            }
+          : entry,
+      ),
     );
   };
 
@@ -127,7 +187,7 @@ export function AutomationEditorPane({
 
   if (!active || !state) {
     return (
-      <View style={{ padding: 20, color: theme.pageTextSubdued }}>
+      <View style={{ padding: 20, color: theme.pageTextLight }}>
         <Trans>Select an automation on the left.</Trans>
       </View>
     );
@@ -137,157 +197,215 @@ export function AutomationEditorPane({
     <View
       style={{
         flex: 1,
-        padding: 20,
         overflowY: 'auto',
-        gap: 14,
+        overflowX: 'hidden',
+        scrollbarGutter: 'stable',
       }}
     >
-      {activeError && (
-        <View
-          style={{
-            padding: '10px 12px',
-            borderRadius: 6,
-            backgroundColor: theme.errorBackground,
-            border: `1px solid ${theme.errorBorder}`,
-            color: theme.errorText,
-            fontSize: 13,
-            flexDirection: 'row',
-            gap: 10,
-            alignItems: 'flex-start',
-          }}
-        >
-          <SvgAlertTriangle
-            width={14}
-            height={14}
-            style={{ marginTop: 2, color: 'inherit', flexShrink: 0 }}
-          />
-          <View style={{ minWidth: 0 }}>
-            <Text style={{ fontWeight: 600, color: 'inherit' }}>
-              <AutomationErrorTitle error={activeError} />
-            </Text>
-            <Text
-              style={{
-                fontSize: 12,
-                marginTop: 2,
-                color: 'inherit',
-                display: 'block',
-              }}
-            >
-              <AutomationErrorDetail error={activeError} />
-            </Text>
-          </View>
-        </View>
-      )}
-
-      <Text
-        style={{
-          fontSize: 11,
-          textTransform: 'uppercase',
-          color: theme.pageTextSubdued,
-          fontWeight: 600,
-          letterSpacing: '0.05em',
-        }}
+      <View
+        className={MOBILE_TOUCH_FIELDS_CLASS}
+        style={{ padding: 20, gap: 14, flexShrink: 0 }}
       >
-        <Trans>Automation type</Trans>
-      </Text>
-      <TypePicker
-        active={state.displayType}
-        disabledTypes={disabledTypes}
-        onPick={type => dispatch({ type: 'set-type', payload: type })}
-      />
-
-      {state.displayType !== 'refill' && (
-        <>
-          <Text
-            style={{
-              fontSize: 11,
-              textTransform: 'uppercase',
-              color: theme.pageTextSubdued,
-              fontWeight: 600,
-              letterSpacing: '0.05em',
-            }}
-          >
-            <Trans>Configuration</Trans>
-          </Text>
+        {activeError && (
           <View
-            className={CONFIG_PANEL_CLASS}
             style={{
-              padding: 16,
-              backgroundColor: theme.tableBackground,
+              padding: '10px 12px',
               borderRadius: 6,
-              border: `1px solid ${theme.tableBorder}`,
+              backgroundColor: theme.errorBackground,
+              border: `1px solid ${theme.errorBorder}`,
+              color: theme.errorText,
+              fontSize: 13,
+              flexDirection: 'row',
+              gap: 10,
+              alignItems: 'flex-start',
             }}
           >
-            <ActiveEditor
-              state={state}
-              dispatch={dispatch}
-              schedules={schedules}
-              categories={categories}
-              hasLimitAutomation={hasLimitAutomation}
-              onAddLimitAutomation={onAddLimitAutomation}
+            <SvgAlertTriangle
+              width={14}
+              height={14}
+              style={{ marginTop: 2, color: 'inherit', flexShrink: 0 }}
             />
-          </View>
-        </>
-      )}
-
-      {state.displayType === 'refill' && (
-        <ActiveEditor
-          state={state}
-          dispatch={dispatch}
-          schedules={schedules}
-          categories={categories}
-          hasLimitAutomation={hasLimitAutomation}
-          onAddLimitAutomation={onAddLimitAutomation}
-        />
-      )}
-
-      <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-        {'priority' in state.template &&
-          typeof state.template.priority === 'number' && (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
+            <View style={{ minWidth: 0 }}>
+              <Text style={{ fontWeight: 600, color: 'inherit' }}>
+                <AutomationErrorTitle error={activeError} />
+              </Text>
               <Text
                 style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: theme.pageTextSubdued,
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase',
+                  fontSize: 12,
+                  marginTop: 2,
+                  color: 'inherit',
+                  display: 'block',
                 }}
               >
-                <Trans>Priority</Trans>
+                <AutomationErrorDetail error={activeError} />
               </Text>
-              <Input
-                type="number"
-                style={{ width: 64 }}
-                value={String(state.template.priority)}
-                onChangeValue={value => {
-                  if (value === '') return;
-                  const parsed = Math.round(Number(value));
-                  if (Number.isNaN(parsed)) return;
-                  setPriority(Math.max(0, parsed));
-                }}
+            </View>
+          </View>
+        )}
+
+        {!NON_CONTRIBUTION_TYPES.has(state.displayType) && (
+          <>
+            <Text
+              style={{
+                fontSize: 11,
+                textTransform: 'uppercase',
+                color: theme.pageTextLight,
+                fontWeight: 600,
+                letterSpacing: '0.05em',
+              }}
+            >
+              <Trans>Automation type</Trans>
+            </Text>
+            <TypePicker
+              active={state.displayType}
+              disabledTypes={disabledTypes}
+              onPick={type => dispatch({ type: 'set-type', payload: type })}
+            />
+          </>
+        )}
+
+        {state.displayType !== 'refill' && (
+          <>
+            <Text
+              style={{
+                fontSize: 11,
+                textTransform: 'uppercase',
+                color: theme.pageTextLight,
+                fontWeight: 600,
+                letterSpacing: '0.05em',
+              }}
+            >
+              <Trans>Configuration</Trans>
+            </Text>
+            <View
+              className={CONFIG_PANEL_CLASS}
+              style={{
+                padding: 16,
+                backgroundColor: theme.tableBackground,
+                borderRadius: 6,
+                border: `1px solid ${theme.tableBorder}`,
+              }}
+            >
+              {NON_CONTRIBUTION_TYPES.has(state.displayType) && (
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: theme.pageTextLight,
+                    display: 'block',
+                    marginBottom: 4,
+                  }}
+                >
+                  {getDisplayTemplateMeta(state.displayType).description}
+                </Text>
+              )}
+              <ActiveEditor
+                key={active.id}
+                state={state}
+                dispatch={dispatch}
+                schedules={schedules}
+                categories={categories}
+                hasLimitAutomation={hasLimitAutomation}
+                onAddLimitAutomation={onAddLimitAutomation}
+                defaultWeeklyStart={defaultWeeklyStart}
               />
             </View>
-          )}
-        <View style={{ flex: 1 }} />
-        <Button
-          variant="bare"
-          onPress={() => onDelete(activeIdx)}
-          style={{ color: theme.errorText }}
-        >
-          <span
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          </>
+        )}
+
+        {state.displayType === 'refill' && (
+          <ActiveEditor
+            key={active.id}
+            state={state}
+            dispatch={dispatch}
+            schedules={schedules}
+            categories={categories}
+            hasLimitAutomation={hasLimitAutomation}
+            onAddLimitAutomation={onAddLimitAutomation}
+            defaultWeeklyStart={defaultWeeklyStart}
+          />
+        )}
+
+        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+          {'priority' in state.template &&
+            typeof state.template.priority === 'number' && (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: theme.pageTextLight,
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  <Trans>Priority</Trans>
+                </Text>
+                <Input
+                  type="number"
+                  style={{ width: 64 }}
+                  value={String(state.template.priority)}
+                  onChangeValue={value => {
+                    if (value === '') return;
+                    const parsed = Math.round(Number(value));
+                    if (Number.isNaN(parsed)) return;
+                    setPriority(Math.max(0, parsed));
+                  }}
+                />
+              </View>
+            )}
+          <View style={{ flex: 1 }} />
+          <Button
+            variant="bare"
+            onPress={() => onDelete(activeIdx)}
+            style={{ color: theme.errorText }}
           >
-            <SvgDelete width={10} height={10} style={{ color: 'inherit' }} />
-            <Trans>Delete automation</Trans>
-          </span>
-        </Button>
+            <span
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            >
+              <SvgDelete width={10} height={10} style={{ color: 'inherit' }} />
+              <Trans>Delete automation</Trans>
+            </span>
+          </Button>
+        </View>
+
+        <Text
+          style={{
+            fontSize: 11,
+            textTransform: 'uppercase',
+            color: theme.pageTextLight,
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+          }}
+        >
+          <Trans>Note</Trans>
+        </Text>
+        <textarea
+          aria-label={t('Automation note')}
+          className={css({
+            width: '100%',
+            minHeight: 60,
+            resize: 'vertical',
+            fontFamily: 'inherit',
+            fontSize: 13,
+            lineHeight: 1.4,
+            padding: '8px 10px',
+            borderRadius: 6,
+            border: `1px solid ${theme.formInputBorder}`,
+            backgroundColor: theme.tableBackground,
+            color: theme.tableText,
+            '::placeholder': { color: theme.pageTextLight },
+          })}
+          value={active.template.description ?? ''}
+          onChange={e => setDescription(e.target.value)}
+          placeholder={t('Note')}
+          rows={3}
+        />
       </View>
     </View>
   );

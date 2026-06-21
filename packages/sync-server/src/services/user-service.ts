@@ -100,13 +100,23 @@ export function updateUserWithRole(
       'UPDATE users SET user_name = ?, display_name = ?, enabled = ?, role = ? WHERE id = ?',
       [userName, displayName, enabled, roleId, userId],
     );
+    if (!enabled) {
+      getAccountDb().mutate('DELETE FROM sessions WHERE user_id = ?', [userId]);
+    }
   });
 }
 
 export function deleteUser(userId) {
-  return getAccountDb().mutate('DELETE FROM users WHERE id = ? and owner = 0', [
-    userId,
-  ]).changes;
+  return getAccountDb().transaction(() => {
+    const { changes } = getAccountDb().mutate(
+      'DELETE FROM users WHERE id = ? and owner = 0',
+      [userId],
+    );
+    if (changes > 0) {
+      getAccountDb().mutate('DELETE FROM sessions WHERE user_id = ?', [userId]);
+    }
+    return changes;
+  });
 }
 export function deleteUserAccess(userId) {
   try {
