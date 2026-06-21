@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import i18n from 'i18next';
+import { Trans } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
@@ -42,15 +43,13 @@ export function MonthlyBudgetOverviewSidebar({
   onSelectedCategoriesChange,
 }: MonthlyBudgetOverviewSidebarProps) {
   const locale = useLocale();
-  const { t } = useTranslation();
 
   const periodOptions = useMemo(
     () =>
       MONTHLY_BUDGET_OVERVIEW_PERIODS.map(
-        option =>
-          [option, getMonthlyBudgetOverviewPeriodLabel(option, t)] as const,
+        option => [option, getMonthlyBudgetOverviewPeriodLabel(option)] as const,
       ),
-    [t],
+    [],
   );
 
   return (
@@ -107,7 +106,7 @@ export function MonthlyBudgetOverviewSidebar({
           </Text>
           <Select
             value={(period ?? '') as MonthlyBudgetOverviewPeriod}
-            defaultLabel={t('Custom month')}
+            defaultLabel={i18n.t('Custom month')}
             onChange={onPeriodChange}
             options={periodOptions}
           />

@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import i18n from 'i18next';
+import { Trans } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgDownload } from '@actual-app/components/icons/v1';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -35,6 +37,10 @@ import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 import { filterAutomationOverview } from './filterAutomationOverview';
+import {
+  exportMonthlyBudgetOverviewCsv,
+  getMonthlyBudgetOverviewCsvFilename,
+} from './monthlyBudgetOverviewCsv';
 import {
   detectMonthlyBudgetOverviewPeriod,
   getMonthlyBudgetOverviewMonth,
@@ -86,7 +92,6 @@ function MonthlyBudgetOverviewInternal({
 }: MonthlyBudgetOverviewInternalProps) {
   const locale = useLocale();
   const dispatch = useDispatch();
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
   const { data: categories = { grouped: [], list: [] } } = useCategories();
@@ -242,7 +247,7 @@ function MonthlyBudgetOverviewInternal({
             addNotification({
               notification: {
                 type: 'message',
-                message: t('Dashboard widget successfully saved.'),
+                message: i18n.t('Dashboard widget successfully saved.'),
               },
             }),
           );
@@ -251,7 +256,7 @@ function MonthlyBudgetOverviewInternal({
     );
   }
 
-  const title = widget?.meta?.name || t('Monthly Budget Overview');
+  const title = widget?.meta?.name || i18n.t('Monthly Budget Overview');
 
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {
@@ -263,7 +268,7 @@ function MonthlyBudgetOverviewInternal({
         id: widget.id,
         meta: {
           ...(widget.meta ?? {}),
-          name: newName || t('Monthly Budget Overview'),
+          name: newName || i18n.t('Monthly Budget Overview'),
         },
       },
     });
@@ -272,6 +277,46 @@ function MonthlyBudgetOverviewInternal({
   const hasCategories =
     filteredData != null &&
     filteredData.groups.some(group => group.categories.length > 0);
+
+  const canExportCsv = filteredData != null && hasCategories && !loading;
+
+  function onDownloadCsv() {
+    if (!filteredData) {
+      return;
+    }
+
+    const csv = exportMonthlyBudgetOverviewCsv(filteredData, { locale });
+    void window.Actual.saveFile(
+      csv,
+      getMonthlyBudgetOverviewCsvFilename(month),
+      i18n.t('Download CSV'),
+    );
+  }
+
+  const actionButtons = (
+    <View
+      style={{
+        flexDirection: 'row',
+        gap: 8,
+        alignItems: 'center',
+      }}
+    >
+      {canExportCsv && (
+        <Button
+          variant="bare"
+          aria-label={i18n.t('Download CSV')}
+          onPress={onDownloadCsv}
+        >
+          <SvgDownload width={15} height={15} />
+        </Button>
+      )}
+      {widget && (
+        <Button variant="primary" onPress={onSaveWidget}>
+          <Trans>Save widget</Trans>
+        </Button>
+      )}
+    </View>
+  );
 
   const sidebar = monthOptions.length > 0 && (
     <MonthlyBudgetOverviewSidebar
@@ -313,7 +358,7 @@ function MonthlyBudgetOverviewInternal({
       }
       padding={0}
     >
-      {widget && !isNarrowWidth && (
+      {(widget || canExportCsv) && !isNarrowWidth && (
         <View
           style={{
             padding: 15,
@@ -322,9 +367,7 @@ function MonthlyBudgetOverviewInternal({
             alignItems: 'flex-end',
           }}
         >
-          <Button variant="primary" onPress={onSaveWidget}>
-            <Trans>Save widget</Trans>
-          </Button>
+          {actionButtons}
         </View>
       )}
       <View
@@ -345,11 +388,9 @@ function MonthlyBudgetOverviewInternal({
               }}
             >
               {sidebar}
-              {widget && (
+              {(widget || canExportCsv) && (
                 <View style={{ paddingBottom: 15, alignItems: 'flex-end' }}>
-                  <Button variant="primary" onPress={onSaveWidget}>
-                    <Trans>Save widget</Trans>
-                  </Button>
+                  {actionButtons}
                 </View>
               )}
             </View>

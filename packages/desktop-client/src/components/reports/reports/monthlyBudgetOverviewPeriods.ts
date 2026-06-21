@@ -1,3 +1,5 @@
+import i18n from 'i18next';
+
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { MonthlyBudgetOverviewPeriod } from '@actual-app/core/types/models';
 
@@ -49,15 +51,14 @@ export function detectMonthlyBudgetOverviewPeriod(
 
 export function getMonthlyBudgetOverviewPeriodLabel(
   period: MonthlyBudgetOverviewPeriod,
-  t: (key: string) => string,
 ): string {
   switch (period) {
     case 'this-month':
-      return t('This month');
+      return i18n.t('This month');
     case 'next-month':
-      return t('Next month');
+      return i18n.t('Next month');
     case 'last-month':
-      return t('Last month');
+      return i18n.t('Last month');
     default:
       period satisfies never;
       return '';

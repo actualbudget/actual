@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import i18n from 'i18next';
+import { Trans } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { theme } from '@actual-app/components/theme';
@@ -54,7 +55,6 @@ export function MonthlyBudgetOverviewCard({
   onRemove,
   onCopy,
 }: MonthlyBudgetOverviewCardProps) {
-  const { t } = useTranslation();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
@@ -74,11 +74,11 @@ export function MonthlyBudgetOverviewCard({
       menuItems={[
         {
           name: 'rename',
-          text: t('Rename'),
+          text: i18n.t('Rename'),
         },
         {
           name: 'remove',
-          text: t('Remove'),
+          text: i18n.t('Remove'),
         },
         ...copyMenuItems,
       ]}
@@ -98,7 +98,7 @@ export function MonthlyBudgetOverviewCard({
     >
       <View style={{ flex: 1, padding: 12 }}>
         <ReportCardName
-          name={meta?.name || t('Monthly Budget Overview')}
+          name={meta?.name || i18n.t('Monthly Budget Overview')}
           isEditing={nameMenuOpen}
           onChange={newName => {
             onMetaChange({
