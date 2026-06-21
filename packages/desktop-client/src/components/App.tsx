@@ -24,7 +24,6 @@ import { useOnVisible } from '#hooks/useOnVisible';
 import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
 import { setI18NextLanguage } from '#i18n';
 import { addNotification } from '#notifications/notificationsSlice';
-import { installPolyfills } from '#polyfills';
 import { loadGlobalPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector, useStore } from '#redux';
 import {
@@ -121,7 +120,7 @@ function AppInner() {
     }
 
     async function initAll() {
-      await Promise.all([installPolyfills(), init()]);
+      await init();
       dispatch(setAppState({ loadingText: null }));
     }
 
