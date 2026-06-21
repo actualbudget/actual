@@ -131,7 +131,6 @@ __metadata:
     mockdate: "npm:^3.0.5"
     npm-run-all: "npm:^4.1.5"
     path-browserify: "npm:^1.0.1"
-    peggy: "npm:5.1.0"
     rollup-plugin-visualizer: "npm:^7.0.1"
     stream-browserify: "npm:^3.0.0"
     timers-browserify: "npm:^2.0.12"
