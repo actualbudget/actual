@@ -1,4 +1,4 @@
-import promiseRetry from 'promise-retry';
+import { retry as promiseRetry } from './retry';
 
 const BACKEND_IMPORT_MAX_RETRIES = 30;
 

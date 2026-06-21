@@ -24,7 +24,7 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import type { CalendarWidget } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { format as formatDate } from 'date-fns';
-import debounce from 'lodash/debounce';
+import { debounce } from 'es-toolkit/compat';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';

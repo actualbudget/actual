@@ -7,7 +7,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { SankeyWidget } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
-import debounce from 'lodash/debounce';
+import { debounce } from 'es-toolkit/compat';
 
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
