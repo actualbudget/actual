@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -12,7 +12,6 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import * as Platform from '@actual-app/core/shared/platform';
 import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
 import { t } from 'i18next';
 
@@ -24,9 +23,10 @@ import {
   ModalHeader,
   ModalTitle,
 } from '#components/common/Modal';
-import { FocusableAmountInput } from '#components/mobile/transactions/FocusableAmountInput';
+import { AmountInput } from '#components/mobile/transactions/AmountInput';
 import { Notes } from '#components/Notes';
 import { useCategory } from '#hooks/useCategory';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useNotes } from '#hooks/useNotes';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { trackingBudget } from '#spreadsheet/bindings';
@@ -64,10 +64,9 @@ export function TrackingBudgetMenuModal({
     trackingBudget.catBudgeted(categoryId),
   );
   const { data: category } = useCategory(categoryId);
+  const mobileCalculatorEnabled = useFeatureFlag('mobileCalculator');
   const notesId = category ? `${category.id}-${month}` : '';
   const originalNotes = useNotes(notesId) ?? '';
-
-  const [amountFocused, setAmountFocused] = useState(false);
 
   const _onUpdateBudget = (amount: number) => {
     onUpdateBudget?.(amountToInteger(amount));
@@ -85,20 +84,17 @@ export function TrackingBudgetMenuModal({
     setShowMore(!showMore);
   };
 
-  useEffect(() => {
-    // iOS does not support automatically opening up the keyboard for the
-    // total amount field. Hence we should not focus on it on page render.
-    if (!Platform.isIOSAgent) {
-      setAmountFocused(true);
-    }
-  }, []);
-
   if (!category) {
     return null;
   }
 
   return (
-    <Modal name="tracking-budget-menu">
+    <Modal
+      name="tracking-budget-menu"
+      wrapperProps={{
+        style: mobileCalculatorEnabled ? { paddingBottom: '30vh' } : undefined,
+      }}
+    >
       {({ state }) => (
         <>
           <ModalHeader
@@ -119,23 +115,14 @@ export function TrackingBudgetMenuModal({
             >
               <Trans>Budgeted</Trans>
             </Text>
-            <FocusableAmountInput
+            <AmountInput
               value={integerToAmount(budgeted || 0)}
-              focused={amountFocused}
-              onFocus={() => setAmountFocused(true)}
-              onBlur={() => setAmountFocused(false)}
               onEnter={() => state.close()}
-              zeroSign="+"
-              focusedStyle={{
-                width: 'auto',
-                padding: '5px',
-                paddingLeft: '20px',
-                paddingRight: '20px',
-                minWidth: '100%',
-              }}
-              textStyle={{ ...styles.veryLargeText, textAlign: 'center' }}
-              onUpdateAmount={_onUpdateBudget}
+              onChange={_onUpdateBudget}
               data-testid="budget-amount"
+              autoFocus
+              autoFocusDelay={150}
+              variant="large"
             />
           </View>
           <View

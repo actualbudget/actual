@@ -18,16 +18,16 @@ __metadata:
   dependencies:
     "@actual-app/core": "workspace:*"
     "@actual-app/crdt": "workspace:*"
+    "@actual-app/vite-plugin-peggy": "workspace:*"
     "@playwright/test": "npm:1.59.1"
     "@typescript/native-preview": "npm:beta"
     better-sqlite3: "npm:^12.10.0"
     compare-versions: "npm:^6.1.1"
     rollup-plugin-visualizer: "npm:^7.0.1"
     typescript-strict-plugin: "npm:^2.4.4"
-    uuid: "npm:^14.0.0"
+    uuid: "npm:^14.0.1"
     vite: "npm:^8.0.16"
     vite-plugin-node-polyfills: "npm:^0.28.0"
-    vite-plugin-peggy-loader: "npm:^2.0.1"
     vitest: "npm:^4.1.8"
   languageName: unknown
   linkType: soft
@@ -99,6 +99,7 @@ __metadata:
   resolution: "@actual-app/core@workspace:packages/loot-core"
   dependencies:
     "@actual-app/crdt": "workspace:*"
+    "@actual-app/vite-plugin-peggy": "workspace:*"
     "@jlongster/sql.js": "npm:^1.6.7"
     "@rschedule/core": "npm:^1.5.0"
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
@@ -137,10 +138,9 @@ __metadata:
     ts-node: "npm:^10.9.2"
     typescript-strict-plugin: "npm:^2.4.4"
     util: "npm:^0.12.5"
-    uuid: "npm:^14.0.0"
+    uuid: "npm:^14.0.1"
     vite: "npm:^8.0.16"
     vite-plugin-node-polyfills: "npm:^0.28.0"
-    vite-plugin-peggy-loader: "npm:^2.0.1"
     vitest: "npm:^4.1.8"
     xml2js: "npm:^0.6.2"
     yargs: "npm:^18.0.0"
@@ -156,7 +156,7 @@ __metadata:
     "@typescript/native-preview": "npm:beta"
     murmurhash: "npm:^2.0.1"
     rollup-plugin-visualizer: "npm:^7.0.1"
-    uuid: "npm:^14.0.0"
+    uuid: "npm:^14.0.1"
     vite: "npm:^8.0.16"
     vitest: "npm:^4.1.8"
   languageName: unknown
@@ -188,7 +188,7 @@ __metadata:
     express: "npm:^5.2.1"
     express-rate-limit: "npm:^8.5.2"
     express-winston: "npm:^4.2.0"
-    http-proxy-middleware: "npm:^3.0.7"
+    http-proxy-middleware: "npm:^4.1.1"
     ipaddr.js: "npm:^2.4.0"
     jws: "npm:^4.0.1"
     migrate: "npm:^2.1.0"
@@ -197,12 +197,22 @@ __metadata:
     pluggy-sdk: "npm:^0.85.3"
     supertest: "npm:^7.2.2"
     typescript-strict-plugin: "npm:^2.4.4"
-    uuid: "npm:^14.0.0"
+    uuid: "npm:^14.0.1"
     vite: "npm:^8.0.16"
     vitest: "npm:^4.1.8"
     winston: "npm:^3.19.0"
   bin:
     actual-server: ./build/bin/actual-server.js
+  languageName: unknown
+  linkType: soft
+
+"@actual-app/vite-plugin-peggy@workspace:*, @actual-app/vite-plugin-peggy@workspace:packages/vite-plugin-peggy":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/vite-plugin-peggy@workspace:packages/vite-plugin-peggy"
+  dependencies:
+    peggy: "npm:5.1.0"
+  peerDependencies:
+    vite: "*"
   languageName: unknown
   linkType: soft
 
@@ -283,7 +293,7 @@ __metadata:
     sass: "npm:^1.101.0"
     typescript-strict-plugin: "npm:^2.4.4"
     usehooks-ts: "npm:^3.1.1"
-    uuid: "npm:^14.0.0"
+    uuid: "npm:^14.0.1"
     vite: "npm:^8.0.16"
     vite-plugin-pwa: "npm:^1.3.0"
     vitest: "npm:^4.1.8"
@@ -8248,7 +8258,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/http-proxy@npm:^1.17.15, @types/http-proxy@npm:^1.17.8":
+"@types/http-proxy@npm:^1.17.8":
   version: 1.17.17
   resolution: "@types/http-proxy@npm:1.17.17"
   dependencies:
@@ -13282,14 +13292,14 @@ __metadata:
   linkType: hard
 
 "dompurify@npm:^3.3.1":
-  version: 3.4.10
-  resolution: "dompurify@npm:3.4.10"
+  version: 3.4.11
+  resolution: "dompurify@npm:3.4.11"
   dependencies:
     "@types/trusted-types": "npm:^2.0.7"
   dependenciesMeta:
     "@types/trusted-types":
       optional: true
-  checksum: 10/e051c70e7a0729d8cc04d40d7863dc8977495140857e81dc668fb548b7a43c7f80cfc973e3c9c0a6cd18b8eaa94ea7de9603daa02d38c8b15a9b32cc25a6f440
+  checksum: 10/d0473e1a22ed9cc23d86ef426717bce866913d1a725512a9478985bd917b272e0faba5f1d6ad8b2e37f3f4219206c4385162d7c984cfedcd23396e1e6ae0bc5e
   languageName: node
   linkType: hard
 
@@ -16231,17 +16241,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"http-proxy-middleware@npm:^3.0.7":
-  version: 3.0.7
-  resolution: "http-proxy-middleware@npm:3.0.7"
+"http-proxy-middleware@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "http-proxy-middleware@npm:4.1.1"
   dependencies:
-    "@types/http-proxy": "npm:^1.17.15"
-    debug: "npm:^4.3.6"
-    http-proxy: "npm:^1.18.1"
+    debug: "npm:^4.4.3"
+    httpxy: "npm:^0.5.3"
     is-glob: "npm:^4.0.3"
-    is-plain-object: "npm:^5.0.0"
+    is-plain-obj: "npm:^4.1.0"
     micromatch: "npm:^4.0.8"
-  checksum: 10/a44135de721e55517b0fca596855e1e4da92b5fdad247425b4253a345fface37b2a800fcfe37dc28863e9021d8c56cf9cb33ebd20d63c9eca6918a46b39082d4
+  checksum: 10/286450e8736a4f2f20a68252f8c84ecbcdba777398108466bd16cd6e95f9f1c490798e7fd5f32cce8a86f6eaf80b862c276fa38dbf97a2cc145c08868bd87e21
   languageName: node
   linkType: hard
 
@@ -16300,6 +16309,13 @@ __metadata:
     agent-base: "npm:^7.1.2"
     debug: "npm:4"
   checksum: 10/784b628cbd55b25542a9d85033bdfd03d4eda630fb8b3c9477959367f3be95dc476ed2ecbb9836c359c7c698027fc7b45723a302324433590f45d6c1706e8c13
+  languageName: node
+  linkType: hard
+
+"httpxy@npm:^0.5.3":
+  version: 0.5.3
+  resolution: "httpxy@npm:0.5.3"
+  checksum: 10/0c46bd2c603b6c13ca5511cace37746ee8781a109dd692656ba1d33a0067ee50661838c143dd9139f7b36495eed2cf8a19370d3da6b7ffe2a2334583de132144
   languageName: node
   linkType: hard
 
@@ -17032,7 +17048,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-plain-obj@npm:^4.0.0":
+"is-plain-obj@npm:^4.0.0, is-plain-obj@npm:^4.1.0":
   version: 4.1.0
   resolution: "is-plain-obj@npm:4.1.0"
   checksum: 10/6dc45da70d04a81f35c9310971e78a6a3c7a63547ef782e3a07ee3674695081b6ca4e977fbb8efc48dae3375e0b34558d2bcd722aec9bddfa2d7db5b041be8ce
@@ -17045,13 +17061,6 @@ __metadata:
   dependencies:
     isobject: "npm:^3.0.1"
   checksum: 10/2a401140cfd86cabe25214956ae2cfee6fbd8186809555cd0e84574f88de7b17abacb2e477a6a658fa54c6083ecbda1e6ae404c7720244cd198903848fca70ca
-  languageName: node
-  linkType: hard
-
-"is-plain-object@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "is-plain-object@npm:5.0.0"
-  checksum: 10/e32d27061eef62c0847d303125440a38660517e586f2f3db7c9d179ae5b6674ab0f469d519b2e25c147a1a3bc87156d0d5f4d8821e0ce4a9ee7fe1fcf11ce45c
   languageName: node
   linkType: hard
 
@@ -26613,12 +26622,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^11.1.0 || ^12 || ^13 || ^14.0.0, uuid@npm:^14.0.0":
+"uuid@npm:^11.1.0 || ^12 || ^13 || ^14.0.0":
   version: 14.0.0
   resolution: "uuid@npm:14.0.0"
   bin:
     uuid: dist-node/bin/uuid
   checksum: 10/8ee9b98f9650e25555515f7a28d3c3ae9364e72f7bb19b9e08b681bc135338beba5509b2830f6ae1cfaba4d45401da0d16d4d109b977097bc3d6ba0c5583341b
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^14.0.1":
+  version: 14.0.1
+  resolution: "uuid@npm:14.0.1"
+  bin:
+    uuid: dist-node/bin/uuid
+  checksum: 10/0f978fd5b0269d7acb615342aeb131f0b8d85eeb8ec34f2915d906baa3befcc14a079a430d0f8116aec6fd20c850cbfab65d1b3d1643fa81ed373c0cf9574f18
   languageName: node
   linkType: hard
 
@@ -26799,15 +26817,6 @@ __metadata:
   peerDependencies:
     vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
   checksum: 10/5cd0747888748f91041ddc90a8bafa8b6e7a8539ee45a547319e4b1c97fb08c473e449cc31563f6f4e9c405cc93830be183a67dfe367abdbbbb0e8ce4b850985
-  languageName: node
-  linkType: hard
-
-"vite-plugin-peggy-loader@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "vite-plugin-peggy-loader@npm:2.0.1"
-  peerDependencies:
-    peggy: ^1.2.0 || ^3.0.2 || ^4.0.0
-  checksum: 10/55460efe15fe84774907a0f46b4351bc3d5e672c32575af3142aca27b99b64c45727e3159bfb191fdc9b890fba4a08eb306e4a8ce4823b1cfcfaa4bf79fa62ff
   languageName: node
   linkType: hard
 
