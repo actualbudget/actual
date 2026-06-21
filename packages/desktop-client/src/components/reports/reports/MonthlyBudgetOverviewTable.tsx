@@ -152,10 +152,7 @@ export function MonthlyBudgetOverviewTable({
               <Block style={{ flex: 1, paddingLeft: 16 }}>
                 {category.categoryName}
               </Block>
-              <AmountColumns
-                amounts={category}
-                highlightGoalBalance
-              />
+              <AmountColumns amounts={category} highlightGoalBalance />
             </View>
           ))}
         </View>

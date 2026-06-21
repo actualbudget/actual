@@ -309,10 +309,12 @@ describe('getAutomationOverview', () => {
     expect(result.totals.remaining).toBe(10000);
     expect(result.totals.overfunded).toBe(5000);
     expect(
-      result.groups[0].categories.find(c => c.categoryId === cat1.id)?.overfunded,
+      result.groups[0].categories.find(c => c.categoryId === cat1.id)
+        ?.overfunded,
     ).toBe(5000);
     expect(
-      result.groups[0].categories.find(c => c.categoryId === cat2.id)?.remaining,
+      result.groups[0].categories.find(c => c.categoryId === cat2.id)
+        ?.remaining,
     ).toBe(10000);
   });
 

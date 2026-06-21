@@ -134,9 +134,7 @@ export function MonthlyBudgetOverviewSummary({
             alignItems: 'center',
             marginBottom: 2,
             color:
-              amounts.remaining > 0
-                ? theme.errorText
-                : theme.noticeTextLight,
+              amounts.remaining > 0 ? theme.errorText : theme.noticeTextLight,
           }}
         >
           <PrivacyFilter>
