@@ -3,7 +3,7 @@ import { createRef, PureComponent } from 'react';
 import type { CSSProperties, ReactNode, Ref, RefObject, UIEvent } from 'react';
 
 import { View } from '@actual-app/components/view';
-import memoizeOne from 'memoize-one';
+import { memoizeOne } from '@actual-app/core/shared/memoize';
 
 const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
 
