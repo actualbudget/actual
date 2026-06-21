@@ -14,6 +14,8 @@
     "migrations",
     "typings",
     "default-db.sqlite",
+    "default-filesystem.mjs",
+    "default-filesystem.d.ts",
     "!src/**/*.test.ts",
     "!src/**/__tests__/**",
     "!src/**/__snapshots__/**",
@@ -171,7 +173,11 @@
     "./types/models": "./src/types/models/index.ts",
     "./types/*": "./src/types/*.ts",
     "./typings/*": "./typings/*.ts",
-    "./lib-dist/electron/bundle.desktop.js": "./lib-dist/electron/bundle.desktop.js"
+    "./lib-dist/electron/bundle.desktop.js": "./lib-dist/electron/bundle.desktop.js",
+    "./default-filesystem": {
+      "types": "./default-filesystem.d.ts",
+      "default": "./default-filesystem.mjs"
+    }
   },
   "scripts": {
     "build:node": "cross-env NODE_ENV=production vite build --config ./vite.desktop.config.mts",

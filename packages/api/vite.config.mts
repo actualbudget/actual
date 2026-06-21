@@ -1,12 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 
+import {
+  defaultDbPath,
+  migrationsDir,
+} from '@actual-app/core/default-filesystem';
 import { peggyLoader } from '@actual-app/vite-plugin-peggy';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import { configDefaults } from 'vitest/config';
 
-const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 const distDir = path.resolve(__dirname, 'dist');
 const typesDir = path.resolve(__dirname, '@types');
 
@@ -21,22 +24,17 @@ function cleanOutputDirs() {
 }
 
 // The Node build reads migrations + the default DB from disk at runtime (see
-// fs.migrationsPath / bundledDatabasePath in loot-core), so copy them straight
-// from loot-core next to the bundle. The browser build embeds its own copies
-// via `?inline`/`?raw`, so nothing else needs to be on disk.
+// fs.migrationsPath / bundledDatabasePath in loot-core), so copy them next to
+// the bundle. The browser build embeds its own copies, so nothing else needs to
+// be on disk.
 function copyNodeRuntimeAssets() {
   return {
     name: 'copy-node-runtime-assets',
     closeBundle() {
-      fs.cpSync(
-        path.join(lootCoreRoot, 'migrations'),
-        path.join(distDir, 'migrations'),
-        { recursive: true },
-      );
-      fs.copyFileSync(
-        path.join(lootCoreRoot, 'default-db.sqlite'),
-        path.join(distDir, 'default-db.sqlite'),
-      );
+      fs.cpSync(migrationsDir, path.join(distDir, 'migrations'), {
+        recursive: true,
+      });
+      fs.copyFileSync(defaultDbPath, path.join(distDir, 'default-db.sqlite'));
     },
   };
 }

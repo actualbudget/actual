@@ -63,7 +63,6 @@
   },
   "devDependencies": {
     "@actual-app/vite-plugin-peggy": "workspace:*",
-    "@jlongster/sql.js": "^1.6.7",
     "@playwright/test": "1.59.1",
     "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.0.1",

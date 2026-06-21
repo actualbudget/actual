@@ -87,6 +87,7 @@ build/
 *.d.ts
 # ...except hand-written ambient declarations that must be committed
 !packages/api/virtual-modules.d.ts
+!packages/loot-core/default-filesystem.d.ts
 
 # Lage cache
 .lage/
