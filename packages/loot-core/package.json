@@ -207,6 +207,7 @@
   },
   "devDependencies": {
     "@actual-app/crdt": "workspace:*",
+    "@actual-app/vite-plugin-peggy": "workspace:*",
     "@types/adm-zip": "^0.5.8",
     "@types/better-sqlite3": "^7.6.13",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
@@ -224,7 +225,6 @@
     "mockdate": "^3.0.5",
     "npm-run-all": "^4.1.5",
     "path-browserify": "^1.0.1",
-    "peggy": "5.1.0",
     "rollup-plugin-visualizer": "^7.0.1",
     "stream-browserify": "^3.0.0",
     "timers-browserify": "^2.0.12",
@@ -233,7 +233,6 @@
     "util": "^0.12.5",
     "vite": "^8.0.16",
     "vite-plugin-node-polyfills": "^0.28.0",
-    "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^4.1.8",
     "yargs": "^18.0.0"
   }
