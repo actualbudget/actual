@@ -1,0 +1,40 @@
+name: Benchmarks
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    paths:
+      - 'packages/loot-core/**'
+      - 'packages/crdt/**'
+      - 'vitest.bench.config.mts'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.github/workflows/benchmark.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+jobs:
+  benchmark:
+    runs-on: depot-ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Run benchmarks
+        uses: CodSpeedHQ/action@1aa3d227c0eaa4157abb72f64750a032cac12a9b # v4.8.2
+        with:
+          run: yarn bench
+          token: ${{ secrets.CODSPEED_TOKEN }}

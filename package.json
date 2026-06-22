@@ -47,6 +47,7 @@
     "generate:release-notes": "ts-node ./bin/release-note-generator.ts",
     "test": "lage test --continue",
     "test:debug": "lage test --no-cache --continue",
+    "bench": "vitest bench --run --config vitest.bench.config.mts",
     "e2e": "yarn workspace @actual-app/web run e2e",
     "e2e:desktop": "yarn build:desktop --skip-exe-build --skip-translations && yarn workspace desktop-electron e2e",
     "playwright": "yarn workspace @actual-app/web run playwright",
@@ -64,6 +65,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@codspeed/vitest-plugin": "^5.6.0",
     "@monorepo-utils/workspaces-to-typescript-project-references": "^2.11.0",
     "@octokit/rest": "^22.0.1",
     "@types/node": "^22.19.21",
