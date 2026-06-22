@@ -347,10 +347,8 @@ export function getServerHostname() {
   );
   if (auth && auth.extra_data) {
     try {
-      const openIdConfig = JSON.parse(auth.extra_data) as {
-        server_hostname: string;
-      };
-      return openIdConfig.server_hostname;
+      const openIdConfig = JSON.parse(auth.extra_data) as ConfigParameter;
+      return openIdConfig.server_hostname ?? null;
     } catch (error) {
       console.error('Error parsing OpenID configuration:', error);
     }

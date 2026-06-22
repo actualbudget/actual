@@ -36,6 +36,7 @@ import {
 } from '#server/util/budget-name';
 import * as Platform from '#shared/platform';
 import type { Budget } from '#types/budget';
+import type { MetadataPrefs } from '#types/prefs';
 
 import {
   loadBackup as _loadBackup,
@@ -335,16 +336,18 @@ async function duplicateBudget({
   // copy metadata from current budget
   // replace id with new budget id and budgetName with new budget name
   const metadataText = await fs.readFile(fs.join(budgetDir, 'metadata.json'));
-  const metadata = JSON.parse(metadataText) as Record<string, unknown>;
+  const metadata = JSON.parse(metadataText) as MetadataPrefs;
   metadata.id = newId;
   metadata.budgetName = newName;
-  [
-    'cloudFileId',
-    'groupId',
-    'lastUploaded',
-    'encryptKeyId',
-    'lastSyncedTimestamp',
-  ].forEach(item => {
+  (
+    [
+      'cloudFileId',
+      'groupId',
+      'lastUploaded',
+      'encryptKeyId',
+      'lastSyncedTimestamp',
+    ] as const
+  ).forEach(item => {
     if (metadata[item]) delete metadata[item];
   });
 

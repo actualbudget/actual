@@ -94,15 +94,7 @@ async function keyTest({
     return { error: { reason: 'old-key-style' } };
   }
 
-  const test: {
-    value: string;
-    meta: {
-      keyId: string;
-      algorithm: string;
-      iv: string;
-      authTag: string;
-    };
-  } = JSON.parse(originalTest) as {
+  const test = JSON.parse(originalTest) as {
     value: string;
     meta: {
       keyId: string;

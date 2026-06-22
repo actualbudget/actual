@@ -8,6 +8,7 @@ import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
 import * as monthUtils from '#shared/months';
+import type { MetadataPrefs } from '#types/prefs';
 
 import * as encryption from './encryption';
 import {
@@ -178,7 +179,7 @@ export async function exportBuffer() {
     // downloads it, it'll get set to a unique node
     const meta = JSON.parse(
       await fs.readFile(fs.join(budgetDir, 'metadata.json')),
-    ) as Record<string, unknown>;
+    ) as MetadataPrefs;
 
     meta.resetClock = true;
     const metaContent = Buffer.from(JSON.stringify(meta), 'utf8');
