@@ -90,26 +90,24 @@ export const MonthPicker = ({
           justifyContent: 'center',
         }}
       >
-        <View>
-          <Link
-            variant="button"
-            buttonVariant="bare"
-            onPress={() => onSelect(currentMonth)}
-            style={{
-              padding: '3px 3px',
-              marginRight: '12px',
-            }}
-          >
-            <View title={t('Today')}>
-              <SvgCalendar
-                style={{
-                  width: 16,
-                  height: 16,
-                }}
-              />
-            </View>
-          </Link>
-        </View>
+        <Link
+          variant="button"
+          buttonVariant="bare"
+          onPress={() => onSelect(currentMonth)}
+          style={{
+            padding: '3px 3px',
+            marginRight: '12px',
+          }}
+        >
+          <View title={t('Today')}>
+            <SvgCalendar
+              style={{
+                width: 16,
+                height: 16,
+              }}
+            />
+          </View>
+        </Link>
         <Link
           variant="button"
           buttonVariant="bare"
@@ -257,6 +255,13 @@ export const MonthPicker = ({
             />
           </View>
         </Link>
+        {/*Keep range centered*/}
+        <span
+          style={{
+            width: '22px',
+            marginLeft: '12px',
+          }}
+        />
       </View>
     </View>
   );
