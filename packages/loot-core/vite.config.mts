@@ -3,7 +3,37 @@ import path from 'path';
 import { peggyLoader } from '@actual-app/vite-plugin-peggy';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
+import type { Plugin } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
+
+import { collectEmbeddedAssets } from './default-filesystem.mjs';
+
+// Embed loot-core's default filesystem (wasm + default DB + migrations) into the
+// browser worker as a virtual module, so the worker performs no PUBLIC_URL asset
+// fetches. This keeps the AQL schema (compiled into this bundle) and its
+// migrations co-versioned in a single content-hashed artifact, preventing the
+// "no such column" errors that occur when a freshly-loaded bundle runs against
+// stale, separately-cached migration files (issue #8290). loot-core owns the
+// bytes and the wire format; this just inlines them.
+function embeddedAssets(): Plugin {
+  const id = 'virtual:actual-embedded-assets';
+  const resolved = '\0' + id;
+  return {
+    name: 'actual-embedded-assets',
+    resolveId(source) {
+      return source === id ? resolved : undefined;
+    },
+    load(thisId) {
+      if (thisId !== resolved) return undefined;
+      const { wasmBase64, dataFiles, index } = collectEmbeddedAssets();
+      return [
+        `export const wasmBase64 = ${JSON.stringify(wasmBase64)};`,
+        `export const dataIndex = ${JSON.stringify(index)};`,
+        `export const dataFiles = ${JSON.stringify(dataFiles)};`,
+      ].join('\n');
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -18,7 +48,7 @@ export default defineConfig(({ mode }) => {
       outDir,
       emptyOutDir: true,
       lib: {
-        entry: path.resolve(__dirname, 'src/server/main.ts'),
+        entry: path.resolve(__dirname, 'src/server/main.browser-worker.ts'),
         name: 'backend',
         formats: ['iife'],
         fileName: () =>
@@ -71,6 +101,7 @@ export default defineConfig(({ mode }) => {
       'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
     },
     plugins: [
+      embeddedAssets(),
       peggyLoader(),
       nodePolyfills({
         include: [
