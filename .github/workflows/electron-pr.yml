@@ -13,7 +13,6 @@ on:
       - 'packages/**'
       - 'package.json'
       - 'yarn.lock'
-      - 'bin/package-electron'
       - '.github/workflows/electron-pr.yml'
       - '!packages/api/**' # API changes don't affect Electron
       - '!packages/ci-actions/**' # CI actions changes don't affect Electron
@@ -35,13 +34,10 @@ jobs:
         include:
           - os: ubuntu-22.04
             runner: depot-ubuntu-22.04-4
-            builderFlags: '--linux AppImage --x64'
           - os: windows-2022
             runner: depot-windows-2022
-            builderFlags: '--win nsis --x64'
           - os: macos-latest
             runner: depot-macos-latest
-            builderFlags: '--mac dmg --arm64'
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -76,8 +72,6 @@ jobs:
           flatpak run --command=flatpak-builder-lint org.flatpak.Builder appstream "$METAINFO_FILE"
       - name: Build Electron
         run: ./bin/package-electron
-        env:
-          ELECTRON_BUILDER_FLAGS: ${{ matrix.builderFlags }}
 
       - name: Upload Linux x64 AppImage
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -86,6 +80,27 @@ jobs:
           if-no-files-found: ignore
           path: packages/desktop-electron/dist/Actual-linux-x86_64.AppImage
 
+      - name: Upload Linux arm64 AppImage
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Actual-linux-arm64.AppImage
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-linux-arm64.AppImage
+
+      - name: Upload Linux x64 flatpak
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Actual-linux-x86_64.flatpak
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-linux-x86_64.flatpak
+
+      - name: Upload Windows x32 exe
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Actual-windows-ia32.exe
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-windows-ia32.exe
+
       - name: Upload Windows x64 exe
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -93,9 +108,31 @@ jobs:
           if-no-files-found: ignore
           path: packages/desktop-electron/dist/Actual-windows-x64.exe
 
+      - name: Upload Windows arm64 exe
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Actual-windows-arm64.exe
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-windows-arm64.exe
+
+      - name: Upload Mac x64 dmg
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Actual-mac-x64.dmg
+          if-no-files-found: ignore
+          path: packages/desktop-electron/dist/Actual-mac-x64.dmg
+
       - name: Upload Mac arm64 dmg
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: Actual-mac-arm64.dmg
           if-no-files-found: ignore
           path: packages/desktop-electron/dist/Actual-mac-arm64.dmg
+
+      - name: Upload Windows Store Build
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: actual-electron-${{ matrix.os }}-appx
+          path: |
+            packages/desktop-electron/dist/*.appx
