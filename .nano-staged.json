@@ -1,6 +1,6 @@
 {
   "packages/*/{package.json,tsconfig.json}": [
-    "ts-node ./bin/validate-publish-imports.ts --fix",
+    "node ./bin/validate-publish-imports.mts --fix",
     "yarn sync:tsconfig-references"
   ],
   "**/*.{js,mjs,jsx,ts,tsx,md,json,yml,yaml}": "oxfmt --no-error-on-unmatched-pattern",
