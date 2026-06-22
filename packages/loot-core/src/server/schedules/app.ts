@@ -33,7 +33,11 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '#shared/schedules';
-import type { RuleConditionEntity, ScheduleEntity } from '#types/models';
+import type {
+  RuleActionEntity,
+  RuleConditionEntity,
+  ScheduleEntity,
+} from '#types/models';
 
 import { findSchedules } from './find-schedules';
 
@@ -119,6 +123,8 @@ export function updateConditions(conditions, newConditions) {
   return updated.concat(added);
 }
 
+// Keep a rule's actions in sync with its (edited) schedule conditions.
+//
 // A schedule's amount lives in the rule's amount *condition*, but a rule can
 // also carry a plain `set amount` *action* (e.g. when customized via "Edit as
 // rule"). Posting a scheduled transaction runs the rule, so a stale action
@@ -130,9 +136,14 @@ export function updateConditions(conditions, newConditions) {
 //     their own value, so they're left untouched.
 //   - `set-split-amount` actions have a different `op` and so are excluded by
 //     the `action.op === 'set'` check below.
-function updateAmountActions(conditions, actions) {
+//
+// Returns `null` when nothing changed, so callers can avoid a redundant write.
+function updateActions(
+  conditions: RuleConditionEntity[],
+  actions: RuleActionEntity[],
+): RuleActionEntity[] | null {
   const { amount: amountCond } = extractScheduleConds(conditions);
-  if (amountCond == null) {
+  if (amountCond === null) {
     return null;
   }
 
@@ -402,10 +413,7 @@ export async function updateSchedule({
       const oldConditions = rule.serialize().conditions;
       const newConditions = updateConditions(oldConditions, conditions);
 
-      const newActions = updateAmountActions(
-        newConditions,
-        rule.serialize().actions,
-      );
+      const newActions = updateActions(newConditions, rule.serialize().actions);
 
       await updateRule({
         id: rule.id,
