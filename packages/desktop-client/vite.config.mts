@@ -316,9 +316,7 @@ export default defineConfig(async ({ mode, command }) => {
               type: 'module',
             },
             workbox: {
-              globPatterns: [
-                '**/*.{js,css,html,ico,png,woff2,webmanifest}',
-              ],
+              globPatterns: ['**/*.{js,css,html,ico,png,woff2,webmanifest}'],
               ignoreURLParametersMatching: [/^v$/],
               navigateFallback: '/index.html',
               maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
