@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { memo, useMemo, useRef, useState } from 'react';
+import React, { memo, useContext, useMemo, useRef, useState } from 'react';
 import type { ComponentProps, CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -19,6 +19,7 @@ import { css } from '@emotion/css';
 import { t } from 'i18next';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import { FilteredCategoriesContext } from '#components/budget/FilteredCategoriesContext';
 import { makeAmountGrey } from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
@@ -122,6 +123,40 @@ function FilteredGroupCell({
 }
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
+  const filteredCategoryGroups = useContext(FilteredCategoriesContext);
+  const { activeViewId } = useFocusedViews();
+  const { sheetName } = useSheetName<'tracking-budget', 'total-budgeted'>(
+    trackingBudget.totalBudgetedExpense,
+  );
+
+  const expenseCategoryIds = useMemo(() => {
+    if (!filteredCategoryGroups) return [];
+    return filteredCategoryGroups
+      .filter(g => !g.is_income)
+      .flatMap(g => g.categories?.map(c => c.id) || []);
+  }, [filteredCategoryGroups]);
+
+  const budgetedSum = useCategorySum(
+    sheetName,
+    expenseCategoryIds,
+    trackingBudget.catBudgeted,
+    activeViewId !== null,
+  );
+
+  const spentSum = useCategorySum(
+    sheetName,
+    expenseCategoryIds,
+    trackingBudget.catSumAmount,
+    activeViewId !== null,
+  );
+
+  const balanceSum = useCategorySum(
+    sheetName,
+    expenseCategoryIds,
+    trackingBudget.catBalance,
+    activeViewId !== null,
+  );
+
   return (
     <View
       style={{
@@ -136,31 +171,61 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Budgeted</Trans>
         </Text>
-        <TrackingCellValue
-          binding={trackingBudget.totalBudgetedExpense}
-          type="financial"
-        >
-          {props => <CellValueText {...props} style={cellStyle} />}
-        </TrackingCellValue>
+        {activeViewId === null ? (
+          <TrackingCellValue
+            binding={trackingBudget.totalBudgetedExpense}
+            type="financial"
+          >
+            {props => <CellValueText {...props} style={cellStyle} />}
+          </TrackingCellValue>
+        ) : (
+          <CellValueText
+            name="filtered"
+            value={budgetedSum}
+            type="financial"
+            style={cellStyle}
+          />
+        )}
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Spent</Trans>
         </Text>
-        <TrackingCellValue binding={trackingBudget.totalSpent} type="financial">
-          {props => <CellValueText {...props} style={cellStyle} />}
-        </TrackingCellValue>
+        {activeViewId === null ? (
+          <TrackingCellValue
+            binding={trackingBudget.totalSpent}
+            type="financial"
+          >
+            {props => <CellValueText {...props} style={cellStyle} />}
+          </TrackingCellValue>
+        ) : (
+          <CellValueText
+            name="filtered"
+            value={spentSum}
+            type="financial"
+            style={cellStyle}
+          />
+        )}
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Balance</Trans>
         </Text>
-        <TrackingCellValue
-          binding={trackingBudget.totalLeftover}
-          type="financial"
-        >
-          {props => <CellValueText {...props} style={cellStyle} />}
-        </TrackingCellValue>
+        {activeViewId === null ? (
+          <TrackingCellValue
+            binding={trackingBudget.totalLeftover}
+            type="financial"
+          >
+            {props => <CellValueText {...props} style={cellStyle} />}
+          </TrackingCellValue>
+        ) : (
+          <CellValueText
+            name="filtered"
+            value={balanceSum}
+            type="financial"
+            style={cellStyle}
+          />
+        )}
       </View>
     </View>
   );

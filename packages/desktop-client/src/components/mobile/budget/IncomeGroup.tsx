@@ -92,6 +92,7 @@ export function IncomeGroup({
           onEdit={onEditCategoryGroup}
           isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
+          showHiddenCategories={showHiddenCategories}
         />
         <IncomeCategoryList
           categories={categories}
@@ -110,6 +111,7 @@ type IncomeGroupHeaderProps = {
   onEdit: (id: CategoryGroupEntity['id']) => void;
   isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
+  showHiddenCategories: boolean;
   style?: CSSProperties;
 };
 
@@ -119,6 +121,7 @@ function IncomeGroupHeader({
   onEdit,
   isCollapsed,
   onToggleCollapse,
+  showHiddenCategories,
   style,
 }: IncomeGroupHeaderProps) {
   return (
@@ -147,7 +150,11 @@ function IncomeGroupHeader({
         isCollapsed={isCollapsed}
         onToggleCollapse={onToggleCollapse}
       />
-      <IncomeGroupCells group={group} month={month} />
+      <IncomeGroupCells
+        group={group}
+        month={month}
+        showHiddenCategories={showHiddenCategories}
+      />
     </View>
   );
 }
@@ -239,9 +246,14 @@ function IncomeGroupName({
 type IncomeGroupCellsProps = {
   group: CategoryGroupEntity;
   month: string;
+  showHiddenCategories: boolean;
 };
 
-function IncomeGroupCells({ group, month }: IncomeGroupCellsProps) {
+function IncomeGroupCells({
+  group,
+  month,
+  showHiddenCategories,
+}: IncomeGroupCellsProps) {
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const format = useFormat();
   const { activeViewId } = useFocusedViews();
@@ -250,8 +262,11 @@ function IncomeGroupCells({ group, month }: IncomeGroupCellsProps) {
   const sheetName = monthUtils.sheetForMonth(month);
 
   const categoryIds = useMemo(
-    () => (group.categories || []).filter(c => !c.hidden).map(c => c.id),
-    [group.categories],
+    () =>
+      (group.categories || [])
+        .filter(c => showHiddenCategories || !c.hidden)
+        .map(c => c.id),
+    [group.categories, showHiddenCategories],
   );
 
   const dynamicBudgetedTracking = useCategorySum(

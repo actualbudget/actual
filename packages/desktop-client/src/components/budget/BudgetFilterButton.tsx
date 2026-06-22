@@ -1,9 +1,11 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
   SvgAdd,
+  SvgCheveronDown,
   SvgDotsHorizontalTriple,
   SvgFilter,
   SvgFilterOutline,
@@ -15,12 +17,15 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { FocusedViewDefinition } from '@actual-app/core/types/prefs';
 
+import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
+import type { DragState, OnDropCallback } from '#components/sort';
 import { useContextMenu } from '#hooks/useContextMenu';
+import { useDragRef } from '#hooks/useDragRef';
 import { BUILT_IN_VIEWS } from '#hooks/useFocusedViews';
 
 type ViewListItemProps = {
   viewId: string;
-  label: string;
+  label: ReactNode;
   isActive: boolean;
   isCustom: boolean;
   isHidden?: boolean;
@@ -28,9 +33,15 @@ type ViewListItemProps = {
   onSelect: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
-  onReorderViews?: () => void;
+  onReorderViewToTarget?: OnDropCallback;
   onToggleVisibility?: () => void;
   onToggleShowHiddenViews?: () => void;
+  dragState?: DragState<FocusedViewDragItem> | null;
+  onDragChange?: (drag: DragState<FocusedViewDragItem>) => void;
+};
+
+type FocusedViewDragItem = {
+  id: string;
 };
 
 function ViewListItem({
@@ -39,27 +50,49 @@ function ViewListItem({
   isActive,
   isCustom,
   isHidden,
-  showHiddenViews,
   onSelect,
   onEdit,
   onDelete,
-  onReorderViews,
+  onReorderViewToTarget,
   onToggleVisibility,
   onToggleShowHiddenViews,
+  dragState,
+  onDragChange,
 }: ViewListItemProps) {
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLDivElement>(null);
 
   const hasContextMenu = Boolean(
-    onEdit ||
-    onDelete ||
-    onReorderViews ||
-    onToggleVisibility ||
-    onToggleShowHiddenViews,
+    onEdit || onDelete || onToggleVisibility || onToggleShowHiddenViews,
   );
 
   const { position, menuOpen, setMenuOpen, handleContextMenu, resetPosition } =
     useContextMenu();
+
+  const dragging = dragState?.item?.id === _viewId;
+  const canDrag = _viewId !== '__all';
+
+  const { dragRef } = useDraggable({
+    type: 'view',
+    onDragChange:
+      onDragChange ||
+      (() => {
+        /* noop */
+      }),
+    item: { id: _viewId },
+    canDrag,
+  });
+  const handleDragRef = useDragRef(dragRef);
+
+  const { dropRef, dropPos } = useDroppable({
+    types: 'view',
+    id: _viewId,
+    onDrop:
+      onReorderViewToTarget ||
+      (() => {
+        /* noop */
+      }),
+  });
 
   function confirmDelete() {
     if (window.confirm(t('Are you sure you want to delete this view?'))) {
@@ -69,121 +102,144 @@ function ViewListItem({
 
   return (
     <View
-      innerRef={triggerRef}
-      onContextMenu={hasContextMenu ? handleContextMenu : undefined}
+      innerRef={canDrag ? dropRef : undefined}
       style={{
-        width: '100%',
         position: 'relative',
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        '& .hover-visible': {
-          opacity: 0,
-        },
-        '&:hover .hover-visible, &:focus-within .hover-visible': {
-          opacity: 1,
-        },
+        width: '100%',
+        backgroundColor: dragging
+          ? theme.tableRowBackgroundHighlight
+          : 'transparent',
       }}
     >
-      <Button
-        variant="bare"
-        onPress={onSelect}
+      {canDrag && <DropHighlight pos={dropPos} offset={{ top: 1 }} />}
+      <View
+        innerRef={(node: HTMLDivElement | null) => {
+          triggerRef.current = node;
+          if (canDrag && handleDragRef) {
+            handleDragRef(node);
+          }
+        }}
+        onContextMenu={hasContextMenu ? handleContextMenu : undefined}
         style={{
           width: '100%',
-          padding: '8px 12px',
-          paddingRight: hasContextMenu ? 32 : 12,
-          justifyContent: 'flex-start',
-          borderRadius: 4,
-          backgroundColor: isActive
-            ? theme.buttonPrimaryBackground
-            : 'transparent',
-          color: isActive ? theme.buttonPrimaryText : theme.buttonNormalText,
-          fontWeight: isActive ? 600 : 400,
-          fontSize: 14,
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          '& .hover-visible': {
+            opacity: 0,
+          },
+          '&:hover .hover-visible, &:focus-within .hover-visible': {
+            opacity: 1,
+          },
         }}
       >
-        {label}
-      </Button>
-
-      {hasContextMenu && (
         <Button
           variant="bare"
-          className={menuOpen ? undefined : 'hover-visible'}
+          onPress={onSelect}
           style={{
-            position: 'absolute',
-            right: 8,
-            padding: 4,
+            width: '100%',
+            padding: '8px 12px',
+            paddingRight: hasContextMenu ? 32 : 12,
+            justifyContent: 'flex-start',
             borderRadius: 4,
+            backgroundColor: isActive
+              ? theme.buttonPrimaryBackground
+              : 'transparent',
             color: isActive ? theme.buttonPrimaryText : theme.buttonNormalText,
-          }}
-          onPress={() => {
-            resetPosition();
-            setMenuOpen(true);
+            fontWeight: isActive ? 600 : 400,
+            fontSize: 14,
           }}
         >
-          <SvgDotsHorizontalTriple style={{ width: 14, height: 14 }} />
+          {label}
         </Button>
-      )}
 
-      {hasContextMenu && (
-        <Popover
-          triggerRef={triggerRef}
-          placement="bottom start"
-          isOpen={menuOpen}
-          onOpenChange={isOpen => {
-            if (!isOpen) {
-              setMenuOpen(false);
-              resetPosition();
-            }
-          }}
-          isNonModal
-          style={{ margin: 1 }}
-          {...position}
-        >
-          <Menu
-            onMenuSelect={item => {
-              switch (item) {
-                case 'edit':
-                  onEdit?.();
-                  break;
-                case 'reorder':
-                  onReorderViews?.();
-                  break;
-                case 'delete':
-                  confirmDelete();
-                  break;
-                case 'toggle-visibility':
-                  onToggleVisibility?.();
-                  break;
-                case 'toggle-show-hidden':
-                  onToggleShowHiddenViews?.();
-                  break;
-                default:
-                  break;
-              }
-              setMenuOpen(false);
+        {hasContextMenu && (
+          <Button
+            variant="bare"
+            className={menuOpen ? undefined : 'hover-visible'}
+            aria-label={t('View actions')}
+            style={{
+              position: 'absolute',
+              right: 8,
+              padding: 4,
+              borderRadius: 4,
+              color: isActive
+                ? theme.buttonPrimaryText
+                : theme.buttonNormalText,
             }}
-            items={
-              [
-                isCustom && { name: 'edit', text: t('Edit view') },
-                onToggleVisibility && {
-                  name: 'toggle-visibility',
-                  text: isHidden ? t('Show view') : t('Hide view'),
-                },
-                onToggleShowHiddenViews && {
-                  name: 'toggle-show-hidden',
-                  text: showHiddenViews
-                    ? t('Hide hidden views')
-                    : t('Show hidden views'),
-                },
-                onReorderViews && { name: 'reorder', text: t('Reorder views') },
-                isCustom && Menu.line,
-                isCustom && { name: 'delete', text: t('Delete view') },
-              ].filter(Boolean) as MenuItem[]
-            }
-          />
-        </Popover>
-      )}
+            onPress={() => {
+              resetPosition();
+              setMenuOpen(true);
+            }}
+          >
+            {_viewId === '__all' ? (
+              <SvgDotsHorizontalTriple style={{ width: 14, height: 14 }} />
+            ) : (
+              <SvgCheveronDown style={{ width: 14, height: 14 }} />
+            )}
+          </Button>
+        )}
+
+        {hasContextMenu && (
+          <Popover
+            triggerRef={triggerRef}
+            placement="bottom start"
+            isOpen={menuOpen}
+            onOpenChange={isOpen => {
+              if (!isOpen) {
+                setMenuOpen(false);
+                resetPosition();
+              }
+            }}
+            isNonModal
+            style={{ width: 200, margin: 1 }}
+            {...position}
+          >
+            <Menu
+              onMenuSelect={item => {
+                switch (item) {
+                  case 'rename':
+                    onEdit?.();
+                    break;
+                  case 'delete':
+                    confirmDelete();
+                    break;
+                  case 'toggle-visibility':
+                    onToggleVisibility?.();
+                    break;
+                  case 'toggle-show-hidden':
+                    onToggleShowHiddenViews?.();
+                    break;
+                  default:
+                    break;
+                }
+                setMenuOpen(false);
+              }}
+              items={
+                _viewId === '__all'
+                  ? ([
+                      onToggleShowHiddenViews && {
+                        name: 'toggle-show-hidden',
+                        text: t('Toggle hidden views'),
+                      },
+                    ].filter(Boolean) as MenuItem[])
+                  : ([
+                      isCustom && { name: 'rename', text: t('Rename') },
+                      onToggleVisibility && {
+                        name: 'toggle-visibility',
+                        text: isHidden ? t('Show') : t('Hide'),
+                      },
+                      isCustom && {
+                        name: 'delete',
+                        text: t('Delete'),
+                      },
+                    ].filter(Boolean) as MenuItem[])
+              }
+            />
+          </Popover>
+        )}
+      </View>
     </View>
   );
 }
@@ -203,7 +259,7 @@ type BudgetFilterButtonProps = {
   onCreateView: () => void;
   onEditView: (id: string) => void;
   onDeleteView: (id: string) => void;
-  onReorderViews: () => void;
+  onReorderViewToTarget?: OnDropCallback;
   onToggleViewVisibility: (id: string) => void;
   onToggleShowHiddenViews: () => void;
 };
@@ -219,17 +275,19 @@ export function BudgetFilterButton({
   onCreateView,
   onEditView,
   onDeleteView,
-  onReorderViews,
+  onReorderViewToTarget,
   onToggleViewVisibility,
   onToggleShowHiddenViews,
 }: BudgetFilterButtonProps) {
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [dragState, setDragState] =
+    useState<DragState<FocusedViewDragItem> | null>(null);
 
   const isFilterActive = activeViewId !== null;
 
-  function getBuiltInLabel(viewId: string): string | null {
+  function getBuiltInLabel(viewId: string): ReactNode | null {
     switch (viewId) {
       case BUILT_IN_VIEWS.UNDERFUNDED:
         return availableBuiltInViews.underfunded ? t('Underfunded') : null;
@@ -289,13 +347,15 @@ export function BudgetFilterButton({
       >
         <ViewListItem
           viewId="__all"
-          label={t('All')}
+          label={<Trans>All</Trans>}
           isActive={activeViewId === null}
           isCustom={false}
+          showHiddenViews={showHiddenViews}
           onSelect={() => {
             onSelectView(null);
             setIsOpen(false);
           }}
+          onToggleShowHiddenViews={onToggleShowHiddenViews}
         />
 
         {viewOrder.map(viewId => {
@@ -321,7 +381,9 @@ export function BudgetFilterButton({
                   onSelectView(viewId);
                   setIsOpen(false);
                 }}
-                onReorderViews={onReorderViews}
+                onReorderViewToTarget={onReorderViewToTarget}
+                dragState={dragState}
+                onDragChange={setDragState}
                 onToggleVisibility={() => onToggleViewVisibility(viewId)}
                 onToggleShowHiddenViews={onToggleShowHiddenViews}
               />
@@ -345,7 +407,9 @@ export function BudgetFilterButton({
                 }}
                 onEdit={() => onEditView(customView.id)}
                 onDelete={() => onDeleteView(customView.id)}
-                onReorderViews={onReorderViews}
+                onReorderViewToTarget={onReorderViewToTarget}
+                dragState={dragState}
+                onDragChange={setDragState}
                 onToggleVisibility={() => onToggleViewVisibility(viewId)}
                 onToggleShowHiddenViews={onToggleShowHiddenViews}
               />

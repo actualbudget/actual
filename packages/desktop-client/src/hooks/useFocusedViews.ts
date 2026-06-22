@@ -6,7 +6,11 @@ import type {
 } from '@actual-app/core/types/prefs';
 import { v4 as uuidv4 } from 'uuid';
 
+import { useFeatureFlag } from './useFeatureFlag';
 import { useSyncedPref } from './useSyncedPref';
+
+const prefListeners = new Map<string, Set<(val: unknown) => void>>();
+const prefValues = new Map<string, unknown>();
 
 function useSyncedPrefJson<T>(
   prefName: keyof SyncedPrefs,
@@ -16,12 +20,27 @@ function useSyncedPrefJson<T>(
 
   // Use optimistic local state for instant UI updates
   const [localValue, setLocalValue] = useState<T>(() => {
+    if (prefValues.has(prefName)) {
+      return prefValues.get(prefName) as T;
+    }
     try {
       return pref !== undefined ? JSON.parse(pref) : defaultValue;
     } catch {
       return defaultValue;
     }
   });
+
+  useEffect(() => {
+    if (!prefListeners.has(prefName)) {
+      prefListeners.set(prefName, new Set());
+    }
+    const listeners = prefListeners.get(prefName)!;
+    const listener = (val: unknown) => setLocalValue(val as T);
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  }, [prefName]);
 
   const lastPrefRef = useRef(pref);
 
@@ -30,19 +49,38 @@ function useSyncedPrefJson<T>(
     if (pref !== lastPrefRef.current) {
       lastPrefRef.current = pref;
       try {
-        setLocalValue(pref !== undefined ? JSON.parse(pref) : defaultValue);
+        const parsed = pref !== undefined ? JSON.parse(pref) : defaultValue;
+        prefValues.set(prefName, parsed);
+        const listeners = prefListeners.get(prefName);
+        if (listeners) {
+          for (const l of listeners) {
+            l(parsed);
+          }
+        }
       } catch {
-        setLocalValue(defaultValue);
+        prefValues.set(prefName, defaultValue);
+        const listeners = prefListeners.get(prefName);
+        if (listeners) {
+          for (const l of listeners) {
+            l(defaultValue);
+          }
+        }
       }
     }
-  }, [pref, defaultValue]);
+  }, [pref, defaultValue, prefName]);
 
   const setValue = useCallback(
     (val: T) => {
-      setLocalValue(val);
+      prefValues.set(prefName, val);
+      const listeners = prefListeners.get(prefName);
+      if (listeners) {
+        for (const l of listeners) {
+          l(val);
+        }
+      }
       setPref(JSON.stringify(val));
     },
-    [setPref],
+    [setPref, prefName],
   );
 
   return [localValue, setValue];
@@ -56,6 +94,7 @@ export const BUILT_IN_VIEWS = {
 } as const;
 
 export function useFocusedViews() {
+  const isFocusedViewsEnabled = useFeatureFlag('focusedViews');
   const [storedViews, setViews] = useSyncedPrefJson<FocusedViewDefinition[]>(
     'budget.focusedViews',
     [],
@@ -226,6 +265,27 @@ export function useFocusedViews() {
   const toggleShowHiddenViews = useCallback(() => {
     setShowHiddenViews(!showHiddenViews);
   }, [showHiddenViews, setShowHiddenViews]);
+
+  if (!isFocusedViewsEnabled) {
+    return {
+      views: [],
+      activeViewId: null,
+      isCollapsed: false,
+      builtInViewsOrder: [],
+      viewOrder: [],
+      hiddenViews: [],
+      showHiddenViews: false,
+      setActiveView: () => undefined,
+      setCollapsed: () => undefined,
+      createView: () => undefined,
+      updateView: () => undefined,
+      deleteView: () => undefined,
+      reorderViewToTarget: () => undefined,
+      toggleViewVisibility: () => undefined,
+      toggleShowHiddenViews: () => undefined,
+      isBuiltInView: () => false,
+    };
+  }
 
   return {
     views,

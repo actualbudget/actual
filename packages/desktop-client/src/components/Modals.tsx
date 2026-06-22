@@ -12,7 +12,6 @@ import { closeModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
-import { ReorderViewsModal } from './budget/ReorderViewsModal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
@@ -424,14 +423,6 @@ export function Modals() {
         case 'enable-password-auth':
           return <PasswordEnableModal key={key} {...modal.options} />;
 
-        case 'reorder-views-editor':
-          return (
-            <ReorderViewsModal
-              key={modal.name}
-              {...(modal.options || {})}
-              onClose={onCloseModal}
-            />
-          );
         default:
           throw new Error('Unknown modal');
       }

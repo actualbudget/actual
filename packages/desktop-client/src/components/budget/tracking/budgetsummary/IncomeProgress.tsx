@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
@@ -8,29 +8,31 @@ import type { Binding, SheetFields } from '#spreadsheet';
 import { fraction } from './fraction';
 import { PieProgress } from './PieProgress';
 
+function BoundValue({
+  binding,
+  children,
+}: {
+  binding: Binding<'tracking-budget', SheetFields<'tracking-budget'>>;
+  children: (value: number) => React.JSX.Element;
+}) {
+  const value = useSheetValue(binding);
+  return children(value || 0);
+}
+
 type IncomeProgressProps = {
   current: Binding<'tracking-budget', SheetFields<'tracking-budget'>> | number;
   target: Binding<'tracking-budget', SheetFields<'tracking-budget'>> | number;
 };
-export function IncomeProgress({ current, target }: IncomeProgressProps) {
-  const dummyBinding = useMemo(
-    () =>
-      ({ name: 'dummy' }) as unknown as Binding<
-        'tracking-budget',
-        SheetFields<'tracking-budget'>
-      >,
-    [],
-  );
-  const currentBound = useSheetValue(
-    typeof current === 'number' ? dummyBinding : current,
-  );
-  const targetBound = useSheetValue(
-    typeof target === 'number' ? dummyBinding : target,
-  );
 
-  let totalIncome = (typeof current === 'number' ? current : currentBound) || 0;
-  const totalBudgeted =
-    (typeof target === 'number' ? target : targetBound) || 0;
+function IncomeProgressLogic({
+  currentNum,
+  targetNum,
+}: {
+  currentNum: number;
+  targetNum: number;
+}) {
+  let totalIncome = currentNum;
+  const totalBudgeted = targetNum;
 
   let over = false;
 
@@ -49,4 +51,36 @@ export function IncomeProgress({ current, target }: IncomeProgressProps) {
       style={{ width: 20, height: 20 }}
     />
   );
+}
+
+export function IncomeProgress({ current, target }: IncomeProgressProps) {
+  if (typeof current === 'number') {
+    if (typeof target === 'number') {
+      return <IncomeProgressLogic currentNum={current} targetNum={target} />;
+    } else {
+      return (
+        <BoundValue binding={target}>
+          {t => <IncomeProgressLogic currentNum={current} targetNum={t} />}
+        </BoundValue>
+      );
+    }
+  } else {
+    if (typeof target === 'number') {
+      return (
+        <BoundValue binding={current}>
+          {c => <IncomeProgressLogic currentNum={c} targetNum={target} />}
+        </BoundValue>
+      );
+    } else {
+      return (
+        <BoundValue binding={current}>
+          {c => (
+            <BoundValue binding={target}>
+              {t => <IncomeProgressLogic currentNum={c} targetNum={t} />}
+            </BoundValue>
+          )}
+        </BoundValue>
+      );
+    }
+  }
 }

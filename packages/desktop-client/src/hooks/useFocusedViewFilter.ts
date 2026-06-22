@@ -2,14 +2,20 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { CategoryGroupEntity } from '@actual-app/core/types/models';
 
-import { BUILT_IN_VIEWS, useFocusedViews } from './useFocusedViews';
+import { useFeatureFlag } from './useFeatureFlag';
+import { BUILT_IN_VIEWS } from './useFocusedViews';
 import { useSpreadsheet } from './useSpreadsheet';
 
 export function useFocusedViewFilter(
   categoryGroups: CategoryGroupEntity[],
   sheetNames: string[],
+  focusedViewState: {
+    activeViewId: string | null;
+    views: { id: string; categoryIds: string[] }[];
+  },
 ) {
-  const { activeViewId, views } = useFocusedViews();
+  const isFocusedViewsEnabled = useFeatureFlag('focusedViews');
+  const { activeViewId, views } = focusedViewState;
   const spreadsheet = useSpreadsheet();
 
   const stableSheetNamesRef = useRef(sheetNames);
@@ -29,6 +35,7 @@ export function useFocusedViewFilter(
   });
 
   useEffect(() => {
+    if (!isFocusedViewsEnabled) return;
     const unbinds: Array<() => void> = [];
 
     // Track state of each category so we only update the Set when necessary
@@ -204,10 +211,16 @@ export function useFocusedViewFilter(
     return () => {
       unbinds.forEach(unbind => unbind());
     };
-  }, [activeViewId, categoryGroups, spreadsheet, stableSheetNames]);
+  }, [
+    activeViewId,
+    categoryGroups,
+    spreadsheet,
+    stableSheetNames,
+    isFocusedViewsEnabled,
+  ]);
 
   const filteredCategoryGroups = useMemo(() => {
-    if (!activeViewId) return categoryGroups;
+    if (!isFocusedViewsEnabled || !activeViewId) return categoryGroups;
 
     const customView = views.find(v => v.id === activeViewId);
 
@@ -233,7 +246,13 @@ export function useFocusedViewFilter(
         group =>
           group.is_income || (group.categories && group.categories.length > 0),
       );
-  }, [categoryGroups, activeViewId, views, matchingCategoryIds]);
+  }, [
+    categoryGroups,
+    activeViewId,
+    views,
+    matchingCategoryIds,
+    isFocusedViewsEnabled,
+  ]);
 
   return { filteredCategoryGroups, availableBuiltInViews };
 }

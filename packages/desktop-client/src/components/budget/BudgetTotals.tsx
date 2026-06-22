@@ -15,6 +15,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { FocusedViewDefinition } from '@actual-app/core/types/prefs';
 
+import type { OnDropCallback } from '#components/sort';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
 import { BudgetFilterButton } from './BudgetFilterButton';
@@ -41,7 +43,7 @@ type BudgetTotalsProps = {
   onCreateView?: () => void;
   onEditView?: (id: string) => void;
   onDeleteView?: (id: string) => void;
-  onReorderViews?: () => void;
+  onReorderViewToTarget?: OnDropCallback;
   onToggleViewVisibility?: (id: string) => void;
   onToggleShowHiddenViews?: () => void;
 };
@@ -60,11 +62,12 @@ export const BudgetTotals = memo(function BudgetTotals({
   onCreateView,
   onEditView,
   onDeleteView,
-  onReorderViews,
+  onReorderViewToTarget,
   onToggleViewVisibility,
   onToggleShowHiddenViews,
 }: BudgetTotalsProps) {
   const { t } = useTranslation();
+  const isFocusedViewsEnabled = useFeatureFlag('focusedViews');
   const [categoryExpandedStatePref, setCategoryExpandedStatePref] =
     useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
@@ -169,12 +172,13 @@ export const BudgetTotals = memo(function BudgetTotals({
           }}
         >
           <Trans>Category</Trans>
-          {availableBuiltInViews &&
+          {isFocusedViewsEnabled &&
+            availableBuiltInViews &&
             onSelectView &&
             onCreateView &&
             onEditView &&
             onDeleteView &&
-            onReorderViews &&
+            onReorderViewToTarget &&
             onToggleViewVisibility &&
             onToggleShowHiddenViews && (
               <BudgetFilterButton
@@ -188,7 +192,7 @@ export const BudgetTotals = memo(function BudgetTotals({
                 onCreateView={onCreateView}
                 onEditView={onEditView}
                 onDeleteView={onDeleteView}
-                onReorderViews={onReorderViews}
+                onReorderViewToTarget={onReorderViewToTarget}
                 onToggleViewVisibility={onToggleViewVisibility}
                 onToggleShowHiddenViews={onToggleShowHiddenViews}
               />

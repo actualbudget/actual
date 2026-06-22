@@ -376,6 +376,7 @@ export function BudgetTable({
         show3Columns={show3Columns}
         showSpentColumn={showSpentColumn}
         toggleSpentColumn={toggleSpentColumn}
+        showHiddenCategories={showHiddenCategories}
         onShowBudgetSummary={onShowBudgetSummary}
       />
       <PullToRefresh onRefresh={onRefresh}>
@@ -413,6 +414,7 @@ type BudgetTableHeaderProps = {
   onShowBudgetSummary: () => void;
   showSpentColumn: boolean;
   toggleSpentColumn: () => void;
+  showHiddenCategories: boolean;
 };
 
 function BudgetTableHeader({
@@ -422,6 +424,7 @@ function BudgetTableHeader({
   onShowBudgetSummary,
   showSpentColumn,
   toggleSpentColumn,
+  showHiddenCategories,
 }: BudgetTableHeaderProps) {
   const { t } = useTranslation();
   const format = useFormat();
@@ -446,16 +449,21 @@ function BudgetTableHeader({
   const isViewActive = activeViewId !== null;
 
   const expenseGroups = useMemo(
-    () => categoryGroups.filter(g => !g.is_income && !g.hidden),
-    [categoryGroups],
+    () =>
+      categoryGroups.filter(
+        g => !g.is_income && (showHiddenCategories || !g.hidden),
+      ),
+    [categoryGroups, showHiddenCategories],
   );
 
   const categoryIds = useMemo(
     () =>
       expenseGroups.flatMap(g =>
-        (g.categories || []).filter(c => !c.hidden).map(c => c.id),
+        (g.categories || [])
+          .filter(c => showHiddenCategories || !c.hidden)
+          .map(c => c.id),
       ),
-    [expenseGroups],
+    [expenseGroups, showHiddenCategories],
   );
 
   const sheetName = monthUtils.sheetForMonth(month);
@@ -720,7 +728,7 @@ function BudgetTableHeader({
           </Button>
         )}
         <View style={{ width: columnWidth }}>
-          <View style={{ flex: 1, alignItems: 'flex-end !important' }}>
+          <View style={{ flex: 1, alignItems: 'flex-end' }}>
             <View>
               <AutoTextSize
                 as={Label}

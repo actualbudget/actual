@@ -18,8 +18,6 @@ import { useFocusedViewFilter } from '#hooks/useFocusedViewFilter';
 import { useFocusedViews } from '#hooks/useFocusedViews';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
-import { pushModal } from '#modals/modalsSlice';
-import { useDispatch } from '#redux';
 
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
@@ -67,7 +65,6 @@ type BudgetTableProps = {
 };
 
 export function BudgetTable(props: BudgetTableProps) {
-  const dispatch = useDispatch();
   const {
     type,
     prewarmStartMonth,
@@ -99,6 +96,7 @@ export function BudgetTable(props: BudgetTableProps) {
     deleteView,
     toggleViewVisibility,
     toggleShowHiddenViews,
+    reorderViewToTarget,
   } = useFocusedViews();
 
   const endMonth = monthUtils.addMonths(startMonth, numMonths - 1);
@@ -109,6 +107,7 @@ export function BudgetTable(props: BudgetTableProps) {
     useFocusedViewFilter(
       categoryGroups,
       months.map(month => monthUtils.sheetForMonth(month)),
+      { activeViewId, views },
     );
 
   const [editorState, setEditorState] = useState<{
@@ -195,7 +194,7 @@ export function BudgetTable(props: BudgetTableProps) {
   };
 
   const moveVertically = (dir: 1 | -1) => {
-    const flattened = categoryGroups.reduce(
+    const flattened = filteredCategoryGroups.reduce(
       (all, group) => {
         if (collapsedGroupIds.includes(group.id)) {
           return all.concat({ id: group.id, isGroup: true });
@@ -332,9 +331,7 @@ export function BudgetTable(props: BudgetTableProps) {
             onCreateView={() => setEditorState({ isOpen: true })}
             onEditView={id => setEditorState({ isOpen: true, viewId: id })}
             onDeleteView={deleteView}
-            onReorderViews={() =>
-              dispatch(pushModal({ modal: { name: 'reorder-views-editor' } }))
-            }
+            onReorderViewToTarget={reorderViewToTarget}
             onToggleViewVisibility={toggleViewVisibility}
             onToggleShowHiddenViews={toggleShowHiddenViews}
           />

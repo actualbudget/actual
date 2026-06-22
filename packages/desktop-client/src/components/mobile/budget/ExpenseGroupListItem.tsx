@@ -98,6 +98,7 @@ export function ExpenseGroupListItem({
           isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
           isHidden={isHidden}
+          showHiddenCategories={showHiddenCategories}
         />
 
         <ExpenseCategoryList
@@ -124,6 +125,7 @@ type ExpenseGroupHeaderProps = {
   show3Columns: boolean;
   showBudgetedColumn: boolean;
   isHidden: boolean;
+  showHiddenCategories: boolean;
 };
 
 export function ExpenseGroupHeader({
@@ -135,6 +137,7 @@ export function ExpenseGroupHeader({
   isCollapsed,
   onToggleCollapse,
   isHidden,
+  showHiddenCategories,
 }: ExpenseGroupHeaderProps) {
   return (
     <View
@@ -167,6 +170,7 @@ export function ExpenseGroupHeader({
         month={month}
         show3Columns={show3Columns}
         showBudgetedColumn={showBudgetedColumn}
+        showHiddenCategories={showHiddenCategories}
       />
     </View>
   );
@@ -276,6 +280,7 @@ type ExpenseGroupCellsProps = {
   month: string;
   show3Columns: boolean;
   showBudgetedColumn: boolean;
+  showHiddenCategories: boolean;
 };
 
 function ExpenseGroupCells({
@@ -283,6 +288,7 @@ function ExpenseGroupCells({
   month,
   show3Columns,
   showBudgetedColumn,
+  showHiddenCategories,
 }: ExpenseGroupCellsProps) {
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const format = useFormat();
@@ -292,8 +298,11 @@ function ExpenseGroupCells({
   const sheetName = monthUtils.sheetForMonth(month);
 
   const categoryIds = useMemo(
-    () => (group.categories || []).filter(c => !c.hidden).map(c => c.id),
-    [group.categories],
+    () =>
+      (group.categories || [])
+        .filter(c => showHiddenCategories || !c.hidden)
+        .map(c => c.id),
+    [group.categories, showHiddenCategories],
   );
 
   const dynamicBudgetedTracking = useCategorySum(

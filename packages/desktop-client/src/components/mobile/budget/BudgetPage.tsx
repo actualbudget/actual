@@ -88,6 +88,7 @@ export function BudgetPage() {
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const spreadsheet = useSpreadsheet();
+  const isFocusedViewsEnabled = useFeatureFlag('focusedViews');
 
   const { views, viewOrder, hiddenViews, activeViewId, setActiveView } =
     useFocusedViews();
@@ -102,7 +103,7 @@ export function BudgetPage() {
   );
 
   const { filteredCategoryGroups, availableBuiltInViews } =
-    useFocusedViewFilter(categoryGroups, sheetNames);
+    useFocusedViewFilter(categoryGroups, sheetNames, { activeViewId, views });
   const [monthBounds, setMonthBounds] = useState({
     start: startMonth,
     end: startMonth,
@@ -620,14 +621,16 @@ export function BudgetPage() {
                 justifyContent: 'flex-end',
               }}
             >
-              <ViewFilterButton
-                views={views}
-                viewOrder={viewOrder}
-                hiddenViews={hiddenViews}
-                activeViewId={activeViewId}
-                availableBuiltInViews={availableBuiltInViews}
-                onSelectView={setActiveView}
-              />
+              {isFocusedViewsEnabled && (
+                <ViewFilterButton
+                  views={views}
+                  viewOrder={viewOrder}
+                  hiddenViews={hiddenViews}
+                  activeViewId={activeViewId}
+                  availableBuiltInViews={availableBuiltInViews}
+                  onSelectView={setActiveView}
+                />
+              )}
               {!monthUtils.isCurrentMonth(startMonth) && (
                 <Button
                   variant="bare"

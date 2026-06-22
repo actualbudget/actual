@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import type { ReactNode } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgFilter, SvgFilterOutline } from '@actual-app/components/icons/v1';
@@ -36,16 +37,22 @@ export function ViewFilterButton({
 
   const isFilterActive = activeViewId !== null;
 
-  function getBuiltInLabel(viewId: string): string | null {
+  function getBuiltInLabel(viewId: string): ReactNode | null {
     switch (viewId) {
       case BUILT_IN_VIEWS.UNDERFUNDED:
-        return availableBuiltInViews.underfunded ? t('Underfunded') : null;
+        return availableBuiltInViews.underfunded ? (
+          <Trans>Underfunded</Trans>
+        ) : null;
       case BUILT_IN_VIEWS.OVERFUNDED:
-        return availableBuiltInViews.overfunded ? t('Overfunded') : null;
+        return availableBuiltInViews.overfunded ? (
+          <Trans>Overfunded</Trans>
+        ) : null;
       case BUILT_IN_VIEWS.OVERSPENT:
-        return availableBuiltInViews.overspent ? t('Overspent') : null;
+        return availableBuiltInViews.overspent ? (
+          <Trans>Overspent</Trans>
+        ) : null;
       case BUILT_IN_VIEWS.MONEY_AVAILABLE:
-        return t('Money Available');
+        return <Trans>Money Available</Trans>;
       default:
         return null;
     }
@@ -56,8 +63,8 @@ export function ViewFilterButton({
   }
 
   // Build the list of view items to render
-  const viewItems: Array<{ id: string | null; label: string }> = [
-    { id: null, label: t('All') },
+  const viewItems: Array<{ id: string | null; label: ReactNode }> = [
+    { id: null, label: <Trans>All</Trans> },
   ];
 
   for (const viewId of viewOrder) {

@@ -358,10 +358,6 @@ export type Modal =
       };
     }
   | {
-      name: 'reorder-views-editor';
-      options?: undefined;
-    }
-  | {
       name: 'category-menu';
       options: {
         categoryId: CategoryEntity['id'];

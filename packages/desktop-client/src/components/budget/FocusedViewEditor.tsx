@@ -9,12 +9,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-  ModalTitle,
-} from '#components/common/Modal';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { Checkbox } from '#components/forms';
 import { useCategories } from '#hooks/useCategories';
 import { useFocusedViews } from '#hooks/useFocusedViews';
@@ -94,11 +89,27 @@ export function FocusedViewEditor({ viewId, onClose }: FocusedViewEditorProps) {
     <Modal name="focused-view-editor" onClose={onClose}>
       <ModalHeader
         title={
-          <ModalTitle
-            title={
-              existingView ? t('Edit Focused View') : t('Create Focused View')
-            }
-          />
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 25,
+                fontWeight: 700,
+                textAlign: 'center',
+              }}
+            >
+              {existingView ? (
+                <Trans>Edit Focused View</Trans>
+              ) : (
+                <Trans>Create Focused View</Trans>
+              )}
+            </Text>
+          </View>
         }
         rightContent={<ModalCloseButton onPress={onClose} />}
       />
