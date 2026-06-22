@@ -4,6 +4,7 @@
 ROOT=`dirname $0`
 RELEASE=""
 CI=${CI:-false}
+ELECTRON_BUILDER_FLAGS="${ELECTRON_BUILDER_FLAGS:-}"
 
 cd "$ROOT/.."
 POSITIONAL=()
@@ -74,12 +75,11 @@ yarn workspace desktop-electron update-client
         yarn build:dist
         echo "Skipping exe build"
     else
-      if [ "$RELEASE" == "production" ]; then
-          yarn build
+        yarn build:dist
+        yarn electron-builder $ELECTRON_BUILDER_FLAGS
 
-          echo "Created release"
-      else
-          yarn build
-      fi
+        if [ "$RELEASE" == "production" ]; then
+            echo "Created release"
+        fi
     fi
 )
