@@ -37,7 +37,7 @@ function ExpenseProgressLogic({
   let over = false;
 
   if (totalSpent > targetNum) {
-    frac = (totalSpent - targetNum) / targetNum;
+    frac = targetNum === 0 ? 1 : (totalSpent - targetNum) / targetNum;
     over = true;
   } else {
     frac = fraction(totalSpent, targetNum);

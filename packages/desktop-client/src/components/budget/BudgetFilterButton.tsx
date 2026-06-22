@@ -383,7 +383,13 @@ export function BudgetFilterButton({
                 }}
                 onReorderViewToTarget={onReorderViewToTarget}
                 dragState={dragState}
-                onDragChange={setDragState}
+                onDragChange={drag => {
+                  if (drag.type === 'end') {
+                    setDragState(null);
+                  } else {
+                    setDragState(drag);
+                  }
+                }}
                 onToggleVisibility={() => onToggleViewVisibility(viewId)}
                 onToggleShowHiddenViews={onToggleShowHiddenViews}
               />
@@ -409,7 +415,13 @@ export function BudgetFilterButton({
                 onDelete={() => onDeleteView(customView.id)}
                 onReorderViewToTarget={onReorderViewToTarget}
                 dragState={dragState}
-                onDragChange={setDragState}
+                onDragChange={drag => {
+                  if (drag.type === 'end') {
+                    setDragState(null);
+                  } else {
+                    setDragState(drag);
+                  }
+                }}
                 onToggleVisibility={() => onToggleViewVisibility(viewId)}
                 onToggleShowHiddenViews={onToggleShowHiddenViews}
               />
