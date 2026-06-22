@@ -1,4 +1,5 @@
 import { send } from '@actual-app/core/platform/client/connection';
+import { memoizeOne } from '@actual-app/core/shared/memoize';
 import { groupById } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
@@ -7,7 +8,6 @@ import type {
 } from '@actual-app/core/types/models';
 import { queryOptions } from '@tanstack/react-query';
 import { t } from 'i18next';
-import memoizeOne from 'memoize-one';
 
 import { getAccountsById } from '#accounts/accountsSlice';
 

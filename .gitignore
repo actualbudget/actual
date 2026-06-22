@@ -88,6 +88,9 @@ build/
 # Lage cache
 .lage/
 
+# Test results (JUnit XML reports, Playwright artifacts)
+**/test-results/
+
 *storybook.log
 storybook-static
 
