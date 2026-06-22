@@ -57,9 +57,9 @@ runs:
       if: ${{ inputs.cache == 'true' }}
       with:
         path: ${{ format('{0}/node_modules/.cache/lage', inputs.working-directory) }}
-        key: lage-${{ runner.os }}-${{ github.sha }}
+        key: lage-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
         restore-keys: |
-          lage-${{ runner.os }}-
+          lage-${{ runner.os }}-${{ github.job }}-
     - name: Install
       working-directory: ${{ inputs.working-directory }}
       run: yarn --immutable
