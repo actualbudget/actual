@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   derivePublishImports,
   validatePackage,
-} from '../validate-publish-imports.js';
+} from '../validate-publish-imports.mjs';
 
 describe('derivePublishImports', () => {
   it('prepends ./build/ to .js paths', () => {
