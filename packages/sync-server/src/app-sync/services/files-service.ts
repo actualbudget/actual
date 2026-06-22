@@ -1,4 +1,4 @@
-import { getAccountDb, isAdmin } from '#account-db';
+import { isAdmin } from '#account-db';
 import { FileNotFound, GenericFileError } from '#app-sync/errors';
 import type { WrappedDatabase } from '#db';
 import { isValidFileId, isValidGroupId } from '#util/paths';
@@ -300,6 +300,4 @@ class FilesService {
   }
 }
 
-const filesService = new FilesService(getAccountDb());
-
-export { filesService, FilesService, File, FileUpdate };
+export { FilesService, File, FileUpdate };

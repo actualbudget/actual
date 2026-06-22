@@ -116,10 +116,6 @@ export function selectAscDesc(
     : defaultAscDesc;
 }
 
-export function getDisplayValue<T>(obj: T | null | undefined, name: keyof T) {
-  return obj ? obj[name] : '';
-}
-
 // Decides whether a rule result should be applied to a field while the user is
 // entering a new transaction. By default rules only fill fields the user left
 // empty, so their manual input isn't overwritten. The exception is the notes
