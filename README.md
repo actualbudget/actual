@@ -2,6 +2,10 @@
   <img src="/demo.png" alt="Actualbudget" />
 </p>
 
+<p align="center">
+  <a href="https://app.codspeed.io/actualbudget/actual?utm_source=badge"><img src="https://img.shields.io/endpoint?url=https://codspeed.io/badge.json" alt="CodSpeed"/></a>
+</p>
+
 ## Getting Started
 
 Actual is a local-first personal finance tool. It is 100% free and open-source, written in NodeJS, it has a synchronization element so that all your changes can move between devices without any heavy lifting.
