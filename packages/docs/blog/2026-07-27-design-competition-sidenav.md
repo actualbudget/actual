@@ -66,5 +66,3 @@ We'll share the direct links to the voting issues here and in our community chan
 If anything's unclear, ask in the [Actual Budget Discord community](https://discord.gg/pRYNYr4W5A). We can't wait to see what you come up with.
 
 Happy designing!
-</content>
-</invoke>
