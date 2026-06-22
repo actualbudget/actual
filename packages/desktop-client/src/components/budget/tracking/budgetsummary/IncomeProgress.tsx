@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
@@ -13,7 +13,7 @@ function BoundValue({
   children,
 }: {
   binding: Binding<'tracking-budget', SheetFields<'tracking-budget'>>;
-  children: (value: number) => React.JSX.Element;
+  children: (value: number) => ReactNode;
 }) {
   const value = useSheetValue(binding);
   return children(value || 0);

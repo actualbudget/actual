@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
@@ -13,7 +13,7 @@ function BoundValue({
   children,
 }: {
   binding: Binding<'tracking-budget', SheetFields<'tracking-budget'>>;
-  children: (value: number) => React.JSX.Element;
+  children: (value: number) => ReactNode;
 }) {
   const value = useTrackingSheetValue(binding);
   return children(value || 0);
@@ -31,7 +31,7 @@ function ExpenseProgressLogic({
   currentNum: number;
   targetNum: number;
 }) {
-  let totalSpent = Math.max(-currentNum, 0);
+  const totalSpent = Math.max(-currentNum, 0);
 
   let frac;
   let over = false;
