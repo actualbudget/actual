@@ -81,6 +81,7 @@ import {
 } from '#components/mobile/MobileForms';
 import { getPrettyPayee } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
+import { shouldApplyRuleChange } from '#components/transactions/table/utils';
 import { createSingleTimeScheduleFromTransaction } from '#components/transactions/TransactionList';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
@@ -1777,15 +1778,13 @@ function TransactionEditUnconnected({
         if (diff) {
           Object.keys(diff).forEach(key => {
             const field = key as keyof TransactionEntity;
-            // Update "empty" fields in general
+            // Apply rule changes to "empty" fields and append/prepend notes rules
+            // (see shouldApplyRuleChange).
             // Or update all fields if the payee changes (assists location-based entry by
             // applying rules to prefill category, notes, etc. based on the selected payee)
             if (
-              newTransaction[field] == null ||
-              newTransaction[field] === '' ||
-              newTransaction[field] === 0 ||
-              newTransaction[field] === false ||
-              updatedField === 'payee'
+              updatedField === 'payee' ||
+              shouldApplyRuleChange(field, newTransaction[field], diff[field])
             ) {
               (newTransaction as Record<string, unknown>)[field] = diff[field];
             }
