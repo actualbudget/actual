@@ -13,8 +13,8 @@ export function Graph() {
     getEdges,
   };
 
-  const edges = new Map();
-  const incomingEdges = new Map();
+  const edges = new Map<unknown, Set<unknown>>();
+  const incomingEdges = new Map<unknown, Set<unknown>>();
 
   function getEdges() {
     return { edges, incomingEdges };
@@ -142,8 +142,9 @@ export function Graph() {
   function generateDOT() {
     const edgeStrings = [];
     edges.forEach(function (adj, edge) {
-      if (adj.length !== 0) {
-        edgeStrings.push(`${edge} -> {${adj.join(',')}}`);
+      const list = adj as unknown as string[];
+      if (list.length !== 0) {
+        edgeStrings.push(`${String(edge)} -> {${list.join(',')}}`);
       }
     });
 

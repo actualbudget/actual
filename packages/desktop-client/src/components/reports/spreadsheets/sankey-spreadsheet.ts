@@ -37,7 +37,7 @@ type BudgetMonthResponse = {
   toBudget: number;
 };
 
-type AggregatedBudget = {
+export type AggregatedBudget = {
   toBudget: number;
   fromPreviousMonth: number;
   lastMonthOverspent: number;

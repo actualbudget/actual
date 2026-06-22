@@ -179,7 +179,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     categoryExpandedState: stringToInteger(categoryExpandedState || '') || 0,
     maxMonths: stringToInteger(maxMonths || '') || 1,
     documentDir: documentDir || getDefaultDocumentDir(),
-    keyId: encryptKey && JSON.parse(encryptKey).id,
+    keyId: encryptKey && (JSON.parse(encryptKey) as { id: string }).id,
     language,
     theme:
       theme === 'light' ||

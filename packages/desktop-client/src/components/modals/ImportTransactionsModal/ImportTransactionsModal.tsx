@@ -423,9 +423,9 @@ export function ImportTransactionsModal({
 
         if (filetype === 'csv') {
           if (!preserveImportSettings) {
-            let mappings = prefs[`csv-mappings-${accountId}`];
-            mappings = mappings
-              ? JSON.parse(mappings)
+            const savedMappings = prefs[`csv-mappings-${accountId}`];
+            const mappings = savedMappings
+              ? JSON.parse(savedMappings)
               : getInitialMappings(transactions);
 
             // @ts-expect-error - mappings might not have outflow/inflow properties

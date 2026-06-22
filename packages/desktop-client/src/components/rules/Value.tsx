@@ -126,7 +126,9 @@ export function Value<T>({
             return value;
           }
           if (data && Array.isArray(data)) {
-            const item = data.find(item => item.id === value);
+            const item = (data as Array<T & { id: unknown }>).find(
+              item => item.id === value,
+            );
             if (item) {
               return describe(item);
             } else {

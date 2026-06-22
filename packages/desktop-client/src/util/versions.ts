@@ -27,7 +27,7 @@ export async function getLatestVersion(): Promise<string | 'unknown'> {
     const response = await fetch(
       'https://api.github.com/repos/actualbudget/actual/releases/latest',
     );
-    const json = await response.json();
+    const json = (await response.json()) as { tag_name?: string };
     return json?.tag_name ?? 'unknown';
   } catch {
     // Rate limit exceeded? Or perhaps GitHub is down?

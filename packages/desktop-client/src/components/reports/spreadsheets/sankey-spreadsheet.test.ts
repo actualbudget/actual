@@ -25,7 +25,7 @@ import {
   nodesInLayer,
   sortGraph,
 } from './sankey-spreadsheet';
-import type { Graph, NodeData } from './sankey-spreadsheet';
+import type { AggregatedBudget, Graph, NodeData } from './sankey-spreadsheet';
 
 // Mock i18n
 vi.mock('i18next', () => ({
@@ -486,7 +486,7 @@ describe('sankey-spreadsheet', () => {
         },
       ];
 
-      const aggregated = {
+      const aggregated: AggregatedBudget = {
         toBudget: 1000,
         fromPreviousMonth: 200,
         lastMonthOverspent: 0,
@@ -516,7 +516,7 @@ describe('sankey-spreadsheet', () => {
         isNegative: false;
       }> = [];
 
-      const aggregated = {
+      const aggregated: AggregatedBudget = {
         toBudget: -500,
         fromPreviousMonth: 0,
         lastMonthOverspent: 0,

@@ -113,7 +113,9 @@ function parseArray(str) {
 }
 
 export function parseConditionsOrActions(str) {
-  return str ? parseArray(str).map(item => fromInternalField(item)) : [];
+  return str
+    ? parseArray(str).map(item => fromInternalField(item as { field: string }))
+    : [];
 }
 
 export function serializeConditionsOrActions(arr) {
@@ -870,7 +872,7 @@ export async function updatePayeeRenameRule(fromNames: string[], to: string) {
 }
 
 export function getProbableCategory(transactions) {
-  const scores = new Map();
+  const scores = new Map<string, number>();
 
   transactions.forEach(trans => {
     if (trans.category) {
@@ -894,7 +896,7 @@ export async function updateCategoryRules(transactions) {
     return;
   }
 
-  const payeeIds = new Set(transactions.map(trans => trans.payee));
+  const payeeIds = new Set<string>(transactions.map(trans => trans.payee));
   const transIds = new Set(transactions.map(trans => trans.id));
 
   // It's going to be quickest to get the oldest date and then query
@@ -924,7 +926,7 @@ export async function updateCategoryRules(transactions) {
   );
 
   const allTransactions = partitionByField(register, 'payee');
-  const categoriesToSet = new Map();
+  const categoriesToSet = new Map<string, string>();
 
   for (const payeeId of payeeIds) {
     // Don't do anything if payee is null

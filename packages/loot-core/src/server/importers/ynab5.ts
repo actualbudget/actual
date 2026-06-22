@@ -1146,7 +1146,11 @@ async function importBudgets(data: Budget, entityIdMap: Map<string, string>) {
 }
 
 export function parseFile(buffer: Buffer): Budget {
-  let data = JSON.parse(buffer.toString());
+  let data = JSON.parse(buffer.toString()) as Budget & {
+    data?: Budget & { plan?: Budget; budget?: Budget };
+    plan?: Budget;
+    budget?: Budget;
+  };
   if (data.data) {
     data = data.data;
   }

@@ -9,6 +9,7 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import type { CategoryEntity } from '@actual-app/core/types/models';
+import type { CleanupTemplate } from '@actual-app/core/types/models/cleanup-templates';
 import type { Template } from '@actual-app/core/types/models/templates';
 import { css, cx } from '@emotion/css';
 
@@ -36,7 +37,7 @@ function getAutomationEntries(
     return [];
   }
   try {
-    const parsed = JSON.parse(goalDef);
+    const parsed = JSON.parse(goalDef) as Template[];
     if (!Array.isArray(parsed)) {
       return [];
     }
@@ -56,7 +57,7 @@ function getCleanupConfig(
     return emptyCleanupConfig();
   }
   try {
-    const parsed = JSON.parse(cleanupDef);
+    const parsed = JSON.parse(cleanupDef) as CleanupTemplate[];
     return cleanupDefToEditor(Array.isArray(parsed) ? parsed : []);
   } catch {
     return emptyCleanupConfig();

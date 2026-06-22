@@ -10,7 +10,12 @@
     "outDir": "@types",
     "rootDir": ".",
     "tsBuildInfoFile": "@types/.tsbuildinfo",
-    "types": ["vite/client", "vitest/globals", "node"],
+    "types": [
+      "vite/client",
+      "vitest/globals",
+      "node",
+      "@total-typescript/ts-reset"
+    ],
     "paths": {
       // Allow importing from hyperformula's internal typings for custom function plugins
       "hyperformula/typings/*": ["../../node_modules/hyperformula/typings/*"]

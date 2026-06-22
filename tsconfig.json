@@ -23,7 +23,7 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "jsx": "preserve",
-    "types": ["vite/client", "vitest/globals"],
+    "types": ["vite/client", "vitest/globals", "@total-typescript/ts-reset"],
     // Check JS files too
     "allowJs": true,
     "checkJs": false,

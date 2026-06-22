@@ -143,7 +143,7 @@ async function loadGlobalPrefs() {
         path.join(process.env.ACTUAL_DATA_DIR!, 'global-store.json'),
         'utf8',
       ),
-    );
+    ) as GlobalPrefsJson;
   } catch {
     logMessage('info', 'Could not load global state - using defaults');
     state = {};

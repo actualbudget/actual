@@ -88,7 +88,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     widget?.meta?.content
       ? (() => {
           try {
-            return JSON.parse(widget.meta.content);
+            return JSON.parse(widget.meta.content) as SummaryContent;
           } catch (error) {
             console.error('Failed to parse widget meta content:', error);
             return {

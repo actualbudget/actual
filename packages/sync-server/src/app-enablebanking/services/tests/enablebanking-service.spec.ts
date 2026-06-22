@@ -22,6 +22,13 @@ import {
   mockSessionAccount,
 } from './fixtures';
 
+type StartAuthRequestBody = {
+  aspsp: { name: string; country: string };
+  redirect_url: string;
+  state: string;
+  access: { valid_until: string };
+};
+
 // Mock dependencies before importing the service
 vi.mock('../../../services/secrets-service', () => ({
   SecretName: {
@@ -184,7 +191,9 @@ describe('enableBankingService', () => {
         }),
       );
 
-      const body = JSON.parse(String(mockFetch.mock.calls[0][1].body));
+      const body = JSON.parse(
+        String(mockFetch.mock.calls[0][1].body),
+      ) as StartAuthRequestBody;
       expect(body.aspsp).toEqual({ name: 'Nordea', country: 'FI' });
       expect(body.redirect_url).toBe('https://app.example.com/callback');
       expect(body.state).toBe('test-state-uuid');
@@ -204,7 +213,9 @@ describe('enableBankingService', () => {
         'state',
       );
 
-      const body = JSON.parse(String(mockFetch.mock.calls[0][1].body));
+      const body = JSON.parse(
+        String(mockFetch.mock.calls[0][1].body),
+      ) as StartAuthRequestBody;
       const validUntil = new Date(body.access.valid_until);
       const now = new Date();
       const diffDays = Math.round(
@@ -225,7 +236,9 @@ describe('enableBankingService', () => {
         thirtyDaysInSeconds,
       );
 
-      const body = JSON.parse(String(mockFetch.mock.calls[0][1].body));
+      const body = JSON.parse(
+        String(mockFetch.mock.calls[0][1].body),
+      ) as StartAuthRequestBody;
       const validUntil = new Date(body.access.valid_until);
       const diffDays = Math.round(
         (validUntil.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
@@ -245,7 +258,9 @@ describe('enableBankingService', () => {
         oneYearInSeconds,
       );
 
-      const body = JSON.parse(String(mockFetch.mock.calls[0][1].body));
+      const body = JSON.parse(
+        String(mockFetch.mock.calls[0][1].body),
+      ) as StartAuthRequestBody;
       const validUntil = new Date(body.access.valid_until);
       const diffDays = Math.round(
         (validUntil.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
@@ -264,7 +279,9 @@ describe('enableBankingService', () => {
         0,
       );
 
-      const body = JSON.parse(String(mockFetch.mock.calls[0][1].body));
+      const body = JSON.parse(
+        String(mockFetch.mock.calls[0][1].body),
+      ) as StartAuthRequestBody;
       const validUntil = new Date(body.access.valid_until);
       const diffDays = Math.round(
         (validUntil.getTime() - Date.now()) / (1000 * 60 * 60 * 24),

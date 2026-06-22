@@ -31,7 +31,7 @@ export function useThemeCatalog() {
           throw new Error('Invalid catalog format: expected an array');
         }
 
-        setData(data);
+        setData(data as CatalogTheme[]);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'Failed to load theme catalog',

@@ -74,7 +74,7 @@ export function useBankSyncAccountSettings(accountId: string) {
   let exampleTransaction;
   if (data) {
     try {
-      exampleTransaction = JSON.parse(data);
+      exampleTransaction = JSON.parse(data) as Record<string, unknown>;
     } catch (error) {
       console.error('Failed to parse transaction data:', error);
     }

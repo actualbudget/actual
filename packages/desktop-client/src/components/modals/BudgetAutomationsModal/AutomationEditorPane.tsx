@@ -64,11 +64,8 @@ const MOBILE_TOUCH_FIELDS_CLASS = css({
   },
 });
 
-const SINGLETON_TYPES: ReadonlySet<DisplayTemplateType> = new Set([
-  'limit',
-  'refill',
-  'remainder',
-]);
+const SINGLETON_TYPES: ReadonlySet<DisplayTemplateType> =
+  new Set<DisplayTemplateType>(['limit', 'refill', 'remainder']);
 
 function getDefaultWeeklyStart(entries: AutomationEntry[]): string {
   const starts: string[] = [];

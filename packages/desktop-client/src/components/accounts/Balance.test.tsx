@@ -4,6 +4,7 @@ import type { ScheduleEntity } from '@actual-app/core/types/models';
 import { render, screen } from '@testing-library/react';
 
 import { useCachedSchedules } from '#hooks/useCachedSchedules';
+import type { UseSchedulesResult } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { TestProviders } from '#mocks';
@@ -44,7 +45,7 @@ function makeSchedule(
   } satisfies ScheduleEntity;
 }
 
-function mockedSchedules(schedules: ScheduleEntity[]) {
+function mockedSchedules(schedules: ScheduleEntity[]): UseSchedulesResult {
   return {
     isLoading: false,
     schedules,

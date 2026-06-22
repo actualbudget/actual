@@ -66,6 +66,7 @@
   "devDependencies": {
     "@monorepo-utils/workspaces-to-typescript-project-references": "^2.11.0",
     "@octokit/rest": "^22.0.1",
+    "@total-typescript/ts-reset": "^0.6.1",
     "@types/node": "^22.19.21",
     "@types/prompts": "^2.4.9",
     "@typescript/native-preview": "beta",

@@ -6,8 +6,11 @@ import { captureBreadcrumb, captureException } from '#platform/exceptions';
 
 import type * as T from './index-types';
 
-const replyHandlers = new Map();
-const listeners = new Map();
+const replyHandlers = new Map<
+  string,
+  { resolve: (result: unknown) => void; reject: (error: unknown) => void }
+>();
+const listeners = new Map<string, Array<(args: unknown) => unknown>>();
 let messageQueue = [];
 
 let globalWorker = null;
@@ -187,7 +190,7 @@ export const listen: T.Listen = function (name, cb) {
   if (!listeners.get(name)) {
     listeners.set(name, []);
   }
-  listeners.get(name).push(cb);
+  listeners.get(name).push(cb as (args: unknown) => unknown);
 
   return () => {
     const arr = listeners.get(name);

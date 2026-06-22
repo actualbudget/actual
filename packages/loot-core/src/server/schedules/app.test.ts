@@ -845,7 +845,7 @@ describe('schedule app', () => {
           id: ruleId,
           actions: [
             { op: 'set', field: 'amount', value: -6000 },
-            ...JSON.parse(ruleRow.actions),
+            ...(JSON.parse(ruleRow.actions) as unknown[]),
           ],
         });
 

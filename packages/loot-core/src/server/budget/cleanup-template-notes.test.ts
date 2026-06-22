@@ -121,9 +121,15 @@ describe('storeNoteCleanups', () => {
 
     await storeNoteCleanups();
 
-    const def1 = JSON.parse(state.categoryDefs.get('cat-1')!);
-    const def2 = JSON.parse(state.categoryDefs.get('cat-2')!);
-    const def3 = JSON.parse(state.categoryDefs.get('cat-3')!);
+    const def1 = JSON.parse(state.categoryDefs.get('cat-1')!) as Array<{
+      groupId: string;
+    }>;
+    const def2 = JSON.parse(state.categoryDefs.get('cat-2')!) as Array<{
+      groupId: string;
+    }>;
+    const def3 = JSON.parse(state.categoryDefs.get('cat-3')!) as Array<{
+      groupId: string;
+    }>;
     expect(def1[0].groupId).toBe(def2[0].groupId);
     expect(def2[0].groupId).toBe(def3[0].groupId);
 
@@ -166,7 +172,9 @@ describe('storeNoteCleanups', () => {
     await storeNoteCleanups();
 
     expect(state.groups.get('g-existing')!.tombstone).toBe(0);
-    const def = JSON.parse(state.categoryDefs.get('cat-1')!);
+    const def = JSON.parse(state.categoryDefs.get('cat-1')!) as Array<{
+      groupId: string;
+    }>;
     expect(def[0].groupId).toBe('g-existing');
   });
 });

@@ -98,7 +98,7 @@ export const goCardlessService = {
       try {
         const payload = JSON.parse(
           Buffer.from(token.split('.')[1], 'base64url').toString(),
-        );
+        ) as { exp: number };
         const clockTimestamp = Math.floor(Date.now() / 1000);
         return clockTimestamp >= payload.exp;
       } catch {

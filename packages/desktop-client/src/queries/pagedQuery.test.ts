@@ -78,7 +78,7 @@ function runPagedQuery(query, data) {
   throw new Error('Unable to execute query: ' + JSON.stringify(query, null, 2));
 }
 
-const eventListeners = new Map();
+const eventListeners = new Map<string, Array<(args: unknown) => void>>();
 
 function clearEventListeners() {
   eventListeners.clear();

@@ -56,7 +56,7 @@ export const init: T.Init = function (_socketName, handlers) {
           }
 
           if (error.type === 'ServerError' && name !== 'api/load-budget') {
-            captureException(nativeError);
+            captureException(nativeError as Error);
           }
 
           if (!catchErrors) {

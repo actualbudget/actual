@@ -88,7 +88,7 @@ export function applyChanges<T extends { id: string }>(
 }
 
 export function partitionByField<T, K extends keyof T>(data: T[], field: K) {
-  const res = new Map();
+  const res = new Map<T[K], T[]>();
   for (let i = 0; i < data.length; i++) {
     const item = data[i];
     const key = item[field];

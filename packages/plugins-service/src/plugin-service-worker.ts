@@ -113,7 +113,9 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
 
         if (fileToCheck === 'mf-manifest.json') {
           try {
-            const manifest = JSON.parse(content);
+            const manifest = JSON.parse(content) as {
+              metaData?: { publicPath?: string };
+            };
             if (manifest.metaData?.publicPath) {
               manifest.metaData.publicPath = `/plugin-data/${slug}/`;
               content = JSON.stringify(manifest);

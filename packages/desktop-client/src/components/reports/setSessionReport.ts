@@ -4,8 +4,12 @@ export const setSessionReport = (
   propName: string,
   propValue: string | boolean | RuleConditionEntity[],
 ) => {
-  const storedReport =
-    sessionStorage.report && JSON.parse(sessionStorage.getItem('report') || '');
+  const storedReport: Record<string, unknown> = sessionStorage.report
+    ? (JSON.parse(sessionStorage.getItem('report') || '') as Record<
+        string,
+        unknown
+      >)
+    : {};
   const result: Record<string, string | boolean | RuleConditionEntity[]> = {};
   result[propName] = propValue;
   sessionStorage.setItem(

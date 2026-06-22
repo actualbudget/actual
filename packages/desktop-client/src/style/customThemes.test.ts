@@ -1754,7 +1754,8 @@ describe('migrateLegacyOverride', () => {
     expect(result?.newLightJson).toBe(JSON.stringify(baseTheme));
     expect(result?.newDarkJson).toBe(darkJson);
     expect(
-      JSON.parse(result?.newLightJson ?? '{}').overrideCss,
+      (JSON.parse(result?.newLightJson ?? '{}') as Record<string, unknown>)
+        .overrideCss,
     ).toBeUndefined();
   });
 
@@ -1773,7 +1774,10 @@ describe('migrateLegacyOverride', () => {
     expect(result?.override).toBe(':root { --color-accent: #00ffaa; }');
     expect(result?.newLightJson).toBe(lightJson);
     expect(result?.newDarkJson).toBe(JSON.stringify(baseTheme));
-    expect(JSON.parse(result?.newDarkJson ?? '{}').overrideCss).toBeUndefined();
+    expect(
+      (JSON.parse(result?.newDarkJson ?? '{}') as Record<string, unknown>)
+        .overrideCss,
+    ).toBeUndefined();
   });
 
   it('prefers light when both have legacy overrideCss (collision rule)', () => {
@@ -1794,9 +1798,13 @@ describe('migrateLegacyOverride', () => {
     expect(result?.newLightJson).toBe(JSON.stringify(baseTheme));
     expect(result?.newDarkJson).toBe(JSON.stringify(baseTheme));
     expect(
-      JSON.parse(result?.newLightJson ?? '{}').overrideCss,
+      (JSON.parse(result?.newLightJson ?? '{}') as Record<string, unknown>)
+        .overrideCss,
     ).toBeUndefined();
-    expect(JSON.parse(result?.newDarkJson ?? '{}').overrideCss).toBeUndefined();
+    expect(
+      (JSON.parse(result?.newDarkJson ?? '{}') as Record<string, unknown>)
+        .overrideCss,
+    ).toBeUndefined();
   });
 
   it('migrates from light when existingOverride is an empty string', () => {

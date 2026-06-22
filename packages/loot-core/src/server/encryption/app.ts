@@ -102,7 +102,15 @@ async function keyTest({
       iv: string;
       authTag: string;
     };
-  } = JSON.parse(originalTest);
+  } = JSON.parse(originalTest) as {
+    value: string;
+    meta: {
+      keyId: string;
+      algorithm: string;
+      iv: string;
+      authTag: string;
+    };
+  };
 
   const key = await encryption.createKey({ id, password, salt });
   await encryption.loadKey(key);
@@ -118,7 +126,9 @@ async function keyTest({
   }
 
   // Persist key in async storage
-  const keys = JSON.parse((await asyncStorage.getItem(`encrypt-keys`)) || '{}');
+  const keys = JSON.parse(
+    (await asyncStorage.getItem(`encrypt-keys`)) || '{}',
+  ) as Record<string, unknown>;
   keys[validCloudFileId] = key.serialize();
   await asyncStorage.setItem('encrypt-keys', JSON.stringify(keys));
 

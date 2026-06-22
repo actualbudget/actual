@@ -78,7 +78,7 @@ async function needsBootstrap({ url }: { url?: string } = {}) {
   };
 
   try {
-    res = JSON.parse(resText);
+    res = JSON.parse(resText) as typeof res;
   } catch {
     return { error: 'parse-failure' };
   }
@@ -116,16 +116,17 @@ async function bootstrap(loginConfig: {
 }
 
 async function getLoginMethods() {
-  let res: {
+  type LoginMethodsResponse = {
     methods?: Array<{ method: string; displayName: string; active: boolean }>;
   };
+  let res: LoginMethodsResponse;
   try {
     const serverConfig = getServer();
     if (!serverConfig) {
       throw new Error('No sync server configured.');
     }
-    res = await fetch(serverConfig.SIGNUP_SERVER + '/login-methods').then(res =>
-      res.json(),
+    res = await fetch(serverConfig.SIGNUP_SERVER + '/login-methods').then(
+      response => response.json() as Promise<LoginMethodsResponse>,
     );
   } catch (err) {
     if (err instanceof PostError) {
@@ -176,7 +177,18 @@ async function getUser() {
         loginMethod = null,
         prefs: serverPrefs,
       } = {},
-    } = JSON.parse(res) || {};
+    } = (JSON.parse(res) as {
+      status?: string;
+      reason?: string;
+      data?: {
+        userName?: string | null;
+        permission?: string;
+        userId?: string | null;
+        displayName?: string | null;
+        loginMethod?: string | null;
+        prefs?: unknown;
+      };
+    }) || {};
 
     if (status === 'error') {
       if (reason === 'unauthorized') {

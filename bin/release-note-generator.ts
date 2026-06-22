@@ -133,7 +133,9 @@ async function getPrNumberFromHead(
       console.warn('error fetching from github pulls api:', resp.status);
       return undefined;
     }
-    const ghResponse = await resp.json();
+    const ghResponse = (await resp.json()) as
+      | Array<{ number: number; title: string }>
+      | undefined;
     if (ghResponse?.length === 1) {
       return ghResponse[0];
     } else {

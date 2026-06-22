@@ -654,7 +654,7 @@ export function parseInstalledTheme(
 ): InstalledTheme | null {
   if (!json) return null;
   try {
-    const parsed = JSON.parse(json);
+    const parsed = JSON.parse(json) as Record<string, unknown>;
     if (
       parsed &&
       typeof parsed === 'object' &&
@@ -704,7 +704,7 @@ export function serializeInstalledTheme(theme: InstalledTheme | null): string {
 export function extractLegacyOverride(json: string | undefined): string | null {
   if (!json) return null;
   try {
-    const parsed = JSON.parse(json);
+    const parsed = JSON.parse(json) as Record<string, unknown>;
     if (
       parsed &&
       typeof parsed === 'object' &&

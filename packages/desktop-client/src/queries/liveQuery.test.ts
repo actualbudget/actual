@@ -18,7 +18,7 @@ function isCountQuery(query) {
   return false;
 }
 
-const eventListeners = new Map();
+const eventListeners = new Map<string, Array<(args: unknown) => void>>();
 
 function clearEventListeners() {
   eventListeners.clear();

@@ -168,7 +168,7 @@ async function getTemplates(
     if (!categoryWithGoalDef.goal_def) continue;
     categoryTemplates[categoryWithGoalDef.id] = JSON.parse(
       categoryWithGoalDef.goal_def,
-    );
+    ) as Template[];
   }
   return categoryTemplates;
 }

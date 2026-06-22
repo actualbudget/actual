@@ -80,7 +80,7 @@ handlers['get-server-version'] = async function () {
   try {
     const res = await get(getServer().BASE_SERVER + '/info');
 
-    const info = JSON.parse(res);
+    const info = JSON.parse(res) as { build: { version: string } };
     version = info.build.version;
   } catch {
     return { error: 'network-failure' };

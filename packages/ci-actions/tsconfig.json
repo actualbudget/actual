@@ -6,7 +6,7 @@
     "moduleResolution": "bundler",
     "skipLibCheck": true,
     "strict": true,
-    "types": ["node"],
+    "types": ["node", "@total-typescript/ts-reset"],
     "outDir": "dist",
     "rootDir": ".",
     "composite": true

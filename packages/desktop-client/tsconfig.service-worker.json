@@ -13,7 +13,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": false,
-    "types": ["vite/client"],
+    "types": ["vite/client", "@total-typescript/ts-reset"],
     "tsBuildInfoFile": "./service-worker/.tsbuildinfo"
   },
   "include": ["src/plugin-service-worker.ts"],

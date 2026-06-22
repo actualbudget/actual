@@ -116,7 +116,7 @@ export function usePreviewTransactions({
       })
       .catch(error => {
         if (!isUnmounted) {
-          setError(error);
+          setError(error as Error);
           setIsLoading(false);
         }
       });

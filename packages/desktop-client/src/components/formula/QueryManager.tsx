@@ -431,7 +431,7 @@ function QueryItem({
 
   function handleImport() {
     try {
-      const config = JSON.parse(importJsonText);
+      const config = JSON.parse(importJsonText) as QueryConfig;
       if (config.conditions && config.conditionsOp && config.timeFrame) {
         // Update refs
         conditionsRef.current = config.conditions;

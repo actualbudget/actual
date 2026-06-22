@@ -252,7 +252,10 @@ async function downloadSimpleFinTransactions(
           Array.isArray(errorList) &&
           errorList.length > 0
         ) {
-          const error = errorList[0];
+          const error = errorList[0] as {
+            error_type?: string;
+            error_code?: string;
+          };
           retVal[accountId] = {
             transactions: [],
             accountBalance: [],
@@ -1286,7 +1289,7 @@ export async function simpleFinBatchSync(
           accountId: account.id,
           res,
         }))
-        .catch(err => ({
+        .catch((err: { category?: string; code?: string }) => ({
           accountId: account.id,
           res: {
             error_type: err?.category || 'INTERNAL_ERROR',

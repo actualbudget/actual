@@ -50,7 +50,7 @@ function LoadComponentInner<K extends string>({
       },
     ).catch(e => {
       if (!isUnmounted) {
-        setError(e);
+        setError(e as Error);
       }
     });
 

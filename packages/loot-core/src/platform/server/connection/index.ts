@@ -84,7 +84,7 @@ export const init: T.Init = function (serverChn, handlers) {
 
             // Only report internal errors
             if (error.type === 'ServerError') {
-              captureException(nativeError);
+              captureException(nativeError as Error);
             }
 
             if (!catchErrors) {

@@ -247,10 +247,14 @@ async function copyDashboardWidget({
         type: widget.type,
         width: widget.width,
         height: widget.height,
-        meta: widget.meta ? JSON.parse(widget.meta) : {},
+        meta: widget.meta
+          ? (JSON.parse(widget.meta) as DashboardWidgetEntity['meta'])
+          : {},
         dashboard_page_id: targetDashboardPageId,
       };
-      await addDashboardWidget(newWidget);
+      await addDashboardWidget(
+        newWidget as Parameters<typeof addDashboardWidget>[0],
+      );
     } else {
       throw new Error(`Unsupported widget type: ${widget.type}`);
     }
@@ -270,7 +274,9 @@ async function importDashboard({
     }
 
     const content = await fs.readFile(filePath);
-    const parsedContent: ExportImportDashboard = JSON.parse(content);
+    const parsedContent: ExportImportDashboard = JSON.parse(
+      content,
+    ) as ExportImportDashboard;
 
     exportModel.validate(parsedContent);
 

@@ -335,7 +335,7 @@ async function duplicateBudget({
   // copy metadata from current budget
   // replace id with new budget id and budgetName with new budget name
   const metadataText = await fs.readFile(fs.join(budgetDir, 'metadata.json'));
-  const metadata = JSON.parse(metadataText);
+  const metadata = JSON.parse(metadataText) as Record<string, unknown>;
   metadata.id = newId;
   metadata.budgetName = newName;
   [

@@ -49,7 +49,7 @@ function useAvailableBanks(country: string) {
         setIsError(true);
         setBanks([]);
       } else {
-        setBanks(data);
+        setBanks(data as GoCardlessInstitution[]);
       }
 
       setIsLoading(false);

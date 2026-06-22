@@ -444,7 +444,9 @@ export function parseFile(buffer: Buffer): YNAB4.YFull {
   }
 
   const metaStr = zipped.readFile(getFile(entries, root + 'Budget.ymeta'));
-  const meta = JSON.parse(metaStr.toString('utf8'));
+  const meta = JSON.parse(metaStr.toString('utf8')) as {
+    relativeDataFolderName: string;
+  };
   const budgetPath = join(root, meta.relativeDataFolderName);
 
   const deviceFiles = entries.filter(e =>
@@ -462,7 +464,7 @@ export function parseFile(buffer: Buffer): YNAB4.YFull {
   }
 
   try {
-    return JSON.parse(contents);
+    return JSON.parse(contents) as YNAB4.YFull;
   } catch {
     throw new Error('Error parsing Budget.yfull file');
   }

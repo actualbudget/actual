@@ -5,12 +5,13 @@ export function handleError(
 ) {
   return (req: Request, res: Response) => {
     func(req, res).catch(err => {
-      console.log('Error', req.originalUrl, err.message || String(err));
+      const error = err as { message?: string };
+      console.log('Error', req.originalUrl, error.message || String(err));
       res.send({
         status: 'ok',
         data: {
           error_code: 'INTERNAL_ERROR',
-          error_type: err.message ? err.message : 'internal-error',
+          error_type: error.message ? error.message : 'internal-error',
         },
       });
     });

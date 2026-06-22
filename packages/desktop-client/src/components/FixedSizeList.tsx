@@ -82,7 +82,7 @@ export class FixedSizeList extends PureComponent<
     super(props);
 
     this.lastPositions = createRef();
-    this.lastPositions.current = new Map();
+    this.lastPositions.current = new Map<string | number, number>();
     this.needsAnimationRerender = createRef();
     this.needsAnimationRerender.current = false;
     this.animationEnabled = false;
@@ -198,7 +198,7 @@ export class FixedSizeList extends PureComponent<
     const { isScrolling } = this.state;
 
     const [startIndex, stopIndex] = this._getRangeToRender();
-    const positions = new Map();
+    const positions = new Map<string | number, number>();
 
     const items = [];
     if (itemCount > 0) {
@@ -207,7 +207,7 @@ export class FixedSizeList extends PureComponent<
         let style = this._getItemStyle(index);
         const lastPosition = this.lastPositions.current.get(key);
         let animating = false;
-        positions.set(key, style.top);
+        positions.set(key, style.top as number);
 
         if (
           this.animationEnabled &&

@@ -208,7 +208,7 @@ async function execTransactionsGrouped(
       }
       return acc;
     },
-    { parents: [], children: new Map() },
+    { parents: [], children: new Map<unknown, unknown[]>() },
   );
 
   const mapper = trans => {

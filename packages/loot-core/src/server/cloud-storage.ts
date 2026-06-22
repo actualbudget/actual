@@ -45,7 +45,7 @@ async function checkHTTPStatus(res) {
     if (res.status === 403) {
       try {
         const text = await res.text();
-        const data = JSON.parse(text)?.data;
+        const data = (JSON.parse(text) as { data?: { reason?: string } })?.data;
         if (data?.reason === 'token-expired') {
           await asyncStorage.removeItem('user-token');
           throw new HTTPError(403, 'token-expired');
@@ -178,7 +178,7 @@ export async function exportBuffer() {
     // downloads it, it'll get set to a unique node
     const meta = JSON.parse(
       await fs.readFile(fs.join(budgetDir, 'metadata.json')),
-    );
+    ) as Record<string, unknown>;
 
     meta.resetClock = true;
     const metaContent = Buffer.from(JSON.stringify(meta), 'utf8');
@@ -439,7 +439,7 @@ export async function download(cloudFileId) {
     userFileFetch,
   ]);
 
-  if (userFileInfoRes.status !== 'ok') {
+  if ((userFileInfoRes as { status?: string }).status !== 'ok') {
     logger.log(
       'Could not download file from the server. Are you sure you have the right file ID?',
       userFileInfoRes,
@@ -447,7 +447,8 @@ export async function download(cloudFileId) {
     throw FileDownloadError('internal', { fileId: cloudFileId });
   }
 
-  const fileData = userFileInfoRes.data;
+  const fileData = (userFileInfoRes as { data: { encryptMeta?: unknown } })
+    .data;
   let buffer = userFileRes;
 
   // The download process checks if the server gave us decrypt

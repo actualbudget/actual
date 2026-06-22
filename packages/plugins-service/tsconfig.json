@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": false,
-    "types": ["vite/client"],
+    "types": ["vite/client", "@total-typescript/ts-reset"],
     "declaration": true,
     "declarationMap": true,
     "outDir": "dist",

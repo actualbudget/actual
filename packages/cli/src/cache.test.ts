@@ -94,7 +94,7 @@ describe('writeCacheState', () => {
       lastDownloadedAt: 1,
     });
     const raw = readFileSync(join(dir, CACHE_FILE_NAME), 'utf-8');
-    expect(JSON.parse(raw).syncId).toBe('a');
+    expect((JSON.parse(raw) as { syncId: string }).syncId).toBe('a');
   });
 
   it('is atomic: removes the tmp file after rename', () => {

@@ -98,7 +98,7 @@ export async function decode(
   const { encryptKeyId } = prefs.getPrefs();
 
   const responsePb = fromBinary(SyncResponseSchema, data);
-  const merkle = JSON.parse(responsePb.merkle);
+  const merkle = JSON.parse(responsePb.merkle) as { hash: number };
   const messages = [];
 
   for (const envelopePb of responsePb.messages) {

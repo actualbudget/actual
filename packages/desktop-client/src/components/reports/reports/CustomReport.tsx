@@ -179,7 +179,7 @@ function CustomReportInner({
 
   const reportFromSessionStorage = sessionStorage.getItem('report');
   const session: Partial<CustomReportEntity> = reportFromSessionStorage
-    ? JSON.parse(reportFromSessionStorage)
+    ? (JSON.parse(reportFromSessionStorage) as Partial<CustomReportEntity>)
     : {};
   const combine = initialReport ?? defaultReport;
 

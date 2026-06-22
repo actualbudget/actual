@@ -294,7 +294,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   });
 
   async function fetchData(): Promise<DataMap> {
-    const data = new Map();
+    const data: DataMap = new Map();
 
     for (const table of Object.keys(idsPerTable)) {
       const rows = await fetchAll(table, idsPerTable[table]);

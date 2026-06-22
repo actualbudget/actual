@@ -31,10 +31,14 @@ export function useCategoryCleanup({
       const result = await aqlQuery(
         q('categories').filter({ id: categoryId }).select(['cleanup_def']),
       );
-      const row = Array.isArray(result.data) ? result.data[0] : null;
+      const row = (
+        Array.isArray(result.data) ? result.data[0] : null
+      ) as Record<string, unknown> | null;
       const raw =
         row && typeof row.cleanup_def === 'string' ? row.cleanup_def : null;
-      const parsed: CleanupTemplate[] = raw ? JSON.parse(raw) : [];
+      const parsed: CleanupTemplate[] = raw
+        ? (JSON.parse(raw) as CleanupTemplate[])
+        : [];
       if (mounted) {
         setCleanup(parsed);
         onLoaded?.(parsed);

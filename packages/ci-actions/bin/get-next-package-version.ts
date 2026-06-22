@@ -48,7 +48,9 @@ if (!packageJsonPath) {
 }
 
 try {
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as {
+    version?: string;
+  };
 
   if (!('version' in packageJson) || typeof packageJson.version !== 'string') {
     fail('The specified package.json does not contain a valid version field.');

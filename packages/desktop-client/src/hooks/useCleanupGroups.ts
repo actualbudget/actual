@@ -15,7 +15,9 @@ export function useCleanupGroups() {
     const result = await aqlQuery(
       q('cleanup_groups').filter({ tombstone: false }).select(['id', 'name']),
     );
-    const rows = Array.isArray(result.data) ? result.data : [];
+    const rows = (Array.isArray(result.data) ? result.data : []) as Array<
+      Record<string, unknown>
+    >;
     setGroups(
       rows.flatMap(row =>
         row && typeof row.id === 'string' && typeof row.name === 'string'

@@ -328,7 +328,7 @@ app.post('/upload-user-file', async (req, res) => {
 
   const keyId =
     encryptMeta && typeof encryptMeta === 'string'
-      ? JSON.parse(encryptMeta).keyId
+      ? (JSON.parse(encryptMeta) as { keyId: string }).keyId
       : null;
 
   const filesService = new FilesService(getAccountDb());

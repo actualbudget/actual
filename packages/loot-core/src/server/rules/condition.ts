@@ -111,7 +111,7 @@ export const CONDITION_TYPES = {
             value,
           )}`,
         );
-        return value.filter(Boolean).map(val => val.toLowerCase());
+        return value.filter(Boolean).map(val => (val as string).toLowerCase());
       }
 
       assert(

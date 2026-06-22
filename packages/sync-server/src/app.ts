@@ -88,7 +88,7 @@ app.get('/info', (_req, res) => {
         if (fs.existsSync(packageJsonPath)) {
           const packageJson = JSON.parse(
             readFileSync(packageJsonPath, 'utf-8'),
-          );
+          ) as { name?: string; description?: string; version?: string };
 
           if (packageJson.name === '@actual-app/sync-server') {
             return packageJson;
