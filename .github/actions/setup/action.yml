@@ -56,14 +56,6 @@ runs:
       uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       if: ${{ inputs.cache == 'true' }}
       with:
-        # Lage writes its build/test cache to node_modules/.cache/lage. The
-        # previous path (the repo-root .lage directory) was always empty, so the
-        # cache never did anything and lage's results only persisted incidentally
-        # inside the yarn.lock-keyed node_modules cache (frozen between lockfile
-        # changes). Pointing at the real directory with the unique per-commit key
-        # plus the prefix restore-key makes the cache roll forward: each run
-        # restores the most recent prior entry and saves a fresh one, so CI
-        # jobs/shards and reruns reuse earlier build/test results.
         path: ${{ format('{0}/node_modules/.cache/lage', inputs.working-directory) }}
         key: lage-${{ runner.os }}-${{ github.sha }}
         restore-keys: |
