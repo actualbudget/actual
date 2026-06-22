@@ -1,0 +1,93 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "rules": {
+    "exports": "off",
+    "types": "off",
+    "nsExports": "off",
+    "nsTypes": "off",
+    "duplicates": "off"
+  },
+  "ignoreBinaries": ["electron-rebuild"],
+  "workspaces": {
+    ".": {
+      "entry": ["bin/*.ts"],
+      "ignore": ["lage.config.js", ".claude/**"]
+    },
+    "packages/api": {
+      "entry": ["index.browser.ts", "browser-worker.ts", "e2e/**/*.{ts,mjs}"],
+      "ignore": ["typings.ts"],
+      "ignoreDependencies": [
+        "@actual-app/crdt",
+        "better-sqlite3",
+        "uuid",
+        "@jlongster/sql.js"
+      ]
+    },
+    "packages/ci-actions": {
+      "entry": ["bin/*.ts"],
+      "ignoreBinaries": ["bin/tsx"],
+      "ignoreDependencies": ["extensionless"]
+    },
+    "packages/component-library": {
+      "entry": ["src/icons/index-template.ts", "src/icons/template.ts"],
+      "ignore": ["src/icons/.svgrrc.js", "src/icons/add-attribute.ts"],
+      "ignoreDependencies": ["@svgr/babel-plugin-add-jsx-attribute"]
+    },
+    "packages/crdt": {
+      "ignore": ["src/proto/**"],
+      "ignoreDependencies": ["@bufbuild/protoc-gen-es"]
+    },
+    "packages/desktop-client": {
+      "entry": [
+        "bin/*.mjs",
+        "globals.ts",
+        "src/globals.ts",
+        "src/build-shims.js"
+      ],
+      "ignoreDependencies": ["plugins-service"]
+    },
+    "packages/desktop-electron": {
+      "entry": [
+        "preload.ts",
+        "server.ts",
+        "afterSignHook.ts",
+        "beforePackHook.ts"
+      ],
+      "ignoreBinaries": ["bin/update-client"],
+      "ignoreDependencies": ["better-sqlite3"]
+    },
+    "packages/docs": {
+      "entry": [
+        "src/theme/**/*.{ts,tsx,js,jsx}",
+        "src/components/**/*.{ts,tsx,js,jsx}",
+        "docs/**/*.{js,jsx}"
+      ],
+      "ignore": ["docusaurus.netlify-config.js"]
+    },
+    "packages/loot-core": {
+      "entry": ["src/**/index-types.ts", "src/mocks/**"],
+      "ignoreDependencies": [
+        "assert",
+        "browserify-zlib",
+        "buffer",
+        "crypto-browserify",
+        "path-browserify",
+        "stream-browserify",
+        "timers-browserify",
+        "util"
+      ]
+    },
+    "packages/plugins-service": {
+      "entry": ["src/plugin-service-worker.ts"]
+    },
+    "packages/sync-server": {
+      "entry": [
+        "app.ts",
+        "src/app.ts",
+        "bin/**/*.js",
+        "src/scripts/**/*.js",
+        "src/app-*/app-*.{ts,js}"
+      ]
+    }
+  }
+}

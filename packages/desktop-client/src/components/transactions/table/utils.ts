@@ -116,10 +116,6 @@ export function selectAscDesc(
     : defaultAscDesc;
 }
 
-export function getDisplayValue<T>(obj: T | null | undefined, name: keyof T) {
-  return obj ? obj[name] : '';
-}
-
 export function makeTemporaryTransactions(
   currentAccountId: AccountEntity['id'] | null | undefined,
   currentCategoryId: CategoryEntity['id'] | null | undefined,
