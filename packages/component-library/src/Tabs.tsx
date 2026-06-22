@@ -50,29 +50,21 @@ const defaultTabListClassName = css({
 
 const defaultTabClassName = css({
   display: 'inline-flex',
-  minHeight: 26,
+  minHeight: 24,
   alignItems: 'center',
   justifyContent: 'center',
-  border: 0,
   borderRadius: 5,
-  backgroundColor: 'transparent',
   color: theme.pageTextLight,
   cursor: 'pointer',
-  fontSize: 14,
   fontWeight: 500,
-  lineHeight: 1,
-  margin: 0,
-  outline: 0,
   padding: '4px 10px',
-  whiteSpace: 'nowrap',
-  WebkitAppRegion: 'no-drag',
   transition: 'background-color .15s, box-shadow .15s, color .15s',
   '&[data-pressed]': {
     transform: 'translateY(1px)',
   },
   '&[data-selected]': {
     backgroundColor: theme.buttonPrimaryBackground,
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12)',
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)',
     color: theme.buttonPrimaryText,
   },
   '&[data-disabled]': {

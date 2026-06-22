@@ -42,10 +42,10 @@ export function HoldBufferModal(props: HoldBufferModalProps) {
     >
       <View style={{ alignItems: 'center' }}>
         <TabList aria-label={t('Automatic holding')}>
-          <Tab id="auto">
+          <Tab id="auto" style={{ minHeight: 30 }}>
             <Trans>Auto</Trans>
           </Tab>
-          <Tab id="manual">
+          <Tab id="manual" style={{ minHeight: 30 }}>
             <Trans>Manual</Trans>
           </Tab>
         </TabList>
