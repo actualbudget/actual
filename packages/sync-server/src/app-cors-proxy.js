@@ -3,7 +3,7 @@ import rateLimit from 'express-rate-limit';
 
 import { config } from './load-config';
 import { requestLoggerMiddleware } from './util/middlewares';
-import { isBlockedIp } from './util/ssrf';
+import { assertUrlAllowed, isBlockedIp } from './util/ssrf';
 import { validateSession } from './util/validate-user';
 
 const app = express();
@@ -204,10 +204,39 @@ app.use('/', async (req, res) => {
       );
     }
 
-    const response = await fetch(url.href, {
-      method: methodNormalized,
-      headers: requestHeaders,
-    });
+    // Follow redirects manually so every hop is re-validated (via DNS) against
+    // the SSRF rules; fetch's automatic 'follow' would only check the initial
+    // URL. Drop GitHub auth on cross-origin hops so the token isn't leaked.
+    const MAX_REDIRECTS = 5;
+    let currentUrl = url.href;
+    let response;
+    for (let hop = 0; ; hop++) {
+      await assertUrlAllowed(currentUrl);
+
+      response = await fetch(currentUrl, {
+        method: methodNormalized,
+        headers: { ...requestHeaders, host: new URL(currentUrl).host },
+        redirect: 'manual',
+      });
+
+      const location = response.headers.get('location');
+      if (response.status < 300 || response.status >= 400 || !location) {
+        break;
+      }
+      if (hop >= MAX_REDIRECTS) {
+        throw new Error('Too many redirects');
+      }
+
+      const nextUrl = new URL(location, currentUrl);
+      if (nextUrl.origin !== new URL(currentUrl).origin) {
+        // Node lowercases incoming header names, so a client-supplied
+        // `authorization` is spread in lowercase while ours is capitalized;
+        // drop both so no credentials cross the origin boundary.
+        delete requestHeaders['Authorization'];
+        delete requestHeaders['authorization'];
+      }
+      currentUrl = nextUrl.toString();
+    }
 
     const contentType =
       response.headers.get('content-type') || 'application/octet-stream';

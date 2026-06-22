@@ -3,6 +3,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { handlers as app, clearAllowlistCache } from './app-cors-proxy';
 import { config } from './load-config';
+import { assertUrlAllowed } from './util/ssrf';
 import { validateSession } from './util/validate-user';
 
 vi.mock('./load-config', () => ({
@@ -22,6 +23,16 @@ vi.mock('./util/validate-user', () => ({
 vi.mock('express-rate-limit', () => ({
   default: vi.fn(() => (req, res, next) => next()),
 }));
+
+// Stub the DNS-resolving assertUrlAllowed to keep tests hermetic; keep the real
+// isBlockedIp used by the allowlist literal-IP checks.
+vi.mock('./util/ssrf', async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    assertUrlAllowed: vi.fn().mockResolvedValue(undefined),
+  };
+});
 
 global.fetch = vi.fn();
 
@@ -160,6 +171,9 @@ describe('app-cors-proxy', () => {
     validateSession.mockClear?.();
 
     validateSession.mockReturnValue({ userId: 'test-user' });
+
+    assertUrlAllowed.mockClear();
+    assertUrlAllowed.mockResolvedValue(undefined);
 
     clearAllowlistCache();
 
@@ -634,6 +648,158 @@ describe('app-cors-proxy', () => {
         .query({ url: 'https://github.com/user/repo1' });
 
       expect(res.headers['access-control-allow-origin']).toBe('*');
+    });
+  });
+
+  describe('Redirect handling (SSRF)', () => {
+    const PLUGINS_URL =
+      'https://raw.githubusercontent.com/actualbudget/plugin-store/refs/heads/main/plugins.json';
+
+    const makeResponse = ({
+      status = 200,
+      location,
+      contentType = 'text/plain',
+      text = 'ok',
+    } = {}) => ({
+      ok: status >= 200 && status < 300,
+      status,
+      text: () => Promise.resolve(text),
+      arrayBuffer: () => Promise.resolve(new TextEncoder().encode(text).buffer),
+      headers: {
+        get: name => {
+          const normalized = name.toLowerCase();
+          if (normalized === 'location') return location ?? null;
+          if (normalized === 'content-type') return contentType;
+          return null;
+        },
+      },
+    });
+
+    const mockRedirectChain = chain => {
+      global.fetch = vi.fn().mockImplementation(url => {
+        if (url === PLUGINS_URL) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve(
+                defaultAllowlistedRepos.map(repoUrl => ({ url: repoUrl })),
+              ),
+          });
+        }
+        if (chain[url]) {
+          return Promise.resolve(makeResponse(chain[url]));
+        }
+        return Promise.resolve(makeResponse({ text: 'final response' }));
+      });
+    };
+
+    beforeEach(() => {
+      validateSession.mockReturnValue({ userId: 'test-user' });
+    });
+
+    it('should re-validate each redirect hop and follow allowlisted redirects', async () => {
+      mockRedirectChain({
+        'https://github.com/user/repo1': {
+          status: 302,
+          location:
+            'https://github.com/user/repo1/releases/download/v1.0.0/file.zip',
+        },
+        'https://github.com/user/repo1/releases/download/v1.0.0/file.zip': {
+          status: 200,
+          text: 'redirected content',
+        },
+      });
+
+      const res = await request(app)
+        .get('/')
+        .query({ url: 'https://github.com/user/repo1' });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.text).toBe('redirected content');
+      expect(assertUrlAllowed).toHaveBeenCalledWith(
+        'https://github.com/user/repo1',
+      );
+      expect(assertUrlAllowed).toHaveBeenCalledWith(
+        'https://github.com/user/repo1/releases/download/v1.0.0/file.zip',
+      );
+    });
+
+    it('should block a redirect to a private/internal address', async () => {
+      mockRedirectChain({
+        'https://github.com/user/repo1': {
+          status: 302,
+          location: 'http://169.254.169.254/latest/meta-data/',
+        },
+      });
+
+      assertUrlAllowed.mockImplementation(target => {
+        if (target.includes('169.254.169.254')) {
+          return Promise.reject(
+            new Error('Blocked request to private/local IP: 169.254.169.254'),
+          );
+        }
+        return Promise.resolve(undefined);
+      });
+
+      const res = await request(app)
+        .get('/')
+        .query({ url: 'https://github.com/user/repo1' });
+
+      expect(res.statusCode).toBe(500);
+      const internalCalls = global.fetch.mock.calls.filter(([url]) =>
+        String(url).includes('169.254.169.254'),
+      );
+      expect(internalCalls).toHaveLength(0);
+    });
+
+    it('should stop following after too many redirects', async () => {
+      mockRedirectChain({
+        'https://github.com/user/repo1': {
+          status: 302,
+          location: 'https://github.com/user/repo1',
+        },
+      });
+
+      const res = await request(app)
+        .get('/')
+        .query({ url: 'https://github.com/user/repo1' });
+
+      expect(res.statusCode).toBe(500);
+      expect(res.body.details).toBe('Too many redirects');
+    });
+
+    it('should drop GitHub Authorization on a cross-origin redirect', async () => {
+      config.get.mockReturnValue('test-github-token');
+      mockRedirectChain({
+        'https://api.github.com/repos/user/repo1': {
+          status: 302,
+          location: 'https://github.com/user/repo1/releases/download/x/file',
+        },
+        'https://github.com/user/repo1/releases/download/x/file': {
+          status: 200,
+          text: 'asset',
+        },
+      });
+
+      await request(app)
+        .get('/')
+        // A client-supplied auth header arrives lowercased via Node.
+        .set('authorization', 'Bearer client-secret')
+        .query({ url: 'https://api.github.com/repos/user/repo1' });
+
+      const firstHop = global.fetch.mock.calls.find(
+        ([url]) => url === 'https://api.github.com/repos/user/repo1',
+      );
+      const secondHop = global.fetch.mock.calls.find(
+        ([url]) =>
+          url === 'https://github.com/user/repo1/releases/download/x/file',
+      );
+
+      expect(firstHop[1].headers.Authorization).toBe(
+        'Bearer test-github-token',
+      );
+      expect(secondHop[1].headers.Authorization).toBeUndefined();
+      expect(secondHop[1].headers.authorization).toBeUndefined();
     });
   });
 });
