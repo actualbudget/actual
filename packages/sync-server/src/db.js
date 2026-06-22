@@ -6,8 +6,10 @@ export class WrappedDatabase {
   }
 
   /**
+   * @template [T=any]
    * @param {string} sql
    * @param {(string | number)[]} params
+   * @returns {T[]}
    */
   all(sql, params = []) {
     const stmt = this.db.prepare(sql);
@@ -15,8 +17,10 @@ export class WrappedDatabase {
   }
 
   /**
+   * @template [T=any]
    * @param {string} sql
    * @param {string[]} params
+   * @returns {T | null}
    */
   first(sql, params = []) {
     const rows = this.all(sql, params);
