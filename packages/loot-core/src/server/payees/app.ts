@@ -2,6 +2,7 @@ import { createApp } from '#server/app';
 import * as db from '#server/db';
 import { payeeModel } from '#server/models';
 import { mutator } from '#server/mutators';
+import { getCompletedScheduleRuleIds } from '#server/schedules/app';
 import { batchMessages } from '#server/sync';
 import * as rules from '#server/transactions/transaction-rules';
 import { undoable } from '#server/undo';
@@ -73,20 +74,10 @@ async function getOrphanedPayees(): Promise<Array<Pick<PayeeEntity, 'id'>>> {
 
 async function getPayeeRuleCounts() {
   const payeeCounts: Record<PayeeEntity['id'], number> = {};
-
-  const completedScheduleRules = new Set(
-    (
-      await db.all<Pick<db.DbSchedule, 'rule'>>(
-        'SELECT rule FROM schedules WHERE completed = 1 AND tombstone = 0',
-      )
-    )
-      .map(row => row.rule)
-      .filter((rule): rule is string => !!rule),
-  );
+  const completedScheduleRules = new Set(await getCompletedScheduleRuleIds());
 
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
-    const ruleId = rule.getId();
-    if (ruleId != null && completedScheduleRules.has(ruleId)) {
+    if (rule.id && completedScheduleRules.has(rule.id)) {
       return;
     }
 
