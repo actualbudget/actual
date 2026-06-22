@@ -192,6 +192,19 @@ app.post(
     const requisitionId = sanitizeId<GoCardlessRequisitionId>(rawRequisitionId);
     const accountId = sanitizeId<GoCardlessAccountId>(rawAccountId);
 
+    // Is GoCardless configured?
+    if (!goCardlessService.isConfigured()) {
+      // Stop here and send a clear, specific error
+      return res.send({
+        status: 'ok',
+        data: {
+          error_type: 'GOCARDLESS_NOT_CONFIGURED',
+          error_code: 'GOCARDLESS_NOT_CONFIGURED',
+          reason: 'GoCardless credentials are missing',
+        },
+      });
+    }
+
     try {
       if (includeBalance) {
         const {

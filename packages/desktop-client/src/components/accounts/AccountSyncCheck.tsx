@@ -47,6 +47,11 @@ function useErrorMessage() {
       case 'RATE_LIMIT_EXCEEDED':
         return t('Rate limit exceeded for this item. Please try again later.');
 
+      case 'GOCARDLESS_NOT_CONFIGURED':
+        return t(
+          'Your GoCardless credentials are missing. Please re-enter them to restore bank sync.',
+        );
+
       case 'TIMED_OUT':
         return t('The request timed out. Please try again later.');
 
