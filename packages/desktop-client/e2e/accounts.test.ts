@@ -118,6 +118,46 @@ test.describe('Accounts', () => {
     await expect(accountPage.selectButton).toHaveText('2 transactions');
   });
 
+  test('running balance text can be selected', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Selectable Balance',
+      offBudget: false,
+      balance: 0,
+    });
+    await accountPage.waitFor();
+
+    await accountPage.createSingleTransaction({
+      payee: '',
+      notes: 'selectable-balance-one',
+      debit: '10.00',
+    });
+    await accountPage.createSingleTransaction({
+      payee: '',
+      notes: 'selectable-balance-two',
+      debit: '20.00',
+    });
+
+    await accountPage.accountMenuButton.click();
+    await page.getByRole('button', { name: 'Show running balance' }).click();
+
+    const balanceCell = accountPage.getNthTransaction(0).balance;
+    await expect(balanceCell).toContainText('-30.00');
+
+    const box = await balanceCell.boundingBox();
+    if (!box) {
+      throw new Error('Failed to get running balance cell bounds.');
+    }
+
+    await page.mouse.move(box.x + box.width - 8, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 8, box.y + box.height / 2);
+    await page.mouse.up();
+
+    await expect
+      .poll(() => page.evaluate(() => window.getSelection()?.toString() ?? ''))
+      .toContain('-30.00');
+  });
+
   test.describe('On Budget Accounts', () => {
     // Reset filters
     test.afterEach(async () => {
