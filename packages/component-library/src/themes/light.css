@@ -143,13 +143,13 @@
   --color-calendarItemBackground: var(--palette-navy800);
   --color-calendarSelectedBackground: var(--palette-navy500);
 
-  --color-buttonBareText: var(--color-buttonNormalText);
-  --color-buttonBareTextHover: var(--color-buttonNormalText);
+  --color-buttonBareText: var(--color-pageText);
+  --color-buttonBareTextHover: var(--color-pageText);
+  --color-buttonBareDisabledText: var(--color-pageTextSubdued);
   --color-buttonBareBackground: transparent;
+  --color-buttonBareDisabledBackground: var(--color-buttonBareBackground);
   --color-buttonBareBackgroundHover: rgba(100, 100, 100, 0.15);
   --color-buttonBareBackgroundActive: rgba(100, 100, 100, 0.25);
-  --color-buttonBareDisabledText: var(--color-buttonNormalDisabledText);
-  --color-buttonBareDisabledBackground: var(--color-buttonBareBackground);
 
   --color-noticeBackground: var(--palette-green150);
   --color-noticeBackgroundLight: var(--palette-green100);

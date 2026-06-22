@@ -1,0 +1,47 @@
+name: API Browser Test
+
+on:
+  pull_request:
+    paths:
+      - 'packages/api/**'
+      - 'packages/loot-core/**'
+      - 'packages/crdt/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.github/workflows/api-browser-test.yml'
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-browser:
+    name: API browser e2e
+    runs-on: depot-ubuntu-latest-4
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-jammy
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Trust the repository directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Build API
+        run: yarn build:api
+      - name: Run browser e2e tests
+        run: yarn workspace @actual-app/api e2e
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: api-browser-test-results
+          path: packages/api/test-results/
+          retention-days: 30
+          overwrite: true
