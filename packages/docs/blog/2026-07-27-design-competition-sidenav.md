@@ -1,7 +1,7 @@
 ---
 title: 'Design Competition: Reimagine the Actual Budget Sidenav'
 description: The sidenav is one of the most-used parts of Actual Budget, and we think it's time to give it some love. We're running a design competition — the top 10 designs get free swag, and the winning design gets built into the app.
-date: 2026-06-22T10:00
+date: 2026-07-27T10:00
 slug: design-competition-sidenav
 tags: [announcement]
 hide_table_of_contents: false
