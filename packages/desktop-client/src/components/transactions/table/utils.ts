@@ -120,6 +120,34 @@ export function getDisplayValue<T>(obj: T | null | undefined, name: keyof T) {
   return obj ? obj[name] : '';
 }
 
+export function shouldApplyRuleChange(
+  field: string,
+  currentValue: unknown,
+  nextValue: unknown,
+) {
+  if (
+    currentValue == null ||
+    currentValue === '' ||
+    currentValue === 0 ||
+    currentValue === false
+  ) {
+    return true;
+  }
+
+  if (
+    field === 'notes' &&
+    typeof currentValue === 'string' &&
+    typeof nextValue === 'string'
+  ) {
+    return (
+      nextValue !== currentValue &&
+      (nextValue.startsWith(currentValue) || nextValue.endsWith(currentValue))
+    );
+  }
+
+  return false;
+}
+
 export function makeTemporaryTransactions(
   currentAccountId: AccountEntity['id'] | null | undefined,
   currentCategoryId: CategoryEntity['id'] | null | undefined,
