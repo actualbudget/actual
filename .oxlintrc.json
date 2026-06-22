@@ -107,6 +107,10 @@
     "typescript/no-duplicate-type-constituents": "off",
     // we want to allow unions such as "string | 'network' | 'file-key-mismatch'"
     "typescript/no-redundant-type-constituents": "off",
+    // requires `strictNullChecks`, which is intentionally off project-wide
+    // (per-file strictness is handled by typescript-strict-plugin instead), so
+    // this rule only emits noise telling us it can't function
+    "typescript/no-useless-default-assignment": "off",
     "typescript/await-thenable": "error",
     "typescript/no-floating-promises": "error",
     "typescript/require-array-sort-compare": "error",
