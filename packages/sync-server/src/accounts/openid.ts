@@ -98,6 +98,42 @@ async function setupOpenIdClient(configParameter) {
   return client;
 }
 
+function getOpenIdIdentityCandidates(userInfo) {
+  return [
+    userInfo.preferred_username,
+    userInfo.login,
+    userInfo.email,
+    userInfo.id,
+    userInfo.sub,
+  ].filter((identity, index, identities) => {
+    return (
+      typeof identity === 'string' &&
+      identity.length > 0 &&
+      identities.indexOf(identity) === index
+    );
+  });
+}
+
+function findUserByOpenIdIdentities(identities, enabledOnly = false) {
+  for (const identity of identities) {
+    const user = enabledOnly
+      ? getAccountDb().first(
+          'SELECT id, display_name FROM users WHERE user_name = ? and enabled = 1',
+          [identity],
+        )
+      : getAccountDb().first(
+          'SELECT id, display_name FROM users WHERE user_name = ?',
+          [identity],
+        );
+
+    if (user) {
+      return user;
+    }
+  }
+
+  return null;
+}
+
 export async function loginWithOpenIdSetup(
   returnUrl,
   firstTimeLoginPassword = '',
@@ -233,12 +269,8 @@ export async function loginWithOpenIdFinalize(body) {
       });
     }
     const userInfo = await client.userinfo(tokenSet.access_token);
-    const identity =
-      userInfo.preferred_username ??
-      userInfo.login ??
-      userInfo.email ??
-      userInfo.id ??
-      userInfo.sub;
+    const identityCandidates = getOpenIdIdentityCandidates(userInfo);
+    const identity = identityCandidates[0];
 
     if (identity == null) {
       return { error: 'openid-grant-failed: no identification was found' };
@@ -252,11 +284,14 @@ export async function loginWithOpenIdFinalize(body) {
           [''],
         );
 
-        // Check if user was created by another transaction
-        const existingUser = accountDb.first(
-          'SELECT id FROM users WHERE user_name = ?',
-          [identity],
+        // Check if user was created by another transaction or manually
+        // pre-created with another stable OpenID claim, such as email.
+        const existingEnabledUser = findUserByOpenIdIdentities(
+          identityCandidates,
+          true,
         );
+        const existingUser =
+          existingEnabledUser || findUserByOpenIdIdentities(identityCandidates);
 
         if (
           !existingUser &&
@@ -283,10 +318,7 @@ export async function loginWithOpenIdFinalize(body) {
           }
         } else {
           const { id: userIdFromDb, display_name: displayName } =
-            accountDb.first(
-              'SELECT id, display_name FROM users WHERE user_name = ? and enabled = 1',
-              [identity],
-            ) || {};
+            existingEnabledUser || {};
 
           if (userIdFromDb == null) {
             throw new Error('openid-grant-failed');
