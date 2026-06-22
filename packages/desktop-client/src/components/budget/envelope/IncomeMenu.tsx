@@ -1,8 +1,10 @@
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
+import type { MenuItem } from '@actual-app/components/menu';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
+import { useFutureBufferMode } from '#hooks/useFutureBufferMode';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
@@ -23,9 +25,28 @@ export function IncomeMenu({
   onClose,
 }: IncomeMenuProps) {
   const { t } = useTranslation();
+  const { isAutomaticFutureBufferMode } = useFutureBufferMode();
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(categoryId),
   );
+
+  // Hide the manual income auto-hold toggle while future buffer mode is active.
+  const hideAutoHold = isAutomaticFutureBufferMode;
+
+  const items: MenuItem[] = [
+    ...(hideAutoHold
+      ? []
+      : [
+          {
+            name: 'carryover',
+            text: carryover ? t('Disable auto hold') : t('Enable auto hold'),
+          },
+        ]),
+    {
+      name: 'view',
+      text: t('View transactions'),
+    },
+  ];
 
   return (
     <span>
@@ -47,16 +68,7 @@ export function IncomeMenu({
               throw new Error(`Unrecognized menu option: ${String(name)}`);
           }
         }}
-        items={[
-          {
-            name: 'carryover',
-            text: carryover ? t('Disable auto hold') : t('Enable auto hold'),
-          },
-          {
-            name: 'view',
-            text: t('View transactions'),
-          },
-        ]}
+        items={items}
       />
     </span>
   );

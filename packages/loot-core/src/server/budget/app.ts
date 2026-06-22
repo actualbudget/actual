@@ -45,6 +45,8 @@ export type BudgetHandlers = {
   'budget/copy-until-year-end': typeof actions.copyUntilYearEnd;
   'budget/set-carryover': typeof actions.setCategoryCarryover;
   'budget/reset-income-carryover': typeof actions.resetIncomeCarryover;
+  'budget/recalculate-future-buffer': typeof actions.recalculateFutureBuffer;
+  'budget/set-future-buffer-mode': typeof actions.setFutureBufferMode;
   'get-categories': typeof getCategories;
   'get-budget-bounds': typeof getBudgetBounds;
   'envelope-budget-month': typeof envelopeBudgetMonth;
@@ -71,43 +73,134 @@ export type BudgetHandlers = {
 
 export const app = createApp<BudgetHandlers>();
 
-app.method('budget/budget-amount', mutator(undoable(actions.setBudget)));
+app.method(
+  'budget/budget-amount',
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(actions.setBudget, touchedTargetMonth),
+    ),
+  ),
+);
 app.method(
   'budget/copy-previous-month',
-  mutator(undoable(actions.copyPreviousMonth)),
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(
+        actions.copyPreviousMonth,
+        touchedTargetMonth,
+      ),
+    ),
+  ),
 );
 app.method(
   'budget/copy-single-month',
-  mutator(undoable(actions.copySinglePreviousMonth)),
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(
+        actions.copySinglePreviousMonth,
+        touchedTargetMonth,
+      ),
+    ),
+  ),
 );
-app.method('budget/set-zero', mutator(undoable(actions.setZero)));
-app.method('budget/set-3month-avg', mutator(undoable(actions.set3MonthAvg)));
-app.method('budget/set-6month-avg', mutator(undoable(actions.set6MonthAvg)));
-app.method('budget/set-12month-avg', mutator(undoable(actions.set12MonthAvg)));
-app.method('budget/set-n-month-avg', mutator(undoable(actions.setNMonthAvg)));
+app.method(
+  'budget/set-zero',
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(actions.setZero, touchedTargetMonth),
+    ),
+  ),
+);
+app.method(
+  'budget/set-3month-avg',
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(actions.set3MonthAvg, touchedTargetMonth),
+    ),
+  ),
+);
+app.method(
+  'budget/set-6month-avg',
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(actions.set6MonthAvg, touchedTargetMonth),
+    ),
+  ),
+);
+app.method(
+  'budget/set-12month-avg',
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(actions.set12MonthAvg, touchedTargetMonth),
+    ),
+  ),
+);
+app.method(
+  'budget/set-n-month-avg',
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(actions.setNMonthAvg, touchedTargetMonth),
+    ),
+  ),
+);
 app.method(
   'budget/check-templates',
   mutator(undoable(goalActions.runCheckTemplates)),
 );
 app.method(
   'budget/apply-goal-template',
-  mutator(undoable(goalActions.applyTemplate)),
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(
+        goalActions.applyTemplate,
+        touchedTargetMonth,
+      ),
+    ),
+  ),
 );
 app.method(
   'budget/apply-multiple-templates',
-  mutator(undoable(goalActions.applyMultipleCategoryTemplates)),
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(
+        goalActions.applyMultipleCategoryTemplates,
+        touchedTargetMonth,
+      ),
+    ),
+  ),
 );
 app.method(
   'budget/overwrite-goal-template',
-  mutator(undoable(goalActions.overwriteTemplate)),
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(
+        goalActions.overwriteTemplate,
+        touchedTargetMonth,
+      ),
+    ),
+  ),
 );
 app.method(
   'budget/apply-single-template',
-  mutator(undoable(goalActions.applySingleCategoryTemplate)),
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(
+        goalActions.applySingleCategoryTemplate,
+        touchedTargetMonth,
+      ),
+    ),
+  ),
 );
 app.method(
   'budget/cleanup-goal-template',
-  mutator(undoable(cleanupActions.cleanupTemplate)),
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(
+        cleanupActions.cleanupTemplate,
+        touchedTargetMonth,
+      ),
+    ),
+  ),
 );
 app.method(
   'budget/hold-for-next-month',
@@ -116,23 +209,58 @@ app.method(
 app.method('budget/reset-hold', mutator(undoable(actions.resetHold)));
 app.method(
   'budget/cover-overspending',
-  mutator(undoable(actions.coverOverspending)),
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(
+        actions.coverOverspending,
+        touchedNextMonth,
+      ),
+    ),
+  ),
 );
 app.method(
   'budget/transfer-available',
-  mutator(undoable(actions.transferAvailable)),
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(
+        actions.transferAvailable,
+        touchedTargetMonth,
+      ),
+    ),
+  ),
 );
 app.method(
   'budget/cover-overbudgeted',
-  mutator(undoable(actions.coverOverbudgeted)),
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(
+        actions.coverOverbudgeted,
+        touchedTargetMonth,
+      ),
+    ),
+  ),
 );
 app.method(
   'budget/transfer-category',
-  mutator(undoable(actions.transferCategory)),
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(
+        actions.transferCategory,
+        touchedTargetMonth,
+      ),
+    ),
+  ),
 );
 app.method(
   'budget/copy-until-year-end',
-  mutator(undoable(actions.copyUntilYearEnd)),
+  mutator(
+    undoable(
+      actions.withBudgetChangeHooks(
+        actions.copyUntilYearEnd,
+        actions.getCopyUntilYearEndTouchedMonths,
+      ),
+    ),
+  ),
 );
 app.method(
   'budget/set-carryover',
@@ -141,6 +269,14 @@ app.method(
 app.method(
   'budget/reset-income-carryover',
   mutator(undoable(actions.resetIncomeCarryover)),
+);
+app.method(
+  'budget/recalculate-future-buffer',
+  mutator(undoable(actions.recalculateFutureBuffer)),
+);
+app.method(
+  'budget/set-future-buffer-mode',
+  mutator(undoable(actions.setFutureBufferMode)),
 );
 app.method('get-categories', getCategories);
 app.method('get-budget-bounds', getBudgetBounds);
@@ -203,7 +339,19 @@ async function getCategories({ hidden }: { hidden?: boolean } = {}) {
 }
 
 async function getBudgetBounds() {
-  return await budget.createAllBudgets();
+  const createdMonthsBefore = new Set<string>(sheet.get().meta().createdMonths);
+  const bounds = await budget.createAllBudgets();
+  const createdMonthsAfter = new Set<string>(sheet.get().meta().createdMonths);
+  const newMonths = [...createdMonthsAfter].filter(
+    month => !createdMonthsBefore.has(month),
+  );
+
+  // `get-budget-bounds` is a load/horizon-extension handler, not a user
+  // budget-edit mutator. Keep this fallback outside undo history while still
+  // refreshing auto-managed buffers when loading creates future months.
+  await actions.runBudgetChangeHooks(newMonths);
+
+  return bounds;
 }
 
 async function envelopeBudgetMonth({ month }: { month: string }) {
@@ -219,6 +367,8 @@ async function envelopeBudgetMonth({ month }: { month: string }) {
     value('available-funds'),
     value('last-month-overspent'),
     value('buffered'),
+    value('buffered-auto'),
+    value('buffered-selected'),
     value('total-budgeted'),
     value('to-budget'),
 
@@ -508,4 +658,12 @@ async function isCategoryTransferRequired({
 
     return value != null && value !== 0;
   });
+}
+
+function touchedTargetMonth({ month }: { month: string }): string[] {
+  return [month];
+}
+
+function touchedNextMonth({ month }: { month: string }): string[] {
+  return [monthUtils.nextMonth(month)];
 }

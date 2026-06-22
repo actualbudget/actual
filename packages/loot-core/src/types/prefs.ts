@@ -12,7 +12,10 @@ export type FeatureFlag =
   | 'enableBanking'
   | 'sankeyReport'
   | 'akahuBankSync'
+  | 'futureBufferMode'
   | 'mobileCalculator';
+
+export type FutureBufferMode = 'manual' | 'automatic';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -29,6 +32,7 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
+    | 'futureBufferMode'
     | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`
     | `show-balances-${string}`

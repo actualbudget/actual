@@ -1,9 +1,11 @@
 // @ts-strict-ignore
 
 import * as connection from '#platform/server/connection';
+import { runBudgetChangeHooks } from '#server/budget/actions';
 import * as db from '#server/db';
 import { incrFetch, whereIn } from '#server/db/util';
 import { batchMessages } from '#server/sync';
+import * as monthUtils from '#shared/months';
 import type { Diff } from '#shared/util';
 import type { PayeeEntity, TransactionEntity } from '#types/models';
 
@@ -37,6 +39,20 @@ async function getTransactionsByIds(
   );
 }
 
+function getBudgetTouchedMonths(
+  transactions: TransactionEntity[],
+): Set<string> {
+  const months = new Set<string>();
+
+  for (const transaction of transactions) {
+    if (!transaction.is_parent && transaction.date && transaction.category) {
+      months.add(monthUtils.monthFromDate(transaction.date));
+    }
+  }
+
+  return months;
+}
+
 export async function batchUpdateTransactions({
   added,
   deleted,
@@ -55,6 +71,8 @@ export async function batchUpdateTransactions({
   const deletedIds = deleted
     ? await idsWithChildren(deleted.map(d => d.id))
     : [];
+  const oldUpdated = await getTransactionsByIds(updatedIds);
+  const oldDeleted = await getTransactionsByIds(deletedIds);
 
   const oldPayees = new Set<PayeeEntity['id']>();
   const accounts = await db.all<db.DbAccount>(
@@ -128,6 +146,13 @@ export async function batchUpdateTransactions({
   const allAdded = await getTransactionsByIds(addedIds);
   const allUpdated = await getTransactionsByIds(updatedIds);
   const allDeleted = await getTransactionsByIds(deletedIds);
+  const touchedBudgetMonths = getBudgetTouchedMonths([
+    ...oldUpdated,
+    ...oldDeleted,
+    ...allAdded,
+    ...allUpdated,
+    ...allDeleted,
+  ]);
 
   // Post-processing phase: first do any updates to transfers.
   // Transfers update the transactions and we need to return updates
@@ -184,6 +209,8 @@ export async function batchUpdateTransactions({
       }
     }
   }
+
+  await runBudgetChangeHooks(touchedBudgetMonths);
 
   return {
     added: resultAdded,

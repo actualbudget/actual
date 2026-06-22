@@ -484,6 +484,9 @@ export type Modal =
       };
     }
   | {
+      name: 'future-buffer-mode';
+    }
+  | {
       name: 'tracking-balance-menu';
       options: {
         categoryId: CategoryEntity['id'];

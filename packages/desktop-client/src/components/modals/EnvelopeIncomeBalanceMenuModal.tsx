@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
+import type { MenuItem } from '@actual-app/components/menu';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -21,13 +22,14 @@ import {
 } from '#components/common/Modal';
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useCategory } from '#hooks/useCategory';
+import { useFutureBufferMode } from '#hooks/useFutureBufferMode';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
-type EnvelopeIncomeBalanceMenuModalProps = Omit<
-  Extract<ModalType, { name: 'envelope-income-balance-menu' }>['options'],
-  'month'
->;
+type EnvelopeIncomeBalanceMenuModalProps = Extract<
+  ModalType,
+  { name: 'envelope-income-balance-menu' }
+>['options'];
 
 export function EnvelopeIncomeBalanceMenuModal({
   categoryId,
@@ -43,10 +45,29 @@ export function EnvelopeIncomeBalanceMenuModal({
 
   const { t } = useTranslation();
   const { data: category } = useCategory(categoryId);
+  const { isAutomaticFutureBufferMode } = useFutureBufferMode();
 
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(categoryId),
   );
+
+  // Hide the manual income auto-hold toggle while future buffer mode is active.
+  const hideAutoHold = isAutomaticFutureBufferMode;
+
+  const items: MenuItem[] = [
+    ...(hideAutoHold
+      ? []
+      : [
+          {
+            name: 'carryover',
+            text: carryover ? t('Disable auto hold') : t('Enable auto hold'),
+          },
+        ]),
+    {
+      name: 'view',
+      text: t('View transactions'),
+    },
+  ];
 
   if (!category) {
     return null;
@@ -120,18 +141,7 @@ export function EnvelopeIncomeBalanceMenuModal({
                   throw new Error(`Unrecognized menu option: ${String(name)}`);
               }
             }}
-            items={[
-              {
-                name: 'carryover',
-                text: carryover
-                  ? t('Disable auto hold')
-                  : t('Enable auto hold'),
-              },
-              {
-                name: 'view',
-                text: t('View transactions'),
-              },
-            ]}
+            items={items}
           />
         </>
       )}
