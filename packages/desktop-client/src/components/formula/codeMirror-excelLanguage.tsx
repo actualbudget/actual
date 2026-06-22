@@ -4,6 +4,7 @@ import { Trans } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { readRegexLiteral } from '@actual-app/core/shared/formulas/customFunctions';
 import { autocompletion } from '@codemirror/autocomplete';
 import type { Completion, CompletionContext } from '@codemirror/autocomplete';
 import {
@@ -139,7 +140,7 @@ const TEXT_FUNCTIONS = new Set([
   'PROPER',
   'SUBSTITUTE',
   'REPLACE',
-  'REGEX',
+  'REGEXREPLACE',
   'FIND',
   'SEARCH',
   'REPT',
@@ -190,9 +191,12 @@ const QUERY_FUNCTIONS = new Set([
 ]);
 
 // Excel formula syntax parser for CodeMirror
-const excelFormulaParser: StreamParser<{ inString: boolean }> = {
+const excelFormulaParser: StreamParser<{
+  inString: boolean;
+  afterValue: boolean;
+}> = {
   startState() {
-    return { inString: false };
+    return { inString: false, afterValue: false };
   },
 
   token(stream, state) {
@@ -204,6 +208,7 @@ const excelFormulaParser: StreamParser<{ inString: boolean }> = {
       } else {
         stream.skipToEnd();
       }
+      state.afterValue = true;
       return 'string';
     }
 
@@ -212,19 +217,32 @@ const excelFormulaParser: StreamParser<{ inString: boolean }> = {
       return 'string';
     }
 
+    // Handle regex literals
+    if (!state.afterValue && stream.peek() === '/') {
+      const end = readRegexLiteral(stream.string, stream.pos);
+      if (end !== -1) {
+        stream.pos = end;
+        state.afterValue = true;
+        return 'regexp';
+      }
+    }
+
     // Handle numbers
     if (stream.match(/^-?\d+(\.\d+)?/)) {
+      state.afterValue = true;
       return 'number';
     }
 
     // Handle operators
     if (stream.match(/^[+\-*/=<>(),:]/)) {
+      state.afterValue = stream.current() === ')';
       return 'operator';
     }
 
     // Handle function names (uppercase letters followed by parenthesis)
     if (stream.match(/^[A-Z_][A-Z0-9_]*/)) {
       const word = stream.current();
+      state.afterValue = true;
       // Check if it's a function (next non-whitespace is '(')
       const pos = stream.pos;
       stream.eatSpace();
@@ -255,6 +273,7 @@ const excelFormulaParser: StreamParser<{ inString: boolean }> = {
 
     // Handle variable names (lowercase or mixed case)
     if (stream.match(/^[a-zA-Z_][a-zA-Z0-9_]*/)) {
+      state.afterValue = true;
       return 'variableName.special';
     }
 
@@ -266,6 +285,8 @@ const excelFormulaParser: StreamParser<{ inString: boolean }> = {
     stream.next();
     return null;
   },
+
+  tokenTable: { regexp: tags.regexp },
 };
 
 // Transaction field variables for autocomplete
@@ -1041,6 +1062,7 @@ export const excelFormulaHighlighting = syntaxHighlighting(
     { tag: tags.function(tags.variableName), color: '#795E26' }, // Generic functions in brown/gold
     // Other syntax elements
     { tag: tags.string, color: '#A31515' }, // Strings in red
+    { tag: tags.regexp, color: '#811F3F' }, // Regex literals in dark red
     { tag: tags.number, color: '#098658' }, // Numbers in green
     { tag: tags.operator, color: '#000000' }, // Operators in black
     { tag: tags.variableName, color: '#001080' }, // Variables in dark blue
@@ -1063,6 +1085,7 @@ export const excelFormulaDarkHighlighting = syntaxHighlighting(
     { tag: tags.function(tags.variableName), color: '#DCDCAA' }, // Generic functions in light yellow
     // Other syntax elements
     { tag: tags.string, color: '#CE9178' }, // Strings in orange
+    { tag: tags.regexp, color: '#D16969' }, // Regex literals in muted red
     { tag: tags.number, color: '#B5CEA8' }, // Numbers in light green
     { tag: tags.operator, color: '#D4D4D4' }, // Operators in light gray
     { tag: tags.variableName, color: '#9CDCFE' }, // Variables in light blue

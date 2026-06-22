@@ -3,4 +3,4 @@ category: Enhancements
 authors: [matt-fidd]
 ---
 
-Add REGEX function to excel formulae
+Add REGEXREPLACE function to excel formulae

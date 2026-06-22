@@ -7,6 +7,7 @@ import enUS from 'hyperformula/i18n/languages/enUS';
 import { logger } from '#platform/server/log';
 import type { TransactionForRules } from '#server/transactions/transaction-rules';
 import {
+  convertRegexLiterals,
   CustomFunctionsPlugin,
   customFunctionsTranslations,
 } from '#shared/formulas/customFunctions';
@@ -346,7 +347,7 @@ export class Action {
         hfInstance.addNamedExpression(key, cellValue);
       }
       hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [
-        [formula],
+        [convertRegexLiterals(formula)],
       ]);
 
       const cellAddress = { sheet: sheetId, col: 0, row: 0 };

@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
-import { setCachedUserPreferences } from '@actual-app/core/shared/formulas/customFunctions';
+import {
+  convertRegexLiterals,
+  setCachedUserPreferences,
+} from '@actual-app/core/shared/formulas/customFunctions';
 import { HyperFormula } from 'hyperformula';
 
 import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
@@ -112,7 +115,7 @@ export function useTransactionFormulaExecution(
 
         // Set the formula in row 0
         hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [
-          [formula],
+          [convertRegexLiterals(formula)],
         ]);
 
         // Get the result

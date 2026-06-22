@@ -173,6 +173,74 @@ function buildRegExp(pattern: string): RegExp {
   return match ? new RegExp(match[1], match[2]) : new RegExp(pattern);
 }
 
+export function readRegexLiteral(text: string, start: number): number {
+  if (text[start] !== '/') {
+    return -1;
+  }
+
+  let inCharClass = false;
+  for (let i = start + 1; i < text.length; i++) {
+    const char = text[i];
+    if (char === '\\') {
+      i++;
+    } else if (char === '\n' || char === '\r') {
+      return -1;
+    } else if (char === '[') {
+      inCharClass = true;
+    } else if (char === ']') {
+      inCharClass = false;
+    } else if (char === '/' && !inCharClass) {
+      let end = i + 1;
+      while (end < text.length && text[end] >= 'a' && text[end] <= 'z') {
+        end++;
+      }
+      return end;
+    }
+  }
+
+  return -1;
+}
+
+export function convertRegexLiterals(formula: string): string {
+  let result = '';
+  let prev = '';
+
+  for (let i = 0; i < formula.length; ) {
+    const char = formula[i];
+
+    if (char === '"') {
+      let end = i + 1;
+      while (end < formula.length && formula[end] !== '"') {
+        end += formula[end] === '\\' ? 2 : 1;
+      }
+      end = Math.min(end + 1, formula.length);
+      result += formula.slice(i, end);
+      i = end;
+      prev = '"';
+      continue;
+    }
+
+    const regexEnd =
+      char === '/' && (prev === '(' || prev === ',')
+        ? readRegexLiteral(formula, i)
+        : -1;
+    if (regexEnd !== -1) {
+      result += `"${formula.slice(i, regexEnd).replace(/"/g, '\\"')}"`;
+      i = regexEnd;
+      prev = '"';
+      continue;
+    }
+
+    result += char;
+    if (char.trim()) {
+      prev = char;
+    }
+    i++;
+  }
+
+  return result;
+}
+
 export class CustomFunctionsPlugin extends FunctionPlugin {
   private getCustomFunctionsContext(): CustomFunctionsContext | undefined {
     return this.config.context as CustomFunctionsContext | undefined;
@@ -204,11 +272,11 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
     );
   }
 
-  regex(ast: ProcedureAst, state: InterpreterState) {
+  regexReplace(ast: ProcedureAst, state: InterpreterState) {
     return this.runFunction(
       ast.args,
       state,
-      this.metadata('REGEX'),
+      this.metadata('REGEXREPLACE'),
       (text: string, pattern: string, replacement: string = '') => {
         let regExp: RegExp;
         try {
@@ -493,8 +561,8 @@ CustomFunctionsPlugin.implementedFunctions = {
       },
     ],
   },
-  REGEX: {
-    method: 'regex',
+  REGEXREPLACE: {
+    method: 'regexReplace',
     parameters: [
       { argumentType: FunctionArgumentType.STRING },
       { argumentType: FunctionArgumentType.STRING },
@@ -599,7 +667,7 @@ export const customFunctionsTranslations = {
     BALANCE_OF: 'BALANCE_OF',
     FIXED: 'FIXED',
     INTEGER_TO_AMOUNT: 'INTEGER_TO_AMOUNT',
-    REGEX: 'REGEX',
+    REGEXREPLACE: 'REGEXREPLACE',
     QUERY: 'QUERY',
     QUERY_COUNT: 'QUERY_COUNT',
     QUERY_EXTRACT_CATEGORIES: 'QUERY_EXTRACT_CATEGORIES',

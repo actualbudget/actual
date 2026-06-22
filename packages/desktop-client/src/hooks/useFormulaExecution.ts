@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
 import {
+  convertRegexLiterals,
   createBudgetQueryPrefetchKey,
   setCachedUserPreferences,
 } from '@actual-app/core/shared/formulas/customFunctions';
@@ -104,7 +105,9 @@ function evaluateFormulaWithContext({
       }
     }
 
-    hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [[formula]]);
+    hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [
+      [convertRegexLiterals(formula)],
+    ]);
 
     const cellValue = hfInstance.getCellValue({
       sheet: sheetId,
