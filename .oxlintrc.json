@@ -443,10 +443,6 @@
         "eslint/no-empty-function": "off"
       }
     },
-    // no-useless-default-assignment needs `strictNullChecks`, which these
-    // packages don't yet enable (`strict: false`). The rule only emits noise
-    // there telling us it can't function, so disable it until they're strict
-    // TS compatible.
     // TODO: drop these globs as each package becomes strict.
     {
       "files": [
