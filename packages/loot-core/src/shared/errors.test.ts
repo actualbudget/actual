@@ -35,7 +35,7 @@ describe('getDownloadError', () => {
     ).not.toBe(SCHEMA_MISMATCH_MESSAGE);
   });
 
-  it('does not report a schema mismatch when meta is missing', () => {
+  it('does not report a schema mismatch when meta is not provided', () => {
     expect(getDownloadError({ reason: 'invalid-schema' })).not.toBe(
       SCHEMA_MISMATCH_MESSAGE,
     );
