@@ -19,7 +19,12 @@ import {
   isValidPassword,
   loginWithPassword,
 } from './accounts/password';
-import { errorMiddleware, requestLoggerMiddleware } from './util/middlewares';
+import {
+  errorMiddleware,
+  rejectApiTokenMiddleware,
+  requestLoggerMiddleware,
+  validateSessionMiddleware,
+} from './util/middlewares';
 import { validateAuthHeader, validateSession } from './util/validate-user';
 
 const app = express();
@@ -143,90 +148,81 @@ app.post('/logout', (req, res) => {
   res.send({ status: 'ok', data: {} });
 });
 
-app.post('/change-password', authRateLimiter, async (req, res) => {
-  const session = await validateSession(req, res);
-  if (!session) return;
+app.post(
+  '/change-password',
+  authRateLimiter,
+  validateSessionMiddleware,
+  rejectApiTokenMiddleware,
+  async (req, res) => {
+    const session = res.locals;
 
-  if (session.auth_method === 'api_token') {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden-auth-method',
-      details: 'API tokens cannot access this endpoint',
-    });
-    return;
-  }
+    if (!isAdmin(session.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'forbidden',
+        details: 'permission-not-found',
+      });
+      return;
+    }
 
-  if (!isAdmin(session.user_id)) {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden',
-      details: 'permission-not-found',
-    });
-    return;
-  }
+    if (session.auth_method !== 'password') {
+      res.status(403).send({
+        status: 'error',
+        reason: 'forbidden',
+        details: 'password-auth-not-active',
+      });
+      return;
+    }
 
-  if (session.auth_method !== 'password') {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden',
-      details: 'password-auth-not-active',
-    });
-    return;
-  }
+    if (!isValidPassword(req.body.currentPassword)) {
+      res
+        .status(400)
+        .send({ status: 'error', reason: 'invalid-current-password' });
+      return;
+    }
 
-  if (!isValidPassword(req.body.currentPassword)) {
-    res
-      .status(400)
-      .send({ status: 'error', reason: 'invalid-current-password' });
-    return;
-  }
+    const { error } = await changePassword(
+      req.body.password,
+      req.body.currentPassword,
+    );
 
-  const { error } = await changePassword(
-    req.body.password,
-    req.body.currentPassword,
-  );
+    if (error) {
+      res.status(400).send({ status: 'error', reason: error });
+      return;
+    }
 
-  if (error) {
-    res.status(400).send({ status: 'error', reason: error });
-    return;
-  }
+    res.send({ status: 'ok', data: {} });
+  },
+);
 
-  res.send({ status: 'ok', data: {} });
-});
+app.post(
+  '/server-prefs',
+  validateSessionMiddleware,
+  rejectApiTokenMiddleware,
+  async (req, res) => {
+    const session = res.locals;
 
-app.post('/server-prefs', async (req, res) => {
-  const session = await validateSession(req, res);
-  if (!session) return;
+    if (!isAdmin(session.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'forbidden',
+        details: 'permission-not-found',
+      });
+      return;
+    }
 
-  if (session.auth_method === 'api_token') {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden-auth-method',
-      details: 'API tokens cannot access this endpoint',
-    });
-    return;
-  }
+    const { prefs } = req.body || {};
 
-  if (!isAdmin(session.user_id)) {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden',
-      details: 'permission-not-found',
-    });
-    return;
-  }
+    if (!prefs || typeof prefs !== 'object') {
+      res.status(400).send({ status: 'error', reason: 'invalid-prefs' });
+      return;
+    }
 
-  const { prefs } = req.body || {};
+    setServerPrefs(prefs);
 
-  if (!prefs || typeof prefs !== 'object') {
-    res.status(400).send({ status: 'error', reason: 'invalid-prefs' });
-    return;
-  }
-
-  setServerPrefs(prefs);
-
-  res.send({ status: 'ok', data: {} });
-});
+    res.send({ status: 'ok', data: {} });
+  },
+);
 
 app.get('/validate', async (req, res) => {
   const session = await validateSession(req, res);

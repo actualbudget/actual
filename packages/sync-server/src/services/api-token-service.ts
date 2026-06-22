@@ -28,17 +28,6 @@ type ApiTokenBudgetRow = {
   file_id: string;
 };
 
-/** Database wrapper type */
-type WrappedDatabase = {
-  all<T = unknown>(sql: string, params?: unknown[]): T[];
-  first<T = unknown>(sql: string, params?: unknown[]): T | null;
-  mutate(
-    sql: string,
-    params?: unknown[],
-  ): { changes: number; insertId: number | bigint };
-  transaction<T>(fn: () => T): T;
-};
-
 // ============================================
 // Public API Types (exported)
 // ============================================
@@ -161,7 +150,7 @@ export const apiTokenService: ApiTokenService = {
     budgetIds: string[] = [],
     expiresAt: number | null = null,
   ): Promise<CreateTokenResult> {
-    const accountDb: WrappedDatabase = getAccountDb();
+    const accountDb = getAccountDb();
     const token = generateToken();
     const tokenHash = hashToken(token);
     const tokenPrefix = extractPrefix(token);
@@ -205,7 +194,7 @@ export const apiTokenService: ApiTokenService = {
       return null;
     }
 
-    const accountDb: WrappedDatabase = getAccountDb();
+    const accountDb = getAccountDb();
     const tokenHash = hashToken(token);
 
     // Direct lookup by the indexed (unique) token_hash. The join on users
@@ -266,7 +255,7 @@ export const apiTokenService: ApiTokenService = {
    * @param userId - The user ID
    */
   listTokens(userId: string): TokenListItem[] {
-    const accountDb: WrappedDatabase = getAccountDb();
+    const accountDb = getAccountDb();
 
     const tokens = accountDb.all<ApiTokenRow>(
       `SELECT id, name, token_prefix, created_at, last_used_at, expires_at, enabled
@@ -316,7 +305,7 @@ export const apiTokenService: ApiTokenService = {
    * @returns True if the token was deleted
    */
   revokeToken(tokenId: string, userId: string): boolean {
-    const accountDb: WrappedDatabase = getAccountDb();
+    const accountDb = getAccountDb();
 
     // Verify ownership
     const token = accountDb.first<{ id: string }>(
@@ -347,7 +336,7 @@ export const apiTokenService: ApiTokenService = {
    * @returns True if the token was updated
    */
   setTokenEnabled(tokenId: string, userId: string, enabled: boolean): boolean {
-    const accountDb: WrappedDatabase = getAccountDb();
+    const accountDb = getAccountDb();
 
     const result = accountDb.mutate(
       `UPDATE api_tokens SET enabled = ? WHERE id = ? AND user_id = ?`,
@@ -363,7 +352,7 @@ export const apiTokenService: ApiTokenService = {
    * @returns Array of budget/file IDs (empty means all user's budgets)
    */
   getTokenBudgets(tokenId: string): string[] {
-    const accountDb: WrappedDatabase = getAccountDb();
+    const accountDb = getAccountDb();
 
     const budgetRows = accountDb.all<ApiTokenBudgetRow>(
       `SELECT file_id FROM api_token_budgets WHERE token_id = ?`,
