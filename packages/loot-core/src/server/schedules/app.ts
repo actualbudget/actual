@@ -310,6 +310,9 @@ function normalizeScheduleName(name) {
 export async function createSchedule({
   schedule = null,
   conditions = [],
+}: {
+  schedule?: Partial<ScheduleEntity> | null;
+  conditions?: RuleConditionEntity[];
 } = {}): Promise<ScheduleEntity['id']> {
   const scheduleId = schedule?.id || uuidv4();
 
@@ -589,6 +592,16 @@ async function getSchedule(id: string): Promise<ScheduleEntity | null> {
   } = await aqlQuery(q('schedules').filter({ id }).select('*'));
 
   return schedule ?? null;
+}
+
+export async function getCompletedScheduleRuleIds(): Promise<string[]> {
+  const { data } = await aqlQuery(
+    q('schedules').filter({ completed: true }).select(['rule']),
+  );
+
+  return data
+    .map(schedule => schedule.rule)
+    .filter((rule): rule is string => !!rule);
 }
 
 async function hasTransactionForSchedule(

@@ -10,7 +10,7 @@
   "ignoreBinaries": ["electron-rebuild"],
   "workspaces": {
     ".": {
-      "entry": ["bin/*.ts"],
+      "entry": ["bin/*.mts"],
       "ignore": ["lage.config.js", ".claude/**"]
     },
     "packages/api": {
