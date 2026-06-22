@@ -13,7 +13,7 @@ import { describeSchedule } from '#util/schedule';
 import { Value } from './Value';
 
 type ScheduleValueProps = {
-  value: ScheduleEntity;
+  value: ScheduleEntity['id'];
 };
 
 export function ScheduleValue({ value }: ScheduleValueProps) {
