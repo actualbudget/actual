@@ -250,7 +250,11 @@ TypeScript configuration uses:
 - Incremental compilation
 - Strict type checking with `typescript-strict-plugin`. New files must be
   type-strict — don't add `// @ts-strict-ignore` to a new file (existing files
-  are grandfathered).
+  are grandfathered). A CI ratchet (`yarn check:strict-ignore`) counts the
+  opted-out files against a committed baseline
+  (`packages/ci-actions/strict-ignore-baseline.json`) and fails if the number
+  goes up. When you remove a directive, run `yarn check:strict-ignore --update`
+  to lower the baseline and commit it — the count is only allowed to go down.
 - Platform-specific exports in `loot-core` (node vs browser)
 
 ### 4. Internationalization (i18n)

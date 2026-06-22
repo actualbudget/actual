@@ -42,6 +42,8 @@ jobs:
         run: yarn constraints
       - name: Check tsconfig project references are in sync
         run: yarn check:tsconfig-references
+      - name: Check strict-mode ratchet (no new @ts-strict-ignore files)
+        run: yarn check:strict-ignore
   lint:
     needs: setup
     runs-on: depot-ubuntu-latest

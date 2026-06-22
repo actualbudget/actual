@@ -60,6 +60,7 @@
     "constraints": "yarn constraints",
     "typecheck": "tsgo -p tsconfig.root.json --noEmit && lage typecheck",
     "check:tsconfig-references": "workspaces-to-typescript-project-references --check",
+    "check:strict-ignore": "yarn workspace @actual-app/ci-actions tsx bin/check-strict-ignore.ts",
     "sync:tsconfig-references": "workspaces-to-typescript-project-references",
     "prepare": "husky"
   },
