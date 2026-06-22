@@ -57,9 +57,14 @@ runs:
       if: ${{ inputs.cache == 'true' }}
       with:
         path: ${{ format('{0}/node_modules/.cache/lage', inputs.working-directory) }}
-        key: lage-${{ runner.os }}-${{ github.sha }}
+        # Scope the key per job: every job in the Build/Test workflows shares the
+        # same setup action, so a single key would let the first job to finish
+        # (the `setup` job, which runs no Lage task and so has an empty cache)
+        # claim it and block every other job from saving its real cache. Keying
+        # on the job lets each job restore and persist its own Lage cache.
+        key: lage-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
         restore-keys: |
-          lage-${{ runner.os }}-
+          lage-${{ runner.os }}-${{ github.job }}-
     - name: Install
       working-directory: ${{ inputs.working-directory }}
       run: yarn --immutable
