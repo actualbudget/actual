@@ -47,8 +47,7 @@ export function migrateTemplatesToAutomations(
   templates.forEach(template => {
     if (template.type === 'simple') {
       const monthly = template.monthly;
-      const hasMonthly =
-        monthly != null && (monthly !== 0 || template.limit != null);
+      const hasMonthly = monthly != null && monthly !== 0;
       const { description } = template;
 
       if (template.limit) {
@@ -70,7 +69,7 @@ export function migrateTemplatesToAutomations(
           ),
         );
 
-        if (!hasMonthly) {
+        if (monthly == null) {
           entries.push(
             createAutomationEntry(
               {
@@ -84,12 +83,17 @@ export function migrateTemplatesToAutomations(
         }
       }
 
-      if (hasMonthly) {
+      const contribution =
+        hasMonthly || (monthly === 0 && template.limit == null)
+          ? monthly
+          : null;
+
+      if (contribution != null) {
         entries.push(
           createAutomationEntry(
             {
               type: 'periodic',
-              amount: monthly,
+              amount: contribution,
               period: { period: 'month', amount: 1 },
               starting: dayFromDate(firstDayOfMonth(new Date())),
               directive: 'template',
@@ -104,6 +108,31 @@ export function migrateTemplatesToAutomations(
       // a simple template with neither monthly nor limit is a no-op; drop it
       // rather than passing through as a phantom 'fixed' entry that would
       // crash FixedAutomationReadOnly (no .amount, no .period)
+      return;
+    }
+
+    if (
+      (template.type === 'periodic' || template.type === 'remainder') &&
+      template.limit
+    ) {
+      const { limit, ...base } = template;
+      entries.push(
+        createAutomationEntry(base, getDisplayTypeFromTemplate(base)),
+      );
+      entries.push(
+        createAutomationEntry(
+          {
+            type: 'limit',
+            amount: limit.amount,
+            hold: limit.hold,
+            period: limit.period,
+            start: limit.start,
+            directive: 'template',
+            priority: null,
+          },
+          'limit',
+        ),
+      );
       return;
     }
 

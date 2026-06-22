@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -29,7 +29,7 @@ jobs:
           download-translations: 'false'
   constraints:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -44,7 +44,7 @@ jobs:
         run: yarn check:tsconfig-references
   lint:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -57,7 +57,7 @@ jobs:
         run: yarn lint
   typecheck:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -70,7 +70,7 @@ jobs:
         run: yarn typecheck
   validate-cli:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -85,7 +85,10 @@ jobs:
         run: node packages/sync-server/build/bin/actual-server.js --version
   test:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Authenticate to Depot via GitHub OIDC for test reporting
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -96,8 +99,15 @@ jobs:
           download-translations: 'false'
       - name: Test
         run: yarn test
+      - name: Report test results to Depot
+        uses: depot/test-report-action@2ad5779840a9c63e884fa26f11d019768a27a941 # v1.0.1
+        if: ${{ !cancelled() && github.event_name == 'push' }}
+        with:
+          path: |
+            bin/test-results/junit*.xml
+            packages/*/test-results/junit*.xml
   check-gh-actions:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     permissions:
       security-events: write
     steps:
@@ -109,7 +119,7 @@ jobs:
   migrations:
     needs: setup
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
