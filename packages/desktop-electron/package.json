@@ -33,6 +33,13 @@
   },
   "build": {
     "appId": "com.actualbudget.actual",
+    "concurrency": {
+      "jobs": 3
+    },
+    "asarUnpack": [
+      "**/node_modules/better-sqlite3/**",
+      "**/node_modules/bcrypt/**"
+    ],
     "files": [
       "build",
       "!node_modules/@actual-app/web",
@@ -45,6 +52,7 @@
       "!build/loot-core/lib-dist/electron/{browser,bundle.mobile*}"
     ],
     "beforePack": "./build/desktop-electron/beforePackHook.js",
+    "afterPack": "./build/desktop-electron/afterPackHook.js",
     "afterSign": "./build/desktop-electron/afterSignHook.js",
     "electronFuses": {
       "runAsNode": false,
