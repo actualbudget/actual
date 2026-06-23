@@ -33,7 +33,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
-            runner: depot-ubuntu-22.04-4
+            runner: depot-ubuntu-22.04-8
           - os: windows-2022
             runner: depot-windows-2022-8
           - os: macos-latest
