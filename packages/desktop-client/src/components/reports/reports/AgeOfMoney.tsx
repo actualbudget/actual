@@ -186,35 +186,29 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
       throw new Error('No widget that could be saved.');
     }
 
-    updateDashboardWidgetMutation.mutate(
-      {
-        widget: {
-          id: widget.id,
-          meta: {
-            ...(widget.meta ?? {}),
-            conditions,
-            conditionsOp,
-            timeFrame: {
-              start,
-              end,
-              mode,
-            },
-            granularity,
+    await updateDashboardWidgetMutation.mutateAsync({
+      widget: {
+        id: widget.id,
+        meta: {
+          ...(widget.meta ?? {}),
+          conditions,
+          conditionsOp,
+          timeFrame: {
+            start,
+            end,
+            mode,
           },
+          granularity,
         },
       },
-      {
-        onSuccess: () => {
-          dispatch(
-            addNotification({
-              notification: {
-                type: 'message',
-                message: t('Dashboard widget successfully saved.'),
-              },
-            }),
-          );
+    });
+    dispatch(
+      addNotification({
+        notification: {
+          type: 'message',
+          message: t('Dashboard widget successfully saved.'),
         },
-      },
+      }),
     );
   }, [
     widget,
@@ -240,7 +234,7 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
       }
 
       const name = newName || t('Age of Money');
-      updateDashboardWidgetMutation.mutate({
+      await updateDashboardWidgetMutation.mutateAsync({
         widget: {
           id: widget.id,
           meta: {
