@@ -94,6 +94,7 @@ export type BudgetAnalysisWidget = AbstractWidget<
     interval?: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
     graphType?: 'Line' | 'Bar';
     showBalance?: boolean;
+    balanceOnly?: boolean;
   } | null
 >;
 export type CustomReportWidget = AbstractWidget<

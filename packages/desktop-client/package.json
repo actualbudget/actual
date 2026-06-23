@@ -73,6 +73,7 @@
     "#components/reports/util": "./src/components/reports/util.ts",
     "#components/schedules": "./src/components/schedules/index.tsx",
     "#components/schedules/schedule-edit-utils": "./src/components/schedules/schedule-edit-utils.ts",
+    "#components/transactions/table/utils": "./src/components/transactions/table/utils.ts",
     "#components/util/accountValidation": "./src/components/util/accountValidation.ts",
     "#components/util/countries": "./src/components/util/countries.ts",
     "#components/util/localeToCountry": "./src/components/util/localeToCountry.ts",
