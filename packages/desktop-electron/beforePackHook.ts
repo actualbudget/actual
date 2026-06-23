@@ -43,7 +43,7 @@ export function nativeBuildDir(context: AfterPackContext): string {
 const beforePackHook = async (context: AfterPackContext) => {
   const arch: string = Arch[context.arch];
   const packagerDir = context.packager.projectDir;
-  const projectRootPath = path.resolve(packagerDir, '..', '..');
+  const repoRoot = path.resolve(packagerDir, '..', '..');
   const electronVersion = context.packager.config.electronVersion;
 
   if (!electronVersion) {
@@ -58,10 +58,7 @@ const beforePackHook = async (context: AfterPackContext) => {
     await mkdir(path.join(buildRoot, 'node_modules'), { recursive: true });
 
     for (const moduleName of NATIVE_MODULES) {
-      const source = resolveModuleDir(moduleName, [
-        packagerDir,
-        projectRootPath,
-      ]);
+      const source = resolveModuleDir(moduleName, [packagerDir, repoRoot]);
       const dest = path.join(buildRoot, 'node_modules', moduleName);
       await cp(source, dest, { recursive: true });
       await rm(path.join(dest, 'build'), { recursive: true, force: true });
@@ -83,7 +80,7 @@ const beforePackHook = async (context: AfterPackContext) => {
       buildPath: buildRoot,
       electronVersion,
       force: true,
-      projectRootPath,
+      projectRootPath: buildRoot,
       onlyModules: NATIVE_MODULES,
     });
 
