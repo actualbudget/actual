@@ -8,6 +8,7 @@ import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgChart, SvgChartBar } from '@actual-app/components/icons/v1';
 import { Paragraph } from '@actual-app/components/paragraph';
+import { Select } from '@actual-app/components/select';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
@@ -42,6 +43,11 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+
+type BalanceMode =
+  | 'balance-only'
+  | 'balance-and-categories'
+  | 'categories-only';
 
 export function BudgetAnalysis() {
   const params = useParams();
@@ -92,6 +98,9 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   );
   const [showBalance, setShowBalance] = useState(
     widget?.meta?.showBalance ?? true,
+  );
+  const [balanceOnly, setBalanceOnly] = useState(
+    widget?.meta?.balanceOnly ?? false,
   );
   const [latestTransaction, setLatestTransaction] = useState('');
   const [isConcise, setIsConcise] = useState(() => {
@@ -225,6 +234,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
             },
             graphType,
             showBalance,
+            balanceOnly,
           },
         },
       },
@@ -268,6 +278,17 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
       },
     });
   };
+
+  const balanceMode: BalanceMode = balanceOnly
+    ? 'balance-only'
+    : showBalance
+      ? 'balance-and-categories'
+      : 'categories-only';
+
+  function onBalanceModeChange(newMode: BalanceMode) {
+    setBalanceOnly(newMode === 'balance-only');
+    setShowBalance(newMode !== 'categories-only');
+  }
 
   return (
     <Page
@@ -337,9 +358,15 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         }
       >
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          <Button onPress={() => setShowBalance(state => !state)}>
-            {showBalance ? t('Hide balance') : t('Show balance')}
-          </Button>
+          <Select<BalanceMode>
+            value={balanceMode}
+            onChange={onBalanceModeChange}
+            options={[
+              ['balance-only', t('Balance only')],
+              ['balance-and-categories', t('Balance + Categories')],
+              ['categories-only', t('Categories only')],
+            ]}
+          />
 
           {widget && (
             <Button variant="primary" onPress={onSaveWidget}>
@@ -442,23 +469,21 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                             </FinancialText>
                           }
                         />
-                        {showBalance && (
-                          <AlignedText
-                            style={{ marginBottom: 5, minWidth: 210 }}
-                            left={
-                              <Block>
-                                <Trans>Ending balance:</Trans>
-                              </Block>
-                            }
-                            right={
-                              <FinancialText style={{ fontWeight: 600 }}>
-                                <PrivacyFilter>
-                                  <Change amount={endingBalance} />
-                                </PrivacyFilter>
-                              </FinancialText>
-                            }
-                          />
-                        )}
+                        <AlignedText
+                          style={{ marginBottom: 5, minWidth: 210 }}
+                          left={
+                            <Block>
+                              <Trans>Ending balance:</Trans>
+                            </Block>
+                          }
+                          right={
+                            <FinancialText style={{ fontWeight: 600 }}>
+                              <PrivacyFilter>
+                                <Change amount={endingBalance} />
+                              </PrivacyFilter>
+                            </FinancialText>
+                          }
+                        />
                       </>
                     )}
                   </View>
@@ -469,6 +494,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                 data={data}
                 graphType={graphType}
                 showBalance={showBalance}
+                balanceOnly={balanceOnly}
                 isConcise={isConcise}
               />
               <View style={{ marginTop: 30 }}>
