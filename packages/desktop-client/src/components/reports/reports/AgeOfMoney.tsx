@@ -44,6 +44,7 @@ import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
+import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 import { getAgeColor } from './AgeOfMoneyCard';
 
@@ -178,35 +179,46 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
     [],
   );
 
+  const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
+
   const onSaveWidget = useCallback(async () => {
     if (!widget) {
       throw new Error('No widget that could be saved.');
     }
 
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        conditions,
-        conditionsOp,
-        timeFrame: {
-          start,
-          end,
-          mode,
+    updateDashboardWidgetMutation.mutate(
+      {
+        widget: {
+          id: widget.id,
+          meta: {
+            ...(widget.meta ?? {}),
+            conditions,
+            conditionsOp,
+            timeFrame: {
+              start,
+              end,
+              mode,
+            },
+            granularity,
+          },
         },
-        granularity,
       },
-    });
-    dispatch(
-      addNotification({
-        notification: {
-          type: 'message',
-          message: t('Dashboard widget successfully saved.'),
+      {
+        onSuccess: () => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'message',
+                message: t('Dashboard widget successfully saved.'),
+              },
+            }),
+          );
         },
-      }),
+      },
     );
   }, [
     widget,
+    updateDashboardWidgetMutation,
     conditions,
     conditionsOp,
     start,
@@ -228,15 +240,17 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
       }
 
       const name = newName || t('Age of Money');
-      await send('dashboard-update-widget', {
-        id: widget.id,
-        meta: {
-          ...(widget.meta ?? {}),
-          name,
+      updateDashboardWidgetMutation.mutate({
+        widget: {
+          id: widget.id,
+          meta: {
+            ...(widget.meta ?? {}),
+            name,
+          },
         },
       });
     },
-    [widget, t],
+    [widget, updateDashboardWidgetMutation, t],
   );
 
   if (!allMonths || !data) {
