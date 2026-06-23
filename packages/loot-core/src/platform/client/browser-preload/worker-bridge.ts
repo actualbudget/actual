@@ -47,7 +47,8 @@ export class WorkerBridge {
     this._started = false;
     this._isInitialized = false;
     this._currentBudgetId = null;
-    this._sharedWorkerLivenessTimeout = this._createSharedWorkerLivenessTimeout();
+    this._sharedWorkerLivenessTimeout =
+      this._createSharedWorkerLivenessTimeout();
     this.localBackendWorker = null;
     this.backendWorkerUrl = backendWorkerUrl;
 
