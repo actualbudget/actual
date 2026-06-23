@@ -525,6 +525,37 @@ describe('runSchedule', () => {
     expect(result.to_budget).toBe(0);
   });
 
+  it('records an error instead of throwing when the schedule cannot be found', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        scheduleId: 'missing-id',
+        name: 'Gone',
+        directive: 'template',
+        priority: 0,
+      } as const,
+    ];
+    vi.mocked(db.first).mockResolvedValue(null);
+    vi.mocked(isTrackingBudget).mockReturnValue(false);
+
+    const result = await runSchedule(
+      template_lines,
+      '2024-08-01',
+      0,
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.errors).toContainEqual(
+      expect.stringMatching(/Schedule Gone could not be found/),
+    );
+    expect(result.to_budget).toBe(0);
+  });
+
   it('contributes target/interval per month for a fully-funded bi-monthly schedule', async () => {
     // Every-2-months from 2024-03-15: interval 2 keeps it out of the
     // pay-month-of fast path. With balance == target the engine takes
