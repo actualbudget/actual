@@ -1,97 +1,46 @@
-import { existsSync } from 'node:fs';
-import { cp, mkdir, rm, writeFile } from 'node:fs/promises';
-import * as path from 'node:path';
-
 import { rebuild } from '@electron/rebuild';
 import copyFiles from 'copyfiles';
 import { Arch } from 'electron-builder';
 import type { AfterPackContext } from 'electron-builder';
 
-const NATIVE_MODULES = ['better-sqlite3', 'bcrypt'];
-
-let appxResourcesPromise: Promise<void> | undefined;
-
-function resolveModuleDir(moduleName: string, searchDirs: string[]): string {
-  for (const dir of searchDirs) {
-    const candidate = path.join(dir, 'node_modules', moduleName);
-    if (existsSync(candidate)) {
-      return candidate;
-    }
-  }
-  throw new Error(`beforePackHook: unable to locate ${moduleName}`);
-}
-
-function copyAppxResources(): Promise<void> {
-  if (!appxResourcesPromise) {
-    appxResourcesPromise = new Promise<void>((resolve, reject) => {
-      copyFiles(['./appx/**/*', './build'], { error: true }, err =>
-        err ? reject(err) : resolve(),
-      );
-    });
-  }
-  return appxResourcesPromise;
-}
-
-export function nativeBuildDir(context: AfterPackContext): string {
-  return path.join(
-    context.outDir,
-    '.native-build',
-    `${context.electronPlatformName}-${Arch[context.arch]}`,
-  );
-}
-
+/* The beforePackHook runs before packing the Electron app for an architecture
+We hook in here to build anything architecture dependent - such as beter-sqlite3
+To build, we call @electron/rebuild on the better-sqlite3 module */
 const beforePackHook = async (context: AfterPackContext) => {
   const arch: string = Arch[context.arch];
-  const packagerDir = context.packager.projectDir;
-  const repoRoot = path.resolve(packagerDir, '..', '..');
+  const buildPath = context.packager.projectDir;
+  const projectRootPath = buildPath + '/../../';
   const electronVersion = context.packager.config.electronVersion;
 
   if (!electronVersion) {
     console.error('beforePackHook: Unable to find electron version.');
-    process.exit(1);
+    process.exit(); // End the process - electron version is required
   }
 
-  const buildRoot = nativeBuildDir(context);
-
   try {
-    await rm(buildRoot, { recursive: true, force: true });
-    await mkdir(path.join(buildRoot, 'node_modules'), { recursive: true });
-
-    for (const moduleName of NATIVE_MODULES) {
-      const source = resolveModuleDir(moduleName, [packagerDir, repoRoot]);
-      const dest = path.join(buildRoot, 'node_modules', moduleName);
-      await cp(source, dest, { recursive: true });
-      await rm(path.join(dest, 'build'), { recursive: true, force: true });
-    }
-
-    await writeFile(
-      path.join(buildRoot, 'package.json'),
-      JSON.stringify({
-        name: 'actual-native-build',
-        version: '0.0.0',
-        dependencies: Object.fromEntries(
-          NATIVE_MODULES.map(moduleName => [moduleName, '*']),
-        ),
-      }),
-    );
-
     await rebuild({
       arch,
-      buildPath: buildRoot,
+      buildPath,
       electronVersion,
       force: true,
-      projectRootPath: buildRoot,
-      onlyModules: NATIVE_MODULES,
+      projectRootPath,
+      onlyModules: ['better-sqlite3', 'bcrypt'],
     });
 
-    console.info(`Rebuilt ${NATIVE_MODULES.join(', ')} for ${arch}!`);
+    console.info(`Rebuilt better-sqlite3 and bcrypt with ${arch}!`);
 
     if (context.packager.platform.name === 'windows') {
-      await copyAppxResources();
+      console.info(`Windows build - copying appx files...`);
+
+      await new Promise(resolve =>
+        copyFiles(['./appx/**/*', './build'], { error: true }, resolve),
+      );
+
+      console.info(`Copied appx files!`);
     }
   } catch (err) {
     console.error('beforePackHook:', err);
-    process.exit(1);
+    process.exit(); // End the process - unsuccessful build
   }
 };
 
