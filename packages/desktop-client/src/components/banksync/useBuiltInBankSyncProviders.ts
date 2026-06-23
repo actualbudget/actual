@@ -2,8 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { send } from '@actual-app/core/platform/client/connection';
+import type { RemoteFile, SyncedLocalFile } from '@actual-app/core/types/file';
 import type {
   AccountEntity,
+  BankSyncCredentialSource,
   BankSyncProviders,
 } from '@actual-app/core/types/models';
 import type { SyncServerSimpleFinAccount } from '@actual-app/core/types/models/simplefin';
@@ -17,12 +19,13 @@ import { useAkahuStatus } from '#hooks/useAkahuStatus';
 import { useEnableBankingStatus } from '#hooks/useEnableBankingStatus';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '#hooks/useGoCardlessStatus';
+import { useMetadataPref } from '#hooks/useMetadataPref';
 import { usePluggyAiStatus } from '#hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '#hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
-import { useDispatch } from '#redux';
+import { useDispatch, useSelector } from '#redux';
 
 import { BUILT_IN_BANK_SYNC_PROVIDERS } from './bankSyncUtils';
 
@@ -57,6 +60,7 @@ export type BuiltInBankSyncProviderState = {
   displayName: string;
   description: string;
   isConfigured: boolean;
+  credentialSource: BankSyncCredentialSource | null;
   canConfigure: boolean;
   isLoading?: boolean;
   onConfigure: ProviderAction;
@@ -93,10 +97,27 @@ export function useBuiltInBankSyncProviders({
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const syncServerStatus = useSyncServerStatus();
+  const [cloudFileId] = useMetadataPref('cloudFileId');
+  const allFiles = useSelector(state => state.budgetfiles.allFiles || []);
+  const remoteFiles = allFiles.filter(
+    (file): file is SyncedLocalFile | RemoteFile =>
+      file.state === 'remote' ||
+      file.state === 'synced' ||
+      file.state === 'detached',
+  );
+  const currentFile = remoteFiles.find(
+    file => file.cloudFileId === cloudFileId,
+  );
+  const userData = useSelector(state => state.user.data);
   const { hasPermission } = useAuth();
   const multiuserEnabled = useMultiuserEnabled();
-  const canConfigureProviders =
-    !multiuserEnabled || hasPermission(Permissions.ADMINISTRATOR);
+  const isAdmin = hasPermission(Permissions.ADMINISTRATOR);
+  const isCurrentFileOwner = Boolean(
+    userData?.userId && currentFile?.owner === userData.userId,
+  );
+  const canConfigureProviders = !multiuserEnabled || isAdmin;
+  const canConfigurePluggyAi =
+    !multiuserEnabled || isAdmin || isCurrentFileOwner;
 
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
@@ -120,7 +141,7 @@ export function useBuiltInBankSyncProviders({
   const akahuEnabled = useFeatureFlag('akahuBankSync');
   const { configuredGoCardless } = useGoCardlessStatus();
   const { configuredSimpleFin } = useSimpleFinStatus();
-  const { configuredPluggyAi } = usePluggyAiStatus();
+  const { pluggyAiStatus, setPluggyAiStatus } = usePluggyAiStatus();
   const { configuredAkahu } = useAkahuStatus(akahuEnabled);
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
     useEnableBankingStatus(enableBankingEnabled);
@@ -134,8 +155,8 @@ export function useBuiltInBankSyncProviders({
   }, [configuredSimpleFin]);
 
   useEffect(() => {
-    setIsPluggyAiSetupComplete(configuredPluggyAi);
-  }, [configuredPluggyAi]);
+    setIsPluggyAiSetupComplete(pluggyAiStatus?.configured ?? null);
+  }, [pluggyAiStatus?.configured]);
 
   useEffect(() => {
     setIsEnableBankingSetupComplete(configuredEnableBanking);
@@ -177,12 +198,19 @@ export function useBuiltInBankSyncProviders({
         modal: {
           name: 'pluggyai-init',
           options: {
-            onSuccess: () => setIsPluggyAiSetupComplete(true),
+            onSuccess: perBudgetFile => {
+              setIsPluggyAiSetupComplete(true);
+              setPluggyAiStatus({
+                configured: true,
+                source: perBudgetFile ? 'per-budget-file' : 'global',
+              });
+            },
+            credentialSource: pluggyAiStatus?.source ?? null,
           },
         },
       }),
     );
-  }, [dispatch]);
+  }, [dispatch, pluggyAiStatus?.source, setPluggyAiStatus]);
 
   const onEnableBankingInit = useCallback(() => {
     dispatch(
@@ -278,6 +306,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'pluggyai_clientId',
           value: null,
+          perBudgetFile: pluggyAiStatus?.source === 'per-budget-file',
         }),
         'Failed to clear Pluggy.ai client ID',
       );
@@ -285,6 +314,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'pluggyai_clientSecret',
           value: null,
+          perBudgetFile: pluggyAiStatus?.source === 'per-budget-file',
         }),
         'Failed to clear Pluggy.ai client secret',
       );
@@ -292,14 +322,16 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'pluggyai_itemIds',
           value: null,
+          perBudgetFile: pluggyAiStatus?.source === 'per-budget-file',
         }),
         'Failed to clear Pluggy.ai item IDs',
       );
       setIsPluggyAiSetupComplete(false);
+      setPluggyAiStatus(await send('pluggyai-status'));
     } catch (error) {
       notifyResetFailure('Pluggy.ai', error);
     }
-  }, [notifyResetFailure]);
+  }, [notifyResetFailure, pluggyAiStatus?.source, setPluggyAiStatus]);
 
   const onEnableBankingReset = useCallback(async () => {
     try {
@@ -611,6 +643,7 @@ export function useBuiltInBankSyncProviders({
               'Link a European bank account to automatically download transactions.',
             ),
             isConfigured: configuredProviders.goCardless,
+            credentialSource: 'global',
             canConfigure: canConfigureProviders,
             onConfigure: onGoCardlessInit,
             onLink: onConnectGoCardless,
@@ -626,6 +659,7 @@ export function useBuiltInBankSyncProviders({
               'Link a North American bank account to automatically download transactions.',
             ),
             isConfigured: configuredProviders.simpleFin,
+            credentialSource: 'global',
             canConfigure: canConfigureProviders,
             isLoading: loadingSimpleFinAccounts,
             onConfigure: onSimpleFinInit,
@@ -641,7 +675,11 @@ export function useBuiltInBankSyncProviders({
             'Link a Brazilian bank account to automatically download transactions.',
           ),
           isConfigured: configuredProviders.pluggyai,
-          canConfigure: canConfigureProviders,
+          credentialSource: pluggyAiStatus?.source ?? null,
+          canConfigure:
+            pluggyAiStatus != null &&
+            canConfigurePluggyAi &&
+            pluggyAiStatus.source !== 'global',
           onConfigure: onPluggyAiInit,
           onLink: onConnectPluggyAi,
           onReset: onPluggyAiReset,
@@ -656,6 +694,7 @@ export function useBuiltInBankSyncProviders({
           'Link a New Zealand bank account to automatically download transactions.',
         ),
         isConfigured: configuredProviders.akahu,
+        credentialSource: 'global',
         canConfigure: canConfigureProviders,
         isLoading: loadingAkahuAccounts,
         onConfigure: onAkahuInit,
@@ -672,6 +711,7 @@ export function useBuiltInBankSyncProviders({
           'Link a European bank account via Enable Banking, a free alternative to GoCardless for PSD2-supported banks.',
         ),
         isConfigured: configuredProviders.enableBanking,
+        credentialSource: 'global',
         canConfigure: canConfigureProviders,
         isLoading: isEnableBankingLoading,
         onConfigure: onEnableBankingInit,
@@ -683,11 +723,13 @@ export function useBuiltInBankSyncProviders({
     return baseProviders;
   }, [
     canConfigureProviders,
+    canConfigurePluggyAi,
     configuredProviders.enableBanking,
     configuredProviders.goCardless,
     configuredProviders.pluggyai,
     configuredProviders.simpleFin,
     configuredProviders.akahu,
+    pluggyAiStatus,
     enableBankingEnabled,
     akahuEnabled,
     isEnableBankingLoading,
@@ -714,13 +756,14 @@ export function useBuiltInBankSyncProviders({
   const providersNeedingConfiguration = providers.filter(
     provider => !provider.isConfigured,
   );
+  const providersNeedingConfigurationPermission =
+    providersNeedingConfiguration.filter(provider => !provider.canConfigure);
 
   return {
     providers,
     syncServerStatus,
     canConfigureProviders,
-    showPermissionWarning:
-      providersNeedingConfiguration.length > 0 && !canConfigureProviders,
-    providersNeedingConfiguration,
+    showPermissionWarning: providersNeedingConfigurationPermission.length > 0,
+    providersNeedingConfiguration: providersNeedingConfigurationPermission,
   };
 }

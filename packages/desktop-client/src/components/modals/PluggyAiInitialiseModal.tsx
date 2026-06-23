@@ -6,9 +6,12 @@ import { ButtonWithLoading } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
+import { useAuth } from '#auth/AuthProvider';
+import { Permissions } from '#auth/types';
 import { Error } from '#components/alerts';
 import { Link } from '#components/common/Link';
 import {
@@ -18,6 +21,7 @@ import {
   ModalHeader,
 } from '#components/common/Modal';
 import { FormField, FormLabel } from '#components/forms';
+import { useMultiuserEnabled } from '#components/ServerContext';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { getSecretsError } from '#util/error';
 
@@ -28,11 +32,19 @@ type PluggyAiInitialiseProps = Extract<
 
 export const PluggyAiInitialiseModal = ({
   onSuccess,
+  credentialSource,
 }: PluggyAiInitialiseProps) => {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
+  const multiuserEnabled = useMultiuserEnabled();
+  const canSetGlobalCredentials =
+    !multiuserEnabled || hasPermission(Permissions.ADMINISTRATOR);
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
   const [itemIds, setItemIds] = useState('');
+  const [perBudgetFile, setPerBudgetFile] = useState(
+    credentialSource ? credentialSource === 'per-budget-file' : true,
+  );
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(
@@ -54,46 +66,53 @@ export const PluggyAiInitialiseModal = ({
 
     setIsLoading(true);
 
-    let { error, reason } =
+    let result =
       (await send('secret-set', {
         name: 'pluggyai_clientId',
         value: clientId,
+        perBudgetFile,
       })) || {};
+    let { error, reason } = result;
 
     if (error) {
       setIsLoading(false);
       setIsValid(false);
       setError(getSecretsError(error, reason));
       return;
-    } else {
-      ({ error, reason } =
-        (await send('secret-set', {
-          name: 'pluggyai_clientSecret',
-          value: clientSecret,
-        })) || {});
-      if (error) {
-        setIsLoading(false);
-        setIsValid(false);
-        setError(getSecretsError(error, reason));
-        return;
-      } else {
-        ({ error, reason } =
-          (await send('secret-set', {
-            name: 'pluggyai_itemIds',
-            value: itemIds,
-          })) || {});
+    }
 
-        if (error) {
-          setIsLoading(false);
-          setIsValid(false);
-          setError(getSecretsError(error, reason));
-          return;
-        }
-      }
+    result =
+      (await send('secret-set', {
+        name: 'pluggyai_clientSecret',
+        value: clientSecret,
+        perBudgetFile,
+      })) || {};
+    ({ error, reason } = result);
+
+    if (error) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(getSecretsError(error, reason));
+      return;
+    }
+
+    result =
+      (await send('secret-set', {
+        name: 'pluggyai_itemIds',
+        value: itemIds,
+        perBudgetFile,
+      })) || {};
+    ({ error, reason } = result);
+
+    if (error) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(getSecretsError(error, reason));
+      return;
     }
 
     setIsValid(true);
-    onSuccess();
+    onSuccess(perBudgetFile);
     setIsLoading(false);
     close();
   };
@@ -122,6 +141,27 @@ export const PluggyAiInitialiseModal = ({
                 .
               </Trans>
             </Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
+              <Text>
+                <Trans>For this budget only</Trans>
+              </Text>
+              <Toggle
+                id="pluggyai-per-budget-file"
+                isOn={perBudgetFile}
+                isDisabled={
+                  Boolean(credentialSource) || !canSetGlobalCredentials
+                }
+                onToggle={setPerBudgetFile}
+              />
+            </View>
 
             <FormField>
               <FormLabel title={t('Client ID:')} htmlFor="client-id-field" />
