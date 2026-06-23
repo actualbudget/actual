@@ -6,6 +6,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+import { isValidFileId } from '#util/paths';
 
 import { pluggyaiService } from './pluggyai-service';
 
@@ -18,13 +19,23 @@ app.use(validateSessionMiddleware);
 app.post(
   '/status',
   handleError(async (req, res) => {
-    const clientId = secretsService.get(SecretName.pluggyai_clientId);
-    const configured = clientId != null;
+    const fileId = req.get('X-Actual-File-Id');
+    if (fileId != null && !isValidFileId(fileId)) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'invalid-file-id',
+        details: 'invalid fileId',
+      });
+      return;
+    }
+
+    const source = pluggyaiService.getCredentialSource(fileId);
 
     res.send({
       status: 'ok',
       data: {
-        configured,
+        configured: source != null,
+        source,
       },
     });
   }),
@@ -33,16 +44,39 @@ app.post(
 app.post(
   '/accounts',
   handleError(async (req, res) => {
+    const fileId = req.get('X-Actual-File-Id');
+    if (fileId != null && !isValidFileId(fileId)) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'invalid-file-id',
+        details: 'invalid fileId',
+      });
+      return;
+    }
+
     try {
-      const itemIds = secretsService
-        .get(SecretName.pluggyai_itemIds)
+      const source = pluggyaiService.getCredentialSource(fileId);
+      if (source == null) {
+        res.status(400).send({
+          status: 'error',
+          reason: 'not-configured',
+          details: 'Pluggy credentials are not configured',
+        });
+        return;
+      }
+
+      const credentialFileId = source === 'per-budget-file' ? fileId : null;
+      const itemIds = (
+        secretsService.get(SecretName.pluggyai_itemIds, credentialFileId) ?? ''
+      )
         .split(',')
-        .map(item => item.trim());
+        .map(item => item.trim())
+        .filter(Boolean);
 
       let accounts = [];
 
       for (const item of itemIds) {
-        const partial = await pluggyaiService.getAccountsByItemId(item);
+        const partial = await pluggyaiService.getAccountsByItemId(item, fileId);
         accounts = accounts.concat(partial.results);
       }
 
@@ -67,14 +101,24 @@ app.post(
   '/transactions',
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
+    const fileId = req.get('X-Actual-File-Id');
+    if (fileId != null && !isValidFileId(fileId)) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'invalid-file-id',
+        details: 'invalid fileId',
+      });
+      return;
+    }
 
     try {
       const transactions = await pluggyaiService.getTransactionsByAccountId(
         accountId,
         startDate,
+        fileId,
       );
 
-      const account = await pluggyaiService.getAccountById(accountId);
+      const account = await pluggyaiService.getAccountById(accountId, fileId);
 
       let startingBalance = parseInt(
         Math.round(account.balance * 100).toString(),
