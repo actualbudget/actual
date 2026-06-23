@@ -55,7 +55,7 @@ async function createScheduleList(
     );
     if (!schedule) {
       errors.push(
-        `Schedule ${template.name ?? template.scheduleId ?? ''} could not be found.`,
+        `Schedule "${template.name ?? template.scheduleId ?? ''}" could not be found.`,
       );
       continue;
     }

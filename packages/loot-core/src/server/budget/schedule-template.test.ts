@@ -551,7 +551,7 @@ describe('runSchedule', () => {
     );
 
     expect(result.errors).toContainEqual(
-      expect.stringMatching(/Schedule Gone could not be found/),
+      expect.stringMatching(/Schedule "Gone" could not be found/),
     );
     expect(result.to_budget).toBe(0);
   });
