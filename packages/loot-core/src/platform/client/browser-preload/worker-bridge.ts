@@ -33,7 +33,6 @@ export class WorkerBridge {
   _onmessage: ((e: MessageEvent) => void) | null;
   _listeners: Array<{ type: string; handler: (e: MessageEvent) => void }>;
   _started: boolean;
-  _isInitialized: boolean;
   _currentBudgetId: string | null;
   _sharedWorkerLivenessTimeout: { start: () => void; clear: () => void };
   _onVisibilityChange: () => void;
@@ -45,7 +44,6 @@ export class WorkerBridge {
     this._onmessage = null;
     this._listeners = [];
     this._started = false;
-    this._isInitialized = false;
     this._currentBudgetId = null;
     this._sharedWorkerLivenessTimeout =
       this._createSharedWorkerLivenessTimeout();
@@ -53,7 +51,7 @@ export class WorkerBridge {
     this.backendWorkerUrl = backendWorkerUrl;
 
     this._onVisibilityChange = () => {
-      if (document.visibilityState === 'hidden' || !this._isInitialized) {
+      if (document.visibilityState === 'hidden' || !this._started) {
         return;
       }
 
@@ -194,10 +192,6 @@ export class WorkerBridge {
     this._dispatch(event);
   }
 
-  markInitialized() {
-    this._isInitialized = true;
-  }
-
   _normalizeBudgetId(budgetId: string | null): string | null {
     if (
       typeof budgetId === 'string' &&
@@ -218,9 +212,6 @@ export class WorkerBridge {
   }
 
   _resumeAssociation() {
-    if (!this._isInitialized) {
-      return;
-    }
     this._sharedPort.postMessage({
       type: '__resume-tab',
       budgetId: this._currentBudgetId,
