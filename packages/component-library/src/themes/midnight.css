@@ -252,4 +252,5 @@
   --color-chartQual7: var(--palette-chartQual7);
   --color-chartQual8: var(--palette-chartQual8);
   --color-chartQual9: var(--palette-chartQual9);
+  --color-scheme: dark;
 }

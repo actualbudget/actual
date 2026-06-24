@@ -262,14 +262,17 @@ export function createBudgetAnalysisSpreadsheet({
       intervalData.push({
         date: month,
         budgeted,
-        spent, // Display as positive
+        spent,
         balance: monthBalance,
-        overspendingAdjustment: Math.abs(overspendingAdjustment), // Display as positive
+        overspendingAdjustment: Math.abs(overspendingAdjustment),
       });
 
-      // Update running balance for next month
-      runningBalance = carryoverToNextMonth;
-      // Save this month's overspending to apply in next month
+      // For future months with no budget or transactions, category balances are
+      // all zero so carryoverToNextMonth=0, which would wipe the running balance.
+      // Use the computed monthBalance as the next month's starting balance instead,
+      // which correctly preserves the cumulative balance regardless of whether
+      // category cells have data.
+      runningBalance = monthBalance;
       overspendingFromPrevMonth = overspendingThisMonth;
     }
 
