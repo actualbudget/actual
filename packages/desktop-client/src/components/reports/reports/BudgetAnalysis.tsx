@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -6,16 +6,10 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import {
-  SvgChart,
-  SvgChartBar,
-  SvgViewHide,
-  SvgViewShow,
-} from '@actual-app/components/icons/v1';
+import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
-import { Select } from '@actual-app/components/select';
+import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
-import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -49,10 +43,82 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
-type BalanceMode =
-  | 'balance-only'
-  | 'balance-and-categories'
-  | 'categories-only';
+type OptionsButtonProps = {
+  graphType: 'Line' | 'Bar';
+  onToggleGraphType: () => void;
+  showBalance: boolean;
+  onToggleShowBalance: () => void;
+  showCategories: boolean;
+  onToggleShowCategories: () => void;
+  showHiddenCategories: boolean;
+  onToggleShowHiddenCategories: () => void;
+};
+
+function OptionsButton({
+  graphType,
+  onToggleGraphType,
+  showBalance,
+  onToggleShowBalance,
+  showCategories,
+  onToggleShowCategories,
+  showHiddenCategories,
+  onToggleShowHiddenCategories,
+}: OptionsButtonProps) {
+  const { t } = useTranslation();
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <Button ref={triggerRef} onPress={() => setIsOpen(true)}>
+        <Trans>Options</Trans>
+      </Button>
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom end"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+      >
+        <Menu
+          onMenuSelect={item => {
+            if (item === 'graph-type') onToggleGraphType();
+            if (item === 'show-balance') onToggleShowBalance();
+            if (item === 'show-categories') onToggleShowCategories();
+            if (item === 'show-hidden-categories') {
+              onToggleShowHiddenCategories();
+            }
+          }}
+          items={[
+            {
+              name: 'graph-type',
+              text:
+                graphType === 'Bar'
+                  ? t('Switch to line chart')
+                  : t('Switch to bar chart'),
+            },
+            Menu.line,
+            {
+              name: 'show-balance',
+              text: t('Show balance'),
+              toggle: showBalance,
+            },
+            {
+              name: 'show-categories',
+              text: t('Show categories'),
+              toggle: showCategories,
+            },
+            Menu.line,
+            {
+              name: 'show-hidden-categories',
+              text: t('Show hidden categories'),
+              toggle: showHiddenCategories,
+            },
+          ]}
+        />
+      </Popover>
+    </>
+  );
+}
 
 export function BudgetAnalysis() {
   const params = useParams();
@@ -104,15 +170,14 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [showBalance, setShowBalance] = useState(
     widget?.meta?.showBalance ?? true,
   );
-  const [balanceOnly, setBalanceOnly] = useState(
-    widget?.meta?.balanceOnly ?? false,
+  const [showCategories, setShowCategories] = useState(
+    !(widget?.meta?.balanceOnly ?? false),
   );
   const [showHiddenCategories, setShowHiddenCategories] = useState(
     widget?.meta?.showHiddenCategories ?? false,
   );
   const [latestTransaction, setLatestTransaction] = useState('');
   const [isConcise, setIsConcise] = useState(() => {
-    // Default to concise (monthly) view until we load the actual date range
     return true;
   });
 
@@ -243,7 +308,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
             },
             graphType,
             showBalance,
-            balanceOnly,
+            balanceOnly: !showCategories,
             showHiddenCategories,
           },
         },
@@ -289,17 +354,6 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     });
   };
 
-  const balanceMode: BalanceMode = balanceOnly
-    ? 'balance-only'
-    : showBalance
-      ? 'balance-and-categories'
-      : 'categories-only';
-
-  function onBalanceModeChange(newMode: BalanceMode) {
-    setBalanceOnly(newMode === 'balance-only');
-    setShowBalance(newMode !== 'categories-only');
-  }
-
   return (
     <Page
       header={
@@ -344,64 +398,22 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         onDeleteFilter={onDeleteFilter}
         onConditionsOpChange={onConditionsOpChange}
         filterInclude={['category', 'saved']}
-        inlineContent={
-          <Tooltip
-            content={
-              graphType === 'Line'
-                ? t('Switch to bar chart')
-                : t('Switch to line chart')
-            }
-          >
-            <Button
-              variant="bare"
-              onPress={() =>
-                setGraphType(graphType === 'Line' ? 'Bar' : 'Line')
-              }
-            >
-              {graphType === 'Line' ? (
-                <SvgChartBar style={{ width: 12, height: 12 }} />
-              ) : (
-                <SvgChart style={{ width: 12, height: 12 }} />
-              )}
-            </Button>
-          </Tooltip>
-        }
       >
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          <Select<BalanceMode>
-            value={balanceMode}
-            onChange={onBalanceModeChange}
-            options={[
-              ['balance-only', t('Balance only')],
-              ['balance-and-categories', t('Balance + Categories')],
-              ['categories-only', t('Categories only')],
-            ]}
-          />
-
-          <Tooltip
-            content={
-              showHiddenCategories
-                ? t('Click to hide hidden categories')
-                : t('Click to show hidden categories')
+          <OptionsButton
+            graphType={graphType}
+            onToggleGraphType={() =>
+              setGraphType(graphType === 'Line' ? 'Bar' : 'Line')
             }
-          >
-            <Button
-              variant="bare"
-              aria-pressed={showHiddenCategories}
-              onPress={() => setShowHiddenCategories(state => !state)}
-              style={
-                showHiddenCategories
-                  ? { backgroundColor: theme.buttonBareBackgroundActive }
-                  : undefined
-              }
-            >
-              {showHiddenCategories ? (
-                <SvgViewHide style={{ width: 16, height: 16 }} />
-              ) : (
-                <SvgViewShow style={{ width: 16, height: 16 }} />
-              )}
-            </Button>
-          </Tooltip>
+            showBalance={showBalance}
+            onToggleShowBalance={() => setShowBalance(v => !v)}
+            showCategories={showCategories}
+            onToggleShowCategories={() => setShowCategories(v => !v)}
+            showHiddenCategories={showHiddenCategories}
+            onToggleShowHiddenCategories={() =>
+              setShowHiddenCategories(v => !v)
+            }
+          />
 
           {widget && (
             <Button variant="primary" onPress={onSaveWidget}>
@@ -529,7 +541,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                 data={data}
                 graphType={graphType}
                 showBalance={showBalance}
-                balanceOnly={balanceOnly}
+                balanceOnly={!showCategories}
                 isConcise={isConcise}
               />
               <View style={{ marginTop: 30 }}>
@@ -555,8 +567,9 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                     changes in a specific area.
                   </Paragraph>
                   <Paragraph>
-                    Hint: You can use the icon in the header to toggle between
-                    line and bar chart views.
+                    Use the <strong>Options</strong> button to switch between
+                    line and bar chart, toggle balance and category series
+                    visibility, and include hidden budget categories.
                   </Paragraph>
                 </Trans>
               </View>
