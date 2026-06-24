@@ -3,8 +3,8 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
@@ -15,7 +15,6 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
-import { useLocale } from '#hooks/useLocale';
 
 import { getLiveRange } from './getLiveRange';
 import {
@@ -24,8 +23,6 @@ import {
   getFullRange,
   getLatestRange,
   getNextRange,
-  validateEnd,
-  validateStart,
 } from './reportRanges';
 
 type HeaderProps = {
@@ -280,9 +277,19 @@ export function Header({
   filterExclude,
   filterInclude,
 }: HeaderProps) {
-  const locale = useLocale();
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+
+  const monthInputStyle = {
+    fontSize: 13,
+    padding: '4px 10px',
+    color: theme.buttonNormalText,
+    backgroundColor: theme.buttonNormalBackground,
+    border: `1px solid ${theme.buttonNormalBorder}`,
+    borderRadius: 4,
+    boxShadow: `0 1px 2px ${theme.buttonNormalShadow}`,
+    outline: 'none',
+  };
 
   function convertToMonth(
     start: string,
@@ -335,36 +342,28 @@ export function Header({
             )}
 
             <SpaceBetween gap={5}>
-              <Select
-                onChange={newValue =>
-                  onChangeDates(
-                    ...validateStart(
-                      allMonths[allMonths.length - 1].name,
-                      allMonths[0].name,
-                      newValue,
-                      end,
-                    ),
-                  )
-                }
+              <input
+                type="month"
                 value={start}
-                defaultLabel={monthUtils.format(start, 'MMMM yyyy', locale)}
-                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+                onChange={e => {
+                  if (!e.target.value) return;
+                  const newStart = e.target.value;
+                  const newEnd = newStart > end ? newStart : end;
+                  onChangeDates(newStart, newEnd, 'static');
+                }}
+                style={monthInputStyle}
               />
               <View>{t('to')}</View>
-              <Select
-                onChange={newValue =>
-                  onChangeDates(
-                    ...validateEnd(
-                      allMonths[allMonths.length - 1].name,
-                      allMonths[0].name,
-                      start,
-                      newValue,
-                    ),
-                  )
-                }
+              <input
+                type="month"
                 value={end}
-                options={allMonths.map(({ name, pretty }) => [name, pretty])}
-                style={{ marginRight: 10 }}
+                onChange={e => {
+                  if (!e.target.value) return;
+                  const newEnd = e.target.value;
+                  const newStart = newEnd < start ? newEnd : start;
+                  onChangeDates(newStart, newEnd, 'static');
+                }}
+                style={{ ...monthInputStyle, marginRight: 10 }}
               />
             </SpaceBetween>
           </SpaceBetween>
