@@ -53,30 +53,17 @@ jobs:
           python3 -m pip install setuptools
       - name: Set up environment
         uses: ./.github/actions/setup
-      - name: Cache Electron binaries
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
-        with:
-          path: ${{ github.workspace }}/.electron-cache
-          key: electron-${{ runner.os }}-${{ hashFiles('packages/desktop-electron/package.json') }}
-          restore-keys: |
-            electron-${{ runner.os }}-
-      - if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        name: Cache Flatpak runtimes
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
-        with:
-          path: ~/.local/share/flatpak
-          key: flatpak-${{ runner.os }}-24.08-v1
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
         name: Setup Flatpak dependencies
         run: |
           sudo apt-get update
           sudo apt-get install flatpak -y
           sudo apt-get install flatpak-builder -y
-          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          flatpak install --user org.freedesktop.Sdk//24.08 -y
-          flatpak install --user org.freedesktop.Platform//24.08 -y
-          flatpak install --user org.electronjs.Electron2.BaseApp//24.08 -y
-          flatpak install --user org.flatpak.Builder -y
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install org.freedesktop.Sdk//24.08 -y
+          sudo flatpak install org.freedesktop.Platform//24.08 -y
+          sudo flatpak install org.electronjs.Electron2.BaseApp//24.08 -y
+          sudo flatpak install org.flatpak.Builder -y
 
           METAINFO_FILE="packages/desktop-electron/extra-resources/linux/com.actualbudget.actual.metainfo.xml"
           TODAY=$(date +%Y-%m-%d)
@@ -85,8 +72,6 @@ jobs:
           flatpak run --command=flatpak-builder-lint org.flatpak.Builder appstream "$METAINFO_FILE"
       - name: Build Electron
         run: ./bin/package-electron --skip-translations
-        env:
-          ELECTRON_CACHE: ${{ github.workspace }}/.electron-cache
 
       - name: Upload Linux x64 AppImage
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
