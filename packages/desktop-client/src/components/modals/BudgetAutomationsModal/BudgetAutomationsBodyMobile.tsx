@@ -24,6 +24,7 @@ import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 
+import { AutomationCategorySelect } from './AutomationCategorySelect';
 import { AutomationEditorPane } from './AutomationEditorPane';
 import { AutomationListRow } from './AutomationListRow';
 import { BudgetAutomationMigrationWarning } from './BudgetAutomationMigrationWarning';
@@ -86,7 +87,7 @@ function AddButton({
 
 type BudgetAutomationsBodyMobileProps = {
   categoryId: string;
-  categoryName: string;
+  onCategoryChange: (categoryId: string) => void;
   needsMigration: boolean;
   initialEntries: AutomationEntry[];
   initialCleanup: CleanupTemplate[];
@@ -98,7 +99,7 @@ type BudgetAutomationsBodyMobileProps = {
 
 export function BudgetAutomationsBodyMobile({
   categoryId,
-  categoryName,
+  onCategoryChange,
   needsMigration,
   initialEntries,
   initialCleanup,
@@ -297,16 +298,11 @@ export function BudgetAutomationsBodyMobile({
           <Text style={{ fontSize: 11, color: theme.pageTextLight }}>
             <Trans>Budget automation</Trans>
           </Text>
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: 600,
-              color: theme.pageText,
-              marginTop: 2,
-            }}
-          >
-            {categoryName}
-          </Text>
+          <AutomationCategorySelect
+            categoryId={categoryId}
+            onCategoryChange={onCategoryChange}
+            style={{ marginTop: 2, fontSize: 18 }}
+          />
         </View>
         <View style={{ textAlign: 'right', flexShrink: 0 }}>
           <Text

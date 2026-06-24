@@ -22,7 +22,6 @@ type NotesButtonProps = {
   height?: number;
   defaultColor?: string;
   tooltipPosition?: ComponentProps<typeof Tooltip>['placement'];
-  showPlaceholder?: boolean;
   style?: CSSProperties;
 };
 export function NotesButton({
@@ -31,7 +30,6 @@ export function NotesButton({
   height = 12,
   defaultColor = theme.buttonNormalText,
   tooltipPosition = 'bottom start',
-  showPlaceholder = false,
   style,
 }: NotesButtonProps) {
   const { t } = useTranslation();
@@ -75,15 +73,11 @@ export function NotesButton({
               color: defaultColor,
               ...style,
               padding: 4,
-              ...(showPlaceholder && {
-                opacity: hasNotes || isOpen ? 1 : 0.3,
-              }),
               ...(isOpen && { color: theme.buttonNormalText }),
               '&:hover': { opacity: 1 },
             }),
-            !hasNotes && !isOpen && !showPlaceholder ? 'hover-visible' : '',
+            !hasNotes && !isOpen ? 'hover-visible' : '',
           )}
-          data-placeholder={showPlaceholder}
           onPress={() => {
             setIsOpen(true);
           }}

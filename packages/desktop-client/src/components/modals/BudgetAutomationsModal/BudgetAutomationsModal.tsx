@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
@@ -31,6 +31,7 @@ export function BudgetAutomationsModal({
   month?: string;
 }) {
   const { isNarrowWidth } = useResponsive();
+  const [selectedCategoryId, setSelectedCategoryId] = useState(categoryId);
   const [parsedTemplates, setParsedTemplates] = useState<Template[] | null>(
     null,
   );
@@ -39,11 +40,14 @@ export function BudgetAutomationsModal({
   );
   const effectiveMonth = month ?? currentMonth();
 
-  const onLoaded = (result: Record<string, Template[]>) => {
-    setParsedTemplates(result[categoryId] ?? []);
-  };
+  const onLoaded = useCallback(
+    (result: Record<string, Template[]>) => {
+      setParsedTemplates(result[selectedCategoryId] ?? []);
+    },
+    [selectedCategoryId],
+  );
 
-  const { data: currentCategory } = useCategory(categoryId);
+  const { data: currentCategory } = useCategory(selectedCategoryId);
   // default to 'ui' while the category is still resolving so we don't fire a
   // notes-mode migration on a category that may turn out to be ui-managed
   const needsMigration =
@@ -52,7 +56,7 @@ export function BudgetAutomationsModal({
   const source = needsMigration ? 'notes' : 'ui';
 
   const { loading: templatesLoading } = useBudgetAutomations({
-    categoryId,
+    categoryId: selectedCategoryId,
     source,
     onLoaded,
   });
@@ -64,11 +68,20 @@ export function BudgetAutomationsModal({
   const categories = useBudgetAutomationCategories();
 
   const { loading: cleanupLoading } = useCategoryCleanup({
-    categoryId,
+    categoryId: selectedCategoryId,
     source,
     onLoaded: setParsedCleanup,
   });
   const loading = templatesLoading || cleanupLoading || schedulesLoading;
+
+  const handleCategoryChange = (newCategoryId: string) => {
+    if (newCategoryId === selectedCategoryId) {
+      return;
+    }
+    setSelectedCategoryId(newCategoryId);
+    setParsedTemplates(null);
+    setParsedCleanup(null);
+  };
 
   const hasErrorTemplate =
     parsedTemplates?.some(t => t.type === 'error') ?? false;
@@ -133,8 +146,9 @@ export function BudgetAutomationsModal({
             <UnsupportedDirectivesNotice onClose={() => state.close()} />
           ) : isNarrowWidth ? (
             <BudgetAutomationsBodyMobile
-              categoryId={categoryId}
-              categoryName={currentCategory?.name ?? ''}
+              key={selectedCategoryId}
+              categoryId={selectedCategoryId}
+              onCategoryChange={handleCategoryChange}
               needsMigration={needsMigration}
               initialEntries={initialEntries ?? []}
               initialCleanup={parsedCleanup}
@@ -145,8 +159,9 @@ export function BudgetAutomationsModal({
             />
           ) : (
             <BudgetAutomationsBody
-              categoryId={categoryId}
-              categoryName={currentCategory?.name ?? ''}
+              key={selectedCategoryId}
+              categoryId={selectedCategoryId}
+              onCategoryChange={handleCategoryChange}
               needsMigration={needsMigration}
               initialEntries={initialEntries ?? []}
               initialCleanup={parsedCleanup}

@@ -5,7 +5,6 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
-  SvgChartPie,
   SvgDotsHorizontalTriple,
   SvgTrash,
 } from '@actual-app/components/icons/v1';
@@ -101,6 +100,9 @@ export function CategoryMenuModal({
                 categoryGroup={categoryGroup}
                 onDelete={_onDelete}
                 onToggleVisibility={_onToggleVisibility}
+                onEditAutomations={
+                  onEditAutomations ? _onEditAutomations : undefined
+                }
               />
             }
             title={
@@ -158,16 +160,6 @@ export function CategoryMenuModal({
                 />
                 <Trans>Edit notes</Trans>
               </Button>
-              {onEditAutomations && (
-                <Button style={buttonStyle} onPress={_onEditAutomations}>
-                  <SvgChartPie
-                    width={20}
-                    height={20}
-                    style={{ paddingRight: 5 }}
-                  />
-                  <Trans>Budget automations</Trans>
-                </Button>
-              )}
             </View>
           </View>
         </>
@@ -181,6 +173,7 @@ function AdditionalCategoryMenu({
   categoryGroup,
   onDelete,
   onToggleVisibility,
+  onEditAutomations,
 }) {
   const { t } = useTranslation();
   const triggerRef = useRef(null);
@@ -219,6 +212,11 @@ function AdditionalCategoryMenu({
           <Menu
             getItemStyle={getItemStyle}
             items={[
+              onEditAutomations && {
+                name: 'editAutomations',
+                text: t('Budget automations'),
+              },
+              onEditAutomations && Menu.line,
               !categoryGroup?.hidden && {
                 name: 'toggleVisibility',
                 text: category.hidden ? t('Show') : t('Hide'),
@@ -235,7 +233,9 @@ function AdditionalCategoryMenu({
             ]}
             onMenuSelect={itemName => {
               setMenuOpen(false);
-              if (itemName === 'delete') {
+              if (itemName === 'editAutomations') {
+                onEditAutomations();
+              } else if (itemName === 'delete') {
                 onDelete();
               } else if (itemName === 'toggleVisibility') {
                 onToggleVisibility();

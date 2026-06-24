@@ -23,6 +23,7 @@ import { Link } from '#components/common/Link';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 
+import { AutomationCategorySelect } from './AutomationCategorySelect';
 import { AutomationEditorPane } from './AutomationEditorPane';
 import { AutomationListRow } from './AutomationListRow';
 import { BudgetAutomationMigrationWarning } from './BudgetAutomationMigrationWarning';
@@ -107,7 +108,7 @@ function SidebarAddButton({
 
 type BudgetAutomationsBodyProps = {
   categoryId: string;
-  categoryName: string;
+  onCategoryChange: (categoryId: string) => void;
   needsMigration: boolean;
   initialEntries: AutomationEntry[];
   initialCleanup: CleanupTemplate[];
@@ -119,7 +120,7 @@ type BudgetAutomationsBodyProps = {
 
 export function BudgetAutomationsBody({
   categoryId,
-  categoryName,
+  onCategoryChange,
   needsMigration,
   initialEntries,
   initialCleanup,
@@ -188,16 +189,11 @@ export function BudgetAutomationsBody({
           <Text style={{ fontSize: 12, color: theme.pageTextLight }}>
             <Trans>Budget automation</Trans>
           </Text>
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: 600,
-              color: theme.pageText,
-              marginTop: 2,
-            }}
-          >
-            {categoryName}
-          </Text>
+          <AutomationCategorySelect
+            categoryId={categoryId}
+            onCategoryChange={onCategoryChange}
+            style={{ marginTop: 2 }}
+          />
         </View>
         <View style={{ textAlign: 'right', flexShrink: 0, minWidth: 220 }}>
           <View

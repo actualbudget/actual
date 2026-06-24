@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useRef } from 'react';
+import React, { useContext, useRef } from 'react';
 import type { CSSProperties, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -15,9 +15,14 @@ import type {
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
 
+import { MonthsContext } from '#components/budget/MonthsContext';
 import { InputCell } from '#components/table';
 import { useContextMenu } from '#hooks/useContextMenu';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { SidebarCategoryButtons } from './SidebarCategoryButtons';
 
@@ -61,8 +66,19 @@ export function SidebarCategory({
   onHideNewCategory,
 }: SidebarCategoryProps) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const monthsContext = useContext(MonthsContext);
+  const month = monthsContext?.months?.[0];
+  const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
+
+  const canEditAutomations =
+    goalTemplatesEnabled &&
+    goalTemplatesUIEnabled &&
+    !(category.is_income && budgetType !== 'tracking');
 
   const temporary = category.id === 'new';
   const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
@@ -114,6 +130,15 @@ export function SidebarCategory({
             onMenuSelect={type => {
               if (type === 'rename') {
                 onEditName(category.id);
+              } else if (type === 'edit-automations') {
+                dispatch(
+                  pushModal({
+                    modal: {
+                      name: 'category-automations-edit',
+                      options: { categoryId: category.id, month },
+                    },
+                  }),
+                );
               } else if (type === 'delete') {
                 onDelete(category.id);
               } else if (type === 'toggle-visibility') {
@@ -123,6 +148,11 @@ export function SidebarCategory({
             }}
             items={[
               { name: 'rename', text: t('Rename') },
+              canEditAutomations && {
+                name: 'edit-automations',
+                text: t('Budget automations'),
+              },
+              canEditAutomations && Menu.line,
               !categoryGroup?.hidden && {
                 name: 'toggle-visibility',
                 text: category.hidden ? t('Show') : t('Hide'),
@@ -132,11 +162,7 @@ export function SidebarCategory({
           />
         </Popover>
       </View>
-      <SidebarCategoryButtons
-        category={category}
-        dragging={dragging}
-        goalsShown={goalsShown}
-      />
+      <SidebarCategoryButtons category={category} dragging={dragging} />
     </View>
   );
 
