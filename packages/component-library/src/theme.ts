@@ -223,4 +223,5 @@ export const theme = {
   tooltipBorder: 'var(--color-tooltipBorder)',
   calendarCellBackground: 'var(--color-calendarCellBackground)',
   overlayBackground: 'var(--color-overlayBackground)',
+  colorScheme: 'var(--color-scheme)',
 };

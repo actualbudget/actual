@@ -289,6 +289,7 @@ export function Header({
     borderRadius: 4,
     boxShadow: `0 1px 2px ${theme.buttonNormalShadow}`,
     outline: 'none',
+    colorScheme: theme.colorScheme,
   };
 
   function convertToMonth(
