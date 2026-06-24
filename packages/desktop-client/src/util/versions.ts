@@ -1,5 +1,6 @@
-// @ts-strict-ignore
 import * as Platform from '@actual-app/core/shared/platform';
+// @ts-strict-ignore
+import * as v from 'valibot';
 
 function parseSemanticVersion(versionString): [number, number, number] {
   return versionString
@@ -27,7 +28,10 @@ export async function getLatestVersion(): Promise<string | 'unknown'> {
     const response = await fetch(
       'https://api.github.com/repos/actualbudget/actual/releases/latest',
     );
-    const json = (await response.json()) as { tag_name?: string };
+    const json = v.parse(
+      v.looseObject({ tag_name: v.optional(v.string()) }),
+      await response.json(),
+    );
     return json?.tag_name ?? 'unknown';
   } catch {
     // Rate limit exceeded? Or perhaps GitHub is down?

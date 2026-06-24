@@ -23,6 +23,7 @@ import type {
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import * as d from 'date-fns';
+import * as v from 'valibot';
 
 import { Warning } from '#components/alerts';
 import { AppliedFilters } from '#components/filters/AppliedFilters';
@@ -179,7 +180,12 @@ function CustomReportInner({
 
   const reportFromSessionStorage = sessionStorage.getItem('report');
   const session: Partial<CustomReportEntity> = reportFromSessionStorage
-    ? (JSON.parse(reportFromSessionStorage) as Partial<CustomReportEntity>)
+    ? v.parse(
+        v.custom<Partial<CustomReportEntity>>(
+          input => typeof input === 'object' && input !== null,
+        ),
+        JSON.parse(reportFromSessionStorage),
+      )
     : {};
   const combine = initialReport ?? defaultReport;
 

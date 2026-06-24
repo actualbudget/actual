@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import * as v from 'valibot';
 
 import * as asyncStorage from '#platform/server/asyncStorage';
 import { logger } from '#platform/server/log';
@@ -94,15 +95,18 @@ async function keyTest({
     return { error: { reason: 'old-key-style' } };
   }
 
-  const test = JSON.parse(originalTest) as {
-    value: string;
-    meta: {
-      keyId: string;
-      algorithm: string;
-      iv: string;
-      authTag: string;
-    };
-  };
+  const test = v.parse(
+    v.looseObject({
+      value: v.string(),
+      meta: v.looseObject({
+        keyId: v.string(),
+        algorithm: v.string(),
+        iv: v.string(),
+        authTag: v.string(),
+      }),
+    }),
+    JSON.parse(originalTest),
+  );
 
   const key = await encryption.createKey({ id, password, salt });
   await encryption.loadKey(key);
@@ -118,9 +122,10 @@ async function keyTest({
   }
 
   // Persist key in async storage
-  const keys = JSON.parse(
-    (await asyncStorage.getItem(`encrypt-keys`)) || '{}',
-  ) as Record<string, unknown>;
+  const keys = v.parse(
+    v.record(v.string(), v.unknown()),
+    JSON.parse((await asyncStorage.getItem(`encrypt-keys`)) || '{}'),
+  );
   keys[validCloudFileId] = key.serialize();
   await asyncStorage.setItem('encrypt-keys', JSON.stringify(keys));
 

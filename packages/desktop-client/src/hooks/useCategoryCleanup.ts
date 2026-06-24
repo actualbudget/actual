@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { send } from '@actual-app/core/platform/client/connection';
 import { q } from '@actual-app/core/shared/query';
 import type { CleanupTemplate } from '@actual-app/core/types/models/cleanup-templates';
+import * as v from 'valibot';
 
 import { aqlQuery } from '#queries/aqlQuery';
 
@@ -37,7 +38,10 @@ export function useCategoryCleanup({
       const raw =
         row && typeof row.cleanup_def === 'string' ? row.cleanup_def : null;
       const parsed: CleanupTemplate[] = raw
-        ? (JSON.parse(raw) as CleanupTemplate[])
+        ? v.parse(
+            v.custom<CleanupTemplate[]>(input => Array.isArray(input)),
+            JSON.parse(raw),
+          )
         : [];
       if (mounted) {
         setCleanup(parsed);

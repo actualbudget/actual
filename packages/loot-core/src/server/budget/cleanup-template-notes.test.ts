@@ -1,3 +1,4 @@
+import * as v from 'valibot';
 import { vi } from 'vitest';
 
 import * as db from '#server/db';
@@ -5,6 +6,8 @@ import * as db from '#server/db';
 import { storeNoteCleanups } from './cleanup-template-notes';
 
 vi.mock('#server/db');
+
+const CategoryDefSchema = v.array(v.looseObject({ groupId: v.string() }));
 
 type CategoryRow = {
   id: string;
@@ -72,7 +75,12 @@ function setupDb(initial: { categories: CategoryRow[]; groups?: GroupRow[] }) {
       const referenced = new Set<string>();
       for (const def of categoryDefs.values()) {
         if (!def) continue;
-        const arr = JSON.parse(def) as Array<{ groupId?: string | null }>;
+        const arr = v.parse(
+          v.array(
+            v.looseObject({ groupId: v.optional(v.nullable(v.string())) }),
+          ),
+          JSON.parse(def),
+        );
         for (const row of arr) {
           if (row.groupId) referenced.add(row.groupId);
         }
@@ -121,15 +129,18 @@ describe('storeNoteCleanups', () => {
 
     await storeNoteCleanups();
 
-    const def1 = JSON.parse(state.categoryDefs.get('cat-1')!) as Array<{
-      groupId: string;
-    }>;
-    const def2 = JSON.parse(state.categoryDefs.get('cat-2')!) as Array<{
-      groupId: string;
-    }>;
-    const def3 = JSON.parse(state.categoryDefs.get('cat-3')!) as Array<{
-      groupId: string;
-    }>;
+    const def1 = v.parse(
+      CategoryDefSchema,
+      JSON.parse(state.categoryDefs.get('cat-1')!),
+    );
+    const def2 = v.parse(
+      CategoryDefSchema,
+      JSON.parse(state.categoryDefs.get('cat-2')!),
+    );
+    const def3 = v.parse(
+      CategoryDefSchema,
+      JSON.parse(state.categoryDefs.get('cat-3')!),
+    );
     expect(def1[0].groupId).toBe(def2[0].groupId);
     expect(def2[0].groupId).toBe(def3[0].groupId);
 
@@ -172,9 +183,10 @@ describe('storeNoteCleanups', () => {
     await storeNoteCleanups();
 
     expect(state.groups.get('g-existing')!.tombstone).toBe(0);
-    const def = JSON.parse(state.categoryDefs.get('cat-1')!) as Array<{
-      groupId: string;
-    }>;
+    const def = v.parse(
+      CategoryDefSchema,
+      JSON.parse(state.categoryDefs.get('cat-1')!),
+    );
     expect(def[0].groupId).toBe('g-existing');
   });
 });

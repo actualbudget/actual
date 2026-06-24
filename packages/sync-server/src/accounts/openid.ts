@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import { custom, generators, Issuer } from 'openid-client';
 import { v4 as uuidv4 } from 'uuid';
+import * as v from 'valibot';
 
 import {
   clearExpiredSessions,
@@ -347,7 +348,10 @@ export function getServerHostname() {
   );
   if (auth && auth.extra_data) {
     try {
-      const openIdConfig = JSON.parse(auth.extra_data) as ConfigParameter;
+      const openIdConfig = v.parse(
+        v.looseObject({ server_hostname: v.optional(v.string()) }),
+        JSON.parse(auth.extra_data),
+      );
       return openIdConfig.server_hostname ?? null;
     } catch (error) {
       console.error('Error parsing OpenID configuration:', error);

@@ -19,6 +19,7 @@ import type {
   TimeFrame,
 } from '@actual-app/core/types/models';
 import { parseISO } from 'date-fns';
+import * as v from 'valibot';
 
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
@@ -431,7 +432,12 @@ function QueryItem({
 
   function handleImport() {
     try {
-      const config = JSON.parse(importJsonText) as QueryConfig;
+      const config = v.parse(
+        v.custom<QueryConfig>(
+          input => typeof input === 'object' && input !== null,
+        ),
+        JSON.parse(importJsonText),
+      );
       if (config.conditions && config.conditionsOp && config.timeFrame) {
         // Update refs
         conditionsRef.current = config.conditions;

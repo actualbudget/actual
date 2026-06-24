@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import * as v from 'valibot';
 
 import { BankFactory } from '#app-gocardless/bank-factory';
 import type { IBank } from '#app-gocardless/banks/bank.interface';
@@ -96,9 +97,10 @@ export const goCardlessService = {
     const isExpiredJwtToken = (token: string | null): boolean => {
       if (!token) return true;
       try {
-        const payload = JSON.parse(
-          Buffer.from(token.split('.')[1], 'base64url').toString(),
-        ) as { exp: number };
+        const payload = v.parse(
+          v.looseObject({ exp: v.number() }),
+          JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString()),
+        );
         const clockTimestamp = Math.floor(Date.now() / 1000);
         return clockTimestamp >= payload.exp;
       } catch {

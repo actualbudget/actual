@@ -106,6 +106,7 @@
     "openid-client": "^5.7.1",
     "pluggy-sdk": "^0.85.3",
     "uuid": "^14.0.1",
+    "valibot": "^1.4.1",
     "winston": "^3.19.0"
   },
   "devDependencies": {

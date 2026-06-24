@@ -3,6 +3,7 @@ import path from 'path';
 
 import electron from 'electron';
 import type { BrowserWindow } from 'electron';
+import * as v from 'valibot';
 
 type WindowState = Electron.Rectangle & {
   isMaximized?: boolean;
@@ -21,9 +22,14 @@ const getDataDir = () => {
 async function loadState() {
   let state: WindowState | undefined = undefined;
   try {
-    state = JSON.parse(
-      fs.readFileSync(path.join(getDataDir(), 'window.json'), 'utf8'),
-    ) as WindowState;
+    state = v.parse(
+      v.custom<WindowState>(
+        input => typeof input === 'object' && input !== null,
+      ),
+      JSON.parse(
+        fs.readFileSync(path.join(getDataDir(), 'window.json'), 'utf8'),
+      ),
+    );
   } catch {
     console.log('Could not load window state');
   }

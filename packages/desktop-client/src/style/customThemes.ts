@@ -2,6 +2,8 @@
  * Custom theme utilities: fetch, validation, and storage helpers.
  */
 
+import * as v from 'valibot';
+
 export const BASE_THEME_OPTIONS = ['light', 'dark', 'midnight'] as const;
 export type BaseTheme = (typeof BASE_THEME_OPTIONS)[number];
 
@@ -654,7 +656,7 @@ export function parseInstalledTheme(
 ): InstalledTheme | null {
   if (!json) return null;
   try {
-    const parsed = JSON.parse(json) as Record<string, unknown>;
+    const parsed = v.parse(v.record(v.string(), v.unknown()), JSON.parse(json));
     if (
       parsed &&
       typeof parsed === 'object' &&
@@ -704,7 +706,7 @@ export function serializeInstalledTheme(theme: InstalledTheme | null): string {
 export function extractLegacyOverride(json: string | undefined): string | null {
   if (!json) return null;
   try {
-    const parsed = JSON.parse(json) as Record<string, unknown>;
+    const parsed = v.parse(v.record(v.string(), v.unknown()), JSON.parse(json));
     if (
       parsed &&
       typeof parsed === 'object' &&

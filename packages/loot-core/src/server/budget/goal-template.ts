@@ -1,3 +1,5 @@
+import * as v from 'valibot';
+
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { batchMessages } from '#server/sync';
@@ -152,6 +154,11 @@ async function getCategories(): Promise<CategoryEntity[]> {
   return categoryGroups.flatMap(g => g.categories || []).filter(c => !c.hidden);
 }
 
+// Goal definitions are stored as a JSON-encoded array of templates. We only
+// validate the array shape here (the templates themselves are a large union
+// produced by our own writers), keeping the `Template[]` output type.
+const TemplatesSchema = v.custom<Template[]>(input => Array.isArray(input));
+
 async function getTemplates(
   filter: (category: CategoryEntity) => boolean = () => true,
 ): Promise<Record<CategoryEntity['id'], Template[]>> {
@@ -166,9 +173,10 @@ async function getTemplates(
   const categoryTemplates: Record<CategoryEntity['id'], Template[]> = {};
   for (const categoryWithGoalDef of categoriesWithGoalDef.filter(filter)) {
     if (!categoryWithGoalDef.goal_def) continue;
-    categoryTemplates[categoryWithGoalDef.id] = JSON.parse(
-      categoryWithGoalDef.goal_def,
-    ) as Template[];
+    categoryTemplates[categoryWithGoalDef.id] = v.parse(
+      TemplatesSchema,
+      JSON.parse(categoryWithGoalDef.goal_def),
+    );
   }
   return categoryTemplates;
 }

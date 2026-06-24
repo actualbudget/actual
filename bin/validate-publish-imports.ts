@@ -1,6 +1,20 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import * as v from 'valibot';
+
+const packageJsonSchema = v.looseObject({
+  name: v.optional(v.string()),
+  imports: v.optional(
+    v.record(v.string(), v.union([v.string(), v.looseObject({})])),
+  ),
+  publishConfig: v.optional(
+    v.looseObject({
+      imports: v.optional(v.record(v.string(), v.string())),
+    }),
+  ),
+});
+
 /**
  * Derives publishConfig.imports from imports by:
  * 1. Prepending ./build/ to each value path
@@ -41,11 +55,10 @@ export function validatePackage(packageJsonPath: string): {
   warnings: string[];
 } {
   const warnings: string[] = [];
-  const content = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')) as {
-    name?: string;
-    imports?: Record<string, string | object>;
-    publishConfig?: { imports?: Record<string, string> };
-  };
+  const content = v.parse(
+    packageJsonSchema,
+    JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')),
+  );
   const packageName: string = content.name ?? packageJsonPath;
 
   const imports: Record<string, string | object> | undefined = content.imports;
@@ -97,10 +110,7 @@ export function validatePackage(packageJsonPath: string): {
 
 export function fixPackage(packageJsonPath: string): boolean {
   const raw = fs.readFileSync(packageJsonPath, 'utf-8');
-  const content = JSON.parse(raw) as {
-    imports?: Record<string, string | object>;
-    publishConfig?: { imports?: Record<string, string> };
-  };
+  const content = v.parse(packageJsonSchema, JSON.parse(raw));
 
   if (!content.imports || !content.publishConfig?.imports) {
     return false;
@@ -173,8 +183,9 @@ function main() {
     if (fixMode) {
       const fixed = fixPackage(pkgPath);
       if (fixed) {
-        const name = (
-          JSON.parse(fs.readFileSync(pkgPath, 'utf-8')) as { name?: string }
+        const name = v.parse(
+          v.looseObject({ name: v.optional(v.string()) }),
+          JSON.parse(fs.readFileSync(pkgPath, 'utf-8')),
         ).name;
         console.log(`Fixed publishConfig.imports in ${name}`);
       }

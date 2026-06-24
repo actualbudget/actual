@@ -22,6 +22,7 @@ import type {
   TimeFrame,
 } from '@actual-app/core/types/models';
 import { parseISO } from 'date-fns';
+import * as v from 'valibot';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { AppliedFilters } from '#components/filters/AppliedFilters';
@@ -88,7 +89,12 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     widget?.meta?.content
       ? (() => {
           try {
-            return JSON.parse(widget.meta.content) as SummaryContent;
+            return v.parse(
+              v.custom<SummaryContent>(
+                input => typeof input === 'object' && input !== null,
+              ),
+              JSON.parse(widget.meta.content),
+            );
           } catch (error) {
             console.error('Failed to parse widget meta content:', error);
             return {

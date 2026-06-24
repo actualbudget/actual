@@ -116,7 +116,7 @@ export function usePreviewTransactions({
       })
       .catch(error => {
         if (!isUnmounted) {
-          setError(error as Error);
+          setError(error instanceof Error ? error : new Error(String(error)));
           setIsLoading(false);
         }
       });

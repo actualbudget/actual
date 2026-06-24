@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import AdmZip from 'adm-zip';
 import { v4 as uuidv4 } from 'uuid';
+import * as v from 'valibot';
 
 import * as asyncStorage from '#platform/server/asyncStorage';
 import { fetch } from '#platform/server/fetch';
@@ -24,6 +25,19 @@ import { getServer } from './server-config';
 
 const UPLOAD_FREQUENCY_IN_DAYS = 7;
 
+const MetadataPrefsSchema = v.object({
+  budgetName: v.optional(v.string()),
+  id: v.optional(v.string()),
+  lastUploaded: v.optional(v.string()),
+  cloudFileId: v.optional(v.string()),
+  groupId: v.optional(v.string()),
+  encryptKeyId: v.optional(v.string()),
+  lastSyncedTimestamp: v.optional(v.string()),
+  resetClock: v.optional(v.boolean()),
+  lastScheduleRun: v.optional(v.string()),
+  userId: v.optional(v.string()),
+}) satisfies v.GenericSchema<unknown, MetadataPrefs>;
+
 export type UsersWithAccess = {
   userId: string;
   userName: string;
@@ -46,7 +60,12 @@ async function checkHTTPStatus(res) {
     if (res.status === 403) {
       try {
         const text = await res.text();
-        const data = (JSON.parse(text) as { data?: { reason?: string } })?.data;
+        const data = v.parse(
+          v.looseObject({
+            data: v.optional(v.looseObject({ reason: v.optional(v.string()) })),
+          }),
+          JSON.parse(text),
+        )?.data;
         if (data?.reason === 'token-expired') {
           await asyncStorage.removeItem('user-token');
           throw new HTTPError(403, 'token-expired');
@@ -177,9 +196,10 @@ export async function exportBuffer() {
 
     // mark it as a file that needs a new clock so when a new client
     // downloads it, it'll get set to a unique node
-    const meta = JSON.parse(
-      await fs.readFile(fs.join(budgetDir, 'metadata.json')),
-    ) as MetadataPrefs;
+    const meta = v.parse(
+      MetadataPrefsSchema,
+      JSON.parse(await fs.readFile(fs.join(budgetDir, 'metadata.json'))),
+    );
 
     meta.resetClock = true;
     const metaContent = Buffer.from(JSON.stringify(meta), 'utf8');

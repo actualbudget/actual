@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import cors from 'cors';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
+import * as v from 'valibot';
 
 import { bootstrap } from './account-db';
 import * as accountApp from './app-account';
@@ -86,9 +87,14 @@ app.get('/info', (_req, res) => {
       while (currentPath !== pathRoot && directoriesSearched < 5) {
         const packageJsonPath = resolve(currentPath, 'package.json');
         if (fs.existsSync(packageJsonPath)) {
-          const packageJson = JSON.parse(
-            readFileSync(packageJsonPath, 'utf-8'),
-          ) as { name?: string; description?: string; version?: string };
+          const packageJson = v.parse(
+            v.object({
+              name: v.optional(v.string()),
+              description: v.optional(v.string()),
+              version: v.optional(v.string()),
+            }),
+            JSON.parse(readFileSync(packageJsonPath, 'utf-8')),
+          );
 
           if (packageJson.name === '@actual-app/sync-server') {
             return packageJson;

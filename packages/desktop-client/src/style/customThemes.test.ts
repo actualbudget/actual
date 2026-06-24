@@ -1,4 +1,5 @@
 // oxlint-disable eslint/no-script-url
+import * as v from 'valibot';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -1754,8 +1755,10 @@ describe('migrateLegacyOverride', () => {
     expect(result?.newLightJson).toBe(JSON.stringify(baseTheme));
     expect(result?.newDarkJson).toBe(darkJson);
     expect(
-      (JSON.parse(result?.newLightJson ?? '{}') as Record<string, unknown>)
-        .overrideCss,
+      v.parse(
+        v.record(v.string(), v.unknown()),
+        JSON.parse(result?.newLightJson ?? '{}'),
+      ).overrideCss,
     ).toBeUndefined();
   });
 
@@ -1775,8 +1778,10 @@ describe('migrateLegacyOverride', () => {
     expect(result?.newLightJson).toBe(lightJson);
     expect(result?.newDarkJson).toBe(JSON.stringify(baseTheme));
     expect(
-      (JSON.parse(result?.newDarkJson ?? '{}') as Record<string, unknown>)
-        .overrideCss,
+      v.parse(
+        v.record(v.string(), v.unknown()),
+        JSON.parse(result?.newDarkJson ?? '{}'),
+      ).overrideCss,
     ).toBeUndefined();
   });
 
@@ -1798,12 +1803,16 @@ describe('migrateLegacyOverride', () => {
     expect(result?.newLightJson).toBe(JSON.stringify(baseTheme));
     expect(result?.newDarkJson).toBe(JSON.stringify(baseTheme));
     expect(
-      (JSON.parse(result?.newLightJson ?? '{}') as Record<string, unknown>)
-        .overrideCss,
+      v.parse(
+        v.record(v.string(), v.unknown()),
+        JSON.parse(result?.newLightJson ?? '{}'),
+      ).overrideCss,
     ).toBeUndefined();
     expect(
-      (JSON.parse(result?.newDarkJson ?? '{}') as Record<string, unknown>)
-        .overrideCss,
+      v.parse(
+        v.record(v.string(), v.unknown()),
+        JSON.parse(result?.newDarkJson ?? '{}'),
+      ).overrideCss,
     ).toBeUndefined();
   });
 

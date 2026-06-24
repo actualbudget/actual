@@ -12,6 +12,7 @@ import type { CategoryEntity } from '@actual-app/core/types/models';
 import type { CleanupTemplate } from '@actual-app/core/types/models/cleanup-templates';
 import type { Template } from '@actual-app/core/types/models/templates';
 import { css, cx } from '@emotion/css';
+import * as v from 'valibot';
 
 import {
   cleanupDefToEditor,
@@ -37,7 +38,10 @@ function getAutomationEntries(
     return [];
   }
   try {
-    const parsed = JSON.parse(goalDef) as Template[];
+    const parsed = v.parse(
+      v.custom<Template[]>(input => Array.isArray(input)),
+      JSON.parse(goalDef),
+    );
     if (!Array.isArray(parsed)) {
       return [];
     }
@@ -57,7 +61,10 @@ function getCleanupConfig(
     return emptyCleanupConfig();
   }
   try {
-    const parsed = JSON.parse(cleanupDef) as CleanupTemplate[];
+    const parsed = v.parse(
+      v.custom<CleanupTemplate[]>(input => Array.isArray(input)),
+      JSON.parse(cleanupDef),
+    );
     return cleanupDefToEditor(Array.isArray(parsed) ? parsed : []);
   } catch {
     return emptyCleanupConfig();

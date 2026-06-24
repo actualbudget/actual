@@ -12,6 +12,7 @@ import type {
   GoCardlessInstitution,
   GoCardlessToken,
 } from '@actual-app/core/types/models';
+import * as v from 'valibot';
 
 import { Error, Warning } from '#components/alerts';
 import { Autocomplete } from '#components/autocomplete/Autocomplete';
@@ -49,7 +50,12 @@ function useAvailableBanks(country: string) {
         setIsError(true);
         setBanks([]);
       } else {
-        setBanks(data as GoCardlessInstitution[]);
+        setBanks(
+          v.parse(
+            v.custom<GoCardlessInstitution[]>(input => Array.isArray(input)),
+            data,
+          ),
+        );
       }
 
       setIsLoading(false);

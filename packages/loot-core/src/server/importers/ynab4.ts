@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import AdmZip from 'adm-zip';
 import { v4 as uuidv4 } from 'uuid';
+import * as v from 'valibot';
 
 import { logger } from '#platform/server/log';
 import { send } from '#server/main-app';
@@ -444,9 +445,10 @@ export function parseFile(buffer: Buffer): YNAB4.YFull {
   }
 
   const metaStr = zipped.readFile(getFile(entries, root + 'Budget.ymeta'));
-  const meta = JSON.parse(metaStr.toString('utf8')) as {
-    relativeDataFolderName: string;
-  };
+  const meta = v.parse(
+    v.looseObject({ relativeDataFolderName: v.string() }),
+    JSON.parse(metaStr.toString('utf8')),
+  );
   const budgetPath = join(root, meta.relativeDataFolderName);
 
   const deviceFiles = entries.filter(e =>
@@ -464,7 +466,14 @@ export function parseFile(buffer: Buffer): YNAB4.YFull {
   }
 
   try {
-    return JSON.parse(contents) as YNAB4.YFull;
+    // The YNAB4 export is a large user-supplied structure; only validate that
+    // it decodes to an object and keep the `YNAB4.YFull` type for downstream use.
+    return v.parse(
+      v.custom<YNAB4.YFull>(
+        input => typeof input === 'object' && input !== null,
+      ),
+      JSON.parse(contents),
+    );
   } catch {
     throw new Error('Error parsing Budget.yfull file');
   }

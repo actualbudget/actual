@@ -1,3 +1,4 @@
+import * as v from 'valibot';
 /// <reference lib="WebWorker" />
 import { precacheAndRoute } from 'workbox-precaching';
 
@@ -113,9 +114,14 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
 
         if (fileToCheck === 'mf-manifest.json') {
           try {
-            const manifest = JSON.parse(content) as {
-              metaData?: { publicPath?: string };
-            };
+            const manifest = v.parse(
+              v.looseObject({
+                metaData: v.optional(
+                  v.looseObject({ publicPath: v.optional(v.string()) }),
+                ),
+              }),
+              JSON.parse(content),
+            );
             if (manifest.metaData?.publicPath) {
               manifest.metaData.publicPath = `/plugin-data/${slug}/`;
               content = JSON.stringify(manifest);

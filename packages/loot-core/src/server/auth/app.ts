@@ -1,3 +1,5 @@
+import * as v from 'valibot';
+
 import * as asyncStorage from '#platform/server/asyncStorage';
 import { logger } from '#platform/server/log';
 import { createApp } from '#server/app';
@@ -63,22 +65,28 @@ async function needsBootstrap({ url }: { url?: string } = {}) {
     return { error: 'network-failure' };
   }
 
-  let res: {
-    status: 'ok';
-    data: {
-      bootstrapped: boolean;
-      loginMethod: 'password' | 'openid' | string;
-      availableLoginMethods: Array<{
-        method: string;
-        displayName: string;
-        active: boolean;
-      }>;
-      multiuser: boolean;
-    };
-  };
+  const NeedsBootstrapSchema = v.looseObject({
+    status: v.optional(v.string()),
+    data: v.looseObject({
+      bootstrapped: v.optional(v.boolean()),
+      loginMethod: v.optional(v.string()),
+      availableLoginMethods: v.optional(
+        v.array(
+          v.looseObject({
+            method: v.string(),
+            displayName: v.string(),
+            active: v.boolean(),
+          }),
+        ),
+      ),
+      multiuser: v.optional(v.boolean()),
+    }),
+  });
+
+  let res: v.InferOutput<typeof NeedsBootstrapSchema>;
 
   try {
-    res = JSON.parse(resText) as typeof res;
+    res = v.parse(NeedsBootstrapSchema, JSON.parse(resText));
   } catch {
     return { error: 'parse-failure' };
   }
@@ -115,18 +123,28 @@ async function bootstrap(loginConfig: {
   return {};
 }
 
+const LoginMethodsResponseSchema = v.looseObject({
+  methods: v.optional(
+    v.array(
+      v.looseObject({
+        method: v.string(),
+        displayName: v.string(),
+        active: v.boolean(),
+      }),
+    ),
+  ),
+});
+
 async function getLoginMethods() {
-  type LoginMethodsResponse = {
-    methods?: Array<{ method: string; displayName: string; active: boolean }>;
-  };
-  let res: LoginMethodsResponse;
+  let res: v.InferOutput<typeof LoginMethodsResponseSchema>;
   try {
     const serverConfig = getServer();
     if (!serverConfig) {
       throw new Error('No sync server configured.');
     }
     res = await fetch(serverConfig.SIGNUP_SERVER + '/login-methods').then(
-      response => response.json() as Promise<LoginMethodsResponse>,
+      async response =>
+        v.parse(LoginMethodsResponseSchema, await response.json()),
     );
   } catch (err) {
     if (err instanceof PostError) {
@@ -177,18 +195,25 @@ async function getUser() {
         loginMethod = null,
         prefs: serverPrefs,
       } = {},
-    } = (JSON.parse(res) as {
-      status?: string;
-      reason?: string;
-      data?: {
-        userName?: string | null;
-        permission?: string;
-        userId?: string | null;
-        displayName?: string | null;
-        loginMethod?: string | null;
-        prefs?: unknown;
-      };
-    }) || {};
+    } = v.parse(
+      v.nullish(
+        v.looseObject({
+          status: v.optional(v.string()),
+          reason: v.optional(v.string()),
+          data: v.optional(
+            v.looseObject({
+              userName: v.optional(v.nullable(v.string())),
+              permission: v.optional(v.string()),
+              userId: v.optional(v.nullable(v.string())),
+              displayName: v.optional(v.nullable(v.string())),
+              loginMethod: v.optional(v.nullable(v.string())),
+              prefs: v.optional(v.unknown()),
+            }),
+          ),
+        }),
+      ),
+      JSON.parse(res),
+    ) || {};
 
     if (status === 'error') {
       if (reason === 'unauthorized') {

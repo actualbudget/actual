@@ -5,6 +5,7 @@ import type {
   CategoryEntity,
   ScheduleEntity,
 } from '@actual-app/core/types/models';
+import * as v from 'valibot';
 
 import { useCachedSchedules } from './useCachedSchedules';
 import { useFeatureFlag } from './useFeatureFlag';
@@ -46,10 +47,10 @@ export function useCategoryScheduleGoalTemplates({
 
     let goalDefinitions: Record<string, unknown>[] = [];
     try {
-      goalDefinitions = JSON.parse(category.goal_def) as Record<
-        string,
-        unknown
-      >[];
+      goalDefinitions = v.parse(
+        v.array(v.record(v.string(), v.unknown())),
+        JSON.parse(category.goal_def),
+      );
     } catch (e) {
       console.error('Failed to parse category goal_def:', e);
       return {

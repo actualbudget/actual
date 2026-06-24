@@ -1,14 +1,15 @@
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
+import * as v from 'valibot';
 
 export const setSessionReport = (
   propName: string,
   propValue: string | boolean | RuleConditionEntity[],
 ) => {
   const storedReport: Record<string, unknown> = sessionStorage.report
-    ? (JSON.parse(sessionStorage.getItem('report') || '') as Record<
-        string,
-        unknown
-      >)
+    ? v.parse(
+        v.record(v.string(), v.unknown()),
+        JSON.parse(sessionStorage.getItem('report') || ''),
+      )
     : {};
   const result: Record<string, string | boolean | RuleConditionEntity[]> = {};
   result[propName] = propValue;

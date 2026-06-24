@@ -126,6 +126,9 @@
     "playwright": "playwright",
     "typecheck": "tsgo -b && tsc-strict"
   },
+  "dependencies": {
+    "valibot": "^1.4.1"
+  },
   "devDependencies": {
     "@actual-app/components": "workspace:*",
     "@actual-app/core": "workspace:*",

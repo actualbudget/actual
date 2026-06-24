@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
+import * as v from 'valibot';
 
 import { logger } from '#platform/server/log';
 import { send } from '#server/main-app';
@@ -1146,11 +1147,18 @@ async function importBudgets(data: Budget, entityIdMap: Map<string, string>) {
 }
 
 export function parseFile(buffer: Buffer): Budget {
-  let data = JSON.parse(buffer.toString()) as Budget & {
-    data?: Budget & { plan?: Budget; budget?: Budget };
-    plan?: Budget;
-    budget?: Budget;
-  };
+  // The YNAB5 export is a large user-supplied structure; only validate that it
+  // decodes to an object and keep the wrapper type so the unwrapping below works.
+  let data = v.parse(
+    v.custom<
+      Budget & {
+        data?: Budget & { plan?: Budget; budget?: Budget };
+        plan?: Budget;
+        budget?: Budget;
+      }
+    >(input => typeof input === 'object' && input !== null),
+    JSON.parse(buffer.toString()),
+  );
   if (data.data) {
     data = data.data;
   }

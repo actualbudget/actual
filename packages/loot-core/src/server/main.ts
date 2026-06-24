@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import * as v from 'valibot';
+
 import * as asyncStorage from '#platform/server/asyncStorage';
 import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
@@ -80,7 +82,10 @@ handlers['get-server-version'] = async function () {
   try {
     const res = await get(getServer().BASE_SERVER + '/info');
 
-    const info = JSON.parse(res) as { build: { version: string } };
+    const info = v.parse(
+      v.looseObject({ build: v.looseObject({ version: v.string() }) }),
+      JSON.parse(res),
+    );
     version = info.build.version;
   } catch {
     return { error: 'network-failure' };

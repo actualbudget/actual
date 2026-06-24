@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import * as v from 'valibot';
+
 import type { CatalogTheme } from '#style/customThemes';
 
 const CATALOG_URL = `https://raw.githubusercontent.com/actualbudget/actual/${import.meta.env.REACT_APP_BRANCH || 'master'}/packages/desktop-client/src/data/customThemeCatalog.json`;
@@ -31,7 +33,12 @@ export function useThemeCatalog() {
           throw new Error('Invalid catalog format: expected an array');
         }
 
-        setData(data as CatalogTheme[]);
+        setData(
+          v.parse(
+            v.custom<CatalogTheme[]>(input => Array.isArray(input)),
+            data,
+          ),
+        );
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'Failed to load theme catalog',

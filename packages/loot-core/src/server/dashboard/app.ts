@@ -1,5 +1,6 @@
 import { isMatch } from 'es-toolkit/compat';
 import { v4 as uuidv4 } from 'uuid';
+import * as v from 'valibot';
 
 import { captureException } from '#platform/exceptions';
 import * as fs from '#platform/server/fs';
@@ -21,6 +22,18 @@ import type {
   ExportImportDashboardWidget,
 } from '#types/models';
 import type { EverythingButIdOptional, WithOptional } from '#types/util';
+
+// Widget metadata is a large per-widget union; we only validate that the
+// persisted JSON decodes to an object (or null) and keep the entity type.
+const WidgetMetaSchema = v.custom<DashboardWidgetEntity['meta']>(
+  input => input === null || (typeof input === 'object' && input !== undefined),
+);
+
+// The exported dashboard shape is validated downstream by `exportModel.validate`,
+// so here we only validate that the JSON decodes to an object.
+const ExportImportDashboardSchema = v.custom<ExportImportDashboard>(
+  input => typeof input === 'object' && input !== null,
+);
 
 function isExportedCustomReportWidget(
   widget: ExportImportDashboardWidget,
@@ -248,7 +261,7 @@ async function copyDashboardWidget({
         width: widget.width,
         height: widget.height,
         meta: widget.meta
-          ? (JSON.parse(widget.meta) as DashboardWidgetEntity['meta'])
+          ? v.parse(WidgetMetaSchema, JSON.parse(widget.meta))
           : {},
         dashboard_page_id: targetDashboardPageId,
       };
@@ -274,9 +287,10 @@ async function importDashboard({
     }
 
     const content = await fs.readFile(filePath);
-    const parsedContent: ExportImportDashboard = JSON.parse(
-      content,
-    ) as ExportImportDashboard;
+    const parsedContent: ExportImportDashboard = v.parse(
+      ExportImportDashboardSchema,
+      JSON.parse(content),
+    );
 
     exportModel.validate(parsedContent);
 

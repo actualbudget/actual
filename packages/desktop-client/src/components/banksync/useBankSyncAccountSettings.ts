@@ -7,6 +7,7 @@ import {
 } from '@actual-app/core/server/util/custom-sync-mapping';
 import type { Mappings } from '@actual-app/core/server/util/custom-sync-mapping';
 import { q } from '@actual-app/core/shared/query';
+import * as v from 'valibot';
 
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useTransactions } from '#hooks/useTransactions';
@@ -74,7 +75,10 @@ export function useBankSyncAccountSettings(accountId: string) {
   let exampleTransaction;
   if (data) {
     try {
-      exampleTransaction = JSON.parse(data) as Record<string, unknown>;
+      exampleTransaction = v.parse(
+        v.record(v.string(), v.unknown()),
+        JSON.parse(data),
+      );
     } catch (error) {
       console.error('Failed to parse transaction data:', error);
     }

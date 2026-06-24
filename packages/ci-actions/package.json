@@ -7,6 +7,9 @@
     "test": "vitest --run",
     "typecheck": "tsgo -b"
   },
+  "dependencies": {
+    "valibot": "^1.4.1"
+  },
   "devDependencies": {
     "@octokit/rest": "^22.0.1",
     "@typescript/native-preview": "beta",

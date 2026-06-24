@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
-    "better-sqlite3": "^12.10.0"
+    "better-sqlite3": "^12.10.0",
+    "valibot": "^1.4.1"
   },
   "devDependencies": {
     "@actual-app/core": "workspace:*",

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import MockDate from 'mockdate';
+import * as v from 'valibot';
 
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
@@ -845,7 +846,7 @@ describe('schedule app', () => {
           id: ruleId,
           actions: [
             { op: 'set', field: 'amount', value: -6000 },
-            ...(JSON.parse(ruleRow.actions) as unknown[]),
+            ...v.parse(v.array(v.unknown()), JSON.parse(ruleRow.actions)),
           ],
         });
 

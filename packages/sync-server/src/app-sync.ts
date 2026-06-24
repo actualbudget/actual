@@ -13,6 +13,7 @@ import {
 import type { Request, Response } from 'express';
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import * as v from 'valibot';
 
 import { getAccountDb, isAdmin } from './account-db';
 import { FileNotFound } from './app-sync/errors';
@@ -328,7 +329,7 @@ app.post('/upload-user-file', async (req, res) => {
 
   const keyId =
     encryptMeta && typeof encryptMeta === 'string'
-      ? (JSON.parse(encryptMeta) as { keyId: string }).keyId
+      ? v.parse(v.object({ keyId: v.string() }), JSON.parse(encryptMeta)).keyId
       : null;
 
   const filesService = new FilesService(getAccountDb());

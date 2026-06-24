@@ -12,6 +12,7 @@
     "typecheck": "tsgo -b && tsc-strict"
   },
   "dependencies": {
+    "valibot": "^1.4.1",
     "workbox-precaching": "^7.4.1"
   },
   "devDependencies": {

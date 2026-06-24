@@ -3,6 +3,7 @@ import { existsSync, writeFile } from 'node:fs';
 import { exit } from 'node:process';
 
 import prompts from 'prompts';
+import * as v from 'valibot';
 
 async function run() {
   const username = await execAsync(
@@ -133,9 +134,12 @@ async function getPrNumberFromHead(
       console.warn('error fetching from github pulls api:', resp.status);
       return undefined;
     }
-    const ghResponse = (await resp.json()) as
-      | Array<{ number: number; title: string }>
-      | undefined;
+    const ghResponse = v.parse(
+      v.optional(
+        v.array(v.looseObject({ number: v.number(), title: v.string() })),
+      ),
+      await resp.json(),
+    );
     if (ghResponse?.length === 1) {
       return ghResponse[0];
     } else {

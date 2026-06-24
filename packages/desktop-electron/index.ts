@@ -24,6 +24,7 @@ import type {
   SaveDialogOptions,
   UtilityProcess,
 } from 'electron';
+import * as v from 'valibot';
 
 import { getMenu } from './menu';
 import { retry as promiseRetry } from './retry';
@@ -138,12 +139,17 @@ if (isDev) {
 async function loadGlobalPrefs() {
   let state: GlobalPrefsJson = {};
   try {
-    state = JSON.parse(
-      fs.readFileSync(
-        path.join(process.env.ACTUAL_DATA_DIR!, 'global-store.json'),
-        'utf8',
+    state = v.parse(
+      v.custom<GlobalPrefsJson>(
+        input => typeof input === 'object' && input !== null,
       ),
-    ) as GlobalPrefsJson;
+      JSON.parse(
+        fs.readFileSync(
+          path.join(process.env.ACTUAL_DATA_DIR!, 'global-store.json'),
+          'utf8',
+        ),
+      ),
+    );
   } catch {
     logMessage('info', 'Could not load global state - using defaults');
     state = {};

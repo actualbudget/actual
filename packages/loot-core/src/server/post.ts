@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import * as v from 'valibot';
+
 import { fetch } from '#platform/server/fetch';
 import { logger } from '#platform/server/log';
 import * as Platform from '#shared/platform';
@@ -13,7 +15,7 @@ function throwIfNot200(res: Response, text: string) {
 
     const contentType = res.headers.get('Content-Type') ?? '';
     if (contentType.toLowerCase().indexOf('application/json') !== -1) {
-      const json = JSON.parse(text) as { reason: string };
+      const json = v.parse(v.object({ reason: v.string() }), JSON.parse(text));
       throw new PostError(json.reason);
     }
 

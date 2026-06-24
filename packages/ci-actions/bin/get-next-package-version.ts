@@ -5,6 +5,8 @@
 import fs from 'node:fs';
 import { parseArgs } from 'node:util';
 
+import * as v from 'valibot';
+
 import {
   getNextVersion,
   isValidVersionType,
@@ -48,9 +50,10 @@ if (!packageJsonPath) {
 }
 
 try {
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as {
-    version?: string;
-  };
+  const packageJson = v.parse(
+    v.looseObject({ version: v.optional(v.string()) }),
+    JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')),
+  );
 
   if (!('version' in packageJson) || typeof packageJson.version !== 'string') {
     fail('The specified package.json does not contain a valid version field.');

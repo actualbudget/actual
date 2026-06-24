@@ -10,6 +10,7 @@ import {
   Timestamp,
   toBinary,
 } from '@actual-app/crdt';
+import * as v from 'valibot';
 
 import { logger } from '#platform/server/log';
 import * as encryption from '#server/encryption';
@@ -98,7 +99,14 @@ export async function decode(
   const { encryptKeyId } = prefs.getPrefs();
 
   const responsePb = fromBinary(SyncResponseSchema, data);
-  const merkle = JSON.parse(responsePb.merkle) as { hash: number };
+  // The server may send an empty merkle object (e.g. a fresh file), so we only
+  // validate that it decodes to an object and keep the declared `{ hash }` type.
+  const merkle = v.parse(
+    v.custom<{ hash: number }>(
+      input => typeof input === 'object' && input !== null,
+    ),
+    JSON.parse(responsePb.merkle),
+  );
   const messages = [];
 
   for (const envelopePb of responsePb.messages) {

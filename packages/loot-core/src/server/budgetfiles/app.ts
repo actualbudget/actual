@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import * as CRDT from '@actual-app/crdt';
+import * as v from 'valibot';
 
 import { createTestBudget } from '#mocks/budget';
 import { captureBreadcrumb, captureException } from '#platform/exceptions';
@@ -45,6 +46,19 @@ import {
   startBackupService,
   stopBackupService,
 } from './backups';
+
+const MetadataPrefsSchema = v.object({
+  budgetName: v.optional(v.string()),
+  id: v.optional(v.string()),
+  lastUploaded: v.optional(v.string()),
+  cloudFileId: v.optional(v.string()),
+  groupId: v.optional(v.string()),
+  encryptKeyId: v.optional(v.string()),
+  lastSyncedTimestamp: v.optional(v.string()),
+  resetClock: v.optional(v.boolean()),
+  lastScheduleRun: v.optional(v.string()),
+  userId: v.optional(v.string()),
+}) satisfies v.GenericSchema<unknown, MetadataPrefs>;
 
 const DEMO_BUDGET_ID = '_demo-budget';
 const TEST_BUDGET_ID = '_test-budget';
@@ -336,7 +350,7 @@ async function duplicateBudget({
   // copy metadata from current budget
   // replace id with new budget id and budgetName with new budget name
   const metadataText = await fs.readFile(fs.join(budgetDir, 'metadata.json'));
-  const metadata = JSON.parse(metadataText) as MetadataPrefs;
+  const metadata = v.parse(MetadataPrefsSchema, JSON.parse(metadataText));
   metadata.id = newId;
   metadata.budgetName = newName;
   (

@@ -1,3 +1,5 @@
+import * as v from 'valibot';
+
 import * as asyncStorage from '#platform/server/asyncStorage';
 import * as fs from '#platform/server/fs';
 import { createApp } from '#server/app';
@@ -179,7 +181,9 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     categoryExpandedState: stringToInteger(categoryExpandedState || '') || 0,
     maxMonths: stringToInteger(maxMonths || '') || 1,
     documentDir: documentDir || getDefaultDocumentDir(),
-    keyId: encryptKey && (JSON.parse(encryptKey) as { id: string }).id,
+    keyId:
+      encryptKey &&
+      v.parse(v.looseObject({ id: v.string() }), JSON.parse(encryptKey)).id,
     language,
     theme:
       theme === 'light' ||
