@@ -1,5 +1,6 @@
-import { buildCsv } from '@actual-app/core/shared/csv';
 import { integerToAmount } from '@actual-app/core/shared/util';
+import { stringify as csvStringify } from 'csv-stringify/sync';
+import { t } from 'i18next';
 
 type IntervalRow = {
   date: string;
@@ -9,44 +10,32 @@ type IntervalRow = {
   overspendingAdjustment: number;
 };
 
-function amountToString(value: number): string {
-  return integerToAmount(value).toFixed(2);
-}
+const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
 
-export type BudgetAnalysisCsvLabels = {
-  month: string;
-  budgeted: string;
-  spent: string;
-  overspendingAdjustment: string;
-  balance: string;
-};
+export function buildBudgetAnalysisCsv(rows: IntervalRow[]): string {
+  const month = t('Month');
+  const budgeted = t('Budgeted');
+  const spent = t('Spent');
+  const overspendingAdjustment = t('Overspending Adjustment');
+  const balance = t('Balance');
 
-const DEFAULT_LABELS: BudgetAnalysisCsvLabels = {
-  month: 'Month',
-  budgeted: 'Budgeted',
-  spent: 'Spent',
-  overspendingAdjustment: 'Overspending Adjustment',
-  balance: 'Balance',
-};
+  const columns = [month, budgeted, spent, overspendingAdjustment, balance];
 
-export function buildBudgetAnalysisCsv(
-  rows: IntervalRow[],
-  labels: BudgetAnalysisCsvLabels = DEFAULT_LABELS,
-): string {
-  return buildCsv(
-    [
-      labels.month,
-      labels.budgeted,
-      labels.spent,
-      labels.overspendingAdjustment,
-      labels.balance,
-    ],
+  return csvStringify(
     rows.map(row => [
       row.date,
-      amountToString(row.budgeted),
-      amountToString(row.spent),
-      amountToString(row.overspendingAdjustment),
-      amountToString(row.balance),
+      integerToAmount(row.budgeted),
+      integerToAmount(row.spent),
+      integerToAmount(row.overspendingAdjustment),
+      integerToAmount(row.balance),
     ]),
+    {
+      header: true,
+      columns,
+      cast: {
+        string: (value: string) =>
+          FORMULA_TRIGGERS.test(value) ? "'" + value : value,
+      },
+    },
   );
 }
