@@ -20,7 +20,7 @@ If you decline the geolocation permission prompt, Actual cannot ask again. You w
 
 :::
 
-![The Request Location button in the payee field on a new transaction](/img/transactions/payee-locations-request.png)
+![The Request Location button in the payee field on a new transaction](/img/experimental/payee-locations/payee-locations-request.png)
 
 ## Saving a Payee Location
 
@@ -34,7 +34,7 @@ The **Save** button only appears when no existing location for this payee is wit
 
 Your location is only captured when you tap **Save**. It is stored in your budget like any other data, so it syncs across your own devices if you use a sync server, and it is never sent to any third party.
 
-![The Save geolocation button in the payee field on the mobile transaction screen](/img/transactions/payee-locations-save.png)
+![The Save geolocation button in the payee field on the mobile transaction screen](/img/experimental/payee-locations/payee-locations-save.png)
 
 ## Using the Nearest Payee
 
@@ -46,9 +46,9 @@ Once you have saved one or more payee locations, Actual can suggest the nearest 
 4. Continue entering the rest of the transaction details.
 5. Save the transaction.
 
-![The Nearby geolocation button in the payee field](/img/transactions/payee-locations-nearby-button.png)
+![The Nearby geolocation button in the payee field](/img/experimental/payee-locations/payee-locations-nearby-button.png)
 
-![The Nearby Payees section in the payee autocomplete, with a Forget button beside each payee](/img/transactions/payee-locations-nearby-autocomplete.png)
+![The Nearby Payees section in the payee autocomplete, with a Forget button beside each payee](/img/experimental/payee-locations/payee-locations-nearby-autocomplete.png)
 
 ## Forgetting a Payee Location
 
