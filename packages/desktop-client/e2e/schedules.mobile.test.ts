@@ -57,7 +57,6 @@ test.describe('Mobile Schedules', () => {
   test('page handles empty state gracefully', async () => {
     // Search for something that won't match to get empty state
     await schedulesPage.searchFor('NonExistentSchedule123456789');
-    await page.waitForTimeout(500);
 
     // Check that empty message is shown
     await expect(schedulesPage.emptyMessage).toBeVisible();
@@ -99,20 +98,20 @@ test.describe('Mobile Schedules', () => {
 
     // Search for a specific schedule
     await schedulesPage.searchFor('Dominion Power');
-    await page.waitForTimeout(500);
 
     // Verify search box has the value
     await expect(schedulesPage.searchBox).toHaveValue('Dominion Power');
-    expect(await schedulesPage.getScheduleCount()).toBe(1);
+    await expect.poll(() => schedulesPage.getScheduleCount()).toBe(1);
 
     await expect(page).toMatchThemeScreenshots();
 
     // Clear search
     await schedulesPage.clearSearch();
-    await page.waitForTimeout(500);
 
     // Verify all schedules are visible again
-    expect(await schedulesPage.getScheduleCount()).toBeGreaterThan(1);
+    await expect
+      .poll(() => schedulesPage.getScheduleCount())
+      .toBeGreaterThan(1);
 
     await expect(page).toMatchThemeScreenshots();
   });

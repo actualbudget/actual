@@ -28,14 +28,9 @@ import { useMultiuserEnabled, useServerURL } from './ServerContext';
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
   style?: CSSProperties;
-  color?: string;
 };
 
-export function LoggedInUser({
-  hideIfNoServer,
-  style,
-  color,
-}: LoggedInUserProps) {
+export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -222,12 +217,7 @@ export function LoggedInUser({
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
-      <Button
-        ref={triggerRef}
-        variant="bare"
-        onPress={() => setMenuOpen(true)}
-        style={{ color: color || 'inherit' }}
-      >
+      <Button ref={triggerRef} variant="bare" onPress={() => setMenuOpen(true)}>
         {serverMessage()}
       </Button>
       {!loading &&

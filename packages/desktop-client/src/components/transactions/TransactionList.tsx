@@ -14,6 +14,7 @@ import {
   addSplitTransaction,
   applyTransactionDiff,
   isPreviewId,
+  makeEmptySplitSubtransactions,
   realizeTempTransactions,
   splitTransaction,
   updateTransaction,
@@ -40,6 +41,7 @@ import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
+import { shouldApplyRuleChange } from './table/utils';
 import { TransactionTable } from './TransactionsTable';
 import type { TransactionTableProps } from './TransactionsTable';
 // When data changes, there are two ways to update the UI:
@@ -497,7 +499,11 @@ export function TransactionList({
 
   const onSplit = useCallback(
     (id: TransactionEntity['id']) => {
-      const changes = splitTransaction(transactionsLatest.current, id);
+      const changes = splitTransaction(
+        transactionsLatest.current,
+        id,
+        makeEmptySplitSubtransactions,
+      );
       onChange(changes.newTransaction, changes.data);
       void saveDiffAndApply(
         changes.diff,
@@ -536,10 +542,7 @@ export function TransactionList({
       if (diff) {
         Object.keys(diff).forEach(field => {
           if (
-            newTransaction[field] == null ||
-            newTransaction[field] === '' ||
-            newTransaction[field] === 0 ||
-            newTransaction[field] === false
+            shouldApplyRuleChange(field, newTransaction[field], diff[field])
           ) {
             newTransaction[field] = diff[field];
           }

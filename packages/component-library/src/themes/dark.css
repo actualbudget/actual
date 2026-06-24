@@ -143,13 +143,13 @@
     --color-buttonNormalSelectedBackground
   );
 
-  --color-buttonBareText: var(--color-buttonNormalText);
-  --color-buttonBareTextHover: var(--color-buttonNormalText);
+  --color-buttonBareText: var(--color-pageText);
+  --color-buttonBareTextHover: var(--color-pageText);
+  --color-buttonBareDisabledText: var(--color-pageTextSubdued);
   --color-buttonBareBackground: transparent;
+  --color-buttonBareDisabledBackground: var(--color-buttonBareBackground);
   --color-buttonBareBackgroundHover: rgba(200, 200, 200, 0.3);
   --color-buttonBareBackgroundActive: rgba(200, 200, 200, 0.5);
-  --color-buttonBareDisabledText: var(--color-buttonNormalDisabledText);
-  --color-buttonBareDisabledBackground: var(--color-buttonBareBackground);
 
   --color-noticeBackground: var(--palette-green800);
   --color-noticeBackgroundLight: var(--palette-green900);

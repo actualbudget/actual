@@ -76,7 +76,6 @@ test.describe('Mobile Rules', () => {
   test('page handles empty state gracefully', async () => {
     // Search for something that won't match to get empty state
     await rulesPage.searchFor('NonExistentRule123456789');
-    await page.waitForTimeout(500);
 
     // Check that empty message is shown
     const emptyMessage = page.getByText(/No rules found/);

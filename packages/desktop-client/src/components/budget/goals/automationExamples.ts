@@ -5,7 +5,7 @@ import {
   monthFromDate,
 } from '@actual-app/core/shared/months';
 import type { Template } from '@actual-app/core/types/models/templates';
-import uniqueId from 'lodash/uniqueId';
+import { uniqueId } from 'es-toolkit/compat';
 
 import type { DisplayTemplateType } from './constants';
 import { DEFAULT_PRIORITY } from './reducer';

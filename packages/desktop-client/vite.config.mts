@@ -44,45 +44,18 @@ const injectPlugin = (options?: Parameters<typeof inject>[0]): Plugin => {
 // Inject build shims using the inject plugin
 const injectShims = (): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
-  const serveInject: {
-    exclude: string[];
-    global: [string, string];
-  } = {
-    exclude: ['src/setupTests.ts'],
-    global: [buildShims, 'global'],
-  };
-  const buildInject: {
-    global: [string, string];
-  } = {
-    global: [buildShims, 'global'],
-  };
 
   return [
-    {
-      name: 'define-build-process',
-      config: () => ({
-        // rename process.env in build mode so it doesn't get set to an empty object up by the vite:define plugin
-        // this isn't needed in serve mode, because vite:define doesn't empty it in serve mode. And defines also happen last anyways in serve mode.
-        environments: {
-          client: {
-            define: {
-              'process.env': '_process.env',
-            },
-          },
-        },
-      }),
-      apply: 'build',
-    },
     {
       enforce: 'post',
       apply: 'serve',
       ...injectPlugin({
-        ...serveInject,
-        process: [buildShims, 'process'],
+        exclude: ['src/setupTests.ts'],
+        global: [buildShims, 'global'],
       }),
     },
     {
-      name: 'inject-build-process',
+      name: 'inject-build-global',
       enforce: 'post',
       apply: 'build',
       config: () => ({
@@ -90,8 +63,7 @@ const injectShims = (): Plugin[] => {
           rolldownOptions: {
             transform: {
               inject: {
-                ...buildInject,
-                _process: [buildShims, 'process'],
+                global: [buildShims, 'global'],
               },
             },
           },
@@ -265,6 +237,7 @@ const pluginsServiceAssets = (): Plugin => ({
 
 export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const isVitest = process.env.VITEST === 'true';
   const devHeaders = {
     'Cross-Origin-Opener-Policy': 'same-origin',
     'Cross-Origin-Embedder-Policy': 'require-corp',
@@ -410,7 +383,7 @@ export default defineConfig(async ({ mode, command }) => {
           }),
       injectShims(),
       addWatchers(),
-      mode === 'desktop' ? undefined : lootCoreBackend(),
+      mode === 'desktop' || isVitest ? undefined : lootCoreBackend(),
       mode === 'desktop' ? undefined : pluginsServiceAssets(),
       react(),
       babel({
@@ -435,6 +408,18 @@ export default defineConfig(async ({ mode, command }) => {
         return type === 'stderr';
       },
       maxWorkers: 2,
+      reporters: process.env.CI
+        ? [
+            'default',
+            [
+              'junit',
+              {
+                outputFile: './test-results/junit.xml',
+                suiteName: 'desktop-client',
+              },
+            ],
+          ]
+        : ['default'],
     },
   };
 });

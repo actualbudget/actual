@@ -26,8 +26,8 @@ import type {
   TimeFrame,
 } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
+import { debounce } from 'es-toolkit/compat';
 import type { TFunction } from 'i18next';
-import debounce from 'lodash/debounce';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
