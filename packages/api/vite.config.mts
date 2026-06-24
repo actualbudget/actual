@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 
+import { peggyLoader } from '@actual-app/vite-plugin-peggy';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
-import peggyLoader from 'vite-plugin-peggy-loader';
 import { configDefaults } from 'vitest/config';
 
 const lootCoreRoot = path.resolve(__dirname, '../loot-core');
@@ -126,5 +126,14 @@ export default defineConfig({
       return type === 'stderr';
     },
     maxWorkers: 2,
+    reporters: process.env.CI
+      ? [
+          'default',
+          [
+            'junit',
+            { outputFile: './test-results/junit.xml', suiteName: 'api' },
+          ],
+        ]
+      : ['default'],
   },
 });

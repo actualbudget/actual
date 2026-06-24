@@ -48,7 +48,7 @@ runs:
           yarn-dl-${{ runner.os }}-${{ steps.get-node.outputs.version }}-
           yarn-dl-${{ runner.os }}-
     - name: Ensure Lage cache directory exists
-      run: mkdir -p "$WORKING_DIRECTORY/.lage"
+      run: mkdir -p "$WORKING_DIRECTORY/node_modules/.cache/lage"
       shell: bash
       env:
         WORKING_DIRECTORY: ${{ inputs.working-directory }}
@@ -56,10 +56,10 @@ runs:
       uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       if: ${{ inputs.cache == 'true' }}
       with:
-        path: ${{ format('{0}/.lage', inputs.working-directory) }}
-        key: lage-${{ runner.os }}-${{ github.sha }}
+        path: ${{ format('{0}/node_modules/.cache/lage', inputs.working-directory) }}
+        key: lage-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
         restore-keys: |
-          lage-${{ runner.os }}-
+          lage-${{ runner.os }}-${{ github.job }}-
     - name: Install
       working-directory: ${{ inputs.working-directory }}
       run: yarn --immutable

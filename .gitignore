@@ -59,6 +59,7 @@ bundle.mobile.js.map
 # VSCode
 .vscode/*
 !.vscode/settings.default.json
+!.vscode/extensions.json
 
 # IntelliJ IDEA
 .idea
@@ -87,6 +88,9 @@ build/
 
 # Lage cache
 .lage/
+
+# Test results (JUnit XML reports, Playwright artifacts)
+**/test-results/
 
 *storybook.log
 storybook-static

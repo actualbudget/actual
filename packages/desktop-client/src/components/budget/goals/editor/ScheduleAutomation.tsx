@@ -59,16 +59,21 @@ export const ScheduleAutomation = ({
             id="schedule-field"
             key="schedule-picker"
             defaultLabel={t('Select a schedule')}
-            value={template.name}
-            onChange={schedule =>
+            value={
+              template.scheduleId ??
+              selectableSchedules.find(s => s.name === template.name)?.id
+            }
+            onChange={scheduleId => {
+              const picked = selectableSchedules.find(s => s.id === scheduleId);
               dispatch(
                 updateTemplate({
                   type: 'schedule',
-                  name: schedule,
+                  scheduleId,
+                  name: picked?.name ?? '',
                 }),
-              )
-            }
-            options={selectableSchedules.map(s => [s.name, s.name] as const)}
+              );
+            }}
+            options={selectableSchedules.map(s => [s.id, s.name] as const)}
           />
         </FormField>
         <FormField style={{ flex: fieldFlex }}>
