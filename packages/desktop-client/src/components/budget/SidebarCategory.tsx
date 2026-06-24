@@ -32,7 +32,6 @@ type SidebarCategoryProps = {
   categoryGroup?: CategoryGroupEntity;
   dragPreview?: boolean;
   dragging?: boolean;
-  goalsShown?: boolean;
   style?: CSSProperties;
   borderColor?: string;
   isLast?: boolean;
@@ -57,7 +56,6 @@ export function SidebarCategory({
   dragPreview,
   dragging,
   editing,
-  goalsShown = false,
   style,
   isLast,
   onEditName,
