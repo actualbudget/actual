@@ -91,10 +91,8 @@ function OptionsButton({
           items={[
             {
               name: 'graph-type',
-              text:
-                graphType === 'Bar'
-                  ? t('Switch to line chart')
-                  : t('Switch to bar chart'),
+              text: t('Bar chart'),
+              toggle: graphType === 'Bar',
             },
             Menu.line,
             {
