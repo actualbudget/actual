@@ -1,6 +1,30 @@
 import type { AccountEntity } from './account';
 import type { BankSyncResponse } from './bank-sync';
 
+export const SIMPLEFIN_RATE_LIMITED = 'SIMPLEFIN_RATE_LIMITED' as const;
+
+export type SimpleFinErrorResponse = {
+  error_type?: string;
+  error_code?: string;
+  status?: string;
+  reason?: string;
+  error?: string;
+};
+
+export function isSimpleFinRateLimited(
+  response: SimpleFinErrorResponse | null | undefined,
+): boolean {
+  if (!response) {
+    return false;
+  }
+
+  return (
+    response.error_type === SIMPLEFIN_RATE_LIMITED ||
+    response.error_code === SIMPLEFIN_RATE_LIMITED ||
+    response.error_type === 'RATE_LIMIT'
+  );
+}
+
 export type SimpleFinOrganization = {
   id: string;
   name: string;

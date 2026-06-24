@@ -64,6 +64,10 @@ app.post(
         },
       });
     } catch (e) {
+      if (e.message === 'RATE_LIMIT') {
+        rateLimited(res);
+        return;
+      }
       serverDown(e, res);
       return;
     }
@@ -291,6 +295,19 @@ function serverDown(e, res) {
   });
 }
 
+function rateLimited(res) {
+  res.send({
+    status: 'ok',
+    data: {
+      error_type: 'SIMPLEFIN_RATE_LIMITED',
+      error_code: 'SIMPLEFIN_RATE_LIMITED',
+      status: 'rejected',
+      reason:
+        'SimpleFIN rate limit exceeded. Please wait a few minutes and try again.',
+    },
+  });
+}
+
 function parseAccessKey(accessKey) {
   let scheme = null;
   let rest = null;
@@ -426,10 +443,20 @@ async function getAccounts(
     throw new Error('Forbidden');
   }
 
+  if (response.status === 429) {
+    throw new Error('RATE_LIMIT');
+  }
+
   const text = await response.text();
   try {
     const results = JSON.parse(text);
     results.sferrors = results.errors;
+    if (
+      Array.isArray(results.sferrors) &&
+      results.sferrors.some(error => /rate limit/i.test(String(error)))
+    ) {
+      throw new Error('RATE_LIMIT');
+    }
     results.hasError = false;
     results.errors = {};
     return results;
