@@ -169,7 +169,7 @@ describe('runSchedule', () => {
     expect(result.remainder).toBe(0);
   });
 
-  it('returns a per-template monthly attribution map keyed by trimmed template name', async () => {
+  it('returns a per-template monthly attribution map keyed by template', async () => {
     const template_lines = [
       {
         type: 'schedule',
@@ -196,7 +196,7 @@ describe('runSchedule', () => {
       defaultCurrency,
     );
 
-    expect(result.perScheduleMonthly.get('Test Schedule')).toBe(10000);
+    expect(result.perScheduleMonthly.get(template_lines[0])).toBe(10000);
     expect(result.to_budget).toBe(10000);
   });
 
@@ -237,8 +237,8 @@ describe('runSchedule', () => {
     );
 
     expect(result.errors).toHaveLength(0);
-    const internet = result.perScheduleMonthly.get('Internet') ?? 0;
-    const insurance = result.perScheduleMonthly.get('Insurance') ?? 0;
+    const internet = result.perScheduleMonthly.get(template_lines[0]) ?? 0;
+    const insurance = result.perScheduleMonthly.get(template_lines[1]) ?? 0;
     expect(internet).toBe(10000); // pay-month-of: full target
     expect(insurance).toBeGreaterThan(0);
     expect(insurance).toBeLessThan(internet);
@@ -273,7 +273,7 @@ describe('runSchedule', () => {
       defaultCurrency,
     );
     expect(result.to_budget).toBe(0);
-    expect(result.perScheduleMonthly.get('Insurance')).toBeUndefined();
+    expect(result.perScheduleMonthly.get(template_lines[0])).toBeUndefined();
   });
 
   it('only attributes contribution to schedules occurring this month when full: true is used', async () => {
@@ -315,8 +315,8 @@ describe('runSchedule', () => {
     );
 
     expect(result.to_budget).toBe(10000);
-    expect(result.perScheduleMonthly.get('Schedule A')).toBe(10000);
-    expect(result.perScheduleMonthly.get('Schedule B')).toBeUndefined();
+    expect(result.perScheduleMonthly.get(template_lines[0])).toBe(10000);
+    expect(result.perScheduleMonthly.get(template_lines[1])).toBeUndefined();
   });
 
   it('applies a percent adjustment to the schedule amount', async () => {

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import fs from 'fs/promises';
+import { stripVTControlCharacters } from 'node:util';
 import { basename, dirname, join } from 'path';
 
 import { diff } from 'jest-diff';
@@ -15,12 +16,14 @@ export function expectSnapshotWithDiffer(
   return {
     expectToMatchDiff: value => {
       expect(
-        diff(currentValue, value, {
-          aAnnotation: 'First value',
-          bAnnotation: 'Second value',
-          contextLines: 5,
-          expand: false,
-        }),
+        stripVTControlCharacters(
+          diff(currentValue, value, {
+            aAnnotation: 'First value',
+            bAnnotation: 'Second value',
+            contextLines: 5,
+            expand: false,
+          }),
+        ),
       ).toMatchSnapshot();
       currentValue = value;
     },
