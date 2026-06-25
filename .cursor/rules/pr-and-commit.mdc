@@ -14,6 +14,3 @@ listed here.
 
 - **ALL pull request titles MUST be prefixed with `[AI]`.** This isn't enforced
   automatically — you have to apply it yourself.
-- **NEVER fill in the PR template** (`.github/PULL_REQUEST_TEMPLATE.md`) — leave it
-  blank for the human. Exception: if a human explicitly asks, fill it out **in
-  Chinese** (简体中文).
