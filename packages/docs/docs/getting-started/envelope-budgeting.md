@@ -60,7 +60,7 @@ zero. When you get a paycheck, or other income, continue filling in where the fu
 As you go along you will start to get a good view of where your money is going. If you don't like how things
 are going, make changes. If you're happy, great! Keep budgeting to keep track of your progress on your goals.
 
-A more detailed breakdown of how budgeting in Actual works is provided in the [budgeting page](/docs/budgeting/).
+A more detailed breakdown of how budgeting in Actual works is provided in the [budgeting page](../budgeting/index.md).
 
 ### The Month Ahead Strategy
 
@@ -69,7 +69,7 @@ paychecks per month. One way to handle this is called the _month ahead_ method. 
 you make this month and only budgeting it next month. The goal is to not need any of this month's income for this
 month's bills, but pay all of this month's bills with last month's income. Actual makes this easy by allowing you
 to hold your available funds for the next month by clicking the _To Budget_ amount at the top of the budgeting screen
-and selecting the _Hold for next month_ option. You can read more about this on [the budgeting page](/docs/budgeting/).
+and selecting the _Hold for next month_ option. You can read more about this on [the budgeting page](../budgeting/index.md).
 
 For example, if you make $ 3,000 this month, instead of spending it on this month's bills, you save it and use it to
 cover next month's expenses. Most people cannot achieve this in one month, so the way forward is to build up a
@@ -77,7 +77,7 @@ buffer. Instead of aiming to save the full $ 3,000 in one go, begin by setting a
 For example, if you can set aside $ 200 each month, gradually build your buffer over several months. As you save
 more, you'll start to pay some of next month's bills with this reserve.
 
-You can also read about this strategy in [one of our blog posts](/blog/2023-12-15-automate-your-budget-with-goal-templates).
+You can also read about this strategy in [one of our blog posts](../../blog/2023-12-15-automate-your-budget-with-goal-templates).
 
 ### Pay-Yourself-First Strategy
 
@@ -85,8 +85,8 @@ The Pay-Yourself-First strategy focuses on saving a portion of your income befor
 By making savings the top priority, this approach helps individuals build financial stability and prepare for unexpected
 events. Automating savings, such as setting up automatic transfers, ensures consistency and reduces the temptation
 to overspend. The strategy also encourages a balanced approach, addressing both immediate needs and long-term
-financial security. Actual has functionality for [Schedules](/docs/schedules)
-and [Budget Goal Templates](/docs/experimental/goal-templates#goal-directive) that can help you with this strategy.
+financial security. Actual has functionality for [Schedules](../schedules.md)
+and [Budget Goal Templates](../experimental/goal-templates.md#goal-directive) that can help you with this strategy.
 
 For example, if you earn $ 3,000 a month, you might decide to save 20%, or $ 600, as soon as you receive your paycheck.
 You set up an automatic transfer to move this amount into a savings account, ensuring it is set aside before you
@@ -97,15 +97,15 @@ having to rely on what's left at the end of the month.
 ### Credit Cards
 
 If you currently are carrying credit card debt in an on budget account you will need to capture that debt in a category.
-A guide on how to handle that can be found in [the credit card guide](/docs/budgeting/credit-cards/).
+A guide on how to handle that can be found in [the credit card guide](../budgeting/credit-cards/index.md).
 
 ### Shared accounts
 
-We have a guide on what to do when it comes to [strategies for handling joint accounts](/docs/budgeting/joint-accounts).
+We have a guide on what to do when it comes to [strategies for handling joint accounts](../budgeting/joint-accounts.md).
 
 ### Returns and Reimbursements
 
-You can read more about these in the [returns and reimbursements guides](/docs/budgeting/returns-and-reimbursements).
+You can read more about these in the [returns and reimbursements guides](../budgeting/returns-and-reimbursements.md).
 
 ## How to set up and use an envelope system with Actual Budget
 
@@ -114,7 +114,7 @@ if you're new to budgeting. Here's a checklist for getting started:
 
 ### 1. Establish budget categories
 
-The first step is deciding which expense and income  [categories to include in your budget](/docs/budgeting/categories).
+The first step is deciding which expense and income  [categories to include in your budget](../budgeting/categories.md).
 Tailor each category to fit your specific budget and spending habits, giving you the power to customize
 the system to your needs for the most accurate tracking.
 
@@ -205,7 +205,7 @@ necessary adjustments.
    Flexibility is key. Adjusting your budget is a normal part of the process.
 
 You can also set up Actual Budget to
-[automatically deduct the overspending](/docs/budgeting/#rollover-negative-category-balances) from next month's funds. Be aware that
+[automatically deduct the overspending](../budgeting/index.md#rollover-negative-category-balances) from next month's funds. Be aware that
 even if you _can_ do something, it does not mean that you _should_ do it.
 
 You maintain control over your budget by reallocating funds and avoiding unnecessary stress. This process helps
@@ -256,13 +256,13 @@ in your bank statement. Bank and credit card statements provide a detailed histo
 transactions, including the date, amount, and merchant. This makes it much easier to track your spending without
 having (to remember) to manually enter each transaction whenever you make a purchase or get income.
 Most financial institutions will let you export your transactions as CSV files,
-which can be [imported into Actual Budget](/docs/transactions/importing). Using cards will save you time and reduce the risk of errors.
+which can be [imported into Actual Budget](../transactions/importing.md). Using cards will save you time and reduce the risk of errors.
 
-**Automatic import**: Actual Budget can [sync directly with your bank accounts](/docs/advanced/bank-sync).
+**Automatic import**: Actual Budget can [sync directly with your bank accounts](../advanced/bank-sync.md).
 Every time you use your debit or credit card, the transaction details are automatically imported into
 your budget categories. You no longer need to keep physical receipts or manually log each expense.
 
-Read more about [managing credit cards](/docs/budgeting/credit-cards) with Actual Budget.
+Read more about [managing credit cards](../budgeting/credit-cards/index.md) with Actual Budget.
 
 ## A detailed example of how to do Zero-Sum budgeting
 

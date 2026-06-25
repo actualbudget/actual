@@ -14,6 +14,22 @@ vi.mock('#shared/errors', () => ({
 describe('API handlers', () => {
   const handlers = installAPI({} as unknown as ServerHandlers);
 
+  describe('api/get-server-version', () => {
+    beforeEach(() => {
+      prefs.unloadPrefs();
+    });
+
+    it('does not require an open budget', async () => {
+      handlers['get-server-version'] = vi
+        .fn()
+        .mockResolvedValue({ version: '26.6.0' });
+
+      await expect(handlers['api/get-server-version']()).resolves.toEqual({
+        version: '26.6.0',
+      });
+    });
+  });
+
   describe('api/bank-sync', () => {
     it('should sync a single account when accountId is provided', async () => {
       handlers['accounts-bank-sync'] = vi

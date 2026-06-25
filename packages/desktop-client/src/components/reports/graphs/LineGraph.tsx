@@ -16,6 +16,7 @@ import {
   CartesianGrid,
   Line,
   LineChart,
+  ReferenceLine,
   Tooltip,
   XAxis,
   YAxis,
@@ -34,6 +35,7 @@ import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { showActivity } from './showActivity';
+import { computeTrendLines } from './util/computeTrendLines';
 
 type PayloadItem = {
   dataKey: string;
@@ -149,6 +151,7 @@ type LineGraphProps = {
   balanceTypeOp: balanceTypeOpType;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showTrendLines?: boolean;
   showTooltip?: boolean;
   interval?: string;
 };
@@ -162,6 +165,7 @@ export function LineGraph({
   balanceTypeOp,
   showHiddenCategories,
   showOffBudget,
+  showTrendLines = false,
   showTooltip = true,
   interval,
 }: LineGraphProps) {
@@ -181,7 +185,11 @@ export function LineGraph({
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 5;
 
-  const onShowActivity = (item, id, payload) => {
+  const trendLines = showTrendLines
+    ? computeTrendLines(data.intervalData, data.legend)
+    : [];
+
+  const onShowActivity = (id, payload, uncategorizedId) => {
     showActivity({
       navigate,
       categories,
@@ -195,6 +203,7 @@ export function LineGraph({
       endDate: payload.payload.intervalEndDate,
       field: groupBy.toLowerCase(),
       id,
+      uncategorizedId,
       interval,
     });
   };
@@ -253,6 +262,16 @@ export function LineGraph({
                   tickSize={0}
                 />
               )}
+              {trendLines.map(t => (
+                <ReferenceLine
+                  key={`trend-${t.id}`}
+                  segment={[t.start, t.end]}
+                  stroke={t.color}
+                  strokeDasharray="4 4"
+                  strokeOpacity={0.6}
+                  ifOverflow="extendDomain"
+                />
+              ))}
               {data.legend.map((entry, index) => {
                 return (
                   <Line
@@ -277,7 +296,11 @@ export function LineGraph({
                       onClick: (e, payload) =>
                         ((compact && showTooltip) || !compact) &&
                         !['Group', 'Interval'].includes(groupBy) &&
-                        onShowActivity(e, entry.id, payload),
+                        onShowActivity(
+                          entry.id,
+                          payload,
+                          entry.uncategorizedId,
+                        ),
                     }}
                   />
                 );

@@ -7,7 +7,7 @@ import type {
 } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 import type { Locale } from 'date-fns';
-import keyBy from 'lodash/keyBy';
+import { keyBy } from 'es-toolkit';
 
 import { ReportOptions } from '#components/reports/ReportOptions';
 import type { FormatType } from '#hooks/useFormat';
@@ -157,7 +157,7 @@ export function createSpreadsheet(
             processedBalances[date] = { date, amount };
           });
         } else {
-          processedBalances = keyBy(balances, 'date');
+          processedBalances = keyBy(balances, b => b.date);
         }
 
         return {

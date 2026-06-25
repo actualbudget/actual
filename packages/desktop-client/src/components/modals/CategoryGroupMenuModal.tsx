@@ -52,6 +52,7 @@ export function CategoryGroupMenuModal({
   onToggleVisibility,
   onClose,
   onApplyBudgetTemplatesInGroup,
+  onSortCategories,
 }: CategoryGroupMenuModalProps) {
   const [showMore, setShowMore] = useState(false);
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
@@ -97,6 +98,11 @@ export function CategoryGroupMenuModal({
     );
   };
 
+  const hasMultipleCategories = (group.categories?.length ?? 0) > 1;
+
+  const _onSortAsc = () => onSortCategories?.(group.id, 'asc');
+  const _onSortDesc = () => onSortCategories?.(group.id, 'desc');
+
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
     height: styles.mobileMinHeight,
@@ -141,6 +147,9 @@ export function CategoryGroupMenuModal({
                 group={group}
                 onDelete={_onDelete}
                 onToggleVisibility={_onToggleVisibility}
+                onSortAsc={hasMultipleCategories ? _onSortAsc : undefined}
+                onSortDesc={hasMultipleCategories ? _onSortDesc : undefined}
+                onClose={() => state.close()}
               />
             }
             title={
@@ -251,7 +260,14 @@ export function CategoryGroupMenuModal({
   );
 }
 
-function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
+function AdditionalCategoryGroupMenu({
+  group,
+  onDelete,
+  onToggleVisibility,
+  onSortAsc,
+  onSortDesc,
+  onClose,
+}) {
   const { t } = useTranslation();
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -310,6 +326,13 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
                       iconSize: 15,
                     },
                   ]),
+                  ...(onSortAsc && onSortDesc
+                    ? [
+                        Menu.line,
+                        { name: 'sort-asc', text: t('Sort A to Z') },
+                        { name: 'sort-desc', text: t('Sort Z to A') },
+                      ]
+                    : []),
                 ].filter(i => i != null) as ComponentProps<typeof Menu>['items']
               }
               onMenuSelect={itemName => {
@@ -318,6 +341,12 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
                   onDelete();
                 } else if (itemName === 'toggleVisibility') {
                   onToggleVisibility();
+                } else if (itemName === 'sort-asc') {
+                  onSortAsc?.();
+                  onClose?.();
+                } else if (itemName === 'sort-desc') {
+                  onSortDesc?.();
+                  onClose?.();
                 }
               }}
             />

@@ -109,6 +109,7 @@ function validateConfigFileContent(value: unknown): ConfigFileContent {
 
 async function loadConfigFile(): Promise<ConfigFileContent> {
   const explorer = cosmiconfig('actual', {
+    searchStrategy: 'global',
     searchPlaces: [
       'package.json',
       '.actualrc',

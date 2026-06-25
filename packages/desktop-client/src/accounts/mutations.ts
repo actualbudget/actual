@@ -5,6 +5,7 @@ import type { SyncResponseWithErrors } from '@actual-app/core/server/accounts/ap
 import type {
   AccountEntity,
   CategoryEntity,
+  SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
@@ -494,6 +495,46 @@ export function useLinkAccountPluggyAiMutation() {
         t(
           'There was an error linking the account to PluggyAI. Please try again.',
         ),
+        error,
+      );
+    },
+  });
+}
+
+type LinkAccountAkahuPayload = LinkAccountBasePayload & {
+  externalAccount: SyncServerAkahuAccount;
+};
+
+export function useLinkAccountAkahuMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountAkahuPayload) => {
+      await send('akahu-accounts-link', {
+        externalAccount,
+        upgradingId,
+        offBudget,
+        startingDate,
+        startingBalance,
+      });
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateQueries(queryClient, payeeQueries.lists());
+    },
+    onError: error => {
+      console.error('Error linking account to Akahu:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error linking the account to Akahu. Please try again.'),
         error,
       );
     },

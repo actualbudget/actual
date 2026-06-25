@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as undo from '#platform/client/undo';
@@ -51,7 +50,7 @@ function handleMessage(msg) {
       handler.reject(error);
     }
   } else if (msg.type === 'reply') {
-    const { id, result, mutated, undoTag } = msg;
+    const { id, result, mutated, undoTag, error } = msg;
 
     const handler = replyHandlers.get(id);
     if (handler) {
@@ -61,7 +60,12 @@ function handleMessage(msg) {
         undo.gc(undoTag);
       }
 
-      handler.resolve(result);
+      // api/* failures arrive as a reply carrying `error`.
+      if (error) {
+        handler.reject(error);
+      } else {
+        handler.resolve(result);
+      }
     }
   } else if (msg.type === 'push') {
     const { name, args } = msg;
@@ -97,11 +101,9 @@ function connectWorker(worker, onOpen, onError) {
     // available, but we don't know when the backend is actually
     // ready to handle messages.
     if (msg.type === 'connect') {
-      // Send any messages that were queued while closed
-      if (messageQueue?.length > 0) {
-        messageQueue.forEach(msg => worker.postMessage(msg));
-        messageQueue = null;
-      }
+      // Null the queue so later sends post directly instead of queueing.
+      messageQueue?.forEach(msg => worker.postMessage(msg));
+      messageQueue = null;
 
       // signal to the backend that we're connected to it
       globalWorker.postMessage({
@@ -127,11 +129,9 @@ function connectWorker(worker, onOpen, onError) {
       );
 
       if (msg.message && msg.message.includes('indexeddb-quota-error')) {
-        alert(
-          t(
-            'We hit a limit on the local storage available. Edits may not be saved. Please get in touch https://actualbudget.org/contact/ so we can help debug this.',
-          ),
-        );
+        // Surface this as a typed event so the desktop-client can present a
+        // localized message - i18n must not live in loot-core.
+        handleMessage({ type: 'push', name: 'indexeddb-quota-error' });
       }
     } else if (msg.type === 'capture-breadcrumb') {
       captureBreadcrumb(msg.data);
@@ -149,8 +149,8 @@ function connectWorker(worker, onOpen, onError) {
   }
 }
 
-export const init: T.Init = async function () {
-  const worker = await global.Actual.getServerSocket();
+export const init: T.Init = async function (socket) {
+  const worker = socket ?? (await global.Actual.getServerSocket());
   return new Promise((resolve, reject) =>
     connectWorker(worker, resolve, reject),
   );

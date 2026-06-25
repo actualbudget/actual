@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
@@ -7,6 +8,8 @@ export class BudgetPage {
   readonly budgetSummary: Locator;
   readonly budgetTable: Locator;
   readonly budgetTableTotals: Locator;
+  readonly selectedMonthButton: Locator;
+  readonly nextMonthButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -14,6 +17,8 @@ export class BudgetPage {
     this.budgetSummary = page.getByTestId('budget-summary');
     this.budgetTable = page.getByTestId('budget-table');
     this.budgetTableTotals = this.budgetTable.getByTestId('budget-totals');
+    this.selectedMonthButton = page.getByTestId('selected-budget-month');
+    this.nextMonthButton = page.getByTitle('Next month');
   }
 
   /**
@@ -69,8 +74,59 @@ export class BudgetPage {
     };
   }
 
-  async showMoreMonths() {
-    await this.page.getByTestId('calendar-icon').first().click();
+  async setBudgetedAmount(
+    categoryName: string,
+    amount: string,
+    monthIndex = 0,
+  ) {
+    const row = this.budgetTable
+      .getByTestId('row')
+      .filter({ hasText: categoryName })
+      .first();
+    const budgetCell = row.getByTestId('budget').nth(monthIndex);
+
+    await budgetCell.click();
+    const input = budgetCell.locator('input');
+    await input.waitFor({ state: 'visible' });
+    await input.fill(amount);
+    await input.press('Enter');
+  }
+
+  async getSelectedMonth() {
+    const selectedMonth =
+      await this.selectedMonthButton.getAttribute('data-month');
+
+    if (!selectedMonth) {
+      throw new Error('Failed to get the selected month.');
+    }
+
+    return selectedMonth;
+  }
+
+  async #waitForNewMonthToLoad({
+    currentMonth,
+    errorMessage,
+  }: {
+    currentMonth: string;
+    errorMessage: string;
+  }) {
+    await expect(this.selectedMonthButton, errorMessage).not.toHaveAttribute(
+      'data-month',
+      currentMonth,
+    );
+
+    return this.getSelectedMonth();
+  }
+
+  async goToNextMonth() {
+    const currentMonth = await this.getSelectedMonth();
+
+    await this.nextMonthButton.click();
+
+    return await this.#waitForNewMonthToLoad({
+      currentMonth,
+      errorMessage: 'Failed to navigate to the next month.',
+    });
   }
 
   async getBalanceForRow(idx: number) {

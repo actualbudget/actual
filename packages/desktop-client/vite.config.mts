@@ -17,12 +17,8 @@ import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const reactCompilerInclude = new RegExp(
-  `^${path
-    .resolve(__dirname, 'src')
-    .replaceAll(path.sep, '/')
-    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/.*\\.[jt]sx$`,
-);
+const reactCompilerInclude =
+  /[\\/]desktop-client[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',
@@ -48,45 +44,18 @@ const injectPlugin = (options?: Parameters<typeof inject>[0]): Plugin => {
 // Inject build shims using the inject plugin
 const injectShims = (): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
-  const serveInject: {
-    exclude: string[];
-    global: [string, string];
-  } = {
-    exclude: ['src/setupTests.ts'],
-    global: [buildShims, 'global'],
-  };
-  const buildInject: {
-    global: [string, string];
-  } = {
-    global: [buildShims, 'global'],
-  };
 
   return [
-    {
-      name: 'define-build-process',
-      config: () => ({
-        // rename process.env in build mode so it doesn't get set to an empty object up by the vite:define plugin
-        // this isn't needed in serve mode, because vite:define doesn't empty it in serve mode. And defines also happen last anyways in serve mode.
-        environments: {
-          client: {
-            define: {
-              'process.env': '_process.env',
-            },
-          },
-        },
-      }),
-      apply: 'build',
-    },
     {
       enforce: 'post',
       apply: 'serve',
       ...injectPlugin({
-        ...serveInject,
-        process: [buildShims, 'process'],
+        exclude: ['src/setupTests.ts'],
+        global: [buildShims, 'global'],
       }),
     },
     {
-      name: 'inject-build-process',
+      name: 'inject-build-global',
       enforce: 'post',
       apply: 'build',
       config: () => ({
@@ -94,8 +63,7 @@ const injectShims = (): Plugin[] => {
           rolldownOptions: {
             transform: {
               inject: {
-                ...buildInject,
-                _process: [buildShims, 'process'],
+                global: [buildShims, 'global'],
               },
             },
           },
@@ -269,6 +237,7 @@ const pluginsServiceAssets = (): Plugin => ({
 
 export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const isVitest = process.env.VITEST === 'true';
   const devHeaders = {
     'Cross-Origin-Opener-Policy': 'same-origin',
     'Cross-Origin-Embedder-Policy': 'require-corp',
@@ -312,7 +281,7 @@ export default defineConfig(async ({ mode, command }) => {
     base: '/',
     envPrefix: 'REACT_APP_',
     build: {
-      minify: false,
+      minify: 'oxc',
       target: 'es2022',
       sourcemap: true,
       outDir: mode === 'desktop' ? 'build-electron' : 'build',
@@ -322,6 +291,14 @@ export default defineConfig(async ({ mode, command }) => {
       chunkSizeWarningLimit: 1500,
       rolldownOptions: {
         output: {
+          // Users debug from raw stack traces, so compress and strip
+          // whitespace but never mangle identifiers (overrides the
+          // mangle: true that `minify: 'oxc'` implies).
+          minify: {
+            compress: true,
+            mangle: false,
+            codegen: true,
+          },
           assetFileNames: (assetInfo: PreRenderedAsset) => {
             const info = assetInfo.name?.split('.') ?? [];
             let extType = info[info.length - 1];
@@ -406,7 +383,7 @@ export default defineConfig(async ({ mode, command }) => {
           }),
       injectShims(),
       addWatchers(),
-      mode === 'desktop' ? undefined : lootCoreBackend(),
+      mode === 'desktop' || isVitest ? undefined : lootCoreBackend(),
       mode === 'desktop' ? undefined : pluginsServiceAssets(),
       react(),
       babel({
@@ -431,6 +408,18 @@ export default defineConfig(async ({ mode, command }) => {
         return type === 'stderr';
       },
       maxWorkers: 2,
+      reporters: process.env.CI
+        ? [
+            'default',
+            [
+              'junit',
+              {
+                outputFile: './test-results/junit.xml',
+                suiteName: 'desktop-client',
+              },
+            ],
+          ]
+        : ['default'],
     },
   };
 });

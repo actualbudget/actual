@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Form } from 'react-aria-components';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
@@ -31,6 +31,8 @@ export function TransferMenu({
   onSubmit,
   onClose,
 }: TransferMenuProps) {
+  const { t } = useTranslation();
+
   const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
     useCategories();
   const filteredCategoryGroups = useMemo(() => {
@@ -83,7 +85,7 @@ export function TransferMenu({
           openOnFocus
           onSelect={(id: string | undefined) => setToCategoryId(id || null)}
           inputProps={{
-            placeholder: '(none)',
+            placeholder: t('(none)'),
           }}
           showHiddenCategories
         />

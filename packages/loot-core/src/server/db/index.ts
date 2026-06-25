@@ -961,7 +961,7 @@ function toSqlQueryParameters(params: unknown[]) {
 
 export function getTags() {
   return all<DbTag>(`
-    SELECT id, tag, color, description
+    SELECT id, tag, color, description, hidden
     FROM tags
     WHERE tombstone = 0
   `);
@@ -969,20 +969,22 @@ export function getTags() {
 
 export function getAllTags() {
   return all<DbTag>(`
-    SELECT id, tag, color, description
+    SELECT id, tag, color, description, hidden
     FROM tags
   `);
 }
 
-export function insertTag(tag): Promise<DbTag['id']> {
+export function insertTag(
+  tag: Omit<DbTag, 'id' | 'tombstone'>,
+): Promise<DbTag['id']> {
   return insertWithUUID('tags', tag);
 }
 
-export async function deleteTag(tag) {
+export async function deleteTag(tag: Pick<DbTag, 'id'>) {
   return delete_('tags', tag.id);
 }
 
-export function updateTag(tag) {
+export function updateTag(tag: Partial<DbTag> & Pick<DbTag, 'id'>) {
   return update('tags', tag);
 }
 

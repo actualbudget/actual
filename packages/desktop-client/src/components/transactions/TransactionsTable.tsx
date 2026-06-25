@@ -45,15 +45,16 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { memoizeOne } from '@actual-app/core/shared/memoize';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import { getStatusLabel } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
   groupTransaction,
   isPreviewId,
   isTemporaryId,
+  makeEmptySplitSubtransactions,
   splitTransaction,
   ungroupTransactions,
   updateTransaction,
@@ -75,7 +76,6 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 import { format as formatDate, parseISO } from 'date-fns';
-import memoizeOne from 'memoize-one';
 
 import { getAccountsById } from '#accounts/accountsSlice';
 import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
@@ -134,6 +134,7 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { getPayeesById } from '#payees';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
+import { getStatusLabel } from '#util/schedule';
 
 import {
   deserializeTransaction,
@@ -1184,7 +1185,9 @@ const Transaction = memo(function Transaction({
   const isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   const isOffBudget = account && account.offbudget === 1;
 
-  const valueStyle = added ? { fontWeight: 600 } : null;
+  const valueStyle = added
+    ? { fontWeight: 600, color: theme.tableTextItemAdded }
+    : null;
   const backgroundFocus = focusedField === 'select';
   const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
@@ -1591,6 +1594,7 @@ const Transaction = memo(function Transaction({
           note={notes ?? ''}
           scheduleNote={isPreview ? schedule?.name : null}
           focused={focusedField === 'notes'}
+          valueStyle={valueStyle}
           onClickTag={onNotesTagClick}
           onUpdate={value => {
             onUpdate('notes', value?.trim());
@@ -1968,6 +1972,7 @@ type NotesCellProps = {
   note: string;
   scheduleNote: string | null | undefined;
   focused: boolean;
+  valueStyle: CSSProperties | null;
   onUpdate: (value: string) => void;
   onClickTag: (tag: string) => void;
   onExpose: (name: string) => void;
@@ -1977,6 +1982,7 @@ function NotesCell({
   note,
   scheduleNote,
   focused,
+  valueStyle,
   onUpdate,
   onClickTag,
   onExpose,
@@ -2001,6 +2007,7 @@ function NotesCell({
       width="flex"
       name="notes"
       value={displayedNote}
+      valueStyle={valueStyle}
       formatter={value =>
         NotesTagFormatter({ notes: value, onNotesTagClick: onClickTag })
       }
@@ -3259,7 +3266,11 @@ export const TransactionTable = forwardRef(
         if (isTemporaryId(id)) {
           const { newNavigator } = latestState.current;
           const newTrans = latestState.current.newTransactions;
-          const { data, diff } = splitTransaction(newTrans, id);
+          const { data, diff } = splitTransaction(
+            newTrans,
+            id,
+            makeEmptySplitSubtransactions,
+          );
           setNewTransactions(data);
 
           // Jump next to "debit" field if it is empty

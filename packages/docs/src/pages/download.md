@@ -12,7 +12,7 @@ import { DownloadCard } from '../components/DownloadCard'
 
 # Downloads
 
-The simplest way to use Actual is to download the desktop application. This will give you access to all of Actual's budgeting features. For a breakdown of what features require a server in addition to the base app see the [Installation Guide](/docs/install).
+The simplest way to use Actual is to download the desktop application. This will give you access to all of Actual's budgeting features. For a breakdown of what features require a server in addition to the base app see the [Installation Guide](../docs/install).
 
 ## Desktop Client
 
@@ -72,14 +72,18 @@ url: 'https://github.com/actualbudget/actual/releases/latest/download/Actual-lin
 
 </div>
 
+:::tip Nightly Builds
+If you want to preview upcoming features before they reach an official release, [nightly builds of the desktop app](/docs/contributing/preview-builds#nightly-desktop-builds) are also available.
+:::
+
 ## Server Download
 
-Actual has two parts, the client and a sync server. The primary task of the sync server is to sync your budget between devices, and to enable bank syncing. We have a full write up of [if you need a server or not](/docs/install/). We also have install guides on how to set up the server in the following ways
+Actual has two parts, the client and a sync server. The primary task of the sync server is to sync your budget between devices, and to enable bank syncing. We have a full write up of [if you need a server or not](../docs/install/). We also have install guides on how to set up the server in the following ways
 
-- [PikaPods](/docs/install/pikapods)
-- [Fly.io](/docs/install/fly)
-- [Server CLI](/docs/install/cli-tool)
-- [Docker Install](/docs/install/docker)
-- [Build from source](/docs/install/build-from-source)
+- [PikaPods](../docs/install/pikapods)
+- [Fly.io](../docs/install/fly)
+- [Server CLI](../docs/install/cli-tool)
+- [Docker Install](../docs/install/docker)
+- [Build from source](../docs/install/build-from-source)
 
 </div>

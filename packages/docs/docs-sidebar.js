@@ -27,6 +27,7 @@ const sidebars = {
     'index',
     'vision',
     'releases',
+    'upcoming-release-notes',
     {
       type: 'category',
       label: 'Getting Started',
@@ -170,6 +171,8 @@ const sidebars = {
                 id: 'advanced/bank-sync',
               },
               items: [
+                'advanced/bank-sync/akahu',
+                'advanced/bank-sync/enable-banking',
                 'advanced/bank-sync/gocardless',
                 'advanced/bank-sync/simplefin',
                 'advanced/bank-sync/pluggyai',
@@ -208,13 +211,15 @@ const sidebars = {
             id: 'experimental/index',
           },
           items: [
+            'experimental/budget-automation',
             'experimental/goal-templates',
             'experimental/monthly-cleanup',
             'experimental/rule-templating',
             'experimental/formulas',
             'experimental/balance-forecast-report',
-            'experimental/crossover-point-report',
             'experimental/budget-analysis-report',
+            'experimental/sankey-report',
+            'experimental/payee-locations',
           ],
         },
         'getting-started/tips-tricks',

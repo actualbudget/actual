@@ -2,6 +2,9 @@ issue_enrichment:
   auto_enrich:
     enabled: true
 reviews:
+  tools:
+    eslint:
+      enabled: false
   request_changes_workflow: true
   review_status: false
   high_level_summary: false

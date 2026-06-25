@@ -1,9 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 
+import { peggyLoader } from '@actual-app/vite-plugin-peggy';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
-import peggyLoader from 'vite-plugin-peggy-loader';
+import { configDefaults } from 'vitest/config';
 
 const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 const distDir = path.resolve(__dirname, 'dist');
@@ -49,6 +50,33 @@ function copyMigrationsAndDefaultDb() {
         throw new Error(`default-db.sqlite not found at ${defaultDbPath}`);
       }
       fs.copyFileSync(defaultDbPath, path.join(distDir, 'default-db.sqlite'));
+
+      // Ship sql.js' WASM next to the bundle so consumers serve it same-origin.
+      const sqlJsWasm = require.resolve('@jlongster/sql.js/dist/sql-wasm.wasm');
+      fs.copyFileSync(sqlJsWasm, path.join(distDir, 'sql-wasm.wasm'));
+
+      // Runtime data files for the browser worker. JS migrations get a `.data`
+      // suffix so consumer bundlers don't import-analyze them.
+      const dataDir = path.join(distDir, 'data');
+      const dataMigrationsDir = path.join(dataDir, 'migrations');
+      fs.mkdirSync(dataMigrationsDir, { recursive: true });
+
+      fs.copyFileSync(defaultDbPath, path.join(dataDir, 'default-db.sqlite'));
+      const migrationNames: string[] = [];
+      for (const name of fs.readdirSync(migrationsDest)) {
+        const wireName = name.endsWith('.js') ? `${name}.data` : name;
+        fs.copyFileSync(
+          path.join(migrationsDest, name),
+          path.join(dataMigrationsDir, wireName),
+        );
+        migrationNames.push(`migrations/${wireName}`);
+      }
+      migrationNames.sort();
+
+      fs.writeFileSync(
+        path.join(distDir, 'data-file-index.txt'),
+        ['default-db.sqlite', ...migrationNames].join('\n') + '\n',
+      );
     },
   };
 }
@@ -85,6 +113,8 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    // e2e/ holds Playwright tests (yarn e2e), not vitest ones.
+    exclude: [...configDefaults.exclude, 'e2e/**'],
     // Each test loads a budget file and runs all DB migrations, which can be
     // slow on busy CI runners; the default 5s timeout is too tight and causes
     // flaky timeouts (and a cascade of unhandled rejections from in-flight work
@@ -96,5 +126,14 @@ export default defineConfig({
       return type === 'stderr';
     },
     maxWorkers: 2,
+    reporters: process.env.CI
+      ? [
+          'default',
+          [
+            'junit',
+            { outputFile: './test-results/junit.xml', suiteName: 'api' },
+          ],
+        ]
+      : ['default'],
   },
 });
