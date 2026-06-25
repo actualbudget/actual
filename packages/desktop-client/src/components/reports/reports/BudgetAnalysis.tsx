@@ -6,7 +6,11 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgChart, SvgChartBar } from '@actual-app/components/icons/v1';
+import {
+  SvgChart,
+  SvgChartBar,
+  SvgDownload,
+} from '@actual-app/components/icons/v1';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { theme } from '@actual-app/components/theme';
@@ -31,6 +35,7 @@ import { BudgetAnalysisGraph } from '#components/reports/graphs/BudgetAnalysisGr
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { calculateTimeRange } from '#components/reports/reportRanges';
+import { buildBudgetAnalysisCsv } from '#components/reports/spreadsheets/budget-analysis-export';
 import { createBudgetAnalysisSpreadsheet } from '#components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
@@ -253,6 +258,19 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     );
   }
 
+  const onExportCsv = () => {
+    if (!data) return;
+    const csv = buildBudgetAnalysisCsv(data.intervalData);
+    const reportName = (widget?.meta?.name || t('Budget Analysis'))
+      .replace(/[^a-z0-9]/gi, '-')
+      .toLowerCase();
+    void window.Actual.saveFile(
+      csv,
+      `${reportName}-${start}-${end}.csv`,
+      t('Export budget analysis'),
+    );
+  };
+
   if (!data || !allMonths) {
     return <LoadingIndicator />;
   }
@@ -367,6 +385,16 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
               ['categories-only', t('Categories only')],
             ]}
           />
+
+          <Tooltip content={t('Export as CSV')}>
+            <Button
+              variant="bare"
+              onPress={onExportCsv}
+              aria-label={t('Export as CSV')}
+            >
+              <SvgDownload style={{ width: 16, height: 16 }} />
+            </Button>
+          </Tooltip>
 
           {widget && (
             <Button variant="primary" onPress={onSaveWidget}>
