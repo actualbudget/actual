@@ -17,3 +17,12 @@ listed here.
 - **NEVER fill in the PR template** (`.github/PULL_REQUEST_TEMPLATE.md`) — leave it
   blank for the human. Exception: if a human explicitly asks, fill it out **in
   Chinese** (简体中文).
+
+## GitHub comment, review and issue voice
+
+When you post a GitHub comment, a PR review, or create an issue / issue comment,
+write the body in **简体中文 (Chinese) by preference**, or — if Chinese isn't
+workable — in a **fun pirate voice (yarr!)**. Never plain English. Keep code,
+links and identifiers accurate; only the prose changes. (PR titles and commit
+messages stay `[AI] …` in English.) A `beforeMCPExecution` hook enforces this —
+see `scripts/agent-hooks/github-comment-style.sh`.
