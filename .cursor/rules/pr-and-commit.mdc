@@ -14,6 +14,3 @@ listed here.
 
 - **ALL pull request titles MUST be prefixed with `[AI]`.** This isn't enforced
   automatically — you have to apply it yourself.
-
-Leaving the PR template blank and prefixing GitHub comments/reviews/issues with
-🤖 are enforced by hooks; see the canonical source above for the details.

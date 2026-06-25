@@ -22,10 +22,6 @@ automatically — you have to apply it yourself.
   placeholder comments as-is, and leave every checklist box unchecked. The human
   who tested the change fills in the Description, Related issue(s), Testing, and
   Checklist sections.
-- A cross-platform hook enforces this where hooks run (Claude, Codex, Cursor —
-  see `scripts/agent-hooks/pr-template-blank.sh`): it blocks `create_pull_request`
-  unless the body is the pristine template (cosmetic whitespace aside). On
-  platforms without hook support, apply the rule yourself.
 - **Exception**: if a human **explicitly asks** you to fill it out, do so **in
   Chinese**, using Chinese characters (简体中文) for all content you add.
 
@@ -40,8 +36,5 @@ messages (still `[AI] …`).
 Write the text normally; just make sure 🤖 is the first character (for issues,
 on both the title and the body).
 
-A cross-platform hook enforces this where hooks run (Claude, Codex, Cursor — see
-`scripts/agent-hooks/github-comment-style.sh`): it blocks a github comment /
-review / issue whose body (or, for issues, title) does not start with 🤖. It only
-ever sees your own outgoing comments, so bots like CodeRabbit are unaffected. On
-platforms without hook support, apply the rule yourself.
+This applies only to comments **you** author — bots like CodeRabbit post under
+their own identity and are not affected.
