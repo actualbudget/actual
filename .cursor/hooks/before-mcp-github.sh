@@ -8,6 +8,9 @@
 # { permission: "allow" | "deny", userMessage, agentMessage }.
 
 input=$(cat)
+# `CDPATH= cd` is an intentional empty-env prefix (not an assignment); silence the
+# SC1007 false positive shellcheck raises for it.
+# shellcheck disable=SC1007
 ROOT=$(CDPATH= cd "$(dirname "$0")/../.." && pwd)
 
 allow() {
