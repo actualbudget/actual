@@ -37,13 +37,13 @@ text=$(printf '%s\n%s' "$title" "$body")
 # Nothing to check (e.g. a tool call that carries no prose) — let it through.
 [ -n "$(printf '%s' "$text" | tr -d '[:space:]')" ] || exit 0
 
-# Exempt comments addressed to CodeRabbit. Its commands (e.g. `@coderabbitai
-# review`, `@coderabbitai resolve`, `@coderabbitai configuration`) are parsed as
-# plain English by the bot — 中文/pirate prose would just be ignored — so the
-# voice rule must not apply when the comment is talking to CodeRabbit.
-if printf '%s' "$text" | grep -qiE '@coderabbit(ai)?([^[:alnum:]]|$)' 2>/dev/null; then
-  exit 0
-fi
+# Note on CodeRabbit: comments *authored by* CodeRabbit are exempt, but that's
+# automatic and needs no check here — this hook only ever runs on the agent's own
+# outgoing comments (its PreToolUse / beforeMCPExecution tool calls), and the bot
+# posts through its own GitHub identity, never through this agent. A comment that
+# merely *mentions* @coderabbitai is still the agent's own prose, so it is NOT
+# exempt (otherwise name-dropping the bot would be a trivial way to post plain
+# English).
 
 # 1. Chinese? Detect CJK by UTF-8 lead byte in the C locale — locale- and
 #    grep-flavour-independent (grep -P's \x{...} needs a UTF-8 locale we can't
