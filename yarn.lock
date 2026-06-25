@@ -254,6 +254,7 @@ __metadata:
     babel-plugin-react-compiler: "npm:^1.0.0"
     cmdk: "npm:^1.1.1"
     cross-env: "npm:^10.1.0"
+    csv-stringify: "npm:^6.7.0"
     date-fns: "npm:^4.4.0"
     downshift: "npm:9.3.6"
     es-toolkit: "npm:^1.47.1"
