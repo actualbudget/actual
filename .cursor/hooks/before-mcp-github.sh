@@ -36,14 +36,16 @@ case "$tool" in
 esac
 
 # The shared guard already reads `.tool_input.body` / `.tool_input.title`, which
-# is exactly the shape Cursor passes, so forward the payload unchanged. Exit 2 +
-# stderr from the guard means "add the 🤖 prefix"; anything else allows.
+# is exactly the shape Cursor passes, so forward the payload unchanged. Exit 0
+# allows, exit 2 + stderr means "add the 🤖 prefix". Fail closed on any other
+# exit (matching guard-shell.sh) so a broken/missing guard can't silently
+# disable enforcement; the message marks it as an execution problem, not a real
+# policy denial. (The guard itself still fails *open* on a malformed payload —
+# that's its own data-level choice and returns exit 0, handled above.)
 status=0
 err=$(printf '%s' "$input" | "$ROOT/scripts/agent-hooks/github-comment-style.sh" 2>&1) || status=$?
 case "$status" in
   0) allow ;;
   2) deny "$err" ;;
-  # Fail open on an unexpected guard error: a missing 🤖 prefix is a lighter
-  # failure than blocking the agent from commenting at all.
-  *) allow ;;
+  *) deny "github-comment-style guard failed (exit $status): $err" ;;
 esac
