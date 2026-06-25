@@ -53,6 +53,7 @@ export async function checkTemplateNotes(): Promise<Notification> {
         }
       } else if (
         template.type === 'schedule' &&
+        template.name &&
         !scheduleNames.includes(template.name)
       ) {
         errors.push(`${name}: Schedule "${template.name}" does not exist`);

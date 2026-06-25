@@ -79,7 +79,7 @@ export async function post(
     ) {
       throw new PostError('aborted');
     }
-    throw new PostError('network-failure');
+    throw new PostError('network-failure', undefined, { cause: err });
   } finally {
     if (timeoutId != null) clearTimeout(timeoutId);
     externalSignal?.removeEventListener('abort', onExternalAbort);
@@ -133,8 +133,8 @@ export async function del(url, data, headers = {}, timeout = null) {
     });
     clearTimeout(timeoutId);
     text = await res.text();
-  } catch {
-    throw new PostError('network-failure');
+  } catch (err) {
+    throw new PostError('network-failure', undefined, { cause: err });
   }
 
   throwIfNot200(res, text);
@@ -181,8 +181,8 @@ export async function patch(url, data, headers = {}, timeout = null) {
     });
     clearTimeout(timeoutId);
     text = await res.text();
-  } catch {
-    throw new PostError('network-failure');
+  } catch (err) {
+    throw new PostError('network-failure', undefined, { cause: err });
   }
 
   throwIfNot200(res, text);
@@ -217,13 +217,12 @@ export async function postBinary(url, data, headers) {
       method: 'POST',
       body: Platform.isBrowser ? data : Buffer.from(data),
       headers: {
-        'Content-Length': data.length,
         'Content-Type': 'application/actual-sync',
         ...headers,
       },
     });
-  } catch {
-    throw new PostError('network-failure');
+  } catch (err) {
+    throw new PostError('network-failure', undefined, { cause: err });
   }
 
   let buffer;

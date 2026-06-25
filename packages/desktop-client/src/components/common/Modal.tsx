@@ -40,6 +40,9 @@ type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
   noAnimation?: boolean;
   style?: CSSProperties;
   onClose?: () => void;
+  wrapperProps?: {
+    style?: CSSProperties;
+  };
   containerProps?: {
     style?: CSSProperties;
   };
@@ -52,6 +55,7 @@ export const Modal = ({
   style,
   children,
   onClose,
+  wrapperProps,
   containerProps,
   ...props
 }: ModalProps) => {
@@ -104,6 +108,7 @@ export const Modal = ({
             justifyContent: 'center',
             height: 'var(--visual-viewport-height)',
             overflowY: 'auto',
+            ...wrapperProps?.style,
           }}
         >
           <ReactAriaModal>

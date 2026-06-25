@@ -52,7 +52,7 @@ This flexibility allows you to customize your view — whether you want to see a
 
 Changing the upcoming length only affects how schedules are displayed in your ledger; it does not impact how your budget data is stored or calculated. You can adjust this setting at any time to fit your preferences. If we change the upcoming length to _1 month_ the Account register will also reflect this change:
 
-![Accont Register View with future schedules](/img/schedules/schedules-account-register.webp)
+![Account Register View with future schedules](/img/schedules/schedules-account-register.webp)
 
 ## Creating a Schedule
 
@@ -75,7 +75,7 @@ Since a mortgage payment is a recurring transaction, the **Repeats** checkbox sh
 You can also enter more than one date by hitting the **+** button next to the date field.
 This is useful for transactions that occur on multiple days of the month, such as a bi-weekly payments.
 
-![Example of changing the frequencey of a schedule](/img/schedules/schedules-add-repeat.webp)
+![Example of changing the frequency of a schedule](/img/schedules/schedules-add-repeat.webp)
 
 The **Move schedule** checkbox allows you to move the schedule either before or after a weekend, if the selected date falls on a weekend.
 
@@ -122,7 +122,7 @@ Navigate to the Accounts page, find the transaction you wish to create a schedul
 2. Once selected, go to the drop-down menu on the top right of the page.
 3. Click on **Link schedule**.
 
-![Example of transaction overivew](/img/schedules/schedules-from-transactions.webp)
+![Example of transaction overview](/img/schedules/schedules-from-transactions.webp)
 
 In the Pop up that appears click "Create New"
 
@@ -163,7 +163,7 @@ Many times it's desired to add notes to the scheduled transactions or to assign 
 
 When you edit a schedule, the **Edit as rule** button will appear in the dialog
 
-![Example of editing a scheudle](/img/schedules/schedules-edit-as-rule.webp)
+![Example of editing a schedule](/img/schedules/schedules-edit-as-rule.webp)
 
 Click on **Edit as Rule** to further customize the automatic entry.
 

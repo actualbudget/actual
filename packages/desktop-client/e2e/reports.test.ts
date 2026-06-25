@@ -104,6 +104,9 @@ test.describe('Reports', () => {
 
     test.beforeEach(async () => {
       customReportPage = await reportsPage.goToCustomReportPage();
+      await page.addStyleTag({
+        content: '[role="tooltip"] { display: none !important; }',
+      });
     });
 
     test('Switches to Data Table and checks the visuals', async () => {
