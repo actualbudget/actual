@@ -14,16 +14,6 @@ listed here.
 
 - **ALL pull request titles MUST be prefixed with `[AI]`.** This isn't enforced
   automatically — you have to apply it yourself.
-- **NEVER fill in the PR template** (`.github/PULL_REQUEST_TEMPLATE.md`) — leave it
-  blank for the human. Exception: if a human explicitly asks, fill it out **in
-  Chinese** (简体中文).
 
-## GitHub comment, review and issue prefix
-
-When you post a GitHub comment, a PR review, or create an issue / issue comment,
-**prefix it with the robot emoji 🤖** so agent-authored content is visibly
-marked. 🤖 must be the first character of the body (and, for issues, of the title
-too). Write the text normally otherwise. (PR titles and commit messages stay
-`[AI] …`.) This covers only comments **you** author; bots like CodeRabbit post
-under their own identity and are unaffected. A `beforeMCPExecution` hook enforces
-this — see `scripts/agent-hooks/github-comment-style.sh`.
+Leaving the PR template blank and prefixing GitHub comments/reviews/issues with
+🤖 are enforced by hooks; see the canonical source above for the details.

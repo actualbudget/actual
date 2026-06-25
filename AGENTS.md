@@ -510,17 +510,7 @@ Before committing changes, ensure:
 
 ## Pull Request Guidelines
 
-See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including title prefix requirements, labeling, and PR template handling.
-
-### GitHub comment / review / issue prefix
-
-When you post a GitHub comment, a PR review, or create an issue or issue comment,
-**prefix it with the robot emoji 🤖** (the first character of the body, and of
-the issue title too) so agent-authored content is visibly marked. PR titles and
-commit messages stay `[AI] …`. This is enforced cross-platform by a hook
-(`scripts/agent-hooks/github-comment-style.sh`, wired for Claude, Codex and
-Cursor); apply it yourself elsewhere. Full rule in
-[PR and Commit Rules](.github/agents/pr-and-commit-rules.md#github-comment-review-and-issue-prefix).
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including title prefix requirements, labeling, the GitHub comment/review/issue 🤖 prefix, and PR template handling.
 
 ## Code Review Guidelines
 
