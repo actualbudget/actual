@@ -1,5 +1,8 @@
 import { integerToAmount } from '@actual-app/core/shared/util';
-import { stringify as csvStringify } from 'csv-stringify/sync';
+// Use the browser ESM build: the default `csv-stringify/sync` entry pulls in
+// the Node build (which imports `stream`), breaking the lazy-loaded reports
+// chunk in the browser bundle. The browser ESM build is self-contained.
+import { stringify as csvStringify } from 'csv-stringify/browser/esm/sync';
 import { t } from 'i18next';
 
 type IntervalRow = {
