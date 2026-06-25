@@ -42,15 +42,17 @@ command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/format-edited-f
 type = "command"
 command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/prefer-one-component.sh"'
 
-# Require GitHub comments/reviews/issues to be prefixed with the robot emoji 🤖.
-# Matches the github MCP comment/review/issue writers; reads tool_input.body /
-# .title (the same payload Claude passes). Blocks an un-prefixed body via exit 2.
+# Require GitHub comments, reviews and issues to be prefixed with the robot emoji
+# 🤖. Matches the github MCP comment/review/issue writers below (add_issue_comment,
+# issue_write, …); the guard reads tool_input.body and, for issues,
+# tool_input.title (the same payload Claude passes), and blocks an un-prefixed
+# comment body or issue title via exit 2.
 [[hooks.PreToolUse]]
 matcher = "^mcp__github__(add_issue_comment|add_comment_to_pending_review|add_reply_to_pull_request_comment|pull_request_review_write|issue_write|sub_issue_write)$"
 [[hooks.PreToolUse.hooks]]
 type = "command"
 command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/github-comment-style.sh"'
-statusMessage = "Checking GitHub comment is 🤖-prefixed"
+statusMessage = "Checking GitHub comment/issue is 🤖-prefixed"
 
 # When creating a PR, require the body to be the blank PR template (unmodified)
 # — agents must not fill it in. Reads tool_input.body; blocks via exit 2.

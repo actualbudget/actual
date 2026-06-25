@@ -22,10 +22,14 @@ input=$(cat)
 # locale- and file-encoding-independent.
 robot=$(printf '\360\237\244\226')
 
-# Fail open on a malformed/empty payload: a parsing hiccup must never wedge the
-# agent's ability to comment.
-body=$(printf '%s' "$input" | jq -r '.tool_input.body // empty' 2>/dev/null) || exit 0
-title=$(printf '%s' "$input" | jq -r '.tool_input.title // empty' 2>/dev/null) || true
+# Fail closed on a malformed payload — invalid JSON, or a missing/non-object
+# `.tool_input` — matching git-guard.sh / guard-shell.sh, so a payload we can't
+# read can't silently bypass the prefix check. A genuinely absent body/title
+# within a valid `.tool_input` is fine (nothing to mark).
+fields=$(printf '%s' "$input" | jq -e '.tool_input | objects' 2>/dev/null) ||
+  block "Blocked: could not read the hook payload (.tool_input). (scripts/agent-hooks/github-comment-style.sh)"
+body=$(printf '%s' "$fields" | jq -r '.body // empty')
+title=$(printf '%s' "$fields" | jq -r '.title // empty')
 
 # A field passes if it's empty/whitespace-only (nothing to mark) or, after
 # stripping leading whitespace, begins with the robot emoji.

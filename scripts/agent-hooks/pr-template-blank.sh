@@ -29,10 +29,12 @@ template="$ROOT/.github/PULL_REQUEST_TEMPLATE.md"
 # the comparison baseline is missing.
 [ -f "$template" ] || exit 0
 
-# Fail open on a malformed/empty payload: a parsing hiccup must not wedge PR
-# creation. (The Cursor/Codex/Claude wiring still fails closed if THIS script
-# can't execute at all.)
-body=$(printf '%s' "$input" | jq -r '.tool_input.body // empty' 2>/dev/null) || exit 0
+# Fail open when there's no body to compare: a parse failure or an absent/null
+# `.tool_input.body` must not wedge PR creation. (The Cursor/Codex/Claude wiring
+# still fails closed if THIS script can't execute at all.) `jq -re` exits
+# non-zero for both cases; an empty-string body, however, is a real submission
+# and still falls through to the template check below.
+body=$(printf '%s' "$input" | jq -re '.tool_input.body' 2>/dev/null) || exit 0
 
 # Canonicalise: drop CR, strip per-line trailing whitespace, and trim leading and
 # trailing blank lines, so only meaningful content differences remain.

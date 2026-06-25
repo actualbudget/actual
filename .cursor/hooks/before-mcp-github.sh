@@ -24,8 +24,11 @@ deny() {
   exit 0
 }
 
-# Pick the guard for this tool; wave everything else by.
-tool=$(printf '%s' "$input" | jq -r '.tool_name // empty')
+# Pick the guard for this tool; wave known non-GitHub tools by. Fail closed on a
+# malformed payload (jq parse failure / missing .tool_name), matching
+# guard-shell.sh — a payload we can't read must not bypass the GitHub guards.
+tool=$(printf '%s' "$input" | jq -re '.tool_name' 2>/dev/null) ||
+  deny "Invalid Cursor hook payload: could not read .tool_name."
 case "$tool" in
   mcp__github__add_issue_comment | \
     mcp__github__add_comment_to_pending_review | \
@@ -43,7 +46,8 @@ esac
 # unchanged. Exit 0 allows, exit 2 + stderr is a real policy denial. Fail closed
 # on any other exit (matching guard-shell.sh) so a broken/missing guard can't
 # silently disable enforcement; the message marks it as an execution problem.
-# (Each guard itself fails *open* on a malformed payload, returning exit 0.)
+# (Each guard fails closed on an unreadable payload and exit-0s only when there's
+# genuinely nothing to enforce.)
 status=0
 err=$(printf '%s' "$input" | "$ROOT/scripts/agent-hooks/$guard" 2>&1) || status=$?
 case "$status" in
