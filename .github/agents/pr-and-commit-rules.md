@@ -1,14 +1,13 @@
 # PR and Commit Rules for AI Agents
 
-The mechanical commit and git rules are handled by tooling. This file lists only
-the rules you have to apply yourself.
+This file lists the PR and commit rules you have to apply yourself.
 
 ## Pull Request Rules
 
 ### `[AI]` prefix on PR titles
 
-**ALL pull request titles MUST be prefixed with `[AI]`.** This isn't enforced
-automatically — you have to apply it yourself.
+**ALL pull request titles MUST be prefixed with `[AI]`** — you have to apply it
+yourself.
 
 **Examples:**
 
