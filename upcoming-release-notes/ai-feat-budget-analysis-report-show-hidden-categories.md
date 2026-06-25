@@ -3,4 +3,4 @@ category: Enhancements
 authors: [tabedzki]
 ---
 
-[AI] feat(budget analysis report): show hidden categories
+Budget analysis report: add "show hidden categories" option, group options into dropdown
