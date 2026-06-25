@@ -15,7 +15,7 @@ input=$(cat)
 ROOT=$(CDPATH= cd "$(dirname "$0")/../.." && pwd)
 
 allow() {
-  jq -n '{permission:"allow"}'
+  printf '%s\n' '{"permission":"allow"}'
   exit 0
 }
 deny() {

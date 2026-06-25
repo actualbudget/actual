@@ -38,7 +38,7 @@ body=$(printf '%s' "$input" | jq -r '.tool_input.body // empty' 2>/dev/null) || 
 # trailing blank lines, so only meaningful content differences remain.
 canon() {
   printf '%s\n' "$1" | awk '
-    { sub(/\r$/, ""); sub(/[[:space:]]+$/, ""); lines[NR] = $0 }
+    { sub(/[[:space:]]+$/, ""); lines[NR] = $0 }  # also strips a trailing CR
     END {
       s = 1; e = NR
       while (s <= e && lines[s] == "") s++

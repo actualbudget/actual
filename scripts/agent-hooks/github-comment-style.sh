@@ -30,12 +30,11 @@ title=$(printf '%s' "$input" | jq -r '.tool_input.title // empty' 2>/dev/null) |
 # A field passes if it's empty/whitespace-only (nothing to mark) or, after
 # stripping leading whitespace, begins with the robot emoji.
 starts_with_robot() {
-  field=$1
-  [ -n "$(printf '%s' "$field" | tr -d '[:space:]')" ] || return 0
-  # ${field%%[![:space:]]*} is the leading whitespace; strip it off the front.
-  trimmed=${field#"${field%%[![:space:]]*}"}
+  # ${1%%[![:space:]]*} is the leading whitespace; strip it off the front. A
+  # whitespace-only (or empty) field strips down to "" and passes too.
+  trimmed=${1#"${1%%[![:space:]]*}"}
   case "$trimmed" in
-    "$robot"*) return 0 ;;
+    "" | "$robot"*) return 0 ;;
     *) return 1 ;;
   esac
 }
