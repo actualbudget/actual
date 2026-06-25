@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 import { MobileAccountPage } from './mobile-account-page';
@@ -91,9 +92,7 @@ export class MobileNavigation {
       },
     });
 
-    // Wait for the react-spring animation to complete before taking screenshots.
-    // The animation typically takes a few hundred milliseconds to finish.
-    await this.page.waitForTimeout(500);
+    await expect(this.navbar).not.toHaveAttribute('data-navbar-state', 'open');
   }
 
   async hasNavbarState(...states: string[]) {

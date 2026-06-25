@@ -39,9 +39,8 @@ import type {
   TransactionEntity,
   TransactionFilterEntity,
 } from '@actual-app/core/types/models';
+import { debounce, isEqual } from 'es-toolkit/compat';
 import { t } from 'i18next';
-import debounce from 'lodash/debounce';
-import isEqual from 'lodash/isEqual';
 import { v4 as uuidv4 } from 'uuid';
 
 import {

@@ -181,8 +181,8 @@
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
     "typecheck": "tsgo -b && tsc-strict",
     "build": "tsgo -b",
-    "prepack": "yarn build && ts-node scripts/add-types-conditions.mts",
-    "postpack": "ts-node scripts/restore-package-json.mts"
+    "prepack": "yarn build && node scripts/add-types-conditions.mts",
+    "postpack": "node scripts/restore-package-json.mts"
   },
   "dependencies": {
     "@jlongster/sql.js": "^1.6.7",
@@ -194,14 +194,11 @@
     "csv-parse": "^6.2.1",
     "csv-stringify": "^6.7.0",
     "date-fns": "^4.4.0",
+    "es-toolkit": "^1.47.1",
     "handlebars": "^4.7.9",
     "hyperformula": "^3.3.0",
-    "lodash": "^4.18.1",
     "lru-cache": "^11.5.1",
-    "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
-    "promise-retry": "^2.0.1",
-    "ua-parser-js": "^2.0.10",
     "uuid": "^14.0.1",
     "xml2js": "^0.6.2"
   },
@@ -228,7 +225,6 @@
     "rollup-plugin-visualizer": "^7.0.1",
     "stream-browserify": "^3.0.0",
     "timers-browserify": "^2.0.12",
-    "ts-node": "^10.9.2",
     "typescript-strict-plugin": "^2.4.4",
     "util": "^0.12.5",
     "vite": "^8.0.16",
