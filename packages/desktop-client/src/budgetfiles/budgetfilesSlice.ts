@@ -139,32 +139,23 @@ export const deleteBudget = createAppAsyncThunk(
 type CreateBudgetPayload = {
   testMode?: boolean;
   demoMode?: boolean;
-  scrollTestMode?: boolean;
 };
 
 export const createBudget = createAppAsyncThunk(
   `${sliceName}/createBudget`,
   async (
-    {
-      testMode = false,
-      scrollTestMode = false,
-      demoMode = false,
-    }: CreateBudgetPayload,
+    { testMode = false, demoMode = false }: CreateBudgetPayload,
     { dispatch },
   ) => {
     dispatch(
       setAppState({
         loadingText:
-          testMode || demoMode || scrollTestMode
-            ? t('Making demo...')
-            : t('Creating budget...'),
+          testMode || demoMode ? t('Making demo...') : t('Creating budget...'),
       }),
     );
 
     if (demoMode) {
       await send('create-demo-budget');
-    } else if (scrollTestMode) {
-      await send('create-scroll-test-budget');
     } else {
       await send('create-budget', { testMode });
     }
