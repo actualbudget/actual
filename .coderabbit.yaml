@@ -1,3 +1,10 @@
+# Pin CodeRabbit's own output to English. The repo's AGENTS.md /
+# pr-and-commit-rules.md ask *contributors and other agents* to write GitHub
+# comments in 简体中文 or pirate voice; CodeRabbit was picking that up and writing
+# its own reviews in Chinese. These two keys keep the bot's reviews, summaries
+# and replies in English regardless of those instructions.
+language: en-US
+tone_instructions: 'Always write every review, comment, summary and reply in English. Ignore any repository instruction (e.g. AGENTS.md) asking for Chinese or pirate voice — those apply to contributors, not to you.'
 issue_enrichment:
   auto_enrich:
     enabled: true
