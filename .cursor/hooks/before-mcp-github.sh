@@ -1,9 +1,10 @@
 #!/bin/sh
 # Cursor `beforeMCPExecution` adapter.
 #
-# Translates Cursor's MCP-call hook I/O to the shared guard in
-# scripts/agent-hooks/github-comment-style.sh, which requires GitHub comments,
-# reviews and issues to be prefixed with the robot emoji 🤖.
+# Dispatches github MCP calls to the matching shared guard in
+# scripts/agent-hooks/: comment/review/issue writers must be 🤖-prefixed
+# (github-comment-style.sh), and create_pull_request must leave the PR template
+# blank (pr-template-blank.sh).
 # Cursor input on stdin: { tool_name, tool_input, ... }. Output on stdout:
 # { permission: "allow" | "deny", userMessage, agentMessage }.
 
@@ -23,7 +24,7 @@ deny() {
   exit 0
 }
 
-# Only police the github comment/review/issue writers; wave everything else by.
+# Pick the guard for this tool; wave everything else by.
 tool=$(printf '%s' "$input" | jq -r '.tool_name // empty')
 case "$tool" in
   mcp__github__add_issue_comment | \
@@ -31,21 +32,22 @@ case "$tool" in
     mcp__github__add_reply_to_pull_request_comment | \
     mcp__github__pull_request_review_write | \
     mcp__github__issue_write | \
-    mcp__github__sub_issue_write) ;;
+    mcp__github__sub_issue_write)
+    guard=github-comment-style.sh ;;
+  mcp__github__create_pull_request)
+    guard=pr-template-blank.sh ;;
   *) allow ;;
 esac
 
-# The shared guard already reads `.tool_input.body` / `.tool_input.title`, which
-# is exactly the shape Cursor passes, so forward the payload unchanged. Exit 0
-# allows, exit 2 + stderr means "add the 🤖 prefix". Fail closed on any other
-# exit (matching guard-shell.sh) so a broken/missing guard can't silently
-# disable enforcement; the message marks it as an execution problem, not a real
-# policy denial. (The guard itself still fails *open* on a malformed payload —
-# that's its own data-level choice and returns exit 0, handled above.)
+# Each guard reads the same `.tool_input.*` payload Cursor passes, so forward it
+# unchanged. Exit 0 allows, exit 2 + stderr is a real policy denial. Fail closed
+# on any other exit (matching guard-shell.sh) so a broken/missing guard can't
+# silently disable enforcement; the message marks it as an execution problem.
+# (Each guard itself fails *open* on a malformed payload, returning exit 0.)
 status=0
-err=$(printf '%s' "$input" | "$ROOT/scripts/agent-hooks/github-comment-style.sh" 2>&1) || status=$?
+err=$(printf '%s' "$input" | "$ROOT/scripts/agent-hooks/$guard" 2>&1) || status=$?
 case "$status" in
   0) allow ;;
   2) deny "$err" ;;
-  *) deny "github-comment-style guard failed (exit $status): $err" ;;
+  *) deny "$guard failed (exit $status): $err" ;;
 esac

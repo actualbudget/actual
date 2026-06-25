@@ -52,6 +52,15 @@ type = "command"
 command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/github-comment-style.sh"'
 statusMessage = "Checking GitHub comment is 🤖-prefixed"
 
+# When creating a PR, require the body to be the blank PR template (unmodified)
+# — agents must not fill it in. Reads tool_input.body; blocks via exit 2.
+[[hooks.PreToolUse]]
+matcher = "^mcp__github__create_pull_request$"
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/pr-template-blank.sh"'
+statusMessage = "Checking PR template is left blank"
+
 # When the turn ends, typecheck + test the workspaces this branch touched.
 [[hooks.Stop]]
 [[hooks.Stop.hooks]]

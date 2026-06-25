@@ -42,6 +42,15 @@
             "command": "\"$CLAUDE_PROJECT_DIR/scripts/agent-hooks/github-comment-style.sh\""
           }
         ]
+      },
+      {
+        "matcher": "mcp__github__create_pull_request",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/scripts/agent-hooks/pr-template-blank.sh\""
+          }
+        ]
       }
     ],
     "Stop": [

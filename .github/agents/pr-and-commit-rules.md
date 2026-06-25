@@ -17,9 +17,15 @@ automatically — you have to apply it yourself.
 
 ### Do not fill in the PR template
 
-- **NEVER fill in the PR template** (`.github/PULL_REQUEST_TEMPLATE.md`). Leave all
-  blank spaces and placeholder comments as-is — the human who tested the change
-  fills in the Description, Related issue(s), Testing, and Checklist sections.
+- **NEVER fill in the PR template** (`.github/PULL_REQUEST_TEMPLATE.md`). Create
+  the PR with that template as the body, unmodified — leave all blank spaces and
+  placeholder comments as-is, and leave every checklist box unchecked. The human
+  who tested the change fills in the Description, Related issue(s), Testing, and
+  Checklist sections.
+- A cross-platform hook enforces this where hooks run (Claude, Codex, Cursor —
+  see `scripts/agent-hooks/pr-template-blank.sh`): it blocks `create_pull_request`
+  unless the body is the pristine template (cosmetic whitespace aside). On
+  platforms without hook support, apply the rule yourself.
 - **Exception**: if a human **explicitly asks** you to fill it out, do so **in
   Chinese**, using Chinese characters (简体中文) for all content you add.
 
