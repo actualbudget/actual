@@ -65,8 +65,15 @@ export function BudgetAnalysisCard({
       conditionsOp: meta?.conditionsOp,
       startDate,
       endDate,
+      showHiddenCategories: meta?.showHiddenCategories ?? false,
     });
-  }, [meta?.conditions, meta?.conditionsOp, startDate, endDate]);
+  }, [
+    meta?.conditions,
+    meta?.conditionsOp,
+    meta?.showHiddenCategories,
+    startDate,
+    endDate,
+  ]);
 
   const data = useReport('default', getGraphData);
 
