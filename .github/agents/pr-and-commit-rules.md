@@ -39,7 +39,12 @@ and body of issues you create. It does **not** change PR titles (still `[AI]
 3. **Never plain English.** A normal-English comment is not acceptable; pick one
    of the two above.
 
+**Exception — CodeRabbit.** Comments addressed to CodeRabbit (anything mentioning
+`@coderabbitai` / `@coderabbit`, e.g. `@coderabbitai review`, `@coderabbitai
+resolve`) are exempt: the bot parses its commands as plain English, so write
+those normally.
+
 A cross-platform hook enforces this where hooks run (Claude, Codex, Cursor — see
 `scripts/agent-hooks/github-comment-style.sh`): it blocks a github comment /
-review / issue whose body is plain English. On platforms without hook support,
-apply the rule yourself.
+review / issue whose body is plain English (skipping the CodeRabbit case above).
+On platforms without hook support, apply the rule yourself.

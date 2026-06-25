@@ -24,5 +24,7 @@ When you post a GitHub comment, a PR review, or create an issue / issue comment,
 write the body in **简体中文 (Chinese) by preference**, or — if Chinese isn't
 workable — in a **fun pirate voice (yarr!)**. Never plain English. Keep code,
 links and identifiers accurate; only the prose changes. (PR titles and commit
-messages stay `[AI] …` in English.) A `beforeMCPExecution` hook enforces this —
-see `scripts/agent-hooks/github-comment-style.sh`.
+messages stay `[AI] …` in English.) **Exception:** comments addressed to
+CodeRabbit — anything mentioning `@coderabbitai` / `@coderabbit` — stay in plain
+English so the bot understands its commands. A `beforeMCPExecution` hook enforces
+this — see `scripts/agent-hooks/github-comment-style.sh`.

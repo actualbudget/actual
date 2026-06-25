@@ -37,6 +37,14 @@ text=$(printf '%s\n%s' "$title" "$body")
 # Nothing to check (e.g. a tool call that carries no prose) — let it through.
 [ -n "$(printf '%s' "$text" | tr -d '[:space:]')" ] || exit 0
 
+# Exempt comments addressed to CodeRabbit. Its commands (e.g. `@coderabbitai
+# review`, `@coderabbitai resolve`, `@coderabbitai configuration`) are parsed as
+# plain English by the bot — 中文/pirate prose would just be ignored — so the
+# voice rule must not apply when the comment is talking to CodeRabbit.
+if printf '%s' "$text" | grep -qiE '@coderabbit(ai)?([^[:alnum:]]|$)' 2>/dev/null; then
+  exit 0
+fi
+
 # 1. Chinese? Detect CJK by UTF-8 lead byte in the C locale — locale- and
 #    grep-flavour-independent (grep -P's \x{...} needs a UTF-8 locale we can't
 #    assume). Lead bytes E3–E9 (\343–\351) cover CJK punctuation, kana and the
