@@ -33,13 +33,22 @@ type createBudgetAnalysisSpreadsheetProps = {
   conditionsOp?: 'and' | 'or';
   startDate: string;
   endDate: string;
+  showHiddenCategories?: boolean;
 };
+
+export function isBaseCategory(
+  cat: CategoryEntity,
+  showHiddenCategories: boolean,
+): boolean {
+  return !cat.is_income && (showHiddenCategories || !cat.hidden);
+}
 
 export function createBudgetAnalysisSpreadsheet({
   conditions = [],
   conditionsOp = 'and',
   startDate,
   endDate,
+  showHiddenCategories = false,
 }: createBudgetAnalysisSpreadsheetProps) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -64,9 +73,10 @@ export function createBudgetAnalysisSpreadsheet({
         (cond.field === 'category' || cond.field === 'category_group'),
     );
 
-    // Base set: expense categories only (exclude income and hidden)
-    const baseCategories = allCategories.filter(
-      (cat: CategoryEntity) => !cat.is_income && !cat.hidden,
+    // Base set: expense categories only; hidden categories are included when
+    // showHiddenCategories is true so historic data is not misrepresented.
+    const baseCategories = allCategories.filter((cat: CategoryEntity) =>
+      isBaseCategory(cat, showHiddenCategories),
     );
 
     let categoriesToInclude: CategoryEntity[];
