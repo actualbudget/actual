@@ -681,13 +681,24 @@ function MultiItem({ name, onRemove }: MultiItemProps) {
       style={{
         alignItems: 'center',
         flexDirection: 'row',
+        flexWrap: 'nowrap',
         backgroundColor: theme.pillBackgroundSelected,
         padding: '2px 4px',
         margin: '2px',
         borderRadius: 4,
       }}
     >
-      {name}
+      <span
+        style={{
+          overflow: 'hidden',
+          maxWidth: '100%',
+          textOverflow: 'ellipsis',
+          textWrap: 'nowrap',
+          display: 'inline-block',
+        }}
+      >
+        {name}
+      </span>
       <Button variant="bare" style={{ marginLeft: 1 }} onPress={onRemove}>
         <SvgRemove style={{ width: 8, height: 8 }} />
       </Button>
@@ -707,6 +718,7 @@ type MultiAutocompleteProps<T extends AutocompleteItem> =
     type: 'multi';
     onSelect: (ids: NonNullable<T['id']>[], id?: NonNullable<T['id']>) => void;
     value: null | T[] | NonNullable<T['id']>[];
+    renderMultiItem?: (props: MultiItemProps) => ReactNode;
   };
 
 function MultiAutocomplete<T extends AutocompleteItem>({
@@ -715,6 +727,7 @@ function MultiAutocomplete<T extends AutocompleteItem>({
   suggestions,
   strict,
   clearOnBlur = true,
+  renderMultiItem = MultiItem,
   ...props
 }: MultiAutocompleteProps<T>) {
   const [focused, setFocused] = useState(false);
@@ -744,6 +757,8 @@ function MultiAutocomplete<T extends AutocompleteItem>({
 
     prevOnKeyDown?.(e);
   }
+
+  const RenderMultiItem = renderMultiItem;
 
   return (
     <Autocomplete
@@ -778,7 +793,7 @@ function MultiAutocomplete<T extends AutocompleteItem>({
             item = findItem(strict, suggestions, item);
             return (
               item && (
-                <MultiItem
+                <RenderMultiItem
                   key={getItemId(item) || idx}
                   name={getItemName(item)}
                   onRemove={() => onRemoveItem(getItemId(item))}

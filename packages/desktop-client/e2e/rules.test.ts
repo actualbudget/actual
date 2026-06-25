@@ -71,8 +71,6 @@ test.describe('Rules', () => {
   });
 
   test('creates a split transaction rule and makes sure it is applied when creating a transaction', async () => {
-    rulesPage = await navigation.goToRulesPage();
-
     const editRuleModal = await rulesPage.createNewRule();
     await editRuleModal.fill({
       conditions: [

@@ -80,5 +80,5 @@ All the non-budgeting features of Actual can be used with the **Tracking Budget*
 Experimental features may not work with the **Tracking Budget** yet.
 If not please let us know in the feature feedback.
 :::note
-If you find critical functionality missing that you need, please submit a request on [GitHub](/contact).
+If you find critical functionality missing that you need, please submit a request on [GitHub](../../../contact).
 :::

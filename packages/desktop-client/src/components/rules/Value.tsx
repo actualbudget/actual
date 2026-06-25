@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { getMonthYearFormat } from '@actual-app/core/shared/months';
-import { getRecurringDescription } from '@actual-app/core/shared/schedules';
 import { format as formatDate, parseISO } from 'date-fns';
 
 import { Link } from '#components/common/Link';
@@ -17,6 +16,7 @@ import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { usePayees } from '#hooks/usePayees';
+import { getRecurringDescription } from '#util/schedule';
 
 type ValueProps<T> = {
   value: T;

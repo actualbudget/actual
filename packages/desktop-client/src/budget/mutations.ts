@@ -491,6 +491,32 @@ export function useReorderCategoryGroupMutation() {
   });
 }
 
+type SortCategoriesPayload = {
+  groupId: CategoryGroupEntity['id'];
+  direction: 'asc' | 'desc';
+};
+
+export function useSortCategoriesMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ groupId, direction }: SortCategoriesPayload) => {
+      await send('categories-sort', { groupId, direction });
+    },
+    onSuccess: () => invalidateQueries(queryClient),
+    onError: error => {
+      console.error('Error sorting categories:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error sorting the categories. Please try again.'),
+        error,
+      );
+    },
+  });
+}
+
 type ApplyBudgetActionPayload =
   | {
       type: 'budget-amount';

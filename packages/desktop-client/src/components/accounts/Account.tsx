@@ -1,4 +1,10 @@
-import React, { createRef, PureComponent, useEffect, useMemo } from 'react';
+import React, {
+  createRef,
+  PureComponent,
+  startTransition,
+  useEffect,
+  useMemo,
+} from 'react';
 import type { ReactElement, RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Trans } from 'react-i18next';
@@ -33,9 +39,8 @@ import type {
   TransactionEntity,
   TransactionFilterEntity,
 } from '@actual-app/core/types/models';
+import { debounce, isEqual } from 'es-toolkit/compat';
 import { t } from 'i18next';
-import debounce from 'lodash/debounce';
-import isEqual from 'lodash/isEqual';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -54,7 +59,6 @@ import { useAccounts } from '#hooks/useAccounts';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
-import { useFailedAccounts } from '#hooks/useFailedAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { usePayees } from '#hooks/usePayees';
 import { getSchedulesQuery } from '#hooks/useSchedules';
@@ -240,7 +244,6 @@ type AccountInternalProps = {
   onBatchDelete: ReturnType<typeof useTransactionBatchActions>['onBatchDelete'];
   categoryId?: string;
   location: ReturnType<typeof useLocation>;
-  failedAccounts: ReturnType<typeof useFailedAccounts>;
   dateFormat: ReturnType<typeof useDateFormat>;
   payees: PayeeEntity[];
   categoryGroups: CategoryGroupEntity[];
@@ -300,6 +303,7 @@ class AccountInternal extends PureComponent<
   table: TableRef;
   unlisten?: () => void;
   dispatchSelected?: (action: Actions) => void;
+  _isOptimisticUpdate: boolean = false;
 
   constructor(props: AccountInternalProps) {
     super(props);
@@ -481,6 +485,26 @@ class AccountInternal extends PureComponent<
         const data = ungroupTransactions([...groupedData]);
         const firstLoad = prevData == null;
 
+        // Fast path for optimistic updates (e.g. field edits): skip the
+        // expensive aggregate DB queries (calculateBalances, getFilteredAmount)
+        // and just update the transaction list in state directly. Balances and
+        // filteredAmount will be refreshed on the next full DB-driven onData.
+        if (this._isOptimisticUpdate) {
+          this._isOptimisticUpdate = false;
+          const transactionsSnapshot = data;
+          // Wrap in startTransition so React treats this as a low-priority
+          // update. Without this, setState blocks the main thread for the
+          // full duration of the re-render (~40–220ms with large transaction
+          // lists), preventing input events from being processed and making
+          // the UI feel frozen. startTransition lets React break the render
+          // into chunks and yield to the browser between them, keeping the
+          // UI responsive while the row update happens in the background.
+          startTransition(() => {
+            this.setState({ transactions: transactionsSnapshot });
+          });
+          return;
+        }
+
         if (firstLoad) {
           this.table.current?.setRowAnimation(false);
 
@@ -631,7 +655,9 @@ class AccountInternal extends PureComponent<
   };
 
   onTransactionsChange = (updatedTransaction: TransactionEntity) => {
-    // Apply changes to pagedQuery data
+    // Apply changes to pagedQuery data optimistically. Set the flag so that
+    // onData skips the expensive aggregate DB queries for this update.
+    this._isOptimisticUpdate = true;
     this.paged?.optimisticUpdate(data => {
       if (updatedTransaction._deleted) {
         return data.filter(t => t.id !== updatedTransaction.id);
@@ -1713,7 +1739,6 @@ class AccountInternal extends PureComponent<
       dateFormat,
       hideFraction,
       accountsSyncing,
-      failedAccounts,
       showExtraBalances,
       accountId,
       categoryId,
@@ -1774,7 +1799,16 @@ class AccountInternal extends PureComponent<
         {(allTransactions, allBalances) => (
           <SelectedProviderWithItems
             name="transactions"
-            items={allTransactions}
+            // When reconciled transactions are hidden they are still
+            // loaded (e.g. to calculate running balances), but they must
+            // not be selectable. Mirror the filtering the transaction
+            // table applies when rendering so that range selection
+            // (shift+click) only covers visible transactions.
+            items={
+              showReconciled
+                ? allTransactions
+                : allTransactions.filter(t => !t.reconciled)
+            }
             fetchAllIds={this.fetchAllIds}
             registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
             selectAllFilter={selectAllFilter}
@@ -1790,7 +1824,6 @@ class AccountInternal extends PureComponent<
                 savedFilters={this.props.savedFilters}
                 accountName={accountName}
                 accountsSyncing={accountsSyncing}
-                failedAccounts={failedAccounts}
                 accounts={accounts}
                 transactions={transactions}
                 showBalances={showBalances ?? false}
@@ -1985,7 +2018,6 @@ export function Account() {
   );
   const { data: accounts = [] } = useAccounts();
   const { data: payees = [] } = usePayees();
-  const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [hideFraction] = useSyncedPref('hideFraction');
   const [expandSplits] = useLocalPref('expand-splits');
@@ -2043,7 +2075,6 @@ export function Account() {
             newTransactions={newTransactions}
             matchedTransactions={matchedTransactions}
             accounts={accounts}
-            failedAccounts={failedAccounts}
             dateFormat={dateFormat}
             hideFraction={String(hideFraction) === 'true'}
             expandSplits={expandSplits}

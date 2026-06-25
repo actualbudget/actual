@@ -1,3 +1,4 @@
+import type { ForecastSource } from './forecast';
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
 
@@ -57,6 +58,19 @@ export type CashFlowWidget = AbstractWidget<
     showBalance?: boolean;
   } | null
 >;
+
+export type SpendingAverageRange =
+  | {
+      mode: 'last-n-months';
+      months: 3 | 6 | 12;
+    }
+  | {
+      mode: 'year-to-date';
+    }
+  | {
+      mode: 'all-time';
+    };
+
 export type SpendingWidget = AbstractWidget<
   'spending-card',
   {
@@ -67,6 +81,7 @@ export type SpendingWidget = AbstractWidget<
     compareTo?: string;
     isLive?: boolean;
     mode?: 'single-month' | 'budget' | 'average';
+    averageRange?: SpendingAverageRange;
   } | null
 >;
 export type BudgetAnalysisWidget = AbstractWidget<
@@ -79,6 +94,7 @@ export type BudgetAnalysisWidget = AbstractWidget<
     interval?: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
     graphType?: 'Line' | 'Bar';
     showBalance?: boolean;
+    balanceOnly?: boolean;
   } | null
 >;
 export type CustomReportWidget = AbstractWidget<
@@ -200,6 +216,7 @@ export type FormulaWidget = AbstractWidget<
     fontSize?: number;
     fontSizeMode?: 'dynamic' | 'static';
     staticFontSize?: number;
+    showTitle?: boolean;
     colorFormula?: string;
     queriesVersion?: number;
     queries?: Record<
@@ -241,5 +258,6 @@ export type BalanceForecastWidget = AbstractWidget<
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
     granularity?: 'Daily' | 'Monthly';
+    source?: ForecastSource;
   } | null
 >;

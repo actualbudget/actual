@@ -30,7 +30,8 @@ function isAdjustmentOutOfRange(template: Template): boolean {
 
 export type GlobalConflictKind =
   | { kind: 'over-income'; total: number; income: number }
-  | { kind: 'percent-over-100'; total: number };
+  | { kind: 'percent-over-100'; total: number }
+  | { kind: 'schedule-priority-mismatch' };
 
 export function validateAutomation(
   template: Template,
@@ -45,20 +46,24 @@ export function validateAutomation(
   validPercentageSources?: ReadonlySet<string>,
 ): AutomationErrorKind | null {
   switch (displayType) {
-    case 'schedule':
+    case 'schedule': {
       if (template.type !== 'schedule') return null;
-      if (!template.name) return { kind: 'schedule-not-found', name: '' };
-      if (
-        !schedules.some(
-          s => s.name === template.name && !s.completed && !s.tombstone,
-        )
-      ) {
-        return { kind: 'schedule-not-found', name: template.name };
+      if (!template.scheduleId && !template.name) {
+        return { kind: 'schedule-not-found', name: '' };
+      }
+      const match = schedules.find(s =>
+        template.scheduleId
+          ? s.id === template.scheduleId
+          : s.name === template.name,
+      );
+      if (!match || match.completed || match.tombstone) {
+        return { kind: 'schedule-not-found', name: template.name ?? '' };
       }
       if (isAdjustmentOutOfRange(template)) {
         return { kind: 'adjustment-out-of-range' };
       }
       return null;
+    }
     case 'historical':
       if (isAdjustmentOutOfRange(template)) {
         return { kind: 'adjustment-out-of-range' };
@@ -149,4 +154,20 @@ export function validatePercentageAllocation(
   return maxPercent > 100
     ? { kind: 'percent-over-100', total: maxPercent }
     : null;
+}
+
+// The engine (CategoryTemplateContext.checkByAndScheduleAndSpend) requires
+// every schedule and by-date template in a category to share one priority; if
+// they don't, none of them budget. Surface that as a conflict so it can't be
+// saved.
+export function validateSchedulePriorities(
+  templates: readonly Template[],
+): GlobalConflictKind | null {
+  const priorities = new Set<number>();
+  for (const t of templates) {
+    if (t.type === 'schedule' || t.type === 'by') {
+      priorities.add(t.priority);
+    }
+  }
+  return priorities.size > 1 ? { kind: 'schedule-priority-mismatch' } : null;
 }

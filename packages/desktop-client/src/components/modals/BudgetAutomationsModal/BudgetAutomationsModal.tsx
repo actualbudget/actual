@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { View } from '@actual-app/components/view';
 import { currentMonth } from '@actual-app/core/shared/months';
@@ -15,6 +16,7 @@ import { useCategoryCleanup } from '#hooks/useCategoryCleanup';
 import { useSchedules } from '#hooks/useSchedules';
 
 import { BudgetAutomationsBody } from './BudgetAutomationsBody';
+import { BudgetAutomationsBodyMobile } from './BudgetAutomationsBodyMobile';
 import { migrateTemplatesToAutomations } from './migrateTemplatesToAutomations';
 import { UnsupportedDirectivesNotice } from './UnsupportedDirectivesNotice';
 
@@ -28,6 +30,7 @@ export function BudgetAutomationsModal({
   categoryId: string;
   month?: string;
 }) {
+  const { isNarrowWidth } = useResponsive();
   const [parsedTemplates, setParsedTemplates] = useState<Template[] | null>(
     null,
   );
@@ -54,7 +57,9 @@ export function BudgetAutomationsModal({
     onLoaded,
   });
 
-  const { schedules } = useSchedules({ query: q('schedules').select('*') });
+  const { schedules, isLoading: schedulesLoading } = useSchedules({
+    query: q('schedules').select('*'),
+  });
 
   const categories = useBudgetAutomationCategories();
 
@@ -63,7 +68,7 @@ export function BudgetAutomationsModal({
     source,
     onLoaded: setParsedCleanup,
   });
-  const loading = templatesLoading || cleanupLoading;
+  const loading = templatesLoading || cleanupLoading || schedulesLoading;
 
   const hasErrorTemplate =
     parsedTemplates?.some(t => t.type === 'error') ?? false;
@@ -82,23 +87,34 @@ export function BudgetAutomationsModal({
   });
   const initialEntries =
     resolved && !hasUnsupportedDirective
-      ? migrateTemplatesToAutomations(resolved)
+      ? migrateTemplatesToAutomations(resolved, schedules)
       : null;
 
   return (
     <Modal
       name="category-automations-edit"
       containerProps={{
-        style: {
-          width: MODAL_WIDTH,
-          maxWidth: '95vw',
-          height: MODAL_HEIGHT,
-          maxHeight: '90vh',
-          padding: 0,
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-        },
+        style: isNarrowWidth
+          ? {
+              width: '90vw',
+              maxWidth: '90vw',
+              height: '90dvh',
+              maxHeight: '90dvh',
+              padding: 0,
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }
+          : {
+              width: MODAL_WIDTH,
+              maxWidth: '95vw',
+              height: MODAL_HEIGHT,
+              maxHeight: '90vh',
+              padding: 0,
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            },
       }}
     >
       {({ state }) => (
@@ -115,6 +131,18 @@ export function BudgetAutomationsModal({
             </View>
           ) : hasUnsupportedDirective ? (
             <UnsupportedDirectivesNotice onClose={() => state.close()} />
+          ) : isNarrowWidth ? (
+            <BudgetAutomationsBodyMobile
+              categoryId={categoryId}
+              categoryName={currentCategory?.name ?? ''}
+              needsMigration={needsMigration}
+              initialEntries={initialEntries ?? []}
+              initialCleanup={parsedCleanup}
+              schedules={schedules}
+              categories={categories}
+              month={effectiveMonth}
+              onClose={() => state.close()}
+            />
           ) : (
             <BudgetAutomationsBody
               categoryId={categoryId}
