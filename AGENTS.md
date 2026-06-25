@@ -357,7 +357,11 @@ describe('ComponentName', () => {
 
 - `/README.md` - Project overview
 - `/CONTRIBUTING.md` - Points to community docs
-- `/upcoming-release-notes/` - Release notes for next version
+- `/upcoming-release-notes/` - Release notes for next version. Name each file
+  with a short, descriptive slug (e.g. `add-payee-autocomplete.md`) — the PR link
+  is resolved automatically at release time, so you don't need the PR number.
+  Numeric filenames like `1234.md` also remain valid. See the release-note
+  template and rules in `packages/docs/docs/contributing/index.md`.
 - `/CODEOWNERS` - Code ownership definitions
 - `/packages/docs/` - Documentation website (Docusaurus)
 
