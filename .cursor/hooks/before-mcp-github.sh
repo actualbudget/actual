@@ -2,8 +2,8 @@
 # Cursor `beforeMCPExecution` adapter.
 #
 # Translates Cursor's MCP-call hook I/O to the shared guard in
-# scripts/agent-hooks/github-comment-style.sh, which keeps GitHub comments,
-# reviews and issues in 简体中文 (preferred) or a fun pirate voice.
+# scripts/agent-hooks/github-comment-style.sh, which requires GitHub comments,
+# reviews and issues to be prefixed with the robot emoji 🤖.
 # Cursor input on stdin: { tool_name, tool_input, ... }. Output on stdout:
 # { permission: "allow" | "deny", userMessage, agentMessage }.
 
@@ -34,13 +34,13 @@ esac
 
 # The shared guard already reads `.tool_input.body` / `.tool_input.title`, which
 # is exactly the shape Cursor passes, so forward the payload unchanged. Exit 2 +
-# stderr from the guard means "rewrite it"; anything else allows.
+# stderr from the guard means "add the 🤖 prefix"; anything else allows.
 status=0
 err=$(printf '%s' "$input" | "$ROOT/scripts/agent-hooks/github-comment-style.sh" 2>&1) || status=$?
 case "$status" in
   0) allow ;;
   2) deny "$err" ;;
-  # Fail open on an unexpected guard error: a wrongly-toned comment is a lighter
+  # Fail open on an unexpected guard error: a missing 🤖 prefix is a lighter
   # failure than blocking the agent from commenting at all.
   *) allow ;;
 esac

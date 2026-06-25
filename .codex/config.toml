@@ -42,15 +42,15 @@ command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/format-edited-f
 type = "command"
 command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/prefer-one-component.sh"'
 
-# Keep GitHub comments/reviews/issues in 简体中文 (preferred) or a pirate voice.
+# Require GitHub comments/reviews/issues to be prefixed with the robot emoji 🤖.
 # Matches the github MCP comment/review/issue writers; reads tool_input.body /
-# .title (the same payload Claude passes). Blocks plain English via exit 2.
+# .title (the same payload Claude passes). Blocks an un-prefixed body via exit 2.
 [[hooks.PreToolUse]]
 matcher = "^mcp__github__(add_issue_comment|add_comment_to_pending_review|add_reply_to_pull_request_comment|pull_request_review_write|issue_write|sub_issue_write)$"
 [[hooks.PreToolUse.hooks]]
 type = "command"
 command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/github-comment-style.sh"'
-statusMessage = "Checking GitHub comment language (中文/pirate)"
+statusMessage = "Checking GitHub comment is 🤖-prefixed"
 
 # When the turn ends, typecheck + test the workspaces this branch touched.
 [[hooks.Stop]]
