@@ -8,7 +8,7 @@ importer. We will work with the community to help write other importers soon.
 ## Migration from YNAB
 
 - [Migration from YNAB4](./ynab4.md)
-- [Migration from nYNAB](./nynab.mdx)
+- [Migration from nYNAB](./nynab.md)
 
 ## Migration from the old Actual Budget Desktop App
 
