@@ -2,8 +2,10 @@
 import * as dateFns from 'date-fns';
 
 import { logger } from '#platform/server/log';
+import { evaluateFormula } from '#shared/formulas/evaluate';
 import {
   addDays,
+  currentDay,
   isAfter,
   isBefore,
   monthFromDate,
@@ -18,6 +20,7 @@ import {
   sortNumbers,
 } from '#shared/rules';
 import { extractTagsForFilter } from '#shared/tags';
+import { amountToInteger } from '#shared/util';
 
 import {
   assert,
@@ -142,9 +145,18 @@ export const CONDITION_TYPES = {
     },
   },
   number: {
-    ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
+    ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte', 'formula'],
     nullable: false,
     parse(op, value, fieldName) {
+      if (op === 'formula') {
+        assert(
+          typeof value === 'string' && value.startsWith('='),
+          'number-format',
+          `Formula value must be a string starting with "=" (field: ${fieldName})`,
+        );
+        return { type: 'formula', value };
+      }
+
       const parsed =
         typeof value === 'number'
           ? { type: 'literal', value }
@@ -320,6 +332,25 @@ export class Condition {
           return fieldValue === number;
         }
         return fieldValue === this.value;
+
+      case 'formula': {
+        try {
+          const result = evaluateFormula(this.value.value, {
+            date: object.date ?? currentDay(),
+          });
+          if (typeof result !== 'number') {
+            return false;
+          }
+          const number = amountToInteger(Math.round(result * 100) / 100);
+          const threshold = getApproxNumberThreshold(number);
+          return (
+            fieldValue >= number - threshold && fieldValue <= number + threshold
+          );
+        } catch (err) {
+          logger.warn('Formula condition evaluation error:', err);
+          return false;
+        }
+      }
 
       case 'isNot':
         return fieldValue !== this.value;

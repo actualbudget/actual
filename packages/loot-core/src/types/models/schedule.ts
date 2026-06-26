@@ -33,7 +33,7 @@ export type ScheduleEntity = {
   // underlying rule
   _payee: PayeeEntity['id'];
   _account: AccountEntity['id'];
-  _amount: number | { num1: number; num2: number };
+  _amount: number | { num1: number; num2: number } | string;
   _amountOp: string;
   _date: RecurConfig | string;
   _conditions: RuleConditionEntity[];

@@ -31,7 +31,8 @@ const defaultCategory = { id: '1', name: 'Test Category' } as CategoryEntity;
 type RuleSpec = {
   id?: string;
   start: string;
-  amount: number;
+  amount: number | string;
+  amountOp?: 'is' | 'isapprox' | 'isbetween' | 'formula';
   frequency: 'monthly' | 'yearly' | 'weekly' | 'daily';
   interval?: number;
 };
@@ -40,6 +41,7 @@ function makeRule({
   id = 'r',
   start,
   amount,
+  amountOp = 'is',
   frequency,
   interval = 1,
 }: RuleSpec): Rule {
@@ -64,7 +66,12 @@ function makeRule({
         },
         type: 'date',
       },
-      { op: 'is', field: 'amount', value: amount, type: 'number' },
+      {
+        op: amountOp,
+        field: 'amount',
+        value: amount,
+        type: amountOp === 'formula' ? 'string' : 'number',
+      },
     ],
     actions: [],
   });
@@ -688,5 +695,130 @@ describe('runSchedule', () => {
       defaultCurrency,
     );
     expect(result.to_budget).toBe(0);
+  });
+
+  it('budgets a constant-formula expense schedule for the same amount as a static one', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'FormulaSchedule',
+        directive: 'template',
+        priority: 0,
+      } as const,
+    ];
+
+    mockSingleSchedule({
+      start: '2024-08-01',
+      amount: '=-100',
+      amountOp: 'formula',
+      frequency: 'monthly',
+    });
+
+    const result = await runSchedule(
+      template_lines,
+      '2024-08-01',
+      0,
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.to_budget).toBe(10000);
+  });
+
+  it('reevaluates a monthly formula schedule against each budget month independently', async () => {
+    const daysOfMonthFormula =
+      '=-DATEDIF(EOMONTH(date,-1) ,EOMONTH(date,0), "D")';
+
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'daysOfMonth',
+        directive: 'template',
+        priority: 0,
+      } as const,
+    ];
+
+    // June run
+    mockSingleSchedule({
+      start: '2026-06-15',
+      amount: daysOfMonthFormula,
+      amountOp: 'formula',
+      frequency: 'monthly',
+    });
+    const june = await runSchedule(
+      template_lines,
+      '2026-06',
+      0,
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    // July run
+    mockSingleSchedule({
+      start: '2026-06-15',
+      amount: daysOfMonthFormula,
+      amountOp: 'formula',
+      frequency: 'monthly',
+    });
+    const july = await runSchedule(
+      template_lines,
+      '2026-07',
+      0,
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(june.errors).toHaveLength(0);
+    expect(july.errors).toHaveLength(0);
+
+    expect(Math.abs(june.to_budget)).toBe(3000);
+    expect(Math.abs(july.to_budget)).toBe(3100);
+  });
+
+  it('budgets a date-dependent formula expense schedule per occurrence', async () => {
+    //Set a daily schedule where we spend the $DAY amount of dollars. 1+2+3+5+..+31 for august
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'DailyFormula',
+        directive: 'template',
+        priority: 0,
+      } as const,
+    ];
+    mockSingleSchedule({
+      start: '2024-08-01',
+      amount: '=-DAY(date)',
+      amountOp: 'formula',
+      frequency: 'daily',
+    });
+
+    const result = await runSchedule(
+      template_lines,
+      '2024-08-01',
+      0,
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.errors).toHaveLength(0);
+    // Sum of 1..31 = 496 dollars → 49600 cents
+    expect(result.to_budget).toBe(49600);
   });
 });

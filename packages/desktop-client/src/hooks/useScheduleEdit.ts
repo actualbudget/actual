@@ -42,12 +42,12 @@ type ScheduleEditAction =
   | {
       type: 'set-field';
       field: 'amountOp';
-      value: 'is' | 'isbetween' | 'isapprox';
+      value: 'is' | 'isbetween' | 'isapprox' | 'formula';
     }
   | {
       type: 'set-field';
       field: 'amount';
-      value: number | { num1: number; num2: number };
+      value: number | { num1: number; num2: number } | string;
     }
   | {
       type: 'set-field';
@@ -130,13 +130,22 @@ function createScheduleEditReducer(useGetScheduledAmount: boolean = false) {
         };
 
         // If we are changing the amount operator either to or
-        // away from the `isbetween` operator, the amount value is
+        // away from the `isbetween` or `formula` operator, the amount value is
         // different and we need to convert it
         if (
           action.field === 'amountOp' &&
           action.value !== state.fields.amountOp
         ) {
-          if (action.value === 'isbetween') {
+          if (action.value === 'formula') {
+            //  Let's clear all when switch to/from formula
+            fields.amount =
+              typeof state.fields.amount === 'string'
+                ? state.fields.amount
+                : '=';
+          } else if (state.fields.amountOp === 'formula') {
+            fields.amount =
+              action.value === 'isbetween' ? { num1: 0, num2: 0 } : 0;
+          } else if (action.value === 'isbetween') {
             // We need a range if switching to `isbetween`
             if (useGetScheduledAmount) {
               const num = getScheduledAmount(state.fields.amount);
@@ -156,7 +165,12 @@ function createScheduleEditReducer(useGetScheduledAmount: boolean = false) {
               fields.amount =
                 typeof state.fields.amount === 'number'
                   ? state.fields.amount
-                  : state.fields.amount?.num1;
+                  : (
+                      state.fields.amount as
+                        | { num1: number; num2: number }
+                        | null
+                        | undefined
+                    )?.num1;
             }
           }
         }

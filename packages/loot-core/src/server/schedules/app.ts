@@ -147,6 +147,31 @@ function updateActions(
     return null;
   }
 
+  // For formula schedules, mirror the formula into any plain `set amount`
+  // action so the rule re-evaluates against each transaction's own date
+  // instead of carrying a stale numeric snapshot.
+  if (amountCond.op === 'formula' && typeof amountCond.value === 'string') {
+    const formula = amountCond.value;
+    let changed = false;
+    const updated = actions.map(action => {
+      if (
+        action.op === 'set' &&
+        action.field === 'amount' &&
+        !action.options?.template &&
+        action.options?.formula !== formula
+      ) {
+        changed = true;
+        return {
+          ...action,
+          value: 0,
+          options: { ...action.options, formula },
+        };
+      }
+      return action;
+    });
+    return changed ? updated : null;
+  }
+
   // Mirrors how `_amount` resolves: a deleted/empty amount condition value
   // yields 0, so the action is synced to 0 too, keeping it consistent with
   // the amount the schedule actually posts.
@@ -572,11 +597,12 @@ async function postTransactionForSchedule({
     return;
   }
 
+  const postingDate = today ? currentDay() : schedule.next_date;
   const transaction = {
     payee: schedule._payee,
     account: schedule._account,
-    amount: getScheduledAmount(schedule._amount),
-    date: today ? currentDay() : schedule.next_date,
+    amount: getScheduledAmount(schedule._amount, false, { date: postingDate }),
+    date: postingDate,
     schedule: schedule.id,
     cleared: false,
   };

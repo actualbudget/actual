@@ -42,6 +42,15 @@ export function updateScheduleConditions(
     return { error: t('A valid amount is required'), conditions: [] };
   }
 
+  if (fields.amountOp === 'formula') {
+    if (typeof fields.amount !== 'string' || !fields.amount.startsWith('=')) {
+      return {
+        error: t('Formula must start with ='),
+        conditions: [],
+      };
+    }
+  }
+
   return {
     conditions: [
       updateCond(conds.payee, 'is', 'payee', fields.payee),

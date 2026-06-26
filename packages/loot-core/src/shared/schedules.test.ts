@@ -6,6 +6,7 @@ import * as monthUtils from './months';
 import {
   computeSchedulePreviewTransactions,
   getNextDate,
+  getScheduledAmount,
   getScheduleOccurrenceMatchStartDate,
   getStatus,
   getUpcomingDays,
@@ -461,6 +462,50 @@ describe('schedules', () => {
 
       const result = getNextDate(dateCond, new Date(2017, 0, 1));
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getScheduledAmount', () => {
+    it('returns the integer amount unchanged for static schedules', () => {
+      expect(getScheduledAmount(12345)).toBe(12345);
+    });
+
+    it('inverts the sign when requested', () => {
+      expect(getScheduledAmount(12345, true)).toBe(-12345);
+    });
+
+    it('averages and rounds an isbetween amount', () => {
+      expect(getScheduledAmount({ num1: 100, num2: 201 })).toBe(151);
+    });
+
+    it('evaluates a constant formula', () => {
+      // =100 dollars -> 10000 cents
+      expect(getScheduledAmount('=100', false, { date: '2024-03-15' })).toBe(
+        10000,
+      );
+    });
+
+    it('evaluates a date-dependent formula with the supplied date', () => {
+      // DAY(date) on 2024-03-15 -> 15; 15 * 100 = 1500 dollars -> 150000 cents
+      const day15 = getScheduledAmount('=DAY(date) * 100', false, {
+        date: '2024-03-15',
+      });
+      const day28 = getScheduledAmount('=DAY(date) * 100', false, {
+        date: '2024-03-28',
+      });
+      expect(day15).toBe(150000);
+      expect(day28).toBe(280000);
+      expect(day28).not.toBe(day15);
+    });
+
+    it('returns 0 when the formula is malformed', () => {
+      expect(
+        getScheduledAmount('=NOT_A_FUNCTION()', false, { date: '2024-03-15' }),
+      ).toBe(0);
+    });
+
+    it('returns 0 when the formula does not start with =', () => {
+      expect(getScheduledAmount('100', false, { date: '2024-03-15' })).toBe(0);
     });
   });
 });
