@@ -1489,8 +1489,8 @@ function NoteInsertHashButton({
       onPointerDown={e => e.preventDefault()}
       onClick={() => {
         if (!noteRef.current) return;
-        const start = noteRef.current.selectionStart;
-        const end = noteRef.current.selectionEnd;
+        const start = noteRef.current.selectionStart ?? 0;
+        const end = noteRef.current.selectionEnd ?? 0;
 
         const before = inputValue.substring(0, start);
         const after = inputValue.substring(end);
