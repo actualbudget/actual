@@ -7,7 +7,7 @@ import {
   addItems,
   setContextMenuPosition,
 } from '#contextmenu/contextMenuSlice';
-import type { ContextMenuItem } from '#contextmenu/types.d';
+import type { ContextMenuItem } from '#contextmenu/types';
 import { useRefEventListener } from '#hooks/useRefEventListener';
 import { useDispatch } from '#redux';
 

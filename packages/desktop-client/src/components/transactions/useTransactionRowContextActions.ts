@@ -10,7 +10,7 @@ import {
 import { isPreviewId } from '@actual-app/core/shared/transactions';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import type { ContextMenuItem } from '#contextmenu/types.d';
+import type { ContextMenuItem } from '#contextmenu/types';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';

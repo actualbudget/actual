@@ -7,7 +7,7 @@ import {
   reducer,
   setContextMenuPosition,
 } from './contextMenuSlice';
-import type { ContextMenuItem } from './types.d';
+import type { ContextMenuItem } from './types';
 
 describe('contextMenuSlice', () => {
   it('should return initial state', () => {

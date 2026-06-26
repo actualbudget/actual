@@ -29,7 +29,7 @@ describe('useContextMenu', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockDispatch = vi.fn();
-    (useDispatch as Mock).mockReturnValue(mockDispatch);
+    (useDispatch as unknown as Mock).mockReturnValue(mockDispatch);
 
     mockTriggerRef = {
       current: {
