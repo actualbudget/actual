@@ -1504,7 +1504,11 @@ function NoteInsertHashButton({
         const space = start === 0 || before.match(/\s$/) ? '' : ' ';
 
         setInputValue(before + space + '#' + after);
+        noteRef.current.focus();
         setCursorPosition(start + 1 + space.length);
+        // so Safari requires that I do noteRef.current.focus() synchronously,
+        // but Chrome doesn't work unless I do it after. We do both this way.
+        // If the element is already focused, these are not called
         setTimeout(() => noteRef.current.focus(), 1);
       }}
     >
@@ -1537,6 +1541,7 @@ function NoteTagAutocomplete({
     currentWordNoHash &&
     !filteredTags.some(tag => tag.tag === currentWordNoHash);
 
+  console.log(currentWord, cursorPosition, startIdx, endIdx, note);
   const getTagCSS = useTagCSS({ ellipsis: true });
 
   function handleSelect(tag: string) {
