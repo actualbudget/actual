@@ -1481,6 +1481,7 @@ function NoteInsertHashButton({
   noteRef: RefObject<HTMLInputElement | null>;
 }) {
   const [inputValue, setInputValue] = useInputRefValue(noteRef);
+  const [_, setCursorPosition] = useCursorPosition(noteRef);
 
   return (
     <Button
@@ -1496,10 +1497,9 @@ function NoteInsertHashButton({
         const after = inputValue.substring(end);
 
         const space = start === 0 || before.match(/\s$/) ? '' : ' ';
-        const newCursorSpot = start + 1 + space.length;
 
         setInputValue(before + space + '#' + after);
-        noteRef.current.setSelectionRange(newCursorSpot, newCursorSpot);
+        setCursorPosition(start + 1 + space.length);
       }}
     >
       <SvgHash width={17} height={17} />
