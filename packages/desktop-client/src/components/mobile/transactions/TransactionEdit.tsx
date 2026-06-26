@@ -1490,14 +1490,20 @@ function NoteInsertHashButton({
       onPointerDown={e => e.preventDefault()}
       onClick={() => {
         if (!noteRef.current) return;
-        const start = noteRef.current.selectionStart ?? 0;
-        const end = noteRef.current.selectionEnd ?? 0;
+        const isFocused = document.activeElement === noteRef.current;
+        const start = isFocused
+          ? (noteRef.current.selectionStart ?? 0)
+          : inputValue.length;
+        const end = isFocused
+          ? (noteRef.current.selectionEnd ?? 0)
+          : inputValue.length;
 
         const before = inputValue.substring(0, start);
         const after = inputValue.substring(end);
 
         const space = start === 0 || before.match(/\s$/) ? '' : ' ';
 
+        noteRef.current.focus();
         setInputValue(before + space + '#' + after);
         setCursorPosition(start + 1 + space.length);
       }}
