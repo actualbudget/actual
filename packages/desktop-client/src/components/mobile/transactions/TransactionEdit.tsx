@@ -1478,7 +1478,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 function NoteInsertHashButton({
   noteRef,
 }: {
-  noteRef: RefObject<HTMLInputElement>;
+  noteRef: RefObject<HTMLInputElement | null>;
 }) {
   const [inputValue, setInputValue] = useInputRefValue(noteRef);
 
@@ -1488,6 +1488,7 @@ function NoteInsertHashButton({
       style={{ color: 'inherit', padding: 1 }}
       onPointerDown={e => e.preventDefault()}
       onClick={() => {
+        if (!noteRef.current) return;
         const start = noteRef.current.selectionStart;
         const end = noteRef.current.selectionEnd;
 
