@@ -1509,7 +1509,7 @@ function NoteInsertHashButton({
         // so Safari requires that I do noteRef.current.focus() synchronously,
         // but Chrome doesn't work unless I do it after. We do both this way.
         // If the element is already focused, these are not called
-        setTimeout(() => noteRef.current.focus(), 1);
+        setTimeout(() => noteRef.current?.focus(), 1);
       }}
     >
       <SvgHash width={17} height={17} />
