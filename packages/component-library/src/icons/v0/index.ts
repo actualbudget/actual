@@ -5,5 +5,6 @@ export { SvgLeftArrow2 } from './LeftArrow2';
 export { SvgMath } from './Math';
 export { SvgRightArrow2 } from './RightArrow2';
 export { SvgSubtract } from './Subtract';
+export { SvgHash } from './Hash';
 export { SvgMerge } from './Merge';
 export { SvgSplit } from './Split';

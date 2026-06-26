@@ -12,7 +12,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
-import { SvgSplit } from '@actual-app/components/icons/v0';
+import { SvgHash, SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgAdd,
   SvgCalendar,
@@ -521,7 +521,27 @@ const ChildTransactionEdit = forwardRef<
           <FieldLabel title={t('Notes')} />
           <InputField
             ref={noteRef}
-            icon={<SvgNotesPaper width={17} height={17} />}
+            iconStart={<SvgNotesPaper width={17} height={17} />}
+            iconEnd={
+              <Button
+                variant="bare"
+                style={{ color: 'inherit', padding: 1 }}
+                onPointerDown={e => e.preventDefault()}
+                onClick={() => {
+                  const val = noteRef.current.value;
+                  const cursor = noteRef.current.selectionEnd;
+                  const beforeVal = val.substring(
+                    0,
+                    noteRef.current.selectionStart,
+                  );
+                  const afterVal = val.substring(cursor);
+                  noteRef.current.value = beforeVal + '#' + afterVal;
+                  noteRef.current.setSelectionRange(cursor + 1, cursor + 1);
+                }}
+              >
+                <SvgHash width={17} height={17} />
+              </Button>
+            }
             placeholder={t('Add a note (optional)')}
             disabled={
               !!editingField &&
@@ -1372,7 +1392,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               <FieldLabel title={t('Date')} />
               <InputField
                 type="date"
-                icon={<SvgCalendar width={17} height={17} />}
+                iconStart={<SvgCalendar width={17} height={17} />}
                 disabled={
                   !!editingField &&
                   editingField !== getFieldName(transaction.id, 'date')
@@ -1418,7 +1438,27 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             <FieldLabel title={t('Notes')} />
             <InputField
               ref={noteRef}
-              icon={<SvgNotesPaper width={17} height={17} />}
+              iconStart={<SvgNotesPaper width={17} height={17} />}
+              iconEnd={
+                <Button
+                  variant="bare"
+                  style={{ color: 'inherit', padding: 1 }}
+                  onPointerDown={e => e.preventDefault()}
+                  onClick={() => {
+                    const val = noteRef.current.value;
+                    const cursor = noteRef.current.selectionEnd;
+                    const beforeVal = val.substring(
+                      0,
+                      noteRef.current.selectionStart,
+                    );
+                    const afterVal = val.substring(cursor);
+                    noteRef.current.value = beforeVal + '#' + afterVal;
+                    noteRef.current.setSelectionRange(cursor + 1, cursor + 1);
+                  }}
+                >
+                  <SvgHash width={17} height={17} />
+                </Button>
+              }
               placeholder={t('Add a note (optional)')}
               disabled={
                 !!editingField &&

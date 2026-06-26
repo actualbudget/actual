@@ -61,6 +61,7 @@ const iconFieldWrapperClassName = css({
   flexDirection: 'row',
   alignItems: 'center',
   paddingLeft: 8,
+  paddingRight: 8,
   gap: 8,
   '&:focus-within': {
     borderColor: theme.formInputBorderSelected,
@@ -68,19 +69,21 @@ const iconFieldWrapperClassName = css({
 });
 
 type InputFieldProps = ComponentPropsWithRef<typeof Input> & {
-  icon?: ReactNode;
+  iconStart?: ReactNode;
+  iconEnd?: ReactNode;
 };
 
 export function InputField({
   disabled,
   style,
   onUpdate,
-  icon,
+  iconStart,
+  iconEnd,
   className,
   ref,
   ...props
 }: InputFieldProps) {
-  if (icon) {
+  if (iconStart || iconEnd) {
     return (
       <View
         className={iconFieldWrapperClassName}
@@ -90,18 +93,20 @@ export function InputField({
             : theme.tableBackground,
         }}
       >
-        <View
-          style={{
-            color: theme.pageTextSubdued,
-            flexShrink: 0,
-            alignSelf: 'stretch',
-            alignItems: 'center',
-            justifyContent: 'center',
-            lineHeight: 0,
-          }}
-        >
-          {icon}
-        </View>
+        {iconStart && (
+          <View
+            style={{
+              color: theme.pageTextSubdued,
+              flexShrink: 0,
+              alignSelf: 'stretch',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: 0,
+            }}
+          >
+            {iconStart}
+          </View>
+        )}
         <Input
           ref={ref}
           autoCorrect="false"
@@ -130,6 +135,20 @@ export function InputField({
             )
           }
         />
+        {iconEnd && (
+          <View
+            style={{
+              color: theme.pageTextSubdued,
+              flexShrink: 0,
+              alignSelf: 'stretch',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: 0,
+            }}
+          >
+            {iconEnd}
+          </View>
+        )}
       </View>
     );
   }
