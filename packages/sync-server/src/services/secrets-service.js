@@ -109,6 +109,6 @@ export const secretsService = {
    * @returns {boolean} True if a secret with the given name exists, false otherwise.
    */
   exists: (name, fileId = null) => {
-    return Boolean(secretsService.get(name, fileId));
+    return secretsService.get(name, fileId) !== null;
   },
 };

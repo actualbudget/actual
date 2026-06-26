@@ -59,6 +59,13 @@ describe('secretsService', () => {
     expect(secretsService.exists(testSecretName)).toBe(true);
   });
 
+  it('should treat empty string secrets as existing', () => {
+    secretsService.set(testSecretName, '', testFileId);
+
+    expect(secretsService.get(testSecretName, testFileId)).toBe('');
+    expect(secretsService.exists(testSecretName, testFileId)).toBe(true);
+  });
+
   describe('two-tier credentials', () => {
     const fileAId = 'test-file-a';
     const fileBId = 'test-file-b';
