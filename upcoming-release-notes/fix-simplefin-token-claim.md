@@ -3,4 +3,4 @@ category: Bugfixes
 authors: [matt-fidd]
 ---
 
-Fix SimpleFIN token claiming failing with "Invalid access key" in some cases
+Fix some SimpleFIN setup tokens failing to claim and link accounts
