@@ -13,7 +13,7 @@ import { describeSchedule } from '#util/schedule';
 import { Value } from './Value';
 
 type ScheduleValueProps = {
-  value: ScheduleEntity;
+  value: ScheduleEntity['id'];
 };
 
 export function ScheduleValue({ value }: ScheduleValueProps) {
@@ -30,16 +30,10 @@ export function ScheduleValue({ value }: ScheduleValueProps) {
     );
   }
 
-  return (
-    <Value
-      value={value}
-      field="rule"
-      data={schedules}
-      // TODO: this manual type coercion does not make much sense -
-      // should we instead do `schedule._payee.id`?
-      describe={schedule =>
-        describeSchedule(schedule, byId[schedule._payee as unknown as string])
-      }
-    />
-  );
+  const schedule = schedules.find(item => item.id === value);
+  const display = schedule
+    ? describeSchedule(schedule, byId[schedule._payee])
+    : t('(deleted)');
+
+  return <Value value={display} field="notes" valueIsRaw />;
 }

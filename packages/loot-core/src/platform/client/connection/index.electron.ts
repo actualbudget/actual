@@ -27,7 +27,7 @@ function connectSocket(onOpen) {
         }
       } else if (msg.type === 'reply') {
         let { result } = msg;
-        const { id, mutated, undoTag } = msg;
+        const { id, mutated, undoTag, error } = msg;
 
         // Check if the result is a serialized buffer, and if so
         // convert it to a Uint8Array. This is only needed when working
@@ -45,7 +45,12 @@ function connectSocket(onOpen) {
             undo.gc(undoTag);
           }
 
-          handler.resolve(result);
+          // api/* failures arrive as a reply carrying `error`.
+          if (error) {
+            handler.reject(error);
+          } else {
+            handler.resolve(result);
+          }
         }
       } else if (msg.type === 'push') {
         const { name, args } = msg;

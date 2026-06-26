@@ -16,7 +16,7 @@ describe('Change', () => {
     );
     const el = screen.getByText('+123.45');
     expect(el).toBeInTheDocument();
-    expect(el).toHaveStyle(`color: ${theme.reportsNumberPositive}`);
+    expect(getComputedStyle(el).color).toBe(theme.reportsNumberPositive);
   });
 
   it('renders zero with a plus sign and neutral color', () => {
@@ -27,7 +27,7 @@ describe('Change', () => {
     );
     const el = screen.getByText('+0.00');
     expect(el).toBeInTheDocument();
-    expect(el).toHaveStyle(`color: ${theme.reportsNumberNeutral}`);
+    expect(getComputedStyle(el).color).toBe(theme.reportsNumberNeutral);
   });
 
   it('renders a negative amount with a minus sign and negative color', () => {
@@ -38,7 +38,7 @@ describe('Change', () => {
     );
     const el = screen.getByText('-98.76');
     expect(el).toBeInTheDocument();
-    expect(el).toHaveStyle(`color: ${theme.reportsNumberNegative}`);
+    expect(getComputedStyle(el).color).toBe(theme.reportsNumberNegative);
   });
 
   it('merges custom style prop', () => {
@@ -48,7 +48,8 @@ describe('Change', () => {
       </TestProviders>,
     );
     const el = screen.getByText('+10.00');
-    expect(el).toHaveStyle('font-weight: bold');
-    expect(el).toHaveStyle(`color: ${theme.reportsNumberPositive}`);
+    const computed = getComputedStyle(el);
+    expect(computed.color).toBe(theme.reportsNumberPositive);
+    expect(computed.fontWeight).toBe('bold');
   });
 });

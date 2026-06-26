@@ -24,9 +24,9 @@ import type {
   SaveDialogOptions,
   UtilityProcess,
 } from 'electron';
-import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
+import { retry as promiseRetry } from './retry';
 import {
   get as getWindowState,
   listen as listenToWindowState,

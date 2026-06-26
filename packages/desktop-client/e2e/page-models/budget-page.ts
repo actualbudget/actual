@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
@@ -105,33 +106,26 @@ export class BudgetPage {
   async #waitForNewMonthToLoad({
     currentMonth,
     errorMessage,
-    maxAttempts = 3,
   }: {
     currentMonth: string;
     errorMessage: string;
-    maxAttempts: number;
   }) {
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const newMonth = await this.getSelectedMonth();
-      if (newMonth !== currentMonth) {
-        return newMonth;
-      }
-      await this.page.waitForTimeout(500);
-    }
+    await expect(this.selectedMonthButton, errorMessage).not.toHaveAttribute(
+      'data-month',
+      currentMonth,
+    );
 
-    throw new Error(errorMessage);
+    return this.getSelectedMonth();
   }
 
-  async goToNextMonth({ maxAttempts = 3 }: { maxAttempts?: number } = {}) {
+  async goToNextMonth() {
     const currentMonth = await this.getSelectedMonth();
 
     await this.nextMonthButton.click();
 
     return await this.#waitForNewMonthToLoad({
       currentMonth,
-      maxAttempts,
-      errorMessage:
-        'Failed to navigate to the next month after maximum attempts.',
+      errorMessage: 'Failed to navigate to the next month.',
     });
   }
 

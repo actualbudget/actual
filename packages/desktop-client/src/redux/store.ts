@@ -94,7 +94,6 @@ export function configureAppStore({
 export type AppStore = ReturnType<typeof configureAppStore>;
 export type RootState = ReturnType<AppStore['getState']>;
 export type AppDispatch = AppStore['dispatch'];
-export type GetRootState = AppStore['getState'];
 export type ExtraArguments = {
   queryClient: QueryClient;
 };

@@ -7,7 +7,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { LazyLoadFailedError } from '@actual-app/core/shared/errors';
-import promiseRetry from 'promise-retry';
+import { retry as promiseRetry } from '@actual-app/core/shared/retry';
 
 type ProplessComponent = ComponentType<Record<string, never>>;
 type LoadComponentProps<K extends string> = {

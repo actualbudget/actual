@@ -43,11 +43,10 @@ test.describe('Budget', () => {
     const currentFundsB = await budgetPage.getBalanceForRow(2);
 
     await budgetPage.transferAllBalance(1, 2);
-    await page.waitForTimeout(1000);
 
-    expect(await budgetPage.getBalanceForRow(2)).toEqual(
-      currentFundsA + currentFundsB,
-    );
+    await expect
+      .poll(() => budgetPage.getBalanceForRow(2))
+      .toEqual(currentFundsA + currentFundsB);
     await expect(page).toMatchThemeScreenshots();
   });
 

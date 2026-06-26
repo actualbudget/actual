@@ -76,7 +76,11 @@ function isCustomReportWidget(
 }
 
 function getWidgetMinHeight(widget: DashboardWidgetEntity) {
-  if (isCustomReportWidget(widget) || widget.type === 'markdown-card') {
+  if (
+    isCustomReportWidget(widget) ||
+    widget.type === 'markdown-card' ||
+    widget.type === 'formula-card'
+  ) {
     return 1;
   }
 
@@ -88,6 +92,10 @@ function getWidgetMinHeight(widget: DashboardWidgetEntity) {
 }
 
 function getWidgetMinWidth(widget: DashboardWidgetEntity) {
+  if (widget.type === 'formula-card') {
+    return 1;
+  }
+
   if (isCustomReportWidget(widget) || widget.type === 'markdown-card') {
     return 2;
   }
