@@ -1,6 +1,11 @@
 import * as db from '#server/db';
 // @ts-strict-ignore
 import type { QueryState } from '#shared/query';
+import type {
+  AqlErrorDetail as AqlError,
+  AqlQueryColumn,
+  AqlQueryResult,
+} from '#types/aql';
 
 import { compileQuery, defaultConstructQuery } from './compiler';
 import type {
@@ -10,6 +15,8 @@ import type {
   SqlPieces,
 } from './compiler';
 import { convertInputType, convertOutputType } from './schema-helpers';
+
+export type { AqlQueryColumn, AqlError, AqlQueryResult };
 
 // TODO (compiler):
 // * Properly safeguard all inputs against SQL injection
@@ -115,14 +122,50 @@ export async function compileAndRunAqlQuery(
   schemaConfig: SchemaConfig,
   queryState: QueryState,
   options: RunCompiledAqlQueryOptions,
-) {
-  const { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
-  // oxlint-disable-next-line typescript/no-explicit-any
-  const data: any = await runCompiledAqlQuery(
-    queryState,
-    sqlPieces,
-    state,
-    options,
-  );
-  return { data, dependencies: state.dependencies };
+): Promise<AqlQueryResult> {
+  let sqlPieces;
+  let state;
+  try {
+    const result = compileQuery(queryState, schema, schemaConfig);
+    sqlPieces = result.sqlPieces;
+    state = result.state;
+  } catch (e) {
+    return {
+      data: [],
+      dependencies: [],
+      error: {
+        type: 'compile-error',
+        message: e instanceof Error ? e.message : String(e),
+      },
+    };
+  }
+
+  const columns: AqlQueryColumn[] = Array.from(
+    state.outputTypes.entries() as IterableIterator<
+      [string, string | number | null]
+    >,
+  ).map(([name, type]) => ({
+    name,
+    type: String(type),
+  }));
+
+  try {
+    const data = await runCompiledAqlQuery(
+      queryState,
+      sqlPieces,
+      state,
+      options,
+    );
+    return { data, dependencies: state.dependencies, columns };
+  } catch (e) {
+    return {
+      data: [],
+      dependencies: [],
+      columns,
+      error: {
+        type: 'runtime-error',
+        message: e instanceof Error ? e.message : String(e),
+      },
+    };
+  }
 }

@@ -136,7 +136,7 @@ export async function generateForecast({
         schedule => schedule._account !== FORECAST_UNASSIGNED_ACCOUNT_ID,
       );
 
-  const ruleAccountsById = new Map(
+  const ruleAccountsById = new Map<string, DbAccountForRules>(
     ruleAccounts.map(account => [account.id, account]),
   );
   if (includeUnassigned) {

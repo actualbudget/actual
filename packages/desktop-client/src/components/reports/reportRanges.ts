@@ -252,6 +252,10 @@ export function calculateTimeRange(
       'priorYearToDate',
     ] as const;
   }
+  if (mode === 'lastMonth') {
+    const prevMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
+    return [prevMonth, prevMonth, 'lastMonth'] as const;
+  }
 
   return [start, end, 'static'] as const;
 }

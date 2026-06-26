@@ -19,6 +19,7 @@ import { useSyncedPref } from './useSyncedPref';
 export type FormatType =
   | 'string'
   | 'number'
+  | 'number-no-decimals'
   | 'percentage'
   | 'financial'
   | 'financial-with-sign'
@@ -55,6 +56,7 @@ function format(
       return { formattedString: val };
     }
     case 'number':
+    case 'number-no-decimals':
       if (typeof value !== 'number') {
         throw new Error(
           'Value is not a number (' + typeof value + '): ' + value,
@@ -172,7 +174,9 @@ export function useFormat(): UseFormatResult {
 
       let displayDecimalPlaces: number | undefined;
 
-      if (isFinancialType) {
+      if (type === 'number-no-decimals') {
+        displayDecimalPlaces = 0;
+      } else if (isFinancialType) {
         if (type === 'financial-no-decimals' || hideFractionPref === 'true') {
           displayDecimalPlaces = 0;
         } else {

@@ -1,3 +1,5 @@
+import type { QueryState } from '../../shared/query';
+import type { ChartSpec } from '../chart-spec';
 import type { ForecastSource } from './forecast';
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
@@ -122,6 +124,28 @@ export type MarkdownWidget = AbstractWidget<
   { content: string; text_align?: 'left' | 'right' | 'center' }
 >;
 
+export type QueryEntry = {
+  source: string;
+  query?: QueryState;
+  label?: string;
+  timeFrame?: TimeFrame;
+};
+
+export type QueryReportWidget = AbstractWidget<
+  'query-report',
+  {
+    name?: string;
+    queries: QueryEntry[];
+    mergeKey?: string;
+    defaultTimeFrame?: TimeFrame;
+    chartSpec: ChartSpec;
+    label?: string;
+    colorFormula?: string;
+    showTrend?: boolean;
+    compact?: boolean;
+  } | null
+>;
+
 export type AgeOfMoneyGranularity = 'daily' | 'weekly' | 'monthly';
 
 export type AgeOfMoneyWidget = AbstractWidget<
@@ -145,6 +169,7 @@ type SpecializedWidget =
   | SummaryWidget
   | CalendarWidget
   | FormulaWidget
+  | QueryReportWidget
   | SankeyWidget
   | AgeOfMoneyWidget
   | BalanceForecastWidget;

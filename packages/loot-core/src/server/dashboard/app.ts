@@ -42,6 +42,7 @@ export function isWidgetType(
     'calendar-card',
     'formula-card',
     'custom-report',
+    'query-report',
     'sankey-card',
     'balance-forecast-card',
     'age-of-money-card',

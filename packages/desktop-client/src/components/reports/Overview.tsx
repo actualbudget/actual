@@ -22,6 +22,27 @@ import type {
   MarkdownWidget,
 } from '@actual-app/core/types/models';
 
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
+import { DashboardHeader } from './DashboardHeader';
+import './overview.scss';
+import { DashboardSelector } from './DashboardSelector';
+import { LoadingIndicator } from './LoadingIndicator';
+import { AgeOfMoneyCard } from './reports/AgeOfMoneyCard';
+import { BalanceForecastCard } from './reports/BalanceForecastCard';
+import { BudgetAnalysisCard } from './reports/BudgetAnalysisCard';
+import { CalendarCard } from './reports/CalendarCard';
+import { CashFlowCard } from './reports/CashFlowCard';
+import { CrossoverCard } from './reports/CrossoverCard';
+import { CustomReportListCards } from './reports/CustomReportListCards';
+import { FormulaCard } from './reports/FormulaCard';
+import { MarkdownCard } from './reports/MarkdownCard';
+import { MissingReportCard } from './reports/MissingReportCard';
+import { NetWorthCard } from './reports/NetWorthCard';
+import { QueryReportCard } from './reports/QueryReportCard';
+import { SankeyCard } from './reports/SankeyCard';
+import { SpendingCard } from './reports/SpendingCard';
+import { SummaryCard } from './reports/SummaryCard';
+
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
@@ -119,6 +140,7 @@ export function Overview({ dashboard }: OverviewProps) {
   const balanceForecastReportEnabled = useFeatureFlag('balanceForecastReport');
 
   const formulaMode = useFeatureFlag('formulaMode');
+  const queryReportEnabled = useFeatureFlag('queryReport');
 
   const [isImporting, setIsImporting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -654,6 +676,14 @@ export function Overview({ dashboard }: OverviewProps) {
                                   },
                                 ]
                               : []),
+                            ...(queryReportEnabled
+                              ? [
+                                  {
+                                    name: 'query-report' as const,
+                                    text: t('Query report'),
+                                  },
+                                ]
+                              : []),
                             ...(sankeyFeatureFlag
                               ? [
                                   {
@@ -974,6 +1004,20 @@ export function Overview({ dashboard }: OverviewProps) {
                         ) : widget.type === 'sankey-card' &&
                           sankeyFeatureFlag ? (
                           <SankeyCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : widget.type === 'query-report' &&
+                          queryReportEnabled ? (
+                          <QueryReportCard
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}

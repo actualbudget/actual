@@ -14,6 +14,7 @@ import { Crossover } from './reports/Crossover';
 import { CustomReport } from './reports/CustomReport';
 import { Formula } from './reports/Formula';
 import { NetWorth } from './reports/NetWorth';
+import { QueryReport } from './reports/QueryReport';
 import { Sankey } from './reports/Sankey';
 import { Spending } from './reports/Spending';
 import { Summary } from './reports/Summary';
@@ -35,6 +36,7 @@ export function ReportRouter() {
   const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
   const balanceForecastReportEnabled = useFeatureFlag('balanceForecastReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
+  const queryReportEnabled = useFeatureFlag('queryReport');
   const sankeyReportEnabled = useFeatureFlag('sankeyReport');
 
   return (
@@ -247,6 +249,12 @@ export function ReportRouter() {
               </ReportBoundary>
             }
           />
+        </>
+      )}
+      {queryReportEnabled && (
+        <>
+          <Route path="/query" element={<QueryReport />} />
+          <Route path="/query/:id" element={<QueryReport />} />
         </>
       )}
     </Routes>
