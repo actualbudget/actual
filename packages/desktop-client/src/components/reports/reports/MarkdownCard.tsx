@@ -54,6 +54,7 @@ export function MarkdownCard({
 
   useContextMenu({
     triggerRef: contextMenuTriggerRef,
+    enabled: !isVisibleTextArea,
     items: [
       {
         type: Menu.label,
