@@ -56,6 +56,7 @@ import {
   groupById,
   integerToAmount,
   integerToCurrency,
+  setIn,
   titleFirst,
 } from '@actual-app/core/shared/util';
 import type {
@@ -522,26 +523,7 @@ const ChildTransactionEdit = forwardRef<
           <InputField
             ref={noteRef}
             iconStart={<SvgNotesPaper width={17} height={17} />}
-            iconEnd={
-              <Button
-                variant="bare"
-                style={{ color: 'inherit', padding: 1 }}
-                onPointerDown={e => e.preventDefault()}
-                onClick={() => {
-                  const val = noteRef.current.value;
-                  const cursor = noteRef.current.selectionEnd;
-                  const beforeVal = val.substring(
-                    0,
-                    noteRef.current.selectionStart,
-                  );
-                  const afterVal = val.substring(cursor);
-                  noteRef.current.value = beforeVal + '#' + afterVal;
-                  noteRef.current.setSelectionRange(cursor + 1, cursor + 1);
-                }}
-              >
-                <SvgHash width={17} height={17} />
-              </Button>
-            }
+            iconEnd={<NoteInsertHashButton noteRef={noteRef} />}
             placeholder={t('Add a note (optional)')}
             disabled={
               !!editingField &&
@@ -1439,26 +1421,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             <InputField
               ref={noteRef}
               iconStart={<SvgNotesPaper width={17} height={17} />}
-              iconEnd={
-                <Button
-                  variant="bare"
-                  style={{ color: 'inherit', padding: 1 }}
-                  onPointerDown={e => e.preventDefault()}
-                  onClick={() => {
-                    const val = noteRef.current.value;
-                    const cursor = noteRef.current.selectionEnd;
-                    const beforeVal = val.substring(
-                      0,
-                      noteRef.current.selectionStart,
-                    );
-                    const afterVal = val.substring(cursor);
-                    noteRef.current.value = beforeVal + '#' + afterVal;
-                    noteRef.current.setSelectionRange(cursor + 1, cursor + 1);
-                  }}
-                >
-                  <SvgHash width={17} height={17} />
-                </Button>
-              }
+              iconEnd={<NoteInsertHashButton noteRef={noteRef} />}
               placeholder={t('Add a note (optional)')}
               disabled={
                 !!editingField &&
@@ -1512,6 +1475,35 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     );
   },
 );
+
+function NoteInsertHashButton({
+  noteRef,
+}: {
+  noteRef: RefObject<HTMLInputElement>;
+}) {
+  const [inputValue, setInputValue] = useInputRefValue(noteRef);
+
+  return (
+    <Button
+      variant="bare"
+      style={{ color: 'inherit', padding: 1 }}
+      onPointerDown={e => e.preventDefault()}
+      onClick={() => {
+        const start = noteRef.current.selectionStart;
+        const end = noteRef.current.selectionEnd;
+
+        const before = inputValue.substring(0, start);
+        const after = inputValue.substring(end);
+
+        setInputValue(before + '#' + after);
+        noteRef.current.value = before + '#' + after;
+        noteRef.current.setSelectionRange(start + 1, start + 1);
+      }}
+    >
+      <SvgHash width={17} height={17} />
+    </Button>
+  );
+}
 
 function NoteTagAutocomplete({
   inputRef,
