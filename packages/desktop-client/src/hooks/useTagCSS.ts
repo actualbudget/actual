@@ -31,7 +31,7 @@ export function useTagCSS(opts?: { ellipsis?: boolean }) {
               textOverflow: 'ellipsis',
               maxWidth: '100%',
               display: 'inline-block',
-              textWrap: 'nowrap',
+              whiteSpace: 'nowrap',
             }
           : { display: 'inline-flex' }),
         opacity: tagObj?.hidden ? 0.5 : undefined,
