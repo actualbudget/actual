@@ -26,25 +26,62 @@ type MockPayeeEntity = Partial<PayeeEntity> & { bill?: boolean };
 
 const DEMO_TAGS = [
   { tag: 'groceries', color: '#388E3C', description: 'Kroger & Publix trips' },
-  { tag: 'dining-out', color: '#FFA000', description: 'Restaurants and takeout' },
-  { tag: 'online-shopping', color: '#1976D2', description: 'Online store purchases' },
-  { tag: 'entertainment', color: '#7B1FA2', description: 'Movies, activities, fun' },
-  { tag: 'home-improvement', color: '#5D4037', description: 'Home Depot, repairs, DIY' },
-  { tag: 'utilities', color: '#D32F2F', description: 'Power, water, internet, phone' },
+  {
+    tag: 'dining-out',
+    color: '#FFA000',
+    description: 'Restaurants and takeout',
+  },
+  {
+    tag: 'online-shopping',
+    color: '#1976D2',
+    description: 'Online store purchases',
+  },
+  {
+    tag: 'entertainment',
+    color: '#7B1FA2',
+    description: 'Movies, activities, fun',
+  },
+  {
+    tag: 'home-improvement',
+    color: '#5D4037',
+    description: 'Home Depot, repairs, DIY',
+  },
+  {
+    tag: 'utilities',
+    color: '#D32F2F',
+    description: 'Power, water, internet, phone',
+  },
   { tag: 'subscription', color: '#455A64', description: 'Recurring services' },
   { tag: 'medical', color: '#C2185B', description: 'Healthcare expenses' },
   { tag: 'gift', color: '#C39DDF', description: 'Gifts given or received' },
   { tag: 'clothing', color: '#E64A19', description: 'Apparel purchases' },
-  { tag: 'retirement', color: '#00796B', description: '401k and IRA contributions' },
+  {
+    tag: 'retirement',
+    color: '#00796B',
+    description: '401k and IRA contributions',
+  },
   { tag: 'mortgage', color: '#616161', description: 'Housing payments' },
   { tag: 'emergency', color: '#F57C00', description: 'Unexpected expenses' },
   { tag: 'income', color: '#689F38', description: 'Paychecks and deposits' },
   { tag: 'splurge', color: '#512DA8', description: 'Treat yourself purchases' },
-  { tag: 'reimbursable', color: '#0097A7', description: 'Expenses to be paid back' },
-  { tag: 'tax-deductible', color: '#AFB42B', description: 'Potentially deductible items' },
+  {
+    tag: 'reimbursable',
+    color: '#0097A7',
+    description: 'Expenses to be paid back',
+  },
+  {
+    tag: 'tax-deductible',
+    color: '#AFB42B',
+    description: 'Potentially deductible items',
+  },
 ];
 
-function getTagNotes(payeeName: string, categoryName: string, amount: number, accountName?: string): string {
+function getTagNotes(
+  payeeName: string,
+  categoryName: string,
+  amount: number,
+  accountName?: string,
+): string {
   const tags: string[] = [];
 
   if (payeeName === 'Kroger' || payeeName === 'Publix') {
@@ -72,7 +109,10 @@ function getTagNotes(payeeName: string, categoryName: string, amount: number, ac
     }
   }
 
-  if ((categoryName === 'Entertainment' || categoryName === 'Clothing') && Math.abs(amount) > 5000) {
+  if (
+    (categoryName === 'Entertainment' || categoryName === 'Clothing') &&
+    Math.abs(amount) > 5000
+  ) {
     tags.push('#splurge');
   }
 
@@ -89,7 +129,10 @@ function getChildTagNotes(categoryName: string, amount: number): string {
   else if (categoryName === 'Medical') tags.push('#medical');
   else if (categoryName === 'Gift') tags.push('#gift');
 
-  if ((categoryName === 'Entertainment' || categoryName === 'Clothing') && Math.abs(amount) > 5000) {
+  if (
+    (categoryName === 'Entertainment' || categoryName === 'Clothing') &&
+    Math.abs(amount) > 5000
+  ) {
     tags.push('#splurge');
   }
 
@@ -230,9 +273,10 @@ async function fillPrimaryChecking(
           account: account.id,
           amount: a,
           category: childCategories[0].id,
-          notes: payee === incomePayee
-            ? '#income'
-            : getChildTagNotes(childCategories[0].name, a),
+          notes:
+            payee === incomePayee
+              ? '#income'
+              : getChildTagNotes(childCategories[0].name, a),
         },
         {
           id: uuidv4(),
@@ -240,9 +284,10 @@ async function fillPrimaryChecking(
           account: account.id,
           amount: a,
           category: childCategories[1].id,
-          notes: payee === incomePayee
-            ? '#income'
-            : getChildTagNotes(childCategories[1].name, a),
+          notes:
+            payee === incomePayee
+              ? '#income'
+              : getChildTagNotes(childCategories[1].name, a),
         },
         {
           id: uuidv4(),
@@ -250,9 +295,13 @@ async function fillPrimaryChecking(
           account: account.id,
           amount: transaction.amount - a * 2,
           category: childCategories[2].id,
-          notes: payee === incomePayee
-            ? '#income'
-            : getChildTagNotes(childCategories[2].name, transaction.amount - a * 2),
+          notes:
+            payee === incomePayee
+              ? '#income'
+              : getChildTagNotes(
+                  childCategories[2].name,
+                  transaction.amount - a * 2,
+                ),
         },
       ];
     }
