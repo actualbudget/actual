@@ -85,7 +85,7 @@ export function ElectronServerConfig({
       await window.globalThis.Actual.startSyncServer();
       setStartingSyncServer(false);
       void initElectronSyncServerRunningStatus();
-      await setServerUrl(`http://localhost:${electronServerPort}`);
+      await setServerUrl(`http://127.0.0.1:${electronServerPort}`);
       void navigate('/');
     } catch (error) {
       setStartingSyncServer(false);
