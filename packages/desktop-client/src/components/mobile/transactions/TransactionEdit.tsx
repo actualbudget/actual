@@ -73,8 +73,8 @@ import {
   parseISO,
 } from 'date-fns';
 
-import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import {
   FieldLabel,
   InputField,

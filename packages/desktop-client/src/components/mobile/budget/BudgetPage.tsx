@@ -595,7 +595,10 @@ export function BudgetPage() {
                   height="20"
                 />
                 <SvgCheveronRight
-                  style={{ flexShrink: 0, color: theme.mobileHeaderTextSubdued }}
+                  style={{
+                    flexShrink: 0,
+                    color: theme.mobileHeaderTextSubdued,
+                  }}
                   width="14"
                   height="14"
                 />
