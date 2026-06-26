@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import _ from 'lodash';
 
 import type { ContextMenuItem } from './types';
 
@@ -29,11 +28,11 @@ const contextMenuSlice = createSlice({
         }
       }
 
-      state.items = _.orderBy(
-        state.items,
-        item => (typeof item === 'object' && item.order) || 0,
-        'asc',
-      );
+      state.items.sort((a, b) => {
+        const orderA = typeof a === 'object' ? (a.order ?? 0) : 0;
+        const orderB = typeof b === 'object' ? (b.order ?? 0) : 0;
+        return orderA - orderB;
+      });
       state.isOpen = !!state.items.length;
     },
     setContextMenuPosition(

@@ -4,7 +4,6 @@ import { Menu } from '@actual-app/components/menu';
 import type { MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
-import _ from 'lodash';
 
 import { closeContextMenu } from '#contextmenu/contextMenuSlice';
 import { useRefEventListener } from '#hooks/useRefEventListener';
