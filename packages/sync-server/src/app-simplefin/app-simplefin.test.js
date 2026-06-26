@@ -93,12 +93,40 @@ describe('app-simplefin', () => {
       expect(secretsService.get(SecretName.simplefin_accessKey)).toBeNull();
     });
 
+    it('treats a blank claim response as invalid and does not persist it', async () => {
+      secretsService.set(SecretName.simplefin_token, SETUP_TOKEN);
+      mockFetch({ claim: okResponse('   \n') });
+
+      const res = await post('/accounts');
+
+      expect(res.body.data.error_code).toBe('INVALID_ACCESS_TOKEN');
+      expect(secretsService.get(SecretName.simplefin_accessKey)).toBeNull();
+    });
+
     it('re-claims when a stale Forbidden access key is cached', async () => {
       secretsService.set(SecretName.simplefin_token, SETUP_TOKEN);
       secretsService.set(
         SecretName.simplefin_accessKey,
         'Forbidden (was it already claimed?)',
       );
+      mockFetch({
+        claim: okResponse(VALID_ACCESS_KEY),
+        accounts: okResponse(
+          JSON.stringify({ accounts: [{ id: 'account-1' }] }),
+        ),
+      });
+
+      const res = await post('/accounts');
+
+      expect(res.body.data.accounts).toEqual([{ id: 'account-1' }]);
+      expect(secretsService.get(SecretName.simplefin_accessKey)).toBe(
+        VALID_ACCESS_KEY,
+      );
+    });
+
+    it('re-claims when a stale empty access key is cached', async () => {
+      secretsService.set(SecretName.simplefin_token, SETUP_TOKEN);
+      secretsService.set(SecretName.simplefin_accessKey, '');
       mockFetch({
         claim: okResponse(VALID_ACCESS_KEY),
         accounts: okResponse(
