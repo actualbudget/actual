@@ -13,9 +13,13 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { FocusedViewDefinition } from '@actual-app/core/types/prefs';
 
+import type { OnDropCallback } from '#components/sort';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
+import { BudgetFilterButton } from './BudgetFilterButton';
 import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
 
@@ -25,14 +29,45 @@ type BudgetTotalsProps = {
   toggleHiddenCategories: () => void;
   expandAllCategories: () => void;
   collapseAllCategories: () => void;
+  views?: FocusedViewDefinition[];
+  viewOrder?: string[];
+  hiddenViews?: string[];
+  showHiddenViews?: boolean;
+  activeViewId?: string | null;
+  availableBuiltInViews?: {
+    underfunded: boolean;
+    overfunded: boolean;
+    overspent: boolean;
+  };
+  onSelectView?: (id: string | null) => void;
+  onCreateView?: () => void;
+  onEditView?: (id: string) => void;
+  onDeleteView?: (id: string) => void;
+  onReorderViewToTarget?: OnDropCallback;
+  onToggleViewVisibility?: (id: string) => void;
+  onToggleShowHiddenViews?: () => void;
 };
 
 export const BudgetTotals = memo(function BudgetTotals({
   toggleHiddenCategories,
   expandAllCategories,
   collapseAllCategories,
+  views = [],
+  viewOrder = [],
+  hiddenViews = [],
+  showHiddenViews = false,
+  activeViewId = null,
+  availableBuiltInViews,
+  onSelectView,
+  onCreateView,
+  onEditView,
+  onDeleteView,
+  onReorderViewToTarget,
+  onToggleViewVisibility,
+  onToggleShowHiddenViews,
 }: BudgetTotalsProps) {
   const { t } = useTranslation();
+  const isFocusedViewsEnabled = useFeatureFlag('focusedViews');
   const [categoryExpandedStatePref, setCategoryExpandedStatePref] =
     useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
@@ -128,8 +163,40 @@ export const BudgetTotals = memo(function BudgetTotals({
             />
           )}
         </Button>
-        <View style={{ flexGrow: '1' }}>
+        <View
+          style={{
+            flexGrow: '1',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+          }}
+        >
           <Trans>Category</Trans>
+          {isFocusedViewsEnabled &&
+            availableBuiltInViews &&
+            onSelectView &&
+            onCreateView &&
+            onEditView &&
+            onDeleteView &&
+            onReorderViewToTarget &&
+            onToggleViewVisibility &&
+            onToggleShowHiddenViews && (
+              <BudgetFilterButton
+                views={views}
+                viewOrder={viewOrder}
+                hiddenViews={hiddenViews}
+                showHiddenViews={showHiddenViews}
+                activeViewId={activeViewId}
+                availableBuiltInViews={availableBuiltInViews}
+                onSelectView={onSelectView}
+                onCreateView={onCreateView}
+                onEditView={onEditView}
+                onDeleteView={onDeleteView}
+                onReorderViewToTarget={onReorderViewToTarget}
+                onToggleViewVisibility={onToggleViewVisibility}
+                onToggleShowHiddenViews={onToggleShowHiddenViews}
+              />
+            )}
         </View>
         <Button
           ref={triggerRef}

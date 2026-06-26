@@ -250,6 +250,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Akahu Bank Sync (NZ banks)</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="focusedViews">
+              <Trans>Focused views</Trans>
+            </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle
                 prefName="flags.plugins"

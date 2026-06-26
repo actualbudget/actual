@@ -49,6 +49,7 @@
     "#components/budget/goals/reducer": "./src/components/budget/goals/reducer.ts",
     "#components/budget/goals/useBudgetAutomationCategories": "./src/components/budget/goals/useBudgetAutomationCategories.ts",
     "#components/budget/goals/validateAutomation": "./src/components/budget/goals/validateAutomation.ts",
+    "#components/budget/FilteredCategoriesContext": "./src/components/budget/FilteredCategoriesContext.ts",
     "#components/budget/util": "./src/components/budget/util.ts",
     "#components/codemirror/autocompleteTabAccept": "./src/components/codemirror/autocompleteTabAccept.ts",
     "#components/mobile/utils": "./src/components/mobile/utils.ts",

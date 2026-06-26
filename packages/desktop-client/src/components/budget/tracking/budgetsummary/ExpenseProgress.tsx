@@ -1,34 +1,46 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
 import { useTrackingSheetValue } from '#components/budget/tracking/TrackingBudgetComponents';
-import type { Binding } from '#spreadsheet';
+import type { Binding, SheetFields } from '#spreadsheet';
 
 import { fraction } from './fraction';
 import { PieProgress } from './PieProgress';
 
-type ExpenseProgressProps = {
-  current: Binding<'tracking-budget', 'total-spent'>;
-  target: Binding<'tracking-budget', 'total-budgeted'>;
-};
-export function ExpenseProgress({ current, target }: ExpenseProgressProps) {
-  let totalSpent = useTrackingSheetValue(current) || 0;
-  const totalBudgeted = useTrackingSheetValue(target) || 0;
+function BoundValue({
+  binding,
+  children,
+}: {
+  binding: Binding<'tracking-budget', SheetFields<'tracking-budget'>>;
+  children: (value: number) => ReactNode;
+}) {
+  const value = useTrackingSheetValue(binding);
+  return children(value || 0);
+}
 
-  // Reverse total spent, and also set a bottom boundary of 0 (in case
-  // income goes into an expense category and it's "positive", don't
-  // show that in the graph)
-  totalSpent = Math.max(-totalSpent, 0);
+type ExpenseProgressProps = {
+  current: Binding<'tracking-budget', SheetFields<'tracking-budget'>> | number;
+  target: Binding<'tracking-budget', SheetFields<'tracking-budget'>> | number;
+};
+
+function ExpenseProgressLogic({
+  currentNum,
+  targetNum,
+}: {
+  currentNum: number;
+  targetNum: number;
+}) {
+  const totalSpent = Math.max(-currentNum, 0);
 
   let frac;
   let over = false;
 
-  if (totalSpent > totalBudgeted) {
-    frac = (totalSpent - totalBudgeted) / totalBudgeted;
+  if (totalSpent > targetNum) {
+    frac = targetNum === 0 ? 1 : (totalSpent - targetNum) / targetNum;
     over = true;
   } else {
-    frac = fraction(totalSpent, totalBudgeted);
+    frac = fraction(totalSpent, targetNum);
   }
 
   return (
@@ -39,4 +51,36 @@ export function ExpenseProgress({ current, target }: ExpenseProgressProps) {
       style={{ width: 20, height: 20 }}
     />
   );
+}
+
+export function ExpenseProgress({ current, target }: ExpenseProgressProps) {
+  if (typeof current === 'number') {
+    if (typeof target === 'number') {
+      return <ExpenseProgressLogic currentNum={current} targetNum={target} />;
+    } else {
+      return (
+        <BoundValue binding={target}>
+          {t => <ExpenseProgressLogic currentNum={current} targetNum={t} />}
+        </BoundValue>
+      );
+    }
+  } else {
+    if (typeof target === 'number') {
+      return (
+        <BoundValue binding={current}>
+          {c => <ExpenseProgressLogic currentNum={c} targetNum={target} />}
+        </BoundValue>
+      );
+    } else {
+      return (
+        <BoundValue binding={current}>
+          {c => (
+            <BoundValue binding={target}>
+              {t => <ExpenseProgressLogic currentNum={c} targetNum={t} />}
+            </BoundValue>
+          )}
+        </BoundValue>
+      );
+    }
+  }
 }

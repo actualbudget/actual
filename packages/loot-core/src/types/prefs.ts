@@ -12,6 +12,7 @@ export type FeatureFlag =
   | 'enableBanking'
   | 'sankeyReport'
   | 'akahuBankSync'
+  | 'focusedViews'
   | 'mobileCalculator';
 
 /**
@@ -58,7 +59,14 @@ export type SyncedPrefs = Partial<
     | `flip-amount-${string}-${'csv' | 'qif'}`
     | `flags.${FeatureFlag}`
     | `learn-categories`
-    | `show-hidden-tags`,
+    | `show-hidden-tags`
+    | 'budget.focusedViews'
+    | 'budget.builtInViewsOrder'
+    | 'budget.viewOrder'
+    | 'budget.hiddenViews'
+    | 'budget.showHiddenViews'
+    | 'budget.activeFocusedView'
+    | 'budget.focusedViewsCollapsed',
     string
   >
 >;
@@ -98,6 +106,13 @@ export type LocalPrefs = Partial<{
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
 }>;
+
+export type FocusedViewDefinition = {
+  id: string;
+  name: string;
+  categoryIds: string[];
+  sortOrder: number;
+};
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;
 export type DarkTheme = 'dark' | 'midnight';

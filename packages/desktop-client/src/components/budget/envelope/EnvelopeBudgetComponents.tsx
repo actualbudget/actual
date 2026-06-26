@@ -1,4 +1,4 @@
-import React, { memo, useRef } from 'react';
+import React, { memo, useContext, useMemo, useRef } from 'react';
 import type { ComponentProps, CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -17,13 +17,16 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import { FilteredCategoriesContext } from '#components/budget/FilteredCategoriesContext';
 import { makeAmountGrey } from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { Field, Row, SheetCell } from '#components/table';
 import type { SheetCellProps } from '#components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '#hooks/useCategoryScheduleGoalTemplateIndicator';
+import { useCategorySum } from '#hooks/useCategorySum';
 import { useContextMenu } from '#hooks/useContextMenu';
+import { useFocusedViews } from '#hooks/useFocusedViews';
 import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSheetName } from '#hooks/useSheetName';
@@ -74,7 +77,88 @@ const cellStyle: CSSProperties = {
   fontWeight: 600,
 };
 
+function FilteredGroupCell({
+  categoryIds,
+  field,
+  groupBinding,
+  name,
+  style,
+}: {
+  categoryIds: string[];
+  field: (categoryId: string) => SheetFields<'envelope-budget'>;
+  groupBinding: SheetFields<'envelope-budget'>;
+  name: string;
+  style?: CSSProperties;
+}) {
+  const { activeViewId } = useFocusedViews();
+  const { sheetName } = useEnvelopeSheetName(envelopeBudget.totalBudgeted);
+  const value = useCategorySum(
+    sheetName,
+    categoryIds,
+    field,
+    activeViewId !== null,
+  );
+
+  if (activeViewId === null) {
+    return (
+      <EnvelopeSheetCell
+        name={name}
+        width="flex"
+        textAlign="right"
+        style={{ fontWeight: 600, ...styles.tnum, ...style }}
+        valueProps={{
+          binding: groupBinding,
+          type: 'financial',
+        }}
+      />
+    );
+  }
+
+  return (
+    <Field name={name} width="flex" style={{ textAlign: 'right', ...style }}>
+      <CellValueText
+        name={`${sheetName}!${name}`}
+        value={value}
+        type="financial"
+        style={{ fontWeight: 600, ...styles.tnum }}
+      />
+    </Field>
+  );
+}
+
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
+  const filteredCategoryGroups = useContext(FilteredCategoriesContext);
+  const { activeViewId } = useFocusedViews();
+  const { sheetName } = useEnvelopeSheetName(envelopeBudget.totalBudgeted);
+
+  const expenseCategoryIds = useMemo(() => {
+    if (!filteredCategoryGroups) return [];
+    return filteredCategoryGroups
+      .filter(g => !g.is_income)
+      .flatMap(g => g.categories?.map(c => c.id) || []);
+  }, [filteredCategoryGroups]);
+
+  const budgetedSum = useCategorySum(
+    sheetName,
+    expenseCategoryIds,
+    envelopeBudget.catBudgeted,
+    activeViewId !== null,
+  );
+
+  const spentSum = useCategorySum(
+    sheetName,
+    expenseCategoryIds,
+    envelopeBudget.catSumAmount,
+    activeViewId !== null,
+  );
+
+  const balanceSum = useCategorySum(
+    sheetName,
+    expenseCategoryIds,
+    envelopeBudget.catBalance,
+    activeViewId !== null,
+  );
+
   return (
     <View
       style={{
@@ -90,33 +174,67 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Budgeted</Trans>
         </Text>
-        <EnvelopeCellValue
-          binding={envelopeBudget.totalBudgeted}
-          type="financial"
-        >
-          {props => (
-            <CellValueText {...props} value={-props.value} style={cellStyle} />
-          )}
-        </EnvelopeCellValue>
+        {activeViewId === null ? (
+          <EnvelopeCellValue
+            binding={envelopeBudget.totalBudgeted}
+            type="financial"
+          >
+            {props => (
+              <CellValueText
+                {...props}
+                value={-props.value}
+                style={cellStyle}
+              />
+            )}
+          </EnvelopeCellValue>
+        ) : (
+          <CellValueText
+            name="filtered"
+            value={budgetedSum}
+            type="financial"
+            style={cellStyle}
+          />
+        )}
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Spent</Trans>
         </Text>
-        <EnvelopeCellValue binding={envelopeBudget.totalSpent} type="financial">
-          {props => <CellValueText {...props} style={cellStyle} />}
-        </EnvelopeCellValue>
+        {activeViewId === null ? (
+          <EnvelopeCellValue
+            binding={envelopeBudget.totalSpent}
+            type="financial"
+          >
+            {props => <CellValueText {...props} style={cellStyle} />}
+          </EnvelopeCellValue>
+        ) : (
+          <CellValueText
+            name="filtered"
+            value={spentSum}
+            type="financial"
+            style={cellStyle}
+          />
+        )}
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Balance</Trans>
         </Text>
-        <EnvelopeCellValue
-          binding={envelopeBudget.totalBalance}
-          type="financial"
-        >
-          {props => <CellValueText {...props} style={cellStyle} />}
-        </EnvelopeCellValue>
+        {activeViewId === null ? (
+          <EnvelopeCellValue
+            binding={envelopeBudget.totalBalance}
+            type="financial"
+          >
+            {props => <CellValueText {...props} style={cellStyle} />}
+          </EnvelopeCellValue>
+        ) : (
+          <CellValueText
+            name="filtered"
+            value={balanceSum}
+            type="financial"
+            style={cellStyle}
+          />
+        )}
       </View>
     </View>
   );
@@ -143,7 +261,11 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   month,
   group,
 }: CategoryGroupMonthProps) {
-  const { id } = group;
+  const { categories = [] } = group;
+  const categoryIds = useMemo(
+    () => categories.map(category => category.id),
+    [categories],
+  );
 
   return (
     <View
@@ -155,39 +277,24 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
           : theme.budgetHeaderOtherMonth,
       }}
     >
-      <EnvelopeSheetCell
+      <FilteredGroupCell
+        categoryIds={categoryIds}
+        field={envelopeBudget.catBudgeted}
+        groupBinding={envelopeBudget.groupBudgeted(group.id)}
         name="budgeted"
-        width="flex"
-        textAlign="right"
-        style={{ fontWeight: 600, ...styles.tnum }}
-        valueProps={{
-          binding: envelopeBudget.groupBudgeted(id),
-          type: 'financial',
-        }}
       />
-      <EnvelopeSheetCell
+      <FilteredGroupCell
+        categoryIds={categoryIds}
+        field={envelopeBudget.catSumAmount}
+        groupBinding={envelopeBudget.groupSumAmount(group.id)}
         name="spent"
-        width="flex"
-        textAlign="right"
-        style={{ fontWeight: 600, ...styles.tnum }}
-        valueProps={{
-          binding: envelopeBudget.groupSumAmount(id),
-          type: 'financial',
-        }}
       />
-      <EnvelopeSheetCell
+      <FilteredGroupCell
+        categoryIds={categoryIds}
+        field={envelopeBudget.catBalance}
+        groupBinding={envelopeBudget.groupBalance(group.id)}
         name="balance"
-        width="flex"
-        textAlign="right"
-        style={{
-          fontWeight: 600,
-          paddingRight: styles.monthRightPadding,
-          ...styles.tnum,
-        }}
-        valueProps={{
-          binding: envelopeBudget.groupBalance(id),
-          type: 'financial',
-        }}
+        style={{ paddingRight: styles.monthRightPadding }}
       />
     </View>
   );
