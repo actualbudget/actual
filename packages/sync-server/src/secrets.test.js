@@ -161,7 +161,7 @@ describe('secretsService', () => {
     it('returns 204 if budget file secret exists', async () => {
       secretsService.set(testSecretName, testSecretValue, testFileId);
       const res = await request(app)
-        .get(`/${testSecretName}?perBudgetFile=true`)
+        .get(`/${testSecretName}`)
         .set('X-Actual-File-Id', 'test-file-id')
         .set('x-actual-token', 'valid-token');
 
@@ -172,7 +172,7 @@ describe('secretsService', () => {
       secretsService.set(testSecretName, testSecretValue);
 
       const res = await request(app)
-        .get(`/${testSecretName}?perBudgetFile=true`)
+        .get(`/${testSecretName}`)
         .set('X-Actual-File-Id', testFileId)
         .set('x-actual-token', 'valid-token');
 
@@ -186,7 +186,6 @@ describe('secretsService', () => {
         .send({
           name: testSecretName,
           value: testSecretValue,
-          fileId: 'test-file-id',
         });
 
       expect(res.statusCode).toEqual(200);
@@ -200,7 +199,7 @@ describe('secretsService', () => {
       secretsService.set(testSecretName, 'file-value', testFileId);
 
       const res = await request(app)
-        .delete(`/${testSecretName}?perBudgetFile=true`)
+        .delete(`/${testSecretName}`)
         .set('X-Actual-File-Id', testFileId)
         .set('x-actual-token', 'valid-token');
 
@@ -238,12 +237,11 @@ describe('secretsService', () => {
 
       const res = await request(app)
         .post('/')
+        .set('X-Actual-File-Id', 'shared-user-secret-file')
         .set('x-actual-token', 'valid-token-user')
         .send({
           name: testSecretName,
           value: testSecretValue,
-          fileId: 'shared-user-secret-file',
-          perBudgetFile: true,
         });
 
       expect(res.statusCode).toEqual(403);
@@ -279,7 +277,7 @@ describe('secretsService', () => {
 
       it('GET returns 403 when the user does not own the file', async () => {
         const res = await request(app)
-          .get(`/${testSecretName}?perBudgetFile=true`)
+          .get(`/${testSecretName}`)
           .set('X-Actual-File-Id', 'test-file-id')
           .set('x-actual-token', 'valid-token-user');
 
@@ -293,7 +291,7 @@ describe('secretsService', () => {
 
       it('GET returns 204 for admin users when secret exists', async () => {
         const res = await request(app)
-          .get(`/${testSecretName}?perBudgetFile=true`)
+          .get(`/${testSecretName}`)
           .set('X-Actual-File-Id', 'test-file-id')
           .set('x-actual-token', 'valid-token-admin');
 
@@ -308,12 +306,11 @@ describe('secretsService', () => {
 
         const res = await request(app)
           .post('/')
+          .set('X-Actual-File-Id', 'owner-secret-file')
           .set('x-actual-token', 'valid-token-user')
           .send({
             name: testSecretName,
             value: testSecretValue,
-            fileId: 'owner-secret-file',
-            perBudgetFile: true,
           });
 
         expect(res.statusCode).toEqual(200);
@@ -335,8 +332,6 @@ describe('secretsService', () => {
           .send({
             name: testSecretName,
             value: testSecretValue,
-            fileId: 'owner-global-secret-file',
-            perBudgetFile: false,
           });
 
         expect(res.statusCode).toEqual(403);
@@ -355,7 +350,6 @@ describe('secretsService', () => {
           .send({
             name: testSecretName,
             value: 'newValue',
-            fileId: 'test-file-id',
           });
 
         expect(res.statusCode).toEqual(200);

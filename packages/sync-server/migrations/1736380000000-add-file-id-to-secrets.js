@@ -2,6 +2,10 @@ import { getAccountDb } from '../src/account-db';
 
 export const up = async function () {
   await getAccountDb().exec(`
+    BEGIN TRANSACTION;
+
+    -- Rebuild the table because name was the primary key, but file-scoped
+    -- secrets need the same name to exist for different file_id values.
     CREATE TABLE IF NOT EXISTS secrets_new (
       name TEXT NOT NULL,
       value BLOB,
@@ -21,11 +25,15 @@ export const up = async function () {
     CREATE UNIQUE INDEX IF NOT EXISTS secrets_file_name_idx
       ON secrets(file_id, name)
       WHERE file_id IS NOT NULL;
+
+    COMMIT;
   `);
 };
 
 export const down = async function () {
   await getAccountDb().exec(`
+    BEGIN TRANSACTION;
+
     DROP INDEX IF EXISTS secrets_global_name_idx;
     DROP INDEX IF EXISTS secrets_file_name_idx;
 
@@ -39,5 +47,7 @@ export const down = async function () {
 
     DROP TABLE secrets;
     ALTER TABLE secrets_old RENAME TO secrets;
+
+    COMMIT;
   `);
 };

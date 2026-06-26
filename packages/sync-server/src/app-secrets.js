@@ -34,10 +34,11 @@ function canManagePerBudgetFileSecrets(fileId, userId) {
 }
 
 app.post('/', async (req, res) => {
-  const { name, value, fileId } = req.body || {};
-  const perBudgetFile = req.body?.perBudgetFile === true;
+  const { name, value } = req.body || {};
+  const fileId = req.get('X-Actual-File-Id');
+  const perBudgetFile = fileId != null;
 
-  if (!Object.hasOwn(SecretName, name)) {
+  if (!(name in SecretName)) {
     res.status(400).send({
       status: 'error',
       reason: 'invalid-secret-name',
@@ -47,14 +48,6 @@ app.post('/', async (req, res) => {
   }
 
   if (perBudgetFile) {
-    if (typeof fileId !== 'string') {
-      res.status(400).send({
-        status: 'error',
-        reason: 'missing-file-id',
-        details: 'fileId is required',
-      });
-      return;
-    }
     if (!isValidFileId(fileId)) {
       res.status(400).send({
         status: 'error',
@@ -82,15 +75,15 @@ app.post('/', async (req, res) => {
   }
 
   secretsService.set(name, value, perBudgetFile ? fileId : null);
-
   res.status(200).send({ status: 'ok' });
 });
 
 app.delete('/:name', async (req, res) => {
   const name = req.params.name;
-  const perBudgetFile = req.query?.perBudgetFile === 'true';
+  const fileId = req.get('X-Actual-File-Id');
+  const perBudgetFile = fileId != null;
 
-  if (!Object.hasOwn(SecretName, name)) {
+  if (!(name in SecretName)) {
     res.status(404).send('key not found');
     return;
   }
@@ -110,15 +103,6 @@ app.delete('/:name', async (req, res) => {
     return;
   }
 
-  const fileId = req.get('X-Actual-File-Id');
-  if (typeof fileId !== 'string') {
-    res.status(400).send({
-      status: 'error',
-      reason: 'missing-file-id',
-      details: 'fileId is required',
-    });
-    return;
-  }
   if (!isValidFileId(fileId)) {
     res.status(400).send({
       status: 'error',
@@ -143,14 +127,14 @@ app.delete('/:name', async (req, res) => {
 
 app.get('/:name', async (req, res) => {
   const name = req.params.name;
-  const perBudgetFile = req.query?.perBudgetFile === 'true';
+  const fileId = req.get('X-Actual-File-Id');
+  const perBudgetFile = fileId != null;
 
-  if (!Object.hasOwn(SecretName, name)) {
+  if (!(name in SecretName)) {
     res.status(404).send('key not found');
     return;
   }
 
-  let fileId = null;
   if (!perBudgetFile) {
     if (!canManageGlobalSecrets(res.locals.user_id)) {
       res.status(403).send({
@@ -161,16 +145,7 @@ app.get('/:name', async (req, res) => {
       return;
     }
   } else {
-    const rawFileId = req.get('X-Actual-File-Id');
-    if (typeof rawFileId !== 'string') {
-      res.status(400).send({
-        status: 'error',
-        reason: 'missing-file-id',
-        details: 'fileId is required',
-      });
-      return;
-    }
-    if (!isValidFileId(rawFileId)) {
+    if (!isValidFileId(fileId)) {
       res.status(400).send({
         status: 'error',
         reason: 'invalid-file-id',
@@ -179,7 +154,7 @@ app.get('/:name', async (req, res) => {
       return;
     }
 
-    if (!canManagePerBudgetFileSecrets(rawFileId, res.locals.user_id)) {
+    if (!canManagePerBudgetFileSecrets(fileId, res.locals.user_id)) {
       res.status(403).send({
         status: 'error',
         reason: 'file-access-denied',
@@ -187,11 +162,9 @@ app.get('/:name', async (req, res) => {
       });
       return;
     }
-
-    fileId = rawFileId;
   }
 
-  const keyExists = secretsService.exists(name, fileId);
+  const keyExists = secretsService.exists(name, perBudgetFile ? fileId : null);
   if (keyExists) {
     res.sendStatus(204);
   } else {

@@ -72,11 +72,6 @@ class SecretsDb {
 }
 
 const secretsDb = new SecretsDb();
-const _cachedSecrets = new Map();
-
-function _createCacheKey(fileId, name) {
-  return fileId == null ? `global:${name}` : `file:${fileId}:${name}`;
-}
 
 /**
  * A service for managing secrets stored in `secretsDb`.
@@ -89,12 +84,7 @@ export const secretsService = {
    * @returns {string|null} The value of the secret, or null if the secret does not exist.
    */
   get: (name, fileId = null) => {
-    const value =
-      _cachedSecrets.get(_createCacheKey(fileId, name)) ??
-      secretsDb.get(name, fileId)?.value ??
-      null;
-
-    return value;
+    return secretsDb.get(name, fileId)?.value ?? null;
   },
 
   /**
@@ -105,18 +95,11 @@ export const secretsService = {
    * @returns {Object}
    */
   set: (name, value, fileId = null) => {
-    const result = secretsDb.set(name, value, fileId);
-
-    if (result.changes === 1) {
-      _cachedSecrets.set(_createCacheKey(fileId, name), value);
-    }
-    return result;
+    return secretsDb.set(name, value, fileId);
   },
 
   reset: (name, fileId = null) => {
-    const result = secretsDb.reset(name, fileId);
-    _cachedSecrets.delete(_createCacheKey(fileId, name));
-    return result;
+    return secretsDb.reset(name, fileId);
   },
 
   /**
