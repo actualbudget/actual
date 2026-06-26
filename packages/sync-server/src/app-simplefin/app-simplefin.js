@@ -20,7 +20,7 @@ app.post(
   '/status',
   handleError(async (req, res) => {
     const token = secretsService.get(SecretName.simplefin_token);
-    const configured = token != null && token !== 'Forbidden';
+    const configured = token != null && !isForbidden(token);
 
     res.send({
       status: 'ok',
@@ -37,16 +37,16 @@ app.post(
     let accessKey = secretsService.get(SecretName.simplefin_accessKey);
 
     try {
-      if (accessKey == null || accessKey === 'Forbidden') {
+      if (accessKey == null || isForbidden(accessKey)) {
         const token = secretsService.get(SecretName.simplefin_token);
-        if (token == null || token === 'Forbidden') {
+        if (token == null || isForbidden(token)) {
           throw new Error('No token');
         } else {
           accessKey = await getAccessKey(token);
-          secretsService.set(SecretName.simplefin_accessKey, accessKey);
-          if (accessKey == null || accessKey === 'Forbidden') {
+          if (accessKey == null || isForbidden(accessKey)) {
             throw new Error('No access key');
           }
+          secretsService.set(SecretName.simplefin_accessKey, accessKey);
         }
       }
     } catch {
@@ -77,7 +77,7 @@ app.post(
 
     const accessKey = secretsService.get(SecretName.simplefin_accessKey);
 
-    if (accessKey == null || accessKey === 'Forbidden') {
+    if (accessKey == null || isForbidden(accessKey)) {
       invalidToken(res);
       return;
     }
@@ -104,7 +104,7 @@ app.post(
         new Date(earliestStartDate),
       );
     } catch (e) {
-      if (e.message === 'Forbidden') {
+      if (isForbidden(e.message)) {
         invalidToken(res);
       } else {
         serverDown(e, res);
@@ -335,6 +335,10 @@ async function getAccessKey(base64Token) {
     });
     req.end();
   });
+}
+
+function isForbidden(value) {
+  return typeof value === 'string' && value.startsWith('Forbidden');
 }
 
 async function getTransactions(accessKey, accounts, startDate, endDate) {
