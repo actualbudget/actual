@@ -1,8 +1,8 @@
+import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 
 import { _electron, test as base } from '@playwright/test';
 import type { ElectronApplication, Page, TestInfo } from '@playwright/test';
-import { ensureDir, remove } from 'fs-extra';
 
 type ElectronFixtures = {
   electronApp: ElectronApplication;
@@ -16,8 +16,8 @@ export const test = base.extend<ElectronFixtures>({
     const uniqueTestId = testInfo.testId.replace(/[^\w-]/g, '-');
     const testDataDir = path.join('e2e/data/', uniqueTestId);
 
-    await remove(testDataDir); // ensure any leftover test data is removed
-    await ensureDir(testDataDir);
+    await rm(testDataDir, { recursive: true, force: true }); // ensure any leftover test data is removed
+    await mkdir(testDataDir, { recursive: true });
 
     const app = await _electron.launch({
       args: ['.'],
@@ -34,7 +34,7 @@ export const test = base.extend<ElectronFixtures>({
 
     // Cleanup after tests
     await app.close();
-    await remove(testDataDir);
+    await rm(testDataDir, { recursive: true, force: true });
   },
 
   electronPage: async ({ electronApp }, use) => {

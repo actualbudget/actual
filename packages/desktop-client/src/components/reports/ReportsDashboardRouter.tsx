@@ -5,11 +5,11 @@ import { useParams } from 'react-router';
 import { Block } from '@actual-app/components/block';
 import { View } from '@actual-app/components/view';
 
+import { useDashboardPages } from '#hooks/useDashboardPages';
+import { useNavigate } from '#hooks/useNavigate';
+
 import { LoadingIndicator } from './LoadingIndicator';
 import { Overview } from './Overview';
-
-import { useDashboardPages } from '@desktop-client/hooks/useDashboardPages';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function ReportsDashboardRouter() {
   const { t } = useTranslation();

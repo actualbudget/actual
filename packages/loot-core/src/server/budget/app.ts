@@ -1,21 +1,24 @@
-import * as monthUtils from '../../shared/months';
-import { q } from '../../shared/query';
-import type { CategoryEntity, CategoryGroupEntity } from '../../types/models';
-import { createApp } from '../app';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
-import { APIError } from '../errors';
-import { categoryGroupModel, categoryModel } from '../models';
-import { mutator } from '../mutators';
-import * as sheet from '../sheet';
-import { resolveName } from '../spreadsheet/util';
-import { batchMessages } from '../sync';
-import { undoable } from '../undo';
+import { createApp } from '#server/app';
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
+import { APIError } from '#server/errors';
+import { categoryGroupModel, categoryModel } from '#server/models';
+import { mutator } from '#server/mutators';
+import * as sheet from '#server/sheet';
+import { resolveName } from '#server/spreadsheet/util';
+import { batchMessages } from '#server/sync';
+import { undoable } from '#server/undo';
+import * as monthUtils from '#shared/months';
+import { q } from '#shared/query';
+import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
 
 import * as actions from './actions';
 import * as budget from './base';
+import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
+import { storeNoteCleanups } from './cleanup-template-notes';
 import * as goalActions from './goal-template';
+import { sortCategories } from './sort-categories';
 import * as goalNoteActions from './template-notes';
 
 export type BudgetHandlers = {
@@ -39,6 +42,7 @@ export type BudgetHandlers = {
   'budget/transfer-available': typeof actions.transferAvailable;
   'budget/cover-overbudgeted': typeof actions.coverOverbudgeted;
   'budget/transfer-category': typeof actions.transferCategory;
+  'budget/copy-until-year-end': typeof actions.copyUntilYearEnd;
   'budget/set-carryover': typeof actions.setCategoryCarryover;
   'budget/reset-income-carryover': typeof actions.resetIncomeCarryover;
   'get-categories': typeof getCategories;
@@ -48,6 +52,7 @@ export type BudgetHandlers = {
   'category-create': typeof createCategory;
   'category-update': typeof updateCategory;
   'category-move': typeof moveCategory;
+  'categories-sort': typeof sortCategories;
   'category-delete': typeof deleteCategory;
   'get-category-groups': typeof getCategoryGroups;
   'category-group-create': typeof createCategoryGroup;
@@ -57,8 +62,11 @@ export type BudgetHandlers = {
   'must-category-transfer': typeof isCategoryTransferRequired;
   'budget/get-category-automations': typeof goalActions.getTemplatesForCategory;
   'budget/set-category-automations': typeof goalActions.storeTemplates;
+  'budget/dry-run-category-template': typeof goalActions.dryRunCategoryTemplate;
   'budget/store-note-templates': typeof goalNoteActions.storeNoteTemplates;
+  'budget/store-note-cleanups': typeof storeNoteCleanups;
   'budget/render-note-templates': typeof goalNoteActions.unparse;
+  'budget/create-cleanup-group': typeof cleanupGroupActions.createCleanupGroup;
 };
 
 export const app = createApp<BudgetHandlers>();
@@ -123,6 +131,10 @@ app.method(
   mutator(undoable(actions.transferCategory)),
 );
 app.method(
+  'budget/copy-until-year-end',
+  mutator(undoable(actions.copyUntilYearEnd)),
+);
+app.method(
   'budget/set-carryover',
   mutator(undoable(actions.setCategoryCarryover)),
 );
@@ -137,6 +149,7 @@ app.method('tracking-budget-month', trackingBudgetMonth);
 app.method('category-create', mutator(undoable(createCategory)));
 app.method('category-update', mutator(undoable(updateCategory)));
 app.method('category-move', mutator(undoable(moveCategory)));
+app.method('categories-sort', mutator(undoable(sortCategories)));
 app.method('category-delete', mutator(undoable(deleteCategory)));
 app.method('get-category-groups', getCategoryGroups);
 app.method('category-group-create', mutator(undoable(createCategoryGroup)));
@@ -154,17 +167,38 @@ app.method(
   mutator(undoable(goalActions.storeTemplates)),
 );
 app.method(
+  'budget/dry-run-category-template',
+  goalActions.dryRunCategoryTemplate,
+);
+app.method(
   'budget/store-note-templates',
   mutator(goalNoteActions.storeNoteTemplates),
 );
+app.method('budget/store-note-cleanups', mutator(storeNoteCleanups));
 app.method('budget/render-note-templates', goalNoteActions.unparse);
+app.method(
+  'budget/create-cleanup-group',
+  mutator(undoable(cleanupGroupActions.createCleanupGroup)),
+);
 
 // Server must return AQL entities not the raw DB data
-async function getCategories() {
-  const categoryGroups = await getCategoryGroups();
+async function getCategories({ hidden }: { hidden?: boolean } = {}) {
+  const categoryGroups = await getCategoryGroups({ hidden });
+  let list: CategoryEntity[];
+  if (hidden === true) {
+    // A hidden category can live in a visible group, so when the caller
+    // explicitly asks for hidden categories the flat list must look beyond
+    // the (already hidden-filtered) groups returned above.
+    const { data }: { data: CategoryEntity[] } = await aqlQuery(
+      q('categories').filter({ hidden: true }).select('*'),
+    );
+    list = data;
+  } else {
+    list = categoryGroups.flatMap(g => g.categories ?? []);
+  }
   return {
     grouped: categoryGroups,
-    list: categoryGroups.flatMap(g => g.categories ?? []),
+    list,
   };
 }
 
@@ -366,7 +400,7 @@ async function deleteCategory({
     }
 
     // Update spreadsheet values if it's an expense category
-    // TODO: We should do this for income too if it's a reflect budget
+    // TODO: We should do this for income too if it's a tracking budget
     if (row.is_income === 0) {
       if (transferId) {
         await budget.doTransfer([id], transferId);
@@ -378,10 +412,18 @@ async function deleteCategory({
 }
 
 // Server must return AQL entities not the raw DB data
-async function getCategoryGroups() {
+async function getCategoryGroups({ hidden }: { hidden?: boolean } = {}) {
+  const baseQuery = q('category_groups').select('*');
+  const query = hidden === undefined ? baseQuery : baseQuery.filter({ hidden });
   const { data: categoryGroups }: { data: CategoryGroupEntity[] } =
-    await aqlQuery(q('category_groups').select('*'));
-  return categoryGroups;
+    await aqlQuery(query);
+  if (hidden === undefined) {
+    return categoryGroups;
+  }
+  return categoryGroups.map(g => ({
+    ...g,
+    categories: g.categories?.filter(c => Boolean(c.hidden) === hidden),
+  }));
 }
 
 async function createCategoryGroup({

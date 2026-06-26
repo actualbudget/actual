@@ -6,13 +6,9 @@ import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { View } from '@actual-app/components/view';
 
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useDashboardPages } from '@desktop-client/hooks/useDashboardPages';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useDashboardPages } from '#hooks/useDashboardPages';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type CopyWidgetToDashboardModalProps = Extract<
   ModalType,
@@ -32,11 +28,11 @@ export function CopyWidgetToDashboardModal({
 
   return (
     <Modal name="copy-widget-to-dashboard">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Copy to dashboard')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
 
           <View style={{ lineHeight: 1.5 }}>
@@ -45,7 +41,7 @@ export function CopyWidgetToDashboardModal({
                 items={items}
                 onMenuSelect={item => {
                   onSelect(item);
-                  close();
+                  state.close();
                 }}
               />
             ) : (
@@ -61,7 +57,7 @@ export function CopyWidgetToDashboardModal({
                 marginTop: 15,
               }}
             >
-              <Button onPress={close}>
+              <Button onPress={() => state.close()}>
                 <Trans>Cancel</Trans>
               </Button>
             </View>

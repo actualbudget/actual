@@ -1,44 +1,46 @@
 import React, { useEffect, useEffectEvent, useRef } from 'react';
 import type { ReactElement } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 import { Navigate, Route, Routes, useHref, useLocation } from 'react-router';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { useQuery } from '@tanstack/react-query';
+import * as undo from '@actual-app/core/platform/client/undo';
 
-import * as undo from 'loot-core/platform/client/undo';
+import { getLatestAppVersion, sync } from '#app/appSlice';
+import { ProtectedRoute } from '#auth/ProtectedRoute';
+import { Permissions } from '#auth/types';
+import { useAccounts } from '#hooks/useAccounts';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
+import { useNavigate } from '#hooks/useNavigate';
+import { ScrollProvider } from '#hooks/useScrollListener';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch, useSelector } from '#redux';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
+import { UserDirectoryPage } from './admin/UserDirectory/UserDirectoryPage';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
+import { EnableBankingCallback } from './EnableBankingCallback';
+import { FeatureErrorFallback } from './FeatureErrorFallback';
 import { GlobalKeys } from './GlobalKeys';
 import { MobileBankSyncAccountEditPage } from './mobile/banksync/MobileBankSyncAccountEditPage';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
+import { MobilePageHeaderProvider, MobilePageHeaderSlot } from './Page';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
-import { UserDirectoryPage } from './responsive/wide';
 import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
-
-import { accountQueries } from '@desktop-client/accounts';
-import { getLatestAppVersion, sync } from '@desktop-client/app/appSlice';
-import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
-import { Permissions } from '@desktop-client/auth/types';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { ScrollProvider } from '@desktop-client/hooks/useScrollListener';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -86,15 +88,13 @@ function RouterBehaviors() {
 
 export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
-  useMetaThemeColor(isNarrowWidth ? theme.mobileViewTheme : undefined);
+  useMetaThemeColor(theme.mobileViewTheme);
 
+  const location = useLocation();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  // TODO: Replace with `useAccounts` hook once it's updated to return the useQuery results.
-  const { data: accounts, isFetching: isAccountsFetching } = useQuery(
-    accountQueries.list(),
-  );
+  const { data: accounts, isFetching: isAccountsFetching } = useAccounts();
 
   const versionInfo = useSelector(state => state.app.versionInfo);
   const [notifyWhenUpdateIsAvailable] = useGlobalPref(
@@ -157,7 +157,7 @@ export function FinancesApp() {
               type: 'message',
               title: t('A new version of Actual is available!'),
               message:
-                (process.env.REACT_APP_IS_PIKAPODS ?? '').toLowerCase() ===
+                (import.meta.env.REACT_APP_IS_PIKAPODS ?? '').toLowerCase() ===
                 'true'
                   ? t(
                       'A new version of Actual is available! Your Pikapods instance will be automatically updated in the next few days - no action needed.',
@@ -220,170 +220,198 @@ export function FinancesApp() {
             isDisabled={!isNarrowWidth}
             scrollableRef={scrollableRef}
           >
-            <View
-              ref={scrollableRef}
-              style={{
-                flex: 1,
-                overflow: 'auto',
-                position: 'relative',
-              }}
-            >
-              <Titlebar
+            <MobilePageHeaderProvider>
+              <View
+                ref={scrollableRef}
                 style={{
-                  WebkitAppRegion: 'drag',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  zIndex: 1000,
+                  flex: 1,
+                  overflow: 'auto',
+                  position: 'relative',
                 }}
-              />
-              <Notifications />
-              <BankSyncStatus />
+              >
+                <Titlebar
+                  style={{
+                    WebkitAppRegion: 'drag',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1000,
+                  }}
+                />
+                <Notifications />
+                <BankSyncStatus />
+                {isNarrowWidth && <MobilePageHeaderSlot />}
+
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      isAccountsFetching || !accounts ? (
+                        <LoadingIndicator />
+                      ) : accounts.length > 0 ? (
+                        <Navigate to="/budget" replace />
+                      ) : (
+                        // If there are no accounts, we want to redirect the user to
+                        // the All Accounts screen which will prompt them to add an account
+                        <Navigate to="/accounts" replace />
+                      )
+                    }
+                  />
+
+                  <Route path="/reports/*" element={<Reports />} />
+
+                  <Route
+                    path="/budget"
+                    element={<NarrowAlternate name="Budget" />}
+                  />
+
+                  <Route
+                    path="/schedules"
+                    element={<NarrowAlternate name="Schedules" />}
+                  />
+                  <Route
+                    path="/schedules/:id"
+                    element={
+                      <WideNotSupported>
+                        <NarrowAlternate name="ScheduleEdit" />
+                      </WideNotSupported>
+                    }
+                  />
+
+                  <Route
+                    path="/payees"
+                    element={<NarrowAlternate name="Payees" />}
+                  />
+                  <Route
+                    path="/payees/:id"
+                    element={
+                      <WideNotSupported>
+                        <NarrowAlternate name="PayeeEdit" />
+                      </WideNotSupported>
+                    }
+                  />
+                  <Route
+                    path="/rules"
+                    element={
+                      <ErrorBoundary
+                        FallbackComponent={FeatureErrorFallback}
+                        resetKeys={[location.pathname]}
+                      >
+                        <NarrowAlternate name="Rules" />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/rules/:id"
+                    element={
+                      <ErrorBoundary
+                        FallbackComponent={FeatureErrorFallback}
+                        resetKeys={[location.pathname]}
+                      >
+                        <NarrowAlternate name="RuleEdit" />
+                      </ErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/bank-sync"
+                    element={<NarrowAlternate name="BankSync" />}
+                  />
+                  <Route
+                    path="/bank-sync/account/:accountId/edit"
+                    element={
+                      <WideNotSupported redirectTo="/bank-sync">
+                        <MobileBankSyncAccountEditPage />
+                      </WideNotSupported>
+                    }
+                  />
+                  <Route path="/tags" element={<ManageTagsPage />} />
+                  <Route path="/settings" element={<Settings />} />
+
+                  <Route
+                    path="/gocardless/link"
+                    element={
+                      <NarrowNotSupported>
+                        <WideComponent name="GoCardlessLink" />
+                      </NarrowNotSupported>
+                    }
+                  />
+
+                  <Route
+                    path="/enablebanking/auth_callback"
+                    element={<EnableBankingCallback />}
+                  />
+
+                  <Route
+                    path="/accounts"
+                    element={<NarrowAlternate name="Accounts" />}
+                  />
+
+                  <Route
+                    path="/accounts/:id"
+                    element={<NarrowAlternate name="Account" />}
+                  />
+
+                  <Route
+                    path="/transactions/:transactionId"
+                    element={
+                      <WideNotSupported>
+                        <TransactionEdit />
+                      </WideNotSupported>
+                    }
+                  />
+
+                  <Route
+                    path="/categories/:id"
+                    element={<NarrowAlternate name="Category" />}
+                  />
+                  {multiuserEnabled && (
+                    <Route
+                      path="/user-directory"
+                      element={
+                        <ProtectedRoute
+                          permission={Permissions.ADMINISTRATOR}
+                          element={<UserDirectoryPage />}
+                        />
+                      }
+                    />
+                  )}
+                  {multiuserEnabled && (
+                    <Route
+                      path="/user-access"
+                      element={
+                        <ProtectedRoute
+                          permission={Permissions.ADMINISTRATOR}
+                          validateOwner
+                          element={<UserAccessPage />}
+                        />
+                      }
+                    />
+                  )}
+                  {/* redirect all other traffic to the budget page */}
+                  <Route
+                    path="/*"
+                    element={<Navigate to="/budget" replace />}
+                  />
+                </Routes>
+              </View>
 
               <Routes>
+                <Route path="/budget" element={<MobileNavTabs />} />
+                <Route path="/accounts" element={<MobileNavTabs />} />
+                <Route path="/settings" element={<MobileNavTabs />} />
+                <Route path="/reports" element={<MobileNavTabs />} />
                 <Route
-                  path="/"
-                  element={
-                    isAccountsFetching || !accounts ? (
-                      <LoadingIndicator />
-                    ) : accounts.length > 0 ? (
-                      <Navigate to="/budget" replace />
-                    ) : (
-                      // If there are no accounts, we want to redirect the user to
-                      // the All Accounts screen which will prompt them to add an account
-                      <Navigate to="/accounts" replace />
-                    )
-                  }
+                  path="/reports/:dashboardId"
+                  element={<MobileNavTabs />}
                 />
-
-                <Route path="/reports/*" element={<Reports />} />
-
-                <Route
-                  path="/budget"
-                  element={<NarrowAlternate name="Budget" />}
-                />
-
-                <Route
-                  path="/schedules"
-                  element={<NarrowAlternate name="Schedules" />}
-                />
-                <Route
-                  path="/schedules/:id"
-                  element={
-                    <WideNotSupported>
-                      <NarrowAlternate name="ScheduleEdit" />
-                    </WideNotSupported>
-                  }
-                />
-
-                <Route
-                  path="/payees"
-                  element={<NarrowAlternate name="Payees" />}
-                />
-                <Route
-                  path="/payees/:id"
-                  element={
-                    <WideNotSupported>
-                      <NarrowAlternate name="PayeeEdit" />
-                    </WideNotSupported>
-                  }
-                />
-                <Route
-                  path="/rules"
-                  element={<NarrowAlternate name="Rules" />}
-                />
-                <Route
-                  path="/rules/:id"
-                  element={<NarrowAlternate name="RuleEdit" />}
-                />
-                <Route
-                  path="/bank-sync"
-                  element={<NarrowAlternate name="BankSync" />}
-                />
-                <Route
-                  path="/bank-sync/account/:accountId/edit"
-                  element={
-                    <WideNotSupported redirectTo="/bank-sync">
-                      <MobileBankSyncAccountEditPage />
-                    </WideNotSupported>
-                  }
-                />
-                <Route path="/tags" element={<ManageTagsPage />} />
-                <Route path="/settings" element={<Settings />} />
-
-                <Route
-                  path="/gocardless/link"
-                  element={
-                    <NarrowNotSupported>
-                      <WideComponent name="GoCardlessLink" />
-                    </NarrowNotSupported>
-                  }
-                />
-
-                <Route
-                  path="/accounts"
-                  element={<NarrowAlternate name="Accounts" />}
-                />
-
-                <Route
-                  path="/accounts/:id"
-                  element={<NarrowAlternate name="Account" />}
-                />
-
-                <Route
-                  path="/transactions/:transactionId"
-                  element={
-                    <WideNotSupported>
-                      <TransactionEdit />
-                    </WideNotSupported>
-                  }
-                />
-
-                <Route
-                  path="/categories/:id"
-                  element={<NarrowAlternate name="Category" />}
-                />
-                {multiuserEnabled && (
-                  <Route
-                    path="/user-directory"
-                    element={
-                      <ProtectedRoute
-                        permission={Permissions.ADMINISTRATOR}
-                        element={<UserDirectoryPage />}
-                      />
-                    }
-                  />
-                )}
-                {multiuserEnabled && (
-                  <Route
-                    path="/user-access"
-                    element={
-                      <ProtectedRoute
-                        permission={Permissions.ADMINISTRATOR}
-                        validateOwner
-                        element={<UserAccessPage />}
-                      />
-                    }
-                  />
-                )}
-                {/* redirect all other traffic to the budget page */}
-                <Route path="/*" element={<Navigate to="/budget" replace />} />
+                <Route path="/bank-sync" element={<MobileNavTabs />} />
+                <Route path="/rules" element={<MobileNavTabs />} />
+                <Route path="/payees" element={<MobileNavTabs />} />
+                <Route path="/schedules" element={<MobileNavTabs />} />
+                <Route path="*" element={null} />
               </Routes>
-            </View>
-
-            <Routes>
-              <Route path="/budget" element={<MobileNavTabs />} />
-              <Route path="/accounts" element={<MobileNavTabs />} />
-              <Route path="/settings" element={<MobileNavTabs />} />
-              <Route path="/reports" element={<MobileNavTabs />} />
-              <Route path="/reports/:dashboardId" element={<MobileNavTabs />} />
-              <Route path="/bank-sync" element={<MobileNavTabs />} />
-              <Route path="/rules" element={<MobileNavTabs />} />
-              <Route path="/payees" element={<MobileNavTabs />} />
-              <Route path="/schedules" element={<MobileNavTabs />} />
-              <Route path="*" element={null} />
-            </Routes>
+            </MobilePageHeaderProvider>
           </ScrollProvider>
         </View>
       </View>

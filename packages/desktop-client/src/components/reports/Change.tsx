@@ -5,8 +5,8 @@ import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { FinancialText } from '#components/FinancialText';
+import { useFormat } from '#hooks/useFormat';
 
 export function Change({
   amount,

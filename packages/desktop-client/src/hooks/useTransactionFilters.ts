@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import { useMemo } from 'react';
 
-import { q } from 'loot-core/shared/query';
-import type { TransactionFilterEntity } from 'loot-core/types/models';
+import { q } from '@actual-app/core/shared/query';
+import type { TransactionFilterEntity } from '@actual-app/core/types/models';
 
 import { useQuery } from './useQuery';
 

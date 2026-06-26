@@ -8,7 +8,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
-import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { FormField, FormLabel } from '#components/forms';
 
 export function NameFilter({
   menuItem,

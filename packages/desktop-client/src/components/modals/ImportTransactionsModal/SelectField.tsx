@@ -26,7 +26,7 @@ export function SelectField({
         option,
         hasHeaderRow
           ? option
-          : `Column ${parseInt(option) + 1} (${firstTransaction[option]})`,
+          : `Column ${parseInt(option) + 1} (${String(firstTransaction[option])})`,
       ] as const,
   );
 

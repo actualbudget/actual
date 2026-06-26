@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useRef } from 'react';
+import { forwardRef, useCallback, useRef } from 'react';
 import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import type { DragItem } from 'react-aria';
 import {
@@ -20,31 +20,24 @@ import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { AccountEntity } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
-import type { AccountEntity } from 'loot-core/types/models';
-
-import {
-  useMoveAccountMutation,
-  useSyncAndDownloadMutation,
-} from '@desktop-client/accounts';
-import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
-import { PullToRefresh } from '@desktop-client/components/mobile/PullToRefresh';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import {
-  CellValue,
-  CellValueText,
-} from '@desktop-client/components/spreadsheet/CellValue';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { replaceModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
-import type { Binding, SheetFields } from '@desktop-client/spreadsheet';
-import * as bindings from '@desktop-client/spreadsheet/bindings';
+import { useMoveAccountMutation, useSyncAndDownloadMutation } from '#accounts';
+import { isAccountFailedSync } from '#accounts/syncStatus';
+import { makeAmountFullStyle } from '#components/budget/util';
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { PullToRefresh } from '#components/mobile/PullToRefresh';
+import { MobilePageHeader, Page } from '#components/Page';
+import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
+import { useAccounts } from '#hooks/useAccounts';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useNavigate } from '#hooks/useNavigate';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { replaceModal } from '#modals/modalsSlice';
+import { useDispatch, useSelector } from '#redux';
+import type { Binding, SheetFields } from '#spreadsheet';
+import * as bindings from '#spreadsheet/bindings';
 
 const ROW_HEIGHT = 60;
 
@@ -172,7 +165,7 @@ function AccountListItem({
             backgroundColor: theme.tableBackground,
             border: 'none',
             borderRadius: 0,
-            paddingLeft: 20,
+            paddingLeft: 8,
           }}
           data-testid="account-list-item"
           onPress={() => onSelect(account)}
@@ -184,23 +177,21 @@ function AccountListItem({
               flexDirection: 'row',
             }}
           >
-            {account.bankId ? (
-              <View
-                style={{
-                  backgroundColor: isPending
-                    ? theme.sidebarItemBackgroundPending
-                    : isFailed
-                      ? theme.sidebarItemBackgroundFailed
-                      : theme.sidebarItemBackgroundPositive,
-                  marginRight: '8px',
-                  width: 8,
-                  flexShrink: 0,
-                  height: 8,
-                  borderRadius: 8,
-                  opacity: isConnected ? 1 : 0,
-                }}
-              />
-            ) : null}
+            <View
+              style={{
+                backgroundColor: isPending
+                  ? theme.sidebarItemBackgroundPending
+                  : isFailed
+                    ? theme.sidebarItemBackgroundFailed
+                    : theme.sidebarItemBackgroundPositive,
+                marginRight: '6px',
+                width: 8,
+                flexShrink: 0,
+                height: 8,
+                borderRadius: 8,
+                opacity: isConnected ? 1 : 0,
+              }}
+            />
             <TextOneLine
               style={{
                 ...styles.text,
@@ -404,7 +395,6 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
     }: AccountListProps,
     ref,
   ) => {
-    const failedAccounts = useFailedAccounts();
     const syncingAccountIds = useSelector(
       state => state.account.accountsSyncing,
     );
@@ -473,6 +463,7 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
       <ListBox
         aria-label={ariaLabel}
         items={accounts}
+        dependencies={[syncingAccountIds, updatedAccounts]}
         dragAndDropHooks={dragAndDropHooks}
         ref={ref}
         style={{
@@ -492,7 +483,7 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
             isUpdated={updatedAccounts && updatedAccounts.includes(account.id)}
             isConnected={!!account.bank}
             isPending={syncingAccountIds.includes(account.id)}
-            isFailed={failedAccounts && failedAccounts.has(account.id)}
+            isFailed={isAccountFailedSync(account)}
             getBalanceQuery={getBalanceBinding}
             onSelect={onOpenAccount}
           />

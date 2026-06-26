@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
+  SvgChartPie,
   SvgDotsHorizontalTriple,
   SvgTrash,
 } from '@actual-app/components/icons/v1';
@@ -24,12 +25,12 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '@desktop-client/components/common/Modal';
-import { Notes } from '@desktop-client/components/Notes';
-import { useCategory } from '@desktop-client/hooks/useCategory';
-import { useCategoryGroup } from '@desktop-client/hooks/useCategoryGroup';
-import { useNotes } from '@desktop-client/hooks/useNotes';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+} from '#components/common/Modal';
+import { Notes } from '#components/Notes';
+import { useCategory } from '#hooks/useCategory';
+import { useCategoryGroup } from '#hooks/useCategoryGroup';
+import { useNotes } from '#hooks/useNotes';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type CategoryMenuModalProps = Extract<
   ModalType,
@@ -42,6 +43,7 @@ export function CategoryMenuModal({
   onEditNotes,
   onDelete,
   onToggleVisibility,
+  onEditAutomations,
   onClose,
 }: CategoryMenuModalProps) {
   const { t } = useTranslation();
@@ -70,6 +72,10 @@ export function CategoryMenuModal({
     onDelete?.(category.id);
   };
 
+  const _onEditAutomations = () => {
+    onEditAutomations?.(category.id);
+  };
+
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
     height: styles.mobileMinHeight,
@@ -86,7 +92,7 @@ export function CategoryMenuModal({
         style: { height: '45vh' },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             leftContent={
@@ -104,7 +110,7 @@ export function CategoryMenuModal({
                 onTitleUpdate={onRename}
               />
             }
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -140,6 +146,7 @@ export function CategoryMenuModal({
                 flexWrap: 'wrap',
                 justifyContent: 'space-between',
                 alignContent: 'space-between',
+                gap: 8,
                 paddingTop: 10,
               }}
             >
@@ -151,6 +158,16 @@ export function CategoryMenuModal({
                 />
                 <Trans>Edit notes</Trans>
               </Button>
+              {onEditAutomations && (
+                <Button style={buttonStyle} onPress={_onEditAutomations}>
+                  <SvgChartPie
+                    width={20}
+                    height={20}
+                    style={{ paddingRight: 5 }}
+                  />
+                  <Trans>Budget automations</Trans>
+                </Button>
+              )}
             </View>
           </View>
         </>

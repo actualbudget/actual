@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "lib": ["ES2021"],
+    "types": ["vitest/globals", "node"],
+    "noEmit": false,
+    "strict": true,
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
+  },
+  "references": [{ "path": "../api" }],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "coverage"]
+}

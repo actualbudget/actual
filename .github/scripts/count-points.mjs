@@ -8,13 +8,13 @@ const CONFIG = {
   POINTS_PER_ISSUE_TRIAGE_ACTION: 1,
   POINTS_PER_ISSUE_CLOSING_ACTION: 1,
   POINTS_PER_RELEASE_PR: 4, // Awarded to whoever merges the release PR
-  PR_CONTRIBUTION_POINTS: {
-    Features: 2,
-    Enhancements: 2,
-    Bugfix: 3,
-    Maintenance: 2,
-    Unknown: 2,
-  },
+  PR_CONTRIBUTION_POINTS: [
+    { categories: ['Features'], points: 2 },
+    { categories: ['Enhancements'], points: 2 },
+    { categories: ['Bugfixes', 'Bugfix'], points: 3 },
+    { categories: ['Maintenance'], points: 2 },
+    { categories: ['Unknown'], points: 2 },
+  ],
   // Point tiers for code changes (non-docs)
   CODE_PR_REVIEW_POINT_TIERS: [
     { minChanges: 500, points: 8 },
@@ -35,7 +35,11 @@ const CONFIG = {
     'release-notes/**/*',
     'upcoming-release-notes/**/*',
   ],
-  DOCS_FILES_PATTERN: 'packages/docs/**/*',
+  DOCS_FILES_PATTERNS: [
+    'packages/docs/**/*',
+    '!packages/docs/package.json',
+    '.github/actions/docs-spelling/*',
+  ],
 };
 
 /**
@@ -58,83 +62,37 @@ function parseReleaseNotesCategory(content) {
 }
 
 /**
- * Get the last commit SHA on or before a given date.
- * @param {Octokit} octokit - The Octokit instance.
- * @param {string} owner - Repository owner.
- * @param {string} repo - Repository name.
- * @param {Date} beforeDate - The date to find the last commit before.
- * @returns {Promise<string|null>} The commit SHA or null if not found.
- */
-async function getLastCommitBeforeDate(octokit, owner, repo, beforeDate) {
-  try {
-    // Get the default branch from the repository
-    const { data: repoData } = await octokit.repos.get({ owner, repo });
-    const defaultBranch = repoData.default_branch;
-
-    const { data: commits } = await octokit.repos.listCommits({
-      owner,
-      repo,
-      sha: defaultBranch,
-      until: beforeDate.toISOString(),
-      per_page: 1,
-    });
-
-    if (commits.length > 0) {
-      return commits[0].sha;
-    }
-  } catch {
-    // If error occurs, return null to fall back to default branch
-  }
-
-  return null;
-}
-
-/**
  * Get the category and points for a PR by reading its release notes file.
  * @param {Octokit} octokit - The Octokit instance.
  * @param {string} owner - Repository owner.
  * @param {string} repo - Repository name.
- * @param {number} prNumber - PR number.
- * @param {Date} monthEnd - The end date of the month to use as base revision.
- * @returns {Promise<Object>} Object with category and points, or null if error.
+ * @param {string|null} releaseNoteBlobSha - The blob SHA of the release notes file, or null if not found.
+ * @returns {Promise<Object>} Object with category and points.
  */
 async function getPRCategoryAndPoints(
   octokit,
   owner,
   repo,
-  prNumber,
-  monthEnd,
+  releaseNoteBlobSha,
 ) {
-  const releaseNotesPath = `upcoming-release-notes/${prNumber}.md`;
-
   try {
-    // Get the last commit of the month to use as base revision
-    const commitSha = await getLastCommitBeforeDate(
-      octokit,
-      owner,
-      repo,
-      monthEnd,
-    );
+    if (releaseNoteBlobSha) {
+      const { data: blob } = await octokit.git.getBlob({
+        owner,
+        repo,
+        file_sha: releaseNoteBlobSha,
+      });
 
-    // Try to read the release notes file from the last commit of the month
-    const { data: fileContent } = await octokit.repos.getContent({
-      owner,
-      repo,
-      path: releaseNotesPath,
-      ref: commitSha || undefined, // Use commit SHA if available, otherwise default branch
-    });
-
-    if (fileContent.content) {
-      // Decode base64 content
-      const content = Buffer.from(fileContent.content, 'base64').toString(
-        'utf-8',
-      );
+      const content = Buffer.from(blob.content, 'base64').toString('utf-8');
       const category = parseReleaseNotesCategory(content);
+      const tier = CONFIG.PR_CONTRIBUTION_POINTS.find(e =>
+        e.categories.includes(category),
+      );
 
-      if (category && CONFIG.PR_CONTRIBUTION_POINTS[category]) {
+      if (tier) {
         return {
           category,
-          points: CONFIG.PR_CONTRIBUTION_POINTS[category],
+          points: tier.points,
         };
       }
     }
@@ -142,9 +100,12 @@ async function getPRCategoryAndPoints(
     // Do nothing
   }
 
+  const unknownTier = CONFIG.PR_CONTRIBUTION_POINTS.find(e =>
+    e.categories.includes('Unknown'),
+  );
   return {
     category: 'Unknown',
-    points: CONFIG.PR_CONTRIBUTION_POINTS.Unknown,
+    points: unknownTier.points,
   };
 }
 
@@ -234,7 +195,7 @@ async function countContributorPoints() {
   };
 
   // Get all PRs using search
-  const searchQuery = `repo:${owner}/${repo} is:pr is:merged merged:${since.toISOString()}..${until.toISOString()}`;
+  const searchQuery = `repo:${owner}/${repo} is:pr is:merged base:master merged:${since.toISOString()}..${until.toISOString()}`;
   const recentPRs = await octokit.paginate(
     'GET /search/issues',
     {
@@ -270,13 +231,25 @@ async function countContributorPoints() {
             ),
         );
 
-        const docsFiles = filteredFiles.filter(file =>
-          minimatch(file.filename, CONFIG.DOCS_FILES_PATTERN, { dot: true }),
-        );
-        const codeFiles = filteredFiles.filter(
-          file =>
-            !minimatch(file.filename, CONFIG.DOCS_FILES_PATTERN, { dot: true }),
-        );
+        const isDocsFile = file => {
+          const positivePatterns = CONFIG.DOCS_FILES_PATTERNS.filter(
+            p => !p.startsWith('!'),
+          );
+          const negativePatterns = CONFIG.DOCS_FILES_PATTERNS.filter(p =>
+            p.startsWith('!'),
+          );
+          return (
+            positivePatterns.some(p =>
+              minimatch(file.filename, p, { dot: true }),
+            ) &&
+            negativePatterns.every(p =>
+              minimatch(file.filename, p, { dot: true }),
+            )
+          );
+        };
+
+        const docsFiles = filteredFiles.filter(isDocsFile);
+        const codeFiles = filteredFiles.filter(file => !isDocsFile(file));
 
         const docsChanges = docsFiles.reduce(
           (sum, file) => sum + file.additions + file.deletions,
@@ -323,12 +296,15 @@ async function countContributorPoints() {
           // Award points to PR author if they are a core maintainer
           const prAuthor = pr.user?.login;
           if (prAuthor && orgMemberLogins.has(prAuthor)) {
+            const releaseNoteFile = modifiedFiles.find(
+              file =>
+                file.filename === `upcoming-release-notes/${pr.number}.md`,
+            );
             const categoryAndPoints = await getPRCategoryAndPoints(
               octokit,
               owner,
               repo,
-              pr.number,
-              until,
+              releaseNoteFile?.sha ?? null,
             );
 
             if (categoryAndPoints) {

@@ -6,10 +6,7 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-
-import type { TagEntity } from 'loot-core/types/models';
-
-import { TagEditor } from './TagEditor';
+import type { TagEntity } from '@actual-app/core/types/models';
 
 import {
   Cell,
@@ -17,15 +14,14 @@ import {
   InputCell,
   Row,
   SelectCell,
-} from '@desktop-client/components/table';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
-import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
-import {
-  useDeleteTagMutation,
-  useUpdateTagMutation,
-} from '@desktop-client/tags';
+} from '#components/table';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { useNavigate } from '#hooks/useNavigate';
+import { useProperFocus } from '#hooks/useProperFocus';
+import { useSelectedDispatch } from '#hooks/useSelected';
+import { useDeleteTagMutation, useUpdateTagMutation } from '#tags';
+
+import { TagEditor } from './TagEditor';
 
 type TagRowProps = {
   tag: TagEntity;
@@ -114,7 +110,7 @@ export const TagRow = memo(
                   deleteTag({ id: tag.id });
                   break;
                 default:
-                  throw new Error(`Unrecognized menu option: ${name}`);
+                  throw new Error(`Unrecognized menu option: ${String(name)}`);
               }
               setMenuOpen(false);
             }}
@@ -145,11 +141,11 @@ export const TagRow = memo(
           exposed={focusedField === 'description'}
           onExpose={name => onEdit(tag.id, name)}
           value={tag.description || t('No description')}
-          valueStyle={
-            tag.description
-              ? {}
-              : { fontStyle: 'italic', color: theme.tableTextLight }
-          }
+          valueStyle={{
+            opacity: tag.hidden ? 0.5 : undefined,
+            fontStyle: !tag.description ? 'italic' : undefined,
+            color: !tag.description ? theme.tableTextLight : undefined,
+          }}
           inputProps={{
             value: tag.description || '',
             onUpdate,
@@ -167,6 +163,7 @@ export const TagRow = memo(
               color: theme.noticeTextDark,
               fontSize: 12,
               cursor: 'pointer',
+              opacity: tag.hidden ? 0.5 : undefined,
               ':hover': { backgroundColor: theme.noticeBackgroundLight },
             }}
             onSelect={onShowActivity}

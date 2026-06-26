@@ -7,26 +7,25 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { CustomReportEntity } from '@actual-app/core/types/models';
 
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import type { CustomReportEntity } from 'loot-core/types/models';
+import { DateRange } from '#components/reports/DateRange';
+import { ReportCard } from '#components/reports/ReportCard';
+import { ReportCardName } from '#components/reports/ReportCardName';
+import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
+import { calculateHasWarning } from '#components/reports/util';
+import { useAccounts } from '#hooks/useAccounts';
+import { useCategories } from '#hooks/useCategories';
+import { usePayees } from '#hooks/usePayees';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import { useUpdateReportMutation } from '#reports/mutations';
 
 import { GetCardData } from './GetCardData';
 import { MissingReportCard } from './MissingReportCard';
-
-import { DateRange } from '@desktop-client/components/reports/DateRange';
-import { ReportCard } from '@desktop-client/components/reports/ReportCard';
-import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
-import { calculateHasWarning } from '@desktop-client/components/reports/util';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import { useUpdateReportMutation } from '@desktop-client/reports/mutations';
 
 type CustomReportListCardsProps = {
   isEditing?: boolean;

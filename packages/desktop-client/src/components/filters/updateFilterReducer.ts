@@ -1,5 +1,5 @@
-import { FIELD_TYPES, makeValue } from 'loot-core/shared/rules';
-import type { RuleConditionEntity } from 'loot-core/types/models';
+import { FIELD_TYPES, makeValue } from '@actual-app/core/shared/rules';
+import type { RuleConditionEntity } from '@actual-app/core/types/models';
 
 export function updateFilterReducer<T extends RuleConditionEntity>(
   state: Pick<T, 'op' | 'field'> & { value: T['value'] | null },
@@ -20,6 +20,7 @@ export function updateFilterReducer<T extends RuleConditionEntity>(
           action.op === 'doesNotContain' ||
           action.op === 'isNot' ||
           action.op === 'hasTags' ||
+          action.op === 'hasAnyTag' ||
           action.op === 'onBudget' ||
           action.op === 'offBudget')
       ) {

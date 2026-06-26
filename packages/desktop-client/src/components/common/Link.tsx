@@ -9,7 +9,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useNavigate } from '#hooks/useNavigate';
 
 type TextLinkProps = {
   style?: CSSProperties;
@@ -17,8 +17,12 @@ type TextLinkProps = {
   children?: ReactNode;
 };
 
-type ButtonLinkProps = Omit<ComponentProps<typeof Button>, 'variant'> & {
+type ButtonLinkProps = Omit<
+  ComponentProps<typeof Button>,
+  'variant' | 'style'
+> & {
   buttonVariant?: ComponentProps<typeof Button>['variant'];
+  style?: CSSProperties;
   to?: string;
   activeStyle?: CSSProperties;
 };
@@ -43,6 +47,7 @@ type ExternalLinkProps = {
   to?: string;
   linkColor?: keyof typeof externalLinkColors;
   onClick?: MouseEventHandler;
+  className?: string;
 };
 
 const ExternalLink = ({
@@ -50,6 +55,7 @@ const ExternalLink = ({
   to,
   linkColor = 'blue',
   onClick,
+  className,
 }: ExternalLinkProps) => {
   return (
     // we can't use <ExternalLink /> here for obvious reasons
@@ -58,6 +64,7 @@ const ExternalLink = ({
       target="_blank"
       rel="noopener noreferrer"
       style={{ color: externalLinkColors[linkColor] }}
+      className={className}
       onClick={onClick}
     >
       {children}

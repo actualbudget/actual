@@ -87,6 +87,11 @@ import APIList from './APIList';
 "deleteSchedule"
 ]} />
 
+<APIList title="Notes" sections={[
+"getNote",
+"updateNote"
+]} />
+
 <APIList title="Misc" sections={[
 "BudgetFile",
 "initConfig",
@@ -119,6 +124,8 @@ Fields specific to a type of request are marked as such in the notes.
 `id` is a special field. All objects have an `id` field. However, you don't need to specify an `id` in a `create` method; all `create` methods will return the created `id` back to you.
 
 All `update` and `delete` methods take an `id` to specify the desired object. `update` takes the fields to update as a second argument — it does not take a full object. That means even if a field is required, you don't have to pass it to `update`. For example, a `category` requires the `group_id` field, however `updateCategory(id, { name: "Food" })` is a valid call. Required means that an `update` can't set the field to `null` and a `create` must always contain the field.
+
+**Note:** `updateRule` is an exception — it requires the full [`Rule`](#rule) object including `id`, and returns `Promise<Rule>`.
 
 ## Primitives
 
@@ -162,17 +169,73 @@ These are types.
 
 A split transaction has several sub-transactions that split the total
 amount across them. You can create a split transaction by specifying
-an array of sub-transactions in the `subtransactions` field.
+an array of sub-transactions in the `subtransactions` field. This field is primarily used during creation and retrieval.
 
-Subtransactions can specify the following fields, and `amount` is the only required field:
+In practice, updating subtransactions individually may not work reliably. To modify split transactions, update the parent transaction and provide the full `subtransactions` array.
+
+Subtransactions are treated as full transaction records and are validated similarly to regular transactions.
+
+In practice, API creation commonly requires at least the fields below.
 
 - `amount`
+- `account`
+- `date`
+- `parent_id`
+- `is_child: true`
+
+Additionally, child transactions should explicitly set:
+
+- `is_parent`: false
+
+Optional fields include:
+
 - `category`
 - `notes`
 
 If the amounts of the sub-transactions do not equal the total amount
 of the transaction, currently the API call will succeed but an error
 will be displayed within the app.
+
+#### Parent Transaction Requirements
+
+A transaction must be marked with `is_parent: true` before subtransactions can be added.
+
+If `is_parent` is not set to `true` on the parent transaction, any provided `subtransactions` will be ignored and the transaction will be treated as a standard (non-split) transaction. No split will be created.
+
+Subtransactions are only processed when the parent transaction has `is_parent: true`.
+
+If subtransactions are provided but are invalid (e.g. missing required fields such as `account` or `date`), the API will return a validation error (HTTP 400) indicating that required transaction fields are missing.
+
+A working example of API fields:
+
+**Note:** When creating a new split transaction, you typically don't need to provide an `id` for the parent; the system will generate one. The parent transaction's `amount` should equal the sum of all subtransaction amounts.
+
+```js
+{
+  "id": "parent-id",
+  "is_parent": true,
+  "subtransactions": [
+    {
+      "amount": 142000,
+      "account": "9c1e5de4-ecf8-41c2-8a97-4a1e8bc385c9",
+      "date": "2024-08-12",
+      "parent_id": "parent-id",
+      "is_child": true,
+      "is_parent": false,
+      "category": "71376207-72f9-4b2b-ae24-0931a226f76a",
+    },
+    {
+      "amount": 150,
+      "account": "9c1e5de4-ecf8-41c2-8a97-4a1e8bc385c9",
+      "date": "2024-08-12",
+      "parent_id": "parent-id",
+      "is_child": true,
+      "is_parent": false,
+      "category": "315d3776-d2a8-4d82-8a69-648b0d80125a",
+    }
+  ]
+}
+```
 
 #### Transfers
 
@@ -199,7 +262,7 @@ This method is mainly for custom importers that want to skip all the automatic s
 
 #### `importTransactions`
 
-<Method name="importTransactions" args={[{ name: 'accountId', type: 'id'}, { name: 'transactions', type: 'Transaction[]'}]} returns="Promise<{ errors, added, updated }>" />
+<Method name="importTransactions" args={[{ name: 'accountId', type: 'id'}, { name: 'transactions', type: 'Transaction[]'}, { name: 'opts = {}', type: 'object?'}]} returns="Promise<{ errors, added, updated }>" />
 
 Adds multiple transactions at once, while going through the same process as importing a file or downloading transactions from a bank.
 In particular, all rules are run on the specified transactions before adding them.
@@ -208,6 +271,21 @@ Use `addTransactions` instead for adding raw transactions without post-processin
 The import will "reconcile" transactions to avoid adding duplicates. Transactions with the same `imported_id` will never be added more than once. Otherwise, the system will match transactions with the same amount and with similar dates and payees and try to avoid duplicates. If not using `imported_id` you should check the results after importing.
 
 It will also create transfers if a transfer payee is specified. See [transfers](#transfers).
+
+This method has the following optional flags (passed as the `opts` object):
+
+- `defaultCleared`: whether imported transactions should be marked as cleared (defaults to `true`)
+- `dryRun`: if `true`, returns what would be added/updated without actually modifying the database (defaults to `false`)
+- `reimportDeleted`: if `true`, transactions that were previously imported and then deleted will be reimported; if `false`, they will be skipped (defaults to `true` for backward compatibility — note that the [file import UI](../transactions/importing.md#avoiding-duplicate-transactions) defaults to `false`)
+
+Example using opts:
+
+```js
+await api.importTransactions(accountId, transactions, {
+  reimportDeleted: false,
+  defaultCleared: false,
+});
+```
 
 This method returns an object with the following fields:
 
@@ -367,9 +445,13 @@ let accounts = await getAccounts();
 
 #### `getCategories`
 
-<Method name="getCategories" args={[]} returns="Promise<Category[]>" />
+<Method name="getCategories" args={[{ name: 'options = {}', type: 'object?' }]} returns="Promise<Category[]>" />
 
-Get all categories.
+Get categories. By default, returns every category.
+
+The `options` object supports:
+
+- `hidden`: filter by hidden status. Pass `false` to return only visible categories, or `true` to return only hidden ones. Omit to return both.
 
 #### `createCategory`
 
@@ -422,9 +504,13 @@ There should only ever be one income category group,
 
 #### `getCategoryGroups`
 
-<Method name="getCategoryGroups" args={[]} returns="Promise<CategoryGroup[]>" />
+<Method name="getCategoryGroups" args={[{ name: 'options = {}', type: 'object?' }]} returns="Promise<CategoryGroup[]>" />
 
-Get all category groups.
+Get category groups. By default, returns every group with all of its categories nested under it.
+
+The `options` object supports:
+
+- `hidden`: filter by hidden status, applied to both groups and their nested categories. Pass `false` to return only visible groups and categories, or `true` to return only hidden ones. Omit to return both.
 
 #### `createCategoryGroup`
 
@@ -436,7 +522,7 @@ Create a category group. Returns the `id` of the new group.
 
 <Method name="updateCategoryGroup" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<id>" />
 
-Update fields of a category group. `fields` can specify any field described in [`CategoryGroup`](#categorygroup).
+Update fields of a category group. `fields` can specify any field described in [`CategoryGroup`](#category-group).
 
 #### `deleteCategoryGroup`
 
@@ -470,6 +556,12 @@ Each account has a corresponding "transfer payee" already created in the system.
 <Method name="getPayees" args={[]} returns="Promise<Payee[]>" />
 
 Get all payees.
+
+#### `getCommonPayees`
+
+<Method name="getCommonPayees" args={[]} returns="Promise<Payee[]>" />
+
+Get common payees that appear frequently in transactions.
 
 #### `createPayee`
 
@@ -572,9 +664,9 @@ Get all rules.
 
 #### `getPayeeRules`
 
-<Method name="getPayeeRules" args={[{ name: 'payeeId', type: "id" }]} returns="Promise<PayeeRule[]>" />
+<Method name="getPayeeRules" args={[{ name: 'payeeId', type: "id" }]} returns="Promise<Rule[]>" />
 
-Get all payee rules for `payeeId`.
+Get all rules associated with `payeeId`.
 
 #### `createRule`
 
@@ -584,9 +676,9 @@ Create a rule. Returns the new rule, including the `id`.
 
 #### `updateRule`
 
-<Method name="updateRule" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<Rule>" />
+<Method name="updateRule" args={[{ name: 'rule', type: 'Rule' }]} returns="Promise<Rule>" />
 
-Update fields of a rule. `fields` can specify any field described in [`Rule`](#rule). Returns the updated rule.
+Update a rule. Unlike other update methods, this requires the full rule object including `id`. Returns the updated rule.
 
 #### `deleteRule`
 
@@ -637,7 +729,7 @@ Get all schedules. Returns an array of [`Schedule`](#schedule) objects.
 
 #### `createSchedule`
 
-<Method name="createSchedule" args={[{ properties: [{ name: 'schedule', type: 'Schedule' }] }]} returns="Promise<id>" />
+<Method name="createSchedule" args={[{ name: 'schedule', type: 'Schedule' }]} returns="Promise<id>" />
 
 Create schedule based on information filled in the schedule object. Please refer to notes of schedule object for details each field.
 
@@ -645,11 +737,27 @@ Create schedule based on information filled in the schedule object. Please refer
 
 <Method name="updateSchedule" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<schedule>" />
 
-Update fields of a rule. `fields` can specify any field described in [`Schedule`](#Schedule). Returns the updated rule.
+Update fields of a rule. `fields` can specify any field described in [`Schedule`](#schedule). Returns the updated rule.
 
 #### `deleteSchedule`
 
 <Method name="deleteSchedule" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
+
+## Notes
+
+Notes can be attached to any entity (categories, budget months, etc.) by ID. They are also used to define budget templates and savings goals (e.g. `#template 250`, `#goal 1000`).
+
+#### `getNote`
+
+<Method name="getNote" args={[{ name: 'id', type: 'id' }]} returns="Promise<Note | null>" />
+
+Returns the note for the given entity ID, or `null` if no note has been set.
+
+#### `updateNote`
+
+<Method name="updateNote" args={[{ name: 'id', type: 'id' }, { name: 'note', type: 'string' }]} returns="Promise<void>" />
+
+Sets the note on the entity with the given ID. Pass an empty string to clear the note.
 
 ## Misc
 
@@ -665,9 +773,9 @@ Update fields of a rule. `fields` can specify any field described in [`Schedule`
 
 #### `init`
 
-<Method name="init" args={[{ properties: [{ name: 'config', type: 'InitConfig' }] }]} returns="Promise<void>" />
+<Method name="init" args={[{ name: 'config', type: 'InitConfig?' }]} returns="Promise<void>" />
 
-Initializes the API by connecting to an Actual Budget server.
+Initializes the API by connecting to an Actual Budget server. The config parameter is optional and defaults to `{}` (local-only mode).
 
 #### `shutdown`
 
@@ -689,7 +797,7 @@ Run the 3rd party (GoCardless, SimpleFIN) bank sync operation. This will downloa
 
 #### `runImport`
 
-<Method name="runImport" args={[{ properties: [{ name: 'budgetName', type: 'string' }, { name: 'func', type: 'func' }] }]} returns="Promise<void>" />
+<Method name="runImport" args={[{ name: 'budgetName', type: 'string' }, { name: 'func', type: 'func' }]} returns="Promise<void>" />
 
 Creates a new budget file with the given name, and then runs the custom importer function to populate it with data.
 
@@ -713,7 +821,7 @@ Load a budget file. If the file exists locally, it will load from there. Otherwi
 
 #### `batchBudgetUpdates`
 
-<Method name="batchBudgetUpdates" args={[{ properties: [{ name: 'func', type: 'func' }] }]} returns="Promise<void>" />
+<Method name="batchBudgetUpdates" args={[{ name: 'func', type: 'func' }]} returns="Promise<void>" />
 
 Performs a batch of budget updates. This is useful for making multiple changes to the budget in a single call to the server.
 

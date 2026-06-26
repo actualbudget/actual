@@ -1,11 +1,11 @@
+import * as db from '#server/db';
 // @ts-strict-ignore
-import type { QueryState } from '../../shared/query';
+import type { QueryState } from '#shared/query';
 import type {
   AqlErrorDetail as AqlError,
   AqlQueryColumn,
   AqlQueryResult,
-} from '../../types/aql';
-import * as db from '../db';
+} from '#types/aql';
 
 import { compileQuery, defaultConstructQuery } from './compiler';
 import type {

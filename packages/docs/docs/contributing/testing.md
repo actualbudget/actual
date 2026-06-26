@@ -33,8 +33,8 @@ The `yarn test` command uses Lage to run tests in parallel across all workspaces
 ### Running Tests for a Specific Package
 
 ```bash
-# Run tests for loot-core
-yarn workspace loot-core run test
+# Run tests for @actual-app/core
+yarn workspace @actual-app/core run test
 
 # Run tests for the API package
 yarn workspace @actual-app/api run test

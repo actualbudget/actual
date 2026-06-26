@@ -2,7 +2,7 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 import type { StorybookConfig } from '@storybook/react-vite';
-import viteTsconfigPaths from 'vite-tsconfig-paths';
+import react from '@vitejs/plugin-react';
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -32,11 +32,9 @@ const config: StorybookConfig = {
     const { mergeConfig } = await import('vite');
 
     return mergeConfig(config, {
-      // Telling Vite how to resolve path aliases
-      plugins: [viteTsconfigPaths({ root: '../..' })],
-      esbuild: {
-        // Needed to handle JSX in .ts/.tsx files
-        jsx: 'automatic',
+      plugins: [react()],
+      resolve: {
+        tsconfigPaths: true,
       },
     });
   },

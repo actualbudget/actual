@@ -1,7 +1,6 @@
+import { format as formatDate_ } from '@actual-app/core/shared/months';
+import { looselyParseAmount } from '@actual-app/core/shared/util';
 import * as d from 'date-fns';
-
-import { format as formatDate_ } from 'loot-core/shared/months';
-import { looselyParseAmount } from 'loot-core/shared/util';
 
 export type DateFormat =
   | 'yyyy mm dd'
@@ -140,6 +139,22 @@ export type ImportTransaction = {
   date?: string;
 } & Record<string, string | number | boolean>;
 
+type ImportCategory = {
+  id: string;
+  name: string;
+};
+
+export function parseCategoryFields(
+  trans: Pick<ImportTransaction, 'category'>,
+  categories: ImportCategory[],
+) {
+  const match = categories.find(
+    category =>
+      category.id !== trans.category && category.name === trans.category,
+  );
+  return match?.id ?? null;
+}
+
 export type FieldMapping = {
   date: string | null;
   amount: string | null;
@@ -261,6 +276,28 @@ export function parseAmountFields(
       inflow: null,
     };
   }
+}
+
+export function filterByStartDate(
+  transactions: ImportTransaction[],
+  startDate: string,
+  isPreParsedDate: boolean,
+  fieldMappings: FieldMapping | null,
+  parseDateFormat: DateFormat | null,
+): ImportTransaction[] {
+  if (!startDate) return transactions;
+  return transactions.filter(trans => {
+    const mapped = fieldMappings
+      ? applyFieldMappings(trans, fieldMappings)
+      : trans;
+    const date = isPreParsedDate
+      ? (mapped.date ?? null)
+      : parseDateFormat
+        ? parseDate(mapped.date ?? null, parseDateFormat)
+        : null;
+    // Keep transactions with unparseable dates (they'll error later in the normal flow)
+    return date == null || date >= startDate;
+  });
 }
 
 export function stripCsvImportTransaction(transaction: ImportTransaction) {

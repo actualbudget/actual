@@ -5,7 +5,10 @@ const { themes } = require('prism-react-renderer');
 
 const defaultOptions = {
   editUrl: 'https://github.com/actualbudget/actual/tree/master/packages/docs',
-  beforeDefaultRemarkPlugins: [require('./src/remark/mentions')],
+  beforeDefaultRemarkPlugins: [
+    require('./src/remark/mentions'),
+    require('./src/remark/enforce-doc-links'),
+  ],
 };
 
 /** @type {import('@docusaurus/types').Config} */
@@ -15,6 +18,7 @@ module.exports = {
   url: 'https://actualbudget.org/',
   baseUrl: '/',
   onBrokenLinks: 'throw',
+  onBrokenAnchors: 'throw',
   favicon: 'img/favicon.ico',
 
   projectName: 'actualbudget.github.io',
@@ -32,7 +36,7 @@ module.exports = {
   markdown: {
     mermaid: true,
     hooks: {
-      onBrokenMarkdownLinks: 'warn',
+      onBrokenMarkdownLinks: 'throw',
     },
   },
 
@@ -50,6 +54,8 @@ module.exports = {
         },
         blog: {
           ...defaultOptions,
+          blogSidebarTitle: 'All posts',
+          blogSidebarCount: 'ALL',
           feedOptions: {
             type: 'rss',
             title: 'Actual Budget Blog',
@@ -70,9 +76,10 @@ module.exports = {
     ({
       image: 'img/og.webp',
       navbar: {
+        title: 'Actual Budget',
         logo: {
           alt: 'Actual Open Source',
-          src: 'img/actual.webp',
+          src: 'img/logo.webp',
         },
         items: [
           {
@@ -80,6 +87,12 @@ module.exports = {
             // never render as active
             activeBaseRegex: '^$',
             label: 'Features',
+            position: 'left',
+          },
+          {
+            type: 'docSidebar',
+            sidebarId: 'tourSidebar',
+            label: 'Tour',
             position: 'left',
           },
           {

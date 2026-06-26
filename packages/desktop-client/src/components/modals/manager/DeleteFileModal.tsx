@@ -6,15 +6,11 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { deleteBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import { deleteBudget } from '#budgetfiles/budgetfilesSlice';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch, useSelector } from '#redux';
 
 type DeleteFileModalProps = Extract<
   ModalType,
@@ -46,11 +42,11 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
 
   return (
     <Modal name="delete-budget">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Delete {{fileName}}', { fileName: file.name })}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -95,7 +91,7 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
                         );
                         setLoadingState(null);
 
-                        close();
+                        state.close();
                       }}
                     >
                       <Trans>Delete file from all devices</Trans>
@@ -176,7 +172,7 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
                     await dispatch(deleteBudget({ id: file.id }));
                     setLoadingState(null);
 
-                    close();
+                    state.close();
                   }}
                 >
                   <Trans>Delete file locally</Trans>

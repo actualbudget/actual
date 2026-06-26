@@ -7,19 +7,14 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { PayeeEntity } from '@actual-app/core/types/models';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { PayeeEntity } from 'loot-core/types/models';
-
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { DisplayId } from '@desktop-client/components/util/DisplayId';
-import { useFormatList } from '@desktop-client/hooks/useFormatList';
-import { popModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { DisplayId } from '#components/util/DisplayId';
+import { useFormatList } from '#hooks/useFormatList';
+import { popModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 export function PostsOfflineNotification() {
   const { t, i18n } = useTranslation();
@@ -47,11 +42,11 @@ export function PostsOfflineNotification() {
 
   return (
     <Modal name="schedule-posts-offline-notification">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Post transactions?')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <Paragraph>
             <Text>
@@ -91,7 +86,7 @@ export function PostsOfflineNotification() {
             gap={10}
             style={{ marginTop: 20, justifyContent: 'flex-end' }}
           >
-            <Button onPress={close}>
+            <Button onPress={() => state.close()}>
               <Trans>Decide later</Trans>
             </Button>
             <Button
@@ -99,7 +94,7 @@ export function PostsOfflineNotification() {
               autoFocus
               onPress={() => {
                 void onPost();
-                close();
+                state.close();
               }}
             >
               <Trans>Post transactions</Trans>

@@ -6,12 +6,8 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { View } from '@actual-app/components/view';
 
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type ConfirmUnlinkAccountModalProps = Extract<
   ModalType,
@@ -30,11 +26,11 @@ export function ConfirmUnlinkAccountModal({
       name="confirm-unlink-account"
       containerProps={{ style: { width: '30vw' } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Confirm Unlink')} // Use translation for title
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             <Paragraph>
@@ -59,7 +55,7 @@ export function ConfirmUnlinkAccountModal({
                 justifyContent: 'flex-end',
               }}
             >
-              <Button style={{ marginRight: 10 }} onPress={close}>
+              <Button style={{ marginRight: 10 }} onPress={() => state.close()}>
                 <Trans>Cancel</Trans>
               </Button>
               <InitialFocus>
@@ -67,7 +63,7 @@ export function ConfirmUnlinkAccountModal({
                   variant="primary"
                   onPress={() => {
                     onUnlink();
-                    close();
+                    state.close();
                   }}
                 >
                   <Trans>Unlink</Trans>

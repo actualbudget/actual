@@ -4,10 +4,10 @@ import type { ComponentProps } from 'react';
 
 import { View } from '@actual-app/components/view';
 
+import { useGlobalPref } from '#hooks/useGlobalPref';
+
 import { MonthPicker } from './MonthPicker';
 import { getScrollbarWidth } from './util';
-
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type BudgetPageHeaderProps = {
   startMonth: string;

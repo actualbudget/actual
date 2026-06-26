@@ -4,7 +4,7 @@ import { css, cx } from '@emotion/css';
 
 import type { CSSProperties } from './styles';
 
-type BlockProps = HTMLProps<HTMLDivElement> & {
+type BlockProps = Omit<HTMLProps<HTMLDivElement>, 'style'> & {
   innerRef?: Ref<HTMLDivElement>;
   style?: CSSProperties;
 };

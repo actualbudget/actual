@@ -91,7 +91,7 @@ export function diff(trie1: TrieNode, trie2: TrieNode): number | null {
   while (true) {
     const keyset = new Set([...getKeys(node1), ...getKeys(node2)]);
     const keys = [...keyset.values()];
-    keys.sort();
+    keys.sort((a, b) => a.localeCompare(b));
 
     let diffkey: null | '0' | '1' | '2' = null;
 
@@ -145,7 +145,7 @@ export function prune(trie: TrieNode, n = 2): TrieNode {
   }
 
   const keys = getKeys(trie);
-  keys.sort();
+  keys.sort((a, b) => a.localeCompare(b));
 
   const next: TrieNode = { hash: trie.hash };
 

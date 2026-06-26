@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { reportQueries } from '@desktop-client/reports';
+import { reportQueries } from '#reports';
 
 export function useReport(id?: string | null) {
   return useQuery({

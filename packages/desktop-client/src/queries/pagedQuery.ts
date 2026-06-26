@@ -1,7 +1,7 @@
 // @ts-strict-ignore
-import { once } from 'loot-core/shared/async';
-import { getPrimaryOrderBy } from 'loot-core/shared/query';
-import type { Query } from 'loot-core/shared/query';
+import { once } from '@actual-app/core/shared/async';
+import { getPrimaryOrderBy } from '@actual-app/core/shared/query';
+import type { Query } from '@actual-app/core/shared/query';
 
 import { aqlQuery } from './aqlQuery';
 import { LiveQuery } from './liveQuery';

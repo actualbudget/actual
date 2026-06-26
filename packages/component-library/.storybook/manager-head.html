@@ -45,6 +45,27 @@
  -->
 
 <style>
+  /* Show logo icon next to brand title text */
+  .sidebar-header a[href='https://actualbudget.org'] {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .sidebar-header a[href='https://actualbudget.org']::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    background-image: url('https://actualbudget.org/img/logo.webp');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
   #storybook-explorer-searchfield {
     font-weight: 400 !important;
     font-size: 14px !important;

@@ -1,0 +1,21 @@
+#!/bin/sh
+# Run yarn install when switching branches (if yarn.lock changed)
+# or when creating a new worktree (node_modules won't exist yet)
+
+# $3 is 1 for branch checkout, 0 for file checkout
+if [ "$3" != "1" ]; then
+  exit 0
+fi
+
+# Worktree creation: node_modules doesn't exist yet, always install
+if [ ! -d "node_modules" ]; then
+  echo "New worktree detected — running yarn install..."
+  yarn install || exit 1
+  exit 0
+fi
+
+# Check if yarn.lock changed between the old and new HEAD
+if git diff --name-only "$1" "$2" | grep -q "^yarn.lock$"; then
+  echo "yarn.lock changed — running yarn install..."
+  yarn install
+fi

@@ -4,7 +4,8 @@
 
 import { runClassic } from 'eslint-vitest-rule-tester';
 
-import * as rule from '../prefer-if-statement';
+import plugin from '../../index';
+const rule = plugin.rules['prefer-if-statement'];
 
 //------------------------------------------------------------------------------
 // Tests
@@ -33,7 +34,6 @@ void runClassic(
           {
             messageId: 'logical',
             data: { op: '&&' },
-            type: 'ExpressionStatement',
           },
         ],
       },
@@ -44,14 +44,13 @@ void runClassic(
           {
             messageId: 'logical',
             data: { op: '||' },
-            type: 'ExpressionStatement',
           },
         ],
       },
       {
         code: 'foo ? bar : baz;',
         output: null,
-        errors: [{ messageId: 'ternary', type: 'ExpressionStatement' }],
+        errors: [{ messageId: 'ternary' }],
       },
       {
         code: 'function foo() { bar && baz; }',
@@ -60,7 +59,6 @@ void runClassic(
           {
             messageId: 'logical',
             data: { op: '&&' },
-            type: 'ExpressionStatement',
           },
         ],
       },
@@ -71,14 +69,13 @@ void runClassic(
           {
             messageId: 'logical',
             data: { op: '||' },
-            type: 'ExpressionStatement',
           },
         ],
       },
       {
         code: 'function foo() { bar ? baz : qux; }',
         output: null,
-        errors: [{ messageId: 'ternary', type: 'ExpressionStatement' }],
+        errors: [{ messageId: 'ternary' }],
       },
       {
         code: 'foo && foo();',
@@ -87,7 +84,6 @@ void runClassic(
           {
             messageId: 'logical',
             data: { op: '&&' },
-            type: 'ExpressionStatement',
           },
         ],
       },
@@ -98,7 +94,6 @@ void runClassic(
           {
             messageId: 'logical',
             data: { op: '||' },
-            type: 'ExpressionStatement',
           },
         ],
       },
@@ -109,7 +104,6 @@ void runClassic(
           {
             messageId: 'logical',
             data: { op: '&&' },
-            type: 'ExpressionStatement',
           },
         ],
       },
@@ -120,14 +114,13 @@ void runClassic(
           {
             messageId: 'logical',
             data: { op: '&&' },
-            type: 'ExpressionStatement',
           },
         ],
       },
       {
         code: 'foo ? bar() : baz();',
         output: null,
-        errors: [{ messageId: 'ternary', type: 'ExpressionStatement' }],
+        errors: [{ messageId: 'ternary' }],
       },
     ],
   },

@@ -10,12 +10,11 @@ import {
 } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
+import type { AccountEntity } from '@actual-app/core/types/models';
 
-import type { AccountEntity } from 'loot-core/types/models';
+import { Checkbox } from '#components/forms';
 
 import { GraphButton } from './GraphButton';
-
-import { Checkbox } from '@desktop-client/components/forms';
 
 type AccountSelectorProps = {
   accounts: AccountEntity[];

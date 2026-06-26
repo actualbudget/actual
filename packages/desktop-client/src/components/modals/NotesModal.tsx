@@ -6,14 +6,10 @@ import { Button } from '@actual-app/components/button';
 import { SvgCheck } from '@actual-app/components/icons/v2';
 import { View } from '@actual-app/components/view';
 
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { Notes } from '@desktop-client/components/Notes';
-import { useNotes } from '@desktop-client/hooks/useNotes';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { Notes } from '#components/Notes';
+import { useNotes } from '#hooks/useNotes';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type NotesModalProps = Extract<ModalType, { name: 'notes' }>['options'];
 
@@ -37,11 +33,11 @@ export function NotesModal({ id, name, onSave }: NotesModalProps) {
         style: { height: '50vh' },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Notes: {{name}}', { name })}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -78,7 +74,7 @@ export function NotesModal({ id, name, onSave }: NotesModalProps) {
                 }}
                 onPress={() => {
                   _onSave();
-                  close();
+                  state.close();
                 }}
               >
                 <SvgCheck width={17} height={17} style={{ paddingRight: 5 }} />

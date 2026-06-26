@@ -1,14 +1,17 @@
+import { extractScheduleConds } from '@actual-app/core/shared/schedules';
+import type {
+  RuleConditionEntity,
+  RuleConditionOp,
+  ScheduleEntity,
+} from '@actual-app/core/types/models';
 import { t } from 'i18next';
-
-import { extractScheduleConds } from 'loot-core/shared/schedules';
-import type { RuleConditionOp, ScheduleEntity } from 'loot-core/types/models';
 
 import type { ScheduleFormFields } from './ScheduleEditForm';
 
 export function updateScheduleConditions(
   schedule: Partial<ScheduleEntity>,
   fields: ScheduleFormFields,
-): { error?: string; conditions?: unknown[] } {
+): { error?: string; conditions?: RuleConditionEntity[] } {
   const conds = extractScheduleConds(schedule._conditions);
 
   const updateCond = (
@@ -51,6 +54,6 @@ export function updateScheduleConditions(
         field: 'amount',
         value: fields.amount,
       },
-    ].filter(val => !!val),
+    ].filter((val): val is RuleConditionEntity => val != null),
   };
 }

@@ -7,17 +7,12 @@ import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
-import type { TransObjectLiteral } from 'loot-core/types/util';
-
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useCategories } from '#hooks/useCategories';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type ConfirmCategoryDeleteModalProps = Extract<
   ModalType,
@@ -71,11 +66,11 @@ export function ConfirmCategoryDeleteModal({
       name="confirm-category-delete"
       containerProps={{ style: { width: '30vw' } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Confirm Delete')} // Use translation for title
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             {group ? (
@@ -177,7 +172,7 @@ export function ConfirmCategoryDeleteModal({
                     setError('required-transfer');
                   } else {
                     onDelete(transferCategory);
-                    close();
+                    state.close();
                   }
                 }}
               >

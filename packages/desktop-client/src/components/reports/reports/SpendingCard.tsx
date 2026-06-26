@@ -5,22 +5,26 @@ import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { SpendingWidget } from '@actual-app/core/types/models';
 
-import * as monthUtils from 'loot-core/shared/months';
-import type { SpendingWidget } from 'loot-core/types/models';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { DateRange } from '@desktop-client/components/reports/DateRange';
-import { SpendingGraph } from '@desktop-client/components/reports/graphs/SpendingGraph';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ReportCard } from '@desktop-client/components/reports/ReportCard';
-import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { calculateSpendingReportTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createSpendingSpreadsheet } from '@desktop-client/components/reports/spreadsheets/spending-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { DateRange } from '#components/reports/DateRange';
+import { SpendingGraph } from '#components/reports/graphs/SpendingGraph';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportCard } from '#components/reports/ReportCard';
+import { ReportCardName } from '#components/reports/ReportCardName';
+import { calculateSpendingReportTimeRange } from '#components/reports/reportRanges';
+import {
+  getSpendingAverageRangeLabel,
+  normalizeSpendingAverageRange,
+} from '#components/reports/spendingAverageRange';
+import { createSpendingSpreadsheet } from '#components/reports/spreadsheets/spending-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
+import { useReport } from '#components/reports/useReport';
+import { useFormat } from '#hooks/useFormat';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 type SpendingCardProps = {
   widgetId: string;
@@ -41,6 +45,9 @@ export function SpendingCard({
 }: SpendingCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
+  const [budgetTypePref] = useSyncedPref('budgetType');
+  const budgetType: 'envelope' | 'tracking' =
+    budgetTypePref === 'tracking' ? 'tracking' : 'envelope';
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
@@ -49,6 +56,8 @@ export function SpendingCard({
     useDashboardWidgetCopyMenu(onCopy);
 
   const spendingReportMode = meta?.mode ?? 'single-month';
+  const averageRange = normalizeSpendingAverageRange(meta?.averageRange);
+  const averageRangeLabel = getSpendingAverageRangeLabel(averageRange, t);
 
   const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
 
@@ -60,8 +69,17 @@ export function SpendingCard({
       conditionsOp: meta?.conditionsOp,
       compare,
       compareTo,
+      averageRange,
+      budgetType,
     });
-  }, [meta?.conditions, meta?.conditionsOp, compare, compareTo]);
+  }, [
+    meta?.conditions,
+    meta?.conditionsOp,
+    compare,
+    compareTo,
+    averageRange,
+    budgetType,
+  ]);
 
   const data = useReport('default', getGraphData);
   const todayDay =
@@ -130,6 +148,9 @@ export function SpendingCard({
               start={compare}
               end={compareTo}
               type={spendingReportMode}
+              comparisonLabel={
+                spendingReportMode === 'average' ? averageRangeLabel : undefined
+              }
             />
           </View>
           {data && (

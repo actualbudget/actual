@@ -6,16 +6,16 @@ import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import * as monthUtils from '@actual-app/core/shared/months';
 import * as d from 'date-fns';
 
-import * as monthUtils from 'loot-core/shared/months';
-
-import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocale } from '#hooks/useLocale';
 
 type DateRangeProps = {
   start: string;
   end: string;
   type?: string;
+  comparisonLabel?: string;
 };
 
 function checkDate(date: string) {
@@ -27,7 +27,12 @@ function checkDate(date: string) {
   }
 }
 
-export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
+export function DateRange({
+  start,
+  end,
+  type,
+  comparisonLabel,
+}: DateRangeProps): ReactElement {
   const { t } = useTranslation();
   const locale = useLocale();
   const checkStart = checkDate(start);
@@ -51,7 +56,8 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
   let typeOrFormattedEndDate: string;
 
   if (type && ['budget', 'average'].includes(type)) {
-    typeOrFormattedEndDate = type === 'budget' ? t('budgeted') : t('average');
+    typeOrFormattedEndDate =
+      comparisonLabel ?? (type === 'budget' ? t('budgeted') : t('average'));
   } else {
     typeOrFormattedEndDate = formattedEndDate;
   }

@@ -11,19 +11,18 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { Query } from '@actual-app/core/shared/query';
+import { tsToRelativeTime } from '@actual-app/core/shared/util';
+import type { AccountEntity } from '@actual-app/core/types/models';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import { format as formatDate } from 'date-fns';
 import { t } from 'i18next';
 
-import type { Query } from 'loot-core/shared/query';
-import { tsToRelativeTime } from 'loot-core/shared/util';
-import type { AccountEntity } from 'loot-core/types/models';
-import type { TransObjectLiteral } from 'loot-core/types/util';
-
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import * as bindings from '@desktop-client/spreadsheet/bindings';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
+import { useSheetValue } from '#hooks/useSheetValue';
+import * as bindings from '#spreadsheet/bindings';
 
 type ReconcilingMessageProps = {
   balanceQuery: { name: `balance-query-${string}`; query: Query };
@@ -183,13 +182,13 @@ export function ReconcileMenu({
             <Input
               value={inputValue}
               onChangeValue={setInputValue}
-              style={{ margin: '7px 0' }}
+              style={{ margin: '7px 0', textAlign: 'right' }}
             />
           </InitialFocus>
         )}
         {lastSyncedBalance != null && (
           <View>
-            <Text>
+            <Text style={{ margin: '0 6px 8px 0', textAlign: 'right' }}>
               <Trans>Last Balance from Bank: </Trans>
               {format(lastSyncedBalance, 'financial')}
             </Text>
@@ -203,7 +202,16 @@ export function ReconcileMenu({
             </Button>
           </View>
         )}
-        <Text style={{ color: theme.pageTextSubdued, paddingBottom: 6 }}>
+        <Button type="submit" variant="primary">
+          <Trans>Reconcile</Trans>
+        </Button>
+        <Text
+          style={{
+            color: theme.pageTextLight,
+            marginTop: '8px',
+            textAlign: 'center',
+          }}
+        >
           {account?.last_reconciled
             ? t('Reconciled {{ relativeTimeAgo }} ({{ absoluteDate }})', {
                 relativeTimeAgo: tsToRelativeTime(
@@ -218,9 +226,6 @@ export function ReconcileMenu({
               })
             : t('Not yet reconciled')}
         </Text>
-        <Button type="submit" variant="primary">
-          <Trans>Reconcile</Trans>
-        </Button>
       </View>
     </Form>
   );

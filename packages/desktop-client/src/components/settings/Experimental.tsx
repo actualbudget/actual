@@ -5,23 +5,19 @@ import { Trans } from 'react-i18next';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { FeatureFlag, ServerPrefs } from '@actual-app/core/types/prefs';
 
-import type { FeatureFlag, ServerPrefs } from 'loot-core/types/prefs';
+import { useAuth } from '#auth/AuthProvider';
+import { Permissions } from '#auth/types';
+import { Link } from '#components/common/Link';
+import { Checkbox } from '#components/forms';
+import { useLoginMethod, useMultiuserEnabled } from '#components/ServerContext';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useServerPref } from '#hooks/useServerPref';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 import { Setting } from './UI';
-
-import { useAuth } from '@desktop-client/auth/AuthProvider';
-import { Permissions } from '@desktop-client/auth/types';
-import { Link } from '@desktop-client/components/common/Link';
-import { Checkbox } from '@desktop-client/components/forms';
-import {
-  useLoginMethod,
-  useMultiuserEnabled,
-} from '@desktop-client/components/ServerContext';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useServerPref } from '@desktop-client/hooks/useServerPref';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 type FeatureToggleProps = {
   flag: FeatureFlag;
@@ -29,6 +25,7 @@ type FeatureToggleProps = {
   error?: ReactNode;
   children: ReactNode;
   feedbackLink?: string;
+  note?: ReactNode;
 };
 
 function FeatureToggle({
@@ -37,6 +34,7 @@ function FeatureToggle({
   feedbackLink,
   error,
   children,
+  note,
 }: FeatureToggleProps) {
   const enabled = useFeatureFlag(flagName);
   const [_, setFlagPref] = useSyncedPref(`flags.${flagName}`);
@@ -72,6 +70,8 @@ function FeatureToggle({
             {error}
           </Text>
         )}
+
+        {note && <Text style={{ color: theme.warningText }}>{note}</Text>}
       </View>
     </label>
   );
@@ -155,10 +155,7 @@ export function ExperimentalFeatures() {
 
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
-  const showGoalTemplatesUI =
-    goalTemplatesUIEnabled ||
-    (goalTemplatesEnabled &&
-      localStorage.getItem('devEnableGoalTemplatesUI') === 'true');
+  const showGoalTemplatesUI = goalTemplatesEnabled || goalTemplatesUIEnabled;
 
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
@@ -173,7 +170,10 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             {showGoalTemplatesUI && (
               <View style={{ paddingLeft: 22 }}>
-                <FeatureToggle flag="goalTemplatesUIEnabled">
+                <FeatureToggle
+                  flag="goalTemplatesUIEnabled"
+                  feedbackLink="https://github.com/actualbudget/actual/issues/7692"
+                >
                   <Trans>Subfeature: Budget automations UI</Trans>
                 </FeatureToggle>
               </View>
@@ -181,6 +181,12 @@ export function ExperimentalFeatures() {
             <FeatureToggle
               flag="actionTemplating"
               feedbackLink="https://github.com/actualbudget/actual/issues/3606"
+              note={
+                <Trans>
+                  Deprecated: this feature will be removed in a future release.
+                  Use Excel formula mode (Rule formulae) instead.
+                </Trans>
+              }
             >
               <Trans>Rule action templating</Trans>
             </FeatureToggle>
@@ -196,18 +202,29 @@ export function ExperimentalFeatures() {
             >
               <Trans>Currency support</Trans>
             </FeatureToggle>
-
             <FeatureToggle
-              flag="crossoverReport"
-              feedbackLink="https://github.com/actualbudget/actual/issues/6134"
+              flag="mobileCalculator"
+              feedbackLink="https://github.com/actualbudget/actual/issues/8255"
             >
-              <Trans>Crossover Report</Trans>
+              <Trans>Mobile calculator</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="customThemes"
-              feedbackLink="https://github.com/actualbudget/actual/issues/6607"
+              flag="sankeyReport"
+              feedbackLink="https://github.com/actualbudget/actual/issues/1919"
             >
-              <Trans>Custom themes</Trans>
+              <Trans>Sankey report</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="balanceForecastReport"
+              feedbackLink="https://github.com/actualbudget/actual/issues/7669"
+            >
+              <Trans>Balance Forecast Report</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="ageOfMoneyReport"
+              feedbackLink="https://github.com/actualbudget/actual/issues/7006"
+            >
+              <Trans>Age of Money Report</Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="budgetAnalysisReport"
@@ -220,6 +237,24 @@ export function ExperimentalFeatures() {
               feedbackLink="https://github.com/actualbudget/actual/issues"
             >
               <Trans>Query Report</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="payeeLocations"
+              feedbackLink="https://github.com/actualbudget/actual/issues/6706"
+            >
+              <Trans>Payee Locations</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="enableBanking"
+              feedbackLink="https://github.com/actualbudget/actual/issues/7799"
+            >
+              <Trans>Enable Banking sync (EU banks)</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="akahuBankSync"
+              feedbackLink="https://github.com/actualbudget/actual/issues/8020"
+            >
+              <Trans>Akahu Bank Sync (NZ banks)</Trans>
             </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle

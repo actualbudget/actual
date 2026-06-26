@@ -7,7 +7,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { GenericInput } from '@desktop-client/components/util/GenericInput';
+import { GenericInput } from '#components/util/GenericInput';
 
 type SaveReportChooseProps = {
   onApply: (cond: string) => void;

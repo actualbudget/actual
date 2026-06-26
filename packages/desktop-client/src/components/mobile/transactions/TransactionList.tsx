@@ -28,31 +28,31 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { validForMerge } from '@actual-app/core/shared/merge';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
+import { validForTransfer } from '@actual-app/core/shared/transfer';
+import { groupById, integerToCurrency } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type {
+  CategoryEntity,
+  TransactionEntity,
+} from '@actual-app/core/types/models';
 
-import * as monthUtils from 'loot-core/shared/months';
-import { isPreviewId } from 'loot-core/shared/transactions';
-import { validForTransfer } from 'loot-core/shared/transfer';
-import { groupById, integerToCurrency } from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { CategoryEntity, TransactionEntity } from 'loot-core/types/models';
+import { FloatingActionBar } from '#components/mobile/FloatingActionBar';
+import { useAccounts } from '#hooks/useAccounts';
+import { useCategoriesById } from '#hooks/useCategories';
+import { useLocale } from '#hooks/useLocale';
+import { useNavigate } from '#hooks/useNavigate';
+import { usePayees } from '#hooks/usePayees';
+import { useScrollListener } from '#hooks/useScrollListener';
+import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
+import { useTransactionBatchActions } from '#hooks/useTransactionBatchActions';
+import { useUndo } from '#hooks/useUndo';
+import { setNotificationInset } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
-
-import { FloatingActionBar } from '@desktop-client/components/mobile/FloatingActionBar';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategoriesById } from '@desktop-client/hooks/useCategories';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useScrollListener } from '@desktop-client/hooks/useScrollListener';
-import {
-  useSelectedDispatch,
-  useSelectedItems,
-} from '@desktop-client/hooks/useSelected';
-import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import { setNotificationInset } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
 
@@ -383,8 +383,7 @@ function SelectedTransactionsFloatingActionBar({
 
   const canMerge = useMemo(() => {
     return Boolean(
-      twoTransactions &&
-      twoTransactions[0].amount === twoTransactions[1].amount,
+      twoTransactions && validForMerge(twoTransactions[0], twoTransactions[1]),
     );
   }, [twoTransactions]);
 
@@ -506,7 +505,7 @@ function SelectedTransactionsFloatingActionBar({
                           : integerToCurrency(Number(value));
                         break;
                       case 'notes':
-                        displayValue = `${mode} with ${value}`;
+                        displayValue = `${mode} with ${String(value)}`;
                         break;
                       default:
                         displayValue = value;
@@ -514,15 +513,15 @@ function SelectedTransactionsFloatingActionBar({
                     }
 
                     showUndoNotification({
-                      message: `Successfully updated ${name} of ${ids.length} transaction${ids.length > 1 ? 's' : ''} to [${displayValue}](#${displayValue}).`,
+                      message: `Successfully updated ${name} of ${ids.length} transaction${ids.length > 1 ? 's' : ''} to [${String(displayValue)}](#${String(displayValue)}).`,
                       messageActions: {
                         [String(displayValue)]: () => {
                           switch (name) {
                             case 'account':
-                              void navigate(`/accounts/${value}`);
+                              void navigate(`/accounts/${String(value)}`);
                               break;
                             case 'category':
-                              void navigate(`/categories/${value}`);
+                              void navigate(`/categories/${String(value)}`);
                               break;
                             case 'payee':
                               void navigate(`/payees`);

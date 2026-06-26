@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 
 import {
   bootstrap,
@@ -21,7 +22,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(errorMiddleware);
 app.use(requestLoggerMiddleware);
-export { app as handlers };
+
+const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per window
+  legacyHeaders: false,
+  standardHeaders: true,
+  skipSuccessfulRequests: true,
+  message: { status: 'error', reason: 'too-many-requests' },
+});
+
+export { app as handlers, authRateLimiter };
 
 // Non-authenticated endpoints:
 //
@@ -45,7 +56,7 @@ app.get('/needs-bootstrap', (req, res) => {
   });
 });
 
-app.post('/bootstrap', async (req, res) => {
+app.post('/bootstrap', authRateLimiter, async (req, res) => {
   const boot = await bootstrap(req.body);
 
   if (boot?.error) {
@@ -60,7 +71,7 @@ app.get('/login-methods', (req, res) => {
   res.send({ status: 'ok', methods });
 });
 
-app.post('/login', async (req, res) => {
+app.post('/login', authRateLimiter, async (req, res) => {
   const loginMethod = getLoginMethod(req);
   console.log('Logging in via ' + loginMethod);
   let tokenRes = null;
@@ -120,6 +131,24 @@ app.post('/login', async (req, res) => {
 app.post('/change-password', (req, res) => {
   const session = validateSession(req, res);
   if (!session) return;
+
+  if (!isAdmin(session.user_id)) {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'permission-not-found',
+    });
+    return;
+  }
+
+  if (session.auth_method !== 'password') {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'password-auth-not-active',
+    });
+    return;
+  }
 
   const { error } = changePassword(req.body.password);
 

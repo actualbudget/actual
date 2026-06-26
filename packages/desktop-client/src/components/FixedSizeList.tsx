@@ -3,7 +3,7 @@ import { createRef, PureComponent } from 'react';
 import type { CSSProperties, ReactNode, Ref, RefObject, UIEvent } from 'react';
 
 import { View } from '@actual-app/components/view';
-import memoizeOne from 'memoize-one';
+import { memoizeOne } from '@actual-app/core/shared/memoize';
 
 const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
 
@@ -134,8 +134,7 @@ export class FixedSizeList extends PureComponent<
     const { initialScrollOffset } = this.props;
 
     if (typeof initialScrollOffset === 'number' && this._outerRef != null) {
-      let outerRef = this._outerRef;
-      outerRef = this._outerRef;
+      const outerRef = this._outerRef;
       outerRef.scrollTop = initialScrollOffset;
     }
 

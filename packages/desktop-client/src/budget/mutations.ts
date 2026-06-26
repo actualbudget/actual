@@ -1,23 +1,22 @@
 import { useTranslation } from 'react-i18next';
 
+import { send } from '@actual-app/core/platform/client/connection';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
+} from '@actual-app/core/types/models';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type {
-  CategoryEntity,
-  CategoryGroupEntity,
-} from 'loot-core/types/models';
+import { pushModal } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import type { AppDispatch } from '#redux/store';
 
 import { categoryQueries } from './queries';
-
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { AppDispatch } from '@desktop-client/redux/store';
 
 function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
   void queryClient.invalidateQueries({
@@ -492,6 +491,32 @@ export function useReorderCategoryGroupMutation() {
   });
 }
 
+type SortCategoriesPayload = {
+  groupId: CategoryGroupEntity['id'];
+  direction: 'asc' | 'desc';
+};
+
+export function useSortCategoriesMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ groupId, direction }: SortCategoriesPayload) => {
+      await send('categories-sort', { groupId, direction });
+    },
+    onSuccess: () => invalidateQueries(queryClient),
+    onError: error => {
+      console.error('Error sorting categories:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error sorting the categories. Please try again.'),
+        error,
+      );
+    },
+  });
+}
+
 type ApplyBudgetActionPayload =
   | {
       type: 'budget-amount';
@@ -649,6 +674,13 @@ type ApplyBudgetActionPayload =
       args: {
         category: CategoryEntity['id'];
       };
+    }
+  | {
+      type: 'copy-until-year-end';
+      month: string;
+      args: {
+        category: CategoryEntity['id'];
+      };
     };
 
 export function useBudgetActions() {
@@ -778,8 +810,14 @@ export function useBudgetActions() {
             category: args.category,
           });
           return null;
+        case 'copy-until-year-end':
+          await send('budget/copy-until-year-end', {
+            month,
+            category: args.category,
+          });
+          return null;
         default:
-          throw new Error(`Unknown budget action type: ${type}`);
+          throw new Error(`Unknown budget action type: ${String(type)}`);
       }
     },
     onSuccess: notification => {

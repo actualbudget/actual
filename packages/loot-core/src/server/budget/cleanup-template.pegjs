@@ -1,6 +1,9 @@
 // https://peggyjs.org
 
 expr
+  = '#cleanup' _ inner: inner { return inner }
+
+inner
   = source
   	{ return { group: null, type: 'source' }}
     /
@@ -8,9 +11,9 @@ expr
     	{ return { type: 'sink', weight: +weight || 1, group: null } }
   /
   group: sourcegroup _? source
-    	{return {group: group || null, type: 'source'}} 
+    	{return {group: group || null, type: 'source'}}
     /
-   	group: sinkgroup? _? sink _? weight: weight? 
+   	group: sinkgroup? _? sink _? weight: weight?
     	{ return { type: 'sink', weight: +weight || 1, group: group || null } }
     /
     group: sourcegroup

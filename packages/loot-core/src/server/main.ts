@@ -1,15 +1,12 @@
 // @ts-strict-ignore
-import './polyfills';
-import * as injectAPI from '@actual-app/api/injected';
-
-import * as asyncStorage from '../platform/server/asyncStorage';
-import * as connection from '../platform/server/connection';
-import * as fs from '../platform/server/fs';
-import { logger, setVerboseMode } from '../platform/server/log';
-import * as sqlite from '../platform/server/sqlite';
-import { q } from '../shared/query';
-import { amountToInteger, integerToAmount } from '../shared/util';
-import type { Handlers } from '../types/handlers';
+import * as asyncStorage from '#platform/server/asyncStorage';
+import * as connection from '#platform/server/connection';
+import * as fs from '#platform/server/fs';
+import { logger, setVerboseMode } from '#platform/server/log';
+import * as sqlite from '#platform/server/sqlite';
+import { q } from '#shared/query';
+import { amountToInteger, integerToAmount } from '#shared/util';
+import type { Handlers } from '#types/handlers';
 
 import { app as accountsApp } from './accounts/app';
 import { app as adminApp } from './admin/app';
@@ -23,6 +20,8 @@ import * as db from './db';
 import * as encryption from './encryption';
 import { app as encryptionApp } from './encryption/app';
 import { app as filtersApp } from './filters/app';
+import { app as forecastApp } from './forecast/app';
+import { app as formulasApp } from './formulas/app';
 import { app } from './main-app';
 import { mutator, runHandler } from './mutators';
 import { app as notesApp } from './notes/app';
@@ -126,8 +125,6 @@ handlers['app-focused'] = async function () {
 
 handlers = installAPI(handlers) as Handlers;
 
-injectAPI.override((name, args) => runHandler(app.handlers[name], args));
-
 // A hack for now until we clean up everything
 app.handlers = handlers;
 app.combine(
@@ -139,6 +136,8 @@ app.combine(
   preferencesApp,
   toolsApp,
   filtersApp,
+  formulasApp,
+  forecastApp,
   reportsApp,
   rulesApp,
   adminApp,
@@ -186,7 +185,8 @@ async function setupDocumentsDir() {
 
 export async function initApp(isDev, socketName) {
   await sqlite.init();
-  await Promise.all([asyncStorage.init(), fs.init()]);
+  asyncStorage.init();
+  await fs.init();
   await setupDocumentsDir();
 
   const keysStr = await asyncStorage.getItem('encrypt-keys');
@@ -274,7 +274,8 @@ export async function init(config: InitConfig) {
   }
 
   await sqlite.init();
-  await Promise.all([asyncStorage.init({ persist: false }), fs.init()]);
+  asyncStorage.init({ persist: false });
+  await fs.init();
   fs._setDocumentDir(dataDir || process.cwd());
 
   if (serverURL) {

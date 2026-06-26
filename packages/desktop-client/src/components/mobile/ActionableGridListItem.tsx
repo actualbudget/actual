@@ -7,9 +7,8 @@ import { animated, config, useSpring } from 'react-spring';
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import type { WithRequired } from '@actual-app/core/types/util';
 import { useDrag } from '@use-gesture/react';
-
-import type { WithRequired } from 'loot-core/types/util';
 
 type ActionableGridListItemProps<T> = {
   actions?: ReactNode | ((params: { close: () => void }) => ReactNode);
@@ -34,10 +33,13 @@ export function ActionableGridListItem<T extends object>({
   const hasActions = !!actions;
 
   // Spring animation for the swipe
-  const [{ x }, api] = useSpring(() => ({
-    x: 0,
-    config: config.stiff,
-  }));
+  const [{ x }, api] = useSpring(
+    () => ({
+      from: { x: 0 },
+      config: config.stiff,
+    }),
+    [],
+  );
 
   // Handle drag gestures
   const bind = useDrag(
@@ -47,8 +49,8 @@ export function ActionableGridListItem<T extends object>({
 
       if (active) {
         dragStartedRef.current = true;
-        api.start({
-          x: Math.max(-actionsWidth, Math.min(0, currentX)),
+        void api.start({
+          to: { x: Math.max(-actionsWidth, Math.min(0, currentX)) },
           onRest: () => {
             dragStartedRef.current = false;
           },
@@ -61,8 +63,8 @@ export function ActionableGridListItem<T extends object>({
         currentX < -actionsWidth / 2 ||
         (vx < -0.5 && currentX < -actionsWidth / 5);
 
-      api.start({
-        x: shouldReveal ? -actionsWidth : 0,
+      void api.start({
+        to: { x: shouldReveal ? -actionsWidth : 0 },
         onRest: () => {
           dragStartedRef.current = false;
           setIsRevealed(shouldReveal);
@@ -119,6 +121,8 @@ export function ActionableGridListItem<T extends object>({
             padding: 16,
             textAlign: 'left',
             borderRadius: 0,
+            justifyContent: 'flex-start',
+            alignItems: 'flex-start',
           }}
           onClick={handleAction}
         >
@@ -138,8 +142,8 @@ export function ActionableGridListItem<T extends object>({
             {typeof actions === 'function'
               ? actions({
                   close: () => {
-                    api.start({
-                      x: 0,
+                    void api.start({
+                      to: { x: 0 },
                       onRest: () => {
                         setIsRevealed(false);
                       },

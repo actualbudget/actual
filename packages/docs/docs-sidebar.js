@@ -13,27 +13,21 @@
 
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebars = {
+  tourSidebar: [
+    'tour/index',
+    'tour/user-interface',
+    'tour/budget',
+    'tour/accounts',
+    'tour/reports',
+    'tour/schedules',
+    'tour/payees',
+    'tour/rules',
+  ],
   docs: [
     'index',
     'vision',
     'releases',
-    {
-      type: 'category',
-      label: 'A Tour of Actual',
-      link: {
-        type: 'doc',
-        id: 'tour/index',
-      },
-      items: [
-        'tour/user-interface',
-        'tour/budget',
-        'tour/accounts',
-        'tour/reports',
-        'tour/schedules',
-        'tour/payees',
-        'tour/rules',
-      ],
-    },
+    'upcoming-release-notes',
     {
       type: 'category',
       label: 'Getting Started',
@@ -168,6 +162,7 @@ const sidebars = {
             'transactions/payees',
             'transactions/bulk-editing',
             'transactions/tags',
+            'transactions/split-transactions',
             {
               type: 'category',
               label: 'Connecting Your Bank',
@@ -176,6 +171,8 @@ const sidebars = {
                 id: 'advanced/bank-sync',
               },
               items: [
+                'advanced/bank-sync/akahu',
+                'advanced/bank-sync/enable-banking',
                 'advanced/bank-sync/gocardless',
                 'advanced/bank-sync/simplefin',
                 'advanced/bank-sync/pluggyai',
@@ -201,6 +198,7 @@ const sidebars = {
           items: ['backup-restore/backup', 'backup-restore/restore'],
         },
         'settings/index',
+        'custom-themes',
         'getting-started/sync',
         'getting-started/manage-files',
 
@@ -213,13 +211,15 @@ const sidebars = {
             id: 'experimental/index',
           },
           items: [
+            'experimental/budget-automation',
             'experimental/goal-templates',
             'experimental/monthly-cleanup',
             'experimental/rule-templating',
             'experimental/formulas',
-            'experimental/crossover-point-report',
-            'experimental/custom-themes',
+            'experimental/balance-forecast-report',
             'experimental/budget-analysis-report',
+            'experimental/sankey-report',
+            'experimental/payee-locations',
           ],
         },
         'getting-started/tips-tricks',
@@ -230,6 +230,7 @@ const sidebars = {
           link: { type: 'doc', id: 'api/index' },
           items: [
             'api/reference',
+            'api/cli',
             {
               type: 'category',
               label: 'ActualQL',
@@ -302,6 +303,7 @@ const sidebars = {
             'contributing/project-details/advice',
           ],
         },
+        'contributing/ai-usage-policy',
         'contributing/development-setup',
         'contributing/testing',
         'contributing/code-style',

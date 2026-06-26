@@ -2,8 +2,8 @@
 import mitt from 'mitt';
 import type { Emitter } from 'mitt';
 
-import { captureException } from '../platform/exceptions';
-import type { ServerEvents } from '../types/server-events';
+import { captureException } from '#platform/exceptions';
+import type { ServerEvents } from '#types/server-events';
 
 // This is a simple helper abstraction for defining methods exposed to
 // the client. It doesn't do much, but checks for naming conflicts and

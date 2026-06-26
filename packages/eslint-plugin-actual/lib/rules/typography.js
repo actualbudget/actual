@@ -17,7 +17,7 @@ module.exports = {
     },
   },
 
-  create(context) {
+  createOnce(context) {
     // variables should be defined here
 
     //----------------------------------------------------------------------
@@ -34,7 +34,7 @@ module.exports = {
         return;
       }
 
-      let rawText = context.getSourceCode().getText(node);
+      let rawText = context.sourceCode.getText(node);
       const originalRawText = rawText;
       if (strip) rawText = rawText.slice(1, -1);
 
@@ -43,7 +43,7 @@ module.exports = {
       const matches = Array.from(rawText.matchAll(curlyQuoteRegex));
       if (matches.length === 0) return;
 
-      const sourceCode = context.getSourceCode();
+      const sourceCode = context.sourceCode;
 
       // Determine the quote delimiter type for fixing
       const firstChar = originalRawText[0];

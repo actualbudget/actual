@@ -15,7 +15,7 @@ module.exports = {
       useT: 'Non-translated English string. Wrap in t().',
     },
   },
-  create(context) {
+  createOnce(context) {
     const whitelist = [
       'Actual',
       'GoCardless',
@@ -194,7 +194,7 @@ module.exports = {
     }
 
     function getFix(node, isJSXText = false) {
-      const sourceCode = context.getSourceCode();
+      const sourceCode = context.sourceCode;
 
       return fixer => {
         const fixes = [];

@@ -9,15 +9,11 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { importBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import { Link } from '@desktop-client/components/common/Link';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useDispatch } from '@desktop-client/redux';
+import { importBudget } from '#budgetfiles/budgetfilesSlice';
+import { Link } from '#components/common/Link';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useNavigate } from '#hooks/useNavigate';
+import { useDispatch } from '#redux';
 
 export function ImportYNAB5Modal() {
   const { t } = useTranslation();
@@ -65,11 +61,11 @@ export function ImportYNAB5Modal() {
 
   return (
     <Modal name="import-ynab5" containerProps={{ style: { width: 400 } }}>
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Import from nYNAB')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ ...styles.smallText, lineHeight: 1.5, marginTop: 20 }}>
             {error && (

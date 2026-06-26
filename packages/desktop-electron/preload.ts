@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { contextBridge, ipcRenderer } from 'electron';
 import type { IpcRenderer } from 'electron';
 

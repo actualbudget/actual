@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import { logger } from '../../platform/server/log';
-import { handlers } from '../main';
+import { logger } from '#platform/server/log';
+import { handlers } from '#server/main';
 
 import { importActual } from './actual';
 import * as YNAB4 from './ynab4';

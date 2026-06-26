@@ -26,6 +26,9 @@ export class AccountPage {
   readonly filterSelectTooltip: Locator;
   readonly selectButton: Locator;
   readonly selectTooltip: Locator;
+  readonly sidebarAllAccountsBalance: Locator;
+  readonly sidebarOnBudgetBalance: Locator;
+  readonly sidebarOffBudgetBalance: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -54,6 +57,16 @@ export class AccountPage {
 
     this.selectButton = this.page.getByTestId('transactions-select-button');
     this.selectTooltip = this.page.getByTestId('transactions-select-tooltip');
+
+    this.sidebarAllAccountsBalance = this.page.getByTestId(
+      'sidebar-all-accounts-balance',
+    );
+    this.sidebarOnBudgetBalance = this.page.getByTestId(
+      'sidebar-on-budget-balance',
+    );
+    this.sidebarOffBudgetBalance = this.page.getByTestId(
+      'sidebar-off-budget-balance',
+    );
   }
 
   async waitFor(...options: Parameters<Locator['waitFor']>) {
@@ -100,16 +113,19 @@ export class AccountPage {
       category: 'split',
     });
 
+    // Splitting starts with two empty splits
+    const initialSplitCount = 2;
+
     // Child transactions
     for (let i = 0; i < transactions.length; i++) {
+      if (i >= initialSplitCount) {
+        await this.page.getByRole('button', { name: 'Add Split' }).click();
+      }
+
       await this._fillTransactionFields(
         this.newTransactionRow.nth(i + 1),
         transactions[i],
       );
-
-      if (i + 1 < transactions.length) {
-        await this.page.getByRole('button', { name: 'Add Split' }).click();
-      }
     }
 
     await this.addTransactionButton.click();
@@ -232,7 +248,7 @@ export class AccountPage {
     if (transaction.notes) {
       const notesCell = transactionRow.getByTestId('notes');
       await notesCell.click();
-      const notesInput = notesCell.getByRole('textbox');
+      const notesInput = notesCell.getByRole('combobox');
       await this.selectInputText(notesInput);
       await notesInput.pressSequentially(transaction.notes);
       await this.page.keyboard.press('Tab');

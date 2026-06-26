@@ -1,37 +1,75 @@
 {
   "name": "@actual-app/api",
-  "version": "26.2.1",
+  "version": "26.6.0",
   "description": "An API for Actual",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/api"
+  },
   "files": [
     "@types",
-    "dist"
+    "dist",
+    "!@types/**/*.test.d.ts",
+    "!@types/**/*.test.d.ts.map"
   ],
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./@types/index.d.ts",
+      "development": "./index.ts",
+      "browser": {
+        "types": "./@types/index.browser.d.ts",
+        "default": "./dist/browser.js"
+      },
+      "default": "./dist/index.js"
+    },
+    "./models": {
+      "types": "./@types/models.d.ts",
+      "development": "./models.ts",
+      "default": "./dist/models.js"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./@types/index.d.ts",
+        "browser": {
+          "types": "./@types/index.browser.d.ts",
+          "default": "./dist/browser.js"
+        },
+        "default": "./dist/index.js"
+      },
+      "./models": {
+        "types": "./@types/models.d.ts",
+        "default": "./dist/models.js"
+      }
+    }
+  },
   "scripts": {
-    "build:app": "yarn workspace loot-core build:api",
-    "build:crdt": "yarn workspace @actual-app/crdt build",
-    "build:node": "tsc && tsc-alias",
-    "build:migrations": "mkdir dist/migrations && cp migrations/*.sql dist/migrations",
-    "build:default-db": "cp default-db.sqlite dist/",
-    "build": "yarn run clean && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
-    "test": "yarn run clean && yarn run build:app && yarn run build:crdt && vitest --run",
-    "clean": "rm -rf dist @types",
-    "typecheck": "yarn build && tsc --noEmit && tsc-strict"
+    "build": "vite build && tsgo --emitDeclarationOnly && vite build --config vite.browser-worker.config.mts && vite build --config vite.browser.config.mts",
+    "test": "vitest --run",
+    "e2e": "playwright test",
+    "typecheck": "tsgo -b && tsc-strict"
   },
   "dependencies": {
-    "@actual-app/crdt": "workspace:^",
-    "better-sqlite3": "^12.6.2",
+    "@actual-app/core": "workspace:*",
+    "@actual-app/crdt": "workspace:*",
+    "better-sqlite3": "^12.10.0",
     "compare-versions": "^6.1.1",
-    "node-fetch": "^3.3.2",
-    "uuid": "^13.0.0"
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
-    "tsc-alias": "^1.8.16",
-    "typescript": "^5.9.3",
+    "@actual-app/vite-plugin-peggy": "workspace:*",
+    "@playwright/test": "1.59.1",
+    "@typescript/native-preview": "beta",
+    "rollup-plugin-visualizer": "^7.0.1",
     "typescript-strict-plugin": "^2.4.4",
-    "vitest": "^4.0.18"
+    "vite": "^8.0.16",
+    "vite-plugin-node-polyfills": "^0.28.0",
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": ">=20"

@@ -1,6 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next';
 
-import type { PercentageTemplate } from 'loot-core/types/models/templates';
+import type { PercentageTemplate } from '@actual-app/core/types/models/templates';
 
 type PercentageAutomationReadOnlyProps = {
   template: PercentageTemplate;
@@ -13,7 +13,7 @@ export const PercentageAutomationReadOnly = ({
 }: PercentageAutomationReadOnlyProps) => {
   const { t } = useTranslation();
 
-  if (template.category === 'total') {
+  if (template.category === 'all income') {
     return template.previous ? (
       <Trans>
         Budget {{ percent: template.percent }}% of total income last month
@@ -25,7 +25,7 @@ export const PercentageAutomationReadOnly = ({
     );
   }
 
-  if (template.category === 'to-budget') {
+  if (template.category === 'available funds') {
     return template.previous ? (
       <Trans>
         Budget {{ percent: template.percent }}% of available funds to budget

@@ -10,6 +10,6 @@ export const SvgVolumeMute = (props: SVGProps<SVGSVGElement>) => (
       ...props.style,
     }}
   >
-    <path d="M9 7H5v6h4l5 5V2L9 7z" fill="currentColor" />
+    <path d="M9 7H5v6h4l5 5V2z" fill="currentColor" />
   </svg>
 );

@@ -4,20 +4,19 @@
  * work well for content-centric websites.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@300..700&display=swap');
-
 h1,
 .serif-header {
-  font-family:
-    Libre Baskerville,
-    serif;
+  font-family: var(--ifm-font-family-base);
   text-wrap: balance;
 }
+
 h1 {
   font-size: 2.5rem;
 }
+
 .serif-header {
   font-weight: normal;
+  font-size: 1.75rem;
 }
 
 /* You can override the default Infima variables here. */
@@ -31,6 +30,18 @@ h1 {
   --ifm-color-primary-lightest: var(--ifm-color-primary);
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  --ifm-font-family-base:
+    'Inter Variable', -apple-system, 'BlinkMacSystemFont', 'Segoe UI', 'Roboto',
+    'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+    'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+
+  --ifm-font-weight-light: 400;
+  --ifm-font-weight-normal: 500;
+  --ifm-font-weight-semibold: 600;
+  --ifm-font-weight-bold: 800;
+
+  font-weight: var(--ifm-font-weight-normal);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */

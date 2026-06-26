@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { accountQueries } from '@desktop-client/accounts';
+import { accountQueries } from '#accounts';
 
 export function useAccount(id: string) {
   const query = useQuery({

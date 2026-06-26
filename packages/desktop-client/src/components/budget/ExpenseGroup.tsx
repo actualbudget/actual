@@ -4,29 +4,24 @@ import type { ComponentProps } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+
+import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
+import type {
+  DragState,
+  OnDragChangeCallback,
+  OnDropCallback,
+} from '#components/sort';
+import { Row, ROW_HEIGHT } from '#components/table';
+import { useDragRef } from '#hooks/useDragRef';
 
 import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
 
 import { useBudgetComponents } from '.';
-
-import {
-  DropHighlight,
-  useDraggable,
-  useDroppable,
-} from '@desktop-client/components/sort';
-import type {
-  DragState,
-  OnDragChangeCallback,
-  OnDropCallback,
-} from '@desktop-client/components/sort';
-import { Row, ROW_HEIGHT } from '@desktop-client/components/table';
-import { useDragRef } from '@desktop-client/hooks/useDragRef';
 
 type ExpenseGroupProps = {
   group: ComponentProps<typeof SidebarGroup>['group'];
@@ -39,6 +34,7 @@ type ExpenseGroupProps = {
   onApplyBudgetTemplatesInGroup?: ComponentProps<
     typeof SidebarGroup
   >['onApplyBudgetTemplatesInGroup'];
+  onSortCategories?: ComponentProps<typeof SidebarGroup>['onSortCategories'];
   onDragChange: OnDragChangeCallback<
     ComponentProps<typeof SidebarGroup>['group']
   >;
@@ -57,6 +53,7 @@ export function ExpenseGroup({
   onSave,
   onDelete,
   onApplyBudgetTemplatesInGroup,
+  onSortCategories,
   onDragChange,
   onReorderGroup,
   onReorderCategory,
@@ -143,6 +140,7 @@ export function ExpenseGroup({
           onSave={onSave}
           onDelete={onDelete}
           onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
+          onSortCategories={onSortCategories}
           onShowNewCategory={onShowNewCategory}
         />
         <RenderMonths>

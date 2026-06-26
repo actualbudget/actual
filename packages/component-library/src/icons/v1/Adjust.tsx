@@ -11,7 +11,7 @@ export const SvgAdjust = (props: SVGProps<SVGSVGElement>) => (
     }}
   >
     <path
-      d="M10 2v16a8 8 0 1 0 0-16zm0 18a10 10 0 1 1 0-20 10 10 0 0 1 0 20z"
+      d="M10 2v16a8 8 0 1 0 0-16m0 18a10 10 0 1 1 0-20 10 10 0 0 1 0 20"
       fill="currentColor"
     />
   </svg>

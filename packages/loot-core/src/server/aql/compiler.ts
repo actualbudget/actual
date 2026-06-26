@@ -1,5 +1,5 @@
-import { getNormalisedString } from '../../shared/normalisation';
-import type { QueryState } from '../../shared/query';
+import { getNormalisedString } from '#shared/normalisation';
+import type { QueryState } from '#shared/query';
 
 // @ts-strict-ignore
 let _uid = 0;
@@ -880,7 +880,11 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
       // Dedupe the ids
       const ids = [...new Set(right)];
 
-      return `${left} IN (` + ids.map(id => `'${id}'`).join(',') + ')';
+      return (
+        `${String(left)} IN (` +
+        ids.map(id => `'${String(id)}'`).join(',') +
+        ')'
+      );
     }
     case '$like': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);

@@ -1,15 +1,15 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 
-import { useSheetName } from './useSheetName';
-import { useSpreadsheet } from './useSpreadsheet';
-
 import type {
   Binding,
   BindingObject,
   SheetFields,
   SheetNames,
   Spreadsheets,
-} from '@desktop-client/spreadsheet';
+} from '#spreadsheet';
+
+import { useSheetName } from './useSheetName';
+import { useSpreadsheet } from './useSpreadsheet';
 
 type SheetValueResult<
   SheetName extends SheetNames,

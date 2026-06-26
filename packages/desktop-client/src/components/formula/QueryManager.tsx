@@ -12,32 +12,34 @@ import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type {
+  RuleConditionEntity,
+  TimeFrame,
+} from '@actual-app/core/types/models';
 import { parseISO } from 'date-fns';
 
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import type { RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
-
-import {
-  normalizeQueryTimeFrameEnd,
-  normalizeQueryTimeFrameStart,
-} from './queryTimeFrame';
-
-import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
-import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
-import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
+import { AppliedFilters } from '#components/filters/AppliedFilters';
+import { FilterButton } from '#components/filters/FiltersMenu';
+import { getLiveRange } from '#components/reports/getLiveRange';
 import {
   calculateTimeRange,
   getLatestRange,
   validateEnd,
   validateStart,
-} from '@desktop-client/components/reports/reportRanges';
-import { fromDateRepr } from '@desktop-client/components/reports/util';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { AppDispatch } from '@desktop-client/redux/store';
+} from '#components/reports/reportRanges';
+import { fromDateRepr } from '#components/reports/util';
+import { useLocale } from '#hooks/useLocale';
+import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import type { AppDispatch } from '#redux/store';
+
+import {
+  normalizeQueryTimeFrameEnd,
+  normalizeQueryTimeFrameStart,
+} from './queryTimeFrame';
 
 type QueryConfig = {
   conditions?: RuleConditionEntity[];

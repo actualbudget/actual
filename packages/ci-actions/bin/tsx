@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+
+cd ../../
+
+script="$1"
+shift
+exec node --import=extensionless/register --experimental-strip-types packages/ci-actions/"$script" "$@"

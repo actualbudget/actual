@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xsi:schemaLocation="urn:iso:std:iso:20022:tech:xsd:camt.053.001.04 camt.053.001.04.xsd"
+    xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.04"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <BkToCstmrStmt>
+        <GrpHdr>
+            <MsgId>053D2019-01-23T00:00:00.0N000000001</MsgId>
+            <CreDtTm>2019-01-23T00:00:00.0+00:00</CreDtTm>
+        </GrpHdr>
+        <Stmt>
+            <Id>TEST-PAYEE-MEMO</Id>
+            <CreDtTm>2019-01-23T00:00:00.0+00:00</CreDtTm>
+            <Acct>
+                <Id>
+                    <IBAN>DE14740618130000033626</IBAN>
+                </Id>
+                <Ccy>EUR</Ccy>
+            </Acct>
+
+            <!-- 1: payee (Cdtr/Nm) AND notes (RmtInf/Ustrd) -->
+            <Ntry>
+                <Amt Ccy="EUR">10.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <Dt>2019-01-23</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2019-01-23</Dt>
+                </ValDt>
+                <AcctSvcrRef>test-payee-and-notes</AcctSvcrRef>
+                <BkTxCd />
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <EndToEndId>test-payee-and-notes</EndToEndId>
+                        </Refs>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>Payee Name</Nm>
+                            </Cdtr>
+                        </RltdPties>
+                        <RmtInf>
+                            <Ustrd>Note Text</Ustrd>
+                        </RmtInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+
+            <!-- 2: payee only (Cdtr/Nm, no RmtInf) -->
+            <Ntry>
+                <Amt Ccy="EUR">20.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <Dt>2019-01-23</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2019-01-23</Dt>
+                </ValDt>
+                <AcctSvcrRef>test-payee-only</AcctSvcrRef>
+                <BkTxCd />
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <EndToEndId>test-payee-only</EndToEndId>
+                        </Refs>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>Payee Name Only</Nm>
+                            </Cdtr>
+                        </RltdPties>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+
+            <!-- 3: notes only (RmtInf/Ustrd, no Cdtr/Nm) -->
+            <Ntry>
+                <Amt Ccy="EUR">30.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <Dt>2019-01-23</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2019-01-23</Dt>
+                </ValDt>
+                <AcctSvcrRef>test-notes-only</AcctSvcrRef>
+                <BkTxCd />
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <EndToEndId>test-notes-only</EndToEndId>
+                        </Refs>
+                        <RmtInf>
+                            <Ustrd>Note Only Text</Ustrd>
+                        </RmtInf>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+
+            <!-- 4: neither payee nor notes -->
+            <Ntry>
+                <Amt Ccy="EUR">40.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <Sts>BOOK</Sts>
+                <BookgDt>
+                    <Dt>2019-01-23</Dt>
+                </BookgDt>
+                <ValDt>
+                    <Dt>2019-01-23</Dt>
+                </ValDt>
+                <AcctSvcrRef>test-neither</AcctSvcrRef>
+                <BkTxCd />
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <EndToEndId>test-neither</EndToEndId>
+                        </Refs>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+
+        </Stmt>
+    </BkToCstmrStmt>
+</Document>

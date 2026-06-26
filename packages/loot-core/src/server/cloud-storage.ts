@@ -2,12 +2,12 @@
 import AdmZip from 'adm-zip';
 import { v4 as uuidv4 } from 'uuid';
 
-import * as asyncStorage from '../platform/server/asyncStorage';
-import { fetch } from '../platform/server/fetch';
-import * as fs from '../platform/server/fs';
-import { logger } from '../platform/server/log';
-import * as sqlite from '../platform/server/sqlite';
-import * as monthUtils from '../shared/months';
+import * as asyncStorage from '#platform/server/asyncStorage';
+import { fetch } from '#platform/server/fetch';
+import * as fs from '#platform/server/fs';
+import { logger } from '#platform/server/log';
+import * as sqlite from '#platform/server/sqlite';
+import * as monthUtils from '#shared/months';
 
 import * as encryption from './encryption';
 import {

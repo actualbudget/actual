@@ -1,36 +1,26 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 import {
   format as formatDate,
   isValid as isDateValid,
   parseISO,
 } from 'date-fns';
 
-import * as monthUtils from 'loot-core/shared/months';
-import type { TransactionEntity } from 'loot-core/types/models';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import {
-  Cell,
-  Field,
-  Row,
-  SelectCell,
-  Table,
-} from '@desktop-client/components/table';
-import { DisplayId } from '@desktop-client/components/util/DisplayId';
-import { useAccount } from '@desktop-client/hooks/useAccount';
-import { useCategory } from '@desktop-client/hooks/useCategory';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import type { FormatType } from '@desktop-client/hooks/useFormat';
-import {
-  useSelectedDispatch,
-  useSelectedItems,
-} from '@desktop-client/hooks/useSelected';
+import { FinancialText } from '#components/FinancialText';
+import { Cell, Field, Row, SelectCell, Table } from '#components/table';
+import { DisplayId } from '#components/util/DisplayId';
+import { useAccount } from '#hooks/useAccount';
+import { useCategory } from '#hooks/useCategory';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
+import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 
 function serializeTransaction(
   transaction: TransactionEntity,
@@ -53,13 +43,15 @@ type TransactionRowProps = {
   fields: string[];
   selected: boolean;
   format: (value: unknown, type: FormatType) => string;
+  index: number;
 };
 
-const TransactionRow = memo(function TransactionRow({
+function TransactionRow({
   transaction,
   fields,
   selected,
   format,
+  index,
 }: TransactionRowProps) {
   const { t } = useTranslation();
 
@@ -69,7 +61,16 @@ const TransactionRow = memo(function TransactionRow({
   const dispatchSelected = useSelectedDispatch();
 
   return (
-    <Row style={{ color: theme.tableText }}>
+    <Row
+      style={{
+        color: theme.tableText,
+        backgroundColor: selected
+          ? theme.tableRowBackgroundHighlight
+          : index % 2 === 0
+            ? theme.tableBackground
+            : theme.tableRowBackgroundAlternate,
+      }}
+    >
       <SelectCell
         exposed
         focused={false}
@@ -162,7 +163,7 @@ const TransactionRow = memo(function TransactionRow({
       })}
     </Row>
   );
-});
+}
 
 type SimpleTransactionsTableProps = {
   transactions: readonly TransactionEntity[];
@@ -188,13 +189,14 @@ export function SimpleTransactionsTable({
   }, [transactions, dateFormat]);
 
   const renderItem = useCallback(
-    ({ item }: { item: TransactionEntity }) => {
+    ({ item, index }: { item: TransactionEntity; index: number }) => {
       return (
         <TransactionRow
           transaction={item}
           fields={memoFields}
           selected={selectedItems && selectedItems.has(item.id)}
           format={format}
+          index={index}
         />
       );
     },

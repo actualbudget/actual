@@ -1,4 +1,4 @@
-import type { GlobalPrefsJson } from '../../../types/prefs';
+import type { GlobalPrefsJson } from '#types/prefs';
 
 export declare function init(opts?: { persist?: boolean }): void;
 export type Init = typeof init;

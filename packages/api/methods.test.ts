@@ -1,9 +1,32 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-import type { RuleEntity } from 'loot-core/types/models';
+import type { RuleEntity } from '@actual-app/core/types/models';
+import { vi } from 'vitest';
 
 import * as api from './index';
+
+declare global {
+  var IS_TESTING: boolean;
+  var currentMonth: string | null;
+}
+
+// In tests we run from source; loot-core's API fs uses __dirname (for the built dist/).
+// Mock the fs so path constants point at loot-core package root where migrations live.
+vi.mock(
+  '../loot-core/src/platform/server/fs/index.api',
+  async importOriginal => {
+    const actual = (await importOriginal()) as Record<string, unknown>;
+    const pathMod = await import('path');
+    const lootCoreRoot = pathMod.join(__dirname, '..', 'loot-core');
+    return {
+      ...actual,
+      migrationsPath: pathMod.join(lootCoreRoot, 'migrations'),
+      bundledDatabasePath: pathMod.join(lootCoreRoot, 'default-db.sqlite'),
+      demoBudgetPath: pathMod.join(lootCoreRoot, 'demo-budget'),
+    };
+  },
+);
 
 const budgetName = 'test-budget';
 
@@ -493,6 +516,29 @@ describe('API CRUD operations', () => {
     );
   });
 
+  // apis: getNote, updateNote
+  test('Notes: successfully get and update note', async () => {
+    const categories = await api.getCategories();
+    const categoryId = categories[0].id;
+
+    // No note exists initially
+    const initial = await api.getNote(categoryId);
+    expect(initial).toBeNull();
+
+    // Set a note
+    await api.updateNote(categoryId, 'Test note content');
+    const afterSet = await api.getNote(categoryId);
+    expect(afterSet).toEqual({ id: categoryId, note: 'Test note content' });
+
+    // Update the note
+    await api.updateNote(categoryId, 'Updated note content');
+    const afterUpdate = await api.getNote(categoryId);
+    expect(afterUpdate).toEqual({
+      id: categoryId,
+      note: 'Updated note content',
+    });
+  });
+
   // apis: getRules, getPayeeRules, createRule, updateRule, deleteRule
   test('Rules: successfully update rules', async () => {
     await api.createPayee({ name: 'test-payee' });
@@ -876,6 +922,73 @@ describe('API CRUD operations', () => {
       '2023-11-30',
     );
     expect(transactions[0].notes).toBeNull();
+  });
+
+  test('Transactions: reimportDeleted=false prevents reimporting deleted transactions', async () => {
+    const accountId = await api.createAccount({ name: 'test-account' }, 0);
+
+    // Import a transaction
+    const result1 = await api.importTransactions(accountId, [
+      {
+        date: '2023-11-03',
+        imported_id: 'reimport-test-1',
+        amount: 100,
+        account: accountId,
+      },
+    ]);
+    expect(result1.added).toHaveLength(1);
+
+    // Delete the transaction
+    await api.deleteTransaction(result1.added[0]);
+
+    // Reimport the same transaction with reimportDeleted=false
+    const result2 = await api.importTransactions(
+      accountId,
+      [
+        {
+          date: '2023-11-03',
+          imported_id: 'reimport-test-1',
+          amount: 100,
+          account: accountId,
+        },
+      ],
+      { reimportDeleted: false },
+    );
+
+    // Should match the deleted transaction and not create a new one
+    expect(result2.added).toHaveLength(0);
+    expect(result2.updated).toHaveLength(0);
+  });
+
+  test('Transactions: reimportDeleted=true reimports deleted transactions', async () => {
+    const accountId = await api.createAccount({ name: 'test-account' }, 0);
+
+    // Import a transaction
+    const result1 = await api.importTransactions(accountId, [
+      {
+        date: '2023-11-03',
+        imported_id: 'reimport-test-2',
+        amount: 200,
+        account: accountId,
+      },
+    ]);
+    expect(result1.added).toHaveLength(1);
+
+    // Delete the transaction
+    await api.deleteTransaction(result1.added[0]);
+
+    // Reimport the same transaction relying on reimportDeleted=true default
+    const result2 = await api.importTransactions(accountId, [
+      {
+        date: '2023-11-03',
+        imported_id: 'reimport-test-2',
+        amount: 200,
+        account: accountId,
+      },
+    ]);
+
+    // Should create a new transaction since deleted ones are ignored
+    expect(result2.added).toHaveLength(1);
   });
 });
 

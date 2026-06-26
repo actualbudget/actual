@@ -10,12 +10,12 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { useTrackingSheetValue } from '@desktop-client/components/budget/tracking/TrackingBudgetComponents';
-import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
+import { useTrackingSheetValue } from '#components/budget/tracking/TrackingBudgetComponents';
+import { makeAmountFullStyle } from '#components/budget/util';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useFormat } from '#hooks/useFormat';
+import { trackingBudget } from '#spreadsheet/bindings';
 
 type SavedProps = {
   projected: boolean;

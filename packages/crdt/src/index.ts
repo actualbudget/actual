@@ -1,6 +1,3 @@
-/* oxlint-disable typescript/no-explicit-any */
-import './proto/sync_pb.js'; // Import for side effects
-
 export {
   merkle,
   getClock,
@@ -13,11 +10,17 @@ export {
   Timestamp,
 } from './crdt';
 
-// Access global proto namespace
-export const SyncRequest = (globalThis as any).proto.SyncRequest;
-export const SyncResponse = (globalThis as any).proto.SyncResponse;
-export const Message = (globalThis as any).proto.Message;
-export const MessageEnvelope = (globalThis as any).proto.MessageEnvelope;
-export const EncryptedData = (globalThis as any).proto.EncryptedData;
+export {
+  type EncryptedData,
+  type Message,
+  type MessageEnvelope,
+  type SyncRequest,
+  type SyncResponse,
+  EncryptedDataSchema,
+  MessageSchema,
+  MessageEnvelopeSchema,
+  SyncRequestSchema,
+  SyncResponseSchema,
+} from './proto/sync_pb';
 
-export const SyncProtoBuf = (globalThis as any).proto;
+export { create, fromBinary, toBinary } from '@bufbuild/protobuf';

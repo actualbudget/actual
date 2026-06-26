@@ -5,7 +5,7 @@ import { Button } from '@actual-app/components/button';
 import type { CSSProperties } from '@actual-app/components/styles';
 import type { View } from '@actual-app/components/view';
 
-import { Link } from '@desktop-client/components/common/Link';
+import { Link } from '#components/common/Link';
 
 type ItemContentProps = {
   style: ComponentProps<typeof View>['style'];

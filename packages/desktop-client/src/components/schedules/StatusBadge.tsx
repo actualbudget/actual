@@ -13,10 +13,10 @@ import {
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { ScheduleStatusType } from '@actual-app/core/shared/schedules';
+import { titleFirst } from '@actual-app/core/shared/util';
 
-import { getStatusLabel } from 'loot-core/shared/schedules';
-import type { ScheduleStatusType } from 'loot-core/shared/schedules';
-import { titleFirst } from 'loot-core/shared/util';
+import { getStatusLabel } from '#util/schedule';
 
 // Consists of Schedule Statuses + Transaction statuses
 export type StatusTypes =

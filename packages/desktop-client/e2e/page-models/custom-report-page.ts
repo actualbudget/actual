@@ -39,7 +39,7 @@ export class CustomReportPage {
           .click();
         break;
       default:
-        throw new Error(`Unrecognized mode: ${mode}`);
+        throw new Error(`Unrecognized mode: ${String(mode)}`);
     }
   }
 }

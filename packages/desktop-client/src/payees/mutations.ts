@@ -1,17 +1,17 @@
 import { useTranslation } from 'react-i18next';
 
+import { send } from '@actual-app/core/platform/client/connection';
+import type { PayeeEntity } from '@actual-app/core/types/models';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { PayeeEntity } from 'loot-core/types/models';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import type { AppDispatch } from '#redux/store';
 
+import { locationService } from './location';
 import { payeeQueries } from './queries';
-
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { AppDispatch } from '@desktop-client/redux/store';
 
 function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
   void queryClient.invalidateQueries({
@@ -39,6 +39,57 @@ function dispatchErrorNotification(
 type CreatePayeePayload = {
   name: PayeeEntity['name'];
 };
+
+export function useDeletePayeeLocationMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (locationId: string) => {
+      await locationService.deletePayeeLocation(locationId);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: payeeQueries.listNearby().queryKey,
+      });
+    },
+    onError: error => {
+      console.error('Error deleting payee location:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error forgetting the location. Please try again.'),
+        error,
+      );
+    },
+  });
+}
+
+export function useSavePayeeLocationMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (payeeId: PayeeEntity['id']) => {
+      const coords = await locationService.getCurrentPosition();
+      await locationService.savePayeeLocation(payeeId, coords);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: payeeQueries.listNearby().queryKey,
+      });
+    },
+    onError: error => {
+      console.error('Error saving payee location:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error saving the location. Please try again.'),
+        error,
+      );
+    },
+  });
+}
 
 export function useCreatePayeeMutation() {
   const queryClient = useQueryClient();

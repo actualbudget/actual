@@ -2,10 +2,10 @@
 import { deserializeClock, getClock } from '@actual-app/crdt';
 import { v4 as uuidv4 } from 'uuid';
 
-import { expectSnapshotWithDiffer } from '../mocks/util';
-import * as connection from '../platform/server/connection';
-import * as fs from '../platform/server/fs';
-import * as monthUtils from '../shared/months';
+import { expectSnapshotWithDiffer } from '#mocks/util';
+import * as connection from '#platform/server/connection';
+import * as fs from '#platform/server/fs';
+import * as monthUtils from '#shared/months';
 
 import * as budgetActions from './budget/actions';
 import * as budget from './budget/base';
@@ -139,7 +139,6 @@ describe('Accounts', () => {
       await db.all<db.DbTransaction>('SELECT * FROM transactions'),
     );
 
-    let transaction = await db.getTransaction(id);
     await runHandler(handlers['transaction-update'], {
       ...(await db.getTransaction(id)),
       payee: 'transfer-three',
@@ -149,7 +148,7 @@ describe('Accounts', () => {
       await db.all<db.DbTransaction>('SELECT * FROM transactions'),
     );
 
-    transaction = await db.getTransaction(id);
+    const transaction = await db.getTransaction(id);
     await runHandler(handlers['transaction-delete'], transaction);
     differ.expectToMatchDiff(
       await db.all<db.DbTransaction>('SELECT * FROM transactions'),
@@ -261,7 +260,9 @@ describe('Budget', () => {
     let changed = await captureChangedCells(() =>
       runHandler(handlers['transaction-add'], trans),
     );
-    expect(changed.sort()).toMatchSnapshot();
+    expect(
+      changed.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0)),
+    ).toMatchSnapshot();
     // Test updates
     changed = await captureChangedCells(async () => {
       await runHandler(handlers['transaction-update'], {
@@ -269,12 +270,16 @@ describe('Budget', () => {
         amount: 7000,
       });
     });
-    expect(changed.sort()).toMatchSnapshot();
+    expect(
+      changed.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0)),
+    ).toMatchSnapshot();
     // Test deletions
     changed = await captureChangedCells(async () => {
       await runHandler(handlers['transaction-delete'], { id: trans.id });
     });
-    expect(changed.sort()).toMatchSnapshot();
+    expect(
+      changed.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0)),
+    ).toMatchSnapshot();
   });
 });
 

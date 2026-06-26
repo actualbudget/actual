@@ -6,29 +6,35 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type {
+  RuleConditionEntity,
+  TimeFrame,
+} from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
-import * as monthUtils from 'loot-core/shared/months';
-import type { RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+import { AppliedFilters } from '#components/filters/AppliedFilters';
+import { FilterButton } from '#components/filters/FiltersMenu';
+import { useLocale } from '#hooks/useLocale';
 
 import { getLiveRange } from './getLiveRange';
 import {
   calculateTimeRange,
+  getFullFutureRange,
   getFullRange,
   getLatestRange,
+  getNextRange,
   validateEnd,
   validateStart,
 } from './reportRanges';
-
-import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
-import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
-import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type HeaderProps = {
   start: TimeFrame['start'];
   end: TimeFrame['end'];
   mode?: TimeFrame['mode'];
   show1Month?: boolean;
+  showFutureRange?: boolean;
+  hideModeToggle?: boolean;
   allMonths: Array<{ name: string; pretty: string }>;
   earliestTransaction: string;
   latestTransaction: string;
@@ -42,6 +48,7 @@ type HeaderProps = {
   inlineContent?: ReactNode;
   // no separate category filter; use main filters instead
   filterExclude?: string[];
+  filterInclude?: string[];
 } & (
   | {
       filters: RuleConditionEntity[];
@@ -63,11 +70,200 @@ type HeaderProps = {
     }
 );
 
+type RangePresetProps = {
+  show1Month?: boolean;
+  earliestTransaction: string;
+  latestTransaction: string;
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  allMonths: Array<{ name: string; pretty: string }>;
+  onChangeDates: HeaderProps['onChangeDates'];
+};
+
+type PastRangePresetsProps = RangePresetProps & {
+  convertToMonth: (
+    start: string,
+    end: string,
+    currentMode: TimeFrame['mode'],
+    mode: TimeFrame['mode'],
+  ) => [string, string, TimeFrame['mode']];
+};
+
+type FutureRangePresetsProps = Pick<
+  RangePresetProps,
+  'show1Month' | 'latestTransaction' | 'onChangeDates'
+>;
+
+function PastRangePresets({
+  show1Month,
+  earliestTransaction,
+  latestTransaction,
+  firstDayOfWeekIdx,
+  allMonths,
+  onChangeDates,
+  convertToMonth,
+}: PastRangePresetsProps) {
+  return (
+    <>
+      {show1Month && (
+        <Button
+          variant="bare"
+          onPress={() => onChangeDates(...getLatestRange(0))}
+        >
+          <Trans>1 month</Trans>
+        </Button>
+      )}
+      <Button
+        variant="bare"
+        onPress={() => onChangeDates(...getLatestRange(2))}
+      >
+        <Trans>3 months</Trans>
+      </Button>
+      <Button
+        variant="bare"
+        onPress={() => onChangeDates(...getLatestRange(5))}
+      >
+        <Trans>6 months</Trans>
+      </Button>
+      <Button
+        variant="bare"
+        onPress={() => onChangeDates(...getLatestRange(11))}
+      >
+        <Trans>1 year</Trans>
+      </Button>
+      <Button
+        variant="bare"
+        onPress={() =>
+          onChangeDates(
+            ...convertToMonth(
+              ...getLiveRange(
+                'Year to date',
+                earliestTransaction,
+                latestTransaction,
+                true,
+                firstDayOfWeekIdx,
+              ),
+              'yearToDate',
+            ),
+          )
+        }
+      >
+        <Trans>Year to date</Trans>
+      </Button>
+      <Button
+        variant="bare"
+        onPress={() =>
+          onChangeDates(
+            ...convertToMonth(
+              ...getLiveRange(
+                'Last month',
+                earliestTransaction,
+                latestTransaction,
+                false,
+                firstDayOfWeekIdx,
+              ),
+              'lastMonth',
+            ),
+          )
+        }
+      >
+        <Trans>Last month</Trans>
+      </Button>
+      <Button
+        variant="bare"
+        onPress={() =>
+          onChangeDates(
+            ...convertToMonth(
+              ...getLiveRange(
+                'Last year',
+                earliestTransaction,
+                latestTransaction,
+                false,
+                firstDayOfWeekIdx,
+              ),
+              'lastYear',
+            ),
+          )
+        }
+      >
+        <Trans>Last year</Trans>
+      </Button>
+      <Button
+        variant="bare"
+        onPress={() =>
+          onChangeDates(
+            ...convertToMonth(
+              ...getLiveRange(
+                'Prior year to date',
+                earliestTransaction,
+                latestTransaction,
+                false,
+                firstDayOfWeekIdx,
+              ),
+              'priorYearToDate',
+            ),
+          )
+        }
+      >
+        <Trans>Prior year to date</Trans>
+      </Button>
+      <Button
+        variant="bare"
+        onPress={() =>
+          onChangeDates(
+            ...getFullRange(
+              allMonths[allMonths.length - 1].name,
+              allMonths[0].name,
+            ),
+          )
+        }
+      >
+        <Trans>All time</Trans>
+      </Button>
+    </>
+  );
+}
+
+function FutureRangePresets({
+  show1Month,
+  latestTransaction,
+  onChangeDates,
+}: FutureRangePresetsProps) {
+  return (
+    <>
+      {show1Month && (
+        <Button
+          variant="bare"
+          onPress={() => onChangeDates(...getNextRange(0))}
+        >
+          <Trans>Next month</Trans>
+        </Button>
+      )}
+      <Button variant="bare" onPress={() => onChangeDates(...getNextRange(2))}>
+        <Trans>Next 3 months</Trans>
+      </Button>
+      <Button variant="bare" onPress={() => onChangeDates(...getNextRange(5))}>
+        <Trans>Next 6 months</Trans>
+      </Button>
+      <Button variant="bare" onPress={() => onChangeDates(...getNextRange(11))}>
+        <Trans>Next year</Trans>
+      </Button>
+      <Button
+        variant="bare"
+        onPress={() => onChangeDates(...getFullFutureRange(latestTransaction))}
+      >
+        <Trans>All future</Trans>
+      </Button>
+    </>
+  );
+}
+
 export function Header({
   start,
   end,
   mode,
   show1Month,
+  showFutureRange,
+  hideModeToggle,
   allMonths,
   earliestTransaction,
   latestTransaction,
@@ -82,6 +278,7 @@ export function Header({
   children,
   inlineContent,
   filterExclude,
+  filterInclude,
 }: HeaderProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -118,7 +315,7 @@ export function Header({
           }}
         >
           <SpaceBetween gap={isNarrowWidth ? 5 : undefined}>
-            {mode && (
+            {mode && !hideModeToggle && (
               <Button
                 variant={mode === 'static' ? 'normal' : 'primary'}
                 onPress={() => {
@@ -173,128 +370,30 @@ export function Header({
           </SpaceBetween>
 
           <SpaceBetween gap={3}>
-            {show1Month && (
-              <Button
-                variant="bare"
-                onPress={() => onChangeDates(...getLatestRange(0))}
-              >
-                <Trans>1 month</Trans>
-              </Button>
+            {showFutureRange ? (
+              <FutureRangePresets
+                show1Month={show1Month}
+                latestTransaction={latestTransaction}
+                onChangeDates={onChangeDates}
+              />
+            ) : (
+              <PastRangePresets
+                show1Month={show1Month}
+                earliestTransaction={earliestTransaction}
+                latestTransaction={latestTransaction}
+                firstDayOfWeekIdx={firstDayOfWeekIdx}
+                allMonths={allMonths}
+                onChangeDates={onChangeDates}
+                convertToMonth={convertToMonth}
+              />
             )}
-            <Button
-              variant="bare"
-              onPress={() => onChangeDates(...getLatestRange(2))}
-            >
-              <Trans>3 months</Trans>
-            </Button>
-            <Button
-              variant="bare"
-              onPress={() => onChangeDates(...getLatestRange(5))}
-            >
-              <Trans>6 months</Trans>
-            </Button>
-            <Button
-              variant="bare"
-              onPress={() => onChangeDates(...getLatestRange(11))}
-            >
-              <Trans>1 year</Trans>
-            </Button>
-            <Button
-              variant="bare"
-              onPress={() =>
-                onChangeDates(
-                  ...convertToMonth(
-                    ...getLiveRange(
-                      'Year to date',
-                      earliestTransaction,
-                      latestTransaction,
-                      true,
-                      firstDayOfWeekIdx,
-                    ),
-                    'yearToDate',
-                  ),
-                )
-              }
-            >
-              <Trans>Year to date</Trans>
-            </Button>
-            <Button
-              variant="bare"
-              onPress={() =>
-                onChangeDates(
-                  ...convertToMonth(
-                    ...getLiveRange(
-                      'Last month',
-                      earliestTransaction,
-                      latestTransaction,
-                      false,
-                      firstDayOfWeekIdx,
-                    ),
-                    'lastMonth',
-                  ),
-                )
-              }
-            >
-              <Trans>Last month</Trans>
-            </Button>
-            <Button
-              variant="bare"
-              onPress={() =>
-                onChangeDates(
-                  ...convertToMonth(
-                    ...getLiveRange(
-                      'Last year',
-                      earliestTransaction,
-                      latestTransaction,
-                      false,
-                      firstDayOfWeekIdx,
-                    ),
-                    'lastYear',
-                  ),
-                )
-              }
-            >
-              <Trans>Last year</Trans>
-            </Button>
-            <Button
-              variant="bare"
-              onPress={() =>
-                onChangeDates(
-                  ...convertToMonth(
-                    ...getLiveRange(
-                      'Prior year to date',
-                      earliestTransaction,
-                      latestTransaction,
-                      false,
-                      firstDayOfWeekIdx,
-                    ),
-                    'priorYearToDate',
-                  ),
-                )
-              }
-            >
-              <Trans>Prior year to date</Trans>
-            </Button>
-            <Button
-              variant="bare"
-              onPress={() =>
-                onChangeDates(
-                  ...getFullRange(
-                    allMonths[allMonths.length - 1].name,
-                    allMonths[0].name,
-                  ),
-                )
-              }
-            >
-              <Trans>All time</Trans>
-            </Button>
-
             {filters && (
               <FilterButton
                 compact={isNarrowWidth}
                 onApply={onApply}
                 hover={false}
                 exclude={filterExclude}
+                include={filterInclude}
               />
             )}
             {inlineContent}

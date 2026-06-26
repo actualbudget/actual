@@ -9,12 +9,31 @@ import { BrowserRouter } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
-import { useQueryClient } from '@tanstack/react-query';
-
 import {
   init as initConnection,
   send,
-} from 'loot-core/platform/client/connection';
+} from '@actual-app/core/platform/client/connection';
+import { useQueryClient } from '@tanstack/react-query';
+
+import { setAppState, sync } from '#app/appSlice';
+import { closeBudget, loadBudget } from '#budgetfiles/budgetfilesSlice';
+import { handleGlobalEvents } from '#global-events';
+import { useIsTestEnv } from '#hooks/useIsTestEnv';
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useOnVisible } from '#hooks/useOnVisible';
+import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
+import { setI18NextLanguage } from '#i18n';
+import { addNotification } from '#notifications/notificationsSlice';
+import { loadGlobalPrefs } from '#prefs/prefsSlice';
+import { useDispatch, useSelector, useStore } from '#redux';
+import {
+  CustomThemeStyle,
+  hasHiddenScrollbars,
+  ThemeStyle,
+  useTheme,
+} from '#style';
+import { signOut } from '#users/usersSlice';
+import { ExposeNavigate } from '#util/router-tools';
 
 import { AppBackground } from './AppBackground';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
@@ -25,29 +44,6 @@ import { ManagementApp } from './manager/ManagementApp';
 import { Modals } from './Modals';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
-
-import { setAppState, sync } from '@desktop-client/app/appSlice';
-import {
-  closeBudget,
-  loadBudget,
-} from '@desktop-client/budgetfiles/budgetfilesSlice';
-import { handleGlobalEvents } from '@desktop-client/global-events';
-import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
-import { setI18NextLanguage } from '@desktop-client/i18n';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { installPolyfills } from '@desktop-client/polyfills';
-import { loadGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
-import { useDispatch, useSelector, useStore } from '@desktop-client/redux';
-import {
-  CustomThemeStyle,
-  hasHiddenScrollbars,
-  ThemeStyle,
-  useTheme,
-} from '@desktop-client/style';
-import { signOut } from '@desktop-client/users/usersSlice';
-import { ExposeNavigate } from '@desktop-client/util/router-tools';
 
 function AppInner() {
   const [budgetId] = useMetadataPref('id');
@@ -124,7 +120,7 @@ function AppInner() {
     }
 
     async function initAll() {
-      await Promise.all([installPolyfills(), init()]);
+      await init();
       dispatch(setAppState({ loadingText: null }));
     }
 
@@ -179,6 +175,11 @@ export function App() {
   );
   const dispatch = useDispatch();
 
+  useOnVisible(async () => {
+    console.debug('triggering sync because of visibility change');
+    await dispatch(sync());
+  });
+
   useEffect(() => {
     function checkScrollbars() {
       if (hiddenScrollbars !== hasHiddenScrollbars()) {
@@ -186,25 +187,9 @@ export function App() {
       }
     }
 
-    let isSyncing = false;
-
-    async function onVisibilityChange() {
-      if (!isSyncing) {
-        console.debug('triggering sync because of visibility change');
-        isSyncing = true;
-        await dispatch(sync());
-        isSyncing = false;
-      }
-    }
-
     window.addEventListener('focus', checkScrollbars);
-    window.addEventListener('visibilitychange', onVisibilityChange);
-
-    return () => {
-      window.removeEventListener('focus', checkScrollbars);
-      window.removeEventListener('visibilitychange', onVisibilityChange);
-    };
-  }, [dispatch, hiddenScrollbars]);
+    return () => window.removeEventListener('focus', checkScrollbars);
+  }, [hiddenScrollbars]);
 
   const [theme] = useTheme();
 
@@ -233,7 +218,7 @@ export function App() {
                     }}
                   >
                     <ErrorBoundary FallbackComponent={ErrorFallback}>
-                      {process.env.REACT_APP_REVIEW_ID && !isTestEnv && (
+                      {import.meta.env.REACT_APP_REVIEW_ID && !isTestEnv && (
                         <DevelopmentTopBar />
                       )}
                       <AppInner />

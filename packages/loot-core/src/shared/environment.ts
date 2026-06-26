@@ -11,7 +11,10 @@ export function isNonProductionEnvironment() {
 }
 
 export function isElectron() {
-  if (navigator.userAgent.indexOf('Electron') >= 0) {
+  if (
+    typeof navigator !== 'undefined' &&
+    navigator.userAgent.indexOf('Electron') >= 0
+  ) {
     return true;
   }
   return false;

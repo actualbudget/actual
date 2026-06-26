@@ -17,22 +17,8 @@ module.exports = {
     },
   },
 
-  create(context) {
-    const filenameRaw = context.getFilename();
-    const normalizedFilename = filenameRaw.replace(/\\/g, '/');
-
-    const isLootCoreFile = normalizedFilename.match(
-      /packages\/loot-core\/src\/(server|shared|platform)/,
-    );
-
-    if (
-      !isLootCoreFile ||
-      normalizedFilename.includes(
-        'packages/loot-core/src/platform/server/log/index.ts',
-      )
-    ) {
-      return {};
-    }
+  createOnce(context) {
+    let normalizedFilename;
 
     const methodMap = {
       log: 'log',
@@ -52,7 +38,7 @@ module.exports = {
     }
 
     function getLoggerImportInfo() {
-      const { ast } = context.getSourceCode();
+      const { ast } = context.sourceCode;
       const importPath = getLoggerImportPath();
 
       for (const node of ast.body) {
@@ -74,6 +60,20 @@ module.exports = {
     }
 
     return {
+      before() {
+        normalizedFilename = context.filename.replace(/\\/g, '/');
+        const isLootCoreFile = normalizedFilename.match(
+          /packages\/loot-core\/src\/(server|shared|platform)/,
+        );
+        if (
+          !isLootCoreFile ||
+          normalizedFilename.includes(
+            'packages/loot-core/src/platform/server/log/index.ts',
+          )
+        ) {
+          return false;
+        }
+      },
       CallExpression(node) {
         if (
           node.callee.type === 'MemberExpression' &&
@@ -89,7 +89,7 @@ module.exports = {
             messageId: 'preferLogger',
             data: { method },
             fix(fixer) {
-              const sourceCode = context.getSourceCode();
+              const sourceCode = context.sourceCode;
               const { localName } = getLoggerImportInfo();
               const loggerIdent = localName || 'logger';
               const fixes = [

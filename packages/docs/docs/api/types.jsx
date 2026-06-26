@@ -423,6 +423,7 @@ export const objects = {
     { name: 'tag', type: 'string', required: true },
     { name: 'color', type: 'string' },
     { name: 'description', type: 'string' },
+    { name: 'hidden', type: 'boolean' },
   ],
 
   condition: [

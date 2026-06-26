@@ -8,26 +8,28 @@ import React, {
 } from 'react';
 import { animated, useSpring } from 'react-spring';
 
-import { View } from '@actual-app/components/view';
+import { View, viewStyles } from '@actual-app/components/view';
+import { addMonths, subMonths } from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 
-import { addMonths, subMonths } from 'loot-core/shared/months';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 
 import { MonthsContext } from './MonthsContext';
 
 import { useBudgetComponents } from '.';
-
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 export function BudgetSummaries() {
   const { months } = useContext(MonthsContext);
   const [firstMonth] = months;
 
   const [widthState, setWidthState] = useState(0);
-  const [styles, spring] = useSpring(() => ({
-    x: 0,
-    config: { mass: 3, tension: 600, friction: 80 },
-  }));
+  const [styles, spring] = useSpring(
+    () => ({
+      from: { x: 0 },
+      config: { mass: 3, tension: 600, friction: 80 },
+    }),
+    [],
+  );
 
   const containerRef = useResizeObserver<HTMLDivElement>(
     useCallback(rect => {
@@ -55,7 +57,9 @@ export function BudgetSummaries() {
     }
 
     const to = -offsetX;
-    spring.start({ from: { x: from }, x: to });
+    if (from !== to) {
+      void spring.start({ from: { x: from }, to: { x: to } });
+    }
   }, [spring, firstMonth, monthWidth, allMonths]);
 
   useLayoutEffect(() => {
@@ -63,7 +67,7 @@ export function BudgetSummaries() {
   }, [firstMonth]);
 
   useLayoutEffect(() => {
-    spring.start({ from: { x: -monthWidth }, to: { x: -monthWidth } });
+    void spring.start({ to: { x: -monthWidth }, immediate: true });
   }, [spring, monthWidth]);
 
   const { SummaryComponent } = useBudgetComponents();
@@ -80,7 +84,7 @@ export function BudgetSummaries() {
       ref={containerRef}
     >
       <animated.div
-        className="view"
+        className={viewStyles}
         style={{
           flexDirection: 'row',
           width: widthState,

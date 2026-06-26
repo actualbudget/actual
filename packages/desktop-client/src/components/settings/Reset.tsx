@@ -3,14 +3,13 @@ import { Trans } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
+import { send } from '@actual-app/core/platform/client/connection';
 
-import { send } from 'loot-core/platform/client/connection';
+import { resetSync } from '#app/appSlice';
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useDispatch } from '#redux';
 
 import { Setting } from './UI';
-
-import { resetSync } from '@desktop-client/app/appSlice';
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { useDispatch } from '@desktop-client/redux';
 
 export function ResetCache() {
   const [resetting, setResetting] = useState(false);

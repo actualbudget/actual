@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import { generateTransaction } from '../../mocks';
-import * as db from '../db';
+import { generateTransaction } from '#mocks';
+import * as db from '#server/db';
 
 import { Spreadsheet } from './spreadsheet';
 

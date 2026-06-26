@@ -1,4 +1,4 @@
-import type { IntegerAmount } from '../../shared/util';
+import type { IntegerAmount } from '#shared/util';
 
 import type { AccountEntity } from './account';
 import type { CategoryEntity } from './category';

@@ -97,7 +97,13 @@ export type RuleConditionEntity =
     >
   | BaseConditionEntity<
       'notes',
-      'is' | 'isNot' | 'contains' | 'doesNotContain' | 'matches' | 'hasTags'
+      | 'is'
+      | 'isNot'
+      | 'contains'
+      | 'doesNotContain'
+      | 'matches'
+      | 'hasTags'
+      | 'hasAnyTag'
     >
   | BaseConditionEntity<
       'payee',
@@ -146,16 +152,17 @@ export type SetRuleActionEntity = {
 
 export type SetSplitAmountRuleActionEntity = {
   op: 'set-split-amount';
-  value: number;
+  value: number | null;
   options?: {
     splitIndex?: number;
-    method: 'fixed-amount' | 'fixed-percent' | 'remainder';
+    method: 'fixed-amount' | 'fixed-percent' | 'formula' | 'remainder';
+    formula?: string;
   };
 };
 
 export type LinkScheduleRuleActionEntity = {
   op: 'link-schedule';
-  value: ScheduleEntity;
+  value: ScheduleEntity['id'];
 };
 
 export type PrependNoteRuleActionEntity = {

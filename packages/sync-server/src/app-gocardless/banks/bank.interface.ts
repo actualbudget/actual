@@ -1,13 +1,24 @@
-import type { Balance, Transaction } from '../gocardless-node.types';
+import type {
+  Balance,
+  Transaction,
+} from '#app-gocardless/gocardless-node.types';
 import type {
   DetailedAccountWithInstitution,
   NormalizedAccountDetails,
-} from '../gocardless.types';
+} from '#app-gocardless/gocardless.types';
 
 type TransactionExtended = Transaction & {
   date?: string;
   payeeName?: string;
   notes?: string;
+  remittanceInformationUnstructuredArrayString?: string;
+  remittanceInformationStructuredArrayString?: string;
+};
+
+type NormalizedTransaction = Transaction & {
+  date: string;
+  payeeName: string;
+  notes: string;
   remittanceInformationUnstructuredArrayString?: string;
   remittanceInformationStructuredArrayString?: string;
 };
@@ -34,7 +45,7 @@ export type IBank = {
     transaction: TransactionExtended,
     booked: boolean,
     editedTransaction?: TransactionExtended,
-  ) => TransactionExtended | null;
+  ) => NormalizedTransaction | null;
 
   /**
    * Function sorts an array of transactions from newest to oldest

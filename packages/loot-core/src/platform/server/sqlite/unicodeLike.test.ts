@@ -55,4 +55,18 @@ describe('unicode LIKE functionality', () => {
 
     expect(result).toBe(0);
   });
+
+  it('should treat \\% as a literal % character instead of a wildcard', () => {
+    expect(unicodeLike('100\\%', '100%')).toBe(1);
+    expect(unicodeLike('100\\%', '1000')).toBe(0);
+  });
+
+  it('should treat \\? as a literal ? character instead of a wildcard', () => {
+    expect(unicodeLike('what\\?', 'what?')).toBe(1);
+    expect(unicodeLike('what\\?', 'what!')).toBe(0);
+  });
+
+  it('should treat \\\\ as a literal \\ character', () => {
+    expect(unicodeLike('c:\\\\test', 'c:\\test')).toBe(1);
+  });
 });

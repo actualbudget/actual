@@ -1,17 +1,16 @@
 import React, { memo } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
+import { tsToRelativeTime } from '@actual-app/core/shared/util';
+import type { AccountEntity } from '@actual-app/core/types/models';
 import { format as formatDate } from 'date-fns';
 import type { Locale } from 'date-fns';
 
-import { tsToRelativeTime } from 'loot-core/shared/util';
-import type { AccountEntity } from 'loot-core/types/models';
-
-import { Cell, Row } from '@desktop-client/components/table';
+import { Cell, Row } from '#components/table';
 
 type AccountRowProps = {
   account: AccountEntity;
@@ -23,7 +22,13 @@ type AccountRowProps = {
 
 export const AccountRow = memo(
   ({ account, hovered, onHover, onAction, locale }: AccountRowProps) => {
+    const { t } = useTranslation();
     const backgroundFocus = hovered;
+
+    // The bank name is stored as null when the sync provider doesn't report an
+    // institution; show a localized fallback for linked accounts.
+    const bankName =
+      account.bank && !account.bankName ? t('Unknown') : account.bankName;
 
     const lastSyncString = tsToRelativeTime(account.last_sync, locale, {
       capitalize: true,
@@ -67,7 +72,7 @@ export const AccountRow = memo(
           plain
           style={{ color: theme.tableText, padding: '10px' }}
         >
-          {account.bankName}
+          {bankName}
         </Cell>
 
         {account.account_sync_source ? (

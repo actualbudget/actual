@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import { styles } from '@actual-app/components/styles';
-
-import * as Platform from 'loot-core/shared/platform';
+import * as Platform from '@actual-app/core/shared/platform';
 
 let hiddenScrollbars = false;
 
@@ -50,6 +49,7 @@ function onScrollbarChange() {
       borderRadius: 30,
       backgroundClip: 'padding-box',
       backgroundColor: 'rgba(200, 200, 200, .5)',
+      border: '2px solid rgba(0, 0, 0, 0)',
     },
   };
 

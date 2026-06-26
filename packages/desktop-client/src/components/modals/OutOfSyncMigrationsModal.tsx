@@ -6,14 +6,10 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import { Link } from '@desktop-client/components/common/Link';
-import {
-  Modal,
-  ModalHeader,
-  ModalTitle,
-} from '@desktop-client/components/common/Modal';
-import { useDispatch } from '@desktop-client/redux';
+import { closeBudget } from '#budgetfiles/budgetfilesSlice';
+import { Link } from '#components/common/Link';
+import { Modal, ModalHeader, ModalTitle } from '#components/common/Modal';
+import { useDispatch } from '#redux';
 
 export function OutOfSyncMigrationsModal() {
   const dispatch = useDispatch();
@@ -27,7 +23,7 @@ export function OutOfSyncMigrationsModal() {
 
   return (
     <Modal name="out-of-sync-migrations">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={<ModalTitle title={t('Please update Actual!')} />}
@@ -82,7 +78,7 @@ export function OutOfSyncMigrationsModal() {
                 style={{
                   padding: '10px 30px',
                 }}
-                onPress={() => closeBudgetAndModal(close)}
+                onPress={() => closeBudgetAndModal(() => state.close())}
               >
                 <Trans>Close Budget</Trans>
               </Button>

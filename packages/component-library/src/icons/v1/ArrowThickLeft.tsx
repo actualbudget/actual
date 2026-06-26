@@ -10,6 +10,6 @@ export const SvgArrowThickLeft = (props: SVGProps<SVGSVGElement>) => (
       ...props.style,
     }}
   >
-    <path d="M10 13h8V7h-8V2l-8 8 8 8v-5z" fill="currentColor" />
+    <path d="M10 13h8V7h-8V2l-8 8 8 8z" fill="currentColor" />
   </svg>
 );

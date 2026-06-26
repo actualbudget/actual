@@ -21,30 +21,29 @@ import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
+import { integerToCurrency } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type {
+  AccountEntity,
+  TransactionEntity,
+} from '@actual-app/core/types/models';
 import {
   PressResponder,
   useLongPress,
   usePress,
 } from '@react-aria/interactions';
 
-import { isPreviewId } from 'loot-core/shared/transactions';
-import { integerToCurrency } from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
+import { makeAmountFullStyle } from '#components/budget/util';
+import { useAccount } from '#hooks/useAccount';
+import { useCachedSchedules } from '#hooks/useCachedSchedules';
+import { useCategories } from '#hooks/useCategories';
+import { useDisplayPayee } from '#hooks/useDisplayPayee';
+import { usePayee } from '#hooks/usePayee';
+import { NotesTagFormatter } from '#notes/NotesTagFormatter';
+import { useSelector } from '#redux';
 
 import { lookupName, Status } from './TransactionEdit';
-
-import {
-  makeAmountFullStyle,
-  makeBalanceAmountStyle,
-} from '@desktop-client/components/budget/util';
-import { useAccount } from '@desktop-client/hooks/useAccount';
-import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
-import { usePayee } from '@desktop-client/hooks/usePayee';
-import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
-import { useSelector } from '@desktop-client/redux';
 
 export const ROW_HEIGHT = 60;
 
@@ -283,7 +282,11 @@ export function TransactionListItem({
             <Text
               style={{
                 ...styles.tnum,
-                ...makeAmountFullStyle(amount),
+                ...makeAmountFullStyle(amount, {
+                  positiveColor: theme.tableText,
+                  negativeColor: theme.tableText,
+                  zeroColor: theme.numberNeutral,
+                }),
                 ...textStyle,
               }}
             >
@@ -295,7 +298,11 @@ export function TransactionListItem({
                   fontSize: 11,
                   fontWeight: '400',
                   ...styles.tnum,
-                  ...makeBalanceAmountStyle(runningBalance),
+                  ...makeAmountFullStyle(runningBalance, {
+                    positiveColor: theme.numberPositive,
+                    negativeColor: theme.numberNegative,
+                    zeroColor: theme.numberNeutral,
+                  }),
                 }}
               >
                 {integerToCurrency(runningBalance)}

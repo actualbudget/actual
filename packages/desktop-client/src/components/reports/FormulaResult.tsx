@@ -9,16 +9,15 @@ import type { Ref, RefObject } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import debounce from 'lodash/debounce';
+import { amountToInteger } from '@actual-app/core/shared/util';
+import { debounce } from 'es-toolkit/compat';
 
-import { amountToInteger } from 'loot-core/shared/util';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useFormat } from '#hooks/useFormat';
+import { useMergedRefs } from '#hooks/useMergedRefs';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 
-import { LoadingIndicator } from './LoadingIndicator';
-
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
+import { ReportCardValueSkeleton } from './ReportCardValueSkeleton';
 
 const FONT_SIZE_SCALE_FACTOR = 1.6;
 const CONTAINER_MARGIN = 8;
@@ -49,6 +48,7 @@ export function FormulaResult({
   containerRef,
 }: FormulaResultProps) {
   const [fontSize, setFontSize] = useState<number>(initialFontSize);
+  const [hasSized, setHasSized] = useState(false);
   const refDiv = useRef<HTMLDivElement>(null);
   const previousFontSizeRef = useRef<number>(initialFontSize);
   const format = useFormat();
@@ -81,15 +81,21 @@ export function FormulaResult({
 
     if (width <= 0 || height <= 0) return;
 
-    // Get the actual display value length at calculation time
-    const valueLength = displayValue.length || 1; // Avoid division by zero
+    // Check if the display value contains line breaks and calculate font size accordingly.
+    const lines = displayValue.split(/\r?\n/);
+    const lineCount = lines.length;
+    const longestLineLength = Math.max(...lines.map(line => line.length), 1);
 
+    // Calculate font size based on the longest line and number of lines
     const calculatedFontSize = Math.min(
-      (width * FONT_SIZE_SCALE_FACTOR) / valueLength,
-      height, // Ensure the text fits vertically by using the height as the limiting factor
+      (width * FONT_SIZE_SCALE_FACTOR) / longestLineLength,
+      height / lineCount, // Divide height by number of lines to fit all lines
     );
 
-    setFontSize(calculatedFontSize);
+    if (calculatedFontSize > 0) {
+      setFontSize(calculatedFontSize);
+      setHasSized(true);
+    }
 
     // Only call fontSizeChanged if the font size actually changed
     if (
@@ -143,6 +149,7 @@ export function FormulaResult({
   useEffect(() => {
     if (fontSizeMode === 'static') {
       setFontSize(staticFontSize);
+      setHasSized(true);
     }
   }, [fontSizeMode, staticFontSize]);
 
@@ -153,9 +160,11 @@ export function FormulaResult({
       ? theme.errorText
       : theme.pageText;
 
+  const showContent = hasSized || fontSizeMode === 'static';
+
   return (
     <View style={{ flex: 1 }}>
-      {loading && <LoadingIndicator />}
+      {loading && <ReportCardValueSkeleton />}
       {!loading && (
         <View
           ref={mergedRef as Ref<HTMLDivElement>}
@@ -175,9 +184,20 @@ export function FormulaResult({
             color,
           }}
         >
-          <span aria-hidden="true">
-            <PrivacyFilter>{displayValue}</PrivacyFilter>
-          </span>
+          {!showContent ? (
+            <ReportCardValueSkeleton />
+          ) : (
+            <span
+              aria-hidden="true"
+              style={{
+                whiteSpace: 'pre-wrap',
+                textAlign: 'center',
+                wordBreak: 'break-word',
+              }}
+            >
+              <PrivacyFilter>{displayValue}</PrivacyFilter>
+            </span>
+          )}
         </View>
       )}
     </View>

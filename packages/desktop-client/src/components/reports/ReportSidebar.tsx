@@ -12,8 +12,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-
-import * as monthUtils from 'loot-core/shared/months';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
@@ -21,8 +20,11 @@ import type {
   sortByOpType,
   TimeFrame,
   TransactionEntity,
-} from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+} from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+
+import { Information } from '#components/alerts';
+import { useLocale } from '#hooks/useLocale';
 
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
@@ -32,9 +34,6 @@ import { ReportOptions } from './ReportOptions';
 import type { dateRangeProps } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
-
-import { Information } from '@desktop-client/components/alerts';
-import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;
@@ -59,6 +58,7 @@ type ReportSidebarProps = {
     value: CustomReportEntity['showUncategorized'],
   ) => void;
   setTrimIntervals: (value: CustomReportEntity['trimIntervals']) => void;
+  setShowTrendLines: (value: CustomReportEntity['showTrendLines']) => void;
   setIncludeCurrentInterval: (
     value: CustomReportEntity['includeCurrentInterval'],
   ) => void;
@@ -98,6 +98,7 @@ export function ReportSidebar({
   setIncludeCurrentInterval,
   setShowUncategorized,
   setTrimIntervals,
+  setShowTrendLines,
   setSelectedCategories,
   onChangeDates,
   onReportChange,
@@ -182,6 +183,34 @@ export function ReportSidebar({
     setSessionReport('balanceType', cond);
     onReportChange({ type: 'modify' });
     setBalanceType(cond);
+
+    if (cond === 'Budgeted') {
+      // Budgeted does not support Payee and Account splits
+      if (
+        customReportItems.groupBy === 'Payee' ||
+        customReportItems.groupBy === 'Account'
+      ) {
+        setSessionReport('groupBy', 'Category');
+        setGroupBy('Category');
+        defaultItems('Category');
+      }
+      // Budgeted only supports Monthly and Yearly intervals
+      if (
+        customReportItems.interval === 'Daily' ||
+        customReportItems.interval === 'Weekly'
+      ) {
+        setSessionReport('interval', 'Monthly');
+        setInterval('Monthly');
+        if (
+          ReportOptions.dateRange
+            .filter(d => !d['Monthly' as keyof dateRangeProps])
+            .map(int => int.key)
+            .includes(customReportItems.dateRange)
+        ) {
+          onSelectRange(defaultsList.intervalRange.get('Monthly') || '');
+        }
+      }
+    }
   };
 
   const onChangeSortBy = (cond?: sortByOpType) => {
@@ -277,7 +306,11 @@ export function ReportSidebar({
               option.key,
               option.description,
             ])}
-            disabledKeys={disabledItems('split')}
+            disabledKeys={
+              customReportItems.balanceType === 'Budgeted'
+                ? [...new Set([...disabledItems('split'), 'Payee', 'Account'])]
+                : disabledItems('split')
+            }
           />
         </View>
 
@@ -330,7 +363,11 @@ export function ReportSidebar({
               option.key,
               option.description,
             ])}
-            disabledKeys={[]}
+            disabledKeys={
+              customReportItems.balanceType === 'Budgeted'
+                ? ['Daily', 'Weekly']
+                : []
+            }
           />
         </View>
 
@@ -424,6 +461,12 @@ export function ReportSidebar({
                     !customReportItems.trimIntervals,
                   );
                   setTrimIntervals(!customReportItems.trimIntervals);
+                } else if (type === 'show-trend-lines') {
+                  setSessionReport(
+                    'showTrendLines',
+                    !customReportItems.showTrendLines,
+                  );
+                  setShowTrendLines(!customReportItems.showTrendLines);
                 }
               }}
               items={[
@@ -469,6 +512,13 @@ export function ReportSidebar({
                     'Trim empty intervals at the start and end of the report',
                   ),
                   toggle: customReportItems.trimIntervals,
+                },
+                {
+                  name: 'show-trend-lines',
+                  text: t('Show trend lines'),
+                  tooltip: t('Add a trend line per series (line graphs only)'),
+                  toggle: customReportItems.showTrendLines,
+                  disabled: customReportItems.graphType !== 'LineGraph',
                 },
               ]}
             />

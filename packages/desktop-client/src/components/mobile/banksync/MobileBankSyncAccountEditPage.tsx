@@ -8,16 +8,16 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useUnlinkAccountMutation } from '@desktop-client/accounts';
-import { BankSyncCheckboxOptions } from '@desktop-client/components/banksync/BankSyncCheckboxOptions';
-import { FieldMapping } from '@desktop-client/components/banksync/FieldMapping';
-import { useBankSyncAccountSettings } from '@desktop-client/components/banksync/useBankSyncAccountSettings';
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { useAccount } from '@desktop-client/hooks/useAccount';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { useUnlinkAccountMutation } from '#accounts';
+import { BankSyncCheckboxOptions } from '#components/banksync/BankSyncCheckboxOptions';
+import { FieldMapping } from '#components/banksync/FieldMapping';
+import { useBankSyncAccountSettings } from '#components/banksync/useBankSyncAccountSettings';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import { MobilePageHeader, Page } from '#components/Page';
+import { useAccount } from '#hooks/useAccount';
+import { useNavigate } from '#hooks/useNavigate';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 export function MobileBankSyncAccountEditPage() {
   const { t } = useTranslation();

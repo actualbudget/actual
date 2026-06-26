@@ -4,28 +4,27 @@ import { useTranslation } from 'react-i18next';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { listen, send } from '@actual-app/core/platform/client/connection';
+import * as undo from '@actual-app/core/platform/client/undo';
+import { getNormalisedString } from '@actual-app/core/shared/normalisation';
+import { q } from '@actual-app/core/shared/query';
+import type { RuleEntity } from '@actual-app/core/types/models';
 
-import { listen, send } from 'loot-core/platform/client/connection';
-import * as undo from 'loot-core/platform/client/undo';
-import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { q } from 'loot-core/shared/query';
-import type { RuleEntity } from 'loot-core/types/models';
+import { Search } from '#components/common/Search';
+import { ruleToString } from '#components/ManageRules';
+import { MobilePageHeader, Page } from '#components/Page';
+import { useAccounts } from '#hooks/useAccounts';
+import { useCategories } from '#hooks/useCategories';
+import { useNavigate } from '#hooks/useNavigate';
+import { usePayees } from '#hooks/usePayees';
+import { useSchedules } from '#hooks/useSchedules';
+import { useUndo } from '#hooks/useUndo';
+import { useUrlParam } from '#hooks/useUrlParam';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 import { AddRuleButton } from './AddRuleButton';
 import { RulesList } from './RulesList';
-
-import { Search } from '@desktop-client/components/common/Search';
-import { ruleToString } from '@desktop-client/components/ManageRules';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import { useUrlParam } from '@desktop-client/hooks/useUrlParam';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 export function MobileRulesPage() {
   const { t } = useTranslation();

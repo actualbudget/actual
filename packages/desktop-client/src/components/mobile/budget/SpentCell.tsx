@@ -9,18 +9,17 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 import { AutoTextSize } from 'auto-text-size';
 
-import type { CategoryEntity } from 'loot-core/types/models';
+import { makeAmountGrey } from '#components/budget/util';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { CellValue } from '#components/spreadsheet/CellValue';
+import { useCategoryScheduleGoalTemplateIndicator } from '#hooks/useCategoryScheduleGoalTemplateIndicator';
+import { useFormat } from '#hooks/useFormat';
+import type { Binding } from '#spreadsheet';
 
 import { getColumnWidth, PILL_STYLE } from './BudgetTable';
-
-import { makeAmountGrey } from '@desktop-client/components/budget/util';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import type { Binding } from '@desktop-client/spreadsheet';
 
 type SpentCellProps = {
   binding: Binding<'envelope-budget' | 'tracking-budget', 'sum-amount'>;

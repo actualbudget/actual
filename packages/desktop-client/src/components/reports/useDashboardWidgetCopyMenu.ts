@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import type { Menu } from '@actual-app/components/menu';
 
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type DashboardWidgetCopyMenuResult = {
   /** Menu items to add to the card's menu */

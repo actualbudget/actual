@@ -1,10 +1,15 @@
 // @ts-strict-ignore
 import mitt from 'mitt';
 
-import { logger } from '../../platform/server/log';
-import type { QueryState } from '../../shared/query';
-import { aqlCompiledQuery, compileQuery, schema, schemaConfig } from '../aql';
-import type { BudgetType } from '../prefs';
+import { logger } from '#platform/server/log';
+import {
+  aqlCompiledQuery,
+  compileQuery,
+  schema,
+  schemaConfig,
+} from '#server/aql';
+import type { BudgetType } from '#server/prefs';
+import type { QueryState } from '#shared/query';
 
 import { Graph } from './graph-data-structure';
 import { resolveName, unresolveName } from './util';
@@ -216,13 +221,17 @@ export class Spreadsheet {
       this.events.emit('change', { names: this.computeQueue });
 
       // Cache the updated cells
-      if (typeof this.saveCache === 'function') {
-        this.saveCache(this.computeQueue);
-      }
+      this.saveCachedCells(this.computeQueue);
       this.markCacheSafe();
 
       this.running = false;
       this.computeQueue = [];
+    }
+  }
+
+  saveCachedCells(names: string[]): void {
+    if (typeof this.saveCache === 'function') {
+      this.saveCache(names);
     }
   }
 

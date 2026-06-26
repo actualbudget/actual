@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useNavigate } from '#hooks/useNavigate';
 
 export function AddScheduleButton() {
   const { t } = useTranslation();

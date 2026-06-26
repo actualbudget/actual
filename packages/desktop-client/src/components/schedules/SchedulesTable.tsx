@@ -12,33 +12,26 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { format as monthUtilFormat } from 'loot-core/shared/months';
-import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { getScheduledAmount } from 'loot-core/shared/schedules';
+import { format as monthUtilFormat } from '@actual-app/core/shared/months';
+import { getNormalisedString } from '@actual-app/core/shared/normalisation';
+import { getScheduledAmount } from '@actual-app/core/shared/schedules';
 import type {
   ScheduleStatuses,
   ScheduleStatusType,
-} from 'loot-core/shared/schedules';
-import type { ScheduleEntity } from 'loot-core/types/models';
+} from '@actual-app/core/shared/schedules';
+import type { ScheduleEntity } from '@actual-app/core/types/models';
+
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { Cell, Field, Row, Table, TableHeader } from '#components/table';
+import { DisplayId } from '#components/util/DisplayId';
+import { useAccounts } from '#hooks/useAccounts';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
+import { usePayees } from '#hooks/usePayees';
 
 import { StatusBadge } from './StatusBadge';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import {
-  Cell,
-  Field,
-  Row,
-  Table,
-  TableHeader,
-} from '@desktop-client/components/table';
-import { DisplayId } from '@desktop-client/components/util/DisplayId';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { usePayees } from '@desktop-client/hooks/usePayees';
 type SchedulesTableProps = {
   isLoading?: boolean;
   schedules: readonly ScheduleEntity[];
@@ -145,8 +138,21 @@ export function ScheduleAmountCell({
 
   const num = getScheduledAmount(amount);
   const currencyAmount = format(Math.abs(num || 0), 'financial');
-  const isApprox = op === 'isapprox' || op === 'isbetween';
-
+  const isApprox = op === 'isapprox';
+  const isBetween = op === 'isbetween';
+  let cellText = '';
+  if (isApprox) {
+    cellText = t('Approximately {{currencyAmount}}', {
+      currencyAmount,
+    });
+  } else if (isBetween && typeof amount != 'number') {
+    cellText = t('{{currency1}} to {{currency2}}', {
+      currency1: format(Math.abs(amount.num1 || 0), 'financial'),
+      currency2: format(Math.abs(amount.num2 || 0), 'financial'),
+    });
+  } else {
+    cellText = currencyAmount;
+  }
   return (
     <Cell
       width={100}
@@ -167,13 +173,22 @@ export function ScheduleAmountCell({
             lineHeight: '1em',
             marginRight: 10,
           }}
-          title={
-            isApprox
-              ? t('Approximately {{currencyAmount}}', { currencyAmount })
-              : currencyAmount
-          }
+          title={cellText}
         >
           ~
+        </View>
+      )}
+      {isBetween && (
+        <View
+          style={{
+            textAlign: 'left',
+            color: theme.pageTextSubdued,
+            lineHeight: '1em',
+            marginRight: 10,
+          }}
+          title={cellText}
+        >
+          ±
         </View>
       )}
       <FinancialText
@@ -184,11 +199,7 @@ export function ScheduleAmountCell({
           overflow: 'hidden',
           textOverflow: 'ellipsis',
         }}
-        title={
-          isApprox
-            ? t('Approximately {{currencyAmount}}', { currencyAmount })
-            : currencyAmount
-        }
+        title={cellText}
       >
         <PrivacyFilter>
           {num > 0 ? `+${currencyAmount}` : `${currencyAmount}`}
@@ -356,12 +367,14 @@ export function SchedulesTable({
       const payee = payees.find(p => schedule._payee === p.id);
       const account = accounts.find(a => schedule._account === a.id);
       const amount = getScheduledAmount(schedule._amount);
-      const amountStr =
-        (schedule._amountOp === 'isapprox' || schedule._amountOp === 'isbetween'
-          ? '~'
-          : '') +
-        (amount > 0 ? '+' : '') +
-        format(Math.abs(amount || 0), 'financial');
+      let amountStr = '';
+      if (schedule._amountOp === 'isbetween') {
+        amountStr = '±';
+      } else if (schedule._amountOp === 'isapprox') {
+        amountStr = '~';
+      }
+      amountStr +=
+        (amount > 0 ? '+' : '') + format(Math.abs(amount || 0), 'financial');
       const dateStr = schedule.next_date
         ? monthUtilFormat(schedule.next_date, dateFormat)
         : null;

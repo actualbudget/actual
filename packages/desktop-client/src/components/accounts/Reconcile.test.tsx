@@ -1,18 +1,17 @@
 import React from 'react';
 
+import { generateAccount } from '@actual-app/core/mocks';
+import { q } from '@actual-app/core/shared/query';
+import type { AccountEntity } from '@actual-app/core/types/models';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { generateAccount } from 'loot-core/mocks';
-import { q } from 'loot-core/shared/query';
-import type { AccountEntity } from 'loot-core/types/models';
+import { useSheetValue } from '#hooks/useSheetValue';
+import { TestProviders } from '#mocks';
 
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { TestProviders } from '@desktop-client/mocks';
-
-vi.mock('@desktop-client/hooks/useSheetValue', () => ({
+vi.mock('#hooks/useSheetValue', () => ({
   useSheetValue: vi.fn(),
 }));
 

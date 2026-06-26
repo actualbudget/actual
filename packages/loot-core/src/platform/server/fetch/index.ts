@@ -1,4 +1,4 @@
-import * as connection from '../connection';
+import * as connection from '#platform/server/connection';
 
 export const fetch = async (
   input: RequestInfo | URL,

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { getLocale } from 'loot-core/shared/locale';
+import { getLocale } from '@actual-app/core/shared/locale';
 
 import { useGlobalPref } from './useGlobalPref';
 

@@ -1,5 +1,10 @@
-import { firstDayOfMonth } from 'loot-core/shared/months';
-import type { Template } from 'loot-core/types/models/templates';
+import {
+  addMonths,
+  dayFromDate,
+  firstDayOfMonth,
+  monthFromDate,
+} from '@actual-app/core/shared/months';
+import type { Template } from '@actual-app/core/types/models/templates';
 
 import type { Action } from './actions';
 import type { DisplayTemplateType, ReducerState } from './constants';
@@ -25,7 +30,7 @@ export const getInitialState = (template: Template | null): ReducerState => {
           priority: template.priority,
           directive: template.directive,
         },
-        displayType: 'week',
+        displayType: 'fixed',
       };
     case 'percentage':
       return {
@@ -40,13 +45,22 @@ export const getInitialState = (template: Template | null): ReducerState => {
     case 'periodic':
       return {
         template,
-        displayType: 'week',
+        displayType: 'fixed',
       };
-    case 'spend':
     case 'by':
-      throw new Error('Goal is not yet supported');
+    case 'spend':
+      return {
+        template:
+          template.annual !== undefined && template.repeat == null
+            ? { ...template, repeat: 1 }
+            : template,
+        displayType: 'by',
+      };
     case 'remainder':
-      throw new Error('Remainder is not yet supported');
+      return {
+        template,
+        displayType: 'remainder',
+      };
     case 'limit':
       return {
         template,
@@ -64,11 +78,16 @@ export const getInitialState = (template: Template | null): ReducerState => {
         displayType: 'historical',
       };
     case 'goal':
-      throw new Error('Goal is not yet supported');
+      return {
+        template,
+        displayType: 'goal',
+      };
     case 'error':
       throw new Error('An error occurred while parsing the template');
     default:
-      throw new Error(`Unknown template type: ${type satisfies undefined}`);
+      throw new Error(
+        `Unknown template type: ${String(type satisfies undefined)}`,
+      );
   }
 };
 
@@ -115,7 +134,7 @@ const changeType = (
           type: 'percentage',
           percent: 15,
           previous: false,
-          category: 'total',
+          category: 'all income',
           priority: DEFAULT_PRIORITY,
         },
       };
@@ -132,7 +151,7 @@ const changeType = (
           priority: DEFAULT_PRIORITY,
         },
       };
-    case 'week':
+    case 'fixed':
       if (prevState.template.type === 'periodic') {
         return prevState;
       }
@@ -141,12 +160,12 @@ const changeType = (
         template: {
           directive: 'template',
           type: 'periodic',
-          amount: 5,
+          amount: 100,
           period: {
-            period: 'week',
+            period: 'month',
             amount: 1,
           },
-          starting: '',
+          starting: dayFromDate(firstDayOfMonth(new Date())),
           priority: DEFAULT_PRIORITY,
         },
       };
@@ -166,9 +185,56 @@ const changeType = (
           priority: DEFAULT_PRIORITY,
         },
       };
+    case 'by':
+      // 'spend' shares displayType 'by'; preserve it instead of discarding
+      if (
+        prevState.template.type === 'by' ||
+        prevState.template.type === 'spend'
+      ) {
+        return prevState;
+      }
+      return {
+        displayType: visualType,
+        template: {
+          directive: 'template',
+          type: 'by',
+          amount: 1200,
+          month: addMonths(monthFromDate(new Date()), 12),
+          annual: true,
+          repeat: 1,
+          priority: DEFAULT_PRIORITY,
+        },
+      };
+    case 'remainder':
+      if (prevState.template.type === 'remainder') {
+        return prevState;
+      }
+      return {
+        displayType: visualType,
+        template: {
+          directive: 'template',
+          type: 'remainder',
+          weight: 1,
+          priority: null,
+        },
+      };
+    case 'goal':
+      if (prevState.template.type === 'goal') {
+        return prevState;
+      }
+      return {
+        displayType: visualType,
+        template: {
+          directive: 'goal',
+          type: 'goal',
+          amount: 1000,
+        },
+      };
     default:
       // Make sure we're not missing any cases
-      throw new Error(`Unknown display type: ${visualType satisfies never}`);
+      throw new Error(
+        `Unknown display type: ${String(visualType satisfies never)}`,
+      );
   }
 };
 
@@ -213,6 +279,50 @@ function mapTemplateTypesForUpdate(
           break;
       }
       break;
+    case 'by':
+      switch (template.type) {
+        case 'spend': {
+          // toggling spend-down on: carry the by template's fields into a
+          // spend template; default `from` to the target month if not given
+          const from =
+            'from' in template && typeof template.from === 'string'
+              ? template.from
+              : state.template.month;
+          return {
+            ...state,
+            displayType: 'by',
+            template: {
+              ...state.template,
+              ...template,
+              type: 'spend',
+              from,
+            },
+          };
+        }
+        default:
+          break;
+      }
+      break;
+    case 'spend':
+      switch (template.type) {
+        case 'by': {
+          // toggling spend-down off: drop `from`, keep everything else
+          const { from: _from, ...rest } = state.template;
+          void _from;
+          return {
+            ...state,
+            displayType: 'by',
+            template: {
+              ...rest,
+              ...template,
+              type: 'by',
+            },
+          };
+        }
+        default:
+          break;
+      }
+      break;
     default:
       break;
   }
@@ -251,6 +361,6 @@ export const templateReducer = (
       return mapTemplateTypesForUpdate(state, action.payload);
     default:
       // Make sure we're not missing any cases
-      throw new Error(`Unknown display type: ${type satisfies never}`);
+      throw new Error(`Unknown display type: ${String(type satisfies never)}`);
   }
 };

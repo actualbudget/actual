@@ -9,10 +9,9 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { CustomReportEntity } from '@actual-app/core/types/models';
 
-import type { CustomReportEntity } from 'loot-core/types/models';
-
-import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { FormField, FormLabel } from '#components/forms';
 
 type SaveReportNameProps = {
   menuItem: string;

@@ -1,30 +1,53 @@
 {
   "name": "@actual-app/crdt",
-  "version": "2.1.0",
+  "version": "3.1.0",
   "description": "CRDT layer of Actual",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/crdt"
+  },
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.test.d.ts",
+    "!dist/**/*.test.d.ts.map",
+    "!dist/**/*.spec.d.ts",
+    "!dist/**/*.spec.d.ts.map"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts"
+  },
   "scripts": {
-    "build:node": "tsc",
+    "build:node": "vite build",
     "proto:generate": "./bin/generate-proto",
-    "build": "rm -rf dist && yarn run build:node",
+    "build": "yarn run build:node && tsgo -b",
     "test": "vitest --run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsgo -b"
   },
   "dependencies": {
-    "google-protobuf": "^3.21.4",
+    "@bufbuild/protobuf": "^2.12.0",
     "murmurhash": "^2.0.1",
-    "uuid": "^13.0.0"
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
-    "@types/google-protobuf": "3.15.12",
-    "protoc-gen-js": "3.21.4-4",
-    "ts-protoc-gen": "0.15.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "@bufbuild/protoc-gen-es": "^2.12.0",
+    "@typescript/native-preview": "beta",
+    "rollup-plugin-visualizer": "^7.0.1",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   }
 }

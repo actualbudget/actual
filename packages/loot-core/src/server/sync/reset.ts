@@ -1,11 +1,11 @@
+import { captureException } from '#platform/exceptions';
 // @ts-strict-ignore
-import { captureException } from '../../platform/exceptions';
-import * as asyncStorage from '../../platform/server/asyncStorage';
-import * as connection from '../../platform/server/connection';
-import * as cloudStorage from '../cloud-storage';
-import * as db from '../db';
-import { runMutator } from '../mutators';
-import * as prefs from '../prefs';
+import * as asyncStorage from '#platform/server/asyncStorage';
+import * as connection from '#platform/server/connection';
+import * as cloudStorage from '#server/cloud-storage';
+import * as db from '#server/db';
+import { runMutator } from '#server/mutators';
+import * as prefs from '#server/prefs';
 
 export async function resetSync(
   keyState?,

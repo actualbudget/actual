@@ -3,13 +3,12 @@ import { Trans } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
+import { send } from '@actual-app/core/platform/client/connection';
 
-import { send } from 'loot-core/platform/client/connection';
+import { Link } from '#components/common/Link';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import { Setting } from './UI';
-
-import { Link } from '@desktop-client/components/common/Link';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function BudgetTypeSettings() {
   const [budgetType = 'envelope', setBudgetType] = useSyncedPref('budgetType');

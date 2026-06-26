@@ -1,19 +1,5 @@
-import path from 'path';
-
-import peggyLoader from 'vite-plugin-peggy-loader';
+import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
-
-const resolveExtensions = [
-  '.testing.ts',
-  '.mjs',
-  '.js',
-  '.mts',
-  '.ts',
-  '.jsx',
-  '.tsx',
-  '.json',
-  '.wasm',
-];
 
 export default defineConfig({
   test: {
@@ -21,15 +7,18 @@ export default defineConfig({
     globals: true,
     include: ['src/**/*.web.test.(js|jsx|ts|tsx)'],
     maxWorkers: 2,
+    reporters: process.env.CI
+      ? [
+          'default',
+          [
+            'junit',
+            {
+              outputFile: './test-results/junit-web.xml',
+              suiteName: 'component-library (web)',
+            },
+          ],
+        ]
+      : ['default'],
   },
-  resolve: {
-    alias: [
-      {
-        find: /^@actual-app\/crdt(\/.*)?$/,
-        replacement: path.resolve('../../../crdt/src$1'),
-      },
-    ],
-    extensions: resolveExtensions,
-  },
-  plugins: [peggyLoader()],
+  plugins: [react()],
 });

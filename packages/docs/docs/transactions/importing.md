@@ -4,9 +4,9 @@ There are various ways to get transactions into Actual.
 
 ## Linked Bank Import
 
-Actual Budget supports [linking your bank accounts](/docs/advanced/bank-sync.md) to sync using SimpleFIN, GoCardless or Pluggy.ai.
+Actual Budget supports [linking your bank accounts](../advanced/bank-sync.md) to sync using SimpleFIN, GoCardless or Pluggy.ai.
 
-There are also [community projects](/docs/community-repos.md) that implement bank syncing.
+There are also [community projects](../community-repos.md) that implement bank syncing.
 
 ## Import Financial Files
 
@@ -50,3 +50,9 @@ Actual will automatically try to avoid duplicate transactions. This works best w
 After checking the **id**, Actual will look for transactions around the same date, with the same amount, and with a similar payee. If it thinks the transaction already exists, it will avoid creating a duplicate. This means you can manually enter a transaction, and later it will be matched when you import it from a file.
 
 It will always favor the imported transaction. If it matches a manually-entered transaction, it will update the date to match the imported transaction. **Keeping dates in sync with your bank is important** as it allows you to compare the balance at any point in time with your bank.
+
+When "Merge with existing transactions" is enabled, a **Reimport deleted transactions** checkbox is also available. When checked (the default for file imports), any transactions that were previously imported and then deleted will be reimported. Disable this option if you do _not_ want deleted transactions to reappear during import.
+
+:::note
+The [API](../api/reference.md#importtransactions) defaults `reimportDeleted` to `true` for backward compatibility. If you are importing via the API and want to skip deleted transactions, pass `reimportDeleted: false` explicitly.
+:::

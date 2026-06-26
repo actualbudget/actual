@@ -2,15 +2,14 @@ import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
+import type { FormulaWidget } from '@actual-app/core/types/models';
 
-import type { FormulaWidget } from 'loot-core/types/models';
-
-import { FormulaResult } from '@desktop-client/components/reports/FormulaResult';
-import { ReportCard } from '@desktop-client/components/reports/ReportCard';
-import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
-import { useFormulaExecution } from '@desktop-client/hooks/useFormulaExecution';
-import { useThemeColors } from '@desktop-client/hooks/useThemeColors';
+import { FormulaResult } from '#components/reports/FormulaResult';
+import { ReportCard } from '#components/reports/ReportCard';
+import { ReportCardName } from '#components/reports/ReportCardName';
+import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
+import { useFormulaExecution } from '#hooks/useFormulaExecution';
+import { useThemeColors } from '#hooks/useThemeColors';
 
 type FormulaCardProps = {
   widgetId: string;
@@ -40,6 +39,7 @@ export function FormulaCard({
   const fontSize = meta?.fontSize;
   const fontSizeMode = meta?.fontSizeMode || 'dynamic';
   const staticFontSize = meta?.staticFontSize || 32;
+  const showTitle = meta?.showTitle ?? true;
   const colorFormula = meta?.colorFormula || '';
 
   const { result, isLoading, error } = useFormulaExecution(
@@ -78,10 +78,14 @@ export function FormulaCard({
       disableClick={nameMenuOpen}
       to={`/reports/formula/${widgetId}`}
       menuItems={[
-        {
-          name: 'rename',
-          text: t('Rename'),
-        },
+        ...(showTitle
+          ? [
+              {
+                name: 'rename',
+                text: t('Rename'),
+              },
+            ]
+          : []),
         {
           name: 'remove',
           text: t('Remove'),
@@ -103,20 +107,22 @@ export function FormulaCard({
       }}
     >
       <View style={{ flex: 1, overflow: 'hidden' }}>
-        <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
-          <ReportCardName
-            name={meta?.name || t('Formula')}
-            isEditing={nameMenuOpen}
-            onChange={newName => {
-              onMetaChange({
-                ...meta,
-                name: newName,
-              });
-              setNameMenuOpen(false);
-            }}
-            onClose={() => setNameMenuOpen(false)}
-          />
-        </View>
+        {showTitle && (
+          <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
+            <ReportCardName
+              name={meta?.name || t('Formula')}
+              isEditing={nameMenuOpen}
+              onChange={newName => {
+                onMetaChange({
+                  ...meta,
+                  name: newName,
+                });
+                setNameMenuOpen(false);
+              }}
+              onClose={() => setNameMenuOpen(false)}
+            />
+          </View>
+        )}
         <View
           ref={containerRef}
           style={{

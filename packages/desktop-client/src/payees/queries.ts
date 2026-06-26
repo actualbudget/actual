@@ -1,12 +1,17 @@
+import { send } from '@actual-app/core/platform/client/connection';
+import { memoizeOne } from '@actual-app/core/shared/memoize';
+import { groupById } from '@actual-app/core/shared/util';
+import type {
+  AccountEntity,
+  NearbyPayeeEntity,
+  PayeeEntity,
+} from '@actual-app/core/types/models';
 import { queryOptions } from '@tanstack/react-query';
 import { t } from 'i18next';
-import memoizeOne from 'memoize-one';
 
-import { send } from 'loot-core/platform/client/connection';
-import { groupById } from 'loot-core/shared/util';
-import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
+import { getAccountsById } from '#accounts/accountsSlice';
 
-import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
+import { locationService } from './location';
 
 export const payeeQueries = {
   all: () => ['payees'],
@@ -53,6 +58,20 @@ export const payeeQueries = {
         return new Map(Object.entries(counts ?? {}));
       },
       placeholderData: new Map(),
+    }),
+  listNearby: () =>
+    queryOptions<NearbyPayeeEntity[]>({
+      queryKey: [...payeeQueries.all(), 'nearby'],
+      queryFn: async () => {
+        const position = await locationService.getCurrentPosition();
+        return locationService.getNearbyPayees({
+          latitude: position.latitude,
+          longitude: position.longitude,
+        });
+      },
+      placeholderData: [],
+      // Manually invalidated when payee locations change
+      staleTime: Infinity,
     }),
 };
 

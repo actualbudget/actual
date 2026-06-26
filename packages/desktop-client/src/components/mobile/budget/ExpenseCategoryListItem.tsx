@@ -10,28 +10,24 @@ import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { BudgetType } from '@actual-app/core/server/prefs';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 
-import type { BudgetType } from 'loot-core/server/prefs';
-import * as monthUtils from 'loot-core/shared/months';
-import type { CategoryEntity } from 'loot-core/types/models';
+import { useCategoriesById } from '#hooks/useCategories';
+import { useFormat } from '#hooks/useFormat';
+import { useNavigate } from '#hooks/useNavigate';
+import { useSheetValue } from '#hooks/useSheetValue';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useUndo } from '#hooks/useUndo';
+import { collapseModals, pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
+import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
 import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { SpentCell } from './SpentCell';
-
-import { useCategoriesById } from '@desktop-client/hooks/useCategories';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import {
-  envelopeBudget,
-  trackingBudget,
-} from '@desktop-client/spreadsheet/bindings';
 
 type ExpenseCategoryNameProps = {
   category: CategoryEntity;

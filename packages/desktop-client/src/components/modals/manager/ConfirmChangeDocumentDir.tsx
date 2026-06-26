@@ -7,16 +7,12 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { Information } from '@desktop-client/components/alerts';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { Checkbox } from '@desktop-client/components/forms';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { Information } from '#components/alerts';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { Checkbox } from '#components/forms';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 function DirectoryDisplay({ directory }: { directory: string }) {
   return (
@@ -100,11 +96,11 @@ export function ConfirmChangeDocumentDirModal({
 
   return (
     <Modal name="confirm-change-document-dir">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Are you sure?')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -190,7 +186,7 @@ export function ConfirmChangeDocumentDirModal({
                   fontSize: 14,
                   alignSelf: 'center',
                 }}
-                onPress={close}
+                onPress={() => state.close()}
               >
                 <Trans>Cancel</Trans>
               </Button>
@@ -202,7 +198,7 @@ export function ConfirmChangeDocumentDirModal({
                   fontSize: 14,
                   alignSelf: 'center',
                 }}
-                onPress={() => moveDirectory(close)}
+                onPress={() => moveDirectory(() => state.close())}
               >
                 <Trans>Change directory</Trans>
               </ButtonWithLoading>

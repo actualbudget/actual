@@ -2,15 +2,14 @@
 import React from 'react';
 
 import { theme } from '@actual-app/components/theme';
+import type { CategoryGroupEntity } from '@actual-app/core/types/models';
 
-import type { CategoryGroupEntity } from 'loot-core/types/models';
+import { Row } from '#components/table';
 
 import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
 
 import { useBudgetComponents } from '.';
-
-import { Row } from '@desktop-client/components/table';
 
 type IncomeGroupProps = {
   group: CategoryGroupEntity;
@@ -18,6 +17,10 @@ type IncomeGroupProps = {
   collapsed: boolean;
   onEditName: (id: CategoryGroupEntity['id']) => void;
   onSave: (group: CategoryGroupEntity) => void;
+  onSortCategories?: (
+    groupId: CategoryGroupEntity['id'],
+    direction: 'asc' | 'desc',
+  ) => void;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
   onShowNewCategory: (groupId: CategoryGroupEntity['id']) => void;
 };
@@ -28,6 +31,7 @@ export function IncomeGroup({
   collapsed,
   onEditName,
   onSave,
+  onSortCategories,
   onToggleCollapse,
   onShowNewCategory,
 }: IncomeGroupProps) {
@@ -50,6 +54,7 @@ export function IncomeGroup({
         }
         onEdit={onEditName}
         onSave={onSave}
+        onSortCategories={onSortCategories}
         onToggleCollapse={onToggleCollapse}
         onShowNewCategory={onShowNewCategory}
       />

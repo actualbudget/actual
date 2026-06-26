@@ -1,12 +1,14 @@
 // @ts-strict-ignore
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+
+import type { BudgetMonthCell } from './budgetMonthCell';
 
 type BudgetAnalysisIntervalData = {
   date: string;
@@ -31,44 +33,100 @@ type createBudgetAnalysisSpreadsheetProps = {
   conditionsOp?: 'and' | 'or';
   startDate: string;
   endDate: string;
+  showHiddenCategories?: boolean;
 };
+
+export function isBaseCategory(
+  cat: CategoryEntity,
+  showHiddenCategories: boolean,
+): boolean {
+  return !cat.is_income && (showHiddenCategories || !cat.hidden);
+}
 
 export function createBudgetAnalysisSpreadsheet({
   conditions = [],
   conditionsOp = 'and',
   startDate,
   endDate,
+  showHiddenCategories = false,
 }: createBudgetAnalysisSpreadsheetProps) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: BudgetAnalysisData) => void,
   ) => {
     // Get all categories
-    const { list: allCategories } = await send('get-categories');
+    const { list: allCategories, grouped: allCategoryGroups } =
+      await send('get-categories');
 
-    // Filter categories based on conditions
-    const categoryConditions = conditions.filter(
-      cond => !cond.customName && cond.field === 'category',
+    // Build a UUID → name map for category groups so text-based operators
+    // (contains, doesNotContain, matches) can match against the group name.
+    const groupNameById = new Map<string, string>(
+      allCategoryGroups.map(
+        (g: { id: string; name: string }) => [g.id, g.name] as const,
+      ),
     );
 
-    // Base set: expense categories only (exclude income and hidden)
-    const baseCategories = allCategories.filter(
-      (cat: CategoryEntity) => !cat.is_income && !cat.hidden,
+    // Filter categories based on conditions (supports both 'category' and 'category_group' fields)
+    const relevantConditions = conditions.filter(
+      cond =>
+        !cond.customName &&
+        (cond.field === 'category' || cond.field === 'category_group'),
+    );
+
+    // Base set: expense categories only; hidden categories are included when
+    // showHiddenCategories is true so historic data is not misrepresented.
+    const baseCategories = allCategories.filter((cat: CategoryEntity) =>
+      isBaseCategory(cat, showHiddenCategories),
     );
 
     let categoriesToInclude: CategoryEntity[];
-    if (categoryConditions.length > 0) {
-      // Evaluate each condition to get sets of matching categories
-      const conditionResults = categoryConditions.map(cond => {
+    if (relevantConditions.length > 0) {
+      // Evaluate each condition to get sets of matching categories.
+      // category_group conditions are expanded to their member categories via cat.group.
+      const conditionResults = relevantConditions.map(cond => {
+        const getKey = (cat: CategoryEntity) =>
+          cond.field === 'category_group' ? cat.group : cat.id;
+        const matchesRegex =
+          cond.op === 'matches' &&
+          typeof cond.value === 'string' &&
+          cond.value.length <= 256
+            ? (() => {
+                try {
+                  return new RegExp(cond.value, 'i');
+                } catch {
+                  return null;
+                }
+              })()
+            : null;
         return baseCategories.filter((cat: CategoryEntity) => {
+          const key = getKey(cat);
+          // For text-based operators, compare against the human-readable name
+          // rather than the UUID. For category_group, resolve UUID → name via
+          // the map; for category, use the category's own name directly.
+          const textValue =
+            cond.field === 'category_group'
+              ? (groupNameById.get(key) ?? key)
+              : cat.name;
           if (cond.op === 'is') {
-            return cond.value === cat.id;
+            return cond.value === key;
           } else if (cond.op === 'isNot') {
-            return cond.value !== cat.id;
+            return cond.value !== key;
           } else if (cond.op === 'oneOf') {
-            return cond.value.includes(cat.id);
+            return Array.isArray(cond.value) && cond.value.includes(key);
           } else if (cond.op === 'notOneOf') {
-            return !cond.value.includes(cat.id);
+            return Array.isArray(cond.value) && !cond.value.includes(key);
+          } else if (cond.op === 'contains') {
+            return (
+              typeof cond.value === 'string' &&
+              textValue.toLowerCase().includes(cond.value.toLowerCase())
+            );
+          } else if (cond.op === 'doesNotContain') {
+            return (
+              typeof cond.value === 'string' &&
+              !textValue.toLowerCase().includes(cond.value.toLowerCase())
+            );
+          } else if (cond.op === 'matches') {
+            return matchesRegex?.test(textValue) ?? false;
           }
           return false;
         });
@@ -102,7 +160,7 @@ export function createBudgetAnalysisSpreadsheet({
         }
       }
     } else {
-      // No category filter, use all expense categories
+      // No category or category group filter — include all expense categories
       categoriesToInclude = baseCategories;
     }
 
@@ -127,10 +185,10 @@ export function createBudgetAnalysisSpreadsheet({
 
     // Calculate the carryover from the previous month
     for (const cat of categoriesToInclude) {
-      const balanceCell = prevMonthData.find((cell: { name: string }) =>
+      const balanceCell = prevMonthData.find((cell: BudgetMonthCell) =>
         cell.name.endsWith(`leftover-${cat.id}`),
       );
-      const carryoverCell = prevMonthData.find((cell: { name: string }) =>
+      const carryoverCell = prevMonthData.find((cell: BudgetMonthCell) =>
         cell.name.endsWith(`carryover-${cat.id}`),
       );
 
@@ -167,16 +225,16 @@ export function createBudgetAnalysisSpreadsheet({
       // Sum up values for categories we're interested in
       for (const cat of categoriesToInclude) {
         // Find the budget, spent, balance, and carryover flag for this category
-        const budgetCell = monthData.find((cell: { name: string }) =>
+        const budgetCell = monthData.find((cell: BudgetMonthCell) =>
           cell.name.endsWith(`budget-${cat.id}`),
         );
-        const spentCell = monthData.find((cell: { name: string }) =>
+        const spentCell = monthData.find((cell: BudgetMonthCell) =>
           cell.name.endsWith(`sum-amount-${cat.id}`),
         );
-        const balanceCell = monthData.find((cell: { name: string }) =>
+        const balanceCell = monthData.find((cell: BudgetMonthCell) =>
           cell.name.endsWith(`leftover-${cat.id}`),
         );
-        const carryoverCell = monthData.find((cell: { name: string }) =>
+        const carryoverCell = monthData.find((cell: BudgetMonthCell) =>
           cell.name.endsWith(`carryover-${cat.id}`),
         );
 

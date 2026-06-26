@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import { parse as csv2json } from 'csv-parse/sync';
 
-import * as fs from '../../../platform/server/fs';
-import { logger } from '../../../platform/server/log';
-import { looselyParseAmount } from '../../../shared/util';
+import * as fs from '#platform/server/fs';
+import { logger } from '#platform/server/log';
+import { looselyParseAmount } from '#shared/util';
 
 import { ofx2json } from './ofx2json';
 import { qif2json } from './qif2json';
@@ -51,6 +51,7 @@ type StructuredTransaction = {
   payee_name: string;
   imported_payee: string;
   notes: string;
+  category?: string | null;
 };
 
 // CSV files return raw data that are not guaranteed to be StructuredTransactions
@@ -68,6 +69,7 @@ export type ParseFileOptions = {
   hasHeaderRow?: boolean;
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;
+  swapPayeeAndMemo?: boolean;
   skipStartLines?: number;
   skipEndLines?: number;
   importNotes?: boolean;
@@ -172,16 +174,27 @@ async function parseQIF(
     return { errors, transactions: [] };
   }
 
+  const swap = options.swapPayeeAndMemo;
+
   return {
     errors: [],
     transactions: data.transactions
-      .map(trans => ({
-        amount: trans.amount != null ? looselyParseAmount(trans.amount) : null,
-        date: trans.date,
-        payee_name: trans.payee,
-        imported_payee: trans.payee,
-        notes: options.importNotes ? trans.memo || null : null,
-      }))
+      .map(trans => {
+        const payeeSource = swap ? trans.memo : trans.payee;
+        const memoSource = swap ? trans.payee : trans.memo;
+        const fallbackUsed = !payeeSource && swap;
+
+        return {
+          amount:
+            trans.amount != null ? looselyParseAmount(trans.amount) : null,
+          date: trans.date,
+          payee_name: payeeSource || (fallbackUsed ? memoSource : null),
+          imported_payee: payeeSource || (fallbackUsed ? memoSource : null),
+          category: trans.subcategory || trans.category || null,
+          notes:
+            options.importNotes && !fallbackUsed ? memoSource || null : null,
+        };
+      })
       .filter(trans => trans.date != null && trans.amount != null),
   };
 }
@@ -207,6 +220,7 @@ async function parseOFX(
   // Banks don't always implement the OFX standard properly
   // If no payee is available try and fallback to memo
   const useMemoFallback = options.fallbackMissingPayeeToMemo;
+  const swap = options.swapPayeeAndMemo;
 
   return {
     errors,
@@ -219,13 +233,17 @@ async function parseOFX(
         });
       }
 
+      const payeeSource = swap ? trans.memo : trans.name;
+      const memoSource = swap ? trans.name : trans.memo;
+      const fallbackUsed = !payeeSource && useMemoFallback;
+
       return {
         amount: parsedAmount || 0,
         imported_id: trans.fitId,
         date: trans.date,
-        payee_name: trans.name || (useMemoFallback ? trans.memo : null),
-        imported_payee: trans.name || (useMemoFallback ? trans.memo : null),
-        notes: options.importNotes ? trans.memo || null : null, //memo used for payee
+        payee_name: payeeSource || (fallbackUsed ? memoSource : null),
+        imported_payee: payeeSource || (fallbackUsed ? memoSource : null),
+        notes: options.importNotes && !fallbackUsed ? memoSource || null : null,
       };
     }),
   };
@@ -250,11 +268,21 @@ async function parseCAMT(
     return { errors };
   }
 
+  const swap = options.swapPayeeAndMemo;
+
   return {
     errors,
-    transactions: data.map(trans => ({
-      ...trans,
-      notes: options.importNotes ? trans.notes : null,
-    })),
+    transactions: data.map(trans => {
+      const payeeSource = swap ? trans.notes : trans.payee_name;
+      const memoSource = swap ? trans.payee_name : trans.notes;
+      const fallbackUsed = !payeeSource && swap;
+
+      return {
+        ...trans,
+        payee_name: payeeSource || (fallbackUsed ? memoSource : null),
+        imported_payee: payeeSource || (fallbackUsed ? memoSource : null),
+        notes: options.importNotes && !fallbackUsed ? memoSource || null : null,
+      };
+    }),
   };
 }

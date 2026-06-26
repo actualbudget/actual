@@ -5,12 +5,11 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { PayeeEntity } from '@actual-app/core/types/models';
 
-import type { PayeeEntity } from 'loot-core/types/models';
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 
 import { PayeesListItem } from './PayeesListItem';
-
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 
 type PayeesListProps = {
   payees: PayeeEntity[];

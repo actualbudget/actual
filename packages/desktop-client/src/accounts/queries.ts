@@ -1,7 +1,6 @@
+import { send } from '@actual-app/core/platform/client/connection';
+import type { AccountEntity } from '@actual-app/core/types/models';
 import { queryOptions } from '@tanstack/react-query';
-
-import { send } from 'loot-core/platform/client/connection';
-import type { AccountEntity } from 'loot-core/types/models';
 
 function selectActive(accounts: AccountEntity[]) {
   return accounts.filter(account => !account.closed);

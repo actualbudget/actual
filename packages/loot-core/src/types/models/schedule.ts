@@ -26,6 +26,7 @@ export type ScheduleEntity = {
   next_date: string;
   completed: boolean;
   posts_transaction: boolean;
+  custom_upcoming_length?: string | null;
   tombstone: boolean;
 
   // These are special fields that are actually pulled from the

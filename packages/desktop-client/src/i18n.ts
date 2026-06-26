@@ -1,9 +1,8 @@
 import { initReactI18next } from 'react-i18next';
 
+import * as Platform from '@actual-app/core/shared/platform';
 import i18n from 'i18next';
 import resourcesToBackend from 'i18next-resources-to-backend';
-
-import * as Platform from 'loot-core/shared/platform';
 
 import { languages } from './languages';
 

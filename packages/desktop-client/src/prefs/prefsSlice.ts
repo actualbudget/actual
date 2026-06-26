@@ -1,20 +1,22 @@
-import { createSlice } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
-
-import { send } from 'loot-core/platform/client/connection';
-import { parseNumberFormat, setNumberFormat } from 'loot-core/shared/util';
+import { send } from '@actual-app/core/platform/client/connection';
+import {
+  parseNumberFormat,
+  setNumberFormat,
+} from '@actual-app/core/shared/util';
 import type {
   GlobalPrefs,
   MetadataPrefs,
   ServerPrefs,
   SyncedPrefs,
-} from 'loot-core/types/prefs';
+} from '@actual-app/core/types/prefs';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { resetApp } from '@desktop-client/app/appSlice';
-import { setI18NextLanguage } from '@desktop-client/i18n';
-import { closeModal } from '@desktop-client/modals/modalsSlice';
-import { createAppAsyncThunk } from '@desktop-client/redux';
-import { getUserData } from '@desktop-client/users/usersSlice';
+import { resetApp } from '#app/appSlice';
+import { setI18NextLanguage } from '#i18n';
+import { closeModal } from '#modals/modalsSlice';
+import { createAppAsyncThunk } from '#redux';
+import { getUserData } from '#users/usersSlice';
 
 const sliceName = 'prefs';
 

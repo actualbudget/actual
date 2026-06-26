@@ -15,7 +15,8 @@
     "vi": "readonly",
     "backend": "readonly",
     "importScripts": "readonly",
-    "FS": "readonly"
+    "FS": "readonly",
+    "__APP_VERSION__": "readonly"
   },
   "rules": {
     // Import sorting
@@ -36,6 +37,9 @@
     "actual/prefer-const": "error",
     "actual/no-anchor-tag": "error",
     "actual/no-react-default-import": "error",
+    "actual/prefer-subpath-imports": "error",
+    "actual/enforce-boundaries": "error",
+    "actual/no-extraneous-dependencies": "error",
 
     // JSX A11y rules
     "jsx-a11y/no-autofocus": [
@@ -101,8 +105,19 @@
     "typescript/no-var-requires": "error",
     // we want to allow unions such as "{ name: DbAccount['name'] | DbPayee['name'] }"
     "typescript/no-duplicate-type-constituents": "off",
+    // we want to allow unions such as "string | 'network' | 'file-key-mismatch'"
+    "typescript/no-redundant-type-constituents": "off",
+    "typescript/no-useless-default-assignment": "error",
     "typescript/await-thenable": "error",
-    "typescript/no-floating-promises": "warn", // TODO: covert to error
+    "typescript/no-floating-promises": "error",
+    "typescript/require-array-sort-compare": "error",
+    "typescript/unbound-method": "error",
+    "typescript/no-for-in-array": "error",
+    "typescript/restrict-template-expressions": "error",
+    "typescript/no-misused-spread": "warn", // TODO: enable this
+    "typescript/no-base-to-string": "warn", // TODO: enable this
+    "typescript/no-unsafe-unary-minus": "warn", // TODO: enable this
+    "typescript/no-unsafe-type-assertion": "warn", // TODO: enable this
 
     // Import rules
     "import/consistent-type-specifier-style": "error",
@@ -110,9 +125,6 @@
     "import/no-amd": "error",
     "import/no-default-export": "error",
     "import/no-webpack-loader-syntax": "error",
-    "import/no-useless-path-segments": "error",
-    "import/no-unresolved": "error",
-    "import/no-unused-modules": "error",
     "import/no-duplicates": [
       "error",
       {
@@ -150,7 +162,6 @@
     "react/no-danger-with-children": "error",
     "react/no-direct-mutation-state": "error",
     "react/no-is-mounted": "error",
-    "react/no-unstable-nested-components": "error",
     "react/require-render-return": "error",
     "react/rules-of-hooks": "error",
     "react/self-closing-comp": "error",
@@ -224,7 +235,7 @@
     "eslint/require-yield": "error",
     "eslint/getter-return": "error",
     "eslint/unicode-bom": ["error", "never"],
-    "eslint/no-use-isnan": "error",
+    "eslint/use-isnan": "error",
     "eslint/valid-typeof": "error",
     "eslint/no-useless-rename": [
       "error",
@@ -325,7 +336,7 @@
         ],
         "patterns": [
           {
-            "group": ["**/*.api", "**/*.web", "**/*.electron"],
+            "group": ["**/*.api", "**/*.electron"],
             "message": "Don't directly reference imports from other platforms"
           },
           {
@@ -349,9 +360,12 @@
         ]
       }
     ],
+    "actual/no-enum": "error",
     "eslint/no-useless-constructor": "error",
     "eslint/no-undef": "error",
-    "eslint/no-unused-expressions": "error"
+    "eslint/no-unused-expressions": "error",
+    "eslint/no-return-assign": "error",
+    "eslint/no-unused-vars": "error"
   },
   "overrides": [
     {
@@ -361,17 +375,34 @@
       }
     },
     {
+      // Grandfathered pre-existing enums; new enums are disallowed everywhere else.
+      "files": [
+        "packages/component-library/src/tokens.ts",
+        "packages/desktop-client/src/auth/types.ts"
+      ],
+      "rules": {
+        "actual/no-enum": "off"
+      }
+    },
+    {
       "files": ["**/*.test.{js,ts,jsx,tsx}", "packages/docs/**/*"],
       "rules": {
         "actual/no-untranslated-strings": "off",
-        "actual/prefer-logger-over-console": "off"
+        "actual/prefer-logger-over-console": "off",
+        "typescript/unbound-method": "off"
+      }
+    },
+    {
+      "files": ["packages/eslint-plugin-actual/lib/rules/__tests__/**/*"],
+      "rules": {
+        "actual/enforce-boundaries": "off"
       }
     },
     {
       "files": [
         "packages/api/migrations/*",
         "packages/loot-core/migrations/*",
-        "packages/sync-server/src/app-gocardless/banks/*.js",
+        "packages/sync-server/src/app-gocardless/banks/*.ts",
         "*.config.{ts,mts,mjs}"
       ],
       "rules": {
@@ -410,6 +441,30 @@
       ],
       "rules": {
         "eslint/no-empty-function": "off"
+      }
+    },
+    // TODO: drop these globs as each package becomes strict.
+    {
+      "files": [
+        "packages/api/**/*",
+        "packages/desktop-client/**/*",
+        "packages/desktop-electron/**/*",
+        "packages/loot-core/**/*",
+        "packages/plugins-service/**/*",
+        "packages/sync-server/**/*"
+      ],
+      "rules": {
+        "typescript/no-useless-default-assignment": "off"
+      }
+    },
+    // crdt enforces the repo's "TODO: enable this" typescript rules as errors
+    {
+      "files": ["packages/crdt/**/*"],
+      "rules": {
+        "typescript/no-misused-spread": "error",
+        "typescript/no-base-to-string": "error",
+        "typescript/no-unsafe-unary-minus": "error",
+        "typescript/no-unsafe-type-assertion": "error"
       }
     }
   ]

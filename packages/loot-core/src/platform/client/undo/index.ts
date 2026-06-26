@@ -1,9 +1,11 @@
-// This is temporary until we move all loot-core/client over to desktop-client.
-// oxlint-disable-next-line eslint/no-restricted-imports
-import type { Modal } from '@actual-app/web/src/modals/modalsSlice';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { UndoState as ServerUndoState } from '../../../server/undo';
+import type { UndoState as ServerUndoState } from '#server/undo';
+
+// Minimal structural shape of desktop-client's Modal union. loot-core can't
+// import the full type from @actual-app/web; the undo system only stores the
+// modal and reads `name`. `options` is kept loose so the real Modal assigns.
+type Modal = { name: string; options?: unknown };
 
 type UndoState = {
   url: string | null;

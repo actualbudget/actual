@@ -29,6 +29,78 @@ const createSession = (userId, sessionToken) => {
 
 const generateSessionToken = () => `token-${uuidv4()}`;
 
+describe('disabled-user session revocation', () => {
+  let adminUserId, adminSessionToken;
+  let targetUserId, targetSessionToken;
+
+  beforeEach(() => {
+    adminUserId = uuidv4();
+    targetUserId = uuidv4();
+    adminSessionToken = generateSessionToken();
+    targetSessionToken = generateSessionToken();
+
+    createUser(adminUserId, 'adminForRevocation', ADMIN_ROLE);
+    createSession(adminUserId, adminSessionToken);
+    createUser(targetUserId, 'targetForRevocation', BASIC_ROLE);
+    createSession(targetUserId, targetSessionToken);
+  });
+
+  afterEach(() => {
+    deleteUser(adminUserId);
+    deleteUser(targetUserId);
+  });
+
+  it('should return 401 when the token belongs to a disabled user', async () => {
+    getAccountDb().mutate('UPDATE users SET enabled = 0 WHERE id = ?', [
+      targetUserId,
+    ]);
+
+    const res = await request(app)
+      .get('/users')
+      .set('x-actual-token', targetSessionToken);
+
+    expect(res.statusCode).toEqual(401);
+    expect(res.body).toHaveProperty('status', 'error');
+    expect(res.body).toHaveProperty('reason', 'unauthorized');
+  });
+
+  it('should remove existing sessions when an admin disables the user', async () => {
+    const res = await request(app)
+      .patch('/users')
+      .send({
+        id: targetUserId,
+        userName: 'targetForRevocation',
+        displayName: 'Target',
+        enabled: false,
+        role: BASIC_ROLE,
+      })
+      .set('x-actual-token', adminSessionToken);
+
+    expect(res.statusCode).toEqual(200);
+
+    const session = getAccountDb().first(
+      'SELECT token FROM sessions WHERE token = ?',
+      [targetSessionToken],
+    );
+    expect(session).toBeNull();
+  });
+
+  it('should remove existing sessions when an admin deletes the user', async () => {
+    const res = await request(app)
+      .delete('/users')
+      .send({ ids: [targetUserId] })
+      .set('x-actual-token', adminSessionToken);
+
+    expect(res.statusCode).toEqual(200);
+
+    const session = getAccountDb().first(
+      'SELECT token FROM sessions WHERE token = ?',
+      [targetSessionToken],
+    );
+    expect(session).toBeNull();
+  });
+});
+
 describe('/admin', () => {
   describe('/owner-created', () => {
     it('should return 200 and true if an owner user is created', async () => {

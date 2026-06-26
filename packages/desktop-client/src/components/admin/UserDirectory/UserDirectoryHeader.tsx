@@ -1,15 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  Cell,
-  SelectCell,
-  TableHeader,
-} from '@desktop-client/components/table';
-import {
-  useSelectedDispatch,
-  useSelectedItems,
-} from '@desktop-client/hooks/useSelected';
+import { Cell, SelectCell, TableHeader } from '#components/table';
+import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 
 export function UserDirectoryHeader() {
   const { t } = useTranslation();

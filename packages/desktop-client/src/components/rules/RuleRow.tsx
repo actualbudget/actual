@@ -11,17 +11,19 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { RuleEntity } from '@actual-app/core/types/models';
 
-import { friendlyOp, translateRuleStage } from 'loot-core/shared/rules';
-import type { RuleEntity } from 'loot-core/types/models';
+import { Cell, Field, Row, SelectCell } from '#components/table';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { useSelectedDispatch } from '#hooks/useSelected';
+import {
+  friendlyOp,
+  groupActionsBySplitIndex,
+  translateRuleStage,
+} from '#util/rule';
 
 import { ActionExpression } from './ActionExpression';
 import { ConditionExpression } from './ConditionExpression';
-
-import { Cell, Field, Row, SelectCell } from '@desktop-client/components/table';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
-import { groupActionsBySplitIndex } from '@desktop-client/util/ruleUtils';
 
 type RuleRowProps = {
   rule: RuleEntity;
@@ -99,7 +101,7 @@ export const RuleRow = memo(
                   onEditRule(rule);
                   break;
                 default:
-                  throw new Error(`Unrecognized menu option: ${name}`);
+                  throw new Error(`Unrecognized menu option: ${String(name)}`);
               }
               setMenuOpen(false);
             }}

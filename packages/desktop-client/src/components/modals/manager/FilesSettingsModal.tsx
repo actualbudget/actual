@@ -8,15 +8,11 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { loadAllFiles } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { loadAllFiles } from '#budgetfiles/budgetfilesSlice';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 function FileLocationSettings() {
   const [documentDir, _setDocumentDirPref] = useGlobalPref('documentDir');
@@ -162,12 +158,14 @@ export function FilesSettingsModal() {
 
   return (
     <Modal name="files-settings">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Settings')}
             rightContent={
-              <ModalCloseButton onPress={() => closeModal(close)} />
+              <ModalCloseButton
+                onPress={() => closeModal(() => state.close())}
+              />
             }
           />
           <View
@@ -189,7 +187,7 @@ export function FilesSettingsModal() {
                 fontSize: 14,
                 alignSelf: 'center',
               }}
-              onPress={() => closeModal(close)}
+              onPress={() => closeModal(() => state.close())}
             >
               <Trans>OK</Trans>
             </Button>

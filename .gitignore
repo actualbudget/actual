@@ -19,6 +19,8 @@ packages/api/app/bundle.api.js
 packages/api/app/stats.json
 packages/api/dist
 packages/api/@types
+packages/api/test-results
+packages/api/playwright-report
 packages/crdt/dist
 packages/desktop-client/build-stats
 packages/desktop-client/dev-dist
@@ -33,16 +35,20 @@ packages/desktop-electron/dist
 packages/desktop-electron/loot-core
 packages/desktop-client/service-worker
 packages/plugins-service/dist
+packages/component-library/dist
 packages/loot-core/lib-dist
 packages/loot-core/@types
-packages/component-library/dist
 packages/cli/dist
 packages/ci-actions/dist
+**/.tsbuildinfo
 packages/sync-server/coverage
 bundle.desktop.js
 bundle.desktop.js.map
 bundle.mobile.js
 bundle.mobile.js.map
+
+# Python virtualenv (Electron CI provisions one at the repo root for setuptools)
+.venv/
 
 # Yarn
 .pnp.*
@@ -56,9 +62,14 @@ bundle.mobile.js.map
 # VSCode
 .vscode/*
 !.vscode/settings.default.json
+!.vscode/extensions.json
 
 # IntelliJ IDEA
 .idea
+
+# Claude Code
+.claude/worktrees/*
+.claude/settings.local.json
 
 # Misc
 .#*
@@ -83,5 +94,15 @@ build/
 # Lage cache
 .lage/
 
+# Test results (JUnit XML reports, Playwright artifacts)
+**/test-results/
+
 *storybook.log
 storybook-static
+
+# cli config when testing locally
+.actualrc.json
+.actualrc
+.actualrc.yaml
+.actualrc.yml
+actual.config.js

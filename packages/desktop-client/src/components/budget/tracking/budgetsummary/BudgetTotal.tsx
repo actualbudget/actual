@@ -8,8 +8,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import type { Binding, SheetFields } from '@desktop-client/spreadsheet';
+import { CellValue } from '#components/spreadsheet/CellValue';
+import type { Binding, SheetFields } from '#spreadsheet';
 
 type BudgetTotalProps<
   CurrentField extends SheetFields<'tracking-budget'>,

@@ -2,12 +2,12 @@
 import { setClock } from '@actual-app/crdt';
 import fc from 'fast-check';
 
+import * as arbs from '#mocks/arbitrary-schema';
+import * as db from '#server/db';
+import { batchMessages, setSyncingMode } from '#server/sync';
+import { q } from '#shared/query';
+import { groupById } from '#shared/util';
 import { aqlQuery } from '..';
-import * as arbs from '../../../mocks/arbitrary-schema';
-import { q } from '../../../shared/query';
-import { groupById } from '../../../shared/util';
-import * as db from '../../db';
-import { batchMessages, setSyncingMode } from '../../sync/index';
 
 import { isHappyPathQuery } from './executors';
 

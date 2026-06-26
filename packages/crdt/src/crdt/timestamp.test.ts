@@ -44,7 +44,8 @@ describe('Timestamp', function () {
         '9999-12-31T23:59:59.999Z-FFFF-10000000000000000',
       ];
       for (const invalidInput of invalidInputs) {
-        expect(Timestamp.parse(invalidInput as string)).toBe(null);
+        // @ts-expect-error we intentionally pass invalid inputs
+        expect(Timestamp.parse(invalidInput)).toBe(null);
       }
     });
 
@@ -121,12 +122,12 @@ describe('Timestamp', function () {
     it('should fail with counter overflow', function () {
       now = 40;
       for (let i = 0; i < 65536; i++) Timestamp.send();
-      expect(Timestamp.send).toThrow(Timestamp.OverflowError);
+      expect(() => Timestamp.send()).toThrow(Timestamp.OverflowError);
     });
 
     it('should fail with clock drift', function () {
       now = -(5 * 60 * 1000 + 1);
-      expect(Timestamp.send).toThrow(Timestamp.ClockDriftError);
+      expect(() => Timestamp.send()).toThrow(Timestamp.ClockDriftError);
     });
   });
 

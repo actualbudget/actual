@@ -1,13 +1,13 @@
 // @ts-strict-ignore
-import * as asyncStorage from '../../platform/server/asyncStorage';
+import * as asyncStorage from '#platform/server/asyncStorage';
+import { createApp } from '#server/app';
+import { del, get, patch, post } from '#server/post';
+import { getServer } from '#server/server-config';
 import type {
   NewUserAccessEntity,
   UserAvailable,
   UserEntity,
-} from '../../types/models';
-import { createApp } from '../app';
-import { del, get, patch, post } from '../post';
-import { getServer } from '../server-config';
+} from '#types/models';
 
 export type AdminHandlers = {
   'users-get': typeof getUsers;

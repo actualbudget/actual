@@ -4,7 +4,8 @@
 
 import { runClassic } from 'eslint-vitest-rule-tester';
 
-import * as rule from '../typography';
+import plugin from '../../index';
+const rule = plugin.rules['typography'];
 
 //------------------------------------------------------------------------------
 // Tests
@@ -28,36 +29,36 @@ void runClassic(
       {
         code: 'var test = `I said \u201CHello, world!\u201D`;',
         errors: [
-          { messageId: 'quote', type: 'TemplateElement', column: 20 },
-          { messageId: 'quote', type: 'TemplateElement', column: 34 },
+          { messageId: 'quote', column: 20 },
+          { messageId: 'quote', column: 34 },
         ],
       },
       {
         code: `test2("I said \u2018Hello, world!\u2019");`,
         errors: [
-          { messageId: 'quote', type: 'Literal', column: 15 },
-          { messageId: 'quote', type: 'Literal', column: 29 },
+          { messageId: 'quote', column: 15 },
+          { messageId: 'quote', column: 29 },
         ],
       },
       {
         code: `test3('I said \u201CHello, world!\u201D');`,
         errors: [
-          { messageId: 'quote', type: 'Literal', column: 15 },
-          { messageId: 'quote', type: 'Literal', column: 29 },
+          { messageId: 'quote', column: 15 },
+          { messageId: 'quote', column: 29 },
         ],
       },
       {
         code: `<Test4>I said \u201CHello, world!\u201D</Test4>`,
         errors: [
-          { messageId: 'quote', type: 'JSXText', column: 15 },
-          { messageId: 'quote', type: 'JSXText', column: 29 },
+          { messageId: 'quote', column: 15 },
+          { messageId: 'quote', column: 29 },
         ],
       },
       {
         code: `<Test5>I said \u2018Hello, world!\u2019</Test5>`,
         errors: [
-          { messageId: 'quote', type: 'JSXText', column: 15 },
-          { messageId: 'quote', type: 'JSXText', column: 29 },
+          { messageId: 'quote', column: 15 },
+          { messageId: 'quote', column: 29 },
         ],
       },
     ],

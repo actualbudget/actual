@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 
-import type { ServerPrefs } from 'loot-core/types/prefs';
+import type { ServerPrefs } from '@actual-app/core/types/prefs';
 
-import { saveServerPrefs } from '@desktop-client/prefs/prefsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import { saveServerPrefs } from '#prefs/prefsSlice';
+import { useDispatch, useSelector } from '#redux';
 
 type SetServerPrefAction<K extends keyof ServerPrefs> = (
   value: ServerPrefs[K],

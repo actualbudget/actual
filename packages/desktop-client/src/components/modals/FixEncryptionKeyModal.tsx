@@ -12,18 +12,17 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
 
-import { send } from 'loot-core/platform/client/connection';
-import { getTestKeyError } from 'loot-core/shared/errors';
-
-import { Link } from '@desktop-client/components/common/Link';
+import { Link } from '#components/common/Link';
 import {
   Modal,
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+} from '#components/common/Modal';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { getTestKeyError } from '#util/error';
 
 type FixEncryptionKeyModalProps = Extract<
   ModalType,
@@ -64,7 +63,7 @@ export function FixEncryptionKeyModal({
 
   return (
     <Modal name="fix-encryption-key">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={
@@ -72,7 +71,7 @@ export function FixEncryptionKeyModal({
                 ? t('Decrypt budget file')
                 : t('This file is encrypted')
             }
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -111,7 +110,7 @@ export function FixEncryptionKeyModal({
           <Form
             onSubmit={e => {
               e.preventDefault();
-              void onUpdateKey(close);
+              void onUpdateKey(() => state.close());
             }}
           >
             <View
@@ -164,7 +163,7 @@ export function FixEncryptionKeyModal({
                   height: isNarrowWidth ? styles.mobileMinHeight : undefined,
                   marginRight: 10,
                 }}
-                onPress={close}
+                onPress={() => state.close()}
               >
                 <Trans>Back</Trans>
               </Button>

@@ -257,6 +257,11 @@ test.describe('Transactions', () => {
 
     const balanceBeforeTransaction =
       await accountPage.accountBalance.textContent();
+    const allAccountsBefore =
+      await accountPage.sidebarAllAccountsBalance.textContent();
+    const onBudgetBefore =
+      await accountPage.sidebarOnBudgetBalance.textContent();
+
     await accountPage.addEnteredTransaction();
 
     transaction = accountPage.getNthTransaction(0);
@@ -271,6 +276,15 @@ test.describe('Transactions', () => {
       const balanceAfterTransaction =
         await accountPage.accountBalance.textContent();
       expect(balanceAfterTransaction).not.toBe(balanceBeforeTransaction);
+    }).toPass();
+
+    // For an on-budget transfer, net totals should be unchanged
+    await expect(async () => {
+      const allAccounts =
+        await accountPage.sidebarAllAccountsBalance.textContent();
+      const onBudget = await accountPage.sidebarOnBudgetBalance.textContent();
+      expect(allAccounts).toBe(allAccountsBefore);
+      expect(onBudget).toBe(onBudgetBefore);
     }).toPass();
 
     await expect(page).toMatchThemeScreenshots();

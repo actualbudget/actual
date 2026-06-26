@@ -17,6 +17,8 @@ import type {
   Ref,
   RefObject,
 } from 'react';
+import { DragPreview } from 'react-aria';
+import type { DragPreviewRenderer } from 'react-aria';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -43,29 +45,27 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { format as formatDate, parseISO } from 'date-fns';
-import memoizeOne from 'memoize-one';
-
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import { getStatusLabel } from 'loot-core/shared/schedules';
+import { memoizeOne } from '@actual-app/core/shared/memoize';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import {
   addSplitTransaction,
   deleteTransaction,
   groupTransaction,
   isPreviewId,
   isTemporaryId,
+  makeEmptySplitSubtransactions,
   splitTransaction,
   ungroupTransactions,
   updateTransaction,
-} from 'loot-core/shared/transactions';
+} from '@actual-app/core/shared/transactions';
 import {
   amountToCurrency,
   currencyToAmount,
   integerToCurrency,
   titleFirst,
-} from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
+} from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -74,7 +74,67 @@ import type {
   RuleEntity,
   ScheduleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { format as formatDate, parseISO } from 'date-fns';
+
+import { getAccountsById } from '#accounts/accountsSlice';
+import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
+import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
+import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
+import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
+import { getStatusProps } from '#components/schedules/StatusBadge';
+import type { StatusTypes } from '#components/schedules/StatusBadge';
+import { DateSelect } from '#components/select/DateSelect';
+import {
+  Cell,
+  CellButton,
+  CustomCell,
+  DeleteCell,
+  Field,
+  InputCell,
+  Row,
+  SelectCell,
+  Table,
+  UnexposedCellContent,
+  useTableNavigator,
+} from '#components/table';
+import type {
+  TableHandleRef,
+  TableNavigator,
+  TableProps,
+} from '#components/table';
+import {
+  SchedulesProvider,
+  useCachedSchedules,
+} from '#hooks/useCachedSchedules';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { DisplayPayeeProvider, useDisplayPayee } from '#hooks/useDisplayPayee';
+import {
+  DropHighlight,
+  isValidBoundaryDrop,
+  useDrag,
+  useDrop,
+} from '#hooks/useDragDrop';
+import type {
+  DropPosition,
+  OnDragChangeCallback,
+  OnDropCallback,
+} from '#hooks/useDragDrop';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useMergedRefs } from '#hooks/useMergedRefs';
+import { usePrevious } from '#hooks/usePrevious';
+import { useProperFocus } from '#hooks/useProperFocus';
+import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
+import type { SplitsExpandedContextValue } from '#hooks/useSplitsExpanded';
+import { pushModal } from '#modals/modalsSlice';
+import { NotesTagFormatter } from '#notes/NotesTagFormatter';
+import { addNotification } from '#notifications/notificationsSlice';
+import { getPayeesById } from '#payees';
+import { aqlQuery } from '#queries/aqlQuery';
+import { useDispatch } from '#redux';
+import { getStatusLabel } from '#util/schedule';
 
 import {
   deserializeTransaction,
@@ -89,57 +149,6 @@ import type {
   TransactionUpdateFunction,
 } from './table/utils';
 import { TransactionMenu } from './TransactionMenu';
-
-import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
-import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
-import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
-import { getStatusProps } from '@desktop-client/components/schedules/StatusBadge';
-import type { StatusTypes } from '@desktop-client/components/schedules/StatusBadge';
-import { DateSelect } from '@desktop-client/components/select/DateSelect';
-import {
-  Cell,
-  CellButton,
-  CustomCell,
-  DeleteCell,
-  Field,
-  InputCell,
-  Row,
-  SelectCell,
-  Table,
-  UnexposedCellContent,
-  useTableNavigator,
-} from '@desktop-client/components/table';
-import type {
-  TableHandleRef,
-  TableNavigator,
-  TableProps,
-} from '@desktop-client/components/table';
-import {
-  SchedulesProvider,
-  useCachedSchedules,
-} from '@desktop-client/hooks/useCachedSchedules';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import {
-  DisplayPayeeProvider,
-  useDisplayPayee,
-} from '@desktop-client/hooks/useDisplayPayee';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { usePrevious } from '@desktop-client/hooks/usePrevious';
-import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
-import {
-  useSelectedDispatch,
-  useSelectedItems,
-} from '@desktop-client/hooks/useSelected';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
-import type { SplitsExpandedContextValue } from '@desktop-client/hooks/useSplitsExpanded';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { getPayeesById } from '@desktop-client/payees';
-import { useDispatch } from '@desktop-client/redux';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -616,7 +625,10 @@ function PayeeCell({
                     </Text>
                   </View>
                 }
-                style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+                style={{
+                  ...styles.tooltip,
+                  borderRadius: '0px 5px 5px 0px',
+                }}
                 placement="bottom"
                 triggerProps={{ delay: 750 }}
               >
@@ -694,7 +706,10 @@ function PayeeCell({
                       </Text>
                     </View>
                   }
-                  style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+                  style={{
+                    ...styles.tooltip,
+                    borderRadius: '0px 5px 5px 0px',
+                  }}
                   placement="bottom"
                   triggerProps={{ delay: 750 }}
                 >
@@ -882,6 +897,19 @@ type TransactionProps = {
   showSelection?: boolean;
   allowSplitTransaction?: boolean;
   showHiddenCategories?: boolean;
+  // Drag and drop props
+  canDrag?: boolean;
+  draggedDate?: string | null;
+  draggedId?: TransactionEntity['id'] | null;
+  draggedParentId?: TransactionEntity['parent_id'] | null;
+  siblingCount?: number;
+  prevRowDate?: string | null;
+  nextRowDate?: string | null;
+  sortField?: string;
+  ascDesc?: 'asc' | 'desc';
+  onDragChange?: OnDragChangeCallback<TransactionEntity>;
+  onDrop?: OnDropCallback;
+  index: number;
 };
 
 const Transaction = memo(function Transaction({
@@ -929,6 +957,18 @@ const Transaction = memo(function Transaction({
   showSelection,
   allowSplitTransaction,
   showHiddenCategories,
+  canDrag = false,
+  draggedDate,
+  draggedId,
+  draggedParentId,
+  siblingCount = 0,
+  prevRowDate,
+  nextRowDate,
+  sortField,
+  ascDesc,
+  onDragChange,
+  onDrop,
+  index,
 }: TransactionProps) {
   const { t } = useTranslation();
 
@@ -957,7 +997,7 @@ const Transaction = memo(function Transaction({
   const [showReconciliationWarning, setShowReconciliationWarning] =
     useState(false);
 
-  const onUpdate: TransactionUpdateFunction = (name, value) => {
+  const onUpdate: TransactionUpdateFunction = async (name, value) => {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
     // modal if the transaction is locked. I added a boolean to guard against showing the modal twice.
     // I'm still not completely happy with how the cells update pre/post modal. Sometimes you have to
@@ -966,14 +1006,14 @@ const Transaction = memo(function Transaction({
     // of the cell all have different implications as well.
 
     if (transaction[name] !== value) {
-      if (
-        transaction.reconciled === true &&
-        (name === 'credit' ||
-          name === 'debit' ||
-          name === 'payee' ||
-          name === 'account' ||
-          name === 'date')
-      ) {
+      const isReconciledField =
+        name === 'credit' ||
+        name === 'debit' ||
+        name === 'payee' ||
+        name === 'account' ||
+        name === 'date';
+
+      if (transaction.reconciled === true && isReconciledField) {
         if (showReconciliationWarning === false) {
           setShowReconciliationWarning(true);
           dispatch(
@@ -993,6 +1033,38 @@ const Transaction = memo(function Transaction({
               },
             }),
           );
+        }
+      } else if (
+        isReconciledField &&
+        transaction.transfer_id &&
+        showReconciliationWarning === false
+      ) {
+        const { data } = await aqlQuery(
+          q('transactions')
+            .filter({ id: transaction.transfer_id, reconciled: true })
+            .select('id'),
+        );
+        if ((data as TransactionEntity[]).length > 0) {
+          setShowReconciliationWarning(true);
+          dispatch(
+            pushModal({
+              modal: {
+                name: 'confirm-transaction-edit',
+                options: {
+                  onCancel: () => {
+                    setShowReconciliationWarning(false);
+                  },
+                  onConfirm: () => {
+                    setShowReconciliationWarning(false);
+                    onUpdateAfterConfirm(name, value);
+                  },
+                  confirmReason: 'batchEditWithReconciledTransfer',
+                },
+              },
+            }),
+          );
+        } else {
+          onUpdateAfterConfirm(name, value);
         }
       } else {
         onUpdateAfterConfirm(name, value);
@@ -1113,7 +1185,9 @@ const Transaction = memo(function Transaction({
   const isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   const isOffBudget = account && account.offbudget === 1;
 
-  const valueStyle = added ? { fontWeight: 600 } : null;
+  const valueStyle = added
+    ? { fontWeight: 600, color: theme.tableTextItemAdded }
+    : null;
   const backgroundFocus = focusedField === 'select';
   const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
@@ -1129,586 +1203,834 @@ const Transaction = memo(function Transaction({
   // a variable (with a small delay in order for the next render cycle to pick up
   // the change instead of the current). We pass the integer to the Popover which
   // causes it to re-calculate the positioning. Thus fixing the problem.
-  const [_, setUpdateId] = useState(1);
   useEffect(() => {
     // The hack applies to only transactions with split errors
     if (!splitError) {
       return;
     }
 
-    setTimeout(() => {
-      setUpdateId(state => state + 1);
+    const id = setTimeout(() => {
+      window.dispatchEvent(new Event('resize')); // Force popover to recalculate position
     }, 1);
+    return () => clearTimeout(id);
   }, [splitError, allTransactions]);
 
   const { setMenuOpen, menuOpen, handleContextMenu, position } =
     useContextMenu();
 
-  return (
-    <Row
-      ref={triggerRef}
-      style={{
-        backgroundColor: selected
-          ? theme.tableRowBackgroundHighlight
-          : backgroundFocus
-            ? theme.tableRowBackgroundHover
-            : theme.tableBackground,
-        ':hover': !(backgroundFocus || selected) && {
-          backgroundColor: theme.tableRowBackgroundHover,
-        },
-        '& .hover-visible': {
-          opacity: 0,
-        },
-        ':hover .hover-visible': {
-          opacity: 1,
-        },
-        ...(highlighted || selected
-          ? { color: theme.tableRowBackgroundHighlightText }
-          : { color: theme.tableText }),
-        ...style,
-        ...(isPreview && {
-          color: theme.tableTextInactive,
-          fontStyle: 'italic',
-        }),
-        ...(_unmatched && { opacity: 0.5 }),
-      }}
-      onContextMenu={handleContextMenu}
-    >
-      <Popover
-        triggerRef={triggerRef}
-        placement="bottom start"
-        isOpen={menuOpen}
-        onOpenChange={() => setMenuOpen(false)}
-        {...position}
-        style={{ width: 200, margin: 1 }}
-        isNonModal
-      >
-        <TransactionMenu
-          transaction={transaction}
-          getTransaction={id => allTransactions?.find(t => t.id === id)}
-          onDelete={ids => onBatchDelete?.(ids)}
-          onDuplicate={ids => onBatchDuplicate?.(ids)}
-          onLinkSchedule={ids => onBatchLinkSchedule?.(ids)}
-          onUnlinkSchedule={ids => onBatchUnlinkSchedule?.(ids)}
-          onCreateRule={ids => onCreateRule?.(ids)}
-          onScheduleAction={(name, ids) => onScheduleAction?.(name, ids)}
-          onMakeAsNonSplitTransactions={ids =>
-            onMakeAsNonSplitTransactions?.(ids)
-          }
-          closeMenu={() => setMenuOpen(false)}
-        />
-      </Popover>
+  // Drag and drop support
+  const isChildTransaction = transaction.is_child;
+  const parentId = transaction.parent_id;
+  // Disable drag if this is the only transaction on its date (nothing to reorder with)
+  // For child transactions, disable if there's only one sibling (nothing to reorder with)
+  const isOnlyTransactionOnDate = isChildTransaction
+    ? siblingCount <= 1
+    : prevRowDate !== transaction.date && nextRowDate !== transaction.date;
+  const previewRef = useRef<DragPreviewRenderer>(null);
+  // Row-level drag must not compete with inline editors (notes, amounts,
+  // payee, etc.): otherwise clicks/drags inside inputs start a reorder drag
+  // instead of moving the caret or selecting text (see GH #7567).
+  const allowRowDrag =
+    canDrag &&
+    !isPreview &&
+    !isOnlyTransactionOnDate &&
+    (!editing || focusedField === 'select' || focusedField === 'cleared');
+  const { dragRef, dragProps } = useDrag<TransactionEntity>({
+    item: originalTransaction,
+    type: 'transaction',
+    canDrag: allowRowDrag,
+    onDragChange,
+    preview: previewRef,
+  });
 
-      {splitError && listContainerRef?.current && (
+  // Gate callbacks for non-reorderable rows (children/previews) to avoid invalid drop operations
+  // For child transactions, allow drops only from siblings (same parent)
+  const isSiblingDrag = isChildTransaction && draggedParentId === parentId;
+  const safeOnDrop: OnDropCallback | undefined = isPreview
+    ? undefined
+    : isChildTransaction
+      ? isSiblingDrag
+        ? onDrop
+        : undefined
+      : onDrop;
+
+  const { dropRef, dropProps, dropPos } = useDrop<TransactionEntity>({
+    types: 'transaction',
+    id: transaction.id,
+    onDrop: safeOnDrop,
+  });
+
+  // Merge refs: drag on row, drop on outer view
+  const rowRef = useMergedRefs(triggerRef, dragRef);
+
+  // Check if this row is a valid drop target for the currently dragged transaction
+  const isValidDropTarget = useMemo(() => {
+    // Non-droppable row types
+    if (isPreview) return false;
+
+    // When dragging a child transaction, only siblings are valid targets
+    if (draggedParentId) {
+      // Only allow drops between siblings (same parent)
+      if (!isChildTransaction || draggedParentId !== parentId) return false;
+      return dropPos != null;
+    }
+
+    // Child transactions are not valid drop targets for parent transactions
+    if (isChildTransaction) return false;
+
+    // Parent transaction drop logic (existing behavior)
+    if (!draggedDate) return false;
+    // Only allow drops when sorted by date (or no sort active)
+    if (sortField && sortField !== 'date') return false;
+    // Prevent inserting between a split parent and its children
+    if (isParent && dropPos === 'after') return false;
+    // Same date is always a valid drop target
+    if (transaction.date === draggedDate) return true;
+    // Boundary drops require a valid drop position
+    if (!dropPos) return false;
+
+    const isAscending = sortField === 'date' && ascDesc === 'asc';
+    const neighborDate = dropPos === 'before' ? prevRowDate : nextRowDate;
+    return isValidBoundaryDrop(
+      dropPos,
+      transaction.date,
+      draggedDate,
+      neighborDate ?? null,
+      isAscending,
+    );
+  }, [
+    draggedDate,
+    draggedParentId,
+    parentId,
+    isChildTransaction,
+    isPreview,
+    sortField,
+    isParent,
+    dropPos,
+    transaction.date,
+    ascDesc,
+    prevRowDate,
+    nextRowDate,
+  ]);
+
+  // Dim this row if it (or its parent) is being dragged
+  const isBeingDragged =
+    draggedId != null &&
+    (draggedId === transaction.id || draggedId === transaction.parent_id);
+
+  // Show drop highlight only for valid targets that aren't the dragged row
+  const showDropHighlight = Boolean(
+    dropPos && isValidDropTarget && !isBeingDragged,
+  );
+
+  return (
+    <View
+      innerRef={dropRef}
+      {...dropProps}
+      style={{
+        position: 'relative',
+      }}
+    >
+      <DropHighlight pos={showDropHighlight ? dropPos : null} />
+      <Row
+        ref={rowRef}
+        {...dragProps}
+        style={{
+          backgroundColor: selected
+            ? theme.tableRowBackgroundHighlight
+            : backgroundFocus
+              ? theme.tableRowBackgroundHover
+              : index % 2 === 0
+                ? theme.tableBackground
+                : theme.tableRowBackgroundAlternate,
+          ':hover': !(backgroundFocus || selected) && {
+            backgroundColor: theme.tableRowBackgroundHover,
+          },
+          '& .hover-visible': {
+            opacity: 0,
+          },
+          ':hover .hover-visible': {
+            opacity: 1,
+          },
+          ...(highlighted || selected
+            ? { color: theme.tableRowBackgroundHighlightText }
+            : { color: theme.tableText }),
+          ...style,
+          ...(isPreview && {
+            color: theme.tableTextInactive,
+            fontStyle: 'italic',
+          }),
+          ...(_unmatched && { opacity: 0.5 }),
+          ...(isBeingDragged && { opacity: 0.5 }),
+        }}
+        onContextMenu={handleContextMenu}
+      >
         <Popover
           triggerRef={triggerRef}
-          isOpen
-          isNonModal
-          style={{
-            maxWidth: 500,
-            minWidth: 375,
-            padding: 5,
-            maxHeight: '38px !important',
+          placement="bottom start"
+          isOpen={menuOpen}
+          onOpenChange={isOpen => {
+            if (!isOpen) setMenuOpen(false);
           }}
-          shouldFlip={false}
-          placement="bottom end"
-          UNSTABLE_portalContainer={listContainerRef.current}
+          {...position}
+          style={{ width: 200, margin: 1 }}
+          isNonModal={false}
         >
-          {splitError}
-        </Popover>
-      )}
-
-      {isChild && (
-        <Field
-          /* Checkmark blank placeholder for Child transaction */
-          width={110}
-          style={{
-            width: 110,
-            backgroundColor: theme.tableRowBackgroundHover,
-            border: 0, // known z-order issue, bottom border for parent transaction hidden
-          }}
-        />
-      )}
-
-      {isChild && showAccount && (
-        <Field
-          /* Account blank placeholder for Child transaction */
-          style={{
-            flex: 1,
-            backgroundColor: theme.tableRowBackgroundHover,
-            border: 0,
-          }}
-        />
-      )}
-
-      {/* Checkmark - for Child transaction
-      between normal Date and Payee or Account and Payee if needed */}
-      {isTemporaryId(transaction.id) ? (
-        isChild ? (
-          <DeleteCell
-            onDelete={() => onDelete && onDelete(transaction.id)}
-            exposed={editing}
-            style={{ ...(isChild && { borderLeftWidth: 1 }), lineHeight: 0 }}
+          <TransactionMenu
+            transaction={transaction}
+            getTransaction={id => allTransactions?.find(t => t.id === id)}
+            onDelete={ids => onBatchDelete?.(ids)}
+            onDuplicate={ids => onBatchDuplicate?.(ids)}
+            onLinkSchedule={ids => onBatchLinkSchedule?.(ids)}
+            onUnlinkSchedule={ids => onBatchUnlinkSchedule?.(ids)}
+            onCreateRule={ids => onCreateRule?.(ids)}
+            onScheduleAction={(name, ids) => onScheduleAction?.(name, ids)}
+            onMakeAsNonSplitTransactions={ids =>
+              onMakeAsNonSplitTransactions?.(ids)
+            }
+            closeMenu={() => setMenuOpen(false)}
           />
-        ) : (
-          <Cell width={20} />
-        )
-      ) : (isPreview && isChild) || !showSelection ? (
-        <Cell width={20} />
-      ) : (
-        <SelectCell
-          /* Checkmark field for non-child transaction */
-          exposed
-          buttonProps={{
-            className: selected || editing ? undefined : 'hover-visible',
-          }}
-          focused={focusedField === 'select'}
-          onSelect={(e: KeyboardEvent<HTMLDivElement>) => {
-            dispatchSelected({
-              type: 'select',
-              id: transaction.id,
-              isRangeSelect: e.shiftKey,
-            });
-          }}
-          onEdit={() => onEdit(id, 'select')}
-          selected={selected}
-          style={{ ...(isChild && { borderLeftWidth: 1 }) }}
-          value={
-            matched
-              ? // TODO: this will require changes in table.tsx
-                ((
-                  <SvgHyperlink2
-                    style={{ width: 13, height: 13, color: 'inherit' }}
-                  />
-                ) as unknown as string)
-              : undefined
-          }
-        />
-      )}
-      {!isChild && (
-        <CustomCell
-          /* Date field for non-child transaction */
-          name="date"
-          width={110}
-          textAlign="flex"
-          exposed={focusedField === 'date'}
-          value={date}
-          valueStyle={valueStyle}
-          formatter={date =>
-            date ? formatDate(parseISO(date), dateFormat) : ''
-          }
-          onExpose={name => !isPreview && onEdit(id, name)}
-          onUpdate={value => {
-            onUpdate('date', value);
-          }}
-        >
-          {({
-            onBlur,
-            onKeyDown,
-            onUpdate,
-            onSave,
-            shouldSaveFromKey,
-            inputStyle,
-          }) => (
-            <DateSelect
-              value={date || ''}
-              dateFormat={dateFormat}
-              inputProps={{ onBlur, onKeyDown, style: inputStyle }}
-              shouldSaveFromKey={shouldSaveFromKey}
-              clearOnBlur
-              onUpdate={onUpdate}
-              onSelect={onSave}
-            />
-          )}
-        </CustomCell>
-      )}
+        </Popover>
 
-      {!isChild && showAccount && (
-        <CustomCell
-          /* Account field for non-child transaction */
-          name="account"
-          width="flex"
-          textAlign="flex"
-          value={accountId}
-          formatter={acctId => {
-            const acct = acctId && getAccountsById(accounts)[acctId];
-            if (acct) {
-              return acct.name;
-            }
-            return '';
-          }}
-          valueStyle={valueStyle}
-          exposed={focusedField === 'account'}
-          onExpose={name => !isPreview && onEdit(id, name)}
-          onUpdate={async value => {
-            // Only ever allow non-null values
-            if (value) {
-              onUpdate('account', value);
-            }
-          }}
-        >
-          {({
-            onBlur,
-            onKeyDown,
-            onUpdate,
-            onSave,
-            shouldSaveFromKey,
-            inputStyle,
-          }) => (
-            <AccountAutocomplete
-              includeClosedAccounts={false}
-              value={accountId}
-              shouldSaveFromKey={shouldSaveFromKey}
-              clearOnBlur={false}
-              focused
-              inputProps={{ onBlur, onKeyDown, style: inputStyle }}
-              onUpdate={onUpdate}
-              onSelect={onSave}
-            />
-          )}
-        </CustomCell>
-      )}
-      {(() => (
-        <PayeeCell
-          /* Payee field for all transactions */
-          id={id}
-          payee={payee}
-          focused={focusedField === 'payee'}
-          /* Filter out the account we're currently in as it is not a valid transfer */
-          accounts={accounts.filter(account => account.id !== accountId)}
-          payees={payees.filter(
-            payee => !payee.transfer_acct || payee.transfer_acct !== accountId,
-          )}
-          valueStyle={valueStyle}
-          transaction={transaction}
-          transferAccountsByTransaction={transferAccountsByTransaction}
-          importedPayee={importedPayee}
-          isPreview={isPreview}
-          onEdit={onEdit}
-          onUpdate={onUpdate}
-          onCreatePayee={onCreatePayee}
-          onManagePayees={onManagePayees}
-          onNavigateToTransferAccount={onNavigateToTransferAccount}
-          onNavigateToSchedule={onNavigateToSchedule}
-        />
-      ))()}
-
-      <InputCell
-        width="flex"
-        name="notes"
-        textAlign="flex"
-        exposed={focusedField === 'notes'}
-        focused={focusedField === 'notes'}
-        value={notes ?? (isPreview ? schedule?.name : null) ?? ''}
-        valueStyle={valueStyle}
-        formatter={value =>
-          NotesTagFormatter({ notes: value, onNotesTagClick })
-        }
-        onExpose={name => !isPreview && onEdit(id, name)}
-        inputProps={{
-          value: notes || '',
-          onUpdate: onUpdate.bind(null, 'notes'),
-        }}
-      />
-
-      {(isPreview && !isChild) || isParent ? (
-        <Cell
-          /* Category field (Split button) for parent transactions */
-          name="category"
-          width="flex"
-          focused={focusedField === 'category'}
-          style={{
-            padding: 0,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            height: '100%',
-          }}
-          plain
-        >
-          {isPreview && (
-            <View
-              style={{
-                color:
-                  previewStatus === 'missed'
-                    ? theme.errorText
-                    : previewStatus === 'due'
-                      ? theme.warningText
-                      : selected
-                        ? theme.formLabelText
-                        : theme.upcomingText,
-                backgroundColor:
-                  previewStatus === 'missed'
-                    ? theme.errorBackground
-                    : previewStatus === 'due'
-                      ? theme.warningBackground
-                      : selected
-                        ? theme.formLabelBackground
-                        : theme.upcomingBackground,
-                margin: '0 5px',
-                padding: '3px 7px',
-                borderRadius: 4,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: 'inline-block',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {titleFirst(getStatusLabel(previewStatus ?? ''))}
-            </View>
-          )}
-          <CellButton
-            bare
+        {splitError && listContainerRef?.current && (
+          <Popover
+            triggerRef={triggerRef}
+            isOpen
+            isNonModal
             style={{
-              borderRadius: 4,
-              border: '1px solid transparent', // so it doesn't shift on hover
-              ':hover': {
-                border: '1px solid ' + theme.buttonNormalBorder,
-              },
+              width: 'max-content',
+              maxWidth: 'none',
+              minWidth: 375,
+              padding: 5,
             }}
-            disabled={isTemporaryId(transaction.id)}
-            onEdit={() => !isPreview && onEdit(id, 'category')}
-            onSelect={() => onToggleSplit(id)}
+            shouldFlip={false}
+            placement="bottom end"
+            UNSTABLE_portalContainer={listContainerRef.current}
           >
-            <View
+            {splitError}
+          </Popover>
+        )}
+
+        {isChild && (
+          <Field
+            /* Checkmark blank placeholder for Child transaction */
+            width={110}
+            style={{
+              width: 110,
+              backgroundColor: theme.tableRowBackgroundHover,
+              border: 0, // known z-order issue, bottom border for parent transaction hidden
+            }}
+          />
+        )}
+
+        {isChild && showAccount && (
+          <Field
+            /* Account blank placeholder for Child transaction */
+            style={{
+              flex: 1,
+              backgroundColor: theme.tableRowBackgroundHover,
+              border: 0,
+            }}
+          />
+        )}
+
+        {/* Checkmark - for Child transaction
+      between normal Date and Payee or Account and Payee if needed */}
+        {isTemporaryId(transaction.id) ? (
+          isChild ? (
+            <DeleteCell
+              onDelete={() => onDelete && onDelete(transaction.id)}
+              exposed={editing}
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                alignSelf: 'stretch',
-                borderRadius: 4,
-                flex: 1,
-                padding: 4,
-                color: theme.pageTextSubdued,
+                ...(isChild && { borderLeftWidth: 1 }),
+                lineHeight: 0,
               }}
+            />
+          ) : (
+            <Cell width={20} />
+          )
+        ) : (isPreview && isChild) || !showSelection ? (
+          <Cell width={20} />
+        ) : (
+          <SelectCell
+            /* Checkmark field for non-child transaction */
+            exposed
+            buttonProps={{
+              className: selected || editing ? undefined : 'hover-visible',
+            }}
+            focused={focusedField === 'select'}
+            onSelect={(e: KeyboardEvent<HTMLDivElement>) => {
+              dispatchSelected({
+                type: 'select',
+                id: transaction.id,
+                isRangeSelect: e.shiftKey,
+              });
+            }}
+            onEdit={() => onEdit(id, 'select')}
+            selected={selected}
+            style={{ ...(isChild && { borderLeftWidth: 1 }) }}
+            value={
+              matched
+                ? // TODO: this will require changes in table.tsx
+                  ((
+                    <SvgHyperlink2
+                      style={{ width: 13, height: 13, color: 'inherit' }}
+                    />
+                  ) as unknown as string)
+                : undefined
+            }
+          />
+        )}
+        {!isChild && (
+          <CustomCell
+            /* Date field for non-child transaction */
+            name="date"
+            width={110}
+            textAlign="flex"
+            exposed={focusedField === 'date'}
+            value={date}
+            valueStyle={valueStyle}
+            formatter={date =>
+              date ? formatDate(parseISO(date), dateFormat) : ''
+            }
+            onExpose={name => !isPreview && onEdit(id, name)}
+            onUpdate={value => {
+              onUpdate('date', value);
+            }}
+          >
+            {({
+              onBlur,
+              onKeyDown,
+              onUpdate,
+              onSave,
+              shouldSaveFromKey,
+              inputStyle,
+            }) => (
+              <DateSelect
+                value={date || ''}
+                dateFormat={dateFormat}
+                inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+                shouldSaveFromKey={shouldSaveFromKey}
+                clearOnBlur
+                onUpdate={onUpdate}
+                onSelect={onSave}
+              />
+            )}
+          </CustomCell>
+        )}
+
+        {!isChild && showAccount && (
+          <CustomCell
+            /* Account field for non-child transaction */
+            name="account"
+            width="flex"
+            textAlign="flex"
+            value={accountId}
+            formatter={acctId => {
+              const acct = acctId && getAccountsById(accounts)[acctId];
+              if (acct) {
+                return acct.name;
+              }
+              return '';
+            }}
+            valueStyle={valueStyle}
+            exposed={focusedField === 'account'}
+            onExpose={name => !isPreview && onEdit(id, name)}
+            onUpdate={async value => {
+              // Only ever allow non-null values
+              if (value) {
+                onUpdate('account', value);
+              }
+            }}
+          >
+            {({
+              onBlur,
+              onKeyDown,
+              onUpdate,
+              onSave,
+              shouldSaveFromKey,
+              inputStyle,
+            }) => (
+              <AccountAutocomplete
+                includeClosedAccounts={false}
+                value={accountId}
+                shouldSaveFromKey={shouldSaveFromKey}
+                clearOnBlur={false}
+                focused
+                inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+                onUpdate={onUpdate}
+                onSelect={onSave}
+              />
+            )}
+          </CustomCell>
+        )}
+        {(() => (
+          <PayeeCell
+            /* Payee field for all transactions */
+            id={id}
+            payee={payee}
+            focused={focusedField === 'payee'}
+            /* Filter out the account we're currently in as it is not a valid transfer */
+            accounts={accounts.filter(account => account.id !== accountId)}
+            payees={payees.filter(
+              payee =>
+                !payee.transfer_acct || payee.transfer_acct !== accountId,
+            )}
+            valueStyle={valueStyle}
+            transaction={transaction}
+            transferAccountsByTransaction={transferAccountsByTransaction}
+            importedPayee={importedPayee}
+            isPreview={isPreview}
+            onEdit={onEdit}
+            onUpdate={onUpdate}
+            onCreatePayee={onCreatePayee}
+            onManagePayees={onManagePayees}
+            onNavigateToTransferAccount={onNavigateToTransferAccount}
+            onNavigateToSchedule={onNavigateToSchedule}
+          />
+        ))()}
+
+        <NotesCell
+          note={notes ?? ''}
+          scheduleNote={isPreview ? schedule?.name : null}
+          focused={focusedField === 'notes'}
+          valueStyle={valueStyle}
+          onClickTag={onNotesTagClick}
+          onUpdate={value => {
+            onUpdate('notes', value?.trim());
+          }}
+          onExpose={name => !isPreview && onEdit(id, name)}
+        />
+
+        {(isPreview && !isChild) || isParent ? (
+          <Cell
+            /* Category field (Split button) for parent transactions */
+            name="category"
+            width="flex"
+            focused={focusedField === 'category'}
+            style={{
+              padding: 0,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              height: '100%',
+            }}
+            plain
+          >
+            {isPreview && (
+              <View
+                style={{
+                  color:
+                    previewStatus === 'missed'
+                      ? theme.errorText
+                      : previewStatus === 'due'
+                        ? theme.warningText
+                        : selected
+                          ? theme.formLabelText
+                          : theme.upcomingText,
+                  backgroundColor:
+                    previewStatus === 'missed'
+                      ? theme.errorBackground
+                      : previewStatus === 'due'
+                        ? theme.warningBackground
+                        : selected
+                          ? theme.formLabelBackground
+                          : theme.upcomingBackground,
+                  margin: '0 5px',
+                  padding: '3px 7px',
+                  borderRadius: 4,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: 'inline-block',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {titleFirst(getStatusLabel(previewStatus ?? ''))}
+              </View>
+            )}
+            <CellButton
+              bare
+              style={{
+                borderRadius: 4,
+                border: '1px solid transparent', // so it doesn't shift on hover
+                ':hover': {
+                  border: '1px solid ' + theme.buttonNormalBorder,
+                },
+              }}
+              disabled={isTemporaryId(transaction.id)}
+              onEdit={() => !isPreview && onEdit(id, 'category')}
+              onSelect={() => onToggleSplit(id)}
             >
-              {isParent && (
-                <SvgCheveronDown
-                  style={{
-                    color: 'inherit',
-                    width: 14,
-                    height: 14,
-                    transition: 'transform .08s',
-                    transform: expanded ? 'rotateZ(0)' : 'rotateZ(-90deg)',
-                  }}
-                />
-              )}
-              {!isPreview && (
-                <Text
-                  style={{
-                    fontStyle: 'italic',
-                    fontWeight: 300,
-                    userSelect: 'none',
-                  }}
-                >
-                  <Trans>Split</Trans>
-                </Text>
-              )}
-            </View>
-          </CellButton>
-        </Cell>
-      ) : isBudgetTransfer || isOffBudget ? (
-        <InputCell
-          /* Category field for transfer and off budget transactions
-     (NOT preview, it is covered first) */
-          name="category"
-          width="flex"
-          exposed={focusedField === 'category'}
-          focused={focusedField === 'category'}
-          onExpose={name => onEdit(id, name)}
-          value={
-            isParent
-              ? t('Split')
-              : isOffBudget
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  alignSelf: 'stretch',
+                  borderRadius: 4,
+                  flex: 1,
+                  padding: 4,
+                  color: theme.pageTextSubdued,
+                }}
+              >
+                {isParent && (
+                  <SvgCheveronDown
+                    style={{
+                      color: 'inherit',
+                      width: 14,
+                      height: 14,
+                      transition: 'transform .08s',
+                      transform: expanded ? 'rotateZ(0)' : 'rotateZ(-90deg)',
+                    }}
+                  />
+                )}
+                {!isPreview && (
+                  <Text
+                    style={{
+                      fontStyle: 'italic',
+                      fontWeight: 300,
+                      userSelect: 'none',
+                    }}
+                  >
+                    <Trans>Split</Trans>
+                  </Text>
+                )}
+              </View>
+            </CellButton>
+          </Cell>
+        ) : isBudgetTransfer || isOffBudget ? (
+          <InputCell
+            /* Category field for transfer and off budget transactions
+              (NOT preview, it is covered first) */
+            name="category"
+            width="flex"
+            exposed={focusedField === 'category'}
+            focused={focusedField === 'category'}
+            onExpose={name => onEdit(id, name)}
+            value={
+              isOffBudget
                 ? t('Off budget')
                 : isBudgetTransfer
                   ? categoryId != null
                     ? t('Needs Repair')
                     : t('Transfer')
                   : ''
+            }
+            valueStyle={valueStyle}
+            style={{
+              fontStyle: 'italic',
+              color: theme.pageTextSubdued,
+              fontWeight: 300,
+            }}
+            inputProps={{
+              readOnly: true,
+              style: { fontStyle: 'italic' },
+            }}
+          />
+        ) : (
+          <CustomCell
+            /* Category field for normal and child transactions */
+            name="category"
+            width="flex"
+            textAlign="flex"
+            value={categoryId}
+            formatter={value =>
+              value
+                ? (getCategoriesById(categoryGroups)[value]?.name ?? '')
+                : transaction.id
+                  ? t('Categorize')
+                  : ''
+            }
+            exposed={focusedField === 'category'}
+            onExpose={name => !isPreview && onEdit(id, name)}
+            valueStyle={
+              !categoryId
+                ? {
+                    // uncategorized transaction
+                    fontStyle: 'italic',
+                    fontWeight: 300,
+                    color: theme.formInputTextHighlight,
+                  }
+                : valueStyle
+            }
+            onUpdate={async value => {
+              if (value === 'split') {
+                onSplit(transaction.id);
+              } else {
+                onUpdate('category', value);
+              }
+            }}
+          >
+            {({
+              onBlur,
+              onKeyDown,
+              onUpdate,
+              onSave,
+              shouldSaveFromKey,
+              inputStyle,
+            }) => (
+              <SheetNameProvider
+                name={monthUtils.sheetForMonth(
+                  monthUtils.monthFromDate(transaction.date),
+                )}
+              >
+                <CategoryAutocomplete
+                  categoryGroups={categoryGroups}
+                  value={categoryId ?? null}
+                  focused
+                  clearOnBlur={false}
+                  showSplitOption={
+                    !isChild && !isParent && allowSplitTransaction
+                  }
+                  shouldSaveFromKey={shouldSaveFromKey}
+                  inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+                  onUpdate={onUpdate}
+                  onSelect={onSave}
+                  showHiddenCategories={showHiddenCategories}
+                />
+              </SheetNameProvider>
+            )}
+          </CustomCell>
+        )}
+
+        <InputCell
+          /* Debit field for all transactions */
+          type="input"
+          width={100}
+          name="debit"
+          exposed={focusedField === 'debit'}
+          focused={focusedField === 'debit'}
+          value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
+          formatter={value =>
+            // reformat value so since we might have kept decimals
+            value ? amountToCurrency(currencyToAmount(value) || 0) : ''
           }
           valueStyle={valueStyle}
+          textAlign="right"
+          title={debit}
+          onExpose={name => !isPreview && onEdit(id, name)}
           style={{
-            fontStyle: 'italic',
-            color: theme.pageTextSubdued,
-            fontWeight: 300,
+            ...(isParent && { fontStyle: 'italic' }),
+            ...styles.tnum,
+            ...amountStyle,
           }}
           inputProps={{
-            readOnly: true,
-            style: { fontStyle: 'italic' },
+            value: debit === '' && credit === '' ? amountToCurrency(0) : debit,
+            onUpdate: onUpdate.bind(null, 'debit'),
+            'data-1p-ignore': true,
+          }}
+          privacyFilter={{
+            activationFilters: [!isTemporaryId(transaction.id)],
           }}
         />
-      ) : (
-        <CustomCell
-          /* Category field for normal and child transactions */
-          name="category"
-          width="flex"
-          textAlign="flex"
-          value={categoryId}
+
+        <InputCell
+          /* Credit field for all transactions */
+          type="input"
+          width={100}
+          name="credit"
+          exposed={focusedField === 'credit'}
+          focused={focusedField === 'credit'}
+          value={credit}
           formatter={value =>
-            value
-              ? (getCategoriesById(categoryGroups)[value]?.name ?? '')
-              : transaction.id
-                ? t('Categorize')
-                : ''
+            // reformat value so since we might have kept decimals
+            value ? amountToCurrency(currencyToAmount(value) || 0) : ''
           }
-          exposed={focusedField === 'category'}
-          onExpose={name => !isPreview && onEdit(id, name)}
-          valueStyle={
-            !categoryId
-              ? {
-                  // uncategorized transaction
-                  fontStyle: 'italic',
-                  fontWeight: 300,
-                  color: theme.formInputTextHighlight,
-                }
-              : valueStyle
-          }
-          onUpdate={async value => {
-            if (value === 'split') {
-              onSplit(transaction.id);
-            } else {
-              onUpdate('category', value);
-            }
-          }}
-        >
-          {({
-            onBlur,
-            onKeyDown,
-            onUpdate,
-            onSave,
-            shouldSaveFromKey,
-            inputStyle,
-          }) => (
-            <SheetNameProvider
-              name={monthUtils.sheetForMonth(
-                monthUtils.monthFromDate(transaction.date),
-              )}
-            >
-              <CategoryAutocomplete
-                categoryGroups={categoryGroups}
-                value={categoryId ?? null}
-                focused
-                clearOnBlur={false}
-                showSplitOption={!isChild && !isParent && allowSplitTransaction}
-                shouldSaveFromKey={shouldSaveFromKey}
-                inputProps={{ onBlur, onKeyDown, style: inputStyle }}
-                onUpdate={onUpdate}
-                onSelect={onSave}
-                showHiddenCategories={showHiddenCategories}
-              />
-            </SheetNameProvider>
-          )}
-        </CustomCell>
-      )}
-
-      <InputCell
-        /* Debit field for all transactions */
-        type="input"
-        width={100}
-        name="debit"
-        exposed={focusedField === 'debit'}
-        focused={focusedField === 'debit'}
-        value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
-        formatter={value =>
-          // reformat value so since we might have kept decimals
-          value ? amountToCurrency(currencyToAmount(value) || 0) : ''
-        }
-        valueStyle={valueStyle}
-        textAlign="right"
-        title={debit}
-        onExpose={name => !isPreview && onEdit(id, name)}
-        style={{
-          ...(isParent && { fontStyle: 'italic' }),
-          ...styles.tnum,
-          ...amountStyle,
-        }}
-        inputProps={{
-          value: debit === '' && credit === '' ? amountToCurrency(0) : debit,
-          onUpdate: onUpdate.bind(null, 'debit'),
-          'data-1p-ignore': true,
-        }}
-        privacyFilter={{
-          activationFilters: [!isTemporaryId(transaction.id)],
-        }}
-      />
-
-      <InputCell
-        /* Credit field for all transactions */
-        type="input"
-        width={100}
-        name="credit"
-        exposed={focusedField === 'credit'}
-        focused={focusedField === 'credit'}
-        value={credit}
-        formatter={value =>
-          // reformat value so since we might have kept decimals
-          value ? amountToCurrency(currencyToAmount(value) || 0) : ''
-        }
-        valueStyle={valueStyle}
-        textAlign="right"
-        title={credit}
-        onExpose={name => !isPreview && onEdit(id, name)}
-        style={{
-          ...(isParent && { fontStyle: 'italic' }),
-          ...styles.tnum,
-          ...amountStyle,
-        }}
-        inputProps={{
-          value: credit,
-          onUpdate: onUpdate.bind(null, 'credit'),
-          'data-1p-ignore': true,
-        }}
-        privacyFilter={{
-          activationFilters: [!isTemporaryId(transaction.id)],
-        }}
-      />
-
-      {showBalance && (
-        <Cell
-          /* Balance field for all transactions */
-          name="balance"
-          value={
-            runningBalance == null || isChild || isTemporaryId(id)
-              ? ''
-              : integerToCurrency(runningBalance)
-          }
-          valueStyle={{
-            color:
-              runningBalance < 0 ? theme.numberNegative : theme.numberPositive,
-          }}
-          style={{ ...styles.tnum, ...amountStyle }}
-          width={103}
+          valueStyle={valueStyle}
           textAlign="right"
-          privacyFilter
+          title={credit}
+          onExpose={name => !isPreview && onEdit(id, name)}
+          style={{
+            ...(isParent && { fontStyle: 'italic' }),
+            ...styles.tnum,
+            ...amountStyle,
+          }}
+          inputProps={{
+            value: credit,
+            onUpdate: onUpdate.bind(null, 'credit'),
+            'data-1p-ignore': true,
+          }}
+          privacyFilter={{
+            activationFilters: [!isTemporaryId(transaction.id)],
+          }}
         />
-      )}
 
-      {showCleared && (
-        <StatusCell
-          /* Icon field for all transactions */
-          id={id}
-          focused={focusedField === 'cleared'}
-          selected={selected}
-          isPreview={isPreview}
-          status={
-            isPreview
-              ? (previewStatus as StatusTypes)
-              : reconciled
-                ? 'reconciled'
-                : cleared
-                  ? 'cleared'
-                  : null
-          }
-          isChild={isChild}
-          onEdit={onEdit}
+        {showBalance && (
+          <Cell
+            /* Balance field for all transactions */
+            name="balance"
+            value={
+              runningBalance == null || isChild || isTemporaryId(id)
+                ? ''
+                : integerToCurrency(runningBalance)
+            }
+            valueStyle={{
+              color:
+                runningBalance < 0
+                  ? theme.numberNegative
+                  : theme.numberPositive,
+            }}
+            style={{ ...styles.tnum, ...amountStyle }}
+            width={103}
+            textAlign="right"
+            privacyFilter
+          />
+        )}
+
+        {showCleared && (
+          <StatusCell
+            /* Icon field for all transactions */
+            id={id}
+            focused={focusedField === 'cleared'}
+            selected={selected}
+            isPreview={isPreview}
+            status={
+              isPreview
+                ? (previewStatus as StatusTypes)
+                : reconciled
+                  ? 'reconciled'
+                  : cleared
+                    ? 'cleared'
+                    : null
+            }
+            isChild={isChild}
+            onEdit={onEdit}
+            onUpdate={onUpdate}
+          />
+        )}
+
+        <Cell width={5} />
+      </Row>
+      <DragPreview ref={previewRef}>
+        {() => (
+          <View
+            style={{
+              backgroundColor: theme.tableBackground,
+              borderRadius: 4,
+              padding: '8px 16px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+              width: '50vw',
+              minWidth: 500,
+              flexDirection: 'row',
+              alignItems: 'center',
+              border: '1px solid ' + theme.tableBorder,
+              opacity: 0.8,
+            }}
+          >
+            <Text style={{ color: theme.tableText, width: '10%' }}>
+              {date ? formatDate(parseISO(date), dateFormat) : ''}
+            </Text>
+            <Text
+              style={{
+                fontWeight: 500,
+                color: theme.tableText,
+                width: '50%',
+                paddingLeft: 16,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {payee?.name || importedPayee || <Trans>No payee</Trans>}
+            </Text>
+            <Text
+              style={{
+                color: isParent ? theme.tableTextSubdued : theme.tableText,
+                fontStyle: isParent ? 'italic' : undefined,
+                width: '30%',
+                paddingLeft: 16,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {isParent ? (
+                <Trans>Split ({{ count: subtransactions?.length ?? 0 }})</Trans>
+              ) : categoryId ? (
+                (getCategoriesById(categoryGroups)[categoryId]?.name ?? '')
+              ) : (
+                ''
+              )}
+            </Text>
+            <Text
+              style={{
+                color: theme.tableText,
+                width: '10%',
+                paddingLeft: 16,
+                textAlign: 'right',
+              }}
+            >
+              {integerToCurrency(amount)}
+            </Text>
+          </View>
+        )}
+      </DragPreview>
+    </View>
+  );
+});
+
+type NotesCellProps = {
+  note: string;
+  scheduleNote: string | null | undefined;
+  focused: boolean;
+  valueStyle: CSSProperties | null;
+  onUpdate: (value: string) => void;
+  onClickTag: (tag: string) => void;
+  onExpose: (name: string) => void;
+};
+
+function NotesCell({
+  note,
+  scheduleNote,
+  focused,
+  valueStyle,
+  onUpdate,
+  onClickTag,
+  onExpose,
+}: NotesCellProps) {
+  const [inputValue, setInputValue] = useState(note);
+  useEffect(() => {
+    setInputValue(note);
+  }, [note, setInputValue]);
+
+  function onKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      onUpdate(inputValue);
+    } else if (e.key === 'Escape') {
+      setInputValue(note);
+    }
+  }
+
+  const displayedNote = note || scheduleNote || '';
+
+  return (
+    <CustomCell
+      width="flex"
+      name="notes"
+      value={displayedNote}
+      valueStyle={valueStyle}
+      formatter={value =>
+        NotesTagFormatter({ notes: value, onNotesTagClick: onClickTag })
+      }
+      focused={focused}
+      exposed={focused}
+      onExpose={onExpose}
+      onUpdate={onUpdate}
+      onKeyDown={onKeyDown}
+      onBlur={() => onUpdate(inputValue)}
+    >
+      {({ inputStyle, onKeyDown, onBlur }) => (
+        <TagAutocomplete
+          inputValue={inputValue}
+          setInputValue={setInputValue}
+          inputStyle={inputStyle}
+          onBlur={onBlur}
+          onKeyDown={onKeyDown}
           onUpdate={onUpdate}
         />
       )}
-
-      <Cell width={5} />
-    </Row>
+    </CustomCell>
   );
-});
+}
 
 type TransactionErrorProps = {
   error: NonNullable<TransactionEntity['error']>;
@@ -1716,7 +2038,6 @@ type TransactionErrorProps = {
   onAddSplit: () => void;
   onDistributeRemainder: () => void;
   style?: CSSProperties;
-  canDistributeRemainder: boolean;
 };
 
 function TransactionError({
@@ -1725,7 +2046,6 @@ function TransactionError({
   onAddSplit,
   onDistributeRemainder,
   style,
-  canDistributeRemainder,
 }: TransactionErrorProps) {
   switch (error.type) {
     case 'SplitTransactionError':
@@ -1736,6 +2056,7 @@ function TransactionError({
               flexDirection: 'row',
               alignItems: 'center',
               padding: '0 5px',
+              gap: 5,
               ...style,
             }}
             data-testid="transaction-error"
@@ -1751,16 +2072,14 @@ function TransactionError({
             <View style={{ flex: 1 }} />
             <Button
               variant="normal"
-              style={{ marginLeft: 15 }}
               onPress={onDistributeRemainder}
               data-testid="distribute-split-button"
-              isDisabled={!canDistributeRemainder}
             >
               <Trans>Distribute</Trans>
             </Button>
             <Button
               variant="primary"
-              style={{ marginLeft: 10, padding: '4px 10px' }}
+              style={{ padding: '4px 10px' }}
               onPress={onAddSplit}
               data-testid="add-split-button"
             >
@@ -1849,7 +2168,6 @@ function NewTransaction({
   const childTransactions = transactions.filter(
     t => t.parent_id === transactions[0].id,
   );
-  const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
 
   const addButtonRef = useRef(null);
   useProperFocus(addButtonRef, focusedField === 'add');
@@ -1878,9 +2196,10 @@ function NewTransaction({
         }
       }}
     >
-      {transactions.map(transaction => (
+      {transactions.map((transaction, index) => (
         <Transaction
           key={transaction.id}
+          index={index}
           editing={editingTransaction === transaction.id}
           transaction={transaction}
           subtransactions={transaction.is_parent ? childTransactions : null}
@@ -1940,7 +2259,6 @@ function NewTransaction({
             onDistributeRemainder={() =>
               onDistributeRemainder(transactions[0].id)
             }
-            canDistributeRemainder={emptyChildTransactions.length > 0}
           />
         ) : (
           <Button
@@ -2033,6 +2351,13 @@ type TransactionTableInnerProps = {
 
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
   showHiddenCategories?: boolean;
+  // Drag and drop props
+  canDrag?: boolean;
+  draggedId?: TransactionEntity['id'] | null;
+  draggedParentId?: TransactionEntity['parent_id'] | null;
+  draggedDate?: string | null;
+  onDragChange?: OnDragChangeCallback<TransactionEntity>;
+  onDrop?: OnDropCallback;
 };
 
 function TransactionTableInner({
@@ -2147,9 +2472,36 @@ function TransactionTableInner({
     const childTransactions = trans.is_parent
       ? props.transactionsByParent[trans.id]
       : null;
-    const emptyChildTransactions = props.transactionsByParent[
-      (trans.is_parent ? trans.id : trans.parent_id) || ''
-    ]?.filter(t => t.amount === 0);
+
+    // Get sibling count for child transactions (used for drag/drop)
+    const siblingCount =
+      trans.is_child && trans.parent_id
+        ? (props.transactionsByParent[trans.parent_id]?.length ?? 0)
+        : 0;
+
+    // Compute adjacent row dates for boundary drop detection
+    // Use transactionsToRender (filtered list) to match rendered row indices
+    // Skip non-reorderable rows (child/preview) when finding neighbors
+    const findPrevReorderableDate = (): string | null => {
+      for (let i = index - 1; i >= 0; i--) {
+        const row = transactionsToRender[i];
+        if (row && !row.is_child && !isPreviewId(row.id)) {
+          return row.date ?? null;
+        }
+      }
+      return null;
+    };
+    const findNextReorderableDate = (): string | null => {
+      for (let i = index + 1; i < transactionsToRender.length; i++) {
+        const row = transactionsToRender[i];
+        if (row && !row.is_child && !isPreviewId(row.id)) {
+          return row.date ?? null;
+        }
+      }
+      return null;
+    };
+    const prevRowDate = findPrevReorderableDate();
+    const nextRowDate = findNextReorderableDate();
 
     return (
       <Transaction
@@ -2200,7 +2552,6 @@ function TransactionTableInner({
               onDistributeRemainder={() =>
                 props.onDistributeRemainder(trans.id)
               }
-              canDistributeRemainder={emptyChildTransactions.length > 0}
             />
           )
         }
@@ -2208,6 +2559,18 @@ function TransactionTableInner({
         showSelection={showSelection}
         allowSplitTransaction={allowSplitTransaction}
         showHiddenCategories={showHiddenCategories}
+        canDrag={props.canDrag}
+        draggedId={props.draggedId}
+        draggedParentId={props.draggedParentId}
+        draggedDate={props.draggedDate}
+        siblingCount={siblingCount}
+        prevRowDate={prevRowDate}
+        nextRowDate={nextRowDate}
+        sortField={props.sortField}
+        ascDesc={props.ascDesc}
+        onDragChange={props.onDragChange}
+        onDrop={props.onDrop}
+        index={index}
       />
     );
   };
@@ -2339,6 +2702,7 @@ export type TransactionTableProps = {
   isAdding: boolean;
   isNew: (id: TransactionEntity['id']) => boolean;
   isMatched: (id: TransactionEntity['id']) => boolean;
+  isFiltered?: boolean;
   dateFormat: string | undefined;
   hideFraction: boolean;
   renderEmpty: ReactNode | (() => ReactNode);
@@ -2359,6 +2723,11 @@ export type TransactionTableProps = {
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
   sortField: string;
   ascDesc: 'asc' | 'desc';
+  onReorder?: (
+    id: string,
+    dropPos: DropPosition,
+    targetId: string,
+  ) => Promise<void> | void;
   onBatchDelete: (ids: TransactionEntity['id'][]) => void;
   onBatchDuplicate: (ids: TransactionEntity['id'][]) => void;
   onBatchLinkSchedule: (ids: TransactionEntity['id'][]) => void;
@@ -2390,6 +2759,54 @@ export const TransactionTable = forwardRef(
     const splitsExpanded = useSplitsExpanded();
     const splitsExpandedDispatch = splitsExpanded.dispatch;
     const prevSplitsExpanded = useRef<SplitsExpandedContextValue | null>(null);
+
+    // Drag state for transaction reordering
+    const [draggedId, setDraggedId] = useState<TransactionEntity['id'] | null>(
+      null,
+    );
+    const [draggedDate, setDraggedDate] = useState<string | null>(null);
+    const [draggedParentId, setDraggedParentId] = useState<
+      TransactionEntity['parent_id'] | null
+    >(null);
+
+    // Dragging is enabled when:
+    // - No sort is active (sortField is empty) OR sorted by date
+    // - Not filtered (isFiltered is false)
+    // - onReorder callback is provided
+    const canDrag = useMemo(
+      () =>
+        (!props.sortField || props.sortField === 'date') &&
+        !props.isFiltered &&
+        props.onReorder != null,
+      [props.sortField, props.isFiltered, props.onReorder],
+    );
+
+    const onDragChange = useCallback<OnDragChangeCallback<TransactionEntity>>(
+      drag => {
+        if (drag.state === 'start-preview') {
+          // Set dragged item info immediately when drag preview starts
+          setDraggedId(drag.item?.id ?? null);
+          setDraggedDate(drag.item?.date ?? null);
+          setDraggedParentId(drag.item?.parent_id ?? null);
+        } else if (drag.state === 'end') {
+          setDraggedId(null);
+          setDraggedDate(null);
+          setDraggedParentId(null);
+        }
+      },
+      [],
+    );
+
+    const { onReorder } = props;
+    const onDrop = useCallback<OnDropCallback>(
+      (id, dropPos, targetId) => {
+        if (id === targetId) {
+          return;
+        }
+        void onReorder?.(id, dropPos, targetId);
+      },
+      [onReorder],
+    );
 
     const tableRef = useRef<TableHandleRef<TransactionEntity>>(null);
     const listContainerRef = useRef<HTMLDivElement>(
@@ -2566,11 +2983,13 @@ export const TransactionTable = forwardRef(
 
     useEffect(() => {
       if (savePending.current && afterSaveFunc.current) {
-        afterSaveFunc.current();
+        const func = afterSaveFunc.current;
         afterSaveFunc.current = null;
+        savePending.current = false;
+        func();
+      } else {
+        savePending.current = false;
       }
-
-      savePending.current = false;
     }, [newTransactions, props, props.transactions]);
 
     function getFieldsNewTransaction(item?: TransactionEntity) {
@@ -2707,11 +3126,13 @@ export const TransactionTable = forwardRef(
     }
 
     const onAddTemporary = useCallback(() => {
-      shouldAdd.current = true;
-      // A little hacky - this forces a rerender which will cause the
-      // effect we want to run. We have to wait for all updates to be
-      // committed (the input could still be saving a value).
-      forceRerender({});
+      afterSave(() => {
+        shouldAdd.current = true;
+        // A little hacky - this forces a rerender which will cause the
+        // effect we want to run. We have to wait for all updates to be
+        // committed (the input could still be saving a value).
+        forceRerender({});
+      });
     }, []);
 
     const onAddAndCloseTemporary = useCallback(() => {
@@ -2845,7 +3266,11 @@ export const TransactionTable = forwardRef(
         if (isTemporaryId(id)) {
           const { newNavigator } = latestState.current;
           const newTrans = latestState.current.newTransactions;
-          const { data, diff } = splitTransaction(newTrans, id);
+          const { data, diff } = splitTransaction(
+            newTrans,
+            id,
+            makeEmptySplitSubtransactions,
+          );
           setNewTransactions(data);
 
           // Jump next to "debit" field if it is empty
@@ -2944,34 +3369,93 @@ export const TransactionTable = forwardRef(
           parentTransaction.amount -
           siblingTransactions.reduce((acc, t) => acc + t.amount, 0);
 
-        const amountPerTransaction = Math.floor(
-          remainingAmount / emptyTransactions.length,
-        );
-        let remainingCents =
-          remainingAmount - amountPerTransaction * emptyTransactions.length;
+        let amounts: number[] = [];
+        if (emptyTransactions.length > 0) {
+          const amountPerTransaction = Math.floor(
+            remainingAmount / emptyTransactions.length,
+          );
+          let remainingCents =
+            remainingAmount - amountPerTransaction * emptyTransactions.length;
 
-        const amounts = new Array(emptyTransactions.length).fill(
-          amountPerTransaction,
-        );
+          amounts = new Array(emptyTransactions.length).fill(
+            amountPerTransaction,
+          );
 
-        for (const amountIndex in amounts) {
-          if (remainingCents === 0) break;
+          for (const [amountIndex] of amounts.entries()) {
+            if (remainingCents === 0) break;
 
-          amounts[amountIndex] += 1;
-          remainingCents--;
-        }
+            amounts[amountIndex] += 1;
+            remainingCents--;
+          }
 
-        if (isTemporaryId(id)) {
-          newNavigator.onEdit(null);
-        } else {
-          tableNavigator.onEdit(null);
-        }
+          if (isTemporaryId(id)) {
+            newNavigator.onEdit(null);
+          } else {
+            tableNavigator.onEdit(null);
+          }
 
-        for (const transactionIndex in emptyTransactions) {
-          await onSave({
-            ...emptyTransactions[transactionIndex],
-            amount: amounts[transactionIndex],
-          });
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of emptyTransactions.entries()) {
+            await onSave({
+              ...transaction,
+              amount: amounts[transactionIndex],
+            });
+          }
+        } else if (
+          emptyTransactions.length === 0 &&
+          siblingTransactions.length > 0
+        ) {
+          const siblingTotal = siblingTransactions.reduce(
+            (acc, t) => acc + t.amount,
+            0,
+          );
+          const siblingProportions = siblingTransactions.map(
+            t => t.amount / siblingTotal,
+          );
+
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of siblingTransactions.entries()) {
+            amounts[transactionIndex] =
+              Math.floor(
+                siblingProportions[transactionIndex] * remainingAmount,
+              ) + transaction.amount;
+          }
+
+          let remainingCents =
+            parentTransaction.amount - amounts.reduce((acc, a) => acc + a, 0);
+
+          let amountIndex = 0;
+          while (remainingCents !== 0) {
+            amountIndex = amountIndex % amounts.length;
+            if (remainingCents > 0) {
+              amounts[amountIndex] += 1;
+              remainingCents--;
+            } else {
+              amounts[amountIndex] -= 1;
+              remainingCents++;
+            }
+            amountIndex++;
+          }
+
+          if (isTemporaryId(id)) {
+            newNavigator.onEdit(null);
+          } else {
+            tableNavigator.onEdit(null);
+          }
+
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of siblingTransactions.entries()) {
+            await onSave({
+              ...transaction,
+              amount: amounts[transactionIndex],
+            });
+          }
         }
       },
       [onSave],
@@ -3037,6 +3521,12 @@ export const TransactionTable = forwardRef(
             showSelection={props.showSelection}
             allowSplitTransaction={props.allowSplitTransaction}
             showHiddenCategories={showHiddenCategories}
+            canDrag={canDrag}
+            draggedId={draggedId}
+            draggedParentId={draggedParentId}
+            draggedDate={draggedDate}
+            onDragChange={onDragChange}
+            onDrop={onDrop}
           />
         </SchedulesProvider>
       </DisplayPayeeProvider>

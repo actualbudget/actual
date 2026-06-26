@@ -1,6 +1,6 @@
 {
   "name": "desktop-electron",
-  "version": "26.2.1",
+  "version": "26.6.0",
   "description": "A simple and powerful personal finance system",
   "author": "Actual",
   "main": "build/desktop-electron/index.js",
@@ -8,29 +8,27 @@
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
     "build": "yarn build:dist && electron-builder",
-    "build:dist": "tsc && yarn copy-static-assets",
-    "typecheck": "tsc --noEmit && tsc-strict",
+    "build:dist": "tsgo && yarn copy-static-assets",
+    "typecheck": "tsgo -b && tsc-strict",
     "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build/desktop-electron",
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
     "e2e": "npx playwright test"
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
-    "better-sqlite3": "^12.6.2",
-    "fs-extra": "^11.3.3",
-    "promise-retry": "^2.0.1"
+    "better-sqlite3": "^12.10.0"
   },
   "devDependencies": {
-    "@electron/notarize": "3.1.1",
-    "@electron/rebuild": "4.0.2",
-    "@playwright/test": "1.58.2",
+    "@actual-app/core": "workspace:*",
+    "@actual-app/web": "workspace:*",
+    "@electron/rebuild": "^4.0.3",
+    "@playwright/test": "1.59.1",
     "@types/copyfiles": "^2",
-    "@types/fs-extra": "^11",
+    "@typescript/native-preview": "beta",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
-    "electron": "39.2.7",
-    "electron-builder": "26.4.0",
-    "typescript": "^5.9.3",
+    "electron": "41.7.1",
+    "electron-builder": "26.8.1",
     "typescript-strict-plugin": "^2.4.4"
   },
   "build": {
@@ -47,6 +45,12 @@
       "!build/loot-core/lib-dist/electron/{browser,bundle.mobile*}"
     ],
     "beforePack": "./build/desktop-electron/beforePackHook.js",
+    "afterSign": "./build/desktop-electron/afterSignHook.js",
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": true,
+      "enableNodeCliInspectArguments": false
+    },
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",

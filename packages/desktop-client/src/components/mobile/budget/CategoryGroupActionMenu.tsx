@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 type CategoryGroupActionMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,

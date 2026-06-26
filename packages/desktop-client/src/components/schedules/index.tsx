@@ -1,22 +1,23 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import { q } from '@actual-app/core/shared/query';
+import type { ScheduleEntity } from '@actual-app/core/types/models';
 
-import { send } from 'loot-core/platform/client/connection';
-import { q } from 'loot-core/shared/query';
-import type { ScheduleEntity } from 'loot-core/types/models';
+import { Search } from '#components/common/Search';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
+import { Page } from '#components/Page';
+import { useSchedules } from '#hooks/useSchedules';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { SchedulesTable } from './SchedulesTable';
 import type { ScheduleItemAction } from './SchedulesTable';
-
-import { Search } from '@desktop-client/components/common/Search';
-import { Page } from '@desktop-client/components/Page';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 export function Schedules() {
   const { t } = useTranslation();
@@ -72,7 +73,7 @@ export function Schedules() {
           await send('schedule/delete', { id });
           break;
         default:
-          throw new Error(`Unknown action: ${name}`);
+          throw new Error(`Unknown action: ${String(name)}`);
       }
     },
     [],
@@ -86,66 +87,68 @@ export function Schedules() {
   } = useSchedules({ query: schedulesQuery });
 
   return (
-    <Page header={t('Schedules')}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: '0 0 15px',
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-          }}
-        >
-          <Search
-            placeholder={t('Filter schedules…')}
-            value={filter}
-            onChange={setFilter}
-          />
-        </View>
-      </View>
-
-      <SchedulesTable
-        isLoading={isSchedulesLoading}
-        schedules={schedules}
-        filter={filter}
-        statuses={statuses}
-        allowCompleted
-        onSelect={onEdit}
-        onAction={onAction}
-        style={{ backgroundColor: theme.tableBackground }}
-      />
-
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          margin: '20px 0',
-          flexShrink: 0,
-        }}
-      >
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <Page header={t('Schedules')}>
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: '1em',
+            padding: '0 0 15px',
           }}
         >
-          <Button onPress={onDiscover}>
-            <Trans>Find schedules</Trans>
-          </Button>
-          <Button onPress={onChangeUpcomingLength}>
-            <Trans>Change upcoming length</Trans>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <Search
+              placeholder={t('Filter schedules…')}
+              value={filter}
+              onChange={setFilter}
+            />
+          </View>
+        </View>
+
+        <SchedulesTable
+          isLoading={isSchedulesLoading}
+          schedules={schedules}
+          filter={filter}
+          statuses={statuses}
+          allowCompleted
+          onSelect={onEdit}
+          onAction={onAction}
+          style={{ backgroundColor: theme.tableBackground }}
+        />
+
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            margin: '20px 0',
+            flexShrink: 0,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: '1em',
+            }}
+          >
+            <Button onPress={onDiscover}>
+              <Trans>Find schedules</Trans>
+            </Button>
+            <Button onPress={onChangeUpcomingLength}>
+              <Trans>Change upcoming length</Trans>
+            </Button>
+          </View>
+          <Button variant="primary" onPress={onAdd}>
+            <Trans>Add new schedule</Trans>
           </Button>
         </View>
-        <Button variant="primary" onPress={onAdd}>
-          <Trans>Add new schedule</Trans>
-        </Button>
-      </View>
-    </Page>
+      </Page>
+    </ErrorBoundary>
   );
 }

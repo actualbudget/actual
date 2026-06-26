@@ -8,14 +8,13 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
+import { LazyLoadFailedError } from '@actual-app/core/shared/errors';
 
-import { LazyLoadFailedError } from 'loot-core/shared/errors';
+import { useModalState } from '#hooks/useModalState';
 
 import { Link } from './common/Link';
 import { Modal, ModalHeader } from './common/Modal';
 import { Checkbox } from './forms';
-
-import { useModalState } from '@desktop-client/hooks/useModalState';
 
 type AppError = Error & {
   type?: string;
@@ -25,10 +24,12 @@ type AppError = Error & {
 };
 
 type FatalErrorProps = {
-  error: Error | AppError;
+  error: unknown;
 };
 
-type RenderSimpleProps = FatalErrorProps;
+type RenderSimpleProps = {
+  error: Error | AppError;
+};
 
 function RenderSimple({ error }: RenderSimpleProps) {
   let msg: ReactNode;
@@ -68,10 +69,17 @@ function RenderSimple({ error }: RenderSimpleProps) {
         </Trans>
       </Text>
     );
+  } else if ('BackendInitFailure' in error && error.BackendInitFailure) {
+    msg = (
+      <Text>
+        <Trans>
+          Actual couldn't load a critical backend worker. Reload the page to try
+          again; if the problem persists, do a hard refresh to clear any stale
+          cached assets.
+        </Trans>
+      </Text>
+    );
   } else {
-    // This indicates the backend failed to initialize. Show the
-    // user something at least so they aren't looking at a blank
-    // screen
     msg = (
       <Text>
         <Trans>
@@ -91,19 +99,6 @@ function RenderSimple({ error }: RenderSimpleProps) {
       }}
     >
       <Text>{msg}</Text>
-      <Text>
-        <Trans>
-          Please get{' '}
-          <Link
-            variant="external"
-            linkColor="muted"
-            to="https://actualbudget.org/contact"
-          >
-            in touch
-          </Link>{' '}
-          for support
-        </Trans>
-      </Text>
     </SpaceBetween>
   );
 }
@@ -196,7 +191,7 @@ function SharedArrayBufferOverride() {
   );
 }
 
-export function FatalError({ error }: FatalErrorProps) {
+export function FatalError({ error: rawError }: FatalErrorProps) {
   const { t } = useTranslation();
 
   const { modalStack } = useModalState();
@@ -204,6 +199,12 @@ export function FatalError({ error }: FatalErrorProps) {
 
   const [showError, setShowError] = useState(false);
 
+  const error: Error | AppError =
+    rawError instanceof Error
+      ? rawError
+      : rawError && typeof rawError === 'object'
+        ? Object.assign(new Error(String(rawError)), rawError)
+        : new Error(String(rawError));
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
   const isLazyLoadError = error instanceof LazyLoadFailedError;
 

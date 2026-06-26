@@ -7,25 +7,76 @@ on:
   pull_request:
   merge_group:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
+  setup:
+    runs-on: depot-ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+  constraints:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Check dependency version consistency
+        run: yarn constraints
+      - name: Check tsconfig project references are in sync
+        run: yarn check:tsconfig-references
+  lint:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
       - name: Lint
         run: yarn lint
-  typecheck:
-    runs-on: ubuntu-latest
+  knip:
+    needs: setup
+    runs-on: depot-ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Build plugins service
+        run: yarn build:plugins-service
+      - name: Check for unused files, dependencies and exports
+        run: yarn knip
+  typecheck:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -33,9 +84,12 @@ jobs:
       - name: Typecheck
         run: yarn typecheck
   validate-cli:
-    runs-on: ubuntu-latest
+    needs: setup
+    runs-on: depot-ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -45,23 +99,49 @@ jobs:
       - name: Check that the built CLI works
         run: node packages/sync-server/build/bin/actual-server.js --version
   test:
-    runs-on: ubuntu-latest
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Authenticate to Depot via GitHub OIDC for test reporting
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
       - name: Test
         run: yarn test
+      - name: Report test results to Depot
+        uses: depot/test-report-action@2ad5779840a9c63e884fa26f11d019768a27a941 # v1.0.1
+        if: ${{ !cancelled() && github.event_name == 'push' }}
+        with:
+          path: |
+            bin/test-results/junit*.xml
+            packages/*/test-results/junit*.xml
+  check-gh-actions:
+    runs-on: depot-ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@71321a20a9ded102f6e9ce5718a2fcec2c4f70d8 # v0.5.2
 
   migrations:
+    needs: setup
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          node-version: 22
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Check migrations
-        run: node ./.github/actions/check-migrations.js
+        run: yarn workspace @actual-app/ci-actions tsx bin/check-migrations.ts

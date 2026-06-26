@@ -12,18 +12,17 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { css, cx } from '@emotion/css';
-
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { css, cx } from '@emotion/css';
 
-import { NotesButton } from '@desktop-client/components/NotesButton';
-import { InputCell } from '@desktop-client/components/table';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { NotesButton } from '#components/NotesButton';
+import { InputCell } from '#components/table';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 
 type SidebarGroupProps = {
   group: CategoryGroupEntity;
@@ -37,6 +36,10 @@ type SidebarGroupProps = {
   onDelete?: (id: CategoryGroupEntity['id']) => void;
   onApplyBudgetTemplatesInGroup?: (
     categories: Array<CategoryEntity['id']>,
+  ) => void;
+  onSortCategories?: (
+    groupId: CategoryGroupEntity['id'],
+    direction: 'asc' | 'desc',
   ) => void;
   onShowNewCategory?: (groupId: CategoryGroupEntity['id']) => void;
   onHideNewGroup?: () => void;
@@ -54,6 +57,7 @@ export function SidebarGroup({
   onSave,
   onDelete,
   onApplyBudgetTemplatesInGroup,
+  onSortCategories,
   onShowNewCategory,
   onHideNewGroup,
   onToggleCollapse,
@@ -64,6 +68,8 @@ export function SidebarGroup({
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
   const temporary = group.id === 'new';
+  const canSortCategories =
+    !!onSortCategories && (group.categories?.length ?? 0) > 1;
   const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
     useContextMenu();
   const triggerRef = useRef(null);
@@ -143,6 +149,10 @@ export function SidebarGroup({
                     onApplyBudgetTemplatesInGroup?.(
                       group.categories.filter(c => !c.hidden).map(c => c.id),
                     );
+                  } else if (type === 'sort-asc') {
+                    onSortCategories?.(group.id, 'asc');
+                  } else if (type === 'sort-desc') {
+                    onSortCategories?.(group.id, 'desc');
                   }
                   setMenuOpen(false);
                 }}
@@ -153,6 +163,15 @@ export function SidebarGroup({
                     text: group.hidden ? t('Show') : t('Hide'),
                   },
                   onDelete && { name: 'delete', text: t('Delete') },
+                  canSortCategories && Menu.line,
+                  canSortCategories && {
+                    name: 'sort-asc',
+                    text: t('Sort A to Z'),
+                  },
+                  canSortCategories && {
+                    name: 'sort-desc',
+                    text: t('Sort Z to A'),
+                  },
                   ...(isGoalTemplatesEnabled
                     ? [
                         {
@@ -191,11 +210,7 @@ export function SidebarGroup({
               </Button>
             </Tooltip>
 
-            <NotesButton
-              id={group.id}
-              style={dragPreview && { color: 'currentColor' }}
-              defaultColor={theme.pageTextLight}
-            />
+            <NotesButton id={group.id} defaultColor={theme.pageTextLight} />
           </View>
         </>
       )}

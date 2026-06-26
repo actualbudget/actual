@@ -21,9 +21,7 @@ module.exports = {
     },
   },
 
-  create(context) {
-    const sourceCode = context.getSourceCode();
-
+  createOnce(context) {
     //----------------------------------------------------------------------
     // Helpers
     //----------------------------------------------------------------------
@@ -39,7 +37,8 @@ module.exports = {
 
       // foo.bar && foo.bar(...)
       if (
-        sourceCode.getText(node.left) === sourceCode.getText(node.right.callee)
+        context.sourceCode.getText(node.left) ===
+        context.sourceCode.getText(node.right.callee)
       ) {
         return fixer =>
           fixer.replaceTextRange(
@@ -51,8 +50,8 @@ module.exports = {
       // foo.bar && foo.bar.baz(...)
       if (
         node.right.callee.type === 'MemberExpression' &&
-        sourceCode.getText(node.left) ===
-          sourceCode.getText(node.right.callee.object)
+        context.sourceCode.getText(node.left) ===
+          context.sourceCode.getText(node.right.callee.object)
       ) {
         return fixer =>
           fixer.replaceTextRange(

@@ -22,51 +22,46 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-import { v4 as uuid } from 'uuid';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import {
   FIELD_TYPES,
-  friendlyOp,
-  getAllocationMethods,
   getFieldError,
   getValidOps,
   isValidOp,
   makeValue,
-  mapField,
   parse,
   unparse,
-} from 'loot-core/shared/rules';
-import type { ScheduleStatusType } from 'loot-core/shared/schedules';
+} from '@actual-app/core/shared/rules';
+import type { ScheduleStatusType } from '@actual-app/core/shared/schedules';
 import type {
   NewRuleEntity,
   RuleActionEntity,
   RuleEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
+import { v4 as uuidv4 } from 'uuid';
+
+import { TagMultiAutocomplete } from '#components/autocomplete/TagMultiAutocomplete';
+import { FinancialText } from '#components/FinancialText';
+import { StatusBadge } from '#components/schedules/StatusBadge';
+import { SimpleTransactionsTable } from '#components/transactions/SimpleTransactionsTable';
+import { BetweenAmountInput } from '#components/util/AmountInput';
+import { DisplayId } from '#components/util/DisplayId';
+import { GenericInput } from '#components/util/GenericInput';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useFormat } from '#hooks/useFormat';
+import { useSchedules } from '#hooks/useSchedules';
+import { SelectedProvider, useSelected } from '#hooks/useSelected';
+import { addNotification } from '#notifications/notificationsSlice';
+import { aqlQuery } from '#queries/aqlQuery';
+import { useDispatch } from '#redux';
+import { disableUndo, enableUndo } from '#undo';
+import { friendlyOp, getAllocationMethods, mapField } from '#util/rule';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
-import { SimpleTransactionsTable } from '@desktop-client/components/transactions/SimpleTransactionsTable';
-import { BetweenAmountInput } from '@desktop-client/components/util/AmountInput';
-import { DisplayId } from '@desktop-client/components/util/DisplayId';
-import { GenericInput } from '@desktop-client/components/util/GenericInput';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import {
-  SelectedProvider,
-  useSelected,
-} from '@desktop-client/hooks/useSelected';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { useDispatch } from '@desktop-client/redux';
-import { disableUndo, enableUndo } from '@desktop-client/undo';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
@@ -154,7 +149,13 @@ export function OpSelect<T extends string>({
       // TODO: Add matches op support for payees, accounts, categories.
       .filter(op =>
         type === 'id'
-          ? !['contains', 'matches', 'doesNotContain', 'hasTags'].includes(op)
+          ? ![
+              'contains',
+              'matches',
+              'doesNotContain',
+              'hasTags',
+              'hasAnyTag',
+            ].includes(op)
           : true,
       )
       .map(op => [op, formatOp(op, type)]);
@@ -311,6 +312,14 @@ function ConditionEditor({
         onChange={v => onChange('value', v)}
       />
     );
+  } else if (type === 'string' && (op === 'hasTags' || op === 'hasAnyTag')) {
+    valueEditor = (
+      <TagMultiAutocomplete
+        key={inputKey}
+        value={value ?? ''}
+        setValue={(value: string) => onChange('value', value)}
+      />
+    );
   } else {
     valueEditor = (
       <GenericInput
@@ -449,8 +458,8 @@ function getSplitActionFields() {
     ([field]) => !parentOnlyFields.includes(field),
   );
 }
-function getAllocationMethodOptions() {
-  return Object.entries(getAllocationMethods());
+function getAllocationMethodOptions(isFormulaEnabled = false) {
+  return Object.entries(getAllocationMethods(isFormulaEnabled));
 }
 
 type ActionEditorProps = {
@@ -545,6 +554,20 @@ function ActionEditor({
                 />
               )}
             </View>
+            {templated && (
+              <Text
+                style={{
+                  ...styles.smallText,
+                  color: theme.warningText,
+                  marginTop: 3,
+                }}
+              >
+                <Trans>
+                  Templating is deprecated and will be removed in a future
+                  release. Switch this action to a formula instead.
+                </Trans>
+              </Text>
+            )}
           </View>
           {/*Due to that these fields have id's as value it is not helpful to have templating here*/}
           {isFormulaEnabled &&
@@ -569,31 +592,15 @@ function ActionEditor({
                     : onChange('formula', options.formula || value || '=')
                 }
               >
-                {hasFormula ? (
-                  <span
-                    style={{
-                      fontSize: 14,
-                      fontFamily: 'serif',
-                      textAlign: 'center',
-                    }}
-                  >
-                    ƒ
-                  </span>
-                ) : hasFormula ? (
-                  <SvgCode
-                    style={{ width: 12, height: 12, color: 'inherit' }}
-                  />
-                ) : (
-                  <span
-                    style={{
-                      fontSize: 14,
-                      fontFamily: 'serif',
-                      textAlign: 'center',
-                    }}
-                  >
-                    ƒ
-                  </span>
-                )}
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontFamily: 'serif',
+                    textAlign: 'center',
+                  }}
+                >
+                  ƒ
+                </span>
               </Button>
             )}
           {isTemplatingEnabled &&
@@ -629,7 +636,7 @@ function ActionEditor({
           </View>
 
           <SplitAmountMethodSelect
-            options={getAllocationMethodOptions()}
+            options={getAllocationMethodOptions(isFormulaEnabled)}
             value={options.method}
             onChange={onChange}
           />
@@ -640,7 +647,12 @@ function ActionEditor({
               minWidth: options.method === 'fixed-percent' ? 45 : 70,
             }}
           >
-            {options.method !== 'remainder' && (
+            {options.method === 'formula' ? (
+              <FormulaActionEditor
+                value={options?.formula || '='}
+                onChange={v => onChange('formula', v, { formula: true })}
+              />
+            ) : options.method !== 'remainder' ? (
               <GenericInput
                 key={inputKey}
                 // @ts-expect-error fix this
@@ -653,8 +665,34 @@ function ActionEditor({
                 value={value}
                 onChange={v => onChange('value', v)}
               />
-            )}
+            ) : null}
           </View>
+          {options.method === 'formula' && (
+            <View
+              style={{
+                padding: 5,
+                backgroundColor: theme.buttonPrimaryBackground,
+                height: 24,
+                width: 24,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 4,
+              }}
+              aria-label={t('Formula mode indicator')}
+              role="img"
+            >
+              <span
+                style={{
+                  fontSize: 14,
+                  fontFamily: 'serif',
+                  textAlign: 'center',
+                }}
+              >
+                ƒ
+              </span>
+            </View>
+          )}
         </>
       ) : op === 'link-schedule' ? (
         <>
@@ -772,7 +810,7 @@ function StageButton({
 }
 
 function newInput(item) {
-  return { ...item, inputKey: uuid() };
+  return { ...item, inputKey: uuidv4() };
 }
 
 function ConditionsList({
@@ -810,7 +848,7 @@ function ConditionsList({
       field,
       op: 'is',
       value: null,
-      inputKey: uuid(),
+      inputKey: uuidv4(),
     });
     onChangeConditions(copy);
   }
@@ -989,26 +1027,32 @@ type RuleEditorProps = {
 
 export function RuleEditor({
   rule: defaultRule,
-  onSave: originalOnSave = undefined,
+  onSave: originalOnSave,
   onDelete,
   onCancel,
   style,
 }: RuleEditorProps) {
   const { t } = useTranslation();
   const [conditions, setConditions] = useState(
-    defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuid() })),
+    defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuidv4() })),
   );
   const [actionSplits, setActionSplits] = useState(() => {
     const parsedActions = defaultRule.actions.map(parse);
     return parsedActions.reduce(
       (acc, action) => {
         const splitIndex = action.options?.splitIndex ?? 0;
-        acc[splitIndex] = acc[splitIndex] ?? { id: uuid(), actions: [] };
-        acc[splitIndex].actions.push({ ...action, inputKey: uuid() });
+        acc[splitIndex] = acc[splitIndex] ?? {
+          id: uuidv4(),
+          actions: [],
+        };
+        acc[splitIndex].actions.push({
+          ...action,
+          inputKey: uuidv4(),
+        });
         return acc;
       },
       // The pre-split group is always there
-      [{ id: uuid(), actions: [] }],
+      [{ id: uuidv4(), actions: [] }],
     );
   });
   const [stage, setStage] = useState(defaultRule.stage);
@@ -1068,12 +1112,12 @@ export function RuleEditor({
   function addActionToSplitAfterIndex(splitIndex, actionIndex) {
     let newAction;
     if (splitIndex && !actionSplits[splitIndex]?.actions?.length) {
-      actionSplits[splitIndex] = { id: uuid(), actions: [] };
+      actionSplits[splitIndex] = { id: uuidv4(), actions: [] };
       newAction = {
         op: 'set-split-amount',
         options: { method: 'remainder', splitIndex },
         value: null,
-        inputKey: uuid(),
+        inputKey: uuidv4(),
       };
     } else {
       const fieldsArray =
@@ -1089,7 +1133,7 @@ export function RuleEditor({
         op: 'set',
         value: '',
         options: { splitIndex },
-        inputKey: uuid(),
+        inputKey: uuidv4(),
       };
     }
 

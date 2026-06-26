@@ -12,19 +12,28 @@ on:
     tags:
       - v**
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
+    environment: release
     steps:
       - name: Repository Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
 
       - name: Install Netlify
         run: npm install netlify-cli@17.10.1 -g
@@ -34,10 +43,11 @@ jobs:
 
       - name: Deploy to Netlify
         id: netlify_deploy
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_API_TOKEN }}
         run: |
           netlify deploy \
             --dir packages/desktop-client/build \
-            --site ${{ secrets.NETLIFY_SITE_ID }} \
-            --auth ${{ secrets.NETLIFY_API_TOKEN }} \
             --filter @actual-app/web \
             --prod

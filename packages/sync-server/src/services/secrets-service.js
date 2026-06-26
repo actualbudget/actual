@@ -1,6 +1,6 @@
 import createDebug from 'debug';
 
-import { getAccountDb } from '../account-db';
+import { getAccountDb } from '#account-db';
 
 /**
  * An enum of valid secret names.
@@ -15,6 +15,10 @@ export const SecretName = {
   pluggyai_clientId: 'pluggyai_clientId',
   pluggyai_clientSecret: 'pluggyai_clientSecret',
   pluggyai_itemIds: 'pluggyai_itemIds',
+  akahu_userToken: 'akahu_userToken',
+  akahu_appToken: 'akahu_appToken',
+  enablebanking_applicationId: 'enablebanking_applicationId',
+  enablebanking_secretKey: 'enablebanking_secretKey',
 };
 
 class SecretsDb {

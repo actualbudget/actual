@@ -11,7 +11,7 @@ export const SvgSubtract = (props: SVGProps<SVGSVGElement>) => (
     }}
   >
     <path
-      d="M1.5 13.5h21a1.5 1.5 0 0 0 0-3h-21a1.5 1.5 0 0 0 0 3Z"
+      d="M1.5 13.5h21a1.5 1.5 0 0 0 0-3h-21a1.5 1.5 0 0 0 0 3"
       fill="currentColor"
     />
   </svg>

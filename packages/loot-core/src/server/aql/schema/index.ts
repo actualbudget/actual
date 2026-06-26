@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import type { SchemaConfig } from '../compiler';
+import type { SchemaConfig } from '#server/aql/compiler';
 
 function f(type: string, opts?: Record<string, unknown>) {
   return { type, ...opts };
@@ -77,6 +77,7 @@ export const schema = {
     account_sync_source: f('string'),
     last_reconciled: f('string'),
     last_sync: f('string'),
+    bank_sync_status: f('string'),
   },
   categories: {
     id: f('id'),
@@ -85,6 +86,7 @@ export const schema = {
     hidden: f('boolean'),
     group: f('id', { ref: 'category_groups' }),
     goal_def: f('string'),
+    cleanup_def: f('string'),
     template_settings: f('json', { default: { source: 'notes' } }),
     sort_order: f('float'),
     tombstone: f('boolean'),
@@ -97,6 +99,11 @@ export const schema = {
     sort_order: f('float'),
     tombstone: f('boolean'),
   },
+  cleanup_groups: {
+    id: f('id'),
+    name: f('string'),
+    tombstone: f('boolean'),
+  },
   schedules: {
     id: f('id'),
     name: f('string'),
@@ -104,6 +111,7 @@ export const schema = {
     next_date: f('date'),
     completed: f('boolean'),
     posts_transaction: f('boolean'),
+    custom_upcoming_length: f('string'),
     tombstone: f('boolean'),
 
     // These are special fields that are actually pulled from the
@@ -155,6 +163,7 @@ export const schema = {
     show_hidden: f('integer', { default: 0 }),
     show_uncategorized: f('integer', { default: 0 }),
     trim_intervals: f('integer', { default: 0 }),
+    show_trend_lines: f('integer', { default: 0 }),
     include_current: f('integer', { default: 0 }),
     graph_type: f('string', { default: 'BarGraph' }),
     conditions: f('json'),
@@ -210,6 +219,14 @@ export const schema = {
     spent: f('integer'),
     leftover: f('integer'),
     carryover: f('boolean'),
+  },
+  payee_locations: {
+    id: f('id'),
+    payee_id: f('id', { ref: 'payees', required: true }),
+    latitude: f('float', { required: true }),
+    longitude: f('float', { required: true }),
+    created_at: f('integer', { required: true }),
+    tombstone: f('boolean'),
   },
 };
 

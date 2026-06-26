@@ -201,6 +201,18 @@ describe('schema-helpers', () => {
     });
   });
 
+  test('undefined values are skipped when updating', () => {
+    const trans = convertForUpdate(basicSchema, {}, 'transactions', {
+      id: 'id',
+      notes: undefined,
+      cleared: false,
+    });
+    expect(trans).toEqual({
+      id: 'id',
+      cleared: 0,
+    });
+  });
+
   test('floats are not allowed as input types to integers', () => {
     expect(() => {
       convertForUpdate(basicSchema, {}, 'transactions', {

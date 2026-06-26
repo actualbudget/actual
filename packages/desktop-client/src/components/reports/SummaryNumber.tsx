@@ -4,15 +4,15 @@ import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import debounce from 'lodash/debounce';
+import { debounce } from 'es-toolkit/compat';
 
-import { LoadingIndicator } from './LoadingIndicator';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useFormat } from '#hooks/useFormat';
+import { useMergedRefs } from '#hooks/useMergedRefs';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
+import { ReportCardValueSkeleton } from './ReportCardValueSkeleton';
 
 const FONT_SIZE_SCALE_FACTOR = 1.6;
 const CONTAINER_MARGIN = 8;
@@ -38,6 +38,7 @@ export function SummaryNumber({
 }: SummaryNumberProps) {
   const { t } = useTranslation();
   const [fontSize, setFontSize] = useState<number>(initialFontSize);
+  const [hasSized, setHasSized] = useState(false);
   const refDiv = useRef<HTMLDivElement>(null);
   const format = useFormat();
   const isNumericValue = Number.isFinite(value);
@@ -61,7 +62,10 @@ export function SummaryNumber({
       height, // Ensure the text fits vertically by using the height as the limiting factor
     );
 
-    setFontSize(calculatedFontSize);
+    if (calculatedFontSize > 0) {
+      setFontSize(calculatedFontSize);
+      setHasSized(true);
+    }
 
     if (calculatedFontSize !== initialFontSize && fontSizeChanged) {
       fontSizeChanged(calculatedFontSize);
@@ -73,7 +77,7 @@ export function SummaryNumber({
 
   return (
     <>
-      {loading && <LoadingIndicator />}
+      {loading && <ReportCardValueSkeleton />}
       {!loading && (
         <View
           ref={mergedRef as Ref<HTMLDivElement>}
@@ -107,9 +111,13 @@ export function SummaryNumber({
                   : theme.reportsNumberPositive,
           }}
         >
-          <FinancialText aria-hidden="true">
-            <PrivacyFilter>{displayAmount}</PrivacyFilter>
-          </FinancialText>
+          {!hasSized ? (
+            <ReportCardValueSkeleton />
+          ) : (
+            <FinancialText aria-hidden="true">
+              <PrivacyFilter>{displayAmount}</PrivacyFilter>
+            </FinancialText>
+          )}
         </View>
       )}
     </>

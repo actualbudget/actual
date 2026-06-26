@@ -1,0 +1,5 @@
+BEGIN TRANSACTION;
+
+ALTER TABLE schedules ADD COLUMN custom_upcoming_length TEXT DEFAULT NULL;
+
+COMMIT;

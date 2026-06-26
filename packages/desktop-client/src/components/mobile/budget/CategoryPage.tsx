@@ -4,18 +4,17 @@ import { useParams, useSearchParams } from 'react-router';
 
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
 
-import * as monthUtils from 'loot-core/shared/months';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import { AddTransactionButton } from '#components/mobile/transactions/AddTransactionButton';
+import { MobilePageHeader, Page } from '#components/Page';
+import { useCategory } from '#hooks/useCategory';
+import { useLocale } from '#hooks/useLocale';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import { CategoryTransactions } from './CategoryTransactions';
 import { UncategorizedTransactions } from './UncategorizedTransactions';
-
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import { AddTransactionButton } from '@desktop-client/components/mobile/transactions/AddTransactionButton';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { useCategory } from '@desktop-client/hooks/useCategory';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function CategoryPage() {
   const locale = useLocale();

@@ -59,7 +59,11 @@ export function getLoginMethod(req) {
     (req.body || { loginMethod: null }).loginMethod &&
     config.get('allowedLoginMethods').includes(req.body.loginMethod)
   ) {
-    return req.body.loginMethod;
+    const accountDb = getAccountDb();
+    const row = accountDb.first('SELECT method FROM auth WHERE method = ?', [
+      req.body.loginMethod,
+    ]);
+    if (row) return req.body.loginMethod;
   }
 
   //BY-PASS ANY OTHER CONFIGURATION TO ENSURE HEADER AUTH
@@ -172,15 +176,13 @@ export async function disableOpenID(loginSettings) {
     return { error: 'invalid-password' };
   }
 
-  if (passwordHash) {
-    const confirmed = bcrypt.compareSync(loginSettings.password, passwordHash);
+  const confirmed = bcrypt.compareSync(loginSettings.password, passwordHash);
 
-    if (!confirmed) {
-      return { error: 'invalid-password' };
-    }
+  if (!confirmed) {
+    return { error: 'invalid-password' };
   }
 
-  const { error } = bootstrapPassword(loginSettings.password) || {};
+  const { error } = bootstrapPassword(loginSettings.password);
   if (error) {
     return { error };
   }
@@ -208,7 +210,13 @@ export async function disableOpenID(loginSettings) {
 
 export function getSession(token) {
   const accountDb = getAccountDb();
-  return accountDb.first('SELECT * FROM sessions WHERE token = ?', [token]);
+  return accountDb.first(
+    `SELECT sessions.*
+     FROM sessions
+     JOIN users ON users.id = sessions.user_id
+     WHERE sessions.token = ? AND users.enabled = 1`,
+    [token],
+  );
 }
 
 export function getUserInfo(userId) {

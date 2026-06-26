@@ -4,10 +4,9 @@ import type { FocusEvent } from 'react';
 import { Input } from '@actual-app/components/input';
 import type { InputProps } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 
-import type { IntegerAmount } from 'loot-core/shared/util';
-
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '#hooks/useFormat';
 
 type FinancialInputProps = Omit<
   InputProps,

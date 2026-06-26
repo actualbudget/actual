@@ -3,21 +3,21 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
-
-import { q } from 'loot-core/shared/query';
+import { validForMerge } from '@actual-app/core/shared/merge';
+import { q } from '@actual-app/core/shared/query';
 import {
   extractScheduleConds,
   scheduleIsRecurring,
-} from 'loot-core/shared/schedules';
-import { isPreviewId } from 'loot-core/shared/transactions';
-import { validForTransfer } from 'loot-core/shared/transfer';
-import type { TransactionEntity } from 'loot-core/types/models';
+} from '@actual-app/core/shared/schedules';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
+import { validForTransfer } from '@actual-app/core/shared/transfer';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import { SelectedItemsButton } from '@desktop-client/components/table';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { useSelectedItems } from '@desktop-client/hooks/useSelected';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { SelectedItemsButton } from '#components/table';
+import { useSchedules } from '#hooks/useSchedules';
+import { useSelectedItems } from '#hooks/useSelected';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type SelectedTransactionsButtonProps = {
   getTransaction: (id: string) => TransactionEntity | undefined;
@@ -137,8 +137,7 @@ export function SelectedTransactionsButton({
 
   const canMerge = useMemo(() => {
     return Boolean(
-      twoTransactions &&
-      twoTransactions[0].amount === twoTransactions[1].amount,
+      twoTransactions && validForMerge(twoTransactions[0], twoTransactions[1]),
     );
   }, [twoTransactions]);
 
@@ -287,6 +286,13 @@ export function SelectedTransactionsButton({
     hotKeyOptions,
     [onMergeTransactions, selectedIds],
   );
+  // make transfer
+  useHotkeys(
+    'r',
+    () => showMakeTransfer && canBeTransfer && onSetTransfer(selectedIds),
+    hotKeyOptions,
+    [onSetTransfer, selectedIds, showMakeTransfer, canBeTransfer],
+  );
 
   return (
     <SelectedItemsButton
@@ -360,6 +366,7 @@ export function SelectedTransactionsButton({
                     {
                       name: 'set-transfer',
                       text: t('Make transfer'),
+                      key: 'R',
                       disabled: !canBeTransfer,
                     } as const,
                   ]

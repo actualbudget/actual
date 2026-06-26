@@ -2,11 +2,28 @@ import React, { useEffect } from 'react';
 import { Trans } from 'react-i18next';
 import { Navigate, Route, Routes } from 'react-router';
 
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+
+import { setAppState } from '#app/appSlice';
+import { ProtectedRoute } from '#auth/ProtectedRoute';
+import { Permissions } from '#auth/types';
+import {
+  BackToFileListButton,
+  UserDirectoryPage,
+} from '#components/admin/UserDirectory/UserDirectoryPage';
+import { AppBackground } from '#components/AppBackground';
+import { LoggedInUser } from '#components/LoggedInUser';
+import { Notifications } from '#components/Notifications';
+import {
+  useMultiuserEnabled,
+  useServerVersion,
+} from '#components/ServerContext';
+import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
+import { useDispatch, useSelector } from '#redux';
+import { loggedIn } from '#users/usersSlice';
 
 import { BudgetFileSelection } from './BudgetFileSelection';
 import { ConfigServer } from './ConfigServer';
@@ -17,24 +34,6 @@ import { Error } from './subscribe/Error';
 import { Login } from './subscribe/Login';
 import { OpenIdCallback } from './subscribe/OpenIdCallback';
 import { WelcomeScreen } from './WelcomeScreen';
-
-import { setAppState } from '@desktop-client/app/appSlice';
-import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
-import { Permissions } from '@desktop-client/auth/types';
-import {
-  BackToFileListButton,
-  UserDirectoryPage,
-} from '@desktop-client/components/admin/UserDirectory/UserDirectoryPage';
-import { AppBackground } from '@desktop-client/components/AppBackground';
-import { LoggedInUser } from '@desktop-client/components/LoggedInUser';
-import { Notifications } from '@desktop-client/components/Notifications';
-import {
-  useMultiuserEnabled,
-  useServerVersion,
-} from '@desktop-client/components/ServerContext';
-import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
-import { useDispatch, useSelector } from '@desktop-client/redux';
-import { loggedIn } from '@desktop-client/users/usersSlice';
 
 function Version() {
   const version = useServerVersion();
@@ -65,10 +64,7 @@ function Version() {
 }
 
 export function ManagementApp() {
-  const { isNarrowWidth } = useResponsive();
-  useMetaThemeColor(
-    isNarrowWidth ? theme.mobileConfigServerViewTheme : undefined,
-  );
+  useMetaThemeColor(theme.mobileConfigServerViewTheme);
 
   const files = useSelector(state => state.budgetfiles.allFiles);
   const isLoading = useSelector(state => state.app.loadingText !== null);

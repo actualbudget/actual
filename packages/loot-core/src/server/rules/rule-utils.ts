@@ -1,11 +1,11 @@
 // @ts-strict-ignore
 import * as dateFns from 'date-fns';
 
-import { logger } from '../../platform/server/log';
-import { recurConfigToRSchedule } from '../../shared/schedules';
-import type { RuleConditionEntity } from '../../types/models';
-import { RuleError } from '../errors';
-import { RSchedule } from '../util/rschedule';
+import { logger } from '#platform/server/log';
+import { RuleError } from '#server/errors';
+import { RSchedule } from '#server/util/rschedule';
+import { recurConfigToRSchedule } from '#shared/schedules';
+import type { RuleConditionEntity } from '#types/models';
 
 import type { Rule } from './rule';
 
@@ -30,6 +30,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   doesNotContain: 0,
   matches: 0,
   hasTags: 0,
+  hasAnyTag: 0,
   onBudget: 0,
   offBudget: 0,
 };

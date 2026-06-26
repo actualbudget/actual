@@ -1,8 +1,8 @@
 // @ts-strict-ignore
-import { APIError } from '../../../server/errors';
-import { isMutating, runHandler } from '../../../server/mutators';
-import { captureException } from '../../exceptions';
-import { logger } from '../log';
+import { captureException } from '#platform/exceptions';
+import { logger } from '#platform/server/log';
+import { APIError } from '#server/errors';
+import { isMutating, runHandler } from '#server/mutators';
 
 import type * as T from './index-types';
 
@@ -74,9 +74,7 @@ export const init: T.Init = function (_socketName, handlers) {
         process.parentPort.postMessage({
           type: 'reply',
           id,
-          result: catchErrors
-            ? { error: unknownMethodError, data: null }
-            : null,
+          result: { error: unknownMethodError, data: null },
         });
       } else {
         process.parentPort.postMessage({

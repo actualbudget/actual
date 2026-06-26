@@ -4,7 +4,7 @@ import type { Dispatch, ReactNode, SetStateAction } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 
 type SidebarContextValue = {
   hidden: boolean;

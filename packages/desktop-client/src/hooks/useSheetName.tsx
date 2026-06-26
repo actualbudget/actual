@@ -2,11 +2,7 @@
 import { createContext, useContext } from 'react';
 import type { PropsWithChildren } from 'react';
 
-import type {
-  Binding,
-  SheetFields,
-  SheetNames,
-} from '@desktop-client/spreadsheet';
+import type { Binding, SheetFields, SheetNames } from '#spreadsheet';
 
 function unresolveName(name) {
   const idx = name.indexOf('!');

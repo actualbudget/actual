@@ -14,12 +14,12 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { useGlobalPref } from '#hooks/useGlobalPref';
+
 import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
 
 import { useBudgetComponents } from '.';
-
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type BudgetTotalsProps = {
   toggleHiddenCategories: () => void;

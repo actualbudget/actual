@@ -1,23 +1,20 @@
-import * as asyncStorage from '../../platform/server/asyncStorage';
-import * as fs from '../../platform/server/fs';
-import { stringToInteger } from '../../shared/util';
-import type {
-  GlobalPrefs,
-  MetadataPrefs,
-  SyncedPrefs,
-} from '../../types/prefs';
-import { createApp } from '../app';
-import * as db from '../db';
-import { PostError } from '../errors';
-import { getDefaultDocumentDir } from '../main';
-import { mutator } from '../mutators';
-import { post } from '../post';
+import * as asyncStorage from '#platform/server/asyncStorage';
+import * as fs from '#platform/server/fs';
+import { createApp } from '#server/app';
+import * as db from '#server/db';
+import { PostError } from '#server/errors';
+import { resetFormulaPreferencesCache } from '#server/formulas/bootstrap';
+import { getDefaultDocumentDir } from '#server/main';
+import { mutator } from '#server/mutators';
+import { post } from '#server/post';
 import {
   getPrefs as _getMetadataPrefs,
   savePrefs as _saveMetadataPrefs,
-} from '../prefs';
-import { getServer } from '../server-config';
-import { undoable } from '../undo';
+} from '#server/prefs';
+import { getServer } from '#server/server-config';
+import { undoable } from '#server/undo';
+import { stringToInteger } from '#shared/util';
+import type { GlobalPrefs, MetadataPrefs, SyncedPrefs } from '#types/prefs';
 
 export type PreferencesHandlers = {
   'preferences/save': typeof saveSyncedPrefs;
@@ -30,6 +27,14 @@ export type PreferencesHandlers = {
 };
 
 export const app = createApp<PreferencesHandlers>();
+
+const FORMULA_FORMAT_SYNCED_PREFS = new Set<keyof SyncedPrefs>([
+  'numberFormat',
+  'hideFraction',
+  'defaultCurrencyCode',
+  'currencySymbolPosition',
+  'currencySpaceBetweenAmountAndSymbol',
+]);
 
 app.method('preferences/save', mutator(undoable(saveSyncedPrefs)));
 app.method('preferences/get', getSyncedPrefs);
@@ -54,6 +59,10 @@ async function saveSyncedPrefs({
     id,
     value,
   });
+
+  if (FORMULA_FORMAT_SYNCED_PREFS.has(id)) {
+    resetFormulaPreferencesCache();
+  }
 }
 
 async function getSyncedPrefs(): Promise<SyncedPrefs> {
@@ -89,6 +98,7 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
   }
   if (prefs.language !== undefined) {
     await asyncStorage.setItem('language', prefs.language);
+    resetFormulaPreferencesCache();
   }
   if (prefs.theme !== undefined) {
     await asyncStorage.setItem('theme', prefs.theme);
@@ -99,11 +109,20 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
       prefs.preferredDarkTheme,
     );
   }
-  if (prefs.installedCustomTheme !== undefined) {
+  if (prefs.installedCustomLightTheme !== undefined) {
     await asyncStorage.setItem(
       'installed-custom-theme',
-      prefs.installedCustomTheme,
+      prefs.installedCustomLightTheme,
     );
+  }
+  if (prefs.installedCustomDarkTheme !== undefined) {
+    await asyncStorage.setItem(
+      'installed-custom-dark-theme',
+      prefs.installedCustomDarkTheme,
+    );
+  }
+  if (prefs.customCssOverride !== undefined) {
+    await asyncStorage.setItem('custom-css-override', prefs.customCssOverride);
   }
   if (prefs.serverSelfSignedCert !== undefined) {
     await asyncStorage.setItem(
@@ -133,7 +152,9 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     language,
     theme,
     'preferred-dark-theme': preferredDarkTheme,
-    'installed-custom-theme': installedCustomTheme,
+    'installed-custom-theme': installedCustomLightTheme,
+    'installed-custom-dark-theme': installedCustomDarkTheme,
+    'custom-css-override': customCssOverride,
     'server-self-signed-cert': serverSelfSignedCert,
     syncServerConfig,
     notifyWhenUpdateIsAvailable,
@@ -147,6 +168,8 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'theme',
     'preferred-dark-theme',
     'installed-custom-theme',
+    'installed-custom-dark-theme',
+    'custom-css-override',
     'server-self-signed-cert',
     'syncServerConfig',
     'notifyWhenUpdateIsAvailable',
@@ -162,7 +185,6 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
       theme === 'light' ||
       theme === 'dark' ||
       theme === 'auto' ||
-      theme === 'development' ||
       theme === 'midnight'
         ? theme
         : 'auto',
@@ -170,7 +192,9 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
       preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
         ? preferredDarkTheme
         : 'dark',
-    installedCustomTheme: installedCustomTheme || undefined,
+    installedCustomLightTheme: installedCustomLightTheme || undefined,
+    installedCustomDarkTheme: installedCustomDarkTheme || undefined,
+    customCssOverride: customCssOverride || undefined,
     serverSelfSignedCert: serverSelfSignedCert || undefined,
     syncServerConfig: syncServerConfig || undefined,
     notifyWhenUpdateIsAvailable:

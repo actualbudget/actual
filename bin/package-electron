@@ -43,6 +43,7 @@ if [ $SKIP_TRANSLATIONS == false ]; then
 
   pushd packages/desktop-client/locale > /dev/null
 
+  git checkout .
   git pull
   popd > /dev/null
   packages/desktop-client/bin/remove-untranslated-languages
@@ -50,14 +51,17 @@ fi
 
 export NODE_OPTIONS="--max-old-space-size=4096"
 
+yarn workspace @actual-app/crdt build
 yarn workspace plugins-service build
-yarn workspace loot-core build:node
+yarn workspace @actual-app/core build:node
 yarn workspace @actual-app/web build --mode=desktop # electron specific build
 
 # required for running the sync-server server
-yarn workspace loot-core build:browser
-yarn workspace @actual-app/web build:browser
+yarn build:browser
 yarn workspace @actual-app/sync-server build
+
+# Emit @actual-app/core declarations so desktop-electron (which includes typings/window.ts) can build
+yarn workspace @actual-app/core exec tsgo -p tsconfig.json
 
 yarn workspace desktop-electron update-client
 

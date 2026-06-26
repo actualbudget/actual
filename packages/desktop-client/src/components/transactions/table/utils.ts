@@ -1,17 +1,16 @@
-import { isValid as isDateValid, parseISO } from 'date-fns';
-
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { currentDay } from 'loot-core/shared/months';
+import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
+import { currentDay } from '@actual-app/core/shared/months';
 import {
   amountToInteger,
   integerToCurrencyWithDecimal,
-} from 'loot-core/shared/util';
-import type { CurrencyAmount } from 'loot-core/shared/util';
+} from '@actual-app/core/shared/util';
+import type { CurrencyAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { isValid as isDateValid, parseISO } from 'date-fns';
 
 export type SerializedTransaction = Omit<TransactionEntity, 'date'> & {
   date: string;
@@ -117,8 +116,53 @@ export function selectAscDesc(
     : defaultAscDesc;
 }
 
-export function getDisplayValue<T>(obj: T | null | undefined, name: keyof T) {
-  return obj ? obj[name] : '';
+// Decides whether a rule result should be applied to a field while the user is
+// entering a new transaction. By default rules only fill fields the user left
+// empty, so their manual input isn't overwritten. The exception is the notes
+// field: append/prepend notes rules intentionally preserve the existing note and
+// add text before or after it, so we allow those through. The check stays
+// idempotent — rules are re-run on every keystroke during entry, so we must not
+// re-add text that the previous run already applied.
+export function shouldApplyRuleChange(
+  field: string,
+  currentValue: unknown,
+  nextValue: unknown,
+) {
+  if (
+    currentValue == null ||
+    currentValue === '' ||
+    currentValue === 0 ||
+    currentValue === false
+  ) {
+    return true;
+  }
+
+  if (
+    field !== 'notes' ||
+    typeof currentValue !== 'string' ||
+    typeof nextValue !== 'string' ||
+    nextValue === currentValue
+  ) {
+    return false;
+  }
+
+  // The rule preserved the user's note only if the result still contains it
+  // verbatim. Otherwise treat it as an overwrite and keep the manual note.
+  const index = nextValue.indexOf(currentValue);
+  if (index === -1) {
+    return false;
+  }
+
+  const prepended = nextValue.slice(0, index);
+  const appended = nextValue.slice(index + currentValue.length);
+
+  // If the note already starts/ends with these exact additions, a previous rule
+  // run already applied them — applying again would duplicate the text.
+  const alreadyApplied =
+    (prepended === '' || currentValue.startsWith(prepended)) &&
+    (appended === '' || currentValue.endsWith(appended));
+
+  return !alreadyApplied;
 }
 
 export function makeTemporaryTransactions(

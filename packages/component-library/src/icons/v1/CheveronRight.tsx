@@ -11,7 +11,7 @@ export const SvgCheveronRight = (props: SVGProps<SVGSVGElement>) => (
     }}
   >
     <path
-      d="m12.95 10.707.707-.707L8 4.343 6.586 5.757 10.828 10l-4.242 4.243L8 15.657l4.95-4.95z"
+      d="m12.95 10.707.707-.707L8 4.343 6.586 5.757 10.828 10l-4.242 4.243L8 15.657z"
       fill="currentColor"
     />
   </svg>

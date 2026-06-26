@@ -24,7 +24,7 @@ export const mappingsFromString = (str: string): Mappings => {
     );
   } catch (e) {
     const message = e instanceof Error ? e.message : e;
-    throw new Error(`Failed to parse mapping: ${message}`);
+    throw new Error(`Failed to parse mapping: ${String(message)}`);
   }
 };
 

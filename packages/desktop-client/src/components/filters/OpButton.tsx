@@ -5,7 +5,7 @@ import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
-import { friendlyOp } from 'loot-core/shared/rules';
+import { friendlyOp } from '#util/rule';
 
 type OpButtonProps = {
   op: string;

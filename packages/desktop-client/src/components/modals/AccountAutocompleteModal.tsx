@@ -5,15 +5,15 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
+import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '@desktop-client/components/common/Modal';
-import { SectionLabel } from '@desktop-client/components/forms';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+} from '#components/common/Modal';
+import { SectionLabel } from '#components/forms';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type AccountAutocompleteModalProps = Extract<
   ModalType,
@@ -46,7 +46,7 @@ export function AccountAutocompleteModal({
         },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           {isNarrowWidth && (
             <ModalHeader
@@ -58,7 +58,7 @@ export function AccountAutocompleteModal({
               }
               rightContent={
                 <ModalCloseButton
-                  onPress={close}
+                  onPress={() => state.close()}
                   style={{ color: theme.menuAutoCompleteText }}
                 />
               }
@@ -80,7 +80,7 @@ export function AccountAutocompleteModal({
                 focused
                 embedded
                 closeOnBlur={false}
-                onClose={close}
+                onClose={() => state.close()}
                 {...defaultAutocompleteProps}
                 onSelect={onSelect}
                 includeClosedAccounts={includeClosedAccounts}

@@ -1,16 +1,15 @@
-import * as d from 'date-fns';
-import type { Locale } from 'date-fns';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import type {
   RuleConditionEntity,
   SummaryContent,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import * as d from 'date-fns';
+import type { Locale } from 'date-fns';
 
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { aqlQuery } from '#queries/aqlQuery';
 
 export function summarySpreadsheet(
   start: string,

@@ -13,16 +13,26 @@ import {
   SvgViewShow,
 } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { listen } from '@actual-app/core/platform/client/connection';
+import { isDevelopmentEnvironment } from '@actual-app/core/shared/environment';
+import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
 
-import { listen } from 'loot-core/platform/client/connection';
-import { isDevelopmentEnvironment } from 'loot-core/shared/environment';
-import * as Platform from 'loot-core/shared/platform';
+import { sync } from '#app/appSlice';
+import { SharedArrayBufferWarning } from '#components/SharedArrayBufferWarning';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useIsTestEnv } from '#hooks/useIsTestEnv';
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useNavigate } from '#hooks/useNavigate';
+import { useSheetValue } from '#hooks/useSheetValue';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useDispatch } from '#redux';
+import * as bindings from '#spreadsheet/bindings';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
@@ -33,16 +43,6 @@ import { LoggedInUser } from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar/SidebarProvider';
 import { ThemeSelector } from './ThemeSelector';
-
-import { sync } from '@desktop-client/app/appSlice';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useDispatch } from '@desktop-client/redux';
-import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 function UncategorizedButton() {
   const count: number | null = useSheetValue(bindings.uncategorizedCount());
@@ -106,11 +106,11 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
   );
 }
 
-type SyncButtonProps = {
+type ServerSyncButtonProps = {
   style?: CSSProperties;
   isMobile?: boolean;
 };
-function SyncButton({ style, isMobile = false }: SyncButtonProps) {
+function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
   const { t } = useTranslation();
   const [cloudFileId] = useMetadataPref('cloudFileId');
   const dispatch = useDispatch();
@@ -166,8 +166,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
       : syncState === 'disabled' ||
           syncState === 'offline' ||
           syncState === 'local'
-        ? theme.tableTextLight
-        : 'inherit';
+        ? theme.buttonBareDisabledText
+        : theme.buttonBareText;
 
   const activeStyle = isMobile
     ? {
@@ -213,7 +213,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
   return (
     <Button
       variant="bare"
-      aria-label={t('Sync')}
+      aria-label={t('Server Sync')}
       className={css({
         ...(isMobile
           ? {
@@ -230,6 +230,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
         '&[data-pressed]': activeStyle,
       })}
       onPress={onSync}
+      isDisabled={syncState === 'offline'}
+      aria-disabled={syncState === 'offline'}
     >
       {isMobile ? (
         syncState === 'error' ? (
@@ -242,12 +244,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
       ) : (
         <AnimatedRefresh animating={syncing} />
       )}
-      <Text style={isMobile ? { ...mobileTextStyle } : { marginLeft: 3 }}>
-        {syncState === 'disabled'
-          ? t('Disabled')
-          : syncState === 'offline'
-            ? t('Offline')
-            : t('Sync')}
+      <Text style={isMobile ? { ...mobileTextStyle } : null}>
+        {syncState === 'disabled' ? ` ${t('Disabled')}` : null}
       </Text>
     </Button>
   );
@@ -315,7 +313,7 @@ export function Titlebar({ style }: TitlebarProps) {
         >
           <SvgNavigationMenu
             className="menu"
-            style={{ width: 15, height: 15, color: theme.pageText, left: 0 }}
+            style={{ width: 15, height: 15, left: 0 }}
           />
         </Button>
       )}
@@ -329,7 +327,7 @@ export function Titlebar({ style }: TitlebarProps) {
                 <SvgArrowLeft
                   width={10}
                   height={10}
-                  style={{ marginRight: 5, color: 'currentColor' }}
+                  style={{ marginRight: 5 }}
                 />{' '}
                 <Trans>Back</Trans>
               </Button>
@@ -346,7 +344,8 @@ export function Titlebar({ style }: TitlebarProps) {
         <UncategorizedButton />
         {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
         <PrivacyButton />
-        {serverURL ? <SyncButton /> : null}
+        {serverURL ? <ServerSyncButton /> : null}
+        <SharedArrayBufferWarning />
         <LoggedInUser />
         <HelpMenu />
       </SpaceBetween>

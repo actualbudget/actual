@@ -2,12 +2,19 @@
 import React, { Fragment, useEffect, useEffectEvent } from 'react';
 import { useLocation } from 'react-router';
 
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useModalState } from '#hooks/useModalState';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { closeModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
+import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
@@ -17,6 +24,7 @@ import { CategoryMenuModal } from './modals/CategoryMenuModal';
 import { CloseAccountModal } from './modals/CloseAccountModal';
 import { ConfirmCategoryDeleteModal } from './modals/ConfirmCategoryDeleteModal';
 import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
+import { ConfirmPayeesMergeModal } from './modals/ConfirmPayeesMergeModal';
 import { ConfirmTransactionEditModal } from './modals/ConfirmTransactionEditModal';
 import { ConfirmUnlinkAccountModal } from './modals/ConfirmUnlinkAccountModal';
 import { ConvertToScheduleModal } from './modals/ConvertToScheduleModal';
@@ -29,6 +37,8 @@ import { EditUserAccess } from './modals/EditAccess';
 import { EditFieldModal } from './modals/EditFieldModal';
 import { EditRuleModal } from './modals/EditRuleModal';
 import { EditUserFinanceApp } from './modals/EditUser';
+import { EnableBankingExternalMsgModal } from './modals/EnableBankingExternalMsgModal';
+import { EnableBankingInitialiseModal } from './modals/EnableBankingInitialiseModal';
 import { EnvelopeBalanceMenuModal } from './modals/EnvelopeBalanceMenuModal';
 import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
@@ -77,12 +87,6 @@ import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleEditModal } from './schedules/ScheduleEditModal';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
-
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { useModalState } from '@desktop-client/hooks/useModalState';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { closeModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 export function Modals() {
   const location = useLocation();
@@ -140,6 +144,9 @@ export function Modals() {
         case 'confirm-category-delete':
           return <ConfirmCategoryDeleteModal key={key} {...modal.options} />;
 
+        case 'confirm-payees-merge':
+          return <ConfirmPayeesMergeModal key={key} {...modal.options} />;
+
         case 'confirm-unlink-account':
           return <ConfirmUnlinkAccountModal key={key} {...modal.options} />;
 
@@ -182,6 +189,15 @@ export function Modals() {
 
         case 'pluggyai-init':
           return <PluggyAiInitialiseModal key={key} {...modal.options} />;
+
+        case 'akahu-init':
+          return <AkahuInitialiseModal key={key} {...modal.options} />;
+
+        case 'enablebanking-init':
+          return <EnableBankingInitialiseModal key={key} {...modal.options} />;
+
+        case 'enablebanking-external-msg':
+          return <EnableBankingExternalMsgModal key={key} {...modal.options} />;
 
         case 'gocardless-external-msg':
           return (

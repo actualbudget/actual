@@ -1,4 +1,4 @@
-import { createApp } from '../app';
+import { createApp } from '#server/app';
 
 import { repairSync as _repairSync } from './repair';
 import { resetSync as _resetSync } from './reset';

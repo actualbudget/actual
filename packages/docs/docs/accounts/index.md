@@ -4,7 +4,7 @@ You can add as many accounts as you like. Adding all of your accounts (including
 
 ## Off budget accounts
 
-Actual makes a distinction between accounts being **on** budget or **off** budget. Off budget accounts don't affect the budget and are meant to track stuff like investments and mortgages. Transactions in off budget accounts can't be categorized; they simply track balances over time.
+Actual makes a distinction between accounts being **on** budget or **off** budget.
 
 **Off budget** accounts don't affect the budget and are meant to track stuff like investments and mortgages. Transactions in off budget accounts can't be categorized; they simply track balances over time.
 

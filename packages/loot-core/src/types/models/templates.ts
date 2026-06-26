@@ -1,6 +1,7 @@
 type BaseTemplate = {
   type: string;
   directive: 'template' | 'goal' | 'error';
+  description?: string;
 };
 type BaseTemplateWithPriority = {
   priority: number;
@@ -61,7 +62,8 @@ export type SimpleTemplate = {
 
 export type ScheduleTemplate = {
   type: 'schedule';
-  name: string;
+  name?: string;
+  scheduleId?: string;
   full?: boolean;
   adjustment?: number;
   adjustmentType?: 'percent' | 'fixed';

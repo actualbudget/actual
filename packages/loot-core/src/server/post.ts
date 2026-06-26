@@ -1,7 +1,7 @@
 // @ts-strict-ignore
-import { fetch } from '../platform/server/fetch';
-import { logger } from '../platform/server/log';
-import * as Platform from '../shared/platform';
+import { fetch } from '#platform/server/fetch';
+import { logger } from '#platform/server/log';
+import * as Platform from '#shared/platform';
 
 import { PostError } from './errors';
 
@@ -11,7 +11,7 @@ function throwIfNot200(res: Response, text: string) {
       throw new PostError(res.status === 500 ? 'internal' : text);
     }
 
-    const contentType = res.headers.get('Content-Type');
+    const contentType = res.headers.get('Content-Type') ?? '';
     if (contentType.toLowerCase().indexOf('application/json') !== -1) {
       const json = JSON.parse(text);
       throw new PostError(json.reason);
@@ -38,14 +38,29 @@ export async function post(
   data: unknown,
   headers = {},
   timeout: number | null = null,
+  // Optional caller-provided abort signal. Used by Enable Banking poll
+  // cancellation so the user can interrupt the 5-minute long-poll.
+  externalSignal?: AbortSignal | null,
 ) {
   let text: string;
   let res: Response;
 
+  const controller = new AbortController();
+  const timeoutId =
+    timeout != null ? setTimeout(() => controller.abort(), timeout) : undefined;
+
+  // If an external signal is provided, abort our controller when it fires
+  const onExternalAbort = () => controller.abort();
+  if (externalSignal) {
+    if (externalSignal.aborted) {
+      controller.abort();
+    } else {
+      externalSignal.addEventListener('abort', onExternalAbort);
+    }
+  }
+
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-    const signal = timeout ? controller.signal : null;
+    const signal = timeout != null || externalSignal ? controller.signal : null;
     res = await fetch(url, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -55,10 +70,19 @@ export async function post(
         'Content-Type': 'application/json',
       },
     });
-    clearTimeout(timeoutId);
     text = await res.text();
-  } catch {
-    throw new PostError('network-failure');
+  } catch (err) {
+    if (
+      err instanceof Error &&
+      err.name === 'AbortError' &&
+      externalSignal?.aborted
+    ) {
+      throw new PostError('aborted');
+    }
+    throw new PostError('network-failure', undefined, { cause: err });
+  } finally {
+    if (timeoutId != null) clearTimeout(timeoutId);
+    externalSignal?.removeEventListener('abort', onExternalAbort);
   }
 
   throwIfNot200(res, text);
@@ -109,8 +133,8 @@ export async function del(url, data, headers = {}, timeout = null) {
     });
     clearTimeout(timeoutId);
     text = await res.text();
-  } catch {
-    throw new PostError('network-failure');
+  } catch (err) {
+    throw new PostError('network-failure', undefined, { cause: err });
   }
 
   throwIfNot200(res, text);
@@ -157,8 +181,8 @@ export async function patch(url, data, headers = {}, timeout = null) {
     });
     clearTimeout(timeoutId);
     text = await res.text();
-  } catch {
-    throw new PostError('network-failure');
+  } catch (err) {
+    throw new PostError('network-failure', undefined, { cause: err });
   }
 
   throwIfNot200(res, text);
@@ -193,13 +217,12 @@ export async function postBinary(url, data, headers) {
       method: 'POST',
       body: Platform.isBrowser ? data : Buffer.from(data),
       headers: {
-        'Content-Length': data.length,
         'Content-Type': 'application/actual-sync',
         ...headers,
       },
     });
-  } catch {
-    throw new PostError('network-failure');
+  } catch (err) {
+    throw new PostError('network-failure', undefined, { cause: err });
   }
 
   let buffer;

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { q } from '../../shared/query';
+import { q } from '#shared/query';
 
 import { generateSQLWithState } from './compiler';
 

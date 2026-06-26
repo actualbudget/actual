@@ -9,14 +9,10 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { importBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useDispatch } from '@desktop-client/redux';
+import { importBudget } from '#budgetfiles/budgetfilesSlice';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useNavigate } from '#hooks/useNavigate';
+import { useDispatch } from '#redux';
 
 function getErrorMessage(error: string): string {
   switch (error) {
@@ -55,11 +51,11 @@ export function ImportYNAB4Modal() {
 
   return (
     <Modal name="import-ynab4" containerProps={{ style: { width: 400 } }}>
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Import from YNAB4')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ ...styles.smallText, lineHeight: 1.5, marginTop: 20 }}>
             {error && (

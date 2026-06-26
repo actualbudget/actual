@@ -1,6 +1,6 @@
 import { useWindowSize } from 'usehooks-ts';
 
-import { breakpoints } from '../tokens';
+import { breakpoints } from '#tokens';
 
 export function useResponsive() {
   const { height, width } = useWindowSize({

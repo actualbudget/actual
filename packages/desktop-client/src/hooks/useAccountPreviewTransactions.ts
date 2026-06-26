@@ -1,13 +1,15 @@
 import { useCallback, useMemo } from 'react';
 
-import { groupById } from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
+import { groupById } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   PayeeEntity,
   ScheduleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+
+import * as bindings from '#spreadsheet/bindings';
 
 import { useAccounts } from './useAccounts';
 import { usePayees } from './usePayees';
@@ -15,8 +17,6 @@ import { usePreviewTransactions } from './usePreviewTransactions';
 import { useSheetValue } from './useSheetValue';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
-
-import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;

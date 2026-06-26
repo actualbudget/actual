@@ -4,24 +4,20 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { Link } from '@desktop-client/components/common/Link';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { Field, Row, TableHeader } from '@desktop-client/components/table';
+import { Link } from '#components/common/Link';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { Field, Row, TableHeader } from '#components/table';
 
 export function GoalTemplateModal() {
   const { t } = useTranslation();
 
   return (
     <Modal name="goal-templates" containerProps={{ style: { width: 850 } }}>
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Goal Templates')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View>
             <TableHeader>

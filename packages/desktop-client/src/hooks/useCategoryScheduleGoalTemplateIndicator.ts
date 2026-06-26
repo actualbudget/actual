@@ -1,13 +1,15 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import * as monthUtils from '@actual-app/core/shared/months';
+import { getUpcomingDays } from '@actual-app/core/shared/schedules';
+import type { ScheduleStatusType } from '@actual-app/core/shared/schedules';
+import type {
+  CategoryEntity,
+  ScheduleEntity,
+} from '@actual-app/core/types/models';
 import type { Locale } from 'date-fns';
 import type { TFunction } from 'i18next';
-
-import * as monthUtils from 'loot-core/shared/months';
-import { getUpcomingDays } from 'loot-core/shared/schedules';
-import type { ScheduleStatusType } from 'loot-core/shared/schedules';
-import type { CategoryEntity, ScheduleEntity } from 'loot-core/types/models';
 
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
 import { useLocale } from './useLocale';

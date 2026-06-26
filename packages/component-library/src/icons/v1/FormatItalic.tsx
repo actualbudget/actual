@@ -10,9 +10,6 @@ export const SvgFormatItalic = (props: SVGProps<SVGSVGElement>) => (
       ...props.style,
     }}
   >
-    <path
-      d="M8 1h9v2H8V1zm3 2h3L8 17H5l6-14zM2 17h9v2H2v-2z"
-      fill="currentColor"
-    />
+    <path d="M8 1h9v2H8zm3 2h3L8 17H5zM2 17h9v2H2z" fill="currentColor" />
   </svg>
 );

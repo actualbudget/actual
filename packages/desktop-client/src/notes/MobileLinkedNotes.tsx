@@ -3,14 +3,13 @@ import { useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { isElectron } from '@actual-app/core/shared/environment';
 import { css } from '@emotion/css';
 
-import { isElectron } from 'loot-core/shared/environment';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 import { normalizeUrl } from './linkParser';
-
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 type MobileLinkedNotesProps = {
   displayText: string;

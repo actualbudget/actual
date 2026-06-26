@@ -2,14 +2,13 @@ import type { MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
+import { isElectron } from '@actual-app/core/shared/environment';
 
-import { isElectron } from 'loot-core/shared/environment';
+import { Link } from '#components/common/Link';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 import { normalizeUrl } from './linkParser';
-
-import { Link } from '@desktop-client/components/common/Link';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 type DesktopLinkedNotesProps = {
   displayText: string;

@@ -2,8 +2,8 @@
 import SQL from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 
-import { readFile, removeFile } from '../fs';
-import { logger } from '../log';
+import { getDataDir, readFile, removeFile } from '#platform/server/fs';
+import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { unicodeLike } from './unicodeLike';
@@ -100,7 +100,7 @@ function regexp(regex: string, text: string | null) {
   return new RegExp(regex).test(text || '') ? 1 : 0;
 }
 
-export function openDatabase(pathOrBuffer: string | Buffer) {
+export function openDatabase(pathOrBuffer: string | Buffer): SQL.Database {
   const db = new SQL(pathOrBuffer);
   // Define Unicode-aware LOWER, UPPER, and LIKE implementation.
   // This is necessary because better-sqlite3 uses SQLite build without ICU support.
@@ -123,7 +123,7 @@ export function closeDatabase(db: SQL.Database) {
 export async function exportDatabase(db: SQL.Database) {
   // electron does not support better-sqlite serialize since v21
   // save to file and read in the raw data.
-  const name = `${process.env.ACTUAL_DATA_DIR}/backup-for-export-${uuidv4()}.db`;
+  const name = `${getDataDir()}/backup-for-export-${uuidv4()}.db`;
 
   await db.backup(name);
 

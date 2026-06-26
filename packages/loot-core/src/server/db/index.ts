@@ -11,29 +11,34 @@ import type { Database, Statement } from '@jlongster/sql.js';
 import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
-import * as fs from '../../platform/server/fs';
-import * as sqlite from '../../platform/server/sqlite';
-import * as monthUtils from '../../shared/months';
-import { groupById } from '../../shared/util';
-import type { TransactionEntity } from '../../types/models';
-import type { WithRequired } from '../../types/util';
+import * as fs from '#platform/server/fs';
+import * as sqlite from '#platform/server/sqlite';
 import {
   convertForInsert,
   convertForUpdate,
   convertFromSelect,
   schema,
   schemaConfig,
-} from '../aql';
+} from '#server/aql';
 import {
   accountModel,
   categoryGroupModel,
   categoryModel,
   payeeModel,
   toDateRepr,
-} from '../models';
-import { batchMessages, sendMessages } from '../sync';
+} from '#server/models';
+import { batchMessages, sendMessages } from '#server/sync';
+import * as monthUtils from '#shared/months';
+import { groupById } from '#shared/util';
+import type { TransactionEntity } from '#types/models';
+import type { WithRequired } from '#types/util';
 
-import { shoveSortOrders, SORT_INCREMENT } from './sort';
+import {
+  shoveSortOrders,
+  shoveSortOrdersDescending,
+  SORT_INCREMENT,
+  TRANSACTION_SORT_INCREMENT,
+} from './sort';
 import type {
   DbAccount,
   DbBank,
@@ -51,7 +56,7 @@ import type {
 
 export * from './types';
 
-export { toDateRepr, fromDateRepr } from '../models';
+export { fromDateRepr, toDateRepr } from '#server/models';
 
 let dbPath: string | null = null;
 let db: Database | null = null;
@@ -361,7 +366,9 @@ export async function insertCategoryGroup(
   );
   if (existingGroup) {
     throw new Error(
-      `A ${existingGroup.hidden ? 'hidden ' : ''}'${existingGroup.name}' category group already exists.`,
+      `A ${
+        existingGroup.hidden ? 'hidden ' : ''
+      }'${existingGroup.name}' category group already exists.`,
     );
   }
 
@@ -392,7 +399,9 @@ export async function updateCategoryGroup(
   );
   if (existingGroup) {
     throw new Error(
-      `A ${existingGroup.hidden ? 'hidden ' : ''}'${existingGroup.name}' category group already exists.`,
+      `A ${
+        existingGroup.hidden ? 'hidden ' : ''
+      }'${existingGroup.name}' category group already exists.`,
     );
   }
   group = categoryGroupModel.validate(group, { update: true });
@@ -810,36 +819,172 @@ export async function deleteTransaction(transaction) {
   return delete_('transactions', transaction.id);
 }
 
+/**
+ * Move a transaction to a new position within the same date.
+ * Uses the same midpoint/shove algorithm as category reordering.
+ *
+ * @param id - The ID of the transaction to move
+ * @param accountId - The account the transaction belongs to
+ * @param targetId - The ID of the transaction to place AFTER, or null to place at top
+ */
+export async function moveTransaction(
+  id: string,
+  accountId: string,
+  targetId: string | null,
+) {
+  await batchMessages(async () => {
+    const transaction = await getTransaction(id);
+    if (!transaction) {
+      throw new Error(`Transaction not found: ${id}`);
+    }
+
+    // Validate that the transaction belongs to the specified account
+    if (transaction.account !== accountId) {
+      throw new Error(
+        `Transaction ${id} does not belong to account ${accountId}`,
+      );
+    }
+
+    // Convert date string (YYYY-MM-DD) to integer format (YYYYMMDD) for SQL query
+    const dateInt = parseInt(transaction.date.replace(/-/g, ''), 10);
+
+    // Get transactions to reorder against.
+    // If this is a child transaction, scope to siblings with the same parent_id.
+    // Otherwise, get all parent transactions for the same date (excluding children).
+    // Query in DESC order to match UI display order.
+    const isChild = transaction.is_child && transaction.parent_id;
+    const transactions = await all<{ id: string; sort_order: number }>(
+      isChild
+        ? `SELECT vt.id, vt.sort_order
+           FROM v_transactions vt
+           WHERE vt.parent_id = ?
+           ORDER BY sort_order DESC, id`
+        : `SELECT vt.id, vt.sort_order
+           FROM v_transactions vt
+           WHERE vt.account = ?
+             AND vt.date = ?
+             AND vt.is_child = 0
+           ORDER BY sort_order DESC, id`,
+      isChild ? [transaction.parent_id] : [accountId, dateInt],
+    );
+
+    // Calculate new sort_order using the descending shove algorithm
+    // - If targetId is null, place at TOP (highest sort_order)
+    // - Otherwise, place AFTER target (sort_order between target and next)
+    const { sort_order: newSortOrder, updates } = shoveSortOrdersDescending(
+      transactions,
+      targetId,
+      id,
+      TRANSACTION_SORT_INCREMENT,
+    );
+
+    // Apply updates to shuffle other transactions if needed
+    for (const info of updates) {
+      await update('transactions', info);
+      // Only move subtransactions for parent transactions
+      if (!isChild) {
+        await moveSubtransactions(info.id, info.sort_order, accountId, dateInt);
+      }
+    }
+
+    // Update the moved transaction
+    await update('transactions', { id, sort_order: newSortOrder });
+    // Only move subtransactions for parent transactions
+    if (!isChild) {
+      await moveSubtransactions(id, newSortOrder, accountId, dateInt);
+    }
+  });
+}
+
+/**
+ * Update sort_order of child/subtransactions to maintain relative ordering.
+ * Children are distributed evenly between the parent's sort_order and the
+ * next sibling's sort_order to avoid collisions.
+ *
+ * This ensures split transaction children move with their parent.
+ *
+ * @param parentId - The ID of the parent transaction
+ * @param parentSortOrder - The sort_order of the parent transaction
+ * @param accountId - The account ID to scope the next sibling lookup
+ * @param txnDate - The transaction date (as integer YYYYMMDD) to scope the next sibling lookup
+ */
+async function moveSubtransactions(
+  parentId: string,
+  parentSortOrder: number,
+  accountId: string,
+  txnDate: number,
+) {
+  const subtransactions = await all<{ id: string }>(
+    'SELECT id FROM v_transactions WHERE parent_id = ? ORDER BY sort_order DESC',
+    [parentId],
+  );
+
+  if (subtransactions.length === 0) {
+    return;
+  }
+
+  // Find the next sibling's sort_order (transaction with lower sort_order that isn't a child)
+  // Scoped to the same account and date to avoid picking transactions from other contexts
+  const nextSibling = await first<{ sort_order: number }>(
+    `SELECT sort_order FROM v_transactions
+     WHERE parent_id IS NULL
+       AND is_child = 0
+       AND sort_order < ?
+       AND account = ?
+       AND date = ?
+     ORDER BY sort_order DESC
+     LIMIT 1`,
+    [parentSortOrder, accountId, txnDate],
+  );
+
+  // Calculate the available gap for distributing children
+  // Use a sensible fallback if no next sibling exists
+  const nextSiblingSortOrder =
+    nextSibling?.sort_order ?? parentSortOrder - TRANSACTION_SORT_INCREMENT;
+  const gap = parentSortOrder - nextSiblingSortOrder;
+
+  // Distribute children evenly within the gap
+  // Avoid rounding to prevent duplicate sort_order values in tight gaps
+  for (const [index, sub] of subtransactions.entries()) {
+    const newSortOrder =
+      parentSortOrder - ((index + 1) * gap) / (subtransactions.length + 1);
+    await update('transactions', {
+      id: sub.id,
+      sort_order: newSortOrder,
+    });
+  }
+}
+
 function toSqlQueryParameters(params: unknown[]) {
   return params.map(() => '?').join(',');
 }
 
 export function getTags() {
   return all<DbTag>(`
-    SELECT id, tag, color, description
+    SELECT id, tag, color, description, hidden
     FROM tags
     WHERE tombstone = 0
-    ORDER BY tag
   `);
 }
 
 export function getAllTags() {
   return all<DbTag>(`
-    SELECT id, tag, color, description
+    SELECT id, tag, color, description, hidden
     FROM tags
-    ORDER BY tag
   `);
 }
 
-export function insertTag(tag): Promise<DbTag['id']> {
+export function insertTag(
+  tag: Omit<DbTag, 'id' | 'tombstone'>,
+): Promise<DbTag['id']> {
   return insertWithUUID('tags', tag);
 }
 
-export async function deleteTag(tag) {
+export async function deleteTag(tag: Pick<DbTag, 'id'>) {
   return delete_('tags', tag.id);
 }
 
-export function updateTag(tag) {
+export function updateTag(tag: Partial<DbTag> & Pick<DbTag, 'id'>) {
   return update('tags', tag);
 }
 

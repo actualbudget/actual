@@ -1,14 +1,13 @@
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { tsToRelativeTime } from '@actual-app/core/shared/util';
+import type { AccountEntity } from '@actual-app/core/types/models';
 
-import { tsToRelativeTime } from 'loot-core/shared/util';
-import type { AccountEntity } from 'loot-core/types/models';
-
-import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocale } from '#hooks/useLocale';
 
 type BankSyncAccountsListItemProps = {
   account: AccountEntity;
@@ -21,6 +20,7 @@ export function BankSyncAccountsListItem({
   onAction,
   isLinked,
 }: BankSyncAccountsListItemProps) {
+  const { t } = useTranslation();
   const locale = useLocale();
 
   const lastSyncString = isLinked
@@ -58,14 +58,14 @@ export function BankSyncAccountsListItem({
           >
             {account.name}
           </Text>
-          {isLinked && account.bankName && (
+          {isLinked && (
             <Text
               style={{
                 fontSize: 13,
                 color: theme.pageTextSubdued,
               }}
             >
-              {account.bankName}
+              {account.bankName ?? t('Unknown')}
             </Text>
           )}
           {isLinked && lastSyncString && (

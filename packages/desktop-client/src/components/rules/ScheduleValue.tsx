@@ -3,18 +3,17 @@ import { useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { View } from '@actual-app/components/view';
+import { q } from '@actual-app/core/shared/query';
+import type { ScheduleEntity } from '@actual-app/core/types/models';
 
-import { q } from 'loot-core/shared/query';
-import { describeSchedule } from 'loot-core/shared/schedules';
-import type { ScheduleEntity } from 'loot-core/types/models';
+import { usePayeesById } from '#hooks/usePayees';
+import { useSchedules } from '#hooks/useSchedules';
+import { describeSchedule } from '#util/schedule';
 
 import { Value } from './Value';
 
-import { usePayeesById } from '@desktop-client/hooks/usePayees';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-
 type ScheduleValueProps = {
-  value: ScheduleEntity;
+  value: ScheduleEntity['id'];
 };
 
 export function ScheduleValue({ value }: ScheduleValueProps) {
@@ -31,16 +30,10 @@ export function ScheduleValue({ value }: ScheduleValueProps) {
     );
   }
 
-  return (
-    <Value
-      value={value}
-      field="rule"
-      data={schedules}
-      // TODO: this manual type coercion does not make much sense -
-      // should we instead do `schedule._payee.id`?
-      describe={schedule =>
-        describeSchedule(schedule, byId[schedule._payee as unknown as string])
-      }
-    />
-  );
+  const schedule = schedules.find(item => item.id === value);
+  const display = schedule
+    ? describeSchedule(schedule, byId[schedule._payee])
+    : t('(deleted)');
+
+  return <Value value={display} field="notes" valueIsRaw />;
 }

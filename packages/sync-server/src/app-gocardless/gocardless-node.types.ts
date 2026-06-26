@@ -1,3 +1,10 @@
+import type { BrandedId } from '#util/types';
+
+export type GoCardlessAccountId = BrandedId<'gocardless-account'>;
+export type GoCardlessRequisitionId = BrandedId<'gocardless-requisition'>;
+export type GoCardlessInstitutionId = BrandedId<'gocardless-institution'>;
+export type GoCardlessAgreementId = BrandedId<'gocardless-agreement'>;
+
 type RequisitionStatus =
   | 'CR'
   | 'ID'
@@ -20,12 +27,12 @@ export type Requisition = {
   /**
    * array of account IDs retrieved within a scope of this requisition
    */
-  accounts: string[];
+  accounts: GoCardlessAccountId[];
 
   /**
    * EUA associated with this requisition
    */
-  agreement: string;
+  agreement: GoCardlessAgreementId;
 
   /**
    * The date & time at which the requisition was created.
@@ -35,12 +42,12 @@ export type Requisition = {
   /**
    * The unique ID of the requisition
    */
-  id: string;
+  id: GoCardlessRequisitionId;
 
   /**
    * an Institution ID for this Requisition
    */
-  institution_id: string;
+  institution_id: GoCardlessInstitutionId;
 
   /**
    * link to initiate authorization with Institution
@@ -180,7 +187,7 @@ export type GoCardlessAccountMetadata = {
   /**
    * ID of the GoCardless account metadata
    */
-  id: string;
+  id: GoCardlessAccountId;
   /**
    * Date when the GoCardless account metadata was created
    */
@@ -196,7 +203,7 @@ export type GoCardlessAccountMetadata = {
   /**
    * ID of the institution associated with the GoCardless account metadata
    */
-  institution_id: string;
+  institution_id: GoCardlessInstitutionId;
   /**
    * Status of the GoCardless account
    * DISCOVERED: User has successfully authenticated and account is discovered
@@ -220,13 +227,28 @@ export type GoCardlessAccountMetadata = {
 };
 
 /**
+ * A feature an institution may support, as returned in `supported_features`.
+ * Potentially not exhaustive.
+ */
+export type InstitutionFeature =
+  | 'account_selection'
+  | 'business_accounts'
+  | 'card_accounts'
+  | 'corporate_accounts'
+  | 'private_accounts'
+  | 'pending_transactions'
+  | 'access_scopes'
+  | 'submit_payment'
+  | 'separate_continuous_history_consent';
+
+/**
  * Information about the Institution
  */
 export type Institution = {
   /**
    * The id of the institution, for example "N26_NTSBDEB1"
    */
-  id: string;
+  id: GoCardlessInstitutionId;
 
   /**
    * The name of the institution, for example "N26 Bank"
@@ -260,7 +282,8 @@ export type Institution = {
   max_access_valid_for_days: string;
 
   supported_payments?: object;
-  supported_features?: string[];
+
+  supported_features?: InstitutionFeature[];
 };
 
 /**

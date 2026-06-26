@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 import { MobileAccountPage } from './mobile-account-page';
@@ -262,33 +263,26 @@ export class MobileBudgetPage {
   async #waitForNewMonthToLoad({
     currentMonth,
     errorMessage,
-    maxAttempts = 3,
   }: {
     currentMonth: string;
     errorMessage: string;
-    maxAttempts: number;
   }) {
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const newMonth = await this.getSelectedMonth();
-      if (newMonth !== currentMonth) {
-        return newMonth;
-      }
-      await this.page.waitForTimeout(500);
-    }
+    await expect(
+      this.heading.locator('[data-month]'),
+      errorMessage,
+    ).not.toHaveAttribute('data-month', currentMonth);
 
-    throw new Error(errorMessage);
+    return this.getSelectedMonth();
   }
 
-  async goToPreviousMonth({ maxAttempts = 3 }: { maxAttempts?: number } = {}) {
+  async goToPreviousMonth() {
     const currentMonth = await this.getSelectedMonth();
 
     await this.previousMonthButton.click();
 
     return await this.#waitForNewMonthToLoad({
       currentMonth,
-      maxAttempts,
-      errorMessage:
-        'Failed to navigate to the previous month after maximum attempts.',
+      errorMessage: 'Failed to navigate to the previous month.',
     });
   }
 
@@ -296,37 +290,28 @@ export class MobileBudgetPage {
     await this.selectedBudgetMonthButton.click();
   }
 
-  async goToNextMonth({ maxAttempts = 3 }: { maxAttempts?: number } = {}) {
+  async goToNextMonth() {
     const currentMonth = await this.getSelectedMonth();
 
     await this.nextMonthButton.click();
 
     return await this.#waitForNewMonthToLoad({
       currentMonth,
-      maxAttempts,
-      errorMessage:
-        'Failed to navigate to the next month after maximum attempts.',
+      errorMessage: 'Failed to navigate to the next month.',
     });
   }
 
   async #getButtonForEnvelopeBudgetSummary({
     throwIfNotFound = true,
   }: { throwIfNotFound?: boolean } = {}) {
-    if (await this.toBudgetButton.isVisible()) {
-      return this.toBudgetButton;
+    const button = this.toBudgetButton.or(this.overbudgetedButton).first();
+    try {
+      await button.waitFor();
+    } catch (err) {
+      if (!throwIfNotFound) return null;
+      throw err;
     }
-
-    if (await this.overbudgetedButton.isVisible()) {
-      return this.overbudgetedButton;
-    }
-
-    if (!throwIfNotFound) {
-      return null;
-    }
-
-    throw new Error(
-      'Neither "To Budget" nor "Overbudgeted" button could be located on the page.',
-    );
+    return button;
   }
 
   async openEnvelopeBudgetSummary() {
@@ -346,25 +331,17 @@ export class MobileBudgetPage {
   async #getButtonForTrackingBudgetSummary({
     throwIfNotFound = true,
   }: { throwIfNotFound?: boolean } = {}) {
-    if (await this.savedButton.isVisible()) {
-      return this.savedButton;
+    const button = this.savedButton
+      .or(this.projectedSavingsButton)
+      .or(this.overspentButton)
+      .first();
+    try {
+      await button.waitFor();
+    } catch (err) {
+      if (!throwIfNotFound) return null;
+      throw err;
     }
-
-    if (await this.projectedSavingsButton.isVisible()) {
-      return this.projectedSavingsButton;
-    }
-
-    if (await this.overspentButton.isVisible()) {
-      return this.overspentButton;
-    }
-
-    if (!throwIfNotFound) {
-      return null;
-    }
-
-    throw new Error(
-      'None of "Saved", "Projected savings", or "Overspent" buttons could be located on the page.',
-    );
+    return button;
   }
 
   async openTrackingBudgetSummary() {

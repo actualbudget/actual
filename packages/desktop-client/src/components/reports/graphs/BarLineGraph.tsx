@@ -16,11 +16,11 @@ import {
   YAxis,
 } from 'recharts';
 
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
-import { Container } from '@desktop-client/components/reports/Container';
-import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useRechartsAnimation } from '#components/reports/chart-theme';
+import { Container } from '#components/reports/Container';
+import { numberFormatterTooltip } from '#components/reports/numberFormatter';
+import { useFormat } from '#hooks/useFormat';
 
 type PayloadItem = {
   payload: {

@@ -1,4 +1,4 @@
-import type { FeatureFlag } from 'loot-core/types/prefs';
+import type { FeatureFlag } from '@actual-app/core/types/prefs';
 
 import { useSyncedPref } from './useSyncedPref';
 
@@ -8,10 +8,16 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   actionTemplating: false,
   formulaMode: false,
   currency: false,
-  crossoverReport: false,
+  ageOfMoneyReport: false,
+  balanceForecastReport: false,
   customThemes: false,
   budgetAnalysisReport: false,
   queryReport: false,
+  payeeLocations: false,
+  enableBanking: false,
+  sankeyReport: false,
+  akahuBankSync: false,
+  mobileCalculator: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

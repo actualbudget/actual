@@ -5,7 +5,7 @@ import { css, cx } from '@emotion/css';
 
 import type { CSSProperties } from './styles';
 
-type TextProps = HTMLProps<HTMLSpanElement> & {
+type TextProps = Omit<HTMLProps<HTMLSpanElement>, 'style'> & {
   innerRef?: Ref<HTMLSpanElement>;
   className?: string;
   children?: ReactNode;

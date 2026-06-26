@@ -8,7 +8,7 @@ zip export, you can restore this backup by importing it using the Import File bu
 ### Steps to Restore a Backup:
 
 1. Close your current budget by clicking on the budget name in the top left
-   corner of the screen and choosing the option to close the budget file.
+   corner of the screen and choosing the option to _Switch file_.
 
 ![Close the current budget file](/img/backup-restore/restore-close-budget.webp)
 
@@ -43,7 +43,7 @@ You may encounter an error during restoration that says:
 
 `This budget cannot be loaded with this version of the app. Make sure the app is up-to-date.`
 
-This should only happen when you upgrade from a Docker image with the `edge` tag to a stable release, such as `latest`. It should not happen in other instances. If you see this bug, please submit a bug report.
+This should only happen when you upgrade from a Docker image with the `nightly` tag to a stable release, such as `latest`. It should not happen in other instances. If you see this bug, please submit a bug report.
 
 **IMPORTANT NOTE**: You _MUST_ download a backup of each of your budgets using the process outlined above **before** continuing. It's always good practice to backup your data before upgrading to a new version.
 

@@ -1,22 +1,21 @@
 import React, { useEffect } from 'react';
 
+import { listen, send } from '@actual-app/core/platform/client/connection';
+import * as undo from '@actual-app/core/platform/client/undo';
+import type { UndoState } from '@actual-app/core/server/undo';
+import { applyChanges } from '@actual-app/core/shared/util';
+import type { Diff } from '@actual-app/core/shared/util';
+import type { NewRuleEntity, PayeeEntity } from '@actual-app/core/types/models';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { listen, send } from 'loot-core/platform/client/connection';
-import * as undo from 'loot-core/platform/client/undo';
-import type { UndoState } from 'loot-core/server/undo';
-import { applyChanges } from 'loot-core/shared/util';
-import type { Diff } from 'loot-core/shared/util';
-import type { NewRuleEntity, PayeeEntity } from 'loot-core/types/models';
+import { useOrphanedPayees } from '#hooks/useOrphanedPayees';
+import { usePayeeRuleCounts } from '#hooks/usePayeeRuleCounts';
+import { usePayees } from '#hooks/usePayees';
+import { pushModal } from '#modals/modalsSlice';
+import { payeeQueries } from '#payees';
+import { useDispatch } from '#redux';
 
 import { ManagePayees } from './ManagePayees';
-
-import { useOrphanedPayees } from '@desktop-client/hooks/useOrphanedPayees';
-import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { payeeQueries } from '@desktop-client/payees';
-import { useDispatch } from '@desktop-client/redux';
 
 type ManagePayeesWithDataProps = {
   initialSelectedIds: string[];
@@ -36,7 +35,10 @@ export function ManagePayeesWithData({
   useEffect(() => {
     const unlisten = listen('sync-event', async event => {
       if (event.type === 'applied') {
-        if (event.tables.includes('rules')) {
+        if (
+          event.tables.includes('rules') ||
+          event.tables.includes('schedules')
+        ) {
           await refetchRuleCounts();
         }
       }

@@ -26,34 +26,34 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { format as formatDate } from 'date-fns';
-
-import { tsToRelativeTime } from 'loot-core/shared/util';
+import { tsToRelativeTime } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   RuleConditionEntity,
   TransactionEntity,
   TransactionFilterEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { format as formatDate } from 'date-fns';
+
+import { isAccountFailedSync } from '#accounts/syncStatus';
+import { AnimatedRefresh } from '#components/AnimatedRefresh';
+import { Search } from '#components/common/Search';
+import { FilterButton } from '#components/filters/FiltersMenu';
+import { FiltersStack } from '#components/filters/FiltersStack';
+import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
+import { NotesButton } from '#components/NotesButton';
+import { SelectedTransactionsButton } from '#components/transactions/SelectedTransactionsButton';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useLocale } from '#hooks/useLocale';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 import type { TableRef } from './Account';
 import { Balances } from './Balance';
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
-
-import { AnimatedRefresh } from '@desktop-client/components/AnimatedRefresh';
-import { Search } from '@desktop-client/components/common/Search';
-import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
-import { FiltersStack } from '@desktop-client/components/filters/FiltersStack';
-import type { SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
-import { NotesButton } from '@desktop-client/components/NotesButton';
-import { SelectedTransactionsButton } from '@desktop-client/components/transactions/SelectedTransactionsButton';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 type AccountHeaderProps = {
   tableRef: TableRef;
@@ -65,7 +65,6 @@ type AccountHeaderProps = {
   filterId?: SavedFilter;
   savedFilters: TransactionFilterEntity[];
   accountsSyncing: string[];
-  failedAccounts: AccountSyncSidebarProps['failedAccounts'];
   accounts: AccountEntity[];
   transactions: TransactionEntity[];
   showBalances: boolean;
@@ -141,7 +140,6 @@ export function AccountHeader({
   filterId,
   savedFilters,
   accountsSyncing,
-  failedAccounts,
   accounts,
   transactions,
   showBalances,
@@ -231,14 +229,20 @@ export function AccountHeader({
 
   useHotkeys(
     'ctrl+f, cmd+f, meta+f',
-    () => {
+    e => {
       if (searchInput.current) {
-        searchInput.current.focus();
+        // Trigger browser-native find if user pressed search twice in a row
+        if (document.activeElement === searchInput.current) {
+          searchInput.current.blur();
+        } else {
+          e.preventDefault();
+          searchInput.current.focus();
+        }
       }
     },
     {
       enableOnFormTags: true,
-      preventDefault: true,
+      preventDefault: false,
       scopes: ['app'],
     },
     [searchInput],
@@ -299,7 +303,6 @@ export function AccountHeader({
               {!!account?.bank && (
                 <AccountSyncSidebar
                   account={account}
-                  failedAccounts={failedAccounts}
                   accountsSyncing={accountsSyncing}
                 />
               )}
@@ -587,19 +590,11 @@ export function AccountHeader({
 
 type AccountSyncSidebarProps = {
   account: AccountEntity;
-  failedAccounts: Map<
-    string,
-    {
-      type: string;
-      code: string;
-    }
-  >;
   accountsSyncing: string[];
 };
 
 function AccountSyncSidebar({
   account,
-  failedAccounts,
   accountsSyncing,
 }: AccountSyncSidebarProps) {
   return (
@@ -607,7 +602,7 @@ function AccountSyncSidebar({
       style={{
         backgroundColor: accountsSyncing.includes(account.id)
           ? theme.sidebarItemBackgroundPending
-          : failedAccounts.has(account.id)
+          : isAccountFailedSync(account)
             ? theme.sidebarItemBackgroundFailed
             : theme.sidebarItemBackgroundPositive,
         marginRight: '4px',

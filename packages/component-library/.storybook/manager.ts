@@ -16,7 +16,6 @@ const theme = create({
   base: 'light',
   brandTitle: 'Actual Budget',
   brandUrl: 'https://actualbudget.org',
-  brandImage: 'https://actualbudget.org/img/actual.webp',
   brandTarget: '_blank',
 
   // UI colors
@@ -32,7 +31,7 @@ const theme = create({
 
   // Fonts
   fontBase:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    '"Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif',
   fontCode: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace',
 
   // Text colors

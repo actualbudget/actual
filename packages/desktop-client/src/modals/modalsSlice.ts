@@ -1,9 +1,6 @@
-import { createSlice } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
-
-import { send } from 'loot-core/platform/client/connection';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { File } from 'loot-core/types/file';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type { File } from '@actual-app/core/types/file';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -14,19 +11,32 @@ import type {
   NoteEntity,
   RuleEntity,
   ScheduleEntity,
+  SyncServerEnableBankingAccount,
   TransactionEntity,
   UserAccessEntity,
   UserEntity,
-} from 'loot-core/types/models';
-import type { Template } from 'loot-core/types/models/templates';
+} from '@actual-app/core/types/models';
+import type { CleanupTemplate } from '@actual-app/core/types/models/cleanup-templates';
+import type { Template } from '@actual-app/core/types/models/templates';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { accountQueries } from '@desktop-client/accounts';
-import { resetApp, setAppState } from '@desktop-client/app/appSlice';
-import type { SelectLinkedAccountsModalProps } from '@desktop-client/components/modals/SelectLinkedAccountsModal';
-import { createAppAsyncThunk } from '@desktop-client/redux';
-import { signOut } from '@desktop-client/users/usersSlice';
+import { accountQueries } from '#accounts';
+import { resetApp, setAppState } from '#app/appSlice';
+import type { SelectLinkedAccountsModalProps } from '#components/modals/SelectLinkedAccountsModal';
+import { createAppAsyncThunk } from '#redux';
+import { signOut } from '#users/usersSlice';
 
 const sliceName = 'modals';
+
+export type ConfirmTransactionEditReason =
+  | 'batchDeleteWithReconciled'
+  | 'batchDeleteWithReconciledTransfer'
+  | 'batchEditWithReconciled'
+  | 'batchEditWithReconciledTransfer'
+  | 'editReconciled'
+  | 'unlockReconciled'
+  | 'deleteReconciled';
 
 export type Modal =
   | {
@@ -65,6 +75,14 @@ export type Modal =
         onDelete: (transferCategoryId: CategoryEntity['id']) => void;
         category?: CategoryEntity['id'];
         group?: CategoryGroupEntity['id'];
+      };
+    }
+  | {
+      name: 'confirm-payees-merge';
+      options: {
+        payeeIds: string[];
+        targetPayeeId: string;
+        onConfirm: () => void;
       };
     }
   | {
@@ -109,6 +127,38 @@ export type Modal =
       name: 'pluggyai-init';
       options: {
         onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'akahu-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'enablebanking-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'enablebanking-external-msg';
+      options: {
+        onMoveExternal: (arg: {
+          aspspId: string;
+          country: string;
+          maxConsentValidity?: number;
+          psuType?: 'personal' | 'business';
+          onStateReady?: (state: string) => void;
+        }) => Promise<
+          | { error: 'timeout' }
+          | { error: 'unknown'; message?: string }
+          | { data: { accounts: SyncServerEnableBankingAccount[] } }
+        >;
+        onClose?: (() => void) | undefined;
+        onSuccess: (data: {
+          accounts: SyncServerEnableBankingAccount[];
+        }) => Promise<void>;
       };
     }
   | {
@@ -223,9 +273,10 @@ export type Modal =
       options: {
         title?: string;
         categoryGroups?: CategoryGroupEntity[];
-        onSelect: (categoryId: string, categoryName: string) => void;
+        onSelect: (categoryId: string | null, categoryName: string) => void;
         month?: string | undefined;
         showHiddenCategories?: boolean;
+        showNoneOption?: boolean;
         closeOnSelect?: boolean;
         clearOnSelect?: boolean;
         onClose?: () => void;
@@ -314,6 +365,7 @@ export type Modal =
         onEditNotes: (id: NoteEntity['id']) => void;
         onDelete: (categoryId: CategoryEntity['id']) => void;
         onToggleVisibility: (categoryId: CategoryEntity['id']) => void;
+        onEditAutomations?: (categoryId: CategoryEntity['id']) => void;
         onClose?: () => void;
       };
     }
@@ -326,6 +378,7 @@ export type Modal =
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
         onApplyBudgetTemplate: () => void;
+        onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
     }
   | {
@@ -337,6 +390,8 @@ export type Modal =
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
         onApplyBudgetTemplate: () => void;
+        onCopyUntilYearEnd: () => void;
+        onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
     }
   | {
@@ -354,6 +409,10 @@ export type Modal =
         onClose?: () => void;
         onApplyBudgetTemplatesInGroup?: (
           categories: Array<CategoryEntity['id']>,
+        ) => void;
+        onSortCategories?: (
+          groupId: CategoryGroupEntity['id'],
+          direction: 'asc' | 'desc',
         ) => void;
       };
     }
@@ -508,7 +567,7 @@ export type Modal =
       options: {
         onConfirm: () => void;
         onCancel?: () => void;
-        confirmReason: string;
+        confirmReason: ConfirmTransactionEditReason;
       };
     }
   | {
@@ -590,6 +649,7 @@ export type Modal =
       name: 'category-automations-edit';
       options: {
         categoryId: CategoryEntity['id'];
+        month?: string;
       };
     }
   | {
@@ -597,6 +657,7 @@ export type Modal =
       options: {
         categoryId: CategoryEntity['id'];
         templates: Template[];
+        cleanup: CleanupTemplate[];
       };
     };
 

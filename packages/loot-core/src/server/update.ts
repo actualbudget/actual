@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import md5 from 'md5';
+import { createHash } from 'node:crypto';
 
 import { makeViews, schema, schemaConfig } from './aql';
 import * as db from './db';
@@ -20,7 +20,7 @@ async function updateViews() {
   const { value: hash } = row || {};
 
   const views = makeViews(schema, schemaConfig);
-  const currentHash = md5(views);
+  const currentHash = createHash('md5').update(views).digest('hex');
 
   if (hash !== currentHash) {
     db.execQuery(views);

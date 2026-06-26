@@ -1,0 +1,16 @@
+---
+description: Rules for AI-generated commits and pull requests
+globs:
+alwaysApply: true
+---
+
+# PR and Commit Rules for AI Agents
+
+Canonical source: `.github/agents/pr-and-commit-rules.md`. The mechanical commit
+and git rules are handled by tooling; only the rules you must apply yourself are
+listed here.
+
+## Pull Request Rules
+
+- **ALL pull request titles MUST be prefixed with `[AI]`.** This isn't enforced
+  automatically — you have to apply it yourself.

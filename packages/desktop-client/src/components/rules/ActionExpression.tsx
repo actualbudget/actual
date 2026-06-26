@@ -5,12 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import {
-  friendlyOp,
-  getAllocationMethods,
-  mapField,
-} from 'loot-core/shared/rules';
 import type {
   AppendNoteRuleActionEntity,
   DeleteTransactionRuleActionEntity,
@@ -19,7 +13,9 @@ import type {
   RuleActionEntity,
   SetRuleActionEntity,
   SetSplitAmountRuleActionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+
+import { friendlyOp, getAllocationMethods, mapField } from '#util/rule';
 
 import { ScheduleValue } from './ScheduleValue';
 import { Value } from './Value';
@@ -99,6 +95,7 @@ function SetSplitAmountActionExpression({
   value,
   options,
 }: SetSplitAmountRuleActionEntity) {
+  const { t } = useTranslation();
   const method = options?.method;
   if (!method) {
     return null;
@@ -109,10 +106,16 @@ function SetSplitAmountActionExpression({
       <Text>{friendlyOp(op)}</Text>{' '}
       <Text style={valueStyle}>{getAllocationMethods()[method]}</Text>
       {method !== 'remainder' && ': '}
-      {method === 'fixed-amount' && (
+      {options?.method === 'formula' ? (
+        <>
+          <Text>{t('formula ')}</Text>
+          <Text style={valueStyle}>{options.formula}</Text>
+        </>
+      ) : method === 'fixed-amount' ? (
         <Value style={valueStyle} value={value} field="amount" />
-      )}
-      {method === 'fixed-percent' && <Text style={valueStyle}>{value}%</Text>}
+      ) : method === 'fixed-percent' ? (
+        <Text style={valueStyle}>{value}%</Text>
+      ) : null}
     </>
   );
 }

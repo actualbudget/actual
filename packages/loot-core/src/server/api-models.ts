@@ -1,4 +1,4 @@
-import type { Budget } from '../types/budget';
+import type { Budget } from '#types/budget';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -6,7 +6,7 @@ import type {
   PayeeEntity,
   ScheduleEntity,
   TagEntity,
-} from '../types/models';
+} from '#types/models';
 
 import type { RemoteFile } from './cloud-storage';
 import * as models from './models';
@@ -88,14 +88,17 @@ export const categoryGroupModel = {
       name: group.name,
       is_income: group.is_income ? true : false,
       hidden: group.hidden ? true : false,
-      categories: group.categories?.map(categoryModel.toExternal) || [],
+      categories:
+        group.categories?.map(cat => categoryModel.toExternal(cat)) || [],
     };
   },
 
   fromExternal(group: APICategoryGroupEntity) {
     const result = { ...group } as unknown as CategoryGroupEntity;
     if ('categories' in group && group.categories) {
-      result.categories = group.categories.map(categoryModel.fromExternal);
+      result.categories = group.categories.map(cat =>
+        categoryModel.fromExternal(cat),
+      );
     }
     return result;
   },

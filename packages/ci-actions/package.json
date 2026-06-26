@@ -3,9 +3,21 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest --run"
+    "tsx": "bin/tsx",
+    "test": "vitest --run",
+    "typecheck": "tsgo -b"
   },
   "devDependencies": {
-    "vitest": "^4.0.18"
+    "@octokit/rest": "^22.0.1",
+    "@typescript/native-preview": "beta",
+    "extensionless": "^2.0.6",
+    "gray-matter": "^4.0.3",
+    "listify": "^1.0.3",
+    "vitest": "^4.1.8"
+  },
+  "extensionless": {
+    "lookFor": [
+      "ts"
+    ]
   }
 }

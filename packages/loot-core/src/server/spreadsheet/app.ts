@@ -1,6 +1,6 @@
-import type { QueryState } from '../../shared/query';
-import { createApp } from '../app';
-import * as sheet from '../sheet';
+import { createApp } from '#server/app';
+import * as sheet from '#server/sheet';
+import type { QueryState } from '#shared/query';
 
 import { resolveName, unresolveName } from './util';
 

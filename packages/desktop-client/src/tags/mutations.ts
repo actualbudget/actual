@@ -1,17 +1,16 @@
 import { useTranslation } from 'react-i18next';
 
+import { send } from '@actual-app/core/platform/client/connection';
+import type { TagEntity } from '@actual-app/core/types/models';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { TagEntity } from 'loot-core/types/models';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import type { AppDispatch } from '#redux/store';
 
 import { tagQueries } from './queries';
-
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { AppDispatch } from '@desktop-client/redux/store';
 
 function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
   void queryClient.invalidateQueries({
@@ -130,6 +129,56 @@ export function useDeleteTagsMutation() {
       dispatchErrorNotification(
         dispatch,
         t('There was an error deleting the tags. Please try again.'),
+        error,
+      );
+    },
+  });
+}
+
+type HideTagsPayload = {
+  ids: Array<TagEntity['id']>;
+};
+
+export function useHideTagsMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ ids }: HideTagsPayload) => {
+      return await send('tags-hide-all', ids);
+    },
+    onSuccess: () => invalidateQueries(queryClient),
+    onError: error => {
+      console.error('Error hiding tags:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error hiding the tags. Please try again.'),
+        error,
+      );
+    },
+  });
+}
+
+type UnhideTagsPayload = {
+  ids: Array<TagEntity['id']>;
+};
+
+export function useUnhideTagsMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ ids }: UnhideTagsPayload) => {
+      return await send('tags-unhide-all', ids);
+    },
+    onSuccess: () => invalidateQueries(queryClient),
+    onError: error => {
+      console.error('Error hiding tags:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error hiding the tags. Please try again.'),
         error,
       );
     },

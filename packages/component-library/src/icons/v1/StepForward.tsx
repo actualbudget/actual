@@ -10,6 +10,6 @@ export const SvgStepForward = (props: SVGProps<SVGSVGElement>) => (
       ...props.style,
     }}
   >
-    <path d="M13 5h3v10h-3V5zM4 5l9 5-9 5V5z" fill="currentColor" />
+    <path d="M13 5h3v10h-3zM4 5l9 5-9 5z" fill="currentColor" />
   </svg>
 );

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 type BudgetMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
@@ -13,11 +13,13 @@ type BudgetMenuProps = Omit<
   onCopyLastMonthAverage: () => void;
   onSetMonthsAverage: (numberOfMonths: number) => void;
   onApplyBudgetTemplate: () => void;
+  onCopyUntilYearEnd: () => void;
 };
 export function BudgetMenu({
   onCopyLastMonthAverage,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
+  onCopyUntilYearEnd,
   ...props
 }: BudgetMenuProps) {
   const { t } = useTranslation();
@@ -38,6 +40,9 @@ export function BudgetMenu({
         break;
       case 'apply-single-category-template':
         onApplyBudgetTemplate?.();
+        break;
+      case 'copy-until-year-end':
+        onCopyUntilYearEnd?.();
         break;
       default:
         throw new Error(`Unrecognized menu item: ${name}`);
@@ -64,6 +69,10 @@ export function BudgetMenu({
         {
           name: 'set-single-12-avg',
           text: t('Set to yearly average'),
+        },
+        {
+          name: 'copy-until-year-end',
+          text: t('Copy until year end'),
         },
         ...(isGoalTemplatesEnabled
           ? [

@@ -101,3 +101,30 @@ or
   );
 });
 ```
+
+## CLI Usage
+
+The examples above are shown in JavaScript. If you're using the [CLI tool](../cli.md), you can express many of the same queries with command-line flags. Here's how the JS patterns translate:
+
+```bash
+# Select specific fields (JS: .select(['date', 'amount', 'payee.name']))
+actual query run --table transactions --select "date,amount,payee.name"
+
+# Filter by condition (JS: .filter({ amount: { $lt: 0 } }))
+actual query run --table transactions --filter '{"amount":{"$lt":0}}'
+
+# Order by field descending (JS: .orderBy([{ date: 'desc' }]))
+actual query run --table transactions --order-by "date:desc"
+
+# Search by month (JS: .filter({ date: { $transform: '$month', $eq: '2021-01' } }))
+actual query run --table transactions --filter '{"date":{"$transform":"$month","$eq":"2021-01"}}'
+
+# Group by payee with sum — use --file for aggregate queries
+echo '{"table":"transactions","groupBy":["payee.name"],"select":["payee.name",{"amount":{"$sum":"$amount"}}]}' | actual query run --file -
+
+# Count transactions (JS: .calculate({ $count: '*' }))
+actual query run --table transactions --count
+
+# Quick shortcut: last 10 transactions
+actual query run --last 10
+```

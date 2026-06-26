@@ -42,27 +42,10 @@ yarn start:desktop
 - Use `yarn workspace <workspace-name> run <command>` for workspace-specific tasks
 - Tests run once and exit by default (using `vitest --run`)
 
-### ⚠️ CRITICAL REQUIREMENT: AI-Generated Commit Messages and PR Titles
+### ⚠️ PR titles must start with `[AI]`
 
-**THIS IS A MANDATORY REQUIREMENT THAT MUST BE FOLLOWED WITHOUT EXCEPTION:**
-
-- **ALL commit messages MUST be prefixed with `[AI]`**
-- **ALL pull request titles MUST be prefixed with `[AI]`**
-
-**Examples:**
-
-- ✅ `[AI] Fix type error in account validation`
-- ✅ `[AI] Add support for new transaction categories`
-- ❌ `Fix type error in account validation` (MISSING PREFIX - NOT ALLOWED)
-- ❌ `Add support for new transaction categories` (MISSING PREFIX - NOT ALLOWED)
-
-**This requirement applies to:**
-
-- Every single commit message created by AI agents
-- Every single pull request title created by AI agents
-- No exceptions are permitted
-
-**This is a hard requirement that agents MUST follow. Failure to include the `[AI]` prefix is a violation of these instructions.**
+Every pull request title must be prefixed with `[AI]` — you have to apply it
+yourself. See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md).
 
 ### Task Orchestration with Lage
 
@@ -100,7 +83,7 @@ The core application logic that runs on any platform.
 
   ```bash
   # Run all loot-core tests
-  yarn workspace loot-core run test
+  yarn workspace @actual-app/core run test
 
   # Or run tests across all packages using lage
   yarn test
@@ -216,10 +199,6 @@ When implementing changes:
 
 1. Read relevant files to understand current implementation
 2. Make focused, incremental changes
-3. Run type checking: `yarn typecheck`
-4. Run linting: `yarn lint:fix`
-5. Run relevant tests
-6. Fix any linter errors that are introduced
 
 ### 2. Testing Strategy
 
@@ -235,7 +214,7 @@ yarn test
 yarn test:debug
 
 # Run tests for a specific package
-yarn workspace loot-core run test
+yarn workspace @actual-app/core run test
 ```
 
 **E2E Tests (Playwright)**
@@ -269,21 +248,20 @@ yarn workspace @actual-app/web e2e
 TypeScript configuration uses:
 
 - Incremental compilation
-- Strict type checking with `typescript-strict-plugin`
+- Strict type checking with `typescript-strict-plugin`. New files must be
+  type-strict — don't add `// @ts-strict-ignore` to a new file (existing files
+  are grandfathered).
 - Platform-specific exports in `loot-core` (node vs browser)
-
-Always run `yarn typecheck` before committing.
 
 ### 4. Internationalization (i18n)
 
-- Use `Trans` component instead of `t()` function when possible
-- All user-facing strings must be translated
-- Generate i18n files: `yarn generate:i18n`
-- Custom ESLint rules enforce translation usage
+Use the `Trans` component (and translated strings) for user-facing text.
+Regenerate i18n files with `yarn generate:i18n`.
 
 ### 5. Financial Number Typography
 
-- Wrap standalone financial numbers with `FinancialText` or apply `styles.tnum` directly if wrapping is not possible
+Wrap standalone financial numbers with `FinancialText` (or `styles.tnum` where
+wrapping isn't possible).
 
 ## Code Style & Conventions
 
@@ -291,18 +269,12 @@ Always run `yarn typecheck` before committing.
 
 **Type Usage:**
 
-- Use TypeScript for all code
-- Prefer `type` over `interface`
-- Avoid `enum` - use objects or maps
-- Avoid `any` or `unknown` unless absolutely necessary
-- Look for existing type definitions in the codebase
-- Avoid type assertions (`as`, `!`) - prefer `satisfies`
-- Use inline type imports: `import { type MyType } from '...'`
+- Use TypeScript for all code; look for existing type definitions before adding new ones
+- Prefer `satisfies` over type assertions (`as`, `!`) for narrowing
 
 **Naming:**
 
 - Use descriptive variable names with auxiliary verbs (e.g., `isLoaded`, `hasError`)
-- Named exports for components and utilities (avoid default exports except in specific cases)
 
 **Code Structure:**
 
@@ -314,14 +286,8 @@ Always run `yarn typecheck` before committing.
 
 **React Patterns:**
 
-- Don't use `React.FunctionComponent` or `React.FC` - type props directly
-- Don't use `React.*` patterns - use named imports instead
-- Use `<Link>` instead of `<a>` tags
-- Use custom hooks from `src/hooks` (not react-router directly):
-  - `useNavigate()` from `src/hooks` (not react-router)
-  - `useDispatch()`, `useSelector()`, `useStore()` from `src/redux` (not react-redux)
+- The project uses **React Compiler** (`babel-plugin-react-compiler`) in the desktop-client. The compiler auto-memoizes component bodies, so you can omit manual `useCallback`, `useMemo`, and `React.memo` when adding or refactoring code; prefer inline callbacks and values unless a stable identity is required by a non-compiled dependency.
 - Avoid unstable nested components
-- Use `satisfies` for type narrowing
 
 **JSX Style:**
 
@@ -330,43 +296,14 @@ Always run `yarn typecheck` before committing.
 - Use concise syntax for simple statements
 - Prefer explicit expressions (`condition && <Component />`)
 
-### Import Organization
-
-Imports are automatically organized by ESLint with the following order:
-
-1. React imports (first)
-2. Built-in Node.js modules
-3. External packages
-4. Actual packages (`loot-core`, `@actual-app/components` - legacy pattern `loot-design` may appear in old code)
-5. Parent imports
-6. Sibling imports
-7. Index imports
-
-Always maintain newlines between import groups.
-
 ### Platform-Specific Code
 
-- Don't directly reference platform-specific imports (`.api`, `.web`, `.electron`)
-- Use conditional exports in `loot-core` for platform-specific code
-- Platform resolution happens at build time via package.json exports
+- Use conditional exports in `loot-core` for platform-specific code; platform
+  resolution happens at build time via package.json exports. Don't directly
+  import another platform's modules (`.api`, `.electron`).
 
-### Restricted Patterns
-
-**Never:**
-
-- Import from `uuid` without destructuring: use `import { v4 as uuidv4 } from 'uuid'`
-- Import colors directly - use theme instead
-- Import `@actual-app/web/*` in `loot-core`
-
-**Git Commands:**
-
-- **MANDATORY: ALL commit messages MUST be prefixed with `[AI]`** - This is a hard requirement with no exceptions
-- **MANDATORY: ALL pull request titles MUST be prefixed with `[AI]`** - This is a hard requirement with no exceptions
-- Never update git config
-- Never run destructive git operations (force push, hard reset) unless explicitly requested
-- Never skip hooks (--no-verify, --no-gpg-sign)
-- Never force push to main/master
-- Never commit unless explicitly asked
+For commit and PR rules, see
+[PR and Commit Rules](.github/agents/pr-and-commit-rules.md).
 
 ## File Structure Patterns
 
@@ -408,7 +345,10 @@ describe('ComponentName', () => {
 
 - `/package.json` - Root workspace configuration, scripts
 - `/lage.config.js` - Lage task runner configuration
-- `/eslint.config.mjs` - ESLint configuration (flat config format)
+- `/.oxlintrc.json` - Lint rules (oxlint); `/.oxfmtrc.json` - formatting (oxfmt)
+- `/.nano-staged.json` - pre-commit format/lint config (run via Husky)
+- `/.claude/settings.json`, `/.codex/config.toml`, `/.cursor/hooks.json` - agent
+  hook wiring; shared scripts live in `/scripts/agent-hooks/`
 - `/tsconfig.json` - Root TypeScript configuration
 - `/.cursorignore`, `/.gitignore` - Ignored files
 - `/yarn.lock` - Dependency lockfile (Yarn 4)
@@ -417,7 +357,11 @@ describe('ComponentName', () => {
 
 - `/README.md` - Project overview
 - `/CONTRIBUTING.md` - Points to community docs
-- `/upcoming-release-notes/` - Release notes for next version
+- `/upcoming-release-notes/` - Release notes for next version. Name each file
+  with a short, descriptive slug (e.g. `add-payee-autocomplete.md`) — the PR link
+  is resolved automatically at release time, so you don't need the PR number.
+  Numeric filenames like `1234.md` also remain valid. See the release-note
+  template and rules in `packages/docs/docs/contributing/index.md`.
 - `/CODEOWNERS` - Code ownership definitions
 - `/packages/docs/` - Documentation website (Docusaurus)
 
@@ -501,13 +445,9 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 ### Linter Errors
 
-1. Run `yarn lint:fix` to auto-fix many issues
-2. Check ESLint output for specific rule violations
-3. Custom rules:
-   - `actual/no-untranslated-strings` - Add i18n
-   - `actual/prefer-trans-over-t` - Use Trans component
-   - `actual/prefer-logger-over-console` - Use logger
-   - Check `eslint.config.mjs` for complete rules
+Run `yarn lint` to check. All rules — including the custom `actual/*` rules
+(`no-untranslated-strings`, `prefer-trans-over-t`, `prefer-logger-over-console`,
+`typography`, …) — are defined in [`.oxlintrc.json`](.oxlintrc.json).
 
 ### Test Failures
 
@@ -522,14 +462,14 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 1. Check `tsconfig.json` for path mappings
 2. Check package.json `exports` field (especially for loot-core)
-3. Verify platform-specific imports (`.web`, `.electron`, `.api`)
-4. Use absolute imports in `desktop-client` (enforced by ESLint)
+3. Verify platform-specific imports (`.electron`, `.api`)
+4. Use absolute imports in `desktop-client`
 
 ### Build Failures
 
 1. Clean build artifacts: `rm -rf packages/*/dist packages/*/lib-dist packages/*/build`
 2. Reinstall dependencies: `yarn install`
-3. Check Node.js version (requires >=20)
+3. Check Node.js version (requires >=22)
 4. Check Yarn version (requires ^4.9.1)
 
 ## Testing Patterns
@@ -565,30 +505,12 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 Before committing changes, ensure:
 
-- [ ] **MANDATORY: Commit message is prefixed with `[AI]`** - This is a hard requirement with no exceptions
-- [ ] `yarn typecheck` passes
-- [ ] `yarn lint:fix` has been run
-- [ ] Relevant tests pass
-- [ ] User-facing strings are translated
-- [ ] Prefer `type` over `interface`
-- [ ] Named exports used (not default exports)
-- [ ] Imports are properly ordered
+- [ ] Commit and PR rules followed (see [PR and Commit Rules](.github/agents/pr-and-commit-rules.md))
 - [ ] Platform-specific code uses proper exports
-- [ ] No unnecessary type assertions
 
 ## Pull Request Guidelines
 
-When creating pull requests:
-
-- **MANDATORY PREFIX REQUIREMENT**: **ALL pull request titles MUST be prefixed with `[AI]`** - This is a hard requirement that MUST be followed without exception
-  - ✅ Correct: `[AI] Fix type error in account validation`
-  - ❌ Incorrect: `Fix type error in account validation` (MISSING PREFIX - NOT ALLOWED)
-- **AI-Generated PRs**: If you create a PR using AI assistance, add the **"AI generated"** label to the pull request. This helps maintainers understand the nature of the contribution.
-
-### PR Template: Do Not Fill In
-
-- **NEVER fill in the PR template** (`.github/PULL_REQUEST_TEMPLATE.md`). Leave all blank spaces and placeholder comments as-is. We expect **humans** to fill in the Description, Related issue(s), Testing, and Checklist sections.
-- **Exception**: If a human **explicitly asks** you to fill out the PR template, then fill it out **in Chinese**, using Chinese characters (简体中文) for all content you add.
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including title prefix requirements, labeling, the GitHub comment/review/issue 🤖 prefix, and PR template handling.
 
 ## Code Review Guidelines
 
@@ -619,7 +541,7 @@ yarn install:server
 
 ## Environment Requirements
 
-- **Node.js**: >=20
+- **Node.js**: >=22
 - **Yarn**: ^4.9.1 (managed by packageManager field)
 - **Browser Targets**: Electron >= 35.0, modern browsers (see browserslist)
 
@@ -632,3 +554,40 @@ The codebase is actively being migrated:
 - **React.\* → Named Imports**: Legacy React.\* patterns being removed
 
 When working with older code, follow the newer patterns described in this guide.
+
+## Cursor Cloud specific instructions
+
+### Services overview
+
+| Service             | Command                 | Port | Required                      |
+| ------------------- | ----------------------- | ---- | ----------------------------- |
+| Web Frontend (Vite) | `yarn start`            | 3001 | Yes                           |
+| Sync Server         | `yarn start:server-dev` | 5006 | Optional (sync features only) |
+
+All storage is **SQLite** (file-based via `better-sqlite3`). No external databases or services are needed.
+
+### Running the app
+
+- `yarn start` builds the plugins-service worker, loot-core browser backend, and starts the Vite dev server on port **3001**.
+- `yarn start:server-dev` starts both the sync server (port 5006) and the web frontend together.
+- The Vite HMR dev server serves many unbundled modules. In constrained environments, the browser may hit `ERR_INSUFFICIENT_RESOURCES`. If that happens, use `yarn build:browser` followed by serving the built output from `packages/desktop-client/build/` with proper COOP/COEP headers (`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`).
+
+### Lint, test, typecheck
+
+Standard commands documented in `package.json` scripts and the Quick Start section above:
+
+- `yarn lint` / `yarn lint:fix` (uses oxlint + oxfmt)
+- `yarn test` (lage across all workspaces)
+- `yarn typecheck` (tsgo + lage typecheck)
+
+### Testing and previewing the app
+
+When running the app for manual testing or demos, use **"View demo"** on the initial setup screen (after selecting "Don't use a server"). This creates a test budget pre-populated with realistic sample data (accounts, transactions, categories, and budgeted amounts), which is far more useful than starting with an empty budget.
+
+### Gotchas
+
+- The `engines` field requires **Node.js >=22** and **Yarn ^4.9.1**. The `.nvmrc` specifies `v22/*`.
+- Pre-commit hook runs `nano-staged` (oxfmt + oxlint, configured in `.nano-staged.json`) via Husky. Run `yarn prepare` once after install to set up hooks.
+- Lage caches test results in `.lage/`. If tests behave unexpectedly, clear with `rm -rf .lage`.
+- Native modules (`better-sqlite3`, `bcrypt`) require build tools (`gcc`, `make`, `python3`). These are pre-installed in the Cloud VM.
+- All yarn commands must be run from the repository root, never from child workspaces.

@@ -1,5 +1,5 @@
-import { Query } from '../../shared/query';
-import type { QueryState } from '../../shared/query';
+import { Query } from '#shared/query';
+import type { QueryState } from '#shared/query';
 
 import type { CompilerState, SqlPieces } from './compiler';
 import { compileAndRunAqlQuery, runCompiledAqlQuery } from './exec';

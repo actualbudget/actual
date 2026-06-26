@@ -2,6 +2,9 @@
   "name": "@actual-app/components",
   "version": "0.0.1",
   "license": "MIT",
+  "imports": {
+    "#tokens": "./src/tokens.ts"
+  },
   "exports": {
     "./hooks/*": "./src/hooks/*.ts",
     "./icons/logo": "./src/icons/logo/index.ts",
@@ -28,6 +31,10 @@
     "./text": "./src/Text.tsx",
     "./text-one-line": "./src/TextOneLine.tsx",
     "./theme": "./src/theme.ts",
+    "./themes/palette.css": "./src/themes/palette.css",
+    "./themes/light.css": "./src/themes/light.css",
+    "./themes/dark.css": "./src/themes/dark.css",
+    "./themes/midnight.css": "./src/themes/midnight.css",
     "./tokens": "./src/tokens.ts",
     "./toggle": "./src/Toggle.tsx",
     "./tooltip": "./src/Tooltip.tsx",
@@ -40,28 +47,34 @@
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
     "start:storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsgo -b"
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",
-    "react-aria-components": "^1.15.1",
+    "react-aria-components": "^1.18.0",
     "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^5.0.0",
-    "@storybook/addon-a11y": "^10.2.7",
-    "@storybook/addon-docs": "^10.2.7",
-    "@storybook/react-vite": "^10.2.7",
+    "@chromatic-com/storybook": "^5.2.1",
+    "@storybook/addon-a11y": "^10.4.4",
+    "@storybook/addon-docs": "^10.4.4",
+    "@storybook/react-vite": "^10.4.4",
+    "@svgr/babel-plugin-add-jsx-attribute": "^8.0.0",
     "@svgr/cli": "^8.1.0",
-    "@types/react": "^19.2.5",
-    "eslint-plugin-storybook": "^10.2.7",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "storybook": "^10.2.7",
-    "vitest": "^4.0.18"
+    "@svgr/core": "^8.1.0",
+    "@testing-library/react": "16.3.2",
+    "@types/react": "^19.2.17",
+    "@typescript/native-preview": "beta",
+    "@vitejs/plugin-react": "^6.0.2",
+    "eslint-plugin-storybook": "^10.4.4",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "storybook": "^10.4.4",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   },
   "peerDependencies": {
-    "react": ">=19.2",
-    "react-dom": ">=19.2"
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   }
 }

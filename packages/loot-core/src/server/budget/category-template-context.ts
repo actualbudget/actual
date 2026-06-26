@@ -1,10 +1,11 @@
-import { getCurrency } from 'loot-core/shared/currencies';
-import type { Currency } from 'loot-core/shared/currencies';
-import { q } from 'loot-core/shared/query';
-
-import * as monthUtils from '../../shared/months';
-import { amountToInteger, integerToAmount } from '../../shared/util';
-import type { CategoryEntity } from '../../types/models';
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
+import { getCurrency } from '#shared/currencies';
+import type { Currency } from '#shared/currencies';
+import * as monthUtils from '#shared/months';
+import { q } from '#shared/query';
+import { amountToInteger, integerToAmount } from '#shared/util';
+import type { CategoryEntity } from '#types/models';
 import type {
   AverageTemplate,
   ByTemplate,
@@ -14,14 +15,18 @@ import type {
   PeriodicTemplate,
   RefillTemplate,
   RemainderTemplate,
+  ScheduleTemplate,
   SimpleTemplate,
   SpendTemplate,
   Template,
-} from '../../types/models/templates';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
+} from '#types/models/templates';
 
-import { getSheetBoolean, getSheetValue, isReflectBudget } from './actions';
+import {
+  getCategoryAverage,
+  getSheetBoolean,
+  getSheetValue,
+  isTrackingBudget,
+} from './actions';
 import { runSchedule } from './schedule-template';
 import { getActiveSchedules } from './statements';
 
@@ -50,6 +55,7 @@ export class CategoryTemplateContext {
     category: CategoryEntity,
     month: string,
     budgeted: number,
+    skipAvailableClamp: boolean = false,
   ) {
     // get all the needed setup values
     const lastMonthSheet = monthUtils.sheetForMonth(
@@ -67,7 +73,7 @@ export class CategoryTemplateContext {
     if (
       (fromLastMonth < 0 && !carryover) || // overspend no carryover
       category.is_income || // tracking budget income categories
-      (isReflectBudget() && !carryover) // tracking budget regular categories
+      (isTrackingBudget() && !carryover) // tracking budget regular categories
     ) {
       fromLastMonth = 0;
     }
@@ -97,6 +103,7 @@ export class CategoryTemplateContext {
       hideDecimal.data.length > 0
         ? hideDecimal.data[0].value === 'true'
         : false,
+      skipAvailableClamp,
     );
   }
 
@@ -124,7 +131,9 @@ export class CategoryTemplateContext {
   // what is the full requested amount this month
   async runAll(available: number) {
     let toBudget: number = 0;
-    const prioritiesSorted = new Int32Array([...this.getPriorities()].sort());
+    const prioritiesSorted = new Int32Array(
+      [...this.getPriorities()].sort((a, b) => a - b),
+    );
     for (let i = 0; i < prioritiesSorted.length; i++) {
       const p = prioritiesSorted[i];
       toBudget += await this.runTemplatesForPriority(p, available, available);
@@ -147,9 +156,12 @@ export class CategoryTemplateContext {
     );
     let available = budgetAvail || 0;
     let toBudget = 0;
+    const perTemplateLocal = new Map<Template, number>();
     let byFlag = false;
     let remainder = 0;
     let scheduleFlag = false;
+    let schedulePerTemplate: Map<ScheduleTemplate, number> | null = null;
+    let byPerTemplate: Map<ByTemplate, number> | null = null;
     // switch on template type and calculate the amount for the line
     for (const template of t) {
       let newBudget = 0;
@@ -185,7 +197,9 @@ export class CategoryTemplateContext {
         case 'by': {
           // all by's get run at once
           if (!byFlag) {
-            newBudget = CategoryTemplateContext.runBy(this);
+            const ret = CategoryTemplateContext.runBy(this);
+            newBudget = ret.toBudget;
+            byPerTemplate = ret.perTemplateNeed;
           } else {
             newBudget = 0;
           }
@@ -210,6 +224,7 @@ export class CategoryTemplateContext {
             // needs to remove the previous funds so they aren't double counted
             newBudget = ret.to_budget - toBudget;
             remainder = ret.remainder;
+            schedulePerTemplate = ret.perScheduleMonthly;
             scheduleFlag = true;
           }
           break;
@@ -225,8 +240,35 @@ export class CategoryTemplateContext {
 
       available = available - newBudget;
       toBudget += newBudget;
+      perTemplateLocal.set(
+        template,
+        (perTemplateLocal.get(template) ?? 0) + newBudget,
+      );
     }
 
+    // `runBy` and `runSchedule` produce a single batch total per priority bucket
+    // and the loop above credits it to whichever sibling template ran first. For
+    // per-template UI projections we want to split that batch across all the
+    // sibling templates. The breakdown is approximate (equal split for schedule,
+    // weighted by goal amount for by); the actual budgeted total is unaffected.
+    // Weight by each `by` template's effective per-month need (as computed
+    // inside runBy) rather than its raw target amount, so per-row UI
+    // projections reflect templates with shorter deadlines or different
+    // repeat windows correctly.
+    redistributeBatch(perTemplateLocal, t, 'by', template => {
+      if (template.type !== 'by') return 0;
+      return Math.max(0, byPerTemplate?.get(template) ?? 0);
+    });
+    // Schedules: weight by each schedule's actual monthly contribution as
+    // computed by runSchedule, so the per-row UI projection reflects the
+    // schedule's real cost rather than an equal split.
+    redistributeBatch(perTemplateLocal, t, 'schedule', template => {
+      if (template.type !== 'schedule') return 0;
+      const monthly = schedulePerTemplate?.get(template) ?? 0;
+      return Math.max(0, monthly);
+    });
+
+    let scale = 1;
     //check limit
     if (this.limitCheck) {
       if (
@@ -237,21 +279,56 @@ export class CategoryTemplateContext {
         toBudget = this.limitAmount - this.toBudgetAmount - this.fromLastMonth;
         this.limitMet = true;
         available = available + orig - toBudget;
+        if (orig > 0) scale *= toBudget / orig;
       }
     }
 
     //round all budget values if needed
-    if (this.hideDecimal) toBudget = this.removeFraction(toBudget);
+    if (this.hideDecimal) {
+      // Capture the pre-round value so per-row contributions track the same
+      // rounding delta as toBudget; otherwise perTemplateContribution would
+      // sum to slightly more/less than the engine's actual budgeted amount.
+      const preRound = toBudget;
+      toBudget = this.removeFraction(toBudget);
+      if (preRound !== 0) scale *= toBudget / preRound;
+    }
 
     // don't overbudget when using a priority unless income category
-    if (priority > 0 && available < 0 && !this.category.is_income) {
+    if (
+      priority > 0 &&
+      available < 0 &&
+      !this.category.is_income &&
+      !this.skipAvailableClamp
+    ) {
       this.fullAmount = (this.fullAmount || 0) + toBudget;
-      toBudget = Math.max(0, toBudget + available);
+      const adjusted = Math.max(0, toBudget + available);
+      if (toBudget > 0) scale *= adjusted / toBudget;
+      toBudget = adjusted;
       this.toBudgetAmount += toBudget;
     } else {
       this.fullAmount = (this.fullAmount || 0) + toBudget;
       this.toBudgetAmount += toBudget;
     }
+
+    // Distribute the priority's final budget across its templates so per-row
+    // projections reflect any clamping that occurred above. The limit branch
+    // can produce a negative scale when the carried-over balance already
+    // exceeds the cap; floor at 0 here so per-row UI projections never go
+    // negative (engine totals are unaffected). Give the last entry the
+    // residual so the per-row sum equals toBudget exactly even when scale
+    // produces fractional cents.
+    const perRowScale = Math.max(0, scale);
+    const items = Array.from(perTemplateLocal);
+    let remaining = Math.max(0, toBudget);
+    items.forEach(([template, value], i) => {
+      const isLast = i === items.length - 1;
+      const share = isLast
+        ? remaining
+        : Math.max(0, Math.min(remaining, Math.round(value * perRowScale)));
+      const existing = this.perTemplateContribution.get(template) ?? 0;
+      this.perTemplateContribution.set(template, existing + share);
+      remaining -= share;
+    });
     return this.category.is_income ? -toBudget : toBudget;
   }
 
@@ -281,6 +358,21 @@ export class CategoryTemplateContext {
       }
     }
 
+    if (toBudget > 0 && this.remainderWeight > 0) {
+      let remaining = toBudget;
+      for (let i = 0; i < this.remainder.length; i++) {
+        const template = this.remainder[i];
+        const isLast = i === this.remainder.length - 1;
+        const share = isLast
+          ? remaining
+          : Math.round(toBudget * (template.weight / this.remainderWeight));
+        const allocated = Math.max(0, Math.min(share, remaining));
+        const existing = this.perTemplateContribution.get(template) ?? 0;
+        this.perTemplateContribution.set(template, existing + allocated);
+        remaining -= allocated;
+      }
+    }
+
     this.toBudgetAmount += toBudget;
     return toBudget;
   }
@@ -291,6 +383,7 @@ export class CategoryTemplateContext {
       budgeted: this.toBudgetAmount,
       goal: this.goalAmount,
       longGoal: this.isLongGoal,
+      perTemplateContribution: this.perTemplateContribution,
     };
   }
 
@@ -303,8 +396,10 @@ export class CategoryTemplateContext {
   private goals: GoalTemplate[] = [];
   private priorities: Set<number> = new Set();
   readonly hideDecimal: boolean = false;
+  readonly skipAvailableClamp: boolean = false;
   private remainderWeight: number = 0;
   private toBudgetAmount: number = 0; // amount that will be budgeted by the templates
+  private perTemplateContribution = new Map<Template, number>();
   private fullAmount: number | null = null; // the full requested amount, start null for remainder only cats
   private isLongGoal: boolean | null = null; //defaulting the goals to null so templates can be unset
   private goalAmount: number | null = null;
@@ -325,6 +420,7 @@ export class CategoryTemplateContext {
     budgeted: number,
     currencyCode: string,
     hideDecimal: boolean = false,
+    skipAvailableClamp: boolean = false,
   ) {
     this.category = category;
     this.month = month;
@@ -332,6 +428,7 @@ export class CategoryTemplateContext {
     this.previouslyBudgeted = budgeted;
     this.currency = getCurrency(currencyCode);
     this.hideDecimal = hideDecimal;
+    this.skipAvailableClamp = skipAvailableClamp;
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
@@ -381,15 +478,27 @@ export class CategoryTemplateContext {
     ) {
       return;
     }
-    //check schedule names
-    const scheduleNames = (await getActiveSchedules()).map(({ name }) =>
-      name.trim(),
+    //check schedule existence (prefer scheduleId, fall back to name)
+    const activeSchedules = await getActiveSchedules();
+    const scheduleIds = new Set(activeSchedules.map(s => s.id));
+    const scheduleNames = new Set(
+      activeSchedules.map(s => s.name?.trim()).filter(Boolean),
     );
     templates
       .filter(t => t.type === 'schedule')
       .forEach(t => {
-        if (!scheduleNames.includes(t.name.trim())) {
-          throw new Error(`Schedule ${t.name.trim()} does not exist`);
+        if (t.scheduleId) {
+          if (!scheduleIds.has(t.scheduleId)) {
+            throw new Error(
+              `Schedule ${t.name ?? t.scheduleId} does not exist`,
+            );
+          }
+        } else if (t.name) {
+          if (!scheduleNames.has(t.name.trim())) {
+            throw new Error(`Schedule ${t.name.trim()} does not exist`);
+          }
+        } else {
+          throw new Error('Schedule template has no scheduleId or name');
         }
       });
     //find lowest priority
@@ -428,21 +537,31 @@ export class CategoryTemplateContext {
   static async checkPercentage(templates: Template[]) {
     const pt = templates.filter(t => t.type === 'percentage');
     if (pt.length === 0) return;
-    const reqCategories = pt.map(t => t.category.toLowerCase());
 
     const availCategories = await db.getCategories();
-    const availNames = availCategories
-      .filter(c => c.is_income)
-      .map(c => c.name.toLocaleLowerCase());
+    const incomeCategories = availCategories.filter(c => c.is_income);
+    const availNames = new Set(
+      incomeCategories.map(c => c.name.toLocaleLowerCase()),
+    );
+    const availIds = new Set(incomeCategories.map(c => c.id));
 
-    reqCategories.forEach(n => {
-      if (n === 'available funds' || n === 'all income') {
-        //skip the name check since these are special
-      } else if (!availNames.includes(n)) {
-        throw new Error(
-          `Category \x22${n}\x22 is not found in available income categories`,
-        );
+    const specialSources = new Set(['all income', 'available funds']);
+
+    pt.forEach(t => {
+      const raw = t.category;
+      const lowered = raw.toLocaleLowerCase();
+      // Accept either an income category name (text templates) or an income
+      // category id (UI-managed templates from CategoryAutocomplete).
+      if (
+        specialSources.has(lowered) ||
+        availNames.has(lowered) ||
+        availIds.has(raw)
+      ) {
+        return;
       }
+      throw new Error(
+        `Category \x22${raw}\x22 is not found in available income categories`,
+      );
     });
   }
 
@@ -590,7 +709,9 @@ export class CategoryTemplateContext {
     const period = template.period.period;
     const numPeriods = template.period.amount;
     let date =
-      template.starting ?? monthUtils.firstDayOfMonth(templateContext.month);
+      template.starting && template.starting.length > 0
+        ? template.starting
+        : monthUtils.firstDayOfMonth(templateContext.month);
 
     let dateShiftFunction;
     switch (period) {
@@ -609,7 +730,7 @@ export class CategoryTemplateContext {
           monthUtils.addMonths(date, numPeriods * 12);
         break;
       default:
-        throw new Error(`Unrecognized periodic period: ${period}`);
+        throw new Error(`Unrecognized periodic period: ${String(period)}`);
     }
 
     //shift the starting date until its in our month or in the future
@@ -707,10 +828,10 @@ export class CategoryTemplateContext {
     templateContext: CategoryTemplateContext,
   ): Promise<number> {
     const percent = template.percent;
-    const cat = template.category.toLowerCase();
+    const cat = template.category.toLocaleLowerCase();
     const prev = template.previous;
     let sheetName;
-    let monthlyIncome = 1;
+    let monthlyIncome;
 
     //choose the sheet to find income for
     if (prev) {
@@ -725,8 +846,13 @@ export class CategoryTemplateContext {
     } else if (cat === 'available funds') {
       monthlyIncome = availableFunds;
     } else {
+      // Text templates address income categories by name (e.g. `#template
+      // 10% of Salary`); the UI's CategoryAutocomplete stores the category
+      // id. Accept either form.
       const incomeCat = (await db.getCategories()).find(
-        c => c.is_income && c.name.toLowerCase() === cat,
+        c =>
+          c.is_income &&
+          (c.id === template.category || c.name.toLocaleLowerCase() === cat),
       );
       if (!incomeCat) {
         throw new Error(
@@ -746,19 +872,15 @@ export class CategoryTemplateContext {
     template: AverageTemplate,
     templateContext: CategoryTemplateContext,
   ): Promise<number> {
-    let sum = 0;
-    for (let i = 1; i <= template.numMonths; i++) {
-      const sheetName = monthUtils.sheetForMonth(
-        monthUtils.subMonths(templateContext.month, i),
-      );
-      sum += await getSheetValue(
-        sheetName,
-        `sum-amount-${templateContext.category.id}`,
-      );
-    }
-
+    let average = await getCategoryAverage({
+      month: templateContext.month,
+      maxMonths: template.numMonths,
+      categoryId: templateContext.category.id,
+    });
     // negate as sheet value is cost ie negative
-    let average = -(sum / template.numMonths);
+    if (average < 0) {
+      average *= -1;
+    }
 
     if (template.adjustment !== undefined && template.adjustmentType) {
       switch (template.adjustmentType) {
@@ -783,7 +905,10 @@ export class CategoryTemplateContext {
     return Math.round(average);
   }
 
-  static runBy(templateContext: CategoryTemplateContext): number {
+  static runBy(templateContext: CategoryTemplateContext): {
+    toBudget: number;
+    perTemplateNeed: Map<ByTemplate, number>;
+  } {
     const byTemplates: ByTemplate[] = templateContext.templates.filter(
       t => t.type === 'by',
     );
@@ -821,6 +946,7 @@ export class CategoryTemplateContext {
 
     // calculate needed funds per template
     const shortNumMonths = workingShortNumMonths || 0;
+    const perTemplateNeed = new Map<ByTemplate, number>();
     for (let i = 0; i < byTemplates.length; i++) {
       const template = byTemplates[i];
       const numMonths = savedInfo[i].numMonths;
@@ -852,10 +978,68 @@ export class CategoryTemplateContext {
           templateContext.currency.decimalPlaces,
         );
       }
+      perTemplateNeed.set(template, amount);
       totalNeeded += amount;
     }
-    return Math.round(
+    const toBudget = Math.round(
       (totalNeeded - templateContext.fromLastMonth) / (shortNumMonths + 1),
     );
+    return { toBudget, perTemplateNeed };
   }
+}
+
+// `runBy` and `runSchedule` are batched: they compute a single budget number
+// for all sibling templates of the same type at a given priority, and the
+// caller loop credits that total to whichever template was iterated first.
+// Split the batch total across all siblings using `weightOf` so the
+// per-template projection map reflects each template's share. The total
+// allocated is preserved (last sibling absorbs any rounding remainder).
+function redistributeBatch<T extends Template>(
+  perTemplateLocal: Map<Template, number>,
+  templates: Template[],
+  type: T['type'],
+  weightOf: (template: T) => number,
+) {
+  const siblings = templates.filter(
+    (template): template is T => template.type === type,
+  );
+  if (siblings.length < 2) return;
+
+  let total = 0;
+  for (const sibling of siblings) {
+    total += perTemplateLocal.get(sibling) ?? 0;
+    perTemplateLocal.set(sibling, 0);
+  }
+  if (total === 0) return;
+
+  const totalWeight = siblings.reduce((sum, s) => sum + weightOf(s), 0);
+  if (totalWeight <= 0) {
+    // Fall back to an equal split if no weights are usable.
+    let remaining = total;
+    siblings.forEach((sibling, i) => {
+      const isLast = i === siblings.length - 1;
+      const share = isLast ? remaining : Math.round(total / siblings.length);
+      const allocated = Math.max(0, Math.min(share, remaining));
+      perTemplateLocal.set(
+        sibling,
+        (perTemplateLocal.get(sibling) ?? 0) + allocated,
+      );
+      remaining -= allocated;
+    });
+    return;
+  }
+
+  let remaining = total;
+  siblings.forEach((sibling, i) => {
+    const isLast = i === siblings.length - 1;
+    const share = isLast
+      ? remaining
+      : Math.round((total * weightOf(sibling)) / totalWeight);
+    const allocated = Math.max(0, Math.min(share, remaining));
+    perTemplateLocal.set(
+      sibling,
+      (perTemplateLocal.get(sibling) ?? 0) + allocated,
+    );
+    remaining -= allocated;
+  });
 }

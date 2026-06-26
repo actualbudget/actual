@@ -14,7 +14,6 @@ This guide outlines the coding conventions and style guidelines for contributing
 - **Avoid `any` or `unknown`**: Only use when absolutely necessary
 - **Look for existing types**: Check `packages/loot-core/src/types/` for existing type definitions
 - **Avoid type assertions**: Prefer `satisfies` over `as` or `!` for type narrowing
-- **Use inline type imports**: `import { type MyType } from '...'`
 
 ### Naming Conventions
 

@@ -21,6 +21,7 @@ message MessageEnvelope {
 }
 
 message SyncRequest {
+        reserved 4;
         repeated MessageEnvelope messages = 1;
         string fileId = 2;
         string groupId = 3;

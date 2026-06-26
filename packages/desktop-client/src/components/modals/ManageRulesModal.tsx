@@ -2,13 +2,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { ManageRules } from '@desktop-client/components/ManageRules';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { ManageRules } from '#components/ManageRules';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type ManageRulesModalProps = Extract<
   ModalType,
@@ -21,11 +17,11 @@ export function ManageRulesModal({ payeeId }: ManageRulesModalProps) {
 
   return (
     <Modal name="manage-rules" isLoading={loading}>
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Rules')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <ManageRules isModal payeeId={payeeId} setLoading={setLoading} />
         </>

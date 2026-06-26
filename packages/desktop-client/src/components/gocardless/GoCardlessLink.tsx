@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { View } from '@actual-app/components/view';
 
-import { Modal, ModalHeader } from '@desktop-client/components/common/Modal';
+import { Modal, ModalHeader } from '#components/common/Modal';
 
 export function GoCardlessLink() {
   const { t } = useTranslation();

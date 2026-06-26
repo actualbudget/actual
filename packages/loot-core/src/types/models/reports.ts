@@ -18,6 +18,7 @@ export type CustomReportEntity = {
   includeCurrentInterval: boolean;
   showUncategorized: boolean;
   trimIntervals: boolean;
+  showTrendLines: boolean;
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
@@ -30,7 +31,8 @@ export type balanceTypeOpType =
   | 'totalDebts'
   | 'totalTotals'
   | 'netAssets'
-  | 'netDebts';
+  | 'netDebts'
+  | 'totalBudgeted';
 
 export type sortByOpType = 'asc' | 'desc' | 'name' | 'budget';
 
@@ -61,6 +63,11 @@ export type SpendingEntity = {
     compareTo: number;
     budget: number;
   }[];
+  averageRange?: {
+    startMonth: string | null;
+    endMonth: string | null;
+    months: string[];
+  };
   startDate?: string;
   endDate?: string;
   totalDebts: number;
@@ -80,6 +87,7 @@ export type DataEntity = {
   netAssets: number;
   netDebts: number;
   totalTotals: number;
+  totalBudgeted: number;
 };
 
 export type LegendEntity = {
@@ -87,10 +95,11 @@ export type LegendEntity = {
   id: string | null;
   color: string;
   dataKey: string; // Uses id for unique data lookup when categories have same name
+  uncategorizedId?: 'off_budget' | 'transfer' | 'other' | 'all';
 };
 
 export type IntervalEntity = {
-  date?: string;
+  date: string;
   change?: number;
   intervalStartDate?: string;
   intervalEndDate?: string;
@@ -99,11 +108,13 @@ export type IntervalEntity = {
   netAssets: number;
   netDebts: number;
   totalTotals: number;
+  totalBudgeted: number;
 };
 
 export type GroupedEntity = {
   id: string;
   name: string;
+  uncategorizedId?: 'off_budget' | 'transfer' | 'other' | 'all';
   date?: string;
   intervalData: IntervalEntity[];
   totalAssets: number;
@@ -111,6 +122,7 @@ export type GroupedEntity = {
   totalTotals: number;
   netAssets: number;
   netDebts: number;
+  totalBudgeted: number;
   categories?: GroupedEntity[];
 };
 
@@ -135,6 +147,7 @@ export type CustomReportData = {
   include_current: number;
   show_uncategorized: number;
   trim_intervals: number;
+  show_trend_lines: number;
   graph_type: string;
   conditions?: RuleConditionEntity[];
   conditions_op: 'and' | 'or';

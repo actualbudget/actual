@@ -9,4 +9,4 @@ function indexTemplate(filePaths: { path: string }[]) {
   return exportEntries.join('\n');
 }
 
-module.exports = indexTemplate;
+export default indexTemplate;

@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
@@ -14,36 +15,39 @@ import { Button } from '@actual-app/components/button';
 import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgAdd,
+  SvgCalendar,
+  SvgCheveronDown,
+  SvgLocation,
   SvgPiggyBank,
+  SvgTag,
   SvgTrash,
+  SvgUser,
+  SvgWallet,
 } from '@actual-app/components/icons/v1';
-import { SvgPencilWriteAlternate } from '@actual-app/components/icons/v2';
+import {
+  SvgNotesPaper,
+  SvgPencilWriteAlternate,
+} from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
-import {
-  format as formatDate,
-  isValid as isValidDate,
-  parse as parseDate,
-  parseISO,
-} from 'date-fns';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import * as Platform from 'loot-core/shared/platform';
-import { q } from 'loot-core/shared/query';
-import { getStatusLabel, getUpcomingDays } from 'loot-core/shared/schedules';
+import { send } from '@actual-app/core/platform/client/connection';
+import { DEFAULT_MAX_DISTANCE_METERS } from '@actual-app/core/shared/constants';
+import { calculateDistance } from '@actual-app/core/shared/location-utils';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import { getUpcomingDays } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
-  makeChild,
+  makeEmptySplitSubtransactions,
   realizeTempTransactions,
   splitTransaction,
   ungroupTransactions,
   updateTransaction,
-} from 'loot-core/shared/transactions';
+} from '@actual-app/core/shared/transactions';
 import {
   amountToInteger,
   applyFindReplace,
@@ -53,44 +57,61 @@ import {
   integerToAmount,
   integerToCurrency,
   titleFirst,
-} from 'loot-core/shared/util';
+} from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
   PayeeEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
+import {
+  format as formatDate,
+  isValid as isValidDate,
+  parse as parseDate,
+  parseISO,
+} from 'date-fns';
 
-import { FocusableAmountInput } from './FocusableAmountInput';
-
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import {
   FieldLabel,
   InputField,
   TapField,
   ToggleField,
-} from '@desktop-client/components/mobile/MobileForms';
-import { getPrettyPayee } from '@desktop-client/components/mobile/utils';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { createSingleTimeScheduleFromTransaction } from '@desktop-client/components/transactions/TransactionList';
-import { AmountInput } from '@desktop-client/components/util/AmountInput';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { usePayees } from '@desktop-client/hooks/usePayees';
+} from '#components/mobile/MobileForms';
+import { getPrettyPayee } from '#components/mobile/utils';
+import { MobilePageHeader, Page } from '#components/Page';
+import { shouldApplyRuleChange } from '#components/transactions/table/utils';
+import { createSingleTimeScheduleFromTransaction } from '#components/transactions/TransactionList';
+import { useAccounts } from '#hooks/useAccounts';
+import { useCategories } from '#hooks/useCategories';
+import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
+import { useCursorPosition } from '#hooks/useCursorPosition';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useInputRefValue } from '#hooks/useInputRefValue';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useLocationPermission } from '#hooks/useLocationPermission';
+import { useNavigate } from '#hooks/useNavigate';
+import { useNearbyPayees } from '#hooks/useNearbyPayees';
+import { usePayees } from '#hooks/usePayees';
 import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
-} from '@desktop-client/hooks/useSingleActiveEditForm';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { useDispatch, useSelector } from '@desktop-client/redux';
-import { setLastTransaction } from '@desktop-client/transactions/transactionsSlice';
+} from '#hooks/useSingleActiveEditForm';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useTagCSS } from '#hooks/useTagCSS';
+import { useFilteredTags } from '#hooks/useTags';
+import { pushModal } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useSavePayeeLocationMutation } from '#payees';
+import { locationService } from '#payees/location';
+import { aqlQuery } from '#queries/aqlQuery';
+import { useDispatch, useSelector } from '#redux';
+import { setLastTransaction } from '#transactions/transactionsSlice';
+import { getStatusLabel } from '#util/schedule';
+
+import { AmountInput } from './AmountInput';
+import { SplitAmountInput } from './SplitAmountInput';
 
 function getFieldName(transactionId: TransactionEntity['id'], field: string) {
   return `${field}-${transactionId}`;
@@ -154,6 +175,14 @@ export function lookupName(items: CategoryEntity[], id?: CategoryEntity['id']) {
   }
   return items.find(item => item.id === id)?.name;
 }
+
+const dropdownChevron = (
+  <SvgCheveronDown
+    width={14}
+    height={14}
+    style={{ color: theme.pageTextSubdued, marginRight: 8 }}
+  />
+);
 
 export function Status({
   status,
@@ -348,9 +377,10 @@ function Footer({
 }
 
 type ChildTransactionEditProps = {
+  keyboardHeader: ReactNode;
   transaction: TransactionEntity;
+  negate: boolean;
   amountFocused: boolean;
-  amountSign: '+' | '-';
   getCategory: (transaction: TransactionEntity, isOffBudget: boolean) => string;
   getPayee: (transaction: TransactionEntity) => PayeeEntity | undefined;
   getTransferAccount: (
@@ -377,8 +407,8 @@ const ChildTransactionEdit = forwardRef<
   (
     {
       transaction,
+      negate,
       amountFocused,
-      amountSign,
       getCategory,
       getPayee,
       getTransferAccount,
@@ -387,13 +417,14 @@ const ChildTransactionEdit = forwardRef<
       onEditField,
       onUpdate,
       onDelete,
+      keyboardHeader,
     },
     ref,
   ) => {
     const { t } = useTranslation();
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
-    const [hideFraction, _] = useSyncedPref('hideFraction');
+    const noteRef = useRef<HTMLInputElement | null>(null);
 
     const prettyPayee = getPrettyPayee({
       t,
@@ -420,6 +451,9 @@ const ChildTransactionEdit = forwardRef<
           <View style={{ flexBasis: '75%' }}>
             <FieldLabel title={t('Payee')} />
             <TapField
+              icon={<SvgUser width={17} height={17} />}
+              placeholder={t('Who did you pay?')}
+              rightContent={dropdownChevron}
               isDisabled={
                 !!editingField &&
                 editingField !== getFieldName(transaction.id, 'payee')
@@ -435,32 +469,25 @@ const ChildTransactionEdit = forwardRef<
             }}
           >
             <FieldLabel title={t('Amount')} style={{ padding: 0 }} />
-            <AmountInput
+            <SplitAmountInput
+              keyboardHeader={keyboardHeader}
               disabled={
                 !!editingField &&
                 editingField !== getFieldName(transaction.id, 'amount')
               }
-              focused={amountFocused}
-              value={amountToInteger(transaction.amount)}
-              zeroSign={amountSign}
-              style={{ marginRight: 8 }}
-              inputStyle={{
-                ...styles.smallText,
-                textAlign: 'right',
-                minWidth: 0,
+              value={transaction.amount}
+              negate={negate}
+              autoFocus={amountFocused}
+              onFocus={event => {
+                onRequestActiveEdit(getFieldName(transaction.id, 'amount'));
+
+                const input = event.currentTarget as HTMLInputElement;
+                input.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }}
-              onFocus={() =>
-                onRequestActiveEdit(getFieldName(transaction.id, 'amount'))
-              }
-              onUpdate={value => {
-                const amount = integerToAmount(value);
-                if (transaction.amount !== amount) {
-                  onUpdate(transaction, 'amount', amount);
-                } else {
-                  onClearActiveEdit();
-                }
+              onBlur={() => onClearActiveEdit()}
+              onChange={amount => {
+                onUpdate(transaction, 'amount', amount);
               }}
-              autoDecimals={String(hideFraction) !== 'true'}
             />
           </View>
         </View>
@@ -468,6 +495,9 @@ const ChildTransactionEdit = forwardRef<
         <View>
           <FieldLabel title={t('Category')} />
           <TapField
+            icon={<SvgTag width={17} height={17} />}
+            placeholder={t('Select a category')}
+            rightContent={dropdownChevron}
             textStyle={{
               ...((isOffBudget || isBudgetTransfer(transaction)) && {
                 fontStyle: 'italic',
@@ -490,6 +520,9 @@ const ChildTransactionEdit = forwardRef<
         <View>
           <FieldLabel title={t('Notes')} />
           <InputField
+            ref={noteRef}
+            icon={<SvgNotesPaper width={17} height={17} />}
+            placeholder={t('Add a note (optional)')}
             disabled={
               !!editingField &&
               editingField !== getFieldName(transaction.id, 'notes')
@@ -500,6 +533,7 @@ const ChildTransactionEdit = forwardRef<
             }
             onUpdate={value => onUpdate(transaction, 'notes', value)}
           />
+          <NoteTagAutocomplete inputRef={noteRef} />
         </View>
 
         <View style={{ alignItems: 'center' }}>
@@ -554,6 +588,11 @@ type TransactionEditInnerProps = {
   onDelete: (id: TransactionEntity['id']) => void;
   onSplit: (id: TransactionEntity['id']) => void;
   onAddSplit: (id: TransactionEntity['id']) => void;
+  shouldShowSaveLocation?: boolean;
+  onSaveLocation?: () => void;
+  onSelectNearestPayee?: () => void;
+  onRequestLocation?: () => void;
+  nearestPayee?: PayeeEntity | null;
 };
 
 const TransactionEditInner = memo<TransactionEditInnerProps>(
@@ -569,6 +608,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     onDelete,
     onSplit,
     onAddSplit,
+    shouldShowSaveLocation,
+    onSaveLocation,
+    onSelectNearestPayee,
+    onRequestLocation,
+    nearestPayee,
   }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -586,6 +630,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     );
     const { data: { grouped: categoryGroups } = { grouped: [] } } =
       useCategories();
+    const noteRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
       if (window.history.length === 1) {
@@ -598,11 +643,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
-    const [totalAmountFocused, setTotalAmountFocused] = useState(
-      // iOS does not support automatically opening up the keyboard for the
-      // total amount field. Hence we should not focus on it on page render.
-      !Platform.isIOSAgent,
-    );
     const childTransactionElementRefMap = useRef<
       Record<TransactionEntity['id'], HTMLDivElement | null>
     >({});
@@ -610,21 +650,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const payeesById = useMemo(() => groupById(payees), [payees]);
     const accountsById = useMemo(() => groupById(accounts), [accounts]);
-
-    const onTotalAmountEdit = useCallback(() => {
-      onRequestActiveEdit?.(getFieldName(transaction.id, 'amount'), () => {
-        setTotalAmountFocused(true);
-        return () => setTotalAmountFocused(false);
-      });
-    }, [onRequestActiveEdit, transaction.id]);
-
-    const isInitialMount = useInitialMount();
-
-    useEffect(() => {
-      if (isInitialMount && isAdding && !Platform.isIOSAgent) {
-        onTotalAmountEdit();
-      }
-    }, [isAdding, isInitialMount, onTotalAmountEdit]);
 
     const getAccount = useCallback(
       (trans: TransactionEntity) => {
@@ -671,7 +696,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       [categories, isBudgetTransfer, t],
     );
 
-    const onSaveInner = useCallback(() => {
+    const onSaveInner = useCallback(async () => {
       const [unserializedTransaction] = unserializedTransactions;
 
       const onConfirmSave = () => {
@@ -751,7 +776,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         return;
       }
 
-      if (unserializedTransaction.reconciled) {
+      if (unserializedTransactions.some(t => t.reconciled)) {
         // On mobile any save gives the warning.
         // On the web only certain changes trigger a warning.
         // Should we bring that here as well? Or does the nature of the editing form
@@ -768,7 +793,37 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           }),
         );
       } else {
-        onConfirmSave();
+        const transferIds = unserializedTransactions
+          .map(t => t.transfer_id)
+          .filter((id): id is string => id != null);
+
+        if (transferIds.length > 0) {
+          const { data } = await aqlQuery(
+            q('transactions')
+              .filter({
+                id: { $oneof: transferIds },
+                reconciled: true,
+              })
+              .select('id'),
+          );
+          if ((data as TransactionEntity[]).length > 0) {
+            dispatch(
+              pushModal({
+                modal: {
+                  name: 'confirm-transaction-edit',
+                  options: {
+                    onConfirm: onConfirmSave,
+                    confirmReason: 'batchEditWithReconciledTransfer',
+                  },
+                },
+              }),
+            );
+          } else {
+            onConfirmSave();
+          }
+        } else {
+          onConfirmSave();
+        }
       }
     }, [
       isAdding,
@@ -832,11 +887,16 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     options: {
                       categoryGroups,
                       showHiddenCategories,
+                      showNoneOption: true,
                       month: monthUtils.monthFromDate(
                         unserializedTransaction.date,
                       ),
                       onSelect: categoryId => {
-                        void onUpdateInner(transactionToEdit, name, categoryId);
+                        void onUpdateInner(
+                          transactionToEdit,
+                          name,
+                          categoryId as TransactionEntity['category'],
+                        );
                       },
                       onClose: () => {
                         onClearActiveEdit();
@@ -928,8 +988,10 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     );
 
     const onDeleteInner = useCallback(
-      (id: TransactionEntity['id']) => {
-        const [unserializedTransaction] = unserializedTransactions;
+      async (id: TransactionEntity['id']) => {
+        const [parentTransaction] = unserializedTransactions;
+        const targetTransaction =
+          unserializedTransactions.find(t => t.id === id) ?? parentTransaction;
 
         const onConfirmDelete = () => {
           dispatch(
@@ -943,7 +1005,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   onConfirm: () => {
                     onDelete(id);
 
-                    if (unserializedTransaction.id !== id) {
+                    if (parentTransaction.id !== id) {
                       // Only a child transaction was deleted.
                       onClearActiveEdit();
                       return;
@@ -957,7 +1019,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           );
         };
 
-        if (unserializedTransaction.reconciled) {
+        if (targetTransaction.reconciled) {
           dispatch(
             pushModal({
               modal: {
@@ -969,6 +1031,30 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               },
             }),
           );
+        } else if (targetTransaction.transfer_id) {
+          const { data } = await aqlQuery(
+            q('transactions')
+              .filter({
+                id: targetTransaction.transfer_id,
+                reconciled: true,
+              })
+              .select('id'),
+          );
+          if ((data as TransactionEntity[]).length > 0) {
+            dispatch(
+              pushModal({
+                modal: {
+                  name: 'confirm-transaction-edit',
+                  options: {
+                    onConfirm: onConfirmDelete,
+                    confirmReason: 'batchDeleteWithReconciledTransfer',
+                  },
+                },
+              }),
+            );
+          } else {
+            onConfirmDelete();
+          }
         } else {
           onConfirmDelete();
         }
@@ -1001,10 +1087,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       [scrollChildTransactionIntoView],
     );
 
-    // Child transactions should always default to the signage
-    // of the parent transaction
-    const childAmountSign = transaction.amount <= 0 ? '-' : '+';
-
     const account = getAccount(transaction);
     const isOffBudget = account ? !!account.offbudget : false;
     const title = getPrettyPayee({
@@ -1016,6 +1098,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const transactionDate = parseDate(transaction.date, dateFormat, new Date());
     const dateDefaultValue = monthUtils.dayFromDate(transactionDate);
+
+    const remaining = transaction.error?.difference ?? 0;
 
     return (
       <Page
@@ -1056,27 +1140,29 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             }}
           >
             <FieldLabel title={t('Amount')} flush style={{ marginBottom: 0 }} />
-            <FocusableAmountInput
+            <AmountInput
               value={transaction.amount}
-              zeroSign="-"
-              focused={totalAmountFocused}
-              onFocus={onTotalAmountEdit}
-              onBlur={() => onClearActiveEdit()}
-              onUpdateAmount={onTotalAmountUpdate}
-              focusedStyle={{
-                width: 'auto',
-                padding: '5px',
-                paddingLeft: '20px',
-                paddingRight: '20px',
-                minWidth: '100%',
+              negate
+              disabled={
+                !!editingField &&
+                editingField !== getFieldName(transaction.id, 'amount')
+              }
+              autoFocus={isAdding}
+              disableNativeAutoFocusOnIOS
+              onFocus={() => {
+                onRequestActiveEdit(getFieldName(transaction.id, 'amount'));
               }}
-              textStyle={{ ...styles.veryLargeText, textAlign: 'center' }}
+              onBlur={() => onClearActiveEdit()}
+              onChange={onTotalAmountUpdate}
+              variant="large"
             />
           </View>
 
           <View>
             <FieldLabel title={t('Payee')} />
             <TapField
+              icon={<SvgUser width={17} height={17} />}
+              placeholder={t('Who did you pay?')}
               textStyle={{
                 ...(transaction.is_parent && {
                   fontStyle: 'italic',
@@ -1090,6 +1176,82 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               }
               onPress={() => onEditFieldInner(transaction.id, 'payee')}
               data-testid="payee-field"
+              alwaysShowRightContent={
+                (!!nearestPayee || !!onRequestLocation) &&
+                !transaction.payee &&
+                !shouldShowSaveLocation
+              }
+              rightContent={
+                shouldShowSaveLocation ? (
+                  <Button
+                    variant="bare"
+                    onPress={onSaveLocation}
+                    style={{
+                      backgroundColor: theme.buttonNormalBackground,
+                      border: `1px solid ${theme.buttonNormalBorder}`,
+                      color: theme.buttonNormalText,
+                      fontSize: '11px',
+                      padding: '4px 8px',
+                      borderRadius: 3,
+                      height: 'auto',
+                      minHeight: 'auto',
+                    }}
+                  >
+                    <Trans>Save</Trans>
+                    <SvgLocation
+                      width={10}
+                      height={10}
+                      style={{ marginLeft: 4 }}
+                    />
+                  </Button>
+                ) : nearestPayee && !transaction.payee ? (
+                  <Button
+                    variant="bare"
+                    onPress={onSelectNearestPayee}
+                    style={{
+                      backgroundColor: theme.buttonNormalBackground,
+                      border: `1px solid ${theme.buttonNormalBorder}`,
+                      color: theme.buttonNormalText,
+                      fontSize: '11px',
+                      padding: '4px 8px',
+                      borderRadius: 3,
+                      height: 'auto',
+                      minHeight: 'auto',
+                    }}
+                  >
+                    <Trans>Nearby</Trans>
+                    <SvgLocation
+                      width={10}
+                      height={10}
+                      style={{ marginLeft: 4 }}
+                    />
+                  </Button>
+                ) : onRequestLocation && !transaction.payee ? (
+                  <Button
+                    variant="bare"
+                    onPress={onRequestLocation}
+                    style={{
+                      backgroundColor: theme.buttonNormalBackground,
+                      border: `1px solid ${theme.buttonNormalBorder}`,
+                      color: theme.buttonNormalText,
+                      fontSize: '11px',
+                      padding: '4px 8px',
+                      borderRadius: 3,
+                      height: 'auto',
+                      minHeight: 'auto',
+                    }}
+                  >
+                    <Trans>Request Location</Trans>
+                    <SvgLocation
+                      width={10}
+                      height={10}
+                      style={{ marginLeft: 4 }}
+                    />
+                  </Button>
+                ) : (
+                  dropdownChevron
+                )
+              }
             />
           </View>
 
@@ -1097,6 +1259,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             <View>
               <FieldLabel title={t('Category')} />
               <TapField
+                icon={<SvgTag width={17} height={17} />}
+                placeholder={t('Select a category')}
+                rightContent={dropdownChevron}
                 style={{
                   ...((isOffBudget || isBudgetTransfer(transaction)) && {
                     fontStyle: 'italic',
@@ -1122,8 +1287,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             <ChildTransactionEdit
               key={childTrans.id}
               transaction={childTrans}
+              negate={transaction.amount <= 0}
               amountFocused={arr.findIndex(c => c.amount === 0) === i}
-              amountSign={childAmountSign}
               ref={r => {
                 childTransactionElementRefMap.current = {
                   ...childTransactionElementRefMap.current,
@@ -1138,6 +1303,18 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               onUpdate={onUpdateInner}
               onEditField={onEditFieldInner}
               onDelete={onDeleteInner}
+              keyboardHeader={
+                <FillRemainingButton
+                  remaining={remaining}
+                  onPress={() => {
+                    void onUpdateInner(
+                      childTrans,
+                      'amount',
+                      integerToAmount(remaining),
+                    );
+                  }}
+                />
+              }
             />
           ))}
 
@@ -1177,6 +1354,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           <View>
             <FieldLabel title={t('Account')} />
             <TapField
+              icon={<SvgWallet width={17} height={17} />}
+              placeholder={t('Select an account')}
+              rightContent={dropdownChevron}
               isDisabled={
                 !!editingField &&
                 editingField !== getFieldName(transaction.id, 'account')
@@ -1192,6 +1372,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               <FieldLabel title={t('Date')} />
               <InputField
                 type="date"
+                icon={<SvgCalendar width={17} height={17} />}
                 disabled={
                   !!editingField &&
                   editingField !== getFieldName(transaction.id, 'date')
@@ -1236,6 +1417,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           <View>
             <FieldLabel title={t('Notes')} />
             <InputField
+              ref={noteRef}
+              icon={<SvgNotesPaper width={17} height={17} />}
+              placeholder={t('Add a note (optional)')}
               disabled={
                 !!editingField &&
                 editingField !== getFieldName(transaction.id, 'notes')
@@ -1249,6 +1433,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                 onUpdateInner(transaction, 'notes', event.target.value)
               }
             />
+            <NoteTagAutocomplete inputRef={noteRef} />
           </View>
 
           {!isAdding && (
@@ -1288,6 +1473,151 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
   },
 );
 
+function NoteTagAutocomplete({
+  inputRef,
+}: {
+  inputRef: RefObject<HTMLInputElement | null>;
+}) {
+  const dispatch = useDispatch();
+  // Yes, there is a lot of ref usages in this component. Here's the motivation
+  // 1. This component purely modifies HTML Input state, app state is handled elsewhere
+  // 2. This component deals with cursor state, which is not easily accessible through regular React code
+  // 3. Child transaction notes (transaction.notes) does not update until blur, so we have to use input state
+  // 4. Given we are already using inputRef in multiple locations, I elected to simplify the props to just the ref and use HTML/JS events
+
+  const [note, setNote] = useInputRefValue(inputRef);
+
+  const [cursorPosition] = useCursorPosition(inputRef);
+  const [startIdx, endIdx] = useCurrentWordRange(note, cursorPosition);
+  const currentWord = note.slice(startIdx, endIdx);
+  const currentWordNoHash = currentWord.replace(/^#+/, '');
+  const { data: filteredTags, refetch } = useFilteredTags(currentWord, true);
+  const showNewTag =
+    currentWord.startsWith('#') &&
+    currentWordNoHash &&
+    !filteredTags.some(tag => tag.tag === currentWordNoHash);
+
+  const getTagCSS = useTagCSS({ ellipsis: true });
+
+  function handleSelect(tag: string) {
+    if (!inputRef.current) return;
+    const newValue =
+      note.slice(0, startIdx) + '#' + tag + ' ' + note.slice(endIdx);
+    setNote(newValue);
+    const newPos = startIdx + tag.length + 2;
+
+    inputRef.current.setSelectionRange(newPos, newPos);
+    document.dispatchEvent(new Event('selectionchange'));
+  }
+
+  async function handleCreate(tag: string) {
+    if (!inputRef.current) return;
+    try {
+      await send('tags-create', { tag });
+      void refetch();
+      handleSelect(tag);
+    } catch (e) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: 'Failed to add tag, check logs',
+          },
+        }),
+      );
+      console.trace(e);
+    }
+  }
+
+  const hideScrollbar = css({
+    'scrollbar-width': 'none',
+    '-ms-overflow-style': 'none',
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
+  });
+
+  return (
+    <View
+      style={{
+        width: '100%',
+        padding: '4px 8px 4px 8px',
+        borderRadius: 30,
+        overflowX: 'auto',
+        height: filteredTags.length || showNewTag ? 30 : 0,
+        transitionProperty: 'height',
+        transitionDuration: '100ms',
+      }}
+      className={hideScrollbar}
+    >
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'end',
+          flexWrap: 'nowrap',
+          gap: 4,
+          paddingRight: 8,
+        }}
+      >
+        {filteredTags.map(tag => (
+          <div key={tag.id}>
+            <button
+              type="button"
+              style={{
+                border: 'none',
+                height: 22,
+                maxWidth: '50dvw',
+              }}
+              className={getTagCSS(tag.tag)}
+              onMouseDown={e => e.preventDefault()} // stops input from losing focus
+              onClick={() => handleSelect(tag.tag)}
+            >
+              #{tag.tag}
+            </button>
+          </div>
+        ))}
+        {showNewTag && (
+          <button
+            type="button"
+            style={{
+              padding: '1px 1px 1px 9px',
+              borderRadius: 12,
+              borderWidth: 0,
+              backgroundColor: theme.noticeBackground,
+              color: theme.noticeTextDark,
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'nowrap',
+              gap: 4,
+            }}
+            onMouseDown={e => e.preventDefault()} // stops input from losing focus
+            onClick={() => handleCreate(currentWordNoHash)}
+          >
+            <SvgAdd height={8} width={8} />
+            <span style={{ whiteSpace: 'nowrap' }}>
+              <Trans>Create tag</Trans>
+            </span>
+            <div
+              style={{
+                borderWidth: 0,
+                height: 20,
+                maxWidth: '50dvw',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: 'inline-block',
+              }}
+              className={getTagCSS('')}
+            >
+              #{currentWordNoHash}
+            </div>
+          </button>
+        )}
+      </View>
+    </View>
+  );
+}
+
 function isTemporary(transaction: TransactionEntity) {
   return transaction.id.indexOf('temp') === 0;
 }
@@ -1312,6 +1642,7 @@ function TransactionEditUnconnected({
   const { state: locationState } = useLocation();
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
+  const updatePayeeLocationMutation = useSavePayeeLocationMutation();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
   const [fetchedTransactions, setFetchedTransactions] = useState<
@@ -1332,6 +1663,17 @@ function TransactionEditUnconnected({
     () => payees.find(p => p.name === searchParams.get('payee'))?.id,
     [payees, searchParams],
   );
+
+  const {
+    isGranted: isLocationGranted,
+    isPending: shouldPromptLocation,
+    requestPermission,
+  } = useLocationPermission();
+  const { data: nearbyPayees = [] } = useNearbyPayees({
+    enabled: isLocationGranted,
+  });
+  const [shouldShowSaveLocation, setShouldShowSaveLocation] = useState(false);
+  const nearestPayee = nearbyPayees[0]?.payee ?? null;
 
   useEffect(() => {
     let unmounted = false;
@@ -1369,6 +1711,12 @@ function TransactionEditUnconnected({
       unmounted = true;
     };
   }, [transactionId]);
+
+  useEffect(() => {
+    if (!isLocationGranted) {
+      setShouldShowSaveLocation(false);
+    }
+  }, [isLocationGranted]);
 
   useEffect(() => {
     if (isAdding.current) {
@@ -1421,6 +1769,7 @@ function TransactionEditUnconnected({
       // Run the rules to auto-fill in any data. Right now we only do
       // this on new transactions because that's how desktop works.
       const newTransaction = { ...transaction };
+      const changedFields = new Set<keyof TransactionEntity>([updatedField]);
       if (isTemporary(newTransaction)) {
         const afterRules = await send('rules-run', {
           transaction: newTransaction,
@@ -1430,13 +1779,16 @@ function TransactionEditUnconnected({
         if (diff) {
           Object.keys(diff).forEach(key => {
             const field = key as keyof TransactionEntity;
+            // Apply rule changes to "empty" fields and append/prepend notes rules
+            // (see shouldApplyRuleChange).
+            // Or update all fields if the payee changes (assists location-based entry by
+            // applying rules to prefill category, notes, etc. based on the selected payee)
             if (
-              newTransaction[field] == null ||
-              newTransaction[field] === '' ||
-              newTransaction[field] === 0 ||
-              newTransaction[field] === false
+              updatedField === 'payee' ||
+              shouldApplyRuleChange(field, newTransaction[field], diff[field])
             ) {
               (newTransaction as Record<string, unknown>)[field] = diff[field];
+              changedFields.add(field);
             }
           });
 
@@ -1454,17 +1806,55 @@ function TransactionEditUnconnected({
                 }),
               }),
             );
+            changedFields.add('subtransactions');
           }
         }
       }
 
-      const { data: newTransactions } = updateTransaction(
-        transactions,
-        newTransaction,
-      );
-      setTransactions(newTransactions);
+      // Updates can be in flight at the same time (e.g. an amount blur
+      // racing a nearby payee press), so merge only the changed fields onto
+      // the latest state rather than replacing the whole transaction.
+      setTransactions(prevTransactions => {
+        const latestTransaction = prevTransactions.find(
+          t => t.id === newTransaction.id,
+        );
+        if (!latestTransaction) {
+          // The transaction was deleted while this update was in flight.
+          return prevTransactions;
+        }
+        const merged = { ...latestTransaction };
+        for (const field of changedFields) {
+          (merged as Record<string, unknown>)[field] = newTransaction[field];
+        }
+        return updateTransaction(prevTransactions, merged).data;
+      });
+
+      if (updatedField === 'payee') {
+        setShouldShowSaveLocation(false);
+
+        if (newTransaction.payee && isLocationGranted) {
+          const payeeLocations = await locationService.getPayeeLocations(
+            newTransaction.payee,
+          );
+          if (payeeLocations.length === 0) {
+            setShouldShowSaveLocation(true);
+          } else {
+            const currentPosition = await locationService.getCurrentPosition();
+            const hasNearby = payeeLocations.some(
+              loc =>
+                calculateDistance(currentPosition, {
+                  latitude: loc.latitude,
+                  longitude: loc.longitude,
+                }) <= DEFAULT_MAX_DISTANCE_METERS,
+            );
+            if (!hasNearby) {
+              setShouldShowSaveLocation(true);
+            }
+          }
+        }
+      }
     },
-    [dateFormat, transactions],
+    [dateFormat, isLocationGranted],
   );
 
   const onSave = useCallback(
@@ -1534,15 +1924,49 @@ function TransactionEditUnconnected({
 
   const onSplit = useCallback(
     (id: TransactionEntity['id']) => {
-      const changes = splitTransaction(transactions, id, parent => [
-        makeChild(parent),
-        makeChild(parent),
-      ]);
+      const changes = splitTransaction(
+        transactions,
+        id,
+        makeEmptySplitSubtransactions,
+      );
 
       setTransactions(changes.data);
     },
     [transactions],
   );
+
+  const onSaveLocation = useCallback(async () => {
+    try {
+      const [transaction] = transactions;
+      if (transaction.payee) {
+        await updatePayeeLocationMutation.mutateAsync(transaction.payee);
+        setShouldShowSaveLocation(false);
+      }
+    } catch (error) {
+      console.error('Failed to save location', { error });
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('Failed to save location'),
+          },
+        }),
+      );
+    }
+  }, [t, transactions, dispatch, updatePayeeLocationMutation]);
+
+  const onSelectNearestPayee = useCallback(() => {
+    const transaction = transactions[0];
+    if (!nearestPayee || !transaction || transaction.payee) {
+      return;
+    }
+
+    const updated = {
+      ...serializeTransaction(transaction, dateFormat),
+      payee: nearestPayee.id,
+    };
+    void onUpdate(updated, 'payee');
+  }, [transactions, nearestPayee, onUpdate, dateFormat]);
 
   if (accounts.length === 0) {
     return (
@@ -1669,6 +2093,11 @@ function TransactionEditUnconnected({
         onDelete={onDelete}
         onSplit={onSplit}
         onAddSplit={onAddSplit}
+        shouldShowSaveLocation={shouldShowSaveLocation}
+        onSaveLocation={onSaveLocation}
+        onSelectNearestPayee={onSelectNearestPayee}
+        nearestPayee={isLocationGranted ? nearestPayee : null}
+        onRequestLocation={shouldPromptLocation ? requestPermission : undefined}
       />
     </View>
   );
@@ -1701,3 +2130,35 @@ export const TransactionEdit = (props: TransactionEditProps) => {
     </SingleActiveEditFormProvider>
   );
 };
+
+function FillRemainingButton({
+  remaining,
+  onPress,
+}: {
+  readonly remaining: number;
+  readonly onPress: () => void;
+}) {
+  return (
+    <Button
+      variant="primary"
+      style={{ height: styles.mobileMinHeight }}
+      onPress={onPress}
+      isDisabled={remaining === 0}
+    >
+      <SvgSplit width={17} height={17} />
+      <Text
+        style={{
+          ...styles.text,
+          marginLeft: 6,
+        }}
+      >
+        <Trans>
+          Use remaining:{' '}
+          {{
+            amount: integerToCurrency(Math.abs(remaining)),
+          }}
+        </Trans>
+      </Text>
+    </Button>
+  );
+}

@@ -9,12 +9,12 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { Cell, Row, TableHeader } from '#components/table';
+
 import type {
   MappableFieldWithExample,
   TransactionDirection,
 } from './EditSyncAccount';
-
-import { Cell, Row, TableHeader } from '@desktop-client/components/table';
 
 const useTransactionDirectionOptions = () => {
   const { t } = useTranslation();

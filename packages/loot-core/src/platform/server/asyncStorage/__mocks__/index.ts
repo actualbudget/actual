@@ -1,6 +1,6 @@
+import type * as T from '#platform/server/asyncStorage/index-types';
 // @ts-strict-ignore
-import type { GlobalPrefsJson } from '../../../../types/prefs';
-import type * as T from '../index-types';
+import type { GlobalPrefsJson } from '#types/prefs';
 
 const store: GlobalPrefsJson = {};
 
