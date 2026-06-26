@@ -1505,7 +1505,7 @@ function NoteInsertHashButton({
 
         setInputValue(before + space + '#' + after);
         setCursorPosition(start + 1 + space.length);
-        setTimeout(() => noteRef.current.focus());
+        setTimeout(() => noteRef.current.focus(), 1);
       }}
     >
       <SvgHash width={17} height={17} />
