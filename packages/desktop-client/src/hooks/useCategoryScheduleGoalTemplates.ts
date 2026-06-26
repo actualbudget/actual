@@ -12,7 +12,8 @@ import type { ScheduleStatusLabels } from './useSchedules';
 
 type ScheduleGoalDefinition = {
   type: 'schedule';
-  name: ScheduleEntity['name'];
+  name?: ScheduleEntity['name'];
+  scheduleId?: ScheduleEntity['id'];
 };
 
 type UseCategoryScheduleGoalTemplatesProps = {
@@ -69,7 +70,9 @@ export function useCategoryScheduleGoalTemplates({
     }
 
     const schedules = allSchedules.filter(s =>
-      scheduleGoalDefinitions.some(g => g.name === s.name),
+      scheduleGoalDefinitions.some(g =>
+        g.scheduleId ? g.scheduleId === s.id : g.name === s.name,
+      ),
     );
 
     const scheduleIds = new Set(schedules.map(s => s.id));
