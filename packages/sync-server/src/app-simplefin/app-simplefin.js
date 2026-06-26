@@ -1,5 +1,3 @@
-import https from 'https';
-
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -319,22 +317,10 @@ async function getAccessKey(base64Token) {
   // private addresses are allowed here; cloud metadata and other always-blocked
   // ranges are still rejected.
   await assertUrlAllowed(token, { allowPrivateNetwork: true });
-  const options = {
-    method: 'POST',
-    port: 443,
-    headers: { 'Content-Length': 0 },
-  };
-  return new Promise((resolve, reject) => {
-    const req = https.request(new URL(token), options, res => {
-      res.on('data', d => {
-        resolve(d.toString());
-      });
-    });
-    req.on('error', e => {
-      reject(e);
-    });
-    req.end();
-  });
+
+  // don't auto-follow redirects for SSRF safety
+  const response = await fetch(token, { method: 'POST', redirect: 'manual' });
+  return (await response.text()).trim();
 }
 
 function isForbidden(value) {
