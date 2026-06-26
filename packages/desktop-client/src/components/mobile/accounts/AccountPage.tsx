@@ -33,12 +33,30 @@ import { OffBudgetAccountTransactions } from './OffBudgetAccountTransactions';
 import { OnBudgetAccountTransactions } from './OnBudgetAccountTransactions';
 
 export function AccountPage() {
+  const { id: accountIdParam } = useParams();
+
+  // The content lives in a child component so the boundary encloses the page's
+  // hooks/render logic too. `resetKeys` clears a previous failure when the user
+  // navigates to a different account.
+  return (
+    <ErrorBoundary
+      FallbackComponent={FeatureErrorFallback}
+      resetKeys={[accountIdParam]}
+    >
+      <AccountPageContent accountIdParam={accountIdParam} />
+    </ErrorBoundary>
+  );
+}
+
+function AccountPageContent({
+  accountIdParam,
+}: {
+  readonly accountIdParam: string | undefined;
+}) {
   const { t } = useTranslation();
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
-
-  const { id: accountIdParam } = useParams();
 
   const account = useAccount(accountIdParam || '');
 
@@ -61,37 +79,35 @@ export function AccountPage() {
   );
 
   return (
-    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-      <Page
-        header={
-          <MobilePageHeader
-            title={
-              account ? (
-                <AccountHeader account={account} />
-              ) : (
-                <NameOnlyHeader name={nameFromId(accountIdParam)} />
-              )
-            }
-            leftContent={<MobileBackButton />}
-            rightContent={<AddTransactionButton accountId={account?.id} />}
-          />
-        }
-        padding={0}
-      >
-        {/* This key forces the whole table rerender when the number format changes */}
-        <Fragment key={numberFormat + hideFraction}>
-          {account ? (
-            <AccountTransactions account={account} />
-          ) : accountIdParam === 'onbudget' ? (
-            <OnBudgetAccountTransactions />
-          ) : accountIdParam === 'offbudget' ? (
-            <OffBudgetAccountTransactions />
-          ) : (
-            <AllAccountTransactions />
-          )}
-        </Fragment>
-      </Page>
-    </ErrorBoundary>
+    <Page
+      header={
+        <MobilePageHeader
+          title={
+            account ? (
+              <AccountHeader account={account} />
+            ) : (
+              <NameOnlyHeader name={nameFromId(accountIdParam)} />
+            )
+          }
+          leftContent={<MobileBackButton />}
+          rightContent={<AddTransactionButton accountId={account?.id} />}
+        />
+      }
+      padding={0}
+    >
+      {/* This key forces the whole table rerender when the number format changes */}
+      <Fragment key={numberFormat + hideFraction}>
+        {account ? (
+          <AccountTransactions account={account} />
+        ) : accountIdParam === 'onbudget' ? (
+          <OnBudgetAccountTransactions />
+        ) : accountIdParam === 'offbudget' ? (
+          <OffBudgetAccountTransactions />
+        ) : (
+          <AllAccountTransactions />
+        )}
+      </Fragment>
+    </Page>
   );
 }
 

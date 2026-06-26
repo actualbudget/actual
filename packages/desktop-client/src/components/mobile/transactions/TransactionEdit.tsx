@@ -2110,7 +2110,7 @@ type TransactionEditProps = Omit<
   'categories' | 'accounts' | 'payees' | 'lastTransaction' | 'dateFormat'
 >;
 
-export const TransactionEdit = (props: TransactionEditProps) => {
+const TransactionEditContent = (props: TransactionEditProps) => {
   const { data: { list: categories } = { list: [] } } = useCategories();
   const { data: payees = [] } = usePayees();
   const lastTransaction = useSelector(
@@ -2120,16 +2120,25 @@ export const TransactionEdit = (props: TransactionEditProps) => {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   return (
+    <TransactionEditUnconnected
+      {...props}
+      categories={categories}
+      payees={payees}
+      lastTransaction={lastTransaction}
+      accounts={accounts}
+      dateFormat={dateFormat}
+    />
+  );
+};
+
+export const TransactionEdit = (props: TransactionEditProps) => {
+  // The data-fetching hooks live in the `TransactionEditContent` child so the
+  // boundary encloses them — otherwise a failure in those hooks would escape to
+  // the global fatal screen instead of the scoped fallback.
+  return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
       <SingleActiveEditFormProvider formName="mobile-transaction">
-        <TransactionEditUnconnected
-          {...props}
-          categories={categories}
-          payees={payees}
-          lastTransaction={lastTransaction}
-          accounts={accounts}
-          dateFormat={dateFormat}
-        />
+        <TransactionEditContent {...props} />
       </SingleActiveEditFormProvider>
     </ErrorBoundary>
   );
