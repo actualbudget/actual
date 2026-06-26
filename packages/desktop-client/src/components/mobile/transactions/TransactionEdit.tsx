@@ -1495,9 +1495,11 @@ function NoteInsertHashButton({
         const before = inputValue.substring(0, start);
         const after = inputValue.substring(end);
 
-        setInputValue(before + '#' + after);
-        noteRef.current.value = before + '#' + after;
-        noteRef.current.setSelectionRange(start + 1, start + 1);
+        const space = before.match(/\s$/) ? '' : ' ';
+        const newCursorSpot = start + 1 + space.length;
+
+        setInputValue(before + space + '#' + after);
+        noteRef.current.setSelectionRange(newCursorSpot, newCursorSpot);
       }}
     >
       <SvgHash width={17} height={17} />
