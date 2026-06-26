@@ -41,7 +41,9 @@ type BaseConditionEntity<
     ? Array<FieldValueTypes[Field]>
     : Op extends 'isbetween'
       ? { num1: number; num2: number }
-      : FieldValueTypes[Field];
+      : Op extends 'formula'
+        ? string
+        : FieldValueTypes[Field];
   options?: {
     inflow?: boolean;
     outflow?: boolean;
@@ -89,7 +91,7 @@ export type RuleConditionEntity =
     >
   | BaseConditionEntity<
       'amount',
-      'is' | 'isapprox' | 'isbetween' | 'gt' | 'gte' | 'lt' | 'lte'
+      'is' | 'isapprox' | 'isbetween' | 'gt' | 'gte' | 'lt' | 'lte' | 'formula'
     >
   | BaseConditionEntity<
       'date',

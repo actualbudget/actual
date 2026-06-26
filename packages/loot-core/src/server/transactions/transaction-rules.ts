@@ -684,12 +684,20 @@ export function conditionsToAQL(
       case 'offBudget':
         return { 'account.offbudget': true };
 
+      case 'formula':
+        // Formula amounts can only be evaluated in JS (HyperFormula); SQLite
+        // can't run them per row. Skip this condition at the DB layer — the
+        // remaining conditions (payee/account/date) still narrow the match
+        // candidate set, and the rule engine's in-memory `Condition.eval`
+        // handles the exact match when the rule actually fires.
+        return null;
+
       default:
         throw new Error('Unhandled operator: ' + op);
     }
   };
 
-  const filters = conditions.map(mapConditionToActualQL);
+  const filters = conditions.map(mapConditionToActualQL).filter(f => f != null);
   return { filters, errors };
 }
 

@@ -712,6 +712,17 @@ describe('Transaction rules', () => {
       },
     ]);
   });
+
+  test('formula amount condition is skipped at the AQL layer', async () => {
+    // SQLite can't evaluate formulas, so omit it from the query
+
+    const { filters, errors } = conditionsToAQL([
+      { field: 'amount', op: 'formula', value: '=DAY(date) * 100' },
+      { field: 'notes', op: 'is', value: 'rent' },
+    ]);
+    expect(errors).toEqual([]);
+    expect(filters).toEqual([{ notes: { $transform: '$lower', $eq: 'rent' } }]);
+  });
 });
 
 describe('Learning categories', () => {

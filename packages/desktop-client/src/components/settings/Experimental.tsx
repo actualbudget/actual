@@ -194,7 +194,10 @@ export function ExperimentalFeatures() {
               flag="formulaMode"
               feedbackLink="https://github.com/actualbudget/actual/issues/5949"
             >
-              <Trans>Excel formula mode (Formula cards & Rule formulas)</Trans>
+              <Trans>
+                Excel formula mode (Formula cards, Rule formulas & Schedule
+                amounts)
+              </Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="currency"

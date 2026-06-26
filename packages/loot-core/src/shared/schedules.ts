@@ -2,11 +2,14 @@
 import type { IRuleOptions } from '@rschedule/core';
 import * as d from 'date-fns';
 
+import { logger } from '#platform/server/log';
 import { Condition } from '#server/rules';
 import type { RuleConditionEntity, ScheduleEntity } from '#types/models';
 
+import { evaluateFormula } from './formulas/evaluate';
 import * as monthUtils from './months';
 import { q } from './query';
+import { amountToInteger } from './util';
 
 export function getStatus(
   nextDate: string,
@@ -220,7 +223,8 @@ export function extractScheduleConds(conditions) {
         cond =>
           (cond.op === 'is' ||
             cond.op === 'isapprox' ||
-            cond.op === 'isbetween') &&
+            cond.op === 'isbetween' ||
+            cond.op === 'formula') &&
           cond.field === 'amount',
       ) || null,
     date:
@@ -283,12 +287,33 @@ export function getDateWithSkippedWeekend(
 }
 
 export function getScheduledAmount(
-  amount: number | { num1: number; num2: number },
+  amount: number | { num1: number; num2: number } | string,
   inverse: boolean = false,
+  context: { date?: string } = {},
 ): number {
   // this check is temporary, and required at the moment as a schedule rule
   // allows the amount condition to be deleted which causes a crash
   if (amount == null) return 0;
+
+  if (typeof amount === 'string') {
+    // Formula-based amount: evaluate against the occurrence date
+    try {
+      const result = evaluateFormula(amount, {
+        date: context.date ?? monthUtils.currentDay(),
+      });
+      const num =
+        typeof result === 'number'
+          ? amountToInteger(Math.round(result * 100) / 100)
+          : 0;
+      return inverse ? -num : num;
+    } catch (err) {
+      logger.warn(
+        `getScheduledAmount: formula evaluation failed for ${JSON.stringify(amount)}:`,
+        err,
+      );
+      return 0;
+    }
+  }
 
   if (typeof amount === 'number') {
     return inverse ? -amount : amount;

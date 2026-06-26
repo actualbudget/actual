@@ -145,7 +145,7 @@ export function ScheduleAmountCell({
     cellText = t('Approximately {{currencyAmount}}', {
       currencyAmount,
     });
-  } else if (isBetween && typeof amount != 'number') {
+  } else if (isBetween && typeof amount === 'object' && amount != null) {
     cellText = t('{{currency1}} to {{currency2}}', {
       currency1: format(Math.abs(amount.num1 || 0), 'financial'),
       currency2: format(Math.abs(amount.num2 || 0), 'financial'),
