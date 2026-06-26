@@ -1503,9 +1503,9 @@ function NoteInsertHashButton({
 
         const space = start === 0 || before.match(/\s$/) ? '' : ' ';
 
-        noteRef.current.focus();
         setInputValue(before + space + '#' + after);
         setCursorPosition(start + 1 + space.length);
+        setTimeout(() => noteRef.current.focus());
       }}
     >
       <SvgHash width={17} height={17} />
