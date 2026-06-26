@@ -35,13 +35,13 @@ app.post(
     let accessKey = secretsService.get(SecretName.simplefin_accessKey);
 
     try {
-      if (accessKey == null || isForbidden(accessKey)) {
+      if (isInvalidAccessKey(accessKey)) {
         const token = secretsService.get(SecretName.simplefin_token);
         if (token == null || isForbidden(token)) {
           throw new Error('No token');
         } else {
           accessKey = await getAccessKey(token);
-          if (accessKey == null || isForbidden(accessKey)) {
+          if (isInvalidAccessKey(accessKey)) {
             throw new Error('No access key');
           }
           secretsService.set(SecretName.simplefin_accessKey, accessKey);
@@ -75,7 +75,7 @@ app.post(
 
     const accessKey = secretsService.get(SecretName.simplefin_accessKey);
 
-    if (accessKey == null || isForbidden(accessKey)) {
+    if (isInvalidAccessKey(accessKey)) {
       invalidToken(res);
       return;
     }
@@ -325,6 +325,14 @@ async function getAccessKey(base64Token) {
 
 function isForbidden(value) {
   return typeof value === 'string' && value.startsWith('Forbidden');
+}
+
+function isInvalidAccessKey(accessKey) {
+  return (
+    typeof accessKey !== 'string' ||
+    accessKey.trim() === '' ||
+    isForbidden(accessKey)
+  );
 }
 
 async function getTransactions(accessKey, accounts, startDate, endDate) {
