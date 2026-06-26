@@ -1495,7 +1495,7 @@ function NoteInsertHashButton({
         const before = inputValue.substring(0, start);
         const after = inputValue.substring(end);
 
-        const space = before.match(/\s$/) ? '' : ' ';
+        const space = start === 0 || before.match(/\s$/) ? '' : ' ';
         const newCursorSpot = start + 1 + space.length;
 
         setInputValue(before + space + '#' + after);
