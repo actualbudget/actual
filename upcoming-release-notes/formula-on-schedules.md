@@ -3,4 +3,4 @@ category: Enhancements
 authors: [zyberzero]
 ---
 
-Add formula supportn to a schedules amount, for date dependant calculations.
+Add formula support to a schedules amount, for date dependant calculations.
