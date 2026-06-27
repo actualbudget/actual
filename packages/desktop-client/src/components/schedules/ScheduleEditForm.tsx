@@ -141,7 +141,7 @@ export function ScheduleEditForm({
         return { error: t('Formula did not evaluate to a number') };
       }
       return {
-        value: amountToInteger(Math.round(result * 100) / 100),
+        value: amountToInteger(result, format.currency.decimalPlaces),
       };
     } catch (e) {
       return { error: e instanceof Error ? e.message : String(e) };
