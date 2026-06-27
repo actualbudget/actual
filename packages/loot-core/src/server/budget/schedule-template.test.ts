@@ -2,7 +2,7 @@ import * as db from '#server/db';
 import { Rule } from '#server/rules';
 import { getRuleForSchedule } from '#server/schedules/app';
 import type { Currency } from '#shared/currencies';
-import type { CategoryEntity } from '#types/models';
+import type { CategoryEntity, RuleConditionEntity } from '#types/models';
 
 import { isTrackingBudget } from './actions';
 import { runSchedule } from './schedule-template';
@@ -31,20 +31,41 @@ const defaultCategory = { id: '1', name: 'Test Category' } as CategoryEntity;
 type RuleSpec = {
   id?: string;
   start: string;
-  amount: number | string;
-  amountOp?: 'is' | 'isapprox' | 'isbetween' | 'formula';
   frequency: 'monthly' | 'yearly' | 'weekly' | 'daily';
   interval?: number;
-};
+} & (
+  | { amountOp?: 'is' | 'isapprox'; amount: number }
+  | { amountOp: 'isbetween'; amount: { num1: number; num2: number } }
+  | { amountOp: 'formula'; amount: string }
+);
 
-function makeRule({
-  id = 'r',
-  start,
-  amount,
-  amountOp = 'is',
-  frequency,
-  interval = 1,
-}: RuleSpec): Rule {
+function makeAmountCondition(spec: RuleSpec): RuleConditionEntity {
+  if (spec.amountOp === 'formula') {
+    return {
+      op: 'formula',
+      field: 'amount',
+      value: spec.amount,
+      type: 'string',
+    };
+  }
+  if (spec.amountOp === 'isbetween') {
+    return {
+      op: 'isbetween',
+      field: 'amount',
+      value: spec.amount,
+      type: 'number',
+    };
+  }
+  return {
+    op: spec.amountOp ?? 'is',
+    field: 'amount',
+    value: spec.amount,
+    type: 'number',
+  };
+}
+
+function makeRule(spec: RuleSpec): Rule {
+  const { id = 'r', start, frequency, interval = 1 } = spec;
   return new Rule({
     id,
     stage: 'pre',
@@ -66,12 +87,7 @@ function makeRule({
         },
         type: 'date',
       },
-      {
-        op: amountOp,
-        field: 'amount',
-        value: amount,
-        type: amountOp === 'formula' ? 'string' : 'number',
-      },
+      makeAmountCondition(spec),
     ],
     actions: [],
   });
