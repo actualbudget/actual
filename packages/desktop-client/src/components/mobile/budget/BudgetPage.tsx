@@ -74,10 +74,6 @@ function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
 }
 
 export function BudgetPage() {
-  // The page body lives in a child component so the boundary encloses the
-  // page's hooks and initialization logic (data loading, `useEffect`), not just
-  // the returned JSX. `resetKeys` lets the feature recover when the displayed
-  // month changes.
   const [startMonth = monthUtils.currentMonth()] =
     useLocalPref('budget.startMonth');
 

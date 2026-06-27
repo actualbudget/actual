@@ -35,9 +35,6 @@ import { OnBudgetAccountTransactions } from './OnBudgetAccountTransactions';
 export function AccountPage() {
   const { id: accountIdParam } = useParams();
 
-  // The content lives in a child component so the boundary encloses the page's
-  // hooks/render logic too. `resetKeys` clears a previous failure when the user
-  // navigates to a different account.
   return (
     <ErrorBoundary
       FallbackComponent={FeatureErrorFallback}

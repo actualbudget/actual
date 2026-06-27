@@ -2132,9 +2132,6 @@ const TransactionEditContent = (props: TransactionEditProps) => {
 };
 
 export const TransactionEdit = (props: TransactionEditProps) => {
-  // The data-fetching hooks live in the `TransactionEditContent` child so the
-  // boundary encloses them — otherwise a failure in those hooks would escape to
-  // the global fatal screen instead of the scoped fallback.
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
       <SingleActiveEditFormProvider formName="mobile-transaction">
