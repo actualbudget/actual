@@ -105,30 +105,15 @@ async function createScheduleList(
     // schedule rules.
     const formulaStrings = collectFormulasFromActions(rule.actions);
 
-    // Use the schedule's next occurrence date so "balance as of this moment"
-    // matches the scheduled date; id/sort_order are unset so we don't exclude a
-    // non-existent transaction from the balance query.
-    const scheduleRuleContext: TransactionEntity = {
-      amount: scheduleAmount,
-      category: category.id,
-      subtransactions: [],
-      ...(next_date_string ? { date: next_date_string } : {}),
-      id: null,
-      sort_order: null,
-    } as TransactionEntity;
-
-    const balanceOfPrefetched = await prefetchBalanceOfForTransaction(
-      scheduleRuleContext,
-      accountsMap,
-      formulaStrings,
-    );
-
     const sign = category.is_income ? 1 : -1;
 
-    const computeOccurrenceTarget = (
+    // Use each occurrence's date so "balance as of this moment" matches that
+    // scheduled date; id/sort_order are unset so we don't exclude a
+    // non-existent transaction from the balance query.
+    const computeOccurrenceTarget = async (
       date: string | null,
       amount: number,
-    ): number => {
+    ): Promise<number> => {
       const occurrenceContext: TransactionEntity = {
         amount,
         category: category.id,
@@ -137,6 +122,11 @@ async function createScheduleList(
         id: null,
         sort_order: null,
       } as TransactionEntity;
+      const balanceOfPrefetched = await prefetchBalanceOfForTransaction(
+        occurrenceContext,
+        accountsMap,
+        formulaStrings,
+      );
       const { amount: postRuleAmount, subtransactions } = rule.execActions({
         ...occurrenceContext,
         _balanceOfPrefetched: balanceOfPrefetched,
@@ -152,7 +142,10 @@ async function createScheduleList(
       );
     };
 
-    const target = computeOccurrenceTarget(next_date_string, scheduleAmount);
+    const target = await computeOccurrenceTarget(
+      next_date_string,
+      scheduleAmount,
+    );
 
     const target_interval = dateConditions.value.interval
       ? dateConditions.value.interval
@@ -205,7 +198,7 @@ async function createScheduleList(
             : nextBaseDate;
           while (nextDate < nextMonth) {
             const occurrenceTarget = isFormulaAmount
-              ? computeOccurrenceTarget(
+              ? await computeOccurrenceTarget(
                   nextDate,
                   computeScheduleAmount(nextDate),
                 )
