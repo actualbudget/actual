@@ -66,3 +66,64 @@ test.describe('Budget', () => {
     await page.getByRole('button', { name: 'Back' }).click();
   });
 });
+
+test.describe('Budget scroll position', () => {
+  let page: Page;
+  let configurationPage: ConfigurationPage;
+  let budgetPage: BudgetPage;
+
+  test.beforeEach(async ({ browser }) => {
+    page = await browser.newPage();
+    configurationPage = new ConfigurationPage(page);
+
+    await page.goto('/');
+    budgetPage = await configurationPage.createTestFile();
+
+    // Add enough categories to make the budget table scrollable.
+    const categoryCount = 20;
+    await page.evaluate(async count => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const $send = (window as any).$send as (
+        type: string,
+        args?: unknown,
+      ) => Promise<string>;
+      const groupId = await $send('category-group-create', {
+        name: 'Extra Categories',
+      });
+      for (let i = 1; i <= count; i++) {
+        await $send('category-create', { name: `Category ${i}`, groupId });
+      }
+      // Invalidate the category query so React re-renders with the new categories.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (window as any).__TANSTACK_QUERY_CLIENT__.invalidateQueries({
+        queryKey: ['categories', 'lists'],
+      });
+    }, categoryCount);
+    await page
+      .getByText(`Category ${categoryCount}`, { exact: true })
+      .waitFor({ state: 'visible' });
+
+    await page.mouse.move(0, 0);
+  });
+
+  test.afterEach(async () => {
+    await page?.close();
+  });
+
+  test('scroll position is restored when navigating back from spent transactions page', async () => {
+    await budgetPage.scrollToBottom();
+    const scrollTopBeforeViewingSpent = await budgetPage.getScrollTop();
+    expect(scrollTopBeforeViewingSpent).toBeGreaterThan(0);
+
+    // Click a spent-amount cell that is already visible at the current scroll position so the scroll does not change
+    // before the handler captures it.
+    await budgetPage.clickOnSpentAmountForLastVisibleRow();
+    expect(page.url()).toContain('/accounts');
+
+    await page.getByRole('button', { name: 'Back' }).click();
+    await budgetPage.waitFor();
+
+    const scrollTopAfterReturningFromSpent = await budgetPage.getScrollTop();
+    expect(scrollTopAfterReturningFromSpent).toBe(scrollTopBeforeViewingSpent);
+  });
+});
