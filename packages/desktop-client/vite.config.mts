@@ -5,6 +5,11 @@ import { cp, mkdir, readdir, rename, rm } from 'node:fs/promises';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
+import {
+  defaultDbPath,
+  migrationsDir,
+  sqlWasmPath,
+} from '@actual-app/core/default-filesystem';
 import babel from '@rolldown/plugin-babel';
 import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
@@ -112,6 +117,38 @@ const CONTENT_TYPES: Record<string, string> = {
 async function stagePluginsService(): Promise<void> {
   await rm(serviceWorkerDir, { recursive: true, force: true });
   await cp(pluginsServiceDistDir, serviceWorkerDir, { recursive: true });
+}
+
+async function stagePublicData(): Promise<void> {
+  const migrationsDest = path.resolve(publicDataDir, 'migrations');
+  await mkdir(publicDataDir, { recursive: true });
+  await rm(migrationsDest, { recursive: true, force: true });
+  await Promise.all([
+    cp(migrationsDir, migrationsDest, { recursive: true }),
+    cp(defaultDbPath, path.resolve(publicDataDir, 'default-db.sqlite')),
+    cp(sqlWasmPath, path.resolve(publicDir, 'sql-wasm.wasm')),
+  ]);
+
+  const entries = await readdir(publicDataDir, {
+    recursive: true,
+    withFileTypes: true,
+  });
+  const files = entries
+    .filter(e => e.isFile())
+    .map(e =>
+      path
+        .relative(publicDataDir, path.join(e.parentPath, e.name))
+        .replaceAll(path.sep, '/'),
+    )
+    // Skip dotfiles (e.g. legacy `.force-copy-windows` marker). They have no
+    // matching extension in the workbox precache globs, so a PWA opened
+    // offline would fail to fetch them and break startup (issue #7886).
+    .filter(file => !file.split('/').some(part => part.startsWith('.')))
+    .sort();
+  await writeFile(
+    path.resolve(publicDir, 'data-file-index.txt'),
+    files.join('\n') + '\n',
+  );
 }
 
 const lootCoreBackend = (): Plugin => ({
