@@ -674,10 +674,15 @@ export function conditionsToAQL(
         return apply(field, '$eq', true);
       case 'false':
         return apply(field, '$eq', false);
-      case 'and':
-        return {
-          $and: getValue(value).map(subExpr => mapConditionToActualQL(subExpr)),
-        };
+      case 'and': {
+        const subFilters = getValue(value)
+          .map(subExpr => mapConditionToActualQL(subExpr))
+          .filter(f => f != null);
+        if (subFilters.length === 0) {
+          return null;
+        }
+        return { $and: subFilters };
+      }
 
       case 'onBudget':
         return { 'account.offbudget': false };
