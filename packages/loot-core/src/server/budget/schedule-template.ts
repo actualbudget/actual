@@ -73,6 +73,7 @@ async function createScheduleList(
     const computeScheduleAmount = (date: string | null): number => {
       let value = getScheduledAmount(amountCondition.value, false, {
         date: date ?? undefined,
+        decimalPlaces: currency.decimalPlaces,
       });
       if (template.adjustment !== undefined && template.adjustmentType) {
         switch (template.adjustmentType) {

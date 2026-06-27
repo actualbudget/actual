@@ -289,7 +289,7 @@ export function getDateWithSkippedWeekend(
 export function getScheduledAmount(
   amount: number | { num1: number; num2: number } | string,
   inverse: boolean = false,
-  context: { date?: string } = {},
+  context: { date?: string; decimalPlaces?: number } = {},
 ): number {
   // this check is temporary, and required at the moment as a schedule rule
   // allows the amount condition to be deleted which causes a crash
@@ -303,7 +303,7 @@ export function getScheduledAmount(
       });
       const num =
         typeof result === 'number'
-          ? amountToInteger(Math.round(result * 100) / 100)
+          ? amountToInteger(result, context.decimalPlaces ?? 2)
           : 0;
       return inverse ? -num : num;
     } catch (err) {
