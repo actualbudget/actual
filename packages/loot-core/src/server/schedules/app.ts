@@ -131,9 +131,14 @@ export function updateConditions(conditions, newConditions) {
 // would revert the posted amount to the old value, ignoring the edited
 // amount. Keep such actions in sync with the amount condition.
 //
-// Only plain `set amount` actions are rewritten:
-//   - Templated/formula actions (`options.template`/`options.formula`) compute
-//     their own value, so they're left untouched.
+// `set amount` actions are rewritten as follows:
+//   - When the amount condition is a formula, the action mirrors that formula
+//     (via `options.formula`) so the rule re-evaluates per transaction.
+//   - When the amount condition is *not* a formula, any leftover
+//     `options.formula` is cleared so a previously-formula schedule cannot
+//     keep applying the stale formula via the action.
+//   - Templated actions (`options.template`) compute their own value, so
+//     they're left untouched.
 //   - `set-split-amount` actions have a different `op` and so are excluded by
 //     the `action.op === 'set'` check below.
 //
@@ -180,16 +185,29 @@ function updateActions(
   let changed = false;
   const updated = actions.map(action => {
     if (
-      action.op === 'set' &&
-      action.field === 'amount' &&
-      !action.options?.template &&
-      !action.options?.formula &&
-      action.value !== amount
+      action.op !== 'set' ||
+      action.field !== 'amount' ||
+      action.options?.template
     ) {
-      changed = true;
+      return action;
+    }
+
+    const hasStaleFormula = action.options?.formula != null;
+    if (!hasStaleFormula && action.value === amount) {
+      return action;
+    }
+
+    changed = true;
+    if (!hasStaleFormula) {
       return { ...action, value: amount };
     }
-    return action;
+
+    const { formula: _drop, ...rest } = action.options!;
+    return {
+      ...action,
+      value: amount,
+      options: Object.keys(rest).length > 0 ? rest : undefined,
+    };
   });
 
   return changed ? updated : null;
