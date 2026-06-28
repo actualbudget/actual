@@ -39,10 +39,11 @@ describe('embedded default filesystem', () => {
   });
 
   it('embeds the default database and sql.js wasm byte-for-byte', () => {
-    const { dataFiles, wasmBase64 } = collectEmbeddedAssets();
+    const { dataFiles, index, wasmBase64 } = collectEmbeddedAssets();
 
     const embeddedDb = Buffer.from(dataFiles['default-db.sqlite'], 'base64');
     expect(embeddedDb.equals(fs.readFileSync(defaultDbPath))).toBe(true);
+    expect(index.split('\n').filter(Boolean)).toContain('default-db.sqlite');
 
     const embeddedWasm = Buffer.from(wasmBase64, 'base64');
     expect(embeddedWasm.equals(fs.readFileSync(sqlWasmPath))).toBe(true);

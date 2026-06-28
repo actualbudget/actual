@@ -23,9 +23,12 @@ export const sqlWasmPath =
   require.resolve('@jlongster/sql.js/dist/sql-wasm.wasm');
 
 function migrationFileNames() {
+  // Sort so the embedded `dataFiles` order (and thus the worker bundle hash) is
+  // stable regardless of the filesystem's `readdirSync` ordering.
   return fs
     .readdirSync(migrationsDir)
-    .filter(name => name.endsWith('.sql') || name.endsWith('.js'));
+    .filter(name => name.endsWith('.sql') || name.endsWith('.js'))
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 /**
