@@ -10,6 +10,7 @@ export class BudgetPage {
   readonly budgetTableTotals: Locator;
   readonly selectedMonthButton: Locator;
   readonly nextMonthButton: Locator;
+  readonly budgetTableScrollContainer: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -19,6 +20,19 @@ export class BudgetPage {
     this.budgetTableTotals = this.budgetTable.getByTestId('budget-totals');
     this.selectedMonthButton = page.getByTestId('selected-budget-month');
     this.nextMonthButton = page.getByTitle('Next month');
+    this.budgetTableScrollContainer = page.getByTestId(
+      'budget-table-scroll-container',
+    );
+  }
+
+  async getScrollTop() {
+    return this.budgetTableScrollContainer.evaluate(el => el.scrollTop);
+  }
+
+  async scrollToBottom() {
+    await this.budgetTableScrollContainer.evaluate(el => {
+      el.scrollTop = el.scrollHeight;
+    });
   }
 
   /**
@@ -163,6 +177,40 @@ export class BudgetPage {
       .nth(idx)
       .getByTestId('category-month-spent')
       .click();
+    return new AccountPage(this.page);
+  }
+
+  async clickOnSpentAmountForLastVisibleRow() {
+    // Click the last spent-amount cell currently visible in the scroll container
+    // without triggering Playwright's auto-scroll-into-view, so the scroll
+    // position is not changed before the click handler captures it.
+    const clicked = await this.page.evaluate(() => {
+      const container = document.querySelector(
+        '[data-testid="budget-table-scroll-container"]',
+      );
+      if (!container) {
+        throw new Error('Budget scroll container not found');
+      }
+      const containerRect = container.getBoundingClientRect();
+      const cells = container.querySelectorAll<HTMLElement>(
+        '[data-testid="category-month-spent"]',
+      );
+      for (const cell of [...cells].reverse()) {
+        const rect = cell.getBoundingClientRect();
+        if (
+          rect.top >= containerRect.top &&
+          rect.bottom <= containerRect.bottom
+        ) {
+          cell.click();
+          return true;
+        }
+      }
+      return false;
+    });
+
+    if (!clicked) {
+      throw new Error('No visible spent-amount cell found to click');
+    }
     return new AccountPage(this.page);
   }
 
