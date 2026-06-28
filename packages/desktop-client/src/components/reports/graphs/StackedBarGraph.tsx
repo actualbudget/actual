@@ -91,9 +91,14 @@ const CustomTooltip = ({
 
   const maxTooltipItems = 5;
 
-  const allLabelsShowing =
-    items.length <= maxTooltipItems ||
-    (items.length === maxTooltipItems + 1 && tooltip === items.at(-1).name);
+  const visibleItems = useMemo(() => {
+    if (!compact || items.length <= maxTooltipItems) return items;
+    const hoveredIndex = items.findIndex(p => tooltip === p.name);
+    if (hoveredIndex >= maxTooltipItems) {
+      return [...items.slice(0, maxTooltipItems - 1), items[hoveredIndex]];
+    }
+    return items.slice(0, maxTooltipItems);
+  }, [compact, items, tooltip]);
 
   if (active && items.length) {
     return (
@@ -113,12 +118,11 @@ const CustomTooltip = ({
             <strong>{label}</strong>
           </div>
           <div style={{ lineHeight: 1.4 }}>
-            {items.map((pay, i) => {
+            {visibleItems.map(pay => {
               const displayName = dataKeyToName.get(pay.name) ?? pay.name;
               const isHovered = tooltip === pay.name;
               return (
-                pay.value !== 0 &&
-                (compact ? i < maxTooltipItems || isHovered : true) && (
+                pay.value !== 0 && (
                   <AlignedText
                     key={pay.name}
                     left={displayName}
@@ -135,7 +139,7 @@ const CustomTooltip = ({
                 )
               );
             })}
-            {compact && !allLabelsShowing && '...'}
+            {compact && items.length > maxTooltipItems && '...'}
             <AlignedText
               left={t('Total')}
               right={
