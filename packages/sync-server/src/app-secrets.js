@@ -74,7 +74,17 @@ app.post('/', async (req, res) => {
     return;
   }
 
-  secretsService.set(name, value, perBudgetFile ? fileId : null);
+  const secretFileId = perBudgetFile ? fileId : null;
+  const simplefinTokenChanged =
+    name === SecretName.simplefin_token &&
+    value !== secretsService.get(SecretName.simplefin_token, secretFileId);
+
+  secretsService.set(name, value, secretFileId);
+
+  if (simplefinTokenChanged) {
+    secretsService.set(SecretName.simplefin_accessKey, null, secretFileId);
+  }
+
   res.status(200).send({ status: 'ok' });
 });
 
