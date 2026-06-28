@@ -109,9 +109,10 @@ const CustomTooltip = ({
           <div style={{ lineHeight: 1.4 }}>
             {items.map((pay, i) => {
               const displayName = dataKeyToName.get(pay.name) ?? pay.name;
+              const isHovered = tooltip === pay.name;
               return (
                 pay.value !== 0 &&
-                (compact ? i < 5 : true) && (
+                (compact ? i < 5 || isHovered : true) && (
                   <AlignedText
                     key={pay.name}
                     left={displayName}
@@ -122,8 +123,7 @@ const CustomTooltip = ({
                     }
                     style={{
                       color: pay.color,
-                      textDecoration:
-                        tooltip === pay.name ? 'underline' : 'inherit',
+                      textDecoration: isHovered ? 'underline' : 'inherit',
                     }}
                   />
                 )
