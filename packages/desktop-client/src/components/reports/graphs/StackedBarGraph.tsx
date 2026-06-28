@@ -89,6 +89,12 @@ const CustomTooltip = ({
       );
   }, [payload]);
 
+  const maxTooltipItems = 5;
+
+  const allLabelsShowing =
+    items.length <= maxTooltipItems ||
+    (items.length === maxTooltipItems + 1 && tooltip === items.at(-1).name);
+
   if (active && items.length) {
     return (
       <div
@@ -112,7 +118,7 @@ const CustomTooltip = ({
               const isHovered = tooltip === pay.name;
               return (
                 pay.value !== 0 &&
-                (compact ? i < 5 || isHovered : true) && (
+                (compact ? i < maxTooltipItems || isHovered : true) && (
                   <AlignedText
                     key={pay.name}
                     left={displayName}
@@ -129,7 +135,7 @@ const CustomTooltip = ({
                 )
               );
             })}
-            {payload.length > 5 && compact && '...'}
+            {compact && !allLabelsShowing && '...'}
             <AlignedText
               left={t('Total')}
               right={
