@@ -373,6 +373,8 @@ export const enableBankingService = {
         state,
         access: {
           valid_until: validUntil.toISOString(),
+          balances: true,
+          transactions: true,
         },
         psu_type: psuType,
       },
