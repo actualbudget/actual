@@ -36,10 +36,7 @@ setWasmBinary(base64ToBytes(wasmBase64));
 const PUBLIC_URL = process.env.PUBLIC_URL ?? '/';
 
 const realFetch = self.fetch.bind(self);
-self.fetch = function patchedFetch(
-  input: RequestInfo | URL,
-  fetchInit?: RequestInit,
-): Promise<Response> {
+const patchedFetch: typeof fetch = function patchedFetch(input, fetchInit) {
   const url =
     typeof input === 'string'
       ? input
@@ -59,6 +56,7 @@ self.fetch = function patchedFetch(
     }
   }
   return realFetch(input, fetchInit);
-} as typeof fetch;
+};
+self.fetch = patchedFetch;
 
 export * from './main';

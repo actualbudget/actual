@@ -8,7 +8,10 @@ export const defaultDbPath: string;
 export const sqlWasmPath: string;
 
 /** The `data-file-index.txt` manifest listing every file under `data/`. */
-export function buildDataFileIndex(names?: string[]): string;
+export function buildDataFileIndex(): string;
+
+/** The absolute paths of every source file `collectEmbeddedAssets()` reads. */
+export function embeddedAssetPaths(): string[];
 
 /** The base64-encoded assets a self-contained browser worker embeds. */
 export function collectEmbeddedAssets(): {

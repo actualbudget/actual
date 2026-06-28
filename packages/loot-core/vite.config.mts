@@ -6,7 +6,10 @@ import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
-import { collectEmbeddedAssets } from './default-filesystem.mjs';
+import {
+  collectEmbeddedAssets,
+  embeddedAssetPaths,
+} from './default-filesystem.mjs';
 
 // Embed loot-core's default filesystem (wasm + default DB + migrations) into the
 // browser worker as a virtual module, so the worker performs no PUBLIC_URL asset
@@ -25,6 +28,10 @@ function embeddedAssets(): Plugin {
     },
     load(thisId) {
       if (thisId !== resolved) return undefined;
+      // Rebuild the virtual module when any embedded source file changes.
+      for (const file of embeddedAssetPaths()) {
+        this.addWatchFile(file);
+      }
       const { wasmBase64, dataFiles, index } = collectEmbeddedAssets();
       return [
         `export const wasmBase64 = ${JSON.stringify(wasmBase64)};`,

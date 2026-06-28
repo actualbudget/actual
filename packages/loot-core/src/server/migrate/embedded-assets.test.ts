@@ -3,7 +3,9 @@ import path from 'node:path';
 
 import {
   collectEmbeddedAssets,
+  defaultDbPath,
   migrationsDir,
+  sqlWasmPath,
 } from '@actual-app/core/default-filesystem';
 
 // The browser worker (`kcab.worker`) embeds the migrations and sql.js wasm at
@@ -21,6 +23,7 @@ describe('embedded default filesystem', () => {
     expect(migrationNames.length).toBeGreaterThan(0);
 
     const { dataFiles, index } = collectEmbeddedAssets();
+    const indexEntries = index.split('\n').filter(Boolean);
 
     for (const name of migrationNames) {
       const key = `migrations/${name}`;
@@ -31,14 +34,17 @@ describe('embedded default filesystem', () => {
       const embedded = Buffer.from(b64, 'base64');
       const onDisk = fs.readFileSync(path.join(migrationsDir, name));
       expect(embedded.equals(onDisk)).toBe(true);
-      expect(index).toContain(key);
+      expect(indexEntries).toContain(key);
     }
   });
 
-  it('embeds the default database and sql.js wasm', () => {
+  it('embeds the default database and sql.js wasm byte-for-byte', () => {
     const { dataFiles, wasmBase64 } = collectEmbeddedAssets();
 
-    expect(dataFiles['default-db.sqlite']).toBeDefined();
-    expect(Buffer.from(wasmBase64, 'base64').length).toBeGreaterThan(0);
+    const embeddedDb = Buffer.from(dataFiles['default-db.sqlite'], 'base64');
+    expect(embeddedDb.equals(fs.readFileSync(defaultDbPath))).toBe(true);
+
+    const embeddedWasm = Buffer.from(wasmBase64, 'base64');
+    expect(embeddedWasm.equals(fs.readFileSync(sqlWasmPath))).toBe(true);
   });
 });
