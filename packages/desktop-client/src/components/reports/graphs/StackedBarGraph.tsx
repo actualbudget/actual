@@ -92,12 +92,14 @@ const CustomTooltip = ({
   const maxTooltipItems = 5;
 
   const visibleItems = useMemo(() => {
-    if (!compact || items.length <= maxTooltipItems) return items;
-    const hoveredIndex = items.findIndex(p => tooltip === p.name);
+    const nonZero = items.filter(p => p.value !== 0);
+    if (!compact || nonZero.length <= maxTooltipItems) return nonZero;
+
+    const hoveredIndex = nonZero.findIndex(p => tooltip === p.name);
     if (hoveredIndex >= maxTooltipItems) {
-      return [...items.slice(0, maxTooltipItems - 1), items[hoveredIndex]];
+      return [...nonZero.slice(0, maxTooltipItems - 1), nonZero[hoveredIndex]];
     }
-    return items.slice(0, maxTooltipItems);
+    return nonZero.slice(0, maxTooltipItems);
   }, [compact, items, tooltip]);
 
   if (active && items.length) {
@@ -120,26 +122,24 @@ const CustomTooltip = ({
           <div style={{ lineHeight: 1.4 }}>
             {visibleItems.map(pay => {
               const displayName = dataKeyToName.get(pay.name) ?? pay.name;
-              const isHovered = tooltip === pay.name;
               return (
-                pay.value !== 0 && (
-                  <AlignedText
-                    key={pay.name}
-                    left={displayName}
-                    right={
-                      <FinancialText>
-                        {format(pay.value, 'financial')}
-                      </FinancialText>
-                    }
-                    style={{
-                      color: pay.color,
-                      textDecoration: isHovered ? 'underline' : 'inherit',
-                    }}
-                  />
-                )
+                <AlignedText
+                  key={pay.name}
+                  left={displayName}
+                  right={
+                    <FinancialText>
+                      {format(pay.value, 'financial')}
+                    </FinancialText>
+                  }
+                  style={{
+                    color: pay.color,
+                    textDecoration:
+                      tooltip === pay.name ? 'underline' : 'inherit',
+                  }}
+                />
               );
             })}
-            {compact && items.length > maxTooltipItems && '...'}
+            {compact && items.length > visibleItems.length && '...'}
             <AlignedText
               left={t('Total')}
               right={
