@@ -53,7 +53,7 @@ function dataAccessPsuHeaders(
   aspspName: string | undefined,
   psuHeaders: PsuHeaders | undefined,
 ): PsuHeaders | undefined {
-  if (!aspspName || ASPSPS_WITHOUT_DATA_ACCESS_PSU_HEADERS.has(aspspName)) {
+  if (aspspName && ASPSPS_WITHOUT_DATA_ACCESS_PSU_HEADERS.has(aspspName)) {
     return undefined;
   }
   return psuHeaders;
