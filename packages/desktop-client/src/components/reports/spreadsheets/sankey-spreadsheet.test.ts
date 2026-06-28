@@ -748,6 +748,36 @@ describe('sankey-spreadsheet', () => {
   });
 
   describe('addHiddenNodes via buildSankeyData', () => {
+    it('groups low-value payees into a single payee Other bucket', () => {
+      const graph: Graph = new Map();
+
+      addNode(graph, 'payee1', GraphLayers.IncomePayee, 'Payee 1');
+      addNode(graph, 'payee2', GraphLayers.IncomePayee, 'Payee 2');
+      addNode(graph, 'income1', GraphLayers.IncomeCategory, 'Income Cat 1');
+      addNode(graph, 'income2', GraphLayers.IncomeCategory, 'Income Cat 2');
+      addNode(graph, 'account', GraphLayers.Account, 'Account');
+
+      addValueToLink(graph, 'payee1', 'income1', 300);
+      addValueToLink(graph, 'payee2', 'income2', 200);
+      addValueToLink(graph, 'income1', 'account', 300);
+      addValueToLink(graph, 'income2', 'account', 200);
+
+      const sankeyData = buildSankeyData(
+        graph,
+        1,
+        [],
+        'global',
+        GraphLayers.IncomePayee,
+        GraphLayers.Account,
+      );
+
+      const payeeOtherKeys = sankeyData.nodes
+        .map(node => node.key)
+        .filter(key => key === 'payee__OTHER_BUCKET');
+
+      expect(payeeOtherKeys).toHaveLength(1);
+    });
+
     it('adds one hidden child layer for category groups without children', () => {
       const graph: Graph = new Map();
 
