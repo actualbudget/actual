@@ -350,6 +350,7 @@ export const enableBankingService = {
     state: string,
     maxConsentValidity?: number,
     psuType: PsuType = 'personal',
+    psuHeaders?: PsuHeaders,
   ): Promise<EnableBankingAuthResponse> {
     const DEFAULT_CONSENT_DAYS = 90;
     const defaultMs = DEFAULT_CONSENT_DAYS * 24 * 60 * 60 * 1000;
@@ -363,15 +364,21 @@ export const enableBankingService = {
 
     const validUntil = new Date(Date.now() + consentMs);
 
-    return request<EnableBankingAuthResponse>('POST', '/auth', {
-      aspsp: { name: aspsp.name, country: aspsp.country },
-      redirect_url: redirectUrl,
-      state,
-      access: {
-        valid_until: validUntil.toISOString(),
+    return request<EnableBankingAuthResponse>(
+      'POST',
+      '/auth',
+      {
+        aspsp: { name: aspsp.name, country: aspsp.country },
+        redirect_url: redirectUrl,
+        state,
+        access: {
+          valid_until: validUntil.toISOString(),
+        },
+        psu_type: psuType,
       },
-      psu_type: psuType,
-    });
+      undefined,
+      psuHeaders,
+    );
   },
 
   async createSession(code: string): Promise<EnableBankingSession> {

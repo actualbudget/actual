@@ -296,6 +296,7 @@ app.post(
         state,
         typeof maxConsentValidity === 'number' ? maxConsentValidity : undefined,
         psuType === 'business' ? 'business' : 'personal',
+        extractPsuHeaders(req),
       );
 
       res.send({
