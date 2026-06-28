@@ -514,7 +514,10 @@ app.post(
           ? startDate
           : new Date(startDate).toISOString().split('T')[0];
 
-      const psuHeaders = dataAccessPsuHeaders(aspspName, extractPsuHeaders(req));
+      const psuHeaders = dataAccessPsuHeaders(
+        aspspName,
+        extractPsuHeaders(req),
+      );
 
       // Fetch balances
       const balanceResult = await enableBankingService.getBalances(
