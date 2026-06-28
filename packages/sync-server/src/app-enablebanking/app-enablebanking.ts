@@ -45,10 +45,25 @@ function extractPsuHeaders(req: Request): PsuHeaders {
   return headers;
 }
 
+// Some ASPSPs reject PSU headers on balance/transaction data-access calls even
+// though they require them during the authorization step. List their names here.
+const ASPSPS_WITHOUT_DATA_ACCESS_PSU_HEADERS = new Set(['HypoVereinsbank']);
+
+function dataAccessPsuHeaders(
+  aspspName: string | undefined,
+  psuHeaders: PsuHeaders | undefined,
+): PsuHeaders | undefined {
+  if (!aspspName || ASPSPS_WITHOUT_DATA_ACCESS_PSU_HEADERS.has(aspspName)) {
+    return undefined;
+  }
+  return psuHeaders;
+}
+
 async function buildSessionResult(
   session: EnableBankingSession,
   psuHeaders?: PsuHeaders,
 ) {
+  const accessHeaders = dataAccessPsuHeaders(session.aspsp?.name, psuHeaders);
   const accountsWithBalances = await Promise.all(
     session.accounts.map(async account => {
       const normalized = normalizeAccount(account, session.aspsp);
@@ -57,7 +72,7 @@ async function buildSessionResult(
       try {
         const balanceResult = await enableBankingService.getBalances(
           account.uid,
-          psuHeaders,
+          accessHeaders,
         );
         balances = balanceResult.balances.map(normalizeBalance);
       } catch (err) {
@@ -115,7 +130,7 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
       session.accounts.length,
     );
 
-    const result = await buildSessionResult(session);
+    const result = await buildSessionResult(session, extractPsuHeaders(req));
 
     // Always cache the result so retries within TTL can read it
     completedAuths.set(state, result);
@@ -341,7 +356,7 @@ app.post(
         session.accounts.length,
       );
 
-      const result = await buildSessionResult(session);
+      const result = await buildSessionResult(session, extractPsuHeaders(req));
 
       // Always cache so retries within TTL can read the result
       if (state) {
@@ -479,7 +494,7 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req: Request, res: Response) => {
-    const { accountId, startDate } = req.body || {};
+    const { accountId, startDate, aspspName } = req.body || {};
 
     if (!accountId || !startDate) {
       res.send({
@@ -499,8 +514,13 @@ app.post(
           ? startDate
           : new Date(startDate).toISOString().split('T')[0];
 
+      const psuHeaders = dataAccessPsuHeaders(aspspName, extractPsuHeaders(req));
+
       // Fetch balances
-      const balanceResult = await enableBankingService.getBalances(accountId);
+      const balanceResult = await enableBankingService.getBalances(
+        accountId,
+        psuHeaders,
+      );
       const balances = balanceResult.balances.map(normalizeBalance);
 
       // Determine starting balance, preferring CLAV balance type
@@ -516,6 +536,7 @@ app.post(
         accountId,
         dateFrom,
         dateTo,
+        psuHeaders,
       );
 
       const all: ReturnType<typeof normalizeTransaction>[] = [];
