@@ -500,9 +500,7 @@ app.post(
           : new Date(startDate).toISOString().split('T')[0];
 
       // Fetch balances
-      const balanceResult = await enableBankingService.getBalances(
-        accountId,
-      );
+      const balanceResult = await enableBankingService.getBalances(accountId);
       const balances = balanceResult.balances.map(normalizeBalance);
 
       // Determine starting balance, preferring CLAV balance type
