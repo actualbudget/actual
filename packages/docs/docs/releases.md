@@ -56,6 +56,7 @@ Release date: 2026-07-01
 - [#8222](https://github.com/actualbudget/actual/pull/8222) Use ± symbol for 'between' amount schedules and improve tooltip wording. — thanks @tjmills-dev
 - [#8234](https://github.com/actualbudget/actual/pull/8234) Start split transactions in the desktop app with two empty splits instead of one, matching the mobile app. — thanks @citrus-it
 - [#8308](https://github.com/actualbudget/actual/pull/8308) Budget automations now link to schedules by ID, so they still remain linked when a schedule is renamed — thanks @matt-fidd
+- Add performance indices for transactions table — thanks @alecbakholdin
 
 #### Bugfixes
 
