@@ -220,6 +220,38 @@ describe('Transaction rules', () => {
     expect(transaction.category).toBe(null);
   });
 
+  test('rules matching on payee apply after a rule renames the payee', async () => {
+    await loadRules();
+
+    await db.insertPayee({ id: 'amazon_id', name: 'Amazon' });
+
+    // This rule is ranked first (oneOf is less specific than is), so it
+    // runs before the renaming rule below ever sets the payee
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'oneOf', field: 'payee', value: ['amazon_id'] }],
+      actions: [{ op: 'set', field: 'category', value: 'shopping' }],
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'is', field: 'imported_payee', value: 'AMZN MKTP US' },
+      ],
+      actions: [{ op: 'set', field: 'payee', value: 'amazon_id' }],
+    });
+
+    const transaction = await runRules({
+      imported_payee: 'AMZN MKTP US',
+      payee: 'raw_payee_id',
+      category: null,
+    });
+    expect(transaction.payee).toBe('amazon_id');
+    expect(transaction.category).toBe('shopping');
+  });
+
   test('loadRules loads all the rules', async () => {
     await loadRules();
     await insertRule({
