@@ -107,6 +107,7 @@ This release adds a new bank sync provider, releases the CLI as stable, and expa
 - [#8101](https://github.com/actualbudget/actual/pull/8101) Fixed desktop settings (such as the selected language) being reset to defaults after an interrupted app update. — thanks @MatissJanis
 - [#8281](https://github.com/actualbudget/actual/pull/8281) Fix Payee page. Rule counts no longer include rules associated with completed schedules. — thanks @Juulz
 - [#8181](https://github.com/actualbudget/actual/pull/8181) Fix the installed web app title bar color to follow the active app theme. — thanks @PaolinPaperin
+- Fix some SimpleFIN setup tokens failing to claim and link accounts — thanks @matt-fidd
 - [#8195](https://github.com/actualbudget/actual/pull/8195) Fix binary sync failing with `network-failure` on Alpine Linux. — thanks @MatissJanis
 - [#8169](https://github.com/actualbudget/actual/pull/8169) Sankey 'Budgeted' view no longer breaks when an amount is left to budget. — thanks @emiltb
 - [#8171](https://github.com/actualbudget/actual/pull/8171) Prioritise category name matches over group matches in the category autocomplete — thanks @matt-fidd
