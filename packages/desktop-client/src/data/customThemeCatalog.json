@@ -322,5 +322,18 @@
       "#56949f"
     ],
     "mode": "light"
+  },
+  {
+    "name": "Thyrium",
+    "repo": "carlisle96/thyrium-actual",
+    "colors": [
+      "#18191A",
+      "#1B1C1D",
+      "#27292D",
+      "#7652B8",
+      "#B85261",
+      "#94B852"
+    ],
+    "mode": "dark"
   }
 ]
