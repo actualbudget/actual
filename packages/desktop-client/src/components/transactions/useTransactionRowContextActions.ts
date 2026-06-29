@@ -164,6 +164,11 @@ export function useTransactionRowContextActions({
       onClick: () => onScheduleAction('post-transaction', selectedIds),
     },
     {
+      name: 'post-transaction-today',
+      text: t('Post transaction today'),
+      onClick: () => onScheduleAction('post-transaction-today', selectedIds),
+    },
+    {
       name: 'skip',
       text: t('Skip next scheduled date'),
       onClick: () => onScheduleAction('skip', selectedIds),
