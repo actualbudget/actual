@@ -44,7 +44,15 @@ app.post('/', async (req, res) => {
     return;
   }
 
+  const simplefinTokenChanged =
+    name === SecretName.simplefin_token &&
+    value !== secretsService.get(SecretName.simplefin_token);
+
   secretsService.set(name, value);
+
+  if (simplefinTokenChanged) {
+    secretsService.set(SecretName.simplefin_accessKey, null);
+  }
 
   res.status(200).send({ status: 'ok' });
 });

@@ -1,5 +1,3 @@
-import https from 'https';
-
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -22,7 +20,7 @@ app.post(
   rejectApiTokenMiddleware,
   handleError(async (req, res) => {
     const token = secretsService.get(SecretName.simplefin_token);
-    const configured = token != null && token !== 'Forbidden';
+    const configured = token != null && !isForbidden(token);
 
     res.send({
       status: 'ok',
@@ -40,16 +38,16 @@ app.post(
     let accessKey = secretsService.get(SecretName.simplefin_accessKey);
 
     try {
-      if (accessKey == null || accessKey === 'Forbidden') {
+      if (isInvalidAccessKey(accessKey)) {
         const token = secretsService.get(SecretName.simplefin_token);
-        if (token == null || token === 'Forbidden') {
+        if (token == null || isForbidden(token)) {
           throw new Error('No token');
         } else {
           accessKey = await getAccessKey(token);
-          secretsService.set(SecretName.simplefin_accessKey, accessKey);
-          if (accessKey == null || accessKey === 'Forbidden') {
+          if (isInvalidAccessKey(accessKey)) {
             throw new Error('No access key');
           }
+          secretsService.set(SecretName.simplefin_accessKey, accessKey);
         }
       }
     } catch {
@@ -84,7 +82,7 @@ app.post(
 
     const accessKey = secretsService.get(SecretName.simplefin_accessKey);
 
-    if (accessKey == null || accessKey === 'Forbidden') {
+    if (isInvalidAccessKey(accessKey)) {
       invalidToken(res);
       return;
     }
@@ -111,7 +109,7 @@ app.post(
         new Date(earliestStartDate),
       );
     } catch (e) {
-      if (e.message === 'Forbidden') {
+      if (isForbidden(e.message)) {
         invalidToken(res);
       } else {
         serverDown(e, res);
@@ -326,22 +324,22 @@ async function getAccessKey(base64Token) {
   // private addresses are allowed here; cloud metadata and other always-blocked
   // ranges are still rejected.
   await assertUrlAllowed(token, { allowPrivateNetwork: true });
-  const options = {
-    method: 'POST',
-    port: 443,
-    headers: { 'Content-Length': 0 },
-  };
-  return new Promise((resolve, reject) => {
-    const req = https.request(new URL(token), options, res => {
-      res.on('data', d => {
-        resolve(d.toString());
-      });
-    });
-    req.on('error', e => {
-      reject(e);
-    });
-    req.end();
-  });
+
+  // don't auto-follow redirects for SSRF safety
+  const response = await fetch(token, { method: 'POST', redirect: 'manual' });
+  return (await response.text()).trim();
+}
+
+function isForbidden(value) {
+  return typeof value === 'string' && value.startsWith('Forbidden');
+}
+
+function isInvalidAccessKey(accessKey) {
+  return (
+    typeof accessKey !== 'string' ||
+    accessKey.trim() === '' ||
+    isForbidden(accessKey)
+  );
 }
 
 async function getTransactions(accessKey, accounts, startDate, endDate) {
