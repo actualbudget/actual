@@ -220,6 +220,42 @@ describe('Transaction rules', () => {
     expect(transaction.category).toBe(null);
   });
 
+  test('payee rules match after a staged formula sets payee name', async () => {
+    await loadRules();
+
+    await db.insertPayee({ id: 'amazon_id', name: 'Amazon' });
+
+    await insertRule({
+      stage: 'pre',
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'imported_payee', value: 'AMZN MKTP' }],
+      actions: [
+        {
+          op: 'set',
+          field: 'payee_name',
+          value: null,
+          options: { formula: '="Amazon"' },
+        },
+      ],
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'payee', value: 'amazon_id' }],
+      actions: [{ op: 'set', field: 'category', value: 'shopping' }],
+    });
+
+    const transaction = await runRules({
+      imported_payee: 'AMZN MKTP',
+      payee: null,
+      category: null,
+    });
+
+    expect(transaction.payee).toBe('amazon_id');
+    expect(transaction.category).toBe('shopping');
+  });
+
   test('loadRules loads all the rules', async () => {
     await loadRules();
     await insertRule({
