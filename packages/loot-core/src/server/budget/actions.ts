@@ -687,10 +687,18 @@ export async function coverOverspending({
 }): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
   const toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
-  const leftoverFrom = await getSheetValue(
+  let leftoverFrom = await getSheetValue(
     sheetName,
     from === 'to-budget' ? 'to-budget' : 'leftover-' + from,
   );
+
+  if (
+    from === 'to-budget' &&
+    isFutureBufferModeActive() &&
+    isCurrentOrFutureMonth(month)
+  ) {
+    leftoverFrom += await getSheetValue(sheetName, 'buffered-selected');
+  }
 
   // Cover provided amount (can be partial) or full overspending amount.
   const amountToCover = amount
@@ -891,6 +899,11 @@ export async function setCategoryCarryover({
   const months = isFutureBufferActiveForIncome
     ? allMonths.filter(month => month < monthUtils.currentMonth())
     : allMonths;
+  const shouldRecalculateFutureBuffer =
+    isFutureBufferModeActive() &&
+    allMonths.some(month =>
+      isCurrentOrFutureMonth(monthUtils.nextMonth(month)),
+    );
 
   await batchMessages(async () => {
     for (const month of months) {
@@ -898,10 +911,7 @@ export async function setCategoryCarryover({
     }
   });
 
-  if (
-    isFutureBufferActiveForIncome &&
-    allMonths.some(month => isCurrentOrFutureMonth(month))
-  ) {
+  if (shouldRecalculateFutureBuffer) {
     await recalculateFutureBuffer();
   }
 }
