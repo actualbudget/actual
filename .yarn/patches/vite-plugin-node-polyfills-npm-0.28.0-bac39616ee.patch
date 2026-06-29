@@ -1,0 +1,14 @@
+diff --git a/dist/index.js b/dist/index.js
+index d6e9f17f6dd411a3259651c361418f9f36456f6e..fe28345f90820b856fd708fd4788037e4057e4d0 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -194,6 +194,9 @@ const q = [
+               ...Object.keys(f).length > 0 && v ? { transform: { inject: f } } : {}
+             }
+           },
++          // PATCH: also inject node globals into Vite worker sub-builds, which
++          // read `worker.rollupOptions` rather than `build.rollupOptions`.
++          ...Object.keys(f).length > 0 && v ? { worker: { rollupOptions: { transform: { inject: f } } } } : {},
+           optimizeDeps: {
+             exclude: [
+               ...h
