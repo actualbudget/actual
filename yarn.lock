@@ -111,7 +111,7 @@ __metadata:
     "@types/node": "npm:^22.19.21"
     "@typescript/native-preview": "npm:beta"
     absurd-sql: "npm:0.0.54"
-    adm-zip: "npm:^0.5.17"
+    adm-zip: "npm:^0.5.18"
     assert: "npm:^2.1.0"
     better-sqlite3: "npm:^12.10.0"
     browserify-zlib: "npm:^0.2.0"
@@ -9671,17 +9671,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"adm-zip@npm:0.5.16":
-  version: 0.5.16
-  resolution: "adm-zip@npm:0.5.16"
-  checksum: 10/e167d1b9e60cde37334efda828fa514680af9facbd4183952f36526390e5c7da9a90ca1e6880dfd3aba7b3517f1506c6178e0dc29cd630b26b98c795f97fc599
-  languageName: node
-  linkType: hard
-
-"adm-zip@patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch":
-  version: 0.5.16
-  resolution: "adm-zip@patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch::version=0.5.16&hash=f6b7d0"
-  checksum: 10/1a8c866a6ad1b6b6870d39468f26369cc6a43027678708cd9d40ff64274bb45b946f570293d0ac5d23a4a2b360e36168f14a3f9bc1a1cea20b8dce7ec8d8425e
+"adm-zip@npm:^0.5.18":
+  version: 0.5.18
+  resolution: "adm-zip@npm:0.5.18"
+  checksum: 10/6eaa298828b92e543241fa24d01af774ad8709b80539b3fa60d4ba6f69fd5a15a19d8177e6d739f18f4e0933610ed555215dc6553b51c532534414702c255167
   languageName: node
   linkType: hard
 
