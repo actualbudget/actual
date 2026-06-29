@@ -7,7 +7,6 @@ import React, {
   useState,
 } from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
-import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -45,7 +44,6 @@ import {
 } from '#budget';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { prewarmMonth } from '#components/budget/util';
-import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { FinancialText } from '#components/FinancialText';
 import { MobilePageHeader, Page } from '#components/Page';
 import { SyncRefresh } from '#components/SyncRefresh';
@@ -74,20 +72,6 @@ function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
 }
 
 export function BudgetPage() {
-  const [startMonth = monthUtils.currentMonth()] =
-    useLocalPref('budget.startMonth');
-
-  return (
-    <ErrorBoundary
-      FallbackComponent={FeatureErrorFallback}
-      resetKeys={[startMonth]}
-    >
-      <BudgetPageInner />
-    </ErrorBoundary>
-  );
-}
-
-function BudgetPageInner() {
   const { t } = useTranslation();
   const locale = useLocale();
   const {
@@ -608,10 +592,7 @@ function BudgetPageInner() {
                 height="20"
               />
               <SvgCheveronRight
-                style={{
-                  flexShrink: 0,
-                  color: theme.mobileHeaderTextSubdued,
-                }}
+                style={{ flexShrink: 0, color: theme.mobileHeaderTextSubdued }}
                 width="14"
                 height="14"
               />

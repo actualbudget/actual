@@ -8,7 +8,6 @@ import {
   useState,
 } from 'react';
 import type { ReactNode, RefObject } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
@@ -73,7 +72,6 @@ import {
   parseISO,
 } from 'date-fns';
 
-import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import {
   FieldLabel,
@@ -2110,7 +2108,7 @@ type TransactionEditProps = Omit<
   'categories' | 'accounts' | 'payees' | 'lastTransaction' | 'dateFormat'
 >;
 
-const TransactionEditContent = (props: TransactionEditProps) => {
+export const TransactionEdit = (props: TransactionEditProps) => {
   const { data: { list: categories } = { list: [] } } = useCategories();
   const { data: payees = [] } = usePayees();
   const lastTransaction = useSelector(
@@ -2120,24 +2118,16 @@ const TransactionEditContent = (props: TransactionEditProps) => {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   return (
-    <TransactionEditUnconnected
-      {...props}
-      categories={categories}
-      payees={payees}
-      lastTransaction={lastTransaction}
-      accounts={accounts}
-      dateFormat={dateFormat}
-    />
-  );
-};
-
-export const TransactionEdit = (props: TransactionEditProps) => {
-  return (
-    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-      <SingleActiveEditFormProvider formName="mobile-transaction">
-        <TransactionEditContent {...props} />
-      </SingleActiveEditFormProvider>
-    </ErrorBoundary>
+    <SingleActiveEditFormProvider formName="mobile-transaction">
+      <TransactionEditUnconnected
+        {...props}
+        categories={categories}
+        payees={payees}
+        lastTransaction={lastTransaction}
+        accounts={accounts}
+        dateFormat={dateFormat}
+      />
+    </SingleActiveEditFormProvider>
   );
 };
 

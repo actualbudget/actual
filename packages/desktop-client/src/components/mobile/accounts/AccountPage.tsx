@@ -1,5 +1,4 @@
 import React, { Fragment, useCallback } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -14,7 +13,6 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
-import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { AddTransactionButton } from '#components/mobile/transactions/AddTransactionButton';
 import { MobilePageHeader, Page } from '#components/Page';
@@ -33,27 +31,12 @@ import { OffBudgetAccountTransactions } from './OffBudgetAccountTransactions';
 import { OnBudgetAccountTransactions } from './OnBudgetAccountTransactions';
 
 export function AccountPage() {
-  const { id: accountIdParam } = useParams();
-
-  return (
-    <ErrorBoundary
-      FallbackComponent={FeatureErrorFallback}
-      resetKeys={[accountIdParam]}
-    >
-      <AccountPageContent accountIdParam={accountIdParam} />
-    </ErrorBoundary>
-  );
-}
-
-function AccountPageContent({
-  accountIdParam,
-}: {
-  readonly accountIdParam: string | undefined;
-}) {
   const { t } = useTranslation();
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
+
+  const { id: accountIdParam } = useParams();
 
   const account = useAccount(accountIdParam || '');
 
