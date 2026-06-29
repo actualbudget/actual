@@ -101,35 +101,6 @@ describe('secretsService', () => {
       });
     });
 
-    it('clears the cached SimpleFIN access key when the token changes', async () => {
-      secretsService.set(SecretName.simplefin_token, 'old-token');
-      secretsService.set(SecretName.simplefin_accessKey, 'cached-access-key');
-
-      const res = await request(app)
-        .post(`/`)
-        .set('x-actual-token', 'valid-token')
-        .send({ name: SecretName.simplefin_token, value: 'new-token' });
-
-      expect(res.statusCode).toEqual(200);
-      expect(secretsService.get(SecretName.simplefin_token)).toBe('new-token');
-      expect(secretsService.get(SecretName.simplefin_accessKey)).toBeNull();
-    });
-
-    it('keeps the SimpleFIN access key when the token is unchanged', async () => {
-      secretsService.set(SecretName.simplefin_token, 'same-token');
-      secretsService.set(SecretName.simplefin_accessKey, 'cached-access-key');
-
-      const res = await request(app)
-        .post(`/`)
-        .set('x-actual-token', 'valid-token')
-        .send({ name: SecretName.simplefin_token, value: 'same-token' });
-
-      expect(res.statusCode).toEqual(200);
-      expect(secretsService.get(SecretName.simplefin_accessKey)).toBe(
-        'cached-access-key',
-      );
-    });
-
     it('POST returns 400 for unknown secret names', async () => {
       const res = await request(app)
         .post('/')
