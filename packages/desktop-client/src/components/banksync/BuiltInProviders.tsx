@@ -104,9 +104,37 @@ export function BuiltInProviders({
                     flex: 1,
                   }}
                 >
-                  <Text style={{ fontSize: 17, fontWeight: 600 }}>
-                    {provider.displayName}
-                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 8,
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <Text style={{ fontSize: 17, fontWeight: 600 }}>
+                      {provider.displayName}
+                    </Text>
+                    {provider.isConfigured && provider.credentialSource && (
+                      <Text
+                        style={{
+                          alignSelf: 'flex-start',
+                          borderRadius: 999,
+                          backgroundColor: theme.buttonPrimaryBackground,
+                          color: theme.buttonPrimaryText,
+                          fontSize: 12,
+                          fontWeight: 500,
+                          padding: '2px 8px',
+                        }}
+                      >
+                        {provider.credentialSource === 'global' ? (
+                          <Trans>global</Trans>
+                        ) : (
+                          <Trans>this budget only</Trans>
+                        )}
+                      </Text>
+                    )}
+                  </View>
                   <Text
                     style={{
                       color: provider.isConfigured
@@ -191,6 +219,15 @@ export function BuiltInProviders({
                   <Trans>Link bank account</Trans>
                 </ButtonWithLoading>
               </View>
+              {provider.credentialSource === 'global' &&
+                !provider.canConfigure && (
+                  <Text style={{ color: theme.pageTextSubdued, fontSize: 13 }}>
+                    <Trans>
+                      Reset credentials before setting credentials for this
+                      budget file.
+                    </Trans>
+                  </Text>
+                )}
             </View>
           ))}
         </View>
