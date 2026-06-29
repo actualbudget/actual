@@ -21,6 +21,10 @@ export const SecretName = {
   enablebanking_secretKey: 'enablebanking_secretKey',
 };
 
+function getSecretKey(name, fileId) {
+  return fileId == null ? name : `${name}:${fileId}`;
+}
+
 class SecretsDb {
   constructor() {
     this.debug = createDebug('actual:secrets-db');
@@ -36,10 +40,11 @@ class SecretsDb {
       this.db = this.open();
     }
 
+    const secretKey = getSecretKey(name, fileId);
     this.debug(`setting secret '${name}' to '${value}'`);
     return this.db.mutate(
-      `INSERT OR REPLACE INTO secrets (name, value, file_id) VALUES (?, ?, ?)`,
-      [name, value, fileId],
+      `INSERT OR REPLACE INTO secrets (name, value) VALUES (?, ?)`,
+      [secretKey, value],
     );
   }
 
@@ -48,11 +53,11 @@ class SecretsDb {
       this.db = this.open();
     }
 
+    const secretKey = getSecretKey(name, fileId);
     this.debug(`getting secret '${name}'`);
-    return this.db.first(
-      `SELECT value FROM secrets WHERE file_id IS ? AND name = ?`,
-      [fileId, name],
-    );
+    return this.db.first(`SELECT value FROM secrets WHERE name = ?`, [
+      secretKey,
+    ]);
   }
 
   reset(name, fileId = null) {
@@ -60,10 +65,10 @@ class SecretsDb {
       this.db = this.open();
     }
 
-    const result = this.db.mutate(
-      `DELETE FROM secrets WHERE file_id IS ? AND name = ?`,
-      [fileId, name],
-    );
+    const secretKey = getSecretKey(name, fileId);
+    const result = this.db.mutate(`DELETE FROM secrets WHERE name = ?`, [
+      secretKey,
+    ]);
     return {
       ...result,
       deletedFrom: fileId == null ? 'global' : 'per-budget-file',

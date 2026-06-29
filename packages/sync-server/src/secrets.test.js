@@ -25,6 +25,11 @@ describe('secretsService', () => {
     );
     expect(result).toBeDefined();
     expect(result.changes).toBe(1);
+    expect(
+      getAccountDb().first('SELECT value FROM secrets WHERE name = ?', [
+        `${testSecretName}:${testFileId}`,
+      ])?.value,
+    ).toBe(testSecretValue);
   });
 
   it('should get a secret', () => {
@@ -57,6 +62,11 @@ describe('secretsService', () => {
 
     expect(secretsService.get(testSecretName)).toBe('global-value');
     expect(secretsService.exists(testSecretName)).toBe(true);
+    expect(
+      getAccountDb().first('SELECT value FROM secrets WHERE name = ?', [
+        testSecretName,
+      ])?.value,
+    ).toBe('global-value');
   });
 
   it('should treat empty string secrets as existing', () => {
@@ -90,6 +100,11 @@ describe('secretsService', () => {
       secretsService.set(testSecretName, 'file-value', fileAId);
 
       expect(secretsService.get(testSecretName, fileAId)).toBe('file-value');
+      expect(
+        getAccountDb().first('SELECT value FROM secrets WHERE name = ?', [
+          `${testSecretName}:${fileAId}`,
+        ])?.value,
+      ).toBe('file-value');
     });
 
     it('keeps budget file credentials when global credentials are saved later', () => {
