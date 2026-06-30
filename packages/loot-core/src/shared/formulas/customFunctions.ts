@@ -166,6 +166,13 @@ function getCurrencySymbolPositionFromArg(
   return value === 'before' || value === 'after' ? value : fallback;
 }
 
+const regexLiteral = /^\/(.*)\/([a-z]*)$/;
+
+function buildRegExp(pattern: string): RegExp {
+  const match = regexLiteral.exec(pattern);
+  return match ? new RegExp(match[1], match[2]) : new RegExp(pattern);
+}
+
 export class CustomFunctionsPlugin extends FunctionPlugin {
   private getCustomFunctionsContext(): CustomFunctionsContext | undefined {
     return this.config.context as CustomFunctionsContext | undefined;
@@ -193,6 +200,23 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       this.metadata('FIXED'),
       (number: number, decimals: number = 0) => {
         return Number(number).toFixed(decimals);
+      },
+    );
+  }
+
+  regex(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('REGEX'),
+      (text: string, pattern: string, replacement: string = '') => {
+        let regExp: RegExp;
+        try {
+          regExp = buildRegExp(pattern);
+        } catch {
+          return new CellError(ErrorType.VALUE);
+        }
+        return String(text).replace(regExp, replacement);
       },
     );
   }
@@ -469,6 +493,18 @@ CustomFunctionsPlugin.implementedFunctions = {
       },
     ],
   },
+  REGEX: {
+    method: 'regex',
+    parameters: [
+      { argumentType: FunctionArgumentType.STRING },
+      { argumentType: FunctionArgumentType.STRING },
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: '',
+      },
+    ],
+  },
   QUERY: {
     method: 'query',
     parameters: [{ argumentType: FunctionArgumentType.STRING }],
@@ -563,6 +599,7 @@ export const customFunctionsTranslations = {
     BALANCE_OF: 'BALANCE_OF',
     FIXED: 'FIXED',
     INTEGER_TO_AMOUNT: 'INTEGER_TO_AMOUNT',
+    REGEX: 'REGEX',
     QUERY: 'QUERY',
     QUERY_COUNT: 'QUERY_COUNT',
     QUERY_EXTRACT_CATEGORIES: 'QUERY_EXTRACT_CATEGORIES',
