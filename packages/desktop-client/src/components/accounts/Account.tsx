@@ -368,17 +368,37 @@ function AccountInternal(props: AccountInternalProps) {
     return queries.transactions(props.accountId);
   };
 
-  const updateQuery = (query: Query, isFiltered: boolean = false) => {
+  const updateQuery = (
+    query: Query,
+    isFiltered: boolean = false,
+    overrides?: {
+      showReconciled?: boolean;
+      showBalances?: boolean;
+      search?: string;
+      sort?: {
+        ascDesc: 'asc' | 'desc';
+        field: string;
+        prevField?: string;
+        prevAscDesc?: 'asc' | 'desc';
+      } | null;
+    },
+  ) => {
     if (pagedRef.current) {
       pagedRef.current.unsubscribe();
     }
 
+    const effectiveShowReconciled = overrides?.showReconciled ?? showReconciled;
+    const effectiveShowBalances = overrides?.showBalances ?? showBalances;
+    const effectiveSearch = overrides?.search ?? search;
+    const effectiveSort = overrides?.sort ?? sort;
+
     if (
-      !showReconciled &&
-      (!showBalances ||
+      !effectiveShowReconciled &&
+      (!effectiveShowBalances ||
         isFiltered ||
-        search !== '' ||
-        (sort !== null && (sort.field !== 'date' || sort.ascDesc !== 'desc')))
+        effectiveSearch !== '' ||
+        (effectiveSort !== null &&
+          (effectiveSort.field !== 'date' || effectiveSort.ascDesc !== 'desc')))
     ) {
       query = query.filter({ reconciled: { $eq: false } });
     }
@@ -437,11 +457,24 @@ function AccountInternal(props: AccountInternalProps) {
     });
   };
 
-  const fetchTransactions = (filterConditionsParam?: ConditionEntity[]) => {
+  const fetchTransactions = (
+    filterConditionsParam?: ConditionEntity[],
+    overrides?: {
+      showReconciled?: boolean;
+      showBalances?: boolean;
+      search?: string;
+      sort?: {
+        ascDesc: 'asc' | 'desc';
+        field: string;
+        prevField?: string;
+        prevAscDesc?: 'asc' | 'desc';
+      } | null;
+    },
+  ) => {
     const query = makeRootTransactionsQuery();
     rootQueryRef.current = currentQueryRef.current = query;
     if (filterConditionsParam) void applyFilters(filterConditionsParam);
-    else updateQuery(query);
+    else updateQuery(query, false, overrides);
 
     if (props.accountId) {
       dispatch(markAccountRead({ id: props.accountId }));
@@ -730,7 +763,11 @@ function AccountInternal(props: AccountInternalProps) {
           setSearch('');
           setSort(null);
           setShowBalances(true);
-          fetchTransactions();
+          fetchTransactions(undefined, {
+            showBalances: true,
+            search: '',
+            sort: null,
+          });
         }
         break;
       case 'remove-sorting': {
@@ -738,7 +775,7 @@ function AccountInternal(props: AccountInternalProps) {
         if (filterConditions.length > 0) {
           void applyFilters([...filterConditions]);
         } else {
-          fetchTransactions();
+          fetchTransactions(undefined, { sort: null });
         }
         if (search !== '') {
           onSearch(search);
@@ -758,11 +795,11 @@ function AccountInternal(props: AccountInternalProps) {
         if (showReconciled) {
           props.setShowReconciled(false);
           setShowReconciled(false);
-          fetchTransactions(filterConditions);
+          fetchTransactions(filterConditions, { showReconciled: false });
         } else {
           props.setShowReconciled(true);
           setShowReconciled(true);
-          fetchTransactions(filterConditions);
+          fetchTransactions(filterConditions, { showReconciled: true });
         }
         break;
       case 'toggle-net-worth-chart':
@@ -1567,16 +1604,7 @@ function AccountInternal(props: AccountInternalProps) {
       setSort(null);
       setSearch('');
       setFilterConditions([]);
-    }
-
-    prevAccountIdRef.current = props.accountId;
-    prevModalShowingRef.current = props.modalShowing;
-  });
-
-  useEffect(() => {
-    if (prevAccountIdRef.current !== props.accountId) {
       setLoading(true);
-      setSearch('');
       setShowBalances(props.showBalances ?? false);
       setBalances(null);
       setShowCleared(props.showCleared ?? false);
@@ -1585,19 +1613,20 @@ function AccountInternal(props: AccountInternalProps) {
 
       const query = makeRootTransactionsQuery();
       rootQueryRef.current = currentQueryRef.current = query;
-      updateQuery(query);
+      updateQuery(query, false, {
+        showReconciled: props.showReconciled,
+        showBalances: props.showBalances ?? false,
+        search: '',
+        sort: null,
+      });
       if (props.accountId) {
         dispatch(markAccountRead({ id: props.accountId }));
       }
     }
-    // Effect intentionally runs only when accountId or balance/shown props change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    props.accountId,
-    props.showBalances,
-    props.showCleared,
-    props.showReconciled,
-  ]);
+
+    prevAccountIdRef.current = props.accountId;
+    prevModalShowingRef.current = props.modalShowing;
+  });
 
   // === RENDER ===
 
