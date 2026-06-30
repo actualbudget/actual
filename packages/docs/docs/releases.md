@@ -173,6 +173,7 @@ This release adds a new bank sync provider, releases the CLI as stable, and expa
 - [#7963](https://github.com/actualbudget/actual/pull/7963) Allow descriptive filenames for release notes (no longer required to be named after the PR number). — thanks @MatissJanis
 - [#8091](https://github.com/actualbudget/actual/pull/8091) ci: remove no longer necessary "environment" from release-notes ci job. — thanks @MatissJanis
 - [#8304](https://github.com/actualbudget/actual/pull/8304) Replace `ts-node` with Node's native TypeScript support for internal scripts. — thanks @MatissJanis
+- Reorganise the SimpleFIN key saving logic — thanks @matt-fidd
 - [#8310](https://github.com/actualbudget/actual/pull/8310) Strip ANSI color codes in the `expectSnapshotWithDiffer` test helper so diff snapshots are deterministic regardless of terminal color detection. — thanks @MatissJanis
 - [#8293](https://github.com/actualbudget/actual/pull/8293) Remove forced waits to speed up some Playwright tests — thanks @matt-fidd
 - [#8284](https://github.com/actualbudget/actual/pull/8284) Move `typescript-strict-plugin` to `devDependencies` in `loot-core` — thanks @MatissJanis
