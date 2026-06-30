@@ -19,6 +19,7 @@ The following are implementations of bank syncing using the Actual API. For inst
 - **MoneyMan an israel banks importer** - https://github.com/daniel-hauser/moneyman
 - **Plaid bank sync** - https://github.com/youngcw/actualplaid
 - **ANZ Plus bank PDF to OFX converter** - [PDFtoOFX](https://github.com/spydisec/PDFtoOFX/)
+- German DKB and Comdirect banks importer - https://github.com/FridoE/actual-bank-importer
 
 ## Other Importers
 
