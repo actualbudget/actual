@@ -100,33 +100,25 @@ export function getFormulaFunctionCatalog(): Record<
       name: 'SUM',
       category: 'math',
       description: t('Returns the sum of all numbers in a range.'),
-      parameters: [
-        { name: 'numbers', description: t('One or more numbers') },
-      ],
+      parameters: [{ name: 'numbers', description: t('One or more numbers') }],
     },
     AVERAGE: {
       name: 'AVERAGE',
       category: 'math',
       description: t('Returns the average of all numbers in a range.'),
-      parameters: [
-        { name: 'numbers', description: t('One or more numbers') },
-      ],
+      parameters: [{ name: 'numbers', description: t('One or more numbers') }],
     },
     MAX: {
       name: 'MAX',
       category: 'math',
       description: t('Returns the maximum value from numbers.'),
-      parameters: [
-        { name: 'numbers', description: t('One or more numbers') },
-      ],
+      parameters: [{ name: 'numbers', description: t('One or more numbers') }],
     },
     MIN: {
       name: 'MIN',
       category: 'math',
       description: t('Returns the minimum value from numbers.'),
-      parameters: [
-        { name: 'numbers', description: t('One or more numbers') },
-      ],
+      parameters: [{ name: 'numbers', description: t('One or more numbers') }],
     },
     ABS: {
       name: 'ABS',
@@ -324,9 +316,7 @@ export function getFormulaFunctionCatalog(): Record<
       name: 'PRODUCT',
       category: 'math',
       description: t('Returns the product of all numbers.'),
-      parameters: [
-        { name: 'numbers', description: t('One or more numbers') },
-      ],
+      parameters: [{ name: 'numbers', description: t('One or more numbers') }],
     },
     IF: {
       name: 'IF',
@@ -337,7 +327,10 @@ export function getFormulaFunctionCatalog(): Record<
       parameters: [
         { name: 'condition', description: t('Condition') },
         { name: 'value_if_true', description: t('Value to return when true') },
-        { name: 'value_if_false', description: t('Value to return when false') },
+        {
+          name: 'value_if_false',
+          description: t('Value to return when false'),
+        },
       ],
     },
     IFS: {
@@ -410,7 +403,10 @@ export function getFormulaFunctionCatalog(): Record<
       ),
       parameters: [
         { name: 'value', description: t('Value') },
-        { name: 'value_if_error', description: t('Value to return when there is an error') },
+        {
+          name: 'value_if_error',
+          description: t('Value to return when there is an error'),
+        },
       ],
     },
     IFNA: {
@@ -421,7 +417,10 @@ export function getFormulaFunctionCatalog(): Record<
       ),
       parameters: [
         { name: 'value', description: t('Value') },
-        { name: 'value_if_na', description: t('Value to return for #N/A errors') },
+        {
+          name: 'value_if_na',
+          description: t('Value to return for #N/A errors'),
+        },
       ],
     },
     SWITCH: {
@@ -440,7 +439,9 @@ export function getFormulaFunctionCatalog(): Record<
       name: 'CONCATENATE',
       category: 'text',
       description: t('Combines several text strings into one.'),
-      parameters: [{ name: 'texts', description: t('One or more text values') }],
+      parameters: [
+        { name: 'texts', description: t('One or more text values') },
+      ],
     },
     INTEGER_TO_AMOUNT: {
       name: 'INTEGER_TO_AMOUNT',
