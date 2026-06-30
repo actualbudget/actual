@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  FORMULA_FUNCTIONS_BY_MODE,
   getDynamicReportQueryCompletions,
   getFormulaCategoryForName,
   getFormulaFunctionCatalog,
   getFormulaFunctionCategoryConfig,
+  getFormulaFunctionsByMode,
   getFormulaFunctionsForMode,
   getFunctionCompletions,
   getNamedVariableCompletions,
@@ -18,18 +18,22 @@ function labels(items: Array<{ label: string }>): string[] {
 }
 
 describe('formulaCatalog', () => {
-  it('has catalog definitions for every available function', () => {
+  it('derives mode availability for every catalog function', () => {
     const catalog = getFormulaFunctionCatalog();
+    const functionsByMode = getFormulaFunctionsByMode();
+    const availableFunctionNames = new Set([
+      ...functionsByMode.query,
+      ...functionsByMode.transaction,
+    ]);
 
-    for (const functionNames of Object.values(FORMULA_FUNCTIONS_BY_MODE)) {
-      for (const functionName of functionNames) {
-        expect(catalog[functionName]).toBeDefined();
-      }
+    for (const [functionName, func] of Object.entries(catalog)) {
+      expect(func.modes.length).toBeGreaterThan(0);
+      expect(availableFunctionNames.has(functionName)).toBe(true);
     }
   });
 
   it('does not duplicate function names within a mode', () => {
-    for (const functionNames of Object.values(FORMULA_FUNCTIONS_BY_MODE)) {
+    for (const functionNames of Object.values(getFormulaFunctionsByMode())) {
       expect(new Set(functionNames).size).toBe(functionNames.length);
     }
   });
