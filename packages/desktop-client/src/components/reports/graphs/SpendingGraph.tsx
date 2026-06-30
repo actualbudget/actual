@@ -163,7 +163,7 @@ export function SpendingGraph({
   compareTo,
 }: SpendingGraphProps) {
   const privacyMode = usePrivacyMode();
-  const animationProps = useRechartsAnimation({ isAnimationActive: false });
+  const animationProps = useRechartsAnimation({ animationDuration: 1000 });
   const balanceTypeOp = 'cumulative';
   const format = useFormat();
 

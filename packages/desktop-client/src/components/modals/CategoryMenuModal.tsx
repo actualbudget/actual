@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
+  SvgChartPie,
   SvgDotsHorizontalTriple,
   SvgTrash,
 } from '@actual-app/components/icons/v1';
@@ -42,6 +43,7 @@ export function CategoryMenuModal({
   onEditNotes,
   onDelete,
   onToggleVisibility,
+  onEditAutomations,
   onClose,
 }: CategoryMenuModalProps) {
   const { t } = useTranslation();
@@ -68,6 +70,10 @@ export function CategoryMenuModal({
 
   const _onDelete = () => {
     onDelete?.(category.id);
+  };
+
+  const _onEditAutomations = () => {
+    onEditAutomations?.(category.id);
   };
 
   const buttonStyle: CSSProperties = {
@@ -140,6 +146,7 @@ export function CategoryMenuModal({
                 flexWrap: 'wrap',
                 justifyContent: 'space-between',
                 alignContent: 'space-between',
+                gap: 8,
                 paddingTop: 10,
               }}
             >
@@ -151,6 +158,16 @@ export function CategoryMenuModal({
                 />
                 <Trans>Edit notes</Trans>
               </Button>
+              {onEditAutomations && (
+                <Button style={buttonStyle} onPress={_onEditAutomations}>
+                  <SvgChartPie
+                    width={20}
+                    height={20}
+                    style={{ paddingRight: 5 }}
+                  />
+                  <Trans>Budget automations</Trans>
+                </Button>
+              )}
             </View>
           </View>
         </>

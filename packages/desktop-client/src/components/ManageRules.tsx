@@ -13,8 +13,6 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import { q } from '@actual-app/core/shared/query';
-import { friendlyOp, mapField } from '@actual-app/core/shared/rules';
-import { describeSchedule } from '@actual-app/core/shared/schedules';
 import type {
   NewRuleEntity,
   RuleEntity,
@@ -28,6 +26,8 @@ import { useSchedules } from '#hooks/useSchedules';
 import { SelectedProvider, useSelected } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import { friendlyOp, mapField } from '#util/rule';
+import { describeSchedule } from '#util/schedule';
 
 import { InfiniteScrollWrapper } from './common/InfiniteScrollWrapper';
 import { Link } from './common/Link';

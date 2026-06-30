@@ -35,7 +35,7 @@
     "**/node_modules/*",
     "dist",
     "@types",
-    "*.test.ts",
+    "e2e",
     "*.config.ts",
     "*.config.mts"
   ]

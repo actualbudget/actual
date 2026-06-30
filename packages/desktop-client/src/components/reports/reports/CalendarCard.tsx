@@ -24,13 +24,13 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import type { CalendarWidget } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { format as formatDate } from 'date-fns';
-import debounce from 'lodash/debounce';
+import { debounce } from 'es-toolkit/compat';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import { CalendarCardSkeleton } from '#components/reports/CalendarCardSkeleton';
 import { DateRange } from '#components/reports/DateRange';
 import { CalendarGraph } from '#components/reports/graphs/CalendarGraph';
-import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
@@ -339,7 +339,7 @@ export function CalendarCard({
                 />
               ))
             ) : (
-              <LoadingIndicator />
+              <CalendarCardSkeleton />
             )}
           </View>
         </View>

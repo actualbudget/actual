@@ -84,6 +84,36 @@ The API communicates with the server using Node's built-in `fetch`. There are a 
 - Option 2: Set environment variable [NODE_TLS_REJECT_UNAUTHORIZED](https://nodejs.org/api/cli.html#node_tls_reject_unauthorizedvalue) to `0`. Not recommended if your program reaches out to any other endpoints other than the Actual server.
 - Options 3: Use OpenSSL CA certificates configuration for Node and add your certificate to the OpenSSL SSL_CERT_DIR. What this requires depends on your build of Node.js, and the configuration details are beyond the scope of this documentation. See the [Node.js OpenSSL Strategy](https://github.com/nodejs/TSC/blob/main/OpenSSL-Strategy.md) page for a starting point.
 
+## Using the API in a Browser
+
+<ExperimentalFeatureWarning />
+
+The package also ships a browser build. When you bundle your web app with a modern bundler (for example Vite), the package's `browser` entry is picked up automatically and you use the same methods as in Node.js:
+
+```js
+import * as api from '@actual-app/api';
+
+await api.init({
+  // In the browser, budget data is stored in IndexedDB. This is a path
+  // inside that virtual file system.
+  dataDir: '/documents',
+  serverURL: 'https://your-server.example.com',
+  password: 'hunter2',
+});
+
+await api.downloadBudget('1cfdbb80-6274-49bf-b0c2-737235a4c81f');
+console.log(await api.getAccounts());
+await api.shutdown();
+```
+
+Behind the scenes, `init` starts a Web Worker running the same budget engine the Actual web app uses, backed by SQLite compiled to WebAssembly. Your budget data is stored in the browser's IndexedDB and stays on the device.
+
+The browser build is fully self-contained: the Web Worker and its WebAssembly and data files are inlined into the package. There are no extra files to copy or serve, and no bundler configuration is required (no `optimizeDeps` tweaks, no worker or asset plugins). Importing the package and calling `init()` is all that's needed.
+
+:::caution Cross-origin isolation is required
+The engine uses `SharedArrayBuffer`, so the page that runs the API must be served **cross-origin isolated**: over HTTPS, with `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`. This is a hosting/server requirement (it cannot be bundled away). See [Enabling SharedArrayBuffer Access](../troubleshooting/shared-array-buffer.md). In local development, set the same headers on your dev server (for example via a small Vite middleware plugin).
+:::
+
 ## Writing Data Importers
 
 If you are using another app, like YNAB or Mint, you might want to migrate your data into Actual. Right now, Actual officially supports [importing YNAB4 data](../migration/ynab4.md) and [importing nYNAB data](../migration/nynab.md) (and it works very well). But if you want to import all of your data into Actual, you can write a custom importer.

@@ -5,11 +5,14 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import type {
-  AccountEntity,
-  BankSyncProviders,
-} from '@actual-app/core/types/models';
+import type { AccountEntity } from '@actual-app/core/types/models';
 
+import {
+  getGroupedBankSyncEntries,
+  getSyncSourceReadable,
+  groupBankSyncAccounts,
+} from '#components/banksync/bankSyncUtils';
+import type { GroupedBankSyncAccounts } from '#components/banksync/bankSyncUtils';
 import { Search } from '#components/common/Search';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
@@ -19,79 +22,42 @@ import { useDispatch } from '#redux';
 
 import { BankSyncAccountsList } from './BankSyncAccountsList';
 
-type SyncProviders = BankSyncProviders | 'unlinked';
-
-const useSyncSourceReadable = () => {
-  const { t } = useTranslation();
-
-  const syncSourceReadable: Record<SyncProviders, string> = {
-    goCardless: 'GoCardless',
-    simpleFin: 'SimpleFIN',
-    pluggyai: 'Pluggy.ai',
-    unlinked: t('Unlinked'),
-  };
-
-  return { syncSourceReadable };
-};
-
 export function MobileBankSyncPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { syncSourceReadable } = useSyncSourceReadable();
   const { data: accounts = [] } = useAccounts();
   const [filter, setFilter] = useState('');
+  const syncSourceReadable = useMemo(() => getSyncSourceReadable(t), [t]);
 
   const openAccounts = useMemo(
     () => accounts.filter(a => !a.closed),
     [accounts],
   );
 
-  const groupedAccounts = useMemo(() => {
-    const unsorted = openAccounts.reduce(
-      (acc, a) => {
-        const syncSource = a.account_sync_source ?? 'unlinked';
-        acc[syncSource] = acc[syncSource] || [];
-        acc[syncSource].push(a);
-        return acc;
-      },
-      {} as Record<SyncProviders, AccountEntity[]>,
-    );
-
-    const sortedKeys = Object.keys(unsorted).sort((keyA, keyB) => {
-      if (keyA === 'unlinked') return 1;
-      if (keyB === 'unlinked') return -1;
-      return keyA.localeCompare(keyB);
-    });
-
-    return sortedKeys.reduce(
-      (sorted, key) => {
-        sorted[key as SyncProviders] = unsorted[key as SyncProviders];
-        return sorted;
-      },
-      {} as Record<SyncProviders, AccountEntity[]>,
-    );
-  }, [openAccounts]);
+  const groupedAccounts = useMemo(
+    () => groupBankSyncAccounts(openAccounts),
+    [openAccounts],
+  );
 
   const filteredGroupedAccounts = useMemo(() => {
     if (!filter) return groupedAccounts;
 
     const filterLower = filter.toLowerCase();
-    const filtered: Record<SyncProviders, AccountEntity[]> = {} as Record<
-      SyncProviders,
-      AccountEntity[]
-    >;
+    const filtered: GroupedBankSyncAccounts = {};
 
-    Object.entries(groupedAccounts).forEach(([provider, accounts]) => {
-      const filteredAccounts = accounts.filter(
-        account =>
-          account.name.toLowerCase().includes(filterLower) ||
-          account.bankName?.toLowerCase().includes(filterLower),
-      );
-      if (filteredAccounts.length > 0) {
-        filtered[provider as SyncProviders] = filteredAccounts;
-      }
-    });
+    getGroupedBankSyncEntries(groupedAccounts).forEach(
+      ([provider, accounts]) => {
+        const filteredAccounts = accounts.filter(
+          account =>
+            account.name.toLowerCase().includes(filterLower) ||
+            account.bankName?.toLowerCase().includes(filterLower),
+        );
+        if (filteredAccounts.length > 0) {
+          filtered[provider] = filteredAccounts;
+        }
+      },
+    );
 
     return filtered;
   }, [groupedAccounts, filter]);

@@ -12,10 +12,14 @@ export function registerTagsCommand(program: Command) {
     .description('List all tags')
     .action(async () => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const result = await api.getTags();
-        printOutput(result, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const result = await api.getTags();
+          printOutput(result, opts.format);
+        },
+        { mutates: false },
+      );
     });
 
   tags
@@ -26,14 +30,18 @@ export function registerTagsCommand(program: Command) {
     .option('--description <description>', 'Tag description')
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const id = await api.createTag({
-          tag: cmdOpts.tag,
-          color: cmdOpts.color,
-          description: cmdOpts.description,
-        });
-        printOutput({ id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const id = await api.createTag({
+            tag: cmdOpts.tag,
+            color: cmdOpts.color,
+            description: cmdOpts.description,
+          });
+          printOutput({ id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   tags
@@ -55,10 +63,14 @@ export function registerTagsCommand(program: Command) {
         );
       }
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.updateTag(id, fields);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.updateTag(id, fields);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   tags
@@ -66,9 +78,13 @@ export function registerTagsCommand(program: Command) {
     .description('Delete a tag')
     .action(async (id: string) => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.deleteTag(id);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.deleteTag(id);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 }

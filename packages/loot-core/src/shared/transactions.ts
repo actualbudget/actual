@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { logger } from '#platform/server/log';
 import type { TransactionEntity } from '#types/models';
 
@@ -39,7 +41,7 @@ export function makeChild<T extends GenericTransactionEntity>(
     ...data,
     category: 'category' in data ? data.category : parent.category,
     payee: 'payee' in data ? data.payee : parent.payee,
-    id: 'id' in data ? data.id : prefix + crypto.randomUUID(),
+    id: 'id' in data ? data.id : prefix + uuidv4(),
     account: parent.account,
     date: parent.date,
     cleared: parent.cleared != null ? parent.cleared : null,
@@ -54,6 +56,15 @@ export function makeChild<T extends GenericTransactionEntity>(
     parent_id: parent.id,
     error: null,
   } as unknown as T;
+}
+
+export function makeEmptySplitSubtransactions(
+  parent: TransactionEntity,
+): TransactionEntity[] {
+  return [
+    makeChild(parent, { sort_order: -1 }),
+    makeChild(parent, { sort_order: -2 }),
+  ];
 }
 
 function makeNonChild<T extends GenericTransactionEntity>(
@@ -247,6 +258,7 @@ export function addSplitTransaction(
     trans.subtransactions?.push(
       makeChild(trans, {
         amount: 0,
+        payee: prevSub?.payee ?? trans.payee,
         sort_order: num(prevSub && prevSub.sort_order) - 1,
       }),
     );
@@ -343,6 +355,7 @@ export function splitTransaction(
     return {
       ...rest,
       is_parent: true,
+      payee: null,
       error: num(trans.amount) === 0 ? null : SplitTransactionError(0, trans),
       subtransactions: subtransactions.map(t => ({
         ...t,
@@ -357,7 +370,7 @@ export function realizeTempTransactions(
 ): TransactionEntity[] {
   const parent = {
     ...transactions.find(t => !t.is_child),
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     sort_order: Date.now(),
   } as TransactionEntity;
   const children = transactions.filter(t => t.is_child);
@@ -367,7 +380,7 @@ export function realizeTempTransactions(
       child =>
         ({
           ...child,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           parent_id: parent.id,
         }) satisfies TransactionEntity,
     ),

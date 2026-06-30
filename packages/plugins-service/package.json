@@ -6,19 +6,19 @@
   "author": "",
   "main": "plugin-sw.js",
   "scripts": {
-    "build": "cross-env NODE_ENV=production ./bin/build-service-worker",
-    "build-dev": "cross-env NODE_ENV=development ./bin/build-service-worker",
-    "watch": "cross-env NODE_ENV=development ./bin/build-service-worker --watch",
+    "build": "cross-env NODE_ENV=production vite build",
+    "build-dev": "cross-env NODE_ENV=development vite build",
+    "watch": "cross-env NODE_ENV=development vite build --watch",
     "typecheck": "tsgo -b && tsc-strict"
   },
   "dependencies": {
-    "workbox-precaching": "^7.4.0"
+    "workbox-precaching": "^7.4.1"
   },
   "devDependencies": {
-    "@types/node": "^22.19.17",
+    "@types/node": "^22.19.21",
     "@typescript/native-preview": "beta",
     "cross-env": "^10.1.0",
     "typescript-strict-plugin": "^2.4.4",
-    "vite": "^8.0.5"
+    "vite": "^8.0.16"
   }
 }

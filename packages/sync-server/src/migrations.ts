@@ -1,40 +1,34 @@
-import { readdir } from 'node:fs/promises';
-import path, { dirname } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import path from 'node:path';
 
 import { load } from 'migrate';
 
 import { config } from './load-config';
 
 type MigrationCallback = (err?: Error) => void;
+type MigrationModule = {
+  up: (next?: MigrationCallback) => void;
+  down: (next?: MigrationCallback) => void;
+};
+
+// Vite resolves this glob at build time and inlines a static map of
+// () => import('chunks/...js') calls. Each migration becomes its own chunk.
+// Runtime fs reads against a migrations/ directory disappear.
+const migrationsLoaders = import.meta.glob<MigrationModule>(
+  '../migrations/*.{ts,js}',
+);
 
 export async function run(direction: 'up' | 'down' = 'up'): Promise<void> {
   console.log(
     `Checking if there are any migrations to run for direction "${direction}"...`,
   );
 
-  const __dirname = dirname(fileURLToPath(import.meta.url)); // this directory
-  const migrationsDir = path.join(__dirname, '../migrations');
-
   try {
-    // Load all script files in the migrations directory
-    const files = await readdir(migrationsDir);
-    const migrationsModules: Record<
-      string,
-      {
-        up: (next?: MigrationCallback) => void;
-        down: (next?: MigrationCallback) => void;
-      }
-    > = {};
+    const sortedKeys = Object.keys(migrationsLoaders).sort();
+    const migrationsModules: Record<string, MigrationModule> = {};
 
-    for (const f of files
-      .filter(
-        f => (f.endsWith('.js') || f.endsWith('.ts')) && !f.endsWith('.d.ts'),
-      )
-      .sort((a, b) => (a > b ? 1 : a < b ? -1 : 0))) {
-      migrationsModules[f] = await import(
-        pathToFileURL(path.join(migrationsDir, f)).href
-      );
+    for (const key of sortedKeys) {
+      const fileName = key.split('/').pop()!;
+      migrationsModules[fileName] = await migrationsLoaders[key]();
     }
 
     return new Promise<void>((resolve, reject) => {

@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
@@ -7,6 +8,9 @@ export class BudgetPage {
   readonly budgetSummary: Locator;
   readonly budgetTable: Locator;
   readonly budgetTableTotals: Locator;
+  readonly selectedMonthButton: Locator;
+  readonly nextMonthButton: Locator;
+  readonly budgetTableScrollContainer: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -14,6 +18,21 @@ export class BudgetPage {
     this.budgetSummary = page.getByTestId('budget-summary');
     this.budgetTable = page.getByTestId('budget-table');
     this.budgetTableTotals = this.budgetTable.getByTestId('budget-totals');
+    this.selectedMonthButton = page.getByTestId('selected-budget-month');
+    this.nextMonthButton = page.getByTitle('Next month');
+    this.budgetTableScrollContainer = page.getByTestId(
+      'budget-table-scroll-container',
+    );
+  }
+
+  async getScrollTop() {
+    return this.budgetTableScrollContainer.evaluate(el => el.scrollTop);
+  }
+
+  async scrollToBottom() {
+    await this.budgetTableScrollContainer.evaluate(el => {
+      el.scrollTop = el.scrollHeight;
+    });
   }
 
   /**
@@ -69,8 +88,59 @@ export class BudgetPage {
     };
   }
 
-  async showMoreMonths() {
-    await this.page.getByTestId('calendar-icon').first().click();
+  async setBudgetedAmount(
+    categoryName: string,
+    amount: string,
+    monthIndex = 0,
+  ) {
+    const row = this.budgetTable
+      .getByTestId('row')
+      .filter({ hasText: categoryName })
+      .first();
+    const budgetCell = row.getByTestId('budget').nth(monthIndex);
+
+    await budgetCell.click();
+    const input = budgetCell.locator('input');
+    await input.waitFor({ state: 'visible' });
+    await input.fill(amount);
+    await input.press('Enter');
+  }
+
+  async getSelectedMonth() {
+    const selectedMonth =
+      await this.selectedMonthButton.getAttribute('data-month');
+
+    if (!selectedMonth) {
+      throw new Error('Failed to get the selected month.');
+    }
+
+    return selectedMonth;
+  }
+
+  async #waitForNewMonthToLoad({
+    currentMonth,
+    errorMessage,
+  }: {
+    currentMonth: string;
+    errorMessage: string;
+  }) {
+    await expect(this.selectedMonthButton, errorMessage).not.toHaveAttribute(
+      'data-month',
+      currentMonth,
+    );
+
+    return this.getSelectedMonth();
+  }
+
+  async goToNextMonth() {
+    const currentMonth = await this.getSelectedMonth();
+
+    await this.nextMonthButton.click();
+
+    return await this.#waitForNewMonthToLoad({
+      currentMonth,
+      errorMessage: 'Failed to navigate to the next month.',
+    });
   }
 
   async getBalanceForRow(idx: number) {
@@ -107,6 +177,40 @@ export class BudgetPage {
       .nth(idx)
       .getByTestId('category-month-spent')
       .click();
+    return new AccountPage(this.page);
+  }
+
+  async clickOnSpentAmountForLastVisibleRow() {
+    // Click the last spent-amount cell currently visible in the scroll container
+    // without triggering Playwright's auto-scroll-into-view, so the scroll
+    // position is not changed before the click handler captures it.
+    const clicked = await this.page.evaluate(() => {
+      const container = document.querySelector(
+        '[data-testid="budget-table-scroll-container"]',
+      );
+      if (!container) {
+        throw new Error('Budget scroll container not found');
+      }
+      const containerRect = container.getBoundingClientRect();
+      const cells = container.querySelectorAll<HTMLElement>(
+        '[data-testid="category-month-spent"]',
+      );
+      for (const cell of [...cells].reverse()) {
+        const rect = cell.getBoundingClientRect();
+        if (
+          rect.top >= containerRect.top &&
+          rect.bottom <= containerRect.bottom
+        ) {
+          cell.click();
+          return true;
+        }
+      }
+      return false;
+    });
+
+    if (!clicked) {
+      throw new Error('No visible spent-amount cell found to click');
+    }
     return new AccountPage(this.page);
   }
 

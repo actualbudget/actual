@@ -6,6 +6,10 @@ This guide will help you set up your development environment for contributing to
 
 ## Prerequisites
 
+:::tip
+If you prefer not to install Node and Yarn locally, you can use the [Dev Container](#dev-container) or run [Docker Compose](#docker-compose) directly.
+:::
+
 Before you begin, ensure you have the following installed:
 
 - **Node.js**: Version 22 or greater. You can download it from the [Node.js website](https://nodejs.org/en/download) (we recommend the LTS version).
@@ -38,6 +42,34 @@ Before you begin, ensure you have the following installed:
    ```bash
    yarn typecheck
    ```
+
+## Dev Container
+
+The repo includes a [`.devcontainer/`](https://github.com/actualbudget/actual/tree/master/.devcontainer) configuration that follows the [Dev Containers spec](https://containers.dev/). Any tool that supports the spec can use it — for example VS Code or Cursor (with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)), JetBrains IDEs (via Gateway), GitHub Codespaces, or the [`@devcontainers/cli`](https://github.com/devcontainers/cli).
+
+In an editor that supports the spec, open the cloned repo and accept the **Reopen in Container** prompt (or run the equivalent command from your editor's command palette). The container will build, `yarn install` will run automatically via `postCreateCommand`, and you'll be dropped into a shell with the toolchain ready.
+
+To start the dev server, open a terminal inside the container and run:
+
+```bash
+yarn start
+```
+
+The dev server will be available at `http://localhost:3001/`. Most editors automatically forward the port from the container to your host.
+
+## Docker Compose
+
+For other editors, run from the repo root:
+
+```bash
+docker compose up --build
+```
+
+This starts a container that runs `yarn start:browser` on port 3001. Open `http://localhost:3001/` in your browser.
+
+:::note
+The container mounts your repo at `/app`. If you've already run `yarn install` on your host, the native modules (`better-sqlite3`, `bcrypt`, `electron`, `sharp`) will be compiled for your host OS and won't work inside the Linux container. Either delete `node_modules/` first and let the container reinstall, or run the dev container path above (which rebuilds them automatically).
+:::
 
 ## Essential Development Commands
 

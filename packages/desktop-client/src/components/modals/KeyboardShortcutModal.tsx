@@ -13,6 +13,7 @@ import * as Platform from '@actual-app/core/shared/platform';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { Search } from '#components/common/Search';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 type KeyIconProps = {
   shortcut: string;
@@ -151,6 +152,7 @@ export function KeyboardShortcutModal() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null,
   );
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   // In future, we may move this to state and pull overrides from config/db
   // This would allow us to drive our shortcuts from state instead of hardcoding them
@@ -232,6 +234,16 @@ export function KeyboardShortcutModal() {
             shortcut: '→',
             description: t('View next month'),
           },
+          ...(isGoalTemplatesEnabled
+            ? [
+                {
+                  id: 'overwrite-with-templates',
+                  shortcut: 'T',
+                  shift: true,
+                  description: t('Overwrite with budget templates'),
+                },
+              ]
+            : []),
         ],
       },
       {
@@ -407,10 +419,17 @@ export function KeyboardShortcutModal() {
             shortcut: 'G',
             description: t('Merge the selected transactions'),
           },
+          {
+            id: 'make-transfer-from-selected-transactions',
+            shortcut: 'R',
+            description: t(
+              'Make a transfer from the two selected transactions',
+            ),
+          },
         ],
       },
     ],
-    [t, ctrl],
+    [t, ctrl, isGoalTemplatesEnabled],
   );
 
   const { isSearching, isInCategory, currentCategory, itemsToShow } =

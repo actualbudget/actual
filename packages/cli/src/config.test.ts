@@ -28,6 +28,9 @@ describe('resolveConfig', () => {
     'ACTUAL_SYNC_ID',
     'ACTUAL_DATA_DIR',
     'ACTUAL_ENCRYPTION_PASSWORD',
+    'ACTUAL_CACHE_TTL',
+    'ACTUAL_LOCK_TIMEOUT',
+    'ACTUAL_NO_LOCK',
   ];
 
   beforeEach(() => {
@@ -156,6 +159,125 @@ describe('resolveConfig', () => {
 
       expect(config.password).toBe('pw');
       expect(config.sessionToken).toBeUndefined();
+    });
+  });
+
+  describe('cache options', () => {
+    beforeEach(() => {
+      process.env.ACTUAL_SERVER_URL = 'http://test';
+      process.env.ACTUAL_PASSWORD = 'pw';
+    });
+
+    it('defaults cacheTtl to 60 seconds', async () => {
+      const config = await resolveConfig({});
+      expect(config.cacheTtl).toBe(60);
+    });
+
+    it('reads cacheTtl from env', async () => {
+      process.env.ACTUAL_CACHE_TTL = '300';
+      const config = await resolveConfig({});
+      expect(config.cacheTtl).toBe(300);
+    });
+
+    it('prefers cacheTtl from CLI flag', async () => {
+      process.env.ACTUAL_CACHE_TTL = '300';
+      const config = await resolveConfig({ cacheTtl: 10 });
+      expect(config.cacheTtl).toBe(10);
+    });
+
+    it('rejects negative cacheTtl', async () => {
+      await expect(resolveConfig({ cacheTtl: -1 })).rejects.toThrow(/cacheTtl/);
+    });
+
+    it('rejects non-integer cacheTtl from env', async () => {
+      process.env.ACTUAL_CACHE_TTL = 'banana';
+      await expect(resolveConfig({})).rejects.toThrow(/ACTUAL_CACHE_TTL/);
+    });
+
+    it('defaults lockTimeout to 10 seconds', async () => {
+      const config = await resolveConfig({});
+      expect(config.lockTimeout).toBe(10);
+    });
+
+    it('reads lockTimeout from env', async () => {
+      process.env.ACTUAL_LOCK_TIMEOUT = '30';
+      const config = await resolveConfig({});
+      expect(config.lockTimeout).toBe(30);
+    });
+
+    it('defaults refresh to false', async () => {
+      const config = await resolveConfig({});
+      expect(config.refresh).toBe(false);
+    });
+
+    it('sets refresh when provided on CLI opts', async () => {
+      const config = await resolveConfig({ refresh: true });
+      expect(config.refresh).toBe(true);
+    });
+
+    it('sets refresh when --no-cache is passed (cliOpts.cache === false)', async () => {
+      const config = await resolveConfig({ cache: false });
+      expect(config.refresh).toBe(true);
+    });
+
+    it('does not set refresh when cliOpts.cache is true (flag absent)', async () => {
+      const config = await resolveConfig({ cache: true });
+      expect(config.refresh).toBe(false);
+    });
+
+    it('defaults noLock to false', async () => {
+      const config = await resolveConfig({});
+      expect(config.noLock).toBe(false);
+    });
+
+    it('sets noLock when --no-lock is passed (cliOpts.lock === false)', async () => {
+      const config = await resolveConfig({ lock: false });
+      expect(config.noLock).toBe(true);
+    });
+
+    it('leaves noLock false when cliOpts.lock is true (flag absent)', async () => {
+      const config = await resolveConfig({ lock: true });
+      expect(config.noLock).toBe(false);
+    });
+
+    it('parses ACTUAL_NO_LOCK=1 as true', async () => {
+      process.env.ACTUAL_NO_LOCK = '1';
+      const config = await resolveConfig({});
+      expect(config.noLock).toBe(true);
+    });
+
+    it('parses ACTUAL_NO_LOCK=true as true', async () => {
+      process.env.ACTUAL_NO_LOCK = 'true';
+      const config = await resolveConfig({});
+      expect(config.noLock).toBe(true);
+    });
+
+    it('throws on an invalid ACTUAL_NO_LOCK value', async () => {
+      process.env.ACTUAL_NO_LOCK = 'yes';
+      await expect(resolveConfig({})).rejects.toThrow(/ACTUAL_NO_LOCK/);
+    });
+
+    it('reads cacheTtl/lockTimeout/noLock from config file', async () => {
+      mockConfigFile({
+        serverUrl: 'http://file',
+        password: 'pw',
+        cacheTtl: 120,
+        lockTimeout: 5,
+        noLock: true,
+      });
+      const config = await resolveConfig({});
+      expect(config.cacheTtl).toBe(120);
+      expect(config.lockTimeout).toBe(5);
+      expect(config.noLock).toBe(true);
+    });
+
+    it('rejects non-number cacheTtl in config file', async () => {
+      mockConfigFile({
+        serverUrl: 'http://file',
+        password: 'pw',
+        cacheTtl: 'soon',
+      });
+      await expect(resolveConfig({})).rejects.toThrow(/cacheTtl/);
     });
   });
 

@@ -13,7 +13,6 @@ import type { DarkTheme, Theme } from '@actual-app/core/types/prefs';
 import { css } from '@emotion/css';
 
 import { useSidebar } from '#components/sidebar/SidebarProvider';
-import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import {
   darkThemeOptions,
@@ -49,9 +48,6 @@ export function ThemeSettings() {
   const showInstallerRef = useRef<InstallerState>(null);
   showInstallerRef.current = showInstaller;
 
-  const customThemesEnabled = useFeatureFlag('customThemes');
-
-  // Global prefs for custom themes
   const [installedLightThemeJson, setInstalledLightThemeJson] = useGlobalPref(
     'installedCustomLightTheme',
   );
@@ -66,71 +62,60 @@ export function ThemeSettings() {
   );
   const installedCustomDarkTheme = parseInstalledTheme(installedDarkThemeJson);
 
-  // Build the options list for the single (non-auto) theme selector
   const buildOptions = useCallback(() => {
     const options: Array<readonly [string, string] | typeof Menu.line> = [
       ...themeOptions,
     ];
 
-    if (customThemesEnabled) {
-      if (theme !== 'auto' && installedCustomLightTheme) {
-        options.push([
-          `custom:${installedCustomLightTheme.id}`,
-          installedCustomLightTheme.name,
-        ] as const);
-      }
-      options.push(Menu.line);
-      options.push([INSTALL_NEW_VALUE, t('Custom theme')] as const);
+    if (theme !== 'auto' && installedCustomLightTheme) {
+      options.push([
+        `custom:${installedCustomLightTheme.id}`,
+        installedCustomLightTheme.name,
+      ] as const);
     }
+    options.push(Menu.line);
+    options.push([INSTALL_NEW_VALUE, t('Custom theme')] as const);
 
     return options;
-  }, [installedCustomLightTheme, customThemesEnabled, theme, t]);
+  }, [installedCustomLightTheme, theme, t]);
 
-  // Build options for the auto-mode light theme selector
   const buildLightOptions = useCallback(() => {
     const options: Array<readonly [string, string] | typeof Menu.line> = [
       ['light', t('Light')],
     ];
-    if (customThemesEnabled) {
-      if (installedCustomLightTheme) {
-        options.push([
-          `custom-light:${installedCustomLightTheme.id}`,
-          installedCustomLightTheme.name,
-        ] as const);
-      }
-      options.push(Menu.line);
-      options.push([INSTALL_CUSTOM_LIGHT, t('Custom theme')] as const);
+    if (installedCustomLightTheme) {
+      options.push([
+        `custom-light:${installedCustomLightTheme.id}`,
+        installedCustomLightTheme.name,
+      ] as const);
     }
+    options.push(Menu.line);
+    options.push([INSTALL_CUSTOM_LIGHT, t('Custom theme')] as const);
     return options;
-  }, [installedCustomLightTheme, customThemesEnabled, t]);
+  }, [installedCustomLightTheme, t]);
 
-  // Build options for the auto-mode dark theme selector
   const buildDarkOptions = useCallback(() => {
     const options: Array<readonly [string, string] | typeof Menu.line> = [
       ...darkThemeOptions,
     ];
-    if (customThemesEnabled) {
-      if (installedCustomDarkTheme) {
-        options.push([
-          `custom-dark:${installedCustomDarkTheme.id}`,
-          installedCustomDarkTheme.name,
-        ] as const);
-      }
-      options.push(Menu.line);
-      options.push([INSTALL_CUSTOM_DARK, t('Custom theme')] as const);
+    if (installedCustomDarkTheme) {
+      options.push([
+        `custom-dark:${installedCustomDarkTheme.id}`,
+        installedCustomDarkTheme.name,
+      ] as const);
     }
+    options.push(Menu.line);
+    options.push([INSTALL_CUSTOM_DARK, t('Custom theme')] as const);
     return options;
-  }, [installedCustomDarkTheme, customThemesEnabled, t]);
+  }, [installedCustomDarkTheme, t]);
 
-  // Determine current value for the single theme select
   const getCurrentValue = useCallback(() => {
-    if (customThemesEnabled && installedCustomLightTheme && theme !== 'auto') {
+    if (installedCustomLightTheme && theme !== 'auto') {
       return `custom:${installedCustomLightTheme.id}`;
     }
     return theme;
-  }, [customThemesEnabled, installedCustomLightTheme, theme]);
+  }, [installedCustomLightTheme, theme]);
 
-  // Handle theme selection (non-auto mode)
   const handleThemeChange = useCallback(
     (value: string) => {
       if (value === INSTALL_NEW_VALUE) {
@@ -150,7 +135,6 @@ export function ThemeSettings() {
     [theme, setInstalledLightThemeJson, setInstalledDarkThemeJson, switchTheme],
   );
 
-  // Handle light theme selection (auto mode)
   const handleLightThemeChange = useCallback(
     (value: string) => {
       if (value === INSTALL_CUSTOM_LIGHT) {
@@ -164,7 +148,6 @@ export function ThemeSettings() {
     [setInstalledLightThemeJson],
   );
 
-  // Handle dark theme selection (auto mode)
   const handleDarkThemeChange = useCallback(
     (value: string) => {
       if (value === INSTALL_CUSTOM_DARK) {
@@ -197,7 +180,6 @@ export function ThemeSettings() {
     [setInstalledLightThemeJson, setInstalledDarkThemeJson, switchTheme],
   );
 
-  // Handle installer close
   const handleInstallerClose = useCallback(() => {
     setShowInstaller(null);
   }, []);
@@ -254,7 +236,7 @@ export function ThemeSettings() {
                       maxWidth: '100%',
                     })}
                   />
-                  {customThemesEnabled && hasCustomCssOverride && (
+                  {hasCustomCssOverride && (
                     <Button
                       variant="bare"
                       aria-label={t(
@@ -278,7 +260,7 @@ export function ThemeSettings() {
                     <Select<string>
                       onChange={handleLightThemeChange}
                       value={
-                        customThemesEnabled && installedCustomLightTheme
+                        installedCustomLightTheme
                           ? `custom-light:${installedCustomLightTheme.id}`
                           : 'light'
                       }
@@ -296,7 +278,7 @@ export function ThemeSettings() {
                     <Select<string>
                       onChange={handleDarkThemeChange}
                       value={
-                        customThemesEnabled && installedCustomDarkTheme
+                        installedCustomDarkTheme
                           ? `custom-dark:${installedCustomDarkTheme.id}`
                           : darkTheme
                       }
@@ -315,7 +297,7 @@ export function ThemeSettings() {
             </View>
           )}
 
-          {customThemesEnabled && showInstaller && (
+          {showInstaller && (
             <ThemeInstaller
               onInstall={handleInstall}
               onClose={handleInstallerClose}

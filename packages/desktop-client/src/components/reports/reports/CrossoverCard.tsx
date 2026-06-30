@@ -19,10 +19,12 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
+import { defaultTimeFrame } from '#components/reports/reports/Crossover';
 import { createCrossoverSpreadsheet } from '#components/reports/spreadsheets/crossover-spreadsheet';
 import type { CrossoverData } from '#components/reports/spreadsheets/crossover-spreadsheet';
 import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
+import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 
@@ -47,6 +49,7 @@ export function CrossoverCard({
 }: CrossoverCardProps) {
   const locale = useLocale();
   const { t } = useTranslation();
+  const { data: categories = { grouped: [], list: [] } } = useCategories();
   const { isNarrowWidth } = useResponsive();
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
@@ -87,7 +90,7 @@ export function CrossoverCard({
       // Use calculateTimeRange to get initial values based on timeFrame mode
       const [initialStart, initialEnd, mode] = calculateTimeRange(
         meta?.timeFrame,
-        undefined,
+        defaultTimeFrame,
         previousMonth,
       );
 
@@ -136,11 +139,17 @@ export function CrossoverCard({
   const onCardHover = useCallback(() => setIsCardHovered(true), []);
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
 
+  const showHiddenCategories = meta?.showHiddenCategories ?? false;
+
   // Memoize these to prevent unnecessary re-renders
-  const expenseCategoryIds = useMemo(
-    () => meta?.expenseCategoryIds ?? [],
-    [meta?.expenseCategoryIds],
-  );
+  const expenseCategoryIds = useMemo(() => {
+    const storedIds = meta?.expenseCategoryIds;
+    const base =
+      storedIds !== undefined
+        ? categories.list.filter(c => storedIds.includes(c.id))
+        : categories.list.filter(c => !c.is_income);
+    return base.filter(c => showHiddenCategories || !c.hidden).map(c => c.id);
+  }, [meta?.expenseCategoryIds, categories.list, showHiddenCategories]);
 
   const incomeAccountIds = useMemo(
     () => meta?.incomeAccountIds ?? accounts.map(a => a.id),

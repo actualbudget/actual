@@ -1,9 +1,9 @@
 import path from 'path';
 
+import { peggyLoader } from '@actual-app/vite-plugin-peggy';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
-import peggyLoader from 'vite-plugin-peggy-loader';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -38,6 +38,16 @@ export default defineConfig(({ mode }) => {
           warn(warning);
         },
         output: {
+          // Users debug from raw stack traces, so compress and strip
+          // whitespace but never mangle identifiers (overrides the
+          // mangle: true that `minify: 'oxc'` implies).
+          ...(!isDev && {
+            minify: {
+              compress: true,
+              mangle: false,
+              codegen: true,
+            },
+          }),
           chunkFileNames: isDev
             ? '[name].kcab.worker.dev.js'
             : '[id].[name].kcab.worker.[hash].js',
@@ -51,7 +61,7 @@ export default defineConfig(({ mode }) => {
         external: [],
       },
       sourcemap: true,
-      minify: false,
+      minify: isDev ? false : 'oxc',
     },
     define: {
       'process.env': '{}',
@@ -62,7 +72,6 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       peggyLoader(),
-      // https://github.com/davidmyersdev/vite-plugin-node-polyfills/issues/142
       nodePolyfills({
         include: [
           'process',

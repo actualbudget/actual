@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import SQL from 'better-sqlite3';
+import { v4 as uuidv4 } from 'uuid';
 
 import { getDataDir, readFile, removeFile } from '#platform/server/fs';
 import { logger } from '#platform/server/log';
@@ -18,6 +19,13 @@ function verifyParamTypes(sql, arr) {
 
 export async function init() {
   // No need to initialise on electron
+}
+
+// Parity with the browser sqlite backend (which instantiates sql.js from an
+// embedded wasm binary). better-sqlite3 has no wasm, so this is a no-op; it
+// exists so callers can reference `setWasmBinary` regardless of platform.
+export function setWasmBinary(_binary: ArrayBuffer | Uint8Array) {
+  // no-op on native sqlite
 }
 
 export function prepare(db, sql) {
@@ -122,7 +130,7 @@ export function closeDatabase(db: SQL.Database) {
 export async function exportDatabase(db: SQL.Database) {
   // electron does not support better-sqlite serialize since v21
   // save to file and read in the raw data.
-  const name = `${getDataDir()}/backup-for-export-${crypto.randomUUID()}.db`;
+  const name = `${getDataDir()}/backup-for-export-${uuidv4()}.db`;
 
   await db.backup(name);
 

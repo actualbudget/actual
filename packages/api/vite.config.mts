@@ -1,11 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 
+import {
+  defaultDbPath,
+  migrationsDir,
+} from '@actual-app/core/default-filesystem';
+import { peggyLoader } from '@actual-app/vite-plugin-peggy';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
-import peggyLoader from 'vite-plugin-peggy-loader';
+import { configDefaults } from 'vitest/config';
 
-const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 const distDir = path.resolve(__dirname, 'dist');
 const typesDir = path.resolve(__dirname, '@types');
 
@@ -19,35 +23,17 @@ function cleanOutputDirs() {
   };
 }
 
-function copyMigrationsAndDefaultDb() {
+// The Node build reads migrations + the default DB from disk at runtime (see
+// fs.migrationsPath / bundledDatabasePath in loot-core), so copy them next to
+// the bundle. The browser build embeds its own copies, so nothing else needs to
+// be on disk.
+function copyNodeRuntimeAssets() {
   return {
-    name: 'copy-migrations-and-default-db',
+    name: 'copy-node-runtime-assets',
     closeBundle() {
-      const migrationsSrc = path.join(lootCoreRoot, 'migrations');
-      const defaultDbPath = path.join(lootCoreRoot, 'default-db.sqlite');
-
-      if (!fs.existsSync(migrationsSrc)) {
-        throw new Error(`migrations directory not found at ${migrationsSrc}`);
-      }
-      const migrationsStat = fs.statSync(migrationsSrc);
-      if (!migrationsStat.isDirectory()) {
-        throw new Error(`migrations path is not a directory: ${migrationsSrc}`);
-      }
-
-      const migrationsDest = path.join(distDir, 'migrations');
-      fs.mkdirSync(migrationsDest, { recursive: true });
-      for (const name of fs.readdirSync(migrationsSrc)) {
-        if (name.endsWith('.sql') || name.endsWith('.js')) {
-          fs.copyFileSync(
-            path.join(migrationsSrc, name),
-            path.join(migrationsDest, name),
-          );
-        }
-      }
-
-      if (!fs.existsSync(defaultDbPath)) {
-        throw new Error(`default-db.sqlite not found at ${defaultDbPath}`);
-      }
+      fs.cpSync(migrationsDir, path.join(distDir, 'migrations'), {
+        recursive: true,
+      });
       fs.copyFileSync(defaultDbPath, path.join(distDir, 'default-db.sqlite'));
     },
   };
@@ -77,7 +63,7 @@ export default defineConfig({
   plugins: [
     cleanOutputDirs(),
     peggyLoader(),
-    copyMigrationsAndDefaultDb(),
+    copyNodeRuntimeAssets(),
     visualizer({ template: 'raw-data', filename: 'app/stats.json' }),
   ],
   resolve: {
@@ -85,10 +71,27 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    // e2e/ holds Playwright tests (yarn e2e), not vitest ones.
+    exclude: [...configDefaults.exclude, 'e2e/**'],
+    // Each test loads a budget file and runs all DB migrations, which can be
+    // slow on busy CI runners; the default 5s timeout is too tight and causes
+    // flaky timeouts (and a cascade of unhandled rejections from in-flight work
+    // continuing after teardown).
+    testTimeout: 20_000,
+    hookTimeout: 20_000,
     onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
       // print only console.error
       return type === 'stderr';
     },
     maxWorkers: 2,
+    reporters: process.env.CI
+      ? [
+          'default',
+          [
+            'junit',
+            { outputFile: './test-results/junit.xml', suiteName: 'api' },
+          ],
+        ]
+      : ['default'],
   },
 });

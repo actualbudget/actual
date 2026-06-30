@@ -49,6 +49,7 @@ function onScrollbarChange() {
       borderRadius: 30,
       backgroundClip: 'padding-box',
       backgroundColor: 'rgba(200, 200, 200, .5)',
+      border: '2px solid rgba(0, 0, 0, 0)',
     },
   };
 

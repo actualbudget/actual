@@ -43,7 +43,7 @@ export const SidebarCategoryButtons = ({
           showPlaceholder={
             !goalsShown &&
             isGoalTemplatesUIEnabled &&
-            !!category.goal_def?.length
+            (!!category.goal_def?.length || !!category.cleanup_def?.length)
           }
         />
       </View>

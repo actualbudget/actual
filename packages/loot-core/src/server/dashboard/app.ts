@@ -1,4 +1,5 @@
-import isMatch from 'lodash/isMatch';
+import { isMatch } from 'es-toolkit/compat';
+import { v4 as uuidv4 } from 'uuid';
 
 import { captureException } from '#platform/exceptions';
 import * as fs from '#platform/server/fs';
@@ -27,7 +28,9 @@ function isExportedCustomReportWidget(
   return widget.type === 'custom-report';
 }
 
-function isWidgetType(type: string): type is DashboardWidgetEntity['type'] {
+export function isWidgetType(
+  type: string,
+): type is DashboardWidgetEntity['type'] {
   return [
     'net-worth-card',
     'cash-flow-card',
@@ -40,6 +43,8 @@ function isWidgetType(type: string): type is DashboardWidgetEntity['type'] {
     'formula-card',
     'custom-report',
     'sankey-card',
+    'balance-forecast-card',
+    'age-of-money-card',
   ].includes(type);
 }
 
@@ -101,7 +106,7 @@ const exportModel = {
 };
 
 async function createDashboardPage({ name }: { name: string }) {
-  const id = crypto.randomUUID();
+  const id = uuidv4();
   await db.insertWithSchema('dashboard_pages', { id, name });
 
   return id;

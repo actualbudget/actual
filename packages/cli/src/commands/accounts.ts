@@ -14,26 +14,30 @@ export function registerAccountsCommand(program: Command) {
     .option('--include-closed', 'Include closed accounts', false)
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const allAccounts = await api.getAccounts();
-        const accounts = allAccounts.filter(
-          a => cmdOpts.includeClosed || !a.closed,
-        );
-        // Stable sort: on-budget first, off-budget second
-        // (preserves API sort_order within each group)
-        accounts.sort((a, b) => Number(a.offbudget) - Number(b.offbudget));
-        const balances = await Promise.all(
-          accounts.map(a => api.getAccountBalance(a.id)),
-        );
-        const output = accounts.map((a, i) => ({
-          id: a.id,
-          name: a.name,
-          offbudget: a.offbudget,
-          closed: a.closed,
-          balance: balances[i],
-        }));
-        printOutput(output, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const allAccounts = await api.getAccounts();
+          const accounts = allAccounts.filter(
+            a => cmdOpts.includeClosed || !a.closed,
+          );
+          // Stable sort: on-budget first, off-budget second
+          // (preserves API sort_order within each group)
+          accounts.sort((a, b) => Number(a.offbudget) - Number(b.offbudget));
+          const balances = await Promise.all(
+            accounts.map(a => api.getAccountBalance(a.id)),
+          );
+          const output = accounts.map((a, i) => ({
+            id: a.id,
+            name: a.name,
+            offbudget: a.offbudget,
+            closed: a.closed,
+            balance: balances[i],
+          }));
+          printOutput(output, opts.format);
+        },
+        { mutates: false },
+      );
     });
 
   accounts
@@ -49,13 +53,17 @@ export function registerAccountsCommand(program: Command) {
     .action(async cmdOpts => {
       const balance = parseIntFlag(cmdOpts.balance, '--balance');
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const id = await api.createAccount(
-          { name: cmdOpts.name, offbudget: cmdOpts.offbudget },
-          balance,
-        );
-        printOutput({ id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const id = await api.createAccount(
+            { name: cmdOpts.name, offbudget: cmdOpts.offbudget },
+            balance,
+          );
+          printOutput({ id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   accounts
@@ -81,10 +89,14 @@ export function registerAccountsCommand(program: Command) {
           'No update fields provided. Use --name or --offbudget.',
         );
       }
-      await withConnection(opts, async () => {
-        await api.updateAccount(id, fields);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.updateAccount(id, fields);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   accounts
@@ -100,14 +112,18 @@ export function registerAccountsCommand(program: Command) {
     )
     .action(async (id: string, cmdOpts) => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.closeAccount(
-          id,
-          cmdOpts.transferAccount,
-          cmdOpts.transferCategory,
-        );
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.closeAccount(
+            id,
+            cmdOpts.transferAccount,
+            cmdOpts.transferCategory,
+          );
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   accounts
@@ -115,10 +131,14 @@ export function registerAccountsCommand(program: Command) {
     .description('Reopen a closed account')
     .action(async (id: string) => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.reopenAccount(id);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.reopenAccount(id);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   accounts
@@ -126,10 +146,14 @@ export function registerAccountsCommand(program: Command) {
     .description('Delete an account')
     .action(async (id: string) => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.deleteAccount(id);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.deleteAccount(id);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   accounts
@@ -148,9 +172,13 @@ export function registerAccountsCommand(program: Command) {
         cutoff = cutoffDate;
       }
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const balance = await api.getAccountBalance(id, cutoff);
-        printOutput({ id, balance }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const balance = await api.getAccountBalance(id, cutoff);
+          printOutput({ id, balance }, opts.format);
+        },
+        { mutates: false },
+      );
     });
 }

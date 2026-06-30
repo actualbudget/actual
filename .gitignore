@@ -18,7 +18,10 @@ node_modules
 packages/api/app/bundle.api.js
 packages/api/app/stats.json
 packages/api/dist
+packages/api/e2e/consumer/dist
 packages/api/@types
+packages/api/test-results
+packages/api/playwright-report
 packages/crdt/dist
 packages/desktop-client/build-stats
 packages/desktop-client/dev-dist
@@ -42,6 +45,9 @@ bundle.desktop.js.map
 bundle.mobile.js
 bundle.mobile.js.map
 
+# Python virtualenv (Electron CI provisions one at the repo root for setuptools)
+.venv/
+
 # Yarn
 .pnp.*
 .yarn/*
@@ -54,6 +60,7 @@ bundle.mobile.js.map
 # VSCode
 .vscode/*
 !.vscode/settings.default.json
+!.vscode/extensions.json
 
 # IntelliJ IDEA
 .idea
@@ -68,6 +75,9 @@ bundle.mobile.js.map
 # Local Netlify folder
 .netlify
 
+# Personal devcontainer config
+.devcontainer/*.local
+
 # build output
 package.tgz
 
@@ -79,9 +89,15 @@ build/
 
 # .d.ts files aren't type-checked with skipLibCheck set to true
 *.d.ts
+# ...except hand-written ambient declarations that must be committed
+!packages/api/virtual-modules.d.ts
+!packages/loot-core/default-filesystem.d.ts
 
 # Lage cache
 .lage/
+
+# Test results (JUnit XML reports, Playwright artifacts)
+**/test-results/
 
 *storybook.log
 storybook-static

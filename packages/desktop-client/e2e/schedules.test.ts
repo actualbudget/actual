@@ -31,8 +31,6 @@ test.describe('Schedules', () => {
   });
 
   test('creates a new schedule, posts the transaction and later completes it', async () => {
-    test.setTimeout(40000);
-
     const scheduleEditModal = await schedulesPage.addNewSchedule();
     await scheduleEditModal.fill({
       payee: 'Home Depot',
@@ -88,8 +86,6 @@ test.describe('Schedules', () => {
   });
 
   test('creates two new schedules, posts both transactions and later completes one', async () => {
-    test.setTimeout(40000);
-
     // Adding two schedules with the same payee and account and amount, mimicking two different subscriptions
     let scheduleEditModal = await schedulesPage.addNewSchedule();
     await scheduleEditModal.fill({

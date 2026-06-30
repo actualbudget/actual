@@ -32,5 +32,8 @@ export default defineConfig({
   plugins: [visualizer({ template: 'raw-data', filename: 'dist/stats.json' })],
   test: {
     globals: true,
+    include: ['src/**/*.test.ts'],
+    exclude: ['**/node_modules/**', '**/dist/**'],
+    testTimeout: 10_000,
   },
 });

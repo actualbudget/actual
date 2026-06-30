@@ -10,9 +10,9 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { DateRange } from '#components/reports/DateRange';
-import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
+import { ReportCardValueSkeleton } from '#components/reports/ReportCardValueSkeleton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { summarySpreadsheet } from '#components/reports/spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '#components/reports/SummaryNumber';
@@ -160,7 +160,7 @@ export function SummaryCard({
               animate={isEditing ?? false}
             />
           ) : (
-            <LoadingIndicator />
+            <ReportCardValueSkeleton />
           )}
         </View>
       </View>

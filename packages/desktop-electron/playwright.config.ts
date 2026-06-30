@@ -4,7 +4,9 @@ export default defineConfig({
   timeout: 60000, // 60 seconds
   retries: 1,
   testDir: 'e2e/',
-  reporter: undefined,
+  reporter: process.env.CI
+    ? [['list'], ['junit', { outputFile: 'e2e/test-results/junit.xml' }]]
+    : undefined,
   outputDir: 'e2e/test-results/',
   snapshotPathTemplate:
     '{testDir}/__screenshots__/{testFilePath}/{arg}-{platform}{ext}',
@@ -16,7 +18,8 @@ export default defineConfig({
     ignoreHTTPSErrors: true,
   },
   expect: {
-    toHaveScreenshot: { maxDiffPixels: 5 },
+    // See desktop-client playwright.config.ts for the threshold rationale.
+    toHaveScreenshot: { maxDiffPixels: 5, threshold: 0.05 },
     timeout: 60000, // 60 seconds
   },
 });

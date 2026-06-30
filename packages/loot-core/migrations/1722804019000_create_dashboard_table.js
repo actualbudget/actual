@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { DEFAULT_DASHBOARD_STATE } from '#shared/dashboard';
 
 export default async function runMigration(db) {
@@ -25,7 +27,7 @@ export default async function runMigration(db) {
         db.runQuery(
           `INSERT INTO dashboard (id, type, width, height, x, y, meta) VALUES (?, ?, ?, ?, ?, ?, ?)`,
           [
-            crypto.randomUUID(),
+            uuidv4(),
             widget.type,
             widget.width,
             widget.height,
@@ -43,9 +45,9 @@ export default async function runMigration(db) {
     db.execQuery(`
       INSERT INTO dashboard (id, type, width, height, x, y)
       VALUES
-        ('${crypto.randomUUID()}', 'net-worth-card', 8, 2, 0, 0),
-        ('${crypto.randomUUID()}', 'cash-flow-card', 4, 2, 8, 0),
-        ('${crypto.randomUUID()}', 'spending-card', 4, 2, 0, 2);
+        ('${uuidv4()}', 'net-worth-card', 8, 2, 0, 0),
+        ('${uuidv4()}', 'cash-flow-card', 4, 2, 8, 0),
+        ('${uuidv4()}', 'spending-card', 4, 2, 0, 2);
     `);
 
     // Add custom reports to the dashboard
@@ -53,7 +55,7 @@ export default async function runMigration(db) {
       db.runQuery(
         `INSERT INTO dashboard (id, type, width, height, x, y, meta) VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
-          crypto.randomUUID(),
+          uuidv4(),
           'custom-report',
           4,
           2,

@@ -1,11 +1,10 @@
 // @ts-strict-ignore
 import * as d from 'date-fns';
 import type { Locale } from 'date-fns';
-import memoizeOne from 'memoize-one';
 
+import { memoizeOne } from '#shared/memoize';
+import * as Platform from '#shared/platform';
 import type { SyncedPrefs } from '#types/prefs';
-
-import * as Platform from './platform';
 
 type DateLike = string | Date;
 type Day = 0 | 1 | 2 | 3 | 4 | 5 | 6;
@@ -89,6 +88,13 @@ export function yearFromDate(date: DateLike): string {
 
 export function monthFromDate(date: DateLike): string {
   return d.format(_parse(date), 'yyyy-MM');
+}
+
+export function isValidYearMonth(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const month = Number(match[2]);
+  return month >= 1 && month <= 12;
 }
 
 export function weekFromDate(

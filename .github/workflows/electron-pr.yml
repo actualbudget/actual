@@ -19,6 +19,9 @@ on:
       - '!packages/docs/**' # Docs changes don't affect Electron
       - '!packages/eslint-plugin-actual/**' # Eslint plugin changes don't affect Electron
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
@@ -28,11 +31,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-22.04
-          - windows-latest
-          - macos-latest
-    runs-on: ${{ matrix.os }}
+        include:
+          - os: ubuntu-22.04
+            runner: depot-ubuntu-22.04-8
+          - os: windows-2022
+            runner: depot-windows-2022-8
+          - os: macos-latest
+            runner: depot-macos-latest
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -65,7 +71,7 @@ jobs:
           sed -i "s/%RELEASE_VERSION%/$VERSION/g; s/%RELEASE_DATE%/$TODAY/g" "$METAINFO_FILE"
           flatpak run --command=flatpak-builder-lint org.flatpak.Builder appstream "$METAINFO_FILE"
       - name: Build Electron
-        run: ./bin/package-electron
+        run: ./bin/package-electron --skip-translations
 
       - name: Upload Linux x64 AppImage
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

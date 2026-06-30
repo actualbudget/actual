@@ -25,6 +25,14 @@ module.exports = {
         outputGlob: BUILD_OUTPUT_GLOBS,
       },
     },
+    // Not cached: the script stages files into public/ and build-stats/ that
+    // fall outside BUILD_OUTPUT_GLOBS, so a cache hit would skip the side
+    // effects.
+    'build:browser': {
+      type: 'npmScript',
+      dependsOn: ['^build'],
+      cache: false,
+    },
   },
   cacheOptions: {
     cacheStorageConfig: {

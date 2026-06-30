@@ -1,6 +1,17 @@
 name: Generate release notes
 description: Generate release documentation from release note files
 
+inputs:
+  release-branch:
+    description: 'The release/X.Y.Z branch to read release notes from'
+    required: true
+  notes-branch:
+    description: 'The release-notes/X.Y.Z branch to write generated docs to'
+    required: true
+  version:
+    description: 'The release version (e.g. 26.5.0)'
+    required: true
+
 runs:
   using: composite
   steps:
@@ -9,9 +20,12 @@ runs:
         node-version: 22
     - name: Install dependencies
       shell: bash
-      run: yarn workspaces focus @actual-app/ci-actions
+      run: yarn workspaces focus actual @actual-app/ci-actions
     - name: Generate release notes
       shell: bash
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        RELEASE_BRANCH: ${{ inputs.release-branch }}
+        NOTES_BRANCH: ${{ inputs.notes-branch }}
+        VERSION: ${{ inputs.version }}
       run: node packages/ci-actions/bin/release-notes-generate.mjs

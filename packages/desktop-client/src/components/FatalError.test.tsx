@@ -30,11 +30,21 @@ describe('FatalError', () => {
     expect(screen.getByText(/IndexedDB/)).toBeInTheDocument();
   });
 
-  it('renders the generic simple message for an app-init-failure without a specific cause', () => {
+  it('renders a backend-worker message for a BackendInitFailure', () => {
     const error = {
       type: 'app-init-failure',
       BackendInitFailure: true,
     };
+
+    render(<FatalError error={error} />, { wrapper: TestProviders });
+
+    expect(
+      screen.getByText(/couldn't load a critical backend worker/i),
+    ).toBeInTheDocument();
+  });
+
+  it('renders the generic simple message for an app-init-failure without a specific cause', () => {
+    const error = { type: 'app-init-failure' };
 
     render(<FatalError error={error} />, { wrapper: TestProviders });
 

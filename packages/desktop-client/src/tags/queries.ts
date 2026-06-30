@@ -8,10 +8,7 @@ export const tagQueries = {
   list: () =>
     queryOptions<TagEntity[]>({
       queryKey: [...tagQueries.lists()],
-      queryFn: async () => {
-        const tags: TagEntity[] = await send('tags-get');
-        return tags;
-      },
+      queryFn: () => send('tags-get'),
       placeholderData: [],
       // Manually invalidated when tags change
       staleTime: Infinity,

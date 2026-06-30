@@ -15,10 +15,14 @@ export function registerSchedulesCommand(program: Command) {
     .description('List all schedules')
     .action(async () => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const result = await api.getSchedules();
-        printOutput(result, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const result = await api.getSchedules();
+          printOutput(result, opts.format);
+        },
+        { mutates: false },
+      );
     });
 
   schedules
@@ -28,13 +32,17 @@ export function registerSchedulesCommand(program: Command) {
     .option('--file <path>', 'Read schedule from JSON file (use - for stdin)')
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const schedule = readJsonInput(cmdOpts) as Parameters<
-          typeof api.createSchedule
-        >[0];
-        const id = await api.createSchedule(schedule);
-        printOutput({ id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const schedule = readJsonInput(cmdOpts) as Parameters<
+            typeof api.createSchedule
+          >[0];
+          const id = await api.createSchedule(schedule);
+          printOutput({ id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   schedules
@@ -45,13 +53,17 @@ export function registerSchedulesCommand(program: Command) {
     .option('--reset-next-date', 'Reset next occurrence date', false)
     .action(async (id: string, cmdOpts) => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const fields = readJsonInput(cmdOpts) as Parameters<
-          typeof api.updateSchedule
-        >[1];
-        await api.updateSchedule(id, fields, cmdOpts.resetNextDate);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const fields = readJsonInput(cmdOpts) as Parameters<
+            typeof api.updateSchedule
+          >[1];
+          await api.updateSchedule(id, fields, cmdOpts.resetNextDate);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   schedules
@@ -59,9 +71,13 @@ export function registerSchedulesCommand(program: Command) {
     .description('Delete a schedule')
     .action(async (id: string) => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.deleteSchedule(id);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.deleteSchedule(id);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 }

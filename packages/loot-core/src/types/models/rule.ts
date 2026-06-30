@@ -97,7 +97,13 @@ export type RuleConditionEntity =
     >
   | BaseConditionEntity<
       'notes',
-      'is' | 'isNot' | 'contains' | 'doesNotContain' | 'matches' | 'hasTags'
+      | 'is'
+      | 'isNot'
+      | 'contains'
+      | 'doesNotContain'
+      | 'matches'
+      | 'hasTags'
+      | 'hasAnyTag'
     >
   | BaseConditionEntity<
       'payee',
@@ -156,7 +162,7 @@ export type SetSplitAmountRuleActionEntity = {
 
 export type LinkScheduleRuleActionEntity = {
   op: 'link-schedule';
-  value: ScheduleEntity;
+  value: ScheduleEntity['id'];
 };
 
 export type PrependNoteRuleActionEntity = {

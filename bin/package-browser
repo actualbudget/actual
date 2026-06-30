@@ -4,21 +4,30 @@ ROOT=`dirname $0`
 
 cd "$ROOT/.."
 
-echo "Updating translations..."
-if ! [ -d packages/desktop-client/locale ]; then
-    git clone https://github.com/actualbudget/translations packages/desktop-client/locale
+SKIP_TRANSLATIONS=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --skip-translations)
+      SKIP_TRANSLATIONS=true
+      shift
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ "$SKIP_TRANSLATIONS" = false ]; then
+  echo "Updating translations..."
+  if ! [ -d packages/desktop-client/locale ]; then
+      git clone https://github.com/actualbudget/translations packages/desktop-client/locale
+  fi
+  pushd packages/desktop-client/locale > /dev/null
+  git checkout .
+  git pull
+  popd > /dev/null
+  packages/desktop-client/bin/remove-untranslated-languages
 fi
-pushd packages/desktop-client/locale > /dev/null
-git checkout .
-git pull
-popd > /dev/null
-packages/desktop-client/bin/remove-untranslated-languages
 
-export NODE_OPTIONS="--max-old-space-size=4096"
-
-yarn workspace @actual-app/crdt build
-yarn workspace plugins-service build
-yarn workspace @actual-app/core build:browser
-yarn workspace @actual-app/web build:browser
-
-echo "packages/desktop-client/build"
+lage build:browser --to=@actual-app/web

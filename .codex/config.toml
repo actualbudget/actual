@@ -1,0 +1,72 @@
+# Codex project hooks for actualbudget/actual.
+#
+# Codex discovers project config by walking up to the .git root, so this file
+# applies to the whole repo. The hook scripts are shared with Claude Code and
+# Cursor (see scripts/agent-hooks/). Codex's Bash hook is Claude-compatible
+# (tool_input.command), so the git guard is reused directly; exit code 2 + stderr
+# blocks the call.
+#
+# Known limitation: Codex's `apply_patch` PreToolUse payload carries the diff as a
+# raw string in tool_input.command (no tool_input.file_path / .content), so the
+# file-content hooks below (strict-ignore, format, one-component) only fire for
+# the Write/Edit tools and no-op for apply_patch. They never false-block. The
+# Bash/git guard and the Stop check work regardless. The file hooks are fully
+# effective under Claude Code and Cursor.
+#
+# Non-managed hooks must be trusted once via `/hooks` in the Codex CLI.
+
+# Block unsafe git/workspace commands ([AI] prefix, --no-verify, force-push,
+# push-to-main, git config writes, yarn-from-a-workspace).
+[[hooks.PreToolUse]]
+matcher = "^Bash$"
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/git-guard.sh"'
+statusMessage = "Checking shell command against repo policy"
+
+# Block creating a new file that contains // @ts-strict-ignore.
+[[hooks.PreToolUse]]
+matcher = "^apply_patch$|^Write$|^Edit$"
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/no-strict-ignore-new-file.sh"'
+statusMessage = "Checking new file is type-strict"
+
+# Format/lint the edited file, and warn on multiple components in a new .tsx.
+[[hooks.PostToolUse]]
+matcher = "^apply_patch$|^Write$|^Edit$"
+[[hooks.PostToolUse.hooks]]
+type = "command"
+command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/format-edited-file.sh"'
+[[hooks.PostToolUse.hooks]]
+type = "command"
+command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/prefer-one-component.sh"'
+
+# Require GitHub comments, reviews and issues to be prefixed with the robot emoji
+# 🤖. Matches the github MCP comment/review/issue writers below (add_issue_comment,
+# issue_write, …); the guard reads tool_input.body and, for issues,
+# tool_input.title (the same payload Claude passes), and blocks an un-prefixed
+# comment body or issue title via exit 2.
+[[hooks.PreToolUse]]
+matcher = "^mcp__github__(add_issue_comment|add_comment_to_pending_review|add_reply_to_pull_request_comment|pull_request_review_write|issue_write|sub_issue_write)$"
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/github-comment-style.sh"'
+statusMessage = "Checking GitHub comment/issue is 🤖-prefixed"
+
+# When creating a PR, require the body to be the blank PR template (unmodified)
+# — agents must not fill it in. Reads tool_input.body; blocks via exit 2.
+[[hooks.PreToolUse]]
+matcher = "^mcp__github__create_pull_request$"
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/pr-template-blank.sh"'
+statusMessage = "Checking PR template is left blank"
+
+# When the turn ends, typecheck + test the workspaces this branch touched.
+[[hooks.Stop]]
+[[hooks.Stop.hooks]]
+type = "command"
+command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/check-on-stop.sh"'
+timeout = 600
+statusMessage = "Typecheck + test touched workspaces"

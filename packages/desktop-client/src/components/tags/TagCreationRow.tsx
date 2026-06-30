@@ -70,6 +70,18 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
     createTag({ tag: { tag, color, description } });
     resetInputs();
   };
+  function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.nativeEvent.isComposing) {
+      return;
+    }
+    if (e.key === 'Escape') {
+      onClose();
+    }
+    if (e.key === 'Enter' && tag) {
+      e.preventDefault();
+      onAddTag();
+    }
+  }
 
   const isInitialMount = useInitialMount();
 
@@ -87,14 +99,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
       }}
       data-testid="new-tag"
       {...tableNavigator.getNavigatorProps({
-        onKeyUp: (e: KeyboardEvent<HTMLDivElement>) => {
-          if (e.key === 'Escape') {
-            onClose();
-          }
-          if (e.key === 'Enter' && tag) {
-            onAddTag();
-          }
-        },
+        onKeyUp: onKeyDown,
       })}
     >
       <Row
@@ -120,6 +125,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           inputProps={{
             value: tag || '',
             onChange: e => setTag(e.target.value.replace(/\s/g, '')),
+            onKeyDownCapture: onKeyDown,
             placeholder: t('New tag'),
             ref: tagInput,
           }}
@@ -140,6 +146,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           inputProps={{
             value: description || '',
             onUpdate: setDescription,
+            onKeyDownCapture: onKeyDown,
             placeholder: t('Tag description'),
           }}
         />

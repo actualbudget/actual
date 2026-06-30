@@ -11,10 +11,12 @@ import type {
   NoteEntity,
   RuleEntity,
   ScheduleEntity,
+  SyncServerEnableBankingAccount,
   TransactionEntity,
   UserAccessEntity,
   UserEntity,
 } from '@actual-app/core/types/models';
+import type { CleanupTemplate } from '@actual-app/core/types/models/cleanup-templates';
 import type { Template } from '@actual-app/core/types/models/templates';
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
@@ -32,8 +34,6 @@ export type ConfirmTransactionEditReason =
   | 'batchDeleteWithReconciledTransfer'
   | 'batchEditWithReconciled'
   | 'batchEditWithReconciledTransfer'
-  | 'batchDuplicateWithReconciled'
-  | 'batchDuplicateWithReconciledTransfer'
   | 'editReconciled'
   | 'unlockReconciled'
   | 'deleteReconciled';
@@ -127,6 +127,38 @@ export type Modal =
       name: 'pluggyai-init';
       options: {
         onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'akahu-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'enablebanking-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'enablebanking-external-msg';
+      options: {
+        onMoveExternal: (arg: {
+          aspspId: string;
+          country: string;
+          maxConsentValidity?: number;
+          psuType?: 'personal' | 'business';
+          onStateReady?: (state: string) => void;
+        }) => Promise<
+          | { error: 'timeout' }
+          | { error: 'unknown'; message?: string }
+          | { data: { accounts: SyncServerEnableBankingAccount[] } }
+        >;
+        onClose?: (() => void) | undefined;
+        onSuccess: (data: {
+          accounts: SyncServerEnableBankingAccount[];
+        }) => Promise<void>;
       };
     }
   | {
@@ -241,9 +273,10 @@ export type Modal =
       options: {
         title?: string;
         categoryGroups?: CategoryGroupEntity[];
-        onSelect: (categoryId: string, categoryName: string) => void;
+        onSelect: (categoryId: string | null, categoryName: string) => void;
         month?: string | undefined;
         showHiddenCategories?: boolean;
+        showNoneOption?: boolean;
         closeOnSelect?: boolean;
         clearOnSelect?: boolean;
         onClose?: () => void;
@@ -332,6 +365,7 @@ export type Modal =
         onEditNotes: (id: NoteEntity['id']) => void;
         onDelete: (categoryId: CategoryEntity['id']) => void;
         onToggleVisibility: (categoryId: CategoryEntity['id']) => void;
+        onEditAutomations?: (categoryId: CategoryEntity['id']) => void;
         onClose?: () => void;
       };
     }
@@ -356,6 +390,7 @@ export type Modal =
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
         onApplyBudgetTemplate: () => void;
+        onCopyUntilYearEnd: () => void;
         onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
     }
@@ -374,6 +409,10 @@ export type Modal =
         onClose?: () => void;
         onApplyBudgetTemplatesInGroup?: (
           categories: Array<CategoryEntity['id']>,
+        ) => void;
+        onSortCategories?: (
+          groupId: CategoryGroupEntity['id'],
+          direction: 'asc' | 'desc',
         ) => void;
       };
     }
@@ -610,6 +649,7 @@ export type Modal =
       name: 'category-automations-edit';
       options: {
         categoryId: CategoryEntity['id'];
+        month?: string;
       };
     }
   | {
@@ -617,6 +657,7 @@ export type Modal =
       options: {
         categoryId: CategoryEntity['id'];
         templates: Template[];
+        cleanup: CleanupTemplate[];
       };
     };
 

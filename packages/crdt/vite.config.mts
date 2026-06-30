@@ -6,7 +6,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   ssr: {
     noExternal: true,
-    external: ['google-protobuf', 'murmurhash'],
+    external: ['@bufbuild/protobuf', 'murmurhash'],
   },
   build: {
     ssr: true,
@@ -16,7 +16,7 @@ export default defineConfig({
     sourcemap: true,
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
-      formats: ['cjs'],
+      formats: ['es'],
       fileName: () => 'index.js',
     },
   },

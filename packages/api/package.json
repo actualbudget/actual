@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/api",
-  "version": "26.4.0",
+  "version": "26.6.0",
   "description": "An API for Actual",
   "license": "MIT",
   "repository": {
@@ -10,7 +10,9 @@
   },
   "files": [
     "@types",
-    "dist"
+    "dist",
+    "!@types/**/*.test.d.ts",
+    "!@types/**/*.test.d.ts.map"
   ],
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
@@ -18,6 +20,10 @@
     ".": {
       "types": "./@types/index.d.ts",
       "development": "./index.ts",
+      "browser": {
+        "types": "./@types/index.browser.d.ts",
+        "default": "./dist/browser.js"
+      },
       "default": "./dist/index.js"
     },
     "./models": {
@@ -30,6 +36,10 @@
     "exports": {
       ".": {
         "types": "./@types/index.d.ts",
+        "browser": {
+          "types": "./@types/index.browser.d.ts",
+          "default": "./dist/browser.js"
+        },
         "default": "./dist/index.js"
       },
       "./models": {
@@ -39,23 +49,27 @@
     }
   },
   "scripts": {
-    "build": "vite build && tsgo --emitDeclarationOnly",
+    "build": "vite build && tsgo --emitDeclarationOnly && vite build --config vite.browser.config.mts",
     "test": "vitest --run",
+    "e2e": "playwright test",
     "typecheck": "tsgo -b && tsc-strict"
   },
   "dependencies": {
     "@actual-app/core": "workspace:*",
     "@actual-app/crdt": "workspace:*",
-    "better-sqlite3": "^12.8.0",
-    "compare-versions": "^6.1.1"
+    "better-sqlite3": "^12.10.0",
+    "compare-versions": "^6.1.1",
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
+    "@actual-app/vite-plugin-peggy": "workspace:*",
+    "@playwright/test": "1.59.1",
     "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.0.1",
     "typescript-strict-plugin": "^2.4.4",
-    "vite": "^8.0.5",
-    "vite-plugin-peggy-loader": "^2.0.1",
-    "vitest": "^4.1.2"
+    "vite": "^8.0.16",
+    "vite-plugin-node-polyfills": "patch:vite-plugin-node-polyfills@npm%3A0.28.0#~/.yarn/patches/vite-plugin-node-polyfills-npm-0.28.0-bac39616ee.patch",
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": ">=20"

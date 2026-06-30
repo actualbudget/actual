@@ -12,13 +12,20 @@ export function registerCategoryGroupsCommand(program: Command) {
 
   groups
     .command('list')
-    .description('List all category groups')
-    .action(async () => {
+    .description('List category groups (excludes hidden by default)')
+    .option('--include-hidden', 'Include hidden groups and categories', false)
+    .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const result = await api.getCategoryGroups();
-        printOutput(result, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const result = await api.getCategoryGroups(
+            cmdOpts.includeHidden ? {} : { hidden: false },
+          );
+          printOutput(result, opts.format);
+        },
+        { mutates: false },
+      );
     });
 
   groups
@@ -28,14 +35,18 @@ export function registerCategoryGroupsCommand(program: Command) {
     .option('--is-income', 'Mark as income group', false)
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const id = await api.createCategoryGroup({
-          name: cmdOpts.name,
-          is_income: cmdOpts.isIncome,
-          hidden: false,
-        });
-        printOutput({ id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const id = await api.createCategoryGroup({
+            name: cmdOpts.name,
+            is_income: cmdOpts.isIncome,
+            hidden: false,
+          });
+          printOutput({ id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   groups
@@ -53,10 +64,14 @@ export function registerCategoryGroupsCommand(program: Command) {
         throw new Error('No update fields provided. Use --name or --hidden.');
       }
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.updateCategoryGroup(id, fields);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.updateCategoryGroup(id, fields);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   groups
@@ -65,9 +80,13 @@ export function registerCategoryGroupsCommand(program: Command) {
     .option('--transfer-to <id>', 'Transfer transactions to this category ID')
     .action(async (id: string, cmdOpts) => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.deleteCategoryGroup(id, cmdOpts.transferTo);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.deleteCategoryGroup(id, cmdOpts.transferTo);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 }

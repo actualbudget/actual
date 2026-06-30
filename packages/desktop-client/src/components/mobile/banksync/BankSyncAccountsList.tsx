@@ -5,14 +5,17 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
+import type {
+  GroupedBankSyncAccounts,
+  SyncProviders,
+} from '#components/banksync/bankSyncUtils';
+import { getGroupedBankSyncEntries } from '#components/banksync/bankSyncUtils';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 
 import { BankSyncAccountsListItem } from './BankSyncAccountsListItem';
 
-type SyncProviders = 'goCardless' | 'simpleFin' | 'pluggyai' | 'unlinked';
-
 type BankSyncAccountsListProps = {
-  groupedAccounts: Record<SyncProviders, AccountEntity[]>;
+  groupedAccounts: GroupedBankSyncAccounts;
   syncSourceReadable: Record<SyncProviders, string>;
   onAction: (account: AccountEntity, action: 'link' | 'edit') => void;
 };
@@ -22,7 +25,8 @@ export function BankSyncAccountsList({
   syncSourceReadable,
   onAction,
 }: BankSyncAccountsListProps) {
-  const allAccounts = Object.values(groupedAccounts).flat();
+  const groupedAccountEntries = getGroupedBankSyncEntries(groupedAccounts);
+  const allAccounts = groupedAccountEntries.flatMap(([, accounts]) => accounts);
 
   if (allAccounts.length === 0) {
     return (
@@ -47,15 +51,13 @@ export function BankSyncAccountsList({
     );
   }
 
-  const shouldShowProviderHeaders = Object.keys(groupedAccounts).length > 1;
+  const shouldShowProviderHeaders = groupedAccountEntries.length > 1;
 
   return (
     <div
       style={{ flex: 1, overflow: 'auto', paddingBottom: MOBILE_NAV_HEIGHT }}
     >
-      {(
-        Object.entries(groupedAccounts) as [SyncProviders, AccountEntity[]][]
-      ).map(([provider, accounts]) => (
+      {groupedAccountEntries.map(([provider, accounts]) => (
         <div key={provider}>
           {shouldShowProviderHeaders && (
             <div

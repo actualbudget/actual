@@ -46,6 +46,76 @@ const setToYearlyAverage = async (
   await budgetMenuModal.close();
 };
 
+function getAverageStartMonth(month: string) {
+  const previousMonth = monthUtils.prevMonth(month);
+
+  if (previousMonth >= monthUtils.currentMonth()) {
+    return monthUtils.prevMonth(monthUtils.currentMonth());
+  }
+
+  return previousMonth;
+}
+
+async function getAverageMonthAmounts(
+  budgetPage: MobileBudgetPage,
+  categoryName: string,
+  numberOfMonths: number,
+) {
+  const averageStartMonth = getAverageStartMonth(
+    await budgetPage.getSelectedMonth(),
+  );
+  const amounts: number[] = [];
+  let selectedMonth = await budgetPage.getSelectedMonth();
+  let navigatedMonths = 0;
+
+  while (selectedMonth > averageStartMonth) {
+    selectedMonth = await budgetPage.goToPreviousMonth();
+    navigatedMonths++;
+  }
+
+  for (let i = 0; i < numberOfMonths; i++) {
+    const spentButton = await budgetPage.getButtonForSpent(categoryName);
+    const spent = await spentButton.textContent();
+
+    if (!spent) {
+      throw new Error('Failed to get average month amounts');
+    }
+
+    amounts.push(currencyToAmount(spent) ?? 0);
+
+    if (i < numberOfMonths - 1) {
+      selectedMonth = await budgetPage.goToPreviousMonth();
+      navigatedMonths++;
+    }
+  }
+
+  for (let i = 0; i < navigatedMonths; i++) {
+    await budgetPage.goToNextMonth();
+  }
+
+  return amounts;
+}
+
+function getAverageSpent(amounts: number[]) {
+  let oldestActivityIndex = -1;
+
+  for (let i = 0; i < amounts.length; i++) {
+    if (amounts[i] !== 0) {
+      oldestActivityIndex = i;
+    }
+  }
+
+  const averageMonths =
+    oldestActivityIndex === -1
+      ? amounts
+      : amounts.slice(0, oldestActivityIndex + 1);
+  const totalSpent = averageMonths.reduce((sum, spentAmount) => {
+    return sum + spentAmount;
+  }, 0);
+
+  return Math.round((totalSpent / averageMonths.length) * 100) / 100;
+}
+
 async function setBudgetAverage(
   budgetPage: MobileBudgetPage,
   categoryName: string,
@@ -56,25 +126,9 @@ async function setBudgetAverage(
     numberOfMonths: number,
   ) => Promise<void>,
 ) {
-  let totalSpent = 0;
-
-  for (let i = 0; i < numberOfMonths; i++) {
-    await budgetPage.goToPreviousMonth();
-    const spentButton = await budgetPage.getButtonForSpent(categoryName);
-    const spent = await spentButton.textContent();
-    if (!spent) {
-      throw new Error('Failed to get spent amount');
-    }
-    totalSpent += currencyToAmount(spent) ?? 0;
-  }
-
-  // Calculate average amount
-  const averageSpent = totalSpent / numberOfMonths;
-
-  // Go back to the current month
-  for (let i = 0; i < numberOfMonths; i++) {
-    await budgetPage.goToNextMonth();
-  }
+  const averageSpent = getAverageSpent(
+    await getAverageMonthAmounts(budgetPage, categoryName, numberOfMonths),
+  );
 
   await setBudgetAverageFn(budgetPage, categoryName, numberOfMonths);
 
@@ -224,13 +278,12 @@ budgetTypes.forEach(budgetType => {
       const budgetPage = await navigation.goToBudgetPage();
 
       const categoryGroupName = await budgetPage.getCategoryGroupNameForRow(0);
-      await budgetPage.openCategoryGroupMenu(categoryGroupName);
+      const categoryGroupMenuModal =
+        await budgetPage.openCategoryGroupMenu(categoryGroupName);
 
-      const categoryMenuModalHeading = page
-        .getByRole('dialog')
-        .getByRole('heading');
-
-      await expect(categoryMenuModalHeading).toHaveText(categoryGroupName);
+      await expect(categoryGroupMenuModal.heading).toHaveText(
+        categoryGroupName,
+      );
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -242,6 +295,41 @@ budgetTypes.forEach(budgetType => {
 
       await expect(categoryMenuModal.heading).toHaveText(categoryName);
       await expect(page).toMatchThemeScreenshots();
+    });
+
+    test('opens the transfer confirmation when deleting a category group with transactions', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const categoryGroupName = await budgetPage.getCategoryGroupNameForRow(0);
+      const categoryGroupMenuModal =
+        await budgetPage.openCategoryGroupMenu(categoryGroupName);
+
+      await categoryGroupMenuModal.delete();
+
+      const confirmDeleteModal = page.getByTestId(
+        'confirm-category-delete-modal',
+      );
+      await expect(confirmDeleteModal.getByRole('heading')).toHaveText(
+        'Confirm Delete',
+      );
+      await expect(confirmDeleteModal).toContainText('Transfer to:');
+    });
+
+    test('opens the transfer confirmation when deleting a category with transactions', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const categoryName = await budgetPage.getCategoryNameForRow(0);
+      const categoryMenuModal = await budgetPage.openCategoryMenu(categoryName);
+
+      await categoryMenuModal.delete();
+
+      const confirmDeleteModal = page.getByTestId(
+        'confirm-category-delete-modal',
+      );
+      await expect(confirmDeleteModal.getByRole('heading')).toHaveText(
+        'Confirm Delete',
+      );
+      await expect(confirmDeleteModal).toContainText('Transfer to:');
     });
 
     // Budgeted Cell Tests

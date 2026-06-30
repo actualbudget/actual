@@ -1,6 +1,15 @@
+import { spawn } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
+import { createReadStream } from 'node:fs';
+import { cp, mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
+import {
+  defaultDbPath,
+  migrationsDir,
+  sqlWasmPath,
+} from '@actual-app/core/default-filesystem';
 import babel from '@rolldown/plugin-babel';
 import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
@@ -8,17 +17,13 @@ import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import type { PreRenderedAsset } from 'rolldown';
 import { visualizer } from 'rollup-plugin-visualizer';
 /// <reference types="vitest" />
-import { defineConfig, loadEnv } from 'vite';
+import { build, defineConfig, loadEnv } from 'vite';
 import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const reactCompilerInclude = new RegExp(
-  `^${path
-    .resolve(__dirname, 'src')
-    .replaceAll(path.sep, '/')
-    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/.*\\.[jt]sx$`,
-);
+const reactCompilerInclude =
+  /[\\/]desktop-client[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',
@@ -44,45 +49,18 @@ const injectPlugin = (options?: Parameters<typeof inject>[0]): Plugin => {
 // Inject build shims using the inject plugin
 const injectShims = (): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
-  const serveInject: {
-    exclude: string[];
-    global: [string, string];
-  } = {
-    exclude: ['src/setupTests.ts'],
-    global: [buildShims, 'global'],
-  };
-  const buildInject: {
-    global: [string, string];
-  } = {
-    global: [buildShims, 'global'],
-  };
 
   return [
-    {
-      name: 'define-build-process',
-      config: () => ({
-        // rename process.env in build mode so it doesn't get set to an empty object up by the vite:define plugin
-        // this isn't needed in serve mode, because vite:define doesn't empty it in serve mode. And defines also happen last anyways in serve mode.
-        environments: {
-          client: {
-            define: {
-              'process.env': '_process.env',
-            },
-          },
-        },
-      }),
-      apply: 'build',
-    },
     {
       enforce: 'post',
       apply: 'serve',
       ...injectPlugin({
-        ...serveInject,
-        process: [buildShims, 'process'],
+        exclude: ['src/setupTests.ts'],
+        global: [buildShims, 'global'],
       }),
     },
     {
-      name: 'inject-build-process',
+      name: 'inject-build-global',
       enforce: 'post',
       apply: 'build',
       config: () => ({
@@ -90,8 +68,7 @@ const injectShims = (): Plugin[] => {
           rolldownOptions: {
             transform: {
               inject: {
-                ...buildInject,
-                _process: [buildShims, 'process'],
+                global: [buildShims, 'global'],
               },
             },
           },
@@ -103,8 +80,160 @@ const injectShims = (): Plugin[] => {
 
 // https://vitejs.dev/config/
 
-export default defineConfig(async ({ mode }) => {
+const lootCoreRoot = path.resolve(__dirname, '../loot-core');
+const lootCoreOutDir = path.resolve(lootCoreRoot, 'lib-dist/browser');
+const lootCoreConfig = path.resolve(lootCoreRoot, 'vite.config.mts');
+const publicDir = path.resolve(__dirname, 'public');
+const publicDataDir = path.resolve(publicDir, 'data');
+const publicKcabDir = path.resolve(publicDir, 'kcab');
+const buildStatsDir = path.resolve(__dirname, 'build-stats');
+const pluginsServiceDistDir = path.resolve(
+  __dirname,
+  '../plugins-service/dist',
+);
+const serviceWorkerDir = path.resolve(__dirname, 'service-worker');
+
+const WORKER_FILENAME_RE = /^kcab\.worker\.(.+)\.js$/;
+
+async function extractWorkerHash(): Promise<string> {
+  const files = await readdir(lootCoreOutDir);
+  for (const f of files) {
+    const match = f.match(WORKER_FILENAME_RE);
+    if (match) return match[1];
+  }
+  throw new Error(
+    `loot-core worker build produced no hashed output at ${lootCoreOutDir}`,
+  );
+}
+
+// Serve loot-core worker assets with correct content types so the browser can
+// stream-compile the sql.js wasm module.
+const CONTENT_TYPES: Record<string, string> = {
+  '.js': 'application/javascript',
+  '.mjs': 'application/javascript',
+  '.map': 'application/json',
+  '.wasm': 'application/wasm',
+};
+
+async function stagePluginsService(): Promise<void> {
+  await rm(serviceWorkerDir, { recursive: true, force: true });
+  await cp(pluginsServiceDistDir, serviceWorkerDir, { recursive: true });
+}
+
+async function stagePublicData(): Promise<void> {
+  const migrationsDest = path.resolve(publicDataDir, 'migrations');
+  await mkdir(publicDataDir, { recursive: true });
+  await rm(migrationsDest, { recursive: true, force: true });
+  await Promise.all([
+    cp(migrationsDir, migrationsDest, { recursive: true }),
+    cp(defaultDbPath, path.resolve(publicDataDir, 'default-db.sqlite')),
+    cp(sqlWasmPath, path.resolve(publicDir, 'sql-wasm.wasm')),
+  ]);
+
+  const entries = await readdir(publicDataDir, {
+    recursive: true,
+    withFileTypes: true,
+  });
+  const files = entries
+    .filter(e => e.isFile())
+    .map(e =>
+      path
+        .relative(publicDataDir, path.join(e.parentPath, e.name))
+        .replaceAll(path.sep, '/'),
+    )
+    // Skip dotfiles (e.g. legacy `.force-copy-windows` marker). They have no
+    // matching extension in the workbox precache globs, so a PWA opened
+    // offline would fail to fetch them and break startup (issue #7886).
+    .filter(file => !file.split('/').some(part => part.startsWith('.')))
+    .sort();
+  await writeFile(
+    path.resolve(publicDir, 'data-file-index.txt'),
+    files.join('\n') + '\n',
+  );
+}
+
+const lootCoreBackend = (): Plugin => ({
+  name: 'loot-core-backend',
+  configureServer(server) {
+    const child: ChildProcess = spawn(
+      'yarn',
+      [
+        'vite',
+        'build',
+        '--config',
+        lootCoreConfig,
+        '--mode',
+        'development',
+        '--watch',
+      ],
+      { cwd: lootCoreRoot, stdio: 'inherit' },
+    );
+    child.on('error', err => {
+      server.config.logger.error(
+        `loot-core backend failed to spawn: ${err.message}`,
+      );
+    });
+    const cleanup = () => {
+      if (!child.killed) child.kill('SIGTERM');
+    };
+    server.httpServer?.once('close', cleanup);
+    process.once('SIGINT', cleanup);
+    process.once('SIGTERM', cleanup);
+    process.once('exit', cleanup);
+
+    server.middlewares.use('/kcab', (req, res, next) => {
+      const url = new URL(req.url ?? '/', 'http://localhost');
+      const filePath = path.join(lootCoreOutDir, url.pathname);
+      if (!filePath.startsWith(lootCoreOutDir + path.sep)) return next();
+      const stream = createReadStream(filePath);
+      stream
+        .on('open', () => {
+          res.setHeader(
+            'Content-Type',
+            CONTENT_TYPES[path.extname(filePath)] ?? 'application/octet-stream',
+          );
+          stream.pipe(res);
+        })
+        .on('error', () => next());
+    });
+  },
+  async closeBundle() {
+    await mkdir(buildStatsDir, { recursive: true });
+    try {
+      await rename(
+        path.resolve(__dirname, 'build/kcab/stats.json'),
+        path.resolve(buildStatsDir, 'loot-core-stats.json'),
+      );
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err;
+    }
+  },
+});
+
+const pluginsServiceAssets = (): Plugin => ({
+  name: 'plugins-service-assets',
+  configureServer(server) {
+    server.middlewares.use('/service-worker', (req, res, next) => {
+      const url = new URL(req.url ?? '/', 'http://localhost');
+      const filePath = path.join(pluginsServiceDistDir, url.pathname);
+      if (!filePath.startsWith(pluginsServiceDistDir + path.sep)) return next();
+      const stream = createReadStream(filePath);
+      stream
+        .on('open', () => {
+          res.setHeader(
+            'Content-Type',
+            CONTENT_TYPES[path.extname(filePath)] ?? 'application/octet-stream',
+          );
+          stream.pipe(res);
+        })
+        .on('error', () => next());
+    });
+  },
+});
+
+export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const isVitest = process.env.VITEST === 'true';
   const devHeaders = {
     'Cross-Origin-Opener-Policy': 'same-origin',
     'Cross-Origin-Embedder-Policy': 'require-corp',
@@ -116,13 +245,39 @@ export default defineConfig(async ({ mode }) => {
     process.env.REACT_APP_BRANCH = process.env.BRANCH;
   }
 
+  // Electron packaging (--mode=desktop) bundles loot-core directly, so skip
+  // all browser-only staging there.
+  if (mode !== 'desktop') {
+    if (command === 'build') {
+      const stageKcab = build({
+        configFile: lootCoreConfig,
+        mode: 'production',
+        root: lootCoreRoot,
+      }).then(async () => {
+        const hash = await extractWorkerHash();
+        await rm(publicKcabDir, { recursive: true, force: true });
+        await cp(lootCoreOutDir, publicKcabDir, { recursive: true });
+        return hash;
+      });
+      const [, , hash] = await Promise.all([
+        stagePublicData(),
+        stagePluginsService(),
+        stageKcab,
+      ]);
+      process.env.REACT_APP_BACKEND_WORKER_HASH = hash;
+    } else {
+      await stagePublicData();
+      process.env.REACT_APP_BACKEND_WORKER_HASH = 'dev';
+    }
+  }
+
   const browserOpen = env.BROWSER_OPEN ? `//${env.BROWSER_OPEN}` : true;
 
   return {
     base: '/',
     envPrefix: 'REACT_APP_',
     build: {
-      minify: false,
+      minify: 'oxc',
       target: 'es2022',
       sourcemap: true,
       outDir: mode === 'desktop' ? 'build-electron' : 'build',
@@ -132,6 +287,14 @@ export default defineConfig(async ({ mode }) => {
       chunkSizeWarningLimit: 1500,
       rolldownOptions: {
         output: {
+          // Users debug from raw stack traces, so compress and strip
+          // whitespace but never mangle identifiers (overrides the
+          // mangle: true that `minify: 'oxc'` implies).
+          minify: {
+            compress: true,
+            mangle: false,
+            codegen: true,
+          },
           assetFileNames: (assetInfo: PreRenderedAsset) => {
             const info = assetInfo.name?.split('.') ?? [];
             let extType = info[info.length - 1];
@@ -190,7 +353,9 @@ export default defineConfig(async ({ mode }) => {
             //   swSrc: `service-worker/plugin-sw.js`,
             // },
             devOptions: {
-              enabled: true, // We need service worker in dev mode to work with plugins
+              // Disabled: caches stale assets across reloads in dev. Plugin
+              // code that explicitly needs a SW can register one itself.
+              enabled: false,
               type: 'module',
             },
             workbox: {
@@ -208,18 +373,24 @@ export default defineConfig(async ({ mode }) => {
                 /^\/plugins\/.*$/,
                 /^\/kcab\/.*$/,
                 /^\/plugin-data\/.*$/,
+                /^\/enablebanking\/.*$/,
               ],
             },
           }),
       injectShims(),
       addWatchers(),
+      mode === 'desktop' || isVitest ? undefined : lootCoreBackend(),
+      mode === 'desktop' ? undefined : pluginsServiceAssets(),
       react(),
       babel({
         include: [reactCompilerInclude],
         // n.b. Must be a string to ensure plugin resolution order. See https://github.com/actualbudget/actual/pull/5853
         presets: [reactCompilerPreset()],
       }),
-      visualizer({ template: 'raw-data' }),
+      visualizer({
+        template: 'raw-data',
+        filename: 'build-stats/web-stats.json',
+      }),
       !!env.HTTPS && basicSsl(),
     ],
     test: {
@@ -233,6 +404,18 @@ export default defineConfig(async ({ mode }) => {
         return type === 'stderr';
       },
       maxWorkers: 2,
+      reporters: process.env.CI
+        ? [
+            'default',
+            [
+              'junit',
+              {
+                outputFile: './test-results/junit.xml',
+                suiteName: 'desktop-client',
+              },
+            ],
+          ]
+        : ['default'],
     },
   };
 });

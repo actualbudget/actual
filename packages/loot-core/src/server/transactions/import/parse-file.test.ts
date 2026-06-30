@@ -28,6 +28,7 @@ type Transaction = {
   payee_name: string;
   imported_payee: string;
   notes: string | null;
+  category?: string | null;
 };
 
 async function getTransactions(accountId: string): Promise<Transaction[]> {
@@ -83,6 +84,18 @@ describe('File import', () => {
     );
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
+  });
+
+  test('qif import preserves categories', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/qif-category.qif',
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toMatchObject([
+      { payee_name: 'Outlet', category: 'Shopping' },
+      { payee_name: 'GroceriesYou', category: 'Groceries' },
+    ]);
   });
 
   test('ofx import works', async () => {

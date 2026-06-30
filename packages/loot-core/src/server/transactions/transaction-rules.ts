@@ -12,6 +12,7 @@ import {
 } from '#server/db';
 import { getMappings } from '#server/db/mappings';
 import { RuleError } from '#server/errors';
+import { ensureFormulaPreferencesLoaded } from '#server/formulas/bootstrap';
 import { requiredFields, toDateRepr } from '#server/models';
 import {
   Action,
@@ -38,6 +39,7 @@ import {
 } from '#shared/months';
 import { q } from '#shared/query';
 import { getApproxNumberThreshold, sortNumbers } from '#shared/rules';
+import { extractTagsForFilter } from '#shared/tags';
 import { ungroupTransaction } from '#shared/transactions';
 import { fastSetMerge, partitionByField } from '#shared/util';
 import type {
@@ -320,6 +322,8 @@ export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
 ) {
+  await ensureFormulaPreferencesLoaded();
+
   let accountsMap: Map<string, db.DbAccount> = null;
   if (accounts === null) {
     accountsMap = new Map(
@@ -366,16 +370,19 @@ export async function runRules(
         // bypass condition checking to run the rule even if the transaction date falls outside of the schedule's date range.
         const changes = rules[i].execActions(finalTrans);
         finalTrans = Object.assign({}, finalTrans, changes);
+        await resolvePayeeNameForRules(finalTrans);
       } else if (RuleIdsLinkedToSchedules.includes(rules[i].id)) {
         // skip all other rules that are linked to other schedules.
         continue;
       } else {
         // if a rule is not linked to a schedule, run it.
         finalTrans = rules[i].apply(finalTrans);
+        await resolvePayeeNameForRules(finalTrans);
       }
     } else {
       // if there is no scheduleRuleID then just run all rules.
       finalTrans = rules[i].apply(finalTrans);
+      await resolvePayeeNameForRules(finalTrans);
     }
   }
 
@@ -490,7 +497,9 @@ export function conditionsToAQL(
       } else if (type === 'string') {
         return {
           [field]: {
-            $transform: op !== 'hasTags' ? '$lower' : undefined,
+            $transform: !['hasTags', 'hasAnyTag'].includes(op)
+              ? '$lower'
+              : undefined,
             [aqlOp]: value,
           },
         };
@@ -614,17 +623,32 @@ export function conditionsToAQL(
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
       case 'hasTags': {
-        const tagValues = [];
-        const seenTags = new Set();
-        for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
-          if (!seenTags.has(tag)) {
-            seenTags.add(tag);
-            tagValues.push(tag);
-          }
+        const tagValues = extractTagsForFilter(value);
+
+        if (tagValues.length === 0) {
+          // No `#tag` patterns in the input — match nothing rather than
+          // returning an empty `$and` (which would match every row).
+          return { id: null };
         }
 
         return {
           $and: tagValues.map(v => {
+            const escapedTag = v
+              .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+              .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
+            const pattern = `(?<!#)${escapedTag}([\\s#]|$)`;
+            return apply(field, '$regexp', pattern);
+          }),
+        };
+      }
+
+      case 'hasAnyTag': {
+        const tagValues = extractTagsForFilter(value);
+        if (tagValues.length === 0) {
+          return { id: null };
+        }
+        return {
+          $or: tagValues.map(v => {
             const escapedTag = v
               .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
               .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
@@ -676,6 +700,8 @@ export async function applyActions(
   transactions: TransactionEntity[],
   actions: Array<Action | RuleActionEntity>,
 ) {
+  await ensureFormulaPreferencesLoaded();
+
   const parsedActions = actions
     .map(action => {
       if (action instanceof Action) {
@@ -782,7 +808,6 @@ function* getIsSetterRules(
 
   return null;
 }
-
 function* getOneOfSetterRules(
   stage,
   condField,
@@ -1076,23 +1101,30 @@ export async function prepareTransactionForRules(
   return r;
 }
 
+async function resolvePayeeNameForRules(
+  trans: TransactionEntity | TransactionForRules,
+): Promise<void> {
+  if (!('payee_name' in trans) || trans.payee !== 'new') {
+    return;
+  }
+
+  if (trans.payee_name) {
+    let payee_id = (await getPayeeByName(trans.payee_name))?.id;
+    payee_id ??= await insertPayee({
+      name: trans.payee_name,
+    });
+
+    trans.payee = payee_id;
+  } else {
+    trans.payee = null;
+  }
+}
+
 export async function finalizeTransactionForRules(
   trans: TransactionEntity | TransactionForRules,
 ): Promise<TransactionEntity> {
   if ('payee_name' in trans) {
-    if (trans.payee === 'new') {
-      if (trans.payee_name) {
-        let payeeId = (await getPayeeByName(trans.payee_name))?.id;
-        payeeId ??= await insertPayee({
-          name: trans.payee_name,
-        });
-
-        trans.payee = payeeId;
-      } else {
-        trans.payee = null;
-      }
-    }
-
+    await resolvePayeeNameForRules(trans);
     delete trans.payee_name;
   }
 

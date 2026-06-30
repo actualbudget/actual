@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
 import { computeSchedulePreviewTransactions } from '@actual-app/core/shared/schedules';
 import { ungroupTransactions } from '@actual-app/core/shared/transactions';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
@@ -99,6 +100,13 @@ export function usePreviewTransactions({
               }),
             ),
           }));
+
+          // re-sort in case rule actions have changed the dates
+          withDefaults.sort(
+            (a, b) =>
+              monthUtils.parseDate(b.date).getTime() -
+                monthUtils.parseDate(a.date).getTime() || a.amount - b.amount,
+          );
 
           const ungroupedTransactions = ungroupTransactions(withDefaults);
           setPreviewTransactions(ungroupedTransactions);
