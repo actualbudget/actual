@@ -21,7 +21,7 @@ export const categoryOrder = [
   'Maintenance',
 ];
 
-export async function parseReleaseNotes(dir, owner, repo) {
+export async function parseReleaseNotes(dir, owner, repo, historyRef) {
   const files = (await fs.readdir(dir)).filter(
     f => f.endsWith('.md') && f !== 'README.md',
   );
@@ -32,7 +32,7 @@ export async function parseReleaseNotes(dir, owner, repo) {
       data.authors.map(a => `@${a}`),
       { finalWord: '&' },
     );
-    const number = await resolvePrNumber(dir, name);
+    const number = await resolvePrNumber(dir, name, historyRef);
     const prefix = number
       ? `[#${number}](https://github.com/${owner}/${repo}/pull/${number}) `
       : '';
@@ -57,7 +57,7 @@ export async function parseReleaseNotes(dir, owner, repo) {
   return { notesByCategory, files };
 }
 
-async function resolvePrNumber(dir, name) {
+async function resolvePrNumber(dir, name, historyRef = 'HEAD') {
   const basename = name.replace(/\.md$/, '');
   if (/^\d+$/.test(basename)) {
     return basename;
@@ -70,6 +70,7 @@ async function resolvePrNumber(dir, name) {
       '-1',
       '--diff-filter=A',
       '--format=%s',
+      historyRef,
       '--',
       join(dir, name),
     ]);
