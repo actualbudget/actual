@@ -248,6 +248,7 @@ export type TableRef = RefObject<{
 
 function AccountInternal(props: AccountInternalProps) {
   // === HOOKS ===
+  const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
   const dispatch = useDispatch();
   const {
     onBatchEdit: onBatchEditAction,
@@ -297,6 +298,7 @@ function AccountInternal(props: AccountInternalProps) {
   );
   const prevModalShowingRef = useRef(props.modalShowing);
   const prevShowClearedRef = useRef<boolean | undefined>(undefined);
+  const initialModeAppliedRef = useRef(false);
 
   // === QUERY & DATA ===
   const queryClient = useQueryClient();
@@ -1355,6 +1357,34 @@ function AccountInternal(props: AccountInternalProps) {
   };
 
   // === EFFECTS ===
+
+  useEffect(() => {
+    if (initialModeAppliedRef.current) return;
+
+    if (transactions.length > 0) {
+      initialModeAppliedRef.current = true;
+
+      const isFiltered = filterConditions.length > 0 || search !== '';
+
+      if (isFiltered) {
+        splitsExpandedDispatch({
+          type: 'set-mode',
+          mode: 'collapse',
+        });
+      } else {
+        splitsExpandedDispatch({
+          type: 'set-mode',
+          mode: props.expandSplits ? 'expand' : 'collapse',
+        });
+      }
+    }
+  }, [
+    transactions,
+    filterConditions,
+    search,
+    splitsExpandedDispatch,
+    props.expandSplits,
+  ]);
 
   useEffect(() => {
     const onUndo = async ({ messages }: UndoState) => {
