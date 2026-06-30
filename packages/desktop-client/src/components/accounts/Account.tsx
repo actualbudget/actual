@@ -1,10 +1,4 @@
-import React, {
-  startTransition,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement, RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Trans } from 'react-i18next';
@@ -18,7 +12,6 @@ import * as undo from '@actual-app/core/platform/client/undo';
 import type { UndoState } from '@actual-app/core/server/undo';
 import { currentDay } from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import type { Query } from '@actual-app/core/shared/query';
 import {
   makeAsNonChildTransactions,
   makeChild,
@@ -39,7 +32,8 @@ import type {
   TransactionEntity,
   TransactionFilterEntity,
 } from '@actual-app/core/types/models';
-import { debounce, isEqual } from 'es-toolkit/compat';
+import { useQueryClient } from '@tanstack/react-query';
+import { isEqual } from 'es-toolkit/compat';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -71,7 +65,10 @@ import {
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useTransactionBatchActions } from '#hooks/useTransactionBatchActions';
 import { useTransactionFilters } from '#hooks/useTransactionFilters';
-import { calculateRunningBalancesBottomUp } from '#hooks/useTransactions';
+import {
+  calculateRunningBalancesBottomUp,
+  useTransactions,
+} from '#hooks/useTransactions';
 import {
   openAccountCloseModal,
   pushModal,
@@ -81,9 +78,8 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { useCreatePayeeMutation } from '#payees';
 import * as queries from '#queries';
 import { aqlQuery } from '#queries/aqlQuery';
-import { pagedQuery } from '#queries/pagedQuery';
-import type { PagedQuery } from '#queries/pagedQuery';
 import { useDispatch, useSelector } from '#redux';
+import { transactionQueries } from '#transactions';
 import { updateNewTransactions } from '#transactions/transactionsSlice';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
@@ -251,8 +247,7 @@ export type TableRef = RefObject<{
 } | null>;
 
 function AccountInternal(props: AccountInternalProps) {
-  // === HOOKS (merged from AccountHack) ===
-  const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
+  // === HOOKS ===
   const dispatch = useDispatch();
   const {
     onBatchEdit: onBatchEditAction,
@@ -268,27 +263,20 @@ function AccountInternal(props: AccountInternalProps) {
   const [filterConditions, setFilterConditions] = useState<ConditionEntity[]>(
     props.filterConditions || [],
   );
+  const [filterAql, setFilterAql] = useState<Record<string, unknown> | null>(
+    null,
+  );
   const [filterId, setFilterId] = useState<SavedFilter | undefined>();
   const [filterConditionsOp, setFilterConditionsOp] = useState<'and' | 'or'>(
     'and',
   );
-  const [loading, setLoading] = useState(true);
   const [workingHard, setWorkingHard] = useState(false);
   const [reconcileAmount, setReconcileAmount] = useState<number | null>(null);
-  const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
-  const [transactionsFiltered, setTransactionsFiltered] = useState<
-    boolean | undefined
-  >();
-  const [balances, setBalances] = useState<Record<
-    TransactionEntity['id'],
-    IntegerAmount
-  > | null>(null);
   const [showBalances, setShowBalances] = useState(props.showBalances ?? false);
   const [showCleared, setShowCleared] = useState(props.showCleared);
   const [showReconciled, setShowReconciled] = useState(props.showReconciled);
   const [nameError, setNameError] = useState('');
   const [isAdding, setIsAdding] = useState(false);
-  const [filteredAmount, setFilteredAmount] = useState<number | null>(null);
   const [sort, setSort] = useState<{
     ascDesc: 'asc' | 'desc';
     field: string;
@@ -297,9 +285,6 @@ function AccountInternal(props: AccountInternalProps) {
   } | null>(null);
 
   // === REFS ===
-  const pagedRef = useRef<PagedQuery<TransactionEntity> | null>(null);
-  const rootQueryRef = useRef<Query>(null!);
-  const currentQueryRef = useRef<Query>(null!);
   const tableRef = useRef<{
     edit: (updatedId: string | null, op?: string, someBool?: boolean) => void;
     setRowAnimation: (animation: boolean) => void;
@@ -310,203 +295,117 @@ function AccountInternal(props: AccountInternalProps) {
   const dispatchSelectedRef = useRef<((action: Actions) => void) | undefined>(
     undefined,
   );
-  const isOptimisticUpdateRef = useRef(false);
-  const prevShowClearedRef = useRef<boolean | undefined>(undefined);
-  const prevAccountIdRef = useRef(props.accountId);
   const prevModalShowingRef = useRef(props.modalShowing);
+  const prevShowClearedRef = useRef<boolean | undefined>(undefined);
 
-  // State snapshot ref for async callbacks (onData, debounced functions, etc.)
-  const stateRef = useRef({
-    search,
-    filterConditions,
-    filterConditionsOp,
-    sort,
-    showBalances: props.showBalances ?? false,
+  // === QUERY & DATA ===
+  const queryClient = useQueryClient();
+
+  const query = useMemo(() => {
+    let q = queries.transactions(props.accountId).select('*');
+
+    const isFiltered =
+      filterConditions.length > 0 ||
+      search !== '' ||
+      (sort !== null && (sort.field !== 'date' || sort.ascDesc !== 'desc'));
+
+    if (
+      !showReconciled &&
+      (!showBalances ||
+        isFiltered ||
+        search !== '' ||
+        (sort !== null && (sort.field !== 'date' || sort.ascDesc !== 'desc')))
+    ) {
+      q = q.filter({ reconciled: { $eq: false } });
+    }
+
+    if (filterAql) {
+      q = q.filter(filterAql);
+    }
+
+    if (search) {
+      q = queries.transactionsSearch(q, search, props.dateFormat);
+    }
+
+    if (sort) {
+      if (sort.prevField) {
+        q = q.orderBy({ [getField(sort.prevField)]: sort.prevAscDesc });
+      }
+      if (getField(sort.field) === 'cleared') {
+        q = q.orderBy({ reconciled: sort.ascDesc });
+      }
+      q = q.orderBy({ [getField(sort.field)]: sort.ascDesc });
+      q = q.orderBy({ sort_order: sort.ascDesc });
+    }
+
+    return q;
+  }, [
+    props.accountId,
     showReconciled,
-    showCleared,
-    balances,
-    filteredAmount,
-    transactions,
-    loading,
-    transactionsFiltered,
+    showBalances,
+    search,
+    sort,
+    filterAql,
+    filterConditions,
+    props.dateFormat,
+  ]);
+
+  const pageSize = 150;
+  const {
+    transactions: flatTransactions,
+    runningBalances,
+    isPending,
+    isFetchingNextPage,
+    fetchNextPage,
+    refetch: refetchTransactions,
+  } = useTransactions({
+    query,
+    options: {
+      pageSize,
+      calculateRunningBalances: showBalances
+        ? calculateRunningBalancesBottomUp
+        : false,
+    },
   });
-  stateRef.current = {
-    search,
-    filterConditions,
-    filterConditionsOp,
-    sort,
-    showBalances: props.showBalances ?? false,
-    showReconciled,
-    showCleared,
-    balances,
-    filteredAmount,
-    transactions,
-    loading,
-    transactionsFiltered,
-  };
+
+  const transactions = useMemo(
+    () => ungroupTransactions([...flatTransactions]),
+    [flatTransactions],
+  );
+
+  const balances = useMemo(() => {
+    if (!runningBalances || runningBalances.size === 0) return null;
+    return Object.fromEntries(runningBalances);
+  }, [runningBalances]);
+
+  const transactionsFiltered = filterConditions.length > 0 || search !== '';
+
+  const filteredAmount = useMemo(
+    () => transactions.reduce((sum, t) => sum + t.amount, 0),
+    [transactions],
+  );
+
+  const loading = isPending;
 
   // === METHODS ===
 
   const fetchAllIds = async () => {
-    if (!pagedRef.current) {
-      return [];
-    }
-
-    const { data } = await aqlQuery(pagedRef.current.query.select('id'));
-    return data.reduce((arr: string[], t: TransactionEntity) => {
+    const allIds = await aqlQuery(
+      queries
+        .transactions(props.accountId)
+        .options({ splits: 'grouped' })
+        .select('id'),
+    );
+    return allIds.data.reduce((arr: string[], t: TransactionEntity) => {
       arr.push(t.id);
       t.subtransactions?.forEach(sub => arr.push(sub.id));
       return arr;
     }, []);
   };
 
-  const refetchTransactions = async () => {
-    void pagedRef.current?.run();
-  };
-
-  const makeRootTransactionsQuery = () => {
-    return queries.transactions(props.accountId);
-  };
-
-  const updateQuery = (
-    query: Query,
-    isFiltered: boolean = false,
-    overrides?: {
-      showReconciled?: boolean;
-      showBalances?: boolean;
-      search?: string;
-      sort?: {
-        ascDesc: 'asc' | 'desc';
-        field: string;
-        prevField?: string;
-        prevAscDesc?: 'asc' | 'desc';
-      } | null;
-    },
-  ) => {
-    if (pagedRef.current) {
-      pagedRef.current.unsubscribe();
-    }
-
-    const effectiveShowReconciled = overrides?.showReconciled ?? showReconciled;
-    const effectiveShowBalances = overrides?.showBalances ?? showBalances;
-    const effectiveSearch = overrides?.search ?? search;
-    const effectiveSort = overrides?.sort ?? sort;
-
-    if (
-      !effectiveShowReconciled &&
-      (!effectiveShowBalances ||
-        isFiltered ||
-        effectiveSearch !== '' ||
-        (effectiveSort !== null &&
-          (effectiveSort.field !== 'date' || effectiveSort.ascDesc !== 'desc')))
-    ) {
-      query = query.filter({ reconciled: { $eq: false } });
-    }
-
-    pagedRef.current = pagedQuery(query.select('*'), {
-      onData: async (groupedData, prevData) => {
-        const data = ungroupTransactions([...groupedData]);
-        const firstLoad = prevData == null;
-
-        if (isOptimisticUpdateRef.current) {
-          isOptimisticUpdateRef.current = false;
-          startTransition(() => {
-            setTransactions(data);
-          });
-          return;
-        }
-
-        if (firstLoad) {
-          tableRef.current?.setRowAnimation(false);
-
-          if (isFiltered) {
-            splitsExpandedDispatch({
-              type: 'set-mode',
-              mode: 'collapse',
-            });
-          } else {
-            splitsExpandedDispatch({
-              type: 'set-mode',
-              mode: props.expandSplits ? 'expand' : 'collapse',
-            });
-          }
-        }
-
-        const s = stateRef.current;
-        const balances = s.showBalances ? await calculateBalances() : null;
-        const filteredAmount = await getFilteredAmount();
-        setTransactions(data);
-        setTransactionsFiltered(isFiltered);
-        setLoading(false);
-        setWorkingHard(false);
-        setBalances(balances);
-        setFilteredAmount(filteredAmount);
-
-        if (firstLoad) {
-          tableRef.current?.scrollToTop();
-        }
-
-        setTimeout(() => {
-          tableRef.current?.setRowAnimation(true);
-        }, 0);
-      },
-      options: {
-        pageCount: 150,
-        onlySync: true,
-      },
-    });
-  };
-
-  const fetchTransactions = (
-    filterConditionsParam?: ConditionEntity[],
-    overrides?: {
-      showReconciled?: boolean;
-      showBalances?: boolean;
-      search?: string;
-      sort?: {
-        ascDesc: 'asc' | 'desc';
-        field: string;
-        prevField?: string;
-        prevAscDesc?: 'asc' | 'desc';
-      } | null;
-    },
-  ) => {
-    const query = makeRootTransactionsQuery();
-    rootQueryRef.current = currentQueryRef.current = query;
-    if (filterConditionsParam) void applyFilters(filterConditionsParam);
-    else updateQuery(query, false, overrides);
-
-    if (props.accountId) {
-      dispatch(markAccountRead({ id: props.accountId }));
-    }
-  };
-
   const onSearch = (value: string) => {
-    pagedRef.current?.unsubscribe();
     setSearch(value);
-    onSearchDoneRef.current?.();
   };
-
-  const onSearchDoneRef = useRef(
-    debounce(() => {
-      const s = stateRef.current.search;
-      if (s === '') {
-        updateQuery(
-          currentQueryRef.current,
-          stateRef.current.filterConditions.length > 0,
-        );
-      } else {
-        updateQuery(
-          queries.transactionsSearch(
-            currentQueryRef.current,
-            s,
-            props.dateFormat,
-          ),
-          true,
-        );
-      }
-    }, 150),
-  );
 
   const onSync = async () => {
     const accountId = props.accountId;
@@ -539,7 +438,7 @@ function AccountInternal(props: AccountInternalProps) {
                   filename: res[0],
                   onImported: (didChange: boolean) => {
                     if (didChange) {
-                      fetchTransactions();
+                      void refetchTransactions();
                     }
                   },
                 },
@@ -553,7 +452,7 @@ function AccountInternal(props: AccountInternalProps) {
 
   const onExport = async (accountName: string) => {
     const exportedTransactions = await send('transactions-export-query', {
-      query: currentQueryRef.current.serialize(),
+      query: queries.transactions(props.accountId).serialize(),
     });
     const normalizedName =
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
@@ -567,16 +466,27 @@ function AccountInternal(props: AccountInternalProps) {
   };
 
   const onTransactionsChange = (updatedTransaction: TransactionEntity) => {
-    isOptimisticUpdateRef.current = true;
-    pagedRef.current?.optimisticUpdate(data => {
-      if (updatedTransaction._deleted) {
-        return data.filter(t => t.id !== updatedTransaction.id);
-      } else {
-        return data.map(t => {
-          return t.id === updatedTransaction.id ? updatedTransaction : t;
-        });
-      }
-    });
+    const queryKey = transactionQueries.aql({ query, pageSize }).queryKey;
+    queryClient.setQueryData(
+      queryKey,
+      (
+        old:
+          | { pages: TransactionEntity[][]; pageParams: unknown[] }
+          | undefined,
+      ) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map(page =>
+            updatedTransaction._deleted
+              ? page.filter(t => t.id !== updatedTransaction.id)
+              : page.map(t =>
+                  t.id === updatedTransaction.id ? updatedTransaction : t,
+                ),
+          ),
+        };
+      },
+    );
 
     dispatch(updateNewTransactions({ id: updatedTransaction.id }));
   };
@@ -592,24 +502,6 @@ function AccountInternal(props: AccountInternalProps) {
     } else {
       return sort.field === 'date' && sort.ascDesc === 'desc';
     }
-  };
-
-  const calculateBalances = async () => {
-    if (!canCalculateBalance() || !pagedRef.current) {
-      return null;
-    }
-
-    const { data }: { data: { id: string; balance: number }[] } =
-      await aqlQuery(
-        pagedRef.current.query
-          .options({ splits: 'none' })
-          .select([{ balance: { $sumOver: '$amount' } }]),
-      );
-
-    return data.reduce((balances: Record<string, number>, row) => {
-      balances[row.id] = row.balance;
-      return balances;
-    }, {});
   };
 
   const onRunRules = async (ids: string[]) => {
@@ -652,7 +544,7 @@ function AccountInternal(props: AccountInternalProps) {
         });
       }
 
-      fetchTransactions();
+      void refetchTransactions();
     } catch (error) {
       console.error('Error applying rules:', error);
       dispatch(
@@ -755,31 +647,16 @@ function AccountInternal(props: AccountInternalProps) {
         if (showBalances) {
           props.setShowBalances(false);
           setShowBalances(false);
-          setBalances(null);
         } else {
           props.setShowBalances(true);
-          setTransactions([]);
           setFilterConditions([]);
           setSearch('');
           setSort(null);
           setShowBalances(true);
-          fetchTransactions(undefined, {
-            showBalances: true,
-            search: '',
-            sort: null,
-          });
         }
         break;
       case 'remove-sorting': {
         setSort(null);
-        if (filterConditions.length > 0) {
-          void applyFilters([...filterConditions]);
-        } else {
-          fetchTransactions(undefined, { sort: null });
-        }
-        if (search !== '') {
-          onSearch(search);
-        }
         break;
       }
       case 'toggle-cleared':
@@ -795,11 +672,9 @@ function AccountInternal(props: AccountInternalProps) {
         if (showReconciled) {
           props.setShowReconciled(false);
           setShowReconciled(false);
-          fetchTransactions(filterConditions, { showReconciled: false });
         } else {
           props.setShowReconciled(true);
           setShowReconciled(true);
-          fetchTransactions(filterConditions, { showReconciled: true });
         }
         break;
       case 'toggle-net-worth-chart':
@@ -839,19 +714,8 @@ function AccountInternal(props: AccountInternalProps) {
   const getBalanceQuery = (id?: string) => {
     return {
       name: `balance-query-${id}`,
-      query: makeRootTransactionsQuery().calculate({ $sum: '$amount' }),
+      query: queries.transactions(id).calculate({ $sum: '$amount' }),
     } as const;
-  };
-
-  const getFilteredAmount = async () => {
-    if (!pagedRef.current) {
-      return 0;
-    }
-
-    const { data: amount } = await aqlQuery(
-      pagedRef.current.query.calculate({ $sum: '$amount' }),
-    );
-    return amount;
   };
 
   const isNew = (id: TransactionEntity['id']) => {
@@ -961,7 +825,26 @@ function AccountInternal(props: AccountInternalProps) {
       },
     ]);
 
-    setTransactions(prev => [...reconciliationTransactions, ...prev]);
+    const queryKey = transactionQueries.aql({ query, pageSize }).queryKey;
+    queryClient.setQueryData(
+      queryKey,
+      (
+        old:
+          | {
+              pages: TransactionEntity[][];
+              pageParams: unknown[];
+            }
+          | undefined,
+      ) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page, i) =>
+            i === 0 ? [...reconciliationTransactions, ...page] : page,
+          ),
+        };
+      },
+    );
 
     const ruledTransactions = await Promise.all(
       reconciliationTransactions.map(transaction =>
@@ -1000,12 +883,19 @@ function AccountInternal(props: AccountInternalProps) {
   const onBatchDuplicate = (ids: string[]) => {
     void onBatchDuplicateAction({
       ids,
-      onSuccess: refetchTransactions,
+      onSuccess: () => {
+        void refetchTransactions();
+      },
     });
   };
 
   const onBatchDelete = (ids: string[]) => {
-    void onBatchDeleteAction({ ids, onSuccess: refetchTransactions });
+    void onBatchDeleteAction({
+      ids,
+      onSuccess: () => {
+        void refetchTransactions();
+      },
+    });
   };
 
   const onMakeAsSplitTransaction = async (ids: string[]) => {
@@ -1135,14 +1025,18 @@ function AccountInternal(props: AccountInternalProps) {
     void onBatchLinkScheduleAction({
       ids,
       account: props.accounts.find(a => a.id === props.accountId),
-      onSuccess: refetchTransactions,
+      onSuccess: () => {
+        void refetchTransactions();
+      },
     });
   };
 
   const onBatchUnlinkSchedule = (ids: string[]) => {
     void onBatchUnlinkScheduleAction({
       ids,
-      onSuccess: refetchTransactions,
+      onSuccess: () => {
+        void refetchTransactions();
+      },
     });
   };
 
@@ -1225,7 +1119,9 @@ function AccountInternal(props: AccountInternalProps) {
 
   const onSetTransfer = async (ids: string[]) => {
     setWorkingHard(true);
-    await onSetTransferAction(ids, props.payees, refetchTransactions);
+    await onSetTransferAction(ids, props.payees, () => {
+      void refetchTransactions();
+    });
   };
 
   const onConditionsOpChange = (value: 'and' | 'or') => {
@@ -1378,12 +1274,9 @@ function AccountInternal(props: AccountInternalProps) {
   };
 
   const applyFilters = async (conditions: ConditionEntity[]) => {
+    setFilterConditions(conditions);
+
     if (conditions.length > 0) {
-      const filteredCustomQueryFilters: Partial<RuleConditionEntity>[] =
-        conditions.filter(cond => !isTransactionFilterEntity(cond));
-      const customQueryFilters = filteredCustomQueryFilters.map(
-        f => f.queryFilter,
-      );
       const { filters: queryFilters } = await send(
         'make-filters-from-conditions',
         {
@@ -1392,119 +1285,22 @@ function AccountInternal(props: AccountInternalProps) {
           ),
         },
       );
+      const filteredCustomQueryFilters: Partial<RuleConditionEntity>[] =
+        conditions.filter(cond => !isTransactionFilterEntity(cond));
+      const customQueryFilters = filteredCustomQueryFilters.map(
+        f => f.queryFilter,
+      );
       const conditionsOpKey = filterConditionsOp === 'or' ? '$or' : '$and';
-      currentQueryRef.current = rootQueryRef.current.filter({
+      setFilterAql({
         [conditionsOpKey]: [...queryFilters, ...customQueryFilters],
       });
-
-      setFilterConditions(conditions);
-      updateQuery(currentQueryRef.current, true);
     } else {
-      setTransactions([]);
-      setFilterConditions(conditions);
-      fetchTransactions();
+      setFilterAql(null);
     }
-
-    if (sort !== null) {
-      applySort();
-    }
-  };
-
-  const applySort = (
-    field?: string,
-    ascDesc?: 'asc' | 'desc',
-    prevField?: string,
-    prevAscDesc?: 'asc' | 'desc',
-  ) => {
-    const currentFilterConditions = filterConditions;
-    const isFiltered = currentFilterConditions.length > 0;
-    const sortField = getField(!field ? sort?.field : field);
-    const sortAscDesc = !ascDesc ? sort?.ascDesc : ascDesc;
-    const sortPrevField = getField(!prevField ? sort?.prevField : prevField);
-    const sortPrevAscDesc = !prevField ? sort?.prevAscDesc : prevAscDesc;
-
-    const sortCurrentQuery = function (
-      currentSortField: string,
-      currentSortAscDesc?: 'asc' | 'desc',
-    ) {
-      if (currentSortField === 'cleared') {
-        currentQueryRef.current = currentQueryRef.current.orderBy({
-          reconciled: currentSortAscDesc,
-        });
-      }
-
-      currentQueryRef.current = currentQueryRef.current.orderBy({
-        [currentSortField]: currentSortAscDesc,
-      });
-    };
-
-    const sortRootQuery = function (
-      currentSortField: string,
-      currentSortAscDesc?: 'asc' | 'desc',
-    ) {
-      if (currentSortField === 'cleared') {
-        currentQueryRef.current = rootQueryRef.current.orderBy({
-          reconciled: currentSortAscDesc,
-        });
-        currentQueryRef.current = currentQueryRef.current.orderBy({
-          cleared: currentSortAscDesc,
-        });
-      } else {
-        currentQueryRef.current = rootQueryRef.current.orderBy({
-          [currentSortField]: currentSortAscDesc,
-        });
-      }
-    };
-
-    const maybeSortByPreviousField = function (
-      currentSortPrevField: string,
-      currentSortPrevAscDesc?: 'asc' | 'desc',
-    ) {
-      if (!currentSortPrevField) {
-        return;
-      }
-
-      if (currentSortPrevField === 'cleared') {
-        currentQueryRef.current = currentQueryRef.current.orderBy({
-          reconciled: currentSortPrevAscDesc,
-        });
-      }
-
-      currentQueryRef.current = currentQueryRef.current.orderBy({
-        [currentSortPrevField]: currentSortPrevAscDesc,
-      });
-    };
-
-    switch (true) {
-      case !field:
-        sortCurrentQuery(sortField, sortAscDesc);
-        break;
-      case isFiltered:
-        void applyFilters([...currentFilterConditions]);
-        sortCurrentQuery(sortField, sortAscDesc);
-        break;
-      case !isFiltered:
-        sortRootQuery(sortField, sortAscDesc);
-        break;
-      default:
-    }
-
-    maybeSortByPreviousField(sortPrevField, sortPrevAscDesc);
-
-    currentQueryRef.current = currentQueryRef.current.orderBy({
-      sort_order: sortAscDesc,
-    });
-
-    updateQuery(currentQueryRef.current, isFiltered);
   };
 
   const onSort = (headerClicked: string, ascDesc: 'asc' | 'desc') => {
-    let prevField: string | undefined;
-    let prevAscDesc: 'asc' | 'desc' | undefined;
-
     if (headerClicked === sort?.field) {
-      prevField = sort.prevField;
-      prevAscDesc = sort.prevAscDesc;
       setSort(
         prev =>
           ({
@@ -1514,8 +1310,6 @@ function AccountInternal(props: AccountInternalProps) {
           }) as typeof sort,
       );
     } else {
-      prevField = sort?.field;
-      prevAscDesc = sort?.ascDesc;
       setSort({
         field: headerClicked,
         ascDesc,
@@ -1523,28 +1317,13 @@ function AccountInternal(props: AccountInternalProps) {
         prevAscDesc: sort?.ascDesc,
       });
     }
-
-    applySort(headerClicked, ascDesc, prevField, prevAscDesc);
-    if (search !== '') {
-      onSearch(search);
-    }
   };
 
   // === EFFECTS ===
 
   useEffect(() => {
-    const maybeRefetch = (tables: string[]) => {
-      if (
-        tables.includes('transactions') ||
-        tables.includes('category_mapping') ||
-        tables.includes('payee_mapping')
-      ) {
-        return refetchTransactions();
-      }
-    };
-
-    const onUndo = async ({ tables, messages }: UndoState) => {
-      await maybeRefetch(tables);
+    const onUndo = async ({ messages }: UndoState) => {
+      void refetchTransactions();
 
       let focusId: null | string = null;
       if (
@@ -1572,7 +1351,9 @@ function AccountInternal(props: AccountInternalProps) {
 
     const unlistens = [listen('undo-event', onUndo)];
 
-    fetchTransactions(filterConditions);
+    if (props.accountId) {
+      dispatch(markAccountRead({ id: props.accountId }));
+    }
 
     const lastUndoEvent = undo.getUndoState('undoEvent');
     if (lastUndoEvent) {
@@ -1581,50 +1362,17 @@ function AccountInternal(props: AccountInternalProps) {
 
     return () => {
       unlistens.forEach(unlisten => unlisten());
-      if (pagedRef.current) {
-        pagedRef.current.unsubscribe();
-      }
     };
     // eslint-disable-next-line react-compiler/react-hooks, react-hooks/exhaustive-deps
-  }, []);
+  }, [props.accountId]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (isAdding && prevAccountIdRef.current !== props.accountId) {
-      setIsAdding(false);
-    }
-
     if (prevModalShowingRef.current && !props.modalShowing) {
       setTimeout(() => {
         void refetchTransactions();
       }, 100);
     }
 
-    if (prevAccountIdRef.current !== props.accountId) {
-      setSort(null);
-      setSearch('');
-      setFilterConditions([]);
-      setLoading(true);
-      setShowBalances(props.showBalances ?? false);
-      setBalances(null);
-      setShowCleared(props.showCleared ?? false);
-      setShowReconciled(props.showReconciled);
-      setReconcileAmount(null);
-
-      const query = makeRootTransactionsQuery();
-      rootQueryRef.current = currentQueryRef.current = query;
-      updateQuery(query, false, {
-        showReconciled: props.showReconciled,
-        showBalances: props.showBalances ?? false,
-        search: '',
-        sort: null,
-      });
-      if (props.accountId) {
-        dispatch(markAccountRead({ id: props.accountId }));
-      }
-    }
-
-    prevAccountIdRef.current = props.accountId;
     prevModalShowingRef.current = props.modalShowing;
   });
 
@@ -1755,9 +1503,11 @@ function AccountInternal(props: AccountInternalProps) {
                 account={account}
                 transactions={transactions}
                 allTransactions={allTransactions}
-                loadMoreTransactions={() =>
-                  pagedRef.current && pagedRef.current.fetchNext()
-                }
+                loadMoreTransactions={() => {
+                  if (!isFetchingNextPage) {
+                    void fetchNextPage();
+                  }
+                }}
                 accounts={props.accounts}
                 category={category}
                 categoryGroups={props.categoryGroups}
@@ -1900,6 +1650,7 @@ export function Account() {
           initialMode={expandSplits ? 'collapse' : 'expand'}
         >
           <AccountInternal
+            key={params.id}
             newTransactions={newTransactions}
             matchedTransactions={matchedTransactions}
             accounts={accounts}
