@@ -662,10 +662,11 @@ function AccountInternal(props: AccountInternalProps) {
       case 'reopen':
         props.onReopenAccount(accountId);
         break;
-      case 'export':
+      case 'export': {
         const accountName = getAccountTitle(account, accountId);
         void onExport(accountName);
         break;
+      }
       case 'toggle-balance':
         if (showBalances) {
           props.setShowBalances(false);
@@ -1432,11 +1433,9 @@ function AccountInternal(props: AccountInternalProps) {
   }, [props.accountId]);
 
   useEffect(() => {
-    if (filterConditions.length > 0) {
-      void applyFilters(filterConditions);
-    }
+    void applyFilters(props.filterConditions);
     // eslint-disable-next-line react-compiler/react-hooks, react-hooks/exhaustive-deps
-  }, []);
+  }, [props.filterConditions]);
 
   useEffect(() => {
     if (prevModalShowingRef.current && !props.modalShowing) {
@@ -1688,7 +1687,10 @@ export function Account() {
   );
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
-  const filterConditions = location?.state?.filterConditions || [];
+  const filterConditions = useMemo(
+    () => location?.state?.filterConditions || [],
+    [location?.state?.filterConditions],
+  );
 
   const savedFiters = useTransactionFilters();
 
