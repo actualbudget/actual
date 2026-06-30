@@ -39,9 +39,9 @@ Click the card to open the editor (where you can save the widget).
 - **Start with `=`** (example: `=SUM(1, 2, 3)`)
 - You can use typical Excel-style functions (autocomplete and hover help are built into the editor).
 
-## Function reference (autocomplete)
+## Function reference
 
-This list documents the functions that appear in the in-app **autocomplete/hover popover** for formulas.
+This list documents formula functions that are useful in Actual. The in-app **autocomplete/hover popover** provides a curated subset of these functions.
 
 :::tip
 If a function isn’t listed here, it still might work. Actual uses HyperFormula under the hood, so you can also refer to [HyperFormula’s built-in functions list](https://hyperformula.handsontable.com/guide/built-in-functions.html).
