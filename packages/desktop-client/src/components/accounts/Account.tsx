@@ -391,10 +391,7 @@ function AccountInternal(props: AccountInternalProps) {
 
   const fetchAllIds = async () => {
     const allIds = await aqlQuery(
-      queries
-        .transactions(props.accountId)
-        .options({ splits: 'grouped' })
-        .select('id'),
+      query.select('id').options({ splits: 'grouped' }),
     );
     return allIds.data.reduce((arr: string[], t: TransactionEntity) => {
       arr.push(t.id);
@@ -452,7 +449,7 @@ function AccountInternal(props: AccountInternalProps) {
 
   const onExport = async (accountName: string) => {
     const exportedTransactions = await send('transactions-export-query', {
-      query: queries.transactions(props.accountId).serialize(),
+      query: query.serialize(),
     });
     const normalizedName =
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
@@ -477,13 +474,37 @@ function AccountInternal(props: AccountInternalProps) {
         if (!old) return old;
         return {
           ...old,
-          pages: old.pages.map(page =>
-            updatedTransaction._deleted
-              ? page.filter(t => t.id !== updatedTransaction.id)
-              : page.map(t =>
-                  t.id === updatedTransaction.id ? updatedTransaction : t,
-                ),
-          ),
+          pages: old.pages.map(page => {
+            if (updatedTransaction._deleted) {
+              return page
+                .filter(t => t.id !== updatedTransaction.id)
+                .map(t => {
+                  if (t.subtransactions) {
+                    return {
+                      ...t,
+                      subtransactions: t.subtransactions.filter(
+                        s => s.id !== updatedTransaction.id,
+                      ),
+                    };
+                  }
+                  return t;
+                });
+            }
+            return page.map(t => {
+              if (t.id === updatedTransaction.id) return updatedTransaction;
+              if (t.subtransactions) {
+                const childIdx = t.subtransactions.findIndex(
+                  s => s.id === updatedTransaction.id,
+                );
+                if (childIdx !== -1) {
+                  const newSub = [...t.subtransactions];
+                  newSub[childIdx] = updatedTransaction;
+                  return { ...t, subtransactions: newSub };
+                }
+              }
+              return t;
+            });
+          }),
         };
       },
     );
@@ -650,6 +671,7 @@ function AccountInternal(props: AccountInternalProps) {
         } else {
           props.setShowBalances(true);
           setFilterConditions([]);
+          setFilterAql(null);
           setSearch('');
           setSort(null);
           setShowBalances(true);
@@ -736,36 +758,39 @@ function AccountInternal(props: AccountInternalProps) {
 
   const lockTransactions = async () => {
     setWorkingHard(true);
+    try {
+      const { accountId } = props;
 
-    const { accountId } = props;
+      const { data } = await aqlQuery(
+        q('transactions')
+          .filter({ cleared: true, reconciled: false, account: accountId })
+          .select('*')
+          .options({ splits: 'grouped' }),
+      );
+      let lockedData = ungroupTransactions(data);
 
-    const { data } = await aqlQuery(
-      q('transactions')
-        .filter({ cleared: true, reconciled: false, account: accountId })
-        .select('*')
-        .options({ splits: 'grouped' }),
-    );
-    let lockedData = ungroupTransactions(data);
+      const changes: { updated: Array<Partial<TransactionEntity>> } = {
+        updated: [],
+      };
 
-    const changes: { updated: Array<Partial<TransactionEntity>> } = {
-      updated: [],
-    };
+      lockedData.forEach(trans => {
+        const { diff } = updateTransaction(lockedData, {
+          ...trans,
+          reconciled: true,
+        });
 
-    lockedData.forEach(trans => {
-      const { diff } = updateTransaction(lockedData, {
-        ...trans,
-        reconciled: true,
+        lockedData = applyChanges(diff, lockedData);
+
+        changes.updated = changes.updated
+          ? changes.updated.concat(diff.updated)
+          : diff.updated;
       });
 
-      lockedData = applyChanges(diff, lockedData);
-
-      changes.updated = changes.updated
-        ? changes.updated.concat(diff.updated)
-        : diff.updated;
-    });
-
-    await send('transactions-batch-update', changes);
-    await refetchTransactions();
+      await send('transactions-batch-update', changes);
+      await refetchTransactions();
+    } finally {
+      setWorkingHard(false);
+    }
   };
 
   const onReconcile = async (amount: number | null) => {
@@ -900,74 +925,98 @@ function AccountInternal(props: AccountInternalProps) {
 
   const onMakeAsSplitTransaction = async (ids: string[]) => {
     setWorkingHard(true);
+    try {
+      const { data } = await aqlQuery(
+        q('transactions')
+          .filter({ id: { $oneof: ids } })
+          .select('*')
+          .options({ splits: 'none' }),
+      );
 
-    const { data } = await aqlQuery(
-      q('transactions')
-        .filter({ id: { $oneof: ids } })
-        .select('*')
-        .options({ splits: 'none' }),
-    );
+      const splitTransactions: TransactionEntity[] = data;
 
-    const splitTransactions: TransactionEntity[] = data;
+      if (!splitTransactions || splitTransactions.length === 0) {
+        return;
+      }
 
-    if (!splitTransactions || splitTransactions.length === 0) {
-      return;
+      const [firstTransaction] = splitTransactions;
+      const parentTransaction = {
+        id: uuidv4(),
+        is_parent: true,
+        cleared: splitTransactions.every(t => !!t.cleared),
+        date: firstTransaction.date,
+        account: firstTransaction.account,
+        amount: splitTransactions
+          .map(t => t.amount)
+          .reduce((total, amount) => total + amount, 0),
+      };
+      const childTransactions = splitTransactions.map(t =>
+        makeChild(parentTransaction, t),
+      );
+
+      await send('transactions-batch-update', {
+        added: [parentTransaction],
+        updated: childTransactions,
+      });
+
+      void refetchTransactions();
+    } finally {
+      setWorkingHard(false);
     }
-
-    const [firstTransaction] = splitTransactions;
-    const parentTransaction = {
-      id: uuidv4(),
-      is_parent: true,
-      cleared: splitTransactions.every(t => !!t.cleared),
-      date: firstTransaction.date,
-      account: firstTransaction.account,
-      amount: splitTransactions
-        .map(t => t.amount)
-        .reduce((total, amount) => total + amount, 0),
-    };
-    const childTransactions = splitTransactions.map(t =>
-      makeChild(parentTransaction, t),
-    );
-
-    await send('transactions-batch-update', {
-      added: [parentTransaction],
-      updated: childTransactions,
-    });
-
-    void refetchTransactions();
   };
 
   const onMakeAsNonSplitTransactions = async (ids: string[]) => {
     setWorkingHard(true);
+    try {
+      const { data } = await aqlQuery(
+        q('transactions')
+          .filter({ id: { $oneof: ids } })
+          .select('*')
+          .options({ splits: 'grouped' }),
+      );
 
-    const { data } = await aqlQuery(
-      q('transactions')
-        .filter({ id: { $oneof: ids } })
-        .select('*')
-        .options({ splits: 'grouped' }),
-    );
+      const groupedTransactions: TransactionEntity[] = data;
 
-    const groupedTransactions: TransactionEntity[] = data;
+      let changes: {
+        updated: TransactionEntity[];
+        deleted: TransactionEntity[];
+      } = {
+        updated: [],
+        deleted: [],
+      };
 
-    let changes: {
-      updated: TransactionEntity[];
-      deleted: TransactionEntity[];
-    } = {
-      updated: [],
-      deleted: [],
-    };
+      const groupedTransactionsToUpdate = groupedTransactions.filter(
+        t => t.is_parent,
+      );
 
-    const groupedTransactionsToUpdate = groupedTransactions.filter(
-      t => t.is_parent,
-    );
+      for (const groupedTransaction of groupedTransactionsToUpdate) {
+        const transactionsData = ungroupTransaction(groupedTransaction);
+        const [parentTransaction, ...childTransactions] = transactionsData;
 
-    for (const groupedTransaction of groupedTransactionsToUpdate) {
-      const transactionsData = ungroupTransaction(groupedTransaction);
-      const [parentTransaction, ...childTransactions] = transactionsData;
+        if (ids.includes(parentTransaction.id)) {
+          const diff = makeAsNonChildTransactions(
+            childTransactions,
+            transactionsData,
+          );
 
-      if (ids.includes(parentTransaction.id)) {
+          changes = {
+            updated: [...changes.updated, ...diff.updated],
+            deleted: [...changes.deleted, ...diff.deleted],
+          };
+
+          continue;
+        }
+
+        const selectedChildTransactions = childTransactions.filter(t =>
+          ids.includes(t.id),
+        );
+
+        if (selectedChildTransactions.length === 0) {
+          continue;
+        }
+
         const diff = makeAsNonChildTransactions(
-          childTransactions,
+          selectedChildTransactions,
           transactionsData,
         );
 
@@ -975,38 +1024,20 @@ function AccountInternal(props: AccountInternalProps) {
           updated: [...changes.updated, ...diff.updated],
           deleted: [...changes.deleted, ...diff.deleted],
         };
-
-        continue;
       }
 
-      const selectedChildTransactions = childTransactions.filter(t =>
-        ids.includes(t.id),
-      );
+      await send('transactions-batch-update', changes);
 
-      if (selectedChildTransactions.length === 0) {
-        continue;
-      }
+      void refetchTransactions();
 
-      const diff = makeAsNonChildTransactions(
-        selectedChildTransactions,
-        transactionsData,
-      );
-
-      changes = {
-        updated: [...changes.updated, ...diff.updated],
-        deleted: [...changes.deleted, ...diff.deleted],
-      };
+      const transactionsToSelect = changes.updated.map(t => t.id);
+      dispatchSelectedRef.current?.({
+        type: 'select-all',
+        ids: transactionsToSelect,
+      });
+    } finally {
+      setWorkingHard(false);
     }
-
-    await send('transactions-batch-update', changes);
-
-    void refetchTransactions();
-
-    const transactionsToSelect = changes.updated.map(t => t.id);
-    dispatchSelectedRef.current?.({
-      type: 'select-all',
-      ids: transactionsToSelect,
-    });
   };
 
   const onMergeTransactions = async (ids: string[]) => {
@@ -1119,9 +1150,13 @@ function AccountInternal(props: AccountInternalProps) {
 
   const onSetTransfer = async (ids: string[]) => {
     setWorkingHard(true);
-    await onSetTransferAction(ids, props.payees, () => {
-      void refetchTransactions();
-    });
+    try {
+      await onSetTransferAction(ids, props.payees, () => {
+        void refetchTransactions();
+      });
+    } finally {
+      setWorkingHard(false);
+    }
   };
 
   const onConditionsOpChange = (value: 'and' | 'or') => {
@@ -1365,6 +1400,13 @@ function AccountInternal(props: AccountInternalProps) {
     };
     // eslint-disable-next-line react-compiler/react-hooks, react-hooks/exhaustive-deps
   }, [props.accountId]);
+
+  useEffect(() => {
+    if (filterConditions.length > 0) {
+      void applyFilters(filterConditions);
+    }
+    // eslint-disable-next-line react-compiler/react-hooks, react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (prevModalShowingRef.current && !props.modalShowing) {
