@@ -21,7 +21,6 @@ import { getLiveRange } from '#components/reports/getLiveRange';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
 
-import { getLiveSlidingWindowRange } from './querySlidingWindow';
 import { useGlobalPref } from './useGlobalPref';
 import { useLocale } from './useLocale';
 
@@ -338,6 +337,16 @@ function isMonthOnlyDate(s: string) {
   return s.includes('-') && s.split('-').length === 2;
 }
 
+function getStartDate(dateOrMonth: string) {
+  return isMonthOnlyDate(dateOrMonth) ? dateOrMonth + '-01' : dateOrMonth;
+}
+
+function getEndDate(dateOrMonth: string) {
+  return isMonthOnlyDate(dateOrMonth)
+    ? monthUtils.getMonthEnd(dateOrMonth + '-01')
+    : dateOrMonth;
+}
+
 async function buildFilteredTransactionsQuery(
   config: QueryConfig,
 ): Promise<Query> {
@@ -366,19 +375,14 @@ async function buildFilteredTransactionsQuery(
       timeFrame.end
     ) {
       if (timeFrame.mode === 'sliding-window') {
-        ({ startDate, endDate } = getLiveSlidingWindowRange(
-          timeFrame.start,
-          timeFrame.end,
-        ));
+        const [calculatedStart, calculatedEnd] = calculateTimeRange(timeFrame);
+        startDate = getStartDate(calculatedStart);
+        endDate = getEndDate(calculatedEnd);
       } else {
         // Static mode: use the actual stored start/end dates.
         // Convert month format (YYYY-MM) to full date format (YYYY-MM-DD) if needed
-        startDate = isMonthOnlyDate(timeFrame.start)
-          ? timeFrame.start + '-01'
-          : timeFrame.start;
-        endDate = isMonthOnlyDate(timeFrame.end)
-          ? monthUtils.getMonthEnd(timeFrame.end + '-01')
-          : timeFrame.end;
+        startDate = getStartDate(timeFrame.start);
+        endDate = getEndDate(timeFrame.end);
       }
     } else {
       // For other modes, use getLiveRange with the appropriate condition
