@@ -103,14 +103,14 @@ function getFormulaCompletionSectionOrder(): Record<string, number> {
   return {
     [getFunctionSignatureCompletionSection()]: -2,
     [getVariableCompletionSection()]: -1,
-    [getBudgetDimensionCompletionSection()]: 0,
-    [getBudgetCategoryCompletionSection()]: 1,
-    [categoryConfig.query.section]: categoryConfig.query.order + 2,
-    [categoryConfig.math.section]: categoryConfig.math.order + 2,
-    [categoryConfig.logical.section]: categoryConfig.logical.order + 2,
-    [categoryConfig.text.section]: categoryConfig.text.order + 2,
-    [categoryConfig.date.section]: categoryConfig.date.order + 2,
-    [categoryConfig.other.section]: categoryConfig.other.order + 2,
+    [categoryConfig.query.section]: categoryConfig.query.order,
+    [categoryConfig.math.section]: categoryConfig.math.order,
+    [categoryConfig.logical.section]: categoryConfig.logical.order,
+    [categoryConfig.text.section]: categoryConfig.text.order,
+    [categoryConfig.date.section]: categoryConfig.date.order,
+    [categoryConfig.other.section]: categoryConfig.other.order,
+    [getBudgetDimensionCompletionSection()]: 6,
+    [getBudgetCategoryCompletionSection()]: 7,
     [getRuleFieldCompletionSection()]: 8,
   };
 }

@@ -92,7 +92,7 @@ describe('formulaCatalog', () => {
     );
   });
 
-  it('defines budget query dimensions and sorts their sections before query functions', () => {
+  it('defines budget query dimensions and sorts their sections after function groups', () => {
     expect(budgetQueryDimensions).toEqual([
       'budgeted',
       'spent',
@@ -111,6 +111,10 @@ describe('formulaCatalog', () => {
         section: getFormulaFunctionCategoryConfig().query.section,
       },
       {
+        label: 'SUM',
+        section: getFormulaFunctionCategoryConfig().math.section,
+      },
+      {
         label: 'spent',
         section: getBudgetDimensionCompletionSection(),
       },
@@ -122,9 +126,10 @@ describe('formulaCatalog', () => {
 
     expect(labels(sorted)).toEqual([
       'BUDGET_QUERY',
+      'QUERY',
+      'SUM',
       'spent',
       'Groceries',
-      'QUERY',
     ]);
   });
 
