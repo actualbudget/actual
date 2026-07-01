@@ -23,18 +23,56 @@ export const sqlWasmPath =
   require.resolve('@jlongster/sql.js/dist/sql-wasm.wasm');
 
 function migrationFileNames() {
+  // Sort so the embedded `dataFiles` order (and thus the worker bundle hash) is
+  // stable regardless of the filesystem's `readdirSync` ordering.
   return fs
     .readdirSync(migrationsDir)
-    .filter(name => name.endsWith('.sql') || name.endsWith('.js'));
+    .filter(name => name.endsWith('.sql') || name.endsWith('.js'))
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+}
+
+/**
+ * Single source of truth for the files served under `data/` (the default budget
+ * DB and every migration). Each entry pairs the runtime `data/<key>` name with
+ * its absolute source path, so the embedded bytes, the manifest, and the build
+ * watch list are all derived from one list and can never drift apart.
+ */
+function dataFileEntries() {
+  return [
+    { key: 'default-db.sqlite', path: defaultDbPath },
+    ...migrationFileNames().map(name => ({
+      key: `migrations/${name}`,
+      path: path.join(migrationsDir, name),
+    })),
+  ];
 }
 
 /**
  * The newline-delimited manifest fetched from
  * `PUBLIC_URL + 'data-file-index.txt'`, listing every file under `data/`.
  */
-export function buildDataFileIndex(names = migrationFileNames()) {
-  const migrations = names.map(name => `migrations/${name}`).sort();
-  return ['default-db.sqlite', ...migrations].join('\n') + '\n';
+export function buildDataFileIndex(entries = dataFileEntries()) {
+  return (
+    entries
+      .map(entry => entry.key)
+      .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+      .join('\n') + '\n'
+  );
+}
+
+/**
+ * The absolute paths of every source file `collectEmbeddedAssets()` reads, so
+ * build tooling can register them as watch dependencies (e.g. Vite's
+ * `this.addWatchFile`) and rebuild when any of them changes.
+ */
+export function embeddedAssetPaths() {
+  // `migrationsDir` is watched too so that adding/removing/renaming a migration
+  // (not just editing an existing one) invalidates the embedded manifest.
+  return [
+    sqlWasmPath,
+    migrationsDir,
+    ...dataFileEntries().map(entry => entry.path),
+  ];
 }
 
 /**
@@ -42,18 +80,14 @@ export function buildDataFileIndex(names = migrationFileNames()) {
  * string. `dataFiles` is keyed by the `data/<key>` name fetched at runtime.
  */
 export function collectEmbeddedAssets() {
-  const names = migrationFileNames();
-  const dataFiles = {
-    'default-db.sqlite': fs.readFileSync(defaultDbPath).toString('base64'),
-  };
-  for (const name of names) {
-    dataFiles[`migrations/${name}`] = fs
-      .readFileSync(path.join(migrationsDir, name))
-      .toString('base64');
+  const entries = dataFileEntries();
+  const dataFiles = {};
+  for (const entry of entries) {
+    dataFiles[entry.key] = fs.readFileSync(entry.path).toString('base64');
   }
   return {
     wasmBase64: fs.readFileSync(sqlWasmPath).toString('base64'),
     dataFiles,
-    index: buildDataFileIndex(names),
+    index: buildDataFileIndex(entries),
   };
 }

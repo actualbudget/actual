@@ -92,6 +92,7 @@ build/
 # ...except hand-written ambient declarations that must be committed
 !packages/api/virtual-modules.d.ts
 !packages/loot-core/default-filesystem.d.ts
+!packages/loot-core/typings/virtual-modules.d.ts
 
 # Lage cache
 .lage/

@@ -1,15 +1,10 @@
 import { spawn } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
 import { createReadStream } from 'node:fs';
-import { cp, mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readdir, rename, rm } from 'node:fs/promises';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
-import {
-  defaultDbPath,
-  migrationsDir,
-  sqlWasmPath,
-} from '@actual-app/core/default-filesystem';
 import babel from '@rolldown/plugin-babel';
 import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
@@ -84,7 +79,6 @@ const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 const lootCoreOutDir = path.resolve(lootCoreRoot, 'lib-dist/browser');
 const lootCoreConfig = path.resolve(lootCoreRoot, 'vite.config.mts');
 const publicDir = path.resolve(__dirname, 'public');
-const publicDataDir = path.resolve(publicDir, 'data');
 const publicKcabDir = path.resolve(publicDir, 'kcab');
 const buildStatsDir = path.resolve(__dirname, 'build-stats');
 const pluginsServiceDistDir = path.resolve(
@@ -118,38 +112,6 @@ const CONTENT_TYPES: Record<string, string> = {
 async function stagePluginsService(): Promise<void> {
   await rm(serviceWorkerDir, { recursive: true, force: true });
   await cp(pluginsServiceDistDir, serviceWorkerDir, { recursive: true });
-}
-
-async function stagePublicData(): Promise<void> {
-  const migrationsDest = path.resolve(publicDataDir, 'migrations');
-  await mkdir(publicDataDir, { recursive: true });
-  await rm(migrationsDest, { recursive: true, force: true });
-  await Promise.all([
-    cp(migrationsDir, migrationsDest, { recursive: true }),
-    cp(defaultDbPath, path.resolve(publicDataDir, 'default-db.sqlite')),
-    cp(sqlWasmPath, path.resolve(publicDir, 'sql-wasm.wasm')),
-  ]);
-
-  const entries = await readdir(publicDataDir, {
-    recursive: true,
-    withFileTypes: true,
-  });
-  const files = entries
-    .filter(e => e.isFile())
-    .map(e =>
-      path
-        .relative(publicDataDir, path.join(e.parentPath, e.name))
-        .replaceAll(path.sep, '/'),
-    )
-    // Skip dotfiles (e.g. legacy `.force-copy-windows` marker). They have no
-    // matching extension in the workbox precache globs, so a PWA opened
-    // offline would fail to fetch them and break startup (issue #7886).
-    .filter(file => !file.split('/').some(part => part.startsWith('.')))
-    .sort();
-  await writeFile(
-    path.resolve(publicDir, 'data-file-index.txt'),
-    files.join('\n') + '\n',
-  );
 }
 
 const lootCoreBackend = (): Plugin => ({
@@ -259,14 +221,9 @@ export default defineConfig(async ({ mode, command }) => {
         await cp(lootCoreOutDir, publicKcabDir, { recursive: true });
         return hash;
       });
-      const [, , hash] = await Promise.all([
-        stagePublicData(),
-        stagePluginsService(),
-        stageKcab,
-      ]);
+      const [, hash] = await Promise.all([stagePluginsService(), stageKcab]);
       process.env.REACT_APP_BACKEND_WORKER_HASH = hash;
     } else {
-      await stagePublicData();
       process.env.REACT_APP_BACKEND_WORKER_HASH = 'dev';
     }
   }
@@ -359,9 +316,7 @@ export default defineConfig(async ({ mode, command }) => {
               type: 'module',
             },
             workbox: {
-              globPatterns: [
-                '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
-              ],
+              globPatterns: ['**/*.{js,css,html,ico,png,woff2,webmanifest}'],
               ignoreURLParametersMatching: [/^v$/],
               navigateFallback: '/index.html',
               maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
