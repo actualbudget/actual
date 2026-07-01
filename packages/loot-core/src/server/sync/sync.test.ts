@@ -9,7 +9,12 @@ import * as mockSyncServer from '#server/tests/mockSyncServer';
 import * as encoder from './encoder';
 import { isError } from './utils';
 
-import { applyMessages, fullSync, sendMessages, setSyncingMode } from './index';
+import {
+  applyMessagesWithHooks,
+  fullSync,
+  sendMessages,
+  setSyncingMode,
+} from './index';
 
 beforeEach(() => {
   mockSyncServer.reset();
@@ -68,7 +73,7 @@ describe('Sync', () => {
 
     global.stepForwardInTime(Date.parse('2018-11-13T13:20:00.000Z'));
 
-    await applyMessages([
+    await applyMessagesWithHooks([
       global.stepForwardInTime() || {
         dataset: 'transactions',
         row: 'foo',
@@ -135,7 +140,7 @@ describe('Sync', () => {
       ),
     );
 
-    await applyMessages([
+    await applyMessagesWithHooks([
       global.stepForwardInTime(Date.parse('1970-01-03T10:17:37.000Z')) || {
         dataset: 'transactions',
         row: 'foo',
@@ -250,13 +255,13 @@ describe('Sync projections', () => {
     const messages = mockSyncServer.getMessages();
 
     // Apply all but the last message (which deletes the category)
-    await applyMessages(messages.slice(0, -1));
+    await applyMessagesWithHooks(messages.slice(0, -1));
     expect((await db.getCategories()).length).toBe(1);
     expectCellToExist('budget201701', 'sum-amount-' + fooId);
 
     // Apply the last message and make sure it deleted the appropriate
     // budget cells
-    await applyMessages([messages[messages.length - 1]]);
+    await applyMessagesWithHooks([messages[messages.length - 1]]);
     expect((await db.getCategories()).length).toBe(0);
     expectCellNotToExist('budget201701', 'sum-amount-' + fooId, true);
   });
@@ -304,14 +309,14 @@ describe('Sync projections', () => {
     const secondMessages = messages.filter(m => m.column === 'tombstone');
 
     // Apply all the good messages
-    await applyMessages(firstMessages);
+    await applyMessagesWithHooks(firstMessages);
     expect((await db.getCategories()).length).toBe(1);
     expect((await db.getCategoriesGrouped()).length).toBe(1);
     expectCellToExist('budget201701', 'sum-amount-' + fooId);
     expectCellToExist('budget201701', 'group-sum-amount-' + groupId);
 
     // Apply the messages that deletes it
-    await applyMessages(secondMessages);
+    await applyMessagesWithHooks(secondMessages);
     expect((await db.getCategories()).length).toBe(0);
     expect((await db.getCategoriesGrouped()).length).toBe(0);
     expectCellNotToExist('budget201701', 'sum-amount-' + fooId, true);
@@ -338,12 +343,12 @@ describe('Sync projections', () => {
     const secondMessages = messages.slice(-2);
 
     // Apply all the good messages
-    await applyMessages(firstMessages);
+    await applyMessagesWithHooks(firstMessages);
     const [cat] = await db.getCategories();
     expect(cat.cat_group).toBe('group1');
     expectCellToExist('budget201701', 'group-sum-amount-' + groupId);
 
     // Apply the messages that deletes it
-    await applyMessages(secondMessages);
+    await applyMessagesWithHooks(secondMessages);
   });
 });

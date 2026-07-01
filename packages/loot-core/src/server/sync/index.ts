@@ -258,7 +258,7 @@ export type Message = {
   value: string | number | null;
 };
 
-export const applyMessages = sequential(async (messages: Message[]) => {
+const applyMessages = sequential(async (messages: Message[]) => {
   if (checkSyncingMode('import')) {
     applyMessagesForImport(messages);
     return undefined;
@@ -398,11 +398,13 @@ export const applyMessages = sequential(async (messages: Message[]) => {
 
   const newData = await fetchData();
 
+  let budgetChangeTouchedMonths: Set<string> | null = null;
+
   // In testing, sometimes the spreadsheet isn't loaded, and that's ok
   if (sheet.get()) {
     // Need to clean up these APIs and make them consistent
     sheet.startTransaction();
-    triggerBudgetChanges(oldData, newData);
+    budgetChangeTouchedMonths = triggerBudgetChanges(oldData, newData);
     sheet.get().triggerDatabaseChanges(oldData, newData);
     sheet.endTransaction();
 
@@ -441,8 +443,53 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     prevData: oldData,
   });
 
-  return messages;
+  return { budgetChangeTouchedMonths, messages } as const;
 });
+
+export async function applyMessagesWithHooks(
+  inputMessages: Message[],
+): Promise<Message[]> {
+  const result = await applyMessages(inputMessages);
+  if (result?.budgetChangeTouchedMonths) {
+    await runBudgetChangeHooks(result.budgetChangeTouchedMonths).catch(
+      errorHandler,
+    );
+  }
+
+  return result?.messages ?? [];
+}
+
+export type BudgetChangeHook = (
+  months: readonly string[],
+) => Promise<void> | void;
+
+function getBudgetChangeHooks(): Set<BudgetChangeHook> {
+  const store = getBudgetChangeHooks as typeof getBudgetChangeHooks & {
+    hooks?: Set<BudgetChangeHook>;
+  };
+  store.hooks ||= new Set();
+  return store.hooks;
+}
+
+export function registerBudgetChangeHook(hook: BudgetChangeHook): () => void {
+  getBudgetChangeHooks().add(hook);
+  return () => {
+    getBudgetChangeHooks().delete(hook);
+  };
+}
+
+export async function runBudgetChangeHooks(
+  months: Iterable<string>,
+): Promise<void> {
+  const touchedMonths = [...months];
+  if (touchedMonths.length === 0) {
+    return;
+  }
+
+  for (const hook of getBudgetChangeHooks()) {
+    await hook(touchedMonths);
+  }
+}
 
 export function receiveMessages(messages: Message[]): Promise<Message[]> {
   try {
@@ -456,7 +503,7 @@ export function receiveMessages(messages: Message[]): Promise<Message[]> {
     throw e;
   }
 
-  return runMutator(() => applyMessages(messages));
+  return runMutator(() => applyMessagesWithHooks(messages));
 }
 
 async function errorHandler(e: Error) {
@@ -487,7 +534,7 @@ async function errorHandler(e: Error) {
 
 async function _sendMessages(messages: Message[]): Promise<void> {
   try {
-    await applyMessages(messages);
+    await applyMessagesWithHooks(messages);
   } catch (e) {
     void errorHandler(e);
     throw e;

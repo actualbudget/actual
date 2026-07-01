@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { Timestamp } from '@actual-app/crdt';
 
-import { addSyncListener, applyMessages } from './index';
+import { addSyncListener, applyMessagesWithHooks } from './index';
 import type { Message } from './index';
 
 function migrateParentIds(_oldValues, newValues) {
@@ -28,7 +28,7 @@ function migrateParentIds(_oldValues, newValues) {
       });
 
       if (toApply.length > 0) {
-        void applyMessages(toApply);
+        void applyMessagesWithHooks(toApply);
       }
     }
   });
