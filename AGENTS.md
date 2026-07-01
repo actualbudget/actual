@@ -44,8 +44,8 @@ yarn start:desktop
 
 ### ⚠️ PR titles must start with `[AI]`
 
-Every pull request title must be prefixed with `[AI]` — this isn't enforced
-automatically, so you have to apply it yourself. See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md).
+Every pull request title must be prefixed with `[AI]` — you have to apply it
+yourself. See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md).
 
 ### Task Orchestration with Lage
 
@@ -357,7 +357,11 @@ describe('ComponentName', () => {
 
 - `/README.md` - Project overview
 - `/CONTRIBUTING.md` - Points to community docs
-- `/upcoming-release-notes/` - Release notes for next version
+- `/upcoming-release-notes/` - Release notes for next version. Name each file
+  with a short, descriptive slug (e.g. `add-payee-autocomplete.md`) — the PR link
+  is resolved automatically at release time, so you don't need the PR number.
+  Numeric filenames like `1234.md` also remain valid. See the release-note
+  template and rules in `packages/docs/docs/contributing/index.md`.
 - `/CODEOWNERS` - Code ownership definitions
 - `/packages/docs/` - Documentation website (Docusaurus)
 
@@ -506,7 +510,7 @@ Before committing changes, ensure:
 
 ## Pull Request Guidelines
 
-See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including title prefix requirements, labeling, and PR template handling.
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including title prefix requirements, labeling, the GitHub comment/review/issue 🤖 prefix, and PR template handling.
 
 ## Code Review Guidelines
 

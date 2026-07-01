@@ -15,7 +15,9 @@ export class ConfigurationPage {
   }
 
   async createTestFile() {
-    await this.page.getByRole('button', { name: 'Create test file' }).click();
+    await this.page
+      .getByRole('button', { name: 'Create test file', exact: true })
+      .click();
     const budgetPage = new BudgetPage(this.page);
     // Wait for the budget page to be fully mounted before returning so
     // callers don't race the virtualized budget-table's layout step.
