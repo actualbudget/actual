@@ -609,12 +609,13 @@ export function excelFormulaAutocomplete(
         const activeFunctionDefinition = activeFunctionContext
           ? getFormulaFunctionByName(activeFunctionContext.name, mode)
           : undefined;
-        const activeFunctionSignatureCompletion = activeFunctionDefinition
-          ? createContextFunctionCompletion(
-              activeFunctionContext.name,
-              activeFunctionDefinition,
-            )
-          : null;
+        const activeFunctionSignatureCompletion =
+          activeFunctionContext && activeFunctionDefinition
+            ? createContextFunctionCompletion(
+                activeFunctionContext.name,
+                activeFunctionDefinition,
+              )
+            : null;
         const isBudgetQueryContext =
           mode === 'query' && activeFunctionContext?.name === 'BUDGET_QUERY';
 
