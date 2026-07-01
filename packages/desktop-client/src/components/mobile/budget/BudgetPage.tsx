@@ -237,14 +237,8 @@ export function BudgetPage() {
 
   const onDeleteGroup = useCallback(
     groupId => {
-      deleteCategoryGroup.mutate(
-        { id: groupId },
-        {
-          onSettled: () => {
-            dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
-          },
-        },
-      );
+      dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
+      deleteCategoryGroup.mutate({ id: groupId });
     },
     [deleteCategoryGroup, dispatch],
   );
@@ -270,14 +264,8 @@ export function BudgetPage() {
 
   const onDeleteCategory = useCallback(
     categoryId => {
-      deleteCategory.mutate(
-        { id: categoryId },
-        {
-          onSettled: () => {
-            dispatch(collapseModals({ rootModalName: 'category-menu' }));
-          },
-        },
-      );
+      dispatch(collapseModals({ rootModalName: 'category-menu' }));
+      deleteCategory.mutate({ id: categoryId });
     },
     [deleteCategory, dispatch],
   );
