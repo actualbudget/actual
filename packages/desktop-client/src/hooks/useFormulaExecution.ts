@@ -21,7 +21,6 @@ import {
   normalizeQueryTimeFrameEnd,
   normalizeQueryTimeFrameStart,
 } from '#components/formula/queryTimeFrame';
-import { getLiveRange } from '#components/reports/getLiveRange';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
 
@@ -311,31 +310,6 @@ async function prefetchBudgetQueries(
   }
 }
 
-// Helper function to convert timeFrame mode to condition string for getLiveRange
-function timeFrameModeToCondition(mode: TimeFrame['mode']): string | null {
-  // Map timeFrame modes to ReportOptions condition strings
-  switch (mode) {
-    case 'full':
-      return 'All time';
-    case 'lastMonth':
-      return 'Last month';
-    case 'lastYear':
-      return 'Last year';
-    case 'yearToDate':
-      return 'Year to date';
-    case 'priorYearToDate':
-      return 'Prior year to date';
-    case 'sliding-window':
-      // sliding-window requires actual start/end dates, not a condition
-      return null;
-    case 'static':
-      // static mode uses manually set start/end dates, not a condition
-      return null;
-    default:
-      return null;
-  }
-}
-
 export async function buildFilteredTransactionsQuery(
   config: QueryConfig,
 ): Promise<Query> {
@@ -355,49 +329,13 @@ export async function buildFilteredTransactionsQuery(
 
   // Add date range filter if provided
   if (timeFrame && timeFrame.mode) {
-    let startDate: string | undefined;
-    let endDate: string | undefined;
+    const [calculatedStart, calculatedEnd] = calculateTimeRange(timeFrame);
+    const startDate = normalizeQueryTimeFrameStart(calculatedStart);
+    const endDate = normalizeQueryTimeFrameEnd(calculatedEnd);
 
-    if (timeFrame.mode === 'sliding-window' || timeFrame.mode === 'static') {
-      const [calculatedStart, calculatedEnd] = calculateTimeRange(timeFrame);
-      startDate = normalizeQueryTimeFrameStart(calculatedStart);
-      endDate = normalizeQueryTimeFrameEnd(calculatedEnd);
-    } else {
-      // For other modes, use getLiveRange with the appropriate condition
-      const condition = timeFrameModeToCondition(timeFrame.mode);
-      if (condition) {
-        // Get earliest and latest transactions for getLiveRange
-        const earliestTransaction = await send('get-earliest-transaction');
-        const latestTransaction = await send('get-latest-transaction');
-
-        const earliestDate = earliestTransaction
-          ? earliestTransaction.date
-          : monthUtils.currentDay();
-        const latestDate = latestTransaction
-          ? latestTransaction.date
-          : monthUtils.currentDay();
-
-        const [calculatedStart, calculatedEnd] = getLiveRange(
-          condition,
-          earliestDate,
-          latestDate,
-          true, // includeCurrentInterval
-        );
-
-        startDate = calculatedStart;
-        endDate = calculatedEnd;
-      } else {
-        // No valid condition found, skip date filtering entirely
-        // Continue without adding date filter
-      }
-    }
-
-    // Apply the date filter only if we have valid dates
-    if (startDate && endDate) {
-      transQuery = transQuery.filter({
-        $and: [{ date: { $gte: startDate } }, { date: { $lte: endDate } }],
-      });
-    }
+    transQuery = transQuery.filter({
+      $and: [{ date: { $gte: startDate } }, { date: { $lte: endDate } }],
+    });
   }
 
   // Add user-defined filters

@@ -39,4 +39,21 @@ describe('buildFilteredTransactionsQuery', () => {
       },
     ]);
   });
+
+  it('applies preset query timeframe modes through calculateTimeRange', async () => {
+    const query = await buildFilteredTransactionsQuery({
+      timeFrame: {
+        mode: 'lastMonth',
+      },
+    });
+
+    expect(query.serialize().filterExpressions).toEqual([
+      {
+        $and: [
+          { date: { $gte: '2016-12-01' } },
+          { date: { $lte: '2016-12-31' } },
+        ],
+      },
+    ]);
+  });
 });
