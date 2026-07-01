@@ -103,13 +103,13 @@ export const budgetQueryDimensions = [
 const budgetDimensions = new Set<string>(budgetQueryDimensions);
 
 function isBudgetTimeframe(value: string) {
-  const yearMonth = value.match(/^(\d{4})-(\d{2})$/);
+  const yearMonth = value.match(/^(\d{4})-(\d{1,2})$/);
   if (yearMonth) {
     const month = Number(yearMonth[2]);
     return month >= 1 && month <= 12;
   }
 
-  const monthYear = value.match(/^(\d{2})-(\d{4})$/);
+  const monthYear = value.match(/^(\d{1,2})-(\d{4})$/);
   if (monthYear) {
     const month = Number(monthYear[1]);
     return month >= 1 && month <= 12;

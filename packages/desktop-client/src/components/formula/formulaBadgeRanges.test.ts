@@ -198,7 +198,7 @@ describe('getFormulaBadgeRanges', () => {
   });
 
   it('badges both budget timeframe formats', () => {
-    const formula = '=BUDGET_QUERY("spent", {"cat-a"}, "2026-01", "03-2026")';
+    const formula = '=BUDGET_QUERY("spent", {"cat-a"}, "2026-1", "3-2026")';
 
     expect(
       getFormulaBadgeRanges({
@@ -207,13 +207,13 @@ describe('getFormulaBadgeRanges', () => {
       }).filter(range => range.variant === 'budget-timeframe'),
     ).toEqual([
       {
-        ...rangeFor(formula, '"2026-01"'),
-        label: '2026-01',
+        ...rangeFor(formula, '"2026-1"'),
+        label: '2026-1',
         variant: 'budget-timeframe',
       },
       {
-        ...rangeFor(formula, '"03-2026"'),
-        label: '03-2026',
+        ...rangeFor(formula, '"3-2026"'),
+        label: '3-2026',
         variant: 'budget-timeframe',
       },
     ]);

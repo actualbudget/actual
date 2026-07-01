@@ -82,7 +82,7 @@ export function FormulaEditor({
   const [categoryPicker, setCategoryPicker] =
     useState<CategoryPickerState | null>(null);
   const suppressBadgePickerUntilRef = useRef(0);
-  const categoryPickerPopoverRef = useRef<HTMLDivElement | null>(null);
+  const badgePickerPopoverRef = useRef<HTMLDivElement | null>(null);
 
   const isDarkTheme = useMemo(() => {
     if (activeTheme === 'dark' || activeTheme === 'midnight') {
@@ -208,7 +208,12 @@ export function FormulaEditor({
   }, [categoryPicker, replaceBadgeValue]);
 
   useEffect(() => {
-    if (!categoryPicker) {
+    if (
+      !queryPicker &&
+      !dimensionPicker &&
+      !timeframePicker &&
+      !categoryPicker
+    ) {
       return;
     }
 
@@ -216,17 +221,28 @@ export function FormulaEditor({
       const target = event.target;
       if (
         target instanceof Node &&
-        categoryPickerPopoverRef.current?.contains(target)
+        badgePickerPopoverRef.current?.contains(target)
       ) {
         return;
       }
 
-      applyCategoryPickerValue();
+      if (categoryPicker) {
+        applyCategoryPickerValue();
+      } else {
+        closeBadgePickers();
+      }
     };
 
     document.addEventListener('mousedown', onMouseDown, true);
     return () => document.removeEventListener('mousedown', onMouseDown, true);
-  }, [applyCategoryPickerValue, categoryPicker]);
+  }, [
+    applyCategoryPickerValue,
+    categoryPicker,
+    closeBadgePickers,
+    dimensionPicker,
+    queryPicker,
+    timeframePicker,
+  ]);
 
   useEffect(() => {
     if (
@@ -332,7 +348,11 @@ export function FormulaEditor({
         }}
       />
       {queryPicker && queries && (
-        <BadgeMenuPopover anchorRect={queryPicker.anchorRect} minWidth={240}>
+        <BadgeMenuPopover
+          anchorRect={queryPicker.anchorRect}
+          minWidth={240}
+          popoverRef={badgePickerPopoverRef}
+        >
           {Object.keys(queries).map(queryName => (
             <BadgeMenuButton
               key={queryName}
@@ -348,6 +368,7 @@ export function FormulaEditor({
         <BadgeMenuPopover
           anchorRect={dimensionPicker.anchorRect}
           minWidth={180}
+          popoverRef={badgePickerPopoverRef}
         >
           {budgetQueryDimensions.map(dimension => (
             <BadgeMenuButton
@@ -364,7 +385,7 @@ export function FormulaEditor({
         <BadgeMenuPopover
           anchorRect={categoryPicker.anchorRect}
           minWidth={280}
-          popoverRef={categoryPickerPopoverRef}
+          popoverRef={badgePickerPopoverRef}
           scrollable={false}
         >
           <div
@@ -418,6 +439,7 @@ export function FormulaEditor({
       )}
       {timeframePicker && (
         <div
+          ref={badgePickerPopoverRef}
           style={{
             ...styles.popover,
             position: 'fixed',
