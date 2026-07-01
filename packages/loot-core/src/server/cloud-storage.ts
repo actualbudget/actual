@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import AdmZip from 'adm-zip';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '#platform/server/asyncStorage';
@@ -20,6 +19,7 @@ import { runMutator } from './mutators';
 import { post } from './post';
 import * as prefs from './prefs';
 import { getServer } from './server-config';
+import { safeUnzip, safeZip } from './util/zip';
 
 const UPLOAD_FREQUENCY_IN_DAYS = 7;
 
@@ -145,14 +145,11 @@ export async function exportBuffer() {
 
   const budgetDir = fs.getBudgetDir(id);
 
-  // create zip
-  const zipped = new AdmZip();
-
   // We run this in a mutator even though its not mutating anything
   // because we are reading the sqlite file from disk. We want to make
   // sure that we get a valid snapshot of it so we want this to be
   // serialized with all other mutations.
-  await runMutator(async () => {
+  const zipped: Uint8Array = await runMutator(async () => {
     const rawDbContent = await fs.readFile(
       fs.join(budgetDir, 'db.sqlite'),
       'binary',
@@ -183,30 +180,35 @@ export async function exportBuffer() {
     meta.resetClock = true;
     const metaContent = Buffer.from(JSON.stringify(meta), 'utf8');
 
-    zipped.addFile('db.sqlite', Buffer.from(dbContent));
-    zipped.addFile('metadata.json', metaContent);
+    return safeZip({
+      'db.sqlite': Buffer.from(dbContent),
+      'metadata.json': metaContent,
+    });
   });
 
-  return Buffer.from(zipped.toBuffer());
+  return Buffer.from(zipped);
 }
 
 export async function importBuffer(fileData, buffer) {
-  let zipped, entries;
+  let entries;
   try {
-    zipped = new AdmZip(buffer);
-    entries = zipped.getEntries();
+    entries = safeUnzip(buffer);
   } catch {
     throw FileDownloadError('not-zip-file');
   }
-  const dbEntry = entries.find(e => e.entryName.includes('db.sqlite'));
-  const metaEntry = entries.find(e => e.entryName.includes('metadata.json'));
+  const entryName = Object.keys(entries).find(name =>
+    name.includes('db.sqlite'),
+  );
+  const metaEntryName = Object.keys(entries).find(name =>
+    name.includes('metadata.json'),
+  );
 
-  if (!dbEntry || !metaEntry) {
+  if (!entryName || !metaEntryName) {
     throw FileDownloadError('invalid-zip-file');
   }
 
-  const dbContent = zipped.readFile(dbEntry);
-  const metaContent = zipped.readFile(metaEntry);
+  const dbContent = Buffer.from(entries[entryName]);
+  const metaContent = Buffer.from(entries[metaEntryName]);
 
   let meta;
   try {
