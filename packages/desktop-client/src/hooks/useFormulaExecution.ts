@@ -29,7 +29,7 @@ bootstrapHyperFormula();
 type QueryConfig = {
   conditions?: RuleConditionEntity[];
   conditionsOp?: 'and' | 'or';
-  timeFrame?: TimeFrame;
+  timeFrame?: Partial<TimeFrame>;
 };
 
 type QueriesMap = Record<string, QueryConfig>;
@@ -333,11 +333,20 @@ function timeFrameModeToCondition(mode: TimeFrame['mode']): string | null {
 }
 
 function isMonthOnlyDate(s: string) {
-  // YYYY-MM
   return s.includes('-') && s.split('-').length === 2;
 }
 
-async function buildFilteredTransactionsQuery(
+function normalizeQueryTimeFrameStart(dateOrMonth: string) {
+  return isMonthOnlyDate(dateOrMonth) ? dateOrMonth + '-01' : dateOrMonth;
+}
+
+function normalizeQueryTimeFrameEnd(dateOrMonth: string) {
+  return isMonthOnlyDate(dateOrMonth)
+    ? monthUtils.getMonthEnd(dateOrMonth + '-01')
+    : dateOrMonth;
+}
+
+export async function buildFilteredTransactionsQuery(
   config: QueryConfig,
 ): Promise<Query> {
   const conditions = config.conditions || [];
@@ -359,18 +368,10 @@ async function buildFilteredTransactionsQuery(
     let startDate: string | undefined;
     let endDate: string | undefined;
 
-    if (
-      (timeFrame.mode === 'sliding-window' || timeFrame.mode === 'static') &&
-      timeFrame.start &&
-      timeFrame.end
-    ) {
+    if (timeFrame.mode === 'sliding-window' || timeFrame.mode === 'static') {
       const [calculatedStart, calculatedEnd] = calculateTimeRange(timeFrame);
-      startDate = isMonthOnlyDate(calculatedStart)
-        ? calculatedStart + '-01'
-        : calculatedStart;
-      endDate = isMonthOnlyDate(calculatedEnd)
-        ? monthUtils.getMonthEnd(calculatedEnd + '-01')
-        : calculatedEnd;
+      startDate = normalizeQueryTimeFrameStart(calculatedStart);
+      endDate = normalizeQueryTimeFrameEnd(calculatedEnd);
     } else {
       // For other modes, use getLiveRange with the appropriate condition
       const condition = timeFrameModeToCondition(timeFrame.mode);
