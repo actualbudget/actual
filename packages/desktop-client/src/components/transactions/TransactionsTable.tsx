@@ -1192,6 +1192,26 @@ const Transaction = memo(function Transaction({
   const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
   const runningBalance = !isTemporaryId(id) ? balance : balance + amount;
+  const [isSelectingRunningBalance, setIsSelectingRunningBalance] =
+    useState(false);
+
+  useEffect(() => {
+    if (!isSelectingRunningBalance) {
+      return;
+    }
+
+    const resetSelectionDragGuard = () => setIsSelectingRunningBalance(false);
+
+    window.addEventListener('pointerup', resetSelectionDragGuard);
+    window.addEventListener('mouseup', resetSelectionDragGuard);
+    window.addEventListener('blur', resetSelectionDragGuard);
+
+    return () => {
+      window.removeEventListener('pointerup', resetSelectionDragGuard);
+      window.removeEventListener('mouseup', resetSelectionDragGuard);
+      window.removeEventListener('blur', resetSelectionDragGuard);
+    };
+  }, [isSelectingRunningBalance]);
 
   // Ok this entire logic is a dirty, dirty hack.. but let me explain.
   // Problem: the split-error Popover (which has the buttons to distribute/add split)
@@ -1232,6 +1252,7 @@ const Transaction = memo(function Transaction({
   // instead of moving the caret or selecting text (see GH #7567).
   const allowRowDrag =
     canDrag &&
+    !isSelectingRunningBalance &&
     !isPreview &&
     !isOnlyTransactionOnDate &&
     (!editing || focusedField === 'select' || focusedField === 'cleared');
@@ -1872,6 +1893,12 @@ const Transaction = memo(function Transaction({
             style={{ ...styles.tnum, ...amountStyle }}
             width={103}
             textAlign="right"
+            onPointerDown={e => {
+              e.stopPropagation();
+              setIsSelectingRunningBalance(true);
+            }}
+            onMouseDown={e => e.stopPropagation()}
+            onDragStart={e => e.stopPropagation()}
             privacyFilter
           />
         )}

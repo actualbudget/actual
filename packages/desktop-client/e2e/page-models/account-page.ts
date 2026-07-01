@@ -159,6 +159,7 @@ export class AccountPage {
       category: row.getByTestId('category'),
       debit: row.getByTestId('debit'),
       credit: row.getByTestId('credit'),
+      balance: row.getByTestId('balance'),
     };
   }
 
