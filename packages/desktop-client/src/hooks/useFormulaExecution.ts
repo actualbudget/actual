@@ -337,16 +337,6 @@ function isMonthOnlyDate(s: string) {
   return s.includes('-') && s.split('-').length === 2;
 }
 
-function getStartDate(dateOrMonth: string) {
-  return isMonthOnlyDate(dateOrMonth) ? dateOrMonth + '-01' : dateOrMonth;
-}
-
-function getEndDate(dateOrMonth: string) {
-  return isMonthOnlyDate(dateOrMonth)
-    ? monthUtils.getMonthEnd(dateOrMonth + '-01')
-    : dateOrMonth;
-}
-
 async function buildFilteredTransactionsQuery(
   config: QueryConfig,
 ): Promise<Query> {
@@ -374,16 +364,13 @@ async function buildFilteredTransactionsQuery(
       timeFrame.start &&
       timeFrame.end
     ) {
-      if (timeFrame.mode === 'sliding-window') {
-        const [calculatedStart, calculatedEnd] = calculateTimeRange(timeFrame);
-        startDate = getStartDate(calculatedStart);
-        endDate = getEndDate(calculatedEnd);
-      } else {
-        // Static mode: use the actual stored start/end dates.
-        // Convert month format (YYYY-MM) to full date format (YYYY-MM-DD) if needed
-        startDate = getStartDate(timeFrame.start);
-        endDate = getEndDate(timeFrame.end);
-      }
+      const [calculatedStart, calculatedEnd] = calculateTimeRange(timeFrame);
+      startDate = isMonthOnlyDate(calculatedStart)
+        ? calculatedStart + '-01'
+        : calculatedStart;
+      endDate = isMonthOnlyDate(calculatedEnd)
+        ? monthUtils.getMonthEnd(calculatedEnd + '-01')
+        : calculatedEnd;
     } else {
       // For other modes, use getLiveRange with the appropriate condition
       const condition = timeFrameModeToCondition(timeFrame.mode);
@@ -445,9 +432,7 @@ async function fetchQuerySum(config: QueryConfig): Promise<number> {
 async function fetchQueryCount(config: QueryConfig): Promise<number> {
   try {
     const transQuery = await buildFilteredTransactionsQuery(config);
-    const countQuery = transQuery
-      .options({ splits: 'grouped' })
-      .calculate({ $count: '*' });
+    const countQuery = transQuery.calculate({ $count: '*' });
     const { data } = await send('query', countQuery.serialize());
     return data || 0;
   } catch (err) {
