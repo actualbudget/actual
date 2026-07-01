@@ -816,7 +816,7 @@ function QueryItem({
               marginTop: 8,
               textAlign: 'center',
             }}
-           />
+          />
         ) : (
           allMonths.length > 0 && (
             <View
