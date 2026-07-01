@@ -4,7 +4,11 @@ import { Trans } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
-import { autocompletion } from '@codemirror/autocomplete';
+import {
+  autocompletion,
+  insertCompletionText,
+  pickedCompletion,
+} from '@codemirror/autocomplete';
 import type { Completion, CompletionContext } from '@codemirror/autocomplete';
 import {
   HighlightStyle,
@@ -391,6 +395,36 @@ function createContextFunctionCompletion(
   };
 }
 
+export function getFormulaStringCompletionEdit({
+  value,
+  hasOpeningQuote,
+  hasClosingQuote,
+}: {
+  value: string;
+  hasOpeningQuote: boolean;
+  hasClosingQuote: boolean;
+}) {
+  return {
+    text: `${hasOpeningQuote ? '' : '"'}${value}"`,
+    offsetClosingQuote: hasClosingQuote ? 1 : 0,
+  };
+}
+
+function applyFormulaStringCompletion(value: string): Completion['apply'] {
+  return (view, completion, from, to) => {
+    const { text, offsetClosingQuote } = getFormulaStringCompletionEdit({
+      value,
+      hasOpeningQuote: from > 0 && view.state.sliceDoc(from - 1, from) === '"',
+      hasClosingQuote: view.state.sliceDoc(to, to + 1) === '"',
+    });
+
+    view.dispatch({
+      ...insertCompletionText(view.state, text, from, to + offsetClosingQuote),
+      annotations: pickedCompletion.of(completion),
+    });
+  };
+}
+
 function getActiveFunctionArgumentContext(text: string) {
   const stack: Array<{
     kind: 'function' | 'group' | 'array';
@@ -578,7 +612,7 @@ export function excelFormulaAutocomplete(
           type: 'constant',
           section: getBudgetDimensionCompletionSection(),
           info: t('Budget query dimension.'),
-          apply: `"${dimension}"`,
+          apply: applyFormulaStringCompletion(dimension),
           boost: 18,
         }))
       : [];
@@ -590,7 +624,7 @@ export function excelFormulaAutocomplete(
           section: getBudgetCategoryCompletionSection(),
           detail: categoryId,
           info: t('Budget category for BUDGET_QUERY category arrays.'),
-          apply: `"${categoryId}"`,
+          apply: applyFormulaStringCompletion(categoryId),
           boost: 17,
         }))
       : [];
