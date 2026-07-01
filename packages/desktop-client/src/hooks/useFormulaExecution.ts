@@ -17,6 +17,10 @@ import type {
 } from '@actual-app/core/types/models';
 import { HyperFormula } from 'hyperformula';
 
+import {
+  normalizeQueryTimeFrameEnd,
+  normalizeQueryTimeFrameStart,
+} from '#components/formula/queryTimeFrame';
 import { getLiveRange } from '#components/reports/getLiveRange';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
@@ -330,20 +334,6 @@ function timeFrameModeToCondition(mode: TimeFrame['mode']): string | null {
     default:
       return null;
   }
-}
-
-function isMonthOnlyDate(s: string) {
-  return s.includes('-') && s.split('-').length === 2;
-}
-
-function normalizeQueryTimeFrameStart(dateOrMonth: string) {
-  return isMonthOnlyDate(dateOrMonth) ? dateOrMonth + '-01' : dateOrMonth;
-}
-
-function normalizeQueryTimeFrameEnd(dateOrMonth: string) {
-  return isMonthOnlyDate(dateOrMonth)
-    ? monthUtils.getMonthEnd(dateOrMonth + '-01')
-    : dateOrMonth;
 }
 
 export async function buildFilteredTransactionsQuery(
