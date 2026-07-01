@@ -480,6 +480,19 @@ function QueryItem({
     }
   }
 
+  const presetTimeRangeLabel =
+    timeRangeRef.current === 'lastMonth'
+      ? t('Last month transactions')
+      : timeRangeRef.current === 'lastYear'
+        ? t('Last year transactions')
+        : timeRangeRef.current === 'yearToDate'
+          ? t('Year to date transactions')
+          : timeRangeRef.current === 'priorYearToDate'
+            ? t('Prior year to date transactions')
+            : timeRangeRef.current === 'full'
+              ? t('All time transactions')
+              : null;
+
   return (
     <View
       style={{
@@ -793,49 +806,61 @@ function QueryItem({
           </Popover>
         </View>
 
-        {/* Date range selectors */}
-        {allMonths.length > 0 && (
-          <View
+        {presetTimeRangeLabel ? (
+          <Input
+            value={presetTimeRangeLabel}
+            readOnly
+            disabled
             style={{
-              display: 'flex',
-              flexDirection: 'row',
-              gap: 10,
+              width: '100%',
               marginTop: 8,
-              alignItems: 'center',
+              textAlign: 'center',
             }}
-          >
-            <Select
-              value={fromDateRepr(startDate)}
-              onChange={newValue => {
-                const [validatedStart] = validateStart(
-                  allMonths[allMonths.length - 1].name,
-                  allMonths[0].name,
-                  newValue,
-                  fromDateRepr(endDate),
-                );
-                handleStartDateChange(validatedStart);
+           />
+        ) : (
+          allMonths.length > 0 && (
+            <View
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 10,
+                marginTop: 8,
+                alignItems: 'center',
               }}
-              options={allMonths.map(({ name, pretty }) => [name, pretty])}
-              style={{ flex: 1 }}
-            />
-            <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
-              <Trans>to</Trans>
-            </Text>
-            <Select
-              value={fromDateRepr(endDate)}
-              onChange={newValue => {
-                const [, validatedEnd] = validateEnd(
-                  allMonths[allMonths.length - 1].name,
-                  allMonths[0].name,
-                  fromDateRepr(startDate),
-                  newValue,
-                );
-                handleEndDateChange(validatedEnd);
-              }}
-              options={allMonths.map(({ name, pretty }) => [name, pretty])}
-              style={{ flex: 1 }}
-            />
-          </View>
+            >
+              <Select
+                value={fromDateRepr(startDate)}
+                onChange={newValue => {
+                  const [validatedStart] = validateStart(
+                    allMonths[allMonths.length - 1].name,
+                    allMonths[0].name,
+                    newValue,
+                    fromDateRepr(endDate),
+                  );
+                  handleStartDateChange(validatedStart);
+                }}
+                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+                style={{ flex: 1 }}
+              />
+              <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
+                <Trans>to</Trans>
+              </Text>
+              <Select
+                value={fromDateRepr(endDate)}
+                onChange={newValue => {
+                  const [, validatedEnd] = validateEnd(
+                    allMonths[allMonths.length - 1].name,
+                    allMonths[0].name,
+                    fromDateRepr(startDate),
+                    newValue,
+                  );
+                  handleEndDateChange(validatedEnd);
+                }}
+                options={allMonths.map(({ name, pretty }) => [name, pretty])}
+                style={{ flex: 1 }}
+              />
+            </View>
+          )
         )}
       </View>
 
