@@ -2,6 +2,8 @@ import { HyperFormula } from 'hyperformula';
 
 import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
 
+import { budgetQueryDimensions } from './formulaCatalog';
+
 type FormulaMode = 'transaction' | 'query';
 
 export type FormulaBadgeVariant =
@@ -91,14 +93,6 @@ const queryNameFunctions = new Set([
   'QUERY_EXTRACT_TIMEFRAME_START',
   'QUERY_EXTRACT_TIMEFRAME_END',
 ]);
-
-export const budgetQueryDimensions = [
-  'budgeted',
-  'spent',
-  'balance_start',
-  'balance_end',
-  'goal',
-] as const;
 
 const budgetDimensions = new Set<string>(budgetQueryDimensions);
 

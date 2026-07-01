@@ -22,7 +22,7 @@ import type {
   FormulaBadgeClick,
   MonthYearFormat,
 } from './codeMirror-excelLanguage';
-import { budgetQueryDimensions } from './formulaBadgeRanges';
+import { budgetQueryDimensions } from './formulaCatalog';
 
 type FormulaMode = 'transaction' | 'query';
 

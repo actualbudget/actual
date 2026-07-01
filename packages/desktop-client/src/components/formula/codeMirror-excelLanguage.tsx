@@ -2,8 +2,10 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Trans } from 'react-i18next';
 
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 import {
   autocompletion,
   insertCompletionText,
@@ -30,22 +32,24 @@ import type { DecorationSet, Tooltip, ViewUpdate } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { t } from 'i18next';
 
-import {
-  budgetQueryDimensions,
-  getFormulaBadgeRanges,
-} from './formulaBadgeRanges';
+import { getFormulaBadgeRanges } from './formulaBadgeRanges';
 import type {
   BudgetCategoryBadge,
   FormulaBadgeVariant,
 } from './formulaBadgeRanges';
 import {
+  budgetQueryDimensions,
+  getBudgetCategoryCompletionSection,
+  getBudgetDimensionCompletionSection,
   getDynamicReportQueryCompletions,
   getFormulaCategoryForName,
   getFormulaFunctionByName,
   getFormulaFunctionCategoryConfig,
   getFunctionCompletions,
+  getFunctionSignatureCompletionSection,
   getNamedVariableCompletions,
   getRuleFieldCompletions,
+  sortFormulaCompletions,
 } from './formulaCatalog';
 import type { FormulaFunctionDef, FormulaMode } from './formulaCatalog';
 
@@ -60,15 +64,25 @@ function FunctionTooltip({
   parameters: Array<{ name: string; description: string }>;
 }) {
   return (
-    <div style={{ maxWidth: '400px' }}>
-      <div style={{ fontWeight: 600, marginBottom: '4px' }}>{name}</div>
-      <div style={{ marginBottom: '8px' }}>{description}</div>
-      <div style={{ fontSize: '0.9em', opacity: 0.8 }}>
-        <div style={{ fontWeight: 500, marginBottom: '4px' }}>
+    <SpaceBetween
+      direction="vertical"
+      gap={8}
+      align="stretch"
+      style={{ maxWidth: '400px' }}
+    >
+      <View style={{ display: 'block', ...styles.mediumText }}>{name}</View>
+      <View style={{ display: 'block' }}>{description}</View>
+      <SpaceBetween
+        direction="vertical"
+        gap={4}
+        align="stretch"
+        style={{ ...styles.smallText, color: theme.pageTextSubdued }}
+      >
+        <View style={{ display: 'block' }}>
           <Trans>Parameters:</Trans>
-        </div>
+        </View>
         {parameters.map((p, i) => (
-          <div key={i} style={{ marginBottom: '2px' }}>
+          <View key={i} style={{ display: 'block' }}>
             •{' '}
             <code
               style={{
@@ -79,19 +93,24 @@ function FunctionTooltip({
               {p.name}
             </code>
             : {p.description}
-          </div>
+          </View>
         ))}
-      </div>
-    </div>
+      </SpaceBetween>
+    </SpaceBetween>
   );
 }
 
 function FieldTooltip({ label, info }: { label: string; info: string }) {
   return (
-    <div style={{ maxWidth: '400px' }}>
-      <div style={{ fontWeight: 600, marginBottom: '4px' }}>{label}</div>
-      <div>{info}</div>
-    </div>
+    <SpaceBetween
+      direction="vertical"
+      gap={4}
+      align="stretch"
+      style={{ maxWidth: '400px' }}
+    >
+      <View style={{ display: 'block', ...styles.mediumText }}>{label}</View>
+      <View style={{ display: 'block' }}>{info}</View>
+    </SpaceBetween>
   );
 }
 
@@ -355,23 +374,6 @@ function formulaBadgeExtension(
   );
 }
 
-function getFunctionSignatureCompletionSection() {
-  return `ℹ️ ${t('Function Signature')}`;
-}
-
-function getBudgetDimensionCompletionSection() {
-  return `💸 ${t('Budget Dimensions')}`;
-}
-
-function getBudgetCategoryCompletionSection() {
-  return `🏷️ ${t('Budget Categories')}`;
-}
-
-function getCompletionSectionName(completion: Completion) {
-  const { section } = completion;
-  return typeof section === 'string' ? section : section?.name || '';
-}
-
 function createContextFunctionCompletion(
   name: string,
   func: FormulaFunctionDef,
@@ -492,41 +494,6 @@ function getActiveFunctionArgumentContext(text: string) {
         argumentIndex: activeFunction.argumentIndex,
       }
     : null;
-}
-
-function sortExcelFormulaCompletions(completions: Completion[]) {
-  const categoryConfig = getFormulaFunctionCategoryConfig();
-  const sectionOrder: Record<string, number> = {
-    [getFunctionSignatureCompletionSection()]: -2,
-    [`🔢 ${t('Variables')}`]: -1,
-    [getBudgetDimensionCompletionSection()]: 0,
-    [getBudgetCategoryCompletionSection()]: 1,
-    [categoryConfig.query.section]: 2,
-    [categoryConfig.math.section]: 3,
-    [categoryConfig.logical.section]: 4,
-    [categoryConfig.text.section]: 5,
-    [categoryConfig.date.section]: 6,
-    [categoryConfig.other.section]: 7,
-    [`💰 ${t('Transaction Fields')}`]: 8,
-  };
-
-  return [...completions].sort((a, b) => {
-    const sectionA = getCompletionSectionName(a);
-    const sectionB = getCompletionSectionName(b);
-    const orderA = sectionOrder[sectionA] ?? 999;
-    const orderB = sectionOrder[sectionB] ?? 999;
-    if (orderA !== orderB) {
-      return orderA - orderB;
-    }
-
-    const boostA = a.boost || 0;
-    const boostB = b.boost || 0;
-    if (boostA !== boostB) {
-      return boostB - boostA;
-    }
-
-    return a.label.localeCompare(b.label);
-  });
 }
 
 // Excel formula syntax parser for CodeMirror
@@ -686,13 +653,13 @@ export function excelFormulaAutocomplete(
         const suggestions = activeFunctionContext
           ? [
               ...contextualSuggestions,
-              ...sortExcelFormulaCompletions(
+              ...sortFormulaCompletions(
                 baseSuggestions.filter(
                   suggestion => !contextualSuggestions.includes(suggestion),
                 ),
               ),
             ]
-          : sortExcelFormulaCompletions(baseSuggestions);
+          : sortFormulaCompletions(baseSuggestions);
 
         return {
           from: word.from,
@@ -888,7 +855,6 @@ const autocompletePopoverTheme = EditorView.baseTheme({
 
   // Matched text within a label
   '.cm-tooltip.cm-tooltip-autocomplete .cm-completionMatchedText': {
-    fontWeight: '600',
     textDecoration: 'underline',
     textUnderlineOffset: '2px',
   },

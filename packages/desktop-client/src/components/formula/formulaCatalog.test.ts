@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  budgetQueryDimensions,
+  getBudgetCategoryCompletionSection,
+  getBudgetDimensionCompletionSection,
   getDynamicReportQueryCompletions,
   getFormulaCategoryForName,
   getFormulaFunctionCatalog,
@@ -8,6 +11,7 @@ import {
   getFormulaFunctionsByMode,
   getFormulaFunctionsForMode,
   getFunctionCompletions,
+  getFunctionSignatureCompletionSection,
   getNamedVariableCompletions,
   getRuleFieldCompletions,
   sortFormulaCompletions,
@@ -86,6 +90,42 @@ describe('formulaCatalog', () => {
     expect(labels(getRuleFieldCompletions())).toEqual(
       expect.arrayContaining(['amount', 'date', 'notes', 'balance']),
     );
+  });
+
+  it('defines budget query dimensions and sorts their sections before query functions', () => {
+    expect(budgetQueryDimensions).toEqual([
+      'budgeted',
+      'spent',
+      'balance_start',
+      'balance_end',
+      'goal',
+    ]);
+
+    const sorted = sortFormulaCompletions([
+      {
+        label: 'BUDGET_QUERY',
+        section: getFunctionSignatureCompletionSection(),
+      },
+      {
+        label: 'QUERY',
+        section: getFormulaFunctionCategoryConfig().query.section,
+      },
+      {
+        label: 'spent',
+        section: getBudgetDimensionCompletionSection(),
+      },
+      {
+        label: 'Groceries',
+        section: getBudgetCategoryCompletionSection(),
+      },
+    ]);
+
+    expect(labels(sorted)).toEqual([
+      'BUDGET_QUERY',
+      'spent',
+      'Groceries',
+      'QUERY',
+    ]);
   });
 
   it('builds report query completions from saved query names', () => {
