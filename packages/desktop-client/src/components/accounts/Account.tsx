@@ -90,6 +90,7 @@ import { updateNewTransactions } from '#transactions/transactionsSlice';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
+import { getTransactionSortExpressions, getTransactionSortField } from './sort';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
@@ -183,27 +184,6 @@ function AllTransactions({
     return children(transactions, balances);
   }
   return children(allTransactions, allBalances);
-}
-
-function getField(field?: string) {
-  if (!field) {
-    return 'date';
-  }
-
-  switch (field) {
-    case 'account':
-      return 'account.name';
-    case 'payee':
-      return 'payee.name';
-    case 'category':
-      return 'category.name';
-    case 'payment':
-      return 'amount';
-    case 'deposit':
-      return 'amount';
-    default:
-      return field;
-  }
 }
 
 type AccountInternalProps = {
@@ -1599,11 +1579,14 @@ class AccountInternal extends PureComponent<
   ) => {
     const filterConditions = this.state.filterConditions;
     const isFiltered = filterConditions.length > 0;
-    const sortField = getField(!field ? this.state.sort?.field : field);
-    const sortAscDesc = !ascDesc ? this.state.sort?.ascDesc : ascDesc;
-    const sortPrevField = getField(
-      !prevField ? this.state.sort?.prevField : prevField,
+    const sortField = getTransactionSortField(
+      !field ? this.state.sort?.field : field,
     );
+    const sortAscDesc = !ascDesc ? this.state.sort?.ascDesc : ascDesc;
+    const prevSortField = !prevField ? this.state.sort?.prevField : prevField;
+    const sortPrevField = prevSortField
+      ? getTransactionSortField(prevSortField)
+      : undefined;
     const sortPrevAscDesc = !prevField
       ? this.state.sort?.prevAscDesc
       : prevAscDesc;
@@ -1613,15 +1596,9 @@ class AccountInternal extends PureComponent<
       sortField: string,
       sortAscDesc?: 'asc' | 'desc',
     ) {
-      if (sortField === 'cleared') {
-        that.currentQuery = that.currentQuery.orderBy({
-          reconciled: sortAscDesc,
-        });
-      }
-
-      that.currentQuery = that.currentQuery.orderBy({
-        [sortField]: sortAscDesc,
-      });
+      that.currentQuery = that.currentQuery.orderBy(
+        getTransactionSortExpressions(sortField, sortAscDesc),
+      );
     };
 
     const sortRootQuery = function (
@@ -1629,39 +1606,24 @@ class AccountInternal extends PureComponent<
       sortField: string,
       sortAscDesc?: 'asc' | 'desc',
     ) {
-      if (sortField === 'cleared') {
-        that.currentQuery = that.rootQuery.orderBy({
-          reconciled: sortAscDesc,
-        });
-        that.currentQuery = that.currentQuery.orderBy({
-          cleared: sortAscDesc,
-        });
-      } else {
-        that.currentQuery = that.rootQuery.orderBy({
-          [sortField]: sortAscDesc,
-        });
-      }
+      that.currentQuery = that.rootQuery.orderBy(
+        getTransactionSortExpressions(sortField, sortAscDesc),
+      );
     };
 
     // sort by previously used sort field, if any
     const maybeSortByPreviousField = function (
       that: AccountInternal,
-      sortPrevField: string,
+      sortPrevField?: string,
       sortPrevAscDesc?: 'asc' | 'desc',
     ) {
       if (!sortPrevField) {
         return;
       }
 
-      if (sortPrevField === 'cleared') {
-        that.currentQuery = that.currentQuery.orderBy({
-          reconciled: sortPrevAscDesc,
-        });
-      }
-
-      that.currentQuery = that.currentQuery.orderBy({
-        [sortPrevField]: sortPrevAscDesc,
-      });
+      that.currentQuery = that.currentQuery.orderBy(
+        getTransactionSortExpressions(sortPrevField, sortPrevAscDesc),
+      );
     };
 
     switch (true) {
