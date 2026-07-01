@@ -106,7 +106,8 @@ function categoryRangeToIds(categories: SimpleRangeValue): string[] {
         !(value instanceof CellError) &&
         (typeof value === 'string' || typeof value === 'number'),
     )
-    .map(value => String(value).trim())
+    .flatMap(value => String(value).split(','))
+    .map(value => value.trim())
     .filter(value => value.length > 0);
 }
 
