@@ -30,7 +30,12 @@ function createBlankMonth(categories, sheetName, months) {
   categories.forEach(cat => createBlankCategory(cat, months));
 }
 
-export function createCategory(cat, sheetName, prevSheetName) {
+export function createCategory(
+  cat,
+  sheetName,
+  prevSheetName,
+  { initialCarryover = false } = {},
+) {
   if (!cat.is_income) {
     sheet.get().createStatic(sheetName, `budget-${cat.id}`, 0);
 
@@ -43,7 +48,9 @@ export function createCategory(cat, sheetName, prevSheetName) {
       sheet.get().set(resolveName(sheetName, `budget-${cat.id}`), 0);
     }
 
-    sheet.get().createStatic(sheetName, `carryover-${cat.id}`, false);
+    sheet
+      .get()
+      .createStatic(sheetName, `carryover-${cat.id}`, initialCarryover);
 
     sheet.get().createDynamic(sheetName, `leftover-${cat.id}`, {
       initialValue: 0,

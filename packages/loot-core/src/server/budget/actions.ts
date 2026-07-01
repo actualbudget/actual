@@ -3,11 +3,11 @@
 import * as asyncStorage from '#platform/server/asyncStorage';
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
+import { batchMessages } from '#server/sync';
 import {
-  batchMessages,
   registerBudgetChangeHook,
   runBudgetChangeHooks,
-} from '#server/sync';
+} from '#server/sync/hooks';
 import { getCurrency } from '#shared/currencies';
 import { getLocale } from '#shared/locale';
 import * as monthUtils from '#shared/months';

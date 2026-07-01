@@ -10,6 +10,7 @@ import { clearUndo, undo } from '#server/undo';
 import {
   copyUntilYearEnd,
   coverOverbudgeted,
+  getSheetBoolean,
   getSheetValue,
   isFutureBufferModeActive,
   recalculateFutureBuffer,
@@ -367,6 +368,29 @@ describe('future buffer mode', () => {
     await runHandler(app.handlers['get-budget-bounds']);
 
     expect(await getBuffered('2024-03')).toBe(50000);
+  });
+
+  it('uses previous carryover when future months are created for automatic buffers', async () => {
+    await setupFutureBufferModeDatabase(['2024-03']);
+    await db.insertTransaction({
+      date: '2024-03-01',
+      amount: -10000,
+      account: 'account1',
+      category: 'cat1',
+    });
+    await setCategoryCarryover({
+      startMonth: '2024-03',
+      category: 'cat1',
+      flag: true,
+    });
+    await sheet.waitOnSpreadsheet();
+    enableFutureBufferModePrefs();
+
+    await runHandler(app.handlers['get-budget-bounds']);
+
+    expect(await getSheetBoolean('budget202404', 'carryover-cat1')).toBe(true);
+    expect(await getBuffered('2024-03')).toBe(0);
+    expect(await getBuffered('2024-04')).toBe(0);
   });
 
   it('prewarms manual, auto, and selected buffered summary cells', async () => {
