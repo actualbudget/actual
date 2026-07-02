@@ -186,13 +186,13 @@ type TemplateBudget = {
 
 async function setBudgets(month: string, templateBudget: TemplateBudget[]) {
   await batchMessages(async () => {
-    templateBudget.forEach(element => {
-      void setBudget({
+    for (const element of templateBudget) {
+      await setBudget({
         category: element.category,
         month,
         amount: element.budgeted,
       });
-    });
+    }
   });
 }
 
@@ -204,14 +204,14 @@ type TemplateGoal = {
 
 async function setGoals(month: string, templateGoal: TemplateGoal[]) {
   await batchMessages(async () => {
-    templateGoal.forEach(element => {
-      void setGoal({
+    for (const element of templateGoal) {
+      await setGoal({
         month,
         category: element.category,
         goal: element.goal,
         long_goal: element.longGoal,
       });
-    });
+    }
   });
 }
 

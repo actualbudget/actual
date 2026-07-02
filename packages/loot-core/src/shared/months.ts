@@ -90,6 +90,15 @@ export function monthFromDate(date: DateLike): string {
   return d.format(_parse(date), 'yyyy-MM');
 }
 
+export function toDbMonth(month: DateLike): number {
+  return parseInt(d.format(_parse(month), 'yyyyMM'));
+}
+
+export function fromDbMonth(month: number): string {
+  const monthString = String(month).padStart(6, '0');
+  return `${monthString.slice(0, 4)}-${monthString.slice(4)}`;
+}
+
 export function isValidYearMonth(value: string): boolean {
   const match = /^(\d{4})-(\d{2})$/.exec(value);
   if (!match) return false;

@@ -2,6 +2,7 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
+import { runBudgetChangeHooks } from '#server/sync/hooks';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
@@ -70,7 +71,14 @@ function getSumAmountsByMonth(
   return sums;
 }
 
-export function createCategory(cat, sheetName, prevSheetName, start, end) {
+export function createCategory(
+  cat,
+  sheetName,
+  prevSheetName,
+  start,
+  end,
+  options = {},
+) {
   sheet.get().createDynamic(sheetName, 'sum-amount-' + cat.id, {
     initialValue: 0,
     run: () => {
@@ -90,7 +98,7 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
   });
 
   if (getBudgetType() === 'envelope') {
-    envelopeBudget.createCategory(cat, sheetName, prevSheetName);
+    envelopeBudget.createCategory(cat, sheetName, prevSheetName, options);
   } else {
     void trackingBudget.createCategory(cat, sheetName, prevSheetName);
   }
@@ -177,8 +185,40 @@ function handleBudgetChange(budget) {
   }
 }
 
+const FUTURE_BUFFER_BUDGET_FIELDS = new Set([
+  'amount',
+  'carryover',
+  'goal',
+  'long_goal',
+]);
+
+const FUTURE_BUFFER_TRANSACTION_FIELDS = new Set([
+  'date',
+  'acct',
+  'account',
+  'amount',
+  'category',
+  'tombstone',
+  'isParent',
+  'isChild',
+]);
+
+const FUTURE_BUFFER_CATEGORY_FIELDS = new Set([
+  'is_income',
+  'cat_group',
+  'hidden',
+  'tombstone',
+]);
+
+const FUTURE_BUFFER_CATEGORY_GROUP_FIELDS = new Set([
+  'is_income',
+  'hidden',
+  'tombstone',
+]);
+
 export function triggerBudgetChanges(oldValues, newValues) {
   const { createdMonths = new Set() } = sheet.get().meta();
+  const futureBufferTouchedMonths = new Set<string>();
   const budgetType = getBudgetType();
   sheet.startTransaction();
 
@@ -188,6 +228,14 @@ export function triggerBudgetChanges(oldValues, newValues) {
 
       items.forEach(newValue => {
         const oldValue = old && old.get(newValue.id);
+
+        addFutureBufferTouchedMonths({
+          months: futureBufferTouchedMonths,
+          table,
+          oldValue,
+          newValue,
+          createdMonths,
+        });
 
         if (table === 'zero_budget_months') {
           handleBudgetMonthChange(newValue);
@@ -240,12 +288,153 @@ export function triggerBudgetChanges(oldValues, newValues) {
   } finally {
     sheet.endTransaction();
   }
+
+  return futureBufferTouchedMonths;
+}
+
+function addFutureBufferTouchedMonths({
+  months,
+  table,
+  oldValue,
+  newValue,
+  createdMonths,
+}: {
+  months: Set<string>;
+  table: string;
+  oldValue: unknown;
+  newValue: unknown;
+  createdMonths: Set<string>;
+}) {
+  const changedFields = getChangedFields(oldValue, newValue);
+
+  if (table === 'zero_budget_months') {
+    return;
+  }
+
+  if (table === 'zero_budgets') {
+    if (
+      changedFields.size === 0 ||
+      hasChangedField(changedFields, FUTURE_BUFFER_BUDGET_FIELDS)
+    ) {
+      addBudgetMonths(months, oldValue, newValue);
+
+      if (
+        changedFields.has('carryover') &&
+        (oldValue || isCarryoverEnabled(newValue))
+      ) {
+        addNextBudgetMonths(months, oldValue, newValue);
+      }
+    }
+  } else if (table === 'reflect_budgets') {
+    if (
+      changedFields.size === 0 ||
+      hasChangedField(changedFields, FUTURE_BUFFER_BUDGET_FIELDS)
+    ) {
+      addBudgetMonths(months, oldValue, newValue);
+    }
+  } else if (table === 'transactions') {
+    if (hasChangedField(changedFields, FUTURE_BUFFER_TRANSACTION_FIELDS)) {
+      if (oldValue) {
+        addTransactionMonth(months, oldValue);
+      }
+      addTransactionMonth(months, newValue);
+    }
+  } else if (table === 'accounts') {
+    if (!oldValue || changedFields.has('offbudget')) {
+      addCreatedMonths(months, createdMonths);
+    }
+  } else if (table === 'categories') {
+    if (hasChangedField(changedFields, FUTURE_BUFFER_CATEGORY_FIELDS)) {
+      addCreatedMonths(months, createdMonths);
+    }
+  } else if (table === 'category_groups') {
+    if (hasChangedField(changedFields, FUTURE_BUFFER_CATEGORY_GROUP_FIELDS)) {
+      addCreatedMonths(months, createdMonths);
+    }
+  } else if (table === 'category_mapping') {
+    addCreatedMonths(months, createdMonths);
+  }
+}
+
+function getChangedFields(oldValue: unknown, newValue: unknown): Set<string> {
+  return new Set(Object.keys(getChangedValues(oldValue || {}, newValue) || {}));
+}
+
+function hasChangedField(changedFields: Set<string>, fields: Set<string>) {
+  for (const field of fields) {
+    if (changedFields.has(field)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function addBudgetMonths(
+  months: Set<string>,
+  oldValue: { month?: number } | null | undefined,
+  newValue: { month?: number },
+) {
+  if (oldValue) {
+    addBudgetMonth(months, oldValue);
+  }
+  addBudgetMonth(months, newValue);
+}
+
+function addBudgetMonth(months: Set<string>, budget: { month?: number }) {
+  const month = getBudgetMonth(budget);
+  if (month) {
+    months.add(month);
+  }
+}
+
+function getBudgetMonth(budget: { month?: number }): string | null {
+  if (budget.month) {
+    return monthUtils.fromDbMonth(budget.month);
+  }
+  return null;
+}
+
+function isCarryoverEnabled(budget: { carryover?: number | boolean }): boolean {
+  return budget.carryover === 1 || budget.carryover === true;
+}
+
+function addNextBudgetMonths(
+  months: Set<string>,
+  oldValue: { month?: number } | null | undefined,
+  newValue: { month?: number },
+) {
+  const oldMonth = oldValue ? getBudgetMonth(oldValue) : null;
+  const newMonth = getBudgetMonth(newValue);
+
+  if (oldMonth) {
+    months.add(monthUtils.nextMonth(oldMonth));
+  }
+  if (newMonth) {
+    months.add(monthUtils.nextMonth(newMonth));
+  }
+}
+
+function addTransactionMonth(
+  months: Set<string>,
+  transaction: {
+    date?: number;
+    category?: string;
+  },
+) {
+  if (transaction.date && transaction.category) {
+    months.add(monthUtils.monthFromDate(db.fromDateRepr(transaction.date)));
+  }
+}
+
+function addCreatedMonths(months: Set<string>, createdMonths: Set<string>) {
+  createdMonths.forEach(month => months.add(month));
 }
 
 export async function doTransfer(categoryIds, transferId) {
-  const { createdMonths: months } = sheet.get().meta();
+  const { createdMonths = new Set<string>() } = sheet.get().meta();
+  const months = [...createdMonths];
 
-  [...months].forEach(month => {
+  for (const month of months) {
     const totalValue = categoryIds
       .map(id => {
         return budgetActions.getBudget({ month, category: id });
@@ -257,12 +446,12 @@ export async function doTransfer(categoryIds, transferId) {
       category: transferId,
     });
 
-    void budgetActions.setBudget({
+    await budgetActions.setBudget({
       month,
       category: transferId,
       amount: totalValue + transferValue,
     });
-  });
+  }
 }
 
 export async function createBudget(months) {
@@ -312,6 +501,8 @@ export async function createBudget(months) {
     return sumAmounts;
   };
   const seededCells: string[] = [];
+  const copyPreviousCarryover =
+    budgetType === 'envelope' && budgetActions.isFutureBufferModeActive();
 
   monthsToCreate.forEach(month => {
     const prevMonth = monthUtils.prevMonth(month);
@@ -332,7 +523,13 @@ export async function createBudget(months) {
           .load(name, getSumAmounts().get(`${dbMonth}-${cat.id}`) || 0);
         seededCells.push(name);
       }
-      createCategory(cat, sheetName, prevSheetName, start, end);
+      createCategory(cat, sheetName, prevSheetName, start, end, {
+        initialCarryover:
+          copyPreviousCarryover &&
+          sheet
+            .get()
+            .getCellValueLoose(prevSheetName, `carryover-${cat.id}`) === true,
+      });
     });
     groups.forEach(group => {
       if (budgetType === 'envelope') {
@@ -395,6 +592,10 @@ export async function createAllBudgets() {
 
   if (newMonths.length > 0) {
     await createBudget(range);
+
+    if (newMonths.some(month => month >= currentMonth)) {
+      await runBudgetChangeHooks(newMonths);
+    }
   }
 
   return { start, end };
