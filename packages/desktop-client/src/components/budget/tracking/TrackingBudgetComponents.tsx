@@ -19,6 +19,10 @@ import { css } from '@emotion/css';
 import { t } from 'i18next';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import {
+  UsageCell,
+  UsageProgressDashes,
+} from '#components/budget/BudgetProgress';
 import { makeAmountGrey } from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
@@ -26,6 +30,7 @@ import { Field, SheetCell } from '#components/table';
 import type { SheetCellProps } from '#components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '#hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useFormat } from '#hooks/useFormat';
+import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { useUndo } from '#hooks/useUndo';
@@ -68,6 +73,11 @@ const cellStyle: CSSProperties = {
 };
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
+  const [showProgressBars] = useLocalPref('budget.showProgressBars');
+  const budgeted =
+    useTrackingSheetValue(trackingBudget.totalBudgetedExpense) ?? 0;
+  const spent = useTrackingSheetValue(trackingBudget.totalSpent) ?? 0;
+
   return (
     <View
       style={{
@@ -99,14 +109,28 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>
-          <Trans>Balance</Trans>
+          {showProgressBars ? <Trans>Usage</Trans> : <Trans>Balance</Trans>}
         </Text>
-        <TrackingCellValue
-          binding={trackingBudget.totalLeftover}
-          type="financial"
-        >
-          {props => <CellValueText {...props} style={cellStyle} />}
-        </TrackingCellValue>
+        {showProgressBars ? (
+          <UsageCell
+            progress={<UsageProgressDashes budgeted={budgeted} spent={spent} />}
+            balance={
+              <TrackingCellValue
+                binding={trackingBudget.totalLeftover}
+                type="financial"
+              >
+                {props => <CellValueText {...props} style={cellStyle} />}
+              </TrackingCellValue>
+            }
+          />
+        ) : (
+          <TrackingCellValue
+            binding={trackingBudget.totalLeftover}
+            type="financial"
+          >
+            {props => <CellValueText {...props} style={cellStyle} />}
+          </TrackingCellValue>
+        )}
       </View>
     </View>
   );
@@ -140,6 +164,9 @@ export const GroupMonth = memo(function GroupMonth({
   group,
 }: CategoryGroupMonthProps) {
   const { id } = group;
+  const [showProgressBars] = useLocalPref('budget.showProgressBars');
+  const budgeted = useTrackingSheetValue(trackingBudget.groupBudgeted(id)) ?? 0;
+  const spent = useTrackingSheetValue(trackingBudget.groupSumAmount(id)) ?? 0;
 
   return (
     <View
@@ -171,7 +198,31 @@ export const GroupMonth = memo(function GroupMonth({
           type: 'financial',
         }}
       />
-      {!group.is_income && (
+      {!group.is_income && showProgressBars && (
+        <Field
+          name="usage"
+          width="flex"
+          truncate={false}
+          style={{
+            fontWeight: 600,
+            paddingRight: styles.monthRightPadding,
+            ...styles.tnum,
+          }}
+        >
+          <UsageCell
+            progress={<UsageProgressDashes budgeted={budgeted} spent={spent} />}
+            balance={
+              <TrackingCellValue
+                binding={trackingBudget.groupBalance(id)}
+                type="financial"
+              >
+                {props => <CellValueText {...props} />}
+              </TrackingCellValue>
+            }
+          />
+        </Field>
+      )}
+      {!group.is_income && !showProgressBars && (
         <TrackingSheetCell
           name="balance"
           width="flex"
@@ -202,6 +253,11 @@ export const CategoryMonth = memo(function CategoryMonth({
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
   const format = useFormat();
+  const [showProgressBars] = useLocalPref('budget.showProgressBars');
+  const budgeted =
+    useTrackingSheetValue(trackingBudget.catBudgeted(category.id)) ?? 0;
+  const spent =
+    useTrackingSheetValue(trackingBudget.catSumAmount(category.id)) ?? 0;
 
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const triggerBalanceMenuRef = useRef(null);
@@ -459,30 +515,62 @@ export const CategoryMonth = memo(function CategoryMonth({
 
       {!category.is_income && (
         <Field
-          name="balance"
+          name={showProgressBars ? 'usage' : 'balance'}
           width="flex"
+          truncate={!showProgressBars}
           style={{ paddingRight: styles.monthRightPadding, textAlign: 'right' }}
         >
-          <Button
-            variant="bare"
-            ref={triggerBalanceMenuRef}
-            onPress={() => !category.is_income && setBalanceMenuOpen(true)}
-            style={{
-              justifyContent: 'flex-end',
-              background: 'transparent',
-              width: '100%',
-              padding: 0,
-            }}
-          >
-            <BalanceWithCarryover
-              isDisabled={category.is_income}
-              carryover={trackingBudget.catCarryover(category.id)}
-              balance={trackingBudget.catBalance(category.id)}
-              goal={trackingBudget.catGoal(category.id)}
-              budgeted={trackingBudget.catBudgeted(category.id)}
-              longGoal={trackingBudget.catLongGoal(category.id)}
+          {showProgressBars ? (
+            <UsageCell
+              progress={
+                <UsageProgressDashes budgeted={budgeted} spent={spent} />
+              }
+              balanceVisible={balanceMenuOpen}
+              balance={
+                <Button
+                  variant="bare"
+                  ref={triggerBalanceMenuRef}
+                  onPress={() => setBalanceMenuOpen(true)}
+                  style={{
+                    justifyContent: 'flex-end',
+                    background: 'transparent',
+                    width: '100%',
+                    padding: 0,
+                  }}
+                >
+                  <BalanceWithCarryover
+                    isDisabled={category.is_income}
+                    carryover={trackingBudget.catCarryover(category.id)}
+                    balance={trackingBudget.catBalance(category.id)}
+                    goal={trackingBudget.catGoal(category.id)}
+                    budgeted={trackingBudget.catBudgeted(category.id)}
+                    longGoal={trackingBudget.catLongGoal(category.id)}
+                  />
+                </Button>
+              }
             />
-          </Button>
+          ) : (
+            <Button
+              variant="bare"
+              ref={triggerBalanceMenuRef}
+              onPress={() => setBalanceMenuOpen(true)}
+              style={{
+                justifyContent: 'flex-end',
+                background: 'transparent',
+                width: '100%',
+                padding: 0,
+              }}
+            >
+              <BalanceWithCarryover
+                isDisabled={category.is_income}
+                carryover={trackingBudget.catCarryover(category.id)}
+                balance={trackingBudget.catBalance(category.id)}
+                goal={trackingBudget.catGoal(category.id)}
+                budgeted={trackingBudget.catBudgeted(category.id)}
+                longGoal={trackingBudget.catLongGoal(category.id)}
+              />
+            </Button>
+          )}
 
           <Popover
             triggerRef={triggerBalanceMenuRef}

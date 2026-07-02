@@ -15,6 +15,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useLocalPref } from '#hooks/useLocalPref';
 
 import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
@@ -35,6 +36,9 @@ export const BudgetTotals = memo(function BudgetTotals({
   const { t } = useTranslation();
   const [categoryExpandedStatePref, setCategoryExpandedStatePref] =
     useGlobalPref('categoryExpandedState');
+  const [showProgressBars, setShowProgressBars] = useLocalPref(
+    'budget.showProgressBars',
+  );
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -155,6 +159,8 @@ export const BudgetTotals = memo(function BudgetTotals({
             onMenuSelect={type => {
               if (type === 'toggle-visibility') {
                 toggleHiddenCategories();
+              } else if (type === 'toggle-progress-bars') {
+                setShowProgressBars(!showProgressBars);
               } else if (type === 'expandAllCategories') {
                 expandAllCategories();
               } else if (type === 'collapseAllCategories') {
@@ -166,6 +172,12 @@ export const BudgetTotals = memo(function BudgetTotals({
               {
                 name: 'toggle-visibility',
                 text: t('Toggle hidden categories'),
+              },
+              {
+                name: 'toggle-progress-bars',
+                text: showProgressBars
+                  ? t('Hide progress bars')
+                  : t('Show progress bars'),
               },
               {
                 name: 'expandAllCategories',
