@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getValidOps, isValidOp } from './rules';
+import { getFieldError, getValidOps, isValidOp } from './rules';
 
 describe('rules', () => {
   describe('isValidOp', () => {
@@ -53,6 +53,12 @@ describe('rules', () => {
       const validOps = getValidOps('payee');
       expect(validOps).toContain('oneOf');
       expect(validOps).toContain('notOneOf');
+    });
+  });
+
+  describe('getFieldError', () => {
+    it('should return a friendly invalid regex message', () => {
+      expect(getFieldError('invalid-regex')).toBe('Invalid regular expression');
     });
   });
 });
