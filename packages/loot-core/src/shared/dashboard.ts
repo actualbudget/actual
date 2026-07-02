@@ -9,18 +9,19 @@ export function serializeDashboardWidget(
   widget: DashboardWidgetEntity,
   customReportMap: Map<string, CustomReportEntity>,
 ): ExportImportDashboardWidget {
-  const { id: _id, tombstone: _tombstone, ...rest } = widget;
-
   if (widget.type === 'custom-report') {
     const customReport = customReportMap.get(widget.meta.id);
     if (!customReport) {
       throw new Error(`Custom report not found for widget: ${widget.id}`);
     }
+    const { id: _id, tombstone: _tombstone, ...rest } = widget;
     return {
       ...rest,
       meta: customReport,
     };
   }
+
+  const { id: _id, tombstone: _tombstone, ...rest } = widget;
   return rest;
 }
 
