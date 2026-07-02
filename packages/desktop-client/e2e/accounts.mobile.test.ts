@@ -74,29 +74,21 @@ test.describe('Mobile Accounts', () => {
     await expect(accountPage.reconcilingBanner).toContainText('needs');
     await expect(page).toMatchThemeScreenshots();
 
-    await page
-      .getByRole('button', { name: 'Create reconciliation transaction' })
-      .click();
+    await accountPage.createReconciliationTransaction();
     await expect(accountPage.reconcilingBanner).toContainText(
       'All reconciled!',
     );
     await expect(page).toMatchThemeScreenshots();
 
-    await page
-      .getByRole('button', { name: 'Unclear transaction' })
-      .first()
-      .click();
+    await accountPage.unclearFirstTransaction();
     await expect(accountPage.reconcilingBanner).toContainText('needs');
 
-    await page
-      .getByRole('button', { name: 'Clear transaction' })
-      .first()
-      .click();
+    await accountPage.clearFirstTransaction();
     await expect(accountPage.reconcilingBanner).toContainText(
       'All reconciled!',
     );
 
-    await page.getByRole('button', { name: 'Lock transactions' }).click();
+    await accountPage.lockTransactions();
     await expect(accountPage.reconcilingBanner).not.toBeVisible();
   });
 });

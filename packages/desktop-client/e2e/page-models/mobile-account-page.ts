@@ -82,4 +82,40 @@ export class MobileAccountPage {
     await reconcileModal.getByRole('button', { name: 'Reconcile' }).click();
     await this.reconcilingBanner.waitFor();
   }
+
+  /**
+   * Create a reconciliation balance adjustment transaction
+   */
+  async createReconciliationTransaction() {
+    await this.page
+      .getByRole('button', { name: 'Create reconciliation transaction' })
+      .click();
+  }
+
+  /**
+   * Lock all cleared transactions as reconciled
+   */
+  async lockTransactions() {
+    await this.page.getByRole('button', { name: 'Lock transactions' }).click();
+  }
+
+  /**
+   * Unclear the first cleared transaction in the list
+   */
+  async unclearFirstTransaction() {
+    await this.page
+      .getByRole('button', { name: 'Unclear transaction' })
+      .first()
+      .click();
+  }
+
+  /**
+   * Clear the first uncleared transaction in the list
+   */
+  async clearFirstTransaction() {
+    await this.page
+      .getByRole('button', { name: 'Clear transaction' })
+      .first()
+      .click();
+  }
 }
