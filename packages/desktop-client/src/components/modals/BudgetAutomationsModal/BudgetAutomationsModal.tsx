@@ -57,7 +57,9 @@ export function BudgetAutomationsModal({
     onLoaded,
   });
 
-  const { schedules } = useSchedules({ query: q('schedules').select('*') });
+  const { schedules, isLoading: schedulesLoading } = useSchedules({
+    query: q('schedules').select('*'),
+  });
 
   const categories = useBudgetAutomationCategories();
 
@@ -66,7 +68,7 @@ export function BudgetAutomationsModal({
     source,
     onLoaded: setParsedCleanup,
   });
-  const loading = templatesLoading || cleanupLoading;
+  const loading = templatesLoading || cleanupLoading || schedulesLoading;
 
   const hasErrorTemplate =
     parsedTemplates?.some(t => t.type === 'error') ?? false;
@@ -85,7 +87,7 @@ export function BudgetAutomationsModal({
   });
   const initialEntries =
     resolved && !hasUnsupportedDirective
-      ? migrateTemplatesToAutomations(resolved)
+      ? migrateTemplatesToAutomations(resolved, schedules)
       : null;
 
   return (

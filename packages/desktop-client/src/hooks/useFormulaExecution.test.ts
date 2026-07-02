@@ -1,4 +1,8 @@
-import * as connection from '@actual-app/core/platform/client/connection';
+import {
+  clearServer,
+  initServer,
+} from '@actual-app/core/platform/client/connection';
+import { getCurrency } from '@actual-app/core/shared/currencies';
 import type {
   RuleConditionEntity,
   TimeFrame,
@@ -8,17 +12,25 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TestProviders } from '#mocks';
 
-import { useFormulaExecution } from './useFormulaExecution';
+import {
+  buildFilteredTransactionsQuery,
+  useFormulaExecution,
+} from './useFormulaExecution';
+
+vi.mock(
+  '@actual-app/core/platform/client/connection',
+  () => import('#mocks/connection'),
+);
 
 type SerializedQuery = {
-  filterExpressions: Array<Record<string, unknown>>;
-  tableOptions: Record<string, unknown>;
+  filterExpressions: ReadonlyArray<Record<string, unknown>>;
+  tableOptions?: Record<string, unknown>;
 };
 
 type QueryConfig = {
   conditions?: RuleConditionEntity[];
   conditionsOp?: 'and' | 'or';
-  timeFrame?: TimeFrame;
+  timeFrame?: Partial<TimeFrame>;
 };
 
 function categoryCondition(value: string) {
@@ -65,9 +77,9 @@ function expectQueryDateRange(
   startDate: string,
   endDate: string,
 ) {
-  const query = findQueryByCategory(queryPayloads, categoryId);
-  expect(query.tableOptions).toMatchObject({ splits: 'grouped' });
-  expect(query.filterExpressions[0]).toEqual({
+  expect(
+    findQueryByCategory(queryPayloads, categoryId).filterExpressions[0],
+  ).toEqual({
     $and: [{ date: { $gte: startDate } }, { date: { $lte: endDate } }],
   });
 }
@@ -93,87 +105,121 @@ const formulaQueries: Record<string, QueryConfig> = {
   },
 };
 
-describe('useFormulaExecution', () => {
-  const previousIsTesting = global.IS_TESTING;
-  const dateNow = global.Date.now;
+describe('formula query timeframes', () => {
+  let previousCurrentMonth: typeof global.currentMonth;
   let queryPayloads: SerializedQuery[];
 
   beforeEach(() => {
+    previousCurrentMonth = global.currentMonth;
     queryPayloads = [];
-    global.IS_TESTING = false;
-    vi.useFakeTimers({ toFake: ['Date'] });
-    vi.spyOn(connection, 'send').mockImplementation(async (name, args) => {
-      switch (name) {
-        case 'formula-load-user-preferences':
-          return undefined;
-        case 'make-filters-from-conditions':
-          return {
-            filters: (
-              (args as { conditions?: RuleConditionEntity[] }).conditions ?? []
-            ).map(condition => ({
-              [condition.field]: condition.value,
-            })),
-          };
-        case 'query':
-          queryPayloads.push(args as SerializedQuery);
-          return { data: queryPayloads.length * 100, dependencies: [] };
-        default:
-          throw new Error(`Unexpected command: ${name}`);
-      }
+    initServer({
+      'formula-load-user-preferences': async () => ({
+        currency: getCurrency('USD'),
+        numberFormat: 'comma-dot',
+        decimalPlaces: 2,
+        thousandsSeparator: ',',
+        decimalSeparator: '.',
+        locale: 'en-US',
+        currencySymbolPosition: 'before',
+        currencySpaceBetweenAmountAndSymbol: false,
+      }),
+      'make-filters-from-conditions': async ({ conditions }) => {
+        const ruleConditions = Array.isArray(conditions) ? conditions : [];
+
+        return {
+          filters: ruleConditions.map(condition => {
+            const { field, value } = condition as RuleConditionEntity;
+            return { [field]: value };
+          }),
+        };
+      },
+      query: async payload => {
+        queryPayloads.push(payload as unknown as SerializedQuery);
+        return { data: queryPayloads.length * 100, dependencies: [] };
+      },
     });
   });
 
-  afterEach(() => {
-    global.IS_TESTING = previousIsTesting;
-    vi.useRealTimers();
-    global.Date.now = dateNow;
-    vi.restoreAllMocks();
+  afterEach(async () => {
+    global.currentMonth = previousCurrentMonth;
+    await clearServer();
   });
 
-  async function executeFormulaAt(
-    date: string,
-    queries: Record<string, QueryConfig>,
-  ) {
-    queryPayloads = [];
-    vi.setSystemTime(new Date(date));
+  it('applies default bounds for partial static query timeframes', async () => {
+    const query = await buildFilteredTransactionsQuery({
+      timeFrame: {
+        mode: 'static',
+        start: '2016-10',
+      },
+    });
 
-    const { result, unmount } = renderHook(
-      () =>
-        useFormulaExecution('=QUERY("Income") + QUERY("Expenses")', queries, 0),
-      { wrapper: TestProviders },
-    );
+    expect(query.serialize().filterExpressions).toEqual([
+      {
+        $and: [
+          { date: { $gte: '2016-10-01' } },
+          { date: { $lte: '2017-01-31' } },
+        ],
+      },
+    ]);
+  });
 
-    await waitFor(() => expect(result.current.result).toBe(3));
-    unmount();
+  it('applies preset query timeframe modes through calculateTimeRange', async () => {
+    const query = await buildFilteredTransactionsQuery({
+      timeFrame: {
+        mode: 'lastMonth',
+      },
+    });
 
-    return [...queryPayloads];
-  }
+    expect(query.serialize().filterExpressions).toEqual([
+      {
+        $and: [
+          { date: { $gte: '2016-12-01' } },
+          { date: { $lte: '2016-12-31' } },
+        ],
+      },
+    ]);
+  });
 
   it('shifts each formula report query window when the current month changes', async () => {
-    const juneQueries = await executeFormulaAt(
-      '2026-06-15T12:00:00',
-      formulaQueries,
-    );
+    async function executeFormula() {
+      queryPayloads = [];
 
-    expectQueryDateRange(juneQueries, 'income-cat', '2026-04-01', '2026-06-15');
+      const { result, unmount } = renderHook(
+        () =>
+          useFormulaExecution(
+            '=QUERY("Income") + QUERY("Expenses")',
+            formulaQueries,
+            0,
+          ),
+        { wrapper: TestProviders },
+      );
+
+      await waitFor(() => expect(result.current.result).toBe(3));
+      unmount();
+
+      return [...queryPayloads];
+    }
+
+    global.currentMonth = '2026-06';
+    const juneQueries = await executeFormula();
+
+    expectQueryDateRange(juneQueries, 'income-cat', '2026-04-01', '2026-06-30');
     expectQueryDateRange(
       juneQueries,
       'expense-cat',
       '2026-06-01',
-      '2026-06-15',
+      '2026-06-30',
     );
 
-    const julyQueries = await executeFormulaAt(
-      '2026-07-15T12:00:00',
-      formulaQueries,
-    );
+    global.currentMonth = '2026-07';
+    const julyQueries = await executeFormula();
 
-    expectQueryDateRange(julyQueries, 'income-cat', '2026-05-01', '2026-07-15');
+    expectQueryDateRange(julyQueries, 'income-cat', '2026-05-01', '2026-07-31');
     expectQueryDateRange(
       julyQueries,
       'expense-cat',
       '2026-07-01',
-      '2026-07-15',
+      '2026-07-31',
     );
   });
 });

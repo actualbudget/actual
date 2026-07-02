@@ -47,6 +47,17 @@ type QueryConfig = {
   timeFrame?: TimeFrame;
 };
 
+type PresetTimeRangeMode = Exclude<
+  TimeFrame['mode'],
+  'sliding-window' | 'static'
+>;
+
+function isPresetTimeRangeMode(
+  mode: TimeFrame['mode'],
+): mode is PresetTimeRangeMode {
+  return !['sliding-window', 'static'].includes(mode);
+}
+
 type QueryManagerProps = {
   queries: Record<string, QueryConfig>;
   onQueriesChange: (queries: Record<string, QueryConfig>) => void;
@@ -481,9 +492,7 @@ function QueryItem({
   }
 
   const timeRangeMode = timeRangeRef.current as TimeFrame['mode'];
-  const isPresetTimeRange = !['sliding-window', 'static'].includes(
-    timeRangeMode,
-  );
+  const isPresetTimeRange = isPresetTimeRangeMode(timeRangeMode);
   const timeRangeLabels = {
     'sliding-window': t('Live'),
     static: t('Static'),
@@ -494,6 +503,16 @@ function QueryItem({
     priorYearToDate: t('Prior year to date'),
   } satisfies Record<TimeFrame['mode'], string>;
   const timeRangeLabel = timeRangeLabels[timeRangeMode];
+  const presetTimeRangeLabels = {
+    full: t('All time transactions'),
+    lastMonth: t('Last month transactions'),
+    lastYear: t('Last year transactions'),
+    yearToDate: t('Year to date transactions'),
+    priorYearToDate: t('Prior year to date transactions'),
+  } satisfies Record<PresetTimeRangeMode, string>;
+  const presetTimeRangeLabel = isPresetTimeRange
+    ? presetTimeRangeLabels[timeRangeMode]
+    : null;
 
   return (
     <View
@@ -807,7 +826,19 @@ function QueryItem({
           </Popover>
         </View>
 
-        {/* Date range selectors */}
+        {presetTimeRangeLabel ? (
+          <Input
+            value={presetTimeRangeLabel}
+            readOnly
+            disabled
+            style={{
+              width: '100%',
+              marginTop: 8,
+              textAlign: 'center',
+            }}
+          />
+        ) : null}
+
         {allMonths.length > 0 && (
           <View
             style={{
