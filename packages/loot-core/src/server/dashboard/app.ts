@@ -13,9 +13,13 @@ import { mutator } from '#server/mutators';
 import { reportModel } from '#server/reports/app';
 import { batchMessages } from '#server/sync';
 import { undoable } from '#server/undo';
-import { DEFAULT_DASHBOARD_STATE } from '#shared/dashboard';
+import {
+  DEFAULT_DASHBOARD_STATE,
+  serializeDashboardWidget,
+} from '#shared/dashboard';
 import { q } from '#shared/query';
 import type {
+  CustomReportData,
   DashboardWidgetEntity,
   ExportImportCustomReportWidget,
   ExportImportDashboard,
@@ -364,7 +368,7 @@ async function exportAllDashboards() {
 
     const { data: customReportRows } = (await aqlQuery(
       q('custom_reports').select('*'),
-    )) as { data: Parameters<typeof reportModel.toJS>[0][] };
+    )) as { data: CustomReportData[] };
 
     const reportMap = new Map(
       customReportRows.map(r => [r.id, reportModel.toJS(r)]),
@@ -380,31 +384,18 @@ async function exportAllDashboards() {
     const zip = new AdmZip();
 
     pages.forEach((page, index) => {
-      const safeName = (page.name ?? 'dashboard')
-        .toLowerCase()
-        .replace(/[^a-z0-9 -]/g, '')
-        .trim()
-        .replace(/\s+/g, '-');
+      const safeName =
+        (page.name ?? 'dashboard')
+          .toLowerCase()
+          .replace(/[^a-z0-9 -]/g, '')
+          .trim()
+          .replace(/\s+/g, '-') || 'dashboard';
 
       const dashboard = {
         version: 1 as const,
-        widgets: (pageWidgetsMap.get(page.id) ?? []).map(widget => {
-          if (widget.type === 'custom-report') {
-            const customReport = reportMap.get(widget.meta.id);
-            if (!customReport) {
-              throw new Error(
-                `Custom report not found for widget with report id: ${widget.meta.id}`,
-              );
-            }
-            return {
-              ...widget,
-              meta: customReport,
-              id: undefined,
-              tombstone: undefined,
-            };
-          }
-          return { ...widget, id: undefined, tombstone: undefined };
-        }),
+        widgets: (pageWidgetsMap.get(page.id) ?? []).map(widget =>
+          serializeDashboardWidget(widget, reportMap),
+        ),
       } satisfies ExportImportDashboard;
 
       zip.addFile(
@@ -413,7 +404,7 @@ async function exportAllDashboards() {
       );
     });
 
-    return { data: Buffer.from(zip.toBuffer()) };
+    return { data: zip.toBuffer() };
   } catch (err) {
     if (err instanceof Error) {
       err.message = 'Error exporting dashboards: ' + err.message;

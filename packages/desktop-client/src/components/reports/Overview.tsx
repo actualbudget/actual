@@ -14,6 +14,7 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { serializeDashboardWidget } from '@actual-app/core/shared/dashboard';
 import type {
   CustomReportWidget,
   DashboardPageEntity,
@@ -322,22 +323,7 @@ export function Overview({ dashboard }: OverviewProps) {
           throw new Error(`Unable to query widget: ${item.i}`);
         }
 
-        if (isCustomReportWidget(widget)) {
-          const customReport = customReportMap.get(widget.meta.id);
-
-          if (!customReport) {
-            throw new Error(`Custom report not found for widget: ${item.i}`);
-          }
-
-          return {
-            ...widget,
-            meta: customReport,
-            id: undefined,
-            tombstone: undefined,
-          };
-        }
-
-        return { ...widget, id: undefined, tombstone: undefined };
+        return serializeDashboardWidget(widget, customReportMap);
       }),
     } satisfies ExportImportDashboard;
 

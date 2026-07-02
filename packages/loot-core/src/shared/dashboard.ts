@@ -1,4 +1,28 @@
-import type { NewDashboardWidgetEntity } from '#types/models';
+import type {
+  CustomReportEntity,
+  DashboardWidgetEntity,
+  ExportImportDashboardWidget,
+  NewDashboardWidgetEntity,
+} from '#types/models';
+
+export function serializeDashboardWidget(
+  widget: DashboardWidgetEntity,
+  customReportMap: Map<string, CustomReportEntity>,
+): ExportImportDashboardWidget {
+  const { id: _id, tombstone: _tombstone, ...rest } = widget;
+
+  if (widget.type === 'custom-report') {
+    const customReport = customReportMap.get(widget.meta.id);
+    if (!customReport) {
+      throw new Error(`Custom report not found for widget: ${widget.id}`);
+    }
+    return {
+      ...rest,
+      meta: customReport,
+    };
+  }
+  return rest;
+}
 
 export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
   // Top row: Key metrics at a glance
