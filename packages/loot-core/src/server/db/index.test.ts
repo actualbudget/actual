@@ -124,6 +124,38 @@ describe('Database', () => {
     expect(await getTransactions('2018-01-05')).toMatchSnapshot();
   });
 
+  test('schedules can be reordered', async () => {
+    await db.insertWithUUID('schedules', { id: 'sched1', sort_order: 30 });
+    await db.insertWithUUID('schedules', { id: 'sched2', sort_order: 20 });
+    await db.insertWithUUID('schedules', { id: 'sched3', sort_order: 10 });
+
+    // Move sched3 (currently last) to be right after sched1 (currently first)
+    await db.moveSchedule('sched3', 'sched1');
+
+    const rows = await db.all<{ id: string; sort_order: number }>(
+      'SELECT id, sort_order FROM schedules ORDER BY sort_order DESC, id',
+    );
+    expect(rows.map(r => r.id)).toEqual(['sched1', 'sched3', 'sched2']);
+  });
+
+  test('moving a schedule to the top uses a null targetId', async () => {
+    await db.insertWithUUID('schedules', { id: 'sched1', sort_order: 30 });
+    await db.insertWithUUID('schedules', { id: 'sched2', sort_order: 20 });
+
+    await db.moveSchedule('sched2', null);
+
+    const rows = await db.all<{ id: string; sort_order: number }>(
+      'SELECT id, sort_order FROM schedules ORDER BY sort_order DESC, id',
+    );
+    expect(rows.map(r => r.id)).toEqual(['sched2', 'sched1']);
+  });
+
+  test('moving a non-existent schedule throws', async () => {
+    await expect(db.moveSchedule('missing', null)).rejects.toThrow(
+      'Schedule not found: missing',
+    );
+  });
+
   test('transactions get child transactions in the right order', async () => {
     // Transactions on the same day should sort by sort order descending
     await insertTransactions([
