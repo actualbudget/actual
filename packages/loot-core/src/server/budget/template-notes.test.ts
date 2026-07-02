@@ -379,6 +379,7 @@ function mockSchedules(): db.DbSchedule[] {
       tombstone: 0,
       name: 'Mock Schedule 1',
       custom_upcoming_length: null,
+      sort_order: 0,
     },
     {
       id: 'mock-schedule-2',
@@ -389,6 +390,7 @@ function mockSchedules(): db.DbSchedule[] {
       tombstone: 0,
       name: 'Mock Schedule 2',
       custom_upcoming_length: null,
+      sort_order: 0,
     },
   ];
 }
