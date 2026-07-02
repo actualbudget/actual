@@ -22,22 +22,27 @@ export function ExportDashboards() {
     setIsLoading(true);
     setError(null);
 
-    const response = await send('dashboard-export-all');
+    try {
+      const response = await send('dashboard-export-all');
 
-    if ('error' in response && response.error) {
-      setError(response.error);
+      if ('error' in response && response.error) {
+        setError(response.error);
+        setIsLoading(false);
+        return;
+      }
+
+      if (response.data) {
+        void window.Actual.saveFile(
+          response.data,
+          `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}-dashboards.zip`,
+          t('Export dashboards'),
+        );
+      }
+    } catch {
+      setError('An unknown error occurred while exporting dashboards.');
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    if (response.data) {
-      void window.Actual.saveFile(
-        response.data,
-        `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}-dashboards.zip`,
-        t('Export dashboards'),
-      );
-    }
-    setIsLoading(false);
   }
 
   return (
