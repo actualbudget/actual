@@ -480,6 +480,21 @@ function QueryItem({
     }
   }
 
+  const timeRangeMode = timeRangeRef.current as TimeFrame['mode'];
+  const isPresetTimeRange = !['sliding-window', 'static'].includes(
+    timeRangeMode,
+  );
+  const timeRangeLabels = {
+    'sliding-window': t('Live'),
+    static: t('Static'),
+    full: t('All time'),
+    lastMonth: t('Last month'),
+    lastYear: t('Last year'),
+    yearToDate: t('Year to date'),
+    priorYearToDate: t('Prior year to date'),
+  } satisfies Record<TimeFrame['mode'], string>;
+  const timeRangeLabel = timeRangeLabels[timeRangeMode];
+
   return (
     <View
       style={{
@@ -630,12 +645,11 @@ function QueryItem({
           }}
         >
           <Button
-            style={{ width: 50 }}
-            variant={timeRangeRef.current === 'static' ? 'normal' : 'primary'}
+            style={{ minWidth: 50 }}
+            variant={timeRangeMode === 'static' ? 'normal' : 'primary'}
             onPress={() => {
-              const currentMode = timeRangeRef.current as TimeFrame['mode'];
               const newMode =
-                currentMode === 'static' ? 'sliding-window' : 'static';
+                timeRangeMode === 'static' ? 'sliding-window' : 'static';
               const [newStart, newEnd] = calculateTimeRange({
                 start: startDate,
                 end: endDate,
@@ -654,7 +668,7 @@ function QueryItem({
               );
             }}
           >
-            {timeRangeRef.current === 'static' ? t('Static') : t('Live')}
+            {timeRangeLabel}
           </Button>
           <Button
             ref={timeRangeMenuTriggerRef}
@@ -805,7 +819,13 @@ function QueryItem({
             }}
           >
             <Select
+              disabled={isPresetTimeRange}
               value={fromDateRepr(startDate)}
+              defaultLabel={monthUtils.format(
+                fromDateRepr(startDate),
+                'MMMM yyyy',
+                locale,
+              )}
               onChange={newValue => {
                 const [validatedStart] = validateStart(
                   allMonths[allMonths.length - 1].name,
@@ -822,7 +842,13 @@ function QueryItem({
               <Trans>to</Trans>
             </Text>
             <Select
+              disabled={isPresetTimeRange}
               value={fromDateRepr(endDate)}
+              defaultLabel={monthUtils.format(
+                fromDateRepr(endDate),
+                'MMMM yyyy',
+                locale,
+              )}
               onChange={newValue => {
                 const [, validatedEnd] = validateEnd(
                   allMonths[allMonths.length - 1].name,
