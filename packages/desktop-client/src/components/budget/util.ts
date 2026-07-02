@@ -38,6 +38,24 @@ export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   ];
 }
 
+export function addForNextMonthGroup(groups: CategoryGroupEntity[]) {
+  return groups.map(group =>
+    group.id === 'to-budget'
+      ? ({
+          ...group,
+          categories: [
+            ...(group.categories ?? []),
+            {
+              id: 'for-next-month',
+              name: t('For next month'),
+              group: 'to-budget',
+            },
+          ],
+        } as CategoryGroupEntity)
+      : group,
+  );
+}
+
 export function removeCategoriesFromGroups(
   categoryGroups: CategoryGroupEntity[],
   ...categoryIds: CategoryEntity['id'][]

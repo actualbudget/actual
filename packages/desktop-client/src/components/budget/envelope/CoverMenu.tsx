@@ -16,13 +16,16 @@ import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import {
+  addForNextMonthGroup,
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
 } from '#components/budget/util';
 import { useCategories } from '#hooks/useCategories';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;
+  showForNextMonth?: boolean;
   initialAmount?: IntegerAmount | null;
   categoryId?: CategoryEntity['id'];
   onSubmit: (amount: IntegerAmount, categoryId: CategoryEntity['id']) => void;
@@ -31,12 +34,14 @@ type CoverMenuProps = {
 
 export function CoverMenu({
   showToBeBudgeted = true,
+  showForNextMonth = false,
   initialAmount = 0,
   categoryId,
   onSubmit,
   onClose,
 }: CoverMenuProps) {
   const { t } = useTranslation();
+  const isFutureBufferModeAvailable = useFeatureFlag('futureBufferMode');
 
   const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
     useCategories();
@@ -48,10 +53,20 @@ export function CoverMenu({
     const categoryGroups = showToBeBudgeted
       ? addToBeBudgetedGroup(expenseGroups)
       : expenseGroups;
+    const categoryGroupsWithForNextMonth =
+      showForNextMonth && isFutureBufferModeAvailable
+        ? addForNextMonthGroup(categoryGroups)
+        : categoryGroups;
     return categoryId
-      ? removeCategoriesFromGroups(categoryGroups, categoryId)
-      : categoryGroups;
-  }, [categoryId, showToBeBudgeted, originalCategoryGroups]);
+      ? removeCategoriesFromGroups(categoryGroupsWithForNextMonth, categoryId)
+      : categoryGroupsWithForNextMonth;
+  }, [
+    categoryId,
+    showToBeBudgeted,
+    showForNextMonth,
+    isFutureBufferModeAvailable,
+    originalCategoryGroups,
+  ]);
 
   const _initialAmount = integerToCurrency(Math.abs(initialAmount ?? 0));
   const [amount, setAmount] = useState<string>(_initialAmount);

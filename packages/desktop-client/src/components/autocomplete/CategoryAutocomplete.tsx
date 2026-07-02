@@ -24,12 +24,12 @@ import type {
 } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
 
-import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
 import { useCategories } from '#hooks/useCategories';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import type { Binding } from '#spreadsheet';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
 import { Autocomplete } from './Autocomplete';
@@ -396,17 +396,8 @@ function CategoryItem({
     : {};
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
-  const balanceBinding =
-    budgetType === 'envelope'
-      ? envelopeBudget.catBalance(item.id)
-      : trackingBudget.catBalance(item.id);
-  const balance = useSheetValue<
-    'envelope-budget' | 'tracking-budget',
-    typeof balanceBinding
-  >(balanceBinding);
-
-  const isToBudgetItem = item.id === 'to-budget';
-  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget);
+  const balanceBinding = getCategoryBinding(budgetType, item.id);
+  const balance = useSheetValue(balanceBinding);
 
   return (
     <button
@@ -444,33 +435,38 @@ function CategoryItem({
             display: !showBalances ? 'none' : undefined,
             marginLeft: 5,
             flexShrink: 0,
-            ...makeAmountFullStyle((isToBudgetItem ? toBudget : balance) || 0, {
+            ...makeAmountFullStyle(balance || 0, {
               positiveColor: theme.noticeTextMenu,
               negativeColor: theme.errorTextMenu,
             }),
           }}
         >
-          {isToBudgetItem
-            ? toBudget != null && (
-                <>
-                  {' '}
-                  <FinancialText>
-                    {integerToCurrency(toBudget || 0)}
-                  </FinancialText>
-                </>
-              )
-            : balance != null && (
-                <>
-                  {' '}
-                  <FinancialText>
-                    {integerToCurrency(balance || 0)}
-                  </FinancialText>
-                </>
-              )}
+          {balance != null && (
+            <>
+              {' '}
+              <FinancialText>{integerToCurrency(balance || 0)}</FinancialText>
+            </>
+          )}
         </TextOneLine>
       </View>
     </button>
   );
+}
+
+function getCategoryBinding(
+  budgetType: string,
+  categoryId: string,
+  // oxlint-disable-next-line typescript/no-explicit-any
+): Binding<'envelope-budget' | 'tracking-budget', any> {
+  const budget = budgetType === 'envelope' ? envelopeBudget : trackingBudget;
+  switch (categoryId) {
+    case 'to-budget':
+      return envelopeBudget.toBudget;
+    case 'for-next-month':
+      return envelopeBudget.forNextMonth;
+    default:
+      return budget.catBalance(categoryId);
+  }
 }
 
 function defaultRenderCategoryItem(

@@ -872,6 +872,7 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
               month,
               amount: amountsByCategoryRef.current.get(category.id),
               categoryId: category.id,
+              showForNextMonth: true,
               onSubmit: (amount, fromCategoryId) => {
                 onBudgetAction(month, 'cover-overspending', {
                   to: category.id,
@@ -887,7 +888,9 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
                       fromCategoryName:
                         fromCategoryId === 'to-budget'
                           ? t('To Budget')
-                          : categoriesById[fromCategoryId].name,
+                          : fromCategoryId === 'for-next-month'
+                            ? t('For next month')
+                            : categoriesById[fromCategoryId].name,
                     },
                   ),
                 });

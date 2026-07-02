@@ -669,24 +669,27 @@ export async function coverOverspending({
 }: {
   month: string;
   to: CategoryEntity['id'] | 'to-budget';
-  from: CategoryEntity['id'] | 'to-budget' | 'overbudgeted';
+  from: CategoryEntity['id'] | 'to-budget' | 'overbudgeted' | 'for-next-month';
   amount?: IntegerAmount;
   currencyCode: string;
 }): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
   const toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
-  let leftoverFrom = await getSheetValue(
-    sheetName,
-    from === 'to-budget' ? 'to-budget' : 'leftover-' + from,
-  );
 
-  if (
-    from === 'to-budget' &&
-    isFutureBufferModeActive() &&
-    isCurrentOrFutureMonth(month)
-  ) {
-    leftoverFrom += await getSheetValue(sheetName, 'buffered-selected');
+  let source: string;
+  switch (from) {
+    case 'to-budget':
+      source = 'to-budget';
+      break;
+    case 'for-next-month':
+      source = 'buffered-selected';
+      break;
+    default:
+      source = `leftover-${from}`;
+      break;
   }
+  const isForNextMonthSource = source === 'buffered-selected';
+  const leftoverFrom = await getSheetValue(sheetName, source);
 
   // Cover provided amount (can be partial) or full overspending amount.
   const amountToCover = amount
@@ -702,8 +705,10 @@ export async function coverOverspending({
   const coverableAmount = Math.min(Math.abs(amountToCover), leftoverFrom);
 
   await batchMessages(async () => {
-    // If we are covering it from the to be budgeted amount, ignore this
-    if (from !== 'to-budget') {
+    if (isForNextMonthSource) {
+      const buffered = await getSheetValue(sheetName, source);
+      await setBuffer(month, buffered - coverableAmount);
+    } else if (from !== 'to-budget') {
       const fromBudgeted = await getSheetValue(sheetName, 'budget-' + from);
       await setBudget({
         category: from,
@@ -909,7 +914,7 @@ async function addMovementNotes({
   month: string;
   amount: number;
   to: CategoryEntity['id'] | 'to-budget' | 'overbudgeted';
-  from: CategoryEntity['id'] | 'to-budget';
+  from: CategoryEntity['id'] | 'to-budget' | 'for-next-month';
   currencyCode: string;
 }) {
   const currency = getCurrency(currencyCode);
@@ -934,13 +939,17 @@ async function addMovementNotes({
     locale,
   );
   const categories = await db.getCategories(
-    [from, to].filter(c => c !== 'to-budget' && c !== 'overbudgeted'),
+    [from, to].filter(
+      c => c !== 'to-budget' && c !== 'overbudgeted' && c !== 'for-next-month',
+    ),
   );
 
   const fromCategoryName =
     from === 'to-budget'
       ? 'To Budget'
-      : categories.find(c => c.id === from)?.name;
+      : from === 'for-next-month'
+        ? 'For next month'
+        : categories.find(c => c.id === from)?.name;
 
   const toCategoryName =
     to === 'to-budget'

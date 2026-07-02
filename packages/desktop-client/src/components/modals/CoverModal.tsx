@@ -8,6 +8,7 @@ import { View } from '@actual-app/components/view';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 
 import {
+  addForNextMonthGroup,
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
 } from '#components/budget/util';
@@ -15,6 +16,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { FieldLabel, TapField } from '#components/mobile/MobileForms';
 import { AmountInput } from '#components/util/AmountInput';
 import { useCategories } from '#hooks/useCategories';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useInitialMount } from '#hooks/useInitialMount';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
@@ -29,9 +31,11 @@ export function CoverModal({
   categoryId,
   month,
   showToBeBudgeted = true,
+  showForNextMonth = false,
   onSubmit,
 }: CoverModalProps) {
   const { t } = useTranslation();
+  const isFutureBufferModeAvailable = useFeatureFlag('futureBufferMode');
   const [hideFraction] = useSyncedPref('hideFraction');
 
   const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
@@ -41,14 +45,24 @@ export function CoverModal({
     const categoryGroups = showToBeBudgeted
       ? addToBeBudgetedGroup(expenseGroups)
       : expenseGroups;
+    const categoryGroupsWithForNextMonth =
+      showForNextMonth && isFutureBufferModeAvailable
+        ? addForNextMonthGroup(categoryGroups)
+        : categoryGroups;
     const filteredCategoryGroups = categoryId
-      ? removeCategoriesFromGroups(categoryGroups, categoryId)
-      : categoryGroups;
+      ? removeCategoriesFromGroups(categoryGroupsWithForNextMonth, categoryId)
+      : categoryGroupsWithForNextMonth;
     const filteredCategoryies = filteredCategoryGroups.flatMap(
       g => g.categories || [],
     );
     return [filteredCategoryGroups, filteredCategoryies];
-  }, [categoryId, originalCategoryGroups, showToBeBudgeted]);
+  }, [
+    categoryId,
+    originalCategoryGroups,
+    showToBeBudgeted,
+    showForNextMonth,
+    isFutureBufferModeAvailable,
+  ]);
 
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();

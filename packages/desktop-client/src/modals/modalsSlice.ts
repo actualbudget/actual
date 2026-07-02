@@ -516,6 +516,7 @@ export type Modal =
         categoryId?: CategoryEntity['id'];
         month: string;
         showToBeBudgeted?: boolean;
+        showForNextMonth?: boolean;
         onSubmit: (
           amount: IntegerAmount,
           fromCategoryId: CategoryEntity['id'],
