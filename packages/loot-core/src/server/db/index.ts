@@ -897,6 +897,41 @@ export async function moveTransaction(
 }
 
 /**
+ * Move a schedule to a new position among all non-tombstoned schedules.
+ * Uses the same midpoint/shove algorithm as transaction reordering.
+ *
+ * @param id - The ID of the schedule to move
+ * @param targetId - The ID of the schedule to place AFTER, or null to place at top
+ */
+export async function moveSchedule(id: string, targetId: string | null) {
+  const schedule = await first<{ id: string }>(
+    'SELECT id FROM schedules WHERE id = ? AND tombstone = 0',
+    [id],
+  );
+  if (!schedule) {
+    throw new Error(`Schedule not found: ${id}`);
+  }
+
+  const schedules = await all<{ id: string; sort_order: number }>(
+    `SELECT id, sort_order FROM schedules
+     WHERE tombstone = 0
+     ORDER BY sort_order DESC, id`,
+  );
+
+  const { sort_order: newSortOrder, updates } = shoveSortOrdersDescending(
+    schedules,
+    targetId,
+    id,
+  );
+
+  for (const info of updates) {
+    await update('schedules', info);
+  }
+
+  await update('schedules', { id, sort_order: newSortOrder });
+}
+
+/**
  * Update sort_order of child/subtransactions to maintain relative ordering.
  * Children are distributed evenly between the parent's sort_order and the
  * next sibling's sort_order to avoid collisions.
