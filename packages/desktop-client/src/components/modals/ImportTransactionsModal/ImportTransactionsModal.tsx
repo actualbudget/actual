@@ -305,7 +305,13 @@ export function ImportTransactionsModal({
         const aDate = getTransDate(a);
         const bDate = getTransDate(b);
 
-        return aDate < bDate ? 1 : aDate === bDate ? 0 : -1;
+        if (aDate !== bDate) {
+          return aDate < bDate ? 1 : -1;
+        }
+        // Same date: use reverse file order so the last entry in the import
+        // file (assumed latest booking of the day) appears first, consistent
+        // with the overall newest-first display ordering.
+        return Number(b.trx_id) - Number(a.trx_id);
       });
 
       for (let trans of transactions) {
