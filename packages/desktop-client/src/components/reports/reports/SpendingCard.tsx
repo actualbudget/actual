@@ -21,7 +21,6 @@ import {
   normalizeSpendingAverageRange,
 } from '#components/reports/spendingAverageRange';
 import { createSpendingSpreadsheet } from '#components/reports/spreadsheets/spending-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -31,8 +30,6 @@ type SpendingCardProps = {
   isEditing?: boolean;
   meta?: SpendingWidget['meta'];
   onMetaChange: (newMeta: SpendingWidget['meta']) => void;
-  onRemove: () => void;
-  onCopy: (targetDashboardId: string) => void;
 };
 
 export function SpendingCard({
@@ -40,8 +37,6 @@ export function SpendingCard({
   isEditing,
   meta = {},
   onMetaChange,
-  onRemove,
-  onCopy,
 }: SpendingCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
@@ -51,9 +46,6 @@ export function SpendingCard({
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
-
-  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useDashboardWidgetCopyMenu(onCopy);
 
   const spendingReportMode = meta?.mode ?? 'single-month';
   const averageRange = normalizeSpendingAverageRange(meta?.averageRange);
@@ -97,33 +89,11 @@ export function SpendingCard({
 
   return (
     <ReportCard
+      widgetId={widgetId}
       isEditing={isEditing}
       disableClick={nameMenuOpen}
       to={`/reports/spending/${widgetId}`}
-      menuItems={[
-        {
-          name: 'rename',
-          text: t('Rename'),
-        },
-        {
-          name: 'remove',
-          text: t('Remove'),
-        },
-        ...copyMenuItems,
-      ]}
-      onMenuSelect={item => {
-        if (handleCopyMenuSelect(item)) return;
-        switch (item) {
-          case 'rename':
-            setNameMenuOpen(true);
-            break;
-          case 'remove':
-            onRemove();
-            break;
-          default:
-            throw new Error(`Unrecognized selection: ${item}`);
-        }
-      }}
+      onRename={() => setNameMenuOpen(true)}
     >
       <View
         style={{ flex: 1 }}

@@ -91,6 +91,7 @@
     "#auth/AuthProvider": "./src/auth/AuthProvider.tsx",
     "#auth/ProtectedRoute": "./src/auth/ProtectedRoute.tsx",
     "#auth/*": "./src/auth/*.ts",
+    "#contextmenu/*": "./src/contextmenu/*.ts",
     "#style/theme": "./src/style/theme.tsx",
     "#style/*": "./src/style/*.ts",
     "#notes/*": "./src/notes/*.tsx",

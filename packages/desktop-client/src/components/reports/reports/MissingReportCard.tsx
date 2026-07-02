@@ -1,43 +1,23 @@
 import React from 'react';
 import type { ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
 
 import { ReportCard } from '#components/reports/ReportCard';
 
 type MissingReportCardProps = {
+  widgetId: string;
   isEditing?: boolean;
-  onRemove: () => void;
   children: ReactNode;
 };
 
 export function MissingReportCard({
+  widgetId,
   isEditing,
-  onRemove,
   children,
 }: MissingReportCardProps) {
-  const { t } = useTranslation();
-
   return (
-    <ReportCard
-      isEditing={isEditing}
-      menuItems={[
-        {
-          name: 'remove',
-          text: t('Remove'),
-        },
-      ]}
-      onMenuSelect={item => {
-        switch (item) {
-          case 'remove':
-            onRemove();
-            break;
-          default:
-            throw new Error(`Unrecognized menu option: ${item}`);
-        }
-      }}
-    >
+    <ReportCard widgetId={widgetId} isEditing={isEditing}>
       <View
         style={{
           flex: 1,

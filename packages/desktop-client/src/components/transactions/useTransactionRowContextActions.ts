@@ -1,8 +1,7 @@
-import React, { useMemo } from 'react';
-import type { ComponentPropsWithoutRef } from 'react';
+import { useMemo } from 'react';
+import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Menu } from '@actual-app/components/menu';
 import { q } from '@actual-app/core/shared/query';
 import {
   extractScheduleConds,
@@ -11,15 +10,15 @@ import {
 import { isPreviewId } from '@actual-app/core/shared/transactions';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
+import type { ContextMenuItem } from '#contextmenu/types';
+import { useContextMenu } from '#hooks/useContextMenu';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
-type BalanceMenuProps = Omit<
-  ComponentPropsWithoutRef<typeof Menu>,
-  'onMenuSelect' | 'items'
-> & {
+type TransactionRowContextMenuProps = {
+  rowRef: RefObject<HTMLElement | null>;
   transaction: TransactionEntity;
   getTransaction: (id: string) => TransactionEntity | undefined;
   onDuplicate: (ids: string[]) => void;
@@ -32,10 +31,10 @@ type BalanceMenuProps = Omit<
     ids: TransactionEntity['id'][],
   ) => void;
   onMakeAsNonSplitTransactions: (ids: string[]) => void;
-  closeMenu: () => void;
 };
 
-export function TransactionMenu({
+export function useTransactionRowContextActions({
+  rowRef,
   transaction,
   getTransaction,
   onDuplicate,
@@ -45,9 +44,7 @@ export function TransactionMenu({
   onCreateRule,
   onScheduleAction,
   onMakeAsNonSplitTransactions,
-  closeMenu,
-  ...props
-}: BalanceMenuProps) {
+}: TransactionRowContextMenuProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
@@ -154,95 +151,85 @@ export function TransactionMenu({
     }
   }
 
-  return (
-    <Menu
-      {...props}
-      onMenuSelect={name => {
-        switch (name) {
-          case 'duplicate':
-            onDuplicate(selectedIds);
-            break;
-          case 'delete':
-            onDelete(selectedIds);
-            break;
-          case 'unsplit-transactions':
-            onMakeAsNonSplitTransactions(selectedIds);
-            break;
-          case 'post-transaction':
-          case 'post-transaction-today':
-          case 'skip':
-          case 'complete':
-            onScheduleAction(name, selectedIds);
-            break;
-          case 'view-schedule':
-            onViewSchedule();
-            break;
-          case 'link-schedule':
-            onLinkSchedule(selectedIds);
-            break;
-          case 'unlink-schedule':
-            onUnlinkSchedule(selectedIds);
-            break;
-          case 'create-rule':
-            onCreateRule(selectedIds);
-            break;
-          default:
-            throw new Error(`Unrecognized menu option: ${name}`);
-        }
-        closeMenu();
-      }}
-      items={[
-        ...(!types.trans
-          ? [
-              ...(selectedIds.length === 1
-                ? [{ name: 'view-schedule', text: t('View schedule') }]
-                : []),
-              { name: 'post-transaction', text: t('Post transaction') },
-              {
-                name: 'post-transaction-today',
-                text: t('Post transaction today'),
-              },
-              ...(canBeSkipped
-                ? [{ name: 'skip', text: t('Skip next scheduled date') }]
-                : []),
-              ...(canBeCompleted
-                ? [{ name: 'complete', text: t('Mark as completed') }]
-                : []),
-            ]
-          : [
-              ...(ambiguousDuplication
-                ? []
-                : [{ name: 'duplicate', text: t('Duplicate') }]),
-              { name: 'delete', text: t('Delete') },
-              ...(linked
-                ? [
-                    ...(selectedIds.length === 1
-                      ? [{ name: 'view-schedule', text: t('View schedule') }]
-                      : []),
-                    { name: 'unlink-schedule', text: t('Unlink schedule') },
-                  ]
-                : [
-                    {
-                      name: 'link-schedule',
-                      text: t('Link schedule'),
-                    },
-                    {
-                      name: 'create-rule',
-                      text: t('Create rule'),
-                    },
-                  ]),
-              ...(canUnsplitTransactions
-                ? [
-                    {
-                      name: 'unsplit-transactions',
-                      text: t('Unsplit {{count}} transactions', {
-                        count: selectedIds.length,
-                      }),
-                    },
-                  ]
-                : []),
-            ]),
-      ]}
-    />
-  );
+  const scheduleActions: ContextMenuItem[] = [
+    {
+      name: 'view-schedule',
+      text: t('View Schedule'),
+      onClick: onViewSchedule,
+      hidden: selectedIds.length !== 1,
+    },
+    {
+      name: 'post-transaction',
+      text: t('Post transaction'),
+      onClick: () => onScheduleAction('post-transaction', selectedIds),
+    },
+    {
+      name: 'post-transaction-today',
+      text: t('Post transaction today'),
+      onClick: () => onScheduleAction('post-transaction-today', selectedIds),
+    },
+    {
+      name: 'skip',
+      text: t('Skip next scheduled date'),
+      onClick: () => onScheduleAction('skip', selectedIds),
+      hidden: !canBeSkipped,
+    },
+    {
+      name: 'complete',
+      text: t('Mark as completed'),
+      onClick: () => onScheduleAction('complete', selectedIds),
+      hidden: !canBeCompleted,
+    },
+  ];
+
+  const transactionActions: ContextMenuItem[] = [
+    {
+      name: 'duplicate',
+      text: t('Duplicate'),
+      onClick: () => onDuplicate(selectedIds),
+      hidden: ambiguousDuplication,
+    },
+    {
+      name: 'delete',
+      text: t('Delete'),
+      onClick: () => onDelete(selectedIds),
+    },
+    {
+      name: 'view-schedule',
+      text: t('View Schedule'),
+      onClick: onViewSchedule,
+      hidden: !(selectedIds.length === 1 && linked),
+    },
+    {
+      name: 'unlink-schedule',
+      text: t('Unlink schedule'),
+      onClick: () => onUnlinkSchedule(selectedIds),
+      hidden: !linked,
+    },
+    {
+      name: 'link-schedule',
+      text: t('Link schedule'),
+      onClick: () => onLinkSchedule(selectedIds),
+      hidden: linked,
+    },
+    {
+      name: 'create-rule',
+      text: t('Create rule'),
+      onClick: () => onCreateRule(selectedIds),
+      hidden: linked,
+    },
+    {
+      name: 'unsplit-transactions',
+      text: t('Unsplit {{count}} transactions', {
+        count: selectedIds.length,
+      }),
+      onClick: () => onMakeAsNonSplitTransactions(selectedIds),
+      hidden: !canUnsplitTransactions,
+    },
+  ];
+
+  useContextMenu({
+    triggerRef: rowRef,
+    items: types.trans ? transactionActions : scheduleActions,
+  });
 }

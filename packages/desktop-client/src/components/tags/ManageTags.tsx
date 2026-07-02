@@ -84,7 +84,6 @@ export function ManageTags() {
           {tags.length ? (
             <TagsList
               tags={filteredTags}
-              selectedItems={selectedInst.items}
               hoveredTag={hoveredTag}
               onHover={id => setHoveredTag(id ?? undefined)}
             />

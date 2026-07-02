@@ -36,7 +36,6 @@ import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { calendarSpreadsheet } from '#components/reports/spreadsheets/calendar-spreadsheet';
 import type { CalendarDataType } from '#components/reports/spreadsheets/calendar-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
@@ -49,8 +48,6 @@ type CalendarCardProps = {
   isEditing?: boolean;
   meta?: CalendarWidget['meta'];
   onMetaChange: (newMeta: CalendarWidget['meta']) => void;
-  onRemove: () => void;
-  onCopy: (targetDashboardId: string) => void;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
 };
 
@@ -59,8 +56,6 @@ export function CalendarCard({
   isEditing,
   meta = {},
   onMetaChange,
-  onRemove,
-  onCopy,
   firstDayOfWeekIdx,
 }: CalendarCardProps) {
   const { t } = useTranslation();
@@ -167,38 +162,13 @@ export function CalendarCard({
     return data?.calendarData.length;
   }, [data]);
 
-  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useDashboardWidgetCopyMenu(onCopy);
-
   return (
     <ReportCard
+      widgetId={widgetId}
       isEditing={isEditing}
       disableClick={nameMenuOpen}
       to={`/reports/calendar/${widgetId}`}
-      menuItems={[
-        {
-          name: 'rename',
-          text: t('Rename'),
-        },
-        {
-          name: 'remove',
-          text: t('Remove'),
-        },
-        ...copyMenuItems,
-      ]}
-      onMenuSelect={item => {
-        if (handleCopyMenuSelect(item)) return;
-        switch (item) {
-          case 'rename':
-            setNameMenuOpen(true);
-            break;
-          case 'remove':
-            onRemove();
-            break;
-          default:
-            throw new Error(`Unrecognized selection: ${item}`);
-        }
-      }}
+      onRename={() => setNameMenuOpen(true)}
     >
       <View
         ref={el => (el ? cardRef(el) : undefined)}

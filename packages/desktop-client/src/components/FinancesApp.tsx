@@ -25,6 +25,7 @@ import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { UserDirectoryPage } from './admin/UserDirectory/UserDirectoryPage';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
+import { ContextMenu } from './ContextMenu';
 import { EnableBankingCallback } from './EnableBankingCallback';
 import { FeatureErrorFallback } from './FeatureErrorFallback';
 import { GlobalKeys } from './GlobalKeys';
@@ -198,6 +199,7 @@ export function FinancesApp() {
       <RouterBehaviors />
       <GlobalKeys />
       <CommandBar />
+      <ContextMenu />
       <View
         style={{
           flexDirection: 'row',
