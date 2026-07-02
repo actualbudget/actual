@@ -72,7 +72,7 @@ app.post('/config', openIdConfigRateLimiter, async (req, res) => {
     return;
   }
 
-  if (!checkPassword(req.body.password)) {
+  if (!(await checkPassword(req.body.password))) {
     res.status(400).send({ status: 'error', reason: 'invalid-password' });
     return;
   }

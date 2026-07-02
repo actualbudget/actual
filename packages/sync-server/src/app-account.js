@@ -86,7 +86,7 @@ app.post('/login', authRateLimiter, async (req, res) => {
         return;
       } else {
         if (validateAuthHeader(req)) {
-          tokenRes = loginWithPassword(headerVal);
+          tokenRes = await loginWithPassword(headerVal);
         } else {
           res.send({ status: 'error', reason: 'proxy-not-trusted' });
           return;
@@ -115,7 +115,7 @@ app.post('/login', authRateLimiter, async (req, res) => {
     }
 
     default:
-      tokenRes = loginWithPassword(req.body.password);
+      tokenRes = await loginWithPassword(req.body.password);
       break;
   }
   const { error, token } = tokenRes;
@@ -128,7 +128,7 @@ app.post('/login', authRateLimiter, async (req, res) => {
   res.send({ status: 'ok', data: { token } });
 });
 
-app.post('/change-password', (req, res) => {
+app.post('/change-password', async (req, res) => {
   const session = validateSession(req, res);
   if (!session) return;
 
@@ -150,7 +150,7 @@ app.post('/change-password', (req, res) => {
     return;
   }
 
-  const { error } = changePassword(req.body.password);
+  const { error } = await changePassword(req.body.password);
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
