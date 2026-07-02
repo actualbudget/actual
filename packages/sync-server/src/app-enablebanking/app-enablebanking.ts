@@ -45,10 +45,25 @@ function extractPsuHeaders(req: Request): PsuHeaders {
   return headers;
 }
 
+// Some ASPSPs reject PSU headers on balance/transaction data-access calls even
+// though they require them during the authorization step. List their names here.
+const ASPSPS_WITHOUT_DATA_ACCESS_PSU_HEADERS = new Set(['HypoVereinsbank']);
+
+function dataAccessPsuHeaders(
+  aspspName: string | undefined,
+  psuHeaders: PsuHeaders | undefined,
+): PsuHeaders | undefined {
+  if (aspspName && ASPSPS_WITHOUT_DATA_ACCESS_PSU_HEADERS.has(aspspName)) {
+    return undefined;
+  }
+  return psuHeaders;
+}
+
 async function buildSessionResult(
   session: EnableBankingSession,
   psuHeaders?: PsuHeaders,
 ) {
+  const accessHeaders = dataAccessPsuHeaders(session.aspsp?.name, psuHeaders);
   const accountsWithBalances = await Promise.all(
     session.accounts.map(async account => {
       const normalized = normalizeAccount(account, session.aspsp);
@@ -57,7 +72,7 @@ async function buildSessionResult(
       try {
         const balanceResult = await enableBankingService.getBalances(
           account.uid,
-          psuHeaders,
+          accessHeaders,
         );
         balances = balanceResult.balances.map(normalizeBalance);
       } catch (err) {
@@ -296,6 +311,7 @@ app.post(
         state,
         typeof maxConsentValidity === 'number' ? maxConsentValidity : undefined,
         psuType === 'business' ? 'business' : 'personal',
+        extractPsuHeaders(req),
       );
 
       res.send({
@@ -478,7 +494,7 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req: Request, res: Response) => {
-    const { accountId, startDate } = req.body || {};
+    const { accountId, startDate, aspspName } = req.body || {};
 
     if (!accountId || !startDate) {
       res.send({
@@ -491,14 +507,17 @@ app.post(
       return;
     }
 
-    const psuHeaders = extractPsuHeaders(req);
-
     try {
       const dateTo = new Date().toISOString().split('T')[0];
       const dateFrom =
         typeof startDate === 'string'
           ? startDate
           : new Date(startDate).toISOString().split('T')[0];
+
+      const psuHeaders = dataAccessPsuHeaders(
+        aspspName,
+        extractPsuHeaders(req),
+      );
 
       // Fetch balances
       const balanceResult = await enableBankingService.getBalances(
