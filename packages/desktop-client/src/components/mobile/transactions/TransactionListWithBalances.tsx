@@ -84,6 +84,8 @@ type TransactionListWithBalancesProps = {
   onOpenTransaction: (transaction: TransactionEntity) => void;
   onRefresh?: () => void;
   showMakeTransfer?: boolean;
+  isReconciling?: boolean;
+  onToggleTransactionCleared?: (transaction: TransactionEntity) => void;
 };
 
 export function TransactionListWithBalances({
@@ -101,6 +103,8 @@ export function TransactionListWithBalances({
   onOpenTransaction,
   onRefresh,
   showMakeTransfer = false,
+  isReconciling = false,
+  onToggleTransactionCleared,
 }: TransactionListWithBalancesProps) {
   const selectedInst = useSelected('transactions', [...transactions], []);
 
@@ -124,6 +128,7 @@ export function TransactionListWithBalances({
                 balance={balance}
                 balanceCleared={balanceCleared}
                 balanceUncleared={balanceUncleared}
+                alwaysShowCleared={isReconciling}
               />
             ) : (
               <Balance balance={balance} />
@@ -152,6 +157,8 @@ export function TransactionListWithBalances({
             onLoadMore={onLoadMore}
             onOpenTransaction={onOpenTransaction}
             showMakeTransfer={showMakeTransfer}
+            isReconciling={isReconciling}
+            onToggleTransactionCleared={onToggleTransactionCleared}
           />
         </PullToRefresh>
       </SelectedProvider>
@@ -180,24 +187,27 @@ type BalanceWithClearedProps = {
     TransactionListWithBalancesProps['balanceCleared']
   >;
   balance: TransactionListWithBalancesProps['balance'];
+  alwaysShowCleared?: boolean;
 };
 
 function BalanceWithCleared({
   balanceUncleared,
   balanceCleared,
   balance,
+  alwaysShowCleared = false,
 }: BalanceWithClearedProps) {
   const { t } = useTranslation();
   const unclearedAmount = useSheetValue<
     'account' | 'category',
     'balanceUncleared'
   >(balanceUncleared);
+  const showCleared = !!unclearedAmount || alwaysShowCleared;
 
   return (
     <>
       <View
         style={{
-          display: !unclearedAmount ? 'none' : undefined,
+          display: !showCleared ? 'none' : undefined,
           flexBasis: '33%',
         }}
       >
@@ -225,7 +235,7 @@ function BalanceWithCleared({
       <Balance balance={balance} />
       <View
         style={{
-          display: !unclearedAmount ? 'none' : undefined,
+          display: !showCleared ? 'none' : undefined,
           flexBasis: '33%',
         }}
       >
