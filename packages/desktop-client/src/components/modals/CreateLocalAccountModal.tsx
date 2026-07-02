@@ -38,11 +38,29 @@ export function CreateLocalAccountModal() {
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
+  const [isNegative, setIsNegative] = useState(false);
 
   const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
 
   const validateBalance = balance => !isNaN(parseFloat(balance));
+
+  // Strips the sign and updates the sign toggle
+  const updateBalance = (value: string) => {
+    if (value.includes('-')) {
+      setIsNegative(true);
+    } else if (value.includes('+')) {
+      setIsNegative(false);
+    }
+
+    const unsignedValue = value.replace(/[-+]/g, '');
+    setBalance(unsignedValue);
+    if (validateBalance(unsignedValue) && balanceError) {
+      setBalanceError(false);
+    }
+  };
+
+  const toggleSign = () => setIsNegative(negative => !negative);
 
   const validateAndSetName = (name: string) => {
     const nameError = validateAccountName(name, '', accounts);
@@ -68,7 +86,7 @@ export function CreateLocalAccountModal() {
       createAccount.mutate(
         {
           name,
-          balance: toRelaxedNumber(balance),
+          balance: toRelaxedNumber((isNegative ? '-' : '') + balance),
           offBudget: offbudget,
         },
         {
@@ -168,20 +186,39 @@ export function CreateLocalAccountModal() {
               </View>
 
               <InlineField label={t('Balance')} width="100%">
-                <Input
-                  name="balance"
-                  inputMode="decimal"
-                  value={balance}
-                  onChangeValue={setBalance}
-                  onUpdate={value => {
-                    const balance = value.trim();
-                    setBalance(balance);
-                    if (validateBalance(balance) && balanceError) {
-                      setBalanceError(false);
-                    }
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    alignItems: 'stretch',
+                    gap: 6,
                   }}
-                  style={{ flex: 1 }}
-                />
+                >
+                  <Button
+                    variant="bare"
+                    aria-pressed={isNegative}
+                    aria-label={
+                      isNegative ? t('Make positive') : t('Make negative')
+                    }
+                    onPress={toggleSign}
+                    style={{
+                      flexShrink: 0,
+                      width: 28,
+                      border: '1px solid ' + theme.formInputBorder,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {isNegative ? '−' : '+'}
+                  </Button>
+                  <Input
+                    name="balance"
+                    inputMode="decimal"
+                    value={balance}
+                    onChangeValue={updateBalance}
+                    onUpdate={value => updateBalance(value.trim())}
+                    style={{ flex: 1 }}
+                  />
+                </View>
               </InlineField>
               {balanceError && (
                 <FormError style={{ marginLeft: 75 }}>
