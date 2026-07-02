@@ -340,6 +340,23 @@ describe('getFormulaBadgeRanges', () => {
     ]);
   });
 
+  it('ignores empty cached source text when remapping badges', () => {
+    expect(
+      remapCachedFormulaBadgeRanges({
+        formula: '=SUM(1, 2)',
+        cachedRanges: [
+          {
+            from: 1,
+            to: 1,
+            label: 'empty',
+            sourceText: '',
+            variant: 'named-expression',
+          },
+        ],
+      }),
+    ).toEqual([]);
+  });
+
   it('falls back to tokenized named expressions for incomplete formulas', () => {
     const formula = '=CONCATENATE(account_name,';
 

@@ -549,6 +549,10 @@ function doRangesOverlap(
 
 function findSourceTextRanges(source: string, sourceText: string) {
   const ranges: FormulaRange[] = [];
+  if (sourceText.length === 0) {
+    return ranges;
+  }
+
   let from = source.indexOf(sourceText);
 
   while (from !== -1) {
