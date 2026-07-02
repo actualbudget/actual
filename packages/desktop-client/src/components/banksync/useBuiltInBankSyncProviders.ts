@@ -7,6 +7,7 @@ import type {
   BankSyncProviders,
 } from '@actual-app/core/types/models';
 import type { SyncServerSimpleFinAccount } from '@actual-app/core/types/models/simplefin';
+import { isSimpleFinRateLimited } from '@actual-app/core/types/models/simplefin';
 
 import { useAuth } from '#auth/AuthProvider';
 import { Permissions } from '#auth/types';
@@ -59,6 +60,7 @@ export type BuiltInBankSyncProviderState = {
   isConfigured: boolean;
   canConfigure: boolean;
   isLoading?: boolean;
+  linkError?: string | null;
   onConfigure: ProviderAction;
   onLink: ProviderAction;
   onReset: ProviderAction;
@@ -114,6 +116,9 @@ export function useBuiltInBankSyncProviders({
   >(null);
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
     useState(false);
+  const [simpleFinLinkError, setSimpleFinLinkError] = useState<string | null>(
+    null,
+  );
   const [loadingAkahuAccounts, setLoadingAkahuAccounts] = useState(false);
 
   const enableBankingEnabled = useFeatureFlag('enableBanking');
@@ -267,6 +272,7 @@ export function useBuiltInBankSyncProviders({
         'Failed to clear SimpleFIN access key',
       );
       setIsSimpleFinSetupComplete(false);
+      setSimpleFinLinkError(null);
     } catch (error) {
       notifyResetFailure('SimpleFIN', error);
     }
@@ -371,9 +377,21 @@ export function useBuiltInBankSyncProviders({
     }
 
     setLoadingSimpleFinAccounts(true);
+    setSimpleFinLinkError(null);
 
     try {
       const results = await send('simplefin-accounts');
+
+      if (isSimpleFinRateLimited(results)) {
+        setSimpleFinLinkError(
+          results.reason ||
+            t(
+              'SimpleFIN rate limit exceeded. Please wait a few minutes and try again.',
+            ),
+        );
+        return;
+      }
+
       if (results.error_code) {
         throw new Error(results.reason);
       }
@@ -414,6 +432,8 @@ export function useBuiltInBankSyncProviders({
     isSimpleFinSetupComplete,
     loadingSimpleFinAccounts,
     onSimpleFinInit,
+    simpleFinLinkError,
+    t,
     upgradingAccountId,
   ]);
 
@@ -628,6 +648,7 @@ export function useBuiltInBankSyncProviders({
             isConfigured: configuredProviders.simpleFin,
             canConfigure: canConfigureProviders,
             isLoading: loadingSimpleFinAccounts,
+            linkError: simpleFinLinkError,
             onConfigure: onSimpleFinInit,
             onLink: onConnectSimpleFin,
             onReset: onSimpleFinReset,
@@ -708,6 +729,7 @@ export function useBuiltInBankSyncProviders({
     onPluggyAiReset,
     onSimpleFinInit,
     onSimpleFinReset,
+    simpleFinLinkError,
     t,
   ]);
 

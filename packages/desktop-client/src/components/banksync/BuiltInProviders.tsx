@@ -191,6 +191,10 @@ export function BuiltInProviders({
                   <Trans>Link bank account</Trans>
                 </ButtonWithLoading>
               </View>
+
+              {provider.linkError && (
+                <Warning>{provider.linkError}</Warning>
+              )}
             </View>
           ))}
         </View>

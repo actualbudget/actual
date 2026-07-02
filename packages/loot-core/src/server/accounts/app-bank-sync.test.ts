@@ -3,6 +3,7 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import { isMutating, runHandler, runMutator } from '#server/mutators';
+import * as postModule from '#server/post';
 
 import { app } from './app';
 import * as bankSync from './sync';
@@ -14,6 +15,7 @@ vi.mock('./sync', async () => ({
 }));
 
 const simpleFinBatchSyncHandler = app.handlers['simplefin-batch-sync'];
+const simpleFinAccountsHandler = app.handlers['simplefin-accounts'];
 const accountsBankSyncHandler = app.handlers['accounts-bank-sync'];
 
 function insertBank(bank: { id: string; bank_id: string; name: string }) {
@@ -273,6 +275,34 @@ describe('accountsBankSync', () => {
       ['acct1'],
     );
     expect(account!.bank_sync_status).toBe('failed');
+  });
+});
+
+describe('simpleFinAccounts', () => {
+  beforeEach(() => {
+    vi.mocked(asyncStorage.getItem).mockImplementation(async key => {
+      if (key === 'user-token') {
+        return 'test-token';
+      }
+      return null;
+    });
+  });
+
+  it('normalizes rate limit responses to SIMPLEFIN_RATE_LIMITED', async () => {
+    vi.spyOn(postModule, 'post').mockResolvedValue({
+      error_type: 'RATE_LIMIT',
+      status: 'rejected',
+      reason: 'Too many requests',
+    });
+
+    const result = await simpleFinAccountsHandler({});
+
+    expect(result).toEqual({
+      error_type: 'SIMPLEFIN_RATE_LIMITED',
+      error_code: 'SIMPLEFIN_RATE_LIMITED',
+      status: 'rejected',
+      reason: 'Too many requests',
+    });
   });
 });
 

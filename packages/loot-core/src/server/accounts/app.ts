@@ -36,6 +36,10 @@ import type {
   SyncServerSimpleFinAccount,
   TransactionEntity,
 } from '#types/models';
+import {
+  isSimpleFinRateLimited,
+  SIMPLEFIN_RATE_LIMITED,
+} from '#types/models/simplefin';
 
 import * as link from './link';
 import { getStartingBalancePayee } from './payees';
@@ -945,7 +949,7 @@ async function simpleFinAccounts() {
   }
 
   try {
-    return await post(
+    const result = await post(
       serverConfig.SIMPLEFIN_SERVER + '/accounts',
       {},
       {
@@ -953,6 +957,19 @@ async function simpleFinAccounts() {
       },
       60000,
     );
+
+    if (isSimpleFinRateLimited(result)) {
+      return {
+        error_type: SIMPLEFIN_RATE_LIMITED,
+        error_code: SIMPLEFIN_RATE_LIMITED,
+        status: 'rejected',
+        reason:
+          result.reason ||
+          'SimpleFIN rate limit exceeded. Please wait a few minutes and try again.',
+      };
+    }
+
+    return result;
   } catch {
     return { error_code: 'TIMED_OUT' };
   }
