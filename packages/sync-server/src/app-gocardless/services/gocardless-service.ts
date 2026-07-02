@@ -5,6 +5,7 @@ import type { IBank } from '#app-gocardless/banks/bank.interface';
 import {
   AccessDeniedError,
   AccountNotLinkedToRequisition,
+  EndUserAgreementExpiredError,
   GenericGoCardlessError,
   InvalidGoCardlessTokenError,
   InvalidInputDataError,
@@ -59,6 +60,22 @@ const getGocardlessClient = (): GoCardlessApi => {
   return client;
 };
 
+const isEuaExpiredError = (error: unknown): boolean => {
+  if (!(error instanceof GoCardlessApiError)) {
+    return false;
+  }
+
+  const data: unknown = error.response.data;
+  if (typeof data !== 'object' || data === null) {
+    return false;
+  }
+
+  const { summary } = data as Record<string, unknown>;
+  return (
+    typeof summary === 'string' && /end user agreement.*expired/i.test(summary)
+  );
+};
+
 export const handleGoCardlessError = (error: unknown): never => {
   const status =
     error instanceof GoCardlessApiError ? error.response.status : undefined;
@@ -67,6 +84,9 @@ export const handleGoCardlessError = (error: unknown): never => {
     case 400:
       throw new InvalidInputDataError(error);
     case 401:
+      if (isEuaExpiredError(error)) {
+        throw new EndUserAgreementExpiredError(error);
+      }
       throw new InvalidGoCardlessTokenError(error);
     case 403:
       throw new AccessDeniedError(error);
