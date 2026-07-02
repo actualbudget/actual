@@ -23,7 +23,8 @@ import { useServerVersion } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMetadataPref } from '#hooks/useMetadataPref';
-import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { loadPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 
 import { AuthSettings } from './AuthSettings';
@@ -32,7 +33,7 @@ import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { CurrencySettings } from './Currency';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
-import { ExportBudget } from './Export';
+import { ExportBudget, ExportDashboards } from './Export';
 import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
@@ -171,6 +172,7 @@ export function Settings() {
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
+  const [_, setDefaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
 
   const onCloseBudget = () => {
     void dispatch(closeBudget());
@@ -187,9 +189,9 @@ export function Settings() {
 
   useEffect(() => {
     if (!isCurrencyExperimentalEnabled) {
-      void dispatch(saveSyncedPrefs({ prefs: { defaultCurrencyCode: '' } }));
+      setDefaultCurrencyCodePref('');
     }
-  }, [dispatch, isCurrencyExperimentalEnabled]);
+  }, [isCurrencyExperimentalEnabled, setDefaultCurrencyCodePref]);
 
   const { isNarrowWidth } = useResponsive();
 
@@ -244,6 +246,7 @@ export function Settings() {
         <BudgetTypeSettings />
         {isElectron() && <Backups />}
         <ExportBudget />
+        <ExportDashboards />
         <AdvancedToggle>
           <AdvancedAbout />
           <ResetCache />

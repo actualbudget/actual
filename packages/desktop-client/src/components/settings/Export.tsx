@@ -12,6 +12,63 @@ import { useMetadataPref } from '#hooks/useMetadataPref';
 
 import { Setting } from './UI';
 
+export function ExportDashboards() {
+  const { t } = useTranslation();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [budgetName] = useMetadataPref('budgetName');
+
+  async function onExport() {
+    setIsLoading(true);
+    setError(null);
+
+    const response = await send('dashboard-export-all');
+
+    if ('error' in response && response.error) {
+      setError(response.error);
+      setIsLoading(false);
+      return;
+    }
+
+    if (response.data) {
+      void window.Actual.saveFile(
+        response.data,
+        `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}-dashboards.zip`,
+        t('Export dashboards'),
+      );
+    }
+    setIsLoading(false);
+  }
+
+  return (
+    <Setting
+      primaryAction={
+        <>
+          <ButtonWithLoading onPress={onExport} isLoading={isLoading}>
+            <Trans>Export dashboards</Trans>
+          </ButtonWithLoading>
+          {error && (
+            <Block style={{ color: theme.errorText, marginTop: 15 }}>
+              {t(
+                'An unknown error occurred while exporting. Please report this as a new issue on GitHub.',
+              )}
+            </Block>
+          )}
+        </>
+      }
+    >
+      <Text>
+        <Trans>
+          <strong>Export</strong> all your dashboards as a zip file for backup.
+          Each dashboard is saved as a separate JSON file inside the zip. Each
+          dashboard can be imported in the "Reports" tab, then selecting "...",
+          then "Import".
+        </Trans>
+      </Text>
+    </Setting>
+  );
+}
+
 export function ExportBudget() {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
