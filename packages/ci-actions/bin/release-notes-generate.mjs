@@ -22,6 +22,8 @@ if (!releaseBranch || !notesBranch || !version) {
   );
 }
 
+const baseBranch = 'master';
+
 const apiResult = await fetch('https://api.github.com/graphql', {
   method: 'POST',
   headers: {
@@ -94,10 +96,9 @@ const AUTOGEN_MARKER = '<!-- release-notes:auto-generated -->';
 
 await group('Prepare branch', async () => {
   // recover deleted release note files from previous generation commits
-  const baseRef = 'master';
-  await exec(`git fetch origin ${baseRef}`, { stdio: 'inherit' });
+  await exec(`git fetch origin ${baseBranch}`, { stdio: 'inherit' });
   const { stdout: mergeBase } = await exec(
-    `git merge-base HEAD origin/${baseRef}`,
+    `git merge-base HEAD origin/${baseBranch}`,
   );
   const base = mergeBase.trim();
   const { stdout: genLog } = await exec(
@@ -133,6 +134,7 @@ const { notesByCategory, files } = await parseReleaseNotes(
   'upcoming-release-notes',
   owner,
   repo,
+  `origin/${baseBranch}`,
 );
 const categorizedNotes = formatNotes(notesByCategory);
 
