@@ -137,9 +137,8 @@ app.post(
         newTrans.transactionId = trans.id;
         newTrans.sortOrder = transactionDate.getTime();
 
-        newTrans.transactionDateCorrected = getDate(
-          getTransactionDateCorrected(trans),
-        );
+        newTrans.originalDate = trans.date;
+        newTrans.date = getDate(getTransactionDateCorrected(trans));
 
         delete trans.amount;
 

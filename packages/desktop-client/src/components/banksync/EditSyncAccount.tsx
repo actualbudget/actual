@@ -45,7 +45,7 @@ const mappableFields: MappableField[] = [
       'booking_date',
       'value_date',
       'transaction_date',
-      'transactionDateCorrected',
+      'originalDate',
     ],
   },
   {
