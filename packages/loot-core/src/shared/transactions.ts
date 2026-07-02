@@ -347,16 +347,24 @@ export function splitTransaction(
     }
 
     const subtransactions = createSubtransactions?.(trans) || [
-      makeChild(trans),
+      makeChild(trans, { amount: trans.amount ?? 0 }),
     ];
 
     const { error: _error, ...rest } = trans;
+
+    const subtransactionTotal = subtransactions.reduce(
+      (sum, t) => sum + num(t.amount),
+      0,
+    );
 
     return {
       ...rest,
       is_parent: true,
       payee: null,
-      error: num(trans.amount) === 0 ? null : SplitTransactionError(0, trans),
+      error:
+        num(trans.amount) === 0 || subtransactionTotal === num(trans.amount)
+          ? null
+          : SplitTransactionError(subtransactionTotal, trans),
       subtransactions: subtransactions.map(t => ({
         ...t,
         sort_order: t.sort_order || -1,

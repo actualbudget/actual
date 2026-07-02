@@ -3286,12 +3286,12 @@ export const TransactionTable = forwardRef(
           }
         } else {
           const trans = latestState.current.transactions.find(t => t.id === id);
-          const newId = onSplitProp(id);
           if (!trans) {
             return;
           }
 
           splitsExpandedDispatch({ type: 'open-split', id: trans.id });
+          const newId = onSplitProp(id);
 
           const { tableNavigator } = latestState.current;
           if (trans.amount === null) {
