@@ -20,7 +20,11 @@ export function getUsageProgress(
   const spentAmount = Math.max(0, -spent);
 
   if (budgetAmount <= 0) {
-    return null;
+    return {
+      percent: 0,
+      normalFilled: 0,
+      overflowLines: [],
+    };
   }
 
   const percent = spentAmount / budgetAmount;
@@ -65,7 +69,7 @@ export function UsageProgressDashes({
           height,
           borderRadius: 1,
           backgroundColor: index < filled ? color : theme.tableBorder,
-          opacity: index < filled ? 1 : 0.35,
+          opacity: index < filled ? 0.55 : 0.35,
         }}
       />
     ));
@@ -84,7 +88,7 @@ export function UsageProgressDashes({
       <View style={{ flexDirection: 'row', gap: 3 }}>
         {renderDashes(
           progress.normalFilled,
-          theme.budgetNumberPositive,
+          theme.buttonPrimaryBackground,
           dashHeight,
         )}
       </View>
