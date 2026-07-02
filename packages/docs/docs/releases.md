@@ -4,14 +4,14 @@
 
 Release date: 2026-07-01
 
-This release adds a new bank sync provider, releases the CLI as stable, improves reports and tag management, as well as numerous other fixes.
+This release adds a new experimental bank sync provider, releases the CLI as stable, improves reports and tag management, as well as numerous other fixes.
 
-- Add [Akahu](./advanced/bank-sync/akahu.md) as a New Zealand bank sync provider
 - A failed bank sync status now persists across reloads and syncs across your devices
 - The [Actual CLI](./api/cli.md) (`@actual-app/cli`) released as stable (no longer experimental)
 - Add show/hide tags, better bulk tag actions, and new "has any tag" / "has all tags" filters
 - Add configurable average ranges to the Monthly Spending report and trend lines to line reports
 - Add the ability to quickly sort categories alphabetically within a budget group
+- Experimental: Add [Akahu](./advanced/bank-sync/akahu.md) as a New Zealand bank sync provider
 - Experimental: Continued improvements to the [budget automations](./experimental/budget-automation.md) UI, including mobile support
 - Experimental: Add a mobile calculator for amount inputs
 
