@@ -12,7 +12,9 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { evaluateFormula } from '@actual-app/core/shared/formulas/evaluate';
 import * as monthUtils from '@actual-app/core/shared/months';
+import { amountToInteger } from '@actual-app/core/shared/util';
 import type {
   RecurConfig,
   ScheduleEntity,
@@ -29,6 +31,8 @@ import { SimpleTransactionsTable } from '#components/transactions/SimpleTransact
 import { AmountInput, BetweenAmountInput } from '#components/util/AmountInput';
 import { GenericInput } from '#components/util/GenericInput';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { SelectedProvider } from '#hooks/useSelected';
 import type { Actions } from '#hooks/useSelected';
@@ -36,7 +40,7 @@ import type { Actions } from '#hooks/useSelected';
 export type ScheduleFormFields = {
   payee: null | string;
   account: null | string;
-  amount: null | number | { num1: number; num2: number };
+  amount: null | number | { num1: number; num2: number } | string;
   amountOp: null | string;
   date: null | string | RecurConfig;
   posts_transaction: boolean;
@@ -53,12 +57,12 @@ export type ScheduleEditFormDispatch =
   | {
       type: 'set-field';
       field: 'amountOp';
-      value: 'is' | 'isbetween' | 'isapprox';
+      value: 'is' | 'isbetween' | 'isapprox' | 'formula';
     }
   | {
       type: 'set-field';
       field: 'amount';
-      value: number | { num1: number; num2: number };
+      value: number | { num1: number; num2: number } | string;
     }
   | {
       type: 'set-field';
@@ -119,6 +123,30 @@ export function ScheduleEditForm({
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { isNarrowWidth } = useResponsive();
+  const format = useFormat();
+  const formulaModeEnabled = useFeatureFlag('formulaMode');
+  // Make sure that we don't hide the formula if formulaMode has been disabled after the schedule was created
+  const showFormulaOp = formulaModeEnabled || fields.amountOp === 'formula';
+
+  const previewDate =
+    upcomingDates?.[0] ?? schedule?.next_date ?? monthUtils.currentDay();
+  const formulaPreview = (() => {
+    if (fields.amountOp !== 'formula') return null;
+    if (typeof fields.amount !== 'string' || !fields.amount.startsWith('=')) {
+      return null;
+    }
+    try {
+      const result = evaluateFormula(fields.amount, { date: previewDate });
+      if (typeof result !== 'number') {
+        return { error: t('Formula did not evaluate to a number') };
+      }
+      return {
+        value: amountToInteger(result, format.currency.decimalPlaces),
+      };
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : String(e) };
+    }
+  })();
 
   return (
     <>
@@ -185,8 +213,14 @@ export function ScheduleEditForm({
                 style={{ margin: 0, flex: 1 }}
               />
               <OpSelect
-                ops={['isapprox', 'is', 'isbetween']}
-                value={fields.amountOp as 'isapprox' | 'is' | 'isbetween'}
+                ops={
+                  showFormulaOp
+                    ? ['isapprox', 'is', 'isbetween', 'formula']
+                    : ['isapprox', 'is', 'isbetween']
+                }
+                value={
+                  fields.amountOp as 'isapprox' | 'is' | 'isbetween' | 'formula'
+                }
                 formatOp={op => {
                   switch (op) {
                     case 'is':
@@ -195,6 +229,8 @@ export function ScheduleEditForm({
                       return t('is approximately');
                     case 'isbetween':
                       return t('is between');
+                    case 'formula':
+                      return t('is formula');
                     default:
                       throw new Error('Invalid op for select: ' + op);
                   }
@@ -225,6 +261,47 @@ export function ScheduleEditForm({
                   })
                 }
               />
+            ) : fields.amountOp === 'formula' ? (
+              <>
+                <Input
+                  id="amount-field"
+                  value={typeof fields.amount === 'string' ? fields.amount : ''}
+                  onChangeValue={value =>
+                    dispatch({
+                      type: 'set-field',
+                      field: 'amount',
+                      value,
+                    })
+                  }
+                />
+                {formulaPreview && (
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      marginTop: 3,
+                      color:
+                        'error' in formulaPreview
+                          ? theme.errorText
+                          : theme.pageTextLight,
+                    }}
+                  >
+                    {'error' in formulaPreview ? (
+                      formulaPreview.error
+                    ) : (
+                      <Trans>
+                        Evaluates to{' '}
+                        {{
+                          amount: format(formulaPreview.value, 'financial'),
+                        }}{' '}
+                        for{' '}
+                        {{
+                          date: monthUtils.format(previewDate, dateFormat),
+                        }}
+                      </Trans>
+                    )}
+                  </Text>
+                )}
+              </>
             ) : (
               <AmountInput
                 id="amount-field"

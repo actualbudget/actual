@@ -131,9 +131,14 @@ export function updateConditions(conditions, newConditions) {
 // would revert the posted amount to the old value, ignoring the edited
 // amount. Keep such actions in sync with the amount condition.
 //
-// Only plain `set amount` actions are rewritten:
-//   - Templated/formula actions (`options.template`/`options.formula`) compute
-//     their own value, so they're left untouched.
+// `set amount` actions are rewritten as follows:
+//   - When the amount condition is a formula, the action mirrors that formula
+//     (via `options.formula`) so the rule re-evaluates per transaction.
+//   - When the amount condition is *not* a formula, any leftover
+//     `options.formula` is cleared so a previously-formula schedule cannot
+//     keep applying the stale formula via the action.
+//   - Templated actions (`options.template`) compute their own value, so
+//     they're left untouched.
 //   - `set-split-amount` actions have a different `op` and so are excluded by
 //     the `action.op === 'set'` check below.
 //
@@ -147,6 +152,31 @@ function updateActions(
     return null;
   }
 
+  // For formula schedules, mirror the formula into any plain `set amount`
+  // action so the rule re-evaluates against each transaction's own date
+  // instead of carrying a stale numeric snapshot.
+  if (amountCond.op === 'formula' && typeof amountCond.value === 'string') {
+    const formula = amountCond.value;
+    let changed = false;
+    const updated = actions.map(action => {
+      if (
+        action.op === 'set' &&
+        action.field === 'amount' &&
+        !action.options?.template &&
+        action.options?.formula !== formula
+      ) {
+        changed = true;
+        return {
+          ...action,
+          value: 0,
+          options: { ...action.options, formula },
+        };
+      }
+      return action;
+    });
+    return changed ? updated : null;
+  }
+
   // Mirrors how `_amount` resolves: a deleted/empty amount condition value
   // yields 0, so the action is synced to 0 too, keeping it consistent with
   // the amount the schedule actually posts.
@@ -155,16 +185,29 @@ function updateActions(
   let changed = false;
   const updated = actions.map(action => {
     if (
-      action.op === 'set' &&
-      action.field === 'amount' &&
-      !action.options?.template &&
-      !action.options?.formula &&
-      action.value !== amount
+      action.op !== 'set' ||
+      action.field !== 'amount' ||
+      action.options?.template
     ) {
-      changed = true;
+      return action;
+    }
+
+    const hasStaleFormula = action.options?.formula != null;
+    if (!hasStaleFormula && action.value === amount) {
+      return action;
+    }
+
+    changed = true;
+    if (!hasStaleFormula) {
       return { ...action, value: amount };
     }
-    return action;
+
+    const { formula: _drop, ...rest } = action.options!;
+    return {
+      ...action,
+      value: amount,
+      options: Object.keys(rest).length > 0 ? rest : undefined,
+    };
   });
 
   return changed ? updated : null;
@@ -572,11 +615,12 @@ async function postTransactionForSchedule({
     return;
   }
 
+  const postingDate = today ? currentDay() : schedule.next_date;
   const transaction = {
     payee: schedule._payee,
     account: schedule._account,
-    amount: getScheduledAmount(schedule._amount),
-    date: today ? currentDay() : schedule.next_date,
+    amount: getScheduledAmount(schedule._amount, false, { date: postingDate }),
+    date: postingDate,
     schedule: schedule.id,
     cleared: false,
   };

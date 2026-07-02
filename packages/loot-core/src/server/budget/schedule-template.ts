@@ -10,6 +10,7 @@ import {
   extractScheduleConds,
   getDateWithSkippedWeekend,
   getNextDate,
+  getScheduledAmount,
 } from '#shared/schedules';
 import { amountToInteger } from '#shared/util';
 import type { CategoryEntity, TransactionEntity } from '#types/models';
@@ -59,37 +60,44 @@ async function createScheduleList(
     const conditions = rule.serialize().conditions;
     const { date: dateConditions, amount: amountCondition } =
       extractScheduleConds(conditions);
-    let scheduleAmount =
-      amountCondition.op === 'isbetween'
-        ? Math.round(amountCondition.value.num1 + amountCondition.value.num2) /
-          2
-        : amountCondition.value;
-    // Apply adjustment percentage if specified
-    if (template.adjustment !== undefined && template.adjustmentType) {
-      switch (template.adjustmentType) {
-        case 'percent': {
-          const adjustmentFactor = 1 + template.adjustment / 100;
-          scheduleAmount = scheduleAmount * adjustmentFactor;
-          break;
-        }
-        case 'fixed': {
-          const sign = scheduleAmount < 0 ? -1 : 1;
-          scheduleAmount +=
-            sign * amountToInteger(template.adjustment, currency.decimalPlaces);
-          break;
-        }
-
-        default:
-        //no valid adjustment was found
-      }
-    }
-
-    scheduleAmount = Math.round(scheduleAmount);
 
     const next_date_string = getNextDate(
       dateConditions,
       monthUtils._parse(current_month),
     );
+
+    const isFormulaAmount =
+      amountCondition.op === 'formula' &&
+      typeof amountCondition.value === 'string';
+
+    const computeScheduleAmount = (date: string | null): number => {
+      let value = getScheduledAmount(amountCondition.value, false, {
+        date: date ?? undefined,
+        decimalPlaces: currency.decimalPlaces,
+      });
+      if (template.adjustment !== undefined && template.adjustmentType) {
+        switch (template.adjustmentType) {
+          case 'percent': {
+            const adjustmentFactor = 1 + template.adjustment / 100;
+            value = value * adjustmentFactor;
+            break;
+          }
+          case 'fixed': {
+            const sign = value < 0 ? -1 : 1;
+            value +=
+              sign *
+              amountToInteger(template.adjustment, currency.decimalPlaces);
+            break;
+          }
+
+          default:
+          //no valid adjustment was found
+        }
+      }
+      return Math.round(value);
+    };
+
+    const scheduleAmount = computeScheduleAmount(next_date_string);
 
     // Schedule templates call rule.execActions() on the rule attached to each
     // schedule, so we prefetch balances and pass _balanceOfPrefetched here too.
@@ -97,39 +105,47 @@ async function createScheduleList(
     // schedule rules.
     const formulaStrings = collectFormulasFromActions(rule.actions);
 
-    // Use the schedule's next occurrence date so "balance as of this moment"
-    // matches the scheduled date; id/sort_order are unset so we don't exclude a
-    // non-existent transaction from the balance query.
-    const scheduleRuleContext: TransactionEntity = {
-      amount: scheduleAmount,
-      category: category.id,
-      subtransactions: [],
-      ...(next_date_string ? { date: next_date_string } : {}),
-      id: null,
-      sort_order: null,
-    } as TransactionEntity;
-
-    const balanceOfPrefetched = await prefetchBalanceOfForTransaction(
-      scheduleRuleContext,
-      accountsMap,
-      formulaStrings,
-    );
-
-    const { amount: postRuleAmount, subtransactions } = rule.execActions({
-      ...scheduleRuleContext,
-      _balanceOfPrefetched: balanceOfPrefetched,
-    });
-    const categorySubtransactions = subtransactions?.filter(
-      t => t.category === category.id,
-    );
-
-    // Unless the current category is relevant to the schedule, target the post-rule amount.
     const sign = category.is_income ? 1 : -1;
-    const target =
-      sign *
-      (categorySubtransactions?.length
-        ? categorySubtransactions.reduce((acc, t) => acc + t.amount, 0)
-        : (postRuleAmount ?? scheduleAmount));
+
+    // Use each occurrence's date so "balance as of this moment" matches that
+    // scheduled date; id/sort_order are unset so we don't exclude a
+    // non-existent transaction from the balance query.
+    const computeOccurrenceTarget = async (
+      date: string | null,
+      amount: number,
+    ): Promise<number> => {
+      const occurrenceContext: TransactionEntity = {
+        amount,
+        category: category.id,
+        subtransactions: [],
+        ...(date ? { date } : {}),
+        id: null,
+        sort_order: null,
+      } as TransactionEntity;
+      const balanceOfPrefetched = await prefetchBalanceOfForTransaction(
+        occurrenceContext,
+        accountsMap,
+        formulaStrings,
+      );
+      const { amount: postRuleAmount, subtransactions } = rule.execActions({
+        ...occurrenceContext,
+        _balanceOfPrefetched: balanceOfPrefetched,
+      });
+      const categorySubtransactions = subtransactions?.filter(
+        t => t.category === category.id,
+      );
+      return (
+        sign *
+        (categorySubtransactions?.length
+          ? categorySubtransactions.reduce((acc, t) => acc + t.amount, 0)
+          : (postRuleAmount ?? amount))
+      );
+    };
+
+    const target = await computeOccurrenceTarget(
+      next_date_string,
+      scheduleAmount,
+    );
 
     const target_interval = dateConditions.value.interval
       ? dateConditions.value.interval
@@ -181,7 +197,13 @@ async function createScheduleList(
               )
             : nextBaseDate;
           while (nextDate < nextMonth) {
-            monthlyTarget += -target;
+            const occurrenceTarget = isFormulaAmount
+              ? await computeOccurrenceTarget(
+                  nextDate,
+                  computeScheduleAmount(nextDate),
+                )
+              : target;
+            monthlyTarget += -occurrenceTarget;
             const currentDate = nextBaseDate;
             const oneDayLater = monthUtils.addDays(nextBaseDate, 1);
             nextBaseDate = getNextDate(

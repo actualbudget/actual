@@ -41,7 +41,7 @@ const TYPE_INFO = {
     nullable: true,
   },
   number: {
-    ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
+    ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte', 'formula'],
     nullable: false,
   },
   boolean: {
