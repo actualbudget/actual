@@ -656,6 +656,10 @@ export function TransactionList({
             aboveIdx >= 0 ? (previews[aboveIdx].schedule ?? null) : null;
         }
 
+        if (!draggedTrans.schedule) {
+          return;
+        }
+
         await send('schedule/move', {
           id: draggedTrans.schedule,
           targetId: apiTargetId,
