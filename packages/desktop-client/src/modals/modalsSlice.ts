@@ -1,4 +1,5 @@
 import { send } from '@actual-app/core/platform/client/connection';
+import type { ApiTokenCreateResult } from '@actual-app/core/server/auth/app';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { File } from '@actual-app/core/types/file';
 import type {
@@ -585,6 +586,18 @@ export type Modal =
       options: {
         message: string;
         onConfirm: () => void;
+      };
+    }
+  | {
+      name: 'create-api-token';
+      options: {
+        onCreated: (token: ApiTokenCreateResult) => void;
+      };
+    }
+  | {
+      name: 'show-api-token';
+      options: {
+        token: ApiTokenCreateResult;
       };
     }
   | {

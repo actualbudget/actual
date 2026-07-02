@@ -87,6 +87,8 @@ import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleEditModal } from './schedules/ScheduleEditModal';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
+import { CreateApiTokenModal } from './settings/ApiTokens/CreateApiTokenModal';
+import { ShowApiTokenModal } from './settings/ApiTokens/ShowApiTokenModal';
 
 export function Modals() {
   const location = useLocation();
@@ -158,6 +160,12 @@ export function Modals() {
 
         case 'confirm-delete':
           return <ConfirmDeleteModal key={key} {...modal.options} />;
+
+        case 'create-api-token':
+          return <CreateApiTokenModal key={key} {...modal.options} />;
+
+        case 'show-api-token':
+          return <ShowApiTokenModal key={key} {...modal.options} />;
 
         case 'copy-widget-to-dashboard':
           return <CopyWidgetToDashboardModal key={key} {...modal.options} />;

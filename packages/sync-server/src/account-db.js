@@ -7,8 +7,10 @@ import { bootstrapPassword, loginWithPassword } from './accounts/password';
 import { openDatabase } from './db';
 import { config } from './load-config';
 
+/** @type {import('./db').WrappedDatabase | undefined} */
 let _accountDb;
 
+/** @returns {import('./db').WrappedDatabase} */
 export function getAccountDb() {
   if (_accountDb === undefined) {
     const dbPath = join(resolve(config.get('serverFiles')), 'account.sqlite');
