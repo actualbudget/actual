@@ -2,6 +2,11 @@ import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-th
 
 import { logger } from '#platform/server/log';
 
+// After sending a __resume-tab ping we wait for any response from the shared worker.
+// A live shared worker replies well below this threshold; no response means
+// it might have been killed by the OS, and we need to reload.
+const RESUME_TAB_RESPONSE_TIMEOUT_MS = 1_000;
+
 type BridgeMessage = { type?: string; [key: string]: unknown };
 
 /** The Worker-like surface the connection layer interacts with. */
@@ -28,9 +33,8 @@ export class WorkerBridge {
   _onmessage: ((e: MessageEvent) => void) | null;
   _listeners: Array<{ type: string; handler: (e: MessageEvent) => void }>;
   _started: boolean;
-  _isInitialized: boolean;
   _currentBudgetId: string | null;
-  _wasHidden: boolean;
+  _sharedWorkerLivenessTimeout: { start: () => void; clear: () => void };
   _onVisibilityChange: () => void;
   localBackendWorker: Worker | null;
   backendWorkerUrl: URL;
@@ -40,19 +44,21 @@ export class WorkerBridge {
     this._onmessage = null;
     this._listeners = [];
     this._started = false;
-    this._isInitialized = false;
     this._currentBudgetId = null;
-    this._wasHidden = document.visibilityState === 'hidden';
+    this._sharedWorkerLivenessTimeout =
+      this._createSharedWorkerLivenessTimeout();
     this.localBackendWorker = null;
     this.backendWorkerUrl = backendWorkerUrl;
 
     this._onVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        this._wasHidden = true;
-      } else if (this._wasHidden) {
-        this._wasHidden = false;
-        this._resumeAssociation();
+      if (document.visibilityState === 'hidden' || !this._started) {
+        return;
       }
+
+      // Cancel any pending reload from a prior transition, then re-check shared worker's liveness
+      this._sharedWorkerLivenessTimeout.clear();
+      this._resumeAssociation();
+      this._sharedWorkerLivenessTimeout.start();
     };
 
     // Listen for all messages from the SharedWorker port
@@ -106,6 +112,9 @@ export class WorkerBridge {
   }
 
   _onSharedMessage(event: MessageEvent) {
+    // Cancel any pending reload — the shared worker is alive.
+    this._sharedWorkerLivenessTimeout.clear();
+
     const msg = event.data as BridgeMessage;
 
     // Elected as leader: create the real backend Worker on this tab
@@ -183,10 +192,6 @@ export class WorkerBridge {
     this._dispatch(event);
   }
 
-  markInitialized() {
-    this._isInitialized = true;
-  }
-
   _normalizeBudgetId(budgetId: string | null): string | null {
     if (
       typeof budgetId === 'string' &&
@@ -207,9 +212,6 @@ export class WorkerBridge {
   }
 
   _resumeAssociation() {
-    if (!this._isInitialized) {
-      return;
-    }
     this._sharedPort.postMessage({
       type: '__resume-tab',
       budgetId: this._currentBudgetId,
@@ -270,5 +272,22 @@ export class WorkerBridge {
     };
 
     localWorker.postMessage(initMsg);
+  }
+
+  _createSharedWorkerLivenessTimeout() {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    return {
+      start() {
+        timer = setTimeout(() => {
+          window.location.reload();
+        }, RESUME_TAB_RESPONSE_TIMEOUT_MS);
+      },
+      clear() {
+        if (timer !== null) {
+          clearTimeout(timer);
+          timer = null;
+        }
+      },
+    };
   }
 }
