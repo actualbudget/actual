@@ -5,6 +5,15 @@ import type {
   NewDashboardWidgetEntity,
 } from '#types/models';
 
+export type DashboardExportSkipReason =
+  | 'missing-custom-report'
+  | 'serialization-error';
+
+export type SkippedDashboardExport = {
+  name: string;
+  reason: DashboardExportSkipReason;
+};
+
 export function serializeDashboardWidget(
   widget: DashboardWidgetEntity,
   customReportMap: Map<string, CustomReportEntity>,

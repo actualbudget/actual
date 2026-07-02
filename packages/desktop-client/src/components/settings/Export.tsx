@@ -6,8 +6,10 @@ import { ButtonWithLoading } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
+import type { SkippedDashboardExport } from '@actual-app/core/shared/dashboard';
 import { format } from 'date-fns';
 
+import { Warning } from '#components/alerts';
 import { useMetadataPref } from '#hooks/useMetadataPref';
 
 import { Setting } from './UI';
@@ -16,22 +18,44 @@ export function ExportDashboards() {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [skippedDashboards, setSkippedDashboards] = useState<
+    SkippedDashboardExport[]
+  >([]);
   const [budgetName] = useMetadataPref('budgetName');
+
+  function formatSkippedDashboard({ name, reason }: SkippedDashboardExport) {
+    const displayName = name || t('Untitled dashboard');
+
+    if (reason === 'missing-custom-report') {
+      return t(
+        '"{{name}}" contains a custom report widget linked to a missing report.',
+        { name: displayName },
+      );
+    }
+
+    return t('"{{name}}" could not be exported.', { name: displayName });
+  }
 
   async function onExport() {
     setIsLoading(true);
     setError(null);
+    setSkippedDashboards([]);
 
     try {
       const response = await send('dashboard-export-all');
 
+      setSkippedDashboards(
+        'skippedDashboards' in response
+          ? (response.skippedDashboards ?? [])
+          : [],
+      );
+
       if ('error' in response && response.error) {
         setError(response.error);
-        setIsLoading(false);
         return;
       }
 
-      if (response.data) {
+      if ('data' in response && response.data) {
         void window.Actual.saveFile(
           response.data,
           `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}-dashboards.zip`,
@@ -54,10 +78,25 @@ export function ExportDashboards() {
           </ButtonWithLoading>
           {error && (
             <Block style={{ color: theme.errorText, marginTop: 15 }}>
-              {t(
-                'An unknown error occurred while exporting. Please report this as a new issue on GitHub.',
-              )}
+              {error === 'all-dashboards-failed'
+                ? t(
+                    'No dashboards could be exported. Review the skipped dashboards below.',
+                  )
+                : t(
+                    'An unknown error occurred while exporting. Please report this as a new issue on GitHub.',
+                  )}
             </Block>
+          )}
+          {skippedDashboards.length > 0 && (
+            <Warning style={{ marginTop: 15 }}>
+              <Trans count={skippedDashboards.length}>
+                {{ count: skippedDashboards.length }} dashboard could not be
+                exported:
+              </Trans>
+              {skippedDashboards.map((skipped, idx) => (
+                <Block key={idx}>{formatSkippedDashboard(skipped)}</Block>
+              ))}
+            </Warning>
           )}
         </>
       }

@@ -17,9 +17,11 @@ import {
   DEFAULT_DASHBOARD_STATE,
   serializeDashboardWidget,
 } from '#shared/dashboard';
+import type { SkippedDashboardExport } from '#shared/dashboard';
 import { q } from '#shared/query';
 import type {
   CustomReportData,
+  CustomReportEntity,
   DashboardWidgetEntity,
   ExportImportCustomReportWidget,
   ExportImportDashboard,
@@ -356,6 +358,15 @@ async function importDashboard({
   }
 }
 
+function hasMissingCustomReport(
+  widgets: DashboardWidgetEntity[],
+  reportMap: Map<string, CustomReportEntity>,
+) {
+  return widgets.some(
+    widget => widget.type === 'custom-report' && !reportMap.has(widget.meta.id),
+  );
+}
+
 async function exportAllDashboards() {
   try {
     const { data: pages } = (await aqlQuery(
@@ -382,6 +393,7 @@ async function exportAllDashboards() {
     }
 
     const zip = new AdmZip();
+    const skippedDashboards: SkippedDashboardExport[] = [];
 
     pages.forEach((page, index) => {
       const safeName =
@@ -390,21 +402,51 @@ async function exportAllDashboards() {
           .replace(/[^a-z0-9 -]/g, '')
           .trim()
           .replace(/\s+/g, '-') || 'dashboard';
+      const dashboardName = page.name?.trim() ?? '';
+      const pageWidgets = pageWidgetsMap.get(page.id) ?? [];
 
-      const dashboard = {
-        version: 1 as const,
-        widgets: (pageWidgetsMap.get(page.id) ?? []).map(widget =>
-          serializeDashboardWidget(widget, reportMap),
-        ),
-      } satisfies ExportImportDashboard;
+      try {
+        if (hasMissingCustomReport(pageWidgets, reportMap)) {
+          skippedDashboards.push({
+            name: dashboardName,
+            reason: 'missing-custom-report',
+          });
+          return;
+        }
 
-      zip.addFile(
-        `${index + 1}-${safeName}.json`,
-        Buffer.from(JSON.stringify(dashboard, null, 2), 'utf8'),
-      );
+        const dashboard = {
+          version: 1 as const,
+          widgets: pageWidgets.map(widget =>
+            serializeDashboardWidget(widget, reportMap),
+          ),
+        } satisfies ExportImportDashboard;
+
+        zip.addFile(
+          `${index + 1}-${safeName}.json`,
+          Buffer.from(JSON.stringify(dashboard, null, 2), 'utf8'),
+        );
+      } catch (err) {
+        skippedDashboards.push({
+          name: dashboardName,
+          reason: 'serialization-error',
+        });
+
+        if (err instanceof Error) {
+          captureException(
+            new Error(
+              `Error exporting dashboard "${dashboardName}" (${page.id}): ${err.message}`,
+              { cause: err },
+            ),
+          );
+        }
+      }
     });
 
-    return { data: zip.toBuffer() };
+    if (pages.length > 0 && skippedDashboards.length === pages.length) {
+      return { error: 'all-dashboards-failed' as const, skippedDashboards };
+    }
+
+    return { data: zip.toBuffer(), skippedDashboards };
   } catch (err) {
     if (err instanceof Error) {
       err.message = 'Error exporting dashboards: ' + err.message;
