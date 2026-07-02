@@ -19,6 +19,14 @@ export type FormulaFunctionDef = {
   parameters: Array<{ name: string; description: string }>;
 };
 
+export const budgetQueryDimensions = [
+  'budgeted',
+  'spent',
+  'balance_start',
+  'balance_end',
+  'goal',
+] as const;
+
 type FormulaFunctionCategoryConfig = {
   section: string;
   order: number;
@@ -73,6 +81,18 @@ function getVariableCompletionSection(): string {
   return `🔢 ${t('Variables')}`;
 }
 
+export function getFunctionSignatureCompletionSection(): string {
+  return `ℹ️ ${t('Function Signature')}`;
+}
+
+export function getBudgetDimensionCompletionSection(): string {
+  return `💸 ${t('Budget Dimensions')}`;
+}
+
+export function getBudgetCategoryCompletionSection(): string {
+  return `🏷️ ${t('Budget Categories')}`;
+}
+
 function getRuleFieldCompletionSection(): string {
   return `💰 ${t('Transaction Fields')}`;
 }
@@ -81,6 +101,7 @@ function getFormulaCompletionSectionOrder(): Record<string, number> {
   const categoryConfig = getFormulaFunctionCategoryConfig();
 
   return {
+    [getFunctionSignatureCompletionSection()]: -2,
     [getVariableCompletionSection()]: -1,
     [categoryConfig.query.section]: categoryConfig.query.order,
     [categoryConfig.math.section]: categoryConfig.math.order,
@@ -88,7 +109,9 @@ function getFormulaCompletionSectionOrder(): Record<string, number> {
     [categoryConfig.text.section]: categoryConfig.text.order,
     [categoryConfig.date.section]: categoryConfig.date.order,
     [categoryConfig.other.section]: categoryConfig.other.order,
-    [getRuleFieldCompletionSection()]: 6,
+    [getBudgetDimensionCompletionSection()]: 6,
+    [getBudgetCategoryCompletionSection()]: 7,
+    [getRuleFieldCompletionSection()]: 8,
   };
 }
 
