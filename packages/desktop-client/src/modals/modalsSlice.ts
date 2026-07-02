@@ -353,8 +353,16 @@ export type Modal =
         onReopenAccount: (accountId: AccountEntity['id']) => void;
         onEditNotes: (id: NoteEntity['id']) => void;
         onClose?: () => void;
+        onReconcile?: () => void;
         onToggleRunningBalance?: () => void;
         onToggleReconciled?: () => void;
+      };
+    }
+  | {
+      name: 'account-reconcile';
+      options: {
+        accountId: AccountEntity['id'];
+        onReconcile: (amount: number) => void;
       };
     }
   | {

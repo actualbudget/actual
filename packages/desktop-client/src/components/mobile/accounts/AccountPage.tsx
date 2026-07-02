@@ -1,6 +1,6 @@
 import React, { Fragment, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router';
+import { useParams, useSearchParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
@@ -139,6 +139,32 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     reopenAccount({ id: account.id });
   }, [account.id, reopenAccount]);
 
+  const [, setSearchParams] = useSearchParams();
+
+  const onReconcile = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'account-reconcile',
+          options: {
+            accountId: account.id,
+            onReconcile: (amount: number) => {
+              setSearchParams(prev => {
+                prev.set('reconcile', String(amount));
+                return prev;
+              });
+              dispatch(
+                collapseModals({
+                  rootModalName: 'account-menu',
+                }),
+              );
+            },
+          },
+        },
+      }),
+    );
+  }, [account.id, dispatch, setSearchParams]);
+
   const [showRunningBalances, setShowRunningBalances] = useSyncedPref(
     `show-balances-${account.id}`,
   );
@@ -175,6 +201,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
             onEditNotes,
             onCloseAccount,
             onReopenAccount,
+            onReconcile,
             onToggleRunningBalance,
             onToggleReconciled,
           },
@@ -186,6 +213,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     dispatch,
     onCloseAccount,
     onEditNotes,
+    onReconcile,
     onReopenAccount,
     onSave,
     onToggleRunningBalance,

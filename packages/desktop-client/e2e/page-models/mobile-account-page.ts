@@ -11,6 +11,8 @@ export class MobileAccountPage {
   readonly transactionList: Locator;
   readonly transactions: Locator;
   readonly createTransactionButton: Locator;
+  readonly accountMenuButton: Locator;
+  readonly reconcilingBanner: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -24,6 +26,8 @@ export class MobileAccountPage {
     this.createTransactionButton = page.getByRole('button', {
       name: 'Add Transaction',
     });
+    this.accountMenuButton = this.heading.getByRole('button');
+    this.reconcilingBanner = page.getByTestId('reconciling-banner');
   }
 
   async waitFor(...options: Parameters<Locator['waitFor']>) {
@@ -58,5 +62,24 @@ export class MobileAccountPage {
   async clickCreateTransaction() {
     await this.createTransactionButton.click();
     return new MobileTransactionEntryPage(this.page);
+  }
+
+  /**
+   * Start reconciling the account
+   */
+  async startReconciliation(amount?: string) {
+    await this.accountMenuButton.click();
+    await this.page
+      .getByTestId('account-menu-modal')
+      .getByRole('button', { name: 'Reconcile' })
+      .click();
+    const reconcileModal = this.page.getByTestId('account-reconcile-modal');
+    const amountInput = reconcileModal.getByTestId('amount-input');
+    await amountInput.waitFor();
+    if (amount != null) {
+      await amountInput.fill(amount);
+    }
+    await reconcileModal.getByRole('button', { name: 'Reconcile' }).click();
+    await this.reconcilingBanner.waitFor();
   }
 }
