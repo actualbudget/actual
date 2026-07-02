@@ -1,3 +1,4 @@
+import AdmZip from 'adm-zip';
 import { isMatch } from 'es-toolkit/compat';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,9 +13,15 @@ import { mutator } from '#server/mutators';
 import { reportModel } from '#server/reports/app';
 import { batchMessages } from '#server/sync';
 import { undoable } from '#server/undo';
-import { DEFAULT_DASHBOARD_STATE } from '#shared/dashboard';
+import {
+  DEFAULT_DASHBOARD_STATE,
+  serializeDashboardWidget,
+} from '#shared/dashboard';
+import type { SkippedDashboardExport } from '#shared/dashboard';
 import { q } from '#shared/query';
 import type {
+  CustomReportData,
+  CustomReportEntity,
   DashboardWidgetEntity,
   ExportImportCustomReportWidget,
   ExportImportDashboard,
@@ -351,6 +358,104 @@ async function importDashboard({
   }
 }
 
+function hasMissingCustomReport(
+  widgets: DashboardWidgetEntity[],
+  reportMap: Map<string, CustomReportEntity>,
+) {
+  return widgets.some(
+    widget => widget.type === 'custom-report' && !reportMap.has(widget.meta.id),
+  );
+}
+
+async function exportAllDashboards() {
+  try {
+    const { data: pages } = (await aqlQuery(
+      q('dashboard_pages').select('*'),
+    )) as { data: { id: string; name: string }[] };
+
+    const { data: allWidgets } = (await aqlQuery(
+      q('dashboard').select('*'),
+    )) as { data: DashboardWidgetEntity[] };
+
+    const { data: customReportRows } = (await aqlQuery(
+      q('custom_reports').select('*'),
+    )) as { data: CustomReportData[] };
+
+    const reportMap = new Map(
+      customReportRows.map(r => [r.id, reportModel.toJS(r)]),
+    );
+
+    const pageWidgetsMap = new Map<string, DashboardWidgetEntity[]>();
+    for (const widget of allWidgets) {
+      const list = pageWidgetsMap.get(widget.dashboard_page_id) ?? [];
+      list.push(widget);
+      pageWidgetsMap.set(widget.dashboard_page_id, list);
+    }
+
+    const zip = new AdmZip();
+    const skippedDashboards: SkippedDashboardExport[] = [];
+
+    pages.forEach((page, index) => {
+      const safeName =
+        (page.name ?? 'dashboard')
+          .toLowerCase()
+          .replace(/[^a-z0-9 -]/g, '')
+          .trim()
+          .replace(/\s+/g, '-') || 'dashboard';
+      const dashboardName = page.name?.trim() ?? '';
+      const pageWidgets = pageWidgetsMap.get(page.id) ?? [];
+
+      try {
+        if (hasMissingCustomReport(pageWidgets, reportMap)) {
+          skippedDashboards.push({
+            name: dashboardName,
+            reason: 'missing-custom-report',
+          });
+          return;
+        }
+
+        const dashboard = {
+          version: 1 as const,
+          widgets: pageWidgets.map(widget =>
+            serializeDashboardWidget(widget, reportMap),
+          ),
+        } satisfies ExportImportDashboard;
+
+        zip.addFile(
+          `${index + 1}-${safeName}.json`,
+          Buffer.from(JSON.stringify(dashboard, null, 2), 'utf8'),
+        );
+      } catch (err) {
+        skippedDashboards.push({
+          name: dashboardName,
+          reason: 'serialization-error',
+        });
+
+        if (err instanceof Error) {
+          captureException(
+            new Error(
+              `Error exporting dashboard "${dashboardName}" (${page.id}): ${err.message}`,
+              { cause: err },
+            ),
+          );
+        }
+      }
+    });
+
+    if (pages.length > 0 && skippedDashboards.length === pages.length) {
+      return { error: 'all-dashboards-failed' as const, skippedDashboards };
+    }
+
+    return { data: zip.toBuffer(), skippedDashboards };
+  } catch (err) {
+    if (err instanceof Error) {
+      err.message = 'Error exporting dashboards: ' + err.message;
+      captureException(err);
+    }
+    return { error: 'internal-error' as const };
+  }
+}
+
 export type DashboardHandlers = {
   'dashboard-create': typeof createDashboardPage;
   'dashboard-delete': typeof deleteDashboardPage;
@@ -362,6 +467,7 @@ export type DashboardHandlers = {
   'dashboard-remove-widget': typeof removeDashboardWidget;
   'dashboard-copy-widget': typeof copyDashboardWidget;
   'dashboard-import': typeof importDashboard;
+  'dashboard-export-all': typeof exportAllDashboards;
 };
 
 export const app = createApp<DashboardHandlers>();
@@ -376,3 +482,4 @@ app.method('dashboard-add-widget', mutator(undoable(addDashboardWidget)));
 app.method('dashboard-remove-widget', mutator(undoable(removeDashboardWidget)));
 app.method('dashboard-copy-widget', mutator(undoable(copyDashboardWidget)));
 app.method('dashboard-import', mutator(undoable(importDashboard)));
+app.method('dashboard-export-all', exportAllDashboards);
