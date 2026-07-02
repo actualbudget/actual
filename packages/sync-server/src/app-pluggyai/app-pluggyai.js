@@ -239,10 +239,7 @@ function addMonthsClamped(date, months) {
 }
 
 function getTransactionDateCorrected(trans) {
-  if (
-    'creditCardMetadata' in trans &&
-    'installmentNumber' in trans.creditCardMetadata
-  ) {
+  if (trans.creditCardMetadata?.installmentNumber != null) {
     return addMonthsClamped(
       trans.creditCardMetadata.purchaseDate || trans.date,
       trans.creditCardMetadata.installmentNumber - 1,
