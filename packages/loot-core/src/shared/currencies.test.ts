@@ -23,6 +23,15 @@ describe('getDecimalPlaces', () => {
 });
 
 describe('currency metadata', () => {
+  it('includes ILS with the expected metadata', () => {
+    const ils = currencies.find(currency => currency.code === 'ILS');
+
+    expect(ils).toBeDefined();
+    expect(ils?.name).toBe('Israeli New Shekel');
+    expect(ils?.symbol).toBe('₪');
+    expect(ils?.decimalPlaces).toBe(2);
+  });
+
   it.each(currencies)(
     '$name ($code) has a numeric decimalPlaces field',
     currency => {
