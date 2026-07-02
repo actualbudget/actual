@@ -4,9 +4,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { logger } from '#platform/server/log';
 import { send } from '#server/main-app';
 import { ruleModel } from '#server/transactions/transaction-rules';
+import { setDefaultCurrencyCode } from '#server/util/currency';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
-import { groupBy, sortByKey } from '#shared/util';
+import { amountToCurrencyInteger, groupBy, sortByKey } from '#shared/util';
 import type { RecurConfig, RecurPattern, RuleEntity } from '#types/models';
 
 import type {
@@ -68,10 +69,10 @@ function findIdByName<T extends { id: string; name: string }>(
   return findByNameIgnoreCase<T>(categories, name)?.id;
 }
 
-function amountFromYnab(amount: number) {
-  // YNAB multiplies amount by 1000 and Actual by 100
-  // so, this function divides by 10
-  return Math.round(amount / 10);
+function amountFromYnab(amount: number, currency: string) {
+  // YNAB stores amounts as milliunits (÷1000 = major unit). Convert to
+  // Actual's integer encoding for the given currency's decimal precision.
+  return amountToCurrencyInteger(amount / 1000, currency);
 }
 
 function getDayOfMonth(date: string) {
@@ -571,6 +572,7 @@ async function importTransactions(
   entityIdMap: Map<string, string>,
   flagNameConflicts: Set<string>,
 ) {
+  const currencyCode = data.currency_format?.iso_code ?? '';
   const payees = await send('api/payees-get');
   const categories = await send('api/categories-get', {
     grouped: false,
@@ -760,7 +762,7 @@ async function importTransactions(
             id: entityIdMap.get(transaction.id),
             account: entityIdMap.get(transaction.account_id),
             date: transaction.date,
-            amount: amountFromYnab(transaction.amount),
+            amount: amountFromYnab(transaction.amount, currencyCode),
             category: entityIdMap.get(transaction.category_id) || null,
             cleared: ['cleared', 'reconciled'].includes(transaction.cleared),
             reconciled: transaction.cleared === 'reconciled',
@@ -774,7 +776,7 @@ async function importTransactions(
               ? subtransactions.map(subtrans => {
                   return {
                     id: entityIdMap.get(subtrans.id),
-                    amount: amountFromYnab(subtrans.amount),
+                    amount: amountFromYnab(subtrans.amount, currencyCode),
                     category: entityIdMap.get(subtrans.category_id) || null,
                     notes: subtrans.memo,
                     transfer_id:
@@ -852,6 +854,7 @@ async function importScheduledTransactions(
   entityIdMap: Map<string, string>,
   flagNameConflicts: Set<string>,
 ) {
+  const currencyCode = data.currency_format?.iso_code ?? '';
   const scheduledTransactions = data.scheduled_transactions;
   const scheduledSubtransactionsGrouped = groupBy(
     data.scheduled_subtransactions,
@@ -956,7 +959,7 @@ async function importScheduledTransactions(
       posts_transaction: false,
       payee: mappedPayeeId,
       account: mappedAccountId,
-      amount: amountFromYnab(scheduled.amount),
+      amount: amountFromYnab(scheduled.amount, currencyCode),
       amountOp: 'is',
       date: scheduleDate,
     });
@@ -1027,7 +1030,7 @@ async function importScheduledTransactions(
 
         actions.push({
           op: 'set-split-amount',
-          value: amountFromYnab(subtransaction.amount),
+          value: amountFromYnab(subtransaction.amount, currencyCode),
           options: { splitIndex, method: 'fixed-amount' },
         });
 
@@ -1103,6 +1106,7 @@ async function importBudgets(data: Budget, entityIdMap: Map<string, string>) {
   // Also, there could be a way to set rollover using
   // Deferred Income Subcat and Immediate Income Subcat
 
+  const currencyCode = data.currency_format?.iso_code ?? '';
   const budgets = sortByKey(data.months, 'month');
 
   const internalCatIdYnab = findIdByName(
@@ -1122,7 +1126,7 @@ async function importBudgets(data: Budget, entityIdMap: Map<string, string>) {
       await Promise.all(
         budget.categories.map(async catBudget => {
           const catId = entityIdMap.get(catBudget.id);
-          const amount = Math.round(catBudget.budgeted / 10);
+          const amount = amountFromYnab(catBudget.budgeted, currencyCode);
 
           if (
             !catId ||
@@ -1168,6 +1172,11 @@ export function getBudgetName(_filepath: string, data: Budget) {
 export async function doImport(data: Budget) {
   const entityIdMap = new Map<string, string>();
   const flagNameConflicts = getFlagNameConflicts(data);
+
+  const currencyCode = data.currency_format?.iso_code ?? '';
+  if (currencyCode) {
+    await setDefaultCurrencyCode(currencyCode);
+  }
 
   logger.log('Importing Accounts...');
   await importAccounts(data, entityIdMap);

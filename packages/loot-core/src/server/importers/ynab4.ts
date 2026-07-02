@@ -4,8 +4,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '#platform/server/log';
 import { send } from '#server/main-app';
+import { setDefaultCurrencyCode } from '#server/util/currency';
 import * as monthUtils from '#shared/months';
-import { amountToInteger, groupBy, sortByKey } from '#shared/util';
+import { amountToCurrencyInteger, groupBy, sortByKey } from '#shared/util';
 
 import type * as YNAB4 from './ynab4-types';
 
@@ -133,6 +134,7 @@ async function importTransactions(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
 ) {
+  const currencyCode = data.budgetMetaData.currencyISOSymbol ?? '';
   const categories = await send('api/categories-get', {
     grouped: false,
   });
@@ -213,7 +215,7 @@ async function importTransactions(
 
           const newTransaction = {
             id,
-            amount: amountToInteger(transaction.amount),
+            amount: amountToCurrencyInteger(transaction.amount, currencyCode),
             category: isOffBudget(entityIdMap.get(accountId))
               ? null
               : getCategory(transaction.categoryId),
@@ -232,7 +234,7 @@ async function importTransactions(
                 .map(t => {
                   return {
                     id: entityIdMap.get(t.entityId),
-                    amount: amountToInteger(t.amount),
+                    amount: amountToCurrencyInteger(t.amount, currencyCode),
                     category: getCategory(t.categoryId),
                     notes: t.memo || null,
                     ...transferProperties(t),
@@ -288,6 +290,7 @@ async function importBudgets(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
 ) {
+  const currencyCode = data.budgetMetaData.currencyISOSymbol ?? '';
   const budgets = sortByKey(data.monthlyBudgets, 'month');
 
   await send('api/batch-budget-start');
@@ -300,7 +303,10 @@ async function importBudgets(
 
       await Promise.all(
         filled.map(async catBudget => {
-          const amount = amountToInteger(catBudget.budgeted);
+          const amount = amountToCurrencyInteger(
+            catBudget.budgeted,
+            currencyCode,
+          );
           const catId = entityIdMap.get(catBudget.categoryId);
           const month = monthUtils.monthFromDate(budget.month);
           if (!catId) {
@@ -375,6 +381,11 @@ function findLatestDevice(zipped: AdmZip, entries: AdmZip.IZipEntry[]): string {
 
 export async function doImport(data: YNAB4.YFull) {
   const entityIdMap = new Map<string, string>();
+
+  const currencyCode = data.budgetMetaData.currencyISOSymbol ?? '';
+  if (currencyCode) {
+    await setDefaultCurrencyCode(currencyCode);
+  }
 
   logger.log('Importing Accounts...');
   await importAccounts(data, entityIdMap);

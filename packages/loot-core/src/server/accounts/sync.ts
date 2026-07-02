@@ -14,6 +14,7 @@ import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
 import { batchUpdateTransactions } from '#server/transactions';
 import { runRules } from '#server/transactions/transaction-rules';
+import { getDefaultCurrencyCode } from '#server/util/currency';
 import {
   defaultMappings,
   mappingsFromString,
@@ -25,7 +26,7 @@ import {
   recalculateSplit,
 } from '#shared/transactions';
 import {
-  amountToInteger,
+  amountToCurrencyInteger,
   hasFieldsChanged,
   integerToAmount,
 } from '#shared/util';
@@ -484,23 +485,25 @@ async function normalizeTransactions(
 async function normalizeBankSyncTransactions(transactions, acctId) {
   const payeesToCreate = new Map();
 
-  const [customMappingsRaw, importPending, importNotes] = await Promise.all([
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `custom-sync-mappings-${acctId}` })
-        .select('value'),
-    ).then(data => data?.data?.[0]?.value),
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `sync-import-pending-${acctId}` })
-        .select('value'),
-    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `sync-import-notes-${acctId}` })
-        .select('value'),
-    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
-  ]);
+  const [customMappingsRaw, importPending, importNotes, defaultCurrencyCode] =
+    await Promise.all([
+      aqlQuery(
+        q('preferences')
+          .filter({ id: `custom-sync-mappings-${acctId}` })
+          .select('value'),
+      ).then(data => data?.data?.[0]?.value),
+      aqlQuery(
+        q('preferences')
+          .filter({ id: `sync-import-pending-${acctId}` })
+          .select('value'),
+      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+      aqlQuery(
+        q('preferences')
+          .filter({ id: `sync-import-notes-${acctId}` })
+          .select('value'),
+      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+      getDefaultCurrencyCode(),
+    ]);
 
   const mappings = customMappingsRaw
     ? mappingsFromString(customMappingsRaw)
@@ -551,7 +554,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     normalized.push({
       payee_name: payeeName,
       trans: {
-        amount: amountToInteger(trans.amount),
+        amount: amountToCurrencyInteger(trans.amount, defaultCurrencyCode),
         payee: trans.payee,
         account: trans.account,
         date,
@@ -1035,17 +1038,20 @@ async function processBankSyncDownload(
   // that account sync sources can give two different transaction IDs even though it's the same transaction.
   const useStrictIdChecking = !acctRow.account_sync_source;
 
-  const importTransactions = await aqlQuery(
-    q('preferences')
-      .filter({ id: `sync-import-transactions-${id}` })
-      .select('value'),
-  ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
-
-  const updateDates = await aqlQuery(
-    q('preferences')
-      .filter({ id: `sync-update-dates-${id}` })
-      .select('value'),
-  ).then(data => String(data?.data?.[0]?.value ?? 'false') === 'true');
+  const [importTransactions, updateDates, defaultCurrencyCode] =
+    await Promise.all([
+      aqlQuery(
+        q('preferences')
+          .filter({ id: `sync-import-transactions-${id}` })
+          .select('value'),
+      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+      aqlQuery(
+        q('preferences')
+          .filter({ id: `sync-update-dates-${id}` })
+          .select('value'),
+      ).then(data => String(data?.data?.[0]?.value ?? 'false') === 'true'),
+      getDefaultCurrencyCode(),
+    ]);
 
   /** Starting balance is actually the current balance of the account. */
   const {
@@ -1063,14 +1069,23 @@ async function processBankSyncDownload(
     } else if (acctRow.account_sync_source === 'simpleFin') {
       const previousBalance = transactions.reduce((total, trans) => {
         return (
-          total - parseInt(trans.transactionAmount.amount.replace('.', ''))
+          total -
+          amountToCurrencyInteger(
+            parseFloat(trans.transactionAmount.amount),
+            defaultCurrencyCode,
+          )
         );
       }, currentBalance);
       balanceToUse = previousBalance;
     } else if (acctRow.account_sync_source === 'pluggyai') {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
-        (total, trans) => total - trans.transactionAmount.amount * 100,
+        (total, trans) =>
+          total -
+          amountToCurrencyInteger(
+            trans.transactionAmount.amount,
+            defaultCurrencyCode,
+          ),
         currentBalance,
       );
       balanceToUse = Math.round(previousBalance);
@@ -1084,14 +1099,24 @@ async function processBankSyncDownload(
         ? transactions
         : transactions.filter(trans => Boolean(trans.booked));
       const previousBalance = importable.reduce((total, trans) => {
-        return total - amountToInteger(trans.transactionAmount.amount);
+        return (
+          total -
+          amountToCurrencyInteger(
+            trans.transactionAmount.amount,
+            defaultCurrencyCode,
+          )
+        );
       }, currentBalance);
       balanceToUse = previousBalance;
     } else if (acctRow.account_sync_source === 'akahu') {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
         (total, trans) =>
-          total - amountToInteger(trans.transactionAmount.amount),
+          total -
+          amountToCurrencyInteger(
+            trans.transactionAmount.amount,
+            defaultCurrencyCode,
+          ),
         currentBalance,
       );
       balanceToUse = Math.round(previousBalance);

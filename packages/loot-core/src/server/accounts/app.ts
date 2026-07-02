@@ -18,10 +18,11 @@ import { get, post } from '#server/post';
 import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
 import { undoable, withUndo } from '#server/undo';
+import { getDefaultCurrencyCode } from '#server/util/currency';
 import { isNonProductionEnvironment } from '#shared/environment';
 import { dayFromDate } from '#shared/months';
 import * as monthUtils from '#shared/months';
-import { amountToInteger } from '#shared/util';
+import { amountToCurrencyInteger } from '#shared/util';
 import type { ImportTransactionsOpts } from '#types/api-handlers';
 import type {
   AccountEntity,
@@ -567,10 +568,11 @@ async function createAccount({
 
   if (balance != null && balance !== 0) {
     const payee = await getStartingBalancePayee();
+    const defaultCurrencyCode = await getDefaultCurrencyCode();
 
     await db.insertTransaction({
       account: id,
-      amount: amountToInteger(balance),
+      amount: amountToCurrencyInteger(balance, defaultCurrencyCode),
       category: offBudget ? null : payee.category,
       payee: payee.id,
       date: monthUtils.currentDay(),

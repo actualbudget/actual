@@ -486,6 +486,13 @@ export function amountToCurrencyInteger(amount: number, code: string): number {
   return amountToInteger(amount, getDecimalPlaces(code));
 }
 
+export function integerToCurrencyAmount(
+  integerAmount: IntegerAmount,
+  code: string,
+): Amount {
+  return integerToAmount(integerAmount, getDecimalPlaces(code));
+}
+
 export function amountToCurrency(amount: Amount): CurrencyAmount {
   return getNumberFormat().formatter.format(amount);
 }
