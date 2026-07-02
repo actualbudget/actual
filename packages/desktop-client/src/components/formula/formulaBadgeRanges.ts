@@ -26,6 +26,15 @@ export type FormulaBadgeRange = {
   categories?: BudgetCategoryBadge[];
 };
 
+export type CachedFormulaBadgeRange = FormulaBadgeRange & {
+  sourceText: string;
+};
+
+export type FormulaBadgeRangeResult = {
+  ranges: FormulaBadgeRange[];
+  status: 'ok' | 'partial' | 'failed' | 'inactive';
+};
+
 type Token = {
   image: string;
   startOffset?: number;
@@ -531,6 +540,143 @@ function getNamedExpressionBadges({
   };
 }
 
+function doRangesOverlap(
+  firstRange: { from: number; to: number },
+  secondRange: { from: number; to: number },
+) {
+  return firstRange.from < secondRange.to && secondRange.from < firstRange.to;
+}
+
+function findSourceTextRanges(source: string, sourceText: string) {
+  const ranges: FormulaRange[] = [];
+  let from = source.indexOf(sourceText);
+
+  while (from !== -1) {
+    ranges.push({ from, to: from + sourceText.length });
+    from = source.indexOf(sourceText, from + 1);
+  }
+
+  return ranges;
+}
+
+export function cacheFormulaBadgeRanges(
+  formula: string,
+  ranges: FormulaBadgeRange[],
+): CachedFormulaBadgeRange[] {
+  return ranges
+    .map(range => ({
+      ...range,
+      sourceText: formula.slice(range.from, range.to),
+    }))
+    .filter(range => range.sourceText.length > 0);
+}
+
+export function remapCachedFormulaBadgeRanges({
+  formula,
+  cachedRanges,
+  blockedRanges = [],
+}: {
+  formula: string;
+  cachedRanges: CachedFormulaBadgeRange[];
+  blockedRanges?: Array<{ from: number; to: number }>;
+}): FormulaBadgeRange[] {
+  const usedRanges = [...blockedRanges];
+
+  return cachedRanges.flatMap(({ sourceText, ...range }) => {
+    const match = findSourceTextRanges(formula, sourceText)
+      .filter(candidate => {
+        return !usedRanges.some(usedRange =>
+          doRangesOverlap(candidate, usedRange),
+        );
+      })
+      .sort((a, b) => {
+        return (
+          Math.abs(a.from - range.from) - Math.abs(b.from - range.from) ||
+          a.from - b.from
+        );
+      })[0];
+
+    if (!match) {
+      return [];
+    }
+
+    usedRanges.push(match);
+    return [{ ...range, ...match }];
+  });
+}
+
+export function getFormulaBadgeRangeResult({
+  formula,
+  mode,
+  variables,
+  queries,
+  categoryBadges,
+}: {
+  formula: string;
+  mode: FormulaMode;
+  variables?: Record<string, number | string>;
+  queries?: Record<string, unknown>;
+  categoryBadges?: Record<string, string>;
+}): FormulaBadgeRangeResult {
+  if (!formula.startsWith('=')) {
+    return { ranges: [], status: 'inactive' };
+  }
+
+  const namedExpressionBadges = getNamedExpressionBadges({ mode, variables });
+  if (mode !== 'query' && Object.keys(namedExpressionBadges).length === 0) {
+    return { ranges: [], status: 'ok' };
+  }
+
+  try {
+    const parser = getParserInstance();
+    const parsed = parser.extractTemporaryFormula(formula);
+    const ast = parsed.ast;
+    const tokenizeResult = parser._parser?.tokenizeFormula(formula.slice(1));
+
+    if (
+      !tokenizeResult ||
+      (tokenizeResult.errors && tokenizeResult.errors.length > 0)
+    ) {
+      return { ranges: [], status: 'failed' };
+    }
+
+    const namedExpressionTokens = tokenizeResult.tokens.filter(
+      token => token.tokenType?.name === 'NamedExpression',
+    );
+    const stringTokens = tokenizeResult.tokens.filter(
+      token => token.tokenType?.name === 'StringLiteral',
+    );
+
+    if (!ast) {
+      return {
+        ranges: getBadgeRangesFromNamedExpressionTokens({
+          namedExpressionTokens,
+          namedExpressionBadges,
+        }),
+        status: 'partial',
+      };
+    }
+
+    return {
+      ranges: getBadgeRangesFromAst({
+        ast,
+        namedExpressionTokens,
+        namedExpressionBadges,
+      }).concat(
+        getStringContextBadgeRangesFromAst({
+          ast,
+          stringTokens,
+          queries,
+          categoryBadges,
+        }),
+      ),
+      status: 'ok',
+    };
+  } catch {
+    return { ranges: [], status: 'failed' };
+  }
+}
+
 export function getFormulaBadgeRanges({
   formula,
   mode,
@@ -544,57 +690,13 @@ export function getFormulaBadgeRanges({
   queries?: Record<string, unknown>;
   categoryBadges?: Record<string, string>;
 }): FormulaBadgeRange[] {
-  if (!formula.startsWith('=')) {
-    return [];
-  }
-
-  const namedExpressionBadges = getNamedExpressionBadges({ mode, variables });
-  if (mode !== 'query' && Object.keys(namedExpressionBadges).length === 0) {
-    return [];
-  }
-
-  try {
-    const parser = getParserInstance();
-    const parsed = parser.extractTemporaryFormula(formula);
-    const ast = parsed.ast;
-    const tokenizeResult = parser._parser?.tokenizeFormula(formula.slice(1));
-
-    if (
-      !tokenizeResult ||
-      (tokenizeResult.errors && tokenizeResult.errors.length > 0)
-    ) {
-      return [];
-    }
-
-    const namedExpressionTokens = tokenizeResult.tokens.filter(
-      token => token.tokenType?.name === 'NamedExpression',
-    );
-    const stringTokens = tokenizeResult.tokens.filter(
-      token => token.tokenType?.name === 'StringLiteral',
-    );
-
-    if (!ast) {
-      return getBadgeRangesFromNamedExpressionTokens({
-        namedExpressionTokens,
-        namedExpressionBadges,
-      });
-    }
-
-    return getBadgeRangesFromAst({
-      ast,
-      namedExpressionTokens,
-      namedExpressionBadges,
-    }).concat(
-      getStringContextBadgeRangesFromAst({
-        ast,
-        stringTokens,
-        queries,
-        categoryBadges,
-      }),
-    );
-  } catch {
-    return [];
-  }
+  return getFormulaBadgeRangeResult({
+    formula,
+    mode,
+    variables,
+    queries,
+    categoryBadges,
+  }).ranges;
 }
 
 export function __resetFormulaBadgeParserForTests() {

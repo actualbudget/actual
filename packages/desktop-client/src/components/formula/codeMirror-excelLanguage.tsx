@@ -32,9 +32,15 @@ import type { DecorationSet, Tooltip, ViewUpdate } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { t } from 'i18next';
 
-import { getFormulaBadgeRanges } from './formulaBadgeRanges';
+import {
+  cacheFormulaBadgeRanges,
+  getFormulaBadgeRangeResult,
+  remapCachedFormulaBadgeRanges,
+} from './formulaBadgeRanges';
 import type {
   BudgetCategoryBadge,
+  CachedFormulaBadgeRange,
+  FormulaBadgeRange,
   FormulaBadgeVariant,
 } from './formulaBadgeRanges';
 import {
@@ -315,15 +321,11 @@ function formulaBadgeExtension(
   onBadgeClick?: (details: FormulaBadgeClick) => void,
   categoryBadges?: Record<string, string>,
 ): Extension {
-  const buildDecorations = (view: EditorView): DecorationSet => {
+  const buildDecorations = (
+    view: EditorView,
+    badgeRanges: FormulaBadgeRange[],
+  ): DecorationSet => {
     const builder = new RangeSetBuilder<Decoration>();
-    const badgeRanges = getFormulaBadgeRanges({
-      formula: view.state.doc.toString(),
-      mode,
-      queries,
-      variables,
-      categoryBadges,
-    });
 
     badgeRanges
       .filter(({ from, to }) =>
@@ -353,15 +355,47 @@ function formulaBadgeExtension(
   return ViewPlugin.fromClass(
     class {
       decorations: DecorationSet;
+      lastValidBadgeRanges: CachedFormulaBadgeRange[] = [];
 
       constructor(view: EditorView) {
-        this.decorations = buildDecorations(view);
+        this.decorations = this.buildDecorations(view);
       }
 
       update(update: ViewUpdate) {
         if (update.docChanged || update.viewportChanged) {
-          this.decorations = buildDecorations(update.view);
+          this.decorations = this.buildDecorations(update.view);
         }
+      }
+
+      buildDecorations(view: EditorView) {
+        const formula = view.state.doc.toString();
+        const result = getFormulaBadgeRangeResult({
+          formula,
+          mode,
+          queries,
+          variables,
+          categoryBadges,
+        });
+        let badgeRanges = result.ranges;
+
+        if (result.status === 'ok') {
+          this.lastValidBadgeRanges = cacheFormulaBadgeRanges(
+            formula,
+            badgeRanges,
+          );
+        } else if (result.status === 'inactive') {
+          this.lastValidBadgeRanges = [];
+        } else {
+          badgeRanges = badgeRanges.concat(
+            remapCachedFormulaBadgeRanges({
+              formula,
+              cachedRanges: this.lastValidBadgeRanges,
+              blockedRanges: badgeRanges,
+            }),
+          );
+        }
+
+        return buildDecorations(view, badgeRanges);
       }
     },
     {

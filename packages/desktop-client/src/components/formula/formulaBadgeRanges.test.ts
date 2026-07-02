@@ -2,7 +2,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   __resetFormulaBadgeParserForTests,
+  cacheFormulaBadgeRanges,
+  getFormulaBadgeRangeResult,
   getFormulaBadgeRanges,
+  remapCachedFormulaBadgeRanges,
 } from './formulaBadgeRanges';
 
 afterEach(() => {
@@ -280,6 +283,59 @@ describe('getFormulaBadgeRanges', () => {
           { id: firstCategoryId, label: 'Food -> Groceries' },
           { id: secondCategoryId, label: 'Bills -> Rent' },
         ],
+      },
+    ]);
+  });
+
+  it('remaps cached budget query badges when a syntax error prevents AST parsing', () => {
+    const validFormula =
+      '=BUDGET_QUERY("budgeted", "cat-a", "2026-01", QUERY_EXTRACT_TIMEFRAME_END("abc")+a)';
+    const invalidFormula =
+      '=BUDGET_QUERY("budgeted", "cat-a", "2026-01", QUERY_EXTRACT_TIMEFRAME_END("abc")+)-';
+    const result = getFormulaBadgeRangeResult({
+      formula: validFormula,
+      mode: 'query',
+      queries: { abc: {} },
+      categoryBadges: { 'cat-a': 'Food -> Groceries' },
+    });
+    const invalidResult = getFormulaBadgeRangeResult({
+      formula: invalidFormula,
+      mode: 'query',
+      queries: { abc: {} },
+      categoryBadges: { 'cat-a': 'Food -> Groceries' },
+    });
+
+    expect(result.status).toBe('ok');
+    expect(invalidResult.status).toBe('partial');
+    expect(
+      invalidResult.ranges.concat(
+        remapCachedFormulaBadgeRanges({
+          formula: invalidFormula,
+          cachedRanges: cacheFormulaBadgeRanges(validFormula, result.ranges),
+          blockedRanges: invalidResult.ranges,
+        }),
+      ),
+    ).toEqual([
+      {
+        ...rangeFor(invalidFormula, '"budgeted"'),
+        label: 'budgeted',
+        variant: 'budget-dimension',
+      },
+      {
+        ...rangeFor(invalidFormula, '"cat-a"'),
+        label: 'Food -> Groceries',
+        variant: 'budget-category-list',
+        categories: [{ id: 'cat-a', label: 'Food -> Groceries' }],
+      },
+      {
+        ...rangeFor(invalidFormula, '"2026-01"'),
+        label: '2026-01',
+        variant: 'budget-timeframe',
+      },
+      {
+        ...rangeFor(invalidFormula, '"abc"'),
+        label: 'abc',
+        variant: 'query-name',
       },
     ]);
   });
