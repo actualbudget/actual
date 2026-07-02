@@ -36,6 +36,25 @@ type UsePreviewTransactionsResult = {
   error?: Error;
 };
 
+export function comparePreviewTransactions(
+  a: Pick<TransactionEntity, 'date' | 'amount'> & {
+    sort_order?: number | null;
+  },
+  b: Pick<TransactionEntity, 'date' | 'amount'> & {
+    sort_order?: number | null;
+  },
+): number {
+  const dateDiff =
+    monthUtils.parseDate(b.date).getTime() -
+    monthUtils.parseDate(a.date).getTime();
+  if (dateDiff !== 0) return dateDiff;
+
+  const sortOrderDiff = (b.sort_order ?? 0) - (a.sort_order ?? 0);
+  if (sortOrderDiff !== 0) return sortOrderDiff;
+
+  return a.amount - b.amount;
+}
+
 export function usePreviewTransactions({
   filter,
   options,
@@ -88,10 +107,15 @@ export function usePreviewTransactions({
     )
       .then(newTrans => {
         if (!isUnmounted) {
+          const scheduleById = new Map(schedules.map(s => [s.id, s]));
           const withDefaults = newTrans.map(t => ({
             ...t,
             category: t.schedule != null ? statuses.get(t.schedule) : undefined,
             schedule: t.schedule,
+            sort_order:
+              t.schedule != null
+                ? scheduleById.get(t.schedule)?.sort_order
+                : undefined,
             subtransactions: t.subtransactions?.map(
               (st: TransactionEntity) => ({
                 ...st,
@@ -102,11 +126,7 @@ export function usePreviewTransactions({
           }));
 
           // re-sort in case rule actions have changed the dates
-          withDefaults.sort(
-            (a, b) =>
-              monthUtils.parseDate(b.date).getTime() -
-                monthUtils.parseDate(a.date).getTime() || a.amount - b.amount,
-          );
+          withDefaults.sort(comparePreviewTransactions);
 
           const ungroupedTransactions = ungroupTransactions(withDefaults);
           setPreviewTransactions(ungroupedTransactions);
