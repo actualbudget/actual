@@ -164,9 +164,6 @@ export const GroupMonth = memo(function GroupMonth({
   group,
 }: CategoryGroupMonthProps) {
   const { id } = group;
-  const [showProgressBars] = useLocalPref('budget.showProgressBars');
-  const budgeted = useTrackingSheetValue(trackingBudget.groupBudgeted(id)) ?? 0;
-  const spent = useTrackingSheetValue(trackingBudget.groupSumAmount(id)) ?? 0;
 
   return (
     <View
@@ -198,31 +195,7 @@ export const GroupMonth = memo(function GroupMonth({
           type: 'financial',
         }}
       />
-      {!group.is_income && showProgressBars && (
-        <Field
-          name="usage"
-          width="flex"
-          truncate={false}
-          style={{
-            fontWeight: 600,
-            paddingRight: styles.monthRightPadding,
-            ...styles.tnum,
-          }}
-        >
-          <UsageCell
-            progress={<UsageProgressDashes budgeted={budgeted} spent={spent} />}
-            balance={
-              <TrackingCellValue
-                binding={trackingBudget.groupBalance(id)}
-                type="financial"
-              >
-                {props => <CellValueText {...props} />}
-              </TrackingCellValue>
-            }
-          />
-        </Field>
-      )}
-      {!group.is_income && !showProgressBars && (
+      {!group.is_income && (
         <TrackingSheetCell
           name="balance"
           width="flex"

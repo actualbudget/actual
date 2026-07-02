@@ -172,9 +172,6 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   group,
 }: CategoryGroupMonthProps) {
   const { id } = group;
-  const [showProgressBars] = useLocalPref('budget.showProgressBars');
-  const budgeted = useEnvelopeSheetValue(envelopeBudget.groupBudgeted(id)) ?? 0;
-  const spent = useEnvelopeSheetValue(envelopeBudget.groupSumAmount(id)) ?? 0;
 
   return (
     <View
@@ -206,45 +203,20 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
           type: 'financial',
         }}
       />
-      {showProgressBars ? (
-        <Field
-          name="usage"
-          width="flex"
-          truncate={false}
-          style={{
-            fontWeight: 600,
-            paddingRight: styles.monthRightPadding,
-            ...styles.tnum,
-          }}
-        >
-          <UsageCell
-            progress={<UsageProgressDashes budgeted={budgeted} spent={spent} />}
-            balance={
-              <EnvelopeCellValue
-                binding={envelopeBudget.groupBalance(id)}
-                type="financial"
-              >
-                {props => <CellValueText {...props} />}
-              </EnvelopeCellValue>
-            }
-          />
-        </Field>
-      ) : (
-        <EnvelopeSheetCell
-          name="balance"
-          width="flex"
-          textAlign="right"
-          style={{
-            fontWeight: 600,
-            paddingRight: styles.monthRightPadding,
-            ...styles.tnum,
-          }}
-          valueProps={{
-            binding: envelopeBudget.groupBalance(id),
-            type: 'financial',
-          }}
-        />
-      )}
+      <EnvelopeSheetCell
+        name="balance"
+        width="flex"
+        textAlign="right"
+        style={{
+          fontWeight: 600,
+          paddingRight: styles.monthRightPadding,
+          ...styles.tnum,
+        }}
+        valueProps={{
+          binding: envelopeBudget.groupBalance(id),
+          type: 'financial',
+        }}
+      />
     </View>
   );
 });
