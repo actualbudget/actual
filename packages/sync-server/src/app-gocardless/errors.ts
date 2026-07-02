@@ -51,6 +51,12 @@ export class InvalidGoCardlessTokenError extends GoCardlessClientError {
   }
 }
 
+export class EndUserAgreementExpiredError extends GoCardlessClientError {
+  constructor(response: unknown) {
+    super('End User Agreement (EUA) has expired', response);
+  }
+}
+
 export class AccessDeniedError extends GoCardlessClientError {
   constructor(response: unknown) {
     super('IP address access denied', response);

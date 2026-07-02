@@ -3,6 +3,7 @@ import type { MockInstance } from 'vitest';
 import {
   AccessDeniedError,
   AccountNotLinkedToRequisition,
+  EndUserAgreementExpiredError,
   GenericGoCardlessError,
   InvalidGoCardlessTokenError,
   InvalidInputDataError,
@@ -564,6 +565,33 @@ describe('#handleGoCardlessError', () => {
 
   it('throws InvalidGoCardlessTokenError for status code 401', () => {
     expect(() => handleGoCardlessError(apiError(401))).toThrow(
+      InvalidGoCardlessTokenError,
+    );
+  });
+
+  it('throws EndUserAgreementExpiredError for status code 401 with an expired EUA', () => {
+    const error = apiError(401);
+    error.response.data = {
+      summary:
+        'End User Agreement (EUA) 76c790ff-274b-46cc-8c5e-1aefb2bee25f has expired',
+      detail:
+        'EUA was valid for 90 days and it expired at 2026-06-30 15:57:27.203016+00:00. The end user must connect the account once more with new EUA and Requisition',
+      status_code: 401,
+    };
+
+    expect(() => handleGoCardlessError(error)).toThrow(
+      EndUserAgreementExpiredError,
+    );
+  });
+
+  it('throws InvalidGoCardlessTokenError for status code 401 with an unrelated body', () => {
+    const error = apiError(401);
+    error.response.data = {
+      summary: 'Authentication credentials were not provided.',
+      status_code: 401,
+    };
+
+    expect(() => handleGoCardlessError(error)).toThrow(
       InvalidGoCardlessTokenError,
     );
   });
