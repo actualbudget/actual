@@ -68,13 +68,13 @@ export function ManageTags() {
             <Trans>Add New</Trans>
           </Button>
           <View style={{ flex: 1 }} />
-          <SelectedTagsButton />
-          <TagsMenuButton />
           <Search
             placeholder={t('Filter tags...')}
             value={filter}
             onChange={setFilter}
           />
+          <SelectedTagsButton />
+          <TagsMenuButton />
         </SpaceBetween>
         <View style={{ marginTop: 12, ...styles.tableContainer }}>
           <TagsHeader />
