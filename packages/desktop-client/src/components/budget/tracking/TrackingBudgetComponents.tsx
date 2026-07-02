@@ -73,11 +73,6 @@ const cellStyle: CSSProperties = {
 };
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
-  const [showProgressBars] = useLocalPref('budget.showProgressBars');
-  const budgeted =
-    useTrackingSheetValue(trackingBudget.totalBudgetedExpense) ?? 0;
-  const spent = useTrackingSheetValue(trackingBudget.totalSpent) ?? 0;
-
   return (
     <View
       style={{
@@ -109,28 +104,14 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>
-          {showProgressBars ? <Trans>Usage</Trans> : <Trans>Balance</Trans>}
+          <Trans>Balance</Trans>
         </Text>
-        {showProgressBars ? (
-          <UsageCell
-            progress={<UsageProgressDashes budgeted={budgeted} spent={spent} />}
-            balance={
-              <TrackingCellValue
-                binding={trackingBudget.totalLeftover}
-                type="financial"
-              >
-                {props => <CellValueText {...props} style={cellStyle} />}
-              </TrackingCellValue>
-            }
-          />
-        ) : (
-          <TrackingCellValue
-            binding={trackingBudget.totalLeftover}
-            type="financial"
-          >
-            {props => <CellValueText {...props} style={cellStyle} />}
-          </TrackingCellValue>
-        )}
+        <TrackingCellValue
+          binding={trackingBudget.totalLeftover}
+          type="financial"
+        >
+          {props => <CellValueText {...props} style={cellStyle} />}
+        </TrackingCellValue>
       </View>
     </View>
   );

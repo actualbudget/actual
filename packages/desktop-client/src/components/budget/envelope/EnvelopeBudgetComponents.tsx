@@ -80,10 +80,6 @@ const cellStyle: CSSProperties = {
 };
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
-  const [showProgressBars] = useLocalPref('budget.showProgressBars');
-  const budgeted = useEnvelopeSheetValue(envelopeBudget.totalBudgeted) ?? 0;
-  const spent = useEnvelopeSheetValue(envelopeBudget.totalSpent) ?? 0;
-
   return (
     <View
       style={{
@@ -118,33 +114,14 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       </View>
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>
-          {showProgressBars ? <Trans>Usage</Trans> : <Trans>Balance</Trans>}
+          <Trans>Balance</Trans>
         </Text>
-        {showProgressBars ? (
-          <UsageCell
-            progress={
-              <UsageProgressDashes
-                budgeted={Math.abs(budgeted)}
-                spent={spent}
-              />
-            }
-            balance={
-              <EnvelopeCellValue
-                binding={envelopeBudget.totalBalance}
-                type="financial"
-              >
-                {props => <CellValueText {...props} style={cellStyle} />}
-              </EnvelopeCellValue>
-            }
-          />
-        ) : (
-          <EnvelopeCellValue
-            binding={envelopeBudget.totalBalance}
-            type="financial"
-          >
-            {props => <CellValueText {...props} style={cellStyle} />}
-          </EnvelopeCellValue>
-        )}
+        <EnvelopeCellValue
+          binding={envelopeBudget.totalBalance}
+          type="financial"
+        >
+          {props => <CellValueText {...props} style={cellStyle} />}
+        </EnvelopeCellValue>
       </View>
     </View>
   );
