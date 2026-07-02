@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "26.6.0",
+  "version": "26.7.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -91,6 +91,7 @@
     "#auth/AuthProvider": "./src/auth/AuthProvider.tsx",
     "#auth/ProtectedRoute": "./src/auth/ProtectedRoute.tsx",
     "#auth/*": "./src/auth/*.ts",
+    "#contextmenu/*": "./src/contextmenu/*.ts",
     "#style/theme": "./src/style/theme.tsx",
     "#style/*": "./src/style/*.ts",
     "#notes/*": "./src/notes/*.tsx",

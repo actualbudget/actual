@@ -124,4 +124,10 @@ export class ReportsPage {
       .getByRole('heading')
       .allTextContents();
   }
+
+  async rightClickReportCard(title: string | RegExp) {
+    await this.pageContent
+      .getByRole('button', { name: title })
+      .click({ button: 'right' });
+  }
 }

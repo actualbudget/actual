@@ -17,9 +17,9 @@ export function useCursorPosition(
         : null,
     );
   };
-  useRefEventListener(ref, 'focusin', update, [ref, setCursorPosition]);
-  useRefEventListener(ref, 'keyup', update, [ref, setCursorPosition]);
-  useRefEventListener(doc, 'selectionchange', update, [ref, setCursorPosition]);
+  useRefEventListener(ref, 'focusin', update);
+  useRefEventListener(ref, 'keyup', update);
+  useRefEventListener(doc, 'selectionchange', update);
   useEffect(update, [ref, setCursorPosition]); // sync on mount
 
   const clear = () => {
@@ -27,7 +27,7 @@ export function useCursorPosition(
       setCursorPosition(null);
     }
   };
-  useRefEventListener(ref, 'focusout', clear, [setCursorPosition]);
+  useRefEventListener(ref, 'focusout', clear);
 
   return [
     cursorPosition,
