@@ -356,6 +356,7 @@ function AccountInternal(props: AccountInternalProps) {
   const {
     transactions: flatTransactions,
     runningBalances,
+    isSuccess,
     isPending,
     isFetchingNextPage,
     fetchNextPage,
@@ -369,6 +370,23 @@ function AccountInternal(props: AccountInternalProps) {
         : false,
     },
   });
+  const isFirstLoad = useRef(true);
+  useEffect(() => {
+    if (isFirstLoad.current && isSuccess) {
+      isFirstLoad.current = false;
+
+      const isFiltered = filterConditions.length > 0 || search !== '';
+      const mode = isFiltered || props.expandSplits ? 'expand' : 'collapse';
+      splitsExpandedDispatch({ type: 'set-mode', mode });
+    }
+  }, [
+    isSuccess,
+    flatTransactions,
+    filterConditions,
+    search,
+    splitsExpandedDispatch,
+    props.expandSplits,
+  ]);
 
   const transactions = useMemo(
     () => ungroupTransactions([...flatTransactions]),
@@ -477,6 +495,7 @@ function AccountInternal(props: AccountInternalProps) {
         return {
           ...old,
           pages: old.pages.map(page => {
+            console.log(updatedTransaction);
             if (updatedTransaction._deleted) {
               return page
                 .filter(t => t.id !== updatedTransaction.id)
@@ -1356,36 +1375,6 @@ function AccountInternal(props: AccountInternalProps) {
       });
     }
   };
-
-  // === EFFECTS ===
-
-  useEffect(() => {
-    if (initialModeAppliedRef.current) return;
-
-    if (transactions.length > 0) {
-      initialModeAppliedRef.current = true;
-
-      const isFiltered = filterConditions.length > 0 || search !== '';
-
-      if (isFiltered) {
-        splitsExpandedDispatch({
-          type: 'set-mode',
-          mode: 'collapse',
-        });
-      } else {
-        splitsExpandedDispatch({
-          type: 'set-mode',
-          mode: props.expandSplits ? 'expand' : 'collapse',
-        });
-      }
-    }
-  }, [
-    transactions,
-    filterConditions,
-    search,
-    splitsExpandedDispatch,
-    props.expandSplits,
-  ]);
 
   useEffect(() => {
     const onUndo = async ({ messages }: UndoState) => {
