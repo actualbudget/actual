@@ -48,6 +48,8 @@ export function getDownloadError({
     case 'invalid-zip-file':
     case 'invalid-meta-file':
       return 'Downloaded file is invalid, sorry! Visit https://actualbudget.org/contact/ for support.';
+    case 'zip-too-large':
+      return 'This file is too large to import, sorry! Visit https://actualbudget.org/contact/ for support.';
     case 'decrypt-failure':
       return (
         'Unable to decrypt file ' +

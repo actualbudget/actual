@@ -19,7 +19,7 @@ import { runMutator } from './mutators';
 import { post } from './post';
 import * as prefs from './prefs';
 import { getServer } from './server-config';
-import { safeUnzip, safeZip } from './util/zip';
+import { safeUnzip, safeZip, UnsafeZipError } from './util/zip';
 
 const UPLOAD_FREQUENCY_IN_DAYS = 7;
 
@@ -193,7 +193,10 @@ export async function importBuffer(fileData, buffer) {
   let entries;
   try {
     entries = safeUnzip(buffer);
-  } catch {
+  } catch (e) {
+    if (e instanceof UnsafeZipError) {
+      throw FileDownloadError('zip-too-large');
+    }
     throw FileDownloadError('not-zip-file');
   }
   const entryName = Object.keys(entries).find(name =>

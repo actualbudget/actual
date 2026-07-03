@@ -88,6 +88,10 @@ export function getDownloadError({
       return t(
         'Downloaded file is invalid, sorry! Visit https://actualbudget.org/contact/ for support.',
       );
+    case 'zip-too-large':
+      return t(
+        'This file is too large to import, sorry! Visit https://actualbudget.org/contact/ for support.',
+      );
     case 'decrypt-failure':
       return t(
         'Unable to decrypt file {{fileName}}. To change your key, first download this file with the proper password.',
