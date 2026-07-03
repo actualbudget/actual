@@ -1,6 +1,7 @@
 import type {
   CustomReportEntity,
   DashboardWidgetEntity,
+  ExportImportDashboard,
   ExportImportDashboardWidget,
   NewDashboardWidgetEntity,
 } from '#types/models';
@@ -32,6 +33,28 @@ export function serializeDashboardWidget(
 
   const { id: _id, tombstone: _tombstone, ...rest } = widget;
   return rest;
+}
+
+export function buildDashboardExport(
+  widgets: DashboardWidgetEntity[],
+  customReportMap: Map<string, CustomReportEntity>,
+): ExportImportDashboard {
+  return {
+    version: 1,
+    widgets: widgets.map(widget =>
+      serializeDashboardWidget(widget, customReportMap),
+    ),
+  };
+}
+
+export function hasMissingCustomReport(
+  widgets: DashboardWidgetEntity[],
+  customReportMap: Map<string, CustomReportEntity>,
+) {
+  return widgets.some(
+    widget =>
+      widget.type === 'custom-report' && !customReportMap.has(widget.meta.id),
+  );
 }
 
 export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [

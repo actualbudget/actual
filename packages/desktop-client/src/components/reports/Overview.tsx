@@ -14,12 +14,11 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { serializeDashboardWidget } from '@actual-app/core/shared/dashboard';
+import { buildDashboardExport } from '@actual-app/core/shared/dashboard';
 import type {
   CustomReportWidget,
   DashboardPageEntity,
   DashboardWidgetEntity,
-  ExportImportDashboard,
   MarkdownWidget,
 } from '@actual-app/core/types/models';
 
@@ -314,18 +313,7 @@ export function Overview({ dashboard }: OverviewProps) {
   };
 
   const onExport = () => {
-    const data = {
-      version: 1,
-      widgets: desktopLayout.map(item => {
-        const widget = widgetMap.get(item.i);
-
-        if (!widget) {
-          throw new Error(`Unable to query widget: ${item.i}`);
-        }
-
-        return serializeDashboardWidget(widget, customReportMap);
-      }),
-    } satisfies ExportImportDashboard;
+    const data = buildDashboardExport(widgets, customReportMap);
 
     void window.Actual.saveFile(
       JSON.stringify(data, null, 2),

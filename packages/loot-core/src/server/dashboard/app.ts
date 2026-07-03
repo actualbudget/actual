@@ -14,14 +14,14 @@ import { reportModel } from '#server/reports/app';
 import { batchMessages } from '#server/sync';
 import { undoable } from '#server/undo';
 import {
+  buildDashboardExport,
   DEFAULT_DASHBOARD_STATE,
-  serializeDashboardWidget,
+  hasMissingCustomReport,
 } from '#shared/dashboard';
 import type { SkippedDashboardExport } from '#shared/dashboard';
 import { q } from '#shared/query';
 import type {
   CustomReportData,
-  CustomReportEntity,
   DashboardWidgetEntity,
   ExportImportCustomReportWidget,
   ExportImportDashboard,
@@ -358,15 +358,6 @@ async function importDashboard({
   }
 }
 
-function hasMissingCustomReport(
-  widgets: DashboardWidgetEntity[],
-  reportMap: Map<string, CustomReportEntity>,
-) {
-  return widgets.some(
-    widget => widget.type === 'custom-report' && !reportMap.has(widget.meta.id),
-  );
-}
-
 async function exportAllDashboards() {
   try {
     const { data: pages } = (await aqlQuery(
@@ -414,12 +405,7 @@ async function exportAllDashboards() {
           return;
         }
 
-        const dashboard = {
-          version: 1 as const,
-          widgets: pageWidgets.map(widget =>
-            serializeDashboardWidget(widget, reportMap),
-          ),
-        } satisfies ExportImportDashboard;
+        const dashboard = buildDashboardExport(pageWidgets, reportMap);
 
         zip.addFile(
           `${index + 1}-${safeName}.json`,
