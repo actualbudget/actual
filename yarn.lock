@@ -168,6 +168,7 @@ __metadata:
   dependencies:
     "@actual-app/crdt": "workspace:*"
     "@actual-app/web": "workspace:*"
+    "@open-banking-io/client": "npm:^0.2.0"
     "@types/bcrypt": "npm:^6.0.0"
     "@types/better-sqlite3": "npm:^7.6.13"
     "@types/convict": "npm:^6"
@@ -5537,6 +5538,13 @@ __metadata:
   dependencies:
     "@octokit/openapi-types": "npm:^27.0.0"
   checksum: 10/03d5cfc29556a9b53eae8beb1bf15c0b704dc722db2c51b53f093f3c3ee6c1d8e20b682be8117a3a17034b458be7746d1b22aaefb959ceb5152ad7589b39e2c9
+  languageName: node
+  linkType: hard
+
+"@open-banking-io/client@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@open-banking-io/client@npm:0.2.0"
+  checksum: 10/199abf7df1d93d3a31dc5c1b7fd681106182b0d133237eb53df275d27e21fc0df42c735377db4a195bc95414b523ba14221d98f5e3462907a105a6eb0ca70e57
   languageName: node
   linkType: hard
 

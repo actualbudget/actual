@@ -16,6 +16,7 @@ export const BUILT_IN_BANK_SYNC_PROVIDERS = [
 
 const SYNC_PROVIDER_KEYS = [
   ...BUILT_IN_BANK_SYNC_PROVIDERS,
+  'openBankingIo',
   'enableBanking',
   'akahu',
   'unlinked',
@@ -34,6 +35,7 @@ export function getSyncSourceReadable(
     goCardless: 'GoCardless',
     simpleFin: 'SimpleFIN',
     pluggyai: 'Pluggy.ai',
+    openBankingIo: 'open-banking.io',
     enableBanking: 'Enable Banking',
     akahu: 'Akahu',
     unlinked: translate('Unlinked'),

@@ -66,6 +66,7 @@ import { MergeUnusedPayeesModal } from './modals/MergeUnusedPayeesModal';
 import { NewCategoryGroupModal } from './modals/NewCategoryGroupModal';
 import { NewCategoryModal } from './modals/NewCategoryModal';
 import { NotesModal } from './modals/NotesModal';
+import { OpenBankingIoInitialiseModal } from './modals/OpenBankingIoInitialiseModal';
 import { OpenIDEnableModal } from './modals/OpenIDEnableModal';
 import { OutOfSyncMigrationsModal } from './modals/OutOfSyncMigrationsModal';
 import { PasswordEnableModal } from './modals/PasswordEnableModal';
@@ -195,6 +196,9 @@ export function Modals() {
 
         case 'enablebanking-init':
           return <EnableBankingInitialiseModal key={key} {...modal.options} />;
+
+        case 'openbankingio-init':
+          return <OpenBankingIoInitialiseModal key={key} {...modal.options} />;
 
         case 'enablebanking-external-msg':
           return <EnableBankingExternalMsgModal key={key} {...modal.options} />;

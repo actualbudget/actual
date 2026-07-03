@@ -8,6 +8,7 @@ import type {
   SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
+  SyncServerOpenBankingIoAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
   TransactionEntity,
@@ -494,6 +495,48 @@ export function useLinkAccountPluggyAiMutation() {
         dispatch,
         t(
           'There was an error linking the account to PluggyAI. Please try again.',
+        ),
+        error,
+      );
+    },
+  });
+}
+
+type LinkAccountOpenBankingIoPayload = LinkAccountBasePayload & {
+  externalAccount: SyncServerOpenBankingIoAccount;
+};
+
+export function useLinkAccountOpenBankingIoMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountOpenBankingIoPayload) => {
+      await send('openbankingio-accounts-link', {
+        externalAccount,
+        upgradingId,
+        offBudget,
+        startingDate,
+        startingBalance,
+      });
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateQueries(queryClient, payeeQueries.lists());
+    },
+    onError: error => {
+      console.error('Error linking account to open-banking.io:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t(
+          'There was an error linking the account to open-banking.io. Please try again.',
         ),
         error,
       );

@@ -6,6 +6,7 @@ import type {
   AccountEntity,
   BankSyncProviders,
 } from '@actual-app/core/types/models';
+import type { SyncServerOpenBankingIoAccount } from '@actual-app/core/types/models/openbankingio';
 import type { SyncServerSimpleFinAccount } from '@actual-app/core/types/models/simplefin';
 
 import { useAuth } from '#auth/AuthProvider';
@@ -17,6 +18,7 @@ import { useAkahuStatus } from '#hooks/useAkahuStatus';
 import { useEnableBankingStatus } from '#hooks/useEnableBankingStatus';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '#hooks/useGoCardlessStatus';
+import { useOpenBankingIoStatus } from '#hooks/useOpenBankingIoStatus';
 import { usePluggyAiStatus } from '#hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '#hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
@@ -107,6 +109,8 @@ export function useBuiltInBankSyncProviders({
   const [isPluggyAiSetupComplete, setIsPluggyAiSetupComplete] = useState<
     boolean | null
   >(null);
+  const [isOpenBankingIoSetupComplete, setIsOpenBankingIoSetupComplete] =
+    useState<boolean | null>(null);
   const [isEnableBankingSetupComplete, setIsEnableBankingSetupComplete] =
     useState<boolean | null>(null);
   const [isAkahuSetupComplete, setIsAkahuSetupComplete] = useState<
@@ -114,13 +118,18 @@ export function useBuiltInBankSyncProviders({
   >(null);
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
     useState(false);
+  const [loadingOpenBankingIoAccounts, setLoadingOpenBankingIoAccounts] =
+    useState(false);
   const [loadingAkahuAccounts, setLoadingAkahuAccounts] = useState(false);
 
   const enableBankingEnabled = useFeatureFlag('enableBanking');
   const akahuEnabled = useFeatureFlag('akahuBankSync');
+  const openBankingIoEnabled = useFeatureFlag('openBankingIo');
   const { configuredGoCardless } = useGoCardlessStatus();
   const { configuredSimpleFin } = useSimpleFinStatus();
   const { configuredPluggyAi } = usePluggyAiStatus();
+  const { configuredOpenBankingIo } =
+    useOpenBankingIoStatus(openBankingIoEnabled);
   const { configuredAkahu } = useAkahuStatus(akahuEnabled);
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
     useEnableBankingStatus(enableBankingEnabled);
@@ -136,6 +145,10 @@ export function useBuiltInBankSyncProviders({
   useEffect(() => {
     setIsPluggyAiSetupComplete(configuredPluggyAi);
   }, [configuredPluggyAi]);
+
+  useEffect(() => {
+    setIsOpenBankingIoSetupComplete(configuredOpenBankingIo);
+  }, [configuredOpenBankingIo]);
 
   useEffect(() => {
     setIsEnableBankingSetupComplete(configuredEnableBanking);
@@ -178,6 +191,19 @@ export function useBuiltInBankSyncProviders({
           name: 'pluggyai-init',
           options: {
             onSuccess: () => setIsPluggyAiSetupComplete(true),
+          },
+        },
+      }),
+    );
+  }, [dispatch]);
+
+  const onOpenBankingIoInit = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'openbankingio-init',
+          options: {
+            onSuccess: () => setIsOpenBankingIoSetupComplete(true),
           },
         },
       }),
@@ -301,6 +327,21 @@ export function useBuiltInBankSyncProviders({
     }
   }, [notifyResetFailure]);
 
+  const onOpenBankingIoReset = useCallback(async () => {
+    try {
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'openbankingio_credentials',
+          value: null,
+        }),
+        'Failed to clear open-banking.io credentials',
+      );
+      setIsOpenBankingIoSetupComplete(false);
+    } catch (error) {
+      notifyResetFailure('open-banking.io', error);
+    }
+  }, [notifyResetFailure]);
+
   const onEnableBankingReset = useCallback(async () => {
     try {
       await ensureSuccessResponse(
@@ -414,6 +455,55 @@ export function useBuiltInBankSyncProviders({
     isSimpleFinSetupComplete,
     loadingSimpleFinAccounts,
     onSimpleFinInit,
+    upgradingAccountId,
+  ]);
+
+  const onConnectOpenBankingIo = useCallback(async () => {
+    if (!isOpenBankingIoSetupComplete) {
+      onOpenBankingIoInit();
+      return;
+    }
+
+    if (loadingOpenBankingIoAccounts) {
+      return;
+    }
+
+    setLoadingOpenBankingIoAccounts(true);
+
+    try {
+      const results = await send('openbankingio-accounts');
+      if (results.error_code) {
+        throw new Error(results.reason);
+      }
+      if ('error' in results && results.error) {
+        throw new Error(results.reason || results.error);
+      }
+
+      const externalAccounts: SyncServerOpenBankingIoAccount[] =
+        results.accounts ?? [];
+
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts,
+              syncSource: 'openBankingIo',
+              upgradingAccountId,
+            },
+          },
+        }),
+      );
+    } catch {
+      onOpenBankingIoInit();
+    } finally {
+      setLoadingOpenBankingIoAccounts(false);
+    }
+  }, [
+    dispatch,
+    isOpenBankingIoSetupComplete,
+    loadingOpenBankingIoAccounts,
+    onOpenBankingIoInit,
     upgradingAccountId,
   ]);
 
@@ -596,6 +686,7 @@ export function useBuiltInBankSyncProviders({
     goCardless: Boolean(isGoCardlessSetupComplete),
     simpleFin: Boolean(isSimpleFinSetupComplete),
     pluggyai: Boolean(isPluggyAiSetupComplete),
+    openBankingIo: Boolean(isOpenBankingIoSetupComplete),
     enableBanking: Boolean(isEnableBankingSetupComplete),
     akahu: Boolean(isAkahuSetupComplete),
   } satisfies Record<BankSyncProviders, boolean>;
@@ -680,23 +771,43 @@ export function useBuiltInBankSyncProviders({
       });
     }
 
+    if (openBankingIoEnabled) {
+      baseProviders.push({
+        id: 'openBankingIo',
+        displayName: 'open-banking.io',
+        description: t(
+          'Link a European or UK bank account via open-banking.io, an affordable certificate-free alternative for PSD2-supported banks.',
+        ),
+        isConfigured: configuredProviders.openBankingIo,
+        canConfigure: canConfigureProviders,
+        isLoading: loadingOpenBankingIoAccounts,
+        onConfigure: onOpenBankingIoInit,
+        onLink: onConnectOpenBankingIo,
+        onReset: onOpenBankingIoReset,
+      });
+    }
+
     return baseProviders;
   }, [
     canConfigureProviders,
     configuredProviders.enableBanking,
     configuredProviders.goCardless,
     configuredProviders.pluggyai,
+    configuredProviders.openBankingIo,
     configuredProviders.simpleFin,
     configuredProviders.akahu,
     enableBankingEnabled,
     akahuEnabled,
+    openBankingIoEnabled,
     isEnableBankingLoading,
     loadingSimpleFinAccounts,
+    loadingOpenBankingIoAccounts,
     loadingAkahuAccounts,
     onConnectAkahu,
     onConnectEnableBanking,
     onConnectGoCardless,
     onConnectPluggyAi,
+    onConnectOpenBankingIo,
     onConnectSimpleFin,
     onAkahuInit,
     onAkahuReset,
@@ -706,6 +817,8 @@ export function useBuiltInBankSyncProviders({
     onGoCardlessReset,
     onPluggyAiInit,
     onPluggyAiReset,
+    onOpenBankingIoInit,
+    onOpenBankingIoReset,
     onSimpleFinInit,
     onSimpleFinReset,
     t,

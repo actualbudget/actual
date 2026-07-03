@@ -26,6 +26,7 @@ export const SYNC_PROVIDERS = [
   'pluggyai',
   'enableBanking',
   'akahu',
+  'openBankingIo',
 ] as const;
 
 export type BankSyncProviders = (typeof SYNC_PROVIDERS)[number];

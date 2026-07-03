@@ -11,6 +11,7 @@ export type * from './gocardless';
 export type * from './import-transaction';
 export type * from './nearby-payee';
 export type * from './note';
+export type * from './openbankingio';
 export type * from './openid';
 export type * from './payee';
 export type * from './payee-location';

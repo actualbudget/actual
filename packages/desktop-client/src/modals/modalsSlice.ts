@@ -142,6 +142,12 @@ export type Modal =
       };
     }
   | {
+      name: 'openbankingio-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
       name: 'enablebanking-external-msg';
       options: {
         onMoveExternal: (arg: {

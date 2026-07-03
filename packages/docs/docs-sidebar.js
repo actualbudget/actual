@@ -173,6 +173,7 @@ const sidebars = {
               items: [
                 'advanced/bank-sync/akahu',
                 'advanced/bank-sync/enable-banking',
+                'advanced/bank-sync/openbankingio',
                 'advanced/bank-sync/gocardless',
                 'advanced/bank-sync/simplefin',
                 'advanced/bank-sync/pluggyai',
