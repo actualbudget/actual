@@ -18,8 +18,9 @@ Want to say thanks? Click the ⭐ at the top of the page.
 
 ## Installation
 
-There are four ways to deploy Actual:
+There are five ways to deploy Actual:
 
+1. Managed hosting [with Zenith](https://zenith.hosting/host/actual-budget?ref=gh): storage, backups and updates handled for you, and a share of revenue goes back to Actual Budget.
 1. One-click deployment [via PikaPods](https://www.pikapods.com/pods?run=actual) (~1.40 $/month) - recommended for non-technical users
 1. Managed hosting [via Fly.io](https://actualbudget.org/docs/install/fly) (~1.50 $/month)
 1. Self-hosted by using [a Docker image](https://actualbudget.org/docs/install/docker)
