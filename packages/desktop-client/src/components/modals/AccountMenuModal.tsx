@@ -92,7 +92,7 @@ export function AccountMenuModal({
     onEditNotes?.(account.id);
   };
 
-  const canReconcile = !!onReconcile && !account?.closed;
+  const canReconcile = !!onReconcile;
 
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
