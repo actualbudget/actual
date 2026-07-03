@@ -1,3 +1,4 @@
+import { send } from '@actual-app/core/platform/client/connection';
 import type {
   APIAccountEntity,
   APICategoryEntity,
@@ -7,10 +8,8 @@ import type {
   APIScheduleEntity,
   APITagEntity,
 } from '@actual-app/core/server/api-models';
-import { lib } from '@actual-app/core/server/main';
 import type { Query } from '@actual-app/core/shared/query';
 import type { ImportTransactionsOpts } from '@actual-app/core/types/api-handlers';
-import type { Handlers } from '@actual-app/core/types/handlers';
 import type {
   ImportTransactionEntity,
   NoteEntity,
@@ -19,13 +18,6 @@ import type {
 } from '@actual-app/core/types/models';
 
 export { q } from './app/query';
-
-function send<K extends keyof Handlers, T extends Handlers[K]>(
-  name: K,
-  args?: Parameters<T>[0],
-): Promise<Awaited<ReturnType<T>>> {
-  return lib.send(name, args);
-}
 
 export async function runImport(
   budgetName: APIFileEntity['name'],

@@ -47,6 +47,20 @@ export const FixedAutomation = ({
   useEffect(() => {
     setRawPeriodAmount(String(periodAmount));
   }, [periodAmount]);
+
+  const onPeriodAmountChange = (value: string) => {
+    setRawPeriodAmount(value);
+    const parsed = Math.trunc(Number(value));
+    if (value.trim() !== '' && parsed >= 1 && parsed !== periodAmount) {
+      dispatch(
+        updateTemplate({
+          type: 'periodic',
+          period: { period: periodUnit, amount: parsed },
+        }),
+      );
+    }
+  };
+
   const commitPeriodAmount = () => {
     const parsed = Math.max(1, Math.trunc(Number(rawPeriodAmount)) || 1);
     setRawPeriodAmount(String(parsed));
@@ -86,7 +100,7 @@ export const FixedAutomation = ({
           min={1}
           step={1}
           value={rawPeriodAmount}
-          onChangeValue={setRawPeriodAmount}
+          onChangeValue={onPeriodAmountChange}
           onBlur={commitPeriodAmount}
         />
       </FormField>

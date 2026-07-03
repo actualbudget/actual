@@ -14,10 +14,10 @@ const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 // browser environment this is where we initialize the backend and
 // everything else.
 
-const IS_DEV = process.env.NODE_ENV === 'development';
+const IS_DEV = import.meta.env.DEV;
 const ACTUAL_VERSION = Platform.isPlaywright
   ? '99.9.9'
-  : process.env.REACT_APP_REVIEW_ID
+  : import.meta.env.REACT_APP_REVIEW_ID
     ? '.preview'
     : packageJson.version;
 
@@ -33,8 +33,8 @@ const worker = startBrowserBackend({
   initPayload: {
     version: ACTUAL_VERSION,
     isDev: IS_DEV,
-    publicUrl: process.env.PUBLIC_URL,
-    hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
+    publicUrl: import.meta.env.BASE_URL.slice(0, -1),
+    hash: import.meta.env.REACT_APP_BACKEND_WORKER_HASH,
   },
   createSharedWorker: () =>
     new SharedBrowserServerWorker({ name: 'actual-backend' }),

@@ -10,6 +10,7 @@ import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useUnlinkAccountMutation } from '#accounts';
+import { getFailedSyncError, isAccountFailedSync } from '#accounts/syncStatus';
 import { Link } from '#components/common/Link';
 import { authorizeBank as authorizeEnableBanking } from '#enablebanking';
 import { authorizeBank as authorizeGoCardless } from '#gocardless';
@@ -126,19 +127,18 @@ export function AccountSyncCheck() {
     [unlinkAccount],
   );
 
-  if (!failedAccounts || !id) {
-    return null;
-  }
-
-  const error = failedAccounts.get(id);
-  if (!error) {
+  if (!id) {
     return null;
   }
 
   const account = accounts.find(account => account.id === id);
-  if (!account) {
+  if (!account || !isAccountFailedSync(account)) {
     return null;
   }
+
+  // prefer the detailed error from the client that ran the sync, fall back
+  // to the persisted status for failures that happened on another client
+  const error = failedAccounts.get(id) ?? getFailedSyncError(account);
 
   const { type, code } = error;
   const showAuth =

@@ -26,9 +26,9 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
-import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useBalanceForecast } from '#hooks/useBalanceForecast';
 import { useFormat } from '#hooks/useFormat';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import {
   buildBalanceForecastChartData,
@@ -43,8 +43,6 @@ type BalanceForecastCardProps = {
   accounts: AccountEntity[];
   meta?: BalanceForecastWidget['meta'];
   onMetaChange: (newMeta: BalanceForecastWidget['meta']) => void;
-  onRemove: () => void;
-  onCopy: (targetDashboardId: string) => void;
 };
 
 export function BalanceForecastCard({
@@ -53,14 +51,16 @@ export function BalanceForecastCard({
   accounts,
   meta,
   onMetaChange,
-  onRemove,
-  onCopy,
 }: BalanceForecastCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
-
-  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useDashboardWidgetCopyMenu(onCopy);
+  const [budgetTypePref] = useSyncedPref('budgetType');
+  const budgetType = budgetTypePref === 'tracking' ? 'tracking' : 'envelope';
+  const source =
+    meta?.source === 'tracking-budget' && budgetType === 'tracking'
+      ? 'tracking-budget'
+      : 'schedules';
+  const isTrackingBudgetForecast = source === 'tracking-budget';
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -88,12 +88,15 @@ export function BalanceForecastCard({
     isPlaceholderData,
     isPending: isLoading,
   } = useBalanceForecast({
-    accountIds: selectedAccountIds,
-    conditions: meta?.conditions,
-    conditionsOp: meta?.conditionsOp,
+    accountIds: isTrackingBudgetForecast ? undefined : selectedAccountIds,
+    conditions: isTrackingBudgetForecast ? undefined : meta?.conditions,
+    conditionsOp: isTrackingBudgetForecast ? undefined : meta?.conditionsOp,
     startDate,
     endDate,
-    includeAccountlessSchedules: meta?.accounts === undefined,
+    includeAccountlessSchedules: isTrackingBudgetForecast
+      ? undefined
+      : meta?.accounts === undefined,
+    source,
   });
   const errorMessage =
     error instanceof Error
@@ -137,37 +140,16 @@ export function BalanceForecastCard({
   const scheduledOccurrenceCount = countForecastScheduledOccurrences(
     normalizedForecastData,
   );
-  const hasFilters = (meta?.conditions?.length ?? 0) > 0;
+  const hasFilters =
+    !isTrackingBudgetForecast && (meta?.conditions?.length ?? 0) > 0;
 
   return (
     <ReportCard
+      widgetId={widgetId}
       isEditing={isEditing}
       disableClick={nameMenuOpen}
       to={`/reports/forecast/${widgetId}`}
-      menuItems={[
-        {
-          name: 'rename',
-          text: t('Rename'),
-        },
-        {
-          name: 'remove',
-          text: t('Remove'),
-        },
-        ...copyMenuItems,
-      ]}
-      onMenuSelect={item => {
-        if (handleCopyMenuSelect(item)) return;
-        switch (item) {
-          case 'rename':
-            setNameMenuOpen(true);
-            break;
-          case 'remove':
-            onRemove();
-            break;
-          default:
-            throw new Error(`Unrecognized selection: ${item}`);
-        }
-      }}
+      onRename={() => setNameMenuOpen(true)}
     >
       <View
         style={{ flex: 1 }}
@@ -347,7 +329,12 @@ export function BalanceForecastCard({
                 color: theme.pageTextLight,
               }}
             >
-              {scheduledOccurrenceCount === 0 ? (
+              {isTrackingBudgetForecast ? (
+                <Trans>
+                  Forecast = starting balance + budgeted income - budgeted
+                  expenses
+                </Trans>
+              ) : scheduledOccurrenceCount === 0 ? (
                 hasFilters ? (
                   <Trans>
                     Filtered running total only; no scheduled occurrences in

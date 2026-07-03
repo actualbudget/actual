@@ -57,7 +57,7 @@ if (values.version) {
   process.exit();
 }
 
-const setupDataDir = (dataDir = undefined) => {
+const setupDataDir = dataDir => {
   if (process.env.ACTUAL_DATA_DIR) {
     return; // Env variables must not be overwritten
   }

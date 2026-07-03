@@ -13,7 +13,7 @@ const IMG_EXTENSIONS = new Set([
   '.ico',
   '.avif',
 ]);
-const DOC_EXTENSIONS = new Set(['.md', '.mdx']);
+const DOC_EXTENSIONS = new Set(['.md']);
 
 // ---------------------------------------------------------------------------
 // Slug cache: maps blog/docs slug strings -> absolute file paths.
@@ -35,13 +35,13 @@ function parseFrontmatterSlug(content) {
 }
 
 /**
- * Walk a directory (non-recursive) and return absolute paths of .md/.mdx files.
+ * Walk a directory (non-recursive) and return absolute paths of .md files.
  */
 function listMarkdownFiles(dir) {
   try {
     return fs
       .readdirSync(dir)
-      .filter(f => /\.(md|mdx)$/.test(f))
+      .filter(f => f.endsWith('.md'))
       .map(f => path.join(dir, f));
   } catch {
     return [];
@@ -121,8 +121,10 @@ function isBlogFile(filePath) {
  *
  * Covers both docs/ pages and blog/ posts:
  *
+ *   0. The page itself must be .md, not .mdx (.mdx is outlawed in this package).
  *   1. No absolute internal links (/docs/..., /blog/...) — use relative .md paths.
- *   2. Relative links to other .md/.mdx files must include the extension.
+ *   2. Relative links to other .md files must include the extension, and must
+ *      not point at a .mdx file.
  *   3. Relative links that use a Docusaurus slug instead of the real filename
  *      are caught via frontmatter scanning and reported with the correct path.
  *
@@ -139,6 +141,13 @@ function remarkEnforceDocLinks() {
     const inDocs = filePath && isDocsFile(filePath);
     const inBlog = filePath && isBlogFile(filePath);
     if (!inDocs && !inBlog) return;
+
+    if (filePath.endsWith('.mdx')) {
+      const rel = path.relative(process.cwd(), filePath);
+      throw new Error(
+        `Doc file ${rel} uses the .mdx extension, which is not allowed. Rename it to .md.`,
+      );
+    }
 
     const fileDir = path.dirname(filePath);
     const docsRoot = findDocsRoot(filePath);
@@ -159,6 +168,15 @@ function remarkEnforceDocLinks() {
       const [base] = url.split('#');
       const ext = path.extname(base);
       if (IMG_EXTENSIONS.has(ext)) return;
+
+      if (ext === '.mdx') {
+        const pos = nodePos(node);
+        const fixed = base.replace(/\.mdx$/, '.md') + url.slice(base.length);
+        errors.push(
+          `${pos}: link "${url}" targets a .mdx file, which is not allowed. Use "${fixed}" instead`,
+        );
+        return;
+      }
 
       // Rule 1: absolute internal links (docs/ only).
       // Blog posts appear in multiple URL contexts (post page, list pages,
@@ -182,31 +200,27 @@ function remarkEnforceDocLinks() {
       if (inBlog && docsContentDir && resolved.startsWith(docsContentDir))
         return;
 
-      // Rule 2a: resolves to a .md/.mdx file directly (just missing the extension)
-      for (const docExt of ['.md', '.mdx']) {
-        if (fs.existsSync(resolved + docExt)) {
-          const pos = nodePos(node);
-          errors.push(
-            `${pos}: link "${url}" is missing its extension — use "${base + docExt}"`,
-          );
-          return;
-        }
+      // Rule 2a: resolves to a .md file directly (just missing the extension)
+      if (fs.existsSync(resolved + '.md')) {
+        const pos = nodePos(node);
+        errors.push(
+          `${pos}: link "${url}" is missing its extension — use "${base + '.md'}"`,
+        );
+        return;
       }
 
       // Rule 2b: resolves to a directory that has an index file
-      for (const docExt of ['.md', '.mdx']) {
-        const indexFile = path.join(resolved, 'index' + docExt);
-        if (fs.existsSync(indexFile)) {
-          const pos = nodePos(node);
-          const suggestion = path.posix.join(
-            base.replace(/\\/g, '/'),
-            'index' + docExt,
-          );
-          errors.push(
-            `${pos}: link "${url}" points to a directory — use "${suggestion}" instead`,
-          );
-          return;
-        }
+      const indexFile = path.join(resolved, 'index.md');
+      if (fs.existsSync(indexFile)) {
+        const pos = nodePos(node);
+        const suggestion = path.posix.join(
+          base.replace(/\\/g, '/'),
+          'index.md',
+        );
+        errors.push(
+          `${pos}: link "${url}" points to a directory — use "${suggestion}" instead`,
+        );
+        return;
       }
 
       // Rule 3: slug-style link that matches a known frontmatter slug.

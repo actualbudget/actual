@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useMemo } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import type {
   ComponentProps,
   ComponentPropsWithoutRef,
@@ -23,7 +23,6 @@ import type {
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
-import { Fzf } from 'fzf';
 
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '#components/budget/util';
@@ -34,6 +33,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
 import { Autocomplete } from './Autocomplete';
+import { filterCategorySuggestions } from './filterCategorySuggestions';
 import { ItemHeader } from './ItemHeader';
 
 type CategoryAutocompleteItem = Omit<CategoryEntity, 'group'> & {
@@ -249,32 +249,6 @@ export function CategoryAutocomplete({
     showHiddenCategories,
   ]);
 
-  const filterSuggestions = useCallback(
-    (
-      suggestions: CategoryAutocompleteItem[],
-      value: string,
-    ): CategoryAutocompleteItem[] => {
-      const splitItem = suggestions.find(s => s.id === 'split');
-      const realSuggestions = suggestions.filter(s => s.id !== 'split');
-
-      if (!value) {
-        return suggestions;
-      }
-
-      const filtered = new Fzf(realSuggestions, {
-        selector: item =>
-          item.group ? item.group.name + ' ' + item.name : item.name,
-        limit: 100,
-        casing: 'case-insensitive',
-      })
-        .find(value)
-        .map(result => result.item);
-
-      return splitItem ? [splitItem, ...filtered] : filtered;
-    },
-    [],
-  );
-
   return (
     <Autocomplete
       strict
@@ -290,7 +264,7 @@ export function CategoryAutocomplete({
         }
         return 0;
       }}
-      filterSuggestions={filterSuggestions}
+      filterSuggestions={filterCategorySuggestions}
       suggestions={categorySuggestions}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <CategoryList

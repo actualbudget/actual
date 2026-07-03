@@ -34,7 +34,7 @@
     // Until/if we build using tsc
     "noEmit": true
   },
-  "include": ["bin/*.ts"],
+  "include": ["bin/*.mts"],
   "exclude": [
     "**/.*/",
     "node_modules",
@@ -49,11 +49,5 @@
     "**/playwright-report/*",
     "**/service-worker/*",
     "packages/docs/**/*"
-  ],
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS",
-      "types": ["node"]
-    }
-  }
+  ]
 }

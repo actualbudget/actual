@@ -69,7 +69,7 @@ app.post(
     const { accountId, startDate } = req.body || {};
 
     try {
-      const transactions = await pluggyaiService.getTransactions(
+      const transactions = await pluggyaiService.getTransactionsByAccountId(
         accountId,
         startDate,
       );
@@ -82,7 +82,7 @@ app.post(
       if (account.type === 'CREDIT') {
         startingBalance = -startingBalance;
       }
-      const date = getDate(new Date(account.updatedAt));
+      const date = getDate(account.updatedAt);
 
       const balances = [
         {
@@ -99,12 +99,16 @@ app.post(
       const booked = [];
       const pending = [];
 
-      for (const trans of transactions) {
+      for (const trans of Object.values(transactions)) {
+        if (typeof trans !== 'object' || Object.keys(trans).length === 0) {
+          continue;
+        }
+
         const newTrans = {};
 
         newTrans.booked = !(trans.status === 'PENDING');
 
-        const transactionDate = new Date(trans.date);
+        const transactionDate = trans.date;
 
         if (transactionDate < startDate && !trans.sandbox) {
           continue;
@@ -132,6 +136,9 @@ app.post(
 
         newTrans.transactionId = trans.id;
         newTrans.sortOrder = transactionDate.getTime();
+
+        newTrans.originalDate = getDate(transactionDate);
+        newTrans.date = getDate(getTransactionDateCorrected(trans));
 
         delete trans.amount;
 
@@ -216,4 +223,28 @@ function getPayeeName(trans) {
   }
 
   return '';
+}
+
+//useful to avoid add month to day 31, which would result in day 01 skipping to the next month
+function addMonthsClamped(date, months) {
+  const result = new Date(date);
+  const day = result.getUTCDate();
+  result.setUTCDate(1);
+  result.setUTCMonth(result.getUTCMonth() + months);
+  const lastDay = new Date(
+    Date.UTC(result.getUTCFullYear(), result.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  result.setUTCDate(Math.min(day, lastDay));
+  return result;
+}
+
+function getTransactionDateCorrected(trans) {
+  if (trans.creditCardMetadata?.installmentNumber != null) {
+    return addMonthsClamped(
+      trans.creditCardMetadata.purchaseDate || trans.date,
+      trans.creditCardMetadata.installmentNumber - 1,
+    );
+  }
+
+  return trans.date;
 }

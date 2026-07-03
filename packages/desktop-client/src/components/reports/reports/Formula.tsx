@@ -9,6 +9,7 @@ import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import type { FormulaWidget } from '@actual-app/core/types/models';
 
@@ -70,6 +71,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
   const [staticFontSize, setStaticFontSize] = useState<number>(
     widget?.meta?.staticFontSize || 32,
   );
+  const [showTitle, setShowTitle] = useState(widget?.meta?.showTitle ?? true);
   const [colorFormula, setColorFormula] = useState(
     widget?.meta?.colorFormula || '',
   );
@@ -136,6 +138,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
           queries: queriesRef.current,
           fontSizeMode,
           staticFontSize,
+          showTitle,
           colorFormula,
         },
       },
@@ -165,6 +168,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
             queries: queriesRef.current,
             fontSizeMode,
             staticFontSize,
+            showTitle,
             colorFormula,
           },
         },
@@ -250,6 +254,24 @@ function FormulaInner({ widget }: FormulaInnerProps) {
             flexDirection: 'column',
           }}
         >
+          <View style={{ padding: 20, paddingBottom: 0 }}>
+            <div
+              style={{
+                fontSize: 13,
+                color: theme.pageTextSubdued,
+                marginBottom: 5,
+              }}
+            >
+              <label htmlFor="formula-show-title">
+                <Trans>Show title:</Trans>
+              </label>
+            </div>
+            <Toggle
+              id="formula-show-title"
+              isOn={showTitle}
+              onToggle={setShowTitle}
+            />
+          </View>
           <View
             style={{
               padding: 20,
@@ -290,7 +312,6 @@ function FormulaInner({ widget }: FormulaInnerProps) {
               />
             </View>
           </View>
-
           <View
             style={{
               flex: 1,
@@ -319,7 +340,6 @@ function FormulaInner({ widget }: FormulaInnerProps) {
               />
             </Suspense>
           </View>
-
           <View
             style={{
               padding: '0 20px 20px 20px',
@@ -372,7 +392,6 @@ function FormulaInner({ widget }: FormulaInnerProps) {
               </View>
             )}
           </View>
-
           <View
             style={{
               padding: 20,

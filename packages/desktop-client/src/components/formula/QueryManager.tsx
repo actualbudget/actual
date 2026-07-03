@@ -47,6 +47,17 @@ type QueryConfig = {
   timeFrame?: TimeFrame;
 };
 
+type PresetTimeRangeMode = Exclude<
+  TimeFrame['mode'],
+  'sliding-window' | 'static'
+>;
+
+function isPresetTimeRangeMode(
+  mode: TimeFrame['mode'],
+): mode is PresetTimeRangeMode {
+  return !['sliding-window', 'static'].includes(mode);
+}
+
 type QueryManagerProps = {
   queries: Record<string, QueryConfig>;
   onQueriesChange: (queries: Record<string, QueryConfig>) => void;
@@ -480,6 +491,29 @@ function QueryItem({
     }
   }
 
+  const timeRangeMode = timeRangeRef.current as TimeFrame['mode'];
+  const isPresetTimeRange = isPresetTimeRangeMode(timeRangeMode);
+  const timeRangeLabels = {
+    'sliding-window': t('Live'),
+    static: t('Static'),
+    full: t('All time'),
+    lastMonth: t('Last month'),
+    lastYear: t('Last year'),
+    yearToDate: t('Year to date'),
+    priorYearToDate: t('Prior year to date'),
+  } satisfies Record<TimeFrame['mode'], string>;
+  const timeRangeLabel = timeRangeLabels[timeRangeMode];
+  const presetTimeRangeLabels = {
+    full: t('All time transactions'),
+    lastMonth: t('Last month transactions'),
+    lastYear: t('Last year transactions'),
+    yearToDate: t('Year to date transactions'),
+    priorYearToDate: t('Prior year to date transactions'),
+  } satisfies Record<PresetTimeRangeMode, string>;
+  const presetTimeRangeLabel = isPresetTimeRange
+    ? presetTimeRangeLabels[timeRangeMode]
+    : null;
+
   return (
     <View
       style={{
@@ -630,12 +664,11 @@ function QueryItem({
           }}
         >
           <Button
-            style={{ width: 50 }}
-            variant={timeRangeRef.current === 'static' ? 'normal' : 'primary'}
+            style={{ minWidth: 50 }}
+            variant={timeRangeMode === 'static' ? 'normal' : 'primary'}
             onPress={() => {
-              const currentMode = timeRangeRef.current as TimeFrame['mode'];
               const newMode =
-                currentMode === 'static' ? 'sliding-window' : 'static';
+                timeRangeMode === 'static' ? 'sliding-window' : 'static';
               const [newStart, newEnd] = calculateTimeRange({
                 start: startDate,
                 end: endDate,
@@ -654,7 +687,7 @@ function QueryItem({
               );
             }}
           >
-            {timeRangeRef.current === 'static' ? t('Static') : t('Live')}
+            {timeRangeLabel}
           </Button>
           <Button
             ref={timeRangeMenuTriggerRef}
@@ -793,7 +826,19 @@ function QueryItem({
           </Popover>
         </View>
 
-        {/* Date range selectors */}
+        {presetTimeRangeLabel ? (
+          <Input
+            value={presetTimeRangeLabel}
+            readOnly
+            disabled
+            style={{
+              width: '100%',
+              marginTop: 8,
+              textAlign: 'center',
+            }}
+          />
+        ) : null}
+
         {allMonths.length > 0 && (
           <View
             style={{
@@ -805,7 +850,13 @@ function QueryItem({
             }}
           >
             <Select
+              disabled={isPresetTimeRange}
               value={fromDateRepr(startDate)}
+              defaultLabel={monthUtils.format(
+                fromDateRepr(startDate),
+                'MMMM yyyy',
+                locale,
+              )}
               onChange={newValue => {
                 const [validatedStart] = validateStart(
                   allMonths[allMonths.length - 1].name,
@@ -822,7 +873,13 @@ function QueryItem({
               <Trans>to</Trans>
             </Text>
             <Select
+              disabled={isPresetTimeRange}
               value={fromDateRepr(endDate)}
+              defaultLabel={monthUtils.format(
+                fromDateRepr(endDate),
+                'MMMM yyyy',
+                locale,
+              )}
               onChange={newValue => {
                 const [, validatedEnd] = validateEnd(
                   allMonths[allMonths.length - 1].name,

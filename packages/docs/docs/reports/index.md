@@ -27,6 +27,7 @@ The following are available as experimental features:
 
 - [Budget Analysis report](../experimental/budget-analysis-report.md)
 - [Balance Forecast report](../experimental/balance-forecast-report.md)
+- [Sankey report](../experimental/sankey-report.md)
 
 ## Cash Flow Graph
 

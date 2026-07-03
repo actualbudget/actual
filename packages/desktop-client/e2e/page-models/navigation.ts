@@ -2,6 +2,7 @@ import type { Locator, Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
 import { BankSyncPage } from './bank-sync-page';
+import { BudgetPage } from './budget-page';
 import { PayeesPage } from './payees-page';
 import { ReportsPage } from './reports-page';
 import { RulesPage } from './rules-page';
@@ -82,6 +83,14 @@ export class Navigation {
     await this.page.getByRole('link', { name: 'Reports' }).click();
 
     return new ReportsPage(this.page);
+  }
+
+  async goToBudgetPage() {
+    await this.page.getByRole('link', { name: 'Budget', exact: true }).click();
+
+    const budgetPage = new BudgetPage(this.page);
+    await budgetPage.waitFor({ state: 'visible' });
+    return budgetPage;
   }
 
   async goToSchedulesPage() {
@@ -176,5 +185,15 @@ export class Navigation {
 
   async clickOnNoServer() {
     await this.page.getByRole('button', { name: 'No server' }).click();
+  }
+
+  async rightClickAccount(accountName: string) {
+    await this.page
+      .getByRole('link', { name: new RegExp(`^${accountName}`) })
+      .click({ button: 'right' });
+  }
+
+  async rightClickBudgetName() {
+    await this.page.getByTestId('budget-name').click({ button: 'right' });
   }
 }

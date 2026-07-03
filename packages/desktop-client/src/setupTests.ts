@@ -2,9 +2,6 @@ import '@testing-library/jest-dom';
 import type { ReactNode } from 'react';
 
 import { resetTestProviders } from './mocks';
-import { installPolyfills } from './polyfills';
-
-void installPolyfills();
 
 global.IS_TESTING = true;
 global.Actual = {} as typeof global.Actual;

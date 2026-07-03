@@ -10,7 +10,7 @@ import type { Ref, RefObject } from 'react';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { amountToInteger } from '@actual-app/core/shared/util';
-import debounce from 'lodash/debounce';
+import { debounce } from 'es-toolkit/compat';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
@@ -81,12 +81,15 @@ export function FormulaResult({
 
     if (width <= 0 || height <= 0) return;
 
-    // Get the actual display value length at calculation time
-    const valueLength = displayValue.length || 1; // Avoid division by zero
+    // Check if the display value contains line breaks and calculate font size accordingly.
+    const lines = displayValue.split(/\r?\n/);
+    const lineCount = lines.length;
+    const longestLineLength = Math.max(...lines.map(line => line.length), 1);
 
+    // Calculate font size based on the longest line and number of lines
     const calculatedFontSize = Math.min(
-      (width * FONT_SIZE_SCALE_FACTOR) / valueLength,
-      height, // Ensure the text fits vertically by using the height as the limiting factor
+      (width * FONT_SIZE_SCALE_FACTOR) / longestLineLength,
+      height / lineCount, // Divide height by number of lines to fit all lines
     );
 
     if (calculatedFontSize > 0) {
@@ -184,7 +187,14 @@ export function FormulaResult({
           {!showContent ? (
             <ReportCardValueSkeleton />
           ) : (
-            <span aria-hidden="true">
+            <span
+              aria-hidden="true"
+              style={{
+                whiteSpace: 'pre-wrap',
+                textAlign: 'center',
+                wordBreak: 'break-word',
+              }}
+            >
               <PrivacyFilter>{displayValue}</PrivacyFilter>
             </span>
           )}

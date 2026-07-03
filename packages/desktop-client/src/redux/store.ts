@@ -19,6 +19,10 @@ import {
   reducer as budgetfilesSliceReducer,
 } from '#budgetfiles/budgetfilesSlice';
 import {
+  name as contextMenuSliceName,
+  reducer as contextMenuSliceReducer,
+} from '#contextmenu/contextMenuSlice';
+import {
   name as modalsSliceName,
   reducer as modalsSliceReducer,
 } from '#modals/modalsSlice';
@@ -44,6 +48,7 @@ const rootReducer = combineReducers({
   [accountsSliceName]: accountsSliceReducer,
   [appSliceName]: appSliceReducer,
   [budgetfilesSliceName]: budgetfilesSliceReducer,
+  [contextMenuSliceName]: contextMenuSliceReducer,
   [modalsSliceName]: modalsSliceReducer,
   [notificationsSliceName]: notificationsSliceReducer,
   [prefsSliceName]: prefsSliceReducer,
@@ -89,7 +94,6 @@ export function configureAppStore({
 export type AppStore = ReturnType<typeof configureAppStore>;
 export type RootState = ReturnType<AppStore['getState']>;
 export type AppDispatch = AppStore['dispatch'];
-export type GetRootState = AppStore['getState'];
 export type ExtraArguments = {
   queryClient: QueryClient;
 };

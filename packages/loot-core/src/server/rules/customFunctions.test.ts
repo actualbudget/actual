@@ -6,8 +6,8 @@ import {
   createBudgetQueryPrefetchKey,
   CustomFunctionsPlugin,
   customFunctionsTranslations,
-} from './customFunctions';
-import type { FormulaQueryContext } from './customFunctions';
+} from '#shared/formulas/customFunctions';
+import type { FormulaQueryContext } from '#shared/formulas/customFunctions';
 
 function createFormulaQueryContext(): Required<FormulaQueryContext> {
   return {

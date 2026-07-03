@@ -1,6 +1,26 @@
+import type { ScheduleEntity } from '@actual-app/core/types/models';
 import type { Template } from '@actual-app/core/types/models/templates';
 
 import { migrateTemplatesToAutomations } from './migrateTemplatesToAutomations';
+
+function schedule(id: string, name: string): ScheduleEntity {
+  return {
+    id,
+    name,
+    rule: 'rule-1',
+    next_date: '2026-01-01',
+    completed: false,
+    posts_transaction: false,
+    tombstone: false,
+    _payee: 'payee-1',
+    _account: 'account-1',
+    _amount: 0,
+    _amountOp: 'is',
+    _date: '2026-01-01',
+    _conditions: [],
+    _actions: [],
+  };
+}
 
 describe('migrateTemplatesToAutomations', () => {
   it('drops simple templates that have no limit and no monthly amount', () => {
@@ -15,7 +35,7 @@ describe('migrateTemplatesToAutomations', () => {
     expect(migrateTemplatesToAutomations([simpleTemplate])).toEqual([]);
   });
 
-  it('drops simple templates whose monthly amount is zero with no limit', () => {
+  it('migrates a standalone `#template 0` (no limit) into a $0 fixed entry', () => {
     const simpleTemplate = {
       type: 'simple',
       directive: 'template',
@@ -23,7 +43,17 @@ describe('migrateTemplatesToAutomations', () => {
       monthly: 0,
     } satisfies Template;
 
-    expect(migrateTemplatesToAutomations([simpleTemplate])).toEqual([]);
+    const result = migrateTemplatesToAutomations([simpleTemplate]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].displayType).toBe('fixed');
+    expect(result[0].template).toMatchObject({
+      type: 'periodic',
+      amount: 0,
+      period: { period: 'month', amount: 1 },
+      directive: 'template',
+      priority: 5,
+    });
   });
 
   it('migrates a goal directive to a long-term goal entry', () => {
@@ -100,7 +130,7 @@ describe('migrateTemplatesToAutomations', () => {
     });
   });
 
-  it('expands `#template 0 up to N` into limit + fixed-zero (not refill)', () => {
+  it('expands `#template 0 up to N` into a standalone limit (no refill, no $0 contribution)', () => {
     const simpleTemplate = {
       type: 'simple',
       directive: 'template',
@@ -115,13 +145,12 @@ describe('migrateTemplatesToAutomations', () => {
 
     const result = migrateTemplatesToAutomations([simpleTemplate]);
 
-    expect(result).toHaveLength(2);
-    expect(result.map(entry => entry.displayType)).toEqual(['limit', 'fixed']);
-    expect(result[1].template).toMatchObject({
-      type: 'periodic',
-      amount: 0,
+    expect(result).toHaveLength(1);
+    expect(result.map(entry => entry.displayType)).toEqual(['limit']);
+    expect(result[0].template).toMatchObject({
+      type: 'limit',
+      amount: 1000,
       directive: 'template',
-      priority: 4,
     });
   });
 
@@ -153,6 +182,98 @@ describe('migrateTemplatesToAutomations', () => {
     });
   });
 
+  it('splits a periodic template with an `up to` limit into fixed + limit entries', () => {
+    // `#template 32.5 repeat every 1 days starting 2025-02-01 up to 2500`: the
+    // fixed editor can't show the inline cap, so the limit must become its own
+    // entry rather than vanishing and re-serialising as a duplicate `up to`.
+    const periodicTemplate = {
+      type: 'periodic',
+      directive: 'template',
+      priority: 2,
+      amount: 32.5,
+      period: { period: 'day', amount: 1 },
+      starting: '2025-02-01',
+      limit: {
+        amount: 2500,
+        hold: false,
+        period: 'monthly',
+      },
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations([periodicTemplate]);
+
+    expect(result).toHaveLength(2);
+    expect(result.map(entry => entry.displayType)).toEqual(['fixed', 'limit']);
+    expect(result[0].template).toEqual({
+      type: 'periodic',
+      directive: 'template',
+      priority: 2,
+      amount: 32.5,
+      period: { period: 'day', amount: 1 },
+      starting: '2025-02-01',
+    });
+    expect(result[1].template).toEqual({
+      type: 'limit',
+      amount: 2500,
+      hold: false,
+      period: 'monthly',
+      start: undefined,
+      directive: 'template',
+      priority: null,
+    });
+  });
+
+  it('splits a remainder template with an `up to` limit into remainder + limit entries', () => {
+    const remainderTemplate = {
+      type: 'remainder',
+      directive: 'template',
+      priority: null,
+      weight: 2,
+      limit: {
+        amount: 500,
+        hold: true,
+        period: 'monthly',
+      },
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations([remainderTemplate]);
+
+    expect(result).toHaveLength(2);
+    expect(result.map(entry => entry.displayType)).toEqual([
+      'remainder',
+      'limit',
+    ]);
+    expect(result[0].template).toEqual({
+      type: 'remainder',
+      directive: 'template',
+      priority: null,
+      weight: 2,
+    });
+    expect(result[1].template).toMatchObject({
+      type: 'limit',
+      amount: 500,
+      hold: true,
+      period: 'monthly',
+    });
+  });
+
+  it('leaves a periodic template without a limit as a single fixed entry', () => {
+    const periodicTemplate = {
+      type: 'periodic',
+      directive: 'template',
+      priority: 2,
+      amount: 10,
+      period: { period: 'month', amount: 1 },
+      starting: '2025-02-01',
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations([periodicTemplate]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].displayType).toBe('fixed');
+    expect(result[0].template).toEqual(periodicTemplate);
+  });
+
   it('creates a single entry for non-simple templates', () => {
     const scheduleTemplate = {
       type: 'schedule',
@@ -165,6 +286,62 @@ describe('migrateTemplatesToAutomations', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].displayType).toBe('schedule');
+    expect(result[0].template).toEqual(scheduleTemplate);
+  });
+
+  it('fills in scheduleId for a name-only schedule template', () => {
+    const scheduleTemplate = {
+      type: 'schedule',
+      directive: 'template',
+      priority: 1,
+      name: 'Rent',
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations(
+      [scheduleTemplate],
+      [schedule('sched-1', 'Rent')],
+    );
+
+    expect(result[0].template).toMatchObject({
+      scheduleId: 'sched-1',
+      name: 'Rent',
+    });
+  });
+
+  it('refreshes a stale name from scheduleId after a rename', () => {
+    const scheduleTemplate = {
+      type: 'schedule',
+      directive: 'template',
+      priority: 1,
+      scheduleId: 'sched-1',
+      name: 'Old Name',
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations(
+      [scheduleTemplate],
+      [schedule('sched-1', 'New Name')],
+    );
+
+    expect(result[0].template).toMatchObject({
+      scheduleId: 'sched-1',
+      name: 'New Name',
+    });
+  });
+
+  it('leaves a schedule template untouched when no schedule matches', () => {
+    const scheduleTemplate = {
+      type: 'schedule',
+      directive: 'template',
+      priority: 1,
+      scheduleId: 'missing',
+      name: 'Gone',
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations(
+      [scheduleTemplate],
+      [schedule('sched-1', 'Rent')],
+    );
+
     expect(result[0].template).toEqual(scheduleTemplate);
   });
 });

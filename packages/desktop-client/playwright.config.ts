@@ -9,7 +9,7 @@ export default defineConfig({
   workers: process.env.CI ? 4 : undefined,
   testDir: 'e2e/',
   reporter: process.env.CI
-    ? [['blob'], ['list']]
+    ? [['blob'], ['list'], ['junit', { outputFile: 'test-results/junit.xml' }]]
     : [['html', { open: 'never' }]],
   use: {
     userAgent: 'playwright',

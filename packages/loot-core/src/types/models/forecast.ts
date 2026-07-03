@@ -1,3 +1,5 @@
+export type ForecastSource = 'schedules' | 'tracking-budget';
+
 export type ForecastDataPoint = {
   date: string;
   balance: number;
@@ -20,6 +22,7 @@ export type BalanceForecastConfig = {
   selectedAccounts: string[];
   showCombined: boolean;
   showIndividual: boolean;
+  source?: ForecastSource;
   tombstone?: boolean;
 };
 

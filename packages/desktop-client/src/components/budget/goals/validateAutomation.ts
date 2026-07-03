@@ -46,20 +46,24 @@ export function validateAutomation(
   validPercentageSources?: ReadonlySet<string>,
 ): AutomationErrorKind | null {
   switch (displayType) {
-    case 'schedule':
+    case 'schedule': {
       if (template.type !== 'schedule') return null;
-      if (!template.name) return { kind: 'schedule-not-found', name: '' };
-      if (
-        !schedules.some(
-          s => s.name === template.name && !s.completed && !s.tombstone,
-        )
-      ) {
-        return { kind: 'schedule-not-found', name: template.name };
+      if (!template.scheduleId && !template.name) {
+        return { kind: 'schedule-not-found', name: '' };
+      }
+      const match = schedules.find(s =>
+        template.scheduleId
+          ? s.id === template.scheduleId
+          : s.name === template.name,
+      );
+      if (!match || match.completed || match.tombstone) {
+        return { kind: 'schedule-not-found', name: template.name ?? '' };
       }
       if (isAdjustmentOutOfRange(template)) {
         return { kind: 'adjustment-out-of-range' };
       }
       return null;
+    }
     case 'historical':
       if (isAdjustmentOutOfRange(template)) {
         return { kind: 'adjustment-out-of-range' };
