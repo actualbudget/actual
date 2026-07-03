@@ -16,7 +16,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { FieldLabel, TapField } from '#components/mobile/MobileForms';
 import { AmountInput } from '#components/util/AmountInput';
 import { useCategories } from '#hooks/useCategories';
-import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useFutureBufferMode } from '#hooks/useFutureBufferMode';
 import { useInitialMount } from '#hooks/useInitialMount';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
@@ -35,7 +35,7 @@ export function CoverModal({
   onSubmit,
 }: CoverModalProps) {
   const { t } = useTranslation();
-  const isFutureBufferModeAvailable = useFeatureFlag('futureBufferMode');
+  const { isFutureBufferModeAvailable } = useFutureBufferMode();
   const [hideFraction] = useSyncedPref('hideFraction');
 
   const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
