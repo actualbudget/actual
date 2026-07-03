@@ -29,6 +29,7 @@ export class AccountPage {
   readonly sidebarAllAccountsBalance: Locator;
   readonly sidebarOnBudgetBalance: Locator;
   readonly sidebarOffBudgetBalance: Locator;
+  readonly reconcileButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -67,6 +68,11 @@ export class AccountPage {
     this.sidebarOffBudgetBalance = this.page.getByTestId(
       'sidebar-off-budget-balance',
     );
+
+    this.reconcileButton = this.page.getByRole('button', {
+      name: 'Reconcile',
+      exact: true,
+    });
   }
 
   async waitFor(...options: Parameters<Locator['waitFor']>) {
@@ -165,6 +171,133 @@ export class AccountPage {
   async clickSelectAction(action: string | RegExp) {
     await this.selectButton.click();
     await this.selectTooltip.getByRole('button', { name: action }).click();
+  }
+
+  /**
+   * Toggle the "cleared" checkbox for the nth transaction.
+   */
+  async toggleCleared(index: number) {
+    await this.transactionTableRow.nth(index).getByTestId('cleared').click();
+  }
+
+  /**
+   * Edit an existing (already-saved) transaction's debit/credit amount.
+   */
+  async editTransactionAmount(
+    index: number,
+    field: 'debit' | 'credit',
+    value: string,
+  ) {
+    const cell = this.transactionTableRow.nth(index).getByTestId(field);
+    await cell.click();
+    const input = cell.getByRole('textbox');
+    await this.selectInputText(input);
+    await input.pressSequentially(value);
+    // Tab (not Enter) to commit — matches `_fillTransactionFields` below.
+    // Enter appears to both submit and trigger a separate blur-commit,
+    // double-firing the reconciled-transaction confirmation for a locked
+    // transaction (surfaces as two stacked "Reconciled Transaction" modals).
+    await this.page.keyboard.press('Tab');
+  }
+
+  /**
+   * Select and delete the nth transaction via the selection toolbar. For a
+   * reconciled transaction this only opens the "Reconciled Transaction"
+   * warning — call `confirmReconciledTransactionWarning()` and then
+   * `confirmDeleteModal()` (a second, generic "Confirm Delete" modal
+   * always follows) to actually complete the deletion.
+   */
+  async deleteNthTransaction(index: number) {
+    await this.selectNthTransaction(index);
+    await this.clickSelectAction('Delete');
+  }
+
+  /**
+   * The generic "Confirm Delete" modal that follows the reconciled-
+   * transaction warning (or appears on its own for non-reconciled deletes).
+   */
+  async confirmDeleteModal() {
+    await this.page.getByRole('button', { name: 'Delete' }).click();
+  }
+
+  /**
+   * The "Reconciled Transaction" warning modal shown when editing or
+   * deleting a transaction that's already reconciled.
+   */
+  get reconciledTransactionWarningHeading() {
+    return this.page.getByRole('heading', { name: 'Reconciled Transaction' });
+  }
+
+  async confirmReconciledTransactionWarning() {
+    await this.page.getByRole('button', { name: 'Confirm' }).click();
+  }
+
+  async cancelReconciledTransactionWarning() {
+    await this.page.getByRole('button', { name: 'Cancel' }).click();
+  }
+
+  /**
+   * Open the reconcile menu (lock icon in the account header) and return
+   * the popover locator.
+   */
+  async openReconcileMenu() {
+    await this.reconcileButton.click();
+    const popover = this.page.locator('[data-popover]');
+    await popover.waitFor({ state: 'visible' });
+    return popover;
+  }
+
+  /**
+   * Submit a balance from an already-open reconcile popover. Leaves the
+   * pre-filled cleared-balance value untouched if `balance` is omitted.
+   */
+  async submitReconcile(popover: Locator, balance?: string) {
+    if (balance) {
+      await popover.getByRole('textbox').fill(balance);
+    }
+    await popover.getByRole('button', { name: 'Reconcile' }).click();
+  }
+
+  /**
+   * Open the reconcile menu and submit a balance in one step.
+   */
+  async reconcile(balance?: string) {
+    const popover = await this.openReconcileMenu();
+    await this.submitReconcile(popover, balance);
+  }
+
+  /**
+   * Read the reconcile menu's status line ("Not yet reconciled" / "Reconciled
+   * ... ago"), then close the popover.
+   */
+  async getReconcileStatusText() {
+    const popover = await this.openReconcileMenu();
+    const text = await popover
+      .getByText(/Reconciled|Not yet reconciled/)
+      .textContent();
+    await this.page.keyboard.press('Escape');
+    return text;
+  }
+
+  /**
+   * The banner shown after submitting a reconcile balance. "Lock
+   * transactions" (exact match) and "Exit reconciliation" (mismatch) are
+   * the same underlying button with a state-dependent label.
+   */
+  get reconciliationAllReconciledText() {
+    return this.page.getByText('All reconciled!');
+  }
+
+  get reconciliationDoneButton() {
+    return this.page.getByRole('button', {
+      name: /^(Lock transactions|Exit reconciliation)$/,
+    });
+  }
+
+  get createReconciliationTransactionButton() {
+    return this.page.getByRole('button', {
+      name: 'Create reconciliation transaction',
+    });
   }
 
   /**

@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
+import { clickReactAriaButton } from './navigation';
 
 export class BudgetPage {
   readonly page: Page;
@@ -10,6 +11,7 @@ export class BudgetPage {
   readonly budgetTableTotals: Locator;
   readonly selectedMonthButton: Locator;
   readonly nextMonthButton: Locator;
+  readonly previousMonthButton: Locator;
   readonly budgetTableScrollContainer: Locator;
 
   constructor(page: Page) {
@@ -20,6 +22,7 @@ export class BudgetPage {
     this.budgetTableTotals = this.budgetTable.getByTestId('budget-totals');
     this.selectedMonthButton = page.getByTestId('selected-budget-month');
     this.nextMonthButton = page.getByTitle('Next month');
+    this.previousMonthButton = page.getByTitle('Previous month');
     this.budgetTableScrollContainer = page.getByTestId(
       'budget-table-scroll-container',
     );
@@ -143,15 +146,37 @@ export class BudgetPage {
     });
   }
 
-  async getBalanceForRow(idx: number) {
-    const balanceText = await this.budgetTable
-      .getByTestId('row')
-      .nth(idx)
+  async goToPreviousMonth() {
+    const currentMonth = await this.getSelectedMonth();
+
+    await this.previousMonthButton.click();
+
+    return await this.#waitForNewMonthToLoad({
+      currentMonth,
+      errorMessage: 'Failed to navigate to the previous month.',
+    });
+  }
+
+  /**
+   * Resolve a budget-table row either by index or by category name. Prefer
+   * a category name for any category created within the test itself (e.g.
+   * via the `category-create` API) — fixture categories can carry
+   * pre-existing budgeted/spent/carryover history from prior months, which
+   * makes row-index-based absolute-value assertions unreliable.
+   */
+  #getRow(row: number | string) {
+    return typeof row === 'number'
+      ? this.budgetTable.getByTestId('row').nth(row)
+      : this.budgetTable.getByTestId('row').filter({ hasText: row }).first();
+  }
+
+  async getBalanceForRow(row: number | string) {
+    const balanceText = await this.#getRow(row)
       .getByTestId('balance')
       .textContent();
 
     if (!balanceText) {
-      throw new Error(`Failed to get balance on row index ${idx}.`);
+      throw new Error(`Failed to get balance for row "${row}".`);
     }
 
     return Math.round(parseFloat(balanceText.replace(/,/g, '')) * 100);
@@ -212,6 +237,146 @@ export class BudgetPage {
       throw new Error('No visible spent-amount cell found to click');
     }
     return new AccountPage(this.page);
+  }
+
+  /**
+   * Open the balance-cell menu (Rollover overspending / Transfer / Cover
+   * overspending) for a category row (by index or name) and return the
+   * popover locator.
+   */
+  async openBalanceMenu(row: number | string) {
+    await clickReactAriaButton(
+      this.#getRow(row)
+        .getByTestId('balance')
+        .getByTestId(/^budget/),
+    );
+
+    const popover = this.page.locator('[data-popover]');
+    await popover.waitFor({ state: 'visible' });
+    return popover;
+  }
+
+  /**
+   * Toggle "Rollover overspending" / "Remove overspending rollover" for a
+   * category row. Present regardless of the category's balance sign.
+   */
+  async toggleCarryover(row: number | string) {
+    const popover = await this.openBalanceMenu(row);
+    await clickReactAriaButton(
+      popover.getByRole('button', {
+        name: /rollover overspending|overspending rollover/i,
+      }),
+    );
+  }
+
+  /**
+   * Cover an overspent category's balance from another category. Only
+   * available in the menu when the row's balance is negative.
+   */
+  async coverOverspending(
+    row: number | string,
+    fromCategoryName: string,
+    amount?: string,
+  ) {
+    const popover = await this.openBalanceMenu(row);
+    await popover.getByRole('button', { name: 'Cover overspending' }).click();
+
+    if (amount) {
+      const amountInput = popover.getByRole('textbox').first();
+      await amountInput.fill(amount);
+    }
+
+    await popover.getByPlaceholder('(none)').click();
+    await this.page.keyboard.type(fromCategoryName);
+    await this.page.keyboard.press('Enter');
+    await popover.getByRole('button', { name: 'Transfer' }).click();
+  }
+
+  /**
+   * The spreadsheet's sheet name for a given month is not the raw
+   * "YYYY-MM" string — it's `sheetForMonth` from loot-core
+   * (`'budget' + month.replace('-', '')`), which is what feeds `data-testid`
+   * on per-month cell values. Replicated here since the page model has no
+   * access to `monthUtils`.
+   */
+  async #getMonthSheetName() {
+    const month = await this.getSelectedMonth();
+    return `budget${month.replace('-', '')}`;
+  }
+
+  /**
+   * Locate the "To Budget" / "Overbudgeted" amount for the currently
+   * selected month. The budget view keeps adjacent months mounted in the
+   * DOM, so this must be scoped by month rather than a bare testid.
+   */
+  async #getToBudgetAmountLocator() {
+    const sheetName = await this.#getMonthSheetName();
+    return this.page.getByTestId(`${sheetName}!to-budget`);
+  }
+
+  /**
+   * Open the "To Budget" / "Overbudgeted" summary menu and return the
+   * popover locator.
+   */
+  async openToBudgetMenu() {
+    await clickReactAriaButton(await this.#getToBudgetAmountLocator());
+
+    const popover = this.page.locator('[data-popover]');
+    await popover.waitFor({ state: 'visible' });
+    return popover;
+  }
+
+  /**
+   * Hold an amount of the current "To Budget" total for next month. Only
+   * available when "To Budget" is positive and no auto-buffer is active.
+   * Defaults to holding the full pre-filled amount.
+   */
+  async holdForNextMonth(amount?: string) {
+    const popover = await this.openToBudgetMenu();
+    // Plain `.click()` — see the comment in `coverOverspending` above;
+    // this button switches the popover's internal step (ToBudgetMenu ->
+    // HoldMenu) and is subject to the same native-click/refocus race.
+    await popover.getByRole('button', { name: 'Hold for next month' }).click();
+
+    if (amount) {
+      const amountInput = popover.getByRole('textbox').first();
+      await amountInput.fill(amount);
+    }
+
+    await popover.getByRole('button', { name: 'Hold' }).click();
+  }
+
+  /**
+   * Reset a previously-held "for next month" buffer back to zero.
+   */
+  async resetHoldBuffer() {
+    const popover = await this.openToBudgetMenu();
+    await popover
+      .getByRole('button', { name: "Reset next month's buffer" })
+      .click();
+  }
+
+  async getToBudgetAmount() {
+    const text = await (await this.#getToBudgetAmountLocator()).textContent();
+
+    if (!text) {
+      throw new Error('Failed to get the "To Budget" amount.');
+    }
+
+    return Math.round(parseFloat(text.replace(/,/g, '')) * 100);
+  }
+
+  async getForNextMonthAmount() {
+    const sheetName = await this.#getMonthSheetName();
+    const text = await this.page
+      .getByTestId(`${sheetName}!buffered-selected`)
+      .textContent();
+
+    if (!text) {
+      throw new Error('Failed to get the "For next month" amount.');
+    }
+
+    return Math.round(parseFloat(text.replace(/,/g, '')) * 100);
   }
 
   async transferAllBalance(fromIdx: number, toIdx: number) {

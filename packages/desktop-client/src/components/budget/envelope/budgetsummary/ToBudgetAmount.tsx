@@ -77,6 +77,7 @@ export function ToBudgetAmount({
             }}
           >
             <Block
+              data-testid={sheetName.fullSheetName}
               onClick={onClick}
               onContextMenu={onContextMenu}
               data-cellname={sheetName}

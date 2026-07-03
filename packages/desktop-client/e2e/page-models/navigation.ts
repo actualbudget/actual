@@ -34,7 +34,7 @@ type AccountEntry = {
  * resolution and click. HTMLElement.click() dispatches a real MouseEvent
  * that React Aria handles correctly.
  */
-async function clickReactAriaButton(locator: Locator): Promise<void> {
+export async function clickReactAriaButton(locator: Locator): Promise<void> {
   await locator.evaluate((el: HTMLElement) => el.click());
 }
 
