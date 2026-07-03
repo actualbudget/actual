@@ -1480,12 +1480,14 @@ function NoteInsertHashButton({
 }: {
   noteRef: RefObject<HTMLInputElement | null>;
 }) {
+  const { t } = useTranslation();
   const [inputValue, setInputValue] = useInputRefValue(noteRef);
   const [_, setCursorPosition] = useCursorPosition(noteRef);
 
   return (
     <Button
       variant="bare"
+      aria-label={t('Add tag')}
       style={{ color: 'inherit', padding: 1 }}
       onPointerDown={e => e.preventDefault()}
       onClick={() => {
@@ -1508,7 +1510,7 @@ function NoteInsertHashButton({
         setCursorPosition(start + 1 + space.length);
         // so Safari requires that I do noteRef.current.focus() synchronously,
         // but Chrome doesn't work unless I do it after. We do both this way.
-        // If the element is already focused, these are not called
+        // If the element is already focused, these invocations have no effect
         setTimeout(() => noteRef.current?.focus(), 1);
       }}
     >
