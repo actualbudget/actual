@@ -1543,7 +1543,6 @@ function NoteTagAutocomplete({
     currentWordNoHash &&
     !filteredTags.some(tag => tag.tag === currentWordNoHash);
 
-  console.log(currentWord, cursorPosition, startIdx, endIdx, note);
   const getTagCSS = useTagCSS({ ellipsis: true });
 
   function handleSelect(tag: string) {
