@@ -73,6 +73,15 @@ type InputFieldProps = ComponentPropsWithRef<typeof Input> & {
   iconEnd?: ReactNode;
 };
 
+const iconStyle: CSSProperties = {
+  color: theme.pageTextSubdued,
+  flexShrink: 0,
+  alignSelf: 'stretch',
+  alignItems: 'center',
+  justifyContent: 'center',
+  lineHeight: 0,
+};
+
 export function InputField({
   disabled,
   style,
@@ -93,20 +102,7 @@ export function InputField({
             : theme.tableBackground,
         }}
       >
-        {iconStart && (
-          <View
-            style={{
-              color: theme.pageTextSubdued,
-              flexShrink: 0,
-              alignSelf: 'stretch',
-              alignItems: 'center',
-              justifyContent: 'center',
-              lineHeight: 0,
-            }}
-          >
-            {iconStart}
-          </View>
-        )}
+        {iconStart && <View style={iconStyle}>{iconStart}</View>}
         <Input
           ref={ref}
           autoCorrect="false"
@@ -135,20 +131,7 @@ export function InputField({
             )
           }
         />
-        {iconEnd && (
-          <View
-            style={{
-              color: theme.pageTextSubdued,
-              flexShrink: 0,
-              alignSelf: 'stretch',
-              alignItems: 'center',
-              justifyContent: 'center',
-              lineHeight: 0,
-            }}
-          >
-            {iconEnd}
-          </View>
-        )}
+        {iconEnd && <View style={iconStyle}>{iconEnd}</View>}
       </View>
     );
   }
