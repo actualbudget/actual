@@ -158,6 +158,7 @@ export function TransactionListItem({
         alignItems: 'stretch',
         width: '100%',
         height: ROW_HEIGHT,
+        overflow: 'hidden',
         ...(itemProps.isSelected
           ? {
               borderWidth: '0 0 0 4px',
