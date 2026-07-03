@@ -3,19 +3,19 @@ import TabItem from '@theme/TabItem';
 
 # Migrating from nYNAB
 
-To export your budget from YNAB, choose one of the methods below. **Option A** is the easiest for most users. If that tool is unavailable, **Options B, C, and D** provide alternatives.
+To export your budget from YNAB, choose one of the methods below. The third-party web tool is the easiest when it works, but it may be unavailable if YNAB restricts access to it. The alternative methods use your own YNAB API token and do not depend on the web tool.
 
 ## Third-Party Web Tool
 
-This is the easiest method available. Visit [https://json-exporter-for-ynab.netlify.app](https://json-exporter-for-ynab.netlify.app), which guides you through authorizing your YNAB account and downloading your budget as a JSON file.
+Visit [https://json-exporter-for-ynab.netlify.app](https://json-exporter-for-ynab.netlify.app), which guides you through authorizing your YNAB account and downloading your budget as a JSON file.
 
 :::note
-This tool is maintained by the community, not the Actual Budget team.
+This tool is maintained by the community, not the Actual Budget team. It may occasionally be unavailable or show an authorization restriction from YNAB. If that happens, use one of the alternative export methods below.
 :::
 
 Once you have the JSON file, skip ahead to [Import the JSON File](#import-the-json-file).
 
-If the json-exporter tool above does not work for any reason (it appears to be blocked by YNAB occasionally), you may try one of the following options.
+If the json-exporter tool above does not work for any reason, use one of the following options.
 
 ## Alternative Export Methods
 

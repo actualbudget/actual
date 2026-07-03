@@ -4,6 +4,7 @@ import type { Locator, Page } from '@playwright/test';
 import { MobileAccountPage } from './mobile-account-page';
 import { BalanceMenuModal } from './mobile-balance-menu-modal';
 import { BudgetMenuModal } from './mobile-budget-menu-modal';
+import { CategoryGroupMenuModal } from './mobile-category-group-menu-modal';
 import { CategoryMenuModal } from './mobile-category-menu-modal';
 import { EnvelopeBudgetSummaryModal } from './mobile-envelope-budget-summary-modal';
 import { TrackingBudgetSummaryModal } from './mobile-tracking-budget-summary-modal';
@@ -160,6 +161,12 @@ export class MobileBudgetPage {
     const categoryGroupButton =
       await this.#getButtonForCategoryGroup(categoryGroupName);
     await categoryGroupButton.click();
+
+    return new CategoryGroupMenuModal(
+      this.page.getByRole('dialog', {
+        name: 'Modal dialog',
+      }),
+    );
   }
 
   async getCategoryNameForRow(idx: number) {

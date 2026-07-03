@@ -6,8 +6,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { SvgCheck } from '@actual-app/components/icons/v2';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -15,10 +13,7 @@ import { View } from '@actual-app/components/view';
 import { format as monthUtilFormat } from '@actual-app/core/shared/months';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import { getScheduledAmount } from '@actual-app/core/shared/schedules';
-import type {
-  ScheduleStatuses,
-  ScheduleStatusType,
-} from '@actual-app/core/shared/schedules';
+import type { ScheduleStatuses } from '@actual-app/core/shared/schedules';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
@@ -67,64 +62,6 @@ export type ScheduleItemAction =
   | 'delete';
 
 export const ROW_HEIGHT = 43;
-
-function OverflowMenu({
-  schedule,
-  status,
-  onAction,
-}: {
-  schedule: ScheduleEntity;
-  status: ScheduleStatusType;
-  onAction: SchedulesTableProps['onAction'];
-}) {
-  const { t } = useTranslation();
-
-  const getMenuItems = () => {
-    const menuItems: { name: ScheduleItemAction; text: string }[] = [];
-
-    menuItems.push(
-      {
-        name: 'post-transaction',
-        text: t('Post transaction'),
-      },
-      {
-        name: 'post-transaction-today',
-        text: t('Post transaction today'),
-      },
-    );
-
-    if (status === 'completed') {
-      menuItems.push({
-        name: 'restart',
-        text: t('Restart'),
-      });
-    } else {
-      menuItems.push(
-        {
-          name: 'skip',
-          text: t('Skip next scheduled date'),
-        },
-        {
-          name: 'complete',
-          text: t('Complete'),
-        },
-      );
-    }
-
-    menuItems.push({ name: 'delete', text: t('Delete') });
-
-    return menuItems;
-  };
-
-  return (
-    <Menu
-      onMenuSelect={name => {
-        onAction(name, schedule.id);
-      }}
-      items={getMenuItems()}
-    />
-  );
-}
 
 export function ScheduleAmountCell({
   amount,
@@ -227,14 +164,43 @@ function ScheduleRow({
 
   const rowRef = useRef(null);
   const buttonRef = useRef(null);
-  const {
-    setMenuOpen,
-    menuOpen,
-    handleContextMenu,
-    resetPosition,
-    position,
-    asContextMenu,
-  } = useContextMenu();
+
+  const status = statuses.get(schedule.id);
+  useContextMenu({
+    triggerRef: rowRef,
+    items: !minimal
+      ? [
+          {
+            name: 'post-transaction',
+            text: t('Post transaction'),
+            onClick: () => onAction('post-transaction', schedule.id),
+          },
+          {
+            name: 'post-transaction-today',
+            text: t('Post transaction today'),
+            onClick: () => onAction('post-transaction-today', schedule.id),
+          },
+          {
+            name: 'restart',
+            text: t('Restart'),
+            onClick: () => onAction('restart', schedule.id),
+            hidden: status !== 'completed',
+          },
+          {
+            name: 'skip',
+            text: t('Skip next scheduled date'),
+            onClick: () => onAction('skip', schedule.id),
+            hidden: status === 'completed',
+          },
+          {
+            name: 'complete',
+            text: t('Complete'),
+            onClick: () => onAction('complete', schedule.id),
+            hidden: status === 'completed',
+          },
+        ]
+      : [],
+  });
 
   return (
     <Row
@@ -248,29 +214,7 @@ function ScheduleRow({
         color: theme.tableText,
         ':hover': { backgroundColor: theme.tableRowBackgroundHover },
       }}
-      onContextMenu={handleContextMenu}
     >
-      {!minimal && (
-        <Popover
-          triggerRef={asContextMenu ? rowRef : buttonRef}
-          isOpen={menuOpen}
-          onOpenChange={() => setMenuOpen(false)}
-          isNonModal
-          placement="bottom start"
-          {...position}
-          style={{ margin: 1 }}
-        >
-          <OverflowMenu
-            schedule={schedule}
-            status={statuses.get(schedule.id)}
-            onAction={(action, id) => {
-              onAction(action, id);
-              resetPosition();
-              setMenuOpen(false);
-            }}
-          />
-        </Popover>
-      )}
       <Field width="flex" name="name">
         <Text
           style={
@@ -315,8 +259,18 @@ function ScheduleRow({
               variant="bare"
               aria-label={t('Menu')}
               onPress={() => {
-                resetPosition();
-                setMenuOpen(true);
+                if (rowRef.current) {
+                  const rect = buttonRef.current?.getBoundingClientRect();
+                  const clientX = rect ? rect.left : 0;
+                  const clientY = rect ? rect.bottom : 0;
+                  (rowRef.current as HTMLElement).dispatchEvent(
+                    new MouseEvent('contextmenu', {
+                      bubbles: true,
+                      clientX,
+                      clientY,
+                    }),
+                  );
+                }
               }}
             >
               <SvgDotsHorizontalTriple

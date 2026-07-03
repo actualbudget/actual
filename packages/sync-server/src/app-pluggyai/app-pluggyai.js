@@ -137,6 +137,9 @@ app.post(
         newTrans.transactionId = trans.id;
         newTrans.sortOrder = transactionDate.getTime();
 
+        newTrans.originalDate = getDate(transactionDate);
+        newTrans.date = getDate(getTransactionDateCorrected(trans));
+
         delete trans.amount;
 
         const finalTrans = { ...flattenObject(trans), ...newTrans };
@@ -220,4 +223,28 @@ function getPayeeName(trans) {
   }
 
   return '';
+}
+
+//useful to avoid add month to day 31, which would result in day 01 skipping to the next month
+function addMonthsClamped(date, months) {
+  const result = new Date(date);
+  const day = result.getUTCDate();
+  result.setUTCDate(1);
+  result.setUTCMonth(result.getUTCMonth() + months);
+  const lastDay = new Date(
+    Date.UTC(result.getUTCFullYear(), result.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  result.setUTCDate(Math.min(day, lastDay));
+  return result;
+}
+
+function getTransactionDateCorrected(trans) {
+  if (trans.creditCardMetadata?.installmentNumber != null) {
+    return addMonthsClamped(
+      trans.creditCardMetadata.purchaseDate || trans.date,
+      trans.creditCardMetadata.installmentNumber - 1,
+    );
+  }
+
+  return trans.date;
 }
