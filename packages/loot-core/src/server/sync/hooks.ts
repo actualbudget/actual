@@ -1,23 +1,19 @@
+import { single } from '#shared/async';
+
 export type BudgetChangeHook = (
   months: readonly string[],
 ) => Promise<void> | void;
 
-function getBudgetChangeHooks(): Set<BudgetChangeHook> {
-  const store = getBudgetChangeHooks as typeof getBudgetChangeHooks & {
-    hooks?: Set<BudgetChangeHook>;
-  };
-  store.hooks ||= new Set();
-  return store.hooks;
-}
+const budgetChangeHooks = new Set<BudgetChangeHook>();
 
 export function registerBudgetChangeHook(hook: BudgetChangeHook): () => void {
-  getBudgetChangeHooks().add(hook);
+  budgetChangeHooks.add(hook);
   return () => {
-    getBudgetChangeHooks().delete(hook);
+    budgetChangeHooks.delete(hook);
   };
 }
 
-export async function runBudgetChangeHooks(
+export const runBudgetChangeHooks = single(async function (
   months: Iterable<string>,
 ): Promise<void> {
   const touchedMonths = [...months];
@@ -25,7 +21,7 @@ export async function runBudgetChangeHooks(
     return;
   }
 
-  for (const hook of getBudgetChangeHooks()) {
+  for (const hook of budgetChangeHooks) {
     await hook(touchedMonths);
   }
-}
+});

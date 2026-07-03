@@ -8,6 +8,7 @@ import {
   registerBudgetChangeHook,
   runBudgetChangeHooks,
 } from '#server/sync/hooks';
+import { single } from '#shared/async';
 import { getCurrency } from '#shared/currencies';
 import { getLocale } from '#shared/locale';
 import * as monthUtils from '#shared/months';
@@ -232,7 +233,7 @@ function isCurrentOrFutureMonth(month: string): boolean {
   return month >= monthUtils.currentMonth();
 }
 
-async function recalculateFutureBufferImpl(): Promise<void> {
+export const recalculateFutureBuffer = single(async function (): Promise<void> {
   if (!isFutureBufferModeActive()) return;
 
   const currentMonth = monthUtils.currentMonth();
@@ -305,22 +306,7 @@ async function recalculateFutureBufferImpl(): Promise<void> {
   });
 
   await sheet.waitOnSpreadsheet();
-}
-
-let isRecalculatingFutureBuffer = false;
-
-export async function recalculateFutureBuffer(): Promise<void> {
-  if (isRecalculatingFutureBuffer) {
-    return;
-  }
-
-  try {
-    isRecalculatingFutureBuffer = true;
-    await recalculateFutureBufferImpl();
-  } finally {
-    isRecalculatingFutureBuffer = false;
-  }
-}
+});
 
 registerBudgetChangeHook(async months => {
   if (!isFutureBufferModeActive()) {

@@ -451,6 +451,7 @@ export async function applyMessagesWithHooks(
   inputMessages: Message[],
 ): Promise<Message[]> {
   const result = await applyMessages(inputMessages);
+
   if (result?.budgetChangeTouchedMonths) {
     await runBudgetChangeHooks(result.budgetChangeTouchedMonths).catch(
       errorHandler,

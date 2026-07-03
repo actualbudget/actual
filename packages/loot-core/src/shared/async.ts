@@ -74,3 +74,22 @@ export function once<T extends AnyFunction>(
     return promise;
   };
 }
+
+/**
+ * Ensures that the function is only called one at a time.
+ * While the function is running, overlapping calls will return immediately.
+ */
+export function single<T extends AnyFunction>(
+  fn: T,
+): (...args: Parameters<T>) => Promise<void> {
+  let running = false;
+  return (...args: Parameters<T>) => {
+    if (!running) {
+      running = true;
+      return fn(...args).finally(() => {
+        running = false;
+      });
+    }
+    return Promise.resolve();
+  };
+}
