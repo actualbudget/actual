@@ -298,7 +298,6 @@ function AccountInternal(props: AccountInternalProps) {
   );
   const prevModalShowingRef = useRef(props.modalShowing);
   const prevShowClearedRef = useRef<boolean | undefined>(undefined);
-  const initialModeAppliedRef = useRef(false);
 
   // === QUERY & DATA ===
   const queryClient = useQueryClient();
