@@ -494,7 +494,6 @@ function AccountInternal(props: AccountInternalProps) {
         return {
           ...old,
           pages: old.pages.map(page => {
-            console.log(updatedTransaction);
             if (updatedTransaction._deleted) {
               return page
                 .filter(t => t.id !== updatedTransaction.id)
