@@ -3,12 +3,12 @@ import express from 'express';
 import { isAdmin } from '#account-db';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
+import * as UserService from '#services/user-service';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
 import { isValidFileId } from '#util/paths';
-import * as UserService from '#services/user-service';
 
 import { pluggyaiService } from './pluggyai-service';
 
