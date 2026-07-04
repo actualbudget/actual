@@ -184,7 +184,7 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
           <Text style={{ fontSize: 12, marginTop: 8 }}>
             <Trans>
               Queries allow you to reference filtered transaction data in your
-              formulas using QUERY('queryName') or QUERY_COUNT('queryName')
+              formulas using QUERY("queryName") or QUERY_COUNT("queryName")
             </Trans>
           </Text>
         </View>
@@ -544,7 +544,7 @@ function QueryItem({
           }}
         >
           <Text style={{ fontWeight: 600, fontFamily: 'monospace' }}>
-            <Trans>QUERY('{queryName}')</Trans>
+            <Trans>QUERY("{queryName}")</Trans>
           </Text>
         </View>
         <View
