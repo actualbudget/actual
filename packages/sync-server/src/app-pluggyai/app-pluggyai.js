@@ -1,5 +1,6 @@
 import express from 'express';
 
+import { isAdmin } from '#account-db';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
 import {
@@ -7,6 +8,7 @@ import {
   validateSessionMiddleware,
 } from '#util/middlewares';
 import { isValidFileId } from '#util/paths';
+import * as UserService from '#services/user-service';
 
 import { pluggyaiService } from './pluggyai-service';
 
@@ -15,6 +17,10 @@ export { app as handlers };
 app.use(requestLoggerMiddleware);
 app.use(express.json());
 app.use(validateSessionMiddleware);
+
+function canAccessFile(fileId, userId) {
+  return isAdmin(userId) || UserService.countUserAccess(fileId, userId) > 0;
+}
 
 app.post(
   '/status',
@@ -25,6 +31,15 @@ app.post(
         status: 'error',
         reason: 'invalid-file-id',
         details: 'invalid fileId',
+      });
+      return;
+    }
+
+    if (fileId != null && !canAccessFile(fileId, res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'file-access-denied',
+        details: "You don't have permissions over this file",
       });
       return;
     }
@@ -50,6 +65,15 @@ app.post(
         status: 'error',
         reason: 'invalid-file-id',
         details: 'invalid fileId',
+      });
+      return;
+    }
+
+    if (fileId != null && !canAccessFile(fileId, res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'file-access-denied',
+        details: "You don't have permissions over this file",
       });
       return;
     }
@@ -111,7 +135,26 @@ app.post(
       return;
     }
 
+    if (fileId != null && !canAccessFile(fileId, res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'file-access-denied',
+        details: "You don't have permissions over this file",
+      });
+      return;
+    }
+
     try {
+      const source = pluggyaiService.getCredentialSource(fileId);
+      if (source == null) {
+        res.status(400).send({
+          status: 'error',
+          reason: 'not-configured',
+          details: 'Pluggy credentials are not configured',
+        });
+        return;
+      }
+
       const transactions = await pluggyaiService.getTransactionsByAccountId(
         accountId,
         startDate,
