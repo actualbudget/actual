@@ -15,7 +15,6 @@ import {
 import { app as mainApp } from '#server/main-app';
 import { mutator } from '#server/mutators';
 import { del, get, post } from '#server/post';
-import { getPrefs } from '#server/prefs';
 import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
 import { undoable, withUndo } from '#server/undo';
@@ -712,11 +711,11 @@ async function moveAccount({
 async function setSecret({
   name,
   value,
-  perBudgetFile = false,
+  fileId = null,
 }: {
   name: string;
   value: string | null;
-  perBudgetFile?: boolean;
+  fileId?: string | null;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -729,7 +728,6 @@ async function setSecret({
     throw new Error('Failed to get server config.');
   }
 
-  const fileId = perBudgetFile ? getPrefs()?.cloudFileId : null;
   const headers = {
     'X-ACTUAL-TOKEN': userToken,
     ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),

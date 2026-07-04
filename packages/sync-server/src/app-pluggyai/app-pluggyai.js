@@ -26,22 +26,24 @@ app.post(
   '/status',
   handleError(async (req, res) => {
     const fileId = req.get('X-Actual-File-Id');
-    if (fileId != null && !isValidFileId(fileId)) {
-      res.status(400).send({
-        status: 'error',
-        reason: 'invalid-file-id',
-        details: 'invalid fileId',
-      });
-      return;
-    }
+    if (!!fileId) {
+      if (!isValidFileId(fileId)) {
+        res.status(400).send({
+          status: 'error',
+          reason: 'invalid-file-id',
+          details: 'invalid fileId',
+        });
+        return;
+      }
 
-    if (fileId != null && !canAccessFile(fileId, res.locals.user_id)) {
-      res.status(403).send({
-        status: 'error',
-        reason: 'file-access-denied',
-        details: "You don't have permissions over this file",
-      });
-      return;
+      if (!canAccessFile(fileId, res.locals.user_id)) {
+        res.status(403).send({
+          status: 'error',
+          reason: 'file-access-denied',
+          details: "You don't have permissions over this file",
+        });
+        return;
+      }
     }
 
     const source = pluggyaiService.getCredentialSource(fileId);
@@ -49,7 +51,7 @@ app.post(
     res.send({
       status: 'ok',
       data: {
-        configured: source != null,
+        configured: !!source,
         source,
       },
     });
@@ -60,27 +62,29 @@ app.post(
   '/accounts',
   handleError(async (req, res) => {
     const fileId = req.get('X-Actual-File-Id');
-    if (fileId != null && !isValidFileId(fileId)) {
-      res.status(400).send({
-        status: 'error',
-        reason: 'invalid-file-id',
-        details: 'invalid fileId',
-      });
-      return;
-    }
+    if (!!fileId) {
+      if (!isValidFileId(fileId)) {
+        res.status(400).send({
+          status: 'error',
+          reason: 'invalid-file-id',
+          details: 'invalid fileId',
+        });
+        return;
+      }
 
-    if (fileId != null && !canAccessFile(fileId, res.locals.user_id)) {
-      res.status(403).send({
-        status: 'error',
-        reason: 'file-access-denied',
-        details: "You don't have permissions over this file",
-      });
-      return;
+      if (!canAccessFile(fileId, res.locals.user_id)) {
+        res.status(403).send({
+          status: 'error',
+          reason: 'file-access-denied',
+          details: "You don't have permissions over this file",
+        });
+        return;
+      }
     }
 
     try {
       const source = pluggyaiService.getCredentialSource(fileId);
-      if (source == null) {
+      if (!source) {
         res.status(400).send({
           status: 'error',
           reason: 'not-configured',
@@ -126,27 +130,29 @@ app.post(
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
     const fileId = req.get('X-Actual-File-Id');
-    if (fileId != null && !isValidFileId(fileId)) {
-      res.status(400).send({
-        status: 'error',
-        reason: 'invalid-file-id',
-        details: 'invalid fileId',
-      });
-      return;
-    }
+    if (!!fileId) {
+      if (!isValidFileId(fileId)) {
+        res.status(400).send({
+          status: 'error',
+          reason: 'invalid-file-id',
+          details: 'invalid fileId',
+        });
+        return;
+      }
 
-    if (fileId != null && !canAccessFile(fileId, res.locals.user_id)) {
-      res.status(403).send({
-        status: 'error',
-        reason: 'file-access-denied',
-        details: "You don't have permissions over this file",
-      });
-      return;
+      if (!canAccessFile(fileId, res.locals.user_id)) {
+        res.status(403).send({
+          status: 'error',
+          reason: 'file-access-denied',
+          details: "You don't have permissions over this file",
+        });
+        return;
+      }
     }
 
     try {
       const source = pluggyaiService.getCredentialSource(fileId);
-      if (source == null) {
+      if (!source) {
         res.status(400).send({
           status: 'error',
           reason: 'not-configured',

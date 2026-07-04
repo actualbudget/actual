@@ -13,7 +13,7 @@ function hasCredentials(fileId = null) {
 }
 
 function getCredentialSource(fileId) {
-  if (fileId != null && hasCredentials(fileId)) {
+  if (!!fileId && hasCredentials(fileId)) {
     return 'per-budget-file';
   }
 
@@ -47,7 +47,7 @@ function getCredentialsCacheEntry(credentialFileId) {
 
 function getPluggyClient(fileId) {
   const credentialSource = getCredentialSource(fileId);
-  if (credentialSource == null) {
+  if (!credentialSource) {
     throw new Error('Pluggy credentials are not configured');
   }
 
