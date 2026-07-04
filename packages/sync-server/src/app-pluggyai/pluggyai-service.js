@@ -2,6 +2,8 @@ import { PluggyClient } from 'pluggy-sdk';
 
 import { SecretName, secretsService } from '#services/secrets-service';
 
+const pluggyClients = new Map();
+
 function hasCredentials(fileId = null) {
   return !!(
     secretsService.get(SecretName.pluggyai_clientId, fileId) &&
@@ -22,6 +24,27 @@ function getCredentialSource(fileId) {
   return null;
 }
 
+function getCredentialsCacheEntry(credentialFileId) {
+  const clientId = secretsService.get(
+    SecretName.pluggyai_clientId,
+    credentialFileId,
+  );
+  const clientSecret = secretsService.get(
+    SecretName.pluggyai_clientSecret,
+    credentialFileId,
+  );
+
+  return {
+    cacheKey: JSON.stringify({
+      fileId: credentialFileId,
+      [SecretName.pluggyai_clientId]: clientId,
+      [SecretName.pluggyai_clientSecret]: clientSecret,
+    }),
+    clientId,
+    clientSecret,
+  };
+}
+
 function getPluggyClient(fileId) {
   const credentialSource = getCredentialSource(fileId);
   if (credentialSource == null) {
@@ -30,17 +53,18 @@ function getPluggyClient(fileId) {
 
   const credentialFileId =
     credentialSource === 'per-budget-file' ? fileId : null;
-  const credentials = {
-    clientId: secretsService.get(
-      SecretName.pluggyai_clientId,
-      credentialFileId,
-    ),
-    clientSecret: secretsService.get(
-      SecretName.pluggyai_clientSecret,
-      credentialFileId,
-    ),
-  };
-  return new PluggyClient(credentials);
+  const { cacheKey, clientId, clientSecret } =
+    getCredentialsCacheEntry(credentialFileId);
+  let pluggyClient = pluggyClients.get(cacheKey);
+  if (!pluggyClient) {
+    pluggyClient = new PluggyClient({
+      clientId,
+      clientSecret,
+    });
+    pluggyClients.set(cacheKey, pluggyClient);
+  }
+
+  return pluggyClient;
 }
 
 export const pluggyaiService = {
