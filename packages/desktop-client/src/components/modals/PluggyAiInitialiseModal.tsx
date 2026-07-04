@@ -22,6 +22,7 @@ import {
 } from '#components/common/Modal';
 import { FormField, FormLabel } from '#components/forms';
 import { useMultiuserEnabled } from '#components/ServerContext';
+import { useMetadataPref } from '#hooks/useMetadataPref';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { getSecretsError } from '#util/error';
 
@@ -35,6 +36,7 @@ export const PluggyAiInitialiseModal = ({
   credentialSource,
 }: PluggyAiInitialiseProps) => {
   const { t } = useTranslation();
+  const [cloudFileId] = useMetadataPref('cloudFileId');
   const { hasPermission } = useAuth();
   const multiuserEnabled = useMultiuserEnabled();
   const canSetGlobalCredentials =
@@ -68,11 +70,19 @@ export const PluggyAiInitialiseModal = ({
 
     setIsLoading(true);
 
+    const fileId = perBudgetFile ? cloudFileId : null;
+    if (perBudgetFile && !fileId) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(t('Budget file ID is required.'));
+      return;
+    }
+
     let result =
       (await send('secret-set', {
         name: 'pluggyai_clientId',
         value: clientId,
-        perBudgetFile,
+        fileId,
       })) || {};
     let { error, reason } = result;
 
@@ -87,7 +97,7 @@ export const PluggyAiInitialiseModal = ({
       (await send('secret-set', {
         name: 'pluggyai_clientSecret',
         value: clientSecret,
-        perBudgetFile,
+        fileId,
       })) || {};
     ({ error, reason } = result);
 
@@ -102,7 +112,7 @@ export const PluggyAiInitialiseModal = ({
       (await send('secret-set', {
         name: 'pluggyai_itemIds',
         value: itemIds,
-        perBudgetFile,
+        fileId,
       })) || {};
     ({ error, reason } = result);
 

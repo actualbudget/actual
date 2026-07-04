@@ -303,11 +303,17 @@ export function useBuiltInBankSyncProviders({
 
   const onPluggyAiReset = useCallback(async () => {
     try {
+      const fileId =
+        pluggyAiStatus?.source === 'per-budget-file' ? cloudFileId : null;
+      if (pluggyAiStatus?.source === 'per-budget-file' && !fileId) {
+        throw new Error(t('Budget file ID is required.'));
+      }
+
       await ensureSuccessResponse(
         await send('secret-set', {
           name: 'pluggyai_clientId',
           value: null,
-          perBudgetFile: pluggyAiStatus?.source === 'per-budget-file',
+          fileId,
         }),
         'Failed to clear Pluggy.ai client ID',
       );
@@ -315,7 +321,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'pluggyai_clientSecret',
           value: null,
-          perBudgetFile: pluggyAiStatus?.source === 'per-budget-file',
+          fileId,
         }),
         'Failed to clear Pluggy.ai client secret',
       );
@@ -323,7 +329,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'pluggyai_itemIds',
           value: null,
-          perBudgetFile: pluggyAiStatus?.source === 'per-budget-file',
+          fileId,
         }),
         'Failed to clear Pluggy.ai item IDs',
       );
@@ -332,7 +338,13 @@ export function useBuiltInBankSyncProviders({
     } catch (error) {
       notifyResetFailure('Pluggy.ai', error);
     }
-  }, [notifyResetFailure, pluggyAiStatus?.source, setPluggyAiStatus]);
+  }, [
+    cloudFileId,
+    notifyResetFailure,
+    pluggyAiStatus?.source,
+    setPluggyAiStatus,
+    t,
+  ]);
 
   const onEnableBankingReset = useCallback(async () => {
     try {
