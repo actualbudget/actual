@@ -3,4 +3,4 @@ category: Enhancements
 authors: [distantvapor]
 ---
 
-Add "YNAB Dark - Blurple" to the custom theme catalog; Rename "You Need A Dark Mode" -> YNAB Dark - Cyan".
+Add "YNAB Dark - Blurple" to the custom theme catalog; rename "You Need A Dark Mode" to "YNAB Dark - Cyan".
