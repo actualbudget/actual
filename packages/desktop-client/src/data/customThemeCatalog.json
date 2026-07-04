@@ -185,11 +185,11 @@
     "name": "YNAB Dark - Blurple",
     "repo": "distantvapor/ynab-dark-blurple",
     "colors": [
-      "#14172e", 
-      "#2c3edd", 
-      "#0f122c", 
-      "#6040dd", 
-      "#94d53f", 
+      "#14172e",
+      "#2c3edd",
+      "#0f122c",
+      "#6040dd",
+      "#94d53f",
       "#994de6"
     ],
     "mode": "dark"
