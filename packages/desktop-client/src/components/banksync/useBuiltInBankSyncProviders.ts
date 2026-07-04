@@ -61,6 +61,7 @@ export type BuiltInBankSyncProviderState = {
   description: string;
   isConfigured: boolean;
   credentialSource: BankSyncCredentialSource | null;
+  supportsPerBudgetFile: boolean;
   canConfigure: boolean;
   isLoading?: boolean;
   onConfigure: ProviderAction;
@@ -644,6 +645,7 @@ export function useBuiltInBankSyncProviders({
             ),
             isConfigured: configuredProviders.goCardless,
             credentialSource: 'global',
+            supportsPerBudgetFile: false,
             canConfigure: canConfigureProviders,
             onConfigure: onGoCardlessInit,
             onLink: onConnectGoCardless,
@@ -660,6 +662,7 @@ export function useBuiltInBankSyncProviders({
             ),
             isConfigured: configuredProviders.simpleFin,
             credentialSource: 'global',
+            supportsPerBudgetFile: false,
             canConfigure: canConfigureProviders,
             isLoading: loadingSimpleFinAccounts,
             onConfigure: onSimpleFinInit,
@@ -676,6 +679,7 @@ export function useBuiltInBankSyncProviders({
           ),
           isConfigured: configuredProviders.pluggyai,
           credentialSource: pluggyAiStatus?.source ?? null,
+          supportsPerBudgetFile: true,
           canConfigure:
             pluggyAiStatus != null &&
             canConfigurePluggyAi &&
@@ -695,6 +699,7 @@ export function useBuiltInBankSyncProviders({
         ),
         isConfigured: configuredProviders.akahu,
         credentialSource: 'global',
+        supportsPerBudgetFile: false,
         canConfigure: canConfigureProviders,
         isLoading: loadingAkahuAccounts,
         onConfigure: onAkahuInit,
@@ -712,6 +717,7 @@ export function useBuiltInBankSyncProviders({
         ),
         isConfigured: configuredProviders.enableBanking,
         credentialSource: 'global',
+        supportsPerBudgetFile: false,
         canConfigure: canConfigureProviders,
         isLoading: isEnableBankingLoading,
         onConfigure: onEnableBankingInit,

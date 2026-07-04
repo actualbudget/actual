@@ -43,7 +43,9 @@ export const PluggyAiInitialiseModal = ({
   const [clientSecret, setClientSecret] = useState('');
   const [itemIds, setItemIds] = useState('');
   const [perBudgetFile, setPerBudgetFile] = useState(
-    credentialSource ? credentialSource === 'per-budget-file' : true,
+    credentialSource == null
+      ? !canSetGlobalCredentials
+      : credentialSource === 'per-budget-file',
   );
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);

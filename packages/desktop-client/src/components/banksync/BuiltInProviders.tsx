@@ -219,7 +219,8 @@ export function BuiltInProviders({
                   <Trans>Link bank account</Trans>
                 </ButtonWithLoading>
               </View>
-              {provider.credentialSource === 'global' &&
+              {provider.supportsPerBudgetFile &&
+                provider.credentialSource === 'global' &&
                 !provider.canConfigure && (
                   <Text style={{ color: theme.pageTextSubdued, fontSize: 13 }}>
                     <Trans>
