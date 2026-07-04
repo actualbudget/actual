@@ -748,7 +748,7 @@ describe('sankey-spreadsheet', () => {
   });
 
   describe('addHiddenNodes via buildSankeyData', () => {
-    it('groups low-value payees into a single payee Other bucket', () => {
+    it('groups low-value payees into a single Other bucket in per-group mode', () => {
       const graph: Graph = new Map();
 
       addNode(graph, 'payee1', GraphLayers.IncomePayee, 'Payee 1');
@@ -766,7 +766,7 @@ describe('sankey-spreadsheet', () => {
         graph,
         1,
         [],
-        'global',
+        'per-group',
         GraphLayers.IncomePayee,
         GraphLayers.Account,
       );
