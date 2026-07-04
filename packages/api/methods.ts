@@ -16,6 +16,7 @@ import type {
   RuleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 export { q } from './app/query';
 
@@ -358,4 +359,9 @@ export function getIDByName(
 
 export function getServerVersion() {
   return send('api/get-server-version');
+}
+
+/** Read the budget's synced preferences (number format, currency, etc.). */
+export function getPreferences(): Promise<SyncedPrefs> {
+  return send('preferences/get');
 }

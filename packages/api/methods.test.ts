@@ -1110,3 +1110,23 @@ test('Schedules: successfully complete schedules operations', async () => {
     ]),
   );
 });
+
+// apis: getPreferences
+test('Preferences: successfully read synced preferences', async () => {
+  await api.loadBudget(budgetName);
+
+  await api.internal?.send('preferences/save', {
+    id: 'numberFormat',
+    value: '1.234,56',
+  });
+  await api.internal?.send('preferences/save', {
+    id: 'hideFraction',
+    value: 'true',
+  });
+
+  const preferences = await api.getPreferences();
+  expect(preferences).toMatchObject({
+    numberFormat: '1.234,56',
+    hideFraction: 'true',
+  });
+});
