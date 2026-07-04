@@ -169,8 +169,8 @@
     "mode": "dark"
   },
   {
-    "name": "You Need A Dark Mode",
-    "repo": "distantvapor/you-need-a-dark-mode",
+    "name": "YNAB Dark - Cyan",
+    "repo": "distantvapor/ynab-dark-cyan",
     "colors": [
       "#121212",
       "#1E1E1E",
@@ -178,6 +178,19 @@
       "#006A84",
       "#D4D4D4",
       "#333333"
+    ],
+    "mode": "dark"
+  },
+  {
+    "name": "YNAB Dark - Blurple",
+    "repo": "distantvapor/ynab-dark-blurple",
+    "colors": [
+      "#14172e", 
+      "#2c3edd", 
+      "#0f122c", 
+      "#6040dd", 
+      "#94d53f", 
+      "#994de6"
     ],
     "mode": "dark"
   },
