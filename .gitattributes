@@ -16,6 +16,9 @@
 
 yarn.lock text eol=lf
 
+# Declare files that will always have CRLF line endings on checkout.
+packages/mobile-client/android/gradlew.bat text eol=crlf
+
 # Denote all files that are truly binary and should not be modified.
 *.png binary
 *.jpg binary

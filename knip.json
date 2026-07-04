@@ -44,6 +44,7 @@
         "src/globals.ts",
         "src/build-shims.js"
       ],
+      "ignore": ["playwright.config.d.ts"],
       "ignoreDependencies": ["plugins-service"]
     },
     "packages/desktop-electron": {
@@ -75,6 +76,19 @@
         "stream-browserify",
         "timers-browserify",
         "util"
+      ]
+    },
+    "packages/mobile-client": {
+      "entry": ["bin/*"],
+      "ignore": [
+        "android/app/src/main/assets/**",
+        "ios/App/App/public/**",
+        "ios/DerivedData/**"
+      ],
+      "ignoreDependencies": [
+        "@capacitor/splash-screen",
+        "@capgo/capacitor-updater",
+        "@capgo/cli"
       ]
     },
     "packages/plugins-service": {
