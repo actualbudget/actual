@@ -31,14 +31,26 @@ export type SqlJsModule = SqlJsStatic & {
 
 let SQL: SqlJsModule | null = null;
 
+// Opt-in: when set, the wasm is instantiated from these bytes instead of being
+// fetched via `locateFile`. The browser build of `@actual-app/api` uses this to
+// ship a fully self-contained worker (no `sql-wasm.wasm` request). Dormant for
+// every other consumer (web app and Node build never call `setWasmBinary`).
+let wasmBinaryOverride: ArrayBuffer | Uint8Array | undefined;
+
+export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
+  wasmBinaryOverride = binary;
+}
+
 export async function init({
   baseURL = process.env.PUBLIC_URL,
-}: { baseURL?: string } = {}) {
+  wasmBinary = wasmBinaryOverride,
+}: { baseURL?: string; wasmBinary?: ArrayBuffer | Uint8Array } = {}) {
   // `initSqlJS` doesn't actually return a real promise, so make sure
   // we're returning a real one for correct semantics
   return new Promise((resolve, reject) => {
     initSqlJS({
       locateFile: file => baseURL + file,
+      ...(wasmBinary ? { wasmBinary: wasmBinary as ArrayBuffer } : {}),
     }).then(
       sql => {
         SQL = sql as SqlJsModule;

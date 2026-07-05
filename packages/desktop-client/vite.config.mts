@@ -5,6 +5,11 @@ import { cp, mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
+import {
+  defaultDbPath,
+  migrationsDir,
+  sqlWasmPath,
+} from '@actual-app/core/default-filesystem';
 import babel from '@rolldown/plugin-babel';
 import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
@@ -78,10 +83,6 @@ const injectShims = (): Plugin[] => {
 const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 const lootCoreOutDir = path.resolve(lootCoreRoot, 'lib-dist/browser');
 const lootCoreConfig = path.resolve(lootCoreRoot, 'vite.config.mts');
-const sqlWasmSrc = path.resolve(
-  __dirname,
-  '../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm',
-);
 const publicDir = path.resolve(__dirname, 'public');
 const publicDataDir = path.resolve(publicDir, 'data');
 const publicKcabDir = path.resolve(publicDir, 'kcab');
@@ -124,14 +125,9 @@ async function stagePublicData(): Promise<void> {
   await mkdir(publicDataDir, { recursive: true });
   await rm(migrationsDest, { recursive: true, force: true });
   await Promise.all([
-    cp(path.resolve(lootCoreRoot, 'migrations'), migrationsDest, {
-      recursive: true,
-    }),
-    cp(
-      path.resolve(lootCoreRoot, 'default-db.sqlite'),
-      path.resolve(publicDataDir, 'default-db.sqlite'),
-    ),
-    cp(sqlWasmSrc, path.resolve(publicDir, 'sql-wasm.wasm')),
+    cp(migrationsDir, migrationsDest, { recursive: true }),
+    cp(defaultDbPath, path.resolve(publicDataDir, 'default-db.sqlite')),
+    cp(sqlWasmPath, path.resolve(publicDir, 'sql-wasm.wasm')),
   ]);
 
   const entries = await readdir(publicDataDir, {
@@ -237,6 +233,7 @@ const pluginsServiceAssets = (): Plugin => ({
 
 export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const isVitest = process.env.VITEST === 'true';
   const devHeaders = {
     'Cross-Origin-Opener-Policy': 'same-origin',
     'Cross-Origin-Embedder-Policy': 'require-corp',
@@ -382,7 +379,7 @@ export default defineConfig(async ({ mode, command }) => {
           }),
       injectShims(),
       addWatchers(),
-      mode === 'desktop' ? undefined : lootCoreBackend(),
+      mode === 'desktop' || isVitest ? undefined : lootCoreBackend(),
       mode === 'desktop' ? undefined : pluginsServiceAssets(),
       react(),
       babel({
@@ -407,6 +404,18 @@ export default defineConfig(async ({ mode, command }) => {
         return type === 'stderr';
       },
       maxWorkers: 2,
+      reporters: process.env.CI
+        ? [
+            'default',
+            [
+              'junit',
+              {
+                outputFile: './test-results/junit.xml',
+                suiteName: 'desktop-client',
+              },
+            ],
+          ]
+        : ['default'],
     },
   };
 });

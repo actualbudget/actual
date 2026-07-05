@@ -322,5 +322,31 @@
       "#56949f"
     ],
     "mode": "light"
+  },
+  {
+    "name": "Thyrium",
+    "repo": "carlisle96/thyrium-actual",
+    "colors": [
+      "#18191A",
+      "#1B1C1D",
+      "#27292D",
+      "#7652B8",
+      "#B85261",
+      "#94B852"
+    ],
+    "mode": "dark"
+  },
+  {
+    "name": "Zero-Dark",
+    "repo": "deathblade666/actual-theme-zero-dark",
+    "colors": [
+      "#0a0a0c",
+      "#a1a1aa",
+      "#facc15",
+      "#f43f5e",
+      "#00e676",
+      "#ffffff"
+    ],
+    "mode": "dark"
   }
 ]

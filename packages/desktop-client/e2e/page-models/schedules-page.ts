@@ -55,7 +55,6 @@ export class SchedulesPage {
    */
   async postNthSchedule(index: number) {
     await this._performNthAction(index, 'Post transaction today');
-    await this.page.waitForTimeout(1000);
   }
 
   /**
@@ -64,7 +63,6 @@ export class SchedulesPage {
    */
   async completeNthSchedule(index: number) {
     await this._performNthAction(index, 'Complete');
-    await this.page.waitForTimeout(1000);
   }
 
   async _performNthAction(index: number, actionName: string | RegExp) {
@@ -73,5 +71,9 @@ export class SchedulesPage {
 
     await actions.getByRole('button').click();
     await this.page.getByRole('button', { name: actionName }).click();
+  }
+
+  async rightClickNthSchedule(index: number) {
+    await this.getNthScheduleRow(index).click({ button: 'right' });
   }
 }

@@ -89,6 +89,19 @@ const CustomTooltip = ({
       );
   }, [payload]);
 
+  const maxTooltipItems = 5;
+
+  const visibleItems = useMemo(() => {
+    const nonZero = items.filter(p => p.value !== 0);
+    if (!compact || nonZero.length <= maxTooltipItems) return nonZero;
+
+    const hoveredIndex = nonZero.findIndex(p => tooltip === p.name);
+    if (hoveredIndex >= maxTooltipItems) {
+      return [...nonZero.slice(0, maxTooltipItems - 1), nonZero[hoveredIndex]];
+    }
+    return nonZero.slice(0, maxTooltipItems);
+  }, [compact, items, tooltip]);
+
   if (active && items.length) {
     return (
       <div
@@ -107,29 +120,26 @@ const CustomTooltip = ({
             <strong>{label}</strong>
           </div>
           <div style={{ lineHeight: 1.4 }}>
-            {items.map((pay, i) => {
+            {visibleItems.map(pay => {
               const displayName = dataKeyToName.get(pay.name) ?? pay.name;
               return (
-                pay.value !== 0 &&
-                (compact ? i < 5 : true) && (
-                  <AlignedText
-                    key={pay.name}
-                    left={displayName}
-                    right={
-                      <FinancialText>
-                        {format(pay.value, 'financial')}
-                      </FinancialText>
-                    }
-                    style={{
-                      color: pay.color,
-                      textDecoration:
-                        tooltip === pay.name ? 'underline' : 'inherit',
-                    }}
-                  />
-                )
+                <AlignedText
+                  key={pay.name}
+                  left={displayName}
+                  right={
+                    <FinancialText>
+                      {format(pay.value, 'financial')}
+                    </FinancialText>
+                  }
+                  style={{
+                    color: pay.color,
+                    textDecoration:
+                      tooltip === pay.name ? 'underline' : 'inherit',
+                  }}
+                />
               );
             })}
-            {payload.length > 5 && compact && '...'}
+            {compact && items.length > visibleItems.length && '...'}
             <AlignedText
               left={t('Total')}
               right={

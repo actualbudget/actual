@@ -118,7 +118,7 @@ export async function loginWithOpenIdSetup(
   if (countUsersWithUserName === 0) {
     const methods = listLoginMethods();
     if (methods.some(authMethod => authMethod.method === 'password')) {
-      const valid = checkPassword(firstTimeLoginPassword);
+      const valid = await checkPassword(firstTimeLoginPassword);
 
       if (!valid) {
         return { error: 'invalid-password' };

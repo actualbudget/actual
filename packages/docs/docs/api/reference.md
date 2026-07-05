@@ -105,7 +105,8 @@ import APIList from './APIList';
 "downloadBudget",
 "batchBudgetUpdates",
 "runQuery",
-"getIDByName"
+"getIDByName",
+"getPreferences"
 ]} />
 
 ## Types of Methods
@@ -842,3 +843,9 @@ get the ID for any Account, Payee, Category or Schedule by providing the corresp
 <Method name="getServerVersion" args={[]} returns="Promise<{error?: string;} | {version: string;}>" />
 
 return error or the current server versions.
+
+#### `getPreferences`
+
+<Method name="getPreferences" args={[]} returns="Promise<SyncedPrefs>" />
+
+Returns the budget's synced preferences — settings that sync across devices, such as the number format (`numberFormat`, `hideFraction`), currency (`defaultCurrencyCode`, `currencySymbolPosition`, `currencySpaceBetweenAmountAndSymbol`), date format (`dateFormat`), and first day of the week (`firstDayOfWeekIdx`). All values are strings (or `undefined` if the preference has never been set). The `SyncedPrefs` type is exported from `@actual-app/api/models`.

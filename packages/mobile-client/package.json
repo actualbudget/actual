@@ -1,0 +1,27 @@
+{
+  "name": "mobile-client",
+  "version": "25.10.0",
+  "license": "MIT",
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build:ios": "cap sync ios",
+    "build:android": "cap sync android",
+    "build:bundle": "yarn workspace @actual-app/web build:browser && ./bin/create-bundle",
+    "build": "yarn build:bundle && yarn build:ios && yarn build:android",
+    "start:ios": "yarn build:ios && cap run ios",
+    "start:android": "yarn build:android && cap run android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/ios": "^8.0.0",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capgo/capacitor-updater": "^8.50.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0",
+    "@capgo/cli": "^8.22.0"
+  }
+}

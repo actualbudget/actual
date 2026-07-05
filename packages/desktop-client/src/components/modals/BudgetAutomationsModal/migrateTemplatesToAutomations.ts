@@ -1,5 +1,9 @@
 import { dayFromDate, firstDayOfMonth } from '@actual-app/core/shared/months';
-import type { Template } from '@actual-app/core/types/models/templates';
+import type { ScheduleEntity } from '@actual-app/core/types/models';
+import type {
+  ScheduleTemplate,
+  Template,
+} from '@actual-app/core/types/models/templates';
 
 import { createAutomationEntry } from '#components/budget/goals/automationExamples';
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
@@ -39,12 +43,42 @@ function getDisplayTypeFromTemplate(template: Template): DisplayTemplateType {
   }
 }
 
+// Fill in scheduleId from name (or refresh a stale name from scheduleId) so
+// the editor and engine consistently see both.
+function hydrateScheduleTemplate(
+  template: ScheduleTemplate,
+  schedules: readonly ScheduleEntity[],
+): ScheduleTemplate {
+  const schedule = template.scheduleId
+    ? schedules.find(s => s.id === template.scheduleId)
+    : template.name
+      ? schedules.find(s => s.name?.trim() === template.name?.trim())
+      : undefined;
+  if (!schedule) return template;
+  return {
+    ...template,
+    scheduleId: schedule.id,
+    name: schedule.name ?? template.name,
+  };
+}
+
 export function migrateTemplatesToAutomations(
   templates: Template[],
+  schedules: readonly ScheduleEntity[] = [],
 ): AutomationEntry[] {
   const entries: AutomationEntry[] = [];
 
   templates.forEach(template => {
+    if (template.type === 'schedule') {
+      entries.push(
+        createAutomationEntry(
+          hydrateScheduleTemplate(template, schedules),
+          'schedule',
+        ),
+      );
+      return;
+    }
+
     if (template.type === 'simple') {
       const monthly = template.monthly;
       const hasMonthly = monthly != null && monthly !== 0;

@@ -23,7 +23,7 @@ export const baseInputStyle = {
   border: '1px solid ' + theme.formInputBorder,
 };
 
-const defaultInputClassName = css({
+export const defaultInputClassName = css({
   ...baseInputStyle,
   color: theme.formInputText,
   whiteSpace: 'nowrap',

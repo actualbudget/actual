@@ -275,6 +275,10 @@ export class AccountPage {
       await input.selectText();
     }
   }
+
+  async rightClickNthTransaction(index: number) {
+    await this.transactionTableRow.nth(index).click({ button: 'right' });
+  }
 }
 
 class FilterTooltip {

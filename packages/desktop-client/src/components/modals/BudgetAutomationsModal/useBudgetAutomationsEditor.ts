@@ -6,7 +6,7 @@ import type {
   ScheduleEntity,
 } from '@actual-app/core/types/models';
 import type { CleanupTemplate } from '@actual-app/core/types/models/cleanup-templates';
-import debounce from 'lodash/debounce';
+import { debounce } from 'es-toolkit/compat';
 
 import {
   createAutomationEntry,
