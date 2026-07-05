@@ -39,6 +39,7 @@ type Notification = {
   pre?: string | undefined;
   title?: string | undefined;
   message: string;
+  values?: Record<string, unknown> | undefined;
   sticky?: boolean | undefined;
 };
 
@@ -355,7 +356,8 @@ async function processTemplate(
 
   return {
     type: 'message',
-    message: `Successfully applied templates to ${contexts.length} categories`,
+    message: 'Successfully applied templates to {{count}} categories',
+    values: { count: contexts.length },
   };
 }
 

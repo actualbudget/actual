@@ -683,6 +683,36 @@ type ApplyBudgetActionPayload =
       };
     };
 
+type BudgetTemplateNotification = {
+  message: string;
+  values?: Record<string, unknown> | undefined;
+};
+
+// goal-template.ts and template-notes.ts run in loot-core and can't depend on
+// i18next, so they return English keys. These literal `t()` calls exist so
+// the i18next-parser extraction (which can't follow a variable key) picks up
+// the strings; the switch below performs the actual translation at runtime.
+function translateBudgetTemplateMessage(
+  t: TFunction,
+  notification: BudgetTemplateNotification,
+): string {
+  switch (notification.message) {
+    case 'Everything is up to date':
+      return t('Everything is up to date');
+    case 'There were errors interpreting some templates:':
+      return t('There were errors interpreting some templates:');
+    case 'All templates passed! 🎉':
+      return t('All templates passed! 🎉');
+    case 'Successfully applied templates to {{count}} categories':
+      return t(
+        'Successfully applied templates to {{count}} categories',
+        notification.values,
+      );
+    default:
+      return notification.message;
+  }
+}
+
 export function useBudgetActions() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -824,7 +854,10 @@ export function useBudgetActions() {
       if (notification) {
         dispatch(
           addNotification({
-            notification,
+            notification: {
+              ...notification,
+              message: translateBudgetTemplateMessage(t, notification),
+            },
           }),
         );
       }

@@ -13,6 +13,7 @@ type Notification = {
   type?: 'message' | 'error' | 'warning' | undefined;
   pre?: string | undefined;
   message: string;
+  values?: Record<string, unknown> | undefined;
   sticky?: boolean | undefined;
 };
 

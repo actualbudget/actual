@@ -11,6 +11,7 @@ type Notification = {
   pre?: string | undefined;
   title?: string | undefined;
   message: string;
+  values?: Record<string, unknown> | undefined;
   sticky?: boolean | undefined;
 };
 

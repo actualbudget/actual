@@ -338,6 +338,7 @@ describe('applyMultipleCategoryTemplates', () => {
     });
 
     expect(result.message).toMatch(/Successfully applied/);
+    expect(result.values).toEqual({ count: 2 });
     expect(actions.setBudget).toHaveBeenCalledTimes(2);
     const budgetCalls = vi
       .mocked(actions.setBudget)
