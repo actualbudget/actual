@@ -45,6 +45,7 @@
     "deploy:docs": "yarn workspace docs deploy",
     "generate:i18n": "yarn workspace @actual-app/web generate:i18n",
     "generate:release-notes": "node ./bin/release-note-generator.mts",
+    "generate:schema-snapshot": "yarn workspace @actual-app/core run generate:schema-snapshot",
     "test": "lage test --continue",
     "test:debug": "lage test --no-cache --continue",
     "e2e": "yarn workspace @actual-app/web run e2e",

@@ -184,6 +184,7 @@
     "watch:node": "cross-env NODE_ENV=development vite build --config ./vite.desktop.config.mts --watch",
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "ENV=node vitest --run",
+    "generate:schema-snapshot": "cross-env SCHEMA_SNAPSHOT_UPDATE=true vitest --run src/server/migrate/schema-guard.test.ts && oxfmt src/server/migrate/schema-snapshot.json src/server/migrate/retired-names.json",
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
     "typecheck": "tsgo -b && tsc-strict",
     "build": "tsgo -b",

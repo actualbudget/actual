@@ -1,0 +1,1389 @@
+{
+  "tables": {
+    "__meta__": {
+      "columns": {
+        "key": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "value": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "__migrations__": {
+      "columns": {
+        "id": {
+          "type": "INT",
+          "notNull": true,
+          "defaultValue": null,
+          "primaryKey": true
+        }
+      }
+    },
+    "accounts": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "account_id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "name": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "balance_current": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "balance_available": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "balance_limit": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "mask": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "official_name": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "subtype": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "bank": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "offbudget": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "closed": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "sort_order": {
+          "type": "REAL",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "type": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "account_sync_source": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "last_sync": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "last_reconciled": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "bank_sync_status": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "banks": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "bank_id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "name": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        }
+      }
+    },
+    "categories": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "name": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "is_income": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "cat_group": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "sort_order": {
+          "type": "REAL",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "hidden": {
+          "type": "BOOLEAN",
+          "notNull": true,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "goal_def": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": "null",
+          "primaryKey": false
+        },
+        "template_settings": {
+          "type": "JSON",
+          "notNull": false,
+          "defaultValue": "'{\"source\": \"notes\"}'",
+          "primaryKey": false
+        },
+        "cleanup_def": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": "NULL",
+          "primaryKey": false
+        }
+      }
+    },
+    "category_groups": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "name": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "is_income": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "sort_order": {
+          "type": "REAL",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "hidden": {
+          "type": "BOOLEAN",
+          "notNull": true,
+          "defaultValue": "0",
+          "primaryKey": false
+        }
+      }
+    },
+    "category_mapping": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "transferId": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "cleanup_groups": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "name": {
+          "type": "TEXT",
+          "notNull": true,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        }
+      }
+    },
+    "created_budgets": {
+      "columns": {
+        "month": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        }
+      }
+    },
+    "custom_reports": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "name": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "start_date": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "end_date": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "date_static": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "date_range": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "mode": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": "'total'",
+          "primaryKey": false
+        },
+        "group_by": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": "'Category'",
+          "primaryKey": false
+        },
+        "balance_type": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": "'Expense'",
+          "primaryKey": false
+        },
+        "show_empty": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "show_offbudget": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "show_hidden": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "show_uncategorized": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "selected_categories": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "graph_type": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": "'BarGraph'",
+          "primaryKey": false
+        },
+        "conditions": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "conditions_op": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": "'and'",
+          "primaryKey": false
+        },
+        "metadata": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "interval": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": "'Monthly'",
+          "primaryKey": false
+        },
+        "color_scheme": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "include_current": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "sort_by": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": "'desc'",
+          "primaryKey": false
+        },
+        "trim_intervals": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "show_trend_lines": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        }
+      }
+    },
+    "dashboard": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "type": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "width": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "height": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "x": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "y": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "meta": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "dashboard_page_id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "dashboard_pages": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "name": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        }
+      }
+    },
+    "kvcache": {
+      "columns": {
+        "key": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "value": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "kvcache_key": {
+      "columns": {
+        "id": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "key": {
+          "type": "REAL",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "messages_clock": {
+      "columns": {
+        "id": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "clock": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "messages_crdt": {
+      "columns": {
+        "id": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "timestamp": {
+          "type": "TEXT",
+          "notNull": true,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "dataset": {
+          "type": "TEXT",
+          "notNull": true,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "row": {
+          "type": "TEXT",
+          "notNull": true,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "column": {
+          "type": "TEXT",
+          "notNull": true,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "value": {
+          "type": "BLOB",
+          "notNull": true,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "notes": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "note": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "payee_locations": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "payee_id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "latitude": {
+          "type": "REAL",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "longitude": {
+          "type": "REAL",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "created_at": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        }
+      }
+    },
+    "payee_mapping": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "targetId": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "payees": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "name": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "category": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "transfer_acct": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "favorite": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "FALSE",
+          "primaryKey": false
+        },
+        "learn_categories": {
+          "type": "BOOLEAN",
+          "notNull": false,
+          "defaultValue": "1",
+          "primaryKey": false
+        }
+      }
+    },
+    "pending_transactions": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "acct": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "amount": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "description": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "date": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "preferences": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "value": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "reflect_budgets": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "month": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "category": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "amount": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "carryover": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "goal": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "null",
+          "primaryKey": false
+        },
+        "long_goal": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "null",
+          "primaryKey": false
+        }
+      }
+    },
+    "rules": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "stage": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "conditions": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "actions": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "conditions_op": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": "'and'",
+          "primaryKey": false
+        }
+      }
+    },
+    "schedules": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "rule": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "active": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "completed": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "posts_transaction": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "name": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": "NULL",
+          "primaryKey": false
+        },
+        "custom_upcoming_length": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": "NULL",
+          "primaryKey": false
+        }
+      }
+    },
+    "schedules_json_paths": {
+      "columns": {
+        "schedule_id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "payee": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "account": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "amount": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "date": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "schedules_next_date": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "schedule_id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "local_next_date": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "local_next_date_ts": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "base_next_date": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "base_next_date_ts": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        }
+      }
+    },
+    "tags": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "tag": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "color": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "description": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "hidden": {
+          "type": "BOOLEAN",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        }
+      }
+    },
+    "transaction_filters": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "name": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "conditions": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "conditions_op": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": "'and'",
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        }
+      }
+    },
+    "transactions": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "isParent": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "isChild": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "acct": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "category": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "amount": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "description": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "notes": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "date": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "financial_id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "type": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "location": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "error": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "imported_description": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "starting_balance_flag": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "transferred_id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "sort_order": {
+          "type": "REAL",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "tombstone": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "cleared": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "1",
+          "primaryKey": false
+        },
+        "pending": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "parent_id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "schedule": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "reconciled": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "raw_synced_data": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
+    "zero_budget_months": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "buffered": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        }
+      }
+    },
+    "zero_budgets": {
+      "columns": {
+        "id": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "month": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "category": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "amount": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "carryover": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "0",
+          "primaryKey": false
+        },
+        "goal": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "null",
+          "primaryKey": false
+        },
+        "long_goal": {
+          "type": "INTEGER",
+          "notNull": false,
+          "defaultValue": "null",
+          "primaryKey": false
+        }
+      }
+    }
+  },
+  "views": {},
+  "indexes": {
+    "messages_crdt_search": {
+      "table": "messages_crdt",
+      "unique": false,
+      "partial": false,
+      "columns": ["dataset", "row", "column", "timestamp"]
+    },
+    "idx_payee_locations_geo_tombstone": {
+      "table": "payee_locations",
+      "unique": false,
+      "partial": false,
+      "columns": ["tombstone", "latitude", "longitude"]
+    },
+    "idx_payee_locations_payee_id": {
+      "table": "payee_locations",
+      "unique": false,
+      "partial": false,
+      "columns": ["payee_id"]
+    },
+    "idx_payee_locations_tombstone_payee_created": {
+      "table": "payee_locations",
+      "unique": false,
+      "partial": false,
+      "columns": ["tombstone", "payee_id", "created_at"]
+    },
+    "idx_transactions_acct_tombstone": {
+      "table": "transactions",
+      "unique": false,
+      "partial": false,
+      "columns": ["acct", "tombstone"]
+    },
+    "idx_transactions_schedule": {
+      "table": "transactions",
+      "unique": false,
+      "partial": false,
+      "columns": ["schedule"]
+    },
+    "trans_category": {
+      "table": "transactions",
+      "unique": false,
+      "partial": false,
+      "columns": ["category"]
+    },
+    "trans_category_date": {
+      "table": "transactions",
+      "unique": false,
+      "partial": false,
+      "columns": ["category", "date"]
+    },
+    "trans_date": {
+      "table": "transactions",
+      "unique": false,
+      "partial": false,
+      "columns": ["date"]
+    },
+    "trans_parent_id": {
+      "table": "transactions",
+      "unique": false,
+      "partial": false,
+      "columns": ["parent_id"]
+    },
+    "trans_sorted": {
+      "table": "transactions",
+      "unique": false,
+      "partial": false,
+      "columns": ["date", "starting_balance_flag", "sort_order", "id"]
+    }
+  }
+}
