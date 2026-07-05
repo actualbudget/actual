@@ -69,11 +69,18 @@ function _authorize(
 
             localStorage.setItem('enablebanking_auth_state', state);
             onStateReady?.(state);
-            window.open(
-              authUrl,
-              'enablebanking-auth',
-              'width=600,height=700,popup=yes',
-            );
+
+            // Open the bank authorization page in a normal browser tab rather
+            // than a constrained popup window. Some providers detect the small
+            // popup and fall back to a broken mobile/app-link path instead of
+            // the desktop QR-code flow, so authorization never completes.
+            //
+            // The return value is intentionally not inspected: in the Electron
+            // desktop app, window.open is denied by the window-open handler
+            // (which opens the URL in the system browser instead) and returns
+            // null even on success, so it can't be used to detect a blocked
+            // tab. Polling below drives the rest of the flow either way.
+            window.open(authUrl, '_blank');
 
             try {
               const pollResp = await sendCatch('enablebanking-poll-auth', {
