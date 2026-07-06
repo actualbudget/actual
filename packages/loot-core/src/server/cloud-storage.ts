@@ -199,11 +199,11 @@ export async function importBuffer(fileData, buffer) {
     }
     throw FileDownloadError('not-zip-file');
   }
-  const entryName = Object.keys(entries).find(name =>
-    name.includes('db.sqlite'),
+  const entryName = Object.keys(entries).find(
+    name => name === 'db.sqlite' || name.endsWith('/db.sqlite'),
   );
-  const metaEntryName = Object.keys(entries).find(name =>
-    name.includes('metadata.json'),
+  const metaEntryName = Object.keys(entries).find(
+    name => name === 'metadata.json' || name.endsWith('/metadata.json'),
   );
 
   if (!entryName || !metaEntryName) {
