@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -12,7 +12,10 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { evaluateFormula } from '@actual-app/core/shared/formulas/evaluate';
+import {
+  evaluateFormula,
+  FormulaEvaluationError,
+} from '@actual-app/core/shared/formulas/evaluate';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { amountToInteger } from '@actual-app/core/shared/util';
 import type {
@@ -36,6 +39,12 @@ import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { SelectedProvider } from '#hooks/useSelected';
 import type { Actions } from '#hooks/useSelected';
+
+const FormulaEditor = lazy(() =>
+  import('#components/formula/FormulaEditor').then(module => ({
+    default: module.FormulaEditor,
+  })),
+);
 
 export type ScheduleFormFields = {
   payee: null | string;
@@ -135,6 +144,10 @@ export function ScheduleEditForm({
     if (typeof fields.amount !== 'string' || !fields.amount.startsWith('=')) {
       return null;
     }
+    // Nothing entered yet (e.g. the seeded `=`) — don't show anything.
+    if (fields.amount.replace(/^=/, '').trim() === '') {
+      return null;
+    }
     try {
       const result = evaluateFormula(fields.amount, { date: previewDate });
       if (typeof result !== 'number') {
@@ -144,6 +157,15 @@ export function ScheduleEditForm({
         value: amountToInteger(result, format.currency.decimalPlaces),
       };
     } catch (e) {
+      // An incomplete/invalid formula (still typing) surfaces as a HyperFormula
+      // parse error — show a calm hint instead of the raw parser dump. Genuine
+      // evaluation errors (#DIV/0!, #NAME?, …) keep showing as errors.
+      if (
+        e instanceof FormulaEvaluationError &&
+        e.formulaErrorType === 'ERROR'
+      ) {
+        return { error: t('Not a valid formula'), soft: true };
+      }
       return { error: e instanceof Error ? e.message : String(e) };
     }
   })();
@@ -171,6 +193,7 @@ export function ScheduleEditForm({
             marginTop: 20,
             display: isNarrowWidth ? 'grid' : 'flex',
             gridTemplateColumns: '1fr 1fr',
+            alignItems: 'flex-start',
           }}
         >
           <FormField style={{ flex: 1 }}>
@@ -209,7 +232,9 @@ export function ScheduleEditForm({
             <SpaceBetween style={{ marginBottom: 3, alignItems: 'center' }}>
               <FormLabel
                 title={t('Amount')}
-                htmlFor="amount-field"
+                htmlFor={
+                  fields.amountOp === 'formula' ? undefined : 'amount-field'
+                }
                 style={{ margin: 0, flex: 1 }}
               />
               <OpSelect
@@ -263,24 +288,40 @@ export function ScheduleEditForm({
               />
             ) : fields.amountOp === 'formula' ? (
               <>
-                <Input
-                  id="amount-field"
-                  value={typeof fields.amount === 'string' ? fields.amount : ''}
-                  onChangeValue={value =>
-                    dispatch({
-                      type: 'set-field',
-                      field: 'amount',
-                      value,
-                    })
-                  }
-                />
+                <View
+                  style={{
+                    flex: 1,
+                    border: `1px solid ${theme.formInputBorder}`,
+                    borderRadius: 4,
+                    overflow: 'visible',
+                    backgroundColor: theme.tableBackground,
+                  }}
+                >
+                  <Suspense fallback={<div style={{ height: 32 }} />}>
+                    <FormulaEditor
+                      value={
+                        typeof fields.amount === 'string' ? fields.amount : ''
+                      }
+                      onChange={value =>
+                        dispatch({
+                          type: 'set-field',
+                          field: 'amount',
+                          value: value.replace(/[\r\n]+/g, ' '),
+                        })
+                      }
+                      mode="schedule"
+                      singleLine
+                      showLineNumbers={false}
+                    />
+                  </Suspense>
+                </View>
                 {formulaPreview && (
                   <Text
                     style={{
                       fontSize: 12,
                       marginTop: 3,
                       color:
-                        'error' in formulaPreview
+                        'error' in formulaPreview && !('soft' in formulaPreview)
                           ? theme.errorText
                           : theme.pageTextLight,
                     }}
@@ -628,7 +669,10 @@ export function ScheduleEditForm({
           <SimpleTransactionsTable
             renderEmpty={
               <NoTransactionsMessage
-                error={error}
+                // A formula amount never affects the match search, so a
+                // formula validation error is not a search failure — it
+                // already shows next to the save button.
+                error={fields.amountOp === 'formula' ? null : error}
                 transactionsMode={transactionsMode}
               />
             }
