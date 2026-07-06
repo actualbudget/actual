@@ -5,6 +5,7 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import { fetch } from '#platform/server/fetch';
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
+import * as memory from '#platform/server/memory';
 import * as sqlite from '#platform/server/sqlite';
 import * as monthUtils from '#shared/months';
 
@@ -19,7 +20,12 @@ import { runMutator } from './mutators';
 import { post } from './post';
 import * as prefs from './prefs';
 import { getServer } from './server-config';
-import { safeUnzip, safeZip, UnsafeZipError } from './util/zip';
+import {
+  exceedsSafeUnzipLimits,
+  safeUnzip,
+  safeZip,
+  UnsafeZipError,
+} from './util/zip';
 
 const UPLOAD_FREQUENCY_IN_DAYS = 7;
 
@@ -149,7 +155,7 @@ export async function exportBuffer() {
   // because we are reading the sqlite file from disk. We want to make
   // sure that we get a valid snapshot of it so we want this to be
   // serialized with all other mutations.
-  const zipped: Uint8Array = await runMutator(async () => {
+  const { zipped, entries } = await runMutator(async () => {
     const rawDbContent = await fs.readFile(
       fs.join(budgetDir, 'db.sqlite'),
       'binary',
@@ -180,13 +186,28 @@ export async function exportBuffer() {
     meta.resetClock = true;
     const metaContent = Buffer.from(JSON.stringify(meta), 'utf8');
 
-    return safeZip({
+    const entries = {
       'db.sqlite': Buffer.from(dbContent),
       'metadata.json': metaContent,
-    });
+    };
+
+    return { zipped: safeZip(entries), entries };
   });
 
-  return Buffer.from(zipped);
+  const warnings: string[] = [];
+  if (exceedsSafeUnzipLimits(zipped, entries)) {
+    warnings.push('exceeds-import-size-limit');
+  }
+
+  const availableMemory = memory.getAvailableMemory();
+  if (
+    availableMemory != null &&
+    entries['db.sqlite'].length > availableMemory
+  ) {
+    warnings.push('may-exceed-available-memory');
+  }
+
+  return { data: Buffer.from(zipped), warnings };
 }
 
 export async function importBuffer(fileData, buffer) {
@@ -259,10 +280,11 @@ export async function upload() {
     throw FileUploadError('unauthorized');
   }
 
-  const zipContent = await exportBuffer();
-  if (zipContent == null) {
+  const exported = await exportBuffer();
+  if (exported == null) {
     return;
   }
+  const zipContent = exported.data;
 
   const {
     id,

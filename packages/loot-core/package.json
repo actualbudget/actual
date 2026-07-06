@@ -51,6 +51,11 @@
       "api": "./src/platform/server/fs/path-join.api.ts",
       "default": "./src/platform/server/fs/path-join.ts"
     },
+    "#platform/server/memory": {
+      "electron": "./src/platform/server/memory/index.electron.ts",
+      "api": "./src/platform/server/memory/index.api.ts",
+      "default": "./src/platform/server/memory/index.ts"
+    },
     "#platform/server/sqlite": {
       "electron": "./src/platform/server/sqlite/index.electron.ts",
       "api": "./src/platform/server/sqlite/index.api.ts",

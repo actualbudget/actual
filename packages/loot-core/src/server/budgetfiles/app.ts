@@ -514,8 +514,10 @@ async function importBudget({
 
 async function exportBudget() {
   try {
+    const exported = await cloudStorage.exportBuffer();
     return {
-      data: await cloudStorage.exportBuffer(),
+      data: exported?.data ?? null,
+      warnings: exported?.warnings ?? [],
     };
   } catch (err) {
     err.message = 'Error exporting budget: ' + err.message;

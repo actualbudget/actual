@@ -1,15 +1,10 @@
 import { unzipSync, zipSync } from 'fflate';
 import type { Unzipped, Zippable } from 'fflate';
 
-// fflate does no validation itself, so we add what a hardened zip reader
-// would: reject path traversal / zip-slip, cap sizes against zip bombs,
-// reject duplicate entries. These checks run inside the `filter` hook
-// unzipSync calls per entry, before it decompresses that entry.
+// fflate does no validation itself: guard against zip-slip, decompression
+// bombs, and duplicate entries.
 
-const DEFAULT_MAX_SIZE = 20 * 1024 * 1024; // 20MB
-const DEFAULT_MAX_ENTRY_SIZE = DEFAULT_MAX_SIZE; // 20MB
-const DEFAULT_MAX_ARCHIVE_SIZE = DEFAULT_MAX_SIZE * 3; // 60MB
-const DEFAULT_MAX_TOTAL_UNCOMPRESSED_SIZE = DEFAULT_MAX_SIZE * 10; // 200MB
+const MAX_ZIP_SIZE = 500 * 1024 * 1024; // 500MB; also doubles as a memory-safety cap
 
 export class UnsafeZipError extends Error {}
 
@@ -36,9 +31,9 @@ type SafeUnzipOptions = {
 export function safeUnzip(
   data: Uint8Array,
   {
-    maxArchiveSize = DEFAULT_MAX_ARCHIVE_SIZE,
-    maxEntrySize = DEFAULT_MAX_ENTRY_SIZE,
-    maxTotalUncompressedSize = DEFAULT_MAX_TOTAL_UNCOMPRESSED_SIZE,
+    maxArchiveSize = MAX_ZIP_SIZE,
+    maxEntrySize = MAX_ZIP_SIZE,
+    maxTotalUncompressedSize = MAX_ZIP_SIZE,
   }: SafeUnzipOptions = {},
 ): Unzipped {
   if (data.length > maxArchiveSize) {
@@ -86,4 +81,23 @@ export function safeZip(files: Zippable): Uint8Array {
     assertSafeEntryName(name);
   }
   return zipSync(files);
+}
+
+export function exceedsSafeUnzipLimits(
+  archive: Uint8Array,
+  entries: Record<string, Uint8Array>,
+): boolean {
+  if (archive.length > MAX_ZIP_SIZE) {
+    return true;
+  }
+
+  let totalUncompressedSize = 0;
+  for (const entry of Object.values(entries)) {
+    if (entry.length > MAX_ZIP_SIZE) {
+      return true;
+    }
+    totalUncompressedSize += entry.length;
+  }
+
+  return totalUncompressedSize > MAX_ZIP_SIZE;
 }
