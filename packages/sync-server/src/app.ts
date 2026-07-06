@@ -1,4 +1,5 @@
 import fs, { readFileSync } from 'node:fs';
+import type { Server } from 'node:http';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,6 +20,7 @@ import * as secretApp from './app-secrets';
 import * as simpleFinApp from './app-simplefin/app-simplefin';
 import * as syncApp from './app-sync';
 import { config } from './load-config';
+import { bootstrapPlugins, shutdownPlugins } from './plugins/plugins-bootstrap';
 
 const app = express();
 
@@ -216,6 +218,10 @@ export async function run() {
     }
   }
 
+  await bootstrapPlugins();
+
+  let server: Server;
+
   if (config.get('https.key') && config.get('https.cert')) {
     const https = await import('node:https');
     const httpsOptions = {
@@ -223,12 +229,45 @@ export async function run() {
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    https.createServer(httpsOptions, app).listen(port, hostname, () => {
-      sendServerStartedMessage();
-    });
+    server = https
+      .createServer(httpsOptions, app)
+      .listen(port, hostname, () => {
+        sendServerStartedMessage();
+      });
   } else {
-    app.listen(port, hostname, () => {
+    server = app.listen(port, hostname, () => {
       sendServerStartedMessage();
     });
   }
+
+  let isShuttingDown = false;
+
+  async function onShutdown(signal: string) {
+    if (isShuttingDown) {
+      return;
+    }
+    isShuttingDown = true;
+    console.log(`${signal} received. Starting graceful shutdown...`);
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        server.close(error => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        });
+      });
+      await shutdownPlugins();
+      process.exit(0);
+    } catch (error) {
+      console.error('Error during shutdown:', error);
+      await shutdownPlugins();
+      process.exit(1);
+    }
+  }
+
+  process.on('SIGTERM', () => onShutdown('SIGTERM'));
+  process.on('SIGINT', () => onShutdown('SIGINT'));
 }

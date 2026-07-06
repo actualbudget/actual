@@ -90,6 +90,7 @@
   "dependencies": {
     "@actual-app/crdt": "workspace:*",
     "@actual-app/web": "workspace:*",
+    "adm-zip": "^0.5.17",
     "akahu": "^2.5.1",
     "argon2": "^0.44.0",
     "bcrypt": "^6.0.0",

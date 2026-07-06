@@ -177,6 +177,7 @@ __metadata:
     "@types/node": "npm:^22.19.21"
     "@types/supertest": "npm:^7.2.0"
     "@typescript/native-preview": "npm:beta"
+    adm-zip: "npm:^0.5.17"
     akahu: "npm:^2.5.1"
     argon2: "npm:^0.44.0"
     bcrypt: "npm:^6.0.0"
