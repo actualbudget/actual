@@ -566,7 +566,7 @@ async function importFlagsAsTags(
   );
 }
 
-async function importTransactions(
+export async function importTransactions(
   data: Budget,
   entityIdMap: Map<string, string>,
   flagNameConflicts: Set<string>,
