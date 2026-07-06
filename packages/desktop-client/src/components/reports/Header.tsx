@@ -50,6 +50,9 @@ type HeaderProps = {
   // those to months in their spreadsheets, so passing this is safe.
   granularity?: MonthRangeGranularity;
   onChangeGranularity?: (granularity: MonthRangeGranularity) => void;
+  // Which granularities this report supports in the picker. Defaults to both;
+  // pass `['month']` for month-only reports to hide the Day toggle.
+  granularities?: MonthRangeGranularity[];
   children?: ReactNode;
   inlineContent?: ReactNode;
   // no separate category filter; use main filters instead
@@ -273,6 +276,7 @@ export function Header({
   onConditionsOpChange,
   granularity,
   onChangeGranularity,
+  granularities,
   children,
   inlineContent,
   filterExclude,
@@ -336,6 +340,10 @@ export function Header({
               end={end}
               granularity={granularity}
               onChangeGranularity={onChangeGranularity}
+              granularities={granularities}
+              // Excluding the current month only makes sense for past ranges;
+              // future ranges start at the current month.
+              allowExcludeCurrentMonth={!showFutureRange}
               // `allMonths` is newest-first, so the last entry is the earliest.
               minDate={allMonths[allMonths.length - 1].name}
               // No upper cap: users can pick any future month/day so future

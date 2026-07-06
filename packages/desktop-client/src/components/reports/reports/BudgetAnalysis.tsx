@@ -403,6 +403,8 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         end={end}
         mode={mode}
         show1Month
+        // Budgets are inherently monthly, so don't offer day-level selection.
+        granularities={['month']}
         allMonths={allMonths}
         earliestTransaction={allMonths[allMonths.length - 1].name}
         latestTransaction={latestTransaction}

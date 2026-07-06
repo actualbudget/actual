@@ -164,8 +164,14 @@ export function getFullRange(start: string, end: string) {
   return [start, end, 'full'] as const;
 }
 
-export function getLatestRange(offset: number) {
-  const end = monthUtils.currentMonth();
+/**
+ * A live (sliding) range, `offset` months wide, whose end sits `endOffset`
+ * months before the current month. `endOffset` defaults to `0` (the window ends
+ * at the current month) so existing callers are unchanged; passing e.g. `1`
+ * yields "the N months ending last month".
+ */
+export function getLatestRange(offset: number, endOffset: number = 0) {
+  const end = monthUtils.subMonths(monthUtils.currentMonth(), endOffset);
   const start = monthUtils.subMonths(end, offset);
 
   return [start, end, 'sliding-window'] as const;
@@ -225,7 +231,15 @@ export function calculateTimeRange(
       ] as const;
     }
 
-    return getLatestRange(offset);
+    // Preserve the window's gap from "now": if the saved range ended before the
+    // current month, keep ending that many months back as months roll over.
+    // Clamp to >= 0 so a range ending in the future still anchors to now.
+    const endOffset = Math.max(
+      0,
+      monthUtils.differenceInCalendarMonths(monthUtils.currentMonth(), end),
+    );
+
+    return getLatestRange(offset, endOffset);
   }
   if (mode === 'lastMonth') {
     const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);

@@ -5,6 +5,7 @@ import {
   calculateSpendingReportTimeRange,
   calculateTimeRange,
   getFullFutureRange,
+  getLatestRange,
 } from './reportRanges';
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'
@@ -19,6 +20,48 @@ describe('calculateTimeRange', () => {
     expect(start).toBe('2016-12');
     expect(end).toBe('2016-12');
     expect(mode).toBe('lastMonth');
+  });
+
+  it('anchors a live window that ends at the current month to now', () => {
+    // Saved 6-month window ending at the (then-)current month.
+    const [start, end, mode] = calculateTimeRange({
+      start: '2016-08',
+      end: '2017-01',
+      mode: 'sliding-window',
+    });
+
+    expect(start).toBe('2016-08');
+    expect(end).toBe('2017-01');
+    expect(mode).toBe('sliding-window');
+  });
+
+  it('preserves a live window that ends before the current month', () => {
+    // Saved 6-month window ending one month before the current month; the gap
+    // from now must be preserved as months roll over.
+    const [start, end, mode] = calculateTimeRange({
+      start: '2016-07',
+      end: '2016-12',
+      mode: 'sliding-window',
+    });
+
+    expect(end).toBe('2016-12'); // one month before current 2017-01
+    expect(start).toBe('2016-07'); // width of 5 preserved
+    expect(mode).toBe('sliding-window');
+  });
+});
+
+// In test mode, monthUtils.currentMonth() returns '2017-01'
+describe('getLatestRange', () => {
+  it('ends at the current month by default', () => {
+    expect(getLatestRange(5)).toEqual(['2016-08', '2017-01', 'sliding-window']);
+  });
+
+  it('ends endOffset months before the current month', () => {
+    expect(getLatestRange(5, 1)).toEqual([
+      '2016-07',
+      '2016-12',
+      'sliding-window',
+    ]);
   });
 });
 
