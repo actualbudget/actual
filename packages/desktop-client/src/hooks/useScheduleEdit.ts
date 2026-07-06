@@ -376,12 +376,18 @@ export function useScheduleEdit({
     let unsubscribe: (() => void) | undefined;
 
     if (state.schedule && state.transactionsMode === 'matched') {
-      const updated = updateScheduleConditions(state.schedule, state.fields);
+      const updated = updateScheduleConditions(state.schedule, state.fields, {
+        excludeFormulaAmount: true,
+      });
 
       if ('error' in updated) {
         dispatch({ type: 'form-error', error: updated.error });
         return;
       }
+
+      // Clear any stale validation error (e.g. from a previous invalid formula)
+      // now that we have a searchable set of conditions.
+      dispatch({ type: 'form-error', error: null });
 
       // *Extremely* gross hack because the rules are not mapped to
       // public names automatically. We really should be doing that
