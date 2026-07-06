@@ -11,6 +11,7 @@ import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
