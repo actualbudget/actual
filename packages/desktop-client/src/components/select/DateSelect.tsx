@@ -3,7 +3,6 @@ import {
   useEffect,
   useEffectEvent,
   useImperativeHandle,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -15,8 +14,23 @@ import type {
   KeyboardEvent,
   Ref,
 } from 'react';
+import {
+  Calendar,
+  CalendarCell,
+  CalendarGrid,
+  CalendarGridBody,
+  CalendarGridHeader,
+  CalendarHeaderCell,
+  Heading,
+  I18nProvider,
+} from 'react-aria-components';
 
+import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import {
+  SvgCheveronLeft,
+  SvgCheveronRight,
+} from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
@@ -31,100 +45,104 @@ import {
   getShortYearRegex,
 } from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
+import { CalendarDate } from '@internationalized/date';
 import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
-import type { Locale } from 'date-fns';
-import Pikaday from 'pikaday';
-import 'pikaday/css/pikaday.css';
+
 import { InputField } from '#components/mobile/MobileForms';
-import { useLocale } from '#hooks/useLocale';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
-import DateSelectLeft from './DateSelect.left.png';
-import DateSelectRight from './DateSelect.right.png';
+const FIRST_DAY_OF_WEEK_NAMES = [
+  'sun',
+  'mon',
+  'tue',
+  'wed',
+  'thu',
+  'fri',
+  'sat',
+] as const;
+
+// Encode the user's configured first day of week into the locale via the
+// Unicode "fw" extension, which @internationalized/date honors -
+// react-aria-components' CalendarGrid has no direct prop for it.
+function withFirstDayOfWeek(locale: string, firstDayOfWeekIdx: string): string {
+  const day = FIRST_DAY_OF_WEEK_NAMES[parseInt(firstDayOfWeekIdx, 10) || 0];
+  return `${locale}-u-fw-${day}`;
+}
+
+function toCalendarDate(date: Date): CalendarDate {
+  return new CalendarDate(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate(),
+  );
+}
+
+function fromCalendarDate(date: CalendarDate): Date {
+  return new Date(date.year, date.month - 1, date.day);
+}
 
 const pickerStyles: CSSProperties = {
-  '& .pika-single.actual-date-picker': {
+  '& .react-aria-Calendar': {
     color: theme.calendarText,
     background: theme.calendarBackground,
-    border: 'none',
     boxShadow: '0 0px 4px rgba(0, 0, 0, .25)',
     borderRadius: 4,
+    padding: 10,
   },
+  '& .calendar-header': {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  '& .calendar-header-title': {
+    fontWeight: 'bold',
+    backgroundColor: theme.calendarBackground,
+  },
+  '& .react-aria-CalendarGrid': {
+    borderCollapse: 'collapse',
+  },
+  '& .react-aria-CalendarHeaderCell': {
+    color: theme.calendarItemText,
+    fontWeight: 'normal',
+    textAlign: 'center',
+    padding: '2px 0',
+  },
+  '& .react-aria-CalendarCell': {
+    width: 28,
+    height: 28,
+    lineHeight: '28px',
+    textAlign: 'center',
+    borderRadius: 4,
+    cursor: 'pointer',
+    backgroundColor: theme.calendarItemBackground,
+    color: theme.calendarItemText,
 
-  '& .actual-date-picker': {
-    '& .pika-lendar': {
-      float: 'none',
-      width: 'auto',
+    '&[data-outside-month]': {
+      opacity: 0.4,
     },
-    // month/year
-    '& .pika-label': {
-      backgroundColor: theme.calendarBackground,
-    },
-    // Back/forward buttons
-    '& .pika-prev': {
-      backgroundImage: `url(${DateSelectLeft})`,
-    },
-    '& .pika-next': {
-      backgroundImage: `url(${DateSelectRight})`,
-    },
-    // Day of week
-    '& .pika-table th': {
-      color: theme.calendarItemText,
-      '& abbr': { textDecoration: 'none' },
-    },
-    // Numbered days
-    '& .pika-button': {
-      backgroundColor: theme.calendarItemBackground,
-      color: theme.calendarItemText,
-    },
-    '& .is-today .pika-button': {
+    '&[data-today]': {
       textDecoration: 'underline',
     },
-    '& .is-selected .pika-button': {
+    '&[data-selected]': {
       backgroundColor: theme.calendarSelectedBackground,
-      boxShadow: 'none',
+    },
+    '&[data-disabled]': {
+      opacity: 0.4,
+      cursor: 'default',
+    },
+    '&[data-focus-visible]': {
+      outline: `2px solid ${theme.calendarSelectedBackground}`,
     },
   },
 };
-
-type PikadayI18n = {
-  previousMonth: string;
-  nextMonth: string;
-  months: string[];
-  weekdays: string[];
-  weekdaysShort: string[];
-};
-
-function createPikadayLocale(dateFnsLocale: Locale): PikadayI18n {
-  const months = Array.from({ length: 12 }, (_, i) =>
-    format(new Date(2023, i, 1), 'MMMM', { locale: dateFnsLocale }),
-  );
-
-  const weekdays = Array.from({ length: 7 }, (_, i) =>
-    format(new Date(2023, 0, i + 1), 'EEEE', { locale: dateFnsLocale }),
-  );
-
-  const weekdaysShort = Array.from({ length: 7 }, (_, i) =>
-    format(new Date(2023, 0, i + 1), 'EEE', { locale: dateFnsLocale }).slice(
-      0,
-      3,
-    ),
-  );
-
-  return {
-    previousMonth: 'Previous',
-    nextMonth: 'Next',
-    months,
-    weekdays,
-    weekdaysShort,
-  };
-}
 
 type DatePickerProps = {
   value: string;
-  firstDayOfWeekIdx: string;
   dateFormat: string;
+  locale: string;
   onUpdate: (selectedDate: Date) => void;
   onSelect: (selectedDate: Date) => void;
 };
@@ -133,10 +151,11 @@ type DatePickerForwardedRef = {
   handleInputKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
 };
 const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
-  ({ value, firstDayOfWeekIdx, dateFormat, onUpdate, onSelect }, ref) => {
-    const locale = useLocale();
-    const picker = useRef<Pikaday | null>(null);
-    const mountPoint = useRef<HTMLDivElement | null>(null);
+  ({ value, dateFormat, locale, onUpdate, onSelect }, ref) => {
+    const parsedValue = value ? parse(value, dateFormat, currentDate()) : null;
+    const focusedCalendarDate = toCalendarDate(
+      parsedValue && isValid(parsedValue) ? parsedValue : currentDate(),
+    );
 
     const onUpdateEffect = useEffectEvent(onUpdate);
 
@@ -144,80 +163,66 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
       ref,
       () => ({
         handleInputKeyDown(e) {
-          const currentDate = picker.current?.getDate();
-          if (!currentDate) return;
+          const jsDate = fromCalendarDate(focusedCalendarDate);
 
           let newDate = null;
           switch (e.key) {
             case 'ArrowLeft':
               e.preventDefault();
-              newDate = subDays(currentDate, 1);
+              newDate = subDays(jsDate, 1);
               break;
             case 'ArrowUp':
               e.preventDefault();
-              newDate = subDays(currentDate, 7);
+              newDate = subDays(jsDate, 7);
               break;
             case 'ArrowRight':
               e.preventDefault();
-              newDate = addDays(currentDate, 1);
+              newDate = addDays(jsDate, 1);
               break;
             case 'ArrowDown':
               e.preventDefault();
-              newDate = addDays(currentDate, 7);
+              newDate = addDays(jsDate, 7);
               break;
             default:
           }
 
           if (newDate) {
-            picker.current?.setDate(newDate, true);
-            onUpdateEffect?.(newDate);
+            onUpdateEffect(newDate);
           }
         },
       }),
-      [],
+      [focusedCalendarDate],
     );
 
-    const initPikaday = useEffectEvent(() => {
-      const pikadayLocale = createPikadayLocale(locale);
-      return new Pikaday({
-        theme: 'actual-date-picker',
-        keyboardInput: false,
-        firstDay: parseInt(firstDayOfWeekIdx),
-        defaultDate: value
-          ? parse(value, dateFormat, currentDate())
-          : currentDate(),
-        setDefaultDate: true,
-        toString(date) {
-          return format(date, dateFormat);
-        },
-        parse(dateString) {
-          return parse(dateString, dateFormat, new Date());
-        },
-        onSelect,
-        i18n: pikadayLocale,
-      });
-    });
-
-    useLayoutEffect(() => {
-      picker.current = initPikaday();
-      mountPoint.current?.appendChild(picker.current.el);
-
-      return () => {
-        picker.current?.destroy();
-      };
-    }, []);
-
-    useEffect(() => {
-      if (value) {
-        picker.current?.setDate(parse(value, dateFormat, new Date()), true);
-      }
-    }, [value, dateFormat]);
-
     return (
-      <View
-        className={css([pickerStyles, { flex: 1 }])}
-        innerRef={mountPoint}
-      />
+      <View className={css([pickerStyles, { flex: 1 }])}>
+        <I18nProvider locale={locale}>
+          <Calendar
+            value={focusedCalendarDate}
+            onChange={date => onSelect(fromCalendarDate(date))}
+          >
+            <View className="calendar-header">
+              <Button variant="bare" slot="previous">
+                <SvgCheveronLeft width={16} height={16} />
+              </Button>
+              <Heading className="calendar-header-title" />
+              <Button variant="bare" slot="next">
+                <SvgCheveronRight width={16} height={16} />
+              </Button>
+            </View>
+            <CalendarGrid>
+              <CalendarGridHeader>
+                {day => (
+                  <CalendarHeaderCell>{day.slice(0, 2)}</CalendarHeaderCell>
+                )}
+              </CalendarGridHeader>
+              <CalendarGridBody>
+                {date => <CalendarCell date={date} />}
+              </CalendarGridBody>
+            </CalendarGrid>
+          </Calendar>
+        </I18nProvider>
+      </View>
     );
   },
 );
@@ -279,6 +284,12 @@ function DateSelectDesktop({
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+
+  const [language] = useGlobalPref('language');
+  const locale = withFirstDayOfWeek(
+    language || navigator.language || 'en-US',
+    firstDayOfWeekIdx,
+  );
 
   useEffect(() => setValue(parsedDefaultValue), [parsedDefaultValue]);
 
@@ -440,8 +451,8 @@ function DateSelectDesktop({
         <DatePicker
           ref={picker}
           value={selectedValue}
-          firstDayOfWeekIdx={firstDayOfWeekIdx}
           dateFormat={dateFormat}
+          locale={locale}
           onUpdate={date => {
             setSelectedValue(format(date, dateFormat));
             onUpdate?.(format(date, 'yyyy-MM-dd'));
