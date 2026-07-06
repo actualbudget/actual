@@ -9,6 +9,19 @@ import {
 
 export type FormulaCellValue = number | string | boolean | null;
 
+// Carries the underlying HyperFormula error type (e.g. 'ERROR' for parse/syntax
+// failures, 'DIV_BY_ZERO', 'NAME', … for evaluation failures) so callers can
+// distinguish an incomplete/invalid formula from a genuine evaluation error.
+export class FormulaEvaluationError extends Error {
+  formulaErrorType: string;
+
+  constructor(formulaErrorType: string, message: string) {
+    super(message);
+    this.name = 'FormulaEvaluationError';
+    this.formulaErrorType = formulaErrorType;
+  }
+}
+
 type EvaluateOptions = {
   balanceOfPrefetch?: Map<string, number>;
 };
@@ -83,7 +96,10 @@ export function evaluateFormula(
 
     if (cellValue && typeof cellValue === 'object' && 'type' in cellValue) {
       const error = cellValue as { type: string; message?: string };
-      throw new Error(`Formula error: ${error.message ?? error.type}`);
+      throw new FormulaEvaluationError(
+        error.type,
+        `Formula error: ${error.message ?? error.type}`,
+      );
     }
 
     return cellValue as FormulaCellValue;
