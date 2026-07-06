@@ -6,19 +6,10 @@ import type { Unzipped, Zippable } from 'fflate';
 // reject duplicate entries. These checks run inside the `filter` hook
 // unzipSync calls per entry, before it decompresses that entry.
 
-// Size caps default to 20MB, same as sync-server's load-config.js).
-// `typeof process !== 'undefined'` guards the read because a bare
-// `process` reference crashes if this file ever leaks into desktop-client's
-// main bundle (no polyfill there).
-const UPLOAD_FILE_SIZE_LIMIT_MB =
-  (typeof process !== 'undefined' &&
-    Number(process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB)) ||
-  20;
-const DEFAULT_MAX_SIZE = UPLOAD_FILE_SIZE_LIMIT_MB * 1024 * 1024;
-
-const DEFAULT_MAX_ARCHIVE_SIZE = DEFAULT_MAX_SIZE;
-const DEFAULT_MAX_ENTRY_SIZE = DEFAULT_MAX_SIZE;
-const DEFAULT_MAX_TOTAL_UNCOMPRESSED_SIZE = DEFAULT_MAX_SIZE * 10;
+const DEFAULT_MAX_SIZE = 20 * 1024 * 1024; // 20MB
+const DEFAULT_MAX_ENTRY_SIZE = DEFAULT_MAX_SIZE; // 20MB
+const DEFAULT_MAX_ARCHIVE_SIZE = DEFAULT_MAX_SIZE * 3; // 60MB
+const DEFAULT_MAX_TOTAL_UNCOMPRESSED_SIZE = DEFAULT_MAX_SIZE * 10; // 200MB
 
 export class UnsafeZipError extends Error {}
 

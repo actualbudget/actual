@@ -69,9 +69,6 @@ export default defineConfig(({ mode }) => {
       'process.env.PUBLIC_URL': JSON.stringify(process.env.PUBLIC_URL || '/'),
       'process.env.ACTUAL_DATA_DIR': JSON.stringify('/'),
       'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
-      'process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB': JSON.stringify(
-        process.env.ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB || '',
-      ),
     },
     plugins: [
       peggyLoader(),
