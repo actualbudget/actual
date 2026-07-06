@@ -30,6 +30,7 @@ import {
   getFunctionCompletions,
   getNamedVariableCompletions,
   getRuleFieldCompletions,
+  getScheduleFieldCompletions,
   sortFormulaCompletions,
 } from './formulaCatalog';
 import type { FormulaMode } from './formulaCatalog';
@@ -169,6 +170,8 @@ export function excelFormulaAutocomplete(
 
         if (mode === 'transaction') {
           suggestions.push(...getRuleFieldCompletions());
+        } else if (mode === 'schedule') {
+          suggestions.push(...getScheduleFieldCompletions());
         }
 
         return {
@@ -215,9 +218,13 @@ export function excelFormulaHover(mode: FormulaMode): Extension {
       } satisfies Tooltip;
     }
 
-    // Transaction fields
-    if (mode === 'transaction') {
-      const field = getRuleFieldCompletions().find(f => f.label === w);
+    // Transaction/schedule fields
+    if (mode === 'transaction' || mode === 'schedule') {
+      const fields =
+        mode === 'transaction'
+          ? getRuleFieldCompletions()
+          : getScheduleFieldCompletions();
+      const field = fields.find(f => f.label === w);
       if (field) {
         return {
           pos: word.from,

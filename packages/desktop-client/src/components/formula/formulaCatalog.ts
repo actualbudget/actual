@@ -77,6 +77,10 @@ function getRuleFieldCompletionSection(): string {
   return `💰 ${t('Transaction Fields')}`;
 }
 
+function getScheduleFieldCompletionSection(): string {
+  return `💰 ${t('Schedule Fields')}`;
+}
+
 function getFormulaCompletionSectionOrder(): Record<string, number> {
   const categoryConfig = getFormulaFunctionCategoryConfig();
 
@@ -89,6 +93,7 @@ function getFormulaCompletionSectionOrder(): Record<string, number> {
     [categoryConfig.date.section]: categoryConfig.date.order,
     [categoryConfig.other.section]: categoryConfig.other.order,
     [getRuleFieldCompletionSection()]: 6,
+    [getScheduleFieldCompletionSection()]: 6,
   };
 }
 
@@ -1128,9 +1133,13 @@ export function getFormulaFunctionsForMode(
   mode: FormulaMode,
 ): Record<string, FormulaFunctionDef> {
   const catalog = getFormulaFunctionCatalog();
+  // Schedule formulas expose the same functions as transaction formulas.
+  const lookupMode = mode === 'schedule' ? 'transaction' : mode;
 
   return Object.fromEntries(
-    Object.entries(catalog).filter(([, func]) => func.modes.includes(mode)),
+    Object.entries(catalog).filter(([, func]) =>
+      func.modes.includes(lookupMode),
+    ),
   );
 }
 
@@ -1140,8 +1149,10 @@ export function getFormulaFunctionByName(
 ): FormulaFunctionDef | undefined {
   const upperName = name.toUpperCase();
   const func = getFormulaFunctionCatalog()[upperName];
+  // Schedule formulas expose the same functions as transaction formulas.
+  const lookupMode = mode === 'schedule' ? 'transaction' : mode;
 
-  if (!func || (mode && !func.modes.includes(mode))) {
+  if (!func || (lookupMode && !func.modes.includes(lookupMode))) {
     return undefined;
   }
 
@@ -1303,6 +1314,22 @@ export function getRuleFieldCompletions(): Completion[] {
       boost: 5,
       info: t(
         'The amount of the parent transaction in cents in split transactions.\n\nExample: =(parent_amount / 100) * .05',
+      ),
+    },
+  ];
+}
+
+// Schedule formulas are evaluated with only the occurrence date available
+// (see getScheduledAmount in loot-core), so `date` is the only field variable.
+export function getScheduleFieldCompletions(): Completion[] {
+  return [
+    {
+      label: 'date',
+      type: 'variable',
+      section: getScheduleFieldCompletionSection(),
+      boost: 5,
+      info: t(
+        'The date of the schedule occurrence in YYYY-MM-DD format. Use with date functions.\n\nExample: =IF(MONTH(date) = 1, 150, 100)',
       ),
     },
   ];
