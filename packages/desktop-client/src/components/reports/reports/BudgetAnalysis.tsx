@@ -256,8 +256,11 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     void run();
   }, [locale, widget?.meta?.timeFrame]);
 
-  const startDate = start + '-01';
-  const endDate = monthUtils.getMonthEnd(end + '-01');
+  // `start`/`end` may be `yyyy-MM` (month mode) or `yyyy-MM-dd` (day mode).
+  // Budget Analysis is month-only, so collapse to the month before building the
+  // day bounds — naive `start + '-01'` would corrupt a `yyyy-MM-dd` value.
+  const startDate = `${monthUtils.getMonth(start)}-01`;
+  const endDate = monthUtils.getMonthEnd(`${monthUtils.getMonth(end)}-01`);
 
   const getGraphData = useMemo(
     () =>

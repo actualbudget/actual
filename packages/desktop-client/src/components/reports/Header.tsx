@@ -17,7 +17,10 @@ import { FilterButton } from '#components/filters/FiltersMenu';
 
 import { getLiveRange } from './getLiveRange';
 import { MonthRangePicker } from './MonthRangePicker';
-import type { QuickSelectPreset } from './MonthRangePicker';
+import type {
+  MonthRangeGranularity,
+  QuickSelectPreset,
+} from './MonthRangePicker';
 import {
   calculateTimeRange,
   getFullFutureRange,
@@ -42,6 +45,11 @@ type HeaderProps = {
     end: TimeFrame['end'],
     mode: TimeFrame['mode'],
   ) => void;
+  // Report opts into day-level selection by passing these. When the picker is
+  // in day mode it emits `yyyy-MM-dd` start/end; month-based reports coerce
+  // those to months in their spreadsheets, so passing this is safe.
+  granularity?: MonthRangeGranularity;
+  onChangeGranularity?: (granularity: MonthRangeGranularity) => void;
   children?: ReactNode;
   inlineContent?: ReactNode;
   // no separate category filter; use main filters instead
@@ -263,6 +271,8 @@ export function Header({
   onUpdateFilter,
   onDeleteFilter,
   onConditionsOpChange,
+  granularity,
+  onChangeGranularity,
   children,
   inlineContent,
   filterExclude,
@@ -324,6 +334,8 @@ export function Header({
             <MonthRangePicker
               start={start}
               end={end}
+              granularity={granularity}
+              onChangeGranularity={onChangeGranularity}
               // `allMonths` is newest-first, so the last entry is the earliest.
               minDate={allMonths[allMonths.length - 1].name}
               // No upper cap: users can pick any future month/day so future

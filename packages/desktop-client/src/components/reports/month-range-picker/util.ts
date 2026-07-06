@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import * as monthUtils from '@actual-app/core/shared/months';
+
 /**
  * Granularity the picker operates at.
  *
@@ -22,6 +24,19 @@ export type QuickSelectPreset = {
 
 export function toMonth(value: string): string {
   return value.slice(0, 7);
+}
+
+// Expand a value to the first day of its month (`yyyy-MM` or `yyyy-MM-dd` in →
+// `yyyy-MM-dd`). Used when switching a range start from month to day mode so it
+// still covers the whole month.
+export function toDayStart(value: string): string {
+  return monthUtils.firstDayOfMonth(`${toMonth(value)}-01`);
+}
+
+// Expand a value to the last day of its month. Used for a range end switching
+// from month to day mode.
+export function toDayEnd(value: string): string {
+  return monthUtils.lastDayOfMonth(`${toMonth(value)}-01`);
 }
 
 // Clamp an ISO date string to [min, max]. Operands must share a granularity;

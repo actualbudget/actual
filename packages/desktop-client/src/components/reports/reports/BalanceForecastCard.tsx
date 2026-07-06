@@ -78,7 +78,9 @@ export function BalanceForecastCard({
     [accounts, meta?.accounts],
   );
 
-  const startDate = start + '-01';
+  // `firstDayOfMonth` tolerates both `yyyy-MM` and `yyyy-MM-dd` (naive
+  // `start + '-01'` would corrupt a day value).
+  const startDate = monthUtils.firstDayOfMonth(start);
   const endDate = monthUtils.lastDayOfMonth(end);
 
   const {

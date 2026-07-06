@@ -133,7 +133,9 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     [accounts, widget?.meta?.accounts],
   );
   const hasMonthOptions = allMonths != null;
-  const startDate = start + '-01';
+  // `start` may be `yyyy-MM` or `yyyy-MM-dd`; `firstDayOfMonth` normalizes both
+  // (naive `start + '-01'` would corrupt a day value).
+  const startDate = monthUtils.firstDayOfMonth(start);
   const endDate = monthUtils.lastDayOfMonth(end);
   const {
     data: forecastData,
