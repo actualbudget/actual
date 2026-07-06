@@ -707,6 +707,88 @@ describe('schedule app', () => {
       }
     });
 
+    it('does not skip earlier daily occurrences when a later transaction exists', async () => {
+      // Regression for the "irregular daily schedules" bug: a transaction dated
+      // *after* an occurrence must not mark that earlier occurrence as paid, or
+      // the catch-up loop advances past it without posting, leaving gaps.
+      // today = 2017-01-01 (test constant). Daily schedule from 2016-12-28.
+      MockDate.set(new Date(2016, 11, 31, 12));
+      schedulesApp.startServices();
+
+      try {
+        const accountId = await db.insertAccount({
+          name: 'Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+
+        const id = await createSchedule({
+          schedule: { posts_transaction: true },
+          conditions: [
+            { op: 'is', field: 'account', value: accountId },
+            { op: 'is', field: 'amount', value: -10000 },
+            {
+              op: 'is',
+              field: 'date',
+              value: {
+                start: '2016-12-28',
+                frequency: 'daily',
+                patterns: [],
+              },
+            },
+          ],
+        });
+
+        const nextDateRow = await db.first<{
+          id: string;
+        }>('SELECT id FROM schedules_next_date WHERE schedule_id = ?', [id]);
+        await db.update('schedules_next_date', {
+          id: nextDateRow.id,
+          local_next_date: 20161228,
+          local_next_date_ts: Date.now(),
+          base_next_date: 20161228,
+          base_next_date_ts: Date.now(),
+        });
+
+        // A transaction already exists for a *later* occurrence (2016-12-30),
+        // e.g. from an out-of-order sync or manual entry.
+        await db.insertTransaction({
+          account: accountId,
+          amount: -10000,
+          date: '2016-12-30',
+          schedule: id,
+        });
+
+        await advanceSchedulesService(true);
+
+        const { data: transactions } = await aqlQuery(
+          q('transactions')
+            .filter({ schedule: id })
+            .select(['date', 'amount'])
+            .orderBy({ date: 'asc' }),
+        );
+
+        // Every day 2016-12-28 .. 2017-01-01 has exactly one transaction; the
+        // pre-existing 2016-12-30 one is not duplicated and no day is skipped.
+        expect(transactions.map(({ date }) => date)).toEqual([
+          '2016-12-28',
+          '2016-12-29',
+          '2016-12-30',
+          '2016-12-31',
+          '2017-01-01',
+        ]);
+
+        const {
+          data: [schedule],
+        } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+        expect(schedule.next_date).toBe('2017-01-02');
+      } finally {
+        MockDate.reset();
+        await schedulesApp.stopServices();
+      }
+    });
+
     it('completes one-time auto-post schedules that are already paid', async () => {
       MockDate.set(new Date(2016, 11, 31, 12));
       schedulesApp.startServices();

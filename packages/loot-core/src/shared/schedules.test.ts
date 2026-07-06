@@ -5,6 +5,7 @@ import type { RuleConditionEntity, ScheduleEntity } from '#types/models';
 import * as monthUtils from './months';
 import {
   computeSchedulePreviewTransactions,
+  getHasTransactionsQuery,
   getNextDate,
   getScheduleOccurrenceMatchStartDate,
   getStatus,
@@ -335,6 +336,44 @@ describe('schedules', () => {
           occurrenceDate,
         ),
       ).toBe(occurrenceDate);
+    });
+  });
+
+  describe('getHasTransactionsQuery', () => {
+    type DateBound = { $gte: string } | { $lte: string };
+    type HasTransactionsFilter = {
+      $or: Array<{ $and: { schedule: string; date: DateBound[] } }>;
+    };
+
+    function dateFilter(schedule: Partial<ScheduleEntity>): DateBound[] {
+      const query = getHasTransactionsQuery([schedule]);
+      const [orFilter] = query.serialize()
+        .filterExpressions as HasTransactionsFilter[];
+      return orFilter.$or[0].$and.date;
+    }
+
+    it('bounds an auto-posted schedule to its exact occurrence date', () => {
+      // Lower and upper bound are both the occurrence date, so a transaction
+      // dated on a *different* day cannot mark this occurrence as paid.
+      expect(
+        dateFilter({
+          id: 'sched-1',
+          next_date: '2024-03-10',
+          posts_transaction: true,
+        }),
+      ).toEqual([{ $gte: '2024-03-10' }, { $lte: '2024-03-10' }]);
+    });
+
+    it('caps the 2-day lookback for manual recurring schedules at the occurrence date', () => {
+      // The lower bound looks back to catch early payments, but the upper bound
+      // stays at the occurrence date so later transactions are excluded.
+      expect(
+        dateFilter({
+          id: 'sched-2',
+          next_date: '2024-03-10',
+          posts_transaction: false,
+        }),
+      ).toEqual([{ $gte: '2024-03-08' }, { $lte: '2024-03-10' }]);
     });
   });
 
