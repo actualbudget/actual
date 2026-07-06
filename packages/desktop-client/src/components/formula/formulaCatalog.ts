@@ -1,7 +1,7 @@
 import type { Completion } from '@codemirror/autocomplete';
 import { t } from 'i18next';
 
-export type FormulaMode = 'query' | 'transaction';
+export type FormulaMode = 'query' | 'transaction' | 'schedule';
 
 export type FormulaFunctionCategory =
   | 'math'
@@ -1112,6 +1112,7 @@ export function getFormulaFunctionsByMode(): Record<FormulaMode, string[]> {
   const functionsByMode: Record<FormulaMode, string[]> = {
     query: [],
     transaction: [],
+    schedule: [],
   };
 
   for (const [name, func] of Object.entries(getFormulaFunctionCatalog())) {

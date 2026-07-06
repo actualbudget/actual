@@ -8,8 +8,7 @@ import { autocompleteTabAcceptHighest } from '#components/codemirror/autocomplet
 import { useTheme } from '#style/theme';
 
 import { excelFormulaExtension } from './codeMirror-excelLanguage';
-
-type FormulaMode = 'transaction' | 'query';
+import type { FormulaMode } from './formulaCatalog';
 
 type FormulaEditorProps = {
   value: string;
