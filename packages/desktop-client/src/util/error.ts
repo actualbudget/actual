@@ -1,3 +1,4 @@
+import { isMissingSchemaErrorMessage } from '@actual-app/core/shared/errors';
 import { t } from 'i18next';
 
 type ErrorWithMeta = {
@@ -54,7 +55,7 @@ function isDatabaseSchemaMismatch(meta?: unknown): boolean {
     'message' in meta.error &&
     typeof meta.error.message === 'string'
   ) {
-    return /no such (column|table)/i.test(meta.error.message);
+    return isMissingSchemaErrorMessage(meta.error.message);
   }
   return false;
 }
