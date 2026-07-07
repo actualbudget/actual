@@ -39,8 +39,8 @@ type SelectProps<Value> = {
  *
  * @example
  * // Usage:
- * // <Select options={[['1', 'Option 1'], ['2', 'Option 2']]} value="1" onChange={handleOnChange} />
- * // <Select options={[['1', 'Option 1'], ['2', 'Option 2']]} value="3" defaultLabel="Select an option"  onChange={handleOnChange} />
+ * // <Select options={[["1", "Option 1"], ["2", "Option 2"]]} value="1" onChange={handleOnChange} />
+ * // <Select options={[["1", "Option 1"], ["2", "Option 2"]]} value="3" defaultLabel="Select an option"  onChange={handleOnChange} />
  */
 export function Select<const Value = string>({
   id,
@@ -111,6 +111,7 @@ export function Select<const Value = string>({
         isOpen={isOpen}
         onOpenChange={() => setIsOpen(false)}
         style={popoverStyle}
+        isNonModal
       >
         <Menu
           onMenuSelect={item => {
