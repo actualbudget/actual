@@ -822,27 +822,16 @@ export function useBudgetActions() {
     },
     onSuccess: notification => {
       if (notification) {
-        const notificationWithMeta = notification as {
-          type?: string;
-          title?: string;
-          sticky?: boolean;
-          message: string;
-          pre?: string;
-          count?: number;
-        };
+        const count = (notification as { count?: number }).count;
         dispatch(
           addNotification({
             notification: {
-              ...notificationWithMeta,
+              ...notification,
               message: t(
-                notificationWithMeta.message,
-                notificationWithMeta.count != null
-                  ? { count: notificationWithMeta.count }
-                  : undefined,
+                notification.message,
+                count != null ? { count } : undefined,
               ),
-              pre: notificationWithMeta.pre
-                ? t(notificationWithMeta.pre)
-                : undefined,
+              pre: notification.pre ? t(notification.pre) : undefined,
             },
           }),
         );
