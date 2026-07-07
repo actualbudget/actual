@@ -12,6 +12,7 @@ import { getSheetValue, isTrackingBudget, setBudget, setGoal } from './actions';
 import { CategoryTemplateContext } from './category-template-context';
 import { tombstoneOrphanCleanupGroups } from './cleanup-groups';
 import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
+import { t } from '#shared/translate';
 
 export function distributeRemainder(
   templateContexts: CategoryTemplateContext[],
@@ -40,6 +41,7 @@ type Notification = {
   title?: string | undefined;
   message: string;
   sticky?: boolean | undefined;
+  count?: number;
 };
 
 export async function storeTemplates({
@@ -325,13 +327,13 @@ async function processTemplate(
     }
     return {
       type: 'message',
-      message: 'Everything is up to date',
+      message: t('Everything is up to date'),
     };
   }
   if (errors.length > 0) {
     return {
       sticky: true,
-      message: 'There were errors interpreting some templates:',
+      message: t('There were errors interpreting some templates:'),
       pre: errors.join(`\n\n`),
     };
   }
@@ -355,7 +357,8 @@ async function processTemplate(
 
   return {
     type: 'message',
-    message: `Successfully applied templates to ${contexts.length} categories`,
+    message: t('Successfully applied templates to {{count}} categories'),
+    count: contexts.length,
   };
 }
 

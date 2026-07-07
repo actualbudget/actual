@@ -8,6 +8,7 @@ import {
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
 import type { CategoryWithTemplateNote } from './statements';
+import { t } from '#shared/translate';
 
 type Notification = {
   type?: 'message' | 'error' | 'warning' | undefined;
@@ -64,14 +65,14 @@ export async function checkTemplateNotes(): Promise<Notification> {
   if (errors.length) {
     return {
       sticky: true,
-      message: 'There were errors interpreting some templates:',
+      message: t('There were errors interpreting some templates:'),
       pre: errors.join('\n\n'),
     };
   }
 
   return {
     type: 'message',
-    message: 'All templates passed! 🎉',
+    message: t('All templates passed! 🎉'),
   };
 }
 

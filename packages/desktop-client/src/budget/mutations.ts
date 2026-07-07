@@ -824,7 +824,16 @@ export function useBudgetActions() {
       if (notification) {
         dispatch(
           addNotification({
-            notification,
+            notification: {
+              ...notification,
+              message: t(
+                notification.message,
+                notification.count != null
+                  ? { count: notification.count }
+                  : undefined,
+              ),
+              pre: notification.pre ? t(notification.pre) : undefined,
+            },
           }),
         );
       }
