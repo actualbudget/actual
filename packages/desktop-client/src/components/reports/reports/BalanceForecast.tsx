@@ -280,6 +280,11 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     newStart: string,
     newEnd: string,
     newMode?: TimeFrame['mode'],
+    // Both Header instances below pass `hideModeToggle`, so `mode` always
+    // stays 'static' for this report and `endOffset` (sliding-window-only)
+    // never applies here — accepted only to match Header's onChangeDates
+    // signature.
+    _endOffset?: number,
   ) => {
     setStart(newStart);
     setEnd(newEnd);

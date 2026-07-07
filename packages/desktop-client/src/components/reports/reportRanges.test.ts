@@ -53,7 +53,12 @@ describe('calculateTimeRange', () => {
 // In test mode, monthUtils.currentMonth() returns '2017-01'
 describe('getLatestRange', () => {
   it('ends at the current month by default', () => {
-    expect(getLatestRange(5)).toEqual(['2016-08', '2017-01', 'sliding-window']);
+    expect(getLatestRange(5)).toEqual([
+      '2016-08',
+      '2017-01',
+      'sliding-window',
+      0,
+    ]);
   });
 
   it('ends endOffset months before the current month', () => {
@@ -61,6 +66,7 @@ describe('getLatestRange', () => {
       '2016-07',
       '2016-12',
       'sliding-window',
+      1,
     ]);
   });
 });

@@ -455,6 +455,10 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   const [timeFrameMode, setTimeFrameMode] = useState<TimeFrame['mode']>(
     widget?.meta?.timeFrame?.mode ?? 'sliding-window',
   );
+  // How many months before the current month a sliding-window `end` sits;
+  // persisted alongside start/end/mode so a live range keeps tracking "now"
+  // correctly between saves instead of drifting (see TimeFrame.endOffset).
+  const [endOffset, setEndOffset] = useState<number | undefined>(undefined);
   const [datesInitialized, setDatesInitialized] = useState(false);
 
   const [earliestTransaction, setEarliestTransaction] = useState('');
@@ -639,14 +643,16 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         : monthUtils.currentDay();
       setLatestTransaction(latestTransactionDate);
 
-      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-        widget?.meta?.timeFrame,
-        undefined,
-        latestTransactionDate,
-      );
+      const [initialStart, initialEnd, initialMode, initialEndOffset] =
+        calculateTimeRange(
+          widget?.meta?.timeFrame,
+          undefined,
+          latestTransactionDate,
+        );
       setStart(initialStart);
       setEnd(initialEnd);
       setTimeFrameMode(initialMode);
+      setEndOffset(initialEndOffset);
       setDatesInitialized(true);
 
       const currentMonth = monthUtils.currentMonth();
@@ -686,10 +692,16 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     }
     void run();
   }, [locale, widget?.meta?.timeFrame]);
-  function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
+  function onChangeDates(
+    start: string,
+    end: string,
+    mode: TimeFrame['mode'],
+    newEndOffset?: number,
+  ) {
     setStart(start);
     setEnd(end);
     setTimeFrameMode(mode);
+    setEndOffset(newEndOffset);
   }
 
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
@@ -716,6 +728,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
               start,
               end,
               mode: timeFrameMode,
+              endOffset,
             },
             groupAccounts,
           },

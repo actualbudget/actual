@@ -78,6 +78,10 @@ function SummaryInner({ widget }: SummaryInnerProps) {
   );
   const [end, setEnd] = useState(monthUtils.currentDay());
   const [mode, setMode] = useState<TimeFrame['mode']>('full');
+  // How many months before the current month a sliding-window `end` sits;
+  // persisted alongside start/end/mode so a live range keeps tracking "now"
+  // correctly between saves instead of drifting (see TimeFrame.endOffset).
+  const [endOffset, setEndOffset] = useState<number | undefined>(undefined);
 
   const dividendFilters: FilterObject = useRuleConditionFilters(
     widget?.meta?.conditions ?? [],
@@ -210,18 +214,20 @@ function SummaryInner({ widget }: SummaryInnerProps) {
 
   useEffect(() => {
     if (latestTransaction) {
-      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-        widget?.meta?.timeFrame,
-        {
-          start: monthUtils.dayFromDate(monthUtils.currentMonth()),
-          end: monthUtils.currentDay(),
-          mode: 'full',
-        },
-        latestTransaction,
-      );
+      const [initialStart, initialEnd, initialMode, initialEndOffset] =
+        calculateTimeRange(
+          widget?.meta?.timeFrame,
+          {
+            start: monthUtils.dayFromDate(monthUtils.currentMonth()),
+            end: monthUtils.currentDay(),
+            mode: 'full',
+          },
+          latestTransaction,
+        );
       setStart(initialStart);
       setEnd(initialEnd);
       setMode(initialMode);
+      setEndOffset(initialEndOffset);
     }
   }, [latestTransaction, widget?.meta?.timeFrame]);
 
@@ -258,10 +264,16 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     });
   };
 
-  function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
+  function onChangeDates(
+    start: string,
+    end: string,
+    mode: TimeFrame['mode'],
+    newEndOffset?: number,
+  ) {
     setStart(start);
     setEnd(end);
     setMode(mode);
+    setEndOffset(newEndOffset);
   }
 
   async function onSaveWidget() {
@@ -289,6 +301,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
               start,
               end,
               mode,
+              endOffset,
             },
             content: JSON.stringify(content),
           },

@@ -44,6 +44,8 @@ type HeaderProps = {
     start: TimeFrame['start'],
     end: TimeFrame['end'],
     mode: TimeFrame['mode'],
+    // Only meaningful for `mode: 'sliding-window'` — see `TimeFrame.endOffset`.
+    endOffset?: number,
   ) => void;
   // Report opts into day-level selection by passing these. When the picker is
   // in day mode it emits `yyyy-MM-dd` start/end; month-based reports coerce
@@ -322,13 +324,15 @@ export function Header({
                 onPress={() => {
                   const newMode =
                     mode === 'static' ? 'sliding-window' : 'static';
-                  const [newStart, newEnd] = calculateTimeRange({
-                    start,
-                    end,
-                    mode: newMode,
-                  });
+                  const [newStart, newEnd, , newEndOffset] = calculateTimeRange(
+                    {
+                      start,
+                      end,
+                      mode: newMode,
+                    },
+                  );
 
-                  onChangeDates(newStart, newEnd, newMode);
+                  onChangeDates(newStart, newEnd, newMode, newEndOffset);
                 }}
               >
                 {mode === 'static' ? t('Static') : t('Live')}
@@ -366,8 +370,8 @@ export function Header({
                       convertToMonth,
                     })
               }
-              onChangeDates={(newStart, newEnd) =>
-                onChangeDates(newStart, newEnd, 'static')
+              onChangeDates={(newStart, newEnd, endOffset) =>
+                onChangeDates(newStart, newEnd, 'static', endOffset)
               }
             />
           </SpaceBetween>

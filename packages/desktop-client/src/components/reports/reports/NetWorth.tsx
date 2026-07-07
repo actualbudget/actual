@@ -103,6 +103,10 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
+  // How many months before the current month a sliding-window `end` sits;
+  // persisted alongside start/end/mode so a live range keeps tracking "now"
+  // correctly between saves instead of drifting (see TimeFrame.endOffset).
+  const [endOffset, setEndOffset] = useState<number | undefined>(undefined);
   // Lifted out of MonthRangePicker (rather than left as its own internal
   // state) because the `!data` early return below unmounts
   // `Header`/`MonthRangePicker` on every date change; an internal state
@@ -211,21 +215,29 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
 
   useEffect(() => {
     if (latestTransaction) {
-      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-        widget?.meta?.timeFrame,
-        undefined,
-        latestTransaction,
-      );
+      const [initialStart, initialEnd, initialMode, initialEndOffset] =
+        calculateTimeRange(
+          widget?.meta?.timeFrame,
+          undefined,
+          latestTransaction,
+        );
       setStart(initialStart);
       setEnd(initialEnd);
       setModeAndInterval(initialMode);
+      setEndOffset(initialEndOffset);
     }
   }, [latestTransaction, widget?.meta?.timeFrame, setModeAndInterval]);
 
-  function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
+  function onChangeDates(
+    start: string,
+    end: string,
+    mode: TimeFrame['mode'],
+    newEndOffset?: number,
+  ) {
     setStart(start);
     setEnd(end);
     setModeAndInterval(mode);
+    setEndOffset(newEndOffset);
   }
 
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
@@ -249,6 +261,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
               start,
               end,
               mode,
+              endOffset,
             },
           },
         },

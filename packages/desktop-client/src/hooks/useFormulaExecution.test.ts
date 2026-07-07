@@ -84,6 +84,13 @@ function expectQueryDateRange(
   });
 }
 
+// `endOffset: 0` marks these as freshly-saved live windows that end at the
+// current month, matching how the picker actually persists a sliding-window
+// range (see TimeFrame.endOffset). Without it, calculateTimeRange has no way
+// to distinguish "just saved, ending now" from "saved long ago and never
+// reopened since" — it would fall back to re-deriving the gap from these
+// stale 2024 dates vs. today, which only grows over time and never lets the
+// window slide forward.
 const formulaQueries: Record<string, QueryConfig> = {
   Income: {
     conditions: [categoryCondition('income-cat')],
@@ -92,6 +99,7 @@ const formulaQueries: Record<string, QueryConfig> = {
       start: '2024-01-01',
       end: '2024-03-31',
       mode: 'sliding-window',
+      endOffset: 0,
     },
   },
   Expenses: {
@@ -101,6 +109,7 @@ const formulaQueries: Record<string, QueryConfig> = {
       start: '2024-03-01',
       end: '2024-03-31',
       mode: 'sliding-window',
+      endOffset: 0,
     },
   },
 };

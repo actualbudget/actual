@@ -92,6 +92,10 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
+  // How many months before the current month a sliding-window `end` sits;
+  // persisted alongside start/end/mode so a live range keeps tracking "now"
+  // correctly between saves instead of drifting (see TimeFrame.endOffset).
+  const [endOffset, setEndOffset] = useState<number | undefined>(undefined);
   // Lifted out of MonthRangePicker (rather than left as its own internal
   // state) because `useReport` below briefly nulls out `data` on every date
   // change, which unmounts `Header`/`MonthRangePicker` via the `!data`
@@ -170,21 +174,29 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
 
   useEffect(() => {
     if (latestTransaction) {
-      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-        widget?.meta?.timeFrame,
-        defaultTimeFrame,
-        latestTransaction,
-      );
+      const [initialStart, initialEnd, initialMode, initialEndOffset] =
+        calculateTimeRange(
+          widget?.meta?.timeFrame,
+          defaultTimeFrame,
+          latestTransaction,
+        );
       setStart(initialStart);
       setEnd(initialEnd);
       setMode(initialMode);
+      setEndOffset(initialEndOffset);
     }
   }, [latestTransaction, widget?.meta?.timeFrame]);
 
-  function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
+  function onChangeDates(
+    start: string,
+    end: string,
+    mode: TimeFrame['mode'],
+    newEndOffset?: number,
+  ) {
     setStart(start);
     setEnd(end);
     setMode(mode);
+    setEndOffset(newEndOffset);
   }
 
   const navigate = useNavigate();
@@ -208,6 +220,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
               start,
               end,
               mode,
+              endOffset,
             },
             showBalance,
           },

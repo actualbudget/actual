@@ -92,6 +92,10 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
+  // How many months before the current month a sliding-window `end` sits;
+  // persisted alongside start/end/mode so a live range keeps tracking "now"
+  // correctly between saves instead of drifting (see TimeFrame.endOffset).
+  const [endOffset, setEndOffset] = useState<number | undefined>(undefined);
   const [granularity, setGranularity] = useState<AgeOfMoneyGranularity>(
     widget?.meta?.granularity ?? 'monthly',
   );
@@ -168,22 +172,30 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
 
   useEffect(() => {
     if (latestTransaction) {
-      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-        widget?.meta?.timeFrame,
-        undefined,
-        latestTransaction,
-      );
+      const [initialStart, initialEnd, initialMode, initialEndOffset] =
+        calculateTimeRange(
+          widget?.meta?.timeFrame,
+          undefined,
+          latestTransaction,
+        );
       setStart(initialStart);
       setEnd(initialEnd);
       setMode(initialMode);
+      setEndOffset(initialEndOffset);
     }
   }, [latestTransaction, widget?.meta?.timeFrame]);
 
   const onChangeDates = useCallback(
-    (newStart: string, newEnd: string, newMode: TimeFrame['mode']) => {
+    (
+      newStart: string,
+      newEnd: string,
+      newMode: TimeFrame['mode'],
+      newEndOffset?: number,
+    ) => {
       setStart(newStart);
       setEnd(newEnd);
       setMode(newMode);
+      setEndOffset(newEndOffset);
     },
     [],
   );
@@ -206,6 +218,7 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
             start,
             end,
             mode,
+            endOffset,
           },
           granularity,
         },
@@ -227,6 +240,7 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
     start,
     end,
     mode,
+    endOffset,
     granularity,
     dispatch,
     t,

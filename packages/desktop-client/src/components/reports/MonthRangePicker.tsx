@@ -7,7 +7,11 @@ import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { currentMonth, format } from '@actual-app/core/shared/months';
+import {
+  currentMonth,
+  differenceInCalendarMonths,
+  format,
+} from '@actual-app/core/shared/months';
 
 import { useLocale } from '#hooks/useLocale';
 
@@ -62,7 +66,10 @@ type MonthRangePickerProps = {
    * makes sense for past ranges. */
   allowExcludeCurrentMonth?: boolean;
   presets?: QuickSelectPreset[];
-  onChangeDates: (start: string, end: string) => void;
+  /** `endOffset` is how many months before the current month the committed
+   * `end` sits (0 if it's the current month), computed at commit time so the
+   * consumer can persist it — see `TimeFrame.endOffset` for why. */
+  onChangeDates: (start: string, end: string, endOffset: number) => void;
 };
 
 // Far-future sentinel used when there is no upper bound. Sorts after any real
@@ -136,6 +143,12 @@ export function MonthRangePicker({
     setIsOpen(true);
   }
 
+  // How many months before the current month `value` sits, clamped to >= 0
+  // (a future end anchors to now, same clamp calculateTimeRange applies).
+  function endOffsetFor(value: string) {
+    return Math.max(0, differenceInCalendarMonths(currentMonth(), value));
+  }
+
   function changeGranularity(next: MonthRangeGranularity) {
     if (next === gran) return;
     // Switching granularity commits immediately (like a preset) instead of
@@ -148,7 +161,7 @@ export function MonthRangePicker({
     setDraftEnd(nextEnd);
     setGran(next);
     onChangeGranularity?.(next);
-    onChangeDates(nextStart, nextEnd);
+    onChangeDates(nextStart, nextEnd, endOffsetFor(nextEnd));
   }
 
   function closeAndCommit() {
@@ -158,7 +171,7 @@ export function MonthRangePicker({
     }
     skipCommitRef.current = true;
     if (draftStart !== start || draftEnd !== end) {
-      onChangeDates(draftStart, draftEnd);
+      onChangeDates(draftStart, draftEnd, endOffsetFor(draftEnd));
     }
   }
 
