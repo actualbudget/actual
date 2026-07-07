@@ -48,6 +48,8 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
   - _Categorize transactions using AI._
 - **Actual Helpers** - https://github.com/psybers/actual-helpers
   - _Collection of helper scripts to track home prices and car values, add loan interest transactions, track investment accounts, etc._
+- **Actual Helpers (Nightly)** - https://github.com/deathblade666/actual-helpers
+  - _Fork of Actual Helpers compiled for Actual Budget Nightly builds_
 - **Actual Tasks** - https://github.com/rodriguestiago0/actual_task
   - _Two utilities to help fix payees and calculate mortgages._
 - **Actual Budget Backup** - https://github.com/rodriguestiago0/actualbudget-backup
