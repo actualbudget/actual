@@ -1,3 +1,4 @@
+import { t } from '#shared/translate';
 import type { RefillTemplate, Template } from '#types/models/templates';
 
 import { storeTemplates } from './goal-template';
@@ -8,7 +9,6 @@ import {
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
 import type { CategoryWithTemplateNote } from './statements';
-import { t } from '#shared/translate';
 
 type Notification = {
   type?: 'message' | 'error' | 'warning' | undefined;
