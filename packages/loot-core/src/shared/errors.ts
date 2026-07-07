@@ -8,6 +8,14 @@ type ErrorWithMeta = {
 // plain English strings. User-facing, translated equivalents live in the
 // desktop-client (`src/util/error.ts`).
 
+// A SQLite error message meaning a query referenced a table or column
+// that doesn't exist in this database's schema. SQLite reports a missing
+// column as "no such column" in UPDATE/SELECT statements but as "has no
+// column named" in INSERT statements.
+export function isMissingSchemaErrorMessage(message: string): boolean {
+  return /no such (table|column)|has no column named/i.test(message);
+}
+
 function isDatabaseSchemaMismatch(meta?: unknown): boolean {
   if (
     meta &&
@@ -18,7 +26,7 @@ function isDatabaseSchemaMismatch(meta?: unknown): boolean {
     'message' in meta.error &&
     typeof meta.error.message === 'string'
   ) {
-    return /no such (column|table)/i.test(meta.error.message);
+    return isMissingSchemaErrorMessage(meta.error.message);
   }
   return false;
 }

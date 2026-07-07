@@ -26,6 +26,7 @@ import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
 import * as undo from '#server/undo';
 import { once, sequential } from '#shared/async';
+import { isMissingSchemaErrorMessage } from '#shared/errors';
 import { getIn, setIn } from '#shared/util';
 import type { MetadataPrefs } from '#types/prefs';
 
@@ -39,6 +40,15 @@ export { repairSync } from './repair';
 
 const FULL_SYNC_DELAY = 1000;
 let SYNCING_MODE = 'enabled';
+// Only notify the user once per loaded budget about data deferred
+// because it comes from a newer version of the app (reset on budget
+// load; the client-side notification id dedupes while it's displayed,
+// this additionally avoids re-nagging after the user dismisses it)
+let hasNotifiedDeferredMessages = false;
+
+export function resetDeferredMessagesNotification() {
+  hasNotifiedDeferredMessages = false;
+}
 type SyncingMode = 'enabled' | 'offline' | 'disabled' | 'import';
 
 export function setSyncingMode(mode: SyncingMode) {
@@ -77,7 +87,35 @@ export function checkSyncingMode(mode: SyncingMode): boolean {
   }
 }
 
-function apply(msg: Message, prev?: boolean) {
+// A SQLite error meaning the message references a table or column this
+// client's schema doesn't have because it was added by a newer version
+// of the app.
+export function isMissingSchemaError(error: unknown): boolean {
+  return error instanceof Error && isMissingSchemaErrorMessage(error.message);
+}
+
+// Record a message that can't be applied yet because it targets schema
+// from a newer version. It's replayed by `replayPendingMessages` once a
+// migration adds the missing table/column.
+function deferMessage(msg: Message) {
+  db.runQuery(
+    db.cache(
+      `INSERT OR IGNORE INTO messages_pending (timestamp, dataset, row, column, value)
+         VALUES (?, ?, ?, ?, ?)`,
+    ),
+    [
+      msg.timestamp.toString(),
+      msg.dataset,
+      msg.row,
+      msg.column,
+      serializeValue(msg.value),
+    ],
+  );
+}
+
+// Returns false when the message was deferred because it references
+// schema this client doesn't have yet (sent by a newer version).
+function apply(msg: Message, prev?: boolean): boolean {
   const { dataset, row, column, value } = msg;
 
   if (dataset === 'prefs') {
@@ -99,12 +137,17 @@ function apply(msg: Message, prev?: boolean) {
 
       db.runQuery(db.cache(query.sql), query.params);
     } catch (error) {
+      if (isMissingSchemaError(error)) {
+        deferMessage(msg);
+        return false;
+      }
       throw new SyncError('invalid-schema', {
         error: { message: error.message, stack: error.stack },
         query,
       });
     }
   }
+  return true;
 }
 
 // TODO: convert to `whereIn`
@@ -141,6 +184,11 @@ async function fetchAll(table, ids) {
       const rows = db.runQuery(sql, partIds, true);
       results = results.concat(rows);
     } catch (error) {
+      if (isMissingSchemaError(error)) {
+        // The table comes from a newer version of the app; its messages
+        // will be deferred by `apply`
+        break;
+      }
       throw new SyncError('invalid-schema', {
         error: {
           message: error.message,
@@ -335,6 +383,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   // nothing is changed. This is critical to maintain consistency. We
   // also avoid any side effects to in-memory objects, and apply them
   // after this succeeds.
+  let hasDeferredMessages = false;
   db.transaction(() => {
     const added = new Set();
 
@@ -342,15 +391,22 @@ export const applyMessages = sequential(async (messages: Message[]) => {
       const { dataset, row, column, timestamp, value } = msg;
 
       if (!msg.old) {
-        apply(msg, getIn(oldData, [dataset, row]) || added.has(dataset + row));
+        const applied = apply(
+          msg,
+          getIn(oldData, [dataset, row]) || added.has(dataset + row),
+        );
 
         if (dataset === 'prefs') {
           prefsToSet[row] = value;
-        } else {
+        } else if (applied) {
           // Keep track of which items have been added it in this sync
           // so it knows whether they already exist in the db or not. We
-          // ignore any changes to the spreadsheet.
+          // ignore any changes to the spreadsheet. Deferred messages
+          // must not be tracked: their row wasn't created, so a later
+          // message for a known column still needs to INSERT it.
           added.add(dataset + row);
+        } else {
+          hasDeferredMessages = true;
         }
       }
 
@@ -440,6 +496,11 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     data: newData,
     prevData: oldData,
   });
+
+  if (hasDeferredMessages && !hasNotifiedDeferredMessages) {
+    hasNotifiedDeferredMessages = true;
+    app.events.emit('sync', { type: 'deferred-messages' });
+  }
 
   return messages;
 });
