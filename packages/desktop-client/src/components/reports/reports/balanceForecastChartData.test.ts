@@ -101,6 +101,44 @@ describe('buildBalanceForecastChartData', () => {
     expect(chartData).toHaveLength(61);
   });
 
+  it('preserves exact day-shaped bounds for daily data instead of widening to full months', () => {
+    const chartData = buildBalanceForecastChartData({
+      forecastData: {
+        dataPoints: [
+          {
+            date: '2024-03-10',
+            balance: 1000,
+            accountId: 'checking',
+            accountName: 'Checking',
+            transactions: [],
+          },
+          {
+            date: '2024-03-20',
+            balance: 900,
+            accountId: 'checking',
+            accountName: 'Checking',
+            transactions: [],
+          },
+        ],
+        lowestBalance: {
+          date: '2024-03-20',
+          balance: 900,
+          accountId: '',
+          accountName: '',
+        },
+        forecastStartDate: '2024-03-10',
+        forecastEndDate: '2024-03-20',
+      },
+      start: '2024-03-10',
+      end: '2024-03-20',
+      granularity: 'Daily',
+    });
+
+    expect(chartData[0]).toEqual({ date: '2024-03-10', balance: 1000 });
+    expect(chartData.at(-1)).toEqual({ date: '2024-03-20', balance: 900 });
+    expect(chartData).toHaveLength(11);
+  });
+
   it('uses the latest same-day balance for each account', () => {
     const chartData = buildBalanceForecastChartData({
       forecastData: {
