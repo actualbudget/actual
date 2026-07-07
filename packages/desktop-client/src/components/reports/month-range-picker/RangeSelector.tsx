@@ -67,21 +67,6 @@ export function RangeSelector({
     }
   }
 
-  function selectMonth(month: string) {
-    if (isDay) {
-      // Keep the previously-picked day within the newly-chosen month.
-      const anchorOrStart = anchor ?? start;
-      const day = anchorOrStart.slice(8, 10) || '01';
-      const monthEnd = monthUtils.lastDayOfMonth(`${month}-01`);
-      const candidate =
-        `${month}-${day}` > monthEnd ? monthEnd : `${month}-${day}`;
-      pick(candidate);
-      setViewMonth(month);
-    } else {
-      pick(month);
-    }
-  }
-
   // The band to paint: while picking a second end, preview it against the
   // hovered cell (falling back to the anchor itself); otherwise show the
   // committed range.
@@ -129,7 +114,7 @@ export function RangeSelector({
           min={min}
           max={max}
           locale={locale}
-          onSelect={selectMonth}
+          onSelect={pick}
           onHover={anchor ? setHoverValue : undefined}
         />
       ) : (
@@ -140,7 +125,7 @@ export function RangeSelector({
           minMonth={minMonth}
           maxMonth={maxMonth}
           locale={locale}
-          onSelect={selectMonth}
+          onSelect={pick}
           onHover={anchor ? setHoverValue : undefined}
         />
       )}
