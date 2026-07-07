@@ -63,11 +63,17 @@ export function shiftMonths(value: string, n: number): string {
   return n < 0 ? subMonths(value, -n) : addMonths(value, n);
 }
 
-// Clamp an ISO date string to [min, max]. Operands must share a granularity;
-// ISO strings compare lexicographically so this works for months and days.
+// Clamp an ISO date string to [min, max], normalizing the bounds to `value`'s
+// own granularity first so the result always matches `value`'s shape even
+// when `min`/`max` are passed in the other granularity (e.g. a month-shaped
+// `minDate` while the picker is in day mode). ISO strings compare
+// lexicographically so this works for months and days.
 export function clamp(value: string, min: string, max: string): string {
-  if (value < min) return min;
-  if (value > max) return max;
+  const isDay = valueIsDay(value);
+  const loBound = isDay ? toDayStart(min) : toMonth(min);
+  const hiBound = isDay ? toDayEnd(max) : toMonth(max);
+  if (value < loBound) return loBound;
+  if (value > hiBound) return hiBound;
   return value;
 }
 

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -209,18 +209,16 @@ export function MonthRangePicker({
   const shownStart = isOpen ? draftStart : start;
   const shownEnd = isOpen ? draftEnd : end;
 
-  const label = useMemo(() => {
-    // Derive the display format from the actual shape of the shown values
-    // rather than the `gran` flag, which can desync from the committed range
-    // (e.g. once the popover closes and a non-persisting report's prop reverts
-    // to 'month'). A `yyyy-MM-dd` value is longer than a `yyyy-MM` one.
-    const fmt = valueIsDay(shownStart) ? 'P' : 'MMM yyyy';
-    return `${format(shownStart, fmt, locale)} – ${format(
-      shownEnd,
-      fmt,
-      locale,
-    )}`;
-  }, [shownStart, shownEnd, locale]);
+  // Derive the display format from the actual shape of the shown values
+  // rather than the `gran` flag, which can desync from the committed range
+  // (e.g. once the popover closes and a non-persisting report's prop reverts
+  // to 'month'). A `yyyy-MM-dd` value is longer than a `yyyy-MM` one.
+  const labelFormat = valueIsDay(shownStart) ? 'P' : 'MMM yyyy';
+  const label = `${format(shownStart, labelFormat, locale)} – ${format(
+    shownEnd,
+    labelFormat,
+    locale,
+  )}`;
 
   return (
     <View>

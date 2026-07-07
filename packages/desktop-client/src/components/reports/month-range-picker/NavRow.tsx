@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '@actual-app/components/button';
 import {
   SvgCheveronLeft,
@@ -21,6 +23,7 @@ export function NavRow({
   onPrev,
   onNext,
 }: NavRowProps) {
+  const { t } = useTranslation();
   return (
     <View
       style={{
@@ -30,11 +33,21 @@ export function NavRow({
         marginBottom: 10,
       }}
     >
-      <Button variant="bare" isDisabled={!canPrev} onPress={onPrev}>
+      <Button
+        aria-label={t('Previous')}
+        variant="bare"
+        isDisabled={!canPrev}
+        onPress={onPrev}
+      >
         <SvgCheveronLeft width={16} height={16} />
       </Button>
       <Text style={{ fontWeight: 'bold' }}>{label}</Text>
-      <Button variant="bare" isDisabled={!canNext} onPress={onNext}>
+      <Button
+        aria-label={t('Next')}
+        variant="bare"
+        isDisabled={!canNext}
+        onPress={onNext}
+      >
         <SvgCheveronRight width={16} height={16} />
       </Button>
     </View>

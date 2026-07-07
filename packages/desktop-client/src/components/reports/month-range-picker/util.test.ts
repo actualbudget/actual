@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  clamp,
   rangePosition,
   shiftMonths,
   toDayEnd,
@@ -55,6 +56,25 @@ describe('shiftMonths', () => {
   it('clamps a day value when the target month is shorter', () => {
     // Jan 31 shifted forward a month lands on the last day of February.
     expect(shiftMonths('2020-01-31', 1)).toBe('2020-02-29');
+  });
+});
+
+describe('clamp', () => {
+  it('leaves a month value within month bounds unchanged', () => {
+    expect(clamp('2020-05', '2020-01', '2020-12')).toBe('2020-05');
+  });
+
+  it('clamps a month value outside month bounds', () => {
+    expect(clamp('2019-12', '2020-01', '2020-12')).toBe('2020-01');
+    expect(clamp('2021-01', '2020-01', '2020-12')).toBe('2020-12');
+  });
+
+  it('normalizes month-shaped bounds to day granularity for a day value', () => {
+    // `min`/`max` may still be `yyyy-MM` (e.g. a report's `minDate`) even
+    // while the picker is in day mode; the result must stay day-shaped.
+    expect(clamp('2020-02-15', '2020-01', '2020-12')).toBe('2020-02-15');
+    expect(clamp('2019-12-31', '2020-01', '2020-12')).toBe('2020-01-01');
+    expect(clamp('2021-01-01', '2020-01', '2020-12')).toBe('2020-12-31');
   });
 });
 
