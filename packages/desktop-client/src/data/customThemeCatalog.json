@@ -169,8 +169,8 @@
     "mode": "dark"
   },
   {
-    "name": "YNAB Dark - Cyan",
-    "repo": "distantvapor/ynab-dark-cyan",
+    "name": "4Rules Cyan - Dark",
+    "repo": "distantvapor/4rules-cyan-dark",
     "colors": [
       "#121212",
       "#1E1E1E",
@@ -182,8 +182,8 @@
     "mode": "dark"
   },
   {
-    "name": "YNAB Dark - Blurple",
-    "repo": "distantvapor/ynab-dark-blurple",
+    "name": "4Rules Blurple - Dark",
+    "repo": "distantvapor/4rules-blurple-dark",
     "colors": [
       "#14172e",
       "#2c3edd",
