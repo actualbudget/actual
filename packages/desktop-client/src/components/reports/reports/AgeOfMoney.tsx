@@ -33,6 +33,7 @@ import { PrivacyFilter } from '#components/PrivacyFilter';
 import { AgeOfMoneyGraph } from '#components/reports/graphs/AgeOfMoneyGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import type { MonthRangeGranularity } from '#components/reports/MonthRangePicker';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createAgeOfMoneySpreadsheet } from '#components/reports/spreadsheets/age-of-money-spreadsheet';
 import { useReport } from '#components/reports/useReport';
@@ -94,6 +95,14 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
   const [granularity, setGranularity] = useState<AgeOfMoneyGranularity>(
     widget?.meta?.granularity ?? 'monthly',
   );
+  // The date-range picker's own Month/Day granularity — distinct from
+  // `granularity` above (this report's monthly/daily-average metric).
+  // Lifted out of MonthRangePicker (rather than left as its own internal
+  // state) because the `!data` early return below unmounts
+  // `Header`/`MonthRangePicker` on every date change; an internal state
+  // there would reset to 'month' on every pick instead of surviving it.
+  const [rangeGranularity, setRangeGranularity] =
+    useState<MonthRangeGranularity>('month');
 
   const [latestTransaction, setLatestTransaction] = useState('');
   const [earliestTransaction, setEarliestTransaction] = useState('');
@@ -287,6 +296,8 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}
+        granularity={rangeGranularity}
+        onChangeGranularity={setRangeGranularity}
         filters={conditions}
         onApply={onApplyFilter}
         onUpdateFilter={onUpdateFilter}

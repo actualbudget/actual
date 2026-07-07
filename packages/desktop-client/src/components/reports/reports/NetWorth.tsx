@@ -31,6 +31,7 @@ import { Change } from '#components/reports/Change';
 import { NetWorthGraph } from '#components/reports/graphs/NetWorthGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import type { MonthRangeGranularity } from '#components/reports/MonthRangePicker';
 import { ReportOptions } from '#components/reports/ReportOptions';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '#components/reports/spreadsheets/net-worth-spreadsheet';
@@ -102,6 +103,12 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
+  // Lifted out of MonthRangePicker (rather than left as its own internal
+  // state) because the `!data` early return below unmounts
+  // `Header`/`MonthRangePicker` on every date change; an internal state
+  // there would reset to 'month' on every pick instead of surviving it.
+  const [granularity, setGranularity] =
+    useState<MonthRangeGranularity>('month');
   const [interval, setInterval] = useState(
     widget?.meta?.interval || getDefaultIntervalForMode(mode),
   );
@@ -324,6 +331,8 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}
+        granularity={granularity}
+        onChangeGranularity={setGranularity}
         filters={conditions}
         onApply={onApplyFilter}
         onUpdateFilter={onUpdateFilter}

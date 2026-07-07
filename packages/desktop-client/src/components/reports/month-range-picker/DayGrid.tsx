@@ -6,23 +6,31 @@ import type { Locale } from 'date-fns';
 
 import { Grid } from './Grid';
 import { GridButton } from './GridButton';
+import { rangePosition } from './util';
 
 type DayGridProps = {
   viewMonth: string;
-  value: string;
+  rangeStart: string;
+  rangeEnd: string;
   min: string;
   max: string;
   locale: Locale;
   onSelect: (day: string) => void;
+  /** Notified on pointer-enter of a cell, to preview the range band while
+   * picking the second endpoint. Omitted when there's no anchor to preview
+   * against. */
+  onHover?: (day: string) => void;
 };
 
 export function DayGrid({
   viewMonth,
-  value,
+  rangeStart,
+  rangeEnd,
   min,
   max,
   locale,
   onSelect,
+  onHover,
 }: DayGridProps) {
   const firstDay = monthUtils.firstDayOfMonth(`${viewMonth}-01`);
   const lastDay = monthUtils.lastDayOfMonth(`${viewMonth}-01`);
@@ -57,17 +65,25 @@ export function DayGrid({
         {Array.from({ length: leadingBlanks }, (_, i) => (
           <View key={`blank-${i}`} />
         ))}
-        {days.map(day => (
-          <GridButton
-            key={day}
-            selected={day === value}
-            disabled={day < min || day > max}
-            isToday={day === currentDay}
-            onSelect={() => onSelect(day)}
-          >
-            {String(monthUtils.getDay(day))}
-          </GridButton>
-        ))}
+        {days.map(day => {
+          const position = rangePosition(day, rangeStart, rangeEnd);
+          return (
+            <GridButton
+              key={day}
+              selected={day === rangeStart || day === rangeEnd}
+              disabled={day < min || day > max}
+              isToday={day === currentDay}
+              inRange={position != null}
+              rangeEdge={
+                position === 'middle' || position == null ? undefined : position
+              }
+              onSelect={() => onSelect(day)}
+              onHover={onHover ? () => onHover(day) : undefined}
+            >
+              {String(monthUtils.getDay(day))}
+            </GridButton>
+          );
+        })}
       </Grid>
     </>
   );

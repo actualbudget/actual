@@ -35,6 +35,7 @@ import { getCustomTick } from '#components/reports/getCustomTick';
 import { computePadding } from '#components/reports/graphs/util/computePadding';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import type { MonthRangeGranularity } from '#components/reports/MonthRangePicker';
 import { useAccounts } from '#hooks/useAccounts';
 import { useBalanceForecast } from '#hooks/useBalanceForecast';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
@@ -115,6 +116,14 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   const [granularity, setGranularity] = useState<'Daily' | 'Monthly'>(
     widget?.meta?.granularity ?? 'Monthly',
   );
+  // The date-range picker's own Month/Day granularity — distinct from
+  // `granularity` above (this report's Daily/Monthly forecast display).
+  // Lifted out of MonthRangePicker (rather than left as its own internal
+  // state) because the `!allMonths` early return below unmounts
+  // `Header`/`MonthRangePicker` on every date change; an internal state
+  // there would reset to 'month' on every pick instead of surviving it.
+  const [rangeGranularity, setRangeGranularity] =
+    useState<MonthRangeGranularity>('month');
   const [source, setSource] = useState<ForecastSource>(
     widget?.meta?.source === 'tracking-budget' && budgetType === 'tracking'
       ? 'tracking-budget'
@@ -379,6 +388,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           }
           mode={mode}
           onChangeDates={onChangeDates}
+          granularity={rangeGranularity}
+          onChangeGranularity={setRangeGranularity}
           showFutureRange
           hideModeToggle
           inlineContent={headerInlineContent}
@@ -398,6 +409,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           }
           mode={mode}
           onChangeDates={onChangeDates}
+          granularity={rangeGranularity}
+          onChangeGranularity={setRangeGranularity}
           filters={conditions}
           onApply={onApplyFilter}
           onUpdateFilter={onUpdateFilter}

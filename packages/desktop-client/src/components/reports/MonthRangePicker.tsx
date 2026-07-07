@@ -13,7 +13,7 @@ import { useLocale } from '#hooks/useLocale';
 
 import { ExcludeCurrentMonthToggle } from './month-range-picker/ExcludeCurrentMonthToggle';
 import { GranularityToggle } from './month-range-picker/GranularityToggle';
-import { RangeEndSelector } from './month-range-picker/RangeEndSelector';
+import { RangeSelector } from './month-range-picker/RangeSelector';
 import {
   shiftMonths,
   toDayEnd,
@@ -93,9 +93,15 @@ export function MonthRangePicker({
   // stale persisted `granularity` can't leave it stuck in day mode.
   const allowsDay = granularities.includes('day');
   const showGranularityToggle = allowsDay && granularities.includes('month');
-  const initialGran = allowsDay ? granularity : 'month';
 
-  const [gran, setGran] = useState<MonthRangeGranularity>(initialGran);
+  // `gran` is the source of truth for "last granularity the user picked in
+  // this picker" and survives the popover closing — most consumers don't
+  // wire `onChangeGranularity` back into the `granularity` prop, so relying
+  // on the prop to reopen in the same mode would silently revert to it on
+  // every close. Only the initial mount seeds from the prop.
+  const [gran, setGran] = useState<MonthRangeGranularity>(
+    allowsDay ? granularity : 'month',
+  );
   const isDay = gran === 'day';
 
   const hasSidebar =
@@ -114,11 +120,12 @@ export function MonthRangePicker({
   const skipCommitRef = useRef(false);
 
   function openPopover() {
-    // Seed the draft from the committed range each time we open, matching the
-    // active granularity so a report reopened in day mode keeps its days. A
-    // month-only report always opens in month mode.
-    setGran(initialGran);
-    if (initialGran === 'day') {
+    // Reopen in whichever granularity the user last picked in this popover
+    // (not the `granularity` prop — see `gran`'s declaration), so the draft
+    // and grid match. A month-only report is always forced to month mode.
+    const openGran = allowsDay ? gran : 'month';
+    setGran(openGran);
+    if (openGran === 'day') {
       setDraftStart(toDayStart(start));
       setDraftEnd(toDayEnd(end));
     } else {
@@ -131,16 +138,17 @@ export function MonthRangePicker({
 
   function changeGranularity(next: MonthRangeGranularity) {
     if (next === gran) return;
-    if (next === 'day') {
-      // Expand the month range to cover whole days so nothing is lost.
-      setDraftStart(toDayStart(draftStart));
-      setDraftEnd(toDayEnd(draftEnd));
-    } else {
-      setDraftStart(toMonth(draftStart));
-      setDraftEnd(toMonth(draftEnd));
-    }
+    // Switching granularity commits immediately (like a preset) instead of
+    // waiting for the popover to close, so the report reflects the new
+    // granularity's range right away.
+    const nextStart =
+      next === 'day' ? toDayStart(draftStart) : toMonth(draftStart);
+    const nextEnd = next === 'day' ? toDayEnd(draftEnd) : toMonth(draftEnd);
+    setDraftStart(nextStart);
+    setDraftEnd(nextEnd);
     setGran(next);
     onChangeGranularity?.(next);
+    onChangeDates(nextStart, nextEnd);
   }
 
   function closeAndCommit() {
@@ -229,24 +237,14 @@ export function MonthRangePicker({
                   : { borderRight: `1px solid ${theme.tableBorder}` })),
             }}
           >
-            <RangeEndSelector
-              title={<Trans>Start</Trans>}
-              value={draftStart}
+            <RangeSelector
+              start={draftStart}
+              end={draftEnd}
               min={minDate}
-              max={draftEnd}
-              isDay={isDay}
-              locale={locale}
-              onChange={value => setDraft(value, draftEnd)}
-            />
-            <View style={{ height: 20 }} />
-            <RangeEndSelector
-              title={<Trans>End</Trans>}
-              value={draftEnd}
-              min={draftStart}
               max={effectiveMax}
               isDay={isDay}
               locale={locale}
-              onChange={value => setDraft(draftStart, value)}
+              onChange={setDraft}
             />
           </View>
 

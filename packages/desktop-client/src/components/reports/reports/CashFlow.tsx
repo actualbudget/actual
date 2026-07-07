@@ -28,6 +28,7 @@ import { Change } from '#components/reports/Change';
 import { CashFlowGraph } from '#components/reports/graphs/CashFlowGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import type { MonthRangeGranularity } from '#components/reports/MonthRangePicker';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { cashFlowByDate } from '#components/reports/spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '#components/reports/useReport';
@@ -91,6 +92,12 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
+  // Lifted out of MonthRangePicker (rather than left as its own internal
+  // state) because `useReport` below briefly nulls out `data` on every date
+  // change, which unmounts `Header`/`MonthRangePicker` via the `!data`
+  // early return further down — an internal state there would reset to
+  // 'month' on every pick instead of surviving the remount.
+  const [granularity, setGranularity] = useState<MonthRangeGranularity>('day');
   const [showBalance, setShowBalance] = useState(
     widget?.meta?.showBalance ?? true,
   );
@@ -286,6 +293,8 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
         mode={mode}
         show1Month
         onChangeDates={onChangeDates}
+        granularity={granularity}
+        onChangeGranularity={setGranularity}
         onApply={onApplyFilter}
         filters={conditions}
         onUpdateFilter={onUpdateFilter}

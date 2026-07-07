@@ -70,3 +70,21 @@ export function clamp(value: string, min: string, max: string): string {
   if (value > max) return max;
   return value;
 }
+
+// Where a cell falls relative to a (start, end) range, for the single-grid
+// range picker's band highlight. `start`/`end` mark the rounded outer edges
+// of the band (a single-cell range is both); values strictly between them
+// are the flat-filled band interior; everything else is outside the range.
+export type RangePosition = 'start' | 'end' | 'middle' | null;
+
+export function rangePosition(
+  cell: string,
+  start: string,
+  end: string,
+): RangePosition {
+  if (cell < start || cell > end) return null;
+  if (cell === start && cell === end) return 'start';
+  if (cell === start) return 'start';
+  if (cell === end) return 'end';
+  return 'middle';
+}
