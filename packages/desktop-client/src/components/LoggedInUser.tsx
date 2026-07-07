@@ -9,6 +9,7 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { listen } from '@actual-app/core/platform/client/connection';
 import type { RemoteFile, SyncedLocalFile } from '@actual-app/core/types/file';
@@ -139,6 +140,28 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
     return t('Server online');
   }
 
+  function serverTooltip() {
+    if (!serverUrl) {
+      return (
+        <Trans>
+          A server syncs your budget across devices and keeps a backup of your
+          data. Click to set one up.
+        </Trans>
+      );
+    }
+
+    if (userData?.offline) {
+      return (
+        <Trans>
+          Can&apos;t reach your server right now. Changes are saved locally and
+          will sync once it&apos;s reachable again.
+        </Trans>
+      );
+    }
+
+    return <Trans>Connected to your server — your budget is syncing.</Trans>;
+  }
+
   if (hideIfNoServer && !serverUrl) return null;
 
   if (loading && serverUrl) {
@@ -217,9 +240,19 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
-      <Button ref={triggerRef} variant="bare" onPress={() => setMenuOpen(true)}>
-        {serverMessage()}
-      </Button>
+      <Tooltip
+        placement="bottom end"
+        content={serverTooltip()}
+        triggerProps={{ isDisabled: menuOpen }}
+      >
+        <Button
+          ref={triggerRef}
+          variant="bare"
+          onPress={() => setMenuOpen(true)}
+        >
+          {serverMessage()}
+        </Button>
+      </Tooltip>
       {!loading &&
         multiuserEnabled &&
         userData &&
