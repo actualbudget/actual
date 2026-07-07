@@ -133,8 +133,12 @@ export function MonthRangePicker({
     const openGran = allowsDay ? gran : 'month';
     setGran(openGran);
     if (openGran === 'day') {
-      setDraftStart(toDayStart(start));
-      setDraftEnd(toDayEnd(end));
+      // Only expand to the full month when `start`/`end` are still
+      // month-shaped (actually switching granularities) — an already
+      // day-shaped range (a precise sub-month selection from a prior pick)
+      // must reopen as-is, not get widened back out to its whole month.
+      setDraftStart(valueIsDay(start) ? start : toDayStart(start));
+      setDraftEnd(valueIsDay(end) ? end : toDayEnd(end));
     } else {
       setDraftStart(toMonth(start));
       setDraftEnd(toMonth(end));
