@@ -128,38 +128,37 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
     }
   };
 
-  function serverMessage() {
+  function getServerStatus() {
     if (!serverUrl) {
-      return t('No server');
+      return {
+        message: t('No server'),
+        tooltip: (
+          <Trans>
+            A server syncs your budget across devices and keeps a backup of your
+            data. Click to set one up.
+          </Trans>
+        ),
+      };
     }
 
     if (userData?.offline) {
-      return t('Server offline');
+      return {
+        message: t('Server offline'),
+        tooltip: (
+          <Trans>
+            Can&apos;t reach your server right now. Changes are saved locally
+            and will sync once it&apos;s reachable again.
+          </Trans>
+        ),
+      };
     }
 
-    return t('Server online');
-  }
-
-  function serverTooltip() {
-    if (!serverUrl) {
-      return (
-        <Trans>
-          A server syncs your budget across devices and keeps a backup of your
-          data. Click to set one up.
-        </Trans>
-      );
-    }
-
-    if (userData?.offline) {
-      return (
-        <Trans>
-          Can&apos;t reach your server right now. Changes are saved locally and
-          will sync once it&apos;s reachable again.
-        </Trans>
-      );
-    }
-
-    return <Trans>Connected to your server — your budget is syncing.</Trans>;
+    return {
+      message: t('Server online'),
+      tooltip: (
+        <Trans>Connected to your server — your budget is syncing.</Trans>
+      ),
+    };
   }
 
   if (hideIfNoServer && !serverUrl) return null;
@@ -238,11 +237,13 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
     return [...adminMenu, ...baseMenu];
   };
 
+  const serverStatus = getServerStatus();
+
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
       <Tooltip
         placement="bottom end"
-        content={serverTooltip()}
+        content={serverStatus.tooltip}
         triggerProps={{ isDisabled: menuOpen }}
       >
         <Button
@@ -250,7 +251,7 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
           variant="bare"
           onPress={() => setMenuOpen(true)}
         >
-          {serverMessage()}
+          {serverStatus.message}
         </Button>
       </Tooltip>
       {!loading &&
