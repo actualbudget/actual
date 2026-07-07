@@ -454,7 +454,11 @@ export function DonutGraph({
                     outerRadius={chartMidRadius}
                     startAngle={90}
                     endAngle={-270}
-                    shape={(props: PieSectorShapeProps, index: number) => {
+                    shape={(
+                      props: PieSectorShapeProps,
+                      rawIndex: string | number = 0,
+                    ) => {
+                      const index = Number(rawIndex);
                       const item = adjustedGroupData[index];
                       const fill =
                         colorMap.get(item?.id ?? item?.name ?? '') ??
@@ -534,7 +538,11 @@ export function DonutGraph({
                     label={e =>
                       viewLabels && !compact ? customLabel(e) : null
                     }
-                    shape={(props: PieSectorShapeProps, index: number) => {
+                    shape={(
+                      props: PieSectorShapeProps,
+                      rawIndex: string | number = 0,
+                    ) => {
+                      const index = Number(rawIndex);
                       const item = flatCategories[index];
                       const fill =
                         colorMap.get(item?.id ?? item?.name ?? '') ??
@@ -632,7 +640,11 @@ export function DonutGraph({
                   }
                   startAngle={90}
                   endAngle={-270}
-                  shape={(props: PieSectorShapeProps, index: number) => {
+                  shape={(
+                    props: PieSectorShapeProps,
+                    rawIndex: string | number = 0,
+                  ) => {
+                    const index = Number(rawIndex);
                     // Fix 3: optional chain data.legend to guard against undefined
                     const fill = data.legend?.[index]?.color ?? props.fill;
                     const isActive = index === activeIndex;
