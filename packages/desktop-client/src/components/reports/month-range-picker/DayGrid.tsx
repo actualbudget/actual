@@ -2,11 +2,12 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import type { Locale } from 'date-fns';
 
 import { Grid } from './Grid';
 import { GridButton } from './GridButton';
-import { rangePosition } from './util';
+import { rangePosition, toDayEnd, toDayStart } from './util';
 
 type DayGridProps = {
   viewMonth: string;
@@ -15,6 +16,9 @@ type DayGridProps = {
   min: string;
   max: string;
   locale: Locale;
+  /** User's configured first day of week, for the weekday header order and
+   * grid alignment. Defaults to Sunday-first when omitted. */
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   onSelect: (day: string) => void;
   /** Notified on pointer-enter of a cell, to preview the range band while
    * picking the second endpoint. Omitted when there's no anchor to preview
@@ -29,6 +33,7 @@ export function DayGrid({
   min,
   max,
   locale,
+  firstDayOfWeekIdx,
   onSelect,
   onHover,
 }: DayGridProps) {
@@ -36,8 +41,19 @@ export function DayGrid({
   const lastDay = monthUtils.lastDayOfMonth(`${viewMonth}-01`);
   const days = monthUtils.dayRangeInclusive(firstDay, lastDay);
   const currentDay = monthUtils.currentDay();
-  // Weekday of the 1st (0 = Sunday) so the grid lines up under its headers.
-  const leadingBlanks = new Date(`${firstDay}T00:00:00`).getDay();
+  // `min`/`max` may still be month-shaped (e.g. a report's `minDate`) even
+  // in day mode; normalize to day bounds so the comparison below is
+  // apples-to-apples instead of comparing a `yyyy-MM-dd` cell against a
+  // `yyyy-MM` bound.
+  const minDay = toDayStart(min);
+  const maxDay = toDayEnd(max);
+  // 0 = Sunday, ... 6 = Saturday; defaults to Sunday-first to match the rest
+  // of the app when a report doesn't pass the user's configured pref.
+  const startOfWeek = parseInt(firstDayOfWeekIdx || '0', 10) || 0;
+  // Weekday of the 1st relative to `startOfWeek` so the grid lines up under
+  // its headers regardless of which day the week starts on.
+  const leadingBlanks =
+    (new Date(`${firstDay}T00:00:00`).getDay() - startOfWeek + 7) % 7;
 
   return (
     <>
@@ -52,9 +68,10 @@ export function DayGrid({
               color: theme.pageTextSubdued,
             }}
           >
-            {/* 2021-01-03 is a Sunday; label the weekday headers from it. */}
+            {/* 2021-01-03 is a Sunday; offset by startOfWeek so the header
+              order follows the user's configured first day of week. */}
             {monthUtils.format(
-              monthUtils.addDays('2021-01-03', i),
+              monthUtils.addDays('2021-01-03', startOfWeek + i),
               'EEEEE',
               locale,
             )}
@@ -71,7 +88,7 @@ export function DayGrid({
             <GridButton
               key={day}
               selected={day === rangeStart || day === rangeEnd}
-              disabled={day < min || day > max}
+              disabled={day < minDay || day > maxDay}
               isToday={day === currentDay}
               inRange={position != null}
               rangeEdge={

@@ -349,10 +349,17 @@ export function Header({
               // future ranges start at the current month.
               allowExcludeCurrentMonth={!showFutureRange}
               // `allMonths` is newest-first, so the last entry is the earliest.
-              minDate={allMonths[allMonths.length - 1].name}
+              // Some reports (e.g. Summary, Calendar) render before their
+              // async load populates it, so fall back to the current month.
+              minDate={
+                allMonths.length
+                  ? allMonths[allMonths.length - 1].name
+                  : monthUtils.currentMonth()
+              }
               // No upper cap: users can pick any future month/day so future
               // ranges can be charted (the report shows empty future periods).
               allowFuture
+              firstDayOfWeekIdx={firstDayOfWeekIdx}
               presets={
                 showFutureRange
                   ? getFutureRangePresets({

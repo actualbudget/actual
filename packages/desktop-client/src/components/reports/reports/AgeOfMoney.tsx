@@ -33,6 +33,7 @@ import { PrivacyFilter } from '#components/PrivacyFilter';
 import { AgeOfMoneyGraph } from '#components/reports/graphs/AgeOfMoneyGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { valueIsDay } from '#components/reports/MonthRangePicker';
 import type { MonthRangeGranularity } from '#components/reports/MonthRangePicker';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createAgeOfMoneySpreadsheet } from '#components/reports/spreadsheets/age-of-money-spreadsheet';
@@ -182,23 +183,24 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
       setEnd(initialEnd);
       setMode(initialMode);
       setEndOffset(initialEndOffset);
+      // The picker's Month/Day mode isn't persisted, so infer it from the
+      // restored range's shape instead of always reopening in month mode
+      // (which would silently collapse a saved day-precision range).
+      setRangeGranularity(valueIsDay(initialStart) ? 'day' : 'month');
     }
   }, [latestTransaction, widget?.meta?.timeFrame]);
 
-  const onChangeDates = useCallback(
-    (
-      newStart: string,
-      newEnd: string,
-      newMode: TimeFrame['mode'],
-      newEndOffset?: number,
-    ) => {
-      setStart(newStart);
-      setEnd(newEnd);
-      setMode(newMode);
-      setEndOffset(newEndOffset);
-    },
-    [],
-  );
+  function onChangeDates(
+    newStart: string,
+    newEnd: string,
+    newMode: TimeFrame['mode'],
+    newEndOffset?: number,
+  ) {
+    setStart(newStart);
+    setEnd(newEnd);
+    setMode(newMode);
+    setEndOffset(newEndOffset);
+  }
 
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
 

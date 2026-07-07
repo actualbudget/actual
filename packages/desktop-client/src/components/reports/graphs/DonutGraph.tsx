@@ -31,12 +31,6 @@ const RADIAN = Math.PI / 180;
 
 const canDeviceHover = () => window.matchMedia('(hover: hover)').matches;
 
-// Recharts' `Pie` `shape` callback receives the sector index typed as
-// `string | number` depending on the event path; normalize it once here
-// instead of repeating the coercion at each call site.
-const toSectorIndex = (rawIndex: string | number = 0): number =>
-  Number(rawIndex);
-
 type ClickablePieItem = PieSectorDataItem &
   Partial<Pick<GroupedEntity, 'id' | 'uncategorizedId'>>;
 
@@ -460,11 +454,8 @@ export function DonutGraph({
                     outerRadius={chartMidRadius}
                     startAngle={90}
                     endAngle={-270}
-                    shape={(
-                      props: PieSectorShapeProps,
-                      rawIndex: string | number = 0,
-                    ) => {
-                      const index = toSectorIndex(rawIndex);
+                    shape={(props: PieSectorShapeProps) => {
+                      const { index } = props;
                       const item = adjustedGroupData[index];
                       const fill =
                         colorMap.get(item?.id ?? item?.name ?? '') ??
@@ -544,11 +535,8 @@ export function DonutGraph({
                     label={e =>
                       viewLabels && !compact ? customLabel(e) : null
                     }
-                    shape={(
-                      props: PieSectorShapeProps,
-                      rawIndex: string | number = 0,
-                    ) => {
-                      const index = toSectorIndex(rawIndex);
+                    shape={(props: PieSectorShapeProps) => {
+                      const { index } = props;
                       const item = flatCategories[index];
                       const fill =
                         colorMap.get(item?.id ?? item?.name ?? '') ??
@@ -646,11 +634,8 @@ export function DonutGraph({
                   }
                   startAngle={90}
                   endAngle={-270}
-                  shape={(
-                    props: PieSectorShapeProps,
-                    rawIndex: string | number = 0,
-                  ) => {
-                    const index = toSectorIndex(rawIndex);
+                  shape={(props: PieSectorShapeProps) => {
+                    const { index } = props;
                     // Fix 3: optional chain data.legend to guard against undefined
                     const fill = data.legend?.[index]?.color ?? props.fill;
                     const isActive = index === activeIndex;

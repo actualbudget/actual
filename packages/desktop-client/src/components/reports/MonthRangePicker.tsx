@@ -12,6 +12,7 @@ import {
   differenceInCalendarMonths,
   format,
 } from '@actual-app/core/shared/months';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { useLocale } from '#hooks/useLocale';
 
@@ -33,6 +34,7 @@ import type {
 export {
   type MonthRangeGranularity,
   type QuickSelectPreset,
+  valueIsDay,
 } from './month-range-picker/util';
 
 type MonthRangePickerProps = {
@@ -66,6 +68,9 @@ type MonthRangePickerProps = {
    * makes sense for past ranges. */
   allowExcludeCurrentMonth?: boolean;
   presets?: QuickSelectPreset[];
+  /** User's configured first day of week, for the day grid's weekday header
+   * and alignment. Defaults to Sunday-first when omitted. */
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   /** `endOffset` is how many months before the current month the committed
    * `end` sits (0 if it's the current month), computed at commit time so the
    * consumer can persist it — see `TimeFrame.endOffset` for why. */
@@ -87,6 +92,7 @@ export function MonthRangePicker({
   onChangeGranularity,
   allowExcludeCurrentMonth = false,
   presets,
+  firstDayOfWeekIdx,
   onChangeDates,
 }: MonthRangePickerProps) {
   const effectiveMax = allowFuture || maxDate == null ? NO_MAX : maxDate;
@@ -259,15 +265,16 @@ export function MonthRangePicker({
               max={effectiveMax}
               isDay={isDay}
               locale={locale}
+              firstDayOfWeekIdx={firstDayOfWeekIdx}
               onChange={setDraft}
             />
           </View>
 
-          {hasSidebar ? (
+          {hasSidebar && (
             <View style={{ padding: 15, minWidth: 140, gap: 16 }}>
               {/* Choose how to pick the range: whole months or exact days. Hidden
                 for month-only reports, where day mode does nothing. */}
-              {showGranularityToggle ? (
+              {showGranularityToggle && (
                 <View>
                   <Text
                     style={{
@@ -285,16 +292,16 @@ export function MonthRangePicker({
                     onChange={changeGranularity}
                   />
                 </View>
-              ) : null}
+              )}
 
-              {allowExcludeCurrentMonth ? (
+              {allowExcludeCurrentMonth && (
                 <ExcludeCurrentMonthToggle
                   checked={excludesCurrentMonth}
                   onChange={toggleExcludeCurrentMonth}
                 />
-              ) : null}
+              )}
 
-              {presets?.length ? (
+              {Boolean(presets?.length) && (
                 <View>
                   <Text
                     style={{
@@ -308,7 +315,7 @@ export function MonthRangePicker({
                     <Trans>Quick select</Trans>
                   </Text>
                   <View style={{ gap: 4 }}>
-                    {presets.map(preset => (
+                    {presets?.map(preset => (
                       <Button
                         key={preset.key}
                         variant="bare"
@@ -327,9 +334,9 @@ export function MonthRangePicker({
                     ))}
                   </View>
                 </View>
-              ) : null}
+              )}
             </View>
-          ) : null}
+          )}
         </View>
       </Popover>
     </View>

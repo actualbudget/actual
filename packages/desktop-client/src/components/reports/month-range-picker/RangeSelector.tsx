@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import type { Locale } from 'date-fns';
 
 import { DayGrid } from './DayGrid';
@@ -17,6 +18,9 @@ type RangeSelectorProps = {
   max: string;
   isDay: boolean;
   locale: Locale;
+  /** User's configured first day of week, for the day grid. Defaults to
+   * Sunday-first when omitted. */
+  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   onChange: (start: string, end: string) => void;
 };
 
@@ -34,6 +38,7 @@ export function RangeSelector({
   max,
   isDay,
   locale,
+  firstDayOfWeekIdx,
   onChange,
 }: RangeSelectorProps) {
   const minMonth = toMonth(min);
@@ -114,6 +119,7 @@ export function RangeSelector({
           min={min}
           max={max}
           locale={locale}
+          firstDayOfWeekIdx={firstDayOfWeekIdx}
           onSelect={pick}
           onHover={anchor ? setHoverValue : undefined}
         />

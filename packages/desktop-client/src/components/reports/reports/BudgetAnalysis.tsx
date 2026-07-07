@@ -189,7 +189,14 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
-  const calculateIsConcise = (startMonth: string, endMonth: string) => {
+  // `start`/`end` should always be `yyyy-MM` here (Budget Analysis is
+  // month-only), but normalize defensively in case a persisted
+  // `widget.meta.timeFrame` predates that restriction and still holds a
+  // `yyyy-MM-dd` value — `endMonth + '-01'` would otherwise corrupt into an
+  // unparseable string.
+  const calculateIsConcise = (start: string, end: string) => {
+    const startMonth = monthUtils.getMonth(start);
+    const endMonth = monthUtils.getMonth(end);
     const numDays = d.differenceInCalendarDays(
       d.parseISO(endMonth + '-01'),
       d.parseISO(startMonth + '-01'),
