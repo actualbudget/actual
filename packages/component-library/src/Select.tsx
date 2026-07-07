@@ -59,7 +59,7 @@ export function Select<const Value = string>({
     .filter(isValueOption)
     .find(option => option[0] === value);
 
-  const triggerRef = useRef(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -111,7 +111,7 @@ export function Select<const Value = string>({
         isOpen={isOpen}
         onOpenChange={() => setIsOpen(false)}
         style={popoverStyle}
-        isNonModal
+        isNonModal={Boolean(triggerRef.current?.closest('[data-popover]'))}
       >
         <Menu
           onMenuSelect={item => {
