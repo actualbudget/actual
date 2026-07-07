@@ -467,19 +467,44 @@ async function createBudget({
 
 async function importBudget({
   filepath,
+  buffer,
+  filename,
   type,
 }: {
-  filepath: string;
   type: ImportableBudgetType;
-}): Promise<{ error?: string }> {
+  /** Path to the file to import, on the engine's filesystem. */
+  filepath?: string;
+  /** Raw contents of the file to import; alternative to `filepath`. */
+  buffer?: ArrayBuffer;
+  /**
+   * Original name of the imported file; only used together with `buffer`,
+   * to derive the budget name for some import types.
+   */
+  filename?: string;
+}): Promise<{ error?: string; id?: string }> {
   try {
-    if (!(await fs.exists(filepath))) {
-      throw new Error(`File not found at the provided path: ${filepath}`);
+    let contents: Buffer;
+    let name: string;
+    if (filepath != null) {
+      if (!(await fs.exists(filepath))) {
+        throw new Error(`File not found at the provided path: ${filepath}`);
+      }
+
+      contents = Buffer.from(await fs.readFile(filepath, 'binary'));
+      name = filepath;
+    } else if (buffer != null) {
+      contents = Buffer.from(buffer);
+      name = filename || 'budget-import';
+    } else {
+      throw new Error('Either `filepath` or `buffer` must be given');
     }
 
-    const buffer = Buffer.from(await fs.readFile(filepath, 'binary'));
-    const results = await handleBudgetImport(type, filepath, buffer);
-    return results || {};
+    const results = await handleBudgetImport(type, name, contents);
+    if (results && results.error) {
+      return results;
+    }
+    // A successful import leaves the imported budget loaded
+    return { id: prefs.getPrefs()?.id };
   } catch (err) {
     err.message = 'Error importing budget: ' + err.message;
     captureException(err);

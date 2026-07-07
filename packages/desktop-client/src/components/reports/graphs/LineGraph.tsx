@@ -285,7 +285,7 @@ export function LineGraph({
                       r: entry.dataKey === tooltip && !compact ? 8 : 3,
                       onMouseEnter: () => {
                         setTooltip(entry.dataKey);
-                        if (!['Group', 'Interval'].includes(groupBy)) {
+                        if (groupBy !== 'Interval') {
                           setPointer('pointer');
                         }
                       },
@@ -295,7 +295,7 @@ export function LineGraph({
                       },
                       onClick: (e, payload) =>
                         ((compact && showTooltip) || !compact) &&
-                        !['Group', 'Interval'].includes(groupBy) &&
+                        groupBy !== 'Interval' &&
                         onShowActivity(
                           entry.id,
                           payload,

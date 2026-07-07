@@ -162,6 +162,7 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "cmdk": "^1.1.1",
     "cross-env": "^10.1.0",
+    "csv-stringify": "^6.7.0",
     "date-fns": "^4.4.0",
     "downshift": "9.3.6",
     "es-toolkit": "^1.47.1",
