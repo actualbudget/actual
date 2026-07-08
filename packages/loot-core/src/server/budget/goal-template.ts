@@ -39,6 +39,11 @@ type Notification = {
   pre?: string | undefined;
   title?: string | undefined;
   message: string;
+  // Named values to interpolate into `message` when it is translated on the
+  // client. `message` itself must stay a stable i18next key (e.g.
+  // '{{count}} things happened'), not a string with values already baked in,
+  // otherwise it can never be translated (see #8413).
+  messageParams?: Record<string, unknown> | undefined;
   sticky?: boolean | undefined;
 };
 
@@ -355,7 +360,8 @@ async function processTemplate(
 
   return {
     type: 'message',
-    message: `Successfully applied templates to ${contexts.length} categories`,
+    message: 'Successfully applied templates to {{count}} categories',
+    messageParams: { count: contexts.length },
   };
 }
 

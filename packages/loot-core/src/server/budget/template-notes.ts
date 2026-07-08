@@ -13,6 +13,8 @@ type Notification = {
   type?: 'message' | 'error' | 'warning' | undefined;
   pre?: string | undefined;
   message: string;
+  // See goal-template.ts's Notification type for why this exists.
+  messageParams?: Record<string, unknown> | undefined;
   sticky?: boolean | undefined;
 };
 
