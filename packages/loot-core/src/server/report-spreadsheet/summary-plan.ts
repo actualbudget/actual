@@ -310,7 +310,7 @@ export function createSummaryReportPlan({
   sheet.createDynamic(sheetName, 'data', {
     dependencies: queryCells,
     initialValue: null,
-    run: (...values: unknown[]) =>
+    run: (...values: JSONValue[]) =>
       calculateSummaryData({
         content,
         data: Array.isArray(values[0]) ? (values[0] as SummaryQueryRow[]) : [],

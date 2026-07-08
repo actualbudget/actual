@@ -335,7 +335,7 @@ export function createAgeOfMoneyReportPlan({
   sheet.createDynamic(sheetName, 'data', {
     dependencies: queryCells,
     initialValue: null,
-    run: (income, expenses) =>
+    run: (income: JSONValue, expenses: JSONValue) =>
       calculateAgeOfMoneyData({
         end,
         expenses: Array.isArray(expenses) ? (expenses as Transaction[]) : [],

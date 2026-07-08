@@ -281,7 +281,7 @@ export function createCalendarReportPlan({
   sheet.createDynamic(sheetName, 'data', {
     dependencies: queryCells,
     initialValue: null,
-    run: (income, expense) =>
+    run: (income: JSONValue, expense: JSONValue) =>
       calculateCalendarData({
         expenseData: Array.isArray(expense)
           ? (expense as CalendarQueryRow[])

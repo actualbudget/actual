@@ -622,6 +622,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
 
   try {
     await sheet.loadSpreadsheet(db, onSheetChange);
+    await reportSpreadsheet.loadReportSpreadsheetCache();
   } catch (e) {
     captureException(e);
     await closeBudget();

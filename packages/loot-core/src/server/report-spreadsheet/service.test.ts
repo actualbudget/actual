@@ -140,6 +140,127 @@ describe('report spreadsheet service', () => {
     expectSummaryValue(cell.value, 20_000);
   });
 
+  it('loads cached report cell values and clears them after database changes', async () => {
+    await db.insertWithSchema('dashboard_pages', {
+      id: 'dashboard-page',
+      name: 'Dashboard',
+    });
+    await db.insertWithSchema('dashboard', {
+      id: 'summary-widget',
+      dashboard_page_id: 'dashboard-page',
+      type: 'summary-card',
+      width: 3,
+      height: 2,
+      x: 0,
+      y: 0,
+      meta: {
+        content: JSON.stringify({ type: 'sum' }),
+        timeFrame: {
+          start: monthUtils.currentMonth(),
+          end: monthUtils.currentMonth(),
+          mode: 'static',
+        },
+      },
+    });
+
+    const accountId = await db.insertAccount({
+      id: 'checking',
+      name: 'Checking',
+    });
+    await db.insertTransaction({
+      id: 'transaction',
+      account: accountId,
+      amount: 12_345,
+      date: monthUtils.currentDay(),
+    });
+
+    await reportSpreadsheet.prepareDashboard({
+      dashboardPageId: 'dashboard-page',
+    });
+    await reportSpreadsheet.waitOnReportSpreadsheet();
+
+    reportSpreadsheet.unloadReportSpreadsheet();
+    const cached = await reportSpreadsheet.prepareDashboard({
+      dashboardPageId: 'dashboard-page',
+    });
+    const cachedCell = cached.cells['summary-widget'];
+    if (!cachedCell) {
+      throw new Error('Expected cached summary widget cell');
+    }
+    expectSummaryValue(cachedCell.value, 12_345);
+
+    reportSpreadsheet.unloadReportSpreadsheet();
+    await db.updateTransaction({
+      id: 'transaction',
+      amount: 20_000,
+    });
+
+    const stale = await reportSpreadsheet.prepareDashboard({
+      dashboardPageId: 'dashboard-page',
+    });
+    const staleCell = stale.cells['summary-widget'];
+    if (!staleCell) {
+      throw new Error('Expected stale summary widget cell');
+    }
+    if (staleCell.value !== null) {
+      expectSummaryValue(staleCell.value, 20_000);
+    }
+
+    await reportSpreadsheet.waitOnReportSpreadsheet();
+    const refreshed = await reportSpreadsheet.getCell({
+      widgetId: 'summary-widget',
+    });
+    if (!refreshed) {
+      throw new Error('Expected refreshed summary widget cell');
+    }
+    expectSummaryValue(refreshed.value, 20_000);
+  });
+
+  it('prepares dashboards when loading an empty report cache', async () => {
+    await db.insertWithSchema('dashboard_pages', {
+      id: 'dashboard-page',
+      name: 'Dashboard',
+    });
+    await db.insertWithSchema('dashboard', {
+      id: 'summary-widget',
+      dashboard_page_id: 'dashboard-page',
+      type: 'summary-card',
+      width: 3,
+      height: 2,
+      x: 0,
+      y: 0,
+      meta: {
+        content: JSON.stringify({ type: 'sum' }),
+        timeFrame: {
+          start: monthUtils.currentMonth(),
+          end: monthUtils.currentMonth(),
+          mode: 'static',
+        },
+      },
+    });
+
+    const accountId = await db.insertAccount({
+      id: 'checking',
+      name: 'Checking',
+    });
+    await db.insertTransaction({
+      id: 'transaction',
+      account: accountId,
+      amount: 12_345,
+      date: monthUtils.currentDay(),
+    });
+
+    await reportSpreadsheet.loadReportSpreadsheetCache();
+    const cell = await reportSpreadsheet.getCell({
+      widgetId: 'summary-widget',
+    });
+
+    if (!cell) {
+      throw new Error('Expected prewarmed summary widget cell');
+    }
+    expectSummaryValue(cell.value, 12_345);
+  });
+
   it('registers and refreshes a net worth widget root cell after transaction changes', async () => {
     await db.insertWithSchema('dashboard_pages', {
       id: 'dashboard-page',

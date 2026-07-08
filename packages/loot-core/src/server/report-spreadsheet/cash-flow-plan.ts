@@ -56,8 +56,8 @@ function calculateCashFlowData({
   expense,
   income,
 }: {
-  expense: unknown;
-  income: unknown;
+  expense: JSONValue;
+  income: JSONValue;
 }): JSONValue {
   return {
     graphData: {
@@ -127,7 +127,8 @@ export function createCashFlowReportPlan({
   sheet.createDynamic(sheetName, 'data', {
     dependencies: queryCells,
     initialValue: null,
-    run: (income, expense) => calculateCashFlowData({ expense, income }),
+    run: (income: JSONValue, expense: JSONValue) =>
+      calculateCashFlowData({ expense, income }),
   });
 
   return {

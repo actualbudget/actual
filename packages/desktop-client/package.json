@@ -70,6 +70,7 @@
     "#components/reports/spreadsheets/*": "./src/components/reports/spreadsheets/*.ts",
     "#components/reports/useDashboardWidgetCopyMenu": "./src/components/reports/useDashboardWidgetCopyMenu.ts",
     "#components/reports/useReport": "./src/components/reports/useReport.ts",
+    "#components/reports/useReportCells": "./src/components/reports/useReportCells.ts",
     "#components/reports/util": "./src/components/reports/util.ts",
     "#components/schedules": "./src/components/schedules/index.tsx",
     "#components/schedules/schedule-edit-utils": "./src/components/schedules/schedule-edit-utils.ts",

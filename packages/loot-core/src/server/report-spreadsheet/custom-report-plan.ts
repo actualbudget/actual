@@ -1420,7 +1420,7 @@ export function createCustomReportPlan({
   sheet.createDynamic(sheetName, 'data', {
     dependencies: queryCells,
     initialValue: null,
-    run: (...values: unknown[]) => {
+    run: (...values: JSONValue[]) => {
       const categories = Array.isArray(values[0])
         ? (values[0] as CategoryEntity[])
         : [];

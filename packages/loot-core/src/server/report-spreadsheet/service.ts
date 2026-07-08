@@ -36,10 +36,86 @@ type ReportContext = {
   latestTransactionDate: string | null;
 };
 
+type ReportCacheRow = {
+  name: string;
+  value: string;
+};
+
+const reportCacheTable = 'report_spreadsheet_cache';
+
 let reportSheet = createReportSheet();
 const activePlans = new Map<DashboardWidgetEntity['id'], ReportPlan>();
 const rootCells = new Map<string, ReportPlan>();
 const pendingComputes = new Set<Promise<void>>();
+let cacheLoaded = false;
+
+function hasOpenDatabase(): boolean {
+  return db.getDatabase() != null;
+}
+
+function loadCachedReportCells(): void {
+  if (cacheLoaded || !hasOpenDatabase()) {
+    return;
+  }
+
+  const rows = db.runQuery<ReportCacheRow>(
+    `SELECT name, value FROM ${reportCacheTable}`,
+    [],
+    true,
+  );
+
+  for (const row of rows) {
+    try {
+      reportSheet.load(row.name, JSON.parse(row.value));
+    } catch (error) {
+      logger.warn(`Failed loading cached report cell ${row.name}!`, error);
+    }
+  }
+
+  cacheLoaded = true;
+}
+
+function saveCachedReportCells(
+  spreadsheet: Spreadsheet,
+  names: string[],
+): void {
+  if (!hasOpenDatabase()) {
+    return;
+  }
+
+  db.transaction(() => {
+    for (const name of names) {
+      const node = spreadsheet._getNode(name);
+      if (node.sql != null) {
+        continue;
+      }
+
+      db.runQuery(
+        `INSERT OR REPLACE INTO ${reportCacheTable} (name, value) VALUES (?, ?)`,
+        [name, JSON.stringify(node.value)],
+      );
+    }
+  });
+}
+
+function clearReportCache(): void {
+  if (hasOpenDatabase()) {
+    db.runQuery(`DELETE FROM ${reportCacheTable}`, []);
+  }
+}
+
+function isReportCacheEmpty(): boolean {
+  if (!hasOpenDatabase()) {
+    return false;
+  }
+
+  const rows = db.runQuery<{ count?: number }>(
+    `SELECT COUNT(*) AS count FROM ${reportCacheTable}`,
+    [],
+    true,
+  );
+  return (rows[0]?.count ?? 0) === 0;
+}
 
 function runPlanCompute(plan: ReportPlan): void {
   if (!plan.compute) {
@@ -63,7 +139,9 @@ function runPlanCompute(plan: ReportPlan): void {
 }
 
 function createReportSheet() {
-  const spreadsheet = new Spreadsheet();
+  const spreadsheet = new Spreadsheet(names =>
+    saveCachedReportCells(spreadsheet, names),
+  );
   spreadsheet.addEventListener('change', ({ names }: { names: string[] }) => {
     const changedNames = new Set(names);
     for (const plan of activePlans.values()) {
@@ -102,7 +180,30 @@ export function unloadReportSpreadsheet(): void {
   activePlans.clear();
   rootCells.clear();
   pendingComputes.clear();
+  cacheLoaded = false;
   reportSheet = createReportSheet();
+}
+
+async function prepareAllDashboards(): Promise<void> {
+  const pages = db.runQuery<Pick<DashboardPageEntity, 'id'>>(
+    'SELECT id FROM dashboard_pages WHERE tombstone = 0',
+    [],
+    true,
+  );
+
+  for (const page of pages) {
+    await prepareDashboard({ dashboardPageId: page.id });
+  }
+
+  await waitOnReportSpreadsheet();
+}
+
+export async function loadReportSpreadsheetCache(): Promise<void> {
+  cacheLoaded = false;
+  loadCachedReportCells();
+  if (isReportCacheEmpty()) {
+    await prepareAllDashboards();
+  }
 }
 
 function waitOnReportSheet(): Promise<void> {
@@ -355,6 +456,8 @@ export async function prepareDashboard({
 }: {
   dashboardPageId: DashboardPageEntity['id'];
 }): Promise<{ cells: ReportSpreadsheetValues }> {
+  loadCachedReportCells();
+
   const { data } = await aqlQuery(
     q('dashboard')
       .filter({ dashboard_page_id: dashboardPageId })
@@ -380,6 +483,8 @@ export async function getCell({
 }: {
   widgetId: DashboardWidgetEntity['id'];
 }): Promise<ReportSpreadsheetCell | null> {
+  loadCachedReportCells();
+
   const plan = activePlans.get(widgetId);
   return plan ? readPlan(plan) : null;
 }
@@ -389,6 +494,8 @@ export async function recomputeWidget({
 }: {
   widgetId: DashboardWidgetEntity['id'];
 }): Promise<ReportSpreadsheetCell | null> {
+  loadCachedReportCells();
+
   let plan = activePlans.get(widgetId);
   if (!plan) {
     const widget = await getWidget(widgetId);
@@ -407,6 +514,10 @@ export async function recomputeWidget({
 }
 
 export function triggerDatabaseChanges(oldValues: DataMap, newValues: DataMap) {
+  if (oldValues.size > 0 || newValues.size > 0) {
+    clearReportCache();
+  }
+
   if (activePlans.size === 0) {
     return;
   }

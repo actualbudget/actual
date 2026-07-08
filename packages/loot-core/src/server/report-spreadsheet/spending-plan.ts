@@ -680,7 +680,7 @@ export function createSpendingReportPlan({
   sheet.createDynamic(sheetName, 'data', {
     dependencies: queryCells,
     initialValue: null,
-    run: (...values: unknown[]) =>
+    run: (...values: JSONValue[]) =>
       calculateSpendingData({
         assets: Array.isArray(values[0]) ? (values[0] as SpendingRow[]) : [],
         debts: Array.isArray(values[1]) ? (values[1] as SpendingRow[]) : [],

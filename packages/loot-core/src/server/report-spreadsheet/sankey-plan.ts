@@ -68,6 +68,14 @@ type TransactionCategoryGroup = {
   name: string;
 };
 
+type SankeyQueryRow = {
+  accountId?: string;
+  accountName?: string;
+  amount?: number;
+  payeeId?: string;
+  payeeName?: string;
+};
+
 type NodeKey = string;
 type NodeData = {
   color?: string;
@@ -393,7 +401,7 @@ async function createTransactionsBaseGraph({
               ])
               .serialize(),
           );
-          return results.data.map(
+          return (results.data as SankeyQueryRow[]).map(
             row =>
               ({
                 accountId: row.accountId ?? '',

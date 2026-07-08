@@ -456,7 +456,7 @@ export function createNetWorthReportPlan({
   sheet.createDynamic(sheetName, 'data', {
     dependencies: queryCells,
     initialValue: null,
-    run: (...values: unknown[]) =>
+    run: (...values: JSONValue[]) =>
       calculateNetWorthData({
         accounts: Array.isArray(values[0]) ? (values[0] as AccountRow[]) : [],
         startingRows: Array.isArray(values[1])

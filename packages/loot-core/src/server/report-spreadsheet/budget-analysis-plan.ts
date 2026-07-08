@@ -324,7 +324,7 @@ export function createBudgetAnalysisReportPlan({
   reportSheet.createDynamic(sheetName, 'data', {
     dependencies: queryCells,
     initialValue: null,
-    run: (...values: unknown[]) =>
+    run: (...values: JSONValue[]) =>
       calculateBudgetAnalysisData({
         categories: Array.isArray(values[0])
           ? (values[0] as CategoryEntity[])

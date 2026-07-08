@@ -763,7 +763,7 @@ export function createFormulaReportPlan({
   sheet.createDynamic(sheetName, 'data', {
     dependencies: queryCells,
     initialValue: null,
-    run: (...values: unknown[]) => {
+    run: (...values: JSONValue[]) => {
       const querySumValues = new Map<string, number>();
       const queryCountValues = new Map<string, number>();
       const sumStartIndex = 4;
