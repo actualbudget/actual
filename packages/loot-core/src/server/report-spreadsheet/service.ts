@@ -24,6 +24,7 @@ import { createCashFlowReportPlan } from './cash-flow-plan';
 import { createCustomReportPlan } from './custom-report-plan';
 import { createFormulaReportPlan } from './formula-plan';
 import { createNetWorthReportPlan } from './net-worth-plan';
+import { stableStringify } from './plan-utils';
 import { createSankeyReportPlan } from './sankey-plan';
 import { createSpendingReportPlan } from './spending-plan';
 import { createSummaryReportPlan } from './summary-plan';
@@ -45,6 +46,7 @@ const reportCacheTable = 'report_spreadsheet_cache';
 
 let reportSheet = createReportSheet();
 const activePlans = new Map<DashboardWidgetEntity['id'], ReportPlan>();
+const activePlanKeys = new Map<DashboardWidgetEntity['id'], string>();
 const rootCells = new Map<string, ReportPlan>();
 const pendingComputes = new Set<Promise<void>>();
 let cacheLoaded = false;
@@ -178,6 +180,7 @@ function createReportSheet() {
 export function unloadReportSpreadsheet(): void {
   reportSheet.unload();
   activePlans.clear();
+  activePlanKeys.clear();
   rootCells.clear();
   pendingComputes.clear();
   cacheLoaded = false;
@@ -284,6 +287,20 @@ function readPlan(plan: ReportPlan): ReportSpreadsheetCell {
   };
 }
 
+function getWidgetPlanKey(
+  widget: DashboardWidgetEntity,
+  context: ReportContext,
+) {
+  return stableStringify({
+    context,
+    widget: {
+      id: widget.id,
+      meta: widget.meta,
+      type: widget.type,
+    },
+  });
+}
+
 function queueWidgetRecompute(plan: ReportPlan): void {
   if (plan.compute && plan.queryCells.length === 0) {
     runPlanCompute(plan);
@@ -296,12 +313,16 @@ function queueWidgetRecompute(plan: ReportPlan): void {
   }
 }
 
-function registerPlan(plan: ReportPlan): ReportSpreadsheetCell {
+function registerPlan(
+  plan: ReportPlan,
+  planKey: string,
+): ReportSpreadsheetCell {
   const previous = activePlans.get(plan.widgetId);
   if (previous) {
     rootCells.delete(previous.rootName);
   }
   activePlans.set(plan.widgetId, plan);
+  activePlanKeys.set(plan.widgetId, planKey);
   rootCells.set(plan.rootName, plan);
   queueWidgetRecompute(plan);
 
@@ -329,6 +350,12 @@ async function registerWidget(
   widget: DashboardWidgetEntity,
   context: ReportContext,
 ): Promise<ReportSpreadsheetCell | null> {
+  const planKey = getWidgetPlanKey(widget, context);
+  const activePlan = activePlans.get(widget.id);
+  if (activePlan && activePlanKeys.get(widget.id) === planKey) {
+    return readPlan(activePlan);
+  }
+
   if (widget.type === 'age-of-money-card') {
     return registerPlan(
       createAgeOfMoneyReportPlan({
@@ -336,6 +363,7 @@ async function registerWidget(
         sheet: reportSheet,
         widget,
       }),
+      planKey,
     );
   }
 
@@ -346,6 +374,7 @@ async function registerWidget(
         sheet: reportSheet,
         widget,
       }),
+      planKey,
     );
   }
 
@@ -355,6 +384,7 @@ async function registerWidget(
         sheet: reportSheet,
         widget,
       }),
+      planKey,
     );
   }
 
@@ -366,6 +396,7 @@ async function registerWidget(
         sheet: reportSheet,
         widget,
       }),
+      planKey,
     );
   }
 
@@ -376,6 +407,7 @@ async function registerWidget(
         sheet: reportSheet,
         widget,
       }),
+      planKey,
     );
   }
 
@@ -395,6 +427,7 @@ async function registerWidget(
         sheet: reportSheet,
         widget,
       }),
+      planKey,
     );
   }
 
@@ -404,6 +437,7 @@ async function registerWidget(
         sheet: reportSheet,
         widget,
       }),
+      planKey,
     );
   }
 
@@ -416,6 +450,7 @@ async function registerWidget(
         sheet: reportSheet,
         widget,
       }),
+      planKey,
     );
   }
 
@@ -425,6 +460,7 @@ async function registerWidget(
         sheet: reportSheet,
         widget,
       }),
+      planKey,
     );
   }
 
@@ -435,6 +471,7 @@ async function registerWidget(
         sheet: reportSheet,
         widget,
       }),
+      planKey,
     );
   }
 
@@ -446,6 +483,7 @@ async function registerWidget(
         sheet: reportSheet,
         widget,
       }),
+      planKey,
     );
   }
   return null;
