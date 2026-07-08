@@ -40,7 +40,15 @@ const migrationsDir = path.join(
 );
 
 function git(args: string[]): string {
-  const { stdout } = spawnSync('git', args);
+  const { status, stdout, stderr, error } = spawnSync('git', args);
+  if (error) {
+    throw error;
+  }
+  if (status !== 0) {
+    throw new Error(
+      `git ${args.join(' ')} failed (exit ${status}): ${stderr.toString()}`,
+    );
+  }
   return stdout.toString();
 }
 
@@ -52,10 +60,9 @@ function readMigrations(ref: string) {
   return migrations;
 }
 
-spawnSync('git', ['fetch', 'origin', 'master']);
+git(['fetch', 'origin', 'master']);
 
-const mergeBase =
-  git(['merge-base', 'origin/master', 'HEAD']).trim() || 'origin/master';
+const mergeBase = git(['merge-base', 'origin/master', 'HEAD']).trim();
 
 const masterMigrations = readMigrations('origin/master');
 const mergeBaseMigrations = readMigrations(mergeBase);
