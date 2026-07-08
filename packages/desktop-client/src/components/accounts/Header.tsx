@@ -553,9 +553,7 @@ export function AccountHeader({
                         { name: 'export', text: t('Export') },
                         {
                           name: 'toggle-group',
-                          text: showGroup
-                            ? t('Hide group')
-                            : t('Show group'),
+                          text: showGroup ? t('Hide group') : t('Show group'),
                         },
                         {
                           name: 'toggle-net-worth-chart',
@@ -818,9 +816,7 @@ function AccountMenu({
         },
         {
           name: 'toggle-group',
-          text: showGroup
-            ? t('Hide group')
-            : t('Show group'),
+          text: showGroup ? t('Hide group') : t('Show group'),
         },
         { name: 'export', text: t('Export') },
         ...(account && !account.closed
