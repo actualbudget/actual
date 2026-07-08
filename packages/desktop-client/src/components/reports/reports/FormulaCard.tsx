@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
 import type { FormulaWidget } from '@actual-app/core/types/models';
+import type { JSONValue } from '@actual-app/core/types/report-spreadsheet';
 
 import { FormulaResult } from '#components/reports/FormulaResult';
 import { ReportCard } from '#components/reports/ReportCard';
@@ -14,13 +15,36 @@ type FormulaCardProps = {
   widgetId: string;
   isEditing?: boolean;
   meta?: FormulaWidget['meta'];
+  reportData?: JSONValue;
   onMetaChange: (newMeta: FormulaWidget['meta']) => void;
 };
+
+type FormulaReportData = {
+  [key: string]: JSONValue;
+  error: string | null;
+  result: number | string | null;
+};
+
+function isFormulaReportData(
+  value: JSONValue | undefined,
+): value is FormulaReportData {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+
+  return (
+    (value.result === null ||
+      typeof value.result === 'number' ||
+      typeof value.result === 'string') &&
+    (value.error === null || typeof value.error === 'string')
+  );
+}
 
 export function FormulaCard({
   widgetId,
   isEditing,
   meta = {},
+  reportData,
   onMetaChange,
 }: FormulaCardProps) {
   const { t } = useTranslation();
@@ -28,18 +52,16 @@ export function FormulaCard({
   const themeColors = useThemeColors();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const formula = meta?.formula || '=SUM(1, 2, 3)';
   const fontSize = meta?.fontSize;
   const fontSizeMode = meta?.fontSizeMode || 'dynamic';
   const staticFontSize = meta?.staticFontSize || 32;
   const showTitle = meta?.showTitle ?? true;
   const colorFormula = meta?.colorFormula || '';
 
-  const { result, isLoading, error } = useFormulaExecution(
-    formula,
-    meta?.queries || {},
-    meta?.queriesVersion,
-  );
+  const data = isFormulaReportData(reportData) ? reportData : null;
+  const result = data?.result ?? null;
+  const error = data?.error ?? null;
+  const isLoading = data === null;
 
   const colorVariables = useMemo(
     () => ({

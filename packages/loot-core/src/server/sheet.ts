@@ -6,6 +6,7 @@ import { logger } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
 import { sheetForMonth } from '#shared/months';
 import * as Platform from '#shared/platform';
+import type { JSONValue } from '#types/report-spreadsheet';
 
 import type * as DbModule from './db';
 import type {
@@ -250,10 +251,7 @@ export function getCell(sheet: string, name: string) {
   return globalSheet._getNode(resolveName(sheet, name));
 }
 
-export function getCellValue(
-  sheet: string,
-  name: string,
-): string | number | boolean {
+export function getCellValue(sheet: string, name: string): JSONValue {
   return globalSheet.getValue(resolveName(sheet, name));
 }
 

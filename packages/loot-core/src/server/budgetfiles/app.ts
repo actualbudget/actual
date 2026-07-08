@@ -18,6 +18,7 @@ import type { ImportableBudgetType } from '#server/importers';
 import { app as mainApp } from '#server/main-app';
 import { mutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
+import * as reportSpreadsheet from '#server/report-spreadsheet/service';
 import { getServer } from '#server/server-config';
 import * as sheet from '#server/sheet';
 import {
@@ -261,7 +262,9 @@ async function closeBudget() {
 
   // The spreadsheet may be running, wait for it to complete
   await sheet.waitOnSpreadsheet();
+  await reportSpreadsheet.waitOnReportSpreadsheet();
   sheet.unloadSpreadsheet();
+  reportSpreadsheet.unloadReportSpreadsheet();
 
   clearFullSyncTimeout();
   await mainApp.stopServices();

@@ -10,14 +10,15 @@ import {
 } from '#server/aql';
 import type { BudgetType } from '#server/prefs';
 import type { QueryState } from '#shared/query';
+import type { JSONValue } from '#types/report-spreadsheet';
 
 import { Graph } from './graph-data-structure';
 import { resolveName, unresolveName } from './util';
 
 export type Node = {
   name: string;
-  expr: string | number | boolean;
-  value: string | number | boolean;
+  expr: JSONValue;
+  value: JSONValue;
   sheet: unknown;
   query?: QueryState;
   sql?: { sqlPieces: unknown; state: { dependencies: unknown[] } };
@@ -323,13 +324,13 @@ export class Spreadsheet {
     });
   }
 
-  load(name: string, value: string | number | boolean): void {
+  load(name: string, value: JSONValue): void {
     const node = this._getNode(name);
     node.expr = value;
     node.value = value;
   }
 
-  create(name: string, value: string | number | boolean) {
+  create(name: string, value: JSONValue) {
     return this.transaction(() => {
       const node = this._getNode(name);
       node.expr = value;
@@ -338,7 +339,7 @@ export class Spreadsheet {
     });
   }
 
-  set(name: string, value: string | number | boolean): void {
+  set(name: string, value: JSONValue): void {
     this.create(name, value);
   }
 
@@ -377,7 +378,7 @@ export class Spreadsheet {
   createStatic(
     sheetName: string,
     cellName: string,
-    initialValue: number | boolean,
+    initialValue: JSONValue,
   ): void {
     const name = resolveName(sheetName, cellName);
     const exists = this.nodes.has(name);
@@ -397,7 +398,7 @@ export class Spreadsheet {
     }: {
       dependencies?: string[];
       run?: unknown;
-      initialValue: number | boolean;
+      initialValue: JSONValue;
       refresh?: boolean;
     },
   ): void {

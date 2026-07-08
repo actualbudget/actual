@@ -11,6 +11,7 @@ import type { FormulasHandlers } from '#server/formulas/app';
 import type { NotesHandlers } from '#server/notes/app';
 import type { PayeesHandlers } from '#server/payees/app';
 import type { PreferencesHandlers } from '#server/preferences/app';
+import type { ReportSpreadsheetHandlers } from '#server/report-spreadsheet/app';
 import type { ReportsHandlers } from '#server/reports/app';
 import type { RulesHandlers } from '#server/rules/app';
 import type { SchedulesHandlers } from '#server/schedules/app';
@@ -32,6 +33,7 @@ export type Handlers = {} & ServerHandlers &
   ForecastHandlers &
   NotesHandlers &
   PreferencesHandlers &
+  ReportSpreadsheetHandlers &
   ReportsHandlers &
   RulesHandlers &
   SchedulesHandlers &

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -9,6 +9,7 @@ import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { AgeOfMoneyWidget } from '@actual-app/core/types/models';
+import type { JSONValue } from '@actual-app/core/types/report-spreadsheet';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { DateRange } from '#components/reports/DateRange';
@@ -17,8 +18,6 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
-import { createAgeOfMoneySpreadsheet } from '#components/reports/spreadsheets/age-of-money-spreadsheet';
-import { useReport } from '#components/reports/useReport';
 
 // Determine status color based on age
 export function getAgeColor(age: number | null) {
@@ -44,13 +43,41 @@ type AgeOfMoneyCardProps = {
   widgetId: string;
   isEditing?: boolean;
   meta?: AgeOfMoneyWidget['meta'];
+  reportData?: JSONValue;
   onMetaChange: (newMeta: AgeOfMoneyWidget['meta']) => void;
 };
+
+type AgeOfMoneyReportData = {
+  [key: string]: JSONValue;
+  currentAge: number | null;
+  graphData: Array<{
+    [key: string]: JSONValue;
+    ageOfMoney: number;
+    date: string;
+  }>;
+  insufficientData: boolean;
+  trend: 'down' | 'stable' | 'up';
+};
+
+function isAgeOfMoneyReportData(
+  value: JSONValue | undefined,
+): value is AgeOfMoneyReportData {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    (typeof value.currentAge === 'number' || value.currentAge === null) &&
+    Array.isArray(value.graphData) &&
+    typeof value.insufficientData === 'boolean' &&
+    (value.trend === 'up' || value.trend === 'down' || value.trend === 'stable')
+  );
+}
 
 export function AgeOfMoneyCard({
   widgetId,
   isEditing,
   meta = {},
+  reportData,
   onMetaChange,
 }: AgeOfMoneyCardProps) {
   const { t } = useTranslation();
@@ -79,18 +106,7 @@ export function AgeOfMoneyCard({
   const onCardHover = useCallback(() => setIsCardHovered(true), []);
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
 
-  const params = useMemo(
-    () =>
-      createAgeOfMoneySpreadsheet({
-        start,
-        end,
-        conditions: meta?.conditions,
-        conditionsOp: meta?.conditionsOp,
-        granularity: meta?.granularity ?? 'monthly',
-      }),
-    [start, end, meta?.conditions, meta?.conditionsOp, meta?.granularity],
-  );
-  const data = useReport('age_of_money', params);
+  const data = isAgeOfMoneyReportData(reportData) ? reportData : null;
 
   return (
     <ReportCard

@@ -21,6 +21,7 @@ import { app } from '#server/main-app';
 import { runMutator } from '#server/mutators';
 import { postBinary } from '#server/post';
 import * as prefs from '#server/prefs';
+import * as reportSpreadsheet from '#server/report-spreadsheet/service';
 import { getServer } from '#server/server-config';
 import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
@@ -430,6 +431,8 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     // to be up-to-date because we are done mutating any other data
     sheet.get().endCacheBarrier();
   }
+
+  reportSpreadsheet.triggerDatabaseChanges(oldData, newData);
 
   _syncListeners.forEach(func => func(oldData, newData));
 

@@ -15,6 +15,7 @@ import type {
   RuleConditionEntity,
   TimeFrame,
 } from '@actual-app/core/types/models';
+import type { JSONValue } from '@actual-app/core/types/report-spreadsheet';
 import { HyperFormula } from 'hyperformula';
 
 import {
@@ -473,17 +474,17 @@ async function getCategoriesFromConditions(
 // Helper: Get month data from envelope-budget-month RPC
 async function getMonthBudgetData(
   month: string,
-): Promise<Array<{ name: string; value: string | number | boolean }>> {
+): Promise<Array<{ name: string; value: JSONValue }>> {
   const monthData = await send('envelope-budget-month', { month });
   return monthData || [];
 }
 
 // Helper: Extract value from month data by field pattern
 function getMonthDataValue(
-  monthData: Array<{ name: string; value: string | number | boolean }>,
+  monthData: Array<{ name: string; value: JSONValue }>,
   pattern: string,
   catId: string,
-): string | number | boolean {
+): JSONValue {
   const fieldName = pattern.replace('{catId}', catId);
   const cell = monthData.find(c => c.name.endsWith(fieldName));
   return cell?.value ?? 0;

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -6,7 +6,11 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
-import type { SpendingWidget } from '@actual-app/core/types/models';
+import type {
+  SpendingEntity,
+  SpendingWidget,
+} from '@actual-app/core/types/models';
+import type { JSONValue } from '@actual-app/core/types/report-spreadsheet';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
@@ -20,29 +24,44 @@ import {
   getSpendingAverageRangeLabel,
   normalizeSpendingAverageRange,
 } from '#components/reports/spendingAverageRange';
-import { createSpendingSpreadsheet } from '#components/reports/spreadsheets/spending-spreadsheet';
-import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
-import { useSyncedPref } from '#hooks/useSyncedPref';
 
 type SpendingCardProps = {
   widgetId: string;
   isEditing?: boolean;
   meta?: SpendingWidget['meta'];
+  reportData?: JSONValue;
   onMetaChange: (newMeta: SpendingWidget['meta']) => void;
 };
+
+type SpendingReportData = SpendingEntity & {
+  [key: string]: JSONValue;
+};
+
+function isSpendingReportData(
+  value: JSONValue | undefined,
+): value is SpendingReportData {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+
+  return (
+    Array.isArray(value.intervalData) &&
+    typeof value.totalAssets === 'number' &&
+    typeof value.totalDebts === 'number' &&
+    typeof value.totalTotals === 'number'
+  );
+}
 
 export function SpendingCard({
   widgetId,
   isEditing,
   meta = {},
+  reportData,
   onMetaChange,
 }: SpendingCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
-  const [budgetTypePref] = useSyncedPref('budgetType');
-  const budgetType: 'envelope' | 'tracking' =
-    budgetTypePref === 'tracking' ? 'tracking' : 'envelope';
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
@@ -55,37 +74,19 @@ export function SpendingCard({
 
   const selection =
     spendingReportMode === 'single-month' ? 'compareTo' : spendingReportMode;
-  const getGraphData = useMemo(() => {
-    return createSpendingSpreadsheet({
-      conditions: meta?.conditions,
-      conditionsOp: meta?.conditionsOp,
-      compare,
-      compareTo,
-      averageRange,
-      budgetType,
-    });
-  }, [
-    meta?.conditions,
-    meta?.conditionsOp,
-    compare,
-    compareTo,
-    averageRange,
-    budgetType,
-  ]);
-
-  const data = useReport('default', getGraphData);
+  const data = isSpendingReportData(reportData) ? reportData : null;
   const todayDay =
     compare !== monthUtils.currentMonth()
       ? 27
       : monthUtils.getDay(monthUtils.currentDay()) - 1 >= 28
         ? 27
         : monthUtils.getDay(monthUtils.currentDay()) - 1;
+  const selectedValue = data?.intervalData[todayDay]?.[selection];
+  const compareValue = data?.intervalData[todayDay]?.compare;
   const difference =
-    data &&
-    Math.round(
-      data.intervalData[todayDay][selection] -
-        data.intervalData[todayDay].compare,
-    );
+    typeof selectedValue === 'number' && typeof compareValue === 'number'
+      ? Math.round(selectedValue - compareValue)
+      : null;
 
   return (
     <ReportCard

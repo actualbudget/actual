@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -7,6 +7,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { BudgetAnalysisWidget } from '@actual-app/core/types/models';
+import type { JSONValue } from '@actual-app/core/types/report-spreadsheet';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
@@ -16,21 +17,55 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
-import { createBudgetAnalysisSpreadsheet } from '#components/reports/spreadsheets/budget-analysis-spreadsheet';
-import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 
 type BudgetAnalysisCardProps = {
   widgetId: string;
   isEditing?: boolean;
   meta?: BudgetAnalysisWidget['meta'];
+  reportData?: JSONValue;
   onMetaChange: (newMeta: BudgetAnalysisWidget['meta']) => void;
 };
+
+type BudgetAnalysisReportData = {
+  [key: string]: JSONValue;
+  endDate: string;
+  finalOverspendingAdjustment: number;
+  intervalData: Array<{
+    [key: string]: JSONValue;
+    balance: number;
+    budgeted: number;
+    date: string;
+    overspendingAdjustment: number;
+    spent: number;
+  }>;
+  startDate: string;
+  totalBudgeted: number;
+  totalOverspendingAdjustment: number;
+  totalSpent: number;
+};
+
+function isBudgetAnalysisReportData(
+  value: JSONValue | undefined,
+): value is BudgetAnalysisReportData {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+
+  return (
+    Array.isArray(value.intervalData) &&
+    typeof value.startDate === 'string' &&
+    typeof value.endDate === 'string' &&
+    typeof value.totalBudgeted === 'number' &&
+    typeof value.totalSpent === 'number'
+  );
+}
 
 export function BudgetAnalysisCard({
   widgetId,
   isEditing,
   meta = {},
+  reportData,
   onMetaChange,
 }: BudgetAnalysisCardProps) {
   const { t } = useTranslation();
@@ -51,23 +86,7 @@ export function BudgetAnalysisCard({
     monthUtils.monthFromDate(endMonth) + '-01',
   );
 
-  const getGraphData = useMemo(() => {
-    return createBudgetAnalysisSpreadsheet({
-      conditions: meta?.conditions,
-      conditionsOp: meta?.conditionsOp,
-      startDate,
-      endDate,
-      showHiddenCategories: meta?.showHiddenCategories ?? false,
-    });
-  }, [
-    meta?.conditions,
-    meta?.conditionsOp,
-    meta?.showHiddenCategories,
-    startDate,
-    endDate,
-  ]);
-
-  const data = useReport('default', getGraphData);
+  const data = isBudgetAnalysisReportData(reportData) ? reportData : null;
 
   const latestInterval =
     data && data.intervalData.length > 0

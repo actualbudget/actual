@@ -1,5 +1,5 @@
 // oxlint-disable typescript-paths/absolute-parent-import
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -7,10 +7,9 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
-import type {
-  AccountEntity,
-  BalanceForecastWidget,
-} from '@actual-app/core/types/models';
+import type { BalanceForecastWidget } from '@actual-app/core/types/models';
+import type { ForecastResult } from '@actual-app/core/types/models/forecast';
+import type { JSONValue } from '@actual-app/core/types/report-spreadsheet';
 import {
   Line,
   LineChart,
@@ -26,7 +25,6 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
-import { useBalanceForecast } from '#hooks/useBalanceForecast';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
@@ -40,16 +38,47 @@ import {
 type BalanceForecastCardProps = {
   widgetId: string;
   isEditing?: boolean;
-  accounts: AccountEntity[];
   meta?: BalanceForecastWidget['meta'];
+  reportData?: JSONValue;
   onMetaChange: (newMeta: BalanceForecastWidget['meta']) => void;
 };
+
+type BalanceForecastReportData = {
+  [key: string]: JSONValue;
+  error: string | null;
+  forecastData: ForecastResult | null;
+};
+
+function isForecastResult(
+  value: JSONValue | undefined,
+): value is ForecastResult {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    Array.isArray(value.dataPoints) &&
+    typeof value.forecastStartDate === 'string' &&
+    typeof value.forecastEndDate === 'string'
+  );
+}
+
+function isBalanceForecastReportData(
+  value: JSONValue | undefined,
+): value is BalanceForecastReportData {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    (typeof value.error === 'string' || value.error === null) &&
+    (value.forecastData === null || isForecastResult(value.forecastData))
+  );
+}
 
 export function BalanceForecastCard({
   widgetId,
   isEditing,
-  accounts,
   meta,
+  reportData,
   onMetaChange,
 }: BalanceForecastCardProps) {
   const { t } = useTranslation();
@@ -72,57 +101,17 @@ export function BalanceForecastCard({
   };
 
   const [start, end] = calculateTimeRange(meta?.timeFrame, defaultTimeFrame);
-
-  const selectedAccountIds = useMemo(
-    () => meta?.accounts ?? accounts.map(a => a.id),
-    [accounts, meta?.accounts],
-  );
-
-  const startDate = start + '-01';
-  const endDate = monthUtils.lastDayOfMonth(end);
-
-  const {
-    data: forecastData,
-    error,
-    isFetching,
-    isPlaceholderData,
-    isPending: isLoading,
-  } = useBalanceForecast({
-    accountIds: isTrackingBudgetForecast ? undefined : selectedAccountIds,
-    conditions: isTrackingBudgetForecast ? undefined : meta?.conditions,
-    conditionsOp: isTrackingBudgetForecast ? undefined : meta?.conditionsOp,
-    startDate,
-    endDate,
-    includeAccountlessSchedules: isTrackingBudgetForecast
-      ? undefined
-      : meta?.accounts === undefined,
-    source,
-  });
-  const errorMessage =
-    error instanceof Error
-      ? error.message
-      : error
-        ? t('Failed to load forecast')
-        : null;
-  const normalizedForecastData = forecastData ?? null;
-  const committedChartRange = useRef({ start, end });
+  const data = isBalanceForecastReportData(reportData) ? reportData : null;
+  const errorMessage = data?.error ?? null;
+  const normalizedForecastData = data?.forecastData ?? null;
 
   const onCardHover = () => setIsCardHovered(true);
   const onCardHoverEnd = () => setIsCardHovered(false);
 
-  const chartRange = isPlaceholderData
-    ? committedChartRange.current
-    : { start, end };
-  useEffect(() => {
-    if (normalizedForecastData && !isPlaceholderData) {
-      committedChartRange.current = { start, end };
-    }
-  }, [end, isPlaceholderData, normalizedForecastData, start]);
-
   const chartData = buildBalanceForecastChartData({
     forecastData: normalizedForecastData,
-    start: chartRange.start,
-    end: chartRange.end,
+    start,
+    end,
     granularity: 'Monthly',
   });
   const endingPoint = chartData.at(-1);
@@ -131,7 +120,6 @@ export function BalanceForecastCard({
   const hasNegativeBalance = chartData.some(d => d.balance < 0);
   const zeroCrossingGradientOffset = getZeroCrossingGradientOffset(chartData);
   const gradientId = `balance-forecast-card-line-gradient-${widgetId}`;
-  const isUpdatingForecast = isFetching && isPlaceholderData;
   const todayReferenceDate = monthUtils.currentMonth();
   const showsTodayReferenceLine = chartData.some(
     dataPoint => dataPoint.date === todayReferenceDate,
@@ -212,7 +200,7 @@ export function BalanceForecastCard({
           )}
         </View>
 
-        {isLoading && !normalizedForecastData ? (
+        {!data ? (
           <LoadingIndicator />
         ) : errorMessage ? (
           <View style={{ height: 120, padding: 20 }}>
@@ -226,7 +214,8 @@ export function BalanceForecastCard({
               {errorMessage}
             </Block>
           </View>
-        ) : forecastData && forecastData.dataPoints.length > 0 ? (
+        ) : normalizedForecastData &&
+          normalizedForecastData.dataPoints.length > 0 ? (
           <>
             <Container style={{ height: 'auto', flex: 1 }}>
               {(width, height) => (
@@ -316,7 +305,6 @@ export function BalanceForecastCard({
                       strokeWidth={2}
                       dot={false}
                       activeDot={{ r: 4 }}
-                      opacity={isUpdatingForecast ? 0.45 : 1}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -357,12 +345,6 @@ export function BalanceForecastCard({
                   ) : null}
                 </>
               )}
-              {isUpdatingForecast ? (
-                <>
-                  {' '}
-                  <Trans>Updating...</Trans>
-                </>
-              ) : null}
             </Block>
           </>
         ) : (

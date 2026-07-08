@@ -23,7 +23,8 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { CalendarWidget } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
-import { format as formatDate } from 'date-fns';
+import type { JSONValue } from '@actual-app/core/types/report-spreadsheet';
+import { format as formatDate, parse as parseDate } from 'date-fns';
 import { debounce } from 'es-toolkit/compat';
 
 import { FinancialText } from '#components/FinancialText';
@@ -34,9 +35,6 @@ import { CalendarGraph } from '#components/reports/graphs/CalendarGraph';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
-import { calendarSpreadsheet } from '#components/reports/spreadsheets/calendar-spreadsheet';
-import type { CalendarDataType } from '#components/reports/spreadsheets/calendar-spreadsheet';
-import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
 import { useMergedRefs } from '#hooks/useMergedRefs';
@@ -47,14 +45,121 @@ type CalendarCardProps = {
   widgetId: string;
   isEditing?: boolean;
   meta?: CalendarWidget['meta'];
+  reportData?: JSONValue;
   onMetaChange: (newMeta: CalendarWidget['meta']) => void;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
 };
+
+type CalendarDayData = {
+  date: Date;
+  expenseSize: number;
+  expenseValue: number;
+  incomeSize: number;
+  incomeValue: number;
+};
+
+type CalendarCardData = {
+  calendarData: Array<{
+    data: CalendarDayData[];
+    end: Date;
+    start: Date;
+    totalExpense: number;
+    totalIncome: number;
+  }>;
+};
+
+type CalendarReportDay = {
+  [key: string]: JSONValue;
+  date: string;
+  expenseSize: number;
+  expenseValue: number;
+  incomeSize: number;
+  incomeValue: number;
+};
+
+type CalendarReportMonth = {
+  [key: string]: JSONValue;
+  data: CalendarReportDay[];
+  end: string;
+  start: string;
+  totalExpense: number;
+  totalIncome: number;
+};
+
+type CalendarReportData = {
+  [key: string]: JSONValue;
+  calendarData: CalendarReportMonth[];
+};
+
+function isRecord(
+  value: JSONValue | undefined,
+): value is { [key: string]: JSONValue } {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isCalendarReportDay(value: JSONValue): value is CalendarReportDay {
+  return (
+    isRecord(value) &&
+    typeof value.date === 'string' &&
+    typeof value.expenseSize === 'number' &&
+    typeof value.expenseValue === 'number' &&
+    typeof value.incomeSize === 'number' &&
+    typeof value.incomeValue === 'number'
+  );
+}
+
+function isCalendarReportMonth(value: JSONValue): value is CalendarReportMonth {
+  return (
+    isRecord(value) &&
+    Array.isArray(value.data) &&
+    value.data.every(isCalendarReportDay) &&
+    typeof value.end === 'string' &&
+    typeof value.start === 'string' &&
+    typeof value.totalExpense === 'number' &&
+    typeof value.totalIncome === 'number'
+  );
+}
+
+function isCalendarReportData(
+  value: JSONValue | undefined,
+): value is CalendarReportData {
+  return (
+    isRecord(value) &&
+    Array.isArray(value.calendarData) &&
+    value.calendarData.every(isCalendarReportMonth)
+  );
+}
+
+function parseReportDate(date: string): Date {
+  return parseDate(date, 'yyyy-MM-dd', new Date());
+}
+
+function parseCalendarReportData(
+  value: JSONValue | undefined,
+): CalendarCardData | null {
+  if (!isCalendarReportData(value)) {
+    return null;
+  }
+
+  return {
+    calendarData: value.calendarData.map(calendar => ({
+      data: calendar.data.map(day => ({
+        ...day,
+        date: parseReportDate(day.date),
+      })),
+      end: parseReportDate(calendar.end),
+      start: parseReportDate(calendar.start),
+      totalExpense: calendar.totalExpense,
+      totalIncome: calendar.totalIncome,
+    })),
+  };
+}
 
 export function CalendarCard({
   widgetId,
   isEditing,
   meta = {},
+  reportData,
   onMetaChange,
   firstDayOfWeekIdx,
 }: CalendarCardProps) {
@@ -82,17 +187,6 @@ export function CalendarCard({
     },
     latestTransaction,
   );
-  const params = useMemo(
-    () =>
-      calendarSpreadsheet(
-        start,
-        end,
-        meta?.conditions,
-        meta?.conditionsOp,
-        firstDayOfWeekIdx,
-      ),
-    [start, end, meta?.conditions, meta?.conditionsOp, firstDayOfWeekIdx],
-  );
 
   const [cardOrientation, setCardOrientation] = useState<'row' | 'column'>(
     'row',
@@ -107,7 +201,7 @@ export function CalendarCard({
     }
   });
 
-  const data = useReport('calendar', params);
+  const data = useMemo(() => parseCalendarReportData(reportData), [reportData]);
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
@@ -322,7 +416,7 @@ type CalendarCardInnerProps = {
   calendar: {
     start: Date;
     end: Date;
-    data: CalendarDataType[];
+    data: CalendarDayData[];
     totalExpense: number;
     totalIncome: number;
   };

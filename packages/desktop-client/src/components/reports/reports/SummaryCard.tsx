@@ -8,31 +8,56 @@ import type {
   SummaryContent,
   SummaryWidget,
 } from '@actual-app/core/types/models';
+import type { JSONValue } from '@actual-app/core/types/report-spreadsheet';
 
 import { DateRange } from '#components/reports/DateRange';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { ReportCardValueSkeleton } from '#components/reports/ReportCardValueSkeleton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
-import { summarySpreadsheet } from '#components/reports/spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '#components/reports/SummaryNumber';
-import { useReport } from '#components/reports/useReport';
-import { useLocale } from '#hooks/useLocale';
+
+type SummaryReportData = {
+  [key: string]: JSONValue;
+  dividend: number;
+  divisor: number;
+  fromRange: string;
+  toRange: string;
+  total: number;
+};
 
 type SummaryCardProps = {
   widgetId: string;
   isEditing?: boolean;
   meta?: SummaryWidget['meta'];
+  reportData?: JSONValue;
   onMetaChange: (newMeta: SummaryWidget['meta']) => void;
 };
+
+function isSummaryReportData(
+  value: JSONValue | undefined,
+): value is SummaryReportData {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+
+  const data = value as Record<string, unknown>;
+  return (
+    typeof data.dividend === 'number' &&
+    typeof data.divisor === 'number' &&
+    typeof data.fromRange === 'string' &&
+    typeof data.toRange === 'string' &&
+    typeof data.total === 'number'
+  );
+}
 
 export function SummaryCard({
   widgetId,
   isEditing,
   meta = {},
+  reportData,
   onMetaChange,
 }: SummaryCardProps) {
-  const locale = useLocale();
   const { t } = useTranslation();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
@@ -72,20 +97,7 @@ export function SummaryCard({
     [meta],
   );
 
-  const params = useMemo(
-    () =>
-      summarySpreadsheet(
-        start,
-        end,
-        meta?.conditions,
-        meta?.conditionsOp,
-        content,
-        locale,
-      ),
-    [start, end, meta?.conditions, meta?.conditionsOp, content, locale],
-  );
-
-  const data = useReport('summary', params);
+  const data = isSummaryReportData(reportData) ? reportData : null;
 
   return (
     <ReportCard

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { SVGAttributes } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +7,7 @@ import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { CashFlowWidget } from '@actual-app/core/types/models';
+import type { JSONValue } from '@actual-app/core/types/report-spreadsheet';
 import { Bar, BarChart, LabelList } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
@@ -19,8 +20,6 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
-import { simpleCashFlow } from '#components/reports/spreadsheets/cash-flow-spreadsheet';
-import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 
 import { defaultTimeFrame } from './CashFlow';
@@ -95,13 +94,46 @@ type CashFlowCardProps = {
   widgetId: string;
   isEditing?: boolean;
   meta?: CashFlowWidget['meta'];
+  reportData?: JSONValue;
   onMetaChange: (newMeta: CashFlowWidget['meta']) => void;
 };
+
+type CashFlowReportData = {
+  [key: string]: JSONValue;
+  graphData: {
+    [key: string]: JSONValue;
+    expense: number;
+    income: number;
+  };
+};
+
+function isCashFlowReportData(
+  value: JSONValue | undefined,
+): value is CashFlowReportData {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+
+  const graphData = value.graphData;
+  if (
+    graphData === null ||
+    typeof graphData !== 'object' ||
+    Array.isArray(graphData)
+  ) {
+    return false;
+  }
+
+  return (
+    typeof graphData.expense === 'number' &&
+    typeof graphData.income === 'number'
+  );
+}
 
 export function CashFlowCard({
   widgetId,
   isEditing,
   meta = {},
+  reportData,
   onMetaChange,
 }: CashFlowCardProps) {
   const { t } = useTranslation();
@@ -125,11 +157,7 @@ export function CashFlowCard({
     latestTransaction,
   );
 
-  const params = useMemo(
-    () => simpleCashFlow(start, end, meta?.conditions, meta?.conditionsOp),
-    [start, end, meta?.conditions, meta?.conditionsOp],
-  );
-  const data = useReport('cash_flow_simple', params);
+  const data = isCashFlowReportData(reportData) ? reportData : null;
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const onCardHover = useCallback(() => setIsCardHovered(true), []);

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -6,6 +6,7 @@ import { Block } from '@actual-app/components/block';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { SankeyWidget } from '@actual-app/core/types/models';
+import type { JSONValue } from '@actual-app/core/types/report-spreadsheet';
 import * as d from 'date-fns';
 import { debounce } from 'es-toolkit/compat';
 
@@ -20,14 +21,13 @@ import {
 } from '#components/reports/reports/Sankey';
 import {
   buildSankeyData,
-  createBaseGraphSpreadsheet,
   isGraphLayer,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import type {
   Graph,
   GraphLayers,
+  NodeData,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
-import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
 import { useLocale } from '#hooks/useLocale';
 import { useResizeObserver } from '#hooks/useResizeObserver';
@@ -36,12 +36,54 @@ type SankeyCardProps = {
   widgetId: string;
   isEditing?: boolean;
   meta?: SankeyWidget['meta'];
+  reportData?: JSONValue;
   onMetaChange: (newMeta: SankeyWidget['meta']) => void;
 };
+
+type SerializedSankeyGraph = Array<
+  [
+    string,
+    Omit<NodeData, 'to'> & {
+      to: Array<[string, number]>;
+    },
+  ]
+>;
+
+function deserializeSankeyGraph(value: JSONValue | undefined): Graph | null {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return null;
+  }
+
+  const graph = value.graph;
+  if (!Array.isArray(graph)) {
+    return null;
+  }
+
+  const result: Graph = new Map();
+  for (const entry of graph as SerializedSankeyGraph) {
+    if (!Array.isArray(entry) || typeof entry[0] !== 'string') {
+      return null;
+    }
+
+    const [, node] = entry;
+    if (!node || !Array.isArray(node.to)) {
+      return null;
+    }
+
+    result.set(entry[0], {
+      ...node,
+      to: new Map(node.to),
+    });
+  }
+
+  return result;
+}
+
 export function SankeyCard({
   widgetId,
   isEditing,
   meta,
+  reportData,
   onMetaChange,
 }: SankeyCardProps) {
   const { t } = useTranslation();
@@ -91,44 +133,10 @@ export function SankeyCard({
     layerTo = defaultLayerRange.to;
   }
 
-  const groupAccounts = meta?.groupAccounts ?? false;
-
-  const baseGraphParams = useMemo(
-    () =>
-      createBaseGraphSpreadsheet(
-        start,
-        end,
-        groupedCategories,
-        meta?.conditions ?? [],
-        meta?.conditionsOp ?? 'and',
-        mode,
-        groupAccounts,
-      ),
-    [
-      start,
-      end,
-      groupedCategories,
-      meta?.conditions,
-      meta?.conditionsOp,
-      mode,
-      groupAccounts,
-    ],
+  const displayBaseGraph = useMemo(
+    () => deserializeSankeyGraph(reportData),
+    [reportData],
   );
-  const defaultGetBaseGraph = async (
-    _spreadsheet: unknown,
-    setData: (data: Graph) => void,
-  ) => setData(new Map());
-
-  const baseGraph = useReport('sankey', baseGraphParams ?? defaultGetBaseGraph);
-  const baseGraphRef = useRef(baseGraph);
-
-  useEffect(() => {
-    if (baseGraph) {
-      baseGraphRef.current = baseGraph;
-    }
-  }, [baseGraph]);
-
-  const displayBaseGraph = baseGraph || baseGraphRef.current;
   const compactData = useMemo(() => {
     if (!displayBaseGraph) {
       return null;

@@ -68,6 +68,7 @@ import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
 import { SpendingCard } from './reports/SpendingCard';
 import { SummaryCard } from './reports/SummaryCard';
+import { useDashboardReportCells } from './useReportCells';
 
 function isCustomReportWidget(
   widget: DashboardWidgetEntity,
@@ -207,6 +208,11 @@ export function Overview({ dashboard }: OverviewProps) {
   const widgetMap = useMemo(
     () => new Map((widgets ?? []).map(widget => [widget.id, widget])),
     [widgets],
+  );
+  const reportCells = useDashboardReportCells(
+    dashboard.id,
+    widgets,
+    customReports,
   );
 
   const closeNotifications = () => {
@@ -800,8 +806,8 @@ export function Overview({ dashboard }: OverviewProps) {
                           <NetWorthCard
                             widgetId={item.i}
                             isEditing={isEditing}
-                            accounts={accounts}
                             meta={widget.meta}
+                            reportData={reportCells[item.i]?.value}
                             onMetaChange={newMeta =>
                               onMetaChange(item, newMeta)
                             }
@@ -822,6 +828,7 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
+                            reportData={reportCells[item.i]?.value}
                             onMetaChange={newMeta =>
                               onMetaChange(item, newMeta)
                             }
@@ -831,6 +838,7 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
+                            reportData={reportCells[item.i]?.value}
                             onMetaChange={newMeta =>
                               onMetaChange(item, newMeta)
                             }
@@ -840,6 +848,7 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
+                            reportData={reportCells[item.i]?.value}
                             onMetaChange={newMeta =>
                               onMetaChange(item, newMeta)
                             }
@@ -850,6 +859,7 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
+                            reportData={reportCells[item.i]?.value}
                             onMetaChange={newMeta =>
                               onMetaChange(item, newMeta)
                             }
@@ -859,8 +869,8 @@ export function Overview({ dashboard }: OverviewProps) {
                           <BalanceForecastCard
                             widgetId={item.i}
                             isEditing={isEditing}
-                            accounts={accounts}
                             meta={widget.meta}
+                            reportData={reportCells[item.i]?.value}
                             onMetaChange={newMeta =>
                               onMetaChange(item, newMeta)
                             }
@@ -879,12 +889,14 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             report={customReportMap.get(widget.meta.id)}
+                            reportData={reportCells[item.i]?.value}
                           />
                         ) : widget.type === 'summary-card' ? (
                           <SummaryCard
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
+                            reportData={reportCells[item.i]?.value}
                             onMetaChange={newMeta =>
                               onMetaChange(item, newMeta)
                             }
@@ -894,6 +906,7 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
+                            reportData={reportCells[item.i]?.value}
                             firstDayOfWeekIdx={firstDayOfWeekIdx}
                             onMetaChange={newMeta =>
                               onMetaChange(item, newMeta)
@@ -904,6 +917,7 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
+                            reportData={reportCells[item.i]?.value}
                             onMetaChange={newMeta =>
                               onMetaChange(item, newMeta)
                             }
@@ -914,6 +928,7 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
+                            reportData={reportCells[item.i]?.value}
                             onMetaChange={newMeta =>
                               onMetaChange(item, newMeta)
                             }

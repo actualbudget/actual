@@ -21,7 +21,7 @@ export function useSpreadsheet() {
 // TODO: Make this generic and replace the Binding type in the desktop-client package.
 type Binding = string | { name: string; query?: Query | undefined };
 
-type CellCacheValue = { name: string; value: string | number | boolean | null };
+type CellCacheValue = { name: string; value: unknown };
 type CellCache = { [name: string]: Promise<CellCacheValue> | null };
 type CellObserverCallback = (node: CellCacheValue) => void;
 type CellObservers = { [name: string]: CellObserverCallback[] };

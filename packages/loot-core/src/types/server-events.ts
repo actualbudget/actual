@@ -1,5 +1,9 @@
 import type { Backup } from '#server/budgetfiles/backups';
 import type { UndoState } from '#server/undo';
+import type {
+  JSONValue,
+  ReportSpreadsheetCell,
+} from '#types/report-spreadsheet';
 
 type SyncSubtype =
   | 'out-of-sync'
@@ -47,8 +51,10 @@ type BackupUpdatedEvent = Backup[];
 
 type CellsChangedEvent = Array<{
   name: string;
-  value: string | number | boolean;
+  value: JSONValue;
 }>;
+
+type ReportCellsChangedEvent = ReportSpreadsheetCell[];
 
 type FallbackWriteErrorEvent = undefined;
 type FinishImportEvent = undefined;
@@ -77,6 +83,7 @@ export type ServerEvents = {
   'indexeddb-quota-error': IndexeddbQuotaErrorEvent;
   'orphaned-payees': OrphanedPayeesEvent;
   'prefs-updated': PrefsUpdatedEvent;
+  'report-cells-changed': ReportCellsChangedEvent;
   'schedules-offline': SchedulesOfflineEvent;
   'server-error': ServerErrorEvent;
   'show-budgets': ShowBudgetsEvent;
