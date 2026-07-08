@@ -1,4 +1,4 @@
-import { Spreadsheet } from '#server/spreadsheet/spreadsheet';
+import type { Spreadsheet } from '#server/spreadsheet/spreadsheet';
 import { resolveName } from '#server/spreadsheet/util';
 import { conditionsToAQL } from '#server/transactions/transaction-rules';
 import * as monthUtils from '#shared/months';

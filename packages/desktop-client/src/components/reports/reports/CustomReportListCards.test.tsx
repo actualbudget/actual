@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -25,21 +25,19 @@ vi.mock('@actual-app/components/icons/v1', () => ({
 }));
 
 vi.mock('@actual-app/components/text', () => ({
-  Text: ({ children }: { children: React.ReactNode }) => (
-    <span>{children}</span>
-  ),
+  Text: ({ children }: { children: ReactNode }) => <span>{children}</span>,
 }));
 
 vi.mock('@actual-app/components/tooltip', () => ({
-  Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Tooltip: ({ children }: { children: ReactNode }) => children,
 }));
 
 vi.mock('@actual-app/components/view', () => ({
-  View: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  View: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
 }));
 
 vi.mock('react-i18next', () => ({
-  Trans: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Trans: ({ children }: { children: ReactNode }) => children,
   useTranslation: () => ({ t: (value: string) => value }),
 }));
 
@@ -68,7 +66,7 @@ vi.mock('#components/reports/LoadingIndicator', () => ({
 }));
 
 vi.mock('#components/reports/ReportCard', () => ({
-  ReportCard: ({ children }: { children: React.ReactNode }) => (
+  ReportCard: ({ children }: { children: ReactNode }) => (
     <section>{children}</section>
   ),
 }));

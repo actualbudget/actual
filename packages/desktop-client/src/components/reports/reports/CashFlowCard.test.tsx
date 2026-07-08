@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -18,12 +18,12 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('recharts', () => ({
-  Bar: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  Bar: ({ children }: { children?: ReactNode }) => children,
   BarChart: ({
     children,
     data,
   }: {
-    children?: React.ReactNode;
+    children?: ReactNode;
     data: Array<{ expenses: number; income: number }>;
   }) => (
     <div
@@ -38,15 +38,13 @@ vi.mock('recharts', () => ({
 }));
 
 vi.mock('#components/FinancialText', () => ({
-  FinancialText: ({ children }: { children: React.ReactNode }) => (
+  FinancialText: ({ children }: { children: ReactNode }) => (
     <span>{children}</span>
   ),
 }));
 
 vi.mock('#components/PrivacyFilter', () => ({
-  PrivacyFilter: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
+  PrivacyFilter: ({ children }: { children: ReactNode }) => children,
 }));
 
 vi.mock('#components/reports/Change', () => ({
@@ -63,8 +61,8 @@ vi.mock('#components/reports/Container', () => ({
   Container: ({
     children,
   }: {
-    children: (width: number, height: number) => React.ReactNode;
-  }) => <>{children(320, 180)}</>,
+    children: (width: number, height: number) => ReactNode;
+  }) => children(320, 180),
 }));
 
 vi.mock('#components/reports/DateRange', () => ({
@@ -78,7 +76,7 @@ vi.mock('#components/reports/LoadingIndicator', () => ({
 }));
 
 vi.mock('#components/reports/ReportCard', () => ({
-  ReportCard: ({ children }: { children: React.ReactNode }) => (
+  ReportCard: ({ children }: { children: ReactNode }) => (
     <section>{children}</section>
   ),
 }));
@@ -88,13 +86,13 @@ vi.mock('#components/reports/ReportCardName', () => ({
 }));
 
 vi.mock('#hooks/useFormat', () => ({
-  useFormat: () => (value: unknown) => `fmt:${value}`,
+  useFormat: () => (value: unknown) => `fmt:${String(value)}`,
 }));
 
 describe('CashFlowCard report cells', () => {
   beforeEach(() => {
     connectionMocks.send.mockReset();
-    connectionMocks.send.mockReturnValue(new Promise(() => {}));
+    connectionMocks.send.mockReturnValue(new Promise(() => undefined));
   });
 
   it('renders cached report cell data', () => {

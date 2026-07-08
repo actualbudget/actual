@@ -1,4 +1,5 @@
-import React from 'react';
+import { forwardRef } from 'react';
+import type { ReactNode } from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -21,14 +22,14 @@ const graphMocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@actual-app/components/block', () => ({
-  Block: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Block: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
 vi.mock('@actual-app/components/button', () => ({
-  Button: React.forwardRef<
+  Button: forwardRef<
     HTMLButtonElement,
     {
-      children: React.ReactNode;
+      children: ReactNode;
       onPress?: () => void;
     }
   >(({ children, onPress }, ref) => (
@@ -48,11 +49,11 @@ vi.mock('@actual-app/components/icons/v1', () => ({
 }));
 
 vi.mock('@actual-app/components/tooltip', () => ({
-  Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Tooltip: ({ children }: { children: ReactNode }) => children,
 }));
 
 vi.mock('@actual-app/components/view', () => ({
-  View: React.forwardRef<HTMLDivElement, { children?: React.ReactNode }>(
+  View: forwardRef<HTMLDivElement, { children?: ReactNode }>(
     ({ children }, ref) => <div ref={ref}>{children}</div>,
   ),
 }));
@@ -62,20 +63,18 @@ vi.mock('@actual-app/core/platform/client/connection', () => ({
 }));
 
 vi.mock('react-i18next', () => ({
-  Trans: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Trans: ({ children }: { children: ReactNode }) => children,
   useTranslation: () => ({ t: (value: string) => value }),
 }));
 
 vi.mock('#components/FinancialText', () => ({
-  FinancialText: ({ children }: { children: React.ReactNode }) => (
+  FinancialText: ({ children }: { children: ReactNode }) => (
     <span>{children}</span>
   ),
 }));
 
 vi.mock('#components/PrivacyFilter', () => ({
-  PrivacyFilter: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
+  PrivacyFilter: ({ children }: { children: ReactNode }) => children,
 }));
 
 vi.mock('#components/reports/CalendarCardSkeleton', () => ({
@@ -103,7 +102,7 @@ vi.mock('#components/reports/graphs/CalendarGraph', () => ({
 }));
 
 vi.mock('#components/reports/ReportCard', () => ({
-  ReportCard: ({ children }: { children: React.ReactNode }) => (
+  ReportCard: ({ children }: { children: ReactNode }) => (
     <section>{children}</section>
   ),
 }));
@@ -113,11 +112,11 @@ vi.mock('#components/reports/ReportCardName', () => ({
 }));
 
 vi.mock('#hooks/useFormat', () => ({
-  useFormat: () => (value: unknown) => `fmt:${value}`,
+  useFormat: () => (value: unknown) => `fmt:${String(value)}`,
 }));
 
 vi.mock('#hooks/useMergedRefs', () => ({
-  useMergedRefs: () => () => {},
+  useMergedRefs: () => () => undefined,
 }));
 
 vi.mock('#hooks/useNavigate', () => ({
@@ -125,14 +124,14 @@ vi.mock('#hooks/useNavigate', () => ({
 }));
 
 vi.mock('#hooks/useResizeObserver', () => ({
-  useResizeObserver: () => () => {},
+  useResizeObserver: () => () => undefined,
 }));
 
 describe('CalendarCard report cells', () => {
   beforeEach(() => {
     graphMocks.props = null;
     connectionMocks.send.mockReset();
-    connectionMocks.send.mockReturnValue(new Promise(() => {}));
+    connectionMocks.send.mockReturnValue(new Promise(() => undefined));
   });
 
   it('renders cached report cell data', () => {

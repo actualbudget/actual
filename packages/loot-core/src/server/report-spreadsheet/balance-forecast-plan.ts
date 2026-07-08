@@ -1,5 +1,5 @@
 import { generateForecast } from '#server/forecast/app';
-import { Spreadsheet } from '#server/spreadsheet/spreadsheet';
+import type { Spreadsheet } from '#server/spreadsheet/spreadsheet';
 import { resolveName } from '#server/spreadsheet/util';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';

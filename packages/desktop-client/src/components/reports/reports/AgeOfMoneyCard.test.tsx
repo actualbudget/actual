@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -16,7 +16,7 @@ const graphMocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@actual-app/components/block', () => ({
-  Block: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Block: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
 vi.mock('@actual-app/components/hooks/useResponsive', () => ({
@@ -24,7 +24,7 @@ vi.mock('@actual-app/components/hooks/useResponsive', () => ({
 }));
 
 vi.mock('@actual-app/components/view', () => ({
-  View: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  View: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
 }));
 
 vi.mock('@actual-app/core/platform/client/connection', () => ({
@@ -32,7 +32,7 @@ vi.mock('@actual-app/core/platform/client/connection', () => ({
 }));
 
 vi.mock('react-i18next', () => ({
-  Trans: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Trans: ({ children }: { children: ReactNode }) => children,
   useTranslation: () => ({
     t: (value: string, params?: Record<string, unknown>) =>
       params?.days == null
@@ -42,9 +42,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('#components/PrivacyFilter', () => ({
-  PrivacyFilter: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
+  PrivacyFilter: ({ children }: { children: ReactNode }) => children,
 }));
 
 vi.mock('#components/reports/DateRange', () => ({
@@ -67,7 +65,7 @@ vi.mock('#components/reports/LoadingIndicator', () => ({
 }));
 
 vi.mock('#components/reports/ReportCard', () => ({
-  ReportCard: ({ children }: { children: React.ReactNode }) => (
+  ReportCard: ({ children }: { children: ReactNode }) => (
     <section>{children}</section>
   ),
 }));
@@ -80,7 +78,7 @@ describe('AgeOfMoneyCard report cells', () => {
   beforeEach(() => {
     graphMocks.props = null;
     connectionMocks.send.mockReset();
-    connectionMocks.send.mockReturnValue(new Promise(() => {}));
+    connectionMocks.send.mockReturnValue(new Promise(() => undefined));
   });
 
   it('renders cached report cell data', () => {

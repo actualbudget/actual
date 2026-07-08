@@ -1,17 +1,12 @@
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import * as budgetSheet from '#server/sheet';
-import { Spreadsheet } from '#server/spreadsheet/spreadsheet';
+import type { Spreadsheet } from '#server/spreadsheet/spreadsheet';
 import { resolveName } from '#server/spreadsheet/util';
 import { conditionsToAQL } from '#server/transactions/transaction-rules';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
-import type {
-  CategoryGroupEntity,
-  RuleConditionEntity,
-  SankeyWidget,
-} from '#types/models';
-import type { JSONValue } from '#types/report-spreadsheet';
+import type { RuleConditionEntity, SankeyWidget } from '#types/models';
 
 import { calculateTimeRange, hashString, stableStringify } from './plan-utils';
 import type { ReportPlan } from './types';
@@ -61,6 +56,16 @@ type CategoryEntry = {
   payeeId?: string;
   payeeName?: string;
   value: number;
+};
+
+type TransactionCategoryGroup = {
+  categories?: Array<{
+    id: string;
+    name: string;
+  }>;
+  id: string;
+  is_income?: boolean | number;
+  name: string;
 };
 
 type NodeKey = string;
@@ -345,7 +350,7 @@ async function createTransactionsBaseGraph({
   groupAccounts,
   start,
 }: {
-  categories: CategoryGroupEntity[];
+  categories: TransactionCategoryGroup[];
   conditions: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
   end: string;
@@ -400,7 +405,7 @@ async function createTransactionsBaseGraph({
                 categoryGroup: categoryGroup.name,
                 categoryGroupId: categoryGroup.id,
                 categoryId: category.id,
-                isIncome: categoryGroup.is_income ?? false,
+                isIncome: Boolean(categoryGroup.is_income),
                 isNegative: row.amount !== undefined && row.amount < 0,
                 payeeId: row.payeeId ?? '',
                 payeeName: row.payeeName ?? '',

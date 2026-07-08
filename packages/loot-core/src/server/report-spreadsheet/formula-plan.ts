@@ -2,7 +2,7 @@ import { HyperFormula } from 'hyperformula';
 import enUS from 'hyperformula/i18n/languages/enUS';
 
 import * as sheet from '#server/sheet';
-import { Spreadsheet } from '#server/spreadsheet/spreadsheet';
+import type { Spreadsheet } from '#server/spreadsheet/spreadsheet';
 import { resolveName } from '#server/spreadsheet/util';
 import { conditionsToAQL } from '#server/transactions/transaction-rules';
 import { getCurrency } from '#shared/currencies';

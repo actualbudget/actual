@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,15 +10,15 @@ const chartMocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@actual-app/components/block', () => ({
-  Block: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Block: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
 vi.mock('@actual-app/components/view', () => ({
-  View: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  View: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
 }));
 
 vi.mock('react-i18next', () => ({
-  Trans: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Trans: ({ children }: { children: ReactNode }) => children,
   useTranslation: () => ({ t: (value: string) => value }),
 }));
 
@@ -29,24 +29,20 @@ vi.mock('recharts', () => ({
     return <div data-testid="balance-forecast-chart" />;
   },
   ReferenceLine: () => null,
-  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
+  ResponsiveContainer: ({ children }: { children: ReactNode }) => children,
   Tooltip: () => null,
 }));
 
 vi.mock('#components/PrivacyFilter', () => ({
-  PrivacyFilter: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
+  PrivacyFilter: ({ children }: { children: ReactNode }) => children,
 }));
 
 vi.mock('#components/reports/Container', () => ({
   Container: ({
     children,
   }: {
-    children: (width: number, height: number) => React.ReactNode;
-  }) => <>{children(320, 180)}</>,
+    children: (width: number, height: number) => ReactNode;
+  }) => children(320, 180),
 }));
 
 vi.mock('#components/reports/DateRange', () => ({
@@ -60,7 +56,7 @@ vi.mock('#components/reports/LoadingIndicator', () => ({
 }));
 
 vi.mock('#components/reports/ReportCard', () => ({
-  ReportCard: ({ children }: { children: React.ReactNode }) => (
+  ReportCard: ({ children }: { children: ReactNode }) => (
     <section>{children}</section>
   ),
 }));
@@ -70,7 +66,7 @@ vi.mock('#components/reports/ReportCardName', () => ({
 }));
 
 vi.mock('#hooks/useFormat', () => ({
-  useFormat: () => (value: unknown) => `fmt:${value}`,
+  useFormat: () => (value: unknown) => `fmt:${String(value)}`,
 }));
 
 vi.mock('#hooks/useSyncedPref', () => ({

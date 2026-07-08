@@ -1,4 +1,5 @@
-import React from 'react';
+import { forwardRef } from 'react';
+import type { ReactNode } from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -11,11 +12,11 @@ const sankeyMocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@actual-app/components/block', () => ({
-  Block: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Block: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }));
 
 vi.mock('@actual-app/components/view', () => ({
-  View: React.forwardRef<HTMLDivElement, { children?: React.ReactNode }>(
+  View: forwardRef<HTMLDivElement, { children?: ReactNode }>(
     ({ children }, ref) => <div ref={ref}>{children}</div>,
   ),
 }));
@@ -36,7 +37,7 @@ vi.mock('#components/reports/LoadingIndicator', () => ({
 }));
 
 vi.mock('#components/reports/ReportCard', () => ({
-  ReportCard: ({ children }: { children: React.ReactNode }) => (
+  ReportCard: ({ children }: { children: ReactNode }) => (
     <section>{children}</section>
   ),
 }));
@@ -79,7 +80,7 @@ vi.mock('#hooks/useLocale', () => ({
 }));
 
 vi.mock('#hooks/useResizeObserver', () => ({
-  useResizeObserver: () => () => {},
+  useResizeObserver: () => () => undefined,
 }));
 
 describe('SankeyCard report cells', () => {

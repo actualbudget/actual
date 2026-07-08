@@ -1,11 +1,11 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 import type { SummaryWidget } from '@actual-app/core/types/models';
 import type { ReportSpreadsheetCell } from '@actual-app/core/types/report-spreadsheet';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useDashboardReportCells } from '../useReportCells';
+import { useDashboardReportCells } from '#components/reports/useReportCells';
 
 import { SummaryCard } from './SummaryCard';
 
@@ -33,7 +33,7 @@ vi.mock('#components/reports/DateRange', () => ({
 }));
 
 vi.mock('#components/reports/ReportCard', () => ({
-  ReportCard: ({ children }: { children: React.ReactNode }) => (
+  ReportCard: ({ children }: { children: ReactNode }) => (
     <section>{children}</section>
   ),
 }));
@@ -112,7 +112,7 @@ describe('SummaryCard report cells', () => {
         if (eventName === 'report-cells-changed') {
           connectionMocks.reportCellsChanged = callback;
         }
-        return () => {};
+        return () => undefined;
       },
     );
     connectionMocks.send.mockImplementation((methodName: string) => {

@@ -14,14 +14,19 @@ const { emptyDatabase } = global as typeof globalThis & {
   emptyDatabase: () => () => Promise<void>;
 };
 
-function expectSummaryValue(value: JSONValue, total: number): void {
+function expectObjectValue(value: JSONValue, message: string) {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error('Expected summary report data');
+    throw new Error(message);
   }
+  return value;
+}
 
-  expect(value.total).toBe(total);
-  expect(value.dividend).toBe(total);
-  expect(value.divisor).toBe(0);
+function expectSummaryValue(value: JSONValue, total: number): void {
+  const reportData = expectObjectValue(value, 'Expected summary report data');
+
+  expect(reportData.total).toBe(total);
+  expect(reportData.dividend).toBe(total);
+  expect(reportData.divisor).toBe(0);
 }
 
 function getSankeyLinkValue(
@@ -29,11 +34,8 @@ function getSankeyLinkValue(
   from: string,
   to: string,
 ): number | undefined {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
-    throw new Error('Expected sankey report data');
-  }
-
-  const graph = value.graph;
+  const reportData = expectObjectValue(value, 'Expected sankey report data');
+  const graph = reportData.graph;
   if (!Array.isArray(graph)) {
     throw new Error('Expected sankey graph');
   }
@@ -190,11 +192,15 @@ describe('report spreadsheet service', () => {
       widgetId: 'net-worth-widget',
     });
 
-    if (!cell || cell.value === null || typeof cell.value !== 'object') {
+    if (!cell) {
       throw new Error('Expected computed net worth widget cell');
     }
-    expect(cell.value.netWorth).toBe(12_345);
-    expect(cell.value.accounts).toEqual([{ id: accountId, name: 'Checking' }]);
+    let value = expectObjectValue(
+      cell.value,
+      'Expected computed net worth widget cell',
+    );
+    expect(value.netWorth).toBe(12_345);
+    expect(value.accounts).toEqual([{ id: accountId, name: 'Checking' }]);
 
     await db.updateTransaction({
       id: 'transaction',
@@ -203,10 +209,14 @@ describe('report spreadsheet service', () => {
     await reportSpreadsheet.waitOnReportSpreadsheet();
 
     cell = await reportSpreadsheet.getCell({ widgetId: 'net-worth-widget' });
-    if (!cell || cell.value === null || typeof cell.value !== 'object') {
+    if (!cell) {
       throw new Error('Expected recomputed net worth widget cell');
     }
-    expect(cell.value.netWorth).toBe(20_000);
+    value = expectObjectValue(
+      cell.value,
+      'Expected recomputed net worth widget cell',
+    );
+    expect(value.netWorth).toBe(20_000);
   });
 
   it('registers and refreshes a cash flow widget root cell after transaction changes', async () => {
@@ -267,10 +277,14 @@ describe('report spreadsheet service', () => {
       widgetId: 'cash-flow-widget',
     });
 
-    if (!cell || cell.value === null || typeof cell.value !== 'object') {
+    if (!cell) {
       throw new Error('Expected computed cash flow widget cell');
     }
-    expect(cell.value.graphData).toEqual({
+    let value = expectObjectValue(
+      cell.value,
+      'Expected computed cash flow widget cell',
+    );
+    expect(value.graphData).toEqual({
       expense: -8_000,
       income: 20_000,
     });
@@ -282,10 +296,14 @@ describe('report spreadsheet service', () => {
     await reportSpreadsheet.waitOnReportSpreadsheet();
 
     cell = await reportSpreadsheet.getCell({ widgetId: 'cash-flow-widget' });
-    if (!cell || cell.value === null || typeof cell.value !== 'object') {
+    if (!cell) {
       throw new Error('Expected recomputed cash flow widget cell');
     }
-    expect(cell.value.graphData).toEqual({
+    value = expectObjectValue(
+      cell.value,
+      'Expected recomputed cash flow widget cell',
+    );
+    expect(value.graphData).toEqual({
       expense: -10_000,
       income: 20_000,
     });
@@ -913,17 +931,21 @@ describe('report spreadsheet service', () => {
       widgetId: 'age-of-money-widget',
     });
 
-    if (!cell || cell.value === null || typeof cell.value !== 'object') {
+    if (!cell) {
       throw new Error('Expected computed age of money widget cell');
     }
-    expect(cell.value.currentAge).toBe(10);
-    expect(cell.value.graphData).toEqual([
+    let value = expectObjectValue(
+      cell.value,
+      'Expected computed age of money widget cell',
+    );
+    expect(value.currentAge).toBe(10);
+    expect(value.graphData).toEqual([
       {
         ageOfMoney: 10,
         date: expect.any(String),
       },
     ]);
-    expect(cell.value.insufficientData).toBe(false);
+    expect(value.insufficientData).toBe(false);
 
     await db.updateTransaction({
       id: 'expense',
@@ -934,10 +956,14 @@ describe('report spreadsheet service', () => {
     cell = await reportSpreadsheet.getCell({
       widgetId: 'age-of-money-widget',
     });
-    if (!cell || cell.value === null || typeof cell.value !== 'object') {
+    if (!cell) {
       throw new Error('Expected recomputed age of money widget cell');
     }
-    expect(cell.value.currentAge).toBe(20);
+    value = expectObjectValue(
+      cell.value,
+      'Expected recomputed age of money widget cell',
+    );
+    expect(value.currentAge).toBe(20);
   });
 
   it('registers and refreshes a balance forecast widget root cell after transaction changes', async () => {
@@ -992,13 +1018,17 @@ describe('report spreadsheet service', () => {
       widgetId: 'balance-forecast-widget',
     });
 
-    if (!cell || cell.value === null || typeof cell.value !== 'object') {
+    if (!cell) {
       throw new Error('Expected computed balance forecast widget cell');
     }
-    expect(cell.value.error).toBeNull();
+    let value = expectObjectValue(
+      cell.value,
+      'Expected computed balance forecast widget cell',
+    );
+    expect(value.error).toBeNull();
     expect(
       (
-        cell.value.forecastData as {
+        value.forecastData as {
           dataPoints: Array<{ balance: number; date: string }>;
         }
       ).dataPoints.find(point => point.date === '2024-01-05')?.balance,
@@ -1013,12 +1043,16 @@ describe('report spreadsheet service', () => {
     cell = await reportSpreadsheet.getCell({
       widgetId: 'balance-forecast-widget',
     });
-    if (!cell || cell.value === null || typeof cell.value !== 'object') {
+    if (!cell) {
       throw new Error('Expected recomputed balance forecast widget cell');
     }
+    value = expectObjectValue(
+      cell.value,
+      'Expected recomputed balance forecast widget cell',
+    );
     expect(
       (
-        cell.value.forecastData as {
+        value.forecastData as {
           dataPoints: Array<{ balance: number; date: string }>;
         }
       ).dataPoints.find(point => point.date === '2024-01-05')?.balance,

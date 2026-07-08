@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -26,15 +26,13 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('#components/FinancialText', () => ({
-  FinancialText: ({ children }: { children: React.ReactNode }) => (
+  FinancialText: ({ children }: { children: ReactNode }) => (
     <span>{children}</span>
   ),
 }));
 
 vi.mock('#components/PrivacyFilter', () => ({
-  PrivacyFilter: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
+  PrivacyFilter: ({ children }: { children: ReactNode }) => children,
 }));
 
 vi.mock('#components/reports/Change', () => ({
@@ -63,7 +61,7 @@ vi.mock('#components/reports/LoadingIndicator', () => ({
 }));
 
 vi.mock('#components/reports/ReportCard', () => ({
-  ReportCard: ({ children }: { children: React.ReactNode }) => (
+  ReportCard: ({ children }: { children: ReactNode }) => (
     <section>{children}</section>
   ),
 }));
@@ -73,14 +71,14 @@ vi.mock('#components/reports/ReportCardName', () => ({
 }));
 
 vi.mock('#hooks/useFormat', () => ({
-  useFormat: () => (value: unknown) => `fmt:${value}`,
+  useFormat: () => (value: unknown) => `fmt:${String(value)}`,
 }));
 
 describe('NetWorthCard report cells', () => {
   beforeEach(() => {
     graphMocks.props = null;
     connectionMocks.send.mockReset();
-    connectionMocks.send.mockReturnValue(new Promise(() => {}));
+    connectionMocks.send.mockReturnValue(new Promise(() => undefined));
   });
 
   it('uses report cell data and formats graph values on the client', () => {

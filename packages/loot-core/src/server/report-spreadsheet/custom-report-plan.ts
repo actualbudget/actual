@@ -1,6 +1,6 @@
 import * as d from 'date-fns';
 
-import { Spreadsheet } from '#server/spreadsheet/spreadsheet';
+import type { Spreadsheet } from '#server/spreadsheet/spreadsheet';
 import { resolveName } from '#server/spreadsheet/util';
 import { conditionsToAQL } from '#server/transactions/transaction-rules';
 import * as monthUtils from '#shared/months';
@@ -232,7 +232,7 @@ function getLiveRange({
     return [earliestTransactionDate, latestTransactionDate];
   }
   if (typeof rangeName === 'number') {
-    return getSpecificRange(
+    const [start, end] = getSpecificRange(
       rangeName,
       ['This month', 'This week'].includes(dateRange)
         ? null
@@ -240,6 +240,7 @@ function getLiveRange({
       dateRangeType.get(dateRange),
       firstDayOfWeekIdx,
     );
+    return [start, end];
   }
 
   return [earliestTransactionDate, latestTransactionDate];
@@ -1046,7 +1047,6 @@ function calculateCustomReportData({
   accounts,
   assets: rawAssets,
   budgetRows,
-  budgetType,
   categories,
   categoryGroups,
   debts: rawDebts,
@@ -1060,7 +1060,6 @@ function calculateCustomReportData({
   accounts: AccountEntity[];
   assets: QueryDataEntity[];
   budgetRows: BudgetRow[];
-  budgetType: 'envelope' | 'tracking';
   categories: CategoryEntity[];
   categoryGroups: CategoryGroupEntity[];
   debts: QueryDataEntity[];
@@ -1451,7 +1450,6 @@ export function createCustomReportPlan({
         accounts,
         assets,
         budgetRows,
-        budgetType,
         categories,
         categoryGroups,
         debts,

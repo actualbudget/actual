@@ -1,5 +1,5 @@
 import * as sheet from '#server/sheet';
-import { Spreadsheet } from '#server/spreadsheet/spreadsheet';
+import type { Spreadsheet } from '#server/spreadsheet/spreadsheet';
 import { resolveName } from '#server/spreadsheet/util';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
@@ -115,9 +115,9 @@ function getCategoriesToInclude({
   const baseCategories = categories.filter(category =>
     isBaseCategory(category, showHiddenCategories),
   );
-  const relevantConditions = (conditions ?? []).filter(
-    condition => !condition.customName && isCategoryCondition(condition),
-  );
+  const relevantConditions = (conditions ?? [])
+    .filter(isCategoryCondition)
+    .filter(condition => !condition.customName);
 
   if (relevantConditions.length === 0) {
     return baseCategories;
