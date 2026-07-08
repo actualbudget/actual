@@ -712,9 +712,11 @@ describe('SimpleFin batch sync', () => {
         'accounts',
         'accounts',
       ]);
-      expect(secondSyncMessages.map(message => message.column).sort()).toEqual(
-        ['balance_current', 'bank_sync_status', 'last_sync'],
-      );
+      expect(secondSyncMessages.map(message => message.column).sort()).toEqual([
+        'balance_current',
+        'bank_sync_status',
+        'last_sync',
+      ]);
       expect(
         secondSyncMessages.some(message => message.dataset === 'transactions'),
       ).toBe(false);
