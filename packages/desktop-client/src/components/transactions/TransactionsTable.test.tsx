@@ -569,7 +569,7 @@ describe('Transactions', () => {
       );
     });
 
-    test('group column does not render for child transactions', () => {
+    test('group column renders for child transactions as well', () => {
       const transactions = generateTransactions(3, [1]);
       transactions[0].amount = -1000;
 
@@ -578,14 +578,10 @@ describe('Transactions', () => {
         transactions,
       });
 
-      // The split parent (index 0) should have a group cell
-      expect(queryField(container, 'group', 'div', 0)).toBeTruthy();
-
-      // Child transactions do not render group cells
       const children = container.querySelectorAll(
         '[data-testid="transaction-table"] [data-testid="group"]',
       );
-      expect(children.length).toBe(3);
+      expect(children.length).toBe(5);
     });
   });
 

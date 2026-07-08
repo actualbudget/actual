@@ -1596,7 +1596,7 @@ const Transaction = memo(function Transaction({
           onExpose={name => !isPreview && onEdit(id, name)}
         />
 
-        {showGroup && !isChild && (
+        {showGroup && (
           <Cell
             name="group"
             width="flex"
