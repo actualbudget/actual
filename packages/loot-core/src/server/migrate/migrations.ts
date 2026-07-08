@@ -150,8 +150,8 @@ function checkDatabaseValidity(
   // Tolerate applied migrations newer than anything this app knows
   // about: they were run by a newer version of the app on this budget.
   // This is safe because migrations are additive-only (enforced by
-  // additive-migrations.test.ts). Unknown ids older than the newest
-  // known migration still fail below — those indicate a corrupt or
+  // schema-guard.test.ts). Unknown ids older than the newest known
+  // migration still fail below — those indicate a corrupt or
   // incompatible database, not just a newer one.
   const maxAvailableId = available.length
     ? getMigrationId(available[available.length - 1])

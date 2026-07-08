@@ -140,8 +140,10 @@ jobs:
         with:
           persist-credentials: false
           # Full history so the migration check can diff against the merge
-          # base with master
+          # base with master; blobless to keep the large repo checkout fast
+          # (ls-tree and merge-base only need commits and trees)
           fetch-depth: 0
+          filter: blob:none
       - name: Set up environment
         uses: ./.github/actions/setup
         with:

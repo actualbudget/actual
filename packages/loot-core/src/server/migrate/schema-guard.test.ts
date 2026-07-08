@@ -7,11 +7,10 @@ import { migrate, withMigrationsDir } from './migrations';
 import {
   computeRetiredNames,
   diffSchemaSnapshots,
+  findNotNullViolations,
   findRetiredNameViolations,
   getSchemaSnapshot,
   mergeRetiredNames,
-  serializeRetiredNames,
-  serializeSchemaSnapshot,
 } from './schema-guard';
 import type { RetiredNames, SchemaSnapshot } from './schema-guard';
 
@@ -95,7 +94,7 @@ describe('Migration schema guard', () => {
           );
           nativeFs.writeFileSync(
             RETIRED_NAMES_PATH,
-            serializeRetiredNames(retired),
+            JSON.stringify(retired, null, 2) + '\n',
           );
           console.log(
             'Recorded retired schema names in retired-names.json:\n' +
@@ -104,7 +103,10 @@ describe('Migration schema guard', () => {
         }
       }
 
-      nativeFs.writeFileSync(SNAPSHOT_PATH, serializeSchemaSnapshot(current));
+      nativeFs.writeFileSync(
+        SNAPSHOT_PATH,
+        JSON.stringify(current, null, 2) + '\n',
+      );
       console.log('Updated schema-snapshot.json');
       return;
     }
@@ -137,6 +139,23 @@ describe('Migration schema guard', () => {
           formatList(diff.additions) +
           '\n\nRun `yarn generate:schema-snapshot` from the repository root ' +
           'and commit the updated schema-snapshot.json.',
+      );
+    }
+  });
+
+  test('synced tables can be created over sync one column at a time', async () => {
+    const current = await buildCurrentSnapshot();
+    const violations = findNotNullViolations(current);
+
+    if (violations.length > 0) {
+      throw new Error(
+        'Synced tables must not have NOT NULL columns without a default:\n' +
+          formatList(violations) +
+          '\n\nRows arrive over CRDT sync one column at a time, so row ' +
+          'creation on a receiving client inserts only (id, column) and ' +
+          'fails if another column is NOT NULL without a default. Make ' +
+          'the column nullable or give it a DEFAULT. See ' +
+          POLICY_URL,
       );
     }
   });

@@ -21,15 +21,27 @@ Migrations must only ever **add** schema. A migration may create a new table, ad
 - Change an existing column's type, `NOT NULL` constraint, or default value.
 - Edit or delete a migration file that has already shipped in a release.
 
+New columns — including columns of newly created tables — must be nullable or have a `DEFAULT` value (the `id` primary key is the exception). Rows arrive over sync one column at a time, so a receiving client creates a row with just `(id, column)`; a `NOT NULL` column without a default makes that insert fail.
+
 If a table or column is no longer needed, simply stop using it in code and leave it in place. An unused column in SQLite costs almost nothing.
 
 ### Why This Policy Exists
 
 Actual is local-first: every device keeps its own copy of the budget file and applies migrations with whatever app version it is running. Devices on different versions sync against the same budget file at the same time.
 
+As long as migrations are additive-only, this works across versions: a client on an older version records sync messages for tables and columns it doesn't know yet and applies them automatically after it updates, and it can open a budget file that a newer client has already migrated. Breaking that assumption breaks older clients:
+
 - Sync messages are column-level changes. If one client removes or renames a column that another client still writes to, applying those messages fails with an `invalid-schema` sync error.
 - When a device downloads the budget file, the applied migrations are compared with the migrations bundled in the app. Removed, edited, or reordered migrations trigger the `out-of-sync-migrations` error, and the budget cannot be opened until the app is updated.
 - Migration files are append-only for the same reason: a device that already ran a migration will never run it again, so editing a shipped migration silently forks the database schema between existing and new installs.
+
+### Cross-Version Sync Behavior
+
+You don't need to do anything special for older clients when your migration is additive — the app handles it:
+
+- When an older client receives a sync message for a table or column it doesn't have yet, it stores the message in a `messages_pending` table instead of failing. Sync keeps working, and the user sees a one-time notice that some changes need an app update to show up.
+- After the client updates and runs the new migrations, the pending messages are replayed into the new schema on the next budget load (last write wins, as with any sync message).
+- An older client can also open a budget file whose database already contains newer migrations, as long as they are all newer than the ones it knows about.
 
 ## The Schema Snapshot Workflow
 
@@ -62,5 +74,5 @@ In rare cases the maintainers may approve a genuinely breaking schema change. Th
 Retired names must **never be reused** for new tables or columns. Historical sync messages referencing the old name still exist on other devices and on the sync server, and would repopulate a reintroduced name with stale data. A test enforces this as well.
 
 :::warning
-A breaking migration locks out every client that has not yet updated to the app version containing it. Treat it as a last resort.
+A breaking migration can lock out clients that have not yet updated to the app version containing it, and clients running versions from before the cross-version sync support will stop syncing entirely. Treat it as a last resort.
 :::

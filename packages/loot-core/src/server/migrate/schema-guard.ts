@@ -225,6 +225,77 @@ export function diffSchemaSnapshots(
   return { additions, breakages };
 }
 
+// Tables that are never populated over CRDT sync (migration/sync/cache
+// bookkeeping), so the NOT NULL rule below doesn't apply to them.
+const NON_SYNCED_TABLES = new Set([
+  '__migrations__',
+  'created_budgets',
+  'kvcache',
+  'kvcache_key',
+  'messages_clock',
+  'messages_crdt',
+  'messages_pending',
+]);
+
+// Columns that shipped before this rule was enforced. They only work
+// because clients happen to send the NOT NULL column's message first
+// when creating a row. Do not add to this list.
+const NOT_NULL_EXCEPTIONS = new Set(['cleanup_groups.name']);
+
+// Synced tables are populated over CRDT sync one column at a time
+// (`INSERT INTO t (id, col) VALUES (?, ?)`), so a NOT NULL column
+// without a default can break row creation on receiving clients. SQLite
+// itself forbids this for `ALTER TABLE … ADD COLUMN`, but not for
+// columns of newly created tables — this rule covers that gap.
+export function findNotNullViolations(current: SchemaSnapshot): string[] {
+  const violations: string[] = [];
+
+  for (const [tableName, table] of Object.entries(current.tables)) {
+    if (NON_SYNCED_TABLES.has(tableName)) {
+      continue;
+    }
+    for (const [columnName, column] of Object.entries(table.columns)) {
+      if (
+        column.notNull &&
+        column.defaultValue == null &&
+        !column.primaryKey &&
+        !NOT_NULL_EXCEPTIONS.has(`${tableName}.${columnName}`)
+      ) {
+        violations.push(
+          `column "${tableName}.${columnName}" is NOT NULL without a default`,
+        );
+      }
+    }
+  }
+
+  // Keep the hardcoded lists honest: a stale entry naming a table that
+  // is later reintroduced as a synced table would silently disable the
+  // rule for it.
+  for (const tableName of NON_SYNCED_TABLES) {
+    if (!current.tables[tableName]) {
+      violations.push(
+        `"${tableName}" in NON_SYNCED_TABLES doesn't exist in the schema — remove the stale entry`,
+      );
+    }
+  }
+  for (const exception of NOT_NULL_EXCEPTIONS) {
+    const [tableName, columnName] = exception.split('.');
+    const column = current.tables[tableName]?.columns[columnName];
+    if (
+      !column ||
+      !column.notNull ||
+      column.defaultValue != null ||
+      column.primaryKey
+    ) {
+      violations.push(
+        `"${exception}" in NOT_NULL_EXCEPTIONS no longer names a NOT NULL column without a default — remove the stale entry`,
+      );
+    }
+  }
+
+  return violations;
+}
+
 // When a breaking change is deliberately approved, the removed names are
 // recorded so they can never be reused: historical CRDT sync messages
 // referencing them still exist and would repopulate a reintroduced name
@@ -282,12 +353,4 @@ export function findRetiredNameViolations(
   }
 
   return violations;
-}
-
-export function serializeSchemaSnapshot(snapshot: SchemaSnapshot): string {
-  return JSON.stringify(snapshot, null, 2) + '\n';
-}
-
-export function serializeRetiredNames(retired: RetiredNames): string {
-  return JSON.stringify(retired, null, 2) + '\n';
 }

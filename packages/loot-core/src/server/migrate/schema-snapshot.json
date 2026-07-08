@@ -646,6 +646,40 @@
         }
       }
     },
+    "messages_pending": {
+      "columns": {
+        "timestamp": {
+          "type": "TEXT",
+          "notNull": false,
+          "defaultValue": null,
+          "primaryKey": true
+        },
+        "dataset": {
+          "type": "TEXT",
+          "notNull": true,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "row": {
+          "type": "TEXT",
+          "notNull": true,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "column": {
+          "type": "TEXT",
+          "notNull": true,
+          "defaultValue": null,
+          "primaryKey": false
+        },
+        "value": {
+          "type": "BLOB",
+          "notNull": true,
+          "defaultValue": null,
+          "primaryKey": false
+        }
+      }
+    },
     "notes": {
       "columns": {
         "id": {
