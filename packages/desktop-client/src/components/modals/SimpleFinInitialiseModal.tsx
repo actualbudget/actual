@@ -52,6 +52,10 @@ export const SimpleFinInitialiseModal = ({
       setIsValid(false);
       setError(getSecretsError(error, reason));
     } else {
+      await send('secret-set', {
+        name: 'simplefin_accessKey',
+        value: null,
+      });
       onSuccess();
     }
     setIsLoading(false);

@@ -370,16 +370,19 @@ export async function runRules(
         // bypass condition checking to run the rule even if the transaction date falls outside of the schedule's date range.
         const changes = rules[i].execActions(finalTrans);
         finalTrans = Object.assign({}, finalTrans, changes);
+        await resolvePayeeNameForRules(finalTrans);
       } else if (RuleIdsLinkedToSchedules.includes(rules[i].id)) {
         // skip all other rules that are linked to other schedules.
         continue;
       } else {
         // if a rule is not linked to a schedule, run it.
         finalTrans = rules[i].apply(finalTrans);
+        await resolvePayeeNameForRules(finalTrans);
       }
     } else {
       // if there is no scheduleRuleID then just run all rules.
       finalTrans = rules[i].apply(finalTrans);
+      await resolvePayeeNameForRules(finalTrans);
     }
   }
 
@@ -1098,23 +1101,30 @@ export async function prepareTransactionForRules(
   return r;
 }
 
+async function resolvePayeeNameForRules(
+  trans: TransactionEntity | TransactionForRules,
+): Promise<void> {
+  if (!('payee_name' in trans) || trans.payee !== 'new') {
+    return;
+  }
+
+  if (trans.payee_name) {
+    let payee_id = (await getPayeeByName(trans.payee_name))?.id;
+    payee_id ??= await insertPayee({
+      name: trans.payee_name,
+    });
+
+    trans.payee = payee_id;
+  } else {
+    trans.payee = null;
+  }
+}
+
 export async function finalizeTransactionForRules(
   trans: TransactionEntity | TransactionForRules,
 ): Promise<TransactionEntity> {
   if ('payee_name' in trans) {
-    if (trans.payee === 'new') {
-      if (trans.payee_name) {
-        let payeeId = (await getPayeeByName(trans.payee_name))?.id;
-        payeeId ??= await insertPayee({
-          name: trans.payee_name,
-        });
-
-        trans.payee = payeeId;
-      } else {
-        trans.payee = null;
-      }
-    }
-
+    await resolvePayeeNameForRules(trans);
     delete trans.payee_name;
   }
 

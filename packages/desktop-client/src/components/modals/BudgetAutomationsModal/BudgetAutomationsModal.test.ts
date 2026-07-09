@@ -1,6 +1,26 @@
+import type { ScheduleEntity } from '@actual-app/core/types/models';
 import type { Template } from '@actual-app/core/types/models/templates';
 
 import { migrateTemplatesToAutomations } from './migrateTemplatesToAutomations';
+
+function schedule(id: string, name: string): ScheduleEntity {
+  return {
+    id,
+    name,
+    rule: 'rule-1',
+    next_date: '2026-01-01',
+    completed: false,
+    posts_transaction: false,
+    tombstone: false,
+    _payee: 'payee-1',
+    _account: 'account-1',
+    _amount: 0,
+    _amountOp: 'is',
+    _date: '2026-01-01',
+    _conditions: [],
+    _actions: [],
+  };
+}
 
 describe('migrateTemplatesToAutomations', () => {
   it('drops simple templates that have no limit and no monthly amount', () => {
@@ -266,6 +286,62 @@ describe('migrateTemplatesToAutomations', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].displayType).toBe('schedule');
+    expect(result[0].template).toEqual(scheduleTemplate);
+  });
+
+  it('fills in scheduleId for a name-only schedule template', () => {
+    const scheduleTemplate = {
+      type: 'schedule',
+      directive: 'template',
+      priority: 1,
+      name: 'Rent',
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations(
+      [scheduleTemplate],
+      [schedule('sched-1', 'Rent')],
+    );
+
+    expect(result[0].template).toMatchObject({
+      scheduleId: 'sched-1',
+      name: 'Rent',
+    });
+  });
+
+  it('refreshes a stale name from scheduleId after a rename', () => {
+    const scheduleTemplate = {
+      type: 'schedule',
+      directive: 'template',
+      priority: 1,
+      scheduleId: 'sched-1',
+      name: 'Old Name',
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations(
+      [scheduleTemplate],
+      [schedule('sched-1', 'New Name')],
+    );
+
+    expect(result[0].template).toMatchObject({
+      scheduleId: 'sched-1',
+      name: 'New Name',
+    });
+  });
+
+  it('leaves a schedule template untouched when no schedule matches', () => {
+    const scheduleTemplate = {
+      type: 'schedule',
+      directive: 'template',
+      priority: 1,
+      scheduleId: 'missing',
+      name: 'Gone',
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations(
+      [scheduleTemplate],
+      [schedule('sched-1', 'Rent')],
+    );
+
     expect(result[0].template).toEqual(scheduleTemplate);
   });
 });

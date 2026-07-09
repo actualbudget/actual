@@ -5,5 +5,14 @@ export default defineConfig({
     globals: true,
     include: ['__tests__/**/*.test.ts'],
     environment: 'node',
+    reporters: process.env.CI
+      ? [
+          'default',
+          [
+            'junit',
+            { outputFile: './test-results/junit.xml', suiteName: 'bin' },
+          ],
+        ]
+      : ['default'],
   },
 });

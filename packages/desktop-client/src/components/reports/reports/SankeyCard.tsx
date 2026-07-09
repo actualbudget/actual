@@ -7,7 +7,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { SankeyWidget } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
-import debounce from 'lodash/debounce';
+import { debounce } from 'es-toolkit/compat';
 
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
@@ -27,7 +27,6 @@ import type {
   Graph,
   GraphLayers,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
 import { useLocale } from '#hooks/useLocale';
@@ -38,22 +37,16 @@ type SankeyCardProps = {
   isEditing?: boolean;
   meta?: SankeyWidget['meta'];
   onMetaChange: (newMeta: SankeyWidget['meta']) => void;
-  onRemove: () => void;
-  onCopy: (targetDashboardId: string) => void;
 };
 export function SankeyCard({
   widgetId,
   isEditing,
   meta,
   onMetaChange,
-  onRemove,
-  onCopy,
 }: SankeyCardProps) {
   const { t } = useTranslation();
   const locale = useLocale();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
-  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useDashboardWidgetCopyMenu(onCopy);
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
 
@@ -179,33 +172,11 @@ export function SankeyCard({
 
   return (
     <ReportCard
+      widgetId={widgetId}
       isEditing={isEditing}
       disableClick={nameMenuOpen}
       to={`/reports/sankey/${widgetId}`}
-      menuItems={[
-        {
-          name: 'rename',
-          text: t('Rename'),
-        },
-        {
-          name: 'remove',
-          text: t('Remove'),
-        },
-        ...copyMenuItems,
-      ]}
-      onMenuSelect={item => {
-        if (handleCopyMenuSelect(item)) return;
-        switch (item) {
-          case 'rename':
-            setNameMenuOpen(true);
-            break;
-          case 'remove':
-            onRemove();
-            break;
-          default:
-            throw new Error(`Unrecognized selection: ${item}`);
-        }
-      }}
+      onRename={() => setNameMenuOpen(true)}
     >
       <View style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', padding: 20 }}>

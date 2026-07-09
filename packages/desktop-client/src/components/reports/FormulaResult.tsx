@@ -10,7 +10,7 @@ import type { Ref, RefObject } from 'react';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { amountToInteger } from '@actual-app/core/shared/util';
-import debounce from 'lodash/debounce';
+import { debounce } from 'es-toolkit/compat';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';

@@ -1,0 +1,15 @@
+{
+  "name": "@actual-app/vite-plugin-peggy",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Vite plugin that compiles Peggy grammars (.pegjs) into ES modules.",
+  "type": "module",
+  "main": "./index.js",
+  "exports": "./index.js",
+  "dependencies": {
+    "peggy": "5.1.0"
+  },
+  "peerDependencies": {
+    "vite": "*"
+  }
+}

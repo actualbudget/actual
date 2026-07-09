@@ -22,7 +22,6 @@ import { calculateTimeRange } from '#components/reports/reportRanges';
 import { defaultTimeFrame } from '#components/reports/reports/Crossover';
 import { createCrossoverSpreadsheet } from '#components/reports/spreadsheets/crossover-spreadsheet';
 import type { CrossoverData } from '#components/reports/spreadsheets/crossover-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
@@ -34,8 +33,6 @@ type CrossoverCardProps = {
   accounts: AccountEntity[];
   meta?: CrossoverWidget['meta'];
   onMetaChange: (newMeta: CrossoverWidget['meta']) => void;
-  onRemove: () => void;
-  onCopy: (targetDashboardId: string) => void;
 };
 
 export function CrossoverCard({
@@ -44,8 +41,6 @@ export function CrossoverCard({
   accounts,
   meta = {},
   onMetaChange,
-  onRemove,
-  onCopy,
 }: CrossoverCardProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -53,9 +48,6 @@ export function CrossoverCard({
   const { isNarrowWidth } = useResponsive();
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
-
-  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useDashboardWidgetCopyMenu(onCopy);
 
   // Calculate date range from meta or use default range
   const [start, setStart] = useState<string>('');
@@ -196,27 +188,11 @@ export function CrossoverCard({
 
   return (
     <ReportCard
+      widgetId={widgetId}
       isEditing={isEditing}
       disableClick={nameMenuOpen}
       to={`/reports/crossover/${widgetId}`}
-      menuItems={[
-        { name: 'rename', text: t('Rename') },
-        { name: 'remove', text: t('Remove') },
-        ...copyMenuItems,
-      ]}
-      onMenuSelect={item => {
-        if (handleCopyMenuSelect(item)) return;
-        switch (item) {
-          case 'rename':
-            setNameMenuOpen(true);
-            break;
-          case 'remove':
-            onRemove();
-            break;
-          default:
-            throw new Error(`Unrecognized selection: ${item}`);
-        }
-      }}
+      onRename={() => setNameMenuOpen(true)}
     >
       <View
         style={{ flex: 1 }}

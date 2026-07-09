@@ -27,15 +27,6 @@ function stripTrailingPunctuation(url: string): string {
 }
 
 /**
- * Checks if a URL is a file path
- */
-export function isFilePathUrl(url: string): boolean {
-  return (
-    url.startsWith('/') || /^[A-Z]:\\/i.test(url) || url.startsWith('file://')
-  );
-}
-
-/**
  * Normalizes a URL by adding protocol if missing
  */
 export function normalizeUrl(rawUrl: string): string {

@@ -4,7 +4,9 @@ export default defineConfig({
   timeout: 60000, // 60 seconds
   retries: 1,
   testDir: 'e2e/',
-  reporter: undefined,
+  reporter: process.env.CI
+    ? [['list'], ['junit', { outputFile: 'e2e/test-results/junit.xml' }]]
+    : undefined,
   outputDir: 'e2e/test-results/',
   snapshotPathTemplate:
     '{testDir}/__screenshots__/{testFilePath}/{arg}-{platform}{ext}',

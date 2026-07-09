@@ -278,13 +278,12 @@ budgetTypes.forEach(budgetType => {
       const budgetPage = await navigation.goToBudgetPage();
 
       const categoryGroupName = await budgetPage.getCategoryGroupNameForRow(0);
-      await budgetPage.openCategoryGroupMenu(categoryGroupName);
+      const categoryGroupMenuModal =
+        await budgetPage.openCategoryGroupMenu(categoryGroupName);
 
-      const categoryMenuModalHeading = page
-        .getByRole('dialog')
-        .getByRole('heading');
-
-      await expect(categoryMenuModalHeading).toHaveText(categoryGroupName);
+      await expect(categoryGroupMenuModal.heading).toHaveText(
+        categoryGroupName,
+      );
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -296,6 +295,41 @@ budgetTypes.forEach(budgetType => {
 
       await expect(categoryMenuModal.heading).toHaveText(categoryName);
       await expect(page).toMatchThemeScreenshots();
+    });
+
+    test('opens the transfer confirmation when deleting a category group with transactions', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const categoryGroupName = await budgetPage.getCategoryGroupNameForRow(0);
+      const categoryGroupMenuModal =
+        await budgetPage.openCategoryGroupMenu(categoryGroupName);
+
+      await categoryGroupMenuModal.delete();
+
+      const confirmDeleteModal = page.getByTestId(
+        'confirm-category-delete-modal',
+      );
+      await expect(confirmDeleteModal.getByRole('heading')).toHaveText(
+        'Confirm Delete',
+      );
+      await expect(confirmDeleteModal).toContainText('Transfer to:');
+    });
+
+    test('opens the transfer confirmation when deleting a category with transactions', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const categoryName = await budgetPage.getCategoryNameForRow(0);
+      const categoryMenuModal = await budgetPage.openCategoryMenu(categoryName);
+
+      await categoryMenuModal.delete();
+
+      const confirmDeleteModal = page.getByTestId(
+        'confirm-category-delete-modal',
+      );
+      await expect(confirmDeleteModal.getByRole('heading')).toHaveText(
+        'Confirm Delete',
+      );
+      await expect(confirmDeleteModal).toContainText('Transfer to:');
     });
 
     // Budgeted Cell Tests

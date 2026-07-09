@@ -124,6 +124,7 @@ export function ActionableGridListItem<T extends object>({
             justifyContent: 'flex-start',
             alignItems: 'flex-start',
           }}
+          onPressStart={e => e.continuePropagation()}
           onClick={handleAction}
         >
           {children}

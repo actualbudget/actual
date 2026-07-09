@@ -37,6 +37,8 @@
     "@types",
     "e2e",
     "*.config.ts",
-    "*.config.mts"
+    "*.config.mts",
+    "app/bundle.*",
+    "app/stats.json"
   ]
 }

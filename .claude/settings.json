@@ -33,6 +33,24 @@
             "command": "\"$CLAUDE_PROJECT_DIR/scripts/agent-hooks/no-strict-ignore-new-file.sh\""
           }
         ]
+      },
+      {
+        "matcher": "mcp__github__(add_issue_comment|add_comment_to_pending_review|add_reply_to_pull_request_comment|pull_request_review_write|issue_write|sub_issue_write)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/scripts/agent-hooks/github-comment-style.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__github__create_pull_request",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/scripts/agent-hooks/pr-template-blank.sh\""
+          }
+        ]
       }
     ],
     "Stop": [

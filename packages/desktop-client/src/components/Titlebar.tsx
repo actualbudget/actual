@@ -167,7 +167,7 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
           syncState === 'offline' ||
           syncState === 'local'
         ? theme.buttonBareDisabledText
-        : 'inherit';
+        : theme.buttonBareText;
 
   const activeStyle = isMobile
     ? {
@@ -313,7 +313,7 @@ export function Titlebar({ style }: TitlebarProps) {
         >
           <SvgNavigationMenu
             className="menu"
-            style={{ width: 15, height: 15, color: theme.pageText, left: 0 }}
+            style={{ width: 15, height: 15, left: 0 }}
           />
         </Button>
       )}
@@ -327,7 +327,7 @@ export function Titlebar({ style }: TitlebarProps) {
                 <SvgArrowLeft
                   width={10}
                   height={10}
-                  style={{ marginRight: 5, color: 'currentColor' }}
+                  style={{ marginRight: 5 }}
                 />{' '}
                 <Trans>Back</Trans>
               </Button>
