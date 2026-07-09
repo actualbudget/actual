@@ -71,8 +71,10 @@ const headMigrations = readMigrations('HEAD');
 const problems: string[] = [];
 
 // 1. New migrations must be dated after the latest migration on master.
-const latestMasterMigration =
-  masterMigrations[masterMigrations.length - 1]?.id ?? 0;
+const latestMasterMigration = Math.max(
+  0,
+  ...masterMigrations.map(migration => migration.id),
+);
 const newMigrations = findAddedMigrations(masterMigrations, headMigrations);
 const misdated = findMisdatedMigrations(newMigrations, latestMasterMigration);
 
