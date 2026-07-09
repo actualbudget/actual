@@ -153,14 +153,6 @@ const pickerStyles: CSSProperties = {
   },
 };
 
-const squareBottomCornersStyle: CSSProperties = {
-  '& .react-aria-Calendar': {
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    boxShadow: 'none',
-  },
-};
-
 type DatePickerProps = {
   value: string;
   dateFormat: string;
@@ -168,7 +160,7 @@ type DatePickerProps = {
   firstDayOfWeek: FirstDayOfWeek;
   onUpdate: (selectedDate: Date) => void;
   onSelect: (selectedDate: Date) => void;
-  squareBottomCorners?: boolean;
+  attached?: boolean;
 };
 
 type DatePickerForwardedRef = {
@@ -176,15 +168,7 @@ type DatePickerForwardedRef = {
 };
 const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
   (
-    {
-      value,
-      dateFormat,
-      locale,
-      firstDayOfWeek,
-      onUpdate,
-      onSelect,
-      squareBottomCorners,
-    },
+    { value, dateFormat, locale, firstDayOfWeek, onUpdate, onSelect, attached },
     ref,
   ) => {
     const { t } = useTranslation();
@@ -243,7 +227,13 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
       <View
         className={css([
           pickerStyles,
-          squareBottomCorners && squareBottomCornersStyle,
+          attached && {
+            '& .react-aria-Calendar': {
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+              boxShadow: 'none',
+            },
+          },
           { flex: 1 },
         ])}
         data-date-picker
@@ -537,7 +527,7 @@ function DateSelectDesktop({
             dateFormat={dateFormat}
             locale={locale}
             firstDayOfWeek={firstDayOfWeek}
-            squareBottomCorners={!!onTransferDateSyncChange}
+            attached={!!onTransferDateSyncChange}
             onUpdate={date => {
               setSelectedValue(format(date, dateFormat));
               onUpdate?.(format(date, 'yyyy-MM-dd'));
