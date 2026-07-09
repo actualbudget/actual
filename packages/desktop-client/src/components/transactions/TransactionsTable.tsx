@@ -50,6 +50,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
 import { memoizeOne } from '@actual-app/core/shared/memoize';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
@@ -1081,6 +1082,15 @@ const Transaction = memo(function Transaction({
 
   const [showReconciliationWarning, setShowReconciliationWarning] =
     useState(false);
+  const [syncTransferDate, setSyncTransferDateState] = useState(false);
+  // Pikaday's date-click handler is bound once at mount, so it always
+  // invokes a stale closure. A ref lets that stale closure still observe
+  // the latest checkbox value.
+  const syncTransferDateRef = useRef(syncTransferDate);
+  const setSyncTransferDate = (value: boolean) => {
+    syncTransferDateRef.current = value;
+    setSyncTransferDateState(value);
+  };
 
   const onUpdate: TransactionUpdateFunction = async (name, value) => {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
@@ -1229,6 +1239,18 @@ const Transaction = memo(function Transaction({
         ? 'amount'
         : name;
       onSave(deserialized, subtransactions, deserializedName);
+
+      if (
+        name === 'date' &&
+        syncTransferDateRef.current &&
+        transaction.transfer_id
+      ) {
+        void send('transactions-batch-update', {
+          updated: [{ id: transaction.transfer_id, date: value as string }],
+          runTransfers: false,
+        });
+        setSyncTransferDate(false);
+      }
     }
   };
 
@@ -1561,7 +1583,12 @@ const Transaction = memo(function Transaction({
             formatter={date =>
               date ? formatDate(parseISO(date), dateFormat) : ''
             }
-            onExpose={name => !isPreview && onEdit(id, name)}
+            onExpose={name => {
+              setSyncTransferDate(false);
+              if (!isPreview) {
+                onEdit(id, name);
+              }
+            }}
             onUpdate={value => {
               onUpdate('date', value);
             }}
@@ -1582,6 +1609,10 @@ const Transaction = memo(function Transaction({
                 clearOnBlur
                 onUpdate={onUpdate}
                 onSelect={onSave}
+                transferDateSyncChecked={syncTransferDate}
+                onTransferDateSyncChange={
+                  transaction.transfer_id ? setSyncTransferDate : undefined
+                }
               />
             )}
           </CustomCell>

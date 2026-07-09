@@ -24,7 +24,7 @@ import {
   Heading,
   I18nProvider,
 } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
@@ -48,6 +48,7 @@ import { css } from '@emotion/css';
 import { CalendarDate } from '@internationalized/date';
 import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
 
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { InputField } from '#components/mobile/MobileForms';
 import { useLanguage } from '#hooks/useLocale';
 import { useMergedRefs } from '#hooks/useMergedRefs';
@@ -81,11 +82,13 @@ function fromCalendarDate(date: CalendarDate): Date {
   return new Date(date.year, date.month - 1, date.day);
 }
 
+const calendarShadow = '0 0px 4px rgba(0, 0, 0, .25)';
+
 const pickerStyles: CSSProperties = {
   '& .react-aria-Calendar': {
     color: theme.calendarText,
     background: theme.calendarBackground,
-    boxShadow: '0 0px 4px rgba(0, 0, 0, .25)',
+    boxShadow: calendarShadow,
     borderRadius: 4,
     padding: 10,
   },
@@ -150,6 +153,14 @@ const pickerStyles: CSSProperties = {
   },
 };
 
+const squareBottomCornersStyle: CSSProperties = {
+  '& .react-aria-Calendar': {
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    boxShadow: 'none',
+  },
+};
+
 type DatePickerProps = {
   value: string;
   dateFormat: string;
@@ -157,13 +168,25 @@ type DatePickerProps = {
   firstDayOfWeek: FirstDayOfWeek;
   onUpdate: (selectedDate: Date) => void;
   onSelect: (selectedDate: Date) => void;
+  squareBottomCorners?: boolean;
 };
 
 type DatePickerForwardedRef = {
   handleInputKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
 };
 const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
-  ({ value, dateFormat, locale, firstDayOfWeek, onUpdate, onSelect }, ref) => {
+  (
+    {
+      value,
+      dateFormat,
+      locale,
+      firstDayOfWeek,
+      onUpdate,
+      onSelect,
+      squareBottomCorners,
+    },
+    ref,
+  ) => {
     const { t } = useTranslation();
     const parsedValue = value ? parse(value, dateFormat, currentDate()) : null;
     const focusedCalendarDate = toCalendarDate(
@@ -218,7 +241,11 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
 
     return (
       <View
-        className={css([pickerStyles, { flex: 1 }])}
+        className={css([
+          pickerStyles,
+          squareBottomCorners && squareBottomCornersStyle,
+          { flex: 1 },
+        ])}
         data-date-picker
         onMouseDown={e => e.preventDefault()}
       >
@@ -286,6 +313,8 @@ type DateSelectProps = {
   clearOnBlur?: boolean;
   onUpdate?: (selectedDate: string) => void;
   onSelect: (selectedDate: string) => void;
+  transferDateSyncChecked?: boolean;
+  onTransferDateSyncChange?: (checked: boolean) => void;
 };
 
 function DateSelectDesktop({
@@ -302,6 +331,8 @@ function DateSelectDesktop({
   clearOnBlur = true,
   onUpdate,
   onSelect,
+  transferDateSyncChecked,
+  onTransferDateSyncChange,
 }: DateSelectProps) {
   const parsedDefaultValue = useMemo(() => {
     if (defaultValue) {
@@ -493,22 +524,48 @@ function DateSelectDesktop({
         }}
       />
       {maybeWrapTooltip(
-        <DatePicker
-          ref={picker}
-          value={selectedValue}
-          dateFormat={dateFormat}
-          locale={locale}
-          firstDayOfWeek={firstDayOfWeek}
-          onUpdate={date => {
-            setSelectedValue(format(date, dateFormat));
-            onUpdate?.(format(date, 'yyyy-MM-dd'));
-          }}
-          onSelect={date => {
-            setValue(format(date, dateFormat));
-            onSelect(format(date, 'yyyy-MM-dd'));
-            setOpen(false);
-          }}
-        />,
+        <View
+          style={
+            onTransferDateSyncChange
+              ? { borderRadius: 4, boxShadow: calendarShadow }
+              : undefined
+          }
+        >
+          <DatePicker
+            ref={picker}
+            value={selectedValue}
+            dateFormat={dateFormat}
+            locale={locale}
+            firstDayOfWeek={firstDayOfWeek}
+            squareBottomCorners={!!onTransferDateSyncChange}
+            onUpdate={date => {
+              setSelectedValue(format(date, dateFormat));
+              onUpdate?.(format(date, 'yyyy-MM-dd'));
+            }}
+            onSelect={date => {
+              setValue(format(date, dateFormat));
+              onSelect(format(date, 'yyyy-MM-dd'));
+              setOpen(false);
+            }}
+          />
+          {onTransferDateSyncChange && (
+            <LabeledCheckbox
+              id={`${id ?? 'date-select'}-transfer-date-sync`}
+              checked={transferDateSyncChecked}
+              onChange={e => onTransferDateSyncChange(e.target.checked)}
+              onMouseDown={e => e.preventDefault()}
+              style={{
+                padding: '6px 8px',
+                borderBottomLeftRadius: 4,
+                borderBottomRightRadius: 4,
+                backgroundColor: theme.calendarBackground,
+                color: theme.calendarText,
+              }}
+            >
+              <Trans>Also update the other side of the transfer</Trans>
+            </LabeledCheckbox>
+          )}
+        </View>,
       )}
     </View>
   );
