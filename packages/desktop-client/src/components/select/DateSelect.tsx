@@ -564,16 +564,28 @@ function DateSelectDesktop({
 function DateSelectMobile(props: DateSelectProps) {
   const { style: inputStyle, ...restInputProps } = props.inputProps ?? {};
   return (
-    <InputField
-      id={props.id}
-      type="date"
-      value={props.value ?? ''}
-      onChange={event => {
-        props.onSelect(event.target.value);
-      }}
-      style={{ height: 28, ...inputStyle }}
-      {...restInputProps}
-    />
+    <View>
+      <InputField
+        id={props.id}
+        type="date"
+        value={props.value ?? ''}
+        onChange={event => {
+          props.onSelect(event.target.value);
+        }}
+        style={{ height: 28, ...inputStyle }}
+        {...restInputProps}
+      />
+      {props.onTransferDateSyncChange && (
+        <LabeledCheckbox
+          id={`${props.id ?? 'date-select'}-transfer-date-sync`}
+          checked={props.transferDateSyncChecked}
+          onChange={e => props.onTransferDateSyncChange?.(e.target.checked)}
+          style={{ padding: '6px 0' }}
+        >
+          <Trans>Also update the other side of the transfer</Trans>
+        </LabeledCheckbox>
+      )}
+    </View>
   );
 }
 
