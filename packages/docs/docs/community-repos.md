@@ -19,6 +19,7 @@ The following are implementations of bank syncing using the Actual API. For inst
 - **MoneyMan an israel banks importer** - https://github.com/daniel-hauser/moneyman
 - **Plaid bank sync** - https://github.com/youngcw/actualplaid
 - **ANZ Plus bank PDF to OFX converter** - [PDFtoOFX](https://github.com/spydisec/PDFtoOFX/)
+- **German DKB and Comdirect banks importer** - https://github.com/FridoE/actual-bank-importer
 
 ## Other Importers
 
@@ -30,8 +31,10 @@ tracking, loyalty card paybacks, prepaid cards, etc.
 
 ## Budget Migration
 
-Actual currently has official support for migrating budgets from YNAB4 and nYNAB. The following are available for migrating from other budget apps.
+Actual currently has official support for migrating budgets from YNAB4 and nYNAB. The following are available for migrating from YNAB or other budget apps.
 
+- **YNAB Export** - https://github.com/StephenBrown2/ynab-export
+  - _A terminal tool that exports nYNAB budget data as JSON for import into Actual._
 - **MoneyMoney** - https://github.com/NikxDa/actual-moneymoney
 - **Quicken on Mac** - https://github.com/slimslickner/quicken-mac-to-actual-budget
 

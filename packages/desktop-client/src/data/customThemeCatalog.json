@@ -335,5 +335,18 @@
       "#94B852"
     ],
     "mode": "dark"
+  },
+  {
+    "name": "Zero-Dark",
+    "repo": "deathblade666/actual-theme-zero-dark",
+    "colors": [
+      "#0a0a0c",
+      "#a1a1aa",
+      "#facc15",
+      "#f43f5e",
+      "#00e676",
+      "#ffffff"
+    ],
+    "mode": "dark"
   }
 ]

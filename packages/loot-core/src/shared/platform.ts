@@ -1,10 +1,16 @@
 const isWindows =
-  navigator.platform && navigator.platform.toLowerCase() === 'win32';
+  typeof navigator !== 'undefined' &&
+  navigator.platform &&
+  navigator.platform.toLowerCase() === 'win32';
 
 const isMac =
-  navigator.platform && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  typeof navigator !== 'undefined' &&
+  navigator.platform &&
+  navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
-export const isPlaywright = navigator.userAgent.includes('playwright');
+export const isPlaywright =
+  typeof navigator !== 'undefined' &&
+  navigator.userAgent.includes('playwright');
 
 export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = isWindows
   ? 'windows'
