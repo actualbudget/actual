@@ -1242,12 +1242,15 @@ const Transaction = memo(function Transaction({
 
       if (
         name === 'date' &&
+        typeof value === 'string' &&
         syncTransferDateRef.current &&
         transaction.transfer_id
       ) {
         void send('transactions-batch-update', {
-          updated: [{ id: transaction.transfer_id, date: value as string }],
+          updated: [{ id: transaction.transfer_id, date: value }],
           runTransfers: false,
+        }).catch(error => {
+          console.error('Failed to sync transfer date:', error);
         });
         setSyncTransferDate(false);
       }
