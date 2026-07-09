@@ -107,13 +107,40 @@ export function FinancesApp() {
 
   const multiuserEnabled = useMultiuserEnabled();
 
-  const init = useEffectEvent(() => {
+  const hasStartedInitialSyncRef = useRef(false);
+
+  const startInitialSync = useEffectEvent(() => {
+    if (hasStartedInitialSyncRef.current) {
+      return;
+    }
+    hasStartedInitialSyncRef.current = true;
+
     // Wait a little bit to make sure the sync button will get the
-    // sync start event. This can be improved later.
+    // sync start event, and to let the visible page send its initial
+    // spreadsheet queries to the worker first. This can be improved
+    // later.
     setTimeout(async () => {
       await dispatch(sync());
     }, 100);
+  });
 
+  // The sync applies messages in long synchronous stretches on the
+  // single worker thread, so starting it too early starves the
+  // account-balance queries issued by the first visible page (most
+  // noticeable on mobile). Hold the initial sync until the initial
+  // account data has loaded, with a timeout in case it never does.
+  useEffect(() => {
+    if (!isAccountsFetching && accounts) {
+      startInitialSync();
+    }
+  }, [isAccountsFetching, accounts]);
+
+  useEffect(() => {
+    const fallbackTimeout = setTimeout(startInitialSync, 5000);
+    return () => clearTimeout(fallbackTimeout);
+  }, []);
+
+  const init = useEffectEvent(() => {
     async function run() {
       await global.Actual.waitForUpdateReadyForDownload(); // This will only resolve when an update is ready
       dispatch(
