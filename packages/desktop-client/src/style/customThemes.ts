@@ -60,16 +60,19 @@ export function normalizeGitHubRepo(repo: string): string {
  * Try fetching actual.css from main branch.
  */
 export function fetchThemeCss(repo: string): Promise<string> {
-  return fetchDirectCss(
+  const url = new URL(
     `https://raw.githubusercontent.com/${repo}/refs/heads/main/actual.css`,
   );
+  url.searchParams.set('v', Date.now().toString());
+
+  return fetchDirectCss(url.toString());
 }
 
 /**
  * Fetch CSS from a direct URL (not a GitHub repo).
  */
 export async function fetchDirectCss(url: string): Promise<string> {
-  const response = await fetch(url);
+  const response = await fetch(url, { cache: 'no-store' });
   if (!response.ok) {
     throw new Error(
       `Failed to fetch CSS from ${url}: ${response.status} ${response.statusText}`,
