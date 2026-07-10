@@ -164,13 +164,7 @@ export function getFullRange(start: string, end: string) {
   return [start, end, 'full'] as const;
 }
 
-/**
- * A live (sliding) range, `offset` months wide, whose end sits `endOffset`
- * months before the current month. `endOffset` defaults to `0` (the window ends
- * at the current month) so existing callers are unchanged; passing e.g. `1`
- * yields "the N months ending last month". Echoes `endOffset` back as the 4th
- * tuple element so callers can persist it (see `TimeFrame.endOffset`).
- */
+/** A live range `offset` months wide, ending `endOffset` months before the current month. */
 export function getLatestRange(offset: number, endOffset: number = 0) {
   const end = monthUtils.subMonths(monthUtils.currentMonth(), endOffset);
   const start = monthUtils.subMonths(end, offset);
@@ -232,13 +226,7 @@ export function calculateTimeRange(
       ] as const;
     }
 
-    // The gap from "now" is stored explicitly (see TimeFrame.endOffset) so a
-    // live window keeps sliding forward correctly between saves. `end` is an
-    // absolute date that goes stale the moment it's saved, so re-deriving the
-    // gap from it vs. "now" on every load would make the window drift further
-    // behind "now" every time it's reopened instead of tracking it. Only
-    // legacy data without a stored endOffset falls back to that derivation,
-    // as a one-time migration.
+    // Derive from the stale `end` only for legacy data without a stored endOffset.
     const endOffset =
       timeFrame?.endOffset ??
       Math.max(

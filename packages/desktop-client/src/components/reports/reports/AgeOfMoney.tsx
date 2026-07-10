@@ -33,8 +33,6 @@ import { PrivacyFilter } from '#components/PrivacyFilter';
 import { AgeOfMoneyGraph } from '#components/reports/graphs/AgeOfMoneyGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
-import { valueIsDay } from '#components/reports/MonthRangePicker';
-import type { MonthRangeGranularity } from '#components/reports/MonthRangePicker';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createAgeOfMoneySpreadsheet } from '#components/reports/spreadsheets/age-of-money-spreadsheet';
 import { useReport } from '#components/reports/useReport';
@@ -93,21 +91,11 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
-  // How many months before the current month a sliding-window `end` sits;
-  // persisted alongside start/end/mode so a live range keeps tracking "now"
-  // correctly between saves instead of drifting (see TimeFrame.endOffset).
+  // Persisted so a live range keeps sliding (see TimeFrame.endOffset).
   const [endOffset, setEndOffset] = useState<number | undefined>(undefined);
   const [granularity, setGranularity] = useState<AgeOfMoneyGranularity>(
     widget?.meta?.granularity ?? 'monthly',
   );
-  // The date-range picker's own Month/Day granularity — distinct from
-  // `granularity` above (this report's monthly/daily-average metric).
-  // Lifted out of MonthRangePicker (rather than left as its own internal
-  // state) because the `!data` early return below unmounts
-  // `Header`/`MonthRangePicker` on every date change; an internal state
-  // there would reset to 'month' on every pick instead of surviving it.
-  const [rangeGranularity, setRangeGranularity] =
-    useState<MonthRangeGranularity>('month');
 
   const [latestTransaction, setLatestTransaction] = useState('');
   const [earliestTransaction, setEarliestTransaction] = useState('');
@@ -183,10 +171,6 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
       setEnd(initialEnd);
       setMode(initialMode);
       setEndOffset(initialEndOffset);
-      // The picker's Month/Day mode isn't persisted, so infer it from the
-      // restored range's shape instead of always reopening in month mode
-      // (which would silently collapse a saved day-precision range).
-      setRangeGranularity(valueIsDay(initialStart) ? 'day' : 'month');
     }
   }, [latestTransaction, widget?.meta?.timeFrame]);
 
@@ -312,8 +296,6 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}
-        granularity={rangeGranularity}
-        onChangeGranularity={setRangeGranularity}
         filters={conditions}
         onApply={onApplyFilter}
         onUpdateFilter={onUpdateFilter}

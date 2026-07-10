@@ -3,22 +3,17 @@ import type { ReactNode } from 'react';
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 
+import type { RangePosition } from './util';
+
 type GridButtonProps = {
   selected: boolean;
   disabled: boolean;
   /** Marks the current month/day so it stands out even when not selected. */
   isToday?: boolean;
-  /** Cell falls strictly between the range endpoints (or the live hover
-   * preview while picking the second endpoint). Painted with a flat band
-   * background that visually joins the two selected endpoints. */
-  inRange?: boolean;
-  /** This cell is the start (`'start'`) or end (`'end'`) of the range band,
-   * so its outer corner should stay rounded while the inner one joins the
-   * band. Omitted for a single-day/-month range (no band to join). */
-  rangeEdge?: 'start' | 'end';
+  /** Where the cell falls in the range band (or the hover preview). */
+  position?: RangePosition;
   onSelect: () => void;
-  /** Notified when the pointer enters this cell, to preview the range band
-   * while picking the second endpoint. */
+  /** Called on pointer-enter to preview the range band. */
   onHover?: () => void;
   children: ReactNode;
 };
@@ -27,12 +22,13 @@ export function GridButton({
   selected,
   disabled,
   isToday = false,
-  inRange = false,
-  rangeEdge,
+  position = null,
   onSelect,
   onHover,
   children,
 }: GridButtonProps) {
+  const inRange = position != null;
+  const rangeEdge = position === 'middle' || position == null ? null : position;
   return (
     <Button
       variant={selected ? 'primary' : 'bare'}
@@ -43,10 +39,12 @@ export function GridButton({
         padding: '8px 4px',
         fontSize: 12,
         minWidth: 0,
+        // Match the selected (primary) variant's 1px border so selecting a
+        // cell doesn't resize the grid.
+        ...(!selected && { border: '1px solid transparent' }),
         ...(isToday && {
           fontWeight: 'bold',
-          // Ring the current period without shifting layout; when it's also
-          // the selected (primary) cell the inset ring stays visible.
+          // Inset ring marks the current period without shifting layout.
           boxShadow: `inset 0 0 0 1px ${theme.pageTextLink}`,
           ...(!selected && { color: theme.pageTextLink }),
         }),

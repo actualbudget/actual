@@ -96,12 +96,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const [start, setStart] = useState<string>('');
   const [end, setEnd] = useState<string>('');
   const [mode, setMode] = useState<TimeFrame['mode']>('static');
-  // How many months before the current month a sliding-window `end` sits;
-  // persisted alongside start/end/mode so a live range keeps tracking "now"
-  // correctly between saves instead of drifting (see TimeFrame.endOffset).
-  // Note: Crossover always shifts a sliding-window range back one extra
-  // month on top of this (see the effect and onChangeDates below), which is
-  // this report's own business rule and independent of endOffset.
+  // Persisted so a live range keeps sliding (see TimeFrame.endOffset).
   const [endOffset, setEndOffset] = useState<number | undefined>(undefined);
   const [earliestTransaction, setEarliestTransaction] = useState<string>('');
   const [latestTransaction, setLatestTransaction] = useState<string>('');
@@ -206,12 +201,14 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
   useEffect(() => {
     if (latestTransaction && allMonths?.length) {
+      // Legacy widgets lack endOffset; default to 0 so `end` isn't shifted twice.
+      const savedTimeFrame =
+        widget?.meta?.timeFrame?.mode === 'sliding-window' &&
+        widget.meta.timeFrame.endOffset == null
+          ? { ...widget.meta.timeFrame, endOffset: 0 }
+          : widget?.meta?.timeFrame;
       const [initialStart, initialEnd, mode, initialEndOffset] =
-        calculateTimeRange(
-          widget?.meta?.timeFrame,
-          defaultTimeFrame,
-          latestTransaction,
-        );
+        calculateTimeRange(savedTimeFrame, defaultTimeFrame, latestTransaction);
       setEndOffset(initialEndOffset);
       const earliestMonth = allMonths[allMonths.length - 1].name;
       const latestMonth = allMonths[0].name;
@@ -479,6 +476,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         allMonths={allMonths}
         earliestTransaction={earliestTransaction}
         latestTransaction={latestTransaction}
+        granularities={['month']}
         onChangeDates={onChangeDates}
       >
         {widget && (

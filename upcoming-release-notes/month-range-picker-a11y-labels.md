@@ -1,6 +1,6 @@
 ---
 category: Enhancement
-authors: [tabedzki, rznn7]
+authors: [tabedzki, rznn7, MatissJanis]
 ---
 
-Address technical debt from #6708 by introducing day picker for calendar
+Add day-level date range selection to reports: the new date range picker lets you switch between picking whole months or exact days, and works the same in every browser

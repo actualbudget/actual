@@ -47,13 +47,8 @@ type HeaderProps = {
     // Only meaningful for `mode: 'sliding-window'` — see `TimeFrame.endOffset`.
     endOffset?: number,
   ) => void;
-  // Report opts into day-level selection by passing these. When the picker is
-  // in day mode it emits `yyyy-MM-dd` start/end; month-based reports coerce
-  // those to months in their spreadsheets, so passing this is safe.
-  granularity?: MonthRangeGranularity;
-  onChangeGranularity?: (granularity: MonthRangeGranularity) => void;
-  // Which granularities this report supports in the picker. Defaults to both;
-  // pass `['month']` for month-only reports to hide the Day toggle.
+  // Granularities the picker offers; defaults to both. In day mode the picker
+  // emits `yyyy-MM-dd` start/end.
   granularities?: MonthRangeGranularity[];
   children?: ReactNode;
   inlineContent?: ReactNode;
@@ -276,8 +271,6 @@ export function Header({
   onUpdateFilter,
   onDeleteFilter,
   onConditionsOpChange,
-  granularity,
-  onChangeGranularity,
   granularities,
   children,
   inlineContent,
@@ -342,23 +335,22 @@ export function Header({
             <MonthRangePicker
               start={start}
               end={end}
-              granularity={granularity}
-              onChangeGranularity={onChangeGranularity}
               granularities={granularities}
-              // Excluding the current month only makes sense for past ranges;
-              // future ranges start at the current month.
+              // Excluding the current month only makes sense for past ranges.
               allowExcludeCurrentMonth={!showFutureRange}
-              // `allMonths` is newest-first, so the last entry is the earliest.
-              // Some reports (e.g. Summary, Calendar) render before their
-              // async load populates it, so fall back to the current month.
+              // allMonths is newest-first and may be empty before reports load.
               minDate={
                 allMonths.length
                   ? allMonths[allMonths.length - 1].name
                   : monthUtils.currentMonth()
               }
-              // No upper cap: users can pick any future month/day so future
-              // ranges can be charted (the report shows empty future periods).
-              allowFuture
+              maxDate={
+                showFutureRange
+                  ? undefined
+                  : allMonths.length
+                    ? allMonths[0].name
+                    : monthUtils.currentMonth()
+              }
               firstDayOfWeekIdx={firstDayOfWeekIdx}
               presets={
                 showFutureRange

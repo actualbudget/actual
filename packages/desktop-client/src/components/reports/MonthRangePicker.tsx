@@ -4,6 +4,7 @@ import { Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Popover } from '@actual-app/components/popover';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -11,6 +12,7 @@ import {
   currentMonth,
   differenceInCalendarMonths,
   format,
+  prevMonth,
 } from '@actual-app/core/shared/months';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
@@ -40,111 +42,72 @@ export {
 type MonthRangePickerProps = {
   start: string;
   end: string;
-  /** Inclusive lower bound (`yyyy-MM` or `yyyy-MM-dd`). `allMonths` is
-   * newest-first in the reports header, so pass its last entry here. */
+  /** Inclusive lower bound (`yyyy-MM` or `yyyy-MM-dd`). */
   minDate: string;
-  /** Inclusive upper bound (`yyyy-MM` or `yyyy-MM-dd`). Omit (or set
-   * `allowFuture`) for no upper limit — the user can then pick any future
-   * month/day and the report simply shows empty future periods. */
+  /** Inclusive upper bound; omit for no upper limit. */
   maxDate?: string;
-  /** Convenience flag for an open-ended future: equivalent to omitting
-   * `maxDate`. */
-  allowFuture?: boolean;
-  /** Initial granularity. The user can switch it with the in-popover toggle;
-   * committed values are emitted in the active granularity (`yyyy-MM` for
-   * month, `yyyy-MM-dd` for day). */
-  granularity?: MonthRangeGranularity;
-  /** Which granularities the consuming report supports. Maintainers embedding
-   * the picker use this to limit day-level selection to reports that actually
-   * render daily data — pass `['month']` for month-only reports (Budget
-   * Analysis, monthly Net Worth, …) to hide the Day toggle entirely. Defaults
-   * to both. */
+  /** Pass `['month']` for month-only reports to hide the Day toggle. */
   granularities?: MonthRangeGranularity[];
-  /** Notified when the user flips the Month/Day toggle so the consumer can
-   * persist the choice. */
-  onChangeGranularity?: (granularity: MonthRangeGranularity) => void;
-  /** Show an "Exclude current month" checkbox that shifts the whole range back
-   * one month (keeping its width) so a live range can end last month. Only
-   * makes sense for past ranges. */
+  /** Offer an "Exclude current month" checkbox that shifts the whole range
+   * back one month, keeping its width. */
   allowExcludeCurrentMonth?: boolean;
   presets?: QuickSelectPreset[];
-  /** User's configured first day of week, for the day grid's weekday header
-   * and alignment. Defaults to Sunday-first when omitted. */
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
-  /** `endOffset` is how many months before the current month the committed
-   * `end` sits (0 if it's the current month), computed at commit time so the
-   * consumer can persist it — see `TimeFrame.endOffset` for why. */
+  /** `endOffset` is how many months `end` sits before the current month —
+   * see `TimeFrame.endOffset`. */
   onChangeDates: (start: string, end: string, endOffset: number) => void;
 };
 
-// Far-future sentinel used when there is no upper bound. Sorts after any real
-// `yyyy-MM` or `yyyy-MM-dd` string lexicographically.
+// Far-future sentinel: sorts after any real date string.
 const NO_MAX = '9999-12-31';
+
+const sectionTitleStyle = {
+  fontWeight: 'bold',
+  marginBottom: 8,
+  fontSize: 12,
+  textTransform: 'uppercase',
+  color: theme.pageTextSubdued,
+} satisfies CSSProperties;
 
 export function MonthRangePicker({
   start,
   end,
   minDate,
   maxDate,
-  allowFuture = false,
-  granularity = 'month',
   granularities = ['month', 'day'],
-  onChangeGranularity,
   allowExcludeCurrentMonth = false,
   presets,
   firstDayOfWeekIdx,
   onChangeDates,
 }: MonthRangePickerProps) {
-  const effectiveMax = allowFuture || maxDate == null ? NO_MAX : maxDate;
+  const effectiveMax = maxDate ?? NO_MAX;
   const locale = useLocale();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const { isNarrowWidth } = useResponsive();
 
-  // Only offer the Day toggle when the report supports it. When a report is
-  // month-only, force month granularity regardless of the incoming prop so a
-  // stale persisted `granularity` can't leave it stuck in day mode.
   const allowsDay = granularities.includes('day');
   const showGranularityToggle = allowsDay && granularities.includes('month');
 
-  // `gran` is the source of truth for "last granularity the user picked in
-  // this picker" and survives the popover closing — most consumers don't
-  // wire `onChangeGranularity` back into the `granularity` prop, so relying
-  // on the prop to reopen in the same mode would silently revert to it on
-  // every close. Only the initial mount seeds from the prop.
-  const [gran, setGran] = useState<MonthRangeGranularity>(
-    allowsDay ? granularity : 'month',
-  );
+  // The committed values' shape encodes the granularity, so it survives the
+  // remounts that reports with a loading early-return cause on every commit.
+  const granFor = (value: string): MonthRangeGranularity =>
+    allowsDay && valueIsDay(value) ? 'day' : 'month';
+  const [gran, setGran] = useState<MonthRangeGranularity>(granFor(start));
   const isDay = gran === 'day';
 
-  const hasSidebar =
-    showGranularityToggle ||
-    allowExcludeCurrentMonth ||
-    Boolean(presets?.length);
-
-  // While the popover is open we edit a local draft so the (potentially
-  // expensive) report only recomputes once — when the popover closes — rather
-  // than on every month click. A user can pick both start and end first.
+  // Edit a local draft while open; the report only recomputes on commit.
   const [draftStart, setDraftStart] = useState(start);
   const [draftEnd, setDraftEnd] = useState(end);
-  // Set when a preset already applied a range, so the close handler doesn't
-  // commit (and overwrite) the stale draft. `onOpenChange` can fire more than
-  // once for a single close, so this also makes committing idempotent.
+  // Set when a preset already committed, so closing doesn't overwrite it.
   const skipCommitRef = useRef(false);
 
   function openPopover() {
-    // Reopen in whichever granularity the user last picked in this popover
-    // (not the `granularity` prop — see `gran`'s declaration), so the draft
-    // and grid match. A month-only report is always forced to month mode.
-    const openGran = allowsDay ? gran : 'month';
+    const openGran = granFor(start);
     setGran(openGran);
     if (openGran === 'day') {
-      // Only expand to the full month when `start`/`end` are still
-      // month-shaped (actually switching granularities) — an already
-      // day-shaped range (a precise sub-month selection from a prior pick)
-      // must reopen as-is, not get widened back out to its whole month.
-      setDraftStart(valueIsDay(start) ? start : toDayStart(start));
-      setDraftEnd(valueIsDay(end) ? end : toDayEnd(end));
+      setDraftStart(start);
+      setDraftEnd(end);
     } else {
       setDraftStart(toMonth(start));
       setDraftEnd(toMonth(end));
@@ -153,25 +116,19 @@ export function MonthRangePicker({
     setIsOpen(true);
   }
 
-  // How many months before the current month `value` sits, clamped to >= 0
-  // (a future end anchors to now, same clamp calculateTimeRange applies).
   function endOffsetFor(value: string) {
     return Math.max(0, differenceInCalendarMonths(currentMonth(), value));
   }
 
   function changeGranularity(next: MonthRangeGranularity) {
     if (next === gran) return;
-    // Switching granularity commits immediately (like a preset) instead of
-    // waiting for the popover to close, so the report reflects the new
-    // granularity's range right away.
-    const nextStart =
-      next === 'day' ? toDayStart(draftStart) : toMonth(draftStart);
-    const nextEnd = next === 'day' ? toDayEnd(draftEnd) : toMonth(draftEnd);
-    setDraftStart(nextStart);
-    setDraftEnd(nextEnd);
+    // Only reshape the draft; committing here recomputes the report, which
+    // can unmount the Header and close this popover. Commit happens on close.
+    setDraftStart(
+      next === 'day' ? toDayStart(draftStart) : toMonth(draftStart),
+    );
+    setDraftEnd(next === 'day' ? toDayEnd(draftEnd) : toMonth(draftEnd));
     setGran(next);
-    onChangeGranularity?.(next);
-    onChangeDates(nextStart, nextEnd, endOffsetFor(nextEnd));
   }
 
   function closeAndCommit() {
@@ -185,17 +142,22 @@ export function MonthRangePicker({
     }
   }
 
-  // The current month is "excluded" when the draft range ends before it. This
-  // is derived from the draft (not a separate flag) so it stays consistent when
-  // the user edits the ends directly.
-  const excludesCurrentMonth = toMonth(draftEnd) < currentMonth();
+  // Only offer the toggle in the two states it switches between: a month-mode
+  // range ending at the current or the previous month.
+  const draftEndMonth = toMonth(draftEnd);
+  const excludesCurrentMonth = draftEndMonth === prevMonth(currentMonth());
+  const showExcludeCurrentMonth =
+    allowExcludeCurrentMonth &&
+    !isDay &&
+    (draftEndMonth === currentMonth() || excludesCurrentMonth);
+
+  const hasSidebar =
+    showGranularityToggle ||
+    showExcludeCurrentMonth ||
+    Boolean(presets?.length);
 
   function toggleExcludeCurrentMonth(exclude: boolean) {
-    // Only shift when it actually changes the exclusion state to avoid drifting
-    // a range that already ends further in the past.
     if (exclude === excludesCurrentMonth) return;
-    // Shift the whole range one month while keeping its width, so a live range
-    // ends either at or one month before the current month.
     const delta = exclude ? -1 : 1;
     setDraftStart(shiftMonths(draftStart, delta));
     setDraftEnd(shiftMonths(draftEnd, delta));
@@ -210,15 +172,11 @@ export function MonthRangePicker({
     setDraftEnd(nextEnd);
   }
 
-  // The trigger reflects the in-progress draft while open, and the committed
-  // range otherwise.
   const shownStart = isOpen ? draftStart : start;
   const shownEnd = isOpen ? draftEnd : end;
 
-  // Derive the display format from the actual shape of the shown values
-  // rather than the `gran` flag, which can desync from the committed range
-  // (e.g. once the popover closes and a non-persisting report's prop reverts
-  // to 'month'). A `yyyy-MM-dd` value is longer than a `yyyy-MM` one.
+  // Format by the values' actual shape; `gran` can desync from committed
+  // values.
   const labelFormat = valueIsDay(shownStart) ? 'P' : 'MMM yyyy';
   const label = `${format(shownStart, labelFormat, locale)} – ${format(
     shownEnd,
@@ -239,8 +197,6 @@ export function MonthRangePicker({
         triggerRef={triggerRef}
         placement="bottom start"
         isOpen={isOpen}
-        // Fires on outside-click / Esc as well as programmatic closes; commit
-        // the draft in every case.
         onOpenChange={nextOpen => {
           if (!nextOpen) {
             closeAndCommit();
@@ -272,19 +228,9 @@ export function MonthRangePicker({
 
           {hasSidebar && (
             <View style={{ padding: 15, minWidth: 140, gap: 16 }}>
-              {/* Choose how to pick the range: whole months or exact days. Hidden
-                for month-only reports, where day mode does nothing. */}
               {showGranularityToggle && (
                 <View>
-                  <Text
-                    style={{
-                      fontWeight: 'bold',
-                      marginBottom: 8,
-                      fontSize: 12,
-                      textTransform: 'uppercase',
-                      color: theme.pageTextSubdued,
-                    }}
-                  >
+                  <Text style={sectionTitleStyle}>
                     <Trans>Select by</Trans>
                   </Text>
                   <GranularityToggle
@@ -294,7 +240,7 @@ export function MonthRangePicker({
                 </View>
               )}
 
-              {allowExcludeCurrentMonth && (
+              {showExcludeCurrentMonth && (
                 <ExcludeCurrentMonthToggle
                   checked={excludesCurrentMonth}
                   onChange={toggleExcludeCurrentMonth}
@@ -303,15 +249,7 @@ export function MonthRangePicker({
 
               {Boolean(presets?.length) && (
                 <View>
-                  <Text
-                    style={{
-                      fontWeight: 'bold',
-                      marginBottom: 8,
-                      fontSize: 12,
-                      textTransform: 'uppercase',
-                      color: theme.pageTextSubdued,
-                    }}
-                  >
+                  <Text style={sectionTitleStyle}>
                     <Trans>Quick select</Trans>
                   </Text>
                   <View style={{ gap: 4 }}>
@@ -320,9 +258,6 @@ export function MonthRangePicker({
                         key={preset.key}
                         variant="bare"
                         onPress={() => {
-                          // Presets apply immediately via their own onSelect;
-                          // skip the draft-commit-on-close so it can't overwrite
-                          // them.
                           skipCommitRef.current = true;
                           preset.onSelect();
                           setIsOpen(false);

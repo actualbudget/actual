@@ -115,7 +115,6 @@
     "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
     "minimatch@3.1.2": "3.1.5",
     "serialize-javascript": "^7.0.5",
-    "shell-quote": "^1.8.4",
     "socks": ">=2.8.3",
     "vite-plugin-node-polyfills": "patch:vite-plugin-node-polyfills@npm%3A0.28.0#~/.yarn/patches/vite-plugin-node-polyfills-npm-0.28.0-bac39616ee.patch",
     "webpackbar": "^7.0.0"

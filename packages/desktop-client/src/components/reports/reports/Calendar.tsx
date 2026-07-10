@@ -566,6 +566,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           latestTransaction={latestTransaction}
           firstDayOfWeekIdx={firstDayOfWeekIdx}
           mode={mode}
+          granularities={['month']}
           onChangeDates={onChangeDates}
           filters={conditions}
           onApply={onApplyFilter}

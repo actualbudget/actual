@@ -18,19 +18,12 @@ type RangeSelectorProps = {
   max: string;
   isDay: boolean;
   locale: Locale;
-  /** User's configured first day of week, for the day grid. Defaults to
-   * Sunday-first when omitted. */
+  /** First day of week for the day grid; defaults to Sunday. */
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   onChange: (start: string, end: string) => void;
 };
 
-/**
- * A single calendar grid for picking a start/end range: click a cell to begin
- * a new range (collapsed to that one cell), then click another cell to set
- * the other end. While picking the second end, hovering previews the band
- * that would result. Mirrors the click-drag range-picking pattern of a
- * typical date-range picker, but via two clicks (no native drag needed).
- */
+/** Calendar grid for picking a range: one click anchors, a second click sets the other end. */
 export function RangeSelector({
   start,
   end,
@@ -44,23 +37,14 @@ export function RangeSelector({
   const minMonth = toMonth(min);
   const maxMonth = toMonth(max);
 
-  // The month whose grid is on screen. Starts on the range start's month but
-  // can be navigated independently of the selection.
   const [viewMonth, setViewMonth] = useState(() => toMonth(start));
   const viewYear = monthUtils.getYear(viewMonth);
 
-  // Set right after the user picks a new range start, so the *next* click
-  // sets the other end instead of starting a fresh single-cell range. Cleared
-  // once that second click lands.
   const [anchor, setAnchor] = useState<string | null>(null);
-  // Cell currently under the pointer, for the live range-band preview while
-  // an anchor is active. Ignored otherwise.
   const [hoverValue, setHoverValue] = useState<string | null>(null);
 
   function pick(cell: string) {
     if (anchor == null) {
-      // First click of a new selection: collapse the range to this cell and
-      // wait for the second click to expand it.
       setAnchor(cell);
       onChange(cell, cell);
     } else {
@@ -72,9 +56,7 @@ export function RangeSelector({
     }
   }
 
-  // The band to paint: while picking a second end, preview it against the
-  // hovered cell (falling back to the anchor itself); otherwise show the
-  // committed range.
+  // While picking a second end, preview the band against the hovered cell.
   const previewCell = hoverValue ?? anchor;
   const [bandStart, bandEnd] =
     anchor != null && previewCell != null

@@ -76,9 +76,7 @@ export function buildBalanceForecastChartData({
     let runningBalance = 0;
     const combinedBalanceByDate = getCombinedBalanceByDate(forecastData);
 
-    // `start`/`end` may be `yyyy-MM` or `yyyy-MM-dd`; expand a month-shaped
-    // bound to cover its whole month, but leave an already day-shaped bound
-    // untouched so an exact sub-month range isn't widened.
+    // Expand month-shaped bounds to full months; keep day-shaped bounds exact.
     const startDay = monthUtils.isValidYearMonth(start)
       ? monthUtils.firstDayOfMonth(start)
       : start;

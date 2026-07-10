@@ -7,8 +7,7 @@ type ExcludeCurrentMonthToggleProps = {
   onChange: (checked: boolean) => void;
 };
 
-// Toggles whether a live (sliding) range ends at the current month or one month
-// earlier, so a user can pick e.g. "the last 6 months ending last month".
+// Toggles whether a live range ends at the current month or one month earlier.
 export function ExcludeCurrentMonthToggle({
   checked,
   onChange,

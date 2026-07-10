@@ -1,31 +1,18 @@
 import { Trans } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
+
+import { ModeButton } from '#components/reports/ModeButton';
 
 import type { MonthRangeGranularity } from './util';
+
+const segmentStyle = { borderRadius: 0, fontSize: 12, padding: '4px 12px' };
 
 type GranularityToggleProps = {
   value: MonthRangeGranularity;
   onChange: (value: MonthRangeGranularity) => void;
 };
-
-const segmentStyle = (selected: boolean) =>
-  css({
-    padding: '4px 12px',
-    fontSize: 12,
-    borderRadius: 0,
-    ...(selected && {
-      backgroundColor: theme.buttonPrimaryBackground,
-      color: theme.buttonPrimaryText,
-      ':hover': {
-        backgroundColor: theme.buttonPrimaryBackgroundHover,
-        color: theme.buttonPrimaryTextHover,
-      },
-    }),
-  });
 
 export function GranularityToggle({ value, onChange }: GranularityToggleProps) {
   return (
@@ -38,20 +25,20 @@ export function GranularityToggle({ value, onChange }: GranularityToggleProps) {
         alignSelf: 'flex-start',
       }}
     >
-      <Button
-        variant="bare"
-        onPress={() => onChange('month')}
-        className={segmentStyle(value === 'month')}
+      <ModeButton
+        selected={value === 'month'}
+        onSelect={() => onChange('month')}
+        style={segmentStyle}
       >
         <Trans>Month</Trans>
-      </Button>
-      <Button
-        variant="bare"
-        onPress={() => onChange('day')}
-        className={segmentStyle(value === 'day')}
+      </ModeButton>
+      <ModeButton
+        selected={value === 'day'}
+        onSelect={() => onChange('day')}
+        style={segmentStyle}
       >
         <Trans>Day</Trans>
-      </Button>
+      </ModeButton>
     </View>
   );
 }

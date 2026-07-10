@@ -20,11 +20,8 @@ export type TimeFrame = {
     | 'yearToDate'
     | 'priorYearToDate';
   /** For `mode: 'sliding-window'` only: how many months before the current
-   * month this range's end should sit (0 = ends at the current month). Stored
-   * explicitly rather than re-derived from `end`, because `end` is an
-   * absolute date that goes stale between saves — recomputing the gap from
-   * `end` vs. "now" would make a live window drift further from "now" every
-   * time it's reopened instead of actually sliding forward with it. */
+   * month this range's end sits (0 = current month). Stored rather than
+   * derived from the stale `end`, so a live range keeps sliding with "now". */
   endOffset?: number;
 };
 

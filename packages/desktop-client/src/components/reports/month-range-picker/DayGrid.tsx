@@ -16,13 +16,10 @@ type DayGridProps = {
   min: string;
   max: string;
   locale: Locale;
-  /** User's configured first day of week, for the weekday header order and
-   * grid alignment. Defaults to Sunday-first when omitted. */
+  /** First day of week for header order and alignment; defaults to Sunday. */
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   onSelect: (day: string) => void;
-  /** Notified on pointer-enter of a cell, to preview the range band while
-   * picking the second endpoint. Omitted when there's no anchor to preview
-   * against. */
+  /** Called on pointer-enter of a cell to preview the range band. */
   onHover?: (day: string) => void;
 };
 
@@ -41,17 +38,11 @@ export function DayGrid({
   const lastDay = monthUtils.lastDayOfMonth(`${viewMonth}-01`);
   const days = monthUtils.dayRangeInclusive(firstDay, lastDay);
   const currentDay = monthUtils.currentDay();
-  // `min`/`max` may still be month-shaped (e.g. a report's `minDate`) even
-  // in day mode; normalize to day bounds so the comparison below is
-  // apples-to-apples instead of comparing a `yyyy-MM-dd` cell against a
-  // `yyyy-MM` bound.
+  // `min`/`max` may still be month-shaped even in day mode; normalize to days.
   const minDay = toDayStart(min);
   const maxDay = toDayEnd(max);
-  // 0 = Sunday, ... 6 = Saturday; defaults to Sunday-first to match the rest
-  // of the app when a report doesn't pass the user's configured pref.
+  // 0 = Sunday ... 6 = Saturday
   const startOfWeek = parseInt(firstDayOfWeekIdx || '0', 10) || 0;
-  // Weekday of the 1st relative to `startOfWeek` so the grid lines up under
-  // its headers regardless of which day the week starts on.
   const leadingBlanks =
     (new Date(`${firstDay}T00:00:00`).getDay() - startOfWeek + 7) % 7;
 
@@ -68,8 +59,7 @@ export function DayGrid({
               color: theme.pageTextSubdued,
             }}
           >
-            {/* 2021-01-03 is a Sunday; offset by startOfWeek so the header
-              order follows the user's configured first day of week. */}
+            {/* 2021-01-03 is a Sunday; offset by startOfWeek for header order */}
             {monthUtils.format(
               monthUtils.addDays('2021-01-03', startOfWeek + i),
               'EEEEE',
@@ -82,25 +72,19 @@ export function DayGrid({
         {Array.from({ length: leadingBlanks }, (_, i) => (
           <View key={`blank-${i}`} />
         ))}
-        {days.map(day => {
-          const position = rangePosition(day, rangeStart, rangeEnd);
-          return (
-            <GridButton
-              key={day}
-              selected={day === rangeStart || day === rangeEnd}
-              disabled={day < minDay || day > maxDay}
-              isToday={day === currentDay}
-              inRange={position != null}
-              rangeEdge={
-                position === 'middle' || position == null ? undefined : position
-              }
-              onSelect={() => onSelect(day)}
-              onHover={onHover ? () => onHover(day) : undefined}
-            >
-              {String(monthUtils.getDay(day))}
-            </GridButton>
-          );
-        })}
+        {days.map(day => (
+          <GridButton
+            key={day}
+            selected={day === rangeStart || day === rangeEnd}
+            disabled={day < minDay || day > maxDay}
+            isToday={day === currentDay}
+            position={rangePosition(day, rangeStart, rangeEnd)}
+            onSelect={() => onSelect(day)}
+            onHover={onHover ? () => onHover(day) : undefined}
+          >
+            {String(Number(day.slice(8)))}
+          </GridButton>
+        ))}
       </Grid>
     </>
   );

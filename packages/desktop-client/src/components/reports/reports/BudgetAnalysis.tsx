@@ -165,9 +165,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
-  // How many months before the current month a sliding-window `end` sits;
-  // persisted alongside start/end/mode so a live range keeps tracking "now"
-  // correctly between saves instead of drifting (see TimeFrame.endOffset).
+  // Persisted so a live range keeps sliding (see TimeFrame.endOffset).
   const [endOffset, setEndOffset] = useState<number | undefined>(undefined);
   const [graphType, setGraphType] = useState<'Line' | 'Bar'>(
     widget?.meta?.graphType || 'Bar',
@@ -189,11 +187,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
-  // `start`/`end` should always be `yyyy-MM` here (Budget Analysis is
-  // month-only), but normalize defensively in case a persisted
-  // `widget.meta.timeFrame` predates that restriction and still holds a
-  // `yyyy-MM-dd` value — `endMonth + '-01'` would otherwise corrupt into an
-  // unparseable string.
+  // Normalize in case a persisted timeFrame still holds `yyyy-MM-dd` values.
   const calculateIsConcise = (start: string, end: string) => {
     const startMonth = monthUtils.getMonth(start);
     const endMonth = monthUtils.getMonth(end);
@@ -266,9 +260,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     void run();
   }, [locale, widget?.meta?.timeFrame]);
 
-  // `start`/`end` may be `yyyy-MM` (month mode) or `yyyy-MM-dd` (day mode).
-  // Budget Analysis is month-only, so collapse to the month before building the
-  // day bounds — naive `start + '-01'` would corrupt a `yyyy-MM-dd` value.
+  // `start`/`end` may be `yyyy-MM` or `yyyy-MM-dd`; collapse to months first.
   const startDate = `${monthUtils.getMonth(start)}-01`;
   const endDate = monthUtils.getMonthEnd(`${monthUtils.getMonth(end)}-01`);
 

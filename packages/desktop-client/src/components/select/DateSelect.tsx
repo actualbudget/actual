@@ -24,8 +24,8 @@ import {
   Heading,
   I18nProvider,
 } from 'react-aria-components';
+import { useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgCheveronLeft,
@@ -49,7 +49,7 @@ import { CalendarDate } from '@internationalized/date';
 import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
 
 import { InputField } from '#components/mobile/MobileForms';
-import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useLanguage } from '#hooks/useLocale';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
@@ -63,13 +63,7 @@ const FIRST_DAY_OF_WEEK_NAMES = [
   'sat',
 ] as const;
 
-// Encode the user's configured first day of week into the locale via the
-// Unicode "fw" extension, which @internationalized/date honors -
-// react-aria-components' CalendarGrid has no direct prop for it.
-function withFirstDayOfWeek(locale: string, firstDayOfWeekIdx: string): string {
-  const day = FIRST_DAY_OF_WEEK_NAMES[parseInt(firstDayOfWeekIdx, 10) || 0];
-  return `${locale}-u-fw-${day}`;
-}
+type FirstDayOfWeek = (typeof FIRST_DAY_OF_WEEK_NAMES)[number];
 
 function toCalendarDate(date: Date): CalendarDate {
   return new CalendarDate(
@@ -93,12 +87,25 @@ const pickerStyles: CSSProperties = {
   },
   '& .calendar-header': {
     display: 'flex',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 6,
+    '& button': {
+      color: 'inherit',
+      background: 'none',
+      border: 'none',
+      borderRadius: 4,
+      padding: 5,
+      cursor: 'pointer',
+      display: 'flex',
+      '&:hover': { backgroundColor: theme.calendarItemBackground },
+    },
   },
   '& .calendar-header-title': {
     fontWeight: 'bold',
+    fontSize: 14,
+    margin: 0,
     backgroundColor: theme.calendarBackground,
   },
   '& .react-aria-CalendarGrid': {
@@ -115,7 +122,6 @@ const pickerStyles: CSSProperties = {
     height: 28,
     lineHeight: '28px',
     textAlign: 'center',
-    borderRadius: 4,
     cursor: 'pointer',
     backgroundColor: theme.calendarItemBackground,
     color: theme.calendarItemText,
@@ -128,6 +134,7 @@ const pickerStyles: CSSProperties = {
     },
     '&[data-selected]': {
       backgroundColor: theme.calendarSelectedBackground,
+      borderRadius: 4,
     },
     '&[data-disabled]': {
       opacity: 0.4,
@@ -143,6 +150,7 @@ type DatePickerProps = {
   value: string;
   dateFormat: string;
   locale: string;
+  firstDayOfWeek: FirstDayOfWeek;
   onUpdate: (selectedDate: Date) => void;
   onSelect: (selectedDate: Date) => void;
 };
@@ -151,11 +159,23 @@ type DatePickerForwardedRef = {
   handleInputKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
 };
 const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
-  ({ value, dateFormat, locale, onUpdate, onSelect }, ref) => {
+  ({ value, dateFormat, locale, firstDayOfWeek, onUpdate, onSelect }, ref) => {
+    const { t } = useTranslation();
     const parsedValue = value ? parse(value, dateFormat, currentDate()) : null;
     const focusedCalendarDate = toCalendarDate(
       parsedValue && isValid(parsedValue) ? parsedValue : currentDate(),
     );
+
+    // Controlled so the header arrows can change the visible month without
+    // involving focus: react-aria's own prev/next buttons steal focus from
+    // the text input on press, whose blur closes the picker.
+    const [focusedDate, setFocusedDate] = useState(focusedCalendarDate);
+    const focusedKey = focusedCalendarDate.toString();
+    const [prevFocusedKey, setPrevFocusedKey] = useState(focusedKey);
+    if (prevFocusedKey !== focusedKey) {
+      setPrevFocusedKey(focusedKey);
+      setFocusedDate(focusedCalendarDate);
+    }
 
     const onUpdateEffect = useEffectEvent(onUpdate);
 
@@ -195,20 +215,37 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
     );
 
     return (
-      <View className={css([pickerStyles, { flex: 1 }])}>
+      <View
+        className={css([pickerStyles, { flex: 1 }])}
+        data-date-picker
+        onMouseDown={e => e.preventDefault()}
+      >
         <I18nProvider locale={locale}>
           <Calendar
             value={focusedCalendarDate}
+            focusedValue={focusedDate}
+            onFocusChange={setFocusedDate}
+            firstDayOfWeek={firstDayOfWeek}
             onChange={date => onSelect(fromCalendarDate(date))}
           >
             <View className="calendar-header">
-              <Button variant="bare" slot="previous">
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label={t('Previous month')}
+                onClick={() => setFocusedDate(d => d.subtract({ months: 1 }))}
+              >
                 <SvgCheveronLeft width={16} height={16} />
-              </Button>
+              </button>
               <Heading className="calendar-header-title" />
-              <Button variant="bare" slot="next">
+              <button
+                type="button"
+                tabIndex={-1}
+                aria-label={t('Next month')}
+                onClick={() => setFocusedDate(d => d.add({ months: 1 }))}
+              >
                 <SvgCheveronRight width={16} height={16} />
-              </Button>
+              </button>
             </View>
             <CalendarGrid>
               <CalendarGridHeader>
@@ -283,13 +320,10 @@ function DateSelectDesktop({
   const [selectedValue, setSelectedValue] = useState(value);
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const firstDayOfWeek =
+    FIRST_DAY_OF_WEEK_NAMES[parseInt(_firstDayOfWeekIdx || '0', 10) || 0];
 
-  const [language] = useGlobalPref('language');
-  const locale = withFirstDayOfWeek(
-    language || navigator.language || 'en-US',
-    firstDayOfWeekIdx,
-  );
+  const locale = useLanguage();
 
   useEffect(() => setValue(parsedDefaultValue), [parsedDefaultValue]);
 
@@ -391,7 +425,7 @@ function DateSelectDesktop({
         isOpen={open}
         isNonModal
         onOpenChange={() => setOpen(false)}
-        style={{ ...styles.popover, minWidth: 225 }}
+        style={styles.popover}
         data-testid="date-select-tooltip"
       >
         {content}
@@ -420,6 +454,16 @@ function DateSelectDesktop({
           inputProps?.onFocus?.(e);
         }}
         onBlur={e => {
+          // react-aria moves focus into the calendar when it's clicked; keep
+          // the picker open and pull focus back so keyboard entry still works
+          // (with pikaday, focus never left the input).
+          if (
+            e.relatedTarget instanceof Element &&
+            e.relatedTarget.closest('[data-date-picker]')
+          ) {
+            innerRef.current?.focus();
+            return;
+          }
           if (!embedded) {
             setOpen(false);
           }
@@ -453,6 +497,7 @@ function DateSelectDesktop({
           value={selectedValue}
           dateFormat={dateFormat}
           locale={locale}
+          firstDayOfWeek={firstDayOfWeek}
           onUpdate={date => {
             setSelectedValue(format(date, dateFormat));
             onUpdate?.(format(date, 'yyyy-MM-dd'));

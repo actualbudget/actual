@@ -13,9 +13,7 @@ type MonthGridProps = {
   maxMonth: string;
   locale: Locale;
   onSelect: (month: string) => void;
-  /** Notified on pointer-enter of a cell, to preview the range band while
-   * picking the second endpoint. Omitted when there's no anchor to preview
-   * against. */
+  /** Called on pointer-enter of a cell to preview the range band. */
   onHover?: (month: string) => void;
 };
 
@@ -30,29 +28,26 @@ export function MonthGrid({
   onHover,
 }: MonthGridProps) {
   const currentMonth = monthUtils.currentMonth();
+  // Depends only on year/locale, so it caches across hover re-renders.
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const month = monthUtils.getMonthFromIndex(year, i);
+    return { month, label: monthUtils.format(month, 'MMM', locale) };
+  });
   return (
     <Grid columns={4}>
-      {Array.from({ length: 12 }, (_, i) => {
-        const month = monthUtils.getMonthFromIndex(year, i);
-        const disabled = month < minMonth || month > maxMonth;
-        const position = rangePosition(month, rangeStart, rangeEnd);
-        return (
-          <GridButton
-            key={month}
-            selected={month === rangeStart || month === rangeEnd}
-            disabled={disabled}
-            isToday={month === currentMonth}
-            inRange={position != null}
-            rangeEdge={
-              position === 'middle' || position == null ? undefined : position
-            }
-            onSelect={() => onSelect(month)}
-            onHover={onHover ? () => onHover(month) : undefined}
-          >
-            {monthUtils.format(month, 'MMM', locale)}
-          </GridButton>
-        );
-      })}
+      {months.map(({ month, label }) => (
+        <GridButton
+          key={month}
+          selected={month === rangeStart || month === rangeEnd}
+          disabled={month < minMonth || month > maxMonth}
+          isToday={month === currentMonth}
+          position={rangePosition(month, rangeStart, rangeEnd)}
+          onSelect={() => onSelect(month)}
+          onHover={onHover ? () => onHover(month) : undefined}
+        >
+          {label}
+        </GridButton>
+      ))}
     </Grid>
   );
 }

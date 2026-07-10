@@ -825,6 +825,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         show1Month
         earliestTransaction={earliestTransaction}
         latestTransaction={latestTransaction}
+        granularities={['month']}
         onChangeDates={onChangeDates}
         filters={conditions}
         onApply={onApplyFilter}
