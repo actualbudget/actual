@@ -88,9 +88,11 @@ jobs:
         run: echo "E2E_PORT=$((3000 + ${{ matrix.shard }}))" >> "$GITHUB_ENV"
       - name: Run E2E Tests
         if: ${{ matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
-        run: yarn e2e --shard=${{ matrix.shard }}/${{ vars.E2E_SHARD_TOTAL || '3' }}
+        env:
+          SHARD_TOTAL: ${{ vars.E2E_SHARD_TOTAL || '3' }}
+        run: yarn e2e --shard=${{ matrix.shard }}/$SHARD_TOTAL
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: failure()
+        if: ${{ failure() && matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
         with:
           name: desktop-client-test-results-shard-${{ matrix.shard }}
           path: packages/desktop-client/test-results/
@@ -197,7 +199,9 @@ jobs:
         run: echo "E2E_PORT=$((3000 + ${{ matrix.shard }}))" >> "$GITHUB_ENV"
       - name: Run VRT Tests
         if: ${{ matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
-        run: yarn vrt --shard=${{ matrix.shard }}/${{ vars.E2E_SHARD_TOTAL || '3' }}
+        env:
+          SHARD_TOTAL: ${{ vars.E2E_SHARD_TOTAL || '3' }}
+        run: yarn vrt --shard=${{ matrix.shard }}/$SHARD_TOTAL
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ always() && matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
         with:
