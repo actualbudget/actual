@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
@@ -12,6 +13,7 @@ import { useClosedAccounts } from '#hooks/useClosedAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useOffBudgetAccounts } from '#hooks/useOffBudgetAccounts';
 import { useOnBudgetAccounts } from '#hooks/useOnBudgetAccounts';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useUpdatedAccounts } from '#hooks/useUpdatedAccounts';
 import { useSelector } from '#redux';
 import * as bindings from '#spreadsheet/bindings';
@@ -20,6 +22,22 @@ import { Account } from './Account';
 import { SecondaryItem } from './SecondaryItem';
 
 const fontWeight = 600;
+const PINNED_ACCOUNTS_PREF = 'side-nav.pinned-accounts';
+
+function parsePinnedAccountIds(value?: string) {
+  if (!value) {
+    return [];
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed)
+      ? parsed.filter((id): id is string => typeof id === 'string')
+      : [];
+  } catch {
+    return [];
+  }
+}
 
 export function Accounts() {
   const { t } = useTranslation();
@@ -30,6 +48,13 @@ export function Accounts() {
   const { data: onBudgetAccounts = [] } = useOnBudgetAccounts();
   const { data: closedAccounts = [] } = useClosedAccounts();
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
+  const [pinnedAccountsPref, setPinnedAccountsPref] =
+    useSyncedPref(PINNED_ACCOUNTS_PREF);
+  const pinnedAccountIds = parsePinnedAccountIds(pinnedAccountsPref);
+  const activeAccounts = accounts.filter(account => !account.closed);
+  const pinnedAccounts = pinnedAccountIds
+    .map(id => activeAccounts.find(account => account.id === id))
+    .filter((account): account is AccountEntity => !!account);
 
   const getAccountPath = (account: AccountEntity) => `/accounts/${account.id}`;
 
@@ -71,6 +96,37 @@ export function Accounts() {
     setShowClosedAccountsPref(!showClosedAccounts);
   };
 
+  const onTogglePinnedAccount = (account: AccountEntity) => {
+    const nextPinnedAccountIds = pinnedAccountIds.includes(account.id)
+      ? pinnedAccountIds.filter(id => id !== account.id)
+      : [...pinnedAccountIds, account.id];
+
+    setPinnedAccountsPref(JSON.stringify(nextPinnedAccountIds));
+  };
+
+  const renderAccount = (
+    account: AccountEntity,
+    options: { canReorder?: boolean; outerStyle?: CSSProperties } = {},
+  ) => (
+    <Account
+      key={account.id}
+      name={account.name}
+      account={account}
+      connected={!!account.bank}
+      pending={syncingAccountIds.includes(account.id)}
+      failed={isAccountFailedSync(account)}
+      updated={updatedAccounts.includes(account.id)}
+      to={getAccountPath(account)}
+      query={bindings.accountBalance(account.id)}
+      onDragChange={onDragChange}
+      onDrop={onReorder}
+      canReorder={options.canReorder}
+      isPinned={pinnedAccountIds.includes(account.id)}
+      onTogglePinned={onTogglePinnedAccount}
+      outerStyle={options.outerStyle}
+    />
+  );
+
   return (
     <View
       style={{
@@ -99,6 +155,20 @@ export function Accounts() {
           balanceTestId="sidebar-all-accounts-balance"
         />
 
+        {pinnedAccounts.length > 0 && (
+          <View data-testid="sidebar-pinned-accounts">
+            <SecondaryItem
+              style={{ marginTop: 13, marginBottom: 5 }}
+              title={t('Pinned')}
+              bold
+            />
+
+            {pinnedAccounts.map(account =>
+              renderAccount(account, { canReorder: false }),
+            )}
+          </View>
+        )}
+
         {onBudgetAccounts.length > 0 && (
           <Account
             name={t('On budget')}
@@ -114,22 +184,9 @@ export function Accounts() {
           />
         )}
 
-        {onBudgetAccounts.map((account, i) => (
-          <Account
-            key={account.id}
-            name={account.name}
-            account={account}
-            connected={!!account.bank}
-            pending={syncingAccountIds.includes(account.id)}
-            failed={isAccountFailedSync(account)}
-            updated={updatedAccounts.includes(account.id)}
-            to={getAccountPath(account)}
-            query={bindings.accountBalance(account.id)}
-            onDragChange={onDragChange}
-            onDrop={onReorder}
-            outerStyle={makeDropPadding(i)}
-          />
-        ))}
+        {onBudgetAccounts.map((account, i) =>
+          renderAccount(account, { outerStyle: makeDropPadding(i) }),
+        )}
 
         {offbudgetAccounts.length > 0 && (
           <Account
@@ -146,22 +203,9 @@ export function Accounts() {
           />
         )}
 
-        {offbudgetAccounts.map((account, i) => (
-          <Account
-            key={account.id}
-            name={account.name}
-            account={account}
-            connected={!!account.bank}
-            pending={syncingAccountIds.includes(account.id)}
-            failed={isAccountFailedSync(account)}
-            updated={updatedAccounts.includes(account.id)}
-            to={getAccountPath(account)}
-            query={bindings.accountBalance(account.id)}
-            onDragChange={onDragChange}
-            onDrop={onReorder}
-            outerStyle={makeDropPadding(i)}
-          />
-        ))}
+        {offbudgetAccounts.map((account, i) =>
+          renderAccount(account, { outerStyle: makeDropPadding(i) }),
+        )}
 
         {closedAccounts.length > 0 && (
           <SecondaryItem

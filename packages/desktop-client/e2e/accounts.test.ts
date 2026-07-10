@@ -63,6 +63,32 @@ test.describe('Accounts', () => {
     await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
   });
 
+  test('pins an account in the sidebar', async () => {
+    await navigation.rightClickAccount('Roth IRA');
+    await page
+      .getByRole('menu')
+      .getByRole('button', { name: 'Pin account' })
+      .click();
+
+    const pinnedSection = page.getByTestId('sidebar-pinned-accounts');
+    await expect(pinnedSection).toBeVisible();
+    await expect(pinnedSection.getByText('Pinned')).toBeVisible();
+    await expect(
+      pinnedSection.getByRole('link', { name: /^Roth IRA/ }),
+    ).toBeVisible();
+    await expect(page.getByRole('link', { name: /^Roth IRA/ })).toHaveCount(2);
+
+    await pinnedSection
+      .getByRole('link', { name: /^Roth IRA/ })
+      .click({ button: 'right' });
+    await page
+      .getByRole('menu')
+      .getByRole('button', { name: 'Unpin account' })
+      .click();
+
+    await expect(pinnedSection).not.toBeVisible();
+  });
+
   test('right clicking a transaction row opens context menu', async () => {
     accountPage = await navigation.createAccount({
       name: 'New Account',

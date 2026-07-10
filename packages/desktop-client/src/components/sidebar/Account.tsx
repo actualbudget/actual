@@ -62,6 +62,9 @@ type AccountProps<FieldName extends SheetFields<'account'>> = {
   outerStyle?: CSSProperties;
   onDragChange?: OnDragChangeCallback<{ id: string }>;
   onDrop?: OnDropCallback;
+  canReorder?: boolean;
+  isPinned?: boolean;
+  onTogglePinned?: (account: AccountEntity) => void;
   titleAccount?: boolean;
   isExactPathMatch?: boolean;
   balanceTestId?: string;
@@ -80,6 +83,9 @@ export function Account<FieldName extends SheetFields<'account'>>({
   outerStyle,
   onDragChange,
   onDrop,
+  canReorder = true,
+  isPinned = false,
+  onTogglePinned,
   titleAccount,
   isExactPathMatch,
   balanceTestId,
@@ -100,12 +106,12 @@ export function Account<FieldName extends SheetFields<'account'>>({
     type,
     onDragChange,
     item: { id: account && account.id },
-    canDrag: account != null,
+    canDrag: account != null && canReorder,
   });
   const handleDragRef = useDragRef(dragRef);
 
   const { dropRef, dropPos } = useDroppable({
-    types: account ? [type] : [],
+    types: account && canReorder ? [type] : [],
     id: account && account.id,
     onDrop,
   });
@@ -143,6 +149,13 @@ export function Account<FieldName extends SheetFields<'account'>>({
         text: t('Rename'),
         onClick: () => setIsEditing(true),
       },
+      account &&
+        !account.closed &&
+        onTogglePinned && {
+          name: isPinned ? 'account-unpin' : 'account-pin',
+          text: isPinned ? t('Unpin account') : t('Pin account'),
+          onClick: () => onTogglePinned(account),
+        },
       account?.closed
         ? {
             name: 'account-reopen',
