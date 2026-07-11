@@ -12,6 +12,8 @@ type GridButtonProps = {
   isToday?: boolean;
   /** Where the cell falls in the range band (or the hover preview). */
   position?: RangePosition;
+  /** Full accessible name (e.g. the complete localized date). */
+  label: string;
   onSelect: () => void;
   /** Called on pointer-enter to preview the range band. */
   onHover?: () => void;
@@ -23,6 +25,7 @@ export function GridButton({
   disabled,
   isToday = false,
   position = null,
+  label,
   onSelect,
   onHover,
   children,
@@ -33,6 +36,8 @@ export function GridButton({
     <Button
       variant={selected ? 'primary' : 'bare'}
       isDisabled={disabled}
+      aria-label={label}
+      aria-pressed={selected}
       onPress={onSelect}
       onHoverStart={onHover}
       style={{

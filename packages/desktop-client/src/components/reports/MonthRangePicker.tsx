@@ -11,7 +11,6 @@ import { View } from '@actual-app/components/view';
 import {
   currentDay,
   currentMonth,
-  differenceInCalendarMonths,
   format,
   prevMonth,
 } from '@actual-app/core/shared/months';
@@ -55,9 +54,7 @@ type MonthRangePickerProps = {
   allowExcludeCurrentMonth?: boolean;
   presets?: QuickSelectPreset[];
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
-  /** `endOffset` is how many months `end` sits before the current month —
-   * see `TimeFrame.endOffset`. */
-  onChangeDates: (start: string, end: string, endOffset: number) => void;
+  onChangeDates: (start: string, end: string) => void;
 };
 
 // Far-future sentinel: sorts after any real date string.
@@ -123,10 +120,6 @@ export function MonthRangePicker({
     setIsOpen(true);
   }
 
-  function endOffsetFor(value: string) {
-    return Math.max(0, differenceInCalendarMonths(currentMonth(), value));
-  }
-
   function changeGranularity(next: MonthRangeGranularity) {
     if (next === gran) return;
     // Only reshape the draft; committing here recomputes the report, which
@@ -151,7 +144,7 @@ export function MonthRangePicker({
     }
     skipCommitRef.current = true;
     if (draftStart !== start || draftEnd !== end) {
-      onChangeDates(draftStart, draftEnd, endOffsetFor(draftEnd));
+      onChangeDates(draftStart, draftEnd);
     }
   }
 
@@ -162,7 +155,9 @@ export function MonthRangePicker({
   const showExcludeCurrentMonth =
     allowExcludeCurrentMonth &&
     !isDay &&
-    (draftEndMonth === currentMonth() || excludesCurrentMonth);
+    (draftEndMonth === currentMonth() || excludesCurrentMonth) &&
+    // Both states must be representable within the configured bounds.
+    prevMonth(currentMonth()) >= toMonth(minDate);
 
   const hasSidebar =
     showGranularityToggle ||
@@ -228,6 +223,9 @@ export function MonthRangePicker({
             }}
           >
             <RangeSelector
+              // Remount on granularity switch so the click-anchor and view
+              // month can't carry a month-shaped value into the day grid.
+              key={gran}
               start={draftStart}
               end={draftEnd}
               min={minDate}

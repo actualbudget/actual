@@ -44,8 +44,6 @@ type HeaderProps = {
     start: TimeFrame['start'],
     end: TimeFrame['end'],
     mode: TimeFrame['mode'],
-    // Only meaningful for `mode: 'sliding-window'` — see `TimeFrame.endOffset`.
-    endOffset?: number,
   ) => void;
   // Granularities the picker offers; defaults to both. In day mode the picker
   // emits `yyyy-MM-dd` start/end.
@@ -201,17 +199,22 @@ function getPastRangePresets({
           ),
         ),
     },
-    {
-      key: 'all-time',
-      label: <Trans>All time</Trans>,
-      onSelect: () =>
-        onChangeDates(
-          ...getFullRange(
-            allMonths[allMonths.length - 1].name,
-            allMonths[0].name,
-          ),
-        ),
-    },
+    // `allMonths` may still be empty before the report's async load finishes.
+    ...(allMonths.length
+      ? [
+          {
+            key: 'all-time',
+            label: <Trans>All time</Trans>,
+            onSelect: () =>
+              onChangeDates(
+                ...getFullRange(
+                  allMonths[allMonths.length - 1].name,
+                  allMonths[0].name,
+                ),
+              ),
+          },
+        ]
+      : []),
   ];
 }
 
@@ -309,13 +312,13 @@ export function Header({
               variant={mode === 'static' ? 'normal' : 'primary'}
               onPress={() => {
                 const newMode = mode === 'static' ? 'sliding-window' : 'static';
-                const [newStart, newEnd, , newEndOffset] = calculateTimeRange({
+                const [newStart, newEnd] = calculateTimeRange({
                   start,
                   end,
                   mode: newMode,
                 });
 
-                onChangeDates(newStart, newEnd, newMode, newEndOffset);
+                onChangeDates(newStart, newEnd, newMode);
               }}
             >
               {mode === 'static' ? t('Static') : t('Live')}
@@ -359,8 +362,8 @@ export function Header({
                     convertToMonth,
                   })
             }
-            onChangeDates={(newStart, newEnd, endOffset) =>
-              onChangeDates(newStart, newEnd, 'static', endOffset)
+            onChangeDates={(newStart, newEnd) =>
+              onChangeDates(newStart, newEnd, 'static')
             }
           />
           {filters && (

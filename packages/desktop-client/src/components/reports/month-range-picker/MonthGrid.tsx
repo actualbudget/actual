@@ -31,17 +31,22 @@ export function MonthGrid({
   // Depends only on year/locale, so it caches across hover re-renders.
   const months = Array.from({ length: 12 }, (_, i) => {
     const month = monthUtils.getMonthFromIndex(year, i);
-    return { month, label: monthUtils.format(month, 'MMM', locale) };
+    return {
+      month,
+      label: monthUtils.format(month, 'MMM', locale),
+      fullLabel: monthUtils.format(month, 'MMMM yyyy', locale),
+    };
   });
   return (
     <Grid columns={4}>
-      {months.map(({ month, label }) => (
+      {months.map(({ month, label, fullLabel }) => (
         <GridButton
           key={month}
           selected={month === rangeStart || month === rangeEnd}
           disabled={month < minMonth || month > maxMonth}
           isToday={month === currentMonth}
           position={rangePosition(month, rangeStart, rangeEnd)}
+          label={fullLabel}
           onSelect={() => onSelect(month)}
           onHover={onHover ? () => onHover(month) : undefined}
         >

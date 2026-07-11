@@ -91,8 +91,6 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
-  // Persisted so a live range keeps sliding (see TimeFrame.endOffset).
-  const [endOffset, setEndOffset] = useState<number | undefined>(undefined);
   const [showBalance, setShowBalance] = useState(
     widget?.meta?.showBalance ?? true,
   );
@@ -165,29 +163,21 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
 
   useEffect(() => {
     if (latestTransaction) {
-      const [initialStart, initialEnd, initialMode, initialEndOffset] =
-        calculateTimeRange(
-          widget?.meta?.timeFrame,
-          defaultTimeFrame,
-          latestTransaction,
-        );
+      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        defaultTimeFrame,
+        latestTransaction,
+      );
       setStart(initialStart);
       setEnd(initialEnd);
       setMode(initialMode);
-      setEndOffset(initialEndOffset);
     }
   }, [latestTransaction, widget?.meta?.timeFrame]);
 
-  function onChangeDates(
-    start: string,
-    end: string,
-    mode: TimeFrame['mode'],
-    newEndOffset?: number,
-  ) {
+  function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
     setEnd(end);
     setMode(mode);
-    setEndOffset(newEndOffset);
   }
 
   const navigate = useNavigate();
@@ -211,7 +201,6 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
               start,
               end,
               mode,
-              endOffset,
             },
             showBalance,
           },

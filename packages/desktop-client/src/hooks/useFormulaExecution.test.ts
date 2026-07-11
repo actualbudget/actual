@@ -84,8 +84,6 @@ function expectQueryDateRange(
   });
 }
 
-// `endOffset: 0` marks these live windows as ending at the current month,
-// as the picker persists them (see TimeFrame.endOffset).
 const formulaQueries: Record<string, QueryConfig> = {
   Income: {
     conditions: [categoryCondition('income-cat')],
@@ -94,7 +92,6 @@ const formulaQueries: Record<string, QueryConfig> = {
       start: '2024-01-01',
       end: '2024-03-31',
       mode: 'sliding-window',
-      endOffset: 0,
     },
   },
   Expenses: {
@@ -104,7 +101,6 @@ const formulaQueries: Record<string, QueryConfig> = {
       start: '2024-03-01',
       end: '2024-03-31',
       mode: 'sliding-window',
-      endOffset: 0,
     },
   },
 };

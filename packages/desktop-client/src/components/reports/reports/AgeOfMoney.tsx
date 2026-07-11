@@ -91,8 +91,6 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
-  // Persisted so a live range keeps sliding (see TimeFrame.endOffset).
-  const [endOffset, setEndOffset] = useState<number | undefined>(undefined);
   const [granularity, setGranularity] = useState<AgeOfMoneyGranularity>(
     widget?.meta?.granularity ?? 'monthly',
   );
@@ -161,16 +159,14 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
 
   useEffect(() => {
     if (latestTransaction) {
-      const [initialStart, initialEnd, initialMode, initialEndOffset] =
-        calculateTimeRange(
-          widget?.meta?.timeFrame,
-          undefined,
-          latestTransaction,
-        );
+      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        undefined,
+        latestTransaction,
+      );
       setStart(initialStart);
       setEnd(initialEnd);
       setMode(initialMode);
-      setEndOffset(initialEndOffset);
     }
   }, [latestTransaction, widget?.meta?.timeFrame]);
 
@@ -178,12 +174,10 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
     newStart: string,
     newEnd: string,
     newMode: TimeFrame['mode'],
-    newEndOffset?: number,
   ) {
     setStart(newStart);
     setEnd(newEnd);
     setMode(newMode);
-    setEndOffset(newEndOffset);
   }
 
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
@@ -204,7 +198,6 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
             start,
             end,
             mode,
-            endOffset,
           },
           granularity,
         },
@@ -226,7 +219,6 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
     start,
     end,
     mode,
-    endOffset,
     granularity,
     dispatch,
     t,

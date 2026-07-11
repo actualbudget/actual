@@ -19,10 +19,6 @@ export type TimeFrame = {
     | 'lastYear'
     | 'yearToDate'
     | 'priorYearToDate';
-  /** For `mode: 'sliding-window'` only: how many months before the current
-   * month this range's end sits (0 = current month). Stored rather than
-   * derived from the stale `end`, so a live range keeps sliding with "now". */
-  endOffset?: number;
 };
 
 type AbstractWidget<

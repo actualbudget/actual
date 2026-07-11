@@ -165,8 +165,6 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
   const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
-  // Persisted so a live range keeps sliding (see TimeFrame.endOffset).
-  const [endOffset, setEndOffset] = useState<number | undefined>(undefined);
   const [graphType, setGraphType] = useState<'Line' | 'Bar'>(
     widget?.meta?.graphType || 'Bar',
   );
@@ -236,23 +234,24 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
       setAllMonths(allMonthsData);
 
       if (widget?.meta?.timeFrame) {
-        const [calculatedStart, calculatedEnd, , calculatedEndOffset] =
-          calculateTimeRange(widget.meta.timeFrame, undefined, latestTransDate);
+        const [calculatedStart, calculatedEnd] = calculateTimeRange(
+          widget.meta.timeFrame,
+          undefined,
+          latestTransDate,
+        );
         setStart(calculatedStart);
         setEnd(calculatedEnd);
         setMode(widget.meta.timeFrame.mode);
-        setEndOffset(calculatedEndOffset);
 
         setIsConcise(calculateIsConcise(calculatedStart, calculatedEnd));
       } else {
-        const [liveStart, liveEnd, , liveEndOffset] = calculateTimeRange({
+        const [liveStart, liveEnd] = calculateTimeRange({
           start: monthUtils.subMonths(currentMonth, 5),
           end: currentMonth,
           mode: 'sliding-window',
         });
         setStart(liveStart);
         setEnd(liveEnd);
-        setEndOffset(liveEndOffset);
 
         setIsConcise(calculateIsConcise(liveStart, liveEnd));
       }
@@ -284,12 +283,10 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     newStart: string,
     newEnd: string,
     newMode: TimeFrame['mode'],
-    newEndOffset?: number,
   ) => {
     setStart(newStart);
     setEnd(newEnd);
     setMode(newMode);
-    setEndOffset(newEndOffset);
 
     setIsConcise(calculateIsConcise(newStart, newEnd));
   };
@@ -313,7 +310,6 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
               start,
               end,
               mode,
-              endOffset,
             },
             graphType,
             showBalance,

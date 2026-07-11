@@ -96,8 +96,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const [start, setStart] = useState<string>('');
   const [end, setEnd] = useState<string>('');
   const [mode, setMode] = useState<TimeFrame['mode']>('static');
-  // Persisted so a live range keeps sliding (see TimeFrame.endOffset).
-  const [endOffset, setEndOffset] = useState<number | undefined>(undefined);
   const [earliestTransaction, setEarliestTransaction] = useState<string>('');
   const [latestTransaction, setLatestTransaction] = useState<string>('');
 
@@ -201,15 +199,11 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
   useEffect(() => {
     if (latestTransaction && allMonths?.length) {
-      // Legacy widgets lack endOffset; default to 0 so `end` isn't shifted twice.
-      const savedTimeFrame =
-        widget?.meta?.timeFrame?.mode === 'sliding-window' &&
-        widget.meta.timeFrame.endOffset == null
-          ? { ...widget.meta.timeFrame, endOffset: 0 }
-          : widget?.meta?.timeFrame;
-      const [initialStart, initialEnd, mode, initialEndOffset] =
-        calculateTimeRange(savedTimeFrame, defaultTimeFrame, latestTransaction);
-      setEndOffset(initialEndOffset);
+      const [initialStart, initialEnd, mode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        defaultTimeFrame,
+        latestTransaction,
+      );
       const earliestMonth = allMonths[allMonths.length - 1].name;
       const latestMonth = allMonths[0].name;
       let start = initialStart;
@@ -242,12 +236,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     }
   }, [latestTransaction, widget?.meta?.timeFrame, allMonths]);
 
-  function onChangeDates(
-    start: string,
-    end: string,
-    mode: TimeFrame['mode'],
-    newEndOffset?: number,
-  ) {
+  function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     if (!allMonths?.length) {
       return;
     }
@@ -278,7 +267,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     setStart(start);
     setEnd(end);
     setMode(mode);
-    setEndOffset(newEndOffset);
   }
 
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
@@ -312,7 +300,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
             projectionType,
             expenseAdjustmentFactor,
             showHiddenCategories,
-            timeFrame: { start, end, mode, endOffset },
+            timeFrame: { start, end, mode },
           },
         },
       },

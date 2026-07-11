@@ -164,12 +164,11 @@ export function getFullRange(start: string, end: string) {
   return [start, end, 'full'] as const;
 }
 
-/** A live range `offset` months wide, ending `endOffset` months before the current month. */
-export function getLatestRange(offset: number, endOffset: number = 0) {
-  const end = monthUtils.subMonths(monthUtils.currentMonth(), endOffset);
+export function getLatestRange(offset: number) {
+  const end = monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, offset);
 
-  return [start, end, 'sliding-window', endOffset] as const;
+  return [start, end, 'sliding-window'] as const;
 }
 
 export function getNextRange(offset: number) {
@@ -226,15 +225,7 @@ export function calculateTimeRange(
       ] as const;
     }
 
-    // Derive from the stale `end` only for legacy data without a stored endOffset.
-    const endOffset =
-      timeFrame?.endOffset ??
-      Math.max(
-        0,
-        monthUtils.differenceInCalendarMonths(monthUtils.currentMonth(), end),
-      );
-
-    return getLatestRange(offset, endOffset);
+    return getLatestRange(offset);
   }
   if (mode === 'lastMonth') {
     const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);

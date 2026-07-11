@@ -102,10 +102,6 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   );
   const [end, setEnd] = useState(monthUtils.currentDay());
   const [mode, setMode] = useState<TimeFrame['mode']>('full');
-  // How many months before the current month a sliding-window `end` sits;
-  // persisted alongside start/end/mode so a live range keeps tracking "now"
-  // correctly between saves instead of drifting (see TimeFrame.endOffset).
-  const [endOffset, setEndOffset] = useState<number | undefined>(undefined);
   const [query, setQuery] = useState<Query | undefined>(undefined);
   const [dirty, setDirty] = useState(false);
   const [latestTransaction, setLatestTransaction] = useState('');
@@ -305,20 +301,18 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
   useEffect(() => {
     if (latestTransaction) {
-      const [initialStart, initialEnd, initialMode, initialEndOffset] =
-        calculateTimeRange(
-          widget?.meta?.timeFrame,
-          {
-            start: monthUtils.dayFromDate(monthUtils.currentMonth()),
-            end: monthUtils.currentDay(),
-            mode: 'full',
-          },
-          latestTransaction,
-        );
+      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        {
+          start: monthUtils.dayFromDate(monthUtils.currentMonth()),
+          end: monthUtils.currentDay(),
+          mode: 'full',
+        },
+        latestTransaction,
+      );
       setStart(initialStart);
       setEnd(initialEnd);
       setMode(initialMode);
-      setEndOffset(initialEndOffset);
     }
   }, [latestTransaction, widget?.meta?.timeFrame]);
 
@@ -347,16 +341,10 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     });
   };
 
-  function onChangeDates(
-    start: string,
-    end: string,
-    mode: TimeFrame['mode'],
-    newEndOffset?: number,
-  ) {
+  function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
     setEnd(end);
     setMode(mode);
-    setEndOffset(newEndOffset);
   }
 
   async function onSaveWidget() {
@@ -376,7 +364,6 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
               start,
               end,
               mode,
-              endOffset,
             },
           },
         },

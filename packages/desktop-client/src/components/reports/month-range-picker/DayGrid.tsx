@@ -36,7 +36,12 @@ export function DayGrid({
 }: DayGridProps) {
   const firstDay = monthUtils.firstDayOfMonth(`${viewMonth}-01`);
   const lastDay = monthUtils.lastDayOfMonth(`${viewMonth}-01`);
-  const days = monthUtils.dayRangeInclusive(firstDay, lastDay);
+  // Depends only on the view month/locale, so it caches across hover
+  // re-renders.
+  const days = monthUtils.dayRangeInclusive(firstDay, lastDay).map(day => ({
+    day,
+    fullLabel: monthUtils.format(day, 'PPPP', locale),
+  }));
   const currentDay = monthUtils.currentDay();
   // `min`/`max` may still be month-shaped even in day mode; widen those to
   // whole months, but keep already day-shaped bounds exact.
@@ -73,13 +78,14 @@ export function DayGrid({
         {Array.from({ length: leadingBlanks }, (_, i) => (
           <View key={`blank-${i}`} />
         ))}
-        {days.map(day => (
+        {days.map(({ day, fullLabel }) => (
           <GridButton
             key={day}
             selected={day === rangeStart || day === rangeEnd}
             disabled={day < minDay || day > maxDay}
             isToday={day === currentDay}
             position={rangePosition(day, rangeStart, rangeEnd)}
+            label={fullLabel}
             onSelect={() => onSelect(day)}
             onHover={onHover ? () => onHover(day) : undefined}
           >

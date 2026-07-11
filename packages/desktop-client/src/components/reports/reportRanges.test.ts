@@ -35,39 +35,25 @@ describe('calculateTimeRange', () => {
     expect(mode).toBe('sliding-window');
   });
 
-  it('preserves a live window that ends before the current month', () => {
-    // Saved 6-month window ending one month before the current month; the gap
-    // from now must be preserved as months roll over.
+  it('anchors a live window that ends before the current month to now', () => {
+    // Saved 6-month window ending one month before the (then-)current month;
+    // a live window always slides so its end is the current month.
     const [start, end, mode] = calculateTimeRange({
       start: '2016-07',
       end: '2016-12',
       mode: 'sliding-window',
     });
 
-    expect(end).toBe('2016-12'); // one month before current 2017-01
-    expect(start).toBe('2016-07'); // width of 5 preserved
+    expect(end).toBe('2017-01');
+    expect(start).toBe('2016-08'); // width of 5 preserved
     expect(mode).toBe('sliding-window');
   });
 });
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'
 describe('getLatestRange', () => {
-  it('ends at the current month by default', () => {
-    expect(getLatestRange(5)).toEqual([
-      '2016-08',
-      '2017-01',
-      'sliding-window',
-      0,
-    ]);
-  });
-
-  it('ends endOffset months before the current month', () => {
-    expect(getLatestRange(5, 1)).toEqual([
-      '2016-07',
-      '2016-12',
-      'sliding-window',
-      1,
-    ]);
+  it('ends at the current month', () => {
+    expect(getLatestRange(5)).toEqual(['2016-08', '2017-01', 'sliding-window']);
   });
 });
 
