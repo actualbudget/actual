@@ -8,9 +8,9 @@ import { Text } from '#Text';
 import { theme } from '#theme';
 import { View } from '#View';
 
-import { DayRangeCalendar } from './DayRangeCalendar';
-import { GranularityToggle } from './GranularityToggle';
-import { RangeSelector } from './RangeSelector';
+import { DayRangeCalendar } from './date-range-picker/DayRangeCalendar';
+import { GranularityToggle } from './date-range-picker/GranularityToggle';
+import { RangeSelector } from './date-range-picker/RangeSelector';
 import {
   clamp,
   currentDay,
@@ -20,20 +20,20 @@ import {
   getMonth,
   lastDayOfMonth,
   valueIsDay,
-} from './util';
+} from './date-range-picker/util';
 import type {
   DateRangeGranularity,
   DateRangePickerLabels,
   DateRangePreset,
   FirstDayOfWeek,
-} from './util';
+} from './date-range-picker/util';
 
 export type {
   DateRangeGranularity,
   DateRangePickerLabels,
   DateRangePreset,
   FirstDayOfWeek,
-} from './util';
+} from './date-range-picker/util';
 
 type DateRangePickerProps = {
   start: string;
@@ -48,6 +48,11 @@ type DateRangePickerProps = {
   firstDayOfWeek?: FirstDayOfWeek;
   /** BCP 47 language tag driving all date formatting. */
   locale: string;
+  /**
+   * Formats a `yyyy-MM-dd` value for the trigger label; falls back to a
+   * locale-numeric date. Pass this when the app has its own date format.
+   */
+  formatDayLabel?: (date: string) => string;
   labels: DateRangePickerLabels;
   onChangeDates: (start: string, end: string) => void;
 };
@@ -72,6 +77,7 @@ export function DateRangePicker({
   presets,
   firstDayOfWeek = 'sun',
   locale,
+  formatDayLabel,
   labels,
   onChangeDates,
 }: DateRangePickerProps) {
@@ -161,14 +167,16 @@ export function DateRangePicker({
 
   // Format by the values' actual shape; the committed values may be
   // day-shaped even when day mode is off.
-  const labelFormat: Intl.DateTimeFormatOptions = valueIsDay(shownStart)
-    ? { year: 'numeric', month: 'numeric', day: 'numeric' }
-    : { month: 'short', year: 'numeric' };
-  const label = `${formatDate(shownStart, locale, labelFormat)} – ${formatDate(
-    shownEnd,
-    locale,
-    labelFormat,
-  )}`;
+  const formatLabel = (value: string) =>
+    valueIsDay(value)
+      ? (formatDayLabel?.(value) ??
+        formatDate(value, locale, {
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+        }))
+      : formatDate(value, locale, { month: 'short', year: 'numeric' });
+  const label = `${formatLabel(shownStart)} – ${formatLabel(shownEnd)}`;
 
   return (
     <View>

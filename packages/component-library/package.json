@@ -50,7 +50,7 @@
     "./tooltip": "./src/Tooltip.tsx",
     "./view": "./src/View.tsx",
     "./color-picker": "./src/ColorPicker.tsx",
-    "./date-range-picker": "./src/date-range-picker/DateRangePicker.tsx"
+    "./date-range-picker": "./src/DateRangePicker.tsx"
   },
   "scripts": {
     "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --template template.ts --index-template index-template.ts --typescript --expand-props start -d . .",

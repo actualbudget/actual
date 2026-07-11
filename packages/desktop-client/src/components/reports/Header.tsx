@@ -20,6 +20,7 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
 import { getFirstDayOfWeek } from '#components/select/DateSelect';
+import { useDateFormat } from '#hooks/useDateFormat';
 import { useLanguage } from '#hooks/useLocale';
 
 import { getLiveRange } from './getLiveRange';
@@ -103,6 +104,7 @@ export function Header({
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const language = useLanguage();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   // Live-range presets return day-shaped bounds; collapse them to months.
   function liveRangeAsMonths(
@@ -287,6 +289,7 @@ export function Header({
             }
             firstDayOfWeek={getFirstDayOfWeek(firstDayOfWeekIdx)}
             locale={language}
+            formatDayLabel={date => monthUtils.format(date, dateFormat)}
             labels={{
               selectBy: t('Select by'),
               quickSelect: t('Quick select'),

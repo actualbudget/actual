@@ -3,8 +3,8 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 
+import type { DateRangePickerLabels } from './date-range-picker/util';
 import { DateRangePicker } from './DateRangePicker';
-import type { DateRangePickerLabels } from './util';
 
 const labels: DateRangePickerLabels = {
   selectBy: 'Select by',
