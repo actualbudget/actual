@@ -21,6 +21,12 @@ cd "$ROOT" 2>/dev/null || exit 0
 # Skip if dependencies aren't installed.
 [ -f "$ROOT/node_modules/.yarn-state.yml" ] || exit 0
 
+# Hook environments often have a minimal PATH without nvm/corepack shims;
+# without this, every check "fails" with `yarn: command not found` and gets
+# reported to the agent as a typecheck/test failure. If yarn genuinely can't
+# be found, skip the check instead of reporting a bogus failure.
+resolve_yarn "$ROOT" || exit 0
+
 # Collect changed files, NUL-delimited so paths with spaces survive: this
 # branch's commits vs master, plus tracked + untracked working-tree changes.
 base=$(git merge-base HEAD origin/master 2>/dev/null || true)
