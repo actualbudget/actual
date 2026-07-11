@@ -7,7 +7,7 @@ import type { Locale } from 'date-fns';
 
 import { Grid } from './Grid';
 import { GridButton } from './GridButton';
-import { rangePosition, toDayEnd, toDayStart } from './util';
+import { rangePosition, toDayEnd, toDayStart, valueIsDay } from './util';
 
 type DayGridProps = {
   viewMonth: string;
@@ -38,9 +38,10 @@ export function DayGrid({
   const lastDay = monthUtils.lastDayOfMonth(`${viewMonth}-01`);
   const days = monthUtils.dayRangeInclusive(firstDay, lastDay);
   const currentDay = monthUtils.currentDay();
-  // `min`/`max` may still be month-shaped even in day mode; normalize to days.
-  const minDay = toDayStart(min);
-  const maxDay = toDayEnd(max);
+  // `min`/`max` may still be month-shaped even in day mode; widen those to
+  // whole months, but keep already day-shaped bounds exact.
+  const minDay = valueIsDay(min) ? min : toDayStart(min);
+  const maxDay = valueIsDay(max) ? max : toDayEnd(max);
   // 0 = Sunday ... 6 = Saturday
   const startOfWeek = parseInt(firstDayOfWeekIdx || '0', 10) || 0;
   const leadingBlanks =

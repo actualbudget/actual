@@ -50,11 +50,20 @@ export function shiftMonths(value: string, n: number): string {
 }
 
 // Clamp an ISO date string to [min, max], normalizing the bounds to `value`'s
-// own granularity so the result keeps `value`'s shape.
+// own granularity so the result keeps `value`'s shape. Month-shaped bounds
+// widen to whole months in day mode; day-shaped bounds stay exact.
 export function clamp(value: string, min: string, max: string): string {
   const isDay = valueIsDay(value);
-  const loBound = isDay ? toDayStart(min) : toMonth(min);
-  const hiBound = isDay ? toDayEnd(max) : toMonth(max);
+  const loBound = isDay
+    ? valueIsDay(min)
+      ? min
+      : toDayStart(min)
+    : toMonth(min);
+  const hiBound = isDay
+    ? valueIsDay(max)
+      ? max
+      : toDayEnd(max)
+    : toMonth(max);
   if (value < loBound) return loBound;
   if (value > hiBound) return hiBound;
   return value;

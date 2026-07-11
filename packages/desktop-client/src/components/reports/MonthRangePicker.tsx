@@ -9,6 +9,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import {
+  currentDay,
   currentMonth,
   differenceInCalendarMonths,
   format,
@@ -22,6 +23,7 @@ import { ExcludeCurrentMonthToggle } from './month-range-picker/ExcludeCurrentMo
 import { GranularityToggle } from './month-range-picker/GranularityToggle';
 import { RangeSelector } from './month-range-picker/RangeSelector';
 import {
+  clamp,
   shiftMonths,
   toDayEnd,
   toDayStart,
@@ -81,6 +83,10 @@ export function MonthRangePicker({
   onChangeDates,
 }: MonthRangePickerProps) {
   const effectiveMax = maxDate ?? NO_MAX;
+  // A month-shaped cap that reaches the current month would otherwise widen to
+  // that month's last day in day mode, allowing days after today.
+  const effectiveDayMax =
+    toMonth(effectiveMax) === currentMonth() ? currentDay() : effectiveMax;
   const locale = useLocale();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -91,8 +97,9 @@ export function MonthRangePicker({
 
   // The committed values' shape encodes the granularity, so it survives the
   // remounts that reports with a loading early-return cause on every commit.
-  const granFor = (value: string): MonthRangeGranularity =>
-    allowsDay && valueIsDay(value) ? 'day' : 'month';
+  function granFor(value: string): MonthRangeGranularity {
+    return allowsDay && valueIsDay(value) ? 'day' : 'month';
+  }
   const [gran, setGran] = useState<MonthRangeGranularity>(granFor(start));
   const isDay = gran === 'day';
 
@@ -125,9 +132,15 @@ export function MonthRangePicker({
     // Only reshape the draft; committing here recomputes the report, which
     // can unmount the Header and close this popover. Commit happens on close.
     setDraftStart(
-      next === 'day' ? toDayStart(draftStart) : toMonth(draftStart),
+      next === 'day'
+        ? clamp(toDayStart(draftStart), minDate, effectiveDayMax)
+        : toMonth(draftStart),
     );
-    setDraftEnd(next === 'day' ? toDayEnd(draftEnd) : toMonth(draftEnd));
+    setDraftEnd(
+      next === 'day'
+        ? clamp(toDayEnd(draftEnd), minDate, effectiveDayMax)
+        : toMonth(draftEnd),
+    );
     setGran(next);
   }
 
@@ -159,8 +172,8 @@ export function MonthRangePicker({
   function toggleExcludeCurrentMonth(exclude: boolean) {
     if (exclude === excludesCurrentMonth) return;
     const delta = exclude ? -1 : 1;
-    setDraftStart(shiftMonths(draftStart, delta));
-    setDraftEnd(shiftMonths(draftEnd, delta));
+    setDraftStart(clamp(shiftMonths(draftStart, delta), minDate, effectiveMax));
+    setDraftEnd(clamp(shiftMonths(draftEnd, delta), minDate, effectiveMax));
   }
 
   function setDraft(nextStart: string, nextEnd: string) {
@@ -218,7 +231,7 @@ export function MonthRangePicker({
               start={draftStart}
               end={draftEnd}
               min={minDate}
-              max={effectiveMax}
+              max={isDay ? effectiveDayMax : effectiveMax}
               isDay={isDay}
               locale={locale}
               firstDayOfWeekIdx={firstDayOfWeekIdx}
