@@ -349,6 +349,9 @@ describe('ComponentName', () => {
 - `/.nano-staged.json` - pre-commit format/lint config (run via Husky)
 - `/.claude/settings.json`, `/.codex/config.toml`, `/.cursor/hooks.json` - agent
   hook wiring; shared scripts live in `/scripts/agent-hooks/`
+- `/.agents/skills/` - symlink mirror of `/.claude/skills/` so Codex-based
+  harnesses (Codex CLI, IDE extension, ChatGPT desktop app) discover the same
+  skills (see `/.agents/skills/README.md`)
 - `/tsconfig.json` - Root TypeScript configuration
 - `/.cursorignore`, `/.gitignore` - Ignored files
 - `/yarn.lock` - Dependency lockfile (Yarn 4)
