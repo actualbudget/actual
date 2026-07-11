@@ -1,50 +1,55 @@
 import { useRef, useState } from 'react';
-import { Trans } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { Popover } from '@actual-app/components/popover';
-import type { CSSProperties } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
+import { Button } from '#Button';
+import { useResponsive } from '#hooks/useResponsive';
+import { Popover } from '#Popover';
+import type { CSSProperties } from '#styles';
+import { Text } from '#Text';
+import { theme } from '#theme';
+import { View } from '#View';
+
+import { DayRangeCalendar } from './DayRangeCalendar';
+import { GranularityToggle } from './GranularityToggle';
+import { RangeSelector } from './RangeSelector';
 import {
+  clamp,
   currentDay,
   currentMonth,
   firstDayOfMonth,
-  format,
+  formatDate,
   getMonth,
   lastDayOfMonth,
-} from '@actual-app/core/shared/months';
-import type { SyncedPrefs } from '@actual-app/core/types/prefs';
-
-import { useLocale } from '#hooks/useLocale';
-
-import { DayRangeCalendar } from './month-range-picker/DayRangeCalendar';
-import { GranularityToggle } from './month-range-picker/GranularityToggle';
-import { RangeSelector } from './month-range-picker/RangeSelector';
-import { clamp, valueIsDay } from './month-range-picker/util';
+  valueIsDay,
+} from './util';
 import type {
-  MonthRangeGranularity,
-  QuickSelectPreset,
-} from './month-range-picker/util';
+  DateRangeGranularity,
+  DateRangePickerLabels,
+  DateRangePreset,
+  FirstDayOfWeek,
+} from './util';
 
+export { valueIsDay } from './util';
 export type {
-  MonthRangeGranularity,
-  QuickSelectPreset,
-} from './month-range-picker/util';
+  DateRangeGranularity,
+  DateRangePickerLabels,
+  DateRangePreset,
+  FirstDayOfWeek,
+} from './util';
 
-type MonthRangePickerProps = {
+type DateRangePickerProps = {
   start: string;
   end: string;
   /** Inclusive lower bound (`yyyy-MM` or `yyyy-MM-dd`). */
   minDate: string;
   /** Inclusive upper bound; omit for no upper limit. */
   maxDate?: string;
-  /** Pass `['month', 'day']` for reports that handle day-shaped values. */
-  granularities?: MonthRangeGranularity[];
-  presets?: QuickSelectPreset[];
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  /** Pass `['month', 'day']` for callers that handle day-shaped values. */
+  granularities?: DateRangeGranularity[];
+  presets?: DateRangePreset[];
+  firstDayOfWeek?: FirstDayOfWeek;
+  /** BCP 47 language tag driving all date formatting. */
+  locale: string;
+  labels: DateRangePickerLabels;
   onChangeDates: (start: string, end: string) => void;
 };
 
@@ -59,18 +64,19 @@ const sectionTitleStyle = {
   color: theme.pageTextSubdued,
 } satisfies CSSProperties;
 
-export function MonthRangePicker({
+export function DateRangePicker({
   start,
   end,
   minDate,
   maxDate,
   granularities = ['month'],
   presets,
-  firstDayOfWeekIdx,
+  firstDayOfWeek = 'sun',
+  locale,
+  labels,
   onChangeDates,
-}: MonthRangePickerProps) {
+}: DateRangePickerProps) {
   const effectiveMax = maxDate ?? NO_MAX;
-  const locale = useLocale();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const { isNarrowWidth } = useResponsive();
@@ -78,9 +84,9 @@ export function MonthRangePicker({
   const allowsDay = granularities.includes('day');
   const showGranularityToggle = allowsDay && granularities.includes('month');
 
-  // Edit a local draft while open; the report only recomputes on commit. The
+  // Edit a local draft while open; the caller only recomputes on commit. The
   // draft's shape encodes the granularity, so it survives the remounts that
-  // reports with a loading early-return cause on every commit.
+  // callers with a loading early-return cause on every commit.
   const [draftStart, setDraftStart] = useState(start);
   const [draftEnd, setDraftEnd] = useState(end);
   const isDay = allowsDay && valueIsDay(draftStart);
@@ -113,10 +119,10 @@ export function MonthRangePicker({
     setIsOpen(true);
   }
 
-  function changeGranularity(next: MonthRangeGranularity) {
+  function changeGranularity(next: DateRangeGranularity) {
     if (next === (isDay ? 'day' : 'month')) return;
-    // Only reshape the draft; committing here recomputes the report, which
-    // can unmount the Header and close this popover. Commit happens on close.
+    // Only reshape the draft; committing here recomputes the caller's view,
+    // which can unmount this picker and close the popover. Commit on close.
     setDraftStart(
       next === 'day'
         ? clamp(firstDayOfMonth(draftStart), dayMin, dayMax)
@@ -156,11 +162,13 @@ export function MonthRangePicker({
 
   // Format by the values' actual shape; the committed values may be
   // day-shaped even when day mode is off.
-  const labelFormat = valueIsDay(shownStart) ? 'P' : 'MMM yyyy';
-  const label = `${format(shownStart, labelFormat, locale)} – ${format(
+  const labelFormat: Intl.DateTimeFormatOptions = valueIsDay(shownStart)
+    ? { year: 'numeric', month: 'numeric', day: 'numeric' }
+    : { month: 'short', year: 'numeric' };
+  const label = `${formatDate(shownStart, locale, labelFormat)} – ${formatDate(
     shownEnd,
-    labelFormat,
     locale,
+    labelFormat,
   )}`;
 
   return (
@@ -199,7 +207,12 @@ export function MonthRangePicker({
                 end={draftEnd}
                 min={dayMin}
                 max={dayMax}
-                firstDayOfWeekIdx={firstDayOfWeekIdx}
+                firstDayOfWeek={firstDayOfWeek}
+                locale={locale}
+                dateRangeLabel={labels.dateRange}
+                previousMonthLabel={labels.previousMonth}
+                nextMonthLabel={labels.nextMonth}
+                yearLabel={labels.year}
                 onChange={setDraft}
               />
             ) : (
@@ -209,6 +222,8 @@ export function MonthRangePicker({
                 min={monthMin}
                 max={monthMax}
                 locale={locale}
+                previousLabel={labels.previous}
+                nextLabel={labels.next}
                 onChange={setDraft}
               />
             )}
@@ -218,11 +233,11 @@ export function MonthRangePicker({
             <View style={{ padding: 15, minWidth: 140, gap: 16 }}>
               {showGranularityToggle && (
                 <View>
-                  <Text style={sectionTitleStyle}>
-                    <Trans>Select by</Trans>
-                  </Text>
+                  <Text style={sectionTitleStyle}>{labels.selectBy}</Text>
                   <GranularityToggle
                     value={isDay ? 'day' : 'month'}
+                    monthLabel={labels.month}
+                    dayLabel={labels.day}
                     onChange={changeGranularity}
                   />
                 </View>
@@ -230,9 +245,7 @@ export function MonthRangePicker({
 
               {Boolean(presets?.length) && (
                 <View>
-                  <Text style={sectionTitleStyle}>
-                    <Trans>Quick select</Trans>
-                  </Text>
+                  <Text style={sectionTitleStyle}>{labels.quickSelect}</Text>
                   <View style={{ gap: 4 }}>
                     {presets?.map(preset => (
                       <Button

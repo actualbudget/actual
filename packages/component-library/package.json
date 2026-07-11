@@ -3,7 +3,15 @@
   "version": "0.0.1",
   "license": "MIT",
   "imports": {
-    "#tokens": "./src/tokens.ts"
+    "#tokens": "./src/tokens.ts",
+    "#Button": "./src/Button.tsx",
+    "#Popover": "./src/Popover.tsx",
+    "#styles": "./src/styles.ts",
+    "#Text": "./src/Text.tsx",
+    "#theme": "./src/theme.ts",
+    "#View": "./src/View.tsx",
+    "#hooks/*": "./src/hooks/*.ts",
+    "#icons/v1": "./src/icons/v1/index.ts"
   },
   "exports": {
     "./hooks/*": "./src/hooks/*.ts",
@@ -39,18 +47,19 @@
     "./toggle": "./src/Toggle.tsx",
     "./tooltip": "./src/Tooltip.tsx",
     "./view": "./src/View.tsx",
-    "./color-picker": "./src/ColorPicker.tsx"
+    "./color-picker": "./src/ColorPicker.tsx",
+    "./date-range-picker": "./src/date-range-picker/DateRangePicker.tsx"
   },
   "scripts": {
     "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --template template.ts --index-template index-template.ts --typescript --expand-props start -d . .",
-    "test": "npm-run-all -cp 'test:*'",
-    "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
+    "test": "ENV=web vitest --run -c vitest.web.config.ts",
     "start:storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
     "typecheck": "tsgo -b"
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",
+    "@internationalized/date": "^3.12.2",
     "react-aria-components": "^1.18.0",
     "usehooks-ts": "^3.1.1"
   },

@@ -1,13 +1,11 @@
 import { useContext } from 'react';
 import { RangeCalendarStateContext } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
 
 // react-aria's CalendarYearPicker windows its year list by stepping whole
 // years from minValue, which drops maxValue's year whenever the range doesn't
 // span full years — for a budget that's most of the time. Build the list from
 // the bounds' years instead; setFocusedDate clamps to [minValue, maxValue].
-export function YearSelect() {
-  const { t } = useTranslation();
+export function YearSelect({ label }: { label: string }) {
   const state = useContext(RangeCalendarStateContext);
   if (!state) return null;
   const minYear = state.minValue?.year ?? state.focusedDate.year;
@@ -24,7 +22,7 @@ export function YearSelect() {
   );
   return (
     <select
-      aria-label={t('Year')}
+      aria-label={label}
       value={state.focusedDate.year}
       onChange={e =>
         state.setFocusedDate(

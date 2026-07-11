@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
-import { clamp, rangePosition, valueIsDay } from './util';
+import {
+  clamp,
+  firstDayOfMonth,
+  formatDate,
+  lastDayOfMonth,
+  monthFromIndex,
+  rangePosition,
+  valueIsDay,
+} from './util';
 
 describe('valueIsDay', () => {
   it('is false for month-shaped values', () => {
@@ -51,5 +59,32 @@ describe('rangePosition', () => {
 
   it('treats a single-cell range as start', () => {
     expect(rangePosition('2020-03', '2020-03', '2020-03')).toBe('start');
+  });
+});
+
+describe('date helpers', () => {
+  it('widens month values to their first and last day', () => {
+    expect(firstDayOfMonth('2020-02')).toBe('2020-02-01');
+    expect(lastDayOfMonth('2020-02')).toBe('2020-02-29');
+    expect(lastDayOfMonth('2021-02-10')).toBe('2021-02-28');
+    expect(lastDayOfMonth('2020-12')).toBe('2020-12-31');
+  });
+
+  it('builds months from a year and index', () => {
+    expect(monthFromIndex('2020', 0)).toBe('2020-01');
+    expect(monthFromIndex('2020', 11)).toBe('2020-12');
+  });
+
+  it('formats month- and day-shaped values without timezone shifts', () => {
+    expect(
+      formatDate('2020-01', 'en-US', { month: 'short', year: 'numeric' }),
+    ).toBe('Jan 2020');
+    expect(
+      formatDate('2020-01-15', 'en-US', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+      }),
+    ).toBe('1/15/2020');
   });
 });

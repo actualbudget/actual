@@ -1,15 +1,12 @@
-import { useTranslation } from 'react-i18next';
-
-import { Button } from '@actual-app/components/button';
-import {
-  SvgCheveronLeft,
-  SvgCheveronRight,
-} from '@actual-app/components/icons/v1';
-import { Text } from '@actual-app/components/text';
-import { View } from '@actual-app/components/view';
+import { Button } from '#Button';
+import { SvgCheveronLeft, SvgCheveronRight } from '#icons/v1';
+import { Text } from '#Text';
+import { View } from '#View';
 
 type NavRowProps = {
   label: string;
+  previousLabel: string;
+  nextLabel: string;
   canPrev: boolean;
   canNext: boolean;
   onPrev: () => void;
@@ -18,12 +15,13 @@ type NavRowProps = {
 
 export function NavRow({
   label,
+  previousLabel,
+  nextLabel,
   canPrev,
   canNext,
   onPrev,
   onNext,
 }: NavRowProps) {
-  const { t } = useTranslation();
   return (
     <View
       style={{
@@ -34,7 +32,7 @@ export function NavRow({
       }}
     >
       <Button
-        aria-label={t('Previous')}
+        aria-label={previousLabel}
         variant="bare"
         isDisabled={!canPrev}
         onPress={onPrev}
@@ -43,7 +41,7 @@ export function NavRow({
       </Button>
       <Text style={{ fontWeight: 'bold' }}>{label}</Text>
       <Button
-        aria-label={t('Next')}
+        aria-label={nextLabel}
         variant="bare"
         isDisabled={!canNext}
         onPress={onNext}

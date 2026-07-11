@@ -1,8 +1,7 @@
+import { valueIsDay } from '@actual-app/components/date-range-picker';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { TimeFrame } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
-
-import { valueIsDay } from './month-range-picker/util';
 
 export function validateStart(
   earliest: string,

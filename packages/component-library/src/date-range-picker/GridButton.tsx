@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
-import { Button } from '@actual-app/components/button';
-import { theme } from '@actual-app/components/theme';
+import { Button } from '#Button';
+import { theme } from '#theme';
 
 import type { RangePosition } from './util';
 
