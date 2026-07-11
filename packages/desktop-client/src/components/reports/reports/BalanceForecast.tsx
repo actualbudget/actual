@@ -308,9 +308,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   );
   const isUpdatingForecast = isFetching && isPlaceholderData;
 
-  const scheduledOccurrenceCount = countForecastScheduledOccurrences(
-    normalizedForecastData,
-  );
+  const scheduledOccurrenceCount = countForecastScheduledOccurrences({
+    forecastData: normalizedForecastData,
+    start: chartRange.start,
+    end: chartRange.end,
+    granularity,
+  });
 
   if (!allMonths) {
     return <LoadingIndicator />;
@@ -376,7 +379,6 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
               ? monthUtils.monthFromDate(forecastData.forecastEndDate)
               : (allMonths[0]?.name ?? monthUtils.addMonths(currentMonth, 24))
           }
-          granularities={['month', 'day']}
           mode={mode}
           onChangeDates={onChangeDates}
           showFutureRange

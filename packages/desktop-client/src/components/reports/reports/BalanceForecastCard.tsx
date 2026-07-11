@@ -138,9 +138,12 @@ export function BalanceForecastCard({
     dataPoint => dataPoint.date === todayReferenceDate,
   );
 
-  const scheduledOccurrenceCount = countForecastScheduledOccurrences(
-    normalizedForecastData,
-  );
+  const scheduledOccurrenceCount = countForecastScheduledOccurrences({
+    forecastData: normalizedForecastData,
+    start: chartRange.start,
+    end: chartRange.end,
+    granularity: 'Monthly',
+  });
   const hasFilters =
     !isTrackingBudgetForecast && (meta?.conditions?.length ?? 0) > 0;
 

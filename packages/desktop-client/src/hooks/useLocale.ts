@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import { getLocale } from '@actual-app/core/shared/locale';
 
 import { useGlobalPref } from './useGlobalPref';
@@ -11,7 +9,5 @@ export function useLanguage() {
 }
 
 export function useLocale() {
-  const language = useLanguage();
-  const locale = useMemo(() => getLocale(language), [language]);
-  return locale;
+  return getLocale(useLanguage());
 }

@@ -67,8 +67,7 @@ test.describe('Reports', () => {
   test('opens the date range picker and checks visuals', async () => {
     await reportsPage.goToNetWorthPage();
 
-    // The picker trigger is labelled with the current range, e.g. "Jan 2025 – Jun 2025"
-    await page.getByRole('button', { name: /–/ }).click();
+    await page.getByTestId('date-range-picker-trigger').click();
     const picker = page.locator('[data-popover]');
     await expect(picker).toMatchThemeScreenshots();
 

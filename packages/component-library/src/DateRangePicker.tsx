@@ -182,6 +182,7 @@ export function DateRangePicker({
     <View>
       <Button
         ref={triggerRef}
+        data-testid="date-range-picker-trigger"
         onPress={() => (isOpen ? closeAndCommit() : openPopover())}
       >
         {label}
