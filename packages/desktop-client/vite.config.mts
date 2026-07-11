@@ -22,8 +22,11 @@ import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Compile every workspace package that ships React components. Workspace
+// imports resolve to their real paths under packages/, so this matches
+// component-library source flowing through this build as well.
 const reactCompilerInclude =
-  /[\\/]desktop-client[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
+  /[\\/](?:desktop-client|component-library)[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',

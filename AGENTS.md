@@ -286,7 +286,7 @@ wrapping isn't possible).
 
 **React Patterns:**
 
-- The project uses **React Compiler** (`babel-plugin-react-compiler`) in the desktop-client. The compiler auto-memoizes component bodies, so you can omit manual `useCallback`, `useMemo`, and `React.memo` when adding or refactoring code; prefer inline callbacks and values unless a stable identity is required by a non-compiled dependency.
+- The project uses **React Compiler** (`babel-plugin-react-compiler`) in all packages with React code (desktop-client, component-library, docs). The compiler auto-memoizes component bodies, so you can omit manual `useCallback`, `useMemo`, and `React.memo` when adding or refactoring code; prefer inline callbacks and values unless a stable identity is required by a non-compiled dependency.
 - Avoid unstable nested components
 
 **JSX Style:**

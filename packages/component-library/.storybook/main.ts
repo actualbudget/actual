@@ -1,8 +1,12 @@
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
+import babel from '@rolldown/plugin-babel';
 import type { StorybookConfig } from '@storybook/react-vite';
-import react from '@vitejs/plugin-react';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
+
+const reactCompilerInclude =
+  /[\\/]component-library[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -32,7 +36,14 @@ const config: StorybookConfig = {
     const { mergeConfig } = await import('vite');
 
     return mergeConfig(config, {
-      plugins: [react()],
+      plugins: [
+        react(),
+        babel({
+          include: [reactCompilerInclude],
+          // n.b. Must be a string to ensure plugin resolution order. See https://github.com/actualbudget/actual/pull/5853
+          presets: [reactCompilerPreset()],
+        }),
+      ],
       resolve: {
         tsconfigPaths: true,
       },

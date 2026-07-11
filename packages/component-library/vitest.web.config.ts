@@ -1,5 +1,9 @@
-import react from '@vitejs/plugin-react';
+import babel from '@rolldown/plugin-babel';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
+
+const reactCompilerInclude =
+  /[\\/]component-library[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
 
 export default defineConfig({
   test: {
@@ -20,5 +24,12 @@ export default defineConfig({
         ]
       : ['default'],
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    babel({
+      include: [reactCompilerInclude],
+      // n.b. Must be a string to ensure plugin resolution order. See https://github.com/actualbudget/actual/pull/5853
+      presets: [reactCompilerPreset()],
+    }),
+  ],
 });
