@@ -53,7 +53,7 @@ import { useLanguage } from '#hooks/useLocale';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
-const FIRST_DAY_OF_WEEK_NAMES = [
+export const FIRST_DAY_OF_WEEK_NAMES = [
   'sun',
   'mon',
   'tue',

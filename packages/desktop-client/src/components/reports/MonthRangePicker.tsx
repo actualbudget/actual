@@ -20,6 +20,7 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { useLocale } from '#hooks/useLocale';
 
+import { DayRangeCalendar } from './month-range-picker/DayRangeCalendar';
 import { GranularityToggle } from './month-range-picker/GranularityToggle';
 import { RangeSelector } from './month-range-picker/RangeSelector';
 import { clamp, valueIsDay } from './month-range-picker/util';
@@ -192,19 +193,25 @@ export function MonthRangePicker({
                   : { borderRight: `1px solid ${theme.tableBorder}` })),
             }}
           >
-            <RangeSelector
-              // Remount on granularity switch so the click-anchor and view
-              // month can't carry a month-shaped value into the day grid.
-              key={isDay ? 'day' : 'month'}
-              start={draftStart}
-              end={draftEnd}
-              min={isDay ? dayMin : monthMin}
-              max={isDay ? dayMax : monthMax}
-              isDay={isDay}
-              locale={locale}
-              firstDayOfWeekIdx={firstDayOfWeekIdx}
-              onChange={setDraft}
-            />
+            {isDay ? (
+              <DayRangeCalendar
+                start={draftStart}
+                end={draftEnd}
+                min={dayMin}
+                max={dayMax}
+                firstDayOfWeekIdx={firstDayOfWeekIdx}
+                onChange={setDraft}
+              />
+            ) : (
+              <RangeSelector
+                start={draftStart}
+                end={draftEnd}
+                min={monthMin}
+                max={monthMax}
+                locale={locale}
+                onChange={setDraft}
+              />
+            )}
           </View>
 
           {hasSidebar && (
