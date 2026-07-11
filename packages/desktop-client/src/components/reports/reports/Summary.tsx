@@ -354,7 +354,6 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         latestTransaction={latestTransaction}
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
-        granularities={['month']}
         onChangeDates={onChangeDates}
         show1Month
       >

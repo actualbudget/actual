@@ -376,6 +376,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
               ? monthUtils.monthFromDate(forecastData.forecastEndDate)
               : (allMonths[0]?.name ?? monthUtils.addMonths(currentMonth, 24))
           }
+          granularities={['month', 'day']}
           mode={mode}
           onChangeDates={onChangeDates}
           showFutureRange
@@ -395,6 +396,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
               ? monthUtils.monthFromDate(forecastData.forecastEndDate)
               : (allMonths[0]?.name ?? monthUtils.addMonths(currentMonth, 24))
           }
+          granularities={['month', 'day']}
           mode={mode}
           onChangeDates={onChangeDates}
           filters={conditions}

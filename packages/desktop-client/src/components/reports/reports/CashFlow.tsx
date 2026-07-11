@@ -283,6 +283,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
         earliestTransaction={earliestTransaction}
         latestTransaction={latestTransaction}
         firstDayOfWeekIdx={firstDayOfWeekIdx}
+        granularities={['month', 'day']}
         mode={mode}
         show1Month
         onChangeDates={onChangeDates}

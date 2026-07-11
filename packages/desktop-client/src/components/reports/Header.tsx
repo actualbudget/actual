@@ -36,7 +36,7 @@ type HeaderProps = {
   show1Month?: boolean;
   showFutureRange?: boolean;
   hideModeToggle?: boolean;
-  allMonths: Array<{ name: string; pretty: string }>;
+  allMonths: Array<{ name: string }>;
   earliestTransaction: string;
   latestTransaction: string;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
@@ -45,8 +45,8 @@ type HeaderProps = {
     end: TimeFrame['end'],
     mode: TimeFrame['mode'],
   ) => void;
-  // Granularities the picker offers; defaults to both. In day mode the picker
-  // emits `yyyy-MM-dd` start/end.
+  // Granularities the picker offers; defaults to month-only. In day mode the
+  // picker emits `yyyy-MM-dd` start/end.
   granularities?: MonthRangeGranularity[];
   children?: ReactNode;
   inlineContent?: ReactNode;
@@ -73,188 +73,6 @@ type HeaderProps = {
       onConditionsOpChange?: never;
     }
 );
-
-type RangePresetProps = {
-  show1Month?: boolean;
-  earliestTransaction: string;
-  latestTransaction: string;
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
-  allMonths: Array<{ name: string; pretty: string }>;
-  onChangeDates: HeaderProps['onChangeDates'];
-};
-
-type PastRangePresetsProps = RangePresetProps & {
-  convertToMonth: (
-    start: string,
-    end: string,
-    currentMode: TimeFrame['mode'],
-    mode: TimeFrame['mode'],
-  ) => [string, string, TimeFrame['mode']];
-};
-
-type FutureRangePresetsProps = Pick<
-  RangePresetProps,
-  'show1Month' | 'latestTransaction' | 'onChangeDates'
->;
-
-function getPastRangePresets({
-  show1Month,
-  earliestTransaction,
-  latestTransaction,
-  firstDayOfWeekIdx,
-  allMonths,
-  onChangeDates,
-  convertToMonth,
-}: PastRangePresetsProps): QuickSelectPreset[] {
-  return [
-    ...(show1Month
-      ? [
-          {
-            key: '1-month',
-            label: <Trans>1 month</Trans>,
-            onSelect: () => onChangeDates(...getLatestRange(0)),
-          },
-        ]
-      : []),
-    {
-      key: '3-months',
-      label: <Trans>3 months</Trans>,
-      onSelect: () => onChangeDates(...getLatestRange(2)),
-    },
-    {
-      key: '6-months',
-      label: <Trans>6 months</Trans>,
-      onSelect: () => onChangeDates(...getLatestRange(5)),
-    },
-    {
-      key: '1-year',
-      label: <Trans>1 year</Trans>,
-      onSelect: () => onChangeDates(...getLatestRange(11)),
-    },
-    {
-      key: 'year-to-date',
-      label: <Trans>Year to date</Trans>,
-      onSelect: () =>
-        onChangeDates(
-          ...convertToMonth(
-            ...getLiveRange(
-              'Year to date',
-              earliestTransaction,
-              latestTransaction,
-              true,
-              firstDayOfWeekIdx,
-            ),
-            'yearToDate',
-          ),
-        ),
-    },
-    {
-      key: 'last-month',
-      label: <Trans>Last month</Trans>,
-      onSelect: () =>
-        onChangeDates(
-          ...convertToMonth(
-            ...getLiveRange(
-              'Last month',
-              earliestTransaction,
-              latestTransaction,
-              false,
-              firstDayOfWeekIdx,
-            ),
-            'lastMonth',
-          ),
-        ),
-    },
-    {
-      key: 'last-year',
-      label: <Trans>Last year</Trans>,
-      onSelect: () =>
-        onChangeDates(
-          ...convertToMonth(
-            ...getLiveRange(
-              'Last year',
-              earliestTransaction,
-              latestTransaction,
-              false,
-              firstDayOfWeekIdx,
-            ),
-            'lastYear',
-          ),
-        ),
-    },
-    {
-      key: 'prior-year-to-date',
-      label: <Trans>Prior year to date</Trans>,
-      onSelect: () =>
-        onChangeDates(
-          ...convertToMonth(
-            ...getLiveRange(
-              'Prior year to date',
-              earliestTransaction,
-              latestTransaction,
-              false,
-              firstDayOfWeekIdx,
-            ),
-            'priorYearToDate',
-          ),
-        ),
-    },
-    // `allMonths` may still be empty before the report's async load finishes.
-    ...(allMonths.length
-      ? [
-          {
-            key: 'all-time',
-            label: <Trans>All time</Trans>,
-            onSelect: () =>
-              onChangeDates(
-                ...getFullRange(
-                  allMonths[allMonths.length - 1].name,
-                  allMonths[0].name,
-                ),
-              ),
-          },
-        ]
-      : []),
-  ];
-}
-
-function getFutureRangePresets({
-  show1Month,
-  latestTransaction,
-  onChangeDates,
-}: FutureRangePresetsProps): QuickSelectPreset[] {
-  return [
-    ...(show1Month
-      ? [
-          {
-            key: 'next-month',
-            label: <Trans>Next month</Trans>,
-            onSelect: () => onChangeDates(...getNextRange(0)),
-          },
-        ]
-      : []),
-    {
-      key: 'next-3-months',
-      label: <Trans>Next 3 months</Trans>,
-      onSelect: () => onChangeDates(...getNextRange(2)),
-    },
-    {
-      key: 'next-6-months',
-      label: <Trans>Next 6 months</Trans>,
-      onSelect: () => onChangeDates(...getNextRange(5)),
-    },
-    {
-      key: 'next-year',
-      label: <Trans>Next year</Trans>,
-      onSelect: () => onChangeDates(...getNextRange(11)),
-    },
-    {
-      key: 'all-future',
-      label: <Trans>All future</Trans>,
-      onSelect: () => onChangeDates(...getFullFutureRange(latestTransaction)),
-    },
-  ];
-}
 
 export function Header({
   start,
@@ -283,14 +101,136 @@ export function Header({
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
-  function convertToMonth(
-    start: string,
-    end: string,
-    _: TimeFrame['mode'],
+  // Live-range presets return day-shaped bounds; collapse them to months.
+  function liveRangeAsMonths(
+    rangeName: string,
+    includeCurrentInterval: boolean,
     mode: TimeFrame['mode'],
   ): [string, string, TimeFrame['mode']] {
-    return [monthUtils.getMonth(start), monthUtils.getMonth(end), mode];
+    const [rangeStart, rangeEnd] = getLiveRange(
+      rangeName,
+      earliestTransaction,
+      latestTransaction,
+      includeCurrentInterval,
+      firstDayOfWeekIdx,
+    );
+    return [
+      monthUtils.getMonth(rangeStart),
+      monthUtils.getMonth(rangeEnd),
+      mode,
+    ];
   }
+
+  const presets: QuickSelectPreset[] = showFutureRange
+    ? [
+        ...(show1Month
+          ? [
+              {
+                key: 'next-month',
+                label: <Trans>Next month</Trans>,
+                onSelect: () => onChangeDates(...getNextRange(0)),
+              },
+            ]
+          : []),
+        {
+          key: 'next-3-months',
+          label: <Trans>Next 3 months</Trans>,
+          onSelect: () => onChangeDates(...getNextRange(2)),
+        },
+        {
+          key: 'next-6-months',
+          label: <Trans>Next 6 months</Trans>,
+          onSelect: () => onChangeDates(...getNextRange(5)),
+        },
+        {
+          key: 'next-year',
+          label: <Trans>Next year</Trans>,
+          onSelect: () => onChangeDates(...getNextRange(11)),
+        },
+        {
+          key: 'all-future',
+          label: <Trans>All future</Trans>,
+          onSelect: () =>
+            onChangeDates(...getFullFutureRange(latestTransaction)),
+        },
+      ]
+    : [
+        ...(show1Month
+          ? [
+              {
+                key: '1-month',
+                label: <Trans>1 month</Trans>,
+                onSelect: () => onChangeDates(...getLatestRange(0)),
+              },
+            ]
+          : []),
+        {
+          key: '3-months',
+          label: <Trans>3 months</Trans>,
+          onSelect: () => onChangeDates(...getLatestRange(2)),
+        },
+        {
+          key: '6-months',
+          label: <Trans>6 months</Trans>,
+          onSelect: () => onChangeDates(...getLatestRange(5)),
+        },
+        {
+          key: '1-year',
+          label: <Trans>1 year</Trans>,
+          onSelect: () => onChangeDates(...getLatestRange(11)),
+        },
+        {
+          key: 'year-to-date',
+          label: <Trans>Year to date</Trans>,
+          onSelect: () =>
+            onChangeDates(
+              ...liveRangeAsMonths('Year to date', true, 'yearToDate'),
+            ),
+        },
+        {
+          key: 'last-month',
+          label: <Trans>Last month</Trans>,
+          onSelect: () =>
+            onChangeDates(
+              ...liveRangeAsMonths('Last month', false, 'lastMonth'),
+            ),
+        },
+        {
+          key: 'last-year',
+          label: <Trans>Last year</Trans>,
+          onSelect: () =>
+            onChangeDates(...liveRangeAsMonths('Last year', false, 'lastYear')),
+        },
+        {
+          key: 'prior-year-to-date',
+          label: <Trans>Prior year to date</Trans>,
+          onSelect: () =>
+            onChangeDates(
+              ...liveRangeAsMonths(
+                'Prior year to date',
+                false,
+                'priorYearToDate',
+              ),
+            ),
+        },
+        // `allMonths` may still be empty before the report's async load
+        // finishes.
+        ...(allMonths.length
+          ? [
+              {
+                key: 'all-time',
+                label: <Trans>All time</Trans>,
+                onSelect: () =>
+                  onChangeDates(
+                    ...getFullRange(
+                      allMonths[allMonths.length - 1].name,
+                      allMonths[0].name,
+                    ),
+                  ),
+              },
+            ]
+          : []),
+      ];
 
   return (
     <View
@@ -343,23 +283,7 @@ export function Header({
                   : monthUtils.currentMonth()
             }
             firstDayOfWeekIdx={firstDayOfWeekIdx}
-            presets={
-              showFutureRange
-                ? getFutureRangePresets({
-                    show1Month,
-                    latestTransaction,
-                    onChangeDates,
-                  })
-                : getPastRangePresets({
-                    show1Month,
-                    earliestTransaction,
-                    latestTransaction,
-                    firstDayOfWeekIdx,
-                    allMonths,
-                    onChangeDates,
-                    convertToMonth,
-                  })
-            }
+            presets={presets}
             onChangeDates={(newStart, newEnd) =>
               onChangeDates(newStart, newEnd, 'static')
             }

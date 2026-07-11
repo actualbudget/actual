@@ -464,7 +464,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         allMonths={allMonths}
         earliestTransaction={earliestTransaction}
         latestTransaction={latestTransaction}
-        granularities={['month']}
         onChangeDates={onChangeDates}
       >
         {widget && (

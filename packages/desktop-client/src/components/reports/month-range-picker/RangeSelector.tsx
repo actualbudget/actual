@@ -8,7 +8,7 @@ import type { Locale } from 'date-fns';
 import { DayGrid } from './DayGrid';
 import { MonthGrid } from './MonthGrid';
 import { NavRow } from './NavRow';
-import { clamp, toMonth } from './util';
+import { clamp } from './util';
 
 type RangeSelectorProps = {
   start: string;
@@ -34,10 +34,10 @@ export function RangeSelector({
   firstDayOfWeekIdx,
   onChange,
 }: RangeSelectorProps) {
-  const minMonth = toMonth(min);
-  const maxMonth = toMonth(max);
+  const minMonth = monthUtils.getMonth(min);
+  const maxMonth = monthUtils.getMonth(max);
 
-  const [viewMonth, setViewMonth] = useState(() => toMonth(start));
+  const [viewMonth, setViewMonth] = useState(() => monthUtils.getMonth(start));
   const viewYear = monthUtils.getYear(viewMonth);
 
   const [anchor, setAnchor] = useState<string | null>(null);
@@ -65,11 +65,6 @@ export function RangeSelector({
         : [anchor, previewCell]
       : [start, end];
 
-  const prevMonth = monthUtils.prevMonth(viewMonth);
-  const nextMonth = monthUtils.nextMonth(viewMonth);
-  const prevYear = monthUtils.subYears(viewMonth, 1);
-  const nextYear = monthUtils.addYears(viewMonth, 1);
-
   return (
     <View
       onMouseLeave={() => setHoverValue(null)}
@@ -80,17 +75,25 @@ export function RangeSelector({
           isDay ? monthUtils.format(viewMonth, 'MMMM yyyy', locale) : viewYear
         }
         canPrev={
-          isDay
-            ? viewMonth > minMonth
-            : monthUtils.getYear(prevYear) >= monthUtils.getYear(minMonth)
+          isDay ? viewMonth > minMonth : viewYear > monthUtils.getYear(minMonth)
         }
         canNext={
-          isDay
-            ? viewMonth < maxMonth
-            : monthUtils.getYear(nextYear) <= monthUtils.getYear(maxMonth)
+          isDay ? viewMonth < maxMonth : viewYear < monthUtils.getYear(maxMonth)
         }
-        onPrev={() => setViewMonth(isDay ? prevMonth : prevYear)}
-        onNext={() => setViewMonth(isDay ? nextMonth : nextYear)}
+        onPrev={() =>
+          setViewMonth(
+            isDay
+              ? monthUtils.prevMonth(viewMonth)
+              : monthUtils.subYears(viewMonth, 1),
+          )
+        }
+        onNext={() =>
+          setViewMonth(
+            isDay
+              ? monthUtils.nextMonth(viewMonth)
+              : monthUtils.addYears(viewMonth, 1),
+          )
+        }
       />
 
       {isDay ? (

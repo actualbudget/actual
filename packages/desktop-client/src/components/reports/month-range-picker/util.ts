@@ -1,9 +1,6 @@
 import type { ReactNode } from 'react';
 
-import {
-  firstDayOfMonth,
-  lastDayOfMonth,
-} from '@actual-app/core/shared/months';
+import { isValidYearMonth } from '@actual-app/core/shared/months';
 
 /**
  * Granularity the picker operates at: `month` values are `yyyy-MM`, `day`
@@ -18,41 +15,16 @@ export type QuickSelectPreset = {
   onSelect: () => void;
 };
 
-export function toMonth(value: string): string {
-  return value.slice(0, 7);
-}
-
 // Whether a value is day-shaped (`yyyy-MM-dd`) rather than month-shaped
 // (`yyyy-MM`).
 export function valueIsDay(value: string): boolean {
-  return value.length > 7;
+  return !isValidYearMonth(value);
 }
 
-export function toDayStart(value: string): string {
-  return firstDayOfMonth(value);
-}
-
-export function toDayEnd(value: string): string {
-  return lastDayOfMonth(value);
-}
-
-// Clamp an ISO date string to [min, max], normalizing the bounds to `value`'s
-// own granularity so the result keeps `value`'s shape. Month-shaped bounds
-// widen to whole months in day mode; day-shaped bounds stay exact.
+// Clamp an ISO date string to [min, max]; all three must share a granularity.
 export function clamp(value: string, min: string, max: string): string {
-  const isDay = valueIsDay(value);
-  const loBound = isDay
-    ? valueIsDay(min)
-      ? min
-      : toDayStart(min)
-    : toMonth(min);
-  const hiBound = isDay
-    ? valueIsDay(max)
-      ? max
-      : toDayEnd(max)
-    : toMonth(max);
-  if (value < loBound) return loBound;
-  if (value > hiBound) return hiBound;
+  if (value < min) return min;
+  if (value > max) return max;
   return value;
 }
 

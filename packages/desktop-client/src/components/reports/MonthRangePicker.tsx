@@ -11,7 +11,10 @@ import { View } from '@actual-app/components/view';
 import {
   currentDay,
   currentMonth,
+  firstDayOfMonth,
   format,
+  getMonth,
+  lastDayOfMonth,
 } from '@actual-app/core/shared/months';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
@@ -19,22 +22,15 @@ import { useLocale } from '#hooks/useLocale';
 
 import { GranularityToggle } from './month-range-picker/GranularityToggle';
 import { RangeSelector } from './month-range-picker/RangeSelector';
-import {
-  clamp,
-  toDayEnd,
-  toDayStart,
-  toMonth,
-  valueIsDay,
-} from './month-range-picker/util';
+import { clamp, valueIsDay } from './month-range-picker/util';
 import type {
   MonthRangeGranularity,
   QuickSelectPreset,
 } from './month-range-picker/util';
 
-export {
-  type MonthRangeGranularity,
-  type QuickSelectPreset,
-  valueIsDay,
+export type {
+  MonthRangeGranularity,
+  QuickSelectPreset,
 } from './month-range-picker/util';
 
 type MonthRangePickerProps = {
@@ -44,7 +40,7 @@ type MonthRangePickerProps = {
   minDate: string;
   /** Inclusive upper bound; omit for no upper limit. */
   maxDate?: string;
-  /** Pass `['month']` for month-only reports to hide the Day toggle. */
+  /** Pass `['month', 'day']` for reports that handle day-shaped values. */
   granularities?: MonthRangeGranularity[];
   presets?: QuickSelectPreset[];
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
@@ -67,16 +63,12 @@ export function MonthRangePicker({
   end,
   minDate,
   maxDate,
-  granularities = ['month', 'day'],
+  granularities = ['month'],
   presets,
   firstDayOfWeekIdx,
   onChangeDates,
 }: MonthRangePickerProps) {
   const effectiveMax = maxDate ?? NO_MAX;
-  // A month-shaped cap that reaches the current month would otherwise widen to
-  // that month's last day in day mode, allowing days after today.
-  const effectiveDayMax =
-    toMonth(effectiveMax) === currentMonth() ? currentDay() : effectiveMax;
   const locale = useLocale();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -85,49 +77,55 @@ export function MonthRangePicker({
   const allowsDay = granularities.includes('day');
   const showGranularityToggle = allowsDay && granularities.includes('month');
 
-  // The committed values' shape encodes the granularity, so it survives the
-  // remounts that reports with a loading early-return cause on every commit.
-  function granFor(value: string): MonthRangeGranularity {
-    return allowsDay && valueIsDay(value) ? 'day' : 'month';
-  }
-  const [gran, setGran] = useState<MonthRangeGranularity>(granFor(start));
-  const isDay = gran === 'day';
-
-  // Edit a local draft while open; the report only recomputes on commit.
+  // Edit a local draft while open; the report only recomputes on commit. The
+  // draft's shape encodes the granularity, so it survives the remounts that
+  // reports with a loading early-return cause on every commit.
   const [draftStart, setDraftStart] = useState(start);
   const [draftEnd, setDraftEnd] = useState(end);
+  const isDay = allowsDay && valueIsDay(draftStart);
   // Set when a preset already committed, so closing doesn't overwrite it.
   const skipCommitRef = useRef(false);
 
+  // Normalize the bounds to each granularity once: month-shaped bounds widen
+  // to whole months in day mode, day-shaped bounds stay exact. A month-shaped
+  // cap that reaches the current month would otherwise widen to that month's
+  // last day, allowing days after today.
+  const monthMin = getMonth(minDate);
+  const monthMax = getMonth(effectiveMax);
+  const dayMin = valueIsDay(minDate) ? minDate : firstDayOfMonth(minDate);
+  const dayMax =
+    monthMax === currentMonth()
+      ? currentDay()
+      : valueIsDay(effectiveMax)
+        ? effectiveMax
+        : lastDayOfMonth(effectiveMax);
+
   function openPopover() {
-    const openGran = granFor(start);
-    setGran(openGran);
-    if (openGran === 'day') {
+    if (allowsDay && valueIsDay(start)) {
       setDraftStart(start);
       setDraftEnd(end);
     } else {
-      setDraftStart(toMonth(start));
-      setDraftEnd(toMonth(end));
+      setDraftStart(getMonth(start));
+      setDraftEnd(getMonth(end));
     }
     skipCommitRef.current = false;
     setIsOpen(true);
   }
 
   function changeGranularity(next: MonthRangeGranularity) {
-    if (next === gran) return;
+    if (next === (isDay ? 'day' : 'month')) return;
     // Only reshape the draft; committing here recomputes the report, which
     // can unmount the Header and close this popover. Commit happens on close.
     setDraftStart(
       next === 'day'
-        ? clamp(toDayStart(draftStart), minDate, effectiveDayMax)
-        : toMonth(draftStart),
+        ? clamp(firstDayOfMonth(draftStart), dayMin, dayMax)
+        : getMonth(draftStart),
     );
     setDraftEnd(
       next === 'day'
-        ? clamp(toDayEnd(draftEnd), minDate, effectiveDayMax)
-        : toMonth(draftEnd),
+        ? clamp(lastDayOfMonth(draftEnd), dayMin, dayMax)
+        : getMonth(draftEnd),
     );
-    setGran(next);
   }
 
   function closeAndCommit() {
@@ -155,8 +153,8 @@ export function MonthRangePicker({
   const shownStart = isOpen ? draftStart : start;
   const shownEnd = isOpen ? draftEnd : end;
 
-  // Format by the values' actual shape; `gran` can desync from committed
-  // values.
+  // Format by the values' actual shape; the committed values may be
+  // day-shaped even when day mode is off.
   const labelFormat = valueIsDay(shownStart) ? 'P' : 'MMM yyyy';
   const label = `${format(shownStart, labelFormat, locale)} – ${format(
     shownEnd,
@@ -197,11 +195,11 @@ export function MonthRangePicker({
             <RangeSelector
               // Remount on granularity switch so the click-anchor and view
               // month can't carry a month-shaped value into the day grid.
-              key={gran}
+              key={isDay ? 'day' : 'month'}
               start={draftStart}
               end={draftEnd}
-              min={minDate}
-              max={isDay ? effectiveDayMax : effectiveMax}
+              min={isDay ? dayMin : monthMin}
+              max={isDay ? dayMax : monthMax}
               isDay={isDay}
               locale={locale}
               firstDayOfWeekIdx={firstDayOfWeekIdx}
@@ -217,7 +215,7 @@ export function MonthRangePicker({
                     <Trans>Select by</Trans>
                   </Text>
                   <GranularityToggle
-                    value={gran}
+                    value={isDay ? 'day' : 'month'}
                     onChange={changeGranularity}
                   />
                 </View>
