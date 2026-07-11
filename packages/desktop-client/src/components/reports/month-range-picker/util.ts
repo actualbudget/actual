@@ -1,14 +1,9 @@
 import type { ReactNode } from 'react';
 
 import {
-  addMonths,
-  dayFromDate,
   firstDayOfMonth,
   lastDayOfMonth,
-  parseDate,
-  subMonths,
 } from '@actual-app/core/shared/months';
-import { addMonths as addMonthsDate } from 'date-fns';
 
 /**
  * Granularity the picker operates at: `month` values are `yyyy-MM`, `day`
@@ -39,14 +34,6 @@ export function toDayStart(value: string): string {
 
 export function toDayEnd(value: string): string {
   return lastDayOfMonth(value);
-}
-
-// Shift a value by `n` months, preserving its month/day shape.
-export function shiftMonths(value: string, n: number): string {
-  if (valueIsDay(value)) {
-    return dayFromDate(addMonthsDate(parseDate(value), n));
-  }
-  return n < 0 ? subMonths(value, -n) : addMonths(value, n);
 }
 
 // Clamp an ISO date string to [min, max], normalizing the bounds to `value`'s

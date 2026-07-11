@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   clamp,
   rangePosition,
-  shiftMonths,
   toDayEnd,
   toDayStart,
   toMonth,
@@ -39,23 +38,6 @@ describe('toDayStart / toDayEnd', () => {
   it('normalizes a day value to whole-month bounds', () => {
     expect(toDayStart('2020-02-15')).toBe('2020-02-01');
     expect(toDayEnd('2020-02-15')).toBe('2020-02-29');
-  });
-});
-
-describe('shiftMonths', () => {
-  it('shifts a month value while keeping month shape', () => {
-    expect(shiftMonths('2020-03', -1)).toBe('2020-02');
-    expect(shiftMonths('2020-03', 1)).toBe('2020-04');
-  });
-
-  it('shifts a day value while preserving day-of-month', () => {
-    expect(shiftMonths('2020-03-15', -1)).toBe('2020-02-15');
-    expect(shiftMonths('2020-03-15', 1)).toBe('2020-04-15');
-  });
-
-  it('clamps a day value when the target month is shorter', () => {
-    // Jan 31 shifted forward a month lands on the last day of February.
-    expect(shiftMonths('2020-01-31', 1)).toBe('2020-02-29');
   });
 });
 

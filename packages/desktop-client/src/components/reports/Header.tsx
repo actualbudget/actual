@@ -329,8 +329,6 @@ export function Header({
             start={start}
             end={end}
             granularities={granularities}
-            // Excluding the current month only makes sense for past ranges.
-            allowExcludeCurrentMonth={!showFutureRange}
             // allMonths is newest-first and may be empty before reports load.
             minDate={
               allMonths.length

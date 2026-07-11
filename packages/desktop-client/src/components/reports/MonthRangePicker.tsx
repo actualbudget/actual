@@ -12,18 +12,15 @@ import {
   currentDay,
   currentMonth,
   format,
-  prevMonth,
 } from '@actual-app/core/shared/months';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { useLocale } from '#hooks/useLocale';
 
-import { ExcludeCurrentMonthToggle } from './month-range-picker/ExcludeCurrentMonthToggle';
 import { GranularityToggle } from './month-range-picker/GranularityToggle';
 import { RangeSelector } from './month-range-picker/RangeSelector';
 import {
   clamp,
-  shiftMonths,
   toDayEnd,
   toDayStart,
   toMonth,
@@ -49,9 +46,6 @@ type MonthRangePickerProps = {
   maxDate?: string;
   /** Pass `['month']` for month-only reports to hide the Day toggle. */
   granularities?: MonthRangeGranularity[];
-  /** Offer an "Exclude current month" checkbox that shifts the whole range
-   * back one month, keeping its width. */
-  allowExcludeCurrentMonth?: boolean;
   presets?: QuickSelectPreset[];
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   onChangeDates: (start: string, end: string) => void;
@@ -74,7 +68,6 @@ export function MonthRangePicker({
   minDate,
   maxDate,
   granularities = ['month', 'day'],
-  allowExcludeCurrentMonth = false,
   presets,
   firstDayOfWeekIdx,
   onChangeDates,
@@ -148,28 +141,7 @@ export function MonthRangePicker({
     }
   }
 
-  // Only offer the toggle in the two states it switches between: a month-mode
-  // range ending at the current or the previous month.
-  const draftEndMonth = toMonth(draftEnd);
-  const excludesCurrentMonth = draftEndMonth === prevMonth(currentMonth());
-  const showExcludeCurrentMonth =
-    allowExcludeCurrentMonth &&
-    !isDay &&
-    (draftEndMonth === currentMonth() || excludesCurrentMonth) &&
-    // Both states must be representable within the configured bounds.
-    prevMonth(currentMonth()) >= toMonth(minDate);
-
-  const hasSidebar =
-    showGranularityToggle ||
-    showExcludeCurrentMonth ||
-    Boolean(presets?.length);
-
-  function toggleExcludeCurrentMonth(exclude: boolean) {
-    if (exclude === excludesCurrentMonth) return;
-    const delta = exclude ? -1 : 1;
-    setDraftStart(clamp(shiftMonths(draftStart, delta), minDate, effectiveMax));
-    setDraftEnd(clamp(shiftMonths(draftEnd, delta), minDate, effectiveMax));
-  }
+  const hasSidebar = showGranularityToggle || Boolean(presets?.length);
 
   function setDraft(nextStart: string, nextEnd: string) {
     // Keep the range ordered regardless of which grid the user clicked.
@@ -249,13 +221,6 @@ export function MonthRangePicker({
                     onChange={changeGranularity}
                   />
                 </View>
-              )}
-
-              {showExcludeCurrentMonth && (
-                <ExcludeCurrentMonthToggle
-                  checked={excludesCurrentMonth}
-                  onChange={toggleExcludeCurrentMonth}
-                />
               )}
 
               {Boolean(presets?.length) && (
