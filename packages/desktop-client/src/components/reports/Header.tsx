@@ -2,6 +2,11 @@ import type { ComponentProps, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { DateRangePicker } from '@actual-app/components/date-range-picker';
+import type {
+  DateRangeGranularity,
+  DateRangePreset,
+} from '@actual-app/components/date-range-picker';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
@@ -14,13 +19,10 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
+import { getFirstDayOfWeek } from '#components/select/DateSelect';
+import { useLanguage } from '#hooks/useLocale';
 
 import { getLiveRange } from './getLiveRange';
-import { MonthRangePicker } from './MonthRangePicker';
-import type {
-  MonthRangeGranularity,
-  QuickSelectPreset,
-} from './MonthRangePicker';
 import {
   calculateTimeRange,
   getFullFutureRange,
@@ -47,7 +49,7 @@ type HeaderProps = {
   ) => void;
   // Granularities the picker offers; defaults to month-only. In day mode the
   // picker emits `yyyy-MM-dd` start/end.
-  granularities?: MonthRangeGranularity[];
+  granularities?: DateRangeGranularity[];
   children?: ReactNode;
   inlineContent?: ReactNode;
   // no separate category filter; use main filters instead
@@ -100,6 +102,7 @@ export function Header({
 }: HeaderProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+  const language = useLanguage();
 
   // Live-range presets return day-shaped bounds; collapse them to months.
   function liveRangeAsMonths(
@@ -121,7 +124,7 @@ export function Header({
     ];
   }
 
-  const presets: QuickSelectPreset[] = showFutureRange
+  const presets: DateRangePreset[] = showFutureRange
     ? [
         ...(show1Month
           ? [
@@ -265,7 +268,7 @@ export function Header({
             </Button>
           )}
 
-          <MonthRangePicker
+          <DateRangePicker
             start={start}
             end={end}
             granularities={granularities}
@@ -282,7 +285,20 @@ export function Header({
                   ? allMonths[0].name
                   : monthUtils.currentMonth()
             }
-            firstDayOfWeekIdx={firstDayOfWeekIdx}
+            firstDayOfWeek={getFirstDayOfWeek(firstDayOfWeekIdx)}
+            locale={language}
+            labels={{
+              selectBy: t('Select by'),
+              quickSelect: t('Quick select'),
+              month: t('Month'),
+              day: t('Day'),
+              previous: t('Previous'),
+              next: t('Next'),
+              previousMonth: t('Previous month'),
+              nextMonth: t('Next month'),
+              year: t('Year'),
+              dateRange: t('Date range'),
+            }}
             presets={presets}
             onChangeDates={(newStart, newEnd) =>
               onChangeDates(newStart, newEnd, 'static')

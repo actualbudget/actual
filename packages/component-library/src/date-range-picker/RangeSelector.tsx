@@ -1,11 +1,10 @@
 import { useState } from 'react';
 
-import { View } from '@actual-app/components/view';
-import * as monthUtils from '@actual-app/core/shared/months';
-import type { Locale } from 'date-fns';
+import { View } from '#View';
 
 import { MonthGrid } from './MonthGrid';
 import { NavRow } from './NavRow';
+import { getYear } from './util';
 
 type RangeSelectorProps = {
   /** Inclusive month-shaped (`yyyy-MM`) range and bounds. */
@@ -13,7 +12,9 @@ type RangeSelectorProps = {
   end: string;
   min: string;
   max: string;
-  locale: Locale;
+  locale: string;
+  previousLabel: string;
+  nextLabel: string;
   onChange: (start: string, end: string) => void;
 };
 
@@ -24,9 +25,11 @@ export function RangeSelector({
   min,
   max,
   locale,
+  previousLabel,
+  nextLabel,
   onChange,
 }: RangeSelectorProps) {
-  const [viewYear, setViewYear] = useState(() => monthUtils.getYear(start));
+  const [viewYear, setViewYear] = useState(() => getYear(start));
 
   const [anchor, setAnchor] = useState<string | null>(null);
   const [hoverValue, setHoverValue] = useState<string | null>(null);
@@ -57,8 +60,10 @@ export function RangeSelector({
     <View onMouseLeave={() => setHoverValue(null)} style={{ minWidth: 180 }}>
       <NavRow
         label={viewYear}
-        canPrev={viewYear > monthUtils.getYear(min)}
-        canNext={viewYear < monthUtils.getYear(max)}
+        previousLabel={previousLabel}
+        nextLabel={nextLabel}
+        canPrev={viewYear > getYear(min)}
+        canNext={viewYear < getYear(max)}
         onPrev={() => setViewYear(String(Number(viewYear) - 1))}
         onNext={() => setViewYear(String(Number(viewYear) + 1))}
       />

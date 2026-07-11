@@ -72,6 +72,7 @@ __metadata:
   dependencies:
     "@chromatic-com/storybook": "npm:^5.2.1"
     "@emotion/css": "npm:^11.13.5"
+    "@internationalized/date": "npm:^3.12.2"
     "@storybook/addon-a11y": "npm:^10.4.4"
     "@storybook/addon-docs": "npm:^10.4.4"
     "@storybook/react-vite": "npm:^10.4.4"

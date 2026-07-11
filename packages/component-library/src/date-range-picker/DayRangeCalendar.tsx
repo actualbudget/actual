@@ -9,22 +9,16 @@ import {
   I18nProvider,
   RangeCalendar,
 } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
 
-import {
-  SvgCheveronLeft,
-  SvgCheveronRight,
-} from '@actual-app/components/icons/v1';
-import type { CSSProperties } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
-import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { css } from '@emotion/css';
 import { parseDate } from '@internationalized/date';
 
-import { getFirstDayOfWeek } from '#components/select/DateSelect';
-import { useLanguage } from '#hooks/useLocale';
+import { SvgCheveronLeft, SvgCheveronRight } from '#icons/v1';
+import type { CSSProperties } from '#styles';
+import { theme } from '#theme';
+import { View } from '#View';
 
+import type { FirstDayOfWeek } from './util';
 import { YearSelect } from './YearSelect';
 
 const calendarStyles: CSSProperties = {
@@ -129,7 +123,12 @@ type DayRangeCalendarProps = {
   end: string;
   min: string;
   max: string;
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeek: FirstDayOfWeek;
+  locale: string;
+  dateRangeLabel: string;
+  previousMonthLabel: string;
+  nextMonthLabel: string;
+  yearLabel: string;
   onChange: (start: string, end: string) => void;
 };
 
@@ -139,18 +138,19 @@ export function DayRangeCalendar({
   end,
   min,
   max,
-  firstDayOfWeekIdx,
+  firstDayOfWeek,
+  locale,
+  dateRangeLabel,
+  previousMonthLabel,
+  nextMonthLabel,
+  yearLabel,
   onChange,
 }: DayRangeCalendarProps) {
-  const { t } = useTranslation();
-  const language = useLanguage();
-  const firstDayOfWeek = getFirstDayOfWeek(firstDayOfWeekIdx);
-
   return (
     <View className={calendarClassName}>
-      <I18nProvider locale={language}>
+      <I18nProvider locale={locale}>
         <RangeCalendar
-          aria-label={t('Date range')}
+          aria-label={dateRangeLabel}
           value={{ start: parseDate(start), end: parseDate(end) }}
           minValue={parseDate(min)}
           maxValue={parseDate(max)}
@@ -160,7 +160,7 @@ export function DayRangeCalendar({
           }
         >
           <View className="calendar-header">
-            <AriaButton slot="previous" aria-label={t('Previous month')}>
+            <AriaButton slot="previous" aria-label={previousMonthLabel}>
               <SvgCheveronLeft width={16} height={16} />
             </AriaButton>
             <CalendarMonthPicker format="long">
@@ -178,8 +178,8 @@ export function DayRangeCalendar({
                 </select>
               )}
             </CalendarMonthPicker>
-            <YearSelect />
-            <AriaButton slot="next" aria-label={t('Next month')}>
+            <YearSelect label={yearLabel} />
+            <AriaButton slot="next" aria-label={nextMonthLabel}>
               <SvgCheveronRight width={16} height={16} />
             </AriaButton>
           </View>
