@@ -14371,7 +14371,6 @@ __metadata:
     "@mdx-js/react": "npm:^3.1.1"
     "@r74tech/docusaurus-plugin-panzoom": "npm:^2.4.2"
     "@types/react": "npm:^19.2.17"
-    babel-plugin-react-compiler: "npm:^1.0.0"
     prism-react-renderer: "npm:^2.4.1"
     react: "npm:19.2.7"
     react-dom: "npm:19.2.7"
