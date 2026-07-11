@@ -7,7 +7,9 @@
     "target": "ES2021",
     "module": "es2022",
     "moduleResolution": "bundler",
-    "customConditions": ["api"],
+    "customConditions": [
+      "api"
+    ],
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
@@ -18,7 +20,9 @@
     "plugins": [
       {
         "name": "typescript-strict-plugin",
-        "paths": ["."]
+        "paths": [
+          "."
+        ]
       }
     ]
   },
@@ -30,7 +34,10 @@
       "path": "../crdt"
     }
   ],
-  "include": ["."],
+  "include": [
+    ".",
+    "package.json"
+  ],
   "exclude": [
     "**/node_modules/*",
     "dist",
