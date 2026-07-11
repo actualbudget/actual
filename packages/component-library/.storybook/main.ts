@@ -5,8 +5,10 @@ import babel from '@rolldown/plugin-babel';
 import type { StorybookConfig } from '@storybook/react-vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 
+// Any workspace package's source; node_modules stays excluded by the babel
+// plugin's default exclude.
 const reactCompilerInclude =
-  /[\\/]component-library[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
+  /[\\/]packages[\\/][^\\/]+[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
 
 /**
  * This function is used to resolve the absolute path of a package.
