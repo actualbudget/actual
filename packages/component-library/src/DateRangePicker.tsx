@@ -94,8 +94,13 @@ export function DateRangePicker({
   // callers with a loading early-return cause on every commit.
   const [draftStart, setDraftStart] = useState(start);
   const [draftEnd, setDraftEnd] = useState(end);
+  // The preset behind the current draft; its onSelect commits on close so the
+  // caller keeps the preset's semantics (e.g. a live range) over a plain
+  // static range. Cleared by any manual edit.
+  const [draftPreset, setDraftPreset] = useState<DateRangePreset | null>(null);
   const isDay = allowsDay && valueIsDay(draftStart);
-  // Set when a preset already committed, so closing doesn't overwrite it.
+  // Guards against committing twice when the trigger button and the popover's
+  // close event both fire.
   const skipCommitRef = useRef(false);
 
   // Normalize the bounds to each granularity once: month-shaped bounds widen
@@ -120,6 +125,7 @@ export function DateRangePicker({
       setDraftStart(getMonth(start));
       setDraftEnd(getMonth(end));
     }
+    setDraftPreset(null);
     skipCommitRef.current = false;
     setIsOpen(true);
   }
@@ -138,6 +144,7 @@ export function DateRangePicker({
         ? clamp(lastDayOfMonth(draftEnd), dayMin, dayMax)
         : getMonth(draftEnd),
     );
+    setDraftPreset(null);
   }
 
   function closeAndCommit() {
@@ -146,7 +153,9 @@ export function DateRangePicker({
       return;
     }
     skipCommitRef.current = true;
-    if (draftStart !== start || draftEnd !== end) {
+    if (draftPreset) {
+      draftPreset.onSelect();
+    } else if (draftStart !== start || draftEnd !== end) {
       onChangeDates(draftStart, draftEnd);
     }
   }
@@ -160,6 +169,7 @@ export function DateRangePicker({
     }
     setDraftStart(nextStart);
     setDraftEnd(nextEnd);
+    setDraftPreset(null);
   }
 
   const shownStart = isOpen ? draftStart : start;
@@ -256,9 +266,12 @@ export function DateRangePicker({
                         key={preset.key}
                         variant="bare"
                         onPress={() => {
-                          skipCommitRef.current = true;
-                          preset.onSelect();
-                          setIsOpen(false);
+                          // Preview in the draft; the commit happens on close,
+                          // like manual selection.
+                          const [nextStart, nextEnd] = preset.getRange();
+                          setDraftStart(nextStart);
+                          setDraftEnd(nextEnd);
+                          setDraftPreset(preset);
                         }}
                         style={{ justifyContent: 'flex-start', fontSize: 13 }}
                       >

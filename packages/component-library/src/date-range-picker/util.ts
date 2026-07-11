@@ -17,6 +17,9 @@ export type DateRangeGranularity = 'month' | 'day';
 export type DateRangePreset = {
   key: string;
   label: ReactNode;
+  /** The range shown in the still-open picker when the preset is clicked. */
+  getRange: () => [string, string];
+  /** Commits the preset; called on close if it is still the selection. */
   onSelect: () => void;
 };
 

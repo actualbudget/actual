@@ -62,11 +62,13 @@ export const WithPresets: Story = {
           {
             key: '3-months',
             label: '3 months',
+            getRange: () => ['2024-04', '2024-06'],
             onSelect: () => setRange({ start: '2024-04', end: '2024-06' }),
           },
           {
             key: '1-year',
             label: '1 year',
+            getRange: () => ['2023-07', '2024-06'],
             onSelect: () => setRange({ start: '2023-07', end: '2024-06' }),
           },
         ]}

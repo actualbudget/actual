@@ -126,113 +126,86 @@ export function Header({
     ];
   }
 
+  // The picker previews the range via getRange while staying open, then
+  // commits via onSelect on close so the preset's mode is preserved.
+  function makePreset(
+    key: string,
+    label: ReactNode,
+    getFullRange: () => readonly [string, string, TimeFrame['mode']],
+  ): DateRangePreset {
+    return {
+      key,
+      label,
+      getRange: () => {
+        const [rangeStart, rangeEnd] = getFullRange();
+        return [rangeStart, rangeEnd];
+      },
+      onSelect: () => onChangeDates(...getFullRange()),
+    };
+  }
+
   const presets: DateRangePreset[] = showFutureRange
     ? [
         ...(show1Month
           ? [
-              {
-                key: 'next-month',
-                label: <Trans>Next month</Trans>,
-                onSelect: () => onChangeDates(...getNextRange(0)),
-              },
+              makePreset('next-month', <Trans>Next month</Trans>, () =>
+                getNextRange(0),
+              ),
             ]
           : []),
-        {
-          key: 'next-3-months',
-          label: <Trans>Next 3 months</Trans>,
-          onSelect: () => onChangeDates(...getNextRange(2)),
-        },
-        {
-          key: 'next-6-months',
-          label: <Trans>Next 6 months</Trans>,
-          onSelect: () => onChangeDates(...getNextRange(5)),
-        },
-        {
-          key: 'next-year',
-          label: <Trans>Next year</Trans>,
-          onSelect: () => onChangeDates(...getNextRange(11)),
-        },
-        {
-          key: 'all-future',
-          label: <Trans>All future</Trans>,
-          onSelect: () =>
-            onChangeDates(...getFullFutureRange(latestTransaction)),
-        },
+        makePreset('next-3-months', <Trans>Next 3 months</Trans>, () =>
+          getNextRange(2),
+        ),
+        makePreset('next-6-months', <Trans>Next 6 months</Trans>, () =>
+          getNextRange(5),
+        ),
+        makePreset('next-year', <Trans>Next year</Trans>, () =>
+          getNextRange(11),
+        ),
+        makePreset('all-future', <Trans>All future</Trans>, () =>
+          getFullFutureRange(latestTransaction),
+        ),
       ]
     : [
         ...(show1Month
           ? [
-              {
-                key: '1-month',
-                label: <Trans>1 month</Trans>,
-                onSelect: () => onChangeDates(...getLatestRange(0)),
-              },
+              makePreset('1-month', <Trans>1 month</Trans>, () =>
+                getLatestRange(0),
+              ),
             ]
           : []),
-        {
-          key: '3-months',
-          label: <Trans>3 months</Trans>,
-          onSelect: () => onChangeDates(...getLatestRange(2)),
-        },
-        {
-          key: '6-months',
-          label: <Trans>6 months</Trans>,
-          onSelect: () => onChangeDates(...getLatestRange(5)),
-        },
-        {
-          key: '1-year',
-          label: <Trans>1 year</Trans>,
-          onSelect: () => onChangeDates(...getLatestRange(11)),
-        },
-        {
-          key: 'year-to-date',
-          label: <Trans>Year to date</Trans>,
-          onSelect: () =>
-            onChangeDates(
-              ...liveRangeAsMonths('Year to date', true, 'yearToDate'),
-            ),
-        },
-        {
-          key: 'last-month',
-          label: <Trans>Last month</Trans>,
-          onSelect: () =>
-            onChangeDates(
-              ...liveRangeAsMonths('Last month', false, 'lastMonth'),
-            ),
-        },
-        {
-          key: 'last-year',
-          label: <Trans>Last year</Trans>,
-          onSelect: () =>
-            onChangeDates(...liveRangeAsMonths('Last year', false, 'lastYear')),
-        },
-        {
-          key: 'prior-year-to-date',
-          label: <Trans>Prior year to date</Trans>,
-          onSelect: () =>
-            onChangeDates(
-              ...liveRangeAsMonths(
-                'Prior year to date',
-                false,
-                'priorYearToDate',
-              ),
-            ),
-        },
+        makePreset('3-months', <Trans>3 months</Trans>, () =>
+          getLatestRange(2),
+        ),
+        makePreset('6-months', <Trans>6 months</Trans>, () =>
+          getLatestRange(5),
+        ),
+        makePreset('1-year', <Trans>1 year</Trans>, () => getLatestRange(11)),
+        makePreset('year-to-date', <Trans>Year to date</Trans>, () =>
+          liveRangeAsMonths('Year to date', true, 'yearToDate'),
+        ),
+        makePreset('last-month', <Trans>Last month</Trans>, () =>
+          liveRangeAsMonths('Last month', false, 'lastMonth'),
+        ),
+        makePreset('last-year', <Trans>Last year</Trans>, () =>
+          liveRangeAsMonths('Last year', false, 'lastYear'),
+        ),
+        makePreset(
+          'prior-year-to-date',
+          <Trans>Prior year to date</Trans>,
+          () =>
+            liveRangeAsMonths('Prior year to date', false, 'priorYearToDate'),
+        ),
         // `allMonths` may still be empty before the report's async load
         // finishes.
         ...(allMonths.length
           ? [
-              {
-                key: 'all-time',
-                label: <Trans>All time</Trans>,
-                onSelect: () =>
-                  onChangeDates(
-                    ...getFullRange(
-                      allMonths[allMonths.length - 1].name,
-                      allMonths[0].name,
-                    ),
-                  ),
-              },
+              makePreset('all-time', <Trans>All time</Trans>, () =>
+                getFullRange(
+                  allMonths[allMonths.length - 1].name,
+                  allMonths[0].name,
+                ),
+              ),
             ]
           : []),
       ];
