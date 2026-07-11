@@ -1,7 +1,5 @@
 import type { ReactNode } from 'react';
 
-import { isValidYearMonth } from '@actual-app/core/shared/months';
-
 /**
  * Granularity the picker operates at: `month` values are `yyyy-MM`, `day`
  * values are `yyyy-MM-dd`. (A custom picker rather than a native
@@ -18,7 +16,11 @@ export type QuickSelectPreset = {
 // Whether a value is day-shaped (`yyyy-MM-dd`) rather than month-shaped
 // (`yyyy-MM`).
 export function valueIsDay(value: string): boolean {
-  return !isValidYearMonth(value);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  return month >= 1 && month <= 12 && day >= 1 && day <= 31;
 }
 
 // Clamp an ISO date string to [min, max]; all three must share a granularity.

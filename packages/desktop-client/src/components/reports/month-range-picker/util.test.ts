@@ -10,6 +10,14 @@ describe('valueIsDay', () => {
   it('is true for day-shaped values', () => {
     expect(valueIsDay('2020-01-15')).toBe(true);
   });
+
+  it('is false for empty or malformed values', () => {
+    expect(valueIsDay('')).toBe(false);
+    expect(valueIsDay('garbage')).toBe(false);
+    expect(valueIsDay('2020-1-15')).toBe(false);
+    expect(valueIsDay('2020-13-01')).toBe(false);
+    expect(valueIsDay('2020-01-32')).toBe(false);
+  });
 });
 
 describe('clamp', () => {

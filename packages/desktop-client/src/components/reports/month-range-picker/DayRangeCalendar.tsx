@@ -28,6 +28,9 @@ import { useLanguage } from '#hooks/useLocale';
 import { YearSelect } from './YearSelect';
 
 const calendarStyles: CSSProperties = {
+  // A definite width so the header and the percentage-sized grid line up;
+  // a 100%-wide table inside the shrink-to-fit popover blows up otherwise.
+  width: 260,
   '& .calendar-header': {
     display: 'flex',
     flexDirection: 'row',
@@ -43,7 +46,7 @@ const calendarStyles: CSSProperties = {
       padding: 5,
       cursor: 'pointer',
       display: 'flex',
-      '&:hover': { backgroundColor: theme.calendarItemBackground },
+      '&:hover': { backgroundColor: theme.buttonBareBackgroundHover },
       '&[disabled]': { opacity: 0.4, cursor: 'default' },
     },
     '& select': {
@@ -55,11 +58,14 @@ const calendarStyles: CSSProperties = {
       fontWeight: 'bold',
       fontSize: 13,
       cursor: 'pointer',
-      '&:hover': { backgroundColor: theme.calendarItemBackground },
+      '&:hover': { backgroundColor: theme.buttonBareBackgroundHover },
     },
   },
   '& .react-aria-CalendarGrid': {
     borderCollapse: 'collapse',
+    // Stretch to the header's width (month/year selects) with equal columns.
+    width: '100%',
+    tableLayout: 'fixed',
   },
   '& .react-aria-CalendarHeaderCell': {
     color: theme.pageTextSubdued,
@@ -69,7 +75,7 @@ const calendarStyles: CSSProperties = {
     padding: '2px 0',
   },
   '& .react-aria-CalendarCell': {
-    width: 28,
+    minWidth: 28,
     height: 28,
     lineHeight: '28px',
     textAlign: 'center',
@@ -79,7 +85,7 @@ const calendarStyles: CSSProperties = {
       display: 'none',
     },
     '&[data-hovered]': {
-      backgroundColor: theme.calendarItemBackground,
+      backgroundColor: theme.buttonBareBackgroundHover,
       borderRadius: 4,
     },
     // Same current-day treatment as the month grid's GridButton.
