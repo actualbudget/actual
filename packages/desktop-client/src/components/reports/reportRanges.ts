@@ -2,6 +2,8 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import type { TimeFrame } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
+import { valueIsDay } from './month-range-picker/util';
+
 export function validateStart(
   earliest: string,
   latest: string,
@@ -189,6 +191,22 @@ export function getFullFutureRange(latestMonth?: string) {
   return [start, end, 'static'] as const;
 }
 
+// For month-granular consumers (e.g. formula queries): collapse day-shaped
+// bounds so a live range keeps sliding by whole months rather than days.
+export function asMonthSlidingTimeFrame(
+  timeFrame: Partial<TimeFrame>,
+): Partial<TimeFrame> {
+  const { start, end, mode } = timeFrame;
+  if (mode !== 'sliding-window' || !start || !end) {
+    return timeFrame;
+  }
+  return {
+    ...timeFrame,
+    start: monthUtils.getMonth(start),
+    end: monthUtils.getMonth(end),
+  };
+}
+
 export function calculateTimeRange(
   timeFrame?: Partial<TimeFrame>,
   defaultTimeFrame?: TimeFrame,
@@ -215,6 +233,17 @@ export function calculateTimeRange(
     return getFullRange(start, fullEnd);
   }
   if (mode === 'sliding-window') {
+    // Day-shaped ranges slide by days: same width, ending today.
+    if (valueIsDay(start) && valueIsDay(end)) {
+      const dayOffset = monthUtils.differenceInCalendarDays(end, start);
+      const today = monthUtils.currentDay();
+      return [
+        monthUtils.subDays(today, Math.max(dayOffset, 0)),
+        today,
+        'sliding-window',
+      ] as const;
+    }
+
     const offset = monthUtils.differenceInCalendarMonths(end, start);
 
     if (start > end) {

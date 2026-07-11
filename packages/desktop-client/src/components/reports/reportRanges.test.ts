@@ -48,6 +48,18 @@ describe('calculateTimeRange', () => {
     expect(start).toBe('2016-08'); // width of 5 preserved
     expect(mode).toBe('sliding-window');
   });
+
+  it('anchors a live day-shaped window to today, preserving its width in days', () => {
+    const [start, end, mode] = calculateTimeRange({
+      start: '2016-12-15',
+      end: '2016-12-29',
+      mode: 'sliding-window',
+    });
+
+    expect(end).toBe('2017-01-01'); // currentDay() in test mode
+    expect(start).toBe('2016-12-18'); // width of 14 days preserved
+    expect(mode).toBe('sliding-window');
+  });
 });
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'
