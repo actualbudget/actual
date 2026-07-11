@@ -447,10 +447,10 @@ async function importCategories(
   }
 }
 
-function importPayees(data: Budget, entityIdMap: Map<string, string>) {
+export function importPayees(data: Budget, entityIdMap: Map<string, string>) {
   return Promise.all(
     data.payees.map(async payee => {
-      if (!payee.deleted) {
+      if (!payee.deleted && !payee.transfer_account_id) {
         const id = await send('api/payee-create', {
           payee: { name: payee.name },
         });
@@ -566,7 +566,7 @@ async function importFlagsAsTags(
   );
 }
 
-async function importTransactions(
+export async function importTransactions(
   data: Budget,
   entityIdMap: Map<string, string>,
   flagNameConflicts: Set<string>,
