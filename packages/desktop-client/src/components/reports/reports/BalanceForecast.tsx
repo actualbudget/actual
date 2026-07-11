@@ -332,7 +332,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     dataPoint => dataPoint.date === todayReferenceDate,
   );
   const headerInlineContent = (
-    <View style={{ flexDirection: 'row', gap: 10 }}>
+    <>
       {budgetType === 'tracking' && (
         <Select
           value={source}
@@ -352,7 +352,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           ['Daily', t('Daily')],
         ]}
       />
-    </View>
+    </>
   );
   const headerChildren = widget ? (
     <Button variant="primary" onPress={onSaveWidget}>

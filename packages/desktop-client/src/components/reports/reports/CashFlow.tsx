@@ -304,17 +304,15 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
         conditionsOp={conditionsOp}
         onConditionsOpChange={onConditionsOpChange}
       >
-        <View style={{ flexDirection: 'row', gap: 10 }}>
-          <Button onPress={() => setShowBalance(state => !state)}>
-            {showBalance ? t('Hide balance') : t('Show balance')}
-          </Button>
+        <Button onPress={() => setShowBalance(state => !state)}>
+          {showBalance ? t('Hide balance') : t('Show balance')}
+        </Button>
 
-          {widget && (
-            <Button variant="primary" onPress={onSaveWidget}>
-              <Trans>Save widget</Trans>
-            </Button>
-          )}
-        </View>
+        {widget && (
+          <Button variant="primary" onPress={onSaveWidget}>
+            <Trans>Save widget</Trans>
+          </Button>
+        )}
       </Header>
       <View
         style={{

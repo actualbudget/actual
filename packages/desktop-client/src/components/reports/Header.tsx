@@ -303,103 +303,89 @@ export function Header({
           alignItems: isNarrowWidth ? 'flex-start' : 'center',
         }}
       >
-        <View
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            flexDirection: 'row',
-          }}
-        >
-          <SpaceBetween gap={isNarrowWidth ? 5 : undefined}>
-            {mode && !hideModeToggle && (
-              <Button
-                variant={mode === 'static' ? 'normal' : 'primary'}
-                onPress={() => {
-                  const newMode =
-                    mode === 'static' ? 'sliding-window' : 'static';
-                  const [newStart, newEnd, , newEndOffset] = calculateTimeRange(
-                    {
-                      start,
-                      end,
-                      mode: newMode,
-                    },
-                  );
+        <SpaceBetween gap={isNarrowWidth ? 5 : undefined}>
+          {mode && !hideModeToggle && (
+            <Button
+              variant={mode === 'static' ? 'normal' : 'primary'}
+              onPress={() => {
+                const newMode = mode === 'static' ? 'sliding-window' : 'static';
+                const [newStart, newEnd, , newEndOffset] = calculateTimeRange({
+                  start,
+                  end,
+                  mode: newMode,
+                });
 
-                  onChangeDates(newStart, newEnd, newMode, newEndOffset);
-                }}
-              >
-                {mode === 'static' ? t('Static') : t('Live')}
-              </Button>
-            )}
+                onChangeDates(newStart, newEnd, newMode, newEndOffset);
+              }}
+            >
+              {mode === 'static' ? t('Static') : t('Live')}
+            </Button>
+          )}
 
-            <MonthRangePicker
-              start={start}
-              end={end}
-              granularities={granularities}
-              // Excluding the current month only makes sense for past ranges.
-              allowExcludeCurrentMonth={!showFutureRange}
-              // allMonths is newest-first and may be empty before reports load.
-              minDate={
-                allMonths.length
-                  ? allMonths[allMonths.length - 1].name
+          <MonthRangePicker
+            start={start}
+            end={end}
+            granularities={granularities}
+            // Excluding the current month only makes sense for past ranges.
+            allowExcludeCurrentMonth={!showFutureRange}
+            // allMonths is newest-first and may be empty before reports load.
+            minDate={
+              allMonths.length
+                ? allMonths[allMonths.length - 1].name
+                : monthUtils.currentMonth()
+            }
+            maxDate={
+              showFutureRange
+                ? undefined
+                : allMonths.length
+                  ? allMonths[0].name
                   : monthUtils.currentMonth()
-              }
-              maxDate={
-                showFutureRange
-                  ? undefined
-                  : allMonths.length
-                    ? allMonths[0].name
-                    : monthUtils.currentMonth()
-              }
-              firstDayOfWeekIdx={firstDayOfWeekIdx}
-              presets={
-                showFutureRange
-                  ? getFutureRangePresets({
-                      show1Month,
-                      latestTransaction,
-                      onChangeDates,
-                    })
-                  : getPastRangePresets({
-                      show1Month,
-                      earliestTransaction,
-                      latestTransaction,
-                      firstDayOfWeekIdx,
-                      allMonths,
-                      onChangeDates,
-                      convertToMonth,
-                    })
-              }
-              onChangeDates={(newStart, newEnd, endOffset) =>
-                onChangeDates(newStart, newEnd, 'static', endOffset)
-              }
+            }
+            firstDayOfWeekIdx={firstDayOfWeekIdx}
+            presets={
+              showFutureRange
+                ? getFutureRangePresets({
+                    show1Month,
+                    latestTransaction,
+                    onChangeDates,
+                  })
+                : getPastRangePresets({
+                    show1Month,
+                    earliestTransaction,
+                    latestTransaction,
+                    firstDayOfWeekIdx,
+                    allMonths,
+                    onChangeDates,
+                    convertToMonth,
+                  })
+            }
+            onChangeDates={(newStart, newEnd, endOffset) =>
+              onChangeDates(newStart, newEnd, 'static', endOffset)
+            }
+          />
+          {filters && (
+            <FilterButton
+              compact={isNarrowWidth}
+              onApply={onApply}
+              hover={false}
+              exclude={filterExclude}
+              include={filterInclude}
             />
-          </SpaceBetween>
-
-          <SpaceBetween gap={3}>
-            {filters && (
-              <FilterButton
-                compact={isNarrowWidth}
-                onApply={onApply}
-                hover={false}
-                exclude={filterExclude}
-                include={filterInclude}
-              />
-            )}
-            {inlineContent}
-          </SpaceBetween>
-        </View>
+          )}
+          {inlineContent}
+        </SpaceBetween>
 
         {children && (
-          <View
+          <SpaceBetween
+            gap={isNarrowWidth ? 5 : undefined}
             style={{
               gridColumn: 2,
-              flexDirection: 'row',
               justifySelf: 'flex-end',
               alignSelf: 'flex-start',
             }}
           >
             {children}
-          </View>
+          </SpaceBetween>
         )}
       </View>
 

@@ -423,38 +423,34 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         onConditionsOpChange={onConditionsOpChange}
         filterInclude={['category', 'saved']}
       >
-        <View style={{ flexDirection: 'row', gap: 10 }}>
-          <OptionsButton
-            graphType={graphType}
-            onToggleGraphType={() =>
-              setGraphType(graphType === 'Line' ? 'Bar' : 'Line')
-            }
-            showBalance={showBalance}
-            onToggleShowBalance={() => setShowBalance(v => !v)}
-            showCategories={showCategories}
-            onToggleShowCategories={() => setShowCategories(v => !v)}
-            showHiddenCategories={showHiddenCategories}
-            onToggleShowHiddenCategories={() =>
-              setShowHiddenCategories(v => !v)
-            }
-          />
+        <OptionsButton
+          graphType={graphType}
+          onToggleGraphType={() =>
+            setGraphType(graphType === 'Line' ? 'Bar' : 'Line')
+          }
+          showBalance={showBalance}
+          onToggleShowBalance={() => setShowBalance(v => !v)}
+          showCategories={showCategories}
+          onToggleShowCategories={() => setShowCategories(v => !v)}
+          showHiddenCategories={showHiddenCategories}
+          onToggleShowHiddenCategories={() => setShowHiddenCategories(v => !v)}
+        />
 
-          <Tooltip content={t('Export as CSV')}>
-            <Button
-              variant="bare"
-              onPress={onExportCsv}
-              aria-label={t('Export as CSV')}
-            >
-              <SvgDownload style={{ width: 16, height: 16 }} />
-            </Button>
-          </Tooltip>
+        <Tooltip content={t('Export as CSV')}>
+          <Button
+            variant="bare"
+            onPress={onExportCsv}
+            aria-label={t('Export as CSV')}
+          >
+            <SvgDownload style={{ width: 16, height: 16 }} />
+          </Button>
+        </Tooltip>
 
-          {widget && (
-            <Button variant="primary" onPress={onSaveWidget}>
-              <Trans>Save widget</Trans>
-            </Button>
-          )}
-        </View>
+        {widget && (
+          <Button variant="primary" onPress={onSaveWidget}>
+            <Trans>Save widget</Trans>
+          </Button>
+        )}
       </Header>
       <View
         style={{

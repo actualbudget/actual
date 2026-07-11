@@ -841,8 +841,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                 width: 1,
                 height: 28,
                 backgroundColor: theme.pillBorderDark,
-                marginRight: 10,
-                marginLeft: 10,
               }}
             />
             <GraphModeSelector mode={graphMode} onChange={setGraphMode} />
@@ -851,8 +849,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                 width: 1,
                 height: 28,
                 backgroundColor: theme.pillBorderDark,
-                marginRight: 10,
-                marginLeft: 10,
               }}
             />
             <TopNSelector value={topNcategories} onChange={settopNcategories} />
