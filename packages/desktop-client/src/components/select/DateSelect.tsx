@@ -53,7 +53,7 @@ import { useLanguage } from '#hooks/useLocale';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
-export const FIRST_DAY_OF_WEEK_NAMES = [
+const FIRST_DAY_OF_WEEK_NAMES = [
   'sun',
   'mon',
   'tue',
@@ -64,6 +64,10 @@ export const FIRST_DAY_OF_WEEK_NAMES = [
 ] as const;
 
 type FirstDayOfWeek = (typeof FIRST_DAY_OF_WEEK_NAMES)[number];
+
+export function getFirstDayOfWeek(idx: string | undefined): FirstDayOfWeek {
+  return FIRST_DAY_OF_WEEK_NAMES[parseInt(idx || '0', 10) || 0];
+}
 
 function toCalendarDate(date: Date): CalendarDate {
   return new CalendarDate(
@@ -320,8 +324,7 @@ function DateSelectDesktop({
   const [selectedValue, setSelectedValue] = useState(value);
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeek =
-    FIRST_DAY_OF_WEEK_NAMES[parseInt(_firstDayOfWeekIdx || '0', 10) || 0];
+  const firstDayOfWeek = getFirstDayOfWeek(_firstDayOfWeekIdx);
 
   const locale = useLanguage();
 

@@ -22,7 +22,7 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { css } from '@emotion/css';
 import { parseDate } from '@internationalized/date';
 
-import { FIRST_DAY_OF_WEEK_NAMES } from '#components/select/DateSelect';
+import { getFirstDayOfWeek } from '#components/select/DateSelect';
 import { useLanguage } from '#hooks/useLocale';
 
 import { YearSelect } from './YearSelect';
@@ -121,6 +121,8 @@ const calendarStyles: CSSProperties = {
   },
 };
 
+const calendarClassName = css(calendarStyles);
+
 type DayRangeCalendarProps = {
   /** Inclusive day-shaped (`yyyy-MM-dd`) range and bounds. */
   start: string;
@@ -142,11 +144,10 @@ export function DayRangeCalendar({
 }: DayRangeCalendarProps) {
   const { t } = useTranslation();
   const language = useLanguage();
-  const firstDayOfWeek =
-    FIRST_DAY_OF_WEEK_NAMES[parseInt(firstDayOfWeekIdx || '0', 10) || 0];
+  const firstDayOfWeek = getFirstDayOfWeek(firstDayOfWeekIdx);
 
   return (
-    <View className={css(calendarStyles)}>
+    <View className={calendarClassName}>
       <I18nProvider locale={language}>
         <RangeCalendar
           aria-label={t('Date range')}
@@ -177,7 +178,7 @@ export function DayRangeCalendar({
                 </select>
               )}
             </CalendarMonthPicker>
-            <YearSelect min={min} max={max} />
+            <YearSelect />
             <AriaButton slot="next" aria-label={t('Next month')}>
               <SvgCheveronRight width={16} height={16} />
             </AriaButton>

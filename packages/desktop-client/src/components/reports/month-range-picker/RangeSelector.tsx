@@ -26,8 +26,7 @@ export function RangeSelector({
   locale,
   onChange,
 }: RangeSelectorProps) {
-  const [viewMonth, setViewMonth] = useState(start);
-  const viewYear = monthUtils.getYear(viewMonth);
+  const [viewYear, setViewYear] = useState(() => monthUtils.getYear(start));
 
   const [anchor, setAnchor] = useState<string | null>(null);
   const [hoverValue, setHoverValue] = useState<string | null>(null);
@@ -60,8 +59,8 @@ export function RangeSelector({
         label={viewYear}
         canPrev={viewYear > monthUtils.getYear(min)}
         canNext={viewYear < monthUtils.getYear(max)}
-        onPrev={() => setViewMonth(monthUtils.subYears(viewMonth, 1))}
-        onNext={() => setViewMonth(monthUtils.addYears(viewMonth, 1))}
+        onPrev={() => setViewYear(String(Number(viewYear) - 1))}
+        onNext={() => setViewYear(String(Number(viewYear) + 1))}
       />
 
       <MonthGrid

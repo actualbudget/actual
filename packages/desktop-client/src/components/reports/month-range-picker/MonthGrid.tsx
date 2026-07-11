@@ -1,7 +1,7 @@
+import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { Locale } from 'date-fns';
 
-import { Grid } from './Grid';
 import { GridButton } from './GridButton';
 import { rangePosition } from './util';
 
@@ -38,7 +38,13 @@ export function MonthGrid({
     };
   });
   return (
-    <Grid columns={4}>
+    <View
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: 4,
+      }}
+    >
       {months.map(({ month, label, fullLabel }) => (
         <GridButton
           key={month}
@@ -53,6 +59,6 @@ export function MonthGrid({
           {label}
         </GridButton>
       ))}
-    </Grid>
+    </View>
   );
 }
