@@ -351,7 +351,8 @@ describe('ComponentName', () => {
   hook wiring; shared scripts live in `/scripts/agent-hooks/`
 - `/.agents/skills/` - symlink mirror of `/.claude/skills/` so Codex-based
   harnesses (Codex CLI, IDE extension, ChatGPT desktop app) discover the same
-  skills (see `/.agents/skills/README.md`)
+  skills; when adding a skill, create it in `/.claude/skills/` and add a
+  matching relative symlink here
 - `/tsconfig.json` - Root TypeScript configuration
 - `/.cursorignore`, `/.gitignore` - Ignored files
 - `/yarn.lock` - Dependency lockfile (Yarn 4)
