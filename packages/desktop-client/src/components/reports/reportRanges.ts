@@ -1,4 +1,3 @@
-import { valueIsDay } from '@actual-app/components/date-range-picker';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { TimeFrame } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
@@ -233,7 +232,10 @@ export function calculateTimeRange(
   }
   if (mode === 'sliding-window') {
     // Day-shaped ranges slide by days: same width, ending today.
-    if (valueIsDay(start) && valueIsDay(end)) {
+    if (
+      monthUtils.isValidYearMonthDay(start) &&
+      monthUtils.isValidYearMonthDay(end)
+    ) {
       const dayOffset = monthUtils.differenceInCalendarDays(end, start);
       const today = monthUtils.currentDay();
       return [

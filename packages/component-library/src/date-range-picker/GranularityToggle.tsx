@@ -1,43 +1,10 @@
-import type { ReactNode } from 'react';
-
-import { css } from '@emotion/css';
-
-import { Button } from '#Button';
+import { ModeButton } from '#ModeButton';
 import { theme } from '#theme';
 import { View } from '#View';
 
 import type { DateRangeGranularity } from './util';
 
-type SegmentButtonProps = {
-  selected: boolean;
-  children: ReactNode;
-  onSelect: () => void;
-};
-
-function SegmentButton({ selected, children, onSelect }: SegmentButtonProps) {
-  return (
-    <Button
-      variant="bare"
-      className={css({
-        padding: '4px 12px',
-        borderRadius: 0,
-        fontSize: 12,
-        backgroundColor: theme.menuBackground,
-        ...(selected && {
-          backgroundColor: theme.buttonPrimaryBackground,
-          color: theme.buttonPrimaryText,
-          ':hover': {
-            backgroundColor: theme.buttonPrimaryBackgroundHover,
-            color: theme.buttonPrimaryTextHover,
-          },
-        }),
-      })}
-      onPress={onSelect}
-    >
-      {children}
-    </Button>
-  );
-}
+const segmentStyle = { borderRadius: 0, fontSize: 12, padding: '4px 12px' };
 
 type GranularityToggleProps = {
   value: DateRangeGranularity;
@@ -62,18 +29,20 @@ export function GranularityToggle({
         alignSelf: 'flex-start',
       }}
     >
-      <SegmentButton
+      <ModeButton
         selected={value === 'month'}
         onSelect={() => onChange('month')}
+        style={segmentStyle}
       >
         {monthLabel}
-      </SegmentButton>
-      <SegmentButton
+      </ModeButton>
+      <ModeButton
         selected={value === 'day'}
         onSelect={() => onChange('day')}
+        style={segmentStyle}
       >
         {dayLabel}
-      </SegmentButton>
+      </ModeButton>
     </View>
   );
 }

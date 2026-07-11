@@ -28,7 +28,6 @@ import type {
   FirstDayOfWeek,
 } from './util';
 
-export { valueIsDay } from './util';
 export type {
   DateRangeGranularity,
   DateRangePickerLabels,
@@ -209,10 +208,7 @@ export function DateRangePicker({
                 max={dayMax}
                 firstDayOfWeek={firstDayOfWeek}
                 locale={locale}
-                dateRangeLabel={labels.dateRange}
-                previousMonthLabel={labels.previousMonth}
-                nextMonthLabel={labels.nextMonth}
-                yearLabel={labels.year}
+                labels={labels}
                 onChange={setDraft}
               />
             ) : (
@@ -222,8 +218,7 @@ export function DateRangePicker({
                 min={monthMin}
                 max={monthMax}
                 locale={locale}
-                previousLabel={labels.previous}
-                nextLabel={labels.next}
+                labels={labels}
                 onChange={setDraft}
               />
             )}

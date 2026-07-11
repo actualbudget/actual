@@ -1,5 +1,12 @@
 import type { ReactNode } from 'react';
 
+import {
+  endOfMonth,
+  getLocalTimeZone,
+  parseDate,
+  today,
+} from '@internationalized/date';
+
 /**
  * Granularity the picker operates at: `month` values are `yyyy-MM`, `day`
  * values are `yyyy-MM-dd`. (A custom picker rather than a native
@@ -74,21 +81,32 @@ export function rangePosition(
   return 'middle';
 }
 
-// Plain string/Intl date helpers — the small loot-core/date-fns subset the
-// picker needs, since the library can depend on neither. Values are local
-// dates, never timezone-shifted.
+// Plain string date helpers — the small loot-core/date-fns subset the picker
+// needs, since the library can depend on neither. Built on Intl and the
+// already-present `@internationalized/date`; values are local dates, never
+// timezone-shifted.
 
 function toDate(value: string): Date {
   const [year, month = 1, day = 1] = value.split('-').map(Number);
   return new Date(year, month - 1, day);
 }
 
+// Intl.DateTimeFormat construction is expensive and the picker uses only a
+// handful of (locale, options) shapes, so cache the formatters.
+const formatters = new Map<string, Intl.DateTimeFormat>();
+
 export function formatDate(
   value: string,
   locale: string,
   options: Intl.DateTimeFormatOptions,
 ): string {
-  return new Intl.DateTimeFormat(locale, options).format(toDate(value));
+  const key = `${locale}|${JSON.stringify(options)}`;
+  let formatter = formatters.get(key);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, options);
+    formatters.set(key, formatter);
+  }
+  return formatter.format(toDate(value));
 }
 
 export function getYear(value: string): string {
@@ -104,16 +122,11 @@ export function firstDayOfMonth(value: string): string {
 }
 
 export function lastDayOfMonth(value: string): string {
-  const [year, month] = value.split('-').map(Number);
-  // Day 0 of the next month; always two digits (28-31).
-  return `${getMonth(value)}-${new Date(year, month, 0).getDate()}`;
+  return endOfMonth(parseDate(firstDayOfMonth(value))).toString();
 }
 
 export function currentDay(): string {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${now.getFullYear()}-${month}-${day}`;
+  return today(getLocalTimeZone()).toString();
 }
 
 export function currentMonth(): string {

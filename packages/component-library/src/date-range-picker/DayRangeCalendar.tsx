@@ -18,7 +18,7 @@ import type { CSSProperties } from '#styles';
 import { theme } from '#theme';
 import { View } from '#View';
 
-import type { FirstDayOfWeek } from './util';
+import type { DateRangePickerLabels, FirstDayOfWeek } from './util';
 import { YearSelect } from './YearSelect';
 
 const calendarStyles: CSSProperties = {
@@ -125,10 +125,10 @@ type DayRangeCalendarProps = {
   max: string;
   firstDayOfWeek: FirstDayOfWeek;
   locale: string;
-  dateRangeLabel: string;
-  previousMonthLabel: string;
-  nextMonthLabel: string;
-  yearLabel: string;
+  labels: Pick<
+    DateRangePickerLabels,
+    'dateRange' | 'previousMonth' | 'nextMonth' | 'year'
+  >;
   onChange: (start: string, end: string) => void;
 };
 
@@ -140,17 +140,14 @@ export function DayRangeCalendar({
   max,
   firstDayOfWeek,
   locale,
-  dateRangeLabel,
-  previousMonthLabel,
-  nextMonthLabel,
-  yearLabel,
+  labels,
   onChange,
 }: DayRangeCalendarProps) {
   return (
     <View className={calendarClassName}>
       <I18nProvider locale={locale}>
         <RangeCalendar
-          aria-label={dateRangeLabel}
+          aria-label={labels.dateRange}
           value={{ start: parseDate(start), end: parseDate(end) }}
           minValue={parseDate(min)}
           maxValue={parseDate(max)}
@@ -160,7 +157,7 @@ export function DayRangeCalendar({
           }
         >
           <View className="calendar-header">
-            <AriaButton slot="previous" aria-label={previousMonthLabel}>
+            <AriaButton slot="previous" aria-label={labels.previousMonth}>
               <SvgCheveronLeft width={16} height={16} />
             </AriaButton>
             <CalendarMonthPicker format="long">
@@ -178,8 +175,8 @@ export function DayRangeCalendar({
                 </select>
               )}
             </CalendarMonthPicker>
-            <YearSelect label={yearLabel} />
-            <AriaButton slot="next" aria-label={nextMonthLabel}>
+            <YearSelect label={labels.year} />
+            <AriaButton slot="next" aria-label={labels.nextMonth}>
               <SvgCheveronRight width={16} height={16} />
             </AriaButton>
           </View>

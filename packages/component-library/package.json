@@ -5,6 +5,7 @@
   "imports": {
     "#tokens": "./src/tokens.ts",
     "#Button": "./src/Button.tsx",
+    "#ModeButton": "./src/ModeButton.tsx",
     "#Popover": "./src/Popover.tsx",
     "#styles": "./src/styles.ts",
     "#Text": "./src/Text.tsx",
@@ -31,6 +32,7 @@
     "./input": "./src/Input.tsx",
     "./label": "./src/Label.tsx",
     "./menu": "./src/Menu.tsx",
+    "./mode-button": "./src/ModeButton.tsx",
     "./paragraph": "./src/Paragraph.tsx",
     "./popover": "./src/Popover.tsx",
     "./select": "./src/Select.tsx",

@@ -5,6 +5,7 @@ import { View } from '#View';
 import { MonthGrid } from './MonthGrid';
 import { NavRow } from './NavRow';
 import { getYear } from './util';
+import type { DateRangePickerLabels } from './util';
 
 type RangeSelectorProps = {
   /** Inclusive month-shaped (`yyyy-MM`) range and bounds. */
@@ -13,8 +14,7 @@ type RangeSelectorProps = {
   min: string;
   max: string;
   locale: string;
-  previousLabel: string;
-  nextLabel: string;
+  labels: Pick<DateRangePickerLabels, 'previous' | 'next'>;
   onChange: (start: string, end: string) => void;
 };
 
@@ -25,8 +25,7 @@ export function RangeSelector({
   min,
   max,
   locale,
-  previousLabel,
-  nextLabel,
+  labels,
   onChange,
 }: RangeSelectorProps) {
   const [viewYear, setViewYear] = useState(() => getYear(start));
@@ -60,8 +59,8 @@ export function RangeSelector({
     <View onMouseLeave={() => setHoverValue(null)} style={{ minWidth: 180 }}>
       <NavRow
         label={viewYear}
-        previousLabel={previousLabel}
-        nextLabel={nextLabel}
+        previousLabel={labels.previous}
+        nextLabel={labels.next}
         canPrev={viewYear > getYear(min)}
         canNext={viewYear < getYear(max)}
         onPrev={() => setViewYear(String(Number(viewYear) - 1))}

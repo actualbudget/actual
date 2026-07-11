@@ -97,6 +97,16 @@ export function isValidYearMonth(value: string): boolean {
   return month >= 1 && month <= 12;
 }
 
+// Whether a value is day-shaped (`yyyy-MM-dd`) rather than month-shaped
+// (`yyyy-MM`).
+export function isValidYearMonthDay(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  return month >= 1 && month <= 12 && day >= 1 && day <= 31;
+}
+
 export function weekFromDate(
   date: DateLike,
   firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'],

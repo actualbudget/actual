@@ -1,10 +1,10 @@
-import React from 'react';
 import type { ReactNode } from 'react';
 
-import { Button } from '@actual-app/components/button';
-import type { CSSProperties } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
+
+import { Button } from '#Button';
+import type { CSSProperties } from '#styles';
+import { theme } from '#theme';
 
 type ModeButtonProps = {
   selected: boolean;
