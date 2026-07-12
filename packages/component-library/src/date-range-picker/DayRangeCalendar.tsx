@@ -53,6 +53,12 @@ const calendarStyles: CSSProperties = {
       fontSize: 13,
       cursor: 'pointer',
       '&:hover': { backgroundColor: theme.buttonBareBackgroundHover },
+      // The open dropdown paints the browser's default (light) popup, so
+      // inherited light text is invisible without explicit option colors.
+      '& option': {
+        backgroundColor: theme.tooltipBackground,
+        color: theme.tooltipText,
+      },
     },
   },
   '& .react-aria-CalendarGrid': {
@@ -85,14 +91,13 @@ const calendarStyles: CSSProperties = {
     // Same current-day treatment as the month grid's GridButton.
     '&[data-today]': {
       fontWeight: 'bold',
-      boxShadow: `inset 0 0 0 1px ${theme.pageTextLink}`,
+      boxShadow: `inset 0 0 0 1px ${theme.pageTextPositive}`,
       borderRadius: 4,
-      color: theme.pageTextLink,
+      color: theme.pageTextPositive,
     },
     '&[data-selected]': {
-      backgroundColor: theme.pillBackgroundSelected,
+      backgroundColor: theme.datePickerRangeBackground,
       borderRadius: 0,
-      color: theme.calendarText,
     },
     '&[data-selection-start], &[data-selection-end]': {
       backgroundColor: theme.buttonPrimaryBackground,

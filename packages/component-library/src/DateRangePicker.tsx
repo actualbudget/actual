@@ -261,23 +261,39 @@ export function DateRangePicker({
                 <View>
                   <Text style={sectionTitleStyle}>{labels.quickSelect}</Text>
                   <View style={{ gap: 4 }}>
-                    {presets?.map(preset => (
-                      <Button
-                        key={preset.key}
-                        variant="bare"
-                        onPress={() => {
-                          // Preview in the draft; the commit happens on close,
-                          // like manual selection.
-                          const [nextStart, nextEnd] = preset.getRange();
-                          setDraftStart(nextStart);
-                          setDraftEnd(nextEnd);
-                          setDraftPreset(preset);
-                        }}
-                        style={{ justifyContent: 'flex-start', fontSize: 13 }}
-                      >
-                        {preset.label}
-                      </Button>
-                    ))}
+                    {presets?.map(preset => {
+                      // Derive the active preset from the shown range instead
+                      // of storing it, so it survives closing and reopening
+                      // without persisting anything.
+                      const [presetStart, presetEnd] = preset.getRange();
+                      const isActive =
+                        presetStart === draftStart && presetEnd === draftEnd;
+                      return (
+                        <Button
+                          key={preset.key}
+                          variant={isActive ? 'primary' : 'bare'}
+                          aria-pressed={isActive}
+                          onPress={() => {
+                            // Preview in the draft; the commit happens on
+                            // close, like manual selection.
+                            setDraftStart(presetStart);
+                            setDraftEnd(presetEnd);
+                            setDraftPreset(preset);
+                          }}
+                          style={{
+                            justifyContent: 'flex-start',
+                            fontSize: 13,
+                            // Match primary's 1px border so toggling the
+                            // active preset doesn't shift the list.
+                            ...(!isActive && {
+                              border: '1px solid transparent',
+                            }),
+                          }}
+                        >
+                          {preset.label}
+                        </Button>
+                      );
+                    })}
                   </View>
                 </View>
               )}

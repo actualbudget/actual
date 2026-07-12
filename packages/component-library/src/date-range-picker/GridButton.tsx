@@ -50,12 +50,12 @@ export function GridButton({
         ...(isToday && {
           fontWeight: 'bold',
           // Inset ring marks the current period without shifting layout.
-          boxShadow: `inset 0 0 0 1px ${theme.pageTextLink}`,
-          ...(!selected && { color: theme.pageTextLink }),
+          boxShadow: `inset 0 0 0 1px ${theme.pageTextPositive}`,
+          ...(!selected && { color: theme.pageTextPositive }),
         }),
         ...(inRange &&
           !selected && {
-            backgroundColor: theme.pillBackgroundSelected,
+            backgroundColor: theme.datePickerRangeBackground,
             borderRadius:
               rangeEdge === 'start'
                 ? '4px 0 0 4px'
