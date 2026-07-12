@@ -314,7 +314,7 @@ export function updateTransaction(
         ...transaction,
         is_parent: true,
         is_child: false,
-        parent_id: null,
+        parent_id: undefined,
       };
       return recalculateSplit({
         ...parent,
