@@ -356,6 +356,7 @@ export function ImportTransactionsModal({
           ignored: _ignored,
           selected: _selected,
           selected_merge: _selected_merge,
+          matchedTransactionId: _matchedTransactionId,
           tombstone: _tombstone,
           ...finalTransaction
         } = trans;
@@ -684,19 +685,27 @@ export function ImportTransactionsModal({
         ignored: _ignored,
         selected: _selected,
         selected_merge: _selected_merge,
+        matchedTransactionId: _matchedTransactionId,
         trx_id: _trx_id,
         ...finalTransaction
       } = trans;
 
-      if (
-        reconcile &&
-        ((trans.ignored && trans.selected) ||
-          (trans.existing && trans.selected && !trans.selected_merge))
-      ) {
-        // in reconcile mode, force transaction add for
-        // - ignored transactions (aleardy existing) that are checked
-        // - transactions with existing (merged transactions) that are not selected_merge
-        finalTransaction.forceAddTransaction = true;
+      if (reconcile) {
+        if (
+          (trans.ignored && trans.selected) ||
+          (trans.existing && trans.selected && !trans.selected_merge)
+        ) {
+          // in reconcile mode, force transaction add for
+          // - ignored transactions (aleardy existing) that are checked
+          // - transactions with existing (merged transactions) that are not selected_merge
+          finalTransaction.forceAddTransaction = true;
+        }
+
+        if (trans.matchedTransactionId !== undefined) {
+          // pass the preview's match decision along so the import doesn't
+          // re-run the fuzzy matching with a potentially different result
+          finalTransaction.matchedTransactionId = trans.matchedTransactionId;
+        }
       }
 
       finalTransactions.push({
@@ -842,6 +851,14 @@ export function ImportTransactionsModal({
               // (reconciled transactions or no change detected)
               currentTrx.ignored = entry?.ignored || false;
 
+              // Pin the preview's match decision so the actual import honors
+              // it instead of re-running the fuzzy matching on a different
+              // set of transactions (which can silently merge rows the
+              // preview showed as new). Rows without any preview entry were
+              // shown as new (null = don't match); ignored rows keep the
+              // default matching (undefined).
+              currentTrx.matchedTransactionId = entry ? existingTrx?.id : null;
+
               currentTrx.tombstone = entry?.tombstone || false;
 
               currentTrx.selected = !currentTrx.ignored;
@@ -887,6 +904,13 @@ export function ImportTransactionsModal({
     fieldMappings,
     parseDateFormat,
     reimportDeleted,
+    // the preview matches on amounts, so any option that changes how amounts
+    // are parsed must refresh the preview (and its pinned match decisions)
+    flipAmount,
+    splitMode,
+    inOutMode,
+    outValue,
+    multiplierAmount,
   ]);
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
