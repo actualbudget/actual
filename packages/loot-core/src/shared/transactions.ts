@@ -309,7 +309,13 @@ export function updateTransaction(
       // parent and materialise each subtransaction as a proper child so it
       // inherits the parent's account/date; otherwise the children are inserted
       // without an `account` and the DB rejects them (#8207).
-      const parent = { ...trans, ...transaction, is_parent: true };
+      const parent = {
+        ...trans,
+        ...transaction,
+        is_parent: true,
+        is_child: false,
+        parent_id: null,
+      };
       return recalculateSplit({
         ...parent,
         subtransactions: transaction.subtransactions.map((sub, index) =>
