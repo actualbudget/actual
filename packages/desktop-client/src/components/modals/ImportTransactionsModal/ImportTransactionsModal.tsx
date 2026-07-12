@@ -854,10 +854,15 @@ export function ImportTransactionsModal({
               // Pin the preview's match decision so the actual import honors
               // it instead of re-running the fuzzy matching on a different
               // set of transactions (which can silently merge rows the
-              // preview showed as new). Rows without any preview entry were
-              // shown as new (null = don't match); ignored rows keep the
-              // default matching (undefined).
-              currentTrx.matchedTransactionId = entry ? existingTrx?.id : null;
+              // preview showed as new). Rows without any preview entry, and
+              // tombstone entries (existing === false), were shown as new
+              // (null = don't match); ignored rows keep the default matching
+              // (undefined).
+              currentTrx.matchedTransactionId = existingTrx
+                ? existingTrx.id
+                : entry && !entry.tombstone
+                  ? undefined
+                  : null;
 
               currentTrx.tombstone = entry?.tombstone || false;
 
