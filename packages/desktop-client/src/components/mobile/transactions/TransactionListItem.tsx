@@ -179,47 +179,6 @@ export function TransactionListItem({
             }),
       }}
     >
-      {isReconciling &&
-        (isPreview ? (
-          <View style={{ width: 44, flexShrink: 0 }} />
-        ) : isChild ? (
-          <View
-            style={{
-              width: 44,
-              flexShrink: 0,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <ClearedStatusIcon
-              isReconciled={isReconciled}
-              isCleared={isCleared}
-            />
-          </View>
-        ) : (
-          <Button
-            variant="bare"
-            aria-label={
-              isReconciled
-                ? t('Unlock reconciled transaction')
-                : isCleared
-                  ? t('Unclear transaction')
-                  : t('Clear transaction')
-            }
-            style={{
-              width: 44,
-              height: '100%',
-              flexShrink: 0,
-              borderRadius: 0,
-            }}
-            onPress={() => onToggleCleared?.(transaction)}
-          >
-            <ClearedStatusIcon
-              isReconciled={isReconciled}
-              isCleared={isCleared}
-            />
-          </Button>
-        ))}
       <PressResponder {...mergeProps(pressProps, longPressProps)}>
         <Button
           {...itemProps}
@@ -377,6 +336,46 @@ export function TransactionListItem({
           </View>
         </Button>
       </PressResponder>
+      {isReconciling &&
+        !isPreview &&
+        (isChild ? (
+          <View
+            style={{
+              width: 32,
+              flexShrink: 0,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <ClearedStatusIcon
+              isReconciled={isReconciled}
+              isCleared={isCleared}
+            />
+          </View>
+        ) : (
+          <Button
+            variant="bare"
+            aria-label={
+              isReconciled
+                ? t('Unlock reconciled transaction')
+                : isCleared
+                  ? t('Unclear transaction')
+                  : t('Clear transaction')
+            }
+            style={{
+              width: 32,
+              height: '100%',
+              flexShrink: 0,
+              borderRadius: 0,
+            }}
+            onPress={() => onToggleCleared?.(transaction)}
+          >
+            <ClearedStatusIcon
+              isReconciled={isReconciled}
+              isCleared={isCleared}
+            />
+          </Button>
+        ))}
     </View>
   );
 }
@@ -393,16 +392,16 @@ function ClearedStatusIcon({
   return isReconciled ? (
     <SvgLockClosed
       style={{
-        width: 16,
-        height: 16,
+        width: 13,
+        height: 13,
         color: theme.noticeTextLight,
       }}
     />
   ) : (
     <SvgCheckCircle1
       style={{
-        width: 16,
-        height: 16,
+        width: 13,
+        height: 13,
         color: isCleared ? theme.noticeTextLight : theme.pageTextSubdued,
       }}
     />
