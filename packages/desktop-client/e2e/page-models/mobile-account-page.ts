@@ -13,6 +13,8 @@ export class MobileAccountPage {
   readonly createTransactionButton: Locator;
   readonly accountMenuButton: Locator;
   readonly reconcilingBanner: Locator;
+  readonly reconcilingBannerAllReconciled: Locator;
+  readonly reconcilingBannerDifference: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -28,6 +30,10 @@ export class MobileAccountPage {
     });
     this.accountMenuButton = this.heading.getByRole('button');
     this.reconcilingBanner = page.getByTestId('reconciling-banner');
+    this.reconcilingBannerAllReconciled =
+      this.reconcilingBanner.getByText('All reconciled!');
+    this.reconcilingBannerDifference =
+      this.reconcilingBanner.getByText('needs');
   }
 
   async waitFor(...options: Parameters<Locator['waitFor']>) {

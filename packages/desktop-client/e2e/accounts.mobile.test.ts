@@ -71,22 +71,18 @@ test.describe('Mobile Accounts', () => {
     await accountPage.waitFor();
 
     await accountPage.startReconciliation('200.00');
-    await expect(accountPage.reconcilingBanner).toContainText('needs');
+    await expect(accountPage.reconcilingBannerDifference).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
 
     await accountPage.createReconciliationTransaction();
-    await expect(accountPage.reconcilingBanner).toContainText(
-      'All reconciled!',
-    );
+    await expect(accountPage.reconcilingBannerAllReconciled).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
 
     await accountPage.unclearFirstTransaction();
-    await expect(accountPage.reconcilingBanner).toContainText('needs');
+    await expect(accountPage.reconcilingBannerDifference).toBeVisible();
 
     await accountPage.clearFirstTransaction();
-    await expect(accountPage.reconcilingBanner).toContainText(
-      'All reconciled!',
-    );
+    await expect(accountPage.reconcilingBannerAllReconciled).toBeVisible();
 
     await accountPage.lockTransactions();
     await expect(accountPage.reconcilingBanner).not.toBeVisible();
