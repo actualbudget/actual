@@ -188,6 +188,7 @@ export function TransactionListItem({
             flex: 1,
             borderRadius: 0,
             borderWidth: 0,
+            ...(isReconciling && { paddingRight: 0 }),
             ...(isPreview
               ? {
                   backgroundColor: theme.tableRowHeaderBackground,
@@ -203,7 +204,7 @@ export function TransactionListItem({
               flex: 1,
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '0 4px',
+              padding: isReconciling ? '0 0 0 4px' : '0 4px',
             }}
           >
             <View style={{ flex: 1 }}>
