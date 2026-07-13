@@ -108,7 +108,7 @@ export function ReconcilingBanner({
               Your cleared balance{' '}
               <strong>{{ clearedBalance } as TransObjectLiteral}</strong> needs{' '}
               <strong>{{ difference } as TransObjectLiteral}</strong> to match
-              <br /> your bank&apos;s balance of{' '}
+              your bank&apos;s balance of{' '}
               <Text style={{ fontWeight: 700 }}>
                 {{ bankBalance } as TransObjectLiteral}
               </Text>
