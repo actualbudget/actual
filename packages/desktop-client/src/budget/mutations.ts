@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
+import type { Notification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import type { AppDispatch } from '#redux/store';
 
@@ -57,6 +58,86 @@ function dispatchCategoryNameAlreadyExistsNotification(
       },
     }),
   );
+}
+
+type BudgetTemplateNotification = Notification & {
+  count?: number | undefined;
+  sourceCount?: number | undefined;
+  sinkCount?: number | undefined;
+};
+
+function formatCleanupApplied(
+  notification: BudgetTemplateNotification,
+  t: TFunction,
+) {
+  const sourceCount = notification.sourceCount ?? 0;
+  const sinkCount = notification.sinkCount ?? 0;
+
+  if (sourceCount === 1 && sinkCount === 1) {
+    return t(
+      'Successfully returned funds from {{sourceCount}} source and funded {{sinkCount}} sinking fund.',
+      { sourceCount, sinkCount },
+    );
+  }
+  if (sourceCount === 1) {
+    return t(
+      'Successfully returned funds from {{sourceCount}} source and funded {{sinkCount}} sinking funds.',
+      { sourceCount, sinkCount },
+    );
+  }
+  if (sinkCount === 1) {
+    return t(
+      'Successfully returned funds from {{sourceCount}} sources and funded {{sinkCount}} sinking fund.',
+      { sourceCount, sinkCount },
+    );
+  }
+  return t(
+    'Successfully returned funds from {{sourceCount}} sources and funded {{sinkCount}} sinking funds.',
+    { sourceCount, sinkCount },
+  );
+}
+
+export function translateBudgetTemplateNotification(
+  notification: BudgetTemplateNotification,
+  t: TFunction,
+): Notification {
+  switch (notification.message) {
+    case 'templates-up-to-date':
+      return { ...notification, message: t('Everything is up to date') };
+    case 'template-errors':
+      return {
+        ...notification,
+        message: t('There were errors interpreting some templates:'),
+      };
+    case 'templates-applied':
+      return {
+        ...notification,
+        message: t('Successfully applied templates to {{count}} categories', {
+          count: notification.count ?? 0,
+        }),
+      };
+    case 'templates-check-passed':
+      return { ...notification, message: t('All templates passed! 🎉') };
+    case 'cleanup-no-funds':
+      return { ...notification, message: t('Global: Funds not available:') };
+    case 'cleanup-up-to-date':
+      return { ...notification, message: t('All categories were up to date.') };
+    case 'cleanup-applied':
+      return {
+        ...notification,
+        message: formatCleanupApplied(notification, t),
+      };
+    case 'cleanup-applied-with-errors':
+      return {
+        ...notification,
+        message: t(
+          '{{appliedMessage}} There were errors interpreting some templates:',
+          { appliedMessage: formatCleanupApplied(notification, t) },
+        ),
+      };
+    default:
+      return notification;
+  }
 }
 
 type CreateCategoryPayload = {
@@ -824,7 +905,7 @@ export function useBudgetActions() {
       if (notification) {
         dispatch(
           addNotification({
-            notification,
+            notification: translateBudgetTemplateNotification(notification, t),
           }),
         );
       }

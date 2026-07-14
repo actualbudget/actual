@@ -5,14 +5,8 @@ import type { CleanupTemplate } from '#types/models/cleanup-templates';
 
 import { getSheetValue, setBudget, setGoal } from './actions';
 import { storeNoteCleanups } from './cleanup-template-notes';
-
-type Notification = {
-  type?: 'message' | 'error' | 'warning' | undefined;
-  pre?: string | undefined;
-  title?: string | undefined;
-  message: string;
-  sticky?: boolean | undefined;
-};
+import { TEMPLATE_NOTIFICATION_MESSAGES } from './template-notification';
+import type { TemplateNotification } from './template-notification';
 
 export async function cleanupTemplate({ month }: { month: string }) {
   await storeNoteCleanups();
@@ -146,7 +140,7 @@ async function applyGroupCleanups(
   return warnings;
 }
 
-async function processCleanup(month: string): Promise<Notification> {
+async function processCleanup(month: string): Promise<TemplateNotification> {
   let num_sources = 0;
   let num_sinks = 0;
   let total_weight = 0;
@@ -310,46 +304,47 @@ async function processCleanup(month: string): Promise<Notification> {
       return {
         type: 'error',
         sticky: true,
-        message: 'There were errors interpreting some templates:',
+        message: TEMPLATE_NOTIFICATION_MESSAGES.templateErrors,
         pre: errors.join('\n\n'),
       };
     } else if (warnings.length) {
       return {
         type: 'warning',
-        message: 'Global: Funds not available:',
+        message: TEMPLATE_NOTIFICATION_MESSAGES.cleanupNoFunds,
         pre: warnings.join('\n\n'),
       };
     } else {
       return {
         type: 'message',
-        message: 'All categories were up to date.',
+        message: TEMPLATE_NOTIFICATION_MESSAGES.cleanupUpToDate,
       };
     }
   } else {
-    const applied = `Successfully returned funds from ${num_sources} ${
-      num_sources === 1 ? 'source' : 'sources'
-    } and funded ${num_sinks} sinking ${num_sinks === 1 ? 'fund' : 'funds'}.`;
     if (errors.length) {
       return {
         sticky: true,
-        message: `${applied} There were errors interpreting some templates:`,
+        message: TEMPLATE_NOTIFICATION_MESSAGES.cleanupAppliedWithErrors,
+        sourceCount: num_sources,
+        sinkCount: num_sinks,
         pre: errors.join('\n\n'),
       };
     } else if (warnings.length) {
       return {
         type: 'warning',
-        message: 'Global: Funds not available:',
+        message: TEMPLATE_NOTIFICATION_MESSAGES.cleanupNoFunds,
         pre: warnings.join('\n\n'),
       };
     } else if (budgetAvailable === 0) {
       return {
         type: 'message',
-        message: 'All categories were up to date.',
+        message: TEMPLATE_NOTIFICATION_MESSAGES.cleanupUpToDate,
       };
     } else {
       return {
         type: 'message',
-        message: applied,
+        message: TEMPLATE_NOTIFICATION_MESSAGES.cleanupApplied,
+        sourceCount: num_sources,
+        sinkCount: num_sinks,
       };
     }
   }

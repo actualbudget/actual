@@ -8,13 +8,8 @@ import {
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
 import type { CategoryWithTemplateNote } from './statements';
-
-type Notification = {
-  type?: 'message' | 'error' | 'warning' | undefined;
-  pre?: string | undefined;
-  message: string;
-  sticky?: boolean | undefined;
-};
+import { TEMPLATE_NOTIFICATION_MESSAGES } from './template-notification';
+import type { TemplateNotification } from './template-notification';
 
 export const TEMPLATE_PREFIX = '#template';
 export const GOAL_PREFIX = '#goal';
@@ -36,7 +31,7 @@ type CategoryWithTemplateNotes = {
   templates: Template[];
 };
 
-export async function checkTemplateNotes(): Promise<Notification> {
+export async function checkTemplateNotes(): Promise<TemplateNotification> {
   const categoryWithTemplates = await getCategoriesWithTemplates();
   const schedules = await getActiveSchedules();
   const scheduleNames = schedules.map(({ name }) => name);
@@ -64,14 +59,14 @@ export async function checkTemplateNotes(): Promise<Notification> {
   if (errors.length) {
     return {
       sticky: true,
-      message: 'There were errors interpreting some templates:',
+      message: TEMPLATE_NOTIFICATION_MESSAGES.templateErrors,
       pre: errors.join('\n\n'),
     };
   }
 
   return {
     type: 'message',
-    message: 'All templates passed! 🎉',
+    message: TEMPLATE_NOTIFICATION_MESSAGES.templatesCheckPassed,
   };
 }
 
