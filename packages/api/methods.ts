@@ -276,7 +276,7 @@ export function deleteCategoryGroup(
 }
 
 export function getCategories(options: { hidden?: boolean } = {}) {
-  return send('api/categories-get', { grouped: false, ...options });
+  return send('api/categories-get', options);
 }
 
 export function createCategory(category: Omit<APICategoryEntity, 'id'>) {

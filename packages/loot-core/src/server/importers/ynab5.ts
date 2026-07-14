@@ -291,9 +291,7 @@ async function importCategories(
   // Hidden categories are put in its own group by YNAB,
   // so it's already handled.
 
-  const categories = await send('api/categories-get', {
-    grouped: false,
-  });
+  const categories = await send('api/categories-get');
   const incomeCatId = findIdByName(categories, 'Income');
   const ynabIncomeCategories = ['To be Budgeted', 'Inflow: Ready to Assign'];
 
@@ -572,9 +570,7 @@ export async function importTransactions(
   flagNameConflicts: Set<string>,
 ) {
   const payees = await send('api/payees-get');
-  const categories = await send('api/categories-get', {
-    grouped: false,
-  });
+  const categories = await send('api/categories-get');
   const incomeCatId = findIdByName(categories, 'Income');
   const startingBalanceCatId = findIdByName(categories, 'Starting Balances'); //better way to do it?
 

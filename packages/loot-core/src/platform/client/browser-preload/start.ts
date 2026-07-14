@@ -74,6 +74,8 @@ export function startBrowserBackend(
           'SharedArrayBufferOverride',
         ),
       });
+      bridge.markInitialized();
+
       window.addEventListener('beforeunload', () => {
         sharedPort.postMessage({ type: 'tab-closing' });
       });
