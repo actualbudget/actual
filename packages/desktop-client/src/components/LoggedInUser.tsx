@@ -135,7 +135,9 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
         tooltip: (
           <Trans>
             A server syncs your budget across devices and keeps a backup of your
-            data. Click to set one up.
+            data.
+            <br />
+            Click to set one up.
           </Trans>
         ),
       };
@@ -146,8 +148,9 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
         message: t('Server offline'),
         tooltip: (
           <Trans>
-            Can&apos;t reach your server right now. Changes are saved locally
-            and will sync once it&apos;s reachable again.
+            Can't reach your server right now.
+            <br />
+            Changes are saved locally and will sync once it's reachable again.
           </Trans>
         ),
       };
