@@ -42,6 +42,33 @@ test.describe('Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('updates the running balance after editing a transaction amount', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Running Balance',
+      offBudget: false,
+      balance: 100,
+    });
+
+    await accountPage.createSingleTransaction({
+      notes: 'running-balance-edit',
+      debit: '10.00',
+    });
+
+    await accountPage.accountMenuButton.click();
+    await page.getByRole('button', { name: 'Show running balance' }).click();
+
+    const transaction = accountPage.getNthTransaction(0);
+    await expect(transaction.balance).toHaveText('90.00');
+
+    await transaction.debit.click();
+    const debitInput = transaction.debit.getByRole('textbox');
+    await accountPage.selectInputText(debitInput);
+    await debitInput.pressSequentially('20.00');
+    await page.keyboard.press('Tab');
+
+    await expect(transaction.balance).toHaveText('80.00');
+  });
+
   test('closes an account', async () => {
     accountPage = await navigation.goToAccountPage('Roth IRA');
 

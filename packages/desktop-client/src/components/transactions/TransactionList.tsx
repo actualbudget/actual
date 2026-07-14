@@ -436,6 +436,9 @@ export function TransactionList({
         transactionsLatest.current = changes.data;
 
         if (changes.diff.updated.length > 0) {
+          const amountChanged = changes.diff.updated.some(
+            update => update.amount !== undefined,
+          );
           const dateChanged = !!changes.diff.updated[0].date;
           if (dateChanged) {
             changes.diff.updated[0].sort_order = Date.now();
@@ -448,7 +451,12 @@ export function TransactionList({
               changes,
               onChange,
               isLearnCategoriesEnabled,
-            );
+            ).then(() => {
+              if (showBalances && amountChanged) {
+                // Running balances are calculated from persisted transactions.
+                onRefetch();
+              }
+            });
           }
         }
       };
@@ -479,7 +487,13 @@ export function TransactionList({
 
       await saveTransaction();
     },
-    [isLearnCategoriesEnabled, onChange, onRefetch, promptToConvertToSchedule],
+    [
+      isLearnCategoriesEnabled,
+      onChange,
+      onRefetch,
+      promptToConvertToSchedule,
+      showBalances,
+    ],
   );
 
   const onAddSplit = useCallback(
