@@ -333,8 +333,8 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       spreadsheet: ReturnType<typeof useSpreadsheet>,
       setData: (data: CrossoverData) => void,
     ) => {
-      // Don't run if dates are not yet initialized
-      if (!start || !end) {
+      // Don't run until dates and saved selections are initialized.
+      if (!selectionsInitialized || !start || !end) {
         return;
       }
 
@@ -356,6 +356,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     [
       start,
       end,
+      selectionsInitialized,
       swr,
       useCustomGrowth,
       estimatedReturn,
