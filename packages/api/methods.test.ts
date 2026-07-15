@@ -75,6 +75,92 @@ describe('API setup and teardown', () => {
   });
 });
 
+describe('API budget import/export', () => {
+  const importedBudgetIds = new Set<string>();
+
+  beforeEach(async () => {
+    await api.loadBudget(budgetName);
+  });
+
+  afterEach(async () => {
+    // Close any budget loaded by an import before removing its files
+    await api.shutdown();
+
+    for (const id of importedBudgetIds) {
+      await fs.rm(path.join(__dirname, '/mocks/budgets/', id), {
+        force: true,
+        recursive: true,
+      });
+    }
+    importedBudgetIds.clear();
+  });
+
+  // apis: exportBudget, importBudget
+  test('exportBudget returns bytes that importBudget loads back', async () => {
+    const accountId = await api.createAccount({ name: 'round-trip' }, 0);
+    await api.addTransactions(accountId, [
+      { date: '2023-10-01', amount: 1234, notes: 'round-trip transaction' },
+    ]);
+
+    const data = await api.exportBudget();
+    expect(data).toBeInstanceOf(Uint8Array);
+    expect(data.length).toBeGreaterThan(0);
+
+    const { id } = await api.importBudget(data);
+    expect(id).toBeTruthy();
+    importedBudgetIds.add(id);
+
+    // The imported budget is now the loaded one; verify the data
+    // survived the round-trip
+    const accounts = await api.getAccounts();
+    expect(accounts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: accountId, name: 'round-trip' }),
+      ]),
+    );
+
+    const transactions = await api.getTransactions(
+      accountId,
+      '2023-10-01',
+      '2023-10-31',
+    );
+    expect(transactions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          amount: 1234,
+          notes: 'round-trip transaction',
+        }),
+      ]),
+    );
+  });
+
+  // apis: exportBudget, importBudget
+  test('importBudget imports from a file path', async () => {
+    const data = await api.exportBudget();
+    const filepath = path.join(__dirname, '/mocks/budgets/', 'export.zip');
+    await fs.writeFile(filepath, data);
+
+    try {
+      const { id } = await api.importBudget(filepath);
+      expect(id).toBeTruthy();
+      importedBudgetIds.add(id);
+    } finally {
+      await fs.rm(filepath, { force: true });
+    }
+  });
+
+  // apis: importBudget
+  test('importBudget rejects with an Error on failure', async () => {
+    await expect(api.importBudget('/does/not/exist.zip')).rejects.toThrow(
+      /^Error importing budget:/,
+    );
+
+    await expect(api.importBudget(new Uint8Array([1, 2, 3]))).rejects.toThrow(
+      /^Error importing budget:/,
+    );
+  });
+});
+
 describe('API CRUD operations', () => {
   beforeEach(async () => {
     // load test budget

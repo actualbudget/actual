@@ -1381,6 +1381,7 @@ const Transaction = memo(function Transaction({
             style={{
               width: 'max-content',
               maxWidth: 'none',
+              maxHeight: 'none !important',
               minWidth: 375,
               padding: 5,
             }}

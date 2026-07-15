@@ -4,11 +4,13 @@ import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import { post } from '#server/post';
 import { getServer } from '#server/server-config';
+import { setSyncingMode } from '#server/sync';
 import { handlers } from '#server/tests/mockSyncServer';
 import { insertRule, loadRules } from '#server/transactions/transaction-rules';
 import * as monthUtils from '#shared/months';
 import type { SyncedPrefs } from '#types/prefs';
 
+import { app as accountsApp } from './app';
 import {
   addTransactions,
   reconcileTransactions,
@@ -643,6 +645,91 @@ describe('SimpleFin batch sync', () => {
 
   afterEach(() => {
     delete handlers['/simplefin/transactions'];
+  });
+
+  test('does not emit transaction CRDT messages when provider category appears later', async () => {
+    const providerAccountId = 'sf-account-1';
+    const acctId = await db.insertAccount({
+      id: 'acct-1',
+      account_id: providerAccountId,
+      name: 'Account 1',
+      account_sync_source: 'simpleFin',
+    });
+
+    const syncTransaction = category => {
+      mockSimpleFinTransactions({
+        [providerAccountId]: {
+          transactions: {
+            all: [
+              {
+                booked: true,
+                ...(category ? { category } : {}),
+                date: '2017-10-02',
+                payeeName: 'Coffee Shop',
+                transactionAmount: {
+                  amount: '-12.34',
+                },
+                transactionId: 'provider-tx-1',
+              },
+            ],
+            booked: [],
+            pending: [],
+          },
+          balances: [],
+          startingBalance: 0,
+        },
+        errors: {},
+      });
+
+      return accountsApp.handlers['simplefin-batch-sync']({ ids: [acctId] });
+    };
+
+    setSyncingMode('offline');
+    try {
+      const firstResult = await syncTransaction(null);
+      expect(firstResult[0].res.errors).toHaveLength(0);
+      expect(firstResult[0].res.newTransactions).toHaveLength(2);
+
+      const { count: crdtMessageCount } = await db.first<{ count: number }>(
+        'SELECT COUNT(*) as count FROM messages_crdt',
+      );
+      expect(crdtMessageCount).toBeGreaterThan(0);
+
+      global.stepForwardInTime();
+      const secondResult = await syncTransaction('provider-category');
+      expect(secondResult[0].res.errors).toHaveLength(0);
+      expect(secondResult[0].res.newTransactions).toHaveLength(0);
+      expect(secondResult[0].res.matchedTransactions).toHaveLength(0);
+
+      const secondSyncMessages = await db.all<db.DbCrdtMessage>(
+        'SELECT * FROM messages_crdt WHERE id > ? ORDER BY id',
+        [crdtMessageCount],
+      );
+
+      expect(secondSyncMessages).toHaveLength(3);
+      expect(secondSyncMessages.map(message => message.dataset)).toEqual([
+        'accounts',
+        'accounts',
+        'accounts',
+      ]);
+      expect(secondSyncMessages.map(message => message.column).sort()).toEqual([
+        'balance_current',
+        'bank_sync_status',
+        'last_sync',
+      ]);
+      expect(
+        secondSyncMessages.some(message => message.dataset === 'transactions'),
+      ).toBe(false);
+
+      const transactions = await getAllTransactions();
+      const syncedTransaction = transactions.find(
+        transaction => transaction.imported_id === 'provider-tx-1',
+      );
+      expect(syncedTransaction).toBeDefined();
+      expect(syncedTransaction.category).toBeNull();
+    } finally {
+      setSyncingMode('disabled');
+    }
   });
 
   test('returns ACCOUNT_MISSING error when an account is not in the response', async () => {

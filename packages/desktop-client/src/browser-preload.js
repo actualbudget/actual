@@ -38,7 +38,8 @@ const worker = startBrowserBackend({
   },
   createSharedWorker: () =>
     new SharedBrowserServerWorker({ name: 'actual-backend' }),
-  forceDirectWorker: Platform.isPlaywright || Platform.isIOS,
+  forceDirectWorker:
+    Platform.isPlaywright || Platform.isIOS || Platform.isAndroid,
 });
 
 let isUpdateReadyForDownload = false;
