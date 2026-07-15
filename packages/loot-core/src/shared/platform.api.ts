@@ -5,3 +5,4 @@ export const env: 'web' | 'mobile' | 'unknown' = 'unknown';
 export const isBrowser: boolean = false;
 
 export const isIOSAgent = false;
+export const isAndroid = false;
