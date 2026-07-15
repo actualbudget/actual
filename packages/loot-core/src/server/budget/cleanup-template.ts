@@ -321,6 +321,7 @@ async function processCleanup(month: string): Promise<TemplateNotification> {
   } else {
     if (errors.length) {
       return {
+        type: 'error',
         sticky: true,
         message: 'cleanup-applied-with-errors',
         sourceCount: num_sources,
