@@ -72,6 +72,7 @@ __metadata:
   dependencies:
     "@chromatic-com/storybook": "npm:^5.2.1"
     "@emotion/css": "npm:^11.13.5"
+    "@rolldown/plugin-babel": "npm:~0.2.3"
     "@storybook/addon-a11y": "npm:^10.4.4"
     "@storybook/addon-docs": "npm:^10.4.4"
     "@storybook/react-vite": "npm:^10.4.4"
@@ -82,6 +83,7 @@ __metadata:
     "@types/react": "npm:^19.2.17"
     "@typescript/native-preview": "npm:beta"
     "@vitejs/plugin-react": "npm:^6.0.2"
+    babel-plugin-react-compiler: "npm:^1.0.0"
     eslint-plugin-storybook: "npm:^10.4.4"
     react: "npm:19.2.7"
     react-aria-components: "npm:^1.18.0"

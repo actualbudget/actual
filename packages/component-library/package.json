@@ -43,8 +43,7 @@
   },
   "scripts": {
     "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --template template.ts --index-template index-template.ts --typescript --expand-props start -d . .",
-    "test": "npm-run-all -cp 'test:*'",
-    "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
+    "test": "ENV=web vitest --run -c vitest.web.config.ts",
     "start:storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
     "typecheck": "tsgo -b"
@@ -56,6 +55,7 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.2.1",
+    "@rolldown/plugin-babel": "~0.2.3",
     "@storybook/addon-a11y": "^10.4.4",
     "@storybook/addon-docs": "^10.4.4",
     "@storybook/react-vite": "^10.4.4",
@@ -66,6 +66,7 @@
     "@types/react": "^19.2.17",
     "@typescript/native-preview": "beta",
     "@vitejs/plugin-react": "^6.0.2",
+    "babel-plugin-react-compiler": "^1.0.0",
     "eslint-plugin-storybook": "^10.4.4",
     "react": "19.2.7",
     "react-dom": "19.2.7",

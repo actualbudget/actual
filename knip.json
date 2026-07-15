@@ -11,7 +11,7 @@
   "workspaces": {
     ".": {
       "entry": ["bin/*.mts"],
-      "ignore": ["lage.config.js", ".claude/**"]
+      "ignore": ["lage.config.js", ".claude/**", ".agents/**"]
     },
     "packages/api": {
       "entry": ["index.browser.ts", "browser-worker.ts", "e2e/**/*.{ts,mjs}"],

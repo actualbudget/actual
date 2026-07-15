@@ -133,9 +133,7 @@ async function importTransactions(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
 ) {
-  const categories = await send('api/categories-get', {
-    grouped: false,
-  });
+  const categories = await send('api/categories-get');
   const incomeCategoryId: string = categories.find(
     cat => cat.name === 'Income',
   ).id;

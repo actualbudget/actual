@@ -205,4 +205,25 @@ describe('CustomFunctionsPlugin formula query functions', () => {
     expect(result).toBe(10);
     expect(context.budgetQueryRequests.get(budgetKey)).toEqual(request);
   });
+
+  it('splits comma-separated direct BUDGET_QUERY category strings', () => {
+    const context = createFormulaQueryContext();
+    const request = {
+      dimension: 'spent',
+      categoryIds: ['cat-a', 'cat-b'],
+      startMonth: '2026-01',
+      endMonth: '2026-03',
+    };
+    const budgetKey = createBudgetQueryPrefetchKey(request);
+
+    context.budgetQueryPrefetch.set(budgetKey, 10);
+
+    const result = evaluateFormula(
+      '=BUDGET_QUERY("spent", "cat-a, cat-b", "2026-01", "2026-03")',
+      context,
+    );
+
+    expect(result).toBe(10);
+    expect(context.budgetQueryRequests.get(budgetKey)).toEqual(request);
+  });
 });

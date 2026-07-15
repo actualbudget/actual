@@ -30,7 +30,7 @@
       "path": "../crdt"
     }
   ],
-  "include": ["."],
+  "include": [".", "package.json"],
   "exclude": [
     "**/node_modules/*",
     "dist",
