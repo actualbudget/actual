@@ -1,8 +1,10 @@
 # Codex project hooks for actualbudget/actual.
 #
 # Codex discovers project config by walking up to the .git root, so this file
-# applies to the whole repo. The hook scripts are shared with Claude Code and
-# Cursor (see scripts/agent-hooks/). Codex's Bash hook is Claude-compatible
+# applies to the whole repo — and to every Codex surface: the Codex CLI, the
+# Codex IDE extension, and the ChatGPT desktop app all read the same config
+# layers. The hook scripts are shared with Claude Code and Cursor (see
+# scripts/agent-hooks/). Codex's Bash hook is Claude-compatible
 # (tool_input.command), so the git guard is reused directly; exit code 2 + stderr
 # blocks the call.
 #
@@ -13,7 +15,21 @@
 # Bash/git guard and the Stop check work regardless. The file hooks are fully
 # effective under Claude Code and Cursor.
 #
-# Non-managed hooks must be trusted once via `/hooks` in the Codex CLI.
+# For hooks to run (any surface, including the ChatGPT desktop app):
+#   1. Lifecycle hooks must be enabled — done by the [features] flag below.
+#   2. The project's .codex/ layer must be trusted. An untrusted project skips
+#      this whole file (hooks included), silently.
+#   3. Each non-managed hook must be trusted once via `/hooks` (hash-pinned, so
+#      editing a hook re-requires trust). Trust is recorded in shared Codex
+#      state, so trusting via the CLI also covers the desktop app and IDE.
+#
+# Repo skills for Codex surfaces are mirrored in .agents/skills/ (symlinks to
+# .claude/skills/) — Codex scans .agents/skills, not .claude/skills.
+
+# Lifecycle hooks are feature-flagged; enable them for this project so all
+# surfaces run the [hooks] tables below once the layer is trusted.
+[features]
+lifecycle_hooks = true
 
 # Block unsafe git/workspace commands ([AI] prefix, --no-verify, force-push,
 # push-to-main, git config writes, yarn-from-a-workspace).
