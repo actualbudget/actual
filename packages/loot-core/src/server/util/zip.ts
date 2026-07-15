@@ -1,12 +1,21 @@
 import { unzipSync, zipSync } from 'fflate';
 import type { Unzipped, Zippable } from 'fflate';
 
+import type { UnsafeZipMeta } from '#shared/errors';
+
 // fflate does no validation itself: guard against zip-slip, decompression
 // bombs, and duplicate entries.
 
 const MAX_ZIP_SIZE = 500 * 1024 * 1024; // 500MB; also doubles as a memory-safety cap
 
-export class UnsafeZipError extends Error {}
+export class UnsafeZipError extends Error {
+  readonly meta: UnsafeZipMeta;
+
+  constructor(message: string, meta: UnsafeZipMeta) {
+    super(message);
+    this.meta = meta;
+  }
+}
 
 function assertSafeEntryName(name: string) {
   const isTraversal = name.split('/').some(segment => segment === '..');
@@ -18,7 +27,10 @@ function assertSafeEntryName(name: string) {
     name.startsWith('/') ||
     isTraversal
   ) {
-    throw new UnsafeZipError(`Unsafe zip entry name: ${name}`);
+    throw new UnsafeZipError(`Unsafe zip entry name: ${name}`, {
+      zipReason: 'unsafe-entry-name',
+      entryName: name,
+    });
   }
 }
 
@@ -39,6 +51,7 @@ export function safeUnzip(
   if (data.length > maxArchiveSize) {
     throw new UnsafeZipError(
       `Zip archive exceeds maximum size of ${maxArchiveSize} bytes`,
+      { zipReason: 'archive-size', maxSize: maxArchiveSize },
     );
   }
 
@@ -53,6 +66,11 @@ export function safeUnzip(
       if (file.originalSize > maxEntrySize) {
         throw new UnsafeZipError(
           `Zip entry "${file.name}" exceeds maximum size of ${maxEntrySize} bytes`,
+          {
+            zipReason: 'entry-size',
+            entryName: file.name,
+            maxSize: maxEntrySize,
+          },
         );
       }
 
@@ -60,6 +78,7 @@ export function safeUnzip(
       if (totalUncompressedSize > maxTotalUncompressedSize) {
         throw new UnsafeZipError(
           `Zip archive's total uncompressed size exceeds maximum of ${maxTotalUncompressedSize} bytes`,
+          { zipReason: 'total-size', maxSize: maxTotalUncompressedSize },
         );
       }
 
@@ -67,6 +86,7 @@ export function safeUnzip(
       if (seen.has(normalized)) {
         throw new UnsafeZipError(
           `Zip archive contains a duplicate entry: ${file.name}`,
+          { zipReason: 'duplicate-entry', entryName: file.name },
         );
       }
       seen.add(normalized);

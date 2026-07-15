@@ -481,7 +481,7 @@ async function importBudget({
    * to derive the budget name for some import types.
    */
   filename?: string;
-}): Promise<{ error?: string; id?: string }> {
+}): Promise<{ error?: string; meta?: unknown; id?: string }> {
   try {
     let contents: Buffer;
     let name: string;

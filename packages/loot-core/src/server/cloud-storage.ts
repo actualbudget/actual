@@ -216,7 +216,7 @@ export async function importBuffer(fileData, buffer) {
     entries = safeUnzip(buffer);
   } catch (e) {
     if (e instanceof UnsafeZipError) {
-      throw FileDownloadError('zip-too-large');
+      throw FileDownloadError('zip-too-large', e.meta);
     }
     throw FileDownloadError('not-zip-file');
   }
