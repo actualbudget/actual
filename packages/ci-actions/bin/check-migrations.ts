@@ -1,13 +1,12 @@
-// overview:
-// 1. Identify the migrations in packages/loot-core/migrations/* on `master`,
-//    on the merge base, and on HEAD.
-// 2. Make sure that any new migrations on HEAD are dated after the latest
+// overview: identify the migrations in packages/loot-core/migrations/* on
+// `master`, on the merge base, and on HEAD, then:
+// 1. Make sure that any new migrations on HEAD are dated after the latest
 //    migration on `master` (older dates trigger `out-of-sync-migrations` for
 //    users who already applied the newer one).
-// 3. Make sure no migration that exists on the merge base was edited or
+// 2. Make sure no migration that exists on the merge base was edited or
 //    deleted (shipped migrations are append-only: existing installs never
 //    re-run them, so edits fork the schema across the user base).
-// 4. Emit advisory warnings when a new migration contains statements that
+// 3. Emit advisory warnings when a new migration contains statements that
 //    look like they remove or rename schema (removing or renaming breaks
 //    older clients syncing the same budget file). The warnings are also
 //    written to migration-warnings.json so the migration-warnings-comment
