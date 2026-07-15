@@ -8,7 +8,6 @@ import {
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
 import type { CategoryWithTemplateNote } from './statements';
-import { TEMPLATE_NOTIFICATION_MESSAGES } from './template-notification';
 import type { TemplateNotification } from './template-notification';
 
 export const TEMPLATE_PREFIX = '#template';
@@ -59,14 +58,14 @@ export async function checkTemplateNotes(): Promise<TemplateNotification> {
   if (errors.length) {
     return {
       sticky: true,
-      message: TEMPLATE_NOTIFICATION_MESSAGES.templateErrors,
+      message: 'template-errors',
       pre: errors.join('\n\n'),
     };
   }
 
   return {
     type: 'message',
-    message: TEMPLATE_NOTIFICATION_MESSAGES.templatesCheckPassed,
+    message: 'templates-check-passed',
   };
 }
 

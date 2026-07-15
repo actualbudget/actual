@@ -1,5 +1,6 @@
 import type { TFunction } from 'i18next';
-import { describe, expect, it } from 'vitest';
+import i18next from 'i18next';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 import { translateBudgetTemplateNotification } from './mutations';
 
@@ -9,6 +10,27 @@ const t = ((key: string, options?: Record<string, unknown>) => {
   }
   return `${key}:${JSON.stringify(options)}`;
 }) as TFunction;
+
+const pluralI18n = i18next.createInstance();
+const pluralT = pluralI18n.t.bind(pluralI18n) as TFunction;
+
+beforeAll(async () => {
+  await pluralI18n.init({
+    lng: 'en',
+    fallbackLng: false,
+    resources: {
+      en: {
+        translation: {
+          source_one: 'source',
+          source_other: 'sources',
+          'sinking fund_one': 'sinking fund',
+          'sinking fund_other': 'sinking funds',
+        },
+      },
+    },
+    interpolation: { escapeValue: false },
+  });
+});
 
 describe('translateBudgetTemplateNotification', () => {
   it('translates static budget template notification keys', () => {
@@ -40,5 +62,44 @@ describe('translateBudgetTemplateNotification', () => {
       translateBudgetTemplateNotification({ message: 'Already translated' }, t)
         .message,
     ).toBe('Already translated');
+  });
+
+  it('translates cleanup notification counts with i18next pluralization', () => {
+    const cases = [
+      [
+        0,
+        0,
+        'Successfully returned funds from 0 sources and funded 0 sinking funds.',
+      ],
+      [
+        1,
+        1,
+        'Successfully returned funds from 1 source and funded 1 sinking fund.',
+      ],
+      [
+        1,
+        2,
+        'Successfully returned funds from 1 source and funded 2 sinking funds.',
+      ],
+      [
+        2,
+        1,
+        'Successfully returned funds from 2 sources and funded 1 sinking fund.',
+      ],
+      [
+        2,
+        2,
+        'Successfully returned funds from 2 sources and funded 2 sinking funds.',
+      ],
+    ] as const;
+
+    for (const [sourceCount, sinkCount, expected] of cases) {
+      expect(
+        translateBudgetTemplateNotification(
+          { message: 'cleanup-applied', sourceCount, sinkCount },
+          pluralT,
+        ).message,
+      ).toBe(expected);
+    }
   });
 });

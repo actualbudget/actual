@@ -12,7 +12,6 @@ import { getSheetValue, isTrackingBudget, setBudget, setGoal } from './actions';
 import { CategoryTemplateContext } from './category-template-context';
 import { tombstoneOrphanCleanupGroups } from './cleanup-groups';
 import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
-import { TEMPLATE_NOTIFICATION_MESSAGES } from './template-notification';
 import type { TemplateNotification } from './template-notification';
 
 export function distributeRemainder(
@@ -319,13 +318,13 @@ async function processTemplate(
     }
     return {
       type: 'message',
-      message: TEMPLATE_NOTIFICATION_MESSAGES.templatesUpToDate,
+      message: 'templates-up-to-date',
     };
   }
   if (errors.length > 0) {
     return {
       sticky: true,
-      message: TEMPLATE_NOTIFICATION_MESSAGES.templateErrors,
+      message: 'template-errors',
       pre: errors.join(`\n\n`),
     };
   }
@@ -349,7 +348,7 @@ async function processTemplate(
 
   return {
     type: 'message',
-    message: TEMPLATE_NOTIFICATION_MESSAGES.templatesApplied,
+    message: 'templates-applied',
     count: contexts.length,
   };
 }

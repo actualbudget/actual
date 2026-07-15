@@ -1,16 +1,12 @@
-export const TEMPLATE_NOTIFICATION_MESSAGES = {
-  templatesUpToDate: 'templates-up-to-date',
-  templateErrors: 'template-errors',
-  templatesApplied: 'templates-applied',
-  templatesCheckPassed: 'templates-check-passed',
-  cleanupNoFunds: 'cleanup-no-funds',
-  cleanupUpToDate: 'cleanup-up-to-date',
-  cleanupApplied: 'cleanup-applied',
-  cleanupAppliedWithErrors: 'cleanup-applied-with-errors',
-} as const;
-
 export type TemplateNotificationMessage =
-  (typeof TEMPLATE_NOTIFICATION_MESSAGES)[keyof typeof TEMPLATE_NOTIFICATION_MESSAGES];
+  | 'templates-up-to-date'
+  | 'template-errors'
+  | 'templates-applied'
+  | 'templates-check-passed'
+  | 'cleanup-no-funds'
+  | 'cleanup-up-to-date'
+  | 'cleanup-applied'
+  | 'cleanup-applied-with-errors';
 
 export type TemplateNotification = {
   type?: 'message' | 'error' | 'warning' | undefined;

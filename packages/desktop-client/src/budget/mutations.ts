@@ -60,7 +60,7 @@ function dispatchCategoryNameAlreadyExistsNotification(
   );
 }
 
-type BudgetTemplateNotification = Notification & {
+export type BudgetTemplateNotification = Notification & {
   count?: number | undefined;
   sourceCount?: number | undefined;
   sinkCount?: number | undefined;
@@ -73,27 +73,20 @@ function formatCleanupApplied(
   const sourceCount = notification.sourceCount ?? 0;
   const sinkCount = notification.sinkCount ?? 0;
 
-  if (sourceCount === 1 && sinkCount === 1) {
-    return t(
-      'Successfully returned funds from {{sourceCount}} source and funded {{sinkCount}} sinking fund.',
-      { sourceCount, sinkCount },
-    );
-  }
-  if (sourceCount === 1) {
-    return t(
-      'Successfully returned funds from {{sourceCount}} source and funded {{sinkCount}} sinking funds.',
-      { sourceCount, sinkCount },
-    );
-  }
-  if (sinkCount === 1) {
-    return t(
-      'Successfully returned funds from {{sourceCount}} sources and funded {{sinkCount}} sinking fund.',
-      { sourceCount, sinkCount },
-    );
-  }
+  const source = t('source', {
+    count: sourceCount,
+    defaultValue_one: 'source',
+    defaultValue_other: 'sources',
+  });
+  const sink = t('sinking fund', {
+    count: sinkCount,
+    defaultValue_one: 'sinking fund',
+    defaultValue_other: 'sinking funds',
+  });
+
   return t(
-    'Successfully returned funds from {{sourceCount}} sources and funded {{sinkCount}} sinking funds.',
-    { sourceCount, sinkCount },
+    'Successfully returned funds from {{sourceCount}} {{source}} and funded {{sinkCount}} {{sink}}.',
+    { sourceCount, source, sinkCount, sink },
   );
 }
 

@@ -5,7 +5,6 @@ import type { CleanupTemplate } from '#types/models/cleanup-templates';
 
 import { getSheetValue, setBudget, setGoal } from './actions';
 import { storeNoteCleanups } from './cleanup-template-notes';
-import { TEMPLATE_NOTIFICATION_MESSAGES } from './template-notification';
 import type { TemplateNotification } from './template-notification';
 
 export async function cleanupTemplate({ month }: { month: string }) {
@@ -304,26 +303,26 @@ async function processCleanup(month: string): Promise<TemplateNotification> {
       return {
         type: 'error',
         sticky: true,
-        message: TEMPLATE_NOTIFICATION_MESSAGES.templateErrors,
+        message: 'template-errors',
         pre: errors.join('\n\n'),
       };
     } else if (warnings.length) {
       return {
         type: 'warning',
-        message: TEMPLATE_NOTIFICATION_MESSAGES.cleanupNoFunds,
+        message: 'cleanup-no-funds',
         pre: warnings.join('\n\n'),
       };
     } else {
       return {
         type: 'message',
-        message: TEMPLATE_NOTIFICATION_MESSAGES.cleanupUpToDate,
+        message: 'cleanup-up-to-date',
       };
     }
   } else {
     if (errors.length) {
       return {
         sticky: true,
-        message: TEMPLATE_NOTIFICATION_MESSAGES.cleanupAppliedWithErrors,
+        message: 'cleanup-applied-with-errors',
         sourceCount: num_sources,
         sinkCount: num_sinks,
         pre: errors.join('\n\n'),
@@ -331,18 +330,18 @@ async function processCleanup(month: string): Promise<TemplateNotification> {
     } else if (warnings.length) {
       return {
         type: 'warning',
-        message: TEMPLATE_NOTIFICATION_MESSAGES.cleanupNoFunds,
+        message: 'cleanup-no-funds',
         pre: warnings.join('\n\n'),
       };
     } else if (budgetAvailable === 0) {
       return {
         type: 'message',
-        message: TEMPLATE_NOTIFICATION_MESSAGES.cleanupUpToDate,
+        message: 'cleanup-up-to-date',
       };
     } else {
       return {
         type: 'message',
-        message: TEMPLATE_NOTIFICATION_MESSAGES.cleanupApplied,
+        message: 'cleanup-applied',
         sourceCount: num_sources,
         sinkCount: num_sinks,
       };
