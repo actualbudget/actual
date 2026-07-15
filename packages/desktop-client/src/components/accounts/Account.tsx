@@ -206,6 +206,45 @@ function getField(field?: string) {
   }
 }
 
+function updateRunningBalancesAfterAmountChange(
+  balances: Record<TransactionEntity['id'], IntegerAmount> | null,
+  transactions: readonly TransactionEntity[],
+  updatedTransaction: TransactionEntity,
+) {
+  if (!balances) {
+    return balances;
+  }
+
+  const updatedIndex = transactions.findIndex(
+    transaction => transaction.id === updatedTransaction.id,
+  );
+  if (updatedIndex === -1) {
+    return balances;
+  }
+
+  const previousAmount = transactions[updatedIndex].amount;
+  const updatedAmount = updatedTransaction._deleted
+    ? 0
+    : updatedTransaction.amount;
+  const amountDelta = updatedAmount - previousAmount;
+  if (amountDelta === 0) {
+    return balances;
+  }
+
+  const updatedBalances = { ...balances };
+  for (const transaction of transactions.slice(0, updatedIndex + 1)) {
+    if (Object.hasOwn(updatedBalances, transaction.id)) {
+      updatedBalances[transaction.id] += amountDelta;
+    }
+  }
+
+  if (updatedTransaction._deleted) {
+    delete updatedBalances[updatedTransaction.id];
+  }
+
+  return updatedBalances;
+}
+
 type AccountInternalProps = {
   accountId?:
     | AccountEntity['id']
@@ -304,6 +343,10 @@ class AccountInternal extends PureComponent<
   unlisten?: () => void;
   dispatchSelected?: (action: Actions) => void;
   _isOptimisticUpdate: boolean = false;
+  _optimisticBalances:
+    | Record<TransactionEntity['id'], IntegerAmount>
+    | null
+    | undefined;
 
   constructor(props: AccountInternalProps) {
     super(props);
@@ -492,6 +535,10 @@ class AccountInternal extends PureComponent<
         if (this._isOptimisticUpdate) {
           this._isOptimisticUpdate = false;
           const transactionsSnapshot = data;
+          const balancesSnapshot =
+            this._optimisticBalances === undefined
+              ? this.state.balances
+              : this._optimisticBalances;
           // Wrap in startTransition so React treats this as a low-priority
           // update. Without this, setState blocks the main thread for the
           // full duration of the re-render (~40–220ms with large transaction
@@ -500,7 +547,17 @@ class AccountInternal extends PureComponent<
           // into chunks and yield to the browser between them, keeping the
           // UI responsive while the row update happens in the background.
           startTransition(() => {
-            this.setState({ transactions: transactionsSnapshot });
+            this.setState(
+              {
+                transactions: transactionsSnapshot,
+                balances: balancesSnapshot,
+              },
+              () => {
+                if (this._optimisticBalances === balancesSnapshot) {
+                  this._optimisticBalances = undefined;
+                }
+              },
+            );
           });
           return;
         }
@@ -659,6 +716,16 @@ class AccountInternal extends PureComponent<
     // onData skips the expensive aggregate DB queries for this update.
     this._isOptimisticUpdate = true;
     this.paged?.optimisticUpdate(data => {
+      const currentBalances =
+        this._optimisticBalances === undefined
+          ? this.state.balances
+          : this._optimisticBalances;
+      this._optimisticBalances = updateRunningBalancesAfterAmountChange(
+        currentBalances,
+        data,
+        updatedTransaction,
+      );
+
       if (updatedTransaction._deleted) {
         return data.filter(t => t.id !== updatedTransaction.id);
       } else {

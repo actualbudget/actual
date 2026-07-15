@@ -76,6 +76,43 @@ test.describe('Accounts', () => {
     await expect(menu.getByRole('button', { name: 'Delete' })).toBeVisible();
   });
 
+  test('updates the running balance after editing a transaction amount', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Running Balance',
+      offBudget: false,
+      balance: 100,
+    });
+    await accountPage.createSingleTransaction({
+      notes: 'running balance edit',
+      debit: '10.00',
+    });
+    await accountPage.createSingleTransaction({
+      notes: 'newer transaction',
+      debit: '5.00',
+    });
+
+    await accountPage.accountMenuButton.click();
+    await page.getByRole('button', { name: 'Show running balance' }).click();
+
+    const transaction = accountPage.transactionTableRow.filter({
+      hasText: 'running balance edit',
+    });
+    const newerTransaction = accountPage.transactionTableRow.filter({
+      hasText: 'newer transaction',
+    });
+    await expect(transaction.getByTestId('balance')).toHaveText('90.00');
+    await expect(newerTransaction.getByTestId('balance')).toHaveText('85.00');
+
+    const debitCell = transaction.getByTestId('debit');
+    await debitCell.click();
+    const debitInput = debitCell.getByRole('textbox');
+    await debitInput.fill('25.00');
+    await debitInput.press('Tab');
+
+    await expect(transaction.getByTestId('balance')).toHaveText('75.00');
+    await expect(newerTransaction.getByTestId('balance')).toHaveText('70.00');
+  });
+
   test('shift-click range selection skips hidden reconciled transactions', async () => {
     accountPage = await navigation.createAccount({
       name: 'Range Select',
