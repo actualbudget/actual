@@ -13,6 +13,9 @@ const t = ((key: string, options?: Record<string, unknown>) => {
 
 const pluralI18n = i18next.createInstance();
 const pluralT = pluralI18n.t.bind(pluralI18n) as TFunction;
+const cleanupAppliedMessage =
+  'Successfully returned funds from $t(budget-template-source, {"count": {{sourceCount}}}) and funded $t(budget-template-sinking-fund, {"count": {{sinkCount}}}).';
+const cleanupAppliedWithErrorsMessage = `${cleanupAppliedMessage} There were errors interpreting some templates:`;
 
 beforeAll(async () => {
   await pluralI18n.init({
@@ -21,10 +24,12 @@ beforeAll(async () => {
     resources: {
       en: {
         translation: {
-          source_one: 'source',
-          source_other: 'sources',
-          'sinking fund_one': 'sinking fund',
-          'sinking fund_other': 'sinking funds',
+          'budget-template-source_one': '{{count}} source',
+          'budget-template-source_other': '{{count}} sources',
+          'budget-template-sinking-fund_one': '{{count}} sinking fund',
+          'budget-template-sinking-fund_other': '{{count}} sinking funds',
+          [cleanupAppliedMessage]: cleanupAppliedMessage,
+          [cleanupAppliedWithErrorsMessage]: cleanupAppliedWithErrorsMessage,
         },
       },
     },
@@ -64,7 +69,7 @@ describe('translateBudgetTemplateNotification', () => {
     ).toBe('Already translated');
   });
 
-  it('translates cleanup notification counts with i18next pluralization', () => {
+  it('translates cleanup notifications with i18next nesting', () => {
     const cases = [
       [
         0,
@@ -101,5 +106,18 @@ describe('translateBudgetTemplateNotification', () => {
         ).message,
       ).toBe(expected);
     }
+
+    expect(
+      translateBudgetTemplateNotification(
+        {
+          message: 'cleanup-applied-with-errors',
+          sourceCount: 1,
+          sinkCount: 2,
+        },
+        pluralT,
+      ).message,
+    ).toBe(
+      'Successfully returned funds from 1 source and funded 2 sinking funds. There were errors interpreting some templates:',
+    );
   });
 });

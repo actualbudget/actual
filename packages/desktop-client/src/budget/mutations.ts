@@ -66,6 +66,9 @@ export type BudgetTemplateNotification = Notification & {
   sinkCount?: number | undefined;
 };
 
+// i18next-parser does not extract keys nested inside translation strings.
+// t('budget-template-source', { count: 1, defaultValue_one: '{{count}} source', defaultValue_other: '{{count}} sources' })
+// t('budget-template-sinking-fund', { count: 1, defaultValue_one: '{{count}} sinking fund', defaultValue_other: '{{count}} sinking funds' })
 function formatCleanupApplied(
   notification: BudgetTemplateNotification,
   t: TFunction,
@@ -73,20 +76,22 @@ function formatCleanupApplied(
   const sourceCount = notification.sourceCount ?? 0;
   const sinkCount = notification.sinkCount ?? 0;
 
-  const source = t('source', {
-    count: sourceCount,
-    defaultValue_one: 'source',
-    defaultValue_other: 'sources',
-  });
-  const sink = t('sinking fund', {
-    count: sinkCount,
-    defaultValue_one: 'sinking fund',
-    defaultValue_other: 'sinking funds',
-  });
+  return t(
+    'Successfully returned funds from $t(budget-template-source, {"count": {{sourceCount}}}) and funded $t(budget-template-sinking-fund, {"count": {{sinkCount}}}).',
+    { sourceCount, sinkCount },
+  );
+}
+
+function formatCleanupAppliedWithErrors(
+  notification: BudgetTemplateNotification,
+  t: TFunction,
+) {
+  const sourceCount = notification.sourceCount ?? 0;
+  const sinkCount = notification.sinkCount ?? 0;
 
   return t(
-    'Successfully returned funds from {{sourceCount}} {{source}} and funded {{sinkCount}} {{sink}}.',
-    { sourceCount, source, sinkCount, sink },
+    'Successfully returned funds from $t(budget-template-source, {"count": {{sourceCount}}}) and funded $t(budget-template-sinking-fund, {"count": {{sinkCount}}}). There were errors interpreting some templates:',
+    { sourceCount, sinkCount },
   );
 }
 
@@ -123,10 +128,7 @@ export function translateBudgetTemplateNotification(
     case 'cleanup-applied-with-errors':
       return {
         ...notification,
-        message: t(
-          '{{appliedMessage}} There were errors interpreting some templates:',
-          { appliedMessage: formatCleanupApplied(notification, t) },
-        ),
+        message: formatCleanupAppliedWithErrors(notification, t),
       };
     default:
       return notification;
