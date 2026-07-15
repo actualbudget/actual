@@ -337,6 +337,32 @@
     "mode": "dark"
   },
   {
+    "name": "Dracula",
+    "repo": "lelemm/dracula-actual",
+    "colors": [
+      "#282A36",
+      "#44475A",
+      "#6272A4",
+      "#F8F8F2",
+      "#BD93F9",
+      "#8BE9FD"
+    ],
+    "mode": "dark"
+  },
+  {
+    "name": "Alucard",
+    "repo": "lelemm/alucard-actual",
+    "colors": [
+      "#FFFBEB",
+      "#EFEDDC",
+      "#DEDCCF",
+      "#1F1F1F",
+      "#644AC9",
+      "#036A96"
+    ],
+    "mode": "light"
+  },
+  {
     "name": "Zero-Dark",
     "repo": "deathblade666/actual-theme-zero-dark",
     "colors": [

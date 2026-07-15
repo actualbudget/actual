@@ -30,6 +30,16 @@ export function RangeSelector({
 }: RangeSelectorProps) {
   const [viewYear, setViewYear] = useState(() => getYear(start));
 
+  // When the range changes from outside (e.g. a quick-select preset) and the
+  // shown year no longer touches it, jump to the range's start.
+  const [prevRange, setPrevRange] = useState([start, end]);
+  if (start !== prevRange[0] || end !== prevRange[1]) {
+    setPrevRange([start, end]);
+    if (viewYear < getYear(start) || viewYear > getYear(end)) {
+      setViewYear(getYear(start));
+    }
+  }
+
   const [anchor, setAnchor] = useState<string | null>(null);
   const [hoverValue, setHoverValue] = useState<string | null>(null);
 

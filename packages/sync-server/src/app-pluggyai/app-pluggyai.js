@@ -236,6 +236,7 @@ app.post(
         delete trans.amount;
 
         const finalTrans = { ...flattenObject(trans), ...newTrans };
+
         if (newTrans.booked) {
           booked.push(finalTrans);
         } else {

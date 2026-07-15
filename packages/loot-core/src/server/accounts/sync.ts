@@ -506,6 +506,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     ? mappingsFromString(customMappingsRaw)
     : defaultMappings;
 
+  const categoryIds = new Set((await db.getCategories()).map(c => c.id));
   const normalized = [];
   for (const trans of transactions) {
     trans.cleared = Boolean(trans.booked);
@@ -556,7 +557,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         account: trans.account,
         date,
         notes: importNotes && notes ? notes.trim().replace(/#/g, '##') : null,
-        category: trans.category ?? null,
+        category: categoryIds.has(trans.category) ? trans.category : null,
         imported_id,
         imported_payee: trans.imported_payee,
         cleared: trans.cleared,
