@@ -9,12 +9,14 @@
 //    re-run them, so edits fork the schema across the user base).
 // 4. Emit advisory warnings when a new migration contains statements that
 //    look like they remove or rename schema (removing or renaming breaks
-//    older clients syncing the same budget file).
+//    older clients syncing the same budget file). The warnings are also
+//    written to migration-warnings.json so the migration-warnings-comment
+//    workflow can surface them as a PR comment.
 //
 // See https://actualbudget.org/docs/contributing/project-details/migrations
 
 import { spawnSync } from 'child_process';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -110,6 +112,7 @@ for (const name of deleted) {
 // 3. Advisory: warn on new migrations that look like they remove or rename
 // schema. Not fatal — regexes over SQL can't be authoritative, so this only
 // surfaces an early hint on the PR.
+const riskyMigrations: { name: string; risks: string[] }[] = [];
 for (const migration of newMigrations) {
   let source = '';
   try {
@@ -117,7 +120,8 @@ for (const migration of newMigrations) {
   } catch {
     continue;
   }
-  for (const risk of findRiskyStatements(source)) {
+  const risks = findRiskyStatements(source);
+  for (const risk of risks) {
     console.log(
       `::warning file=packages/loot-core/migrations/${migration.name},` +
         `title=Possibly breaking migration::This migration ${risk}. ` +
@@ -125,7 +129,23 @@ for (const migration of newMigrations) {
         `breaks older clients syncing the same budget file. See ${POLICY_URL}`,
     );
   }
+  if (risks.length) {
+    riskyMigrations.push({ name: migration.name, risks });
+  }
 }
+
+// The warnings above don't fail the job, so they're easy to miss. Hand them
+// to the migration-warnings-comment workflow (whose token can comment on
+// fork PRs) via an artifact. Always written — an empty list tells the
+// workflow to remove a stale comment once the warnings are resolved.
+writeFileSync(
+  path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '..',
+    'migration-warnings.json',
+  ),
+  JSON.stringify(riskyMigrations),
+);
 
 if (problems.length) {
   console.error(`Migration policy violations found (see ${POLICY_URL}):`);
