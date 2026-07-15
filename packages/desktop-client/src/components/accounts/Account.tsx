@@ -655,9 +655,9 @@ class AccountInternal extends PureComponent<
   };
 
   onTransactionsChange = (updatedTransaction: TransactionEntity) => {
-    // Apply changes to pagedQuery data optimistically. Set the flag so that
-    // onData skips the expensive aggregate DB queries for this update.
-    this._isOptimisticUpdate = true;
+    // Apply changes to pagedQuery data optimistically. Skip the aggregate DB
+    // queries unless running balances need to stay in sync with the edit.
+    this._isOptimisticUpdate = !this.state.showBalances;
     this.paged?.optimisticUpdate(data => {
       if (updatedTransaction._deleted) {
         return data.filter(t => t.id !== updatedTransaction.id);
