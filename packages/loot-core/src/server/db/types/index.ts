@@ -256,6 +256,8 @@ export type DbCustomReport = {
   color_scheme: string;
   include_current: 1 | 0;
   sort_by: string;
+  trim_intervals: 1 | 0;
+  show_trend_lines: 1 | 0;
   tombstone: 1 | 0;
 };
 

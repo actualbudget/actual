@@ -15,6 +15,7 @@ import { undoable } from '#server/undo';
 import { DEFAULT_DASHBOARD_STATE } from '#shared/dashboard';
 import { q } from '#shared/query';
 import type {
+  CustomReportData,
   DashboardWidgetEntity,
   ExportImportCustomReportWidget,
   ExportImportDashboard,
@@ -223,6 +224,106 @@ async function removeDashboardWidget(widgetId: string) {
   await db.delete_('dashboard', widgetId);
 }
 
+async function uniqueReportName(baseName: string): Promise<string> {
+  let idx = 1;
+  let newName = baseName;
+
+  while (true) {
+    const existing = await db.first<Pick<db.DbCustomReport, 'id'>>(
+      'SELECT id from custom_reports WHERE tombstone = 0 AND name = ?',
+      [newName],
+    );
+
+    if (!existing) {
+      return newName;
+    }
+
+    newName = `${baseName} ${idx}`;
+    idx++;
+  }
+}
+
+function duplicateWidgetMeta(
+  meta: Record<string, unknown>,
+): Record<string, unknown> {
+  const clonedMeta = JSON.parse(JSON.stringify(meta)) as Record<
+    string,
+    unknown
+  >;
+
+  if (typeof clonedMeta.name === 'string' && clonedMeta.name) {
+    clonedMeta.name = `${clonedMeta.name} (Duplicate)`;
+  }
+
+  return clonedMeta;
+}
+
+async function duplicateDashboardWidget({
+  id,
+  targetDashboardPageId,
+}: {
+  id: string;
+  targetDashboardPageId: string;
+}) {
+  const widget = await db.first<db.DbDashboard>(
+    'SELECT * FROM dashboard WHERE id = ? AND tombstone = 0',
+    [id],
+  );
+
+  if (!widget) {
+    throw new Error(`Widget not found: ${id}`);
+  }
+
+  const widgetType = widget.type;
+  if (!isWidgetType(widgetType)) {
+    throw new Error(`Unsupported widget type: ${widgetType}`);
+  }
+
+  const meta = widget.meta ? JSON.parse(widget.meta) : {};
+
+  await batchMessages(async () => {
+    let newMeta = duplicateWidgetMeta(meta);
+
+    if (widget.type === 'custom-report') {
+      const { data: reports }: { data: CustomReportData[] } = await aqlQuery(
+        q('custom_reports')
+          .filter({ id: meta.id as string })
+          .select('*'),
+      );
+      const report = reports[0];
+
+      if (!report) {
+        throw new Error(`Custom report not found: ${meta.id}`);
+      }
+
+      const reportEntity = reportModel.toJS(report);
+      const newReportId = uuidv4();
+      const newName = await uniqueReportName(
+        `${reportEntity.name} (Duplicate)`,
+      );
+
+      await db.insertWithSchema(
+        'custom_reports',
+        reportModel.fromJS({
+          ...reportEntity,
+          id: newReportId,
+          name: newName,
+        }),
+      );
+
+      newMeta = { id: newReportId };
+    }
+
+    await addDashboardWidget({
+      type: widgetType,
+      width: widget.width,
+      height: widget.height,
+      meta: newMeta,
+      dashboard_page_id: targetDashboardPageId,
+    });
+  });
+}
+
 async function copyDashboardWidget({
   id,
   targetDashboardPageId,
@@ -361,6 +462,7 @@ export type DashboardHandlers = {
   'dashboard-add-widget': typeof addDashboardWidget;
   'dashboard-remove-widget': typeof removeDashboardWidget;
   'dashboard-copy-widget': typeof copyDashboardWidget;
+  'dashboard-duplicate-widget': typeof duplicateDashboardWidget;
   'dashboard-import': typeof importDashboard;
 };
 
@@ -375,4 +477,8 @@ app.method('dashboard-reset', mutator(undoable(resetDashboard)));
 app.method('dashboard-add-widget', mutator(undoable(addDashboardWidget)));
 app.method('dashboard-remove-widget', mutator(undoable(removeDashboardWidget)));
 app.method('dashboard-copy-widget', mutator(undoable(copyDashboardWidget)));
+app.method(
+  'dashboard-duplicate-widget',
+  mutator(undoable(duplicateDashboardWidget)),
+);
 app.method('dashboard-import', mutator(undoable(importDashboard)));

@@ -13,9 +13,13 @@ type DashboardWidgetCopyMenuResult = {
   handleMenuSelect: (item: string) => boolean;
 };
 
-export function useDashboardWidgetCopyMenu(
-  onCopy: (targetDashboardId: string) => void,
-): DashboardWidgetCopyMenuResult {
+export function useDashboardWidgetCopyMenu({
+  onCopy,
+  onDuplicate,
+}: {
+  onCopy: (targetDashboardId: string) => void;
+  onDuplicate: (targetDashboardId: string) => void;
+}): DashboardWidgetCopyMenuResult {
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
@@ -23,6 +27,10 @@ export function useDashboardWidgetCopyMenu(
     {
       name: 'copy-to-dashboard',
       text: t('Copy to dashboard'),
+    },
+    {
+      name: 'duplicate-to-dashboard',
+      text: t('Duplicate to dashboard'),
     },
   ];
 
@@ -36,6 +44,21 @@ export function useDashboardWidgetCopyMenu(
               options: {
                 onSelect: targetDashboardId => {
                   onCopy(targetDashboardId);
+                },
+              },
+            },
+          }),
+        );
+        return true;
+      case 'duplicate-to-dashboard':
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'copy-widget-to-dashboard',
+              options: {
+                title: t('Duplicate to dashboard'),
+                onSelect: targetDashboardId => {
+                  onDuplicate(targetDashboardId);
                 },
               },
             },

@@ -381,6 +381,40 @@ export function useCopyDashboardWidgetMutation() {
   });
 }
 
+type DuplicateDashboardWidgetMutationPayload = {
+  id: DashboardWidgetEntity['id'];
+  targetDashboardPageId: DashboardPageEntity['id'];
+};
+
+export function useDuplicateDashboardWidgetMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      targetDashboardPageId,
+    }: DuplicateDashboardWidgetMutationPayload) => {
+      return await sendThrow('dashboard-duplicate-widget', {
+        id,
+        targetDashboardPageId,
+      });
+    },
+    onSuccess: () => invalidateDashboardQueries(queryClient),
+    onError: error => {
+      console.error('Error duplicating dashboard widget:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t(
+          'There was an error duplicating the dashboard widget. Please try again.',
+        ),
+        error,
+      );
+    },
+  });
+}
+
 type ImportDashboardPageMutationPayload = {
   filePath: string;
   dashboardPageId: DashboardPageEntity['id'];

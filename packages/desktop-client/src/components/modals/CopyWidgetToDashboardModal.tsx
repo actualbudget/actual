@@ -16,6 +16,7 @@ type CopyWidgetToDashboardModalProps = Extract<
 >['options'];
 
 export function CopyWidgetToDashboardModal({
+  title,
   onSelect,
 }: CopyWidgetToDashboardModalProps) {
   const { t } = useTranslation();
@@ -31,7 +32,7 @@ export function CopyWidgetToDashboardModal({
       {({ state }) => (
         <>
           <ModalHeader
-            title={t('Copy to dashboard')}
+            title={title ?? t('Copy to dashboard')}
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
 

@@ -590,6 +590,7 @@ export type Modal =
   | {
       name: 'copy-widget-to-dashboard';
       options: {
+        title?: string;
         onSelect: (dashboardId: string) => void;
       };
     }

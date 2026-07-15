@@ -15,6 +15,7 @@ import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 import {
   useCopyDashboardWidgetMutation,
+  useDuplicateDashboardWidgetMutation,
   useRemoveDashboardWidgetMutation,
 } from '#reports/mutations';
 
@@ -152,6 +153,8 @@ function Layout({
 
   const removeDashboardWidgetMutation = useRemoveDashboardWidgetMutation();
   const copyDashboardWidgetMutation = useCopyDashboardWidgetMutation();
+  const duplicateDashboardWidgetMutation =
+    useDuplicateDashboardWidgetMutation();
 
   useContextMenu({
     triggerRef: viewRef,
@@ -179,6 +182,29 @@ function Layout({
                 options: {
                   onSelect: targetDashboardId => {
                     copyDashboardWidgetMutation.mutate({
+                      id: widgetId,
+                      targetDashboardPageId: targetDashboardId,
+                    });
+                  },
+                },
+              },
+            }),
+          );
+        },
+        order: 1,
+      },
+      {
+        name: 'duplicate',
+        text: t('Duplicate to dashboard'),
+        onClick: () => {
+          dispatch(
+            pushModal({
+              modal: {
+                name: 'copy-widget-to-dashboard',
+                options: {
+                  title: t('Duplicate to dashboard'),
+                  onSelect: targetDashboardId => {
+                    duplicateDashboardWidgetMutation.mutate({
                       id: widgetId,
                       targetDashboardPageId: targetDashboardId,
                     });

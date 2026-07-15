@@ -52,6 +52,8 @@ test.describe('Reports', () => {
     const menu = page.getByRole('menu');
     await expect(menu).toBeVisible();
     await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Duplicate to dashboard' })).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Copy to dashboard' })).toBeVisible();
   });
 
   test('loads net worth graph and checks visuals', async () => {
