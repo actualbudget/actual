@@ -220,16 +220,29 @@ export async function importBuffer(fileData, buffer) {
     }
     throw FileDownloadError('not-zip-file');
   }
-  const entryName = Object.keys(entries).find(
-    name => name === 'db.sqlite' || name.endsWith('/db.sqlite'),
-  );
-  const metaEntryName = Object.keys(entries).find(
-    name => name === 'metadata.json' || name.endsWith('/metadata.json'),
-  );
+  const entryNames = Object.keys(entries);
+  const dbDirs = entryNames
+    .filter(name => name === 'db.sqlite' || name.endsWith('/db.sqlite'))
+    .map(name => name.slice(0, -'db.sqlite'.length));
+  const metaDirs = entryNames
+    .filter(name => name === 'metadata.json' || name.endsWith('/metadata.json'))
+    .map(name => name.slice(0, -'metadata.json'.length));
 
-  if (!entryName || !metaEntryName) {
+  // Both files must come from the same directory: prefer the archive root,
+  // otherwise there must be exactly one directory containing both.
+  const sharedDirs = dbDirs.filter(dir => metaDirs.includes(dir));
+  const dir = sharedDirs.includes('')
+    ? ''
+    : sharedDirs.length === 1
+      ? sharedDirs[0]
+      : null;
+
+  if (dir == null) {
     throw FileDownloadError('invalid-zip-file');
   }
+
+  const entryName = dir + 'db.sqlite';
+  const metaEntryName = dir + 'metadata.json';
 
   const dbContent = Buffer.from(entries[entryName]);
   const metaContent = Buffer.from(entries[metaEntryName]);
