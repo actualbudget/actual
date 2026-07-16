@@ -124,7 +124,7 @@ export const init: T.Init = function (serverChn, handlers) {
 export const send: T.Send = function (name, args) {
   const { __globalServerChannel } = getGlobalObject();
   if (__globalServerChannel) {
-    __globalServerChannel.postMessage({
+    safePost(msg => __globalServerChannel.postMessage(msg), {
       type: 'push',
       name,
       args,
