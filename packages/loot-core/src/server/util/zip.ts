@@ -1,5 +1,5 @@
 import { unzipSync, zipSync } from 'fflate';
-import type { Unzipped, Zippable } from 'fflate';
+import type { Unzipped } from 'fflate';
 
 import type { UnsafeZipMeta } from '#shared/errors';
 
@@ -96,7 +96,7 @@ export function safeUnzip(
   });
 }
 
-export function safeZip(files: Zippable): Uint8Array {
+export function safeZip(files: Record<string, Uint8Array>): Uint8Array {
   for (const name of Object.keys(files)) {
     assertSafeEntryName(name);
   }
