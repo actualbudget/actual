@@ -116,19 +116,19 @@ export async function loadClock() {
 // Functions
 export function runQuery(
   sql: string | Statement,
-  params?: Array<string | number>,
+  params?: Array<string | number | null>,
   fetchAll?: false,
 ): { changes: unknown };
 
 export function runQuery<T>(
   sql: string | Statement,
-  params: Array<string | number> | undefined,
+  params: Array<string | number | null> | undefined,
   fetchAll: true,
 ): T[];
 
 export function runQuery<T>(
   sql: string | Statement,
-  params: (string | number)[],
+  params: (string | number | null)[],
   fetchAll: boolean,
 ) {
   if (fetchAll) {

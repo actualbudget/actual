@@ -26,9 +26,7 @@ export function replayPendingMessages(): void {
   let appliedCount = 0;
   db.transaction(() => {
     for (const msg of pending) {
-      // `null` values are valid SQL params even though the runQuery
-      // types don't declare them (same as the sync `apply` path)
-      const value = deserializeValue(msg.value) as string | number;
+      const value = deserializeValue(msg.value);
 
       try {
         const { changes } = db.runQuery(

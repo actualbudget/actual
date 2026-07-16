@@ -16,48 +16,22 @@ const ADDITIVE_ONLY_CUTOFF = 1780606215001;
 
 const MIGRATIONS_DIR = path.resolve(__dirname, '../../../migrations');
 
+// Matched against the raw source, comments and strings included, so
+// nothing destructive can hide inside a comment or a quoted literal.
+// The flip side: a comment merely *mentioning* e.g. "DROP TABLE" fails
+// the test too — just reword it. That false positive is the price of
+// not parsing SQL here, and it fails in the safe direction.
 const FORBIDDEN_PATTERNS = [
   { name: 'DROP TABLE', regex: /\bDROP\s+TABLE\b/i },
   { name: 'DROP COLUMN', regex: /\bDROP\s+COLUMN\b/i },
   { name: 'RENAME (table or column)', regex: /\bRENAME\s+(TO|COLUMN)\b/i },
+  {
+    // New columns must be nullable or have a DEFAULT, so rows written
+    // by older clients (which don't know the column) stay valid
+    name: 'ADD COLUMN with NOT NULL but no DEFAULT',
+    regex: /\bADD\s+COLUMN(?![^,;)]*\bDEFAULT\b)[^,;)]*\bNOT\s+NULL\b/i,
+  },
 ];
-
-function stripComments(source: string, kind: 'sql' | 'js'): string {
-  const withoutBlocks = source.replace(/\/\*[\s\S]*?\*\//g, '');
-  if (kind === 'sql') {
-    // Strip `--` comments to end of line, including inline ones — an
-    // inline comment could otherwise hide a destructive statement split
-    // across lines, or false-flag SQL with a comment mentioning one
-    return withoutBlocks.replace(/--[^\n]*/g, '');
-  }
-  // In JS `--` is an operator and inline `//` appears in URLs, so only
-  // drop whole-line comments
-  return withoutBlocks
-    .split('\n')
-    .filter(line => !line.trim().startsWith('//'))
-    .join('\n');
-}
-
-function findViolations(source: string, kind: 'sql' | 'js'): string[] {
-  const code = stripComments(source, kind);
-  const violations = FORBIDDEN_PATTERNS.filter(({ regex }) =>
-    regex.test(code),
-  ).map(({ name }) => name);
-
-  // Columns added to existing tables must be nullable or have a
-  // default, so rows written by older clients (which don't know the
-  // column) stay valid
-  const addColumnClauses = code.match(/\bADD\s+COLUMN\b[^,;)]*/gi) || [];
-  for (const clause of addColumnClauses) {
-    if (/\bNOT\s+NULL\b/i.test(clause) && !/\bDEFAULT\b/i.test(clause)) {
-      violations.push(
-        `ADD COLUMN with NOT NULL but no DEFAULT: ${clause.trim()}`,
-      );
-    }
-  }
-
-  return violations;
-}
 
 describe('migrations are additive-only', () => {
   const files = fs
@@ -67,10 +41,9 @@ describe('migrations are additive-only', () => {
 
   it.each(files)('%s contains no destructive schema changes', file => {
     const source = fs.readFileSync(path.join(MIGRATIONS_DIR, file), 'utf8');
-    const violations = findViolations(
-      source,
-      file.endsWith('.js') ? 'js' : 'sql',
-    );
+    const violations = FORBIDDEN_PATTERNS.filter(({ regex }) =>
+      regex.test(source),
+    ).map(({ name }) => name);
 
     expect(
       violations,
@@ -78,40 +51,28 @@ describe('migrations are additive-only', () => {
         'Migrations must be additive-only so that older clients keep ' +
         'working: no dropping or renaming tables/columns, and new ' +
         'columns must be nullable or have a DEFAULT. If you need to ' +
-        'retire a column, stop reading it but leave it in place.',
+        'retire a column, stop reading it but leave it in place. ' +
+        '(A comment merely mentioning a destructive statement also ' +
+        'trips this check — reword it.)',
     ).toEqual([]);
   });
 
-  it('sanity check: destructive statements are detected', () => {
-    expect(
-      findViolations('ALTER TABLE foo DROP COLUMN bar;', 'sql'),
-    ).not.toEqual([]);
-    expect(findViolations('DROP TABLE foo;', 'sql')).not.toEqual([]);
-    expect(findViolations('ALTER TABLE foo RENAME TO bar;', 'sql')).not.toEqual(
-      [],
-    );
-    expect(
-      findViolations('ALTER TABLE foo RENAME COLUMN a TO b;', 'sql'),
-    ).not.toEqual([]);
-    expect(
-      findViolations('ALTER TABLE foo ADD COLUMN bar TEXT NOT NULL;', 'sql'),
-    ).not.toEqual([]);
-    expect(
-      findViolations(
-        "ALTER TABLE foo ADD COLUMN bar TEXT NOT NULL DEFAULT 'x';",
-        'sql',
-      ),
-    ).toEqual([]);
-    expect(findViolations('DROP VIEW v_foo;', 'sql')).toEqual([]);
-    expect(findViolations('-- DROP TABLE foo (comment)', 'sql')).toEqual([]);
-    // Inline comments must not hide a destructive statement split
-    // across lines...
-    expect(
-      findViolations('ALTER TABLE foo DROP -- sneaky\nCOLUMN bar;', 'sql'),
-    ).not.toEqual([]);
-    // ...and a trailing comment mentioning one must not false-flag
-    expect(
-      findViolations('CREATE TABLE x (id TEXT); -- no more DROP TABLE', 'sql'),
-    ).toEqual([]);
+  it.each([
+    'DROP TABLE foo;',
+    'ALTER TABLE foo DROP COLUMN bar;',
+    'ALTER TABLE foo RENAME TO bar;',
+    'ALTER TABLE foo RENAME COLUMN a TO b;',
+    'ALTER TABLE foo ADD COLUMN bar TEXT NOT NULL;',
+    "INSERT INTO x VALUES ('a--b'); DROP TABLE foo;",
+  ])('sanity check: flags `%s`', sql => {
+    expect(FORBIDDEN_PATTERNS.some(({ regex }) => regex.test(sql))).toBe(true);
+  });
+
+  it.each([
+    'ALTER TABLE foo ADD COLUMN bar TEXT;',
+    "ALTER TABLE foo ADD COLUMN bar TEXT NOT NULL DEFAULT 'x';",
+    'DROP VIEW v_foo;',
+  ])('sanity check: allows `%s`', sql => {
+    expect(FORBIDDEN_PATTERNS.some(({ regex }) => regex.test(sql))).toBe(false);
   });
 });

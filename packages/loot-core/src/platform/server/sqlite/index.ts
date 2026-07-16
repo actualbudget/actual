@@ -72,7 +72,7 @@ export function _getModule() {
 
 function verifyParamTypes(
   sql: string | Statement,
-  arr: (string | number)[] = [],
+  arr: (string | number | null)[] = [],
 ) {
   arr.forEach(val => {
     if (typeof val !== 'string' && typeof val !== 'number' && val !== null) {
@@ -88,19 +88,19 @@ export function prepare(db: Database, sql: string) {
 export function runQuery(
   db: Database,
   sql: string | Statement,
-  params?: (string | number)[],
+  params?: (string | number | null)[],
   fetchAll?: false,
 ): { changes: unknown };
 export function runQuery<T>(
   db: Database,
   sql: string | Statement,
-  params: (string | number)[],
+  params: (string | number | null)[],
   fetchAll: true,
 ): T[];
 export function runQuery<T>(
   db: Database,
   sql: string | Statement,
-  params: (string | number)[] = [],
+  params: (string | number | null)[] = [],
   fetchAll = false,
 ): T[] | { changes: unknown } {
   if (params) {

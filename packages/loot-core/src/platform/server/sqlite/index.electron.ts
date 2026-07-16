@@ -35,7 +35,7 @@ export function prepare(db, sql) {
 export function runQuery(
   db: SQL.Database,
   sql: string | SQL.Statement,
-  params: (string | number)[] = [],
+  params: (string | number | null)[] = [],
   fetchAll = false,
 ) {
   if (params) {
