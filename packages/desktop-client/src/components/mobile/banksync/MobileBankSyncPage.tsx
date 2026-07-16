@@ -13,6 +13,8 @@ import {
   groupBankSyncAccounts,
 } from '#components/banksync/bankSyncUtils';
 import type { GroupedBankSyncAccounts } from '#components/banksync/bankSyncUtils';
+import { BuiltInProviders } from '#components/banksync/BuiltInProviders';
+import { useBuiltInBankSyncProviders } from '#components/banksync/useBuiltInBankSyncProviders';
 import { Search } from '#components/common/Search';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
@@ -29,6 +31,12 @@ export function MobileBankSyncPage() {
   const { data: accounts = [] } = useAccounts();
   const [filter, setFilter] = useState('');
   const syncSourceReadable = useMemo(() => getSyncSourceReadable(t), [t]);
+  const {
+    providers,
+    syncServerStatus,
+    showPermissionWarning,
+    providersNeedingConfiguration,
+  } = useBuiltInBankSyncProviders();
 
   const openAccounts = useMemo(
     () => accounts.filter(a => !a.closed),
@@ -91,30 +99,40 @@ export function MobileBankSyncPage() {
 
   return (
     <Page header={<MobilePageHeader title={t('Bank Sync')} />} padding={0}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: theme.mobilePageBackground,
-          padding: 10,
-          width: '100%',
-          borderBottomWidth: 2,
-          borderBottomStyle: 'solid',
-          borderBottomColor: theme.tableBorder,
-        }}
-      >
-        <Search
-          placeholder={t('Filter accounts…')}
-          value={filter}
-          onChange={onSearchChange}
-          width="100%"
-          height={styles.mobileMinHeight}
-          style={{
-            backgroundColor: theme.tableBackground,
-            borderColor: theme.formInputBorder,
-          }}
+      <View style={{ padding: 15 }}>
+        <BuiltInProviders
+          providers={providers}
+          syncServerStatus={syncServerStatus}
+          showPermissionWarning={showPermissionWarning}
+          providersNeedingConfiguration={providersNeedingConfiguration}
         />
       </View>
+      {openAccounts.length > 0 && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.mobilePageBackground,
+            padding: 10,
+            width: '100%',
+            borderBottomWidth: 2,
+            borderBottomStyle: 'solid',
+            borderBottomColor: theme.tableBorder,
+          }}
+        >
+          <Search
+            placeholder={t('Filter accounts…')}
+            value={filter}
+            onChange={onSearchChange}
+            width="100%"
+            height={styles.mobileMinHeight}
+            style={{
+              backgroundColor: theme.tableBackground,
+              borderColor: theme.formInputBorder,
+            }}
+          />
+        </View>
+      )}
 
       {openAccounts.length === 0 ? (
         <View
@@ -134,7 +152,9 @@ export function MobileBankSyncPage() {
             }}
           >
             <Trans>
-              To use the bank syncing features, you must first add an account.
+              Linked accounts will appear here. Use a provider above to link
+              your bank, or create an account from the Accounts tab and connect
+              it here later.
             </Trans>
           </Text>
         </View>
