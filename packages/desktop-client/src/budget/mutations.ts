@@ -18,6 +18,45 @@ import type { AppDispatch } from '#redux/store';
 
 import { categoryQueries } from './queries';
 
+
+function localizeBudgetNotification(
+  notification: { message?: string; pre?: string; type?: string; sticky?: boolean },
+  t: TFunction,
+) {
+  if (!notification?.message) {
+    return notification;
+  }
+
+  const message = notification.message;
+
+  if (message === 'All templates passed! 🎉') {
+    return { ...notification, message: t('All templates passed! 🎉') };
+  }
+  if (message === 'Everything is up to date') {
+    return { ...notification, message: t('Everything is up to date') };
+  }
+  if (message === 'There were errors interpreting some templates:') {
+    return {
+      ...notification,
+      message: t('There were errors interpreting some templates:'),
+    };
+  }
+
+  const applied = message.match(
+    /^Successfully applied templates to (\d+) categories$/,
+  );
+  if (applied) {
+    return {
+      ...notification,
+      message: t('Successfully applied templates to {{count}} categories', {
+        count: Number(applied[1]),
+      }),
+    };
+  }
+
+  return notification;
+}
+
 function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
   void queryClient.invalidateQueries({
     queryKey: queryKey ?? categoryQueries.lists(),
@@ -824,7 +863,7 @@ export function useBudgetActions() {
       if (notification) {
         dispatch(
           addNotification({
-            notification,
+            notification: localizeBudgetNotification(notification, t),
           }),
         );
       }
