@@ -822,9 +822,18 @@ export function useBudgetActions() {
     },
     onSuccess: notification => {
       if (notification) {
+        // `message` is a stable i18next key (e.g. a plain sentence, or one
+        // containing `{{count}}`-style placeholders); `messageParams` carries
+        // any values to interpolate. Translating here, right before display,
+        // is what actually makes these notifications translatable — the
+        // server (loot-core) has no i18n of its own. See #8413.
+        const { messageParams, ...rest } = notification;
         dispatch(
           addNotification({
-            notification,
+            notification: {
+              ...rest,
+              message: t(notification.message, messageParams),
+            },
           }),
         );
       }

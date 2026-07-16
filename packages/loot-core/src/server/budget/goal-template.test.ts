@@ -337,7 +337,14 @@ describe('applyMultipleCategoryTemplates', () => {
       categoryIds: [cat1.id, cat2.id],
     });
 
-    expect(result.message).toMatch(/Successfully applied/);
+    // The message must stay a stable, translatable key — the category count
+    // is passed separately via `messageParams` for the client to interpolate
+    // (via i18next) rather than being baked into the string, which would
+    // make it untranslatable (see #8413).
+    expect(result.message).toBe(
+      'Successfully applied templates to {{count}} categories',
+    );
+    expect(result.messageParams).toEqual({ count: 2 });
     expect(actions.setBudget).toHaveBeenCalledTimes(2);
     const budgetCalls = vi
       .mocked(actions.setBudget)
