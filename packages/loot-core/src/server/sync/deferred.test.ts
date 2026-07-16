@@ -13,7 +13,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  global.resetTime();
   setSyncingMode('disabled');
 });
 
@@ -43,7 +42,7 @@ describe('Deferred sync messages (newer schema)', () => {
         value: 'hello',
         timestamp: sendTimestamp(),
       },
-      global.stepForwardInTime() || {
+      {
         dataset: 'transactions',
         row: 't1',
         column: 'amount',
@@ -100,21 +99,21 @@ describe('Deferred sync messages (newer schema)', () => {
         value: 'old value',
         timestamp: sendTimestamp(),
       },
-      global.stepForwardInTime() || {
+      {
         dataset: 'transactions',
         row: 't1',
         column: 'amount',
         value: 1234,
         timestamp: sendTimestamp(),
       },
-      global.stepForwardInTime() || {
+      {
         dataset: 'transactions',
         row: 't1',
         column: 'brand_new_column',
         value: 'new value',
         timestamp: sendTimestamp(),
       },
-      global.stepForwardInTime() || {
+      {
         // A row that only ever got a deferred message; replay has to
         // create it
         dataset: 'transactions',
@@ -123,7 +122,7 @@ describe('Deferred sync messages (newer schema)', () => {
         value: 'other row',
         timestamp: sendTimestamp(),
       },
-      global.stepForwardInTime() || {
+      {
         dataset: 'gadgets',
         row: 'g1',
         column: 'name',

@@ -61,9 +61,4 @@ declare global {
   var currentMonth: string | null;
 
   var emptyDatabase: (avoidUpdate?: boolean) => () => Promise<void>;
-
-  // Test-time fake clock helpers (see src/mocks/setup.ts)
-  var stepForwardInTime: (time?: number) => undefined;
-
-  var resetTime: () => void;
 }
