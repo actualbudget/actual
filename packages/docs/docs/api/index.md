@@ -113,6 +113,56 @@ The browser build is fully self-contained: the Web Worker and its WebAssembly an
 The engine uses `SharedArrayBuffer`, so the page that runs the API must be served **cross-origin isolated**: over HTTPS, with `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`. This is a hosting/server requirement (it cannot be bundled away). See [Enabling SharedArrayBuffer Access](../troubleshooting/shared-array-buffer.md). In local development, set the same headers on your dev server (for example via a small Vite middleware plugin).
 :::
 
+## Handling Errors
+
+When an API method fails, the rejected error usually carries a human-readable `message` in English. For the most common connection and download failures, the error also carries a stable, machine-readable `code`. Use `code` when your app needs to react to a specific kind of failure (for example, to show its own translated message) — matching on the text of `message` is fragile because the wording can change between releases.
+
+```js
+try {
+  await api.init({
+    dataDir: '/some/path',
+    serverURL: 'http://localhost:5006',
+    password: 'hunter2',
+  });
+  await api.downloadBudget('1cfdbb80-6274-49bf-b0c2-737235a4c81f');
+} catch (error) {
+  switch (error.code) {
+    case 'network-failure':
+    case 'network':
+      // The server could not be reached. Check the serverURL.
+      break;
+    case 'invalid-password':
+      // The server password is wrong.
+      break;
+    case 'budget-not-found':
+      // No budget file matches the given sync ID.
+      break;
+    default:
+      // Fall back to the message text.
+      console.error(error.message);
+  }
+}
+```
+
+These are the codes for the common failures:
+
+| Code                     | Meaning                                                                                              |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `network-failure`        | The server could not be reached — the `serverURL` is wrong, or the server is offline or unreachable. |
+| `network`                | Same as `network-failure`, reported by the download and encryption-key checks.                       |
+| `invalid-password`       | The server password given to `init` is wrong.                                                        |
+| `token-expired`          | The session token given to `init` is invalid or has expired.                                         |
+| `unauthorized`           | The client is not logged in to the server.                                                           |
+| `budget-not-found`       | No budget file matches the given sync ID.                                                            |
+| `missing-key`            | The budget file is end-to-end encrypted, and no encryption password was given.                       |
+| `decrypt-failure`        | The budget file could not be decrypted — the encryption password is wrong.                           |
+| `old-key-style`          | The budget file uses an old, unsupported encryption key style.                                       |
+| `out-of-sync-migrations` | The budget file needs a newer version of Actual — update the API package.                            |
+
+:::note
+`code` is present for the common connection and download failures listed above. Other errors may only carry a `message`, so always keep a fallback.
+:::
+
 ## Writing Data Importers
 
 If you are using another app, like YNAB or Mint, you might want to migrate your data into Actual. Right now, Actual officially supports [importing YNAB4 data](../migration/ynab4.md) and [importing nYNAB data](../migration/nynab.md) (and it works very well). But if you want to import all of your data into Actual, you can write a custom importer.

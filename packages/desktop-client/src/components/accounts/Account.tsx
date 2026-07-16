@@ -16,18 +16,14 @@ import { View } from '@actual-app/components/view';
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
 import type { UndoState } from '@actual-app/core/server/undo';
-import { currentDay } from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
 import {
   makeAsNonChildTransactions,
   makeChild,
-  realizeTempTransactions,
   ungroupTransaction,
   ungroupTransactions,
-  updateTransaction,
 } from '@actual-app/core/shared/transactions';
-import { applyChanges } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
@@ -50,6 +46,7 @@ import {
   useUpdateAccountMutation,
 } from '#accounts';
 import { markAccountRead } from '#accounts/accountsSlice';
+import * as reconciliation from '#accounts/reconciliation';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 import { TransactionList } from '#components/transactions/TransactionList';
@@ -978,36 +975,14 @@ class AccountInternal extends PureComponent<
   };
 
   lockTransactions = async () => {
+    const { accountId } = this.props;
+    if (!accountId) {
+      return;
+    }
+
     this.setState({ workingHard: true });
 
-    const { accountId } = this.props;
-
-    const { data } = await aqlQuery(
-      q('transactions')
-        .filter({ cleared: true, reconciled: false, account: accountId })
-        .select('*')
-        .options({ splits: 'grouped' }),
-    );
-    let transactions = ungroupTransactions(data);
-
-    const changes: { updated: Array<Partial<TransactionEntity>> } = {
-      updated: [],
-    };
-
-    transactions.forEach(trans => {
-      const { diff } = updateTransaction(transactions, {
-        ...trans,
-        reconciled: true,
-      });
-
-      transactions = applyChanges(diff, transactions);
-
-      changes.updated = changes.updated
-        ? changes.updated.concat(diff.updated)
-        : diff.updated;
-    });
-
-    await send('transactions-batch-update', changes);
+    await reconciliation.lockTransactions(accountId);
     await this.refetchTransactions();
   };
 
@@ -1030,27 +1005,9 @@ class AccountInternal extends PureComponent<
 
     const { reconcileAmount } = this.state;
 
-    const { data } = await aqlQuery(
-      q('transactions')
-        .filter({ cleared: true, account: accountId })
-        .select('*')
-        .options({ splits: 'grouped' }),
+    await reconciliation.finishReconciliation(account.id, reconcileAmount, () =>
+      this.lockTransactions(),
     );
-    const transactions = ungroupTransactions(data);
-
-    let cleared = 0;
-
-    transactions.forEach(trans => {
-      if (!trans.is_parent) {
-        cleared += trans.amount;
-      }
-    });
-
-    const targetDiff = (reconcileAmount || 0) - cleared;
-
-    if (targetDiff === 0) {
-      await this.lockTransactions();
-    }
 
     const lastReconciled = new Date().getTime().toString();
     this.props.onUpdateAccount({ ...account, last_reconciled: lastReconciled });
@@ -1062,36 +1019,20 @@ class AccountInternal extends PureComponent<
   };
 
   onCreateReconciliationTransaction = async (diff: number) => {
-    // Create a new reconciliation transaction
-    const reconciliationTransactions = realizeTempTransactions([
-      {
-        id: 'temp',
-        account: this.props.accountId!,
-        cleared: true,
-        reconciled: false,
-        amount: diff,
-        date: currentDay(),
-        notes: t('Reconciliation balance adjustment'),
-      },
-    ]);
+    const { accountId } = this.props;
+    if (!accountId) {
+      return;
+    }
 
-    // Optimistic UI: update the transaction list before sending the data to the database
-    this.setState(state => ({
-      transactions: [...reconciliationTransactions, ...state.transactions],
-    }));
-
-    // run rules on the reconciliation transaction
-    const ruledTransactions = await Promise.all(
-      reconciliationTransactions.map(transaction =>
-        send('rules-run', { transaction }),
-      ),
+    await reconciliation.createReconciliationTransaction(
+      accountId,
+      diff,
+      // Optimistic UI: update the transaction list before sending the data to the database
+      reconciliationTransactions =>
+        this.setState(state => ({
+          transactions: [...reconciliationTransactions, ...state.transactions],
+        })),
     );
-
-    // sync the reconciliation transaction
-    await send('transactions-batch-update', {
-      added: ruledTransactions.filter(trans => !trans.tombstone),
-      deleted: ruledTransactions.filter(trans => trans.tombstone),
-    });
     await this.refetchTransactions();
   };
 

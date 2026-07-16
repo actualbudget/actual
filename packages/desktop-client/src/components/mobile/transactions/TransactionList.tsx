@@ -88,6 +88,8 @@ type TransactionListProps = {
   isLoadingMore: boolean;
   onLoadMore: () => void;
   showMakeTransfer?: boolean;
+  isReconciling?: boolean;
+  onToggleTransactionCleared?: (transaction: TransactionEntity) => void;
 };
 
 export function TransactionList({
@@ -99,6 +101,8 @@ export function TransactionList({
   isLoadingMore,
   onLoadMore,
   showMakeTransfer = false,
+  isReconciling = false,
+  onToggleTransactionCleared,
 }: TransactionListProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -184,6 +188,8 @@ export function TransactionList({
               onTransactionPress,
               runningBalances,
               showRunningBalances,
+              isReconciling,
+              onToggleTransactionCleared,
               t,
             ]}
             renderEmptyState={() =>
@@ -235,8 +241,10 @@ export function TransactionList({
                           showRunningBalance={showRunningBalances}
                           runningBalance={runningBalances?.get(transaction.id)}
                           transaction={transaction}
+                          isReconciling={isReconciling}
                           onPress={trans => onTransactionPress(trans)}
                           onLongPress={trans => onTransactionPress(trans, true)}
+                          onToggleCleared={onToggleTransactionCleared}
                         />
                       )}
                     </ListBoxItem>

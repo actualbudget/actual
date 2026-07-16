@@ -4,6 +4,7 @@ import { logger } from '#platform/server/log';
 import { APIError } from '#server/errors';
 import { isMutating, runHandler } from '#server/mutators';
 
+import { postErrorReply } from './errors';
 import type * as T from './index-types';
 import { safePost } from './shared';
 import type { Message } from './shared';
@@ -24,14 +25,6 @@ function getGlobalObject() {
 }
 
 getGlobalObject().__globalServerChannel = null;
-
-function coerceError(error) {
-  if (error.type && error.type === 'APIError') {
-    return error;
-  }
-
-  return { type: 'ServerError', message: error.message, cause: error };
-}
 
 export const init: T.Init = function (serverChn, handlers) {
   const serverChannel = serverChn as Window;
@@ -72,21 +65,11 @@ export const init: T.Init = function (serverChn, handlers) {
             });
           },
           nativeError => {
-            const error = coerceError(nativeError);
-
-            if (name.startsWith('api/')) {
-              // The API is newer and does automatically forward
-              // errors
-              post({ type: 'reply', id, error });
-            } else if (catchErrors) {
-              post({
-                type: 'reply',
-                id,
-                result: { error, data: null },
-              });
-            } else {
-              post({ type: 'error', id, error });
-            }
+            const error = postErrorReply(
+              message => serverChannel.postMessage(message),
+              { id, name, catchErrors },
+              nativeError,
+            );
 
             // Only report internal errors
             if (error.type === 'ServerError') {
