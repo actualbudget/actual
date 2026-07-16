@@ -27,6 +27,7 @@ import { Checkbox } from '#components/forms';
 import { validateAccountName } from '#components/util/accountValidation';
 import { useAccounts } from '#hooks/useAccounts';
 import { useNavigate } from '#hooks/useNavigate';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { closeModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -34,6 +35,7 @@ export function CreateLocalAccountModal() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const isUsingServer = useSyncServerStatus() !== 'no-server';
   const { data: accounts = [] } = useAccounts();
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
@@ -86,17 +88,44 @@ export function CreateLocalAccountModal() {
         <>
           <ModalHeader
             title={
-              <ModalTitle title={t('Create Local Account')} shrinkOnOverflow />
+              <ModalTitle
+                title={
+                  isUsingServer ? t('Create Local Account') : t('Add account')
+                }
+                shrinkOnOverflow
+              />
             }
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View>
+            {!isUsingServer && (
+              <Text
+                style={{
+                  color: theme.pageTextSubdued,
+                  lineHeight: 1.5,
+                  marginBottom: 15,
+                }}
+              >
+                <Trans>
+                  Once the account is created, you can also{' '}
+                  <Link
+                    variant="external"
+                    linkColor="muted"
+                    to="https://actualbudget.org/docs/transactions/importing"
+                  >
+                    import QIF/OFX/QFX files
+                  </Link>{' '}
+                  into it.
+                </Trans>
+              </Text>
+            )}
             <Form onSubmit={onSubmit}>
               <InlineField label={t('Name')} width="100%">
                 <InitialFocus>
                   <Input
                     name="name"
                     value={name}
+                    placeholder={t('e.g. Bank, Savings, Credit Card, Cash')}
                     onChangeValue={setName}
                     onUpdate={value => {
                       const name = value.trim();
@@ -152,6 +181,8 @@ export function CreateLocalAccountModal() {
                   >
                     <Text>
                       <Trans>
+                        Off-budget accounts (like investments, loans, or your
+                        house) are tracked but not part of your spending budget.
                         This cannot be changed later. See{' '}
                         <Link
                           variant="external"
@@ -191,7 +222,7 @@ export function CreateLocalAccountModal() {
 
               <ModalButtons>
                 <Button onPress={() => state.close()}>
-                  <Trans>Back</Trans>
+                  {isUsingServer ? <Trans>Back</Trans> : <Trans>Cancel</Trans>}
                 </Button>
                 <Button
                   type="submit"
