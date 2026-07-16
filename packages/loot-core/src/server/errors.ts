@@ -1,3 +1,5 @@
+import type { UnsafeZipMeta } from '#shared/errors';
+
 // TODO: normalize error types
 export class PostError extends Error {
   meta: { meta: string } | undefined;
@@ -111,7 +113,7 @@ export function FileDownloadError(
     isMissingKey?: boolean;
     name?: string;
     id?: string;
-  },
+  } & Partial<UnsafeZipMeta>,
 ) {
   return { type: 'FileDownloadError', reason, meta };
 }

@@ -39,6 +39,10 @@ export function ImportActualModal() {
         return t('This archive is not a valid Actual export file.');
       case 'invalid-metadata-file':
         return t('The metadata file in the given archive is corrupted.');
+      case 'zip-too-large':
+        return t(
+          'This file is too large to import, sorry! Visit https://actualbudget.org/contact/ for support.',
+        );
       default:
         return t(
           'An unknown error occurred while importing. Please report this as a new issue on GitHub.',
