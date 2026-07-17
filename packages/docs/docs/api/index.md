@@ -94,9 +94,6 @@ The package also ships a browser build. When you bundle your web app with a mode
 import * as api from '@actual-app/api';
 
 await api.init({
-  // In the browser, budget data is stored in IndexedDB. This is a path
-  // inside that virtual file system.
-  dataDir: '/documents',
   serverURL: 'https://your-server.example.com',
   password: 'hunter2',
 });
@@ -107,6 +104,8 @@ await api.shutdown();
 ```
 
 Behind the scenes, `init` starts a Web Worker running the same budget engine the Actual web app uses, backed by SQLite compiled to WebAssembly. Your budget data is stored in the browser's IndexedDB and stays on the device.
+
+In the browser, `dataDir` is a path inside the worker's virtual file system rather than a folder on disk. It is optional: it defaults to `/documents`, and if you pass a custom path it is created automatically and persisted to IndexedDB just the same.
 
 The browser build is fully self-contained: the Web Worker and its WebAssembly and data files are inlined into the package. There are no extra files to copy or serve, and no bundler configuration is required (no `optimizeDeps` tweaks, no worker or asset plugins). Importing the package and calling `init()` is all that's needed.
 
@@ -209,7 +208,7 @@ These are the public methods that you can use. The API also exports low-level fu
 
 Call this before attempting to use any of the API methods. This will connect to the server using the provided password and load the budget data.
 
-`dataDir` defaults to the current working directory.
+`dataDir` defaults to the current working directory in Node.js, and to `/documents` in the [browser build](#using-the-api-in-a-browser).
 
 If no `serverURL` is provided, no network connections will be made, and you'll only be able to access budget files already downloaded locally.
 

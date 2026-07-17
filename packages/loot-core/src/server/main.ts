@@ -228,6 +228,13 @@ export async function initApp(isDev, socketName) {
 }
 
 type BaseInitConfig = {
+  /**
+   * Directory where budget data is stored. In Node this is a directory on
+   * disk (defaults to the current working directory) and must already exist.
+   * In the browser build it is a path inside the worker's virtual filesystem
+   * (persisted to IndexedDB); it defaults to `/documents` and is created
+   * automatically if missing.
+   */
   dataDir?: string;
   verbose?: boolean;
 };
