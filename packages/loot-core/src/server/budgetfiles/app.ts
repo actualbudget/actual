@@ -481,7 +481,7 @@ async function importBudget({
    * to derive the budget name for some import types.
    */
   filename?: string;
-}): Promise<{ error?: string; id?: string }> {
+}): Promise<{ error?: string; meta?: unknown; id?: string }> {
   try {
     let contents: Buffer;
     let name: string;
@@ -514,8 +514,10 @@ async function importBudget({
 
 async function exportBudget() {
   try {
+    const exported = await cloudStorage.exportBuffer();
     return {
-      data: await cloudStorage.exportBuffer(),
+      data: exported?.data ?? null,
+      warnings: exported?.warnings ?? [],
     };
   } catch (err) {
     err.message = 'Error exporting budget: ' + err.message;

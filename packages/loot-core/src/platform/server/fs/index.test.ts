@@ -5,7 +5,15 @@ import { patchFetchForSqlJS } from '#mocks/util';
 import * as idb from '#platform/server/indexeddb';
 import * as sqlite from '#platform/server/sqlite';
 
-import { exists, init, join, pathToId, readFile, writeFile } from './index';
+import {
+  _setDocumentDir,
+  exists,
+  init,
+  join,
+  pathToId,
+  readFile,
+  writeFile,
+} from './index';
 
 beforeAll(() => {
   const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;
@@ -105,6 +113,57 @@ describe('web filesystem', () => {
     expect(node.link).toBe(
       '/blocked/' + pathToId('/documents/deep/nested/db.sqlite'),
     );
+  });
+
+  test('files under a custom document dir are persisted', async () => {
+    await idb.openDatabase();
+    await sqlite.init();
+    await init();
+
+    _setDocumentDir('/budget');
+
+    expect(await exists('/budget')).toBe(true);
+
+    await writeFile('/budget/foo.txt', 'hello');
+    expect(await readFile('/budget/foo.txt')).toBe('hello');
+
+    const db = await idb.openDatabase();
+    const { store } = idb.getStore(db, 'files');
+    expect(await idb.get(store, '/budget/foo.txt')).toEqual({
+      filepath: '/budget/foo.txt',
+      contents: 'hello',
+    });
+
+    // sqlite files are symlinked into the blocked fs
+    await writeFile('/budget/db.sqlite', 'some junk');
+    expect(await readFile('/blocked/' + pathToId('/budget/db.sqlite'))).toBe(
+      'some junk',
+    );
+
+    await idb.closeDatabase();
+  });
+
+  test('files under a custom document dir are restored from idb', async () => {
+    const db = await idb.openDatabase();
+    const { store } = idb.getStore(db, 'files');
+    await idb.set(store, {
+      filepath: '/custom/xyz/metadata.json',
+      contents: '{"id":"xyz"}',
+    });
+    await idb.set(store, {
+      filepath: '/custom/xyz/db.sqlite',
+      contents: 'this will be blank and just create a symlink',
+    });
+
+    await sqlite.init();
+    await init();
+    _setDocumentDir('/custom');
+
+    expect(await readFile('/custom/xyz/metadata.json')).toBe('{"id":"xyz"}');
+
+    const FS = sqlite._getModule().FS;
+    const { node } = FS.lookupPath('/custom/xyz/db.sqlite', {});
+    expect(node.link).toBe('/blocked/' + pathToId('/custom/xyz/db.sqlite'));
   });
 });
 

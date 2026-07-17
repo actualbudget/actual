@@ -1,0 +1,99 @@
+name: Migration warnings comment
+
+# Posts the advisory migration warnings from the `migrations` job in
+# check.yml as a PR comment, so they're visible without opening the job log.
+#
+# SECURITY: This runs in the trusted base-repo context (workflow_run) so its
+# token can comment on fork PRs, whose `pull_request` runs only get a
+# read-only token. The artifact produced by the PR run is UNTRUSTED data:
+# the PR number is cross-checked against the triggering run's head SHA, and
+# the findings are validated against a fixed allowlist before being rendered
+# into the comment. Nothing from the artifact is ever executed.
+on:
+  # See SECURITY note above: artifact content is validated and only ever
+  # treated as data.
+  workflow_run: # zizmor: ignore[dangerous-triggers]
+    workflows: ['Test']
+    types:
+      - completed
+
+permissions: {}
+
+jobs:
+  comment:
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: depot-ubuntu-latest
+    permissions:
+      actions: read
+      pull-requests: write
+    steps:
+      - name: Download warnings artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+          # `pattern` instead of `name` so a run without the artifact (PR
+          # doesn't touch migrations) skips gracefully instead of failing.
+          pattern: migration-warnings
+          merge-multiple: true
+          path: warnings
+
+      - name: Post or update PR comment
+        if: hashFiles('warnings/migration-warnings.json') != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          JSON=warnings/migration-warnings.json
+          MARKER='<!--- migration-warnings --->'
+
+          PR=$(cat warnings/migration-warnings-pr.txt)
+          if ! [[ "$PR" =~ ^[0-9]+$ ]]; then
+            echo "Invalid PR number in artifact"
+            exit 1
+          fi
+
+          # The artifact is untrusted: make sure the PR it names is really
+          # the one that produced the triggering run.
+          if [ "$(gh api "repos/$REPO/pulls/$PR" --jq .head.sha)" != "$HEAD_SHA" ]; then
+            echo "Artifact PR head does not match triggering run head; skipping"
+            exit 0
+          fi
+
+          existing=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]") | select(.body | contains("<!--- migration-warnings --->")) | .id')
+          existing=${existing%%$'\n'*}
+
+          # Warnings resolved (or none) — remove a stale comment if present.
+          if jq -e 'length == 0' "$JSON" > /dev/null; then
+            if [ -n "$existing" ]; then
+              gh api -X DELETE "repos/$REPO/issues/comments/$existing"
+            fi
+            exit 0
+          fi
+
+          # Only render findings matching the exact shape and allowlisted
+          # risk strings produced by check-migrations.ts.
+          jq -e '
+            type == "array" and all(.[];
+              (.name | type == "string" and test("^[A-Za-z0-9._-]{1,200}$")) and
+              (.risks | type == "array" and length > 0 and all(.[];
+                IN("drops a table", "drops a column", "renames a table or column"))))
+          ' "$JSON" > /dev/null
+
+          body="$MARKER
+          ### ⚠️ This PR contains possibly breaking database migrations
+
+          $(jq -r '.[] | . as $m | .risks[] | "- `\($m.name)` \(.)."' "$JSON")
+
+          Migrations must be additive-only: removing or renaming tables or columns breaks older clients that sync the same budget file. See the [migration guidelines](https://actualbudget.org/docs/contributing/project-details/migrations).
+
+          <sub>This is an automated advisory check — it may be a false positive and does not block the PR.</sub>"
+
+          if [ -n "$existing" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$existing" -f body="$body"
+          else
+            gh api "repos/$REPO/issues/$PR/comments" -f body="$body"
+          fi

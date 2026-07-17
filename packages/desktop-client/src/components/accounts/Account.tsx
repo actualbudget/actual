@@ -489,6 +489,9 @@ class AccountInternal extends PureComponent<
         if (this._isOptimisticUpdate) {
           this._isOptimisticUpdate = false;
           const transactionsSnapshot = data;
+          const balances = this.state.showBalances
+            ? await this.calculateBalances()
+            : null;
           // Wrap in startTransition so React treats this as a low-priority
           // update. Without this, setState blocks the main thread for the
           // full duration of the re-render (~40–220ms with large transaction
@@ -497,7 +500,10 @@ class AccountInternal extends PureComponent<
           // into chunks and yield to the browser between them, keeping the
           // UI responsive while the row update happens in the background.
           startTransition(() => {
-            this.setState({ transactions: transactionsSnapshot });
+            this.setState({
+              transactions: transactionsSnapshot,
+              balances,
+            });
           });
           return;
         }
