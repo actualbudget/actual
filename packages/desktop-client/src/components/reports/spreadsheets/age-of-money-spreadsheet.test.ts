@@ -699,6 +699,27 @@ describe('Age of Money calculations', () => {
       });
     });
 
+    it('treats empty oneOf as matching no accounts (inverted notOneOf is tautology)', () => {
+      // account oneOf [] inverts to notOneOf []. Everything is outside the
+      // empty set, so on-budget transfers to any counterpart are included.
+      const conditions: RuleConditionEntity[] = [
+        { field: 'account', op: 'oneOf', value: [] },
+      ];
+
+      expect(buildTransferInclusionFilter(conditions)).toEqual({
+        $or: [
+          { 'payee.transfer_acct': null },
+          { 'payee.transfer_acct.offbudget': true },
+          {
+            $and: [
+              { 'payee.transfer_acct.offbudget': false },
+              { 'payee.transfer_acct': { $ne: null } },
+            ],
+          },
+        ],
+      });
+    });
+
     it('combines multiple account conditions with De Morgan for and/or', () => {
       const conditions: RuleConditionEntity[] = [
         { field: 'account', op: 'is', value: 'a' },

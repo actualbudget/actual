@@ -365,13 +365,16 @@ function accountConditionToTransferAcctAql(
     case 'isNot':
       return { [field]: { $ne: value } };
     case 'oneOf': {
-      const values = value as string[];
+      if (!Array.isArray(value)) return null;
+      const values = value;
       if (values.length === 0) return { id: null };
       return { $or: values.map(v => ({ [field]: { $eq: v } })) };
     }
     case 'notOneOf': {
-      const values = value as string[];
-      if (values.length === 0) return { id: null };
+      if (!Array.isArray(value)) return null;
+      const values = value;
+      // Empty notOneOf is a tautology (everything is outside the empty set).
+      if (values.length === 0) return { [field]: { $ne: null } };
       return { $and: values.map(v => ({ [field]: { $ne: v } })) };
     }
     case 'onBudget':
