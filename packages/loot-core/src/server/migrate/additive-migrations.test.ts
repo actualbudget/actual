@@ -81,12 +81,13 @@ describe('migrations are additive-only', () => {
     expect(
       violations,
       'Migrations must be additive-only so that older clients keep ' +
-        'working: no dropping or renaming tables/columns, and new ' +
-        'columns in synced tables must be nullable or have a DEFAULT ' +
-        '(sync builds rows one column at a time). If you need to ' +
-        'retire a column, stop reading it but leave it in place. New ' +
-        'internal (non-synced) tables go in NON_SYNCED_TABLES in this ' +
-        'test.',
+        'working: no dropping or renaming tables/columns, new columns ' +
+        'in synced tables must be nullable or have a DEFAULT, and new ' +
+        'synced tables need a single primary key named "id" (sync ' +
+        'builds rows one column at a time, addressed by id). If you ' +
+        'need to retire a column, stop reading it but leave it in ' +
+        'place. New internal (non-synced) tables go in ' +
+        'NON_SYNCED_TABLES in this test.',
     ).toEqual([]);
   });
 
@@ -118,6 +119,21 @@ describe('migrations are additive-only', () => {
           size INTEGER NOT NULL,
           color TEXT,
           shape TEXT DEFAULT 'round');`,
+    ],
+    [
+      'creating a synced table whose primary key is not "id"',
+      TABLE_FOO,
+      'CREATE TABLE gadgets (uuid TEXT PRIMARY KEY, name TEXT);',
+    ],
+    [
+      'creating a synced table with a composite primary key',
+      TABLE_FOO,
+      'CREATE TABLE gadgets (id TEXT, name TEXT, PRIMARY KEY (id, name));',
+    ],
+    [
+      'creating a synced table with no primary key',
+      TABLE_FOO,
+      'CREATE TABLE gadgets (name TEXT);',
     ],
   ])('sanity check: flags %s', async (_case, setup, migration) => {
     expect(await violationsFor(setup, migration)).not.toEqual([]);

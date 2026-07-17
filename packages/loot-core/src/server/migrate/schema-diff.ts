@@ -4,8 +4,12 @@ import * as sqlite from '#platform/server/sqlite';
 
 // One entry per column, keyed "table.column". `required` means a row
 // cannot be inserted without explicitly providing this column (NOT NULL,
-// no DEFAULT, not the primary key).
-export type SchemaSnapshot = Map<string, { table: string; required: boolean }>;
+// no DEFAULT, not the primary key). `pk` means the column is part of the
+// table's primary key.
+export type SchemaSnapshot = Map<
+  string,
+  { table: string; required: boolean; pk: boolean }
+>;
 
 export function snapshotSchema(db: Database): SchemaSnapshot {
   const tables = sqlite.runQuery<{ name: string }>(
@@ -23,16 +27,21 @@ export function snapshotSchema(db: Database): SchemaSnapshot {
           dflt_value: string | null;
           pk: number;
         }>(db, `PRAGMA table_info("${table}")`, [], true)
-        .map((column): [string, { table: string; required: boolean }] => [
-          `${table}.${column.name}`,
-          {
-            table,
-            required:
-              column.notnull !== 0 &&
-              column.dflt_value == null &&
-              column.pk === 0,
-          },
-        ]),
+        .map(
+          (
+            column,
+          ): [string, { table: string; required: boolean; pk: boolean }] => [
+            `${table}.${column.name}`,
+            {
+              table,
+              required:
+                column.notnull !== 0 &&
+                column.dflt_value == null &&
+                column.pk === 0,
+              pk: column.pk !== 0,
+            },
+          ],
+        ),
     ),
   );
 }
@@ -49,6 +58,13 @@ export function findAdditiveViolations(
   after: SchemaSnapshot,
   nonSyncedTables: Set<string>,
 ): string[] {
+  const tablesBefore = new Set([...before.values()].map(c => c.table));
+  const newSyncedTables = new Set(
+    [...after.values()]
+      .map(c => c.table)
+      .filter(table => !tablesBefore.has(table) && !nonSyncedTables.has(table)),
+  );
+
   return [
     ...[...before.keys()]
       .filter(key => !after.has(key))
@@ -61,5 +77,19 @@ export function findAdditiveViolations(
           !nonSyncedTables.has(column.table),
       )
       .map(([key]) => `new column "${key}" is NOT NULL without a DEFAULT`),
+    // Sync addresses rows by their `id` column (see `apply` in
+    // #server/sync), so a synced table needs exactly that as its
+    // primary key — no other name, no composite keys
+    ...[...newSyncedTables]
+      .filter(table => {
+        const pks = [...after]
+          .filter(([, c]) => c.table === table && c.pk)
+          .map(([key]) => key);
+        return pks.length !== 1 || pks[0] !== `${table}.id`;
+      })
+      .map(
+        table =>
+          `new table "${table}" must have a single primary key named "id"`,
+      ),
   ];
 }
