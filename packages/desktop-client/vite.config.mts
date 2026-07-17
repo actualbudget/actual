@@ -249,6 +249,9 @@ export default defineConfig(async ({ mode, command }) => {
     process.env.REACT_APP_REVIEW_ID = process.env.REVIEW_ID;
     process.env.REACT_APP_BRANCH = process.env.BRANCH;
   }
+  if (process.env.COMMIT_REF) {
+    process.env.REACT_APP_COMMIT_REF = process.env.COMMIT_REF;
+  }
 
   // Electron packaging (--mode=desktop) bundles loot-core directly, so skip
   // all browser-only staging there.

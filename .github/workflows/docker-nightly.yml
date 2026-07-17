@@ -81,6 +81,8 @@ jobs:
           # Avoid restoring potentially poisoned caches in release jobs.
           cache: 'false'
       - name: Build Web
+        env:
+          REACT_APP_COMMIT_REF: ${{ github.sha }}
         run: yarn build:server
 
       - name: Build image for testing
