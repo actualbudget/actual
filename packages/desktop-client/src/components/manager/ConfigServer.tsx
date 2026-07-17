@@ -393,7 +393,7 @@ export function ConfigServer() {
           }
           style={{
             position: 'fixed',
-            top: 10,
+            top: 'calc(10px + env(safe-area-inset-top))',
             left: 10,
             margin: 0,
             zIndex: 4000,

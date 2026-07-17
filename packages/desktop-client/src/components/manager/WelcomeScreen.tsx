@@ -64,7 +64,7 @@ export function WelcomeScreen() {
         paddingTop: 20,
         // Keep the last line clear of the absolutely-positioned
         // server bar at the bottom of the screen.
-        paddingBottom: 45,
+        paddingBottom: 'calc(45px + env(safe-area-inset-bottom))',
       }}
     >
       <View

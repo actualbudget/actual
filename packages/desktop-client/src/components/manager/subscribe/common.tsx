@@ -76,6 +76,9 @@ export function useBootstrapped(redirect = true) {
           }
 
           await setServerURL(null, { validate: false });
+          if (isCancelled) {
+            return;
+          }
           await dispatch(loggedIn());
           if (isCancelled) {
             return;
@@ -85,6 +88,9 @@ export function useBootstrapped(redirect = true) {
         }
 
         await setServerURL(serverURL, { validate: false });
+        if (isCancelled) {
+          return;
+        }
 
         setMultiuserEnabled(result.multiuser);
         setLoginMethods(result.availableLoginMethods);
@@ -98,6 +104,9 @@ export function useBootstrapped(redirect = true) {
         const result: Awaited<
           ReturnType<Handlers['subscribe-needs-bootstrap']>
         > = await send('subscribe-needs-bootstrap');
+        if (isCancelled) {
+          return;
+        }
 
         if ('error' in result) {
           void navigate('/error', { state: { error: result.error } });
