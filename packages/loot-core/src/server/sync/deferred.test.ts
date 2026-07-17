@@ -34,22 +34,25 @@ function getPending(): db.DbPendingMessage[] {
 
 describe('Deferred sync messages (newer schema)', () => {
   it('defers messages for unknown columns without failing the batch', async () => {
-    await applyMessages([
-      {
-        dataset: 'transactions',
-        row: 't1',
-        column: 'brand_new_column',
-        value: 'hello',
-        timestamp: sendTimestamp(),
-      },
-      {
-        dataset: 'transactions',
-        row: 't1',
-        column: 'amount',
-        value: 1234,
-        timestamp: sendTimestamp(),
-      },
-    ]);
+    await applyMessages(
+      [
+        {
+          dataset: 'transactions',
+          row: 't1',
+          column: 'brand_new_column',
+          value: 'hello',
+          timestamp: sendTimestamp(),
+        },
+        {
+          dataset: 'transactions',
+          row: 't1',
+          column: 'amount',
+          value: 1234,
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
 
     // The known-column message must still create the row, even though
     // the unknown-column message for the same row came first
@@ -76,60 +79,82 @@ describe('Deferred sync messages (newer schema)', () => {
     expect(crdt.length).toBe(2);
   });
 
+  it('does not defer local messages: unknown schema is a bug and must fail', async () => {
+    await expect(
+      applyMessages([
+        {
+          dataset: 'transactions',
+          row: 't1',
+          column: 'brand_new_column',
+          value: 'hello',
+          timestamp: sendTimestamp(),
+        },
+      ]),
+    ).rejects.toMatchObject({ reason: 'invalid-schema' });
+
+    expect(getPending().length).toBe(0);
+  });
+
   it('defers messages for unknown tables without failing the batch', async () => {
-    await applyMessages([
-      {
-        dataset: 'gadgets',
-        row: 'g1',
-        column: 'name',
-        value: 'flux capacitor',
-        timestamp: sendTimestamp(),
-      },
-    ]);
+    await applyMessages(
+      [
+        {
+          dataset: 'gadgets',
+          row: 'g1',
+          column: 'name',
+          value: 'flux capacitor',
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
 
     expect(getPending().length).toBe(1);
   });
 
   it('replays pending messages once the schema catches up, last write wins', async () => {
-    await applyMessages([
-      {
-        dataset: 'transactions',
-        row: 't1',
-        column: 'brand_new_column',
-        value: 'old value',
-        timestamp: sendTimestamp(),
-      },
-      {
-        dataset: 'transactions',
-        row: 't1',
-        column: 'amount',
-        value: 1234,
-        timestamp: sendTimestamp(),
-      },
-      {
-        dataset: 'transactions',
-        row: 't1',
-        column: 'brand_new_column',
-        value: 'new value',
-        timestamp: sendTimestamp(),
-      },
-      {
-        // A row that only ever got a deferred message; replay has to
-        // create it
-        dataset: 'transactions',
-        row: 't2',
-        column: 'brand_new_column',
-        value: 'other row',
-        timestamp: sendTimestamp(),
-      },
-      {
-        dataset: 'gadgets',
-        row: 'g1',
-        column: 'name',
-        value: 'flux capacitor',
-        timestamp: sendTimestamp(),
-      },
-    ]);
+    await applyMessages(
+      [
+        {
+          dataset: 'transactions',
+          row: 't1',
+          column: 'brand_new_column',
+          value: 'old value',
+          timestamp: sendTimestamp(),
+        },
+        {
+          dataset: 'transactions',
+          row: 't1',
+          column: 'amount',
+          value: 1234,
+          timestamp: sendTimestamp(),
+        },
+        {
+          dataset: 'transactions',
+          row: 't1',
+          column: 'brand_new_column',
+          value: 'new value',
+          timestamp: sendTimestamp(),
+        },
+        {
+          // A row that only ever got a deferred message; replay has to
+          // create it
+          dataset: 'transactions',
+          row: 't2',
+          column: 'brand_new_column',
+          value: 'other row',
+          timestamp: sendTimestamp(),
+        },
+        {
+          dataset: 'gadgets',
+          row: 'g1',
+          column: 'name',
+          value: 'flux capacitor',
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
     expect(getPending().length).toBe(4);
 
     // "Run the migration" that the newer client already has

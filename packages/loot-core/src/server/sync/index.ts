@@ -49,6 +49,13 @@ let hasNotifiedDeferredMessages = false;
 export function resetDeferredMessagesNotification() {
   hasNotifiedDeferredMessages = false;
 }
+
+export function notifyDeferredMessages() {
+  if (!hasNotifiedDeferredMessages) {
+    hasNotifiedDeferredMessages = true;
+    app.events.emit('sync', { type: 'deferred-messages' });
+  }
+}
 type SyncingMode = 'enabled' | 'offline' | 'disabled' | 'import';
 
 export function setSyncingMode(mode: SyncingMode) {
@@ -115,7 +122,14 @@ function deferMessage(msg: Message) {
 
 // Returns false when the message was deferred because it references
 // schema this client doesn't have yet (sent by a newer version).
-function apply(msg: Message, prev?: boolean): boolean {
+// Deferral only makes sense for inbound messages; for locally-created
+// messages a missing table/column is a bug and must surface as an
+// apply-failure.
+function apply(
+  msg: Message,
+  prev?: boolean,
+  deferUnknownSchema?: boolean,
+): boolean {
   const { dataset, row, column, value } = msg;
 
   if (dataset === 'prefs') {
@@ -137,7 +151,7 @@ function apply(msg: Message, prev?: boolean): boolean {
 
       db.runQuery(db.cache(query.sql), query.params);
     } catch (error) {
-      if (isMissingSchemaError(error)) {
+      if (deferUnknownSchema && isMissingSchemaError(error)) {
         deferMessage(msg);
         return false;
       }
@@ -306,204 +320,206 @@ export type Message = {
   value: string | number | null;
 };
 
-export const applyMessages = sequential(async (messages: Message[]) => {
-  if (checkSyncingMode('import')) {
-    applyMessagesForImport(messages);
-    return undefined;
-  } else if (checkSyncingMode('enabled')) {
-    // Compare the messages with the existing crdt. This filters out
-    // already applied messages and determines if a message is old or
-    // not. An "old" message doesn't need to be applied, but it still
-    // needs to be put into the merkle trie to maintain the hash.
-    messages = await compareMessages(messages);
-  }
-
-  messages = [...messages].sort((m1, m2) => {
-    const t1 = m1.timestamp ? m1.timestamp.toString() : '';
-    const t2 = m2.timestamp ? m2.timestamp.toString() : '';
-    if (t1 < t2) {
-      return -1;
-    } else if (t1 > t2) {
-      return 1;
-    }
-    return 0;
-  });
-
-  const idsPerTable: Record<string, string[]> = {};
-  messages.forEach(msg => {
-    if (msg.dataset === 'prefs') {
-      return;
+export const applyMessages = sequential(
+  async (messages: Message[], deferUnknownSchema = false) => {
+    if (checkSyncingMode('import')) {
+      applyMessagesForImport(messages);
+      return undefined;
+    } else if (checkSyncingMode('enabled')) {
+      // Compare the messages with the existing crdt. This filters out
+      // already applied messages and determines if a message is old or
+      // not. An "old" message doesn't need to be applied, but it still
+      // needs to be put into the merkle trie to maintain the hash.
+      messages = await compareMessages(messages);
     }
 
-    if (idsPerTable[msg.dataset] == null) {
-      idsPerTable[msg.dataset] = [];
-    }
-    idsPerTable[msg.dataset].push(msg.row);
-  });
-
-  async function fetchData(): Promise<DataMap> {
-    const data = new Map();
-
-    for (const table of Object.keys(idsPerTable)) {
-      const rows = await fetchAll(table, idsPerTable[table]);
-
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        setIn(data, [table, row.id], row);
+    messages = [...messages].sort((m1, m2) => {
+      const t1 = m1.timestamp ? m1.timestamp.toString() : '';
+      const t2 = m2.timestamp ? m2.timestamp.toString() : '';
+      if (t1 < t2) {
+        return -1;
+      } else if (t1 > t2) {
+        return 1;
       }
+      return 0;
+    });
+
+    const idsPerTable: Record<string, string[]> = {};
+    messages.forEach(msg => {
+      if (msg.dataset === 'prefs') {
+        return;
+      }
+
+      if (idsPerTable[msg.dataset] == null) {
+        idsPerTable[msg.dataset] = [];
+      }
+      idsPerTable[msg.dataset].push(msg.row);
+    });
+
+    async function fetchData(): Promise<DataMap> {
+      const data = new Map();
+
+      for (const table of Object.keys(idsPerTable)) {
+        const rows = await fetchAll(table, idsPerTable[table]);
+
+        for (let i = 0; i < rows.length; i++) {
+          const row = rows[i];
+          setIn(data, [table, row.id], row);
+        }
+      }
+
+      return data;
     }
 
-    return data;
-  }
+    const prefsToSet: MetadataPrefs = {};
+    const oldData = await fetchData();
 
-  const prefsToSet: MetadataPrefs = {};
-  const oldData = await fetchData();
+    undo.appendMessages(messages, oldData);
 
-  undo.appendMessages(messages, oldData);
+    // It's important to not mutate the clock while processing the
+    // messages. We only want to mutate it if the transaction succeeds.
+    // The merkle variable will be updated while applying the messages and
+    // we'll apply it afterwards.
+    let clock;
+    let currentMerkle;
+    if (checkSyncingMode('enabled')) {
+      clock = getClock();
+      currentMerkle = clock.merkle;
+    }
 
-  // It's important to not mutate the clock while processing the
-  // messages. We only want to mutate it if the transaction succeeds.
-  // The merkle variable will be updated while applying the messages and
-  // we'll apply it afterwards.
-  let clock;
-  let currentMerkle;
-  if (checkSyncingMode('enabled')) {
-    clock = getClock();
-    currentMerkle = clock.merkle;
-  }
+    if (sheet.get()) {
+      sheet.get().startCacheBarrier();
+    }
 
-  if (sheet.get()) {
-    sheet.get().startCacheBarrier();
-  }
+    // Now that we have all of the data, go through and apply the
+    // messages carefully. This transaction is **crucial**: it
+    // guarantees that everything is atomically committed to the
+    // database, and if any part of it fails everything aborts and
+    // nothing is changed. This is critical to maintain consistency. We
+    // also avoid any side effects to in-memory objects, and apply them
+    // after this succeeds.
+    let hasDeferredMessages = false;
+    db.transaction(() => {
+      const added = new Set();
 
-  // Now that we have all of the data, go through and apply the
-  // messages carefully. This transaction is **crucial**: it
-  // guarantees that everything is atomically committed to the
-  // database, and if any part of it fails everything aborts and
-  // nothing is changed. This is critical to maintain consistency. We
-  // also avoid any side effects to in-memory objects, and apply them
-  // after this succeeds.
-  let hasDeferredMessages = false;
-  db.transaction(() => {
-    const added = new Set();
+      for (const msg of messages) {
+        const { dataset, row, column, timestamp, value } = msg;
 
-    for (const msg of messages) {
-      const { dataset, row, column, timestamp, value } = msg;
+        if (!msg.old) {
+          const applied = apply(
+            msg,
+            getIn(oldData, [dataset, row]) || added.has(dataset + row),
+            deferUnknownSchema,
+          );
 
-      if (!msg.old) {
-        const applied = apply(
-          msg,
-          getIn(oldData, [dataset, row]) || added.has(dataset + row),
-        );
+          if (dataset === 'prefs') {
+            prefsToSet[row] = value;
+          } else if (applied) {
+            // Keep track of which items have been added it in this sync
+            // so it knows whether they already exist in the db or not. We
+            // ignore any changes to the spreadsheet. Deferred messages
+            // must not be tracked: their row wasn't created, so a later
+            // message for a known column still needs to INSERT it.
+            added.add(dataset + row);
+          } else {
+            hasDeferredMessages = true;
+          }
+        }
 
-        if (dataset === 'prefs') {
-          prefsToSet[row] = value;
-        } else if (applied) {
-          // Keep track of which items have been added it in this sync
-          // so it knows whether they already exist in the db or not. We
-          // ignore any changes to the spreadsheet. Deferred messages
-          // must not be tracked: their row wasn't created, so a later
-          // message for a known column still needs to INSERT it.
-          added.add(dataset + row);
-        } else {
-          hasDeferredMessages = true;
+        if (checkSyncingMode('enabled')) {
+          db.runQuery(
+            db.cache(`INSERT INTO messages_crdt (timestamp, dataset, row, column, value)
+           VALUES (?, ?, ?, ?, ?)`),
+            [timestamp.toString(), dataset, row, column, serializeValue(value)],
+          );
+
+          currentMerkle = merkle.insert(currentMerkle, timestamp);
+        }
+
+        // Special treatment for some synced prefs
+        if (dataset === 'preferences' && row === 'budgetType') {
+          void setBudgetType(value);
         }
       }
 
       if (checkSyncingMode('enabled')) {
+        currentMerkle = merkle.prune(currentMerkle);
+
+        // Save the clock in the db first (queries might throw
+        // exceptions)
         db.runQuery(
-          db.cache(`INSERT INTO messages_crdt (timestamp, dataset, row, column, value)
-           VALUES (?, ?, ?, ?, ?)`),
-          [timestamp.toString(), dataset, row, column, serializeValue(value)],
+          db.cache(
+            'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
+          ),
+          [serializeClock({ ...clock, merkle: currentMerkle })],
         );
-
-        currentMerkle = merkle.insert(currentMerkle, timestamp);
       }
-
-      // Special treatment for some synced prefs
-      if (dataset === 'preferences' && row === 'budgetType') {
-        void setBudgetType(value);
-      }
-    }
+    });
 
     if (checkSyncingMode('enabled')) {
-      currentMerkle = merkle.prune(currentMerkle);
-
-      // Save the clock in the db first (queries might throw
-      // exceptions)
-      db.runQuery(
-        db.cache(
-          'INSERT OR REPLACE INTO messages_clock (id, clock) VALUES (1, ?)',
-        ),
-        [serializeClock({ ...clock, merkle: currentMerkle })],
-      );
+      // The transaction succeeded, so we can update in-memory objects
+      // now. Update the in-memory clock.
+      clock.merkle = currentMerkle;
     }
-  });
 
-  if (checkSyncingMode('enabled')) {
-    // The transaction succeeded, so we can update in-memory objects
-    // now. Update the in-memory clock.
-    clock.merkle = currentMerkle;
-  }
+    // Save any synced prefs
+    if (Object.keys(prefsToSet).length > 0) {
+      void prefs.savePrefs(prefsToSet, { avoidSync: true });
+      connection.send('prefs-updated');
+    }
 
-  // Save any synced prefs
-  if (Object.keys(prefsToSet).length > 0) {
-    void prefs.savePrefs(prefsToSet, { avoidSync: true });
-    connection.send('prefs-updated');
-  }
+    const newData = await fetchData();
 
-  const newData = await fetchData();
+    // In testing, sometimes the spreadsheet isn't loaded, and that's ok
+    if (sheet.get()) {
+      // Need to clean up these APIs and make them consistent
+      sheet.startTransaction();
+      triggerBudgetChanges(oldData, newData);
+      sheet.get().triggerDatabaseChanges(oldData, newData);
+      sheet.endTransaction();
 
-  // In testing, sometimes the spreadsheet isn't loaded, and that's ok
-  if (sheet.get()) {
-    // Need to clean up these APIs and make them consistent
-    sheet.startTransaction();
-    triggerBudgetChanges(oldData, newData);
-    sheet.get().triggerDatabaseChanges(oldData, newData);
-    sheet.endTransaction();
-
-    // Transfers insert the source row in one sync batch and the counterparty in
-    // a second. triggerDatabaseChanges should dirty aggregate query cells, but
-    // explicitly recompute global account totals so the second batch always
-    // refreshes sidebar "All accounts" / On budget / etc. (see bindings.ts).
-    if (idsPerTable.transactions?.length) {
-      const s = sheet.get();
-      const globalAggregateCells = [
-        'accounts-balance',
-        'onbudget-accounts-balance',
-        'offbudget-accounts-balance',
-        'closed-accounts-balance',
-      ] as const;
-      for (const cellName of globalAggregateCells) {
-        const fullName = resolveName('__global', cellName);
-        if (s.hasCell(fullName)) {
-          s.recompute(fullName);
+      // Transfers insert the source row in one sync batch and the counterparty in
+      // a second. triggerDatabaseChanges should dirty aggregate query cells, but
+      // explicitly recompute global account totals so the second batch always
+      // refreshes sidebar "All accounts" / On budget / etc. (see bindings.ts).
+      if (idsPerTable.transactions?.length) {
+        const s = sheet.get();
+        const globalAggregateCells = [
+          'accounts-balance',
+          'onbudget-accounts-balance',
+          'offbudget-accounts-balance',
+          'closed-accounts-balance',
+        ] as const;
+        for (const cellName of globalAggregateCells) {
+          const fullName = resolveName('__global', cellName);
+          if (s.hasCell(fullName)) {
+            s.recompute(fullName);
+          }
         }
       }
+
+      // Allow the cache to be used in the future. At this point it's guaranteed
+      // to be up-to-date because we are done mutating any other data
+      sheet.get().endCacheBarrier();
     }
 
-    // Allow the cache to be used in the future. At this point it's guaranteed
-    // to be up-to-date because we are done mutating any other data
-    sheet.get().endCacheBarrier();
-  }
+    _syncListeners.forEach(func => func(oldData, newData));
 
-  _syncListeners.forEach(func => func(oldData, newData));
+    const tables = getTablesFromMessages(messages.filter(msg => !msg.old));
+    app.events.emit('sync', {
+      type: 'applied',
+      tables,
+      data: newData,
+      prevData: oldData,
+    });
 
-  const tables = getTablesFromMessages(messages.filter(msg => !msg.old));
-  app.events.emit('sync', {
-    type: 'applied',
-    tables,
-    data: newData,
-    prevData: oldData,
-  });
+    if (hasDeferredMessages) {
+      notifyDeferredMessages();
+    }
 
-  if (hasDeferredMessages && !hasNotifiedDeferredMessages) {
-    hasNotifiedDeferredMessages = true;
-    app.events.emit('sync', { type: 'deferred-messages' });
-  }
-
-  return messages;
-});
+    return messages;
+  },
+);
 
 export function receiveMessages(messages: Message[]): Promise<Message[]> {
   try {
@@ -517,7 +533,9 @@ export function receiveMessages(messages: Message[]): Promise<Message[]> {
     throw e;
   }
 
-  return runMutator(() => applyMessages(messages));
+  // Inbound messages may come from a newer version of the app, so
+  // unknown-schema errors defer instead of failing the batch
+  return runMutator(() => applyMessages(messages, true));
 }
 
 async function errorHandler(e: Error) {

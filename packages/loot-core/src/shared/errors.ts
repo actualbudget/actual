@@ -62,7 +62,7 @@ export function isMissingSchemaErrorMessage(message: string): boolean {
   return /no such (table|column)|has no column named/i.test(message);
 }
 
-function isDatabaseSchemaMismatch(meta?: unknown): boolean {
+export function isDatabaseSchemaMismatch(meta?: unknown): boolean {
   if (
     meta &&
     typeof meta === 'object' &&

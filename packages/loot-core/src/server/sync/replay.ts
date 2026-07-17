@@ -13,14 +13,17 @@ import { deserializeValue, isMissingSchemaError } from './index';
 // safe because nothing else can have written those cells: while the
 // column/table was missing, every message for it was deferred, and replay
 // runs before syncing or local mutations start.
-export function replayPendingMessages(): void {
+//
+// Returns the number of messages still pending afterwards, so the
+// caller can re-notify the user that an app update is needed.
+export function replayPendingMessages(): number {
   const pending = db.runQuery<db.DbPendingMessage>(
     'SELECT * FROM messages_pending ORDER BY timestamp',
     [],
     true,
   );
   if (pending.length === 0) {
-    return;
+    return 0;
   }
 
   let appliedCount = 0;
@@ -65,4 +68,5 @@ export function replayPendingMessages(): void {
       `Applied ${appliedCount} sync message(s) deferred from a newer version`,
     );
   }
+  return pending.length - appliedCount;
 }
