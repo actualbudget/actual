@@ -7,17 +7,19 @@ import { describe, expect, it } from 'vitest';
 import * as sqlite from '#platform/server/sqlite';
 
 import { applyMigration, getMigrationId, getMigrationList } from './migrations';
+import { findAdditiveViolations, snapshotSchema } from './schema-diff';
 
 // Migrations newer than this id must be additive-only. Clients tolerate
 // budgets and sync messages from newer app versions (see
 // `replayPendingMessages` and `checkDatabaseValidity`), which is only
 // safe if newer migrations never remove or rename what older clients
 // depend on. This is enforced by actually running the migration chain
-// and diffing the real schema before/after each new migration, so
-// nothing a migration does (comments, string literals, table rebuilds)
-// can hide a destructive change. Dropping/recreating views is fine —
-// they hold no data — but their columns must stay backwards-compatible
-// (a code-review concern, not enforceable here).
+// and diffing the real schema around each new migration (see
+// ./schema-diff.ts), so nothing a migration does — comments, string
+// literals, table rebuilds — can hide a destructive change.
+// Dropping/recreating views is fine: they hold no data, but their
+// columns must stay backwards-compatible (a code-review concern, not
+// enforceable here).
 const ADDITIVE_ONLY_CUTOFF = 1780606215001;
 
 const MIGRATIONS_DIR = path.resolve(__dirname, '../../../migrations');
@@ -31,100 +33,46 @@ const INIT_SQL = path.resolve(__dirname, '../sql/init.sql');
 // internal tables here.
 const NON_SYNCED_TABLES = new Set(['messages_pending']);
 
-// table name -> columns, from PRAGMA table_info
-type Schema = Map<
-  string,
-  Array<{
-    name: string;
-    notnull: number;
-    dflt_value: string | null;
-    pk: number;
-  }>
->;
-
-function snapshotSchema(db: Database): Schema {
-  const tables = sqlite.runQuery<{ name: string }>(
-    db,
-    "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
-    [],
-    true,
-  );
-  return new Map(
-    tables.map(({ name }) => [
-      name,
-      sqlite.runQuery(db, `PRAGMA table_info("${name}")`, [], true),
-    ]),
-  );
+async function openTestDb(setupSql: string): Promise<Database> {
+  await sqlite.init();
+  const db = await sqlite.openDatabase(':memory:');
+  sqlite.execQuery(db, setupSql);
+  return db;
 }
 
-function findViolations(before: Schema, after: Schema): string[] {
-  const violations: string[] = [];
-
-  for (const [table, beforeColumns] of before) {
-    const afterColumns = after.get(table);
-    if (!afterColumns) {
-      violations.push(`table "${table}" was removed or renamed`);
-      continue;
-    }
-    for (const column of beforeColumns) {
-      if (!afterColumns.some(c => c.name === column.name)) {
-        violations.push(
-          `column "${table}.${column.name}" was removed or renamed`,
-        );
-      }
-    }
-  }
-
-  for (const [table, afterColumns] of after) {
-    if (NON_SYNCED_TABLES.has(table)) {
-      continue;
-    }
-    const beforeColumns = before.get(table);
-    for (const column of afterColumns) {
-      const isNew = !beforeColumns?.some(c => c.name === column.name);
-      if (isNew && column.notnull && column.dflt_value == null && !column.pk) {
-        violations.push(
-          `new column "${table}.${column.name}" is NOT NULL without a DEFAULT`,
-        );
-      }
-    }
-  }
-
-  return violations;
-}
-
-// Applies `migrationSql` to a scratch database prepared with `setupSql`
-// and returns the additive-only violations it introduces
+// The additive-only violations that `migrationSql` introduces on a
+// database prepared with `setupSql`
 async function violationsFor(
   setupSql: string,
   migrationSql: string,
 ): Promise<string[]> {
-  await sqlite.init();
-  const db = await sqlite.openDatabase(':memory:');
-  sqlite.execQuery(db, setupSql);
+  const db = await openTestDb(setupSql);
   const before = snapshotSchema(db);
   sqlite.execQuery(db, migrationSql);
-  const violations = findViolations(before, snapshotSchema(db));
+  const violations = findAdditiveViolations(
+    before,
+    snapshotSchema(db),
+    NON_SYNCED_TABLES,
+  );
   sqlite.closeDatabase(db);
   return violations;
 }
 
 describe('migrations are additive-only', () => {
   it('every migration after the cutoff is additive-only', async () => {
-    await sqlite.init();
-    const db = await sqlite.openDatabase(':memory:');
-    sqlite.execQuery(db, nativeFs.readFileSync(INIT_SQL, 'utf8'));
+    const db = await openTestDb(nativeFs.readFileSync(INIT_SQL, 'utf8'));
 
     const violations: string[] = [];
     for (const name of await getMigrationList(MIGRATIONS_DIR)) {
-      const isChecked = getMigrationId(name) > ADDITIVE_ONLY_CUTOFF;
-      const before = isChecked ? snapshotSchema(db) : null;
+      const before = snapshotSchema(db);
       await applyMigration(db, name, MIGRATIONS_DIR);
-      if (before) {
+      if (getMigrationId(name) > ADDITIVE_ONLY_CUTOFF) {
         violations.push(
-          ...findViolations(before, snapshotSchema(db)).map(
-            violation => `${name}: ${violation}`,
-          ),
+          ...findAdditiveViolations(
+            before,
+            snapshotSchema(db),
+            NON_SYNCED_TABLES,
+          ).map(violation => `${name}: ${violation}`),
         );
       }
     }
@@ -132,8 +80,7 @@ describe('migrations are additive-only', () => {
 
     expect(
       violations,
-      `Destructive migrations found (${violations.join('; ')}). ` +
-        'Migrations must be additive-only so that older clients keep ' +
+      'Migrations must be additive-only so that older clients keep ' +
         'working: no dropping or renaming tables/columns, and new ' +
         'columns in synced tables must be nullable or have a DEFAULT ' +
         '(sync builds rows one column at a time). If you need to ' +
@@ -173,7 +120,7 @@ describe('migrations are additive-only', () => {
           shape TEXT DEFAULT 'round');`,
     ],
   ])('sanity check: flags %s', async (_case, setup, migration) => {
-    expect((await violationsFor(setup, migration)).length).toBeGreaterThan(0);
+    expect(await violationsFor(setup, migration)).not.toEqual([]);
   });
 
   it.each([
