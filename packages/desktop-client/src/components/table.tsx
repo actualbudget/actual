@@ -181,6 +181,7 @@ export function Cell({
   valueStyle,
   unexposedContent,
   privacyFilter,
+  role,
   ...viewProps
 }: CellProps) {
   const mouseCoords = useRef(null);
@@ -272,6 +273,7 @@ export function Cell({
 
   return (
     <View
+      role={role ?? 'gridcell'}
       style={{ ...widthStyle, ...cellStyle, ...style }}
       {...viewProps}
       innerRef={mergedRef}
@@ -796,12 +798,14 @@ export function TableHeader({
 }: TableHeaderProps) {
   return (
     <View
+      role="rowgroup"
       style={{
         overflow: 'hidden',
         flexShrink: 0,
       }}
     >
       <Row
+        role="row"
         collapsed
         {...rowProps}
         style={{
@@ -813,10 +817,12 @@ export function TableHeader({
         }}
       >
         {headers
-          ? headers.map(header => {
+          ? headers.map((header, index) => {
               return (
                 <Cell
                   key={header.name}
+                  role="columnheader"
+                  aria-colindex={index + 1}
                   value={header.name}
                   width={header.width}
                   style={header.style}
@@ -929,6 +935,10 @@ type TableItem = { id: number | string };
 export type TableProps<T extends TableItem = TableItem> = {
   items: T[];
   count?: number;
+  ariaLabel?: string;
+  ariaLabelledBy?: string;
+  ariaColCount?: number;
+  headerRowCount?: number;
   headers?: ReactNode | TableHeaderProps['headers'];
   contentHeader?: ReactNode;
   loading?: boolean;
@@ -959,6 +969,10 @@ export const Table = forwardRef(
     {
       items,
       count,
+      ariaLabel,
+      ariaLabelledBy,
+      ariaColCount,
+      headerRowCount,
       headers,
       contentHeader,
       loading,
@@ -1091,6 +1105,8 @@ export const Table = forwardRef(
       return (
         <View
           key={key}
+          role="row"
+          aria-rowindex={index + (headerRowCount ?? (headers ? 1 : 0)) + 1}
           style={{
             ...rowStyle,
             zIndex: editing || selected ? 101 : 'auto',
@@ -1158,9 +1174,19 @@ export const Table = forwardRef(
     }
 
     const isEmpty = (count || items.length) === 0;
+    const resolvedHeaderRowCount = headerRowCount ?? (headers ? 1 : 0);
+    const resolvedBodyRowCount = count ?? items.length;
+    const resolvedRowCount = resolvedHeaderRowCount + resolvedBodyRowCount;
+    const resolvedColCount =
+      ariaColCount ?? (Array.isArray(headers) ? headers.length : undefined);
 
     return (
       <View
+        role="grid"
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
+        aria-rowcount={resolvedRowCount}
+        aria-colcount={resolvedColCount}
         style={{
           flex: 1,
           outline: 'none',
@@ -1178,6 +1204,7 @@ export const Table = forwardRef(
           />
         )}
         <View
+          role="rowgroup"
           style={{
             flex: `1 1 ${rowHeight * Math.max(2, items.length)}px`,
             backgroundColor,

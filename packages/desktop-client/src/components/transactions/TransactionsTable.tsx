@@ -162,6 +162,35 @@ type TransactionHeaderProps = {
   field: string;
 };
 
+function getTransactionColIndex({
+  showSelection,
+  showAccount,
+  showCategory,
+  showBalance,
+  showCleared,
+}: {
+  showSelection: boolean;
+  showAccount: boolean;
+  showCategory: boolean;
+  showBalance: boolean;
+  showCleared: boolean;
+}) {
+  let colIndex = 1;
+
+  return {
+    selection: colIndex++,
+    date: colIndex++,
+    account: showAccount ? colIndex++ : null,
+    payee: colIndex++,
+    notes: colIndex++,
+    category: showCategory ? colIndex++ : null,
+    payment: colIndex++,
+    deposit: colIndex++,
+    balance: showBalance ? colIndex++ : null,
+    cleared: showCleared ? colIndex++ : null,
+  };
+}
+
 const TransactionHeader = memo(
   ({
     hasSelected,
@@ -188,21 +217,17 @@ const TransactionHeader = memo(
       [dispatchSelected],
     );
 
-    const headerColIndex = useMemo(() => {
-      let colIndex = 2;
-
-      return {
-        date: colIndex++,
-        account: showAccount ? colIndex++ : null,
-        payee: colIndex++,
-        notes: colIndex++,
-        category: showCategory ? colIndex++ : null,
-        payment: colIndex++,
-        deposit: colIndex++,
-        balance: showBalance ? colIndex++ : null,
-        cleared: showCleared ? colIndex++ : null,
-      };
-    }, [showAccount, showCategory, showBalance, showCleared]);
+    const headerColIndex = useMemo(
+      () =>
+        getTransactionColIndex({
+          showSelection,
+          showAccount,
+          showCategory,
+          showBalance,
+          showCleared,
+        }),
+      [showSelection, showAccount, showCategory, showBalance, showCleared],
+    );
 
     return (
       <Row
@@ -222,7 +247,7 @@ const TransactionHeader = memo(
         {showSelection && (
           <SelectCell
             role="columnheader"
-            aria-colindex={1}
+            aria-colindex={headerColIndex.selection}
             aria-label={t('Select')}
             exposed
             focused={false}
@@ -244,7 +269,7 @@ const TransactionHeader = memo(
         {!showSelection && (
           <Field
             role="columnheader"
-            aria-colindex={1}
+            aria-colindex={headerColIndex.selection}
             style={{
               width: '20px',
               border: 0,
@@ -276,7 +301,7 @@ const TransactionHeader = memo(
             width="flex"
             alignItems="flex"
             marginLeft={-5}
-            colIndex={headerColIndex.account}
+            colIndex={headerColIndex.account!}
             ariaSort={
               field === 'account'
                 ? ascDesc === 'asc'
@@ -335,7 +360,7 @@ const TransactionHeader = memo(
             width="flex"
             alignItems="flex"
             marginLeft={-5}
-            colIndex={headerColIndex.category}
+            colIndex={headerColIndex.category!}
             ariaSort={
               field === 'category'
                 ? ascDesc === 'asc'
@@ -397,7 +422,7 @@ const TransactionHeader = memo(
             width={103}
             alignItems="flex-end"
             marginRight={-5}
-            colIndex={headerColIndex.balance}
+            colIndex={headerColIndex.balance!}
             id="balance"
           />
         )}
@@ -406,7 +431,7 @@ const TransactionHeader = memo(
             value="✓"
             width={38}
             alignItems="center"
-            colIndex={headerColIndex.cleared}
+            colIndex={headerColIndex.cleared!}
             ariaSort={
               field === 'cleared'
                 ? ascDesc === 'asc'
@@ -433,6 +458,7 @@ TransactionHeader.displayName = 'TransactionHeader';
 
 type StatusCellProps = {
   id: TransactionEntity['id'];
+  colIndex?: number;
   status?: StatusTypes | null;
   focused?: boolean;
   selected?: boolean;
@@ -444,6 +470,7 @@ type StatusCellProps = {
 
 function StatusCell({
   id,
+  colIndex,
   focused,
   selected,
   status,
@@ -477,6 +504,7 @@ function StatusCell({
 
   return (
     <Cell
+      aria-colindex={colIndex}
       name="cleared"
       width={38}
       alignItems="center"
@@ -585,6 +613,7 @@ function HeaderCell({
 
 type PayeeCellProps = {
   id: TransactionEntity['id'];
+  colIndex: number;
   payee?: PayeeEntity;
   focused: boolean;
   payees: PayeeEntity[];
@@ -606,6 +635,7 @@ type PayeeCellProps = {
 
 function PayeeCell({
   id,
+  colIndex,
   payee,
   focused,
   payees,
@@ -633,6 +663,7 @@ function PayeeCell({
 
   return transaction.is_parent ? (
     <Cell
+      aria-colindex={colIndex}
       name="payee"
       width="flex"
       focused={focused}
@@ -737,6 +768,7 @@ function PayeeCell({
     </Cell>
   ) : (
     <CustomCell
+      aria-colindex={colIndex}
       width="flex"
       name="payee"
       textAlign="flex"
@@ -946,6 +978,7 @@ type TransactionProps = {
   };
   editing: boolean;
   showAccount?: boolean;
+  showCategory?: boolean;
   showBalance?: boolean;
   showCleared?: boolean;
   showZeroInDeposit?: boolean;
@@ -1013,6 +1046,7 @@ const Transaction = memo(function Transaction({
   transferAccountsByTransaction,
   editing,
   showAccount,
+  showCategory,
   showBalance,
   showCleared,
   showZeroInDeposit,
@@ -1069,6 +1103,17 @@ const Transaction = memo(function Transaction({
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
   const triggerRef = useRef(null);
+  const colIndex = useMemo(
+    () =>
+      getTransactionColIndex({
+        showSelection: !!showSelection,
+        showAccount: !!showAccount,
+        showCategory: showCategory !== false,
+        showBalance: !!showBalance,
+        showCleared: !!showCleared,
+      }),
+    [showSelection, showAccount, showCategory, showBalance, showCleared],
+  );
 
   const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
@@ -1437,6 +1482,7 @@ const Transaction = memo(function Transaction({
     >
       <DropHighlight pos={showDropHighlight ? dropPos : null} />
       <Row
+        role="presentation"
         ref={rowRef}
         {...dragProps}
         style={{
@@ -1490,6 +1536,7 @@ const Transaction = memo(function Transaction({
 
         {isChild && (
           <Field
+            aria-colindex={colIndex.date ?? undefined}
             /* Checkmark blank placeholder for Child transaction */
             width={110}
             style={{
@@ -1502,6 +1549,7 @@ const Transaction = memo(function Transaction({
 
         {isChild && showAccount && (
           <Field
+            aria-colindex={colIndex.account ?? undefined}
             /* Account blank placeholder for Child transaction */
             style={{
               flex: 1,
@@ -1516,6 +1564,7 @@ const Transaction = memo(function Transaction({
         {isTemporaryId(transaction.id) ? (
           isChild ? (
             <DeleteCell
+              aria-colindex={colIndex.selection}
               onDelete={() => onDelete && onDelete(transaction.id)}
               exposed={editing}
               style={{
@@ -1524,12 +1573,13 @@ const Transaction = memo(function Transaction({
               }}
             />
           ) : (
-            <Cell width={20} />
+            <Cell aria-colindex={colIndex.selection} width={20} />
           )
         ) : (isPreview && isChild) || !showSelection ? (
-          <Cell width={20} />
+          <Cell aria-colindex={colIndex.selection} width={20} />
         ) : (
           <SelectCell
+            aria-colindex={colIndex.selection}
             /* Checkmark field for non-child transaction */
             exposed
             buttonProps={{
@@ -1560,6 +1610,7 @@ const Transaction = memo(function Transaction({
         )}
         {!isChild && (
           <CustomCell
+            aria-colindex={colIndex.date ?? undefined}
             /* Date field for non-child transaction */
             name="date"
             width={110}
@@ -1598,6 +1649,7 @@ const Transaction = memo(function Transaction({
 
         {!isChild && showAccount && (
           <CustomCell
+            aria-colindex={colIndex.account ?? undefined}
             /* Account field for non-child transaction */
             name="account"
             width="flex"
@@ -1643,6 +1695,7 @@ const Transaction = memo(function Transaction({
         )}
         {(() => (
           <PayeeCell
+            colIndex={colIndex.payee}
             /* Payee field for all transactions */
             id={id}
             payee={payee}
@@ -1668,6 +1721,7 @@ const Transaction = memo(function Transaction({
         ))()}
 
         <NotesCell
+          ariaColIndex={colIndex.notes}
           note={notes ?? ''}
           scheduleNote={isPreview ? schedule?.name : null}
           focused={focusedField === 'notes'}
@@ -1679,8 +1733,9 @@ const Transaction = memo(function Transaction({
           onExpose={name => !isPreview && onEdit(id, name)}
         />
 
-        {(isPreview && !isChild) || isParent ? (
+        {showCategory && ((isPreview && !isChild) || isParent ? (
           <Cell
+            aria-colindex={colIndex.category ?? undefined}
             /* Category field (Split button) for parent transactions */
             name="category"
             width="flex"
@@ -1776,6 +1831,7 @@ const Transaction = memo(function Transaction({
           </Cell>
         ) : isBudgetTransfer || isOffBudget ? (
           <InputCell
+            aria-colindex={colIndex.category ?? undefined}
             /* Category field for transfer and off budget transactions
               (NOT preview, it is covered first) */
             name="category"
@@ -1805,6 +1861,7 @@ const Transaction = memo(function Transaction({
           />
         ) : (
           <CustomCell
+            aria-colindex={colIndex.category ?? undefined}
             /* Category field for normal and child transactions */
             name="category"
             width="flex"
@@ -1867,9 +1924,10 @@ const Transaction = memo(function Transaction({
               </SheetNameProvider>
             )}
           </CustomCell>
-        )}
+        ))}
 
         <InputCell
+          aria-colindex={colIndex.payment}
           /* Debit field for all transactions */
           type="input"
           width={100}
@@ -1901,6 +1959,7 @@ const Transaction = memo(function Transaction({
         />
 
         <InputCell
+          aria-colindex={colIndex.deposit}
           /* Credit field for all transactions */
           type="input"
           width={100}
@@ -1933,6 +1992,7 @@ const Transaction = memo(function Transaction({
 
         {showBalance && (
           <Cell
+            aria-colindex={colIndex.balance ?? undefined}
             /* Balance field for all transactions */
             name="balance"
             value={
@@ -1955,6 +2015,7 @@ const Transaction = memo(function Transaction({
 
         {showCleared && (
           <StatusCell
+            colIndex={colIndex.cleared ?? undefined}
             /* Icon field for all transactions */
             id={id}
             focused={focusedField === 'cleared'}
@@ -1975,7 +2036,7 @@ const Transaction = memo(function Transaction({
           />
         )}
 
-        <Cell width={5} />
+        <Cell role="presentation" width={5} />
       </Row>
       <DragPreview ref={previewRef}>
         {() => (
@@ -2046,6 +2107,7 @@ const Transaction = memo(function Transaction({
 });
 
 type NotesCellProps = {
+  ariaColIndex: number;
   note: string;
   scheduleNote: string | null | undefined;
   focused: boolean;
@@ -2056,6 +2118,7 @@ type NotesCellProps = {
 };
 
 function NotesCell({
+  ariaColIndex,
   note,
   scheduleNote,
   focused,
@@ -2082,6 +2145,7 @@ function NotesCell({
 
   return (
     <CustomCell
+      aria-colindex={ariaColIndex}
       innerRef={cellRef}
       width="flex"
       name="notes"
@@ -2201,6 +2265,7 @@ type NewTransactionProps = {
   onSplit: (id: TransactionEntity['id']) => void;
   payees: PayeeEntity[];
   showAccount?: boolean;
+  showCategory?: boolean;
   showBalance?: boolean;
   balance?: number | null;
   showCleared?: boolean;
@@ -2219,6 +2284,7 @@ function NewTransaction({
   editingTransaction,
   focusedField,
   showAccount,
+  showCategory,
   showBalance,
   showCleared,
   dateFormat,
@@ -2284,6 +2350,7 @@ function NewTransaction({
           subtransactions={transaction.is_parent ? childTransactions : null}
           transferAccountsByTransaction={transferAccountsByTransaction}
           showAccount={showAccount}
+          showCategory={showCategory}
           showBalance={showBalance}
           showCleared={showCleared}
           focusedField={
@@ -2606,6 +2673,7 @@ function TransactionTableInner({
         transferAccountsByTransaction={props.transferAccountsByTransaction}
         subtransactions={childTransactions}
         showAccount={showAccount}
+        showCategory={props.showCategory}
         showBalance={showBalances}
         showCleared={showCleared}
         selected={selected}
@@ -2710,6 +2778,7 @@ function TransactionTableInner({
               categoryGroups={props.categoryGroups}
               payees={props.payees || []}
               showAccount={props.showAccount}
+              showCategory={props.showCategory}
               showBalance={props.showBalances}
               showCleared={props.showCleared}
               dateFormat={dateFormat}
