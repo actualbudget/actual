@@ -378,20 +378,24 @@ function accountConditionToTransferAcctAql(
       return { 'payee.transfer_acct.offbudget': false };
     case 'offBudget':
       return { 'payee.transfer_acct.offbudget': true };
-    case 'contains':
+    case 'contains': {
+      if (typeof value !== 'string') return null;
       return {
         'payee.transfer_acct.name': {
           $transform: '$lower',
           $like: `%${value}%`,
         },
       };
-    case 'doesNotContain':
+    }
+    case 'doesNotContain': {
+      if (typeof value !== 'string') return null;
       return {
         'payee.transfer_acct.name': {
           $transform: '$lower',
           $notlike: `%${value}%`,
         },
       };
+    }
     default:
       return null;
   }

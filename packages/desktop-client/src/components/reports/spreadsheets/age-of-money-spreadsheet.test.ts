@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
+import { describe, expect, it } from 'vitest';
 
 import type {
   Transaction,
