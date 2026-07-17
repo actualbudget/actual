@@ -3,8 +3,9 @@ import type { CSSProperties } from 'react';
 
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
-import { friendlyOp } from '@actual-app/core/shared/rules';
 import { css } from '@emotion/css';
+
+import { friendlyOp } from '#util/rule';
 
 type OpButtonProps = {
   op: string;

@@ -4,20 +4,21 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgRightArrow2 } from '@actual-app/components/icons/v0';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { friendlyOp, translateRuleStage } from '@actual-app/core/shared/rules';
 import type { RuleEntity } from '@actual-app/core/types/models';
 
 import { Cell, Field, Row, SelectCell } from '#components/table';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useSelectedDispatch } from '#hooks/useSelected';
-import { groupActionsBySplitIndex } from '#util/ruleUtils';
+import {
+  friendlyOp,
+  groupActionsBySplitIndex,
+  translateRuleStage,
+} from '#util/rule';
 
 import { ActionExpression } from './ActionExpression';
 import { ConditionExpression } from './ConditionExpression';
@@ -52,8 +53,23 @@ export const RuleRow = memo(
     const { t } = useTranslation();
 
     const triggerRef = useRef(null);
-    const { setMenuOpen, menuOpen, handleContextMenu, position } =
-      useContextMenu();
+
+    useContextMenu({
+      triggerRef,
+      items: [
+        onEditRule && {
+          name: 'edit',
+          text: t('Edit'),
+          onClick: () => onEditRule(rule),
+        },
+        onDeleteRule &&
+          !hasSchedule && {
+            name: 'delete',
+            text: t('Delete'),
+            onClick: () => onDeleteRule(rule),
+          },
+      ],
+    });
 
     return (
       <Row
@@ -72,38 +88,7 @@ export const RuleRow = memo(
         collapsed
         onMouseEnter={() => onHover && onHover(rule.id)}
         onMouseLeave={() => onHover && onHover(null)}
-        onContextMenu={handleContextMenu}
       >
-        <Popover
-          triggerRef={triggerRef}
-          placement="bottom start"
-          isOpen={menuOpen}
-          onOpenChange={() => setMenuOpen(false)}
-          {...position}
-          style={{ width: 200, margin: 1 }}
-          isNonModal
-        >
-          <Menu
-            items={[
-              onEditRule && { name: 'edit', text: t('Edit') },
-              onDeleteRule &&
-                !hasSchedule && { name: 'delete', text: t('Delete') },
-            ]}
-            onMenuSelect={name => {
-              switch (name) {
-                case 'delete':
-                  onDeleteRule(rule);
-                  break;
-                case 'edit':
-                  onEditRule(rule);
-                  break;
-                default:
-                  throw new Error(`Unrecognized menu option: ${String(name)}`);
-              }
-              setMenuOpen(false);
-            }}
-          />
-        </Popover>
         <SelectCell
           exposed={hovered || selected}
           focused

@@ -8,6 +8,7 @@ import React, {
 import type { ReactNode } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
+import * as Platform from '@actual-app/core/shared/platform';
 import type { Handlers } from '@actual-app/core/types/handlers';
 import { t } from 'i18next';
 
@@ -73,6 +74,9 @@ export const useAvailableLoginMethods = () =>
   useContext(ServerContext).availableLoginMethods;
 
 async function getServerVersion() {
+  if (Platform.isPlaywright) {
+    return '99.9.9';
+  }
   const result = await send('get-server-version');
   if ('version' in result) {
     return result.version;

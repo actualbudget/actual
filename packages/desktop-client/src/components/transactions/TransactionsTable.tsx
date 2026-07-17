@@ -45,15 +45,16 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { memoizeOne } from '@actual-app/core/shared/memoize';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import { getStatusLabel } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
   groupTransaction,
   isPreviewId,
   isTemporaryId,
+  makeEmptySplitSubtransactions,
   splitTransaction,
   ungroupTransactions,
   updateTransaction,
@@ -75,7 +76,6 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 import { format as formatDate, parseISO } from 'date-fns';
-import memoizeOne from 'memoize-one';
 
 import { getAccountsById } from '#accounts/accountsSlice';
 import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
@@ -107,7 +107,6 @@ import {
   SchedulesProvider,
   useCachedSchedules,
 } from '#hooks/useCachedSchedules';
-import { useContextMenu } from '#hooks/useContextMenu';
 import { DisplayPayeeProvider, useDisplayPayee } from '#hooks/useDisplayPayee';
 import {
   DropHighlight,
@@ -134,6 +133,7 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { getPayeesById } from '#payees';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
+import { getStatusLabel } from '#util/schedule';
 
 import {
   deserializeTransaction,
@@ -147,7 +147,7 @@ import type {
   TransactionEditFunction,
   TransactionUpdateFunction,
 } from './table/utils';
-import { TransactionMenu } from './TransactionMenu';
+import { useTransactionRowContextActions } from './useTransactionRowContextActions';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -1279,7 +1279,9 @@ const Transaction = memo(function Transaction({
   const isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   const isOffBudget = account && account.offbudget === 1;
 
-  const valueStyle = added ? { fontWeight: 600 } : null;
+  const valueStyle = added
+    ? { fontWeight: 600, color: theme.tableTextItemAdded }
+    : null;
   const backgroundFocus = focusedField === 'select';
   const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
@@ -1306,9 +1308,6 @@ const Transaction = memo(function Transaction({
     }, 1);
     return () => clearTimeout(id);
   }, [splitError, allTransactions]);
-
-  const { setMenuOpen, menuOpen, handleContextMenu, position } =
-    useContextMenu();
 
   // Drag and drop support
   const isChildTransaction = transaction.is_child;
@@ -1415,6 +1414,19 @@ const Transaction = memo(function Transaction({
     dropPos && isValidDropTarget && !isBeingDragged,
   );
 
+  useTransactionRowContextActions({
+    rowRef: triggerRef,
+    transaction,
+    getTransaction: id => allTransactions?.find(t => t.id === id),
+    onDelete: ids => onBatchDelete?.(ids),
+    onDuplicate: ids => onBatchDuplicate?.(ids),
+    onLinkSchedule: ids => onBatchLinkSchedule?.(ids),
+    onUnlinkSchedule: ids => onBatchUnlinkSchedule?.(ids),
+    onCreateRule: ids => onCreateRule?.(ids),
+    onScheduleAction: (name, ids) => onScheduleAction?.(name, ids),
+    onMakeAsNonSplitTransactions: ids => onMakeAsNonSplitTransactions?.(ids),
+  });
+
   return (
     <View
       innerRef={dropRef}
@@ -1455,35 +1467,7 @@ const Transaction = memo(function Transaction({
           ...(_unmatched && { opacity: 0.5 }),
           ...(isBeingDragged && { opacity: 0.5 }),
         }}
-        onContextMenu={handleContextMenu}
       >
-        <Popover
-          triggerRef={triggerRef}
-          placement="bottom start"
-          isOpen={menuOpen}
-          onOpenChange={isOpen => {
-            if (!isOpen) setMenuOpen(false);
-          }}
-          {...position}
-          style={{ width: 200, margin: 1 }}
-          isNonModal={false}
-        >
-          <TransactionMenu
-            transaction={transaction}
-            getTransaction={id => allTransactions?.find(t => t.id === id)}
-            onDelete={ids => onBatchDelete?.(ids)}
-            onDuplicate={ids => onBatchDuplicate?.(ids)}
-            onLinkSchedule={ids => onBatchLinkSchedule?.(ids)}
-            onUnlinkSchedule={ids => onBatchUnlinkSchedule?.(ids)}
-            onCreateRule={ids => onCreateRule?.(ids)}
-            onScheduleAction={(name, ids) => onScheduleAction?.(name, ids)}
-            onMakeAsNonSplitTransactions={ids =>
-              onMakeAsNonSplitTransactions?.(ids)
-            }
-            closeMenu={() => setMenuOpen(false)}
-          />
-        </Popover>
-
         {splitError && listContainerRef?.current && (
           <Popover
             triggerRef={triggerRef}
@@ -1492,6 +1476,7 @@ const Transaction = memo(function Transaction({
             style={{
               width: 'max-content',
               maxWidth: 'none',
+              maxHeight: 'none !important',
               minWidth: 375,
               padding: 5,
             }}
@@ -1686,6 +1671,7 @@ const Transaction = memo(function Transaction({
           note={notes ?? ''}
           scheduleNote={isPreview ? schedule?.name : null}
           focused={focusedField === 'notes'}
+          valueStyle={valueStyle}
           onClickTag={onNotesTagClick}
           onUpdate={value => {
             onUpdate('notes', value?.trim());
@@ -2063,6 +2049,7 @@ type NotesCellProps = {
   note: string;
   scheduleNote: string | null | undefined;
   focused: boolean;
+  valueStyle: CSSProperties | null;
   onUpdate: (value: string) => void;
   onClickTag: (tag: string) => void;
   onExpose: (name: string) => void;
@@ -2072,10 +2059,12 @@ function NotesCell({
   note,
   scheduleNote,
   focused,
+  valueStyle,
   onUpdate,
   onClickTag,
   onExpose,
 }: NotesCellProps) {
+  const cellRef = useRef<HTMLDivElement | null>(null);
   const [inputValue, setInputValue] = useState(note);
   useEffect(() => {
     setInputValue(note);
@@ -2093,9 +2082,11 @@ function NotesCell({
 
   return (
     <CustomCell
+      innerRef={cellRef}
       width="flex"
       name="notes"
       value={displayedNote}
+      valueStyle={valueStyle}
       formatter={value =>
         NotesTagFormatter({ notes: value, onNotesTagClick: onClickTag })
       }
@@ -3373,7 +3364,11 @@ export const TransactionTable = forwardRef(
         if (isTemporaryId(id)) {
           const { newNavigator } = latestState.current;
           const newTrans = latestState.current.newTransactions;
-          const { data, diff } = splitTransaction(newTrans, id);
+          const { data, diff } = splitTransaction(
+            newTrans,
+            id,
+            makeEmptySplitSubtransactions,
+          );
           setNewTransactions(data);
 
           // Jump next to "debit" field if it is empty

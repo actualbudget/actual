@@ -31,7 +31,7 @@ export function TypePicker({ active, disabledTypes, onPick }: TypePickerProps) {
     <View
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
         gap: 8,
       }}
     >

@@ -26,6 +26,13 @@ app.get('/owner-created/', (req, res) => {
   }
 });
 
+// NOTE: This endpoint intentionally has no isAdmin check, which allows user
+// enumeration by any authenticated user. This is a known, accepted trade-off
+// (wont-fix). Actual's multi-user/OpenID feature is intended for friends &
+// family setups, not SaaS, so the attack surface is low. The endpoint is also
+// used in the budget ownership transfer flow, where neither the current nor the
+// target user is necessarily an admin — adding isAdmin would break that flow
+// without a substantial refactor.
 app.get('/users/', validateSessionMiddleware, (req, res) => {
   const users = UserService.getAllUsers();
   res.json(

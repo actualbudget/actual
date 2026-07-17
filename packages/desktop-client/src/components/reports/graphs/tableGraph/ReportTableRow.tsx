@@ -76,25 +76,22 @@ export const ReportTableRow = memo(
     const { data: categories = { grouped: [], list: [] } } = useCategories();
     const { data: accounts = [] } = useAccounts();
 
-    const pointer =
-      !isNarrowWidth &&
-      !['Group', 'Interval'].includes(groupBy) &&
-      !compact &&
-      !categories.grouped.map(g => g.id).includes(item.id)
-        ? 'pointer'
-        : 'inherit';
+    const isGroupRow =
+      item.uncategorizedId === 'all' ||
+      categories.grouped.some(g => g.id === item.id);
+    const drilldownField = isGroupRow ? 'group' : groupBy.toLowerCase();
+    const canShowActivity =
+      !isNarrowWidth && groupBy !== 'Interval' && !compact;
 
-    const hoverUnderline =
-      !isNarrowWidth &&
-      !['Group', 'Interval'].includes(groupBy) &&
-      !compact &&
-      !categories.grouped.map(g => g.id).includes(item.id)
-        ? {
-            cursor: pointer,
-            ':hover': { textDecoration: 'underline' },
-            flexGrow: 0,
-          }
-        : {};
+    const pointer = canShowActivity ? 'pointer' : 'inherit';
+
+    const hoverUnderline = canShowActivity
+      ? {
+          cursor: pointer,
+          ':hover': { textDecoration: 'underline' },
+          flexGrow: 0,
+        }
+      : {};
 
     return (
       <Row
@@ -161,10 +158,7 @@ export const ReportTableRow = memo(
                         : undefined
                     }
                     onClick={() =>
-                      !isNarrowWidth &&
-                      !['Group', 'Interval'].includes(groupBy) &&
-                      !compact &&
-                      !categories.grouped.map(g => g.id).includes(item.id) &&
+                      canShowActivity &&
                       showActivity({
                         navigate,
                         categories,
@@ -176,8 +170,9 @@ export const ReportTableRow = memo(
                         type: 'time',
                         startDate: intervalItem.intervalStartDate || '',
                         endDate: intervalItem.intervalEndDate || '',
-                        field: groupBy.toLowerCase(),
+                        field: drilldownField,
                         id: item.id,
+                        uncategorizedId: item.uncategorizedId,
                         interval,
                       })
                     }
@@ -218,10 +213,7 @@ export const ReportTableRow = memo(
                     )}
                     valueStyle={compactStyle}
                     onClick={() =>
-                      !isNarrowWidth &&
-                      !['Group', 'Interval'].includes(groupBy) &&
-                      !compact &&
-                      !categories.grouped.map(g => g.id).includes(item.id) &&
+                      canShowActivity &&
                       showActivity({
                         navigate,
                         categories,
@@ -233,8 +225,9 @@ export const ReportTableRow = memo(
                         type: 'assets',
                         startDate,
                         endDate,
-                        field: groupBy.toLowerCase(),
+                        field: drilldownField,
                         id: item.id,
+                        uncategorizedId: item.uncategorizedId,
                       })
                     }
                   />
@@ -268,10 +261,7 @@ export const ReportTableRow = memo(
                     )}
                     valueStyle={compactStyle}
                     onClick={() =>
-                      !isNarrowWidth &&
-                      !['Group', 'Interval'].includes(groupBy) &&
-                      !compact &&
-                      !categories.grouped.map(g => g.id).includes(item.id) &&
+                      canShowActivity &&
                       showActivity({
                         navigate,
                         categories,
@@ -283,8 +273,9 @@ export const ReportTableRow = memo(
                         type: 'debts',
                         startDate,
                         endDate,
-                        field: groupBy.toLowerCase(),
+                        field: drilldownField,
                         id: item.id,
+                        uncategorizedId: item.uncategorizedId,
                       })
                     }
                   />
@@ -317,10 +308,7 @@ export const ReportTableRow = memo(
             )}
             valueStyle={compactStyle}
             onClick={() =>
-              !isNarrowWidth &&
-              !['Group', 'Interval'].includes(groupBy) &&
-              !compact &&
-              !categories.grouped.map(g => g.id).includes(item.id) &&
+              canShowActivity &&
               showActivity({
                 navigate,
                 categories,
@@ -332,8 +320,9 @@ export const ReportTableRow = memo(
                 type: 'totals',
                 startDate,
                 endDate,
-                field: groupBy.toLowerCase(),
+                field: drilldownField,
                 id: item.id,
+                uncategorizedId: item.uncategorizedId,
               })
             }
             width="flex"

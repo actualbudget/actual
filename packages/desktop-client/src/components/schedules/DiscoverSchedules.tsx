@@ -10,7 +10,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import { q } from '@actual-app/core/shared/query';
-import { getRecurringDescription } from '@actual-app/core/shared/schedules';
 import type { DiscoverScheduleEntity } from '@actual-app/core/types/models';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
@@ -26,6 +25,7 @@ import {
 } from '#hooks/useSelected';
 import { useSendPlatformRequest } from '#hooks/useSendPlatformRequest';
 import { aqlQuery } from '#queries/aqlQuery';
+import { getRecurringDescription } from '#util/schedule';
 
 import { ScheduleAmountCell } from './SchedulesTable';
 

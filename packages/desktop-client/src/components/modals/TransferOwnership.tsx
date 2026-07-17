@@ -9,7 +9,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
-import { getUserAccessErrors } from '@actual-app/core/shared/errors';
 import type { Budget } from '@actual-app/core/types/budget';
 import type { RemoteFile, SyncedLocalFile } from '@actual-app/core/types/file';
 import type { Handlers } from '@actual-app/core/types/handlers';
@@ -22,6 +21,7 @@ import { popModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch, useSelector } from '#redux';
+import { getUserAccessErrors } from '#util/error';
 
 type TransferOwnershipProps = Extract<
   ModalType,

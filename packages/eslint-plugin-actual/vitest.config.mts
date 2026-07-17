@@ -7,5 +7,17 @@ export default defineConfig({
     environment: 'node',
     maxWorkers: 1,
     isolate: false,
+    reporters: process.env.CI
+      ? [
+          'default',
+          [
+            'junit',
+            {
+              outputFile: './test-results/junit.xml',
+              suiteName: 'eslint-plugin-actual',
+            },
+          ],
+        ]
+      : ['default'],
   },
 });

@@ -144,3 +144,13 @@ export function getZeroCrossingGradientOffset(chartData: ChartDataPoint[]) {
 
   return (maxBalance / (maxBalance - minBalance)) * 100;
 }
+
+export function getLowestChartDataPoint(chartData: ChartDataPoint[]) {
+  return chartData.reduce<ChartDataPoint | undefined>((lowestPoint, point) => {
+    if (!lowestPoint || point.balance < lowestPoint.balance) {
+      return point;
+    }
+
+    return lowestPoint;
+  }, undefined);
+}

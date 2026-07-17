@@ -77,6 +77,7 @@ export const schema = {
     account_sync_source: f('string'),
     last_reconciled: f('string'),
     last_sync: f('string'),
+    bank_sync_status: f('string'),
   },
   categories: {
     id: f('id'),
@@ -162,6 +163,7 @@ export const schema = {
     show_hidden: f('integer', { default: 0 }),
     show_uncategorized: f('integer', { default: 0 }),
     trim_intervals: f('integer', { default: 0 }),
+    show_trend_lines: f('integer', { default: 0 }),
     include_current: f('integer', { default: 0 }),
     graph_type: f('string', { default: 'BarGraph' }),
     conditions: f('json'),

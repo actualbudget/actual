@@ -19,3 +19,5 @@ export const env: typeof T.env = 'unknown';
 export const isBrowser: typeof T.isBrowser = false;
 
 export const isIOSAgent: typeof T.isIOSAgent = false;
+export const isIOS: typeof T.isIOS = false;
+export const isAndroid: typeof T.isAndroid = false;

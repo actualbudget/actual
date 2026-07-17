@@ -6,7 +6,7 @@ You'll need to enable HTTPS on your server in order to safely use all of Actual'
 
 ## 1. Acquire a certificate to use on your server
 
-There are two methods to do this and both refer to not exposing Actual on the internet. If access from the internet is desired, refer to [Using a Reverse Proxy](/docs/config/reverse-proxies).
+There are two methods to do this and both refer to not exposing Actual on the internet. If access from the internet is desired, refer to [Using a Reverse Proxy](./reverse-proxies.md).
 
 ### Use a self-signed certificate
 
@@ -34,7 +34,7 @@ Once you have the certificate, you'll need to configure Actual to use it. There 
 
 ### Configuring with `config.json`
 
-Create a `config.json` file in the same folder where you run the Actual Sync Server. If you are [building from source](/docs/install/build-from-source) this will be in `packages/sync-server/`. Put the paths to the `.key` and `.crt` files in the config file. Note: if you're using Docker or a similar container environment, make sure the paths are accessible to the container.
+Create a `config.json` file in the same folder where you run the Actual Sync Server. If you are [building from source](../install/build-from-source.md) this will be in `packages/sync-server/`. Put the paths to the `.key` and `.crt` files in the config file. Note: if you're using Docker or a similar container environment, make sure the paths are accessible to the container.
 
 If using a Docker container, this folder is `/data` within the container. If you mounted a volume for the container, the folder on the host where `/data` is mounted is where you can place the `config.json` file.
 

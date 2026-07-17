@@ -2,34 +2,79 @@ import { PluggyClient } from 'pluggy-sdk';
 
 import { SecretName, secretsService } from '#services/secrets-service';
 
-let pluggyClient = null;
+const pluggyClients = new Map();
 
-function getPluggyClient() {
+function hasCredentials(fileId = null) {
+  return !!(
+    secretsService.get(SecretName.pluggyai_clientId, fileId) &&
+    secretsService.get(SecretName.pluggyai_clientSecret, fileId) &&
+    secretsService.get(SecretName.pluggyai_itemIds, fileId)
+  );
+}
+
+function getCredentialSource(fileId) {
+  if (!!fileId && hasCredentials(fileId)) {
+    return 'per-budget-file';
+  }
+
+  if (hasCredentials()) {
+    return 'global';
+  }
+
+  return null;
+}
+
+function getCredentialsCacheEntry(credentialFileId) {
+  const clientId = secretsService.get(
+    SecretName.pluggyai_clientId,
+    credentialFileId,
+  );
+  const clientSecret = secretsService.get(
+    SecretName.pluggyai_clientSecret,
+    credentialFileId,
+  );
+
+  return {
+    cacheKey: JSON.stringify({
+      fileId: credentialFileId,
+      [SecretName.pluggyai_clientId]: clientId,
+      [SecretName.pluggyai_clientSecret]: clientSecret,
+    }),
+    clientId,
+    clientSecret,
+  };
+}
+
+function getPluggyClient(fileId) {
+  const credentialSource = getCredentialSource(fileId);
+  if (!credentialSource) {
+    throw new Error('Pluggy credentials are not configured');
+  }
+
+  const credentialFileId =
+    credentialSource === 'per-budget-file' ? fileId : null;
+  const { cacheKey, clientId, clientSecret } =
+    getCredentialsCacheEntry(credentialFileId);
+  let pluggyClient = pluggyClients.get(cacheKey);
   if (!pluggyClient) {
-    const clientId = secretsService.get(SecretName.pluggyai_clientId);
-    const clientSecret = secretsService.get(SecretName.pluggyai_clientSecret);
-
     pluggyClient = new PluggyClient({
       clientId,
       clientSecret,
     });
+    pluggyClients.set(cacheKey, pluggyClient);
   }
 
   return pluggyClient;
 }
 
 export const pluggyaiService = {
-  isConfigured: () => {
-    return !!(
-      secretsService.get(SecretName.pluggyai_clientId) &&
-      secretsService.get(SecretName.pluggyai_clientSecret) &&
-      secretsService.get(SecretName.pluggyai_itemIds)
-    );
-  },
+  isConfigured: fileId => getCredentialSource(fileId) != null,
 
-  getAccountsByItemId: async itemId => {
+  getCredentialSource,
+
+  getAccountsByItemId: async (itemId, fileId) => {
     try {
-      const client = getPluggyClient();
+      const client = getPluggyClient(fileId);
       const { results, total, ...rest } = await client.fetchAccounts(itemId);
       return {
         results,
@@ -43,9 +88,9 @@ export const pluggyaiService = {
       throw error;
     }
   },
-  getAccountById: async accountId => {
+  getAccountById: async (accountId, fileId) => {
     try {
-      const client = getPluggyClient();
+      const client = getPluggyClient(fileId);
       const account = await client.fetchAccount(accountId);
       return {
         ...account,
@@ -58,11 +103,11 @@ export const pluggyaiService = {
     }
   },
 
-  getTransactionsByAccountId: async (accountId, startDate, pageSize, page) => {
+  getTransactionsByAccountId: async (accountId, startDate, fileId) => {
     try {
-      const client = getPluggyClient();
+      const client = getPluggyClient(fileId);
 
-      const account = await pluggyaiService.getAccountById(accountId);
+      const account = await pluggyaiService.getAccountById(accountId, fileId);
 
       // the sandbox data doesn't move the dates automatically so the
       // transactions are often older than 90 days. The owner on one of the
@@ -72,14 +117,12 @@ export const pluggyaiService = {
 
       if (sandboxAccount) startDate = '2000-01-01';
 
-      const transactions = await client.fetchTransactions(accountId, {
-        from: startDate,
-        pageSize,
-        page,
+      let transactions = await client.fetchAllTransactions(accountId, {
+        dateFrom: startDate,
       });
 
       if (sandboxAccount) {
-        transactions.results = transactions.results.map(t => ({
+        transactions = transactions.map(t => ({
           ...t,
           sandbox: true,
         }));
@@ -94,27 +137,5 @@ export const pluggyaiService = {
       console.error(`Error fetching transactions: ${error.message}`);
       throw error;
     }
-  },
-  getTransactions: async (accountId, startDate) => {
-    let transactions = [];
-    let result = await pluggyaiService.getTransactionsByAccountId(
-      accountId,
-      startDate,
-      500,
-      1,
-    );
-    transactions = transactions.concat(result.results);
-    const totalPages = result.totalPages;
-    while (result.page !== totalPages) {
-      result = await pluggyaiService.getTransactionsByAccountId(
-        accountId,
-        startDate,
-        500,
-        result.page + 1,
-      );
-      transactions = transactions.concat(result.results);
-    }
-
-    return transactions;
   },
 };

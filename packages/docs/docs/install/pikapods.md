@@ -13,9 +13,11 @@ For web clients, PikaPods will automatically update about a week or so after the
 For desktop clients, you will need to reinstall the desktop client to update to the latest version.
 First check on the web client to see if PikaPods has updated, then reinstall the desktop client.
 
-:::note[Using Actual on Pikapods]
+:::caution[Desktop App Not Recommended with PikaPods]
 
-We suggest [using a PWA](#using-a-PWA) desktop client with PikaPods so you don't run into version issues.
+Using the Actual desktop app with PikaPods is not recommended. The desktop client version can fall out of sync with the server version, causing compatibility issues.
+
+It is best to install Actual as a PWA (Progressive Web App) instead. See the [Using a PWA](#using-a-pwa) section below for step-by-step instructions for Chrome, Firefox, Safari, and other browsers.
 
 :::
 
@@ -27,7 +29,7 @@ You can leave the resources at their lowest setting (although you will need a no
 
 _Your browser does most of Actual's computation,_ so purchasing more resources for the server won't necessarily result in a better experience.
 
-After setting up your Pod, head over to our [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with
+After setting up your Pod, head over to our [Starting Fresh](../getting-started/starting-fresh.md) guide to get started with
 Actual Budget.
 
 ## A step by step guide to setting up Actual Budget with PikaPods
@@ -66,7 +68,7 @@ Simply put, _a Pod is a very tiny computer running in the cloud_. Typically, a P
 
 Multiple budgets can reside in one Pod running Actual. You do not need to set up a new Pod for each budget you create. The number of budgets is limited only by the storage capacity you assign to your Pod.
 
-If you [connect to your bank](/docs/advanced/bank-sync.md), note that all budgets in the same Pod share a single bank sync key.
+If you [connect to your bank](../advanced/bank-sync.md), note that all budgets in the same Pod share a single bank sync key.
 
 :::
 
@@ -108,7 +110,7 @@ Keep your Actual Budget password safe, as it cannot be retrieved. If you forget 
 <br />
 <br />
 
-## Using a PWA (Progressive Web App) {#using-a-PWA}
+## Using a PWA (Progressive Web App) {#using-a-pwa}
 
 When using Actual Server over the internet, we suggest using a PWA web client. After you login and open Actual Budget, it's easy to set up a PWA from your browser of choice.
 
@@ -130,4 +132,4 @@ For other browsers or browser/OS combinations, most search engines or the browse
 
 ## Getting started with Actual Budget
 
-Go to our [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with Actual Budget.
+Go to our [Starting Fresh](../getting-started/starting-fresh.md) guide to get started with Actual Budget.

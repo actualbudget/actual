@@ -15,6 +15,7 @@ import type {
   RuleConditionEntity,
   TimeFrame,
 } from '@actual-app/core/types/models';
+import type { ForecastSource } from '@actual-app/core/types/models/forecast';
 import * as d from 'date-fns';
 import {
   CartesianGrid,
@@ -31,6 +32,7 @@ import { Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
+import { computePadding } from '#components/reports/graphs/util/computePadding';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { useAccounts } from '#hooks/useAccounts';
@@ -40,12 +42,14 @@ import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
 import {
   buildBalanceForecastChartData,
   countForecastScheduledOccurrences,
+  getLowestChartDataPoint,
   getZeroCrossingGradientOffset,
 } from './balanceForecastChartData';
 
@@ -76,6 +80,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   const locale = useLocale();
   const dispatch = useDispatch();
   const { data: accounts = [] } = useAccounts();
+  const [budgetTypePref] = useSyncedPref('budgetType');
+  const budgetType = budgetTypePref === 'tracking' ? 'tracking' : 'envelope';
 
   const {
     conditions,
@@ -109,6 +115,19 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   const [granularity, setGranularity] = useState<'Daily' | 'Monthly'>(
     widget?.meta?.granularity ?? 'Monthly',
   );
+  const [source, setSource] = useState<ForecastSource>(
+    widget?.meta?.source === 'tracking-budget' && budgetType === 'tracking'
+      ? 'tracking-budget'
+      : 'schedules',
+  );
+  const isTrackingBudgetForecast = source === 'tracking-budget';
+
+  useEffect(() => {
+    if (budgetType !== 'tracking' && source === 'tracking-budget') {
+      setSource('schedules');
+    }
+  }, [budgetType, source]);
+
   const selectedAccountIds = useMemo(
     () => widget?.meta?.accounts ?? accounts.map(a => a.id),
     [accounts, widget?.meta?.accounts],
@@ -123,12 +142,19 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     isPlaceholderData,
     isPending: isLoading,
   } = useBalanceForecast({
-    accountIds: widget ? selectedAccountIds : undefined,
-    conditions,
-    conditionsOp,
+    accountIds: isTrackingBudgetForecast
+      ? undefined
+      : widget
+        ? selectedAccountIds
+        : undefined,
+    conditions: isTrackingBudgetForecast ? undefined : conditions,
+    conditionsOp: isTrackingBudgetForecast ? undefined : conditionsOp,
     startDate,
     endDate,
-    includeAccountlessSchedules: widget?.meta?.accounts === undefined,
+    includeAccountlessSchedules: isTrackingBudgetForecast
+      ? undefined
+      : widget?.meta?.accounts === undefined,
+    source,
     enabled: hasMonthOptions,
   });
   const errorMessage =
@@ -138,7 +164,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         ? t('Failed to load forecast')
         : null;
   const normalizedForecastData = forecastData ?? null;
-  const hasFilters = conditions.length > 0;
+  const hasFilters = !isTrackingBudgetForecast && conditions.length > 0;
   const committedChartRange = useRef({ start, end });
 
   async function onSaveWidget() {
@@ -154,7 +180,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         conditionsOp,
         startDate: start,
         endDate: end,
-        granularity,
+        granularity: isTrackingBudgetForecast ? 'Monthly' : granularity,
+        source,
         timeFrame: {
           start,
           end,
@@ -250,6 +277,13 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     }
   };
 
+  function onSourceChange(newSource: ForecastSource) {
+    setSource(newSource);
+    if (newSource === 'tracking-budget') {
+      setGranularity('Monthly');
+    }
+  }
+
   const chartRange = isPlaceholderData
     ? committedChartRange.current
     : { start, end };
@@ -265,6 +299,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     end: chartRange.end,
     granularity,
   });
+  const formatYTick = (value: number) =>
+    getCustomTick(format(value, 'financial-no-decimals'), privacyMode);
+  const yAxisLeftPadding = computePadding(
+    chartData.map(point => point.balance),
+    formatYTick,
+  );
   const isUpdatingForecast = isFetching && isPlaceholderData;
 
   const scheduledOccurrenceCount = countForecastScheduledOccurrences(
@@ -279,7 +319,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     return <LoadingIndicator />;
   }
 
-  const lowestPoint = forecastData?.lowestBalance;
+  const endingPoint = chartData.at(-1);
+  const lowestPoint = getLowestChartDataPoint(chartData);
   const hasNegativeBalance = chartData.some(d => d.balance < 0);
   const zeroCrossingGradientOffset = getZeroCrossingGradientOffset(chartData);
   const todayReferenceDate =
@@ -289,47 +330,85 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   const showsTodayReferenceLine = chartData.some(
     dataPoint => dataPoint.date === todayReferenceDate,
   );
+  const headerInlineContent = (
+    <View style={{ flexDirection: 'row', gap: 10 }}>
+      {budgetType === 'tracking' && (
+        <Select
+          value={source}
+          onChange={onSourceChange}
+          options={[
+            ['schedules', t('Scheduled transactions')],
+            ['tracking-budget', t('Tracking budget')],
+          ]}
+        />
+      )}
+      <Select
+        value={granularity}
+        onChange={setGranularity}
+        disabled={isTrackingBudgetForecast}
+        options={[
+          ['Monthly', t('Monthly')],
+          ['Daily', t('Daily')],
+        ]}
+      />
+    </View>
+  );
+  const headerChildren = widget ? (
+    <Button variant="primary" onPress={onSaveWidget}>
+      <Trans>Save widget</Trans>
+    </Button>
+  ) : null;
 
   return (
     <Page
       header={<PageHeader title={<Trans>Balance Forecast</Trans>} />}
       padding={0}
     >
-      <Header
-        allMonths={allMonths}
-        start={start}
-        end={end}
-        earliestTransaction={earliestTransaction}
-        latestTransaction={
-          allMonths[0]?.name ?? monthUtils.addMonths(currentMonth, 24)
-        }
-        mode={mode}
-        onChangeDates={onChangeDates}
-        filters={conditions}
-        onApply={onApplyFilter}
-        onUpdateFilter={onUpdateFilter}
-        onDeleteFilter={onDeleteFilter}
-        conditionsOp={conditionsOp}
-        onConditionsOpChange={onConditionsOpChange}
-        showFutureRange
-        hideModeToggle
-        inlineContent={
-          <Select
-            value={granularity}
-            onChange={setGranularity}
-            options={[
-              ['Monthly', t('Monthly')],
-              ['Daily', t('Daily')],
-            ]}
-          />
-        }
-      >
-        {widget && (
-          <Button variant="primary" onPress={onSaveWidget}>
-            <Trans>Save widget</Trans>
-          </Button>
-        )}
-      </Header>
+      {isTrackingBudgetForecast ? (
+        <Header
+          allMonths={allMonths}
+          start={start}
+          end={end}
+          earliestTransaction={earliestTransaction}
+          latestTransaction={
+            forecastData?.forecastEndDate
+              ? monthUtils.monthFromDate(forecastData.forecastEndDate)
+              : (allMonths[0]?.name ?? monthUtils.addMonths(currentMonth, 24))
+          }
+          mode={mode}
+          onChangeDates={onChangeDates}
+          showFutureRange
+          hideModeToggle
+          inlineContent={headerInlineContent}
+        >
+          {headerChildren}
+        </Header>
+      ) : (
+        <Header
+          allMonths={allMonths}
+          start={start}
+          end={end}
+          earliestTransaction={earliestTransaction}
+          latestTransaction={
+            forecastData?.forecastEndDate
+              ? monthUtils.monthFromDate(forecastData.forecastEndDate)
+              : (allMonths[0]?.name ?? monthUtils.addMonths(currentMonth, 24))
+          }
+          mode={mode}
+          onChangeDates={onChangeDates}
+          filters={conditions}
+          onApply={onApplyFilter}
+          onUpdateFilter={onUpdateFilter}
+          onDeleteFilter={onDeleteFilter}
+          conditionsOp={conditionsOp}
+          onConditionsOpChange={onConditionsOpChange}
+          showFutureRange
+          hideModeToggle
+          inlineContent={headerInlineContent}
+        >
+          {headerChildren}
+        </Header>
+      )}
 
       <View
         style={{
@@ -344,7 +423,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           <div style={{ color: theme.errorText, marginBottom: 20 }}>
             {errorMessage}
           </div>
-        ) : lowestPoint ? (
+        ) : endingPoint ? (
           <View
             style={{
               textAlign: 'right',
@@ -358,17 +437,31 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                 fontWeight: 400,
                 marginBottom: 5,
                 color:
-                  lowestPoint.balance < 0 ? theme.errorText : theme.pageText,
+                  endingPoint.balance < 0 ? theme.errorText : theme.pageText,
               }}
             >
               <PrivacyFilter>
-                {format(lowestPoint.balance, 'financial')}
+                {format(endingPoint.balance, 'financial')}
               </PrivacyFilter>
             </View>
             <View style={{ color: theme.pageTextLight }}>
-              <Trans>Lowest Point</Trans>: {lowestPoint.date}
-              {lowestPoint.accountName && <> ({lowestPoint.accountName})</>}
+              <Trans>Ending Balance</Trans>: {endingPoint.date}
             </View>
+            {lowestPoint && lowestPoint.date !== endingPoint.date ? (
+              <View
+                style={{
+                  color: theme.pageTextLight,
+                  fontSize: 12,
+                  marginTop: 4,
+                }}
+              >
+                <Trans>Lowest visible point</Trans>:{' '}
+                <PrivacyFilter>
+                  {format(lowestPoint.balance, 'financial')}
+                </PrivacyFilter>{' '}
+                ({lowestPoint.date})
+              </View>
+            ) : null}
           </View>
         ) : null}
 
@@ -382,7 +475,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                       width={width}
                       height={height}
                       data={chartData}
-                      margin={{ top: 10, right: 10, left: 5, bottom: 10 }}
+                      margin={{
+                        top: 10,
+                        right: 10,
+                        left: 5 + yAxisLeftPadding,
+                        bottom: 10,
+                      }}
                     >
                       <defs>
                         <linearGradient
@@ -397,19 +495,19 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                               offset="0%"
                               stopColor={
                                 hasNegativeBalance
-                                  ? theme.errorText
-                                  : theme.noticeText
+                                  ? theme.reportsNumberNegative
+                                  : theme.reportsChartFill
                               }
                             />
                           ) : (
                             <>
                               <stop
                                 offset={`${zeroCrossingGradientOffset}%`}
-                                stopColor={theme.noticeText}
+                                stopColor={theme.reportsChartFill}
                               />
                               <stop
                                 offset={`${zeroCrossingGradientOffset}%`}
-                                stopColor={theme.errorText}
+                                stopColor={theme.reportsNumberNegative}
                               />
                             </>
                           )}
@@ -437,12 +535,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                       />
                       <YAxis
                         domain={['auto', 'auto']}
-                        tickFormatter={value =>
-                          getCustomTick(
-                            format(value, 'financial-no-decimals'),
-                            privacyMode,
-                          )
-                        }
+                        tickFormatter={formatYTick}
                         tick={{ fill: theme.pageText }}
                         tickLine={{ stroke: theme.pageText }}
                         tickSize={0}
@@ -481,11 +574,11 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                       {showsTodayReferenceLine && (
                         <ReferenceLine
                           x={todayReferenceDate}
-                          stroke={theme.noticeText}
+                          stroke={theme.reportsBlue}
                           strokeDasharray="4 4"
                           label={{
                             value: t('Today'),
-                            fill: theme.noticeText,
+                            fill: theme.reportsBlue,
                             fontSize: 12,
                             position: 'insideTop',
                             offset: 8,
@@ -515,7 +608,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                   color: theme.pageTextLight,
                 }}
               >
-                {scheduledOccurrenceCount === 0 ? (
+                {isTrackingBudgetForecast ? (
+                  <Trans>
+                    Tracking budget forecast uses on-budget balance plus monthly
+                    budgeted income minus budgeted expenses.
+                  </Trans>
+                ) : scheduledOccurrenceCount === 0 ? (
                   <Trans>
                     This range shows posted transactions only; no scheduled
                     occurrences fall in it.
@@ -554,7 +652,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           )}
         </div>
 
-        {!errorMessage && (
+        {!errorMessage && !isTrackingBudgetForecast && (
           <div
             style={{ marginTop: 20, fontSize: 12, color: theme.pageTextLight }}
           >

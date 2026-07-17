@@ -35,7 +35,7 @@ Before we get started, check the settings for your Credit Card accounts to make 
 - When we use the "Uncleared total" or account "Balance" from Actual we will use the absolute value, the positive value without the (-) sign. So, if Actual shows "Uncleared total: -2553.86", then we will use 2553.86.
 - For our purposes here, we will be paying the credit card from a checking account.
 - While you are paying off your credit card(s), it is best to use a debit card or cash. If that is not possible, and you have a card with no debt, use that one to make new purchases so you can pay it in full every month using [Paying in Full - Within the Budget](./paying-in-full.md) and work to pay off another. In any case, use _**only one credit card**_ for new purchases and pay off the one with the highest interest first.
-- We recommend doing this On Budget. If you will not use the card again after it's completely paid off and you have received a statement with a $0 balance, you can [close](/docs/accounts/index.md#closing-or-deleting-an-account) the account.
+- We recommend doing this On Budget. If you will not use the card again after it's completely paid off and you have received a statement with a $0 balance, you can [close](../../accounts/index.md#closing-or-deleting-an-account) the account.
 
 ### Setting Up Actual Budget for Credit Card Debt
 
@@ -64,12 +64,12 @@ If you have been paying the statement balance in full every month, but need to i
 
 - If you are _not_ paying off the debt on this card:
   - When your statement arrives, create the Interest & Fees transaction in the Credit Card account and categorize it to **Bank Card Debt**.
-  - [Reconcile](/docs/accounts/reconciliation.md) your account.
+  - [Reconcile](../../accounts/reconciliation.md) your account.
   - Make sure the amount in the **Budgeted** column for **Bank Card Debt** is at least the statement Minimum Payment. If you need to add to it to reach the Minimum Payment, _cover_ any overspending by transferring from another category with a positive balance.
   - Use _Make Transfer_ to transfer the amount in the **Budgeted** column from your Checking account to the Credit Card account. Send that amount to the Credit Card Bank to pay your bill.
 - If you _are_ paying off the debt:
   - When your statement arrives, create the Interest & Fees transaction in the Credit Card account and categorize it to **Bank Card Debt**.
-  - [Reconcile](/docs/accounts/reconciliation.md) your account.
+  - [Reconcile](../../accounts/reconciliation.md) your account.
   - Make sure the amount in the **Budgeted** category is higher than the statement Minimum Payment. One day your Minimum Payment will pay off the card completely! Happy Day!
   - Use _Make Transfer_ to transfer the amount in the **Budgeted** column from your Checking account to the Credit Card account. Send that amount to the Credit Card Bank to pay your bill.
 
@@ -79,7 +79,7 @@ If you have been paying the statement balance in full every month, but need to i
 - When your statement arrives, find the following information:
   - New Balance, Minimum Payment, Interest & Fees, Returns/Credits and New Purchases. We will use this information to reconcile and calculate your payment.
   - In the Credit Card account, create a transaction for Interest & Fees and categorize it to **Bank Card Debt**.
-  - [Reconcile](/docs/accounts/reconciliation.md) the account. Clear each and every transaction with your statement, including the Interest & Fees and Return Credits. Fix any problems before you move on. We do not advocate using a Reconciliation Transaction to fix any problems, especially when you are carrying debt. Before you "complete" the reconciliation, you can add up your cleared purchases and make sure the sum matches the "New Purchases" amount from your statement. The first month will be the most difficult - it will get easier!
+  - [Reconcile](../../accounts/reconciliation.md) the account. Clear each and every transaction with your statement, including the Interest & Fees and Return Credits. Fix any problems before you move on. We do not advocate using a Reconciliation Transaction to fix any problems, especially when you are carrying debt. Before you "complete" the reconciliation, you can add up your cleared purchases and make sure the sum matches the "New Purchases" amount from your statement. The first month will be the most difficult - it will get easier!
 - Looking at your statement, the very least amount you need to pay to not increase your debt is the Interest & Fees and your New Purchases minus the Return Credits. Remember, you accounted for and funded the interest at the beginning of the month when you budgeted for the expected Minimum Payment and you were setting aside funds to pay for New Purchases each time you categorized them! You can pay for them all without worry.
   - If you are _not_ paying off any original debt on this card, make sure the **Budgeted** column is at least the Minimum Payment. The Minimum Payment you budgeted for at the beginning of the month should have this covered. If the Minimum Payment is more than you expected due to Interest or Fees, add an amount to the **Budgeted** column to equal the statement Minimum Payment. _Cover_ any additions to the **Budgeted** amount by transferring from another category with a positive balance.
   - If you _are_ paying off the debt on this card, make sure the current **Budgeted** column is more than the Minimum Payment. It should be at least the sum of the Interest & Fees plus the extra amount you want to pay off, but it will probably be a bit more and that's OK!

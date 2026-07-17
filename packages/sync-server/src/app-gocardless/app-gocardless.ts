@@ -10,6 +10,7 @@ import {
 
 import {
   AccountNotLinkedToRequisition,
+  EndUserAgreementExpiredError,
   GenericGoCardlessError,
   GoCardlessClientError,
   RateLimitError,
@@ -274,6 +275,7 @@ app.post(
 
       switch (true) {
         case error instanceof RequisitionNotLinked:
+        case error instanceof EndUserAgreementExpiredError:
           sendErrorResponse({
             error_type: 'ITEM_ERROR',
             error_code: 'ITEM_LOGIN_REQUIRED',

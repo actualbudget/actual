@@ -13,6 +13,7 @@ module.exports = eslintCompatPlugin({
     'object-shorthand-properties': require('./rules/object-shorthand-properties'),
     'prefer-const': require('./rules/prefer-const'),
     'no-anchor-tag': require('./rules/no-anchor-tag'),
+    'no-enum': require('./rules/no-enum'),
     'no-react-default-import': require('./rules/no-react-default-import'),
     'prefer-subpath-imports': require('./rules/prefer-subpath-imports'),
     'enforce-boundaries': require('./rules/enforce-boundaries'),

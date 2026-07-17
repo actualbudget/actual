@@ -116,10 +116,17 @@ const verifyFileExists = (
   }
 };
 
-function requireFileAccess(file: File, userId: string) {
+function requireFileOwner(file: File, userId: string) {
   const isOwner = file.owner === userId;
   const isServerAdmin = isAdmin(userId);
   if (isOwner || isServerAdmin) {
+    return null;
+  }
+  return 'file-access-not-allowed';
+}
+
+function requireFileAccess(file: File, userId: string) {
+  if (requireFileOwner(file, userId) === null) {
     return null;
   }
   if (UserService.countUserAccess(file.id, userId) > 0) {
@@ -232,7 +239,7 @@ app.post('/user-create-key', (req, res) => {
     return;
   }
 
-  const fileAccessError = requireFileAccess(file, res.locals.user_id);
+  const fileAccessError = requireFileOwner(file, res.locals.user_id);
   if (fileAccessError) {
     res.status(403);
     res.send(fileAccessError);
@@ -266,7 +273,7 @@ app.post('/reset-user-file', async (req, res) => {
     return;
   }
 
-  const fileAccessError = requireFileAccess(file, res.locals.user_id);
+  const fileAccessError = requireFileOwner(file, res.locals.user_id);
   if (fileAccessError) {
     res.status(403);
     res.send(fileAccessError);
@@ -552,7 +559,7 @@ app.post('/delete-user-file', (req, res) => {
     return;
   }
 
-  const fileAccessError = requireFileAccess(file, res.locals.user_id);
+  const fileAccessError = requireFileOwner(file, res.locals.user_id);
   if (fileAccessError) {
     res.status(403);
     res.send(fileAccessError);

@@ -17,10 +17,11 @@ export function useTagCSS(opts?: { ellipsis?: boolean }) {
       tag: string,
       options: { color?: string | null; compact?: boolean } = {},
     ) => {
+      const tagObj = tags.find(t => t.tag === tag);
       const [color, backgroundColor, backgroundColorHovered] = getTagCSSColors(
         theme,
         // fallback strategy: options color > tag color > default color > theme color (undefined)
-        options.color ?? tags.find(t => t.tag === tag)?.color,
+        options.color ?? tagObj?.color,
       );
 
       return css({
@@ -30,8 +31,10 @@ export function useTagCSS(opts?: { ellipsis?: boolean }) {
               textOverflow: 'ellipsis',
               maxWidth: '100%',
               display: 'inline-block',
+              whiteSpace: 'nowrap',
             }
           : { display: 'inline-flex' }),
+        opacity: tagObj?.hidden ? 0.5 : undefined,
         padding: options.compact ? '0px 7px' : '3px 7px',
         borderRadius: 16,
         userSelect: 'none',

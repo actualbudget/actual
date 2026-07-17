@@ -6,8 +6,6 @@ import { Button } from '@actual-app/components/button';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -60,43 +58,34 @@ function EditableBudgetName() {
   const [budgetName, setBudgetNamePref] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const triggerRef = useRef<HTMLButtonElement>(null);
   const [editing, setEditing] = useState(false);
-  const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
-    useContextMenu();
-
-  function onMenuSelect(type: string) {
-    setMenuOpen(false);
-
-    switch (type) {
-      case 'rename':
-        setEditing(true);
-        break;
-      case 'settings':
-        void navigate('/settings');
-        break;
-      case 'loadBackup':
-        if (isElectron()) {
-          dispatch(
-            pushModal({
-              modal: { name: 'load-backup', options: {} },
-            }),
-          );
-        }
-        break;
-      case 'close':
-        void dispatch(closeBudget());
-        break;
-      default:
-    }
-  }
-
-  const items = [
-    { name: 'rename', text: t('Rename budget') },
-    { name: 'settings', text: t('Settings') },
-    isElectron() ? { name: 'loadBackup', text: t('Load Backup…') } : null,
-    { name: 'close', text: t('Switch file') },
-  ].filter(item => item !== null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const { handleContextMenu } = useContextMenu({
+    triggerRef,
+    items: [
+      {
+        name: 'rename',
+        text: t('Rename budget'),
+        onClick: () => setEditing(true),
+      },
+      {
+        name: 'settings',
+        text: t('Settings'),
+        onClick: () => void navigate('/settings'),
+      },
+      isElectron() && {
+        name: 'loadBackup',
+        text: t('Load Backup…'),
+        onClick: () =>
+          dispatch(pushModal({ modal: { name: 'load-backup', options: {} } })),
+      },
+      {
+        name: 'close',
+        text: t('Switch file'),
+        onClick: () => void dispatch(closeBudget()),
+      },
+    ],
+  });
 
   if (editing) {
     return (
@@ -121,42 +110,27 @@ function EditableBudgetName() {
   }
 
   return (
-    <View onContextMenu={handleContextMenu}>
-      <Button
-        ref={triggerRef}
-        variant="bare"
-        style={{
-          color: theme.sidebarBudgetName,
-          fontSize: 16,
-          fontWeight: 500,
-          marginLeft: -5,
-          flex: '0 auto',
-        }}
-        onPress={() => {
-          resetPosition();
-          setMenuOpen(true);
-        }}
-      >
-        <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
-          {budgetName || t('Unnamed')}
-        </Text>
-        <SvgExpandArrow
-          width={7}
-          height={7}
-          style={{ flexShrink: 0, marginLeft: 5 }}
-        />
-      </Button>
-
-      <Popover
-        triggerRef={triggerRef}
-        placement="bottom start"
-        isOpen={menuOpen}
-        onOpenChange={() => setMenuOpen(false)}
-        style={{ margin: 1 }}
-        {...position}
-      >
-        <Menu onMenuSelect={onMenuSelect} items={items} />
-      </Popover>
-    </View>
+    <Button
+      ref={triggerRef}
+      data-testid="budget-name"
+      variant="bare"
+      style={{
+        color: theme.sidebarBudgetName,
+        fontSize: 16,
+        fontWeight: 500,
+        marginLeft: -5,
+        flex: '0 auto',
+      }}
+      onClick={handleContextMenu}
+    >
+      <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+        {budgetName || t('Unnamed')}
+      </Text>
+      <SvgExpandArrow
+        width={7}
+        height={7}
+        style={{ flexShrink: 0, marginLeft: 5 }}
+      />
+    </Button>
   );
 }

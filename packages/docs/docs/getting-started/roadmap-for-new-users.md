@@ -10,7 +10,7 @@ Below, we have outlined various use cases and, under each use case, give pointer
 
 ## I just want to look at screenshots before doing anything.
 
-Please take a look at our [Tour of Actual](/docs/tour/).
+Please take a look at our [Tour of Actual](../tour/index.md).
 
 ## I want to test out Actual without committing to any work or installations.
 
@@ -25,9 +25,9 @@ you can [download the stand-alone software](https://github.com/actualbudget/actu
 ## I want the complete package but do not know how to run a server.
 
 In this case, you can use a service provider called PikaPods. Setup only takes a few minutes.
-We have written a thorough [step-by-step guide for PikaPods](/docs/install/pikapods).
+We have written a thorough [step-by-step guide for PikaPods](../install/pikapods.md).
 However, if you are adventurous or somewhat technical, please go directly to the [Actual Budget setup in PikaPod](https://www.pikapods.com/pods?run=actual).
 
 ## I am technical and have no issues running a service on my own.
 
-Check out [Running a Server](/docs/install/#running-a-server) from the Installation guide.
+Check out [Running a Server](../install/index.md#running-a-server) from the Installation guide.

@@ -9,6 +9,7 @@ import type { PeriodicTemplate } from '@actual-app/core/types/models/templates';
 
 import { updateTemplate } from '#components/budget/goals/actions';
 import type { Action } from '#components/budget/goals/actions';
+import { TWO_UP_FIELD_FLEX } from '#components/budget/goals/editor/fieldLayout';
 import { FormField, FormLabel } from '#components/forms';
 import { AmountInput } from '#components/util/AmountInput';
 import { GenericInput } from '#components/util/GenericInput';
@@ -46,6 +47,20 @@ export const FixedAutomation = ({
   useEffect(() => {
     setRawPeriodAmount(String(periodAmount));
   }, [periodAmount]);
+
+  const onPeriodAmountChange = (value: string) => {
+    setRawPeriodAmount(value);
+    const parsed = Math.trunc(Number(value));
+    if (value.trim() !== '' && parsed >= 1 && parsed !== periodAmount) {
+      dispatch(
+        updateTemplate({
+          type: 'periodic',
+          period: { period: periodUnit, amount: parsed },
+        }),
+      );
+    }
+  };
+
   const commitPeriodAmount = () => {
     const parsed = Math.max(1, Math.trunc(Number(rawPeriodAmount)) || 1);
     setRawPeriodAmount(String(parsed));
@@ -61,7 +76,7 @@ export const FixedAutomation = ({
 
   return (
     <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
-      <FormField style={{ flex: 1 }}>
+      <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
         <FormLabel title={t('Amount')} htmlFor="amount-field" />
         <AmountInput
           id="amount-field"
@@ -77,7 +92,7 @@ export const FixedAutomation = ({
           }
         />
       </FormField>
-      <FormField style={{ flex: 1 }}>
+      <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
         <FormLabel title={t('Every')} htmlFor="period-amount-field" />
         <Input
           id="period-amount-field"
@@ -85,11 +100,11 @@ export const FixedAutomation = ({
           min={1}
           step={1}
           value={rawPeriodAmount}
-          onChangeValue={setRawPeriodAmount}
+          onChangeValue={onPeriodAmountChange}
           onBlur={commitPeriodAmount}
         />
       </FormField>
-      <FormField style={{ flex: 1 }}>
+      <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
         <FormLabel title={t('Period')} htmlFor="period-unit-field" />
         <Select
           id="period-unit-field"
@@ -108,7 +123,7 @@ export const FixedAutomation = ({
           options={periodUnitOptions}
         />
       </FormField>
-      <FormField style={{ flex: 1 }}>
+      <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
         <FormLabel title={t('Starting')} htmlFor="starting-field" />
         <GenericInput
           type="date"

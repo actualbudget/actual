@@ -47,42 +47,62 @@ const valueStyle = {
   height: styles.mobileMinHeight,
 };
 
-const hideNativeDateIconClassName = css({
+export const hideNativeDateIconClassName = css({
   '&::-webkit-calendar-picker-indicator': {
     display: 'none',
+  },
+  '&::-webkit-date-and-time-value': {
+    textAlign: 'left',
+  },
+});
+
+const iconFieldWrapperClassName = css({
+  ...valueStyle,
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingLeft: 8,
+  paddingRight: 8,
+  gap: 8,
+  '&:focus-within': {
+    borderColor: theme.formInputBorderSelected,
   },
 });
 
 type InputFieldProps = ComponentPropsWithRef<typeof Input> & {
-  icon?: ReactNode;
+  iconStart?: ReactNode;
+  iconEnd?: ReactNode;
+};
+
+const iconStyle: CSSProperties = {
+  color: theme.pageTextSubdued,
+  flexShrink: 0,
+  alignSelf: 'stretch',
+  alignItems: 'center',
+  justifyContent: 'center',
+  lineHeight: 0,
 };
 
 export function InputField({
   disabled,
   style,
   onUpdate,
-  icon,
+  iconStart,
+  iconEnd,
   className,
   ref,
   ...props
 }: InputFieldProps) {
-  if (icon) {
+  if (iconStart || iconEnd) {
     return (
       <View
-        style={{
-          ...valueStyle,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingLeft: 8,
-          gap: 8,
+        className={iconFieldWrapperClassName}
+        nativeStyle={{
           backgroundColor: disabled
             ? theme.formInputTextReadOnlySelection
             : theme.tableBackground,
         }}
       >
-        <View style={{ color: theme.pageTextSubdued, flexShrink: 0 }}>
-          {icon}
-        </View>
+        {iconStart && <View style={iconStyle}>{iconStart}</View>}
         <Input
           ref={ref}
           autoCorrect="false"
@@ -95,8 +115,11 @@ export function InputField({
             backgroundColor: 'transparent',
             height: '100%',
             padding: 0,
+            textAlign: 'left',
             color: disabled ? theme.tableTextInactive : theme.tableText,
             ...style,
+            borderRadius: 0,
+            boxShadow: 'none',
           }}
           {...props}
           className={renderProps =>
@@ -108,6 +131,7 @@ export function InputField({
             )
           }
         />
+        {iconEnd && <View style={iconStyle}>{iconEnd}</View>}
       </View>
     );
   }

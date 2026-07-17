@@ -35,6 +35,7 @@ import type {
 } from '@actual-app/core/types/models';
 import { format as formatDate } from 'date-fns';
 
+import { isAccountFailedSync } from '#accounts/syncStatus';
 import { AnimatedRefresh } from '#components/AnimatedRefresh';
 import { Search } from '#components/common/Search';
 import { FilterButton } from '#components/filters/FiltersMenu';
@@ -64,7 +65,6 @@ type AccountHeaderProps = {
   filterId?: SavedFilter;
   savedFilters: TransactionFilterEntity[];
   accountsSyncing: string[];
-  failedAccounts: AccountSyncSidebarProps['failedAccounts'];
   accounts: AccountEntity[];
   transactions: TransactionEntity[];
   showBalances: boolean;
@@ -140,7 +140,6 @@ export function AccountHeader({
   filterId,
   savedFilters,
   accountsSyncing,
-  failedAccounts,
   accounts,
   transactions,
   showBalances,
@@ -304,7 +303,6 @@ export function AccountHeader({
               {!!account?.bank && (
                 <AccountSyncSidebar
                   account={account}
-                  failedAccounts={failedAccounts}
                   accountsSyncing={accountsSyncing}
                 />
               )}
@@ -592,19 +590,11 @@ export function AccountHeader({
 
 type AccountSyncSidebarProps = {
   account: AccountEntity;
-  failedAccounts: Map<
-    string,
-    {
-      type: string;
-      code: string;
-    }
-  >;
   accountsSyncing: string[];
 };
 
 function AccountSyncSidebar({
   account,
-  failedAccounts,
   accountsSyncing,
 }: AccountSyncSidebarProps) {
   return (
@@ -612,7 +602,7 @@ function AccountSyncSidebar({
       style={{
         backgroundColor: accountsSyncing.includes(account.id)
           ? theme.sidebarItemBackgroundPending
-          : failedAccounts.has(account.id)
+          : isAccountFailedSync(account)
             ? theme.sidebarItemBackgroundFailed
             : theme.sidebarItemBackgroundPositive,
         marginRight: '4px',

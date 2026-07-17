@@ -1,6 +1,5 @@
 import type { Database } from '@jlongster/sql.js';
 // @ts-strict-ignore
-import AdmZip from 'adm-zip';
 import * as dateFns from 'date-fns';
 
 import * as connection from '#platform/server/connection';
@@ -9,6 +8,7 @@ import { logger } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
 import * as cloudStorage from '#server/cloud-storage';
 import * as prefs from '#server/prefs';
+import { safeUnzip, safeZip } from '#server/util/zip';
 import * as monthUtils from '#shared/months';
 
 // A special backup that represents the latest version of the db that
@@ -137,10 +137,16 @@ export async function makeBackup(id: string) {
     sqlite.runQuery(db, 'DELETE FROM messages_crdt');
     sqlite.runQuery(db, 'DELETE FROM messages_clock');
     // Zip up the cleaned db and metadata into a single backup file
-    const zip = new AdmZip();
-    zip.addLocalFile(tempDbPath, '', 'db.sqlite');
-    zip.addLocalFile(fs.join(budgetDir, 'metadata.json'));
-    zip.writeZip(backupPath);
+    const dbContent = await fs.readFile(tempDbPath, 'binary');
+    const metaContent = await fs.readFile(
+      fs.join(budgetDir, 'metadata.json'),
+      'binary',
+    );
+    const zipped = safeZip({
+      'db.sqlite': dbContent,
+      'metadata.json': metaContent,
+    });
+    await fs.writeFile(backupPath, zipped);
   } finally {
     if (db) {
       sqlite.closeDatabase(db);
@@ -224,9 +230,27 @@ export async function loadBackup(id: string, backupId: string) {
 
     prefs.unloadPrefs();
 
-    const zip = new AdmZip(fs.join(budgetDir, 'backups', backupId));
-    zip.extractEntryTo('db.sqlite', budgetDir, false, true);
-    zip.extractEntryTo('metadata.json', budgetDir, false, true);
+    const zipContent = await fs.readFile(
+      fs.join(budgetDir, 'backups', backupId),
+      'binary',
+    );
+
+    let entries: Record<string, Uint8Array>;
+    try {
+      entries = safeUnzip(zipContent);
+    } catch (e) {
+      logger.log(e);
+      throw new Error('Error reading backup zip file');
+    }
+    if (!entries['db.sqlite'] || !entries['metadata.json']) {
+      throw new Error('Backup zip file is missing db.sqlite or metadata.json');
+    }
+
+    await fs.writeFile(fs.join(budgetDir, 'db.sqlite'), entries['db.sqlite']);
+    await fs.writeFile(
+      fs.join(budgetDir, 'metadata.json'),
+      entries['metadata.json'],
+    );
   }
 }
 

@@ -1,4 +1,3 @@
-import ipaddr from 'ipaddr.js';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -22,13 +21,6 @@ vi.mock('./util/validate-user', () => ({
 
 vi.mock('express-rate-limit', () => ({
   default: vi.fn(() => (req, res, next) => next()),
-}));
-
-vi.mock('ipaddr.js', () => ({
-  default: {
-    isValid: vi.fn().mockReturnValue(false),
-    parse: vi.fn(),
-  },
 }));
 
 global.fetch = vi.fn();
@@ -166,8 +158,6 @@ describe('app-cors-proxy', () => {
 
   beforeEach(() => {
     validateSession.mockClear?.();
-    ipaddr.isValid.mockClear?.();
-    ipaddr.parse.mockClear?.();
 
     validateSession.mockReturnValue({ userId: 'test-user' });
 
@@ -238,11 +228,6 @@ describe('app-cors-proxy', () => {
     });
 
     it('should block private IP addresses', async () => {
-      ipaddr.isValid.mockReturnValueOnce(true);
-      ipaddr.parse.mockReturnValueOnce({
-        range: () => 'private',
-      });
-
       const res = await request(app)
         .get('/')
         .query({ url: 'http://192.168.1.1/test' });
@@ -255,11 +240,6 @@ describe('app-cors-proxy', () => {
     });
 
     it('should block loopback addresses', async () => {
-      ipaddr.isValid.mockReturnValueOnce(true);
-      ipaddr.parse.mockReturnValueOnce({
-        range: () => 'loopback',
-      });
-
       const res = await request(app)
         .get('/')
         .query({ url: 'http://127.0.0.1/test' });
@@ -282,6 +262,27 @@ describe('app-cors-proxy', () => {
         .query({ url: 'https://api.github.com/repos/user/repo1/releases' });
 
       expect(res.statusCode).toBe(200);
+    });
+
+    it('should allow the exact GitHub API repo URL for allowlisted repos', async () => {
+      const res = await request(app)
+        .get('/')
+        .query({ url: 'https://api.github.com/repos/user/repo1' });
+
+      expect(res.statusCode).toBe(200);
+    });
+
+    it('should block prefix-matched GitHub API repos that are not allowlisted', async () => {
+      const res = await request(app).get('/').query({
+        url: 'https://api.github.com/repos/user/repo1-private/contents/.env',
+      });
+
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error).toBe('URL not allowed');
+      expect(console.warn).toHaveBeenCalledWith(
+        'Blocked request to unauthorized URL:',
+        'https://api.github.com/repos/user/repo1-private/contents/.env',
+      );
     });
 
     it('should allow raw.githubusercontent.com URLs for allowlisted repos', async () => {

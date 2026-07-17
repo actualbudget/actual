@@ -25,7 +25,7 @@ export function calculateLegend(
           return { name: c.name, id: c.id, data: c };
         });
 
-  function getColor(data: IntervalEntity, index: number) {
+  function getColor(data: IntervalEntity | GroupedEntity, index: number) {
     if (graphType === 'DonutGraph') {
       return colorScale[index % colorScale.length];
     }
@@ -71,6 +71,8 @@ export function calculateLegend(
       name: item.name || '',
       color: getColor(item.data, index),
       dataKey: item.id || item.name || '', // Use id for unique data lookup
+      uncategorizedId:
+        'uncategorizedId' in item.data ? item.data.uncategorizedId : undefined,
     };
   });
   return legend;

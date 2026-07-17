@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { BigInput } from '@actual-app/components/input';
@@ -8,19 +9,16 @@ import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import {
-  isElectron,
-  isNonProductionEnvironment,
-} from '@actual-app/core/shared/environment';
+import { isElectron } from '@actual-app/core/shared/environment';
 import { css } from '@emotion/css';
 
-import { createBudget } from '#budgetfiles/budgetfilesSlice';
 import { Link } from '#components/common/Link';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { useServerURL, useSetServerURL } from '#components/ServerContext';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { saveGlobalPrefs } from '#prefs/prefsSlice';
-import { useDispatch } from '#redux';
+import { useDispatch, useSelector } from '#redux';
 import { loggedIn, signOut } from '#users/usersSlice';
 
 import { Title } from './subscribe/common';
@@ -286,6 +284,8 @@ export function ConfigServer() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const userData = useSelector(state => state.user.data);
   const [url, setUrl] = useState('');
   const currentUrl = useServerURL();
   const setServerUrl = useSetServerURL();
@@ -370,12 +370,6 @@ export function ConfigServer() {
     void navigate('/');
   }
 
-  async function onCreateTestFile() {
-    await setServerUrl(null);
-    await dispatch(createBudget({ testMode: true }));
-    void navigate('/');
-  }
-
   const [syncServerConfig] = useGlobalPref('syncServerConfig');
 
   const hasExternalServerConfig = !syncServerConfig?.port && !!currentUrl;
@@ -392,6 +386,20 @@ export function ConfigServer() {
 
   return (
     <View style={{ maxWidth: 500, marginTop: -30 }}>
+      {(userData || currentUrl) && (
+        <MobileBackButton
+          onPress={() =>
+            location.key !== 'default' ? navigate(-1) : navigate('/')
+          }
+          style={{
+            position: 'fixed',
+            top: 'calc(10px + env(safe-area-inset-top))',
+            left: 10,
+            margin: 0,
+            zIndex: 4000,
+          }}
+        />
+      )}
       {serverConfigView === 'internal' && (
         <ElectronServerConfig
           onDoNotUseServer={onSkip}
@@ -400,7 +408,7 @@ export function ConfigServer() {
       )}
       {serverConfigView === 'external' && (
         <>
-          <Title text={t("Where's the server?")} />
+          <Title text={t('Connect to a server')} />
           <Text
             style={{
               fontSize: 16,
@@ -415,12 +423,35 @@ export function ConfigServer() {
               </Trans>
             ) : (
               <Trans>
-                There is no server configured. After running the server, specify
-                the URL here to use the app. You can always change this later.
-                We will validate that Actual is running at this URL.
+                A sync server keeps your budget up to date across all your
+                devices and unlocks features like bank syncing. It is completely
+                optional: Actual works great on just this device too.
               </Trans>
             )}
           </Text>
+          {!currentUrl && (
+            <Text
+              style={{
+                fontSize: 16,
+                color: theme.pageTextLight,
+                lineHeight: 1.5,
+                marginTop: 10,
+              }}
+            >
+              <Trans>
+                If you already run a server, enter its URL below. Otherwise you
+                can{' '}
+                <Link
+                  variant="external"
+                  to="https://actualbudget.org/docs/install/"
+                  linkColor="purple"
+                >
+                  learn how to set one up
+                </Link>{' '}
+                and connect it whenever you are ready.
+              </Trans>
+            </Text>
+          )}
           {error && (
             <>
               <Text
@@ -481,30 +512,20 @@ export function ConfigServer() {
               style={{ fontSize: 15 }}
               onPress={onSubmit}
             >
-              <Trans>OK</Trans>
+              <Trans>Connect</Trans>
             </ButtonWithLoading>
-            {currentUrl && (
-              <Button
-                variant="bare"
-                style={{ fontSize: 15, marginLeft: 10 }}
-                onPress={() => navigate(-1)}
-              >
-                <Trans>Cancel</Trans>
-              </Button>
-            )}
           </View>
           <View
             style={{
-              flexDirection: 'row',
-              flexFlow: 'row wrap',
-              justifyContent: 'center',
-              marginTop: 15,
+              alignItems: 'center',
+              gap: 15,
+              marginTop: 30,
             }}
           >
             {currentUrl ? (
               <Button
                 variant="bare"
-                style={{ color: theme.pageTextLight }}
+                style={{ color: theme.pageTextLink }}
                 onPress={onSkip}
               >
                 <Trans>Stop using a server</Trans>
@@ -514,34 +535,19 @@ export function ConfigServer() {
                 {!isElectron() && (
                   <Button
                     variant="bare"
-                    style={{
-                      color: theme.pageTextLight,
-                      margin: 5,
-                      marginRight: 15,
-                    }}
+                    style={{ color: theme.pageTextLink }}
                     onPress={onSameDomain}
                   >
-                    <Trans>Use current domain</Trans>
+                    <Trans>Use the current domain</Trans>
                   </Button>
                 )}
-                <Button
-                  variant="bare"
-                  style={{ color: theme.pageTextLight, margin: 5 }}
-                  onPress={onSkip}
-                >
-                  <Trans>Don't use a server</Trans>
-                </Button>
-
-                {isNonProductionEnvironment() && (
+                {!userData && (
                   <Button
-                    variant="primary"
-                    style={{ marginLeft: 15 }}
-                    onPress={async () => {
-                      await onCreateTestFile();
-                      void navigate('/');
-                    }}
+                    variant="bare"
+                    style={{ color: theme.pageTextLink }}
+                    onPress={onSkip}
                   >
-                    <Trans>Create test file</Trans>
+                    <Trans>Don't use a server</Trans>
                   </Button>
                 )}
               </>

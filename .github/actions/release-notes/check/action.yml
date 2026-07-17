@@ -12,6 +12,6 @@ runs:
       run: yarn workspaces focus @actual-app/ci-actions
     - name: Check release notes
       env:
-        PR_NUMBER: ${{ github.event.pull_request.number }}
+        BASE_REF: ${{ github.event.pull_request.base.ref }}
       shell: bash
       run: node packages/ci-actions/bin/release-notes-check.mjs

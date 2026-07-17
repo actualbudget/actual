@@ -20,7 +20,7 @@ When a payee is matched, if it has a **default category** the transaction will a
 
 :::tip[Category Learning]
 
-Actual defaults with Category Learning enabled. You can find this setting in the bottom left corner of the Payees page. A more in depth discussion of Payee Rules and Category Learning can be found in the [Rules](docs/budgeting/rules/index.md) documentation. You can turn this off for one, several or all Payees. [Learn more](docs/budgeting/rules/index.md#managing-rules)
+Actual defaults with Category Learning enabled. You can find this setting in the bottom left corner of the Payees page. A more in depth discussion of Payee Rules and Category Learning can be found in the [Rules](../budgeting/rules/index.md) documentation. You can turn this off for one, several or all Payees. [Learn more](../budgeting/rules/index.md#managing-rules)
 
 :::
 
@@ -31,7 +31,7 @@ Actual defaults with Category Learning enabled. You can find this setting in the
 3. To **delete** a payee, select it and press the **1 payee** button at the top-left, just under "Payees" and select **Delete**.
 4. To mark a payee as a **favorite**, select it and press the **1 payee** button in the top-left and select **Favorite**. This will make it appear at the top of the suggestions box when entering a payee in the account ledger.
 5. Edit the rules by clicking on the "associated rules" button and a box will appear with the list of rules to match this payee with.
-6. Create a new rule by clicking on the "Create rule" button and the [Rule](docs/budgeting/rules/index.md) creation box will appear.
+6. Create a new rule by clicking on the "Create rule" button and the [Rule](../budgeting/rules/index.md) creation box will appear.
 
 ## Merging Payees
 

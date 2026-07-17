@@ -72,7 +72,7 @@ through the list of available commands. You can also quickly move to any of the 
 :::important
 Transaction(s) must be selected for the following shortcuts, or as noted.
 
-See [Bulk Actions](/docs/transactions/bulk-editing.md) for guidance on working with multiple transactions.
+See [Bulk Actions](../transactions/bulk-editing.md) for guidance on working with multiple transactions.
 :::
 
 - <Key k="e" /> Open date picker and set date for selected transactions.
@@ -86,8 +86,8 @@ See [Bulk Actions](/docs/transactions/bulk-editing.md) for guidance on working w
 - <Key k="f" /> Show only selected transactions. If no transaction is selected, it brings up the Filter dropdown menu.
 - <Key k="d" /> Delete selected transactions.
 - <Key k="u" /> Duplicate selected transactions.
-- <Key k="g" /> Merge selected transactions. Only _two_ transactions with equal amounts can be selected. [Learn more.](/docs/transactions/merging.md)
-- <Key k="r" /> Make transfer from selected transactions. Only _two_ valid conjugate transactions can be selected. [Learn more.](/docs/transactions/transfers.md)
+- <Key k="g" /> Merge selected transactions. Only _two_ transactions with equal amounts can be selected. [Learn more.](../transactions/merging.md)
+- <Key k="r" /> Make transfer from selected transactions. Only _two_ valid conjugate transactions can be selected. [Learn more.](../transactions/transfers.md)
 
 ## How to View Multiple Months at Once
 

@@ -4,7 +4,7 @@ The purpose of a budget is to answer simple questions: how much money did I save
 
 There are many approaches to budgeting. Some of the approaches that seem simple at first end up causing more work to keep an accurate budget, or make it easy for hidden expenses to drain your savings.
 
-We find the best way to track your money is rooted in something called **[envelope budgeting](/docs/getting-started/envelope-budgeting.md)**. Instead of predicting how much you'll make and spend and trying to reconcile that with what actually happened, envelope budgeting embraces real income as the source of your budget instead. This means you can only budget money that you already have.
+We find the best way to track your money is rooted in something called **[envelope budgeting](../getting-started/envelope-budgeting.md)**. Instead of predicting how much you'll make and spend and trying to reconcile that with what actually happened, envelope budgeting embraces real income as the source of your budget instead. This means you can only budget money that you already have.
 
 You can think of categories as little funds that you deposit money into. Combined with our rollover system, it provides an intuitive way to handle a lot of things that come up in life. And you know it's always accurately depicting your finances — there's no made up numbers.
 
@@ -60,7 +60,7 @@ It is possible to hold money multiple months ahead. If you do this, those dollar
 If you enter a new month and have a negative "To Be Budgeted" amount and you're sure it should be positive, try resetting next month's buffer to bring money that may be held back to the current month.
 :::
 :::note
-If you hold funds regularly, you can [automatically hold funds from specific income categories](./#automatic-holding-of-funds).
+If you hold funds regularly, you can [automatically hold funds from specific income categories](./index.md#automatic-holding-of-funds).
 :::
 
 ### Overspending

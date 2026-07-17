@@ -12,13 +12,13 @@
     "typecheck": "tsgo -b && tsc-strict"
   },
   "dependencies": {
-    "workbox-precaching": "^7.4.0"
+    "workbox-precaching": "^7.4.1"
   },
   "devDependencies": {
-    "@types/node": "^22.19.17",
+    "@types/node": "^22.19.21",
     "@typescript/native-preview": "beta",
     "cross-env": "^10.1.0",
     "typescript-strict-plugin": "^2.4.4",
-    "vite": "^8.0.5"
+    "vite": "^8.0.16"
   }
 }

@@ -1,6 +1,6 @@
 # The Account Register
 
-This view lets you manage your transactions for an account. Consult [Accounts & Transactions](/docs/accounts/) for detailed information on how to work with this view.
+This view lets you manage your transactions for an account. Consult [Accounts & Transactions](../accounts/index.md) for detailed information on how to work with this view.
 
 ![Account register overview](/img/a-tour-of-actual/tour-account-register-overview.webp)
 
@@ -8,19 +8,19 @@ This view lets you manage your transactions for an account. Consult [Accounts & 
 
 To rename the account, click on the pencil icon that appears when you hover over the account name. Clicking on the note icon lets you add a note. Actual fully supports Markdown and the note will be rendered according to your Markdown when the cursor is hovering over the note.
 
-Below the account name, you'll see the current balance. Green indicates a positive account balance, and red indicates a negative balance. A chevron will appear if you hover over the balance with the cursor. Clicking on this will reveal the values for both cleared and uncleared totals. See [Reconciliation](/docs/accounts/reconciliation) for more information.
+Below the account name, you'll see the current balance. Green indicates a positive account balance, and red indicates a negative balance. A chevron will appear if you hover over the balance with the cursor. Clicking on this will reveal the values for both cleared and uncleared totals. See [Reconciliation](../accounts/reconciliation.md) for more information.
 
 The top section also gives you access to several functions like importing transactions, manually adding new transactions, and filtering what transactions you see. On the right side you'll find the _Search_ field which lets you quickly search all fields.
 
 It is possible to split a transaction into more than one category. By clicking on the expand/contract arrows, seen in the yellow box, you will be able to show or hide split transactions.
 
-The three horizontal dots, shown in the blue box, will allow you to perform various manipulations on the account. These range from reconciling and exporting your account to closing or [Connecting Your Bank](/docs/advanced/bank-sync) for transaction syncing. You can show or hide the account's running balance, previously reconciled transactions and the cleared checkbox column to the far right of the transaction's row.
+The three horizontal dots, shown in the blue box, will allow you to perform various manipulations on the account. These range from reconciling and exporting your account to closing or [Connecting Your Bank](../advanced/bank-sync.md) for transaction syncing. You can show or hide the account's running balance, previously reconciled transactions and the cleared checkbox column to the far right of the transaction's row.
 
 ![Account register header](/img/a-tour-of-actual/tour-account-register-header.webp)
 
-Clicking on **Import** will let you [import transactions](/docs/transactions/importing) from CSV, QIF, OFX, QFX or CAMT files.
+Clicking on **Import** will let you [import transactions](../transactions/importing.md) from CSV, QIF, OFX, QFX or CAMT files.
 
-Manually add transactions by clicking on **Add New**. The Payee and the Category fields will provide a dropdown menu of available options. You can add new payees directly from this view, but if you need to add a new category, you can only do so from the [Budget View](./budget).
+Manually add transactions by clicking on **Add New**. The Payee and the Category fields will provide a dropdown menu of available options. You can add new payees directly from this view, but if you need to add a new category, you can only do so from the [Budget View](./budget.md).
 
 ![Adding a transaction](/img/a-tour-of-actual/tour-account-register-adding-transaction.webp)
 
@@ -30,7 +30,7 @@ Clicking on **Filter** lets you filter on all the fields. In the screenshot, we 
 
 If you are filtering for the same things over and over, you can save your filter by clicking on the _Unsaved filter_ dropdown on the right side in the header. Provide a name to save the filter for future use.
 
-Consult [Filtering Transactions](/docs/transactions/filters) for more information.
+Consult [Filtering Transactions](../transactions/filters.md) for more information.
 
 ![Filtering transactions](/img/a-tour-of-actual/tour-account-register-filter.webp)
 
@@ -40,6 +40,6 @@ You can select transactions by clicking on the checkbox - just to the left of th
 
 The number of selected transactions is shown in the red box. If you click on this dropdown, you can perform various commands on these transactions.
 
-Another powerful feature allows you to perform [Bulk Actions](/docs/transactions/bulk-editing).
+Another powerful feature allows you to perform [Bulk Actions](../transactions/bulk-editing.md).
 
 ![Selecting transactions](/img/a-tour-of-actual/tour-account-register-selected-transactions.webp)

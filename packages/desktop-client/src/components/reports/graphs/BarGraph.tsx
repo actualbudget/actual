@@ -185,6 +185,14 @@ const customLabel = (props, typeOp, format) => {
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
 };
 
+type ReportDrilldownPayload = Pick<GroupedEntity, 'uncategorizedId'>;
+
+function hasUncategorizedId(value: unknown): value is ReportDrilldownPayload {
+  return (
+    value !== null && typeof value === 'object' && 'uncategorizedId' in value
+  );
+}
+
 type BarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
@@ -310,27 +318,33 @@ export function BarGraph({
                 {...animationProps}
                 onMouseLeave={() => setPointer('')}
                 onMouseEnter={() =>
-                  !['Group', 'Interval'].includes(groupBy) &&
-                  setPointer('pointer')
+                  groupBy !== 'Interval' && setPointer('pointer')
                 }
-                onClick={item =>
-                  ((compact && showTooltip) || !compact) &&
-                  !['Group', 'Interval'].includes(groupBy) &&
-                  showActivity({
-                    navigate,
-                    categories,
-                    accounts,
-                    balanceTypeOp,
-                    filters,
-                    showHiddenCategories,
-                    showOffBudget,
-                    type: 'totals',
-                    startDate: data.startDate,
-                    endDate: data.endDate,
-                    field: groupBy.toLowerCase(),
-                    id: item.id,
-                  })
-                }
+                onClick={item => {
+                  const itemPayload = hasUncategorizedId(item.payload)
+                    ? item.payload
+                    : undefined;
+
+                  return (
+                    ((compact && showTooltip) || !compact) &&
+                    groupBy !== 'Interval' &&
+                    showActivity({
+                      navigate,
+                      categories,
+                      accounts,
+                      balanceTypeOp,
+                      filters,
+                      showHiddenCategories,
+                      showOffBudget,
+                      type: 'totals',
+                      startDate: data.startDate,
+                      endDate: data.endDate,
+                      field: groupBy.toLowerCase(),
+                      id: item.id,
+                      uncategorizedId: itemPayload?.uncategorizedId,
+                    })
+                  );
+                }}
                 shape={(props: BarShapeProps) => (
                   <Rectangle
                     {...props}

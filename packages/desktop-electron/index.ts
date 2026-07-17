@@ -24,9 +24,9 @@ import type {
   SaveDialogOptions,
   UtilityProcess,
 } from 'electron';
-import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
+import { retry as promiseRetry } from './retry';
 import {
   get as getWindowState,
   listen as listenToWindowState,
@@ -356,6 +356,17 @@ async function createWindow() {
 
   win.setBackgroundColor('#E8ECF0');
 
+  if (isPlaywrightTest) {
+    // Append a 'playwright' marker to the default Electron userAgent so
+    // navigator.userAgent-based checks in the renderer (Platform.isPlaywright,
+    // environment.isElectron) both light up. Replacing the UA with bare
+    // 'playwright' (as playwright.config.ts does for chromium launches) would
+    // strip the 'Electron' substring that isElectron() relies on.
+    win.webContents.setUserAgent(
+      `${win.webContents.getUserAgent()} playwright`,
+    );
+  }
+
   if (isDev) {
     win.webContents.openDevTools();
   }
@@ -533,7 +544,7 @@ export type GetBootstrapDataPayload = {
 
 ipcMain.on('get-bootstrap-data', event => {
   const payload: GetBootstrapDataPayload = {
-    version: app.getVersion(),
+    version: isPlaywrightTest ? '99.9.9' : app.getVersion(),
     isDev,
   };
 

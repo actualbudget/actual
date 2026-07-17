@@ -29,6 +29,7 @@ function _authorize(
             aspspId,
             country,
             maxConsentValidity,
+            psuType = 'personal',
             onStateReady,
           }) => {
             const redirectUrl = `${window.location.origin}/enablebanking/auth_callback`;
@@ -37,6 +38,7 @@ function _authorize(
               country,
               redirectUrl,
               maxConsentValidity,
+              psuType,
             });
 
             if (resp.error) {

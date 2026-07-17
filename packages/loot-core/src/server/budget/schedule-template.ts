@@ -18,6 +18,7 @@ import type { ScheduleTemplate, Template } from '#types/models/templates';
 import { getSheetValue, isTrackingBudget } from './actions';
 
 type ScheduleTemplateTarget = {
+  template: ScheduleTemplate;
   name: string;
   target: number;
   next_date_string: string;
@@ -41,11 +42,18 @@ async function createScheduleList(
   const accountsMap = new Map(accounts.map(a => [a.id, a]));
 
   for (const template of templates) {
-    const { id: sid, completed } = await db.first<
-      Pick<db.DbSchedule, 'id' | 'completed'>
-    >(
-      'SELECT id, completed FROM schedules WHERE TRIM(name) = ? AND tombstone = 0',
-      [template.name],
+    // Prefer scheduleId so renames don't break the lookup; fall back to name
+    // for notes-source templates (and legacy ui-source data) that only carry
+    // the name.
+    const {
+      id: sid,
+      name: scheduleName,
+      completed,
+    } = await db.first<Pick<db.DbSchedule, 'id' | 'name' | 'completed'>>(
+      template.scheduleId
+        ? 'SELECT id, name, completed FROM schedules WHERE id = ? AND tombstone = 0'
+        : 'SELECT id, name, completed FROM schedules WHERE TRIM(name) = ? AND tombstone = 0',
+      [template.scheduleId ?? template.name],
     );
     const rule = await getRuleForSchedule(sid);
     const conditions = rule.serialize().conditions;
@@ -134,11 +142,13 @@ async function createScheduleList(
       next_date_string,
       current_month,
     );
+    const displayName = scheduleName ?? template.name ?? '';
     if (num_months < 0) {
       //non-repeating schedules could be negative
-      errors.push(`Schedule ${template.name} is in the Past.`);
+      errors.push(`Schedule ${displayName} is in the Past.`);
     } else {
       t.push({
+        template,
         target,
         next_date_string,
         target_interval,
@@ -148,7 +158,7 @@ async function createScheduleList(
         //started,
         full: template.full === null ? false : template.full,
         repeat: isRepeating,
-        name: template.name,
+        name: displayName,
       });
       if (!completed) {
         if (isRepeating) {
@@ -200,7 +210,7 @@ async function createScheduleList(
         }
       } else {
         errors.push(
-          `Schedule ${template.name} is not active during the month in question.`,
+          `Schedule ${displayName} is not active during the month in question.`,
         );
       }
     }
@@ -227,7 +237,7 @@ function getSinkingContributionBreakdown(
   // contribution so the caller can attribute the batch back to individual
   // templates. Total math is unchanged.
   let total = 0;
-  const perSchedule = new Map<string, number>();
+  const perSchedule = new Map<ScheduleTemplate, number>();
   for (const [index, schedule] of t.entries()) {
     remainder =
       index === 0
@@ -244,8 +254,8 @@ function getSinkingContributionBreakdown(
     const contribution = tg / (schedule.num_months + 1);
     total += contribution;
     perSchedule.set(
-      schedule.name.trim(),
-      (perSchedule.get(schedule.name.trim()) ?? 0) + contribution,
+      schedule.template,
+      (perSchedule.get(schedule.template) ?? 0) + contribution,
     );
   }
   return { total, perSchedule };
@@ -353,14 +363,14 @@ export async function runSchedule(
   // haven't been paid yet, or if we can use the leftover balance for this month
   // First option: check if the previous month doesn't have its monthly schedules paid yet
   // Second option: check if the previous month needed less than this month and hasn't paid yet
-  // Accumulate per-schedule contributions (keyed by trimmed template name) so
+  // Accumulate per-schedule contributions, keyed by the source template, so
   // callers can attribute the batched to_budget back to individual schedule
   // templates for UI projections.
-  const perScheduleMonthly = new Map<string, number>();
-  const addContribution = (name: string, amount: number) => {
+  const perScheduleMonthly = new Map<ScheduleTemplate, number>();
+  const addContribution = (template: ScheduleTemplate, amount: number) => {
     perScheduleMonthly.set(
-      name.trim(),
-      (perScheduleMonthly.get(name.trim()) ?? 0) + amount,
+      template,
+      (perScheduleMonthly.get(template) ?? 0) + amount,
     );
   };
 
@@ -372,9 +382,13 @@ export async function runSchedule(
       numSubMonthly > 0)
   ) {
     to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
-    for (const c of t_payMonthOf) addContribution(c.name, c.target);
+    for (const c of t_payMonthOf) {
+      if (c.num_months === 0) {
+        addContribution(c.template, c.target);
+      }
+    }
     for (const c of t_sinking) {
-      addContribution(c.name, getMonthlyBaseContribution(c));
+      addContribution(c.template, getMonthlyBaseContribution(c));
     }
   } else {
     const { total: totalSinkingContribution, perSchedule: sinkingPerSchedule } =
@@ -386,9 +400,13 @@ export async function runSchedule(
     } else {
       to_budget += Math.round(totalPayMonthOf + totalSinkingContribution);
     }
-    for (const c of t_payMonthOf) addContribution(c.name, c.target);
-    for (const [name, amount] of sinkingPerSchedule) {
-      addContribution(name, amount);
+    for (const c of t_payMonthOf) {
+      if (c.num_months === 0) {
+        addContribution(c.template, c.target);
+      }
+    }
+    for (const [template, amount] of sinkingPerSchedule) {
+      addContribution(template, amount);
     }
   }
   return { to_budget, errors, remainder, perScheduleMonthly };

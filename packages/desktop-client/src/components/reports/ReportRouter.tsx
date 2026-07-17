@@ -1,6 +1,8 @@
-import React from 'react';
-import { Route, Routes } from 'react-router';
+import type { ReactNode } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
+import { Route, Routes, useLocation } from 'react-router';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 import { AgeOfMoney } from './reports/AgeOfMoney';
@@ -17,6 +19,18 @@ import { Spending } from './reports/Spending';
 import { Summary } from './reports/Summary';
 import { ReportsDashboardRouter } from './ReportsDashboardRouter';
 
+function ReportBoundary({ children }: { children: ReactNode }) {
+  const location = useLocation();
+  return (
+    <ErrorBoundary
+      FallbackComponent={FeatureErrorFallback}
+      resetKeys={[location.pathname]}
+    >
+      {children}
+    </ErrorBoundary>
+  );
+}
+
 export function ReportRouter() {
   const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
   const balanceForecastReportEnabled = useFeatureFlag('balanceForecastReport');
@@ -27,44 +41,212 @@ export function ReportRouter() {
     <Routes>
       <Route path="/" element={<ReportsDashboardRouter />} />
       <Route path="/:dashboardId" element={<ReportsDashboardRouter />} />
-      <Route path="/net-worth" element={<NetWorth />} />
-      <Route path="/net-worth/:id" element={<NetWorth />} />
-      <Route path="/crossover" element={<Crossover />} />
-      <Route path="/crossover/:id" element={<Crossover />} />
+      <Route
+        path="/net-worth"
+        element={
+          <ReportBoundary>
+            <NetWorth />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/net-worth/:id"
+        element={
+          <ReportBoundary>
+            <NetWorth />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/crossover"
+        element={
+          <ReportBoundary>
+            <Crossover />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/crossover/:id"
+        element={
+          <ReportBoundary>
+            <Crossover />
+          </ReportBoundary>
+        }
+      />
       {ageOfMoneyReportEnabled && (
         <>
-          <Route path="/age-of-money" element={<AgeOfMoney />} />
-          <Route path="/age-of-money/:id" element={<AgeOfMoney />} />
+          <Route
+            path="/age-of-money"
+            element={
+              <ReportBoundary>
+                <AgeOfMoney />
+              </ReportBoundary>
+            }
+          />
+          <Route
+            path="/age-of-money/:id"
+            element={
+              <ReportBoundary>
+                <AgeOfMoney />
+              </ReportBoundary>
+            }
+          />
         </>
       )}
-      <Route path="/cash-flow" element={<CashFlow />} />
-      <Route path="/cash-flow/:id" element={<CashFlow />} />
-      <Route path="/custom" element={<CustomReport />} />
-      <Route path="/custom/:id" element={<CustomReport />} />
-      <Route path="/spending" element={<Spending />} />
-      <Route path="/spending/:id" element={<Spending />} />
+      <Route
+        path="/cash-flow"
+        element={
+          <ReportBoundary>
+            <CashFlow />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/cash-flow/:id"
+        element={
+          <ReportBoundary>
+            <CashFlow />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/custom"
+        element={
+          <ReportBoundary>
+            <CustomReport />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/custom/:id"
+        element={
+          <ReportBoundary>
+            <CustomReport />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/spending"
+        element={
+          <ReportBoundary>
+            <Spending />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/spending/:id"
+        element={
+          <ReportBoundary>
+            <Spending />
+          </ReportBoundary>
+        }
+      />
       {budgetAnalysisReportEnabled && (
         <>
-          <Route path="/budget-analysis" element={<BudgetAnalysis />} />
-          <Route path="/budget-analysis/:id" element={<BudgetAnalysis />} />
+          <Route
+            path="/budget-analysis"
+            element={
+              <ReportBoundary>
+                <BudgetAnalysis />
+              </ReportBoundary>
+            }
+          />
+          <Route
+            path="/budget-analysis/:id"
+            element={
+              <ReportBoundary>
+                <BudgetAnalysis />
+              </ReportBoundary>
+            }
+          />
         </>
       )}
-      <Route path="/summary" element={<Summary />} />
-      <Route path="/summary/:id" element={<Summary />} />
-      <Route path="/calendar" element={<Calendar />} />
-      <Route path="/calendar/:id" element={<Calendar />} />
-      <Route path="/formula" element={<Formula />} />
-      <Route path="/formula/:id" element={<Formula />} />
+      <Route
+        path="/summary"
+        element={
+          <ReportBoundary>
+            <Summary />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/summary/:id"
+        element={
+          <ReportBoundary>
+            <Summary />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/calendar"
+        element={
+          <ReportBoundary>
+            <Calendar />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/calendar/:id"
+        element={
+          <ReportBoundary>
+            <Calendar />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/formula"
+        element={
+          <ReportBoundary>
+            <Formula />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/formula/:id"
+        element={
+          <ReportBoundary>
+            <Formula />
+          </ReportBoundary>
+        }
+      />
       {balanceForecastReportEnabled && (
         <>
-          <Route path="/forecast" element={<BalanceForecast />} />
-          <Route path="/forecast/:id" element={<BalanceForecast />} />
+          <Route
+            path="/forecast"
+            element={
+              <ReportBoundary>
+                <BalanceForecast />
+              </ReportBoundary>
+            }
+          />
+          <Route
+            path="/forecast/:id"
+            element={
+              <ReportBoundary>
+                <BalanceForecast />
+              </ReportBoundary>
+            }
+          />
         </>
       )}
       {sankeyReportEnabled && (
         <>
-          <Route path="/sankey" element={<Sankey />} />
-          <Route path="/sankey/:id" element={<Sankey />} />
+          <Route
+            path="/sankey"
+            element={
+              <ReportBoundary>
+                <Sankey />
+              </ReportBoundary>
+            }
+          />
+          <Route
+            path="/sankey/:id"
+            element={
+              <ReportBoundary>
+                <Sankey />
+              </ReportBoundary>
+            }
+          />
         </>
       )}
     </Routes>

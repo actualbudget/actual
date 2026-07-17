@@ -72,13 +72,6 @@ export const mockTransactions: { transactions: Transactions } = {
   },
 };
 
-export const mockUnknownError = {
-  summary: "Couldn't update account balances",
-  detail: 'Request to Institution returned an error',
-  type: 'UnknownRequestError',
-  status_code: 500,
-};
-
 export const mockAccountDetails: { account: GoCardlessAccountDetails } = {
   account: {
     resourceId: 'PL00000000000000000987654321',

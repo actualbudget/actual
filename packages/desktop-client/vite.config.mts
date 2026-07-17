@@ -5,6 +5,11 @@ import { cp, mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
+import {
+  defaultDbPath,
+  migrationsDir,
+  sqlWasmPath,
+} from '@actual-app/core/default-filesystem';
 import babel from '@rolldown/plugin-babel';
 import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
@@ -17,12 +22,13 @@ import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const reactCompilerInclude = new RegExp(
-  `^${path
-    .resolve(__dirname, 'src')
-    .replaceAll(path.sep, '/')
-    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/.*\\.[jt]sx$`,
-);
+// Compile every workspace package that ships React components. Workspace
+// imports resolve to their real paths under packages/<name>/src, so any
+// current or future package flowing through this build is picked up
+// automatically. Third-party code is never compiled: the babel plugin's
+// default exclude (node_modules) still applies alongside this include.
+const reactCompilerInclude =
+  /[\\/]packages[\\/][^\\/]+[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',
@@ -48,45 +54,18 @@ const injectPlugin = (options?: Parameters<typeof inject>[0]): Plugin => {
 // Inject build shims using the inject plugin
 const injectShims = (): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
-  const serveInject: {
-    exclude: string[];
-    global: [string, string];
-  } = {
-    exclude: ['src/setupTests.ts'],
-    global: [buildShims, 'global'],
-  };
-  const buildInject: {
-    global: [string, string];
-  } = {
-    global: [buildShims, 'global'],
-  };
 
   return [
-    {
-      name: 'define-build-process',
-      config: () => ({
-        // rename process.env in build mode so it doesn't get set to an empty object up by the vite:define plugin
-        // this isn't needed in serve mode, because vite:define doesn't empty it in serve mode. And defines also happen last anyways in serve mode.
-        environments: {
-          client: {
-            define: {
-              'process.env': '_process.env',
-            },
-          },
-        },
-      }),
-      apply: 'build',
-    },
     {
       enforce: 'post',
       apply: 'serve',
       ...injectPlugin({
-        ...serveInject,
-        process: [buildShims, 'process'],
+        exclude: ['src/setupTests.ts'],
+        global: [buildShims, 'global'],
       }),
     },
     {
-      name: 'inject-build-process',
+      name: 'inject-build-global',
       enforce: 'post',
       apply: 'build',
       config: () => ({
@@ -94,8 +73,7 @@ const injectShims = (): Plugin[] => {
           rolldownOptions: {
             transform: {
               inject: {
-                ...buildInject,
-                _process: [buildShims, 'process'],
+                global: [buildShims, 'global'],
               },
             },
           },
@@ -110,10 +88,6 @@ const injectShims = (): Plugin[] => {
 const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 const lootCoreOutDir = path.resolve(lootCoreRoot, 'lib-dist/browser');
 const lootCoreConfig = path.resolve(lootCoreRoot, 'vite.config.mts');
-const sqlWasmSrc = path.resolve(
-  __dirname,
-  '../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm',
-);
 const publicDir = path.resolve(__dirname, 'public');
 const publicDataDir = path.resolve(publicDir, 'data');
 const publicKcabDir = path.resolve(publicDir, 'kcab');
@@ -156,14 +130,9 @@ async function stagePublicData(): Promise<void> {
   await mkdir(publicDataDir, { recursive: true });
   await rm(migrationsDest, { recursive: true, force: true });
   await Promise.all([
-    cp(path.resolve(lootCoreRoot, 'migrations'), migrationsDest, {
-      recursive: true,
-    }),
-    cp(
-      path.resolve(lootCoreRoot, 'default-db.sqlite'),
-      path.resolve(publicDataDir, 'default-db.sqlite'),
-    ),
-    cp(sqlWasmSrc, path.resolve(publicDir, 'sql-wasm.wasm')),
+    cp(migrationsDir, migrationsDest, { recursive: true }),
+    cp(defaultDbPath, path.resolve(publicDataDir, 'default-db.sqlite')),
+    cp(sqlWasmPath, path.resolve(publicDir, 'sql-wasm.wasm')),
   ]);
 
   const entries = await readdir(publicDataDir, {
@@ -177,6 +146,10 @@ async function stagePublicData(): Promise<void> {
         .relative(publicDataDir, path.join(e.parentPath, e.name))
         .replaceAll(path.sep, '/'),
     )
+    // Skip dotfiles (e.g. legacy `.force-copy-windows` marker). They have no
+    // matching extension in the workbox precache globs, so a PWA opened
+    // offline would fail to fetch them and break startup (issue #7886).
+    .filter(file => !file.split('/').some(part => part.startsWith('.')))
     .sort();
   await writeFile(
     path.resolve(publicDir, 'data-file-index.txt'),
@@ -265,6 +238,7 @@ const pluginsServiceAssets = (): Plugin => ({
 
 export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const isVitest = process.env.VITEST === 'true';
   const devHeaders = {
     'Cross-Origin-Opener-Policy': 'same-origin',
     'Cross-Origin-Embedder-Policy': 'require-corp',
@@ -308,7 +282,7 @@ export default defineConfig(async ({ mode, command }) => {
     base: '/',
     envPrefix: 'REACT_APP_',
     build: {
-      minify: false,
+      minify: 'oxc',
       target: 'es2022',
       sourcemap: true,
       outDir: mode === 'desktop' ? 'build-electron' : 'build',
@@ -318,6 +292,14 @@ export default defineConfig(async ({ mode, command }) => {
       chunkSizeWarningLimit: 1500,
       rolldownOptions: {
         output: {
+          // Users debug from raw stack traces, so compress and strip
+          // whitespace but never mangle identifiers (overrides the
+          // mangle: true that `minify: 'oxc'` implies).
+          minify: {
+            compress: true,
+            mangle: false,
+            codegen: true,
+          },
           assetFileNames: (assetInfo: PreRenderedAsset) => {
             const info = assetInfo.name?.split('.') ?? [];
             let extType = info[info.length - 1];
@@ -402,7 +384,7 @@ export default defineConfig(async ({ mode, command }) => {
           }),
       injectShims(),
       addWatchers(),
-      mode === 'desktop' ? undefined : lootCoreBackend(),
+      mode === 'desktop' || isVitest ? undefined : lootCoreBackend(),
       mode === 'desktop' ? undefined : pluginsServiceAssets(),
       react(),
       babel({
@@ -427,6 +409,18 @@ export default defineConfig(async ({ mode, command }) => {
         return type === 'stderr';
       },
       maxWorkers: 2,
+      reporters: process.env.CI
+        ? [
+            'default',
+            [
+              'junit',
+              {
+                outputFile: './test-results/junit.xml',
+                suiteName: 'desktop-client',
+              },
+            ],
+          ]
+        : ['default'],
     },
   };
 });

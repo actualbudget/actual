@@ -107,6 +107,14 @@ async function clickAutocomplete(autocomplete: HTMLElement) {
   await waitForAutocomplete();
 }
 
+vi.mock('#hooks/useLocationPermission', () => ({
+  useLocationPermission: vi.fn(() => ({
+    isGranted: true,
+    isPending: false,
+    requestPermission: vi.fn().mockResolvedValue(undefined),
+  })),
+}));
+
 vi.mock('#hooks/useNearbyPayees', () => ({
   useNearbyPayees: vi.fn(),
 }));

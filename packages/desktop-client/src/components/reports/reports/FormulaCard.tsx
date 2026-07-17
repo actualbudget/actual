@@ -7,7 +7,6 @@ import type { FormulaWidget } from '@actual-app/core/types/models';
 import { FormulaResult } from '#components/reports/FormulaResult';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
-import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useFormulaExecution } from '#hooks/useFormulaExecution';
 import { useThemeColors } from '#hooks/useThemeColors';
 
@@ -16,8 +15,6 @@ type FormulaCardProps = {
   isEditing?: boolean;
   meta?: FormulaWidget['meta'];
   onMetaChange: (newMeta: FormulaWidget['meta']) => void;
-  onRemove: () => void;
-  onCopy: (targetDashboardId: string) => void;
 };
 
 export function FormulaCard({
@@ -25,13 +22,9 @@ export function FormulaCard({
   isEditing,
   meta = {},
   onMetaChange,
-  onRemove,
-  onCopy,
 }: FormulaCardProps) {
   const { t } = useTranslation();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
-  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useDashboardWidgetCopyMenu(onCopy);
   const themeColors = useThemeColors();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -39,6 +32,7 @@ export function FormulaCard({
   const fontSize = meta?.fontSize;
   const fontSizeMode = meta?.fontSizeMode || 'dynamic';
   const staticFontSize = meta?.staticFontSize || 32;
+  const showTitle = meta?.showTitle ?? true;
   const colorFormula = meta?.colorFormula || '';
 
   const { result, isLoading, error } = useFormulaExecution(
@@ -73,49 +67,29 @@ export function FormulaCard({
 
   return (
     <ReportCard
+      widgetId={widgetId}
       isEditing={isEditing}
       disableClick={nameMenuOpen}
       to={`/reports/formula/${widgetId}`}
-      menuItems={[
-        {
-          name: 'rename',
-          text: t('Rename'),
-        },
-        {
-          name: 'remove',
-          text: t('Remove'),
-        },
-        ...copyMenuItems,
-      ]}
-      onMenuSelect={item => {
-        if (handleCopyMenuSelect(item)) return;
-        switch (item) {
-          case 'rename':
-            setNameMenuOpen(true);
-            break;
-          case 'remove':
-            onRemove();
-            break;
-          default:
-            break;
-        }
-      }}
+      onRename={() => setNameMenuOpen(true)}
     >
       <View style={{ flex: 1, overflow: 'hidden' }}>
-        <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
-          <ReportCardName
-            name={meta?.name || t('Formula')}
-            isEditing={nameMenuOpen}
-            onChange={newName => {
-              onMetaChange({
-                ...meta,
-                name: newName,
-              });
-              setNameMenuOpen(false);
-            }}
-            onClose={() => setNameMenuOpen(false)}
-          />
-        </View>
+        {showTitle && (
+          <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
+            <ReportCardName
+              name={meta?.name || t('Formula')}
+              isEditing={nameMenuOpen}
+              onChange={newName => {
+                onMetaChange({
+                  ...meta,
+                  name: newName,
+                });
+                setNameMenuOpen(false);
+              }}
+              onClose={() => setNameMenuOpen(false)}
+            />
+          </View>
+        )}
         <View
           ref={containerRef}
           style={{

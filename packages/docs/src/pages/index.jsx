@@ -1,4 +1,5 @@
 import Link from '@docusaurus/Link';
+import useBrokenLinks from '@docusaurus/useBrokenLinks';
 import Layout from '@theme/Layout';
 import ThemedImage from '@theme/ThemedImage';
 
@@ -7,6 +8,10 @@ import Button from '../components/Button';
 import classes from './index.module.css';
 
 export default function Hello() {
+  // register the #features anchor with the broken-link checker, which
+  // can't detect anchors in react pages
+  useBrokenLinks().collectAnchor('features');
+
   const title = 'Your Finances — made simple';
   const pageDescription =
     'Actual Budget is a super fast and privacy-focused app for managing your finances. At its heart is the well proven and much loved Envelope Budgeting methodology.';

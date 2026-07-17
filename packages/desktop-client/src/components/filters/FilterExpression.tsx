@@ -8,10 +8,10 @@ import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { friendlyOp, mapField } from '@actual-app/core/shared/rules';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 
 import { Value } from '#components/rules/Value';
+import { friendlyOp, mapField } from '#util/rule';
 
 import { FilterEditor } from './FiltersMenu';
 import { subfieldFromFilter } from './subfieldFromFilter';
@@ -94,7 +94,8 @@ export function FilterExpression<T extends RuleConditionEntity>({
                     op === 'contains' ||
                     op === 'matches' ||
                     op === 'doesNotContain' ||
-                    op === 'hasTags'
+                    op === 'hasTags' ||
+                    op === 'hasAnyTag'
                   }
                 />
               )}

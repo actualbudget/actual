@@ -22,7 +22,7 @@ Lets see how Actual stacks up!
 I will structure this comparison as follows.
 First I will go over some of the fundamentals individually, then at the end have a quick comparison of some of the smaller features.
 I will go in depth in the basics like how Actual is installed and run, how the budgeting basics compare, and then the other exciting features.
-Along with this blog post you can look around at our [documentation](../../docs), or our [main feature list](../../#features).
+Along with this blog post you can look around at our [documentation](../../docs/), or our [main feature list](../../#features).
 
 ### tl;dr
 
@@ -74,8 +74,8 @@ This can be found in your browser settings when viewing the web page.
 
 Actual has two parts: the client (the stuff you see and interact with), and an optional sync server.
 The server is what allows syncing your budget file between devices and allows for bank syncing.
-A full list of what does and does not require the sync server can be found [in this table](../../docs/install).
-The [docs page](../../docs/install) also includes information about options for hosting a sync server.
+A full list of what does and does not require the sync server can be found [in this table](../../docs/install/).
+The [docs page](../../docs/install/) also includes information about options for hosting a sync server.
 
 The quickest way to host a sync server is [to use PikaPods](https://www.pikapods.com/pods?run=actual).
 PikaPods is a hosting service that costs just over one dollar a month to host a personal sync server[^1].
@@ -89,7 +89,7 @@ Other options include hosting your own with docker or node.js, or using some oth
 The core budgeting style is where Actual and YNAB are the most similar.
 Both use envelope style budgeting, sometimes referred to zero-sum budgeting.
 This means that all your funds are assigned to categories, or "jobs" in YNAB vernacular.
-The budgeting styles are so similar you can [import your YNAB data into Actual](../../docs/migration) and move on like almost nothing changed.
+The budgeting styles are so similar you can [import your YNAB data into Actual](../../docs/migration/) and move on like almost nothing changed.
 
 How accounts and transactions are handled is very similar. There are transactions with payees, notes, categories, etc.
 Just like you are used to.
@@ -107,7 +107,7 @@ Some users prefer this approach while others find it annoying.
 
 The way YNAB handles this can make it a bit too easy to hold onto credit card debt and let it build up.
 Actual needs some more deliberate handling of that debt.
-Our docs [show how to do this in Actual](../../docs/budgeting/credit-cards).
+Our docs [show how to do this in Actual](../../docs/budgeting/credit-cards/).
 The tl;dr is that you put your existing debt in a category on your budget and any new debt has to be manually added into that category.
 Principal and interest payments, get categorized into this category.
 If you use credit cards, but don't carry any debt, then don't worry, you don't have to do anything special.
@@ -170,7 +170,7 @@ Goal templates is under active development so expect it to be even better as tim
 
 ### Other Features
 
-This will be a rapid fire view of feature comparison. For a full view of these features you can read up [in our documentation](../../docs).
+This will be a rapid fire view of feature comparison. For a full view of these features you can read up [in our documentation](../../docs/).
 Don't worry the docs aren't too long to read. I will also be including the already mentioned features.
 
 | Feature                | Actual |  YNAB   |                                                                    Notes                                                                    |

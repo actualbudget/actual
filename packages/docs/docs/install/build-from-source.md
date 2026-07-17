@@ -6,10 +6,10 @@ Installing Actual by building it from source is a highly technical process. We r
 
 For most cases, we suggest opting for one of the simpler alternatives:
 
-- [Pikapods](/docs/install/pikapods)
-- [Desktop Client](/download)
-- [Server CLI](/docs/install/cli-tool)
-- [Docker](/docs/install/docker)
+- [Pikapods](./pikapods.md)
+- [Desktop Client](../../../download)
+- [Server CLI](./cli-tool.md)
+- [Docker](./docker.md)
 
 :::
 

@@ -20,15 +20,14 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
-import { mapField } from '@actual-app/core/shared/rules';
 import type {
   RuleConditionEntity,
   SankeyWidget,
   TimeFrame,
 } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
+import { debounce } from 'es-toolkit/compat';
 import type { TFunction } from 'i18next';
-import debounce from 'lodash/debounce';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
@@ -58,6 +57,7 @@ import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+import { mapField } from '#util/rule';
 
 export function Sankey() {
   const params = useParams();

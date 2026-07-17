@@ -28,7 +28,7 @@ This process will only apply when the below conditions are met
 
 :::
 
-Make a transfer of existing transactions in the same way you [bulk-edit transactions](bulk-editing.md).
+Make a transfer of existing transactions in the same way you [bulk-edit transactions](./bulk-editing.md).
 
 ![](/img/transfers/make-transfer-tooltip.webp)
 

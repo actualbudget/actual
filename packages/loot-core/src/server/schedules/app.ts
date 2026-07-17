@@ -33,7 +33,11 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '#shared/schedules';
-import type { RuleConditionEntity, ScheduleEntity } from '#types/models';
+import type {
+  RuleActionEntity,
+  RuleConditionEntity,
+  ScheduleEntity,
+} from '#types/models';
 
 import { findSchedules } from './find-schedules';
 
@@ -117,6 +121,53 @@ export function updateConditions(conditions, newConditions) {
     .map(x => x[1]);
 
   return updated.concat(added);
+}
+
+// Keep a rule's actions in sync with its (edited) schedule conditions.
+//
+// A schedule's amount lives in the rule's amount *condition*, but a rule can
+// also carry a plain `set amount` *action* (e.g. when customized via "Edit as
+// rule"). Posting a scheduled transaction runs the rule, so a stale action
+// would revert the posted amount to the old value, ignoring the edited
+// amount. Keep such actions in sync with the amount condition.
+//
+// Only plain `set amount` actions are rewritten:
+//   - Templated/formula actions (`options.template`/`options.formula`) compute
+//     their own value, so they're left untouched.
+//   - `set-split-amount` actions have a different `op` and so are excluded by
+//     the `action.op === 'set'` check below.
+//
+// Returns `null` when nothing changed, so callers can avoid a redundant write.
+function updateActions(
+  conditions: RuleConditionEntity[],
+  actions: RuleActionEntity[],
+): RuleActionEntity[] | null {
+  const { amount: amountCond } = extractScheduleConds(conditions);
+  if (amountCond === null) {
+    return null;
+  }
+
+  // Mirrors how `_amount` resolves: a deleted/empty amount condition value
+  // yields 0, so the action is synced to 0 too, keeping it consistent with
+  // the amount the schedule actually posts.
+  const amount = getScheduledAmount(amountCond.value);
+
+  let changed = false;
+  const updated = actions.map(action => {
+    if (
+      action.op === 'set' &&
+      action.field === 'amount' &&
+      !action.options?.template &&
+      !action.options?.formula &&
+      action.value !== amount
+    ) {
+      changed = true;
+      return { ...action, value: amount };
+    }
+    return action;
+  });
+
+  return changed ? updated : null;
 }
 
 export async function getRuleForSchedule(id: string | null): Promise<Rule> {
@@ -251,9 +302,17 @@ async function checkIfScheduleExists(name, scheduleId) {
   return true;
 }
 
+function normalizeScheduleName(name) {
+  const trimmedName = name?.trim();
+  return trimmedName || null;
+}
+
 export async function createSchedule({
   schedule = null,
   conditions = [],
+}: {
+  schedule?: Partial<ScheduleEntity> | null;
+  conditions?: RuleConditionEntity[];
 } = {}): Promise<ScheduleEntity['id']> {
   const scheduleId = schedule?.id || uuidv4();
 
@@ -267,13 +326,15 @@ export async function createSchedule({
 
   const nextDate = getNextDate(dateCond);
   const nextDateRepr = nextDate ? toDateRepr(nextDate) : null;
-  if (schedule) {
-    if (schedule.name) {
-      if (await checkIfScheduleExists(schedule.name, scheduleId)) {
+  const scheduleFields = schedule && {
+    ...schedule,
+    name: normalizeScheduleName(schedule.name),
+  };
+  if (scheduleFields) {
+    if (scheduleFields.name) {
+      if (await checkIfScheduleExists(scheduleFields.name, scheduleId)) {
         throw new Error('Cannot create schedules with the same name');
       }
-    } else {
-      schedule.name = null;
     }
   }
 
@@ -295,7 +356,7 @@ export async function createSchedule({
   });
 
   await db.insertWithSchema('schedules', {
-    ...schedule,
+    ...scheduleFields,
     id: scheduleId,
     rule: ruleId,
   });
@@ -316,6 +377,16 @@ export async function updateSchedule({
 }) {
   if (schedule.rule) {
     throw new Error('You cannot change the rule of a schedule');
+  }
+  const scheduleFields = { ...schedule };
+  if ('name' in scheduleFields) {
+    scheduleFields.name = normalizeScheduleName(scheduleFields.name);
+    if (
+      scheduleFields.name &&
+      (await checkIfScheduleExists(scheduleFields.name, scheduleFields.id))
+    ) {
+      throw new Error('Cannot update schedules with the same name');
+    }
   }
   let rule;
 
@@ -345,7 +416,13 @@ export async function updateSchedule({
       const oldConditions = rule.serialize().conditions;
       const newConditions = updateConditions(oldConditions, conditions);
 
-      await updateRule({ id: rule.id, conditions: newConditions });
+      const newActions = updateActions(newConditions, rule.serialize().actions);
+
+      await updateRule({
+        id: rule.id,
+        conditions: newConditions,
+        ...(newActions ? { actions: newActions } : {}),
+      });
 
       // Annoyingly, sometimes it has `type` and sometimes it doesn't
       const stripType = ({ type: _type, ...fields }) => fields;
@@ -375,10 +452,10 @@ export async function updateSchedule({
       await setNextDate({ id: schedule.id, reset: true });
     }
 
-    await db.updateWithSchema('schedules', schedule);
+    await db.updateWithSchema('schedules', scheduleFields);
   });
 
-  return schedule.id;
+  return scheduleFields.id;
 }
 
 export async function deleteSchedule({ id }) {
@@ -509,9 +586,74 @@ async function postTransactionForSchedule({
   }
 }
 
+async function getSchedule(id: string): Promise<ScheduleEntity | null> {
+  const {
+    data: [schedule],
+  } = await aqlQuery(q('schedules').filter({ id }).select('*'));
+
+  return schedule ?? null;
+}
+
+export async function getCompletedScheduleRuleIds(): Promise<string[]> {
+  const { data } = await aqlQuery(
+    q('schedules').filter({ completed: true }).select(['rule']),
+  );
+
+  return data
+    .map(schedule => schedule.rule)
+    .filter((rule): rule is string => !!rule);
+}
+
+async function hasTransactionForSchedule(
+  schedule: ScheduleEntity,
+): Promise<boolean> {
+  const { data } = await aqlQuery(getHasTransactionsQuery([schedule]));
+
+  return data.filter(Boolean).some(row => row.schedule === schedule.id);
+}
+
+function isRecurringSchedule(schedule: ScheduleEntity): boolean {
+  return (
+    schedule._date != null &&
+    typeof schedule._date === 'object' &&
+    'frequency' in schedule._date
+  );
+}
+
+async function advanceRecurringScheduleFromNextDate(
+  schedule: ScheduleEntity,
+): Promise<ScheduleEntity | null> {
+  if (!isRecurringSchedule(schedule)) {
+    return null;
+  }
+
+  const previousNextDate = schedule.next_date;
+
+  try {
+    await setNextDate({
+      id: schedule.id,
+      start: nextDate => d.addDays(parseDate(nextDate), 1),
+    });
+  } catch {
+    // This might error if the rule is corrupted and it can't find the rule.
+    return null;
+  }
+
+  const updatedSchedule = await getSchedule(schedule.id);
+
+  if (
+    updatedSchedule == null ||
+    updatedSchedule.next_date === previousNextDate
+  ) {
+    return null;
+  }
+
+  return updatedSchedule;
+}
+
 // TODO: make this sequential
 
-async function advanceSchedulesService(syncSuccess) {
+export async function advanceSchedulesService(syncSuccess) {
   // Move all paid schedules
   const { data: schedules } = await aqlQuery(
     q('schedules')
@@ -543,10 +685,77 @@ async function advanceSchedulesService(syncSuccess) {
       schedule.custom_upcoming_length ?? upcomingLength[0]?.value ?? '7',
     );
 
-    if (status === 'paid') {
+    if (
+      schedule.posts_transaction &&
+      schedule._account &&
+      (status !== 'paid' || isRecurringSchedule(schedule)) &&
+      (status === 'paid' || status === 'due' || status === 'missed')
+    ) {
+      let currentSchedule = schedule;
+      let currentStatus = status;
+
+      while (
+        currentSchedule.posts_transaction &&
+        currentSchedule._account &&
+        (currentStatus === 'paid' ||
+          currentStatus === 'due' ||
+          currentStatus === 'missed')
+      ) {
+        if (currentStatus === 'paid') {
+          const updatedSchedule =
+            await advanceRecurringScheduleFromNextDate(currentSchedule);
+
+          if (updatedSchedule == null) {
+            break;
+          }
+
+          currentSchedule = updatedSchedule;
+          currentStatus = getStatus(
+            currentSchedule.next_date,
+            currentSchedule.completed,
+            await hasTransactionForSchedule(currentSchedule),
+            currentSchedule.custom_upcoming_length ??
+              upcomingLength[0]?.value ??
+              '7',
+          );
+          continue;
+        }
+
+        // Automatically create a transaction for due schedules.
+        if (syncSuccess) {
+          await postTransactionForSchedule({ id: currentSchedule.id });
+
+          didPost = true;
+        } else {
+          failedToPost.push(currentSchedule._payee);
+          break;
+        }
+
+        if (!isRecurringSchedule(currentSchedule)) {
+          break;
+        }
+
+        const updatedSchedule =
+          await advanceRecurringScheduleFromNextDate(currentSchedule);
+
+        if (updatedSchedule == null) {
+          break;
+        }
+
+        currentSchedule = updatedSchedule;
+        currentStatus = getStatus(
+          currentSchedule.next_date,
+          currentSchedule.completed,
+          await hasTransactionForSchedule(currentSchedule),
+          currentSchedule.custom_upcoming_length ??
+            upcomingLength[0]?.value ??
+            '7',
+        );
+      }
+    } else if (status === 'paid') {
       if (schedule._date) {
         // Move forward recurring schedules
-        if (schedule._date.frequency) {
+        if (isRecurringSchedule(schedule)) {
           try {
             await setNextDate({ id: schedule.id });
           } catch {
@@ -561,19 +770,6 @@ async function advanceSchedulesService(syncSuccess) {
             });
           }
         }
-      }
-    } else if (
-      (status === 'due' || status === 'missed') &&
-      schedule.posts_transaction &&
-      schedule._account
-    ) {
-      // Automatically create a transaction for due schedules
-      if (syncSuccess) {
-        await postTransactionForSchedule({ id: schedule.id });
-
-        didPost = true;
-      } else {
-        failedToPost.push(schedule._payee);
       }
     }
   }

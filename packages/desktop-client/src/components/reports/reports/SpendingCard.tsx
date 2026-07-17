@@ -16,8 +16,11 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateSpendingReportTimeRange } from '#components/reports/reportRanges';
+import {
+  getSpendingAverageRangeLabel,
+  normalizeSpendingAverageRange,
+} from '#components/reports/spendingAverageRange';
 import { createSpendingSpreadsheet } from '#components/reports/spreadsheets/spending-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -27,8 +30,6 @@ type SpendingCardProps = {
   isEditing?: boolean;
   meta?: SpendingWidget['meta'];
   onMetaChange: (newMeta: SpendingWidget['meta']) => void;
-  onRemove: () => void;
-  onCopy: (targetDashboardId: string) => void;
 };
 
 export function SpendingCard({
@@ -36,8 +37,6 @@ export function SpendingCard({
   isEditing,
   meta = {},
   onMetaChange,
-  onRemove,
-  onCopy,
 }: SpendingCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
@@ -48,10 +47,9 @@ export function SpendingCard({
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
-  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useDashboardWidgetCopyMenu(onCopy);
-
   const spendingReportMode = meta?.mode ?? 'single-month';
+  const averageRange = normalizeSpendingAverageRange(meta?.averageRange);
+  const averageRangeLabel = getSpendingAverageRangeLabel(averageRange, t);
 
   const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
 
@@ -63,9 +61,17 @@ export function SpendingCard({
       conditionsOp: meta?.conditionsOp,
       compare,
       compareTo,
+      averageRange,
       budgetType,
     });
-  }, [meta?.conditions, meta?.conditionsOp, compare, compareTo, budgetType]);
+  }, [
+    meta?.conditions,
+    meta?.conditionsOp,
+    compare,
+    compareTo,
+    averageRange,
+    budgetType,
+  ]);
 
   const data = useReport('default', getGraphData);
   const todayDay =
@@ -83,33 +89,11 @@ export function SpendingCard({
 
   return (
     <ReportCard
+      widgetId={widgetId}
       isEditing={isEditing}
       disableClick={nameMenuOpen}
       to={`/reports/spending/${widgetId}`}
-      menuItems={[
-        {
-          name: 'rename',
-          text: t('Rename'),
-        },
-        {
-          name: 'remove',
-          text: t('Remove'),
-        },
-        ...copyMenuItems,
-      ]}
-      onMenuSelect={item => {
-        if (handleCopyMenuSelect(item)) return;
-        switch (item) {
-          case 'rename':
-            setNameMenuOpen(true);
-            break;
-          case 'remove':
-            onRemove();
-            break;
-          default:
-            throw new Error(`Unrecognized selection: ${item}`);
-        }
-      }}
+      onRename={() => setNameMenuOpen(true)}
     >
       <View
         style={{ flex: 1 }}
@@ -134,6 +118,9 @@ export function SpendingCard({
               start={compare}
               end={compareTo}
               type={spendingReportMode}
+              comparisonLabel={
+                spendingReportMode === 'average' ? averageRangeLabel : undefined
+              }
             />
           </View>
           {data && (

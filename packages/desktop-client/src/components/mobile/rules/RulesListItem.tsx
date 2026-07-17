@@ -13,7 +13,7 @@ import type { WithRequired } from '@actual-app/core/types/util';
 import { ActionableGridListItem } from '#components/mobile/ActionableGridListItem';
 import { ActionExpression } from '#components/rules/ActionExpression';
 import { ConditionExpression } from '#components/rules/ConditionExpression';
-import { groupActionsBySplitIndex } from '#util/ruleUtils';
+import { groupActionsBySplitIndex } from '#util/rule';
 
 type RulesListItemProps = {
   onDelete: () => void;

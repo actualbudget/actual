@@ -22,6 +22,7 @@ type ActiveEditorProps = {
   categories: CategoryGroupEntity[];
   hasLimitAutomation: boolean;
   onAddLimitAutomation: () => void;
+  defaultWeeklyStart: string;
 };
 
 export function ActiveEditor({
@@ -31,10 +32,17 @@ export function ActiveEditor({
   categories,
   hasLimitAutomation,
   onAddLimitAutomation,
+  defaultWeeklyStart,
 }: ActiveEditorProps) {
   switch (state.displayType) {
     case 'limit':
-      return <LimitAutomation template={state.template} dispatch={dispatch} />;
+      return (
+        <LimitAutomation
+          template={state.template}
+          dispatch={dispatch}
+          defaultWeeklyStart={defaultWeeklyStart}
+        />
+      );
     case 'refill':
       return (
         <RefillAutomation

@@ -1,4 +1,4 @@
-import { getAccountDb, isAdmin } from '#account-db';
+import { isAdmin } from '#account-db';
 import { FileNotFound, GenericFileError } from '#app-sync/errors';
 import type { WrappedDatabase } from '#db';
 import { isValidFileId, isValidGroupId } from '#util/paths';
@@ -88,15 +88,15 @@ class File extends FileBase {
  */
 class FileUpdate extends FileBase {
   constructor({
-    name = undefined,
-    groupId = undefined,
-    encryptSalt = undefined,
-    encryptTest = undefined,
-    encryptKeyId = undefined,
-    encryptMeta = undefined,
-    syncVersion = undefined,
-    deleted = undefined,
-    owner = undefined,
+    name,
+    groupId,
+    encryptSalt,
+    encryptTest,
+    encryptKeyId,
+    encryptMeta,
+    syncVersion,
+    deleted,
+    owner,
   }: Partial<FileConstructorArgs>) {
     super(
       name,
@@ -300,6 +300,4 @@ class FilesService {
   }
 }
 
-const filesService = new FilesService(getAccountDb());
-
-export { filesService, FilesService, File, FileUpdate };
+export { FilesService, File, FileUpdate };

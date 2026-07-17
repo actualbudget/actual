@@ -37,6 +37,7 @@ import { View } from '@actual-app/components/view';
 
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
+import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useModalState } from '#hooks/useModalState';
 import {
   AvoidRefocusScrollProvider,
@@ -182,7 +183,6 @@ export function Cell({
   privacyFilter,
   ...viewProps
 }: CellProps) {
-  const { role = 'gridcell', ...restViewProps } = viewProps;
   const mouseCoords = useRef(null);
   const viewRef = useRef(null);
 
@@ -268,12 +268,13 @@ export function Cell({
     ],
   );
 
+  const mergedRef = useMergedRefs(viewRef, viewProps.ref, viewProps.innerRef);
+
   return (
     <View
-      innerRef={viewRef}
-      role={role}
       style={{ ...widthStyle, ...cellStyle, ...style }}
-      {...restViewProps}
+      {...viewProps}
+      innerRef={mergedRef}
       data-testid={name}
     >
       {conditionalPrivacyFilter}
@@ -795,7 +796,6 @@ export function TableHeader({
 }: TableHeaderProps) {
   return (
     <View
-      role="rowgroup"
       style={{
         overflow: 'hidden',
         flexShrink: 0,
@@ -803,8 +803,6 @@ export function TableHeader({
     >
       <Row
         collapsed
-        role="row"
-        aria-rowindex={1}
         {...rowProps}
         style={{
           color: theme.tableHeaderText,
@@ -815,12 +813,10 @@ export function TableHeader({
         }}
       >
         {headers
-          ? headers.map((header, index) => {
+          ? headers.map(header => {
               return (
                 <Cell
                   key={header.name}
-                  role="columnheader"
-                  aria-colindex={index + 1}
                   value={header.name}
                   width={header.width}
                   style={header.style}
@@ -933,9 +929,6 @@ type TableItem = { id: number | string };
 export type TableProps<T extends TableItem = TableItem> = {
   items: T[];
   count?: number;
-  ariaLabel?: string;
-  ariaColCount?: number;
-  headerRowCount?: number;
   headers?: ReactNode | TableHeaderProps['headers'];
   contentHeader?: ReactNode;
   loading?: boolean;
@@ -966,9 +959,6 @@ export const Table = forwardRef(
     {
       items,
       count,
-      ariaLabel,
-      ariaColCount,
-      headerRowCount,
       headers,
       contentHeader,
       loading,
@@ -1085,8 +1075,6 @@ export const Table = forwardRef(
       const item = items[index];
       const editing = editingId === item.id;
       const selected = isSelected && isSelected(item.id);
-      const resolvedHeaderRowCount =
-        headerRowCount == null ? (headers ? 1 : 0) : headerRowCount;
 
       const row = renderItem({
         item,
@@ -1103,9 +1091,6 @@ export const Table = forwardRef(
       return (
         <View
           key={key}
-          role="row"
-          aria-rowindex={index + 1 + resolvedHeaderRowCount}
-          aria-selected={selected || undefined}
           style={{
             ...rowStyle,
             zIndex: editing || selected ? 101 : 'auto',
@@ -1173,21 +1158,9 @@ export const Table = forwardRef(
     }
 
     const isEmpty = (count || items.length) === 0;
-    const resolvedHeaderRowCount =
-      headerRowCount == null ? (headers ? 1 : 0) : headerRowCount;
-    const resolvedColCount =
-      ariaColCount == null && Array.isArray(headers)
-        ? headers.length
-        : ariaColCount;
-    const resolvedRowCount = (count || items.length) + resolvedHeaderRowCount;
 
     return (
       <View
-        role="grid"
-        aria-label={ariaLabel}
-        aria-colcount={resolvedColCount}
-        aria-rowcount={resolvedRowCount}
-        aria-busy={loading || undefined}
         style={{
           flex: 1,
           outline: 'none',
@@ -1205,7 +1178,6 @@ export const Table = forwardRef(
           />
         )}
         <View
-          role="rowgroup"
           style={{
             flex: `1 1 ${rowHeight * Math.max(2, items.length)}px`,
             backgroundColor,

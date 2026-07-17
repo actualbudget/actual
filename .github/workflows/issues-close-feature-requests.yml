@@ -10,7 +10,7 @@ permissions:
 jobs:
   needs-votes:
     if: ${{ github.event.label.name == 'feature' }}
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GH_REPO: ${{ github.repository }}

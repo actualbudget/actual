@@ -66,7 +66,7 @@ export function EmptyState({ onAdd }: EmptyStateProps) {
       <View
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
           gap: 10,
           textAlign: 'center',
         }}

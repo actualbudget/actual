@@ -1,5 +1,3 @@
-import https from 'https';
-
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -8,6 +6,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+import { assertUrlAllowed } from '#util/ssrf';
 
 const app = express();
 export { app as handlers };
@@ -19,7 +18,7 @@ app.post(
   '/status',
   handleError(async (req, res) => {
     const token = secretsService.get(SecretName.simplefin_token);
-    const configured = token != null && token !== 'Forbidden';
+    const configured = token != null && !isForbidden(token);
 
     res.send({
       status: 'ok',
@@ -36,16 +35,16 @@ app.post(
     let accessKey = secretsService.get(SecretName.simplefin_accessKey);
 
     try {
-      if (accessKey == null || accessKey === 'Forbidden') {
+      if (isInvalidAccessKey(accessKey)) {
         const token = secretsService.get(SecretName.simplefin_token);
-        if (token == null || token === 'Forbidden') {
+        if (token == null || isForbidden(token)) {
           throw new Error('No token');
         } else {
           accessKey = await getAccessKey(token);
-          secretsService.set(SecretName.simplefin_accessKey, accessKey);
-          if (accessKey == null || accessKey === 'Forbidden') {
+          if (isInvalidAccessKey(accessKey)) {
             throw new Error('No access key');
           }
+          secretsService.set(SecretName.simplefin_accessKey, accessKey);
         }
       }
     } catch {
@@ -76,7 +75,7 @@ app.post(
 
     const accessKey = secretsService.get(SecretName.simplefin_accessKey);
 
-    if (accessKey == null || accessKey === 'Forbidden') {
+    if (isInvalidAccessKey(accessKey)) {
       invalidToken(res);
       return;
     }
@@ -103,7 +102,7 @@ app.post(
         new Date(earliestStartDate),
       );
     } catch (e) {
-      if (e.message === 'Forbidden') {
+      if (isForbidden(e.message)) {
         invalidToken(res);
       } else {
         serverDown(e, res);
@@ -314,22 +313,26 @@ function parseAccessKey(accessKey) {
 
 async function getAccessKey(base64Token) {
   const token = Buffer.from(base64Token, 'base64').toString();
-  const options = {
-    method: 'POST',
-    port: 443,
-    headers: { 'Content-Length': 0 },
-  };
-  return new Promise((resolve, reject) => {
-    const req = https.request(new URL(token), options, res => {
-      res.on('data', d => {
-        resolve(d.toString());
-      });
-    });
-    req.on('error', e => {
-      reject(e);
-    });
-    req.end();
-  });
+  // Self-hosters may run their own SimpleFIN bridge on the local network, so
+  // private addresses are allowed here; cloud metadata and other always-blocked
+  // ranges are still rejected.
+  await assertUrlAllowed(token, { allowPrivateNetwork: true });
+
+  // don't auto-follow redirects for SSRF safety
+  const response = await fetch(token, { method: 'POST', redirect: 'manual' });
+  return (await response.text()).trim();
+}
+
+function isForbidden(value) {
+  return typeof value === 'string' && value.startsWith('Forbidden');
+}
+
+function isInvalidAccessKey(accessKey) {
+  return (
+    typeof accessKey !== 'string' ||
+    accessKey.trim() === '' ||
+    isForbidden(accessKey)
+  );
 }
 
 async function getTransactions(accessKey, accounts, startDate, endDate) {
@@ -385,11 +388,37 @@ async function getAccounts(
   const url = new URL(`${sfin.baseUrl}/accounts`);
   url.search = params.toString();
 
-  const response = await fetch(url.toString(), {
-    method: 'GET',
-    headers,
-    redirect: 'follow',
-  });
+  // Follow redirects manually so every hop is re-validated against the SSRF
+  // rules; fetch's automatic 'follow' would let a 3xx response redirect to a
+  // blocked address after only the initial URL was checked. Authorization is
+  // dropped once a redirect leaves the original origin (matching fetch's
+  // default cross-origin stripping) so the bridge credentials aren't leaked.
+  const MAX_REDIRECTS = 5;
+  let currentUrl = url.toString();
+  let response;
+  for (let hop = 0; ; hop++) {
+    await assertUrlAllowed(currentUrl, { allowPrivateNetwork: true });
+
+    response = await fetch(currentUrl, {
+      method: 'GET',
+      headers,
+      redirect: 'manual',
+    });
+
+    const location = response.headers.get('location');
+    if (response.status < 300 || response.status >= 400 || !location) {
+      break;
+    }
+    if (hop >= MAX_REDIRECTS) {
+      throw new Error('Too many redirects');
+    }
+
+    const nextUrl = new URL(location, currentUrl);
+    if (nextUrl.origin !== new URL(currentUrl).origin) {
+      delete headers.Authorization;
+    }
+    currentUrl = nextUrl.toString();
+  }
 
   if (response.status === 403) {
     throw new Error('Forbidden');

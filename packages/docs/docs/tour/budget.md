@@ -1,6 +1,6 @@
 # The Budget
 
-This view lets you manage your budget. You'll find more information about envelope budgeting with Actual in [Budgeting](/docs/budgeting/).
+This view lets you manage your budget. You'll find more information about envelope budgeting with Actual in [Budgeting](../budgeting/index.md).
 
 ![Budget overview](/img/a-tour-of-actual/tour-budget-overview.webp)
 

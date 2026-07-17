@@ -58,6 +58,7 @@ type ReportSidebarProps = {
     value: CustomReportEntity['showUncategorized'],
   ) => void;
   setTrimIntervals: (value: CustomReportEntity['trimIntervals']) => void;
+  setShowTrendLines: (value: CustomReportEntity['showTrendLines']) => void;
   setIncludeCurrentInterval: (
     value: CustomReportEntity['includeCurrentInterval'],
   ) => void;
@@ -97,6 +98,7 @@ export function ReportSidebar({
   setIncludeCurrentInterval,
   setShowUncategorized,
   setTrimIntervals,
+  setShowTrendLines,
   setSelectedCategories,
   onChangeDates,
   onReportChange,
@@ -459,6 +461,12 @@ export function ReportSidebar({
                     !customReportItems.trimIntervals,
                   );
                   setTrimIntervals(!customReportItems.trimIntervals);
+                } else if (type === 'show-trend-lines') {
+                  setSessionReport(
+                    'showTrendLines',
+                    !customReportItems.showTrendLines,
+                  );
+                  setShowTrendLines(!customReportItems.showTrendLines);
                 }
               }}
               items={[
@@ -504,6 +512,13 @@ export function ReportSidebar({
                     'Trim empty intervals at the start and end of the report',
                   ),
                   toggle: customReportItems.trimIntervals,
+                },
+                {
+                  name: 'show-trend-lines',
+                  text: t('Show trend lines'),
+                  tooltip: t('Add a trend line per series (line graphs only)'),
+                  toggle: customReportItems.showTrendLines,
+                  disabled: customReportItems.graphType !== 'LineGraph',
                 },
               ]}
             />

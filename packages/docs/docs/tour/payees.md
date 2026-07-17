@@ -1,8 +1,8 @@
 # Payees Management
 
-This view lets you manage your Payees. See [Payees](/docs/transactions/payees) for more details.
+This view lets you manage your Payees. See [Payees](../transactions/payees.md) for more details.
 
-In the overview, you can see which Payees you have used in your system and if they have any associated [rules](./rules).
+In the overview, you can see which Payees you have used in your system and if they have any associated [rules](./rules.md).
 
 If you have any unused payees, they are readily available by clicking on the _Show n unused payee_.
 

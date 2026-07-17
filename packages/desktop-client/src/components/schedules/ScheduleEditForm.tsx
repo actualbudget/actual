@@ -122,7 +122,7 @@ export function ScheduleEditForm({
 
   return (
     <>
-      <View style={{ display: 'block', overflow: 'scroll', padding: 10 }}>
+      <View style={{ display: 'block', overflow: 'auto', padding: 10 }}>
         <SpaceBetween style={{ marginTop: 10 }}>
           <FormField style={{ flex: 1 }}>
             <FormLabel title={t('Schedule Name')} htmlFor="name-field" />

@@ -38,6 +38,38 @@ export function getBudgetRange(start: string, end: string) {
   return { start, end, range: monthUtils.rangeInclusive(start, end) };
 }
 
+// Computes the spend total for every category in every month within the
+// given day range using a single grouped query. This is used to seed the
+// `sum-amount` cells on a cold build so we avoid running one
+// `SELECT SUM(amount)` query per category per month (which scales as
+// categories × months and dominates load time for budgets with many years
+// of data). The filters must match the per-cell query in `createCategory`
+// exactly so balances stay identical.
+function getSumAmountsByMonth(
+  rangeStart: number,
+  rangeEnd: number,
+): Map<string, number> {
+  const rows = db.runQuery<{ month: number; category: string; amount: number }>(
+    `SELECT t.category AS category,
+            t.date / 100 AS month,
+            SUM(t.amount) AS amount
+       FROM v_transactions_internal_alive t
+       LEFT JOIN accounts a ON a.id = t.account
+      WHERE t.date >= ${rangeStart} AND t.date <= ${rangeEnd}
+        AND t.category IS NOT NULL
+        AND a.offbudget = 0
+      GROUP BY t.category, t.date / 100`,
+    [],
+    true,
+  );
+
+  const sums = new Map<string, number>();
+  for (const row of rows) {
+    sums.set(`${row.month}-${row.category}`, row.amount || 0);
+  }
+  return sums;
+}
+
 export function createCategory(cat, sheetName, prevSheetName, start, end) {
   sheet.get().createDynamic(sheetName, 'sum-amount-' + cat.id, {
     initialValue: 0,
@@ -249,41 +281,91 @@ export async function createBudget(months) {
     envelopeBudget.createBudget(meta, categories, months);
   }
 
-  months.forEach(month => {
-    if (!meta.createdMonths.has(month)) {
-      const prevMonth = monthUtils.prevMonth(month);
-      const { start, end } = monthUtils.bounds(month);
-      const sheetName = monthUtils.sheetForMonth(month);
-      const prevSheetName = monthUtils.sheetForMonth(prevMonth);
+  // Only months that don't already exist need to be created and seeded.
+  const monthsToCreate = months.filter(month => !meta.createdMonths.has(month));
 
-      categories.forEach(cat => {
-        createCategory(cat, sheetName, prevSheetName, start, end);
-      });
-      groups.forEach(group => {
-        if (budgetType === 'envelope') {
-          envelopeBudget.createCategoryGroup(group, sheetName);
-        } else {
-          trackingBudget.createCategoryGroup(group, sheetName);
+  // Spend totals for every category in the months being created, computed
+  // once via a single grouped query and used to seed the `sum-amount` cells so
+  // they don't each run their own query. Scoped to the uncached month span so
+  // extending the budget horizon doesn't rescan the entire transaction
+  // history, and loaded lazily so warm loads never touch the database here.
+  let sumAmounts: Map<string, number> | null = null;
+  const getSumAmounts = () => {
+    if (!sumAmounts) {
+      // `monthsToCreate` isn't guaranteed to be sorted, so find the span
+      // explicitly ('YYYY-MM' strings compare chronologically).
+      let firstMonth = monthsToCreate[0];
+      let lastMonth = monthsToCreate[0];
+      for (const month of monthsToCreate) {
+        if (month < firstMonth) {
+          firstMonth = month;
         }
-      });
-
-      if (budgetType === 'envelope') {
-        envelopeBudget.createSummary(
-          groups,
-          categories,
-          prevSheetName,
-          sheetName,
-        );
-      } else {
-        trackingBudget.createSummary(groups, sheetName);
+        if (month > lastMonth) {
+          lastMonth = month;
+        }
       }
-
-      meta.createdMonths.add(month);
+      sumAmounts = getSumAmountsByMonth(
+        monthUtils.bounds(firstMonth).start,
+        monthUtils.bounds(lastMonth).end,
+      );
     }
+    return sumAmounts;
+  };
+  const seededCells: string[] = [];
+
+  monthsToCreate.forEach(month => {
+    const prevMonth = monthUtils.prevMonth(month);
+    const { start, end } = monthUtils.bounds(month);
+    const sheetName = monthUtils.sheetForMonth(month);
+    const prevSheetName = monthUtils.sheetForMonth(prevMonth);
+    const dbMonth = parseInt(month.replace('-', ''));
+
+    categories.forEach(cat => {
+      // Seed the spend total before creating the dynamic cell so the cell
+      // skips its per-category query. Only happens on a cold build, when
+      // the value hasn't been restored from cache.
+      const sumCell = `sum-amount-${cat.id}`;
+      if (sheet.get().getCellValueLoose(sheetName, sumCell) == null) {
+        const name = resolveName(sheetName, sumCell);
+        sheet
+          .get()
+          .load(name, getSumAmounts().get(`${dbMonth}-${cat.id}`) || 0);
+        seededCells.push(name);
+      }
+      createCategory(cat, sheetName, prevSheetName, start, end);
+    });
+    groups.forEach(group => {
+      if (budgetType === 'envelope') {
+        envelopeBudget.createCategoryGroup(group, sheetName);
+      } else {
+        trackingBudget.createCategoryGroup(group, sheetName);
+      }
+    });
+
+    if (budgetType === 'envelope') {
+      envelopeBudget.createSummary(
+        groups,
+        categories,
+        prevSheetName,
+        sheetName,
+      );
+    } else {
+      trackingBudget.createSummary(groups, sheetName);
+    }
+
+    meta.createdMonths.add(month);
   });
 
   sheet.get().setMeta(meta);
   sheet.endTransaction();
+
+  // Persist the seeded spend totals to the cache. Because they were loaded
+  // directly (rather than recomputed) they aren't part of the computation
+  // queue that normally gets cached, so without this a warm load would have
+  // to recompute them. The cells already hold their final values here.
+  if (seededCells.length > 0) {
+    sheet.get().saveCachedCells(seededCells);
+  }
 
   // Wait for the spreadsheet to finish computing. Normally this won't
   // do anything (as values are cached) but on first run this need to
