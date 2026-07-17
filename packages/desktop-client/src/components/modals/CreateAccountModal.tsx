@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -42,7 +42,7 @@ export function CreateAccountModal({
   const isUsingServer = syncServerStatus !== 'no-server';
   const shouldSkipToLocalAccount = !isUsingServer && upgradingAccountId == null;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (shouldSkipToLocalAccount) {
       dispatch(replaceModal({ modal: { name: 'add-local-account' } }));
     }
@@ -123,31 +123,29 @@ export function CreateAccountModal({
                   </View>
                 </View>
 
-                {isUsingServer && (
-                  <View style={{ gap: 10 }}>
-                    <Button
-                      onPress={() => {
-                        state.close();
-                        void navigate('/bank-sync');
-                      }}
-                      style={{
-                        padding: '10px 0',
-                        fontSize: 15,
-                        fontWeight: 600,
-                      }}
-                    >
-                      <Trans>Set up bank sync</Trans>
-                    </Button>
-                    <Paragraph
-                      style={{ fontSize: 15, color: theme.pageTextSubdued }}
-                    >
-                      <Trans>
-                        Configure providers and link accounts from the Bank Sync
-                        page.
-                      </Trans>
-                    </Paragraph>
-                  </View>
-                )}
+                <View style={{ gap: 10 }}>
+                  <Button
+                    onPress={() => {
+                      state.close();
+                      void navigate('/bank-sync');
+                    }}
+                    style={{
+                      padding: '10px 0',
+                      fontSize: 15,
+                      fontWeight: 600,
+                    }}
+                  >
+                    <Trans>Set up bank sync</Trans>
+                  </Button>
+                  <Paragraph
+                    style={{ fontSize: 15, color: theme.pageTextSubdued }}
+                  >
+                    <Trans>
+                      Configure providers and link accounts from the Bank Sync
+                      page.
+                    </Trans>
+                  </Paragraph>
+                </View>
               </>
             )}
           </View>
