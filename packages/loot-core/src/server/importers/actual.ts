@@ -19,7 +19,7 @@ export async function importActual(_filepath: string, buffer: Buffer) {
     ));
   } catch (e) {
     if (e.type === 'FileDownloadError') {
-      return { error: e.reason };
+      return { error: e.reason, meta: e.meta };
     }
     throw e;
   }

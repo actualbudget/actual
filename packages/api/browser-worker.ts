@@ -67,7 +67,8 @@ self.fetch = function patchedFetch(
   'api-browser/init'
 ] = async function (args?: unknown) {
   const { config } = (args ?? {}) as { config?: InitConfig };
-  await init(config ?? {});
+  // There is no meaningful `process.cwd()` to fall back to in a worker
+  await init({ dataDir: '/documents', ...config });
 };
 
 connection.init(self, handlers);

@@ -107,13 +107,11 @@ __metadata:
     "@jlongster/sql.js": "npm:^1.6.7"
     "@rschedule/core": "npm:^1.5.0"
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
-    "@types/adm-zip": "npm:^0.5.8"
     "@types/better-sqlite3": "npm:^7.6.13"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/node": "npm:^22.19.21"
     "@typescript/native-preview": "npm:beta"
     absurd-sql: "npm:0.0.54"
-    adm-zip: "npm:^0.5.17"
     assert: "npm:^2.1.0"
     better-sqlite3: "npm:^12.10.0"
     browserify-zlib: "npm:^0.2.0"
@@ -126,6 +124,7 @@ __metadata:
     es-toolkit: "npm:^1.47.1"
     fake-indexeddb: "npm:^6.2.5"
     fast-check: "npm:^4.8.0"
+    fflate: "npm:^0.8.3"
     handlebars: "npm:^4.7.9"
     hyperformula: "npm:^3.3.0"
     jest-diff: "npm:^30.4.1"
@@ -8654,15 +8653,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/adm-zip@npm:^0.5.8":
-  version: 0.5.8
-  resolution: "@types/adm-zip@npm:0.5.8"
-  dependencies:
-    "@types/node": "npm:*"
-  checksum: 10/0739e5abda05f5c02b84048a02d308f77dd9e2d4e7d6ac7126830a0000b9e962a1f5795efd96d50df289333af9ae3b264adacfad9623dde66c10570ce65029d5
-  languageName: node
-  linkType: hard
-
 "@types/aria-query@npm:^5.0.1":
   version: 5.0.4
   resolution: "@types/aria-query@npm:5.0.4"
@@ -10511,20 +10501,6 @@ __metadata:
   version: 1.2.2
   resolution: "address@npm:1.2.2"
   checksum: 10/57d80a0c6ccadc8769ad3aeb130c1599e8aee86a8d25f671216c40df9b8489d6c3ef879bc2752b40d1458aa768f947c2d91e5b2fedfe63cf702c40afdfda9ba9
-  languageName: node
-  linkType: hard
-
-"adm-zip@npm:0.5.16":
-  version: 0.5.16
-  resolution: "adm-zip@npm:0.5.16"
-  checksum: 10/e167d1b9e60cde37334efda828fa514680af9facbd4183952f36526390e5c7da9a90ca1e6880dfd3aba7b3517f1506c6178e0dc29cd630b26b98c795f97fc599
-  languageName: node
-  linkType: hard
-
-"adm-zip@patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch":
-  version: 0.5.16
-  resolution: "adm-zip@patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch::version=0.5.16&hash=f6b7d0"
-  checksum: 10/1a8c866a6ad1b6b6870d39468f26369cc6a43027678708cd9d40ff64274bb45b946f570293d0ac5d23a4a2b360e36168f14a3f9bc1a1cea20b8dce7ec8d8425e
   languageName: node
   linkType: hard
 
@@ -15970,6 +15946,13 @@ __metadata:
   dependencies:
     xml-js: "npm:^1.6.11"
   checksum: 10/6aeee26b92037d9b49e89513696cd9d487ada84b31d707f92ab6d579f5cf347353474722727ec0a2d7bcf4ea0829a02d9c7774aacae7709de35c2ea48a8a0d80
+  languageName: node
+  linkType: hard
+
+"fflate@npm:^0.8.3":
+  version: 0.8.3
+  resolution: "fflate@npm:0.8.3"
+  checksum: 10/6ebf528dc9c56e78e715eac615b009b25dc33e15c1920b11ebba44e6d76181c647756a81a23e19247907496b93aa99928514c53090579a65109e026ac2824aa7
   languageName: node
   linkType: hard
 

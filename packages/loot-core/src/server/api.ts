@@ -42,7 +42,7 @@ import { isTrackingBudget } from './budget/actions';
 import * as cloudStorage from './cloud-storage';
 import type { RemoteFile } from './cloud-storage';
 import * as db from './db';
-import { APIError } from './errors';
+import { APIError, withErrorCode } from './errors';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
@@ -170,7 +170,7 @@ handlers['api/load-budget'] = async function ({ id }) {
     } else {
       connection.send('show-budgets');
 
-      throw new Error(getSyncError(error, id));
+      throw withErrorCode(new Error(getSyncError(error, id)), error);
     }
   }
 };
@@ -189,12 +189,18 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
   if (!localBudget) {
     const files = await handlers['get-remote-files']();
     if (!files) {
-      throw new Error('Could not get remote files');
+      throw withErrorCode(
+        new Error('Could not get remote files'),
+        'network-failure',
+      );
     }
     const file = files.find(f => f.groupId === syncId);
     if (!file) {
-      throw new Error(
-        `Budget "${syncId}" not found. Check the sync id of your budget in the Advanced section of the settings page.`,
+      throw withErrorCode(
+        new Error(
+          `Budget "${syncId}" not found. Check the sync id of your budget in the Advanced section of the settings page.`,
+        ),
+        'budget-not-found',
       );
     }
 
@@ -206,8 +212,11 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
   // Set the e2e encryption keys
   if (activeFile.encryptKeyId) {
     if (!password) {
-      throw new Error(
-        `File ${activeFile.name} is encrypted. Please provide a password.`,
+      throw withErrorCode(
+        new Error(
+          `File ${activeFile.name} is encrypted. Please provide a password.`,
+        ),
+        'missing-key',
       );
     }
 
@@ -216,7 +225,10 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
       password,
     });
     if (result.error) {
-      throw new Error(getTestKeyError(result.error));
+      throw withErrorCode(
+        new Error(getTestKeyError(result.error)),
+        result.error.reason,
+      );
     }
   }
 
@@ -225,8 +237,11 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     await handlers['load-budget']({ id: localBudget.id });
     const result = await handlers['sync-budget']();
     if (result.error) {
-      throw new Error(
-        getSyncError(result.error.reason, localBudget.id, result.error.meta),
+      throw withErrorCode(
+        new Error(
+          getSyncError(result.error.reason, localBudget.id, result.error.meta),
+        ),
+        result.error.reason,
       );
     }
     return;
@@ -238,7 +253,10 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
   });
   if (result.error) {
     logger.log('Full error details', result.error);
-    throw new Error(getDownloadError(result.error));
+    throw withErrorCode(
+      new Error(getDownloadError(result.error)),
+      result.error.reason,
+    );
   }
   await handlers['load-budget']({ id: result.id });
 };
@@ -256,7 +274,10 @@ handlers['api/sync'] = async function () {
   const { id } = prefs.getPrefs();
   const result = await handlers['sync-budget']();
   if (result.error) {
-    throw new Error(getSyncError(result.error.reason, id, result.error.meta));
+    throw withErrorCode(
+      new Error(getSyncError(result.error.reason, id, result.error.meta)),
+      result.error.reason,
+    );
   }
 };
 
@@ -295,7 +316,7 @@ handlers['api/bank-sync'] = async function (args) {
 
   const errors = allErrors.filter(e => e != null);
   if (errors.length > 0) {
-    throw new Error(getBankSyncError(errors[0]));
+    throw withErrorCode(new Error(getBankSyncError(errors[0])), errors[0].code);
   }
 };
 

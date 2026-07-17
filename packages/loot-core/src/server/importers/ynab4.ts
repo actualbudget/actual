@@ -1,9 +1,9 @@
 // @ts-strict-ignore
-import AdmZip from 'adm-zip';
 import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '#platform/server/log';
 import { send } from '#server/main-app';
+import { safeUnzip } from '#server/util/zip';
 import * as monthUtils from '#shared/months';
 import { amountToInteger, groupBy, sortByKey } from '#shared/util';
 
@@ -343,10 +343,13 @@ function estimateRecentness(str: string) {
   }, 0);
 }
 
-function findLatestDevice(zipped: AdmZip, entries: AdmZip.IZipEntry[]): string {
+function findLatestDevice(
+  zipped: Record<string, Uint8Array>,
+  entries: string[],
+): string {
   let devices = entries
     .map(entry => {
-      const contents = zipped.readFile(entry).toString('utf8');
+      const contents = Buffer.from(zipped[entry]).toString('utf8');
 
       let data;
       try {
@@ -411,8 +414,8 @@ export function getBudgetName(filepath) {
   return m[1];
 }
 
-function getFile(entries: AdmZip.IZipEntry[], path: string) {
-  const files = entries.filter(e => e.entryName === path);
+function getFile(entries: string[], path: string) {
+  const files = entries.filter(e => e === path);
   if (files.length === 0) {
     throw new Error('Could not find file: ' + path);
   }
@@ -432,28 +435,36 @@ function join(...paths: string[]): string {
 }
 
 export function parseFile(buffer: Buffer): YNAB4.YFull {
-  const zipped = new AdmZip(buffer);
-  const entries = zipped.getEntries();
+  let zipped: Record<string, Uint8Array>;
+  try {
+    zipped = safeUnzip(buffer);
+  } catch (e) {
+    logger.log(e);
+    throw new Error('Error reading zip file');
+  }
+  const entries = Object.keys(zipped);
 
   let root = '';
-  const dirMatch = entries[0].entryName.match(/([^/]*\.ynab4)/);
+  const dirMatch = entries[0].match(/([^/]*\.ynab4)/);
   if (dirMatch) {
     root = dirMatch[1] + '/';
   }
 
-  const metaStr = zipped.readFile(getFile(entries, root + 'Budget.ymeta'));
+  const metaStr = Buffer.from(zipped[getFile(entries, root + 'Budget.ymeta')]);
   const meta = JSON.parse(metaStr.toString('utf8'));
   const budgetPath = join(root, meta.relativeDataFolderName);
 
   const deviceFiles = entries.filter(e =>
-    e.entryName.startsWith(join(budgetPath, 'devices')),
+    e.startsWith(join(budgetPath, 'devices')),
   );
   const deviceGUID = findLatestDevice(zipped, deviceFiles);
 
   const yfullPath = join(budgetPath, deviceGUID, 'Budget.yfull');
   let contents;
   try {
-    contents = zipped.readFile(getFile(entries, yfullPath)).toString('utf8');
+    contents = Buffer.from(zipped[getFile(entries, yfullPath)]).toString(
+      'utf8',
+    );
   } catch (e) {
     logger.log(e);
     throw new Error('Error reading Budget.yfull file');

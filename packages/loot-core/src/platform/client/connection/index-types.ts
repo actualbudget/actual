@@ -8,6 +8,18 @@ import type { ServerEvents } from '#types/server-events';
 export declare function init(socket?: Worker | MessagePort): Promise<unknown>;
 export type Init = typeof init;
 
+/** Error shape posted by the backend when a handler rejects. */
+export type ConnectionError = {
+  /** Stable, machine-readable failure code (e.g. 'network-failure') */
+  code?: string;
+  name?: string;
+  cause?: unknown;
+} & (
+  | { type: 'APIError'; message: string }
+  // A ServerError can be built from a rejection without a message
+  | { type: 'ServerError'; message?: string }
+);
+
 /**
  * Send a command to the browser server.
  *
@@ -25,14 +37,7 @@ export declare function send<K extends keyof Handlers>(
   options: { catchErrors: true },
 ): Promise<
   | { data: Awaited<ReturnType<Handlers[K]>>; error: undefined }
-  | {
-      data: undefined;
-      error: {
-        type: 'APIError' | 'ServerError';
-        message: string;
-        cause?: unknown;
-      };
-    }
+  | { data: undefined; error: ConnectionError }
 >;
 export declare function send<K extends keyof Handlers>(
   name: K,
@@ -54,14 +59,7 @@ export declare function sendCatch<K extends keyof Handlers>(
   args?: Parameters<Handlers[K]>[0],
 ): Promise<
   | { data: Awaited<ReturnType<Handlers[K]>>; error: undefined }
-  | {
-      data: undefined;
-      error: {
-        type: 'APIError' | 'ServerError';
-        message: string;
-        cause?: unknown;
-      };
-    }
+  | { data: undefined; error: ConnectionError }
 >;
 export type SendCatch = typeof sendCatch;
 
