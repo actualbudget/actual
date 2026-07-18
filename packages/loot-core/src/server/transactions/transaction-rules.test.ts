@@ -404,6 +404,88 @@ describe('Transaction rules', () => {
     });
   });
 
+  test('runRules evaluates the category_group condition (run-rules / auto-run path)', async () => {
+    // Regression test for https://github.com/actualbudget/actual/issues/8498
+    // The `category_group` condition resolved correctly through the rule
+    // editor's preview/Apply (which uses conditionsToAQL -> category.group
+    // join) but silently failed through runRules / auto-run-on-save, because
+    // Condition.eval read object['category_group'] which was never populated
+    // on the transaction. prepareTransactionForRules now resolves the
+    // category's group so both paths share the same resolution logic.
+    await loadRules();
+    const account = await db.insertAccount({ id: 'acct', name: 'acct' });
+    const personalGroupId = await db.insertCategoryGroup({
+      id: 'personal',
+      name: 'Personal',
+    });
+    const billsGroupId = await db.insertCategoryGroup({
+      id: 'bills',
+      name: 'Bills',
+    });
+    const groceriesId = await db.insertCategory({
+      id: 'groceries',
+      name: 'groceries',
+      cat_group: personalGroupId,
+    });
+    const rentId = await db.insertCategory({
+      id: 'rent',
+      name: 'rent',
+      cat_group: billsGroupId,
+    });
+    await db.insertPayee({ id: 'store', name: 'store' });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'is', field: 'category_group', value: personalGroupId },
+      ],
+      actions: [{ op: 'prepend-notes', value: '#personal ' }],
+    });
+
+    // A transaction whose category belongs to the matched group: the rule's
+    // action should be applied via runRules.
+    const matched = await runRules({
+      id: 't1',
+      date: '2025-01-01',
+      account,
+      payee: 'store',
+      category: groceriesId,
+      amount: 500,
+      notes: 'weekly shop',
+    });
+    expect(matched.notes).toBe('#personal weekly shop');
+    // The resolved category_group helper must not leak into the result.
+    expect('category_group' in matched).toBe(false);
+
+    // A transaction whose category belongs to a different group: the rule
+    // should NOT match and the action should not be applied.
+    const notMatched = await runRules({
+      id: 't2',
+      date: '2025-01-02',
+      account,
+      payee: 'store',
+      category: rentId,
+      amount: 1200,
+      notes: 'january rent',
+    });
+    expect(notMatched.notes).toBe('january rent');
+    expect('category_group' in notMatched).toBe(false);
+
+    // A transaction with no category: the group cannot be resolved, so the
+    // rule should not match (consistent with the editor preview behaviour).
+    const noCategory = await runRules({
+      id: 't3',
+      date: '2025-01-03',
+      account,
+      payee: 'store',
+      category: null,
+      amount: 50,
+      notes: '',
+    });
+    expect(noCategory.notes).toBe('');
+  });
+
   test('transactions can be queried by rule', async () => {
     await loadRules();
     const account = await db.insertAccount({ name: 'bank' });
