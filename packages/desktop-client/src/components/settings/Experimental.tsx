@@ -233,12 +233,6 @@ export function ExperimentalFeatures() {
               <Trans>Budget Analysis Report</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="payeeLocations"
-              feedbackLink="https://github.com/actualbudget/actual/issues/6706"
-            >
-              <Trans>Payee Locations</Trans>
-            </FeatureToggle>
-            <FeatureToggle
               flag="enableBanking"
               feedbackLink="https://github.com/actualbudget/actual/issues/7799"
             >
