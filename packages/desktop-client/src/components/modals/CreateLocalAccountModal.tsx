@@ -179,10 +179,14 @@ export function CreateLocalAccountModal() {
                       marginTop: 3,
                     }}
                   >
-                    <Text>
+                    <Text style={{ display: 'block' }}>
                       <Trans>
                         Off-budget accounts (like investments, loans, or your
                         house) are tracked but not part of your spending budget.
+                      </Trans>
+                    </Text>
+                    <Text style={{ display: 'block' }}>
+                      <Trans>
                         This cannot be changed later. See{' '}
                         <Link
                           variant="external"
