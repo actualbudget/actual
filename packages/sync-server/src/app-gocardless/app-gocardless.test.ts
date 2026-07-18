@@ -53,6 +53,20 @@ describe('/create-web-token', () => {
     });
   });
 
+  it('accepts the electron app origin', async () => {
+    const res = await request(app)
+      .post('/create-web-token')
+      .set('Origin', 'app://actual')
+      .send({ institutionId: 'SANDBOXFINANCE_SFIN0000' });
+
+    expect(res.body.status).toBe('ok');
+    expect(res.body.data.link).toBe('https://gocardless.example/start');
+    expect(createRequisition).toHaveBeenCalledWith({
+      institutionId: 'SANDBOXFINANCE_SFIN0000',
+      host: 'app://actual',
+    });
+  });
+
   it('rejects a missing Origin header', async () => {
     const res = await request(app)
       .post('/create-web-token')
@@ -89,5 +103,15 @@ describe('/create-web-token', () => {
       error_type: 'Invalid GoCardless identifier: undefined',
     });
     expect(createRequisition).not.toHaveBeenCalled();
+  });
+});
+
+describe('/link', () => {
+  it('serves the completion page', async () => {
+    const res = await request(app).get('/link');
+
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/text\/html/);
+    expect(res.text).toContain('window.close()');
   });
 });

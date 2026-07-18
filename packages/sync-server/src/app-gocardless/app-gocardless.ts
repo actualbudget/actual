@@ -1,5 +1,3 @@
-import path from 'path';
-
 import express from 'express';
 
 import { sha256String } from '#util/hash';
@@ -28,7 +26,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
+const ELECTRON_APP_ORIGIN = 'app://actual';
+
 function validateOrigin(origin: string | undefined) {
+  if (origin === ELECTRON_APP_ORIGIN) {
+    return origin;
+  }
+
   let url;
   try {
     url = new URL(origin ?? '');
@@ -49,11 +53,30 @@ function sanitizeId<T extends string = string>(id: unknown): T {
   return id as T;
 }
 
+const LINK_PAGE_HTML = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Actual</title>
+  </head>
+  <body>
+    <script>
+      window.close();
+    </script>
+
+    <p>Please wait...</p>
+    <p>
+      The window should close automatically. If nothing happened you can close
+      this window or tab.
+    </p>
+  </body>
+</html>`;
+
 const app = express();
 app.use(requestLoggerMiddleware);
 
 app.get('/link', function (req, res) {
-  res.sendFile('link.html', { root: path.resolve('./src/app-gocardless') });
+  res.send(LINK_PAGE_HTML);
 });
 
 export { app as handlers };
