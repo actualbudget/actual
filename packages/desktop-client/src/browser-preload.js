@@ -21,6 +21,17 @@ const ACTUAL_VERSION = Platform.isPlaywright
     ? '.preview'
     : packageJson.version;
 
+// The OIDC callback (/openid-cb) is reached via a full-page navigation back
+// from the OpenID provider. Routing it through the SharedWorker coordinator is
+// unreliable: the returning tab can be left UNASSIGNED (no leader/backend), so
+// the token write hangs and login silently fails (worst on iOS/iPad, where the
+// pre-redirect tab never reports closing). It's a transient pre-login page with
+// no budget open, so it doesn't need multi-tab coordination — give it a direct
+// Worker, then it reloads to the app root and rejoins coordination normally.
+const isOpenIdCallback = window.location.pathname
+  .replace(/\/+$/, '')
+  .endsWith('/openid-cb');
+
 // *** Start the backend ***
 //
 // The multi-tab coordinator (leader/follower over SharedWorker), the direct
@@ -38,7 +49,8 @@ const worker = startBrowserBackend({
   },
   createSharedWorker: () =>
     new SharedBrowserServerWorker({ name: 'actual-backend' }),
-  forceDirectWorker: Platform.isPlaywright || Platform.isIOS,
+  forceDirectWorker:
+    Platform.isPlaywright || Platform.isIOS || isOpenIdCallback,
 });
 
 let isUpdateReadyForDownload = false;
