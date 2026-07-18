@@ -8,9 +8,9 @@ import { loggedIn } from '#users/usersSlice';
 
 export function OpenIdCallback() {
   const dispatch = useDispatch();
+  // `dispatch` is a stable reference, so this effect runs exactly once.
   useEffect(() => {
-    const token = new URLSearchParams(window.location.search).get('token');
-    void send('subscribe-set-token', { token: token as string }).then(() => {
+    const finishLogin = () => {
       if (Platform.isBrowser) {
         // On the web the callback page intentionally ran on a direct worker
         // (see browser-preload.js) to avoid the SharedWorker coordinator
@@ -27,7 +27,18 @@ export function OpenIdCallback() {
       // Electron has no SharedWorker (own IPC backend), so there's nothing to
       // rejoin — complete the login in-place as before.
       void dispatch(loggedIn());
-    });
-  });
+    };
+
+    const token = new URLSearchParams(window.location.search).get('token');
+    if (!token) {
+      // No token in the callback URL — nothing to persist. Fall through to the
+      // normal post-login handling, which lands the user back on the login
+      // screen (an unauthenticated boot shows login).
+      finishLogin();
+      return;
+    }
+
+    void send('subscribe-set-token', { token }).then(finishLogin);
+  }, [dispatch]);
   return null;
 }
