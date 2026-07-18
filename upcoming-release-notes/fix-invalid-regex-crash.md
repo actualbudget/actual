@@ -1,0 +1,1 @@
+Fix crash when typing an invalid regex pattern (e.g. trailing backslash or unclosed bracket) in a rule `matches` condition. The invalid pattern is now treated as "no match" instead of crashing the app.
