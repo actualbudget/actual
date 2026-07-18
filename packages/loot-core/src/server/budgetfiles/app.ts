@@ -23,8 +23,6 @@ import * as sheet from '#server/sheet';
 import {
   clearFullSyncTimeout,
   initialFullSync,
-  notifyDeferredMessages,
-  resetDeferredMessagesNotification,
   setSyncingMode,
 } from '#server/sync';
 import * as syncMigrations from '#server/sync/migrate';
@@ -600,14 +598,10 @@ async function _loadBudget(id: Budget['id']): Promise<{
     return result;
   }
 
-  resetDeferredMessagesNotification();
   try {
     // Apply any sync messages that were deferred because they came from
-    // a newer version of the app, now that migrations have run. If some
-    // are still unappliable, remind the user that an update is needed
-    if (replayPendingMessages() > 0) {
-      notifyDeferredMessages();
-    }
+    // a newer version of the app, now that migrations have run
+    replayPendingMessages();
   } catch (e) {
     // Failing to replay shouldn't block loading the budget; the
     // messages stay pending

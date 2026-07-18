@@ -2,14 +2,13 @@ import type { Database } from '@jlongster/sql.js';
 
 import * as sqlite from '#platform/server/sqlite';
 
-// One entry per column, keyed "table.column". `required` means a row
-// cannot be inserted without explicitly providing this column (NOT NULL,
-// no DEFAULT, not the primary key). `pk` means the column is part of the
-// table's primary key.
-export type SchemaSnapshot = Map<
-  string,
-  { table: string; required: boolean; pk: boolean }
->;
+// `required` means a row cannot be inserted without explicitly providing
+// this column (NOT NULL, no DEFAULT, not the primary key). `pk` means
+// the column is part of the table's primary key.
+type ColumnFlags = { required: boolean; pk: boolean };
+
+// table -> column -> flags, from PRAGMA table_info
+export type SchemaSnapshot = Map<string, Map<string, ColumnFlags>>;
 
 export function snapshotSchema(db: Database): SchemaSnapshot {
   const tables = sqlite.runQuery<{ name: string }>(
@@ -19,95 +18,99 @@ export function snapshotSchema(db: Database): SchemaSnapshot {
     true,
   );
   return new Map(
-    tables.flatMap(({ name: table }) =>
-      sqlite
-        .runQuery<{
-          name: string;
-          notnull: number;
-          dflt_value: string | null;
-          pk: number;
-        }>(db, `PRAGMA table_info("${table}")`, [], true)
-        .map(
-          (
-            column,
-          ): [string, { table: string; required: boolean; pk: boolean }] => [
-            `${table}.${column.name}`,
+    tables.map(({ name: table }): [string, Map<string, ColumnFlags>] => [
+      table,
+      new Map(
+        sqlite
+          .runQuery<{
+            name: string;
+            notnull: number;
+            dflt_value: string | null;
+            pk: number;
+          }>(db, `PRAGMA table_info("${table}")`, [], true)
+          .map((column): [string, ColumnFlags] => [
+            column.name,
             {
-              table,
               required:
                 column.notnull !== 0 &&
                 column.dflt_value == null &&
                 column.pk === 0,
               pk: column.pk !== 0,
             },
-          ],
-        ),
-    ),
+          ]),
+      ),
+    ]),
   );
 }
 
 // A schema change is additive-only when every column that existed before
-// still exists after (a dropped or renamed table shows up as all of its
-// columns disappearing), and any new column outside `nonSyncedTables` is
-// optional — sync builds rows one column at a time (see `apply` in
-// #server/sync), so a required column in a synced table can never be
-// inserted. This backs the additive-migrations guard that
+// still exists after, unchanged (a dropped or renamed table shows up as
+// all of its columns disappearing), and any new column outside
+// `nonSyncedTables` is optional — sync builds rows one column at a time
+// (see `apply` in #server/sync), so a required column in a synced table
+// can never be inserted. This backs the additive-migrations guard that
 // `checkDatabaseValidity` relies on for cross-version compatibility.
 export function findAdditiveViolations(
   before: SchemaSnapshot,
   after: SchemaSnapshot,
   nonSyncedTables: Set<string>,
 ): string[] {
-  const tablesBefore = new Set([...before.values()].map(c => c.table));
-  const newSyncedTables = new Set(
-    [...after.values()]
-      .map(c => c.table)
-      .filter(table => !tablesBefore.has(table) && !nonSyncedTables.has(table)),
-  );
+  const violations: string[] = [];
 
-  return [
-    ...[...before.keys()]
-      .filter(key => !after.has(key))
-      .map(key => `column "${key}" (or its table) was removed or renamed`),
-    ...[...after]
-      .filter(
-        ([key, column]) =>
-          !before.has(key) &&
-          column.required &&
-          !nonSyncedTables.has(column.table),
-      )
-      .map(([key]) => `new column "${key}" is NOT NULL without a DEFAULT`),
-    // A table rebuild can also change an existing column in place:
-    // tightening it to NOT NULL breaks per-column inserts from older
-    // clients, and changing primary-key membership breaks sync's
-    // addressing by id
-    ...[...after].flatMap(([key, column]) => {
-      const prev = before.get(key);
-      if (!prev || nonSyncedTables.has(column.table)) {
-        return [];
+  for (const [table, beforeColumns] of before) {
+    const afterColumns = after.get(table);
+    for (const name of beforeColumns.keys()) {
+      if (!afterColumns?.has(name)) {
+        violations.push(
+          `column "${table}.${name}" (or its table) was removed or renamed`,
+        );
       }
-      return [
-        ...(column.required && !prev.required
-          ? [`existing column "${key}" became NOT NULL without a DEFAULT`]
-          : []),
-        ...(column.pk !== prev.pk
-          ? [`existing column "${key}" changed primary-key membership`]
-          : []),
-      ];
-    }),
-    // Sync addresses rows by their `id` column (see `apply` in
-    // #server/sync), so a synced table needs exactly that as its
-    // primary key — no other name, no composite keys
-    ...[...newSyncedTables]
-      .filter(table => {
-        const pks = [...after]
-          .filter(([, c]) => c.table === table && c.pk)
-          .map(([key]) => key);
-        return pks.length !== 1 || pks[0] !== `${table}.id`;
-      })
-      .map(
-        table =>
+    }
+  }
+
+  for (const [table, afterColumns] of after) {
+    if (nonSyncedTables.has(table)) {
+      continue;
+    }
+    const beforeColumns = before.get(table);
+
+    for (const [name, column] of afterColumns) {
+      const prev = beforeColumns?.get(name);
+      if (!prev && column.required) {
+        violations.push(
+          `new column "${table}.${name}" is NOT NULL without a DEFAULT`,
+        );
+      }
+      // A table rebuild can change an existing column in place:
+      // tightening it to NOT NULL breaks per-column inserts from older
+      // clients, and changing primary-key membership breaks sync's
+      // addressing by id
+      if (prev && column.required && !prev.required) {
+        violations.push(
+          `existing column "${table}.${name}" became NOT NULL without a DEFAULT`,
+        );
+      }
+      if (prev && column.pk !== prev.pk) {
+        violations.push(
+          `existing column "${table}.${name}" changed primary-key membership`,
+        );
+      }
+    }
+
+    if (!beforeColumns) {
+      // Sync addresses rows by their `id` column (see `apply` in
+      // #server/sync), so a new synced table needs exactly that as its
+      // primary key — no other name, no composite keys
+      const pks = [...afterColumns]
+        .filter(([, c]) => c.pk)
+        .map(([name]) => name);
+      if (pks.length !== 1 || pks[0] !== 'id') {
+        violations.push(
           `new table "${table}" must have a single primary key named "id"`,
-      ),
-  ];
+        );
+      }
+    }
+  }
+
+  return violations;
 }
