@@ -1,22 +1,4 @@
-import { createInterface, cursorTo } from 'node:readline';
-
-export async function prompt(message: string) {
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  const promise = new Promise(resolve => {
-    rl.question(message, answer => {
-      resolve(answer);
-      rl.close();
-    });
-  });
-
-  const answer = await promise;
-
-  return answer;
-}
+import { cursorTo } from 'node:readline';
 
 export async function promptPassword() {
   const password = await askForPassword('Enter a password, then press enter: ');

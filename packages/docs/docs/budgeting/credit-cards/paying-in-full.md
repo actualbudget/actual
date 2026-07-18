@@ -36,7 +36,7 @@ See [Carrying Debt](./carrying-debt.md) for instructions on how we set up our ac
 
 :::
 
-We'll need the following informaiton from our July statement:
+We'll need the following information from our July statement:
 
 **Chase Account Summary - July 2025**
 

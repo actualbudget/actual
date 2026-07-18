@@ -3,6 +3,52 @@ type ErrorWithMeta = {
   meta?: unknown;
 };
 
+export type UnsafeZipMeta = {
+  zipReason:
+    | 'unsafe-entry-name'
+    | 'archive-size'
+    | 'entry-size'
+    | 'total-size'
+    | 'duplicate-entry';
+  entryName?: string;
+  maxSize?: number;
+};
+
+export function getUnsafeZipMeta(meta?: unknown): UnsafeZipMeta | null {
+  if (
+    meta &&
+    typeof meta === 'object' &&
+    'zipReason' in meta &&
+    typeof meta.zipReason === 'string'
+  ) {
+    return meta as UnsafeZipMeta;
+  }
+  return null;
+}
+
+export function toMB(bytes?: number): number | null {
+  return bytes != null ? Math.round(bytes / (1024 * 1024)) : null;
+}
+
+function getUnsafeZipError(meta: UnsafeZipMeta): string {
+  const { entryName } = meta;
+  const maxSizeMB = toMB(meta.maxSize);
+  switch (meta.zipReason) {
+    case 'archive-size':
+      return `This file is larger than the maximum supported size of ${maxSizeMB} MB, sorry! Visit https://actualbudget.org/contact/ for support.`;
+    case 'entry-size':
+      return `The file "${entryName}" in this archive is larger than the maximum supported size of ${maxSizeMB} MB, sorry! Visit https://actualbudget.org/contact/ for support.`;
+    case 'total-size':
+      return `The uncompressed contents of this archive are larger than the maximum supported size of ${maxSizeMB} MB, sorry! Visit https://actualbudget.org/contact/ for support.`;
+    case 'unsafe-entry-name':
+      return `This archive contains an entry with an unsafe file name: "${entryName}".`;
+    case 'duplicate-entry':
+      return `This archive contains more than one entry named "${entryName}".`;
+    default:
+      return 'This file could not be imported, sorry! Visit https://actualbudget.org/contact/ for support.';
+  }
+}
+
 // NOTE: These error formatters are consumed by the headless `@actual-app/api`
 // (see `src/server/api.ts`), which has no i18n. They intentionally return
 // plain English strings. User-facing, translated equivalents live in the
@@ -48,6 +94,13 @@ export function getDownloadError({
     case 'invalid-zip-file':
     case 'invalid-meta-file':
       return 'Downloaded file is invalid, sorry! Visit https://actualbudget.org/contact/ for support.';
+    case 'zip-too-large': {
+      const zipMeta = getUnsafeZipMeta(meta);
+      if (zipMeta) {
+        return getUnsafeZipError(zipMeta);
+      }
+      return 'This file is too large to import, sorry! Visit https://actualbudget.org/contact/ for support.';
+    }
     case 'decrypt-failure':
       return (
         'Unable to decrypt file ' +

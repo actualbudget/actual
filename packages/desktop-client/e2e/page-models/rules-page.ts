@@ -39,4 +39,12 @@ export class RulesPage {
   async searchFor(text: string) {
     await this.searchBox.fill(text);
   }
+
+  async rightClickNthRule(index: number) {
+    await this.page
+      .getByTestId('table')
+      .getByTestId('row')
+      .nth(index)
+      .click({ button: 'right' });
+  }
 }

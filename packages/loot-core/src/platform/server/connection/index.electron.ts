@@ -4,15 +4,8 @@ import { logger } from '#platform/server/log';
 import { APIError } from '#server/errors';
 import { isMutating, runHandler } from '#server/mutators';
 
+import { postErrorReply } from './errors';
 import type * as T from './index-types';
-
-function coerceError(error) {
-  if (error.type && error.type === 'APIError') {
-    return error;
-  }
-
-  return { type: 'ServerError', message: error.message, cause: error };
-}
 
 export const init: T.Init = function (_socketName, handlers) {
   process.parentPort.on('message', ({ data }) => {
@@ -35,25 +28,11 @@ export const init: T.Init = function (_socketName, handlers) {
           });
         },
         nativeError => {
-          const error = coerceError(nativeError);
-
-          if (name.startsWith('api/')) {
-            // The API is newer and does automatically forward
-            // errors
-            process.parentPort.postMessage({
-              type: 'reply',
-              id,
-              error,
-            });
-          } else if (catchErrors) {
-            process.parentPort.postMessage({
-              type: 'reply',
-              id,
-              result: { error, data: null },
-            });
-          } else {
-            process.parentPort.postMessage({ type: 'error', id, error });
-          }
+          const error = postErrorReply(
+            message => process.parentPort.postMessage(message),
+            { id, name, catchErrors },
+            nativeError,
+          );
 
           if (error.type === 'ServerError' && name !== 'api/load-budget') {
             captureException(nativeError);

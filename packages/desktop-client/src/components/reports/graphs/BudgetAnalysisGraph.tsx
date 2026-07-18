@@ -56,6 +56,7 @@ type BudgetAnalysisGraphProps = {
   };
   graphType?: 'Line' | 'Bar';
   showBalance?: boolean;
+  balanceOnly?: boolean;
   isConcise?: boolean;
 };
 
@@ -65,6 +66,7 @@ type CustomTooltipProps = {
   isConcise: boolean;
   format: (value: unknown, type?: FormatType) => string;
   showBalance: boolean;
+  balanceOnly: boolean;
 };
 
 function CustomTooltip({
@@ -73,6 +75,7 @@ function CustomTooltip({
   isConcise,
   format,
   showBalance,
+  balanceOnly,
 }: CustomTooltipProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -105,65 +108,71 @@ function CustomTooltip({
           </strong>
         </div>
         <div style={{ lineHeight: 1.5 }}>
-          <AlignedText
-            left={
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <span
-                  style={{
-                    width: 10,
-                    height: 10,
-                    backgroundColor: theme.reportsNumberPositive,
-                    display: 'inline-block',
-                  }}
-                />
-                <Trans>Budgeted:</Trans>
-              </span>
-            }
-            right={
-              <FinancialText>
-                {format(data.budgeted, 'financial')}
-              </FinancialText>
-            }
-          />
-          <AlignedText
-            left={
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <span
-                  style={{
-                    width: 10,
-                    height: 10,
-                    backgroundColor: theme.reportsNumberNegative,
-                    display: 'inline-block',
-                  }}
-                />
-                <Trans>Spent:</Trans>
-              </span>
-            }
-            right={
-              <FinancialText>{format(data.spent, 'financial')}</FinancialText>
-            }
-          />
-          <AlignedText
-            left={
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <span
-                  style={{
-                    width: 10,
-                    height: 10,
-                    backgroundColor: theme.templateNumberUnderFunded,
-                    display: 'inline-block',
-                  }}
-                />
-                {t('Overspending Adjustment:')}
-              </span>
-            }
-            right={
-              <FinancialText>
-                {format(data.overspendingAdjustment, 'financial')}
-              </FinancialText>
-            }
-          />
-          {showBalance && (
+          {!balanceOnly && (
+            <AlignedText
+              left={
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span
+                    style={{
+                      width: 10,
+                      height: 10,
+                      backgroundColor: theme.reportsNumberPositive,
+                      display: 'inline-block',
+                    }}
+                  />
+                  <Trans>Budgeted:</Trans>
+                </span>
+              }
+              right={
+                <FinancialText>
+                  {format(data.budgeted, 'financial')}
+                </FinancialText>
+              }
+            />
+          )}
+          {!balanceOnly && (
+            <AlignedText
+              left={
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span
+                    style={{
+                      width: 10,
+                      height: 10,
+                      backgroundColor: theme.reportsNumberNegative,
+                      display: 'inline-block',
+                    }}
+                  />
+                  <Trans>Spent:</Trans>
+                </span>
+              }
+              right={
+                <FinancialText>{format(data.spent, 'financial')}</FinancialText>
+              }
+            />
+          )}
+          {!balanceOnly && (
+            <AlignedText
+              left={
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span
+                    style={{
+                      width: 10,
+                      height: 10,
+                      backgroundColor: theme.templateNumberUnderFunded,
+                      display: 'inline-block',
+                    }}
+                  />
+                  {t('Overspending Adjustment:')}
+                </span>
+              }
+              right={
+                <FinancialText>
+                  {format(data.overspendingAdjustment, 'financial')}
+                </FinancialText>
+              }
+            />
+          )}
+          {(showBalance || balanceOnly) && (
             <AlignedText
               left={
                 <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -196,6 +205,7 @@ export function BudgetAnalysisGraph({
   data,
   graphType = 'Line',
   showBalance = true,
+  balanceOnly = false,
   isConcise = true,
 }: BudgetAnalysisGraphProps) {
   const { t } = useTranslation();
@@ -244,8 +254,8 @@ export function BudgetAnalysisGraph({
       {(width, height) => {
         const chartProps = { ...commonProps, width, height };
 
-        return graphType === 'Bar' ? (
-          <ComposedChart {...chartProps}>
+        const sharedAxes = (
+          <>
             <CartesianGrid strokeDasharray="3 3" stroke={theme.pillBorder} />
             <XAxis
               dataKey="date"
@@ -272,10 +282,17 @@ export function BudgetAnalysisGraph({
                   isConcise={isConcise}
                   format={format}
                   showBalance={showBalance}
+                  balanceOnly={balanceOnly}
                 />
               }
               isAnimationActive={false}
             />
+          </>
+        );
+
+        return graphType === 'Bar' && !balanceOnly ? (
+          <ComposedChart {...chartProps}>
+            {sharedAxes}
             <Bar
               dataKey="budgeted"
               fill={theme.reportsNumberPositive}
@@ -308,64 +325,41 @@ export function BudgetAnalysisGraph({
           </ComposedChart>
         ) : (
           <LineChart {...chartProps}>
-            <CartesianGrid strokeDasharray="3 3" stroke={theme.pillBorder} />
-            <XAxis
-              dataKey="date"
-              tick={{ fill: theme.reportsLabel }}
-              tickFormatter={formatDate}
-              minTickGap={50}
-            />
-            <YAxis
-              tick={{ fill: theme.reportsLabel }}
-              tickCount={8}
-              tickFormatter={value =>
-                privacyMode && !yAxisIsHovered
-                  ? '...'
-                  : format(value, 'financial-no-decimals')
-              }
-              onMouseEnter={() => setYAxisIsHovered(true)}
-              onMouseLeave={() => setYAxisIsHovered(false)}
-              stroke={theme.pageTextSubdued}
-            />
-            <Tooltip
-              cursor={{ fill: 'transparent' }}
-              content={
-                <CustomTooltip
-                  isConcise={isConcise}
-                  format={format}
-                  showBalance={showBalance}
-                />
-              }
-              isAnimationActive={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="budgeted"
-              stroke={theme.reportsNumberPositive}
-              strokeWidth={2}
-              name={budgetedLabel}
-              dot={false}
-              animationDuration={1000}
-            />
-            <Line
-              type="monotone"
-              dataKey="spent"
-              stroke={theme.reportsNumberNegative}
-              strokeWidth={2}
-              name={spentLabel}
-              dot={false}
-              animationDuration={1000}
-            />
-            <Line
-              type="monotone"
-              dataKey="overspendingAdjustment"
-              stroke={theme.templateNumberUnderFunded}
-              strokeWidth={2}
-              name={overspendingLabel}
-              dot={false}
-              animationDuration={1000}
-            />
-            {showBalance && (
+            {sharedAxes}
+            {!balanceOnly && (
+              <Line
+                type="monotone"
+                dataKey="budgeted"
+                stroke={theme.reportsNumberPositive}
+                strokeWidth={2}
+                name={budgetedLabel}
+                dot={false}
+                animationDuration={1000}
+              />
+            )}
+            {!balanceOnly && (
+              <Line
+                type="monotone"
+                dataKey="spent"
+                stroke={theme.reportsNumberNegative}
+                strokeWidth={2}
+                name={spentLabel}
+                dot={false}
+                animationDuration={1000}
+              />
+            )}
+            {!balanceOnly && (
+              <Line
+                type="monotone"
+                dataKey="overspendingAdjustment"
+                stroke={theme.templateNumberUnderFunded}
+                strokeWidth={2}
+                name={overspendingLabel}
+                dot={false}
+                animationDuration={1000}
+              />
+            )}
+            {(showBalance || balanceOnly) && (
               <Line
                 type="monotone"
                 dataKey="balance"

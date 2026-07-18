@@ -1,4 +1,4 @@
-import isMatch from 'lodash/isMatch';
+import { isMatch } from 'es-toolkit/compat';
 import { v4 as uuidv4 } from 'uuid';
 
 import { captureException } from '#platform/exceptions';

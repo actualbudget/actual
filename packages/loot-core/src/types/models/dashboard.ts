@@ -94,6 +94,8 @@ export type BudgetAnalysisWidget = AbstractWidget<
     interval?: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
     graphType?: 'Line' | 'Bar';
     showBalance?: boolean;
+    balanceOnly?: boolean;
+    showHiddenCategories?: boolean;
   } | null
 >;
 export type CustomReportWidget = AbstractWidget<
@@ -215,6 +217,7 @@ export type FormulaWidget = AbstractWidget<
     fontSize?: number;
     fontSizeMode?: 'dynamic' | 'static';
     staticFontSize?: number;
+    showTitle?: boolean;
     colorFormula?: string;
     queriesVersion?: number;
     queries?: Record<

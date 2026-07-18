@@ -58,6 +58,15 @@ export function makeChild<T extends GenericTransactionEntity>(
   } as unknown as T;
 }
 
+export function makeEmptySplitSubtransactions(
+  parent: TransactionEntity,
+): TransactionEntity[] {
+  return [
+    makeChild(parent, { sort_order: -1 }),
+    makeChild(parent, { sort_order: -2 }),
+  ];
+}
+
 function makeNonChild<T extends GenericTransactionEntity>(
   parent: T,
   data: object,

@@ -1,3 +1,4 @@
+import { send } from '@actual-app/core/platform/client/connection';
 import type {
   APIAccountEntity,
   APICategoryEntity,
@@ -7,25 +8,18 @@ import type {
   APIScheduleEntity,
   APITagEntity,
 } from '@actual-app/core/server/api-models';
-import { lib } from '@actual-app/core/server/main';
+import type { ImportableBudgetType } from '@actual-app/core/server/importers/index';
 import type { Query } from '@actual-app/core/shared/query';
 import type { ImportTransactionsOpts } from '@actual-app/core/types/api-handlers';
-import type { Handlers } from '@actual-app/core/types/handlers';
 import type {
   ImportTransactionEntity,
   NoteEntity,
   RuleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 export { q } from './app/query';
-
-function send<K extends keyof Handlers, T extends Handlers[K]>(
-  name: K,
-  args?: Parameters<T>[0],
-): Promise<Awaited<ReturnType<T>>> {
-  return lib.send(name, args);
-}
 
 export async function runImport(
   budgetName: APIFileEntity['name'],
@@ -54,6 +48,61 @@ export async function downloadBudget(
 
 export async function getBudgets() {
   return send('api/get-budgets');
+}
+
+/**
+ * Import a budget from an exported file — an Actual `.zip` export, or a
+ * YNAB4/YNAB5 export. Accepts either a path to the file on the engine's
+ * filesystem, or the raw file contents. Loads the imported budget and
+ * returns its id.
+ */
+export async function importBudget(
+  input: string | ArrayBuffer | Uint8Array,
+  {
+    type = 'actual',
+    filename,
+  }: { type?: ImportableBudgetType; filename?: string } = {},
+): Promise<{ id: string }> {
+  const result =
+    typeof input === 'string'
+      ? await send('import-budget', { filepath: input, type })
+      : await send('import-budget', {
+          buffer: toArrayBuffer(input),
+          filename,
+          type,
+        });
+
+  if (result.error) {
+    throw new Error(`Error importing budget: ${result.error}`);
+  }
+  if (!result.id) {
+    throw new Error('Error importing budget: no budget was loaded');
+  }
+  return { id: result.id };
+}
+
+/** Export the currently-loaded budget as a zip buffer. */
+export async function exportBudget(): Promise<Uint8Array> {
+  const result = await send('export-budget');
+
+  if ('error' in result) {
+    throw new Error(`Error exporting budget: ${result.error}`);
+  }
+  if (!result.data) {
+    throw new Error('Error exporting budget: no data was returned');
+  }
+  return new Uint8Array(result.data);
+}
+
+function toArrayBuffer(data: ArrayBuffer | Uint8Array): ArrayBuffer {
+  if (data instanceof Uint8Array) {
+    // Copy into a fresh ArrayBuffer so that views into a larger (possibly
+    // shared) buffer are not sent across the worker boundary as-is.
+    const copy = new Uint8Array(data.byteLength);
+    copy.set(data);
+    return copy.buffer;
+  }
+  return data;
 }
 
 export async function sync() {
@@ -227,7 +276,7 @@ export function deleteCategoryGroup(
 }
 
 export function getCategories(options: { hidden?: boolean } = {}) {
-  return send('api/categories-get', { grouped: false, ...options });
+  return send('api/categories-get', options);
 }
 
 export function createCategory(category: Omit<APICategoryEntity, 'id'>) {
@@ -366,4 +415,9 @@ export function getIDByName(
 
 export function getServerVersion() {
   return send('api/get-server-version');
+}
+
+/** Read the budget's synced preferences (number format, currency, etc.). */
+export function getPreferences(): Promise<SyncedPrefs> {
+  return send('preferences/get');
 }

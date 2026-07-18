@@ -1,17 +1,42 @@
-# check-spelling/check-spelling configuration
+# Docs spell-checking configuration
 
-| File                                               | Purpose                                                                          | Format                                                                                            | Info                                                                                                 |
-| -------------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| [dictionary.txt](dictionary.txt)                   | Replacement dictionary (creating this file will override the default dictionary) | one word per line                                                                                 | [dictionary](https://github.com/check-spelling/check-spelling/wiki/Configuration#dictionary)         |
-| [allow.txt](allow.txt)                             | Add words to the dictionary                                                      | one word per line (only letters and `'`s allowed)                                                 | [allow](https://github.com/check-spelling/check-spelling/wiki/Configuration#allow)                   |
-| [reject.txt](reject.txt)                           | Remove words from the dictionary (after allow)                                   | grep pattern matching whole dictionary words                                                      | [reject](https://github.com/check-spelling/check-spelling/wiki/Configuration-Examples%3A-reject)     |
-| [excludes.txt](excludes.txt)                       | Files to ignore entirely                                                         | perl regular expression                                                                           | [excludes](https://github.com/check-spelling/check-spelling/wiki/Configuration-Examples%3A-excludes) |
-| [only.txt](only.txt)                               | Only check matching files (applied after excludes)                               | perl regular expression                                                                           | [only](https://github.com/check-spelling/check-spelling/wiki/Configuration-Examples%3A-only)         |
-| [patterns.txt](patterns.txt)                       | Patterns to ignore from checked lines                                            | perl regular expression (order matters, first match wins)                                         | [patterns](https://github.com/check-spelling/check-spelling/wiki/Configuration-Examples%3A-patterns) |
-| [candidate.patterns](candidate.patterns)           | Patterns that might be worth adding to [patterns.txt](patterns.txt)              | perl regular expression with optional comment block introductions (all matches will be suggested) | [candidates](https://github.com/check-spelling/check-spelling/wiki/Feature:-Suggest-patterns)        |
-| [line_forbidden.patterns](line_forbidden.patterns) | Patterns to flag in checked lines                                                | perl regular expression (order matters, first match wins)                                         | [patterns](https://github.com/check-spelling/check-spelling/wiki/Configuration-Examples%3A-patterns) |
-| [expect.txt](expect.txt)                           | Expected words that aren't in the dictionary                                     | one word per line (sorted, alphabetically)                                                        | [expect](https://github.com/check-spelling/check-spelling/wiki/Configuration#expect)                 |
-| [advice.md](advice.md)                             | Supplement for GitHub comment when unrecognized words are found                  | GitHub Markdown                                                                                   | [advice](https://github.com/check-spelling/check-spelling/wiki/Configuration-Examples%3A-advice)     |
+The documentation under `packages/docs` is spell-checked by the
+[crate-ci/typos](https://github.com/crate-ci/typos) action, wired up in
+[`.github/workflows/docs-spelling.yml`](../../workflows/docs-spelling.yml).
 
-Note: you can replace any of these files with a directory by the same name (minus the suffix)
-and then include multiple files inside that directory (with that suffix) to merge multiple files together.
+| File                     | Purpose                                                                             |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| [typos.toml](typos.toml) | typos configuration: the allowlist of accepted words and the list of excluded files |
+
+## How it works
+
+typos only reports high-confidence misspellings from its built-in
+correction dictionary, so — unlike the previous check-spelling setup — proper
+nouns, bank codes, and abbreviations usually do **not** need to be added to an
+allowlist. Add an entry only when typos flags something that is actually
+correct.
+
+### Allowing a word
+
+Add it to `[default.extend-words]` in [typos.toml](typos.toml), mapped to
+itself:
+
+```toml
+[default.extend-words]
+HSA = "HSA"
+```
+
+### Excluding a file
+
+Add a glob to `extend-exclude` under `[files]` in [typos.toml](typos.toml).
+
+See the [typos documentation](https://github.com/crate-ci/typos/blob/master/docs/reference.md)
+for the full configuration reference.
+
+## Why not check-spelling?
+
+The repository previously used `check-spelling/check-spelling`. That project's
+upstream repository was archived and shipped a self-disabling "secpoll"
+kill-switch following a maintainer-account compromise on 2026-06-16, which made
+every workflow pinned to it fail fatally. typos is actively maintained and runs
+entirely from the checked-out tree without any PR-comment or bot machinery.

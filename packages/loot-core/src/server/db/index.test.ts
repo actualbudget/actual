@@ -30,6 +30,22 @@ async function getTransactions(latestDate) {
 // validated in the same event loop and it's same to not await)
 
 describe('Database', () => {
+  test('all and first accept null params', async () => {
+    await db.insertAccount({ id: 'foo', name: 'bar' });
+
+    const rows = await db.all<{ id: string }>(
+      'SELECT id FROM accounts WHERE official_name IS ?',
+      [null],
+    );
+    expect(rows).toEqual([{ id: 'foo' }]);
+
+    const row = await db.first<{ id: string }>(
+      'SELECT id FROM accounts WHERE official_name IS ?',
+      [null],
+    );
+    expect(row).toEqual({ id: 'foo' });
+  });
+
   test('inserting a category works', async () => {
     await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
     await db.insertCategory({

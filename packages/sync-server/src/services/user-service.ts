@@ -51,14 +51,6 @@ export function getOwnerId() {
   return id;
 }
 
-export function getFileOwnerId(fileId) {
-  const { owner } =
-    getAccountDb().first(`SELECT files.owner FROM files WHERE files.id = ?`, [
-      fileId,
-    ]) || {};
-  return owner;
-}
-
 export function getAllUsers() {
   return getAccountDb().all(
     `SELECT users.id, user_name as userName, display_name as displayName, enabled, ifnull(owner,0) as owner, role
@@ -72,20 +64,6 @@ export function insertUser(userId, userName, displayName, enabled, role) {
     'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, ?, 0, ?)',
     [userId, userName, displayName, enabled, role],
   );
-}
-
-export function updateUser(userId, userName, displayName, enabled) {
-  if (!userId || !userName) {
-    throw new Error('Invalid user parameters');
-  }
-  try {
-    getAccountDb().mutate(
-      'UPDATE users SET user_name = ?, display_name = ?, enabled = ? WHERE id = ?',
-      [userName, displayName, enabled, userId],
-    );
-  } catch (error) {
-    throw new Error(`Failed to update user: ${error.message}`);
-  }
 }
 
 export function updateUserWithRole(

@@ -12,6 +12,7 @@ import { getSheetValue, isTrackingBudget, setBudget, setGoal } from './actions';
 import { CategoryTemplateContext } from './category-template-context';
 import { tombstoneOrphanCleanupGroups } from './cleanup-groups';
 import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
+import type { TemplateNotification } from './template-notification';
 
 export function distributeRemainder(
   templateContexts: CategoryTemplateContext[],
@@ -33,14 +34,6 @@ export function distributeRemainder(
   }
   return availBudget;
 }
-
-type Notification = {
-  type?: 'message' | 'error' | 'warning' | undefined;
-  pre?: string | undefined;
-  title?: string | undefined;
-  message: string;
-  sticky?: boolean | undefined;
-};
 
 export async function storeTemplates({
   categoriesWithTemplates,
@@ -79,7 +72,7 @@ export async function applyTemplate({
   month,
 }: {
   month: string;
-}): Promise<Notification> {
+}): Promise<TemplateNotification> {
   await storeNoteTemplates();
   const categoryTemplates = await getTemplates();
   const ret = await processTemplate(month, false, categoryTemplates, []);
@@ -90,7 +83,7 @@ export async function overwriteTemplate({
   month,
 }: {
   month: string;
-}): Promise<Notification> {
+}): Promise<TemplateNotification> {
   await storeNoteTemplates();
   const categoryTemplates = await getTemplates();
   const ret = await processTemplate(month, true, categoryTemplates, []);
@@ -311,7 +304,7 @@ async function processTemplate(
   force: boolean,
   categoryTemplates: Record<CategoryEntity['id'], Template[]>,
   categories: CategoryEntity[] = [],
-): Promise<Notification> {
+): Promise<TemplateNotification> {
   const { contexts, errors, orphanGoals } = await computeTemplates(
     month,
     force,
@@ -325,13 +318,13 @@ async function processTemplate(
     }
     return {
       type: 'message',
-      message: 'Everything is up to date',
+      message: 'templates-up-to-date',
     };
   }
   if (errors.length > 0) {
     return {
       sticky: true,
-      message: 'There were errors interpreting some templates:',
+      message: 'template-errors',
       pre: errors.join(`\n\n`),
     };
   }
@@ -355,7 +348,8 @@ async function processTemplate(
 
   return {
     type: 'message',
-    message: `Successfully applied templates to ${contexts.length} categories`,
+    message: 'templates-applied',
+    count: contexts.length,
   };
 }
 

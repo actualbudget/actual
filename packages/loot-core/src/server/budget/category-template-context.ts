@@ -15,12 +15,18 @@ import type {
   PeriodicTemplate,
   RefillTemplate,
   RemainderTemplate,
+  ScheduleTemplate,
   SimpleTemplate,
   SpendTemplate,
   Template,
 } from '#types/models/templates';
 
-import { getSheetBoolean, getSheetValue, isTrackingBudget } from './actions';
+import {
+  getCategoryAverage,
+  getSheetBoolean,
+  getSheetValue,
+  isTrackingBudget,
+} from './actions';
 import { runSchedule } from './schedule-template';
 import { getActiveSchedules } from './statements';
 
@@ -154,7 +160,7 @@ export class CategoryTemplateContext {
     let byFlag = false;
     let remainder = 0;
     let scheduleFlag = false;
-    let schedulePerTemplate: Map<string, number> | null = null;
+    let schedulePerTemplate: Map<ScheduleTemplate, number> | null = null;
     let byPerTemplate: Map<ByTemplate, number> | null = null;
     // switch on template type and calculate the amount for the line
     for (const template of t) {
@@ -258,7 +264,7 @@ export class CategoryTemplateContext {
     // schedule's real cost rather than an equal split.
     redistributeBatch(perTemplateLocal, t, 'schedule', template => {
       if (template.type !== 'schedule') return 0;
-      const monthly = schedulePerTemplate?.get(template.name.trim()) ?? 0;
+      const monthly = schedulePerTemplate?.get(template) ?? 0;
       return Math.max(0, monthly);
     });
 
@@ -472,15 +478,27 @@ export class CategoryTemplateContext {
     ) {
       return;
     }
-    //check schedule names
-    const scheduleNames = (await getActiveSchedules()).map(({ name }) =>
-      name.trim(),
+    //check schedule existence (prefer scheduleId, fall back to name)
+    const activeSchedules = await getActiveSchedules();
+    const scheduleIds = new Set(activeSchedules.map(s => s.id));
+    const scheduleNames = new Set(
+      activeSchedules.map(s => s.name?.trim()).filter(Boolean),
     );
     templates
       .filter(t => t.type === 'schedule')
       .forEach(t => {
-        if (!scheduleNames.includes(t.name.trim())) {
-          throw new Error(`Schedule ${t.name.trim()} does not exist`);
+        if (t.scheduleId) {
+          if (!scheduleIds.has(t.scheduleId)) {
+            throw new Error(
+              `Schedule ${t.name ?? t.scheduleId} does not exist`,
+            );
+          }
+        } else if (t.name) {
+          if (!scheduleNames.has(t.name.trim())) {
+            throw new Error(`Schedule ${t.name.trim()} does not exist`);
+          }
+        } else {
+          throw new Error('Schedule template has no scheduleId or name');
         }
       });
     //find lowest priority
@@ -854,19 +872,15 @@ export class CategoryTemplateContext {
     template: AverageTemplate,
     templateContext: CategoryTemplateContext,
   ): Promise<number> {
-    let sum = 0;
-    for (let i = 1; i <= template.numMonths; i++) {
-      const sheetName = monthUtils.sheetForMonth(
-        monthUtils.subMonths(templateContext.month, i),
-      );
-      sum += await getSheetValue(
-        sheetName,
-        `sum-amount-${templateContext.category.id}`,
-      );
-    }
-
+    let average = await getCategoryAverage({
+      month: templateContext.month,
+      maxMonths: template.numMonths,
+      categoryId: templateContext.category.id,
+    });
     // negate as sheet value is cost ie negative
-    let average = -(sum / template.numMonths);
+    if (average < 0) {
+      average *= -1;
+    }
 
     if (template.adjustment !== undefined && template.adjustmentType) {
       switch (template.adjustmentType) {

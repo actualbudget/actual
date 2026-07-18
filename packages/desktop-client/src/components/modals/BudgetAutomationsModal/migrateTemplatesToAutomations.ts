@@ -1,5 +1,9 @@
 import { dayFromDate, firstDayOfMonth } from '@actual-app/core/shared/months';
-import type { Template } from '@actual-app/core/types/models/templates';
+import type { ScheduleEntity } from '@actual-app/core/types/models';
+import type {
+  ScheduleTemplate,
+  Template,
+} from '@actual-app/core/types/models/templates';
 
 import { createAutomationEntry } from '#components/budget/goals/automationExamples';
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
@@ -39,16 +43,45 @@ function getDisplayTypeFromTemplate(template: Template): DisplayTemplateType {
   }
 }
 
+// Fill in scheduleId from name (or refresh a stale name from scheduleId) so
+// the editor and engine consistently see both.
+function hydrateScheduleTemplate(
+  template: ScheduleTemplate,
+  schedules: readonly ScheduleEntity[],
+): ScheduleTemplate {
+  const schedule = template.scheduleId
+    ? schedules.find(s => s.id === template.scheduleId)
+    : template.name
+      ? schedules.find(s => s.name?.trim() === template.name?.trim())
+      : undefined;
+  if (!schedule) return template;
+  return {
+    ...template,
+    scheduleId: schedule.id,
+    name: schedule.name ?? template.name,
+  };
+}
+
 export function migrateTemplatesToAutomations(
   templates: Template[],
+  schedules: readonly ScheduleEntity[] = [],
 ): AutomationEntry[] {
   const entries: AutomationEntry[] = [];
 
   templates.forEach(template => {
+    if (template.type === 'schedule') {
+      entries.push(
+        createAutomationEntry(
+          hydrateScheduleTemplate(template, schedules),
+          'schedule',
+        ),
+      );
+      return;
+    }
+
     if (template.type === 'simple') {
       const monthly = template.monthly;
-      const hasMonthly =
-        monthly != null && (monthly !== 0 || template.limit != null);
+      const hasMonthly = monthly != null && monthly !== 0;
       const { description } = template;
 
       if (template.limit) {
@@ -70,7 +103,7 @@ export function migrateTemplatesToAutomations(
           ),
         );
 
-        if (!hasMonthly) {
+        if (monthly == null) {
           entries.push(
             createAutomationEntry(
               {
@@ -84,12 +117,17 @@ export function migrateTemplatesToAutomations(
         }
       }
 
-      if (hasMonthly) {
+      const contribution =
+        hasMonthly || (monthly === 0 && template.limit == null)
+          ? monthly
+          : null;
+
+      if (contribution != null) {
         entries.push(
           createAutomationEntry(
             {
               type: 'periodic',
-              amount: monthly,
+              amount: contribution,
               period: { period: 'month', amount: 1 },
               starting: dayFromDate(firstDayOfMonth(new Date())),
               directive: 'template',
@@ -104,6 +142,31 @@ export function migrateTemplatesToAutomations(
       // a simple template with neither monthly nor limit is a no-op; drop it
       // rather than passing through as a phantom 'fixed' entry that would
       // crash FixedAutomationReadOnly (no .amount, no .period)
+      return;
+    }
+
+    if (
+      (template.type === 'periodic' || template.type === 'remainder') &&
+      template.limit
+    ) {
+      const { limit, ...base } = template;
+      entries.push(
+        createAutomationEntry(base, getDisplayTypeFromTemplate(base)),
+      );
+      entries.push(
+        createAutomationEntry(
+          {
+            type: 'limit',
+            amount: limit.amount,
+            hold: limit.hold,
+            period: limit.period,
+            start: limit.start,
+            directive: 'template',
+            priority: null,
+          },
+          'limit',
+        ),
+      );
       return;
     }
 

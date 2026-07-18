@@ -1,11 +1,11 @@
 // @ts-strict-ignore
-import AdmZip from 'adm-zip';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '#platform/server/asyncStorage';
 import { fetch } from '#platform/server/fetch';
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
+import * as memory from '#platform/server/memory';
 import * as sqlite from '#platform/server/sqlite';
 import * as monthUtils from '#shared/months';
 
@@ -20,6 +20,12 @@ import { runMutator } from './mutators';
 import { post } from './post';
 import * as prefs from './prefs';
 import { getServer } from './server-config';
+import {
+  exceedsSafeUnzipLimits,
+  safeUnzip,
+  safeZip,
+  UnsafeZipError,
+} from './util/zip';
 
 const UPLOAD_FREQUENCY_IN_DAYS = 7;
 
@@ -145,14 +151,11 @@ export async function exportBuffer() {
 
   const budgetDir = fs.getBudgetDir(id);
 
-  // create zip
-  const zipped = new AdmZip();
-
   // We run this in a mutator even though its not mutating anything
   // because we are reading the sqlite file from disk. We want to make
   // sure that we get a valid snapshot of it so we want this to be
   // serialized with all other mutations.
-  await runMutator(async () => {
+  const { zipped, entries } = await runMutator(async () => {
     const rawDbContent = await fs.readFile(
       fs.join(budgetDir, 'db.sqlite'),
       'binary',
@@ -183,30 +186,66 @@ export async function exportBuffer() {
     meta.resetClock = true;
     const metaContent = Buffer.from(JSON.stringify(meta), 'utf8');
 
-    zipped.addFile('db.sqlite', Buffer.from(dbContent));
-    zipped.addFile('metadata.json', metaContent);
+    const entries = {
+      'db.sqlite': Buffer.from(dbContent),
+      'metadata.json': metaContent,
+    };
+
+    return { zipped: safeZip(entries), entries };
   });
 
-  return Buffer.from(zipped.toBuffer());
+  const warnings: string[] = [];
+  if (exceedsSafeUnzipLimits(zipped, entries)) {
+    warnings.push('exceeds-import-size-limit');
+  }
+
+  const availableMemory = memory.getAvailableMemory();
+  if (
+    availableMemory != null &&
+    entries['db.sqlite'].length > availableMemory
+  ) {
+    warnings.push('may-exceed-available-memory');
+  }
+
+  return { data: Buffer.from(zipped), warnings };
 }
 
 export async function importBuffer(fileData, buffer) {
-  let zipped, entries;
+  let entries;
   try {
-    zipped = new AdmZip(buffer);
-    entries = zipped.getEntries();
-  } catch {
+    entries = safeUnzip(buffer);
+  } catch (e) {
+    if (e instanceof UnsafeZipError) {
+      throw FileDownloadError('zip-too-large', e.meta);
+    }
     throw FileDownloadError('not-zip-file');
   }
-  const dbEntry = entries.find(e => e.entryName.includes('db.sqlite'));
-  const metaEntry = entries.find(e => e.entryName.includes('metadata.json'));
+  const entryNames = Object.keys(entries);
+  const dbDirs = entryNames
+    .filter(name => name === 'db.sqlite' || name.endsWith('/db.sqlite'))
+    .map(name => name.slice(0, -'db.sqlite'.length));
+  const metaDirs = entryNames
+    .filter(name => name === 'metadata.json' || name.endsWith('/metadata.json'))
+    .map(name => name.slice(0, -'metadata.json'.length));
 
-  if (!dbEntry || !metaEntry) {
+  // Both files must come from the same directory: prefer the archive root,
+  // otherwise there must be exactly one directory containing both.
+  const sharedDirs = dbDirs.filter(dir => metaDirs.includes(dir));
+  const dir = sharedDirs.includes('')
+    ? ''
+    : sharedDirs.length === 1
+      ? sharedDirs[0]
+      : null;
+
+  if (dir == null) {
     throw FileDownloadError('invalid-zip-file');
   }
 
-  const dbContent = zipped.readFile(dbEntry);
-  const metaContent = zipped.readFile(metaEntry);
+  const entryName = dir + 'db.sqlite';
+  const metaEntryName = dir + 'metadata.json';
+
+  const dbContent = Buffer.from(entries[entryName]);
+  const metaContent = Buffer.from(entries[metaEntryName]);
 
   let meta;
   try {
@@ -254,10 +293,11 @@ export async function upload() {
     throw FileUploadError('unauthorized');
   }
 
-  const zipContent = await exportBuffer();
-  if (zipContent == null) {
+  const exported = await exportBuffer();
+  if (exported == null) {
     return;
   }
+  const zipContent = exported.data;
 
   const {
     id,

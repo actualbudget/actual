@@ -113,16 +113,19 @@ export class AccountPage {
       category: 'split',
     });
 
+    // Splitting starts with two empty splits
+    const initialSplitCount = 2;
+
     // Child transactions
     for (let i = 0; i < transactions.length; i++) {
+      if (i >= initialSplitCount) {
+        await this.page.getByRole('button', { name: 'Add Split' }).click();
+      }
+
       await this._fillTransactionFields(
         this.newTransactionRow.nth(i + 1),
         transactions[i],
       );
-
-      if (i + 1 < transactions.length) {
-        await this.page.getByRole('button', { name: 'Add Split' }).click();
-      }
     }
 
     await this.addTransactionButton.click();
@@ -156,6 +159,7 @@ export class AccountPage {
       category: row.getByTestId('category'),
       debit: row.getByTestId('debit'),
       credit: row.getByTestId('credit'),
+      balance: row.getByTestId('balance'),
     };
   }
 
@@ -271,6 +275,10 @@ export class AccountPage {
     if (value) {
       await input.selectText();
     }
+  }
+
+  async rightClickNthTransaction(index: number) {
+    await this.transactionTableRow.nth(index).click({ button: 'right' });
   }
 }
 

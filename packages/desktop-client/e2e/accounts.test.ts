@@ -56,6 +56,54 @@ test.describe('Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('right clicking an account in sidebar opens context menu', async () => {
+    await navigation.rightClickAccount('Roth IRA');
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
+  });
+
+  test('right clicking a transaction row opens context menu', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'New Account',
+      offBudget: false,
+      balance: 100,
+    });
+
+    await accountPage.rightClickNthTransaction(0);
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Delete' })).toBeVisible();
+  });
+
+  test('updates the running balance after editing a transaction amount', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Running balance',
+      offBudget: false,
+      balance: 0,
+    });
+    await accountPage.waitFor();
+    await accountPage.createSingleTransaction({
+      payee: '',
+      notes: 'editable transaction',
+      credit: '10.00',
+    });
+
+    await accountPage.accountMenuButton.click();
+    await page.getByRole('button', { name: 'Show running balance' }).click();
+
+    const transaction = accountPage.getNthTransaction(0);
+    await expect(transaction.balance).toHaveText('10.00');
+
+    await transaction.credit.click();
+    const creditInput = transaction.credit.getByRole('textbox');
+    await creditInput.selectText();
+    await creditInput.pressSequentially('25.00');
+    await page.keyboard.press('Tab');
+
+    await expect(transaction.balance).toHaveText('25.00');
+  });
+
   test('shift-click range selection skips hidden reconciled transactions', async () => {
     accountPage = await navigation.createAccount({
       name: 'Range Select',

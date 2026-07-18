@@ -3,6 +3,9 @@
   "compilerOptions": {
     "composite": false,
     "noEmit": true,
+    // window.ts lives outside this dir, so root the project at packages/ to keep
+    // it within rootDir (noEmit, so this only affects rootDir validation).
+    "rootDir": "../..",
     "types": ["@playwright/test", "node"]
   },
   "include": ["./**/*.ts", "./**/*.tsx", "../../loot-core/typings/window.ts"]
