@@ -33,6 +33,7 @@
     "./label": "./src/Label.tsx",
     "./menu": "./src/Menu.tsx",
     "./mode-button": "./src/ModeButton.tsx",
+    "./month-picker": "./src/MonthPicker.tsx",
     "./paragraph": "./src/Paragraph.tsx",
     "./popover": "./src/Popover.tsx",
     "./select": "./src/Select.tsx",
