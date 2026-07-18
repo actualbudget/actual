@@ -18,6 +18,7 @@ import { useBuiltInBankSyncProviders } from '#components/banksync/useBuiltInBank
 import { Search } from '#components/common/Search';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
+import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -30,6 +31,9 @@ export function MobileBankSyncPage() {
   const dispatch = useDispatch();
   const { data: accounts = [] } = useAccounts();
   const [filter, setFilter] = useState('');
+  const [providersCollapsed = true, setProvidersCollapsed] = useLocalPref(
+    'mobile.bankSyncProvidersCollapsed',
+  );
   const syncSourceReadable = useMemo(() => getSyncSourceReadable(t), [t]);
   const {
     providers,
@@ -99,17 +103,20 @@ export function MobileBankSyncPage() {
 
   return (
     <Page header={<MobilePageHeader title={t('Bank Sync')} />} padding={0}>
-      <View style={{ padding: 15 }}>
+      <View style={{ padding: 15, flexShrink: 0 }}>
         <BuiltInProviders
           providers={providers}
           syncServerStatus={syncServerStatus}
           showPermissionWarning={showPermissionWarning}
           providersNeedingConfiguration={providersNeedingConfiguration}
+          isCollapsed={providersCollapsed}
+          onToggleCollapse={() => setProvidersCollapsed(!providersCollapsed)}
         />
       </View>
       {openAccounts.length > 0 && (
         <View
           style={{
+            flexShrink: 0,
             flexDirection: 'row',
             alignItems: 'center',
             backgroundColor: theme.mobilePageBackground,
