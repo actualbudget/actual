@@ -1,4 +1,5 @@
 import express from 'express';
+import type { Request } from 'express';
 
 import { sha256String } from '#util/hash';
 import {
@@ -29,10 +30,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 const ELECTRON_APP_ORIGIN = 'app://actual';
 
 function validateOrigin(origin: string | undefined) {
-  if (origin === ELECTRON_APP_ORIGIN) {
-    return origin;
-  }
-
   let url;
   try {
     url = new URL(origin ?? '');
@@ -43,6 +40,15 @@ function validateOrigin(origin: string | undefined) {
     throw new Error('Invalid Origin header');
   }
   return url.origin;
+}
+
+function resolveRedirectHost(req: Request) {
+  const { origin } = req.headers;
+  const host = req.get('host');
+  if (origin === ELECTRON_APP_ORIGIN && host) {
+    return `${req.protocol}://${host}`;
+  }
+  return validateOrigin(origin);
 }
 
 const SAFE_ID = /^[a-zA-Z0-9_-]+$/;
@@ -97,7 +103,7 @@ app.post(
   handleError(async (req, res) => {
     const { institutionId: rawInstitutionId } = req.body || {};
     const institutionId = sanitizeId<GoCardlessInstitutionId>(rawInstitutionId);
-    const host = validateOrigin(req.headers.origin);
+    const host = resolveRedirectHost(req);
 
     const { link, requisitionId } = await goCardlessService.createRequisition({
       institutionId,
