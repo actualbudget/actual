@@ -105,4 +105,27 @@ describe('Web sqlite', () => {
     // @ts-expect-error Property 'id' does not exist on type 'unknown'
     expect(rows[0].id).toBe('id1');
   });
+
+  it('should not crash on invalid regex patterns', async () => {
+    const db = await openDatabase();
+    execQuery(db, initSQL);
+
+    runQuery(
+      db,
+      "INSERT INTO textstrings (id, string) VALUES ('id1', 'test string')",
+    );
+
+    // Invalid regex patterns (trailing backslash, unclosed bracket) should
+    // return 0 (no match) instead of throwing and crashing the app.
+    // See https://github.com/actualbudget/actual/issues/6317
+    for (const invalidPattern of ['\\', '[', 'asdf\\']) {
+      const rows = runQuery(
+        db,
+        'SELECT id FROM textstrings where REGEXP(?, string)',
+        [invalidPattern],
+        true,
+      );
+      expect(rows.length).toBe(0);
+    }
+  });
 });
