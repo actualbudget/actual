@@ -31,7 +31,6 @@ import {
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import { DEFAULT_MAX_DISTANCE_METERS } from '@actual-app/core/shared/constants';
@@ -77,7 +76,6 @@ import {
   FieldLabel,
   InputField,
   TapField,
-  ToggleField,
 } from '#components/mobile/MobileForms';
 import { getPrettyPayee } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
@@ -112,6 +110,7 @@ import { getStatusLabel } from '#util/schedule';
 
 import { AmountInput } from './AmountInput';
 import { SplitAmountInput } from './SplitAmountInput';
+import { TransactionStatusField } from './TransactionStatusField';
 
 function getFieldName(transactionId: TransactionEntity['id'], field: string) {
   return `${field}-${transactionId}`;
@@ -1398,21 +1397,18 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                 }
               />
             </View>
-            {transaction.reconciled ? (
-              <View style={{ alignItems: 'center' }}>
-                <FieldLabel title={t('Reconciled')} />
-                <Toggle id="Reconciled" isOn isDisabled />
-              </View>
-            ) : (
-              <View style={{ alignItems: 'center' }}>
-                <FieldLabel title={t('Cleared')} />
-                <ToggleField
-                  id="cleared"
-                  isOn={!!transaction.cleared}
-                  onToggle={on => onUpdateInner(transaction, 'cleared', on)}
-                />
-              </View>
-            )}
+            <View style={{ alignItems: 'center' }}>
+              <TransactionStatusField
+                isCleared={!!transaction.cleared}
+                isReconciled={!!transaction.reconciled}
+                onToggleCleared={on =>
+                  onUpdateInner(transaction, 'cleared', on)
+                }
+                onToggleReconciled={on =>
+                  onUpdateInner(transaction, 'reconciled', on)
+                }
+              />
+            </View>
           </View>
 
           <View>

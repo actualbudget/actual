@@ -87,4 +87,40 @@ test.describe('Mobile Accounts', () => {
     await accountPage.lockTransactions();
     await expect(accountPage.reconcilingBanner).not.toBeVisible();
   });
+
+  test('unlocks a reconciled transaction from the edit form', async () => {
+    const accountsPage = await navigation.goToAccountsPage();
+    await accountsPage.waitFor();
+
+    const accountPage = await accountsPage.openNthAccount(0);
+    await accountPage.waitFor();
+
+    await accountPage.startReconciliation('200.00');
+    await accountPage.createReconciliationTransaction();
+    await accountPage.lockTransactions();
+    await expect(accountPage.reconcilingBanner).not.toBeVisible();
+
+    const reconciliationTransaction = accountPage.transactionList.getByRole(
+      'button',
+      { name: /Reconciliation balance adjustment/ },
+    );
+    await reconciliationTransaction.click();
+
+    const reconciledToggle = page.getByRole('checkbox', {
+      name: 'Reconciled',
+    });
+    await expect(reconciledToggle).toBeChecked();
+    await expect(reconciledToggle).toBeEnabled();
+    await expect(reconciledToggle.locator('..')).toHaveCSS('width', '50px');
+    await expect(reconciledToggle.locator('..')).toHaveCSS('height', '24px');
+
+    await reconciledToggle.click();
+    await expect(page.getByRole('checkbox', { name: 'Cleared' })).toBeChecked();
+
+    await page.getByRole('button', { name: 'Save changes' }).click();
+    await accountPage.waitFor();
+
+    await reconciliationTransaction.click();
+    await expect(page.getByRole('checkbox', { name: 'Cleared' })).toBeChecked();
+  });
 });
