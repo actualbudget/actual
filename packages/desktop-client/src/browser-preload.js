@@ -27,7 +27,9 @@ const ACTUAL_VERSION = Platform.isPlaywright
 // the token write hangs and login silently fails (worst on iOS/iPad, where the
 // pre-redirect tab never reports closing). It's a transient pre-login page with
 // no budget open, so it doesn't need multi-tab coordination — give it a direct
-// Worker, then it reloads to the app root and rejoins coordination normally.
+// Worker so the token write resolves and login can complete. Once the user
+// opens a budget the app navigates and the next page load rejoins the
+// coordinator normally.
 const isOpenIdCallback = window.location.pathname
   .replace(/\/+$/, '')
   .endsWith('/openid-cb');
