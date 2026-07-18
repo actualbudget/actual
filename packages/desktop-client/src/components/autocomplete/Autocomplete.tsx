@@ -389,7 +389,17 @@ function SingleAutocomplete<T extends AutocompleteItem>({
             // Do nothing if it is a "touch" selection event
             Downshift.stateChangeTypes.touchEnd,
             Downshift.stateChangeTypes.mouseUp,
+            // Do nothing if it is a click/tap selection event — the
+            // `onSelect` handler already manages all necessary state
+            // (selectedItem, highlightedIndex, isOpen, and the selection
+            // callback). Allowing this handler to proceed for `clickItem`
+            // causes it to re-filter suggestions, reset `highlightedIndex`
+            // to the first item, and call `open()`, which triggers re-
+            // renders mid-touch-event on touch devices. That re-render
+            // disrupts the touchstart → touchend → click sequence so the
+            // `click` lands on the first item instead of the tapped one.
             // @ts-expect-error Types say there is no type
+            Downshift.stateChangeTypes.clickItem,
           ].includes(changes.type)
         ) {
           return;
@@ -402,10 +412,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
         if (value === '') {
           // A blank value shouldn't highlight any item so that the field
           // can be left blank if desired
-          // @ts-expect-error Types say there is no type
-          if (changes.type !== Downshift.stateChangeTypes.clickItem) {
-            fireUpdate(onUpdate, strict, filteredSuggestions, null, null);
-          }
+          fireUpdate(onUpdate, strict, filteredSuggestions, null, null);
 
           setHighlightedIndex(null);
         } else {
@@ -415,16 +422,13 @@ function SingleAutocomplete<T extends AutocompleteItem>({
           const highlightedIndex = (
             getHighlightedIndex || defaultGetHighlightedIndex
           )(filteredSuggestions);
-          // @ts-expect-error Types say there is no type
-          if (changes.type !== Downshift.stateChangeTypes.clickItem) {
-            fireUpdate(
-              onUpdate,
-              strict,
-              filteredSuggestions,
-              highlightedIndex,
-              value,
-            );
-          }
+          fireUpdate(
+            onUpdate,
+            strict,
+            filteredSuggestions,
+            highlightedIndex,
+            value,
+          );
 
           setHighlightedIndex(highlightedIndex);
         }
