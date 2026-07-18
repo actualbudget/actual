@@ -107,7 +107,12 @@ export async function asyncTransaction(
 }
 
 function regexp(regex: string, text: string | null) {
-  return new RegExp(regex).test(text || '') ? 1 : 0;
+  try {
+    return new RegExp(regex).test(text || '') ? 1 : 0;
+  } catch (e) {
+    logger.log('invalid regexp in REGEXP function', e);
+    return 0;
+  }
 }
 
 export function openDatabase(pathOrBuffer: string | Buffer): SQL.Database {
