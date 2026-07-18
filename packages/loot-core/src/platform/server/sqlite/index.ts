@@ -196,7 +196,12 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
 }
 
 function regexp(regex: string, text: string) {
-  return new RegExp(regex).test(text || '') ? 1 : 0;
+  try {
+    return new RegExp(regex).test(text || '') ? 1 : 0;
+  } catch (e) {
+    logger.log('invalid regexp in REGEXP function', e);
+    return 0;
+  }
 }
 
 export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
