@@ -28,9 +28,12 @@ const INIT_SQL = path.resolve(__dirname, '../sql/init.sql');
 // Tables that are not CRDT-synced. Sync builds rows one column at a
 // time, so in a synced table every column beyond the primary key must
 // be nullable or have a DEFAULT — otherwise the first per-column INSERT
-// can never satisfy the constraints. Internal tables are always written
-// with full rows by app code, so they may use NOT NULL freely. Add new
-// internal tables here.
+// can never satisfy the constraints. Internal tables are written with
+// full rows by app code, so they may use any shape when first created —
+// the exemption applies only to the creating migration. Later changes
+// are validated like any other table, because older app versions can
+// open this budget and still write these tables with the column lists
+// they were built with. Add new internal tables here.
 const NON_SYNCED_TABLES = new Set(['messages_pending']);
 
 async function openTestDb(setupSql: string): Promise<Database> {
@@ -149,6 +152,24 @@ describe('migrations are additive-only', () => {
        DROP TABLE foo;
        ALTER TABLE foo_new RENAME TO foo;`,
     ],
+    [
+      'adding a UNIQUE index to a synced table',
+      TABLE_FOO,
+      'CREATE UNIQUE INDEX foo_a ON foo (a);',
+    ],
+    [
+      'adding a UNIQUE constraint via table rebuild',
+      TABLE_FOO,
+      `CREATE TABLE foo_new (id TEXT PRIMARY KEY, a TEXT UNIQUE, b TEXT);
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
+    [
+      'adding a required column to an existing internal table',
+      TABLE_FOO +
+        'CREATE TABLE messages_pending (timestamp TEXT PRIMARY KEY, dataset TEXT NOT NULL);',
+      'ALTER TABLE messages_pending ADD COLUMN extra TEXT NOT NULL;',
+    ],
   ])('sanity check: flags %s', async (_case, setup, migration) => {
     expect(await violationsFor(setup, migration)).not.toEqual([]);
   });
@@ -177,6 +198,11 @@ describe('migrations are additive-only', () => {
       TABLE_FOO,
       `CREATE TABLE messages_pending
          (timestamp TEXT PRIMARY KEY, dataset TEXT NOT NULL);`,
+    ],
+    [
+      'adding a plain (non-unique) index',
+      TABLE_FOO,
+      'CREATE INDEX foo_a_idx ON foo (a);',
     ],
   ])('sanity check: allows %s', async (_case, setup, migration) => {
     expect(await violationsFor(setup, migration)).toEqual([]);

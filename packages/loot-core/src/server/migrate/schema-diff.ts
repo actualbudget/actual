@@ -7,8 +7,14 @@ import * as sqlite from '#platform/server/sqlite';
 // the column is part of the table's primary key.
 type ColumnFlags = { required: boolean; pk: boolean };
 
-// table -> column -> flags, from PRAGMA table_info
-export type SchemaSnapshot = Map<string, Map<string, ColumnFlags>>;
+export type TableSnapshot = {
+  columns: Map<string, ColumnFlags>;
+  // Column lists of UNIQUE constraints/indexes, e.g. "a" or "a,b"
+  uniques: Set<string>;
+};
+
+// table -> its columns and unique constraints, from PRAGMA introspection
+export type SchemaSnapshot = Map<string, TableSnapshot>;
 
 export function snapshotSchema(db: Database): SchemaSnapshot {
   const tables = sqlite.runQuery<{ name: string }>(
@@ -18,9 +24,8 @@ export function snapshotSchema(db: Database): SchemaSnapshot {
     true,
   );
   return new Map(
-    tables.map(({ name: table }): [string, Map<string, ColumnFlags>] => [
-      table,
-      new Map(
+    tables.map(({ name: table }): [string, TableSnapshot] => {
+      const columns = new Map(
         sqlite
           .runQuery<{
             name: string;
@@ -38,17 +43,40 @@ export function snapshotSchema(db: Database): SchemaSnapshot {
               pk: column.pk !== 0,
             },
           ]),
-      ),
-    ]),
+      );
+      const uniques = new Set(
+        sqlite
+          .runQuery<{ name: string; unique: number; origin: string }>(
+            db,
+            `PRAGMA index_list("${table}")`,
+            [],
+            true,
+          )
+          .filter(index => index.unique !== 0 && index.origin !== 'pk')
+          .map(index =>
+            sqlite
+              .runQuery<{ name: string }>(
+                db,
+                `PRAGMA index_info("${index.name}")`,
+                [],
+                true,
+              )
+              .map(column => column.name)
+              .sort()
+              .join(','),
+          ),
+      );
+      return [table, { columns, uniques }];
+    }),
   );
 }
 
 // A schema change is additive-only when every column that existed before
-// still exists after, unchanged (a dropped or renamed table shows up as
-// all of its columns disappearing), and any new column outside
-// `nonSyncedTables` is optional — sync builds rows one column at a time
-// (see `apply` in #server/sync), so a required column in a synced table
-// can never be inserted. This backs the additive-migrations guard that
+// still exists after, unchanged, and nothing new constrains what older
+// clients may write: sync builds rows one column at a time (see `apply`
+// in #server/sync), so a required column in a synced table can never be
+// inserted, and a new UNIQUE constraint can be violated by rows other
+// devices already hold. This backs the additive-migrations guard that
 // `checkDatabaseValidity` relies on for cross-version compatibility.
 export function findAdditiveViolations(
   before: SchemaSnapshot,
@@ -57,8 +85,8 @@ export function findAdditiveViolations(
 ): string[] {
   const violations: string[] = [];
 
-  for (const [table, beforeColumns] of before) {
-    const afterColumns = after.get(table);
+  for (const [table, { columns: beforeColumns }] of before) {
+    const afterColumns = after.get(table)?.columns;
     for (const name of beforeColumns.keys()) {
       if (!afterColumns?.has(name)) {
         violations.push(
@@ -68,14 +96,21 @@ export function findAdditiveViolations(
     }
   }
 
-  for (const [table, afterColumns] of after) {
-    if (nonSyncedTables.has(table)) {
+  for (const [table, { columns: afterColumns, uniques }] of after) {
+    const beforeTable = before.get(table);
+
+    // The internal-table exemption applies only at creation: a new
+    // internal table is written exclusively by app code that knows its
+    // schema, always with full rows. Once a table exists, changes are
+    // validated regardless of syncedness — older app versions can open
+    // this budget (see `checkDatabaseValidity`) and their code writes
+    // these tables with the column lists they were built with.
+    if (!beforeTable && nonSyncedTables.has(table)) {
       continue;
     }
-    const beforeColumns = before.get(table);
 
     for (const [name, column] of afterColumns) {
-      const prev = beforeColumns?.get(name);
+      const prev = beforeTable?.columns.get(name);
       if (!prev && column.required) {
         violations.push(
           `new column "${table}.${name}" is NOT NULL without a DEFAULT`,
@@ -97,7 +132,18 @@ export function findAdditiveViolations(
       }
     }
 
-    if (!beforeColumns) {
+    // A new UNIQUE constraint rejects data that older clients (or other
+    // devices on the same version) already have or keep writing, so
+    // applying their sync messages would fail
+    for (const unique of uniques) {
+      if (!beforeTable?.uniques.has(unique)) {
+        violations.push(
+          `table "${table}" gained a UNIQUE constraint on (${unique})`,
+        );
+      }
+    }
+
+    if (!beforeTable) {
       // Sync addresses rows by their `id` column (see `apply` in
       // #server/sync), so a new synced table needs exactly that as its
       // primary key — no other name, no composite keys
