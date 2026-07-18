@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { Trans } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -44,7 +45,7 @@ export function TransactionStatusField({
   onToggleCleared,
   onToggleReconciled,
 }: TransactionStatusFieldProps) {
-  const id = isReconciled ? 'reconciled' : 'cleared';
+  const id = useId();
 
   return (
     <>

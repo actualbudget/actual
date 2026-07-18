@@ -8,7 +8,7 @@ describe('TransactionStatusField', () => {
     const user = userEvent.setup();
     const onToggleReconciled = vi.fn();
 
-    render(
+    const { rerender } = render(
       <TransactionStatusField
         isCleared
         isReconciled
@@ -26,5 +26,20 @@ describe('TransactionStatusField', () => {
     await user.click(reconciledToggle);
 
     expect(onToggleReconciled).toHaveBeenCalledWith(false);
+
+    const toggleId = reconciledToggle.id;
+    rerender(
+      <TransactionStatusField
+        isCleared
+        isReconciled={false}
+        onToggleCleared={vi.fn()}
+        onToggleReconciled={onToggleReconciled}
+      />,
+    );
+
+    expect(screen.getByRole('checkbox', { name: 'Cleared' })).toHaveAttribute(
+      'id',
+      toggleId,
+    );
   });
 });
