@@ -9,14 +9,14 @@ import {
 } from '#components/mobile/MobileForms';
 import { useLanguage } from '#hooks/useLocale';
 
-type MonthFieldProps = {
+type MonthInputProps = {
   id: string;
   value: string;
   onChange: (month: string) => void;
 };
 
 // mobile keeps the native month input; desktop uses the custom month picker
-export function MonthField({ id, value, onChange }: MonthFieldProps) {
+export function MonthInput({ id, value, onChange }: MonthInputProps) {
   const { t } = useTranslation();
   const language = useLanguage();
   const { isNarrowWidth } = useResponsive();

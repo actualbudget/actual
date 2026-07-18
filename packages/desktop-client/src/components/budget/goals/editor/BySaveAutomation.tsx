@@ -17,10 +17,10 @@ import type {
 import { updateTemplate } from '#components/budget/goals/actions';
 import type { Action } from '#components/budget/goals/actions';
 import { TWO_UP_FIELD_FLEX } from '#components/budget/goals/editor/fieldLayout';
-import { MonthField } from '#components/budget/goals/editor/MonthField';
 import { FormField, FormLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { AmountInput } from '#components/util/AmountInput';
+import { MonthInput } from '#components/util/MonthInput';
 import { useFormat } from '#hooks/useFormat';
 
 type BySaveAutomationProps = {
@@ -88,7 +88,7 @@ export const BySaveAutomation = ({
         </FormField>
         <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
           <FormLabel title={t('Target month')} htmlFor="by-month-field" />
-          <MonthField
+          <MonthInput
             id="by-month-field"
             value={template.month ?? ''}
             onChange={month =>
@@ -238,7 +238,7 @@ export const BySaveAutomation = ({
               title={t('Start spending in')}
               htmlFor="by-spend-from-field"
             />
-            <MonthField
+            <MonthInput
               id="by-spend-from-field"
               value={fromMonth ?? ''}
               onChange={from =>
