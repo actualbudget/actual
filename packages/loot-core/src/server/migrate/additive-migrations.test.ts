@@ -170,6 +170,31 @@ describe('migrations are additive-only', () => {
         'CREATE TABLE messages_pending (timestamp TEXT PRIMARY KEY, dataset TEXT NOT NULL);',
       'ALTER TABLE messages_pending ADD COLUMN extra TEXT NOT NULL;',
     ],
+    [
+      'removing a UNIQUE constraint',
+      TABLE_FOO + 'CREATE UNIQUE INDEX foo_a ON foo (a);',
+      'DROP INDEX foo_a;',
+    ],
+    [
+      'adding a CHECK constraint',
+      TABLE_FOO,
+      'ALTER TABLE foo ADD COLUMN amount INTEGER CHECK(amount >= 0);',
+    ],
+    [
+      'making a column NOT NULL with a DEFAULT via table rebuild',
+      TABLE_FOO,
+      `CREATE TABLE foo_new
+         (id TEXT PRIMARY KEY, a TEXT NOT NULL DEFAULT 'x', b TEXT);
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
+    [
+      'making a NOT NULL column nullable via table rebuild',
+      "CREATE TABLE foo (id TEXT PRIMARY KEY, a TEXT NOT NULL DEFAULT 'x');",
+      `CREATE TABLE foo_new (id TEXT PRIMARY KEY, a TEXT);
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
   ])('sanity check: flags %s', async (_case, setup, migration) => {
     expect(await violationsFor(setup, migration)).not.toEqual([]);
   });
