@@ -990,6 +990,13 @@ export type TransactionForRules = TransactionEntity & {
   _category_name?: string;
   _account_name?: string;
   parent_amount?: number;
+  /**
+   * The category group id of the transaction's category, resolved in
+   * `prepareTransactionForRules` so the `category_group` rule condition can be
+   * evaluated by `Condition.eval` (the run-rules / auto-run path). Cleared in
+   * `finalizeTransactionForRules` so it never leaks into persisted data.
+   */
+  category_group?: string;
   /** Prefetched cent balances for BALANCE_OF("…") in rule formulas; cleared in finalize */
   _balanceOfPrefetched?: Map<string, number>;
 };
@@ -1095,6 +1102,12 @@ export async function prepareTransactionForRules(
     const category = await getCategory(trans.category);
     if (category) {
       r._category_name = category.name;
+      // Resolve the category's group so the `category_group` rule condition
+      // can be evaluated by `Condition.eval` in the run-rules / auto-run path.
+      // `conditionsToAQL` (used by the rule editor preview/Apply) already maps
+      // `category_group` to a `category.group` join; this makes the two paths
+      // consistent. See https://github.com/actualbudget/actual/issues/8498
+      r.category_group = category.cat_group;
     }
   }
 
@@ -1138,6 +1151,10 @@ export async function finalizeTransactionForRules(
 
   if ('parent_amount' in trans) {
     delete trans.parent_amount;
+  }
+
+  if ('category_group' in trans) {
+    delete trans.category_group;
   }
 
   if (trans.subtransactions?.length) {
