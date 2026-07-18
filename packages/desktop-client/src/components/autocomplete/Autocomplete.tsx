@@ -344,6 +344,12 @@ function SingleAutocomplete<T extends AutocompleteItem>({
 
         if (clearOnSelect) {
           setValue('');
+        } else {
+          // Keep the controlled input synchronized with the selected item.
+          // onInputValueChange skips clickItem (see the early-return filter
+          // above), so the input value must be set here for click/tap
+          // selections when it is not cleared.
+          setValue(item ? getItemName(item) : '');
         }
 
         if (closeOnSelect) {
