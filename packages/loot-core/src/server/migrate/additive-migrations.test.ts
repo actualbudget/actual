@@ -135,6 +135,20 @@ describe('migrations are additive-only', () => {
       TABLE_FOO,
       'CREATE TABLE gadgets (name TEXT);',
     ],
+    [
+      'making an existing column required via table rebuild',
+      TABLE_FOO,
+      `CREATE TABLE foo_new (id TEXT PRIMARY KEY, a TEXT NOT NULL, b TEXT);
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
+    [
+      'changing primary-key membership via table rebuild',
+      TABLE_FOO,
+      `CREATE TABLE foo_new (id TEXT, a TEXT, b TEXT, PRIMARY KEY (id, a));
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
   ])('sanity check: flags %s', async (_case, setup, migration) => {
     expect(await violationsFor(setup, migration)).not.toEqual([]);
   });

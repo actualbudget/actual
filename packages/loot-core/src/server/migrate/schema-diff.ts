@@ -77,6 +77,24 @@ export function findAdditiveViolations(
           !nonSyncedTables.has(column.table),
       )
       .map(([key]) => `new column "${key}" is NOT NULL without a DEFAULT`),
+    // A table rebuild can also change an existing column in place:
+    // tightening it to NOT NULL breaks per-column inserts from older
+    // clients, and changing primary-key membership breaks sync's
+    // addressing by id
+    ...[...after].flatMap(([key, column]) => {
+      const prev = before.get(key);
+      if (!prev || nonSyncedTables.has(column.table)) {
+        return [];
+      }
+      return [
+        ...(column.required && !prev.required
+          ? [`existing column "${key}" became NOT NULL without a DEFAULT`]
+          : []),
+        ...(column.pk !== prev.pk
+          ? [`existing column "${key}" changed primary-key membership`]
+          : []),
+      ];
+    }),
     // Sync addresses rows by their `id` column (see `apply` in
     // #server/sync), so a synced table needs exactly that as its
     // primary key — no other name, no composite keys

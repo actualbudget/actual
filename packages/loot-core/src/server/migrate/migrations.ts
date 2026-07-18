@@ -157,14 +157,19 @@ function checkDatabaseValidity(
     ? getMigrationId(available[available.length - 1])
     : 0;
   const hasNewerUnknownMigrations = appliedIds.some(id => id > maxAvailableId);
-  appliedIds = appliedIds.filter(id => id <= maxAvailableId);
+  // Keep `appliedIds` intact for the error logs below so newer unknown
+  // ids stay visible in diagnostics
+  const knownAppliedIds = appliedIds.filter(id => id <= maxAvailableId);
 
   // A database touched by a newer version must already contain every
   // migration this app knows (append-only migrations guarantee the newer
   // version knew them all). A known migration missing next to a newer
   // unknown one means the database is corrupt — running it now, after
   // later migrations already ran, would be unsafe.
-  if (hasNewerUnknownMigrations && appliedIds.length !== available.length) {
+  if (
+    hasNewerUnknownMigrations &&
+    knownAppliedIds.length !== available.length
+  ) {
     logger.error(
       'Database is out of sync with migrations (missing known migration next to a newer unknown one):',
       {
@@ -175,7 +180,7 @@ function checkDatabaseValidity(
     throw new Error('out-of-sync-migrations');
   }
 
-  if (appliedIds.length > available.length) {
+  if (knownAppliedIds.length > available.length) {
     logger.error(
       'Database is out of sync with migrations (index past available):',
       {
@@ -186,8 +191,8 @@ function checkDatabaseValidity(
     throw new Error('out-of-sync-migrations');
   }
 
-  for (let i = 0; i < appliedIds.length; i++) {
-    if (appliedIds[i] !== getMigrationId(available[i])) {
+  for (let i = 0; i < knownAppliedIds.length; i++) {
+    if (knownAppliedIds[i] !== getMigrationId(available[i])) {
       logger.error(
         'Database is out of sync with migrations (migration id mismatch):',
         {
