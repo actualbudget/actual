@@ -354,12 +354,12 @@ function ClearedColumnLegend() {
     {
       Icon: SvgCheckCircleHollow,
       color: theme.pageTextSubdued,
-      label: <Trans>Uncleared: not yet confirmed by your bank</Trans>,
+      label: <Trans>Uncleared: not yet verified</Trans>,
     },
     {
       Icon: SvgCheckCircle1,
       color: theme.noticeTextLight,
-      label: <Trans>Cleared: confirmed by your bank</Trans>,
+      label: <Trans>Cleared: verified against your account</Trans>,
     },
     {
       Icon: SvgLockClosed,
