@@ -244,6 +244,16 @@ describe('migrations are additive-only', () => {
       'CREATE INDEX foo_a_idx ON foo (a);',
     ],
     [
+      'creating a synced table with a UNIQUE constraint',
+      TABLE_FOO,
+      'CREATE TABLE gadgets (id TEXT PRIMARY KEY, name TEXT UNIQUE);',
+    ],
+    [
+      'creating a synced table with a CHECK constraint',
+      TABLE_FOO,
+      'CREATE TABLE gadgets (id TEXT PRIMARY KEY, amount INTEGER CHECK(amount >= 0));',
+    ],
+    [
       'rebuilding a table with an identical CHECK, reformatted',
       'CREATE TABLE foo (id TEXT PRIMARY KEY, amount INTEGER CHECK(amount >= 0));',
       `CREATE TABLE foo_new

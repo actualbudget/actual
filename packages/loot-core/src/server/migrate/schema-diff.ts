@@ -179,23 +179,28 @@ export function findAdditiveViolations(
       }
     }
 
-    for (const unique of uniques) {
-      if (!beforeTable?.uniques.has(unique)) {
-        violations.push(
-          `table "${table}" gained a UNIQUE constraint on (${unique})`,
-        );
+    // Constraint changes only matter on existing tables — a brand-new
+    // table gets the same constraints on every client that runs its
+    // migration, so there is no version skew to protect against
+    if (beforeTable) {
+      for (const unique of uniques) {
+        if (!beforeTable.uniques.has(unique)) {
+          violations.push(
+            `table "${table}" gained a UNIQUE constraint on (${unique})`,
+          );
+        }
       }
-    }
-    for (const unique of beforeTable?.uniques ?? []) {
-      if (!uniques.has(unique)) {
-        violations.push(
-          `table "${table}" lost a UNIQUE constraint on (${unique})`,
-        );
+      for (const unique of beforeTable.uniques) {
+        if (!uniques.has(unique)) {
+          violations.push(
+            `table "${table}" lost a UNIQUE constraint on (${unique})`,
+          );
+        }
       }
-    }
 
-    if ((beforeTable?.checks ?? []).join(';') !== checks.join(';')) {
-      violations.push(`table "${table}" changed its CHECK constraints`);
+      if (beforeTable.checks.join(';') !== checks.join(';')) {
+        violations.push(`table "${table}" changed its CHECK constraints`);
+      }
     }
 
     if (!beforeTable) {
