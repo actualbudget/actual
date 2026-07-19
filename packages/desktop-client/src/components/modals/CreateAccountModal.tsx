@@ -31,8 +31,7 @@ export function CreateAccountModal({
   const {
     providers,
     syncServerStatus,
-    showPermissionWarning,
-    providersNeedingConfiguration,
+    permissionWarning,
   } = useBuiltInBankSyncProviders({ upgradingAccountId });
 
   const onCreateLocalAccount = () => {
@@ -72,8 +71,7 @@ export function CreateAccountModal({
                 <BuiltInProviders
                   providers={providers}
                   syncServerStatus={syncServerStatus}
-                  showPermissionWarning={showPermissionWarning}
-                  providersNeedingConfiguration={providersNeedingConfiguration}
+                  permissionWarning={permissionWarning}
                 />
               </>
             ) : (

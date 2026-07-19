@@ -18,15 +18,13 @@ import type { BuiltInBankSyncProviderState } from './useBuiltInBankSyncProviders
 type BuiltInProvidersProps = {
   providers: BuiltInBankSyncProviderState[];
   syncServerStatus: 'offline' | 'no-server' | 'online';
-  showPermissionWarning: boolean;
-  providersNeedingConfiguration: BuiltInBankSyncProviderState[];
+  permissionWarning: 'general' | 'file-owner' | null;
 };
 
 export function BuiltInProviders({
   providers,
   syncServerStatus,
-  showPermissionWarning,
-  providersNeedingConfiguration,
+  permissionWarning,
 }: BuiltInProvidersProps) {
   const { t } = useTranslation();
 
@@ -234,16 +232,20 @@ export function BuiltInProviders({
         </View>
       )}
 
-      {showPermissionWarning && (
+      {permissionWarning && (
         <Warning>
-          <Trans>
-            You don&apos;t have the required permissions to configure bank sync
-            providers. Please contact an Admin to configure
-          </Trans>{' '}
-          {providersNeedingConfiguration
-            .map(provider => provider.displayName)
-            .join(' or ')}
-          .
+          {permissionWarning === 'file-owner' ? (
+            <Trans>
+              You don&apos;t have the required permissions to configure all bank
+              sync providers. You can set up Pluggy.ai because you are the
+              owner of this budget file.
+            </Trans>
+          ) : (
+            <Trans>
+              You don&apos;t have the required permissions to configure bank sync
+              providers. Please contact an Admin.
+            </Trans>
+          )}
         </Warning>
       )}
     </View>

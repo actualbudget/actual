@@ -75,6 +75,22 @@ type UseBuiltInBankSyncProvidersOptions = {
   upgradingAccountId?: AccountEntity['id'];
 };
 
+export function getPermissionWarning(
+  syncServerStatus: 'offline' | 'no-server' | 'online',
+  isAdmin: boolean,
+  isFileOwner: boolean,
+): 'general' | 'file-owner' | null {
+  if (syncServerStatus !== 'online') {
+    return 'general';
+  }
+
+  if (isAdmin) {
+    return null;
+  }
+
+  return isFileOwner ? 'file-owner' : 'general';
+}
+
 async function ensureSuccessResponse(
   response: SecretSetResponse,
   fallbackMessage: string,
@@ -96,7 +112,6 @@ export function useBuiltInBankSyncProviders({
   const syncServerStatus = useSyncServerStatus();
   const { cloudFileId, isAdmin, isFileOwner } = useCurrentAccess();
   const canConfigureProviders = isAdmin;
-  const canConfigurePluggyAi = isAdmin || isFileOwner;
 
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
@@ -662,7 +677,9 @@ export function useBuiltInBankSyncProviders({
           credentialSource: pluggyAiStatus.source ?? 'global',
           supportsPerBudgetFile: true,
           canConfigure:
-            canConfigurePluggyAi && pluggyAiStatus.source !== 'global',
+            syncServerStatus === 'online' &&
+            (isAdmin ||
+              (isFileOwner && pluggyAiStatus.source !== 'global')),
           onConfigure: onPluggyAiInit,
           onLink: onConnectPluggyAi,
           onReset: onPluggyAiReset,
@@ -708,13 +725,15 @@ export function useBuiltInBankSyncProviders({
     return baseProviders;
   }, [
     canConfigureProviders,
-    canConfigurePluggyAi,
+    isAdmin,
+    isFileOwner,
     configuredProviders.enableBanking,
     configuredProviders.goCardless,
     configuredProviders.pluggyai,
     configuredProviders.simpleFin,
     configuredProviders.akahu,
     pluggyAiStatus,
+    syncServerStatus,
     enableBankingEnabled,
     akahuEnabled,
     isEnableBankingLoading,
@@ -738,19 +757,15 @@ export function useBuiltInBankSyncProviders({
     t,
   ]);
 
-  const providersNeedingConfiguration = providers.filter(
-    provider => !provider.isConfigured,
+  const permissionWarning = getPermissionWarning(
+    syncServerStatus,
+    isAdmin,
+    isFileOwner,
   );
-  const providersNeedingConfigurationPermission =
-    providersNeedingConfiguration.filter(provider => !provider.canConfigure);
 
   return {
     providers,
     syncServerStatus,
-    canConfigureProviders,
-    showPermissionWarning:
-      providersNeedingConfigurationPermission.length > 0 &&
-      !canConfigureProviders,
-    providersNeedingConfiguration: providersNeedingConfigurationPermission,
+    permissionWarning,
   };
 }

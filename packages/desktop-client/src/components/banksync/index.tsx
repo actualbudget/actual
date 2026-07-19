@@ -34,8 +34,7 @@ export function BankSync() {
   const {
     providers,
     syncServerStatus,
-    showPermissionWarning,
-    providersNeedingConfiguration,
+    permissionWarning,
   } = useBuiltInBankSyncProviders();
 
   const [hoveredAccount, setHoveredAccount] = useState<
@@ -101,8 +100,7 @@ export function BankSync() {
         <BuiltInProviders
           providers={providers}
           syncServerStatus={syncServerStatus}
-          showPermissionWarning={showPermissionWarning}
-          providersNeedingConfiguration={providersNeedingConfiguration}
+          permissionWarning={permissionWarning}
         />
 
         {openAccounts.length === 0 && (
