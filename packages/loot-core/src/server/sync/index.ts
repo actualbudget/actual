@@ -103,12 +103,17 @@ export function isMissingSchemaError(error: unknown): boolean {
 
 // Record a message that can't be applied yet because it targets schema
 // from a newer version. It's replayed by `replayPendingMessages` once a
-// migration adds the missing table/column.
+// migration adds the missing table/column. Only the newest value per
+// cell is kept — replay is last-write-wins per cell anyway, and this
+// bounds the table while the client stays on an old version.
 function deferMessage(msg: Message) {
   db.runQuery(
     db.cache(
-      `INSERT OR IGNORE INTO messages_pending (timestamp, dataset, row, column, value)
-         VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO messages_pending (timestamp, dataset, row, column, value)
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT(dataset, row, column) DO UPDATE
+           SET timestamp = excluded.timestamp, value = excluded.value
+           WHERE excluded.timestamp > messages_pending.timestamp`,
     ),
     [
       msg.timestamp.toString(),

@@ -155,7 +155,14 @@ describe('Deferred sync messages (newer schema)', () => {
       ],
       true,
     );
-    expect(getPending().length).toBe(4);
+    // Repeated writes to the same cell coalesce to the newest value, so
+    // t1's two brand_new_column messages leave one pending row
+    const coalesced = getPending();
+    expect(coalesced.length).toBe(3);
+    expect(
+      coalesced.find(p => p.row === 't1' && p.column === 'brand_new_column')
+        ?.value,
+    ).toBe('S:new value');
 
     // "Run the migration" that the newer client already has
     db.execQuery('ALTER TABLE transactions ADD COLUMN brand_new_column TEXT');
