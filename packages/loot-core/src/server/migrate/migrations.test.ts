@@ -58,6 +58,43 @@ describe('Migrations', () => {
     );
   });
 
+  test('tolerates migrations applied by a newer version of the app', async () => {
+    return withMigrationsDir(
+      __dirname + '/../../mocks/migrations',
+      async () => {
+        await migrate(db.getDatabase());
+
+        // Simulate a migration applied by a newer version of the app
+        // (its id is newer than anything this version knows about)
+        db.runQuery('INSERT INTO __migrations__ (id) VALUES (9999999999999)');
+
+        // Should not throw
+        await migrate(db.getDatabase());
+
+        const applied = await getAppliedMigrations(db.getDatabase());
+        expect(applied).toContain(9999999999999);
+      },
+    );
+  });
+
+  test('rejects a newer unknown migration when a known one is missing', async () => {
+    return withMigrationsDir(
+      __dirname + '/../../mocks/migrations',
+      async () => {
+        // A database that skipped known migrations but somehow contains
+        // one from a newer version — impossible via any legitimate flow
+        // (append-only migrations mean the newer version knew ours too),
+        // so it must be treated as corrupt, not migrated further
+        db.runQuery('INSERT INTO __migrations__ (id) VALUES (1508717984291)');
+        db.runQuery('INSERT INTO __migrations__ (id) VALUES (9999999999999)');
+
+        await expect(migrate(db.getDatabase())).rejects.toThrow(
+          'out-of-sync-migrations',
+        );
+      },
+    );
+  });
+
   test('app runs database migrations', async () => {
     return withMigrationsDir(
       __dirname + '/../../mocks/migrations',

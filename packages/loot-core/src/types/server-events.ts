@@ -41,6 +41,11 @@ type SyncEvent = {
   | {
       type: 'unauthorized';
     }
+  | {
+      // Some received messages were written by a newer version of the
+      // app and can't be shown until this client updates
+      type: 'deferred-messages';
+    }
 );
 
 type BackupUpdatedEvent = Backup[];
