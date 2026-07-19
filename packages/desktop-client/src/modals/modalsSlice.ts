@@ -128,7 +128,7 @@ export type Modal =
       name: 'pluggyai-init';
       options: {
         onSuccess: (perBudgetFile: boolean) => void;
-        credentialSource?: BankSyncCredentialSource | null;
+        credentialSource: BankSyncCredentialSource;
       };
     }
   | {

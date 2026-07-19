@@ -10,8 +10,6 @@ import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
-import { useAuth } from '#auth/AuthProvider';
-import { Permissions } from '#auth/types';
 import { Error } from '#components/alerts';
 import { Link } from '#components/common/Link';
 import {
@@ -21,8 +19,7 @@ import {
   ModalHeader,
 } from '#components/common/Modal';
 import { FormField, FormLabel } from '#components/forms';
-import { useMultiuserEnabled } from '#components/ServerContext';
-import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { getSecretsError } from '#util/error';
 
@@ -36,18 +33,12 @@ export const PluggyAiInitialiseModal = ({
   credentialSource,
 }: PluggyAiInitialiseProps) => {
   const { t } = useTranslation();
-  const [cloudFileId] = useMetadataPref('cloudFileId');
-  const { hasPermission } = useAuth();
-  const multiuserEnabled = useMultiuserEnabled();
-  const canSetGlobalCredentials =
-    !multiuserEnabled || hasPermission(Permissions.ADMINISTRATOR);
+  const { cloudFileId, isAdmin: canSetGlobalCredentials } = useCurrentAccess();
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
   const [itemIds, setItemIds] = useState('');
   const [perBudgetFile, setPerBudgetFile] = useState(
-    credentialSource == null
-      ? !canSetGlobalCredentials
-      : credentialSource === 'per-budget-file',
+    credentialSource === 'per-budget-file',
   );
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -168,9 +159,7 @@ export const PluggyAiInitialiseModal = ({
               <Toggle
                 id="pluggyai-per-budget-file"
                 isOn={perBudgetFile}
-                isDisabled={
-                  Boolean(credentialSource) || !canSetGlobalCredentials
-                }
+                isDisabled={!canSetGlobalCredentials}
                 onToggle={setPerBudgetFile}
               />
             </View>

@@ -6,8 +6,9 @@ import type { BankSyncProviderStatus } from '@actual-app/core/types/models';
 import { useSyncServerStatus } from './useSyncServerStatus';
 
 export function usePluggyAiStatus() {
-  const [pluggyAiStatus, setPluggyAiStatus] =
-    useState<BankSyncProviderStatus | null>(null);
+  const [pluggyAiStatus, setPluggyAiStatus] = useState<BankSyncProviderStatus>(
+    {},
+  );
   const [isLoading, setIsLoading] = useState(false);
   const status = useSyncServerStatus();
 
@@ -21,9 +22,12 @@ export function usePluggyAiStatus() {
       setIsLoading(false);
     }
 
-    if (status === 'online') {
-      void fetch();
+    if (status !== 'online') {
+      setPluggyAiStatus({});
+      return;
     }
+
+    void fetch();
   }, [status]);
 
   return {
