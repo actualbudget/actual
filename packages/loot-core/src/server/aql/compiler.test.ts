@@ -815,6 +815,18 @@ describe('sheet language', () => {
     );
     expect(result.sql).toMatch("id IN ('one','two','three')");
   });
+
+  it('$oneof escapes single quotes to prevent SQL injection', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .filter({ id: { $oneof: ["a'; DROP TABLE x;--", "b"] } })
+        .select(['amount'])
+        .serialize(),
+      schemaWithRefs,
+    );
+    expect(result.sql).toMatch("id IN ('a''; DROP TABLE x;--','b')");
+    expect(result.sql).not.toMatch("'a'; DROP");
+  });
 });
 
 describe('Type conversions', () => {
