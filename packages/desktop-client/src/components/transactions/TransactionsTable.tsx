@@ -34,9 +34,14 @@ import {
   SvgCheveronDown,
 } from '@actual-app/components/icons/v1';
 import {
+  SvgAlertTriangle,
   SvgArrowsSynchronize,
   SvgCalendar3,
+  SvgCheckCircle1,
+  SvgCheckCircleHollow,
+  SvgEditSkull1,
   SvgHyperlink2,
+  SvgLockClosed,
   SvgSubtract,
 } from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
@@ -327,6 +332,7 @@ const TransactionHeader = memo(
             width={38}
             alignItems="center"
             id="cleared"
+            tooltip={<ClearedColumnLegend />}
             icon={field === 'cleared' ? ascDesc : 'clickable'}
             onClick={() => {
               onSort(
@@ -342,6 +348,63 @@ const TransactionHeader = memo(
 );
 
 TransactionHeader.displayName = 'TransactionHeader';
+
+function ClearedColumnLegend() {
+  const legendItems = [
+    {
+      Icon: SvgCheckCircleHollow,
+      color: theme.pageTextSubdued,
+      label: <Trans>Uncleared: not yet verified</Trans>,
+    },
+    {
+      Icon: SvgCheckCircle1,
+      color: theme.noticeTextLight,
+      label: <Trans>Cleared: verified against your account</Trans>,
+    },
+    {
+      Icon: SvgLockClosed,
+      color: theme.noticeTextLight,
+      label: <Trans>Reconciled: locked after reconciliation</Trans>,
+    },
+    {
+      Icon: SvgCalendar3,
+      color: theme.pageTextSubdued,
+      label: <Trans>Upcoming scheduled transaction</Trans>,
+    },
+    {
+      Icon: SvgAlertTriangle,
+      color: theme.warningText,
+      label: <Trans>Due scheduled transaction</Trans>,
+    },
+    {
+      Icon: SvgEditSkull1,
+      color: theme.errorText,
+      label: <Trans>Missed scheduled transaction</Trans>,
+    },
+  ];
+
+  return (
+    <View style={{ maxWidth: 260, padding: 4 }}>
+      <Text style={{ fontWeight: 600 }}>
+        <Trans>Transaction status</Trans>
+      </Text>
+      {legendItems.map(({ Icon, color, label }, index) => (
+        <View
+          key={index}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            marginTop: 6,
+          }}
+        >
+          <Icon style={{ width: 13, height: 13, color, flexShrink: 0 }} />
+          <Text>{label}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
 
 type StatusCellProps = {
   id: TransactionEntity['id'];
@@ -436,6 +499,7 @@ type HeaderCellProps = {
   value: string;
   id: string;
   icon?: 'asc' | 'desc' | 'clickable';
+  tooltip?: ReactNode;
   onClick?: () => void;
 } & Pick<CSSProperties, 'width' | 'alignItems' | 'marginLeft' | 'marginRight'>;
 
@@ -447,6 +511,7 @@ function HeaderCell({
   marginLeft,
   marginRight,
   icon,
+  tooltip,
   onClick,
 }: HeaderCellProps) {
   const style = {
@@ -469,8 +534,8 @@ function HeaderCell({
         borderTopWidth: 0,
         borderBottomWidth: 0,
       }}
-      unexposedContent={({ value: cellValue }) =>
-        onClick ? (
+      unexposedContent={({ value: cellValue }) => {
+        const content = onClick ? (
           <Button variant="bare" onPress={onClick} style={style}>
             <UnexposedCellContent value={cellValue} />
             {icon === 'asc' && (
@@ -482,8 +547,16 @@ function HeaderCell({
           </Button>
         ) : (
           <Text style={style}>{cellValue}</Text>
-        )
-      }
+        );
+
+        return tooltip ? (
+          <Tooltip content={tooltip} placement="bottom end">
+            {content}
+          </Tooltip>
+        ) : (
+          content
+        );
+      }}
     />
   );
 }
