@@ -28,11 +28,8 @@ export function CreateAccountModal({
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const {
-    providers,
-    syncServerStatus,
-    permissionWarning,
-  } = useBuiltInBankSyncProviders({ upgradingAccountId });
+  const { providers, syncServerStatus, permissionWarning } =
+    useBuiltInBankSyncProviders({ upgradingAccountId });
 
   const onCreateLocalAccount = () => {
     dispatch(pushModal({ modal: { name: 'add-local-account' } }));

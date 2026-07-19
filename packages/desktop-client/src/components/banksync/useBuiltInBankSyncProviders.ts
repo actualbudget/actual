@@ -678,8 +678,7 @@ export function useBuiltInBankSyncProviders({
           supportsPerBudgetFile: true,
           canConfigure:
             syncServerStatus === 'online' &&
-            (isAdmin ||
-              (isFileOwner && pluggyAiStatus.source !== 'global')),
+            (isAdmin || (isFileOwner && pluggyAiStatus.source !== 'global')),
           onConfigure: onPluggyAiInit,
           onLink: onConnectPluggyAi,
           onReset: onPluggyAiReset,
