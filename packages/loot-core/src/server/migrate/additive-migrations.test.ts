@@ -195,6 +195,20 @@ describe('migrations are additive-only', () => {
        DROP TABLE foo;
        ALTER TABLE foo_new RENAME TO foo;`,
     ],
+    [
+      'removing a DEFAULT from a NOT NULL column via table rebuild',
+      "CREATE TABLE foo (id TEXT PRIMARY KEY, a TEXT NOT NULL DEFAULT 'x');",
+      `CREATE TABLE foo_new (id TEXT PRIMARY KEY, a TEXT NOT NULL);
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
+    [
+      'changing a CHECK expression via table rebuild',
+      'CREATE TABLE foo (id TEXT PRIMARY KEY, amount INTEGER CHECK(amount >= 0));',
+      `CREATE TABLE foo_new (id TEXT PRIMARY KEY, amount INTEGER CHECK(amount > 0));
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
   ])('sanity check: flags %s', async (_case, setup, migration) => {
     expect(await violationsFor(setup, migration)).not.toEqual([]);
   });
@@ -228,6 +242,14 @@ describe('migrations are additive-only', () => {
       'adding a plain (non-unique) index',
       TABLE_FOO,
       'CREATE INDEX foo_a_idx ON foo (a);',
+    ],
+    [
+      'rebuilding a table with an identical CHECK, reformatted',
+      'CREATE TABLE foo (id TEXT PRIMARY KEY, amount INTEGER CHECK(amount >= 0));',
+      `CREATE TABLE foo_new
+         (id TEXT PRIMARY KEY, amount INTEGER CHECK( amount   >= 0 ));
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
     ],
   ])('sanity check: allows %s', async (_case, setup, migration) => {
     expect(await violationsFor(setup, migration)).toEqual([]);

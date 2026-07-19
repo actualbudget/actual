@@ -13,11 +13,41 @@ export type TableSnapshot = {
   columns: Map<string, ColumnFlags>;
   // Column lists of UNIQUE constraints/indexes, e.g. "a" or "a,b"
   uniques: Set<string>;
-  // Number of CHECK constraints in the table definition. PRAGMAs don't
-  // expose CHECKs, so this counts them in the canonical CREATE TABLE
-  // text SQLite stores — enough to detect a migration changing them
-  checks: number;
+  // Normalized CHECK constraint expressions, sorted. PRAGMAs don't
+  // expose CHECKs, so they are extracted from the canonical CREATE
+  // TABLE text SQLite stores
+  checks: string[];
 };
+
+// Extracts each CHECK(...) expression by scanning to the balanced close
+// paren, normalized (whitespace collapsed, lowercased) so formatting
+// differences don't register as changes. The scan ignores quoting — a
+// paren inside a string literal would truncate the clause — but both
+// sides of a diff parse identically, so comparisons stay sound.
+function checkClauses(sql: string): string[] {
+  const clauses: string[] = [];
+  const starts = /\bCHECK\s*\(/gi;
+  let match;
+  while ((match = starts.exec(sql))) {
+    const start = match.index + match[0].length;
+    let i = start;
+    for (let depth = 1; i < sql.length && depth > 0; i++) {
+      if (sql[i] === '(') {
+        depth++;
+      } else if (sql[i] === ')') {
+        depth--;
+      }
+    }
+    clauses.push(
+      sql
+        .slice(start, i - 1)
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase(),
+    );
+  }
+  return clauses.sort();
+}
 
 // table -> its columns and constraints, from schema introspection
 export type SchemaSnapshot = Map<string, TableSnapshot>;
@@ -73,8 +103,7 @@ export function snapshotSchema(db: Database): SchemaSnapshot {
               .join(','),
           ),
       );
-      const checks = (sql.match(/\bCHECK\s*\(/gi) ?? []).length;
-      return [table, { columns, uniques, checks }];
+      return [table, { columns, uniques, checks: checkClauses(sql) }];
     }),
   );
 }
@@ -140,6 +169,14 @@ export function findAdditiveViolations(
           `existing column "${table}.${name}" changed primary-key membership`,
         );
       }
+      // With NOT NULL unchanged, a `required` flip means a DEFAULT was
+      // added or removed on a NOT NULL column — removal breaks inserts
+      // that omit the column, which is every per-column sync insert
+      if (prev && column.required !== prev.required) {
+        violations.push(
+          `existing column "${table}.${name}" changed whether an explicit value is required (NOT NULL/DEFAULT)`,
+        );
+      }
     }
 
     for (const unique of uniques) {
@@ -157,7 +194,7 @@ export function findAdditiveViolations(
       }
     }
 
-    if ((beforeTable?.checks ?? 0) !== checks) {
+    if ((beforeTable?.checks ?? []).join(';') !== checks.join(';')) {
       violations.push(`table "${table}" changed its CHECK constraints`);
     }
 
