@@ -1,3 +1,5 @@
+import type { UnsafeZipMeta } from '#shared/errors';
+
 // TODO: normalize error types
 export class PostError extends Error {
   meta: { meta: string } | undefined;
@@ -90,6 +92,20 @@ export function APIError(
   return { type: 'APIError', message: msg, meta };
 }
 
+/**
+ * Tag an error with a stable, machine-readable failure code (e.g.
+ * 'network-failure', 'invalid-password', 'budget-not-found'). The code is
+ * kept when the error crosses the worker boundary (see
+ * `#platform/server/connection`), so API consumers can branch on `err.code`
+ * instead of parsing the English message.
+ */
+export function withErrorCode<E extends Error>(
+  error: E,
+  code: string | undefined,
+): E & { code?: string } {
+  return code == null ? error : Object.assign(error, { code });
+}
+
 export function FileDownloadError(
   reason: string,
   meta?: {
@@ -97,7 +113,7 @@ export function FileDownloadError(
     isMissingKey?: boolean;
     name?: string;
     id?: string;
-  },
+  } & Partial<UnsafeZipMeta>,
 ) {
   return { type: 'FileDownloadError', reason, meta };
 }

@@ -19,6 +19,7 @@ import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
 import * as encryption from './encryption';
 import { app as encryptionApp } from './encryption/app';
+import { withErrorCode } from './errors';
 import { app as filtersApp } from './filters/app';
 import { app as forecastApp } from './forecast/app';
 import { app as formulasApp } from './formulas/app';
@@ -227,6 +228,13 @@ export async function initApp(isDev, socketName) {
 }
 
 type BaseInitConfig = {
+  /**
+   * Directory where budget data is stored. In Node this is a directory on
+   * disk (defaults to the current working directory) and must already exist.
+   * In the browser build it is a path inside the worker's virtual filesystem
+   * (persisted to IndexedDB); it defaults to `/documents` and is created
+   * automatically if missing.
+   */
   dataDir?: string;
   verbose?: boolean;
 };
@@ -291,21 +299,30 @@ export async function init(config: InitConfig) {
       if (!user || user.tokenExpired === true) {
         // Clear invalid token
         await runHandler(handlers['subscribe-set-token'], { token: '' });
-        throw new Error(
-          'Authentication failed: invalid or expired session token',
+        throw withErrorCode(
+          new Error('Authentication failed: invalid or expired session token'),
+          'token-expired',
         );
       }
       if (user.offline === true) {
         // Clear token since we can't validate
         await runHandler(handlers['subscribe-set-token'], { token: '' });
-        throw new Error('Authentication failed: server offline or unreachable');
+        throw withErrorCode(
+          new Error('Authentication failed: server offline or unreachable'),
+          'network-failure',
+        );
       }
     } else if ('password' in config && config.password) {
       const result = await runHandler(handlers['subscribe-sign-in'], {
         password: config.password,
       });
       if (result?.error) {
-        throw new Error(`Authentication failed: ${result.error}`);
+        // `result.error` is already a machine-readable slug (e.g.
+        // 'invalid-password', 'network-failure')
+        throw withErrorCode(
+          new Error(`Authentication failed: ${result.error}`),
+          result.error,
+        );
       }
     }
   } else {

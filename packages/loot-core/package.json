@@ -51,6 +51,11 @@
       "api": "./src/platform/server/fs/path-join.api.ts",
       "default": "./src/platform/server/fs/path-join.ts"
     },
+    "#platform/server/memory": {
+      "electron": "./src/platform/server/memory/index.electron.ts",
+      "api": "./src/platform/server/memory/index.api.ts",
+      "default": "./src/platform/server/memory/index.ts"
+    },
     "#platform/server/sqlite": {
       "electron": "./src/platform/server/sqlite/index.electron.ts",
       "api": "./src/platform/server/sqlite/index.api.ts",
@@ -195,12 +200,12 @@
     "@rschedule/core": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",
     "absurd-sql": "0.0.54",
-    "adm-zip": "^0.5.17",
     "better-sqlite3": "^12.10.0",
     "csv-parse": "^6.2.1",
     "csv-stringify": "^6.7.0",
     "date-fns": "^4.4.0",
     "es-toolkit": "^1.47.1",
+    "fflate": "^0.8.3",
     "handlebars": "^4.7.9",
     "hyperformula": "^3.3.0",
     "lru-cache": "^11.5.1",
@@ -211,7 +216,6 @@
   "devDependencies": {
     "@actual-app/crdt": "workspace:*",
     "@actual-app/vite-plugin-peggy": "workspace:*",
-    "@types/adm-zip": "^0.5.8",
     "@types/better-sqlite3": "^7.6.13",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
     "@types/node": "^22.19.21",

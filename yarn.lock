@@ -72,6 +72,8 @@ __metadata:
   dependencies:
     "@chromatic-com/storybook": "npm:^5.2.1"
     "@emotion/css": "npm:^11.13.5"
+    "@internationalized/date": "npm:^3.12.2"
+    "@rolldown/plugin-babel": "npm:~0.2.3"
     "@storybook/addon-a11y": "npm:^10.4.4"
     "@storybook/addon-docs": "npm:^10.4.4"
     "@storybook/react-vite": "npm:^10.4.4"
@@ -82,6 +84,7 @@ __metadata:
     "@types/react": "npm:^19.2.17"
     "@typescript/native-preview": "npm:beta"
     "@vitejs/plugin-react": "npm:^6.0.2"
+    babel-plugin-react-compiler: "npm:^1.0.0"
     eslint-plugin-storybook: "npm:^10.4.4"
     react: "npm:19.2.7"
     react-aria-components: "npm:^1.18.0"
@@ -105,13 +108,11 @@ __metadata:
     "@jlongster/sql.js": "npm:^1.6.7"
     "@rschedule/core": "npm:^1.5.0"
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
-    "@types/adm-zip": "npm:^0.5.8"
     "@types/better-sqlite3": "npm:^7.6.13"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/node": "npm:^22.19.21"
     "@typescript/native-preview": "npm:beta"
     absurd-sql: "npm:0.0.54"
-    adm-zip: "npm:^0.5.17"
     assert: "npm:^2.1.0"
     better-sqlite3: "npm:^12.10.0"
     browserify-zlib: "npm:^0.2.0"
@@ -124,6 +125,7 @@ __metadata:
     es-toolkit: "npm:^1.47.1"
     fake-indexeddb: "npm:^6.2.5"
     fast-check: "npm:^4.8.0"
+    fflate: "npm:^0.8.3"
     handlebars: "npm:^4.7.9"
     hyperformula: "npm:^3.3.0"
     jest-diff: "npm:^30.4.1"
@@ -231,6 +233,7 @@ __metadata:
     "@emotion/css": "npm:^11.13.5"
     "@fontsource-variable/inter": "npm:^5.2.8"
     "@fontsource/redacted-script": "npm:^5.2.8"
+    "@internationalized/date": "npm:^3.12.2"
     "@lezer/highlight": "npm:^1.2.3"
     "@playwright/test": "npm:1.59.1"
     "@react-aria/interactions": "npm:^3.28.1"
@@ -242,7 +245,6 @@ __metadata:
     "@testing-library/jest-dom": "npm:^6.9.1"
     "@testing-library/react": "npm:16.3.2"
     "@testing-library/user-event": "npm:14.6.1"
-    "@types/pikaday": "npm:^1.7.10"
     "@types/react": "npm:^19.2.17"
     "@types/react-dom": "npm:^19.2.3"
     "@typescript/native-preview": "npm:beta"
@@ -254,6 +256,7 @@ __metadata:
     babel-plugin-react-compiler: "npm:^1.0.0"
     cmdk: "npm:^1.1.1"
     cross-env: "npm:^10.1.0"
+    csv-stringify: "npm:^6.7.0"
     date-fns: "npm:^4.4.0"
     downshift: "npm:9.3.6"
     es-toolkit: "npm:^1.47.1"
@@ -266,7 +269,6 @@ __metadata:
     jsdom: "npm:^29.1.1"
     lru-cache: "npm:^11.5.1"
     mdast-util-newline-to-break: "npm:^2.0.0"
-    pikaday: "npm:1.8.2"
     plugins-service: "workspace:*"
     re-resizable: "npm:^6.11.2"
     react: "npm:19.2.7"
@@ -8651,15 +8653,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/adm-zip@npm:^0.5.8":
-  version: 0.5.8
-  resolution: "@types/adm-zip@npm:0.5.8"
-  dependencies:
-    "@types/node": "npm:*"
-  checksum: 10/0739e5abda05f5c02b84048a02d308f77dd9e2d4e7d6ac7126830a0000b9e962a1f5795efd96d50df289333af9ae3b264adacfad9623dde66c10570ce65029d5
-  languageName: node
-  linkType: hard
-
 "@types/aria-query@npm:^5.0.1":
   version: 5.0.4
   resolution: "@types/aria-query@npm:5.0.4"
@@ -9430,15 +9423,6 @@ __metadata:
   version: 4.0.2
   resolution: "@types/parse-json@npm:4.0.2"
   checksum: 10/5bf62eec37c332ad10059252fc0dab7e7da730764869c980b0714777ad3d065e490627be9f40fc52f238ffa3ac4199b19de4127196910576c2fe34dd47c7a470
-  languageName: node
-  linkType: hard
-
-"@types/pikaday@npm:^1.7.10":
-  version: 1.7.10
-  resolution: "@types/pikaday@npm:1.7.10"
-  dependencies:
-    moment: "npm:>=2.29.2"
-  checksum: 10/638bc31725f4663c6266bb527d34d08740d8dc98c1c71efe53ef5bc63e177718e960f96f2719ee97f18ec7caf15e9f70d225e07f4d9ae1235384bb6da31a34a7
   languageName: node
   linkType: hard
 
@@ -10508,20 +10492,6 @@ __metadata:
   version: 1.2.2
   resolution: "address@npm:1.2.2"
   checksum: 10/57d80a0c6ccadc8769ad3aeb130c1599e8aee86a8d25f671216c40df9b8489d6c3ef879bc2752b40d1458aa768f947c2d91e5b2fedfe63cf702c40afdfda9ba9
-  languageName: node
-  linkType: hard
-
-"adm-zip@npm:0.5.16":
-  version: 0.5.16
-  resolution: "adm-zip@npm:0.5.16"
-  checksum: 10/e167d1b9e60cde37334efda828fa514680af9facbd4183952f36526390e5c7da9a90ca1e6880dfd3aba7b3517f1506c6178e0dc29cd630b26b98c795f97fc599
-  languageName: node
-  linkType: hard
-
-"adm-zip@patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch":
-  version: 0.5.16
-  resolution: "adm-zip@patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch::version=0.5.16&hash=f6b7d0"
-  checksum: 10/1a8c866a6ad1b6b6870d39468f26369cc6a43027678708cd9d40ff64274bb45b946f570293d0ac5d23a4a2b360e36168f14a3f9bc1a1cea20b8dce7ec8d8425e
   languageName: node
   linkType: hard
 
@@ -15970,6 +15940,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fflate@npm:^0.8.3":
+  version: 0.8.3
+  resolution: "fflate@npm:0.8.3"
+  checksum: 10/6ebf528dc9c56e78e715eac615b009b25dc33e15c1920b11ebba44e6d76181c647756a81a23e19247907496b93aa99928514c53090579a65109e026ac2824aa7
+  languageName: node
+  linkType: hard
+
 "figures@npm:^6.1.0":
   version: 6.1.0
   resolution: "figures@npm:6.1.0"
@@ -20980,13 +20957,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment@npm:>=2.29.2":
-  version: 2.30.1
-  resolution: "moment@npm:2.30.1"
-  checksum: 10/ae42d876d4ec831ef66110bdc302c0657c664991e45cf2afffc4b0f6cd6d251dde11375c982a5c0564ccc0fa593fc564576ddceb8c8845e87c15f58aa6baca69
-  languageName: node
-  linkType: hard
-
 "mrmime@npm:^2.0.0":
   version: 2.0.1
   resolution: "mrmime@npm:2.0.1"
@@ -22664,13 +22634,6 @@ __metadata:
   version: 3.0.0
   resolution: "pify@npm:3.0.0"
   checksum: 10/668c1dc8d9fc1b34b9ce3b16ba59deb39d4dc743527bf2ed908d2b914cb8ba40aa5ba6960b27c417c241531c5aafd0598feeac2d50cb15278cf9863fa6b02a77
-  languageName: node
-  linkType: hard
-
-"pikaday@npm:1.8.2":
-  version: 1.8.2
-  resolution: "pikaday@npm:1.8.2"
-  checksum: 10/88dbf7cd9ac61340910e845dc7310160b50ec86bc4cfb59a766820caad805de05584287ba6982ea047219f2a8a49ff8fa89934332dc559062c45d7c65782d2ef
   languageName: node
   linkType: hard
 

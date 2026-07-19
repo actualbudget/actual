@@ -78,7 +78,6 @@ function SummaryInner({ widget }: SummaryInnerProps) {
   );
   const [end, setEnd] = useState(monthUtils.currentDay());
   const [mode, setMode] = useState<TimeFrame['mode']>('full');
-
   const dividendFilters: FilterObject = useRuleConditionFilters(
     widget?.meta?.conditions ?? [],
     widget?.meta?.conditionsOp ?? 'and',

@@ -139,9 +139,30 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+          # Full history so the migration check can diff against the merge
+          # base with master; blobless to keep the large repo checkout fast
+          # (ls-tree and merge-base only need commits and trees)
+          fetch-depth: 0
+          filter: blob:none
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
       - name: Check migrations
         run: yarn workspace @actual-app/ci-actions tsx bin/check-migrations.ts
+      - name: Save PR number for the warnings comment workflow
+        if: always() && hashFiles('packages/ci-actions/migration-warnings.json') != ''
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: echo "$PR_NUMBER" > packages/ci-actions/migration-warnings-pr.txt
+      # Consumed by migration-warnings-comment.yml, which posts the advisory
+      # warnings as a PR comment (this job's token is read-only on fork PRs,
+      # so it can't comment itself).
+      - name: Upload warnings for the comment workflow
+        if: always() && hashFiles('packages/ci-actions/migration-warnings.json') != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: migration-warnings
+          path: |
+            packages/ci-actions/migration-warnings.json
+            packages/ci-actions/migration-warnings-pr.txt

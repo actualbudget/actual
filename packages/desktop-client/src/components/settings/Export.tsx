@@ -16,12 +16,14 @@ export function ExportBudget() {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
   const [budgetName] = useMetadataPref('budgetName');
   const [encryptKeyId] = useMetadataPref('encryptKeyId');
 
   async function onExport() {
     setIsLoading(true);
     setError(null);
+    setWarnings([]);
 
     const response = await send('export-budget');
 
@@ -33,6 +35,7 @@ export function ExportBudget() {
     }
 
     if (response.data) {
+      setWarnings(response.warnings ?? []);
       void window.Actual.saveFile(
         response.data,
         `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
@@ -54,6 +57,22 @@ export function ExportBudget() {
               {t(
                 'An unknown error occurred while exporting. Please report this as a new issue on GitHub.',
               )}
+            </Block>
+          )}
+          {warnings.includes('exceeds-import-size-limit') && (
+            <Block style={{ color: theme.warningText, marginTop: 15 }}>
+              <Trans>
+                This export is larger than Actual can safely re-import. You may
+                not be able to restore this backup.
+              </Trans>
+            </Block>
+          )}
+          {warnings.includes('may-exceed-available-memory') && (
+            <Block style={{ color: theme.warningText, marginTop: 15 }}>
+              <Trans>
+                This export is larger than the memory available on this device.
+                Restoring it here may fail.
+              </Trans>
             </Block>
           )}
         </>
