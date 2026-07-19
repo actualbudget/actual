@@ -124,6 +124,7 @@ import type {
   OnDragChangeCallback,
   OnDropCallback,
 } from '#hooks/useDragDrop';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { usePrevious } from '#hooks/usePrevious';
@@ -140,6 +141,12 @@ import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
 import { getStatusLabel } from '#util/schedule';
 
+import {
+  deriveTransactionFields,
+  getVisibleHeaderColumns,
+  NEW_TRANSACTION_FIELDS,
+  TABLE_TRANSACTION_FIELDS,
+} from './table/columns';
 import {
   deserializeTransaction,
   isLastChild,
@@ -182,6 +189,34 @@ const TransactionHeader = memo(
   }: TransactionHeaderProps) => {
     const dispatchSelected = useSelectedDispatch();
     const { t } = useTranslation();
+    const useTableV2 = useFeatureFlag('transactionTableV2');
+
+    // Header labels are kept as literal `t()` calls (rather than stored in the
+    // column model) so the i18n extractor can find them.
+    function getHeaderLabel(id: string) {
+      switch (id) {
+        case 'date':
+          return t('Date');
+        case 'account':
+          return t('Account');
+        case 'payee':
+          return t('Payee');
+        case 'notes':
+          return t('Notes');
+        case 'category':
+          return t('Category');
+        case 'debit':
+          return t('Payment');
+        case 'credit':
+          return t('Deposit');
+        case 'balance':
+          return t('Balance');
+        case 'cleared':
+          return '✓';
+        default:
+          return '';
+      }
+    }
 
     useHotkeys(
       'ctrl+a, cmd+a, meta+a',
@@ -233,114 +268,183 @@ const TransactionHeader = memo(
             }}
           />
         )}
-        <HeaderCell
-          value={t('Date')}
-          width={110}
-          alignItems="flex"
-          marginLeft={-5}
-          id="date"
-          icon={field === 'date' ? ascDesc : 'clickable'}
-          onClick={() =>
-            onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc'))
-          }
-        />
-        {showAccount && (
-          <HeaderCell
-            value={t('Account')}
-            width="flex"
-            alignItems="flex"
-            marginLeft={-5}
-            id="account"
-            icon={field === 'account' ? ascDesc : 'clickable'}
-            onClick={() =>
-              onSort('account', selectAscDesc(field, ascDesc, 'account', 'asc'))
-            }
-          />
-        )}
-        <HeaderCell
-          value={t('Payee')}
-          width="flex"
-          alignItems="flex"
-          marginLeft={-5}
-          id="payee"
-          icon={field === 'payee' ? ascDesc : 'clickable'}
-          onClick={() =>
-            onSort('payee', selectAscDesc(field, ascDesc, 'payee', 'asc'))
-          }
-        />
-        <HeaderCell
-          value={t('Notes')}
-          width="flex"
-          alignItems="flex"
-          marginLeft={-5}
-          id="notes"
-          icon={field === 'notes' ? ascDesc : 'clickable'}
-          onClick={() =>
-            onSort('notes', selectAscDesc(field, ascDesc, 'notes', 'asc'))
-          }
-        />
-        {showCategory && (
-          <HeaderCell
-            value={t('Category')}
-            width="flex"
-            alignItems="flex"
-            marginLeft={-5}
-            id="category"
-            icon={field === 'category' ? ascDesc : 'clickable'}
-            onClick={() =>
-              onSort(
-                'category',
-                selectAscDesc(field, ascDesc, 'category', 'asc'),
-              )
-            }
-          />
-        )}
-        <HeaderCell
-          value={t('Payment')}
-          width={100}
-          alignItems="flex-end"
-          marginRight={-5}
-          id="payment"
-          icon={field === 'payment' ? ascDesc : 'clickable'}
-          onClick={() =>
-            onSort('payment', selectAscDesc(field, ascDesc, 'payment', 'asc'))
-          }
-        />
-        <HeaderCell
-          value={t('Deposit')}
-          width={100}
-          alignItems="flex-end"
-          marginRight={-5}
-          id="deposit"
-          icon={field === 'deposit' ? ascDesc : 'clickable'}
-          onClick={() =>
-            onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc'))
-          }
-        />
-        {showBalance && (
-          <HeaderCell
-            value={t('Balance')}
-            width={103}
-            alignItems="flex-end"
-            marginRight={-5}
-            id="balance"
-          />
-        )}
-        {showCleared && (
-          <HeaderCell
-            value="✓"
-            width={38}
-            alignItems="center"
-            id="cleared"
-            tooltip={<ClearedColumnLegend />}
-            icon={field === 'cleared' ? ascDesc : 'clickable'}
-            onClick={() => {
-              onSort(
-                'cleared',
-                selectAscDesc(field, ascDesc, 'cleared', 'asc'),
+        {useTableV2 ? (
+          getVisibleHeaderColumns({
+            showAccount,
+            showCategory,
+            showBalance,
+            showCleared,
+          })
+            .filter(col => col.id !== 'select')
+            .map(col => {
+              const {
+                width,
+                alignItems,
+                marginLeft,
+                marginRight,
+                sortKey,
+                defaultSortDirection,
+              } = col.meta;
+              return (
+                <HeaderCell
+                  key={col.id}
+                  // The header uses sort ids (e.g. `payment`/`deposit`) where
+                  // they differ from the navigator field ids
+                  // (`debit`/`credit`), matching the legacy markup.
+                  id={sortKey ?? col.id}
+                  value={getHeaderLabel(col.id)}
+                  width={width}
+                  alignItems={alignItems}
+                  marginLeft={marginLeft}
+                  marginRight={marginRight}
+                  tooltip={
+                    col.id === 'cleared' ? <ClearedColumnLegend /> : undefined
+                  }
+                  icon={
+                    sortKey
+                      ? field === sortKey
+                        ? ascDesc
+                        : 'clickable'
+                      : undefined
+                  }
+                  onClick={
+                    sortKey
+                      ? () =>
+                          onSort(
+                            sortKey,
+                            selectAscDesc(
+                              field,
+                              ascDesc,
+                              sortKey,
+                              defaultSortDirection ?? 'asc',
+                            ),
+                          )
+                      : undefined
+                  }
+                />
               );
-            }}
-          />
+            })
+        ) : (
+          <>
+            <HeaderCell
+              value={t('Date')}
+              width={110}
+              alignItems="flex"
+              marginLeft={-5}
+              id="date"
+              icon={field === 'date' ? ascDesc : 'clickable'}
+              onClick={() =>
+                onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc'))
+              }
+            />
+            {showAccount && (
+              <HeaderCell
+                value={t('Account')}
+                width="flex"
+                alignItems="flex"
+                marginLeft={-5}
+                id="account"
+                icon={field === 'account' ? ascDesc : 'clickable'}
+                onClick={() =>
+                  onSort(
+                    'account',
+                    selectAscDesc(field, ascDesc, 'account', 'asc'),
+                  )
+                }
+              />
+            )}
+            <HeaderCell
+              value={t('Payee')}
+              width="flex"
+              alignItems="flex"
+              marginLeft={-5}
+              id="payee"
+              icon={field === 'payee' ? ascDesc : 'clickable'}
+              onClick={() =>
+                onSort('payee', selectAscDesc(field, ascDesc, 'payee', 'asc'))
+              }
+            />
+            <HeaderCell
+              value={t('Notes')}
+              width="flex"
+              alignItems="flex"
+              marginLeft={-5}
+              id="notes"
+              icon={field === 'notes' ? ascDesc : 'clickable'}
+              onClick={() =>
+                onSort('notes', selectAscDesc(field, ascDesc, 'notes', 'asc'))
+              }
+            />
+            {showCategory && (
+              <HeaderCell
+                value={t('Category')}
+                width="flex"
+                alignItems="flex"
+                marginLeft={-5}
+                id="category"
+                icon={field === 'category' ? ascDesc : 'clickable'}
+                onClick={() =>
+                  onSort(
+                    'category',
+                    selectAscDesc(field, ascDesc, 'category', 'asc'),
+                  )
+                }
+              />
+            )}
+            <HeaderCell
+              value={t('Payment')}
+              width={100}
+              alignItems="flex-end"
+              marginRight={-5}
+              id="payment"
+              icon={field === 'payment' ? ascDesc : 'clickable'}
+              onClick={() =>
+                onSort(
+                  'payment',
+                  selectAscDesc(field, ascDesc, 'payment', 'asc'),
+                )
+              }
+            />
+            <HeaderCell
+              value={t('Deposit')}
+              width={100}
+              alignItems="flex-end"
+              marginRight={-5}
+              id="deposit"
+              icon={field === 'deposit' ? ascDesc : 'clickable'}
+              onClick={() =>
+                onSort(
+                  'deposit',
+                  selectAscDesc(field, ascDesc, 'deposit', 'desc'),
+                )
+              }
+            />
+            {showBalance && (
+              <HeaderCell
+                value={t('Balance')}
+                width={103}
+                alignItems="flex-end"
+                marginRight={-5}
+                id="balance"
+              />
+            )}
+            {showCleared && (
+              <HeaderCell
+                value="✓"
+                width={38}
+                alignItems="center"
+                id="cleared"
+                tooltip={<ClearedColumnLegend />}
+                icon={field === 'cleared' ? ascDesc : 'clickable'}
+                onClick={() => {
+                  onSort(
+                    'cleared',
+                    selectAscDesc(field, ascDesc, 'cleared', 'asc'),
+                  );
+                }}
+              />
+            )}
+          </>
         )}
       </Row>
     );
@@ -2807,6 +2911,14 @@ export const TransactionTable = forwardRef(
   ) => {
     const { t } = useTranslation();
 
+    const useTableV2 = useFeatureFlag('transactionTableV2');
+    const fieldVisibility = {
+      showAccount: props.showAccount,
+      showCategory: props.showCategory,
+      showBalance: props.showBalances,
+      showCleared: props.showCleared,
+    };
+
     const dispatch = useDispatch();
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
     const [newTransactions, setNewTransactions] = useState<TransactionEntity[]>(
@@ -3050,6 +3162,14 @@ export const TransactionTable = forwardRef(
     }, [newTransactions, props, props.transactions]);
 
     function getFieldsNewTransaction(item?: TransactionEntity) {
+      if (useTableV2) {
+        return deriveTransactionFields(
+          item,
+          NEW_TRANSACTION_FIELDS,
+          fieldVisibility,
+        );
+      }
+
       const fields = [
         'select',
         'date',
@@ -3068,6 +3188,14 @@ export const TransactionTable = forwardRef(
     }
 
     function getFieldsTableTransaction(item?: TransactionEntity) {
+      if (useTableV2) {
+        return deriveTransactionFields(
+          item,
+          TABLE_TRANSACTION_FIELDS,
+          fieldVisibility,
+        );
+      }
+
       const fields = [
         'select',
         'date',

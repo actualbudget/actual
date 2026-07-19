@@ -16,6 +16,9 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   sankeyReport: false,
   akahuBankSync: false,
   mobileCalculator: false,
+  // Enabled by default: drives the transaction table from the TanStack Table
+  // column model. The Experimental settings toggle is an opt-out escape hatch.
+  transactionTableV2: true,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

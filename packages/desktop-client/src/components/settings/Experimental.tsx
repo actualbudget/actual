@@ -244,6 +244,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Akahu Bank Sync (NZ banks)</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="transactionTableV2">
+              <Trans>Transaction table v2 (column model)</Trans>
+            </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle
                 prefName="flags.plugins"
