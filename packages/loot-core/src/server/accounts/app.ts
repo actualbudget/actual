@@ -912,7 +912,7 @@ async function simpleFinStatus() {
     // from "the user is not configured" — otherwise the UI falls back to
     // the "Set Up SimpleFIN" modal even though the user already has
     // credentials in place. See issue #7785.
-    console.error('Failed to get SimpleFIN status:', error);
+    logger.error('Failed to get SimpleFIN status:', error);
     return { error: 'rate-limited' };
   }
 }
