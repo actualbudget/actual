@@ -81,7 +81,7 @@ export function getPermissionWarning(
   isFileOwner: boolean,
 ): 'general' | 'file-owner' | null {
   if (syncServerStatus !== 'online') {
-    return 'general';
+    return null;
   }
 
   if (isAdmin) {

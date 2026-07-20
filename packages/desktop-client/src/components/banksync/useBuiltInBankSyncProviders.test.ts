@@ -1,8 +1,8 @@
 import { getPermissionWarning } from './useBuiltInBankSyncProviders';
 
 test.each([
-  ['offline', true, true, 'general'],
-  ['no-server', false, false, 'general'],
+  ['offline', true, true, null],
+  ['no-server', false, false, null],
   ['online', true, false, null],
   ['online', false, false, 'general'],
   ['online', false, true, 'file-owner'],
