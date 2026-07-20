@@ -92,9 +92,10 @@ const logMessage = (loglevel: 'info' | 'error', message: string) => {
 
 const createOAuthServer = async () => {
   const port = 3010;
-  logMessage('info', `OAuth server running on port: ${port}`);
 
   if (oAuthServer) {
+    logMessage('info', `OAuth server is already running on port: ${port}`);
+
     return { url: `http://localhost:${port}`, server: oAuthServer };
   }
 
@@ -119,6 +120,7 @@ const createOAuthServer = async () => {
 
         // Clean up the server after receiving the code
         server.close();
+        oAuthServer = null;
       } else {
         res.writeHead(400, { 'Content-Type': 'text/plain' });
         res.end('No token received.');
@@ -126,6 +128,7 @@ const createOAuthServer = async () => {
     });
 
     server.listen(port, '127.0.0.1', () => {
+      logMessage('info', `OAuth server started on port: ${port}`);
       resolve({ url: `http://localhost:${port}`, server });
     });
   });
