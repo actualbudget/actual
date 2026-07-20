@@ -100,7 +100,7 @@ const createOAuthServer = async () => {
   }
 
   return new Promise<{ url: string; server: Server }>(resolve => {
-    const server = createServer((req, res) => {
+    const server = createServer(async (req, res) => {
       const query = new URL(req.url || '', `http://localhost:${port}`)
         .searchParams;
 
@@ -118,8 +118,13 @@ const createOAuthServer = async () => {
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         res.end('OpenID login successful! You can close this tab.');
 
-        // Clean up the server after receiving the code
-        server.close();
+        // Clean up the server after receiving the code. Wait for the listener
+        // to fully release port 3010 before clearing the reference, otherwise a
+        // subsequent start-oauth-server request could try to bind the port
+        // while this listener is still shutting down.
+        await new Promise<void>(closeResolve => {
+          server.close(() => closeResolve());
+        });
         oAuthServer = null;
       } else {
         res.writeHead(400, { 'Content-Type': 'text/plain' });
