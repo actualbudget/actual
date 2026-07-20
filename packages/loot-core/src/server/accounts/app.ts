@@ -894,13 +894,26 @@ async function simpleFinStatus() {
     throw new Error('Failed to get server config.');
   }
 
-  return post(
-    serverConfig.SIMPLEFIN_SERVER + '/status',
-    {},
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-  );
+  try {
+    return await post(
+      serverConfig.SIMPLEFIN_SERVER + '/status',
+      {},
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+  } catch {
+    // SimpleFIN's API is fronted by Cloudflare and may return a non-JSON
+    // HTML page (typically 403/429) when the sync server's IP is rate
+    // limited. The base `post` helper treats any non-JSON, non-200
+    // response as an exception, so a Cloudflare block surfaces here as a
+    // thrown PostError. Swallow it and return a structured response so
+    // the client can distinguish "SimpleFIN is unreachable right now"
+    // from "the user is not configured" — otherwise the UI falls back to
+    // the "Set Up SimpleFIN" modal even though the user already has
+    // credentials in place. See issue #7785.
+    return { error: 'rate-limited' };
+  }
 }
 
 async function pluggyAiStatus() {

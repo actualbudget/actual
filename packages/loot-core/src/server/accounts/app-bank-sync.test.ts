@@ -3,6 +3,7 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import { isMutating, runHandler, runMutator } from '#server/mutators';
+import * as postModule from '#server/post';
 
 import { app } from './app';
 import * as bankSync from './sync';
@@ -15,6 +16,7 @@ vi.mock('./sync', async () => ({
 
 const simpleFinBatchSyncHandler = app.handlers['simplefin-batch-sync'];
 const accountsBankSyncHandler = app.handlers['accounts-bank-sync'];
+const simpleFinStatusHandler = app.handlers['simplefin-status'];
 
 function insertBank(bank: { id: string; bank_id: string; name: string }) {
   db.runQuery(
@@ -310,5 +312,57 @@ describe('bank sync handlers must not nest mutators', () => {
     clearTimeout(timer);
 
     expect(result.errors).toEqual([]);
+  });
+});
+
+describe('simpleFinStatus', () => {
+  let postSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    vi.mocked(asyncStorage.getItem).mockImplementation(async key =>
+      key === 'user-token' ? 'token-1' : undefined,
+    );
+    postSpy = vi
+      .spyOn(postModule, 'post')
+      // The handleRequest mock throws for unknown URLs by default, which
+      // is fine — we override per-test below.
+      .mockResolvedValue({} as never);
+  });
+
+  afterEach(() => {
+    postSpy.mockRestore();
+  });
+
+  it('returns a structured rate-limited error when the post call throws (Cloudflare block)', async () => {
+    // Simulate SimpleFIN's API being fronted by Cloudflare, which returns
+    // a non-JSON HTML body with a 4xx/5xx status. The base `post` helper
+    // throws PostError in that case, which previously propagated up and
+    // caused the client to think the user was not configured. See #7785.
+    postSpy.mockRejectedValue(
+      new Error(
+        '<!DOCTYPE html><html><head><title>403 Forbidden</title></head><body>Cloudflare block</body></html>',
+      ),
+    );
+
+    const result = await simpleFinStatusHandler();
+
+    expect(result).toEqual({ error: 'rate-limited' });
+  });
+
+  it('returns the post response on success', async () => {
+    postSpy.mockResolvedValue({ configured: true } as never);
+
+    const result = await simpleFinStatusHandler();
+
+    expect(result).toEqual({ configured: true });
+  });
+
+  it('returns unauthorized when there is no user token', async () => {
+    vi.mocked(asyncStorage.getItem).mockResolvedValue(undefined);
+
+    const result = await simpleFinStatusHandler();
+
+    expect(result).toEqual({ error: 'unauthorized' });
+    expect(postSpy).not.toHaveBeenCalled();
   });
 });
