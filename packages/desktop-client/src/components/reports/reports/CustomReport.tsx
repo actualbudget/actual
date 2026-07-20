@@ -333,8 +333,8 @@ function CustomReportInner({
 
   const onSetAllIntervals = useEffectEvent(
     async (
-      earliestTransaction: TransactionEntity,
-      latestTransaction: TransactionEntity,
+      earliestTransactionDate: TransactionEntity['date'],
+      latestTransactionDate: TransactionEntity['date'],
       interval: CustomReportEntity['interval'],
     ) => {
       const fromDate =
@@ -346,33 +346,21 @@ function CustomReportInner({
       const earliestInterval =
         interval === 'Weekly'
           ? monthUtils.weekFromDate(
-              d.parseISO(
-                fromDateRepr(
-                  earliestTransaction.date || monthUtils.currentDay(),
-                ),
-              ),
+              d.parseISO(fromDateRepr(earliestTransactionDate)),
               firstDayOfWeekIdx,
             )
           : monthUtils[fromDate](
-              d.parseISO(
-                fromDateRepr(
-                  earliestTransaction.date || monthUtils.currentDay(),
-                ),
-              ),
+              d.parseISO(fromDateRepr(earliestTransactionDate)),
             );
 
       const latestInterval =
         interval === 'Weekly'
           ? monthUtils.weekFromDate(
-              d.parseISO(
-                fromDateRepr(latestTransaction.date || monthUtils.currentDay()),
-              ),
+              d.parseISO(fromDateRepr(latestTransactionDate)),
               firstDayOfWeekIdx,
             )
           : monthUtils[fromDate](
-              d.parseISO(
-                fromDateRepr(latestTransaction.date || monthUtils.currentDay()),
-              ),
+              d.parseISO(fromDateRepr(latestTransactionDate)),
             );
 
       const currentInterval =
@@ -415,8 +403,8 @@ function CustomReportInner({
 
   const onSetStartAndEndDates = useEffectEvent(
     (
-      earliestTransaction: TransactionEntity,
-      latestTransaction: TransactionEntity,
+      earliestTransactionDate: TransactionEntity['date'],
+      latestTransactionDate: TransactionEntity['date'],
       dateRange: CustomReportEntity['dateRange'],
       isDateStatic: CustomReportEntity['isDateStatic'],
       includeCurrentInterval: CustomReportEntity['includeCurrentInterval'],
@@ -424,10 +412,8 @@ function CustomReportInner({
       if (!isDateStatic) {
         const [dateStart, dateEnd] = getLiveRange(
           dateRange,
-          earliestTransaction
-            ? earliestTransaction.date
-            : monthUtils.currentDay(),
-          latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
+          earliestTransactionDate,
+          latestTransactionDate,
           includeCurrentInterval,
           firstDayOfWeekIdx,
         );
@@ -442,21 +428,22 @@ function CustomReportInner({
       onApplyFilterConditions(report.conditions, report.conditionsOp);
 
       const earliestTransaction = await send('get-earliest-transaction');
-      setEarliestTransactionDate(
-        earliestTransaction
-          ? earliestTransaction.date
-          : monthUtils.currentDay(),
-      );
-
       const latestTransaction = await send('get-latest-transaction');
-      setLatestTransactionDate(
-        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
-      );
+      const currentDay = monthUtils.currentDay();
+      const earliestTransactionDate = earliestTransaction?.date ?? currentDay;
+      const latestTransactionDate = latestTransaction?.date ?? currentDay;
 
-      void onSetAllIntervals(earliestTransaction, latestTransaction, interval);
+      setEarliestTransactionDate(earliestTransactionDate);
+      setLatestTransactionDate(latestTransactionDate);
+
+      void onSetAllIntervals(
+        earliestTransactionDate,
+        latestTransactionDate,
+        interval,
+      );
       onSetStartAndEndDates(
-        earliestTransaction,
-        latestTransaction,
+        earliestTransactionDate,
+        latestTransactionDate,
         dateRange,
         isDateStatic,
         includeCurrentInterval,
