@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -13,7 +13,7 @@ import { useBuiltInBankSyncProviders } from '#components/banksync/useBuiltInBank
 import { Link } from '#components/common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { useNavigate } from '#hooks/useNavigate';
-import { pushModal } from '#modals/modalsSlice';
+import { pushModal, replaceModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -39,10 +39,23 @@ export function CreateAccountModal({
     dispatch(pushModal({ modal: { name: 'add-local-account' } }));
   };
 
+  const isUsingServer = syncServerStatus !== 'no-server';
+  const shouldSkipToLocalAccount = !isUsingServer && upgradingAccountId == null;
+
+  useLayoutEffect(() => {
+    if (shouldSkipToLocalAccount) {
+      dispatch(replaceModal({ modal: { name: 'add-local-account' } }));
+    }
+  }, [dispatch, shouldSkipToLocalAccount]);
+
   let title = t('Add account');
 
   if (upgradingAccountId != null) {
     title = t('Link account');
+  }
+
+  if (shouldSkipToLocalAccount) {
+    return null;
   }
 
   return (

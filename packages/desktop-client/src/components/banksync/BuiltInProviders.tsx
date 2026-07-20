@@ -2,7 +2,11 @@ import { Dialog, DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
-import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
+import {
+  SvgCheveronDown,
+  SvgCheveronRight,
+  SvgDotsHorizontalTriple,
+} from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
@@ -20,6 +24,8 @@ type BuiltInProvidersProps = {
   syncServerStatus: 'offline' | 'no-server' | 'online';
   showPermissionWarning: boolean;
   providersNeedingConfiguration: BuiltInBankSyncProviderState[];
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 };
 
 export function BuiltInProviders({
@@ -27,15 +33,48 @@ export function BuiltInProviders({
   syncServerStatus,
   showPermissionWarning,
   providersNeedingConfiguration,
+  isCollapsed = false,
+  onToggleCollapse,
 }: BuiltInProvidersProps) {
   const { t } = useTranslation();
+
+  const Cheveron = isCollapsed ? SvgCheveronRight : SvgCheveronDown;
+  const title = (
+    <Text style={{ fontSize: 20, fontWeight: 600 }}>
+      <Trans>Providers</Trans>
+    </Text>
+  );
+
+  if (onToggleCollapse && isCollapsed) {
+    return (
+      <Button
+        variant="bare"
+        aria-expanded={false}
+        onPress={onToggleCollapse}
+        style={{ alignSelf: 'flex-start' }}
+      >
+        {title}
+        <Cheveron width={20} height={20} style={{ marginLeft: 5 }} />
+      </Button>
+    );
+  }
 
   return (
     <View style={{ gap: 12 }}>
       <View style={{ gap: 4 }}>
-        <Text style={{ fontSize: 20, fontWeight: 600 }}>
-          <Trans>Providers</Trans>
-        </Text>
+        {onToggleCollapse ? (
+          <Button
+            variant="bare"
+            aria-expanded
+            onPress={onToggleCollapse}
+            style={{ alignSelf: 'flex-start' }}
+          >
+            {title}
+            <Cheveron width={20} height={20} style={{ marginLeft: 5 }} />
+          </Button>
+        ) : (
+          title
+        )}
         <Paragraph style={{ fontSize: 15, color: theme.pageTextSubdued }}>
           <Trans>
             Set up a bank sync provider, then link new accounts or connect an
