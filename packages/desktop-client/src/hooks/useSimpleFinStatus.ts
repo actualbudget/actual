@@ -21,23 +21,26 @@ export function useSimpleFinStatus() {
     async function fetch() {
       setIsLoading(true);
 
-      const results = (await send('simplefin-status')) as
-        | SimpleFinStatusResult
-        | undefined;
+      try {
+        const results = (await send('simplefin-status')) as
+          | SimpleFinStatusResult
+          | undefined;
 
-      if (results?.error === 'rate-limited') {
-        // SimpleFIN's API is blocked upstream (typically a Cloudflare
-        // 403/429). The user is still configured — we just can't verify
-        // right now — so preserve the existing "configured" view and
-        // surface a flag for the UI to show a notification. See
-        // issue #7785.
-        setIsRateLimited(true);
-        setConfiguredSimpleFin(prev => (prev === null ? true : prev));
-      } else {
-        setIsRateLimited(false);
-        setConfiguredSimpleFin(results?.configured || false);
+        if (results?.error === 'rate-limited') {
+          // SimpleFIN's API is blocked upstream (typically a Cloudflare
+          // 403/429). The user is still configured — we just can't verify
+          // right now — so preserve the existing "configured" view and
+          // surface a flag for the UI to show a notification. See
+          // issue #7785.
+          setIsRateLimited(true);
+          setConfiguredSimpleFin(prev => (prev === null ? true : prev));
+        } else {
+          setIsRateLimited(false);
+          setConfiguredSimpleFin(results?.configured || false);
+        }
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
 
     if (status === 'online') {

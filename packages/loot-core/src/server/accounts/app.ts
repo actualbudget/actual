@@ -902,7 +902,7 @@ async function simpleFinStatus() {
         'X-ACTUAL-TOKEN': userToken,
       },
     );
-  } catch {
+  } catch (error) {
     // SimpleFIN's API is fronted by Cloudflare and may return a non-JSON
     // HTML page (typically 403/429) when the sync server's IP is rate
     // limited. The base `post` helper treats any non-JSON, non-200
@@ -912,6 +912,7 @@ async function simpleFinStatus() {
     // from "the user is not configured" — otherwise the UI falls back to
     // the "Set Up SimpleFIN" modal even though the user already has
     // credentials in place. See issue #7785.
+    console.error('Failed to get SimpleFIN status:', error);
     return { error: 'rate-limited' };
   }
 }
