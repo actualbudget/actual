@@ -349,7 +349,7 @@ export const apiTokenService: ApiTokenService = {
   /**
    * Get the budget IDs that a token has access to
    * @param tokenId - The token ID
-   * @returns Array of budget/file IDs (empty means all user's budgets)
+   * @returns Array of budget/file IDs (empty means no budget access)
    */
   getTokenBudgets(tokenId: string): string[] {
     const accountDb = getAccountDb();

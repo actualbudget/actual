@@ -4,6 +4,7 @@ import express from 'express';
 import { apiTokenService } from './services/api-token-service';
 import { countUserAccess } from './services/user-service';
 import {
+  rejectApiTokenMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
@@ -15,6 +16,8 @@ export { app as handlers };
 app.use(express.json());
 app.use(requestLoggerMiddleware);
 app.use(validateSessionMiddleware);
+// API tokens must never manage API tokens; enforced for every route below.
+app.use(rejectApiTokenMiddleware);
 
 type CreateTokenBody = {
   name?: string;
@@ -30,18 +33,7 @@ type UpdateTokenBody = {
 app.post(
   '/',
   async (req: Request<object, object, CreateTokenBody>, res: Response) => {
-    const locals = res.locals;
-
-    if (locals.auth_method === 'api_token') {
-      res.status(403).send({
-        status: 'error',
-        reason: 'forbidden-auth-method',
-        details: 'API tokens cannot manage other API tokens',
-      });
-      return;
-    }
-
-    const userId = locals.user_id;
+    const userId = res.locals.user_id;
     const { name, budgetIds = [] } = req.body || {};
     // Normalize expiresAt: null/undefined -> TOKEN_EXPIRATION_NEVER (-1)
     const expiresAt = req.body?.expiresAt ?? TOKEN_EXPIRATION_NEVER;
@@ -152,18 +144,7 @@ app.post(
 
 // List all API tokens for the current user
 app.get('/', async (req: Request, res: Response) => {
-  const locals = res.locals;
-
-  if (locals.auth_method === 'api_token') {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden-auth-method',
-      details: 'API tokens cannot manage other API tokens',
-    });
-    return;
-  }
-
-  const userId = locals.user_id;
+  const userId = res.locals.user_id;
 
   try {
     const tokens = apiTokenService.listTokens(userId);
@@ -184,18 +165,7 @@ app.get('/', async (req: Request, res: Response) => {
 
 // Revoke (delete) an API token
 app.delete('/:id', async (req: Request<{ id: string }>, res: Response) => {
-  const locals = res.locals;
-
-  if (locals.auth_method === 'api_token') {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden-auth-method',
-      details: 'API tokens cannot manage other API tokens',
-    });
-    return;
-  }
-
-  const userId = locals.user_id;
+  const userId = res.locals.user_id;
   const tokenId = req.params.id;
 
   if (!tokenId) {
@@ -239,18 +209,7 @@ app.patch(
     req: Request<{ id: string }, object, UpdateTokenBody>,
     res: Response,
   ) => {
-    const locals = res.locals;
-
-    if (locals.auth_method === 'api_token') {
-      res.status(403).send({
-        status: 'error',
-        reason: 'forbidden-auth-method',
-        details: 'API tokens cannot manage other API tokens',
-      });
-      return;
-    }
-
-    const userId = locals.user_id;
+    const userId = res.locals.user_id;
     const tokenId = req.params.id;
     const { enabled } = req.body || {};
 
