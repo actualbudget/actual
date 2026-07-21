@@ -154,7 +154,7 @@ __metadata:
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
     "@bufbuild/protobuf": "npm:^2.12.1"
-    "@bufbuild/protoc-gen-es": "npm:^2.12.0"
+    "@bufbuild/protoc-gen-es": "npm:^2.12.1"
     "@typescript/native-preview": "npm:beta"
     murmurhash: "npm:^2.0.1"
     rollup-plugin-visualizer: "npm:^7.0.1"
@@ -2031,45 +2031,38 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bufbuild/protobuf@npm:2.12.0":
-  version: 2.12.0
-  resolution: "@bufbuild/protobuf@npm:2.12.0"
-  checksum: 10/a21ee54b053672827f52e3525477972f7ea75ce82150d6599ee3544f00b442a49093608b7557581bc8846d066193220bece20cf4712bb44d8aba5067a8eeb035
-  languageName: node
-  linkType: hard
-
-"@bufbuild/protobuf@npm:^2.12.1":
+"@bufbuild/protobuf@npm:2.12.1, @bufbuild/protobuf@npm:^2.12.1":
   version: 2.12.1
   resolution: "@bufbuild/protobuf@npm:2.12.1"
   checksum: 10/9a47dd781f58bfc464aebe17d6b02377eafef2a9cd40a2bdb07de1be07c284618cebe1df4e31061f91fdaf166ba9bb2d76da0082fd125a1d3c26cf35f0329928
   languageName: node
   linkType: hard
 
-"@bufbuild/protoc-gen-es@npm:^2.12.0":
-  version: 2.12.0
-  resolution: "@bufbuild/protoc-gen-es@npm:2.12.0"
+"@bufbuild/protoc-gen-es@npm:^2.12.1":
+  version: 2.12.1
+  resolution: "@bufbuild/protoc-gen-es@npm:2.12.1"
   dependencies:
-    "@bufbuild/protobuf": "npm:2.12.0"
-    "@bufbuild/protoplugin": "npm:2.12.0"
+    "@bufbuild/protobuf": "npm:2.12.1"
+    "@bufbuild/protoplugin": "npm:2.12.1"
   peerDependencies:
-    "@bufbuild/protobuf": 2.12.0
+    "@bufbuild/protobuf": 2.12.1
   peerDependenciesMeta:
     "@bufbuild/protobuf":
       optional: true
   bin:
     protoc-gen-es: bin/protoc-gen-es
-  checksum: 10/870f106aaa4a5f8b1e4e7894cbd417872b9af49a8b0cca2a519304600dda94393c42dec0339d2191f86a5631cea2d5ada2dffbfd8b9116e80cfa707b82e57361
+  checksum: 10/3d036c771fd45092479cdcc2aae5d6fdf5bc7d9be79a67fe113bc63298b682cd8467521976cd12e0c8d83d51e46004b13a3c4c0f10a76a95ef1a41b71699b988
   languageName: node
   linkType: hard
 
-"@bufbuild/protoplugin@npm:2.12.0":
-  version: 2.12.0
-  resolution: "@bufbuild/protoplugin@npm:2.12.0"
+"@bufbuild/protoplugin@npm:2.12.1":
+  version: 2.12.1
+  resolution: "@bufbuild/protoplugin@npm:2.12.1"
   dependencies:
-    "@bufbuild/protobuf": "npm:2.12.0"
+    "@bufbuild/protobuf": "npm:2.12.1"
     "@typescript/vfs": "npm:^1.6.2"
     typescript: "npm:5.4.5"
-  checksum: 10/ad59fe9f4d805bab3d3c260315020259d9fc8a27bbbfbd74d16502e2e60cf15eaa8527435eb45da1ecc0d0b223d5f5a0f9ebd72dd3f0fec605f39d9a92dda752
+  checksum: 10/5790c9dfe78ac4c298d464b91a56154ddc9180832c81c10cc50161154dee048b613fb514452e716a5882446df9da5bf0dfb1141105e66bb044f022c8eace5ae8
   languageName: node
   linkType: hard
 
