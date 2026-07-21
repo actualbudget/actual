@@ -270,7 +270,7 @@ __metadata:
     cross-env: "npm:^10.1.0"
     csv-stringify: "npm:^6.8.1"
     date-fns: "npm:^4.4.0"
-    downshift: "npm:9.3.6"
+    downshift: "npm:9.4.0"
     es-toolkit: "npm:^1.49.0"
     fzf: "npm:^0.5.2"
     html-to-image: "npm:^1.11.13"
@@ -14748,9 +14748,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"downshift@npm:9.3.6":
-  version: 9.3.6
-  resolution: "downshift@npm:9.3.6"
+"downshift@npm:9.4.0":
+  version: 9.4.0
+  resolution: "downshift@npm:9.4.0"
   dependencies:
     "@babel/runtime": "npm:^7.28.6"
     compute-scroll-into-view: "npm:^3.1.1"
@@ -14759,7 +14759,7 @@ __metadata:
     tslib: "npm:^2.8.1"
   peerDependencies:
     react: ">=16.12.0"
-  checksum: 10/1b87a9bafe98d297a9223712c15d39fd2d3a6c7b31ffba54479fed5497cc8e3cd51d48cc508f5711ad3872ab476b15a209b84b29dca2a3ca9637bb4064644a9f
+  checksum: 10/5beb71bd0babf7c38b2bc3066f0e49851580d96062483e4e5663f14c6a630ca3768e1c25524e7b1c8ac2787830f82688ffbb61901062fdcb06591681806e691d
   languageName: node
   linkType: hard
 

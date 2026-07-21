@@ -164,7 +164,7 @@
     "cross-env": "^10.1.0",
     "csv-stringify": "^6.8.1",
     "date-fns": "^4.4.0",
-    "downshift": "9.3.6",
+    "downshift": "9.4.0",
     "es-toolkit": "^1.49.0",
     "fzf": "^0.5.2",
     "html-to-image": "^1.11.13",
