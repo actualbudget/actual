@@ -202,7 +202,7 @@
     "absurd-sql": "0.0.54",
     "better-sqlite3": "^12.11.1",
     "csv-parse": "^6.2.1",
-    "csv-stringify": "^6.7.0",
+    "csv-stringify": "^6.8.1",
     "date-fns": "^4.4.0",
     "es-toolkit": "^1.47.1",
     "fflate": "^0.8.3",
