@@ -203,6 +203,18 @@ function getField(field?: string) {
   }
 }
 
+export function getSelectableTransactions(
+  transactions: TransactionEntity[],
+  showReconciled: boolean,
+  isSplitExpanded: (id: string) => boolean,
+) {
+  return transactions.filter(
+    transaction =>
+      (showReconciled || !transaction.reconciled) &&
+      (!transaction.parent_id || isSplitExpanded(transaction.parent_id)),
+  );
+}
+
 type AccountInternalProps = {
   accountId?:
     | AccountEntity['id']
@@ -226,6 +238,7 @@ type AccountInternalProps = {
   newTransactions: Array<TransactionEntity['id']>;
   matchedTransactions: Array<TransactionEntity['id']>;
   splitsExpandedDispatch: ReturnType<typeof useSplitsExpanded>['dispatch'];
+  isSplitExpanded: ReturnType<typeof useSplitsExpanded>['isExpanded'];
   expandSplits?: boolean | undefined;
   savedFilters: TransactionFilterEntity[];
   onBatchEdit: ReturnType<typeof useTransactionBatchActions>['onBatchEdit'];
@@ -1746,16 +1759,17 @@ class AccountInternal extends PureComponent<
         {(allTransactions, allBalances) => (
           <SelectedProviderWithItems
             name="transactions"
-            // When reconciled transactions are hidden they are still
-            // loaded (e.g. to calculate running balances), but they must
-            // not be selectable. Mirror the filtering the transaction
-            // table applies when rendering so that range selection
-            // (shift+click) only covers visible transactions.
-            items={
-              showReconciled
-                ? allTransactions
-                : allTransactions.filter(t => !t.reconciled)
-            }
+            // Hidden transactions are still loaded (reconciled ones to
+            // calculate running balances, split children so they can be
+            // revealed without a refetch), but they must not be selectable.
+            // Mirror the filtering the transaction table applies when
+            // rendering so that range selection (shift+click) only covers
+            // visible transactions.
+            items={getSelectableTransactions(
+              allTransactions,
+              showReconciled,
+              this.props.isSplitExpanded,
+            )}
             fetchAllIds={this.fetchAllIds}
             registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
             selectAllFilter={selectAllFilter}
@@ -1916,6 +1930,7 @@ type AccountHackProps = Omit<
   AccountInternalProps,
   | 'dispatch'
   | 'splitsExpandedDispatch'
+  | 'isSplitExpanded'
   | 'onBatchEdit'
   | 'onBatchDuplicate'
   | 'onBatchLinkSchedule'
@@ -1925,7 +1940,8 @@ type AccountHackProps = Omit<
 >;
 
 function AccountHack(props: AccountHackProps) {
-  const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
+  const { dispatch: splitsExpandedDispatch, isExpanded: isSplitExpanded } =
+    useSplitsExpanded();
   const dispatch = useDispatch();
   const {
     onBatchEdit,
@@ -1940,6 +1956,7 @@ function AccountHack(props: AccountHackProps) {
     <AccountInternal
       dispatch={dispatch}
       splitsExpandedDispatch={splitsExpandedDispatch}
+      isSplitExpanded={isSplitExpanded}
       onBatchEdit={onBatchEdit}
       onBatchDuplicate={onBatchDuplicate}
       onBatchLinkSchedule={onBatchLinkSchedule}

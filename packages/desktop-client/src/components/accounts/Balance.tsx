@@ -66,22 +66,28 @@ export function SelectedBalance({
 }: SelectedBalanceProps) {
   const { t } = useTranslation();
 
-  const name = `selected-balance-${[...selectedItems].join('-')}`;
+  const selectedIds = [...selectedItems];
+  const name = `selected-balance-${selectedIds.join('-')}`;
 
   const rows = useSheetValue<'balance', `selected-transactions-${string}`>({
     name: name as `selected-transactions-${string}`,
     query: q('transactions')
       .filter({
-        id: { $oneof: [...selectedItems] },
-        parent_id: { $oneof: [...selectedItems] },
+        id: { $oneof: selectedIds },
+        parent_id: { $oneof: selectedIds },
       })
       .select('id'),
   });
   const ids = new Set((rows || []).map((r: { id: string }) => r.id));
 
-  const finalIds = [...selectedItems].filter(id => !ids.has(id));
+  const finalIds = selectedIds.filter(id => !ids.has(id));
+  // The spreadsheet caches cell values by name alone, so this sum must be
+  // keyed on the ids it actually covers. While the query above is still
+  // resolving, `finalIds` also holds the selected split children, and summing
+  // those with `splits: 'all'` counts their parent twice. Keying on
+  // `selectedItems` would cache that intermediate under the final name.
   let balance = useSheetValue<'balance', `selected-balance-${string}`>({
-    name: (name + '-sum') as `selected-balance-${string}`,
+    name: `selected-balance-${finalIds.join('-')}-sum`,
     query: q('transactions')
       .filter({ id: { $oneof: finalIds } })
       .options({ splits: 'all' })
