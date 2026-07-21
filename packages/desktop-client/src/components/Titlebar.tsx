@@ -37,6 +37,7 @@ import * as bindings from '#spreadsheet/bindings';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
+import { BankSyncStatus } from './BankSyncStatus';
 import { MonthCountSelector } from './budget/MonthCountSelector';
 import { Link } from './common/Link';
 import { HelpMenu } from './HelpMenu';
@@ -373,6 +374,7 @@ export function Titlebar({ style }: TitlebarProps) {
       </Routes>
       <View style={{ flex: 1 }} />
       <SpaceBetween gap={10}>
+        <BankSyncStatus />
         <UncategorizedButton />
         {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
         <PrivacyButton />
