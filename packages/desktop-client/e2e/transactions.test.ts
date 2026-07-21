@@ -244,6 +244,28 @@ test.describe('Transactions', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('keeps focus on the parent amount when splitting with the keyboard', async () => {
+    await accountPage.addNewTransactionButton.click();
+
+    const parentTransaction = accountPage.newTransactionRow.first();
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await expect(
+      parentTransaction.getByTestId('category').getByRole('textbox'),
+    ).toBeFocused();
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('55');
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+
+    await expect(accountPage.newTransactionRow).toHaveCount(3);
+    await expect(
+      parentTransaction.getByTestId('debit').getByRole('textbox'),
+    ).toBeFocused();
+  });
+
   test('creates a transfer test transaction', async () => {
     await accountPage.enterSingleTransaction({
       payee: 'Bank of America',
