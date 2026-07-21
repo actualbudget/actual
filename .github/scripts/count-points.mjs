@@ -303,7 +303,8 @@ async function countContributorPoints() {
             const releaseNoteFile =
               modifiedFiles.find(
                 file =>
-                  file.filename === `upcoming-release-notes/${pr.number}.md`,
+                  file.filename === `upcoming-release-notes/${pr.number}.md` &&
+                  file.status !== 'removed',
               ) ??
               modifiedFiles.find(
                 file => file.status === 'added' && isReleaseNoteFile(file),
