@@ -67,10 +67,9 @@ export function SelectedBalance({
   const { t } = useTranslation();
 
   const selectedIds = [...selectedItems];
-  const name = `selected-balance-${selectedIds.join('-')}`;
 
   const rows = useSheetValue<'balance', `selected-transactions-${string}`>({
-    name: name as `selected-transactions-${string}`,
+    name: `selected-transactions-${selectedIds.join('-')}`,
     query: q('transactions')
       .filter({
         id: { $oneof: selectedIds },
