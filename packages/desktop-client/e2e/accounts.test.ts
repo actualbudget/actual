@@ -42,6 +42,22 @@ test.describe('Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('account register widens amount columns for large balances', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Large Balance Account',
+      offBudget: false,
+      balance: 12345678.9,
+    });
+
+    const transaction = accountPage.getNthTransaction(0);
+    await expect(transaction.credit).toHaveText('12,345,678.90');
+
+    const creditBox = await transaction.credit.boundingBox();
+    expect(creditBox?.width).toBeGreaterThan(100); // default width is 100px
+
+    await expect(page).toMatchThemeScreenshots();
+  });
+
   test('closes an account', async () => {
     accountPage = await navigation.goToAccountPage('Roth IRA');
 
