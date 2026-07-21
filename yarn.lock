@@ -136,7 +136,7 @@ __metadata:
     date-fns: "npm:^4.4.0"
     es-toolkit: "npm:^1.49.0"
     fake-indexeddb: "npm:^6.2.5"
-    fast-check: "npm:^4.8.0"
+    fast-check: "npm:^4.9.0"
     fflate: "npm:^0.8.3"
     handlebars: "npm:^4.7.9"
     hyperformula: "npm:^3.3.0"
@@ -16114,12 +16114,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-check@npm:^4.8.0":
-  version: 4.8.0
-  resolution: "fast-check@npm:4.8.0"
+"fast-check@npm:^4.9.0":
+  version: 4.9.0
+  resolution: "fast-check@npm:4.9.0"
   dependencies:
     pure-rand: "npm:^8.0.0"
-  checksum: 10/32101d27e69f7f0a3ea486f1a6feee6b34c824ba14bf3efce2ad1741fcd412817ac3ed14f53ef57a55d6fe2e00038e399c4a9c62444446a6e7a1a4b04bc6b88d
+  checksum: 10/b549435b29f7b60bc93cb2b19c194c35804bff15aaeb723bc94c65fef5b06fb2c3652bcd98379e3257d461cb61c40d2f4b0001fcb6b515f1085ebbcc6163d1e5
   languageName: node
   linkType: hard
 
