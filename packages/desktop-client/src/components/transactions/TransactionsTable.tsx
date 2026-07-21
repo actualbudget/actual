@@ -1243,15 +1243,45 @@ const Transaction = memo(function Transaction({
       if (
         name === 'date' &&
         typeof value === 'string' &&
-        syncTransferDateRef.current &&
-        transaction.transfer_id
+        syncTransferDateRef.current
       ) {
-        void send('transactions-batch-update', {
-          updated: [{ id: transaction.transfer_id, date: value }],
-          runTransfers: false,
-        }).catch(error => {
-          console.error('Failed to sync transfer date:', error);
-        });
+        // transaction's own leg, or a split child's leg
+        const transferIds = [
+          transaction.transfer_id,
+          ...(subtransactions?.map(t => t.transfer_id) ?? []),
+        ].filter((id): id is string => Boolean(id));
+
+        if (transferIds.length > 0) {
+          void (async () => {
+            const updated: { id: string; date: string }[] = transferIds.map(
+              id => ({ id, date: value }),
+            );
+
+            // sync split parent if the other leg is a split child
+            const { data } = await aqlQuery(
+              q('transactions')
+                .filter({ id: { $oneof: transferIds } })
+                .select(['id', 'is_child', 'parent_id']),
+            );
+            updated.push(
+              ...(
+                data as Pick<
+                  TransactionEntity,
+                  'id' | 'is_child' | 'parent_id'
+                >[]
+              )
+                .filter(t => t.is_child && t.parent_id)
+                .map(t => ({ id: t.parent_id as string, date: value })),
+            );
+
+            await send('transactions-batch-update', {
+              updated,
+              runTransfers: false,
+            });
+          })().catch(error => {
+            console.error('Failed to sync transfer date:', error);
+          });
+        }
         setSyncTransferDate(false);
       }
     }
@@ -1614,7 +1644,10 @@ const Transaction = memo(function Transaction({
                 onSelect={onSave}
                 transferDateSyncChecked={syncTransferDate}
                 onTransferDateSyncChange={
-                  transaction.transfer_id ? setSyncTransferDate : undefined
+                  transaction.transfer_id ||
+                  subtransactions?.some(t => t.transfer_id)
+                    ? setSyncTransferDate
+                    : undefined
                 }
               />
             )}
