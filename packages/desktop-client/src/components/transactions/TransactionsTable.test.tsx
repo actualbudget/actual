@@ -22,7 +22,13 @@ import type {
   TagEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
@@ -36,7 +42,11 @@ import { createTestQueryClient, TestProviders } from '#mocks';
 import { payeeQueries } from '#payees';
 import { tagQueries } from '#tags/queries';
 
-import { TransactionTable } from './TransactionsTable';
+import {
+  DEFAULT_AMOUNT_COLUMN_WIDTHS,
+  TransactionTable,
+  useAmountColumnWidths,
+} from './TransactionsTable';
 
 const queryClient = createTestQueryClient();
 
@@ -1532,5 +1542,41 @@ describe('Transactions', () => {
       // Verify the tag was added to the note correctly
       expect(getTransactions()[2].notes).toBe('spending on #coffee');
     });
+  });
+});
+
+describe('useAmountColumnWidths', () => {
+  function transaction(amount: number) {
+    return generateTransaction({ account: accounts[0].id, amount })[0];
+  }
+
+  it('does not narrow below the default minimum for short-value accounts', () => {
+    const { result } = renderHook(() =>
+      useAmountColumnWidths([transaction(150), transaction(-200)], null),
+    );
+
+    expect(result.current).toEqual(DEFAULT_AMOUNT_COLUMN_WIDTHS);
+  });
+
+  it('widens the balance column for a long formatted balance value', () => {
+    // '1,234,567,890,123.45' (21 chars) comfortably clears the 103px floor
+    // (12 chars is the most a default-width column already fits).
+    const { result } = renderHook(() =>
+      useAmountColumnWidths([transaction(150)], { 'tx-1': 123456789012345 }),
+    );
+
+    expect(result.current.balance).toBeGreaterThan(
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.balance,
+    );
+  });
+
+  it('widens the amount column for a long formatted amount', () => {
+    const { result } = renderHook(() =>
+      useAmountColumnWidths([transaction(123456789012)], null),
+    );
+
+    expect(result.current.amount).toBeGreaterThan(
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.amount,
+    );
   });
 });

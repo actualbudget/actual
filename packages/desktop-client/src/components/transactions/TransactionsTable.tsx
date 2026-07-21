@@ -160,6 +160,65 @@ import type {
 } from './table/utils';
 import { useTransactionRowContextActions } from './useTransactionRowContextActions';
 
+type AmountColumnWidths = {
+  // Debit and credit share one width: same source values (transaction
+  // amount magnitude), same formatter, so they're always equal.
+  amount: number;
+  balance: number;
+};
+
+// Fallback widths, also the floor auto-fit will not shrink below.
+export const DEFAULT_AMOUNT_COLUMN_WIDTHS: AmountColumnWidths = {
+  amount: 100,
+  balance: 103,
+};
+
+// Tabular numerals (styles.tnum, applied to all three amount cells) make
+// digit glyphs a consistent width, so a per-character estimate is a
+// reasonable proxy for the pixel width a formatted amount needs — see
+// actual-transactions-table-column-width-research.md §3/§6 for why exact
+// canvas measurement isn't necessary here.
+const AMOUNT_COLUMN_CHAR_WIDTH = 7;
+const AMOUNT_COLUMN_PADDING = 16;
+
+function measureAmountColumnWidth(values: string[], minWidth: number) {
+  const maxChars = values.reduce(
+    (max, value) => Math.max(max, value.length),
+    0,
+  );
+  return Math.max(
+    minWidth,
+    maxChars * AMOUNT_COLUMN_CHAR_WIDTH + AMOUNT_COLUMN_PADDING,
+  );
+}
+
+// Widths are computed from every transaction currently loaded (not just the
+// virtualized rows on screen) so the column doesn't jump width while
+// scrolling. Values are measured with the same formatter the cells render
+// with, so the estimate tracks what is actually displayed.
+export function useAmountColumnWidths(
+  transactions: TransactionEntity[],
+  balances: Record<TransactionEntity['id'], IntegerAmount> | null,
+): AmountColumnWidths {
+  const debitCreditValues = transactions.map(t =>
+    integerToCurrency(Math.abs(t.amount ?? 0)),
+  );
+  const balanceValues = balances
+    ? Object.values(balances).map(balance => integerToCurrency(balance))
+    : [];
+
+  return {
+    amount: measureAmountColumnWidth(
+      debitCreditValues,
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.amount,
+    ),
+    balance: measureAmountColumnWidth(
+      balanceValues,
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.balance,
+    ),
+  };
+}
+
 type TransactionHeaderProps = {
   hasSelected: boolean;
   columns: TransactionTableColumnId[];
@@ -168,6 +227,7 @@ type TransactionHeaderProps = {
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
   ascDesc: 'asc' | 'desc';
   field: string;
+  amountColumnWidths?: AmountColumnWidths;
 };
 
 const TransactionHeader = memo(
@@ -179,6 +239,7 @@ const TransactionHeader = memo(
     ascDesc,
     field,
     showSelection,
+    amountColumnWidths = DEFAULT_AMOUNT_COLUMN_WIDTHS,
   }: TransactionHeaderProps) => {
     const dispatchSelected = useSelectedDispatch();
     const { t } = useTranslation();
@@ -245,21 +306,21 @@ const TransactionHeader = memo(
       },
       payment: {
         value: columnLabels.payment,
-        width: 100,
+        width: amountColumnWidths.amount,
         alignItems: 'flex-end',
         marginRight: -5,
         sortDirection: 'asc',
       },
       deposit: {
         value: columnLabels.deposit,
-        width: 100,
+        width: amountColumnWidths.amount,
         alignItems: 'flex-end',
         marginRight: -5,
         sortDirection: 'desc',
       },
       balance: {
         value: t('Balance'),
-        width: 103,
+        width: amountColumnWidths.balance,
         alignItems: 'flex-end',
         marginRight: -5,
       },
@@ -977,6 +1038,7 @@ type TransactionProps = {
   onDragChange?: OnDragChangeCallback<TransactionEntity>;
   onDrop?: OnDropCallback;
   index: number;
+  amountColumnWidths?: AmountColumnWidths;
 };
 
 const Transaction = memo(function Transaction({
@@ -1035,6 +1097,7 @@ const Transaction = memo(function Transaction({
   onDragChange,
   onDrop,
   index,
+  amountColumnWidths = DEFAULT_AMOUNT_COLUMN_WIDTHS,
 }: TransactionProps) {
   const { t } = useTranslation();
 
@@ -1905,7 +1968,7 @@ const Transaction = memo(function Transaction({
             key={columnId}
             /* Debit field for all transactions */
             type="input"
-            width={100}
+            width={amountColumnWidths.amount}
             name="debit"
             exposed={focusedField === 'debit'}
             focused={focusedField === 'debit'}
@@ -1940,7 +2003,7 @@ const Transaction = memo(function Transaction({
             key={columnId}
             /* Credit field for all transactions */
             type="input"
-            width={100}
+            width={amountColumnWidths.amount}
             name="credit"
             exposed={focusedField === 'credit'}
             focused={focusedField === 'credit'}
@@ -1986,7 +2049,7 @@ const Transaction = memo(function Transaction({
                   : theme.numberPositive,
             }}
             style={{ ...styles.tnum, ...amountStyle }}
-            width={103}
+            width={amountColumnWidths.balance}
             textAlign="right"
             privacyFilter
           />
@@ -2605,6 +2668,11 @@ function TransactionTableInner({
     [props.transactions, props.showReconciled],
   );
 
+  const amountColumnWidths = useAmountColumnWidths(
+    transactionsToRender,
+    props.balances,
+  );
+
   const renderRow: TableProps<TransactionEntity>['renderItem'] = ({
     item,
     index,
@@ -2702,6 +2770,7 @@ function TransactionTableInner({
         matched={isMatched?.(trans.id)}
         showZeroInDeposit={isChildDeposit}
         balance={balances?.[trans.id] ?? 0}
+        amountColumnWidths={amountColumnWidths}
         focusedField={editing ? tableNavigator.focusedField : undefined}
         accounts={accounts}
         categoryGroups={categoryGroups}
@@ -2776,6 +2845,7 @@ function TransactionTableInner({
           ascDesc={props.ascDesc}
           field={props.sortField}
           showSelection={props.showSelection}
+          amountColumnWidths={amountColumnWidths}
         />
 
         {props.isAdding && (
