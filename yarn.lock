@@ -279,7 +279,7 @@ __metadata:
     react-dom: "npm:19.2.7"
     react-error-boundary: "npm:^6.1.2"
     react-grid-layout: "npm:^2.2.3"
-    react-hotkeys-hook: "npm:^5.3.2"
+    react-hotkeys-hook: "npm:^5.3.3"
     react-i18next: "npm:^17.0.8"
     react-markdown: "npm:^10.1.0"
     react-redux: "npm:^9.3.0"
@@ -24579,13 +24579,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-hotkeys-hook@npm:^5.3.2":
-  version: 5.3.2
-  resolution: "react-hotkeys-hook@npm:5.3.2"
+"react-hotkeys-hook@npm:^5.3.3":
+  version: 5.3.3
+  resolution: "react-hotkeys-hook@npm:5.3.3"
   peerDependencies:
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: 10/6d5c25b90b6d5aa8b1e2611f7753bca851305437ca273325d571b4803cb8b118e85469e50102966e242b4333dc2579937505440de657cf546fa4acc4dc287bfb
+  checksum: 10/3145c62c1ed042d83e036a71d770d177fb98f1b295835fd278dc14dc663678e5ea2e18524e538354e2c5f18d0256c38ac8534251e357fdf95c055c6e13647276
   languageName: node
   linkType: hard
 
