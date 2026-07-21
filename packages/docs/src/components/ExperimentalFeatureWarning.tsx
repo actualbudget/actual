@@ -38,6 +38,13 @@ export function ExperimentalFeatureWarning({
         )}{' '}
         or post a message in the Discord.
       </p>
+      <p>
+        Due to being an experimental feature, it is not made available by default.
+        To enable it, you will need to go into <strong>More</strong> and <strong>Settings</strong>,
+        scroll at the bottom and <strong>open the advanced settings</strong>, scroll once again and
+        <strong>accept the risks to show experimental features</strong>.
+        Then you can tick the <em>checkbox<em> related to this feature.
+      </p>
       {children}
     </Admonition>
   );
