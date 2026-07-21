@@ -2087,9 +2087,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@capacitor/cli@npm:^8.0.0":
-  version: 8.4.1
-  resolution: "@capacitor/cli@npm:8.4.1"
+"@capacitor/cli@npm:^8.4.2":
+  version: 8.4.2
+  resolution: "@capacitor/cli@npm:8.4.2"
   dependencies:
     "@ionic/cli-framework-output": "npm:^2.2.8"
     "@ionic/utils-subprocess": "npm:^3.0.1"
@@ -2111,7 +2111,7 @@ __metadata:
   bin:
     cap: bin/capacitor
     capacitor: bin/capacitor
-  checksum: 10/cec8429bbe86d8981c7ee39b397f7f67afb0843d18d313a2aa855d3ef16ab43e391b5ac7541af49226511f6c48e4016697861bfcdad73fdf81debba711e310cf
+  checksum: 10/f583142b64b700c913956f55ec7dc6aa22d9d661e2ea458b048ca2f0ae17bf210a318e9060a6eb709108a2ae8e38497f33e7bfb2efe0702e941eaa88a1cbaf36
   languageName: node
   linkType: hard
 
@@ -21282,7 +21282,7 @@ __metadata:
   resolution: "mobile-client@workspace:packages/mobile-client"
   dependencies:
     "@capacitor/android": "npm:^8.4.2"
-    "@capacitor/cli": "npm:^8.0.0"
+    "@capacitor/cli": "npm:^8.4.2"
     "@capacitor/core": "npm:^8.4.2"
     "@capacitor/ios": "npm:^8.4.2"
     "@capacitor/splash-screen": "npm:^8.0.2"
