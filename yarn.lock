@@ -9355,7 +9355,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/estree@npm:1.0.9":
+"@types/estree@npm:1.0.9, @types/estree@npm:^1.0.9":
   version: 1.0.9
   resolution: "@types/estree@npm:1.0.9"
   checksum: 10/16aabfa703b5bdac83f719b07ce92a11b2d3c9b8628eacc92889d8af46cab2d78fc45c7b5378de383d0500585cea5c2f79125eeddfe5fbc6bd6a27eb0c8ccee5
@@ -15556,7 +15556,7 @@ __metadata:
   resolution: "eslint-plugin-actual@workspace:packages/eslint-plugin-actual"
   dependencies:
     "@oxlint/plugins": "npm:^1.74.0"
-    "@types/estree": "npm:^1.0.8"
+    "@types/estree": "npm:^1.0.9"
     eslint-vitest-rule-tester: "npm:^3.1.0"
     vitest: "npm:^4.1.10"
   languageName: unknown

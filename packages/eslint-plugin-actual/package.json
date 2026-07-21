@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@oxlint/plugins": "^1.74.0",
-    "@types/estree": "^1.0.8",
+    "@types/estree": "^1.0.9",
     "eslint-vitest-rule-tester": "^3.1.0",
     "vitest": "^4.1.10"
   }
