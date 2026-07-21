@@ -218,7 +218,7 @@
     "@actual-app/vite-plugin-peggy": "workspace:*",
     "@types/better-sqlite3": "^7.6.13",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
-    "@types/node": "^22.19.21",
+    "@types/node": "^22.20.1",
     "@typescript/native-preview": "beta",
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
