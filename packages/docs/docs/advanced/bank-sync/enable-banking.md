@@ -6,7 +6,9 @@
 All functionality described here may not be available in the latest stable release. See [Experimental Features](../../experimental/index.md) for instructions to enable experimental features. Use the `nightly` images for the latest implementation.
 :::
 
-To set up Enable Banking, start by creating and signing in to your account: https://enablebanking.com/sign-in/
+Due to being an experimental feature, it is not made available by default. To enable it, you will need to go into **More** and **Settings**, scroll at the bottom and **open the advanced settings**, scroll once again and **accept the risks to show experimental features**. Then you can tick the *Enable Banking sync (EU banks)* box. With this, you should be able to see the EnableBanking provider appear in your Bank Sync page.
+
+You can then go to https://enablebanking.com/sign-in/ and start by creating and signing in to your account.
 
 Create a new application: https://enablebanking.com/cp/applications. Select **Production** and make sure the redirect URL uses `https` and your domain.
 
