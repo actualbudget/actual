@@ -126,5 +126,5 @@
     "node": ">=22.18.0",
     "yarn": "^4.9.1"
   },
-  "packageManager": "yarn@4.13.0"
+  "packageManager": "yarn@4.17.1"
 }
