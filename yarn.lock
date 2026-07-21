@@ -2142,12 +2142,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@capgo/capacitor-updater@npm:^8.50.1":
-  version: 8.50.1
-  resolution: "@capgo/capacitor-updater@npm:8.50.1"
+"@capgo/capacitor-updater@npm:^8.51.2":
+  version: 8.51.2
+  resolution: "@capgo/capacitor-updater@npm:8.51.2"
   peerDependencies:
     "@capacitor/core": ^8.0.0
-  checksum: 10/ca64835f885bb4e802871d781389dbf90b7a7a78aec070ddd70523f85230bd64af7c135dbd5cea2b45f2db1d14dab7b5241a3fc3af2cc34cd2b79b3b16b72e0a
+  checksum: 10/06c0bdf26051b3f6e9cb2c719b353f461b1b4632efd49529891a07686fa0c6c265c4cf2bc457fbf31d57027aaa84b4fe7f6ccaff182f3f5bd43c0a659b2f66cf
   languageName: node
   linkType: hard
 
@@ -21286,7 +21286,7 @@ __metadata:
     "@capacitor/core": "npm:^8.4.2"
     "@capacitor/ios": "npm:^8.4.2"
     "@capacitor/splash-screen": "npm:^8.0.2"
-    "@capgo/capacitor-updater": "npm:^8.50.1"
+    "@capgo/capacitor-updater": "npm:^8.51.2"
     "@capgo/cli": "npm:^8.22.0"
   languageName: unknown
   linkType: soft
