@@ -130,7 +130,7 @@ __metadata:
     hyperformula: "npm:^3.3.0"
     jest-diff: "npm:^30.4.1"
     jsverify: "npm:^0.8.4"
-    lru-cache: "npm:^11.5.1"
+    lru-cache: "npm:^11.5.2"
     mitt: "npm:^3.0.1"
     mockdate: "npm:^3.0.5"
     npm-run-all: "npm:^4.1.5"
@@ -267,7 +267,7 @@ __metadata:
     i18next-parser: "npm:^9.4.0"
     i18next-resources-to-backend: "npm:^1.2.1"
     jsdom: "npm:^29.1.1"
-    lru-cache: "npm:^11.5.1"
+    lru-cache: "npm:^11.5.2"
     mdast-util-newline-to-break: "npm:^2.0.0"
     plugins-service: "workspace:*"
     re-resizable: "npm:^6.11.2"
@@ -19820,10 +19820,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lru-cache@npm:^11.0.0, lru-cache@npm:^11.3.5, lru-cache@npm:^11.5.1":
+"lru-cache@npm:^11.0.0, lru-cache@npm:^11.3.5":
   version: 11.5.1
   resolution: "lru-cache@npm:11.5.1"
   checksum: 10/02c4f73967d91fb101f4accf8ebac9e0541e08e16d987bdb9e9737f13e5f2c4bc33c593b98ec30e4486bf899bc97edb36fbd133684b36087336559e41edafdea
+  languageName: node
+  linkType: hard
+
+"lru-cache@npm:^11.5.2":
+  version: 11.5.2
+  resolution: "lru-cache@npm:11.5.2"
+  checksum: 10/122789c66605ddf29df58ff279e9e2c9499499d0b80b895ec524496f14bcde045d1582e3e38008f3457226d98067556719573b352119d6be8bdb1f8849f85681
   languageName: node
   linkType: hard
 

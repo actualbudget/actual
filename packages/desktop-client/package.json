@@ -173,7 +173,7 @@
     "i18next-parser": "^9.4.0",
     "i18next-resources-to-backend": "^1.2.1",
     "jsdom": "^29.1.1",
-    "lru-cache": "^11.5.1",
+    "lru-cache": "^11.5.2",
     "mdast-util-newline-to-break": "^2.0.0",
     "plugins-service": "workspace:*",
     "re-resizable": "^6.11.2",
