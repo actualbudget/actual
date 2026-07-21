@@ -181,8 +181,6 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
       setFocusedDate(focusedCalendarDate);
     }
 
-    const onUpdateEffect = useEffectEvent(onUpdate);
-
     useImperativeHandle(
       ref,
       () => ({
@@ -211,11 +209,11 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
           }
 
           if (newDate) {
-            onUpdateEffect(newDate);
+            onUpdate(newDate);
           }
         },
       }),
-      [focusedCalendarDate],
+      [focusedCalendarDate, onUpdate],
     );
 
     return (
