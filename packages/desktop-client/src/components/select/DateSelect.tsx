@@ -48,6 +48,7 @@ import { css } from '@emotion/css';
 import { CalendarDate } from '@internationalized/date';
 import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
 
+import { TransferDirectionIcon } from '#components/common/TransferDirectionIcon';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { InputField } from '#components/mobile/MobileForms';
 import { useLanguage } from '#hooks/useLocale';
@@ -83,6 +84,8 @@ function fromCalendarDate(date: CalendarDate): Date {
 }
 
 const calendarShadow = '0 0px 4px rgba(0, 0, 0, .25)';
+
+const transferIconStyle = { width: 10, height: 10, marginLeft: 5 };
 
 const pickerStyles: CSSProperties = {
   '& .react-aria-Calendar': {
@@ -305,6 +308,7 @@ type DateSelectProps = {
   onSelect: (selectedDate: string) => void;
   transferDateSyncChecked?: boolean;
   onTransferDateSyncChange?: (checked: boolean) => void;
+  transferIsDeposit?: boolean;
 };
 
 function DateSelectDesktop({
@@ -323,6 +327,7 @@ function DateSelectDesktop({
   onSelect,
   transferDateSyncChecked,
   onTransferDateSyncChange,
+  transferIsDeposit,
 }: DateSelectProps) {
   const parsedDefaultValue = useMemo(() => {
     if (defaultValue) {
@@ -552,7 +557,13 @@ function DateSelectDesktop({
                 color: theme.calendarText,
               }}
             >
-              <Trans>Also update the other side of the transfer</Trans>
+              <Trans>
+                Also update other side of{' '}
+                <TransferDirectionIcon
+                  isDeposit={transferIsDeposit}
+                  style={transferIconStyle}
+                />
+              </Trans>
             </LabeledCheckbox>
           )}
         </View>,
@@ -582,7 +593,13 @@ function DateSelectMobile(props: DateSelectProps) {
           onChange={e => props.onTransferDateSyncChange?.(e.target.checked)}
           style={{ padding: '6px 0' }}
         >
-          <Trans>Also update the other side of the transfer</Trans>
+          <Trans>
+            Also update other side of{' '}
+            <TransferDirectionIcon
+              isDeposit={props.transferIsDeposit}
+              style={transferIconStyle}
+            />
+          </Trans>
         </LabeledCheckbox>
       )}
     </View>

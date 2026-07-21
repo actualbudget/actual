@@ -23,11 +23,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import {
-  SvgLeftArrow2,
-  SvgRightArrow2,
-  SvgSplit,
-} from '@actual-app/components/icons/v0';
+import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgArrowDown,
   SvgArrowUp,
@@ -88,6 +84,7 @@ import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplet
 import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
+import { TransferDirectionIcon } from '#components/common/TransferDirectionIcon';
 import { getStatusProps } from '#components/schedules/StatusBadge';
 import type { StatusTypes } from '#components/schedules/StatusBadge';
 import { DateSelect } from '#components/select/DateSelect';
@@ -916,11 +913,10 @@ function PayeeIcons({
             }
           }}
         >
-          {isDeposit ? (
-            <SvgLeftArrow2 style={transferIconStyle} />
-          ) : (
-            <SvgRightArrow2 style={transferIconStyle} />
-          )}
+          <TransferDirectionIcon
+            isDeposit={isDeposit}
+            style={transferIconStyle}
+          />
         </Button>
       )}
     </>
@@ -1649,6 +1645,7 @@ const Transaction = memo(function Transaction({
                     ? setSyncTransferDate
                     : undefined
                 }
+                transferIsDeposit={transaction.amount > 0}
               />
             )}
           </CustomCell>
