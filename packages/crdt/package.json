@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/crdt",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "CRDT layer of Actual",
   "license": "MIT",
   "repository": {
@@ -22,14 +22,14 @@
     ".": "./src/index.ts"
   },
   "publishConfig": {
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
     "exports": {
       ".": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       }
-    }
+    },
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts"
   },
   "scripts": {
     "build:node": "vite build",
