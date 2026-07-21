@@ -2124,12 +2124,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@capacitor/ios@npm:^8.0.0":
-  version: 8.4.1
-  resolution: "@capacitor/ios@npm:8.4.1"
+"@capacitor/ios@npm:^8.4.2":
+  version: 8.4.2
+  resolution: "@capacitor/ios@npm:8.4.2"
   peerDependencies:
     "@capacitor/core": ^8.4.0
-  checksum: 10/d640b4c4e065f8a7b747eb5e1acbbcf83652adb2b251352f6dfb1f6d60b68d3b72d4baa75112ea0ff6435818a7dad6bf87207e8a5f0454aa1d4ff487450ed2d7
+  checksum: 10/afecf7636eef0949a772663274098c2cddf973bbf16abd63105a495cc816369cfd1e79cf3a99f4022944a34d9cac0c4231845a2f9494fb11b00c0b779f637b4c
   languageName: node
   linkType: hard
 
@@ -21284,7 +21284,7 @@ __metadata:
     "@capacitor/android": "npm:^8.4.2"
     "@capacitor/cli": "npm:^8.0.0"
     "@capacitor/core": "npm:^8.4.2"
-    "@capacitor/ios": "npm:^8.0.0"
+    "@capacitor/ios": "npm:^8.4.2"
     "@capacitor/splash-screen": "npm:^8.0.1"
     "@capgo/capacitor-updater": "npm:^8.50.1"
     "@capgo/cli": "npm:^8.22.0"
