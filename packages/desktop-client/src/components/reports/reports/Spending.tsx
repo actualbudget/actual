@@ -7,6 +7,7 @@ import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { ModeButton } from '@actual-app/components/mode-button';
+import { MonthPicker } from '@actual-app/components/month-picker';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -46,7 +47,7 @@ import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
-import { useLocale } from '#hooks/useLocale';
+import { useLanguage, useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -74,6 +75,7 @@ type SpendingInternalProps = {
 
 function SpendingInternal({ widget }: SpendingInternalProps) {
   const locale = useLocale();
+  const language = useLanguage();
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const format = useFormat();
@@ -238,6 +240,12 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
       : reportMode === 'average'
         ? averageRangeOptions
         : [['label', t('Budgeted')] as const];
+  const earliestInterval = allIntervals.at(-1)?.name;
+  const latestInterval = allIntervals[0]?.name;
+  const monthPickerLabels = {
+    previous: t('Previous'),
+    next: t('Next'),
+  };
   const onComparisonChange = (value: string) => {
     if (reportMode === 'single-month') {
       setCompareTo(value);
@@ -323,26 +331,38 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               <Text>
                 <Trans>Compare</Trans>
               </Text>
-              <Select
+              <MonthPicker
                 value={compare}
+                minDate={earliestInterval}
+                maxDate={latestInterval}
+                locale={language}
+                labels={monthPickerLabels}
                 onChange={setCompare}
-                options={allIntervals.map(
-                  ({ name, pretty }) => [name, pretty] as const,
-                )}
                 style={{ width: 150 }}
-                popoverStyle={{ width: 150 }}
               />
               <Text>
                 <Trans>to</Trans>
               </Text>
-              <Select
-                value={comparisonValue}
-                onChange={onComparisonChange}
-                options={comparisonOptions}
-                disabled={reportMode === 'budget'}
-                style={{ width: 150 }}
-                popoverStyle={{ width: 150 }}
-              />
+              {reportMode === 'single-month' ? (
+                <MonthPicker
+                  value={compareTo}
+                  minDate={earliestInterval}
+                  maxDate={latestInterval}
+                  locale={language}
+                  labels={monthPickerLabels}
+                  onChange={setCompareTo}
+                  style={{ width: 150 }}
+                />
+              ) : (
+                <Select
+                  value={comparisonValue}
+                  onChange={onComparisonChange}
+                  options={comparisonOptions}
+                  disabled={reportMode === 'budget'}
+                  style={{ width: 150 }}
+                  popoverStyle={{ width: 150 }}
+                />
+              )}
             </SpaceBetween>
 
             <View
