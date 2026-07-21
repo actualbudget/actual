@@ -74,7 +74,7 @@ __metadata:
     "@emotion/css": "npm:^11.13.5"
     "@internationalized/date": "npm:^3.12.2"
     "@rolldown/plugin-babel": "npm:~0.2.3"
-    "@storybook/addon-a11y": "npm:^10.4.4"
+    "@storybook/addon-a11y": "npm:^10.5.2"
     "@storybook/addon-docs": "npm:^10.4.4"
     "@storybook/react-vite": "npm:^10.4.4"
     "@svgr/babel-plugin-add-jsx-attribute": "npm:^8.0.0"
@@ -8350,15 +8350,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-a11y@npm:^10.4.4":
-  version: 10.4.4
-  resolution: "@storybook/addon-a11y@npm:10.4.4"
+"@storybook/addon-a11y@npm:^10.5.2":
+  version: 10.5.2
+  resolution: "@storybook/addon-a11y@npm:10.5.2"
   dependencies:
     "@storybook/global": "npm:^5.0.0"
     axe-core: "npm:^4.2.0"
   peerDependencies:
-    storybook: ^10.4.4
-  checksum: 10/feecb922937a8c92079e1819be93e6b600e0facc13304808b2c9ed46a9f967cfc49656469f71dd948ebfadd8b9b124c0a93c80117fed206472ccc52da3f976d4
+    storybook: ^10.5.2
+  checksum: 10/94b327f274724b9e94be9cfcd5acb5e0ff09f2dec19f5b89b02eb3190cbc98193c36d93606f09b5db26abf1f13165fca3af9120b1c8d888079dc1fd72c0a46fe
   languageName: node
   linkType: hard
 
