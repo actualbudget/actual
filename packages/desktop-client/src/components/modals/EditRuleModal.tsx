@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
+import * as undo from '@actual-app/core/platform/client/undo';
 import type { NewRuleEntity, RuleEntity } from '@actual-app/core/types/models';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
@@ -17,6 +18,16 @@ export function EditRuleModal({
   onSave: originalOnSave,
 }: EditRuleModalProps) {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    const previousModal = undo.getUndoState('openModal');
+    undo.setUndoState('openModal', {
+      name: 'edit-rule',
+      options: { rule: defaultRule, onSave: originalOnSave },
+    });
+
+    return () => undo.setUndoState('openModal', previousModal);
+  }, [defaultRule, originalOnSave]);
 
   return (
     <Modal name="edit-rule">
