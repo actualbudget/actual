@@ -21,7 +21,7 @@ __metadata:
     "@actual-app/vite-plugin-peggy": "workspace:*"
     "@playwright/test": "npm:1.59.1"
     "@typescript/native-preview": "npm:beta"
-    better-sqlite3: "npm:^12.10.0"
+    better-sqlite3: "npm:^12.11.1"
     compare-versions: "npm:^6.1.1"
     rollup-plugin-visualizer: "npm:^7.0.1"
     typescript-strict-plugin: "npm:^2.4.4"
@@ -114,7 +114,7 @@ __metadata:
     "@typescript/native-preview": "npm:beta"
     absurd-sql: "npm:0.0.54"
     assert: "npm:^2.1.0"
-    better-sqlite3: "npm:^12.10.0"
+    better-sqlite3: "npm:^12.11.1"
     browserify-zlib: "npm:^0.2.0"
     buffer: "npm:^6.0.3"
     cross-env: "npm:^10.1.0"
@@ -182,7 +182,7 @@ __metadata:
     akahu: "npm:^2.5.1"
     argon2: "npm:^0.44.0"
     bcrypt: "npm:^6.0.0"
-    better-sqlite3: "npm:^12.10.0"
+    better-sqlite3: "npm:^12.11.1"
     convict: "npm:^6.2.5"
     cors: "npm:^2.8.6"
     cross-env: "npm:^10.1.0"
@@ -11391,14 +11391,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:^12.10.0":
-  version: 12.10.0
-  resolution: "better-sqlite3@npm:12.10.0"
+"better-sqlite3@npm:^12.11.1":
+  version: 12.11.1
+  resolution: "better-sqlite3@npm:12.11.1"
   dependencies:
     bindings: "npm:^1.5.0"
     node-gyp: "npm:latest"
     prebuild-install: "npm:^7.1.1"
-  checksum: 10/99e213e78f15a7f40d5cb666b56781223a6b83ffc317c93846e2b63b694592978c1e3762e81afd6ce851e0e3c24ebc9d0c42341158ea93c8a39987e5e19602f8
+  checksum: 10/a516421fda128dd25e36dd9c8c8857e6fd94b27ab7da644af939109bd57540c58bad8ed784ef0fdfe03d094deabed5733c33dabed4f91b57a89543deab9b28d6
   languageName: node
   linkType: hard
 
@@ -14260,7 +14260,7 @@ __metadata:
     "@playwright/test": "npm:1.59.1"
     "@types/copyfiles": "npm:^2"
     "@typescript/native-preview": "npm:beta"
-    better-sqlite3: "npm:^12.10.0"
+    better-sqlite3: "npm:^12.11.1"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^10.1.0"
     electron: "npm:41.7.1"

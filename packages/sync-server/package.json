@@ -93,7 +93,7 @@
     "akahu": "^2.5.1",
     "argon2": "^0.44.0",
     "bcrypt": "^6.0.0",
-    "better-sqlite3": "^12.10.0",
+    "better-sqlite3": "^12.11.1",
     "convict": "^6.2.5",
     "cors": "^2.8.6",
     "date-fns": "^4.4.0",

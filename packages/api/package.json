@@ -57,7 +57,7 @@
   "dependencies": {
     "@actual-app/core": "workspace:*",
     "@actual-app/crdt": "workspace:*",
-    "better-sqlite3": "^12.10.0",
+    "better-sqlite3": "^12.11.1",
     "compare-versions": "^6.1.1",
     "uuid": "^14.0.1"
   },
