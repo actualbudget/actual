@@ -80,7 +80,7 @@
     "@typescript/native-preview": "beta",
     "@vitejs/plugin-react": "^6.0.3",
     "babel-plugin-react-compiler": "^1.0.0",
-    "eslint-plugin-storybook": "^10.4.4",
+    "eslint-plugin-storybook": "^10.5.2",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "storybook": "^10.4.4",

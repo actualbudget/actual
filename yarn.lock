@@ -85,7 +85,7 @@ __metadata:
     "@typescript/native-preview": "npm:beta"
     "@vitejs/plugin-react": "npm:^6.0.3"
     babel-plugin-react-compiler: "npm:^1.0.0"
-    eslint-plugin-storybook: "npm:^10.4.4"
+    eslint-plugin-storybook: "npm:^10.5.2"
     react: "npm:19.2.7"
     react-aria-components: "npm:^1.19.0"
     react-dom: "npm:19.2.7"
@@ -9996,7 +9996,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/types@npm:8.64.0, @typescript-eslint/types@npm:^8.64.0":
+"@typescript-eslint/types@npm:8.64.0, @typescript-eslint/types@npm:^8.48.0, @typescript-eslint/types@npm:^8.64.0":
   version: 8.64.0
   resolution: "@typescript-eslint/types@npm:8.64.0"
   checksum: 10/b8951c00ce9b9702f3201f017354774ea5f39c30c2b6f815cb50d91f53f61c325e30f548329daf731d5169d752095cf102da54b754fb202bcfb619faa56fa9f4
@@ -15518,15 +15518,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-storybook@npm:^10.4.4":
-  version: 10.4.4
-  resolution: "eslint-plugin-storybook@npm:10.4.4"
+"eslint-plugin-storybook@npm:^10.5.2":
+  version: 10.5.2
+  resolution: "eslint-plugin-storybook@npm:10.5.2"
   dependencies:
+    "@typescript-eslint/types": "npm:^8.48.0"
     "@typescript-eslint/utils": "npm:^8.48.0"
   peerDependencies:
     eslint: ">=8"
-    storybook: ^10.4.4
-  checksum: 10/033294b8a884222d8acfc45b3ad6bb29b3ff70399bc6b01e85204090cd2f3115ef754ca3e03c14ea688472fba7db0f8874389489de3ad203a0874b223d0d55e4
+    storybook: ^10.5.2
+  checksum: 10/2934705d7aeb330f70d2b7c8ccc055b1750fa2e11c784df7df0911963c7bbc9e6d7a6cb812e3adb83a2fa5f6e7b7e4e64532d3ff4cdfb85d296c593573668bd7
   languageName: node
   linkType: hard
 
