@@ -14704,7 +14704,7 @@ __metadata:
     prism-react-renderer: "npm:^2.4.1"
     react: "npm:19.2.7"
     react-dom: "npm:19.2.7"
-    unist-util-visit-parents: "npm:^6.0.0"
+    unist-util-visit-parents: "npm:^6.0.2"
   languageName: unknown
   linkType: soft
 
@@ -28699,6 +28699,16 @@ __metadata:
     "@types/unist": "npm:^3.0.0"
     unist-util-is: "npm:^6.0.0"
   checksum: 10/645b3cbc5e923bc692b1eb1a9ca17bffc5aabc25e6090ff3f1489bff8effd1890b28f7a09dc853cb6a7fa0da8581bfebc9b670a68b53c4c086cb9610dfd37701
+  languageName: node
+  linkType: hard
+
+"unist-util-visit-parents@npm:^6.0.2":
+  version: 6.0.2
+  resolution: "unist-util-visit-parents@npm:6.0.2"
+  dependencies:
+    "@types/unist": "npm:^3.0.0"
+    unist-util-is: "npm:^6.0.0"
+  checksum: 10/aa16e97e45bd1d641e1f933d2fb3bf0800865350eaeb5cc0317ab511075480fb4ac5e2a55f57dd72d27311e8ba29fd23908848bd83479849c626be1f7dabcae5
   languageName: node
   linkType: hard
 
