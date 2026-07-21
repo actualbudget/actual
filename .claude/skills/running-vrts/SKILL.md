@@ -75,13 +75,13 @@ Run all yarn commands from the repo root.
 
    ```sh
    docker run --rm --network host -v "$(pwd)":/work/ -w /work/ \
-     mcr.microsoft.com/playwright:v1.59.1-jammy /bin/bash -c \
+     mcr.microsoft.com/playwright:v1.61.1-jammy /bin/bash -c \
      "E2E_START_URL=https://<HOST>:3001 yarn vrt --update-snapshots -g '<test name>' <file>.test.ts"
    ```
 
    Pin the image tag to the repo's Playwright version (`@playwright/test` in
-   `packages/desktop-client/package.json` — currently 1.59.1 →
-   `v1.59.1-jammy`). The equivalent user-facing wrapper is
+   `packages/desktop-client/package.json` — currently 1.61.1 →
+   `v1.61.1-jammy`). The equivalent user-facing wrapper is
    `yarn vrt:docker --e2e-start-url https://<HOST>:3001 --update-snapshots`.
 
 4. **Always scope `--update-snapshots`** with `-g`/file args to the new or
