@@ -70,7 +70,7 @@
     "@chromatic-com/storybook": "^5.2.1",
     "@rolldown/plugin-babel": "~0.2.3",
     "@storybook/addon-a11y": "^10.5.2",
-    "@storybook/addon-docs": "^10.4.4",
+    "@storybook/addon-docs": "^10.5.2",
     "@storybook/react-vite": "^10.4.4",
     "@svgr/babel-plugin-add-jsx-attribute": "^8.0.0",
     "@svgr/cli": "^8.1.0",
