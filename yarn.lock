@@ -10453,7 +10453,7 @@ __metadata:
     "@types/prompts": "npm:^2.4.9"
     "@typescript/native-preview": "npm:beta"
     "@yarnpkg/types": "npm:^4.0.1"
-    eslint: "npm:^10.5.0"
+    eslint: "npm:^10.7.0"
     eslint-plugin-perfectionist: "npm:^5.9.0"
     eslint-plugin-typescript-paths: "npm:^0.0.33"
     glob-hasher-linux-arm64-gnu: "npm:1.4.2"
@@ -15321,9 +15321,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^10.5.0":
-  version: 10.5.0
-  resolution: "eslint@npm:10.5.0"
+"eslint@npm:^10.7.0":
+  version: 10.7.0
+  resolution: "eslint@npm:10.7.0"
   dependencies:
     "@eslint-community/eslint-utils": "npm:^4.8.0"
     "@eslint-community/regexpp": "npm:^4.12.2"
@@ -15362,7 +15362,7 @@ __metadata:
       optional: true
   bin:
     eslint: bin/eslint.js
-  checksum: 10/28882f9b00803fca938015894d6e1ac2c80e00c1349385764f54ac4c0707c33fd0e32b678845c54ea0bc8ae04d59d7aa93d68dbd835e5e4833c65bf9b15ea91f
+  checksum: 10/51cb70fbdd0de6586f0cb12625388faab18eb679cbdb523ecb631cae9f47fd9171d9ff02f570dc4d2e5700017908a81477511025ccb2a6603c5928fbfddcaebf
   languageName: node
   linkType: hard
 
