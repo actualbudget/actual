@@ -263,7 +263,7 @@ __metadata:
     fzf: "npm:^0.5.2"
     html-to-image: "npm:^1.11.13"
     hyperformula: "npm:^3.3.0"
-    i18next: "npm:^26.3.1"
+    i18next: "npm:^26.3.6"
     i18next-parser: "npm:^9.4.0"
     i18next-resources-to-backend: "npm:^1.2.1"
     jsdom: "npm:^29.1.1"
@@ -17930,15 +17930,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^26.3.1":
-  version: 26.3.1
-  resolution: "i18next@npm:26.3.1"
+"i18next@npm:^26.3.6":
+  version: 26.3.6
+  resolution: "i18next@npm:26.3.6"
   peerDependencies:
-    typescript: ^5 || ^6
+    typescript: ^5 || ^6 || ^7
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10/d0d86873f3d63b2c4983963944b154cbcfda13d6f26a77193c8893307bde97c7032605238b98115a41b20e4b37cee342bb662eab0f02a0532a8c65b0fbb2e02a
+  checksum: 10/529f1dbfae6b0fe98d997af98af5d6d0a0e27ddf5b91b81c5dfccad94e3a66dceeba2d1b7327f0045085bc4d552abbf4a1efbfadd4bbb98d13a54e3310eae428
   languageName: node
   linkType: hard
 
