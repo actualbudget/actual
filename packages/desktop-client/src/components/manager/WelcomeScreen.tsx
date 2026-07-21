@@ -39,10 +39,10 @@ export function WelcomeScreen() {
   const navigate = useNavigate();
   const serverURL = useServerURL();
   const { isNarrowWidth } = useResponsive();
-  const reducedMotion = useReducedMotion();
+  const isReducedMotion = useReducedMotion();
 
   const entranceClass = (delay: number) =>
-    reducedMotion ? undefined : entrance(delay);
+    isReducedMotion ? undefined : entrance(delay);
 
   const buttonStyle = {
     fontSize: 15,
