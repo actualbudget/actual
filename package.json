@@ -76,7 +76,7 @@
     "eslint-plugin-typescript-paths": "^0.0.33",
     "husky": "^9.1.7",
     "knip": "^6.27.0",
-    "lage": "^2.15.13",
+    "lage": "^2.15.17",
     "minimatch": "^10.2.5",
     "nano-staged": "^1.0.2",
     "npm-run-all": "^4.1.5",
