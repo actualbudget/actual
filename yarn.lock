@@ -122,7 +122,7 @@ __metadata:
     csv-parse: "npm:^6.2.1"
     csv-stringify: "npm:^6.8.1"
     date-fns: "npm:^4.4.0"
-    es-toolkit: "npm:^1.47.1"
+    es-toolkit: "npm:^1.49.0"
     fake-indexeddb: "npm:^6.2.5"
     fast-check: "npm:^4.8.0"
     fflate: "npm:^0.8.3"
@@ -259,7 +259,7 @@ __metadata:
     csv-stringify: "npm:^6.8.1"
     date-fns: "npm:^4.4.0"
     downshift: "npm:9.3.6"
-    es-toolkit: "npm:^1.47.1"
+    es-toolkit: "npm:^1.49.0"
     fzf: "npm:^0.5.2"
     html-to-image: "npm:^1.11.13"
     hyperformula: "npm:^3.3.0"
@@ -15237,9 +15237,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"es-toolkit@npm:^1.47.1":
-  version: 1.47.1
-  resolution: "es-toolkit@npm:1.47.1"
+"es-toolkit@npm:^1.49.0":
+  version: 1.49.0
+  resolution: "es-toolkit@npm:1.49.0"
   dependenciesMeta:
     "@trivago/prettier-plugin-sort-imports@4.3.0":
       unplugged: true
@@ -15247,7 +15247,7 @@ __metadata:
       unplugged: true
     vitepress-plugin-sandpack@1.1.4:
       unplugged: true
-  checksum: 10/d98305a8298a6fa7e478fbcc1f25a05314080cc83af9baea473da0f6de0b0c67a36081ba98247eb0baa01608e4a8f69f1d6da56a7c02fc6a308a55ede2f11b96
+  checksum: 10/ff0377f1fa681e6b58c06ec46cd3683c02df499f5101effb70bfbf4d69fce2e6a13889b182f68c495e25cdee31829f21dfd6094f722d4de82c546c2a32d0c670
   languageName: node
   linkType: hard
 
