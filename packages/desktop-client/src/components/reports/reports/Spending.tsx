@@ -229,17 +229,13 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const averageRangeLabel = getSpendingAverageRangeLabel(averageRange, t);
   const averageRangeOptions = getSpendingAverageRangeOptions(t);
   const comparisonValue =
-    reportMode === 'single-month'
-      ? compareTo
-      : reportMode === 'average'
-        ? spendingAverageRangeToKey(averageRange)
-        : 'label';
+    reportMode === 'average'
+      ? spendingAverageRangeToKey(averageRange)
+      : 'label';
   const comparisonOptions =
-    reportMode === 'single-month'
-      ? allIntervals.map(({ name, pretty }) => [name, pretty] as const)
-      : reportMode === 'average'
-        ? averageRangeOptions
-        : [['label', t('Budgeted')] as const];
+    reportMode === 'average'
+      ? averageRangeOptions
+      : [['label', t('Budgeted')] as const];
   const earliestInterval = allIntervals.at(-1)?.name;
   const latestInterval = allIntervals[0]?.name;
   const monthPickerLabels = {
@@ -247,9 +243,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     next: t('Next'),
   };
   const onComparisonChange = (value: string) => {
-    if (reportMode === 'single-month') {
-      setCompareTo(value);
-    } else if (reportMode === 'average') {
+    if (reportMode === 'average') {
       setAverageRange(spendingAverageRangeFromKey(value));
     }
   };
