@@ -31,7 +31,7 @@
   "devDependencies": {
     "@actual-app/ci-actions": "workspace:*",
     "@docusaurus/module-type-aliases": "^3.10.2",
-    "@docusaurus/types": "^3.10.1",
+    "@docusaurus/types": "^3.10.2",
     "@types/react": "^19.2.17"
   },
   "browserslist": {
