@@ -2115,12 +2115,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@capacitor/core@npm:^8.0.0":
-  version: 8.4.1
-  resolution: "@capacitor/core@npm:8.4.1"
+"@capacitor/core@npm:^8.4.2":
+  version: 8.4.2
+  resolution: "@capacitor/core@npm:8.4.2"
   dependencies:
     tslib: "npm:^2.1.0"
-  checksum: 10/2d872d9aca9b85508982b7a316102a0d79dc2c367d3afa44d57ecbe65985b9ce315557c528d1395c8e59b29aec4b759a66cacef0479a5d265ce33d3d5edd081f
+  checksum: 10/dc1f1cf89de2bbdce1fa4b7b8f9eac81886bed6c9956038cd9463c057aba189d1eca938acba798ba039e86ef51e8d7b0eb70db2be08994ddbbd5aa6a35a2deb6
   languageName: node
   linkType: hard
 
@@ -21283,7 +21283,7 @@ __metadata:
   dependencies:
     "@capacitor/android": "npm:^8.4.2"
     "@capacitor/cli": "npm:^8.0.0"
-    "@capacitor/core": "npm:^8.0.0"
+    "@capacitor/core": "npm:^8.4.2"
     "@capacitor/ios": "npm:^8.0.0"
     "@capacitor/splash-screen": "npm:^8.0.1"
     "@capgo/capacitor-updater": "npm:^8.50.1"
