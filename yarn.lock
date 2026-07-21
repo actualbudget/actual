@@ -3944,7 +3944,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/theme-common@npm:3.10.1, @docusaurus/theme-common@npm:^3.10.1":
+"@docusaurus/theme-common@npm:3.10.1":
   version: 3.10.1
   resolution: "@docusaurus/theme-common@npm:3.10.1"
   dependencies:
@@ -3968,7 +3968,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/theme-common@npm:3.10.2":
+"@docusaurus/theme-common@npm:3.10.2, @docusaurus/theme-common@npm:^3.10.2":
   version: 3.10.2
   resolution: "@docusaurus/theme-common@npm:3.10.2"
   dependencies:
@@ -14949,7 +14949,7 @@ __metadata:
     "@docusaurus/plugin-content-docs": "npm:^3.10.2"
     "@docusaurus/plugin-ideal-image": "npm:^3.10.2"
     "@docusaurus/preset-classic": "npm:^3.10.2"
-    "@docusaurus/theme-common": "npm:^3.10.1"
+    "@docusaurus/theme-common": "npm:^3.10.2"
     "@docusaurus/theme-mermaid": "npm:^3.10.1"
     "@docusaurus/types": "npm:^3.10.1"
     "@easyops-cn/docusaurus-search-local": "npm:^0.55.2"
