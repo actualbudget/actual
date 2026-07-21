@@ -209,7 +209,7 @@ __metadata:
     migrate: "npm:^2.1.0"
     nodemon: "npm:^3.1.14"
     openid-client: "npm:^5.7.1"
-    pluggy-sdk: "npm:^0.85.3"
+    pluggy-sdk: "npm:^0.89.0"
     supertest: "npm:^7.2.2"
     typescript-strict-plugin: "npm:^2.4.4"
     uuid: "npm:^14.0.1"
@@ -22932,13 +22932,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pluggy-sdk@npm:^0.85.3":
-  version: 0.85.3
-  resolution: "pluggy-sdk@npm:0.85.3"
+"pluggy-sdk@npm:^0.89.0":
+  version: 0.89.0
+  resolution: "pluggy-sdk@npm:0.89.0"
   dependencies:
     got: "npm:11.8.6"
     jsonwebtoken: "npm:9.0.3"
-  checksum: 10/ab27cf972cfdcc972da83a25857f39befc3f9d6af5052f9932e90f1f29e2d1c3317a99838e801056cdbf441b1e2b23e8aa83317aa6eba505d5826dfaff0cfc9b
+  checksum: 10/e58174aaa7e441929e9fed4636c2939792efebac39cc5e46dbfcfbb122f64a633dc66e3fc5a7ef63c4805ae14c437037ceac2e13bd2a6ed8fe171463743ce12a
   languageName: node
   linkType: hard
 
