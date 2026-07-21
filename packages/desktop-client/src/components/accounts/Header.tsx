@@ -553,7 +553,9 @@ export function AccountHeader({
                         { name: 'export', text: t('Export') },
                         {
                           name: 'toggle-group',
-                          text: showGroup ? t('Hide category group') : t('Show category group'),
+                          text: showGroup
+                            ? t('Hide category group')
+                            : t('Show category group'),
                         },
                         {
                           name: 'toggle-net-worth-chart',
