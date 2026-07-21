@@ -1,0 +1,71 @@
+name: Close PRs from accounts without a profile picture
+
+##########################################################################################
+# WARNING! This workflow uses the 'pull_request_target' event. That means that it will   #
+# always run in the context of the main actualbudget/actual repo, even if the PR is from #
+# a fork. This is necessary to get access to a GitHub token that can comment on and      #
+# close the PR. Be VERY CAREFUL about adding things to this workflow, since forks can    #
+# inject arbitrary code into their branch, and can pollute the artifacts we download.    #
+# Arbitrary code execution in this workflow could lead to a compromise of the main repo. #
+##########################################################################################
+# See: https://securitylab.github.com/research/github-actions-preventing-pwn-requests    #
+##########################################################################################
+
+on:
+  # See banner above: no checkout, no PR-supplied script execution. Only the PR
+  # author's login (a GitHub-validated identifier) is read from the event, and it
+  # is passed via an environment variable rather than template interpolation.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    types: [opened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  close-no-avatar:
+    name: Close PR if author has no profile picture
+    runs-on: depot-ubuntu-latest
+    # Only screen first-time/unknown authors. Members, collaborators and prior
+    # contributors are trusted regardless of their avatar, and bots (renovate,
+    # dependabot, ...) never have "real" profile pictures.
+    if: |
+      github.event.pull_request.user.type != 'Bot' &&
+      contains(fromJSON('["NONE", "FIRST_TIMER", "FIRST_TIME_CONTRIBUTOR"]'), github.event.pull_request.author_association)
+    steps:
+      - name: Check avatar and close PR if it is the auto-generated default
+        run: |
+          # GitHub generates a deterministic identicon for accounts that never
+          # uploaded a profile picture. github.com/<login>.png serves the
+          # account's current avatar, and github.com/identicons/<login>.png
+          # serves the generated fallback — if the two are byte-identical, the
+          # account has no custom profile picture.
+          avatar_hash=$(curl -sfL --max-time 30 "https://github.com/${AUTHOR}.png" | sha256sum | cut -d' ' -f1) || avatar_hash=""
+          identicon_hash=$(curl -sfL --max-time 30 "https://github.com/identicons/${AUTHOR}.png" | sha256sum | cut -d' ' -f1) || identicon_hash=""
+
+          # Fail open: if either fetch failed, do nothing rather than risk
+          # closing a legitimate PR over a network hiccup.
+          if [ -z "$avatar_hash" ] || [ -z "$identicon_hash" ]; then
+            echo "Could not fetch avatar images for $AUTHOR; skipping check."
+            exit 0
+          fi
+
+          if [ "$avatar_hash" != "$identicon_hash" ]; then
+            echo "$AUTHOR has a custom profile picture; nothing to do."
+            exit 0
+          fi
+
+          echo "$AUTHOR has no custom profile picture; closing PR."
+
+          gh pr comment "$PR_URL" --body ":wave: Thanks for your interest in contributing!
+
+          To help us manage a wave of automated spam, we automatically close pull requests opened from accounts that have not set a profile picture. This is not a judgement of your work — it is just a lightweight signal we use to filter automated submissions.
+
+          If you are a real person: please [add a profile picture](https://github.com/settings/profile) to your GitHub account, then reopen this pull request (or leave a comment and a maintainer will reopen it for you).
+
+          <!-- no-avatar-auto-close-comment -->"
+
+          gh pr close "$PR_URL"
+        env:
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_URL: https://github.com/actualbudget/actual/pull/${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
