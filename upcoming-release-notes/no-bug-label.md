@@ -3,4 +3,4 @@ category: Maintenance
 authors: [youngcw]
 ---
 
-Dont add bug label to bug issues. There is already a bug type
+Dont add duplicate labels to bug and feature issues when there is already a type set
