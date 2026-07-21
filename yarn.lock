@@ -2165,9 +2165,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@capgo/cli@npm:^8.22.0":
-  version: 8.22.0
-  resolution: "@capgo/cli@npm:8.22.0"
+"@capgo/cli@npm:^8.28.2":
+  version: 8.28.2
+  resolution: "@capgo/cli@npm:8.28.2"
   dependencies:
     "@capgo/cli-helper-darwin-arm64": "npm:^1.1.1"
     "@capgo/cli-helper-darwin-x64": "npm:^1.1.1"
@@ -2194,7 +2194,7 @@ __metadata:
       optional: true
   bin:
     capgo: dist/index.js
-  checksum: 10/e3eecb02887f32e86550724dd18408ebbc529a93510b54a22e24e080cd8bf0c8773c7327e42a928c0d11a64eee1308c516240d49b5bb55071b1957c0dc9d91d7
+  checksum: 10/b30f9e35d609bf8dc53de54435cff5ad6294e766414465a99977ad9d4c6769c999eea5da6138ca832c2fc6ac1c8525e61c932d8d7041ae518efaf9bcd5a7a15c
   languageName: node
   linkType: hard
 
@@ -21287,7 +21287,7 @@ __metadata:
     "@capacitor/ios": "npm:^8.4.2"
     "@capacitor/splash-screen": "npm:^8.0.2"
     "@capgo/capacitor-updater": "npm:^8.51.2"
-    "@capgo/cli": "npm:^8.22.0"
+    "@capgo/cli": "npm:^8.28.2"
   languageName: unknown
   linkType: soft
 

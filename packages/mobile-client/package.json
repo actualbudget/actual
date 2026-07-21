@@ -22,6 +22,6 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.4.2",
-    "@capgo/cli": "^8.22.0"
+    "@capgo/cli": "^8.28.2"
   }
 }
