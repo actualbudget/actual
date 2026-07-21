@@ -178,7 +178,7 @@
     "plugins-service": "workspace:*",
     "re-resizable": "^6.11.2",
     "react": "19.2.7",
-    "react-aria": "^3.49.0",
+    "react-aria": "^3.50.0",
     "react-aria-components": "^1.19.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
