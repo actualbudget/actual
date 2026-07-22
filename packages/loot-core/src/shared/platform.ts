@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core';
+
 const isWindows =
   typeof navigator !== 'undefined' &&
   navigator.platform &&
@@ -17,7 +19,9 @@ export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = isWindows
   : isMac
     ? 'mac'
     : 'linux';
-export const env: 'web' | 'mobile' | 'unknown' = 'web';
+export const env: 'web' | 'mobile' | 'unknown' = Capacitor.isNativePlatform()
+  ? 'mobile'
+  : 'web';
 export const isBrowser: boolean = true;
 
 const userAgent = navigator.userAgent;

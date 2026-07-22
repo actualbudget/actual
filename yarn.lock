@@ -117,6 +117,7 @@ __metadata:
   dependencies:
     "@actual-app/crdt": "workspace:*"
     "@actual-app/vite-plugin-peggy": "workspace:*"
+    "@capacitor/core": "npm:^8.4.2"
     "@jlongster/sql.js": "npm:^1.6.7"
     "@rschedule/core": "npm:^1.5.0"
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
