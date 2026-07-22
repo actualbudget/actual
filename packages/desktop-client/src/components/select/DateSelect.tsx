@@ -573,22 +573,6 @@ function DateSelectMobile(props: DateSelectProps) {
         style={{ height: 28, ...inputStyle }}
         {...restInputProps}
       />
-      {props.onTransferDateSyncChange && (
-        <LabeledCheckbox
-          id={`${props.id ?? 'date-select'}-transfer-date-sync`}
-          checked={props.transferDateSyncChecked}
-          onChange={e => props.onTransferDateSyncChange?.(e.target.checked)}
-          style={{ padding: '6px 0' }}
-        >
-          <Trans>
-            Also update other side of{' '}
-            <TransferDirectionIcon
-              isDeposit={props.transferIsDeposit}
-              style={transferIconStyle}
-            />
-          </Trans>
-        </LabeledCheckbox>
-      )}
     </View>
   );
 }
