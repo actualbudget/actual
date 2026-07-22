@@ -5,11 +5,7 @@ import type { ListBoxItemRenderProps } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import {
-  SvgLeftArrow2,
-  SvgRightArrow2,
-  SvgSplit,
-} from '@actual-app/components/icons/v0';
+import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgArrowsSynchronize,
   SvgCalendar3,
@@ -35,6 +31,7 @@ import {
 } from '@react-aria/interactions';
 
 import { makeAmountFullStyle } from '#components/budget/util';
+import { TransferDirectionIcon } from '#components/common/TransferDirectionIcon';
 import { useAccount } from '#hooks/useAccount';
 import { useCachedSchedules } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
@@ -438,12 +435,12 @@ function PayeeIcons({ transaction, transferAccount }: PayeeIconsProps) {
         ) : (
           <SvgCalendar3 style={getScheduleIconStyle({ isPreview })} />
         ))}
-      {transferAccount &&
-        (transaction.amount > 0 ? (
-          <SvgLeftArrow2 style={{ width: 12, height: 12, marginRight: 5 }} />
-        ) : (
-          <SvgRightArrow2 style={{ width: 12, height: 12, marginRight: 5 }} />
-        ))}
+      {transferAccount && (
+        <TransferDirectionIcon
+          isDeposit={transaction.amount > 0}
+          style={{ width: 12, height: 12, marginRight: 5 }}
+        />
+      )}
     </>
   );
 }
