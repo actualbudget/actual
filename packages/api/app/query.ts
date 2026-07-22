@@ -32,7 +32,7 @@ class Query {
     });
   }
 
-  unfilter(exprs?: Array<keyof ObjectExpression>) {
+  unfilter(exprs?: string[]) {
     const exprSet = new Set(exprs);
     return new Query({
       ...this.state,
