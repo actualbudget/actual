@@ -42,7 +42,14 @@ class Query {
     });
   }
 
-  select(exprs = []) {
+  select(
+    exprs:
+      | Array<ObjectExpression | string>
+      | ObjectExpression
+      | string
+      | '*'
+      | ['*'] = [],
+  ) {
     if (!Array.isArray(exprs)) {
       exprs = [exprs];
     }
