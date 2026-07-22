@@ -284,7 +284,7 @@ type TransactionListProps = Pick<
   onApplyFilter: (
     f: Partial<RuleConditionEntity> | TransactionFilterEntity,
   ) => void;
-  onRefetch: () => void;
+  onRefetch: () => Promise<unknown>;
 };
 
 export function TransactionList({
@@ -370,11 +370,11 @@ export function TransactionList({
                     },
                   }),
                 );
-                onRefetch();
+                void onRefetch();
               },
               onCancel: async () => {
                 await onCancel();
-                onRefetch();
+                void onRefetch();
               },
             },
           },
@@ -421,7 +421,7 @@ export function TransactionList({
       }
 
       await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
-      onRefetch();
+      await onRefetch();
     },
     [isLearnCategoriesEnabled, onRefetch, promptToConvertToSchedule],
   );
@@ -440,7 +440,7 @@ export function TransactionList({
           if (dateChanged) {
             changes.diff.updated[0].sort_order = Date.now();
             await saveDiff(changes.diff, isLearnCategoriesEnabled);
-            onRefetch();
+            void onRefetch();
           } else {
             onChange(changes.newTransaction, changes.data);
             void saveDiffAndApply(
@@ -652,7 +652,7 @@ export function TransactionList({
           accountId: draggedTrans.account,
           targetId: apiTargetId,
         });
-        onRefetch();
+        void onRefetch();
         return;
       }
 
@@ -721,7 +721,7 @@ export function TransactionList({
         accountId: trans.account,
         targetId: apiTargetId,
       });
-      onRefetch();
+      void onRefetch();
     },
     [sortField, ascDesc, isFiltered, allTransactions, onRefetch],
   );

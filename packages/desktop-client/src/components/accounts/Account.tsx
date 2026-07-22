@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { ReactElement, RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Trans } from 'react-i18next';
@@ -369,6 +375,17 @@ function AccountInternal(props: AccountInternalProps) {
         : false,
     },
   });
+
+  // Cache-invalidating refetch wrapper: invalidates the react-query cache
+  // before refetching to ensure stale data (especially from placeholderData
+  // or optimistic updates) doesn't remain visible after saves.
+  const invalidateAndRefetch = useCallback(async () => {
+    await queryClient.invalidateQueries({
+      queryKey: transactionQueries.aql({ query, pageSize }).queryKey,
+    });
+    void refetchTransactions();
+  }, [queryClient, query, pageSize, refetchTransactions]);
+
   const isFirstLoad = useRef(true);
   useEffect(() => {
     if (isFirstLoad.current && isSuccess) {
@@ -1627,7 +1644,7 @@ function AccountInternal(props: AccountInternalProps) {
                 onCreateRule={onCreateRule}
                 onScheduleAction={onScheduleAction}
                 onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
-                onRefetch={refetchTransactions}
+                onRefetch={invalidateAndRefetch}
                 onCloseAddTransaction={() => setIsAdding(false)}
                 onCreatePayee={onCreatePayee}
                 onApplyFilter={onApplyFilter}

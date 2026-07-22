@@ -682,7 +682,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     sortField={sortField}
                     ascDesc={ascDesc}
                     onChange={() => {}}
-                    onRefetch={() => setDirty(true)}
+                    onRefetch={async () => setDirty(true)}
                     onCloseAddTransaction={() => {}}
                     onCreatePayee={async () => null}
                     onApplyFilter={() => {}}
