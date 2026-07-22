@@ -130,6 +130,10 @@
     "playwright": "playwright",
     "typecheck": "tsgo -b && tsc-strict"
   },
+  "dependencies": {
+    "@capacitor/core": "^8.4.2",
+    "@capacitor/splash-screen": "^8.0.2"
+  },
   "devDependencies": {
     "@actual-app/components": "workspace:*",
     "@actual-app/core": "workspace:*",

@@ -239,6 +239,8 @@ __metadata:
     "@actual-app/components": "workspace:*"
     "@actual-app/core": "workspace:*"
     "@babel/core": "npm:^8.0.1"
+    "@capacitor/core": "npm:^8.4.2"
+    "@capacitor/splash-screen": "npm:^8.0.2"
     "@codemirror/autocomplete": "npm:^6.20.3"
     "@codemirror/language": "npm:^6.12.4"
     "@codemirror/state": "npm:^6.7.1"
