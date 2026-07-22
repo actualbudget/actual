@@ -116,26 +116,15 @@ jobs:
   mobile:
     needs: setup
     runs-on: depot-macos-latest
+    env:
+      ANDROID_HOME: /Users/runner/Library/Android/sdk
+      ANDROID_SDK_ROOT: /Users/runner/Library/Android/sdk
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-      - name: Inspect Android environment
-        run: |
-          echo "Runner architecture: $(uname -m)"
-          echo "ImageOS=${ImageOS:-<unset>}"
-          echo "ImageVersion=${ImageVersion:-<unset>}"
-          echo "ANDROID_HOME=${ANDROID_HOME:-<unset>}"
-          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-<unset>}"
-          if [[ -d /Users/runner/Library/Android/sdk ]]; then
-            echo "Android SDK directory exists"
-            ls -ld /Users/runner/Library/Android/sdk
-          else
-            echo "Android SDK directory is missing"
-          fi
-          command -v sdkmanager || echo "sdkmanager is not on PATH"
       - name: Build Mobile Apps
         run: yarn build:mobile
       - name: Upload Build
