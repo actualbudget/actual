@@ -85,11 +85,7 @@
         "ios/App/App/public/**",
         "ios/DerivedData/**"
       ],
-      "ignoreDependencies": [
-        "@capacitor/splash-screen",
-        "@capgo/capacitor-updater",
-        "@capgo/cli"
-      ]
+      "ignoreDependencies": ["@capacitor/splash-screen"]
     },
     "packages/plugins-service": {
       "entry": ["src/plugin-service-worker.ts"]
