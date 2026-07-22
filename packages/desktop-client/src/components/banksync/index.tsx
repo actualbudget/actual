@@ -31,12 +31,8 @@ export function BankSync() {
   const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
   const syncSourceReadable = useMemo(() => getSyncSourceReadable(t), [t]);
-  const {
-    providers,
-    syncServerStatus,
-    showPermissionWarning,
-    providersNeedingConfiguration,
-  } = useBuiltInBankSyncProviders();
+  const { providers, syncServerStatus, permissionWarning } =
+    useBuiltInBankSyncProviders();
 
   const [hoveredAccount, setHoveredAccount] = useState<
     AccountEntity['id'] | null
@@ -101,8 +97,7 @@ export function BankSync() {
         <BuiltInProviders
           providers={providers}
           syncServerStatus={syncServerStatus}
-          showPermissionWarning={showPermissionWarning}
-          providersNeedingConfiguration={providersNeedingConfiguration}
+          permissionWarning={permissionWarning}
         />
 
         {openAccounts.length === 0 && (

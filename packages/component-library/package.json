@@ -63,29 +63,29 @@
   "dependencies": {
     "@emotion/css": "^11.13.5",
     "@internationalized/date": "^3.12.2",
-    "react-aria-components": "^1.18.0",
+    "react-aria-components": "^1.19.0",
     "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.2.1",
     "@rolldown/plugin-babel": "~0.2.3",
-    "@storybook/addon-a11y": "^10.4.4",
-    "@storybook/addon-docs": "^10.4.4",
-    "@storybook/react-vite": "^10.4.4",
+    "@storybook/addon-a11y": "^10.5.2",
+    "@storybook/addon-docs": "^10.5.2",
+    "@storybook/react-vite": "^10.5.2",
     "@svgr/babel-plugin-add-jsx-attribute": "^8.0.0",
     "@svgr/cli": "^8.1.0",
     "@svgr/core": "^8.1.0",
     "@testing-library/react": "16.3.2",
     "@types/react": "^19.2.17",
     "@typescript/native-preview": "beta",
-    "@vitejs/plugin-react": "^6.0.2",
+    "@vitejs/plugin-react": "^6.0.3",
     "babel-plugin-react-compiler": "^1.0.0",
-    "eslint-plugin-storybook": "^10.4.4",
+    "eslint-plugin-storybook": "^10.5.2",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "storybook": "^10.4.4",
-    "vite": "^8.0.16",
-    "vitest": "^4.1.8"
+    "storybook": "^10.5.2",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
   },
   "peerDependencies": {
     "react": "19.2.7",

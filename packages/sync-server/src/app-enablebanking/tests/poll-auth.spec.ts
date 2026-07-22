@@ -530,16 +530,13 @@ describe('Enable Banking Express routes', () => {
 
       await request(app)
         .post('/transactions')
-        .set('X-Forwarded-For', '203.0.113.42, 10.0.0.1')
+        .set('X-Forwarded-For', '8.8.8.8, 10.0.0.1')
         .set('User-Agent', 'TestBrowser/1.0')
         .send({ accountId: 'uid-1', startDate: '2026-01-01' });
 
       // Both the balance and transaction fetch calls should include PSU headers
       for (const call of mockFetch.mock.calls) {
-        expect(call[1].headers).toHaveProperty(
-          'Psu-Ip-Address',
-          '203.0.113.42',
-        );
+        expect(call[1].headers).toHaveProperty('Psu-Ip-Address', '8.8.8.8');
         expect(call[1].headers).toHaveProperty(
           'Psu-User-Agent',
           'TestBrowser/1.0',

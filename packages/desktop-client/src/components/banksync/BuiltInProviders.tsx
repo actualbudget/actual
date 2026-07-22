@@ -22,8 +22,7 @@ import type { BuiltInBankSyncProviderState } from './useBuiltInBankSyncProviders
 type BuiltInProvidersProps = {
   providers: BuiltInBankSyncProviderState[];
   syncServerStatus: 'offline' | 'no-server' | 'online';
-  showPermissionWarning: boolean;
-  providersNeedingConfiguration: BuiltInBankSyncProviderState[];
+  permissionWarning: 'general' | 'file-owner' | null;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
 };
@@ -31,8 +30,7 @@ type BuiltInProvidersProps = {
 export function BuiltInProviders({
   providers,
   syncServerStatus,
-  showPermissionWarning,
-  providersNeedingConfiguration,
+  permissionWarning,
   isCollapsed = false,
   onToggleCollapse,
 }: BuiltInProvidersProps) {
@@ -143,9 +141,37 @@ export function BuiltInProviders({
                     flex: 1,
                   }}
                 >
-                  <Text style={{ fontSize: 17, fontWeight: 600 }}>
-                    {provider.displayName}
-                  </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 8,
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <Text style={{ fontSize: 17, fontWeight: 600 }}>
+                      {provider.displayName}
+                    </Text>
+                    {provider.isConfigured && provider.credentialSource && (
+                      <Text
+                        style={{
+                          alignSelf: 'flex-start',
+                          borderRadius: 999,
+                          backgroundColor: theme.buttonPrimaryBackground,
+                          color: theme.buttonPrimaryText,
+                          fontSize: 12,
+                          fontWeight: 500,
+                          padding: '2px 8px',
+                        }}
+                      >
+                        {provider.credentialSource === 'global' ? (
+                          <Trans>global</Trans>
+                        ) : (
+                          <Trans>this budget only</Trans>
+                        )}
+                      </Text>
+                    )}
+                  </View>
                   <Text
                     style={{
                       color: provider.isConfigured
@@ -230,21 +256,35 @@ export function BuiltInProviders({
                   <Trans>Link bank account</Trans>
                 </ButtonWithLoading>
               </View>
+              {provider.supportsPerBudgetFile &&
+                provider.credentialSource === 'global' &&
+                !provider.canConfigure && (
+                  <Text style={{ color: theme.pageTextSubdued, fontSize: 13 }}>
+                    <Trans>
+                      Reset credentials before setting credentials for this
+                      budget file.
+                    </Trans>
+                  </Text>
+                )}
             </View>
           ))}
         </View>
       )}
 
-      {showPermissionWarning && (
+      {permissionWarning && (
         <Warning>
-          <Trans>
-            You don&apos;t have the required permissions to configure bank sync
-            providers. Please contact an Admin to configure
-          </Trans>{' '}
-          {providersNeedingConfiguration
-            .map(provider => provider.displayName)
-            .join(' or ')}
-          .
+          {permissionWarning === 'file-owner' ? (
+            <Trans>
+              You don&apos;t have the required permissions to configure all bank
+              sync providers. You can set up Pluggy.ai because you are the owner
+              of this budget file.
+            </Trans>
+          ) : (
+            <Trans>
+              You don&apos;t have the required permissions to configure bank
+              sync providers. Please contact an Admin.
+            </Trans>
+          )}
         </Warning>
       )}
     </View>

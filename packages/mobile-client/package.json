@@ -14,14 +14,14 @@
     "start:android": "yarn build:android && cap run android"
   },
   "dependencies": {
-    "@capacitor/android": "^8.0.0",
-    "@capacitor/core": "^8.0.0",
-    "@capacitor/ios": "^8.0.0",
-    "@capacitor/splash-screen": "^8.0.1",
-    "@capgo/capacitor-updater": "^8.50.1"
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/core": "^8.4.2",
+    "@capacitor/ios": "^8.4.2",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capgo/capacitor-updater": "^8.51.2"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.0.0",
-    "@capgo/cli": "^8.22.0"
+    "@capacitor/cli": "^8.4.2",
+    "@capgo/cli": "^8.28.2"
   }
 }

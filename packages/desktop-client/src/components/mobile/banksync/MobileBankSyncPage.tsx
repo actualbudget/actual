@@ -35,12 +35,8 @@ export function MobileBankSyncPage() {
     'mobile.bankSyncProvidersCollapsed',
   );
   const syncSourceReadable = useMemo(() => getSyncSourceReadable(t), [t]);
-  const {
-    providers,
-    syncServerStatus,
-    showPermissionWarning,
-    providersNeedingConfiguration,
-  } = useBuiltInBankSyncProviders();
+  const { providers, syncServerStatus, permissionWarning } =
+    useBuiltInBankSyncProviders();
 
   const openAccounts = useMemo(
     () => accounts.filter(a => !a.closed),
@@ -107,8 +103,7 @@ export function MobileBankSyncPage() {
         <BuiltInProviders
           providers={providers}
           syncServerStatus={syncServerStatus}
-          showPermissionWarning={showPermissionWarning}
-          providersNeedingConfiguration={providersNeedingConfiguration}
+          permissionWarning={permissionWarning}
           isCollapsed={providersCollapsed}
           onToggleCollapse={() => setProvidersCollapsed(!providersCollapsed)}
         />
