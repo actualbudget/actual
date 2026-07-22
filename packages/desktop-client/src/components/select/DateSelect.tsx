@@ -469,8 +469,7 @@ function DateSelectDesktop({
         }}
         onBlur={e => {
           // react-aria moves focus into the calendar when it's clicked; keep
-          // the picker open and pull focus back so keyboard entry still works
-          // (with pikaday, focus never left the input).
+          // the picker open and pull focus back so keyboard entry still works.
           if (
             e.relatedTarget instanceof Element &&
             e.relatedTarget.closest('[data-date-picker]')

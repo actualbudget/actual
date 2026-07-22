@@ -1078,15 +1078,7 @@ const Transaction = memo(function Transaction({
 
   const [showReconciliationWarning, setShowReconciliationWarning] =
     useState(false);
-  const [syncTransferDate, setSyncTransferDateState] = useState(false);
-  // Pikaday's date-click handler is bound once at mount, so it always
-  // invokes a stale closure. A ref lets that stale closure still observe
-  // the latest checkbox value.
-  const syncTransferDateRef = useRef(syncTransferDate);
-  const setSyncTransferDate = (value: boolean) => {
-    syncTransferDateRef.current = value;
-    setSyncTransferDateState(value);
-  };
+  const [syncTransferDate, setSyncTransferDate] = useState(false);
 
   const onUpdate: TransactionUpdateFunction = async (name, value) => {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
@@ -1236,11 +1228,7 @@ const Transaction = memo(function Transaction({
         : name;
       onSave(deserialized, subtransactions, deserializedName);
 
-      if (
-        name === 'date' &&
-        typeof value === 'string' &&
-        syncTransferDateRef.current
-      ) {
+      if (name === 'date' && typeof value === 'string' && syncTransferDate) {
         // transaction's own leg, or a split child's leg
         const transferIds = [
           transaction.transfer_id,
