@@ -1,6 +1,7 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
 import { logger } from '#platform/server/log';
+import * as Platform from '#shared/platform';
 
 import { WorkerBridge } from './worker-bridge';
 
@@ -70,9 +71,9 @@ export function startBrowserBackend(
       sharedPort.postMessage({
         type: 'init',
         ...initPayload,
-        isSharedArrayBufferOverrideEnabled: localStorage.getItem(
-          'SharedArrayBufferOverride',
-        ),
+        isSharedArrayBufferOverrideEnabled:
+          Platform.env === 'mobile' ||
+          localStorage.getItem('SharedArrayBufferOverride'),
       });
       bridge.markInitialized();
 
@@ -100,9 +101,9 @@ export function startBrowserBackend(
     type: 'init',
     ...initPayload,
     hasSharedArrayBuffer: !!window.SharedArrayBuffer,
-    isSharedArrayBufferOverrideEnabled: localStorage.getItem(
-      'SharedArrayBufferOverride',
-    ),
+    isSharedArrayBufferOverrideEnabled:
+      Platform.env === 'mobile' ||
+      localStorage.getItem('SharedArrayBufferOverride'),
   });
 
   return worker;
