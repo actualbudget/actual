@@ -55,21 +55,8 @@ import { useLanguage } from '#hooks/useLocale';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
-const FIRST_DAY_OF_WEEK_NAMES = [
-  'sun',
-  'mon',
-  'tue',
-  'wed',
-  'thu',
-  'fri',
-  'sat',
-] as const;
-
-type FirstDayOfWeek = (typeof FIRST_DAY_OF_WEEK_NAMES)[number];
-
-export function getFirstDayOfWeek(idx: string | undefined): FirstDayOfWeek {
-  return FIRST_DAY_OF_WEEK_NAMES[parseInt(idx || '0', 10) || 0];
-}
+import { getFirstDayOfWeek } from './getFirstDayOfWeek';
+import type { FirstDayOfWeek } from './getFirstDayOfWeek';
 
 function toCalendarDate(date: Date): CalendarDate {
   return new CalendarDate(
