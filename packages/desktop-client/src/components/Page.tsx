@@ -9,6 +9,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 const HEADER_HEIGHT = 50;
+const MOBILE_HEADER_HEIGHT = `calc(${HEADER_HEIGHT}px + env(safe-area-inset-top))`;
 
 type PageHeaderProps = {
   title: ReactNode;
@@ -58,7 +59,9 @@ export function MobilePageHeader({
         alignItems: 'center',
         flexDirection: 'row',
         flexShrink: 0,
-        height: HEADER_HEIGHT,
+        height: MOBILE_HEADER_HEIGHT,
+        paddingTop: 'env(safe-area-inset-top)',
+        boxSizing: 'border-box',
         backgroundColor: theme.mobileHeaderBackground,
         '& *': {
           color: theme.mobileHeaderText,
@@ -144,7 +147,7 @@ export function MobilePageHeaderSlot({ style }: MobilePageHeaderSlotProps) {
       ref={slotRef ?? undefined}
       style={{
         flexShrink: 0,
-        minHeight: HEADER_HEIGHT,
+        minHeight: MOBILE_HEADER_HEIGHT,
         backgroundColor: theme.mobileHeaderBackground,
         ...style,
       }}
