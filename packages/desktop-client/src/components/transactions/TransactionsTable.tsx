@@ -1633,7 +1633,6 @@ const Transaction = memo(function Transaction({
                     ? setSyncTransferDate
                     : undefined
                 }
-                transferIsDeposit={transaction.amount > 0}
               />
             )}
           </CustomCell>
