@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgInformationCircle } from '@actual-app/components/icons/v2';
 import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
@@ -20,55 +19,9 @@ import type { Action } from '#components/budget/goals/actions';
 import { TWO_UP_FIELD_FLEX } from '#components/budget/goals/editor/fieldLayout';
 import { FormField, FormLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
-import {
-  hideNativeDateIconClassName,
-  InputField,
-} from '#components/mobile/MobileForms';
 import { AmountInput } from '#components/util/AmountInput';
-import { GenericInput } from '#components/util/GenericInput';
+import { MonthInput } from '#components/util/MonthInput';
 import { useFormat } from '#hooks/useFormat';
-
-type MonthFieldProps = {
-  id: string;
-  value: string;
-  onChange: (month: string) => void;
-};
-
-// we can use a month picker for mobile because we use the native datepicker
-// no such luck on desktop (yet!)
-function MonthField({ id, value, onChange }: MonthFieldProps) {
-  const { isNarrowWidth } = useResponsive();
-  if (isNarrowWidth) {
-    return (
-      <InputField
-        id={id}
-        type="month"
-        value={value}
-        onChange={event => onChange(event.target.value)}
-        className={hideNativeDateIconClassName}
-        style={{
-          width: '100%',
-          marginLeft: 0,
-          marginRight: 0,
-          boxSizing: 'border-box',
-          WebkitAppearance: 'none',
-          appearance: 'none',
-        }}
-      />
-    );
-  }
-  return (
-    <GenericInput
-      // remount when the stored month changes so the picker re-syncs
-      // to day 01 instead of lingering on whatever day the user picked
-      key={value}
-      type="date"
-      field="date"
-      value={value ? `${value}-01` : ''}
-      onChange={(next: string) => onChange(next ? next.slice(0, 7) : '')}
-    />
-  );
-}
 
 type BySaveAutomationProps = {
   template: ByTemplate | SpendTemplate;
@@ -135,7 +88,7 @@ export const BySaveAutomation = ({
         </FormField>
         <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
           <FormLabel title={t('Target month')} htmlFor="by-month-field" />
-          <MonthField
+          <MonthInput
             id="by-month-field"
             value={template.month ?? ''}
             onChange={month =>
@@ -285,7 +238,7 @@ export const BySaveAutomation = ({
               title={t('Start spending in')}
               htmlFor="by-spend-from-field"
             />
-            <MonthField
+            <MonthInput
               id="by-spend-from-field"
               value={fromMonth ?? ''}
               onChange={from =>

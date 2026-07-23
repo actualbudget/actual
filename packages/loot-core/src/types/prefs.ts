@@ -4,11 +4,9 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
-  | 'ageOfMoneyReport'
   | 'balanceForecastReport'
   | 'customThemes'
   | 'budgetAnalysisReport'
-  | 'payeeLocations'
   | 'enableBanking'
   | 'sankeyReport'
   | 'akahuBankSync'
@@ -97,6 +95,7 @@ export type LocalPrefs = Partial<{
   reportsViewLabel: boolean;
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
+  'mobile.bankSyncProvidersCollapsed': boolean;
 }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;

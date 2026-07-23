@@ -1,9 +1,16 @@
+import type {
+  ObjectExpression,
+  QueryState,
+} from '@actual-app/core/shared/query';
+import type { WithRequired } from '@actual-app/core/types/util';
+
 class Query {
   /** @type {import('@actual-app/core/shared/query').QueryState} */
-  state;
+  state: QueryState;
 
-  constructor(state) {
+  constructor(state: WithRequired<Partial<QueryState>, 'table'>) {
     this.state = {
+      tableOptions: state.tableOptions || {},
       filterExpressions: state.filterExpressions || [],
       selectExpressions: state.selectExpressions || [],
       groupExpressions: state.groupExpressions || [],
@@ -18,14 +25,14 @@ class Query {
     };
   }
 
-  filter(expr) {
+  filter(expr: ObjectExpression) {
     return new Query({
       ...this.state,
       filterExpressions: [...this.state.filterExpressions, expr],
     });
   }
 
-  unfilter(exprs) {
+  unfilter(exprs?: string[]) {
     const exprSet = new Set(exprs);
     return new Query({
       ...this.state,
@@ -35,23 +42,35 @@ class Query {
     });
   }
 
-  select(exprs = []) {
+  select(
+    exprs:
+      | Array<ObjectExpression | string>
+      | ObjectExpression
+      | string
+      | '*'
+      | ['*'] = [],
+  ) {
     if (!Array.isArray(exprs)) {
       exprs = [exprs];
     }
 
-    const query = new Query({ ...this.state, selectExpressions: exprs });
-    query.state.calculation = false;
+    const query = new Query({
+      ...this.state,
+      selectExpressions: exprs,
+      calculation: false,
+    });
     return query;
   }
 
-  calculate(expr) {
-    const query = this.select({ result: expr });
-    query.state.calculation = true;
-    return query;
+  calculate(expr: ObjectExpression | string) {
+    return new Query({
+      ...this.state,
+      selectExpressions: [{ result: expr }],
+      calculation: true,
+    });
   }
 
-  groupBy(exprs) {
+  groupBy(exprs: ObjectExpression | string | Array<ObjectExpression | string>) {
     if (!Array.isArray(exprs)) {
       exprs = [exprs];
     }
@@ -62,7 +81,7 @@ class Query {
     });
   }
 
-  orderBy(exprs) {
+  orderBy(exprs: ObjectExpression | string | Array<ObjectExpression | string>) {
     if (!Array.isArray(exprs)) {
       exprs = [exprs];
     }
@@ -73,11 +92,11 @@ class Query {
     });
   }
 
-  limit(num) {
+  limit(num: number) {
     return new Query({ ...this.state, limit: num });
   }
 
-  offset(num) {
+  offset(num: number) {
     return new Query({ ...this.state, offset: num });
   }
 
@@ -93,7 +112,7 @@ class Query {
     return new Query({ ...this.state, validateRefs: false });
   }
 
-  options(opts) {
+  options(opts: Record<string, unknown>) {
     return new Query({ ...this.state, tableOptions: opts });
   }
 
@@ -110,6 +129,6 @@ class Query {
   }
 }
 
-export function q(table) {
+export function q(table: QueryState['table']) {
   return new Query({ table });
 }
