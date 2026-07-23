@@ -165,9 +165,8 @@ export type ApiHandlers = {
   }) => Promise<number>;
 
   'api/categories-get': (arg: {
-    grouped?: boolean;
     hidden?: boolean;
-  }) => Promise<Array<APICategoryGroupEntity | APICategoryEntity>>;
+  }) => Promise<APICategoryEntity[]>;
 
   'api/category-groups-get': (arg?: {
     hidden?: boolean;

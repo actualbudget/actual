@@ -34,11 +34,14 @@
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
     "start:storybook": "yarn workspace @actual-app/components start:storybook",
     "build": "lage build",
+    "start:ios": "yarn build:browser && yarn workspace mobile-client start:ios",
+    "start:android": "yarn build:browser && yarn workspace mobile-client start:android",
     "build:server": "yarn build:browser && yarn workspace @actual-app/sync-server build",
     "build:browser": "./bin/package-browser",
     "build:desktop": "./bin/package-electron",
     "build:plugins-service": "yarn workspace plugins-service build",
     "build:api": "yarn build --scope=@actual-app/api",
+    "build:mobile": "yarn build --scope=mobile-client",
     "build:cli": "yarn build --scope=@actual-app/cli",
     "build:docs": "yarn workspace docs build",
     "build:storybook": "yarn workspace @actual-app/components build:storybook",
@@ -67,26 +70,26 @@
   "devDependencies": {
     "@monorepo-utils/workspaces-to-typescript-project-references": "^2.11.0",
     "@octokit/rest": "^22.0.1",
-    "@types/node": "^22.19.21",
+    "@types/node": "^22.20.1",
     "@types/prompts": "^2.4.9",
     "@typescript/native-preview": "beta",
     "@yarnpkg/types": "^4.0.1",
-    "eslint": "^10.5.0",
-    "eslint-plugin-perfectionist": "^5.9.0",
+    "eslint": "^10.7.0",
+    "eslint-plugin-perfectionist": "^5.10.0",
     "eslint-plugin-typescript-paths": "^0.0.33",
     "husky": "^9.1.7",
-    "knip": "^6.17.1",
-    "lage": "^2.15.13",
+    "knip": "^6.27.0",
+    "lage": "^2.15.17",
     "minimatch": "^10.2.5",
     "nano-staged": "^1.0.2",
     "npm-run-all": "^4.1.5",
-    "oxfmt": "^0.44.0",
-    "oxlint": "^1.69.0",
-    "oxlint-tsgolint": "^0.23.0",
+    "oxfmt": "^0.59.0",
+    "oxlint": "^1.74.0",
+    "oxlint-tsgolint": "^0.25.0",
     "p-limit": "^7.3.0",
     "prompts": "^2.4.2",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.10"
   },
   "dependenciesMeta": {
     "argon2": {
@@ -112,7 +115,6 @@
     "glob-hasher-linux-arm64-gnu": "1.4.2"
   },
   "resolutions": {
-    "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
     "minimatch@3.1.2": "3.1.5",
     "serialize-javascript": "^7.0.5",
     "socks": ">=2.8.3",
@@ -127,5 +129,5 @@
     "node": ">=22.18.0",
     "yarn": "^4.9.1"
   },
-  "packageManager": "yarn@4.13.0"
+  "packageManager": "yarn@4.17.1"
 }

@@ -3,7 +3,16 @@
   "version": "0.0.1",
   "license": "MIT",
   "imports": {
-    "#tokens": "./src/tokens.ts"
+    "#tokens": "./src/tokens.ts",
+    "#Button": "./src/Button.tsx",
+    "#ModeButton": "./src/ModeButton.tsx",
+    "#Popover": "./src/Popover.tsx",
+    "#styles": "./src/styles.ts",
+    "#Text": "./src/Text.tsx",
+    "#theme": "./src/theme.ts",
+    "#View": "./src/View.tsx",
+    "#hooks/*": "./src/hooks/*.ts",
+    "#icons/v1": "./src/icons/v1/index.ts"
   },
   "exports": {
     "./hooks/*": "./src/hooks/*.ts",
@@ -23,6 +32,8 @@
     "./input": "./src/Input.tsx",
     "./label": "./src/Label.tsx",
     "./menu": "./src/Menu.tsx",
+    "./mode-button": "./src/ModeButton.tsx",
+    "./month-picker": "./src/MonthPicker.tsx",
     "./paragraph": "./src/Paragraph.tsx",
     "./popover": "./src/Popover.tsx",
     "./select": "./src/Select.tsx",
@@ -39,39 +50,42 @@
     "./toggle": "./src/Toggle.tsx",
     "./tooltip": "./src/Tooltip.tsx",
     "./view": "./src/View.tsx",
-    "./color-picker": "./src/ColorPicker.tsx"
+    "./color-picker": "./src/ColorPicker.tsx",
+    "./date-range-picker": "./src/DateRangePicker.tsx"
   },
   "scripts": {
     "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --template template.ts --index-template index-template.ts --typescript --expand-props start -d . .",
-    "test": "npm-run-all -cp 'test:*'",
-    "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
+    "test": "ENV=web vitest --run -c vitest.web.config.ts",
     "start:storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
     "typecheck": "tsgo -b"
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",
-    "react-aria-components": "^1.18.0",
+    "@internationalized/date": "^3.12.2",
+    "react-aria-components": "^1.19.0",
     "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.2.1",
-    "@storybook/addon-a11y": "^10.4.4",
-    "@storybook/addon-docs": "^10.4.4",
-    "@storybook/react-vite": "^10.4.4",
+    "@rolldown/plugin-babel": "~0.2.3",
+    "@storybook/addon-a11y": "^10.5.2",
+    "@storybook/addon-docs": "^10.5.2",
+    "@storybook/react-vite": "^10.5.2",
     "@svgr/babel-plugin-add-jsx-attribute": "^8.0.0",
     "@svgr/cli": "^8.1.0",
     "@svgr/core": "^8.1.0",
     "@testing-library/react": "16.3.2",
     "@types/react": "^19.2.17",
     "@typescript/native-preview": "beta",
-    "@vitejs/plugin-react": "^6.0.2",
-    "eslint-plugin-storybook": "^10.4.4",
+    "@vitejs/plugin-react": "^6.0.3",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "eslint-plugin-storybook": "^10.5.2",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "storybook": "^10.4.4",
-    "vite": "^8.0.16",
-    "vitest": "^4.1.8"
+    "storybook": "^10.5.2",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
   },
   "peerDependencies": {
     "react": "19.2.7",

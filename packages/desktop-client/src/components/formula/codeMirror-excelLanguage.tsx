@@ -2,37 +2,62 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Trans } from 'react-i18next';
 
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
-import { autocompletion } from '@codemirror/autocomplete';
-import type { CompletionContext } from '@codemirror/autocomplete';
+import { View } from '@actual-app/components/view';
+import {
+  autocompletion,
+  insertCompletionText,
+  pickedCompletion,
+} from '@codemirror/autocomplete';
+import type { Completion, CompletionContext } from '@codemirror/autocomplete';
 import {
   HighlightStyle,
   StreamLanguage,
   syntaxHighlighting,
 } from '@codemirror/language';
 import type { StreamParser } from '@codemirror/language';
+import { RangeSetBuilder } from '@codemirror/state';
 import type { Extension } from '@codemirror/state';
 import {
+  Decoration,
   EditorView,
   hoverTooltip,
   tooltips,
   ViewPlugin,
+  WidgetType,
 } from '@codemirror/view';
-import type { Tooltip } from '@codemirror/view';
+import type { DecorationSet, Tooltip, ViewUpdate } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
+import { t } from 'i18next';
 
 import {
+  cacheFormulaBadgeRanges,
+  getFormulaBadgeRangeResult,
+  remapCachedFormulaBadgeRanges,
+} from './formulaBadgeRanges';
+import type {
+  BudgetCategoryBadge,
+  CachedFormulaBadgeRange,
+  FormulaBadgeRange,
+  FormulaBadgeVariant,
+} from './formulaBadgeRanges';
+import {
+  budgetQueryDimensions,
+  getBudgetCategoryCompletionSection,
+  getBudgetDimensionCompletionSection,
   getDynamicReportQueryCompletions,
   getFormulaCategoryForName,
   getFormulaFunctionByName,
   getFormulaFunctionCategoryConfig,
   getFunctionCompletions,
+  getFunctionSignatureCompletionSection,
   getNamedVariableCompletions,
   getRuleFieldCompletions,
   sortFormulaCompletions,
 } from './formulaCatalog';
-import type { FormulaMode } from './formulaCatalog';
+import type { FormulaFunctionDef, FormulaMode } from './formulaCatalog';
 
 // Tooltip components using the same styles as Tooltip.tsx
 function FunctionTooltip({
@@ -45,15 +70,25 @@ function FunctionTooltip({
   parameters: Array<{ name: string; description: string }>;
 }) {
   return (
-    <div style={{ maxWidth: '400px' }}>
-      <div style={{ fontWeight: 600, marginBottom: '4px' }}>{name}</div>
-      <div style={{ marginBottom: '8px' }}>{description}</div>
-      <div style={{ fontSize: '0.9em', opacity: 0.8 }}>
-        <div style={{ fontWeight: 500, marginBottom: '4px' }}>
+    <SpaceBetween
+      direction="vertical"
+      gap={8}
+      align="stretch"
+      style={{ maxWidth: '400px' }}
+    >
+      <View style={{ display: 'block', ...styles.mediumText }}>{name}</View>
+      <View style={{ display: 'block' }}>{description}</View>
+      <SpaceBetween
+        direction="vertical"
+        gap={4}
+        align="stretch"
+        style={{ ...styles.smallText, color: theme.pageTextSubdued }}
+      >
+        <View style={{ display: 'block' }}>
           <Trans>Parameters:</Trans>
-        </div>
+        </View>
         {parameters.map((p, i) => (
-          <div key={i} style={{ marginBottom: '2px' }}>
+          <View key={i} style={{ display: 'block' }}>
             •{' '}
             <code
               style={{
@@ -64,20 +99,435 @@ function FunctionTooltip({
               {p.name}
             </code>
             : {p.description}
-          </div>
+          </View>
         ))}
-      </div>
-    </div>
+      </SpaceBetween>
+    </SpaceBetween>
   );
 }
 
 function FieldTooltip({ label, info }: { label: string; info: string }) {
   return (
-    <div style={{ maxWidth: '400px' }}>
-      <div style={{ fontWeight: 600, marginBottom: '4px' }}>{label}</div>
-      <div>{info}</div>
-    </div>
+    <SpaceBetween
+      direction="vertical"
+      gap={4}
+      align="stretch"
+      style={{ maxWidth: '400px' }}
+    >
+      <View style={{ display: 'block', ...styles.mediumText }}>{label}</View>
+      <View style={{ display: 'block' }}>{info}</View>
+    </SpaceBetween>
   );
+}
+
+export type FormulaBadgeClick = {
+  view: EditorView;
+  anchorRect: DOMRect;
+  from: number;
+  to: number;
+  label: string;
+  variant: FormulaBadgeVariant;
+  categories?: BudgetCategoryBadge[];
+};
+
+export type MonthYearFormat = 'year-month' | 'month-year';
+
+export function parseMonthYear(
+  value: string,
+): { month: string; format: MonthYearFormat } | null {
+  const yearMonth = value.match(/^(\d{4})-(\d{1,2})$/);
+  if (yearMonth) {
+    const month = Number(yearMonth[2]);
+    if (month >= 1 && month <= 12) {
+      return {
+        month: `${yearMonth[1]}-${String(month).padStart(2, '0')}`,
+        format: 'year-month',
+      };
+    }
+  }
+
+  const monthYear = value.match(/^(\d{1,2})-(\d{4})$/);
+  if (monthYear) {
+    const month = Number(monthYear[1]);
+    if (month >= 1 && month <= 12) {
+      return {
+        month: `${monthYear[2]}-${String(month).padStart(2, '0')}`,
+        format: 'month-year',
+      };
+    }
+  }
+
+  return null;
+}
+
+export function formatMonthYear(month: string, format: MonthYearFormat) {
+  if (format === 'month-year') {
+    return `${month.slice(5, 7)}-${month.slice(0, 4)}`;
+  }
+  return month;
+}
+
+function applyStyle(element: HTMLElement, style: Record<string, string>) {
+  Object.assign(element.style, style);
+}
+
+class FormulaBadgeWidget extends WidgetType {
+  constructor(
+    readonly label: string,
+    readonly variant: FormulaBadgeVariant,
+    readonly range: { from: number; to: number },
+    readonly onBadgeClick?: (details: FormulaBadgeClick) => void,
+    readonly categories?: BudgetCategoryBadge[],
+  ) {
+    super();
+  }
+
+  eq(other: FormulaBadgeWidget) {
+    return (
+      other.label === this.label &&
+      other.variant === this.variant &&
+      other.range.from === this.range.from &&
+      other.range.to === this.range.to &&
+      other.onBadgeClick === this.onBadgeClick &&
+      JSON.stringify(other.categories) === JSON.stringify(this.categories)
+    );
+  }
+
+  toDOM(view: EditorView) {
+    const element = document.createElement('span');
+    const isQueryBadge = this.variant === 'query-name';
+    const isBudgetBadge = this.variant.startsWith('budget-');
+    const isCategoryList = this.variant === 'budget-category-list';
+    const baseElementStyle = {
+      display: 'inline-flex',
+      alignItems: 'center',
+      margin: '0 1px',
+      border: `1px solid ${theme.formInputBorder}`,
+      color: theme.pageText,
+      fontSize: '12px',
+    };
+    const categoryListElementStyle = {
+      maxWidth: '100%',
+      overflow: 'visible',
+      textOverflow: 'clip',
+      whiteSpace: 'normal',
+      padding: '2px 4px',
+      borderRadius: '4px',
+      backgroundColor: theme.tableRowBackgroundHover,
+      lineHeight: '20px',
+      gap: '4px',
+      flexWrap: 'wrap',
+      verticalAlign: 'middle',
+    };
+    const singleBadgeElementStyle = {
+      maxWidth: '220px',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      padding: '0 6px',
+      borderRadius: '999px',
+      lineHeight: '18px',
+    };
+    let singleBadgeColorStyle = {
+      backgroundColor: theme.pillBackground,
+    };
+
+    if (isQueryBadge) {
+      singleBadgeColorStyle = {
+        backgroundColor: theme.noticeBackground,
+      };
+    } else if (isBudgetBadge) {
+      singleBadgeColorStyle = {
+        backgroundColor: theme.buttonNormalBackground,
+      };
+    }
+
+    element.title = this.label;
+    if (isCategoryList) {
+      applyStyle(element, {
+        ...baseElementStyle,
+        ...categoryListElementStyle,
+      });
+
+      for (const category of this.categories ?? []) {
+        const badge = document.createElement('span');
+        const categoryBadgeStyle = {
+          display: 'inline-flex',
+          alignItems: 'center',
+          maxWidth: '100%',
+          overflow: 'visible',
+          textOverflow: 'clip',
+          whiteSpace: 'normal',
+          overflowWrap: 'anywhere',
+          padding: '0 6px',
+          borderRadius: '999px',
+          backgroundColor: theme.buttonNormalBackground,
+          color: theme.pageText,
+          lineHeight: '18px',
+        };
+
+        badge.textContent = category.label;
+        badge.title = category.label;
+        applyStyle(badge, {
+          ...categoryBadgeStyle,
+        });
+        element.appendChild(badge);
+      }
+    } else {
+      applyStyle(element, {
+        ...baseElementStyle,
+        ...singleBadgeElementStyle,
+        ...singleBadgeColorStyle,
+      });
+      element.textContent = this.label;
+    }
+
+    if (
+      this.onBadgeClick &&
+      [
+        'query-name',
+        'budget-dimension',
+        'budget-timeframe',
+        'budget-category-list',
+      ].includes(this.variant)
+    ) {
+      element.style.cursor = 'pointer';
+      element.addEventListener('mousedown', event => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      element.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.onBadgeClick?.({
+          view,
+          anchorRect: element.getBoundingClientRect(),
+          from: this.range.from,
+          to: this.range.to,
+          label: this.label,
+          variant: this.variant,
+          categories: this.categories,
+        });
+      });
+    }
+    return element;
+  }
+}
+
+function formulaBadgeExtension(
+  mode: FormulaMode,
+  queries?: Record<string, unknown>,
+  variables?: Record<string, number | string>,
+  onBadgeClick?: (details: FormulaBadgeClick) => void,
+  categoryBadges?: Record<string, string>,
+): Extension {
+  const buildDecorations = (
+    view: EditorView,
+    badgeRanges: FormulaBadgeRange[],
+  ): DecorationSet => {
+    const builder = new RangeSetBuilder<Decoration>();
+
+    badgeRanges
+      .filter(({ from, to }) =>
+        view.visibleRanges.some(range => from < range.to && to > range.from),
+      )
+      .sort((a, b) => a.from - b.from || a.to - b.to)
+      .forEach(({ from, to, label, variant, categories }) => {
+        builder.add(
+          from,
+          to,
+          Decoration.replace({
+            widget: new FormulaBadgeWidget(
+              label,
+              variant,
+              { from, to },
+              onBadgeClick,
+              categories,
+            ),
+            inclusive: false,
+          }),
+        );
+      });
+
+    return builder.finish();
+  };
+
+  return ViewPlugin.fromClass(
+    class {
+      decorations: DecorationSet;
+      lastValidBadgeRanges: CachedFormulaBadgeRange[] = [];
+
+      constructor(view: EditorView) {
+        this.decorations = this.buildDecorations(view);
+      }
+
+      update(update: ViewUpdate) {
+        if (update.docChanged || update.viewportChanged) {
+          this.decorations = this.buildDecorations(update.view);
+        }
+      }
+
+      buildDecorations(view: EditorView) {
+        const formula = view.state.doc.toString();
+        const result = getFormulaBadgeRangeResult({
+          formula,
+          mode,
+          queries,
+          variables,
+          categoryBadges,
+        });
+        let badgeRanges = result.ranges;
+
+        if (result.status === 'ok') {
+          this.lastValidBadgeRanges = cacheFormulaBadgeRanges(
+            formula,
+            badgeRanges,
+          );
+        } else if (result.status === 'inactive') {
+          this.lastValidBadgeRanges = [];
+        } else {
+          badgeRanges = badgeRanges.concat(
+            remapCachedFormulaBadgeRanges({
+              formula,
+              cachedRanges: this.lastValidBadgeRanges,
+              blockedRanges: badgeRanges,
+            }),
+          );
+        }
+
+        return buildDecorations(view, badgeRanges);
+      }
+    },
+    {
+      decorations: plugin => plugin.decorations,
+      provide: plugin =>
+        EditorView.atomicRanges.of(
+          view => view.plugin(plugin)?.decorations ?? Decoration.none,
+        ),
+    },
+  );
+}
+
+function createContextFunctionCompletion(
+  name: string,
+  func: FormulaFunctionDef,
+): Completion {
+  return {
+    label: name,
+    type: 'function',
+    section: getFunctionSignatureCompletionSection(),
+    detail: `(${func.parameters.map(p => p.name).join(', ')})`,
+    info: [
+      func.description,
+      '',
+      `${t('Parameters:')} ${func.parameters.map(p => p.name).join(', ')}`,
+      '',
+      func.parameters.map(p => `- ${p.name}: ${p.description}`).join('\n'),
+    ].join('\n'),
+    apply: view => {
+      view.dispatch({ selection: view.state.selection });
+    },
+    boost: 99,
+  };
+}
+
+export function getFormulaStringCompletionEdit({
+  value,
+  hasOpeningQuote,
+  hasClosingQuote,
+}: {
+  value: string;
+  hasOpeningQuote: boolean;
+  hasClosingQuote: boolean;
+}) {
+  return {
+    text: `${hasOpeningQuote ? '' : '"'}${value}"`,
+    offsetClosingQuote: hasClosingQuote ? 1 : 0,
+  };
+}
+
+function applyFormulaStringCompletion(value: string): Completion['apply'] {
+  return (view, completion, from, to) => {
+    const { text, offsetClosingQuote } = getFormulaStringCompletionEdit({
+      value,
+      hasOpeningQuote: from > 0 && view.state.sliceDoc(from - 1, from) === '"',
+      hasClosingQuote: view.state.sliceDoc(to, to + 1) === '"',
+    });
+
+    view.dispatch({
+      ...insertCompletionText(view.state, text, from, to + offsetClosingQuote),
+      annotations: pickedCompletion.of(completion),
+    });
+  };
+}
+
+function getActiveFunctionArgumentContext(text: string) {
+  const stack: Array<{
+    kind: 'function' | 'group' | 'array';
+    name?: string;
+    argumentIndex: number;
+  }> = [];
+  let isInString = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (char === '"') {
+      isInString = !isInString;
+      continue;
+    }
+
+    if (isInString) {
+      continue;
+    }
+
+    if (char === '(') {
+      const functionMatch = text
+        .slice(0, index)
+        .match(/([A-Za-z_][A-Za-z0-9_]*)\s*$/);
+      stack.push({
+        kind: functionMatch ? 'function' : 'group',
+        name: functionMatch?.[1].toUpperCase(),
+        argumentIndex: 0,
+      });
+      continue;
+    }
+
+    if (char === '{') {
+      stack.push({ kind: 'array', argumentIndex: 0 });
+      continue;
+    }
+
+    if (char === ')' || char === '}') {
+      stack.pop();
+      continue;
+    }
+
+    if (char === ',') {
+      const activeFrame = stack.at(-1);
+      if (activeFrame?.kind === 'function') {
+        activeFrame.argumentIndex += 1;
+      }
+    }
+  }
+
+  let activeFunction: {
+    kind: 'function' | 'group' | 'array';
+    name?: string;
+    argumentIndex: number;
+  } | null = null;
+  for (let index = stack.length - 1; index >= 0; index -= 1) {
+    if (stack[index].kind === 'function') {
+      activeFunction = stack[index];
+      break;
+    }
+  }
+
+  return activeFunction?.name
+    ? {
+        name: activeFunction.name,
+        argumentIndex: activeFunction.argumentIndex,
+      }
+    : null;
 }
 
 // Excel formula syntax parser for CodeMirror
@@ -150,7 +600,36 @@ export function excelFormulaAutocomplete(
   mode: FormulaMode,
   queries?: Record<string, unknown>,
   variables?: Record<string, number | string>,
+  categoryBadges?: Record<string, string>,
 ): Extension {
+  const functionCompletions = getFunctionCompletions(mode);
+  const queryCompletions =
+    mode === 'query' ? getDynamicReportQueryCompletions(queries) : [];
+  const variableCompletions = getNamedVariableCompletions(variables);
+  const budgetDimensionCompletions: Completion[] =
+    mode === 'query'
+      ? budgetQueryDimensions.map(dimension => ({
+          label: dimension,
+          type: 'constant',
+          section: getBudgetDimensionCompletionSection(),
+          info: t('Budget query dimension.'),
+          apply: applyFormulaStringCompletion(dimension),
+          boost: 18,
+        }))
+      : [];
+  const budgetCategoryCompletions: Completion[] =
+    mode === 'query' && categoryBadges
+      ? Object.entries(categoryBadges).map(([categoryId, label]) => ({
+          label,
+          type: 'constant',
+          section: getBudgetCategoryCompletionSection(),
+          detail: categoryId,
+          info: t('Budget category for BUDGET_QUERY category arrays.'),
+          apply: applyFormulaStringCompletion(categoryId),
+          boost: 17,
+        }))
+      : [];
+
   return autocompletion({
     override: [
       (context: CompletionContext) => {
@@ -159,21 +638,66 @@ export function excelFormulaAutocomplete(
           return null;
         }
 
-        const suggestions = [
-          ...getNamedVariableCompletions(variables),
-          ...(mode === 'query'
-            ? getDynamicReportQueryCompletions(queries)
-            : []),
-          ...getFunctionCompletions(mode),
+        const activeFunctionContext = getActiveFunctionArgumentContext(
+          context.state.doc.sliceString(0, context.pos),
+        );
+        const activeFunctionDefinition = activeFunctionContext
+          ? getFormulaFunctionByName(activeFunctionContext.name, mode)
+          : undefined;
+        const activeFunctionSignatureCompletion =
+          activeFunctionContext && activeFunctionDefinition
+            ? createContextFunctionCompletion(
+                activeFunctionContext.name,
+                activeFunctionDefinition,
+              )
+            : null;
+        const isBudgetQueryContext =
+          mode === 'query' && activeFunctionContext?.name === 'BUDGET_QUERY';
+
+        const baseSuggestions: Completion[] = [
+          ...variableCompletions,
+          ...budgetDimensionCompletions,
+          ...budgetCategoryCompletions,
+          ...queryCompletions,
+          ...functionCompletions,
+          ...(mode === 'transaction' ? getRuleFieldCompletions() : []),
         ];
 
-        if (mode === 'transaction') {
-          suggestions.push(...getRuleFieldCompletions());
-        }
+        const contextualSuggestions: Completion[] = activeFunctionContext
+          ? [
+              ...(activeFunctionSignatureCompletion
+                ? [activeFunctionSignatureCompletion]
+                : []),
+              ...(isBudgetQueryContext &&
+              activeFunctionContext.argumentIndex === 0
+                ? budgetDimensionCompletions
+                : []),
+              ...(isBudgetQueryContext &&
+              activeFunctionContext.argumentIndex === 1
+                ? budgetCategoryCompletions
+                : []),
+              ...(isBudgetQueryContext &&
+              (activeFunctionContext.argumentIndex === 2 ||
+                activeFunctionContext.argumentIndex === 3)
+                ? queryCompletions
+                : []),
+            ]
+          : [];
+
+        const suggestions = activeFunctionContext
+          ? [
+              ...contextualSuggestions,
+              ...sortFormulaCompletions(
+                baseSuggestions.filter(
+                  suggestion => !contextualSuggestions.includes(suggestion),
+                ),
+              ),
+            ]
+          : sortFormulaCompletions(baseSuggestions);
 
         return {
           from: word.from,
-          options: sortFormulaCompletions(suggestions),
+          options: suggestions,
         };
       },
     ],
@@ -365,7 +889,6 @@ const autocompletePopoverTheme = EditorView.baseTheme({
 
   // Matched text within a label
   '.cm-tooltip.cm-tooltip-autocomplete .cm-completionMatchedText': {
-    fontWeight: '600',
     textDecoration: 'underline',
     textUnderlineOffset: '2px',
   },
@@ -651,11 +1174,20 @@ export function excelFormulaExtension(
   queries?: Record<string, unknown>,
   isDark?: boolean,
   variables?: Record<string, number | string>,
+  onBadgeClick?: (details: FormulaBadgeClick) => void,
+  categoryBadges?: Record<string, string>,
 ): Extension[] {
   return [
     excelFormulaLanguage,
-    excelFormulaAutocomplete(mode, queries, variables),
+    excelFormulaAutocomplete(mode, queries, variables, categoryBadges),
     excelFormulaHover(mode),
+    formulaBadgeExtension(
+      mode,
+      queries,
+      variables,
+      onBadgeClick,
+      categoryBadges,
+    ),
     isDark ? excelFormulaDarkHighlighting : excelFormulaHighlighting,
     isDark ? functionCategoryThemeDark : functionCategoryTheme,
     tooltipZIndexTheme,

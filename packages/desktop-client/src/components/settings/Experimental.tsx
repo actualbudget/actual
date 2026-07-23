@@ -221,22 +221,10 @@ export function ExperimentalFeatures() {
               <Trans>Balance Forecast Report</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="ageOfMoneyReport"
-              feedbackLink="https://github.com/actualbudget/actual/issues/7006"
-            >
-              <Trans>Age of Money Report</Trans>
-            </FeatureToggle>
-            <FeatureToggle
               flag="budgetAnalysisReport"
               feedbackLink="https://github.com/actualbudget/actual/pull/6742"
             >
               <Trans>Budget Analysis Report</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="payeeLocations"
-              feedbackLink="https://github.com/actualbudget/actual/issues/6706"
-            >
-              <Trans>Payee Locations</Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="enableBanking"

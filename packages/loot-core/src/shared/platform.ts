@@ -25,6 +25,8 @@ const userAgent = navigator.userAgent;
 // True for all browsers on iOS (iPhone/iPad/iPod) — not macOS.
 export const isIOS = /iP(hone|ad|od)/.test(userAgent);
 
+export const isAndroid = /Android/.test(userAgent);
+
 // True only for Safari on iOS — Chrome (CriOS), Firefox (FxiOS), Edge (EdgiOS),
 // etc. carry their own tokens and are excluded.
 export const isIOSAgent =

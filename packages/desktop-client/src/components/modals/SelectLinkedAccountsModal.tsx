@@ -73,6 +73,57 @@ function isNewAccountOption(
   );
 }
 
+/**
+ * Computes which local accounts should be pre-linked to which external
+ * accounts when the modal first opens. When `upgradingAccountId` is set and
+ * there's exactly one external account that doesn't already match a known
+ * local account, it's unambiguous which row it belongs to, so it's
+ * preselected. If there's more than one unmatched external account, guessing
+ * would risk claiming the wrong row (and hiding the account from every other
+ * row's picker), so it's left for the user to pick manually.
+ */
+export function computeInitialLinkState(
+  localAccounts: AccountEntity[],
+  externalAccounts: ExternalAccount[],
+  upgradingAccountId: string | undefined,
+): {
+  initialDraftLinkAccounts: Map<string, 'linking' | 'unlinking'>;
+  initiallyChosenAccounts: Record<string, string>;
+} {
+  const externalAccountIds = new Set(externalAccounts.map(a => a.account_id));
+  const initialDraftLinkAccounts = new Map<string, 'linking' | 'unlinking'>();
+  for (const acc of localAccounts) {
+    if (acc.account_id && externalAccountIds.has(acc.account_id)) {
+      initialDraftLinkAccounts.set(acc.account_id, 'linking');
+    }
+  }
+
+  const initiallyChosenAccounts: Record<string, string> = Object.fromEntries(
+    localAccounts
+      .filter(acc => acc.account_id)
+      .map(acc => [acc.account_id, acc.id]),
+  );
+
+  const unmatchedExternalAccounts = externalAccounts.filter(
+    account => initiallyChosenAccounts[account.account_id] == null,
+  );
+
+  if (
+    upgradingAccountId &&
+    unmatchedExternalAccounts.length === 1 &&
+    !Object.values(initiallyChosenAccounts).includes(upgradingAccountId)
+  ) {
+    initiallyChosenAccounts[unmatchedExternalAccounts[0].account_id] =
+      upgradingAccountId;
+    initialDraftLinkAccounts.set(
+      unmatchedExternalAccounts[0].account_id,
+      'linking',
+    );
+  }
+
+  return { initialDraftLinkAccounts, initiallyChosenAccounts };
+}
+
 export type SelectLinkedAccountsModalProps =
   | {
       requisitionId: string;
@@ -161,48 +212,19 @@ export function SelectLinkedAccountsModal({
   const dispatch = useDispatch();
   const { data: allAccounts = [] } = useAccounts();
   const localAccounts = allAccounts.filter(a => a.closed === 0);
-  const { initialDraftLinkAccounts, initiallyChosenAccounts } = useMemo(() => {
-    const externalAccountIds = new Set(
-      externalAccounts?.map(a => a.account_id) || [],
-    );
-    const initialDraftLinkAccounts = new Map<string, 'linking' | 'unlinking'>();
-    for (const acc of localAccounts) {
-      if (acc.account_id && externalAccountIds.has(acc.account_id)) {
-        initialDraftLinkAccounts.set(acc.account_id, 'linking');
-      }
-    }
-
-    const initiallyChosenAccounts = Object.fromEntries(
-      localAccounts
-        .filter(acc => acc.account_id)
-        .map(acc => [acc.account_id, acc.id]),
-    );
-
-    const preselectedExternalAccount =
-      propsWithSortedExternalAccounts.externalAccounts.find(
-        account => initiallyChosenAccounts[account.account_id] == null,
-      );
-
-    if (
-      upgradingAccountId &&
-      preselectedExternalAccount &&
-      !Object.values(initiallyChosenAccounts).includes(upgradingAccountId)
-    ) {
-      initiallyChosenAccounts[preselectedExternalAccount.account_id] =
-        upgradingAccountId;
-      initialDraftLinkAccounts.set(
-        preselectedExternalAccount.account_id,
-        'linking',
-      );
-    }
-
-    return { initialDraftLinkAccounts, initiallyChosenAccounts };
-  }, [
-    localAccounts,
-    externalAccounts,
-    propsWithSortedExternalAccounts.externalAccounts,
-    upgradingAccountId,
-  ]);
+  const { initialDraftLinkAccounts, initiallyChosenAccounts } = useMemo(
+    () =>
+      computeInitialLinkState(
+        localAccounts,
+        propsWithSortedExternalAccounts.externalAccounts,
+        upgradingAccountId,
+      ),
+    [
+      localAccounts,
+      propsWithSortedExternalAccounts.externalAccounts,
+      upgradingAccountId,
+    ],
+  );
 
   const [draftLinkAccounts, setDraftLinkAccounts] = useState<
     Map<string, 'linking' | 'unlinking'>

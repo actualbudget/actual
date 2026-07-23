@@ -112,7 +112,6 @@ export function Overview({ dashboard }: OverviewProps) {
   const dispatch = useDispatch();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
-  const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
   const balanceForecastReportEnabled = useFeatureFlag('balanceForecastReport');
 
@@ -589,14 +588,10 @@ export function Overview({ dashboard }: OverviewProps) {
                               name: 'crossover-card' as const,
                               text: t('Crossover point'),
                             },
-                            ...(ageOfMoneyReportEnabled
-                              ? [
-                                  {
-                                    name: 'age-of-money-card' as const,
-                                    text: t('Age of Money'),
-                                  },
-                                ]
-                              : []),
+                            {
+                              name: 'age-of-money-card' as const,
+                              text: t('Age of Money'),
+                            },
                             {
                               name: 'spending-card' as const,
                               text: t('Spending analysis'),
@@ -816,8 +811,7 @@ export function Overview({ dashboard }: OverviewProps) {
                               onMetaChange(item, newMeta)
                             }
                           />
-                        ) : widget.type === 'age-of-money-card' &&
-                          ageOfMoneyReportEnabled ? (
+                        ) : widget.type === 'age-of-money-card' ? (
                           <AgeOfMoneyCard
                             widgetId={item.i}
                             isEditing={isEditing}

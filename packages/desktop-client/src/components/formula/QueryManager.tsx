@@ -24,6 +24,7 @@ import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
 import { getLiveRange } from '#components/reports/getLiveRange';
 import {
+  asMonthSlidingTimeFrame,
   calculateTimeRange,
   getLatestRange,
   validateEnd,
@@ -669,11 +670,13 @@ function QueryItem({
             onPress={() => {
               const newMode =
                 timeRangeMode === 'static' ? 'sliding-window' : 'static';
-              const [newStart, newEnd] = calculateTimeRange({
-                start: startDate,
-                end: endDate,
-                mode: newMode,
-              });
+              const [newStart, newEnd] = calculateTimeRange(
+                asMonthSlidingTimeFrame({
+                  start: startDate,
+                  end: endDate,
+                  mode: newMode,
+                }),
+              );
 
               setStartDate(newStart);
               setEndDate(newEnd);
