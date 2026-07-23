@@ -97,6 +97,68 @@ export function isValidYearMonth(value: string): boolean {
   return month >= 1 && month <= 12;
 }
 
+export function parseBudgetCycleStartDay(value: string | undefined): number {
+  if (!value) return 1;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 28) {
+    return 1;
+  }
+  return parsed;
+}
+
+export function getBudgetPeriodId(date: string, startDay: number): string {
+  const parsed = _parse(date);
+  const day = d.getDate(parsed);
+
+  if (day < startDay) {
+    return d.format(d.subMonths(parsed, 1), 'yyyy-MM');
+  }
+  return d.format(parsed, 'yyyy-MM');
+}
+
+export function getBudgetPeriodBounds(
+  periodId: string,
+  startDay: number,
+): { start: string; end: string } {
+  const startMonthDate = _parse(periodId);
+  if (startDay === 1) {
+    return {
+      start: dayFromDate(d.startOfMonth(startMonthDate)),
+      end: dayFromDate(d.endOfMonth(startMonthDate)),
+    };
+  }
+
+  const startDate = d.setDate(startMonthDate, startDay);
+  const endDate = d.subDays(d.addMonths(startDate, 1), 1);
+  return {
+    start: dayFromDate(startDate),
+    end: dayFromDate(endDate),
+  };
+}
+
+export function getPreviousBudgetPeriod(periodId: string): string {
+  return prevMonth(periodId);
+}
+
+export function getNextBudgetPeriod(periodId: string): string {
+  return nextMonth(periodId);
+}
+
+export function formatBudgetPeriod(
+  periodId: string,
+  startDay: number,
+  locale?: Locale,
+): string {
+  if (startDay === 1) {
+    return nameForMonth(periodId, locale);
+  }
+
+  const { start, end } = getBudgetPeriodBounds(periodId, startDay);
+  const startFmt = format(start, 'MMM d', locale);
+  const endFmt = format(end, 'MMM d', locale);
+  return `${startFmt} - ${endFmt}`;
+}
+
 export function weekFromDate(
   date: DateLike,
   firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'],
