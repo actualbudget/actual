@@ -1266,7 +1266,6 @@ const Transaction = memo(function Transaction({
             console.error('Failed to sync transfer date:', error);
           });
         }
-        setSyncTransferDate(false);
       }
     }
   };
