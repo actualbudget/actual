@@ -130,6 +130,7 @@ import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import type { SplitsExpandedContextValue } from '#hooks/useSplitsExpanded';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -1078,7 +1079,12 @@ const Transaction = memo(function Transaction({
 
   const [showReconciliationWarning, setShowReconciliationWarning] =
     useState(false);
-  const [syncTransferDate, setSyncTransferDate] = useState(false);
+  const [syncTransferDatePref, setSyncTransferDatePref] = useSyncedPref(
+    `sync-transfer-date-${transaction.account}`,
+  );
+  const syncTransferDate = String(syncTransferDatePref) === 'true';
+  const setSyncTransferDate = (checked: boolean) =>
+    setSyncTransferDatePref(checked ? 'true' : 'false');
 
   const onUpdate: TransactionUpdateFunction = async (name, value) => {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
@@ -1600,7 +1606,6 @@ const Transaction = memo(function Transaction({
               date ? formatDate(parseISO(date), dateFormat) : ''
             }
             onExpose={name => {
-              setSyncTransferDate(false);
               if (!isPreview) {
                 onEdit(id, name);
               }
