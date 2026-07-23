@@ -276,7 +276,7 @@ describe('buildDateRangePresets', () => {
       ytdPreset!.onSelect();
 
       expect(onSelect).toHaveBeenCalledOnce();
-      const [mode] = onSelect.mock.calls[0][0];
+      const [, , mode] = onSelect.mock.calls[0][0];
       expect(mode).toBe('yearToDate');
     });
 
@@ -295,7 +295,7 @@ describe('buildDateRangePresets', () => {
       threeMonthPreset!.onSelect();
 
       expect(onSelect).toHaveBeenCalledOnce();
-      const [mode] = onSelect.mock.calls[0][0];
+      const [, , mode] = onSelect.mock.calls[0][0];
       expect(mode).toBe('sliding-window');
     });
 
@@ -314,7 +314,7 @@ describe('buildDateRangePresets', () => {
       allTimePreset!.onSelect();
 
       expect(onSelect).toHaveBeenCalledOnce();
-      const [mode] = onSelect.mock.calls[0][0];
+      const [, , mode] = onSelect.mock.calls[0][0];
       expect(mode).toBe('full');
     });
   });
