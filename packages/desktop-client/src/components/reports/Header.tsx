@@ -24,9 +24,7 @@ import { useDateFormat } from '#hooks/useDateFormat';
 import { useLanguage } from '#hooks/useLocale';
 
 import { buildDateRangePresets } from './dateRangePresets';
-import {
-  calculateTimeRange,
-} from './reportRanges';
+import { calculateTimeRange } from './reportRanges';
 
 type HeaderProps = {
   start: TimeFrame['start'];

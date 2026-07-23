@@ -79,7 +79,12 @@ export function buildDateRangePresets({
     return [
       ...(show1Month
         ? [
-            makePreset('next-month', t('Next month'), () => getNextRange(0), onSelectRange),
+            makePreset(
+              'next-month',
+              t('Next month'),
+              () => getNextRange(0),
+              onSelectRange,
+            ),
           ]
         : []),
       makePreset(
@@ -94,7 +99,12 @@ export function buildDateRangePresets({
         () => getNextRange(5),
         onSelectRange,
       ),
-      makePreset('next-year', t('Next year'), () => getNextRange(11), onSelectRange),
+      makePreset(
+        'next-year',
+        t('Next year'),
+        () => getNextRange(11),
+        onSelectRange,
+      ),
       makePreset(
         'all-future',
         t('All future'),
@@ -107,11 +117,26 @@ export function buildDateRangePresets({
   return [
     ...(show1Month
       ? [
-          makePreset('1-month', t('1 month'), () => getLatestRange(0), onSelectRange),
+          makePreset(
+            '1-month',
+            t('1 month'),
+            () => getLatestRange(0),
+            onSelectRange,
+          ),
         ]
       : []),
-    makePreset('3-months', t('3 months'), () => getLatestRange(2), onSelectRange),
-    makePreset('6-months', t('6 months'), () => getLatestRange(5), onSelectRange),
+    makePreset(
+      '3-months',
+      t('3 months'),
+      () => getLatestRange(2),
+      onSelectRange,
+    ),
+    makePreset(
+      '6-months',
+      t('6 months'),
+      () => getLatestRange(5),
+      onSelectRange,
+    ),
     makePreset('1-year', t('1 year'), () => getLatestRange(11), onSelectRange),
     makePreset(
       'year-to-date',

@@ -730,7 +730,6 @@ function QueryItem({
             }}
           />
         ) : null}
-
       </View>
 
       <View style={{ marginBottom: 8, flex: 1 }}>
