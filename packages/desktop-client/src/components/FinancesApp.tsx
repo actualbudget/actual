@@ -277,27 +277,51 @@ export function FinancesApp() {
 
                   <Route
                     path="/schedules"
-                    element={<NarrowAlternate name="Schedules" />}
+                    element={
+                      <ErrorBoundary
+                        FallbackComponent={FeatureErrorFallback}
+                        resetKeys={[location.pathname]}
+                      >
+                        <NarrowAlternate name="Schedules" />
+                      </ErrorBoundary>
+                    }
                   />
                   <Route
                     path="/schedules/:id"
                     element={
-                      <WideNotSupported>
-                        <NarrowAlternate name="ScheduleEdit" />
-                      </WideNotSupported>
+                      <ErrorBoundary
+                        FallbackComponent={FeatureErrorFallback}
+                        resetKeys={[location.pathname]}
+                      >
+                        <WideNotSupported>
+                          <NarrowAlternate name="ScheduleEdit" />
+                        </WideNotSupported>
+                      </ErrorBoundary>
                     }
                   />
 
                   <Route
                     path="/payees"
-                    element={<NarrowAlternate name="Payees" />}
+                    element={
+                      <ErrorBoundary
+                        FallbackComponent={FeatureErrorFallback}
+                        resetKeys={[location.pathname]}
+                      >
+                        <NarrowAlternate name="Payees" />
+                      </ErrorBoundary>
+                    }
                   />
                   <Route
                     path="/payees/:id"
                     element={
-                      <WideNotSupported>
-                        <NarrowAlternate name="PayeeEdit" />
-                      </WideNotSupported>
+                      <ErrorBoundary
+                        FallbackComponent={FeatureErrorFallback}
+                        resetKeys={[location.pathname]}
+                      >
+                        <WideNotSupported>
+                          <NarrowAlternate name="PayeeEdit" />
+                        </WideNotSupported>
+                      </ErrorBoundary>
                     }
                   />
                   <Route
@@ -324,14 +348,26 @@ export function FinancesApp() {
                   />
                   <Route
                     path="/bank-sync"
-                    element={<NarrowAlternate name="BankSync" />}
+                    element={
+                      <ErrorBoundary
+                        FallbackComponent={FeatureErrorFallback}
+                        resetKeys={[location.pathname]}
+                      >
+                        <NarrowAlternate name="BankSync" />
+                      </ErrorBoundary>
+                    }
                   />
                   <Route
                     path="/bank-sync/account/:accountId/edit"
                     element={
-                      <WideNotSupported redirectTo="/bank-sync">
-                        <MobileBankSyncAccountEditPage />
-                      </WideNotSupported>
+                      <ErrorBoundary
+                        FallbackComponent={FeatureErrorFallback}
+                        resetKeys={[location.pathname]}
+                      >
+                        <WideNotSupported redirectTo="/bank-sync">
+                          <MobileBankSyncAccountEditPage />
+                        </WideNotSupported>
+                      </ErrorBoundary>
                     }
                   />
                   <Route path="/tags" element={<ManageTagsPage />} />

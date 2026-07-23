@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/crdt",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "CRDT layer of Actual",
   "license": "MIT",
   "repository": {
@@ -22,14 +22,14 @@
     ".": "./src/index.ts"
   },
   "publishConfig": {
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "exports": {
       ".": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       }
-    },
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts"
+    }
   },
   "scripts": {
     "build:node": "vite build",
@@ -39,15 +39,15 @@
     "typecheck": "tsgo -b"
   },
   "dependencies": {
-    "@bufbuild/protobuf": "^2.12.0",
+    "@bufbuild/protobuf": "^2.12.1",
     "murmurhash": "^2.0.1",
     "uuid": "^14.0.1"
   },
   "devDependencies": {
-    "@bufbuild/protoc-gen-es": "^2.12.0",
+    "@bufbuild/protoc-gen-es": "^2.12.1",
     "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.0.1",
-    "vite": "^8.0.16",
-    "vitest": "^4.1.8"
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
   }
 }

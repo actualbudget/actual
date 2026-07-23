@@ -21,7 +21,10 @@ import {
   normalizeQueryTimeFrameEnd,
   normalizeQueryTimeFrameStart,
 } from '#components/formula/queryTimeFrame';
-import { calculateTimeRange } from '#components/reports/reportRanges';
+import {
+  asMonthSlidingTimeFrame,
+  calculateTimeRange,
+} from '#components/reports/reportRanges';
 import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
 
 import { useGlobalPref } from './useGlobalPref';
@@ -329,7 +332,9 @@ export async function buildFilteredTransactionsQuery(
 
   // Add date range filter if provided
   if (timeFrame && timeFrame.mode) {
-    const [calculatedStart, calculatedEnd] = calculateTimeRange(timeFrame);
+    const [calculatedStart, calculatedEnd] = calculateTimeRange(
+      asMonthSlidingTimeFrame(timeFrame),
+    );
     const startDate = normalizeQueryTimeFrameStart(calculatedStart);
     const endDate = normalizeQueryTimeFrameEnd(calculatedEnd);
 
@@ -524,7 +529,9 @@ async function extractQueryTimeframeStart(
     return monthUtils.currentMonth();
   }
 
-  const [startMonth] = calculateTimeRange(queryConfig.timeFrame);
+  const [startMonth] = calculateTimeRange(
+    asMonthSlidingTimeFrame(queryConfig.timeFrame),
+  );
   return startMonth;
 }
 
@@ -541,7 +548,9 @@ async function extractQueryTimeframeEnd(
     return monthUtils.currentMonth();
   }
 
-  const [, endMonth] = calculateTimeRange(queryConfig.timeFrame);
+  const [, endMonth] = calculateTimeRange(
+    asMonthSlidingTimeFrame(queryConfig.timeFrame),
+  );
   return endMonth;
 }
 

@@ -1,6 +1,5 @@
-import path from 'path';
-
 import express from 'express';
+import type { Request } from 'express';
 
 import { sha256String } from '#util/hash';
 import {
@@ -28,6 +27,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
+const ELECTRON_APP_ORIGIN = 'app://actual';
+
 function validateOrigin(origin: string | undefined) {
   let url;
   try {
@@ -41,6 +42,15 @@ function validateOrigin(origin: string | undefined) {
   return url.origin;
 }
 
+function resolveRedirectHost(req: Request) {
+  const { origin } = req.headers;
+  const host = req.get('host');
+  if (origin === ELECTRON_APP_ORIGIN && host) {
+    return `${req.protocol}://${host}`;
+  }
+  return validateOrigin(origin);
+}
+
 const SAFE_ID = /^[a-zA-Z0-9_-]+$/;
 function sanitizeId<T extends string = string>(id: unknown): T {
   if (typeof id !== 'string' || !SAFE_ID.test(id)) {
@@ -49,11 +59,30 @@ function sanitizeId<T extends string = string>(id: unknown): T {
   return id as T;
 }
 
+const LINK_PAGE_HTML = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Actual</title>
+  </head>
+  <body>
+    <script>
+      window.close();
+    </script>
+
+    <p>Please wait...</p>
+    <p>
+      The window should close automatically. If nothing happened you can close
+      this window or tab.
+    </p>
+  </body>
+</html>`;
+
 const app = express();
 app.use(requestLoggerMiddleware);
 
 app.get('/link', function (req, res) {
-  res.sendFile('link.html', { root: path.resolve('./src/app-gocardless') });
+  res.send(LINK_PAGE_HTML);
 });
 
 export { app as handlers };
@@ -74,7 +103,7 @@ app.post(
   handleError(async (req, res) => {
     const { institutionId: rawInstitutionId } = req.body || {};
     const institutionId = sanitizeId<GoCardlessInstitutionId>(rawInstitutionId);
-    const host = validateOrigin(req.headers.origin);
+    const host = resolveRedirectHost(req);
 
     const { link, requisitionId } = await goCardlessService.createRequisition({
       institutionId,

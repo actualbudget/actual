@@ -8,7 +8,7 @@ import {
   SvgDotsHorizontalTriple,
   SvgLockOpen,
 } from '@actual-app/components/icons/v1';
-import { SvgNotesPaper } from '@actual-app/components/icons/v2';
+import { SvgLockClosed, SvgNotesPaper } from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
@@ -42,6 +42,7 @@ export function AccountMenuModal({
   onReopenAccount,
   onEditNotes,
   onClose,
+  onReconcile,
   onToggleRunningBalance,
   onToggleReconciled,
 }: AccountMenuModalProps) {
@@ -91,12 +92,14 @@ export function AccountMenuModal({
     onEditNotes?.(account.id);
   };
 
+  const canReconcile = !!onReconcile;
+
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
     height: styles.mobileMinHeight,
     color: theme.formLabelText,
     // Adjust based on desired number of buttons per row.
-    flexBasis: '100%',
+    flexBasis: canReconcile ? '48%' : '100%',
   };
 
   if (!account) {
@@ -188,6 +191,16 @@ export function AccountMenuModal({
                 />
                 <Trans>Edit notes</Trans>
               </Button>
+              {canReconcile && (
+                <Button style={buttonStyle} onPress={() => onReconcile?.()}>
+                  <SvgLockClosed
+                    width={20}
+                    height={20}
+                    style={{ paddingRight: 5 }}
+                  />
+                  <Trans>Reconcile</Trans>
+                </Button>
+              )}
             </View>
           </View>
         </>

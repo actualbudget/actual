@@ -6,7 +6,10 @@ import { getDataDir, readFile, removeFile } from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
+import type { SqlParam } from './types';
 import { unicodeLike } from './unicodeLike';
+
+export type { SqlParam } from './types';
 
 function verifyParamTypes(sql, arr) {
   arr.forEach(val => {
@@ -35,7 +38,7 @@ export function prepare(db, sql) {
 export function runQuery(
   db: SQL.Database,
   sql: string | SQL.Statement,
-  params: (string | number)[] = [],
+  params: SqlParam[] = [],
   fetchAll = false,
 ) {
   if (params) {

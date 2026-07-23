@@ -64,6 +64,18 @@ test.describe('Reports', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('opens the date range picker and checks visuals', async () => {
+    await reportsPage.goToNetWorthPage();
+
+    await page.getByTestId('date-range-picker-trigger').click();
+    const picker = page.locator('[data-popover]');
+    await expect(picker).toMatchThemeScreenshots();
+
+    // Switch to day granularity
+    await picker.getByRole('button', { name: 'Day', exact: true }).click();
+    await expect(picker).toMatchThemeScreenshots();
+  });
+
   test.describe('balance forecast', () => {
     test.beforeEach(async () => {
       const settingsPage = await navigation.goToSettingsPage();

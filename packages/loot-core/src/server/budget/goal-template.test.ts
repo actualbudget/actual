@@ -337,7 +337,8 @@ describe('applyMultipleCategoryTemplates', () => {
       categoryIds: [cat1.id, cat2.id],
     });
 
-    expect(result.message).toMatch(/Successfully applied/);
+    expect(result.message).toBe('templates-applied');
+    expect(result.count).toBe(2);
     expect(actions.setBudget).toHaveBeenCalledTimes(2);
     const budgetCalls = vi
       .mocked(actions.setBudget)
@@ -414,7 +415,7 @@ describe('applyMultipleCategoryTemplates', () => {
       categoryIds: [cat1.id],
     });
 
-    expect(result.message).toMatch(/There were errors/);
+    expect(result.message).toBe('template-errors');
     expect(result.pre).toMatch(/Target month has passed/);
     expect(actions.setBudget).not.toHaveBeenCalled();
   });
@@ -434,7 +435,7 @@ describe('applyMultipleCategoryTemplates', () => {
       categoryIds: [cat1.id],
     });
 
-    expect(result.message).toBe('Everything is up to date');
+    expect(result.message).toBe('templates-up-to-date');
     const goalCalls = vi.mocked(actions.setGoal).mock.calls.map(c => c[0]);
     expect(goalCalls).toContainEqual(
       expect.objectContaining({ category: cat1.id, goal: null }),

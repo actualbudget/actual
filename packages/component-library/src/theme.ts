@@ -131,6 +131,7 @@ export const theme = {
   calendarItemText: 'var(--color-calendarItemText)',
   calendarItemBackground: 'var(--color-calendarItemBackground)',
   calendarSelectedBackground: 'var(--color-calendarSelectedBackground)',
+  datePickerRangeBackground: 'var(--color-datePickerRangeBackground)',
   noticeBackground: 'var(--color-noticeBackground)',
   noticeBackgroundLight: 'var(--color-noticeBackgroundLight)',
   noticeBackgroundDark: 'var(--color-noticeBackgroundDark)',

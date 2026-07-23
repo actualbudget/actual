@@ -78,7 +78,8 @@ export function BalanceForecastCard({
     [accounts, meta?.accounts],
   );
 
-  const startDate = start + '-01';
+  // `start` may be `yyyy-MM` or `yyyy-MM-dd`; `firstDayOfMonth` handles both.
+  const startDate = monthUtils.firstDayOfMonth(start);
   const endDate = monthUtils.lastDayOfMonth(end);
 
   const {
@@ -137,9 +138,12 @@ export function BalanceForecastCard({
     dataPoint => dataPoint.date === todayReferenceDate,
   );
 
-  const scheduledOccurrenceCount = countForecastScheduledOccurrences(
-    normalizedForecastData,
-  );
+  const scheduledOccurrenceCount = countForecastScheduledOccurrences({
+    forecastData: normalizedForecastData,
+    start: chartRange.start,
+    end: chartRange.end,
+    granularity: 'Monthly',
+  });
   const hasFilters =
     !isTrackingBudgetForecast && (meta?.conditions?.length ?? 0) > 0;
 
