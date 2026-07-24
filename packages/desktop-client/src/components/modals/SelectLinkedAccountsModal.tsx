@@ -59,6 +59,43 @@ function useAddBudgetAccountOptions() {
   return { addOnBudgetAccountOption, addOffBudgetAccountOption };
 }
 
+type AddBudgetAccountOption = {
+  id: string;
+  name: string;
+};
+
+export function getSelectableAccountOptions({
+  localAccounts,
+  selectedLocalAccountIds,
+  chosenAccount,
+  syncSource,
+  addOnBudgetAccountOption,
+  addOffBudgetAccountOption,
+}: {
+  localAccounts: AccountEntity[];
+  selectedLocalAccountIds: ReadonlySet<string>;
+  chosenAccount: { id: string; name: string } | undefined;
+  syncSource: NonNullable<AccountEntity['account_sync_source']>;
+  addOnBudgetAccountOption: AddBudgetAccountOption;
+  addOffBudgetAccountOption: AddBudgetAccountOption;
+}): AutocompleteItem[] {
+  const options: AutocompleteItem[] = localAccounts.filter(account => {
+    const isCurrentSelection = account.id === chosenAccount?.id;
+
+    // Keep the current row's selection visible. Otherwise, offer only accounts
+    // that are unselected and either manual or linked to this provider.
+    return (
+      isCurrentSelection ||
+      (!selectedLocalAccountIds.has(account.id) &&
+        (account.account_sync_source == null ||
+          account.account_sync_source === syncSource))
+    );
+  });
+
+  options.push(addOnBudgetAccountOption, addOffBudgetAccountOption);
+  return options;
+}
+
 /**
  * Helper to determine if the chosen account option represents creating a new account.
  */
@@ -364,8 +401,20 @@ export function SelectLinkedAccountsModal({
     dispatch(closeModal());
   }
 
-  const unlinkedAccounts = localAccounts.filter(
-    account => !Object.values(chosenAccounts).includes(account.id),
+  // Only reserve accounts chosen by visible rows; stale provider links should
+  // stay selectable so users can relink them after reconnecting.
+  const currentExternalAccountIds = new Set(
+    propsWithSortedExternalAccounts.externalAccounts.map(
+      account => account.account_id,
+    ),
+  );
+
+  const selectedLocalAccountIds = new Set(
+    Object.entries(chosenAccounts)
+      .filter(([externalAccountId]) =>
+        currentExternalAccountIds.has(externalAccountId),
+      )
+      .map(([, localAccountId]) => localAccountId),
   );
 
   function onSetLinkedAccount(
@@ -504,7 +553,9 @@ export function SelectLinkedAccountsModal({
                   key={account.account_id}
                   externalAccount={account}
                   chosenAccount={getChosenAccount(account.account_id)}
-                  unlinkedAccounts={unlinkedAccounts}
+                  localAccounts={localAccounts}
+                  selectedLocalAccountIds={selectedLocalAccountIds}
+                  syncSource={syncSource}
                   onSetLinkedAccount={onSetLinkedAccount}
                   customStartingDate={getCustomStartingDate(account.account_id)}
                   onSetCustomStartingDate={setCustomStartingDate}
@@ -544,7 +595,9 @@ export function SelectLinkedAccountsModal({
                       key={item.id}
                       externalAccount={item}
                       chosenAccount={chosenAccount}
-                      unlinkedAccounts={unlinkedAccounts}
+                      localAccounts={localAccounts}
+                      selectedLocalAccountIds={selectedLocalAccountIds}
+                      syncSource={syncSource}
                       onSetLinkedAccount={onSetLinkedAccount}
                       customStartingDate={getCustomStartingDate(
                         item.account_id,
@@ -609,30 +662,14 @@ type StartingBalanceInfo = {
 type SharedAccountRowProps = {
   externalAccount: ExternalAccount;
   chosenAccount: { id: string; name: string } | undefined;
-  unlinkedAccounts: AccountEntity[];
+  localAccounts: AccountEntity[];
+  selectedLocalAccountIds: ReadonlySet<string>;
+  syncSource: SelectLinkedAccountsModalProps['syncSource'];
   onSetLinkedAccount: (
     externalAccount: ExternalAccount,
     localAccountId: string | null | undefined,
   ) => void;
 };
-
-function getAvailableAccountOptions(
-  unlinkedAccounts: AccountEntity[],
-  chosenAccount: { id: string; name: string } | undefined,
-  addOnBudgetAccountOption: { id: string; name: string },
-  addOffBudgetAccountOption: { id: string; name: string },
-): AutocompleteItem[] {
-  const options: AutocompleteItem[] = [...unlinkedAccounts];
-  if (
-    chosenAccount &&
-    chosenAccount.id !== addOnBudgetAccountOption.id &&
-    chosenAccount.id !== addOffBudgetAccountOption.id
-  ) {
-    options.push(chosenAccount);
-  }
-  options.push(addOnBudgetAccountOption, addOffBudgetAccountOption);
-  return options;
-}
 
 type TableRowProps = SharedAccountRowProps & {
   customStartingDate: StartingBalanceInfo;
@@ -677,7 +714,9 @@ function useStartingBalanceInfo(accountId: string | undefined) {
 function TableRow({
   externalAccount,
   chosenAccount,
-  unlinkedAccounts,
+  localAccounts,
+  selectedLocalAccountIds,
+  syncSource,
   onSetLinkedAccount,
   customStartingDate,
   onSetCustomStartingDate,
@@ -693,12 +732,14 @@ function TableRow({
     showStartingOptions ? undefined : chosenAccount?.id,
   );
 
-  const availableAccountOptions = getAvailableAccountOptions(
-    unlinkedAccounts,
+  const availableAccountOptions = getSelectableAccountOptions({
+    localAccounts,
+    selectedLocalAccountIds,
     chosenAccount,
+    syncSource,
     addOnBudgetAccountOption,
     addOffBudgetAccountOption,
-  );
+  });
 
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
@@ -973,7 +1014,9 @@ type AccountCardProps = SharedAccountRowProps & {
 function AccountCard({
   externalAccount,
   chosenAccount,
-  unlinkedAccounts,
+  localAccounts,
+  selectedLocalAccountIds,
+  syncSource,
   onSetLinkedAccount,
   customStartingDate,
   onSetCustomStartingDate,
@@ -985,12 +1028,14 @@ function AccountCard({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
 
-  const availableAccountOptions = getAvailableAccountOptions(
-    unlinkedAccounts,
+  const availableAccountOptions = getSelectableAccountOptions({
+    localAccounts,
+    selectedLocalAccountIds,
     chosenAccount,
+    syncSource,
     addOnBudgetAccountOption,
     addOffBudgetAccountOption,
-  );
+  });
 
   // Only show starting date options for new accounts being created
   const shouldShowStartingOptions = isNewAccountOption(
