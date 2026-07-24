@@ -186,7 +186,9 @@ export function MonteCarloRunsTable({
                 {hasSurvived
                   ? t('Survived')
                   : t('Ran out at age {{age}}', {
-                      age: startAge + depletionYear,
+                      // The age of the year that couldn't be funded, matching
+                      // the drill-in's failure row
+                      age: startAge + depletionYear - 1,
                     })}
               </Text>
               <Text style={{ width: 160, textAlign: 'right' }}>
@@ -221,10 +223,11 @@ export function MonteCarloRunsTable({
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          flexWrap: 'wrap',
           gap: 10,
+          // Stays pinned right, and drops to its own line when the jump
+          // links need the full width
+          marginLeft: 'auto',
           marginTop: 10,
-          width: '100%',
         }}
       >
         <Select
@@ -246,35 +249,24 @@ export function MonteCarloRunsTable({
           ]}
           style={{ width: 170 }}
         />
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 10,
-            // Stays pinned right, and drops to its own line when the jump
-            // links need the full width
-            marginLeft: 'auto',
+        <Button
+          isDisabled={currentPage === 0}
+          onPress={() => {
+            setPage(currentPage - 1);
+            setHighlightedRank(null);
           }}
         >
-          <Button
-            isDisabled={currentPage === 0}
-            onPress={() => {
-              setPage(currentPage - 1);
-              setHighlightedRank(null);
-            }}
-          >
-            <Trans>Previous</Trans>
-          </Button>
-          <Button
-            isDisabled={currentPage >= pageCount - 1}
-            onPress={() => {
-              setPage(currentPage + 1);
-              setHighlightedRank(null);
-            }}
-          >
-            <Trans>Next</Trans>
-          </Button>
-        </View>
+          <Trans>Previous</Trans>
+        </Button>
+        <Button
+          isDisabled={currentPage >= pageCount - 1}
+          onPress={() => {
+            setPage(currentPage + 1);
+            setHighlightedRank(null);
+          }}
+        >
+          <Trans>Next</Trans>
+        </Button>
       </View>
     </View>
   );

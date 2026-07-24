@@ -537,14 +537,19 @@ export function runMonteCarloSimulation(
           if (year > 1 && rule.type !== 'none') {
             const currentRate = (planned * adjustmentFactor) / total;
             if (rule.type === 'guardrails') {
+              // Drift is measured against the planned spending path, not
+              // the year-1 rate, so a deliberate phase change doesn't
+              // read as a trigger - only market-driven drift does.
+              // Identical to the year-1 anchor for single-phase plans.
+              const referenceRate = plannedTodayByYear[year] / startingTotal;
               if (
                 currentRate >
-                initialRate * (1 + rule.preservationTriggerPct)
+                referenceRate * (1 + rule.preservationTriggerPct)
               ) {
                 adjustmentFactor *= 1 - rule.preservationCutPct;
               } else if (
                 currentRate <
-                initialRate * (1 - rule.prosperityTriggerPct)
+                referenceRate * (1 - rule.prosperityTriggerPct)
               ) {
                 adjustmentFactor *= 1 + rule.prosperityIncreasePct;
               }

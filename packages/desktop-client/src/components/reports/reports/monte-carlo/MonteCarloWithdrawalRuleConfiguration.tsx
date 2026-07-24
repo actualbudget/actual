@@ -111,7 +111,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
         <Text style={{ color: theme.pageText }}>
           {rule.type === 'guardrails'
             ? t(
-                'Withdrawals are cut when the withdrawal rate drifts too far above the initial rate, and raised when it falls well below it.',
+                'Withdrawals are cut when the withdrawal rate drifts too far above the rate your plan intended, and raised when it falls well below it. A deliberate spending-phase change is not counted as drift.',
               )
             : rule.type === 'ratcheting'
               ? t(

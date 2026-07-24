@@ -17,7 +17,7 @@ import { MonteCarloHistogramTooltip } from '#components/reports/graphs/MonteCarl
 type MonteCarloHistogramProps = {
   style?: CSSProperties;
   depletionHistogram: Array<{ year: number; count: number }>;
-  /** The user's current age; the x-axis shows startAge + year */
+  /** The user's current age; the x-axis shows the failure year's age */
   startAge: number;
   medianDepletionYear: number | null;
   simulationCount: number;
@@ -36,7 +36,8 @@ export function MonteCarloHistogram({
 
   const data = depletionHistogram.map(entry => ({
     ...entry,
-    age: startAge + entry.year,
+    // The age of the year that couldn't be funded, matching the drill-in
+    age: startAge + entry.year - 1,
   }));
 
   return (
@@ -70,7 +71,7 @@ export function MonteCarloHistogram({
           )}
           {medianDepletionYear != null && (
             <ReferenceLine
-              x={startAge + medianDepletionYear}
+              x={startAge + medianDepletionYear - 1}
               stroke={theme.noticeText}
               strokeDasharray="4 4"
             />

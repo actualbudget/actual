@@ -380,7 +380,9 @@ export function MonteCarlo() {
                 </Text>
                 <Text style={{ ...styles.mediumText, fontWeight: 500 }}>
                   {t('Age {{age}}', {
-                    age: config.currentAge + result.medianDepletionYear,
+                    // Ages here are the failure year itself, matching the
+                    // drill-in's failure row
+                    age: config.currentAge + result.medianDepletionYear - 1,
                   })}
                 </Text>
               </View>
@@ -561,11 +563,17 @@ export function MonteCarlo() {
                     'Worst case: money ran out at age {{worst}}. Among failures, the typical depletion age was {{median}}; the luckiest failure lasted until age {{best}}.',
                     {
                       worst:
-                        config.currentAge + (result.earliestDepletionYear ?? 0),
+                        config.currentAge +
+                        (result.earliestDepletionYear ?? 1) -
+                        1,
                       median:
-                        config.currentAge + (result.medianDepletionYear ?? 0),
+                        config.currentAge +
+                        (result.medianDepletionYear ?? 1) -
+                        1,
                       best:
-                        config.currentAge + (result.latestDepletionYear ?? 0),
+                        config.currentAge +
+                        (result.latestDepletionYear ?? 1) -
+                        1,
                     },
                   )}
                 </Text>

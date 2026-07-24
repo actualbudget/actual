@@ -99,7 +99,7 @@ If you set a **Minimum withdrawal**, your yearly spending never drops below that
 
 ### Guardrails (Guyton-Klinger)
 
-Think of this as pay cuts and pay rises. The rule watches what percentage of your remaining money you're withdrawing each year. If your pots shrink so much that the percentage drifts well above where it started, you take a pay cut (for example, 10% less). If your pots race ahead and the percentage falls well below the start, you get a pay rise. You set how far the percentage must drift before the rule reacts, and how big the adjustment is.
+Think of this as pay cuts and pay rises. The rule watches what percentage of your remaining money you're withdrawing each year. If your pots shrink so much that the percentage drifts well above where your plan says it should be, you take a pay cut (for example, 10% less). If your pots race ahead and the percentage falls well below it, you get a pay rise. You set how far the percentage must drift before the rule reacts, and how big the adjustment is. The drift is measured against your planned spending path, so moving into a deliberately higher or lower spending phase doesn't count as drift by itself - only market-driven changes do.
 
 ### Ratcheting (Kitces)
 

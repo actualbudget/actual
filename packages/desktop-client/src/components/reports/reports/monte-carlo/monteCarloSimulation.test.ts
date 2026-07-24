@@ -457,6 +457,37 @@ describe('runMonteCarloSimulation', () => {
     expect(withRule.successRate).toBe(1);
   });
 
+  it('does not treat a planned phase change as guardrails drift', () => {
+    // On-track plan stepping from a 1% to a 2% planned rate at year 11:
+    // guardrails measures drift against the planned phase path, so the
+    // deliberate jump must not trigger a preservation cut by itself
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          horizonYears: 13,
+          captureRunDetail: 0,
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
+          spendingPhases: [
+            {
+              id: 'phase-1',
+              name: '',
+              fromAge: null,
+              annualWithdrawal: 10_000,
+            },
+            { id: 'phase-2', name: '', fromAge: 70, annualWithdrawal: 20_000 },
+          ],
+        },
+        { startingBalance: 1_000_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    expect(rows.map(row => row.withdrawal)).toEqual([
+      ...new Array(10).fill(10_000),
+      ...new Array(3).fill(20_000),
+    ]);
+  });
+
   it('boundaries cut withdrawals and extend survival', () => {
     // 10% withdrawal rate on a flat pot depletes in exactly year 10
     const base = makeParams(

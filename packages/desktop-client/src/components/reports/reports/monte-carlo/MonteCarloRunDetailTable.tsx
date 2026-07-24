@@ -70,7 +70,9 @@ export function MonteCarloRunDetailTable({
             : t('Run {{number}} of {{total}} - ran out at age {{age}}', {
                 number: simIndex + 1,
                 total: simulationCount,
-                age: lastRow ? startAge + lastRow.year : startAge,
+                // The failure row's own age: the year the withdrawal
+                // couldn't be funded
+                age: lastRow ? startAge + lastRow.year - 1 : startAge,
               })}
         </Text>
       </View>
@@ -237,7 +239,7 @@ export function MonteCarloRunDetailTable({
           {t(
             'The plan failed at age {{age}} with {{amount}} still locked in pots that had not reached their access age.',
             {
-              age: startAge + lastRow.year,
+              age: startAge + lastRow.year - 1,
               amount: format(lastRow.inaccessibleBalance, 'financial'),
             },
           )}
