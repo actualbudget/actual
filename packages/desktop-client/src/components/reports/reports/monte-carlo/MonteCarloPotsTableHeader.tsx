@@ -15,6 +15,7 @@ export const POT_COLUMNS = {
   dragHandle: 36,
   name: 150,
   startingBalance: 120,
+  linkedAccount: 160,
   allocation: 190,
   expectedReturn: 150,
   volatility: 170,
@@ -38,6 +39,37 @@ export function MonteCarloPotsTableHeader() {
       </Field>
       <Field width="flex" style={{ minWidth: POT_COLUMNS.startingBalance }}>
         <Trans>Starting balance</Trans>
+      </Field>
+      <Field
+        width="flex"
+        style={{ minWidth: POT_COLUMNS.linkedAccount }}
+        truncate={false}
+      >
+        <View style={HEADER_LABEL_STYLE}>
+          <Text>
+            <Trans>Linked account</Trans>
+          </Text>
+          <Tooltip
+            content={
+              <View style={{ maxWidth: 300 }}>
+                <Text>
+                  <Trans>
+                    Use an account&apos;s live balance as this pot&apos;s
+                    starting balance, so the plan stays up to date on its own.
+                    <br />
+                    <br />
+                    Typing a starting balance manually unlinks the pot &mdash;
+                    handy for what-if experiments.
+                  </Trans>
+                </Text>
+              </View>
+            }
+            placement="bottom start"
+            style={{ ...styles.tooltip }}
+          >
+            <SvgQuestion height={12} width={12} cursor="pointer" />
+          </Tooltip>
+        </View>
       </Field>
       <Field
         width="flex"

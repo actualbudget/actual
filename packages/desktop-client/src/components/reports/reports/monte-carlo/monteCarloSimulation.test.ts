@@ -19,6 +19,7 @@ function makePot(overrides: Partial<MonteCarloPot> = {}): MonteCarloPot {
     expectedReturnMean: 0.06,
     returnStdDev: 0.1,
     accessAge: null,
+    accountId: null,
     ...overrides,
   };
 }

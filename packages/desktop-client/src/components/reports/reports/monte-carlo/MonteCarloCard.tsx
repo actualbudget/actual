@@ -18,6 +18,7 @@ import {
   monteCarloConfigFromMeta,
   runMonteCarloSimulation,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
+import { useAccountBalances } from '#hooks/useAccountBalances';
 
 type MonteCarloCardProps = {
   widgetId: string;
@@ -39,9 +40,26 @@ export function MonteCarloCard({
   const [isCardHovered, setIsCardHovered] = useState(false);
 
   const config = monteCarloConfigFromMeta(meta);
-  const result = runMonteCarloSimulation({
+  // Pots linked to an account use its live balance; the stored balance is
+  // the fallback until the live value arrives
+  const accountBalances = useAccountBalances(
+    config.pots
+      .map(pot => pot.accountId)
+      .filter((id): id is string => id != null),
+  );
+  const resolvedConfig = {
     ...config,
-    horizonYears: getMonteCarloHorizonYears(config),
+    pots: config.pots.map(pot => {
+      const balance =
+        pot.accountId != null ? accountBalances[pot.accountId] : null;
+      return balance != null
+        ? { ...pot, startingBalance: Math.max(0, balance) }
+        : pot;
+    }),
+  };
+  const result = runMonteCarloSimulation({
+    ...resolvedConfig,
+    horizonYears: getMonteCarloHorizonYears(resolvedConfig),
     deflateToTodaysMoney: true,
   });
 

@@ -79,6 +79,11 @@ export type MonteCarloPot = {
   returnStdDev: number; // decimal fraction
   /** Age from which the pot can fund withdrawals; null = immediately */
   accessAge: number | null;
+  /**
+   * Account whose live balance supplies the starting balance (resolved by
+   * the UI before the simulation runs); null = manually entered balance
+   */
+  accountId: string | null;
 };
 
 export function createMonteCarloPot(id: string): MonteCarloPot {
@@ -90,6 +95,7 @@ export function createMonteCarloPot(id: string): MonteCarloPot {
     expectedReturnMean: ALLOCATION_PRESETS['equity-60'].mean,
     returnStdDev: ALLOCATION_PRESETS['equity-60'].stdDev,
     accessAge: null,
+    accountId: null,
   };
 }
 
@@ -185,6 +191,7 @@ function potFromMeta(potMeta: MonteCarloPotMeta, index: number): MonteCarloPot {
     returnStdDev: potMeta.returnStdDev ?? defaults.returnStdDev,
     accessAge:
       potMeta.accessAge !== undefined ? potMeta.accessAge : defaults.accessAge,
+    accountId: potMeta.accountId ?? null,
   };
 }
 

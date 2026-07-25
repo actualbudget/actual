@@ -192,6 +192,11 @@ export type MonteCarloPotMeta = {
   returnStdDev?: number; // decimal fraction
   /** Age from which the pot can fund withdrawals; null = immediately */
   accessAge?: number | null;
+  /**
+   * Account whose live balance supplies the starting balance;
+   * null/undefined = manually entered balance
+   */
+  accountId?: string | null;
 };
 
 export type MonteCarloWidget = AbstractWidget<

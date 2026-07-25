@@ -62,7 +62,8 @@ The tab is organized into three small groups - **Your plan**, **Inflation** and 
 A _pot_ is a chunk of invested money - a pension, a stocks-and-shares account, a savings account. You can model one pot or several, each with its own settings:
 
 - **Pot name** - anything you like, such as "Pension".
-- **Starting balance** - how much is in the pot today.
+- **Starting balance** - how much is in the pot today. Enter it by hand, or use **Linked account** below to keep it up to date automatically.
+- **Linked account** - link the pot to one of your accounts and its starting balance becomes that account's live balance, so the plan tracks reality without re-typing numbers. Typing a starting balance manually unlinks the pot and keeps your typed value - useful for what-if questions like "how big would this pot need to be?" - and you can re-link it any time with the picker.
 - **Portfolio allocation** - a one-click preset that fills in a typical expected return and volatility for a given mix of stocks and bonds. A pot that's 100% stocks tends to grow faster but swings harder; a cash pot barely moves in either direction. You can always override the numbers, which switches the pot to **Custom**.
 - **Expected return (%)** - the average yearly growth you expect from this pot, before inflation.
 - **Volatility (std dev %)** - how much the returns swing from year to year. Two pots can have the same average return, but the one with higher volatility is riskier: bad early years can do damage that a smooth ride would avoid.

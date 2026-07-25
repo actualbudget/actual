@@ -34,6 +34,7 @@ import {
   runMonteCarloSimulation,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type { MonteCarloConfig } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
+import { useAccountBalances } from '#hooks/useAccountBalances';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
@@ -72,6 +73,24 @@ export function MonteCarlo() {
   const [showTodaysMoney, setShowTodaysMoney] = useState(true);
   const [selectedRunIndex, setSelectedRunIndex] = useState<number | null>(null);
   const [selectionsInitialized, setSelectionsInitialized] = useState(false);
+
+  // Pots linked to an account take their starting balance from the
+  // account's live balance; fall back to the stored value until it arrives
+  const accountBalances = useAccountBalances(
+    config.pots
+      .map(pot => pot.accountId)
+      .filter((id): id is string => id != null),
+  );
+  const resolvedConfig: MonteCarloConfig = {
+    ...config,
+    pots: config.pots.map(pot => {
+      const balance =
+        pot.accountId != null ? accountBalances[pot.accountId] : null;
+      return balance != null
+        ? { ...pot, startingBalance: Math.max(0, balance) }
+        : pot;
+    }),
+  };
 
   // reset when widget changes
   useEffect(() => {
@@ -115,7 +134,9 @@ export function MonteCarlo() {
           id: widget.id,
           meta: {
             ...(widget.meta ?? {}),
-            ...config,
+            // Persist the resolved config so linked pots' stored balances
+            // stay fresh as a fallback while live balances load
+            ...resolvedConfig,
           },
         },
       },
@@ -165,8 +186,8 @@ export function MonteCarlo() {
   }
 
   const result = runMonteCarloSimulation({
-    ...config,
-    horizonYears: getMonteCarloHorizonYears(config),
+    ...resolvedConfig,
+    horizonYears: getMonteCarloHorizonYears(resolvedConfig),
     deflateToTodaysMoney: showTodaysMoney,
   });
 
@@ -175,8 +196,8 @@ export function MonteCarlo() {
   const runDetailRows =
     selectedRunIndex != null
       ? runMonteCarloSimulation({
-          ...config,
-          horizonYears: getMonteCarloHorizonYears(config),
+          ...resolvedConfig,
+          horizonYears: getMonteCarloHorizonYears(resolvedConfig),
           deflateToTodaysMoney: showTodaysMoney,
           captureRunDetail: selectedRunIndex,
         }).runDetail
@@ -262,7 +283,7 @@ export function MonteCarlo() {
             )}
           </View>
           <MonteCarloConfiguration
-            config={config}
+            config={resolvedConfig}
             onConfigChange={changes =>
               setConfig(prev => ({ ...prev, ...changes }))
             }
@@ -502,7 +523,7 @@ export function MonteCarlo() {
           ) : selectedRunIndex != null && runDetailRows != null ? (
             <MonteCarloRunDetailTable
               rows={runDetailRows}
-              pots={config.pots}
+              pots={resolvedConfig.pots}
               simIndex={selectedRunIndex}
               simulationCount={result.simulationCount}
               startAge={config.currentAge}

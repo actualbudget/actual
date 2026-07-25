@@ -17,6 +17,7 @@ import { ALLOCATION_PRESETS } from '#components/reports/reports/monte-carlo/mont
 import type { MonteCarloPot } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { Field, Row } from '#components/table';
 import { FinancialInput } from '#components/util/FinancialInput';
+import { useAccounts } from '#hooks/useAccounts';
 
 export const FIELD_LABEL_STYLE = { fontWeight: 600 } as const;
 
@@ -54,6 +55,7 @@ export function MonteCarloPotConfiguration({
   ...props
 }: MonteCarloPotConfigurationProps) {
   const { t } = useTranslation();
+  const { data: accounts = [] } = useAccounts();
 
   // Historical models derive this pot's returns from its allocation mix;
   // the manual return/volatility only apply to Custom pots there
@@ -126,9 +128,37 @@ export function MonteCarloPotConfiguration({
         >
           <FinancialInput
             value={pot.startingBalance}
-            onUpdate={value =>
-              onPotChange({ startingBalance: Math.max(0, value) })
+            // Typing a different balance takes manual control: the pot
+            // unlinks from its account and keeps the typed value. The
+            // changed-check stops a mere tab-through from unlinking.
+            onUpdate={value => {
+              const newBalance = Math.max(0, value);
+              if (newBalance !== pot.startingBalance) {
+                onPotChange({
+                  startingBalance: newBalance,
+                  accountId: null,
+                });
+              }
+            }}
+          />
+        </Field>
+
+        <Field
+          width="flex"
+          style={{ minWidth: POT_COLUMNS.linkedAccount }}
+          truncate={false}
+        >
+          <Select
+            value={pot.accountId ?? ''}
+            onChange={value =>
+              onPotChange({ accountId: value === '' ? null : value })
             }
+            options={[
+              ['', t('None')],
+              ...accounts
+                .filter(account => account.closed === 0)
+                .map(account => [account.id, account.name] as [string, string]),
+            ]}
           />
         </Field>
 
