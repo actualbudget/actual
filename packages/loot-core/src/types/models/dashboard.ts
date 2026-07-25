@@ -130,7 +130,11 @@ export type MonteCarloAllocationPreset =
   | 'cash'
   | 'custom';
 
-export type MonteCarloWithdrawalStrategy = 'proportional' | 'sequential';
+export type MonteCarloWithdrawalStrategy =
+  | 'proportional'
+  | 'sequential'
+  | 'best-performer'
+  | 'target-mix';
 
 export type MonteCarloReturnModel =
   | 'normal'

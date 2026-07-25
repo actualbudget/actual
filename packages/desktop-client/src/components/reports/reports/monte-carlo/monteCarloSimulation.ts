@@ -265,6 +265,8 @@ export type MonteCarloRunDetailRow = {
   endBalance: number;
   /** End-of-year balance per pot, in the order the pots are configured */
   potBalances: number[];
+  /** How much of this year's withdrawal each pot funded, same order */
+  potWithdrawals: number[];
   /**
    * The return each pot actually experienced that year, as a decimal
    * fraction; null when the pot had no balance or the plan failed
@@ -386,6 +388,15 @@ export function runMonteCarloSimulation(
   const potMeans = pots.map(pot => pot.expectedReturnMean);
   const potStdDevs = pots.map(pot => Math.max(0, pot.returnStdDev));
   const isSequential = params.withdrawalStrategy === 'sequential';
+  const isBestPerformer = params.withdrawalStrategy === 'best-performer';
+  const isTargetMix = params.withdrawalStrategy === 'target-mix';
+  // Best-performer order: each pot's return from the previous simulated
+  // year, and a reusable index buffer for the per-year drain order
+  const prevReturns = new Float64Array(potCount);
+  const drainOrder = pots.map((_, index) => index);
+  // Target-mix order: each pot's target weight is its share of the
+  // starting balances; this holds each pot's ideal post-withdrawal balance
+  const potIdealBalances = new Float64Array(potCount);
 
   // First simulation year (1-based) in which each pot can fund withdrawals.
   // The year-y withdrawal happens at age currentAge + (y - 1).
@@ -503,6 +514,7 @@ export function runMonteCarloSimulation(
 
   for (let sim = 0; sim < simulationCount; sim++) {
     potBalances.set(potStartBalances);
+    prevReturns.fill(0);
     let total = startingTotal;
     // Cuts/raises from the withdrawal rule compound here, applied on top of
     // the planned spending path (so they persist across spending phases)
@@ -608,6 +620,11 @@ export function runMonteCarloSimulation(
           runDetail && sim === captureIndex
             ? new Array<number | null>(potCount).fill(null)
             : null;
+        // Starts as a copy of the pre-withdrawal balances; after the split
+        // it holds how much of the withdrawal each pot funded
+        const capturedPotWithdrawals = capturedPotReturns
+          ? Array.from(potBalances)
+          : null;
 
         if (accessibleTotal <= withdrawal) {
           fundingShortfall = true;
@@ -629,8 +646,68 @@ export function runMonteCarloSimulation(
         } else {
           withdrawnSum += withdrawal * invStart;
           withdrawalTaken = withdrawal;
-          if (isSequential) {
+          if (isSequential || isBestPerformer) {
+            if (isBestPerformer) {
+              // Drain the pot with the highest return last year first;
+              // ties (and year 1, when no returns exist yet) fall back to
+              // the listed order via the stable sort
+              for (let i = 0; i < potCount; i++) {
+                drainOrder[i] = i;
+              }
+              drainOrder.sort((a, b) => prevReturns[b] - prevReturns[a]);
+            }
             let remaining = withdrawal;
+            for (let i = 0; i < potCount && remaining > 0; i++) {
+              const p = isBestPerformer ? drainOrder[i] : i;
+              if (year < potAccessFromYear[p]) {
+                continue;
+              }
+              const take = Math.min(potBalances[p], remaining);
+              potBalances[p] -= take;
+              remaining -= take;
+            }
+          } else if (isTargetMix) {
+            // Withdraw so the accessible pots move back toward their target
+            // mix (weights = shares of the starting balances, renormalized
+            // over whichever pots are unlocked this year): each pot ideally
+            // ends at its target share of the post-withdrawal total, so the
+            // withdrawal comes from overweight pots, most overweight first
+            let targetAccessible = 0;
+            for (let p = 0; p < potCount; p++) {
+              if (year >= potAccessFromYear[p]) {
+                targetAccessible += potStartBalances[p];
+              }
+            }
+            const remainingTotal = accessibleTotal - withdrawal;
+            for (let p = 0; p < potCount; p++) {
+              drainOrder[p] = p;
+              potIdealBalances[p] =
+                year >= potAccessFromYear[p] && targetAccessible > 0
+                  ? (potStartBalances[p] / targetAccessible) * remainingTotal
+                  : 0;
+            }
+            drainOrder.sort(
+              (a, b) =>
+                potBalances[b] -
+                potIdealBalances[b] -
+                (potBalances[a] - potIdealBalances[a]),
+            );
+            let remaining = withdrawal;
+            for (let i = 0; i < potCount && remaining > 0; i++) {
+              const p = drainOrder[i];
+              if (year < potAccessFromYear[p]) {
+                continue;
+              }
+              const excess = potBalances[p] - potIdealBalances[p];
+              if (excess <= 0) {
+                continue;
+              }
+              const take = Math.min(remaining, potBalances[p], excess);
+              potBalances[p] -= take;
+              remaining -= take;
+            }
+            // Float-drift safety net: drain any accessible pot for whatever
+            // tiny residue the excess passes left behind
             for (let p = 0; p < potCount && remaining > 0; p++) {
               if (year < potAccessFromYear[p]) {
                 continue;
@@ -653,6 +730,12 @@ export function runMonteCarloSimulation(
               remaining -= take;
             }
             potBalances[lastAccessibleIndex] -= remaining;
+          }
+
+          if (capturedPotWithdrawals) {
+            for (let p = 0; p < potCount; p++) {
+              capturedPotWithdrawals[p] -= potBalances[p];
+            }
           }
 
           // Every pot experiences the same market year: historical models
@@ -678,6 +761,7 @@ export function runMonteCarloSimulation(
               if (capturedPotReturns) {
                 capturedPotReturns[p] = yearReturn;
               }
+              prevReturns[p] = yearReturn;
               potBalances[p] *= 1 + yearReturn;
               if (potBalances[p] <= 0) {
                 // A sub-(-100%) return draw wiped this pot out
@@ -724,6 +808,14 @@ export function runMonteCarloSimulation(
               potBalances: (failurePotSnapshot ?? []).map(balance =>
                 Math.round(balance * startInv),
               ),
+              // On a shortfall the accessible pots gave up everything they
+              // had; locked pots funded nothing
+              potWithdrawals: (capturedPotWithdrawals ?? []).map(
+                (balance, p) =>
+                  year >= potAccessFromYear[p]
+                    ? Math.round(balance * startInv)
+                    : 0,
+              ),
               potReturns: capturedPotReturns ?? [],
               ...(locked > 0 && { inaccessibleBalance: locked }),
             });
@@ -740,6 +832,9 @@ export function runMonteCarloSimulation(
               endBalance: Math.round(total * endInv),
               potBalances: Array.from(potBalances, balance =>
                 Math.round(balance * endInv),
+              ),
+              potWithdrawals: (capturedPotWithdrawals ?? []).map(take =>
+                Math.round(take * startInv),
               ),
               potReturns: (capturedPotReturns ?? []).map(potReturn =>
                 potReturn == null

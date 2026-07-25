@@ -698,6 +698,181 @@ describe('runMonteCarloSimulation', () => {
     expect(result.medianDepletionYear).toBe(10);
   });
 
+  it('best-performer order drains the pot with the highest return last year', () => {
+    // Pot A (0% return) is listed first, pot B earns 50% every year.
+    // Year 1 has no returns yet, so the listed order drains A; from year
+    // 2 onward B is always last year's best performer and gets drained.
+    const result = runMonteCarloSimulation(
+      makeParams({
+        annualWithdrawal: 10,
+        horizonYears: 4,
+        withdrawalStrategy: 'best-performer',
+        captureRunDetail: 0,
+        pots: [
+          makePot({
+            id: 'a',
+            startingBalance: 100,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+          }),
+          makePot({
+            id: 'b',
+            startingBalance: 100,
+            expectedReturnMean: 0.5,
+            returnStdDev: 0,
+          }),
+        ],
+      }),
+    );
+
+    // Hand recurrence: y1 drains A then B grows 50%; y2-y4 drain B only
+    expect(result.runDetail!.map(row => row.potBalances)).toEqual([
+      [90, 150],
+      [90, 210],
+      [90, 300],
+      [90, 435],
+    ]);
+    expect(result.runDetail!.map(row => row.potWithdrawals)).toEqual([
+      [10, 0],
+      [0, 10],
+      [0, 10],
+      [0, 10],
+    ]);
+  });
+
+  it('best-performer order switches pots as the market flips', () => {
+    // Alternating real years: stocks crash, boom, crash, boom while cash
+    // stays flat. After a crash the cash pot funds the withdrawal (stocks
+    // left to recover); after a boom the stocks pot funds it.
+    const result = runMonteCarloSimulation(
+      makeParams({
+        annualWithdrawal: 100,
+        horizonYears: 4,
+        withdrawalStrategy: 'best-performer',
+        returnModel: 'historical-sequence',
+        captureRunDetail: 0,
+        historicalReturns: [
+          { year: 2001, stocks: -0.5, bonds: 0, cash: 0 },
+          { year: 2002, stocks: 1, bonds: 0, cash: 0 },
+          { year: 2003, stocks: -0.5, bonds: 0, cash: 0 },
+          { year: 2004, stocks: 1, bonds: 0, cash: 0 },
+        ],
+        pots: [
+          makePot({
+            id: 'stocks',
+            startingBalance: 1_000,
+            allocationPreset: 'equity-100',
+          }),
+          makePot({
+            id: 'cash',
+            startingBalance: 1_000,
+            allocationPreset: 'cash',
+          }),
+        ],
+      }),
+    );
+
+    // y1: listed order drains stocks, then the crash halves them;
+    // y2: cash beat stocks last year -> drain cash, stocks double back;
+    // y3: stocks boomed last year -> drain stocks, then they halve;
+    // y4: cash beat stocks again -> drain cash, stocks double back
+    expect(result.runDetail!.map(row => row.potBalances)).toEqual([
+      [450, 1_000],
+      [900, 900],
+      [400, 900],
+      [800, 800],
+    ]);
+  });
+
+  it('best-performer order falls back to the listed order on ties', () => {
+    // Identical pots share every market shock, so their returns always
+    // tie and best-performer must behave exactly like draining in order
+    const pots = [
+      makePot({ id: 'a', startingBalance: 25_000_000 }),
+      makePot({ id: 'b', startingBalance: 25_000_000 }),
+    ];
+    const sequential = runMonteCarloSimulation(
+      makeParams({ withdrawalStrategy: 'sequential', pots }),
+    );
+    const bestPerformer = runMonteCarloSimulation(
+      makeParams({ withdrawalStrategy: 'best-performer', pots }),
+    );
+
+    expect(bestPerformer.successRate).toBe(sequential.successRate);
+    expect(bestPerformer.percentileBands).toEqual(sequential.percentileBands);
+    expect(bestPerformer.medianTotalWithdrawn).toBe(
+      sequential.medianTotalWithdrawn,
+    );
+  });
+
+  it('target-mix order withdraws from overweight pots back toward the mix', () => {
+    // 50/50 starting mix; pot B doubles every year while A is flat, so B
+    // is always the overweight pot and funds every withdrawal after year 1
+    const result = runMonteCarloSimulation(
+      makeParams({
+        annualWithdrawal: 30,
+        horizonYears: 3,
+        withdrawalStrategy: 'target-mix',
+        captureRunDetail: 0,
+        pots: [
+          makePot({
+            id: 'a',
+            startingBalance: 100,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+          }),
+          makePot({
+            id: 'b',
+            startingBalance: 100,
+            expectedReturnMean: 1,
+            returnStdDev: 0,
+          }),
+        ],
+      }),
+    );
+
+    // y1: both pots sit exactly at target, so each gives up its share
+    // (15 each); afterwards only B is ever above its ideal balance
+    expect(result.runDetail!.map(row => row.potBalances)).toEqual([
+      [85, 170],
+      [85, 280],
+      [85, 500],
+    ]);
+    expect(result.runDetail!.map(row => row.potWithdrawals)).toEqual([
+      [15, 15],
+      [0, 30],
+      [0, 30],
+    ]);
+  });
+
+  it('target-mix order matches proportional when pots never drift', () => {
+    // Identical returns keep every pot exactly at its target share, so
+    // pulling toward the mix and splitting proportionally take the same
+    // amounts from the same pots
+    const pots = [
+      makePot({ id: 'a', startingBalance: 30_000_000 }),
+      makePot({ id: 'b', startingBalance: 20_000_000 }),
+    ];
+    const proportional = runMonteCarloSimulation(
+      makeParams({ withdrawalStrategy: 'proportional', pots }),
+    );
+    const targetMix = runMonteCarloSimulation(
+      makeParams({ withdrawalStrategy: 'target-mix', pots }),
+    );
+
+    expect(targetMix.successRate).toBe(proportional.successRate);
+    expect(
+      Math.abs(
+        targetMix.medianEndingBalance - proportional.medianEndingBalance,
+      ),
+    ).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(
+        targetMix.medianTotalWithdrawn - proportional.medianTotalWithdrawn,
+      ),
+    ).toBeLessThanOrEqual(1);
+  });
+
   it('reports per-run summaries consistent with the aggregates', () => {
     const result = runMonteCarloSimulation(
       makeParams(
@@ -817,6 +992,10 @@ describe('runMonteCarloSimulation', () => {
     // Per-pot view: the ISA was consumed, the pension stayed locked
     expect(failureRow.potBalances).toEqual([0, 1_000]);
     expect(rows[0].potBalances).toEqual([70, 1_000]);
+    // The shortfall year took the ISA's last 10; the locked pension
+    // funded nothing in any year
+    expect(rows[0].potWithdrawals).toEqual([30, 0]);
+    expect(failureRow.potWithdrawals).toEqual([10, 0]);
     // Zero-volatility pots return exactly 0% each year; on the failure year
     // no returns are applied at all
     expect(rows[0].potReturns).toEqual([0, 0]);

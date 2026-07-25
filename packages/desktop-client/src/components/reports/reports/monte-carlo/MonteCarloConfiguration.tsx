@@ -498,6 +498,20 @@ export function MonteCarloConfiguration({
                           next, in the order listed on the Investment pots tab.
                           <br />
                           <br />
+                          Best performer first: each year, drain the pot with
+                          the highest return last year &mdash; e.g. spend cash
+                          after a stock crash so the crashed pot can recover,
+                          and spend stocks in boom years. The first year uses
+                          the listed order.
+                          <br />
+                          <br />
+                          Keep pots at their target mix: withdrawals come from
+                          whichever pots have grown above their share of your
+                          starting mix, pulling the portfolio back toward it
+                          &mdash; trim stocks after a boom, spend cash and bonds
+                          after a crash.
+                          <br />
+                          <br />
                           Pots that haven&apos;t reached their access age yet
                           are skipped until they unlock.
                         </Trans>
@@ -520,6 +534,8 @@ export function MonteCarloConfiguration({
                 options={[
                   ['proportional', t('Split proportionally across pots')],
                   ['sequential', t('Drain pots in order')],
+                  ['best-performer', t('Spend from the best performer first')],
+                  ['target-mix', t('Keep pots at their target mix')],
                 ]}
               />
             </View>
