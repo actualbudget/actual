@@ -1084,6 +1084,7 @@ const Transaction = memo(function Transaction({
   const syncTransferDate = String(syncTransferDatePref) === 'true';
   const setSyncTransferDate = (checked: boolean) =>
     setSyncTransferDatePref(checked ? 'true' : 'false');
+  const transferDateSyncSeq = useRef(0);
 
   const onUpdate: TransactionUpdateFunction = async (name, value) => {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
@@ -1241,6 +1242,7 @@ const Transaction = memo(function Transaction({
         ].filter((id): id is string => Boolean(id));
 
         if (transferIds.length > 0) {
+          const seq = ++transferDateSyncSeq.current;
           void (async () => {
             const updated: { id: string; date: string }[] = transferIds.map(
               id => ({ id, date: value }),
@@ -1262,6 +1264,11 @@ const Transaction = memo(function Transaction({
                 .filter(t => t.is_child && t.parent_id)
                 .map(t => ({ id: t.parent_id as string, date: value })),
             );
+
+            // a newer date edit started while we were querying: let it win
+            if (seq !== transferDateSyncSeq.current) {
+              return;
+            }
 
             await send('transactions-batch-update', {
               updated,
