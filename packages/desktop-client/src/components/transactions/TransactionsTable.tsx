@@ -1079,9 +1079,8 @@ const Transaction = memo(function Transaction({
 
   const [showReconciliationWarning, setShowReconciliationWarning] =
     useState(false);
-  const [syncTransferDatePref, setSyncTransferDatePref] = useSyncedPref(
-    `sync-transfer-date-${transaction.account}`,
-  );
+  const [syncTransferDatePref, setSyncTransferDatePref] =
+    useSyncedPref('sync-transfer-date');
   const syncTransferDate = String(syncTransferDatePref) === 'true';
   const setSyncTransferDate = (checked: boolean) =>
     setSyncTransferDatePref(checked ? 'true' : 'false');

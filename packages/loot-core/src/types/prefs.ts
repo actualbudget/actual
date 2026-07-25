@@ -34,7 +34,7 @@ export type SyncedPrefs = Partial<
     | `hide-cleared-${string}`
     | `hide-reconciled-${string}`
     | `show-group-${string}`
-    | `sync-transfer-date-${string}`
+    | 'sync-transfer-date'
     // TODO: pull from src/components/modals/ImportTransactions.js
     | `parse-date-${string}-${'csv' | 'qif'}`
     | `import-reimport-deleted-${string}`
