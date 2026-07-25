@@ -24,6 +24,127 @@ import type { CategoryGroupDefinition } from '.';
 
 type MockPayeeEntity = Partial<PayeeEntity> & { bill?: boolean };
 
+const DEMO_TAGS = [
+  { tag: 'groceries', color: '#388E3C', description: 'Kroger & Publix trips' },
+  {
+    tag: 'dining-out',
+    color: '#FFA000',
+    description: 'Restaurants and takeout',
+  },
+  {
+    tag: 'online-shopping',
+    color: '#1976D2',
+    description: 'Online store purchases',
+  },
+  {
+    tag: 'entertainment',
+    color: '#7B1FA2',
+    description: 'Movies, activities, fun',
+  },
+  {
+    tag: 'home-improvement',
+    color: '#5D4037',
+    description: 'Home Depot, repairs, DIY',
+  },
+  {
+    tag: 'utilities',
+    color: '#D32F2F',
+    description: 'Power, water, internet, phone',
+  },
+  { tag: 'subscription', color: '#455A64', description: 'Recurring services' },
+  { tag: 'medical', color: '#C2185B', description: 'Healthcare expenses' },
+  { tag: 'gift', color: '#C39DDF', description: 'Gifts given or received' },
+  { tag: 'clothing', color: '#E64A19', description: 'Apparel purchases' },
+  {
+    tag: 'retirement',
+    color: '#00796B',
+    description: '401k and IRA contributions',
+  },
+  { tag: 'mortgage', color: '#616161', description: 'Housing payments' },
+  { tag: 'emergency', color: '#F57C00', description: 'Unexpected expenses' },
+  { tag: 'income', color: '#689F38', description: 'Paychecks and deposits' },
+  { tag: 'splurge', color: '#512DA8', description: 'Treat yourself purchases' },
+  {
+    tag: 'reimbursable',
+    color: '#0097A7',
+    description: 'Expenses to be paid back',
+  },
+  {
+    tag: 'tax-deductible',
+    color: '#AFB42B',
+    description: 'Potentially deductible items',
+  },
+];
+
+function getTagNotes(
+  payeeName: string,
+  categoryName: string,
+  amount: number,
+  accountName?: string,
+): string {
+  const tags: string[] = [];
+
+  if (payeeName === 'Kroger' || payeeName === 'Publix') {
+    tags.push('#groceries');
+  } else if (payeeName === 'Home Depot') {
+    tags.push('#home-improvement');
+  } else if (payeeName === 'Movies') {
+    tags.push('#entertainment');
+  } else if (payeeName === 'Online store') {
+    tags.push('#online-shopping');
+  } else if (payeeName === 'Dominion Power') {
+    tags.push('#utilities');
+  } else if (payeeName === 'Extra Watery') {
+    tags.push('#utilities');
+  } else if (payeeName === 'Housy House') {
+    tags.push('#mortgage');
+  } else if (payeeName === 'Fast Internet' || payeeName === 'T-mobile') {
+    tags.push('#subscription');
+    tags.push('#utilities');
+  } else if (payeeName === 'Deposit') {
+    if (accountName === 'Vanguard 401k' || accountName === 'Roth IRA') {
+      tags.push('#retirement');
+    } else {
+      tags.push('#income');
+    }
+  }
+
+  if (
+    (categoryName === 'Entertainment' || categoryName === 'Clothing') &&
+    Math.abs(amount) > 5000
+  ) {
+    tags.push('#splurge');
+  }
+
+  return tags.join(' ');
+}
+
+function getChildTagNotes(categoryName: string, amount: number): string {
+  const tags: string[] = [];
+
+  if (categoryName === 'Food') tags.push('#groceries');
+  else if (categoryName === 'Restaurants') tags.push('#dining-out');
+  else if (categoryName === 'Entertainment') tags.push('#entertainment');
+  else if (categoryName === 'Clothing') tags.push('#clothing');
+  else if (categoryName === 'Medical') tags.push('#medical');
+  else if (categoryName === 'Gift') tags.push('#gift');
+
+  if (
+    (categoryName === 'Entertainment' || categoryName === 'Clothing') &&
+    Math.abs(amount) > 5000
+  ) {
+    tags.push('#splurge');
+  }
+
+  return tags.join(' ');
+}
+
+async function insertDemoTags(handlers: Handlers) {
+  for (const tagDef of DEMO_TAGS) {
+    await handlers['tags-create'](tagDef);
+  }
+}
+
 function pickRandom<T>(list: T[]): T {
   return list[Math.floor(random() * list.length) % list.length];
 }
@@ -134,36 +255,53 @@ async function fillPrimaryChecking(
       account: account.id,
       date: currentDate,
       category: category.id,
+      notes: getTagNotes(payee.name, category.name, amount, account.name),
     };
     transactions.push(transaction);
 
     if (random() < 0.2) {
       const a = Math.round(transaction.amount / 3);
-      const pick = () =>
+      const pickCat = () =>
         payee === incomePayee
-          ? incomeGroup.categories.find(c => c.name === 'Income').id
-          : pickRandom(expenseCategories).id;
+          ? incomeGroup.categories.find(c => c.name === 'Income')
+          : pickRandom(expenseCategories);
+      const childCategories = [pickCat(), pickCat(), pickCat()];
       transaction.subtransactions = [
         {
           id: uuidv4(),
           date: currentDate,
           account: account.id,
           amount: a,
-          category: pick(),
+          category: childCategories[0].id,
+          notes:
+            payee === incomePayee
+              ? '#income'
+              : getChildTagNotes(childCategories[0].name, a),
         },
         {
           id: uuidv4(),
           date: currentDate,
           account: account.id,
           amount: a,
-          category: pick(),
+          category: childCategories[1].id,
+          notes:
+            payee === incomePayee
+              ? '#income'
+              : getChildTagNotes(childCategories[1].name, a),
         },
         {
           id: uuidv4(),
           date: currentDate,
           account: account.id,
           amount: transaction.amount - a * 2,
-          category: pick(),
+          category: childCategories[2].id,
+          notes:
+            payee === incomePayee
+              ? '#income'
+              : getChildTagNotes(
+                  childCategories[2].name,
+                  transaction.amount - a * 2,
+                ),
         },
       ];
     }
@@ -186,6 +324,7 @@ async function fillPrimaryChecking(
         account: account.id,
         date,
         category: billCategories.find(c => c.name === 'Power').id,
+        notes: '#utilities',
       });
     }
 
@@ -197,6 +336,7 @@ async function fillPrimaryChecking(
         account: account.id,
         date,
         category: billCategories.find(c => c.name === 'Water').id,
+        notes: '#utilities',
       });
     }
 
@@ -208,6 +348,7 @@ async function fillPrimaryChecking(
         account: account.id,
         date,
         category: billCategories.find(c => c.name === 'Mortgage').id,
+        notes: '#mortgage',
       });
     }
 
@@ -220,6 +361,7 @@ async function fillPrimaryChecking(
         account: account.id,
         date,
         category: billCategories.find(c => c.name === 'Internet').id,
+        notes: '#subscription #utilities',
       });
     }
 
@@ -232,6 +374,7 @@ async function fillPrimaryChecking(
         account: account.id,
         date,
         category: billCategories.find(c => c.name === 'Cell').id,
+        notes: '#subscription #utilities',
       });
     }
   }
@@ -285,6 +428,7 @@ async function fillChecking(handlers, account, payees, groups) {
       account: account.id,
       date: monthUtils.subDays(monthUtils.currentDay(), i * 2),
       category: category.id,
+      notes: getTagNotes(payee.name, category.name, amount, account.name),
     });
   }
 
@@ -321,6 +465,7 @@ async function fillInvestment(handlers, account, payees, groups) {
       account: account.id,
       date: monthUtils.subDays(monthUtils.currentDay(), integer(10, 360)),
       category: category.id,
+      notes: getTagNotes(payee.name, category.name, amount, account.name),
     });
   }
 
@@ -366,6 +511,7 @@ async function fillSavings(handlers, account, payees, groups) {
       account: account.id,
       date: monthUtils.subDays(monthUtils.currentDay(), i * 5),
       category: category.id,
+      notes: getTagNotes(payee.name, category.name, amount, account.name),
     });
   }
 
@@ -399,6 +545,7 @@ async function fillMortgage(handlers, account, payees, groups) {
       date:
         monthUtils.subMonths(monthUtils.currentDay(), numTransactions) + '-02',
       category: getStartingBalanceCat(incomeGroup.categories),
+      notes: '#mortgage',
       starting_balance_flag: true,
     },
   ];
@@ -411,6 +558,7 @@ async function fillMortgage(handlers, account, payees, groups) {
       account: account.id,
       date: monthUtils.subMonths(monthUtils.currentDay(), i) + '-02',
       category: category.id,
+      notes: '#mortgage',
       starting_balance_flag: true,
     });
   }
@@ -450,6 +598,7 @@ async function fillOther(handlers, account, payees, groups) {
       account: account.id,
       date: monthUtils.subMonths(monthUtils.currentDay(), i) + '-02',
       category: category.id,
+      notes: getTagNotes(payee.name, category.name, amount, account.name),
     });
   }
 
@@ -720,6 +869,12 @@ export async function createTestBudget(handlers: Handlers) {
   const allGroups = (await runHandler(handlers['get-categories'])).grouped;
 
   setSyncingMode('import');
+
+  await runMutator(() =>
+    batchMessages(async () => {
+      await insertDemoTags(handlers);
+    }),
+  );
 
   await runMutator(() =>
     batchMessages(async () => {

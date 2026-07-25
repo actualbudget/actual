@@ -2,6 +2,9 @@
   "version": 1,
   "hooks": {
     "beforeShellExecution": [{ "command": "./.cursor/hooks/guard-shell.sh" }],
+    "beforeMCPExecution": [
+      { "command": "./.cursor/hooks/before-mcp-github.sh" }
+    ],
     "afterFileEdit": [{ "command": "./.cursor/hooks/after-file-edit.sh" }]
   }
 }

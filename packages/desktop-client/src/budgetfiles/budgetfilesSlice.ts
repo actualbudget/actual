@@ -1,5 +1,6 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import type { RemoteFile } from '@actual-app/core/server/cloud-storage';
+import { getUnsafeZipMeta } from '@actual-app/core/shared/errors';
 import type { Budget } from '@actual-app/core/types/budget';
 import type { File } from '@actual-app/core/types/file';
 import type { Handlers } from '@actual-app/core/types/handlers';
@@ -12,7 +13,7 @@ import { closeModal, pushModal } from '#modals/modalsSlice';
 import { loadGlobalPrefs, loadPrefs } from '#prefs/prefsSlice';
 import { createAppAsyncThunk } from '#redux';
 import { signOut } from '#users/usersSlice';
-import { getDownloadError, getSyncError } from '#util/error';
+import { getDownloadError, getSyncError, getUnsafeZipError } from '#util/error';
 
 const sliceName = 'budgetfiles';
 
@@ -243,9 +244,10 @@ type ImportBudgetPayload = {
 export const importBudget = createAppAsyncThunk(
   `${sliceName}/importBudget`,
   async ({ filepath, type }: ImportBudgetPayload, { dispatch }) => {
-    const { error } = await send('import-budget', { filepath, type });
+    const { error, meta } = await send('import-budget', { filepath, type });
     if (error) {
-      throw new Error(error);
+      const zipMeta = getUnsafeZipMeta(meta);
+      throw new Error(zipMeta ? getUnsafeZipError(zipMeta) : error);
     }
 
     dispatch(closeModal());

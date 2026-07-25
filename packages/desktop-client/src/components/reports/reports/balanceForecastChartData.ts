@@ -73,11 +73,27 @@ export function buildBalanceForecastChartData({
 
   if (granularity === 'Daily') {
     const result: ChartDataPoint[] = [];
-    let runningBalance = 0;
     const combinedBalanceByDate = getCombinedBalanceByDate(forecastData);
 
-    const startDate = monthUtils.parseDate(start + '-01');
-    const endDate = monthUtils.parseDate(monthUtils.lastDayOfMonth(end));
+    // Expand month-shaped bounds to full months; keep day-shaped bounds exact.
+    const startDay = monthUtils.isValidYearMonth(start)
+      ? monthUtils.firstDayOfMonth(start)
+      : start;
+    const endDay = monthUtils.isValidYearMonth(end)
+      ? monthUtils.lastDayOfMonth(end)
+      : end;
+
+    // Carry the balance forward from the latest point before the visible
+    // range, so a day-shaped start doesn't begin the chart at zero.
+    const priorDate = Object.keys(combinedBalanceByDate)
+      .filter(date => date < startDay)
+      .sort()
+      .at(-1);
+    let runningBalance =
+      priorDate === undefined ? 0 : combinedBalanceByDate[priorDate];
+
+    const startDate = monthUtils.parseDate(startDay);
+    const endDate = monthUtils.parseDate(endDay);
     const current = new Date(startDate);
 
     while (current <= endDate) {
@@ -96,9 +112,11 @@ export function buildBalanceForecastChartData({
   let runningBalance = 0;
   const combinedBalanceByMonth = getCombinedBalanceByMonth(forecastData);
 
+  // Collapse day-level bounds to months so the month keys line up.
+  const endMonth = monthUtils.getMonth(end);
   for (
-    let month = start;
-    month <= end;
+    let month = monthUtils.getMonth(start);
+    month <= endMonth;
     month = monthUtils.addMonths(month, 1)
   ) {
     if (combinedBalanceByMonth[month] !== undefined) {
@@ -111,16 +129,39 @@ export function buildBalanceForecastChartData({
   return result;
 }
 
-export function countForecastScheduledOccurrences(
-  forecastData: ForecastResult | null | undefined,
-): number {
+export function countForecastScheduledOccurrences({
+  forecastData,
+  start,
+  end,
+  granularity,
+}: {
+  forecastData: ForecastResult | null | undefined;
+  start: string;
+  end: string;
+  granularity: Granularity;
+}): number {
   if (!forecastData?.dataPoints.length) {
     return 0;
   }
 
+  // The forecast query always covers whole months; only count occurrences the
+  // chart actually shows. Daily keeps day-shaped bounds exact, Monthly widens
+  // to full months (mirrors buildBalanceForecastChartData).
+  const startDay =
+    granularity === 'Daily' && !monthUtils.isValidYearMonth(start)
+      ? start
+      : monthUtils.firstDayOfMonth(start);
+  const endDay =
+    granularity === 'Daily' && !monthUtils.isValidYearMonth(end)
+      ? end
+      : monthUtils.lastDayOfMonth(end);
+
   const occurrenceKeys = new Set<string>();
 
   for (const dataPoint of forecastData.dataPoints) {
+    if (dataPoint.date < startDay || dataPoint.date > endDay) {
+      continue;
+    }
     for (const transaction of dataPoint.transactions) {
       occurrenceKeys.add(`${dataPoint.date}:${transaction.scheduleId}`);
     }

@@ -47,6 +47,13 @@ test.describe('Reports', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('right clicking a report card opens context menu', async () => {
+    await reportsPage.rightClickReportCard('Net Worth');
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
+  });
+
   test('loads net worth graph and checks visuals', async () => {
     await reportsPage.goToNetWorthPage();
     await expect(page).toMatchThemeScreenshots();
@@ -55,6 +62,18 @@ test.describe('Reports', () => {
   test('loads cash flow graph and checks visuals', async () => {
     await reportsPage.goToCashFlowPage();
     await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('opens the date range picker and checks visuals', async () => {
+    await reportsPage.goToNetWorthPage();
+
+    await page.getByTestId('date-range-picker-trigger').click();
+    const picker = page.locator('[data-popover]');
+    await expect(picker).toMatchThemeScreenshots();
+
+    // Switch to day granularity
+    await picker.getByRole('button', { name: 'Day', exact: true }).click();
+    await expect(picker).toMatchThemeScreenshots();
   });
 
   test.describe('balance forecast', () => {

@@ -57,7 +57,7 @@ jobs:
           overwrite: true
 
   functional:
-    name: Functional (shard ${{ matrix.shard }}/3)
+    name: Functional (shard ${{ matrix.shard }}/${{ vars.E2E_SHARD_TOTAL || '3' }})
     runs-on: depot-ubuntu-latest-4
     needs: build-web
     strategy:
@@ -65,7 +65,7 @@ jobs:
       matrix:
         shard: [1, 2, 3]
     container:
-      image: mcr.microsoft.com/playwright:v1.59.1-jammy
+      image: mcr.microsoft.com/playwright:v1.61.1-jammy
     env:
       E2E_USE_BUILD: '1'
     steps:
@@ -83,10 +83,16 @@ jobs:
         with:
           name: desktop-client-build
           path: packages/desktop-client/build/
+      - name: Set E2E port
+        if: ${{ matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
+        run: echo "E2E_PORT=$((3000 + ${{ matrix.shard }}))" >> "$GITHUB_ENV"
       - name: Run E2E Tests
-        run: yarn e2e --shard=${{ matrix.shard }}/3
+        if: ${{ matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
+        env:
+          SHARD_TOTAL: ${{ vars.E2E_SHARD_TOTAL || '3' }}
+        run: yarn e2e --shard=${{ matrix.shard }}/$SHARD_TOTAL
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: failure()
+        if: ${{ failure() && matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
         with:
           name: desktop-client-test-results-shard-${{ matrix.shard }}
           path: packages/desktop-client/test-results/
@@ -94,7 +100,7 @@ jobs:
           overwrite: true
       - name: Upload E2E JUnit report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
         with:
           name: e2e-junit-${{ matrix.shard }}
           path: packages/desktop-client/test-results/junit.xml
@@ -128,7 +134,7 @@ jobs:
       contents: read
       id-token: write # Authenticate to Depot via GitHub OIDC for test reporting
     container:
-      image: mcr.microsoft.com/playwright:v1.59.1-jammy
+      image: mcr.microsoft.com/playwright:v1.61.1-jammy
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -162,7 +168,7 @@ jobs:
           path: packages/desktop-electron/e2e/test-results/junit.xml
 
   vrt:
-    name: Visual regression (shard ${{ matrix.shard }}/3)
+    name: Visual regression (shard ${{ matrix.shard }}/${{ vars.E2E_SHARD_TOTAL || '3' }})
     runs-on: depot-ubuntu-latest
     needs: build-web
     strategy:
@@ -170,7 +176,7 @@ jobs:
       matrix:
         shard: [1, 2, 3]
     container:
-      image: mcr.microsoft.com/playwright:v1.59.1-jammy
+      image: mcr.microsoft.com/playwright:v1.61.1-jammy
     env:
       E2E_USE_BUILD: '1'
     steps:
@@ -188,10 +194,16 @@ jobs:
         with:
           name: desktop-client-build
           path: packages/desktop-client/build/
+      - name: Set E2E port
+        if: ${{ matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
+        run: echo "E2E_PORT=$((3000 + ${{ matrix.shard }}))" >> "$GITHUB_ENV"
       - name: Run VRT Tests
-        run: yarn vrt --shard=${{ matrix.shard }}/3
+        if: ${{ matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
+        env:
+          SHARD_TOTAL: ${{ vars.E2E_SHARD_TOTAL || '3' }}
+        run: yarn vrt --shard=${{ matrix.shard }}/$SHARD_TOTAL
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always()
+        if: ${{ always() && matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
         with:
           name: vrt-blob-report-${{ matrix.shard }}
           path: packages/desktop-client/blob-report/
@@ -199,7 +211,7 @@ jobs:
           overwrite: true
       - name: Upload VRT JUnit report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
         with:
           name: vrt-junit-${{ matrix.shard }}
           path: packages/desktop-client/test-results/junit.xml

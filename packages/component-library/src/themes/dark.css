@@ -142,6 +142,7 @@
   --color-calendarSelectedBackground: var(
     --color-buttonNormalSelectedBackground
   );
+  --color-datePickerRangeBackground: var(--palette-purple600);
 
   --color-buttonBareText: var(--color-pageText);
   --color-buttonBareTextHover: var(--color-pageText);

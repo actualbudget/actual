@@ -12,7 +12,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
-import { SvgSplit } from '@actual-app/components/icons/v0';
+import { SvgHash, SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgAdd,
   SvgCalendar,
@@ -521,7 +521,8 @@ const ChildTransactionEdit = forwardRef<
           <FieldLabel title={t('Notes')} />
           <InputField
             ref={noteRef}
-            icon={<SvgNotesPaper width={17} height={17} />}
+            iconStart={<SvgNotesPaper width={17} height={17} />}
+            iconEnd={<NoteInsertHashButton noteRef={noteRef} />}
             placeholder={t('Add a note (optional)')}
             disabled={
               !!editingField &&
@@ -1372,7 +1373,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               <FieldLabel title={t('Date')} />
               <InputField
                 type="date"
-                icon={<SvgCalendar width={17} height={17} />}
+                iconStart={<SvgCalendar width={17} height={17} />}
                 disabled={
                   !!editingField &&
                   editingField !== getFieldName(transaction.id, 'date')
@@ -1418,7 +1419,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             <FieldLabel title={t('Notes')} />
             <InputField
               ref={noteRef}
-              icon={<SvgNotesPaper width={17} height={17} />}
+              iconStart={<SvgNotesPaper width={17} height={17} />}
+              iconEnd={<NoteInsertHashButton noteRef={noteRef} />}
               placeholder={t('Add a note (optional)')}
               disabled={
                 !!editingField &&
@@ -1472,6 +1474,50 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     );
   },
 );
+
+function NoteInsertHashButton({
+  noteRef,
+}: {
+  noteRef: RefObject<HTMLInputElement | null>;
+}) {
+  const { t } = useTranslation();
+  const [inputValue, setInputValue] = useInputRefValue(noteRef);
+  const [_, setCursorPosition] = useCursorPosition(noteRef);
+
+  return (
+    <Button
+      variant="bare"
+      aria-label={t('Add tag')}
+      style={{ color: 'inherit', padding: 1 }}
+      onPointerDown={e => e.preventDefault()}
+      onClick={() => {
+        if (!noteRef.current) return;
+        const isFocused = document.activeElement === noteRef.current;
+        const start = isFocused
+          ? (noteRef.current.selectionStart ?? 0)
+          : inputValue.length;
+        const end = isFocused
+          ? (noteRef.current.selectionEnd ?? 0)
+          : inputValue.length;
+
+        const before = inputValue.substring(0, start);
+        const after = inputValue.substring(end);
+
+        const space = start === 0 || before.match(/\s$/) ? '' : ' ';
+
+        setInputValue(before + space + '#' + after);
+        noteRef.current.focus();
+        setCursorPosition(start + 1 + space.length);
+        // so Safari requires that I do noteRef.current.focus() synchronously,
+        // but Chrome doesn't work unless I do it after. We do both this way.
+        // If the element is already focused, these invocations have no effect
+        setTimeout(() => noteRef.current?.focus(), 1);
+      }}
+    >
+      <SvgHash width={17} height={17} />
+    </Button>
+  );
+}
 
 function NoteTagAutocomplete({
   inputRef,

@@ -62,4 +62,29 @@ test.describe('Mobile Accounts', () => {
     await expect(accountPage.transactions).not.toHaveCount(0);
     await expect(page).toMatchThemeScreenshots();
   });
+
+  test('reconciles an account', async () => {
+    const accountsPage = await navigation.goToAccountsPage();
+    await accountsPage.waitFor();
+
+    const accountPage = await accountsPage.openNthAccount(0);
+    await accountPage.waitFor();
+
+    await accountPage.startReconciliation('200.00');
+    await expect(accountPage.reconcilingBannerDifference).toBeVisible();
+    await expect(page).toMatchThemeScreenshots();
+
+    await accountPage.createReconciliationTransaction();
+    await expect(accountPage.reconcilingBannerAllReconciled).toBeVisible();
+    await expect(page).toMatchThemeScreenshots();
+
+    await accountPage.unclearFirstTransaction();
+    await expect(accountPage.reconcilingBannerDifference).toBeVisible();
+
+    await accountPage.clearFirstTransaction();
+    await expect(accountPage.reconcilingBannerAllReconciled).toBeVisible();
+
+    await accountPage.lockTransactions();
+    await expect(accountPage.reconcilingBanner).not.toBeVisible();
+  });
 });

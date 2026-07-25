@@ -9,6 +9,7 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { listen } from '@actual-app/core/platform/client/connection';
 import type { RemoteFile, SyncedLocalFile } from '@actual-app/core/types/file';
@@ -127,16 +128,40 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
     }
   };
 
-  function serverMessage() {
+  function getServerStatus() {
     if (!serverUrl) {
-      return t('No server');
+      return {
+        message: t('No server'),
+        tooltip: (
+          <Trans>
+            A server syncs your budget across devices and keeps a backup of your
+            data.
+            <br />
+            Click to set one up.
+          </Trans>
+        ),
+      };
     }
 
     if (userData?.offline) {
-      return t('Server offline');
+      return {
+        message: t('Server offline'),
+        tooltip: (
+          <Trans>
+            Can't reach your server right now.
+            <br />
+            Changes are saved locally and will sync once it's reachable again.
+          </Trans>
+        ),
+      };
     }
 
-    return t('Server online');
+    return {
+      message: t('Server online'),
+      tooltip: (
+        <Trans>Connected to your server — your budget is syncing.</Trans>
+      ),
+    };
   }
 
   if (hideIfNoServer && !serverUrl) return null;
@@ -215,11 +240,23 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
     return [...adminMenu, ...baseMenu];
   };
 
+  const serverStatus = getServerStatus();
+
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
-      <Button ref={triggerRef} variant="bare" onPress={() => setMenuOpen(true)}>
-        {serverMessage()}
-      </Button>
+      <Tooltip
+        placement="bottom end"
+        content={serverStatus.tooltip}
+        triggerProps={{ isDisabled: menuOpen }}
+      >
+        <Button
+          ref={triggerRef}
+          variant="bare"
+          onPress={() => setMenuOpen(true)}
+        >
+          {serverStatus.message}
+        </Button>
+      </Tooltip>
       {!loading &&
         multiuserEnabled &&
         userData &&

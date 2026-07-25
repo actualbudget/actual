@@ -9,6 +9,8 @@ import { logger } from '#platform/server/log';
 import { _getModule } from '#platform/server/sqlite';
 import type { SqlJsModule } from '#platform/server/sqlite';
 
+import { _setDocumentDir as _setDocumentDirShared } from './shared';
+
 let FS: SqlJsModule['FS'] = null;
 let BFS = null;
 const NO_PERSIST = false;
@@ -17,8 +19,43 @@ export const bundledDatabasePath: string = '/default-db.sqlite';
 export const migrationsPath: string = '/migrations';
 export const demoBudgetPath: string = '/demo-budget';
 export { join };
-export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
+export { getDocumentDir, getBudgetDir } from './shared';
 export const getDataDir = () => process.env.ACTUAL_DATA_DIR;
+
+// The active document dir is persisted alongside the built-in /documents
+let customPersistedRoot: string | null = null;
+
+function normalizePath(filepath: string): string {
+  const absolute = filepath.startsWith('/') ? filepath : '/' + filepath;
+  let end = absolute.length;
+  while (end > 0 && absolute[end - 1] === '/') {
+    end--;
+  }
+  return absolute.slice(0, end);
+}
+
+function isUnderRoot(path: string, root: string): boolean {
+  return path === root || path.startsWith(root + '/');
+}
+
+function isPersistedPath(filepath: string): boolean {
+  const path = normalizePath(filepath);
+  return (
+    isUnderRoot(path, '/documents') ||
+    (customPersistedRoot != null && isUnderRoot(path, customPersistedRoot))
+  );
+}
+
+export const _setDocumentDir = dir => {
+  const normalized = typeof dir === 'string' ? normalizePath(dir) : '';
+  if (normalized !== '') {
+    customPersistedRoot = normalized;
+    if (FS) {
+      _mkdirRecursively(normalized);
+    }
+  }
+  return _setDocumentDirShared(dir);
+};
 
 export const pathToId = function (filepath: string): string {
   return filepath.replace(/^\//, '').replace(/\//g, '-');
@@ -48,21 +85,25 @@ function _mkdirRecursively(dir) {
   }
 }
 
+function _createPersistedFile(filepath: string) {
+  if (filepath.endsWith('.sqlite')) {
+    // If it doesn't exist, we need to create a symlink
+    if (!_exists(filepath)) {
+      FS.symlink('/blocked/' + pathToId(filepath), filepath);
+    }
+  } else {
+    // The contents are actually stored in IndexedDB. We only write to
+    // the in-memory fs to take advantage of the file hierarchy
+    FS.writeFile(filepath, '!$@) this should never read !$@)');
+  }
+}
+
 function _createFile(filepath: string) {
   // This can create the file. Check if it exists, if not create a
   // symlink if it's a sqlite file. Otherwise store in idb
 
-  if (!NO_PERSIST && filepath.startsWith('/documents')) {
-    if (filepath.endsWith('.sqlite')) {
-      // If it doesn't exist, we need to create a symlink
-      if (!_exists(filepath)) {
-        FS.symlink('/blocked/' + pathToId(filepath), filepath);
-      }
-    } else {
-      // The contents are actually stored in IndexedDB. We only write to
-      // the in-memory fs to take advantage of the file hierarchy
-      FS.writeFile(filepath, '!$@) this should never read !$@)');
-    }
+  if (!NO_PERSIST && isPersistedPath(filepath)) {
+    _createPersistedFile(filepath);
   }
 
   return filepath;
@@ -85,7 +126,7 @@ async function _readFile(
   // filesystem and will be handled in the BlockedFS
   if (
     !NO_PERSIST &&
-    filepath.startsWith('/documents') &&
+    isPersistedPath(filepath) &&
     !filepath.endsWith('.sqlite')
   ) {
     if (!_exists(filepath)) {
@@ -139,7 +180,7 @@ async function _writeFile(filepath: string, contents): Promise<boolean> {
   // setups up the file depending on its type
   _createFile(filepath);
 
-  if (!NO_PERSIST && filepath.startsWith('/documents')) {
+  if (!NO_PERSIST && isPersistedPath(filepath)) {
     const isDb = filepath.endsWith('.sqlite');
 
     // Write to IDB
@@ -211,7 +252,7 @@ async function _copySqlFile(
 }
 
 async function _removeFile(filepath: string) {
-  if (!NO_PERSIST && filepath.startsWith('/documents')) {
+  if (!NO_PERSIST && isPersistedPath(filepath)) {
     const isDb = filepath.endsWith('.sqlite');
 
     // Remove from IDB
@@ -272,7 +313,7 @@ const populateFileHierarchy = async function () {
 
   for (const path of paths) {
     _mkdirRecursively(basename(path));
-    _createFile(path);
+    _createPersistedFile(path);
   }
 };
 

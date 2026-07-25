@@ -2,9 +2,15 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Trans } from 'react-i18next';
 
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
-import { autocompletion } from '@codemirror/autocomplete';
+import { View } from '@actual-app/components/view';
+import {
+  autocompletion,
+  insertCompletionText,
+  pickedCompletion,
+} from '@codemirror/autocomplete';
 import type { Completion, CompletionContext } from '@codemirror/autocomplete';
 import {
   HighlightStyle,
@@ -12,20 +18,46 @@ import {
   syntaxHighlighting,
 } from '@codemirror/language';
 import type { StreamParser } from '@codemirror/language';
+import { RangeSetBuilder } from '@codemirror/state';
 import type { Extension } from '@codemirror/state';
 import {
+  Decoration,
   EditorView,
   hoverTooltip,
   tooltips,
   ViewPlugin,
+  WidgetType,
 } from '@codemirror/view';
-import type { Tooltip } from '@codemirror/view';
+import type { DecorationSet, Tooltip, ViewUpdate } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { t } from 'i18next';
 
-import { queryModeFunctions } from './queryModeFunctions';
-import type { FunctionDef } from './queryModeFunctions';
-import { transactionModeFunctions } from './transactionModeFunctions';
+import {
+  cacheFormulaBadgeRanges,
+  getFormulaBadgeRangeResult,
+  remapCachedFormulaBadgeRanges,
+} from './formulaBadgeRanges';
+import type {
+  BudgetCategoryBadge,
+  CachedFormulaBadgeRange,
+  FormulaBadgeRange,
+  FormulaBadgeVariant,
+} from './formulaBadgeRanges';
+import {
+  budgetQueryDimensions,
+  getBudgetCategoryCompletionSection,
+  getBudgetDimensionCompletionSection,
+  getDynamicReportQueryCompletions,
+  getFormulaCategoryForName,
+  getFormulaFunctionByName,
+  getFormulaFunctionCategoryConfig,
+  getFunctionCompletions,
+  getFunctionSignatureCompletionSection,
+  getNamedVariableCompletions,
+  getRuleFieldCompletions,
+  sortFormulaCompletions,
+} from './formulaCatalog';
+import type { FormulaFunctionDef, FormulaMode } from './formulaCatalog';
 
 // Tooltip components using the same styles as Tooltip.tsx
 function FunctionTooltip({
@@ -38,15 +70,25 @@ function FunctionTooltip({
   parameters: Array<{ name: string; description: string }>;
 }) {
   return (
-    <div style={{ maxWidth: '400px' }}>
-      <div style={{ fontWeight: 600, marginBottom: '4px' }}>{name}</div>
-      <div style={{ marginBottom: '8px' }}>{description}</div>
-      <div style={{ fontSize: '0.9em', opacity: 0.8 }}>
-        <div style={{ fontWeight: 500, marginBottom: '4px' }}>
+    <SpaceBetween
+      direction="vertical"
+      gap={8}
+      align="stretch"
+      style={{ maxWidth: '400px' }}
+    >
+      <View style={{ display: 'block', ...styles.mediumText }}>{name}</View>
+      <View style={{ display: 'block' }}>{description}</View>
+      <SpaceBetween
+        direction="vertical"
+        gap={4}
+        align="stretch"
+        style={{ ...styles.smallText, color: theme.pageTextSubdued }}
+      >
+        <View style={{ display: 'block' }}>
           <Trans>Parameters:</Trans>
-        </div>
+        </View>
         {parameters.map((p, i) => (
-          <div key={i} style={{ marginBottom: '2px' }}>
+          <View key={i} style={{ display: 'block' }}>
             •{' '}
             <code
               style={{
@@ -57,136 +99,436 @@ function FunctionTooltip({
               {p.name}
             </code>
             : {p.description}
-          </div>
+          </View>
         ))}
-      </div>
-    </div>
+      </SpaceBetween>
+    </SpaceBetween>
   );
 }
 
 function FieldTooltip({ label, info }: { label: string; info: string }) {
   return (
-    <div style={{ maxWidth: '400px' }}>
-      <div style={{ fontWeight: 600, marginBottom: '4px' }}>{label}</div>
-      <div>{info}</div>
-    </div>
+    <SpaceBetween
+      direction="vertical"
+      gap={4}
+      align="stretch"
+      style={{ maxWidth: '400px' }}
+    >
+      <View style={{ display: 'block', ...styles.mediumText }}>{label}</View>
+      <View style={{ display: 'block' }}>{info}</View>
+    </SpaceBetween>
   );
 }
 
-type FormulaMode = 'query' | 'transaction';
+export type FormulaBadgeClick = {
+  view: EditorView;
+  anchorRect: DOMRect;
+  from: number;
+  to: number;
+  label: string;
+  variant: FormulaBadgeVariant;
+  categories?: BudgetCategoryBadge[];
+};
 
-const MATH_FUNCTIONS = new Set([
-  'SUM',
-  'AVERAGE',
-  'MAX',
-  'MIN',
-  'ABS',
-  'ROUND',
-  'ROUNDUP',
-  'ROUNDDOWN',
-  'CEILING',
-  'FLOOR',
-  'MOD',
-  'POWER',
-  'SQRT',
-  'INT',
-  'TRUNC',
-  'SIGN',
-  'PI',
-  'SIN',
-  'COS',
-  'TAN',
-  'LN',
-  'LOG',
-  'LOG10',
-  'EXP',
-  'PRODUCT',
-  'PMT',
-  'FV',
-  'PV',
-  'NPV',
-  'IRR',
-  'RATE',
-]);
+export type MonthYearFormat = 'year-month' | 'month-year';
 
-const LOGICAL_FUNCTIONS = new Set([
-  'IF',
-  'IFS',
-  'AND',
-  'OR',
-  'XOR',
-  'NOT',
-  'TRUE',
-  'FALSE',
-  'IFERROR',
-  'IFNA',
-  'SWITCH',
-]);
+export function parseMonthYear(
+  value: string,
+): { month: string; format: MonthYearFormat } | null {
+  const yearMonth = value.match(/^(\d{4})-(\d{1,2})$/);
+  if (yearMonth) {
+    const month = Number(yearMonth[2]);
+    if (month >= 1 && month <= 12) {
+      return {
+        month: `${yearMonth[1]}-${String(month).padStart(2, '0')}`,
+        format: 'year-month',
+      };
+    }
+  }
 
-const TEXT_FUNCTIONS = new Set([
-  'TEXT',
-  'FIXED',
-  'FORMATNUMBER',
-  'FORMATCURRENCY',
-  'CONCATENATE',
-  'LEFT',
-  'RIGHT',
-  'MID',
-  'LEN',
-  'UPPER',
-  'LOWER',
-  'TRIM',
-  'PROPER',
-  'SUBSTITUTE',
-  'REPLACE',
-  'FIND',
-  'SEARCH',
-  'REPT',
-  'CHAR',
-  'CODE',
-  'EXACT',
-  'CLEAN',
-  'SPLIT',
-  'VALUE',
-  'T',
-  'N',
-]);
+  const monthYear = value.match(/^(\d{1,2})-(\d{4})$/);
+  if (monthYear) {
+    const month = Number(monthYear[1]);
+    if (month >= 1 && month <= 12) {
+      return {
+        month: `${monthYear[2]}-${String(month).padStart(2, '0')}`,
+        format: 'month-year',
+      };
+    }
+  }
 
-const DATE_FUNCTIONS = new Set([
-  'DATE',
-  'YEAR',
-  'MONTH',
-  'DAY',
-  'TODAY',
-  'NOW',
-  'WEEKDAY',
-  'EDATE',
-  'EOMONTH',
-  'DAYS',
-  'DATEDIF',
-  'DATEVALUE',
-  'NETWORKDAYS',
-  'WEEKNUM',
-  'ISOWEEKNUM',
-]);
+  return null;
+}
 
-const QUERY_FUNCTIONS = new Set([
-  'QUERY',
-  'QUERY_COUNT',
-  'BUDGET_QUERY',
-  'QUERY_EXTRACT_CATEGORIES',
-  'QUERY_EXTRACT_TIMEFRAME_START',
-  'QUERY_EXTRACT_TIMEFRAME_END',
-  'CHOOSE',
-  'ISBLANK',
-  'ISERROR',
-  'ISNA',
-  'ISNUMBER',
-  'ISTEXT',
-  'ISLOGICAL',
-  'ISEVEN',
-  'ISODD',
-]);
+export function formatMonthYear(month: string, format: MonthYearFormat) {
+  if (format === 'month-year') {
+    return `${month.slice(5, 7)}-${month.slice(0, 4)}`;
+  }
+  return month;
+}
+
+function applyStyle(element: HTMLElement, style: Record<string, string>) {
+  Object.assign(element.style, style);
+}
+
+class FormulaBadgeWidget extends WidgetType {
+  constructor(
+    readonly label: string,
+    readonly variant: FormulaBadgeVariant,
+    readonly range: { from: number; to: number },
+    readonly onBadgeClick?: (details: FormulaBadgeClick) => void,
+    readonly categories?: BudgetCategoryBadge[],
+  ) {
+    super();
+  }
+
+  eq(other: FormulaBadgeWidget) {
+    return (
+      other.label === this.label &&
+      other.variant === this.variant &&
+      other.range.from === this.range.from &&
+      other.range.to === this.range.to &&
+      other.onBadgeClick === this.onBadgeClick &&
+      JSON.stringify(other.categories) === JSON.stringify(this.categories)
+    );
+  }
+
+  toDOM(view: EditorView) {
+    const element = document.createElement('span');
+    const isQueryBadge = this.variant === 'query-name';
+    const isBudgetBadge = this.variant.startsWith('budget-');
+    const isCategoryList = this.variant === 'budget-category-list';
+    const baseElementStyle = {
+      display: 'inline-flex',
+      alignItems: 'center',
+      margin: '0 1px',
+      border: `1px solid ${theme.formInputBorder}`,
+      color: theme.pageText,
+      fontSize: '12px',
+    };
+    const categoryListElementStyle = {
+      maxWidth: '100%',
+      overflow: 'visible',
+      textOverflow: 'clip',
+      whiteSpace: 'normal',
+      padding: '2px 4px',
+      borderRadius: '4px',
+      backgroundColor: theme.tableRowBackgroundHover,
+      lineHeight: '20px',
+      gap: '4px',
+      flexWrap: 'wrap',
+      verticalAlign: 'middle',
+    };
+    const singleBadgeElementStyle = {
+      maxWidth: '220px',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      padding: '0 6px',
+      borderRadius: '999px',
+      lineHeight: '18px',
+    };
+    let singleBadgeColorStyle = {
+      backgroundColor: theme.pillBackground,
+    };
+
+    if (isQueryBadge) {
+      singleBadgeColorStyle = {
+        backgroundColor: theme.noticeBackground,
+      };
+    } else if (isBudgetBadge) {
+      singleBadgeColorStyle = {
+        backgroundColor: theme.buttonNormalBackground,
+      };
+    }
+
+    element.title = this.label;
+    if (isCategoryList) {
+      applyStyle(element, {
+        ...baseElementStyle,
+        ...categoryListElementStyle,
+      });
+
+      for (const category of this.categories ?? []) {
+        const badge = document.createElement('span');
+        const categoryBadgeStyle = {
+          display: 'inline-flex',
+          alignItems: 'center',
+          maxWidth: '100%',
+          overflow: 'visible',
+          textOverflow: 'clip',
+          whiteSpace: 'normal',
+          overflowWrap: 'anywhere',
+          padding: '0 6px',
+          borderRadius: '999px',
+          backgroundColor: theme.buttonNormalBackground,
+          color: theme.pageText,
+          lineHeight: '18px',
+        };
+
+        badge.textContent = category.label;
+        badge.title = category.label;
+        applyStyle(badge, {
+          ...categoryBadgeStyle,
+        });
+        element.appendChild(badge);
+      }
+    } else {
+      applyStyle(element, {
+        ...baseElementStyle,
+        ...singleBadgeElementStyle,
+        ...singleBadgeColorStyle,
+      });
+      element.textContent = this.label;
+    }
+
+    if (
+      this.onBadgeClick &&
+      [
+        'query-name',
+        'budget-dimension',
+        'budget-timeframe',
+        'budget-category-list',
+      ].includes(this.variant)
+    ) {
+      element.style.cursor = 'pointer';
+      element.addEventListener('mousedown', event => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      element.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.onBadgeClick?.({
+          view,
+          anchorRect: element.getBoundingClientRect(),
+          from: this.range.from,
+          to: this.range.to,
+          label: this.label,
+          variant: this.variant,
+          categories: this.categories,
+        });
+      });
+    }
+    return element;
+  }
+}
+
+function formulaBadgeExtension(
+  mode: FormulaMode,
+  queries?: Record<string, unknown>,
+  variables?: Record<string, number | string>,
+  onBadgeClick?: (details: FormulaBadgeClick) => void,
+  categoryBadges?: Record<string, string>,
+): Extension {
+  const buildDecorations = (
+    view: EditorView,
+    badgeRanges: FormulaBadgeRange[],
+  ): DecorationSet => {
+    const builder = new RangeSetBuilder<Decoration>();
+
+    badgeRanges
+      .filter(({ from, to }) =>
+        view.visibleRanges.some(range => from < range.to && to > range.from),
+      )
+      .sort((a, b) => a.from - b.from || a.to - b.to)
+      .forEach(({ from, to, label, variant, categories }) => {
+        builder.add(
+          from,
+          to,
+          Decoration.replace({
+            widget: new FormulaBadgeWidget(
+              label,
+              variant,
+              { from, to },
+              onBadgeClick,
+              categories,
+            ),
+            inclusive: false,
+          }),
+        );
+      });
+
+    return builder.finish();
+  };
+
+  return ViewPlugin.fromClass(
+    class {
+      decorations: DecorationSet;
+      lastValidBadgeRanges: CachedFormulaBadgeRange[] = [];
+
+      constructor(view: EditorView) {
+        this.decorations = this.buildDecorations(view);
+      }
+
+      update(update: ViewUpdate) {
+        if (update.docChanged || update.viewportChanged) {
+          this.decorations = this.buildDecorations(update.view);
+        }
+      }
+
+      buildDecorations(view: EditorView) {
+        const formula = view.state.doc.toString();
+        const result = getFormulaBadgeRangeResult({
+          formula,
+          mode,
+          queries,
+          variables,
+          categoryBadges,
+        });
+        let badgeRanges = result.ranges;
+
+        if (result.status === 'ok') {
+          this.lastValidBadgeRanges = cacheFormulaBadgeRanges(
+            formula,
+            badgeRanges,
+          );
+        } else if (result.status === 'inactive') {
+          this.lastValidBadgeRanges = [];
+        } else {
+          badgeRanges = badgeRanges.concat(
+            remapCachedFormulaBadgeRanges({
+              formula,
+              cachedRanges: this.lastValidBadgeRanges,
+              blockedRanges: badgeRanges,
+            }),
+          );
+        }
+
+        return buildDecorations(view, badgeRanges);
+      }
+    },
+    {
+      decorations: plugin => plugin.decorations,
+      provide: plugin =>
+        EditorView.atomicRanges.of(
+          view => view.plugin(plugin)?.decorations ?? Decoration.none,
+        ),
+    },
+  );
+}
+
+function createContextFunctionCompletion(
+  name: string,
+  func: FormulaFunctionDef,
+): Completion {
+  return {
+    label: name,
+    type: 'function',
+    section: getFunctionSignatureCompletionSection(),
+    detail: `(${func.parameters.map(p => p.name).join(', ')})`,
+    info: [
+      func.description,
+      '',
+      `${t('Parameters:')} ${func.parameters.map(p => p.name).join(', ')}`,
+      '',
+      func.parameters.map(p => `- ${p.name}: ${p.description}`).join('\n'),
+    ].join('\n'),
+    apply: view => {
+      view.dispatch({ selection: view.state.selection });
+    },
+    boost: 99,
+  };
+}
+
+export function getFormulaStringCompletionEdit({
+  value,
+  hasOpeningQuote,
+  hasClosingQuote,
+}: {
+  value: string;
+  hasOpeningQuote: boolean;
+  hasClosingQuote: boolean;
+}) {
+  return {
+    text: `${hasOpeningQuote ? '' : '"'}${value}"`,
+    offsetClosingQuote: hasClosingQuote ? 1 : 0,
+  };
+}
+
+function applyFormulaStringCompletion(value: string): Completion['apply'] {
+  return (view, completion, from, to) => {
+    const { text, offsetClosingQuote } = getFormulaStringCompletionEdit({
+      value,
+      hasOpeningQuote: from > 0 && view.state.sliceDoc(from - 1, from) === '"',
+      hasClosingQuote: view.state.sliceDoc(to, to + 1) === '"',
+    });
+
+    view.dispatch({
+      ...insertCompletionText(view.state, text, from, to + offsetClosingQuote),
+      annotations: pickedCompletion.of(completion),
+    });
+  };
+}
+
+function getActiveFunctionArgumentContext(text: string) {
+  const stack: Array<{
+    kind: 'function' | 'group' | 'array';
+    name?: string;
+    argumentIndex: number;
+  }> = [];
+  let isInString = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (char === '"') {
+      isInString = !isInString;
+      continue;
+    }
+
+    if (isInString) {
+      continue;
+    }
+
+    if (char === '(') {
+      const functionMatch = text
+        .slice(0, index)
+        .match(/([A-Za-z_][A-Za-z0-9_]*)\s*$/);
+      stack.push({
+        kind: functionMatch ? 'function' : 'group',
+        name: functionMatch?.[1].toUpperCase(),
+        argumentIndex: 0,
+      });
+      continue;
+    }
+
+    if (char === '{') {
+      stack.push({ kind: 'array', argumentIndex: 0 });
+      continue;
+    }
+
+    if (char === ')' || char === '}') {
+      stack.pop();
+      continue;
+    }
+
+    if (char === ',') {
+      const activeFrame = stack.at(-1);
+      if (activeFrame?.kind === 'function') {
+        activeFrame.argumentIndex += 1;
+      }
+    }
+  }
+
+  let activeFunction: {
+    kind: 'function' | 'group' | 'array';
+    name?: string;
+    argumentIndex: number;
+  } | null = null;
+  for (let index = stack.length - 1; index >= 0; index -= 1) {
+    if (stack[index].kind === 'function') {
+      activeFunction = stack[index];
+      break;
+    }
+  }
+
+  return activeFunction?.name
+    ? {
+        name: activeFunction.name,
+        argumentIndex: activeFunction.argumentIndex,
+      }
+    : null;
+}
 
 // Excel formula syntax parser for CodeMirror
 const excelFormulaParser: StreamParser<{ inString: boolean }> = {
@@ -230,23 +572,9 @@ const excelFormulaParser: StreamParser<{ inString: boolean }> = {
       if (stream.peek() === '(') {
         stream.pos = pos; // Reset position
 
-        // Categorize the function using different token types
-        if (MATH_FUNCTIONS.has(word)) {
-          return 'keyword';
-        }
-        if (LOGICAL_FUNCTIONS.has(word)) {
-          return 'className';
-        }
-        if (TEXT_FUNCTIONS.has(word)) {
-          return 'namespace';
-        }
-        if (DATE_FUNCTIONS.has(word)) {
-          return 'typeName';
-        }
-        if (QUERY_FUNCTIONS.has(word)) {
-          return 'propertyName';
-        }
-        return 'function';
+        return getFormulaFunctionCategoryConfig()[
+          getFormulaCategoryForName(word) ?? 'other'
+        ].tokenClass;
       }
       stream.pos = pos; // Reset position
       return 'variableName';
@@ -267,274 +595,40 @@ const excelFormulaParser: StreamParser<{ inString: boolean }> = {
   },
 };
 
-// Transaction field variables for autocomplete
-const transactionFields: Completion[] = [
-  {
-    label: 'amount',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Transaction amount in cents. Use for calculations and comparisons.\n\nExample: =amount / 100 to get dollar value',
-    ),
-  },
-  {
-    label: 'date',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Transaction date in YYYY-MM-DD format. Use with date functions.\n\nExample: =TEXT(date, "MMMM") to get month name',
-    ),
-  },
-  {
-    label: 'notes',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Transaction notes/memo text. Use for string operations.\n\nExample: =UPPER(notes) to convert to uppercase',
-    ),
-  },
-  {
-    label: 'imported_payee',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Original imported payee name from bank import. Contains the raw text before matching.\n\nExample: =LEFT(imported_payee, 10) to get first 10 characters',
-    ),
-  },
-  {
-    label: 'payee',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Payee ID (string). The ID of the payee.\n\nExample: =CONCATENATE("Payment to ", payee)',
-    ),
-  },
-  {
-    label: 'payee_name',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Payee name (string). The human-readable name of the payee.\n\nExample: =UPPER(payee_name) or =CONCATENATE("Payment to ", payee_name)',
-    ),
-  },
-  {
-    label: 'account',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Account ID (string). The ID of the account.\n\nExample: =CONCATENATE("Paid from ", account)',
-    ),
-  },
-  {
-    label: 'account_name',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Account name (string). The human-readable name of the account.\n\nExample: =CONCATENATE("Paid from ", account_name)',
-    ),
-  },
-  {
-    label: 'category',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Category ID (string). The ID of the category.\n\nExample: =IF(category="Groceries", "Food", "Other")',
-    ),
-  },
-  {
-    label: 'category_name',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Category Name (string). The human-readable name of the category.\n\nExample: =IF(category_name="Groceries", "Food", "Other")',
-    ),
-  },
-  {
-    label: 'cleared',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Boolean cleared status. TRUE if transaction is cleared, FALSE otherwise.\n\nExample: =IF(cleared, "Cleared", "Pending")',
-    ),
-  },
-  {
-    label: 'reconciled',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Boolean reconciled status. TRUE if transaction is reconciled, FALSE otherwise.',
-    ),
-  },
-  {
-    label: 'balance',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Account balance as of the date of the transaction, excluding the transaction amount. Use for calculations and comparisons.\n\nExample: =IF(balance < 0, "Negative Balance", "Positive Balance")',
-    ),
-  },
-  {
-    label: 'parent_amount',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'The amount of the parent transaction in cents in split transactions.\n\nExample: =(parent_amount / 100) * .05',
-    ),
-  },
-];
-
-// Convert function definitions to completions with grouping
-function getFunctionCompletions(mode: FormulaMode): Completion[] {
-  const functions =
-    mode === 'query' ? queryModeFunctions : transactionModeFunctions;
-
-  // Helper to create completion with section info
-  const createCompletion = (
-    name: string,
-    func: FunctionDef,
-    section: string,
-  ): Completion => ({
-    label: name,
-    type: 'function',
-    section,
-    info: [
-      func.description,
-      '',
-      `${t('Parameters:')} ${func.parameters.map(p => p.name).join(', ')}`,
-      '',
-      func.parameters.map(p => `- ${p.name}: ${p.description}`).join('\n'),
-    ].join('\n'),
-    apply: `${name}()`,
-    boost: 10, // Boost functions to appear higher
-  });
-
-  const completions: Completion[] = [];
-
-  // Group functions by category
-  for (const [name, func] of Object.entries(functions)) {
-    if (MATH_FUNCTIONS.has(name)) {
-      completions.push(createCompletion(name, func, '📊 Math Functions'));
-    } else if (LOGICAL_FUNCTIONS.has(name)) {
-      completions.push(createCompletion(name, func, '🔀 Logical Functions'));
-    } else if (TEXT_FUNCTIONS.has(name)) {
-      completions.push(createCompletion(name, func, '📝 Text Functions'));
-    } else if (DATE_FUNCTIONS.has(name)) {
-      completions.push(createCompletion(name, func, '📅 Date Functions'));
-    } else if (QUERY_FUNCTIONS.has(name)) {
-      completions.push(createCompletion(name, func, '🔍 Query Functions'));
-    } else {
-      completions.push(createCompletion(name, func, '⚙️ Other Functions'));
-    }
-  }
-
-  return completions;
-}
-
 // Autocomplete extension
 export function excelFormulaAutocomplete(
   mode: FormulaMode,
   queries?: Record<string, unknown>,
   variables?: Record<string, number | string>,
+  categoryBadges?: Record<string, string>,
 ): Extension {
   const functionCompletions = getFunctionCompletions(mode);
-
-  const queryCompletions: Completion[] = queries
-    ? Object.keys(queries).flatMap(queryName => [
-        {
-          label: `QUERY("${queryName}")`,
-          type: 'function',
-          section: '🔍 Query Functions',
-          info: t('Execute the {{queryName}} query and return the result.', {
-            queryName,
-          }),
-          apply: `QUERY("${queryName}")`,
-          boost: 15, // Boost query completions to appear at top of Query Functions section
-        },
-        {
-          label: `QUERY_COUNT("${queryName}")`,
-          type: 'function',
-          section: '🔍 Query Functions',
-          info: t(
-            'Execute the {{queryName}} query and return the number of matching rows.',
-            {
-              queryName,
-            },
-          ),
-          apply: `QUERY_COUNT("${queryName}")`,
-          boost: 14,
-        },
-        {
-          label: `BUDGET_QUERY("budgeted", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
-          type: 'function',
-          section: '🔍 Query Functions',
-          info: t(
-            'Sum of budgeted amounts with extracted parameters from {{queryName}}.',
-            { queryName },
-          ),
-          apply: `BUDGET_QUERY("budgeted", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
-          boost: 13,
-        },
-        {
-          label: `BUDGET_QUERY("spent", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
-          type: 'function',
-          section: '🔍 Query Functions',
-          info: t(
-            'Sum of spending with extracted parameters from {{queryName}}.',
-            { queryName },
-          ),
-          apply: `BUDGET_QUERY("spent", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
-          boost: 13,
-        },
-        {
-          label: `BUDGET_QUERY("balance_start", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
-          type: 'function',
-          section: '🔍 Query Functions',
-          info: t(
-            'Opening balance with extracted parameters from {{queryName}}.',
-            { queryName },
-          ),
-          apply: `BUDGET_QUERY("balance_start", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
-          boost: 13,
-        },
-        {
-          label: `BUDGET_QUERY("balance_end", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
-          type: 'function',
-          section: '🔍 Query Functions',
-          info: t(
-            'Closing balance with extracted parameters from {{queryName}}.',
-            { queryName },
-          ),
-          apply: `BUDGET_QUERY("balance_end", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
-          boost: 13,
-        },
-      ])
-    : [];
-
-  const variableCompletions: Completion[] = variables
-    ? Object.entries(variables).map(([varName, value]) => ({
-        label: varName,
-        type: 'variable',
-        section: '🔢 Variables',
-        info: t('Variable with value: {{value}}', {
-          value: String(value),
-        }),
-        boost: 20, // Boost variable completions to appear at top
-      }))
-    : [];
+  const queryCompletions =
+    mode === 'query' ? getDynamicReportQueryCompletions(queries) : [];
+  const variableCompletions = getNamedVariableCompletions(variables);
+  const budgetDimensionCompletions: Completion[] =
+    mode === 'query'
+      ? budgetQueryDimensions.map(dimension => ({
+          label: dimension,
+          type: 'constant',
+          section: getBudgetDimensionCompletionSection(),
+          info: t('Budget query dimension.'),
+          apply: applyFormulaStringCompletion(dimension),
+          boost: 18,
+        }))
+      : [];
+  const budgetCategoryCompletions: Completion[] =
+    mode === 'query' && categoryBadges
+      ? Object.entries(categoryBadges).map(([categoryId, label]) => ({
+          label,
+          type: 'constant',
+          section: getBudgetCategoryCompletionSection(),
+          detail: categoryId,
+          info: t('Budget category for BUDGET_QUERY category arrays.'),
+          apply: applyFormulaStringCompletion(categoryId),
+          boost: 17,
+        }))
+      : [];
 
   return autocompletion({
     override: [
@@ -544,57 +638,66 @@ export function excelFormulaAutocomplete(
           return null;
         }
 
-        const suggestions: Completion[] = [
-          ...variableCompletions, // Put variable completions first
-          ...queryCompletions, // Put query completions first
+        const activeFunctionContext = getActiveFunctionArgumentContext(
+          context.state.doc.sliceString(0, context.pos),
+        );
+        const activeFunctionDefinition = activeFunctionContext
+          ? getFormulaFunctionByName(activeFunctionContext.name, mode)
+          : undefined;
+        const activeFunctionSignatureCompletion =
+          activeFunctionContext && activeFunctionDefinition
+            ? createContextFunctionCompletion(
+                activeFunctionContext.name,
+                activeFunctionDefinition,
+              )
+            : null;
+        const isBudgetQueryContext =
+          mode === 'query' && activeFunctionContext?.name === 'BUDGET_QUERY';
+
+        const baseSuggestions: Completion[] = [
+          ...variableCompletions,
+          ...budgetDimensionCompletions,
+          ...budgetCategoryCompletions,
+          ...queryCompletions,
           ...functionCompletions,
+          ...(mode === 'transaction' ? getRuleFieldCompletions() : []),
         ];
 
-        if (mode === 'transaction') {
-          suggestions.push(...transactionFields);
-        }
+        const contextualSuggestions: Completion[] = activeFunctionContext
+          ? [
+              ...(activeFunctionSignatureCompletion
+                ? [activeFunctionSignatureCompletion]
+                : []),
+              ...(isBudgetQueryContext &&
+              activeFunctionContext.argumentIndex === 0
+                ? budgetDimensionCompletions
+                : []),
+              ...(isBudgetQueryContext &&
+              activeFunctionContext.argumentIndex === 1
+                ? budgetCategoryCompletions
+                : []),
+              ...(isBudgetQueryContext &&
+              (activeFunctionContext.argumentIndex === 2 ||
+                activeFunctionContext.argumentIndex === 3)
+                ? queryCompletions
+                : []),
+            ]
+          : [];
 
-        // Sort by section first, then by boost (descending), then by label
-        const sortedSuggestions = suggestions.sort((a, b) => {
-          // Define section priority order
-          const sectionOrder: Record<string, number> = {
-            '🔢 Variables': -1,
-            '🔍 Query Functions': 0,
-            '📊 Math Functions': 1,
-            '🔀 Logical Functions': 2,
-            '📝 Text Functions': 3,
-            '📅 Date Functions': 4,
-            '⚙️ Other Functions': 5,
-            '💰 Transaction Fields': 6,
-          };
-
-          // Get section names
-          const sectionA =
-            typeof a.section === 'string' ? a.section : a.section?.name || '';
-          const sectionB =
-            typeof b.section === 'string' ? b.section : b.section?.name || '';
-
-          // Compare by section priority
-          const orderA = sectionOrder[sectionA] ?? 999;
-          const orderB = sectionOrder[sectionB] ?? 999;
-          if (orderA !== orderB) {
-            return orderA - orderB;
-          }
-
-          // Within same section, sort by boost (higher first)
-          const boostA = a.boost || 0;
-          const boostB = b.boost || 0;
-          if (boostA !== boostB) {
-            return boostB - boostA;
-          }
-
-          // Finally, sort by label alphabetically
-          return a.label.localeCompare(b.label);
-        });
+        const suggestions = activeFunctionContext
+          ? [
+              ...contextualSuggestions,
+              ...sortFormulaCompletions(
+                baseSuggestions.filter(
+                  suggestion => !contextualSuggestions.includes(suggestion),
+                ),
+              ),
+            ]
+          : sortFormulaCompletions(baseSuggestions);
 
         return {
           from: word.from,
-          options: sortedSuggestions,
+          options: suggestions,
         };
       },
     ],
@@ -603,15 +706,12 @@ export function excelFormulaAutocomplete(
 
 // Hover tooltip for documentation
 export function excelFormulaHover(mode: FormulaMode): Extension {
-  const functions =
-    mode === 'query' ? queryModeFunctions : transactionModeFunctions;
-
   return hoverTooltip((view, pos) => {
     const word = view.state.wordAt(pos);
     if (!word) return null;
     const w = view.state.doc.sliceString(word.from, word.to);
     const upper = w.toUpperCase();
-    const funcDef = functions[upper];
+    const funcDef = getFormulaFunctionByName(upper, mode);
     if (funcDef) {
       return {
         pos: word.from,
@@ -641,7 +741,7 @@ export function excelFormulaHover(mode: FormulaMode): Extension {
 
     // Transaction fields
     if (mode === 'transaction') {
-      const field = transactionFields.find(f => f.label === w);
+      const field = getRuleFieldCompletions().find(f => f.label === w);
       if (field) {
         return {
           pos: word.from,
@@ -789,7 +889,6 @@ const autocompletePopoverTheme = EditorView.baseTheme({
 
   // Matched text within a label
   '.cm-tooltip.cm-tooltip-autocomplete .cm-completionMatchedText': {
-    fontWeight: '600',
     textDecoration: 'underline',
     textUnderlineOffset: '2px',
   },
@@ -1075,11 +1174,20 @@ export function excelFormulaExtension(
   queries?: Record<string, unknown>,
   isDark?: boolean,
   variables?: Record<string, number | string>,
+  onBadgeClick?: (details: FormulaBadgeClick) => void,
+  categoryBadges?: Record<string, string>,
 ): Extension[] {
   return [
     excelFormulaLanguage,
-    excelFormulaAutocomplete(mode, queries, variables),
+    excelFormulaAutocomplete(mode, queries, variables, categoryBadges),
     excelFormulaHover(mode),
+    formulaBadgeExtension(
+      mode,
+      queries,
+      variables,
+      onBadgeClick,
+      categoryBadges,
+    ),
     isDark ? excelFormulaDarkHighlighting : excelFormulaHighlighting,
     isDark ? functionCategoryThemeDark : functionCategoryTheme,
     tooltipZIndexTheme,

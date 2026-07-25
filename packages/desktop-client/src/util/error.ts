@@ -1,9 +1,50 @@
+import { getUnsafeZipMeta, toMB } from '@actual-app/core/shared/errors';
+import type { UnsafeZipMeta } from '@actual-app/core/shared/errors';
 import { t } from 'i18next';
 
 type ErrorWithMeta = {
   reason: string;
   meta?: unknown;
 };
+
+export function getUnsafeZipError({
+  zipReason,
+  entryName,
+  maxSize,
+}: UnsafeZipMeta): string {
+  const maxSizeMB = toMB(maxSize);
+  switch (zipReason) {
+    case 'archive-size':
+      return t(
+        'This file is larger than the maximum supported size of {{maxSizeMB}} MB, sorry! Visit https://actualbudget.org/contact/ for support.',
+        { maxSizeMB },
+      );
+    case 'entry-size':
+      return t(
+        'The file "{{entryName}}" in this archive is larger than the maximum supported size of {{maxSizeMB}} MB, sorry! Visit https://actualbudget.org/contact/ for support.',
+        { entryName, maxSizeMB },
+      );
+    case 'total-size':
+      return t(
+        'The uncompressed contents of this archive are larger than the maximum supported size of {{maxSizeMB}} MB, sorry! Visit https://actualbudget.org/contact/ for support.',
+        { maxSizeMB },
+      );
+    case 'unsafe-entry-name':
+      return t(
+        'This archive contains an entry with an unsafe file name: "{{entryName}}".',
+        { entryName },
+      );
+    case 'duplicate-entry':
+      return t(
+        'This archive contains more than one entry named "{{entryName}}".',
+        { entryName },
+      );
+    default:
+      return t(
+        'This file could not be imported, sorry! Visit https://actualbudget.org/contact/ for support.',
+      );
+  }
+}
 
 export function getUploadError({ reason, meta }: ErrorWithMeta) {
   switch (reason) {
@@ -88,6 +129,15 @@ export function getDownloadError({
       return t(
         'Downloaded file is invalid, sorry! Visit https://actualbudget.org/contact/ for support.',
       );
+    case 'zip-too-large': {
+      const zipMeta = getUnsafeZipMeta(meta);
+      if (zipMeta) {
+        return getUnsafeZipError(zipMeta);
+      }
+      return t(
+        'This file is too large to import, sorry! Visit https://actualbudget.org/contact/ for support.',
+      );
+    }
     case 'decrypt-failure':
       return t(
         'Unable to decrypt file {{fileName}}. To change your key, first download this file with the proper password.',

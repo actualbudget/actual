@@ -44,8 +44,8 @@ yarn start:desktop
 
 ### ⚠️ PR titles must start with `[AI]`
 
-Every pull request title must be prefixed with `[AI]` — this isn't enforced
-automatically, so you have to apply it yourself. See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md).
+Every pull request title must be prefixed with `[AI]` — you have to apply it
+yourself. See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md).
 
 ### Task Orchestration with Lage
 
@@ -286,7 +286,7 @@ wrapping isn't possible).
 
 **React Patterns:**
 
-- The project uses **React Compiler** (`babel-plugin-react-compiler`) in the desktop-client. The compiler auto-memoizes component bodies, so you can omit manual `useCallback`, `useMemo`, and `React.memo` when adding or refactoring code; prefer inline callbacks and values unless a stable identity is required by a non-compiled dependency.
+- The project uses **React Compiler** (`babel-plugin-react-compiler`) in all app packages with React code (desktop-client, component-library). The compiler auto-memoizes component bodies, so you can omit manual `useCallback`, `useMemo`, and `React.memo` when adding or refactoring code; prefer inline callbacks and values unless a stable identity is required by a non-compiled dependency.
 - Avoid unstable nested components
 
 **JSX Style:**
@@ -349,6 +349,10 @@ describe('ComponentName', () => {
 - `/.nano-staged.json` - pre-commit format/lint config (run via Husky)
 - `/.claude/settings.json`, `/.codex/config.toml`, `/.cursor/hooks.json` - agent
   hook wiring; shared scripts live in `/scripts/agent-hooks/`
+- `/.agents/skills/` - symlink mirror of `/.claude/skills/` so Codex-based
+  harnesses (Codex CLI, IDE extension, ChatGPT desktop app) discover the same
+  skills; when adding a skill, create it in `/.claude/skills/` and add a
+  matching relative symlink here
 - `/tsconfig.json` - Root TypeScript configuration
 - `/.cursorignore`, `/.gitignore` - Ignored files
 - `/yarn.lock` - Dependency lockfile (Yarn 4)
@@ -357,7 +361,11 @@ describe('ComponentName', () => {
 
 - `/README.md` - Project overview
 - `/CONTRIBUTING.md` - Points to community docs
-- `/upcoming-release-notes/` - Release notes for next version
+- `/upcoming-release-notes/` - Release notes for next version. Name each file
+  with a short, descriptive slug (e.g. `add-payee-autocomplete.md`) — the PR link
+  is resolved automatically at release time, so you don't need the PR number.
+  Numeric filenames like `1234.md` also remain valid. See the release-note
+  template and rules in `packages/docs/docs/contributing/index.md`.
 - `/CODEOWNERS` - Code ownership definitions
 - `/packages/docs/` - Documentation website (Docusaurus)
 
@@ -506,7 +514,7 @@ Before committing changes, ensure:
 
 ## Pull Request Guidelines
 
-See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including title prefix requirements, labeling, and PR template handling.
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including title prefix requirements, labeling, the GitHub comment/review/issue 🤖 prefix, and PR template handling.
 
 ## Code Review Guidelines
 

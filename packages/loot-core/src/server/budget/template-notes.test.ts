@@ -268,7 +268,7 @@ describe('checkTemplates', () => {
       mockSchedules: mockSchedules(),
       expected: {
         type: 'message',
-        message: 'All templates passed! 🎉',
+        message: 'templates-check-passed',
       },
     },
     {
@@ -283,7 +283,7 @@ describe('checkTemplates', () => {
       mockSchedules: mockSchedules(),
       expected: {
         type: 'message',
-        message: 'All templates passed! 🎉',
+        message: 'templates-check-passed',
       },
     },
     {
@@ -298,7 +298,7 @@ describe('checkTemplates', () => {
       mockSchedules: mockSchedules(),
       expected: {
         sticky: true,
-        message: 'There were errors interpreting some templates:',
+        message: 'template-errors',
         pre: 'Category 1: #template broken template',
       },
     },
@@ -314,7 +314,7 @@ describe('checkTemplates', () => {
       mockSchedules: mockSchedules(),
       expected: {
         sticky: true,
-        message: 'There were errors interpreting some templates:',
+        message: 'template-errors',
         pre: 'Category 1: Schedule "Non-existent Schedule" does not exist',
       },
     },
@@ -330,7 +330,7 @@ describe('checkTemplates', () => {
       mockSchedules: mockSchedules(),
       expected: {
         sticky: true,
-        message: 'There were errors interpreting some templates:',
+        message: 'template-errors',
         pre: 'Category 1: #template schedule Mock Schedule 1 [increase 1001%]\nError: Invalid adjustment percentage (1001%). Must be between -100% and 1000%',
       },
     },
@@ -346,7 +346,7 @@ describe('checkTemplates', () => {
       mockSchedules: mockSchedules(),
       expected: {
         sticky: true,
-        message: 'There were errors interpreting some templates:',
+        message: 'template-errors',
         pre: 'Category 1: #template schedule Mock Schedule 1 [decrease 101%]\nError: Invalid adjustment percentage (-101%). Must be between -100% and 1000%',
       },
     },

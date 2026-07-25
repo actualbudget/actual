@@ -34,9 +34,14 @@ import {
   SvgCheveronDown,
 } from '@actual-app/components/icons/v1';
 import {
+  SvgAlertTriangle,
   SvgArrowsSynchronize,
   SvgCalendar3,
+  SvgCheckCircle1,
+  SvgCheckCircleHollow,
+  SvgEditSkull1,
   SvgHyperlink2,
+  SvgLockClosed,
   SvgSubtract,
 } from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
@@ -107,7 +112,6 @@ import {
   SchedulesProvider,
   useCachedSchedules,
 } from '#hooks/useCachedSchedules';
-import { useContextMenu } from '#hooks/useContextMenu';
 import { DisplayPayeeProvider, useDisplayPayee } from '#hooks/useDisplayPayee';
 import {
   DropHighlight,
@@ -148,7 +152,7 @@ import type {
   TransactionEditFunction,
   TransactionUpdateFunction,
 } from './table/utils';
-import { TransactionMenu } from './TransactionMenu';
+import { useTransactionRowContextActions } from './useTransactionRowContextActions';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -328,6 +332,7 @@ const TransactionHeader = memo(
             width={38}
             alignItems="center"
             id="cleared"
+            tooltip={<ClearedColumnLegend />}
             icon={field === 'cleared' ? ascDesc : 'clickable'}
             onClick={() => {
               onSort(
@@ -343,6 +348,63 @@ const TransactionHeader = memo(
 );
 
 TransactionHeader.displayName = 'TransactionHeader';
+
+function ClearedColumnLegend() {
+  const legendItems = [
+    {
+      Icon: SvgCheckCircleHollow,
+      color: theme.pageTextSubdued,
+      label: <Trans>Uncleared: not yet verified</Trans>,
+    },
+    {
+      Icon: SvgCheckCircle1,
+      color: theme.noticeTextLight,
+      label: <Trans>Cleared: verified against your account</Trans>,
+    },
+    {
+      Icon: SvgLockClosed,
+      color: theme.noticeTextLight,
+      label: <Trans>Reconciled: locked after reconciliation</Trans>,
+    },
+    {
+      Icon: SvgCalendar3,
+      color: theme.pageTextSubdued,
+      label: <Trans>Upcoming scheduled transaction</Trans>,
+    },
+    {
+      Icon: SvgAlertTriangle,
+      color: theme.warningText,
+      label: <Trans>Due scheduled transaction</Trans>,
+    },
+    {
+      Icon: SvgEditSkull1,
+      color: theme.errorText,
+      label: <Trans>Missed scheduled transaction</Trans>,
+    },
+  ];
+
+  return (
+    <View style={{ maxWidth: 260, padding: 4 }}>
+      <Text style={{ fontWeight: 600 }}>
+        <Trans>Transaction status</Trans>
+      </Text>
+      {legendItems.map(({ Icon, color, label }, index) => (
+        <View
+          key={index}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            marginTop: 6,
+          }}
+        >
+          <Icon style={{ width: 13, height: 13, color, flexShrink: 0 }} />
+          <Text>{label}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
 
 type StatusCellProps = {
   id: TransactionEntity['id'];
@@ -437,6 +499,7 @@ type HeaderCellProps = {
   value: string;
   id: string;
   icon?: 'asc' | 'desc' | 'clickable';
+  tooltip?: ReactNode;
   onClick?: () => void;
 } & Pick<CSSProperties, 'width' | 'alignItems' | 'marginLeft' | 'marginRight'>;
 
@@ -448,6 +511,7 @@ function HeaderCell({
   marginLeft,
   marginRight,
   icon,
+  tooltip,
   onClick,
 }: HeaderCellProps) {
   const style = {
@@ -470,8 +534,8 @@ function HeaderCell({
         borderTopWidth: 0,
         borderBottomWidth: 0,
       }}
-      unexposedContent={({ value: cellValue }) =>
-        onClick ? (
+      unexposedContent={({ value: cellValue }) => {
+        const content = onClick ? (
           <Button variant="bare" onPress={onClick} style={style}>
             <UnexposedCellContent value={cellValue} />
             {icon === 'asc' && (
@@ -483,8 +547,16 @@ function HeaderCell({
           </Button>
         ) : (
           <Text style={style}>{cellValue}</Text>
-        )
-      }
+        );
+
+        return tooltip ? (
+          <Tooltip content={tooltip} placement="bottom end">
+            {content}
+          </Tooltip>
+        ) : (
+          content
+        );
+      }}
     />
   );
 }
@@ -1215,9 +1287,6 @@ const Transaction = memo(function Transaction({
     return () => clearTimeout(id);
   }, [splitError, allTransactions]);
 
-  const { setMenuOpen, menuOpen, handleContextMenu, position } =
-    useContextMenu();
-
   // Drag and drop support
   const isChildTransaction = transaction.is_child;
   const parentId = transaction.parent_id;
@@ -1323,6 +1392,19 @@ const Transaction = memo(function Transaction({
     dropPos && isValidDropTarget && !isBeingDragged,
   );
 
+  useTransactionRowContextActions({
+    rowRef: triggerRef,
+    transaction,
+    getTransaction: id => allTransactions?.find(t => t.id === id),
+    onDelete: ids => onBatchDelete?.(ids),
+    onDuplicate: ids => onBatchDuplicate?.(ids),
+    onLinkSchedule: ids => onBatchLinkSchedule?.(ids),
+    onUnlinkSchedule: ids => onBatchUnlinkSchedule?.(ids),
+    onCreateRule: ids => onCreateRule?.(ids),
+    onScheduleAction: (name, ids) => onScheduleAction?.(name, ids),
+    onMakeAsNonSplitTransactions: ids => onMakeAsNonSplitTransactions?.(ids),
+  });
+
   return (
     <View
       innerRef={dropRef}
@@ -1363,35 +1445,7 @@ const Transaction = memo(function Transaction({
           ...(_unmatched && { opacity: 0.5 }),
           ...(isBeingDragged && { opacity: 0.5 }),
         }}
-        onContextMenu={handleContextMenu}
       >
-        <Popover
-          triggerRef={triggerRef}
-          placement="bottom start"
-          isOpen={menuOpen}
-          onOpenChange={isOpen => {
-            if (!isOpen) setMenuOpen(false);
-          }}
-          {...position}
-          style={{ width: 200, margin: 1 }}
-          isNonModal={false}
-        >
-          <TransactionMenu
-            transaction={transaction}
-            getTransaction={id => allTransactions?.find(t => t.id === id)}
-            onDelete={ids => onBatchDelete?.(ids)}
-            onDuplicate={ids => onBatchDuplicate?.(ids)}
-            onLinkSchedule={ids => onBatchLinkSchedule?.(ids)}
-            onUnlinkSchedule={ids => onBatchUnlinkSchedule?.(ids)}
-            onCreateRule={ids => onCreateRule?.(ids)}
-            onScheduleAction={(name, ids) => onScheduleAction?.(name, ids)}
-            onMakeAsNonSplitTransactions={ids =>
-              onMakeAsNonSplitTransactions?.(ids)
-            }
-            closeMenu={() => setMenuOpen(false)}
-          />
-        </Popover>
-
         {splitError && listContainerRef?.current && (
           <Popover
             triggerRef={triggerRef}
@@ -1400,6 +1454,7 @@ const Transaction = memo(function Transaction({
             style={{
               width: 'max-content',
               maxWidth: 'none',
+              maxHeight: 'none !important',
               minWidth: 375,
               padding: 5,
             }}
@@ -1987,6 +2042,7 @@ function NotesCell({
   onClickTag,
   onExpose,
 }: NotesCellProps) {
+  const cellRef = useRef<HTMLDivElement | null>(null);
   const [inputValue, setInputValue] = useState(note);
   useEffect(() => {
     setInputValue(note);
@@ -2004,6 +2060,7 @@ function NotesCell({
 
   return (
     <CustomCell
+      innerRef={cellRef}
       width="flex"
       name="notes"
       value={displayedNote}

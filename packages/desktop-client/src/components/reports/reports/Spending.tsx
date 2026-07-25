@@ -6,6 +6,7 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { ModeButton } from '@actual-app/components/mode-button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -31,7 +32,6 @@ import { PrivacyFilter } from '#components/PrivacyFilter';
 import { SpendingGraph } from '#components/reports/graphs/SpendingGraph';
 import { LegendItem } from '#components/reports/LegendItem';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
-import { ModeButton } from '#components/reports/ModeButton';
 import { calculateSpendingReportTimeRange } from '#components/reports/reportRanges';
 import {
   getSpendingAverageRangeLabel,
