@@ -1249,20 +1249,20 @@ const Transaction = memo(function Transaction({
             );
 
             // sync split parent if the other leg is a split child
-            const { data } = await aqlQuery(
+            const { data } = (await aqlQuery(
               q('transactions')
                 .filter({ id: { $oneof: transferIds } })
                 .select(['id', 'is_child', 'parent_id']),
-            );
+            )) as {
+              data: Pick<TransactionEntity, 'id' | 'is_child' | 'parent_id'>[];
+            };
             updated.push(
-              ...(
-                data as Pick<
-                  TransactionEntity,
-                  'id' | 'is_child' | 'parent_id'
-                >[]
-              )
-                .filter(t => t.is_child && t.parent_id)
-                .map(t => ({ id: t.parent_id as string, date: value })),
+              ...data
+                .filter(
+                  (t): t is typeof t & { parent_id: string } =>
+                    t.is_child === true && typeof t.parent_id === 'string',
+                )
+                .map(t => ({ id: t.parent_id, date: value })),
             );
 
             // a newer date edit started while we were querying: let it win
