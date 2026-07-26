@@ -875,6 +875,73 @@ describe('runMonteCarloSimulation', () => {
     ).toBeLessThanOrEqual(1);
   });
 
+  it('guardrails ignore a booming locked pot during a bridge', () => {
+    // Accessible bridge pot drains while a locked pension quintuples: the
+    // rule must measure the withdrawal rate against accessible wealth and
+    // CUT spending, not hand out prosperity raises against locked money
+    const result = runMonteCarloSimulation(
+      makeParams({
+        annualWithdrawal: 10_000,
+        horizonYears: 5,
+        captureRunDetail: 0,
+        withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
+        pots: [
+          makePot({
+            id: 'bridge',
+            startingBalance: 100_000,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+          }),
+          makePot({
+            id: 'pension',
+            startingBalance: 1_000_000,
+            expectedReturnMean: 0.2,
+            returnStdDev: 0,
+            accessAge: 120,
+          }),
+        ],
+      }),
+    );
+
+    // Reference rate is 10% of the accessible start; the draining bridge
+    // pot pushes the rate past the guardrail and spending steps down
+    expect(result.runDetail!.map(row => row.withdrawal)).toEqual([
+      10_000, 10_000, 9_000, 8_100, 7_290,
+    ]);
+  });
+
+  it('ratcheting ignores a booming locked pot during a bridge', () => {
+    // Pre-fix, total wealth (locked pension included) crossing the
+    // threshold ratcheted spending up while only the bridge pot could pay
+    const result = runMonteCarloSimulation(
+      makeParams({
+        annualWithdrawal: 10_000,
+        horizonYears: 5,
+        captureRunDetail: 0,
+        withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'ratcheting' },
+        pots: [
+          makePot({
+            id: 'bridge',
+            startingBalance: 100_000,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+          }),
+          makePot({
+            id: 'pension',
+            startingBalance: 1_000_000,
+            expectedReturnMean: 0.5,
+            returnStdDev: 0,
+            accessAge: 120,
+          }),
+        ],
+      }),
+    );
+
+    expect(result.runDetail!.map(row => row.withdrawal)).toEqual([
+      10_000, 10_000, 10_000, 10_000, 10_000,
+    ]);
+  });
+
   it('reports per-run summaries consistent with the aggregates', () => {
     const result = runMonteCarloSimulation(
       makeParams(

@@ -535,8 +535,25 @@ export function runMonteCarloSimulation(
   function toSafeAmount(value: number) {
     return clamp(value, -maxEmitted, maxEmitted);
   }
+  // Starting wealth that is accessible in each simulated year. Withdrawal
+  // rules measure rates against the pots that can actually fund spending -
+  // a locked pension mustn't earn prosperity raises during a bridge, and
+  // starts counting the moment it unlocks
+  const accessibleStartByYear = new Float64Array(horizonYears + 1);
+  for (let year = 1; year <= horizonYears; year++) {
+    let accessibleStart = 0;
+    for (let p = 0; p < potCount; p++) {
+      if (year >= potAccessFromYear[p]) {
+        accessibleStart += potStartBalances[p];
+      }
+    }
+    accessibleStartByYear[year] = accessibleStart;
+  }
+
   const initialRate =
-    startingTotal > 0 ? plannedTodayByYear[1] / startingTotal : 0;
+    accessibleStartByYear[1] > 0
+      ? plannedTodayByYear[1] / accessibleStartByYear[1]
+      : 0;
   const withdrawnTotals = new Float64Array(simulationCount);
   const depletionYearBySim = new Int32Array(simulationCount).fill(-1);
 
@@ -567,25 +584,44 @@ export function runMonteCarloSimulation(
         const planned = plannedTodayByYear[year] * cumInflation;
         let withdrawal: number;
 
+        // Only pots that have reached their access age can fund this year's
+        // withdrawal; locked pots stay invested but untouchable
+        let accessibleTotal = 0;
+        let lastAccessibleIndex = -1;
+        for (let p = 0; p < potCount; p++) {
+          if (year >= potAccessFromYear[p]) {
+            accessibleTotal += potBalances[p];
+            lastAccessibleIndex = p;
+          }
+        }
+
         // Apply the dynamic withdrawal rule before taking this year's
-        // withdrawal (from year 2 - year 1 always uses the planned amount)
+        // withdrawal (from year 2 - year 1 always uses the planned amount).
+        // Rules evaluate accessible wealth only: locked pots can't fund
+        // spending, so they must not drive cuts or raises until they unlock
         if (year > 1 && rule.type === 'floor-ceiling') {
-          // Recompute rule: a fixed share of the current balance, kept
+          // Recompute rule: a fixed share of the accessible balance, kept
           // within limits around the planned spending
           withdrawal = clamp(
-            initialRate * total,
+            initialRate * accessibleTotal,
             planned * (1 - rule.floorPct),
             planned * (1 + rule.ceilingPct),
           );
         } else {
-          if (year > 1 && rule.type !== 'none') {
-            const currentRate = (planned * adjustmentFactor) / total;
+          if (
+            year > 1 &&
+            rule.type !== 'none' &&
+            accessibleTotal > 0 &&
+            accessibleStartByYear[year] > 0
+          ) {
+            const currentRate = (planned * adjustmentFactor) / accessibleTotal;
             if (rule.type === 'guardrails') {
               // Drift is measured against the planned spending path, not
               // the year-1 rate, so a deliberate phase change doesn't
               // read as a trigger - only market-driven drift does.
               // Identical to the year-1 anchor for single-phase plans.
-              const referenceRate = plannedTodayByYear[year] / startingTotal;
+              const referenceRate =
+                plannedTodayByYear[year] / accessibleStartByYear[year];
               if (
                 currentRate >
                 referenceRate * (1 + rule.preservationTriggerPct)
@@ -598,7 +634,10 @@ export function runMonteCarloSimulation(
                 adjustmentFactor *= 1 + rule.prosperityIncreasePct;
               }
             } else if (rule.type === 'ratcheting') {
-              if (total > startingTotal * rule.balanceThresholdMultiple) {
+              if (
+                accessibleTotal >
+                accessibleStartByYear[year] * rule.balanceThresholdMultiple
+              ) {
                 ratchetStreak++;
                 if (ratchetStreak >= rule.consecutiveYears) {
                   adjustmentFactor *= 1 + rule.ratchetIncreasePct;
@@ -628,17 +667,6 @@ export function runMonteCarloSimulation(
           withdrawal < minimumThisYear
         ) {
           withdrawal = minimumThisYear;
-        }
-
-        // Only pots that have reached their access age can fund this year's
-        // withdrawal; locked pots stay invested but untouchable
-        let accessibleTotal = 0;
-        let lastAccessibleIndex = -1;
-        for (let p = 0; p < potCount; p++) {
-          if (year >= potAccessFromYear[p]) {
-            accessibleTotal += potBalances[p];
-            lastAccessibleIndex = p;
-          }
         }
 
         const yearStartTotal = total;

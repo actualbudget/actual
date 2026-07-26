@@ -91,10 +91,11 @@ The inflation settings that grow your spending over time live on the [Plan Detai
 
 By default, the simulation withdraws the same (inflation-adjusted) amount every year, no matter what the market does. Real retirees usually don't behave that way - in a bad stretch they tighten their belts, and in a good stretch they allow themselves a bit more. Withdrawal rules teach the simulation to do the same.
 
-All the rules share two ideas:
+All the rules share a few ideas:
 
 - Your **spending phases** set the planned amounts. From the second year onward, the rule adjusts what's actually taken - independently in every replay, reacting to how that replay is going. A cut or raise carries across phase boundaries: if the rule cut your spending by 10% during a rough patch, the next phase's amount starts 10% lower too.
 - Rules usually improve your **success rate** by cutting spending in bad times, but that safety isn't free - you get it by living on less. Keep an eye on the **Median total withdrawn** stat to see what a rule costs you in income.
+- Rules only see the wealth you can actually spend. If a pension is locked until its access age, it doesn't earn you spending raises while a bridge pot pays the bills - the rules watch the accessible pots, and the pension starts counting the moment it unlocks.
 
 If you set a **Minimum withdrawal**, your yearly spending never drops below that amount, no matter what the rule says. Like your spending phases, it's an amount in today's money - it rises with inflation so its spending power holds steady.
 

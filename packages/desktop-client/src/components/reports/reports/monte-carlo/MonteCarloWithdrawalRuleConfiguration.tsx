@@ -130,7 +130,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
                     'Withdrawals are reduced when the withdrawal rate crosses an upper limit and increased when it falls below a lower limit.',
                   )}{' '}
           {t(
-            'The rule adjusts your planned spending year by year, independently in every scenario.',
+            'The rule adjusts your planned spending year by year, independently in every scenario. It only looks at the pots you can currently access - locked pots count from the moment they unlock.',
           )}
         </Text>
       )}
