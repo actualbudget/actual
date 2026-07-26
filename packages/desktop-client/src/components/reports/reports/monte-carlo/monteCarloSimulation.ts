@@ -38,6 +38,20 @@ export const PRESET_ASSET_WEIGHTS: Record<
   cash: { stocks: 0, bonds: 0, cash: 1 },
 };
 
+/**
+ * Money inputs above this are clamped (1e14 minor units = 1 trillion major
+ * units); keeps even heavily compounded results within the range the
+ * app's formatter accepts
+ */
+export const MAX_AMOUNT = 100_000_000_000_000;
+
+/**
+ * The largest integer amount loot-core's safeNumber will format (2^51 - 1,
+ * tighter than MAX_SAFE_INTEGER so display division stays exact). Chart
+ * axes must clamp synthesized tick values to this before formatting.
+ */
+export const MAX_FORMATTABLE_AMOUNT = 2 ** 51 - 1;
+
 export const MIN_SIMULATION_COUNT = 1000;
 export const MAX_SIMULATION_COUNT = 10000;
 export const MIN_HORIZON_YEARS = 1;
@@ -391,7 +405,9 @@ export function runMonteCarloSimulation(
 ): MonteCarloResult {
   const pots = params.pots.length > 0 ? params.pots : MONTE_CARLO_DEFAULTS.pots;
   const potCount = pots.length;
-  const potStartBalances = pots.map(pot => Math.max(0, pot.startingBalance));
+  const potStartBalances = pots.map(pot =>
+    clamp(pot.startingBalance, 0, MAX_AMOUNT),
+  );
   const potMeans = pots.map(pot => pot.expectedReturnMean);
   const potStdDevs = pots.map(pot => Math.max(0, pot.returnStdDev));
   const isSequential = params.withdrawalStrategy === 'sequential';
@@ -462,10 +478,10 @@ export function runMonteCarloSimulation(
   const plannedTodayByYear = new Float64Array(horizonYears + 1);
   for (let year = 1; year <= horizonYears; year++) {
     const age = params.currentAge + year - 1;
-    let amount = Math.max(0, spendingPhases[0].annualWithdrawal);
+    let amount = clamp(spendingPhases[0].annualWithdrawal, 0, MAX_AMOUNT);
     for (const phase of spendingPhases) {
       if (phase.fromAge == null || phase.fromAge <= age) {
-        amount = Math.max(0, phase.annualWithdrawal);
+        amount = clamp(phase.annualWithdrawal, 0, MAX_AMOUNT);
       } else {
         break;
       }
@@ -509,7 +525,16 @@ export function runMonteCarloSimulation(
   const potBalances = new Float64Array(potCount);
 
   const rule = params.withdrawalRule;
-  const minimumWithdrawal = Math.max(0, params.minimumWithdrawal);
+  const minimumWithdrawal = clamp(params.minimumWithdrawal, 0, MAX_AMOUNT);
+
+  // Keep every emitted amount within the range the formatter accepts -
+  // absurd configs flat-line at the cap instead of crashing the report.
+  // Capped a factor of two below MAX_FORMATTABLE_AMOUNT so chart axes can
+  // round their top tick above the data maximum and still format it
+  const maxEmitted = 2 ** 50;
+  function toSafeAmount(value: number) {
+    return clamp(value, -maxEmitted, maxEmitted);
+  }
   const initialRate =
     startingTotal > 0 ? plannedTodayByYear[1] / startingTotal : 0;
   const withdrawnTotals = new Float64Array(simulationCount);
@@ -534,7 +559,7 @@ export function runMonteCarloSimulation(
     let depleted = false;
     let simDepletionYear = Infinity;
 
-    balancesByYear[0][sim] = total;
+    balancesByYear[0][sim] = toSafeAmount(total);
 
     for (let year = 1; year <= horizonYears; year++) {
       if (!depleted) {
@@ -638,7 +663,9 @@ export function runMonteCarloSimulation(
           // The accessible pots can't cover this year's withdrawal (locked
           // pots may still hold money, but the plan failed to fund spending);
           // they get whatever was reachable
-          withdrawnSum += accessibleTotal * invStart;
+          withdrawnSum = toSafeAmount(
+            withdrawnSum + accessibleTotal * invStart,
+          );
           withdrawalTaken = accessibleTotal;
           if (runDetail && sim === captureIndex) {
             failurePotSnapshot = Array.from(potBalances, (balance, p) =>
@@ -651,7 +678,7 @@ export function runMonteCarloSimulation(
           simDepletionYear = year;
           depletionCounts[year]++;
         } else {
-          withdrawnSum += withdrawal * invStart;
+          withdrawnSum = toSafeAmount(withdrawnSum + withdrawal * invStart);
           withdrawalTaken = withdrawal;
           if (isSequential || isBestPerformer) {
             if (isBestPerformer) {
@@ -803,24 +830,24 @@ export function runMonteCarloSimulation(
             // The plan failed to fund this year's spending; any remaining
             // balance was locked in pots not yet accessible, not lost to
             // markets
-            const locked = Math.round(
-              (yearStartTotal - withdrawalTaken) * startInv,
+            const locked = toSafeAmount(
+              Math.round((yearStartTotal - withdrawalTaken) * startInv),
             );
             runDetail.push({
               year,
-              startBalance: Math.round(yearStartTotal * startInv),
-              withdrawal: Math.round(withdrawalTaken * startInv),
+              startBalance: toSafeAmount(Math.round(yearStartTotal * startInv)),
+              withdrawal: toSafeAmount(Math.round(withdrawalTaken * startInv)),
               growth: 0,
               endBalance: 0,
               potBalances: (failurePotSnapshot ?? []).map(balance =>
-                Math.round(balance * startInv),
+                toSafeAmount(Math.round(balance * startInv)),
               ),
               // On a shortfall the accessible pots gave up everything they
               // had; locked pots funded nothing
               potWithdrawals: (capturedPotWithdrawals ?? []).map(
                 (balance, p) =>
                   year >= potAccessFromYear[p]
-                    ? Math.round(balance * startInv)
+                    ? toSafeAmount(Math.round(balance * startInv))
                     : 0,
               ),
               potReturns: capturedPotReturns ?? [],
@@ -829,19 +856,22 @@ export function runMonteCarloSimulation(
           } else {
             runDetail.push({
               year,
-              startBalance: Math.round(yearStartTotal * startInv),
-              withdrawal: Math.round(withdrawalTaken * startInv),
+              startBalance: toSafeAmount(Math.round(yearStartTotal * startInv)),
+              withdrawal: toSafeAmount(Math.round(withdrawalTaken * startInv)),
               // In today's money, growth is the real gain: the inflation
               // drag comes out of it
-              growth: Math.round(
-                total * endInv - (yearStartTotal - withdrawalTaken) * startInv,
+              growth: toSafeAmount(
+                Math.round(
+                  total * endInv -
+                    (yearStartTotal - withdrawalTaken) * startInv,
+                ),
               ),
-              endBalance: Math.round(total * endInv),
+              endBalance: toSafeAmount(Math.round(total * endInv)),
               potBalances: Array.from(potBalances, balance =>
-                Math.round(balance * endInv),
+                toSafeAmount(Math.round(balance * endInv)),
               ),
               potWithdrawals: (capturedPotWithdrawals ?? []).map(take =>
-                Math.round(take * startInv),
+                toSafeAmount(Math.round(take * startInv)),
               ),
               potReturns: (capturedPotReturns ?? []).map(potReturn =>
                 potReturn == null
@@ -853,7 +883,7 @@ export function runMonteCarloSimulation(
         }
 
         // Store this replay's balance, in today's money when deflating
-        balancesByYear[year][sim] = total * invEnd;
+        balancesByYear[year][sim] = toSafeAmount(total * invEnd);
       }
       // Post-depletion years stay at zero (total is 0 here)
     }

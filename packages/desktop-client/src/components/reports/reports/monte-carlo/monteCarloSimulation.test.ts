@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   getMonteCarloHorizonYears,
+  MAX_AMOUNT,
   MAX_HORIZON_YEARS,
   MIN_HORIZON_YEARS,
   MIN_SIMULATION_COUNT,
@@ -1212,5 +1213,56 @@ describe('runMonteCarloSimulation', () => {
     );
     expect(result.simulationCount).toBe(MIN_SIMULATION_COUNT);
     expect(result.horizonYears).toBe(MAX_HORIZON_YEARS);
+  });
+
+  it('keeps every output formatter-safe under absurdly large configs', () => {
+    // A trillion at 100% yearly growth over a century overflows the safe
+    // integer range many times over; the engine must clamp instead of
+    // producing values the app's formatter refuses to render
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 1_000_000,
+          horizonYears: 100,
+          captureRunDetail: 0,
+        },
+        {
+          // Over-cap input: clamped to MAX_AMOUNT before simulating
+          startingBalance: 9_000_000_000_000_000,
+          expectedReturnMean: 1,
+          returnStdDev: 0.5,
+        },
+      ),
+    );
+
+    expect(result.percentileBands[0].p50).toBe(MAX_AMOUNT);
+
+    // Outputs are capped at 2^50 - a factor of two below the formatter's
+    // 2^51 - 1 limit, leaving room for chart axes to round ticks upward
+    const maxFormattable = 2 ** 50;
+    for (const band of result.percentileBands) {
+      expect(band.p5).toBeGreaterThanOrEqual(0);
+      expect(band.p90).toBeLessThanOrEqual(maxFormattable);
+    }
+    for (let sim = 0; sim < result.simulationCount; sim++) {
+      expect(result.endingBalances[sim]).toBeLessThanOrEqual(maxFormattable);
+      expect(result.totalWithdrawnBySim[sim]).toBeLessThanOrEqual(
+        maxFormattable,
+      );
+    }
+    for (const row of result.runDetail!) {
+      const values = [
+        row.startBalance,
+        row.withdrawal,
+        row.growth,
+        row.endBalance,
+        ...row.potBalances,
+        ...row.potWithdrawals,
+      ];
+      for (const value of values) {
+        expect(Number.isSafeInteger(value)).toBe(true);
+        expect(Math.abs(value)).toBeLessThanOrEqual(maxFormattable);
+      }
+    }
   });
 });

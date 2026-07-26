@@ -18,6 +18,7 @@ import type {
 } from '#components/reports/graphs/MonteCarloGraphTooltip';
 import { MonteCarloGraphTooltip } from '#components/reports/graphs/MonteCarloGraphTooltip';
 import { computePadding } from '#components/reports/graphs/util/computePadding';
+import { MAX_FORMATTABLE_AMOUNT } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type { MonteCarloPercentileBand } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { useFormat } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
@@ -77,7 +78,13 @@ export function MonteCarloGraph({
     if (privacyMode) {
       return '...';
     }
-    return `${format(Math.round(tick), 'financial-no-decimals')}`;
+    // Recharts can synthesize ticks above the (already clamped) data
+    // maximum; keep them within what the formatter accepts
+    const safeTick = Math.min(
+      Math.max(Math.round(tick), -MAX_FORMATTABLE_AMOUNT),
+      MAX_FORMATTABLE_AMOUNT,
+    );
+    return `${format(safeTick, 'financial-no-decimals')}`;
   };
 
   return (

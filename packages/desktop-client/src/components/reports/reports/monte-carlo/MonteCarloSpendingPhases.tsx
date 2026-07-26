@@ -13,7 +13,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import { FIELD_LABEL_STYLE } from '#components/reports/reports/monte-carlo/MonteCarloPotConfiguration';
-import { createMonteCarloSpendingPhase } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
+import {
+  createMonteCarloSpendingPhase,
+  MAX_AMOUNT,
+} from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type { MonteCarloSpendingPhase } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { Field, Row, TableHeader } from '#components/table';
 import { FinancialInput } from '#components/util/FinancialInput';
@@ -216,7 +219,10 @@ export function MonteCarloSpendingPhases({
                     value={phase.annualWithdrawal}
                     onUpdate={value =>
                       updatePhase(phase.id, {
-                        annualWithdrawal: Math.max(0, value),
+                        annualWithdrawal: Math.min(
+                          MAX_AMOUNT,
+                          Math.max(0, value),
+                        ),
                       })
                     }
                   />

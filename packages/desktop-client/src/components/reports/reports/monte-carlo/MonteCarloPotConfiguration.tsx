@@ -13,7 +13,10 @@ import { css } from '@emotion/css';
 
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import { POT_COLUMNS } from '#components/reports/reports/monte-carlo/MonteCarloPotsTableHeader';
-import { ALLOCATION_PRESETS } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
+import {
+  ALLOCATION_PRESETS,
+  MAX_AMOUNT,
+} from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type { MonteCarloPot } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { Field, Row } from '#components/table';
 import { FinancialInput } from '#components/util/FinancialInput';
@@ -132,7 +135,7 @@ export function MonteCarloPotConfiguration({
             // unlinks from its account and keeps the typed value. The
             // changed-check stops a mere tab-through from unlinking.
             onUpdate={value => {
-              const newBalance = Math.max(0, value);
+              const newBalance = Math.min(MAX_AMOUNT, Math.max(0, value));
               if (newBalance !== pot.startingBalance) {
                 onPotChange({
                   startingBalance: newBalance,

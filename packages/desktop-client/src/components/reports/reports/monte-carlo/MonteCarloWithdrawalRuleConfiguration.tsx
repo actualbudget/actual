@@ -15,6 +15,7 @@ import {
   FIELD_LABEL_STYLE,
   FIELD_STYLE,
 } from '#components/reports/reports/monte-carlo/MonteCarloPotConfiguration';
+import { MAX_AMOUNT } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type { MonteCarloWithdrawalRuleConfig } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { FinancialInput } from '#components/util/FinancialInput';
 
@@ -101,7 +102,11 @@ export function MonteCarloWithdrawalRuleConfiguration({
             </View>
             <FinancialInput
               value={minimumWithdrawal}
-              onUpdate={value => onMinimumWithdrawalChange(Math.max(0, value))}
+              onUpdate={value =>
+                onMinimumWithdrawalChange(
+                  Math.min(MAX_AMOUNT, Math.max(0, value)),
+                )
+              }
             />
           </View>
         )}
