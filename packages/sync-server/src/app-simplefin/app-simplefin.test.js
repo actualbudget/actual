@@ -15,11 +15,14 @@ const SETUP_TOKEN = Buffer.from(
   'https://bridge.example.com/claim/abc',
 ).toString('base64');
 
-const okResponse = body => ({
-  status: 200,
+const statusResponse = (status, body = '') => ({
+  ok: status >= 200 && status < 300,
+  status,
   headers: { get: () => null },
   text: () => Promise.resolve(body),
 });
+
+const okResponse = body => statusResponse(200, body);
 
 // The claim is a POST to the bridge; listing accounts is a GET. Route the mock
 // by method so a test can stub one or both.
@@ -185,6 +188,40 @@ describe('app-simplefin', () => {
 
       expect(res.body.data.error_code).toBe('INVALID_ACCESS_TOKEN');
       expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('treats a 403 Forbidden claim as an invalid token and does not persist it', async () => {
+      secretsService.set(SecretName.simplefin_token, SETUP_TOKEN);
+      mockFetch({
+        claim: statusResponse(403, 'Forbidden (was it already claimed?)'),
+      });
+
+      const res = await post('/accounts');
+
+      expect(res.body.data.error_code).toBe('INVALID_ACCESS_TOKEN');
+      expect(secretsService.get(SecretName.simplefin_accessKey)).toBeNull();
+    });
+
+    it('reports SERVER_DOWN when the claim response is a redirect', async () => {
+      secretsService.set(SecretName.simplefin_token, SETUP_TOKEN);
+      mockFetch({ claim: statusResponse(302) });
+
+      const res = await post('/accounts');
+
+      expect(res.body.data.error_code).toBe('SERVER_DOWN');
+      expect(secretsService.get(SecretName.simplefin_accessKey)).toBeNull();
+    });
+
+    it('reports SERVER_DOWN when the claim fails with a server error', async () => {
+      secretsService.set(SecretName.simplefin_token, SETUP_TOKEN);
+      mockFetch({
+        claim: statusResponse(502, '<html>Bad Gateway</html>'),
+      });
+
+      const res = await post('/accounts');
+
+      expect(res.body.data.error_code).toBe('SERVER_DOWN');
+      expect(secretsService.get(SecretName.simplefin_accessKey)).toBeNull();
     });
 
     it('reports SERVER_DOWN when the claim request fails at the network level', async () => {

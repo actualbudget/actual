@@ -360,6 +360,11 @@ async function claimAccessKey(claimUrl) {
     method: 'POST',
     redirect: 'manual',
   });
+
+  if (!response.ok && response.status !== 403) {
+    throw new Error(`SimpleFIN claim failed with HTTP ${response.status}`);
+  }
+
   return (await response.text()).trim();
 }
 
