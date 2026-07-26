@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 
 import { Input } from '@actual-app/components/input';
 import { css } from '@emotion/css';
@@ -27,6 +28,8 @@ type MonteCarloNumberInputProps = {
   step?: number;
   placeholder?: string;
   disabled?: boolean;
+  /** Extra styles, e.g. for compact inline inputs inside a sentence */
+  style?: CSSProperties;
 };
 
 function toDisplayText(value: number | null, scale: number) {
@@ -44,6 +47,7 @@ export function MonteCarloNumberInput({
   step = 0.1,
   placeholder,
   disabled = false,
+  style,
 }: MonteCarloNumberInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState(() => toDisplayText(value, scale));
@@ -97,6 +101,7 @@ export function MonteCarloNumberInput({
       value={text}
       placeholder={placeholder}
       disabled={disabled}
+      style={style}
       onChangeValue={setText}
       onFocus={() => {
         setIsFocused(true);

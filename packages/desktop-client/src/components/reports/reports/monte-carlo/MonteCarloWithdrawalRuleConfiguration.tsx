@@ -19,6 +19,19 @@ import { MAX_AMOUNT } from '#components/reports/reports/monte-carlo/monteCarloSi
 import type { MonteCarloWithdrawalRuleConfig } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { FinancialInput } from '#components/util/FinancialInput';
 
+const SENTENCE_STYLE = {
+  color: theme.pageText,
+  // Room for the inline inputs without cramped line wrapping
+  lineHeight: 2.6,
+} as const;
+
+const INLINE_INPUT_STYLE = {
+  width: 70,
+  display: 'inline-block',
+  textAlign: 'center',
+  margin: '0 6px',
+} as const;
+
 type MonteCarloWithdrawalRuleConfigurationProps = {
   rule: MonteCarloWithdrawalRuleConfig;
   minimumWithdrawal: number;
@@ -112,252 +125,203 @@ export function MonteCarloWithdrawalRuleConfiguration({
         )}
       </View>
 
-      {rule.type !== 'none' && (
-        <Text style={{ color: theme.pageText }}>
-          {rule.type === 'guardrails'
-            ? t(
-                'Withdrawals are cut when the withdrawal rate drifts too far above the rate your plan intended, and raised when it falls well below it. A deliberate spending-phase change is not counted as drift.',
-              )
-            : rule.type === 'ratcheting'
-              ? t(
-                  'Withdrawals only ever increase: when the balance stays above a multiple of the starting balance for several years in a row.',
-                )
-              : rule.type === 'floor-ceiling'
-                ? t(
-                    "Each year's withdrawal is a fixed share of the current balance, kept within limits around the inflation-adjusted initial withdrawal.",
-                  )
-                : t(
-                    'Withdrawals are reduced when the withdrawal rate crosses an upper limit and increased when it falls below a lower limit.',
-                  )}{' '}
-          {t(
-            'The rule adjusts your planned spending year by year, independently in every scenario. It only looks at the pots you can currently access - locked pots count from the moment they unlock.',
-          )}
-        </Text>
-      )}
-
       {rule.type === 'guardrails' && (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 20 }}>
-          <View style={FIELD_STYLE}>
-            <View style={FIELD_LABEL_ROW_STYLE}>
-              <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Rate falls below initial by (%)</Trans>
-              </Text>
-            </View>
-            <MonteCarloNumberInput
-              value={rule.prosperityTriggerPct}
-              scale={100}
-              min={0}
-              max={100}
-              onCommit={newValue =>
-                onRuleChange({ prosperityTriggerPct: newValue ?? 0 })
-              }
-            />
-          </View>
-          <View style={FIELD_STYLE}>
-            <View style={FIELD_LABEL_ROW_STYLE}>
-              <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Increase withdrawals by (%)</Trans>
-              </Text>
-            </View>
-            <MonteCarloNumberInput
-              value={rule.prosperityIncreasePct}
-              scale={100}
-              min={0}
-              max={100}
-              onCommit={newValue =>
-                onRuleChange({ prosperityIncreasePct: newValue ?? 0 })
-              }
-            />
-          </View>
-          <View style={FIELD_STYLE}>
-            <View style={FIELD_LABEL_ROW_STYLE}>
-              <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Rate rises above initial by (%)</Trans>
-              </Text>
-            </View>
-            <MonteCarloNumberInput
-              value={rule.preservationTriggerPct}
-              scale={100}
-              min={0}
-              max={100}
-              onCommit={newValue =>
-                onRuleChange({ preservationTriggerPct: newValue ?? 0 })
-              }
-            />
-          </View>
-          <View style={FIELD_STYLE}>
-            <View style={FIELD_LABEL_ROW_STYLE}>
-              <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Reduce withdrawals by (%)</Trans>
-              </Text>
-            </View>
-            <MonteCarloNumberInput
-              value={rule.preservationCutPct}
-              scale={100}
-              min={0}
-              max={100}
-              onCommit={newValue =>
-                onRuleChange({ preservationCutPct: newValue ?? 0 })
-              }
-            />
-          </View>
+        <View>
+          <Text style={SENTENCE_STYLE}>
+            <Trans>
+              If the withdrawal rate rises more than
+              <MonteCarloNumberInput
+                value={rule.preservationTriggerPct}
+                scale={100}
+                min={0}
+                max={100}
+                style={INLINE_INPUT_STYLE}
+                onCommit={newValue =>
+                  onRuleChange({ preservationTriggerPct: newValue ?? 0 })
+                }
+              />
+              % above the planned rate, cut withdrawals by
+              <MonteCarloNumberInput
+                value={rule.preservationCutPct}
+                scale={100}
+                min={0}
+                max={100}
+                style={INLINE_INPUT_STYLE}
+                onCommit={newValue =>
+                  onRuleChange({ preservationCutPct: newValue ?? 0 })
+                }
+              />
+              %.
+            </Trans>
+          </Text>
+          <Text style={SENTENCE_STYLE}>
+            <Trans>
+              If it falls more than
+              <MonteCarloNumberInput
+                value={rule.prosperityTriggerPct}
+                scale={100}
+                min={0}
+                max={100}
+                style={INLINE_INPUT_STYLE}
+                onCommit={newValue =>
+                  onRuleChange({ prosperityTriggerPct: newValue ?? 0 })
+                }
+              />
+              % below the planned rate, raise withdrawals by
+              <MonteCarloNumberInput
+                value={rule.prosperityIncreasePct}
+                scale={100}
+                min={0}
+                max={100}
+                style={INLINE_INPUT_STYLE}
+                onCommit={newValue =>
+                  onRuleChange({ prosperityIncreasePct: newValue ?? 0 })
+                }
+              />
+              %.
+            </Trans>
+          </Text>
         </View>
       )}
 
       {rule.type === 'ratcheting' && (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 20 }}>
-          <View style={FIELD_STYLE}>
-            <View style={FIELD_LABEL_ROW_STYLE}>
-              <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Balance exceeds (× initial)</Trans>
-              </Text>
-            </View>
+        <Text style={SENTENCE_STYLE}>
+          <Trans>
+            If the accessible balance stays above
             <MonteCarloNumberInput
               value={rule.balanceThresholdMultiple}
               min={1}
               max={10}
               step={0.1}
+              style={INLINE_INPUT_STYLE}
               onCommit={newValue =>
                 onRuleChange({ balanceThresholdMultiple: newValue ?? 1.5 })
               }
             />
-          </View>
-          <View style={FIELD_STYLE}>
-            <View style={FIELD_LABEL_ROW_STYLE}>
-              <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Consecutive years</Trans>
-              </Text>
-            </View>
+            times its starting level for
             <MonteCarloNumberInput
               value={rule.consecutiveYears}
               roundToInteger
               min={1}
               max={30}
               step={1}
+              style={INLINE_INPUT_STYLE}
               onCommit={newValue =>
                 onRuleChange({ consecutiveYears: newValue ?? 1 })
               }
             />
-          </View>
-          <View style={FIELD_STYLE}>
-            <View style={FIELD_LABEL_ROW_STYLE}>
-              <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Increase withdrawals by (%)</Trans>
-              </Text>
-            </View>
+            years in a row, raise withdrawals by
             <MonteCarloNumberInput
               value={rule.ratchetIncreasePct}
               scale={100}
               min={0}
               max={100}
+              style={INLINE_INPUT_STYLE}
               onCommit={newValue =>
                 onRuleChange({ ratchetIncreasePct: newValue ?? 0 })
               }
             />
-          </View>
-        </View>
+            %.
+          </Trans>
+        </Text>
       )}
 
       {rule.type === 'floor-ceiling' && (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 20 }}>
-          <View style={FIELD_STYLE}>
-            <View style={FIELD_LABEL_ROW_STYLE}>
-              <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Floor below initial (%)</Trans>
-              </Text>
-            </View>
-            <MonteCarloNumberInput
-              value={rule.floorPct}
-              scale={100}
-              min={0}
-              max={100}
-              onCommit={newValue => onRuleChange({ floorPct: newValue ?? 0 })}
-            />
-          </View>
-          <View style={FIELD_STYLE}>
-            <View style={FIELD_LABEL_ROW_STYLE}>
-              <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Ceiling above initial (%)</Trans>
-              </Text>
-            </View>
+        <Text style={SENTENCE_STYLE}>
+          <Trans>
+            Each year, withdraw the starting rate&apos;s share of the current
+            accessible balance, but never more than
             <MonteCarloNumberInput
               value={rule.ceilingPct}
               scale={100}
               min={0}
               max={200}
+              style={INLINE_INPUT_STYLE}
               onCommit={newValue => onRuleChange({ ceilingPct: newValue ?? 0 })}
             />
-          </View>
-        </View>
+            % above or
+            <MonteCarloNumberInput
+              value={rule.floorPct}
+              scale={100}
+              min={0}
+              max={100}
+              style={INLINE_INPUT_STYLE}
+              onCommit={newValue => onRuleChange({ floorPct: newValue ?? 0 })}
+            />
+            % below the planned amount.
+          </Trans>
+        </Text>
       )}
 
       {rule.type === 'boundaries' && (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 20 }}>
-          <View style={FIELD_STYLE}>
-            <View style={FIELD_LABEL_ROW_STYLE}>
-              <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Upper rate limit (%)</Trans>
-              </Text>
-            </View>
-            <MonteCarloNumberInput
-              value={rule.upperRateThreshold}
-              scale={100}
-              min={0}
-              max={100}
-              onCommit={newValue =>
-                onRuleChange({ upperRateThreshold: newValue ?? 0 })
-              }
-            />
-          </View>
-          <View style={FIELD_STYLE}>
-            <View style={FIELD_LABEL_ROW_STYLE}>
-              <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Reduce withdrawals by (%)</Trans>
-              </Text>
-            </View>
-            <MonteCarloNumberInput
-              value={rule.upperCutPct}
-              scale={100}
-              min={0}
-              max={100}
-              onCommit={newValue =>
-                onRuleChange({ upperCutPct: newValue ?? 0 })
-              }
-            />
-          </View>
-          <View style={FIELD_STYLE}>
-            <View style={FIELD_LABEL_ROW_STYLE}>
-              <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Lower rate limit (%)</Trans>
-              </Text>
-            </View>
-            <MonteCarloNumberInput
-              value={rule.lowerRateThreshold}
-              scale={100}
-              min={0}
-              max={100}
-              onCommit={newValue =>
-                onRuleChange({ lowerRateThreshold: newValue ?? 0 })
-              }
-            />
-          </View>
-          <View style={FIELD_STYLE}>
-            <View style={FIELD_LABEL_ROW_STYLE}>
-              <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Increase withdrawals by (%)</Trans>
-              </Text>
-            </View>
-            <MonteCarloNumberInput
-              value={rule.lowerIncreasePct}
-              scale={100}
-              min={0}
-              max={100}
-              onCommit={newValue =>
-                onRuleChange({ lowerIncreasePct: newValue ?? 0 })
-              }
-            />
-          </View>
+        <View>
+          <Text style={SENTENCE_STYLE}>
+            <Trans>
+              If the withdrawal rate rises above
+              <MonteCarloNumberInput
+                value={rule.upperRateThreshold}
+                scale={100}
+                min={0}
+                max={100}
+                style={INLINE_INPUT_STYLE}
+                onCommit={newValue =>
+                  onRuleChange({ upperRateThreshold: newValue ?? 0 })
+                }
+              />
+              %, cut withdrawals by
+              <MonteCarloNumberInput
+                value={rule.upperCutPct}
+                scale={100}
+                min={0}
+                max={100}
+                style={INLINE_INPUT_STYLE}
+                onCommit={newValue =>
+                  onRuleChange({ upperCutPct: newValue ?? 0 })
+                }
+              />
+              %.
+            </Trans>
+          </Text>
+          <Text style={SENTENCE_STYLE}>
+            <Trans>
+              If it falls below
+              <MonteCarloNumberInput
+                value={rule.lowerRateThreshold}
+                scale={100}
+                min={0}
+                max={100}
+                style={INLINE_INPUT_STYLE}
+                onCommit={newValue =>
+                  onRuleChange({ lowerRateThreshold: newValue ?? 0 })
+                }
+              />
+              %, raise withdrawals by
+              <MonteCarloNumberInput
+                value={rule.lowerIncreasePct}
+                scale={100}
+                min={0}
+                max={100}
+                style={INLINE_INPUT_STYLE}
+                onCommit={newValue =>
+                  onRuleChange({ lowerIncreasePct: newValue ?? 0 })
+                }
+              />
+              %.
+            </Trans>
+          </Text>
         </View>
+      )}
+
+      {rule.type !== 'none' && (
+        <Text style={{ color: theme.pageText, fontSize: 13 }}>
+          {rule.type === 'guardrails'
+            ? t(
+                'A deliberate spending-phase change is not counted as drift. The rule adjusts your planned spending year by year, independently in every scenario, and only looks at the pots you can currently access - locked pots count from the moment they unlock.',
+              )
+            : t(
+                'The rule adjusts your planned spending year by year, independently in every scenario, and only looks at the pots you can currently access - locked pots count from the moment they unlock.',
+              )}
+        </Text>
       )}
     </View>
   );
