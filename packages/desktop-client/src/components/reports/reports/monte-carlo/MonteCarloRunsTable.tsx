@@ -202,7 +202,7 @@ export function MonteCarloRunsTable({
                     </FinancialText>
                   </PrivacyFilter>
                 ) : (
-                  <FinancialText as="span">—</FinancialText>
+                  <FinancialText as="span">-</FinancialText>
                 )}
               </Text>
               <Text style={{ width: 160, textAlign: 'right' }}>

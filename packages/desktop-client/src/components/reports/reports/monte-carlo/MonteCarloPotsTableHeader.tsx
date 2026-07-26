@@ -20,6 +20,7 @@ export const POT_COLUMNS = {
   expectedReturn: 150,
   volatility: 170,
   accessAge: 155,
+  tax: 155,
   remove: 36,
 } as const;
 
@@ -30,7 +31,14 @@ const HEADER_LABEL_STYLE = {
   whiteSpace: 'nowrap',
 } as const;
 
-export function MonteCarloPotsTableHeader() {
+type MonteCarloPotsTableHeaderProps = {
+  /** True when the bands tax model is active */
+  usesTaxBands: boolean;
+};
+
+export function MonteCarloPotsTableHeader({
+  usesTaxBands,
+}: MonteCarloPotsTableHeaderProps) {
   return (
     <TableHeader>
       <Field width={POT_COLUMNS.dragHandle} />
@@ -58,8 +66,8 @@ export function MonteCarloPotsTableHeader() {
                     starting balance, so the plan stays up to date on its own.
                     <br />
                     <br />
-                    Typing a starting balance manually unlinks the pot &mdash;
-                    handy for what-if experiments.
+                    Typing a starting balance manually unlinks the pot - handy
+                    for what-if experiments.
                   </Trans>
                 </Text>
               </View>
@@ -175,6 +183,51 @@ export function MonteCarloPotsTableHeader() {
                     <br />
                     Leave blank if the pot is available now.
                   </Trans>
+                </Text>
+              </View>
+            }
+            placement="bottom start"
+            style={{ ...styles.tooltip }}
+          >
+            <SvgQuestion height={12} width={12} cursor="pointer" />
+          </Tooltip>
+        </View>
+      </Field>
+      <Field
+        width="flex"
+        style={{ minWidth: POT_COLUMNS.tax }}
+        truncate={false}
+      >
+        <View style={HEADER_LABEL_STYLE}>
+          <Text>
+            {usesTaxBands ? (
+              <Trans>Taxable portion (%)</Trans>
+            ) : (
+              <Trans>Tax (%)</Trans>
+            )}
+          </Text>
+          <Tooltip
+            content={
+              <View style={{ maxWidth: 300 }}>
+                <Text>
+                  {usesTaxBands ? (
+                    <Trans>
+                      The share of a withdrawal from this pot that counts as
+                      taxable income under your tax bands - e.g. a pension with
+                      a 25% tax-free portion is 75, a tax-free account is 0, and
+                      a taxable account is roughly the share of each withdrawal
+                      that is gains.
+                    </Trans>
+                  ) : (
+                    <Trans>
+                      The effective tax rate on withdrawals from this pot. Your
+                      spending is what you keep after tax, so the simulation
+                      withdraws extra to cover it - e.g. a tax-free account is
+                      0, a pension blending its tax-free portion with income tax
+                      might be around 15, and a taxable account its effective
+                      gains rate.
+                    </Trans>
+                  )}
                 </Text>
               </View>
             }

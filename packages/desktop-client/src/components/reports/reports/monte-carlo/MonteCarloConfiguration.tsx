@@ -38,9 +38,10 @@ import type {
   MonteCarloPot,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { MonteCarloSpendingPhases } from '#components/reports/reports/monte-carlo/MonteCarloSpendingPhases';
+import { MonteCarloTaxConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloTaxConfiguration';
 import { MonteCarloWithdrawalRuleConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloWithdrawalRuleConfiguration';
 
-type ConfigurationTab = 'plan' | 'pots' | 'withdrawals';
+type ConfigurationTab = 'plan' | 'pots' | 'withdrawals' | 'tax';
 
 // Same visual family as the stat-tile headings on the report page
 const PLAN_GROUP_HEADING_STYLE = {
@@ -142,6 +143,12 @@ export function MonteCarloConfiguration({
         >
           <Trans>Spending</Trans>
         </ModeButton>
+        <ModeButton
+          selected={activeTab === 'tax'}
+          onSelect={() => setActiveTab('tax')}
+        >
+          <Trans>Tax</Trans>
+        </ModeButton>
       </View>
 
       <Text style={{ color: theme.pageText }}>
@@ -153,9 +160,13 @@ export function MonteCarloConfiguration({
             ? t(
                 'The invested accounts your plan draws from - each with its own balance, allocation, and return assumptions.',
               )
-            : t(
-                'How much you take out each year, and optional rules that adjust it as markets move.',
-              )}
+            : activeTab === 'withdrawals'
+              ? t(
+                  'How much you take out each year, and optional rules that adjust it as markets move.',
+                )
+              : t(
+                  'How withdrawals are taxed - your spending is what you keep after tax.',
+                )}
       </Text>
 
       {/* Plan details */}
@@ -418,7 +429,9 @@ export function MonteCarloConfiguration({
             }}
           >
             <View style={{ minWidth: 'fit-content' }}>
-              <MonteCarloPotsTableHeader />
+              <MonteCarloPotsTableHeader
+                usesTaxBands={config.taxModel === 'bands'}
+              />
               <GridList
                 aria-label={t('Investment pots')}
                 // Without this, typing in the pot fields moves the list
@@ -438,6 +451,7 @@ export function MonteCarloConfiguration({
                     potNumber={config.pots.indexOf(pot) + 1}
                     canRemove={config.pots.length > 1}
                     usesHistoricalReturns={config.returnModel !== 'normal'}
+                    usesTaxBands={config.taxModel === 'bands'}
                     onPotChange={changes => onPotChange(pot.id, changes)}
                     onRemove={() =>
                       onConfigChange({
@@ -499,17 +513,17 @@ export function MonteCarloConfiguration({
                           <br />
                           <br />
                           Best performer first: each year, drain the pot with
-                          the highest return last year &mdash; e.g. spend cash
-                          after a stock crash so the crashed pot can recover,
-                          and spend stocks in boom years. The first year uses
-                          the listed order.
+                          the highest return last year - e.g. spend cash after a
+                          stock crash so the crashed pot can recover, and spend
+                          stocks in boom years. The first year uses the listed
+                          order.
                           <br />
                           <br />
                           Keep pots at their target mix: withdrawals come from
                           whichever pots have grown above their share of your
-                          starting mix, pulling the portfolio back toward it
-                          &mdash; trim stocks after a boom, spend cash and bonds
-                          after a crash.
+                          starting mix, pulling the portfolio back toward it -
+                          trim stocks after a boom, spend cash and bonds after a
+                          crash.
                           <br />
                           <br />
                           Pots that haven&apos;t reached their access age yet
@@ -553,6 +567,15 @@ export function MonteCarloConfiguration({
             }
           />
         </View>
+      )}
+
+      {/* Tax */}
+      {activeTab === 'tax' && (
+        <MonteCarloTaxConfiguration
+          taxModel={config.taxModel}
+          taxBands={config.taxBands}
+          onConfigChange={onConfigChange}
+        />
       )}
     </View>
   );

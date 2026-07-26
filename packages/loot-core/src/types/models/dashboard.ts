@@ -197,6 +197,27 @@ export type MonteCarloPotMeta = {
    * null/undefined = manually entered balance
    */
   accountId?: string | null;
+  /**
+   * Flat tax model: effective tax rate on withdrawals from this pot as a
+   * decimal fraction (0.15 = 15%)
+   */
+  withdrawalTaxRate?: number;
+  /**
+   * Bands tax model: share of a withdrawal that counts as taxable income
+   * (pension ~0.75, ISA 0), as a decimal fraction
+   */
+  taxableFraction?: number;
+};
+
+export type MonteCarloTaxModel = 'flat' | 'bands';
+
+/** One tax band: income from `from` upward taxed at `rate` */
+export type MonteCarloTaxBandMeta = {
+  id: string;
+  /** Annual taxable income threshold in minor units, today's money */
+  from?: number;
+  /** Decimal fraction (0.2 = 20%) */
+  rate?: number;
 };
 
 export type MonteCarloWidget = AbstractWidget<
@@ -214,6 +235,10 @@ export type MonteCarloWidget = AbstractWidget<
     inflationMean?: number | null;
     /** Yearly inflation volatility as a decimal fraction; 0 = fixed rate */
     inflationStdDev?: number;
+    /** How withdrawals are taxed; absent = 'flat' */
+    taxModel?: MonteCarloTaxModel;
+    /** Bands model: progressive tax bands over annual taxable income */
+    taxBands?: MonteCarloTaxBandMeta[];
     currentAge?: number;
     /** Age the pot must last to; the horizon is targetAge - currentAge */
     targetAge?: number;

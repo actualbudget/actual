@@ -99,8 +99,8 @@ export function MonteCarloSpendingPhases({
                 <Trans>
                   Your yearly spending doesn&apos;t have to stay the same for
                   the whole plan. Each phase sets the yearly amount from a given
-                  age until the next phase begins &mdash; for example, more in
-                  your active early years and less later on.
+                  age until the next phase begins - for example, more in your
+                  active early years and less later on.
                   <br />
                   <br />
                   Amounts are in today&apos;s money; the inflation settings on

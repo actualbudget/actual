@@ -44,6 +44,8 @@ type MonteCarloPotConfigurationProps = ComponentPropsWithoutRef<
   canRemove: boolean;
   /** True when a historical return model is active */
   usesHistoricalReturns: boolean;
+  /** True when the bands tax model is active */
+  usesTaxBands: boolean;
   onPotChange: (changes: Partial<MonteCarloPot>) => void;
   onRemove: () => void;
 };
@@ -53,6 +55,7 @@ export function MonteCarloPotConfiguration({
   potNumber,
   canRemove,
   usesHistoricalReturns,
+  usesTaxBands,
   onPotChange,
   onRemove,
   ...props
@@ -250,6 +253,34 @@ export function MonteCarloPotConfiguration({
             placeholder={t('Immediately')}
             onCommit={newValue => onPotChange({ accessAge: newValue })}
           />
+        </Field>
+
+        <Field
+          width="flex"
+          style={{ minWidth: POT_COLUMNS.tax }}
+          truncate={false}
+        >
+          {usesTaxBands ? (
+            <MonteCarloNumberInput
+              value={pot.taxableFraction}
+              scale={100}
+              min={0}
+              max={100}
+              onCommit={newValue =>
+                onPotChange({ taxableFraction: newValue ?? 1 })
+              }
+            />
+          ) : (
+            <MonteCarloNumberInput
+              value={pot.withdrawalTaxRate}
+              scale={100}
+              min={0}
+              max={75}
+              onCommit={newValue =>
+                onPotChange({ withdrawalTaxRate: newValue ?? 0 })
+              }
+            />
+          )}
         </Field>
 
         <Field

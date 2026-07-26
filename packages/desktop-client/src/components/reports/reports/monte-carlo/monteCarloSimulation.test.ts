@@ -21,6 +21,8 @@ function makePot(overrides: Partial<MonteCarloPot> = {}): MonteCarloPot {
     returnStdDev: 0.1,
     accessAge: null,
     accountId: null,
+    withdrawalTaxRate: 0,
+    taxableFraction: 1,
     ...overrides,
   };
 }
@@ -43,6 +45,8 @@ function makeParams(
     ],
     inflationMean: null,
     inflationStdDev: 0,
+    taxModel: 'flat',
+    taxBands: [],
     horizonYears: 30,
     simulationCount: 1000,
     seed: 42,
@@ -1280,6 +1284,200 @@ describe('runMonteCarloSimulation', () => {
     );
     expect(result.simulationCount).toBe(MIN_SIMULATION_COUNT);
     expect(result.horizonYears).toBe(MAX_HORIZON_YEARS);
+  });
+
+  it('flat tax grosses up withdrawals to deliver the net spending', () => {
+    // 20% tax pot: delivering 8,000 net costs 10,000 gross each year, so
+    // 95,000 funds nine full years and fails in year ten with the last
+    // 5,000 delivering only 4,000 net
+    const result = runMonteCarloSimulation(
+      makeParams(
+        { annualWithdrawal: 8_000, horizonYears: 12, captureRunDetail: 0 },
+        {
+          startingBalance: 95_000,
+          expectedReturnMean: 0,
+          returnStdDev: 0,
+          withdrawalTaxRate: 0.2,
+        },
+      ),
+    );
+
+    expect(result.successRate).toBe(0);
+    expect(result.medianDepletionYear).toBe(10);
+    const rows = result.runDetail!;
+    expect(rows).toHaveLength(10);
+    for (const row of rows.slice(0, 9)) {
+      expect(row.withdrawal).toBe(10_000);
+      expect(row.taxPaid).toBe(2_000);
+    }
+    expect(rows[9].withdrawal).toBe(5_000);
+    expect(rows[9].taxPaid).toBe(1_000);
+    expect(rows[9].endBalance).toBe(0);
+  });
+
+  it('flat tax applies per pot as sequential order crosses pots', () => {
+    // Tax-free ISA pays the first three years at face value; once it runs
+    // dry the 25%-taxed pension must gross up to 13,333 for the same
+    // 10,000 of spending
+    const result = runMonteCarloSimulation(
+      makeParams({
+        annualWithdrawal: 10_000,
+        horizonYears: 5,
+        withdrawalStrategy: 'sequential',
+        captureRunDetail: 0,
+        pots: [
+          makePot({
+            id: 'isa',
+            startingBalance: 30_000,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+          }),
+          makePot({
+            id: 'pension',
+            startingBalance: 100_000,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+            withdrawalTaxRate: 0.25,
+          }),
+        ],
+      }),
+    );
+
+    const rows = result.runDetail!;
+    expect(rows.map(row => row.withdrawal)).toEqual([
+      10_000, 10_000, 10_000, 13_333, 13_333,
+    ]);
+    expect(rows.map(row => row.taxPaid)).toEqual([0, 0, 0, 3_333, 3_333]);
+    expect(rows[3].potWithdrawals).toEqual([0, 13_333]);
+  });
+
+  it('tax bands gross up progressively over the taxable income', () => {
+    // Bands: first 10,000 tax-free, 20% above. Delivering 18,000 net
+    // needs 20,000 gross (tax 2,000 on the 10,000 above the threshold)
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 18_000,
+          horizonYears: 3,
+          captureRunDetail: 0,
+          taxModel: 'bands',
+          taxBands: [
+            { id: 'a', from: 0, rate: 0 },
+            { id: 'b', from: 10_000, rate: 0.2 },
+          ],
+        },
+        { startingBalance: 200_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    expect(rows.map(row => row.withdrawal)).toEqual([20_000, 20_000, 20_000]);
+    expect(rows.map(row => row.taxPaid)).toEqual([2_000, 2_000, 2_000]);
+  });
+
+  it('tax bands pool taxable income across pots by taxable fraction', () => {
+    // Proportional split takes half the gross from each pot; only the
+    // pension half is 75% taxable, so taxable income is 0.375x the gross.
+    // Solving 0.925g = 38,000 gives g = 41,081 for 40,000 net
+    const result = runMonteCarloSimulation(
+      makeParams({
+        annualWithdrawal: 40_000,
+        horizonYears: 1,
+        captureRunDetail: 0,
+        taxModel: 'bands',
+        taxBands: [
+          { id: 'a', from: 0, rate: 0 },
+          { id: 'b', from: 10_000, rate: 0.2 },
+        ],
+        pots: [
+          makePot({
+            id: 'isa',
+            startingBalance: 100_000,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+            taxableFraction: 0,
+          }),
+          makePot({
+            id: 'pension',
+            startingBalance: 100_000,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+            taxableFraction: 0.75,
+          }),
+        ],
+      }),
+    );
+
+    const row = result.runDetail![0];
+    expect(row.withdrawal).toBe(41_081);
+    expect(row.taxPaid).toBe(1_081);
+    expect(row.potWithdrawals).toEqual([20_541, 20_541]);
+  });
+
+  it("tax band thresholds are in today's money and rise with inflation", () => {
+    // With 5% fixed inflation the nominal gross grows every year, but in
+    // today's money the withdrawal and tax stay exactly 20,000 and 2,000
+    // because the thresholds inflate along with spending
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 18_000,
+          horizonYears: 4,
+          inflationMean: 0.05,
+          inflationStdDev: 0,
+          deflateToTodaysMoney: true,
+          captureRunDetail: 0,
+          taxModel: 'bands',
+          taxBands: [
+            { id: 'a', from: 0, rate: 0 },
+            { id: 'b', from: 10_000, rate: 0.2 },
+          ],
+        },
+        { startingBalance: 500_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    expect(rows.map(row => row.withdrawal)).toEqual([
+      20_000, 20_000, 20_000, 20_000,
+    ]);
+    expect(rows.map(row => row.taxPaid)).toEqual([2_000, 2_000, 2_000, 2_000]);
+  });
+
+  it('a single tax band behaves like the same flat rate', () => {
+    const flat = runMonteCarloSimulation(
+      makeParams({}, { withdrawalTaxRate: 0.25 }),
+    );
+    const bands = runMonteCarloSimulation(
+      makeParams(
+        {
+          taxModel: 'bands',
+          taxBands: [{ id: 'a', from: 0, rate: 0.25 }],
+        },
+        { taxableFraction: 1 },
+      ),
+    );
+
+    expect(bands.successRate).toBe(flat.successRate);
+    expect(
+      Math.abs(bands.medianEndingBalance - flat.medianEndingBalance),
+    ).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(bands.medianTotalWithdrawn - flat.medianTotalWithdrawn),
+    ).toBeLessThanOrEqual(1);
+  });
+
+  it('zero-rate tax configurations match the untaxed engine exactly', () => {
+    const untaxed = runMonteCarloSimulation(makeParams());
+    const zeroBands = runMonteCarloSimulation(
+      makeParams({
+        taxModel: 'bands',
+        taxBands: [{ id: 'a', from: 0, rate: 0 }],
+      }),
+    );
+
+    expect(zeroBands.percentileBands).toEqual(untaxed.percentileBands);
+    expect(zeroBands.successRate).toBe(untaxed.successRate);
   });
 
   it('keeps every output formatter-safe under absurdly large configs', () => {

@@ -57,7 +57,7 @@ The tab is organized into three small groups - **Your plan**, **Inflation** and 
 
 ![The Investment Pots tab](/img/reports/monte-carlo-pots.png)
 
-A _pot_ is a chunk of invested money - a pension, a stocks-and-shares account, a savings account. You can model one pot or several, each with its own settings:
+A _pot_ is a chunk of invested money - a pension or retirement account, an investment account, a savings account. You can model one pot or several, each with its own settings:
 
 - **Pot name** - anything you like, such as "Pension".
 - **Starting balance** - how much is in the pot today. Enter it by hand, or use **Linked account** below to keep it up to date automatically.
@@ -65,7 +65,8 @@ A _pot_ is a chunk of invested money - a pension, a stocks-and-shares account, a
 - **Portfolio allocation** - a one-click preset that fills in a typical expected return and volatility for a given mix of stocks and bonds. A pot that's 100% stocks tends to grow faster but swings harder; a cash pot barely moves in either direction. You can always override the numbers, which switches the pot to **Custom**.
 - **Expected return (%)** - the average yearly growth you expect from this pot, before inflation.
 - **Volatility (std dev %)** - how much the returns swing from year to year. Two pots can have the same average return, but the one with higher volatility is riskier: bad early years can do damage that a smooth ride would avoid.
-- **Accessible from age** - some pots can't be touched until a certain age. For example, personal pensions in the UK can't be accessed until age 57. Leave this blank if the pot is available now. A locked pot stays invested and keeps growing - it just can't pay your bills until you reach the access age.
+- **Accessible from age** - some pots can't be touched until a certain age; retirement accounts in many countries work this way. Leave this blank if the pot is available now. A locked pot stays invested and keeps growing - it just can't pay your bills until you reach the access age.
+- **Tax (%)** (or **Taxable portion (%)** with the bands model) - how withdrawals from this pot are taxed; see [Tax](#tax) below. Leave at 0 for tax-free pots.
 
 Drag the handle on the left of each pot to reorder them - the order matters if you choose to drain pots one at a time (see [Spending](#spending) below).
 
@@ -86,6 +87,19 @@ The access age setting is what lets the report model the classic "bridge gap": r
 - **Withdrawal rule** and **Minimum withdrawal** - see the next section.
 
 The inflation settings that grow your spending over time live on the [Plan Details](#plan-details) tab.
+
+### Tax
+
+Withdrawing money from a pension or a taxable account usually costs more than the amount you get to spend. The Tax tab lets the simulation account for that: **your yearly spending is always what you keep after tax**, and the simulation withdraws extra to cover the tax bill. Two models are available:
+
+- **Flat rate per pot** (the default) - each pot gets one effective tax rate on its withdrawals, set in the pots table. A tax-free account is 0%. For a pension with a tax-free portion, blend it with your expected income tax rate - for example, 25% tax-free plus 20% tax on the rest works out around 15%. For a taxable investment account, estimate the effective rate on your typical withdrawal. This is deliberately simple and works for any country - you own the number.
+- **Tax bands (progressive)** - enter your own tax brackets: yearly income thresholds and the rate above each one (your tax-free allowance is simply the first band at 0%). Each pot then declares its **Taxable portion (%)** - how much of a withdrawal counts as taxable income: a pension with a 25% tax-free lump portion is 75, a tax-free account is 0, and a taxable account is roughly the share of each withdrawal that is gains. The bands apply to each year's combined taxable withdrawals across all pots, and the thresholds are in today's money - they rise with inflation in the simulation.
+
+With either model, the run drill-in shows each year's gross withdrawal with the tax paid underneath, so you can see exactly what your spending actually costs.
+
+:::note
+This is a deliberate approximation, not a tax calculator. It doesn't track capital-gains cost basis, model frozen thresholds, or know any country's actual rules - and tax law changes every year. Treat the rates and bands as your own honest estimates.
+:::
 
 ## Withdrawal Rules Explained
 
@@ -162,5 +176,5 @@ If a run failed while money was still locked in an inaccessible pot, the table s
 - **This is a model, not a prophecy.** A 90% success rate does not mean success is guaranteed - 1 in 10 of the simulated futures still failed.
 - **The random model is simplified.** It draws each year independently, which ignores the way real crashes cluster together and the occasional extreme year. It also moves all pots in step - there's no independent luck per pot, so a bond-heavy pot dips a little in the same year a stock-heavy pot crashes. The historical models partly address the first point.
 - **The historical data is US market data** (S&P 500 shares, US government bonds and bills, from 1928 onwards). US markets had an unusually good century, so results may be optimistic if your money is invested elsewhere.
-- **Fees and taxes are not modeled.** Your real returns will be lower than gross market returns, so consider entering expected returns net of fees.
+- **Fees are not modeled, and tax is approximated.** Enter expected returns net of fees, and remember the [Tax](#tax) settings are effective-rate estimates you control - not a tax calculator.
 - **Garbage in, garbage out.** The results are only as good as your estimates for returns, volatility, spending and inflation. Try a few variations - small changes to the withdrawal often move the success rate a lot.

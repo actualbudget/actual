@@ -158,13 +158,31 @@ export function MonteCarloRunDetailTable({
                     </FinancialText>
                   </PrivacyFilter>
                 </Text>
-                <Text style={AMOUNT_CELL_STYLE}>
-                  <PrivacyFilter>
-                    <FinancialText as="span">
-                      {format(row.withdrawal, 'financial')}
-                    </FinancialText>
-                  </PrivacyFilter>
-                </Text>
+                <View
+                  style={{ flex: 1, minWidth: 110, alignItems: 'flex-end' }}
+                >
+                  <Text>
+                    <PrivacyFilter>
+                      <FinancialText as="span">
+                        {format(row.withdrawal, 'financial')}
+                      </FinancialText>
+                    </PrivacyFilter>
+                  </Text>
+                  {row.taxPaid > 0 && (
+                    <Text
+                      style={{ fontSize: 11, color: theme.warningText }}
+                      title={t('Tax paid out of this withdrawal')}
+                    >
+                      <PrivacyFilter>
+                        <FinancialText as="span">
+                          {t('incl. {{amount}} tax', {
+                            amount: format(row.taxPaid, 'financial'),
+                          })}
+                        </FinancialText>
+                      </PrivacyFilter>
+                    </Text>
+                  )}
+                </View>
                 {showPotColumns &&
                   row.potBalances.map((potBalance, potIndex) => {
                     const potReturn = row.potReturns[potIndex];
