@@ -55,8 +55,6 @@ The tab is organized into three small groups - **Your plan**, **Inflation** and 
 
 ### Investment Pots
 
-<!-- TODO screenshot: this image predates the table layout for pots - retake the Investment Pots tab screenshot once a preview deploy with the table view is available. -->
-
 ![The Investment Pots tab](/img/reports/monte-carlo-pots.png)
 
 A _pot_ is a chunk of invested money - a pension, a stocks-and-shares account, a savings account. You can model one pot or several, each with its own settings:
@@ -153,6 +151,8 @@ This bar chart only counts the replays that failed, showing at which age they ra
 ![The simulation runs table](/img/reports/monte-carlo-runs.png)
 
 Switch the results view from **Chart** to **Runs** to see every replay listed from worst outcome to best. Rather than paging through thousands of runs, use the **Jump to** links to go straight to the worst, median or best run - or the 25th/75th percentile for a typically-bad or typically-good outcome - with the run highlighted so you can click into it. Click any run to walk through it year by year: the balance at the start of each year, the withdrawal taken, the investment growth in that year (as money and as a percentage), and the balance at the end. With multiple pots you also get a column per pot showing its balance, that year's return, and - when money was taken from it - how much of the year's withdrawal that pot funded, so you can watch, for example, the cash pot covering spending after a crash while the stock pots are left alone.
+
+![The simulation run table](/img/reports/monte-carlo-run.png)
 
 If a run failed while money was still locked in an inaccessible pot, the table says so explicitly, so you can tell the difference between "the market ate my savings" and "the money existed but I couldn't reach it yet."
 
