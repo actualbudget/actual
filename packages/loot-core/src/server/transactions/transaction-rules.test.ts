@@ -404,6 +404,55 @@ describe('Transaction rules', () => {
     });
   });
 
+  test('category_group condition matches categories in that group (live)', async () => {
+    await loadRules();
+    const billsGroupId = await db.insertCategoryGroup({ name: 'Bills' });
+    const electricId = await db.insertCategory({
+      name: 'Electric',
+      cat_group: billsGroupId,
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'category_group', value: billsGroupId }],
+      actions: [{ op: 'set', field: 'notes', value: 'bills-matched' }],
+    });
+
+    const transaction = await runRules({
+      date: '2020-01-01',
+      category: electricId,
+      notes: '',
+    });
+
+    expect(transaction.notes).toBe('bills-matched');
+  });
+
+  test('category_group condition does not match an unrelated group (live)', async () => {
+    await loadRules();
+    const billsGroupId = await db.insertCategoryGroup({ name: 'Bills' });
+    const funGroupId = await db.insertCategoryGroup({ name: 'Fun' });
+    const moviesId = await db.insertCategory({
+      name: 'Movies',
+      cat_group: funGroupId,
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'category_group', value: billsGroupId }],
+      actions: [{ op: 'set', field: 'notes', value: 'bills-matched' }],
+    });
+
+    const transaction = await runRules({
+      date: '2020-01-01',
+      category: moviesId,
+      notes: '',
+    });
+
+    expect(transaction.notes).toBe('');
+  });
+
   test('transactions can be queried by rule', async () => {
     await loadRules();
     const account = await db.insertAccount({ name: 'bank' });

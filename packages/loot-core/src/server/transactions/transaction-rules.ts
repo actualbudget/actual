@@ -989,6 +989,8 @@ export type TransactionForRules = TransactionEntity & {
   balance?: number;
   _category_name?: string;
   _account_name?: string;
+  /** The transaction's category's group id; see prepareTransactionForRules */
+  category_group?: string;
   parent_amount?: number;
   /** Prefetched cent balances for BALANCE_OF("…") in rule formulas; cleared in finalize */
   _balanceOfPrefetched?: Map<string, number>;
@@ -1095,6 +1097,16 @@ export async function prepareTransactionForRules(
     const category = await getCategory(trans.category);
     if (category) {
       r._category_name = category.name;
+
+      // Populate the group id so a `category_group` rule condition can
+      // actually match. Previously this was never set here, so
+      // Condition.eval()'s `object['category_group']` lookup always
+      // came back undefined and the condition silently never matched
+      // during live rule application (import/manual entry). The
+      // query/report path (conditionsToAQL) was unaffected, since it
+      // maps the field to a real join (`category.group`) instead of
+      // reading this property.
+      r.category_group = category.cat_group;
     }
   }
 
@@ -1130,6 +1142,13 @@ export async function finalizeTransactionForRules(
 
   if ('balance' in trans) {
     delete trans.balance;
+  }
+
+  // Synthetic field used only for `category_group` condition matching;
+  // never a real transaction column, so strip it before the
+  // transaction is returned/persisted.
+  if ('category_group' in trans) {
+    delete trans.category_group;
   }
 
   if ('_balanceOfPrefetched' in trans) {
