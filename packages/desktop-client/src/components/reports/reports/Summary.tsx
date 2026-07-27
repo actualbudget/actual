@@ -51,6 +51,8 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
+const MAX_EXTRA_TERMS = 2;
+
 export function Summary() {
   const params = useParams();
   const { data: widget, isPending } = useDashboardWidget<SummaryWidget>({
@@ -326,47 +328,38 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     return format(Math.round(value), 'financial');
   };
 
-  const addTerm = (side: 'dividend' | 'divisor') =>
+  const updateTerms = (
+    side: 'dividend' | 'divisor',
+    updater: (terms: PercentageSummaryTerm[]) => PercentageSummaryTerm[],
+  ) =>
     setContent(prev => {
       if (prev.type !== 'percentage') return prev;
       const key =
         side === 'dividend' ? 'dividendExtraTerms' : 'divisorExtraTerms';
-      const terms = prev[key] ?? [];
-      if (terms.length >= 2) return prev;
-      return {
-        ...prev,
-        [key]: [
-          ...terms,
-          { id: uuidv4(), op: 'add', conditions: [], conditionsOp: 'and' },
-        ],
-      };
+      return { ...prev, [key]: updater(prev[key] ?? []) };
     });
+
+  const addTerm = (side: 'dividend' | 'divisor') =>
+    updateTerms(side, terms =>
+      terms.length >= MAX_EXTRA_TERMS
+        ? terms
+        : [
+            ...terms,
+            { id: uuidv4(), op: 'add', conditions: [], conditionsOp: 'and' },
+          ],
+    );
 
   const removeTerm = (side: 'dividend' | 'divisor', id: string) =>
-    setContent(prev => {
-      if (prev.type !== 'percentage') return prev;
-      const key =
-        side === 'dividend' ? 'dividendExtraTerms' : 'divisorExtraTerms';
-      return {
-        ...prev,
-        [key]: (prev[key] ?? []).filter(term => term.id !== id),
-      };
-    });
+    updateTerms(side, terms => terms.filter(term => term.id !== id));
 
   const onToggleOp = (side: 'dividend' | 'divisor', id: string) =>
-    setContent(prev => {
-      if (prev.type !== 'percentage') return prev;
-      const key =
-        side === 'dividend' ? 'dividendExtraTerms' : 'divisorExtraTerms';
-      return {
-        ...prev,
-        [key]: (prev[key] ?? []).map(term =>
-          term.id === id
-            ? { ...term, op: term.op === 'subtract' ? 'add' : 'subtract' }
-            : term,
-        ),
-      };
-    });
+    updateTerms(side, terms =>
+      terms.map(term =>
+        term.id === id
+          ? { ...term, op: term.op === 'subtract' ? 'add' : 'subtract' }
+          : term,
+      ),
+    );
 
   const onChangeTerm = (
     side: 'dividend' | 'divisor',
@@ -374,17 +367,11 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     conditions: RuleConditionEntity[],
     conditionsOp: 'and' | 'or',
   ) =>
-    setContent(prev => {
-      if (prev.type !== 'percentage') return prev;
-      const key =
-        side === 'dividend' ? 'dividendExtraTerms' : 'divisorExtraTerms';
-      return {
-        ...prev,
-        [key]: (prev[key] ?? []).map(term =>
-          term.id === id ? { ...term, conditions, conditionsOp } : term,
-        ),
-      };
-    });
+    updateTerms(side, terms =>
+      terms.map(term =>
+        term.id === id ? { ...term, conditions, conditionsOp } : term,
+      ),
+    );
 
   return (
     <Page
@@ -643,28 +630,17 @@ function Operator({
         to={toRange}
         filterObject={dividendFilterObject}
       />
-      {type === 'percentage' &&
-        dividendTerms.map(term => (
-          <ExtraTermRow
-            key={term.id}
-            term={term}
-            from={fromRange}
-            to={toRange}
-            onChange={(id, conditions, conditionsOp) =>
-              onChangeTerm('dividend', id, conditions, conditionsOp)
-            }
-            onToggleOp={id => onToggleOp('dividend', id)}
-            onRemove={id => onRemoveTerm('dividend', id)}
-          />
-        ))}
-      {type === 'percentage' && dividendTerms.length < 2 && (
-        <Button
-          variant="bare"
-          style={{ marginTop: 24, alignSelf: 'flex-start' }}
-          onPress={() => onAddTerm('dividend')}
-        >
-          <Trans>Add term</Trans>
-        </Button>
+      {type === 'percentage' && (
+        <TermsSection
+          side="dividend"
+          terms={dividendTerms}
+          from={fromRange}
+          to={toRange}
+          onAddTerm={onAddTerm}
+          onRemoveTerm={onRemoveTerm}
+          onToggleOp={onToggleOp}
+          onChangeTerm={onChangeTerm}
+        />
       )}
       {type === 'percentage' && (
         <>
@@ -682,28 +658,16 @@ function Operator({
             to={!showDivisorDateRange ? '' : toRange}
             filterObject={divisorFilterObject}
           />
-          {divisorTerms.map(term => (
-            <ExtraTermRow
-              key={term.id}
-              term={term}
-              from={!showDivisorDateRange ? '' : fromRange}
-              to={!showDivisorDateRange ? '' : toRange}
-              onChange={(id, conditions, conditionsOp) =>
-                onChangeTerm('divisor', id, conditions, conditionsOp)
-              }
-              onToggleOp={id => onToggleOp('divisor', id)}
-              onRemove={id => onRemoveTerm('divisor', id)}
-            />
-          ))}
-          {divisorTerms.length < 2 && (
-            <Button
-              variant="bare"
-              style={{ marginTop: 24, alignSelf: 'flex-start' }}
-              onPress={() => onAddTerm('divisor')}
-            >
-              <Trans>Add term</Trans>
-            </Button>
-          )}
+          <TermsSection
+            side="divisor"
+            terms={divisorTerms}
+            from={!showDivisorDateRange ? '' : fromRange}
+            to={!showDivisorDateRange ? '' : toRange}
+            onAddTerm={onAddTerm}
+            onRemoveTerm={onRemoveTerm}
+            onToggleOp={onToggleOp}
+            onChangeTerm={onChangeTerm}
+          />
         </>
       )}
       {type !== 'percentage' && type !== 'sum' && (
@@ -729,6 +693,59 @@ function Operator({
         </>
       )}
     </View>
+  );
+}
+
+type TermsSectionProps = {
+  side: 'dividend' | 'divisor';
+  terms: PercentageSummaryTerm[];
+  from: string;
+  to: string;
+  onAddTerm: (side: 'dividend' | 'divisor') => void;
+  onRemoveTerm: (side: 'dividend' | 'divisor', id: string) => void;
+  onToggleOp: (side: 'dividend' | 'divisor', id: string) => void;
+  onChangeTerm: (
+    side: 'dividend' | 'divisor',
+    id: string,
+    conditions: RuleConditionEntity[],
+    conditionsOp: 'and' | 'or',
+  ) => void;
+};
+function TermsSection({
+  side,
+  terms,
+  from,
+  to,
+  onAddTerm,
+  onRemoveTerm,
+  onToggleOp,
+  onChangeTerm,
+}: TermsSectionProps) {
+  return (
+    <>
+      {terms.map(term => (
+        <ExtraTermRow
+          key={term.id}
+          term={term}
+          from={from}
+          to={to}
+          onChange={(id, conditions, conditionsOp) =>
+            onChangeTerm(side, id, conditions, conditionsOp)
+          }
+          onToggleOp={id => onToggleOp(side, id)}
+          onRemove={id => onRemoveTerm(side, id)}
+        />
+      ))}
+      {terms.length < MAX_EXTRA_TERMS && (
+        <Button
+          variant="bare"
+          style={{ marginTop: 24, alignSelf: 'flex-start' }}
+          onPress={() => onAddTerm(side)}
+        >
+          <Trans>Add term</Trans>
+        </Button>
+      )}
+    </>
   );
 }
 

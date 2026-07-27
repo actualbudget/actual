@@ -2,6 +2,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
+  PercentageSummaryTerm,
   RuleConditionEntity,
   SummaryContent,
 } from '@actual-app/core/types/models';
@@ -323,29 +324,31 @@ async function calculatePercentage(
     summaryContent.divisorAllTimeDateRange ?? false
   );
 
-  const baseDivisor = await sumForConditions(
-    summaryContent.divisorConditions,
-    summaryContent.divisorConditionsOp,
-    divisorAppliesDateRange,
-  );
+  const sumExtraTerms = (
+    terms: PercentageSummaryTerm[] = [],
+    applyDateRange: boolean,
+  ) =>
+    Promise.all(
+      terms.map(async term => ({
+        op: term.op,
+        value: await sumForConditions(
+          term.conditions,
+          term.conditionsOp,
+          applyDateRange,
+        ),
+      })),
+    );
 
-  const divisorExtraValues = await Promise.all(
-    (summaryContent.divisorExtraTerms ?? []).map(async term => ({
-      op: term.op,
-      value: await sumForConditions(
-        term.conditions,
-        term.conditionsOp,
+  const [baseDivisor, divisorExtraValues, dividendExtraValues] =
+    await Promise.all([
+      sumForConditions(
+        summaryContent.divisorConditions,
+        summaryContent.divisorConditionsOp,
         divisorAppliesDateRange,
       ),
-    })),
-  );
-
-  const dividendExtraValues = await Promise.all(
-    (summaryContent.dividendExtraTerms ?? []).map(async term => ({
-      op: term.op,
-      value: await sumForConditions(term.conditions, term.conditionsOp, true),
-    })),
-  );
+      sumExtraTerms(summaryContent.divisorExtraTerms, divisorAppliesDateRange),
+      sumExtraTerms(summaryContent.dividendExtraTerms, true),
+    ]);
 
   const baseDividend = data.reduce((prev, ac) => prev + (ac?.amount ?? 0), 0);
 
