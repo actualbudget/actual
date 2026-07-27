@@ -336,6 +336,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   // nothing is changed. This is critical to maintain consistency. We
   // also avoid any side effects to in-memory objects, and apply them
   // after this succeeds.
+  let shouldRebuildBudget = false;
   db.transaction(() => {
     const added = new Set();
 
@@ -370,7 +371,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
         if (row === 'budgetType') {
           void setBudgetType(value);
         } else if (row === 'budgetStartMonth') {
-          void rebuildBudget();
+          shouldRebuildBudget = true;
         }
       }
     }
@@ -388,6 +389,10 @@ export const applyMessages = sequential(async (messages: Message[]) => {
       );
     }
   });
+
+  if (shouldRebuildBudget && sheet.get()) {
+    await rebuildBudget();
+  }
 
   if (checkSyncingMode('enabled')) {
     // The transaction succeeded, so we can update in-memory objects

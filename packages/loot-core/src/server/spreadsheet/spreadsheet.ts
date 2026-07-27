@@ -28,6 +28,7 @@ export type Node = {
 
 export class Spreadsheet {
   _meta: {
+    blankSheet?: string;
     createdMonths: Set<string>;
     budgetType: BudgetType;
   };

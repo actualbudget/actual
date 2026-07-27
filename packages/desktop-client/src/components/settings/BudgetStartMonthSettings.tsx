@@ -55,7 +55,7 @@ export function BudgetStartMonthSettings() {
           <ButtonWithLoading
             onPress={onSave}
             isLoading={isLoading}
-            disabled={!selectedMonth}
+            isDisabled={!selectedMonth}
           >
             <Trans>Save</Trans>
           </ButtonWithLoading>
@@ -63,7 +63,7 @@ export function BudgetStartMonthSettings() {
             <ButtonWithLoading
               onPress={onClear}
               isLoading={isLoading}
-              disabled={isLoading}
+              isDisabled={isLoading}
             >
               <Trans>Clear</Trans>
             </ButtonWithLoading>

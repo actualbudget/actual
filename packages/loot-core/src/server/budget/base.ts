@@ -435,11 +435,12 @@ export async function setType(type) {
   });
 
   sheet.get().startCacheBarrier();
-  void sheet.loadUserBudgets(db);
-  const bounds = await createAllBudgets();
-  sheet.get().endCacheBarrier();
-
-  return bounds;
+  try {
+    void sheet.loadUserBudgets(db);
+    return await createAllBudgets();
+  } finally {
+    sheet.get().endCacheBarrier();
+  }
 }
 
 export async function rebuild() {
