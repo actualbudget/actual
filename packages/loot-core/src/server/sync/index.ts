@@ -12,6 +12,7 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as connection from '#platform/server/connection';
 import { logger } from '#platform/server/log';
 import {
+  rebuild as rebuildBudget,
   setType as setBudgetType,
   triggerBudgetChanges,
 } from '#server/budget/base';
@@ -365,8 +366,12 @@ export const applyMessages = sequential(async (messages: Message[]) => {
       }
 
       // Special treatment for some synced prefs
-      if (dataset === 'preferences' && row === 'budgetType') {
-        void setBudgetType(value);
+      if (dataset === 'preferences') {
+        if (row === 'budgetType') {
+          void setBudgetType(value);
+        } else if (row === 'budgetStartMonth') {
+          void rebuildBudget();
+        }
       }
     }
 

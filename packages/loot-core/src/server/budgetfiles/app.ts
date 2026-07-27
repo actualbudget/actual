@@ -54,6 +54,7 @@ export type BudgetFileHandlers = {
   'get-budgets': typeof getBudgets;
   'get-remote-files': typeof getRemoteFiles;
   'reset-budget-cache': typeof resetBudgetCache;
+  'rebuild-budget-spreadsheet': typeof rebuildBudgetSpreadsheet;
   'upload-budget': typeof uploadBudget;
   'download-budget': typeof downloadBudget;
   'sync-budget': typeof syncBudget;
@@ -78,6 +79,7 @@ app.method('unique-budget-name', handleUniqueBudgetName);
 app.method('get-budgets', getBudgets);
 app.method('get-remote-files', getRemoteFiles);
 app.method('reset-budget-cache', mutator(resetBudgetCache));
+app.method('rebuild-budget-spreadsheet', mutator(rebuildBudgetSpreadsheet));
 app.method('upload-budget', uploadBudget);
 app.method('download-budget', downloadBudget);
 app.method('sync-budget', syncBudget);
@@ -145,10 +147,14 @@ async function getRemoteFiles() {
 }
 
 async function resetBudgetCache() {
-  // Recomputing everything will update the cache
+  // Recomputing everything will update the cache.
   await sheet.loadUserBudgets(db);
   sheet.get().recomputeAll();
   await sheet.waitOnSpreadsheet();
+}
+
+async function rebuildBudgetSpreadsheet() {
+  await budget.rebuild();
 }
 
 async function uploadBudget({ id }: { id?: Budget['id'] } = {}): Promise<{

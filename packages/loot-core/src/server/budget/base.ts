@@ -17,6 +17,17 @@ export function getBudgetType() {
   return meta.budgetType || 'envelope';
 }
 
+export function getBudgetStartMonth(): string | null {
+  const preference = db.firstSync<Pick<db.DbPreference, 'value'>>(
+    'SELECT value FROM preferences WHERE id = ?',
+    ['budgetStartMonth'],
+  );
+
+  return preference && monthUtils.isValidYearMonth(preference.value)
+    ? preference.value
+    : null;
+}
+
 export function getBudgetRange(start: string, end: string) {
   start = monthUtils.getMonth(start);
   end = monthUtils.getMonth(end);
@@ -276,6 +287,7 @@ export async function createBudget(months) {
   meta.createdMonths = meta.createdMonths || new Set();
 
   const budgetType = getBudgetType();
+  const budgetStartMonth = getBudgetStartMonth();
 
   if (budgetType === 'envelope') {
     envelopeBudget.createBudget(meta, categories, months);
@@ -314,10 +326,12 @@ export async function createBudget(months) {
   const seededCells: string[] = [];
 
   monthsToCreate.forEach(month => {
-    const prevMonth = monthUtils.prevMonth(month);
     const { start, end } = monthUtils.bounds(month);
     const sheetName = monthUtils.sheetForMonth(month);
-    const prevSheetName = monthUtils.sheetForMonth(prevMonth);
+    const prevSheetName =
+      budgetType === 'envelope' && month === budgetStartMonth
+        ? meta.blankSheet
+        : monthUtils.sheetForMonth(monthUtils.prevMonth(month));
     const dbMonth = parseInt(month.replace('-', ''));
 
     categories.forEach(cat => {
@@ -410,6 +424,29 @@ export async function setType(type) {
   meta.createdMonths = new Set();
 
   // Go through and force all the cells to be recomputed
+  const nodes = sheet.get().getNodes();
+  db.transaction(() => {
+    for (const name of nodes.keys()) {
+      const [sheetName, cellName] = name.split('!');
+      if (sheetName.match(/^budget\d+/)) {
+        sheet.get().deleteCell(sheetName, cellName);
+      }
+    }
+  });
+
+  sheet.get().startCacheBarrier();
+  void sheet.loadUserBudgets(db);
+  const bounds = await createAllBudgets();
+  sheet.get().endCacheBarrier();
+
+  return bounds;
+}
+
+export async function rebuild() {
+  const meta = sheet.get().meta();
+  meta.createdMonths = new Set();
+  meta.blankSheet = undefined;
+
   const nodes = sheet.get().getNodes();
   db.transaction(() => {
     for (const name of nodes.keys()) {

@@ -3,13 +3,84 @@ import * as sheet from '#server/sheet';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
 
-import { createAllBudgets } from './base';
+import { setBudget } from './actions';
+import { createAllBudgets, rebuild } from './base';
 
 beforeEach(() => {
   return global.emptyDatabase()();
 });
 
 describe('Base budget', () => {
+  it('starts envelope budget calculations from the configured month', async () => {
+    await sheet.loadSpreadsheet(db);
+
+    await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
+    await db.insertCategoryGroup({
+      id: 'income',
+      name: 'Income',
+      is_income: 1,
+    });
+    const foodId = await db.insertCategory({
+      name: 'Food',
+      cat_group: 'expenses',
+    });
+    const incomeId = await db.insertCategory({
+      name: 'Income',
+      cat_group: 'income',
+      is_income: 1,
+    });
+    await db.insertAccount({ id: 'account', name: 'Account' });
+
+    await db.insertTransaction({
+      date: '2017-01-01',
+      amount: 10000,
+      account: 'account',
+      category: incomeId,
+    });
+    await db.insertTransaction({
+      date: '2017-01-02',
+      amount: -2000,
+      account: 'account',
+      category: foodId,
+    });
+    await db.insertTransaction({
+      date: '2017-02-02',
+      amount: -1000,
+      account: 'account',
+      category: foodId,
+    });
+    await createAllBudgets();
+    await sheet.waitOnSpreadsheet();
+
+    const january = monthUtils.sheetForMonth('2017-01');
+    const february = monthUtils.sheetForMonth('2017-02');
+
+    await setBudget({ category: foodId, month: '2017-01', amount: 5000 });
+    await sheet.waitOnSpreadsheet();
+
+    expect(sheet.getCellValue(january, 'total-income')).toBe(10000);
+    expect(sheet.getCellValue(january, `leftover-${foodId}`)).toBe(3000);
+    expect(sheet.getCellValue(february, 'from-last-month')).toBe(5000);
+    expect(sheet.getCellValue(february, `leftover-${foodId}`)).toBe(2000);
+
+    await db.update('preferences', {
+      id: 'budgetStartMonth',
+      value: '2017-02',
+    });
+    await rebuild();
+
+    expect(sheet.getCellValue(february, 'from-last-month')).toBe(0);
+    expect(sheet.getCellValue(february, 'last-month-overspent')).toBe(0);
+    expect(sheet.getCellValue(february, `leftover-${foodId}`)).toBe(-1000);
+
+    await db.update('preferences', { id: 'budgetStartMonth', value: '' });
+    await rebuild();
+
+    expect(sheet.getCellValue(february, 'from-last-month')).toBe(5000);
+    expect(sheet.getCellValue(february, 'last-month-overspent')).toBe(0);
+    expect(sheet.getCellValue(february, `leftover-${foodId}`)).toBe(2000);
+  });
+
   it('Recomputes budget cells when account fields change', async () => {
     await sheet.loadSpreadsheet(db);
 
