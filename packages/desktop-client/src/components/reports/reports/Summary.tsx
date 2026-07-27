@@ -637,7 +637,7 @@ function Operator({
   const { isNarrowWidth } = useResponsive();
 
   return (
-    <View style={{ gap: isNarrowWidth ? 28 : 40, paddingTop: 24 }}>
+    <View style={{ gap: isNarrowWidth ? 46 : 52, paddingTop: 24 }}>
       <SumRow
         from={fromRange}
         to={toRange}
@@ -751,7 +751,7 @@ function TermsSection({
           style={{ alignSelf: 'flex-start' }}
           onPress={() => onAddTerm(side)}
         >
-          <Trans>Add term</Trans>
+          <Trans>Add another sum</Trans>
         </Button>
       )}
     </>
@@ -885,7 +885,7 @@ function SumWithRange({
           style={{
             position: 'absolute',
             right: -30,
-            top: -20,
+            top: isNarrowWidth ? -14 : -20,
             fontSize: isNarrowWidth ? '11px' : undefined,
           }}
         >
@@ -895,7 +895,7 @@ function SumWithRange({
           style={{
             position: 'absolute',
             right: -30,
-            bottom: -20,
+            bottom: isNarrowWidth ? -14 : -20,
             fontSize: isNarrowWidth ? '11px' : undefined,
           }}
         >
