@@ -1021,6 +1021,25 @@ describe('Transactions', () => {
     expect(getTransactions()[2].amount).toBe(-1000);
   });
 
+  test('splitting a new transaction keeps focus on the parent amount', async () => {
+    const { container, updateProps } = renderTransactions();
+    updateProps({ isAdding: true });
+
+    let input = await editNewField(container, 'debit');
+    await userEvent.type(input, '55.00');
+
+    input = await editNewField(container, 'category');
+    await userEvent.type(input, '[ArrowDown][Enter]');
+    await waitForAutocomplete();
+
+    expect(
+      container.querySelectorAll(
+        '[data-testid="new-transaction"] [data-testid="row"]',
+      ),
+    ).toHaveLength(3);
+    expectToBeEditingField(container, 'debit', 0, true);
+  });
+
   test('escape closes the new transaction rows', async () => {
     const { container, updateProps } = renderTransactions({
       onCloseAddTransaction: () => {
