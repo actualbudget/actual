@@ -318,8 +318,7 @@ test.describe('Transactions', () => {
       await expect(modal).not.toBeVisible();
 
       // The saved layout has notes hidden and category moved before payee
-      await expect(header).not.toContainText('Notes');
-      await expect(header).toContainText('CategoryPayeePaymentDeposit');
+      await expect(header).toHaveText('DateCategoryPayeePaymentDeposit✓');
       await expect(page).toMatchThemeScreenshots();
 
       // Reopen: the saved configuration should be reflected in the modal
@@ -333,8 +332,7 @@ test.describe('Transactions', () => {
       await modal.getByRole('button', { name: 'Save', exact: true }).click();
       await expect(modal).not.toBeVisible();
 
-      await expect(header).toContainText('Notes');
-      await expect(header).toContainText('PayeeNotesCategoryPaymentDeposit');
+      await expect(header).toHaveText('DatePayeeNotesCategoryPaymentDeposit✓');
     });
 
     test('applies columns to all transaction tables when enabled', async () => {
