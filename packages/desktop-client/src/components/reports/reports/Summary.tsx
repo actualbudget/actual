@@ -478,7 +478,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
               }}
             >
               <Checkbox
-                id="enabled-field"
+                id="divisor-all-time-date-range"
                 checked={content.divisorAllTimeDateRange ?? false}
                 onChange={() => {
                   const currentValue = content.divisorAllTimeDateRange ?? false;
@@ -488,7 +488,9 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                   }));
                 }}
               />{' '}
-              <Trans>All time divisor</Trans>
+              <label htmlFor="divisor-all-time-date-range">
+                <Trans>All time divisor</Trans>
+              </label>
             </View>
           )}
         </View>
@@ -794,8 +796,21 @@ function ExtraTermRow({
   );
 
   useEffect(() => {
+    // Skip the mount-time sync when the editor still holds the term's own
+    // values; only propagate genuine edits back into content.
+    if (
+      filterConditions === term.conditions &&
+      filterConditionsOp === term.conditionsOp
+    ) {
+      return;
+    }
     onSync(filterConditions, filterConditionsOp);
-  }, [filterConditions, filterConditionsOp]);
+  }, [
+    filterConditions,
+    filterConditionsOp,
+    term.conditions,
+    term.conditionsOp,
+  ]);
 
   return (
     <SumRow
@@ -806,10 +821,15 @@ function ExtraTermRow({
       operator={
         <Button
           variant="bare"
+          aria-label={
+            term.op === 'subtract'
+              ? t('Switch this sum to add')
+              : t('Switch this sum to subtract')
+          }
           style={{ fontSize: isNarrowWidth ? '22px' : '32px' }}
           onPress={() => onToggleOp(term.id)}
         >
-          {term.op === 'subtract' ? t('−') : t('+')}
+          {term.op === 'subtract' ? '−' : '+'}
         </Button>
       }
     />

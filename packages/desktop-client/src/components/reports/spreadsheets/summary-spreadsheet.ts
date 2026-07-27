@@ -300,7 +300,7 @@ async function calculatePercentage(
     applyDateRange: boolean,
   ): Promise<number> => {
     const opKey = conditionsOp === 'or' ? '$or' : '$and';
-    let filters = [];
+    let filters: unknown[] = [];
     try {
       const response = await send('make-filters-from-conditions', {
         conditions: conditions.filter(cond => !cond.customName),
