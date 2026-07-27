@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
@@ -52,6 +52,7 @@ import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 const MAX_EXTRA_TERMS = 2;
+const EMPTY_TERMS: PercentageSummaryTerm[] = [];
 
 export function Summary() {
   const params = useParams();
@@ -119,8 +120,12 @@ function SummaryInner({ widget }: SummaryInnerProps) {
   );
 
   const isPct = content.type === 'percentage';
-  const dividendTerms = isPct ? (content.dividendExtraTerms ?? []) : [];
-  const divisorTerms = isPct ? (content.divisorExtraTerms ?? []) : [];
+  const dividendTerms = isPct
+    ? (content.dividendExtraTerms ?? EMPTY_TERMS)
+    : EMPTY_TERMS;
+  const divisorTerms = isPct
+    ? (content.divisorExtraTerms ?? EMPTY_TERMS)
+    : EMPTY_TERMS;
 
   const params = useMemo(
     () =>
@@ -589,7 +594,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
           >
             <PrivacyFilter>
               {content.type === 'percentage'
-                ? format(Math.abs(data?.total ?? 0), 'number')
+                ? format(data?.total ?? 0, 'number')
                 : format(Math.abs(Math.round(data?.total ?? 0)), 'financial')}
               {content.type === 'percentage' ? '%' : ''}
             </PrivacyFilter>
@@ -636,6 +641,10 @@ function Operator({
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
+  const termsCallbacks = { onAddTerm, onRemoveTerm, onToggleOp, onChangeTerm };
+  const divisorFrom = showDivisorDateRange ? fromRange : '';
+  const divisorTo = showDivisorDateRange ? toRange : '';
+
   return (
     <View style={{ gap: isNarrowWidth ? 46 : 52, paddingTop: 24 }}>
       <SumRow
@@ -649,10 +658,7 @@ function Operator({
           terms={dividendTerms}
           from={fromRange}
           to={toRange}
-          onAddTerm={onAddTerm}
-          onRemoveTerm={onRemoveTerm}
-          onToggleOp={onToggleOp}
-          onChangeTerm={onChangeTerm}
+          {...termsCallbacks}
         />
       )}
       {type === 'percentage' && (
@@ -665,19 +671,16 @@ function Operator({
             }}
           />
           <SumRow
-            from={!showDivisorDateRange ? '' : fromRange}
-            to={!showDivisorDateRange ? '' : toRange}
+            from={divisorFrom}
+            to={divisorTo}
             filterObject={divisorFilterObject}
           />
           <TermsSection
             side="divisor"
             terms={divisorTerms}
-            from={!showDivisorDateRange ? '' : fromRange}
-            to={!showDivisorDateRange ? '' : toRange}
-            onAddTerm={onAddTerm}
-            onRemoveTerm={onRemoveTerm}
-            onToggleOp={onToggleOp}
-            onChangeTerm={onChangeTerm}
+            from={divisorFrom}
+            to={divisorTo}
+            {...termsCallbacks}
           />
         </>
       )}
@@ -784,14 +787,15 @@ function ExtraTermRow({
 
   const filterConditions = filter.conditions;
   const filterConditionsOp = filter.conditionsOp;
-  const termId = term.id;
 
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+  const onSync = useEffectEvent(
+    (conditions: RuleConditionEntity[], conditionsOp: 'and' | 'or') =>
+      onChange(term.id, conditions, conditionsOp),
+  );
 
   useEffect(() => {
-    onChangeRef.current(termId, filterConditions, filterConditionsOp);
-  }, [termId, filterConditions, filterConditionsOp]);
+    onSync(filterConditions, filterConditionsOp);
+  }, [filterConditions, filterConditionsOp]);
 
   return (
     <SumRow
