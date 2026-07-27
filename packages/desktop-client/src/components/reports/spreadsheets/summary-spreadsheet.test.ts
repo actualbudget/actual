@@ -26,4 +26,10 @@ describe('combineTerms', () => {
     const denominator = combineTerms(3000, [{ op: 'subtract', value: 500 }]);
     expect(Math.round((1000 / denominator) * 10000) / 100).toBe(40);
   });
+
+  it('treats each amount as a magnitude regardless of stored sign', () => {
+    // expenses are stored negative; subtracting one must reduce the total
+    expect(combineTerms(-3000, [{ op: 'subtract', value: -500 }])).toBe(2500);
+    expect(combineTerms(-3000, [{ op: 'add', value: -500 }])).toBe(3500);
+  });
 });
