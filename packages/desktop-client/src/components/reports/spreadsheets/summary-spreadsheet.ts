@@ -27,6 +27,15 @@ export function combineTerms(
   );
 }
 
+// The percentage is a magnitude ratio: always non-negative, and 0 when the
+// divisor is 0 (rather than Infinity/NaN).
+export function computePercentage(dividend: number, divisor: number): number {
+  if (divisor === 0) {
+    return 0;
+  }
+  return Math.abs(Math.round((dividend / divisor) * 10000) / 100);
+}
+
 export function summarySpreadsheet(
   start: string,
   end: string,
@@ -360,8 +369,8 @@ async function calculatePercentage(
   const divisorValue = combineTerms(baseDivisor, divisorExtraValues);
 
   return {
-    total: Math.round((dividend / (divisorValue ?? 1)) * 10000) / 100,
-    divisor: divisorValue ?? 0,
-    dividend: dividend ?? 0,
+    total: computePercentage(dividend, divisorValue),
+    divisor: divisorValue,
+    dividend,
   };
 }
