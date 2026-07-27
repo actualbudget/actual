@@ -65,6 +65,48 @@ describe('Autocomplete', () => {
     },
   );
 
+  test('preserves a custom item mouse move handler on touch devices', () => {
+    const onMouseMove = vi.fn();
+    vi.mocked(window.matchMedia).mockImplementation(
+      query =>
+        ({
+          matches: query === '(hover: none)',
+          media: query,
+        }) as MediaQueryList,
+    );
+
+    render(
+      <Autocomplete
+        embedded
+        strict
+        value={null}
+        suggestions={suggestions}
+        onSelect={vi.fn()}
+        renderItems={(items, getItemProps) => (
+          <div>
+            {items.map(item => (
+              <div
+                key={item.id}
+                role="button"
+                {...getItemProps({ item, onMouseMove })}
+              >
+                {item.name}
+              </div>
+            ))}
+          </div>
+        )}
+      />,
+    );
+
+    const secondItem = screen.getByRole('option', {
+      name: 'Second category',
+    });
+    fireEvent.mouseMove(secondItem);
+
+    expect(onMouseMove).toHaveBeenCalledTimes(1);
+    expect(secondItem).toHaveAttribute('aria-selected', 'false');
+  });
+
   test('refilters suggestions when the input value changes', async () => {
     const user = userEvent.setup();
     const filterSuggestions = vi.fn(

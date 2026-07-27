@@ -32,7 +32,9 @@ type CommonAutocompleteProps<T extends AutocompleteItem> = {
   renderInput?: (props: ComponentProps<typeof Input>) => ReactNode;
   renderItems?: (
     items: T[],
-    getItemProps: (arg: { item: T }) => ComponentProps<typeof View>,
+    getItemProps: (
+      arg: { item: T } & ComponentProps<typeof View>,
+    ) => ComponentProps<typeof View>,
     idx: number,
     value?: string,
   ) => ReactNode;
@@ -488,6 +490,8 @@ function SingleAutocomplete<T extends AutocompleteItem>({
           getItemProps({
             ...itemProps,
             onMouseMove: e => {
+              itemProps.onMouseMove?.(e);
+
               if (window.matchMedia?.('(hover: none)').matches) {
                 e['preventDownshiftDefault'] = true;
               }
