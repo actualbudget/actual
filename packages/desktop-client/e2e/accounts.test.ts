@@ -89,8 +89,7 @@ test.describe('Accounts', () => {
       credit: '10.00',
     });
 
-    await accountPage.accountMenuButton.click();
-    await page.getByRole('button', { name: 'Show running balance' }).click();
+    await accountPage.toggleTransactionColumn('balance');
 
     const transaction = accountPage.getNthTransaction(0);
     await expect(transaction.balance).toHaveText('10.00');
