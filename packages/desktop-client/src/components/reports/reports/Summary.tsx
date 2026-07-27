@@ -421,6 +421,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         style={{
           width: '100%',
           background: theme.pageBackground,
+          paddingBottom: 24,
         }}
       >
         <View
@@ -463,23 +464,29 @@ function SummaryInner({ widget }: SummaryInnerProps) {
               )
             }
           />
-        </View>
-        {content.type === 'percentage' && (
-          <View style={{ flexDirection: 'row', marginLeft: 16 }}>
-            <Checkbox
-              id="enabled-field"
-              checked={content.divisorAllTimeDateRange ?? false}
-              onChange={() => {
-                const currentValue = content.divisorAllTimeDateRange ?? false;
-                setContent(prev => ({
-                  ...prev,
-                  divisorAllTimeDateRange: !currentValue,
-                }));
+          {content.type === 'percentage' && (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginLeft: 16,
               }}
-            />{' '}
-            <Trans>All time divisor</Trans>
-          </View>
-        )}
+            >
+              <Checkbox
+                id="enabled-field"
+                checked={content.divisorAllTimeDateRange ?? false}
+                onChange={() => {
+                  const currentValue = content.divisorAllTimeDateRange ?? false;
+                  setContent(prev => ({
+                    ...prev,
+                    divisorAllTimeDateRange: !currentValue,
+                  }));
+                }}
+              />{' '}
+              <Trans>All time divisor</Trans>
+            </View>
+          )}
+        </View>
       </View>
       <View
         style={{
@@ -624,7 +631,7 @@ function Operator({
   const { t } = useTranslation();
 
   return (
-    <View>
+    <View style={{ gap: 40, paddingTop: 24 }}>
       <SumWithRange
         from={fromRange}
         to={toRange}
@@ -647,8 +654,6 @@ function Operator({
           <div
             style={{
               width: '100%',
-              marginTop: 32,
-              marginBottom: 32,
               borderTop: '2px solid',
               borderBottom: '2px solid',
             }}
@@ -675,8 +680,6 @@ function Operator({
           <div
             style={{
               width: '100%',
-              marginTop: 32,
-              marginBottom: 32,
               borderTop: '2px solid',
               borderBottom: '2px solid',
             }}
@@ -739,7 +742,7 @@ function TermsSection({
       {terms.length < MAX_EXTRA_TERMS && (
         <Button
           variant="bare"
-          style={{ marginTop: 24, alignSelf: 'flex-start' }}
+          style={{ alignSelf: 'flex-start' }}
           onPress={() => onAddTerm(side)}
         >
           <Trans>Add term</Trans>
@@ -784,7 +787,7 @@ function ExtraTermRow({
   }, [termId, filterConditions, filterConditionsOp]);
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 48 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <Button
         variant="bare"
         style={{ fontSize: '32px', marginRight: 8 }}
