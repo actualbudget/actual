@@ -708,10 +708,6 @@ describe('schedule app', () => {
     });
 
     it('does not skip earlier daily occurrences when a later transaction exists', async () => {
-      // Regression for the "irregular daily schedules" bug: a transaction dated
-      // *after* an occurrence must not mark that earlier occurrence as paid, or
-      // the catch-up loop advances past it without posting, leaving gaps.
-      // today = 2017-01-01 (test constant). Daily schedule from 2016-12-28.
       MockDate.set(new Date(2016, 11, 31, 12));
       schedulesApp.startServices();
 

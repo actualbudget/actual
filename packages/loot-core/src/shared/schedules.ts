@@ -122,20 +122,13 @@ export function isScheduleOccurrencePosted({
  * - Otherwise (manual recurring with `isapprox`, etc.): 2-day lookback to catch
  *   early payments.
  *
- * The upper-bound is always `next_date`: a transaction dated *after* the current
- * occurrence belongs to a later occurrence and must not mark this one as paid.
- * Without it, a single later transaction (e.g. an out-of-order or manually
- * entered one) would make every earlier unposted occurrence look already-paid,
- * causing the auto-post catch-up to skip those days and leave gaps.
+ * The date upper-bound is always exactly `next_date` to avoid marking future occurrences as paid.
  */
 export function getHasTransactionsQuery(schedules) {
   const filters = schedules.map(schedule => {
     return {
       $and: {
         schedule: schedule.id,
-        // An array of conditions for a field is implicitly AND-ed, giving us a
-        // `[matchStart, next_date]` range. (A single `{ $gte, $lte }` object
-        // would silently drop the second operator in the AQL compiler.)
         date: [
           {
             $gte: getScheduleOccurrenceMatchStartDate(
