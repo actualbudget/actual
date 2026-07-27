@@ -389,6 +389,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
             // Do nothing if it is a "touch" selection event
             Downshift.stateChangeTypes.touchEnd,
             Downshift.stateChangeTypes.mouseUp,
+            Downshift.stateChangeTypes.clickItem,
             // @ts-expect-error Types say there is no type
           ].includes(changes.type)
         ) {
@@ -483,7 +484,15 @@ function SingleAutocomplete<T extends AutocompleteItem>({
         inputValue,
         highlightedIndex,
       }) => {
-        const wrappedGetItemProps = itemProps => getItemProps({ ...itemProps });
+        const wrappedGetItemProps = itemProps =>
+          getItemProps({
+            ...itemProps,
+            onMouseMove: e => {
+              if (window.matchMedia?.('(hover: none)').matches) {
+                e['preventDownshiftDefault'] = true;
+              }
+            },
+          });
         return (
           // Super annoying but it works best to return a div so we
           // can't use a View here, but we can fake it be using the
