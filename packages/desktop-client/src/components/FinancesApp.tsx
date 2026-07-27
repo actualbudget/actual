@@ -23,6 +23,7 @@ import { useDispatch, useSelector } from '#redux';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { UserDirectoryPage } from './admin/UserDirectory/UserDirectoryPage';
+import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
 import { ContextMenu } from './ContextMenu';
 import { EnableBankingCallback } from './EnableBankingCallback';
@@ -241,6 +242,7 @@ export function FinancesApp() {
                   }}
                 />
                 <Notifications />
+                {isNarrowWidth && <BankSyncStatus isOverlay />}
                 {isNarrowWidth && <MobilePageHeaderSlot />}
 
                 <Routes>
