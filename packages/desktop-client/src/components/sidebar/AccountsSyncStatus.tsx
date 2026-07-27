@@ -8,8 +8,10 @@ import { View } from '@actual-app/components/view';
 import { listen } from '@actual-app/core/platform/client/connection';
 import { tsToRelativeTime } from '@actual-app/core/shared/util';
 
+import { isAccountFailedSync } from '#accounts/syncStatus';
 import { sync } from '#app/appSlice';
 import { AnimatedRefresh } from '#components/AnimatedRefresh';
+import { useAccounts } from '#hooks/useAccounts';
 import { useIsUsingSyncServer } from '#hooks/useIsUsingSyncServer';
 import { useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
@@ -32,6 +34,15 @@ export function AccountsSyncStatus({
   const isUsingSyncServer = useIsUsingSyncServer();
   const [syncing, setSyncing] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
+
+  // Only bank-linked accounts are ever "synced" — manual accounts have
+  // nothing to report here, so they're excluded from both sides of the
+  // ratio (an all-manual budget correctly reads "0/0", not "0/8").
+  const { data: accounts = [] } = useAccounts();
+  const linkedAccounts = accounts.filter(a => !!a.bank && !a.closed);
+  const linkedSyncedCount = linkedAccounts.filter(
+    a => !isAccountFailedSync(a),
+  ).length;
 
   useEffect(() => {
     const unlisten = listen('sync-event', event => {
@@ -86,6 +97,21 @@ export function AccountsSyncStatus({
           marginLeft: showLabel ? undefined : 'auto',
         }}
       >
+        {showLabel && (
+          <span
+            title={t('{{synced}} of {{total}} linked accounts synced', {
+              synced: linkedSyncedCount,
+              total: linkedAccounts.length,
+            })}
+            style={{
+              fontSize: 10.5,
+              color: theme.pageTextSubdued,
+              marginRight: 2,
+            }}
+          >
+            {linkedSyncedCount}/{linkedAccounts.length}
+          </span>
+        )}
         <Button
           variant="bare"
           aria-label={label}
