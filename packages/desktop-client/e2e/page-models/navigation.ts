@@ -93,60 +93,40 @@ export class Navigation {
     return budgetPage;
   }
 
+  // Schedules has no top-level sidebar entry in the redesigned nav; it's
+  // only reached via the sidebar's Transactions widget "scheduled" stat
+  // (Full width, the default) or a direct link elsewhere in the app.
   async goToSchedulesPage() {
-    await this.page.getByRole('link', { name: 'Schedules' }).click();
+    await this.page.getByRole('button', { name: /scheduled/i }).click();
 
     return new SchedulesPage(this.page);
   }
 
+  // Payees/Rules/Bank Sync are Settings tabs now, not top-level sidebar
+  // entries.
   async goToRulesPage() {
-    const rulesLink = this.page.getByRole('link', { name: 'Rules' });
-
-    // Expand the "more" menu only if it is not already expanded
-    if (!(await rulesLink.isVisible())) {
-      await this.page.getByRole('button', { name: 'More' }).click();
-    }
-
-    await rulesLink.click();
+    await this.goToSettingsPage();
+    await this.page.getByRole('link', { name: 'Rules' }).click();
 
     return new RulesPage(this.page);
   }
 
   async goToPayeesPage() {
-    const payeesLink = this.page.getByRole('link', { name: 'Payees' });
-
-    // Expand the "More" menu only if the Payees link is not visible
-    if (!(await payeesLink.isVisible())) {
-      await this.page.getByRole('button', { name: 'More' }).click();
-    }
-
-    await payeesLink.click();
+    await this.goToSettingsPage();
+    await this.page.getByRole('link', { name: 'Payees' }).click();
 
     return new PayeesPage(this.page);
   }
 
   async goToBankSyncPage() {
-    const bankSyncLink = this.page.getByRole('link', { name: 'Bank Sync' });
-
-    // Expand the "more" menu only if it is not already expanded
-    if (!(await bankSyncLink.isVisible())) {
-      await this.page.getByRole('button', { name: 'More' }).click();
-    }
-
-    await bankSyncLink.click();
+    await this.goToSettingsPage();
+    await this.page.getByRole('link', { name: 'Bank Sync' }).click();
 
     return new BankSyncPage(this.page);
   }
 
   async goToSettingsPage() {
-    const settingsLink = this.page.getByRole('link', { name: 'Settings' });
-
-    // Expand the "more" menu only if it is not already expanded
-    if (!(await settingsLink.isVisible())) {
-      await this.page.getByRole('button', { name: 'More' }).click();
-    }
-
-    await settingsLink.click();
+    await this.page.getByRole('link', { name: 'Settings' }).click();
 
     return new SettingsPage(this.page);
   }
