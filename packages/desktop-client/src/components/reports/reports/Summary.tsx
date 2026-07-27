@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -632,7 +632,7 @@ function Operator({
 
   return (
     <View style={{ gap: 40, paddingTop: 24 }}>
-      <SumWithRange
+      <SumRow
         from={fromRange}
         to={toRange}
         filterObject={dividendFilterObject}
@@ -658,7 +658,7 @@ function Operator({
               borderBottom: '2px solid',
             }}
           />
-          <SumWithRange
+          <SumRow
             from={!showDivisorDateRange ? '' : fromRange}
             to={!showDivisorDateRange ? '' : toRange}
             filterObject={divisorFilterObject}
@@ -787,22 +787,50 @@ function ExtraTermRow({
   }, [termId, filterConditions, filterConditionsOp]);
 
   return (
+    <SumRow
+      from={from}
+      to={to}
+      filterObject={filter}
+      onRemove={() => onRemove(term.id)}
+      operator={
+        <Button
+          variant="bare"
+          style={{ fontSize: '32px' }}
+          onPress={() => onToggleOp(term.id)}
+        >
+          {term.op === 'subtract' ? t('−') : t('+')}
+        </Button>
+      }
+    />
+  );
+}
+
+type SumRowProps = {
+  operator?: ReactNode;
+  onRemove?: () => void;
+  from: string;
+  to: string;
+  filterObject: FilterObject;
+};
+function SumRow({ operator, onRemove, from, to, filterObject }: SumRowProps) {
+  return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <Button
-        variant="bare"
-        style={{ fontSize: '32px', marginRight: 8 }}
-        onPress={() => onToggleOp(term.id)}
+      <View
+        style={{
+          width: 40,
+          marginRight: 8,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
-        {term.op === 'subtract' ? t('−') : t('+')}
-      </Button>
-      <SumWithRange from={from} to={to} filterObject={filter} />
-      <Button
-        variant="bare"
-        style={{ marginLeft: 8 }}
-        onPress={() => onRemove(term.id)}
-      >
-        <Trans>Remove</Trans>
-      </Button>
+        {operator}
+      </View>
+      <SumWithRange from={from} to={to} filterObject={filterObject} />
+      {onRemove && (
+        <Button variant="bare" style={{ marginLeft: 8 }} onPress={onRemove}>
+          <Trans>Remove</Trans>
+        </Button>
+      )}
     </View>
   );
 }
