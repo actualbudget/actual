@@ -26,6 +26,7 @@ import { SecondaryButtons } from './SecondaryButtons';
 import { useSidebar } from './SidebarProvider';
 import { SummaryWidget } from './SummaryWidget';
 import { ToggleButton } from './ToggleButton';
+import { TransactionsWidget } from './TransactionsWidget';
 import { WIDTH_MODE_ORDER, WIDTH_MODE_PIXELS } from './widthMode';
 import type { WidthMode } from './widthMode';
 import { WidthToggleButton } from './WidthToggleButton';
@@ -139,6 +140,9 @@ export function Sidebar() {
           >
             <SummaryWidget size={widthMode} />
             <NavTiles widthMode={widthMode} />
+            <View style={{ marginTop: widthMode === 'full' ? 12 : 8 }}>
+              <TransactionsWidget widthMode={widthMode} />
+            </View>
 
             {widthMode === 'rail' ? (
               <RailAccounts />

@@ -17,6 +17,8 @@ export type Spreadsheets = {
     balanceUncleared: number;
     lastReconciled: string | null;
     unreconciledCount: number;
+    'pending-transaction-count': number;
+    'last-30-days-transaction-count': number;
   };
   category: {
     // Common fields

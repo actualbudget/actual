@@ -21,6 +21,7 @@ import type { Binding, SheetFields } from '#spreadsheet';
 import * as bindings from '#spreadsheet/bindings';
 
 import { Account } from './Account';
+import { AccountsSyncStatus } from './AccountsSyncStatus';
 import { SecondaryItem } from './SecondaryItem';
 import type { WidthMode } from './widthMode';
 
@@ -161,11 +162,15 @@ export function Accounts({ widthMode }: AccountsProps) {
       />
 
       <View style={{ overflow: 'auto' }}>
+        <View style={{ padding: '15px 14px 6px' }}>
+          <AccountsSyncStatus showLabel={widthMode === 'full'} />
+        </View>
+
         <Account
           name={t('All accounts')}
           to="/accounts"
           query={bindings.allAccountBalance()}
-          style={{ fontWeight, marginTop: 15 }}
+          style={{ fontWeight }}
           isExactPathMatch
           balanceTestId="sidebar-all-accounts-balance"
           widthMode={widthMode}

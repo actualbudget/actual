@@ -1,3 +1,4 @@
+import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
   AccountEntity,
@@ -60,6 +61,30 @@ export function accountUnreconciledCount(accountId: AccountEntity['id']) {
       .options({ splits: 'none' })
       .calculate({ $count: '*' }),
   } satisfies Binding<'account', 'unreconciledCount'>;
+}
+
+// Uncleared transactions across every open account — the sidebar's
+// "pending" count.
+export function pendingTransactionCount() {
+  return {
+    name: 'pending-transaction-count',
+    query: q('transactions')
+      .filter({ 'account.closed': false, cleared: false })
+      .calculate({ $count: '*' }),
+  } satisfies Binding<'account', 'pending-transaction-count'>;
+}
+
+// Transactions dated in the last 30 days across every open account.
+export function last30DaysTransactionCount() {
+  return {
+    name: 'last-30-days-transaction-count',
+    query: q('transactions')
+      .filter({
+        'account.closed': false,
+        date: { $gte: monthUtils.subDays(monthUtils.currentDay(), 30) },
+      })
+      .calculate({ $count: '*' }),
+  } satisfies Binding<'account', 'last-30-days-transaction-count'>;
 }
 
 export function allAccountBalance() {
