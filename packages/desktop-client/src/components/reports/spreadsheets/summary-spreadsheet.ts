@@ -11,6 +11,17 @@ import type { Locale } from 'date-fns';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { aqlQuery } from '#queries/aqlQuery';
 
+export function combineTerms(
+  base: number,
+  terms: Array<{ op: 'add' | 'subtract'; value: number }>,
+): number {
+  return terms.reduce(
+    (acc, term) =>
+      term.op === 'subtract' ? acc - term.value : acc + term.value,
+    base,
+  );
+}
+
 export function summarySpreadsheet(
   start: string,
   end: string,
