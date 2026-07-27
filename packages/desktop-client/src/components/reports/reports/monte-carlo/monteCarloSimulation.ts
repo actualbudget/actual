@@ -104,6 +104,12 @@ export type MonteCarloPot = {
   withdrawalTaxRate: number;
   /** Bands tax model: share of a withdrawal counted as taxable income */
   taxableFraction: number;
+  /** Fixed yearly fee in minor units, today's money */
+  annualFeeFixed: number;
+  /** Whether the fixed fee rises with inflation */
+  feeAdjustsWithInflation: boolean;
+  /** Yearly fee as a fraction of the end-of-year balance */
+  annualFeeRate: number;
 };
 
 export function createMonteCarloPot(id: string): MonteCarloPot {
@@ -118,6 +124,9 @@ export function createMonteCarloPot(id: string): MonteCarloPot {
     accountId: null,
     withdrawalTaxRate: 0,
     taxableFraction: 1,
+    annualFeeFixed: 0,
+    feeAdjustsWithInflation: false,
+    annualFeeRate: 0,
   };
 }
 
@@ -238,6 +247,10 @@ function potFromMeta(potMeta: MonteCarloPotMeta, index: number): MonteCarloPot {
     accountId: potMeta.accountId ?? null,
     withdrawalTaxRate: potMeta.withdrawalTaxRate ?? defaults.withdrawalTaxRate,
     taxableFraction: potMeta.taxableFraction ?? defaults.taxableFraction,
+    annualFeeFixed: potMeta.annualFeeFixed ?? defaults.annualFeeFixed,
+    feeAdjustsWithInflation:
+      potMeta.feeAdjustsWithInflation ?? defaults.feeAdjustsWithInflation,
+    annualFeeRate: potMeta.annualFeeRate ?? defaults.annualFeeRate,
   };
 }
 
@@ -338,6 +351,8 @@ export type MonteCarloRunDetailRow = {
   potWithdrawals: number[];
   /** Tax paid out of this year's gross withdrawal (0 with no tax model) */
   taxPaid: number;
+  /** Management fees charged at the end of this year */
+  feesPaid: number;
   /**
    * The return each pot actually experienced that year, as a decimal
    * fraction; null when the pot had no balance or the plan failed
@@ -508,6 +523,15 @@ export function runMonteCarloSimulation(
       ? taxBands.some(band => band.rate > 0) &&
         potTaxableFractions.some(fraction => fraction > 0)
       : potTaxRates.some(rate => rate > 0);
+
+  // --- Fees --------------------------------------------------------------
+  const potFeeFixed = pots.map(pot =>
+    clamp(pot.annualFeeFixed ?? 0, 0, MAX_AMOUNT),
+  );
+  const potFeeAdjusts = pots.map(pot => pot.feeAdjustsWithInflation ?? false);
+  const potFeeRates = pots.map(pot => clamp(pot.annualFeeRate ?? 0, 0, 0.1));
+  const hasFees =
+    potFeeFixed.some(fee => fee > 0) || potFeeRates.some(rate => rate > 0);
 
   // Progressive tax on an annual taxable income, in today's money
   function bandTax(taxableIncome: number) {
@@ -1030,6 +1054,35 @@ export function runMonteCarloSimulation(
               : inflationMean;
           cumInflation *= 1 + yearInflation;
         }
+
+        // Management fees come out at the end of the year, after growth
+        // and inflation: a percentage of each pot's balance plus a fixed
+        // amount (optionally inflation-adjusted so it stays constant in
+        // today's money). Fees can deplete a plan on their own.
+        let feesThisYear = 0;
+        if (hasFees && !fundingShortfall && total > 0) {
+          for (let p = 0; p < potCount; p++) {
+            if (potBalances[p] <= 0) {
+              continue;
+            }
+            const fee =
+              potBalances[p] * potFeeRates[p] +
+              potFeeFixed[p] * (potFeeAdjusts[p] ? cumInflation : 1);
+            const charged = Math.min(potBalances[p], fee);
+            potBalances[p] -= charged;
+            feesThisYear += charged;
+          }
+          total = 0;
+          for (let p = 0; p < potCount; p++) {
+            total += potBalances[p];
+          }
+          if (total <= 0) {
+            total = 0;
+            depleted = true;
+            simDepletionYear = year;
+            depletionCounts[year]++;
+          }
+        }
         const invEnd = deflate ? 1 / cumInflation : 1;
 
         if (runDetail && sim === captureIndex) {
@@ -1050,6 +1103,7 @@ export function runMonteCarloSimulation(
                 Math.round((withdrawalTaken - netDelivered) * startInv),
               ),
               growth: 0,
+              feesPaid: 0,
               endBalance: 0,
               potBalances: (failurePotSnapshot ?? []).map(balance =>
                 toSafeAmount(Math.round(balance * startInv)),
@@ -1071,13 +1125,15 @@ export function runMonteCarloSimulation(
                 Math.round((withdrawalTaken - netDelivered) * startInv),
               ),
               // In today's money, growth is the real gain: the inflation
-              // drag comes out of it
+              // drag comes out of it. Fees are reported separately, so
+              // growth stays pure market performance
               growth: toSafeAmount(
                 Math.round(
-                  total * endInv -
+                  (total + feesThisYear) * endInv -
                     (yearStartTotal - withdrawalTaken) * startInv,
                 ),
               ),
+              feesPaid: toSafeAmount(Math.round(feesThisYear * endInv)),
               endBalance: toSafeAmount(Math.round(total * endInv)),
               potBalances: Array.from(potBalances, balance =>
                 toSafeAmount(Math.round(balance * endInv)),

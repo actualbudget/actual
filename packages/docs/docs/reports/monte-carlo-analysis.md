@@ -65,10 +65,15 @@ A _pot_ is a chunk of invested money - a pension or retirement account, an inves
 - **Portfolio allocation** - a one-click preset that fills in a typical expected return and volatility for a given mix of stocks and bonds. A pot that's 100% stocks tends to grow faster but swings harder; a cash pot barely moves in either direction. You can always override the numbers, which switches the pot to **Custom**.
 - **Expected return (%)** - the average yearly growth you expect from this pot, before inflation.
 - **Volatility (std dev %)** - how much the returns swing from year to year. Two pots can have the same average return, but the one with higher volatility is riskier: bad early years can do damage that a smooth ride would avoid.
-- **Accessible from age** - some pots can't be touched until a certain age; retirement accounts in many countries work this way. Leave this blank if the pot is available now. A locked pot stays invested and keeps growing - it just can't pay your bills until you reach the access age.
-- **Tax (%)** (or **Taxable portion (%)** with the bands model) - how withdrawals from this pot are taxed; see [Tax](#tax) below. Leave at 0 for tax-free pots.
+  Click the arrow at the start of a pot's row to expand its additional settings, organized into three groups:
 
-Drag the handle on the left of each pot to reorder them - the order matters if you choose to drain pots one at a time (see [Spending](#spending) below).
+- **Access - Accessible from age** - some pots can't be touched until a certain age; retirement accounts in many countries work this way. Leave this blank if the pot is available now. A locked pot stays invested and keeps growing - it just can't pay your bills until you reach the access age.
+- **Tax - Tax (%)** (or **Taxable portion (%)** with the bands model) - how withdrawals from this pot are taxed; see [Tax](#tax) below. Leave at 0 for tax-free pots.
+- **Fees** - what this pot costs you each year, charged at the end of every simulated year:
+  - **Fixed yearly fee** - the sum of fixed costs like adviser or platform fees, as an amount. Tick **Adjust by inflation** if the fee will rise with prices over time (untick it for a contractually flat fee, which shrinks in real terms).
+  - **Fee (% of balance)** - percentage charges like fund management fees, taken from the pot's end-of-year balance - e.g. 0.22 for a typical index fund platform.
+
+Drag a pot's row to reorder the list - the order matters if you choose to drain pots one at a time (see [Spending](#spending) below).
 
 :::tip
 The access age setting is what lets the report model the classic "bridge gap": retiring at 48 with a big pension you can't open until 57, and a smaller pot that has to carry you across those nine years. If the bridge pot runs dry too soon, the plan fails - even though the pension money exists.
@@ -169,6 +174,8 @@ Switch the results view from **Chart** to **Runs** to see every replay listed fr
 
 ![The simulation run table](/img/reports/monte-carlo-run.png)
 
+Above the year-by-year table, a summary line totals the run: how much was withdrawn over the whole replay, how much of that went to tax, and how much was paid in fees on top.
+
 If a run failed while money was still locked in an inaccessible pot, the table says so explicitly, so you can tell the difference between "the market ate my savings" and "the money existed but I couldn't reach it yet."
 
 ## Things to Keep in Mind
@@ -176,5 +183,5 @@ If a run failed while money was still locked in an inaccessible pot, the table s
 - **This is a model, not a prophecy.** A 90% success rate does not mean success is guaranteed - 1 in 10 of the simulated futures still failed.
 - **The random model is simplified.** It draws each year independently, which ignores the way real crashes cluster together and the occasional extreme year. It also moves all pots in step - there's no independent luck per pot, so a bond-heavy pot dips a little in the same year a stock-heavy pot crashes. The historical models partly address the first point.
 - **The historical data is US market data** (S&P 500 shares, US government bonds and bills, from 1928 onwards). US markets had an unusually good century, so results may be optimistic if your money is invested elsewhere.
-- **Fees are not modeled, and tax is approximated.** Enter expected returns net of fees, and remember the [Tax](#tax) settings are effective-rate estimates you control - not a tax calculator.
+- **Fees and taxes are approximations you control.** Each pot's fee settings model yearly costs explicitly - so enter expected returns _gross_ of those fees to avoid double-counting - and the [Tax](#tax) settings are effective-rate estimates, not a tax calculator.
 - **Garbage in, garbage out.** The results are only as good as your estimates for returns, volatility, spending and inflation. Try a few variations - small changes to the withdrawal often move the success rate a lot.

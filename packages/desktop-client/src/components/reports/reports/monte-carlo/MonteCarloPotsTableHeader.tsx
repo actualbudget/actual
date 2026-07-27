@@ -9,18 +9,18 @@ import { View } from '@actual-app/components/view';
 import { Field, TableHeader } from '#components/table';
 
 // Shared by the header and the pot rows so the columns line up. The
-// drag/remove columns are fixed; the rest flex evenly, with these minimum
-// widths so labels and controls don't get crushed on narrow windows
+// drag/expand/remove columns are fixed; the rest flex evenly, with these
+// minimum widths so labels and controls don't get crushed on narrow
+// windows. Access, tax and fee settings live in the expandable panel
+// under each row, not in columns.
 export const POT_COLUMNS = {
-  dragHandle: 36,
+  expand: 36,
   name: 150,
   startingBalance: 120,
   linkedAccount: 160,
   allocation: 190,
   expectedReturn: 150,
   volatility: 170,
-  accessAge: 155,
-  tax: 155,
   remove: 36,
 } as const;
 
@@ -31,17 +31,10 @@ const HEADER_LABEL_STYLE = {
   whiteSpace: 'nowrap',
 } as const;
 
-type MonteCarloPotsTableHeaderProps = {
-  /** True when the bands tax model is active */
-  usesTaxBands: boolean;
-};
-
-export function MonteCarloPotsTableHeader({
-  usesTaxBands,
-}: MonteCarloPotsTableHeaderProps) {
+export function MonteCarloPotsTableHeader() {
   return (
     <TableHeader>
-      <Field width={POT_COLUMNS.dragHandle} />
+      <Field width={POT_COLUMNS.expand} />
       <Field width="flex" style={{ minWidth: POT_COLUMNS.name }}>
         <Trans>Pot name</Trans>
       </Field>
@@ -152,82 +145,6 @@ export function MonteCarloPotsTableHeader({
                     means bigger ups and downs, which makes running out of money
                     more likely even with the same average return.
                   </Trans>
-                </Text>
-              </View>
-            }
-            placement="bottom start"
-            style={{ ...styles.tooltip }}
-          >
-            <SvgQuestion height={12} width={12} cursor="pointer" />
-          </Tooltip>
-        </View>
-      </Field>
-      <Field
-        width="flex"
-        style={{ minWidth: POT_COLUMNS.accessAge }}
-        truncate={false}
-      >
-        <View style={HEADER_LABEL_STYLE}>
-          <Text>
-            <Trans>Accessible from age</Trans>
-          </Text>
-          <Tooltip
-            content={
-              <View style={{ maxWidth: 300 }}>
-                <Text>
-                  <Trans>
-                    Some pots can&apos;t be touched until a certain age - e.g.
-                    personal pensions. Until then the pot stays invested and
-                    keeps growing, but can&apos;t fund withdrawals.
-                    <br />
-                    <br />
-                    Leave blank if the pot is available now.
-                  </Trans>
-                </Text>
-              </View>
-            }
-            placement="bottom start"
-            style={{ ...styles.tooltip }}
-          >
-            <SvgQuestion height={12} width={12} cursor="pointer" />
-          </Tooltip>
-        </View>
-      </Field>
-      <Field
-        width="flex"
-        style={{ minWidth: POT_COLUMNS.tax }}
-        truncate={false}
-      >
-        <View style={HEADER_LABEL_STYLE}>
-          <Text>
-            {usesTaxBands ? (
-              <Trans>Taxable portion (%)</Trans>
-            ) : (
-              <Trans>Tax (%)</Trans>
-            )}
-          </Text>
-          <Tooltip
-            content={
-              <View style={{ maxWidth: 300 }}>
-                <Text>
-                  {usesTaxBands ? (
-                    <Trans>
-                      The share of a withdrawal from this pot that counts as
-                      taxable income under your tax bands - e.g. a pension with
-                      a 25% tax-free portion is 75, a tax-free account is 0, and
-                      a taxable account is roughly the share of each withdrawal
-                      that is gains.
-                    </Trans>
-                  ) : (
-                    <Trans>
-                      The effective tax rate on withdrawals from this pot. Your
-                      spending is what you keep after tax, so the simulation
-                      withdraws extra to cover it - e.g. a tax-free account is
-                      0, a pension blending its tax-free portion with income tax
-                      might be around 15, and a taxable account its effective
-                      gains rate.
-                    </Trans>
-                  )}
                 </Text>
               </View>
             }

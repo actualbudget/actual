@@ -23,6 +23,9 @@ function makePot(overrides: Partial<MonteCarloPot> = {}): MonteCarloPot {
     accountId: null,
     withdrawalTaxRate: 0,
     taxableFraction: 1,
+    annualFeeFixed: 0,
+    feeAdjustsWithInflation: false,
+    annualFeeRate: 0,
     ...overrides,
   };
 }
@@ -1478,6 +1481,97 @@ describe('runMonteCarloSimulation', () => {
 
     expect(zeroBands.percentileBands).toEqual(untaxed.percentileBands);
     expect(zeroBands.successRate).toBe(untaxed.successRate);
+  });
+
+  it('deducts a fixed yearly fee at the end of each year', () => {
+    const result = runMonteCarloSimulation(
+      makeParams(
+        { annualWithdrawal: 0, horizonYears: 3, captureRunDetail: 0 },
+        {
+          startingBalance: 100_000,
+          expectedReturnMean: 0,
+          returnStdDev: 0,
+          annualFeeFixed: 1_000,
+        },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    expect(rows.map(row => row.endBalance)).toEqual([99_000, 98_000, 97_000]);
+    expect(rows.map(row => row.feesPaid)).toEqual([1_000, 1_000, 1_000]);
+    // Growth stays pure market performance (zero here) - fees are separate
+    expect(rows.map(row => row.growth)).toEqual([0, 0, 0]);
+  });
+
+  it('deducts a percentage fee from the end-of-year balance', () => {
+    const result = runMonteCarloSimulation(
+      makeParams(
+        { annualWithdrawal: 0, horizonYears: 3, captureRunDetail: 0 },
+        {
+          startingBalance: 100_000,
+          expectedReturnMean: 0,
+          returnStdDev: 0,
+          annualFeeRate: 0.01,
+        },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    expect(rows.map(row => row.endBalance)).toEqual([99_000, 98_010, 97_030]);
+    expect(rows.map(row => row.feesPaid)).toEqual([1_000, 990, 980]);
+  });
+
+  it("keeps an inflation-adjusted fixed fee constant in today's money", () => {
+    const base = {
+      annualWithdrawal: 0,
+      horizonYears: 3,
+      inflationMean: 0.05,
+      inflationStdDev: 0,
+      deflateToTodaysMoney: true,
+      captureRunDetail: 0,
+    };
+    const adjusted = runMonteCarloSimulation(
+      makeParams(base, {
+        startingBalance: 100_000,
+        expectedReturnMean: 0,
+        returnStdDev: 0,
+        annualFeeFixed: 1_000,
+        feeAdjustsWithInflation: true,
+      }),
+    );
+    expect(adjusted.runDetail!.map(row => row.feesPaid)).toEqual([
+      1_000, 1_000, 1_000,
+    ]);
+
+    // A non-adjusted fee shrinks in real terms as prices rise
+    const flat = runMonteCarloSimulation(
+      makeParams(base, {
+        startingBalance: 100_000,
+        expectedReturnMean: 0,
+        returnStdDev: 0,
+        annualFeeFixed: 1_000,
+      }),
+    );
+    const flatFees = flat.runDetail!.map(row => row.feesPaid);
+    expect(flatFees[0]).toBeLessThan(1_000);
+    expect(flatFees[2]).toBeLessThan(flatFees[0]);
+  });
+
+  it('fees alone can deplete a plan', () => {
+    const result = runMonteCarloSimulation(
+      makeParams(
+        { annualWithdrawal: 0, horizonYears: 5 },
+        {
+          startingBalance: 1_000,
+          expectedReturnMean: 0,
+          returnStdDev: 0,
+          annualFeeFixed: 400,
+        },
+      ),
+    );
+
+    expect(result.successRate).toBe(0);
+    expect(result.medianDepletionYear).toBe(3);
   });
 
   it('keeps every output formatter-safe under absurdly large configs', () => {

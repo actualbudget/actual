@@ -158,7 +158,7 @@ export function MonteCarloConfiguration({
             )
           : activeTab === 'pots'
             ? t(
-                'The invested accounts your plan draws from - each with its own balance, allocation, and return assumptions.',
+                'The invested accounts your plan draws from - each with its own balance, allocation, and return assumptions. Drag rows to reorder pots; expand a row for access, tax and fee settings.',
               )
             : activeTab === 'withdrawals'
               ? t(
@@ -429,9 +429,7 @@ export function MonteCarloConfiguration({
             }}
           >
             <View style={{ minWidth: 'fit-content' }}>
-              <MonteCarloPotsTableHeader
-                usesTaxBands={config.taxModel === 'bands'}
-              />
+              <MonteCarloPotsTableHeader />
               <GridList
                 aria-label={t('Investment pots')}
                 // Without this, typing in the pot fields moves the list

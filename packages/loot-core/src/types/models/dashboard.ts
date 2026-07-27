@@ -204,9 +204,15 @@ export type MonteCarloPotMeta = {
   withdrawalTaxRate?: number;
   /**
    * Bands tax model: share of a withdrawal that counts as taxable income
-   * (pension ~0.75, ISA 0), as a decimal fraction
+   * (pension ~0.75, tax-free account 0), as a decimal fraction
    */
   taxableFraction?: number;
+  /** Fixed yearly fee in minor units, today's money */
+  annualFeeFixed?: number;
+  /** Whether the fixed fee rises with inflation */
+  feeAdjustsWithInflation?: boolean;
+  /** Yearly fee as a fraction of the end-of-year balance (0.0022 = 0.22%) */
+  annualFeeRate?: number;
 };
 
 export type MonteCarloTaxModel = 'flat' | 'bands';

@@ -54,6 +54,17 @@ export function MonteCarloRunDetailTable({
   const hasSurvived = lastRow != null && lastRow.endBalance > 0;
   const showPotColumns = pots.length > 0;
 
+  // Run-level cost of the plan: what left the pots, and how much of it
+  // went to tax and fees rather than spending
+  let totalWithdrawn = 0;
+  let totalTax = 0;
+  let totalFees = 0;
+  for (const row of rows) {
+    totalWithdrawn += row.withdrawal;
+    totalTax += row.taxPaid;
+    totalFees += row.feesPaid;
+  }
+
   return (
     <View>
       <View
@@ -83,6 +94,41 @@ export function MonteCarloRunDetailTable({
               })}
         </Text>
       </View>
+
+      <Text style={{ fontSize: 13, color: theme.pageText, marginBottom: 10 }}>
+        <PrivacyFilter>
+          <FinancialText as="span">
+            {totalTax > 0 && totalFees > 0
+              ? t(
+                  'Total withdrawn over this run: {{total}}, of which {{tax}} tax, plus {{fees}} paid in fees.',
+                  {
+                    total: format(totalWithdrawn, 'financial'),
+                    tax: format(totalTax, 'financial'),
+                    fees: format(totalFees, 'financial'),
+                  },
+                )
+              : totalTax > 0
+                ? t(
+                    'Total withdrawn over this run: {{total}}, of which {{tax}} tax.',
+                    {
+                      total: format(totalWithdrawn, 'financial'),
+                      tax: format(totalTax, 'financial'),
+                    },
+                  )
+                : totalFees > 0
+                  ? t(
+                      'Total withdrawn over this run: {{total}}, plus {{fees}} paid in fees.',
+                      {
+                        total: format(totalWithdrawn, 'financial'),
+                        fees: format(totalFees, 'financial'),
+                      },
+                    )
+                  : t('Total withdrawn over this run: {{total}}.', {
+                      total: format(totalWithdrawn, 'financial'),
+                    })}
+          </FinancialText>
+        </PrivacyFilter>
+      </Text>
 
       <View style={{ ...styles.horizontalScrollbar, overflowX: 'auto' }}>
         <View style={{ minWidth: 'fit-content' }}>
@@ -236,23 +282,40 @@ export function MonteCarloRunDetailTable({
                       </View>
                     );
                   })}
-                <Text
-                  style={{
-                    ...AMOUNT_CELL_STYLE,
-                    color:
-                      row.growth >= 0
-                        ? theme.reportsNumberPositive
-                        : theme.reportsNumberNegative,
-                  }}
+                <View
+                  style={{ flex: 1, minWidth: 110, alignItems: 'flex-end' }}
                 >
-                  {!isFailureRow && (
-                    <PrivacyFilter>
-                      <FinancialText as="span">
-                        {format(row.growth, 'financial')}
-                      </FinancialText>
-                    </PrivacyFilter>
+                  <Text
+                    style={{
+                      color:
+                        row.growth >= 0
+                          ? theme.reportsNumberPositive
+                          : theme.reportsNumberNegative,
+                    }}
+                  >
+                    {!isFailureRow && (
+                      <PrivacyFilter>
+                        <FinancialText as="span">
+                          {format(row.growth, 'financial')}
+                        </FinancialText>
+                      </PrivacyFilter>
+                    )}
+                  </Text>
+                  {row.feesPaid > 0 && (
+                    <Text
+                      style={{ fontSize: 11, color: theme.warningText }}
+                      title={t('Fees charged this year')}
+                    >
+                      <PrivacyFilter>
+                        <FinancialText as="span">
+                          {t('− {{amount}} fees', {
+                            amount: format(row.feesPaid, 'financial'),
+                          })}
+                        </FinancialText>
+                      </PrivacyFilter>
+                    </Text>
                   )}
-                </Text>
+                </View>
                 <Text
                   style={{
                     width: 90,
