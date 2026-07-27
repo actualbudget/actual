@@ -371,7 +371,7 @@ export function FinancesApp() {
                     }
                   />
                   <Route path="/tags" element={<ManageTagsPage />} />
-                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/settings/*" element={<Settings />} />
 
                   <Route
                     path="/gocardless/link"

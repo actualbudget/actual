@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
+import { Navigate, Route, Routes } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -16,12 +18,16 @@ import { css } from '@emotion/css';
 import { getLatestAppVersion } from '#app/appSlice';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { Link } from '#components/common/Link';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { Checkbox, FormField, FormLabel } from '#components/forms';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { Page } from '#components/Page';
+import { WideComponent } from '#components/responsive';
 import { useServerVersion } from '#components/ServerContext';
+import { ManageTagsPage } from '#components/tags/ManageTagsPage';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useIsUsingSyncServer } from '#hooks/useIsUsingSyncServer';
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
@@ -37,6 +43,7 @@ import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
+import { SettingsNav } from './SettingsNav';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
@@ -166,6 +173,56 @@ function AdvancedAbout() {
 }
 
 export function Settings() {
+  const { isNarrowWidth } = useResponsive();
+  const isUsingSyncServer = useIsUsingSyncServer();
+
+  // Mobile has its own top-level Payees/Rules/Bank Sync destinations
+  // (see MobileNavTabs), so the settings tab strip is desktop-only.
+  if (isNarrowWidth) {
+    return <GeneralSettings />;
+  }
+
+  return (
+    <View style={{ flex: 1, minHeight: 0, flexDirection: 'column' }}>
+      <View style={{ paddingTop: 20 }}>
+        <SettingsNav />
+      </View>
+      <Routes>
+        <Route index element={<GeneralSettings />} />
+        <Route
+          path="payees"
+          element={
+            <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+              <WideComponent name="Payees" />
+            </ErrorBoundary>
+          }
+        />
+        <Route
+          path="rules"
+          element={
+            <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+              <WideComponent name="Rules" />
+            </ErrorBoundary>
+          }
+        />
+        {isUsingSyncServer && (
+          <Route
+            path="bank-sync"
+            element={
+              <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+                <WideComponent name="BankSync" />
+              </ErrorBoundary>
+            }
+          />
+        )}
+        <Route path="tags" element={<ManageTagsPage />} />
+        <Route path="*" element={<Navigate to="/settings" replace />} />
+      </Routes>
+    </View>
+  );
+}
+
+function GeneralSettings() {
   const { t } = useTranslation();
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
   const [budgetName] = useMetadataPref('budgetName');

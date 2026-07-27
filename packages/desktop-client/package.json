@@ -71,6 +71,7 @@
     "#components/reports/useDashboardWidgetCopyMenu": "./src/components/reports/useDashboardWidgetCopyMenu.ts",
     "#components/reports/useReport": "./src/components/reports/useReport.ts",
     "#components/reports/util": "./src/components/reports/util.ts",
+    "#components/responsive": "./src/components/responsive/index.tsx",
     "#components/schedules": "./src/components/schedules/index.tsx",
     "#components/schedules/schedule-edit-utils": "./src/components/schedules/schedule-edit-utils.ts",
     "#components/transactions/table/utils": "./src/components/transactions/table/utils.ts",
