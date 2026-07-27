@@ -44,6 +44,7 @@ import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { SettingsNav } from './SettingsNav';
+import { SidebarWidgetSettings } from './SidebarWidgetSettings';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
@@ -293,6 +294,7 @@ function GeneralSettings() {
         )}
         <About />
         <ThemeSettings />
+        <SidebarWidgetSettings />
         <FormatSettings />
         {isCurrencyExperimentalEnabled && <CurrencySettings />}
         <LanguageSettings />

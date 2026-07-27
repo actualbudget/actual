@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -11,20 +10,35 @@ import { View } from '@actual-app/components/view';
 import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
+import type { ResizeCallback } from 're-resizable';
 
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
-import { useResizeObserver } from '#hooks/useResizeObserver';
 import { replaceModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
 import { Accounts } from './Accounts';
 import { BudgetName } from './BudgetName';
-import { PrimaryButtons } from './PrimaryButtons';
+import { NavTiles } from './NavTiles';
 import { SecondaryButtons } from './SecondaryButtons';
 import { useSidebar } from './SidebarProvider';
+import { SummaryWidget } from './SummaryWidget';
 import { ToggleButton } from './ToggleButton';
+import { WIDTH_MODE_ORDER, WIDTH_MODE_PIXELS } from './widthMode';
+import type { WidthMode } from './widthMode';
+import { WidthToggleButton } from './WidthToggleButton';
+
+function closestWidthMode(width: number): WidthMode {
+  return WIDTH_MODE_ORDER.reduce<WidthMode>(
+    (closest, mode) =>
+      Math.abs(WIDTH_MODE_PIXELS[mode] - width) <
+      Math.abs(WIDTH_MODE_PIXELS[closest] - width)
+        ? mode
+        : closest,
+    WIDTH_MODE_ORDER[0],
+  );
+}
 
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
@@ -32,28 +46,28 @@ export function Sidebar() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const sidebar = useSidebar();
-  const { width } = useResponsive();
   const [isFloating = false, setFloatingSidebarPref] =
     useGlobalPref('floatingSidebar');
 
-  const [sidebarWidthLocalPref, setSidebarWidthLocalPref] =
-    useLocalPref('sidebarWidth');
-  const DEFAULT_SIDEBAR_WIDTH = 240;
-  const MAX_SIDEBAR_WIDTH = width / 3;
-  const MIN_SIDEBAR_WIDTH = 200;
+  const [widthModePref, setWidthModePref] = useLocalPref('sidebar.widthMode');
+  const widthMode: WidthMode = widthModePref ?? 'full';
 
-  const [sidebarWidth, setSidebarWidth] = useState(
-    Math.min(
-      MAX_SIDEBAR_WIDTH,
-      Math.max(
-        MIN_SIDEBAR_WIDTH,
-        sidebarWidthLocalPref || DEFAULT_SIDEBAR_WIDTH,
-      ),
-    ),
-  );
+  // Live width during a drag; snaps back to the pref's width once the drag
+  // (or a footer/keyboard width change) settles on a mode.
+  const [liveWidth, setLiveWidth] = useState(WIDTH_MODE_PIXELS[widthMode]);
 
-  const onResizeStop = () => {
-    setSidebarWidthLocalPref(sidebarWidth);
+  useEffect(() => {
+    setLiveWidth(WIDTH_MODE_PIXELS[widthMode]);
+  }, [widthMode]);
+
+  const onResize: ResizeCallback = (_e, _direction, ref) => {
+    setLiveWidth(ref.offsetWidth);
+  };
+
+  const onResizeStop: ResizeCallback = (_e, _direction, ref) => {
+    const snapped = closestWidthMode(ref.offsetWidth);
+    setWidthModePref(snapped);
+    setLiveWidth(WIDTH_MODE_PIXELS[snapped]);
   };
 
   const onFloat = () => {
@@ -64,20 +78,14 @@ export function Sidebar() {
     dispatch(replaceModal({ modal: { name: 'add-account', options: {} } }));
   };
 
-  const containerRef = useResizeObserver<HTMLDivElement>(rect => {
-    setSidebarWidth(rect.width);
-  });
-
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
       <Resizable
-        defaultSize={{
-          width: sidebarWidth,
-          height: '100%',
-        }}
+        size={{ width: liveWidth, height: '100%' }}
+        onResize={onResize}
         onResizeStop={onResizeStop}
-        maxWidth={MAX_SIDEBAR_WIDTH}
-        minWidth={MIN_SIDEBAR_WIDTH}
+        maxWidth={WIDTH_MODE_PIXELS.full}
+        minWidth={WIDTH_MODE_PIXELS.rail}
         enable={{
           top: false,
           right: true,
@@ -90,7 +98,6 @@ export function Sidebar() {
         }}
       >
         <View
-          innerRef={containerRef}
           className={css({
             color: theme.sidebarItemText,
             height: '100%',
@@ -105,35 +112,61 @@ export function Sidebar() {
               width: hasWindowButtons ? null : 'auto',
             } as CSSProperties,
             flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
             ...styles.darkScrollbar,
           })}
         >
-          <BudgetName>
-            {!sidebar.alwaysFloats && (
-              <ToggleButton isFloating={isFloating} onFloat={onFloat} />
-            )}
-          </BudgetName>
+          {widthMode !== 'rail' && (
+            <BudgetName>
+              {!sidebar.alwaysFloats && (
+                <ToggleButton isFloating={isFloating} onFloat={onFloat} />
+              )}
+            </BudgetName>
+          )}
 
           <View
             style={{
               flexGrow: 1,
+              minHeight: 0,
+              paddingTop: widthMode === 'rail' ? 12 : 0,
+              gap: widthMode === 'rail' ? 4 : 0,
               '@media screen and (max-height: 480px)': {
                 overflowY: 'auto',
               },
             }}
           >
-            <PrimaryButtons />
+            <SummaryWidget size={widthMode} />
+            <NavTiles widthMode={widthMode} />
 
-            <Accounts />
+            {widthMode !== 'rail' && <Accounts />}
+          </View>
 
-            <SecondaryButtons
-              buttons={[
-                {
-                  title: t('Add account'),
-                  Icon: SvgAdd,
-                  onClick: onAddAccount,
-                },
-              ]}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: widthMode === 'rail' ? 'center' : undefined,
+              flexShrink: 0,
+              paddingRight: widthMode === 'rail' ? 0 : 8,
+            }}
+          >
+            {widthMode !== 'rail' && (
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <SecondaryButtons
+                  buttons={[
+                    {
+                      title: t('Add account'),
+                      Icon: SvgAdd,
+                      onClick: onAddAccount,
+                    },
+                  ]}
+                />
+              </View>
+            )}
+            <WidthToggleButton
+              widthMode={widthMode}
+              onChange={setWidthModePref}
             />
           </View>
         </View>

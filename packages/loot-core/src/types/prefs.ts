@@ -94,6 +94,9 @@ export type LocalPrefs = Partial<{
   reportsViewSummary: boolean;
   reportsViewLabel: boolean;
   sidebarWidth: number;
+  'sidebar.widthMode': 'rail' | 'compact' | 'full';
+  'sidebar.widgetMetrics': string[];
+  'sidebar.widgetMetricIndex': number;
   'mobile.showSpentColumn': boolean;
   'mobile.bankSyncProvidersCollapsed': boolean;
 }>;
