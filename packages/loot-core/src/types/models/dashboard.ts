@@ -189,11 +189,19 @@ export type BaseSummaryContent = {
   fontSize?: number;
 };
 
+export type PercentageSummaryTerm = {
+  op: 'add' | 'subtract';
+  conditions: RuleConditionEntity[];
+  conditionsOp: 'and' | 'or';
+};
+
 export type PercentageSummaryContent = {
   type: 'percentage';
   divisorConditions: RuleConditionEntity[];
   divisorConditionsOp: 'and' | 'or';
   divisorAllTimeDateRange?: boolean;
+  dividendExtraTerms?: PercentageSummaryTerm[];
+  divisorExtraTerms?: PercentageSummaryTerm[];
   fontSize?: number;
 };
 
