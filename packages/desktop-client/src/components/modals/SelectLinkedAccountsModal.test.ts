@@ -4,7 +4,10 @@ import type {
 } from '@actual-app/core/types/models';
 import { describe, expect, it } from 'vitest';
 
-import { computeInitialLinkState } from './SelectLinkedAccountsModal';
+import {
+  computeInitialLinkState,
+  getSelectableAccountOptions,
+} from './SelectLinkedAccountsModal';
 
 function makeLocalAccount(
   overrides: Partial<AccountEntity> & { id: string },
@@ -35,6 +38,16 @@ function makeLocalAccount(
 function makeExternalAccount(accountId: string): SyncServerSimpleFinAccount {
   return { account_id: accountId, name: accountId, balance: 0 };
 }
+
+const addOnBudgetAccountOption = {
+  id: 'new-on',
+  name: 'Create new account',
+};
+
+const addOffBudgetAccountOption = {
+  id: 'new-off',
+  name: 'Create new account (off budget)',
+};
 
 describe('computeInitialLinkState', () => {
   it('preselects the upgrading account when there is exactly one unmatched external account', () => {
@@ -95,5 +108,53 @@ describe('computeInitialLinkState', () => {
     );
 
     expect(initiallyChosenAccounts).toEqual({ 'ext-1': 'local-1' });
+  });
+});
+
+describe('getSelectableAccountOptions', () => {
+  it('allows relinking stale accounts from the same sync provider', () => {
+    const staleSimpleFinAccount = makeLocalAccount({
+      id: 'actual-account-stale-simplefin',
+      name: 'Hilton Honors Aspire',
+      account_id: 'old-simplefin-id',
+      account_sync_source: 'simpleFin',
+    });
+    const selectedVisibleSimpleFinAccount = makeLocalAccount({
+      id: 'actual-account-visible-simplefin',
+      name: 'Business Gold Card',
+      account_id: 'visible-simplefin-id',
+      account_sync_source: 'simpleFin',
+    });
+    const goCardlessAccount = makeLocalAccount({
+      id: 'actual-account-gocardless',
+      name: 'Checking',
+      account_id: 'gocardless-id',
+      account_sync_source: 'goCardless',
+    });
+    const manualAccount = makeLocalAccount({
+      id: 'actual-account-manual',
+      name: 'Manual Card',
+    });
+
+    const options = getSelectableAccountOptions({
+      localAccounts: [
+        staleSimpleFinAccount,
+        selectedVisibleSimpleFinAccount,
+        goCardlessAccount,
+        manualAccount,
+      ],
+      selectedLocalAccountIds: new Set([selectedVisibleSimpleFinAccount.id]),
+      chosenAccount: undefined,
+      syncSource: 'simpleFin',
+      addOnBudgetAccountOption,
+      addOffBudgetAccountOption,
+    });
+
+    expect(options.map(option => option.name)).toEqual([
+      'Hilton Honors Aspire',
+      'Manual Card',
+      'Create new account',
+      'Create new account (off budget)',
+    ]);
   });
 });
