@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import type { CSSProperties } from 'react';
+import { useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -26,6 +26,10 @@ import { SecondaryItem } from './SecondaryItem';
 import type { WidthMode } from './widthMode';
 
 const fontWeight = 600;
+
+// Width of the group header's collapse chevron, reused as the left indent
+// for grouped account rows so their status dot lines up underneath it.
+const GROUP_INDENT = 20;
 
 type GroupHeaderProps<FieldName extends SheetFields<'account'>> = {
   name: string;
@@ -57,7 +61,15 @@ function GroupHeader<FieldName extends SheetFields<'account'>>({
         aria-label={collapseLabel}
         aria-expanded={!collapsed}
         onPress={onToggleCollapse}
-        style={{ padding: '2px 4px', color: theme.pageTextSubdued }}
+        style={{
+          width: GROUP_INDENT,
+          height: 20,
+          padding: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: theme.pageTextSubdued,
+        }}
       >
         <SvgCheveronDown
           width={9}
@@ -79,6 +91,18 @@ function GroupHeader<FieldName extends SheetFields<'account'>>({
           widthMode={widthMode}
         />
       </View>
+    </View>
+  );
+}
+
+// Mirrors the group header's [chevron][content] row so a grouped account's
+// status dot lands directly under the header's chevron rather than under
+// its own left edge.
+function IndentedRow({ children }: { children: ReactNode }) {
+  return (
+    <View style={{ flexDirection: 'row' }}>
+      <View style={{ width: GROUP_INDENT, flexShrink: 0 }} />
+      <View style={{ flex: 1, minWidth: 0 }}>{children}</View>
     </View>
   );
 }
@@ -198,21 +222,22 @@ export function Accounts({ widthMode }: AccountsProps) {
 
         {!onBudgetCollapsed &&
           onBudgetAccounts.map((account, i) => (
-            <Account
-              key={account.id}
-              name={account.name}
-              account={account}
-              connected={!!account.bank}
-              pending={syncingAccountIds.includes(account.id)}
-              failed={isAccountFailedSync(account)}
-              updated={updatedAccounts.includes(account.id)}
-              to={getAccountPath(account)}
-              query={bindings.accountBalance(account.id)}
-              onDragChange={onDragChange}
-              onDrop={onReorder}
-              outerStyle={makeDropPadding(i)}
-              widthMode={widthMode}
-            />
+            <IndentedRow key={account.id}>
+              <Account
+                name={account.name}
+                account={account}
+                connected={!!account.bank}
+                pending={syncingAccountIds.includes(account.id)}
+                failed={isAccountFailedSync(account)}
+                updated={updatedAccounts.includes(account.id)}
+                to={getAccountPath(account)}
+                query={bindings.accountBalance(account.id)}
+                onDragChange={onDragChange}
+                onDrop={onReorder}
+                outerStyle={makeDropPadding(i)}
+                widthMode={widthMode}
+              />
+            </IndentedRow>
           ))}
 
         {offbudgetAccounts.length > 0 && (
@@ -237,21 +262,22 @@ export function Accounts({ widthMode }: AccountsProps) {
 
         {!offBudgetCollapsed &&
           offbudgetAccounts.map((account, i) => (
-            <Account
-              key={account.id}
-              name={account.name}
-              account={account}
-              connected={!!account.bank}
-              pending={syncingAccountIds.includes(account.id)}
-              failed={isAccountFailedSync(account)}
-              updated={updatedAccounts.includes(account.id)}
-              to={getAccountPath(account)}
-              query={bindings.accountBalance(account.id)}
-              onDragChange={onDragChange}
-              onDrop={onReorder}
-              outerStyle={makeDropPadding(i)}
-              widthMode={widthMode}
-            />
+            <IndentedRow key={account.id}>
+              <Account
+                name={account.name}
+                account={account}
+                connected={!!account.bank}
+                pending={syncingAccountIds.includes(account.id)}
+                failed={isAccountFailedSync(account)}
+                updated={updatedAccounts.includes(account.id)}
+                to={getAccountPath(account)}
+                query={bindings.accountBalance(account.id)}
+                onDragChange={onDragChange}
+                onDrop={onReorder}
+                outerStyle={makeDropPadding(i)}
+                widthMode={widthMode}
+              />
+            </IndentedRow>
           ))}
 
         {closedAccounts.length > 0 && (

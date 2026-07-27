@@ -78,12 +78,20 @@ function abbreviate(language: string, cents: number) {
   }).format(cents / 100);
 }
 
+// Explicit rather than inherited from the wrapping bare Button, so the
+// widget's contrast against its own (theme-independent) background can't
+// be accidentally weakened by an unrelated ancestor style change.
 const valueStyle = (size: WidthMode) =>
   size === 'full'
-    ? { fontSize: 30, fontWeight: 500 as const, letterSpacing: -0.5 }
+    ? {
+        fontSize: 30,
+        fontWeight: 500 as const,
+        letterSpacing: -0.5,
+        color: theme.pageText,
+      }
     : size === 'compact'
-      ? { fontSize: 22, fontWeight: 500 as const }
-      : { fontSize: 12 };
+      ? { fontSize: 22, fontWeight: 500 as const, color: theme.pageText }
+      : { fontSize: 12, color: theme.pageText };
 
 function NetWorthValue({ size }: { size: WidthMode }) {
   const format = useFormat();
@@ -280,7 +288,12 @@ export function SummaryWidget({ size }: SummaryWidgetProps) {
           style={{
             fontSize: 8,
             letterSpacing: 0.5,
-            color: theme.pageTextSubdued,
+            // `pageTextSubdued` is tuned for contrast against the main
+            // content background, not this tile's `sidebarItemBackgroundHover`
+            // fill — in dark/midnight that combination falls well under
+            // WCAG AA (~2:1). `sidebarItemText` keeps it legible; the small
+            // uppercase/letter-spaced treatment already reads as secondary.
+            color: theme.sidebarItemText,
             textTransform: 'uppercase',
           }}
         >
@@ -315,7 +328,8 @@ export function SummaryWidget({ size }: SummaryWidgetProps) {
           justifyContent: 'space-between',
           fontSize: size === 'full' ? 9.5 : 9,
           letterSpacing: 1.4,
-          color: theme.pageTextSubdued,
+          // See the rail-size label above for why this isn't pageTextSubdued.
+          color: theme.sidebarItemText,
           textTransform: 'uppercase',
         }}
       >

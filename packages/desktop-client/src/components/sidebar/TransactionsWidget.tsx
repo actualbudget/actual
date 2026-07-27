@@ -12,8 +12,10 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 
 import { useNavigate } from '#hooks/useNavigate';
+import { usePayees } from '#hooks/usePayees';
 import { getSchedulesQuery, useSchedules } from '#hooks/useSchedules';
 import { useSheetValue } from '#hooks/useSheetValue';
+import { useTags } from '#hooks/useTags';
 import * as bindings from '#spreadsheet/bindings';
 
 import type { WidthMode } from './widthMode';
@@ -74,6 +76,8 @@ export function TransactionsWidget({ widthMode }: { widthMode: WidthMode }) {
   const pendingCount = usePendingCount();
   const last30DaysCount = useLast30DaysCount();
   const scheduledCount = useUpcomingScheduleCount();
+  const { data: payees = [] } = usePayees();
+  const { data: tags = [] } = useTags();
 
   const onAllTransactions = () => void navigate('/accounts');
   const onPending = () =>
@@ -85,6 +89,8 @@ export function TransactionsWidget({ widthMode }: { widthMode: WidthMode }) {
       state: { goBack: true, filterConditions: last30DaysFilterConditions() },
     });
   const onScheduled = () => void navigate('/schedules');
+  const onPayees = () => void navigate('/settings/payees');
+  const onTags = () => void navigate('/settings/tags');
 
   if (widthMode === 'rail') {
     return (
@@ -200,6 +206,19 @@ export function TransactionsWidget({ widthMode }: { widthMode: WidthMode }) {
           valueStyle={{ color: theme.sidebarItemAccentSelected }}
         >
           {scheduledCount}
+        </TransactionsStat>
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          borderTop: `1px solid ${theme.sidebarItemBackgroundHover}`,
+        }}
+      >
+        <TransactionsStat label={t('payees')} onPress={onPayees}>
+          {payees.length}
+        </TransactionsStat>
+        <TransactionsStat label={t('tags')} onPress={onTags}>
+          {tags.length}
         </TransactionsStat>
       </View>
     </View>

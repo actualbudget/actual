@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgWrench } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { listen } from '@actual-app/core/platform/client/connection';
@@ -9,7 +10,9 @@ import { tsToRelativeTime } from '@actual-app/core/shared/util';
 
 import { sync } from '#app/appSlice';
 import { AnimatedRefresh } from '#components/AnimatedRefresh';
+import { useIsUsingSyncServer } from '#hooks/useIsUsingSyncServer';
 import { useLocale } from '#hooks/useLocale';
+import { useNavigate } from '#hooks/useNavigate';
 import { useDispatch } from '#redux';
 
 type AccountsSyncStatusProps = {
@@ -25,6 +28,8 @@ export function AccountsSyncStatus({
   const { t } = useTranslation();
   const locale = useLocale();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const isUsingSyncServer = useIsUsingSyncServer();
   const [syncing, setSyncing] = useState(false);
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
 
@@ -73,28 +78,46 @@ export function AccountsSyncStatus({
           <Trans>Accounts</Trans>
         </span>
       )}
-      <Button
-        variant="bare"
-        aria-label={label}
-        onPress={onSync}
+      <View
         style={{
-          display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 4,
-          fontSize: 10.5,
-          color: theme.pageTextSubdued,
+          gap: 2,
           marginLeft: showLabel ? undefined : 'auto',
         }}
       >
-        <AnimatedRefresh
-          animating={syncing}
-          width={11}
-          height={11}
-          iconStyle={{ color: theme.sidebarItemBackgroundPositive }}
-        />
-        {showLabel && label}
-      </Button>
+        <Button
+          variant="bare"
+          aria-label={label}
+          onPress={onSync}
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+            fontSize: 10.5,
+            color: theme.pageTextSubdued,
+          }}
+        >
+          <AnimatedRefresh
+            animating={syncing}
+            width={11}
+            height={11}
+            iconStyle={{ color: theme.sidebarItemBackgroundPositive }}
+          />
+          {showLabel && label}
+        </Button>
+        {isUsingSyncServer && (
+          <Button
+            variant="bare"
+            aria-label={t('Bank Sync settings')}
+            onPress={() => void navigate('/settings/bank-sync')}
+            style={{ padding: 4, color: theme.pageTextSubdued }}
+          >
+            <SvgWrench width={10} height={10} />
+          </Button>
+        )}
+      </View>
     </View>
   );
 }

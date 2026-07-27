@@ -319,6 +319,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
+                    justifyContent: 'flex-end',
                     gap: 4,
                   }}
                 >
