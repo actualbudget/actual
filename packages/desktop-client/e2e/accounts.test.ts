@@ -140,8 +140,7 @@ test.describe('Accounts', () => {
     // Showing the running balance keeps reconciled transactions loaded
     // even when they are hidden; they must still be excluded from
     // range selection.
-    await accountPage.accountMenuButton.click();
-    await page.getByRole('button', { name: 'Show running balance' }).click();
+    await accountPage.toggleTransactionColumn('balance');
     await accountPage.accountMenuButton.click();
     await page
       .getByRole('button', { name: 'Hide reconciled transactions' })
