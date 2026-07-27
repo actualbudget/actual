@@ -498,10 +498,11 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       >
         <View
           style={{
-            flexDirection: 'row',
+            flexDirection: isNarrowWidth ? 'column' : 'row',
             justifyContent: 'center',
             width: '100%',
             alignItems: 'center',
+            gap: isNarrowWidth ? 24 : 0,
           }}
         >
           <Operator
@@ -524,11 +525,13 @@ function SummaryInner({ widget }: SummaryInnerProps) {
           />
           {content.type !== 'sum' && (
             <>
-              <SvgEquals width={50} style={{ marginLeft: 56 }} />
+              {!isNarrowWidth && (
+                <SvgEquals width={50} style={{ marginLeft: 56 }} />
+              )}
               <View style={{ padding: 16 }}>
                 <Text
                   style={{
-                    fontSize: '50px',
+                    fontSize: isNarrowWidth ? '32px' : '50px',
                     width: '100%',
                     textAlign: 'center',
                   }}
@@ -542,15 +545,15 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                 <div
                   style={{
                     width: '100%',
-                    marginTop: 32,
-                    marginBottom: 32,
+                    marginTop: isNarrowWidth ? 12 : 32,
+                    marginBottom: isNarrowWidth ? 12 : 32,
                     borderTop: '2px solid',
                     borderBottom: '2px solid',
                   }}
                 />
                 <Text
                   style={{
-                    fontSize: '50px',
+                    fontSize: isNarrowWidth ? '32px' : '50px',
                     width: '100%',
                     textAlign: 'center',
                   }}
@@ -562,17 +565,19 @@ function SummaryInner({ widget }: SummaryInnerProps) {
               </View>
             </>
           )}
-          <SvgEquals width={50} style={{ marginLeft: 16 }} />
+          {!isNarrowWidth && (
+            <SvgEquals width={50} style={{ marginLeft: 16 }} />
+          )}
           <View
             style={{
-              flexGrow: 1,
+              flexGrow: isNarrowWidth ? 0 : 1,
               textAlign: 'center',
-              width: '250px',
-              maxWidth: '250px',
+              width: isNarrowWidth ? '100%' : '250px',
+              maxWidth: isNarrowWidth ? '100%' : '250px',
               justifyItems: 'center',
               alignItems: 'center',
-              marginLeft: 16,
-              fontSize: '50px',
+              marginLeft: isNarrowWidth ? 0 : 16,
+              fontSize: isNarrowWidth ? '40px' : '50px',
               justifyContent: 'center',
               color:
                 (data?.total ?? 0) === 0
@@ -629,9 +634,10 @@ function Operator({
   onChangeTerm,
 }: OperatorProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
 
   return (
-    <View style={{ gap: 40, paddingTop: 24 }}>
+    <View style={{ gap: isNarrowWidth ? 28 : 40, paddingTop: 24 }}>
       <SumRow
         from={fromRange}
         to={toRange}
@@ -773,6 +779,7 @@ function ExtraTermRow({
   onRemove,
 }: ExtraTermRowProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const filter = useRuleConditionFilters(term.conditions, term.conditionsOp);
 
   const filterConditions = filter.conditions;
@@ -795,7 +802,7 @@ function ExtraTermRow({
       operator={
         <Button
           variant="bare"
-          style={{ fontSize: '32px' }}
+          style={{ fontSize: isNarrowWidth ? '22px' : '32px' }}
           onPress={() => onToggleOp(term.id)}
         >
           {term.op === 'subtract' ? t('−') : t('+')}
@@ -813,11 +820,12 @@ type SumRowProps = {
   filterObject: FilterObject;
 };
 function SumRow({ operator, onRemove, from, to, filterObject }: SumRowProps) {
+  const { isNarrowWidth } = useResponsive();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <View
         style={{
-          width: 40,
+          width: isNarrowWidth ? 24 : 40,
           marginRight: 8,
           alignItems: 'center',
           justifyContent: 'center',
@@ -848,6 +856,8 @@ function SumWithRange({
   filterObject,
 }: SumWithRangeProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
+  const sigmaSize = isNarrowWidth ? 34 : 50;
 
   return (
     <View
@@ -858,20 +868,55 @@ function SumWithRange({
         alignItems: 'center',
         position: 'relative',
         display: 'grid',
-        gridTemplateColumns: '70px 15px 1fr 15px',
+        gridTemplateColumns: isNarrowWidth
+          ? `${sigmaSize}px 12px 1fr 12px`
+          : '70px 15px 1fr 15px',
       }}
     >
-      <View style={{ position: 'relative', height: '50px', marginRight: 50 }}>
-        <SvgSum width={50} height={50} />
-        <Text style={{ position: 'absolute', right: -30, top: -20 }}>{to}</Text>
-        <Text style={{ position: 'absolute', right: -30, bottom: -20 }}>
+      <View
+        style={{
+          position: 'relative',
+          height: sigmaSize,
+          marginRight: isNarrowWidth ? 28 : 50,
+        }}
+      >
+        <SvgSum width={sigmaSize} height={sigmaSize} />
+        <Text
+          style={{
+            position: 'absolute',
+            right: -30,
+            top: -20,
+            fontSize: isNarrowWidth ? '11px' : undefined,
+          }}
+        >
+          {to}
+        </Text>
+        <Text
+          style={{
+            position: 'absolute',
+            right: -30,
+            bottom: -20,
+            fontSize: isNarrowWidth ? '11px' : undefined,
+          }}
+        >
           {from}
         </Text>
       </View>
       <SvgOpenParenthesis width={15} style={{ height: '100%' }} />
-      <View style={{ marginLeft: 16, maxWidth: '220px', marginRight: 16 }}>
+      <View
+        style={{
+          marginLeft: isNarrowWidth ? 8 : 16,
+          maxWidth: isNarrowWidth ? '150px' : '220px',
+          marginRight: isNarrowWidth ? 8 : 16,
+        }}
+      >
         {(filterObject.conditions?.length ?? 0) === 0 ? (
-          <Text style={{ fontSize: '25px', color: theme.pageTextPositive }}>
+          <Text
+            style={{
+              fontSize: isNarrowWidth ? '16px' : '25px',
+              color: theme.pageTextPositive,
+            }}
+          >
             {t('all transactions')}
           </Text>
         ) : (
@@ -885,7 +930,13 @@ function SumWithRange({
         )}
       </View>
       <SvgCloseParenthesis width={15} style={{ height: '100%' }} />
-      <View style={{ position: 'absolute', top: -15, right: -55 }}>
+      <View
+        style={{
+          position: 'absolute',
+          top: -15,
+          right: isNarrowWidth ? -42 : -55,
+        }}
+      >
         <FilterButton
           compact={false}
           onApply={filterObject.onApply}
