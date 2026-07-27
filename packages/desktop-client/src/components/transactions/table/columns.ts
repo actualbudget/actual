@@ -6,6 +6,7 @@ export const TRANSACTION_TABLE_COLUMN_IDS = [
   'account',
   'payee',
   'notes',
+  'group',
   'category',
   'payment',
   'deposit',
@@ -30,6 +31,14 @@ export function isTransactionTableColumnLocked(
   return id === 'date';
 }
 
+// Display-only columns render plain values with no editing, so they are
+// excluded from keyboard-focusable fields.
+export function isTransactionTableColumnDisplayOnly(
+  id: TransactionTableColumnId,
+): boolean {
+  return id === 'balance' || id === 'group';
+}
+
 // Child (split) transactions render the date/account cells as blank
 // placeholders, so those columns can't be focused or edited in child rows.
 export function isTransactionTableColumnAvailableInChildRows(
@@ -51,6 +60,7 @@ export function useTransactionTableColumnLabels(): Record<
     account: t('Account'),
     payee: t('Payee'),
     notes: t('Notes'),
+    group: t('Category group'),
     category: t('Category'),
     payment: t('Payment'),
     deposit: t('Deposit'),
@@ -60,9 +70,9 @@ export function useTransactionTableColumnLabels(): Record<
 }
 
 function isColumnHiddenByDefault(id: TransactionTableColumnId): boolean {
-  // The running balance column is opt-in, matching the app's historical
-  // default of not showing it
-  return id === 'balance';
+  // The running balance and category group columns are opt-in, matching the
+  // app's historical default of not showing them
+  return id === 'balance' || id === 'group';
 }
 
 export function getDefaultTransactionTableColumns(): TransactionTableColumn[] {

@@ -142,6 +142,7 @@ import { getStatusLabel } from '#util/schedule';
 
 import {
   isTransactionTableColumnAvailableInChildRows,
+  isTransactionTableColumnDisplayOnly,
   TRANSACTION_TABLE_COLUMN_IDS,
   useTransactionTableColumnLabels,
 } from './table/columns';
@@ -229,6 +230,12 @@ const TransactionHeader = memo(
         alignItems: 'flex',
         marginLeft: -5,
         sortDirection: 'asc',
+      },
+      group: {
+        value: t('Group'),
+        width: 'flex',
+        alignItems: 'flex',
+        marginLeft: -5,
       },
       category: {
         value: columnLabels.category,
@@ -1602,6 +1609,24 @@ const Transaction = memo(function Transaction({
             onExpose={name => !isPreview && onEdit(id, name)}
           />
         );
+      case 'group':
+        return (
+          <Cell
+            key={columnId}
+            name="group"
+            width="flex"
+            style={{
+              fontStyle: 'italic',
+              color: theme.pageTextSubdued,
+              fontWeight: 300,
+            }}
+            value={
+              categoryId
+                ? (getGroupByCatId(categoryGroups)[categoryId]?.name ?? '')
+                : ''
+            }
+          />
+        );
       case 'category':
         return (isPreview && !isChild) || isParent ? (
           <Cell
@@ -2763,10 +2788,11 @@ export type TransactionTableProps = {
   showCleared: boolean;
   showAccount: boolean;
   showCategory: boolean;
+  showGroup?: boolean;
   // The full set of columns the user wants visible, in display order. When
   // provided, columns are rendered in this order; the show* flags above
-  // still control the availability of the account/category/balance/cleared
-  // columns in the current view.
+  // still control the availability of the account/category/group/balance/
+  // cleared columns in the current view.
   columnOrder?: TransactionTableColumnId[];
   currentAccountId: AccountEntity['id'];
   currentCategoryId: CategoryEntity['id'];
@@ -2837,6 +2863,7 @@ export const TransactionTable = forwardRef(
       columnOrder,
       showAccount,
       showCategory,
+      showGroup,
       showBalances,
       showCleared,
     } = props;
@@ -2848,6 +2875,8 @@ export const TransactionTable = forwardRef(
               return showAccount;
             case 'category':
               return showCategory;
+            case 'group':
+              return !!showGroup;
             case 'balance':
               return showBalances;
             case 'cleared':
@@ -2856,7 +2885,14 @@ export const TransactionTable = forwardRef(
               return true;
           }
         }),
-      [columnOrder, showAccount, showCategory, showBalances, showCleared],
+      [
+        columnOrder,
+        showAccount,
+        showCategory,
+        showGroup,
+        showBalances,
+        showCleared,
+      ],
     );
     const [prevIsAdding, setPrevIsAdding] = useState(false);
     const splitsExpanded = useSplitsExpanded();
@@ -3105,9 +3141,8 @@ export const TransactionTable = forwardRef(
     }
 
     function getFocusableFields() {
-      // The balance column is display-only and can't be focused
       return visibleColumns
-        .filter(columnId => columnId !== 'balance')
+        .filter(columnId => !isTransactionTableColumnDisplayOnly(columnId))
         .map(columnToField);
     }
 
@@ -3128,7 +3163,11 @@ export const TransactionTable = forwardRef(
         ? [
             'select',
             ...visibleColumns
-              .filter(isTransactionTableColumnAvailableInChildRows)
+              .filter(
+                columnId =>
+                  isTransactionTableColumnAvailableInChildRows(columnId) &&
+                  !isTransactionTableColumnDisplayOnly(columnId),
+              )
               .map(columnToField),
           ]
         : fields;
@@ -3641,6 +3680,19 @@ const getCategoriesById = memoizeOne(
     categoryGroups?.forEach(group => {
       group.categories?.forEach(cat => {
         res[cat.id] = cat;
+      });
+    });
+
+    return res;
+  },
+);
+
+const getGroupByCatId = memoizeOne(
+  (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
+    const res: { [id: CategoryEntity['id']]: CategoryGroupEntity } = {};
+    categoryGroups?.forEach(group => {
+      group.categories?.forEach(cat => {
+        res[cat.id] = group;
       });
     });
 

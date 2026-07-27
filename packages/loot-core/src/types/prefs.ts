@@ -39,6 +39,7 @@ export type SyncedPrefs = Partial<
     | `hide-reconciled-${string}`
     | 'transaction-table-columns'
     | `transaction-table-columns-${string}`
+    | `show-group-${string}`
     // TODO: pull from src/components/modals/ImportTransactions.js
     | `parse-date-${string}-${'csv' | 'qif'}`
     | `import-reimport-deleted-${string}`

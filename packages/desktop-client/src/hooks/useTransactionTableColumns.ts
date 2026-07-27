@@ -27,6 +27,9 @@ export function useTransactionTableColumns(accountId: string | undefined) {
   const { data: accounts = [] } = useAccounts();
   const [legacyShowBalances] = useSyncedPref(`show-balances-${accountId}`);
   const [legacyHideCleared] = useSyncedPref(`hide-cleared-${accountId}`);
+  const [legacyShowGroup] = useSyncedPref(
+    `show-group-${accountId || 'all-accounts'}`,
+  );
   const [viewColumnsConfig, setViewColumnsConfig] = useSyncedPref(
     `transaction-table-columns-${accountId || 'all-accounts'}`,
   );
@@ -47,6 +50,12 @@ export function useTransactionTableColumns(accountId: string | undefined) {
   const showCleared = columnsConfig
     ? !transactionColumns.find(column => column.id === 'cleared')?.hidden
     : String(legacyHideCleared) !== 'true';
+  const showGroup = columnsConfig
+    ? !transactionColumns.find(column => column.id === 'group')?.hidden
+    : String(legacyShowGroup) === 'true';
+  // The balance/cleared/group columns stay in the order even when hidden:
+  // their visibility is controlled by the show* flags, which can come from
+  // the legacy prefs or component-state overrides instead of the config.
   const columnOrder = useMemo(
     () =>
       transactionColumns
@@ -54,6 +63,7 @@ export function useTransactionTableColumns(accountId: string | undefined) {
           column =>
             column.id === 'balance' ||
             column.id === 'cleared' ||
+            column.id === 'group' ||
             !column.hidden,
         )
         .map(column => column.id),
@@ -94,6 +104,7 @@ export function useTransactionTableColumns(accountId: string | undefined) {
     columnOrder,
     showBalances,
     showCleared,
+    showGroup,
     saveColumns,
   };
 }

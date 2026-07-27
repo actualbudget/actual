@@ -403,8 +403,12 @@ export function useBuiltInBankSyncProviders({
 
     try {
       const results = await send('simplefin-accounts');
+      if (results.error_code === 'INVALID_ACCESS_TOKEN') {
+        onSimpleFinInit();
+        return;
+      }
       if (results.error_code) {
-        throw new Error(results.reason);
+        throw new Error(results.reason || results.error_code);
       }
       if ('error' in results && results.error) {
         throw new Error(results.reason || results.error);
@@ -433,8 +437,17 @@ export function useBuiltInBankSyncProviders({
           },
         }),
       );
-    } catch {
-      onSimpleFinInit();
+    } catch (error) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            title: t('Error when trying to contact SimpleFIN'),
+            message: error instanceof Error ? error.message : String(error),
+            timeout: 5000,
+          },
+        }),
+      );
     } finally {
       setLoadingSimpleFinAccounts(false);
     }
@@ -443,6 +456,7 @@ export function useBuiltInBankSyncProviders({
     isSimpleFinSetupComplete,
     loadingSimpleFinAccounts,
     onSimpleFinInit,
+    t,
     upgradingAccountId,
   ]);
 

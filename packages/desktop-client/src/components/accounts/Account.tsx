@@ -225,6 +225,7 @@ type AccountInternalProps = {
   showCleared?: boolean;
   showReconciled: boolean;
   setShowReconciled: (newValue: boolean) => void;
+  showGroup: boolean;
   showExtraBalances?: boolean;
   setShowExtraBalances: (newValue: boolean) => void;
   transactionColumns: TransactionTableColumn[];
@@ -926,6 +927,11 @@ class AccountInternal extends PureComponent<
         }
         if (column.id === 'cleared') {
           return { ...column, hidden: !this.state.showCleared };
+        }
+        // Group visibility may come from the legacy pref fallback rather
+        // than the saved config, so the resolved prop is the source of truth
+        if (column.id === 'group') {
+          return { ...column, hidden: !this.props.showGroup };
         }
         return column;
       });
@@ -1906,6 +1912,7 @@ class AccountInternal extends PureComponent<
                   showBalances={!!allBalances}
                   showReconciled={showReconciled}
                   showCleared={!!showCleared}
+                  showGroup={this.props.showGroup}
                   showAccount={this.showAccountColumn()}
                   columnOrder={this.props.columnOrder}
                   allowReorder={
@@ -2043,6 +2050,7 @@ export function Account() {
     columnOrder,
     showBalances,
     showCleared,
+    showGroup,
     saveColumns,
   } = useTransactionTableColumns(params.id);
 
@@ -2094,6 +2102,7 @@ export function Account() {
             showCleared={showCleared}
             showReconciled={String(hideReconciled) !== 'true'}
             setShowReconciled={val => setHideReconciled(String(!val))}
+            showGroup={showGroup}
             showExtraBalances={String(showExtraBalances) === 'true'}
             setShowExtraBalances={extraBalances =>
               setShowExtraBalances(String(extraBalances))
