@@ -46,9 +46,7 @@ export function BudgetStartMonthSettings() {
   return (
     <Setting
       primaryAction={
-        <View
-          style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-end' }}
-        >
+        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-end' }}>
           <MonthInput
             id="settings-budget-start-month"
             value={selectedMonth}
@@ -76,9 +74,9 @@ export function BudgetStartMonthSettings() {
       <Text>
         <Trans>
           Start envelope budgeting from a month while keeping your complete
-          transaction history. Earlier transactions remain available for
-          reports and reconciliation, but their income, overspending, and
-          category carryover do not affect this month or later months.
+          transaction history. Earlier transactions remain available for reports
+          and reconciliation, but their income, overspending, and category
+          carryover do not affect this month or later months.
         </Trans>
       </Text>
     </Setting>
