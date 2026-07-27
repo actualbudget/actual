@@ -190,6 +190,7 @@ export type BaseSummaryContent = {
 };
 
 export type PercentageSummaryTerm = {
+  id: string;
   op: 'add' | 'subtract';
   conditions: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
