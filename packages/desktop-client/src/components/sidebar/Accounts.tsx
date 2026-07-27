@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
@@ -14,14 +17,76 @@ import { useOffBudgetAccounts } from '#hooks/useOffBudgetAccounts';
 import { useOnBudgetAccounts } from '#hooks/useOnBudgetAccounts';
 import { useUpdatedAccounts } from '#hooks/useUpdatedAccounts';
 import { useSelector } from '#redux';
+import type { Binding, SheetFields } from '#spreadsheet';
 import * as bindings from '#spreadsheet/bindings';
 
 import { Account } from './Account';
 import { SecondaryItem } from './SecondaryItem';
+import type { WidthMode } from './widthMode';
 
 const fontWeight = 600;
 
-export function Accounts() {
+type GroupHeaderProps<FieldName extends SheetFields<'account'>> = {
+  name: string;
+  to: string;
+  query: Binding<'account', FieldName>;
+  balanceTestId: string;
+  collapsed: boolean;
+  onToggleCollapse: () => void;
+  collapseLabel: string;
+  style?: CSSProperties;
+  widthMode: Exclude<WidthMode, 'rail'>;
+};
+
+function GroupHeader<FieldName extends SheetFields<'account'>>({
+  name,
+  to,
+  query,
+  balanceTestId,
+  collapsed,
+  onToggleCollapse,
+  collapseLabel,
+  style,
+  widthMode,
+}: GroupHeaderProps<FieldName>) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
+      <Button
+        variant="bare"
+        aria-label={collapseLabel}
+        aria-expanded={!collapsed}
+        onPress={onToggleCollapse}
+        style={{ padding: '2px 4px', color: theme.pageTextSubdued }}
+      >
+        <SvgCheveronDown
+          width={9}
+          height={9}
+          style={{
+            transform: collapsed ? 'rotate(-90deg)' : 'none',
+            transition: 'transform .15s',
+          }}
+        />
+      </Button>
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Account
+          name={name}
+          to={to}
+          query={query}
+          style={{ fontWeight, marginTop: 0, marginBottom: 0 }}
+          titleAccount
+          balanceTestId={balanceTestId}
+          widthMode={widthMode}
+        />
+      </View>
+    </View>
+  );
+}
+
+type AccountsProps = {
+  widthMode: Exclude<WidthMode, 'rail'>;
+};
+
+export function Accounts({ widthMode }: AccountsProps) {
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const { data: accounts = [] } = useAccounts();
@@ -35,6 +100,12 @@ export function Accounts() {
 
   const [showClosedAccounts, setShowClosedAccountsPref] = useLocalPref(
     'ui.showClosedAccounts',
+  );
+  const [onBudgetCollapsed, setOnBudgetCollapsedPref] = useLocalPref(
+    'ui.sidebarOnBudgetCollapsed',
+  );
+  const [offBudgetCollapsed, setOffBudgetCollapsedPref] = useLocalPref(
+    'ui.sidebarOffBudgetCollapsed',
   );
 
   function onDragChange(drag: { state: string }) {
@@ -97,71 +168,86 @@ export function Accounts() {
           style={{ fontWeight, marginTop: 15 }}
           isExactPathMatch
           balanceTestId="sidebar-all-accounts-balance"
+          widthMode={widthMode}
         />
 
         {onBudgetAccounts.length > 0 && (
-          <Account
+          <GroupHeader
             name={t('On budget')}
             to="/accounts/onbudget"
             query={bindings.onBudgetAccountBalance()}
-            style={{
-              fontWeight,
-              marginTop: 13,
-              marginBottom: 5,
-            }}
-            titleAccount
+            style={{ marginTop: 13, marginBottom: 5 }}
             balanceTestId="sidebar-on-budget-balance"
+            collapsed={!!onBudgetCollapsed}
+            onToggleCollapse={() =>
+              setOnBudgetCollapsedPref(!onBudgetCollapsed)
+            }
+            collapseLabel={
+              onBudgetCollapsed
+                ? t('Expand on budget accounts')
+                : t('Collapse on budget accounts')
+            }
+            widthMode={widthMode}
           />
         )}
 
-        {onBudgetAccounts.map((account, i) => (
-          <Account
-            key={account.id}
-            name={account.name}
-            account={account}
-            connected={!!account.bank}
-            pending={syncingAccountIds.includes(account.id)}
-            failed={isAccountFailedSync(account)}
-            updated={updatedAccounts.includes(account.id)}
-            to={getAccountPath(account)}
-            query={bindings.accountBalance(account.id)}
-            onDragChange={onDragChange}
-            onDrop={onReorder}
-            outerStyle={makeDropPadding(i)}
-          />
-        ))}
+        {!onBudgetCollapsed &&
+          onBudgetAccounts.map((account, i) => (
+            <Account
+              key={account.id}
+              name={account.name}
+              account={account}
+              connected={!!account.bank}
+              pending={syncingAccountIds.includes(account.id)}
+              failed={isAccountFailedSync(account)}
+              updated={updatedAccounts.includes(account.id)}
+              to={getAccountPath(account)}
+              query={bindings.accountBalance(account.id)}
+              onDragChange={onDragChange}
+              onDrop={onReorder}
+              outerStyle={makeDropPadding(i)}
+              widthMode={widthMode}
+            />
+          ))}
 
         {offbudgetAccounts.length > 0 && (
-          <Account
+          <GroupHeader
             name={t('Off budget')}
             to="/accounts/offbudget"
             query={bindings.offBudgetAccountBalance()}
-            style={{
-              fontWeight,
-              marginTop: 13,
-              marginBottom: 5,
-            }}
-            titleAccount
+            style={{ marginTop: 13, marginBottom: 5 }}
             balanceTestId="sidebar-off-budget-balance"
+            collapsed={!!offBudgetCollapsed}
+            onToggleCollapse={() =>
+              setOffBudgetCollapsedPref(!offBudgetCollapsed)
+            }
+            collapseLabel={
+              offBudgetCollapsed
+                ? t('Expand off budget accounts')
+                : t('Collapse off budget accounts')
+            }
+            widthMode={widthMode}
           />
         )}
 
-        {offbudgetAccounts.map((account, i) => (
-          <Account
-            key={account.id}
-            name={account.name}
-            account={account}
-            connected={!!account.bank}
-            pending={syncingAccountIds.includes(account.id)}
-            failed={isAccountFailedSync(account)}
-            updated={updatedAccounts.includes(account.id)}
-            to={getAccountPath(account)}
-            query={bindings.accountBalance(account.id)}
-            onDragChange={onDragChange}
-            onDrop={onReorder}
-            outerStyle={makeDropPadding(i)}
-          />
-        ))}
+        {!offBudgetCollapsed &&
+          offbudgetAccounts.map((account, i) => (
+            <Account
+              key={account.id}
+              name={account.name}
+              account={account}
+              connected={!!account.bank}
+              pending={syncingAccountIds.includes(account.id)}
+              failed={isAccountFailedSync(account)}
+              updated={updatedAccounts.includes(account.id)}
+              to={getAccountPath(account)}
+              query={bindings.accountBalance(account.id)}
+              onDragChange={onDragChange}
+              onDrop={onReorder}
+              outerStyle={makeDropPadding(i)}
+              widthMode={widthMode}
+            />
+          ))}
 
         {closedAccounts.length > 0 && (
           <SecondaryItem
@@ -186,6 +272,7 @@ export function Accounts() {
               query={bindings.accountBalance(account.id)}
               onDragChange={onDragChange}
               onDrop={onReorder}
+              widthMode={widthMode}
             />
           ))}
       </View>

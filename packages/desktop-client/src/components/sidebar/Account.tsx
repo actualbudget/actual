@@ -6,8 +6,10 @@ import { useTranslation } from 'react-i18next';
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { Button } from '@actual-app/components/button';
 import {
+  SvgAlertTriangle,
   SvgArrowButtonDown1,
   SvgArrowButtonUp1,
+  SvgCheckCircle1,
 } from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
@@ -21,6 +23,7 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
 
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
+import { getReconciliationStatus } from '#accounts/reconciliationStatus';
 import { BalanceHistoryGraph } from '#components/accounts/BalanceHistoryGraph';
 import { Link } from '#components/common/Link';
 import { Notes } from '#components/Notes';
@@ -30,11 +33,14 @@ import { CellValue } from '#components/spreadsheet/CellValue';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useDragRef } from '#hooks/useDragRef';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
+import { useLocalPref } from '#hooks/useLocalPref';
 import { useNotes } from '#hooks/useNotes';
+import { useSheetValue } from '#hooks/useSheetValue';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { openAccountCloseModal } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
 import type { Binding, SheetFields } from '#spreadsheet';
+import * as bindings from '#spreadsheet/bindings';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
@@ -65,6 +71,9 @@ type AccountProps<FieldName extends SheetFields<'account'>> = {
   titleAccount?: boolean;
   isExactPathMatch?: boolean;
   balanceTestId?: string;
+  // 'compact' hides the inline balance (shown in the hover tooltip
+  // instead); omitted (full width) shows it inline as before.
+  widthMode?: 'compact' | 'full';
 };
 
 export function Account<FieldName extends SheetFields<'account'>>({
@@ -83,6 +92,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   titleAccount,
   isExactPathMatch,
   balanceTestId,
+  widthMode = 'full',
 }: AccountProps<FieldName>) {
   const isTestEnv = useIsTestEnv();
   const { t } = useTranslation();
@@ -126,7 +136,28 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const reopenAccount = useReopenAccountMutation();
   const updateAccount = useUpdateAccountMutation();
 
+  const unreconciledCount = useSheetValue<'account', 'unreconciledCount'>(
+    bindings.accountUnreconciledCount(account?.id ?? ''),
+  );
+  const reconciliationStatus = account
+    ? getReconciliationStatus(account.last_reconciled, unreconciledCount)
+    : 'never';
+
   const balanceCell = <CellValue binding={query} type="financial" />;
+
+  const [pinnedAccountIds, setPinnedAccountIdsPref] = useLocalPref(
+    'sidebar.pinnedAccountIds',
+  );
+  const isPinned = !!account && !!pinnedAccountIds?.includes(account.id);
+  const togglePin = () => {
+    if (!account) return;
+    const current = pinnedAccountIds ?? [];
+    setPinnedAccountIdsPref(
+      isPinned
+        ? current.filter(id => id !== account.id)
+        : [...current, account.id],
+    );
+  };
 
   const isContextMenuOpen = useSelector(state =>
     state.contextMenu.items.some(
@@ -142,6 +173,11 @@ export function Account<FieldName extends SheetFields<'account'>>({
         name: 'account-rename',
         text: t('Rename'),
         onClick: () => setIsEditing(true),
+      },
+      {
+        name: 'account-toggle-pin',
+        text: isPinned ? t('Unpin from rail') : t('Pin to rail'),
+        onClick: togglePin,
       },
       account?.closed
         ? {
@@ -211,14 +247,33 @@ export function Account<FieldName extends SheetFields<'account'>>({
                     width: 5,
                     height: 5,
                     borderRadius: 5,
-                    backgroundColor: pending
-                      ? theme.sidebarItemBackgroundPending
-                      : failed
-                        ? theme.sidebarItemBackgroundFailed
-                        : theme.sidebarItemBackgroundPositive,
                     marginLeft: 2,
-                    transition: 'transform .3s',
-                    opacity: connected ? 1 : 0,
+                    transition: 'transform .3s, opacity .2s',
+                    boxSizing: 'border-box',
+                    ...(!account
+                      ? // Title rows ("All accounts", "On budget", …) keep an
+                        // invisible dot so the text still lines up.
+                        {
+                          backgroundColor: theme.sidebarItemBackgroundPositive,
+                          opacity: 0,
+                        }
+                      : connected
+                        ? {
+                            backgroundColor: pending
+                              ? theme.sidebarItemBackgroundPending
+                              : failed
+                                ? theme.sidebarItemBackgroundFailed
+                                : theme.sidebarItemBackgroundPositive,
+                            opacity: 1,
+                          }
+                        : // Manual account, no bank connection: a hollow ring
+                          // rather than nothing, so it's a real status and
+                          // not just a missing dot.
+                          {
+                            backgroundColor: 'transparent',
+                            border: `1.5px solid ${theme.pageTextSubdued}`,
+                            opacity: 1,
+                          }),
                   }),
                 )}
               />
@@ -260,11 +315,44 @@ export function Account<FieldName extends SheetFields<'account'>>({
                 )
               }
               right={
-                balanceTestId ? (
-                  <View data-testid={balanceTestId}>{balanceCell}</View>
-                ) : (
-                  balanceCell
-                )
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 4,
+                  }}
+                >
+                  {reconciliationStatus === 'reconciled' && (
+                    <span
+                      title={t('Reconciled')}
+                      style={{ display: 'flex', flexShrink: 0 }}
+                    >
+                      <SvgCheckCircle1
+                        width={12}
+                        height={12}
+                        style={{ color: theme.noticeText }}
+                      />
+                    </span>
+                  )}
+                  {reconciliationStatus === 'needs-review' && (
+                    <span
+                      title={t('Activity since last reconcile')}
+                      style={{ display: 'flex', flexShrink: 0 }}
+                    >
+                      <SvgAlertTriangle
+                        width={11}
+                        height={11}
+                        style={{ color: theme.warningText }}
+                      />
+                    </span>
+                  )}
+                  {widthMode === 'full' &&
+                    (balanceTestId ? (
+                      <View data-testid={balanceTestId}>{balanceCell}</View>
+                    ) : (
+                      balanceCell
+                    ))}
+                </View>
               }
             />
           </Link>
@@ -298,13 +386,14 @@ export function Account<FieldName extends SheetFields<'account'>>({
               },
             }}
           >
-            <Text
-              style={{
-                fontWeight: 'bold',
-              }}
-            >
-              {name}
-            </Text>
+            <View>
+              <Text style={{ fontWeight: 'bold' }}>{name}</Text>
+              {widthMode === 'compact' && (
+                <Text style={{ color: theme.pageTextSubdued }}>
+                  {balanceCell}
+                </Text>
+              )}
+            </View>
             <Button
               aria-label={t('Toggle balance history')}
               variant="bare"

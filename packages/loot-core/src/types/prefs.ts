@@ -83,6 +83,9 @@ export type MetadataPrefs = Partial<{
  */
 export type LocalPrefs = Partial<{
   'ui.showClosedAccounts': boolean;
+  'ui.sidebarOnBudgetCollapsed': boolean;
+  'ui.sidebarOffBudgetCollapsed': boolean;
+  'sidebar.pinnedAccountIds': string[];
   'expand-splits': boolean;
   'budget.collapsed': string[];
   'budget.summaryCollapsed': boolean;

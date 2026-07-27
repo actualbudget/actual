@@ -16,6 +16,7 @@ export type Spreadsheets = {
     balanceCleared: number;
     balanceUncleared: number;
     lastReconciled: string | null;
+    unreconciledCount: number;
   };
   category: {
     // Common fields

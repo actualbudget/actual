@@ -21,6 +21,7 @@ import { useDispatch } from '#redux';
 import { Accounts } from './Accounts';
 import { BudgetName } from './BudgetName';
 import { NavTiles } from './NavTiles';
+import { RailAccounts } from './RailAccounts';
 import { SecondaryButtons } from './SecondaryButtons';
 import { useSidebar } from './SidebarProvider';
 import { SummaryWidget } from './SummaryWidget';
@@ -139,7 +140,11 @@ export function Sidebar() {
             <SummaryWidget size={widthMode} />
             <NavTiles widthMode={widthMode} />
 
-            {widthMode !== 'rail' && <Accounts />}
+            {widthMode === 'rail' ? (
+              <RailAccounts />
+            ) : (
+              <Accounts widthMode={widthMode} />
+            )}
           </View>
 
           <View

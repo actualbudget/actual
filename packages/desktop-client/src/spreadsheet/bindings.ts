@@ -49,6 +49,19 @@ export function accountBalanceUncleared(accountId: AccountEntity['id']) {
   } satisfies Binding<'account', 'balanceUncleared'>;
 }
 
+// Cleared transactions that haven't been swept up by a reconcile yet — the
+// same set `lockTransactions` marks `reconciled: true` on completion, so a
+// non-zero count here means the account has drifted since `last_reconciled`.
+export function accountUnreconciledCount(accountId: AccountEntity['id']) {
+  return {
+    name: accountParametrizedField('unreconciledCount')(accountId),
+    query: q('transactions')
+      .filter({ account: accountId, cleared: true, reconciled: false })
+      .options({ splits: 'none' })
+      .calculate({ $count: '*' }),
+  } satisfies Binding<'account', 'unreconciledCount'>;
+}
+
 export function allAccountBalance() {
   return {
     query: q('transactions')
