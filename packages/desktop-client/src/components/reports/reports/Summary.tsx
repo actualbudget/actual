@@ -17,6 +17,7 @@ import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
+  PercentageSummaryTerm,
   SummaryContent,
   SummaryWidget,
   TimeFrame,
@@ -113,6 +114,27 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       : 'and',
   );
 
+  const isPct = content.type === 'percentage';
+  const dividendTerms = isPct ? (content.dividendExtraTerms ?? []) : [];
+  const divisorTerms = isPct ? (content.divisorExtraTerms ?? []) : [];
+
+  const dividendTerm0 = useRuleConditionFilters(
+    dividendTerms[0]?.conditions ?? [],
+    dividendTerms[0]?.conditionsOp ?? 'and',
+  );
+  const dividendTerm1 = useRuleConditionFilters(
+    dividendTerms[1]?.conditions ?? [],
+    dividendTerms[1]?.conditionsOp ?? 'and',
+  );
+  const divisorTerm0 = useRuleConditionFilters(
+    divisorTerms[0]?.conditions ?? [],
+    divisorTerms[0]?.conditionsOp ?? 'and',
+  );
+  const divisorTerm1 = useRuleConditionFilters(
+    divisorTerms[1]?.conditions ?? [],
+    divisorTerms[1]?.conditionsOp ?? 'and',
+  );
+
   const params = useMemo(
     () =>
       summarySpreadsheet(
@@ -142,6 +164,65 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       divisorConditionsOp: divisorFilters.conditionsOp,
     }));
   }, [divisorFilters.conditions, divisorFilters.conditionsOp]);
+
+  const dividendTerm0Conditions = dividendTerm0.conditions;
+  const dividendTerm0ConditionsOp = dividendTerm0.conditionsOp;
+  const dividendTerm1Conditions = dividendTerm1.conditions;
+  const dividendTerm1ConditionsOp = dividendTerm1.conditionsOp;
+  const divisorTerm0Conditions = divisorTerm0.conditions;
+  const divisorTerm0ConditionsOp = divisorTerm0.conditionsOp;
+  const divisorTerm1Conditions = divisorTerm1.conditions;
+  const divisorTerm1ConditionsOp = divisorTerm1.conditionsOp;
+
+  useEffect(() => {
+    setContent(prev => {
+      if (prev.type !== 'percentage') return prev;
+      const syncSide = (
+        terms: PercentageSummaryTerm[] = [],
+        editorConditions: Array<{
+          conditions: FilterObject['conditions'];
+          conditionsOp: FilterObject['conditionsOp'];
+        }>,
+      ) =>
+        terms.map((term, i) => ({
+          ...term,
+          conditions: editorConditions[i].conditions,
+          conditionsOp: editorConditions[i].conditionsOp,
+        }));
+      return {
+        ...prev,
+        dividendExtraTerms: syncSide(prev.dividendExtraTerms, [
+          {
+            conditions: dividendTerm0Conditions,
+            conditionsOp: dividendTerm0ConditionsOp,
+          },
+          {
+            conditions: dividendTerm1Conditions,
+            conditionsOp: dividendTerm1ConditionsOp,
+          },
+        ]),
+        divisorExtraTerms: syncSide(prev.divisorExtraTerms, [
+          {
+            conditions: divisorTerm0Conditions,
+            conditionsOp: divisorTerm0ConditionsOp,
+          },
+          {
+            conditions: divisorTerm1Conditions,
+            conditionsOp: divisorTerm1ConditionsOp,
+          },
+        ]),
+      };
+    });
+  }, [
+    dividendTerm0Conditions,
+    dividendTerm0ConditionsOp,
+    dividendTerm1Conditions,
+    dividendTerm1ConditionsOp,
+    divisorTerm0Conditions,
+    divisorTerm0ConditionsOp,
+    divisorTerm1Conditions,
+    divisorTerm1ConditionsOp,
+  ]);
 
   const [allMonths, setAllMonths] = useState<
     Array<{
@@ -319,6 +400,53 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     return format(Math.round(value), 'financial');
   };
 
+  const addTerm = (side: 'dividend' | 'divisor') =>
+    setContent(prev => {
+      if (prev.type !== 'percentage') return prev;
+      const key =
+        side === 'dividend' ? 'dividendExtraTerms' : 'divisorExtraTerms';
+      const terms = prev[key] ?? [];
+      if (terms.length >= 2) return prev;
+      return {
+        ...prev,
+        [key]: [...terms, { op: 'add', conditions: [], conditionsOp: 'and' }],
+      };
+    });
+
+  const removeTerm = (side: 'dividend' | 'divisor', index: number) =>
+    setContent(prev => {
+      if (prev.type !== 'percentage') return prev;
+      const key =
+        side === 'dividend' ? 'dividendExtraTerms' : 'divisorExtraTerms';
+      return {
+        ...prev,
+        [key]: (prev[key] ?? []).filter((_, i) => i !== index),
+      };
+    });
+
+  const setTermOp = (
+    side: 'dividend' | 'divisor',
+    index: number,
+    op: 'add' | 'subtract',
+  ) =>
+    setContent(prev => {
+      if (prev.type !== 'percentage') return prev;
+      const key =
+        side === 'dividend' ? 'dividendExtraTerms' : 'divisorExtraTerms';
+      return {
+        ...prev,
+        [key]: (prev[key] ?? []).map((term, i) =>
+          i === index ? { ...term, op } : term,
+        ),
+      };
+    });
+
+  const onToggleOp = (side: 'dividend' | 'divisor', index: number) => {
+    const terms = side === 'dividend' ? dividendTerms : divisorTerms;
+    const currentOp = terms[index]?.op;
+    setTermOp(side, index, currentOp === 'subtract' ? 'add' : 'subtract');
+  };
+
   return (
     <Page
       header={
@@ -454,6 +582,13 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             }
             fromRange={data?.fromRange ?? ''}
             toRange={data?.toRange ?? ''}
+            dividendTermEditors={[dividendTerm0, dividendTerm1]}
+            divisorTermEditors={[divisorTerm0, divisorTerm1]}
+            dividendTerms={dividendTerms}
+            divisorTerms={divisorTerms}
+            onAddTerm={addTerm}
+            onRemoveTerm={removeTerm}
+            onToggleOp={onToggleOp}
           />
           {content.type !== 'sum' && (
             <>
@@ -535,6 +670,13 @@ type OperatorProps = {
   fromRange: string;
   toRange: string;
   showDivisorDateRange: boolean;
+  dividendTermEditors: FilterObject[];
+  divisorTermEditors: FilterObject[];
+  dividendTerms: PercentageSummaryTerm[];
+  divisorTerms: PercentageSummaryTerm[];
+  onAddTerm: (side: 'dividend' | 'divisor') => void;
+  onRemoveTerm: (side: 'dividend' | 'divisor', index: number) => void;
+  onToggleOp: (side: 'dividend' | 'divisor', index: number) => void;
 };
 function Operator({
   type,
@@ -543,6 +685,13 @@ function Operator({
   fromRange,
   toRange,
   showDivisorDateRange,
+  dividendTermEditors,
+  divisorTermEditors,
+  dividendTerms,
+  divisorTerms,
+  onAddTerm,
+  onRemoveTerm,
+  onToggleOp,
 }: OperatorProps) {
   const { t } = useTranslation();
 
@@ -553,6 +702,27 @@ function Operator({
         to={toRange}
         filterObject={dividendFilterObject}
       />
+      {type === 'percentage' &&
+        dividendTerms.map((term, i) => (
+          <View key={i} style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Button variant="bare" onPress={() => onToggleOp('dividend', i)}>
+              {term.op === 'subtract' ? t('−') : t('+')}
+            </Button>
+            <SumWithRange
+              from={fromRange}
+              to={toRange}
+              filterObject={dividendTermEditors[i]}
+            />
+            <Button variant="bare" onPress={() => onRemoveTerm('dividend', i)}>
+              <Trans>Remove</Trans>
+            </Button>
+          </View>
+        ))}
+      {type === 'percentage' && dividendTerms.length < 2 && (
+        <Button variant="bare" onPress={() => onAddTerm('dividend')}>
+          <Trans>Add term</Trans>
+        </Button>
+      )}
       {type === 'percentage' && (
         <>
           <div
@@ -569,6 +739,29 @@ function Operator({
             to={!showDivisorDateRange ? '' : toRange}
             filterObject={divisorFilterObject}
           />
+          {divisorTerms.map((term, i) => (
+            <View
+              key={i}
+              style={{ flexDirection: 'row', alignItems: 'center' }}
+            >
+              <Button variant="bare" onPress={() => onToggleOp('divisor', i)}>
+                {term.op === 'subtract' ? t('−') : t('+')}
+              </Button>
+              <SumWithRange
+                from={!showDivisorDateRange ? '' : fromRange}
+                to={!showDivisorDateRange ? '' : toRange}
+                filterObject={divisorTermEditors[i]}
+              />
+              <Button variant="bare" onPress={() => onRemoveTerm('divisor', i)}>
+                <Trans>Remove</Trans>
+              </Button>
+            </View>
+          ))}
+          {divisorTerms.length < 2 && (
+            <Button variant="bare" onPress={() => onAddTerm('divisor')}>
+              <Trans>Add term</Trans>
+            </Button>
+          )}
         </>
       )}
       {type !== 'percentage' && type !== 'sum' && (
