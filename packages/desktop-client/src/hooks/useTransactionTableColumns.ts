@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+
 import { parseTransactionTableColumns } from '#components/transactions/table/columns';
 import type { TransactionTableColumn } from '#components/transactions/table/columns';
-import { useAccounts } from '#hooks/useAccounts';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
@@ -24,7 +25,6 @@ export const SPECIAL_VIEW_IDS: string[] = [
  */
 export function useTransactionTableColumns(accountId: string | undefined) {
   const dispatch = useDispatch();
-  const { data: accounts = [] } = useAccounts();
   const [legacyShowBalances] = useSyncedPref(`show-balances-${accountId}`);
   const [legacyHideCleared] = useSyncedPref(`hide-cleared-${accountId}`);
   const [legacyShowGroup] = useSyncedPref(
@@ -76,16 +76,15 @@ export function useTransactionTableColumns(accountId: string | undefined) {
   ) => {
     const serialized = JSON.stringify(columns);
     if (applyToAll) {
-      // Save the budget-wide configuration and clear the view-specific
-      // overrides in one batch so all tables actually show this layout.
-      // Only overrides that are actually set are cleared — each pref write
-      // is a separate backend call and sync message.
-      const overrideKeys = [
-        ...accounts.map(account => account.id),
-        ...SPECIAL_VIEW_IDS,
-      ]
-        .map(id => `transaction-table-columns-${id}` as const)
-        .filter(key => syncedPrefs[key]);
+      // Save the budget-wide configuration and clear every stored
+      // view-specific override in one batch so all tables actually show
+      // this layout. Deriving the keys from the stored prefs also covers
+      // views that no longer exist (e.g. closed or deleted accounts).
+      const overrideKeys = (
+        Object.keys(syncedPrefs) as (keyof SyncedPrefs)[]
+      ).filter(
+        key => key.startsWith('transaction-table-columns-') && syncedPrefs[key],
+      );
       void dispatch(
         saveSyncedPrefs({
           prefs: {

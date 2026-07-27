@@ -89,7 +89,7 @@ test.describe('Accounts', () => {
       credit: '10.00',
     });
 
-    await accountPage.toggleTransactionColumn('balance');
+    await accountPage.setTransactionColumnVisibility('balance', true);
 
     const transaction = accountPage.getNthTransaction(0);
     await expect(transaction.balance).toHaveText('10.00');
@@ -139,7 +139,7 @@ test.describe('Accounts', () => {
     // Showing the running balance keeps reconciled transactions loaded
     // even when they are hidden; they must still be excluded from
     // range selection.
-    await accountPage.toggleTransactionColumn('balance');
+    await accountPage.setTransactionColumnVisibility('balance', true);
     await accountPage.accountMenuButton.click();
     await page
       .getByRole('button', { name: 'Hide reconciled transactions' })

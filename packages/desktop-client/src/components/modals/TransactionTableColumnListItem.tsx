@@ -90,6 +90,7 @@ export function TransactionTableColumnListItem({
       ) : (
         <Toggle
           id={`toggle-column-${column.id}`}
+          aria-label={label}
           isOn={!column.hidden}
           onToggle={isVisible => onToggle(column.id, isVisible)}
         />

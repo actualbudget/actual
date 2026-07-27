@@ -126,6 +126,15 @@ export function parseTransactionTableColumns(
     }
   }
 
+  // At least one amount column must stay visible — new transactions need an
+  // amount input. Restore both when a saved config hides the whole pair.
+  const payment = saved.find(c => c.id === 'payment');
+  const deposit = saved.find(c => c.id === 'deposit');
+  if (payment?.hidden && deposit?.hidden) {
+    payment.hidden = false;
+    deposit.hidden = false;
+  }
+
   // Insert any missing columns at their default relative position
   for (const id of TRANSACTION_TABLE_COLUMN_IDS) {
     if (saved.some(c => c.id === id)) {

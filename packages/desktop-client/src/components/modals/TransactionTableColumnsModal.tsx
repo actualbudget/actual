@@ -44,11 +44,19 @@ export function TransactionTableColumnsModal({
   const [applyToAll, setApplyToAll] = useState(false);
 
   const onToggleColumn = (id: TransactionTableColumnId, isVisible: boolean) => {
-    setColumns(prev =>
-      prev.map(column =>
+    setColumns(prev => {
+      // Keep at least one amount column visible — new transactions need an
+      // amount input
+      if (!isVisible && (id === 'payment' || id === 'deposit')) {
+        const other = id === 'payment' ? 'deposit' : 'payment';
+        if (prev.find(column => column.id === other)?.hidden) {
+          return prev;
+        }
+      }
+      return prev.map(column =>
         column.id === id ? { ...column, hidden: !isVisible } : column,
-      ),
-    );
+      );
+    });
   };
 
   const onResetToDefault = () => {
@@ -62,7 +70,7 @@ export function TransactionTableColumnsModal({
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>
-      [...keys].map(key => ({ 'text/plain': String(key) }) as DragItem),
+      [...keys].map(key => ({ 'text/plain': String(key) }) satisfies DragItem),
     renderDropIndicator: target => (
       <DropIndicator
         target={target}

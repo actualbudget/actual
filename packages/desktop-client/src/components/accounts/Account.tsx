@@ -926,7 +926,13 @@ class AccountInternal extends PureComponent<
           return { ...column, hidden: !this.state.showBalances };
         }
         if (column.id === 'cleared') {
-          return { ...column, hidden: !this.state.showCleared };
+          // During reconciliation the cleared column is temporarily forced
+          // visible, so show the user's underlying preference instead
+          const showCleared =
+            this.state.reconcileAmount != null
+              ? this.state.prevShowCleared
+              : this.state.showCleared;
+          return { ...column, hidden: !showCleared };
         }
         // Group visibility may come from the legacy pref fallback rather
         // than the saved config, so the resolved prop is the source of truth
