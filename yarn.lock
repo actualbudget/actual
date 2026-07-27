@@ -295,7 +295,7 @@ __metadata:
     react-i18next: "npm:^17.0.10"
     react-markdown: "npm:^10.1.0"
     react-redux: "npm:^9.3.0"
-    react-router: "npm:8.2.0"
+    react-router: "npm:8.3.0"
     react-simple-pull-to-refresh: "npm:^1.3.4"
     react-spring: "npm:^10.0.4"
     react-swipeable: "npm:^7.0.2"
@@ -23474,9 +23474,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:8.2.0":
-  version: 8.2.0
-  resolution: "react-router@npm:8.2.0"
+"react-router@npm:8.3.0":
+  version: 8.3.0
+  resolution: "react-router@npm:8.3.0"
   dependencies:
     cookie-es: "npm:^3.1.1"
   peerDependencies:
@@ -23485,7 +23485,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 10/cd94c90f83e37a8537d4270bb368e343509be972cc079cd76b4c6e499c890674d70eb97171480e3f34a05ca08f1b460805f5b2249f879d4d7c9145aec7ec28a8
+  checksum: 10/6ef9ee17910356e7a7c1d262d3c3a943a25e36bf871a199628438d1436d1a16828091da30a5df7c318030dff434c5b3f003c16f82c7ffca9cf37545316f6525c
   languageName: node
   linkType: hard
 
