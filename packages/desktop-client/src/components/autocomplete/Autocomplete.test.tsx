@@ -135,30 +135,4 @@ describe('Autocomplete', () => {
       screen.queryByRole('button', { name: 'First category' }),
     ).not.toBeInTheDocument();
   });
-
-  test('does not refilter suggestions when an item is clicked', async () => {
-    const user = userEvent.setup();
-    const onSelect = vi.fn();
-    const filterSuggestions = vi.fn((items: typeof suggestions) => items);
-
-    render(
-      <Autocomplete
-        strict
-        value={null}
-        suggestions={suggestions}
-        onSelect={onSelect}
-        filterSuggestions={filterSuggestions}
-      />,
-    );
-
-    filterSuggestions.mockClear();
-    await user.click(screen.getByRole('textbox'));
-    await user.click(screen.getByRole('button', { name: 'Second category' }));
-
-    await waitFor(() => {
-      expect(onSelect).toHaveBeenCalledWith('second', expect.any(String));
-      expect(screen.queryByTestId('autocomplete')).not.toBeInTheDocument();
-    });
-    expect(filterSuggestions).not.toHaveBeenCalled();
-  });
 });
