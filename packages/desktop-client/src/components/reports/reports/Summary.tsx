@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
@@ -658,7 +658,11 @@ function Operator({
           />
         ))}
       {type === 'percentage' && dividendTerms.length < 2 && (
-        <Button variant="bare" onPress={() => onAddTerm('dividend')}>
+        <Button
+          variant="bare"
+          style={{ marginTop: 24, alignSelf: 'flex-start' }}
+          onPress={() => onAddTerm('dividend')}
+        >
           <Trans>Add term</Trans>
         </Button>
       )}
@@ -692,7 +696,11 @@ function Operator({
             />
           ))}
           {divisorTerms.length < 2 && (
-            <Button variant="bare" onPress={() => onAddTerm('divisor')}>
+            <Button
+              variant="bare"
+              style={{ marginTop: 24, alignSelf: 'flex-start' }}
+              onPress={() => onAddTerm('divisor')}
+            >
               <Trans>Add term</Trans>
             </Button>
           )}
@@ -751,17 +759,28 @@ function ExtraTermRow({
   const filterConditionsOp = filter.conditionsOp;
   const termId = term.id;
 
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
   useEffect(() => {
-    onChange(termId, filterConditions, filterConditionsOp);
-  }, [termId, filterConditions, filterConditionsOp, onChange]);
+    onChangeRef.current(termId, filterConditions, filterConditionsOp);
+  }, [termId, filterConditions, filterConditionsOp]);
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <Button variant="bare" onPress={() => onToggleOp(term.id)}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 48 }}>
+      <Button
+        variant="bare"
+        style={{ fontSize: '32px', marginRight: 8 }}
+        onPress={() => onToggleOp(term.id)}
+      >
         {term.op === 'subtract' ? t('−') : t('+')}
       </Button>
       <SumWithRange from={from} to={to} filterObject={filter} />
-      <Button variant="bare" onPress={() => onRemove(term.id)}>
+      <Button
+        variant="bare"
+        style={{ marginLeft: 8 }}
+        onPress={() => onRemove(term.id)}
+      >
         <Trans>Remove</Trans>
       </Button>
     </View>
