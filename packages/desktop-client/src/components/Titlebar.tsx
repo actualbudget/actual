@@ -373,7 +373,7 @@ export function Titlebar({ style }: TitlebarProps) {
         <Route path="/budget" element={<BudgetTitlebar />} />
       </Routes>
       <View style={{ flex: 1 }} />
-      <SpaceBetween gap={10}>
+      <SpaceBetween gap={10} wrap={false}>
         <BankSyncStatus />
         <UncategorizedButton />
         {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
