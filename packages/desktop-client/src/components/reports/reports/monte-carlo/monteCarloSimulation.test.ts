@@ -1352,9 +1352,12 @@ describe('runMonteCarloSimulation', () => {
     ]);
     expect(rows.map(row => row.taxPaid)).toEqual([0, 0, 0, 3_333, 3_333]);
     expect(rows[3].potWithdrawals).toEqual([0, 13_333]);
-    // Flat-model tax attributes exactly to the pot that paid it
+    // Flat-model tax attributes exactly to the pot that paid it; the
+    // taxable amount is the whole take for a pot with a nonzero rate
     expect(rows[0].potTaxes).toEqual([0, 0]);
     expect(rows[3].potTaxes).toEqual([0, 3_333]);
+    expect(rows[0].potTaxables).toEqual([0, 0]);
+    expect(rows[3].potTaxables).toEqual([0, 13_333]);
   });
 
   it('tax bands gross up progressively over the taxable income', () => {
@@ -1421,6 +1424,8 @@ describe('runMonteCarloSimulation', () => {
     // Bands-model tax prorates by taxable share: the tax-free pot
     // contributes no taxable income, so the pension carries all the tax
     expect(row.potTaxes).toEqual([0, 1_081]);
+    // Taxable amounts: take x taxable fraction (20,540.54 x 0.75)
+    expect(row.potTaxables).toEqual([0, 15_405]);
   });
 
   it("tax band thresholds are in today's money and rise with inflation", () => {

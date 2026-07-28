@@ -354,6 +354,12 @@ export type MonteCarloRunDetailRow = {
    * prorated by taxable-income share under the bands model
    */
   potTaxes: number[];
+  /**
+   * The slice of each pot's withdrawal assessed for tax: taxable fraction
+   * of the take under the bands model, the whole take under a nonzero
+   * flat rate, 0 with no tax
+   */
+  potTaxables: number[];
   /** Tax paid out of this year's gross withdrawal (0 with no tax model) */
   taxPaid: number;
   /** Management fees charged at the end of this year */
@@ -936,6 +942,23 @@ export function runMonteCarloSimulation(
         const capturedPotTaxes = capturedPotReturns
           ? new Array<number>(potCount).fill(0)
           : null;
+        const capturedPotTaxables = capturedPotReturns
+          ? new Array<number>(potCount).fill(0)
+          : null;
+
+        // The slice of each pot's take that was assessed for tax: the
+        // taxable fraction under the bands model, or the whole take under
+        // a nonzero flat rate
+        function captureTaxables(into: number[]) {
+          for (let p = 0; p < potCount; p++) {
+            into[p] =
+              taxModel === 'bands'
+                ? potTakes[p] * potTaxableFractions[p]
+                : potTaxRates[p] > 0
+                  ? potTakes[p]
+                  : 0;
+          }
+        }
 
         // Attribute a year's tax to pots for the drill-in: exact per pot
         // under the flat model; under the bands model (where tax is
@@ -1006,6 +1029,9 @@ export function runMonteCarloSimulation(
                 capturedPotTaxes,
               );
             }
+            if (capturedPotTaxables && hasTax) {
+              captureTaxables(capturedPotTaxables);
+            }
           }
           potBalances.fill(0);
           total = 0;
@@ -1050,6 +1076,9 @@ export function runMonteCarloSimulation(
           }
           if (capturedPotTaxes) {
             attributeTaxToPots(grossTotal - netRequired, capturedPotTaxes);
+          }
+          if (capturedPotTaxables && hasTax) {
+            captureTaxables(capturedPotTaxables);
           }
 
           // Every pot experiences the same market year: historical models
@@ -1163,6 +1192,9 @@ export function runMonteCarloSimulation(
               potTaxes: (capturedPotTaxes ?? []).map(tax =>
                 toSafeAmount(Math.round(tax * startInv)),
               ),
+              potTaxables: (capturedPotTaxables ?? []).map(taxable =>
+                toSafeAmount(Math.round(taxable * startInv)),
+              ),
               potReturns: capturedPotReturns ?? [],
               ...(locked > 0 && { inaccessibleBalance: locked }),
             });
@@ -1193,6 +1225,9 @@ export function runMonteCarloSimulation(
               ),
               potTaxes: (capturedPotTaxes ?? []).map(tax =>
                 toSafeAmount(Math.round(tax * startInv)),
+              ),
+              potTaxables: (capturedPotTaxables ?? []).map(taxable =>
+                toSafeAmount(Math.round(taxable * startInv)),
               ),
               potReturns: (capturedPotReturns ?? []).map(potReturn =>
                 potReturn == null

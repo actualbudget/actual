@@ -5,10 +5,12 @@ import { Button } from '@actual-app/components/button';
 import {
   SvgCheveronDown,
   SvgCheveronRight,
+  SvgQuestion,
 } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { FinancialText } from '#components/FinancialText';
@@ -360,7 +362,7 @@ export function MonteCarloRunDetailTable({
                     )}
 
                     {pots.length > 0 && (
-                      <View style={{ marginTop: 6, maxWidth: 640 }}>
+                      <View style={{ marginTop: 6, maxWidth: 760 }}>
                         <View
                           style={{
                             flexDirection: 'row',
@@ -394,8 +396,47 @@ export function MonteCarloRunDetailTable({
                               textAlign: 'right',
                             }}
                           >
-                            <Trans>Tax paid</Trans>
+                            <Trans>Taxable</Trans>
                           </Text>
+                          <View
+                            style={{
+                              width: 110,
+                              flexDirection: 'row',
+                              justifyContent: 'flex-end',
+                              alignItems: 'center',
+                              gap: 4,
+                            }}
+                          >
+                            <Text style={HEADER_CELL_STYLE}>
+                              <Trans>Tax paid</Trans>
+                            </Text>
+                            <Tooltip
+                              content={
+                                <View style={{ maxWidth: 300 }}>
+                                  <Text>
+                                    <Trans>
+                                      With tax bands, the year&apos;s tax is
+                                      worked out on all pots&apos; taxable
+                                      income together, then shared here in
+                                      proportion to each pot&apos;s taxable
+                                      income - so every taxable pound bears the
+                                      year&apos;s average rate, even from a
+                                      small pot. With a flat rate per pot, each
+                                      pot&apos;s tax is exact.
+                                    </Trans>
+                                  </Text>
+                                </View>
+                              }
+                              placement="bottom end"
+                              style={{ ...styles.tooltip }}
+                            >
+                              <SvgQuestion
+                                height={12}
+                                width={12}
+                                cursor="pointer"
+                              />
+                            </Tooltip>
+                          </View>
                           <Text
                             style={{
                               ...HEADER_CELL_STYLE,
@@ -437,6 +478,16 @@ export function MonteCarloRunDetailTable({
                                   <FinancialText as="span">
                                     {format(
                                       row.potWithdrawals[potIndex] ?? 0,
+                                      'financial',
+                                    )}
+                                  </FinancialText>
+                                </PrivacyFilter>
+                              </Text>
+                              <Text style={{ width: 110, textAlign: 'right' }}>
+                                <PrivacyFilter>
+                                  <FinancialText as="span">
+                                    {format(
+                                      row.potTaxables[potIndex] ?? 0,
                                       'financial',
                                     )}
                                   </FinancialText>
