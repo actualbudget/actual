@@ -2,14 +2,14 @@ name: Close feature requests with automated message
 
 on:
   issues:
-    types: [labeled]
+    types: [typed]
 
 permissions:
   issues: write
 
 jobs:
   needs-votes:
-    if: ${{ github.event.label.name == 'feature' }}
+    if: ${{ github.event.type.name == 'Feature' }}
     runs-on: depot-ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
