@@ -479,9 +479,7 @@ describe('Transaction rules', () => {
     await insertRule({
       stage: 'post',
       conditionsOp: 'and',
-      conditions: [
-        { op: 'is', field: 'category_group', value: billsGroupId },
-      ],
+      conditions: [{ op: 'is', field: 'category_group', value: billsGroupId }],
       actions: [{ op: 'set', field: 'notes', value: 'bills-matched' }],
     });
 
