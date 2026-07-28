@@ -426,6 +426,7 @@ describe('Transaction rules', () => {
     });
 
     expect(transaction.notes).toBe('bills-matched');
+    expect(transaction).not.toHaveProperty('category_group');
   });
 
   test('category_group condition does not match an unrelated group (live)', async () => {
@@ -451,6 +452,48 @@ describe('Transaction rules', () => {
     });
 
     expect(transaction.notes).toBe('');
+    expect(transaction).not.toHaveProperty('category_group');
+  });
+
+  test('category_group condition observes a category set earlier in the same rule chain (live)', async () => {
+    await loadRules();
+    const billsGroupId = await db.insertCategoryGroup({ name: 'Bills' });
+    const electricId = await db.insertCategory({
+      name: 'Electric',
+      cat_group: billsGroupId,
+    });
+    await db.insertPayee({ id: 'power_co_id', name: 'Power Co' });
+
+    // Runs first (pre stage): sets category based on payee. Nothing
+    // about category_group is checked here.
+    await insertRule({
+      stage: 'pre',
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'payee', value: 'power_co_id' }],
+      actions: [{ op: 'set', field: 'category', value: electricId }],
+    });
+
+    // Runs after (post stage): checks category_group. This should see
+    // the category the *first* rule just set, not whatever the
+    // transaction started with.
+    await insertRule({
+      stage: 'post',
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'is', field: 'category_group', value: billsGroupId },
+      ],
+      actions: [{ op: 'set', field: 'notes', value: 'bills-matched' }],
+    });
+
+    const transaction = await runRules({
+      date: '2020-01-01',
+      payee: 'power_co_id',
+      category: null,
+      notes: '',
+    });
+
+    expect(transaction.category).toBe(electricId);
+    expect(transaction.notes).toBe('bills-matched');
   });
 
   test('transactions can be queried by rule', async () => {
