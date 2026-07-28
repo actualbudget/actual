@@ -383,4 +383,42 @@ describe('Transactions', () => {
       id: 't2',
     });
   });
+
+  test('converting a simple transaction into a split stamps children with the parent account (#8207)', () => {
+    const transactions = [
+      makeTransaction({ amount: 2001 }),
+      makeTransaction({ id: 't1', amount: 5000, account: 'acc-id-1' }),
+      makeTransaction({ amount: 3002 }),
+    ];
+
+    // Mirrors `api.updateTransaction(id, { subtransactions: [...] })`, which
+    // reaches this reducer as `updateTransaction(transactions, { id, ...fields })`
+    // (see `api/transaction-update` in server/api.ts).
+    const { data, diff } = updateTransaction(transactions, {
+      id: 't1',
+      subtransactions: [{ amount: 4000 }, { amount: 1000 }],
+    } as TransactionEntity);
+
+    const parent = data.find(d => d.id === 't1');
+    expect(parent?.is_parent).toBe(true);
+
+    const children = data.filter(t => t.parent_id === 't1');
+    expect(children).toHaveLength(2);
+    // Regression (#8207): children used to be emitted without an account/date,
+    // so the DB rejected the insert with
+    // `"account" is required for table "transactions"`.
+    for (const child of children) {
+      expect(child.account).toBe('acc-id-1');
+      expect(child.date).toBe('2020-01-05');
+      expect(child.is_child).toBe(true);
+      expect(child.parent_id).toBe('t1');
+    }
+    expect(children.map(c => c.amount).sort((a, b) => b - a)).toEqual([
+      4000, 1000,
+    ]);
+
+    // The new child rows are inserted, and every one must carry the account.
+    expect(diff.added).toHaveLength(2);
+    expect(diff.added.every(t => t.account === 'acc-id-1')).toBe(true);
+  });
 });

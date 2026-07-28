@@ -296,10 +296,19 @@ async function countContributorPoints() {
           // Award points to PR author if they are a core maintainer
           const prAuthor = pr.user?.login;
           if (prAuthor && orgMemberLogins.has(prAuthor)) {
-            const releaseNoteFile = modifiedFiles.find(
-              file =>
-                file.filename === `upcoming-release-notes/${pr.number}.md`,
-            );
+            const isReleaseNoteFile = file =>
+              file.filename.startsWith('upcoming-release-notes/') &&
+              file.filename.endsWith('.md') &&
+              file.filename !== 'upcoming-release-notes/README.md';
+            const releaseNoteFile =
+              modifiedFiles.find(
+                file =>
+                  file.filename === `upcoming-release-notes/${pr.number}.md` &&
+                  file.status !== 'removed',
+              ) ??
+              modifiedFiles.find(
+                file => file.status === 'added' && isReleaseNoteFile(file),
+              );
             const categoryAndPoints = await getPRCategoryAndPoints(
               octokit,
               owner,

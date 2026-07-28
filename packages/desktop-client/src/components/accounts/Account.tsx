@@ -219,6 +219,8 @@ type AccountInternalProps = {
   setShowCleared: (newValue: boolean) => void;
   showReconciled: boolean;
   setShowReconciled: (newValue: boolean) => void;
+  showGroup: boolean;
+  setShowGroup: (newValue: boolean) => void;
   showExtraBalances?: boolean;
   setShowExtraBalances: (newValue: boolean) => void;
   modalShowing?: boolean;
@@ -270,6 +272,7 @@ type AccountInternalState = {
   showCleared?: boolean | undefined;
   prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
+  showGroup: boolean;
   nameError: string;
   isAdding: boolean;
   modalShowing?: boolean;
@@ -320,6 +323,7 @@ class AccountInternal extends PureComponent<
       balances: null,
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
+      showGroup: props.showGroup,
       nameError: '',
       isAdding: false,
       sort: null,
@@ -566,6 +570,7 @@ class AccountInternal extends PureComponent<
           balances: null,
           showCleared: nextProps.showCleared,
           showReconciled: nextProps.showReconciled,
+          showGroup: nextProps.showGroup,
           reconcileAmount: null,
         },
         () => {
@@ -810,6 +815,7 @@ class AccountInternal extends PureComponent<
       | 'remove-sorting'
       | 'toggle-cleared'
       | 'toggle-reconciled'
+      | 'toggle-group'
       | 'toggle-net-worth-chart',
   ) => {
     const accountId = this.props.accountId!;
@@ -910,6 +916,15 @@ class AccountInternal extends PureComponent<
           this.setState({ showReconciled: true }, () =>
             this.fetchTransactions(this.state.filterConditions),
           );
+        }
+        break;
+      case 'toggle-group':
+        if (this.state.showGroup) {
+          this.props.setShowGroup(false);
+          this.setState({ showGroup: false });
+        } else {
+          this.props.setShowGroup(true);
+          this.setState({ showGroup: true });
         }
         break;
       case 'toggle-net-worth-chart':
@@ -1701,6 +1716,7 @@ class AccountInternal extends PureComponent<
       balances,
       showCleared,
       showReconciled,
+      showGroup,
       filteredAmount,
     } = this.state;
 
@@ -1777,6 +1793,7 @@ class AccountInternal extends PureComponent<
                 showExtraBalances={showExtraBalances ?? false}
                 showCleared={showCleared ?? false}
                 showReconciled={showReconciled ?? false}
+                showGroup={showGroup}
                 showEmptyMessage={showEmptyMessage ?? false}
                 balanceQuery={balanceQuery}
                 canCalculateBalance={this?.canCalculateBalance ?? undefined}
@@ -1841,6 +1858,7 @@ class AccountInternal extends PureComponent<
                   showBalances={!!allBalances}
                   showReconciled={showReconciled}
                   showCleared={!!showCleared}
+                  showGroup={showGroup}
                   showAccount={
                     !accountId ||
                     accountId === 'offbudget' ||
@@ -1980,6 +1998,9 @@ export function Account() {
   const [hideReconciled, setHideReconciled] = useSyncedPref(
     `hide-reconciled-${params.id}`,
   );
+  const [showGroup, setShowGroup] = useSyncedPref(
+    `show-group-${params.id || 'all-accounts'}`,
+  );
   const [showExtraBalances, setShowExtraBalances] = useSyncedPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
@@ -2035,6 +2056,8 @@ export function Account() {
             setShowCleared={val => setHideCleared(String(!val))}
             showReconciled={String(hideReconciled) !== 'true'}
             setShowReconciled={val => setHideReconciled(String(!val))}
+            showGroup={String(showGroup) === 'true'}
+            setShowGroup={val => setShowGroup(String(val))}
             showExtraBalances={String(showExtraBalances) === 'true'}
             setShowExtraBalances={extraBalances =>
               setShowExtraBalances(String(extraBalances))
