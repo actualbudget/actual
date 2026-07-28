@@ -9,7 +9,10 @@ import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import { getUpcomingDays } from '@actual-app/core/shared/schedules';
+import {
+  DEFAULT_UPCOMING_SCHEDULE_DAYS,
+  getUpcomingDays,
+} from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   applyTransactionDiff,
@@ -35,6 +38,7 @@ import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { TableHandleRef } from '#components/table';
 import { isValidBoundaryDrop } from '#hooks/useDragDrop';
 import type { DropPosition } from '#hooks/useDragDrop';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
@@ -338,8 +342,14 @@ export function TransactionList({
   const navigate = useNavigate();
   const [learnCategories = 'true'] = useSyncedPref('learn-categories');
   const isLearnCategoriesEnabled = String(learnCategories) === 'true';
-  const [upcomingLength = '7'] = useSyncedPref(
+  const [upcomingLength = DEFAULT_UPCOMING_SCHEDULE_DAYS] = useSyncedPref(
     'upcomingScheduledTransactionLength',
+  );
+
+  // Whether to show the "Convert to Schedule" prompt when adding/editing future transactions.
+  // Default to true for existing behavior.
+  const [showConvertPrompt = true] = useGlobalPref(
+    'showConvertToSchedulePrompt',
   );
 
   const transactionsLatest = useRef<readonly TransactionEntity[]>([]);
@@ -353,6 +363,13 @@ export function TransactionList({
       onConfirm: () => Promise<void>,
       onCancel: () => Promise<void>,
     ) => {
+      // If user has disabled the prompt globally, skip showing the modal and
+      // run the cancel path (keep as transaction) by default.
+      if (!showConvertPrompt) {
+        void onCancel().then(() => onRefetch());
+        return;
+      }
+
       const futureInfo = calculateFutureTransactionInfo(
         transaction,
         upcomingLength,
@@ -385,7 +402,7 @@ export function TransactionList({
         }),
       );
     },
-    [dispatch, onRefetch, upcomingLength, t],
+    [dispatch, onRefetch, upcomingLength, t, showConvertPrompt],
   );
 
   const onAdd = useCallback(

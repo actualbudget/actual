@@ -39,9 +39,9 @@ You can control how far in advance scheduled transactions _appear_ in the Schedu
 
 For example, in the image at the top of this page, the upcoming length is set to _End of the current month_.
 
-By clicking on the **Change upcoming length** button, you can select how far in advance you want to see forthcoming transactions (e.g., 1 day, 1 week, 2 weeks, 1 month, End of the current month, or Custom length).
+Open Schedule Settings from the Schedules overview by clicking the "Schedule Settings" link. This opens Settings → Schedules where you can select how far in advance you want to see forthcoming transactions (e.g., 1 day, 1 week, 2 weeks, 1 month, End of the current month, or Custom length). The custom length option displays inline controls for number and unit.
 
-![Change upcoming length](/img/schedules/schedules-upcoming-length-dialog.webp)
+![Change upcoming length](/img/schedules/schedules-settings.webp)
 
 If you change the upcoming length to _1 week_, only transactions scheduled within the next week will appear as forthcoming.
 The _Monthly movie subscription_, _the Mortgage_, and the _Water melon subscription_ will now show as upcoming transactions.
@@ -53,6 +53,12 @@ This flexibility allows you to customize your view — whether you want to see a
 Changing the upcoming length only affects how schedules are displayed in your ledger; it does not impact how your budget data is stored or calculated. You can adjust this setting at any time to fit your preferences. If we change the upcoming length to _1 month_ the Account register will also reflect this change:
 
 ![Account Register View with future schedules](/img/schedules/schedules-account-register.webp)
+
+## Convert to Schedule prompt
+
+When you add a future-dated transaction, Actual can offer to convert it into a single-time schedule to more clearly indicate that it's happening in the future. You can control this behavior in settings.
+
+![Convert to schedule prompt](/img/schedules/convert-to-schedule.webp)
 
 ## Creating a Schedule
 

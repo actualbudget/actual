@@ -38,7 +38,10 @@ import { DEFAULT_MAX_DISTANCE_METERS } from '@actual-app/core/shared/constants';
 import { calculateDistance } from '@actual-app/core/shared/location-utils';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import { getUpcomingDays } from '@actual-app/core/shared/schedules';
+import {
+  DEFAULT_UPCOMING_SCHEDULE_DAYS,
+  getUpcomingDays,
+} from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -88,6 +91,7 @@ import { useCategories } from '#hooks/useCategories';
 import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
 import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useInputRefValue } from '#hooks/useInputRefValue';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
@@ -623,8 +627,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
-    const [upcomingLength = '7'] = useSyncedPref(
+    const [upcomingLength = DEFAULT_UPCOMING_SCHEDULE_DAYS] = useSyncedPref(
       'upcomingScheduledTransactionLength',
+    );
+    const [shouldShowConvertPrompt = true] = useGlobalPref(
+      'showConvertToSchedulePrompt',
     );
     const transactions = useMemo(
       () =>
@@ -720,7 +727,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       const isFuture = unserializedTransaction.date > today;
       const isLinkedToSchedule = !!unserializedTransaction.schedule;
 
-      if (isFuture && !isLinkedToSchedule) {
+      if (shouldShowConvertPrompt && isFuture && !isLinkedToSchedule) {
         const upcomingDays = getUpcomingDays(upcomingLength, today);
         const daysUntilTransaction = monthUtils.differenceInCalendarDays(
           unserializedTransaction.date,
@@ -837,6 +844,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       onSave,
       unserializedTransactions,
       upcomingLength,
+      shouldShowConvertPrompt,
       t,
     ]);
 

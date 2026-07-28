@@ -9,6 +9,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 import { q } from '@actual-app/core/shared/query';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 
+import { Link } from '#components/common/Link';
 import { Search } from '#components/common/Search';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { Page } from '#components/Page';
@@ -40,10 +41,6 @@ export function Schedules() {
 
   const onDiscover = useCallback(() => {
     dispatch(pushModal({ modal: { name: 'schedules-discover' } }));
-  }, [dispatch]);
-
-  const onChangeUpcomingLength = useCallback(() => {
-    dispatch(pushModal({ modal: { name: 'schedules-upcoming-length' } }));
   }, [dispatch]);
 
   const onAction = useCallback(
@@ -140,9 +137,9 @@ export function Schedules() {
             <Button onPress={onDiscover}>
               <Trans>Find schedules</Trans>
             </Button>
-            <Button onPress={onChangeUpcomingLength}>
-              <Trans>Change upcoming length</Trans>
-            </Button>
+            <Link variant="internal" to="/settings#schedules">
+              <Trans>Schedule Settings →</Trans>
+            </Link>
           </View>
           <Button variant="primary" onPress={onAdd}>
             <Trans>Add new schedule</Trans>

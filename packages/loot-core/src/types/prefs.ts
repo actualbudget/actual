@@ -141,6 +141,7 @@ export type GlobalPrefs = Partial<{
     port?: number;
   };
   notifyWhenUpdateIsAvailable: boolean;
+  showConvertToSchedulePrompt: boolean;
 }>;
 
 // GlobalPrefsJson represents what's saved in the global-store.json file
@@ -169,6 +170,7 @@ export type GlobalPrefsJson = Partial<{
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
   syncServerConfig?: GlobalPrefs['syncServerConfig'];
   notifyWhenUpdateIsAvailable?: GlobalPrefs['notifyWhenUpdateIsAvailable'];
+  showConvertToSchedulePrompt?: GlobalPrefs['showConvertToSchedulePrompt'];
 }>;
 
 export type AuthMethods = 'password' | 'openid';
