@@ -1,6 +1,11 @@
+import { Fragment, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import {
+  SvgCheveronDown,
+  SvgCheveronRight,
+} from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -49,10 +54,23 @@ export function MonteCarloRunDetailTable({
 }: MonteCarloRunDetailTableProps) {
   const { t } = useTranslation();
   const format = useFormat();
+  const [expandedYears, setExpandedYears] = useState<Set<number>>(new Set());
 
   const lastRow = rows[rows.length - 1];
   const hasSurvived = lastRow != null && lastRow.endBalance > 0;
-  const showPotColumns = pots.length > 0;
+  const allExpanded = rows.length > 0 && expandedYears.size === rows.length;
+
+  function toggleYear(year: number) {
+    setExpandedYears(previous => {
+      const next = new Set(previous);
+      if (next.has(year)) {
+        next.delete(year);
+      } else {
+        next.add(year);
+      }
+      return next;
+    });
+  }
 
   // Run-level cost of the plan: what left the pots, and how much of it
   // went to tax and fees rather than spending
@@ -93,6 +111,21 @@ export function MonteCarloRunDetailTable({
                 age: lastRow ? startAge + lastRow.year - 1 : startAge,
               })}
         </Text>
+        <Button
+          variant="bare"
+          onPress={() =>
+            setExpandedYears(
+              allExpanded ? new Set() : new Set(rows.map(row => row.year)),
+            )
+          }
+          style={{ marginLeft: 'auto', color: theme.pageText }}
+        >
+          {allExpanded ? (
+            <Trans>Collapse all years</Trans>
+          ) : (
+            <Trans>Expand all years</Trans>
+          )}
+        </Button>
       </View>
 
       <Text style={{ fontSize: 13, color: theme.pageText, marginBottom: 10 }}>
@@ -141,6 +174,7 @@ export function MonteCarloRunDetailTable({
               gap: 10,
             }}
           >
+            <View style={{ width: 36 }} />
             <Text style={{ ...HEADER_CELL_STYLE, width: 60 }}>
               <Trans>Age</Trans>
             </Text>
@@ -150,15 +184,6 @@ export function MonteCarloRunDetailTable({
             <Text style={{ ...HEADER_CELL_STYLE, ...AMOUNT_CELL_STYLE }}>
               <Trans>Withdrawal</Trans>
             </Text>
-            {showPotColumns &&
-              pots.map((pot, potIndex) => (
-                <Text
-                  key={pot.id}
-                  style={{ ...HEADER_CELL_STYLE, ...AMOUNT_CELL_STYLE }}
-                >
-                  {pot.name || t('Pot {{number}}', { number: potIndex + 1 })}
-                </Text>
-              ))}
             <Text style={{ ...HEADER_CELL_STYLE, ...AMOUNT_CELL_STYLE }}>
               <Trans>Investment growth</Trans>
             </Text>
@@ -174,119 +199,66 @@ export function MonteCarloRunDetailTable({
 
           {rows.map(row => {
             const isFailureRow = row === lastRow && !hasSurvived;
-            // Growth applies to what stayed invested after the withdrawal; no
-            // growth on a failure year (the plan stops there)
+            const isExpanded = expandedYears.has(row.year);
+            // Growth applies to what stayed invested after the withdrawal;
+            // no growth on a failure year (the plan stops there)
             const growthBase = row.startBalance - row.withdrawal;
             const growthPct =
               !isFailureRow && growthBase > 0
                 ? (row.growth / growthBase) * 100
                 : null;
+            const netSpending = row.withdrawal - row.taxPaid;
             return (
-              <View
-                key={row.year}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  padding: '6px 0',
-                  borderBottom: `1px solid ${theme.tableBorder}`,
-                  gap: 10,
-                }}
-              >
-                <Text style={{ width: 60 }}>
-                  <FinancialText as="span">
-                    {String(startAge + row.year - 1)}
-                  </FinancialText>
-                </Text>
-                <Text style={AMOUNT_CELL_STYLE}>
-                  <PrivacyFilter>
-                    <FinancialText as="span">
-                      {format(row.startBalance, 'financial')}
-                    </FinancialText>
-                  </PrivacyFilter>
-                </Text>
+              <Fragment key={row.year}>
                 <View
-                  style={{ flex: 1, minWidth: 110, alignItems: 'flex-end' }}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: '6px 0',
+                    borderBottom: `1px solid ${theme.tableBorder}`,
+                    gap: 10,
+                  }}
                 >
-                  <Text>
+                  <View style={{ width: 36, alignItems: 'center' }}>
+                    <Button
+                      variant="bare"
+                      aria-label={
+                        isExpanded
+                          ? t("Hide this year's breakdown")
+                          : t("Show this year's breakdown")
+                      }
+                      onPress={() => toggleYear(row.year)}
+                      style={{ padding: 4 }}
+                    >
+                      {isExpanded ? (
+                        <SvgCheveronDown width={14} height={14} />
+                      ) : (
+                        <SvgCheveronRight width={14} height={14} />
+                      )}
+                    </Button>
+                  </View>
+                  <Text style={{ width: 60 }}>
+                    <FinancialText as="span">
+                      {String(startAge + row.year - 1)}
+                    </FinancialText>
+                  </Text>
+                  <Text style={AMOUNT_CELL_STYLE}>
+                    <PrivacyFilter>
+                      <FinancialText as="span">
+                        {format(row.startBalance, 'financial')}
+                      </FinancialText>
+                    </PrivacyFilter>
+                  </Text>
+                  <Text style={AMOUNT_CELL_STYLE}>
                     <PrivacyFilter>
                       <FinancialText as="span">
                         {format(row.withdrawal, 'financial')}
                       </FinancialText>
                     </PrivacyFilter>
                   </Text>
-                  {row.taxPaid > 0 && (
-                    <Text
-                      style={{ fontSize: 11, color: theme.warningText }}
-                      title={t('Tax paid out of this withdrawal')}
-                    >
-                      <PrivacyFilter>
-                        <FinancialText as="span">
-                          {t('incl. {{amount}} tax', {
-                            amount: format(row.taxPaid, 'financial'),
-                          })}
-                        </FinancialText>
-                      </PrivacyFilter>
-                    </Text>
-                  )}
-                </View>
-                {showPotColumns &&
-                  row.potBalances.map((potBalance, potIndex) => {
-                    const potReturn = row.potReturns[potIndex];
-                    const potWithdrawal = row.potWithdrawals[potIndex] ?? 0;
-                    return (
-                      <View
-                        key={pots[potIndex]?.id ?? potIndex}
-                        style={{
-                          flex: 1,
-                          minWidth: 110,
-                          alignItems: 'flex-end',
-                        }}
-                      >
-                        <Text>
-                          <PrivacyFilter>
-                            <FinancialText as="span">
-                              {format(potBalance, 'financial')}
-                            </FinancialText>
-                          </PrivacyFilter>
-                        </Text>
-                        {potWithdrawal > 0 && (
-                          <Text
-                            style={{
-                              fontSize: 11,
-                              color: theme.warningText,
-                            }}
-                            title={t('Withdrawn from this pot')}
-                          >
-                            <PrivacyFilter>
-                              <FinancialText as="span">
-                                {`−${format(potWithdrawal, 'financial')}`}
-                              </FinancialText>
-                            </PrivacyFilter>
-                          </Text>
-                        )}
-                        {potReturn != null && (
-                          <Text
-                            style={{
-                              fontSize: 11,
-                              color:
-                                potReturn >= 0
-                                  ? theme.reportsNumberPositive
-                                  : theme.reportsNumberNegative,
-                            }}
-                          >
-                            <FinancialText as="span">
-                              {`${(potReturn * 100).toFixed(2)}%`}
-                            </FinancialText>
-                          </Text>
-                        )}
-                      </View>
-                    );
-                  })}
-                <View
-                  style={{ flex: 1, minWidth: 110, alignItems: 'flex-end' }}
-                >
                   <Text
                     style={{
+                      ...AMOUNT_CELL_STYLE,
                       color:
                         row.growth >= 0
                           ? theme.reportsNumberPositive
@@ -301,48 +273,221 @@ export function MonteCarloRunDetailTable({
                       </PrivacyFilter>
                     )}
                   </Text>
-                  {row.feesPaid > 0 && (
-                    <Text
-                      style={{ fontSize: 11, color: theme.warningText }}
-                      title={t('Fees charged this year')}
-                    >
+                  <Text
+                    style={{
+                      width: 90,
+                      textAlign: 'right',
+                      color:
+                        row.growth >= 0
+                          ? theme.reportsNumberPositive
+                          : theme.reportsNumberNegative,
+                    }}
+                  >
+                    {growthPct != null && (
+                      <FinancialText as="span">{`${growthPct.toFixed(2)}%`}</FinancialText>
+                    )}
+                  </Text>
+                  <Text style={AMOUNT_CELL_STYLE}>
+                    <PrivacyFilter>
+                      <FinancialText as="span">
+                        {/* On a bridge-gap failure the true remaining balance
+                        is the locked money, not zero */}
+                        {format(
+                          row.inaccessibleBalance ?? row.endBalance,
+                          'financial',
+                        )}
+                      </FinancialText>
+                    </PrivacyFilter>
+                  </Text>
+                </View>
+
+                {isExpanded && (
+                  <View
+                    style={{
+                      borderBottom: `1px solid ${theme.tableBorder}`,
+                      padding: '10px 12px 12px 46px',
+                      gap: 4,
+                    }}
+                  >
+                    <Text style={{ fontSize: 13, color: theme.pageText }}>
                       <PrivacyFilter>
                         <FinancialText as="span">
-                          {t('− {{amount}} fees', {
-                            amount: format(row.feesPaid, 'financial'),
-                          })}
+                          {row.taxPaid > 0
+                            ? t(
+                                'Withdrawal: {{gross}} gross − {{tax}} tax = {{net}} to spend.',
+                                {
+                                  gross: format(row.withdrawal, 'financial'),
+                                  tax: format(row.taxPaid, 'financial'),
+                                  net: format(netSpending, 'financial'),
+                                },
+                              )
+                            : t('Withdrawal: {{gross}}, untaxed.', {
+                                gross: format(row.withdrawal, 'financial'),
+                              })}
                         </FinancialText>
                       </PrivacyFilter>
                     </Text>
-                  )}
-                </View>
-                <Text
-                  style={{
-                    width: 90,
-                    textAlign: 'right',
-                    color:
-                      row.growth >= 0
-                        ? theme.reportsNumberPositive
-                        : theme.reportsNumberNegative,
-                  }}
-                >
-                  {growthPct != null && (
-                    <FinancialText as="span">{`${growthPct.toFixed(2)}%`}</FinancialText>
-                  )}
-                </Text>
-                <Text style={AMOUNT_CELL_STYLE}>
-                  <PrivacyFilter>
-                    <FinancialText as="span">
-                      {/* On a bridge-gap failure the true remaining balance is
-                      the locked money, not zero */}
-                      {format(
-                        row.inaccessibleBalance ?? row.endBalance,
-                        'financial',
-                      )}
-                    </FinancialText>
-                  </PrivacyFilter>
-                </Text>
-              </View>
+                    {row.feesPaid > 0 && (
+                      <Text style={{ fontSize: 13, color: theme.pageText }}>
+                        <PrivacyFilter>
+                          <FinancialText as="span">
+                            {t(
+                              'Fees paid: {{amount}}, charged at the end of the year.',
+                              {
+                                amount: format(row.feesPaid, 'financial'),
+                              },
+                            )}
+                          </FinancialText>
+                        </PrivacyFilter>
+                      </Text>
+                    )}
+                    {row.inaccessibleBalance != null && (
+                      <Text style={{ fontSize: 13, color: theme.pageText }}>
+                        <PrivacyFilter>
+                          <FinancialText as="span">
+                            {t(
+                              '{{amount}} remained locked in pots that had not reached their access age.',
+                              {
+                                amount: format(
+                                  row.inaccessibleBalance,
+                                  'financial',
+                                ),
+                              },
+                            )}
+                          </FinancialText>
+                        </PrivacyFilter>
+                      </Text>
+                    )}
+
+                    {pots.length > 0 && (
+                      <View style={{ marginTop: 6, maxWidth: 640 }}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            gap: 10,
+                            paddingBottom: 4,
+                            borderBottom: `1px solid ${theme.tableBorder}`,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              ...HEADER_CELL_STYLE,
+                              flex: 1,
+                              minWidth: 120,
+                            }}
+                          >
+                            <Trans>Pot</Trans>
+                          </Text>
+                          <Text
+                            style={{
+                              ...HEADER_CELL_STYLE,
+                              width: 130,
+                              textAlign: 'right',
+                            }}
+                          >
+                            <Trans>Withdrawn</Trans>
+                          </Text>
+                          <Text
+                            style={{
+                              ...HEADER_CELL_STYLE,
+                              width: 110,
+                              textAlign: 'right',
+                            }}
+                          >
+                            <Trans>Tax paid</Trans>
+                          </Text>
+                          <Text
+                            style={{
+                              ...HEADER_CELL_STYLE,
+                              width: 90,
+                              textAlign: 'right',
+                            }}
+                          >
+                            <Trans>Return (%)</Trans>
+                          </Text>
+                          <Text
+                            style={{
+                              ...HEADER_CELL_STYLE,
+                              width: 130,
+                              textAlign: 'right',
+                            }}
+                          >
+                            <Trans>End balance</Trans>
+                          </Text>
+                        </View>
+                        {pots.map((pot, potIndex) => {
+                          const potReturn = row.potReturns[potIndex];
+                          return (
+                            <View
+                              key={pot.id}
+                              style={{
+                                flexDirection: 'row',
+                                gap: 10,
+                                padding: '3px 0',
+                              }}
+                            >
+                              <Text style={{ flex: 1, minWidth: 120 }}>
+                                {pot.name ||
+                                  t('Pot {{number}}', {
+                                    number: potIndex + 1,
+                                  })}
+                              </Text>
+                              <Text style={{ width: 130, textAlign: 'right' }}>
+                                <PrivacyFilter>
+                                  <FinancialText as="span">
+                                    {format(
+                                      row.potWithdrawals[potIndex] ?? 0,
+                                      'financial',
+                                    )}
+                                  </FinancialText>
+                                </PrivacyFilter>
+                              </Text>
+                              <Text style={{ width: 110, textAlign: 'right' }}>
+                                <PrivacyFilter>
+                                  <FinancialText as="span">
+                                    {format(
+                                      row.potTaxes[potIndex] ?? 0,
+                                      'financial',
+                                    )}
+                                  </FinancialText>
+                                </PrivacyFilter>
+                              </Text>
+                              <Text
+                                style={{
+                                  width: 90,
+                                  textAlign: 'right',
+                                  color:
+                                    potReturn == null
+                                      ? theme.pageText
+                                      : potReturn >= 0
+                                        ? theme.reportsNumberPositive
+                                        : theme.reportsNumberNegative,
+                                }}
+                              >
+                                {potReturn != null && (
+                                  <FinancialText as="span">
+                                    {`${(potReturn * 100).toFixed(2)}%`}
+                                  </FinancialText>
+                                )}
+                              </Text>
+                              <Text style={{ width: 130, textAlign: 'right' }}>
+                                <PrivacyFilter>
+                                  <FinancialText as="span">
+                                    {format(
+                                      row.potBalances[potIndex] ?? 0,
+                                      'financial',
+                                    )}
+                                  </FinancialText>
+                                </PrivacyFilter>
+                              </Text>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    )}
+                  </View>
+                )}
+              </Fragment>
             );
           })}
         </View>

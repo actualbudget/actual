@@ -349,6 +349,11 @@ export type MonteCarloRunDetailRow = {
   potBalances: number[];
   /** How much of this year's withdrawal each pot funded (gross), same order */
   potWithdrawals: number[];
+  /**
+   * Tax attributed to each pot's withdrawal: exact under the flat model,
+   * prorated by taxable-income share under the bands model
+   */
+  potTaxes: number[];
   /** Tax paid out of this year's gross withdrawal (0 with no tax model) */
   taxPaid: number;
   /** Management fees charged at the end of this year */
@@ -928,6 +933,37 @@ export function runMonteCarloSimulation(
         const capturedPotWithdrawals = capturedPotReturns
           ? new Array<number>(potCount).fill(0)
           : null;
+        const capturedPotTaxes = capturedPotReturns
+          ? new Array<number>(potCount).fill(0)
+          : null;
+
+        // Attribute a year's tax to pots for the drill-in: exact per pot
+        // under the flat model; under the bands model (where tax is
+        // computed on pooled income) prorated by each pot's share of the
+        // taxable income
+        function attributeTaxToPots(totalTax: number, into: number[]) {
+          if (totalTax <= 0) {
+            return;
+          }
+          if (taxModel === 'flat') {
+            for (let p = 0; p < potCount; p++) {
+              into[p] = potTakes[p] * potTaxRates[p];
+            }
+            return;
+          }
+          let taxableTotal = 0;
+          for (let p = 0; p < potCount; p++) {
+            taxableTotal += potTakes[p] * potTaxableFractions[p];
+          }
+          if (taxableTotal <= 0) {
+            return;
+          }
+          for (let p = 0; p < potCount; p++) {
+            into[p] =
+              totalTax *
+              ((potTakes[p] * potTaxableFractions[p]) / taxableTotal);
+          }
+        }
 
         // Net capacity: what withdrawing every accessible penny would
         // actually deliver after tax
@@ -961,6 +997,14 @@ export function runMonteCarloSimulation(
                 capturedPotWithdrawals[p] =
                   year >= potAccessFromYear[p] ? potBalances[p] : 0;
               }
+            }
+            if (capturedPotTaxes) {
+              // potTakes still holds the everything-accessible split from
+              // the net-capacity check above
+              attributeTaxToPots(
+                accessibleTotal - netDelivered,
+                capturedPotTaxes,
+              );
             }
           }
           potBalances.fill(0);
@@ -1003,6 +1047,9 @@ export function runMonteCarloSimulation(
             for (let p = 0; p < potCount; p++) {
               capturedPotWithdrawals[p] = potTakes[p];
             }
+          }
+          if (capturedPotTaxes) {
+            attributeTaxToPots(grossTotal - netRequired, capturedPotTaxes);
           }
 
           // Every pot experiences the same market year: historical models
@@ -1113,6 +1160,9 @@ export function runMonteCarloSimulation(
               potWithdrawals: (capturedPotWithdrawals ?? []).map(take =>
                 toSafeAmount(Math.round(take * startInv)),
               ),
+              potTaxes: (capturedPotTaxes ?? []).map(tax =>
+                toSafeAmount(Math.round(tax * startInv)),
+              ),
               potReturns: capturedPotReturns ?? [],
               ...(locked > 0 && { inaccessibleBalance: locked }),
             });
@@ -1140,6 +1190,9 @@ export function runMonteCarloSimulation(
               ),
               potWithdrawals: (capturedPotWithdrawals ?? []).map(take =>
                 toSafeAmount(Math.round(take * startInv)),
+              ),
+              potTaxes: (capturedPotTaxes ?? []).map(tax =>
+                toSafeAmount(Math.round(tax * startInv)),
               ),
               potReturns: (capturedPotReturns ?? []).map(potReturn =>
                 potReturn == null

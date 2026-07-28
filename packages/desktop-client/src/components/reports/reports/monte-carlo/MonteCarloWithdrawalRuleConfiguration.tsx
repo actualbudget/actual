@@ -128,6 +128,9 @@ export function MonteCarloWithdrawalRuleConfiguration({
       {rule.type === 'guardrails' && (
         <View>
           <Text style={SENTENCE_STYLE}>
+            <Text style={{ fontWeight: 600 }}>
+              <Trans>Capital preservation rule:</Trans>
+            </Text>{' '}
             <Trans>
               If the withdrawal rate rises more than
               <MonteCarloNumberInput
@@ -155,8 +158,11 @@ export function MonteCarloWithdrawalRuleConfiguration({
             </Trans>
           </Text>
           <Text style={SENTENCE_STYLE}>
+            <Text style={{ fontWeight: 600 }}>
+              <Trans>Prosperity rule:</Trans>
+            </Text>{' '}
             <Trans>
-              If it falls more than
+              If the withdrawal rate falls more than
               <MonteCarloNumberInput
                 value={rule.prosperityTriggerPct}
                 scale={100}
@@ -284,7 +290,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
           </Text>
           <Text style={SENTENCE_STYLE}>
             <Trans>
-              If it falls below
+              If the withdrawal rate falls below
               <MonteCarloNumberInput
                 value={rule.lowerRateThreshold}
                 scale={100}
