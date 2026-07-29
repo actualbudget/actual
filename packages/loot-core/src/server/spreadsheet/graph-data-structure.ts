@@ -86,56 +86,66 @@ export function Graph() {
       }
     });
 
+    // Nodes are collected in the order they finish (post-order). A topological
+    // order is the reverse of that, so flip the list once at the end instead of
+    // prepending each node as we go (which would be O(n) per node).
+    sorted.reverse();
+
     return sorted;
   }
 
+  // Iterative depth-first, post-order traversal. We use an explicit stack rather
+  // than recursion so that very deep dependency chains — e.g. the per-transaction
+  // running-balance cells in a large budget — can't overflow the call stack.
+  //
+  // Each stack frame keeps a cursor into its own list of neighbors. That makes
+  // finishing a node O(1): when a child finishes we simply return to its parent
+  // frame, which is right below it on the stack — no scanning to find the parent
+  // and no per-node bookkeeping that grows with the depth of the graph. The whole
+  // sort is therefore O(nodes + edges).
   function topologicalSortIterable(name, visited, sorted) {
-    const stackTrace: StackItem[] = [];
+    const stack: StackFrame[] = [{ value: name, neighbors: null, index: 0 }];
 
-    stackTrace.push({
-      count: -1,
-      value: name,
-      parent: '',
-      level: 0,
-    });
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1];
 
-    while (stackTrace.length > 0) {
-      const current = stackTrace.slice(-1)[0];
-
-      const adjacents = adjacent(current.value);
-      if (current.count === -1) {
-        current.count = adjacents.size;
+      if (frame.neighbors === null) {
+        if (visited.has(frame.value)) {
+          stack.pop();
+          continue;
+        }
+        // Snapshot the neighbors up front, in reverse. Because we pull them off a
+        // LIFO stack, reversing here keeps the visit order identical to the
+        // previous implementation.
+        const adjacents = adjacent(frame.value);
+        const neighbors = new Array(adjacents.size);
+        let i = adjacents.size - 1;
+        for (const neighbor of adjacents.values()) {
+          neighbors[i--] = neighbor;
+        }
+        frame.neighbors = neighbors;
       }
 
-      if (current.count > 0) {
-        const iter = adjacents.values();
-        let cur = iter.next();
-        while (!cur.done) {
-          if (!visited.has(cur.value)) {
-            stackTrace.push({
-              count: -1,
-              parent: current.value,
-              value: cur.value,
-              level: current.level + 1,
-            });
-          } else {
-            current.count--;
-          }
-          cur = iter.next();
-        }
-      } else {
-        if (!visited.has(current.value)) {
-          visited.add(current.value);
-          sorted.unshift(current.value);
-        }
-
-        const removed = stackTrace.pop();
-        for (let i = 0; i < stackTrace.length; i++) {
-          if (stackTrace[i].value === removed.parent) {
-            stackTrace[i].count--;
-          }
+      // Descend into the next unvisited neighbor, if there is one.
+      let descended = false;
+      while (frame.index < frame.neighbors.length) {
+        const neighbor = frame.neighbors[frame.index++];
+        if (!visited.has(neighbor)) {
+          stack.push({ value: neighbor, neighbors: null, index: 0 });
+          descended = true;
+          break;
         }
       }
+      if (descended) {
+        continue;
+      }
+
+      // All neighbors done: this node is finished.
+      if (!visited.has(frame.value)) {
+        visited.add(frame.value);
+        sorted.push(frame.value);
+      }
+      stack.pop();
     }
   }
 
@@ -157,9 +167,8 @@ export function Graph() {
   return graph;
 }
 
-type StackItem = {
-  count: number;
+type StackFrame = {
   value: string;
-  parent: string;
-  level: number;
+  neighbors: string[] | null;
+  index: number;
 };
