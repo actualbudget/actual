@@ -95,6 +95,8 @@ The inflation settings that grow your spending over time live on the [Plan Detai
 
 ### Tax
 
+![The Tax tab](/img/reports/monte-carlo-tax.png)
+
 Withdrawing money from a pension or a taxable account usually costs more than the amount you get to spend. The Tax tab lets the simulation account for that: **your yearly spending is always what you keep after tax**, and the simulation withdraws extra to cover the tax bill. Two models are available:
 
 - **Flat rate per pot** (the default) - each pot gets one effective tax rate on its withdrawals, set in the pots table. A tax-free account is 0%. For a pension with a tax-free portion, blend it with your expected income tax rate - for example, 25% tax-free plus 20% tax on the rest works out around 15%. For a taxable investment account, estimate the effective rate on your typical withdrawal. This is deliberately simple and works for any country - you own the number.
@@ -116,7 +118,7 @@ All the rules share a few ideas:
 - Rules usually improve your **success rate** by cutting spending in bad times, but that safety isn't free - you get it by living on less. Keep an eye on the **Median total withdrawn** stat to see what a rule costs you in income.
 - Rules only see the wealth you can actually spend. If a pension is locked until its access age, it doesn't earn you spending raises while a bridge pot pays the bills - the rules watch the accessible pots, and the pension starts counting the moment it unlocks.
 
-If you set a **Minimum withdrawal**, your yearly spending never drops below that amount, no matter what the rule says. Like your spending phases, it's an amount in today's money - it rises with inflation so its spending power holds steady.
+If you set a **Minimum withdrawal**, your yearly spending never drops below that amount, no matter what the rule says. It only applies in years you actually plan to spend - a spending phase set to 0 (for example, years before retirement while your salary covers your costs) takes nothing. Like your spending phases, it's an amount in today's money - it rises with inflation so its spending power holds steady.
 
 ### Guardrails (Guyton-Klinger)
 

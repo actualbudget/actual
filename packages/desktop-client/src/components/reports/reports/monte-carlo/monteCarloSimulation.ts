@@ -1008,12 +1008,15 @@ export function runMonteCarloSimulation(
         }
         // The minimum floor belongs to the withdrawal rule system (the UI
         // only offers it alongside a rule); with no rule active the planned
-        // spending is taken as-is. Like the phase amounts it's in today's
-        // money, so it rises with this replay's inflation path
+        // spending is taken as-is. It guards against rule-driven cuts, so
+        // it only applies in years with planned spending - a deliberate
+        // zero-spend phase takes nothing. Like the phase amounts it's in
+        // today's money, so it rises with this replay's inflation path
         const minimumThisYear = minimumWithdrawal * cumulativeInflation;
         if (
           rule.type !== 'none' &&
           minimumWithdrawal > 0 &&
+          planned > 0 &&
           withdrawal < minimumThisYear
         ) {
           withdrawal = minimumThisYear;

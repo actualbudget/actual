@@ -85,9 +85,10 @@ export function MonteCarloWithdrawalRuleConfiguration({
               <MonteCarloHelpTooltip>
                 <Trans>
                   The annual withdrawal never drops below this amount, no matter
-                  what the rule says. Like your planned spending, it&apos;s in
-                  today&apos;s money and rises with inflation. Set to 0 for no
-                  floor.
+                  what the rule says. It only applies in years with planned
+                  spending - a spending phase set to 0 takes nothing. Like your
+                  planned spending, it&apos;s in today&apos;s money and rises
+                  with inflation. Set to 0 for no floor.
                 </Trans>
               </MonteCarloHelpTooltip>
             </View>

@@ -578,6 +578,40 @@ describe('runMonteCarloSimulation', () => {
     );
   });
 
+  it('takes nothing in zero-spend phases even with a minimum withdrawal', () => {
+    // Working years first (costs covered by salary), retirement at 65;
+    // the floor guards against rule-driven cuts and must not invent
+    // withdrawals during a deliberate zero-spend phase
+    // The horizon stops before spend-down drift would cross the
+    // preservation trigger, so retirement withdrawals stay at the
+    // planned amount and the assertions are exact
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          horizonYears: 8,
+          captureRunDetail: 0,
+          minimumWithdrawal: 15_000,
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
+          spendingPhases: [
+            { id: 'working', name: '', fromAge: null, annualWithdrawal: 0 },
+            { id: 'retired', name: '', fromAge: 65, annualWithdrawal: 40_000 },
+          ],
+        },
+        { startingBalance: 500_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    // currentAge is 60, so years 1-5 (ages 60-64) are the zero phase
+    for (const row of rows.slice(0, 5)) {
+      expect(row.withdrawal).toBe(0);
+    }
+    // From 65 the planned spending applies, already above the floor
+    for (const row of rows.slice(5)) {
+      expect(row.withdrawal).toBe(40_000);
+    }
+  });
+
   it("keeps the minimum withdrawal floor in today's money under inflation", () => {
     // Guardrails cut hard while prices rise; the floor must rise with
     // inflation too, so in today's money withdrawals never dip below it
