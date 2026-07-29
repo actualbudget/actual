@@ -10,6 +10,7 @@ export class BudgetPage {
   readonly budgetTableTotals: Locator;
   readonly selectedMonthButton: Locator;
   readonly nextMonthButton: Locator;
+  readonly previousMonthButton: Locator;
   readonly budgetTableScrollContainer: Locator;
 
   constructor(page: Page) {
@@ -20,6 +21,7 @@ export class BudgetPage {
     this.budgetTableTotals = this.budgetTable.getByTestId('budget-totals');
     this.selectedMonthButton = page.getByTestId('selected-budget-month');
     this.nextMonthButton = page.getByTitle('Next month');
+    this.previousMonthButton = page.getByTitle('Previous month');
     this.budgetTableScrollContainer = page.getByTestId(
       'budget-table-scroll-container',
     );
@@ -53,7 +55,7 @@ export class BudgetPage {
       throw new Error('Failed to get total budgeted.');
     }
 
-    return parseInt(totalBudgetedText, 10);
+    return parseInt(totalBudgetedText.replace(/,/g, ''), 10);
   }
 
   async getTotalSpent() {
@@ -65,7 +67,7 @@ export class BudgetPage {
       throw new Error('Failed to get total spent.');
     }
 
-    return parseInt(totalSpentText, 10);
+    return parseInt(totalSpentText.replace(/,/g, ''), 10);
   }
 
   async getTotalLeftover() {
@@ -77,7 +79,7 @@ export class BudgetPage {
       throw new Error('Failed to get total leftover.');
     }
 
-    return parseInt(totalLeftoverText, 10);
+    return parseInt(totalLeftoverText.replace(/,/g, ''), 10);
   }
 
   async getTableTotals() {
@@ -104,6 +106,29 @@ export class BudgetPage {
     await input.waitFor({ state: 'visible' });
     await input.fill(amount);
     await input.press('Enter');
+  }
+
+  /**
+   * Get the budgeted amount currently displayed for a category, in the same
+   * whole-dollar units as getTotalBudgeted().
+   */
+  async getBudgetedAmount(categoryName: string, monthIndex = 0) {
+    const row = this.budgetTable
+      .getByTestId('row')
+      .filter({ hasText: categoryName })
+      .first();
+    const budgetText = await row
+      .getByTestId('budget')
+      .nth(monthIndex)
+      .textContent();
+
+    if (!budgetText) {
+      throw new Error(
+        `Failed to get budgeted amount for category "${categoryName}".`,
+      );
+    }
+
+    return parseInt(budgetText.replace(/,/g, ''), 10);
   }
 
   async getSelectedMonth() {
@@ -140,6 +165,17 @@ export class BudgetPage {
     return await this.#waitForNewMonthToLoad({
       currentMonth,
       errorMessage: 'Failed to navigate to the next month.',
+    });
+  }
+
+  async goToPreviousMonth() {
+    const currentMonth = await this.getSelectedMonth();
+
+    await this.previousMonthButton.click();
+
+    return await this.#waitForNewMonthToLoad({
+      currentMonth,
+      errorMessage: 'Failed to navigate to the previous month.',
     });
   }
 

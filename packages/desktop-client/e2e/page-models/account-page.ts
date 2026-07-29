@@ -280,6 +280,21 @@ export class AccountPage {
   async rightClickNthTransaction(index: number) {
     await this.transactionTableRow.nth(index).click({ button: 'right' });
   }
+
+  /**
+   * Delete the nth transaction via its context menu, confirming the
+   * "Confirm Delete" dialog that follows.
+   */
+  async deleteNthTransaction(index: number) {
+    await this.rightClickNthTransaction(index);
+    await this.page
+      .getByRole('menu')
+      .getByRole('button', { name: 'Delete' })
+      .click();
+
+    const confirmModal = this.page.getByTestId('confirm-delete-modal');
+    await confirmModal.getByRole('button', { name: 'Delete' }).click();
+  }
 }
 
 class FilterTooltip {

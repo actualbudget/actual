@@ -104,6 +104,46 @@ test.describe('Accounts', () => {
     await expect(transaction.balance).toHaveText('25.00');
   });
 
+  test('deletes a transaction and restores the account balance', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Delete transaction',
+      offBudget: false,
+      balance: 0,
+    });
+    await accountPage.waitFor();
+
+    const balanceBeforeCreate = await accountPage.accountBalance.textContent();
+    const rowCountBeforeCreate = await accountPage.transactionTableRow.count();
+
+    await test.step('create a transaction to delete', async () => {
+      await accountPage.createSingleTransaction({
+        payee: '',
+        notes: 'to be deleted',
+        credit: '42.00',
+      });
+
+      await expect(accountPage.transactionTableRow).toHaveCount(
+        rowCountBeforeCreate + 1,
+      );
+      await expect(accountPage.getNthTransaction(0).notes).toHaveText(
+        'to be deleted',
+      );
+    });
+
+    await test.step('delete the transaction', async () => {
+      await accountPage.deleteNthTransaction(0);
+    });
+
+    await test.step('verify the transaction is gone and the balance is restored', async () => {
+      await expect(accountPage.transactionTableRow).toHaveCount(
+        rowCountBeforeCreate,
+      );
+      await expect(accountPage.accountBalance).toHaveText(
+        balanceBeforeCreate ?? '',
+      );
+    });
+  });
+
   test('shift-click range selection skips hidden reconciled transactions', async () => {
     accountPage = await navigation.createAccount({
       name: 'Range Select',

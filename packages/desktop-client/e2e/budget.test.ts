@@ -88,6 +88,59 @@ test.describe('Budget', () => {
       menu.getByRole('button', { name: 'Switch file' }),
     ).toBeVisible();
   });
+
+  test('assigning a budgeted amount updates the category and the total budgeted', async () => {
+    const categoryName = 'Food';
+    let totalBudgetedBefore: number;
+    let categoryBudgetBefore: number;
+
+    await test.step('capture totals before budgeting', async () => {
+      totalBudgetedBefore = await budgetPage.getTotalBudgeted();
+      categoryBudgetBefore = await budgetPage.getBudgetedAmount(categoryName);
+    });
+
+    await test.step(`assign a new budgeted amount to ${categoryName}`, async () => {
+      await budgetPage.setBudgetedAmount(categoryName, '1200', 0);
+    });
+
+    await test.step('verify the category budgeted amount updated', async () => {
+      await expect
+        .poll(() => budgetPage.getBudgetedAmount(categoryName))
+        .toEqual(1200);
+    });
+
+    await test.step('verify the total budgeted reflects the change', async () => {
+      await expect
+        .poll(() => budgetPage.getTotalBudgeted())
+        .toEqual(totalBudgetedBefore - categoryBudgetBefore + 1200);
+    });
+  });
+
+  test('budgeted amounts are independent across months', async () => {
+    const categoryName = 'Food';
+
+    await test.step('assign a budgeted amount in the current month', async () => {
+      await budgetPage.setBudgetedAmount(categoryName, '400', 0);
+      await expect
+        .poll(() => budgetPage.getBudgetedAmount(categoryName))
+        .toEqual(400);
+    });
+
+    await test.step('navigate to next month and assign a different amount', async () => {
+      await budgetPage.goToNextMonth();
+      await budgetPage.setBudgetedAmount(categoryName, '900', 0);
+      await expect
+        .poll(() => budgetPage.getBudgetedAmount(categoryName))
+        .toEqual(900);
+    });
+
+    await test.step('navigate back and verify the original month kept its own amount', async () => {
+      await budgetPage.goToPreviousMonth();
+      await expect
+        .poll(() => budgetPage.getBudgetedAmount(categoryName))
+        .toEqual(400);
+    });
+  });
 });
 
 test.describe('Budget scroll position', () => {
