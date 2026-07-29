@@ -38,11 +38,14 @@ export function MonteCarloHistogramTooltip({
           padding: 10,
         })}
       >
-        {t('{{count}} of {{total}} scenarios ran out of money at age {{age}}', {
-          count: point.count,
-          total: simulationCount,
-          age: point.age,
-        })}
+        {t(
+          '{{failedCount}} of {{total}} scenarios ran out of money at age {{age}}',
+          {
+            failedCount: point.count,
+            total: simulationCount,
+            age: point.age,
+          },
+        )}
       </div>
     );
   }

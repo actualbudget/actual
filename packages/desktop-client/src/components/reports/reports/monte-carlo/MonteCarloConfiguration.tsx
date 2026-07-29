@@ -187,6 +187,7 @@ export function MonteCarloConfiguration({
                 </View>
                 <MonteCarloNumberInput
                   value={config.currentAge}
+                  aria-label={t('Your current age')}
                   roundToInteger
                   min={16}
                   max={119}
@@ -207,6 +208,7 @@ export function MonteCarloConfiguration({
                 </View>
                 <MonteCarloNumberInput
                   value={config.targetAge}
+                  aria-label={t('Pot must last until age')}
                   roundToInteger
                   min={config.currentAge + 1}
                   max={120}
@@ -244,6 +246,7 @@ export function MonteCarloConfiguration({
                 </View>
                 <MonteCarloNumberInput
                   value={config.inflationMean}
+                  aria-label={t('Inflation mean (%)')}
                   scale={100}
                   allowEmpty
                   min={0}
@@ -275,6 +278,7 @@ export function MonteCarloConfiguration({
                 </View>
                 <MonteCarloNumberInput
                   value={config.inflationStdDev}
+                  aria-label={t('Inflation std dev (%)')}
                   scale={100}
                   min={0}
                   max={50}
@@ -348,6 +352,7 @@ export function MonteCarloConfiguration({
                 </View>
                 <MonteCarloNumberInput
                   value={config.simulationCount}
+                  aria-label={t('Simulations')}
                   roundToInteger
                   min={MIN_SIMULATION_COUNT}
                   max={MAX_SIMULATION_COUNT}

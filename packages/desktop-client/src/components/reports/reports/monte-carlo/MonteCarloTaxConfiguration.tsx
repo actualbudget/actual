@@ -174,6 +174,7 @@ export function MonteCarloTaxConfiguration({
                 <Field width="flex" style={{ minWidth: 140 }} truncate={false}>
                   <MonteCarloNumberInput
                     value={band.rate}
+                    aria-label={t('Taxed at (%)')}
                     scale={100}
                     min={0}
                     max={MAX_TAX_BAND_RATE * 100}

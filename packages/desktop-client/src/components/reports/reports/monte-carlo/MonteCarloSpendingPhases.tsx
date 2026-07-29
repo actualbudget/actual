@@ -173,6 +173,7 @@ export function MonteCarloSpendingPhases({
                   ) : (
                     <MonteCarloNumberInput
                       value={phase.fromAge}
+                      aria-label={t('From age')}
                       roundToInteger
                       min={currentAge + 1}
                       max={targetAge}

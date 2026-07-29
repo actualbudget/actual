@@ -63,15 +63,22 @@ export function MonteCarloRunsTable({
     if (balanceDiff !== 0) {
       return balanceDiff;
     }
-    const runADepletion =
-      depletionYearBySimulation[runA] === -1
-        ? Infinity
-        : depletionYearBySimulation[runA];
-    const runBDepletion =
-      depletionYearBySimulation[runB] === -1
-        ? Infinity
-        : depletionYearBySimulation[runB];
-    return runADepletion - runBDepletion;
+    // Survivors (-1) rank after any depleted run; explicit branches so
+    // two survivors compare as a tie instead of Infinity - Infinity
+    const runADepletionYear = depletionYearBySimulation[runA];
+    const runBDepletionYear = depletionYearBySimulation[runB];
+    const runASurvived = runADepletionYear === -1;
+    const runBSurvived = runBDepletionYear === -1;
+    if (runASurvived && runBSurvived) {
+      return 0;
+    }
+    if (runASurvived) {
+      return 1;
+    }
+    if (runBSurvived) {
+      return -1;
+    }
+    return runADepletionYear - runBDepletionYear;
   });
   if (sortOrder === 'best-first') {
     rankedIndices.reverse();

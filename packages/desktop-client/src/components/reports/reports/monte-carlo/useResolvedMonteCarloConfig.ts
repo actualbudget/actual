@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import type { MonteCarloConfig } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { useAccountBalances } from '#hooks/useAccountBalances';
 
@@ -16,14 +18,21 @@ export function useResolvedMonteCarloConfig(
       .filter((id): id is string => id != null),
   );
 
-  return {
-    ...config,
-    pots: config.pots.map(pot => {
-      const balance =
-        pot.accountId != null ? accountBalances[pot.accountId] : null;
-      return balance != null
-        ? { ...pot, startingBalance: Math.max(0, balance) }
-        : pot;
+  // Memoized by hand: this plain .ts file sits outside the React
+  // Compiler's include (.tsx only), and the compiled consumers key their
+  // auto-memoized simulation runs on this object's identity - a fresh
+  // object every render would re-simulate on every unrelated re-render
+  return useMemo(
+    () => ({
+      ...config,
+      pots: config.pots.map(pot => {
+        const balance =
+          pot.accountId != null ? accountBalances[pot.accountId] : null;
+        return balance != null
+          ? { ...pot, startingBalance: Math.max(0, balance) }
+          : pot;
+      }),
     }),
-  };
+    [config, accountBalances],
+  );
 }

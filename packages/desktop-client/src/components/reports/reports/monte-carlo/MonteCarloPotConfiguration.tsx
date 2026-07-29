@@ -73,6 +73,24 @@ export function MonteCarloPotConfiguration({
   const isManualReturnDisabled =
     usesHistoricalReturns && pot.allocationPreset !== 'custom';
 
+  // A linked account that has since been closed or deleted isn't in the
+  // open-accounts list; keep it represented so the stored link doesn't
+  // display as a blank selection
+  const openAccounts = accounts.filter(account => account.closed === 0);
+  const linkedAccount = accounts.find(account => account.id === pot.accountId);
+  const missingLinkedOptions: Array<[string, string]> =
+    pot.accountId != null &&
+    !openAccounts.some(account => account.id === pot.accountId)
+      ? [
+          [
+            pot.accountId,
+            linkedAccount
+              ? t('{{name}} (closed)', { name: linkedAccount.name })
+              : t('Unavailable account'),
+          ],
+        ]
+      : [];
+
   return (
     <GridListItem
       textValue={pot.name || t('Pot {{number}}', { number: potNumber })}
@@ -164,9 +182,10 @@ export function MonteCarloPotConfiguration({
             }
             options={[
               ['', t('None')],
-              ...accounts
-                .filter(account => account.closed === 0)
-                .map(account => [account.id, account.name] as [string, string]),
+              ...missingLinkedOptions,
+              ...openAccounts.map(
+                account => [account.id, account.name] as [string, string],
+              ),
             ]}
           />
         </Field>
@@ -208,6 +227,7 @@ export function MonteCarloPotConfiguration({
         >
           <MonteCarloNumberInput
             value={pot.expectedReturnMean}
+            aria-label={t('Expected return (%)')}
             scale={100}
             min={-100}
             max={100}
@@ -228,6 +248,7 @@ export function MonteCarloPotConfiguration({
         >
           <MonteCarloNumberInput
             value={pot.returnStdDev}
+            aria-label={t('Volatility (std dev %)')}
             scale={100}
             min={0}
             max={100}
@@ -294,6 +315,7 @@ export function MonteCarloPotConfiguration({
               </View>
               <MonteCarloNumberInput
                 value={pot.accessAge}
+                aria-label={t('Accessible from age')}
                 allowEmpty
                 roundToInteger
                 min={16}
@@ -342,6 +364,7 @@ export function MonteCarloPotConfiguration({
               {usesTaxBands ? (
                 <MonteCarloNumberInput
                   value={pot.taxableFraction}
+                  aria-label={t('Taxable portion (%)')}
                   scale={100}
                   min={0}
                   max={100}
@@ -352,6 +375,7 @@ export function MonteCarloPotConfiguration({
               ) : (
                 <MonteCarloNumberInput
                   value={pot.withdrawalTaxRate}
+                  aria-label={t('Tax (%)')}
                   scale={100}
                   min={0}
                   max={MAX_WITHDRAWAL_TAX_RATE * 100}
@@ -426,6 +450,7 @@ export function MonteCarloPotConfiguration({
                 </View>
                 <MonteCarloNumberInput
                   value={pot.annualFeeRate}
+                  aria-label={t('Fee (% of balance)')}
                   scale={100}
                   min={0}
                   max={MAX_ANNUAL_FEE_RATE * 100}

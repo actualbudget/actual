@@ -114,6 +114,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
               If the withdrawal rate rises more than
               <MonteCarloNumberInput
                 value={rule.preservationTriggerPct}
+                aria-label={t('Capital preservation trigger (%)')}
                 scale={100}
                 min={0}
                 max={100}
@@ -125,6 +126,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
               % above the planned rate, cut withdrawals by
               <MonteCarloNumberInput
                 value={rule.preservationCutPct}
+                aria-label={t('Capital preservation cut (%)')}
                 scale={100}
                 min={0}
                 max={100}
@@ -144,6 +146,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
               If the withdrawal rate falls more than
               <MonteCarloNumberInput
                 value={rule.prosperityTriggerPct}
+                aria-label={t('Prosperity trigger (%)')}
                 scale={100}
                 min={0}
                 max={100}
@@ -155,6 +158,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
               % below the planned rate, raise withdrawals by
               <MonteCarloNumberInput
                 value={rule.prosperityIncreasePct}
+                aria-label={t('Prosperity raise (%)')}
                 scale={100}
                 min={0}
                 max={100}
@@ -175,6 +179,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
             If the accessible balance stays above
             <MonteCarloNumberInput
               value={rule.balanceThresholdMultiple}
+              aria-label={t('Balance threshold multiple')}
               min={1}
               max={10}
               step={0.1}
@@ -186,6 +191,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
             times its starting level for
             <MonteCarloNumberInput
               value={rule.consecutiveYears}
+              aria-label={t('Years in a row')}
               roundToInteger
               min={1}
               max={30}
@@ -198,6 +204,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
             years in a row, raise withdrawals by
             <MonteCarloNumberInput
               value={rule.ratchetIncreasePct}
+              aria-label={t('Ratchet raise (%)')}
               scale={100}
               min={0}
               max={100}
@@ -218,6 +225,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
             accessible balance, but never more than
             <MonteCarloNumberInput
               value={rule.ceilingPct}
+              aria-label={t('Ceiling above planned amount (%)')}
               scale={100}
               min={0}
               max={200}
@@ -227,6 +235,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
             % above or
             <MonteCarloNumberInput
               value={rule.floorPct}
+              aria-label={t('Floor below planned amount (%)')}
               scale={100}
               min={0}
               max={100}
@@ -245,6 +254,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
               If the withdrawal rate rises above
               <MonteCarloNumberInput
                 value={rule.upperRateThreshold}
+                aria-label={t('Upper withdrawal rate threshold (%)')}
                 scale={100}
                 min={0}
                 max={100}
@@ -256,6 +266,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
               %, cut withdrawals by
               <MonteCarloNumberInput
                 value={rule.upperCutPct}
+                aria-label={t('Cut when above the upper threshold (%)')}
                 scale={100}
                 min={0}
                 max={100}
@@ -272,6 +283,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
               If the withdrawal rate falls below
               <MonteCarloNumberInput
                 value={rule.lowerRateThreshold}
+                aria-label={t('Lower withdrawal rate threshold (%)')}
                 scale={100}
                 min={0}
                 max={100}
@@ -283,6 +295,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
               %, raise withdrawals by
               <MonteCarloNumberInput
                 value={rule.lowerIncreasePct}
+                aria-label={t('Raise when below the lower threshold (%)')}
                 scale={100}
                 min={0}
                 max={100}

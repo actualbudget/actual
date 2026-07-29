@@ -28,6 +28,8 @@ type MonteCarloNumberInputProps = {
   step?: number;
   placeholder?: string;
   disabled?: boolean;
+  /** Accessible name; pass the field's visible label text */
+  'aria-label'?: string;
   /** Extra styles, e.g. for compact inline inputs inside a sentence */
   style?: CSSProperties;
 };
@@ -47,6 +49,7 @@ export function MonteCarloNumberInput({
   step = 0.1,
   placeholder,
   disabled = false,
+  'aria-label': ariaLabel,
   style,
 }: MonteCarloNumberInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -101,6 +104,7 @@ export function MonteCarloNumberInput({
       value={text}
       placeholder={placeholder}
       disabled={disabled}
+      aria-label={ariaLabel}
       style={style}
       onChangeValue={setText}
       onFocus={() => {

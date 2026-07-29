@@ -614,8 +614,8 @@ export function MonteCarlo() {
                 Damodaran data) drawn in random order for each pot&apos;s
                 allocation mix. Real crash years are included, but multi-year
                 momentum is lost by shuffling, fees and taxes are ignored, and
-                US history has been unusually good results may be optimistic for
-                globally diversified portfolios.
+                US history has been unusually good, so results may be optimistic
+                for globally diversified portfolios.
               </Trans>
             ) : (
               <Trans>
