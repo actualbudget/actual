@@ -2,9 +2,18 @@
 
 ## 26.8.0
 
-Release date: 2026-08-01
+Release date: 2026-08-02
 
-- TODO: Add release highlights
+This release promotes Age of Money and Payee Locations to stable features, improves mobile banking and onboarding, and adds day-level date ranges to reports, as well as numerous other fixes.
+
+- Age of Money report released as a first-party feature
+- [Payee Locations](../../docs/transactions/payee-locations) released as a first-party feature
+- Redesigned onboarding screens and a smoother first-account setup
+- Add account reconciliation on mobile
+- Set up bank sync providers and link accounts from the mobile Bank Sync page
+- Day-level date range selection in reports
+- Export Budget Analysis reports as CSV
+- The `@actual-app/api` package can now be used in browser context; allowing to build your own UI for Actual or custom tools - [demo - financial analysis](https://github.com/actualbudget/browser-app-demo)
 
 **Docker Tag: 26.8.0**
 
