@@ -16,23 +16,15 @@ import type {
   FanChartDataPoint,
   MonteCarloGraphView,
 } from '#components/reports/graphs/MonteCarloGraphTooltip';
-import { MonteCarloGraphTooltip } from '#components/reports/graphs/MonteCarloGraphTooltip';
+import {
+  MonteCarloGraphTooltip,
+  VIEW_DATA_KEYS,
+} from '#components/reports/graphs/MonteCarloGraphTooltip';
 import { computePadding } from '#components/reports/graphs/util/computePadding';
 import { MAX_FORMATTABLE_AMOUNT } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type { MonteCarloPercentileBand } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { useFormat } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
-
-const VIEW_DATA_KEYS: Record<
-  Exclude<MonteCarloGraphView, 'all'>,
-  keyof FanChartDataPoint
-> = {
-  'single-worst': 'worstRun',
-  'worst-case': 'p5',
-  pessimistic: 'p30',
-  median: 'p50',
-  optimistic: 'p70',
-};
 
 type MonteCarloGraphProps = {
   style?: CSSProperties;

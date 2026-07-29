@@ -5,29 +5,21 @@ import { Button } from '@actual-app/components/button';
 import {
   SvgCheveronDown,
   SvgCheveronRight,
-  SvgQuestion,
 } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import type {
   MonteCarloPot,
   MonteCarloRunDetailRow,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
+import { GROUP_HEADING_STYLE } from '#components/reports/reports/monte-carlo/monteCarloStyles';
 import { useFormat } from '#hooks/useFormat';
-
-const HEADER_CELL_STYLE = {
-  fontWeight: 600,
-  color: theme.pageText,
-  textTransform: 'uppercase',
-  fontSize: 12,
-  letterSpacing: 0.5,
-} as const;
 
 // The minWidth keeps amounts readable on narrow screens - the table
 // scrolls sideways instead of letting columns collapse into each other
@@ -40,7 +32,7 @@ const AMOUNT_CELL_STYLE = {
 type MonteCarloRunDetailTableProps = {
   rows: MonteCarloRunDetailRow[];
   pots: MonteCarloPot[];
-  simIndex: number;
+  simulationIndex: number;
   simulationCount: number;
   startAge: number;
   onBack: () => void;
@@ -49,7 +41,7 @@ type MonteCarloRunDetailTableProps = {
 export function MonteCarloRunDetailTable({
   rows,
   pots,
-  simIndex,
+  simulationIndex,
   simulationCount,
   startAge,
   onBack,
@@ -85,6 +77,33 @@ export function MonteCarloRunDetailTable({
     totalFees += row.feesPaid;
   }
 
+  // Four sentence variants so each language can phrase the combinations
+  // naturally
+  function getTotalsSentence() {
+    const total = format(totalWithdrawn, 'financial');
+    const tax = format(totalTax, 'financial');
+    const fees = format(totalFees, 'financial');
+    if (totalTax > 0 && totalFees > 0) {
+      return t(
+        'Total withdrawn over this run: {{total}}, of which {{tax}} tax, plus {{fees}} paid in fees.',
+        { total, tax, fees },
+      );
+    }
+    if (totalTax > 0) {
+      return t(
+        'Total withdrawn over this run: {{total}}, of which {{tax}} tax.',
+        { total, tax },
+      );
+    }
+    if (totalFees > 0) {
+      return t(
+        'Total withdrawn over this run: {{total}}, plus {{fees}} paid in fees.',
+        { total, fees },
+      );
+    }
+    return t('Total withdrawn over this run: {{total}}.', { total });
+  }
+
   return (
     <View>
       <View
@@ -101,12 +120,12 @@ export function MonteCarloRunDetailTable({
         <Text style={{ fontWeight: 600 }}>
           {hasSurvived
             ? t('Run {{number}} of {{total}} - survived to age {{age}}', {
-                number: simIndex + 1,
+                number: simulationIndex + 1,
                 total: simulationCount,
                 age: lastRow ? startAge + lastRow.year : startAge,
               })
             : t('Run {{number}} of {{total}} - ran out at age {{age}}', {
-                number: simIndex + 1,
+                number: simulationIndex + 1,
                 total: simulationCount,
                 // The failure row's own age: the year the withdrawal
                 // couldn't be funded
@@ -132,36 +151,7 @@ export function MonteCarloRunDetailTable({
 
       <Text style={{ fontSize: 13, color: theme.pageText, marginBottom: 10 }}>
         <PrivacyFilter>
-          <FinancialText as="span">
-            {totalTax > 0 && totalFees > 0
-              ? t(
-                  'Total withdrawn over this run: {{total}}, of which {{tax}} tax, plus {{fees}} paid in fees.',
-                  {
-                    total: format(totalWithdrawn, 'financial'),
-                    tax: format(totalTax, 'financial'),
-                    fees: format(totalFees, 'financial'),
-                  },
-                )
-              : totalTax > 0
-                ? t(
-                    'Total withdrawn over this run: {{total}}, of which {{tax}} tax.',
-                    {
-                      total: format(totalWithdrawn, 'financial'),
-                      tax: format(totalTax, 'financial'),
-                    },
-                  )
-                : totalFees > 0
-                  ? t(
-                      'Total withdrawn over this run: {{total}}, plus {{fees}} paid in fees.',
-                      {
-                        total: format(totalWithdrawn, 'financial'),
-                        fees: format(totalFees, 'financial'),
-                      },
-                    )
-                  : t('Total withdrawn over this run: {{total}}.', {
-                      total: format(totalWithdrawn, 'financial'),
-                    })}
-          </FinancialText>
+          <FinancialText as="span">{getTotalsSentence()}</FinancialText>
         </PrivacyFilter>
       </Text>
 
@@ -177,24 +167,24 @@ export function MonteCarloRunDetailTable({
             }}
           >
             <View style={{ width: 36 }} />
-            <Text style={{ ...HEADER_CELL_STYLE, width: 60 }}>
+            <Text style={{ ...GROUP_HEADING_STYLE, width: 60 }}>
               <Trans>Age</Trans>
             </Text>
-            <Text style={{ ...HEADER_CELL_STYLE, ...AMOUNT_CELL_STYLE }}>
+            <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
               <Trans>Starting balance</Trans>
             </Text>
-            <Text style={{ ...HEADER_CELL_STYLE, ...AMOUNT_CELL_STYLE }}>
+            <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
               <Trans>Withdrawal</Trans>
             </Text>
-            <Text style={{ ...HEADER_CELL_STYLE, ...AMOUNT_CELL_STYLE }}>
+            <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
               <Trans>Investment growth</Trans>
             </Text>
             <Text
-              style={{ ...HEADER_CELL_STYLE, width: 90, textAlign: 'right' }}
+              style={{ ...GROUP_HEADING_STYLE, width: 90, textAlign: 'right' }}
             >
               <Trans>Return (%)</Trans>
             </Text>
-            <Text style={{ ...HEADER_CELL_STYLE, ...AMOUNT_CELL_STYLE }}>
+            <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
               <Trans>Ending balance</Trans>
             </Text>
           </View>
@@ -373,7 +363,7 @@ export function MonteCarloRunDetailTable({
                         >
                           <Text
                             style={{
-                              ...HEADER_CELL_STYLE,
+                              ...GROUP_HEADING_STYLE,
                               flex: 1,
                               minWidth: 120,
                             }}
@@ -382,7 +372,7 @@ export function MonteCarloRunDetailTable({
                           </Text>
                           <Text
                             style={{
-                              ...HEADER_CELL_STYLE,
+                              ...GROUP_HEADING_STYLE,
                               width: 130,
                               textAlign: 'right',
                             }}
@@ -391,7 +381,7 @@ export function MonteCarloRunDetailTable({
                           </Text>
                           <Text
                             style={{
-                              ...HEADER_CELL_STYLE,
+                              ...GROUP_HEADING_STYLE,
                               width: 110,
                               textAlign: 'right',
                             }}
@@ -407,39 +397,24 @@ export function MonteCarloRunDetailTable({
                               gap: 4,
                             }}
                           >
-                            <Text style={HEADER_CELL_STYLE}>
+                            <Text style={GROUP_HEADING_STYLE}>
                               <Trans>Tax paid</Trans>
                             </Text>
-                            <Tooltip
-                              content={
-                                <View style={{ maxWidth: 300 }}>
-                                  <Text>
-                                    <Trans>
-                                      With tax bands, the year&apos;s tax is
-                                      worked out on all pots&apos; taxable
-                                      income together, then shared here in
-                                      proportion to each pot&apos;s taxable
-                                      income - so every taxable pound bears the
-                                      year&apos;s average rate, even from a
-                                      small pot. With a flat rate per pot, each
-                                      pot&apos;s tax is exact.
-                                    </Trans>
-                                  </Text>
-                                </View>
-                              }
-                              placement="bottom end"
-                              style={{ ...styles.tooltip }}
-                            >
-                              <SvgQuestion
-                                height={12}
-                                width={12}
-                                cursor="pointer"
-                              />
-                            </Tooltip>
+                            <MonteCarloHelpTooltip placement="bottom end">
+                              <Trans>
+                                With tax bands, the year&apos;s tax is worked
+                                out on all pots&apos; taxable income together,
+                                then shared here in proportion to each
+                                pot&apos;s taxable income - so every taxable
+                                pound bears the year&apos;s average rate, even
+                                from a small pot. With a flat rate per pot, each
+                                pot&apos;s tax is exact.
+                              </Trans>
+                            </MonteCarloHelpTooltip>
                           </View>
                           <Text
                             style={{
-                              ...HEADER_CELL_STYLE,
+                              ...GROUP_HEADING_STYLE,
                               width: 90,
                               textAlign: 'right',
                             }}
@@ -448,7 +423,7 @@ export function MonteCarloRunDetailTable({
                           </Text>
                           <Text
                             style={{
-                              ...HEADER_CELL_STYLE,
+                              ...GROUP_HEADING_STYLE,
                               width: 130,
                               textAlign: 'right',
                             }}

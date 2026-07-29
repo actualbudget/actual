@@ -1,11 +1,9 @@
 import { Trans } from 'react-i18next';
 
-import { SvgQuestion } from '@actual-app/components/icons/v1';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
-import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
+import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { Field, TableHeader } from '#components/table';
 
 // Shared by the header and the pot rows so the columns line up. The
@@ -50,26 +48,16 @@ export function MonteCarloPotsTableHeader() {
           <Text>
             <Trans>Linked account</Trans>
           </Text>
-          <Tooltip
-            content={
-              <View style={{ maxWidth: 300 }}>
-                <Text>
-                  <Trans>
-                    Use an account&apos;s live balance as this pot&apos;s
-                    starting balance, so the plan stays up to date on its own.
-                    <br />
-                    <br />
-                    Typing a starting balance manually unlinks the pot - handy
-                    for what-if experiments.
-                  </Trans>
-                </Text>
-              </View>
-            }
-            placement="bottom start"
-            style={{ ...styles.tooltip }}
-          >
-            <SvgQuestion height={12} width={12} cursor="pointer" />
-          </Tooltip>
+          <MonteCarloHelpTooltip>
+            <Trans>
+              Use an account&apos;s live balance as this pot&apos;s starting
+              balance, so the plan stays up to date on its own.
+              <br />
+              <br />
+              Typing a starting balance manually unlinks the pot - handy for
+              what-if experiments.
+            </Trans>
+          </MonteCarloHelpTooltip>
         </View>
       </Field>
       <Field
@@ -81,23 +69,13 @@ export function MonteCarloPotsTableHeader() {
           <Text>
             <Trans>Portfolio allocation</Trans>
           </Text>
-          <Tooltip
-            content={
-              <View style={{ maxWidth: 300 }}>
-                <Text>
-                  <Trans>
-                    A one-click starting point that fills in a typical expected
-                    return and volatility for the selected mix of stocks and
-                    bonds. You can still override both values.
-                  </Trans>
-                </Text>
-              </View>
-            }
-            placement="bottom start"
-            style={{ ...styles.tooltip }}
-          >
-            <SvgQuestion height={12} width={12} cursor="pointer" />
-          </Tooltip>
+          <MonteCarloHelpTooltip>
+            <Trans>
+              A one-click starting point that fills in a typical expected return
+              and volatility for the selected mix of stocks and bonds. You can
+              still override both values.
+            </Trans>
+          </MonteCarloHelpTooltip>
         </View>
       </Field>
       <Field
@@ -109,22 +87,12 @@ export function MonteCarloPotsTableHeader() {
           <Text>
             <Trans>Expected return (%)</Trans>
           </Text>
-          <Tooltip
-            content={
-              <View style={{ maxWidth: 300 }}>
-                <Text>
-                  <Trans>
-                    The average yearly investment return before inflation. Each
-                    simulated year draws a random return around this average.
-                  </Trans>
-                </Text>
-              </View>
-            }
-            placement="bottom start"
-            style={{ ...styles.tooltip }}
-          >
-            <SvgQuestion height={12} width={12} cursor="pointer" />
-          </Tooltip>
+          <MonteCarloHelpTooltip>
+            <Trans>
+              The average yearly investment return before inflation. Each
+              simulated year draws a random return around this average.
+            </Trans>
+          </MonteCarloHelpTooltip>
         </View>
       </Field>
       <Field
@@ -136,23 +104,13 @@ export function MonteCarloPotsTableHeader() {
           <Text>
             <Trans>Volatility (std dev %)</Trans>
           </Text>
-          <Tooltip
-            content={
-              <View style={{ maxWidth: 300 }}>
-                <Text>
-                  <Trans>
-                    How much returns swing from year to year. Higher volatility
-                    means bigger ups and downs, which makes running out of money
-                    more likely even with the same average return.
-                  </Trans>
-                </Text>
-              </View>
-            }
-            placement="bottom start"
-            style={{ ...styles.tooltip }}
-          >
-            <SvgQuestion height={12} width={12} cursor="pointer" />
-          </Tooltip>
+          <MonteCarloHelpTooltip>
+            <Trans>
+              How much returns swing from year to year. Higher volatility means
+              bigger ups and downs, which makes running out of money more likely
+              even with the same average return.
+            </Trans>
+          </MonteCarloHelpTooltip>
         </View>
       </Field>
       <Field width={POT_COLUMNS.remove} />

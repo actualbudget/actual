@@ -208,12 +208,12 @@ describe('runMonteCarloSimulation', () => {
   });
 
   it('is deterministic for a given seed', () => {
-    const a = runMonteCarloSimulation(makeParams({ seed: 7 }));
-    const b = runMonteCarloSimulation(makeParams({ seed: 7 }));
-    expect(a).toEqual(b);
+    const firstRun = runMonteCarloSimulation(makeParams({ seed: 7 }));
+    const secondRun = runMonteCarloSimulation(makeParams({ seed: 7 }));
+    expect(firstRun).toEqual(secondRun);
 
-    const c = runMonteCarloSimulation(makeParams({ seed: 8 }));
-    expect(c.successRate).not.toBe(a.successRate);
+    const differentSeedRun = runMonteCarloSimulation(makeParams({ seed: 8 }));
+    expect(differentSeedRun.successRate).not.toBe(firstRun.successRate);
   });
 
   it('produces ordered percentile bands', () => {
@@ -243,8 +243,10 @@ describe('runMonteCarloSimulation', () => {
     );
     const probabilities = result.depletionProbabilityByYear;
     expect(probabilities[0]).toBe(0);
-    for (let i = 1; i < probabilities.length; i++) {
-      expect(probabilities[i]).toBeGreaterThanOrEqual(probabilities[i - 1]);
+    for (let year = 1; year < probabilities.length; year++) {
+      expect(probabilities[year]).toBeGreaterThanOrEqual(
+        probabilities[year - 1],
+      );
     }
     expect(probabilities[result.horizonYears]).toBeCloseTo(
       1 - result.successRate,
@@ -958,16 +960,24 @@ describe('runMonteCarloSimulation', () => {
     );
 
     expect(result.endingBalances).toHaveLength(result.simulationCount);
-    expect(result.depletionYearBySim).toHaveLength(result.simulationCount);
-    expect(result.totalWithdrawnBySim).toHaveLength(result.simulationCount);
+    expect(result.depletionYearBySimulation).toHaveLength(
+      result.simulationCount,
+    );
+    expect(result.totalWithdrawnBySimulation).toHaveLength(
+      result.simulationCount,
+    );
 
     let survived = 0;
-    for (let sim = 0; sim < result.simulationCount; sim++) {
-      if (result.depletionYearBySim[sim] === -1) {
+    for (
+      let simulationIndex = 0;
+      simulationIndex < result.simulationCount;
+      simulationIndex++
+    ) {
+      if (result.depletionYearBySimulation[simulationIndex] === -1) {
         survived++;
       } else {
         // Depleted runs end at zero
-        expect(result.endingBalances[sim]).toBe(0);
+        expect(result.endingBalances[simulationIndex]).toBe(0);
       }
     }
     expect(survived / result.simulationCount).toBe(result.successRate);
@@ -1013,18 +1023,18 @@ describe('runMonteCarloSimulation', () => {
     const base = makeParams({}, { returnStdDev: 0.15 });
     const original = runMonteCarloSimulation(base);
 
-    const simIndex = 123;
+    const simulationIndex = 123;
     const replay = runMonteCarloSimulation({
       ...base,
-      captureRunDetail: simIndex,
+      captureRunDetail: simulationIndex,
     });
     const rows = replay.runDetail!;
 
-    const depletionYear = original.depletionYearBySim[simIndex];
+    const depletionYear = original.depletionYearBySimulation[simulationIndex];
     if (depletionYear === -1) {
       expect(rows).toHaveLength(original.horizonYears);
       expect(rows[rows.length - 1].endBalance).toBe(
-        Math.round(original.endingBalances[simIndex]),
+        Math.round(original.endingBalances[simulationIndex]),
       );
     } else {
       expect(rows).toHaveLength(depletionYear);
@@ -1236,9 +1246,9 @@ describe('runMonteCarloSimulation', () => {
       { inflationMean: 0.025, inflationStdDev: 0.04 },
       { returnStdDev: 0.15 },
     );
-    const a = runMonteCarloSimulation(volatileParams);
-    const b = runMonteCarloSimulation(volatileParams);
-    expect(a).toEqual(b);
+    const firstRun = runMonteCarloSimulation(volatileParams);
+    const secondRun = runMonteCarloSimulation(volatileParams);
+    expect(firstRun).toEqual(secondRun);
 
     const fixed = runMonteCarloSimulation(
       makeParams(
@@ -1246,10 +1256,10 @@ describe('runMonteCarloSimulation', () => {
         { returnStdDev: 0.15 },
       ),
     );
-    expect(a.successRate).not.toBe(fixed.successRate);
+    expect(firstRun.successRate).not.toBe(fixed.successRate);
 
     // Percentile ordering holds under inflation volatility too
-    for (const band of a.percentileBands) {
+    for (const band of firstRun.percentileBands) {
       expect(band.p10).toBeLessThanOrEqual(band.p50);
       expect(band.p50).toBeLessThanOrEqual(band.p90);
     }
@@ -1614,11 +1624,17 @@ describe('runMonteCarloSimulation', () => {
       expect(band.p5).toBeGreaterThanOrEqual(0);
       expect(band.p90).toBeLessThanOrEqual(maxFormattable);
     }
-    for (let sim = 0; sim < result.simulationCount; sim++) {
-      expect(result.endingBalances[sim]).toBeLessThanOrEqual(maxFormattable);
-      expect(result.totalWithdrawnBySim[sim]).toBeLessThanOrEqual(
+    for (
+      let simulationIndex = 0;
+      simulationIndex < result.simulationCount;
+      simulationIndex++
+    ) {
+      expect(result.endingBalances[simulationIndex]).toBeLessThanOrEqual(
         maxFormattable,
       );
+      expect(
+        result.totalWithdrawnBySimulation[simulationIndex],
+      ).toBeLessThanOrEqual(maxFormattable);
     }
     for (const row of result.runDetail!) {
       const values = [

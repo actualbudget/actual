@@ -9,32 +9,25 @@ import { View } from '@actual-app/components/view';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import { GROUP_HEADING_STYLE } from '#components/reports/reports/monte-carlo/monteCarloStyles';
 import { useFormat } from '#hooks/useFormat';
 
 const PAGE_SIZE = 20;
-
-const HEADER_CELL_STYLE = {
-  fontWeight: 600,
-  color: theme.pageText,
-  textTransform: 'uppercase',
-  fontSize: 12,
-  letterSpacing: 0.5,
-} as const;
 
 type SortOrder = 'worst-first' | 'best-first';
 
 type MonteCarloRunsTableProps = {
   endingBalances: Float64Array;
-  depletionYearBySim: Int32Array;
-  totalWithdrawnBySim: Float64Array;
+  depletionYearBySimulation: Int32Array;
+  totalWithdrawnBySimulation: Float64Array;
   startAge: number;
-  onSelectRun: (simIndex: number) => void;
+  onSelectRun: (simulationIndex: number) => void;
 };
 
 export function MonteCarloRunsTable({
   endingBalances,
-  depletionYearBySim,
-  totalWithdrawnBySim,
+  depletionYearBySimulation,
+  totalWithdrawnBySimulation,
   startAge,
   onSelectRun,
 }: MonteCarloRunsTableProps) {
@@ -61,17 +54,24 @@ export function MonteCarloRunsTable({
 
   // Rank every run: by ending balance, using the depletion year to order
   // the failed runs (which all end at zero) among themselves
-  const rankedIndices = Array.from({ length: simulationCount }, (_, i) => i);
-  rankedIndices.sort((a, b) => {
-    const balanceDiff = endingBalances[a] - endingBalances[b];
+  const rankedIndices = Array.from(
+    { length: simulationCount },
+    (_, index) => index,
+  );
+  rankedIndices.sort((runA, runB) => {
+    const balanceDiff = endingBalances[runA] - endingBalances[runB];
     if (balanceDiff !== 0) {
       return balanceDiff;
     }
-    const aDepletion =
-      depletionYearBySim[a] === -1 ? Infinity : depletionYearBySim[a];
-    const bDepletion =
-      depletionYearBySim[b] === -1 ? Infinity : depletionYearBySim[b];
-    return aDepletion - bDepletion;
+    const runADepletion =
+      depletionYearBySimulation[runA] === -1
+        ? Infinity
+        : depletionYearBySimulation[runA];
+    const runBDepletion =
+      depletionYearBySimulation[runB] === -1
+        ? Infinity
+        : depletionYearBySimulation[runB];
+    return runADepletion - runBDepletion;
   });
   if (sortOrder === 'best-first') {
     rankedIndices.reverse();
@@ -127,29 +127,33 @@ export function MonteCarloRunsTable({
           gap: 10,
         }}
       >
-        <Text style={{ ...HEADER_CELL_STYLE, width: 80 }}>
+        <Text style={{ ...GROUP_HEADING_STYLE, width: 80 }}>
           <Trans>Rank</Trans>
         </Text>
-        <Text style={{ ...HEADER_CELL_STYLE, flex: 1 }}>
+        <Text style={{ ...GROUP_HEADING_STYLE, flex: 1 }}>
           <Trans>Outcome</Trans>
         </Text>
-        <Text style={{ ...HEADER_CELL_STYLE, width: 160, textAlign: 'right' }}>
+        <Text
+          style={{ ...GROUP_HEADING_STYLE, width: 160, textAlign: 'right' }}
+        >
           <Trans>Ending balance</Trans>
         </Text>
-        <Text style={{ ...HEADER_CELL_STYLE, width: 160, textAlign: 'right' }}>
+        <Text
+          style={{ ...GROUP_HEADING_STYLE, width: 160, textAlign: 'right' }}
+        >
           <Trans>Total withdrawn</Trans>
         </Text>
       </View>
 
-      {pageIndices.map((simIndex, rowNumber) => {
-        const depletionYear = depletionYearBySim[simIndex];
+      {pageIndices.map((simulationIndex, rowNumber) => {
+        const depletionYear = depletionYearBySimulation[simulationIndex];
         const hasSurvived = depletionYear === -1;
         const isHighlighted = highlightedRank === pageStart + rowNumber;
         return (
           <Button
-            key={simIndex}
+            key={simulationIndex}
             variant="bare"
-            onPress={() => onSelectRun(simIndex)}
+            onPress={() => onSelectRun(simulationIndex)}
             style={{
               padding: '8px 0',
               borderBottom: `1px solid ${theme.tableBorder}`,
@@ -196,7 +200,7 @@ export function MonteCarloRunsTable({
                   <PrivacyFilter>
                     <FinancialText as="span">
                       {format(
-                        Math.round(endingBalances[simIndex]),
+                        Math.round(endingBalances[simulationIndex]),
                         'financial',
                       )}
                     </FinancialText>
@@ -209,7 +213,7 @@ export function MonteCarloRunsTable({
                 <PrivacyFilter>
                   <FinancialText as="span">
                     {format(
-                      Math.round(totalWithdrawnBySim[simIndex]),
+                      Math.round(totalWithdrawnBySimulation[simulationIndex]),
                       'financial',
                     )}
                   </FinancialText>

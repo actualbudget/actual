@@ -1,22 +1,20 @@
 import { Trans, useTranslation } from 'react-i18next';
 
-import { SvgQuestion } from '@actual-app/components/icons/v1';
 import { Select } from '@actual-app/components/select';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import type { MonteCarloWithdrawalRuleType } from '@actual-app/core/types/models';
 
+import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
+import { MAX_AMOUNT } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
+import type { MonteCarloWithdrawalRuleConfig } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import {
   FIELD_LABEL_ROW_STYLE,
   FIELD_LABEL_STYLE,
   FIELD_STYLE,
-} from '#components/reports/reports/monte-carlo/MonteCarloPotConfiguration';
-import { MAX_AMOUNT } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
-import type { MonteCarloWithdrawalRuleConfig } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
+} from '#components/reports/reports/monte-carlo/monteCarloStyles';
 import { FinancialInput } from '#components/util/FinancialInput';
 
 const SENTENCE_STYLE = {
@@ -55,23 +53,13 @@ export function MonteCarloWithdrawalRuleConfiguration({
             <Text style={FIELD_LABEL_STYLE}>
               <Trans>Withdrawal rule</Trans>
             </Text>
-            <Tooltip
-              content={
-                <View style={{ maxWidth: 300 }}>
-                  <Text>
-                    <Trans>
-                      Dynamic strategies that adjust your withdrawal each year
-                      based on how the pots are doing, instead of blindly taking
-                      the same inflation-adjusted amount.
-                    </Trans>
-                  </Text>
-                </View>
-              }
-              placement="bottom start"
-              style={{ ...styles.tooltip }}
-            >
-              <SvgQuestion height={12} width={12} cursor="pointer" />
-            </Tooltip>
+            <MonteCarloHelpTooltip>
+              <Trans>
+                Dynamic strategies that adjust your withdrawal each year based
+                on how the pots are doing, instead of blindly taking the same
+                inflation-adjusted amount.
+              </Trans>
+            </MonteCarloHelpTooltip>
           </View>
           <Select
             value={rule.type}
@@ -94,24 +82,14 @@ export function MonteCarloWithdrawalRuleConfiguration({
               <Text style={FIELD_LABEL_STYLE}>
                 <Trans>Minimum withdrawal</Trans>
               </Text>
-              <Tooltip
-                content={
-                  <View style={{ maxWidth: 300 }}>
-                    <Text>
-                      <Trans>
-                        The annual withdrawal never drops below this amount, no
-                        matter what the rule says. Like your planned spending,
-                        it&apos;s in today&apos;s money and rises with
-                        inflation. Set to 0 for no floor.
-                      </Trans>
-                    </Text>
-                  </View>
-                }
-                placement="bottom start"
-                style={{ ...styles.tooltip }}
-              >
-                <SvgQuestion height={12} width={12} cursor="pointer" />
-              </Tooltip>
+              <MonteCarloHelpTooltip>
+                <Trans>
+                  The annual withdrawal never drops below this amount, no matter
+                  what the rule says. Like your planned spending, it&apos;s in
+                  today&apos;s money and rises with inflation. Set to 0 for no
+                  floor.
+                </Trans>
+              </MonteCarloHelpTooltip>
             </View>
             <FinancialInput
               value={minimumWithdrawal}

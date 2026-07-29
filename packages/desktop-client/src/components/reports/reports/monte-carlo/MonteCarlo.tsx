@@ -15,7 +15,7 @@ import type { MonteCarloWidget } from '@actual-app/core/types/models';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { FinancialText } from '#components/FinancialText';
-import { Checkbox } from '#components/forms';
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
@@ -34,7 +34,8 @@ import {
   runMonteCarloSimulation,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type { MonteCarloConfig } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
-import { useAccountBalances } from '#hooks/useAccountBalances';
+import { GROUP_HEADING_STYLE } from '#components/reports/reports/monte-carlo/monteCarloStyles';
+import { useResolvedMonteCarloConfig } from '#components/reports/reports/monte-carlo/useResolvedMonteCarloConfig';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
@@ -45,14 +46,6 @@ import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 const firstYear = HISTORICAL_ANNUAL_RETURNS[0].year;
 const lastYear =
   HISTORICAL_ANNUAL_RETURNS[HISTORICAL_ANNUAL_RETURNS.length - 1].year;
-
-const STAT_HEADING_STYLE = {
-  fontWeight: 600,
-  color: theme.pageText,
-  textTransform: 'uppercase',
-  fontSize: 12,
-  letterSpacing: 0.5,
-} as const;
 
 export function MonteCarlo() {
   const params = useParams();
@@ -71,37 +64,26 @@ export function MonteCarlo() {
   const [graphView, setGraphView] = useState<MonteCarloGraphView>('all');
   const [resultsView, setResultsView] = useState<'chart' | 'runs'>('chart');
   const [showTodaysMoney, setShowTodaysMoney] = useState(true);
-  const [selectedRunIndex, setSelectedRunIndex] = useState<number | null>(null);
+  // A selected run refers to a specific simulation, so the selection is
+  // stored with the config it belongs to and silently expires when the
+  // config changes - no effect, no wasted render with a stale selection
+  const [selectedRun, setSelectedRun] = useState<{
+    forConfig: MonteCarloConfig;
+    index: number;
+  } | null>(null);
   const [selectionsInitialized, setSelectionsInitialized] = useState(false);
 
-  // Pots linked to an account take their starting balance from the
-  // account's live balance; fall back to the stored value until it arrives
-  const accountBalances = useAccountBalances(
-    config.pots
-      .map(pot => pot.accountId)
-      .filter((id): id is string => id != null),
-  );
-  const resolvedConfig: MonteCarloConfig = {
-    ...config,
-    pots: config.pots.map(pot => {
-      const balance =
-        pot.accountId != null ? accountBalances[pot.accountId] : null;
-      return balance != null
-        ? { ...pot, startingBalance: Math.max(0, balance) }
-        : pot;
-    }),
-  };
+  const selectedRunIndex =
+    selectedRun != null && selectedRun.forConfig === config
+      ? selectedRun.index
+      : null;
+
+  const resolvedConfig = useResolvedMonteCarloConfig(config);
 
   // reset when widget changes
   useEffect(() => {
     setSelectionsInitialized(false);
   }, [widget?.id]);
-
-  // A selected run refers to a specific simulation; drop the selection when
-  // the configuration (and therefore the simulation) changes
-  useEffect(() => {
-    setSelectedRunIndex(null);
-  }, [config]);
 
   // initialize once when the widget (if any) is available
   useEffect(() => {
@@ -116,15 +98,8 @@ export function MonteCarlo() {
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
 
   async function onSaveWidget() {
+    // The save button only renders when a widget exists
     if (!widget) {
-      dispatch(
-        addNotification({
-          notification: {
-            type: 'error',
-            message: t('Save failed: No widget found to save.'),
-          },
-        }),
-      );
       return;
     }
 
@@ -157,15 +132,8 @@ export function MonteCarlo() {
 
   const title = widget?.meta?.name || t('Monte Carlo Analysis');
   const onSaveWidgetName = async (newName: string) => {
+    // The editable title only renders when a widget exists
     if (!widget) {
-      dispatch(
-        addNotification({
-          notification: {
-            type: 'error',
-            message: t('Save failed: No widget found to save.'),
-          },
-        }),
-      );
       return;
     }
 
@@ -185,20 +153,19 @@ export function MonteCarlo() {
     return <LoadingIndicator />;
   }
 
-  const result = runMonteCarloSimulation({
+  const simulationParams = {
     ...resolvedConfig,
     horizonYears: getMonteCarloHorizonYears(resolvedConfig),
     deflateToTodaysMoney: showTodaysMoney,
-  });
+  };
+  const result = runMonteCarloSimulation(simulationParams);
 
   // Runs are seeded, so re-running with a capture index reproduces the
   // selected run exactly; only computed while a run is being inspected
   const runDetailRows =
     selectedRunIndex != null
       ? runMonteCarloSimulation({
-          ...resolvedConfig,
-          horizonYears: getMonteCarloHorizonYears(resolvedConfig),
-          deflateToTodaysMoney: showTodaysMoney,
+          ...simulationParams,
           captureRunDetail: selectedRunIndex,
         }).runDetail
       : null;
@@ -310,25 +277,14 @@ export function MonteCarlo() {
           >
             <Trans>Results</Trans>
           </Text>
-          <label
-            htmlFor="mc-todays-money"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              cursor: 'pointer',
-              userSelect: 'none',
-            }}
+          <LabeledCheckbox
+            id="mc-todays-money"
+            checked={showTodaysMoney}
+            onChange={event => setShowTodaysMoney(event.target.checked)}
+            style={{ flex: 'unset' }}
           >
-            <Checkbox
-              id="mc-todays-money"
-              checked={showTodaysMoney}
-              onChange={e => setShowTodaysMoney(e.target.checked)}
-            />
-            <Text>
-              <Trans>Show values in today&apos;s money</Trans>
-            </Text>
-          </label>
+            <Trans>Show values in today&apos;s money</Trans>
+          </LabeledCheckbox>
         </View>
 
         {/* Headline stats */}
@@ -350,7 +306,7 @@ export function MonteCarlo() {
             }}
           >
             <View style={{ gap: 4 }}>
-              <Text style={STAT_HEADING_STYLE}>
+              <Text style={GROUP_HEADING_STYLE}>
                 <Trans>Success rate</Trans>
               </Text>
               <Text
@@ -363,7 +319,7 @@ export function MonteCarlo() {
               </Text>
             </View>
             <View style={{ gap: 4 }}>
-              <Text style={STAT_HEADING_STYLE}>
+              <Text style={GROUP_HEADING_STYLE}>
                 <Trans>Median ending balance</Trans>
               </Text>
               <Text style={{ ...styles.mediumText, fontWeight: 500 }}>
@@ -375,7 +331,7 @@ export function MonteCarlo() {
               </Text>
             </View>
             <View style={{ gap: 4 }}>
-              <Text style={STAT_HEADING_STYLE}>
+              <Text style={GROUP_HEADING_STYLE}>
                 <Trans>Median total withdrawn</Trans>
               </Text>
               <Text style={{ ...styles.mediumText, fontWeight: 500 }}>
@@ -387,7 +343,7 @@ export function MonteCarlo() {
               </Text>
             </View>
             <View style={{ gap: 4 }}>
-              <Text style={STAT_HEADING_STYLE}>
+              <Text style={GROUP_HEADING_STYLE}>
                 <Trans>Chance of running out of money</Trans>
               </Text>
               <Text style={{ ...styles.mediumText, fontWeight: 500 }}>
@@ -396,7 +352,7 @@ export function MonteCarlo() {
             </View>
             {result.medianDepletionYear != null && (
               <View style={{ gap: 4 }}>
-                <Text style={STAT_HEADING_STYLE}>
+                <Text style={GROUP_HEADING_STYLE}>
                   <Trans>Typical failure runs out at</Trans>
                 </Text>
                 <Text style={{ ...styles.mediumText, fontWeight: 500 }}>
@@ -410,7 +366,7 @@ export function MonteCarlo() {
             )}
           </View>
           <View style={{ marginTop: 10, gap: 5 }}>
-            <Text style={STAT_HEADING_STYLE}>
+            <Text style={GROUP_HEADING_STYLE}>
               <Trans>Summary</Trans>
             </Text>
             <Text>
@@ -524,18 +480,20 @@ export function MonteCarlo() {
             <MonteCarloRunDetailTable
               rows={runDetailRows}
               pots={resolvedConfig.pots}
-              simIndex={selectedRunIndex}
+              simulationIndex={selectedRunIndex}
               simulationCount={result.simulationCount}
               startAge={config.currentAge}
-              onBack={() => setSelectedRunIndex(null)}
+              onBack={() => setSelectedRun(null)}
             />
           ) : (
             <MonteCarloRunsTable
               endingBalances={result.endingBalances}
-              depletionYearBySim={result.depletionYearBySim}
-              totalWithdrawnBySim={result.totalWithdrawnBySim}
+              depletionYearBySimulation={result.depletionYearBySimulation}
+              totalWithdrawnBySimulation={result.totalWithdrawnBySimulation}
               startAge={config.currentAge}
-              onSelectRun={simIndex => setSelectedRunIndex(simIndex)}
+              onSelectRun={simulationIndex =>
+                setSelectedRun({ forConfig: config, index: simulationIndex })
+              }
             />
           )}
         </View>

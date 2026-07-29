@@ -2,22 +2,23 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgDelete } from '@actual-app/components/icons/v0';
-import { SvgAdd, SvgQuestion } from '@actual-app/components/icons/v1';
+import { SvgAdd } from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { v4 as uuidv4 } from 'uuid';
 
+import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
-import { FIELD_LABEL_STYLE } from '#components/reports/reports/monte-carlo/MonteCarloPotConfiguration';
 import {
   createMonteCarloSpendingPhase,
   MAX_AMOUNT,
+  sortMonteCarloSpendingPhases,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type { MonteCarloSpendingPhase } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
+import { FIELD_LABEL_STYLE } from '#components/reports/reports/monte-carlo/monteCarloStyles';
 import { Field, Row, TableHeader } from '#components/table';
 import { FinancialInput } from '#components/util/FinancialInput';
 
@@ -31,12 +32,6 @@ const PHASE_COLUMNS = {
 } as const;
 
 const PHASE_ROW_HEIGHT = 43;
-
-function sortPhases(phases: MonteCarloSpendingPhase[]) {
-  return [...phases].sort(
-    (a, b) => (a.fromAge ?? -Infinity) - (b.fromAge ?? -Infinity),
-  );
-}
 
 type MonteCarloSpendingPhasesProps = {
   phases: MonteCarloSpendingPhase[];
@@ -58,7 +53,7 @@ export function MonteCarloSpendingPhases({
     changes: Partial<MonteCarloSpendingPhase>,
   ) {
     onPhasesChange(
-      sortPhases(
+      sortMonteCarloSpendingPhases(
         phases.map(phase =>
           phase.id === phaseId ? { ...phase, ...changes } : phase,
         ),
@@ -82,7 +77,10 @@ export function MonteCarloSpendingPhases({
       Math.min(targetAge - 1, lastFrom + 10),
     );
     onPhasesChange(
-      sortPhases([...phases, createMonteCarloSpendingPhase(uuidv4(), fromAge)]),
+      sortMonteCarloSpendingPhases([
+        ...phases,
+        createMonteCarloSpendingPhase(uuidv4(), fromAge),
+      ]),
     );
   }
 
@@ -92,28 +90,18 @@ export function MonteCarloSpendingPhases({
         <Text style={FIELD_LABEL_STYLE}>
           <Trans>Spending phases</Trans>
         </Text>
-        <Tooltip
-          content={
-            <View style={{ maxWidth: 300 }}>
-              <Text>
-                <Trans>
-                  Your yearly spending doesn&apos;t have to stay the same for
-                  the whole plan. Each phase sets the yearly amount from a given
-                  age until the next phase begins - for example, more in your
-                  active early years and less later on.
-                  <br />
-                  <br />
-                  Amounts are in today&apos;s money; the inflation settings on
-                  the Plan details tab are applied on top.
-                </Trans>
-              </Text>
-            </View>
-          }
-          placement="bottom start"
-          style={{ ...styles.tooltip }}
-        >
-          <SvgQuestion height={12} width={12} cursor="pointer" />
-        </Tooltip>
+        <MonteCarloHelpTooltip>
+          <Trans>
+            Your yearly spending doesn&apos;t have to stay the same for the
+            whole plan. Each phase sets the yearly amount from a given age until
+            the next phase begins - for example, more in your active early years
+            and less later on.
+            <br />
+            <br />
+            Amounts are in today&apos;s money; the inflation settings on the
+            Plan details tab are applied on top.
+          </Trans>
+        </MonteCarloHelpTooltip>
       </View>
 
       <View

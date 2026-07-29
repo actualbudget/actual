@@ -31,6 +31,19 @@ export type FanChartDataPoint = {
   worstRun?: number;
 };
 
+// Single source of truth for which data point each focused view plots -
+// the graph draws this key and the tooltip reads the same one
+export const VIEW_DATA_KEYS = {
+  'single-worst': 'worstRun',
+  'worst-case': 'p5',
+  pessimistic: 'p30',
+  median: 'p50',
+  optimistic: 'p70',
+} as const satisfies Record<
+  Exclude<MonteCarloGraphView, 'all'>,
+  keyof FanChartDataPoint
+>;
+
 type PayloadItem = {
   payload: FanChartDataPoint;
 };
@@ -51,6 +64,16 @@ export function MonteCarloGraphTooltip({
 
   if (active && payload && payload.length) {
     const point = payload[0].payload;
+    const singleViewLabels: Record<
+      Exclude<MonteCarloGraphView, 'all'>,
+      string
+    > = {
+      'single-worst': t('Single worst run:'),
+      'worst-case': t('Worst-case (5th percentile):'),
+      pessimistic: t('Pessimistic (30th percentile):'),
+      median: t('Median (50th percentile):'),
+      optimistic: t('Optimistic (70th percentile):'),
+    };
     const rows =
       view === 'all'
         ? [
@@ -60,25 +83,12 @@ export function MonteCarloGraphTooltip({
             { label: t('Bottom quartile:'), value: point.p25 },
             { label: t('Worst 10%:'), value: point.p10 },
           ]
-        : view === 'single-worst'
-          ? [{ label: t('Single worst run:'), value: point.worstRun ?? 0 }]
-          : view === 'worst-case'
-            ? [{ label: t('Worst-case (5th percentile):'), value: point.p5 }]
-            : view === 'pessimistic'
-              ? [
-                  {
-                    label: t('Pessimistic (30th percentile):'),
-                    value: point.p30,
-                  },
-                ]
-              : view === 'median'
-                ? [{ label: t('Median (50th percentile):'), value: point.p50 }]
-                : [
-                    {
-                      label: t('Optimistic (70th percentile):'),
-                      value: point.p70,
-                    },
-                  ];
+        : [
+            {
+              label: singleViewLabels[view],
+              value: point[VIEW_DATA_KEYS[view]] ?? 0,
+            },
+          ];
     return (
       <div
         className={css({

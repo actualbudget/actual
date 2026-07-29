@@ -4,13 +4,12 @@ import { DropIndicator, GridList, useDragAndDrop } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgAdd, SvgQuestion } from '@actual-app/components/icons/v1';
+import { SvgAdd } from '@actual-app/components/icons/v1';
 import { ModeButton } from '@actual-app/components/mode-button';
 import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import type {
   MonteCarloReturnModel,
@@ -19,13 +18,9 @@ import type {
 import { css } from '@emotion/css';
 import { v4 as uuidv4 } from 'uuid';
 
+import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
-import {
-  FIELD_LABEL_ROW_STYLE,
-  FIELD_LABEL_STYLE,
-  FIELD_STYLE,
-  MonteCarloPotConfiguration,
-} from '#components/reports/reports/monte-carlo/MonteCarloPotConfiguration';
+import { MonteCarloPotConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloPotConfiguration';
 import { MonteCarloPotsTableHeader } from '#components/reports/reports/monte-carlo/MonteCarloPotsTableHeader';
 import {
   createMonteCarloPot,
@@ -38,19 +33,16 @@ import type {
   MonteCarloPot,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { MonteCarloSpendingPhases } from '#components/reports/reports/monte-carlo/MonteCarloSpendingPhases';
+import {
+  FIELD_LABEL_ROW_STYLE,
+  FIELD_LABEL_STYLE,
+  FIELD_STYLE,
+  GROUP_HEADING_STYLE,
+} from '#components/reports/reports/monte-carlo/monteCarloStyles';
 import { MonteCarloTaxConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloTaxConfiguration';
 import { MonteCarloWithdrawalRuleConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloWithdrawalRuleConfiguration';
 
 type ConfigurationTab = 'plan' | 'pots' | 'withdrawals' | 'tax';
-
-// Same visual family as the stat-tile headings on the report page
-const PLAN_GROUP_HEADING_STYLE = {
-  fontSize: 12,
-  fontWeight: 600,
-  letterSpacing: 0.5,
-  textTransform: 'uppercase',
-  color: theme.pageText,
-} as const;
 
 const PLAN_GROUP_FIELDS_STYLE = {
   flexDirection: 'row',
@@ -94,10 +86,12 @@ export function MonteCarloConfiguration({
         })}
       />
     ),
-    onReorder: e => {
-      const [movedKey] = e.keys;
+    onReorder: event => {
+      const [movedKey] = event.keys;
       const fromIndex = config.pots.findIndex(pot => pot.id === movedKey);
-      const targetIndex = config.pots.findIndex(pot => pot.id === e.target.key);
+      const targetIndex = config.pots.findIndex(
+        pot => pot.id === event.target.key,
+      );
       if (fromIndex === -1 || targetIndex === -1) {
         return;
       }
@@ -105,7 +99,7 @@ export function MonteCarloConfiguration({
       const newPots = [...config.pots];
       const [movedPot] = newPots.splice(fromIndex, 1);
       let insertIndex =
-        targetIndex + (e.target.dropPosition === 'after' ? 1 : 0);
+        targetIndex + (event.target.dropPosition === 'after' ? 1 : 0);
       if (fromIndex < insertIndex) {
         insertIndex -= 1;
       }
@@ -181,7 +175,7 @@ export function MonteCarloConfiguration({
           }}
         >
           <View style={{ gap: 10 }}>
-            <Text style={PLAN_GROUP_HEADING_STYLE}>
+            <Text style={GROUP_HEADING_STYLE}>
               <Trans>Your plan</Trans>
             </Text>
             <View style={PLAN_GROUP_FIELDS_STYLE}>
@@ -228,7 +222,7 @@ export function MonteCarloConfiguration({
           </View>
 
           <View style={{ gap: 10 }}>
-            <Text style={PLAN_GROUP_HEADING_STYLE}>
+            <Text style={GROUP_HEADING_STYLE}>
               <Trans>Inflation</Trans>
             </Text>
             <View style={PLAN_GROUP_FIELDS_STYLE}>
@@ -237,26 +231,16 @@ export function MonteCarloConfiguration({
                   <Text style={FIELD_LABEL_STYLE}>
                     <Trans>Mean (%)</Trans>
                   </Text>
-                  <Tooltip
-                    content={
-                      <View style={{ maxWidth: 300 }}>
-                        <Text>
-                          <Trans>
-                            The average yearly rise in prices. When set, your
-                            planned spending grows with it so your spending
-                            power is maintained.
-                            <br />
-                            <br />
-                            Leave blank to keep withdrawals flat.
-                          </Trans>
-                        </Text>
-                      </View>
-                    }
-                    placement="bottom start"
-                    style={{ ...styles.tooltip }}
-                  >
-                    <SvgQuestion height={12} width={12} cursor="pointer" />
-                  </Tooltip>
+                  <MonteCarloHelpTooltip>
+                    <Trans>
+                      The average yearly rise in prices. When set, your planned
+                      spending grows with it so your spending power is
+                      maintained.
+                      <br />
+                      <br />
+                      Leave blank to keep withdrawals flat.
+                    </Trans>
+                  </MonteCarloHelpTooltip>
                 </View>
                 <MonteCarloNumberInput
                   value={config.inflationMean}
@@ -276,29 +260,18 @@ export function MonteCarloConfiguration({
                   <Text style={FIELD_LABEL_STYLE}>
                     <Trans>Std dev (%)</Trans>
                   </Text>
-                  <Tooltip
-                    content={
-                      <View style={{ maxWidth: 300 }}>
-                        <Text>
-                          <Trans>
-                            Real-world inflation bounces around from year to
-                            year rather than staying fixed. When set, each
-                            simulated year draws its own inflation rate around
-                            the mean.
-                            <br />
-                            <br />
-                            Around 2% matches how much US inflation has varied
-                            in recent decades. Set to 0 to use the fixed mean
-                            rate every year.
-                          </Trans>
-                        </Text>
-                      </View>
-                    }
-                    placement="bottom start"
-                    style={{ ...styles.tooltip }}
-                  >
-                    <SvgQuestion height={12} width={12} cursor="pointer" />
-                  </Tooltip>
+                  <MonteCarloHelpTooltip>
+                    <Trans>
+                      Real-world inflation bounces around from year to year
+                      rather than staying fixed. When set, each simulated year
+                      draws its own inflation rate around the mean.
+                      <br />
+                      <br />
+                      Around 2% matches how much US inflation has varied in
+                      recent decades. Set to 0 to use the fixed mean rate every
+                      year.
+                    </Trans>
+                  </MonteCarloHelpTooltip>
                 </View>
                 <MonteCarloNumberInput
                   value={config.inflationStdDev}
@@ -315,7 +288,7 @@ export function MonteCarloConfiguration({
           </View>
 
           <View style={{ gap: 10 }}>
-            <Text style={PLAN_GROUP_HEADING_STYLE}>
+            <Text style={GROUP_HEADING_STYLE}>
               <Trans>Simulation</Trans>
             </Text>
             <View style={PLAN_GROUP_FIELDS_STYLE}>
@@ -324,38 +297,27 @@ export function MonteCarloConfiguration({
                   <Text style={FIELD_LABEL_STYLE}>
                     <Trans>Return model</Trans>
                   </Text>
-                  <Tooltip
-                    content={
-                      <View style={{ maxWidth: 300 }}>
-                        <Text>
-                          <Trans>
-                            How each simulated year&apos;s investment return is
-                            generated.
-                            <br />
-                            <br />
-                            Random: drawn from a normal distribution around each
-                            pot&apos;s expected return and volatility. All pots
-                            experience the same market conditions each year,
-                            scaled by their own volatility.
-                            <br />
-                            <br />
-                            Historical, shuffled: drawn from actual US market
-                            years (1928 onwards) in random order.
-                            <br />
-                            <br />
-                            Historical sequences: replays real market history,
-                            one scenario per starting year. Pots with a Custom
-                            allocation always use their own return and
-                            volatility.
-                          </Trans>
-                        </Text>
-                      </View>
-                    }
-                    placement="bottom start"
-                    style={{ ...styles.tooltip }}
-                  >
-                    <SvgQuestion height={12} width={12} cursor="pointer" />
-                  </Tooltip>
+                  <MonteCarloHelpTooltip>
+                    <Trans>
+                      How each simulated year&apos;s investment return is
+                      generated.
+                      <br />
+                      <br />
+                      Random: drawn from a normal distribution around each
+                      pot&apos;s expected return and volatility. All pots
+                      experience the same market conditions each year, scaled by
+                      their own volatility.
+                      <br />
+                      <br />
+                      Historical, shuffled: drawn from actual US market years
+                      (1928 onwards) in random order.
+                      <br />
+                      <br />
+                      Historical sequences: replays real market history, one
+                      scenario per starting year. Pots with a Custom allocation
+                      always use their own return and volatility.
+                    </Trans>
+                  </MonteCarloHelpTooltip>
                 </View>
                 <Select
                   value={config.returnModel}
@@ -377,22 +339,12 @@ export function MonteCarloConfiguration({
                   <Text style={FIELD_LABEL_STYLE}>
                     <Trans>Simulations</Trans>
                   </Text>
-                  <Tooltip
-                    content={
-                      <View style={{ maxWidth: 300 }}>
-                        <Text>
-                          <Trans>
-                            How many random scenarios to run. More simulations
-                            give a steadier result but take slightly longer.
-                          </Trans>
-                        </Text>
-                      </View>
-                    }
-                    placement="bottom start"
-                    style={{ ...styles.tooltip }}
-                  >
-                    <SvgQuestion height={12} width={12} cursor="pointer" />
-                  </Tooltip>
+                  <MonteCarloHelpTooltip>
+                    <Trans>
+                      How many random scenarios to run. More simulations give a
+                      steadier result but take slightly longer.
+                    </Trans>
+                  </MonteCarloHelpTooltip>
                 </View>
                 <MonteCarloNumberInput
                   value={config.simulationCount}
@@ -493,48 +445,36 @@ export function MonteCarloConfiguration({
                 <Text style={FIELD_LABEL_STYLE}>
                   <Trans>Withdrawal order</Trans>
                 </Text>
-                <Tooltip
-                  content={
-                    <View style={{ maxWidth: 300 }}>
-                      <Text>
-                        <Trans>
-                          How the annual withdrawal is taken when you have more
-                          than one pot.
-                          <br />
-                          <br />
-                          Proportionally: split across pots based on their
-                          current balances.
-                          <br />
-                          <br />
-                          In pot order: drain the first pot before touching the
-                          next, in the order listed on the Investment pots tab.
-                          <br />
-                          <br />
-                          Best performer first: each year, drain the pot with
-                          the highest return last year - e.g. spend cash after a
-                          stock crash so the crashed pot can recover, and spend
-                          stocks in boom years. The first year uses the listed
-                          order.
-                          <br />
-                          <br />
-                          Keep pots at their target mix: withdrawals come from
-                          whichever pots have grown above their share of your
-                          starting mix, pulling the portfolio back toward it -
-                          trim stocks after a boom, spend cash and bonds after a
-                          crash.
-                          <br />
-                          <br />
-                          Pots that haven&apos;t reached their access age yet
-                          are skipped until they unlock.
-                        </Trans>
-                      </Text>
-                    </View>
-                  }
-                  placement="bottom start"
-                  style={{ ...styles.tooltip }}
-                >
-                  <SvgQuestion height={12} width={12} cursor="pointer" />
-                </Tooltip>
+                <MonteCarloHelpTooltip>
+                  <Trans>
+                    How the annual withdrawal is taken when you have more than
+                    one pot.
+                    <br />
+                    <br />
+                    Proportionally: split across pots based on their current
+                    balances.
+                    <br />
+                    <br />
+                    In pot order: drain the first pot before touching the next,
+                    in the order listed on the Investment pots tab.
+                    <br />
+                    <br />
+                    Best performer first: each year, drain the pot with the
+                    highest return last year - e.g. spend cash after a stock
+                    crash so the crashed pot can recover, and spend stocks in
+                    boom years. The first year uses the listed order.
+                    <br />
+                    <br />
+                    Keep pots at their target mix: withdrawals come from
+                    whichever pots have grown above their share of your starting
+                    mix, pulling the portfolio back toward it - trim stocks
+                    after a boom, spend cash and bonds after a crash.
+                    <br />
+                    <br />
+                    Pots that haven&apos;t reached their access age yet are
+                    skipped until they unlock.
+                  </Trans>
+                </MonteCarloHelpTooltip>
               </View>
               <Select
                 value={config.withdrawalStrategy}

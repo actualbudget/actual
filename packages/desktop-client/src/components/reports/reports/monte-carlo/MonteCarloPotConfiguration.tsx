@@ -8,52 +8,37 @@ import { SvgDelete } from '@actual-app/components/icons/v0';
 import {
   SvgCheveronDown,
   SvgCheveronRight,
-  SvgQuestion,
 } from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import type { MonteCarloAllocationPreset } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
-import { Checkbox } from '#components/forms';
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
+import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import { POT_COLUMNS } from '#components/reports/reports/monte-carlo/MonteCarloPotsTableHeader';
 import {
   ALLOCATION_PRESETS,
   MAX_AMOUNT,
+  MAX_ANNUAL_FEE_RATE,
+  MAX_WITHDRAWAL_TAX_RATE,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type { MonteCarloPot } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
+import {
+  FIELD_LABEL_ROW_STYLE,
+  FIELD_LABEL_STYLE,
+  FIELD_STYLE,
+  GROUP_HEADING_STYLE,
+} from '#components/reports/reports/monte-carlo/monteCarloStyles';
 import { Field, Row } from '#components/table';
 import { FinancialInput } from '#components/util/FinancialInput';
 import { useAccounts } from '#hooks/useAccounts';
 
-export const FIELD_LABEL_STYLE = { fontWeight: 600 } as const;
-
-export const FIELD_STYLE = { width: 170 } as const;
-
-export const FIELD_LABEL_ROW_STYLE = {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  marginBottom: 6,
-  minHeight: 18,
-} as const;
-
 const POT_ROW_HEIGHT = 43;
-
-// Group headings in the expanded panel, matching the Plan details groups
-const PANEL_GROUP_HEADING_STYLE = {
-  fontSize: 12,
-  fontWeight: 600,
-  letterSpacing: 0.5,
-  textTransform: 'uppercase',
-  color: theme.pageText,
-} as const;
 
 type MonteCarloPotConfigurationProps = ComponentPropsWithoutRef<
   typeof GridListItem<MonteCarloPot>
@@ -288,7 +273,7 @@ export function MonteCarloPotConfiguration({
           }}
         >
           <View style={{ gap: 10 }}>
-            <Text style={PANEL_GROUP_HEADING_STYLE}>
+            <Text style={GROUP_HEADING_STYLE}>
               <Trans>Access</Trans>
             </Text>
             <View style={FIELD_STYLE}>
@@ -296,27 +281,16 @@ export function MonteCarloPotConfiguration({
                 <Text style={FIELD_LABEL_STYLE}>
                   <Trans>Accessible from age</Trans>
                 </Text>
-                <Tooltip
-                  content={
-                    <View style={{ maxWidth: 300 }}>
-                      <Text>
-                        <Trans>
-                          Some pots can&apos;t be touched until a certain age -
-                          e.g. personal pensions. Until then the pot stays
-                          invested and keeps growing, but can&apos;t fund
-                          withdrawals.
-                          <br />
-                          <br />
-                          Leave blank if the pot is available now.
-                        </Trans>
-                      </Text>
-                    </View>
-                  }
-                  placement="bottom start"
-                  style={{ ...styles.tooltip }}
-                >
-                  <SvgQuestion height={12} width={12} cursor="pointer" />
-                </Tooltip>
+                <MonteCarloHelpTooltip>
+                  <Trans>
+                    Some pots can&apos;t be touched until a certain age - e.g.
+                    personal pensions. Until then the pot stays invested and
+                    keeps growing, but can&apos;t fund withdrawals.
+                    <br />
+                    <br />
+                    Leave blank if the pot is available now.
+                  </Trans>
+                </MonteCarloHelpTooltip>
               </View>
               <MonteCarloNumberInput
                 value={pot.accessAge}
@@ -332,7 +306,7 @@ export function MonteCarloPotConfiguration({
           </View>
 
           <View style={{ gap: 10 }}>
-            <Text style={PANEL_GROUP_HEADING_STYLE}>
+            <Text style={GROUP_HEADING_STYLE}>
               <Trans>Tax</Trans>
             </Text>
             <View style={FIELD_STYLE}>
@@ -344,36 +318,26 @@ export function MonteCarloPotConfiguration({
                     <Trans>Tax (%)</Trans>
                   )}
                 </Text>
-                <Tooltip
-                  content={
-                    <View style={{ maxWidth: 300 }}>
-                      <Text>
-                        {usesTaxBands ? (
-                          <Trans>
-                            The share of a withdrawal from this pot that counts
-                            as taxable income under your tax bands - e.g. a
-                            pension with a 25% tax-free portion is 75, a
-                            tax-free account is 0, and a taxable account is
-                            roughly the share of each withdrawal that is gains.
-                          </Trans>
-                        ) : (
-                          <Trans>
-                            The effective tax rate on withdrawals from this pot.
-                            Your spending is what you keep after tax, so the
-                            simulation withdraws extra to cover it - e.g. a
-                            tax-free account is 0, a pension blending its
-                            tax-free portion with income tax might be around 15,
-                            and a taxable account its effective gains rate.
-                          </Trans>
-                        )}
-                      </Text>
-                    </View>
-                  }
-                  placement="bottom start"
-                  style={{ ...styles.tooltip }}
-                >
-                  <SvgQuestion height={12} width={12} cursor="pointer" />
-                </Tooltip>
+                <MonteCarloHelpTooltip>
+                  {usesTaxBands ? (
+                    <Trans>
+                      The share of a withdrawal from this pot that counts as
+                      taxable income under your tax bands - e.g. a pension with
+                      a 25% tax-free portion is 75, a tax-free account is 0, and
+                      a taxable account is roughly the share of each withdrawal
+                      that is gains.
+                    </Trans>
+                  ) : (
+                    <Trans>
+                      The effective tax rate on withdrawals from this pot. Your
+                      spending is what you keep after tax, so the simulation
+                      withdraws extra to cover it - e.g. a tax-free account is
+                      0, a pension blending its tax-free portion with income tax
+                      might be around 15, and a taxable account its effective
+                      gains rate.
+                    </Trans>
+                  )}
+                </MonteCarloHelpTooltip>
               </View>
               {usesTaxBands ? (
                 <MonteCarloNumberInput
@@ -390,7 +354,7 @@ export function MonteCarloPotConfiguration({
                   value={pot.withdrawalTaxRate}
                   scale={100}
                   min={0}
-                  max={75}
+                  max={MAX_WITHDRAWAL_TAX_RATE * 100}
                   onCommit={newValue =>
                     onPotChange({ withdrawalTaxRate: newValue ?? 0 })
                   }
@@ -400,7 +364,7 @@ export function MonteCarloPotConfiguration({
           </View>
 
           <View style={{ gap: 10 }}>
-            <Text style={PANEL_GROUP_HEADING_STYLE}>
+            <Text style={GROUP_HEADING_STYLE}>
               <Trans>Fees</Trans>
             </Text>
             <View
@@ -416,23 +380,13 @@ export function MonteCarloPotConfiguration({
                   <Text style={FIELD_LABEL_STYLE}>
                     <Trans>Fixed yearly fee</Trans>
                   </Text>
-                  <Tooltip
-                    content={
-                      <View style={{ maxWidth: 300 }}>
-                        <Text>
-                          <Trans>
-                            The sum of all fixed yearly costs on this pot - e.g.
-                            adviser or platform fees - charged at the end of
-                            each year.
-                          </Trans>
-                        </Text>
-                      </View>
-                    }
-                    placement="bottom start"
-                    style={{ ...styles.tooltip }}
-                  >
-                    <SvgQuestion height={12} width={12} cursor="pointer" />
-                  </Tooltip>
+                  <MonteCarloHelpTooltip>
+                    <Trans>
+                      The sum of all fixed yearly costs on this pot - e.g.
+                      adviser or platform fees - charged at the end of each
+                      year.
+                    </Trans>
+                  </MonteCarloHelpTooltip>
                 </View>
                 <FinancialInput
                   value={pot.annualFeeFixed}
@@ -445,57 +399,36 @@ export function MonteCarloPotConfiguration({
                 />
               </View>
 
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 5,
-                  paddingBottom: 6,
-                }}
+              <LabeledCheckbox
+                id={`pot-fee-inflation-${pot.id}`}
+                checked={pot.feeAdjustsWithInflation}
+                onChange={event =>
+                  onPotChange({
+                    feeAdjustsWithInflation: event.target.checked,
+                  })
+                }
+                style={{ flex: 'unset', paddingBottom: 6 }}
               >
-                <Checkbox
-                  id={`pot-fee-inflation-${pot.id}`}
-                  checked={pot.feeAdjustsWithInflation}
-                  onChange={event =>
-                    onPotChange({
-                      feeAdjustsWithInflation: event.target.checked,
-                    })
-                  }
-                />
-                <label htmlFor={`pot-fee-inflation-${pot.id}`}>
-                  <Text>
-                    <Trans>Adjust by inflation</Trans>
-                  </Text>
-                </label>
-              </View>
+                <Trans>Adjust by inflation</Trans>
+              </LabeledCheckbox>
 
               <View style={FIELD_STYLE}>
                 <View style={FIELD_LABEL_ROW_STYLE}>
                   <Text style={FIELD_LABEL_STYLE}>
                     <Trans>Fee (% of balance)</Trans>
                   </Text>
-                  <Tooltip
-                    content={
-                      <View style={{ maxWidth: 300 }}>
-                        <Text>
-                          <Trans>
-                            A yearly percentage of the pot&apos;s end-of-year
-                            balance - e.g. fund or platform charges.
-                          </Trans>
-                        </Text>
-                      </View>
-                    }
-                    placement="bottom start"
-                    style={{ ...styles.tooltip }}
-                  >
-                    <SvgQuestion height={12} width={12} cursor="pointer" />
-                  </Tooltip>
+                  <MonteCarloHelpTooltip>
+                    <Trans>
+                      A yearly percentage of the pot&apos;s end-of-year balance
+                      - e.g. fund or platform charges.
+                    </Trans>
+                  </MonteCarloHelpTooltip>
                 </View>
                 <MonteCarloNumberInput
                   value={pot.annualFeeRate}
                   scale={100}
                   min={0}
-                  max={10}
+                  max={MAX_ANNUAL_FEE_RATE * 100}
                   step={0.01}
                   onCommit={newValue =>
                     onPotChange({ annualFeeRate: newValue ?? 0 })

@@ -2,36 +2,37 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgDelete } from '@actual-app/components/icons/v0';
-import { SvgAdd, SvgQuestion } from '@actual-app/components/icons/v1';
+import { SvgAdd } from '@actual-app/components/icons/v1';
 import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import type { MonteCarloTaxModel } from '@actual-app/core/types/models';
 import { v4 as uuidv4 } from 'uuid';
 
+import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
-import {
-  FIELD_LABEL_ROW_STYLE,
-  FIELD_LABEL_STYLE,
-} from '#components/reports/reports/monte-carlo/MonteCarloPotConfiguration';
 import {
   createMonteCarloTaxBand,
   MAX_AMOUNT,
+  MAX_TAX_BAND_RATE,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type {
   MonteCarloConfig,
   MonteCarloTaxBand,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
+import {
+  FIELD_LABEL_ROW_STYLE,
+  FIELD_LABEL_STYLE,
+} from '#components/reports/reports/monte-carlo/monteCarloStyles';
 import { Field, Row, TableHeader } from '#components/table';
 import { FinancialInput } from '#components/util/FinancialInput';
 
 const BAND_ROW_HEIGHT = 43;
 
 function sortBands(bands: MonteCarloTaxBand[]) {
-  return [...bands].sort((a, b) => a.from - b.from);
+  return [...bands].sort((bandA, bandB) => bandA.from - bandB.from);
 }
 
 type MonteCarloTaxConfigurationProps = {
@@ -83,32 +84,21 @@ export function MonteCarloTaxConfiguration({
           <Text style={FIELD_LABEL_STYLE}>
             <Trans>Tax model</Trans>
           </Text>
-          <Tooltip
-            content={
-              <View style={{ maxWidth: 300 }}>
-                <Text>
-                  <Trans>
-                    Your yearly spending is what you keep after tax; the
-                    simulation withdraws extra to cover the tax.
-                    <br />
-                    <br />
-                    Flat rate: each pot has one effective tax rate on its
-                    withdrawals - simple and jurisdiction-free.
-                    <br />
-                    <br />
-                    Tax bands: enter your own progressive bands, and each pot
-                    declares how much of a withdrawal counts as taxable income.
-                    The bands apply to each year&apos;s combined taxable
-                    withdrawals.
-                  </Trans>
-                </Text>
-              </View>
-            }
-            placement="bottom start"
-            style={{ ...styles.tooltip }}
-          >
-            <SvgQuestion height={12} width={12} cursor="pointer" />
-          </Tooltip>
+          <MonteCarloHelpTooltip>
+            <Trans>
+              Your yearly spending is what you keep after tax; the simulation
+              withdraws extra to cover the tax.
+              <br />
+              <br />
+              Flat rate: each pot has one effective tax rate on its withdrawals
+              - simple and jurisdiction-free.
+              <br />
+              <br />
+              Tax bands: enter your own progressive bands, and each pot declares
+              how much of a withdrawal counts as taxable income. The bands apply
+              to each year&apos;s combined taxable withdrawals.
+            </Trans>
+          </MonteCarloHelpTooltip>
         </View>
         <Select
           value={taxModel}
@@ -186,7 +176,7 @@ export function MonteCarloTaxConfiguration({
                     value={band.rate}
                     scale={100}
                     min={0}
-                    max={99}
+                    max={MAX_TAX_BAND_RATE * 100}
                     onCommit={newValue =>
                       updateBand(band.id, { rate: newValue ?? 0 })
                     }

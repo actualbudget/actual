@@ -5,7 +5,7 @@ import { Input } from '@actual-app/components/input';
 import { css } from '@emotion/css';
 
 // Plain numeric text input - no browser spin buttons
-export const NUMBER_INPUT_CLASS = css({
+const NUMBER_INPUT_CLASS = css({
   '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
     WebkitAppearance: 'none',
     margin: 0,
@@ -113,7 +113,7 @@ export function MonteCarloNumberInput({
         setIsFocused(false);
         commit(event.currentTarget.value);
       }}
-      onEnter={newText => commit(newText)}
+      onEnter={commit}
     />
   );
 }
