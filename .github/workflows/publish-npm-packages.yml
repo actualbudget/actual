@@ -57,7 +57,7 @@ jobs:
 
       - name: Build Server & Web
         env:
-          REACT_APP_COMMIT_REF: ${{ github.event_name != 'push' && github.sha || '' }}
+          COMMIT_REF: ${{ github.event_name != 'push' && github.sha || '' }}
         run: yarn build:server
 
       - name: Pack the web and server packages
