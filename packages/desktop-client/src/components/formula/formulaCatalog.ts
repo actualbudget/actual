@@ -985,7 +985,7 @@ export function getFormulaFunctionCatalog(): Record<
     IPMT: {
       name: 'IPMT',
       category: 'math',
-      modes: ['query'],
+      modes: ['query', 'transaction'],
       description: t(
         'Calculates the interest portion of a loan payment for a given period.',
       ),
@@ -999,7 +999,7 @@ export function getFormulaFunctionCatalog(): Record<
     PPMT: {
       name: 'PPMT',
       category: 'math',
-      modes: ['query'],
+      modes: ['query', 'transaction'],
       description: t(
         'Calculates the principal portion of a loan payment for a given period.',
       ),
@@ -1013,7 +1013,7 @@ export function getFormulaFunctionCatalog(): Record<
     NPER: {
       name: 'NPER',
       category: 'math',
-      modes: ['query'],
+      modes: ['query', 'transaction'],
       description: t(
         'Calculates the number of payment periods for a loan or investment.',
       ),
@@ -1026,7 +1026,7 @@ export function getFormulaFunctionCatalog(): Record<
     CUMIPMT: {
       name: 'CUMIPMT',
       category: 'math',
-      modes: ['query'],
+      modes: ['query', 'transaction'],
       description: t(
         'Calculates cumulative interest paid between two periods.',
       ),
@@ -1045,7 +1045,7 @@ export function getFormulaFunctionCatalog(): Record<
     CUMPRINC: {
       name: 'CUMPRINC',
       category: 'math',
-      modes: ['query'],
+      modes: ['query', 'transaction'],
       description: t(
         'Calculates cumulative principal paid between two periods.',
       ),
