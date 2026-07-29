@@ -1430,7 +1430,10 @@ describe('runMonteCarloSimulation', () => {
     const row = result.runDetail![0];
     expect(row.withdrawal).toBe(41_081);
     expect(row.taxPaid).toBe(1_081);
-    expect(row.potWithdrawals).toEqual([20_541, 20_541]);
+    // Raw takes are 20,540.5 each; the parts reconcile to the 41,081
+    // total (equal remainders break toward the earlier pot) instead of
+    // both rounding up to a sum of 41,082
+    expect(row.potWithdrawals).toEqual([20_541, 20_540]);
     // Bands-model tax prorates by taxable share: the tax-free pot
     // contributes no taxable income, so the pension carries all the tax
     expect(row.potTaxes).toEqual([0, 1_081]);
@@ -1540,6 +1543,90 @@ describe('runMonteCarloSimulation', () => {
     const rows = result.runDetail!;
     expect(rows.map(row => row.endBalance)).toEqual([99_000, 98_010, 97_030]);
     expect(rows.map(row => row.feesPaid)).toEqual([1_000, 990, 980]);
+  });
+
+  it("captures each pot's own fee in the run detail", () => {
+    const result = runMonteCarloSimulation(
+      makeParams({
+        annualWithdrawal: 0,
+        horizonYears: 2,
+        captureRunDetail: 0,
+        pots: [
+          makePot({
+            id: 'fixed-fee',
+            startingBalance: 100_000,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+            annualFeeFixed: 1_000,
+          }),
+          makePot({
+            id: 'rate-fee',
+            startingBalance: 200_000,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+            annualFeeRate: 0.01,
+          }),
+          makePot({
+            id: 'no-fee',
+            startingBalance: 50_000,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+          }),
+        ],
+      }),
+    );
+
+    const rows = result.runDetail!;
+    // Year 1: 1,000 fixed; 1% of 200,000; nothing from the fee-free pot
+    expect(rows[0].potFees).toEqual([1_000, 2_000, 0]);
+    // Year 2: the percentage pot's balance shrank to 198,000
+    expect(rows[1].potFees).toEqual([1_000, 1_980, 0]);
+    // Each year opens with the previous year's post-fee balances
+    expect(rows[0].potStartBalances).toEqual([100_000, 200_000, 50_000]);
+    expect(rows[1].potStartBalances).toEqual([99_000, 198_000, 50_000]);
+    for (const row of rows) {
+      expect(row.potFees.reduce((sum, fee) => sum + fee, 0)).toBe(row.feesPaid);
+      expect(
+        row.potStartBalances.reduce((sum, balance) => sum + balance, 0),
+      ).toBe(row.startBalance);
+      expect(row.potBalances.reduce((sum, balance) => sum + balance, 0)).toBe(
+        row.endBalance,
+      );
+    }
+  });
+
+  it('rounds per-pot amounts so they sum exactly to the row totals', () => {
+    // Each pot's raw fee is 10.5: rounded independently both would show
+    // 11, summing to 22 against a fees-paid total of 21. The largest-
+    // remainder split keeps the parts reconciled with the total instead.
+    const result = runMonteCarloSimulation(
+      makeParams({
+        annualWithdrawal: 0,
+        horizonYears: 1,
+        captureRunDetail: 0,
+        pots: [
+          makePot({
+            id: 'pot-a',
+            startingBalance: 1_050,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+            annualFeeRate: 0.01,
+          }),
+          makePot({
+            id: 'pot-b',
+            startingBalance: 1_050,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+            annualFeeRate: 0.01,
+          }),
+        ],
+      }),
+    );
+
+    const row = result.runDetail![0];
+    expect(row.feesPaid).toBe(21);
+    // Equal remainders break ties toward the earlier pot
+    expect(row.potFees).toEqual([11, 10]);
   });
 
   it("keeps an inflation-adjusted fixed fee constant in today's money", () => {

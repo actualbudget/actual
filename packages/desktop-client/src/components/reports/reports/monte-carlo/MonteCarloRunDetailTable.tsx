@@ -352,7 +352,7 @@ export function MonteCarloRunDetailTable({
                     )}
 
                     {pots.length > 0 && (
-                      <View style={{ marginTop: 6, maxWidth: 760 }}>
+                      <View style={{ marginTop: 6, maxWidth: 1010 }}>
                         <View
                           style={{
                             flexDirection: 'row',
@@ -369,6 +369,15 @@ export function MonteCarloRunDetailTable({
                             }}
                           >
                             <Trans>Pot</Trans>
+                          </Text>
+                          <Text
+                            style={{
+                              ...GROUP_HEADING_STYLE,
+                              width: 130,
+                              textAlign: 'right',
+                            }}
+                          >
+                            <Trans>Start balance</Trans>
                           </Text>
                           <Text
                             style={{
@@ -412,6 +421,28 @@ export function MonteCarloRunDetailTable({
                               </Trans>
                             </MonteCarloHelpTooltip>
                           </View>
+                          <View
+                            style={{
+                              width: 110,
+                              flexDirection: 'row',
+                              justifyContent: 'flex-end',
+                              alignItems: 'center',
+                              gap: 4,
+                            }}
+                          >
+                            <Text style={GROUP_HEADING_STYLE}>
+                              <Trans>Fees</Trans>
+                            </Text>
+                            <MonteCarloHelpTooltip placement="bottom end">
+                              <Trans>
+                                Charged at the end of the year, on the
+                                pot&apos;s balance after that year&apos;s growth
+                                but before the fee itself is deducted - so the
+                                end balance is the post-growth balance minus
+                                this fee.
+                              </Trans>
+                            </MonteCarloHelpTooltip>
+                          </View>
                           <Text
                             style={{
                               ...GROUP_HEADING_STYLE,
@@ -452,6 +483,16 @@ export function MonteCarloRunDetailTable({
                                 <PrivacyFilter>
                                   <FinancialText as="span">
                                     {format(
+                                      row.potStartBalances[potIndex] ?? 0,
+                                      'financial',
+                                    )}
+                                  </FinancialText>
+                                </PrivacyFilter>
+                              </Text>
+                              <Text style={{ width: 130, textAlign: 'right' }}>
+                                <PrivacyFilter>
+                                  <FinancialText as="span">
+                                    {format(
                                       row.potWithdrawals[potIndex] ?? 0,
                                       'financial',
                                     )}
@@ -473,6 +514,16 @@ export function MonteCarloRunDetailTable({
                                   <FinancialText as="span">
                                     {format(
                                       row.potTaxes[potIndex] ?? 0,
+                                      'financial',
+                                    )}
+                                  </FinancialText>
+                                </PrivacyFilter>
+                              </Text>
+                              <Text style={{ width: 110, textAlign: 'right' }}>
+                                <PrivacyFilter>
+                                  <FinancialText as="span">
+                                    {format(
+                                      row.potFees[potIndex] ?? 0,
                                       'financial',
                                     )}
                                   </FinancialText>

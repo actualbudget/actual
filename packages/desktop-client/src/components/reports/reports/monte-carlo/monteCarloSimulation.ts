@@ -366,6 +366,8 @@ export type MonteCarloRunDetailRow = {
   endBalance: number;
   /** End-of-year balance per pot, in the order the pots are configured */
   potBalances: number[];
+  /** Start-of-year balance per pot, before the withdrawal, same order */
+  potStartBalances: number[];
   /** How much of this year's withdrawal each pot funded (gross), same order */
   potWithdrawals: number[];
   /**
@@ -383,6 +385,8 @@ export type MonteCarloRunDetailRow = {
   taxPaid: number;
   /** Management fees charged at the end of this year */
   feesPaid: number;
+  /** Fee each pot was charged at the end of the year, same order as pots */
+  potFees: number[];
   /**
    * The return each pot actually experienced that year, as a decimal
    * fraction; null when the pot had no balance or the plan failed
@@ -1039,6 +1043,13 @@ export function runMonteCarloSimulation(
         const capturedPotTaxables = capturedPotReturns
           ? new Array<number>(potCount).fill(0)
           : null;
+        const capturedPotFees = capturedPotReturns
+          ? new Array<number>(potCount).fill(0)
+          : null;
+        // Snapshot taken now, before the withdrawal touches the balances
+        const capturedPotStartBalances = capturedPotReturns
+          ? Array.from(potBalances)
+          : null;
 
         // Net capacity: what withdrawing every accessible penny would
         // actually deliver after tax. The full-drain split is only worth
@@ -1208,6 +1219,9 @@ export function runMonteCarloSimulation(
             const charged = Math.min(potBalances[potIndex], fee);
             potBalances[potIndex] -= charged;
             feesThisYear += charged;
+            if (capturedPotFees) {
+              capturedPotFees[potIndex] = charged;
+            }
           }
           total = 0;
           for (let potIndex = 0; potIndex < potCount; potIndex++) {
@@ -1228,19 +1242,65 @@ export function runMonteCarloSimulation(
           // forget the wrapper
           const emit = (value: number, deflator: number) =>
             toSafeAmount(Math.round(value * deflator));
+          // Per-pot amounts are rounded so they sum exactly to their row's
+          // already-rounded total: floor each part, then hand the leftover
+          // cents to the parts that lost the most in flooring (largest
+          // remainder, ties to the lower pot index). Independently rounded
+          // parts can visibly disagree with the total by a cent or two.
+          const emitParts = (
+            values: ArrayLike<number> | null,
+            deflator: number,
+            target: number,
+          ) => {
+            if (!values) {
+              return [];
+            }
+            const scaled = Array.from(values, value => value * deflator);
+            const parts = scaled.map(Math.floor);
+            const shortfall =
+              target - parts.reduce((sum, part) => sum + part, 0);
+            if (shortfall < 0 || shortfall > parts.length) {
+              // The parts don't reconcile with this target (safe-amount
+              // clamping, or a degenerate float path) - fall back to
+              // independent rounding rather than distorting them
+              return Array.from(values, value => emit(value, deflator));
+            }
+            const byLargestRemainder = parts
+              .map((_, partIndex) => partIndex)
+              .sort(
+                (partIndexA, partIndexB) =>
+                  scaled[partIndexB] -
+                    parts[partIndexB] -
+                    (scaled[partIndexA] - parts[partIndexA]) ||
+                  partIndexA - partIndexB,
+              );
+            for (let centIndex = 0; centIndex < shortfall; centIndex++) {
+              parts[byLargestRemainder[centIndex]] += 1;
+            }
+            return parts.map(toSafeAmount);
+          };
+          const startBalance = emit(yearStartTotal, startDeflator);
+          const withdrawal = emit(withdrawalTaken, startDeflator);
+          const taxPaid = emit(withdrawalTaken - netDelivered, startDeflator);
           const base = {
             year,
-            startBalance: emit(yearStartTotal, startDeflator),
-            withdrawal: emit(withdrawalTaken, startDeflator),
-            taxPaid: emit(withdrawalTaken - netDelivered, startDeflator),
-            potWithdrawals: (capturedPotWithdrawals ?? []).map(take =>
-              emit(take, startDeflator),
+            startBalance,
+            withdrawal,
+            taxPaid,
+            potWithdrawals: emitParts(
+              capturedPotWithdrawals,
+              startDeflator,
+              withdrawal,
             ),
-            potTaxes: (capturedPotTaxes ?? []).map(tax =>
-              emit(tax, startDeflator),
-            ),
+            potTaxes: emitParts(capturedPotTaxes, startDeflator, taxPaid),
+            // No displayed total to reconcile against
             potTaxables: (capturedPotTaxables ?? []).map(taxable =>
               emit(taxable, startDeflator),
+            ),
+            potStartBalances: emitParts(
+              capturedPotStartBalances,
+              startDeflator,
+              startBalance,
             ),
           };
           if (fundingShortfall) {
@@ -1255,14 +1315,18 @@ export function runMonteCarloSimulation(
               ...base,
               growth: 0,
               feesPaid: 0,
+              // No fees on a shortfall year - the plan stops before the
+              // end-of-year charge
+              potFees: (capturedPotFees ?? []).map(() => 0),
               endBalance: 0,
-              potBalances: (failurePotSnapshot ?? []).map(balance =>
-                emit(balance, startDeflator),
-              ),
+              // The snapshot is the locked money the failure note reports
+              potBalances: emitParts(failurePotSnapshot, startDeflator, locked),
               potReturns: capturedPotReturns ?? [],
               ...(locked > 0 && { inaccessibleBalance: locked }),
             });
           } else {
+            const feesPaid = emit(feesThisYear, endDeflator);
+            const endBalance = emit(total, endDeflator);
             runDetail.push({
               ...base,
               // In today's money, growth is the real gain: the inflation
@@ -1274,11 +1338,10 @@ export function runMonteCarloSimulation(
                     (yearStartTotal - withdrawalTaken) * startDeflator,
                 ),
               ),
-              feesPaid: emit(feesThisYear, endDeflator),
-              endBalance: emit(total, endDeflator),
-              potBalances: Array.from(potBalances, balance =>
-                emit(balance, endDeflator),
-              ),
+              feesPaid,
+              potFees: emitParts(capturedPotFees, endDeflator, feesPaid),
+              endBalance,
+              potBalances: emitParts(potBalances, endDeflator, endBalance),
               potReturns: (capturedPotReturns ?? []).map(potReturn =>
                 potReturn == null
                   ? null
