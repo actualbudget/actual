@@ -280,6 +280,13 @@ describe('BALANCE_OF in query mode', () => {
     );
 
     await waitFor(() => expect(result.current.result).toBe(123.45));
+
+    const balanceQuery = queryPayloads.find(payload =>
+      payload.filterExpressions.some(
+        expression => (expression as { account?: string }).account === 'acc1',
+      ),
+    );
+    expect(balanceQuery).toBeDefined();
   });
 
   it('returns 0 for an unknown account', async () => {
