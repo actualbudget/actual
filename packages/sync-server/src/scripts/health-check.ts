@@ -5,13 +5,27 @@ const protocol =
 const hostname =
   config.get('hostname') === '::' ? 'localhost' : config.get('hostname');
 
+function getHealthStatus(response: unknown) {
+  if (
+    typeof response === 'object' &&
+    response !== null &&
+    'status' in response
+  ) {
+    return response.status;
+  }
+
+  return undefined;
+}
+
 fetch(`${protocol}://${hostname}:${config.get('port')}/health`)
-  .then(res => res.json())
-  .then(res => {
-    if (res.status !== 'UP') {
+  .then(response => response.json())
+  .then(response => {
+    const status = getHealthStatus(response);
+
+    if (status !== 'UP') {
       throw new Error(
         'Health check failed: Server responded to health check with status ' +
-          res.status,
+          status,
       );
     }
   })
