@@ -5,11 +5,12 @@ const protocol =
 const hostname =
   config.get('hostname') === '::' ? 'localhost' : config.get('hostname');
 
-function getHealthStatus(response: unknown) {
+function getHealthStatus(response: unknown): string | undefined {
   if (
     typeof response === 'object' &&
     response !== null &&
-    'status' in response
+    'status' in response &&
+    typeof response.status === 'string'
   ) {
     return response.status;
   }
