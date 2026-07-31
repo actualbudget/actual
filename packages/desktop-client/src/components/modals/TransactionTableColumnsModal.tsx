@@ -6,7 +6,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -16,6 +15,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '#components/common/Modal';
+import { Checkbox } from '#components/forms';
 import { TransactionTableColumnListItem } from '#components/modals/TransactionTableColumnListItem';
 import {
   getDefaultTransactionTableColumns,
@@ -150,13 +150,18 @@ export function TransactionTableColumnsModal({
             <View
               style={{
                 flexDirection: 'row',
-                alignItems: 'center',
-                gap: 10,
+                alignItems: 'flex-start',
                 padding: '8px 10px',
                 borderRadius: 6,
                 backgroundColor: theme.tableRowBackgroundHover,
               }}
             >
+              <Checkbox
+                id="apply-columns-to-all"
+                checked={applyToAll}
+                onChange={e => setApplyToAll(e.target.checked)}
+                style={{ marginTop: 2 }}
+              />
               <label
                 htmlFor="apply-columns-to-all"
                 style={{ flex: 1, userSelect: 'none', cursor: 'pointer' }}
@@ -177,11 +182,6 @@ export function TransactionTableColumnsModal({
                   </Trans>
                 </Text>
               </label>
-              <Toggle
-                id="apply-columns-to-all"
-                isOn={applyToAll}
-                onToggle={setApplyToAll}
-              />
             </View>
 
             <ModalButtons
