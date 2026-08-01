@@ -18,9 +18,7 @@ export type TimeFrame = {
     | 'lastMonth'
     | 'lastYear'
     | 'yearToDate'
-    | 'priorYearToDate'
-    | 'currentQuarter'
-    | 'previousQuarter';
+    | 'priorYearToDate';
 };
 
 type AbstractWidget<

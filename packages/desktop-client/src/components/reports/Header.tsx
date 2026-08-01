@@ -196,12 +196,6 @@ export function Header({
           () =>
             liveRangeAsMonths('Prior year to date', false, 'priorYearToDate'),
         ),
-        makePreset('current-quarter', <Trans>Current quarter</Trans>, () =>
-          liveRangeAsMonths('Current quarter', false, 'currentQuarter'),
-        ),
-        makePreset('previous-quarter', <Trans>Previous quarter</Trans>, () =>
-          liveRangeAsMonths('Previous quarter', false, 'previousQuarter'),
-        ),
         // `allMonths` may still be empty before the report's async load
         // finishes.
         ...(allMonths.length
