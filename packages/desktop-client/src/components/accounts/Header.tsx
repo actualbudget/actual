@@ -71,6 +71,7 @@ type AccountHeaderProps = {
   showExtraBalances: boolean;
   showCleared: boolean;
   showReconciled: boolean;
+  showGroup: boolean;
   showEmptyMessage: boolean;
   balanceQuery: ComponentProps<typeof ReconcilingMessage>['balanceQuery'];
   reconcileAmount?: number | null;
@@ -146,6 +147,7 @@ export function AccountHeader({
   showExtraBalances,
   showCleared,
   showReconciled,
+  showGroup,
   showEmptyMessage,
   balanceQuery,
   reconcileAmount,
@@ -516,6 +518,7 @@ export function AccountHeader({
                       showBalances={showBalances}
                       showCleared={showCleared}
                       showReconciled={showReconciled}
+                      showGroup={showGroup}
                       onMenuSelect={onMenuSelect}
                     />
                   </Dialog>
@@ -548,6 +551,12 @@ export function AccountHeader({
                             ]
                           : []),
                         { name: 'export', text: t('Export') },
+                        {
+                          name: 'toggle-group',
+                          text: showGroup
+                            ? t('Hide category group')
+                            : t('Show category group'),
+                        },
                         {
                           name: 'toggle-net-worth-chart',
                           text: showNetWorthChart
@@ -731,6 +740,7 @@ type AccountMenuProps = {
   canShowBalances: boolean;
   showCleared: boolean;
   showReconciled: boolean;
+  showGroup: boolean;
   isSorted: boolean;
   onMenuSelect: (
     item:
@@ -743,6 +753,7 @@ type AccountMenuProps = {
       | 'remove-sorting'
       | 'toggle-cleared'
       | 'toggle-reconciled'
+      | 'toggle-group'
       | 'toggle-net-worth-chart',
   ) => void;
 };
@@ -755,6 +766,7 @@ function AccountMenu({
   canShowBalances,
   showCleared,
   showReconciled,
+  showGroup,
   isSorted,
   onMenuSelect,
 }: AccountMenuProps) {
@@ -803,6 +815,10 @@ function AccountMenu({
           text: showReconciled
             ? t('Hide reconciled transactions')
             : t('Show reconciled transactions'),
+        },
+        {
+          name: 'toggle-group',
+          text: showGroup ? t('Hide category group') : t('Show category group'),
         },
         { name: 'export', text: t('Export') },
         ...(account && !account.closed

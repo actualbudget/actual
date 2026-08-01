@@ -113,6 +113,26 @@ jobs:
           name: build-stats
           path: packages/desktop-client/build-stats
 
+  mobile:
+    needs: setup
+    runs-on: depot-macos-latest
+    env:
+      ANDROID_HOME: /Users/runner/Library/Android/sdk
+      ANDROID_SDK_ROOT: /Users/runner/Library/Android/sdk
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Build Mobile Apps
+        run: yarn build:mobile
+      - name: Upload Build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: actual-mobile
+          path: packages/mobile-client/build
+
   cli:
     needs: setup
     runs-on: depot-ubuntu-latest
