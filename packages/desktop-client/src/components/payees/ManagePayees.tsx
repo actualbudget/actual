@@ -86,7 +86,9 @@ export const ManagePayees = ({
     let filtered = payees;
     if (filter) {
       filtered = filtered.filter(p =>
-        getNormalisedString(p.name).includes(getNormalisedString(filter)),
+        getNormalisedString(
+          (p.transfer_acct ? t('Transfer: ') : '') + p.name,
+        ).includes(getNormalisedString(filter)),
       );
     }
     if (orphanedOnly) {
@@ -95,7 +97,7 @@ export const ManagePayees = ({
       );
     }
     return filtered;
-  }, [payees, filter, orphanedOnly, orphanedPayees]);
+  }, [payees, filter, orphanedOnly, orphanedPayees, t]);
 
   const selected = useSelected('payees', filteredPayees, initialSelectedIds);
 

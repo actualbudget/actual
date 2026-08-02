@@ -57,19 +57,19 @@
   "dependencies": {
     "@actual-app/core": "workspace:*",
     "@actual-app/crdt": "workspace:*",
-    "better-sqlite3": "^12.10.0",
+    "better-sqlite3": "^12.11.1",
     "compare-versions": "^6.1.1",
     "uuid": "^14.0.1"
   },
   "devDependencies": {
     "@actual-app/vite-plugin-peggy": "workspace:*",
-    "@playwright/test": "1.59.1",
+    "@playwright/test": "1.61.1",
     "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.0.1",
     "typescript-strict-plugin": "^2.4.4",
-    "vite": "^8.0.16",
+    "vite": "^8.1.5",
     "vite-plugin-node-polyfills": "patch:vite-plugin-node-polyfills@npm%3A0.28.0#~/.yarn/patches/vite-plugin-node-polyfills-npm-0.28.0-bac39616ee.patch",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=20"
