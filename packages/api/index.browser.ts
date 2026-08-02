@@ -2,6 +2,8 @@ import { startBackendWorker } from '@actual-app/core/platform/client/backend-wor
 import { send } from '@actual-app/core/platform/client/connection';
 import type { InitConfig } from '@actual-app/core/server/main';
 
+import InlineWorker from './browser-worker?worker&inline';
+
 export * from './methods';
 export * as utils from './utils';
 
@@ -10,15 +12,10 @@ let worker: Worker | null = null;
 export async function init(
   config: InitConfig = {},
 ): Promise<{ send: typeof send }> {
-  // Non-literal so bundlers don't pre-bundle ./worker.js, which only exists
-  // next to the built file.
-  const rel = './worker.js';
-  worker = new Worker(new URL(rel, import.meta.url), { type: 'module' });
+  worker = new InlineWorker();
 
-  // Not `new URL('.', import.meta.url)` — consumer asset analyzers rewrite it.
-  const assetsBaseUrl = import.meta.url.replace(/[^/]+$/, '');
   try {
-    await startBackendWorker(worker, config, assetsBaseUrl);
+    await startBackendWorker(worker, config);
   } catch (error) {
     worker.terminate();
     worker = null;

@@ -1,8 +1,10 @@
 # Codex project hooks for actualbudget/actual.
 #
 # Codex discovers project config by walking up to the .git root, so this file
-# applies to the whole repo. The hook scripts are shared with Claude Code and
-# Cursor (see scripts/agent-hooks/). Codex's Bash hook is Claude-compatible
+# applies to the whole repo — and to every Codex surface: the Codex CLI, the
+# Codex IDE extension, and the ChatGPT desktop app all read the same config
+# layers. The hook scripts are shared with Claude Code and Cursor (see
+# scripts/agent-hooks/). Codex's Bash hook is Claude-compatible
 # (tool_input.command), so the git guard is reused directly; exit code 2 + stderr
 # blocks the call.
 #
@@ -13,7 +15,21 @@
 # Bash/git guard and the Stop check work regardless. The file hooks are fully
 # effective under Claude Code and Cursor.
 #
-# Non-managed hooks must be trusted once via `/hooks` in the Codex CLI.
+# For hooks to run (any surface, including the ChatGPT desktop app):
+#   1. Lifecycle hooks must be enabled — done by the [features] flag below.
+#   2. The project's .codex/ layer must be trusted. An untrusted project skips
+#      this whole file (hooks included), silently.
+#   3. Each non-managed hook must be trusted once via `/hooks` (hash-pinned, so
+#      editing a hook re-requires trust). Trust is recorded in shared Codex
+#      state, so trusting via the CLI also covers the desktop app and IDE.
+#
+# Repo skills for Codex surfaces are mirrored in .agents/skills/ (symlinks to
+# .claude/skills/) — Codex scans .agents/skills, not .claude/skills.
+
+# Lifecycle hooks are feature-flagged; enable them for this project so all
+# surfaces run the [hooks] tables below once the layer is trusted.
+[features]
+lifecycle_hooks = true
 
 # Block unsafe git/workspace commands ([AI] prefix, --no-verify, force-push,
 # push-to-main, git config writes, yarn-from-a-workspace).
@@ -41,6 +57,27 @@ command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/format-edited-f
 [[hooks.PostToolUse.hooks]]
 type = "command"
 command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/prefer-one-component.sh"'
+
+# Require GitHub comments, reviews and issues to be prefixed with the robot emoji
+# 🤖. Matches the github MCP comment/review/issue writers below (add_issue_comment,
+# issue_write, …); the guard reads tool_input.body and, for issues,
+# tool_input.title (the same payload Claude passes), and blocks an un-prefixed
+# comment body or issue title via exit 2.
+[[hooks.PreToolUse]]
+matcher = "^mcp__github__(add_issue_comment|add_comment_to_pending_review|add_reply_to_pull_request_comment|pull_request_review_write|issue_write|sub_issue_write)$"
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/github-comment-style.sh"'
+statusMessage = "Checking GitHub comment/issue is 🤖-prefixed"
+
+# When creating a PR, require the body to be the blank PR template (unmodified)
+# — agents must not fill it in. Reads tool_input.body; blocks via exit 2.
+[[hooks.PreToolUse]]
+matcher = "^mcp__github__create_pull_request$"
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/pr-template-blank.sh"'
+statusMessage = "Checking PR template is left blank"
 
 # When the turn ends, typecheck + test the workspaces this branch touched.
 [[hooks.Stop]]

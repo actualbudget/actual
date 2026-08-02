@@ -4,11 +4,9 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
-  | 'ageOfMoneyReport'
   | 'balanceForecastReport'
   | 'customThemes'
   | 'budgetAnalysisReport'
-  | 'payeeLocations'
   | 'enableBanking'
   | 'sankeyReport'
   | 'akahuBankSync'
@@ -36,6 +34,7 @@ export type SyncedPrefs = Partial<
     | `show-extra-balances-${string}`
     | `hide-cleared-${string}`
     | `hide-reconciled-${string}`
+    | `show-group-${string}`
     // TODO: pull from src/components/modals/ImportTransactions.js
     | `parse-date-${string}-${'csv' | 'qif'}`
     | `import-reimport-deleted-${string}`
@@ -105,6 +104,7 @@ export type LocalPrefs = Partial<{
   reportsViewLabel: boolean;
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
+  'mobile.bankSyncProvidersCollapsed': boolean;
 }>;
 
 export type FocusedViewDefinition = {

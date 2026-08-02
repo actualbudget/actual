@@ -22,7 +22,7 @@ type showActivityProps = {
   type: string;
   startDate: string;
   endDate?: string;
-  field?: string;
+  field?: string; // 'group' becomes a category_group filter
   id?: string | string[]; // changed: supports array for oneOf
   uncategorizedId?: 'off_budget' | 'transfer' | 'other' | 'all';
   interval?: string;
@@ -62,13 +62,21 @@ export function showActivity({
           value: true,
           type: 'boolean',
         }
-      : id && {
-          // changed: use oneOf when id is an array, is when it's a string
-          field,
-          op: Array.isArray(id) ? 'oneOf' : 'is',
-          value: id,
-          type: 'id',
-        };
+      : field === 'group'
+        ? !uncategorizedId &&
+          id && {
+            field: 'category_group',
+            op: 'is',
+            value: id,
+            type: 'id',
+          }
+        : id && {
+            // changed: use oneOf when id is an array, is when it's a string
+            field,
+            op: Array.isArray(id) ? 'oneOf' : 'is',
+            value: id,
+            type: 'id',
+          };
 
   const filterConditions = [
     ...filters,

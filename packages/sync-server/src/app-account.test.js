@@ -127,7 +127,7 @@ describe('/change-password', () => {
   });
 
   it('should return 403 when user is not an admin', async () => {
-    bootstrapPassword('oldpassword');
+    await bootstrapPassword('oldpassword');
 
     const res = await request(app)
       .post('/change-password')
@@ -143,7 +143,7 @@ describe('/change-password', () => {
   });
 
   it('should return 403 when admin session uses openid auth method', async () => {
-    bootstrapPassword('oldpassword');
+    await bootstrapPassword('oldpassword');
 
     const res = await request(app)
       .post('/change-password')
@@ -159,7 +159,7 @@ describe('/change-password', () => {
   });
 
   it('should return 400 when admin password-auth session sends empty password', async () => {
-    bootstrapPassword('oldpassword');
+    await bootstrapPassword('oldpassword');
 
     const res = await request(app)
       .post('/change-password')
@@ -171,7 +171,7 @@ describe('/change-password', () => {
   });
 
   it('should return 200 when admin with password-auth session sends valid password', async () => {
-    bootstrapPassword('oldpassword');
+    await bootstrapPassword('oldpassword');
 
     const res = await request(app)
       .post('/change-password')
@@ -225,7 +225,7 @@ describe('/login', () => {
   });
 
   it('should allow password login when OIDC is the active method', async () => {
-    bootstrapPassword('testpassword');
+    await bootstrapPassword('testpassword');
     insertAuthRow('openid', 1);
     getAccountDb().mutate(
       "UPDATE auth SET active = 0 WHERE method = 'password'",
@@ -241,7 +241,7 @@ describe('/login', () => {
   });
 
   it('should reject wrong password even when method is explicitly requested', async () => {
-    bootstrapPassword('testpassword');
+    await bootstrapPassword('testpassword');
     insertAuthRow('openid', 1);
     getAccountDb().mutate(
       "UPDATE auth SET active = 0 WHERE method = 'password'",

@@ -80,7 +80,7 @@ export function SavedFilterMenuButton({
         });
 
         if (response.error) {
-          setErr(response.error.message);
+          setErr(response.error.message ?? null);
           setNameOpen(true);
           return;
         }
@@ -126,7 +126,7 @@ export function SavedFilterMenuButton({
       });
 
       if (response.error) {
-        setErr(response.error.message);
+        setErr(response.error.message ?? null);
         setNameOpen(true);
         return;
       }
@@ -152,7 +152,7 @@ export function SavedFilterMenuButton({
     });
 
     if (response.error) {
-      setErr(response.error.message);
+      setErr(response.error.message ?? null);
       setNameOpen(true);
       return;
     }

@@ -25,15 +25,15 @@ test.describe('Onboarding', () => {
   });
 
   test('checks the page visuals', async () => {
-    await expect(configurationPage.heading).toHaveText("Where's the server?");
+    await expect(page.getByText('Welcome to Actual')).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
 
-    await configurationPage.clickOnNoServer();
+    await configurationPage.clickOnConnectServer();
+    await expect(configurationPage.heading).toHaveText('Connect to a server');
     await expect(page).toMatchThemeScreenshots();
   });
 
   test('creates a new budget file by importing YNAB4 budget', async () => {
-    await configurationPage.clickOnNoServer();
     const budgetPage = await configurationPage.importBudget(
       'YNAB4',
       path.resolve(__dirname, 'data/ynab4-demo-budget.zip'),
@@ -51,7 +51,6 @@ test.describe('Onboarding', () => {
   });
 
   test('creates a new budget file by importing nYNAB budget', async () => {
-    await configurationPage.clickOnNoServer();
     const budgetPage = await configurationPage.importBudget(
       'nYNAB',
       path.resolve(__dirname, 'data/ynab5-demo-budget.json'),
@@ -93,7 +92,6 @@ test.describe('Onboarding', () => {
   });
 
   test('creates a new budget file by importing Actual budget', async () => {
-    await configurationPage.clickOnNoServer();
     const budgetPage = await configurationPage.importBudget(
       'Actual',
       path.resolve(__dirname, 'data/actual-demo-budget.zip'),
@@ -109,7 +107,6 @@ test.describe('Onboarding', () => {
   });
 
   test('creates a new empty budget file', async () => {
-    await configurationPage.clickOnNoServer();
     await configurationPage.startFresh();
 
     const accountPage = new AccountPage(page);
@@ -119,7 +116,6 @@ test.describe('Onboarding', () => {
   });
 
   test('navigates back to start page by clicking on "no server" in an empty budget file', async () => {
-    await configurationPage.clickOnNoServer();
     const accountPage = await configurationPage.startFresh();
 
     await expect(accountPage.transactionTable).toBeVisible();
@@ -127,6 +123,6 @@ test.describe('Onboarding', () => {
     await navigation.clickOnNoServer();
     await page.getByRole('button', { name: 'Start using a server' }).click();
 
-    await expect(configurationPage.heading).toHaveText("Where's the server?");
+    await expect(configurationPage.heading).toHaveText('Connect to a server');
   });
 });

@@ -142,6 +142,7 @@
   --color-calendarItemText: var(--palette-navy150);
   --color-calendarItemBackground: var(--palette-navy800);
   --color-calendarSelectedBackground: var(--palette-navy500);
+  --color-datePickerRangeBackground: var(--palette-purple150);
 
   --color-buttonBareText: var(--color-pageText);
   --color-buttonBareTextHover: var(--color-pageText);

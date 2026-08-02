@@ -160,6 +160,7 @@ const sidebars = {
             'transactions/merging',
             'accounts/reconciliation',
             'transactions/payees',
+            'transactions/payee-locations',
             'transactions/bulk-editing',
             'transactions/tags',
             'transactions/split-transactions',

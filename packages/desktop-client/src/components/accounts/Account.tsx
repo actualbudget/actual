@@ -16,18 +16,14 @@ import { View } from '@actual-app/components/view';
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
 import type { UndoState } from '@actual-app/core/server/undo';
-import { currentDay } from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
 import {
   makeAsNonChildTransactions,
   makeChild,
-  realizeTempTransactions,
   ungroupTransaction,
   ungroupTransactions,
-  updateTransaction,
 } from '@actual-app/core/shared/transactions';
-import { applyChanges } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
@@ -50,6 +46,7 @@ import {
   useUpdateAccountMutation,
 } from '#accounts';
 import { markAccountRead } from '#accounts/accountsSlice';
+import * as reconciliation from '#accounts/reconciliation';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 import { TransactionList } from '#components/transactions/TransactionList';
@@ -222,6 +219,8 @@ type AccountInternalProps = {
   setShowCleared: (newValue: boolean) => void;
   showReconciled: boolean;
   setShowReconciled: (newValue: boolean) => void;
+  showGroup: boolean;
+  setShowGroup: (newValue: boolean) => void;
   showExtraBalances?: boolean;
   setShowExtraBalances: (newValue: boolean) => void;
   modalShowing?: boolean;
@@ -273,6 +272,7 @@ type AccountInternalState = {
   showCleared?: boolean | undefined;
   prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
+  showGroup: boolean;
   nameError: string;
   isAdding: boolean;
   modalShowing?: boolean;
@@ -323,6 +323,7 @@ class AccountInternal extends PureComponent<
       balances: null,
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
+      showGroup: props.showGroup,
       nameError: '',
       isAdding: false,
       sort: null,
@@ -492,6 +493,9 @@ class AccountInternal extends PureComponent<
         if (this._isOptimisticUpdate) {
           this._isOptimisticUpdate = false;
           const transactionsSnapshot = data;
+          const balances = this.state.showBalances
+            ? await this.calculateBalances()
+            : null;
           // Wrap in startTransition so React treats this as a low-priority
           // update. Without this, setState blocks the main thread for the
           // full duration of the re-render (~40–220ms with large transaction
@@ -500,7 +504,10 @@ class AccountInternal extends PureComponent<
           // into chunks and yield to the browser between them, keeping the
           // UI responsive while the row update happens in the background.
           startTransition(() => {
-            this.setState({ transactions: transactionsSnapshot });
+            this.setState({
+              transactions: transactionsSnapshot,
+              balances,
+            });
           });
           return;
         }
@@ -563,6 +570,7 @@ class AccountInternal extends PureComponent<
           balances: null,
           showCleared: nextProps.showCleared,
           showReconciled: nextProps.showReconciled,
+          showGroup: nextProps.showGroup,
           reconcileAmount: null,
         },
         () => {
@@ -807,6 +815,7 @@ class AccountInternal extends PureComponent<
       | 'remove-sorting'
       | 'toggle-cleared'
       | 'toggle-reconciled'
+      | 'toggle-group'
       | 'toggle-net-worth-chart',
   ) => {
     const accountId = this.props.accountId!;
@@ -909,6 +918,15 @@ class AccountInternal extends PureComponent<
           );
         }
         break;
+      case 'toggle-group':
+        if (this.state.showGroup) {
+          this.props.setShowGroup(false);
+          this.setState({ showGroup: false });
+        } else {
+          this.props.setShowGroup(true);
+          this.setState({ showGroup: true });
+        }
+        break;
       case 'toggle-net-worth-chart':
         if (this.props.showNetWorthChart) {
           this.props.setShowNetWorthChart(false);
@@ -978,36 +996,14 @@ class AccountInternal extends PureComponent<
   };
 
   lockTransactions = async () => {
+    const { accountId } = this.props;
+    if (!accountId) {
+      return;
+    }
+
     this.setState({ workingHard: true });
 
-    const { accountId } = this.props;
-
-    const { data } = await aqlQuery(
-      q('transactions')
-        .filter({ cleared: true, reconciled: false, account: accountId })
-        .select('*')
-        .options({ splits: 'grouped' }),
-    );
-    let transactions = ungroupTransactions(data);
-
-    const changes: { updated: Array<Partial<TransactionEntity>> } = {
-      updated: [],
-    };
-
-    transactions.forEach(trans => {
-      const { diff } = updateTransaction(transactions, {
-        ...trans,
-        reconciled: true,
-      });
-
-      transactions = applyChanges(diff, transactions);
-
-      changes.updated = changes.updated
-        ? changes.updated.concat(diff.updated)
-        : diff.updated;
-    });
-
-    await send('transactions-batch-update', changes);
+    await reconciliation.lockTransactions(accountId);
     await this.refetchTransactions();
   };
 
@@ -1030,27 +1026,9 @@ class AccountInternal extends PureComponent<
 
     const { reconcileAmount } = this.state;
 
-    const { data } = await aqlQuery(
-      q('transactions')
-        .filter({ cleared: true, account: accountId })
-        .select('*')
-        .options({ splits: 'grouped' }),
+    await reconciliation.finishReconciliation(account.id, reconcileAmount, () =>
+      this.lockTransactions(),
     );
-    const transactions = ungroupTransactions(data);
-
-    let cleared = 0;
-
-    transactions.forEach(trans => {
-      if (!trans.is_parent) {
-        cleared += trans.amount;
-      }
-    });
-
-    const targetDiff = (reconcileAmount || 0) - cleared;
-
-    if (targetDiff === 0) {
-      await this.lockTransactions();
-    }
 
     const lastReconciled = new Date().getTime().toString();
     this.props.onUpdateAccount({ ...account, last_reconciled: lastReconciled });
@@ -1062,36 +1040,20 @@ class AccountInternal extends PureComponent<
   };
 
   onCreateReconciliationTransaction = async (diff: number) => {
-    // Create a new reconciliation transaction
-    const reconciliationTransactions = realizeTempTransactions([
-      {
-        id: 'temp',
-        account: this.props.accountId!,
-        cleared: true,
-        reconciled: false,
-        amount: diff,
-        date: currentDay(),
-        notes: t('Reconciliation balance adjustment'),
-      },
-    ]);
+    const { accountId } = this.props;
+    if (!accountId) {
+      return;
+    }
 
-    // Optimistic UI: update the transaction list before sending the data to the database
-    this.setState(state => ({
-      transactions: [...reconciliationTransactions, ...state.transactions],
-    }));
-
-    // run rules on the reconciliation transaction
-    const ruledTransactions = await Promise.all(
-      reconciliationTransactions.map(transaction =>
-        send('rules-run', { transaction }),
-      ),
+    await reconciliation.createReconciliationTransaction(
+      accountId,
+      diff,
+      // Optimistic UI: update the transaction list before sending the data to the database
+      reconciliationTransactions =>
+        this.setState(state => ({
+          transactions: [...reconciliationTransactions, ...state.transactions],
+        })),
     );
-
-    // sync the reconciliation transaction
-    await send('transactions-batch-update', {
-      added: ruledTransactions.filter(trans => !trans.tombstone),
-      deleted: ruledTransactions.filter(trans => trans.tombstone),
-    });
     await this.refetchTransactions();
   };
 
@@ -1754,6 +1716,7 @@ class AccountInternal extends PureComponent<
       balances,
       showCleared,
       showReconciled,
+      showGroup,
       filteredAmount,
     } = this.state;
 
@@ -1830,6 +1793,7 @@ class AccountInternal extends PureComponent<
                 showExtraBalances={showExtraBalances ?? false}
                 showCleared={showCleared ?? false}
                 showReconciled={showReconciled ?? false}
+                showGroup={showGroup}
                 showEmptyMessage={showEmptyMessage ?? false}
                 balanceQuery={balanceQuery}
                 canCalculateBalance={this?.canCalculateBalance ?? undefined}
@@ -1894,6 +1858,7 @@ class AccountInternal extends PureComponent<
                   showBalances={!!allBalances}
                   showReconciled={showReconciled}
                   showCleared={!!showCleared}
+                  showGroup={showGroup}
                   showAccount={
                     !accountId ||
                     accountId === 'offbudget' ||
@@ -2033,6 +1998,9 @@ export function Account() {
   const [hideReconciled, setHideReconciled] = useSyncedPref(
     `hide-reconciled-${params.id}`,
   );
+  const [showGroup, setShowGroup] = useSyncedPref(
+    `show-group-${params.id || 'all-accounts'}`,
+  );
   const [showExtraBalances, setShowExtraBalances] = useSyncedPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
@@ -2088,6 +2056,8 @@ export function Account() {
             setShowCleared={val => setHideCleared(String(!val))}
             showReconciled={String(hideReconciled) !== 'true'}
             setShowReconciled={val => setHideReconciled(String(!val))}
+            showGroup={String(showGroup) === 'true'}
+            setShowGroup={val => setShowGroup(String(val))}
             showExtraBalances={String(showExtraBalances) === 'true'}
             setShowExtraBalances={extraBalances =>
               setShowExtraBalances(String(extraBalances))

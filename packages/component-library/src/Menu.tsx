@@ -37,7 +37,7 @@ export type MenuItemObject<NameType, Type extends string | symbol = string> = {
   disabled?: boolean;
   icon?: ComponentType<SVGProps<SVGSVGElement>>;
   iconSize?: number;
-  text: string;
+  text: string | ReactNode;
   key?: string;
   toggle?: boolean;
   tooltip?: string;
@@ -148,6 +148,7 @@ export function Menu<const NameType = string>({
 
   return (
     <View
+      role="menu"
       className={className}
       style={{ outline: 'none', borderRadius: 4, overflow: 'hidden', ...style }}
       tabIndex={0}

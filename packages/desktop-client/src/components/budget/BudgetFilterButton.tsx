@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import type { MouseEvent, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -19,9 +19,10 @@ import type { FocusedViewDefinition } from '@actual-app/core/types/prefs';
 
 import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
 import type { DragState, OnDropCallback } from '#components/sort';
-import { useContextMenu } from '#hooks/useContextMenu';
 import { useDragRef } from '#hooks/useDragRef';
 import { BUILT_IN_VIEWS } from '#hooks/useFocusedViews';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type ViewListItemProps = {
   viewId: string;
@@ -66,8 +67,21 @@ function ViewListItem({
     onEdit || onDelete || onToggleVisibility || onToggleShowHiddenViews,
   );
 
-  const { position, menuOpen, setMenuOpen, handleContextMenu, resetPosition } =
-    useContextMenu();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [position, setPosition] = useState({ crossOffset: 0, offset: 0 });
+
+  const resetPosition = (crossOffset = 0, offset = 0) =>
+    setPosition({ crossOffset, offset });
+
+  const handleContextMenu = (e: MouseEvent) => {
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setPosition({
+      crossOffset: e.clientX - rect.left,
+      offset: e.clientY - rect.bottom,
+    });
+    setMenuOpen(true);
+  };
 
   const dragging = dragState?.item?.id === _viewId;
   const canDrag = _viewId !== '__all';
@@ -94,10 +108,22 @@ function ViewListItem({
       }),
   });
 
+  const dispatch = useDispatch();
+
   function confirmDelete() {
-    if (window.confirm(t('Are you sure you want to delete this view?'))) {
-      onDelete?.();
-    }
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'confirm-delete',
+          options: {
+            message: <Trans>Are you sure you want to delete this view?</Trans>,
+            onConfirm: () => {
+              onDelete?.();
+            },
+          },
+        },
+      }),
+    );
   }
 
   return (
@@ -221,18 +247,25 @@ function ViewListItem({
                   ? ([
                       onToggleShowHiddenViews && {
                         name: 'toggle-show-hidden',
-                        text: t('Toggle hidden views'),
+                        text: <Trans>Toggle hidden views</Trans>,
                       },
                     ].filter(Boolean) as MenuItem[])
                   : ([
-                      isCustom && { name: 'rename', text: t('Rename') },
+                      isCustom && {
+                        name: 'rename',
+                        text: <Trans>Rename</Trans>,
+                      },
                       onToggleVisibility && {
                         name: 'toggle-visibility',
-                        text: isHidden ? t('Show') : t('Hide'),
+                        text: isHidden ? (
+                          <Trans>Show</Trans>
+                        ) : (
+                          <Trans>Hide</Trans>
+                        ),
                       },
                       isCustom && {
                         name: 'delete',
-                        text: t('Delete'),
+                        text: <Trans>Delete</Trans>,
                       },
                     ].filter(Boolean) as MenuItem[])
               }
@@ -290,13 +323,19 @@ export function BudgetFilterButton({
   function getBuiltInLabel(viewId: string): ReactNode | null {
     switch (viewId) {
       case BUILT_IN_VIEWS.UNDERFUNDED:
-        return availableBuiltInViews.underfunded ? t('Underfunded') : null;
+        return availableBuiltInViews.underfunded ? (
+          <Trans>Underfunded</Trans>
+        ) : null;
       case BUILT_IN_VIEWS.OVERFUNDED:
-        return availableBuiltInViews.overfunded ? t('Overfunded') : null;
+        return availableBuiltInViews.overfunded ? (
+          <Trans>Overfunded</Trans>
+        ) : null;
       case BUILT_IN_VIEWS.OVERSPENT:
-        return availableBuiltInViews.overspent ? t('Overspent') : null;
+        return availableBuiltInViews.overspent ? (
+          <Trans>Overspent</Trans>
+        ) : null;
       case BUILT_IN_VIEWS.MONEY_AVAILABLE:
-        return t('Money Available');
+        return <Trans>Money Available</Trans>;
       default:
         return null;
     }

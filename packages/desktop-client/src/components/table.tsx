@@ -37,6 +37,7 @@ import { View } from '@actual-app/components/view';
 
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
+import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useModalState } from '#hooks/useModalState';
 import {
   AvoidRefocusScrollProvider,
@@ -267,11 +268,13 @@ export function Cell({
     ],
   );
 
+  const mergedRef = useMergedRefs(viewRef, viewProps.ref, viewProps.innerRef);
+
   return (
     <View
-      innerRef={viewRef}
       style={{ ...widthStyle, ...cellStyle, ...style }}
       {...viewProps}
+      innerRef={mergedRef}
       data-testid={name}
     >
       {conditionalPrivacyFilter}
