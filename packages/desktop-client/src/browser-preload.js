@@ -136,6 +136,10 @@ global.Actual = {
         'application/octet-stream',
         'com.intuit.qfx',
       ],
+      // MT940 statements have no registered MIME type, so browsers report them
+      // as plain text or an unknown binary blob.
+      sta: ['text/plain', 'application/octet-stream'],
+      mt940: ['text/plain', 'application/octet-stream'],
     };
 
     return new Promise(resolve => {
