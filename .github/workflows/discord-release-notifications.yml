@@ -27,7 +27,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Notify Discord of new tag
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && github.event.created == true
         uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1.16.0
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
