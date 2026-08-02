@@ -252,7 +252,7 @@ function ViewListItem({
                   : ([
                       isCustom && {
                         name: 'rename',
-                        text: <Trans>Rename</Trans>,
+                        text: <Trans>Edit</Trans>,
                       },
                       onToggleVisibility && {
                         name: 'toggle-visibility',

@@ -90,7 +90,10 @@ export function FocusedViewEditor({ viewId, onClose }: FocusedViewEditorProps) {
       name="focused-view-editor"
       onClose={onClose}
       containerProps={{
-        style: { height: 'calc(var(--visual-viewport-height) * 0.9)' },
+        style: {
+          height: 'calc(var(--visual-viewport-height) * 0.9)',
+          overflow: 'hidden',
+        },
       }}
     >
       <ModalHeader
@@ -120,7 +123,7 @@ export function FocusedViewEditor({ viewId, onClose }: FocusedViewEditorProps) {
         rightContent={<ModalCloseButton onPress={onClose} />}
       />
 
-      <View style={{ padding: 15, flex: 1 }}>
+      <View style={{ padding: 15, flex: 1, minHeight: 0 }}>
         <View style={{ marginBottom: 20, flexShrink: 0 }}>
           <Text style={{ marginBottom: 5, fontWeight: 500 }}>
             <Trans>View Name</Trans>
@@ -135,12 +138,12 @@ export function FocusedViewEditor({ viewId, onClose }: FocusedViewEditorProps) {
           </InitialFocus>
         </View>
 
-        <View style={{ marginBottom: 20, flex: 1 }}>
+        <View style={{ marginBottom: 20, flex: 1, minHeight: 0 }}>
           <Text style={{ marginBottom: 10, fontWeight: 500, flexShrink: 0 }}>
             <Trans>Select Categories</Trans>
           </Text>
 
-          <View style={{ flex: 1, position: 'relative' }}>
+          <View style={{ flex: 1, minHeight: 0, position: 'relative' }}>
             <View
               style={{
                 position: 'absolute',
@@ -165,7 +168,7 @@ export function FocusedViewEditor({ viewId, onClose }: FocusedViewEditorProps) {
                   groupCatIds.some(id => selectedCategoryIds.has(id));
 
                 return (
-                  <View key={group.id}>
+                  <View key={group.id} style={{ flexShrink: 0 }}>
                     <View
                       style={{
                         flexDirection: 'row',
