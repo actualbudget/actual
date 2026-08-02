@@ -31,8 +31,6 @@ type BudgetTotalsProps = {
   collapseAllCategories: () => void;
   views?: FocusedViewDefinition[];
   viewOrder?: string[];
-  hiddenViews?: string[];
-  showHiddenViews?: boolean;
   activeViewId?: string | null;
   availableBuiltInViews?: {
     underfunded: boolean;
@@ -44,8 +42,6 @@ type BudgetTotalsProps = {
   onEditView?: (id: string) => void;
   onDeleteView?: (id: string) => void;
   onReorderViewToTarget?: OnDropCallback;
-  onToggleViewVisibility?: (id: string) => void;
-  onToggleShowHiddenViews?: () => void;
 };
 
 export const BudgetTotals = memo(function BudgetTotals({
@@ -54,8 +50,6 @@ export const BudgetTotals = memo(function BudgetTotals({
   collapseAllCategories,
   views = [],
   viewOrder = [],
-  hiddenViews = [],
-  showHiddenViews = false,
   activeViewId = null,
   availableBuiltInViews,
   onSelectView,
@@ -63,8 +57,6 @@ export const BudgetTotals = memo(function BudgetTotals({
   onEditView,
   onDeleteView,
   onReorderViewToTarget,
-  onToggleViewVisibility,
-  onToggleShowHiddenViews,
 }: BudgetTotalsProps) {
   const { t } = useTranslation();
   const isFocusedViewsEnabled = useFeatureFlag('focusedViews');
@@ -178,14 +170,10 @@ export const BudgetTotals = memo(function BudgetTotals({
             onCreateView &&
             onEditView &&
             onDeleteView &&
-            onReorderViewToTarget &&
-            onToggleViewVisibility &&
-            onToggleShowHiddenViews && (
+            onReorderViewToTarget && (
               <BudgetFilterButton
                 views={views}
                 viewOrder={viewOrder}
-                hiddenViews={hiddenViews}
-                showHiddenViews={showHiddenViews}
                 activeViewId={activeViewId}
                 availableBuiltInViews={availableBuiltInViews}
                 onSelectView={onSelectView}
@@ -193,8 +181,6 @@ export const BudgetTotals = memo(function BudgetTotals({
                 onEditView={onEditView}
                 onDeleteView={onDeleteView}
                 onReorderViewToTarget={onReorderViewToTarget}
-                onToggleViewVisibility={onToggleViewVisibility}
-                onToggleShowHiddenViews={onToggleShowHiddenViews}
               />
             )}
         </View>

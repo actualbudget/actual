@@ -188,15 +188,6 @@ export function useFocusedViews() {
     [],
   );
 
-  const [hiddenViews, setHiddenViews] = useSyncedPrefJson<string[]>(
-    'budget.hiddenViews',
-    [],
-  );
-  const [showHiddenViews, setShowHiddenViews] = useSyncedPrefJson<boolean>(
-    'budget.showHiddenViews',
-    false,
-  );
-
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   const viewOrder = useMemo(() => {
@@ -248,24 +239,6 @@ export function useFocusedViews() {
     [viewOrder, saveViewOrder],
   );
 
-  const toggleViewVisibility = useCallback(
-    (id: string) => {
-      if (hiddenViews.includes(id)) {
-        setHiddenViews(hiddenViews.filter(v => v !== id));
-      } else {
-        setHiddenViews([...hiddenViews, id]);
-        if (activeViewId === id) {
-          setActiveView(null);
-        }
-      }
-    },
-    [hiddenViews, setHiddenViews, activeViewId, setActiveView],
-  );
-
-  const toggleShowHiddenViews = useCallback(() => {
-    setShowHiddenViews(!showHiddenViews);
-  }, [showHiddenViews, setShowHiddenViews]);
-
   if (!isFocusedViewsEnabled) {
     return {
       views: [],
@@ -273,16 +246,12 @@ export function useFocusedViews() {
       isCollapsed: false,
       builtInViewsOrder: [],
       viewOrder: [],
-      hiddenViews: [],
-      showHiddenViews: false,
       setActiveView: () => undefined,
       setCollapsed: () => undefined,
       createView: () => undefined,
       updateView: () => undefined,
       deleteView: () => undefined,
       reorderViewToTarget: () => undefined,
-      toggleViewVisibility: () => undefined,
-      toggleShowHiddenViews: () => undefined,
       isBuiltInView: () => false,
     };
   }
@@ -293,16 +262,12 @@ export function useFocusedViews() {
     isCollapsed,
     builtInViewsOrder,
     viewOrder,
-    hiddenViews,
-    showHiddenViews,
     setActiveView,
     setCollapsed,
     createView,
     updateView,
     deleteView,
     reorderViewToTarget,
-    toggleViewVisibility,
-    toggleShowHiddenViews,
     isBuiltInView,
   };
 }

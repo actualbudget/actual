@@ -90,12 +90,8 @@ export function BudgetTable(props: BudgetTableProps) {
     views,
     activeViewId,
     viewOrder,
-    hiddenViews,
-    showHiddenViews,
     setActiveView,
     deleteView,
-    toggleViewVisibility,
-    toggleShowHiddenViews,
     reorderViewToTarget,
   } = useFocusedViews();
 
@@ -345,8 +341,6 @@ export function BudgetTable(props: BudgetTableProps) {
             collapseAllCategories={collapseAllCategories}
             views={views}
             viewOrder={viewOrder}
-            hiddenViews={hiddenViews}
-            showHiddenViews={showHiddenViews}
             activeViewId={activeViewId}
             availableBuiltInViews={availableBuiltInViews}
             onSelectView={setActiveView}
@@ -354,8 +348,6 @@ export function BudgetTable(props: BudgetTableProps) {
             onEditView={id => setEditorState({ isOpen: true, viewId: id })}
             onDeleteView={deleteView}
             onReorderViewToTarget={reorderViewToTarget}
-            onToggleViewVisibility={toggleViewVisibility}
-            onToggleShowHiddenViews={toggleShowHiddenViews}
           />
           <View
             ref={scrollContainerRef}

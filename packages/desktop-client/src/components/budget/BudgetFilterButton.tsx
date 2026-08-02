@@ -6,7 +6,6 @@ import { Button } from '@actual-app/components/button';
 import {
   SvgAdd,
   SvgCheveronDown,
-  SvgDotsHorizontalTriple,
   SvgFilter,
 } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
@@ -28,14 +27,10 @@ type ViewListItemProps = {
   label: ReactNode;
   isActive: boolean;
   isCustom: boolean;
-  isHidden?: boolean;
-  showHiddenViews?: boolean;
   onSelect: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
   onReorderViewToTarget?: OnDropCallback;
-  onToggleVisibility?: () => void;
-  onToggleShowHiddenViews?: () => void;
   dragState?: DragState<FocusedViewDragItem> | null;
   onDragChange?: (drag: DragState<FocusedViewDragItem>) => void;
 };
@@ -49,22 +44,17 @@ function ViewListItem({
   label,
   isActive,
   isCustom,
-  isHidden,
   onSelect,
   onEdit,
   onDelete,
   onReorderViewToTarget,
-  onToggleVisibility,
-  onToggleShowHiddenViews,
   dragState,
   onDragChange,
 }: ViewListItemProps) {
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLDivElement>(null);
 
-  const hasContextMenu = Boolean(
-    onEdit || onDelete || onToggleVisibility || onToggleShowHiddenViews,
-  );
+  const hasContextMenu = Boolean(onEdit || onDelete);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [position, setPosition] = useState({ crossOffset: 0, offset: 0 });
@@ -198,11 +188,7 @@ function ViewListItem({
               setMenuOpen(true);
             }}
           >
-            {_viewId === '__all' ? (
-              <SvgDotsHorizontalTriple style={{ width: 14, height: 14 }} />
-            ) : (
-              <SvgCheveronDown style={{ width: 14, height: 14 }} />
-            )}
+            <SvgCheveronDown style={{ width: 14, height: 14 }} />
           </Button>
         )}
 
@@ -230,43 +216,22 @@ function ViewListItem({
                   case 'delete':
                     confirmDelete();
                     break;
-                  case 'toggle-visibility':
-                    onToggleVisibility?.();
-                    break;
-                  case 'toggle-show-hidden':
-                    onToggleShowHiddenViews?.();
-                    break;
                   default:
                     break;
                 }
                 setMenuOpen(false);
               }}
               items={
-                _viewId === '__all'
-                  ? ([
-                      onToggleShowHiddenViews && {
-                        name: 'toggle-show-hidden',
-                        text: <Trans>Toggle hidden views</Trans>,
-                      },
-                    ].filter(Boolean) as MenuItem[])
-                  : ([
-                      isCustom && {
-                        name: 'rename',
-                        text: <Trans>Edit</Trans>,
-                      },
-                      onToggleVisibility && {
-                        name: 'toggle-visibility',
-                        text: isHidden ? (
-                          <Trans>Show</Trans>
-                        ) : (
-                          <Trans>Hide</Trans>
-                        ),
-                      },
-                      isCustom && {
-                        name: 'delete',
-                        text: <Trans>Delete</Trans>,
-                      },
-                    ].filter(Boolean) as MenuItem[])
+                [
+                  isCustom && {
+                    name: 'rename',
+                    text: <Trans>Edit</Trans>,
+                  },
+                  isCustom && {
+                    name: 'delete',
+                    text: <Trans>Delete</Trans>,
+                  },
+                ].filter(Boolean) as MenuItem[]
               }
             />
           </Popover>
@@ -279,8 +244,6 @@ function ViewListItem({
 type BudgetFilterButtonProps = {
   views: FocusedViewDefinition[];
   viewOrder: string[];
-  hiddenViews: string[];
-  showHiddenViews: boolean;
   activeViewId: string | null;
   availableBuiltInViews: {
     underfunded: boolean;
@@ -292,15 +255,11 @@ type BudgetFilterButtonProps = {
   onEditView: (id: string) => void;
   onDeleteView: (id: string) => void;
   onReorderViewToTarget?: OnDropCallback;
-  onToggleViewVisibility: (id: string) => void;
-  onToggleShowHiddenViews: () => void;
 };
 
 export function BudgetFilterButton({
   views,
   viewOrder,
-  hiddenViews,
-  showHiddenViews,
   activeViewId,
   availableBuiltInViews,
   onSelectView,
@@ -308,8 +267,6 @@ export function BudgetFilterButton({
   onEditView,
   onDeleteView,
   onReorderViewToTarget,
-  onToggleViewVisibility,
-  onToggleShowHiddenViews,
 }: BudgetFilterButtonProps) {
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -380,20 +337,13 @@ export function BudgetFilterButton({
           label={<Trans>All</Trans>}
           isActive={activeViewId === null}
           isCustom={false}
-          showHiddenViews={showHiddenViews}
           onSelect={() => {
             onSelectView(null);
             setIsOpen(false);
           }}
-          onToggleShowHiddenViews={onToggleShowHiddenViews}
         />
 
         {viewOrder.map(viewId => {
-          const isHidden = hiddenViews.includes(viewId);
-          if (isHidden && !showHiddenViews) {
-            return null;
-          }
-
           if (isBuiltIn(viewId)) {
             const label = getBuiltInLabel(viewId);
             if (!label) return null;
@@ -405,8 +355,6 @@ export function BudgetFilterButton({
                 label={label}
                 isActive={activeViewId === viewId}
                 isCustom={false}
-                isHidden={isHidden}
-                showHiddenViews={showHiddenViews}
                 onSelect={() => {
                   onSelectView(viewId);
                   setIsOpen(false);
@@ -420,8 +368,6 @@ export function BudgetFilterButton({
                     setDragState(drag);
                   }
                 }}
-                onToggleVisibility={() => onToggleViewVisibility(viewId)}
-                onToggleShowHiddenViews={onToggleShowHiddenViews}
               />
             );
           } else {
@@ -435,8 +381,6 @@ export function BudgetFilterButton({
                 label={customView.name}
                 isActive={activeViewId === viewId}
                 isCustom
-                isHidden={isHidden}
-                showHiddenViews={showHiddenViews}
                 onSelect={() => {
                   onSelectView(viewId);
                   setIsOpen(false);
@@ -452,8 +396,6 @@ export function BudgetFilterButton({
                     setDragState(drag);
                   }
                 }}
-                onToggleVisibility={() => onToggleViewVisibility(viewId)}
-                onToggleShowHiddenViews={onToggleShowHiddenViews}
               />
             );
           }

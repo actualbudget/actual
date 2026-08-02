@@ -62,8 +62,6 @@ export type SyncedPrefs = Partial<
     | 'budget.focusedViews'
     | 'budget.builtInViewsOrder'
     | 'budget.viewOrder'
-    | 'budget.hiddenViews'
-    | 'budget.showHiddenViews'
     | 'budget.activeFocusedView'
     | 'budget.focusedViewsCollapsed',
     string

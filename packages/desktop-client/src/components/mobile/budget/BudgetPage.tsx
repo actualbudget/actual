@@ -90,8 +90,7 @@ export function BudgetPage() {
   const spreadsheet = useSpreadsheet();
   const isFocusedViewsEnabled = useFeatureFlag('focusedViews');
 
-  const { views, viewOrder, hiddenViews, activeViewId, setActiveView } =
-    useFocusedViews();
+  const { views, viewOrder, activeViewId, setActiveView } = useFocusedViews();
 
   const currMonth = monthUtils.currentMonth();
   const [startMonth = currMonth, setStartMonthPref] =
@@ -613,7 +612,6 @@ export function BudgetPage() {
                 <ViewFilterButton
                   views={views}
                   viewOrder={viewOrder}
-                  hiddenViews={hiddenViews}
                   activeViewId={activeViewId}
                   availableBuiltInViews={availableBuiltInViews}
                   onSelectView={setActiveView}

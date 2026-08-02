@@ -13,7 +13,6 @@ import { BUILT_IN_VIEWS } from '#hooks/useFocusedViews';
 type ViewFilterButtonProps = {
   views: FocusedViewDefinition[];
   viewOrder: string[];
-  hiddenViews: string[];
   activeViewId: string | null;
   availableBuiltInViews: {
     underfunded: boolean;
@@ -26,7 +25,6 @@ type ViewFilterButtonProps = {
 export function ViewFilterButton({
   views,
   viewOrder,
-  hiddenViews,
   activeViewId,
   availableBuiltInViews,
   onSelectView,
@@ -66,11 +64,6 @@ export function ViewFilterButton({
   ];
 
   for (const viewId of viewOrder) {
-    // Skip hidden views on mobile
-    if (hiddenViews.includes(viewId)) {
-      continue;
-    }
-
     if (isBuiltIn(viewId)) {
       const label = getBuiltInLabel(viewId);
       if (label) {
