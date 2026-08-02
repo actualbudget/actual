@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgFilter, SvgFilterOutline } from '@actual-app/components/icons/v1';
+import { SvgFilter } from '@actual-app/components/icons/v1';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import type { FocusedViewDefinition } from '@actual-app/core/types/prefs';
@@ -34,8 +34,6 @@ export function ViewFilterButton({
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
-
-  const isFilterActive = activeViewId !== null;
 
   function getBuiltInLabel(viewId: string): ReactNode | null {
     switch (viewId) {
@@ -95,25 +93,14 @@ export function ViewFilterButton({
         aria-label={t('Filter views')}
         style={{ margin: 10, position: 'relative' }}
       >
-        {isFilterActive ? (
-          <SvgFilter
-            width={18}
-            height={17}
-            style={{
-              color: theme.mobileHeaderText,
-              transform: 'translateY(2px)',
-            }}
-          />
-        ) : (
-          <SvgFilterOutline
-            width={18}
-            height={17}
-            style={{
-              color: theme.mobileHeaderText,
-              transform: 'translateY(2px)',
-            }}
-          />
-        )}
+        <SvgFilter
+          width={18}
+          height={17}
+          style={{
+            color: theme.mobileHeaderText,
+            transform: 'translateY(2px)',
+          }}
+        />
       </Button>
 
       <Popover

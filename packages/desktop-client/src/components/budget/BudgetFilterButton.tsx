@@ -8,7 +8,6 @@ import {
   SvgCheveronDown,
   SvgDotsHorizontalTriple,
   SvgFilter,
-  SvgFilterOutline,
 } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import type { MenuItem } from '@actual-app/components/menu';
@@ -361,15 +360,7 @@ export function BudgetFilterButton({
         }}
         className={!isFilterActive && !isOpen ? 'hover-visible' : undefined}
       >
-        {isFilterActive ? (
-          <SvgFilter width={14} height={14} style={{ color: 'currentColor' }} />
-        ) : (
-          <SvgFilterOutline
-            width={14}
-            height={14}
-            style={{ color: 'currentColor' }}
-          />
-        )}
+        <SvgFilter width={14} height={14} style={{ color: 'currentColor' }} />
       </Button>
 
       <Popover

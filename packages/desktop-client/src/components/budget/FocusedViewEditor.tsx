@@ -86,7 +86,13 @@ export function FocusedViewEditor({ viewId, onClose }: FocusedViewEditorProps) {
   };
 
   return (
-    <Modal name="focused-view-editor" onClose={onClose}>
+    <Modal
+      name="focused-view-editor"
+      onClose={onClose}
+      containerProps={{
+        style: { height: 'calc(var(--visual-viewport-height) * 0.9)' },
+      }}
+    >
       <ModalHeader
         title={
           <View
@@ -114,8 +120,8 @@ export function FocusedViewEditor({ viewId, onClose }: FocusedViewEditorProps) {
         rightContent={<ModalCloseButton onPress={onClose} />}
       />
 
-      <View style={{ padding: 15, ...styles.scrollbar, overflowY: 'auto' }}>
-        <View style={{ marginBottom: 20 }}>
+      <View style={{ padding: 15, flex: 1 }}>
+        <View style={{ marginBottom: 20, flexShrink: 0 }}>
           <Text style={{ marginBottom: 5, fontWeight: 500 }}>
             <Trans>View Name</Trans>
           </Text>
@@ -129,72 +135,80 @@ export function FocusedViewEditor({ viewId, onClose }: FocusedViewEditorProps) {
           </InitialFocus>
         </View>
 
-        <View style={{ marginBottom: 20 }}>
-          <Text style={{ marginBottom: 10, fontWeight: 500 }}>
+        <View style={{ marginBottom: 20, flex: 1 }}>
+          <Text style={{ marginBottom: 10, fontWeight: 500, flexShrink: 0 }}>
             <Trans>Select Categories</Trans>
           </Text>
 
-          <View
-            style={{
-              border: `1px solid ${theme.tableBorder}`,
-              borderRadius: 4,
-              overflow: 'hidden',
-            }}
-          >
-            {expenseGroups.map(group => {
-              const groupCatIds =
-                group.categories?.filter(c => !c.hidden).map(c => c.id) || [];
-              const allSelected =
-                groupCatIds.length > 0 &&
-                groupCatIds.every(id => selectedCategoryIds.has(id));
-              const _someSelected =
-                !allSelected &&
-                groupCatIds.some(id => selectedCategoryIds.has(id));
+          <View style={{ flex: 1, position: 'relative' }}>
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                border: `1px solid ${theme.tableBorder}`,
+                borderRadius: 4,
+                ...styles.scrollbar,
+                overflowY: 'auto',
+              }}
+            >
+              {expenseGroups.map(group => {
+                const groupCatIds =
+                  group.categories?.filter(c => !c.hidden).map(c => c.id) || [];
+                const allSelected =
+                  groupCatIds.length > 0 &&
+                  groupCatIds.every(id => selectedCategoryIds.has(id));
+                const _someSelected =
+                  !allSelected &&
+                  groupCatIds.some(id => selectedCategoryIds.has(id));
 
-              return (
-                <View key={group.id}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      padding: '8px 10px',
-                      backgroundColor: theme.tableHeaderBackground,
-                      borderBottom: `1px solid ${theme.tableBorder}`,
-                    }}
-                  >
-                    <Checkbox
-                      checked={allSelected}
-                      onChange={() => handleToggleGroup(group.id)}
-                    />
-                    <Text style={{ fontWeight: 600, marginLeft: 8 }}>
-                      {group.name}
-                    </Text>
+                return (
+                  <View key={group.id}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        padding: '8px 10px',
+                        backgroundColor: theme.tableHeaderBackground,
+                        borderBottom: `1px solid ${theme.tableBorder}`,
+                      }}
+                    >
+                      <Checkbox
+                        checked={allSelected}
+                        onChange={() => handleToggleGroup(group.id)}
+                      />
+                      <Text style={{ fontWeight: 600, marginLeft: 8 }}>
+                        {group.name}
+                      </Text>
+                    </View>
+
+                    {group.categories
+                      ?.filter(c => !c.hidden)
+                      .map(category => (
+                        <View
+                          key={category.id}
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            padding: '8px 10px',
+                            paddingLeft: 30,
+                            backgroundColor: theme.tableBackground,
+                            borderBottom: `1px solid ${theme.tableBorder}`,
+                          }}
+                        >
+                          <Checkbox
+                            checked={selectedCategoryIds.has(category.id)}
+                            onChange={() => handleToggleCategory(category.id)}
+                          />
+                          <Text style={{ marginLeft: 8 }}>{category.name}</Text>
+                        </View>
+                      ))}
                   </View>
-
-                  {group.categories
-                    ?.filter(c => !c.hidden)
-                    .map(category => (
-                      <View
-                        key={category.id}
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          padding: '8px 10px',
-                          paddingLeft: 30,
-                          backgroundColor: theme.tableBackground,
-                          borderBottom: `1px solid ${theme.tableBorder}`,
-                        }}
-                      >
-                        <Checkbox
-                          checked={selectedCategoryIds.has(category.id)}
-                          onChange={() => handleToggleCategory(category.id)}
-                        />
-                        <Text style={{ marginLeft: 8 }}>{category.name}</Text>
-                      </View>
-                    ))}
-                </View>
-              );
-            })}
+                );
+              })}
+            </View>
           </View>
         </View>
 
@@ -203,6 +217,7 @@ export function FocusedViewEditor({ viewId, onClose }: FocusedViewEditorProps) {
             flexDirection: 'row',
             justifyContent: 'flex-end',
             gap: 10,
+            flexShrink: 0,
           }}
         >
           <Button onClick={onClose}>
