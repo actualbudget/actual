@@ -1636,9 +1636,13 @@ class AccountInternal extends PureComponent<
     }
 
     // Persist the active filters for this view so they are restored the
-    // next time it is opened (no-op when nothing changed).
+    // next time it is opened (no-op when nothing changed). Conditions
+    // carrying a customName come from navigation (e.g. report drill-downs)
+    // and can't be recreated from the filter UI, so they aren't persisted.
     this.props.onSaveFilterConditions(
-      conditions,
+      conditions.filter(
+        cond => isTransactionFilterEntity(cond) || !cond.customName,
+      ),
       this.state.filterConditionsOp,
     );
 

@@ -53,3 +53,4 @@ There is also a small `ServerPrefs` type for settings that configure the sync se
 - Does it configure the app itself, regardless of which budget is open? Use a **global pref**.
 - Is it per-budget UI state that should stay on this device only? Use a **local pref**.
 - Is it something the app tracks about the budget file rather than a user choice? It is probably a **metadata pref**.
+- Does it configure the sync server itself rather than the app? Use a **server pref**.
