@@ -34,7 +34,7 @@ jobs:
           status: Success
           title: 'New tag: ${{ github.ref_name }}'
           description: Tag `${{ github.ref_name }}` was pushed to ${{ github.repository }}.
-          url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}
+          url: ${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }}
           username: Actual Releases
           nofail: true
 
