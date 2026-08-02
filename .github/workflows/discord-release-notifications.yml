@@ -1,0 +1,62 @@
+name: Discord Release Notifications
+
+# Sends a Discord notification when a new tag is pushed or when a release
+# is drafted or published. Requires the DISCORD_WEBHOOK_URL secret.
+
+on:
+  push:
+    tags:
+      - '**'
+  release:
+    types: [created, published]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: Notify Discord
+    runs-on: depot-ubuntu-latest
+    if: github.repository == 'actualbudget/actual'
+    timeout-minutes: 5
+    steps:
+      - name: Notify Discord of new tag
+        if: github.event_name == 'push'
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1.16.0
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          status: Success
+          title: 'New tag: ${{ github.ref_name }}'
+          description: Tag `${{ github.ref_name }}` was pushed to ${{ github.repository }}.
+          url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}
+          username: Actual Releases
+          nofail: true
+
+      # GitHub does not deliver the `created` activity type for draft
+      # releases (see the release event docs), so this step is best-effort.
+      # The draft guard also prevents a duplicate notification when a
+      # release is published directly, which fires both `created` and
+      # `published`.
+      - name: Notify Discord of drafted release
+        if: github.event_name == 'release' && github.event.action == 'created' && github.event.release.draft
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1.16.0
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          status: Success
+          title: 'Release drafted: ${{ github.event.release.name || github.event.release.tag_name }}'
+          description: A new release draft was created for ${{ github.repository }}.
+          url: ${{ github.event.release.html_url }}
+          username: Actual Releases
+          nofail: true
+
+      - name: Notify Discord of published release
+        if: github.event_name == 'release' && github.event.action == 'published'
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1.16.0
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          status: Success
+          title: 'Release published: ${{ github.event.release.name || github.event.release.tag_name }}'
+          description: A new release was published for ${{ github.repository }}.
+          url: ${{ github.event.release.html_url }}
+          username: Actual Releases
+          nofail: true
