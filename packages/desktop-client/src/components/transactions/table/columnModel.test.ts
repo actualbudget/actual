@@ -4,6 +4,7 @@ import {
   columnIdToFieldId,
   deriveTransactionFields,
   getOrderedColumns,
+  getTransactionColumnWidth,
   TRANSACTION_COLUMNS,
 } from './columnModel';
 import {
@@ -88,6 +89,27 @@ describe('transaction column model', () => {
     expect(TRANSACTION_COLUMNS.map(col => col.id)).toEqual([
       ...TRANSACTION_TABLE_COLUMN_IDS,
     ]);
+  });
+
+  it('keeps the legacy column widths', () => {
+    // These widths are shared by the header and the row cells in BOTH the
+    // legacy and v2 rendering paths, so changing them changes the table's
+    // layout for everyone.
+    const legacyWidths: Record<TransactionTableColumnId, number | 'flex'> = {
+      date: 110,
+      account: 'flex',
+      payee: 'flex',
+      notes: 'flex',
+      group: 'flex',
+      category: 'flex',
+      payment: 100,
+      deposit: 100,
+      balance: 103,
+      cleared: 38,
+    };
+    for (const id of TRANSACTION_TABLE_COLUMN_IDS) {
+      expect(getTransactionColumnWidth(id)).toBe(legacyWidths[id]);
+    }
   });
 
   it('maps payment/deposit columns to the debit/credit fields', () => {

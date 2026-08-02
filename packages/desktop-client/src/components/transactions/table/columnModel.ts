@@ -157,6 +157,16 @@ function buildColumnDef(id: TransactionTableColumnId): TransactionColumnDef {
 export const TRANSACTION_COLUMNS: TransactionColumnDef[] =
   TRANSACTION_TABLE_COLUMN_IDS.map(buildColumnDef);
 
+/**
+ * A column's width, shared by the header and the row cells so the two can
+ * never drift apart.
+ */
+export function getTransactionColumnWidth(
+  id: TransactionTableColumnId,
+): number | 'flex' {
+  return COLUMN_LAYOUT[id].width;
+}
+
 const COLUMNS_BY_ID = new Map(TRANSACTION_COLUMNS.map(col => [col.id, col]));
 
 /**

@@ -144,6 +144,7 @@ import { getStatusLabel } from '#util/schedule';
 import {
   deriveTransactionFields,
   getOrderedColumns,
+  getTransactionColumnWidth,
 } from './table/columnModel';
 import {
   isTransactionTableColumnAvailableInChildRows,
@@ -523,7 +524,7 @@ function StatusCell({
   return (
     <Cell
       name="cleared"
-      width={38}
+      width={getTransactionColumnWidth('cleared')}
       alignItems="center"
       focused={focused}
       style={{ padding: 1 }}
@@ -1537,9 +1538,9 @@ const Transaction = memo(function Transaction({
           <Field
             key={columnId}
             /* Date blank placeholder for Child transaction */
-            width={110}
+            width={getTransactionColumnWidth('date')}
             style={{
-              width: 110,
+              width: getTransactionColumnWidth('date'),
               backgroundColor: theme.tableRowBackgroundHover,
               border: 0, // known z-order issue, bottom border for parent transaction hidden
             }}
@@ -1549,7 +1550,7 @@ const Transaction = memo(function Transaction({
             key={columnId}
             /* Date field for non-child transaction */
             name="date"
-            width={110}
+            width={getTransactionColumnWidth('date')}
             textAlign="flex"
             exposed={focusedField === 'date'}
             value={date}
@@ -1898,7 +1899,7 @@ const Transaction = memo(function Transaction({
             key={columnId}
             /* Debit field for all transactions */
             type="input"
-            width={100}
+            width={getTransactionColumnWidth('payment')}
             name="debit"
             exposed={focusedField === 'debit'}
             focused={focusedField === 'debit'}
@@ -1933,7 +1934,7 @@ const Transaction = memo(function Transaction({
             key={columnId}
             /* Credit field for all transactions */
             type="input"
-            width={100}
+            width={getTransactionColumnWidth('deposit')}
             name="credit"
             exposed={focusedField === 'credit'}
             focused={focusedField === 'credit'}
@@ -1979,7 +1980,7 @@ const Transaction = memo(function Transaction({
                   : theme.numberPositive,
             }}
             style={{ ...styles.tnum, ...amountStyle }}
-            width={103}
+            width={getTransactionColumnWidth('balance')}
             textAlign="right"
             privacyFilter
           />
