@@ -98,6 +98,7 @@ export function TransactionListItem({
   const account = useAccount(transaction?.account || '');
   const transferAccount = useAccount(payee?.transfer_acct || '');
   const isPreview = isPreviewId(transaction?.id || '');
+  const { schedules = [] } = useCachedSchedules();
 
   const newTransactions = useSelector(
     state => state.transactions.newTransactions,
@@ -134,7 +135,13 @@ export function TransactionListItem({
     is_child: isChild,
     notes,
     forceUpcoming,
+    schedule: scheduleId,
   } = transaction;
+
+  const schedule = scheduleId
+    ? schedules.find(s => s.id === scheduleId)
+    : undefined;
+  const displayedNotes = notes || (isPreview ? schedule?.name : undefined);
 
   const previewStatus = forceUpcoming ? 'upcoming' : categoryId;
 
@@ -288,7 +295,7 @@ export function TransactionListItem({
                   </TextOneLine>
                 </View>
               )}
-              {notes && (
+              {displayedNotes && (
                 <TextOneLine
                   style={{
                     fontSize: 11,
@@ -299,7 +306,7 @@ export function TransactionListItem({
                     opacity: 0.85,
                   }}
                 >
-                  <NotesTagFormatter notes={notes} />
+                  <NotesTagFormatter notes={displayedNotes} />
                 </TextOneLine>
               )}
             </View>
