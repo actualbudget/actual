@@ -23,11 +23,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import {
-  SvgLeftArrow2,
-  SvgRightArrow2,
-  SvgSplit,
-} from '@actual-app/components/icons/v0';
+import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgArrowDown,
   SvgArrowUp,
@@ -50,6 +46,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
 import { memoizeOne } from '@actual-app/core/shared/memoize';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
@@ -87,6 +84,7 @@ import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplet
 import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
+import { TransferDirectionIcon } from '#components/common/TransferDirectionIcon';
 import { getStatusProps } from '#components/schedules/StatusBadge';
 import type { StatusTypes } from '#components/schedules/StatusBadge';
 import { DateSelect } from '#components/select/DateSelect';
@@ -132,6 +130,7 @@ import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import type { SplitsExpandedContextValue } from '#hooks/useSplitsExpanded';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -902,11 +901,10 @@ function PayeeIcons({
             }
           }}
         >
-          {isDeposit ? (
-            <SvgLeftArrow2 style={transferIconStyle} />
-          ) : (
-            <SvgRightArrow2 style={transferIconStyle} />
-          )}
+          <TransferDirectionIcon
+            isDeposit={isDeposit}
+            style={transferIconStyle}
+          />
         </Button>
       )}
     </>
@@ -1062,6 +1060,12 @@ const Transaction = memo(function Transaction({
 
   const [showReconciliationWarning, setShowReconciliationWarning] =
     useState(false);
+  const [syncTransferDatePref, setSyncTransferDatePref] =
+    useSyncedPref('sync-transfer-date');
+  const syncTransferDate = String(syncTransferDatePref) === 'true';
+  const setSyncTransferDate = (checked: boolean) =>
+    setSyncTransferDatePref(checked ? 'true' : 'false');
+  const transferDateSyncSeq = useRef(0);
 
   const onUpdate: TransactionUpdateFunction = async (name, value) => {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
@@ -1210,6 +1214,52 @@ const Transaction = memo(function Transaction({
         ? 'amount'
         : name;
       onSave(deserialized, subtransactions, deserializedName);
+
+      if (name === 'date' && typeof value === 'string' && syncTransferDate) {
+        // transaction's own leg, or a split child's leg
+        const transferIds = [
+          transaction.transfer_id,
+          ...(subtransactions?.map(t => t.transfer_id) ?? []),
+        ].filter((id): id is string => Boolean(id));
+
+        if (transferIds.length > 0) {
+          const seq = ++transferDateSyncSeq.current;
+          void (async () => {
+            const updated: { id: string; date: string }[] = transferIds.map(
+              id => ({ id, date: value }),
+            );
+
+            // sync split parent if the other leg is a split child
+            const { data } = (await aqlQuery(
+              q('transactions')
+                .filter({ id: { $oneof: transferIds } })
+                .select(['id', 'is_child', 'parent_id']),
+            )) as {
+              data: Pick<TransactionEntity, 'id' | 'is_child' | 'parent_id'>[];
+            };
+            updated.push(
+              ...data
+                .filter(
+                  (t): t is typeof t & { parent_id: string } =>
+                    t.is_child === true && typeof t.parent_id === 'string',
+                )
+                .map(t => ({ id: t.parent_id, date: value })),
+            );
+
+            // a newer date edit started while we were querying: let it win
+            if (seq !== transferDateSyncSeq.current) {
+              return;
+            }
+
+            await send('transactions-batch-update', {
+              updated,
+              runTransfers: false,
+            });
+          })().catch(error => {
+            console.error('Failed to sync transfer date:', error);
+          });
+        }
+      }
     }
   };
 
@@ -1485,7 +1535,11 @@ const Transaction = memo(function Transaction({
             formatter={date =>
               date ? formatDate(parseISO(date), dateFormat) : ''
             }
-            onExpose={name => !isPreview && onEdit(id, name)}
+            onExpose={name => {
+              if (!isPreview) {
+                onEdit(id, name);
+              }
+            }}
             onUpdate={value => {
               onUpdate('date', value);
             }}
@@ -1506,6 +1560,13 @@ const Transaction = memo(function Transaction({
                 clearOnBlur
                 onUpdate={onUpdate}
                 onSelect={onSave}
+                transferDateSyncChecked={syncTransferDate}
+                onTransferDateSyncChange={
+                  transaction.transfer_id ||
+                  subtransactions?.some(t => t.transfer_id)
+                    ? setSyncTransferDate
+                    : undefined
+                }
               />
             )}
           </CustomCell>
