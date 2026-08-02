@@ -71,6 +71,8 @@ import {
 } from '#hooks/useSplitsExpanded';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useTransactionBatchActions } from '#hooks/useTransactionBatchActions';
+import { useTransactionFilterConditions } from '#hooks/useTransactionFilterConditions';
+import type { ConditionEntity } from '#hooks/useTransactionFilterConditions';
 import { useTransactionFilters } from '#hooks/useTransactionFilters';
 import { calculateRunningBalancesBottomUp } from '#hooks/useTransactions';
 import {
@@ -95,8 +97,6 @@ import { updateNewTransactions } from '#transactions/transactionsSlice';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
-
-type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
 function isTransactionFilterEntity(
   filter: ConditionEntity,
@@ -218,7 +218,12 @@ type AccountInternalProps = {
     | 'offbudget'
     | 'uncategorized'
     | undefined;
-  filterConditions: RuleConditionEntity[];
+  filterConditions: ConditionEntity[];
+  filterConditionsOp: 'and' | 'or';
+  onSaveFilterConditions: (
+    conditions: ConditionEntity[],
+    conditionsOp: 'and' | 'or',
+  ) => void;
   showBalances?: boolean;
   showNetWorthChart: boolean;
   setShowNetWorthChart: (newValue: boolean) => void;
@@ -321,7 +326,7 @@ class AccountInternal extends PureComponent<
       search: '',
       filterConditions: props.filterConditions || [],
       filterId: undefined,
-      filterConditionsOp: 'and',
+      filterConditionsOp: props.filterConditionsOp,
       loading: true,
       workingHard: false,
       reconcileAmount: null,
@@ -422,9 +427,10 @@ class AccountInternal extends PureComponent<
       }, 100);
     }
 
-    //Resest sort/filter/search on account change
+    // Reset sort/search on account change; the filters for the new view are
+    // restored by UNSAFE_componentWillReceiveProps via fetchTransactions.
     if (this.props.accountId !== prevProps.accountId) {
-      this.setState({ sort: null, search: '', filterConditions: [] });
+      this.setState({ sort: null, search: '' });
     }
   }
 
@@ -459,7 +465,12 @@ class AccountInternal extends PureComponent<
   fetchTransactions = (filterConditions?: ConditionEntity[]) => {
     const query = this.makeRootTransactionsQuery();
     this.rootQuery = this.currentQuery = query;
-    if (filterConditions) void this.applyFilters(filterConditions);
+    // Default to the active filters so full refetches (e.g. after an
+    // import or applying rules) don't silently drop them. Only re-apply
+    // non-empty conditions: applyFilters([]) itself calls back into
+    // fetchTransactions, so recursing on empty conditions would loop.
+    const conditions = filterConditions ?? this.state.filterConditions;
+    if (conditions.length > 0) void this.applyFilters(conditions);
     else this.updateQuery(query);
 
     if (this.props.accountId) {
@@ -577,9 +588,12 @@ class AccountInternal extends PureComponent<
           showCleared: nextProps.showCleared,
           showReconciled: nextProps.showReconciled,
           reconcileAmount: null,
+          filterConditions: nextProps.filterConditions,
+          filterConditionsOp: nextProps.filterConditionsOp,
+          filterId: undefined,
         },
         () => {
-          this.fetchTransactions();
+          this.fetchTransactions(nextProps.filterConditions);
         },
       );
     }
@@ -979,13 +993,14 @@ class AccountInternal extends PureComponent<
         this.setState(
           {
             transactions: [],
-            filterConditions: [],
             search: '',
             sort: null,
             showBalances: true,
           },
           () => {
-            this.fetchTransactions();
+            // Refetch with the active filters so enabling the balance
+            // column doesn't silently clear them.
+            this.fetchTransactions(this.state.filterConditions);
           },
         );
       }
@@ -1574,6 +1589,7 @@ class AccountInternal extends PureComponent<
 
   applyFilters = async (conditions: ConditionEntity[]) => {
     if (conditions.length > 0) {
+      const accountId = this.props.accountId;
       const filteredCustomQueryFilters: Partial<RuleConditionEntity>[] =
         conditions.filter(cond => !isTransactionFilterEntity(cond));
       const customQueryFilters = filteredCustomQueryFilters.map(
@@ -1587,6 +1603,12 @@ class AccountInternal extends PureComponent<
           ),
         },
       );
+      // Bail if the user switched accounts while the conversion was in
+      // flight — otherwise the stale filters would be applied (and
+      // persisted) to the newly selected account.
+      if (this.props.accountId !== accountId) {
+        return;
+      }
       const conditionsOpKey =
         this.state.filterConditionsOp === 'or' ? '$or' : '$and';
       this.currentQuery = this.rootQuery.filter({
@@ -1612,6 +1634,13 @@ class AccountInternal extends PureComponent<
         },
       );
     }
+
+    // Persist the active filters for this view so they are restored the
+    // next time it is opened (no-op when nothing changed).
+    this.props.onSaveFilterConditions(
+      conditions,
+      this.state.filterConditionsOp,
+    );
 
     if (this.state.sort !== null) {
       this.applySort();
@@ -2062,7 +2091,9 @@ export function Account() {
 
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
-  const filterConditions = location?.state?.filterConditions || [];
+
+  const { filterConditions, filterConditionsOp, onSaveFilterConditions } =
+    useTransactionFilterConditions(params.id);
 
   const savedFiters = useTransactionFilters();
 
@@ -2120,6 +2151,8 @@ export function Account() {
             modalShowing={modalShowing}
             accountsSyncing={accountsSyncing}
             filterConditions={filterConditions}
+            filterConditionsOp={filterConditionsOp}
+            onSaveFilterConditions={onSaveFilterConditions}
             categoryGroups={categoryGroups}
             accountId={params.id}
             categoryId={location?.state?.categoryId}
