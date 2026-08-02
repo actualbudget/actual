@@ -1,7 +1,8 @@
 name: Discord Release Notifications
 
 # Sends a Discord notification when a new tag is pushed or when a release
-# is published. Requires the DISCORD_WEBHOOK_URL secret.
+# is published. Uses the DISCORD_WEBHOOK_URL secret from the nightly-alerts
+# environment (shared with the nightly theme catalog scan).
 #
 # Draft releases are not covered: GitHub does not deliver the `created`
 # release activity type for drafts, so the earliest observable event is
@@ -22,6 +23,7 @@ jobs:
     name: Notify Discord
     runs-on: depot-ubuntu-latest
     if: github.repository == 'actualbudget/actual'
+    environment: nightly-alerts
     timeout-minutes: 5
     steps:
       - name: Notify Discord of new tag
