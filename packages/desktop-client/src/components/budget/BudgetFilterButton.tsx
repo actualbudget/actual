@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import type { MouseEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -8,8 +8,6 @@ import {
   SvgCheveronDown,
   SvgFilter,
 } from '@actual-app/components/icons/v1';
-import { Menu } from '@actual-app/components/menu';
-import type { MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -17,6 +15,7 @@ import type { FocusedViewDefinition } from '@actual-app/core/types/prefs';
 
 import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
 import type { DragState, OnDropCallback } from '#components/sort';
+import { useContextMenu } from '#hooks/useContextMenu';
 import { useDragRef } from '#hooks/useDragRef';
 import { BUILT_IN_VIEWS } from '#hooks/useFocusedViews';
 import { pushModal } from '#modals/modalsSlice';
@@ -55,22 +54,6 @@ function ViewListItem({
   const triggerRef = useRef<HTMLDivElement>(null);
 
   const hasContextMenu = Boolean(onEdit || onDelete);
-
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [position, setPosition] = useState({ crossOffset: 0, offset: 0 });
-
-  const resetPosition = (crossOffset = 0, offset = 0) =>
-    setPosition({ crossOffset, offset });
-
-  const handleContextMenu = (e: MouseEvent) => {
-    e.preventDefault();
-    const rect = e.currentTarget.getBoundingClientRect();
-    setPosition({
-      crossOffset: e.clientX - rect.left,
-      offset: e.clientY - rect.bottom,
-    });
-    setMenuOpen(true);
-  };
 
   const dragging = dragState?.item?.id === _viewId;
   const canDrag = _viewId !== '__all';
@@ -115,6 +98,23 @@ function ViewListItem({
     );
   }
 
+  const { handleContextMenu } = useContextMenu({
+    triggerRef,
+    enabled: hasContextMenu,
+    items: [
+      isCustom && {
+        name: 'edit',
+        text: t('Edit'),
+        onClick: onEdit,
+      },
+      isCustom && {
+        name: 'delete',
+        text: t('Delete'),
+        onClick: confirmDelete,
+      },
+    ],
+  });
+
   return (
     <View
       innerRef={canDrag ? dropRef : undefined}
@@ -134,7 +134,6 @@ function ViewListItem({
             handleDragRef(node);
           }
         }}
-        onContextMenu={hasContextMenu ? handleContextMenu : undefined}
         style={{
           width: '100%',
           position: 'relative',
@@ -172,7 +171,7 @@ function ViewListItem({
         {hasContextMenu && (
           <Button
             variant="bare"
-            className={menuOpen ? undefined : 'hover-visible'}
+            className="hover-visible"
             aria-label={t('View actions')}
             style={{
               position: 'absolute',
@@ -183,58 +182,10 @@ function ViewListItem({
                 ? theme.buttonPrimaryText
                 : theme.buttonNormalText,
             }}
-            onPress={() => {
-              resetPosition();
-              setMenuOpen(true);
-            }}
+            onPress={handleContextMenu}
           >
             <SvgCheveronDown style={{ width: 14, height: 14 }} />
           </Button>
-        )}
-
-        {hasContextMenu && (
-          <Popover
-            triggerRef={triggerRef}
-            placement="bottom start"
-            isOpen={menuOpen}
-            onOpenChange={isOpen => {
-              if (!isOpen) {
-                setMenuOpen(false);
-                resetPosition();
-              }
-            }}
-            isNonModal
-            style={{ width: 200, margin: 1 }}
-            {...position}
-          >
-            <Menu
-              onMenuSelect={item => {
-                switch (item) {
-                  case 'rename':
-                    onEdit?.();
-                    break;
-                  case 'delete':
-                    confirmDelete();
-                    break;
-                  default:
-                    break;
-                }
-                setMenuOpen(false);
-              }}
-              items={
-                [
-                  isCustom && {
-                    name: 'rename',
-                    text: <Trans>Edit</Trans>,
-                  },
-                  isCustom && {
-                    name: 'delete',
-                    text: <Trans>Delete</Trans>,
-                  },
-                ].filter(Boolean) as MenuItem[]
-              }
-            />
-          </Popover>
         )}
       </View>
     </View>
