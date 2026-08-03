@@ -307,6 +307,17 @@ function normalizeScheduleName(name) {
   return trimmedName || null;
 }
 
+async function moveSchedule({
+  id,
+  targetId,
+}: {
+  id: string;
+  targetId: string | null;
+}) {
+  await db.moveSchedule(id, targetId);
+  return {};
+}
+
 export async function createSchedule({
   schedule = null,
   conditions = [],
@@ -793,6 +804,7 @@ export type SchedulesHandlers = {
   'schedule/create': typeof createSchedule;
   'schedule/update': typeof updateSchedule;
   'schedule/delete': typeof deleteSchedule;
+  'schedule/move': typeof moveSchedule;
   'schedule/skip-next-date': typeof skipNextDate;
   'schedule/post-transaction': typeof postTransactionForSchedule;
   'schedule/force-run-service': typeof advanceSchedulesService;
@@ -806,6 +818,7 @@ export const app = createApp<SchedulesHandlers>();
 app.method('schedule/create', mutator(undoable(createSchedule)));
 app.method('schedule/update', mutator(undoable(updateSchedule)));
 app.method('schedule/delete', mutator(undoable(deleteSchedule)));
+app.method('schedule/move', mutator(undoable(moveSchedule)));
 app.method('schedule/skip-next-date', mutator(undoable(skipNextDate)));
 app.method(
   'schedule/post-transaction',
