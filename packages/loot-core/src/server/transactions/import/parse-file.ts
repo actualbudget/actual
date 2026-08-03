@@ -5,6 +5,7 @@ import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 import { looselyParseAmount } from '#shared/util';
 
+import { mt9402json } from './mt9402json';
 import { ofx2json } from './ofx2json';
 import { qif2json } from './qif2json';
 import { xmlCAMT2json } from './xmlcamt2json';
@@ -94,6 +95,8 @@ export async function parseFile(
       case '.ofx':
       case '.qfx':
         return parseOFX(filepath, options);
+      case '.mt940':
+        return parseMT940(filepath, options);
       case '.xml':
         return parseCAMT(filepath, options);
       default:
@@ -247,6 +250,32 @@ async function parseOFX(
       };
     }),
   };
+}
+
+async function parseMT940(
+  filepath: string,
+  options: ParseFileOptions = {},
+): Promise<ParseFileResult> {
+  const errors = Array<ParseError>();
+  const contents = await fs.readFile(filepath, 'binary');
+
+  try {
+    const data = mt9402json(contents);
+    return {
+      errors,
+      transactions: data.transactions.map(trans => ({
+        ...trans,
+        notes: options.importNotes ? trans.notes : null,
+      })),
+    };
+  } catch (err) {
+    logger.error(err);
+    errors.push({
+      message: 'Failed importing file',
+      internal: err.stack,
+    });
+    return { errors };
+  }
 }
 
 async function parseCAMT(

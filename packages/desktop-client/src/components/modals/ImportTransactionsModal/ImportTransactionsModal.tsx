@@ -294,9 +294,9 @@ export function ImportTransactionsModal({
       multiplierAmount: string,
     ) => {
       const previewTransactions = [];
-      const inOutModeEnabled = isOfxFile(filetype) ? false : inOutMode;
+      const inOutModeEnabled = isPreParsedFile(filetype) ? false : inOutMode;
       const getTransDate: (trans: ImportTransaction) => string | null =
-        isOfxFile(filetype)
+        isPreParsedFile(filetype)
           ? trans => trans.date ?? null
           : trans => parseDate(trans.date, parseDateFormat);
 
@@ -551,7 +551,7 @@ export function ImportTransactionsModal({
       filters: [
         {
           name: 'Financial Files',
-          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
+          extensions: ['qif', 'ofx', 'qfx', 'mt940', 'csv', 'tsv', 'xml'],
         },
       ],
     });
@@ -646,10 +646,9 @@ export function ImportTransactionsModal({
 
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
-      const date =
-        isOfxFile(filetype) || isCamtFile(filetype)
-          ? trans.date
-          : parseDate(trans.date, parseDateFormat);
+      const date = isPreParsedFile(filetype)
+        ? trans.date
+        : parseDate(trans.date, parseDateFormat);
       if (date == null) {
         errorMessage = t(
           'Unable to parse date {{date}} with given date format',
@@ -661,7 +660,7 @@ export function ImportTransactionsModal({
       const { amount } = parseAmountFields(
         trans,
         splitMode,
-        isOfxFile(filetype) ? false : inOutMode,
+        isPreParsedFile(filetype) ? false : inOutMode,
         outValue,
         flipAmount,
         multiplierAmount,
@@ -714,7 +713,7 @@ export function ImportTransactionsModal({
       return;
     }
 
-    if (!isOfxFile(filetype) && !isCamtFile(filetype)) {
+    if (!isPreParsedFile(filetype)) {
       const key = `parse-date-${accountId}-${filetype}`;
       savePrefs({ [key]: parseDateFormat });
     }
@@ -792,7 +791,7 @@ export function ImportTransactionsModal({
 
   const onImportPreview = useEffectEvent(async () => {
     // Filter by start date before preview and deduplication
-    const isPreParsed = isOfxFile(filetype) || isCamtFile(filetype);
+    const isPreParsed = isPreParsedFile(filetype);
     const filteredTransactions = filterByStartDate(
       parsedTransactions,
       startDate,
@@ -1117,7 +1116,7 @@ export function ImportTransactionsModal({
             </CheckboxToggle>
           )}
 
-          {(isOfxFile(filetype) || isCamtFile(filetype)) && (
+          {isPreParsedFile(filetype) && (
             <CheckboxToggle
               id="form_dont_reconcile"
               checked={reconcile}
@@ -1127,7 +1126,7 @@ export function ImportTransactionsModal({
             </CheckboxToggle>
           )}
 
-          {(isOfxFile(filetype) || isCamtFile(filetype)) && reconcile && (
+          {isPreParsedFile(filetype) && reconcile && (
             <CheckboxToggle
               id="form_reimport_deleted"
               checked={reimportDeleted}
@@ -1402,4 +1401,12 @@ function isOfxFile(fileType: string) {
 
 function isCamtFile(fileType: string) {
   return fileType === 'xml';
+}
+
+function isMt940File(fileType: string) {
+  return fileType === 'mt940';
+}
+
+function isPreParsedFile(fileType: string) {
+  return isOfxFile(fileType) || isCamtFile(fileType) || isMt940File(fileType);
 }
