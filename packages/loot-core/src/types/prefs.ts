@@ -4,7 +4,6 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
-  | 'ageOfMoneyReport'
   | 'balanceForecastReport'
   | 'customThemes'
   | 'budgetAnalysisReport'
@@ -30,10 +29,18 @@ export type SyncedPrefs = Partial<
     | 'defaultCurrencyCode'
     | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`
+    // @deprecated: superseded by `transaction-table-columns-${string}`; only
+    // read as a fallback for budgets that never used the column manager
     | `show-balances-${string}`
     | `show-extra-balances-${string}`
+    // @deprecated: superseded by `transaction-table-columns-${string}`; only
+    // read as a fallback for budgets that never used the column manager
     | `hide-cleared-${string}`
     | `hide-reconciled-${string}`
+    | 'transaction-table-columns'
+    | `transaction-table-columns-${string}`
+    | `show-group-${string}`
+    | 'sync-transfer-date'
     // TODO: pull from src/components/modals/ImportTransactions.js
     | `parse-date-${string}-${'csv' | 'qif'}`
     | `import-reimport-deleted-${string}`
@@ -96,6 +103,7 @@ export type LocalPrefs = Partial<{
   reportsViewLabel: boolean;
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
+  'mobile.bankSyncProvidersCollapsed': boolean;
 }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;

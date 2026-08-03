@@ -417,6 +417,13 @@ budgetTypes.forEach(budgetType => {
     test(`applies budget template`, async () => {
       const settingsPage = await navigation.goToSettingsPage();
       await settingsPage.enableExperimentalFeature('Goal templates');
+      const uiToggle = page.getByRole('checkbox', {
+        name: 'Budget automations UI',
+      });
+      await uiToggle.waitFor({ state: 'visible' });
+      if (!(await uiToggle.isChecked())) {
+        await uiToggle.click();
+      }
 
       const budgetPage = await navigation.goToBudgetPage();
 
@@ -425,10 +432,23 @@ budgetTypes.forEach(budgetType => {
       const amountToTemplate = 123;
 
       const categoryMenuModal = await budgetPage.openCategoryMenu(categoryName);
-      const editNotesModal = await categoryMenuModal.editNotes();
-      const templateNotes = `#template ${amountToTemplate}`;
-      await editNotesModal.updateNotes(templateNotes);
-      await editNotesModal.close();
+      const automationsModal = await categoryMenuModal.editAutomations();
+      await automationsModal
+        .getByRole('button', { name: 'Add an automation' })
+        .click();
+      const amountField = automationsModal.locator('#amount-field');
+      await amountField.fill(String(amountToTemplate));
+      await amountField.press('Enter');
+      await automationsModal
+        .getByRole('spinbutton', { name: 'Priority' })
+        .fill('0');
+      await automationsModal
+        .getByRole('button', { name: 'Back', exact: true })
+        .click();
+      await automationsModal
+        .getByRole('button', { name: 'Save', exact: true })
+        .click();
+      await expect(automationsModal).toBeHidden();
 
       const budgetedButton =
         await budgetPage.getButtonForBudgeted(categoryName);
@@ -440,8 +460,6 @@ budgetTypes.forEach(budgetType => {
       await expect(budgetedButton).toHaveText(
         amountToCurrency(amountToTemplate),
       );
-      const templateNotification = page.getByRole('alert').nth(1);
-      await expect(templateNotification).toContainText(templateNotes);
       await expect(page).toMatchThemeScreenshots();
     });
 

@@ -6,7 +6,7 @@ runs:
   steps:
     - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
       with:
-        node-version: 22
+        node-version: 24
     - name: Install dependencies
       shell: bash
       run: yarn workspaces focus @actual-app/ci-actions

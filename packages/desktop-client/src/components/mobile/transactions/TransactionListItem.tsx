@@ -5,11 +5,7 @@ import type { ListBoxItemRenderProps } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import {
-  SvgLeftArrow2,
-  SvgRightArrow2,
-  SvgSplit,
-} from '@actual-app/components/icons/v0';
+import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgArrowsSynchronize,
   SvgCalendar3,
@@ -35,6 +31,7 @@ import {
 } from '@react-aria/interactions';
 
 import { makeAmountFullStyle } from '#components/budget/util';
+import { TransferDirectionIcon } from '#components/common/TransferDirectionIcon';
 import { useAccount } from '#hooks/useAccount';
 import { useCachedSchedules } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
@@ -98,6 +95,7 @@ export function TransactionListItem({
   const account = useAccount(transaction?.account || '');
   const transferAccount = useAccount(payee?.transfer_acct || '');
   const isPreview = isPreviewId(transaction?.id || '');
+  const { schedules = [] } = useCachedSchedules();
 
   const newTransactions = useSelector(
     state => state.transactions.newTransactions,
@@ -134,7 +132,13 @@ export function TransactionListItem({
     is_child: isChild,
     notes,
     forceUpcoming,
+    schedule: scheduleId,
   } = transaction;
+
+  const schedule = scheduleId
+    ? schedules.find(s => s.id === scheduleId)
+    : undefined;
+  const displayedNotes = notes || (isPreview ? schedule?.name : undefined);
 
   const previewStatus = forceUpcoming ? 'upcoming' : categoryId;
 
@@ -288,7 +292,7 @@ export function TransactionListItem({
                   </TextOneLine>
                 </View>
               )}
-              {notes && (
+              {displayedNotes && (
                 <TextOneLine
                   style={{
                     fontSize: 11,
@@ -299,7 +303,7 @@ export function TransactionListItem({
                     opacity: 0.85,
                   }}
                 >
-                  <NotesTagFormatter notes={notes} />
+                  <NotesTagFormatter notes={displayedNotes} />
                 </TextOneLine>
               )}
             </View>
@@ -438,12 +442,12 @@ function PayeeIcons({ transaction, transferAccount }: PayeeIconsProps) {
         ) : (
           <SvgCalendar3 style={getScheduleIconStyle({ isPreview })} />
         ))}
-      {transferAccount &&
-        (transaction.amount > 0 ? (
-          <SvgLeftArrow2 style={{ width: 12, height: 12, marginRight: 5 }} />
-        ) : (
-          <SvgRightArrow2 style={{ width: 12, height: 12, marginRight: 5 }} />
-        ))}
+      {transferAccount && (
+        <TransferDirectionIcon
+          isDeposit={transaction.amount > 0}
+          style={{ width: 12, height: 12, marginRight: 5 }}
+        />
+      )}
     </>
   );
 }
