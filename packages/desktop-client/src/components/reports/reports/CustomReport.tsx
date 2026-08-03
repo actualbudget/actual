@@ -22,7 +22,6 @@ import type {
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import type { TransObjectLiteral } from '@actual-app/core/types/util';
-import * as d from 'date-fns';
 
 import { Warning } from '#components/alerts';
 import { AppliedFilters } from '#components/filters/AppliedFilters';
@@ -346,22 +345,18 @@ function CustomReportInner({
       const earliestInterval =
         interval === 'Weekly'
           ? monthUtils.weekFromDate(
-              d.parseISO(fromDateRepr(earliestTransactionDate)),
+              fromDateRepr(earliestTransactionDate),
               firstDayOfWeekIdx,
             )
-          : monthUtils[fromDate](
-              d.parseISO(fromDateRepr(earliestTransactionDate)),
-            );
+          : monthUtils[fromDate](fromDateRepr(earliestTransactionDate));
 
       const latestInterval =
         interval === 'Weekly'
           ? monthUtils.weekFromDate(
-              d.parseISO(fromDateRepr(latestTransactionDate)),
+              fromDateRepr(latestTransactionDate),
               firstDayOfWeekIdx,
             )
-          : monthUtils[fromDate](
-              d.parseISO(fromDateRepr(latestTransactionDate)),
-            );
+          : monthUtils[fromDate](fromDateRepr(latestTransactionDate));
 
       const currentInterval =
         interval === 'Weekly'
