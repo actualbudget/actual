@@ -219,6 +219,7 @@ const sidebars = {
             'experimental/formulas',
             'experimental/balance-forecast-report',
             'experimental/budget-analysis-report',
+            'experimental/monte-carlo-analysis',
             'experimental/sankey-report',
           ],
         },
