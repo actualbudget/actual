@@ -9,7 +9,7 @@ declare module '*?worker&inline' {
 // Runtime assets emitted by the `actual-embedded-assets` plugin
 // (vite.browser.config.mts), sourced from loot-core's `default-filesystem`.
 declare module 'virtual:actual-embedded-assets' {
-  /** base64 of sql.js' sql-wasm.wasm */
+  /** base64 of the official SQLite WASM binary */
   export const wasmBase64: string;
   /** contents of data-file-index.txt */
   export const dataIndex: string;

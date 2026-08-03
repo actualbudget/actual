@@ -266,21 +266,13 @@ export async function importBuffer(fileData, buffer) {
 
   const budgetDir = fs.getBudgetDir(meta.id);
 
-  if (await fs.exists(budgetDir)) {
-    // Don't remove the directory so that backups are retained
-    const dbFile = fs.join(budgetDir, 'db.sqlite');
-    const metaFile = fs.join(budgetDir, 'metadata.json');
-
-    if (await fs.exists(dbFile)) {
-      await fs.removeFile(dbFile);
-    }
-    if (await fs.exists(metaFile)) {
-      await fs.removeFile(metaFile);
-    }
-  } else {
+  if (!(await fs.exists(budgetDir))) {
     await fs.mkdir(budgetDir);
   }
 
+  // Database writes stage and validate a new SAH-pool generation before
+  // atomically switching the catalog. Do not delete the old generation first:
+  // a crash or invalid download must leave the current local budget intact.
   await fs.writeFile(fs.join(budgetDir, 'db.sqlite'), dbContent);
   await fs.writeFile(fs.join(budgetDir, 'metadata.json'), JSON.stringify(meta));
 

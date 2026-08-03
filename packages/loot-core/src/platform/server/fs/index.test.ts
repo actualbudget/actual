@@ -1,176 +1,250 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 
-import { patchFetchForSqlJS } from '#mocks/util';
 import * as idb from '#platform/server/indexeddb';
-import * as sqlite from '#platform/server/sqlite';
 
 import {
   _setDocumentDir,
+  bundledDatabasePath,
+  copyFile,
   exists,
+  getModifiedTime,
   init,
-  join,
-  pathToId,
+  listDir,
+  mkdir,
   readFile,
+  refreshPersistedHierarchy,
+  removeDirRecursively,
   writeFile,
 } from './index';
 
-beforeAll(() => {
-  const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;
-  patchFetchForSqlJS(baseURL);
-  process.env.PUBLIC_URL = baseURL;
-});
+const sahState = vi.hoisted(() => ({
+  databases: new Map<string, Uint8Array>(),
+  shouldFailNextImport: false,
+}));
 
-beforeEach(() => {
-  global.indexedDB = new IDBFactory();
-});
-
-afterEach(() => {
-  sqlite._getModule().reset_filesystem();
-});
-
-describe('web filesystem', () => {
-  test('basic reads/writes are stored in idb', async () => {
-    await idb.openDatabase();
-    await sqlite.init();
-    await init();
-
-    // Text file
-    await writeFile('/documents/foo.txt', 'hello');
-    expect(await readFile('/documents/foo.txt')).toBe('hello');
-
-    // Binary file
-    const str = 'hello, world';
-    const buf = new ArrayBuffer(str.length * 2);
-    const view = new Uint16Array(buf);
-    for (let i = 0, strLen = str.length; i < strLen; i++) {
-      view[i] = str.charCodeAt(i);
+vi.mock('#platform/server/sqlite', () => ({
+  exportDatabasePath: async (path: string) => {
+    const contents = sahState.databases.get(path);
+    if (contents === undefined) {
+      throw new Error(`Missing mocked database: ${path}`);
     }
+    return contents.slice();
+  },
+  importDatabasePath: async (path: string, contents: Uint8Array) => {
+    if (sahState.shouldFailNextImport) {
+      sahState.shouldFailNextImport = false;
+      throw new Error('Mocked import failure');
+    }
+    sahState.databases.set(path, contents.slice());
+  },
+  removeDatabasePath: async (path: string) => {
+    sahState.databases.delete(path);
+  },
+}));
 
-    await writeFile('/documents/foo.bin', buf);
-    expect(await readFile('/documents/foo.bin')).toBe('hello, world');
+beforeEach(async () => {
+  await idb.closeDatabase();
+  global.indexedDB = new IDBFactory();
+  await idb.openDatabase();
 
-    const db = await idb.openDatabase();
-    const { store } = idb.getStore(db, 'files');
+  sahState.databases.clear();
+  sahState.shouldFailNextImport = false;
+  process.env.PUBLIC_URL = '/';
 
-    // Make sure they are in idb
-    expect(await idb.get(store, '/documents/foo.txt')).toEqual({
-      filepath: '/documents/foo.txt',
-      contents: 'hello',
-    });
-    const binResult = await idb.get(store, '/documents/foo.bin');
-    expect(binResult.filepath).toBe('/documents/foo.bin');
-    expect(Array.from(binResult.contents)).toEqual(
-      Array.from(new Uint8Array(buf)),
-    );
-
-    // Write a file outside of documents
-    await writeFile('/outside.txt', 'some junk');
-    expect(await readFile('/outside.txt')).toBe('some junk');
-    expect(await idb.get(store, '/outside.txt')).toBe(undefined);
-
-    await idb.closeDatabase();
-  });
-
-  test('writing to sqlite files creates symlinks', async () => {
-    await idb.openDatabase();
-    await sqlite.init();
-    await init();
-
-    await writeFile('/documents/db.sqlite', 'some junk');
-
-    expect(await readFile('/documents/db.sqlite')).toBe('some junk');
-    expect(await readFile('/blocked/' + pathToId('/documents/db.sqlite'))).toBe(
-      'some junk',
-    );
-  });
-
-  test('files are restored from idb', async () => {
-    const db = await idb.openDatabase();
-    const { store } = idb.getStore(db, 'files');
-    await idb.set(store, {
-      filepath: '/documents/ok.txt',
-      contents: 'oh yeah',
-    });
-    await idb.set(store, {
-      filepath: '/documents/deep/nested/file/ok.txt',
-      contents: 'deeper',
-    });
-    await idb.set(store, {
-      filepath: '/documents/deep/nested/db.sqlite',
-      contents: 'this will be blank and just create a symlink',
-    });
-
-    await sqlite.init();
-    await init();
-
-    expect(await readFile('/documents/ok.txt')).toBe('oh yeah');
-    expect(await exists('/documents/deep')).toBe(true);
-    expect(await readFile('/documents/deep/nested/file/ok.txt')).toBe('deeper');
-
-    const FS = sqlite._getModule().FS;
-    const { node } = FS.lookupPath('/documents/deep/nested/db.sqlite', {});
-    expect(node.link).toBe(
-      '/blocked/' + pathToId('/documents/deep/nested/db.sqlite'),
-    );
-  });
-
-  test('files under a custom document dir are persisted', async () => {
-    await idb.openDatabase();
-    await sqlite.init();
-    await init();
-
-    _setDocumentDir('/budget');
-
-    expect(await exists('/budget')).toBe(true);
-
-    await writeFile('/budget/foo.txt', 'hello');
-    expect(await readFile('/budget/foo.txt')).toBe('hello');
-
-    const db = await idb.openDatabase();
-    const { store } = idb.getStore(db, 'files');
-    expect(await idb.get(store, '/budget/foo.txt')).toEqual({
-      filepath: '/budget/foo.txt',
-      contents: 'hello',
-    });
-
-    // sqlite files are symlinked into the blocked fs
-    await writeFile('/budget/db.sqlite', 'some junk');
-    expect(await readFile('/blocked/' + pathToId('/budget/db.sqlite'))).toBe(
-      'some junk',
-    );
-
-    await idb.closeDatabase();
-  });
-
-  test('files under a custom document dir are restored from idb', async () => {
-    const db = await idb.openDatabase();
-    const { store } = idb.getStore(db, 'files');
-    await idb.set(store, {
-      filepath: '/custom/xyz/metadata.json',
-      contents: '{"id":"xyz"}',
-    });
-    await idb.set(store, {
-      filepath: '/custom/xyz/db.sqlite',
-      contents: 'this will be blank and just create a symlink',
-    });
-
-    await sqlite.init();
-    await init();
-    _setDocumentDir('/custom');
-
-    expect(await readFile('/custom/xyz/metadata.json')).toBe('{"id":"xyz"}');
-
-    const FS = sqlite._getModule().FS;
-    const { node } = FS.lookupPath('/custom/xyz/db.sqlite', {});
-    expect(node.link).toBe('/blocked/' + pathToId('/custom/xyz/db.sqlite'));
-  });
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (input: string | URL | Request) => {
+      const url =
+        typeof input === 'string'
+          ? input
+          : input instanceof URL
+            ? input.href
+            : input.url;
+      if (url.endsWith('data-file-index.txt')) {
+        return new Response('default-db.sqlite\n');
+      }
+      if (url.endsWith('data/default-db.sqlite')) {
+        return new Response(new Uint8Array([1, 2, 3]));
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    }),
+  );
 });
 
-describe('join', () => {
-  test('basic join works', () => {
-    expect(join('foo', 'bar')).toBe('foo/bar');
-    expect(join('/foo', 'bar')).toBe('/foo/bar');
-    expect(join('/foo', '../bar')).toBe('/bar');
+afterEach(async () => {
+  vi.unstubAllGlobals();
+  await idb.closeDatabase();
+});
+
+describe('browser filesystem', () => {
+  it('routes persisted database files through the SAH pool', async () => {
+    await init();
+    _setDocumentDir('/documents/Actual');
+
+    const budgetDir = '/documents/Actual/budget';
+    const databasePath = `${budgetDir}/db.sqlite`;
+    const temporaryDatabasePath = `${budgetDir}/db.123.sqlite.tmp`;
+
+    await mkdir(budgetDir);
+    await writeFile(`${budgetDir}/metadata.json`, '{"id":"budget"}');
+    await copyFile(bundledDatabasePath, databasePath);
+    await copyFile(databasePath, temporaryDatabasePath);
+
+    expect(await readFile(databasePath, 'binary')).toEqual(
+      new Uint8Array([1, 2, 3]),
+    );
+    expect(new Set(await listDir(budgetDir))).toEqual(
+      new Set(['metadata.json', 'db.sqlite', 'db.123.sqlite.tmp']),
+    );
+    expect([...sahState.databases.keys()]).toEqual([
+      databasePath,
+      temporaryDatabasePath,
+    ]);
+
+    await removeDirRecursively(budgetDir);
+
+    expect(await exists(budgetDir)).toBe(false);
+    expect(sahState.databases.size).toBe(0);
+  });
+
+  it('uses an existing database marker without changing its storage record', async () => {
+    const databasePath = '/documents/Actual/budget/db.sqlite';
+    const database = await idb.openDatabase();
+    const { store } = idb.getStore(database, 'files');
+    await idb.set(store, { filepath: databasePath, contents: '' });
+    sahState.databases.set(databasePath, new Uint8Array([1, 2, 3]));
+
+    await init();
+    _setDocumentDir('/documents/Actual');
+
+    await expect(readFile(databasePath, 'binary')).resolves.toEqual(
+      new Uint8Array([1, 2, 3]),
+    );
+    await expect(
+      idb.get(idb.getStore(database, 'files').store, databasePath),
+    ).resolves.toMatchObject({ filepath: databasePath, contents: '' });
+  });
+
+  it('checks a database marker lazily when its OPFS database is read', async () => {
+    const databasePath = '/documents/Actual/budget/db.sqlite';
+    const database = await idb.openDatabase();
+    await idb.set(idb.getStore(database, 'files').store, {
+      filepath: databasePath,
+      contents: '',
+    });
+
+    await init();
+    _setDocumentDir('/documents/Actual');
+
+    await expect(readFile(databasePath, 'binary')).rejects.toThrow(
+      `Missing mocked database: ${databasePath}`,
+    );
+  });
+
+  it('keeps file and directory paths mutually exclusive', async () => {
+    await init();
+    _setDocumentDir('/documents/Actual');
+
+    await mkdir('/documents/Actual/budget');
+
+    await expect(mkdir('/documents/Actual/budget')).rejects.toThrow(
+      'Path already exists',
+    );
+    await expect(
+      writeFile('/documents/Actual/budget', 'not a directory'),
+    ).rejects.toThrow('Path is already a directory');
+    await expect(
+      writeFile('/documents/Actual/missing/metadata.json', '{}'),
+    ).rejects.toThrow('Parent directory does not exist');
+  });
+
+  it('does not write a database marker when an import fails', async () => {
+    await init();
+    _setDocumentDir('/documents/Actual');
+    const budgetDir = '/documents/Actual/budget';
+    const databasePath = `${budgetDir}/db.sqlite`;
+    await mkdir(budgetDir);
+    sahState.shouldFailNextImport = true;
+    await expect(
+      writeFile(databasePath, new Uint8Array([4, 5, 6])),
+    ).rejects.toThrow('Mocked import failure');
+
+    const database = await idb.openDatabase();
+    await expect(
+      idb.get(idb.getStore(database, 'files').store, databasePath),
+    ).resolves.toBeUndefined();
+  });
+
+  it('can delete a budget whose database bytes are already missing', async () => {
+    const budgetDir = '/documents/Actual/budget';
+    const databasePath = `${budgetDir}/db.sqlite`;
+    const database = await idb.openDatabase();
+    const { store } = idb.getStore(database, 'files');
+    await idb.set(store, { filepath: databasePath, contents: '' });
+    await idb.set(store, {
+      filepath: `${budgetDir}/metadata.json`,
+      contents: '{}',
+    });
+
+    await init();
+    _setDocumentDir('/documents/Actual');
+    await removeDirRecursively(budgetDir);
+
+    expect(await exists(budgetDir)).toBe(false);
+  });
+
+  it('preserves the order of legacy backups without stored mtimes', async () => {
+    const first = '/documents/Actual/budget/backups/2025-01-02_03-04-05.zip';
+    const second = '/documents/Actual/budget/backups/2025-02-03_04-05-06.zip';
+    const database = await idb.openDatabase();
+    await idb.set(idb.getStore(database, 'files').store, {
+      filepath: first,
+      contents: new Uint8Array(),
+    });
+    await idb.set(idb.getStore(database, 'files').store, {
+      filepath: second,
+      contents: new Uint8Array(),
+    });
+
+    await init();
+    _setDocumentDir('/documents/Actual');
+
+    expect((await getModifiedTime(first)).getTime()).toBeLessThan(
+      (await getModifiedTime(second)).getTime(),
+    );
+  });
+
+  it('refreshes budgets created and deleted by another backend Worker', async () => {
+    await init();
+    _setDocumentDir('/documents/Actual');
+
+    const budgetDir = '/documents/Actual/other-worker-budget';
+    const databasePath = `${budgetDir}/db.sqlite`;
+    const metadataPath = `${budgetDir}/metadata.json`;
+    const database = await idb.openDatabase();
+    await idb.set(idb.getStore(database, 'files').store, {
+      filepath: metadataPath,
+      contents: '{"budgetName":"Other Worker"}',
+    });
+    await idb.set(idb.getStore(database, 'files').store, {
+      filepath: databasePath,
+      contents: '',
+    });
+
+    await refreshPersistedHierarchy();
+
+    expect(await listDir('/documents/Actual')).toContain('other-worker-budget');
+    await expect(readFile(metadataPath)).resolves.toBe(
+      '{"budgetName":"Other Worker"}',
+    );
+
+    await idb.del(idb.getStore(database, 'files').store, metadataPath);
+    await idb.del(idb.getStore(database, 'files').store, databasePath);
+    await refreshPersistedHierarchy();
+
+    expect(await listDir('/documents/Actual')).not.toContain(
+      'other-worker-budget',
+    );
   });
 });

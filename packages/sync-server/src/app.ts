@@ -148,8 +148,6 @@ const csp = [
 ].join('; ');
 
 app.use((req, res, next) => {
-  res.set('Cross-Origin-Opener-Policy', 'same-origin');
-  res.set('Cross-Origin-Embedder-Policy', 'require-corp');
   res.set('Content-Security-Policy', csp);
   next();
 });

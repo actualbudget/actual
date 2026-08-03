@@ -61,6 +61,10 @@
       "api": "./src/platform/server/sqlite/index.api.ts",
       "default": "./src/platform/server/sqlite/index.ts"
     },
+    "#platform/server/sqlite/sqlite-module": {
+      "external-sqlite": "./src/platform/server/sqlite/sqlite-module.external.ts",
+      "default": "./src/platform/server/sqlite/sqlite-module.bundled.ts"
+    },
     "#platform/client/connection": {
       "electron-renderer": "./src/platform/client/connection/index.electron.ts",
       "default": "./src/platform/client/connection/index.ts"
@@ -196,10 +200,9 @@
     "postpack": "node scripts/restore-package-json.mts"
   },
   "dependencies": {
-    "@jlongster/sql.js": "^1.6.7",
     "@rschedule/core": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",
-    "absurd-sql": "0.0.54",
+    "@sqlite.org/sqlite-wasm": "3.53.0-build1",
     "better-sqlite3": "^12.11.1",
     "csv-parse": "^7.0.1",
     "csv-stringify": "^6.8.1",
@@ -217,7 +220,6 @@
     "@actual-app/crdt": "workspace:*",
     "@actual-app/vite-plugin-peggy": "workspace:*",
     "@types/better-sqlite3": "^7.6.13",
-    "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
     "@types/node": "^22.20.1",
     "@typescript/native-preview": "beta",
     "assert": "^2.1.0",

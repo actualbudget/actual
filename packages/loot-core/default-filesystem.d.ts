@@ -4,8 +4,10 @@
 export const migrationsDir: string;
 /** Absolute path to loot-core's default budget database. */
 export const defaultDbPath: string;
-/** Absolute path to the sql.js wasm binary loot-core depends on. */
+/** Absolute path to the official SQLite WASM binary loot-core depends on. */
 export const sqlWasmPath: string;
+/** Absolute path to the official SQLite browser module loot-core depends on. */
+export const sqliteModulePath: string;
 
 /** The `data-file-index.txt` manifest listing every file under `data/`. */
 export function buildDataFileIndex(names?: string[]): string;

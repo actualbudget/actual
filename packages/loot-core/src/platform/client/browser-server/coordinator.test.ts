@@ -273,6 +273,33 @@ describe('SharedWorker coordinator', () => {
       expect(group.followers.has(follower)).toBe(true);
     });
 
+    it('does not demote a leader which reloads its own budget', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+      leader.postMessage.mockClear();
+
+      sendMsg(leader, {
+        id: 'reload-1',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+
+      const state = coordinator.getState();
+      expect(state.budgetGroups.get('budget-1').leaderPort).toBe(leader);
+      expect(state.budgetGroups.get('budget-1').followers.has(leader)).toBe(
+        false,
+      );
+      expect(leader.postMessage).toHaveBeenCalledWith({
+        type: '__to-worker',
+        msg: expect.objectContaining({ id: 'reload-1', name: 'load-budget' }),
+      });
+      expect(leader.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'FOLLOWER',
+        }),
+      );
+    });
+
     it('new tab on unloaded budget becomes leader for that budget', () => {
       // Set up budget-1 so the lobby is consumed
       setupBudgetGroup(coordinator, 'budget-1');
@@ -323,6 +350,45 @@ describe('SharedWorker coordinator', () => {
       // Follower should be pushed to show-budgets
       expect(follower.postMessage).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'push', name: 'show-budgets' }),
+      );
+    });
+
+    it('transfers the old budget before its leader joins an existing budget', () => {
+      const switchingLeader = setupBudgetGroup(coordinator, 'budget-1');
+      const oldBudgetFollower = connectTab(coordinator);
+      sendInit(oldBudgetFollower);
+      sendMsg(oldBudgetFollower, {
+        id: 'follow-old',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      const existingLeader = setupBudgetGroup(coordinator, 'budget-2');
+
+      existingLeader.postMessage.mockClear();
+      oldBudgetFollower.postMessage.mockClear();
+
+      sendMsg(switchingLeader, {
+        id: 'switch-existing',
+        name: 'load-budget',
+        args: { id: 'budget-2' },
+      });
+
+      const state = coordinator.getState();
+      expect(state.budgetGroups.get('budget-1').leaderPort).toBe(
+        oldBudgetFollower,
+      );
+      expect(state.budgetGroups.get('budget-2').leaderPort).toBe(
+        existingLeader,
+      );
+      expect(state.budgetGroups.get('budget-2').followers).toContain(
+        switchingLeader,
+      );
+      expect(oldBudgetFollower.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'LEADER',
+          budgetId: 'budget-1',
+        }),
       );
     });
   });
@@ -730,37 +796,183 @@ describe('SharedWorker coordinator', () => {
 
   // ── Budget-replacing operations ─────────────────────────────────────
 
+  describe('existing-budget operations', () => {
+    it('routes upload to the Worker which already owns the budget', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+      const uploader = connectTab(coordinator);
+      sendInit(uploader);
+      leader.postMessage.mockClear();
+      uploader.postMessage.mockClear();
+
+      sendMsg(uploader, {
+        id: 'upload-1',
+        name: 'upload-budget',
+        args: { id: 'budget-1' },
+      });
+
+      expect(leader.postMessage).toHaveBeenCalledWith({
+        type: '__to-worker',
+        msg: {
+          id: 'upload-1',
+          name: 'upload-budget',
+          args: {},
+        },
+      });
+
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'upload-1', result: {} },
+      });
+      expect(uploader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'upload-1' }),
+      );
+    });
+
+    it('releases an open source budget before duplicating it', () => {
+      const sourceLeader = setupBudgetGroup(coordinator, 'budget-1');
+      const duplicator = connectTab(coordinator);
+      sendInit(duplicator);
+      sourceLeader.postMessage.mockClear();
+      duplicator.postMessage.mockClear();
+
+      sendMsg(duplicator, {
+        id: 'duplicate-1',
+        name: 'duplicate-budget',
+        args: {
+          id: 'budget-1',
+          newName: 'Copy',
+          cloudSync: false,
+          open: 'none',
+        },
+      });
+
+      expect(sourceLeader.postMessage).toHaveBeenCalledWith({
+        type: '__close-and-transfer',
+        requestId: null,
+      });
+      expect(coordinator.getState().budgetGroups.has('budget-1')).toBe(false);
+      expect(coordinator.getState().portToBudget.get(duplicator)).toMatch(
+        /^__creating-/,
+      );
+    });
+
+    it('duplicates without restarting the source Worker', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+      leader.postMessage.mockClear();
+
+      sendMsg(leader, {
+        id: 'duplicate-1',
+        name: 'duplicate-budget',
+        args: {
+          id: 'budget-1',
+          newName: 'Copy',
+          cloudSync: false,
+          open: 'none',
+        },
+      });
+
+      expect(leader.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: '__close-and-transfer' }),
+      );
+      expect(leader.postMessage).toHaveBeenCalledWith({
+        type: '__to-worker',
+        msg: expect.objectContaining({ name: 'duplicate-budget' }),
+      });
+      expect(coordinator.getState().budgetGroups.has('budget-1')).toBe(false);
+      expect(coordinator.getState().portToBudget.get(leader)).toMatch(
+        /^__creating-/,
+      );
+    });
+
+    it('hands an open budget to a temporary Worker before restoring a backup', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+      const restorer = connectTab(coordinator);
+      sendInit(restorer);
+      sendMsg(restorer, {
+        id: 'load-follower',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      sendMsg(restorer, { id: 'close-follower', name: 'close-budget' });
+      leader.postMessage.mockClear();
+      restorer.postMessage.mockClear();
+
+      sendMsg(restorer, {
+        id: 'restore-1',
+        name: 'backup-load',
+        args: { id: 'budget-1', backupId: 'backup.zip' },
+      });
+
+      expect(leader.postMessage).toHaveBeenCalledWith({
+        type: '__close-and-transfer',
+        requestId: null,
+      });
+      expect(coordinator.getState().budgetGroups.has('budget-1')).toBe(false);
+      expect(coordinator.getState().portToBudget.get(restorer)).toMatch(
+        /^__creating-/,
+      );
+      expect(restorer.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__become-leader',
+          pendingMsg: expect.objectContaining({ name: 'backup-load' }),
+        }),
+      );
+    });
+  });
+
   describe('budget-replacing operations', () => {
-    it.each(['create-budget', 'import-budget', 'duplicate-budget'])(
-      '%s from follower gets own temporary Worker',
-      (opName: string) => {
-        setupBudgetGroup(coordinator, 'budget-1');
+    it('moves the lobby leader into a temporary group before creating', () => {
+      const leader = connectTab(coordinator);
+      sendInit(leader);
+      leader.postMessage.mockClear();
 
-        const follower = connectTab(coordinator);
-        sendInit(follower);
-        sendMsg(follower, {
-          id: 'lb-f',
-          name: 'load-budget',
-          args: { id: 'budget-1' },
-        });
-        follower.postMessage.mockClear();
+      sendMsg(leader, {
+        id: 'cb-1',
+        name: 'create-budget',
+        args: { testMode: true },
+      });
 
-        sendMsg(follower, { id: 'op-1', name: opName });
+      const tempId = coordinator.getState().portToBudget.get(leader);
+      expect(tempId).toMatch(/^__creating-/);
+      expect(coordinator.getState().budgetGroups.has('__lobby')).toBe(false);
+      expect(leader.postMessage).toHaveBeenCalledWith({
+        type: '__to-worker',
+        msg: expect.objectContaining({ name: 'create-budget' }),
+      });
+    });
 
-        // Follower should be elected as leader for a temp group
-        expect(follower.postMessage).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: '__role-change',
-            role: 'LEADER',
-          }),
-        );
+    it.each([
+      'create-budget',
+      'import-budget',
+      'download-budget',
+      'duplicate-budget',
+    ])('%s from follower gets own temporary Worker', (opName: string) => {
+      setupBudgetGroup(coordinator, 'budget-1');
 
-        // The temp group should exist
-        const state = coordinator.getState();
-        const tempBudget = state.portToBudget.get(follower);
-        expect(tempBudget).toMatch(/^__creating-/);
-      },
-    );
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'lb-f',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      follower.postMessage.mockClear();
+
+      sendMsg(follower, { id: 'op-1', name: opName });
+
+      // Follower should be elected as leader for a temp group
+      expect(follower.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'LEADER',
+        }),
+      );
+
+      // The temp group should exist
+      const state = coordinator.getState();
+      const tempBudget = state.portToBudget.get(follower);
+      expect(tempBudget).toMatch(/^__creating-/);
+    });
 
     it('create-budget from leader pushes followers off', () => {
       const leader = setupBudgetGroup(coordinator, 'budget-1');
@@ -780,8 +992,12 @@ describe('SharedWorker coordinator', () => {
         expect.objectContaining({ type: 'push', name: 'show-budgets' }),
       );
 
-      const group = coordinator.getState().budgetGroups.get('budget-1');
-      expect(group.followers.size).toBe(0);
+      const tempId = coordinator.getState().portToBudget.get(leader);
+      expect(tempId).toMatch(/^__creating-/);
+      expect(coordinator.getState().budgetGroups.has('budget-1')).toBe(false);
+      expect(
+        coordinator.getState().budgetGroups.get(tempId).followers.size,
+      ).toBe(0);
     });
 
     it('create-demo-budget evicts existing _demo-budget group', () => {
@@ -809,6 +1025,29 @@ describe('SharedWorker coordinator', () => {
       );
     });
 
+    it('moves the current demo owner to a temporary group when recreating it', () => {
+      const demoLeader = setupBudgetGroup(coordinator, '_demo-budget');
+      demoLeader.postMessage.mockClear();
+
+      sendMsg(demoLeader, {
+        id: 'cdb-owner',
+        name: 'create-demo-budget',
+      });
+
+      const tempId = coordinator.getState().portToBudget.get(demoLeader);
+      expect(tempId).toMatch(/^__creating-/);
+      expect(coordinator.getState().budgetGroups.has('_demo-budget')).toBe(
+        false,
+      );
+      expect(demoLeader.postMessage).toHaveBeenCalledWith({
+        type: '__to-worker',
+        msg: expect.objectContaining({
+          id: 'cdb-owner',
+          name: 'create-demo-budget',
+        }),
+      });
+    });
+
     it('create-budget with testMode evicts existing _test-budget group', () => {
       const testLeader = setupBudgetGroup(coordinator, '_test-budget');
 
@@ -828,6 +1067,30 @@ describe('SharedWorker coordinator', () => {
           requestId: null,
         }),
       );
+    });
+
+    it('moves the current test-budget owner to a temporary group when recreating it', () => {
+      const testLeader = setupBudgetGroup(coordinator, '_test-budget');
+      testLeader.postMessage.mockClear();
+
+      sendMsg(testLeader, {
+        id: 'ctb-owner',
+        name: 'create-budget',
+        args: { testMode: true },
+      });
+
+      const tempId = coordinator.getState().portToBudget.get(testLeader);
+      expect(tempId).toMatch(/^__creating-/);
+      expect(coordinator.getState().budgetGroups.has('_test-budget')).toBe(
+        false,
+      );
+      expect(testLeader.postMessage).toHaveBeenCalledWith({
+        type: '__to-worker',
+        msg: expect.objectContaining({
+          id: 'ctb-owner',
+          name: 'create-budget',
+        }),
+      });
     });
 
     it('load-prefs reply renames __creating- temp group to real budget ID', () => {
@@ -890,6 +1153,34 @@ describe('SharedWorker coordinator', () => {
         }),
       );
       expect(coordinator.getState().budgetGroups.has('budget-1')).toBe(false);
+    });
+
+    it('hands deletion to a temporary Worker when the owner requests it', () => {
+      const leader1 = setupBudgetGroup(coordinator, 'budget-1');
+      setupBudgetGroup(coordinator, 'budget-2');
+      leader1.postMessage.mockClear();
+
+      sendMsg(leader1, {
+        id: 'db-owner',
+        name: 'delete-budget',
+        args: { id: 'budget-1' },
+      });
+
+      expect(leader1.postMessage).toHaveBeenCalledWith({
+        type: '__close-and-transfer',
+        requestId: null,
+      });
+      expect(coordinator.getState().budgetGroups.has('budget-1')).toBe(false);
+      expect(coordinator.getState().budgetGroups.has('budget-2')).toBe(true);
+      expect(coordinator.getState().portToBudget.get(leader1)).toMatch(
+        /^__deleting-/,
+      );
+      expect(leader1.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__become-leader',
+          pendingMsg: expect.objectContaining({ name: 'delete-budget' }),
+        }),
+      );
     });
 
     it('spins up temp Worker when no connected group remains after eviction', () => {
