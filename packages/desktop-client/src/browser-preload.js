@@ -221,6 +221,7 @@ global.Actual = {
   onEventFromMain: () => {
     // Only for electron app
   },
+  supportsAutoUpdate: false,
   isUpdateReadyForDownload: () => isUpdateReadyForDownload,
   waitForUpdateReadyForDownload: () => isUpdateReadyForDownloadPromise,
   applyAppUpdate: async () => {

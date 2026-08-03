@@ -8,8 +8,22 @@ import type {
   SaveFileDialogPayload,
 } from './index';
 
-const { version: VERSION, isDev: IS_DEV }: GetBootstrapDataPayload =
-  ipcRenderer.sendSync('get-bootstrap-data');
+const {
+  version: VERSION,
+  isDev: IS_DEV,
+  isAutoUpdateSupported: IS_AUTO_UPDATE_SUPPORTED,
+  isUpdateDownloaded,
+}: GetBootstrapDataPayload = ipcRenderer.sendSync('get-bootstrap-data');
+
+let isUpdateReadyForDownload = isUpdateDownloaded;
+const isUpdateReadyForDownloadPromise = isUpdateReadyForDownload
+  ? Promise.resolve()
+  : new Promise<void>(resolve => {
+      ipcRenderer.on('update-downloaded', () => {
+        isUpdateReadyForDownload = true;
+        resolve();
+      });
+    });
 
 contextBridge.exposeInMainWorld('Actual', {
   IS_DEV,
@@ -75,12 +89,10 @@ contextBridge.exposeInMainWorld('Actual', {
     ipcRenderer.on(type, handler);
   },
 
-  // No auto-updates in the desktop app
-  isUpdateReadyForDownload: () => false,
-  waitForUpdateReadyForDownload: () =>
-    new Promise<void>(() => {
-      // This is used in browser environment; do nothing in electron
-    }),
+  supportsAutoUpdate: IS_AUTO_UPDATE_SUPPORTED,
+
+  isUpdateReadyForDownload: () => isUpdateReadyForDownload,
+  waitForUpdateReadyForDownload: () => isUpdateReadyForDownloadPromise,
 
   getServerSocket: async () => {
     return null;
@@ -106,6 +118,6 @@ contextBridge.exposeInMainWorld('Actual', {
   },
 
   applyAppUpdate: async () => {
-    throw new Error('applyAppUpdate not implemented in electron app');
+    await ipcRenderer.invoke('apply-app-update');
   },
 } satisfies typeof global.Actual);

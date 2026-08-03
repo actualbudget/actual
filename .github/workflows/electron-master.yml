@@ -125,8 +125,12 @@ jobs:
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/*.exe
             !packages/desktop-electron/dist/Actual-windows.exe
+            packages/desktop-electron/dist/*.zip
             packages/desktop-electron/dist/*.AppImage
             packages/desktop-electron/dist/*.flatpak
+            packages/desktop-electron/dist/*.blockmap
+            !packages/desktop-electron/dist/Actual-windows.exe.blockmap
+            packages/desktop-electron/dist/latest*.yml
       - name: Upload Windows Store Build
         if: ${{ startsWith(matrix.os, 'windows') }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -144,9 +148,12 @@ jobs:
           files=(
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/!(Actual-windows).exe
+            packages/desktop-electron/dist/*.zip
             packages/desktop-electron/dist/*.AppImage
             packages/desktop-electron/dist/*.flatpak
             packages/desktop-electron/dist/*.appx
+            packages/desktop-electron/dist/!(Actual-windows.exe).blockmap
+            packages/desktop-electron/dist/latest*.yml
           )
           if [ ${#files[@]} -gt 0 ]; then
             gh release upload "$TAG" --clobber "${files[@]}"

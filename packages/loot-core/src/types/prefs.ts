@@ -140,6 +140,7 @@ export type GlobalPrefs = Partial<{
     port?: number;
   };
   notifyWhenUpdateIsAvailable: boolean;
+  autoUpdate: boolean; // Electron only
 }>;
 
 // GlobalPrefsJson represents what's saved in the global-store.json file
@@ -168,6 +169,7 @@ export type GlobalPrefsJson = Partial<{
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
   syncServerConfig?: GlobalPrefs['syncServerConfig'];
   notifyWhenUpdateIsAvailable?: GlobalPrefs['notifyWhenUpdateIsAvailable'];
+  autoUpdate?: GlobalPrefs['autoUpdate'];
 }>;
 
 export type AuthMethods = 'password' | 'openid';

@@ -28,6 +28,11 @@ import type {
 import { getMenu } from './menu';
 import { retry as promiseRetry } from './retry';
 import {
+  getIsUpdateDownloaded,
+  initAutoUpdater,
+  isAutoUpdateSupported,
+} from './updater';
+import {
   get as getWindowState,
   listen as listenToWindowState,
 } from './window-state';
@@ -523,6 +528,17 @@ app.on('ready', async () => {
   });
 
   await createBackgroundProcess();
+
+  initAutoUpdater({
+    getClientWindow: () => clientWin,
+    isAutoUpdateEnabled: async () => {
+      // Read the pref fresh on every check so toggling it in the settings
+      // takes effect without a restart
+      const prefs = await loadGlobalPrefs();
+      return prefs.autoUpdate !== false; // default to enabled
+    },
+    log: logMessage,
+  });
 });
 
 app.on('window-all-closed', () => {
@@ -548,12 +564,18 @@ app.on('activate', () => {
 export type GetBootstrapDataPayload = {
   version: string;
   isDev: boolean;
+  isAutoUpdateSupported: boolean;
+  isUpdateDownloaded: boolean;
 };
 
 ipcMain.on('get-bootstrap-data', event => {
   const payload: GetBootstrapDataPayload = {
     version: isPlaywrightTest ? '99.9.9' : app.getVersion(),
     isDev,
+    isAutoUpdateSupported: isAutoUpdateSupported(),
+    // Covers a window (re)load happening after the update was already
+    // downloaded - the 'update-downloaded' push event would have been missed
+    isUpdateDownloaded: getIsUpdateDownloaded(),
   };
 
   event.returnValue = payload;

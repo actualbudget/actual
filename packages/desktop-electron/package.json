@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
-    "build": "yarn build:dist && electron-builder",
+    "build": "yarn build:dist && electron-builder --publish never",
     "build:dist": "tsgo && yarn copy-static-assets",
     "typecheck": "tsgo -b && tsc-strict",
     "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build/desktop-electron",
@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
-    "better-sqlite3": "^12.11.1"
+    "better-sqlite3": "^12.11.1",
+    "electron-updater": "^6.6.2"
   },
   "devDependencies": {
     "@actual-app/core": "workspace:*",
@@ -33,6 +34,13 @@
   },
   "build": {
     "appId": "com.actualbudget.actual",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "actualbudget",
+        "repo": "actual"
+      }
+    ],
     "files": [
       "build",
       "!node_modules/@actual-app/web",
@@ -60,6 +68,13 @@
       "target": [
         {
           "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
           "arch": [
             "x64",
             "arm64"
