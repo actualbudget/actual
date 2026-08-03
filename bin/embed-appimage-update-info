@@ -29,7 +29,7 @@ for appimage in "${appimages[@]}"; do
     # Locate the .upd_info section (offset/size differ per architecture).
     # `readelf -S --wide` prints: [Nr] Name Type Address Off Size ...
     # Strip the [Nr] column first — it splits into two fields when Nr < 10.
-    section=$(readelf -S --wide "$appimage" | sed 's/^ *\[[ 0-9]*\] //' | grep '^\.upd_info ')
+    section=$(readelf -S --wide "$appimage" | sed 's/^ *\[[ 0-9]*\] //' | grep '^\.upd_info ' || true)
     if [ -z "$section" ]; then
         echo "$filename: no .upd_info section in AppImage runtime" >&2
         exit 1
