@@ -269,6 +269,7 @@ type TransactionListProps = Pick<
   | 'showGroup'
   | 'showReconciled'
   | 'showSelection'
+  | 'columnOrder'
   | 'sortField'
   | 'transactions'
 > & {
@@ -304,6 +305,7 @@ export function TransactionList({
   showCleared,
   showGroup,
   showAccount,
+  columnOrder,
   isAdding,
   isNew,
   isMatched,
@@ -628,6 +630,46 @@ export function TransactionList({
         return;
       }
 
+      // Preview (upcoming schedule) reordering: only against other
+      // previews on the same date. Never mix preview and real transactions.
+      if (isPreviewId(id) !== isPreviewId(targetId)) {
+        return;
+      }
+      if (isPreviewId(id)) {
+        const targetTrans = allTransactions.find(t => t.id === targetId);
+        if (!targetTrans || targetTrans.date !== draggedTrans.date) {
+          return;
+        }
+
+        const previews = allTransactions.filter(
+          t => isPreviewId(t.id) && t.date === draggedTrans.date,
+        );
+        const targetIdx = previews.findIndex(t => t.id === targetId);
+        if (targetIdx === -1) {
+          return;
+        }
+
+        let apiTargetId: string | null;
+        if (dropPos === 'after') {
+          apiTargetId = targetTrans.schedule ?? null;
+        } else {
+          const aboveIdx = targetIdx - 1;
+          apiTargetId =
+            aboveIdx >= 0 ? (previews[aboveIdx].schedule ?? null) : null;
+        }
+
+        if (!draggedTrans.schedule) {
+          return;
+        }
+
+        await send('schedule/move', {
+          id: draggedTrans.schedule,
+          targetId: apiTargetId,
+        });
+        onRefetch();
+        return;
+      }
+
       // Child transaction reordering: siblings only
       if (draggedTrans.is_child && draggedTrans.parent_id) {
         const siblings = allTransactions.filter(
@@ -744,6 +786,7 @@ export function TransactionList({
         showAccount={showAccount}
         showCategory
         showGroup={showGroup}
+        columnOrder={columnOrder}
         currentAccountId={account && account.id}
         currentCategoryId={category && category.id}
         isAdding={isAdding}

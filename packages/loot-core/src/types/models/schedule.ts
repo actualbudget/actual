@@ -28,6 +28,7 @@ export type ScheduleEntity = {
   posts_transaction: boolean;
   custom_upcoming_length?: string | null;
   tombstone: boolean;
+  sort_order?: number;
 
   // These are special fields that are actually pulled from the
   // underlying rule

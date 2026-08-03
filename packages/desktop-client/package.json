@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "26.7.0",
+  "version": "26.8.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -73,6 +73,8 @@
     "#components/reports/util": "./src/components/reports/util.ts",
     "#components/schedules": "./src/components/schedules/index.tsx",
     "#components/schedules/schedule-edit-utils": "./src/components/schedules/schedule-edit-utils.ts",
+    "#components/select/getFirstDayOfWeek": "./src/components/select/getFirstDayOfWeek.ts",
+    "#components/transactions/table/columns": "./src/components/transactions/table/columns.ts",
     "#components/transactions/table/utils": "./src/components/transactions/table/utils.ts",
     "#components/util/accountValidation": "./src/components/util/accountValidation.ts",
     "#components/util/countries": "./src/components/util/countries.ts",
