@@ -4,10 +4,17 @@ import type { ReactNode } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ColumnWidthsProvider, useColumnWidthsContext } from './useColumnWidths';
+import {
+  ColumnWidthsProvider,
+  useColumnWidthsContext,
+} from './useColumnWidths';
+
+const { budgetIdRef } = vi.hoisted(() => ({
+  budgetIdRef: { current: 'test-budget' },
+}));
 
 vi.mock('./useMetadataPref', () => ({
-  useMetadataPref: () => ['test-budget', vi.fn()],
+  useMetadataPref: () => [budgetIdRef.current, vi.fn()],
 }));
 
 const defaultWidths = {
@@ -46,6 +53,7 @@ function wrapper({ children }: { children: ReactNode }) {
 describe('useColumnWidths', () => {
   beforeEach(() => {
     localStorage.clear();
+    budgetIdRef.current = 'test-budget';
   });
 
   it('initializes widths from defaults', () => {
@@ -70,7 +78,9 @@ describe('useColumnWidths', () => {
     act(() => ctx.onResizeEnd());
 
     expect(container.style.getPropertyValue('--col-date-width')).toBe('150px');
-    const saved = JSON.parse(localStorage.getItem('test-budget-columnWidths-test')!);
+    const saved = JSON.parse(
+      localStorage.getItem('test-budget-columnWidths-test')!,
+    );
     expect(saved).toMatchObject({ date: 150 });
   });
 
@@ -113,7 +123,7 @@ describe('useColumnWidths', () => {
     );
   });
 
-  it('never lets the neighbor go below the minimum width', () => {
+  it('preserves the total width when the neighbor hits its minimum', () => {
     const { result } = renderHook(() => useColumnWidthsContext(), {
       wrapper,
     });
@@ -121,18 +131,112 @@ describe('useColumnWidths', () => {
     const container = createContainer(defaultWidths);
     act(() => ctx.setContainerRef(container));
 
-    // Drag 200px wide: payment grows to 100 + 200 = 300, but the deposit
-    // neighbor would drop to -100; it clamps at 30.
+    // Dragging 200px wide: the deposit neighbor would drop to -100, so the
+    // payment column is capped at 100 + (100 - 30) = 170 instead of growing
+    // unbounded. The two columns always total 200px.
     act(() => ctx.onResizeStart('payment', 100));
     act(() => ctx.onResize('payment', 300));
     act(() => ctx.onResizeEnd());
 
+    expect(container.style.getPropertyValue('--col-payment-width')).toBe(
+      '170px',
+    );
     expect(container.style.getPropertyValue('--col-deposit-width')).toBe(
       '30px',
     );
+  });
+
+  it('does not pin a flex neighbor to a fixed width', () => {
+    const { result } = renderHook(() => useColumnWidthsContext(), {
+      wrapper,
+    });
+    const ctx = result.current!;
+    const container = createContainer(defaultWidths);
+    act(() => ctx.setContainerRef(container));
+
+    // The date column's neighbor is the flex payee column; flex columns
+    // reflow automatically, so no compensation is applied anywhere.
+    act(() => ctx.onResizeStart('date', 100));
+    act(() => ctx.onResize('date', 200));
+    act(() => ctx.onResizeEnd());
+
+    expect(container.style.getPropertyValue('--col-date-width')).toBe('210px');
+    expect(container.style.getPropertyValue('--col-payee-width')).toBe('');
     expect(container.style.getPropertyValue('--col-payment-width')).toBe(
-      '300px',
+      '100px',
     );
+  });
+
+  it('falls back to a sane width when a flex column cannot be measured', () => {
+    const { result } = renderHook(() => useColumnWidthsContext(), {
+      wrapper,
+    });
+    const ctx = result.current!;
+    const container = createContainer(defaultWidths);
+    act(() => ctx.setContainerRef(container));
+
+    // jsdom measures all elements as 0px, which must not become the starting
+    // drag width — that would let a drag persist a 0px column.
+    act(() => ctx.onResizeStart('payee', 100));
+    act(() => ctx.onResize('payee', 130));
+    act(() => ctx.onResizeEnd());
+
+    expect(container.style.getPropertyValue('--col-payee-width')).toBe('130px');
+    const saved = JSON.parse(
+      localStorage.getItem('test-budget-columnWidths-test')!,
+    );
+    expect(saved).toMatchObject({ payee: 130 });
+  });
+
+  it('finds the neighbor using the visible column order', () => {
+    // The user reordered the columns so deposit sits directly after date
+    const reordered = ['date', 'deposit', 'payment'];
+    const { result } = renderHook(() => useColumnWidthsContext(), {
+      wrapper: ({ children }) => (
+        <ColumnWidthsProvider
+          tableId="test"
+          defaultWidths={defaultWidths}
+          columnOrder={reordered}
+        >
+          {children}
+        </ColumnWidthsProvider>
+      ),
+    });
+    const ctx = result.current!;
+    const container = createContainer(defaultWidths);
+    act(() => ctx.setContainerRef(container));
+
+    act(() => ctx.onResizeStart('date', 100));
+    act(() => ctx.onResize('date', 150));
+    act(() => ctx.onResizeEnd());
+
+    // The visible neighbor is deposit, not payment (which is date's neighbor
+    // in the default order)
+    expect(container.style.getPropertyValue('--col-date-width')).toBe('160px');
+    expect(container.style.getPropertyValue('--col-deposit-width')).toBe(
+      '50px',
+    );
+    expect(container.style.getPropertyValue('--col-payment-width')).toBe(
+      '100px',
+    );
+  });
+
+  it('keeps the live width when the provider re-renders mid-drag', () => {
+    const { result, rerender } = renderHook(() => useColumnWidthsContext(), {
+      wrapper,
+    });
+    const ctx = result.current!;
+    const container = createContainer(defaultWidths);
+    act(() => ctx.setContainerRef(container));
+
+    act(() => ctx.onResizeStart('date', 100));
+    act(() => ctx.onResize('date', 150));
+    expect(container.style.getPropertyValue('--col-date-width')).toBe('160px');
+
+    // Any re-render of the provider must not overwrite the in-flight width
+    // with the stale state value
+    act(() => rerender());
+    expect(container.style.getPropertyValue('--col-date-width')).toBe('160px');
   });
 
   it('resets a flex column back to flex on double-click', () => {
@@ -150,7 +254,9 @@ describe('useColumnWidths', () => {
     act(() => ctx.onResetWidth('payee'));
 
     expect(container.style.getPropertyValue('--col-payee-width')).toBe('');
-    const saved = JSON.parse(localStorage.getItem('test-budget-columnWidths-test')!);
+    const saved = JSON.parse(
+      localStorage.getItem('test-budget-columnWidths-test')!,
+    );
     // Nothing else was resized, so the stored overrides object is empty.
     expect(saved).toEqual({});
   });
@@ -170,7 +276,53 @@ describe('useColumnWidths', () => {
 
     act(() => ctx.onResetWidth('date'));
     expect(container.style.getPropertyValue('--col-date-width')).toBe('110px');
-    const saved = JSON.parse(localStorage.getItem('test-budget-columnWidths-test')!);
-    expect(saved).toMatchObject({ date: 110 });
+    // The override is deleted so future default changes can apply
+    const saved = JSON.parse(
+      localStorage.getItem('test-budget-columnWidths-test')!,
+    );
+    expect(saved).toEqual({});
+  });
+
+  it('re-hydrates saved widths when the budget changes', () => {
+    localStorage.setItem(
+      'other-budget-columnWidths-test',
+      JSON.stringify({ date: 150 }),
+    );
+    const { result, rerender } = renderHook(() => useColumnWidthsContext(), {
+      wrapper,
+    });
+    expect(result.current!.widths.date).toBe(110);
+
+    act(() => {
+      budgetIdRef.current = 'other-budget';
+    });
+    act(() => {
+      rerender();
+    });
+
+    expect(result.current!.widths.date).toBe(150);
+    // The previous budget's widths must not leak through
+    expect(result.current!.widths.deposit).toBe(100);
+  });
+
+  it('validates and clamps persisted widths on load', () => {
+    localStorage.setItem(
+      'test-budget-columnWidths-test',
+      JSON.stringify({
+        date: 10,
+        payment: 'wide',
+        deposit: Number.MAX_VALUE * 2,
+        unknown: 300,
+      }),
+    );
+    const { result } = renderHook(() => useColumnWidthsContext(), {
+      wrapper,
+    });
+
+    // Clamped to the minimum; invalid values and unknown columns are dropped
+    expect(result.current!.widths.date).toBe(30);
+    expect(result.current!.widths.payment).toBe(100);
+    expect(result.current!.widths.deposit).toBe(100);
+    expect(result.current!.widths.unknown).toBeUndefined();
   });
 });

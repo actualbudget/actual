@@ -107,11 +107,11 @@ import type {
   TableNavigator,
   TableProps,
 } from '#components/table';
-import { ColumnWidthsProvider } from '#hooks/useColumnWidths';
 import {
   SchedulesProvider,
   useCachedSchedules,
 } from '#hooks/useCachedSchedules';
+import { ColumnWidthsProvider } from '#hooks/useColumnWidths';
 import { DisplayPayeeProvider, useDisplayPayee } from '#hooks/useDisplayPayee';
 import {
   DropHighlight,
@@ -161,6 +161,20 @@ import type {
   TransactionUpdateFunction,
 } from './table/utils';
 import { useTransactionRowContextActions } from './useTransactionRowContextActions';
+
+// Default widths for the transaction table columns. Flex columns reflow to
+// fill the available space; fixed columns keep their pixel width.
+const TRANSACTION_TABLE_COLUMN_WIDTHS: Record<string, number | 'flex'> = {
+  date: 110,
+  account: 'flex',
+  payee: 'flex',
+  notes: 'flex',
+  group: 'flex',
+  category: 'flex',
+  payment: 100,
+  deposit: 100,
+  balance: 103,
+};
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -337,7 +351,12 @@ const TransactionHeader = memo(
                     ? () =>
                         onSort(
                           columnId,
-                          selectAscDesc(field, ascDesc, columnId, sortDirection),
+                          selectAscDesc(
+                            field,
+                            ascDesc,
+                            columnId,
+                            sortDirection,
+                          ),
                         )
                     : undefined
                 }
@@ -2771,7 +2790,7 @@ function TransactionTableInner({
     );
   };
 
-	  return (
+  return (
     <ColumnWidthsProvider
       tableId="transactions"
       defaultWidths={props.columnWidthsDefaultWidths}
@@ -2998,34 +3017,18 @@ export const TransactionTable = forwardRef(
         showGroup,
         showBalances,
         showCleared,
-	      ],
-	    );
+      ],
+    );
 
-    const columnWidthsDefaultWidths: Record<string, number | 'flex'> = {
-      date: 110,
-      account: 'flex',
-      payee: 'flex',
-      notes: 'flex',
-      group: 'flex',
-      category: 'flex',
-      payment: 100,
-      deposit: 100,
-      balance: 103,
-    };
+    const columnWidthsDefaultWidths = TRANSACTION_TABLE_COLUMN_WIDTHS;
 
-    const columnWidthsOrder: string[] = [
-      ...(props.showSelection ? ['_select'] : []),
-      'date',
-      ...(props.showAccount ? ['account'] : []),
-      'payee',
-      'notes',
-      ...(props.showGroup ? ['group'] : []),
-      ...(props.showCategory ? ['category'] : []),
-      'payment',
-      'deposit',
-      ...(props.showBalances ? ['balance'] : []),
-      ...(props.showCleared ? ['_cleared'] : []),
-    ];
+    // The order used for resize compensation must mirror the visible column
+    // order (which follows the user's column preferences), not the default
+    // order — otherwise resizing adjusts a non-adjacent column
+    const columnWidthsOrder = useMemo(
+      () => [...(props.showSelection ? ['_select'] : []), ...visibleColumns],
+      [props.showSelection, visibleColumns],
+    );
 
     const [prevIsAdding, setPrevIsAdding] = useState(false);
     const splitsExpanded = useSplitsExpanded();

@@ -1,17 +1,40 @@
-import React, {
+import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 import type { ReactNode, RefObject } from 'react';
+
 import { useLocalStorage } from 'usehooks-ts';
 
 import { useMetadataPref } from './useMetadataPref';
 
-const MIN_COLUMN_WIDTH = 30;
+export const MIN_COLUMN_WIDTH = 30;
+
+function buildWidths(
+  defaultWidths: Record<string, number | 'flex'>,
+  savedWidths: Record<string, number> | undefined,
+): Record<string, number | 'flex'> {
+  const initial: Record<string, number | 'flex'> = { ...defaultWidths };
+  if (savedWidths) {
+    for (const [name, width] of Object.entries(savedWidths)) {
+      // Ignore unknown columns and values that would render invalid CSS
+      // (NaN, Infinity, strings, etc.) and enforce the minimum width
+      if (
+        name in defaultWidths &&
+        typeof width === 'number' &&
+        Number.isFinite(width)
+      ) {
+        initial[name] = Math.max(MIN_COLUMN_WIDTH, width);
+      }
+    }
+  }
+  return initial;
+}
 
 type ColumnWidthsContextValue = {
   widths: Record<string, number | 'flex'>;
@@ -25,7 +48,9 @@ type ColumnWidthsContextValue = {
   onResetWidth: (columnName: string) => void;
 };
 
-const ColumnWidthsContext = createContext<ColumnWidthsContextValue | null>(null);
+const ColumnWidthsContext = createContext<ColumnWidthsContextValue | null>(
+  null,
+);
 
 export function useColumnWidthsContext() {
   return useContext(ColumnWidthsContext);
@@ -53,17 +78,15 @@ export function ColumnWidthsProvider({
     serializer: JSON.stringify,
   });
 
-  const [widths, setWidths] = useState<Record<string, number | 'flex'>>(() => {
-    const initial: Record<string, number | 'flex'> = { ...defaultWidths };
-    if (savedWidths) {
-      for (const [name, width] of Object.entries(savedWidths)) {
-        if (name in defaultWidths) {
-          initial[name] = width;
-        }
-      }
-    }
-    return initial;
-  });
+  const [widths, setWidths] = useState<Record<string, number | 'flex'>>(() =>
+    buildWidths(defaultWidths, savedWidths),
+  );
+
+  // Re-hydrate when the storage key changes (e.g. the user switches
+  // budgets) or when the saved widths are updated externally
+  useEffect(() => {
+    setWidths(buildWidths(defaultWidths, savedWidths));
+  }, [defaultWidths, savedWidths]);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<{
@@ -78,17 +101,19 @@ export function ColumnWidthsProvider({
     containerRef.current = el;
   }, []);
 
+  // Find the column visually adjacent to `columnName` that gets compensated
+  // when it is resized. Only fixed-width columns are returned: flex columns
+  // reflow automatically to fill the space a neighbor takes, so pinning them
+  // to a pixel width would strip their flex semantics.
   const findNeighbor = useCallback(
     (columnName: string): string | null => {
       const idx = columnOrder.indexOf(columnName);
       if (idx === -1) return null;
 
-      for (let i = idx + 1; i < columnOrder.length; i++) {
-        if (columnOrder[i] in widths) return columnOrder[i];
-      }
-      for (let i = idx - 1; i >= 0; i--) {
-        if (columnOrder[i] in widths) return columnOrder[i];
-      }
+      const next = columnOrder[idx + 1];
+      if (next !== undefined && typeof widths[next] === 'number') return next;
+      const prev = columnOrder[idx - 1];
+      if (prev !== undefined && typeof widths[prev] === 'number') return prev;
       return null;
     },
     [columnOrder, widths],
@@ -102,10 +127,11 @@ export function ColumnWidthsProvider({
       if (val) return parseFloat(val);
       const w = widths[name];
       if (typeof w === 'number') return w;
-      const cell = el.querySelector(
-        `[data-column="${name}"]`,
-      ) as HTMLElement | null;
-      return cell?.getBoundingClientRect().width ?? 100;
+      const cell = el.querySelector<HTMLElement>(`[data-column="${name}"]`);
+      const measured = cell?.getBoundingClientRect().width;
+      // A flex column may not have been laid out yet (or be measured as 0
+      // in tests); fall back to a sane default rather than a 0px width
+      return measured ? measured : 100;
     },
     [widths],
   );
@@ -146,31 +172,33 @@ export function ColumnWidthsProvider({
     [findNeighbor, getColumnWidth],
   );
 
-  const onResize = useCallback(
-    (_columnName: string, currentX: number) => {
-      const el = containerRef.current;
-      const drag = dragRef.current;
-      if (!el || !drag) return;
+  const onResize = useCallback((_columnName: string, currentX: number) => {
+    const el = containerRef.current;
+    const drag = dragRef.current;
+    if (!el || !drag) return;
 
-      const delta = currentX - drag.startX;
-      const newWidth = Math.max(MIN_COLUMN_WIDTH, drag.startWidth + delta);
+    const delta = currentX - drag.startX;
+    // The source column can only grow by as much as the neighbor can
+    // shrink, preserving the total width of the two columns
+    const maxWidth = drag.neighborName
+      ? drag.startWidth + (drag.neighborStartWidth - MIN_COLUMN_WIDTH)
+      : Number.POSITIVE_INFINITY;
+    const newWidth = Math.min(
+      Math.max(MIN_COLUMN_WIDTH, drag.startWidth + delta),
+      maxWidth,
+    );
 
-      el.style.setProperty(`--col-${drag.columnName}-width`, `${newWidth}px`);
+    el.style.setProperty(`--col-${drag.columnName}-width`, `${newWidth}px`);
 
-      if (drag.neighborName) {
-        const effectiveDelta = newWidth - drag.startWidth;
-        const neighborWidth = Math.max(
-          MIN_COLUMN_WIDTH,
-          drag.neighborStartWidth - effectiveDelta,
-        );
-        el.style.setProperty(
-          `--col-${drag.neighborName}-width`,
-          `${neighborWidth}px`,
-        );
-      }
-    },
-    [],
-  );
+    if (drag.neighborName) {
+      const neighborWidth =
+        drag.neighborStartWidth - (newWidth - drag.startWidth);
+      el.style.setProperty(
+        `--col-${drag.neighborName}-width`,
+        `${neighborWidth}px`,
+      );
+    }
+  }, []);
 
   const onResizeEnd = useCallback(() => {
     const el = containerRef.current;
@@ -180,13 +208,25 @@ export function ColumnWidthsProvider({
     const finalWidth = parseFloat(
       el.style.getPropertyValue(`--col-${drag.columnName}-width`),
     );
+    if (!Number.isFinite(finalWidth)) {
+      dragRef.current = null;
+      return;
+    }
+
     const updated: Record<string, number> = {
       ...(savedWidths || {}),
       [drag.columnName]: finalWidth,
     };
 
+    const neighborIsFinite =
+      drag.neighborName != null &&
+      Number.isFinite(
+        parseFloat(
+          el.style.getPropertyValue(`--col-${drag.neighborName}-width`),
+        ),
+      );
     let neighborFinalWidth = 0;
-    if (drag.neighborName) {
+    if (drag.neighborName && neighborIsFinite) {
       neighborFinalWidth = parseFloat(
         el.style.getPropertyValue(`--col-${drag.neighborName}-width`),
       );
@@ -195,7 +235,7 @@ export function ColumnWidthsProvider({
 
     setWidths(prev => {
       const next = { ...prev, [drag.columnName]: finalWidth };
-      if (drag.neighborName) {
+      if (drag.neighborName && neighborIsFinite) {
         next[drag.neighborName] = neighborFinalWidth;
       }
       return next;
@@ -211,18 +251,17 @@ export function ColumnWidthsProvider({
       if (!el) return;
 
       const defaultVal = defaultWidths[columnName];
+      // Deleting the override (rather than storing the default) lets future
+      // changes to the default widths apply to columns that were never
+      // explicitly resized
       const updated = { ...(savedWidths || {}) };
+      delete updated[columnName];
 
       if (defaultVal === 'flex') {
         el.style.removeProperty(`--col-${columnName}-width`);
-        delete updated[columnName];
         setWidths(prev => ({ ...prev, [columnName]: 'flex' }));
-      } else {
-        el.style.setProperty(
-          `--col-${columnName}-width`,
-          `${defaultVal as number}px`,
-        );
-        updated[columnName] = defaultVal as number;
+      } else if (typeof defaultVal === 'number') {
+        el.style.setProperty(`--col-${columnName}-width`, `${defaultVal}px`);
         setWidths(prev => ({ ...prev, [columnName]: defaultVal }));
       }
 
@@ -273,7 +312,8 @@ export function ColumnWidthsProvider({
             opacity: 0;
             transition: opacity 0.15s ease;
           }
-          [data-resize-handle]:hover {
+          [data-resize-handle]:hover,
+          [data-resize-handle]:focus-visible {
             opacity: 1;
           }
           [data-column]:hover > [data-resize-handle] {

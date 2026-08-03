@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, {
+  createContext,
   forwardRef,
   useCallback,
   useContext,
@@ -63,7 +64,7 @@ import {
 
 export const ROW_HEIGHT = 32;
 
-export const HeaderContext = React.createContext({ isHeader: false });
+export const HeaderContext = createContext({ isHeader: false });
 
 function fireBlur(onBlur, e) {
   if (document.hasFocus()) {
@@ -85,6 +86,23 @@ type FieldProps = ComponentProps<typeof View> & {
   truncate?: boolean;
   contentStyle?: CSSProperties;
 };
+
+// A column governed by the column-widths context uses either a fixed pixel
+// width (via the container's --col-* custom property, which stays in sync
+// during drags) or flexes to fill the remaining space
+function getWidthStyle(
+  width: CSSProperties['width'] | undefined,
+  ctxWidth: number | 'flex' | undefined,
+  columnName?: string,
+): CSSProperties {
+  if (ctxWidth !== undefined) {
+    return ctxWidth === 'flex'
+      ? { flex: 1, flexBasis: 0 }
+      : { width: `var(--col-${columnName}-width)` };
+  }
+  return width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
+}
+
 export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   {
     width,
@@ -106,20 +124,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
       ? columnWidthsCtx.widths[effectiveColumnName]
       : undefined;
 
-  let widthStyle: CSSProperties;
-  if (ctxWidth !== undefined) {
-    if (ctxWidth === 'flex') {
-      widthStyle = { flex: 1, flexBasis: 0 };
-    } else {
-      widthStyle = {
-        width: `var(--col-${effectiveColumnName}-width)`,
-      };
-    }
-  } else if (width === 'flex') {
-    widthStyle = { flex: 1, flexBasis: 0 };
-  } else {
-    widthStyle = { width };
-  }
+  const widthStyle = getWidthStyle(width, ctxWidth, effectiveColumnName);
 
   const { isHeader } = useContext(HeaderContext);
 
@@ -246,20 +251,7 @@ export function Cell({
       ? columnWidthsCtx.widths[effectiveColumnName]
       : undefined;
 
-  let widthStyle: CSSProperties;
-  if (ctxWidth !== undefined) {
-    if (ctxWidth === 'flex') {
-      widthStyle = { flex: 1, flexBasis: 0 };
-    } else {
-      widthStyle = {
-        width: `var(--col-${effectiveColumnName}-width)`,
-      };
-    }
-  } else if (width === 'flex') {
-    widthStyle = { flex: 1, flexBasis: 0 };
-  } else {
-    widthStyle = { width };
-  }
+  const widthStyle = getWidthStyle(width, ctxWidth, effectiveColumnName);
   const cellStyle: CSSProperties = {
     position: 'relative',
     textAlign: textAlign || 'left',
