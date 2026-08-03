@@ -110,7 +110,7 @@ jobs:
           context: .
           push: true
           file: packages/sync-server/docker/ubuntu.Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Build alpine image for testing
