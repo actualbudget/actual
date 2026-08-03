@@ -2,7 +2,7 @@
 
 If you want to transfer money between accounts, you will want to do it in a way that doesn't mess up reports. If you only created two transactions, Actual would have no way of knowing they are a single transfer and can be ignored in reports.
 
-When you create a transfer in Actual, those two transactions are linked, and updating one automatically updates the other. For example, if you typed something into the **Notes** column it would appear in both transactions. Some fields are always kept in sync this way, while others can be kept independent or synced optionally — see [Modifying a Transfer](#modifying-a-transfer) below for the full breakdown.
+When you create a transfer in Actual, those two transactions are linked, and updating one automatically updates the other. For example, if you typed something into the **Notes** column it would appear in both transactions. Some fields are always kept in sync this way, while others will be kept independent or synced optionally. See [Modifying a Transfer](#modifying-a-transfer) below for the full breakdown.
 
 ![](/img/transfers/transfer-complete.webp)
 
