@@ -497,6 +497,80 @@ describe('Transactions', () => {
     });
   });
 
+  test('preview split transactions show a payee', async () => {
+    schedules = [
+      {
+        id: 'schedule-1',
+        name: 'Monthly rent',
+        rule: 'rule-1',
+        next_date: '2017-01-01',
+        completed: false,
+        posts_transaction: false,
+        tombstone: false,
+        _payee: 'alice-id',
+        _account: accounts[0].id,
+        _amount: -1000,
+        _amountOp: 'is',
+        _date: '2017-01-01',
+        _conditions: [],
+        _actions: [],
+      },
+    ];
+
+    const previewParentId = 'preview/schedule-1/2017-01-01';
+    const previewParent: TransactionEntity = {
+      id: previewParentId,
+      account: accounts[0].id,
+      amount: -1000,
+      date: '2017-01-01',
+      payee: null,
+      is_parent: true,
+      schedule: 'schedule-1',
+      cleared: false,
+      reconciled: false,
+    };
+    const previewChildren: TransactionEntity[] = [
+      {
+        id: 'preview/schedule-1-child-1',
+        account: accounts[0].id,
+        amount: -600,
+        date: '2017-01-01',
+        payee: 'alice-id',
+        is_child: true,
+        parent_id: previewParentId,
+        schedule: 'schedule-1',
+        cleared: false,
+        reconciled: false,
+      },
+      {
+        id: 'preview/schedule-1-child-2',
+        account: accounts[0].id,
+        amount: -400,
+        date: '2017-01-01',
+        payee: 'alice-id',
+        is_child: true,
+        parent_id: previewParentId,
+        schedule: 'schedule-1',
+        cleared: false,
+        reconciled: false,
+      },
+    ];
+
+    const { container } = renderTransactions({
+      transactions: [previewParent, ...previewChildren],
+      isAdding: false,
+    });
+
+    // The preview parent row should show the same computed payee a real,
+    // persisted split transaction would show (most common child payee),
+    // instead of being blank.
+    await waitFor(() => {
+      expect(queryField(container, 'payee', '', 0).textContent).toContain(
+        'Alice',
+      );
+    });
+  });
+
   test('transactions table shows the correct data', () => {
     const { container, getTransactions } = renderTransactions();
 
