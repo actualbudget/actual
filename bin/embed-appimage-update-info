@@ -1,0 +1,57 @@
+#!/bin/bash -e
+
+# Embeds AppImage update information into the reserved .upd_info ELF section
+# of each built AppImage, and generates a companion .zsync file. This lets
+# AppImage managers (Gear Lever, AppImageUpdate, ...) detect new releases on
+# GitHub and offer one-click (delta) updates.
+#
+# See https://github.com/AppImage/AppImageSpec/blob/master/draft.md#update-information
+
+ROOT=`dirname $0`
+cd "$ROOT/.."
+
+REPO_OWNER="${REPO_OWNER:-actualbudget}"
+REPO_NAME="${REPO_NAME:-actual}"
+DIST_DIR="packages/desktop-electron/dist"
+
+shopt -s nullglob
+appimages=("$DIST_DIR"/*.AppImage)
+
+if [ ${#appimages[@]} -eq 0 ]; then
+    echo "No AppImages found in $DIST_DIR" >&2
+    exit 1
+fi
+
+for appimage in "${appimages[@]}"; do
+    filename=$(basename "$appimage")
+    update_info="gh-releases-zsync|$REPO_OWNER|$REPO_NAME|latest|$filename.zsync"
+
+    # Locate the .upd_info section (offset/size differ per architecture).
+    # `readelf -S --wide` prints: [Nr] Name Type Address Off Size ...
+    # Strip the [Nr] column first — it splits into two fields when Nr < 10.
+    section=$(readelf -S --wide "$appimage" | sed 's/^ *\[[ 0-9]*\] //' | grep '^\.upd_info ')
+    if [ -z "$section" ]; then
+        echo "$filename: no .upd_info section in AppImage runtime" >&2
+        exit 1
+    fi
+    offset=$((16#$(echo "$section" | awk '{print $4}')))
+    size=$((16#$(echo "$section" | awk '{print $5}')))
+
+    if [ ${#update_info} -ge $size ]; then
+        echo "$filename: update info (${#update_info} bytes) does not fit in .upd_info section ($size bytes)" >&2
+        exit 1
+    fi
+
+    printf '%s' "$update_info" | dd of="$appimage" bs=1 seek=$offset conv=notrunc status=none
+
+    if ! readelf --string-dump=.upd_info "$appimage" | grep -qF "$update_info"; then
+        echo "$filename: failed to verify embedded update info" >&2
+        exit 1
+    fi
+    echo "$filename: embedded update info: $update_info"
+
+    # Relative URL, resolved against the .zsync file's own location in the
+    # GitHub release (same convention appimagetool uses).
+    zsyncmake -u "$filename" -o "$appimage.zsync" "$appimage"
+    echo "$filename: generated $filename.zsync"
+done

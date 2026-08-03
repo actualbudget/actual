@@ -117,6 +117,11 @@ jobs:
       - name: Build Electron
         if: ${{ ! startsWith(matrix.os, 'macos') }}
         run: ./bin/package-electron --skip-translations
+      - name: Embed AppImage update information
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        run: |
+          sudo apt-get install zsync -y
+          ./bin/embed-appimage-update-info
       - name: Upload Build
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -126,6 +131,7 @@ jobs:
             packages/desktop-electron/dist/*.exe
             !packages/desktop-electron/dist/Actual-windows.exe
             packages/desktop-electron/dist/*.AppImage
+            packages/desktop-electron/dist/*.AppImage.zsync
             packages/desktop-electron/dist/*.flatpak
       - name: Upload Windows Store Build
         if: ${{ startsWith(matrix.os, 'windows') }}
@@ -145,6 +151,7 @@ jobs:
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/!(Actual-windows).exe
             packages/desktop-electron/dist/*.AppImage
+            packages/desktop-electron/dist/*.AppImage.zsync
             packages/desktop-electron/dist/*.flatpak
             packages/desktop-electron/dist/*.appx
           )
