@@ -635,7 +635,7 @@ describe('pagedQuery', () => {
     mockServer({
       send: async (name, args) => {
         switch (name) {
-          case 'query':
+          case 'query': {
             const query = args;
             if (isCountQuery(query)) {
               return { data: data.length, dependencies: ['transactions'] };
@@ -649,6 +649,7 @@ describe('pagedQuery', () => {
               ),
               dependencies: ['transactions'],
             };
+          }
           default:
             throw new Error(`Command not implemented: ${name}`);
         }
