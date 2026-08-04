@@ -20,6 +20,7 @@ import {
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
 import { useResizeObserver } from '#hooks/useResizeObserver';
 
 type CalendarGraphProps = {
@@ -43,6 +44,7 @@ export function CalendarGraph({
   onDayClick,
 }: CalendarGraphProps) {
   const format = useFormat();
+  const locale = useLocale();
 
   const startingDate = startOfWeek(new Date(), {
     weekStartsOn:
@@ -90,7 +92,7 @@ export function CalendarGraph({
               marginBottom: 4,
             }}
           >
-            {formatDate(addDays(startingDate, index), 'EEEEE')}
+            {formatDate(addDays(startingDate, index), 'EEEEE', { locale })}
           </View>
         ))}
       </View>
@@ -117,7 +119,9 @@ export function CalendarGraph({
               content={
                 <View>
                   <View style={{ marginBottom: 10 }}>
-                    <strong>{formatDate(day.date, 'MMM dd')}</strong>
+                    <strong>
+                      {formatDate(day.date, 'MMM dd', { locale })}
+                    </strong>
                   </View>
                   <View style={{ lineHeight: 1.5 }}>
                     <View
@@ -242,6 +246,7 @@ type DayButtonProps = {
   onPress: () => void;
 };
 function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
+  const locale = useLocale();
   const [currentFontSize, setCurrentFontSize] = useState(fontSize);
 
   useEffect(() => {
@@ -251,7 +256,7 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
   return (
     <Button
       ref={resizeRef}
-      aria-label={formatDate(day.date, 'MMMM d, yyyy')}
+      aria-label={formatDate(day.date, 'MMMM d, yyyy', { locale })}
       style={{
         borderColor: 'transparent',
         backgroundColor: theme.calendarCellBackground,

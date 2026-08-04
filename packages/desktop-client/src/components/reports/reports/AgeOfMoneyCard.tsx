@@ -19,6 +19,7 @@ import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createAgeOfMoneySpreadsheet } from '#components/reports/spreadsheets/age-of-money-spreadsheet';
 import { useReport } from '#components/reports/useReport';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 // Determine status color based on age
 export function getAgeColor(age: number | null) {
@@ -108,7 +109,7 @@ export function AgeOfMoneyCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={meta?.name || t('Age of Money')}
+              name={translateWidgetName(meta?.name, t, t('Age of Money'))}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({

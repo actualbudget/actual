@@ -92,7 +92,7 @@ export function Value<T>({
     if (value == null || value === '') {
       return t('(nothing)');
     } else if (typeof value === 'boolean') {
-      return value ? 'true' : 'false';
+      return value ? t('true') : t('false');
     } else {
       switch (field) {
         case 'amount':

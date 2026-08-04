@@ -52,7 +52,7 @@ function About() {
   return (
     <Setting>
       <Text>
-        <Trans>
+        <Trans i18nKey="<0>Actual</0> is a super fast privacy-focused app for managing your finances.">
           <strong>Actual</strong> is a super fast privacy-focused app for
           managing your finances.
         </Trans>

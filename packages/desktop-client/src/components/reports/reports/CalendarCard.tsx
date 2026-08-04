@@ -39,9 +39,11 @@ import type { CalendarDataType } from '#components/reports/spreadsheets/calendar
 import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useNavigate } from '#hooks/useNavigate';
 import { useResizeObserver } from '#hooks/useResizeObserver';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 type CalendarCardProps = {
   widgetId: string;
@@ -177,7 +179,7 @@ export function CalendarCard({
         <View style={{ flexDirection: 'row', padding: 20, paddingBottom: 0 }}>
           <View style={{ flex: 1, marginBottom: -5 }}>
             <ReportCardName
-              name={meta?.name || t('Calendar')}
+              name={translateWidgetName(meta?.name, t, t('Calendar'))}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({
@@ -345,6 +347,7 @@ function CalendarCardInner({
   format,
 }: CalendarCardInnerProps) {
   const { t } = useTranslation();
+  const locale = useLocale();
   const [monthNameVisible, setMonthNameVisible] = useState(true);
   const monthFormatSizeContainers = useRef<(HTMLSpanElement | null)[]>(
     new Array(5),
@@ -413,10 +416,19 @@ function CalendarCardInner({
   const navigate = useNavigate();
 
   const monthFormats = [
-    { format: 'MMMM yyyy', text: formatDate(calendar.start, 'MMMM yyyy') },
-    { format: 'MMM yyyy', text: formatDate(calendar.start, 'MMM yyyy') },
-    { format: 'MMM yy', text: formatDate(calendar.start, 'MMM yy') },
-    { format: 'MMM', text: formatDate(calendar.start, 'MMM') },
+    {
+      format: 'MMMM yyyy',
+      text: formatDate(calendar.start, 'MMMM yyyy', { locale }),
+    },
+    {
+      format: 'MMM yyyy',
+      text: formatDate(calendar.start, 'MMM yyyy', { locale }),
+    },
+    {
+      format: 'MMM yy',
+      text: formatDate(calendar.start, 'MMM yy', { locale }),
+    },
+    { format: 'MMM', text: formatDate(calendar.start, 'MMM', { locale }) },
     { format: '', text: '' },
   ];
 

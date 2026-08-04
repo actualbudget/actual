@@ -57,11 +57,11 @@ export function LanguageSettings() {
     >
       <Text>
         {isEnabled ? (
-          <Trans>
-            <strong>Language</strong> is the display language of all text.
-            Please note that no warranty is provided for the accuracy or
-            completeness of non-English translations. If you encounter a
-            translation error, feel free to make a suggestion on{' '}
+          <>
+            <strong>{t('Language')}</strong>
+            {t(
+              ' is the display language of all text. Please note that no warranty is provided for the accuracy or completeness of non-English translations. If you encounter a translation error, feel free to make a suggestion on ',
+            )}
             <Link
               variant="external"
               to={
@@ -73,7 +73,7 @@ export function LanguageSettings() {
               Weblate
             </Link>
             .
-          </Trans>
+          </>
         ) : (
           <Trans>
             <strong>Language</strong> support is not available. Please follow

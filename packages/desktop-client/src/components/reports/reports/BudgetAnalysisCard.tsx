@@ -19,6 +19,7 @@ import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createBudgetAnalysisSpreadsheet } from '#components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 type BudgetAnalysisCardProps = {
   widgetId: string;
@@ -90,7 +91,7 @@ export function BudgetAnalysisCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={meta?.name || t('Budget Analysis')}
+              name={translateWidgetName(meta?.name, t, t('Budget Analysis'))}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({

@@ -34,46 +34,65 @@ export const defaultReport: CustomReportEntity = {
   conditionsOp: 'and',
 };
 
-const balanceTypeOptions = [
-  { description: t('Payment'), key: 'Payment', format: 'totalDebts' as const },
-  { description: t('Deposit'), key: 'Deposit', format: 'totalAssets' as const },
-  { description: t('Net'), key: 'Net', format: 'totalTotals' as const },
-  {
-    description: t('Net Payment'),
-    key: 'Net Payment',
-    format: 'netDebts' as const,
-  },
-  {
-    description: t('Net Deposit'),
-    key: 'Net Deposit',
-    format: 'netAssets' as const,
-  },
-  {
-    description: t('Budgeted'),
-    key: 'Budgeted',
-    format: 'totalBudgeted' as const,
-  },
-];
+/** Rebuild option descriptions via t() at access time (language may change after module load). */
+function getBalanceTypeOptions() {
+  return [
+    {
+      description: t('Payment'),
+      key: 'Payment',
+      format: 'totalDebts' as const,
+    },
+    {
+      description: t('Deposit'),
+      key: 'Deposit',
+      format: 'totalAssets' as const,
+    },
+    { description: t('Net'), key: 'Net', format: 'totalTotals' as const },
+    {
+      description: t('Net Payment'),
+      key: 'Net Payment',
+      format: 'netDebts' as const,
+    },
+    {
+      description: t('Net Deposit'),
+      key: 'Net Deposit',
+      format: 'netAssets' as const,
+    },
+    {
+      description: t('Budgeted'),
+      key: 'Budgeted',
+      format: 'totalBudgeted' as const,
+    },
+  ];
+}
 
-const groupByOptions = [
-  { description: t('Category'), key: 'Category' },
-  { description: t('Group'), key: 'Group' },
-  { description: t('Category+Group'), key: 'CategoryGroup' }, // new: two-ring donut support
-  { description: t('Payee'), key: 'Payee' },
-  { description: t('Account'), key: 'Account' },
-  { description: t('Interval'), key: 'Interval' },
-];
+function getGroupByOptions() {
+  return [
+    { description: t('Category'), key: 'Category' },
+    { description: t('Group'), key: 'Group' },
+    { description: t('Category+Group'), key: 'CategoryGroup' },
+    { description: t('Payee'), key: 'Payee' },
+    { description: t('Account'), key: 'Account' },
+    { description: t('Interval'), key: 'Interval' },
+  ];
+}
 
-const sortByOptions: {
+function getSortByOptions(): {
   description: string;
   key: string;
   format: sortByOpType;
-}[] = [
-  { description: t('Ascending'), key: 'Ascending', format: 'asc' as const },
-  { description: t('Descending'), key: 'Descending', format: 'desc' as const },
-  { description: t('Name'), key: 'Name', format: 'name' as const },
-  { description: t('Budget'), key: 'Budget', format: 'budget' as const },
-];
+}[] {
+  return [
+    { description: t('Ascending'), key: 'Ascending', format: 'asc' as const },
+    {
+      description: t('Descending'),
+      key: 'Descending',
+      format: 'desc' as const,
+    },
+    { description: t('Name'), key: 'Name', format: 'name' as const },
+    { description: t('Budget'), key: 'Budget', format: 'budget' as const },
+  ];
+}
 
 export type dateRangeProps = {
   description: string;
@@ -86,128 +105,130 @@ export type dateRangeProps = {
   Yearly: boolean;
 };
 
-const dateRangeOptions: dateRangeProps[] = [
-  {
-    description: t('This week'),
-    key: 'This week',
-    name: 0,
-    type: 'Week',
-    Daily: true,
-    Weekly: true,
-    Monthly: false,
-    Yearly: false,
-  },
-  {
-    description: t('Last week'),
-    key: 'Last week',
-    name: 1,
-    type: 'Week',
-    Daily: true,
-    Weekly: true,
-    Monthly: false,
-    Yearly: false,
-  },
-  {
-    description: t('This month'),
-    key: 'This month',
-    name: 0,
-    type: 'Month',
-    Daily: true,
-    Weekly: true,
-    Monthly: true,
-    Yearly: false,
-  },
-  {
-    description: t('Last month'),
-    key: 'Last month',
-    name: 1,
-    type: 'Month',
-    Daily: true,
-    Weekly: true,
-    Monthly: true,
-    Yearly: false,
-  },
-  {
-    description: t('Last 30 days'),
-    key: 'Last 30 days',
-    name: 'last30Days',
-    type: 'Day',
-    Daily: true,
-    Weekly: true,
-    Monthly: true,
-    Yearly: false,
-  },
-  {
-    description: t('Last 3 months'),
-    key: 'Last 3 months',
-    name: 3,
-    type: 'Month',
-    Daily: true,
-    Weekly: true,
-    Monthly: true,
-    Yearly: false,
-  },
-  {
-    description: t('Last 6 months'),
-    key: 'Last 6 months',
-    name: 6,
-    type: 'Month',
-    Daily: false,
-    Weekly: false,
-    Monthly: true,
-    Yearly: false,
-  },
-  {
-    description: t('Last 12 months'),
-    key: 'Last 12 months',
-    name: 12,
-    type: 'Month',
-    Daily: false,
-    Weekly: false,
-    Monthly: true,
-    Yearly: false,
-  },
-  {
-    description: t('Year to date'),
-    key: 'Year to date',
-    name: 'yearToDate',
-    type: 'Month',
-    Daily: false,
-    Weekly: true,
-    Monthly: true,
-    Yearly: true,
-  },
-  {
-    description: t('Last year'),
-    key: 'Last year',
-    name: 'lastYear',
-    type: 'Month',
-    Daily: false,
-    Weekly: true,
-    Monthly: true,
-    Yearly: true,
-  },
-  {
-    description: t('Prior year to date'),
-    key: 'Prior year to date',
-    name: 'priorYearToDate',
-    type: 'Month',
-    Daily: false,
-    Weekly: true,
-    Monthly: true,
-    Yearly: true,
-  },
-  {
-    description: t('All time'),
-    key: 'All time',
-    name: 'allTime',
-    type: 'Month',
-    Daily: false,
-    Weekly: true,
-    Monthly: true,
-    Yearly: true,
-  },
-];
+function getDateRangeOptions(): dateRangeProps[] {
+  return [
+    {
+      description: t('This week'),
+      key: 'This week',
+      name: 0,
+      type: 'Week',
+      Daily: true,
+      Weekly: true,
+      Monthly: false,
+      Yearly: false,
+    },
+    {
+      description: t('Last week'),
+      key: 'Last week',
+      name: 1,
+      type: 'Week',
+      Daily: true,
+      Weekly: true,
+      Monthly: false,
+      Yearly: false,
+    },
+    {
+      description: t('This month'),
+      key: 'This month',
+      name: 0,
+      type: 'Month',
+      Daily: true,
+      Weekly: true,
+      Monthly: true,
+      Yearly: false,
+    },
+    {
+      description: t('Last month'),
+      key: 'Last month',
+      name: 1,
+      type: 'Month',
+      Daily: true,
+      Weekly: true,
+      Monthly: true,
+      Yearly: false,
+    },
+    {
+      description: t('Last 30 days'),
+      key: 'Last 30 days',
+      name: 'last30Days',
+      type: 'Day',
+      Daily: true,
+      Weekly: true,
+      Monthly: true,
+      Yearly: false,
+    },
+    {
+      description: t('Last 3 months'),
+      key: 'Last 3 months',
+      name: 3,
+      type: 'Month',
+      Daily: true,
+      Weekly: true,
+      Monthly: true,
+      Yearly: false,
+    },
+    {
+      description: t('Last 6 months'),
+      key: 'Last 6 months',
+      name: 6,
+      type: 'Month',
+      Daily: false,
+      Weekly: false,
+      Monthly: true,
+      Yearly: false,
+    },
+    {
+      description: t('Last 12 months'),
+      key: 'Last 12 months',
+      name: 12,
+      type: 'Month',
+      Daily: false,
+      Weekly: false,
+      Monthly: true,
+      Yearly: false,
+    },
+    {
+      description: t('Year to date'),
+      key: 'Year to date',
+      name: 'yearToDate',
+      type: 'Month',
+      Daily: false,
+      Weekly: true,
+      Monthly: true,
+      Yearly: true,
+    },
+    {
+      description: t('Last year'),
+      key: 'Last year',
+      name: 'lastYear',
+      type: 'Month',
+      Daily: false,
+      Weekly: true,
+      Monthly: true,
+      Yearly: true,
+    },
+    {
+      description: t('Prior year to date'),
+      key: 'Prior year to date',
+      name: 'priorYearToDate',
+      type: 'Month',
+      Daily: false,
+      Weekly: true,
+      Monthly: true,
+      Yearly: true,
+    },
+    {
+      description: t('All time'),
+      key: 'All time',
+      name: 'allTime',
+      type: 'Month',
+      Daily: false,
+      Weekly: true,
+      Monthly: true,
+      Yearly: true,
+    },
+  ];
+}
 
 type intervalOptionsProps = {
   description: string;
@@ -221,61 +242,91 @@ type intervalOptionsProps = {
     | 'yearRangeInclusive';
 };
 
-const intervalOptions: intervalOptionsProps[] = [
-  {
-    description: t('Daily'),
-    key: 'Daily',
-    name: 'Day',
-    format: 'yy-MM-dd',
-    range: 'dayRangeInclusive',
-  },
-  {
-    description: t('Weekly'),
-    key: 'Weekly',
-    name: 'Week',
-    format: 'yy-MM-dd',
-    range: 'weekRangeInclusive',
-  },
-  {
-    description: t('Monthly'),
-    key: 'Monthly',
-    name: 'Month',
-    format: "MMM ''yy",
-    range: 'rangeInclusive',
-  },
-  {
-    description: t('Yearly'),
-    key: 'Yearly',
-    name: 'Year',
-    format: 'yyyy',
-    range: 'yearRangeInclusive',
-  },
-];
+function getIntervalOptions(): intervalOptionsProps[] {
+  return [
+    {
+      description: t('Daily'),
+      key: 'Daily',
+      name: 'Day',
+      format: 'yy-MM-dd',
+      range: 'dayRangeInclusive',
+    },
+    {
+      description: t('Weekly'),
+      key: 'Weekly',
+      name: 'Week',
+      format: 'yy-MM-dd',
+      range: 'weekRangeInclusive',
+    },
+    {
+      description: t('Monthly'),
+      key: 'Monthly',
+      name: 'Month',
+      format: "MMM ''yy",
+      range: 'rangeInclusive',
+    },
+    {
+      description: t('Yearly'),
+      key: 'Yearly',
+      name: 'Year',
+      format: 'yyyy',
+      range: 'yearRangeInclusive',
+    },
+  ];
+}
+
+// Static maps (keys only — language-independent)
+const balanceTypeMap = new Map(
+  getBalanceTypeOptions().map(item => [item.key, item.format] as const),
+);
+const sortByMap = new Map(
+  getSortByOptions().map(item => [item.key, item.format] as const),
+);
+const dateRangeMap = new Map(
+  getDateRangeOptions().map(item => [item.key, item.name] as const),
+);
+const dateRangeType = new Map(
+  getDateRangeOptions().map(item => [item.key, item.type] as const),
+);
+const intervalMap = new Map<string, 'Day' | 'Week' | 'Month' | 'Year'>(
+  getIntervalOptions().map(item => [item.key, item.name]),
+);
+const intervalFormat = new Map(
+  getIntervalOptions().map(item => [item.key, item.format] as const),
+);
+const intervalRange = new Map<
+  string,
+  | 'dayRangeInclusive'
+  | 'weekRangeInclusive'
+  | 'rangeInclusive'
+  | 'yearRangeInclusive'
+>(getIntervalOptions().map(item => [item.key, item.range]));
+const groupByItems = new Set(getGroupByOptions().map(item => item.key));
 
 export const ReportOptions = {
-  groupBy: groupByOptions,
-  groupByItems: new Set(groupByOptions.map(item => item.key)),
-  balanceType: balanceTypeOptions,
-  balanceTypeMap: new Map(
-    balanceTypeOptions.map(item => [item.key, item.format]),
-  ),
-  sortBy: sortByOptions,
-  sortByMap: new Map(sortByOptions.map(item => [item.key, item.format])),
-  dateRange: dateRangeOptions,
-  dateRangeMap: new Map(dateRangeOptions.map(item => [item.key, item.name])),
-  dateRangeType: new Map(dateRangeOptions.map(item => [item.key, item.type])),
-  interval: intervalOptions,
-  intervalMap: new Map<string, 'Day' | 'Week' | 'Month' | 'Year'>(
-    intervalOptions.map(item => [item.key, item.name]),
-  ),
-  intervalFormat: new Map(intervalOptions.map(item => [item.key, item.format])),
-  intervalRange: new Map<
-    string,
-    | 'dayRangeInclusive'
-    | 'weekRangeInclusive'
-    | 'rangeInclusive'
-    | 'yearRangeInclusive'
-  >(intervalOptions.map(item => [item.key, item.range])),
+  get groupBy() {
+    return getGroupByOptions();
+  },
+  groupByItems,
+  get balanceType() {
+    return getBalanceTypeOptions();
+  },
+  balanceTypeMap,
+  get sortBy() {
+    return getSortByOptions();
+  },
+  sortByMap,
+  get dateRange() {
+    return getDateRangeOptions();
+  },
+  dateRangeMap,
+  dateRangeType,
+  get interval() {
+    return getIntervalOptions();
+  },
+  intervalMap,
+  intervalFormat,
+  intervalRange,
 };
 
 export type QueryDataEntity = {
@@ -300,25 +351,6 @@ export type UncategorizedEntity = Pick<
   uncategorized_id?: UncategorizedId;
 };
 
-const uncategorizedCategory: UncategorizedEntity = {
-  id: '',
-  name: t('Uncategorized'),
-  uncategorized_id: 'other',
-  hidden: false,
-};
-const transferCategory: UncategorizedEntity = {
-  id: '',
-  name: t('Transfers'),
-  uncategorized_id: 'transfer',
-  hidden: false,
-};
-const offBudgetCategory: UncategorizedEntity = {
-  id: '',
-  name: t('Off budget'),
-  uncategorized_id: 'off_budget',
-  hidden: false,
-};
-
 type UncategorizedGroupEntity = Pick<
   CategoryGroupEntity,
   'name' | 'id' | 'hidden'
@@ -327,18 +359,51 @@ type UncategorizedGroupEntity = Pick<
   uncategorized_id?: UncategorizedId;
 };
 
-const uncategorizedGroup: UncategorizedGroupEntity = {
-  name: t('Uncategorized & Off budget'),
-  id: 'uncategorized',
-  hidden: false,
-  uncategorized_id: 'all',
-  categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
-};
+function getSpecialCategories() {
+  const uncategorizedCategory: UncategorizedEntity = {
+    id: '',
+    name: t('Uncategorized'),
+    uncategorized_id: 'other',
+    hidden: false,
+  };
+  const transferCategory: UncategorizedEntity = {
+    id: '',
+    name: t('Transfers'),
+    uncategorized_id: 'transfer',
+    hidden: false,
+  };
+  const offBudgetCategory: UncategorizedEntity = {
+    id: '',
+    name: t('Off budget'),
+    uncategorized_id: 'off_budget',
+    hidden: false,
+  };
+  const uncategorizedGroup: UncategorizedGroupEntity = {
+    name: t('Uncategorized & Off budget'),
+    id: 'uncategorized',
+    hidden: false,
+    uncategorized_id: 'all',
+    categories: [uncategorizedCategory, transferCategory, offBudgetCategory],
+  };
+  return {
+    uncategorizedCategory,
+    transferCategory,
+    offBudgetCategory,
+    uncategorizedGroup,
+  };
+}
 
 export const categoryLists = (categories: {
   list: CategoryEntity[];
   grouped: CategoryGroupEntity[];
 }) => {
+  const {
+    uncategorizedCategory,
+    transferCategory,
+    offBudgetCategory,
+    uncategorizedGroup,
+  } = getSpecialCategories();
+
   const categoriesToSort = [...categories.list];
   const categoryList: UncategorizedEntity[] = [
     ...categoriesToSort.sort((a, b) => {

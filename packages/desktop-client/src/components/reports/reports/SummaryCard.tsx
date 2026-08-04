@@ -18,6 +18,7 @@ import { summarySpreadsheet } from '#components/reports/spreadsheets/summary-spr
 import { SummaryNumber } from '#components/reports/SummaryNumber';
 import { useReport } from '#components/reports/useReport';
 import { useLocale } from '#hooks/useLocale';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 type SummaryCardProps = {
   widgetId: string;
@@ -98,7 +99,7 @@ export function SummaryCard({
       <View style={{ flex: 1, overflow: 'hidden' }}>
         <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
           <ReportCardName
-            name={meta?.name || t('Summary')}
+            name={translateWidgetName(meta?.name, t, t('Summary'))}
             isEditing={nameMenuOpen}
             onChange={newName => {
               onMetaChange({

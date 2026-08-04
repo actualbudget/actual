@@ -19,6 +19,7 @@ import {
   runMonteCarloSimulation,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { useResolvedMonteCarloConfig } from '#components/reports/reports/monte-carlo/useResolvedMonteCarloConfig';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 // Stable default so an unsaved widget doesn't bust the simulation's
 // memoization on every re-render (e.g. hover state changes)
@@ -70,7 +71,7 @@ export function MonteCarloCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={meta?.name || t('Monte Carlo Analysis')}
+              name={translateWidgetName(meta?.name, t, t('Monte Carlo Analysis'))}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({

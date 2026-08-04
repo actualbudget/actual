@@ -58,6 +58,7 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 import { mapField } from '#util/rule';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 export function Sankey() {
   const params = useParams();
@@ -753,7 +754,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     });
   };
 
-  const title = widget?.meta?.name || t('Sankey');
+  const title = translateWidgetName(widget?.meta?.name, t, t('Sankey'));
 
   const ignoredFilterFields =
     graphMode === 'budgeted'

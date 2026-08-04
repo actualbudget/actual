@@ -24,6 +24,7 @@ import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 
 import { defaultTimeFrame } from './CashFlow';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 type CustomLabelProps = {
   value?: number;
@@ -155,7 +156,7 @@ export function CashFlowCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={meta?.name || t('Cash Flow')}
+              name={translateWidgetName(meta?.name, t, t('Cash Flow'))}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({

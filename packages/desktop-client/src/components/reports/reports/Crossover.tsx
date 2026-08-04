@@ -48,6 +48,7 @@ import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 export const defaultTimeFrame = {
   start: monthUtils.subMonths(monthUtils.currentMonth(), 120),
@@ -393,7 +394,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
-  const title = widget?.meta?.name || t('Crossover Point');
+  const title = translateWidgetName(widget?.meta?.name, t, t('Crossover Point'));
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {
       dispatch(

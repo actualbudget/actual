@@ -26,6 +26,7 @@ import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 type CrossoverCardProps = {
   widgetId: string;
@@ -202,7 +203,7 @@ export function CrossoverCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={meta?.name || t('Crossover Point')}
+              name={translateWidgetName(meta?.name, t, t('Crossover Point'))}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({

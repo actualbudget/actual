@@ -11,6 +11,33 @@ type CategoryViews = {
   list: CategoryEntity[];
 };
 
+/**
+ * Exact English names from demo / default-db seeds.
+ * Display-layer only — stored names stay English; custom renames are untouched.
+ */
+const DEFAULT_CATEGORY_DISPLAY_NAMES = new Set(
+  [
+    'Starting Balances',
+    'Usual Expenses',
+    'Food',
+    'Restaurants',
+    'Entertainment',
+    'Clothing',
+    'General',
+    'Gift',
+    'Medical',
+    'Savings',
+    'Bills',
+    'Cell',
+    'Internet',
+    'Mortgage',
+    'Water',
+    'Power',
+    'Income',
+    'Misc',
+  ].map(n => n.toLowerCase()),
+);
+
 export const categoryQueries = {
   all: () => ['categories'],
   lists: () => [...categoryQueries.all(), 'lists'],
@@ -19,7 +46,7 @@ export const categoryQueries = {
       queryKey: [...categoryQueries.lists()],
       queryFn: async () => {
         const categories = await send('get-categories');
-        return translateStartingBalances(categories);
+        return translateDefaultCategoryNames(categories);
       },
       placeholderData: {
         grouped: [],
@@ -30,35 +57,38 @@ export const categoryQueries = {
     }),
 };
 
-function translateStartingBalances(categories: {
+function translateDefaultCategoryNames(categories: {
   grouped: CategoryGroupEntity[];
   list: CategoryEntity[];
 }): CategoryViews {
   return {
-    list: translateStartingBalancesCategories(categories.list) ?? [],
+    list: translateCategoryList(categories.list) ?? [],
     grouped: categories.grouped.map(group => ({
       ...group,
-      categories: translateStartingBalancesCategories(group.categories),
+      name: translateDefaultName(group.name),
+      categories: translateCategoryList(group.categories),
     })),
   };
 }
 
-function translateStartingBalancesCategories(
+function translateCategoryList(
   categories: CategoryEntity[] | undefined,
 ): CategoryEntity[] | undefined {
   return categories
-    ? categories.map(cat => translateStartingBalancesCategory(cat))
+    ? categories.map(cat => ({
+        ...cat,
+        name: translateDefaultName(cat.name),
+      }))
     : undefined;
 }
 
-function translateStartingBalancesCategory(
-  category: CategoryEntity,
-): CategoryEntity {
-  return {
-    ...category,
-    name:
-      category.name?.toLowerCase() === 'starting balances'
-        ? i18n.t('Starting Balances')
-        : category.name,
-  };
+function translateDefaultName(name: string | undefined): string {
+  if (!name) {
+    return name ?? '';
+  }
+  if (!DEFAULT_CATEGORY_DISPLAY_NAMES.has(name.toLowerCase())) {
+    return name;
+  }
+  // i18n natural keys match the English seed names exactly
+  return i18n.t(name);
 }

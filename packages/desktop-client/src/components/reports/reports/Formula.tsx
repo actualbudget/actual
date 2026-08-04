@@ -27,6 +27,7 @@ import { useThemeColors } from '#hooks/useThemeColors';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 const FormulaEditor = lazy(() =>
   import('#components/formula/FormulaEditor').then(module => ({
@@ -83,7 +84,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
     widget?.meta?.colorFormula || '',
   );
 
-  const title = widget?.meta?.name || t('Formula');
+  const title = translateWidgetName(widget?.meta?.name, t, t('Formula'));
 
   const {
     result,

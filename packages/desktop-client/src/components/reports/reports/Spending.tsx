@@ -53,6 +53,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 export function Spending() {
   const params = useParams();
@@ -246,7 +247,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     }
   };
 
-  const title = widget?.meta?.name || t('Monthly Spending');
+  const title = translateWidgetName(widget?.meta?.name, t, t('Monthly Spending'));
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {
       throw new Error('No widget that could be saved.');

@@ -47,6 +47,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 export function Summary() {
   const params = useParams();
@@ -227,7 +228,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
-  const title = widget?.meta?.name || t('Summary');
+  const title = translateWidgetName(widget?.meta?.name, t, t('Summary'));
 
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
 

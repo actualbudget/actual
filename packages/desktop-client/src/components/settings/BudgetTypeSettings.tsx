@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
@@ -11,6 +11,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { Setting } from './UI';
 
 export function BudgetTypeSettings() {
+  const { t } = useTranslation();
   const [budgetType = 'envelope', setBudgetType] = useSyncedPref('budgetType');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,42 +32,37 @@ export function BudgetTypeSettings() {
     <Setting
       primaryAction={
         <ButtonWithLoading onPress={onSwitchType} isLoading={isLoading}>
-          {budgetType === 'tracking' ? (
-            <Trans>Switch to envelope budgeting</Trans>
-          ) : (
-            <Trans>Switch to tracking budgeting</Trans>
-          )}
+          {budgetType === 'tracking'
+            ? t('Switch to envelope budgeting')
+            : t('Switch to tracking budgeting')}
         </ButtonWithLoading>
       }
     >
       <Text>
-        <Trans>
-          <strong>Envelope budgeting</strong> (recommended) digitally mimics
-          physical envelope budgeting system by allocating funds into virtual
-          envelopes for different expenses. It helps track spending and ensure
-          you don't overspend in any category.
-        </Trans>{' '}
+        <strong>{t('Envelope budgeting')}</strong>
+        {t(
+          " (recommended) digitally mimics physical envelope budgeting system by allocating funds into virtual envelopes for different expenses. It helps track spending and ensure you don't overspend in any category.",
+        )}{' '}
         <Link
           variant="external"
           to="https://actualbudget.org/docs/getting-started/envelope-budgeting"
           linkColor="purple"
         >
-          <Trans>Learn more</Trans>
+          {t('Learn more')}
         </Link>
       </Text>
       <Text>
-        <Trans>
-          With <strong>tracking budgeting</strong>, category balances reset each
-          month, and funds are managed using a "Saved" metric instead of "To Be
-          Budgeted." Income is forecasted to plan future spending, rather than
-          relying on current available funds.
-        </Trans>{' '}
+        {t('With ')}
+        <strong>{t('tracking budgeting')}</strong>
+        {t(
+          ', category balances reset each month, and funds are managed using a "Saved" metric instead of "To Be Budgeted." Income is forecasted to plan future spending, rather than relying on current available funds.',
+        )}{' '}
         <Link
           variant="external"
           to="https://actualbudget.org/docs/getting-started/tracking-budget"
           linkColor="purple"
         >
-          <Trans>Learn more</Trans>
+          {t('Learn more')}
         </Link>
       </Text>
     </Setting>

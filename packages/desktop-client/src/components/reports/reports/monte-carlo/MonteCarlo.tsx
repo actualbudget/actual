@@ -42,6 +42,7 @@ import { useNavigate } from '#hooks/useNavigate';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 const firstYear = HISTORICAL_ANNUAL_RETURNS[0].year;
 const lastYear =
@@ -130,7 +131,7 @@ export function MonteCarlo() {
     );
   }
 
-  const title = widget?.meta?.name || t('Monte Carlo Analysis');
+  const title = translateWidgetName(widget?.meta?.name, t, t('Monte Carlo Analysis'));
   const onSaveWidgetName = async (newName: string) => {
     // The editable title only renders when a widget exists
     if (!widget) {

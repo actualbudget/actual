@@ -36,6 +36,7 @@ import {
   getLowestChartDataPoint,
   getZeroCrossingGradientOffset,
 } from './balanceForecastChartData';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 type BalanceForecastCardProps = {
   widgetId: string;
@@ -163,7 +164,7 @@ export function BalanceForecastCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={meta?.name || t('Balance Forecast')}
+              name={translateWidgetName(meta?.name, t, t('Balance Forecast'))}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({

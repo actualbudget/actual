@@ -24,6 +24,7 @@ import { createSpendingSpreadsheet } from '#components/reports/spreadsheets/spen
 import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 type SpendingCardProps = {
   widgetId: string;
@@ -103,7 +104,7 @@ export function SpendingCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={meta?.name || t('Monthly Spending')}
+              name={translateWidgetName(meta?.name, t, t('Monthly Spending'))}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({

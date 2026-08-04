@@ -50,6 +50,7 @@ type HelpButtonProps = {
 
 const HelpButton = forwardRef<HTMLButtonElement, HelpButtonProps>(
   ({ onPress }, ref) => {
+    const { t } = useTranslation();
     const size = 15;
     return (
       <Button
@@ -63,7 +64,7 @@ const HelpButton = forwardRef<HTMLButtonElement, HelpButtonProps>(
         }}
       >
         <SvgHelp width={size} height={size} />
-        <Trans>Help</Trans>
+        {t('Help')}
       </Button>
     );
   },

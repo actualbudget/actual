@@ -9,6 +9,7 @@ import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { useFormulaExecution } from '#hooks/useFormulaExecution';
 import { useThemeColors } from '#hooks/useThemeColors';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 type FormulaCardProps = {
   widgetId: string;
@@ -77,7 +78,7 @@ export function FormulaCard({
         {showTitle && (
           <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
             <ReportCardName
-              name={meta?.name || t('Formula')}
+              name={translateWidgetName(meta?.name, t, t('Formula'))}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({

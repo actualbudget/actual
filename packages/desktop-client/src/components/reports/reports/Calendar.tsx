@@ -68,6 +68,7 @@ import { useTransactions } from '#hooks/useTransactions';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 const CHEVRON_HEIGHT = 42;
 const SUMMARY_HEIGHT = 140;
@@ -319,7 +320,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
-  const title = widget?.meta?.name || t('Calendar');
+  const title = translateWidgetName(widget?.meta?.name, t, t('Calendar'));
   const table = useRef<TableHandleRef<TransactionEntity>>(null);
   const dateFormat = useDateFormat();
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
@@ -858,7 +859,7 @@ function CalendarWithHeader({
             });
           }}
         >
-          {formatDate(calendar.start, 'MMMM yyyy')}
+          {formatDate(calendar.start, 'MMMM yyyy', { locale })}
         </Button>
         <View
           style={{ display: 'grid', gridTemplateColumns: '16px 1fr', gap: 2 }}

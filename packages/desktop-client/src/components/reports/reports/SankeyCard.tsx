@@ -31,6 +31,7 @@ import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
 import { useLocale } from '#hooks/useLocale';
 import { useResizeObserver } from '#hooks/useResizeObserver';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 type SankeyCardProps = {
   widgetId: string;
@@ -182,7 +183,7 @@ export function SankeyCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={meta?.name || t('Sankey')}
+              name={translateWidgetName(meta?.name, t, t('Sankey'))}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
@@ -14,6 +14,7 @@ import { useDispatch } from '#redux';
 import { Setting } from './UI';
 
 export function EncryptionSettings() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const serverURL = useServerURL();
   const [encryptKeyId] = useMetadataPref('encryptKeyId');
@@ -60,7 +61,7 @@ export function EncryptionSettings() {
     <Setting
       primaryAction={
         <Button isDisabled>
-          <Trans>Enable encryption</Trans>
+          {t('Enable encryption')}
         </Button>
       }
     >
@@ -92,7 +93,7 @@ export function EncryptionSettings() {
             )
           }
         >
-          <Trans>Enable encryption</Trans>
+          {t('Enable encryption')}
         </Button>
       }
     >
@@ -117,22 +118,21 @@ export function EncryptionSettings() {
     <Setting
       primaryAction={
         <Button isDisabled>
-          <Trans>Enable encryption</Trans>
+          {t('Enable encryption')}
         </Button>
       }
     >
       <Text>
-        <Trans>
-          <strong>End-to-end encryption</strong> is not available when running
-          without a server. Budget files are always kept unencrypted locally,
-          and encryption is only applied when sending data to a server.
-        </Trans>{' '}
+        <strong>{t('End-to-end encryption')}</strong>
+        {t(
+          ' is not available when running without a server. Budget files are always kept unencrypted locally, and encryption is only applied when sending data to a server.',
+        )}{' '}
         <Link
           variant="external"
           to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
           linkColor="purple"
         >
-          <Trans>Learn more</Trans>
+          {t('Learn more')}
         </Link>
       </Text>
     </Setting>

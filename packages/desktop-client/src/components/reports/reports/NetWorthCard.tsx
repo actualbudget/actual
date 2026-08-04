@@ -26,6 +26,7 @@ import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 type NetWorthCardProps = {
   widgetId: string;
@@ -114,7 +115,7 @@ export function NetWorthCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={meta?.name || t('Net Worth')}
+              name={translateWidgetName(meta?.name, t, t('Net Worth'))}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({

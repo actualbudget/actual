@@ -40,6 +40,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 // Month-shaped so the range means the whole current month (the query clamps
 // to today); day-shaped values here would slide by days instead.
@@ -223,7 +224,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     );
   }
 
-  const title = widget?.meta?.name || t('Cash Flow');
+  const title = translateWidgetName(widget?.meta?.name, t, t('Cash Flow'));
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {
       throw new Error('No widget that could be saved.');

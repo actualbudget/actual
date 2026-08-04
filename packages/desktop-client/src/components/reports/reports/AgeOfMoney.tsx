@@ -47,6 +47,7 @@ import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 import { getAgeColor } from './AgeOfMoneyCard';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 export function AgeOfMoney() {
   const params = useParams();
@@ -227,7 +228,7 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
-  const title = widget?.meta?.name || t('Age of Money');
+  const title = translateWidgetName(widget?.meta?.name, t, t('Age of Money'));
   const onSaveWidgetName = useCallback(
     async (newName: string) => {
       if (!widget) {

@@ -46,6 +46,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 export function NetWorth() {
   const params = useParams();
@@ -264,7 +265,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
-  const title = widget?.meta?.name || t('Net Worth');
+  const title = translateWidgetName(widget?.meta?.name, t, t('Net Worth'));
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {
       throw new Error('No widget that could be saved.');

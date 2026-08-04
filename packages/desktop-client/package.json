@@ -70,6 +70,7 @@
     "#components/reports/reports/monte-carlo/useResolvedMonteCarloConfig": "./src/components/reports/reports/monte-carlo/useResolvedMonteCarloConfig.ts",
     "#components/reports/setSessionReport": "./src/components/reports/setSessionReport.ts",
     "#components/reports/spendingAverageRange": "./src/components/reports/spendingAverageRange.ts",
+    "#components/reports/translateWidgetName": "./src/components/reports/translateWidgetName.ts",
     "#components/reports/spreadsheets/cash-flow-spreadsheet": "./src/components/reports/spreadsheets/cash-flow-spreadsheet.tsx",
     "#components/reports/spreadsheets/*": "./src/components/reports/spreadsheets/*.ts",
     "#components/reports/useDashboardWidgetCopyMenu": "./src/components/reports/useDashboardWidgetCopyMenu.ts",

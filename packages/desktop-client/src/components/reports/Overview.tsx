@@ -24,6 +24,7 @@ import type {
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 import { useAccounts } from '#hooks/useAccounts';
 import {
   useDashboardPages,
@@ -486,7 +487,8 @@ export function Overview({ dashboard }: OverviewProps) {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  <Trans>Reports</Trans>: {dashboard.name}
+                  <Trans>Reports</Trans>:{' '}
+                  {translateWidgetName(dashboard.name, t, dashboard.name)}
                 </View>
               }
             />

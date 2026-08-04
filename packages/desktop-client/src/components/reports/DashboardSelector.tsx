@@ -9,6 +9,7 @@ import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 import type { DashboardPageEntity } from '@actual-app/core/types/models';
 
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 import { useNavigate } from '#hooks/useNavigate';
 import { useCreateDashboardPageMutation } from '#reports/mutations';
 
@@ -70,7 +71,11 @@ export function DashboardSelector({
             textAlign: 'center',
           }}
         >
-          {currentDashboard.name}
+          {translateWidgetName(
+            currentDashboard.name,
+            t,
+            currentDashboard.name,
+          )}
         </View>
         <SvgExpandArrow
           width={7}
@@ -105,7 +110,7 @@ export function DashboardSelector({
               items={[
                 ...dashboards.map(dashboard => ({
                   name: dashboard.id,
-                  text: dashboard.name,
+                  text: translateWidgetName(dashboard.name, t, dashboard.name),
                 })),
                 Menu.line,
                 {

@@ -9,6 +9,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { DashboardPageEntity } from '@actual-app/core/types/models';
 
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 import { useRenameDashboardPageMutation } from '#reports/mutations';
 
 type DashboardHeaderProps = {
@@ -18,6 +19,7 @@ type DashboardHeaderProps = {
 export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
   const { t } = useTranslation();
   const [editingName, setEditingName] = useState(false);
+  const displayName = translateWidgetName(dashboard.name, t, dashboard.name);
 
   const renameDashboardPageMutation = useRenameDashboardPageMutation();
 
@@ -105,7 +107,7 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
               minWidth: 0,
             }}
           >
-            {dashboard.name}
+            {displayName}
           </View>
           <Button
             variant="bare"

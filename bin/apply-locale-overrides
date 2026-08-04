@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Apply fork locale overrides on top of packages/desktop-client/locale/
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+LOCALE="$ROOT/packages/desktop-client/locale"
+OVERRIDES="$ROOT/packages/desktop-client/locale-overrides"
+
+if [[ ! -d "$LOCALE" ]]; then
+  echo "locale/ missing — cloning official translations..."
+  git clone --depth 1 https://github.com/actualbudget/translations "$LOCALE"
+fi
+
+shopt -s nullglob
+for f in "$OVERRIDES"/*.json; do
+  name="$(basename "$f")"
+  cp "$f" "$LOCALE/$name"
+  echo "Applied override: $name"
+done
+
+# Quick coverage report for zh-Hans
+node -e '
+const fs = require("fs");
+const path = require("path");
+const locale = process.argv[1];
+const en = JSON.parse(fs.readFileSync(path.join(locale, "en.json"), "utf8"));
+const zhPath = path.join(locale, "zh-Hans.json");
+if (!fs.existsSync(zhPath)) { console.log("zh-Hans.json not present"); process.exit(0); }
+const zh = JSON.parse(fs.readFileSync(zhPath, "utf8"));
+const enN = Object.keys(en).length;
+const zhN = Object.keys(zh).length;
+const missing = Object.keys(en).filter(k => !(k in zh)).length;
+console.log(`zh-Hans: ${zhN}/${enN} keys (${((zhN/enN)*100).toFixed(1)}%), missing ${missing}`);
+' "$LOCALE"

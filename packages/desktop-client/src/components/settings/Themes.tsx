@@ -64,7 +64,9 @@ export function ThemeSettings() {
 
   const buildOptions = useCallback(() => {
     const options: Array<readonly [string, string] | typeof Menu.line> = [
-      ...themeOptions,
+      ...themeOptions.map(
+        ([key, name]) => [key, t(name)] as [string, string],
+      ),
     ];
 
     if (theme !== 'auto' && installedCustomLightTheme) {
@@ -96,7 +98,9 @@ export function ThemeSettings() {
 
   const buildDarkOptions = useCallback(() => {
     const options: Array<readonly [string, string] | typeof Menu.line> = [
-      ...darkThemeOptions,
+      ...darkThemeOptions.map(
+        ([key, name]) => [key, t(name)] as [string, string],
+      ),
     ];
     if (installedCustomDarkTheme) {
       options.push([

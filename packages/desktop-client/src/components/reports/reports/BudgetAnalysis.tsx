@@ -45,6 +45,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+import { translateWidgetName } from '#components/reports/translateWidgetName';
 
 type OptionsButtonProps = {
   graphType: 'Line' | 'Bar';
@@ -336,7 +337,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const onExportCsv = () => {
     if (!data) return;
     const csv = buildBudgetAnalysisCsv(data.intervalData);
-    const reportName = (widget?.meta?.name || t('Budget Analysis'))
+    const reportName = translateWidgetName(widget?.meta?.name, t, t('Budget Analysis'))
       .replace(/[^a-z0-9]/gi, '-')
       .toLowerCase();
     void window.Actual.saveFile(
@@ -353,7 +354,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const latestInterval = data.intervalData[data.intervalData.length - 1];
   const endingBalance = latestInterval?.balance ?? 0;
 
-  const title = widget?.meta?.name || t('Budget Analysis');
+  const title = translateWidgetName(widget?.meta?.name, t, t('Budget Analysis'));
 
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {

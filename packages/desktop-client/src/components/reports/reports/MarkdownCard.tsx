@@ -14,6 +14,7 @@ import remarkGfm from 'remark-gfm';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from '#components/reports/constants';
 import { ReportCard } from '#components/reports/ReportCard';
+import { translateDashboardMarkdownContent } from '#components/reports/translateWidgetName';
 import { useContextMenu } from '#hooks/useContextMenu';
 import {
   markdownBaseStyles,
@@ -47,6 +48,9 @@ export function MarkdownCard({
   onMetaChange,
 }: MarkdownCardProps) {
   const { t } = useTranslation();
+  // Display-layer only: default English seed → locale; custom content unchanged.
+  // Editor still uses stored meta.content so saves do not rewrite seed text.
+  const displayContent = translateDashboardMarkdownContent(meta.content, t);
 
   const [isVisibleTextArea, setIsVisibleTextArea] = useState(false);
 
@@ -147,7 +151,7 @@ export function MarkdownCard({
                 ],
               ]}
             >
-              {meta.content}
+              {displayContent}
             </ReactMarkdown>
           </Text>
         )}
