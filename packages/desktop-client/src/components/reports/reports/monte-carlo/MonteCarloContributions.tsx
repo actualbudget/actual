@@ -12,7 +12,6 @@ import { View } from '@actual-app/components/view';
 import { v4 as uuidv4 } from 'uuid';
 
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
-import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import {
   createMonteCarloContribution,
@@ -95,32 +94,6 @@ export function MonteCarloContributions({
 
   return (
     <View style={{ gap: 10 }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 4,
-        }}
-      >
-        <Text style={{ color: theme.pageText }}>
-          <Trans>
-            Money you add to a pot each year, in today&apos;s money - for
-            example pension or savings deposits while you&apos;re still earning.
-          </Trans>
-        </Text>
-        <MonteCarloHelpTooltip>
-          <Trans>
-            Each contribution is paid in at the start of every year in its age
-            window (both ages inclusive), so it earns that year&apos;s return.
-            Leave the ages blank for &ldquo;now&rdquo; and &ldquo;the end of the
-            plan&rdquo;. Tick Adjust by inflation to keep the amount&apos;s
-            buying power constant; untick it for a fixed amount that shrinks in
-            real terms. A pot can receive any number of contributions - even one
-            that is still locked for withdrawals.
-          </Trans>
-        </MonteCarloHelpTooltip>
-      </View>
-
       <View style={{ ...styles.tableContainer, flex: 'unset' }}>
         <TableHeader>
           <Field width="flex" style={{ minWidth: 150 }}>

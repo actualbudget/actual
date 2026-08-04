@@ -157,25 +157,42 @@ export function MonteCarloConfiguration({
         </ModeButton>
       </View>
 
-      <Text style={{ color: theme.pageText }}>
-        {activeTab === 'plan'
-          ? t(
-              'Who this plan is for and how the simulation generates market returns.',
-            )
-          : activeTab === 'pots'
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+        <Text style={{ color: theme.pageText }}>
+          {activeTab === 'plan'
             ? t(
-                'The invested accounts your plan draws from - each with its own balance, allocation, and return assumptions. Drag rows to reorder pots; expand a row for access, tax and fee settings.',
+                'Who this plan is for and how the simulation generates market returns.',
               )
-            : activeTab === 'contributions'
-              ? t('Money you pay into your pots each year while the plan runs.')
-              : activeTab === 'withdrawals'
+            : activeTab === 'pots'
+              ? t(
+                  'The invested accounts your plan draws from - each with its own balance, allocation, and return assumptions. Drag rows to reorder pots; expand a row for access, tax and fee settings.',
+                )
+              : activeTab === 'contributions'
                 ? t(
-                    'How much you take out each year, and optional rules that adjust it as markets move.',
+                    "Money you add to your pots each year, in today's money - for example pension or savings deposits while you're still earning.",
                   )
-                : t(
-                    'How withdrawals are taxed - your spending is what you keep after tax.',
-                  )}
-      </Text>
+                : activeTab === 'withdrawals'
+                  ? t(
+                      'How much you take out each year, and optional rules that adjust it as markets move.',
+                    )
+                  : t(
+                      'How withdrawals are taxed - your spending is what you keep after tax.',
+                    )}
+        </Text>
+        {activeTab === 'contributions' && (
+          <MonteCarloHelpTooltip>
+            <Trans>
+              Each contribution is paid in at the start of every year in its age
+              window (both ages inclusive), so it earns that year&apos;s return.
+              Leave the ages blank for &ldquo;now&rdquo; and &ldquo;the end of
+              the plan&rdquo;. Tick Adjust by inflation to keep the
+              amount&apos;s buying power constant; untick it for a fixed amount
+              that shrinks in real terms. A pot can receive any number of
+              contributions - even one that is still locked for withdrawals.
+            </Trans>
+          </MonteCarloHelpTooltip>
+        )}
+      </View>
 
       {/* Plan details */}
       {activeTab === 'plan' && (
