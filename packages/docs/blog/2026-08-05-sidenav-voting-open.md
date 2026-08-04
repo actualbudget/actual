@@ -8,7 +8,7 @@ hide_table_of_contents: false
 authors: MatissJanis
 ---
 
-The submissions are in, the finalists are picked, and now it's your turn: **voting for the [sidenav design competition](./2026-07-27-design-competition-sidenav.md) is officially open.**
+The submissions are in and the finalists are picked. Now it's your turn: **voting for the [sidenav design competition](./2026-07-27-design-competition-sidenav.md) submissions is officially open.**
 
 **🗳️ [Vote for your favorite designs here](https://github.com/actualbudget/actual/issues/8642)**
 
@@ -16,9 +16,11 @@ The submissions are in, the finalists are picked, and now it's your turn: **voti
 
 ## Thank You to Everyone Who Submitted
 
-First things first: a huge thank you to everyone who sent in a design. The range of ideas, from careful refinements to complete rethinks, blew us away. Picking the finalists was genuinely hard, and that's the best problem to have.
+First things first: a huge thank you to everyone who sent in a design! The range of ideas, from careful refinements to complete rethinks, blew us away. Picking the finalists was genuinely hard, and that's the best problem to have.
 
 Whether or not your design made the shortlist, thank you for putting your time and creativity into Actual. This competition only worked because you showed up for it.
+
+We will be getting in touch with the finalists shortly to send out the free Actual SWAG!
 
 ## How to Vote
 
@@ -30,6 +32,6 @@ Want to talk about the designs? Join the discussion on [GitHub](https://github.c
 
 ## A Word About This Community
 
-Moments like this remind me why I love working on Actual. This project is built by its community, and watching that community grow, seeing the passion people pour into everything from code to designs to helping each other out on [Discord](https://discord.gg/pRYNYr4W5A), is the most rewarding part of it all.
+Moments like this remind me why I love volunteering my time on Actual. This project is built by its community, for its community. Watching it grow, seeing the passion people pour into everything from code to designs to helping each other out on [Discord](https://discord.gg/pRYNYr4W5A), is the most rewarding part of it all.
 
-Thank you for being part of it. Now go vote!
+Thank you for being part of it.
