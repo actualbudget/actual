@@ -10,7 +10,7 @@ authors: MatissJanis
 
 The submissions are in, the finalists are picked, and now it's your turn: **voting for the [sidenav design competition](./2026-07-27-design-competition-sidenav.md) is officially open.**
 
-**🗳️ [Vote for your favorite designs here](https://TODO-INSERT-VOTING-LINK)**
+**🗳️ [Vote for your favorite designs here](https://github.com/actualbudget/actual/issues/8642)**
 
 <!--truncate-->
 
@@ -24,7 +24,9 @@ Whether or not your design made the shortlist, thank you for putting your time a
 
 Head over to the voting page and add a 👍 reaction to the designs you like best. You can vote for as many as you want. Voting runs for one week, and the top-voted design gets built into the app.
 
-**🗳️ [Vote here](https://TODO-INSERT-VOTING-LINK)**
+**🗳️ [Vote here](https://github.com/actualbudget/actual/issues/8642)**
+
+Want to talk about the designs? Join the discussion on [GitHub](https://github.com/actualbudget/actual/issues/8643) or in the [#project-design-system channel on Discord](https://discord.com/channels/937901803608096828/1345447799319429160).
 
 ## A Word About This Community
 
