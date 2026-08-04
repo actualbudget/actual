@@ -27,6 +27,7 @@ describe('getLocale', () => {
     expect(getLocale(null)).toBe(enUS);
     expect(getLocale(undefined)).toBe(enUS);
     expect(getLocale('not-a-locale')).toBe(enUS);
+    expect(getLocale('fil')).toBe(enUS);
     // @ts-expect-error intentional invalid type
     expect(getLocale(123)).toBe(enUS);
   });

@@ -335,7 +335,7 @@ type CalendarCardInnerProps = {
   isEditing?: boolean;
   format: (value: unknown, type: FormatType) => string;
 };
-function CalendarCardInner({
+export function CalendarCardInner({
   calendar,
   firstDayOfWeekIdx,
   setMonthNameFormats,
@@ -399,6 +399,10 @@ function CalendarCardInner({
   );
 
   const monthNameResizeRef = useResizeObserver(debouncedResizeCallback);
+
+  useEffect(() => {
+    debouncedResizeCallback();
+  }, [debouncedResizeCallback, locale]);
 
   useEffect(() => {
     const toCancel = debouncedResizeCallback;

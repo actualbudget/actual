@@ -50,11 +50,12 @@ export function getLocale(
 
   // 2) BCP-47 segments → date-fns keys (pt-BR → ptBR, en-GB → enGB)
   // date-fns uses language lowercase + region uppercase (not title case).
-  const stripped = language
+  const languageParts = language
     .trim()
     .replace(/_/g, '-')
     .split('-')
-    .filter(Boolean)
+    .filter(Boolean);
+  const stripped = languageParts
     .map((part, i) => (i === 0 ? part.toLowerCase() : part.toUpperCase()))
     .join('');
 
@@ -63,9 +64,9 @@ export function getLocale(
   }
 
   // 3) Two-letter language only (nb-NO → nb, de-AT → de)
-  const twoLetter = normalized.slice(0, 2);
-  if (twoLetter && twoLetter in locales) {
-    return locales[twoLetter];
+  const primaryLanguage = languageParts[0]?.toLowerCase();
+  if (primaryLanguage?.length === 2 && primaryLanguage in locales) {
+    return locales[primaryLanguage];
   }
 
   return locales.enUS;
