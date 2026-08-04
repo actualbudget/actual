@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 import { CloseAccountModal } from './close-account-modal';
@@ -244,21 +245,12 @@ export class AccountPage {
     transactionRow: Locator,
     transaction: TransactionEntry,
   ) {
-    if (transaction.debit) {
-      const debitCell = transactionRow.getByTestId('debit');
-      await debitCell.click();
-      const debitInput = debitCell.getByRole('textbox');
-      await this.selectInputText(debitInput);
-      await debitInput.pressSequentially(transaction.debit);
-      await this.page.keyboard.press('Tab');
-    }
-
-    if (transaction.credit) {
-      const creditCell = transactionRow.getByTestId('credit');
-      await creditCell.click();
-      const creditInput = creditCell.getByRole('textbox');
-      await this.selectInputText(creditInput);
-      await creditInput.pressSequentially(transaction.credit);
+    if (transaction.date) {
+      const dateCell = transactionRow.getByTestId('date');
+      await dateCell.click();
+      const dateInput = dateCell.getByRole('textbox');
+      await this.selectInputText(dateInput);
+      await dateInput.pressSequentially(transaction.date);
       await this.page.keyboard.press('Tab');
     }
 
@@ -277,16 +269,33 @@ export class AccountPage {
       const payeeInput = payeeCell.getByRole('textbox');
       await this.selectInputText(payeeInput);
       await payeeInput.pressSequentially(transaction.payee);
-      await this.page.keyboard.press('Tab');
-    }
 
-    if (transaction.notes) {
-      const notesCell = transactionRow.getByTestId('notes');
-      await notesCell.click();
-      const notesInput = notesCell.getByRole('combobox');
-      await this.selectInputText(notesInput);
-      await notesInput.pressSequentially(transaction.notes);
+      // The payee autocomplete filters asynchronously. Tabbing out before it
+      // has settled commits nothing, and the transaction saves with an empty
+      // payee -- no error, just a row with a blank payee cell. Wait for the
+      // dropdown to offer this exact name, either as an existing match or as
+      // the "create payee" action, before moving focus off the cell. Matching
+      // on the full name (not just the presence of a dropdown) is what proves
+      // the autocomplete has caught up with everything that was typed.
+      await expect(
+        this.page
+          .getByTestId(`${transaction.payee}-payee-item`)
+          .or(
+            this.page
+              .getByTestId('create-payee-button')
+              .filter({ hasText: transaction.payee }),
+          )
+          .first(),
+      ).toBeVisible();
+
       await this.page.keyboard.press('Tab');
+
+      // Tabbing out is what commits the selection, and that commit is itself
+      // async -- submitting the row before it lands is the other half of the
+      // same empty-payee bug. Confirm the cell actually holds the name.
+      // Scoped to .first() because selecting a payee can trigger a rule that
+      // splits the row, after which this locator matches the child rows too.
+      await expect(payeeCell.first()).toContainText(transaction.payee);
     }
 
     if (transaction.category) {
@@ -303,12 +312,30 @@ export class AccountPage {
       }
     }
 
-    if (transaction.date) {
-      const dateCell = transactionRow.getByTestId('date');
-      await dateCell.click();
-      const dateInput = dateCell.getByRole('textbox');
-      await this.selectInputText(dateInput);
-      await dateInput.pressSequentially(transaction.date);
+    if (transaction.notes) {
+      const notesCell = transactionRow.getByTestId('notes');
+      await notesCell.click();
+      const notesInput = notesCell.getByRole('combobox');
+      await this.selectInputText(notesInput);
+      await notesInput.pressSequentially(transaction.notes);
+      await this.page.keyboard.press('Tab');
+    }
+
+    if (transaction.debit) {
+      const debitCell = transactionRow.getByTestId('debit');
+      await debitCell.click();
+      const debitInput = debitCell.getByRole('textbox');
+      await this.selectInputText(debitInput);
+      await debitInput.pressSequentially(transaction.debit);
+      await this.page.keyboard.press('Tab');
+    }
+
+    if (transaction.credit) {
+      const creditCell = transactionRow.getByTestId('credit');
+      await creditCell.click();
+      const creditInput = creditCell.getByRole('textbox');
+      await this.selectInputText(creditInput);
+      await creditInput.pressSequentially(transaction.credit);
       await this.page.keyboard.press('Tab');
     }
   }

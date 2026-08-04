@@ -236,7 +236,12 @@ test.describe('Transaction lifecycle', () => {
     // observation (typing without this first click goes nowhere).
     await filterTooltip.locator.getByPlaceholder('nothing').click();
     await page.keyboard.type('FilterTestUniquePayee');
-    await page.keyboard.press('Enter');
+    const payeeOption = page
+      .getByTestId('FilterTestUniquePayee-payee-item')
+      .or(page.getByRole('option', { name: 'FilterTestUniquePayee' }))
+      .first();
+    await expect(payeeOption).toBeVisible();
+    await payeeOption.click();
     await filterTooltip.applyButton.click();
 
     await expect(
