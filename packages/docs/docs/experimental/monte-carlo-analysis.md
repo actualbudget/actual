@@ -83,7 +83,7 @@ The access age setting is what lets the report model the classic "bridge gap": r
 
 ![The Contributions tab](/img/experimental/monte-carlo-analysis/monte-carlo-contributions.png)
 
-If you're still earning, you can model the money you add to your pots each year - pension deposits, ISA or brokerage savings, anything that tops up a pot on a regular basis. Each contribution has:
+If you're still earning, you can model the money you add to your pots each year - pension deposits or brokerage savings, anything that tops up a pot on a regular basis. Each contribution has:
 
 - **Contribution name** - anything you like, such as "Pension contributions".
 - **Into pot** - the pot the money is paid into. A pot can receive any number of contributions, and contributions can go into a pot that is still locked for withdrawals - the access age only controls when money can come _out_.
