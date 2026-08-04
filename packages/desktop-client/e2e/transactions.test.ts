@@ -252,7 +252,7 @@ test.describe('Transactions', () => {
     });
 
     let transaction = accountPage.getEnteredTransaction();
-    await expect(transaction.category.locator('input')).toHaveValue('Transfer');
+    await expect(transaction.category).toContainText('Transfer');
     await expect(page).toMatchThemeScreenshots();
 
     const balanceBeforeTransaction =

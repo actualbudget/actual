@@ -81,7 +81,10 @@ export class AccountPage {
    */
   async enterSingleTransaction(transaction: TransactionEntry) {
     await this.addNewTransactionButton.click();
-    await this._fillTransactionFields(this.newTransactionRow, transaction);
+    await this._fillTransactionFields(
+      this.newTransactionRow.first(),
+      transaction,
+    );
   }
 
   /**
