@@ -341,6 +341,16 @@ export class AccountPage {
       await creditInput.pressSequentially(transaction.credit);
       await this.page.keyboard.press('Tab');
     }
+
+    if (
+      !transaction.category &&
+      (await transactionRow
+        .getByTestId('category')
+        .textContent()
+        .catch(() => '')) === 'Transfer'
+    ) {
+      await transactionRow.getByTestId('category').click();
+    }
   }
 
   async selectInputText(input: Locator) {
