@@ -17,8 +17,14 @@ import type {
 } from '@actual-app/core/types/models';
 import { HyperFormula } from 'hyperformula';
 
-import { getLiveRange } from '#components/reports/getLiveRange';
-import { calculateTimeRange } from '#components/reports/reportRanges';
+import {
+  normalizeQueryTimeFrameEnd,
+  normalizeQueryTimeFrameStart,
+} from '#components/formula/queryTimeFrame';
+import {
+  asMonthSlidingTimeFrame,
+  calculateTimeRange,
+} from '#components/reports/reportRanges';
 import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
 
 import { useGlobalPref } from './useGlobalPref';
@@ -29,7 +35,7 @@ bootstrapHyperFormula();
 type QueryConfig = {
   conditions?: RuleConditionEntity[];
   conditionsOp?: 'and' | 'or';
-  timeFrame?: TimeFrame;
+  timeFrame?: Partial<TimeFrame>;
 };
 
 type QueriesMap = Record<string, QueryConfig>;
@@ -307,43 +313,7 @@ async function prefetchBudgetQueries(
   }
 }
 
-// Helper function to convert timeFrame mode to condition string for getLiveRange
-function timeFrameModeToCondition(mode: TimeFrame['mode']): string | null {
-  // Map timeFrame modes to ReportOptions condition strings
-  switch (mode) {
-    case 'full':
-      return 'All time';
-    case 'lastMonth':
-      return 'Last month';
-    case 'lastYear':
-      return 'Last year';
-    case 'yearToDate':
-      return 'Year to date';
-    case 'priorYearToDate':
-      return 'Prior year to date';
-    case 'sliding-window':
-      // sliding-window requires actual start/end dates, not a condition
-      return null;
-    case 'static':
-      // static mode uses manually set start/end dates, not a condition
-      return null;
-    default:
-      return null;
-  }
-}
-
-function isMonthOnlyDate(s: string) {
-  // YYYY-MM
-  return s.includes('-') && s.split('-').length === 2;
-}
-
-function toMonth(dateOrMonth: string) {
-  return isMonthOnlyDate(dateOrMonth)
-    ? dateOrMonth
-    : monthUtils.monthFromDate(dateOrMonth);
-}
-
-async function buildFilteredTransactionsQuery(
+export async function buildFilteredTransactionsQuery(
   config: QueryConfig,
 ): Promise<Query> {
   const conditions = config.conditions || [];
@@ -362,75 +332,15 @@ async function buildFilteredTransactionsQuery(
 
   // Add date range filter if provided
   if (timeFrame && timeFrame.mode) {
-    let startDate: string | undefined;
-    let endDate: string | undefined;
+    const [calculatedStart, calculatedEnd] = calculateTimeRange(
+      asMonthSlidingTimeFrame(timeFrame),
+    );
+    const startDate = normalizeQueryTimeFrameStart(calculatedStart);
+    const endDate = normalizeQueryTimeFrameEnd(calculatedEnd);
 
-    if (
-      (timeFrame.mode === 'sliding-window' || timeFrame.mode === 'static') &&
-      timeFrame.start &&
-      timeFrame.end
-    ) {
-      if (timeFrame.mode === 'sliding-window') {
-        // Sliding-window should move with time. Interpret start/end as a window length
-        // (in months) and always anchor the end to the current month/day.
-        const startMonth = toMonth(timeFrame.start);
-        const endMonth = toMonth(timeFrame.end);
-        const offset = monthUtils.differenceInCalendarMonths(
-          endMonth,
-          startMonth,
-        );
-
-        const liveEndMonth = monthUtils.currentMonth();
-        const liveStartMonth = monthUtils.subMonths(liveEndMonth, offset);
-
-        startDate = monthUtils.firstDayOfMonth(liveStartMonth);
-        endDate = monthUtils.currentDay();
-      } else {
-        // Static mode: use the actual stored start/end dates.
-        // Convert month format (YYYY-MM) to full date format (YYYY-MM-DD) if needed
-        startDate = isMonthOnlyDate(timeFrame.start)
-          ? timeFrame.start + '-01'
-          : timeFrame.start;
-        endDate = isMonthOnlyDate(timeFrame.end)
-          ? monthUtils.getMonthEnd(timeFrame.end + '-01')
-          : timeFrame.end;
-      }
-    } else {
-      // For other modes, use getLiveRange with the appropriate condition
-      const condition = timeFrameModeToCondition(timeFrame.mode);
-      if (condition) {
-        // Get earliest and latest transactions for getLiveRange
-        const earliestTransaction = await send('get-earliest-transaction');
-        const latestTransaction = await send('get-latest-transaction');
-
-        const earliestDate = earliestTransaction
-          ? earliestTransaction.date
-          : monthUtils.currentDay();
-        const latestDate = latestTransaction
-          ? latestTransaction.date
-          : monthUtils.currentDay();
-
-        const [calculatedStart, calculatedEnd] = getLiveRange(
-          condition,
-          earliestDate,
-          latestDate,
-          true, // includeCurrentInterval
-        );
-
-        startDate = calculatedStart;
-        endDate = calculatedEnd;
-      } else {
-        // No valid condition found, skip date filtering entirely
-        // Continue without adding date filter
-      }
-    }
-
-    // Apply the date filter only if we have valid dates
-    if (startDate && endDate) {
-      transQuery = transQuery.filter({
-        $and: [{ date: { $gte: startDate } }, { date: { $lte: endDate } }],
-      });
-    }
+    transQuery = transQuery.filter({
+      $and: [{ date: { $gte: startDate } }, { date: { $lte: endDate } }],
+    });
   }
 
   // Add user-defined filters
@@ -619,7 +529,9 @@ async function extractQueryTimeframeStart(
     return monthUtils.currentMonth();
   }
 
-  const [startMonth] = calculateTimeRange(queryConfig.timeFrame);
+  const [startMonth] = calculateTimeRange(
+    asMonthSlidingTimeFrame(queryConfig.timeFrame),
+  );
   return startMonth;
 }
 
@@ -636,7 +548,9 @@ async function extractQueryTimeframeEnd(
     return monthUtils.currentMonth();
   }
 
-  const [, endMonth] = calculateTimeRange(queryConfig.timeFrame);
+  const [, endMonth] = calculateTimeRange(
+    asMonthSlidingTimeFrame(queryConfig.timeFrame),
+  );
   return endMonth;
 }
 

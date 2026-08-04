@@ -1,14 +1,13 @@
-import { useMemo } from 'react';
-
 import { getLocale } from '@actual-app/core/shared/locale';
 
 import { useGlobalPref } from './useGlobalPref';
 
-export function useLocale() {
+/** The user's language code (BCP 47), falling back to the browser's. */
+export function useLanguage() {
   const [language] = useGlobalPref('language');
-  const locale = useMemo(
-    () => getLocale(language ? language : (navigator.language ?? 'en-US')),
-    [language],
-  );
-  return locale;
+  return language || navigator.language || 'en-US';
+}
+
+export function useLocale() {
+  return getLocale(useLanguage());
 }

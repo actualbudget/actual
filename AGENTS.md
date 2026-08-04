@@ -286,7 +286,7 @@ wrapping isn't possible).
 
 **React Patterns:**
 
-- The project uses **React Compiler** (`babel-plugin-react-compiler`) in the desktop-client. The compiler auto-memoizes component bodies, so you can omit manual `useCallback`, `useMemo`, and `React.memo` when adding or refactoring code; prefer inline callbacks and values unless a stable identity is required by a non-compiled dependency.
+- The project uses **React Compiler** (`babel-plugin-react-compiler`) in all app packages with React code (desktop-client, component-library). The compiler auto-memoizes component bodies, so you can omit manual `useCallback`, `useMemo`, and `React.memo` when adding or refactoring code; prefer inline callbacks and values unless a stable identity is required by a non-compiled dependency.
 - Avoid unstable nested components
 
 **JSX Style:**
@@ -349,6 +349,10 @@ describe('ComponentName', () => {
 - `/.nano-staged.json` - pre-commit format/lint config (run via Husky)
 - `/.claude/settings.json`, `/.codex/config.toml`, `/.cursor/hooks.json` - agent
   hook wiring; shared scripts live in `/scripts/agent-hooks/`
+- `/.agents/skills/` - symlink mirror of `/.claude/skills/` so Codex-based
+  harnesses (Codex CLI, IDE extension, ChatGPT desktop app) discover the same
+  skills; when adding a skill, create it in `/.claude/skills/` and add a
+  matching relative symlink here
 - `/tsconfig.json` - Root TypeScript configuration
 - `/.cursorignore`, `/.gitignore` - Ignored files
 - `/yarn.lock` - Dependency lockfile (Yarn 4)
@@ -586,7 +590,7 @@ When running the app for manual testing or demos, use **"View demo"** on the ini
 
 ### Gotchas
 
-- The `engines` field requires **Node.js >=22** and **Yarn ^4.9.1**. The `.nvmrc` specifies `v22/*`.
+- The `engines` field requires **Node.js >=22** and **Yarn ^4.9.1**. The `.nvmrc` specifies `v24.18.1`.
 - Pre-commit hook runs `nano-staged` (oxfmt + oxlint, configured in `.nano-staged.json`) via Husky. Run `yarn prepare` once after install to set up hooks.
 - Lage caches test results in `.lage/`. If tests behave unexpectedly, clear with `rm -rf .lage`.
 - Native modules (`better-sqlite3`, `bcrypt`) require build tools (`gcc`, `make`, `python3`). These are pre-installed in the Cloud VM.

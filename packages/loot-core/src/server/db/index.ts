@@ -116,19 +116,19 @@ export async function loadClock() {
 // Functions
 export function runQuery(
   sql: string | Statement,
-  params?: Array<string | number>,
+  params?: sqlite.SqlParam[],
   fetchAll?: false,
 ): { changes: unknown };
 
 export function runQuery<T>(
   sql: string | Statement,
-  params: Array<string | number> | undefined,
+  params: sqlite.SqlParam[] | undefined,
   fetchAll: true,
 ): T[];
 
 export function runQuery<T>(
   sql: string | Statement,
-  params: (string | number)[],
+  params: sqlite.SqlParam[],
   fetchAll: boolean,
 ) {
   if (fetchAll) {
@@ -171,18 +171,18 @@ export function asyncTransaction(fn: () => Promise<void>) {
 // This function is marked as async because `runQuery` is no longer
 // async. We return a promise here until we've audited all the code to
 // make sure nothing calls `.then` on this.
-export async function all<T>(sql: string, params?: (string | number)[]) {
+export async function all<T>(sql: string, params?: sqlite.SqlParam[]) {
   return runQuery<T>(sql, params, true);
 }
 
-export async function first<T>(sql, params?: (string | number)[]) {
+export async function first<T>(sql, params?: sqlite.SqlParam[]) {
   const arr = runQuery<T>(sql, params, true);
   return arr.length === 0 ? null : arr[0];
 }
 
 // The underlying sql system is now sync, but we can't update `first` yet
 // without auditing all uses of it
-export function firstSync<T>(sql, params?: (string | number)[]) {
+export function firstSync<T>(sql, params?: sqlite.SqlParam[]) {
   const arr = runQuery<T>(sql, params, true);
   return arr.length === 0 ? null : arr[0];
 }
@@ -190,7 +190,7 @@ export function firstSync<T>(sql, params?: (string | number)[]) {
 // This function is marked as async because `runQuery` is no longer
 // async. We return a promise here until we've audited all the code to
 // make sure nothing calls `.then` on this.
-export async function run(sql, params?: (string | number)[]) {
+export async function run(sql, params?: sqlite.SqlParam[]) {
   return runQuery(sql, params);
 }
 
@@ -893,6 +893,43 @@ export async function moveTransaction(
     if (!isChild) {
       await moveSubtransactions(id, newSortOrder, accountId, dateInt);
     }
+  });
+}
+
+/**
+ * Move a schedule to a new position among all non-tombstoned schedules.
+ * Uses the same midpoint/shove algorithm as transaction reordering.
+ *
+ * @param id - The ID of the schedule to move
+ * @param targetId - The ID of the schedule to place AFTER, or null to place at top
+ */
+export async function moveSchedule(id: string, targetId: string | null) {
+  await batchMessages(async () => {
+    const schedule = await first<{ id: string }>(
+      'SELECT id FROM schedules WHERE id = ? AND tombstone = 0',
+      [id],
+    );
+    if (!schedule) {
+      throw new Error(`Schedule not found: ${id}`);
+    }
+
+    const schedules = await all<{ id: string; sort_order: number }>(
+      `SELECT id, sort_order FROM schedules
+       WHERE tombstone = 0
+       ORDER BY sort_order DESC, id`,
+    );
+
+    const { sort_order: newSortOrder, updates } = shoveSortOrdersDescending(
+      schedules,
+      targetId,
+      id,
+    );
+
+    for (const info of updates) {
+      await update('schedules', info);
+    }
+
+    await update('schedules', { id, sort_order: newSortOrder });
   });
 }
 

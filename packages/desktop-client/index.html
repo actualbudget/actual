@@ -66,6 +66,15 @@
         outline-color: #2b8fed;
       }
 
+      /* recharts makes chart surfaces and layers focusable for keyboard
+         navigation; suppress the focus ring it would draw on click */
+      .recharts-wrapper:focus,
+      .recharts-wrapper :focus,
+      .recharts-surface:focus,
+      .recharts-surface :focus {
+        outline: none;
+      }
+
       input,
       textarea {
         font-size: 1em;

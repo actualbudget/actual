@@ -83,7 +83,7 @@
       "error",
       {
         "prefer": "type-imports",
-        "fixStyle": "inline-type-imports"
+        "fixStyle": "separate-type-imports"
       }
     ],
     "typescript/no-implied-eval": "error",

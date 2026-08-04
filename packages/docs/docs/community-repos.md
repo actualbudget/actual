@@ -31,8 +31,10 @@ tracking, loyalty card paybacks, prepaid cards, etc.
 
 ## Budget Migration
 
-Actual currently has official support for migrating budgets from YNAB4 and nYNAB. The following are available for migrating from other budget apps.
+Actual currently has official support for migrating budgets from YNAB4 and nYNAB. The following are available for migrating from YNAB or other budget apps.
 
+- **YNAB Export** - https://github.com/StephenBrown2/ynab-export
+  - _A terminal tool that exports nYNAB budget data as JSON for import into Actual._
 - **MoneyMoney** - https://github.com/NikxDa/actual-moneymoney
 - **Quicken on Mac** - https://github.com/slimslickner/quicken-mac-to-actual-budget
 

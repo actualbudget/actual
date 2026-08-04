@@ -209,10 +209,12 @@ export function ManagementApp() {
         </View>
       )}
 
-      <Routes>
-        <Route path="/config-server" element={null} />
-        <Route path="/*" element={<ServerURL />} />
-      </Routes>
+      {managerHasInitialized && !isLoading && (
+        <Routes>
+          <Route path="/config-server" element={null} />
+          <Route path="/*" element={<ServerURL />} />
+        </Routes>
+      )}
       <Version />
     </View>
   );

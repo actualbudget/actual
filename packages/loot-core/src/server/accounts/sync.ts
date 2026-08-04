@@ -278,6 +278,7 @@ async function downloadSimpleFinTransactions(
 async function downloadPluggyAiTransactions(
   acctId: AccountEntity['id'],
   since: string,
+  fileId?: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -292,6 +293,7 @@ async function downloadPluggyAiTransactions(
     },
     {
       'X-ACTUAL-TOKEN': userToken,
+      ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
     },
     60000,
   );
@@ -508,6 +510,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     ? mappingsFromString(customMappingsRaw)
     : defaultMappings;
 
+  const categoryIds = new Set((await db.getCategories()).map(c => c.id));
   const normalized = [];
   for (const trans of transactions) {
     trans.cleared = Boolean(trans.booked);
@@ -558,7 +561,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         account: trans.account,
         date,
         notes: importNotes && notes ? notes.trim().replace(/#/g, '##') : null,
-        category: trans.category ?? null,
+        category: categoryIds.has(trans.category) ? trans.category : null,
         imported_id,
         imported_payee: trans.imported_payee,
         cleared: trans.cleared,
@@ -1172,6 +1175,7 @@ export async function syncAccount(
   bankId: string,
   customStartingDate?: string,
   customStartingBalance?: number,
+  fileId?: string,
 ) {
   const acctRow = await db.select('accounts', id);
 
@@ -1184,7 +1188,11 @@ export async function syncAccount(
   if (acctRow.account_sync_source === 'simpleFin') {
     download = await downloadSimpleFinTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'pluggyai') {
-    download = await downloadPluggyAiTransactions(acctId, syncStartDate);
+    download = await downloadPluggyAiTransactions(
+      acctId,
+      syncStartDate,
+      fileId,
+    );
   } else if (acctRow.account_sync_source === 'akahu') {
     download = await downloadAkahuTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'goCardless') {

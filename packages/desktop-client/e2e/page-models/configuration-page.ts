@@ -16,7 +16,7 @@ export class ConfigurationPage {
 
   async createTestFile() {
     await this.page
-      .getByRole('button', { name: 'Create test file', exact: true })
+      .getByRole('button', { name: 'Try the demo', exact: true })
       .click();
     const budgetPage = new BudgetPage(this.page);
     // Wait for the budget page to be fully mounted before returning so
@@ -26,10 +26,16 @@ export class ConfigurationPage {
   }
 
   async createDemoFile() {
-    await this.page.getByRole('button', { name: 'View demo' }).click();
+    await this.page.getByRole('button', { name: 'Try the demo' }).click();
     const budgetPage = new BudgetPage(this.page);
     await budgetPage.waitFor();
     return budgetPage;
+  }
+
+  async clickOnConnectServer() {
+    await this.page
+      .getByRole('button', { name: 'Connect to a sync server' })
+      .click();
   }
 
   async clickOnNoServer() {
@@ -43,7 +49,7 @@ export class ConfigurationPage {
   }
 
   async startFresh() {
-    await this.page.getByRole('button', { name: 'Start fresh' }).click();
+    await this.page.getByRole('button', { name: 'Start budgeting' }).click();
 
     const accountPage = new AccountPage(this.page);
     await accountPage.accountName.waitFor();

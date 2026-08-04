@@ -318,8 +318,7 @@ export function BarGraph({
                 {...animationProps}
                 onMouseLeave={() => setPointer('')}
                 onMouseEnter={() =>
-                  !['Group', 'Interval'].includes(groupBy) &&
-                  setPointer('pointer')
+                  groupBy !== 'Interval' && setPointer('pointer')
                 }
                 onClick={item => {
                   const itemPayload = hasUncategorizedId(item.payload)
@@ -328,7 +327,7 @@ export function BarGraph({
 
                   return (
                     ((compact && showTooltip) || !compact) &&
-                    !['Group', 'Interval'].includes(groupBy) &&
+                    groupBy !== 'Interval' &&
                     showActivity({
                       navigate,
                       categories,

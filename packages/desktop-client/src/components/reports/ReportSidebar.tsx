@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
+import { ModeButton } from '@actual-app/components/mode-button';
 import { Popover } from '@actual-app/components/popover';
 import { Select } from '@actual-app/components/select';
 import type { SelectOption } from '@actual-app/components/select';
@@ -29,7 +30,6 @@ import { useLocale } from '#hooks/useLocale';
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
-import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
 import type { dateRangeProps } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';

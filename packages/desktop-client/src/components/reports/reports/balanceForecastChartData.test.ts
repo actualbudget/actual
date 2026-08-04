@@ -101,6 +101,82 @@ describe('buildBalanceForecastChartData', () => {
     expect(chartData).toHaveLength(61);
   });
 
+  it('preserves exact day-shaped bounds for daily data instead of widening to full months', () => {
+    const chartData = buildBalanceForecastChartData({
+      forecastData: {
+        dataPoints: [
+          {
+            date: '2024-03-10',
+            balance: 1000,
+            accountId: 'checking',
+            accountName: 'Checking',
+            transactions: [],
+          },
+          {
+            date: '2024-03-20',
+            balance: 900,
+            accountId: 'checking',
+            accountName: 'Checking',
+            transactions: [],
+          },
+        ],
+        lowestBalance: {
+          date: '2024-03-20',
+          balance: 900,
+          accountId: '',
+          accountName: '',
+        },
+        forecastStartDate: '2024-03-10',
+        forecastEndDate: '2024-03-20',
+      },
+      start: '2024-03-10',
+      end: '2024-03-20',
+      granularity: 'Daily',
+    });
+
+    expect(chartData[0]).toEqual({ date: '2024-03-10', balance: 1000 });
+    expect(chartData.at(-1)).toEqual({ date: '2024-03-20', balance: 900 });
+    expect(chartData).toHaveLength(11);
+  });
+
+  it('carries the balance forward from points before a day-shaped start', () => {
+    const chartData = buildBalanceForecastChartData({
+      forecastData: {
+        dataPoints: [
+          {
+            date: '2024-03-01',
+            balance: 1000,
+            accountId: 'checking',
+            accountName: 'Checking',
+            transactions: [],
+          },
+          {
+            date: '2024-03-15',
+            balance: 800,
+            accountId: 'checking',
+            accountName: 'Checking',
+            transactions: [],
+          },
+        ],
+        lowestBalance: {
+          date: '2024-03-15',
+          balance: 800,
+          accountId: '',
+          accountName: '',
+        },
+        forecastStartDate: '2024-03-01',
+        forecastEndDate: '2024-03-31',
+      },
+      start: '2024-03-10',
+      end: '2024-03-20',
+      granularity: 'Daily',
+    });
+
+    expect(chartData[0]).toEqual({ date: '2024-03-10', balance: 1000 });
+    expect(chartData.at(-1)).toEqual({ date: '2024-03-20', balance: 800 });
+    expect(chartData).toHaveLength(11);
+  });
+
   it('uses the latest same-day balance for each account', () => {
     const chartData = buildBalanceForecastChartData({
       forecastData: {
@@ -201,7 +277,7 @@ describe('buildBalanceForecastChartData', () => {
 
 describe('countForecastScheduledOccurrences', () => {
   it('counts a transfer schedule once across both account legs', () => {
-    const count = countForecastScheduledOccurrences({
+    const forecastData = {
       dataPoints: [
         {
           date: '2024-03-20',
@@ -254,9 +330,77 @@ describe('countForecastScheduledOccurrences', () => {
       },
       forecastStartDate: '2024-03-01',
       forecastEndDate: '2024-04-30',
+    };
+
+    const count = countForecastScheduledOccurrences({
+      forecastData,
+      start: '2024-03',
+      end: '2024-04',
+      granularity: 'Monthly',
     });
 
     expect(count).toBe(2);
+  });
+
+  it('ignores occurrences outside exact day-shaped bounds in daily mode', () => {
+    const forecastData = {
+      dataPoints: [
+        {
+          date: '2024-03-05',
+          balance: 100,
+          accountId: 'checking',
+          accountName: 'Checking',
+          transactions: [
+            {
+              amount: 100,
+              payee: 'Early',
+              scheduleId: 'schedule-early',
+              scheduleName: 'Early',
+            },
+          ],
+        },
+        {
+          date: '2024-03-15',
+          balance: 200,
+          accountId: 'checking',
+          accountName: 'Checking',
+          transactions: [
+            {
+              amount: 100,
+              payee: 'In range',
+              scheduleId: 'schedule-in-range',
+              scheduleName: 'In range',
+            },
+          ],
+        },
+      ],
+      lowestBalance: {
+        date: '2024-03-05',
+        balance: 100,
+        accountId: '',
+        accountName: '',
+      },
+      forecastStartDate: '2024-03-01',
+      forecastEndDate: '2024-03-31',
+    };
+
+    expect(
+      countForecastScheduledOccurrences({
+        forecastData,
+        start: '2024-03-10',
+        end: '2024-03-20',
+        granularity: 'Daily',
+      }),
+    ).toBe(1);
+
+    expect(
+      countForecastScheduledOccurrences({
+        forecastData,
+        start: '2024-03-10',
+        end: '2024-03-20',
+        granularity: 'Monthly',
+      }),
+    ).toBe(2);
   });
 });
 

@@ -22,8 +22,13 @@ import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Compile every workspace package that ships React components. Workspace
+// imports resolve to their real paths under packages/<name>/src, so any
+// current or future package flowing through this build is picked up
+// automatically. Third-party code is never compiled: the babel plugin's
+// default exclude (node_modules) still applies alongside this include.
 const reactCompilerInclude =
-  /[\\/]desktop-client[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
+  /[\\/]packages[\\/][^\\/]+[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',

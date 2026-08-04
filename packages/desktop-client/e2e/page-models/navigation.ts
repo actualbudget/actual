@@ -154,14 +154,10 @@ export class Navigation {
   async createAccount(data: AccountEntry) {
     await this.page.getByRole('button', { name: 'Add account' }).click();
 
-    // Clicking "Create a local account" pushes a second modal whose
-    // heading is "Create Local Account". Wait for that heading to
-    // confirm the form is fully mounted before touching any fields.
-    await clickReactAriaButton(
-      this.page.getByRole('button', { name: 'Create a local account' }),
-    );
+    // Wait for the form heading to confirm it is fully mounted before
+    // touching any fields.
     await this.page
-      .getByRole('heading', { name: 'Create Local Account' })
+      .getByRole('heading', { name: 'Add account' })
       .waitFor({ state: 'visible' });
 
     await fillReactInput(this.page.getByLabel('Name'), data.name);
@@ -185,5 +181,15 @@ export class Navigation {
 
   async clickOnNoServer() {
     await this.page.getByRole('button', { name: 'No server' }).click();
+  }
+
+  async rightClickAccount(accountName: string) {
+    await this.page
+      .getByRole('link', { name: new RegExp(`^${accountName}`) })
+      .click({ button: 'right' });
+  }
+
+  async rightClickBudgetName() {
+    await this.page.getByTestId('budget-name').click({ button: 'right' });
   }
 }

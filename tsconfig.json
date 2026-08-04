@@ -48,6 +48,8 @@
     "**/test-results/*",
     "**/playwright-report/*",
     "**/service-worker/*",
-    "packages/docs/**/*"
+    "packages/docs/**/*",
+    "packages/mobile-client/android/*",
+    "packages/mobile-client/ios/*"
   ]
 }

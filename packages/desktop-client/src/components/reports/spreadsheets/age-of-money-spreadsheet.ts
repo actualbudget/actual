@@ -315,6 +315,163 @@ export type AgeOfMoneyParams = {
   granularity?: AgeOfMoneyGranularity;
 };
 
+type AccountCondition = Extract<RuleConditionEntity, { field: 'account' }>;
+
+/**
+ * Invert an account filter op so we can match counterpart accounts that
+ * fall *outside* the filtered set.
+ */
+function invertAccountOp(
+  op: AccountCondition['op'],
+): AccountCondition['op'] | null {
+  switch (op) {
+    case 'is':
+      return 'isNot';
+    case 'isNot':
+      return 'is';
+    case 'oneOf':
+      return 'notOneOf';
+    case 'notOneOf':
+      return 'oneOf';
+    case 'onBudget':
+      return 'offBudget';
+    case 'offBudget':
+      return 'onBudget';
+    case 'contains':
+      return 'doesNotContain';
+    case 'doesNotContain':
+      return 'contains';
+    // `matches` has no clean inverse in AQL — skip transfer special-casing
+    case 'matches':
+      return null;
+    default:
+      return null;
+  }
+}
+
+/**
+ * Build an AQL clause that matches `payee.transfer_acct` against a single
+ * (already inverted) account condition.
+ */
+function accountConditionToTransferAcctAql(
+  op: AccountCondition['op'],
+  value: AccountCondition['value'],
+): Record<string, unknown> | null {
+  const field = 'payee.transfer_acct';
+
+  switch (op) {
+    case 'is':
+      return { [field]: { $eq: value } };
+    case 'isNot':
+      return { [field]: { $ne: value } };
+    case 'oneOf': {
+      if (!Array.isArray(value)) return null;
+      const values = value;
+      if (values.length === 0) return { id: null };
+      return { $or: values.map(v => ({ [field]: { $eq: v } })) };
+    }
+    case 'notOneOf': {
+      if (!Array.isArray(value)) return null;
+      const values = value;
+      // Empty notOneOf is a tautology (everything is outside the empty set).
+      if (values.length === 0) return { [field]: { $ne: null } };
+      return { $and: values.map(v => ({ [field]: { $ne: v } })) };
+    }
+    case 'onBudget':
+      return { 'payee.transfer_acct.offbudget': false };
+    case 'offBudget':
+      return { 'payee.transfer_acct.offbudget': true };
+    case 'contains': {
+      if (typeof value !== 'string') return null;
+      return {
+        'payee.transfer_acct.name': {
+          $transform: '$lower',
+          $like: `%${value}%`,
+        },
+      };
+    }
+    case 'doesNotContain': {
+      if (typeof value !== 'string') return null;
+      return {
+        'payee.transfer_acct.name': {
+          $transform: '$lower',
+          $notlike: `%${value}%`,
+        },
+      };
+    }
+    default:
+      return null;
+  }
+}
+
+/**
+ * Build the transfer-inclusion filter for Age of Money queries.
+ *
+ * Default (no account filters): exclude on-budget↔on-budget transfers —
+ * they are just moving money within the budget pool.
+ *
+ * With account filters: also include on-budget transfers whose counterpart
+ * account is filtered out. From the filtered subset's perspective those
+ * transfers are real money leaving (or entering) the pool — e.g. filtering
+ * to a chequing account should treat a CC payment as an expenditure so the
+ * report reflects "age of cash" rather than budget-wide AoM.
+ */
+export function buildTransferInclusionFilter(
+  conditions: RuleConditionEntity[],
+  conditionsOp: 'and' | 'or' = 'and',
+): Record<string, unknown> {
+  const base: Array<Record<string, unknown>> = [
+    { 'payee.transfer_acct': null },
+    { 'payee.transfer_acct.offbudget': true },
+  ];
+
+  const accountConditions = conditions.filter(
+    (c): c is AccountCondition => !c.customName && c.field === 'account',
+  );
+
+  if (accountConditions.length === 0) {
+    return { $or: base };
+  }
+
+  // Destination/source is outside the filtered set when it fails the
+  // account conditions. De Morgan: AND → OR of negations, OR → AND of
+  // negations.
+  const negations: Array<Record<string, unknown>> = [];
+  for (const cond of accountConditions) {
+    const invertedOp = invertAccountOp(cond.op);
+    if (invertedOp == null) {
+      // Unsupported op — fall back to default transfer exclusion
+      return { $or: base };
+    }
+    const clause = accountConditionToTransferAcctAql(invertedOp, cond.value);
+    if (clause == null) {
+      return { $or: base };
+    }
+    negations.push(clause);
+  }
+
+  const filteredOutCounterpart =
+    conditionsOp === 'and'
+      ? negations.length === 1
+        ? negations[0]
+        : { $or: negations }
+      : negations.length === 1
+        ? negations[0]
+        : { $and: negations };
+
+  return {
+    $or: [
+      ...base,
+      {
+        $and: [
+          { 'payee.transfer_acct.offbudget': false },
+          filteredOutCounterpart,
+        ],
+      },
+    ],
+  };
+}
+
 export function createAgeOfMoneySpreadsheet({
   start,
   end,
@@ -330,15 +487,21 @@ export function createAgeOfMoneySpreadsheet({
     const today = monthUtils.currentDay();
     const fixedEnd = endDate > today ? today : endDate;
 
+    const activeConditions = conditions.filter(cond => !cond.customName);
     const { filters } = await send('make-filters-from-conditions', {
-      conditions: conditions.filter(cond => !cond.customName),
+      conditions: activeConditions,
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+    const transferFilter = buildTransferInclusionFilter(
+      activeConditions,
+      conditionsOp,
+    );
 
     // Query for ALL income transactions up to the end date
     // FIFO requires complete income history to calculate ages correctly
-    // Includes: regular income + transfers from off-budget accounts (money entering budget)
-    // Excludes: on-budget-to-on-budget transfers (just moving money between accounts)
+    // Includes: regular income + transfers from off-budget accounts
+    //   + (when account-filtered) transfers from filtered-out on-budget accounts
+    // Excludes: on-budget transfers within the filtered account set
     function makeIncomeQuery() {
       return q('transactions')
         .filter({
@@ -347,10 +510,7 @@ export function createAgeOfMoneySpreadsheet({
         .filter({
           date: { $lte: fixedEnd },
           'account.offbudget': false,
-          $or: [
-            { 'payee.transfer_acct': null },
-            { 'payee.transfer_acct.offbudget': true },
-          ],
+          ...transferFilter,
           amount: { $gt: 0 },
         })
         .select(['id', 'date', 'amount']);
@@ -358,8 +518,9 @@ export function createAgeOfMoneySpreadsheet({
 
     // Query for ALL expense transactions up to the end date
     // FIFO requires complete expense history to properly consume income buckets
-    // Includes: regular expenses + transfers to off-budget accounts (categorized spending)
-    // Excludes: on-budget-to-on-budget transfers (just moving money between accounts)
+    // Includes: regular expenses + transfers to off-budget accounts
+    //   + (when account-filtered) transfers to filtered-out on-budget accounts
+    // Excludes: on-budget transfers within the filtered account set
     function makeExpenseQuery() {
       return q('transactions')
         .filter({
@@ -368,10 +529,7 @@ export function createAgeOfMoneySpreadsheet({
         .filter({
           date: { $lte: fixedEnd },
           'account.offbudget': false,
-          $or: [
-            { 'payee.transfer_acct': null },
-            { 'payee.transfer_acct.offbudget': true },
-          ],
+          ...transferFilter,
           amount: { $lt: 0 },
         })
         .select(['id', 'date', 'amount']);
