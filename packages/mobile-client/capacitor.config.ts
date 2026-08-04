@@ -4,7 +4,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const actualAppWebBuildPath = path.join(
   path.dirname(require.resolve('@actual-app/web/package.json')),
-  'build',
+  'build-mobile',
 );
 
 const baseConfig: CapacitorConfig = {

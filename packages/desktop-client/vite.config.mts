@@ -158,7 +158,7 @@ async function stagePublicData(): Promise<void> {
   );
 }
 
-const lootCoreBackend = (): Plugin => ({
+const lootCoreBackend = (outDir: string): Plugin => ({
   name: 'loot-core-backend',
   configureServer(server) {
     const child: ChildProcess = spawn(
@@ -219,7 +219,7 @@ const lootCoreBackend = (): Plugin => ({
     await mkdir(buildStatsDir, { recursive: true });
     try {
       await rename(
-        path.resolve(__dirname, 'build/kcab/stats.json'),
+        path.resolve(__dirname, outDir, 'kcab/stats.json'),
         path.resolve(buildStatsDir, 'loot-core-stats.json'),
       );
     } catch (err) {
@@ -252,6 +252,12 @@ const pluginsServiceAssets = (): Plugin => ({
 export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isVitest = process.env.VITEST === 'true';
+  const isMobile = mode === 'mobile';
+  const outDir = isMobile
+    ? 'build-mobile'
+    : mode === 'desktop'
+      ? 'build-electron'
+      : 'build';
 
   // Forward Netlify env variables
   if (process.env.REVIEW_ID) {
@@ -298,7 +304,7 @@ export default defineConfig(async ({ mode, command }) => {
       minify: 'oxc',
       target: 'es2022',
       sourcemap: true,
-      outDir: mode === 'desktop' ? 'build-electron' : 'build',
+      outDir,
       assetsDir: 'static',
       manifest: true,
       assetsInlineLimit: 0,
@@ -341,14 +347,21 @@ export default defineConfig(async ({ mode, command }) => {
       },
     },
     resolve: {
-      ...(mode !== 'browser' && {
-        conditions: ['electron-renderer', 'module', 'browser', 'default'],
-      }),
+      ...(isMobile
+        ? { conditions: ['module', 'browser', 'default'] }
+        : mode !== 'browser'
+          ? {
+              conditions: ['electron-renderer', 'module', 'browser', 'default'],
+            }
+          : {}),
       tsconfigPaths: true,
     },
     plugins: [
+      // Mobile builds run from Capacitor's packaged origin. Emit a
+      // self-destroying worker to retire a PWA left by a previous build.
+      isMobile ? VitePWA({ selfDestroying: true, manifest: false }) : undefined,
       // electron (desktop) builds do not support PWA
-      mode === 'desktop'
+      mode === 'desktop' || isMobile
         ? undefined
         : VitePWA({
             registerType: 'prompt',
@@ -396,7 +409,7 @@ export default defineConfig(async ({ mode, command }) => {
           }),
       injectShims(),
       addWatchers(),
-      mode === 'desktop' || isVitest ? undefined : lootCoreBackend(),
+      mode === 'desktop' || isVitest ? undefined : lootCoreBackend(outDir),
       mode === 'desktop' ? undefined : pluginsServiceAssets(),
       react(),
       babel({
