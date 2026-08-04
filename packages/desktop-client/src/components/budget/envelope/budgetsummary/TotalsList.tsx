@@ -1,6 +1,6 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
@@ -47,6 +47,7 @@ type TotalsListProps = {
 };
 
 export function TotalsList({ prevMonthName, style }: TotalsListProps) {
+  const { t } = useTranslation();
   const format = useFormat();
   const signedFormatter = makeSignedFormatter(format);
   const invertedSignedFormatter = makeSignedFormatter(format, true);
@@ -72,7 +73,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           content={
             <>
               <AlignedText
-                left="Income:"
+                left={t('Income:')}
                 right={
                   <EnvelopeCellValue
                     binding={envelopeBudget.totalIncome}
@@ -81,7 +82,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
                 }
               />
               <AlignedText
-                left="From Last Month:"
+                left={t('From Last Month:')}
                 right={
                   <EnvelopeCellValue
                     binding={envelopeBudget.fromLastMonth}

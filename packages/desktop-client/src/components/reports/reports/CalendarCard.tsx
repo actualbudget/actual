@@ -39,6 +39,7 @@ import type { CalendarDataType } from '#components/reports/spreadsheets/calendar
 import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useNavigate } from '#hooks/useNavigate';
 import { useResizeObserver } from '#hooks/useResizeObserver';
@@ -345,6 +346,7 @@ function CalendarCardInner({
   format,
 }: CalendarCardInnerProps) {
   const { t } = useTranslation();
+  const locale = useLocale();
   const [monthNameVisible, setMonthNameVisible] = useState(true);
   const monthFormatSizeContainers = useRef<(HTMLSpanElement | null)[]>(
     new Array(5),
@@ -413,10 +415,19 @@ function CalendarCardInner({
   const navigate = useNavigate();
 
   const monthFormats = [
-    { format: 'MMMM yyyy', text: formatDate(calendar.start, 'MMMM yyyy') },
-    { format: 'MMM yyyy', text: formatDate(calendar.start, 'MMM yyyy') },
-    { format: 'MMM yy', text: formatDate(calendar.start, 'MMM yy') },
-    { format: 'MMM', text: formatDate(calendar.start, 'MMM') },
+    {
+      format: 'MMMM yyyy',
+      text: formatDate(calendar.start, 'MMMM yyyy', { locale }),
+    },
+    {
+      format: 'MMM yyyy',
+      text: formatDate(calendar.start, 'MMM yyyy', { locale }),
+    },
+    {
+      format: 'MMM yy',
+      text: formatDate(calendar.start, 'MMM yy', { locale }),
+    },
+    { format: 'MMM', text: formatDate(calendar.start, 'MMM', { locale }) },
     { format: '', text: '' },
   ];
 
@@ -462,7 +473,7 @@ function CalendarCardInner({
             }}
           >
             {selectedMonthNameFormat &&
-              formatDate(calendar.start, selectedMonthNameFormat)}
+              formatDate(calendar.start, selectedMonthNameFormat, { locale })}
           </Button>
         </View>
         <View
