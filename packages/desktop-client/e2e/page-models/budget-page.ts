@@ -10,6 +10,7 @@ export class BudgetPage {
   readonly budgetTableTotals: Locator;
   readonly selectedMonthButton: Locator;
   readonly nextMonthButton: Locator;
+  readonly prevMonthButton: Locator;
   readonly budgetTableScrollContainer: Locator;
 
   constructor(page: Page) {
@@ -20,6 +21,7 @@ export class BudgetPage {
     this.budgetTableTotals = this.budgetTable.getByTestId('budget-totals');
     this.selectedMonthButton = page.getByTestId('selected-budget-month');
     this.nextMonthButton = page.getByTitle('Next month');
+    this.prevMonthButton = page.getByTitle('Previous month');
     this.budgetTableScrollContainer = page.getByTestId(
       'budget-table-scroll-container',
     );
@@ -53,7 +55,9 @@ export class BudgetPage {
       throw new Error('Failed to get total budgeted.');
     }
 
-    return parseInt(totalBudgetedText, 10);
+    // parseInt alone truncates at the first comma in values like
+    // "3,030.00" (-> 3); match getBalanceForRow's parsing instead.
+    return Math.round(parseFloat(totalBudgetedText.replace(/,/g, '')) * 100);
   }
 
   async getTotalSpent() {
@@ -65,7 +69,7 @@ export class BudgetPage {
       throw new Error('Failed to get total spent.');
     }
 
-    return parseInt(totalSpentText, 10);
+    return Math.round(parseFloat(totalSpentText.replace(/,/g, '')) * 100);
   }
 
   async getTotalLeftover() {
@@ -77,7 +81,7 @@ export class BudgetPage {
       throw new Error('Failed to get total leftover.');
     }
 
-    return parseInt(totalLeftoverText, 10);
+    return Math.round(parseFloat(totalLeftoverText.replace(/,/g, '')) * 100);
   }
 
   async getTableTotals() {
@@ -140,6 +144,17 @@ export class BudgetPage {
     return await this.#waitForNewMonthToLoad({
       currentMonth,
       errorMessage: 'Failed to navigate to the next month.',
+    });
+  }
+
+  async goToPrevMonth() {
+    const currentMonth = await this.getSelectedMonth();
+
+    await this.prevMonthButton.click();
+
+    return await this.#waitForNewMonthToLoad({
+      currentMonth,
+      errorMessage: 'Failed to navigate to the previous month.',
     });
   }
 
@@ -239,12 +254,94 @@ export class BudgetPage {
     await this.page.getByRole('button', { name: 'Transfer' }).click();
   }
 
+  getCategoryRowByName(categoryName: string) {
+    return this.budgetTable
+      .getByTestId('row')
+      .filter({ hasText: categoryName })
+      .first();
+  }
+
+  async getBudgetedForRow(idx: number) {
+    const budgetedText = await this.budgetTable
+      .getByTestId('row')
+      .nth(idx)
+      .getByTestId('budget')
+      .first()
+      .textContent();
+
+    if (!budgetedText) {
+      throw new Error(`Failed to get budgeted amount on row index ${idx}.`);
+    }
+
+    return Math.round(parseFloat(budgetedText.replace(/,/g, '')) * 100);
+  }
+
+  async getSpentForRow(idx: number) {
+    const spentText = await this.budgetTable
+      .getByTestId('row')
+      .nth(idx)
+      .getByTestId('category-month-spent')
+      .textContent();
+
+    if (!spentText) {
+      throw new Error(`Failed to get spent amount on row index ${idx}.`);
+    }
+
+    return Math.round(parseFloat(spentText.replace(/,/g, '')) * 100);
+  }
+
+  /**
+   * Cover an overspent category's negative balance from another category,
+   * mirroring transferAllBalance's UI flow (same category-autocomplete
+   * pattern) but via the "Cover overspending" menu item.
+   */
+  async coverOverspending(overspentIdx: number, fromCategoryName: string) {
+    await this.budgetTable
+      .getByTestId('row')
+      .nth(overspentIdx)
+      .getByTestId('balance')
+      .getByTestId(/^budget/)
+      .click();
+
+    await this.page.getByRole('button', { name: 'Cover overspending' }).click();
+
+    await this.page.getByPlaceholder('(none)').click();
+
+    await this.page.keyboard.type(fromCategoryName);
+    await this.page.keyboard.press('Enter');
+
+    await this.page.getByRole('button', { name: 'Transfer' }).click();
+  }
+
   async rightClickCategory(idx: number) {
     await this.budgetTable
       .getByTestId('row')
       .nth(idx)
       .getByTestId('category-name')
       .click({ button: 'right' });
+  }
+
+  /**
+   * Delete a category via its context menu. When it has existing
+   * transactions, ConfirmCategoryDeleteModal requires a transfer target
+   * before the "Delete" button will submit -- there's no "leave
+   * uncategorized" option.
+   */
+  async deleteCategoryWithTransfer(
+    idx: number,
+    transferToCategoryName: string,
+  ) {
+    await this.rightClickCategory(idx);
+    await this.page
+      .getByRole('menu')
+      .getByRole('button', { name: 'Delete' })
+      .click();
+
+    const dialog = this.page.getByRole('dialog');
+    await dialog.getByPlaceholder('Select category...').click();
+    await this.page.keyboard.type(transferToCategoryName);
+    await this.page.keyboard.press('Enter');
+    await dialog.getByRole('button', { name: 'Delete' }).click();
   }
 
   async rightClickCategoryGroup(name: string) {

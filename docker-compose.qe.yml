@@ -1,0 +1,15 @@
+###################################################
+# QE take-home only — not part of upstream. Builds
+# from qe.Dockerfile (no bind mount) so the container
+# has its own node_modules, independent of the host's.
+###################################################
+
+services:
+  actual-qe:
+    build:
+      context: .
+      dockerfile: qe.Dockerfile
+    image: actual-qe
+    ports:
+      - '3001:3001'
+    restart: 'no'

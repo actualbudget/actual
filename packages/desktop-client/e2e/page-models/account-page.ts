@@ -9,6 +9,8 @@ type TransactionEntry = {
   payee?: string;
   notes?: string;
   category?: string;
+  /** MM/dd/yyyy, matching the app's default date format. */
+  date?: string;
 };
 
 export class AccountPage {
@@ -82,10 +84,18 @@ export class AccountPage {
   }
 
   /**
-   * Finish adding a transaction
+   * Finish adding a transaction. A transaction dated in the future
+   * triggers a "Convert to schedule?" prompt; dismiss it (keep it as a
+   * one-time transaction) so this works uniformly regardless of date.
    */
   async addEnteredTransaction() {
     await this.addTransactionButton.click();
+
+    const scheduleModal = this.page.getByTestId('convert-to-schedule-modal');
+    if (await scheduleModal.isVisible().catch(() => false)) {
+      await scheduleModal.getByRole('button', { name: 'Cancel' }).click();
+    }
+
     await this.cancelTransactionButton.click();
   }
 
@@ -292,6 +302,15 @@ export class AccountPage {
         await this.page.keyboard.press('Tab');
       }
     }
+
+    if (transaction.date) {
+      const dateCell = transactionRow.getByTestId('date');
+      await dateCell.click();
+      const dateInput = dateCell.getByRole('textbox');
+      await this.selectInputText(dateInput);
+      await dateInput.pressSequentially(transaction.date);
+      await this.page.keyboard.press('Tab');
+    }
   }
 
   async selectInputText(input: Locator) {
@@ -303,6 +322,53 @@ export class AccountPage {
 
   async rightClickNthTransaction(index: number) {
     await this.transactionTableRow.nth(index).click({ button: 'right' });
+  }
+
+  /**
+   * Get the account balance as an integer number of cents, mirroring
+   * BudgetPage.getBalanceForRow's parsing.
+   */
+  async getAccountBalanceValue() {
+    const balanceText = await this.accountBalance.textContent();
+
+    if (!balanceText) {
+      throw new Error('Failed to get account balance.');
+    }
+
+    return Math.round(parseFloat(balanceText.replace(/,/g, '')) * 100);
+  }
+
+  /**
+   * Edit a single field of an existing transaction row in place.
+   */
+  async editTransactionField(
+    index: number,
+    field: 'debit' | 'credit' | 'payee' | 'notes' | 'category',
+    value: string,
+  ) {
+    const cell = this.transactionTableRow.nth(index).getByTestId(field);
+    await cell.click();
+
+    const input =
+      field === 'notes'
+        ? cell.getByRole('combobox')
+        : cell.getByRole('textbox');
+    await this.selectInputText(input);
+    await input.pressSequentially(value);
+    await this.page.keyboard.press('Tab');
+  }
+
+  /**
+   * Delete a transaction via its row context menu, confirming the
+   * "Confirm Delete" modal that follows.
+   */
+  async deleteNthTransaction(index: number) {
+    await this.rightClickNthTransaction(index);
+    await this.page
+      .getByRole('menu')
+      .getByRole('button', { name: 'Delete' })
+      .click();
+    await this.page.getByRole('button', { name: 'Delete' }).click();
   }
 }
 
