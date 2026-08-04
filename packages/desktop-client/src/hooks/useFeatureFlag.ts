@@ -16,6 +16,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   akahuBankSync: false,
   focusedViews: false,
   mobileCalculator: false,
+  monteCarloReport: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {
