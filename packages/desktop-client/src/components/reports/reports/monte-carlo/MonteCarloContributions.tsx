@@ -157,7 +157,7 @@ export function MonteCarloContributions({
                 allowEmpty
                 roundToInteger
                 min={currentAge}
-                max={targetAge}
+                max={contribution.toAge ?? targetAge}
                 step={1}
                 placeholder={t('Now')}
                 onCommit={newValue =>
@@ -172,7 +172,7 @@ export function MonteCarloContributions({
                 aria-label={t('To age')}
                 allowEmpty
                 roundToInteger
-                min={currentAge}
+                min={contribution.fromAge ?? currentAge}
                 max={targetAge}
                 step={1}
                 placeholder={t('End of plan')}

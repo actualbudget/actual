@@ -1845,6 +1845,77 @@ describe('runMonteCarloSimulation', () => {
     expect(rows[1].potBalances).toEqual([50_000, 40_000]);
   });
 
+  it('ignores reversed and beyond-horizon contribution windows', () => {
+    // currentAge 60 with a 5-year horizon simulates ages 60-64. A
+    // reversed window can never match an age, and a window starting at
+    // the final age (65) is past the last simulated year - both must
+    // contribute nothing rather than misbehave.
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 0,
+          horizonYears: 5,
+          captureRunDetail: 0,
+          contributions: [
+            makeContribution({
+              id: 'reversed',
+              annualAmount: 10_000,
+              fromAge: 63,
+              toAge: 61,
+            }),
+            makeContribution({
+              id: 'too-late',
+              annualAmount: 10_000,
+              fromAge: 65,
+            }),
+          ],
+        },
+        { startingBalance: 50_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    for (const row of result.runDetail!) {
+      expect(row.contributions).toBe(0);
+    }
+    expect(result.runDetail![4].endBalance).toBe(50_000);
+  });
+
+  it('emits one pot contribution entry per pot even without contributions', () => {
+    // A contribution into a pot that no longer exists is ignored, but the
+    // captured rows must still carry a per-pot array in pot order, like
+    // every other per-pot field
+    const result = runMonteCarloSimulation(
+      makeParams({
+        annualWithdrawal: 0,
+        horizonYears: 2,
+        captureRunDetail: 0,
+        contributions: [
+          makeContribution({ potId: 'deleted-pot', annualAmount: 10_000 }),
+        ],
+        pots: [
+          makePot({
+            id: 'pot-a',
+            startingBalance: 50_000,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+          }),
+          makePot({
+            id: 'pot-b',
+            startingBalance: 20_000,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+          }),
+        ],
+      }),
+    );
+
+    for (const row of result.runDetail!) {
+      expect(row.contributions).toBe(0);
+      expect(row.potContributions).toEqual([0, 0]);
+      expect(row.potContributions).toHaveLength(row.potWithdrawals.length);
+    }
+  });
+
   it('keeps an empty pot alive while contributions are still coming', () => {
     // A pure accumulation plan: nothing saved yet, no spending, steady
     // deposits - this must not be declared depleted at the start
@@ -1871,6 +1942,30 @@ describe('runMonteCarloSimulation', () => {
     ) {
       expect(result.depletionYearBySimulation[simulationIndex]).toBe(-1);
     }
+  });
+
+  it('an empty zero-spend plan survives until delayed contributions begin', () => {
+    // Nothing saved and nothing spent for the first two years; deposits
+    // only start at age 62. The empty early years must not read as a
+    // funding shortfall.
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 0,
+          horizonYears: 5,
+          captureRunDetail: 0,
+          contributions: [
+            makeContribution({ annualAmount: 10_000, fromAge: 62 }),
+          ],
+        },
+        { startingBalance: 0, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    expect(result.successRate).toBe(1);
+    expect(result.runDetail!.map(row => row.endBalance)).toEqual([
+      0, 0, 10_000, 20_000, 30_000,
+    ]);
   });
 
   it('a funding shortfall still fails the plan despite pending contributions', () => {

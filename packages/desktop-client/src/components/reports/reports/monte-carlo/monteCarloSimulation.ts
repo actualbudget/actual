@@ -1041,13 +1041,18 @@ export function runMonteCarloSimulation(
         // access age only gates withdrawals.
         let contributionsThisYear = 0;
         let preContributionPotBalances: number[] | null = null;
-        let capturedPotContributions: number[] | null = null;
+        // Always sized to the pots when capturing, like the other per-pot
+        // arrays, so captured rows keep one entry per pot even in plans
+        // with no contributions
+        const capturedPotContributions =
+          runDetail && simulationIndex === captureIndex
+            ? new Array<number>(potCount).fill(0)
+            : null;
         if (hasContributions) {
-          if (runDetail && simulationIndex === captureIndex) {
+          if (capturedPotContributions) {
             // The drill-in shows contributions as their own step, so its
             // Start balance column needs the pre-contribution snapshot
             preContributionPotBalances = Array.from(potBalances);
-            capturedPotContributions = new Array<number>(potCount).fill(0);
           }
           const flatContributions = flatContributionsByYear[year];
           const adjustedContributions = adjustedContributionsByYear[year];
@@ -1206,7 +1211,10 @@ export function runMonteCarloSimulation(
             accessibleTotal - taxForTakes(cumulativeInflation);
         }
 
-        if (accessibleNetCapacity <= netRequired) {
+        // A shortfall needs an actual requirement: a zero-spend year with
+        // nothing accessible (e.g. before delayed contributions start, or
+        // while every pot is still locked) is not a failure
+        if (netRequired > 0 && accessibleNetCapacity <= netRequired) {
           fundingShortfall = true;
           // The accessible pots can't cover this year's spending (locked
           // pots may still hold money, but the plan failed to fund it);
