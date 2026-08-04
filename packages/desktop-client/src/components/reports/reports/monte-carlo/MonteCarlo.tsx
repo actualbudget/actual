@@ -483,6 +483,7 @@ export function MonteCarlo() {
               simulationIndex={selectedRunIndex}
               simulationCount={result.simulationCount}
               startAge={config.currentAge}
+              hasContributions={config.contributions.length > 0}
               onBack={() => setSelectedRun(null)}
             />
           ) : (

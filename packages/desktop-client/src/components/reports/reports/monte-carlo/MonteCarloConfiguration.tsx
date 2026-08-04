@@ -18,6 +18,7 @@ import type {
 import { css } from '@emotion/css';
 import { v4 as uuidv4 } from 'uuid';
 
+import { MonteCarloContributions } from '#components/reports/reports/monte-carlo/MonteCarloContributions';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import { MonteCarloPotConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloPotConfiguration';
@@ -42,7 +43,12 @@ import {
 import { MonteCarloTaxConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloTaxConfiguration';
 import { MonteCarloWithdrawalRuleConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloWithdrawalRuleConfiguration';
 
-type ConfigurationTab = 'plan' | 'pots' | 'withdrawals' | 'tax';
+type ConfigurationTab =
+  | 'plan'
+  | 'pots'
+  | 'contributions'
+  | 'withdrawals'
+  | 'tax';
 
 const PLAN_GROUP_FIELDS_STYLE = {
   flexDirection: 'row',
@@ -132,6 +138,12 @@ export function MonteCarloConfiguration({
           <Trans>Investment pots</Trans>
         </ModeButton>
         <ModeButton
+          selected={activeTab === 'contributions'}
+          onSelect={() => setActiveTab('contributions')}
+        >
+          <Trans>Contributions</Trans>
+        </ModeButton>
+        <ModeButton
           selected={activeTab === 'withdrawals'}
           onSelect={() => setActiveTab('withdrawals')}
         >
@@ -154,13 +166,15 @@ export function MonteCarloConfiguration({
             ? t(
                 'The invested accounts your plan draws from - each with its own balance, allocation, and return assumptions. Drag rows to reorder pots; expand a row for access, tax and fee settings.',
               )
-            : activeTab === 'withdrawals'
-              ? t(
-                  'How much you take out each year, and optional rules that adjust it as markets move.',
-                )
-              : t(
-                  'How withdrawals are taxed - your spending is what you keep after tax.',
-                )}
+            : activeTab === 'contributions'
+              ? t('Money you pay into your pots each year while the plan runs.')
+              : activeTab === 'withdrawals'
+                ? t(
+                    'How much you take out each year, and optional rules that adjust it as markets move.',
+                  )
+                : t(
+                    'How withdrawals are taxed - your spending is what you keep after tax.',
+                  )}
       </Text>
 
       {/* Plan details */}
@@ -411,6 +425,10 @@ export function MonteCarloConfiguration({
                     onRemove={() =>
                       onConfigChange({
                         pots: config.pots.filter(other => other.id !== pot.id),
+                        // A removed pot takes its contributions with it
+                        contributions: config.contributions.filter(
+                          contribution => contribution.potId !== pot.id,
+                        ),
                       })
                     }
                   />
@@ -431,6 +449,17 @@ export function MonteCarloConfiguration({
             </Button>
           </View>
         </View>
+      )}
+
+      {/* Contributions */}
+      {activeTab === 'contributions' && (
+        <MonteCarloContributions
+          contributions={config.contributions}
+          pots={config.pots}
+          currentAge={config.currentAge}
+          targetAge={config.targetAge}
+          onConfigChange={onConfigChange}
+        />
       )}
 
       {/* Spending */}

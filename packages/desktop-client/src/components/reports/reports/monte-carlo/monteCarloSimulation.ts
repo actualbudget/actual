@@ -1,6 +1,7 @@
 import { MAX_SAFE_NUMBER } from '@actual-app/core/shared/util';
 import type {
   MonteCarloAllocationPreset,
+  MonteCarloContributionMeta,
   MonteCarloPotMeta,
   MonteCarloReturnModel,
   MonteCarloSpendingPhaseMeta,
@@ -103,6 +104,37 @@ export function sortMonteCarloSpendingPhases(
     (phaseA, phaseB) =>
       (phaseA.fromAge ?? -Infinity) - (phaseB.fromAge ?? -Infinity),
   );
+}
+
+/** One recurring yearly contribution into a pot over an age window */
+export type MonteCarloContribution = {
+  id: string;
+  name: string;
+  /** The pot the contribution is paid into */
+  potId: string;
+  /** Age the contribution starts (inclusive); null = starts now */
+  fromAge: number | null;
+  /** Age the contribution stops (inclusive); null = end of plan */
+  toAge: number | null;
+  /** Yearly amount in minor units, in today's money */
+  annualAmount: number;
+  /** Whether the amount rises with inflation */
+  adjustsWithInflation: boolean;
+};
+
+export function createMonteCarloContribution(
+  id: string,
+  potId: string,
+): MonteCarloContribution {
+  return {
+    id,
+    name: '',
+    potId,
+    fromAge: null,
+    toAge: null,
+    annualAmount: 1_000_000, // 10,000.00 in minor units
+    adjustsWithInflation: true,
+  };
 }
 
 /** One invested pot with its own balance and return assumptions */
@@ -211,6 +243,8 @@ export type MonteCarloConfig = {
   minimumWithdrawal: number;
   /** The planned spending path; each phase runs until the next one starts */
   spendingPhases: MonteCarloSpendingPhase[];
+  /** Recurring yearly contributions paid into pots */
+  contributions: MonteCarloContribution[];
   /** Mean yearly inflation as a decimal fraction; null = flat withdrawals */
   inflationMean: number | null;
   /** Yearly inflation volatility as a decimal fraction; 0 = fixed rate */
@@ -232,6 +266,7 @@ export const MONTE_CARLO_DEFAULTS: MonteCarloConfig = {
   withdrawalRule: WITHDRAWAL_RULE_DEFAULTS,
   minimumWithdrawal: 0,
   spendingPhases: [createMonteCarloSpendingPhase('phase-1')],
+  contributions: [],
   inflationMean: 0.025,
   inflationStdDev: 0.02,
   taxModel: 'flat',
@@ -300,6 +335,25 @@ function spendingPhaseFromMeta(
   };
 }
 
+function contributionFromMeta(
+  contributionMeta: MonteCarloContributionMeta,
+  index: number,
+): MonteCarloContribution {
+  const defaults = createMonteCarloContribution(
+    contributionMeta.id || `contribution-${index + 1}`,
+    contributionMeta.potId ?? '',
+  );
+  return {
+    ...defaults,
+    name: contributionMeta.name ?? defaults.name,
+    fromAge: contributionMeta.fromAge ?? null,
+    toAge: contributionMeta.toAge ?? null,
+    annualAmount: contributionMeta.annualAmount ?? defaults.annualAmount,
+    adjustsWithInflation:
+      contributionMeta.adjustsWithInflation ?? defaults.adjustsWithInflation,
+  };
+}
+
 export function monteCarloConfigFromMeta(
   meta: MonteCarloWidget['meta'] | undefined,
 ): MonteCarloConfig {
@@ -316,6 +370,9 @@ export function monteCarloConfigFromMeta(
     spendingPhases: meta?.spendingPhases?.length
       ? meta.spendingPhases.map(spendingPhaseFromMeta)
       : [createMonteCarloSpendingPhase('phase-1')],
+    contributions: meta?.contributions?.length
+      ? meta.contributions.map(contributionFromMeta)
+      : [],
     inflationMean:
       meta?.inflationMean !== undefined
         ? meta.inflationMean
@@ -366,8 +423,13 @@ export type MonteCarloRunDetailRow = {
   endBalance: number;
   /** End-of-year balance per pot, in the order the pots are configured */
   potBalances: number[];
-  /** Start-of-year balance per pot, before the withdrawal, same order */
+  /** Start-of-year balance per pot, before contributions and the
+   * withdrawal, same order */
   potStartBalances: number[];
+  /** Contributions paid in at the start of this year */
+  contributions: number;
+  /** Contribution each pot received at the start of the year, same order */
+  potContributions: number[];
   /** How much of this year's withdrawal each pot funded (gross), same order */
   potWithdrawals: number[];
   /**
@@ -832,6 +894,46 @@ export function runMonteCarloSimulation(
     plannedTodayByYear[year] = amount;
   }
 
+  // Planned contributions per pot per year, in today's money - split into
+  // an inflation-adjusted and a flat portion so a year's deposit is
+  // flat + adjusted × cumulativeInflation. Deterministic and shared by
+  // every replay. Contributions into unknown pots (e.g. a pot that was
+  // deleted) are ignored.
+  const flatContributionsByYear: Float64Array[] = [];
+  const adjustedContributionsByYear: Float64Array[] = [];
+  for (let year = 0; year <= horizonYears; year++) {
+    flatContributionsByYear.push(new Float64Array(potCount));
+    adjustedContributionsByYear.push(new Float64Array(potCount));
+  }
+  // While deposits are still to come, an empty pot isn't a dead plan -
+  // depletion is only declared after the final contribution year
+  let lastContributionYear = 0;
+  let hasContributions = false;
+  for (const contribution of params.contributions) {
+    const potIndex = pots.findIndex(pot => pot.id === contribution.potId);
+    const amount = clamp(contribution.annualAmount, 0, MAX_AMOUNT);
+    if (potIndex === -1 || amount <= 0) {
+      continue;
+    }
+    for (let year = 1; year <= horizonYears; year++) {
+      const age = params.currentAge + year - 1;
+      if (contribution.fromAge != null && age < contribution.fromAge) {
+        continue;
+      }
+      if (contribution.toAge != null && age > contribution.toAge) {
+        continue;
+      }
+      const target = contribution.adjustsWithInflation
+        ? adjustedContributionsByYear
+        : flatContributionsByYear;
+      target[year][potIndex] += amount;
+      hasContributions = true;
+      if (year > lastContributionYear) {
+        lastContributionYear = year;
+      }
+    }
+  }
+
   // When showing values in today's money, outputs are discounted by each
   // replay's own realized inflation path
   const deflate = params.deflateToTodaysMoney === true && inflationMean != null;
@@ -932,6 +1034,37 @@ export function runMonteCarloSimulation(
       if (!depleted) {
         const startDeflator = deflate ? 1 / cumulativeInflation : 1;
         const planned = plannedTodayByYear[year] * cumulativeInflation;
+
+        // Contributions land at the start of the year, before the
+        // withdrawal: new money can fund this year's spending and earns
+        // this year's return. Locked pots receive deposits too - the
+        // access age only gates withdrawals.
+        let contributionsThisYear = 0;
+        let preContributionPotBalances: number[] | null = null;
+        let capturedPotContributions: number[] | null = null;
+        if (hasContributions) {
+          if (runDetail && simulationIndex === captureIndex) {
+            // The drill-in shows contributions as their own step, so its
+            // Start balance column needs the pre-contribution snapshot
+            preContributionPotBalances = Array.from(potBalances);
+            capturedPotContributions = new Array<number>(potCount).fill(0);
+          }
+          const flatContributions = flatContributionsByYear[year];
+          const adjustedContributions = adjustedContributionsByYear[year];
+          for (let potIndex = 0; potIndex < potCount; potIndex++) {
+            const deposit =
+              flatContributions[potIndex] +
+              adjustedContributions[potIndex] * cumulativeInflation;
+            if (deposit > 0) {
+              potBalances[potIndex] += deposit;
+              total += deposit;
+              contributionsThisYear += deposit;
+              if (capturedPotContributions) {
+                capturedPotContributions[potIndex] = deposit;
+              }
+            }
+          }
+        }
         let withdrawal: number;
 
         // Only pots that have reached their access age can fund this year's
@@ -1049,9 +1182,11 @@ export function runMonteCarloSimulation(
         const capturedPotFees = capturedPotReturns
           ? new Array<number>(potCount).fill(0)
           : null;
-        // Snapshot taken now, before the withdrawal touches the balances
+        // Snapshot taken before the withdrawal touches the balances; with
+        // contributions in play, the pre-contribution snapshot from the
+        // top of the year is the displayed starting point
         const capturedPotStartBalances = capturedPotReturns
-          ? Array.from(potBalances)
+          ? (preContributionPotBalances ?? Array.from(potBalances))
           : null;
 
         // Net capacity: what withdrawing every accessible penny would
@@ -1189,9 +1324,14 @@ export function runMonteCarloSimulation(
           }
           if (total <= 0) {
             total = 0;
-            depleted = true;
-            simulationDepletionYear = year;
-            depletionCounts[year]++;
+            // An empty balance with deposits still to come isn't a dead
+            // plan - future contributions re-seed the pots. This year's
+            // deposits have already landed, so >= is the right bound.
+            if (year >= lastContributionYear) {
+              depleted = true;
+              simulationDepletionYear = year;
+              depletionCounts[year]++;
+            }
           }
         }
 
@@ -1232,9 +1372,12 @@ export function runMonteCarloSimulation(
           }
           if (total <= 0) {
             total = 0;
-            depleted = true;
-            simulationDepletionYear = year;
-            depletionCounts[year]++;
+            // Same future-deposits guard as the post-growth check
+            if (year >= lastContributionYear) {
+              depleted = true;
+              simulationDepletionYear = year;
+              depletionCounts[year]++;
+            }
           }
         }
         const endDeflator = deflate ? 1 / cumulativeInflation : 1;
@@ -1282,12 +1425,25 @@ export function runMonteCarloSimulation(
             }
             return parts.map(toSafeAmount);
           };
-          const startBalance = emit(yearStartTotal, startDeflator);
+          // The displayed starting balance excludes contributions - the
+          // drill-in's chain is start + contributions - withdrawal +
+          // growth - fees = end
+          const startBalance = emit(
+            yearStartTotal - contributionsThisYear,
+            startDeflator,
+          );
+          const contributions = emit(contributionsThisYear, startDeflator);
           const withdrawal = emit(withdrawalTaken, startDeflator);
           const taxPaid = emit(withdrawalTaken - netDelivered, startDeflator);
           const base = {
             year,
             startBalance,
+            contributions,
+            potContributions: emitParts(
+              capturedPotContributions,
+              startDeflator,
+              contributions,
+            ),
             withdrawal,
             taxPaid,
             potWithdrawals: emitParts(
