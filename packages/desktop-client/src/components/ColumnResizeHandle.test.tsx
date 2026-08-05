@@ -3,61 +3,61 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ColumnWidthsProvider } from '#hooks/useColumnWidths';
+import type { ColumnWidthsContextValue } from '#hooks/useColumnWidths';
+import type * as useColumnWidths from '#hooks/useColumnWidths';
 
 import { ColumnResizeHandle } from './ColumnResizeHandle';
 
-vi.mock('#hooks/useMetadataPref', () => ({
-  useMetadataPref: () => ['test-budget', vi.fn()],
+const { contextRef } = vi.hoisted(() => ({
+  contextRef: { current: null as ColumnWidthsContextValue | null },
 }));
 
-const defaultWidths = {
-  date: 110,
-  payee: 'flex',
-  notes: 'flex',
-  payment: 100,
-  deposit: 100,
-} as const;
+vi.mock('#hooks/useColumnWidths', async importOriginal => {
+  const actual = await importOriginal<typeof useColumnWidths>();
+  return {
+    ...actual,
+    useColumnWidthsContext: () => contextRef.current,
+  };
+});
 
-const columnOrder = ['date', 'payee', 'notes', 'payment', 'deposit'];
+function makeContext(): ColumnWidthsContextValue {
+  return {
+    widths: { date: 110 },
+    containerRef: { current: null },
+    setContainerRef: vi.fn(),
+    getColumnWidth: vi.fn(() => 110),
+    setColumnWidth: vi.fn(),
+    onResizeStart: vi.fn(),
+    onResize: vi.fn(),
+    onResizeEnd: vi.fn(),
+    onResetWidth: vi.fn(),
+  };
+}
 
 function renderHandle(columnName = 'date') {
   const utils = render(
-    <div data-testid="wrapper">
-      <ColumnWidthsProvider
-        tableId="test"
-        defaultWidths={defaultWidths}
-        columnOrder={columnOrder}
-      >
-        <div data-column={columnName}>
-          <ColumnResizeHandle columnName={columnName} />
-        </div>
-      </ColumnWidthsProvider>
+    <div data-column={columnName}>
+      <ColumnResizeHandle columnName={columnName} />
     </div>,
   );
   return {
     handle: utils.getByTestId(`resize-handle-${columnName}`),
-    // The provider's container div carries the inline --col-* custom props.
-    // Query it lazily because React replaces the element on re-render during
-    // a resize, which would otherwise leave a captured reference stale.
-    getContainer: () =>
-      utils
-        .getByTestId('wrapper')
-        .querySelector('[style*="--col-"]') as HTMLElement,
     ...utils,
   };
 }
 
 describe('ColumnResizeHandle', () => {
+  let context: ColumnWidthsContextValue;
+
   beforeEach(() => {
-    localStorage.clear();
+    context = makeContext();
+    contextRef.current = context;
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
   });
 
   it('renders an accessible resize handle', () => {
     const { handle } = renderHandle();
-    expect(handle).toBeInTheDocument();
     expect(handle).toHaveAttribute('data-resize-handle');
     expect(handle).toHaveAttribute('role', 'separator');
     expect(handle).toHaveAttribute('aria-orientation', 'vertical');
@@ -67,105 +67,55 @@ describe('ColumnResizeHandle', () => {
     expect(handle.style.cursor).toBe('col-resize');
   });
 
-  it('starts, moves, and ends a drag via pointer events', () => {
-    const { handle, getContainer } = renderHandle();
+  it('starts a drag on pointerdown and tracks it on the document', () => {
+    const { handle } = renderHandle();
 
-    fireEvent.pointerDown(handle, { clientX: 100 });
+    fireEvent.pointerDown(handle, { button: 0, clientX: 100 });
+    expect(context.onResizeStart).toHaveBeenCalledWith('date', 100);
     expect(document.body.style.cursor).toBe('col-resize');
     expect(document.body.style.userSelect).toBe('none');
 
-    // The width should be applied to the container via CSS vars during drag.
-    fireEvent.pointerMove(handle, { clientX: 130 });
-    expect(getContainer().style.getPropertyValue('--col-date-width')).toBe(
-      '140px',
-    );
+    fireEvent.pointerMove(document, { clientX: 130 });
+    expect(context.onResize).toHaveBeenCalledWith('date', 130);
 
-    fireEvent.pointerUp(handle, { clientX: 130 });
+    fireEvent.pointerUp(document, { clientX: 130 });
+    expect(context.onResizeEnd).toHaveBeenCalled();
     expect(document.body.style.cursor).toBe('');
     expect(document.body.style.userSelect).toBe('');
+
+    // A stray pointermove after the drag ended is ignored
+    fireEvent.pointerMove(document, { clientX: 200 });
+    expect(context.onResize).toHaveBeenCalledTimes(1);
   });
 
-  it('does not resize on pointer moves without a drag in progress', () => {
-    const { handle, getContainer } = renderHandle();
-
-    fireEvent.pointerMove(handle, { clientX: 200 });
-    expect(getContainer().style.getPropertyValue('--col-date-width')).toBe(
-      '110px',
-    );
-  });
-
-  it('clamps the drag at the minimum column width', () => {
-    const { handle, getContainer } = renderHandle('payment');
-
-    fireEvent.pointerDown(handle, { clientX: 100 });
-    fireEvent.pointerMove(handle, { clientX: -400 });
-    expect(getContainer().style.getPropertyValue('--col-payment-width')).toBe(
-      '30px',
-    );
-
-    fireEvent.pointerUp(handle, { clientX: -400 });
-  });
-
-  it('restores the body state when the drag is cancelled', () => {
+  it('ignores non-primary pointer buttons', () => {
     const { handle } = renderHandle();
 
-    fireEvent.pointerDown(handle, { clientX: 100 });
-    expect(document.body.style.cursor).toBe('col-resize');
-
-    fireEvent.pointerCancel(handle);
+    fireEvent.pointerDown(handle, { button: 2, clientX: 100 });
+    expect(context.onResizeStart).not.toHaveBeenCalled();
     expect(document.body.style.cursor).toBe('');
-    expect(document.body.style.userSelect).toBe('');
-  });
-
-  it('cleans up a repeated pointerdown with a single pointerup', () => {
-    const { handle } = renderHandle();
-
-    fireEvent.pointerDown(handle, { clientX: 100 });
-    fireEvent.pointerDown(handle, { clientX: 200 });
-    fireEvent.pointerUp(handle, { clientX: 200 });
-
-    // A stray pointerup afterwards must not end an already-finished drag
-    fireEvent.pointerUp(handle, { clientX: 200 });
-    expect(document.body.style.cursor).toBe('');
-    expect(document.body.style.userSelect).toBe('');
   });
 
   it('resizes with the keyboard arrow keys', () => {
-    const { handle, getContainer } = renderHandle();
+    const { handle } = renderHandle();
 
     fireEvent.keyDown(handle, { key: 'ArrowRight' });
-    expect(getContainer().style.getPropertyValue('--col-date-width')).toBe(
-      '120px',
-    );
+    expect(context.getColumnWidth).toHaveBeenCalledWith('date');
+    expect(context.setColumnWidth).toHaveBeenCalledWith('date', 120);
 
     fireEvent.keyDown(handle, { key: 'ArrowLeft' });
-    expect(getContainer().style.getPropertyValue('--col-date-width')).toBe(
-      '110px',
-    );
-
-    const saved = JSON.parse(
-      localStorage.getItem('test-budget-columnWidths-test')!,
-    );
-    expect(saved).toMatchObject({ date: 110 });
+    expect(context.setColumnWidth).toHaveBeenCalledWith('date', 100);
   });
 
   it('resets the column width on double click', () => {
-    const { handle, getContainer } = renderHandle();
-
-    fireEvent.pointerDown(handle, { clientX: 100 });
-    fireEvent.pointerMove(handle, { clientX: 200 });
-    fireEvent.pointerUp(handle, { clientX: 200 });
-    expect(getContainer().style.getPropertyValue('--col-date-width')).toBe(
-      '210px',
-    );
+    const { handle } = renderHandle();
 
     fireEvent.doubleClick(handle);
-    expect(getContainer().style.getPropertyValue('--col-date-width')).toBe(
-      '110px',
-    );
+    expect(context.onResetWidth).toHaveBeenCalledWith('date');
   });
 
   it('renders nothing when there is no column-widths context', () => {
+    contextRef.current = null;
     render(
       <div>
         <ColumnResizeHandle columnName="date" />

@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type {
   KeyboardEvent as ReactKeyboardEvent,
   MouseEvent as ReactMouseEvent,
   PointerEvent as ReactPointerEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { theme } from '@actual-app/components/theme';
 
 import {
   MIN_COLUMN_WIDTH,
@@ -19,97 +21,71 @@ type ColumnResizeHandleProps = {
 
 export function ColumnResizeHandle({ columnName }: ColumnResizeHandleProps) {
   const context = useColumnWidthsContext();
-  const isDraggingRef = useRef(false);
   const { t } = useTranslation();
 
-  // The context value changes when a resize starts (the provider updates its
-  // state), so endDrag must not depend on it or its identity would change
-  // mid-drag and trigger the unmount cleanup — which would cancel the drag
-  const contextRef = useRef(context);
-  contextRef.current = context;
-
-  const endDrag = useCallback(() => {
-    if (!isDraggingRef.current) return;
-    isDraggingRef.current = false;
-    contextRef.current?.onResizeEnd();
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-  }, []);
+  // Holds the teardown for the document-level drag listeners. The unmount
+  // effect below calls it if the component disappears mid-drag; empty deps
+  // so it never re-fires while a drag is in progress.
+  const cleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     return () => {
-      endDrag();
+      cleanupRef.current?.();
     };
-  }, [endDrag]);
-
-  const onPointerDown = useCallback(
-    (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (!context || (e.button != null && e.button !== 0)) return;
-      e.preventDefault();
-      e.stopPropagation();
-
-      // Cancel any in-flight drag before starting a new one so a repeated
-      // pointerdown can never leave a stuck drag state
-      endDrag();
-
-      context.onResizeStart(columnName, e.clientX);
-      isDraggingRef.current = true;
-
-      try {
-        e.currentTarget.setPointerCapture(e.pointerId);
-      } catch {
-        // Pointer capture is not available (e.g. jsdom); pointermove and
-        // pointerup are still handled by this element
-      }
-
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-    },
-    [columnName, context, endDrag],
-  );
-
-  const onPointerMove = useCallback(
-    (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (!isDraggingRef.current || !context) return;
-      context.onResize(columnName, e.clientX);
-    },
-    [columnName, context],
-  );
-
-  const onPointerEnd = useCallback(
-    (e: ReactPointerEvent<HTMLDivElement>) => {
-      e.preventDefault();
-      endDrag();
-    },
-    [endDrag],
-  );
-
-  const onKeyDown = useCallback(
-    (e: ReactKeyboardEvent<HTMLDivElement>) => {
-      if (!context || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) {
-        return;
-      }
-      e.preventDefault();
-      e.stopPropagation();
-
-      const delta = (e.key === 'ArrowRight' ? 1 : -1) * KEYBOARD_RESIZE_STEP;
-      context.onResizeStart(columnName, 0);
-      context.onResize(columnName, delta);
-      context.onResizeEnd();
-    },
-    [columnName, context],
-  );
-
-  const onDoubleClick = useCallback(
-    (e: ReactMouseEvent<HTMLDivElement>) => {
-      e.preventDefault();
-      e.stopPropagation();
-      context?.onResetWidth(columnName);
-    },
-    [columnName, context],
-  );
+  }, []);
 
   if (!context) return null;
+
+  const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    context.onResizeStart(columnName, e.clientX);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    // Track the drag on the document so it keeps working when the pointer
+    // leaves the handle, and ends even if the pointer is released outside
+    // the browser window
+    const onPointerMove = (ev: PointerEvent) => {
+      context.onResize(columnName, ev.clientX);
+    };
+    const cleanup = () => {
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerEnd);
+      document.removeEventListener('pointercancel', onPointerEnd);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    const onPointerEnd = () => {
+      cleanup();
+      cleanupRef.current = null;
+      context.onResizeEnd();
+    };
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerEnd);
+    document.addEventListener('pointercancel', onPointerEnd);
+    cleanupRef.current = cleanup;
+  };
+
+  const onKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const delta = (e.key === 'ArrowRight' ? 1 : -1) * KEYBOARD_RESIZE_STEP;
+    context.setColumnWidth(
+      columnName,
+      context.getColumnWidth(columnName) + delta,
+    );
+  };
+
+  const onDoubleClick = (e: ReactMouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    context.onResetWidth(columnName);
+  };
 
   const width = context.widths[columnName];
 
@@ -124,10 +100,6 @@ export function ColumnResizeHandle({ columnName }: ColumnResizeHandleProps) {
       data-testid={`resize-handle-${columnName}`}
       data-resize-handle
       onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerEnd}
-      onPointerCancel={endDrag}
-      onLostPointerCapture={endDrag}
       onKeyDown={onKeyDown}
       onDoubleClick={onDoubleClick}
       style={{
@@ -138,7 +110,7 @@ export function ColumnResizeHandle({ columnName }: ColumnResizeHandleProps) {
         height: '100%',
         cursor: 'col-resize',
         zIndex: 10,
-        borderRight: '1px solid rgba(0, 0, 0, 0.15)',
+        borderRight: `1px solid ${theme.tableBorder}`,
         touchAction: 'none',
       }}
     />
