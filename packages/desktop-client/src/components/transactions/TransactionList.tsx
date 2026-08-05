@@ -38,7 +38,6 @@ import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { TableHandleRef } from '#components/table';
 import { isValidBoundaryDrop } from '#hooks/useDragDrop';
 import type { DropPosition } from '#hooks/useDragDrop';
-import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
@@ -346,12 +345,6 @@ export function TransactionList({
     'upcomingScheduledTransactionLength',
   );
 
-  // Whether to show the "Convert to Schedule" prompt when adding/editing future transactions.
-  // Default to true for existing behavior.
-  const [showConvertPrompt = true] = useGlobalPref(
-    'showConvertToSchedulePrompt',
-  );
-
   const transactionsLatest = useRef<readonly TransactionEntity[]>([]);
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -363,13 +356,6 @@ export function TransactionList({
       onConfirm: () => Promise<void>,
       onCancel: () => Promise<void>,
     ) => {
-      // If user has disabled the prompt globally, skip showing the modal and
-      // run the cancel path (keep as transaction) by default.
-      if (!showConvertPrompt) {
-        void onCancel().then(() => onRefetch());
-        return;
-      }
-
       const futureInfo = calculateFutureTransactionInfo(
         transaction,
         upcomingLength,
@@ -402,7 +388,7 @@ export function TransactionList({
         }),
       );
     },
-    [dispatch, onRefetch, upcomingLength, t, showConvertPrompt],
+    [dispatch, onRefetch, upcomingLength, t],
   );
 
   const onAdd = useCallback(

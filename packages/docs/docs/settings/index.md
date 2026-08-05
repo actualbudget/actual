@@ -29,16 +29,6 @@ The language choice alters the display language of all text. If you encounter a 
 
 ![Image of language setting](/img/using-actual/actual-languages.webp)
 
-### Schedules
-
-Two user-facing options are available:
-
-- Upcoming length: controls how far ahead scheduled transactions are shown as "upcoming" in the Accounts and Schedules views.
-
-- Show "Convert to Schedule" prompt: when enabled (default), Actual will prompt to convert any future-dated transaction into a single-time schedule. When disabled, the prompt is suppressed and future transactions are saved directly.
-
-As with all settings, these are saved automatically when you adjust these controls. See [the Schedules page](../schedules.md) for details and examples.
-
 ### Authentication Method
 
 OpenID can be enabled here. [Learn more](../config/oauth-auth.md)

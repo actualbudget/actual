@@ -91,7 +91,6 @@ import { useCategories } from '#hooks/useCategories';
 import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
 import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useDateFormat } from '#hooks/useDateFormat';
-import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useInputRefValue } from '#hooks/useInputRefValue';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
@@ -630,9 +629,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const [upcomingLength = DEFAULT_UPCOMING_SCHEDULE_DAYS] = useSyncedPref(
       'upcomingScheduledTransactionLength',
     );
-    const [shouldShowConvertPrompt = true] = useGlobalPref(
-      'showConvertToSchedulePrompt',
-    );
     const transactions = useMemo(
       () =>
         unserializedTransactions.map(t =>
@@ -727,7 +723,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       const isFuture = unserializedTransaction.date > today;
       const isLinkedToSchedule = !!unserializedTransaction.schedule;
 
-      if (shouldShowConvertPrompt && isFuture && !isLinkedToSchedule) {
+      if (isFuture && !isLinkedToSchedule) {
         const upcomingDays = getUpcomingDays(upcomingLength, today);
         const daysUntilTransaction = monthUtils.differenceInCalendarDays(
           unserializedTransaction.date,
@@ -844,7 +840,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       onSave,
       unserializedTransactions,
       upcomingLength,
-      shouldShowConvertPrompt,
       t,
     ]);
 
