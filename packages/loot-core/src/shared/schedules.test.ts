@@ -7,6 +7,7 @@ import {
   computeSchedulePreviewTransactions,
   getHasTransactionsQuery,
   getNextDate,
+  getScheduledAmount,
   getScheduleOccurrenceMatchStartDate,
   getStatus,
   getUpcomingDays,
@@ -524,6 +525,87 @@ describe('schedules', () => {
       expect(isCustomUpcomingLength('2-week')).toBe(true);
       expect(isCustomUpcomingLength(null)).toBe(false);
       expect(isCustomUpcomingLength(undefined)).toBe(false);
+    });
+  });
+
+  describe('getScheduledAmount', () => {
+    it('returns the integer amount unchanged for static schedules', () => {
+      expect(getScheduledAmount(12345)).toBe(12345);
+    });
+
+    it('inverts the sign when requested', () => {
+      expect(getScheduledAmount(12345, true)).toBe(-12345);
+    });
+
+    it('averages and rounds an isbetween amount', () => {
+      expect(getScheduledAmount({ num1: 100, num2: 201 })).toBe(151);
+    });
+
+    it('returns 0 for null amounts', () => {
+      expect(getScheduledAmount(null as never)).toBe(0);
+    });
+
+    it('evaluates a constant formula', () => {
+      // =100 currency units -> 10000 minor units
+      expect(getScheduledAmount('=100', false, { date: '2024-03-15' })).toBe(
+        10000,
+      );
+    });
+
+    it('evaluates a date-dependent formula with the supplied date', () => {
+      // DAY(date) on 2024-03-15 -> 15; 15 * 100 units -> 150000 minor units
+      const day15 = getScheduledAmount('=DAY(date) * 100', false, {
+        date: '2024-03-15',
+      });
+      const day28 = getScheduledAmount('=DAY(date) * 100', false, {
+        date: '2024-03-28',
+      });
+      expect(day15).toBe(150000);
+      expect(day28).toBe(280000);
+      expect(day28).not.toBe(day15);
+    });
+
+    it('uses the currency decimal places for the conversion', () => {
+      // 100 units with 0 decimal places (e.g. JPY) -> 100 minor units
+      expect(
+        getScheduledAmount('=100', false, {
+          date: '2024-03-15',
+          decimalPlaces: 0,
+        }),
+      ).toBe(100);
+      // 3-decimal currency -> 100000 minor units
+      expect(
+        getScheduledAmount('=100', false, {
+          date: '2024-03-15',
+          decimalPlaces: 3,
+        }),
+      ).toBe(100000);
+    });
+
+    it('resolves BALANCE_OF from the prefetched context', () => {
+      const prefetch = new Map<string, number>([['Checking', 123456]]);
+      expect(
+        getScheduledAmount('=BALANCE_OF("Checking")', false, {
+          date: '2024-03-15',
+          balanceOfPrefetch: prefetch,
+        }),
+      ).toBe(12345600);
+    });
+
+    it('returns 0 when the formula is malformed', () => {
+      expect(
+        getScheduledAmount('=NOT_A_FUNCTION()', false, { date: '2024-03-15' }),
+      ).toBe(0);
+    });
+
+    it('returns 0 when the formula does not start with =', () => {
+      expect(getScheduledAmount('100', false, { date: '2024-03-15' })).toBe(0);
+    });
+
+    it('returns 0 when the formula does not produce a number', () => {
+      expect(
+        getScheduledAmount('="hello"', false, { date: '2024-03-15' }),
+      ).toBe(0);
     });
   });
 });

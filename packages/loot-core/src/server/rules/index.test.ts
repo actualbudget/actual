@@ -68,6 +68,44 @@ describe('Condition', () => {
     spy.mockRestore();
   });
 
+  test('formula conditions require a formula value', () => {
+    expect(() => new Condition('formula', 'amount', 100, null)).toThrow(
+      'Formula value must be a string starting with "="',
+    );
+    expect(() => new Condition('formula', 'amount', '100', null)).toThrow(
+      'Formula value must be a string starting with "="',
+    );
+    expect(
+      () => new Condition('formula', 'amount', '=100', null),
+    ).not.toThrow();
+  });
+
+  test('formula conditions evaluate against the field value approximately', () => {
+    // =100 major units -> 10000 minor units
+    let cond = new Condition('formula', 'amount', '=100', null);
+    expect(cond.eval({ amount: 10000, date: '2020-08-10' })).toBe(true);
+    expect(cond.eval({ amount: 10001, date: '2020-08-10' })).toBe(true);
+    expect(cond.eval({ amount: 20000, date: '2020-08-10' })).toBe(false);
+
+    // Date-dependent formulas use the transaction's own date
+    cond = new Condition('formula', 'amount', '=DAY(date) * 100', null);
+    expect(cond.eval({ amount: 150000, date: '2020-08-15' })).toBe(true);
+    expect(cond.eval({ amount: 10000, date: '2020-08-15' })).toBe(false);
+  });
+
+  test('formula conditions never match non-numeric or invalid formulas', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => null);
+    let cond = new Condition('formula', 'amount', '="hello"', null);
+    expect(cond.eval({ amount: 0, date: '2020-08-10' })).toBe(false);
+
+    cond = new Condition('formula', 'amount', '=NOT_A_FUNCTION()', null);
+    expect(cond.eval({ amount: 0, date: '2020-08-10' })).toBe(false);
+
+    cond = new Condition('formula', 'amount', '=1 +', null);
+    expect(cond.eval({ amount: 0, date: '2020-08-10' })).toBe(false);
+    warnSpy.mockRestore();
+  });
+
   test('date restricts operators for each type', () => {
     expect(() => {
       new Condition('isapprox', 'date', '2020-08', null);
