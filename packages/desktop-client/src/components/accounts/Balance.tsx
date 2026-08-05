@@ -100,7 +100,7 @@ export function SelectedBalance({
 
   for (const id of [...selectedItems].filter(isPreviewId)) {
     // Preview IDs are in the format `preview/<schedule_id>/<date>`
-    const scheduleId = id.slice(8).split('/')[0];
+    const [, scheduleId, date] = id.split('/');
     const schedule = schedules.find(s => s.id === scheduleId);
     if (schedule) {
       // If a schedule is `between X and Y` then we calculate the average
@@ -108,10 +108,18 @@ export function SelectedBalance({
         isExactBalance = false;
       }
 
+      // Formula amounts are evaluated per occurrence date; the balance is
+      // only an estimate because BALANCE_OF can't be resolved here.
+      if (schedule._amountOp === 'formula') {
+        isExactBalance = false;
+      }
+
+      const amount = getScheduledAmount(schedule._amount, false, { date });
+
       if (!account || account.id === schedule._account) {
-        scheduleBalance += getScheduledAmount(schedule._amount);
+        scheduleBalance += amount;
       } else {
-        scheduleBalance -= getScheduledAmount(schedule._amount);
+        scheduleBalance -= amount;
       }
     }
   }

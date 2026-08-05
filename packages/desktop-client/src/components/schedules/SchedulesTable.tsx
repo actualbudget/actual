@@ -77,16 +77,19 @@ export function ScheduleAmountCell({
   const currencyAmount = format(Math.abs(num || 0), 'financial');
   const isApprox = op === 'isapprox';
   const isBetween = op === 'isbetween';
+  const isFormula = op === 'formula';
   let cellText = '';
   if (isApprox) {
     cellText = t('Approximately {{currencyAmount}}', {
       currencyAmount,
     });
-  } else if (isBetween && typeof amount != 'number') {
+  } else if (isBetween && typeof amount === 'object' && amount != null) {
     cellText = t('{{currency1}} to {{currency2}}', {
       currency1: format(Math.abs(amount.num1 || 0), 'financial'),
       currency2: format(Math.abs(amount.num2 || 0), 'financial'),
     });
+  } else if (isFormula && typeof amount === 'string') {
+    cellText = amount;
   } else {
     cellText = currencyAmount;
   }
@@ -128,6 +131,19 @@ export function ScheduleAmountCell({
           ±
         </View>
       )}
+      {isFormula && (
+        <View
+          style={{
+            textAlign: 'left',
+            color: theme.pageTextSubdued,
+            lineHeight: '1em',
+            marginRight: 10,
+          }}
+          title={cellText}
+        >
+          ƒ
+        </View>
+      )}
       <FinancialText
         style={{
           flex: 1,
@@ -139,7 +155,11 @@ export function ScheduleAmountCell({
         title={cellText}
       >
         <PrivacyFilter>
-          {num > 0 ? `+${currencyAmount}` : `${currencyAmount}`}
+          {isFormula
+            ? cellText
+            : num > 0
+              ? `+${currencyAmount}`
+              : `${currencyAmount}`}
         </PrivacyFilter>
       </FinancialText>
     </Cell>
@@ -325,15 +345,26 @@ export function SchedulesTable({
     return schedules.filter(schedule => {
       const payee = payees.find(p => schedule._payee === p.id);
       const account = accounts.find(a => schedule._account === a.id);
-      const amount = getScheduledAmount(schedule._amount);
-      let amountStr = '';
-      if (schedule._amountOp === 'isbetween') {
-        amountStr = '±';
-      } else if (schedule._amountOp === 'isapprox') {
-        amountStr = '~';
-      }
-      amountStr +=
-        (amount > 0 ? '+' : '') + format(Math.abs(amount || 0), 'financial');
+      const isFormula =
+        schedule._amountOp === 'formula' &&
+        typeof schedule._amount === 'string';
+      const amountStr =
+        isFormula && typeof schedule._amount === 'string'
+          ? schedule._amount
+          : (() => {
+              const amount = getScheduledAmount(schedule._amount);
+              let str = '';
+              if (schedule._amountOp === 'isbetween') {
+                str = '±';
+              } else if (schedule._amountOp === 'isapprox') {
+                str = '~';
+              }
+              return (
+                str +
+                (amount > 0 ? '+' : '') +
+                format(Math.abs(amount || 0), 'financial')
+              );
+            })();
       const dateStr = schedule.next_date
         ? monthUtilFormat(schedule.next_date, dateFormat)
         : null;
