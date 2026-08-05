@@ -64,6 +64,11 @@ export function setCachedUserPreferences(prefs: UserPreferences): void {
   cachedUserPreferences = prefs;
 }
 
+/** Returns the cached formula preferences, or null before they are loaded. */
+export function getCachedFormulaPreferences(): UserPreferences | null {
+  return cachedUserPreferences;
+}
+
 export function clearCachedUserPreferences(): void {
   cachedUserPreferences = null;
 }
