@@ -272,4 +272,57 @@ test.describe('Schedules', () => {
     await expect(menu).toBeVisible();
     await expect(menu.getByRole('button', { name: 'Complete' })).toBeVisible();
   });
+
+  test('creates a schedule with a formula amount', async () => {
+    const settingsPage = await navigation.goToSettingsPage();
+    await settingsPage.enableExperimentalFeature(
+      'Excel formula mode (Formula cards, Rule formulas & Schedule amounts)',
+    );
+    await navigation.goToSchedulesPage();
+
+    const scheduleEditModal = await schedulesPage.addNewSchedule();
+    await scheduleEditModal.fill({
+      payee: 'Home Depot',
+      account: 'HSBC',
+    });
+
+    // Switch the amount to a formula
+    await scheduleEditModal.selectAmountOp('is formula');
+
+    await scheduleEditModal.formulaEditor.waitFor({ state: 'visible' });
+    await scheduleEditModal.formulaEditor.click();
+    await scheduleEditModal.formulaEditor.pressSequentially('-DAY(date)*100');
+
+    // The live preview evaluates the formula for the next occurrence
+    await expect(scheduleEditModal.formulaPreview).toBeVisible();
+    await expect(scheduleEditModal.formulaPreview).toHaveText(
+      /Evaluates to .* on .*/,
+    );
+
+    // The preview line reserves its space: the date row must not move when
+    // the formula (and thus the preview text) changes.
+    const dateRowBefore = await scheduleEditModal.locator
+      .getByText('Upcoming dates')
+      .boundingBox();
+    await scheduleEditModal.formulaEditor.click();
+    await scheduleEditModal.formulaEditor.press('End');
+    await scheduleEditModal.formulaEditor.pressSequentially('/2');
+    await expect(scheduleEditModal.formulaPreview).toHaveText(
+      /Evaluates to .* on .*/,
+    );
+    const dateRowAfter = await scheduleEditModal.locator
+      .getByText('Upcoming dates')
+      .boundingBox();
+    expect(dateRowAfter?.y).toBe(dateRowBefore?.y);
+
+    // Restore the intended formula before saving
+    await scheduleEditModal.formulaEditor.press('Backspace');
+    await scheduleEditModal.formulaEditor.press('Backspace');
+
+    await scheduleEditModal.add();
+
+    const schedule = schedulesPage.getNthSchedule(2);
+    await expect(schedule.payee).toHaveText('Home Depot');
+    await expect(schedule.amount).toHaveText('ƒ=-DAY(date)*100');
+  });
 });
