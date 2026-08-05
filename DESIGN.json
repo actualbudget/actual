@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-05T00:00:00Z",
+  "title": "Design System: Actual Budget",
+  "extensions": {
+    "colorMeta": {
+      "actual-purple": {
+        "role": "primary",
+        "displayName": "Actual Purple",
+        "canonical": "#8719e0",
+        "tonalRamp": [
+          "#44056e",
+          "#580a94",
+          "#690cb0",
+          "#7a0ecc",
+          "#8719e0",
+          "#9446ed",
+          "#a368fc",
+          "#b990ff",
+          "#dac4ff",
+          "#f2ebfe"
+        ]
+      },
+      "navy-ink": {
+        "role": "neutral",
+        "displayName": "Navy Ink",
+        "canonical": "#102a43",
+        "tonalRamp": [
+          "#102a43",
+          "#243b53",
+          "#334e68",
+          "#486581",
+          "#627d98",
+          "#829ab1",
+          "#9fb3c8",
+          "#bcccdc",
+          "#d9e2ec",
+          "#f7fafc"
+        ]
+      },
+      "navy-slate": {
+        "role": "neutral",
+        "displayName": "Navy Slate",
+        "canonical": "#627d98"
+      },
+      "navy-mist": {
+        "role": "neutral",
+        "displayName": "Navy Mist",
+        "canonical": "#e8ecf0"
+      },
+      "navy-frost": {
+        "role": "neutral",
+        "displayName": "Navy Frost",
+        "canonical": "#f7fafc"
+      },
+      "page-text": {
+        "role": "neutral",
+        "displayName": "Page Ink",
+        "canonical": "#272630"
+      },
+      "surface-white": {
+        "role": "neutral",
+        "displayName": "Surface White",
+        "canonical": "#ffffff"
+      },
+      "positive-green": {
+        "role": "tertiary",
+        "displayName": "Positive Green",
+        "canonical": "#147d64",
+        "tonalRamp": [
+          "#014d40",
+          "#0c6b58",
+          "#147d64",
+          "#199473",
+          "#27ab83",
+          "#3ebd93",
+          "#65d6ad",
+          "#8eedc7",
+          "#c6f7e2",
+          "#effcf6"
+        ]
+      },
+      "negative-red": {
+        "role": "tertiary",
+        "displayName": "Negative Red",
+        "canonical": "#e12d39",
+        "tonalRamp": [
+          "#610316",
+          "#8a041a",
+          "#ab091e",
+          "#cf1124",
+          "#e12d39",
+          "#ef4e4e",
+          "#f86a6a",
+          "#ff9b9b",
+          "#ffbdbd",
+          "#ffe3e3"
+        ]
+      },
+      "link-blue": {
+        "role": "tertiary",
+        "displayName": "Link Blue",
+        "canonical": "#1980d4",
+        "tonalRamp": [
+          "#034388",
+          "#0b5fa3",
+          "#1271bf",
+          "#1980d4",
+          "#2b8fed",
+          "#40a5f7",
+          "#66b5fa",
+          "#8bcafd",
+          "#b3d9ff",
+          "#e3f0ff"
+        ]
+      },
+      "warning-gold": {
+        "role": "tertiary",
+        "displayName": "Warning Gold",
+        "canonical": "#b88115"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page-level headings and large balances. Rare."
+      },
+      "headline": { "displayName": "Headline", "purpose": "Section titles." },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Emphasized in-table and card text."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default text; financial figures add tnum/ss01/ss04 features."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Table meta, menus, dense secondary text."
+      }
+    },
+    "shadows": [
+      {
+        "name": "card",
+        "value": "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
+        "purpose": "Resting cards and small raised widgets."
+      },
+      {
+        "name": "ambient",
+        "value": "0 2px 4px 0 rgba(0,0,0,0.1)",
+        "purpose": "Focused big inputs, subtle lift."
+      },
+      {
+        "name": "large",
+        "value": "0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)",
+        "purpose": "Tooltips, popovers, floating panels."
+      }
+    ],
+    "motion": [
+      {
+        "name": "button-shadow",
+        "value": "box-shadow .25s",
+        "purpose": "Primary button hover lift."
+      },
+      {
+        "name": "delayed-fade-in",
+        "value": "opacity 1s both 0.5s delay",
+        "purpose": "Loading placeholders that shouldn't flash."
+      }
+    ],
+    "breakpoints": [
+      { "name": "small", "value": "512px" },
+      { "name": "medium", "value": "730px" },
+      { "name": "wide", "value": "1100px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single accented action on a screen.",
+      "html": "<button class=\"ds-btn-primary\">Add transaction</button>",
+      "css": ".ds-btn-primary { background: var(--color-buttonPrimaryBackground, #8719e0); color: var(--color-buttonPrimaryText, #ffffff); padding: 5px 10px; border: 1px solid var(--color-buttonPrimaryBorder, #8719e0); border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; transition: box-shadow .25s; } .ds-btn-primary:hover { background: var(--color-buttonPrimaryBackgroundHover, #a368fc); box-shadow: 0 1px 3px rgba(0,0,0,0.3); } .ds-btn-primary:focus-visible { outline: 2px solid #8719e0; outline-offset: 2px; }"
+    },
+    {
+      "name": "Normal Button",
+      "kind": "button",
+      "refersTo": "button-normal",
+      "description": "Default secondary action.",
+      "html": "<button class=\"ds-btn-normal\">Cancel</button>",
+      "css": ".ds-btn-normal { background: var(--color-buttonNormalBackground, #ffffff); color: var(--color-buttonNormalText, #102a43); padding: 5px 10px; border: 1px solid var(--color-buttonNormalBorder, #d9e2ec); border-radius: 4px; font-size: 13px; font-weight: 500; cursor: pointer; transition: box-shadow .25s; } .ds-btn-normal:hover { box-shadow: 0 1px 2px rgba(0,0,0,0.2); } .ds-btn-normal:focus-visible { outline: 2px solid #8719e0; outline-offset: 2px; }"
+    },
+    {
+      "name": "Bare Button",
+      "kind": "button",
+      "refersTo": "button-bare",
+      "description": "In-table workhorse action; invisible until interaction.",
+      "html": "<button class=\"ds-btn-bare\">Edit</button>",
+      "css": ".ds-btn-bare { background: transparent; color: var(--color-pageText, #272630); padding: 5px; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; } .ds-btn-bare:hover { background: rgba(100, 100, 100, 0.15); } .ds-btn-bare:active { background: rgba(100, 100, 100, 0.25); } .ds-btn-bare:focus-visible { outline: 2px solid #8719e0; outline-offset: 1px; }"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Compact form field.",
+      "html": "<input class=\"ds-input\" placeholder=\"Payee\" />",
+      "css": ".ds-input { background: var(--color-tableBackground, #ffffff); color: var(--color-pageText, #272630); padding: 5px; border: 1px solid var(--color-tableBorder, #e8ecf0); border-radius: 4px; font-size: 13px; } .ds-input:focus-visible { outline: none; border-color: #8719e0; box-shadow: 0 0 0 1px #8719e0; }"
+    },
+    {
+      "name": "Editor Pill",
+      "kind": "chip",
+      "refersTo": "input",
+      "description": "Inline token for rule conditions and filters.",
+      "html": "<span class=\"ds-pill\">category is Food</span>",
+      "css": ".ds-pill { display: inline-block; background: var(--color-pillBackground, #e8ecf0); color: var(--color-pillText, #272630); border-radius: 4px; padding: 3px 5px; font-size: 13px; }"
+    },
+    {
+      "name": "Money Table Row",
+      "kind": "custom",
+      "refersTo": "input",
+      "description": "The signature surface: tabular amounts, semantic money colors, frost hover.",
+      "html": "<div class=\"ds-row\"><span>Grocery Store</span><span class=\"ds-amount ds-neg\">-42.18</span></div><div class=\"ds-row\"><span>Paycheck</span><span class=\"ds-amount ds-pos\">1,250.00</span></div>",
+      "css": ".ds-row { display: flex; justify-content: space-between; gap: 24px; background: var(--color-tableBackground, #ffffff); border-bottom: 1px solid var(--color-tableBorder, #e8ecf0); padding: 6px 10px; font-size: 13px; color: var(--color-tableText, #272630); cursor: default; } .ds-row:hover { background: var(--color-tableRowBackgroundHover, #f7fafc); } .ds-amount { font-feature-settings: 'tnum', 'ss01', 'ss04'; text-align: right; } .ds-neg { color: var(--color-numberNegative, #e12d39); } .ds-pos { color: var(--color-numberPositive, #147d64); }"
+    },
+    {
+      "name": "Sidebar Item",
+      "kind": "nav",
+      "refersTo": "button-bare",
+      "description": "Navigation row on the Navy Ink sidebar.",
+      "html": "<div class=\"ds-sidebar\"><div class=\"ds-nav-item\">Budget</div><div class=\"ds-nav-item ds-nav-selected\">Accounts</div></div>",
+      "css": ".ds-sidebar { background: var(--color-sidebarBackground, #102a43); padding: 8px; border-radius: 6px; width: 180px; } .ds-nav-item { color: var(--color-sidebarItemText, #d9e2ec); font-size: 13px; font-weight: 500; padding: 6px 10px; border-radius: 4px; cursor: pointer; } .ds-nav-item:hover { background: var(--color-sidebarItemBackgroundHover, #243b53); } .ds-nav-selected { color: var(--color-sidebarItemTextSelected, #b990ff); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Home Office",
+    "overview": "Actual feels like a tidy personal desk: familiar, unpretentious, everything within reach. It is a tool people open weekly for years to reconcile accounts and move envelope money around, so the interface optimizes for routine, not first impressions. Density is moderate-to-high, feedback is instant, and decoration is close to zero. The financial numbers are the interface; everything else exists to keep them legible and trustworthy. The system explicitly rejects fintech-startup gloss and corporate banking UI, and must render identically well in light, dark, and midnight themes.",
+    "keyCharacteristics": [
+      "Table-first layouts with tabular numerals everywhere money appears",
+      "One accent (Actual Purple) used sparingly for primary actions and selection",
+      "Semantic color tokens only; components never hardcode hex values",
+      "Utilitarian, compact components built for daily repetition",
+      "Flat-first surfaces; shadows reserved for transient overlays"
+    ],
+    "rules": [
+      {
+        "name": "The Semantic Token Rule",
+        "body": "Components never use raw palette values or hex codes. Every color goes through the theme.* semantic layer (--color-* custom properties) so all three themes (light, dark, midnight) stay correct. A hardcoded hex in a component is a bug.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Accent Rule",
+        "body": "Actual Purple appears on well under 10% of any screen: primary action, current selection, active nav. It never decorates.",
+        "section": "colors"
+      },
+      {
+        "name": "The Never-Color-Alone Rule",
+        "body": "Positive/negative money state is conveyed by sign and context as well as color; green/red are reinforcement, never the only signal.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Number Rule",
+        "body": "Every standalone financial figure renders with font-feature-settings \"tnum\", \"ss01\", \"ss04\" (via FinancialText or styles.tnum) so digits align in columns and disambiguate. A proportional-figure money column is a bug.",
+        "section": "typography"
+      },
+      {
+        "name": "The Transient-Only Rule",
+        "body": "If a surface stays on screen, it gets a border. If it appears on interaction and disappears, it may cast a shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do route every color through theme.* semantic tokens so light, dark, and midnight themes all work. Test all three.",
+      "Do wrap standalone financial numbers in FinancialText or apply styles.tnum.",
+      "Do keep components compact and quick: 4px radii, 5-10px paddings, instant hover/press states.",
+      "Do reuse the existing component library (@actual-app/components) before writing new UI.",
+      "Do keep Actual Purple scarce: primary action and selection only.",
+      "Do respect the breakpoints: 512px (small), 730px (medium), 1100px (wide); mobile touch targets are at least 40px tall."
+    ],
+    "donts": [
+      "Don't use fintech-startup gloss: gradient heroes, glassmorphism, neon accents, crypto-dashboard styling.",
+      "Don't use corporate banking UI patterns: navy-and-gold, enterprise-portal density, legalese energy.",
+      "Don't hardcode hex values or raw --palette-* colors in components; the semantic layer is the only entry point.",
+      "Don't rely on color alone for positive/negative amounts.",
+      "Don't put shadows on persistent surfaces; shadows are for transient overlays only.",
+      "Don't use border-left/border-right thicker than 1px as a colored accent stripe.",
+      "Don't animate layout properties; transitions are for color, opacity, and shadow."
+    ]
+  }
+}
