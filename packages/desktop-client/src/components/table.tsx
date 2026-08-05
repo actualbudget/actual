@@ -96,11 +96,34 @@ function getWidthStyle(
   columnName?: string,
 ): CSSProperties {
   if (ctxWidth !== undefined) {
+    // Flex columns keep a floor so a very wide neighbor can't fully
+    // collapse them
     return ctxWidth === 'flex'
-      ? { flex: 1, flexBasis: 0 }
+      ? { flex: 1, flexBasis: 0, minWidth: 50 }
       : { width: `var(--col-${columnName}-width)` };
   }
   return width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
+}
+
+// Resolves the effective column name, the width style, and whether the
+// column is governed by a column-widths provider (in which case the field
+// also needs position/attributes for the resize handle)
+function useColumnWidthStyle(
+  width: CSSProperties['width'] | undefined,
+  name: string | undefined,
+  columnName: string | undefined,
+) {
+  const columnWidthsCtx = useColumnWidthsContext();
+  const effectiveColumnName = columnName || name;
+  const ctxWidth =
+    columnWidthsCtx && effectiveColumnName
+      ? columnWidthsCtx.widths[effectiveColumnName]
+      : undefined;
+  return {
+    widthStyle: getWidthStyle(width, ctxWidth, effectiveColumnName),
+    effectiveColumnName,
+    hasResizeContext: !!(columnWidthsCtx && effectiveColumnName),
+  };
 }
 
 export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
@@ -117,15 +140,8 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   },
   ref,
 ) {
-  const columnWidthsCtx = useColumnWidthsContext();
-  const effectiveColumnName = columnName || name;
-  const ctxWidth =
-    columnWidthsCtx && effectiveColumnName
-      ? columnWidthsCtx.widths[effectiveColumnName]
-      : undefined;
-
-  const widthStyle = getWidthStyle(width, ctxWidth, effectiveColumnName);
-
+  const { widthStyle, effectiveColumnName, hasResizeContext } =
+    useColumnWidthStyle(width, name, columnName);
   const { isHeader } = useContext(HeaderContext);
 
   return (
@@ -134,7 +150,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
       {...props}
       style={{
         ...widthStyle,
-        position: 'relative',
+        ...(hasResizeContext && { position: 'relative' }),
         borderTopWidth: 1,
         borderBottomWidth: 1,
         borderColor: theme.tableBorder,
@@ -142,7 +158,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
         ...style,
       }}
       data-testid={name}
-      data-column={effectiveColumnName}
+      {...(hasResizeContext && { 'data-column': effectiveColumnName })}
     >
       {/* This is wrapped so that the padding is not taken into
           account with the flex width (which aligns it with the Cell
@@ -169,7 +185,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
           children
         )}
       </View>
-      {isHeader && resizable && effectiveColumnName && columnWidthsCtx && (
+      {isHeader && resizable && hasResizeContext && (
         <ColumnResizeHandle columnName={effectiveColumnName} />
       )}
     </View>
@@ -241,19 +257,13 @@ export function Cell({
   const mouseCoords = useRef(null);
   const viewRef = useRef(null);
   const { isHeader } = useContext(HeaderContext);
-  const columnWidthsCtx = useColumnWidthsContext();
 
   useProperFocus(viewRef, focused !== undefined ? focused : exposed);
 
-  const effectiveColumnName = columnName || name;
-  const ctxWidth =
-    columnWidthsCtx && effectiveColumnName
-      ? columnWidthsCtx.widths[effectiveColumnName]
-      : undefined;
-
-  const widthStyle = getWidthStyle(width, ctxWidth, effectiveColumnName);
+  const { widthStyle, effectiveColumnName, hasResizeContext } =
+    useColumnWidthStyle(width, name, columnName);
   const cellStyle: CSSProperties = {
-    position: 'relative',
+    ...(hasResizeContext && { position: 'relative' }),
     textAlign: textAlign || 'left',
     justifyContent: 'center',
     borderTopWidth: 1,
@@ -338,10 +348,10 @@ export function Cell({
       {...viewProps}
       innerRef={mergedRef}
       data-testid={name}
-      data-column={effectiveColumnName}
+      {...(hasResizeContext && { 'data-column': effectiveColumnName })}
     >
       {conditionalPrivacyFilter}
-      {isHeader && resizable && effectiveColumnName && columnWidthsCtx && (
+      {isHeader && resizable && hasResizeContext && (
         <ColumnResizeHandle columnName={effectiveColumnName} />
       )}
     </View>
