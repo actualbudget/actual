@@ -181,7 +181,7 @@ export const budgetModel = {
   },
 };
 
-export type AmountOPType = 'is' | 'isapprox' | 'isbetween';
+export type AmountOPType = 'is' | 'isapprox' | 'isbetween' | 'formula';
 
 export type APIScheduleEntity = Pick<
   ScheduleEntity,
@@ -193,7 +193,7 @@ export type APIScheduleEntity = Pick<
   payee?: ScheduleEntity['_payee']; // Optional will default to null
   account?: ScheduleEntity['_account']; // Optional will default to null
   amount?: ScheduleEntity['_amount']; // Provide only 1 number except if the Amount
-  amountOp: AmountOPType; // 'is' | 'isapprox' | 'isbetween'
+  amountOp: AmountOPType; // 'is' | 'isapprox' | 'isbetween' | 'formula'
   date: ScheduleEntity['_date']; // mandatory field in creating a schedule Mandatory field in creation
 };
 
@@ -209,7 +209,11 @@ export const scheduleModel = {
       payee: schedule._payee,
       account: schedule._account,
       amount: schedule._amount,
-      amountOp: schedule._amountOp as 'is' | 'isapprox' | 'isbetween', // e.g. 'isapprox', 'is', etc.
+      amountOp: schedule._amountOp as
+        | 'is'
+        | 'isapprox'
+        | 'isbetween'
+        | 'formula', // e.g. 'isapprox', 'is', etc.
       date: schedule._date,
     };
   },
@@ -234,7 +238,12 @@ export const scheduleModel = {
         { op: 'is', field: 'payee', value: String(schedule.payee) },
         { op: 'is', field: 'account', value: String(schedule.account) },
         { op: 'isapprox', field: 'date', value: schedule.date },
-        { op: schedule.amountOp, field: 'amount', value: amount },
+        {
+          op: schedule.amountOp,
+          field: 'amount',
+          value: amount,
+          type: schedule.amountOp === 'formula' ? 'string' : 'number',
+        },
       ],
       _actions: [], // empty array, as you requested
     };
