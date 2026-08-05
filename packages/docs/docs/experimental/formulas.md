@@ -346,3 +346,37 @@ When a rule runs, Actual converts the formula result to the field type:
 - **date fields**: must produce a valid date
 - **boolean fields**: `TRUE`/`FALSE` (or a string that equals `"true"`/`"false"`)
 - **string fields**: converted with `String(...)`
+
+## Schedule amounts
+
+Schedule formulas compute the amount of a scheduled transaction from its occurrence date (and, with `BALANCE_OF`, from the balances of other accounts). This is useful for amounts that vary over time, such as:
+
+- Credit-card statement balance payments: `=INTEGER_TO_AMOUNT(BALANCE_OF("Credit Card"))`
+- Loan principal tracking: `=-BALANCE_OF("Home Loan") / 100 / 12`
+- Costs that repeat several times in a month:
+  `=-50 * (INT((EOMONTH(date,1) - (EOMONTH(date,0)+1) - MOD(5 - WEEKDAY(EOMONTH(date,0)+1, 2) + 7, 7)) / 7) + 1)`
+
+### Where to find the formula toggle
+
+In **More -> Schedules**, edit or create a schedule and change the **Amount** operator to **is formula**. A formula editor with autocomplete and hover help replaces the amount input, and a live preview shows what the next occurrences evaluate to.
+
+### Available variables
+
+Schedule formulas evaluate with the occurrence's own date:
+
+- `date` — The date of the schedule occurrence
+- `today` — Today's date
+
+### Units
+
+Numbers written directly in the formula are in **currency units**: `=100` means 100 currency units (for example $100.00). The result is rounded to the currency's decimal places.
+
+`BALANCE_OF("…")` returns an amount in **cents** (minor units), like in rule formulas. To use it as an amount, divide by 100 or wrap it in `INTEGER_TO_AMOUNT()`:
+
+```text
+=INTEGER_TO_AMOUNT(BALANCE_OF("Credit Card"))
+```
+
+:::note
+The schedule editor's preview resolves `BALANCE_OF` to 0 because balances are only fetched when the transaction is posted. The posted transaction always uses the balance as of the scheduled date, and each occurrence is evaluated with its own date.
+:::
