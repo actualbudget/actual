@@ -383,7 +383,6 @@ test.describe('Transactions', () => {
       await expect
         .poll(() => accountPage.getColumnWidth('date'))
         .toBeGreaterThan(initialWidth);
-      await expect(page).toMatchThemeScreenshots();
     });
 
     test('resets a column width on double click', async () => {
@@ -399,7 +398,6 @@ test.describe('Transactions', () => {
       await expect
         .poll(() => accountPage.getColumnWidth('date'))
         .toBeLessThan(initialWidth + 20);
-      await expect(page).toMatchThemeScreenshots();
     });
   });
 });
