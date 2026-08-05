@@ -36,13 +36,17 @@ export function SchedulesListItem({
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
+  const isFormula =
+    schedule._amountOp === 'formula' && typeof schedule._amount === 'string';
   const amount = getScheduledAmount(schedule._amount);
   const amountStr =
-    (schedule._amountOp === 'isapprox' || schedule._amountOp === 'isbetween'
-      ? '~'
-      : '') +
-    (amount > 0 ? '+' : '') +
-    format(Math.abs(amount || 0), 'financial');
+    isFormula && typeof schedule._amount === 'string'
+      ? schedule._amount
+      : (schedule._amountOp === 'isapprox' || schedule._amountOp === 'isbetween'
+          ? '~'
+          : '') +
+        (amount > 0 ? '+' : '') +
+        format(Math.abs(amount || 0), 'financial');
 
   return (
     <ActionableGridListItem

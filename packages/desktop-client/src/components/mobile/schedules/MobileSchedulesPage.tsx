@@ -57,14 +57,19 @@ export function MobileSchedulesPage() {
     ? schedules.filter(schedule => {
         const payee = payees.find(p => schedule._payee === p.id);
         const account = accounts.find(a => schedule._account === a.id);
+        const isFormula =
+          schedule._amountOp === 'formula' &&
+          typeof schedule._amount === 'string';
         const amount = getScheduledAmount(schedule._amount);
         const amountStr =
-          (schedule._amountOp === 'isapprox' ||
-          schedule._amountOp === 'isbetween'
-            ? '~'
-            : '') +
-          (amount > 0 ? '+' : '') +
-          format(Math.abs(amount || 0), 'financial');
+          isFormula && typeof schedule._amount === 'string'
+            ? schedule._amount
+            : (schedule._amountOp === 'isapprox' ||
+              schedule._amountOp === 'isbetween'
+                ? '~'
+                : '') +
+              (amount > 0 ? '+' : '') +
+              format(Math.abs(amount || 0), 'financial');
         const dateStr = schedule.next_date
           ? monthUtilFormat(schedule.next_date, dateFormat)
           : null;
