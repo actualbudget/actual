@@ -7,7 +7,7 @@
 # react/no-multi-comp stays out of .oxlintrc.json.
 
 . "$(dirname "$0")/common.sh"
-require_jq
+require_jq advisory
 
 file=$(jq -r '.tool_input.file_path // empty')
 [ -n "$file" ] && [ -f "$file" ] || exit 0

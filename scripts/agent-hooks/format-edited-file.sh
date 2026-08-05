@@ -9,7 +9,7 @@
 # type-aware pass still runs at commit time via nano-staged.
 
 . "$(dirname "$0")/common.sh"
-require_jq
+require_jq advisory
 
 file=$(jq -r '.tool_input.file_path // empty')
 [ -n "$file" ] && [ -f "$file" ] || exit 0
