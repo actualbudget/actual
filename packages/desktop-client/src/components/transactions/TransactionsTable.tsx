@@ -220,62 +220,53 @@ const TransactionHeader = memo(
     > = {
       date: {
         value: columnLabels.date,
-        width: 110,
         alignItems: 'flex',
         marginLeft: -5,
         sortDirection: 'desc',
       },
       account: {
         value: columnLabels.account,
-        width: 'flex',
         alignItems: 'flex',
         marginLeft: -5,
         sortDirection: 'asc',
       },
       payee: {
         value: columnLabels.payee,
-        width: 'flex',
         alignItems: 'flex',
         marginLeft: -5,
         sortDirection: 'asc',
       },
       notes: {
         value: columnLabels.notes,
-        width: 'flex',
         alignItems: 'flex',
         marginLeft: -5,
         sortDirection: 'asc',
       },
       group: {
         value: t('Group'),
-        width: 'flex',
         alignItems: 'flex',
         marginLeft: -5,
       },
       category: {
         value: columnLabels.category,
-        width: 'flex',
         alignItems: 'flex',
         marginLeft: -5,
         sortDirection: 'asc',
       },
       payment: {
         value: columnLabels.payment,
-        width: 100,
         alignItems: 'flex-end',
         marginRight: -5,
         sortDirection: 'asc',
       },
       deposit: {
         value: columnLabels.deposit,
-        width: 100,
         alignItems: 'flex-end',
         marginRight: -5,
         sortDirection: 'desc',
       },
       balance: {
         value: t('Balance'),
-        width: 103,
         alignItems: 'flex-end',
         marginRight: -5,
       },
@@ -289,6 +280,8 @@ const TransactionHeader = memo(
       },
     };
 
+    // TransactionHeader renders its own header row rather than through
+    // TableHeader, so it provides the header context itself
     return (
       <HeaderContext.Provider value={{ isHeader: true }}>
         <Row
@@ -2511,8 +2504,6 @@ type TransactionTableInnerProps = {
   payees: PayeeEntity[];
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   columns: TransactionTableColumnId[];
-  columnWidthsDefaultWidths: Record<string, number | 'flex'>;
-  columnWidthsOrder: string[];
   showReconciled: boolean;
   currentAccountId: AccountEntity['id'];
   currentCategoryId: CategoryEntity['id'];
@@ -2793,8 +2784,7 @@ function TransactionTableInner({
   return (
     <ColumnWidthsProvider
       tableId="transactions"
-      defaultWidths={props.columnWidthsDefaultWidths}
-      columnOrder={props.columnWidthsOrder}
+      defaultWidths={TRANSACTION_TABLE_COLUMN_WIDTHS}
     >
       <View
         innerRef={containerRef}
@@ -3018,16 +3008,6 @@ export const TransactionTable = forwardRef(
         showBalances,
         showCleared,
       ],
-    );
-
-    const columnWidthsDefaultWidths = TRANSACTION_TABLE_COLUMN_WIDTHS;
-
-    // The order used for resize compensation must mirror the visible column
-    // order (which follows the user's column preferences), not the default
-    // order — otherwise resizing adjusts a non-adjacent column
-    const columnWidthsOrder = useMemo(
-      () => [...(props.showSelection ? ['_select'] : []), ...visibleColumns],
-      [props.showSelection, visibleColumns],
     );
 
     const [prevIsAdding, setPrevIsAdding] = useState(false);
@@ -3765,8 +3745,6 @@ export const TransactionTable = forwardRef(
             listContainerRef={listContainerRef}
             {...props}
             columns={visibleColumns}
-            columnWidthsDefaultWidths={columnWidthsDefaultWidths}
-            columnWidthsOrder={columnWidthsOrder}
             transactions={transactionsWithExpandedSplits}
             transactionMap={transactionMap}
             transactionsByParent={transactionsByParent}
