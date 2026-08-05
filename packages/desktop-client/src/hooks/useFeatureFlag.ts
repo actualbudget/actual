@@ -8,7 +8,6 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   actionTemplating: false,
   formulaMode: false,
   currency: false,
-  ageOfMoneyReport: false,
   balanceForecastReport: false,
   customThemes: false,
   budgetAnalysisReport: false,
@@ -16,6 +15,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   sankeyReport: false,
   akahuBankSync: false,
   mobileCalculator: false,
+  monteCarloReport: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

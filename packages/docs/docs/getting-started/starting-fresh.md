@@ -123,7 +123,7 @@ way of reporting your spending habits.
 2. **Debt**. Create a separate category group if you have more than one kind of debt. Typical
    categories in this group are Mortgage, Car Payments, Student Loans, Short Term Credit.
    Should you put your credit card debts in this category?
-   The answer is *it depends*. For some input on this, please read our article on 
+   The answer is _it depends_. For some input on this, please read our article on 
    [Carrying Debt](../budgeting/credit-cards/carrying-debt.md).
 
 3. **Daily expenses**. Group your everyday expenses for a more organized and convenient way
@@ -132,13 +132,13 @@ way of reporting your spending habits.
    Personal Care, Gifts, Entertainment, Streaming services, News (paper) subscriptions, and Charities.
 
 4. **For a rainy day**. Certain expenses you know will happen in the future, but you don't know when.
-   You should have at least one category named *Emergency Fund*. Other examples may be Car Maintenance,
+   You should have at least one category named _Emergency Fund_. Other examples may be Car Maintenance,
    Replacing Stove, and Replacing Washing Machine.
 
 5. **Savings goals**. This is where you keep your savings goals categorized _on budget_. What we
    mean by on budget is that if you need to reallocate money, you may settle for a cheaper Vacation or
    postpone the Car Replacement or the Bathroom Renovation for a few months. If you are saving for a
-   long view, like your retirement, we suggest you create an *off budget* account for those kind of
+   long view, like your retirement, we suggest you create an _off budget_ account for those kind of
    savings. Money allocated in off budget accounts takes more effort to reallocate as you need to
    move the actual funds from your savings account or sell your stocks or global
    index funds (a few examples of long term saving methods).
@@ -155,7 +155,7 @@ When making categories remember that it is easier to merge categories later than
 ## 4. Assigning Available Funds
 
 The big question everybody struggles with when using the envelope budgeting method for the first
-time is *how much money to assign to each category*. Fear not; this part of our Starting Fresh
+time is _how much money to assign to each category_. Fear not; this part of our Starting Fresh
 guide will help you with this.
 
 The best way of bootstrapping your budget is to rely on how you have spent your money and what
@@ -185,7 +185,7 @@ We can now see the budget numbers to be used for the month of August in the Aver
 ### Using Actual to find your initial budget numbers
 
 It's important to note that this method only works correctly if you use a debit or credit card for all your purchases.
-As a result, your actual *start date* for your budget is in the past. We will reiterate our warning on
+As a result, your actual _start date_ for your budget is in the past. We will reiterate our warning on
 [how to set up accounts](#how-to-setup-accounts): going too far back might make your budget completely
 out of wack. It's crucial to avoid this, as you can easily spend more time trying to find out what's
 wrong with your budget and spent numbers because "nothing adds up" anymore.
@@ -197,7 +197,7 @@ If you have a lot of cash withdrawals during a month, you will be better off usi
 :::
 
 1. You start the budget by entering or importing your transactions.
-2. In the Budget view, you enter the same amount in the *Budgeted* columns as found in the *Spent* columns
+2. In the Budget view, you enter the same amount in the _Budgeted_ columns as found in the _Spent_ columns
    for all the months you have entered or imported your data.
 
 ![](/img/getting-started/actual-intro-with-budget-numbers.webp)
@@ -229,8 +229,8 @@ budgeting.
    over a month. If you repeatedly make cash withdrawals and do not know what you are spending
    your money on, then no expense and budget tracking tools in the world will be able to help you.
 
-3. At the end of each week, set the *Budgeted* column in the Budget view to the same value
-   as what you see in the *Spent* column. If done correctly, the sum under *To Budget* should
+3. At the end of each week, set the _Budgeted_ column in the Budget view to the same value
+   as what you see in the _Spent_ column. If done correctly, the sum under _To Budget_ should
    correctly tell you how much money you have left.
 
 4. Set aside time to analyze your spending and income at the end of the month. Based on this,

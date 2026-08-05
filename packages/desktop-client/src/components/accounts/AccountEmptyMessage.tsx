@@ -31,9 +31,10 @@ export function AccountEmptyMessage({ onAdd }: AccountEmptyMessageProps) {
       >
         <Text style={{ textAlign: 'center', lineHeight: '1.4em' }}>
           <Trans>
-            For Actual to be useful, you need to <strong>add an account</strong>
-            . You can link an account to automatically download transactions, or
-            manage it locally yourself.
+            <strong>Let's add your first account.</strong> Accounts hold your
+            transactions, like everyday spending, savings, credit cards, or
+            cash. You can connect to your bank to import transactions
+            automatically, or add them yourself.
           </Trans>
         </Text>
 
@@ -49,7 +50,7 @@ export function AccountEmptyMessage({ onAdd }: AccountEmptyMessageProps) {
         <View
           style={{ marginTop: 20, fontSize: 13, color: theme.tableTextLight }}
         >
-          <Trans>In the future, you can add accounts from the sidebar.</Trans>
+          <Trans>You can add more accounts at any time from the sidebar.</Trans>
         </View>
       </View>
     </View>

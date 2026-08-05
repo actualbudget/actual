@@ -64,6 +64,7 @@ import { CustomReportListCards } from './reports/CustomReportListCards';
 import { FormulaCard } from './reports/FormulaCard';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { MissingReportCard } from './reports/MissingReportCard';
+import { MonteCarloCard } from './reports/monte-carlo/MonteCarloCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
 import { SpendingCard } from './reports/SpendingCard';
@@ -112,9 +113,9 @@ export function Overview({ dashboard }: OverviewProps) {
   const dispatch = useDispatch();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
-  const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
   const balanceForecastReportEnabled = useFeatureFlag('balanceForecastReport');
+  const monteCarloReportEnabled = useFeatureFlag('monteCarloReport');
 
   const formulaMode = useFeatureFlag('formulaMode');
 
@@ -589,14 +590,10 @@ export function Overview({ dashboard }: OverviewProps) {
                               name: 'crossover-card' as const,
                               text: t('Crossover point'),
                             },
-                            ...(ageOfMoneyReportEnabled
-                              ? [
-                                  {
-                                    name: 'age-of-money-card' as const,
-                                    text: t('Age of Money'),
-                                  },
-                                ]
-                              : []),
+                            {
+                              name: 'age-of-money-card' as const,
+                              text: t('Age of Money'),
+                            },
                             {
                               name: 'spending-card' as const,
                               text: t('Spending analysis'),
@@ -614,6 +611,14 @@ export function Overview({ dashboard }: OverviewProps) {
                                   {
                                     name: 'balance-forecast-card' as const,
                                     text: t('Balance forecast'),
+                                  },
+                                ]
+                              : []),
+                            ...(monteCarloReportEnabled
+                              ? [
+                                  {
+                                    name: 'monte-carlo-card' as const,
+                                    text: t('Monte Carlo analysis'),
                                   },
                                 ]
                               : []),
@@ -816,8 +821,7 @@ export function Overview({ dashboard }: OverviewProps) {
                               onMetaChange(item, newMeta)
                             }
                           />
-                        ) : widget.type === 'age-of-money-card' &&
-                          ageOfMoneyReportEnabled ? (
+                        ) : widget.type === 'age-of-money-card' ? (
                           <AgeOfMoneyCard
                             widgetId={item.i}
                             isEditing={isEditing}
@@ -911,6 +915,16 @@ export function Overview({ dashboard }: OverviewProps) {
                         ) : widget.type === 'sankey-card' &&
                           sankeyFeatureFlag ? (
                           <SankeyCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                          />
+                        ) : widget.type === 'monte-carlo-card' &&
+                          monteCarloReportEnabled ? (
+                          <MonteCarloCard
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
