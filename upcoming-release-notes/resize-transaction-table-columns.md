@@ -3,4 +3,4 @@ category: Enhancements
 authors: [sreetamdas]
 ---
 
-Add drag handles to the transaction table for resizing columns, including keyboard support and double-click to reset
+Add drag handles that resize the columns in the transaction table, with keyboard support and double-click reset
