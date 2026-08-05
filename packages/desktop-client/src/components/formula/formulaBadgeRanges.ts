@@ -3,8 +3,7 @@ import { HyperFormula } from 'hyperformula';
 import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
 
 import { budgetQueryDimensions } from './formulaCatalog';
-
-type FormulaMode = 'transaction' | 'query';
+import type { FormulaMode } from './formulaCatalog';
 
 export type FormulaBadgeVariant =
   | 'named-expression'
@@ -93,6 +92,12 @@ const transactionNamedExpressionBadges: Record<string, string> = {
   reconciled: 'reconciled',
   balance: 'balance',
   parent_amount: 'parent_amount',
+};
+
+// Schedule formulas only know about their own occurrence date.
+const scheduleNamedExpressionBadges: Record<string, string> = {
+  today: 'today',
+  date: 'date',
 };
 
 const queryNameFunctions = new Set([
@@ -534,6 +539,7 @@ function getNamedExpressionBadges({
 }) {
   return {
     ...(mode === 'transaction' ? transactionNamedExpressionBadges : {}),
+    ...(mode === 'schedule' ? scheduleNamedExpressionBadges : {}),
     ...Object.fromEntries(
       Object.keys(variables ?? {}).map(name => [name, name]),
     ),

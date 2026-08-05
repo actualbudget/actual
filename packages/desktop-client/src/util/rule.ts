@@ -90,6 +90,8 @@ export function friendlyOp(op, type?) {
       return t('is approx');
     case 'isbetween':
       return t('is between');
+    case 'formula':
+      return t('is formula');
     case 'contains':
       return t('contains');
     case 'hasTags':

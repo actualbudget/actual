@@ -23,8 +23,7 @@ import type {
   MonthYearFormat,
 } from './codeMirror-excelLanguage';
 import { budgetQueryDimensions } from './formulaCatalog';
-
-type FormulaMode = 'transaction' | 'query';
+import type { FormulaMode } from './formulaCatalog';
 
 type FormulaEditorProps = {
   value: string;

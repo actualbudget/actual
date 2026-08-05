@@ -55,6 +55,7 @@ import {
   getFunctionSignatureCompletionSection,
   getNamedVariableCompletions,
   getRuleFieldCompletions,
+  getScheduleFieldCompletions,
   sortFormulaCompletions,
 } from './formulaCatalog';
 import type { FormulaFunctionDef, FormulaMode } from './formulaCatalog';
@@ -661,6 +662,7 @@ export function excelFormulaAutocomplete(
           ...queryCompletions,
           ...functionCompletions,
           ...(mode === 'transaction' ? getRuleFieldCompletions() : []),
+          ...(mode === 'schedule' ? getScheduleFieldCompletions() : []),
         ];
 
         const contextualSuggestions: Completion[] = activeFunctionContext
@@ -739,9 +741,14 @@ export function excelFormulaHover(mode: FormulaMode): Extension {
       } satisfies Tooltip;
     }
 
-    // Transaction fields
-    if (mode === 'transaction') {
-      const field = getRuleFieldCompletions().find(f => f.label === w);
+    // Transaction/schedule fields
+    if (mode === 'transaction' || mode === 'schedule') {
+      const fields =
+        mode === 'transaction'
+          ? getRuleFieldCompletions()
+          : getScheduleFieldCompletions();
+      // Field lookups are case-insensitive, matching the function lookup.
+      const field = fields.find(f => f.label === w.toLowerCase());
       if (field) {
         return {
           pos: word.from,

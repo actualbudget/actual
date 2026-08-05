@@ -1,7 +1,7 @@
 import type { Completion } from '@codemirror/autocomplete';
 import { t } from 'i18next';
 
-export type FormulaMode = 'query' | 'transaction';
+export type FormulaMode = 'query' | 'transaction' | 'schedule';
 
 export type FormulaFunctionCategory =
   | 'math'
@@ -97,6 +97,10 @@ function getRuleFieldCompletionSection(): string {
   return `💰 ${t('Transaction Fields')}`;
 }
 
+function getScheduleFieldCompletionSection(): string {
+  return `💰 ${t('Schedule Fields')}`;
+}
+
 function getFormulaCompletionSectionOrder(): Record<string, number> {
   const categoryConfig = getFormulaFunctionCategoryConfig();
 
@@ -112,6 +116,7 @@ function getFormulaCompletionSectionOrder(): Record<string, number> {
     [getBudgetDimensionCompletionSection()]: 6,
     [getBudgetCategoryCompletionSection()]: 7,
     [getRuleFieldCompletionSection()]: 8,
+    [getScheduleFieldCompletionSection()]: 8,
   };
 }
 
@@ -1135,11 +1140,16 @@ export function getFormulaFunctionsByMode(): Record<FormulaMode, string[]> {
   const functionsByMode: Record<FormulaMode, string[]> = {
     query: [],
     transaction: [],
+    schedule: [],
   };
 
   for (const [name, func] of Object.entries(getFormulaFunctionCatalog())) {
     for (const mode of func.modes) {
       functionsByMode[mode].push(name);
+    }
+    // Schedule formulas expose the same functions as transaction formulas.
+    if (func.modes.includes('transaction')) {
+      functionsByMode.schedule.push(name);
     }
   }
 
@@ -1150,9 +1160,13 @@ export function getFormulaFunctionsForMode(
   mode: FormulaMode,
 ): Record<string, FormulaFunctionDef> {
   const catalog = getFormulaFunctionCatalog();
+  // Schedule formulas expose the same functions as transaction formulas.
+  const lookupMode = mode === 'schedule' ? 'transaction' : mode;
 
   return Object.fromEntries(
-    Object.entries(catalog).filter(([, func]) => func.modes.includes(mode)),
+    Object.entries(catalog).filter(([, func]) =>
+      func.modes.includes(lookupMode),
+    ),
   );
 }
 
@@ -1162,8 +1176,10 @@ export function getFormulaFunctionByName(
 ): FormulaFunctionDef | undefined {
   const upperName = name.toUpperCase();
   const func = getFormulaFunctionCatalog()[upperName];
+  // Schedule formulas expose the same functions as transaction formulas.
+  const lookupMode = mode === 'schedule' ? 'transaction' : mode;
 
-  if (!func || (mode && !func.modes.includes(mode))) {
+  if (!func || (lookupMode && !func.modes.includes(lookupMode))) {
     return undefined;
   }
 
@@ -1325,6 +1341,34 @@ export function getRuleFieldCompletions(): Completion[] {
       boost: 5,
       info: t(
         'The amount of the parent transaction in cents in split transactions.\n\nExample: =(parent_amount / 100) * .05',
+      ),
+    },
+  ];
+}
+
+// Schedule formulas are evaluated against each occurrence, which only knows
+// its own date — `date` and `today` are the only available variables. Amounts
+// written as numbers in the formula are in currency units (e.g. `=100` means
+// 100 currency units); `BALANCE_OF` returns cents, so divide by 100 or use
+// `INTEGER_TO_AMOUNT` when combining it with other amounts.
+export function getScheduleFieldCompletions(): Completion[] {
+  return [
+    {
+      label: 'date',
+      type: 'variable',
+      section: getScheduleFieldCompletionSection(),
+      boost: 5,
+      info: t(
+        'The date of the schedule occurrence. Use with date functions.\n\nExample: =IF(MONTH(date) = 1, 150, 100)',
+      ),
+    },
+    {
+      label: 'today',
+      type: 'variable',
+      section: getScheduleFieldCompletionSection(),
+      boost: 5,
+      info: t(
+        "Today's date. Use with date functions.\n\nExample: =IF(date = today, 100, 200)",
       ),
     },
   ];
