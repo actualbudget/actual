@@ -1,6 +1,5 @@
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -9,11 +8,51 @@ import {
 } from 'react';
 import type { ReactNode, RefObject } from 'react';
 
-import { useLocalStorage } from 'usehooks-ts';
+import { css } from '@emotion/css';
 
-import { useMetadataPref } from './useMetadataPref';
+import { useSyncedPref } from './useSyncedPref';
 
 export const MIN_COLUMN_WIDTH = 30;
+export const FALLBACK_COLUMN_WIDTH = 100;
+
+// Handle visibility: shown while the column is hovered or the handle is
+// focused. Scoped to elements rendered inside the provider, so other
+// tables are unaffected.
+const resizeHandleStyles = css`
+  [data-resize-handle] {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  [data-resize-handle]:hover,
+  [data-resize-handle]:focus-visible {
+    opacity: 1;
+  }
+  [data-column]:hover > [data-resize-handle] {
+    opacity: 0.5;
+  }
+  [data-column]:hover > [data-resize-handle]:hover {
+    opacity: 1;
+  }
+`;
+
+function parseWidthsPref(
+  pref: string | undefined,
+): Record<string, number> | undefined {
+  if (pref == null || pref === '') return undefined;
+  try {
+    const parsed: unknown = JSON.parse(pref);
+    if (
+      typeof parsed !== 'object' ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
+      return undefined;
+    }
+    return parsed as Record<string, number>;
+  } catch {
+    return undefined;
+  }
+}
 
 function buildWidths(
   defaultWidths: Record<string, number | 'flex'>,
@@ -36,12 +75,12 @@ function buildWidths(
   return initial;
 }
 
-type ColumnWidthsContextValue = {
+export type ColumnWidthsContextValue = {
   widths: Record<string, number | 'flex'>;
-  columnOrder: string[];
-  defaultWidths: Record<string, number | 'flex'>;
   containerRef: RefObject<HTMLDivElement | null>;
   setContainerRef: (el: HTMLDivElement | null) => void;
+  getColumnWidth: (columnName: string) => number;
+  setColumnWidth: (columnName: string, width: number) => void;
   onResizeStart: (columnName: string, startX: number) => void;
   onResize: (columnName: string, currentX: number) => void;
   onResizeEnd: () => void;
@@ -59,31 +98,32 @@ export function useColumnWidthsContext() {
 type ColumnWidthsProviderProps = {
   tableId: string;
   defaultWidths: Record<string, number | 'flex'>;
-  columnOrder: string[];
   children: ReactNode;
 };
 
 export function ColumnWidthsProvider({
   tableId,
   defaultWidths,
-  columnOrder,
   children,
 }: ColumnWidthsProviderProps) {
-  const [budgetId] = useMetadataPref('id');
-
-  const [savedWidths, setSavedWidths] = useLocalStorage<
-    Record<string, number> | undefined
-  >(`${budgetId}-columnWidths-${tableId}`, undefined, {
-    deserializer: JSON.parse,
-    serializer: JSON.stringify,
-  });
+  // Synced prefs are strings; the widths map is JSON-encoded. Parsing is
+  // memoized because the rehydrate effect below depends on its identity —
+  // a fresh object every render would re-run the effect (and setWidths)
+  // on every render.
+  const [savedWidthsPref, setSavedWidthsPref] = useSyncedPref(
+    `column-widths-${tableId}`,
+  );
+  const savedWidths = useMemo(
+    () => parseWidthsPref(savedWidthsPref),
+    [savedWidthsPref],
+  );
 
   const [widths, setWidths] = useState<Record<string, number | 'flex'>>(() =>
     buildWidths(defaultWidths, savedWidths),
   );
 
-  // Re-hydrate when the storage key changes (e.g. the user switches
-  // budgets) or when the saved widths are updated externally
+  // Re-hydrate when the pref changes (e.g. the user switches budgets or
+  // resizes a column from another device)
   useEffect(() => {
     setWidths(buildWidths(defaultWidths, savedWidths));
   }, [defaultWidths, savedWidths]);
@@ -93,211 +133,110 @@ export function ColumnWidthsProvider({
     columnName: string;
     startWidth: number;
     startX: number;
-    neighborName: string | null;
-    neighborStartWidth: number;
+    width: number;
   } | null>(null);
 
-  const setContainerRef = useCallback((el: HTMLDivElement | null) => {
+  const setContainerRef = (el: HTMLDivElement | null) => {
     containerRef.current = el;
-  }, []);
+  };
 
-  // Find the column visually adjacent to `columnName` that gets compensated
-  // when it is resized. Only fixed-width columns are returned: flex columns
-  // reflow automatically to fill the space a neighbor takes, so pinning them
-  // to a pixel width would strip their flex semantics.
-  const findNeighbor = useCallback(
-    (columnName: string): string | null => {
-      const idx = columnOrder.indexOf(columnName);
-      if (idx === -1) return null;
-
-      const next = columnOrder[idx + 1];
-      if (next !== undefined && typeof widths[next] === 'number') return next;
-      const prev = columnOrder[idx - 1];
-      if (prev !== undefined && typeof widths[prev] === 'number') return prev;
-      return null;
-    },
-    [columnOrder, widths],
-  );
-
-  const getColumnWidth = useCallback(
-    (name: string): number => {
-      const el = containerRef.current;
-      if (!el) return 100;
+  // The width to start a resize from: the live CSS variable (a drag is in
+  // flight or the width was already applied), else the state value, else a
+  // sane default for flex columns that have no pixel width of their own.
+  const getColumnWidth = (name: string): number => {
+    const el = containerRef.current;
+    if (el) {
       const val = el.style.getPropertyValue(`--col-${name}-width`);
       if (val) return parseFloat(val);
-      const w = widths[name];
-      if (typeof w === 'number') return w;
-      const cell = el.querySelector<HTMLElement>(`[data-column="${name}"]`);
-      const measured = cell?.getBoundingClientRect().width;
-      // A flex column may not have been laid out yet (or be measured as 0
-      // in tests); fall back to a sane default rather than a 0px width
-      return measured ? measured : 100;
-    },
-    [widths],
-  );
+    }
+    const w = widths[name];
+    return typeof w === 'number' ? w : FALLBACK_COLUMN_WIDTH;
+  };
 
-  const onResizeStart = useCallback(
-    (columnName: string, startX: number) => {
-      const el = containerRef.current;
-      if (!el) return;
-
-      const startWidth = getColumnWidth(columnName);
-      const neighborName = findNeighbor(columnName);
-      const neighborStartWidth = neighborName
-        ? getColumnWidth(neighborName)
-        : 0;
-
-      dragRef.current = {
-        columnName,
-        startWidth,
-        startX,
-        neighborName,
-        neighborStartWidth,
-      };
-
-      el.style.setProperty(`--col-${columnName}-width`, `${startWidth}px`);
-      if (neighborName) {
-        el.style.setProperty(
-          `--col-${neighborName}-width`,
-          `${neighborStartWidth}px`,
-        );
-      }
-
-      setWidths(prev => {
-        const next = { ...prev, [columnName]: startWidth };
-        if (neighborName) next[neighborName] = neighborStartWidth;
-        return next;
-      });
-    },
-    [findNeighbor, getColumnWidth],
-  );
-
-  const onResize = useCallback((_columnName: string, currentX: number) => {
+  // The single write path for a column width: clamp, update the live CSS
+  // variable, update state, and (optionally) persist the override
+  const applyWidth = (columnName: string, width: number, persist: boolean) => {
+    const clamped = Math.max(MIN_COLUMN_WIDTH, width);
     const el = containerRef.current;
-    const drag = dragRef.current;
-    if (!el || !drag) return;
-
-    const delta = currentX - drag.startX;
-    // The source column can only grow by as much as the neighbor can
-    // shrink, preserving the total width of the two columns
-    const maxWidth = drag.neighborName
-      ? drag.startWidth + (drag.neighborStartWidth - MIN_COLUMN_WIDTH)
-      : Number.POSITIVE_INFINITY;
-    const newWidth = Math.min(
-      Math.max(MIN_COLUMN_WIDTH, drag.startWidth + delta),
-      maxWidth,
-    );
-
-    el.style.setProperty(`--col-${drag.columnName}-width`, `${newWidth}px`);
-
-    if (drag.neighborName) {
-      const neighborWidth =
-        drag.neighborStartWidth - (newWidth - drag.startWidth);
-      el.style.setProperty(
-        `--col-${drag.neighborName}-width`,
-        `${neighborWidth}px`,
+    if (el) {
+      el.style.setProperty(`--col-${columnName}-width`, `${clamped}px`);
+    }
+    setWidths(prev => ({ ...prev, [columnName]: clamped }));
+    if (persist) {
+      setSavedWidthsPref(
+        JSON.stringify({ ...(savedWidths || {}), [columnName]: clamped }),
       );
     }
-  }, []);
+  };
 
-  const onResizeEnd = useCallback(() => {
+  const setColumnWidth = (columnName: string, width: number) => {
+    applyWidth(columnName, width, true);
+  };
+
+  const onResizeStart = (columnName: string, startX: number) => {
+    const startWidth = getColumnWidth(columnName);
+    dragRef.current = { columnName, startWidth, startX, width: startWidth };
+    applyWidth(columnName, startWidth, false);
+  };
+
+  const onResize = (_columnName: string, currentX: number) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    const newWidth = Math.max(
+      MIN_COLUMN_WIDTH,
+      drag.startWidth + (currentX - drag.startX),
+    );
+    drag.width = newWidth;
     const el = containerRef.current;
+    if (el) {
+      el.style.setProperty(`--col-${drag.columnName}-width`, `${newWidth}px`);
+    }
+  };
+
+  const onResizeEnd = () => {
     const drag = dragRef.current;
-    if (!el || !drag) return;
-
-    const finalWidth = parseFloat(
-      el.style.getPropertyValue(`--col-${drag.columnName}-width`),
-    );
-    if (!Number.isFinite(finalWidth)) {
-      dragRef.current = null;
-      return;
-    }
-
-    const updated: Record<string, number> = {
-      ...(savedWidths || {}),
-      [drag.columnName]: finalWidth,
-    };
-
-    const neighborIsFinite =
-      drag.neighborName != null &&
-      Number.isFinite(
-        parseFloat(
-          el.style.getPropertyValue(`--col-${drag.neighborName}-width`),
-        ),
-      );
-    let neighborFinalWidth = 0;
-    if (drag.neighborName && neighborIsFinite) {
-      neighborFinalWidth = parseFloat(
-        el.style.getPropertyValue(`--col-${drag.neighborName}-width`),
-      );
-      updated[drag.neighborName] = neighborFinalWidth;
-    }
-
-    setWidths(prev => {
-      const next = { ...prev, [drag.columnName]: finalWidth };
-      if (drag.neighborName && neighborIsFinite) {
-        next[drag.neighborName] = neighborFinalWidth;
-      }
-      return next;
-    });
-
-    setSavedWidths(updated);
+    if (!drag) return;
     dragRef.current = null;
-  }, [savedWidths, setSavedWidths]);
+    applyWidth(drag.columnName, drag.width, true);
+  };
 
-  const onResetWidth = useCallback(
-    (columnName: string) => {
+  const onResetWidth = (columnName: string) => {
+    const defaultVal = defaultWidths[columnName];
+    // Deleting the override (rather than storing the default) lets future
+    // changes to the default widths apply to columns that were never
+    // explicitly resized
+    const updated = { ...(savedWidths || {}) };
+    delete updated[columnName];
+    setSavedWidthsPref(JSON.stringify(updated));
+
+    if (defaultVal === 'flex') {
       const el = containerRef.current;
-      if (!el) return;
-
-      const defaultVal = defaultWidths[columnName];
-      // Deleting the override (rather than storing the default) lets future
-      // changes to the default widths apply to columns that were never
-      // explicitly resized
-      const updated = { ...(savedWidths || {}) };
-      delete updated[columnName];
-
-      if (defaultVal === 'flex') {
+      if (el) {
         el.style.removeProperty(`--col-${columnName}-width`);
-        setWidths(prev => ({ ...prev, [columnName]: 'flex' }));
-      } else if (typeof defaultVal === 'number') {
-        el.style.setProperty(`--col-${columnName}-width`, `${defaultVal}px`);
-        setWidths(prev => ({ ...prev, [columnName]: defaultVal }));
       }
+      setWidths(prev => ({ ...prev, [columnName]: 'flex' }));
+    } else if (typeof defaultVal === 'number') {
+      applyWidth(columnName, defaultVal, false);
+    }
+  };
 
-      setSavedWidths(updated);
-    },
-    [defaultWidths, savedWidths, setSavedWidths],
-  );
-
-  const value = useMemo(
-    () => ({
-      widths,
-      columnOrder,
-      defaultWidths,
-      containerRef,
-      setContainerRef,
-      onResizeStart,
-      onResize,
-      onResizeEnd,
-      onResetWidth,
-    }),
-    [
-      widths,
-      columnOrder,
-      defaultWidths,
-      setContainerRef,
-      onResizeStart,
-      onResize,
-      onResizeEnd,
-      onResetWidth,
-    ],
-  );
+  const value = {
+    widths,
+    containerRef,
+    setContainerRef,
+    getColumnWidth,
+    setColumnWidth,
+    onResizeStart,
+    onResize,
+    onResizeEnd,
+    onResetWidth,
+  };
 
   return (
     <ColumnWidthsContext.Provider value={value}>
       <div
         ref={setContainerRef}
+        className={resizeHandleStyles}
         style={{
           display: 'contents',
           ...Object.fromEntries(
@@ -307,22 +246,6 @@ export function ColumnWidthsProvider({
           ),
         }}
       >
-        <style>{`
-          [data-resize-handle] {
-            opacity: 0;
-            transition: opacity 0.15s ease;
-          }
-          [data-resize-handle]:hover,
-          [data-resize-handle]:focus-visible {
-            opacity: 1;
-          }
-          [data-column]:hover > [data-resize-handle] {
-            opacity: 0.5;
-          }
-          [data-column]:hover > [data-resize-handle]:hover {
-            opacity: 1;
-          }
-        `}</style>
         {children}
       </div>
     </ColumnWidthsContext.Provider>
