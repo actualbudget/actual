@@ -96,7 +96,7 @@ function getWidthStyle(
   columnName?: string,
 ): CSSProperties {
   if (ctxWidth !== undefined) {
-    // Flex columns keep a floor so a very wide neighbor can't fully
+    // Flex columns have a minimum width so a very wide neighbor cannot
     // collapse them
     return ctxWidth === 'flex'
       ? { flex: 1, flexBasis: 0, minWidth: 50 }

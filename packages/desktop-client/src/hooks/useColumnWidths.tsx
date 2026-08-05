@@ -15,9 +15,9 @@ import { useSyncedPref } from './useSyncedPref';
 export const MIN_COLUMN_WIDTH = 30;
 export const FALLBACK_COLUMN_WIDTH = 100;
 
-// Handle visibility: shown while the column is hovered or the handle is
-// focused. Scoped to elements rendered inside the provider, so other
-// tables are unaffected.
+// The handle is visible while the column is hovered or the handle is
+// focused. These styles apply only to elements inside the provider, so
+// other tables are unaffected.
 const resizeHandleStyles = css`
   [data-resize-handle] {
     opacity: 0;
@@ -61,8 +61,8 @@ function buildWidths(
   const initial: Record<string, number | 'flex'> = { ...defaultWidths };
   if (savedWidths) {
     for (const [name, width] of Object.entries(savedWidths)) {
-      // Ignore unknown columns and values that would render invalid CSS
-      // (NaN, Infinity, strings, etc.) and enforce the minimum width
+      // Ignore unknown columns and values that render invalid CSS
+      // (NaN, Infinity, strings, and more) and enforce the minimum width
       if (
         name in defaultWidths &&
         typeof width === 'number' &&
@@ -106,10 +106,10 @@ export function ColumnWidthsProvider({
   defaultWidths,
   children,
 }: ColumnWidthsProviderProps) {
-  // Synced prefs are strings; the widths map is JSON-encoded. Parsing is
-  // memoized because the rehydrate effect below depends on its identity —
-  // a fresh object every render would re-run the effect (and setWidths)
-  // on every render.
+  // Synced prefs are strings, and the widths map is JSON-encoded. Parsing
+  // is memoized because the rehydrate effect below depends on its
+  // identity — a fresh object every render re-runs the effect, and
+  // setWidths, on every render.
   const [savedWidthsPref, setSavedWidthsPref] = useSyncedPref(
     `column-widths-${tableId}`,
   );
@@ -122,8 +122,8 @@ export function ColumnWidthsProvider({
     buildWidths(defaultWidths, savedWidths),
   );
 
-  // Re-hydrate when the pref changes (e.g. the user switches budgets or
-  // resizes a column from another device)
+  // The widths re-hydrate when the pref changes, for example when the
+  // user switches budgets or resizes a column from another device.
   useEffect(() => {
     setWidths(buildWidths(defaultWidths, savedWidths));
   }, [defaultWidths, savedWidths]);
@@ -140,9 +140,10 @@ export function ColumnWidthsProvider({
     containerRef.current = el;
   };
 
-  // The width to start a resize from: the live CSS variable (a drag is in
-  // flight or the width was already applied), else the state value, else a
-  // sane default for flex columns that have no pixel width of their own.
+  // The width to start a resize from is the live CSS variable, or the
+  // state value, or the default width. The CSS variable wins when a drag
+  // is in progress or a width was already applied. Flex columns have no
+  // pixel width, so they use the default.
   const getColumnWidth = (name: string): number => {
     const el = containerRef.current;
     if (el) {

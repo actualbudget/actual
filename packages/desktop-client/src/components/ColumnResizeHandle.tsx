@@ -24,8 +24,8 @@ export function ColumnResizeHandle({ columnName }: ColumnResizeHandleProps) {
   const { t } = useTranslation();
 
   // Holds the teardown for the document-level drag listeners. The unmount
-  // effect below calls it if the component disappears mid-drag; empty deps
-  // so it never re-fires while a drag is in progress.
+  // effect below calls it if the component disappears mid-drag. The effect
+  // has empty deps so it never re-fires during a drag.
   const cleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -45,9 +45,9 @@ export function ColumnResizeHandle({ columnName }: ColumnResizeHandleProps) {
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
 
-    // Track the drag on the document so it keeps working when the pointer
-    // leaves the handle, and ends even if the pointer is released outside
-    // the browser window
+    // Track the drag on the document. The drag continues when the pointer
+    // leaves the handle. It ends when the pointer is released outside the
+    // browser window
     const onPointerMove = (ev: PointerEvent) => {
       context.onResize(columnName, ev.clientX);
     };
