@@ -871,5 +871,198 @@ describe('schedule app', () => {
         await schedulesApp.stopServices();
       }
     });
+
+    it('createSchedule mirrors a formula amount into a `set amount` action', async () => {
+      const id = await createSchedule({
+        conditions: [
+          { op: 'is', field: 'date', value: '2024-08-01' },
+          {
+            op: 'formula',
+            field: 'amount',
+            value: '=-DAY(date) * 100',
+            type: 'string',
+          },
+        ],
+      });
+
+      const { data: ruleId } = await aqlQuery(
+        q('schedules').filter({ id }).calculate('rule'),
+      );
+      const ruleRow = await db.first<Pick<db.DbRule, 'actions'>>(
+        'SELECT actions FROM rules WHERE id = ?',
+        [ruleId],
+      );
+
+      const actions = JSON.parse(ruleRow.actions);
+      // Posting runs the rule's actions, so the formula must be mirrored into
+      // a `set amount` action for per-transaction re-evaluation.
+      expect(actions).toContainEqual({
+        op: 'set',
+        field: 'amount',
+        value: 0,
+        options: { formula: '=-DAY(date) * 100' },
+      });
+    });
+
+    it('updateSchedule mirrors a formula amount into existing `set amount` actions', async () => {
+      const id = await createSchedule({
+        conditions: [
+          { op: 'is', field: 'date', value: '2024-08-01' },
+          { op: 'is', field: 'amount', value: -6000 },
+        ],
+      });
+
+      const { data: ruleId } = await aqlQuery(
+        q('schedules').filter({ id }).calculate('rule'),
+      );
+      const ruleRow = await db.first<Pick<db.DbRule, 'actions'>>(
+        'SELECT actions FROM rules WHERE id = ?',
+        [ruleId],
+      );
+      await updateRule({
+        id: ruleId,
+        actions: [
+          { op: 'set', field: 'amount', value: -6000 },
+          ...JSON.parse(ruleRow.actions),
+        ],
+      });
+
+      // Switch the amount to a formula.
+      await updateSchedule({
+        schedule: { id },
+        conditions: [
+          { op: 'is', field: 'date', value: '2024-08-01' },
+          {
+            op: 'formula',
+            field: 'amount',
+            value: '=-DAY(date) * 100',
+            type: 'string',
+          },
+        ],
+      });
+
+      let ruleAfter = await db.first<Pick<db.DbRule, 'actions'>>(
+        'SELECT actions FROM rules WHERE id = ?',
+        [ruleId],
+      );
+      expect(JSON.parse(ruleAfter.actions)).toContainEqual({
+        op: 'set',
+        field: 'amount',
+        value: 0,
+        options: { formula: '=-DAY(date) * 100' },
+        type: 'number',
+      });
+
+      // Switching back to a fixed amount clears the stale formula.
+      await updateSchedule({
+        schedule: { id },
+        conditions: [
+          { op: 'is', field: 'date', value: '2024-08-01' },
+          { op: 'is', field: 'amount', value: -8000 },
+        ],
+      });
+
+      ruleAfter = await db.first<Pick<db.DbRule, 'actions'>>(
+        'SELECT actions FROM rules WHERE id = ?',
+        [ruleId],
+      );
+      expect(JSON.parse(ruleAfter.actions)).toContainEqual({
+        op: 'set',
+        field: 'amount',
+        value: -8000,
+        type: 'number',
+      });
+    });
+
+    it('posts a date-dependent formula schedule with the occurrence date', async () => {
+      MockDate.set(new Date(2016, 11, 31, 12));
+      schedulesApp.startServices();
+
+      try {
+        const accountId = await db.insertAccount({
+          name: 'Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+
+        // DAY(2016-12-31) = 31 -> -31 * 100 major units = -310000 cents
+        const id = await createSchedule({
+          schedule: { posts_transaction: true },
+          conditions: [
+            { op: 'is', field: 'account', value: accountId },
+            {
+              op: 'formula',
+              field: 'amount',
+              value: '=-DAY(date) * 100',
+              type: 'string',
+            },
+            { op: 'is', field: 'date', value: '2016-12-31' },
+          ],
+        });
+
+        await advanceSchedulesService(true);
+
+        const { data: transactions } = await aqlQuery(
+          q('transactions').filter({ schedule: id }).select(['amount']),
+        );
+        expect(transactions.map(({ amount }) => amount)).toEqual([-310000]);
+      } finally {
+        MockDate.reset();
+        await schedulesApp.stopServices();
+      }
+    });
+
+    it('posts a BALANCE_OF formula schedule using the balance as of the scheduled date', async () => {
+      MockDate.set(new Date(2016, 11, 31, 12));
+      schedulesApp.startServices();
+
+      try {
+        const savingsId = await db.insertAccount({
+          name: 'Savings',
+          offbudget: 0,
+          closed: 0,
+        });
+        const checkingId = await db.insertAccount({
+          name: 'Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+
+        // The savings balance at the scheduled date (2016-12-31) is $500.
+        // BALANCE_OF returns cents, so the formula divides by 100 to stay in
+        // the formula's major-unit convention.
+        await db.insertTransaction({
+          id: 'savings-deposit',
+          amount: 50000,
+          date: '2016-12-30',
+          account: savingsId,
+          cleared: true,
+        });
+
+        const id = await createSchedule({
+          schedule: { posts_transaction: true },
+          conditions: [
+            { op: 'is', field: 'account', value: checkingId },
+            {
+              op: 'formula',
+              field: 'amount',
+              value: '=-BALANCE_OF("Savings")/100',
+              type: 'string',
+            },
+            { op: 'is', field: 'date', value: '2016-12-31' },
+          ],
+        });
+
+        await advanceSchedulesService(true);
+
+        const { data: transactions } = await aqlQuery(
+          q('transactions').filter({ schedule: id }).select(['amount']),
+        );
+        expect(transactions.map(({ amount }) => amount)).toEqual([-50000]);
+      } finally {
+        MockDate.reset();
+        await schedulesApp.stopServices();
+      }
+    });
   });
 });

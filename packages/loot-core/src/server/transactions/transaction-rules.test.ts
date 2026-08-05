@@ -748,6 +748,35 @@ describe('Transaction rules', () => {
       },
     ]);
   });
+
+  test('formula amount condition is skipped at the AQL layer', async () => {
+    // SQLite can't evaluate formulas, so it is omitted from the query; the
+    // remaining conditions still narrow the match candidate set.
+    const { filters, errors } = conditionsToAQL([
+      { field: 'amount', op: 'formula', value: '=DAY(date) * 100' },
+      { field: 'notes', op: 'is', value: 'rent' },
+    ]);
+    expect(errors).toEqual([]);
+    expect(filters).toEqual([{ notes: { $transform: '$lower', $eq: 'rent' } }]);
+  });
+
+  test('formula amount condition is skipped inside nested and groups', async () => {
+    // The formula inside the `and` group must not produce a null fragment;
+    // the remaining sub-condition still matches.
+    const { filters, errors } = conditionsToAQL([
+      {
+        field: 'category',
+        op: 'and',
+        value: [
+          { field: 'amount', op: 'formula', value: '=BALANCE_OF("Checking")' },
+          { field: 'payee', op: 'is', value: 'Rent' },
+        ],
+      },
+      { field: 'amount', op: 'formula', value: '=100' },
+    ]);
+    expect(errors).toEqual([]);
+    expect(filters).toEqual([{ $and: [{ payee: { $eq: 'Rent' } }] }]);
+  });
 });
 
 describe('Learning categories', () => {
