@@ -140,6 +140,7 @@ export type DbSchedule = {
   posts_transaction: 1 | 0;
   custom_upcoming_length: string | null;
   tombstone: 1 | 0;
+  sort_order: number;
 };
 
 // type DbScheduleJsonPath = {

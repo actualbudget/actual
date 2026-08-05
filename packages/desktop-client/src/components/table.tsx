@@ -1058,7 +1058,10 @@ export const Table = forwardRef(
       }
 
       if (scrollContainer.current && saveScrollWidth) {
-        setTimeout(saveScrollDelayed, 200);
+        const timeout = setTimeout(saveScrollDelayed, 200);
+        // Without this, the timer can fire after unmount and call setState
+        // on a dead component (crashes test teardown)
+        return () => clearTimeout(timeout);
       }
     });
 
