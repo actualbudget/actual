@@ -98,6 +98,10 @@ export function Value<T>({
         case 'amount':
         case 'amount-inflow':
         case 'amount-outflow':
+          // Formula amount conditions store the formula string
+          if (typeof value === 'string') {
+            return value;
+          }
           return format(value, 'financial');
         case 'date':
           if (value) {
