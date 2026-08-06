@@ -168,53 +168,58 @@ export function ScheduleEditForm({
     }
 
     let cancelled = false;
-    void import('@actual-app/core/shared/formulas/evaluate').then(
-      ({ evaluateFormula, FormulaEvaluationError }) => {
-        if (cancelled) {
-          return;
-        }
-        const next = new Map<
-          string,
-          { ok: number } | { error: string; soft: boolean }
-        >();
-        for (const date of previewDates) {
-          try {
-            const result = evaluateFormula(formula, {
-              date,
-              today: monthUtils.currentDay(),
-            });
-            if (typeof result !== 'number') {
-              next.set(date, {
-                error: t('Formula did not evaluate to a number'),
-                soft: true,
+    // Debounce so rapid typing doesn't build and destroy a HyperFormula
+    // engine for every keystroke.
+    const timer = setTimeout(() => {
+      void import('@actual-app/core/shared/formulas/evaluate').then(
+        ({ evaluateFormula, FormulaEvaluationError }) => {
+          if (cancelled) {
+            return;
+          }
+          const next = new Map<
+            string,
+            { ok: number } | { error: string; soft: boolean }
+          >();
+          for (const date of previewDates) {
+            try {
+              const result = evaluateFormula(formula, {
+                date,
+                today: monthUtils.currentDay(),
               });
-            } else {
-              next.set(date, {
-                ok: amountToInteger(result, format.currency.decimalPlaces),
-              });
-            }
-          } catch (e) {
-            if (
-              e instanceof FormulaEvaluationError &&
-              e.formulaErrorType === 'ERROR'
-            ) {
-              next.set(date, {
-                error: t('Not a valid formula'),
-                soft: true,
-              });
-            } else {
-              next.set(date, {
-                error: e instanceof Error ? e.message : String(e),
-                soft: false,
-              });
+              if (typeof result !== 'number') {
+                next.set(date, {
+                  error: t('Formula did not evaluate to a number'),
+                  soft: true,
+                });
+              } else {
+                next.set(date, {
+                  ok: amountToInteger(result, format.currency.decimalPlaces),
+                });
+              }
+            } catch (e) {
+              if (
+                e instanceof FormulaEvaluationError &&
+                e.formulaErrorType === 'ERROR'
+              ) {
+                next.set(date, {
+                  error: t('Not a valid formula'),
+                  soft: true,
+                });
+              } else {
+                next.set(date, {
+                  error: e instanceof Error ? e.message : String(e),
+                  soft: false,
+                });
+              }
             }
           }
-        }
-        setFormulaPreviews(next);
-      },
-    );
+          setFormulaPreviews(next);
+        },
+      );
+    }, 200);
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
   }, [
     isFormula,
@@ -312,6 +317,7 @@ export function ScheduleEditForm({
             <SpaceBetween style={{ marginBottom: 3, alignItems: 'center' }}>
               <FormLabel
                 title={t('Amount')}
+                id="amount-label"
                 htmlFor={isFormula ? undefined : 'amount-field'}
                 style={{ margin: 0, flex: 1 }}
               />
@@ -355,6 +361,9 @@ export function ScheduleEditForm({
             {isFormula ? (
               <>
                 <View
+                  id="amount-field"
+                  role="group"
+                  aria-labelledby="amount-label"
                   style={{
                     flex: 1,
                     border: `1px solid ${theme.formInputBorder}`,

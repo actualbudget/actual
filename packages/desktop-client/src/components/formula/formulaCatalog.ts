@@ -1277,7 +1277,11 @@ export function getFormulaFunctionsByMode(): Record<FormulaMode, string[]> {
       functionsByMode[mode].push(name);
     }
     // Schedule formulas expose the same functions as transaction formulas.
-    if (func.modes.includes('transaction')) {
+    // Guard against duplicates if an entry ever declares both modes.
+    if (
+      func.modes.includes('transaction') &&
+      !func.modes.includes('schedule')
+    ) {
       functionsByMode.schedule.push(name);
     }
   }
