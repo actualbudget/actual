@@ -65,6 +65,7 @@ export function SelectedBalance({
   account,
 }: SelectedBalanceProps) {
   const { t } = useTranslation();
+  const format = useFormat();
 
   const name = `selected-balance-${[...selectedItems].join('-')}`;
 
@@ -114,7 +115,10 @@ export function SelectedBalance({
         isExactBalance = false;
       }
 
-      const amount = getScheduledAmount(schedule._amount, false, { date });
+      const amount = getScheduledAmount(schedule._amount, false, {
+        date,
+        decimalPlaces: format.currency.decimalPlaces,
+      });
 
       if (!account || account.id === schedule._account) {
         scheduleBalance += amount;

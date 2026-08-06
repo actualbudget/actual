@@ -401,25 +401,36 @@ export function useScheduleEdit({
 
       void send('make-filters-from-conditions', {
         conditions,
-      }).then(({ filters }) => {
-        if (current) {
-          const live = liveQuery<TransactionEntity>(
-            q('transactions')
-              .filter({ $and: filters })
-              .select('*')
-              .options({ splits: 'all' }),
-            {
-              onData: data =>
-                dispatch({
-                  type: 'set-transactions',
-                  transactions: data,
-                  transactionId,
-                }),
-            },
-          );
-          unsubscribe = live.unsubscribe;
-        }
-      });
+      })
+        .then(({ filters }) => {
+          if (current) {
+            const live = liveQuery<TransactionEntity>(
+              q('transactions')
+                .filter({ $and: filters })
+                .select('*')
+                .options({ splits: 'all' }),
+              {
+                onData: data =>
+                  dispatch({
+                    type: 'set-transactions',
+                    transactions: data,
+                    transactionId,
+                  }),
+              },
+            );
+            unsubscribe = live.unsubscribe;
+          }
+        })
+        .catch(error => {
+          // A failed filter request must not leave stale results silently;
+          // surface it through the same error path as validation failures.
+          if (current) {
+            dispatch({
+              type: 'form-error',
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        });
     }
 
     return () => {
