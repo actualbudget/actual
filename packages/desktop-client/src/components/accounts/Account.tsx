@@ -312,9 +312,10 @@ class AccountInternal extends PureComponent<
   dispatchSelected?: (action: Actions) => void;
   _isOptimisticUpdate: boolean = false;
   // Whether the pending optimistic update could change a transaction's
-  // contribution to the running balance (added/deleted, or its amount/account
-  // changed). Edits like cleared/notes/category/payee can't affect balances,
-  // so we skip the expensive recompute for those.
+  // contribution to the running balance (added/deleted, or its date/amount/
+  // account changed — balances are a running sum in date order, so moving a
+  // row changes every later row). Edits like cleared/notes/category/payee
+  // can't affect balances, so we skip the expensive recompute for those.
   _optimisticUpdateAffectsBalance: boolean = true;
 
   constructor(props: AccountInternalProps) {
@@ -687,6 +688,7 @@ class AccountInternal extends PureComponent<
     this._optimisticUpdateAffectsBalance =
       !!updatedTransaction._deleted ||
       !previousTransaction ||
+      previousTransaction.date !== updatedTransaction.date ||
       previousTransaction.amount !== updatedTransaction.amount ||
       previousTransaction.account !== updatedTransaction.account;
 
