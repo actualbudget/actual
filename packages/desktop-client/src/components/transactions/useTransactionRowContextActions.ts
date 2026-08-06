@@ -63,9 +63,6 @@ export function useTransactionRowContextActions({
       .map(id => id.split('/')[1]);
   }, [selectedIds]);
 
-  // This hook runs for every rendered transaction row, so only subscribe to
-  // schedules when the selection actually contains previews. Passing no query
-  // keeps `useSchedules` from opening live queries for ordinary transactions.
   const scheduleQuery = useMemo(() => {
     if (scheduleIds.length === 0) {
       return undefined;
