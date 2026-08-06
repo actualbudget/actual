@@ -426,5 +426,5 @@ Numbers written directly in the formula are in **currency units**: `=100` means 
 ```
 
 :::note
-The schedule editor's preview resolves `BALANCE_OF` to 0 because balances are only fetched when the transaction is posted. The posted transaction always uses the balance as of the scheduled date, and each occurrence is evaluated with its own date.
+The schedule editor's preview resolves `BALANCE_OF` to 0 because balances are only fetched when the transaction is posted. The posted transaction always uses the balance as of the scheduled date, and each occurrence is evaluated with its own date. If a formula fails to evaluate (for example, because it references an account that was deleted), the transaction is not posted.
 :::
