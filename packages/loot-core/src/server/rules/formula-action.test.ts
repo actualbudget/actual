@@ -28,6 +28,37 @@ describe('Formula-based rule actions', () => {
     expect(result).toBe(30000);
   });
 
+  it('should scale formula results with the currency decimal places', () => {
+    const action = new Action('set', 'amount', null, {});
+    const transaction: Partial<TransactionForRules> = { amount: 500 };
+
+    // JPY has 0 decimal places: =100 means 100 yen
+    setCachedUserPreferences({
+      currency: getCurrency('JPY'),
+      numberFormat: 'comma-dot',
+      decimalPlaces: 0,
+      thousandsSeparator: ',',
+      decimalSeparator: '.',
+      locale: 'en-US',
+      currencySymbolPosition: 'before',
+      currencySpaceBetweenAmountAndSymbol: false,
+    });
+    expect(action.executeFormulaSync('=100', transaction)).toBe(100);
+
+    // A 3-decimal currency: =100 means 100.000 minor units
+    setCachedUserPreferences({
+      currency: { ...getCurrency('USD'), decimalPlaces: 3 },
+      numberFormat: 'comma-dot',
+      decimalPlaces: 3,
+      thousandsSeparator: ',',
+      decimalSeparator: '.',
+      locale: 'en-US',
+      currencySymbolPosition: 'before',
+      currencySpaceBetweenAmountAndSymbol: false,
+    });
+    expect(action.executeFormulaSync('=100', transaction)).toBe(100000);
+  });
+
   it('should use transaction field variables', () => {
     const action = new Action('set', 'notes', null, {});
     const transaction = { amount: 5000 };

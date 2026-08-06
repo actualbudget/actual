@@ -1,4 +1,7 @@
 // @ts-strict-ignore
+import { getCurrency } from '#shared/currencies';
+import { setCachedUserPreferences } from '#shared/formulas/customFunctions';
+
 import {
   Action,
   Condition,
@@ -104,6 +107,38 @@ describe('Condition', () => {
     cond = new Condition('formula', 'amount', '=1 +', null);
     expect(cond.eval({ amount: 0, date: '2020-08-10' })).toBe(false);
     warnSpy.mockRestore();
+  });
+
+  test('formula conditions scale with the currency decimal places', () => {
+    const prefs = (
+      decimalPlaces: number,
+      currency = getCurrency('USD'),
+    ): Parameters<typeof setCachedUserPreferences>[0] => ({
+      currency: { ...currency, decimalPlaces },
+      numberFormat: 'comma-dot',
+      decimalPlaces,
+      thousandsSeparator: ',',
+      decimalSeparator: '.',
+      locale: 'en-US',
+      currencySymbolPosition: 'before',
+      currencySpaceBetweenAmountAndSymbol: false,
+    });
+
+    try {
+      // JPY: 0 decimal places, so =100 matches amount 100
+      setCachedUserPreferences(prefs(0, getCurrency('JPY')));
+      let cond = new Condition('formula', 'amount', '=100', null);
+      expect(cond.eval({ amount: 100, date: '2020-08-10' })).toBe(true);
+      expect(cond.eval({ amount: 10000, date: '2020-08-10' })).toBe(false);
+
+      // 3-decimal currency: =100 matches amount 100000
+      setCachedUserPreferences(prefs(3));
+      cond = new Condition('formula', 'amount', '=100', null);
+      expect(cond.eval({ amount: 100000, date: '2020-08-10' })).toBe(true);
+      expect(cond.eval({ amount: 10000, date: '2020-08-10' })).toBe(false);
+    } finally {
+      setCachedUserPreferences(prefs(2));
+    }
   });
 
   test('date restricts operators for each type', () => {

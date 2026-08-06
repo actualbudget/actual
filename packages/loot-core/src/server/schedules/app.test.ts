@@ -1040,6 +1040,7 @@ describe('schedule app', () => {
         field: 'amount',
         value: 0,
         options: { formula: '=-DAY(date) * 100' },
+        type: 'number',
       });
     });
 
@@ -1178,6 +1179,16 @@ describe('schedule app', () => {
           cleared: true,
         });
 
+        // Dated after the schedule; it must not affect the prefetched
+        // balance, proving the as-of-scheduled-date cutoff is applied.
+        await db.insertTransaction({
+          id: 'savings-later-deposit',
+          amount: 25000,
+          date: '2017-01-05',
+          account: savingsId,
+          cleared: true,
+        });
+
         const id = await createSchedule({
           schedule: { posts_transaction: true },
           conditions: [
@@ -1198,6 +1209,45 @@ describe('schedule app', () => {
           q('transactions').filter({ schedule: id }).select(['amount']),
         );
         expect(transactions.map(({ amount }) => amount)).toEqual([-50000]);
+      } finally {
+        MockDate.reset();
+        await schedulesApp.stopServices();
+      }
+    });
+
+    it('does not post a transaction when the formula fails to evaluate', async () => {
+      MockDate.set(new Date(2016, 11, 31, 12));
+      schedulesApp.startServices();
+
+      try {
+        const accountId = await db.insertAccount({
+          name: 'Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+
+        // =1/0 is a parseable but non-evaluable formula (#DIV/0!)
+        const id = await createSchedule({
+          schedule: { posts_transaction: true },
+          conditions: [
+            { op: 'is', field: 'account', value: accountId },
+            {
+              op: 'formula',
+              field: 'amount',
+              value: '=1/0',
+              type: 'string',
+            },
+            { op: 'is', field: 'date', value: '2016-12-31' },
+          ],
+        });
+
+        await advanceSchedulesService(true);
+
+        const { data: transactions } = await aqlQuery(
+          q('transactions').filter({ schedule: id }).select(['amount']),
+        );
+        // No transaction with a silent amount of 0 is created.
+        expect(transactions).toEqual([]);
       } finally {
         MockDate.reset();
         await schedulesApp.stopServices();

@@ -43,7 +43,9 @@ export class ScheduleEditModal {
     this.cancelButton = locator.getByRole('button', { name: 'Cancel' });
   }
 
-  async selectAmountOp(op: string) {
+  async selectAmountOp(
+    op: 'is exactly' | 'is approximately' | 'is between' | 'is formula',
+  ) {
     await this.amountOpButton.click();
 
     // The popover is rendered outside of the modal locator

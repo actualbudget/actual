@@ -725,7 +725,7 @@ describe('runSchedule', () => {
     expect(result.to_budget).toBe(0);
   });
 
-  it('budgets a constant-formula expense schedule for the same amount as a static one', async () => {
+  it('budgets a constant-formula expense schedule at the formula value', async () => {
     const template_lines = [
       {
         type: 'schedule',

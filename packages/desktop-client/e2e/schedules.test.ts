@@ -313,6 +313,8 @@ test.describe('Schedules', () => {
     const dateRowAfter = await scheduleEditModal.locator
       .getByText('Upcoming dates')
       .boundingBox();
+    expect(dateRowBefore).not.toBeNull();
+    expect(dateRowAfter).not.toBeNull();
     expect(dateRowAfter?.y).toBe(dateRowBefore?.y);
 
     // Restore the intended formula before saving

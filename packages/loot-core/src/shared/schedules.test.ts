@@ -5,6 +5,7 @@ import type { RuleConditionEntity, ScheduleEntity } from '#types/models';
 import * as monthUtils from './months';
 import {
   computeSchedulePreviewTransactions,
+  evaluateScheduledAmount,
   getHasTransactionsQuery,
   getNextDate,
   getScheduledAmount,
@@ -590,6 +591,34 @@ describe('schedules', () => {
           balanceOfPrefetch: prefetch,
         }),
       ).toBe(12345600);
+    });
+
+    it('inverts the sign of a formula amount', () => {
+      const prefetch = new Map<string, number>([['Checking', 123456]]);
+      expect(
+        getScheduledAmount('=BALANCE_OF("Checking")', true, {
+          date: '2024-03-15',
+          balanceOfPrefetch: prefetch,
+        }),
+      ).toBe(-12345600);
+      expect(getScheduledAmount('=100', true, { date: '2024-03-15' })).toBe(
+        -10000,
+      );
+    });
+
+    it('evaluateScheduledAmount reports evaluation failures', () => {
+      const { amount, error } = evaluateScheduledAmount(
+        '=NOT_A_FUNCTION()',
+        false,
+        { date: '2024-03-15' },
+      );
+      expect(amount).toBe(0);
+      expect(error).toBeDefined();
+
+      const ok = evaluateScheduledAmount('=100', false, {
+        date: '2024-03-15',
+      });
+      expect(ok).toEqual({ amount: 10000 });
     });
 
     it('returns 0 when the formula is malformed', () => {
