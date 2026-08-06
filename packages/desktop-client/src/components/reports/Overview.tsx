@@ -425,7 +425,9 @@ export function Overview({ dashboard }: OverviewProps) {
         height: type === 'sankey-card' ? 3 : 2,
         meta,
         dashboard_page_id: dashboard.id,
-        use_dashboard_date_range: true,
+        use_dashboard_date_range: !(
+          type === 'calendar-card' && dashboard.date_range_enabled
+        ),
       },
     });
   };
