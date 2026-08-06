@@ -7,13 +7,11 @@ import { Select } from '@actual-app/components/select';
 type CustomUpcomingLengthProps = {
   onChange: (value: string) => void;
   tempValue: string;
-  inline?: boolean;
 };
 
 export function CustomUpcomingLength({
   onChange,
   tempValue,
-  inline = false,
 }: CustomUpcomingLengthProps) {
   const { t } = useTranslation();
 
@@ -40,16 +38,11 @@ export function CustomUpcomingLength({
 
   return (
     <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        marginTop: inline ? 0 : 10,
-      }}
+      style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 10 }}
     >
       <Input
         id="length"
-        style={{ width: 56 }}
+        style={{ width: 40 }}
         type="number"
         min={1}
         onChangeValue={value => setNumValue(parseInt(value))}

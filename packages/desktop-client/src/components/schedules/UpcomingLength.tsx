@@ -10,7 +10,6 @@ import {
   isCustomUpcomingLength,
   UPCOMING_LENGTH_PRESET_OPTIONS,
 } from '@actual-app/core/shared/schedules';
-import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -20,10 +19,11 @@ import { CustomUpcomingLength } from './CustomUpcomingLength';
 function useUpcomingLengthOptions() {
   const { t } = useTranslation();
 
-  const upcomingLengthOptions = UPCOMING_LENGTH_PRESET_OPTIONS.map(o => ({
-    value: o.value as SyncedPrefs['upcomingScheduledTransactionLength'],
-    label: t(o.labelKey),
-  }));
+  const upcomingLengthOptions: Array<{ value: string; label: string }> =
+    UPCOMING_LENGTH_PRESET_OPTIONS.map(o => ({
+      value: o.value,
+      label: t(o.labelKey),
+    }));
 
   upcomingLengthOptions.push({ value: 'custom', label: t('Custom length') });
 

@@ -38,10 +38,7 @@ import { DEFAULT_MAX_DISTANCE_METERS } from '@actual-app/core/shared/constants';
 import { calculateDistance } from '@actual-app/core/shared/location-utils';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import {
-  DEFAULT_UPCOMING_SCHEDULE_DAYS,
-  getUpcomingDays,
-} from '@actual-app/core/shared/schedules';
+import { DEFAULT_UPCOMING_SCHEDULE_DAYS } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -85,7 +82,6 @@ import {
 import { getPrettyPayee } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import { shouldApplyRuleChange } from '#components/transactions/table/utils';
-import { createSingleTimeScheduleFromTransaction } from '#components/transactions/TransactionList';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
@@ -112,6 +108,11 @@ import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch, useSelector } from '#redux';
 import { setLastTransaction } from '#transactions/transactionsSlice';
 import { getStatusLabel } from '#util/schedule';
+import {
+  calculateFutureTransactionInfo,
+  createSingleTimeScheduleFromTransaction,
+  isFutureTransaction,
+} from '#util/schedule-actions';
 
 import { AmountInput } from './AmountInput';
 import { SplitAmountInput } from './SplitAmountInput';
@@ -235,6 +236,7 @@ type FooterProps = {
   isAdding: boolean;
   onAdd: () => void;
   onSave: () => void;
+  onSchedule: () => void;
   onSplit: (id: TransactionEntity['id']) => void;
   onAddSplit: (id: TransactionEntity['id']) => void;
   onEmptySplitFound: (id: TransactionEntity['id']) => void;
@@ -250,6 +252,7 @@ function Footer({
   isAdding,
   onAdd,
   onSave,
+  onSchedule,
   onSplit,
   onAddSplit,
   onEmptySplitFound,
@@ -258,6 +261,7 @@ function Footer({
 }: FooterProps) {
   const [transaction, ...childTransactions] = transactions;
   const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
+  const isFuture = isFutureTransaction(transaction);
   const onClickRemainingSplit = () => {
     if (childTransactions.length === 0) {
       onSplit(transaction.id);
@@ -281,8 +285,27 @@ function Footer({
         backgroundColor: theme.tableHeaderBackground,
         borderTopWidth: 1,
         borderColor: theme.tableBorder,
+        gap: 8,
       }}
     >
+      {isFuture && (
+        <Button
+          variant="normal"
+          style={{ height: styles.mobileMinHeight }}
+          isDisabled={!!editingField}
+          onPress={onSchedule}
+        >
+          <SvgCalendar width={17} height={17} />
+          <Text
+            style={{
+              ...styles.text,
+              marginLeft: 6,
+            }}
+          >
+            <Trans>Schedule</Trans>
+          </Text>
+        </Button>
+      )}
       {transaction.error?.type === 'SplitTransactionError' ? (
         <Button
           variant="primary"
@@ -705,8 +728,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     );
 
     const onSaveInner = useCallback(async () => {
-      const [unserializedTransaction] = unserializedTransactions;
-
       const onConfirmSave = () => {
         let transactionsToSave = unserializedTransactions;
         if (isAdding) {
@@ -718,71 +739,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         onSave(transactionsToSave);
         void navigate(-1);
       };
-
-      const today = monthUtils.currentDay();
-      const isFuture = unserializedTransaction.date > today;
-      const isLinkedToSchedule = !!unserializedTransaction.schedule;
-
-      if (isFuture && !isLinkedToSchedule) {
-        const upcomingDays = getUpcomingDays(upcomingLength, today);
-        const daysUntilTransaction = monthUtils.differenceInCalendarDays(
-          unserializedTransaction.date,
-          today,
-        );
-        const isBeyondWindow = daysUntilTransaction > upcomingDays;
-
-        dispatch(
-          pushModal({
-            modal: {
-              name: 'convert-to-schedule',
-              options: {
-                isBeyondWindow,
-                daysUntilTransaction,
-                upcomingDays,
-                onConfirm: async () => {
-                  if (
-                    !isAdding &&
-                    unserializedTransaction.id &&
-                    !unserializedTransaction.id.startsWith('temp')
-                  ) {
-                    await send('transaction-delete', {
-                      id: unserializedTransaction.id,
-                    });
-                  }
-
-                  const transactionForSchedule =
-                    unserializedTransaction.is_parent
-                      ? {
-                          ...unserializedTransaction,
-                          subtransactions: unserializedTransactions.filter(
-                            t =>
-                              t.is_child &&
-                              t.parent_id === unserializedTransaction.id,
-                          ),
-                        }
-                      : unserializedTransaction;
-
-                  await createSingleTimeScheduleFromTransaction(
-                    transactionForSchedule,
-                  );
-
-                  dispatch(
-                    addNotification({
-                      notification: {
-                        type: 'message',
-                        message: t('Schedule created successfully'),
-                      },
-                    }),
-                  );
-                  void navigate(-1);
-                },
-                onCancel: onConfirmSave,
-              },
-            },
-          }),
-        );
-        return;
-      }
 
       if (unserializedTransactions.some(t => t.reconciled)) {
         // On mobile any save gives the warning.
@@ -833,11 +789,93 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           onConfirmSave();
         }
       }
+    }, [isAdding, dispatch, navigate, onSave, unserializedTransactions, t]);
+
+    const onSchedule = useCallback(async () => {
+      const [unserializedTransaction] = unserializedTransactions;
+
+      if (!unserializedTransaction.account) {
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: t('Account is a required field'),
+            },
+          }),
+        );
+        return;
+      }
+
+      // Already linked to a schedule; keep it as a transaction.
+      if (unserializedTransaction.schedule) {
+        return;
+      }
+
+      const transactionForSchedule = unserializedTransaction.is_parent
+        ? {
+            ...unserializedTransaction,
+            subtransactions: unserializedTransactions.filter(
+              t => t.is_child && t.parent_id === unserializedTransaction.id,
+            ),
+          }
+        : unserializedTransaction;
+
+      const createSchedule = async () => {
+        try {
+          await createSingleTimeScheduleFromTransaction(transactionForSchedule);
+          if (
+            !isAdding &&
+            unserializedTransaction.id &&
+            !unserializedTransaction.id.startsWith('temp')
+          ) {
+            await send('transaction-delete', {
+              id: unserializedTransaction.id,
+            });
+          }
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'message',
+                message: t('Schedule created successfully'),
+              },
+            }),
+          );
+          void navigate(-1);
+        } catch {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: t('Failed to create schedule'),
+              },
+            }),
+          );
+        }
+      };
+
+      const { isBeyondWindow, daysUntilTransaction, upcomingDays } =
+        calculateFutureTransactionInfo(transactionForSchedule, upcomingLength);
+
+      if (isBeyondWindow) {
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'convert-to-schedule',
+              options: {
+                daysUntilTransaction,
+                upcomingDays,
+                onConfirm: createSchedule,
+              },
+            },
+          }),
+        );
+      } else {
+        await createSchedule();
+      }
     }, [
       isAdding,
       dispatch,
       navigate,
-      onSave,
       unserializedTransactions,
       upcomingLength,
       t,
@@ -1129,6 +1167,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             isAdding={isAdding}
             onAdd={onSaveInner}
             onSave={onSaveInner}
+            onSchedule={onSchedule}
             onSplit={onSplit}
             onAddSplit={onAddSplit}
             onEmptySplitFound={onEmptySplitFound}
