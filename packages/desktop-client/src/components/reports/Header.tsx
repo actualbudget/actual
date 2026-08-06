@@ -27,7 +27,7 @@ import { getFirstDayOfWeek } from '#components/select/getFirstDayOfWeek';
 import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useDateFormat } from '#hooks/useDateFormat';
-import { useLanguage } from '#hooks/useLocale';
+import { useLanguage, useLocale } from '#hooks/useLocale';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 import { getLiveRange } from './getLiveRange';
@@ -117,6 +117,7 @@ export function Header({
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const language = useLanguage();
+  const locale = useLocale();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [searchParams] = useSearchParams();
   const routeParams = useParams();
@@ -143,6 +144,13 @@ export function Header({
             dashboardScope!.end,
           )
         : [start, end, mode];
+  const liveReferenceDate =
+    hasDashboardContext && !useDashboardDateRange && displayMode !== 'static'
+      ? dashboardScope!.end
+      : undefined;
+  const liveReferenceMonth = liveReferenceDate
+    ? monthUtils.getMonth(liveReferenceDate)
+    : undefined;
   const commitDates = (
     newStart: string,
     newEnd: string,
@@ -165,6 +173,7 @@ export function Header({
       latestTransaction,
       includeCurrentInterval,
       firstDayOfWeekIdx,
+      liveReferenceDate,
     );
     return [
       monthUtils.getMonth(rangeStart),
@@ -217,17 +226,19 @@ export function Header({
         ...(show1Month
           ? [
               makePreset('1-month', <Trans>1 month</Trans>, () =>
-                getLatestRange(0),
+                getLatestRange(0, liveReferenceDate),
               ),
             ]
           : []),
         makePreset('3-months', <Trans>3 months</Trans>, () =>
-          getLatestRange(2),
+          getLatestRange(2, liveReferenceDate),
         ),
         makePreset('6-months', <Trans>6 months</Trans>, () =>
-          getLatestRange(5),
+          getLatestRange(5, liveReferenceDate),
         ),
-        makePreset('1-year', <Trans>1 year</Trans>, () => getLatestRange(11)),
+        makePreset('1-year', <Trans>1 year</Trans>, () =>
+          getLatestRange(11, liveReferenceDate),
+        ),
         makePreset('year-to-date', <Trans>Year to date</Trans>, () =>
           liveRangeAsMonths('Year to date', true, 'yearToDate'),
         ),
@@ -317,6 +328,18 @@ export function Header({
           <DateRangePicker
             start={displayStart}
             end={displayEnd}
+            referenceMonth={liveReferenceMonth}
+            referenceHint={
+              liveReferenceMonth
+                ? t('Live ranges use {{month}} as the reference month.', {
+                    month: monthUtils.format(
+                      liveReferenceMonth,
+                      'MMMM yyyy',
+                      locale,
+                    ),
+                  })
+                : undefined
+            }
             isDisabled={useDashboardDateRange}
             granularities={granularities}
             // allMonths is newest-first and may be empty before reports load.
@@ -328,9 +351,13 @@ export function Header({
             maxDate={
               showFutureRange
                 ? undefined
-                : allMonths.length
-                  ? allMonths[0].name
-                  : monthUtils.currentMonth()
+                : liveReferenceMonth &&
+                    (!allMonths.length ||
+                      liveReferenceMonth > allMonths[0].name)
+                  ? liveReferenceMonth
+                  : allMonths.length
+                    ? allMonths[0].name
+                    : monthUtils.currentMonth()
             }
             firstDayOfWeek={getFirstDayOfWeek(firstDayOfWeekIdx)}
             locale={language}

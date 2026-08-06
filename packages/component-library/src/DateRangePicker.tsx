@@ -42,6 +42,10 @@ type DateRangePickerProps = {
   minDate: string;
   /** Inclusive upper bound; omit for no upper limit. */
   maxDate?: string;
+  /** Month treated as current when LIVE dates use an external reference. */
+  referenceMonth?: string;
+  /** Explanation shown below the picker when an external reference is active. */
+  referenceHint?: string;
   /** Pass `['month', 'day']` for callers that handle day-shaped values. */
   granularities?: DateRangeGranularity[];
   presets?: DateRangePreset[];
@@ -74,6 +78,8 @@ export function DateRangePicker({
   end,
   minDate,
   maxDate,
+  referenceMonth,
+  referenceHint,
   granularities = ['month'],
   presets,
   firstDayOfWeek = 'sun',
@@ -212,95 +218,111 @@ export function DateRangePicker({
         }}
         style={{ padding: 0 }}
       >
-        <View style={{ flexDirection: isNarrowWidth ? 'column' : 'row' }}>
-          <View
-            style={{
-              padding: 15,
-              ...(hasSidebar &&
-                (isNarrowWidth
-                  ? { borderBottom: `1px solid ${theme.tableBorder}` }
-                  : { borderRight: `1px solid ${theme.tableBorder}` })),
-            }}
-          >
-            {isDay ? (
-              <DayRangeCalendar
-                start={draftStart}
-                end={draftEnd}
-                min={dayMin}
-                max={dayMax}
-                firstDayOfWeek={firstDayOfWeek}
-                locale={locale}
-                labels={labels}
-                onChange={setDraft}
-              />
-            ) : (
-              <RangeSelector
-                start={draftStart}
-                end={draftEnd}
-                min={monthMin}
-                max={monthMax}
-                locale={locale}
-                labels={labels}
-                onChange={setDraft}
-              />
+        <View>
+          <View style={{ flexDirection: isNarrowWidth ? 'column' : 'row' }}>
+            <View
+              style={{
+                padding: 15,
+                ...(hasSidebar &&
+                  (isNarrowWidth
+                    ? { borderBottom: `1px solid ${theme.tableBorder}` }
+                    : { borderRight: `1px solid ${theme.tableBorder}` })),
+              }}
+            >
+              {isDay ? (
+                <DayRangeCalendar
+                  start={draftStart}
+                  end={draftEnd}
+                  min={dayMin}
+                  max={dayMax}
+                  firstDayOfWeek={firstDayOfWeek}
+                  locale={locale}
+                  labels={labels}
+                  onChange={setDraft}
+                />
+              ) : (
+                <RangeSelector
+                  start={draftStart}
+                  end={draftEnd}
+                  min={monthMin}
+                  max={monthMax}
+                  referenceMonth={referenceMonth}
+                  locale={locale}
+                  labels={labels}
+                  onChange={setDraft}
+                />
+              )}
+            </View>
+
+            {hasSidebar && (
+              <View style={{ padding: 15, minWidth: 140, gap: 16 }}>
+                {showGranularityToggle && (
+                  <View>
+                    <Text style={sectionTitleStyle}>{labels.selectBy}</Text>
+                    <GranularityToggle
+                      value={isDay ? 'day' : 'month'}
+                      monthLabel={labels.month}
+                      dayLabel={labels.day}
+                      onChange={changeGranularity}
+                    />
+                  </View>
+                )}
+
+                {Boolean(presets?.length) && (
+                  <View>
+                    <Text style={sectionTitleStyle}>{labels.quickSelect}</Text>
+                    <View style={{ gap: 4 }}>
+                      {presets?.map(preset => {
+                        // Derive the active preset from the shown range instead
+                        // of storing it, so it survives closing and reopening
+                        // without persisting anything.
+                        const [presetStart, presetEnd] = preset.getRange();
+                        const isActive =
+                          presetStart === draftStart && presetEnd === draftEnd;
+                        return (
+                          <Button
+                            key={preset.key}
+                            variant={isActive ? 'primary' : 'bare'}
+                            aria-pressed={isActive}
+                            onPress={() => {
+                              // Preview in the draft; the commit happens on
+                              // close, like manual selection.
+                              setDraftStart(presetStart);
+                              setDraftEnd(presetEnd);
+                              setDraftPreset(preset);
+                            }}
+                            style={{
+                              justifyContent: 'flex-start',
+                              fontSize: 13,
+                              // Match primary's 1px border so toggling the
+                              // active preset doesn't shift the list.
+                              ...(!isActive && {
+                                border: '1px solid transparent',
+                              }),
+                            }}
+                          >
+                            {preset.label}
+                          </Button>
+                        );
+                      })}
+                    </View>
+                  </View>
+                )}
+              </View>
             )}
           </View>
 
-          {hasSidebar && (
-            <View style={{ padding: 15, minWidth: 140, gap: 16 }}>
-              {showGranularityToggle && (
-                <View>
-                  <Text style={sectionTitleStyle}>{labels.selectBy}</Text>
-                  <GranularityToggle
-                    value={isDay ? 'day' : 'month'}
-                    monthLabel={labels.month}
-                    dayLabel={labels.day}
-                    onChange={changeGranularity}
-                  />
-                </View>
-              )}
-
-              {Boolean(presets?.length) && (
-                <View>
-                  <Text style={sectionTitleStyle}>{labels.quickSelect}</Text>
-                  <View style={{ gap: 4 }}>
-                    {presets?.map(preset => {
-                      // Derive the active preset from the shown range instead
-                      // of storing it, so it survives closing and reopening
-                      // without persisting anything.
-                      const [presetStart, presetEnd] = preset.getRange();
-                      const isActive =
-                        presetStart === draftStart && presetEnd === draftEnd;
-                      return (
-                        <Button
-                          key={preset.key}
-                          variant={isActive ? 'primary' : 'bare'}
-                          aria-pressed={isActive}
-                          onPress={() => {
-                            // Preview in the draft; the commit happens on
-                            // close, like manual selection.
-                            setDraftStart(presetStart);
-                            setDraftEnd(presetEnd);
-                            setDraftPreset(preset);
-                          }}
-                          style={{
-                            justifyContent: 'flex-start',
-                            fontSize: 13,
-                            // Match primary's 1px border so toggling the
-                            // active preset doesn't shift the list.
-                            ...(!isActive && {
-                              border: '1px solid transparent',
-                            }),
-                          }}
-                        >
-                          {preset.label}
-                        </Button>
-                      );
-                    })}
-                  </View>
-                </View>
-              )}
-            </View>
+          {referenceHint && (
+            <Text
+              style={{
+                padding: '8px 15px',
+                borderTop: `1px solid ${theme.tableBorder}`,
+                color: theme.pageTextSubdued,
+                fontSize: 11,
+              }}
+            >
+              {referenceHint}
+            </Text>
           )}
         </View>
       </Popover>
