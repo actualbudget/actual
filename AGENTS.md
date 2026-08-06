@@ -268,7 +268,8 @@ wrapping isn't possible).
 This repo uses the [impeccable](https://www.npmjs.com/package/impeccable)
 design skill for designing, restyling, or reviewing UI. The skill payload is
 not committed — only its hook wiring and the project design context
-(`PRODUCT.md`, `DESIGN.md`, `DESIGN.json`) are. If your harness's `skills/impeccable/`
+(`PRODUCT.md`, `DESIGN.md`) are. `DESIGN.json` is a generated sidecar of
+`DESIGN.md`; regenerate it locally with `$impeccable document` when needed. If your harness's `skills/impeccable/`
 directory (e.g. `.claude/skills/impeccable/`) is missing, install it with
 `npx impeccable install`, then invoke `/impeccable` for design tasks.
 
