@@ -64,6 +64,7 @@ import { CustomReportListCards } from './reports/CustomReportListCards';
 import { FormulaCard } from './reports/FormulaCard';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { MissingReportCard } from './reports/MissingReportCard';
+import { MonteCarloCard } from './reports/monte-carlo/MonteCarloCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
 import { SpendingCard } from './reports/SpendingCard';
@@ -114,6 +115,7 @@ export function Overview({ dashboard }: OverviewProps) {
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
   const balanceForecastReportEnabled = useFeatureFlag('balanceForecastReport');
+  const monteCarloReportEnabled = useFeatureFlag('monteCarloReport');
 
   const formulaMode = useFeatureFlag('formulaMode');
 
@@ -612,6 +614,14 @@ export function Overview({ dashboard }: OverviewProps) {
                                   },
                                 ]
                               : []),
+                            ...(monteCarloReportEnabled
+                              ? [
+                                  {
+                                    name: 'monte-carlo-card' as const,
+                                    text: t('Monte Carlo analysis'),
+                                  },
+                                ]
+                              : []),
                             {
                               name: 'markdown-card' as const,
                               text: t('Text widget'),
@@ -905,6 +915,16 @@ export function Overview({ dashboard }: OverviewProps) {
                         ) : widget.type === 'sankey-card' &&
                           sankeyFeatureFlag ? (
                           <SankeyCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                          />
+                        ) : widget.type === 'monte-carlo-card' &&
+                          monteCarloReportEnabled ? (
+                          <MonteCarloCard
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}

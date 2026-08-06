@@ -7,6 +7,9 @@
 # Adapted from a suggestion by @StephenBrown2 on PR #8089.
 set -uo pipefail
 
+. "$(dirname "$0")/common.sh"
+require_jq
+
 # Read the hook payload (Claude provides stop_hook_active to prevent loops).
 payload=$(cat 2>/dev/null || true)
 if printf '%s' "$payload" | jq -e '.stop_hook_active == true' >/dev/null 2>&1; then
@@ -14,7 +17,6 @@ if printf '%s' "$payload" | jq -e '.stop_hook_active == true' >/dev/null 2>&1; t
 fi
 
 # Resolve the repo root regardless of which agent invoked us.
-. "$(dirname "$0")/common.sh"
 ROOT=$(resolve_repo_root)
 cd "$ROOT" 2>/dev/null || exit 0
 
