@@ -56,6 +56,7 @@ const HelpButton = forwardRef<HTMLButtonElement, HelpButtonProps>(
         variant="bare"
         ref={ref}
         onPress={onPress}
+        data-testid="help-menu-button"
         style={{
           display: 'flex',
           alignItems: 'center',
