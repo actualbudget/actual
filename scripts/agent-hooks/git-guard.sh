@@ -18,6 +18,11 @@ block() {
   exit 2
 }
 
+# A missing jq gets its own actionable block, distinct from the
+# malformed-payload block below.
+. "$(dirname "$0")/common.sh"
+require_jq
+
 # Fail closed: a malformed payload (jq parse failure) blocks rather than allows.
 cmd=$(jq -r '.tool_input.command // empty' 2>/dev/null) ||
   block "Blocked: could not parse the hook payload (.tool_input.command)."
