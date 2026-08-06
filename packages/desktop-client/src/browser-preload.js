@@ -63,13 +63,18 @@ const worker = startBrowserBackend({
 // the browser is allowed to silently delete all local data, forcing a full
 // re-download of the budget and losing any changes not yet synced.
 if (navigator.storage?.persist) {
-  void navigator.storage.persist().then(persisted => {
-    if (!persisted) {
-      console.warn(
-        'Persistent storage was not granted; the browser may evict local budget data under storage pressure.',
-      );
-    }
-  });
+  void navigator.storage
+    .persist()
+    .then(persisted => {
+      if (!persisted) {
+        console.warn(
+          'Persistent storage was not granted; the browser may evict local budget data under storage pressure.',
+        );
+      }
+    })
+    .catch(error => {
+      console.warn('Persistent storage request failed:', error);
+    });
 }
 
 let isUpdateReadyForDownload = false;
