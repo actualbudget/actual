@@ -1,9 +1,9 @@
 import { q } from '@actual-app/core/shared/query';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Mock } from 'vitest';
 
 import { liveQuery } from '#queries/liveQuery';
+import type { LiveQuery } from '#queries/liveQuery';
 
 import { useSchedules } from './useSchedules';
 
@@ -16,8 +16,8 @@ vi.mock('./useSyncedPref', () => ({
 }));
 
 type LiveQueryCall = {
-  onData: (data: unknown[]) => void;
-  unsubscribe: Mock;
+  onData: (data: unknown[], previousData: unknown[]) => void;
+  unsubscribe: ReturnType<typeof vi.fn>;
 };
 
 describe('useSchedules', () => {
@@ -27,13 +27,18 @@ describe('useSchedules', () => {
     vi.clearAllMocks();
     calls = [];
 
-    (liveQuery as unknown as Mock).mockImplementation(
-      (_query, { onData }: { onData: (data: unknown[]) => void }) => {
-        const handle = { onData, unsubscribe: vi.fn() };
-        calls.push(handle);
-        return handle;
-      },
-    );
+    // `vi.mocked` keeps the mock bound to the real `liveQuery` signature, so a
+    // change to how the hook calls it still fails typecheck.
+    vi.mocked(liveQuery).mockImplementation((_query, { onData }) => {
+      const handle = {
+        onData: onData ?? vi.fn(),
+        unsubscribe: vi.fn(),
+      };
+      calls.push(handle);
+      // `LiveQuery` is a class with private state; only the subscription
+      // surface used by the hook is faked here.
+      return handle as unknown as LiveQuery<unknown>;
+    });
   });
 
   it('does not open any live query when no query is given', () => {
@@ -43,32 +48,30 @@ describe('useSchedules', () => {
   });
 
   it('unsubscribes the previous status query when schedules refresh', () => {
-    renderHook(() =>
-      useSchedules({ query: q('schedules').select('*') as never }),
-    );
+    renderHook(() => useSchedules({ query: q('schedules').select('*') }));
 
     // The schedules query is opened first; its onData opens the status query.
     expect(calls).toHaveLength(1);
     const schedulesQuery = calls[0];
 
-    schedulesQuery.onData([]);
+    schedulesQuery.onData([], []);
     expect(calls).toHaveLength(2);
     const firstStatusQuery = calls[1];
     expect(firstStatusQuery.unsubscribe).not.toHaveBeenCalled();
 
     // A refresh must tear down the previous status query rather than orphaning
     // it — an orphan stays subscribed to sync events and keeps re-running.
-    schedulesQuery.onData([]);
+    schedulesQuery.onData([], []);
     expect(firstStatusQuery.unsubscribe).toHaveBeenCalledTimes(1);
     expect(calls).toHaveLength(3);
   });
 
   it('unsubscribes both queries on unmount', () => {
     const { unmount } = renderHook(() =>
-      useSchedules({ query: q('schedules').select('*') as never }),
+      useSchedules({ query: q('schedules').select('*') }),
     );
 
-    calls[0].onData([]);
+    calls[0].onData([], []);
     expect(calls).toHaveLength(2);
 
     unmount();
