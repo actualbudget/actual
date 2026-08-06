@@ -12,7 +12,6 @@ import * as undo from '@actual-app/core/platform/client/undo';
 import { getLatestAppVersion, sync } from '#app/appSlice';
 import { ProtectedRoute } from '#auth/ProtectedRoute';
 import { Permissions } from '#auth/types';
-import { useAccounts } from '#hooks/useAccounts';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
@@ -35,7 +34,6 @@ import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
 import { MobilePageHeaderProvider, MobilePageHeaderSlot } from './Page';
 import { Reports } from './reports';
-import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
@@ -94,8 +92,6 @@ export function FinancesApp() {
   const location = useLocation();
   const dispatch = useDispatch();
   const { t } = useTranslation();
-
-  const { data: accounts, isFetching: isAccountsFetching } = useAccounts();
 
   const versionInfo = useSelector(state => state.app.versionInfo);
   const [notifyWhenUpdateIsAvailable] = useGlobalPref(
@@ -246,20 +242,7 @@ export function FinancesApp() {
                 {isNarrowWidth && <MobilePageHeaderSlot />}
 
                 <Routes>
-                  <Route
-                    path="/"
-                    element={
-                      isAccountsFetching || !accounts ? (
-                        <LoadingIndicator />
-                      ) : accounts.length > 0 ? (
-                        <Navigate to="/budget" replace />
-                      ) : (
-                        // If there are no accounts, we want to redirect the user to
-                        // the All Accounts screen which will prompt them to add an account
-                        <Navigate to="/accounts" replace />
-                      )
-                    }
-                  />
+                  <Route path="/" element={<Navigate to="/budget" replace />} />
 
                   <Route path="/reports/*" element={<Reports />} />
 
