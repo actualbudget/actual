@@ -9,6 +9,7 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 
+import { PSEUDO_ACCOUNT_VIEWS } from '#queries';
 import * as bindings from '#spreadsheet/bindings';
 
 import { useAccounts } from './useAccounts';
@@ -19,6 +20,10 @@ import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
 
 type UseAccountPreviewTransactionsProps = {
+  /**
+   * A concrete account id, one of the pseudo views ('onbudget', 'offbudget',
+   * 'closed', 'uncategorized'), or undefined for all accounts.
+   */
   accountId?: AccountEntity['id'] | undefined;
 };
 
@@ -27,13 +32,18 @@ type UseAccountPreviewTransactionsResult = ReturnType<
 >;
 
 /**
- * Preview transactions for a given account or all accounts if no `accountId` is provided.
- * This will invert the payees, accounts, and amounts accordingly depending on which account
- * the preview transactions are being viewed from.
+ * Preview transactions for a given account (or pseudo account view), or all
+ * accounts if no `accountId` is provided. This will invert the payees,
+ * accounts, and amounts accordingly depending on which account the preview
+ * transactions are being viewed from.
  */
 export function useAccountPreviewTransactions({
   accountId,
 }: UseAccountPreviewTransactionsProps): UseAccountPreviewTransactionsResult {
+  const concreteAccountId =
+    accountId != null && PSEUDO_ACCOUNT_VIEWS.includes(accountId)
+      ? undefined
+      : accountId;
   const { data: accounts = [] } = useAccounts();
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
   const { data: payees = [] } = usePayees();
@@ -61,19 +71,43 @@ export function useAccountPreviewTransactions({
   );
 
   const accountSchedulesFilter = useCallback(
-    (schedule: ScheduleEntity) =>
-      !accountId ||
-      schedule._account === accountId ||
-      getTransferAccountByPayee(schedule._payee)?.id === accountId,
-    [accountId, getTransferAccountByPayee],
+    (schedule: ScheduleEntity) => {
+      if (!accountId) {
+        return true;
+      }
+
+      if (accountId === 'uncategorized' || accountId === 'closed') {
+        // These views never show schedule previews
+        return false;
+      }
+
+      if (accountId === 'onbudget' || accountId === 'offbudget') {
+        const wantOffbudget = accountId === 'offbudget';
+        return [
+          accountsById[schedule._account],
+          getTransferAccountByPayee(schedule._payee),
+        ].some(
+          account =>
+            account != null &&
+            !account.closed &&
+            Boolean(account.offbudget) === wantOffbudget,
+        );
+      }
+
+      return (
+        schedule._account === accountId ||
+        getTransferAccountByPayee(schedule._payee)?.id === accountId
+      );
+    },
+    [accountId, accountsById, getTransferAccountByPayee],
   );
 
   const accountBalanceValue = useSheetValue<
     'account',
     'balance' | 'accounts-balance'
   >(
-    accountId
-      ? bindings.accountBalance(accountId)
+    concreteAccountId
+      ? bindings.accountBalance(concreteAccountId)
       : bindings.allAccountBalance(),
   );
 
@@ -93,7 +127,7 @@ export function useAccountPreviewTransactions({
   });
 
   return useMemo(() => {
-    if (!accountId) {
+    if (!concreteAccountId) {
       return {
         previewTransactions: allPreviewTransactions,
         runningBalances: allRunningBalances,
@@ -106,7 +140,7 @@ export function useAccountPreviewTransactions({
       transactions: previewTransactions,
       runningBalances: previewRunningBalances,
     } = inverseBasedOnAccount({
-      accountId,
+      accountId: concreteAccountId,
       transactions: allPreviewTransactions,
       runningBalances: allRunningBalances,
       startingBalance: accountBalanceValue ?? 0,
@@ -128,7 +162,7 @@ export function useAccountPreviewTransactions({
       error,
     };
   }, [
-    accountId,
+    concreteAccountId,
     allPreviewTransactions,
     accountBalanceValue,
     allRunningBalances,

@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { q } from '@actual-app/core/shared/query';
 import {
   extractScheduleConds,
   scheduleIsRecurring,
@@ -12,7 +11,7 @@ import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import type { ContextMenuItem } from '#contextmenu/types';
 import { useContextMenu } from '#hooks/useContextMenu';
-import { useSchedules } from '#hooks/useSchedules';
+import { useSelectedPreviewSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -49,29 +48,15 @@ export function useTransactionRowContextActions({
   const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
 
+  const transactionId = transaction.id;
   const selectedIds = useMemo(() => {
     const ids =
-      selectedItems && selectedItems.size > 0
-        ? selectedItems
-        : [transaction.id];
+      selectedItems && selectedItems.size > 0 ? selectedItems : [transactionId];
     return Array.from(new Set(ids));
-  }, [transaction, selectedItems]);
+  }, [transactionId, selectedItems]);
 
-  const scheduleIds = useMemo(() => {
-    return selectedIds
-      .filter(id => isPreviewId(id))
-      .map(id => id.split('/')[1]);
-  }, [selectedIds]);
-
-  const scheduleQuery = useMemo(() => {
-    return q('schedules')
-      .filter({ id: { $oneof: scheduleIds } })
-      .select('*');
-  }, [scheduleIds]);
-
-  const { schedules: selectedSchedules } = useSchedules({
-    query: scheduleQuery,
-  });
+  const { schedules: selectedSchedules } =
+    useSelectedPreviewSchedules(selectedIds);
 
   const types = useMemo(() => {
     const items = selectedIds;

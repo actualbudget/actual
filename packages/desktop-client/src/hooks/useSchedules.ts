@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
@@ -7,6 +7,7 @@ import {
   getStatus,
 } from '@actual-app/core/shared/schedules';
 import type { ScheduleStatuses } from '@actual-app/core/shared/schedules';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
 import type {
   AccountEntity,
   ScheduleEntity,
@@ -86,7 +87,14 @@ export function useSchedules({
     setError(undefined);
 
     if (!query) {
-      // This usually means query is not yet set on this render cycle.
+      // No query yet (or the caller disabled the subscription) — clear any
+      // data left over from a previous query
+      setData({
+        schedules: [],
+        statuses: new Map(),
+        statusLabels: new Map(),
+      });
+      setIsLoading(false);
       return;
     }
 
@@ -167,4 +175,32 @@ export function getSchedulesQuery(
   }
 
   return query.orderBy({ next_date: 'desc' });
+}
+
+/**
+ * Schedules behind the preview (scheduled) transactions among the given
+ * selected ids. Only subscribes to the schedules query when preview
+ * transactions are actually selected — this is used for every transaction
+ * row's context menu, and an unconditional subscription per row floods the
+ * backend on every table change.
+ */
+export function useSelectedPreviewSchedules(
+  selectedIds: string[],
+): UseSchedulesResult {
+  const scheduleIds = useMemo(
+    () => selectedIds.filter(id => isPreviewId(id)).map(id => id.split('/')[1]),
+    [selectedIds],
+  );
+
+  const scheduleQuery = useMemo(
+    () =>
+      scheduleIds.length > 0
+        ? q('schedules')
+            .filter({ id: { $oneof: scheduleIds } })
+            .select('*')
+        : undefined,
+    [scheduleIds],
+  );
+
+  return useSchedules({ query: scheduleQuery });
 }

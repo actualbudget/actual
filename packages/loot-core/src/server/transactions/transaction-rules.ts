@@ -321,6 +321,9 @@ export async function getAllRuleIdsFromSchedules(
 export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
+  // Optional schedule id -> rule id map so batch callers can share one
+  // schedules lookup across many transactions
+  scheduleRules: Map<string, string | null> | null = null,
 ) {
   await ensureFormulaPreferencesLoaded();
 
@@ -338,14 +341,19 @@ export async function runRules(
   let scheduleRuleID = '';
   // Check if a schedule is attached to this transaction and if so get the rule ID attached to that schedule.
   if (trans.schedule != null) {
-    const ruleId = await getRuleIdFromScheduleId(trans.schedule);
+    const ruleId = scheduleRules
+      ? scheduleRules.get(trans.schedule) || null
+      : await getRuleIdFromScheduleId(trans.schedule);
     if (ruleId != null) {
       scheduleRuleID = ruleId;
     }
   }
 
-  const RuleIdsLinkedToSchedules =
-    await getAllRuleIdsFromSchedules(scheduleRuleID);
+  const RuleIdsLinkedToSchedules = scheduleRules
+    ? [...scheduleRules.values()]
+        .filter((rule): rule is string => !!rule)
+        .filter(ruleId => ruleId !== scheduleRuleID)
+    : await getAllRuleIdsFromSchedules(scheduleRuleID);
 
   const rules = rankRules(
     fastSetMerge(
@@ -387,6 +395,22 @@ export async function runRules(
   }
 
   return await finalizeTransactionForRules(finalTrans);
+}
+
+// Run rules over many transactions sharing one accounts and one schedules
+// lookup, instead of the per-transaction queries runRules does on its own
+export async function runRulesBatch(trans: unknown[]) {
+  const accounts = new Map(
+    (await db.getAccounts()).map(account => [account.id, account]),
+  );
+  const scheduleRules = new Map(
+    (
+      await db.all<Pick<db.DbSchedule, 'id' | 'rule'>>(
+        'SELECT id, rule FROM schedules',
+      )
+    ).map(row => [row.id, row.rule]),
+  );
+  return Promise.all(trans.map(t => runRules(t, accounts, scheduleRules)));
 }
 
 function conditionSpecialCases(cond: Condition | null): Condition | null {

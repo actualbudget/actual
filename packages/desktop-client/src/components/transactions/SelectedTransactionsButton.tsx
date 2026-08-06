@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 import { validForMerge } from '@actual-app/core/shared/merge';
-import { q } from '@actual-app/core/shared/query';
 import {
   extractScheduleConds,
   scheduleIsRecurring,
@@ -14,7 +13,7 @@ import { validForTransfer } from '@actual-app/core/shared/transfer';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import { SelectedItemsButton } from '#components/table';
-import { useSchedules } from '#hooks/useSchedules';
+import { useSelectedPreviewSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -72,21 +71,8 @@ export function SelectedTransactionsButton({
   const selectedItems = useSelectedItems();
   const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
 
-  const scheduleIds = useMemo(() => {
-    return selectedIds
-      .filter(id => isPreviewId(id))
-      .map(id => id.split('/')[1]);
-  }, [selectedIds]);
-
-  const scheduleQuery = useMemo(() => {
-    return q('schedules')
-      .filter({ id: { $oneof: scheduleIds } })
-      .select('*');
-  }, [scheduleIds]);
-
-  const { schedules: selectedSchedules } = useSchedules({
-    query: scheduleQuery,
-  });
+  const { schedules: selectedSchedules } =
+    useSelectedPreviewSchedules(selectedIds);
 
   const types = useMemo(() => {
     const items = selectedIds;

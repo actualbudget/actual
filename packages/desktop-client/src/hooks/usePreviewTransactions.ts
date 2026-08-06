@@ -59,16 +59,20 @@ export function usePreviewTransactions({
   filter,
   options,
 }: UsePreviewTransactionsProps = {}): UsePreviewTransactionsResult {
-  const [previewTransactions, setPreviewTransactions] = useState<
-    TransactionEntity[]
-  >([]);
+  // The rules-applied transactions, where `key` tags which
+  // `scheduleTransactions` value they were computed from: `key !==
+  // scheduleTransactions` means a refresh is in flight (reported as
+  // `isLoading`, with no stale-`false` windows during account switches).
+  const [resolved, setResolved] = useState<{
+    key: TransactionEntity[] | null;
+    transactions: TransactionEntity[];
+  }>({ key: null, transactions: [] });
   const {
     isLoading: isSchedulesLoading,
     error: scheduleQueryError,
     schedules,
     statuses,
   } = useCachedSchedules();
-  const [isLoading, setIsLoading] = useState(isSchedulesLoading);
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
@@ -92,19 +96,12 @@ export function usePreviewTransactions({
     setError(undefined);
 
     if (scheduleTransactions.length === 0) {
-      setIsLoading(false);
-      setPreviewTransactions([]);
+      setResolved({ key: scheduleTransactions, transactions: [] });
       return;
     }
 
-    setIsLoading(true);
-
-    Promise.all(
-      scheduleTransactions.map(transaction =>
-        // Kick off an async rules application
-        send('rules-run', { transaction }),
-      ),
-    )
+    // Apply rules to all preview transactions in a single round-trip
+    send('rules-run-batch', { transactions: scheduleTransactions })
       .then(newTrans => {
         if (!isUnmounted) {
           const scheduleById = new Map(schedules.map(s => [s.id, s]));
@@ -129,15 +126,16 @@ export function usePreviewTransactions({
           withDefaults.sort(comparePreviewTransactions);
 
           const ungroupedTransactions = ungroupTransactions(withDefaults);
-          setPreviewTransactions(ungroupedTransactions);
-
-          setIsLoading(false);
+          setResolved({
+            key: scheduleTransactions,
+            transactions: ungroupedTransactions,
+          });
         }
       })
       .catch(error => {
         if (!isUnmounted) {
           setError(error);
-          setIsLoading(false);
+          setResolved({ key: scheduleTransactions, transactions: [] });
         }
       });
 
@@ -145,6 +143,8 @@ export function usePreviewTransactions({
       isUnmounted = true;
     };
   }, [scheduleTransactions, schedules, statuses, upcomingLength]);
+
+  const previewTransactions = resolved.transactions;
 
   const runningBalances = useMemo(() => {
     if (!options?.calculateRunningBalances) {
@@ -168,7 +168,7 @@ export function usePreviewTransactions({
   return {
     previewTransactions,
     runningBalances,
-    isLoading: isLoading || isSchedulesLoading,
+    isLoading: isSchedulesLoading || resolved.key !== scheduleTransactions,
     ...(returnError && { error: returnError }),
   };
 }

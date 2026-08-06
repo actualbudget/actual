@@ -4,6 +4,7 @@ import React, {
   startTransition,
   useEffect,
   useMemo,
+  useState,
 } from 'react';
 import type { ReactElement, RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -105,29 +106,51 @@ function isTransactionFilterEntity(
 }
 
 type AllTransactionsProps = {
-  account?: AccountEntity | undefined;
+  accountId?: string | undefined;
   transactions: TransactionEntity[];
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances?: boolean | undefined;
   filtered?: boolean | undefined;
+  transactionsStale?: boolean | undefined;
   children: (
     transactions: TransactionEntity[],
     balances: Record<TransactionEntity['id'], IntegerAmount> | null,
+    isWaitingForPreviews: boolean,
   ) => ReactElement;
 };
 
+type SettledView = {
+  transactions: TransactionEntity[];
+  balances: Record<TransactionEntity['id'], IntegerAmount> | null;
+};
+
 function AllTransactions({
-  account,
+  accountId,
   transactions,
   balances,
   showBalances,
   filtered,
+  transactionsStale,
   children,
 }: AllTransactionsProps) {
-  const accountId = account?.id;
   const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
   const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
     useAccountPreviewTransactions({ accountId });
+
+  // On an account switch, keep showing the previous account's complete view
+  // (rows + previews) until the new account's transactions AND its
+  // scheduled-transaction previews have both resolved, then swap everything in
+  // a single paint — no blank state and no table shift when previews arrive.
+  // Later preview refreshes (e.g. after an edit) keep showing the current
+  // rows, so this only affects account switches.
+  const previewKey = accountId ?? 'all';
+  const [loadedPreviewKey, setLoadedPreviewKey] = useState<string | null>(null);
+  if (!isPreviewTransactionsLoading && loadedPreviewKey !== previewKey) {
+    // Adjust-state-during-render, same pattern as settledView below
+    setLoadedPreviewKey(previewKey);
+  }
+  const isWaitingForPreviews =
+    loadedPreviewKey !== previewKey && isPreviewTransactionsLoading;
 
   useEffect(() => {
     if (!isPreviewTransactionsLoading) {
@@ -184,10 +207,31 @@ function AllTransactions({
     return balances;
   }, [filtered, prependBalances, balances]);
 
-  if (!previewTransactions?.length || filtered) {
-    return children(transactions, balances);
+  // allTransactions/allBalances already fall back to the plain
+  // transactions/balances when filtering or when there are no previews
+  const currentView: SettledView = useMemo(
+    () => ({ transactions: allTransactions, balances: allBalances }),
+    [allTransactions, allBalances],
+  );
+
+  const isSettled = !isWaitingForPreviews && !transactionsStale;
+
+  // Remember the last fully-settled view so it can keep being shown while the
+  // next account's data loads (adjust-state-during-render pattern)
+  const [settledView, setSettledView] = useState<SettledView>({
+    transactions: [],
+    balances: null,
+  });
+  if (isSettled && settledView !== currentView) {
+    setSettledView(currentView);
   }
-  return children(allTransactions, allBalances);
+
+  if (filtered) {
+    return children(transactions, balances, false);
+  }
+
+  const shownView = isSettled ? currentView : settledView;
+  return children(shownView.transactions, shownView.balances, !isSettled);
 }
 
 function getField(field?: string) {
@@ -275,6 +319,10 @@ type AccountInternalState = {
   reconcileAmount: null | number;
   transactions: TransactionEntity[];
   transactionsFiltered?: boolean;
+  // True between an account switch and the arrival of the new account's
+  // transactions; the previous account's rows stay in state so the table can
+  // keep showing them until the new view is ready to swap in
+  isTransactionsStale?: boolean;
   showBalances?: boolean | undefined;
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showCleared?: boolean | undefined;
@@ -534,29 +582,67 @@ class AccountInternal extends PureComponent<
           }
         }
 
-        const balances = this.state.showBalances
-          ? await this.calculateBalances()
-          : null;
-        const filteredAmount = await this.getFilteredAmount();
-        this.setState(
-          {
-            transactions: data,
-            transactionsFiltered: isFiltered,
-            loading: false,
-            workingHard: false,
-            balances,
-            filteredAmount,
-          },
-          () => {
-            if (firstLoad) {
-              this.table.current?.scrollToTop();
-            }
+        const paged = this.paged;
+        const aggregatesPromise = Promise.all([
+          this.state.showBalances ? this.calculateBalances() : null,
+          // The filtered total is only shown when a filter/search is active
+          isFiltered ? this.getFilteredAmount() : null,
+        ]);
 
-            setTimeout(() => {
-              this.table.current?.setRowAnimation(true);
-            }, 0);
-          },
-        );
+        const onRendered = () => {
+          if (firstLoad) {
+            this.table.current?.scrollToTop();
+          }
+
+          setTimeout(() => {
+            this.table.current?.setRowAnimation(true);
+          }, 0);
+        };
+
+        if (firstLoad) {
+          // Render the rows immediately; the aggregate queries (running
+          // balances, filtered total) fill in when they resolve
+          this.setState(
+            {
+              transactions: data,
+              transactionsFiltered: isFiltered,
+              isTransactionsStale: false,
+              loading: false,
+              workingHard: false,
+              balances: null,
+              filteredAmount: null,
+            },
+            onRendered,
+          );
+
+          const [balances, filteredAmount] = await aggregatesPromise;
+          // Bail if the query changed while the aggregates were computing
+          // (e.g. the user switched to another account)
+          if (this.paged === paged) {
+            this.setState({ balances, filteredAmount });
+          }
+        } else {
+          // On live updates (sync, pagination) render rows and aggregates
+          // together to avoid a second full-table render
+          const [balances, filteredAmount] = await aggregatesPromise;
+          // Bail if the query changed while the aggregates were computing
+          // (e.g. the user switched to another account)
+          if (this.paged !== paged) {
+            return;
+          }
+          this.setState(
+            {
+              transactions: data,
+              transactionsFiltered: isFiltered,
+              isTransactionsStale: false,
+              loading: false,
+              workingHard: false,
+              balances,
+              filteredAmount,
+            },
+            onRendered,
+          );
+        }
       },
       options: {
         pageCount: 150,
@@ -572,8 +658,14 @@ class AccountInternal extends PureComponent<
         {
           loading: true,
           search: '',
+          // Keep the previous account's rows in state but mark them stale;
+          // AllTransactions keeps showing the old view until the new
+          // account's transactions and previews are both ready
+          isTransactionsStale: true,
+          transactionsFiltered: false,
           showBalances: nextProps.showBalances,
           balances: null,
+          filteredAmount: null,
           showCleared: nextProps.showCleared,
           showReconciled: nextProps.showReconciled,
           reconcileAmount: null,
@@ -1817,13 +1909,14 @@ class AccountInternal extends PureComponent<
 
     return (
       <AllTransactions
-        account={account}
+        accountId={accountId}
         transactions={transactions}
         balances={balances}
         showBalances={showBalances}
         filtered={transactionsFiltered}
+        transactionsStale={this.state.isTransactionsStale}
       >
-        {(allTransactions, allBalances) => (
+        {(allTransactions, allBalances, isWaitingForPreviews) => (
           <SelectedProviderWithItems
             name="transactions"
             // When reconciled transactions are hidden they are still
@@ -1944,7 +2037,7 @@ class AccountInternal extends PureComponent<
                           )
                         }
                       />
-                    ) : !loading ? (
+                    ) : !loading && !isWaitingForPreviews ? (
                       <View
                         style={{
                           color: theme.tableText,
@@ -2066,10 +2159,12 @@ export function Account() {
 
   const savedFiters = useTransactionFilters();
 
-  const schedulesQuery = useMemo(
-    () => getSchedulesQuery(params.id),
-    [params.id],
-  );
+  // Subscribe to the full schedules list rather than a per-view query:
+  // previews are filtered per account/view client-side (see
+  // useAccountPreviewTransactions), and a query identity that never changes
+  // keeps the schedules/statuses subscriptions alive across account switches
+  // so previews resolve without waiting on fresh round-trips.
+  const schedulesQuery = useMemo(() => getSchedulesQuery(), []);
 
   const { mutate: reopenAccount } = useReopenAccountMutation();
   const onReopenAccount = (id: AccountEntity['id']) => reopenAccount({ id });
