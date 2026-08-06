@@ -195,11 +195,14 @@ export const schema = {
   dashboard_pages: {
     id: f('id'),
     name: f('string'),
+    date_range_enabled: f('boolean'),
+    time_frame: f('json'),
     tombstone: f('boolean'),
   },
   dashboard: {
     id: f('id'),
     dashboard_page_id: f('id', { ref: 'dashboard_pages' }),
+    use_dashboard_date_range: f('boolean'),
     type: f('string', { required: true }),
     width: f('integer', { required: true }),
     height: f('integer', { required: true }),

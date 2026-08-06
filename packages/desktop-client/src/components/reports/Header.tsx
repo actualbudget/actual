@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useParams, useSearchParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { DateRangePicker } from '@actual-app/components/date-range-picker';
@@ -9,9 +10,12 @@ import type {
 } from '@actual-app/components/date-range-picker';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
+  DashboardDateScope,
+  DashboardWidgetEntity,
   RuleConditionEntity,
   TimeFrame,
 } from '@actual-app/core/types/models';
@@ -20,8 +24,11 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
 import { getFirstDayOfWeek } from '#components/select/getFirstDayOfWeek';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
+import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLanguage } from '#hooks/useLocale';
+import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 import { getLiveRange } from './getLiveRange';
 import {
@@ -39,6 +46,9 @@ type HeaderProps = {
   show1Month?: boolean;
   showFutureRange?: boolean;
   hideModeToggle?: boolean;
+  preserveRangeOnModeChange?: boolean;
+  contentPadding?: number;
+  resolvedTimeFrame?: DashboardDateScope;
   allMonths: Array<{ name: string }>;
   earliestTransaction: string;
   latestTransaction: string;
@@ -84,6 +94,9 @@ export function Header({
   show1Month,
   showFutureRange,
   hideModeToggle,
+  preserveRangeOnModeChange,
+  contentPadding,
+  resolvedTimeFrame,
   allMonths,
   earliestTransaction,
   latestTransaction,
@@ -105,6 +118,40 @@ export function Header({
   const { isNarrowWidth } = useResponsive();
   const language = useLanguage();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const [searchParams] = useSearchParams();
+  const routeParams = useParams();
+  const dashboardWidgetId =
+    searchParams.get('dashboardWidget') ?? routeParams.id;
+  const { data: dashboardChild } = useDashboardWidget<DashboardWidgetEntity>({
+    id: resolvedTimeFrame ? undefined : (dashboardWidgetId ?? undefined),
+  });
+  const {
+    dashboardScope,
+    hasDashboardContext,
+    isUsingDashboardRange: useDashboardDateRange,
+  } = useDashboardReportTimeRange(dashboardChild);
+  const updateWidget = useUpdateDashboardWidgetMutation();
+  const [displayStart, displayEnd, displayMode] = resolvedTimeFrame
+    ? [resolvedTimeFrame.start, resolvedTimeFrame.end, resolvedTimeFrame.mode]
+    : useDashboardDateRange
+      ? [dashboardScope!.start, dashboardScope!.end, dashboardScope!.mode]
+      : hasDashboardContext && mode !== 'static'
+        ? calculateTimeRange(
+            { start, end, mode },
+            undefined,
+            latestTransaction,
+            dashboardScope!.end,
+          )
+        : [start, end, mode];
+  const commitDates = (
+    newStart: string,
+    newEnd: string,
+    newMode: TimeFrame['mode'],
+  ) => {
+    if (resolvedTimeFrame || !useDashboardDateRange) {
+      onChangeDates(newStart, newEnd, newMode);
+    }
+  };
 
   // Live-range presets return day-shaped bounds; collapse them to months.
   function liveRangeAsMonths(
@@ -140,7 +187,7 @@ export function Header({
         const [rangeStart, rangeEnd] = getFullRange();
         return [rangeStart, rangeEnd];
       },
-      onSelect: () => onChangeDates(...getFullRange()),
+      onSelect: () => commitDates(...getFullRange()),
     };
   }
 
@@ -213,8 +260,9 @@ export function Header({
   return (
     <View
       style={{
-        padding: 20,
-        paddingTop: 15,
+        padding: contentPadding ?? 20,
+        paddingTop: contentPadding == null ? 15 : 4,
+        paddingBottom: contentPadding == null ? 20 : 4,
         flexShrink: 0,
       }}
     >
@@ -225,27 +273,51 @@ export function Header({
         }}
       >
         <SpaceBetween gap={isNarrowWidth ? 5 : undefined}>
-          {mode && !hideModeToggle && (
+          {!resolvedTimeFrame &&
+            hasDashboardContext &&
+            dashboardChild?.type !== 'formula-card' && (
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+              >
+                <Toggle
+                  id={`use-dashboard-date-range-${dashboardChild?.id}`}
+                  isOn={useDashboardDateRange}
+                  onToggle={value =>
+                    updateWidget.mutate({
+                      widget: {
+                        id: dashboardChild!.id,
+                        use_dashboard_date_range: value,
+                      },
+                    })
+                  }
+                />
+                <Trans>Use dashboard date range</Trans>
+              </View>
+            )}
+          {displayMode && !hideModeToggle && (
             <Button
-              variant={mode === 'static' ? 'normal' : 'primary'}
+              variant={displayMode === 'static' ? 'normal' : 'primary'}
+              isDisabled={useDashboardDateRange}
               onPress={() => {
                 const newMode = mode === 'static' ? 'sliding-window' : 'static';
-                const [newStart, newEnd] = calculateTimeRange({
-                  start,
-                  end,
-                  mode: newMode,
-                });
+                const [newStart, newEnd] =
+                  newMode === 'static'
+                    ? [displayStart, displayEnd]
+                    : preserveRangeOnModeChange
+                      ? [start, end]
+                      : calculateTimeRange({ start, end, mode: newMode });
 
-                onChangeDates(newStart, newEnd, newMode);
+                commitDates(newStart, newEnd, newMode);
               }}
             >
-              {mode === 'static' ? t('Static') : t('Live')}
+              {displayMode === 'static' ? t('Static') : t('Live')}
             </Button>
           )}
 
           <DateRangePicker
-            start={start}
-            end={end}
+            start={displayStart}
+            end={displayEnd}
+            isDisabled={useDashboardDateRange}
             granularities={granularities}
             // allMonths is newest-first and may be empty before reports load.
             minDate={
@@ -277,7 +349,7 @@ export function Header({
             }}
             presets={presets}
             onChangeDates={(newStart, newEnd) =>
-              onChangeDates(newStart, newEnd, 'static')
+              commitDates(newStart, newEnd, 'static')
             }
           />
           {filters && (

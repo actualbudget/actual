@@ -11,10 +11,13 @@ import { Popover } from '@actual-app/components/popover';
 import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
+  DashboardDateScope,
+  FormulaQueryConfig,
   RuleConditionEntity,
   TimeFrame,
 } from '@actual-app/core/types/models';
@@ -42,12 +45,6 @@ import {
   normalizeQueryTimeFrameStart,
 } from './queryTimeFrame';
 
-type QueryConfig = {
-  conditions?: RuleConditionEntity[];
-  conditionsOp?: 'and' | 'or';
-  timeFrame?: TimeFrame;
-};
-
 type PresetTimeRangeMode = Exclude<
   TimeFrame['mode'],
   'sliding-window' | 'static'
@@ -60,11 +57,16 @@ function isPresetTimeRangeMode(
 }
 
 type QueryManagerProps = {
-  queries: Record<string, QueryConfig>;
-  onQueriesChange: (queries: Record<string, QueryConfig>) => void;
+  queries: Record<string, FormulaQueryConfig>;
+  onQueriesChange: (queries: Record<string, FormulaQueryConfig>) => void;
+  dashboardScope?: DashboardDateScope | null;
 };
 
-export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
+export function QueryManager({
+  queries,
+  onQueriesChange,
+  dashboardScope,
+}: QueryManagerProps) {
   const { t } = useTranslation();
   const [newQueryName, setNewQueryName] = useState('');
   const [isAddingQuery, setIsAddingQuery] = useState(false);
@@ -95,6 +97,7 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
           end: monthUtils.currentDay(),
           mode: 'sliding-window',
         },
+        ...(dashboardScope ? { useDashboardDateRange: true } : null),
       },
     });
 
@@ -108,7 +111,7 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
     onQueriesChange(newQueries);
   }
 
-  function handleUpdateQuery(queryName: string, config: QueryConfig) {
+  function handleUpdateQuery(queryName: string, config: FormulaQueryConfig) {
     onQueriesChange({
       ...queries,
       [queryName]: config,
@@ -198,6 +201,7 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
               defaultConfig={config}
               onUpdate={newConfig => handleUpdateQuery(queryName, newConfig)}
               onRemove={() => handleRemoveQuery(queryName)}
+              dashboardScope={dashboardScope}
             />
           ))}
         </View>
@@ -208,9 +212,10 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
 
 type QueryItemProps = {
   queryName: string;
-  defaultConfig: QueryConfig;
-  onUpdate: (config: QueryConfig) => void;
+  defaultConfig: FormulaQueryConfig;
+  onUpdate: (config: FormulaQueryConfig) => void;
   onRemove: () => void;
+  dashboardScope?: DashboardDateScope | null;
 };
 
 function QueryItem({
@@ -218,6 +223,7 @@ function QueryItem({
   defaultConfig,
   onUpdate,
   onRemove,
+  dashboardScope,
 }: QueryItemProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -225,6 +231,9 @@ function QueryItem({
   const dispatch = useDispatch<AppDispatch>();
   const timeRangeMenuTriggerRef = useRef(null);
   const [timeRangeMenuOpen, setTimeRangeMenuOpen] = useState(false);
+  const [useDashboardDateRange, setUseDashboardDateRange] = useState(
+    defaultConfig.useDashboardDateRange ?? true,
+  );
 
   // Time range state
   const [startDate, setStartDate] = useState(
@@ -344,6 +353,7 @@ function QueryItem({
       onUpdate({
         conditions,
         conditionsOp,
+        useDashboardDateRange,
         timeFrame: {
           start: newStartDate,
           end: newEndDate,
@@ -358,6 +368,7 @@ function QueryItem({
       startDate,
       endDate,
       onUpdate,
+      useDashboardDateRange,
     ],
   );
 
@@ -493,6 +504,18 @@ function QueryItem({
   }
 
   const timeRangeMode = timeRangeRef.current as TimeFrame['mode'];
+  const isUsingDashboardDateRange = Boolean(
+    dashboardScope && useDashboardDateRange,
+  );
+  const displayedStartDate = isUsingDashboardDateRange
+    ? (dashboardScope?.start ?? startDate)
+    : startDate;
+  const displayedEndDate = isUsingDashboardDateRange
+    ? (dashboardScope?.end ?? endDate)
+    : endDate;
+  const displayedTimeRangeMode = isUsingDashboardDateRange
+    ? (dashboardScope?.mode ?? timeRangeMode)
+    : timeRangeMode;
   const isPresetTimeRange = isPresetTimeRangeMode(timeRangeMode);
   const timeRangeLabels = {
     'sliding-window': t('Live'),
@@ -503,7 +526,7 @@ function QueryItem({
     yearToDate: t('Year to date'),
     priorYearToDate: t('Prior year to date'),
   } satisfies Record<TimeFrame['mode'], string>;
-  const timeRangeLabel = timeRangeLabels[timeRangeMode];
+  const timeRangeLabel = timeRangeLabels[displayedTimeRangeMode];
   const presetTimeRangeLabels = {
     full: t('All time transactions'),
     lastMonth: t('Last month transactions'),
@@ -557,6 +580,31 @@ function QueryItem({
             alignItems: 'center',
           }}
         >
+          {dashboardScope && (
+            <View
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+              }}
+            >
+              <label
+                htmlFor={`formula-query-dashboard-range-${queryName}`}
+                style={{ fontSize: 12 }}
+              >
+                <Trans>Dashboard dates</Trans>
+              </label>
+              <Toggle
+                id={`formula-query-dashboard-range-${queryName}`}
+                isOn={useDashboardDateRange}
+                onToggle={value => {
+                  setUseDashboardDateRange(value);
+                  onUpdate({ ...defaultConfig, useDashboardDateRange: value });
+                }}
+              />
+            </View>
+          )}
           <View style={{ display: 'flex', flexDirection: 'row', gap: 4 }}>
             <Button
               variant="bare"
@@ -656,17 +704,19 @@ function QueryItem({
 
       <View style={{ marginBottom: 12 }}>
         <View
+          inert={isUsingDashboardDateRange}
           style={{
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'flex-end',
             gap: 8,
             marginTop: 16,
+            ...(isUsingDashboardDateRange ? { opacity: 0.5 } : null),
           }}
         >
           <Button
             style={{ minWidth: 50 }}
-            variant={timeRangeMode === 'static' ? 'normal' : 'primary'}
+            variant={displayedTimeRangeMode === 'static' ? 'normal' : 'primary'}
             onPress={() => {
               const newMode =
                 timeRangeMode === 'static' ? 'sliding-window' : 'static';
@@ -829,7 +879,7 @@ function QueryItem({
           </Popover>
         </View>
 
-        {presetTimeRangeLabel ? (
+        {!isUsingDashboardDateRange && presetTimeRangeLabel ? (
           <Input
             value={presetTimeRangeLabel}
             readOnly
@@ -842,7 +892,7 @@ function QueryItem({
           />
         ) : null}
 
-        {allMonths.length > 0 && (
+        {(isUsingDashboardDateRange || allMonths.length > 0) && (
           <View
             style={{
               display: 'flex',
@@ -853,10 +903,10 @@ function QueryItem({
             }}
           >
             <Select
-              disabled={isPresetTimeRange}
-              value={fromDateRepr(startDate)}
+              disabled={isUsingDashboardDateRange || isPresetTimeRange}
+              value={fromDateRepr(displayedStartDate)}
               defaultLabel={monthUtils.format(
-                fromDateRepr(startDate),
+                fromDateRepr(displayedStartDate),
                 'MMMM yyyy',
                 locale,
               )}
@@ -876,10 +926,10 @@ function QueryItem({
               <Trans>to</Trans>
             </Text>
             <Select
-              disabled={isPresetTimeRange}
-              value={fromDateRepr(endDate)}
+              disabled={isUsingDashboardDateRange || isPresetTimeRange}
+              value={fromDateRepr(displayedEndDate)}
               defaultLabel={monthUtils.format(
-                fromDateRepr(endDate),
+                fromDateRepr(displayedEndDate),
                 'MMMM yyyy',
                 locale,
               )}

@@ -13,8 +13,10 @@ import { reportModel } from '#server/reports/app';
 import { batchMessages } from '#server/sync';
 import { undoable } from '#server/undo';
 import { DEFAULT_DASHBOARD_STATE } from '#shared/dashboard';
+import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import type {
+  DashboardPageEntity,
   DashboardWidgetEntity,
   ExportImportCustomReportWidget,
   ExportImportDashboard,
@@ -58,6 +60,9 @@ const exportModel = {
         'Invalid dashboard.widgets data type: it must be an array of widgets.',
       );
     }
+    if (![1, 2].includes(dashboard.version)) {
+      throw new ValidationError('Unsupported dashboard export version.');
+    }
 
     dashboard.widgets.forEach((widget, idx) => {
       requiredFields(`Dashboard widget #${idx}`, widget, [
@@ -68,7 +73,6 @@ const exportModel = {
         'height',
         ...(isExportedCustomReportWidget(widget) ? ['meta' as const] : []),
       ]);
-
       if (!Number.isInteger(widget.x)) {
         throw new ValidationError(
           `Invalid widget.${idx}.x data-type for value ${widget.x}.`,
@@ -103,6 +107,45 @@ const exportModel = {
         reportModel.validate(widget.meta);
       }
     });
+
+    if (dashboard.version === 2) {
+      requiredFields('Dashboard', dashboard, ['date_range_enabled']);
+      if (typeof dashboard.date_range_enabled !== 'boolean') {
+        throw new ValidationError(
+          'Invalid dashboard.date_range_enabled data type.',
+        );
+      }
+      if (!Object.hasOwn(dashboard, 'time_frame')) {
+        throw new ValidationError('Dashboard is missing field time_frame.');
+      }
+      if (dashboard.date_range_enabled && !dashboard.time_frame) {
+        throw new ValidationError(
+          'Dashboard is missing a timeframe for enabled date ranges.',
+        );
+      }
+      if (dashboard.time_frame) {
+        const { start, end, mode } = dashboard.time_frame;
+        const isDate = (value: unknown) =>
+          typeof value === 'string' &&
+          (monthUtils.isValidYearMonth(value) ||
+            monthUtils.isValidYearMonthDay(value));
+        if (
+          !isDate(start) ||
+          !isDate(end) ||
+          ![
+            'sliding-window',
+            'static',
+            'full',
+            'lastMonth',
+            'lastYear',
+            'yearToDate',
+            'priorYearToDate',
+          ].includes(mode)
+        ) {
+          throw new ValidationError('Invalid dashboard timeframe.');
+        }
+      }
+    }
   },
 };
 
@@ -138,6 +181,18 @@ async function deleteDashboardPage(id: string) {
 
 async function renameDashboardPage({ id, name }: { id: string; name: string }) {
   await db.updateWithSchema('dashboard_pages', { id, name });
+}
+
+async function updateDashboardPageDateRange({
+  id,
+  date_range_enabled,
+  time_frame,
+}: Pick<DashboardPageEntity, 'id' | 'date_range_enabled' | 'time_frame'>) {
+  await db.updateWithSchema('dashboard_pages', {
+    id,
+    date_range_enabled,
+    time_frame,
+  });
 }
 
 async function updateDashboard(
@@ -182,6 +237,11 @@ async function resetDashboard(id: string) {
       ...DEFAULT_DASHBOARD_STATE.map(widget =>
         db.insertWithSchema('dashboard', { ...widget, dashboard_page_id: id }),
       ),
+      db.updateWithSchema('dashboard_pages', {
+        id,
+        date_range_enabled: false,
+        time_frame: null,
+      }),
     ]);
   });
 }
@@ -214,7 +274,7 @@ async function addDashboardWidget(
 
   const { dashboard_page_id, ...widgetWithoutDashboardPageId } = widget;
 
-  await db.insertWithSchema('dashboard', {
+  return await db.insertWithSchema('dashboard', {
     ...widgetWithoutDashboardPageId,
     dashboard_page_id,
   });
@@ -251,7 +311,12 @@ async function copyDashboardWidget({
         meta: widget.meta ? JSON.parse(widget.meta) : {},
         dashboard_page_id: targetDashboardPageId,
       };
-      await addDashboardWidget(newWidget);
+      await addDashboardWidget({
+        ...newWidget,
+        use_dashboard_date_range: Boolean(
+          widget.use_dashboard_date_range ?? true,
+        ),
+      });
     } else {
       throw new Error(`Unsupported widget type: ${widget.type}`);
     }
@@ -274,6 +339,8 @@ async function importDashboard({
     const parsedContent: ExportImportDashboard = JSON.parse(content);
 
     exportModel.validate(parsedContent);
+    const importedWidgets: ExportImportDashboardWidget[] =
+      parsedContent.widgets;
 
     const customReportIds = await db.all<Pick<db.DbCustomReport, 'id'>>(
       'SELECT id from custom_reports',
@@ -288,11 +355,20 @@ async function importDashboard({
 
     await batchMessages(async () => {
       await Promise.all([
+        db.updateWithSchema('dashboard_pages', {
+          id: dashboardPageId,
+          date_range_enabled:
+            parsedContent.version === 2
+              ? parsedContent.date_range_enabled
+              : false,
+          time_frame:
+            parsedContent.version === 2 ? parsedContent.time_frame : null,
+        }),
         // Delete all widgets
         ...existingWidgets.map(({ id }) => db.delete_('dashboard', id)),
 
         // Insert new widgets
-        ...parsedContent.widgets.map(widget =>
+        ...importedWidgets.map(widget =>
           db.insertWithSchema('dashboard', {
             type: widget.type,
             width: widget.width,
@@ -300,6 +376,7 @@ async function importDashboard({
             x: widget.x,
             y: widget.y,
             dashboard_page_id: dashboardPageId,
+            use_dashboard_date_range: widget.use_dashboard_date_range ?? true,
             meta: isExportedCustomReportWidget(widget)
               ? { id: widget.meta.id }
               : widget.meta,
@@ -307,7 +384,7 @@ async function importDashboard({
         ),
 
         // Insert new custom reports
-        ...parsedContent.widgets
+        ...importedWidgets
           .filter(isExportedCustomReportWidget)
           .filter(({ meta }) => !customReportIdSet.has(meta.id))
           .map(({ meta }) =>
@@ -315,7 +392,7 @@ async function importDashboard({
           ),
 
         // Update existing reports
-        ...parsedContent.widgets
+        ...importedWidgets
           .filter(isExportedCustomReportWidget)
           .filter(({ meta }) => customReportIdSet.has(meta.id))
           .map(({ meta }) =>
@@ -356,6 +433,7 @@ export type DashboardHandlers = {
   'dashboard-create': typeof createDashboardPage;
   'dashboard-delete': typeof deleteDashboardPage;
   'dashboard-rename': typeof renameDashboardPage;
+  'dashboard-update-date-range': typeof updateDashboardPageDateRange;
   'dashboard-update': typeof updateDashboard;
   'dashboard-update-widget': typeof updateDashboardWidget;
   'dashboard-reset': typeof resetDashboard;
@@ -370,6 +448,10 @@ export const app = createApp<DashboardHandlers>();
 app.method('dashboard-create', mutator(undoable(createDashboardPage)));
 app.method('dashboard-delete', mutator(undoable(deleteDashboardPage)));
 app.method('dashboard-rename', mutator(undoable(renameDashboardPage)));
+app.method(
+  'dashboard-update-date-range',
+  mutator(undoable(updateDashboardPageDateRange)),
+);
 app.method('dashboard-update', mutator(undoable(updateDashboard)));
 app.method('dashboard-update-widget', mutator(undoable(updateDashboardWidget)));
 app.method('dashboard-reset', mutator(undoable(resetDashboard)));

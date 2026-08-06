@@ -55,6 +55,7 @@ type DateRangePickerProps = {
   formatDayLabel?: (date: string) => string;
   labels: DateRangePickerLabels;
   onChangeDates: (start: string, end: string) => void;
+  isDisabled?: boolean;
 };
 
 // Far-future sentinel: sorts after any real date string.
@@ -80,6 +81,7 @@ export function DateRangePicker({
   formatDayLabel,
   labels,
   onChangeDates,
+  isDisabled,
 }: DateRangePickerProps) {
   const effectiveMax = maxDate ?? NO_MAX;
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -193,6 +195,7 @@ export function DateRangePicker({
       <Button
         ref={triggerRef}
         data-testid="date-range-picker-trigger"
+        isDisabled={isDisabled}
         onPress={() => (isOpen ? closeAndCommit() : openPopover())}
       >
         {label}

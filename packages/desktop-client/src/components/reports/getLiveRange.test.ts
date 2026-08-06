@@ -76,4 +76,17 @@ describe('getLiveRange', () => {
       expect(end).toBe('2017-01-01');
     });
   });
+
+  it('uses an explicit reference date for live ranges', () => {
+    expect(
+      getLiveRange(
+        'Last 30 days',
+        EARLIEST,
+        LATEST,
+        false,
+        undefined,
+        '2026-08-31',
+      ).slice(0, 2),
+    ).toEqual(['2026-08-02', '2026-08-31']);
+  });
 });
