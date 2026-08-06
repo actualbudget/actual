@@ -334,24 +334,23 @@ export function getDateWithSkippedWeekend(
   return date;
 }
 
-export function getScheduledAmount(
+export type ScheduledAmountContext = {
+  date?: string;
+  decimalPlaces?: number;
+  balanceOfPrefetch?: Map<string, number>;
+};
+
+/**
+ * Error-aware variant of `getScheduledAmount` for formula amounts. Callers
+ * that persist the result (e.g. posting a schedule transaction) must use
+ * this so a failing formula is reported instead of silently posting 0.
+ */
+export function evaluateScheduledAmount(
   amount: number | { num1: number; num2: number } | string,
   inverse: boolean = false,
-  context: {
-    date?: string;
-    decimalPlaces?: number;
-    balanceOfPrefetch?: Map<string, number>;
-  } = {},
-): number {
-  // this check is temporary, and required at the moment as a schedule rule
-  // allows the amount condition to be deleted which causes a crash
-  if (amount == null) return 0;
-
+  context: ScheduledAmountContext = {},
+): { amount: number; error?: unknown } {
   if (typeof amount === 'string') {
-    // Formula-based amount: evaluate against the occurrence date. Formula
-    // numbers are major units (e.g. `=100` means 100 currency units), so the
-    // result is converted to integer minor units using the schedule
-    // currency's decimal places.
     try {
       const result = evaluateFormula(
         amount,
@@ -361,17 +360,38 @@ export function getScheduledAmount(
         },
         { balanceOfPrefetch: context.balanceOfPrefetch },
       );
-      const num =
-        typeof result === 'number'
-          ? amountToInteger(result, context.decimalPlaces ?? 2)
-          : 0;
-      return inverse ? -num : num;
-    } catch {
-      // An invalid formula (e.g. still being typed) evaluates to 0 rather
-      // than crashing callers. Callers that need to surface errors evaluate
-      // the formula themselves.
-      return 0;
+      if (typeof result !== 'number') {
+        return {
+          amount: 0,
+          error: new Error('Formula did not produce a number'),
+        };
+      }
+      const num = amountToInteger(result, context.decimalPlaces ?? 2);
+      return { amount: inverse ? -num : num };
+    } catch (error) {
+      return { amount: 0, error };
     }
+  }
+  return { amount: getScheduledAmount(amount, inverse, context) };
+}
+
+export function getScheduledAmount(
+  amount: number | { num1: number; num2: number } | string,
+  inverse: boolean = false,
+  context: ScheduledAmountContext = {},
+): number {
+  // this check is temporary, and required at the moment as a schedule rule
+  // allows the amount condition to be deleted which causes a crash
+  if (amount == null) return 0;
+
+  if (typeof amount === 'string') {
+    // Formula-based amount: evaluate against the occurrence date. Formula
+    // numbers are major units (e.g. `=100` means 100 currency units), so the
+    // result is converted to integer minor units using the schedule
+    // currency's decimal places. An invalid formula (e.g. still being typed)
+    // evaluates to 0 rather than crashing callers; see
+    // `evaluateScheduledAmount` for an error-aware variant.
+    return evaluateScheduledAmount(amount, inverse, context).amount;
   }
 
   if (typeof amount === 'number') {

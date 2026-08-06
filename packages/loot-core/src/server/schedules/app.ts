@@ -30,6 +30,7 @@ import { currentDay, dayFromDate, parseDate } from '#shared/months';
 import { q } from '#shared/query';
 import {
   DEFAULT_UPCOMING_SCHEDULE_DAYS,
+  evaluateScheduledAmount,
   extractScheduleConds,
   getDateWithSkippedWeekend,
   getHasTransactionsQuery,
@@ -189,6 +190,7 @@ function updateActions(
         field: 'amount',
         value: 0,
         options: { formula },
+        type: 'number',
       });
     }
 
@@ -210,17 +212,19 @@ function updateActions(
       return action;
     }
 
-    const hasStaleFormula = action.options?.formula != null;
-    if (!hasStaleFormula && action.value === amount) {
-      return action;
-    }
-
-    changed = true;
-    if (!hasStaleFormula) {
+    const options = action.options;
+    if (options?.formula == null) {
+      if (action.value === amount) {
+        return action;
+      }
+      changed = true;
       return { ...action, value: amount };
     }
 
-    const { formula: _drop, ...rest } = action.options!;
+    // Drop a stale formula from a previously-formula schedule and replace
+    // it with the fixed amount.
+    changed = true;
+    const { formula: _drop, ...rest } = options;
     return {
       ...action,
       value: amount,
@@ -688,14 +692,26 @@ async function postTransactionForSchedule({
     );
   }
 
+  // A failing formula (e.g. BALANCE_OF referencing a deleted account) must
+  // not post a transaction with amount 0: report it and skip the posting.
+  // The schedule remains due and the failure shows up in the logs.
+  const { amount, error } = evaluateScheduledAmount(schedule._amount, false, {
+    date: postingDate,
+    decimalPlaces,
+    balanceOfPrefetch: balanceOfPrefetched,
+  });
+  if (error) {
+    logger.error(
+      `schedule: failed to evaluate formula amount for schedule ${schedule.id}:`,
+      error,
+    );
+    return;
+  }
+
   const transaction = {
     payee: schedule._payee,
     account: schedule._account,
-    amount: getScheduledAmount(schedule._amount, false, {
-      date: postingDate,
-      decimalPlaces,
-      balanceOfPrefetch: balanceOfPrefetched,
-    }),
+    amount,
     date: postingDate,
     schedule: schedule.id,
     cleared: false,

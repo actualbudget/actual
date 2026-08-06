@@ -2,6 +2,7 @@
 import * as dateFns from 'date-fns';
 
 import { logger } from '#platform/server/log';
+import { getCachedFormulaPreferences } from '#shared/formulas/customFunctions';
 import { evaluateFormula } from '#shared/formulas/evaluate';
 import {
   addDays,
@@ -351,7 +352,12 @@ export class Condition {
           if (typeof result !== 'number') {
             return false;
           }
-          const number = amountToInteger(Math.round(result * 100) / 100);
+          // Use the app currency's decimal places so the formula condition
+          // matches amounts posted for zero- and non-two-decimal currencies.
+          const number = amountToInteger(
+            Math.round(result * 100) / 100,
+            getCachedFormulaPreferences()?.currency.decimalPlaces ?? 2,
+          );
           const threshold = getApproxNumberThreshold(number);
           return (
             fieldValue >= number - threshold && fieldValue <= number + threshold

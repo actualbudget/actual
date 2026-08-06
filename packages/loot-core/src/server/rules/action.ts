@@ -4,6 +4,7 @@ import * as Handlebars from 'handlebars';
 
 import { logger } from '#platform/server/log';
 import type { TransactionForRules } from '#server/transactions/transaction-rules';
+import { getCachedFormulaPreferences } from '#shared/formulas/customFunctions';
 import { evaluateFormula } from '#shared/formulas/evaluate';
 import { currentDay, format, parseDate } from '#shared/months';
 import { FIELD_TYPES } from '#shared/rules';
@@ -296,7 +297,14 @@ export class Action {
       });
 
       if (typeof cellValue === 'number') {
-        return amountToInteger(Math.round(cellValue * 100) / 100);
+        // Use the app currency's decimal places so formula results scale the
+        // same way as schedule amounts (getScheduledAmount), matching for
+        // zero- and non-two-decimal currencies. Falls back to 2 decimal
+        // places when the formula preferences have not been loaded yet.
+        return amountToInteger(
+          Math.round(cellValue * 100) / 100,
+          getCachedFormulaPreferences()?.currency.decimalPlaces ?? 2,
+        );
       }
 
       return cellValue;
