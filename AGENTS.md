@@ -348,7 +348,8 @@ describe('ComponentName', () => {
 - `/.oxlintrc.json` - Lint rules (oxlint); `/.oxfmtrc.json` - formatting (oxfmt)
 - `/.nano-staged.json` - pre-commit format/lint config (run via Husky)
 - `/.claude/settings.json`, `/.codex/config.toml`, `/.cursor/hooks.json` - agent
-  hook wiring; shared scripts live in `/scripts/agent-hooks/`
+  hook wiring; shared scripts live in `/scripts/agent-hooks/` and require `jq`
+  on PATH (a missing `jq` fails the hooks with an install message)
 - `/.agents/skills/` - symlink mirror of `/.claude/skills/` so Codex-based
   harnesses (Codex CLI, IDE extension, ChatGPT desktop app) discover the same
   skills; when adding a skill, create it in `/.claude/skills/` and add a

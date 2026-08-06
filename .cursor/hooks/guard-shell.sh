@@ -5,6 +5,13 @@
 # scripts/agent-hooks/git-guard.sh. Cursor input on stdin: { command, cwd, ... }.
 # Output on stdout: { permission: "allow" | "deny", userMessage, agentMessage }.
 
+# jq is a hard prerequisite — even deny() below needs it to build JSON — so
+# fail closed with a static deny instead of emitting nothing at all.
+command -v jq >/dev/null 2>&1 || {
+  printf '%s\n' '{"permission":"deny","userMessage":"Blocked by repo policy","agentMessage":"The agent hooks require jq, which was not found on PATH. Install jq (https://jqlang.org) and retry."}'
+  exit 0
+}
+
 input=$(cat)
 ROOT=$(CDPATH= cd "$(dirname "$0")/../.." && pwd)
 
