@@ -311,6 +311,11 @@ class AccountInternal extends PureComponent<
   unlisten?: () => void;
   dispatchSelected?: (action: Actions) => void;
   _isOptimisticUpdate: boolean = false;
+  // Whether the pending optimistic update could change a transaction's
+  // contribution to the running balance (added/deleted, or its amount/account
+  // changed). Edits like cleared/notes/category/payee can't affect balances,
+  // so we skip the expensive recompute for those.
+  _optimisticUpdateAffectsBalance: boolean = true;
 
   constructor(props: AccountInternalProps) {
     super(props);
@@ -499,9 +504,13 @@ class AccountInternal extends PureComponent<
         if (this._isOptimisticUpdate) {
           this._isOptimisticUpdate = false;
           const transactionsSnapshot = data;
-          const balances = this.state.showBalances
-            ? await this.calculateBalances()
-            : null;
+          // Only recompute balances (a whole-account aggregate query) when the
+          // edit could actually change one — e.g. cleared/notes/category/payee
+          // edits can't, so reuse the last-known balances for those.
+          const balances =
+            this.state.showBalances && this._optimisticUpdateAffectsBalance
+              ? await this.calculateBalances()
+              : this.state.balances;
           // Wrap in startTransition so React treats this as a low-priority
           // update. Without this, setState blocks the main thread for the
           // full duration of the re-render (~40–220ms with large transaction
@@ -671,6 +680,16 @@ class AccountInternal extends PureComponent<
     // Apply changes to pagedQuery data optimistically. Set the flag so that
     // onData skips the expensive aggregate DB queries for this update.
     this._isOptimisticUpdate = true;
+
+    const previousTransaction = this.state.transactions.find(
+      t => t.id === updatedTransaction.id,
+    );
+    this._optimisticUpdateAffectsBalance =
+      !!updatedTransaction._deleted ||
+      !previousTransaction ||
+      previousTransaction.amount !== updatedTransaction.amount ||
+      previousTransaction.account !== updatedTransaction.account;
+
     this.paged?.optimisticUpdate(data => {
       if (updatedTransaction._deleted) {
         return data.filter(t => t.id !== updatedTransaction.id);
