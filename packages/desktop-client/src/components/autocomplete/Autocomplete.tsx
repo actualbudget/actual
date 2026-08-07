@@ -644,9 +644,12 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                   onOpenChange={close}
                   isNonModal
                   shouldCloseOnInteractOutside={element => {
-                    const outerPopover = triggerRef.current?.closest('[data-popover]');
+                    const outerPopover =
+                      triggerRef.current?.closest('[data-popover]');
                     if (outerPopover && !outerPopover.contains(element)) {
-                      document.dispatchEvent(new CustomEvent('close-outer-popovers'));
+                      document.dispatchEvent(
+                        new CustomEvent('close-outer-popovers'),
+                      );
                     }
                     return true;
                   }}
