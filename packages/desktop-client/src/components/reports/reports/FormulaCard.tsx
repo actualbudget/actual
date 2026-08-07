@@ -17,10 +17,14 @@ type FormulaCardProps = {
   onMetaChange: (newMeta: FormulaWidget['meta']) => void;
 };
 
+// Stable identity so a card without named queries doesn't hand
+// `useFormulaExecution` a fresh object on every render.
+const EMPTY_QUERIES = {};
+
 export function FormulaCard({
   widgetId,
   isEditing,
-  meta = {},
+  meta,
   onMetaChange,
 }: FormulaCardProps) {
   const { t } = useTranslation();
@@ -37,7 +41,7 @@ export function FormulaCard({
 
   const { result, isLoading, error } = useFormulaExecution(
     formula,
-    meta?.queries || {},
+    meta?.queries ?? EMPTY_QUERIES,
     meta?.queriesVersion,
   );
 
@@ -56,7 +60,7 @@ export function FormulaCard({
   );
   const { result: colorResult, error: colorError } = useFormulaExecution(
     colorFormula,
-    meta?.queries || {},
+    meta?.queries ?? EMPTY_QUERIES,
     meta?.queriesVersion,
     colorVariables,
   );
@@ -81,7 +85,7 @@ export function FormulaCard({
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({
-                  ...meta,
+                  ...(meta ?? {}),
                   name: newName,
                 });
                 setNameMenuOpen(false);
@@ -102,11 +106,14 @@ export function FormulaCard({
           <FormulaResult
             value={result}
             error={error}
-            loading={isLoading}
+            // Only fall back to the skeleton when there is nothing to show yet;
+            // a refresh should leave the previous value in place rather than
+            // blanking the card.
+            loading={isLoading && result === null && !error}
             initialFontSize={fontSize}
             fontSizeChanged={newSize => {
               onMetaChange({
-                ...meta,
+                ...(meta ?? {}),
                 fontSize: newSize,
               });
             }}
