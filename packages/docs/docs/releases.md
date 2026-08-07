@@ -1,5 +1,25 @@
 # Release Notes
 
+## 26.8.1
+
+Release date: 2026-08-08
+
+- TODO: Add release highlights
+
+**Docker Tag: 26.8.1**
+
+<!-- release-notes:auto-generated -->
+
+#### Bugfixes
+
+- [#8628](https://github.com/actualbudget/actual/pull/8628) Fix intermittent app freezes with 100% CPU usage — thanks @matt-fidd
+- [#8663](https://github.com/actualbudget/actual/pull/8663) Fix the transaction list getting slower as a budget grows, especially when adding, clearing, or deleting transactions and when reconciling — thanks @youngcw
+- [#8616](https://github.com/actualbudget/actual/pull/8616) Restore the "Delete" option in the schedule row menu on the Schedules page — thanks @bzupnick
+
+#### Maintenance
+
+- [#8606](https://github.com/actualbudget/actual/pull/8606) Prevent context menu listeners from rebinding every render — thanks @youngcw
+
 ## 26.8.0
 
 Release date: 2026-08-02
