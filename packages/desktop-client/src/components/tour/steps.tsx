@@ -11,6 +11,7 @@ export const ADD_ACCOUNT_STEP_ID = 'add-account';
 
 export type TourStepDeps = {
   navigate: (to: string) => void;
+  budgetType: 'envelope' | 'tracking';
 };
 
 function findBudgetSummary(): HTMLElement | null {
@@ -36,7 +37,7 @@ function waitForElement(selector: string, timeoutMs = 4000): Promise<void> {
   });
 }
 
-const getBudgetTourSteps = ({ navigate }: TourStepDeps): Step[] => [
+const getBudgetTourSteps = ({ navigate, budgetType }: TourStepDeps): Step[] => [
   {
     id: 'welcome',
     target: 'body',

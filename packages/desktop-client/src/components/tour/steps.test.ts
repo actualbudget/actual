@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { getTourSteps } from './steps';
+import type { TourStepDeps } from './steps';
 
-const deps = { navigate: vi.fn() };
+const deps: TourStepDeps = { navigate: vi.fn(), budgetType: 'envelope' };
 
 describe('getTourSteps', () => {
   it('returns a tour that starts with a centered welcome step', () => {
@@ -26,4 +27,16 @@ describe('getTourSteps', () => {
       expect(step.title).toBeTruthy();
     }
   });
+
+  it.each(['envelope', 'tracking'] as const)(
+    'returns a complete tour for %s budgets',
+    budgetType => {
+      const steps = getTourSteps('budget-tour', { ...deps, budgetType });
+
+      const summaryStep = steps.find(step => step.id === 'budget-summary');
+      expect(summaryStep?.title).toBeTruthy();
+      expect(summaryStep?.content).toBeTruthy();
+      expect(summaryStep?.target).toBeTruthy();
+    },
+  );
 });
