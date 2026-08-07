@@ -261,7 +261,6 @@ const sidebars = {
           collapsed: true,
           items: [
             'troubleshooting/server',
-            'troubleshooting/shared-array-buffer',
             'troubleshooting/reset_password',
             'troubleshooting/edge-browser',
           ],

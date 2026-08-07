@@ -70,6 +70,9 @@ export default defineConfig(({ mode }) => {
       'process.env.ACTUAL_DATA_DIR': JSON.stringify('/'),
       'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
     },
+    resolve: {
+      conditions: ['external-sqlite', 'module', 'browser', 'default'],
+    },
     plugins: [
       peggyLoader(),
       nodePolyfills({
@@ -93,6 +96,7 @@ export default defineConfig(({ mode }) => {
       visualizer({ template: 'raw-data', filename: `${outDir}/stats.json` }),
     ],
     optimizeDeps: {
+      exclude: ['@sqlite.org/sqlite-wasm'],
       include: [
         'buffer',
         'process',
