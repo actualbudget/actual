@@ -136,11 +136,19 @@ export function getHasTransactionsQuery(schedules) {
     };
   });
 
-  return q('transactions')
+  const query = q('transactions')
     .options({ splits: 'all' })
-    .filter({ $or: filters })
     .orderBy({ date: 'desc' })
     .select(['schedule', 'date']);
+
+  // An empty `$or` compiles away to no constraint at all (`WHERE 1`), which
+  // would scan every transaction in the budget to answer a question about zero
+  // schedules. Match nothing instead — `id` is a primary key and never null.
+  if (filters.length === 0) {
+    return query.filter({ id: null });
+  }
+
+  return query.filter({ $or: filters });
 }
 
 type ScheduleRuleOptions = IRuleOptions & {

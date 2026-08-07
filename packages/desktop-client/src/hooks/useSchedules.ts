@@ -114,6 +114,10 @@ export function useSchedules({
 
     scheduleQueryRef.current = liveQuery<ScheduleEntity>(query, {
       onData: async schedules => {
+        // `onData` fires again whenever the schedules change, so tear down the
+        // previous status query first. Otherwise each refresh orphans a live
+        // query that stays subscribed to sync events and keeps re-running.
+        statusQueryRef.current?.unsubscribe();
         statusQueryRef.current = loadStatuses(
           schedules,
           (statuses: ScheduleStatuses) => {
