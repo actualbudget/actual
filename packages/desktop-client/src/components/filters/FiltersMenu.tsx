@@ -649,7 +649,10 @@ export function FilterButton<T extends RuleConditionEntity>({
     };
     document.addEventListener('close-outer-popovers', handleCloseOuterPopovers);
     return () => {
-      document.removeEventListener('close-outer-popovers', handleCloseOuterPopovers);
+      document.removeEventListener(
+        'close-outer-popovers',
+        handleCloseOuterPopovers,
+      );
     };
   }, []);
 
