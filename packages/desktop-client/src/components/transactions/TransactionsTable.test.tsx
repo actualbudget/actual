@@ -33,6 +33,7 @@ import { SelectedProviderWithItems } from '#hooks/useSelected';
 import { SplitsExpandedProvider } from '#hooks/useSplitsExpanded';
 import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
 import { createTestQueryClient, TestProviders } from '#mocks';
+import * as modalsSlice from '#modals/modalsSlice';
 import { payeeQueries } from '#payees';
 import { tagQueries } from '#tags/queries';
 
@@ -105,6 +106,7 @@ vi.mock('../../hooks/useCategories', () => ({
 
 const usualGroup = categoryGroups[1];
 let schedules: ScheduleEntity[] = [];
+const createScheduleMock = vi.fn(async () => 'new-schedule');
 
 function generateTransactions(
   count: number,
@@ -261,11 +263,13 @@ function initBasicServer() {
       id: 'new-tag',
       ...tag,
     }),
+    'schedule/create': createScheduleMock,
   });
 }
 
 beforeEach(() => {
   schedules = [];
+  createScheduleMock.mockClear();
   initBasicServer();
 });
 
@@ -1124,6 +1128,128 @@ describe('Transactions', () => {
     expect(container.querySelector('[data-testid="new-transaction"]')).toBe(
       null,
     );
+  });
+
+  describe('Schedule button for future-dated new transactions', () => {
+    const scheduleButtonSelector =
+      '[data-testid="new-transaction"] [data-testid="schedule-button"]';
+
+    test('shows the Schedule button for a future-dated new transaction', async () => {
+      const { container, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '02/01/2017[Tab]');
+
+      expect(container.querySelector(scheduleButtonSelector)).toBeTruthy();
+    });
+
+    test('hides the Schedule button for a non-future-dated new transaction', () => {
+      const { container, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      expect(container.querySelector(scheduleButtonSelector)).toBeNull();
+    });
+
+    test('creates a schedule directly when the date is within the upcoming window', async () => {
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '01/02/2017[Tab]');
+
+      const scheduleButton = container.querySelector(scheduleButtonSelector)!;
+      await userEvent.click(scheduleButton);
+
+      await waitFor(() => {
+        expect(createScheduleMock).toHaveBeenCalled();
+      });
+      expect(getTransactions().length).toBe(5);
+    });
+
+    test('opens the convert-to-schedule modal when the date is beyond the upcoming window', async () => {
+      const pushModalSpy = vi.spyOn(modalsSlice, 'pushModal');
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '02/01/2017[Tab]');
+
+      const scheduleButton = container.querySelector(scheduleButtonSelector)!;
+      await userEvent.click(scheduleButton);
+
+      await waitFor(() => {
+        expect(pushModalSpy).toHaveBeenCalled();
+      });
+      expect(createScheduleMock).not.toHaveBeenCalled();
+      expect(getTransactions().length).toBe(5);
+
+      const modal = pushModalSpy.mock.calls[0][0].modal as Extract<
+        modalsSlice.Modal,
+        { name: 'convert-to-schedule' }
+      >;
+      expect(modal.name).toBe('convert-to-schedule');
+      pushModalSpy.mockRestore();
+    });
+
+    test('confirming the modal creates a schedule', async () => {
+      const pushModalSpy = vi.spyOn(modalsSlice, 'pushModal');
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '02/01/2017[Tab]');
+
+      const scheduleButton = container.querySelector(scheduleButtonSelector)!;
+      await userEvent.click(scheduleButton);
+
+      await waitFor(() => {
+        expect(pushModalSpy).toHaveBeenCalled();
+      });
+
+      const modal = pushModalSpy.mock.calls[0][0].modal as Extract<
+        modalsSlice.Modal,
+        { name: 'convert-to-schedule' }
+      >;
+      modal.options.onConfirm();
+
+      await waitFor(() => {
+        expect(createScheduleMock).toHaveBeenCalled();
+      });
+      expect(getTransactions().length).toBe(5);
+      pushModalSpy.mockRestore();
+    });
+
+    test('cancelling the modal keeps the transaction without creating a schedule', async () => {
+      const pushModalSpy = vi.spyOn(modalsSlice, 'pushModal');
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '02/01/2017[Tab]');
+
+      const scheduleButton = container.querySelector(scheduleButtonSelector)!;
+      await userEvent.click(scheduleButton);
+
+      await waitFor(() => {
+        expect(pushModalSpy).toHaveBeenCalled();
+      });
+
+      const modal = pushModalSpy.mock.calls[0][0].modal as Extract<
+        modalsSlice.Modal,
+        { name: 'convert-to-schedule' }
+      >;
+      modal.options.onCancel?.();
+
+      expect(createScheduleMock).not.toHaveBeenCalled();
+      expect(getTransactions().length).toBe(5);
+      pushModalSpy.mockRestore();
+    });
   });
 
   test('ctrl/cmd+enter adds transaction and closes form', async () => {
