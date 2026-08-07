@@ -643,6 +643,13 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                   isOpen={isOpen}
                   onOpenChange={close}
                   isNonModal
+                  shouldCloseOnInteractOutside={element => {
+                    const outerPopover = triggerRef.current?.closest('[data-popover]');
+                    if (outerPopover && !outerPopover.contains(element)) {
+                      document.dispatchEvent(new CustomEvent('close-outer-popovers'));
+                    }
+                    return true;
+                  }}
                   style={{
                     ...styles.darkScrollbar,
                     ...styles.popover,
