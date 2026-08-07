@@ -6,6 +6,9 @@
 # (skipped if already tracked by git), and this never touches `yarn lint`, so
 # react/no-multi-comp stays out of .oxlintrc.json.
 
+. "$(dirname "$0")/common.sh"
+require_jq advisory
+
 file=$(jq -r '.tool_input.file_path // empty')
 [ -n "$file" ] && [ -f "$file" ] || exit 0
 case "$file" in
@@ -16,7 +19,6 @@ esac
 dir=$(dirname "$file")
 
 # Resolve the repo root regardless of which agent invoked us.
-. "$(dirname "$0")/common.sh"
 ROOT=$(resolve_repo_root "$dir")
 
 # Normalize to an absolute + repo-root-relative path so the git pathspec is
