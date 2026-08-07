@@ -3497,10 +3497,10 @@ export const TransactionTable = forwardRef(
           );
           setNewTransactions(data);
 
-          // Jump next to "debit" field if it is empty
+          // Jump next to the parent "debit" field if it is empty or zero.
           // Otherwise jump to the same field as before, but downwards
           // to the added split transaction
-          if (newTrans[0].amount === null) {
+          if (newTrans[0].amount === null || newTrans[0].amount === 0) {
             newNavigator.onEdit(newTrans[0].id, 'debit');
           } else {
             newNavigator.onEdit(

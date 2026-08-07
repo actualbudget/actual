@@ -1095,6 +1095,24 @@ describe('Transactions', () => {
     expect(getTransactions()[2].amount).toBe(-1000);
   });
 
+  test('keeps the parent amount field focused when splitting a zero-valued new transaction', async () => {
+    const { container, updateProps } = renderTransactions();
+    updateProps({ isAdding: true });
+
+    const input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '0');
+
+    await editNewField(container, 'category');
+    await userEvent.keyboard('{ArrowDown}{Enter}');
+
+    await waitFor(() => {
+      expect(container.ownerDocument.activeElement).toBe(
+        queryNewField(container, 'debit', 'input'),
+      );
+    });
+  });
+
   test('escape closes the new transaction rows', async () => {
     const { container, updateProps } = renderTransactions({
       onCloseAddTransaction: () => {
