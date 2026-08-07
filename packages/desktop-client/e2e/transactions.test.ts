@@ -351,4 +351,37 @@ test.describe('Transactions', () => {
       await expect(header).not.toContainText('Notes');
     });
   });
+
+  test.describe('filter persistence', () => {
+    test('persists the applied filters per account', async () => {
+      const deleteFilterButtons = page.getByRole('button', {
+        name: 'Delete filter',
+      });
+
+      // Apply a category filter on Ally Savings
+      const filterTooltip = await accountPage.filterBy('Category');
+      await page.getByTestId('Clothing-category-item').click();
+      await filterTooltip.applyButton.click();
+      await expect(deleteFilterButtons).toHaveCount(1);
+
+      // Another account is unaffected
+      accountPage = await navigation.goToAccountPage('Bank of America');
+      await expect(deleteFilterButtons).toHaveCount(0);
+
+      // Returning to the account restores the filter
+      accountPage = await navigation.goToAccountPage('Ally Savings');
+      await expect(deleteFilterButtons).toHaveCount(1);
+      for (let i = 0; i < 5; i++) {
+        await expect(accountPage.getNthTransaction(i).category).toHaveText(
+          'Clothing',
+        );
+      }
+
+      // Removing the filter persists too
+      await accountPage.removeFilter(0);
+      accountPage = await navigation.goToAccountPage('Bank of America');
+      accountPage = await navigation.goToAccountPage('Ally Savings');
+      await expect(deleteFilterButtons).toHaveCount(0);
+    });
+  });
 });

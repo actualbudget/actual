@@ -40,6 +40,7 @@ export type SyncedPrefs = Partial<
     | `hide-reconciled-${string}`
     | 'transaction-table-columns'
     | `transaction-table-columns-${string}`
+    | `transaction-table-filters-${string}`
     | `show-group-${string}`
     | 'sync-transfer-date'
     // TODO: pull from src/components/modals/ImportTransactions.js
