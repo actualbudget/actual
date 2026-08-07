@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { send } from '@actual-app/core/platform/client/connection';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { File } from '@actual-app/core/types/file';
@@ -604,7 +606,7 @@ export type Modal =
   | {
       name: 'confirm-delete';
       options: {
-        message: string;
+        message: string | ReactNode;
         onConfirm: () => void;
       };
     }

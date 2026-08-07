@@ -10,6 +10,7 @@ export type FeatureFlag =
   | 'enableBanking'
   | 'sankeyReport'
   | 'akahuBankSync'
+  | 'focusedViews'
   | 'mobileCalculator'
   | 'monteCarloReport';
 
@@ -65,7 +66,12 @@ export type SyncedPrefs = Partial<
     | `flip-amount-${string}-${'csv' | 'qif'}`
     | `flags.${FeatureFlag}`
     | `learn-categories`
-    | `show-hidden-tags`,
+    | `show-hidden-tags`
+    | 'budget.focusedViews'
+    | 'budget.builtInViewsOrder'
+    | 'budget.viewOrder'
+    | 'budget.activeFocusedView'
+    | 'budget.focusedViewsCollapsed',
     string
   >
 >;
@@ -106,6 +112,13 @@ export type LocalPrefs = Partial<{
   'mobile.showSpentColumn': boolean;
   'mobile.bankSyncProvidersCollapsed': boolean;
 }>;
+
+export type FocusedViewDefinition = {
+  id: string;
+  name: string;
+  categoryIds: string[];
+  sortOrder: number;
+};
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;
 export type DarkTheme = 'dark' | 'midnight';

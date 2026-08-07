@@ -85,6 +85,7 @@ export function ExpenseGroupList({
           isCollapsed={() => true}
           onToggleCollapse={() => {}}
           isHidden={false}
+          showHiddenCategories={showHiddenCategories}
         />
       );
     },

@@ -37,7 +37,7 @@ export type MenuItemObject<NameType, Type extends string | symbol = string> = {
   disabled?: boolean;
   icon?: ComponentType<SVGProps<SVGSVGElement>>;
   iconSize?: number;
-  text: string;
+  text: string | ReactNode;
   key?: string;
   toggle?: boolean;
   tooltip?: string;
