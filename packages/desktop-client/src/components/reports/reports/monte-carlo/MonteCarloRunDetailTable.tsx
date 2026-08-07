@@ -29,12 +29,21 @@ const AMOUNT_CELL_STYLE = {
   textAlign: 'right',
 } as const;
 
+// Pot mini-table cells must not shrink, so on narrow screens the panel
+// pushes the shared scroll container wider instead of clipping columns
+const POT_CELL_STYLE = {
+  flexShrink: 0,
+  textAlign: 'right',
+} as const;
+
 type MonteCarloRunDetailTableProps = {
   rows: MonteCarloRunDetailRow[];
   pots: MonteCarloPot[];
   simulationIndex: number;
   simulationCount: number;
   startAge: number;
+  /** Show the Contributions columns (the plan has contributions set up) */
+  hasContributions: boolean;
   onBack: () => void;
 };
 
@@ -44,6 +53,7 @@ export function MonteCarloRunDetailTable({
   simulationIndex,
   simulationCount,
   startAge,
+  hasContributions,
   onBack,
 }: MonteCarloRunDetailTableProps) {
   const { t } = useTranslation();
@@ -173,6 +183,11 @@ export function MonteCarloRunDetailTable({
             <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
               <Trans>Starting balance</Trans>
             </Text>
+            {hasContributions && (
+              <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
+                <Trans>Contributions</Trans>
+              </Text>
+            )}
             <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
               <Trans>Withdrawal</Trans>
             </Text>
@@ -192,9 +207,11 @@ export function MonteCarloRunDetailTable({
           {rows.map(row => {
             const isFailureRow = row === lastRow && !hasSurvived;
             const isExpanded = expandedYears.has(row.year);
-            // Growth applies to what stayed invested after the withdrawal;
-            // no growth on a failure year (the plan stops there)
-            const growthBase = row.startBalance - row.withdrawal;
+            // Growth applies to what stayed invested after contributions
+            // came in and the withdrawal went out; no growth on a failure
+            // year (the plan stops there)
+            const growthBase =
+              row.startBalance + row.contributions - row.withdrawal;
             const growthPct =
               !isFailureRow && growthBase > 0
                 ? (row.growth / growthBase) * 100
@@ -241,6 +258,15 @@ export function MonteCarloRunDetailTable({
                       </FinancialText>
                     </PrivacyFilter>
                   </Text>
+                  {hasContributions && (
+                    <Text style={AMOUNT_CELL_STYLE}>
+                      <PrivacyFilter>
+                        <FinancialText as="span">
+                          {format(row.contributions, 'financial')}
+                        </FinancialText>
+                      </PrivacyFilter>
+                    </Text>
+                  )}
                   <Text style={AMOUNT_CELL_STYLE}>
                     <PrivacyFilter>
                       <FinancialText as="span">
@@ -319,6 +345,20 @@ export function MonteCarloRunDetailTable({
                         </FinancialText>
                       </PrivacyFilter>
                     </Text>
+                    {row.contributions > 0 && (
+                      <Text style={{ fontSize: 13, color: theme.pageText }}>
+                        <PrivacyFilter>
+                          <FinancialText as="span">
+                            {t(
+                              'Contributions: {{amount}}, added at the start of the year.',
+                              {
+                                amount: format(row.contributions, 'financial'),
+                              },
+                            )}
+                          </FinancialText>
+                        </PrivacyFilter>
+                      </Text>
+                    )}
                     {row.feesPaid > 0 && (
                       <Text style={{ fontSize: 13, color: theme.pageText }}>
                         <PrivacyFilter>
@@ -352,7 +392,12 @@ export function MonteCarloRunDetailTable({
                     )}
 
                     {pots.length > 0 && (
-                      <View style={{ marginTop: 6, maxWidth: 1010 }}>
+                      <View
+                        style={{
+                          marginTop: 6,
+                          maxWidth: hasContributions ? 1150 : 1010,
+                        }}
+                      >
                         <View
                           style={{
                             flexDirection: 'row',
@@ -373,17 +418,28 @@ export function MonteCarloRunDetailTable({
                           <Text
                             style={{
                               ...GROUP_HEADING_STYLE,
+                              ...POT_CELL_STYLE,
                               width: 130,
-                              textAlign: 'right',
                             }}
                           >
                             <Trans>Start balance</Trans>
                           </Text>
+                          {hasContributions && (
+                            <Text
+                              style={{
+                                ...GROUP_HEADING_STYLE,
+                                ...POT_CELL_STYLE,
+                                width: 130,
+                              }}
+                            >
+                              <Trans>Contributed</Trans>
+                            </Text>
+                          )}
                           <Text
                             style={{
                               ...GROUP_HEADING_STYLE,
+                              ...POT_CELL_STYLE,
                               width: 130,
-                              textAlign: 'right',
                             }}
                           >
                             <Trans>Withdrawn</Trans>
@@ -391,8 +447,8 @@ export function MonteCarloRunDetailTable({
                           <Text
                             style={{
                               ...GROUP_HEADING_STYLE,
+                              ...POT_CELL_STYLE,
                               width: 110,
-                              textAlign: 'right',
                             }}
                           >
                             <Trans>Taxable</Trans>
@@ -400,6 +456,7 @@ export function MonteCarloRunDetailTable({
                           <View
                             style={{
                               width: 110,
+                              flexShrink: 0,
                               flexDirection: 'row',
                               justifyContent: 'flex-end',
                               alignItems: 'center',
@@ -424,6 +481,7 @@ export function MonteCarloRunDetailTable({
                           <View
                             style={{
                               width: 110,
+                              flexShrink: 0,
                               flexDirection: 'row',
                               justifyContent: 'flex-end',
                               alignItems: 'center',
@@ -446,8 +504,8 @@ export function MonteCarloRunDetailTable({
                           <Text
                             style={{
                               ...GROUP_HEADING_STYLE,
+                              ...POT_CELL_STYLE,
                               width: 90,
-                              textAlign: 'right',
                             }}
                           >
                             <Trans>Return (%)</Trans>
@@ -455,8 +513,8 @@ export function MonteCarloRunDetailTable({
                           <Text
                             style={{
                               ...GROUP_HEADING_STYLE,
+                              ...POT_CELL_STYLE,
                               width: 130,
-                              textAlign: 'right',
                             }}
                           >
                             <Trans>End balance</Trans>
@@ -479,7 +537,7 @@ export function MonteCarloRunDetailTable({
                                     number: potIndex + 1,
                                   })}
                               </Text>
-                              <Text style={{ width: 130, textAlign: 'right' }}>
+                              <Text style={{ ...POT_CELL_STYLE, width: 130 }}>
                                 <PrivacyFilter>
                                   <FinancialText as="span">
                                     {format(
@@ -489,7 +547,19 @@ export function MonteCarloRunDetailTable({
                                   </FinancialText>
                                 </PrivacyFilter>
                               </Text>
-                              <Text style={{ width: 130, textAlign: 'right' }}>
+                              {hasContributions && (
+                                <Text style={{ ...POT_CELL_STYLE, width: 130 }}>
+                                  <PrivacyFilter>
+                                    <FinancialText as="span">
+                                      {format(
+                                        row.potContributions[potIndex] ?? 0,
+                                        'financial',
+                                      )}
+                                    </FinancialText>
+                                  </PrivacyFilter>
+                                </Text>
+                              )}
+                              <Text style={{ ...POT_CELL_STYLE, width: 130 }}>
                                 <PrivacyFilter>
                                   <FinancialText as="span">
                                     {format(
@@ -499,7 +569,7 @@ export function MonteCarloRunDetailTable({
                                   </FinancialText>
                                 </PrivacyFilter>
                               </Text>
-                              <Text style={{ width: 110, textAlign: 'right' }}>
+                              <Text style={{ ...POT_CELL_STYLE, width: 110 }}>
                                 <PrivacyFilter>
                                   <FinancialText as="span">
                                     {format(
@@ -509,7 +579,7 @@ export function MonteCarloRunDetailTable({
                                   </FinancialText>
                                 </PrivacyFilter>
                               </Text>
-                              <Text style={{ width: 110, textAlign: 'right' }}>
+                              <Text style={{ ...POT_CELL_STYLE, width: 110 }}>
                                 <PrivacyFilter>
                                   <FinancialText as="span">
                                     {format(
@@ -519,7 +589,7 @@ export function MonteCarloRunDetailTable({
                                   </FinancialText>
                                 </PrivacyFilter>
                               </Text>
-                              <Text style={{ width: 110, textAlign: 'right' }}>
+                              <Text style={{ ...POT_CELL_STYLE, width: 110 }}>
                                 <PrivacyFilter>
                                   <FinancialText as="span">
                                     {format(
@@ -531,8 +601,8 @@ export function MonteCarloRunDetailTable({
                               </Text>
                               <Text
                                 style={{
+                                  ...POT_CELL_STYLE,
                                   width: 90,
-                                  textAlign: 'right',
                                   color:
                                     potReturn == null
                                       ? theme.pageText
@@ -547,7 +617,7 @@ export function MonteCarloRunDetailTable({
                                   </FinancialText>
                                 )}
                               </Text>
-                              <Text style={{ width: 130, textAlign: 'right' }}>
+                              <Text style={{ ...POT_CELL_STYLE, width: 130 }}>
                                 <PrivacyFilter>
                                   <FinancialText as="span">
                                     {format(

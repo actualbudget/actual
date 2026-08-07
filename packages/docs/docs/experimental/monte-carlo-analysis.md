@@ -36,7 +36,7 @@ The report works immediately with sensible example numbers filled in, so you can
 
 ## Setting Up Your Plan
 
-The configuration area at the top of the report is organized into three tabs.
+The configuration area at the top of the report is organized into five tabs.
 
 ### Plan Details
 
@@ -78,6 +78,20 @@ Drag a pot's row to reorder the list - the order matters if you choose to drain 
 :::tip
 The access age setting is what lets the report model the classic "bridge gap": retiring at 48 with a big pension you can't open until 57, and a smaller pot that has to carry you across those nine years. If the bridge pot runs dry too soon, the plan fails - even though the pension money exists.
 :::
+
+### Contributions
+
+![The Contributions tab](/img/experimental/monte-carlo-analysis/monte-carlo-contributions.png)
+
+If you're still earning, you can model the money you add to your pots each year - pension deposits or brokerage savings, anything that tops up a pot on a regular basis. Each contribution has:
+
+- **Contribution name** - anything you like, such as "Pension contributions".
+- **Into pot** - the pot the money is paid into. A pot can receive any number of contributions, and contributions can go into a pot that is still locked for withdrawals - the access age only controls when money can come _out_.
+- **From age** and **To age** - the years the contribution runs, inclusive at both ends. Leave **From age** blank to start now, and **To age** blank to keep contributing until the end of the plan.
+- **Amount (per year)** - how much is added each year, in today's money. The money is paid in at the start of each year, so it earns that year's investment return.
+- **Adjust by inflation** - tick this if the contribution will grow with prices over time (for example, a percentage of a salary that keeps pace with inflation). Untick it for a fixed amount, which buys a little less each year as prices rise.
+
+Contributions pair naturally with a spending phase set to 0: while you're working, salary covers your costs and the plan only accumulates; from your retirement age, contributions stop and spending begins.
 
 ### Spending
 
@@ -172,7 +186,7 @@ This bar chart only counts the replays that failed, showing at which age they ra
 
 ![The simulation runs table](/img/experimental/monte-carlo-analysis/monte-carlo-runs.png)
 
-Switch the results view from **Chart** to **Runs** to see every replay listed from worst outcome to best. Rather than paging through thousands of runs, use the **Jump to** dropdown to go straight to the worst, median or best run - or the 25th/75th percentile for a typically-bad or typically-good outcome - with the run highlighted so you can click into it. Click any run to walk through it year by year: the balance at the start of each year, the withdrawal taken, the investment growth in that year (as money and as a percentage), and the balance at the end. Expand a year with the arrow at the start of its row (or use **Expand all years**) for the fully labeled breakdown: the withdrawal split into gross, tax and money to spend; the fees paid; and a small table showing each pot's balance at the start of the year, what it contributed to the withdrawal, how much of that counted as taxable income, the tax paid on its share, the fee it was charged that year, its return that year, and its ending balance - so you can watch, for example, the cash pot covering spending after a crash while the stock pots are left alone. With the tax-bands model, the per-pot tax is the year's tax bill shared out in proportion to each pot's taxable income.
+Switch the results view from **Chart** to **Runs** to see every replay listed from worst outcome to best. Rather than paging through thousands of runs, use the **Jump to** dropdown to go straight to the worst, median or best run - or the 25th/75th percentile for a typically-bad or typically-good outcome - with the run highlighted so you can click into it. Click any run to walk through it year by year: the balance at the start of each year, the contributions paid in (when your plan has any), the withdrawal taken, the investment growth in that year (as money and as a percentage), and the balance at the end. Expand a year with the arrow at the start of its row (or use **Expand all years**) for the fully labeled breakdown: the withdrawal split into gross, tax and money to spend; the contributions added; the fees paid; and a small table showing each pot's balance at the start of the year, what was contributed into it, what it contributed to the withdrawal, how much of that counted as taxable income, the tax paid on its share, the fee it was charged that year, its return that year, and its ending balance - so you can watch, for example, the cash pot covering spending after a crash while the stock pots are left alone. With the tax-bands model, the per-pot tax is the year's tax bill shared out in proportion to each pot's taxable income.
 
 ![The simulation run table](/img/experimental/monte-carlo-analysis/monte-carlo-run.png)
 
