@@ -7,6 +7,9 @@
 # contains `// @ts-strict-ignore`. Existing files (241 of them) are grandfathered
 # automatically because this only fires when the target path does not yet exist.
 
+. "$(dirname "$0")/common.sh"
+require_jq
+
 input=$(cat)
 file=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')
 [ -n "$file" ] || exit 0
