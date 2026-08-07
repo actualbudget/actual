@@ -241,6 +241,7 @@ type FooterProps = {
   onAddSplit: (id: TransactionEntity['id']) => void;
   onEmptySplitFound: (id: TransactionEntity['id']) => void;
   editingField?: string;
+  isFuture: boolean;
   onEditField: (
     id: TransactionEntity['id'],
     field: 'category' | 'payee' | 'account' | 'date' | 'amount' | 'notes',
@@ -258,10 +259,10 @@ function Footer({
   onEmptySplitFound,
   editingField,
   onEditField,
+  isFuture,
 }: FooterProps) {
   const [transaction, ...childTransactions] = transactions;
   const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
-  const isFuture = isFutureTransaction(transaction);
   const onClickRemainingSplit = () => {
     if (childTransactions.length === 0) {
       onSplit(transaction.id);
@@ -671,6 +672,10 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     }, []);
 
     const [transaction, ...childTransactions] = transactions;
+
+    const isFuture =
+      unserializedTransactions.length > 0 &&
+      isFutureTransaction(unserializedTransactions[0]);
 
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
@@ -1172,6 +1177,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             onAddSplit={onAddSplit}
             onEmptySplitFound={onEmptySplitFound}
             editingField={editingField}
+            isFuture={isFuture}
             onEditField={onEditFieldInner}
           />
         }
