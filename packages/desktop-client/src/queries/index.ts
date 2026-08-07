@@ -16,6 +16,15 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 // @ts-strict-ignore
 import { isValid as isDateValid, parse as parseDate } from 'date-fns';
 
+// The pseudo account views that can appear in place of a concrete account id
+// (see accountFilter below for their semantics)
+export const PSEUDO_ACCOUNT_VIEWS: readonly string[] = [
+  'onbudget',
+  'offbudget',
+  'closed',
+  'uncategorized',
+];
+
 export function accountFilter(
   accountId?:
     | AccountEntity['id']

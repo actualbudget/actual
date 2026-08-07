@@ -11,6 +11,8 @@ Release notes are the user-facing changelog. Each code change adds one Markdown 
 
 Create `upcoming-release-notes/<slug>.md`, where `<slug>` is a **short, descriptive kebab-case slug** naming the change (e.g. `add-payee-autocomplete.md`, `fix-mobile-category-delete.md`). Do **not** use a PR number, since the PR link is resolved automatically at release time. (Numeric filenames like `1234.md` still work, but a slug is preferred.)
 
+**One file per PR.** Each pull request ships exactly one release note. If work spanning several changes lands as a single PR, combine them into one file with one sentence covering the overall change — do not create a file per change. If you already created several files during a work session that will ship as one PR, merge them into a single file before the PR is cut.
+
 ```markdown
 ---
 category: Features
