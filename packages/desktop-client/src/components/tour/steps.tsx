@@ -42,13 +42,13 @@ const getBudgetTourSteps = ({ navigate, budgetType }: TourStepDeps): Step[] => [
     id: 'welcome',
     target: 'body',
     placement: 'center',
-    title: <Trans>Welcome to Actual!</Trans>,
+    title: <Trans>Welcome to {{ appName: 'Actual' }}!</Trans>,
     content: (
       <Trans>
-        Actual is a budgeting app that helps you understand exactly where your
-        money goes. This short tour walks you through the basics. It only takes
-        a couple of minutes, and you can leave at any time and replay it later
-        from the Help menu.
+        {{ appName: 'Actual' }} is a budgeting app that helps you understand
+        exactly where your money goes. This short tour walks you through the
+        basics. It only takes a couple of minutes, and you can leave at any time
+        and replay it later from the Help menu.
       </Trans>
     ),
   },
@@ -87,9 +87,9 @@ const getBudgetTourSteps = ({ navigate, budgetType }: TourStepDeps): Step[] => [
         </Trans>
       ) : (
         <Trans>
-          Categories in Actual work like virtual envelopes: you assign the money
-          you already have to them, then spend from each envelope. This approach
-          is called{' '}
+          Categories in {{ appName: 'Actual' }} work like virtual envelopes: you
+          assign the money you already have to them, then spend from each
+          envelope. This approach is called{' '}
           <Link
             variant="external"
             to="https://actualbudget.org/docs/getting-started/envelope-budgeting"
@@ -180,8 +180,8 @@ const getBudgetTourSteps = ({ navigate, budgetType }: TourStepDeps): Step[] => [
     content: (
       <Trans>
         Transactions live in accounts, so adding your first account is the best
-        way to get started with Actual. Click here to add one. You can enter
-        transactions yourself, or{' '}
+        way to get started with {{ appName: 'Actual' }}. Click here to add one.
+        You can enter transactions yourself, or{' '}
         <Link
           variant="external"
           to="https://actualbudget.org/docs/advanced/bank-sync"

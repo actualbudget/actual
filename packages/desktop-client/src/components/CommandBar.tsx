@@ -243,7 +243,11 @@ export function CommandBar() {
       key: 'help',
       heading: t('Help'),
       items: [
-        { id: 'start-tour', name: t('Take a tour of Actual'), Icon: SvgHelp },
+        {
+          id: 'start-tour',
+          name: t('Take a tour of {{appName}}', { appName: 'Actual' }),
+          Icon: SvgHelp,
+        },
       ],
       onSelect: () => {
         setOpen(false);
