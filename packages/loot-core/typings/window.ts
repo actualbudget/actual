@@ -40,6 +40,7 @@ type Actual = {
     event: string,
     listener: (...args: unknown[]) => void,
   ) => void;
+  supportsAutoUpdate: boolean;
   isUpdateReadyForDownload: () => boolean;
   waitForUpdateReadyForDownload: () => Promise<void>;
   startSyncServer: () => Promise<void>;

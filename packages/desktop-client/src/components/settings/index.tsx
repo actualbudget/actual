@@ -47,6 +47,7 @@ function About() {
     useGlobalPref('notifyWhenUpdateIsAvailable', () => {
       void dispatch(getLatestAppVersion());
     });
+  const [autoUpdate, setAutoUpdatePref] = useGlobalPref('autoUpdate');
   const dispatch = useDispatch();
 
   return (
@@ -121,6 +122,20 @@ function About() {
           </label>
         </Text>
       </View>
+      {isElectron() && window.Actual?.supportsAutoUpdate && (
+        <View>
+          <Text style={{ display: 'flex' }}>
+            <Checkbox
+              id="settings-autoUpdate"
+              checked={autoUpdate !== false}
+              onChange={e => setAutoUpdatePref(e.currentTarget.checked)}
+            />
+            <label htmlFor="settings-autoUpdate">
+              <Trans>Automatically download and install updates</Trans>
+            </label>
+          </Text>
+        </View>
+      )}
     </Setting>
   );
 }
