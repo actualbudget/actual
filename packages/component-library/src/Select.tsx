@@ -39,8 +39,8 @@ type SelectProps<Value> = {
  *
  * @example
  * // Usage:
- * // <Select options={[["1", "Option 1"], ["2", "Option 2"]]} value="1" onChange={handleOnChange} />
- * // <Select options={[["1", "Option 1"], ["2", "Option 2"]]} value="3" defaultLabel="Select an option"  onChange={handleOnChange} />
+ * // <Select options={[['1', 'Option 1'], ['2', 'Option 2']]} value="1" onChange={handleOnChange} />
+ * // <Select options={[['1', 'Option 1'], ['2', 'Option 2']]} value="3" defaultLabel="Select an option"  onChange={handleOnChange} />
  */
 export function Select<const Value = string>({
   id,
@@ -61,6 +61,7 @@ export function Select<const Value = string>({
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isNonModal, setIsNonModal] = useState(false);
 
   return (
     <>
@@ -70,6 +71,7 @@ export function Select<const Value = string>({
         variant={bare ? 'bare' : 'normal'}
         isDisabled={disabled}
         onPress={() => {
+          setIsNonModal(Boolean(triggerRef.current?.closest('[data-popover]')));
           setIsOpen(true);
         }}
         style={style}
@@ -111,7 +113,7 @@ export function Select<const Value = string>({
         isOpen={isOpen}
         onOpenChange={() => setIsOpen(false)}
         style={popoverStyle}
-        isNonModal={Boolean(triggerRef.current?.closest('[data-popover]'))}
+        isNonModal={isNonModal}
       >
         <Menu
           onMenuSelect={item => {
