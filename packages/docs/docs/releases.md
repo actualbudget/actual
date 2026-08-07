@@ -13,6 +13,7 @@ This hotfix resolves some performance issues reported in 26.8.0 as well as some 
 #### Bugfixes
 
 - [#8628](https://github.com/actualbudget/actual/pull/8628) Fix intermittent app freezes with 100% CPU usage — thanks @matt-fidd
+- [#8662](https://github.com/actualbudget/actual/pull/8662) Fix context menu showing on multi-account views — thanks @matt-fidd
 - [#8663](https://github.com/actualbudget/actual/pull/8663) Fix the transaction list getting slower as a budget grows, especially when adding, clearing, or deleting transactions and when reconciling — thanks @youngcw
 - [#8616](https://github.com/actualbudget/actual/pull/8616) Restore the "Delete" option in the schedule row menu on the Schedules page — thanks @bzupnick
 
