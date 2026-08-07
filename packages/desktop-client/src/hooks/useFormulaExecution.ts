@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
 import {
@@ -143,6 +143,19 @@ export function useFormulaExecution(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Callers pass `queries`/`namedExpressions` as plain objects, and several of
+  // them build a fresh object on every render. Keying the effect on the object
+  // identity would re-execute the formula on every render (and each execution
+  // toggles `isLoading`, which renders again — an endless loop). Depend on the
+  // serialized contents instead, and read the live objects through refs.
+  const queriesKey = JSON.stringify(queries ?? {});
+  const namedExpressionsKey = JSON.stringify(namedExpressions ?? null);
+
+  const queriesRef = useRef(queries);
+  queriesRef.current = queries;
+  const namedExpressionsRef = useRef(namedExpressions);
+  namedExpressionsRef.current = namedExpressions;
+
   useEffect(() => {
     let cancelled = false;
 
@@ -150,8 +163,12 @@ export function useFormulaExecution(
       if (!formula || !formula.startsWith('=')) {
         setResult(null);
         setError('Formula must start with =');
+        setIsLoading(false);
         return;
       }
+
+      const currentQueries = queriesRef.current;
+      const currentNamedExpressions = namedExpressionsRef.current;
 
       setIsLoading(true);
       setError(null);
@@ -178,18 +195,18 @@ export function useFormulaExecution(
           formula,
           formulaQueryContext,
           locale: formulaLocale,
-          namedExpressions,
+          namedExpressions: currentNamedExpressions,
           throwOnCellError: false,
         });
 
-        await prefetchFormulaQueries(formulaQueryContext, queries);
+        await prefetchFormulaQueries(formulaQueryContext, currentQueries);
 
         formulaQueryContext.budgetQueryRequests.clear();
         evaluateFormulaWithContext({
           formula,
           formulaQueryContext,
           locale: formulaLocale,
-          namedExpressions,
+          namedExpressions: currentNamedExpressions,
           throwOnCellError: false,
         });
 
@@ -199,7 +216,7 @@ export function useFormulaExecution(
           formula,
           formulaQueryContext,
           locale: formulaLocale,
-          namedExpressions,
+          namedExpressions: currentNamedExpressions,
         });
 
         if (cancelled) return;
@@ -223,7 +240,14 @@ export function useFormulaExecution(
     return () => {
       cancelled = true;
     };
-  }, [formula, queriesVersion, locale, language, queries, namedExpressions]);
+  }, [
+    formula,
+    queriesVersion,
+    locale,
+    language,
+    queriesKey,
+    namedExpressionsKey,
+  ]);
 
   return { result, isLoading, error };
 }
