@@ -2,6 +2,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
+  PercentageSummaryTerm,
   RuleConditionEntity,
   SummaryContent,
 } from '@actual-app/core/types/models';
@@ -10,6 +11,30 @@ import type { Locale } from 'date-fns';
 
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { aqlQuery } from '#queries/aqlQuery';
+
+// Each sum is combined by magnitude; the op sign controls add/subtract, so
+// subtracting an expense (stored negative) reduces the total as expected.
+export function combineTerms(
+  base: number,
+  terms: Array<{ op: 'add' | 'subtract'; value: number }>,
+): number {
+  return terms.reduce(
+    (acc, term) =>
+      term.op === 'subtract'
+        ? acc - Math.abs(term.value)
+        : acc + Math.abs(term.value),
+    Math.abs(base),
+  );
+}
+
+// The percentage is a magnitude ratio: always non-negative, and 0 when the
+// divisor is 0 (rather than Infinity/NaN).
+export function computePercentage(dividend: number, divisor: number): number {
+  if (divisor === 0) {
+    return 0;
+  }
+  return Math.abs(Math.round((dividend / divisor) * 10000) / 100);
+}
 
 export function summarySpreadsheet(
   start: string,
@@ -269,69 +294,83 @@ async function calculatePercentage(
     };
   }
 
-  const conditionsOpKey =
-    summaryContent.divisorConditionsOp === 'or' ? '$or' : '$and';
-  let filters = [];
-  try {
-    const response = await send('make-filters-from-conditions', {
-      conditions: summaryContent?.divisorConditions?.filter(
-        cond => !cond.customName,
-      ),
-    });
-    filters = response.filters;
-  } catch (error) {
-    console.error('Error creating filters:', error);
-    return {
-      total: 0,
-      dividend: 0,
-      divisor: 0,
-    };
-  }
+  const sumForConditions = async (
+    conditions: RuleConditionEntity[] = [],
+    conditionsOp: 'and' | 'or' = 'and',
+    applyDateRange: boolean,
+  ): Promise<number> => {
+    const opKey = conditionsOp === 'or' ? '$or' : '$and';
+    let filters: unknown[] = [];
+    try {
+      const response = await send('make-filters-from-conditions', {
+        conditions: conditions.filter(cond => !cond.customName),
+      });
+      filters = response.filters;
+    } catch (error) {
+      console.error('Error creating filters:', error);
+      return 0;
+    }
 
-  const makeDivisorQuery = () =>
-    q('transactions')
-      .filter({
-        [conditionsOpKey]: filters,
-      })
+    let query = q('transactions')
+      .filter({ [opKey]: filters })
       .select([{ amount: { $sum: '$amount' } }]);
 
-  let query = makeDivisorQuery();
+    if (applyDateRange) {
+      query = query.filter({
+        $and: [
+          { date: { $gte: d.format(startDay, 'yyyy-MM-dd') } },
+          { date: { $lte: d.format(endDay, 'yyyy-MM-dd') } },
+        ],
+      });
+    }
 
-  if (!(summaryContent.divisorAllTimeDateRange ?? false)) {
-    query = query.filter({
-      $and: [
-        {
-          date: {
-            $gte: d.format(startDay, 'yyyy-MM-dd'),
-          },
-        },
-        {
-          date: {
-            $lte: d.format(endDay, 'yyyy-MM-dd'),
-          },
-        },
-      ],
-    });
-  }
+    try {
+      const result = (await aqlQuery(query)) as { data: { amount: number }[] };
+      return result?.data?.[0]?.amount ?? 0;
+    } catch (error) {
+      console.error('Error executing sum query:', error);
+      return 0;
+    }
+  };
 
-  let divisorData;
-  try {
-    divisorData = (await aqlQuery(query)) as { data: { amount: number }[] };
-  } catch (error) {
-    console.error('Error executing divisor query:', error);
-    return {
-      total: 0,
-      dividend: 0,
-      divisor: 0,
-    };
-  }
+  const divisorAppliesDateRange = !(
+    summaryContent.divisorAllTimeDateRange ?? false
+  );
 
-  const divisorValue = divisorData?.data?.[0]?.amount ?? 0;
+  const sumExtraTerms = (
+    terms: PercentageSummaryTerm[] = [],
+    applyDateRange: boolean,
+  ) =>
+    Promise.all(
+      terms.map(async term => ({
+        op: term.op,
+        value: await sumForConditions(
+          term.conditions,
+          term.conditionsOp,
+          applyDateRange,
+        ),
+      })),
+    );
 
-  const dividend = data.reduce((prev, ac) => prev + (ac?.amount ?? 0), 0);
+  const [baseDivisor, divisorExtraValues, dividendExtraValues] =
+    await Promise.all([
+      sumForConditions(
+        summaryContent.divisorConditions,
+        summaryContent.divisorConditionsOp,
+        divisorAppliesDateRange,
+      ),
+      sumExtraTerms(summaryContent.divisorExtraTerms, divisorAppliesDateRange),
+      sumExtraTerms(summaryContent.dividendExtraTerms, true),
+    ]);
+
+  const baseDividend = data.reduce((prev, ac) => prev + (ac?.amount ?? 0), 0);
+
+  const dividend = combineTerms(baseDividend, dividendExtraValues);
+  const divisorValue = combineTerms(baseDivisor, divisorExtraValues);
+
   return {
-    total: Math.round(((dividend ?? 0) / (divisorValue ?? 1)) * 10000) / 100,
-    divisor: divisorValue ?? 0,
-    dividend: dividend ?? 0,
+    total: computePercentage(dividend, divisorValue),
+    divisor: divisorValue,
+    dividend,
   };
 }

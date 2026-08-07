@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import type { CSSProperties } from 'react';
+import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -17,11 +17,14 @@ import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
+  PercentageSummaryTerm,
+  RuleConditionEntity,
   SummaryContent,
   SummaryWidget,
   TimeFrame,
 } from '@actual-app/core/types/models';
 import { parseISO } from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { AppliedFilters } from '#components/filters/AppliedFilters';
@@ -47,6 +50,9 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+
+const MAX_EXTRA_TERMS = 2;
+const EMPTY_TERMS: PercentageSummaryTerm[] = [];
 
 export function Summary() {
   const params = useParams();
@@ -112,6 +118,14 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       ? (content?.divisorConditionsOp ?? 'and')
       : 'and',
   );
+
+  const isPct = content.type === 'percentage';
+  const dividendTerms = isPct
+    ? (content.dividendExtraTerms ?? EMPTY_TERMS)
+    : EMPTY_TERMS;
+  const divisorTerms = isPct
+    ? (content.divisorExtraTerms ?? EMPTY_TERMS)
+    : EMPTY_TERMS;
 
   const params = useMemo(
     () =>
@@ -319,6 +333,51 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     return format(Math.round(value), 'financial');
   };
 
+  const updateTerms = (
+    side: 'dividend' | 'divisor',
+    updater: (terms: PercentageSummaryTerm[]) => PercentageSummaryTerm[],
+  ) =>
+    setContent(prev => {
+      if (prev.type !== 'percentage') return prev;
+      const key =
+        side === 'dividend' ? 'dividendExtraTerms' : 'divisorExtraTerms';
+      return { ...prev, [key]: updater(prev[key] ?? []) };
+    });
+
+  const addTerm = (side: 'dividend' | 'divisor') =>
+    updateTerms(side, terms =>
+      terms.length >= MAX_EXTRA_TERMS
+        ? terms
+        : [
+            ...terms,
+            { id: uuidv4(), op: 'add', conditions: [], conditionsOp: 'and' },
+          ],
+    );
+
+  const removeTerm = (side: 'dividend' | 'divisor', id: string) =>
+    updateTerms(side, terms => terms.filter(term => term.id !== id));
+
+  const onToggleOp = (side: 'dividend' | 'divisor', id: string) =>
+    updateTerms(side, terms =>
+      terms.map(term =>
+        term.id === id
+          ? { ...term, op: term.op === 'subtract' ? 'add' : 'subtract' }
+          : term,
+      ),
+    );
+
+  const onChangeTerm = (
+    side: 'dividend' | 'divisor',
+    id: string,
+    conditions: RuleConditionEntity[],
+    conditionsOp: 'and' | 'or',
+  ) =>
+    updateTerms(side, terms =>
+      terms.map(term =>
+        term.id === id ? { ...term, conditions, conditionsOp } : term,
+      ),
+    );
+
   return (
     <Page
       header={
@@ -367,6 +426,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         style={{
           width: '100%',
           background: theme.pageBackground,
+          paddingBottom: 24,
         }}
       >
         <View
@@ -409,23 +469,31 @@ function SummaryInner({ widget }: SummaryInnerProps) {
               )
             }
           />
-        </View>
-        {content.type === 'percentage' && (
-          <View style={{ flexDirection: 'row', marginLeft: 16 }}>
-            <Checkbox
-              id="enabled-field"
-              checked={content.divisorAllTimeDateRange ?? false}
-              onChange={() => {
-                const currentValue = content.divisorAllTimeDateRange ?? false;
-                setContent(prev => ({
-                  ...prev,
-                  divisorAllTimeDateRange: !currentValue,
-                }));
+          {content.type === 'percentage' && (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginLeft: 16,
               }}
-            />{' '}
-            <Trans>All time divisor</Trans>
-          </View>
-        )}
+            >
+              <Checkbox
+                id="divisor-all-time-date-range"
+                checked={content.divisorAllTimeDateRange ?? false}
+                onChange={() => {
+                  const currentValue = content.divisorAllTimeDateRange ?? false;
+                  setContent(prev => ({
+                    ...prev,
+                    divisorAllTimeDateRange: !currentValue,
+                  }));
+                }}
+              />{' '}
+              <label htmlFor="divisor-all-time-date-range">
+                <Trans>All time divisor</Trans>
+              </label>
+            </View>
+          )}
+        </View>
       </View>
       <View
         style={{
@@ -437,10 +505,11 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       >
         <View
           style={{
-            flexDirection: 'row',
+            flexDirection: isNarrowWidth ? 'column' : 'row',
             justifyContent: 'center',
             width: '100%',
             alignItems: 'center',
+            gap: isNarrowWidth ? 24 : 0,
           }}
         >
           <Operator
@@ -454,14 +523,22 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             }
             fromRange={data?.fromRange ?? ''}
             toRange={data?.toRange ?? ''}
+            dividendTerms={dividendTerms}
+            divisorTerms={divisorTerms}
+            onAddTerm={addTerm}
+            onRemoveTerm={removeTerm}
+            onToggleOp={onToggleOp}
+            onChangeTerm={onChangeTerm}
           />
           {content.type !== 'sum' && (
             <>
-              <SvgEquals width={50} style={{ marginLeft: 56 }} />
+              {!isNarrowWidth && (
+                <SvgEquals width={50} style={{ marginLeft: 56 }} />
+              )}
               <View style={{ padding: 16 }}>
                 <Text
                   style={{
-                    fontSize: '50px',
+                    fontSize: isNarrowWidth ? '32px' : '50px',
                     width: '100%',
                     textAlign: 'center',
                   }}
@@ -475,15 +552,15 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                 <div
                   style={{
                     width: '100%',
-                    marginTop: 32,
-                    marginBottom: 32,
+                    marginTop: isNarrowWidth ? 12 : 32,
+                    marginBottom: isNarrowWidth ? 12 : 32,
                     borderTop: '2px solid',
                     borderBottom: '2px solid',
                   }}
                 />
                 <Text
                   style={{
-                    fontSize: '50px',
+                    fontSize: isNarrowWidth ? '32px' : '50px',
                     width: '100%',
                     textAlign: 'center',
                   }}
@@ -495,17 +572,19 @@ function SummaryInner({ widget }: SummaryInnerProps) {
               </View>
             </>
           )}
-          <SvgEquals width={50} style={{ marginLeft: 16 }} />
+          {!isNarrowWidth && (
+            <SvgEquals width={50} style={{ marginLeft: 16 }} />
+          )}
           <View
             style={{
-              flexGrow: 1,
+              flexGrow: isNarrowWidth ? 0 : 1,
               textAlign: 'center',
-              width: '250px',
-              maxWidth: '250px',
+              width: isNarrowWidth ? '100%' : '250px',
+              maxWidth: isNarrowWidth ? '100%' : '250px',
               justifyItems: 'center',
               alignItems: 'center',
-              marginLeft: 16,
-              fontSize: '50px',
+              marginLeft: isNarrowWidth ? 0 : 16,
+              fontSize: isNarrowWidth ? '40px' : '50px',
               justifyContent: 'center',
               color:
                 (data?.total ?? 0) === 0
@@ -517,7 +596,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
           >
             <PrivacyFilter>
               {content.type === 'percentage'
-                ? format(Math.abs(data?.total ?? 0), 'number')
+                ? format(data?.total ?? 0, 'number')
                 : format(Math.abs(Math.round(data?.total ?? 0)), 'financial')}
               {content.type === 'percentage' ? '%' : ''}
             </PrivacyFilter>
@@ -535,6 +614,17 @@ type OperatorProps = {
   fromRange: string;
   toRange: string;
   showDivisorDateRange: boolean;
+  dividendTerms: PercentageSummaryTerm[];
+  divisorTerms: PercentageSummaryTerm[];
+  onAddTerm: (side: 'dividend' | 'divisor') => void;
+  onRemoveTerm: (side: 'dividend' | 'divisor', id: string) => void;
+  onToggleOp: (side: 'dividend' | 'divisor', id: string) => void;
+  onChangeTerm: (
+    side: 'dividend' | 'divisor',
+    id: string,
+    conditions: RuleConditionEntity[],
+    conditionsOp: 'and' | 'or',
+  ) => void;
 };
 function Operator({
   type,
@@ -543,31 +633,56 @@ function Operator({
   fromRange,
   toRange,
   showDivisorDateRange,
+  dividendTerms,
+  divisorTerms,
+  onAddTerm,
+  onRemoveTerm,
+  onToggleOp,
+  onChangeTerm,
 }: OperatorProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
+
+  const termsCallbacks = { onAddTerm, onRemoveTerm, onToggleOp, onChangeTerm };
+  const divisorFrom = showDivisorDateRange ? fromRange : '';
+  const divisorTo = showDivisorDateRange ? toRange : '';
 
   return (
-    <View>
-      <SumWithRange
+    <View style={{ gap: isNarrowWidth ? 46 : 52, paddingTop: 24 }}>
+      <SumRow
         from={fromRange}
         to={toRange}
         filterObject={dividendFilterObject}
       />
       {type === 'percentage' && (
+        <TermsSection
+          side="dividend"
+          terms={dividendTerms}
+          from={fromRange}
+          to={toRange}
+          {...termsCallbacks}
+        />
+      )}
+      {type === 'percentage' && (
         <>
           <div
             style={{
               width: '100%',
-              marginTop: 32,
-              marginBottom: 32,
               borderTop: '2px solid',
               borderBottom: '2px solid',
             }}
           />
-          <SumWithRange
-            from={!showDivisorDateRange ? '' : fromRange}
-            to={!showDivisorDateRange ? '' : toRange}
+          <SumRow
+            from={divisorFrom}
+            to={divisorTo}
             filterObject={divisorFilterObject}
+          />
+          <TermsSection
+            side="divisor"
+            terms={divisorTerms}
+            from={divisorFrom}
+            to={divisorTo}
+            {...termsCallbacks}
           />
         </>
       )}
@@ -576,8 +691,6 @@ function Operator({
           <div
             style={{
               width: '100%',
-              marginTop: 32,
-              marginBottom: 32,
               borderTop: '2px solid',
               borderBottom: '2px solid',
             }}
@@ -597,6 +710,163 @@ function Operator({
   );
 }
 
+type TermsSectionProps = {
+  side: 'dividend' | 'divisor';
+  terms: PercentageSummaryTerm[];
+  from: string;
+  to: string;
+  onAddTerm: (side: 'dividend' | 'divisor') => void;
+  onRemoveTerm: (side: 'dividend' | 'divisor', id: string) => void;
+  onToggleOp: (side: 'dividend' | 'divisor', id: string) => void;
+  onChangeTerm: (
+    side: 'dividend' | 'divisor',
+    id: string,
+    conditions: RuleConditionEntity[],
+    conditionsOp: 'and' | 'or',
+  ) => void;
+};
+function TermsSection({
+  side,
+  terms,
+  from,
+  to,
+  onAddTerm,
+  onRemoveTerm,
+  onToggleOp,
+  onChangeTerm,
+}: TermsSectionProps) {
+  return (
+    <>
+      {terms.map(term => (
+        <ExtraTermRow
+          key={term.id}
+          term={term}
+          from={from}
+          to={to}
+          onChange={(id, conditions, conditionsOp) =>
+            onChangeTerm(side, id, conditions, conditionsOp)
+          }
+          onToggleOp={id => onToggleOp(side, id)}
+          onRemove={id => onRemoveTerm(side, id)}
+        />
+      ))}
+      {terms.length < MAX_EXTRA_TERMS && (
+        <Button
+          variant="bare"
+          style={{ alignSelf: 'flex-start' }}
+          onPress={() => onAddTerm(side)}
+        >
+          <Trans>Add another sum</Trans>
+        </Button>
+      )}
+    </>
+  );
+}
+
+type ExtraTermRowProps = {
+  term: PercentageSummaryTerm;
+  from: string;
+  to: string;
+  onChange: (
+    id: string,
+    conditions: RuleConditionEntity[],
+    conditionsOp: 'and' | 'or',
+  ) => void;
+  onToggleOp: (id: string) => void;
+  onRemove: (id: string) => void;
+};
+function ExtraTermRow({
+  term,
+  from,
+  to,
+  onChange,
+  onToggleOp,
+  onRemove,
+}: ExtraTermRowProps) {
+  const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
+  const filter = useRuleConditionFilters(term.conditions, term.conditionsOp);
+
+  const filterConditions = filter.conditions;
+  const filterConditionsOp = filter.conditionsOp;
+
+  const onSync = useEffectEvent(
+    (conditions: RuleConditionEntity[], conditionsOp: 'and' | 'or') =>
+      onChange(term.id, conditions, conditionsOp),
+  );
+
+  useEffect(() => {
+    // Skip the mount-time sync when the editor still holds the term's own
+    // values; only propagate genuine edits back into content.
+    if (
+      filterConditions === term.conditions &&
+      filterConditionsOp === term.conditionsOp
+    ) {
+      return;
+    }
+    onSync(filterConditions, filterConditionsOp);
+  }, [
+    filterConditions,
+    filterConditionsOp,
+    term.conditions,
+    term.conditionsOp,
+  ]);
+
+  return (
+    <SumRow
+      from={from}
+      to={to}
+      filterObject={filter}
+      onRemove={() => onRemove(term.id)}
+      operator={
+        <Button
+          variant="bare"
+          aria-label={
+            term.op === 'subtract'
+              ? t('Switch this sum to add')
+              : t('Switch this sum to subtract')
+          }
+          style={{ fontSize: isNarrowWidth ? '22px' : '32px' }}
+          onPress={() => onToggleOp(term.id)}
+        >
+          {term.op === 'subtract' ? '−' : '+'}
+        </Button>
+      }
+    />
+  );
+}
+
+type SumRowProps = {
+  operator?: ReactNode;
+  onRemove?: () => void;
+  from: string;
+  to: string;
+  filterObject: FilterObject;
+};
+function SumRow({ operator, onRemove, from, to, filterObject }: SumRowProps) {
+  const { isNarrowWidth } = useResponsive();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View
+        style={{
+          width: isNarrowWidth ? 24 : 40,
+          marginRight: 8,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {operator}
+      </View>
+      <SumWithRange from={from} to={to} filterObject={filterObject} />
+      {onRemove && (
+        <Button variant="bare" style={{ marginLeft: 8 }} onPress={onRemove}>
+          <Trans>Remove</Trans>
+        </Button>
+      )}
+    </View>
+  );
+}
+
 type SumWithRangeProps = {
   from: string;
   to: string;
@@ -610,6 +880,8 @@ function SumWithRange({
   filterObject,
 }: SumWithRangeProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
+  const sigmaSize = isNarrowWidth ? 34 : 50;
 
   return (
     <View
@@ -620,20 +892,55 @@ function SumWithRange({
         alignItems: 'center',
         position: 'relative',
         display: 'grid',
-        gridTemplateColumns: '70px 15px 1fr 15px',
+        gridTemplateColumns: isNarrowWidth
+          ? `${sigmaSize}px 12px 1fr 12px`
+          : '70px 15px 1fr 15px',
       }}
     >
-      <View style={{ position: 'relative', height: '50px', marginRight: 50 }}>
-        <SvgSum width={50} height={50} />
-        <Text style={{ position: 'absolute', right: -30, top: -20 }}>{to}</Text>
-        <Text style={{ position: 'absolute', right: -30, bottom: -20 }}>
+      <View
+        style={{
+          position: 'relative',
+          height: sigmaSize,
+          marginRight: isNarrowWidth ? 28 : 50,
+        }}
+      >
+        <SvgSum width={sigmaSize} height={sigmaSize} />
+        <Text
+          style={{
+            position: 'absolute',
+            right: -30,
+            top: isNarrowWidth ? -14 : -20,
+            fontSize: isNarrowWidth ? '11px' : undefined,
+          }}
+        >
+          {to}
+        </Text>
+        <Text
+          style={{
+            position: 'absolute',
+            right: -30,
+            bottom: isNarrowWidth ? -14 : -20,
+            fontSize: isNarrowWidth ? '11px' : undefined,
+          }}
+        >
           {from}
         </Text>
       </View>
       <SvgOpenParenthesis width={15} style={{ height: '100%' }} />
-      <View style={{ marginLeft: 16, maxWidth: '220px', marginRight: 16 }}>
+      <View
+        style={{
+          marginLeft: isNarrowWidth ? 8 : 16,
+          maxWidth: isNarrowWidth ? '150px' : '220px',
+          marginRight: isNarrowWidth ? 8 : 16,
+        }}
+      >
         {(filterObject.conditions?.length ?? 0) === 0 ? (
-          <Text style={{ fontSize: '25px', color: theme.pageTextPositive }}>
+          <Text
+            style={{
+              fontSize: isNarrowWidth ? '16px' : '25px',
+              color: theme.pageTextPositive,
+            }}
+          >
             {t('all transactions')}
           </Text>
         ) : (
@@ -647,7 +954,13 @@ function SumWithRange({
         )}
       </View>
       <SvgCloseParenthesis width={15} style={{ height: '100%' }} />
-      <View style={{ position: 'absolute', top: -15, right: -55 }}>
+      <View
+        style={{
+          position: 'absolute',
+          top: -15,
+          right: isNarrowWidth ? -42 : -55,
+        }}
+      >
         <FilterButton
           compact={false}
           onApply={filterObject.onApply}
