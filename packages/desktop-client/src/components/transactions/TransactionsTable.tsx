@@ -94,6 +94,7 @@ import {
   CustomCell,
   DeleteCell,
   Field,
+  HeaderContext,
   InputCell,
   Row,
   SelectCell,
@@ -110,6 +111,7 @@ import {
   SchedulesProvider,
   useCachedSchedules,
 } from '#hooks/useCachedSchedules';
+import { ColumnWidthsProvider } from '#hooks/useColumnWidths';
 import { DisplayPayeeProvider, useDisplayPayee } from '#hooks/useDisplayPayee';
 import {
   DropHighlight,
@@ -160,6 +162,20 @@ import type {
 } from './table/utils';
 import { useTransactionRowContextActions } from './useTransactionRowContextActions';
 
+// Default widths for the transaction table columns. Flex columns reflow to
+// fill the available space; fixed columns keep their pixel width.
+const TRANSACTION_TABLE_COLUMN_WIDTHS: Record<string, number | 'flex'> = {
+  date: 110,
+  account: 'flex',
+  payee: 'flex',
+  notes: 'flex',
+  group: 'flex',
+  category: 'flex',
+  payment: 100,
+  deposit: 100,
+  balance: 103,
+};
+
 type TransactionHeaderProps = {
   hasSelected: boolean;
   columns: TransactionTableColumnId[];
@@ -204,62 +220,53 @@ const TransactionHeader = memo(
     > = {
       date: {
         value: columnLabels.date,
-        width: 110,
         alignItems: 'flex',
         marginLeft: -5,
         sortDirection: 'desc',
       },
       account: {
         value: columnLabels.account,
-        width: 'flex',
         alignItems: 'flex',
         marginLeft: -5,
         sortDirection: 'asc',
       },
       payee: {
         value: columnLabels.payee,
-        width: 'flex',
         alignItems: 'flex',
         marginLeft: -5,
         sortDirection: 'asc',
       },
       notes: {
         value: columnLabels.notes,
-        width: 'flex',
         alignItems: 'flex',
         marginLeft: -5,
         sortDirection: 'asc',
       },
       group: {
         value: t('Group'),
-        width: 'flex',
         alignItems: 'flex',
         marginLeft: -5,
       },
       category: {
         value: columnLabels.category,
-        width: 'flex',
         alignItems: 'flex',
         marginLeft: -5,
         sortDirection: 'asc',
       },
       payment: {
         value: columnLabels.payment,
-        width: 100,
         alignItems: 'flex-end',
         marginRight: -5,
         sortDirection: 'asc',
       },
       deposit: {
         value: columnLabels.deposit,
-        width: 100,
         alignItems: 'flex-end',
         marginRight: -5,
         sortDirection: 'desc',
       },
       balance: {
         value: t('Balance'),
-        width: 103,
         alignItems: 'flex-end',
         marginRight: -5,
       },
@@ -268,78 +275,89 @@ const TransactionHeader = memo(
         width: 38,
         alignItems: 'center',
         tooltip: <ClearedColumnLegend />,
+        resizable: false,
         sortDirection: 'asc',
       },
     };
 
+    // TransactionHeader renders its own header row rather than through
+    // TableHeader, so it provides the header context itself
     return (
-      <Row
-        style={{
-          fontWeight: 300,
-          zIndex: 200,
-          color: theme.tableHeaderText,
-          backgroundColor: theme.tableHeaderBackground,
-          paddingRight: `${5 + (scrollWidth ?? 0)}px`,
-          borderTopWidth: 1,
-          borderBottomWidth: 1,
-          borderColor: theme.tableBorder,
-        }}
-        data-testid="transaction-table-header"
-      >
-        {showSelection && (
-          <SelectCell
-            exposed
-            focused={false}
-            selected={hasSelected}
-            width={20}
-            style={{
-              borderTopWidth: 0,
-              borderBottomWidth: 0,
-            }}
-            icon={<SvgSubtract width={6} height={6} />}
-            onSelect={(e: KeyboardEvent<HTMLDivElement>) =>
-              dispatchSelected({
-                type: 'select-all',
-                isRangeSelect: e.shiftKey,
-              })
-            }
-          />
-        )}
-        {!showSelection && (
-          <Field
-            style={{
-              width: '20px',
-              border: 0,
-            }}
-          />
-        )}
-        {columns.map(columnId => {
-          const { sortDirection, ...cellProps } = headerConfig[columnId];
-          return (
-            <HeaderCell
-              key={columnId}
-              id={columnId}
-              {...cellProps}
-              icon={
-                sortDirection
-                  ? field === columnId
-                    ? ascDesc
-                    : 'clickable'
-                  : undefined
-              }
-              onClick={
-                sortDirection
-                  ? () =>
-                      onSort(
-                        columnId,
-                        selectAscDesc(field, ascDesc, columnId, sortDirection),
-                      )
-                  : undefined
+      <HeaderContext.Provider value={{ isHeader: true }}>
+        <Row
+          style={{
+            fontWeight: 300,
+            zIndex: 200,
+            color: theme.tableHeaderText,
+            backgroundColor: theme.tableHeaderBackground,
+            paddingRight: `${5 + (scrollWidth ?? 0)}px`,
+            borderTopWidth: 1,
+            borderBottomWidth: 1,
+            borderColor: theme.tableBorder,
+          }}
+          data-testid="transaction-table-header"
+        >
+          {showSelection && (
+            <SelectCell
+              exposed
+              focused={false}
+              selected={hasSelected}
+              resizable={false}
+              width={20}
+              style={{
+                borderTopWidth: 0,
+                borderBottomWidth: 0,
+              }}
+              icon={<SvgSubtract width={6} height={6} />}
+              onSelect={(e: KeyboardEvent<HTMLDivElement>) =>
+                dispatchSelected({
+                  type: 'select-all',
+                  isRangeSelect: e.shiftKey,
+                })
               }
             />
-          );
-        })}
-      </Row>
+          )}
+          {!showSelection && (
+            <Field
+              style={{
+                width: '20px',
+                border: 0,
+              }}
+            />
+          )}
+          {columns.map(columnId => {
+            const { sortDirection, ...cellProps } = headerConfig[columnId];
+            return (
+              <HeaderCell
+                key={columnId}
+                id={columnId}
+                {...cellProps}
+                icon={
+                  sortDirection
+                    ? field === columnId
+                      ? ascDesc
+                      : 'clickable'
+                    : undefined
+                }
+                onClick={
+                  sortDirection
+                    ? () =>
+                        onSort(
+                          columnId,
+                          selectAscDesc(
+                            field,
+                            ascDesc,
+                            columnId,
+                            sortDirection,
+                          ),
+                        )
+                    : undefined
+                }
+              />
+            );
+          })}
+        </Row>
+      </HeaderContext.Provider>
     );
   },
 );
@@ -498,6 +516,7 @@ type HeaderCellProps = {
   icon?: 'asc' | 'desc' | 'clickable';
   tooltip?: ReactNode;
   onClick?: () => void;
+  resizable?: boolean;
 } & Pick<CSSProperties, 'width' | 'alignItems' | 'marginLeft' | 'marginRight'>;
 
 function HeaderCell({
@@ -510,6 +529,7 @@ function HeaderCell({
   icon,
   tooltip,
   onClick,
+  resizable = true,
 }: HeaderCellProps) {
   const style = {
     whiteSpace: 'nowrap' as CSSProperties['whiteSpace'],
@@ -525,6 +545,7 @@ function HeaderCell({
     <CustomCell
       width={width}
       name={id}
+      resizable={resizable}
       alignItems={alignItems}
       value={value}
       style={{
@@ -1907,6 +1928,7 @@ const Transaction = memo(function Transaction({
             type="input"
             width={100}
             name="debit"
+            columnName="payment"
             exposed={focusedField === 'debit'}
             focused={focusedField === 'debit'}
             value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
@@ -1942,6 +1964,7 @@ const Transaction = memo(function Transaction({
             type="input"
             width={100}
             name="credit"
+            columnName="deposit"
             exposed={focusedField === 'credit'}
             focused={focusedField === 'credit'}
             value={credit}
@@ -2759,100 +2782,105 @@ function TransactionTableInner({
   };
 
   return (
-    <View
-      innerRef={containerRef}
-      style={{
-        flex: 1,
-        cursor: 'default',
-        ...props.style,
-      }}
+    <ColumnWidthsProvider
+      tableId="transactions"
+      defaultWidths={TRANSACTION_TABLE_COLUMN_WIDTHS}
     >
-      <View>
-        <TransactionHeader
-          hasSelected={props.selectedItems.size > 0}
-          columns={props.columns}
-          scrollWidth={scrollWidth}
-          onSort={props.onSort}
-          ascDesc={props.ascDesc}
-          field={props.sortField}
-          showSelection={props.showSelection}
-        />
-
-        {props.isAdding && (
-          <View
-            {...newNavigator.getNavigatorProps({
-              onKeyDown: (e: KeyboardEvent) => props.onCheckNewEnter(e),
-            })}
-          >
-            <NewTransaction
-              transactions={props.newTransactions}
-              transferAccountsByTransaction={
-                props.transferAccountsByTransaction
-              }
-              editingTransaction={newNavigator.editingId}
-              focusedField={newNavigator.focusedField}
-              accounts={props.accounts}
-              categoryGroups={props.categoryGroups}
-              payees={props.payees || []}
-              columns={props.columns}
-              dateFormat={dateFormat}
-              hideFraction={props.hideFraction}
-              onClose={props.onCloseAddTransaction}
-              onAdd={props.onAddTemporary}
-              onAddAndClose={props.onAddAndCloseTemporary}
-              onAddSplit={props.onAddSplit}
-              onToggleSplit={props.onToggleSplit}
-              onSplit={props.onSplit}
-              onEdit={newNavigator.onEdit}
-              onSave={props.onSave}
-              onDelete={props.onDelete}
-              onManagePayees={props.onManagePayees}
-              onCreatePayee={props.onCreatePayee}
-              onNavigateToTransferAccount={onNavigateToTransferAccount}
-              onNavigateToSchedule={onNavigateToSchedule}
-              onNotesTagClick={onNotesTagClick}
-              onDistributeRemainder={props.onDistributeRemainder}
-              showHiddenCategories={showHiddenCategories}
-            />
-          </View>
-        )}
-      </View>
-      {/*// * On Windows, makes the scrollbar always appear
-         //   the full height of the container ??? */}
-
       <View
-        style={{ flex: 1, overflow: 'hidden' }}
-        data-testid="transaction-table"
+        innerRef={containerRef}
+        style={{
+          flex: 1,
+          cursor: 'default',
+          ...props.style,
+        }}
       >
-        <Table
-          navigator={tableNavigator}
-          ref={tableRef}
-          listContainerRef={listContainerRef}
-          items={transactionsToRender}
-          renderItem={renderRow}
-          renderEmpty={renderEmpty}
-          loadMore={props.loadMoreTransactions}
-          isSelected={id => props.selectedItems.has(id)}
-          onKeyDown={e => props.onCheckEnter(e)}
-          saveScrollWidth={saveScrollWidth}
-        />
-
-        {props.isAdding && (
-          <div
-            key="shadow"
-            style={{
-              position: 'absolute',
-              top: -20,
-              left: 0,
-              right: 0,
-              height: 20,
-              backgroundColor: theme.errorText,
-              boxShadow: '0 0 6px rgba(0, 0, 0, .20)',
-            }}
+        <View>
+          <TransactionHeader
+            hasSelected={props.selectedItems.size > 0}
+            columns={props.columns}
+            scrollWidth={scrollWidth}
+            onSort={props.onSort}
+            ascDesc={props.ascDesc}
+            field={props.sortField}
+            showSelection={props.showSelection}
           />
-        )}
+
+          {props.isAdding && (
+            <View
+              {...newNavigator.getNavigatorProps({
+                onKeyDown: (e: KeyboardEvent) => props.onCheckNewEnter(e),
+              })}
+            >
+              <NewTransaction
+                transactions={props.newTransactions}
+                transferAccountsByTransaction={
+                  props.transferAccountsByTransaction
+                }
+                editingTransaction={newNavigator.editingId}
+                focusedField={newNavigator.focusedField}
+                accounts={props.accounts}
+                categoryGroups={props.categoryGroups}
+                payees={props.payees || []}
+                columns={props.columns}
+                dateFormat={dateFormat}
+                hideFraction={props.hideFraction}
+                onClose={props.onCloseAddTransaction}
+                onAdd={props.onAddTemporary}
+                onAddAndClose={props.onAddAndCloseTemporary}
+                onAddSplit={props.onAddSplit}
+                onToggleSplit={props.onToggleSplit}
+                onSplit={props.onSplit}
+                onEdit={newNavigator.onEdit}
+                onSave={props.onSave}
+                onDelete={props.onDelete}
+                onManagePayees={props.onManagePayees}
+                onCreatePayee={props.onCreatePayee}
+                onNavigateToTransferAccount={onNavigateToTransferAccount}
+                onNavigateToSchedule={onNavigateToSchedule}
+                onNotesTagClick={onNotesTagClick}
+                onDistributeRemainder={props.onDistributeRemainder}
+                showHiddenCategories={showHiddenCategories}
+              />
+            </View>
+          )}
+        </View>
+        {/*// * On Windows, makes the scrollbar always appear
+           //   the full height of the container ??? */}
+
+        <View
+          style={{ flex: 1, overflow: 'hidden' }}
+          data-testid="transaction-table"
+        >
+          <Table
+            navigator={tableNavigator}
+            ref={tableRef}
+            listContainerRef={listContainerRef}
+            items={transactionsToRender}
+            renderItem={renderRow}
+            renderEmpty={renderEmpty}
+            loadMore={props.loadMoreTransactions}
+            isSelected={id => props.selectedItems.has(id)}
+            onKeyDown={e => props.onCheckEnter(e)}
+            saveScrollWidth={saveScrollWidth}
+          />
+
+          {props.isAdding && (
+            <div
+              key="shadow"
+              style={{
+                position: 'absolute',
+                top: -20,
+                left: 0,
+                right: 0,
+                height: 20,
+                backgroundColor: theme.errorText,
+                boxShadow: '0 0 6px rgba(0, 0, 0, .20)',
+              }}
+            />
+          )}
+        </View>
       </View>
-    </View>
+    </ColumnWidthsProvider>
   );
 }
 
@@ -2981,6 +3009,7 @@ export const TransactionTable = forwardRef(
         showCleared,
       ],
     );
+
     const [prevIsAdding, setPrevIsAdding] = useState(false);
     const splitsExpanded = useSplitsExpanded();
     const splitsExpandedDispatch = splitsExpanded.dispatch;

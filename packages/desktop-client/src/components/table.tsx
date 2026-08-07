@@ -1,7 +1,9 @@
 // @ts-strict-ignore
 import React, {
+  createContext,
   forwardRef,
   useCallback,
+  useContext,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
@@ -35,6 +37,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { useColumnWidthsContext } from '#hooks/useColumnWidths';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
 import { useMergedRefs } from '#hooks/useMergedRefs';
@@ -52,6 +55,7 @@ import type {
   Spreadsheets,
 } from '#spreadsheet';
 
+import { ColumnResizeHandle } from './ColumnResizeHandle';
 import { FixedSizeList } from './FixedSizeList';
 import {
   ConditionalPrivacyFilter,
@@ -59,6 +63,8 @@ import {
 } from './PrivacyFilter';
 
 export const ROW_HEIGHT = 32;
+
+export const HeaderContext = createContext({ isHeader: false });
 
 function fireBlur(onBlur, e) {
   if (document.hasFocus()) {
@@ -75,19 +81,76 @@ function fireBlur(onBlur, e) {
 type FieldProps = ComponentProps<typeof View> & {
   width?: CSSProperties['width'];
   name?: string;
+  columnName?: string;
+  resizable?: boolean;
   truncate?: boolean;
   contentStyle?: CSSProperties;
 };
+
+// A column governed by the column-widths context uses either a fixed pixel
+// width (via the container's --col-* custom property, which stays in sync
+// during drags) or flexes to fill the remaining space
+function getWidthStyle(
+  width: CSSProperties['width'] | undefined,
+  ctxWidth: number | 'flex' | undefined,
+  columnName?: string,
+): CSSProperties {
+  if (ctxWidth !== undefined) {
+    // Flex columns have a minimum width so a very wide neighbor cannot
+    // collapse them
+    return ctxWidth === 'flex'
+      ? { flex: 1, flexBasis: 0, minWidth: 50 }
+      : { width: `var(--col-${columnName}-width)` };
+  }
+  return width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
+}
+
+// Resolves the effective column name, the width style, and whether the
+// column is governed by a column-widths provider (in which case the field
+// also needs position/attributes for the resize handle)
+function useColumnWidthStyle(
+  width: CSSProperties['width'] | undefined,
+  name: string | undefined,
+  columnName: string | undefined,
+) {
+  const columnWidthsCtx = useColumnWidthsContext();
+  const effectiveColumnName = columnName || name;
+  const ctxWidth =
+    columnWidthsCtx && effectiveColumnName
+      ? columnWidthsCtx.widths[effectiveColumnName]
+      : undefined;
+  return {
+    widthStyle: getWidthStyle(width, ctxWidth, effectiveColumnName),
+    effectiveColumnName,
+    hasResizeContext: !!(columnWidthsCtx && effectiveColumnName),
+  };
+}
+
 export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
-  { width, name, truncate = true, children, style, contentStyle, ...props },
+  {
+    width,
+    name,
+    columnName,
+    resizable = true,
+    truncate = true,
+    children,
+    style,
+    contentStyle,
+    ...props
+  },
   ref,
 ) {
+  const { widthStyle, effectiveColumnName, hasResizeContext } =
+    useColumnWidthStyle(width, name, columnName);
+  const { isHeader } = useContext(HeaderContext);
+
   return (
     <View
       innerRef={ref}
       {...props}
       style={{
-        ...(width === 'flex' ? { flex: 1, flexBasis: 0 } : { width }),
+        ...widthStyle,
+        ...(hasResizeContext && { position: 'relative' }),
         borderTopWidth: 1,
         borderBottomWidth: 1,
         borderColor: theme.tableBorder,
@@ -95,6 +158,7 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
         ...style,
       }}
       data-testid={name}
+      {...(hasResizeContext && { 'data-column': effectiveColumnName })}
     >
       {/* This is wrapped so that the padding is not taken into
           account with the flex width (which aligns it with the Cell
@@ -121,6 +185,9 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
           children
         )}
       </View>
+      {isHeader && resizable && hasResizeContext && (
+        <ColumnResizeHandle columnName={effectiveColumnName} />
+      )}
     </View>
   );
 });
@@ -164,6 +231,8 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   privacyFilter?: ComponentProps<
     typeof ConditionalPrivacyFilter
   >['privacyFilter'];
+  columnName?: string;
+  resizable?: boolean;
 };
 export function Cell({
   width,
@@ -181,17 +250,20 @@ export function Cell({
   valueStyle,
   unexposedContent,
   privacyFilter,
+  columnName,
+  resizable = true,
   ...viewProps
 }: CellProps) {
   const mouseCoords = useRef(null);
   const viewRef = useRef(null);
+  const { isHeader } = useContext(HeaderContext);
 
   useProperFocus(viewRef, focused !== undefined ? focused : exposed);
 
-  const widthStyle: CSSProperties =
-    width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
+  const { widthStyle, effectiveColumnName, hasResizeContext } =
+    useColumnWidthStyle(width, name, columnName);
   const cellStyle: CSSProperties = {
-    position: 'relative',
+    ...(hasResizeContext && { position: 'relative' }),
     textAlign: textAlign || 'left',
     justifyContent: 'center',
     borderTopWidth: 1,
@@ -276,8 +348,12 @@ export function Cell({
       {...viewProps}
       innerRef={mergedRef}
       data-testid={name}
+      {...(hasResizeContext && { 'data-column': effectiveColumnName })}
     >
       {conditionalPrivacyFilter}
+      {isHeader && resizable && hasResizeContext && (
+        <ColumnResizeHandle columnName={effectiveColumnName} />
+      )}
     </View>
   );
 }
@@ -801,31 +877,33 @@ export function TableHeader({
         flexShrink: 0,
       }}
     >
-      <Row
-        collapsed
-        {...rowProps}
-        style={{
-          color: theme.tableHeaderText,
-          backgroundColor: theme.tableHeaderBackground,
-          zIndex: 200,
-          fontWeight: 500,
-          ...rowProps.style,
-        }}
-      >
-        {headers
-          ? headers.map(header => {
-              return (
-                <Cell
-                  key={header.name}
-                  value={header.name}
-                  width={header.width}
-                  style={header.style}
-                  valueStyle={header.valueStyle}
-                />
-              );
-            })
-          : children}
-      </Row>
+      <HeaderContext.Provider value={{ isHeader: true }}>
+        <Row
+          collapsed
+          {...rowProps}
+          style={{
+            color: theme.tableHeaderText,
+            backgroundColor: theme.tableHeaderBackground,
+            zIndex: 200,
+            fontWeight: 500,
+            ...rowProps.style,
+          }}
+        >
+          {headers
+            ? headers.map(header => {
+                return (
+                  <Cell
+                    key={header.name}
+                    value={header.name}
+                    width={header.width}
+                    style={header.style}
+                    valueStyle={header.valueStyle}
+                  />
+                );
+              })
+            : children}
+        </Row>
+      </HeaderContext.Provider>
     </View>
   );
 }

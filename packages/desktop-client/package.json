@@ -85,6 +85,7 @@
     "#components/util/localeToCountry": "./src/components/util/localeToCountry.ts",
     "#components/*": "./src/components/*.tsx",
     "#hooks/useCachedSchedules": "./src/hooks/useCachedSchedules.tsx",
+    "#hooks/useColumnWidths": "./src/hooks/useColumnWidths.tsx",
     "#hooks/useDisplayPayee": "./src/hooks/useDisplayPayee.tsx",
     "#hooks/useDragDrop": "./src/hooks/useDragDrop.tsx",
     "#hooks/useProperFocus": "./src/hooks/useProperFocus.tsx",
