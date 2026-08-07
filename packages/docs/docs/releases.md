@@ -2,7 +2,7 @@
 
 ## 26.8.1
 
-Release date: 2026-08-08
+Release date: 2026-08-07
 
 This hotfix resolves some performance issues reported in 26.8.0 as well as some other minor bugs
 
