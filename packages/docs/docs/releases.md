@@ -4,7 +4,7 @@
 
 Release date: 2026-08-08
 
-- TODO: Add release highlights
+This hotfix resolves some performance issues reported in 26.8.0 as well as some other minor bugs
 
 **Docker Tag: 26.8.1**
 
