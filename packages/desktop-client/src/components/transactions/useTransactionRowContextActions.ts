@@ -64,6 +64,9 @@ export function useTransactionRowContextActions({
   }, [selectedIds]);
 
   const scheduleQuery = useMemo(() => {
+    if (scheduleIds.length === 0) {
+      return undefined;
+    }
     return q('schedules')
       .filter({ id: { $oneof: scheduleIds } })
       .select('*');
