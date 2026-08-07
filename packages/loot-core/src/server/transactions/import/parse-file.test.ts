@@ -234,4 +234,49 @@ describe('File import', () => {
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
   });
+
+  test('MT940 import works', async () => {
+    await prefs.loadPrefs();
+    await db.insertAccount({ id: 'one', name: 'one' });
+
+    const { errors } = await importFileWithRealTime(
+      'one',
+      __dirname + '/../../../mocks/files/data.mt940',
+      null,
+      { importNotes: true },
+    );
+    expect(errors).toHaveLength(0);
+
+    const transactions = await getTransactions('one');
+    expect(transactions).toHaveLength(6);
+    expect(transactions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          amount: -4250,
+          date: 20250801,
+          financial_id: 'BANKREF001',
+          imported_description: "Boulangerie L'Étoile",
+          notes: 'Facture 2025-0042',
+        }),
+        expect.objectContaining({
+          amount: 120000,
+          date: 20250802,
+          financial_id: 'BANKREF002',
+          imported_description: 'Employeur Acme SARL',
+          notes: 'Salaire août 2025',
+        }),
+        expect.objectContaining({
+          amount: -8999,
+          date: 20250803,
+          financial_id: 'BANKREF003',
+          imported_description: 'MÜLLER GMBH',
+          notes: 'Rechnung 4711 SEPA ÜBERWEISUNG',
+        }),
+        expect.objectContaining({
+          financial_id: 'BANKREF005',
+          notes: 'Virement en ligne',
+        }),
+      ]),
+    );
+  });
 });

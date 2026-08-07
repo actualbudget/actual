@@ -624,7 +624,7 @@ class AccountInternal extends PureComponent<
         filters: [
           {
             name: t('Financial files'),
-            extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
+            extensions: ['qif', 'ofx', 'qfx', 'mt940', 'csv', 'tsv', 'xml'],
           },
         ],
       });
