@@ -152,11 +152,12 @@ function getBudgetTourSteps({ navigate, budgetType }: TourStepDeps): Step[] {
       id: 'month-picker',
       target: '[data-testid="selected-budget-month"]',
       placement: 'bottom',
-      title: <Trans>One Month at a Time</Trans>,
+      title: <Trans>Month by Month</Trans>,
       content: (
         <Trans>
-          You budget one month at a time. Use the month picker to review earlier
-          months or to plan ahead.
+          Every month gets its own budget. Use the month picker to move between
+          months, and the calendar icons on the left to choose how many months
+          are shown side by side.
         </Trans>
       ),
     },
