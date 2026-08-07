@@ -40,6 +40,20 @@ export function FilterExpression<T extends RuleConditionEntity>({
   onDelete,
 }: FilterExpressionProps<T>) {
   const { t } = useTranslation();
+  
+  useEffect(() => {
+    const handleCloseOuterPopovers = () => {
+      setEditing(false);
+    };
+    document.addEventListener('close-outer-popovers', handleCloseOuterPopovers);
+    return () => {
+      document.removeEventListener(
+        'close-outer-popovers',
+        handleCloseOuterPopovers,
+      );
+    };
+  }, []);
+
   const [editing, setEditing] = useState(false);
   const triggerRef = useRef(null);
 
