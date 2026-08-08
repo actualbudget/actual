@@ -56,6 +56,8 @@ jobs:
           yarn workspace @actual-app/core pack --filename @actual-app/core.tgz
 
       - name: Build Server & Web
+        env:
+          COMMIT_REF: ${{ github.event_name != 'push' && github.sha || '' }}
         run: yarn build:server
 
       - name: Pack the web and server packages
