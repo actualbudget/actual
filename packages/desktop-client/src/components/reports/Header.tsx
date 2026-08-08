@@ -19,7 +19,7 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
-import { getFirstDayOfWeek } from '#components/select/DateSelect';
+import { getFirstDayOfWeek } from '#components/select/getFirstDayOfWeek';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLanguage } from '#hooks/useLocale';
 

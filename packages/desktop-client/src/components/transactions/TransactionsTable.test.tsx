@@ -148,6 +148,7 @@ type LiveTransactionTableProps = {
   currentAccountId: string | null;
   showAccount: boolean;
   showCategory: boolean;
+  showGroup?: boolean;
   showCleared: boolean;
   isAdding: boolean;
   onTransactionsChange?: (newTrans: TransactionEntity[]) => void;
@@ -496,6 +497,80 @@ describe('Transactions', () => {
     });
   });
 
+  test('preview split transactions show a payee', async () => {
+    schedules = [
+      {
+        id: 'schedule-1',
+        name: 'Monthly rent',
+        rule: 'rule-1',
+        next_date: '2017-01-01',
+        completed: false,
+        posts_transaction: false,
+        tombstone: false,
+        _payee: 'alice-id',
+        _account: accounts[0].id,
+        _amount: -1000,
+        _amountOp: 'is',
+        _date: '2017-01-01',
+        _conditions: [],
+        _actions: [],
+      },
+    ];
+
+    const previewParentId = 'preview/schedule-1/2017-01-01';
+    const previewParent: TransactionEntity = {
+      id: previewParentId,
+      account: accounts[0].id,
+      amount: -1000,
+      date: '2017-01-01',
+      payee: null,
+      is_parent: true,
+      schedule: 'schedule-1',
+      cleared: false,
+      reconciled: false,
+    };
+    const previewChildren: TransactionEntity[] = [
+      {
+        id: 'preview/schedule-1-child-1',
+        account: accounts[0].id,
+        amount: -600,
+        date: '2017-01-01',
+        payee: 'alice-id',
+        is_child: true,
+        parent_id: previewParentId,
+        schedule: 'schedule-1',
+        cleared: false,
+        reconciled: false,
+      },
+      {
+        id: 'preview/schedule-1-child-2',
+        account: accounts[0].id,
+        amount: -400,
+        date: '2017-01-01',
+        payee: 'alice-id',
+        is_child: true,
+        parent_id: previewParentId,
+        schedule: 'schedule-1',
+        cleared: false,
+        reconciled: false,
+      },
+    ];
+
+    const { container } = renderTransactions({
+      transactions: [previewParent, ...previewChildren],
+      isAdding: false,
+    });
+
+    // The preview parent row should show the same computed payee a real,
+    // persisted split transaction would show (most common child payee),
+    // instead of being blank.
+    await waitFor(() => {
+      expect(queryField(container, 'payee', '', 0).textContent).toContain(
+        'Alice',
+      );
+    });
+  });
+
   test('transactions table shows the correct data', () => {
     const { container, getTransactions } = renderTransactions();
 
@@ -531,6 +606,56 @@ describe('Transactions', () => {
           integerToCurrency(transaction.amount),
         );
       }
+    });
+  });
+
+  describe('Group column', () => {
+    test('group column is hidden by default', () => {
+      const { container } = renderTransactions();
+      expect(
+        container.querySelector('[data-testid="group"]'),
+      ).not.toBeInTheDocument();
+    });
+
+    test('group column header renders when showGroup is true', () => {
+      const { container } = renderTransactions({ showGroup: true });
+      expect(
+        container.querySelector(
+          '[data-testid="transaction-table"] [data-testid="group"]',
+        ),
+      ).toBeInTheDocument();
+    });
+
+    test('group cell shows the correct group name', () => {
+      const { container } = renderTransactions({ showGroup: true });
+
+      // Transaction 0 has no category — group cell should be empty
+      expect(queryField(container, 'group', 'div', 0).textContent).toBe('');
+
+      // Transaction 1 has category "General" in group "Usual Expenses"
+      expect(queryField(container, 'group', 'div', 1).textContent).toBe(
+        'Usual Expenses',
+      );
+
+      // Transaction 2 has category "Food" in group "Usual Expenses"
+      expect(queryField(container, 'group', 'div', 2).textContent).toBe(
+        'Usual Expenses',
+      );
+    });
+
+    test('group column renders for child transactions as well', () => {
+      const transactions = generateTransactions(3, [1]);
+      transactions[0].amount = -1000;
+
+      const { container } = renderTransactions({
+        showGroup: true,
+        transactions,
+      });
+
+      const children = container.querySelectorAll(
+        '[data-testid="transaction-table"] [data-testid="group"]',
+      );
+      expect(children.length).toBe(5);
     });
   });
 

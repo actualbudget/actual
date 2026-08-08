@@ -42,6 +42,7 @@ export const currencies: Currency[] = [
   { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'HUF', name: 'Hungarian Forint', symbol: 'Ft', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
+  { code: 'ILS', name: 'Israeli New Shekel', symbol: '₪', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'INR', name: 'Indian Rupee', symbol: '₹', decimalPlaces: 2, numberFormat: 'comma-dot-in', symbolFirst: true },
   { code: 'IRR', name: 'Iranian Rial', symbol: '﷼', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: false },
   { code: 'JMD', name: 'Jamaican Dollar', symbol: 'J$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
@@ -66,6 +67,7 @@ export const currencies: Currency[] = [
   { code: 'TWD', name: 'New Taiwan Dollar', symbol: 'NT$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'UAH', name: 'Ukrainian Hryvnia', symbol: '₴', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'USD', name: 'US Dollar', symbol: '$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'UYU', name: 'Uruguayan Peso', symbol: '$U', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'UZS', name: 'Uzbek Soum', symbol: 'UZS', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
 ];
 
