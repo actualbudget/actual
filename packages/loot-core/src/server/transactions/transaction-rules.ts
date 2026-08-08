@@ -988,6 +988,7 @@ export type TransactionForRules = TransactionEntity & {
   _account?: db.DbAccount;
   balance?: number;
   _category_name?: string;
+  category_group?: string;
   _account_name?: string;
   parent_amount?: number;
   /** Prefetched cent balances for BALANCE_OF("…") in rule formulas; cleared in finalize */
@@ -1095,6 +1096,7 @@ export async function prepareTransactionForRules(
     const category = await getCategory(trans.category);
     if (category) {
       r._category_name = category.name;
+      r.category_group = category.cat_group;
     }
   }
 
@@ -1134,6 +1136,10 @@ export async function finalizeTransactionForRules(
 
   if ('_balanceOfPrefetched' in trans) {
     delete trans._balanceOfPrefetched;
+  }
+
+  if ('category_group' in trans) {
+    delete trans.category_group;
   }
 
   if ('parent_amount' in trans) {

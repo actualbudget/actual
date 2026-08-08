@@ -404,6 +404,32 @@ describe('Transaction rules', () => {
     });
   });
 
+  test('runRules matches category group conditions', async () => {
+    await loadRules();
+    const categoryGroupId = await db.insertCategoryGroup({ name: 'general' });
+    const categoryId = await db.insertCategory({
+      name: 'food',
+      cat_group: categoryGroupId,
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'is', field: 'category_group', value: categoryGroupId },
+      ],
+      actions: [{ op: 'set', field: 'notes', value: 'matched' }],
+    });
+
+    const transaction = await runRules({
+      category: categoryId,
+      notes: '',
+    });
+
+    expect(transaction.notes).toBe('matched');
+    expect(transaction).not.toHaveProperty('category_group');
+  });
+
   test('transactions can be queried by rule', async () => {
     await loadRules();
     const account = await db.insertAccount({ name: 'bank' });
