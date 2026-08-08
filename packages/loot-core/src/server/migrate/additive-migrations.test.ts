@@ -67,17 +67,19 @@ describe('migrations are additive-only', () => {
 
     const violations: string[] = [];
     for (const name of await getMigrationList(MIGRATIONS_DIR)) {
+      if (getMigrationId(name) <= ADDITIVE_ONLY_CUTOFF) {
+        await applyMigration(db, name, MIGRATIONS_DIR);
+        continue;
+      }
       const before = snapshotSchema(db);
       await applyMigration(db, name, MIGRATIONS_DIR);
-      if (getMigrationId(name) > ADDITIVE_ONLY_CUTOFF) {
-        violations.push(
-          ...findAdditiveViolations(
-            before,
-            snapshotSchema(db),
-            NON_SYNCED_TABLES,
-          ).map(violation => `${name}: ${violation}`),
-        );
-      }
+      violations.push(
+        ...findAdditiveViolations(
+          before,
+          snapshotSchema(db),
+          NON_SYNCED_TABLES,
+        ).map(violation => `${name}: ${violation}`),
+      );
     }
     sqlite.closeDatabase(db);
 
@@ -300,6 +302,11 @@ describe('migrations are additive-only', () => {
          (id TEXT PRIMARY KEY, a TEXT CHECK(a <> ')' AND a <> 'x'));
        DROP TABLE foo;
        ALTER TABLE foo_new RENAME TO foo;`,
+    ],
+    [
+      'adding a column whose quoted DEFAULT contains CHECK(...)',
+      TABLE_FOO,
+      "ALTER TABLE foo ADD COLUMN c TEXT DEFAULT 'CHECK(c > 0)';",
     ],
     [
       'rebuilding a table replacing an explicit DEFAULT NULL with no DEFAULT',

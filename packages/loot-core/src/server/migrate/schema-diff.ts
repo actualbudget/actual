@@ -28,53 +28,41 @@ export type TableSnapshot = {
   checks: string[];
 };
 
+// Collapses whitespace so formatting differences in SQL text don't
+// register as changes
+function normalizeSql(sql: string): string {
+  return sql.replace(/\s+/g, ' ').trim();
+}
+
+// Quoted literals/identifiers (doubled quotes are escapes) and comments.
+// The input is well-formed SQL from sqlite_master, so unterminated
+// quotes/comments can't occur.
+const NON_CODE =
+  /'(?:[^']|'')*'|"(?:[^"]|"")*"|`(?:[^`]|``)*`|\[[^\]]*\]|--[^\n]*|\/\*[\s\S]*?\*\//g;
+
 // Extracts each CHECK(...) expression by scanning to the balanced close
 // paren, normalized (whitespace collapsed, lowercased) so formatting
-// differences don't register as changes. Parens inside quoted
-// literals/identifiers and comments don't count toward balancing —
-// truncating there would hide any change made after the quote.
+// differences don't register as changes. The scan runs on a masked copy
+// with literals and comments blanked to spaces (length-preserving, so
+// indexes line up) — a CHECK or paren inside one can't start or end a
+// clause. Clause text is sliced from the original so literal contents
+// survive intact.
 function checkClauses(sql: string): string[] {
+  const masked = sql.replace(NON_CODE, match => ' '.repeat(match.length));
   const clauses: string[] = [];
   const starts = /\bCHECK\s*\(/gi;
   let match;
-  while ((match = starts.exec(sql))) {
+  while ((match = starts.exec(masked))) {
     const start = match.index + match[0].length;
     let i = start;
-    for (let depth = 1; i < sql.length && depth > 0; i++) {
-      const ch = sql[i];
-      if (ch === '(') {
+    for (let depth = 1; i < masked.length && depth > 0; i++) {
+      if (masked[i] === '(') {
         depth++;
-      } else if (ch === ')') {
+      } else if (masked[i] === ')') {
         depth--;
-      } else if (ch === "'" || ch === '"' || ch === '`') {
-        // Skip to the closing quote; a doubled quote is an escape
-        for (i++; i < sql.length; i++) {
-          if (sql[i] === ch) {
-            if (sql[i + 1] === ch) {
-              i++;
-            } else {
-              break;
-            }
-          }
-        }
-      } else if (ch === '[') {
-        const end = sql.indexOf(']', i + 1);
-        i = end < 0 ? sql.length : end;
-      } else if (ch === '-' && sql[i + 1] === '-') {
-        const end = sql.indexOf('\n', i);
-        i = end < 0 ? sql.length : end;
-      } else if (ch === '/' && sql[i + 1] === '*') {
-        const end = sql.indexOf('*/', i + 2);
-        i = end < 0 ? sql.length : end + 1;
       }
     }
-    clauses.push(
-      sql
-        .slice(start, i - 1)
-        .replace(/\s+/g, ' ')
-        .trim()
-        .toLowerCase(),
-    );
+    clauses.push(normalizeSql(sql.slice(start, i - 1)).toLowerCase());
   }
   return clauses.sort();
 }
@@ -105,7 +93,9 @@ export function snapshotSchema(db: Database): SchemaSnapshot {
             // explicit `DEFAULT NULL` comes back as the string "NULL",
             // which is not a usable default for a NOT NULL column
             const rawDefault =
-              column.dflt_value?.replace(/\s+/g, ' ').trim() ?? null;
+              column.dflt_value == null
+                ? null
+                : normalizeSql(column.dflt_value);
             const defaultValue =
               rawDefault?.toUpperCase() === 'NULL' ? null : rawDefault;
             return [
@@ -117,7 +107,7 @@ export function snapshotSchema(db: Database): SchemaSnapshot {
                   column.pk === 0,
                 notNull: column.notnull !== 0,
                 pk: column.pk !== 0,
-                type: column.type.replace(/\s+/g, ' ').trim().toLowerCase(),
+                type: normalizeSql(column.type).toLowerCase(),
                 defaultValue,
               },
             ];
@@ -192,44 +182,26 @@ export function findAdditiveViolations(
 
     for (const [name, column] of afterColumns) {
       const prev = beforeTable?.columns.get(name);
-      if (!prev && column.required) {
-        violations.push(
-          `new column "${table}.${name}" is NOT NULL without a DEFAULT`,
-        );
+      if (!prev) {
+        if (column.required) {
+          violations.push(
+            `new column "${table}.${name}" is NOT NULL without a DEFAULT`,
+          );
+        }
+        continue;
       }
-      // A table rebuild can change an existing column in place; any
-      // NOT NULL change breaks one side (a DEFAULT doesn't save an
-      // explicit NULL write), and changing primary-key membership
-      // breaks sync's addressing by id
-      if (prev && column.notNull !== prev.notNull) {
+      // A table rebuild can change an existing column in place; every
+      // attribute change breaks one side of the version skew: NOT NULL
+      // and type alter what each version accepts or coerces, a
+      // different DEFAULT fills omitted columns with diverging values
+      // (and removing one breaks per-column sync inserts), and
+      // primary-key membership backs sync's addressing by id
+      const changed = (
+        ['notNull', 'pk', 'type', 'defaultValue'] as const
+      ).filter(key => column[key] !== prev[key]);
+      if (changed.length > 0) {
         violations.push(
-          `existing column "${table}.${name}" changed its NOT NULL constraint`,
-        );
-      }
-      if (prev && column.pk !== prev.pk) {
-        violations.push(
-          `existing column "${table}.${name}" changed primary-key membership`,
-        );
-      }
-      // A type change alters affinity/coercion between versions, and a
-      // different DEFAULT makes old and new clients fill omitted
-      // columns with diverging values
-      if (prev && column.type !== prev.type) {
-        violations.push(
-          `existing column "${table}.${name}" changed its declared type`,
-        );
-      }
-      if (prev && column.defaultValue !== prev.defaultValue) {
-        violations.push(
-          `existing column "${table}.${name}" changed its DEFAULT value`,
-        );
-      }
-      // With NOT NULL unchanged, a `required` flip means a DEFAULT was
-      // added or removed on a NOT NULL column — removal breaks inserts
-      // that omit the column, which is every per-column sync insert
-      if (prev && column.required !== prev.required) {
-        violations.push(
-          `existing column "${table}.${name}" changed whether an explicit value is required (NOT NULL/DEFAULT)`,
+          `existing column "${table}.${name}" changed: ${changed.join(', ')}`,
         );
       }
     }
