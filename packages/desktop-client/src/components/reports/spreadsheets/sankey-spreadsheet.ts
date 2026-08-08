@@ -985,13 +985,6 @@ function moveToOther(
         const categoryGroupKey = categoryGroupResult[0];
         otherKey = categoryGroupKey + SpecialNodeKeys.OtherSuffix;
       }
-    } else if (nodeData.type === GraphLayers.IncomePayee) {
-      const incomeCategoryKey = Array.from(
-        graph.get(key)?.to.keys() ?? [],
-      ).find(k => graph.get(k)?.type === GraphLayers.IncomeCategory);
-      if (incomeCategoryKey) {
-        otherKey = incomeCategoryKey + SpecialNodeKeys.OtherSuffix;
-      }
     }
   }
 
