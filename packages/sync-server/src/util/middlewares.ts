@@ -4,6 +4,76 @@ import * as winston from 'winston';
 
 import { validateSession } from './validate-user';
 
+/**
+ * Enforce an API token's budget scope against an already-resolved file id.
+ *
+ * This is the authoritative scope check and must be called from request
+ * handlers once the real file id is known (e.g. decoded from the sync
+ * protobuf body or read from request headers), since middleware that runs
+ * before body parsing cannot reliably see it.
+ *
+ * Returns `true` when the request is allowed to proceed. When the token is
+ * scoped and the file id is outside that scope, it sends a 403 response and
+ * returns `false`; callers must stop processing in that case.
+ */
+const enforceBudgetScope = (res: Response, fileId: unknown): boolean => {
+  // Only enforce for API token auth
+  if (res.locals.auth_method !== 'api_token') {
+    return true;
+  }
+
+  const denyScope = (): boolean => {
+    res.status(403).send({
+      status: 'error',
+      reason: 'token-scope-error',
+      details: 'The API token does not have access to this budget',
+    });
+    return false;
+  };
+
+  const budgetIds = res.locals.budget_ids;
+
+  // Least-privilege: a token with no budget scope (empty/missing) has access
+  // to nothing. Legacy unscoped tokens are therefore denied all file access.
+  if (!budgetIds || budgetIds.length === 0) {
+    return denyScope();
+  }
+
+  // A scoped token must always target a file id; reject when missing.
+  if (typeof fileId !== 'string' || fileId === '') {
+    return denyScope();
+  }
+
+  // Check if the file is in the allowed budget scopes
+  if (budgetIds.includes(fileId)) {
+    return true;
+  }
+
+  // File is not in token's scopes - deny access
+  return denyScope();
+};
+
+/**
+ * Middleware that rejects API token authentication on privileged,
+ * non-data endpoints. API tokens are data-only and must never reach
+ * admin/secrets/bank-sync/auth-management surfaces.
+ */
+const rejectApiTokenMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (res.locals.auth_method === 'api_token') {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden-auth-method',
+      details: 'API tokens cannot access this endpoint',
+    });
+    return;
+  }
+  next();
+};
+
 async function errorMiddleware(
   err: Error,
   req: Request,
@@ -60,4 +130,10 @@ const requestLoggerMiddleware = expressWinston.logger({
   ),
 });
 
-export { validateSessionMiddleware, errorMiddleware, requestLoggerMiddleware };
+export {
+  validateSessionMiddleware,
+  enforceBudgetScope,
+  rejectApiTokenMiddleware,
+  errorMiddleware,
+  requestLoggerMiddleware,
+};
