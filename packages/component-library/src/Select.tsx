@@ -59,8 +59,9 @@ export function Select<const Value = string>({
     .filter(isValueOption)
     .find(option => option[0] === value);
 
-  const triggerRef = useRef(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isNonModal, setIsNonModal] = useState(false);
 
   return (
     <>
@@ -70,6 +71,7 @@ export function Select<const Value = string>({
         variant={bare ? 'bare' : 'normal'}
         isDisabled={disabled}
         onPress={() => {
+          setIsNonModal(Boolean(triggerRef.current?.closest('[data-popover]')));
           setIsOpen(true);
         }}
         style={style}
@@ -111,6 +113,16 @@ export function Select<const Value = string>({
         isOpen={isOpen}
         onOpenChange={() => setIsOpen(false)}
         style={popoverStyle}
+        isNonModal={isNonModal}
+        shouldCloseOnInteractOutside={element => {
+          if (isNonModal) {
+            const outerPopover = triggerRef.current?.closest('[data-popover]');
+            if (outerPopover && !outerPopover.contains(element)) {
+              document.dispatchEvent(new CustomEvent('close-outer-popovers'));
+            }
+          }
+          return true;
+        }}
       >
         <Menu
           onMenuSelect={item => {
