@@ -111,7 +111,8 @@ export function isScheduleOccurrencePosted({
 }
 
 /**
- * Builds a query to check if each schedule already has a matching transaction.
+ * Builds a query to check if each schedule already has a matching transaction
+ * for its current `next_date` occurrence.
  *
  * The date lower-bound varies:
  * - `dateCond.op === 'is'` (one-time or recurring): exact `next_date`, no lookback.
@@ -120,18 +121,23 @@ export function isScheduleOccurrencePosted({
  *   yesterday's transaction to falsely match today's occurrence.
  * - Otherwise (manual recurring with `isapprox`, etc.): 2-day lookback to catch
  *   early payments.
+ *
+ * The date upper-bound is always exactly `next_date` to avoid marking future occurrences as paid.
  */
 export function getHasTransactionsQuery(schedules) {
   const filters = schedules.map(schedule => {
     return {
       $and: {
         schedule: schedule.id,
-        date: {
-          $gte: getScheduleOccurrenceMatchStartDate(
-            schedule,
-            schedule.next_date,
-          ),
-        },
+        date: [
+          {
+            $gte: getScheduleOccurrenceMatchStartDate(
+              schedule,
+              schedule.next_date,
+            ),
+          },
+          { $lte: schedule.next_date },
+        ],
       },
     };
   });
