@@ -90,6 +90,23 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           queryKey: accountQueries.lists(),
         });
       }
+    } else if (event.type === 'deferred-messages') {
+      store.dispatch(
+        addNotification({
+          notification: {
+            id: 'deferred-messages',
+            type: 'message',
+            // Sticky: it fires during budget load and would otherwise
+            // auto-dismiss before the user can read it
+            sticky: true,
+            title: t('Update available'),
+            message: t(
+              'Some synced changes were made with a newer version of Actual. ' +
+                'They will show up here once you update this app.',
+            ),
+          },
+        }),
+      );
     } else if (event.type === 'error') {
       let notif: Notification | null = null;
       const learnMore = `[${t('Learn more')}](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)`;

@@ -36,6 +36,9 @@ export async function resetSync(
     db.execQuery(`
       DELETE FROM messages_crdt;
       DELETE FROM messages_clock;
+      -- Deferred messages belong to the discarded message log; replaying
+      -- them later would resurrect rows hard-deleted below as empty stubs
+      DELETE FROM messages_pending;
       DELETE FROM transactions WHERE tombstone = 1;
       DELETE FROM accounts WHERE tombstone = 1;
       DELETE FROM payees WHERE tombstone = 1;

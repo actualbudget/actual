@@ -26,6 +26,7 @@ import {
   setSyncingMode,
 } from '#server/sync';
 import * as syncMigrations from '#server/sync/migrate';
+import { replayPendingMessages } from '#server/sync/replay';
 import * as rules from '#server/transactions/transaction-rules';
 import { clearUndo } from '#server/undo';
 import { updateVersion } from '#server/update';
@@ -595,6 +596,16 @@ async function _loadBudget(id: Budget['id']): Promise<{
 
     await closeBudget();
     return result;
+  }
+
+  try {
+    // Apply any sync messages that were deferred because they came from
+    // a newer version of the app, now that migrations have run
+    replayPendingMessages();
+  } catch (e) {
+    // Failing to replay shouldn't block loading the budget; the
+    // messages stay pending
+    captureException(e);
   }
 
   await db.loadClock();
