@@ -12,8 +12,9 @@ import type { Query } from '@actual-app/core/shared/query';
 import { integerToAmount } from '@actual-app/core/shared/util';
 import type {
   CategoryEntity,
+  DashboardDateScope,
+  FormulaQueryConfig,
   RuleConditionEntity,
-  TimeFrame,
 } from '@actual-app/core/types/models';
 import { HyperFormula } from 'hyperformula';
 
@@ -32,11 +33,7 @@ import { useLocale } from './useLocale';
 
 bootstrapHyperFormula();
 
-type QueryConfig = {
-  conditions?: RuleConditionEntity[];
-  conditionsOp?: 'and' | 'or';
-  timeFrame?: Partial<TimeFrame>;
-};
+type QueryConfig = FormulaQueryConfig;
 
 type QueriesMap = Record<string, QueryConfig>;
 
@@ -136,6 +133,7 @@ export function useFormulaExecution(
   queries: QueriesMap,
   queriesVersion?: number,
   namedExpressions?: Record<string, number | string>,
+  dashboardScope?: DashboardDateScope | null,
 ) {
   const locale = useLocale();
   const [language] = useGlobalPref('language');
@@ -182,7 +180,11 @@ export function useFormulaExecution(
           throwOnCellError: false,
         });
 
-        await prefetchFormulaQueries(formulaQueryContext, queries);
+        const effectiveQueries = applyDashboardScopeToFormulaQueries(
+          queries,
+          dashboardScope,
+        );
+        await prefetchFormulaQueries(formulaQueryContext, effectiveQueries);
 
         formulaQueryContext.budgetQueryRequests.clear();
         evaluateFormulaWithContext({
@@ -223,9 +225,53 @@ export function useFormulaExecution(
     return () => {
       cancelled = true;
     };
-  }, [formula, queriesVersion, locale, language, queries, namedExpressions]);
+  }, [
+    formula,
+    queriesVersion,
+    locale,
+    language,
+    queries,
+    namedExpressions,
+    dashboardScope,
+  ]);
 
   return { result, isLoading, error };
+}
+
+export function applyDashboardScopeToFormulaQueries(
+  queries: QueriesMap,
+  dashboardScope?: DashboardDateScope | null,
+): QueriesMap {
+  if (!dashboardScope) {
+    return queries;
+  }
+  return Object.fromEntries(
+    Object.entries(queries).map(([name, query]) => {
+      let timeFrame = query.timeFrame;
+      if (query.useDashboardDateRange ?? true) {
+        timeFrame = {
+          start: dashboardScope.start,
+          end: dashboardScope.end,
+          mode: 'static',
+        };
+      } else if (timeFrame && timeFrame.mode !== 'static') {
+        const [start, end] = calculateTimeRange(
+          asMonthSlidingTimeFrame(timeFrame),
+          undefined,
+          undefined,
+          dashboardScope.end,
+        );
+        timeFrame = { start, end, mode: 'static' };
+      }
+      return [
+        name,
+        {
+          ...query,
+          timeFrame,
+        },
+      ];
+    }),
+  );
 }
 
 async function prefetchFormulaQueries(
@@ -326,7 +372,6 @@ export async function buildFilteredTransactionsQuery(
   });
 
   const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
-
   // Start building the query
   let transQuery = q('transactions');
 

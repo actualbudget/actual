@@ -13,6 +13,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestProviders } from '#mocks';
 
 import {
+  applyDashboardScopeToFormulaQueries,
   buildFilteredTransactionsQuery,
   useFormulaExecution,
 } from './useFormulaExecution';
@@ -221,5 +222,43 @@ describe('formula query timeframes', () => {
       '2026-07-01',
       '2026-07-31',
     );
+  });
+
+  it('applies dashboard dates independently to formula queries', () => {
+    const queries = applyDashboardScopeToFormulaQueries(
+      {
+        inherited: {
+          timeFrame: {
+            start: '2025-01',
+            end: '2025-03',
+            mode: 'sliding-window',
+          },
+        },
+        independent: {
+          useDashboardDateRange: false,
+          timeFrame: {
+            start: '2025-01',
+            end: '2025-03',
+            mode: 'sliding-window',
+          },
+        },
+      },
+      {
+        start: '2026-03',
+        end: '2026-08',
+        mode: 'sliding-window',
+      },
+    );
+
+    expect(queries.inherited.timeFrame).toEqual({
+      start: '2026-03',
+      end: '2026-08',
+      mode: 'static',
+    });
+    expect(queries.independent.timeFrame).toEqual({
+      start: '2026-06',
+      end: '2026-08',
+      mode: 'static',
+    });
   });
 });

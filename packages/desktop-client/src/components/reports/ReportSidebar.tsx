@@ -11,6 +11,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Toggle } from '@actual-app/components/toggle';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -76,6 +77,8 @@ type ReportSidebarProps = {
   latestTransaction: TransactionEntity['date'];
   firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
   isComplexCategoryCondition?: boolean;
+  useDashboardDateRange?: boolean;
+  onUseDashboardDateRangeChange?: (value: boolean) => void;
 };
 
 export function ReportSidebar({
@@ -109,6 +112,8 @@ export function ReportSidebar({
   latestTransaction,
   firstDayOfWeekIdx,
   isComplexCategoryCondition = false,
+  useDashboardDateRange,
+  onUseDashboardDateRangeChange,
 }: ReportSidebarProps) {
   const { t } = useTranslation();
   const locale = useLocale();
@@ -544,9 +549,24 @@ export function ReportSidebar({
               <Trans>Date filters</Trans>
             </strong>
           </Text>
+          {onUseDashboardDateRangeChange && (
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+            >
+              <Toggle
+                id="custom-report-use-dashboard-date-range"
+                isOn={Boolean(useDashboardDateRange)}
+                onToggle={onUseDashboardDateRangeChange}
+              />
+              <Text>
+                <Trans>Use dashboard date range</Trans>
+              </Text>
+            </View>
+          )}
           <View style={{ flex: 1 }} />
           <ModeButton
             selected={!customReportItems.isDateStatic}
+            isDisabled={useDashboardDateRange}
             onSelect={() => {
               setSessionReport('isDateStatic', false);
               setIsDateStatic(false);
@@ -557,6 +577,7 @@ export function ReportSidebar({
           </ModeButton>
           <ModeButton
             selected={customReportItems.isDateStatic}
+            isDisabled={useDashboardDateRange}
             onSelect={() => {
               setSessionReport('isDateStatic', true);
               setIsDateStatic(true);
@@ -584,6 +605,7 @@ export function ReportSidebar({
             <Select
               value={customReportItems.dateRange}
               onChange={onSelectRange}
+              disabled={useDashboardDateRange}
               options={rangeOptions}
             />
             {!disabledList.currentInterval.get(customReportItems.dateRange) &&
@@ -632,6 +654,7 @@ export function ReportSidebar({
                   )
                 }
                 value={customReportItems.startDate}
+                disabled={useDashboardDateRange}
                 defaultLabel={monthUtils.format(
                   customReportItems.startDate,
                   ReportOptions.intervalFormat.get(
@@ -666,6 +689,7 @@ export function ReportSidebar({
                   )
                 }
                 value={customReportItems.endDate}
+                disabled={useDashboardDateRange}
                 defaultLabel={monthUtils.format(
                   customReportItems.endDate,
                   ReportOptions.intervalFormat.get(

@@ -5,7 +5,15 @@ import type { RuleConditionEntity } from './rule';
 export type DashboardPageEntity = {
   id: string;
   name: string;
+  date_range_enabled: boolean;
+  time_frame: TimeFrame | null;
   tombstone: boolean;
+};
+
+export type DashboardDateScope = {
+  start: string;
+  end: string;
+  mode: TimeFrame['mode'];
 };
 
 export type TimeFrame = {
@@ -27,6 +35,7 @@ type AbstractWidget<
 > = {
   id: string;
   dashboard_page_id: string;
+  use_dashboard_date_range?: boolean;
   type: T;
   x: number;
   y: number;
@@ -287,22 +296,35 @@ export type NewDashboardWidgetEntity = Omit<
 // Exported/imported (json) widget definition
 export type ExportImportCustomReportWidget = Omit<
   CustomReportWidget,
-  'id' | 'meta' | 'tombstone'
+  'id' | 'dashboard_page_id' | 'meta' | 'tombstone'
 > & {
   meta: Omit<CustomReportEntity, 'tombstone'>;
 };
-export type ExportImportDashboardWidget = Omit<
-  ExportImportCustomReportWidget | SpecializedWidget,
-  'tombstone'
->;
+type ExportImportSpecializedWidget<T> = T extends SpecializedWidget
+  ? Omit<T, 'id' | 'dashboard_page_id' | 'tombstone'>
+  : never;
+export type ExportImportDashboardWidget =
+  | ExportImportCustomReportWidget
+  | ExportImportSpecializedWidget<SpecializedWidget>;
 
-export type ExportImportDashboard = {
+export type ExportImportDashboardV1 = {
   // Dashboard exports can be versioned; currently we support
   // only a single version, but lets account for multiple
   // future versions
   version: 1;
   widgets: ExportImportDashboardWidget[];
 };
+
+export type ExportImportDashboardV2 = {
+  version: 2;
+  date_range_enabled: boolean;
+  time_frame: TimeFrame | null;
+  widgets: ExportImportDashboardWidget[];
+};
+
+export type ExportImportDashboard =
+  | ExportImportDashboardV1
+  | ExportImportDashboardV2;
 
 export type SummaryWidget = AbstractWidget<
   'summary-card',
@@ -351,16 +373,16 @@ export type FormulaWidget = AbstractWidget<
     showTitle?: boolean;
     colorFormula?: string;
     queriesVersion?: number;
-    queries?: Record<
-      string,
-      {
-        conditions?: RuleConditionEntity[];
-        conditionsOp?: 'and' | 'or';
-        timeFrame?: TimeFrame;
-      }
-    >;
+    queries?: Record<string, FormulaQueryConfig>;
   } | null
 >;
+
+export type FormulaQueryConfig = {
+  conditions?: RuleConditionEntity[];
+  conditionsOp?: 'and' | 'or';
+  timeFrame?: Partial<TimeFrame>;
+  useDashboardDateRange?: boolean;
+};
 
 export type SankeyWidget = AbstractWidget<
   'sankey-card',

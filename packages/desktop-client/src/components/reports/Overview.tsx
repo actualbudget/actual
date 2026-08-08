@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
 import { ErrorBoundary } from 'react-error-boundary';
 import ReactGridLayout from 'react-grid-layout';
@@ -14,8 +14,11 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CustomReportWidget,
+  DashboardDateScope,
   DashboardPageEntity,
   DashboardWidgetEntity,
   ExportImportDashboard,
@@ -45,15 +48,22 @@ import {
   useDeleteDashboardPageMutation,
   useImportDashboardPageMutation,
   useResetDashboardPageMutation,
+  useUpdateDashboardDateRangeMutation,
   useUpdateDashboardWidgetMutation,
   useUpdateDashboardWidgetsMutation,
 } from '#reports/mutations';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
-import { DashboardHeader } from './DashboardHeader';
 import './overview.scss';
+import { DashboardDateRangeControls } from './DashboardDateRangeControls';
+import { DashboardDateScopeProvider } from './DashboardDateScope';
+import { DashboardHeader } from './DashboardHeader';
 import { DashboardSelector } from './DashboardSelector';
 import { LoadingIndicator } from './LoadingIndicator';
+import {
+  calculateSpendingReportTimeRange,
+  calculateTimeRange,
+} from './reportRanges';
 import { AgeOfMoneyCard } from './reports/AgeOfMoneyCard';
 import { BalanceForecastCard } from './reports/BalanceForecastCard';
 import { BudgetAnalysisCard } from './reports/BudgetAnalysisCard';
@@ -104,6 +114,65 @@ function getWidgetMinWidth(widget: DashboardWidgetEntity) {
   return 3;
 }
 
+function getDashboardMeta<T extends DashboardWidgetEntity>(
+  widget: T,
+  dashboardScope?: DashboardDateScope | null,
+): T['meta'] {
+  if (!dashboardScope || widget.type === 'formula-card') {
+    return widget.meta;
+  }
+  const usesTimeFrame = [
+    'net-worth-card',
+    'cash-flow-card',
+    'crossover-card',
+    'budget-analysis-card',
+    'summary-card',
+    'calendar-card',
+    'sankey-card',
+    'balance-forecast-card',
+    'age-of-money-card',
+  ].includes(widget.type);
+  let timeFrame =
+    widget.meta && 'timeFrame' in widget.meta
+      ? widget.meta.timeFrame
+      : undefined;
+  let spendingRange: {
+    compare: string;
+    compareTo: string;
+    isLive: false;
+  } | null = null;
+  if (widget.type === 'spending-card') {
+    const [compare, compareTo] =
+      (widget.use_dashboard_date_range ?? true)
+        ? [dashboardScope.start, dashboardScope.end]
+        : calculateSpendingReportTimeRange(
+            widget.meta ?? {},
+            dashboardScope.end,
+          );
+    spendingRange = { compare, compareTo, isLive: false };
+  }
+  if (usesTimeFrame && (widget.use_dashboard_date_range ?? true)) {
+    timeFrame = {
+      start: dashboardScope.start,
+      end: dashboardScope.end,
+      mode: 'static',
+    };
+  } else if (usesTimeFrame && timeFrame && timeFrame.mode !== 'static') {
+    const [start, end] = calculateTimeRange(
+      timeFrame,
+      undefined,
+      undefined,
+      dashboardScope.end,
+    );
+    timeFrame = { start, end, mode: 'static' };
+  }
+  return {
+    ...widget.meta,
+    ...(timeFrame ? { timeFrame } : null),
+    ...spendingRange,
+  } as T['meta'];
+}
+
 type OverviewProps = {
   dashboard: DashboardPageEntity;
 };
@@ -140,6 +209,48 @@ export function Overview({ dashboard }: OverviewProps) {
 
   const { data: widgets = [], isPending: isWidgetsLoading } =
     useDashboardPageWidgets(dashboard.id);
+  const [earliestTransaction, setEarliestTransaction] = useState(
+    monthUtils.currentDay(),
+  );
+  const [latestTransaction, setLatestTransaction] = useState(
+    monthUtils.currentDay(),
+  );
+  const [allMonths, setAllMonths] = useState<Array<{ name: string }>>([]);
+
+  useEffect(() => {
+    async function loadTransactionRange() {
+      const [earliest, latest] = await Promise.all([
+        send('get-earliest-transaction'),
+        send('get-latest-transaction'),
+      ]);
+      const first = earliest?.date ?? monthUtils.currentDay();
+      const last = latest?.date ?? monthUtils.currentDay();
+      setEarliestTransaction(first);
+      setLatestTransaction(last);
+      setAllMonths(
+        monthUtils
+          .rangeInclusive(
+            monthUtils.monthFromDate(first),
+            monthUtils.monthFromDate(last),
+          )
+          .map(name => ({ name }))
+          .reverse(),
+      );
+    }
+    void loadTransactionRange();
+  }, []);
+
+  const dashboardScope = useMemo<DashboardDateScope | null>(() => {
+    if (!dashboard.date_range_enabled || !dashboard.time_frame) {
+      return null;
+    }
+    const [start, end, mode] = calculateTimeRange(
+      dashboard.time_frame,
+      undefined,
+      latestTransaction,
+    );
+    return { start, end, mode };
+  }, [dashboard, latestTransaction]);
 
   const isLoading =
     isCustomReportsLoading || isWidgetsLoading || isDashboardPageLoading;
@@ -157,7 +268,7 @@ export function Overview({ dashboard }: OverviewProps) {
   const isMounted = containerWidth > 0;
 
   const mobileLayout = useMemo(() => {
-    if (!widgets || widgets.length === 0) {
+    if (widgets.length === 0) {
       return [];
     }
 
@@ -188,7 +299,6 @@ export function Overview({ dashboard }: OverviewProps) {
   }, [widgets]);
 
   const desktopLayout = useMemo(() => {
-    if (!widgets) return [];
     return widgets.map(widget => ({
       i: widget.id,
       x: widget.x,
@@ -247,6 +357,20 @@ export function Overview({ dashboard }: OverviewProps) {
   };
 
   const resetDashboardPageMutation = useResetDashboardPageMutation();
+  const updateDashboardDateRangeMutation =
+    useUpdateDashboardDateRangeMutation();
+
+  const onToggleDashboardDateRange = () => {
+    updateDashboardDateRangeMutation.mutate({
+      id: dashboard.id,
+      date_range_enabled: !dashboard.date_range_enabled,
+      time_frame: dashboard.time_frame ?? {
+        start: monthUtils.subMonths(monthUtils.currentMonth(), 5),
+        end: monthUtils.currentMonth(),
+        mode: 'sliding-window',
+      },
+    });
+  };
 
   const onResetDashboard = async () => {
     setIsImporting(true);
@@ -301,36 +425,45 @@ export function Overview({ dashboard }: OverviewProps) {
         height: type === 'sankey-card' ? 3 : 2,
         meta,
         dashboard_page_id: dashboard.id,
+        use_dashboard_date_range: !(
+          type === 'calendar-card' && dashboard.date_range_enabled
+        ),
       },
     });
   };
 
   const onExport = () => {
     const data = {
-      version: 1,
-      widgets: desktopLayout.map(item => {
-        const widget = widgetMap.get(item.i);
-
-        if (!widget) {
-          throw new Error(`Unable to query widget: ${item.i}`);
-        }
-
+      version: 2,
+      date_range_enabled: dashboard.date_range_enabled,
+      time_frame: dashboard.time_frame,
+      widgets: widgets.map(widget => {
         if (isCustomReportWidget(widget)) {
           const customReport = customReportMap.get(widget.meta.id);
 
           if (!customReport) {
-            throw new Error(`Custom report not found for widget: ${item.i}`);
+            throw new Error(`Custom report not found for widget: ${widget.id}`);
           }
+          const {
+            id: _id,
+            dashboard_page_id: _dashboardPageId,
+            tombstone: _tombstone,
+            ...exportWidget
+          } = widget;
 
           return {
-            ...widget,
+            ...exportWidget,
             meta: customReport,
-            id: undefined,
-            tombstone: undefined,
           };
         }
 
-        return { ...widget, id: undefined, tombstone: undefined };
+        const {
+          id: _id,
+          dashboard_page_id: _dashboardPageId,
+          tombstone: _tombstone,
+          ...exportWidget
+        } = widget;
+        return exportWidget;
       }),
     } satisfies ExportImportDashboard;
 
@@ -468,6 +601,157 @@ export function Overview({ dashboard }: OverviewProps) {
 
   const { data: accounts = [] } = useAccounts();
 
+  function renderWidget(
+    widget: DashboardWidgetEntity,
+    activeDashboardScope?: DashboardDateScope | null,
+  ) {
+    const common = {
+      widgetId: widget.id,
+      isEditing,
+    };
+    const changeMeta = (meta: DashboardWidgetEntity['meta']) => {
+      if (!activeDashboardScope || !meta) {
+        onMetaChange({ i: widget.id }, meta);
+        return;
+      }
+      const dateKeys = ['timeFrame', 'compare', 'compareTo', 'isLive'];
+      const originalMeta = (widget.meta ?? {}) as Record<string, unknown>;
+      const persistedMeta = Object.fromEntries(
+        Object.entries(meta).filter(([key]) => !dateKeys.includes(key)),
+      );
+      dateKeys.forEach(key => {
+        if (Object.hasOwn(originalMeta, key)) {
+          persistedMeta[key] = originalMeta[key];
+        }
+      });
+      onMetaChange(
+        { i: widget.id },
+        persistedMeta as DashboardWidgetEntity['meta'],
+      );
+    };
+
+    switch (widget.type) {
+      case 'net-worth-card':
+        return (
+          <NetWorthCard
+            {...common}
+            accounts={accounts}
+            meta={getDashboardMeta(widget, activeDashboardScope)}
+            onMetaChange={changeMeta}
+          />
+        );
+      case 'crossover-card':
+        return (
+          <CrossoverCard
+            {...common}
+            accounts={accounts}
+            meta={getDashboardMeta(widget, activeDashboardScope)}
+            onMetaChange={changeMeta}
+          />
+        );
+      case 'age-of-money-card':
+        return (
+          <AgeOfMoneyCard
+            {...common}
+            meta={getDashboardMeta(widget, activeDashboardScope)}
+            onMetaChange={changeMeta}
+          />
+        );
+      case 'cash-flow-card':
+        return (
+          <CashFlowCard
+            {...common}
+            meta={getDashboardMeta(widget, activeDashboardScope)}
+            onMetaChange={changeMeta}
+          />
+        );
+      case 'spending-card':
+        return (
+          <SpendingCard
+            {...common}
+            meta={getDashboardMeta(widget, activeDashboardScope)}
+            onMetaChange={changeMeta}
+          />
+        );
+      case 'budget-analysis-card':
+        return budgetAnalysisReportEnabled ? (
+          <BudgetAnalysisCard
+            {...common}
+            meta={getDashboardMeta(widget, activeDashboardScope)}
+            onMetaChange={changeMeta}
+          />
+        ) : null;
+      case 'balance-forecast-card':
+        return balanceForecastReportEnabled ? (
+          <BalanceForecastCard
+            {...common}
+            accounts={accounts}
+            meta={getDashboardMeta(widget, activeDashboardScope)}
+            onMetaChange={changeMeta}
+          />
+        ) : null;
+      case 'markdown-card':
+        return (
+          <MarkdownCard
+            {...common}
+            meta={widget.meta}
+            onMetaChange={changeMeta}
+          />
+        );
+      case 'custom-report':
+        return (
+          <CustomReportListCards
+            {...common}
+            report={customReportMap.get(widget.meta.id)}
+            useDashboardDateRange={widget.use_dashboard_date_range}
+          />
+        );
+      case 'summary-card':
+        return (
+          <SummaryCard
+            {...common}
+            meta={getDashboardMeta(widget, activeDashboardScope)}
+            onMetaChange={changeMeta}
+          />
+        );
+      case 'calendar-card':
+        return (
+          <CalendarCard
+            {...common}
+            meta={getDashboardMeta(widget, activeDashboardScope)}
+            firstDayOfWeekIdx={firstDayOfWeekIdx}
+            onMetaChange={changeMeta}
+          />
+        );
+      case 'formula-card':
+        return formulaMode ? (
+          <FormulaCard
+            {...common}
+            meta={widget.meta}
+            onMetaChange={changeMeta}
+          />
+        ) : null;
+      case 'sankey-card':
+        return sankeyFeatureFlag ? (
+          <SankeyCard
+            {...common}
+            meta={getDashboardMeta(widget, activeDashboardScope)}
+            onMetaChange={changeMeta}
+          />
+        ) : null;
+      case 'monte-carlo-card':
+        return monteCarloReportEnabled ? (
+          <MonteCarloCard
+            {...common}
+            meta={widget.meta}
+            onMetaChange={changeMeta}
+          />
+        ) : null;
+      default:
+        return null;
+    }
+  }
+
   if (isLoading) {
     return <LoadingIndicator message={t('Loading reports...')} />;
   }
@@ -495,11 +779,19 @@ export function Overview({ dashboard }: OverviewProps) {
                 padding: '5px',
                 borderBottom: '1px solid ' + theme.pillBorder,
                 backgroundColor: theme.mobilePageBackground,
+                gap: 10,
               }}
             >
               <DashboardSelector
                 dashboards={dashboardPages}
                 currentDashboard={dashboard}
+              />
+              <DashboardDateRangeControls
+                dashboard={dashboard}
+                scope={dashboardScope}
+                allMonths={allMonths}
+                earliestTransaction={earliestTransaction}
+                latestTransaction={latestTransaction}
               />
             </View>
           </View>
@@ -518,12 +810,20 @@ export function Overview({ dashboard }: OverviewProps) {
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
-                gap: 5,
+                gap: 10,
                 alignItems: 'stretch',
               }}
             >
               {currentBreakpoint === 'desktop' && (
                 <>
+                  <DashboardDateRangeControls
+                    dashboard={dashboard}
+                    scope={dashboardScope}
+                    allMonths={allMonths}
+                    earliestTransaction={earliestTransaction}
+                    latestTransaction={latestTransaction}
+                  />
+
                   {/* Dashboard Selector */}
                   <DashboardSelector
                     dashboards={dashboardPages}
@@ -699,6 +999,9 @@ export function Overview({ dashboard }: OverviewProps) {
                           slot="close"
                           onMenuSelect={item => {
                             switch (item) {
+                              case 'date-ranges':
+                                onToggleDashboardDateRange();
+                                break;
                               case 'reset':
                                 void onResetDashboard();
                                 break;
@@ -718,6 +1021,13 @@ export function Overview({ dashboard }: OverviewProps) {
                             }
                           }}
                           items={[
+                            {
+                              name: 'date-ranges',
+                              text: dashboard.date_range_enabled
+                                ? t('Disable date ranges')
+                                : t('Enable date ranges'),
+                            },
+                            Menu.line,
                             {
                               name: 'reset',
                               text: t('Reset to default'),
@@ -764,180 +1074,51 @@ export function Overview({ dashboard }: OverviewProps) {
             style={{ userSelect: 'none', paddingBottom: MOBILE_NAV_HEIGHT }}
           >
             {isMounted && (
-              <ReactGridLayout
-                width={containerWidth}
-                layout={currentLayout}
-                gridConfig={{
-                  cols: currentBreakpoint === 'desktop' ? 12 : 1,
-                  rowHeight: 100,
-                }}
-                dragConfig={{
-                  enabled: currentBreakpoint === 'desktop' && isEditing,
-                  cancel: `.${NON_DRAGGABLE_AREA_CLASS_NAME}`,
-                }}
-                resizeConfig={{
-                  enabled: currentBreakpoint === 'desktop' && isEditing,
-                }}
-                onLayoutChange={
-                  currentBreakpoint === 'desktop' ? onLayoutChange : undefined
-                }
-              >
-                {currentLayout.map(item => {
-                  const widget = widgetMap.get(item.i);
-
-                  if (!widget) {
-                    return null;
+              <DashboardDateScopeProvider scope={dashboardScope}>
+                <ReactGridLayout
+                  width={containerWidth}
+                  layout={currentLayout}
+                  gridConfig={{
+                    cols: currentBreakpoint === 'desktop' ? 12 : 1,
+                    rowHeight: 100,
+                  }}
+                  dragConfig={{
+                    enabled: currentBreakpoint === 'desktop' && isEditing,
+                    cancel: `.${NON_DRAGGABLE_AREA_CLASS_NAME}`,
+                  }}
+                  resizeConfig={{
+                    enabled: currentBreakpoint === 'desktop' && isEditing,
+                  }}
+                  onLayoutChange={
+                    currentBreakpoint === 'desktop' ? onLayoutChange : undefined
                   }
+                >
+                  {currentLayout.map(item => {
+                    const widget = widgetMap.get(item.i);
 
-                  return (
-                    <div key={item.i}>
-                      <ErrorBoundary
-                        fallbackRender={() => (
-                          <MissingReportCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                          >
-                            <Trans>This widget has failed to load.</Trans>
-                          </MissingReportCard>
-                        )}
-                      >
-                        {widget.type === 'net-worth-card' ? (
-                          <NetWorthCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            accounts={accounts}
-                            meta={widget.meta}
-                            onMetaChange={newMeta =>
-                              onMetaChange(item, newMeta)
-                            }
-                          />
-                        ) : widget.type === 'crossover-card' ? (
-                          <CrossoverCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            accounts={accounts}
-                            meta={widget.meta}
-                            onMetaChange={newMeta =>
-                              onMetaChange(item, newMeta)
-                            }
-                          />
-                        ) : widget.type === 'age-of-money-card' ? (
-                          <AgeOfMoneyCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            meta={widget.meta}
-                            onMetaChange={newMeta =>
-                              onMetaChange(item, newMeta)
-                            }
-                          />
-                        ) : widget.type === 'cash-flow-card' ? (
-                          <CashFlowCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            meta={widget.meta}
-                            onMetaChange={newMeta =>
-                              onMetaChange(item, newMeta)
-                            }
-                          />
-                        ) : widget.type === 'spending-card' ? (
-                          <SpendingCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            meta={widget.meta}
-                            onMetaChange={newMeta =>
-                              onMetaChange(item, newMeta)
-                            }
-                          />
-                        ) : widget.type === 'budget-analysis-card' &&
-                          budgetAnalysisReportEnabled ? (
-                          <BudgetAnalysisCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            meta={widget.meta}
-                            onMetaChange={newMeta =>
-                              onMetaChange(item, newMeta)
-                            }
-                          />
-                        ) : widget.type === 'balance-forecast-card' &&
-                          balanceForecastReportEnabled ? (
-                          <BalanceForecastCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            accounts={accounts}
-                            meta={widget.meta}
-                            onMetaChange={newMeta =>
-                              onMetaChange(item, newMeta)
-                            }
-                          />
-                        ) : widget.type === 'markdown-card' ? (
-                          <MarkdownCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            meta={widget.meta}
-                            onMetaChange={newMeta =>
-                              onMetaChange(item, newMeta)
-                            }
-                          />
-                        ) : widget.type === 'custom-report' ? (
-                          <CustomReportListCards
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            report={customReportMap.get(widget.meta.id)}
-                          />
-                        ) : widget.type === 'summary-card' ? (
-                          <SummaryCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            meta={widget.meta}
-                            onMetaChange={newMeta =>
-                              onMetaChange(item, newMeta)
-                            }
-                          />
-                        ) : widget.type === 'calendar-card' ? (
-                          <CalendarCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            meta={widget.meta}
-                            firstDayOfWeekIdx={firstDayOfWeekIdx}
-                            onMetaChange={newMeta =>
-                              onMetaChange(item, newMeta)
-                            }
-                          />
-                        ) : widget.type === 'formula-card' && formulaMode ? (
-                          <FormulaCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            meta={widget.meta}
-                            onMetaChange={newMeta =>
-                              onMetaChange(item, newMeta)
-                            }
-                          />
-                        ) : widget.type === 'sankey-card' &&
-                          sankeyFeatureFlag ? (
-                          <SankeyCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            meta={widget.meta}
-                            onMetaChange={newMeta =>
-                              onMetaChange(item, newMeta)
-                            }
-                          />
-                        ) : widget.type === 'monte-carlo-card' &&
-                          monteCarloReportEnabled ? (
-                          <MonteCarloCard
-                            widgetId={item.i}
-                            isEditing={isEditing}
-                            meta={widget.meta}
-                            onMetaChange={newMeta =>
-                              onMetaChange(item, newMeta)
-                            }
-                          />
-                        ) : null}
-                      </ErrorBoundary>
-                    </div>
-                  );
-                })}
-              </ReactGridLayout>
+                    if (!widget) {
+                      return null;
+                    }
+
+                    return (
+                      <div key={item.i}>
+                        <ErrorBoundary
+                          fallbackRender={() => (
+                            <MissingReportCard
+                              widgetId={item.i}
+                              isEditing={isEditing}
+                            >
+                              <Trans>This widget has failed to load.</Trans>
+                            </MissingReportCard>
+                          )}
+                        >
+                          {renderWidget(widget, dashboardScope)}
+                        </ErrorBoundary>
+                      </div>
+                    );
+                  })}
+                </ReactGridLayout>
+              </DashboardDateScopeProvider>
             )}
           </View>
         </div>

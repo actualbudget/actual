@@ -11,7 +11,10 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
-import type { FormulaWidget } from '@actual-app/core/types/models';
+import type {
+  DashboardDateScope,
+  FormulaWidget,
+} from '@actual-app/core/types/models';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { QueryManager } from '#components/formula/QueryManager';
@@ -20,6 +23,7 @@ import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { FormulaResult } from '#components/reports/FormulaResult';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { useCategories } from '#hooks/useCategories';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormulaExecution } from '#hooks/useFormulaExecution';
 import { useNavigate } from '#hooks/useNavigate';
@@ -40,19 +44,21 @@ export function Formula() {
     id: params.id,
     type: 'formula-card',
   });
+  const { dashboardScope } = useDashboardReportTimeRange(widget);
 
   if (isPending) {
     return <LoadingIndicator />;
   }
 
-  return <FormulaInner widget={widget} />;
+  return <FormulaInner widget={widget} dashboardScope={dashboardScope} />;
 }
 
 type FormulaInnerProps = {
   widget?: FormulaWidget;
+  dashboardScope: DashboardDateScope | null;
 };
 
-function FormulaInner({ widget }: FormulaInnerProps) {
+function FormulaInner({ widget, dashboardScope }: FormulaInnerProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -89,7 +95,13 @@ function FormulaInner({ widget }: FormulaInnerProps) {
     result,
     isLoading: isExecuting,
     error,
-  } = useFormulaExecution(formula, queriesRef.current, queriesVersion);
+  } = useFormulaExecution(
+    formula,
+    queriesRef.current,
+    queriesVersion,
+    undefined,
+    dashboardScope,
+  );
 
   const colorVariables = useMemo(
     () => ({
@@ -126,6 +138,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
     queriesRef.current,
     queriesVersion,
     colorVariables,
+    dashboardScope,
   );
 
   const handleQueriesChange = useCallback(
@@ -477,6 +490,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
           <QueryManager
             queries={queriesRef.current}
             onQueriesChange={handleQueriesChange}
+            dashboardScope={dashboardScope}
           />
         </View>
       </View>

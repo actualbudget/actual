@@ -11,6 +11,7 @@ export function getLiveRange(
   latestTransaction: string,
   includeCurrentInterval: boolean,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  referenceDate = monthUtils.currentDay(),
 ): [string, string, TimeFrame['mode']] {
   let dateStart = earliestTransaction;
   let dateEnd = latestTransaction;
@@ -19,13 +20,13 @@ export function getLiveRange(
     case 'yearToDate': {
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
-        monthUtils.getYearStart(monthUtils.currentMonth()) + '-01',
-        monthUtils.currentDay(),
+        monthUtils.getYearStart(referenceDate) + '-01',
+        referenceDate,
       );
       break;
     }
     case 'lastMonth': {
-      const prevMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
+      const prevMonth = monthUtils.subMonths(referenceDate, 1);
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
         monthUtils.firstDayOfMonth(prevMonth),
@@ -36,29 +37,24 @@ export function getLiveRange(
     case 'lastYear': {
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
-        monthUtils.getYearStart(
-          monthUtils.prevYear(monthUtils.currentMonth()),
-        ) + '-01',
-        monthUtils.getYearEnd(monthUtils.prevYear(monthUtils.currentDate())) +
-          '-31',
+        monthUtils.getYearStart(monthUtils.prevYear(referenceDate)) + '-01',
+        monthUtils.getYearEnd(monthUtils.prevYear(referenceDate)) + '-31',
       );
       break;
     }
     case 'priorYearToDate': {
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
-        monthUtils.getYearStart(
-          monthUtils.prevYear(monthUtils.currentMonth()),
-        ) + '-01',
-        monthUtils.prevYear(monthUtils.currentDate(), 'yyyy-MM-dd'),
+        monthUtils.getYearStart(monthUtils.prevYear(referenceDate)) + '-01',
+        monthUtils.prevYear(referenceDate, 'yyyy-MM-dd'),
       );
       break;
     }
     case 'last30Days': {
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
-        monthUtils.subDays(monthUtils.currentDay(), 29),
-        monthUtils.currentDay(),
+        monthUtils.subDays(referenceDate, 29),
+        referenceDate,
       );
       break;
     }
@@ -76,6 +72,7 @@ export function getLiveRange(
             : rangeName - (includeCurrentInterval ? 0 : 1),
           ReportOptions.dateRangeType.get(cond),
           firstDayOfWeekIdx,
+          referenceDate,
         );
       } else {
         break;

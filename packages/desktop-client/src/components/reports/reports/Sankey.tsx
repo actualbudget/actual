@@ -37,7 +37,6 @@ import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
-import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
   buildSankeyData,
   createBaseGraphSpreadsheet,
@@ -48,6 +47,7 @@ import type { Graph } from '#components/reports/spreadsheets/sankey-spreadsheet'
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { useCategories } from '#hooks/useCategories';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormatList } from '#hooks/useFormatList';
 import { useLocale } from '#hooks/useLocale';
@@ -424,6 +424,8 @@ type SankeyInnerProps = {
   widget?: SankeyWidget;
 };
 function SankeyInner({ widget }: SankeyInnerProps) {
+  const { resolve: resolveTimeRange, isUsingDashboardRange } =
+    useDashboardReportTimeRange(widget);
   const locale = useLocale();
   const dispatch = useDispatch();
   const { t, i18n } = useTranslation();
@@ -441,7 +443,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     widget?.meta?.conditions,
     widget?.meta?.conditionsOp,
   );
-
   const currentMonth = monthUtils.currentMonth();
   const [allMonths, setAllMonths] = useState([
     {
@@ -639,7 +640,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         : monthUtils.currentDay();
       setLatestTransaction(latestTransactionDate);
 
-      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+      const [initialStart, initialEnd, initialMode] = resolveTimeRange(
         widget?.meta?.timeFrame,
         undefined,
         latestTransactionDate,
@@ -685,7 +686,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       setAllMonths(allMonths);
     }
     void run();
-  }, [locale, widget?.meta?.timeFrame]);
+  }, [locale, widget?.meta?.timeFrame, resolveTimeRange]);
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
     setEnd(end);
@@ -712,11 +713,13 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             showPercentages,
             layerFrom,
             layerTo,
-            timeFrame: {
-              start,
-              end,
-              mode: timeFrameMode,
-            },
+            timeFrame: isUsingDashboardRange
+              ? widget.meta?.timeFrame
+              : {
+                  start,
+                  end,
+                  mode: timeFrameMode,
+                },
             groupAccounts,
           },
         },

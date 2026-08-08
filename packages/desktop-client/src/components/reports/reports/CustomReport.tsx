@@ -54,9 +54,14 @@ import { setSessionReport } from '#components/reports/setSessionReport';
 import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
 import { useReport } from '#components/reports/useReport';
-import { calculateHasWarning, fromDateRepr } from '#components/reports/util';
+import {
+  calculateHasWarning,
+  fromDateRepr,
+  normalizeCustomReportDateRange,
+} from '#components/reports/util';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
@@ -65,6 +70,7 @@ import { usePayees } from '#hooks/usePayees';
 import { useReport as useCustomReport } from '#hooks/useReport';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 /**
  * Transform `selectedCategories` into `conditions`.
@@ -187,6 +193,13 @@ function CustomReportInner({
     ...combine,
     ...session,
   };
+  const {
+    dashboardWidget,
+    dashboardScope,
+    hasDashboardContext,
+    isUsingDashboardRange,
+  } = useDashboardReportTimeRange();
+  const updateDashboardWidget = useUpdateDashboardWidgetMutation();
 
   const [allIntervals, setAllIntervals] = useState<
     Array<{
@@ -311,6 +324,51 @@ function CustomReportInner({
         ? 'saved'
         : 'new',
   );
+
+  useEffect(() => {
+    if (!dashboardScope) {
+      return;
+    }
+    if (isUsingDashboardRange) {
+      const [nextStart, nextEnd] = normalizeCustomReportDateRange(
+        interval,
+        dashboardScope.start,
+        dashboardScope.end,
+      );
+      setStartDate(nextStart);
+      setEndDate(nextEnd);
+      setIsDateStatic(true);
+      return;
+    }
+    setIsDateStatic(loadReport.isDateStatic);
+    if (!loadReport.isDateStatic) {
+      const [nextStart, nextEnd] = getLiveRange(
+        loadReport.dateRange,
+        earliestTransactionDate || monthUtils.currentDay(),
+        latestTransactionDate || monthUtils.currentDay(),
+        loadReport.includeCurrentInterval,
+        firstDayOfWeekIdx,
+        dashboardScope.end,
+      );
+      setStartDate(nextStart);
+      setEndDate(nextEnd);
+    } else {
+      setStartDate(loadReport.startDate);
+      setEndDate(loadReport.endDate);
+    }
+  }, [
+    dashboardScope,
+    earliestTransactionDate,
+    firstDayOfWeekIdx,
+    interval,
+    isUsingDashboardRange,
+    latestTransactionDate,
+    loadReport.dateRange,
+    loadReport.endDate,
+    loadReport.includeCurrentInterval,
+    loadReport.isDateStatic,
+    loadReport.startDate,
+  ]);
 
   const onApplyFilterConditions = useEffectEvent(
     (
@@ -501,7 +559,6 @@ function CustomReportInner({
     payees,
     accounts,
   });
-
   useEffect(() => {
     if (balanceTypeOp !== 'totalBudgeted') {
       return;
@@ -631,6 +688,16 @@ function CustomReportInner({
     conditions,
     conditionsOp,
   };
+  const savedCustomReportItems = isUsingDashboardRange
+    ? {
+        ...customReportItems,
+        startDate: loadReport.startDate,
+        endDate: loadReport.endDate,
+        isDateStatic: loadReport.isDateStatic,
+        dateRange: loadReport.dateRange,
+        includeCurrentInterval: loadReport.includeCurrentInterval,
+      }
+    : customReportItems;
 
   const navigate = useNavigate();
   const [, setScrollWidth] = useState(0);
@@ -929,6 +996,18 @@ function CustomReportInner({
             latestTransaction={latestTransactionDate}
             firstDayOfWeekIdx={firstDayOfWeekIdx}
             isComplexCategoryCondition={isComplexCategoryCondition}
+            useDashboardDateRange={isUsingDashboardRange}
+            onUseDashboardDateRangeChange={
+              hasDashboardContext && dashboardWidget
+                ? use_dashboard_date_range =>
+                    updateDashboardWidget.mutate({
+                      widget: {
+                        id: dashboardWidget.id,
+                        use_dashboard_date_range,
+                      },
+                    })
+                : undefined
+            }
           />
         )}
         <View
@@ -938,7 +1017,7 @@ function CustomReportInner({
         >
           {!isNarrowWidth && (
             <ReportTopbar
-              customReportItems={customReportItems}
+              customReportItems={savedCustomReportItems}
               report={report}
               savedStatus={savedStatus}
               setGraphType={setGraphType}

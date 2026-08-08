@@ -4,11 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { View } from '@actual-app/components/view';
 import type { FormulaWidget } from '@actual-app/core/types/models';
 
+import { useDashboardDateScope } from '#components/reports/DashboardDateScope';
 import { FormulaResult } from '#components/reports/FormulaResult';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { useFormulaExecution } from '#hooks/useFormulaExecution';
 import { useThemeColors } from '#hooks/useThemeColors';
+
+const EMPTY_QUERIES = {};
 
 type FormulaCardProps = {
   widgetId: string;
@@ -27,6 +30,7 @@ export function FormulaCard({
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const themeColors = useThemeColors();
   const containerRef = useRef<HTMLDivElement>(null);
+  const dashboardScope = useDashboardDateScope();
 
   const formula = meta?.formula || '=SUM(1, 2, 3)';
   const fontSize = meta?.fontSize;
@@ -34,11 +38,14 @@ export function FormulaCard({
   const staticFontSize = meta?.staticFontSize || 32;
   const showTitle = meta?.showTitle ?? true;
   const colorFormula = meta?.colorFormula || '';
+  const queries = meta?.queries ?? EMPTY_QUERIES;
 
   const { result, isLoading, error } = useFormulaExecution(
     formula,
-    meta?.queries || {},
+    queries,
     meta?.queriesVersion,
+    undefined,
+    dashboardScope,
   );
 
   const colorVariables = useMemo(
@@ -56,9 +63,10 @@ export function FormulaCard({
   );
   const { result: colorResult, error: colorError } = useFormulaExecution(
     colorFormula,
-    meta?.queries || {},
+    queries,
     meta?.queriesVersion,
     colorVariables,
+    dashboardScope,
   );
 
   // Determine the custom color from color formula result
