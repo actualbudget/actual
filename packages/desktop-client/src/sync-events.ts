@@ -96,6 +96,9 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           notification: {
             id: 'deferred-messages',
             type: 'message',
+            // Sticky: it fires during budget load and would otherwise
+            // auto-dismiss before the user can read it
+            sticky: true,
             title: t('Update available'),
             message: t(
               'Some synced changes were made with a newer version of Actual. ' +

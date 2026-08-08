@@ -3,11 +3,20 @@ import type { Database } from '@jlongster/sql.js';
 import * as sqlite from '#platform/server/sqlite';
 
 // `required` means a row cannot be inserted without explicitly providing
-// this column (NOT NULL, no DEFAULT, not the primary key). `notNull` is
-// the raw NOT NULL flag, tracked separately because a NOT NULL column
-// with a DEFAULT still rejects explicit NULL writes. `pk` means the
-// column is part of the table's primary key.
-type ColumnFlags = { required: boolean; notNull: boolean; pk: boolean };
+// this column (NOT NULL, no usable DEFAULT, not the primary key).
+// `notNull` is the raw NOT NULL flag, tracked separately because a NOT
+// NULL column with a DEFAULT still rejects explicit NULL writes. `pk`
+// means the column is part of the table's primary key. `type` is the
+// normalized declared type and `defaultValue` the normalized DEFAULT
+// expression (null when absent or an explicit NULL, which behaves the
+// same) — both must stay unchanged on existing columns.
+type ColumnFlags = {
+  required: boolean;
+  notNull: boolean;
+  pk: boolean;
+  type: string;
+  defaultValue: string | null;
+};
 
 export type TableSnapshot = {
   columns: Map<string, ColumnFlags>;
@@ -21,9 +30,9 @@ export type TableSnapshot = {
 
 // Extracts each CHECK(...) expression by scanning to the balanced close
 // paren, normalized (whitespace collapsed, lowercased) so formatting
-// differences don't register as changes. The scan ignores quoting — a
-// paren inside a string literal would truncate the clause — but both
-// sides of a diff parse identically, so comparisons stay sound.
+// differences don't register as changes. Parens inside quoted
+// literals/identifiers and comments don't count toward balancing —
+// truncating there would hide any change made after the quote.
 function checkClauses(sql: string): string[] {
   const clauses: string[] = [];
   const starts = /\bCHECK\s*\(/gi;
@@ -32,10 +41,31 @@ function checkClauses(sql: string): string[] {
     const start = match.index + match[0].length;
     let i = start;
     for (let depth = 1; i < sql.length && depth > 0; i++) {
-      if (sql[i] === '(') {
+      const ch = sql[i];
+      if (ch === '(') {
         depth++;
-      } else if (sql[i] === ')') {
+      } else if (ch === ')') {
         depth--;
+      } else if (ch === "'" || ch === '"' || ch === '`') {
+        // Skip to the closing quote; a doubled quote is an escape
+        for (i++; i < sql.length; i++) {
+          if (sql[i] === ch) {
+            if (sql[i + 1] === ch) {
+              i++;
+            } else {
+              break;
+            }
+          }
+        }
+      } else if (ch === '[') {
+        const end = sql.indexOf(']', i + 1);
+        i = end < 0 ? sql.length : end;
+      } else if (ch === '-' && sql[i + 1] === '-') {
+        const end = sql.indexOf('\n', i);
+        i = end < 0 ? sql.length : end;
+      } else if (ch === '/' && sql[i + 1] === '*') {
+        const end = sql.indexOf('*/', i + 2);
+        i = end < 0 ? sql.length : end + 1;
       }
     }
     clauses.push(
@@ -65,21 +95,33 @@ export function snapshotSchema(db: Database): SchemaSnapshot {
         sqlite
           .runQuery<{
             name: string;
+            type: string;
             notnull: number;
             dflt_value: string | null;
             pk: number;
           }>(db, `PRAGMA table_info("${table}")`, [], true)
-          .map((column): [string, ColumnFlags] => [
-            column.name,
-            {
-              required:
-                column.notnull !== 0 &&
-                column.dflt_value == null &&
-                column.pk === 0,
-              notNull: column.notnull !== 0,
-              pk: column.pk !== 0,
-            },
-          ]),
+          .map((column): [string, ColumnFlags] => {
+            // PRAGMA reports the DEFAULT as verbatim SQL text; an
+            // explicit `DEFAULT NULL` comes back as the string "NULL",
+            // which is not a usable default for a NOT NULL column
+            const rawDefault =
+              column.dflt_value?.replace(/\s+/g, ' ').trim() ?? null;
+            const defaultValue =
+              rawDefault?.toUpperCase() === 'NULL' ? null : rawDefault;
+            return [
+              column.name,
+              {
+                required:
+                  column.notnull !== 0 &&
+                  defaultValue == null &&
+                  column.pk === 0,
+                notNull: column.notnull !== 0,
+                pk: column.pk !== 0,
+                type: column.type.replace(/\s+/g, ' ').trim().toLowerCase(),
+                defaultValue,
+              },
+            ];
+          }),
       );
       const uniques = new Set(
         sqlite
@@ -167,6 +209,19 @@ export function findAdditiveViolations(
       if (prev && column.pk !== prev.pk) {
         violations.push(
           `existing column "${table}.${name}" changed primary-key membership`,
+        );
+      }
+      // A type change alters affinity/coercion between versions, and a
+      // different DEFAULT makes old and new clients fill omitted
+      // columns with diverging values
+      if (prev && column.type !== prev.type) {
+        violations.push(
+          `existing column "${table}.${name}" changed its declared type`,
+        );
+      }
+      if (prev && column.defaultValue !== prev.defaultValue) {
+        violations.push(
+          `existing column "${table}.${name}" changed its DEFAULT value`,
         );
       }
       // With NOT NULL unchanged, a `required` flip means a DEFAULT was

@@ -209,6 +209,37 @@ describe('migrations are additive-only', () => {
        DROP TABLE foo;
        ALTER TABLE foo_new RENAME TO foo;`,
     ],
+    [
+      'changing a CHECK expression after a quoted paren',
+      `CREATE TABLE foo
+         (id TEXT PRIMARY KEY, a TEXT CHECK(a <> ')' AND a <> 'x'));`,
+      `CREATE TABLE foo_new
+         (id TEXT PRIMARY KEY, a TEXT CHECK(a <> ')' AND a <> 'y'));
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
+    [
+      'adding a NOT NULL column whose DEFAULT is an explicit NULL',
+      TABLE_FOO,
+      `CREATE TABLE foo_new
+         (id TEXT PRIMARY KEY, a TEXT, b TEXT, c TEXT NOT NULL DEFAULT NULL);
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
+    [
+      "changing an existing column's type via table rebuild",
+      TABLE_FOO,
+      `CREATE TABLE foo_new (id TEXT PRIMARY KEY, a INTEGER, b TEXT);
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
+    [
+      "changing an existing column's DEFAULT value via table rebuild",
+      "CREATE TABLE foo (id TEXT PRIMARY KEY, a TEXT DEFAULT 'x');",
+      `CREATE TABLE foo_new (id TEXT PRIMARY KEY, a TEXT DEFAULT 'y');
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
   ])('sanity check: flags %s', async (_case, setup, migration) => {
     expect(await violationsFor(setup, migration)).not.toEqual([]);
   });
@@ -258,6 +289,22 @@ describe('migrations are additive-only', () => {
       'CREATE TABLE foo (id TEXT PRIMARY KEY, amount INTEGER CHECK(amount >= 0));',
       `CREATE TABLE foo_new
          (id TEXT PRIMARY KEY, amount INTEGER CHECK( amount   >= 0 ));
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
+    [
+      'rebuilding a table with an identical CHECK containing a quoted paren',
+      `CREATE TABLE foo
+         (id TEXT PRIMARY KEY, a TEXT CHECK(a <> ')' AND a <> 'x'));`,
+      `CREATE TABLE foo_new
+         (id TEXT PRIMARY KEY, a TEXT CHECK(a <> ')' AND a <> 'x'));
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
+    [
+      'rebuilding a table replacing an explicit DEFAULT NULL with no DEFAULT',
+      'CREATE TABLE foo (id TEXT PRIMARY KEY, a TEXT DEFAULT NULL);',
+      `CREATE TABLE foo_new (id TEXT PRIMARY KEY, a TEXT);
        DROP TABLE foo;
        ALTER TABLE foo_new RENAME TO foo;`,
     ],
