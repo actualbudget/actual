@@ -111,6 +111,11 @@
       "built": true
     }
   },
+  "allowScripts": {
+    "bcrypt": "6.0.0",
+    "better-sqlite3": "12.11.1",
+    "argon2": "0.44.0"
+  },
   "optionalDependencies": {
     "glob-hasher-linux-arm64-gnu": "1.4.2"
   },
