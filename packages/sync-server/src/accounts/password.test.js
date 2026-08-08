@@ -156,6 +156,19 @@ describe('bootstrapPassword / changePassword', () => {
   it('rejects an empty password on changePassword', async () => {
     expect(await changePassword('')).toEqual({ error: 'invalid-password' });
   });
+
+  it('returns password-auth-not-active when no password row exists (OIDC-only setup)', async () => {
+    // Simulate an OIDC-only deployment: bootstrapPassword was never called,
+    // so the `auth` table has no `method='password'` row.
+    expect(getStoredPasswordHash()).toBeNull();
+
+    const result = await changePassword('new password');
+
+    expect(result).toEqual({ error: 'password-auth-not-active' });
+    // The auth table is still empty — the failed UPDATE must not silently
+    // succeed or insert a row.
+    expect(getStoredPasswordHash()).toBeNull();
+  });
 });
 
 describe('checkPassword', () => {
