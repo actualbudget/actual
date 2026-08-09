@@ -120,14 +120,14 @@ const configSchema = convict({
   },
   loginMethod: {
     doc: 'Authentication method.',
-    format: ['password', 'header', 'openid'],
+    format: ['password', 'header', 'openid', 'webauthn'],
     default: 'password',
     env: 'ACTUAL_LOGIN_METHOD',
   },
   allowedLoginMethods: {
     doc: 'Allowed authentication methods.',
     format: Array,
-    default: ['password', 'header', 'openid'],
+    default: ['password', 'header', 'openid', 'webauthn'],
     env: 'ACTUAL_ALLOWED_LOGIN_METHODS',
   },
   trustedProxies: {

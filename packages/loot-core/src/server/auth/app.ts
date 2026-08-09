@@ -20,6 +20,10 @@ export type AuthHandlers = {
   'enable-openid': typeof enableOpenId;
   'get-openid-config': typeof getOpenIdConfig;
   'enable-password': typeof enablePassword;
+  'webauthn-get-registration-options': typeof webauthnGetRegistrationOptions;
+  'webauthn-verify-registration': typeof webauthnVerifyRegistration;
+  'webauthn-get-authentication-options': typeof webauthnGetAuthenticationOptions;
+  'webauthn-verify-authentication': typeof webauthnVerifyAuthentication;
 };
 
 export const app = createApp<AuthHandlers>();
@@ -35,6 +39,13 @@ app.method('subscribe-set-token', setToken);
 app.method('enable-openid', enableOpenId);
 app.method('get-openid-config', getOpenIdConfig);
 app.method('enable-password', enablePassword);
+app.method('webauthn-get-registration-options', webauthnGetRegistrationOptions);
+app.method('webauthn-verify-registration', webauthnVerifyRegistration);
+app.method(
+  'webauthn-get-authentication-options',
+  webauthnGetAuthenticationOptions,
+);
+app.method('webauthn-verify-authentication', webauthnVerifyAuthentication);
 
 async function didBootstrap() {
   return Boolean(await asyncStorage.getItem('did-bootstrap'));
@@ -383,5 +394,112 @@ async function enablePassword(passwordConfig: { password: string }) {
 
     throw err;
   }
+  return {};
+}
+
+async function webauthnGetRegistrationOptions() {
+  try {
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+
+    const options = await post(
+      serverConfig.BASE_SERVER + '/webauthn/registration-options',
+      {},
+    );
+
+    return { options };
+  } catch (err) {
+    if (err instanceof PostError) {
+      return {
+        error: err.reason || 'network-failure',
+      };
+    }
+
+    throw err;
+  }
+}
+
+async function webauthnVerifyRegistration({ response }: { response: unknown }) {
+  try {
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+
+    await post(serverConfig.BASE_SERVER + '/webauthn/registration-verify', {
+      response,
+    });
+  } catch (err) {
+    if (err instanceof PostError) {
+      return {
+        error: err.reason || 'network-failure',
+      };
+    }
+
+    throw err;
+  }
+  return {};
+}
+
+async function webauthnGetAuthenticationOptions() {
+  try {
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+
+    const options = await post(
+      serverConfig.BASE_SERVER + '/webauthn/authentication-options',
+      {},
+    );
+
+    return { options };
+  } catch (err) {
+    if (err instanceof PostError) {
+      return {
+        error: err.reason || 'network-failure',
+      };
+    }
+
+    throw err;
+  }
+}
+
+async function webauthnVerifyAuthentication({
+  response,
+}: {
+  response: unknown;
+}) {
+  let res: { token?: string };
+
+  try {
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+
+    res = await post(
+      serverConfig.BASE_SERVER + '/webauthn/authentication-verify',
+      {
+        response,
+      },
+    );
+  } catch (err) {
+    if (err instanceof PostError) {
+      return {
+        error: err.reason || 'network-failure',
+      };
+    }
+
+    throw err;
+  }
+
+  if (!res.token) {
+    throw new Error('webauthn login: User token not set');
+  }
+
+  await asyncStorage.setItem('user-token', res.token);
   return {};
 }
