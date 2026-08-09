@@ -26,36 +26,35 @@ import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
 import * as undo from '#server/undo';
 import { once, sequential } from '#shared/async';
-import { isMissingSchemaErrorMessage } from '#shared/errors';
+import { isMissingSchemaError } from '#shared/errors';
 import { getIn, setIn } from '#shared/util';
 import type { MetadataPrefs } from '#types/prefs';
 
 import * as encoder from './encoder';
+import { notifyDeferredMessages } from './notifications';
 import { rebuildMerkleHash } from './repair';
+import {
+  deserializeValue,
+  deserializeValueSafe,
+  isUnknownFormatValue,
+  serializeValue,
+} from './serialization';
+import type { UnknownFormatValue } from './serialization';
 import { isError } from './utils';
 
 export { makeTestMessage } from './make-test-message';
 export { resetSync } from './reset';
 export { repairSync } from './repair';
+export {
+  deserializeValue,
+  deserializeValueSafe,
+  isUnknownFormatValue,
+  serializeValue,
+} from './serialization';
+export type { UnknownFormatValue } from './serialization';
 
 const FULL_SYNC_DELAY = 1000;
 let SYNCING_MODE = 'enabled';
-// Only notify the user once per loaded budget about data deferred
-// because it comes from a newer version of the app (reset on budget
-// load; the client-side notification id dedupes while it's displayed,
-// this additionally avoids re-nagging after the user dismisses it)
-let hasNotifiedDeferredMessages = false;
-
-export function resetDeferredMessagesNotification() {
-  hasNotifiedDeferredMessages = false;
-}
-
-export function notifyDeferredMessages() {
-  if (!hasNotifiedDeferredMessages) {
-    hasNotifiedDeferredMessages = true;
-    app.events.emit('sync', { type: 'deferred-messages' });
-  }
-}
 type SyncingMode = 'enabled' | 'offline' | 'disabled' | 'import';
 
 export function setSyncingMode(mode: SyncingMode) {
@@ -92,13 +91,6 @@ export function checkSyncingMode(mode: SyncingMode): boolean {
     default:
       throw new Error('checkSyncingMode: invalid mode: ' + mode);
   }
-}
-
-// A SQLite error meaning the message references a table or column this
-// client's schema doesn't have because it was added by a newer version
-// of the app.
-export function isMissingSchemaError(error: unknown): boolean {
-  return error instanceof Error && isMissingSchemaErrorMessage(error.message);
 }
 
 // Record a message that can't be applied yet because it targets schema
@@ -139,6 +131,25 @@ function apply(
 
   if (dataset === 'prefs') {
     // Do nothing, it doesn't exist in the db
+  } else if (dataset === 'spreadsheet_cells') {
+    // Legacy dataset from ancient versions; its table is keyed by
+    // `name`, not `id`, so the write below could never apply. The data
+    // is a derived cache — ignore the message instead of failing (or
+    // deferring it forever with a false "update the app" notice)
+  } else if (isUnknownFormatValue(value)) {
+    // The value was serialized by a newer version in a format this one
+    // can't decode — defer it whole, like a missing table/column
+    if (deferUnknownSchema) {
+      deferMessage(msg);
+      return false;
+    }
+    throw new SyncError('invalid-schema', {
+      error: { message: 'Unknown value format: ' + value.raw, stack: '' },
+      query: {
+        sql: `INSERT INTO ${dataset} (id, ${column}) VALUES (?, ?)`,
+        params: [row, value.raw],
+      },
+    });
   } else {
     let query;
     try {
@@ -221,33 +232,6 @@ async function fetchAll(table, ids) {
   return results;
 }
 
-export function serializeValue(value: string | number | null): string {
-  if (value === null) {
-    return '0:';
-  } else if (typeof value === 'number') {
-    return 'N:' + value;
-  } else if (typeof value === 'string') {
-    return 'S:' + value;
-  }
-
-  throw new Error('Unserializable value type: ' + JSON.stringify(value));
-}
-
-export function deserializeValue(value: string): string | number | null {
-  const type = value[0];
-  switch (type) {
-    case '0':
-      return null;
-    case 'N':
-      return parseFloat(value.slice(2));
-    case 'S':
-      return value.slice(2);
-    default:
-  }
-
-  throw new Error('Invalid type key for value: ' + value);
-}
-
 // TODO make this type stricter.
 type DataMap = Map<string, unknown>;
 type SyncListener = (oldData: DataMap, newData: DataMap) => unknown;
@@ -322,7 +306,7 @@ export type Message = {
   old?: unknown;
   row: string;
   timestamp: Timestamp;
-  value: string | number | null;
+  value: string | number | null | UnknownFormatValue;
 };
 
 export const applyMessages = sequential(
@@ -403,7 +387,7 @@ export const applyMessages = sequential(
     // nothing is changed. This is critical to maintain consistency. We
     // also avoid any side effects to in-memory objects, and apply them
     // after this succeeds.
-    let hasDeferredMessages = false;
+    const deferredMessages = new Set<Message>();
     db.transaction(() => {
       const added = new Set();
 
@@ -417,17 +401,33 @@ export const applyMessages = sequential(
             deferUnknownSchema,
           );
 
-          if (dataset === 'prefs') {
-            prefsToSet[row] = value;
-          } else if (applied) {
-            // Keep track of which items have been added it in this sync
-            // so it knows whether they already exist in the db or not. We
-            // ignore any changes to the spreadsheet. Deferred messages
-            // must not be tracked: their row wasn't created, so a later
-            // message for a known column still needs to INSERT it.
-            added.add(dataset + row);
+          if (applied) {
+            if (dataset === 'prefs') {
+              // An unknown-format pref value can't be stored (it would
+              // corrupt the metadata) nor replayed (prefs aren't a
+              // table) — leave the local pref as-is
+              if (!isUnknownFormatValue(value)) {
+                prefsToSet[row] = value;
+              }
+            } else {
+              // Keep track of which items have been added it in this sync
+              // so it knows whether they already exist in the db or not. We
+              // ignore any changes to the spreadsheet.
+              added.add(dataset + row);
+
+              // Special treatment for some synced prefs. Only for
+              // messages that actually applied — an old or deferred
+              // message must not flip the in-memory budget type to a
+              // stale or undecodable value
+              if (dataset === 'preferences' && row === 'budgetType') {
+                void setBudgetType(value);
+              }
+            }
           } else {
-            hasDeferredMessages = true;
+            // Deferred messages must not be tracked in `added`: their
+            // row wasn't created, so a later message for a known column
+            // still needs to INSERT it
+            deferredMessages.add(msg);
           }
         }
 
@@ -439,11 +439,6 @@ export const applyMessages = sequential(
           );
 
           currentMerkle = merkle.insert(currentMerkle, timestamp);
-        }
-
-        // Special treatment for some synced prefs
-        if (dataset === 'preferences' && row === 'budgetType') {
-          void setBudgetType(value);
         }
       }
 
@@ -510,7 +505,11 @@ export const applyMessages = sequential(
 
     _syncListeners.forEach(func => func(oldData, newData));
 
-    const tables = getTablesFromMessages(messages.filter(msg => !msg.old));
+    // Only tables that actually changed — deferred messages wrote
+    // nothing, so they must not trigger client cache invalidation
+    const tables = getTablesFromMessages(
+      messages.filter(msg => !msg.old && !deferredMessages.has(msg)),
+    );
     app.events.emit('sync', {
       type: 'applied',
       tables,
@@ -518,11 +517,15 @@ export const applyMessages = sequential(
       prevData: oldData,
     });
 
-    if (hasDeferredMessages) {
+    if (deferredMessages.size > 0) {
       notifyDeferredMessages();
     }
 
-    return messages;
+    // Deferred messages wrote nothing, so they don't count as received
+    // — this also keeps their tables out of the `success` event in
+    // `fullSync`. Old messages stay: they were processed (merkled),
+    // just superseded.
+    return messages.filter(msg => !deferredMessages.has(msg));
   },
 );
 
@@ -828,7 +831,7 @@ async function _fullSync(
     receivedMessages = await receiveMessages(
       res.messages.map(msg => ({
         ...msg,
-        value: deserializeValue(msg.value as string),
+        value: deserializeValueSafe(msg.value as string),
       })),
     );
   }

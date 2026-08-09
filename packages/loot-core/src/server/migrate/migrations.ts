@@ -147,6 +147,17 @@ function checkDatabaseValidity(
   appliedIds: number[],
   available: string[],
 ): void {
+  // A migrated database with no migrations on disk means the install is
+  // broken (unreadable/empty migrations directory) — without this guard
+  // every applied id would count as "newer unknown" below and the
+  // checks would pass vacuously
+  if (available.length === 0 && appliedIds.length > 0) {
+    logger.error('No migrations found on disk for a migrated database:', {
+      appliedIds,
+    });
+    throw new Error('out-of-sync-migrations');
+  }
+
   // Tolerate applied migrations newer than anything this app knows
   // about: they were run by a newer version of the app on this budget.
   // This is safe because migrations are additive-only (enforced by

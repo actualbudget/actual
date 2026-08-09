@@ -95,6 +95,24 @@ describe('Migrations', () => {
     );
   });
 
+  test('rejects a migrated database when no migrations exist on disk', async () => {
+    await withMigrationsDir(__dirname + '/../../mocks/migrations', async () => {
+      await migrate(db.getDatabase());
+    });
+
+    // A directory with no migration files in it — a broken install must
+    // not pass validation just because every applied id looks "newer
+    // than anything known"
+    await withMigrationsDir(
+      __dirname + '/../../mocks/empty-migrations',
+      async () => {
+        await expect(migrate(db.getDatabase())).rejects.toThrow(
+          'out-of-sync-migrations',
+        );
+      },
+    );
+  });
+
   test('app runs database migrations', async () => {
     return withMigrationsDir(
       __dirname + '/../../mocks/migrations',

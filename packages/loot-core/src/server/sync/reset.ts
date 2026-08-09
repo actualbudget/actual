@@ -7,6 +7,9 @@ import * as db from '#server/db';
 import { runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 
+import { notifyDroppedMessages } from './notifications';
+import { deleteStalePendingMessages } from './replay';
+
 export async function resetSync(
   keyState?,
 ): Promise<{ error?: { reason: string; meta?: unknown } }> {
@@ -27,7 +30,28 @@ export async function resetSync(
     return { error };
   }
 
+  // Deferred messages hold changes from a newer app version that this
+  // client acknowledged into its merkle but couldn't apply yet.
+  // Uploading this file as the new source of truth discards them for
+  // every device — reset is a destructive last-resort tool, so proceed,
+  // but tell the user afterwards (see `notifyDroppedMessages`).
+  // TODO: a pre-reset confirmation dialog would be better UX; add one
+  // in the client if this notification proves too subtle
+  let discardedDeferredCount = 0;
+
   await runMutator(async () => {
+    // Deferred messages belong to the discarded message log; replaying
+    // them later would resurrect rows hard-deleted below as empty
+    // stubs. Deleted inside the mutator so messages deferred by an
+    // in-flight sync during the cloud round-trips above are included.
+    // Stale rows (superseded by newer writes, or legacy datasets) go
+    // first, uncounted — only real user-visible losses feed the
+    // warning notification below.
+    deleteStalePendingMessages();
+    discardedDeferredCount = Number(
+      db.runQuery('DELETE FROM messages_pending').changes,
+    );
+
     // TOOD: We could automatically generate the list of tables to
     // cleanup by looking at the schema
     //
@@ -36,9 +60,6 @@ export async function resetSync(
     db.execQuery(`
       DELETE FROM messages_crdt;
       DELETE FROM messages_clock;
-      -- Deferred messages belong to the discarded message log; replaying
-      -- them later would resurrect rows hard-deleted below as empty stubs
-      DELETE FROM messages_pending;
       DELETE FROM transactions WHERE tombstone = 1;
       DELETE FROM accounts WHERE tombstone = 1;
       DELETE FROM payees WHERE tombstone = 1;
@@ -51,6 +72,10 @@ export async function resetSync(
     `);
     await db.loadClock();
   });
+
+  if (discardedDeferredCount > 0) {
+    notifyDroppedMessages();
+  }
 
   await prefs.savePrefs({
     groupId: null,

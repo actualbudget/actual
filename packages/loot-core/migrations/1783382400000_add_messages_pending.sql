@@ -11,7 +11,9 @@ CREATE TABLE messages_pending
    row TEXT NOT NULL,
    column TEXT NOT NULL,
    timestamp TEXT NOT NULL,
-   value BLOB NOT NULL,
+   -- The serialized string form, e.g. "S:hello" (see `serializeValue`),
+   -- unlike messages_crdt.value which stores binary
+   value TEXT NOT NULL,
    PRIMARY KEY (dataset, row, column));
 
 COMMIT;

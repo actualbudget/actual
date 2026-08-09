@@ -54,12 +54,15 @@ function getUnsafeZipError(meta: UnsafeZipMeta): string {
 // plain English strings. User-facing, translated equivalents live in the
 // desktop-client (`src/util/error.ts`).
 
-// A SQLite error message meaning a query referenced a table or column
-// that doesn't exist in this database's schema. SQLite reports a missing
+// A SQLite error meaning a query referenced a table or column that
+// doesn't exist in this database's schema. SQLite reports a missing
 // column as "no such column" in UPDATE/SELECT statements but as "has no
 // column named" in INSERT statements.
-export function isMissingSchemaErrorMessage(message: string): boolean {
-  return /no such (table|column)|has no column named/i.test(message);
+export function isMissingSchemaError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    /no such (table|column)|has no column named/i.test(error.message)
+  );
 }
 
 export function isDatabaseSchemaMismatch(meta?: unknown): boolean {
@@ -72,7 +75,12 @@ export function isDatabaseSchemaMismatch(meta?: unknown): boolean {
     'message' in meta.error &&
     typeof meta.error.message === 'string'
   ) {
-    return isMissingSchemaErrorMessage(meta.error.message);
+    // Deliberately narrower than `isMissingSchemaError`: sync defers
+    // INSERT-form errors ("has no column named") instead of surfacing
+    // them, so one that reaches the UI indicates a damaged local
+    // database — telling the user to update the app would be wrong
+    // there
+    return /no such (table|column)/i.test(meta.error.message);
   }
   return false;
 }

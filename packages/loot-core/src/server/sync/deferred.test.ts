@@ -5,7 +5,7 @@ import * as db from '#server/db';
 
 import { replayPendingMessages } from './replay';
 
-import { applyMessages, setSyncingMode } from './index';
+import { applyMessages, deserializeValueSafe, setSyncingMode } from './index';
 
 beforeEach(() => {
   setSyncingMode('enabled');
@@ -196,5 +196,199 @@ describe('Deferred sync messages (newer schema)', () => {
     expect(g1?.name).toBe('flux capacitor');
     pending = getPending();
     expect(pending.length).toBe(0);
+  });
+
+  it('drops a message that can never apply without blocking the rest', async () => {
+    await applyMessages(
+      [
+        {
+          dataset: 'gadgets',
+          row: 'g1',
+          column: 'size',
+          value: -5,
+          timestamp: sendTimestamp(),
+        },
+        {
+          dataset: 'gadgets',
+          row: 'g2',
+          column: 'size',
+          value: 10,
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
+    expect(getPending().length).toBe(2);
+
+    // The migration arrives with a CHECK constraint that the first
+    // deferred value violates; replay must still apply the second one
+    // and must not leave the failing message wedged in the queue
+    db.execQuery(
+      'CREATE TABLE gadgets (id TEXT PRIMARY KEY, size INTEGER CHECK(size >= 0))',
+    );
+    replayPendingMessages();
+
+    const g2 = await db.first<{ size: number }>(
+      'SELECT * FROM gadgets WHERE id = ?',
+      ['g2'],
+    );
+    expect(g2?.size).toBe(10);
+    expect(getPending().length).toBe(0);
+  });
+
+  it('defers an inbound message whose value uses a newer serialization format', async () => {
+    await applyMessages(
+      [
+        {
+          // Even though the column exists, the value can't be decoded —
+          // the message must defer instead of wedging the sync
+          dataset: 'transactions',
+          row: 't1',
+          column: 'notes',
+          value: deserializeValueSafe('B:true'),
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
+
+    // Deferred with its original encoding intact, and acknowledged into
+    // the crdt log with the same bytes the sender wrote
+    const pending = getPending();
+    expect(pending.length).toBe(1);
+    expect(pending[0].value).toBe('B:true');
+    const crdt = db.runQuery<{ value: string }>(
+      'SELECT * FROM messages_crdt',
+      [],
+      true,
+    );
+    expect(crdt.length).toBe(1);
+    expect(String(crdt[0].value)).toBe('B:true');
+  });
+
+  it('applies dependency chains among deferred cells', async () => {
+    await applyMessages(
+      [
+        {
+          dataset: 'gadgets',
+          row: 'g1',
+          column: 'a',
+          value: 'A',
+          timestamp: sendTimestamp(),
+        },
+        {
+          dataset: 'gadgets',
+          row: 'g1',
+          column: 'b',
+          value: 'B',
+          timestamp: sendTimestamp(),
+        },
+        {
+          dataset: 'gadgets',
+          row: 'g1',
+          column: 'c',
+          value: 'C',
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
+    expect(getPending().length).toBe(3);
+
+    // Row-level constraints form a chain: `a` needs `b` set, `b` needs
+    // `c` set — timestamp order alone can't apply these in one pass, so
+    // replay must keep retrying while passes make progress
+    db.execQuery(`
+      CREATE TABLE gadgets
+        (id TEXT PRIMARY KEY, a TEXT, b TEXT, c TEXT,
+         CHECK(a IS NULL OR b IS NOT NULL),
+         CHECK(b IS NULL OR c IS NOT NULL))
+    `);
+    replayPendingMessages();
+
+    const g1 = await db.first<{ a: string; b: string; c: string }>(
+      'SELECT * FROM gadgets WHERE id = ?',
+      ['g1'],
+    );
+    expect(g1?.a).toBe('A');
+    expect(g1?.b).toBe('B');
+    expect(g1?.c).toBe('C');
+    expect(getPending().length).toBe(0);
+  });
+
+  it('does not replay a deferred value over a newer applied write', async () => {
+    await applyMessages(
+      [
+        {
+          dataset: 'transactions',
+          row: 't1',
+          column: 'notes',
+          value: deserializeValueSafe('B:old-format'),
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
+    // A later, decodable write to the same cell applies through normal
+    // sync while the undecodable one sits pending
+    await applyMessages(
+      [
+        {
+          dataset: 'transactions',
+          row: 't1',
+          column: 'notes',
+          value: 'newer value',
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
+    expect(getPending().length).toBe(1);
+
+    replayPendingMessages();
+
+    // Last write wins: the stale pending value is discarded, not applied
+    const t1 = await db.first<{ notes: string }>(
+      'SELECT * FROM transactions WHERE id = ?',
+      ['t1'],
+    );
+    expect(t1?.notes).toBe('newer value');
+    expect(getPending().length).toBe(0);
+  });
+
+  it('keeps a message whose value uses a newer serialization format', async () => {
+    await applyMessages(
+      [
+        {
+          dataset: 'gadgets',
+          row: 'g1',
+          column: 'name',
+          value: 'flux capacitor',
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
+    // A value prefix this version's deserializeValue doesn't know,
+    // as a newer app version could write it
+    db.runQuery(
+      `INSERT INTO messages_pending (timestamp, dataset, row, column, value)
+         VALUES (?, 'gadgets', 'g2', 'name', 'B:true')`,
+      [sendTimestamp().toString()],
+    );
+
+    db.execQuery('CREATE TABLE gadgets (id TEXT PRIMARY KEY, name TEXT)');
+    replayPendingMessages();
+
+    // The known-format message applied; the newer-format one stays
+    // pending for a future upgrade instead of aborting the replay
+    const g1 = await db.first<{ name: string }>(
+      'SELECT * FROM gadgets WHERE id = ?',
+      ['g1'],
+    );
+    expect(g1?.name).toBe('flux capacitor');
+    const pending = getPending();
+    expect(pending.length).toBe(1);
+    expect(pending[0].row).toBe('g2');
   });
 });
