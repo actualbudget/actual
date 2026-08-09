@@ -308,7 +308,7 @@ export function CommandBar() {
   return (
     <Command.Dialog
       vimBindings
-      loop={true}
+      loop
       open={open}
       onOpenChange={setOpen}
       label={t('Command Bar')}
