@@ -55,6 +55,8 @@ export function WebAuthnRegistration({
       } else {
         onRegistered();
       }
+    } catch {
+      onError('network-failure');
     } finally {
       setLoading(false);
     }

@@ -128,6 +128,8 @@ function WebAuthnLogin({ setError, dispatch }) {
       } else {
         dispatch(loggedIn());
       }
+    } catch {
+      setError('network-failure');
     } finally {
       setLoading(false);
     }

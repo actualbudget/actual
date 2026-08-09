@@ -63,16 +63,18 @@ function consumePendingChallenge(
   type: PendingChallengeType,
 ): boolean {
   const accountDb = getAccountDb();
-  const row = accountDb.first(
-    'SELECT challenge FROM pending_webauthn_challenges WHERE challenge = ? AND type = ? AND expiry_time > ?',
-    [challenge, type, Date.now()],
-  );
-  if (!row) return false;
-  accountDb.mutate(
-    'DELETE FROM pending_webauthn_challenges WHERE challenge = ?',
-    [challenge],
-  );
-  return true;
+  return accountDb.transaction(() => {
+    const row = accountDb.first(
+      'SELECT challenge FROM pending_webauthn_challenges WHERE challenge = ? AND type = ? AND expiry_time > ?',
+      [challenge, type, Date.now()],
+    );
+    if (!row) return false;
+    accountDb.mutate(
+      'DELETE FROM pending_webauthn_challenges WHERE challenge = ?',
+      [challenge],
+    );
+    return true;
+  });
 }
 
 function getStoredCredential(): StoredWebAuthnCredential | null {
