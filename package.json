@@ -111,11 +111,6 @@
       "built": true
     }
   },
-  "allowScripts": {
-    "bcrypt": "6.0.0",
-    "better-sqlite3": "12.11.1",
-    "argon2": "0.44.0"
-  },
   "optionalDependencies": {
     "glob-hasher-linux-arm64-gnu": "1.4.2"
   },
@@ -134,5 +129,10 @@
     "node": ">=22.18.0",
     "yarn": "^4.9.1"
   },
-  "packageManager": "yarn@4.17.1"
+  "packageManager": "yarn@4.17.1",
+  "allowScripts": {
+    "bcrypt": "6.0.0",
+    "better-sqlite3": "12.11.1",
+    "argon2": "0.44.0"
+  }
 }
