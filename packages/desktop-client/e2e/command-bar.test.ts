@@ -65,15 +65,53 @@ test.describe('Command bar', () => {
 
     // Navigate to schedule page
     await page.keyboard.press('ControlOrMeta+k');
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('ArrowDown'); // Select second suggestion - Schedules
     await expect(page).toMatchThemeScreenshots();
 
-    await page.keyboard.press('Enter');
+    await page.getByRole('option', { name: 'Schedules', exact: true }).click();
     await expect(
       page.getByRole('button', {
         name: 'Add new schedule',
       }),
     ).toBeVisible();
+  });
+
+  test('Shows and navigates to recent command bar entries', async () => {
+    await page.keyboard.press('ControlOrMeta+k');
+    await expect(page.getByText('Recent', { exact: true })).not.toBeVisible();
+
+    await page.getByRole('option', { name: 'Reports', exact: true }).click();
+    await expect(page.getByTestId('reports-page')).toBeVisible();
+    await expect(page.getByText('Loading reports...')).not.toBeVisible({
+      timeout: 10000,
+    });
+    await page.getByRole('button', { name: 'Rename dashboard' }).click();
+    await page.getByRole('textbox').fill('Reports');
+    await page.getByRole('textbox').press('Enter');
+    await expect(
+      page.getByRole('button', { name: 'Rename dashboard' }),
+    ).toBeVisible();
+
+    await page.keyboard.press('ControlOrMeta+k');
+    await page.getByRole('option', { name: 'Tags', exact: true }).click();
+    await expect(page).toHaveURL(/\/tags$/);
+
+    await page.keyboard.press('ControlOrMeta+k');
+    const recentGroup = page
+      .locator('[cmdk-group]')
+      .filter({ has: page.getByText('Recent', { exact: true }) });
+
+    await expect(recentGroup).toBeVisible();
+    await expect(recentGroup.getByRole('option')).toHaveText([
+      'Reports',
+      'Budget',
+    ]);
+    await expect(
+      page.locator('[cmdk-group]:not([hidden])').first(),
+    ).toContainText('Recent');
+
+    await recentGroup
+      .getByRole('option', { name: 'Reports', exact: true })
+      .click();
+    await expect(page.getByTestId('reports-page')).toBeVisible();
   });
 });
