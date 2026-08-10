@@ -173,7 +173,6 @@ function createPluginManager(pluginsDir: string) {
       fs.rmSync(tempZipPath, { force: true });
       extractedPlugins.delete(tempSlug);
     }
-    }
   }
 
   async function reloadPlugins(): Promise<void> {
