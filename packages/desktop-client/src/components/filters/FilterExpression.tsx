@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -40,7 +40,7 @@ export function FilterExpression<T extends RuleConditionEntity>({
   onDelete,
 }: FilterExpressionProps<T>) {
   const { t } = useTranslation();
-  
+
   const [editing, setEditing] = useState(false);
   const triggerRef = useRef(null);
 
