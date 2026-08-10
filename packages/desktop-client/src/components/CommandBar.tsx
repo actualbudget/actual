@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ComponentType, ReactNode, SVGProps } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router';
 
 import {
   SvgCog,
@@ -39,7 +40,6 @@ import {
 import { CellValue, CellValueText } from './spreadsheet/CellValue';
 
 type SearchableItem = {
-  id: string;
   /** The name to display and use for searching */
   name: string;
   /**
@@ -49,13 +49,13 @@ type SearchableItem = {
    */
   content?: ReactNode;
   Icon: ComponentType<SVGProps<SVGSVGElement>>;
+  path: string;
 };
 
 type SearchSection = {
   key: string;
   heading: string;
   items: Readonly<SearchableItem[]>;
-  onSelect: (item: Pick<SearchableItem, 'id'>) => void;
 };
 
 function BalanceRow<
@@ -94,31 +94,30 @@ export function CommandBar() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [recentPaths, setRecentPaths] = useState<string[]>([]);
   const navigate = useNavigate();
+  const location = useLocation();
   const [budgetName] = useMetadataPref('budgetName');
   const { modalStack } = useModalState();
 
   const navigationItems = useMemo(
     () => [
-      { id: 'budget', name: t('Budget'), path: '/budget', Icon: SvgWallet },
+      { name: t('Budget'), path: '/budget', Icon: SvgWallet },
       {
-        id: 'reports-nav',
         name: t('Reports'),
         path: '/reports',
         Icon: SvgReports,
       },
       {
-        id: 'schedules',
         name: t('Schedules'),
         path: '/schedules',
         Icon: SvgCalendar3,
       },
-      { id: 'payees', name: t('Payees'), path: '/payees', Icon: SvgStoreFront },
-      { id: 'rules', name: t('Rules'), path: '/rules', Icon: SvgTuning },
-      { id: 'tags', name: t('Tags'), path: '/tags', Icon: SvgTag },
-      { id: 'settings', name: t('Settings'), path: '/settings', Icon: SvgCog },
+      { name: t('Payees'), path: '/payees', Icon: SvgStoreFront },
+      { name: t('Rules'), path: '/rules', Icon: SvgTuning },
+      { name: t('Tags'), path: '/tags', Icon: SvgTag },
+      { name: t('Settings'), path: '/settings', Icon: SvgCog },
       {
-        id: 'accounts',
         name: t('All Accounts'),
         path: '/accounts',
         content: (
@@ -138,11 +137,15 @@ export function CommandBar() {
     if (!open) setSearch('');
   }, [open]);
 
-  const { data: allAccounts = [] } = useAccounts();
-  const { data: customReports = [] } = useReports();
-  const { data: dashboardPages = [] } = useDashboardPages();
+  const { data: allAccounts } = useAccounts();
+  const { data: customReports } = useReports();
+  const { data: dashboardPages, isPending: isDashboardPagesPending } =
+    useDashboardPages();
 
-  const accounts = allAccounts.filter(acc => !acc.closed);
+  const accounts = useMemo(
+    () => (allAccounts ?? []).filter(acc => !acc.closed),
+    [allAccounts],
+  );
 
   const openEventListener = useCallback(
     (e: KeyboardEvent) => {
@@ -161,85 +164,135 @@ export function CommandBar() {
     return () => document.removeEventListener('keydown', openEventListener);
   }, [openEventListener]);
 
-  const handleNavigate = useCallback(
-    (path: string) => {
-      setOpen(false);
-      void navigate(path);
-    },
-    [navigate],
+  function handleNavigate(path: string) {
+    setOpen(false);
+    void navigate(path);
+  }
+
+  const sections = useMemo<SearchSection[]>(
+    () => [
+      {
+        key: 'navigation',
+        heading: t('Navigation'),
+        items: navigationItems,
+      },
+      {
+        key: 'accounts',
+        heading: t('Accounts'),
+        items: [
+          {
+            name: t('On Budget'),
+            path: '/accounts/onbudget',
+            content: (
+              <BalanceRow<'account', 'onbudget-accounts-balance'>
+                label={t('On Budget')}
+                binding={onBudgetAccountBalance()}
+              />
+            ),
+            Icon: SvgLibrary,
+          },
+          {
+            name: t('Off Budget'),
+            path: '/accounts/offbudget',
+            content: (
+              <BalanceRow<'account', 'offbudget-accounts-balance'>
+                label={t('Off Budget')}
+                binding={offBudgetAccountBalance()}
+              />
+            ),
+            Icon: SvgLibrary,
+          },
+          ...accounts.map(account => ({
+            name: account.name,
+            path: `/accounts/${account.id}`,
+            content: (
+              <BalanceRow<'account', 'balance'>
+                label={account.name}
+                binding={accountBalance(account.id)}
+              />
+            ),
+            Icon: SvgPiggyBank,
+          })),
+        ],
+      },
+      {
+        key: 'reports',
+        heading: t('Reports'),
+        items: (dashboardPages ?? []).map(dashboardPage => ({
+          name: dashboardPage.name,
+          path: `/reports/${dashboardPage.id}`,
+          Icon: SvgReports,
+        })),
+      },
+      {
+        key: 'reports-custom',
+        heading: t('Custom Reports'),
+        items: (customReports ?? []).map(report => ({
+          name: report.name,
+          path: `/reports/custom/${report.id}`,
+          Icon: SvgNotesPaperText,
+        })),
+      },
+    ],
+    [accounts, customReports, dashboardPages, navigationItems, t],
   );
 
-  const sections: SearchSection[] = [
-    {
-      key: 'navigation',
-      heading: t('Navigation'),
-      items: navigationItems,
-      onSelect: ({ id }) => {
-        const item = navigationItems.find(item => item.id === id);
-        if (item) handleNavigate(item.path);
-      },
-    },
-    {
-      key: 'accounts',
-      heading: t('Accounts'),
-      items: [
-        {
-          id: 'onbudget',
-          name: t('On Budget'),
-          content: (
-            <BalanceRow<'account', 'onbudget-accounts-balance'>
-              label={t('On Budget')}
-              binding={onBudgetAccountBalance()}
-            />
-          ),
-          Icon: SvgLibrary,
-        },
-        {
-          id: 'offbudget',
-          name: t('Off Budget'),
-          content: (
-            <BalanceRow<'account', 'offbudget-accounts-balance'>
-              label={t('Off Budget')}
-              binding={offBudgetAccountBalance()}
-            />
-          ),
-          Icon: SvgLibrary,
-        },
-        ...accounts.map(account => ({
-          ...account,
-          content: (
-            <BalanceRow<'account', 'balance'>
-              label={account.name}
-              binding={accountBalance(account.id)}
-            />
-          ),
-          Icon: SvgPiggyBank,
-        })),
-      ],
-      onSelect: ({ id }) => handleNavigate(`/accounts/${id}`),
-    },
-    {
-      key: 'reports',
-      heading: t('Reports'),
-      items: dashboardPages.map(dashboardPage => ({
-        ...dashboardPage,
-        Icon: SvgReports,
-      })),
-      onSelect: ({ id }) => handleNavigate(`/reports/${id}`),
-    },
-    {
-      key: 'reports-custom',
-      heading: t('Custom Reports'),
-      items: customReports.map(report => ({
-        ...report,
-        Icon: SvgNotesPaperText,
-      })),
-      onSelect: ({ id }) => handleNavigate(`/reports/custom/${id}`),
-    },
-  ];
+  const allItems = useMemo(
+    () => sections.flatMap(section => section.items),
+    [sections],
+  );
+
+  // Hook to track route visits and store them in state
+  useEffect(() => {
+    // `/reports` is an alias which redirects to the first dashboard. Do not
+    // leave the alias in Recent while that redirect is resolving.
+    if (
+      location.pathname === '/reports' &&
+      (isDashboardPagesPending || (dashboardPages ?? []).length > 0)
+    ) {
+      return;
+    }
+
+    // Ensure route path is in the list of CommandBar items before storing it in state
+    const currentItem = allItems.find(item => item.path === location.pathname);
+    if (!currentItem) return;
+
+    setRecentPaths(paths => {
+      if (paths[0] === currentItem.path) return paths;
+      return [
+        currentItem.path,
+        ...paths.filter(path => path !== currentItem.path),
+      ];
+    });
+  }, [dashboardPages, allItems, isDashboardPagesPending, location.pathname]);
+
+  // Build "Recent" section with items
+  const recentSectionItems: SearchableItem[] = [];
+  for (const path of recentPaths) {
+    if (path === location.pathname) continue;
+
+    const item = allItems.find(item => item.path === path);
+    if (!item) continue;
+
+    recentSectionItems.push(item);
+    if (recentSectionItems.length === 3) break;
+  }
+
+  // Append "Recent" section to sections list if there are recent items
+  const sectionsWithRecent: SearchSection[] =
+    recentSectionItems.length > 0
+      ? [
+          {
+            key: 'recent',
+            heading: t('Recent'),
+            items: recentSectionItems,
+          },
+          ...sections,
+        ]
+      : sections;
 
   const searchLower = search.toLowerCase();
-  const filteredSections = sections.map(section => ({
+  const filteredSections = sectionsWithRecent.map(section => ({
     ...section,
     items: section.items.filter(item =>
       item.name.toLowerCase().includes(searchLower),
@@ -250,6 +303,7 @@ export function CommandBar() {
   return (
     <Command.Dialog
       vimBindings
+      loop
       open={open}
       onOpenChange={setOpen}
       label={t('Command Bar')}
@@ -321,11 +375,11 @@ export function CommandBar() {
                   },
                 })}
               >
-                {section.items.map(({ id, name, Icon, content }) => (
+                {section.items.map(({ name, path, Icon, content }) => (
                   <Command.Item
-                    key={id}
-                    onSelect={() => section.onSelect({ id })}
-                    value={name}
+                    key={path}
+                    onSelect={() => handleNavigate(path)}
+                    value={`${section.key}:${path}`}
                     className={css({
                       padding: '8px 16px',
                       cursor: 'pointer',
