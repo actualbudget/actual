@@ -18,7 +18,7 @@ Node.js v22 or higher is required for the @actual-app/sync-server npm package
 npm install --location=global --allow-scripts=bcrypt,better-sqlite3,argon2 @actual-app/sync-server
 ```
 
-The `--allow-scripts` flag is required on npm 11.16 and later: by default, npm blocks install scripts for native dependencies, and the sync server needs `bcrypt`, `better-sqlite3`, and `argon2` to build their native bindings during install. The flag authorizes those three packages specifically. See issue [#8584](https://github.com/actualbudget/actual/issues/8584) for background.
+On npm 11, `--allow-scripts` explicitly approves these packages and avoids the unreviewed-script warning. npm 12 blocks unapproved install scripts by default, so the flag is required there. The sync server needs `bcrypt`, `better-sqlite3`, and `argon2` to build their native bindings during install, and the flag authorizes those three packages specifically. See issue [#8584](https://github.com/actualbudget/actual/issues/8584) for background.
 
 After installing, you can execute actual-server commands directly in your terminal.
 
