@@ -1,13 +1,21 @@
 // Adversarial regression tests for PR #8519 (cross-version sync:
 // deferred messages). NOT part of the PR — written to try to break the
-// implementation during review.
+// implementation during review. Updated for the hardened revision
+// (per-message replay outcomes, quoteSqlId, unknown-format values,
+// stale-pending cleanup, dropped-message flow).
 import { getClock, Timestamp } from '@actual-app/crdt';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import * as db from '#server/db';
+import {
+  getMigrationsDir,
+  migrate,
+  withMigrationsDir,
+} from '#server/migrate/migrations';
 
 import { rebuildMerkleHash } from './repair';
 import { replayPendingMessages } from './replay';
+import { deserializeValueSafe } from './serialization';
 
 import { applyMessages, setSyncingMode } from './index';
 
@@ -61,12 +69,20 @@ describe('adversarial: deferred sync messages', () => {
           value: 'y',
           timestamp: sendTimestamp(),
         },
+        {
+          // Unknown value format for an existing column
+          dataset: 'transactions',
+          row: 't1',
+          column: 'notes',
+          value: deserializeValueSafe('B:true'),
+          timestamp: sendTimestamp(),
+        },
       ],
       true,
     );
 
     const rebuilt = rebuildMerkleHash();
-    expect(rebuilt.numMessages).toBe(3);
+    expect(rebuilt.numMessages).toBe(4);
     expect(rebuilt.trie.hash).toBe(getClock().merkle.hash);
   });
 
@@ -74,7 +90,6 @@ describe('adversarial: deferred sync messages', () => {
     const tsOld = sendTimestamp();
     const tsNew = sendTimestamp();
 
-    // Newer message arrives first (separate batch)
     await applyMessages(
       [
         {
@@ -87,7 +102,6 @@ describe('adversarial: deferred sync messages', () => {
       ],
       true,
     );
-    // Older message arrives later
     await applyMessages(
       [
         {
@@ -244,27 +258,56 @@ describe('adversarial: deferred sync messages', () => {
     expect(getPending().length).toBe(0);
   });
 
-  it('does NOT defer non-schema errors (syntax errors still fail the batch)', async () => {
-    await expect(
-      applyMessages(
-        [
-          {
-            dataset: 'transactions x',
-            row: 't1',
-            column: 'amount',
-            value: 1,
-            timestamp: sendTimestamp(),
-          },
-        ],
-        true,
-      ),
-    ).rejects.toMatchObject({ reason: 'invalid-schema' });
-    expect(getPending().length).toBe(0);
+  it('defers messages whose dataset/column are SQL keywords or contain spaces (quoteSqlId)', async () => {
+    await applyMessages(
+      [
+        {
+          // SQL keyword as a column name on an existing table
+          dataset: 'transactions',
+          row: 't1',
+          column: 'order',
+          value: 'x',
+          timestamp: sendTimestamp(),
+        },
+        {
+          // Identifier with a space — must be treated as an unknown
+          // table, not a syntax error that fails the batch
+          dataset: 'transactions x',
+          row: 't1',
+          column: 'amount',
+          value: 1,
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
+    expect(getPending().length).toBe(2);
   });
 
-  it('documents blast radius: one poisoned pending message rolls back the whole replay', async () => {
-    // A valid deferral and a poisoned one (violates a CHECK constraint
-    // once the table exists)
+  it('quote-escaping prevents identifier injection through column names', async () => {
+    const evil = 'a" , "b';
+    await applyMessages(
+      [
+        {
+          dataset: 'transactions',
+          row: 't1',
+          column: evil,
+          value: 'x',
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
+    // Deferred (unknown column), and replay keeps it pending — never
+    // interpreted as extra SQL
+    expect(getPending().length).toBe(1);
+    replayPendingMessages();
+    const pending = getPending();
+    expect(pending.length).toBe(1);
+    expect(pending[0].column).toBe(evil);
+  });
+
+  it('poisoned pending message is dropped without blocking valid replays', async () => {
     await applyMessages(
       [
         {
@@ -291,16 +334,59 @@ describe('adversarial: deferred sync messages', () => {
       'CREATE TABLE checked_table (id TEXT PRIMARY KEY, amount INTEGER CHECK(amount >= 0))',
     );
 
-    expect(() => replayPendingMessages()).toThrow();
+    // Must not throw; the CHECK-violating message is dropped, the valid
+    // one applies
+    replayPendingMessages();
 
-    // The whole transaction rolled back: even the valid message was not
-    // applied and stays pending
     const t1 = await db.first<{ future_col: string | null }>(
       'SELECT * FROM transactions WHERE id = ?',
       ['t1'],
     );
-    expect(t1?.future_col ?? null).toBeNull();
-    expect(getPending().length).toBe(2);
+    expect(t1?.future_col).toBe('good');
+    expect(getPending().length).toBe(0);
+    const c1 = await db.first<{ id: string } | null>(
+      'SELECT * FROM checked_table WHERE id = ?',
+      ['c1'],
+    );
+    expect(c1).toBeNull();
+  });
+
+  it('unknown-format value for an existing column defers, and a newer plain write supersedes it', async () => {
+    await applyMessages(
+      [
+        {
+          dataset: 'transactions',
+          row: 't1',
+          column: 'notes',
+          value: deserializeValueSafe('B:true'),
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
+    expect(getPending().length).toBe(1);
+
+    await applyMessages(
+      [
+        {
+          dataset: 'transactions',
+          row: 't1',
+          column: 'notes',
+          value: 'plain newer value',
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
+
+    // Replay must discard the stale pending value instead of applying it
+    replayPendingMessages();
+    const t1 = await db.first<{ notes: string }>(
+      'SELECT * FROM transactions WHERE id = ?',
+      ['t1'],
+    );
+    expect(t1?.notes).toBe('plain newer value');
+    expect(getPending().length).toBe(0);
   });
 
   it('local messages (no defer flag) still fail loudly on unknown schema', async () => {
@@ -316,8 +402,25 @@ describe('adversarial: deferred sync messages', () => {
       ]),
     ).rejects.toMatchObject({ reason: 'invalid-schema' });
     expect(getPending().length).toBe(0);
-    // and nothing leaked into the crdt log
     const crdt = db.runQuery('SELECT * FROM messages_crdt', [], true);
     expect(crdt.length).toBe(0);
+  });
+
+  it('rejects an unknown pre-cutoff migration id (corruption, not a newer version)', async () => {
+    // 1600000000000 is far below ADDITIVE_ONLY_CUTOFF and unknown
+    db.runQuery('INSERT INTO __migrations__ (id) VALUES (1600000000000)');
+    await withMigrationsDir(getMigrationsDir(), async () => {
+      await expect(migrate(db.getDatabase())).rejects.toThrow(
+        'out-of-sync-migrations',
+      );
+    });
+  });
+
+  it('tolerates an unknown post-cutoff migration id on the real migration chain', async () => {
+    db.runQuery('INSERT INTO __migrations__ (id) VALUES (9999999999999)');
+    await withMigrationsDir(getMigrationsDir(), async () => {
+      // Must not throw
+      await migrate(db.getDatabase());
+    });
   });
 });
