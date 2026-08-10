@@ -1,4 +1,8 @@
 // @ts-strict-ignore
+import * as nativeFs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+
 import * as db from '#server/db';
 
 import {
@@ -95,22 +99,64 @@ describe('Migrations', () => {
     );
   });
 
+  test('applies a pending migration whose id sorts below an applied one', async () => {
+    const dir = nativeFs.mkdtempSync(
+      path.join(os.tmpdir(), 'interleaved-migrations-'),
+    );
+    try {
+      nativeFs.writeFileSync(
+        path.join(dir, '1790000000001_a.sql'),
+        'CREATE TABLE interleave_a (id TEXT PRIMARY KEY);',
+      );
+      nativeFs.writeFileSync(
+        path.join(dir, '1790000000003_c.sql'),
+        'CREATE TABLE interleave_c (id TEXT PRIMARY KEY);',
+      );
+      await withMigrationsDir(dir, async () => {
+        await migrate(db.getDatabase());
+      });
+
+      // A later release ships a migration authored earlier: its id
+      // sorts between two already-applied ones. The upgrade must treat
+      // it as pending, not as an out-of-sync database.
+      nativeFs.writeFileSync(
+        path.join(dir, '1790000000002_b.sql'),
+        'CREATE TABLE interleave_b (id TEXT PRIMARY KEY);',
+      );
+      await withMigrationsDir(dir, async () => {
+        await migrate(db.getDatabase());
+      });
+
+      const applied = await getAppliedMigrations(db.getDatabase());
+      expect(applied).toContain(1790000000002);
+      const desc = await db.first<{ name: string }>(
+        "SELECT name FROM sqlite_master WHERE name = 'interleave_b'",
+      );
+      expect(desc?.name).toBe('interleave_b');
+    } finally {
+      nativeFs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   test('rejects a migrated database when no migrations exist on disk', async () => {
     await withMigrationsDir(__dirname + '/../../mocks/migrations', async () => {
       await migrate(db.getDatabase());
     });
 
-    // A directory with no migration files in it — a broken install must
-    // not pass validation just because every applied id looks "newer
-    // than anything known"
-    await withMigrationsDir(
-      __dirname + '/../../mocks/empty-migrations',
-      async () => {
+    // An empty migrations directory — a broken install must not pass
+    // validation just because every applied id looks unknown
+    const dir = nativeFs.mkdtempSync(
+      path.join(os.tmpdir(), 'empty-migrations-'),
+    );
+    try {
+      await withMigrationsDir(dir, async () => {
         await expect(migrate(db.getDatabase())).rejects.toThrow(
           'out-of-sync-migrations',
         );
-      },
-    );
+      });
+    } finally {
+      nativeFs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   test('app runs database migrations', async () => {

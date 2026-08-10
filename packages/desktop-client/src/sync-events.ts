@@ -18,10 +18,7 @@ import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
 
-// Notifications for sync events that can fire during budget load,
-// before prefs have loaded on the client — dispatched ahead of the
-// loaded-budget guard (accepting the budget-loading state instead), or
-// load-time emissions would be silently dropped
+// Notifications for sync events that can fire during budget load
 const syncNotifications: Partial<
   Record<ServerEvents['sync-event']['type'], () => Notification>
 > = {

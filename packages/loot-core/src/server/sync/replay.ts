@@ -3,61 +3,47 @@ import { logger } from '#platform/server/log';
 import * as db from '#server/db';
 import { isMissingSchemaError } from '#shared/errors';
 
+import { deserializeValue } from './serialization';
 import {
   notifyDeferredMessages,
   notifyDroppedMessages,
+  quoteSqlId,
   resetDeferredMessagesNotification,
-} from './notifications';
-import { deserializeValue } from './serialization';
+} from './utils';
 
-// SQLite failures that deterministically repeat on every attempt:
-// constraint violations and type rejections. Anything else non-schema
-// (locked/full/interrupted/browser storage errors) may be transient, so
-// it aborts the whole replay — everything stays pending and retries on
-// the next load. Substring match: SQLite prefixes these phrases with
-// error-specific detail.
+// SQLite failures that repeat identically on every attempt. Anything
+// else non-schema (locked/full/interrupted/storage errors) may be
+// transient and aborts the whole replay instead.
 const DETERMINISTIC_SQLITE_ERROR =
-  /constraint failed|datatype mismatch|cannot store/i;
+  /constraint failed|datatype mismatch|cannot store|generated column|string or blob too big|syntax error/i;
 
 type ReplayOutcome =
   | { outcome: 'applied' }
   | { outcome: 'newer-version' }
   | { outcome: 'failed'; error: Error };
 
-// Applies sync messages that were deferred because they referenced
-// tables/columns this client didn't have yet (sent by a newer version of
-// the app; see `deferMessage` in ./index.ts). Called on budget load right
-// after migrations run, but only when a sync server is configured (see
-// the call site in budgetfiles/app.ts). Messages that still reference
-// unknown schema (or use a value format this version can't decode) stay
-// pending for a future upgrade, and re-trigger the update-required
-// notification.
-//
-// Applying in timestamp order gives last-write-wins per cell. While a
-// column/table was missing, every message for it was deferred, so
-// nothing else wrote those cells — but an unknown-format value defers
-// even when its column exists, so a newer decodable write may have
-// applied through normal sync in the meantime. Pending rows superseded
-// by a newer acknowledged write are discarded up front.
-// Deletes pending rows whose loss is not user-visible data loss: rows
-// superseded by a newer write in the crdt log (last write wins per
-// cell), and rows for the legacy spreadsheet_cells dataset — `apply`
-// ignores it (see ./index.ts), but builds of this feature from before
-// that fix deferred them, and they could otherwise never drain. Also
-// used by `resetSync` so its discard warning only counts real losses.
+// Deletes pending rows superseded by a newer acknowledged write in the
+// crdt log (last write wins per cell — possible because an
+// unknown-format value defers even when its column exists). Also used
+// by `resetSync` so its discard warning only counts real losses.
 export function deleteStalePendingMessages(): void {
   db.runQuery(`
     DELETE FROM messages_pending
-      WHERE dataset = 'spreadsheet_cells'
-        OR EXISTS
-          (SELECT 1 FROM messages_crdt c
-            WHERE c.dataset = messages_pending.dataset
-              AND c.row = messages_pending.row
-              AND c.column = messages_pending.column
-              AND c.timestamp > messages_pending.timestamp)
+      WHERE EXISTS
+        (SELECT 1 FROM messages_crdt c
+          WHERE c.dataset = messages_pending.dataset
+            AND c.row = messages_pending.row
+            AND c.column = messages_pending.column
+            AND c.timestamp > messages_pending.timestamp)
   `);
 }
 
+// Applies sync messages that were deferred because they referenced
+// schema (or a value format) this client didn't have yet — see
+// `deferMessage` in ./index.ts. Called on budget load right after
+// migrations run, only when a sync server is configured. Messages that
+// still can't apply stay pending for a future upgrade and re-trigger
+// the update-required notification.
 export function replayPendingMessages(): void {
   resetDeferredMessagesNotification();
 
@@ -68,6 +54,7 @@ export function replayPendingMessages(): void {
   const replay = () => {
     deleteStalePendingMessages();
 
+    // Timestamp order gives last-write-wins per cell
     const pending = db.runQuery<db.DbPendingMessage>(
       'SELECT * FROM messages_pending ORDER BY timestamp',
       [],
@@ -82,46 +69,42 @@ export function replayPendingMessages(): void {
       try {
         value = deserializeValue(msg.value);
       } catch {
-        // A serialized-value format from an even newer version; it
-        // decodes once the user updates
+        // A value format from an even newer version; decodes after the
+        // user updates
         return { outcome: 'newer-version' };
       }
       try {
-        // The same per-cell write as `apply` in ./index.ts. A plain
-        // `ON CONFLICT DO UPDATE` upsert won't do here: SQLite checks
-        // row-level CHECK constraints against the INSERT candidate row
-        // (sibling columns NULL) before the conflict clause fires, so
-        // an existing row must take the UPDATE path for constraints
-        // involving sibling columns to see the merged row.
-        const exists =
+        // The same per-cell write as `apply` in ./index.ts. Not an
+        // upsert: SQLite checks row-level CHECK constraints against the
+        // INSERT candidate row (sibling columns NULL) before ON
+        // CONFLICT fires, so an existing row must take the UPDATE path.
+        const updated = Number(
           db.runQuery(
-            db.cache(`SELECT 1 FROM ${msg.dataset} WHERE id = ? LIMIT 1`),
-            [msg.row],
-            true,
-          ).length > 0;
-        db.runQuery(
-          db.cache(
-            exists
-              ? `UPDATE ${msg.dataset} SET ${msg.column} = ? WHERE id = ?`
-              : `INSERT INTO ${msg.dataset} (id, ${msg.column}) VALUES (?, ?)`,
-          ),
-          exists ? [value, msg.row] : [msg.row, value],
+            db.cache(
+              `UPDATE ${quoteSqlId(msg.dataset)} SET ${quoteSqlId(msg.column)} = ? WHERE id = ?`,
+            ),
+            [value, msg.row],
+          ).changes,
         );
+        if (updated === 0) {
+          db.runQuery(
+            db.cache(
+              `INSERT INTO ${quoteSqlId(msg.dataset)} (id, ${quoteSqlId(msg.column)}) VALUES (?, ?)`,
+            ),
+            [msg.row, value],
+          );
+        }
         return { outcome: 'applied' };
       } catch (e) {
         if (isMissingSchemaError(e)) {
-          // Still targets schema from an even newer version — keep it
-          // pending for the next upgrade
+          // Still targets schema from an even newer version
           return { outcome: 'newer-version' };
         }
         const error = e instanceof Error ? e : new Error(String(e));
         if (!DETERMINISTIC_SQLITE_ERROR.test(error.message)) {
           // Possibly transient — and errors like disk-full force SQLite
           // to roll back the enclosing transaction, so continuing would
-          // run the remaining statements in autocommit. Abort the whole
-          // replay: everything stays pending and retries on the next
-          // load (reported and notified by the catch around the
-          // transaction).
+          // run in autocommit. Abort; everything stays pending.
           throw error;
         }
         return { outcome: 'failed', error };
@@ -137,16 +120,10 @@ export function replayPendingMessages(): void {
       );
     }
 
-    // Applies each message, returning the ones that failed
-    // deterministically; with `dropFailed`, those are dropped instead.
-    // The value is still recorded in messages_crdt history when that
-    // happens, but this device then diverges for the cell (it would
-    // otherwise re-fail identically on every load, wedging replay).
     function processPass(
       msgs: db.DbPendingMessage[],
-      dropFailed: boolean,
-    ): db.DbPendingMessage[] {
-      const failed: db.DbPendingMessage[] = [];
+    ): Array<{ msg: db.DbPendingMessage; error: Error }> {
+      const failed: Array<{ msg: db.DbPendingMessage; error: Error }> = [];
       for (const msg of msgs) {
         const result = applyOne(msg);
         if (result.outcome === 'applied') {
@@ -154,38 +131,37 @@ export function replayPendingMessages(): void {
           deletePending(msg);
         } else if (result.outcome === 'newer-version') {
           newerVersionCount++;
-        } else if (dropFailed) {
-          captureException(result.error);
-          failedCount++;
-          deletePending(msg);
         } else {
-          failed.push(msg);
+          failed.push({ msg, error: result.error });
         }
       }
       return failed;
     }
 
-    // First pass in timestamp order, then keep retrying while passes
-    // make progress: a row-level constraint (NOT NULL/CHECK involving
-    // sibling columns) can fail a cell's INSERT until later pending
-    // messages fill the rest of the row, including through dependency
+    // Retry while passes make progress: a row-level constraint can need
+    // later cells to fill the row first, including through dependency
     // chains. Terminates because each retained pass strictly shrinks
-    // the failure list (worst case O(n) passes over the per-cell
-    // coalesced queue). Only failures surviving a no-progress pass are
-    // deterministic for good and get dropped.
-    let failed = processPass(pending, false);
+    // the failure list.
+    let failed = processPass(pending);
     while (failed.length > 0) {
-      const retried = processPass(failed, false);
+      const retried = processPass(failed.map(failure => failure.msg));
       if (retried.length === failed.length) {
-        processPass(retried, true);
+        // No progress: these repeat identically on every load, so drop
+        // them. The values stay in messages_crdt history, but this
+        // device now diverges for those cells.
+        for (const { msg, error } of retried) {
+          captureException(error);
+          failedCount++;
+          deletePending(msg);
+        }
         break;
       }
       failed = retried;
     }
 
     if (appliedCount > 0) {
-      // The replayed values were written outside of the normal sync
-      // pipeline, so force the spreadsheet cache to recompute
+      // The values were written outside the normal sync pipeline, so
+      // force the spreadsheet cache to recompute
       db.runQuery('DELETE FROM kvcache_key');
     }
   };
@@ -193,11 +169,9 @@ export function replayPendingMessages(): void {
   try {
     db.transaction(replay);
   } catch (e) {
-    // A possibly-transient error aborted the replay (see `applyOne`);
-    // everything stays pending and retries on the next load. Don't stay
-    // silent about the other devices' changes not being visible yet.
+    // Possibly-transient abort: nothing was dropped, everything retries
+    // on the next load — telemetry only, no user notification
     captureException(e instanceof Error ? e : new Error(String(e)));
-    notifyDroppedMessages();
     return;
   }
 
@@ -206,8 +180,6 @@ export function replayPendingMessages(): void {
       `Applied ${appliedCount} sync message(s) deferred from a newer version`,
     );
   }
-  // Dropped messages mean the other device's change is not visible on
-  // this one, so say so
   if (failedCount > 0) {
     notifyDroppedMessages();
   }

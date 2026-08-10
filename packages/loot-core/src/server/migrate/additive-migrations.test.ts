@@ -6,34 +6,30 @@ import { describe, expect, it } from 'vitest';
 
 import * as sqlite from '#platform/server/sqlite';
 
-import { applyMigration, getMigrationId, getMigrationList } from './migrations';
+import {
+  ADDITIVE_ONLY_CUTOFF,
+  applyMigration,
+  getMigrationId,
+  getMigrationList,
+  migrate,
+  withMigrationsDir,
+} from './migrations';
 import { findAdditiveViolations, snapshotSchema } from './schema-diff';
+import type { SchemaSnapshot } from './schema-diff';
 
-// Migrations newer than this id must be additive-only. Clients tolerate
-// budgets and sync messages from newer app versions (see
-// `replayPendingMessages` and `checkDatabaseValidity`), which is only
-// safe if newer migrations never remove or rename what older clients
-// depend on. This is enforced by actually running the migration chain
-// and diffing the real schema around each new migration (see
-// ./schema-diff.ts), so nothing a migration does — comments, string
-// literals, table rebuilds — can hide a destructive change.
-// Dropping/recreating views is fine: they hold no data, but their
-// columns must stay backwards-compatible (a code-review concern, not
-// enforceable here).
-const ADDITIVE_ONLY_CUTOFF = 1780606215001;
+// Migrations newer than ADDITIVE_ONLY_CUTOFF must be additive-only:
+// clients tolerate budgets and sync messages from newer app versions
+// (see `replayPendingMessages` and `checkDatabaseValidity`), which is
+// only safe if newer migrations never remove or rename what older
+// clients depend on. Enforced by running the real migration chain and
+// diffing the actual schema around each new migration.
 
 const MIGRATIONS_DIR = path.resolve(__dirname, '../../../migrations');
 const INIT_SQL = path.resolve(__dirname, '../sql/init.sql');
 
-// Tables that are not CRDT-synced. Sync builds rows one column at a
-// time, so in a synced table every column beyond the primary key must
-// be nullable or have a DEFAULT — otherwise the first per-column INSERT
-// can never satisfy the constraints. Internal tables are written with
-// full rows by app code, so they may use any shape when first created —
-// the exemption applies only to the creating migration. Later changes
-// are validated like any other table, because older app versions can
-// open this budget and still write these tables with the column lists
-// they were built with. Add new internal tables here.
+// Internal (non-CRDT-synced) tables, exempt from the synced-table rules
+// at creation only (see `findAdditiveViolations`). Add new internal
+// tables here.
 const NON_SYNCED_TABLES = new Set(['messages_pending']);
 
 async function openTestDb(setupSql: string): Promise<Database> {
@@ -62,23 +58,35 @@ async function violationsFor(
 }
 
 describe('migrations are additive-only', () => {
+  it('new migrations carry post-cutoff ids', async () => {
+    // `checkDatabaseValidity` treats an unknown pre-cutoff id as
+    // corruption, so merging a migration with a pre-cutoff id (e.g. a
+    // long-lived PR keeping its original authoring timestamp) would
+    // break every upgrade. The pre-cutoff set shipped long ago and is
+    // frozen — if this count changed, renumber the new migration's id
+    // to the present day.
+    const ids = (await getMigrationList(MIGRATIONS_DIR)).map(getMigrationId);
+    expect(ids.filter(id => id <= ADDITIVE_ONLY_CUTOFF).length).toBe(57);
+  });
+
   it('every migration after the cutoff is additive-only', async () => {
     const db = await openTestDb(nativeFs.readFileSync(INIT_SQL, 'utf8'));
 
     const violations: string[] = [];
+    let snapshot: SchemaSnapshot | null = null;
     for (const name of await getMigrationList(MIGRATIONS_DIR)) {
       if (getMigrationId(name) <= ADDITIVE_ONLY_CUTOFF) {
         await applyMigration(db, name, MIGRATIONS_DIR);
+        snapshot = null;
         continue;
       }
-      const before = snapshotSchema(db);
+      const before = snapshot ?? snapshotSchema(db);
       await applyMigration(db, name, MIGRATIONS_DIR);
+      snapshot = snapshotSchema(db);
       violations.push(
-        ...findAdditiveViolations(
-          before,
-          snapshotSchema(db),
-          NON_SYNCED_TABLES,
-        ).map(violation => `${name}: ${violation}`),
+        ...findAdditiveViolations(before, snapshot, NON_SYNCED_TABLES).map(
+          violation => `${name}: ${violation}`,
+        ),
       );
     }
     sqlite.closeDatabase(db);
@@ -94,6 +102,21 @@ describe('migrations are additive-only', () => {
         'place. New internal (non-synced) tables go in ' +
         'NON_SYNCED_TABLES in this test.',
     ).toEqual([]);
+  });
+
+  it('tolerates an unknown migration id interleaved below the newest known one', async () => {
+    const db = await openTestDb(nativeFs.readFileSync(INIT_SQL, 'utf8'));
+    await withMigrationsDir(MIGRATIONS_DIR, async () => {
+      await migrate(db);
+      // A newer release may ship a migration whose id (an authoring
+      // timestamp) sorts below ids this version already knows — it is
+      // still additive-era and must not fail validation
+      sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
+        ADDITIVE_ONLY_CUTOFF + 1,
+      ]);
+      await migrate(db);
+    });
+    sqlite.closeDatabase(db);
   });
 
   const TABLE_FOO = 'CREATE TABLE foo (id TEXT PRIMARY KEY, a TEXT, b TEXT);';

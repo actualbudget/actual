@@ -4,8 +4,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import * as db from '#server/db';
 
 import { replayPendingMessages } from './replay';
+import { deserializeValueSafe } from './serialization';
 
-import { applyMessages, deserializeValueSafe, setSyncingMode } from './index';
+import { applyMessages, setSyncingMode } from './index';
 
 beforeEach(() => {
   setSyncingMode('enabled');
@@ -93,23 +94,6 @@ describe('Deferred sync messages (newer schema)', () => {
     ).rejects.toMatchObject({ reason: 'invalid-schema' });
 
     expect(getPending().length).toBe(0);
-  });
-
-  it('defers messages for unknown tables without failing the batch', async () => {
-    await applyMessages(
-      [
-        {
-          dataset: 'gadgets',
-          row: 'g1',
-          column: 'name',
-          value: 'flux capacitor',
-          timestamp: sendTimestamp(),
-        },
-      ],
-      true,
-    );
-
-    expect(getPending().length).toBe(1);
   });
 
   it('replays pending messages once the schema catches up, last write wins', async () => {

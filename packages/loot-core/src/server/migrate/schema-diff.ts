@@ -6,14 +6,10 @@ import type { Database } from '@jlongster/sql.js';
 
 import * as sqlite from '#platform/server/sqlite';
 
-// `required` means a row cannot be inserted without explicitly providing
-// this column (NOT NULL, no usable DEFAULT, not the primary key).
-// `notNull` is the raw NOT NULL flag, tracked separately because a NOT
-// NULL column with a DEFAULT still rejects explicit NULL writes. `pk`
-// means the column is part of the table's primary key. `type` is the
-// normalized declared type and `defaultValue` the normalized DEFAULT
-// expression (null when absent or an explicit NULL, which behaves the
-// same) — both must stay unchanged on existing columns.
+// `required` = cannot insert a row without providing this column.
+// `notNull` is tracked separately: NOT NULL with a DEFAULT still
+// rejects explicit NULL writes. `defaultValue` is null when absent or
+// an explicit NULL (they behave the same).
 type ColumnFlags = {
   required: boolean;
   notNull: boolean;
@@ -144,15 +140,11 @@ export function snapshotSchema(db: Database): SchemaSnapshot {
   );
 }
 
-// A schema change is additive-only when every column that existed before
-// still exists after, unchanged, and no constraint changes in either
-// direction. Tightening (NOT NULL, UNIQUE, CHECK) rejects data older
-// clients legitimately hold or keep writing; loosening lets newer
-// clients write data that *older* clients' schema rejects when it syncs
-// back. Sync also builds rows one column at a time (see `apply` in
-// #server/sync), so a required column in a synced table can never be
-// inserted. This backs the additive-migrations guard that
-// `checkDatabaseValidity` relies on for cross-version compatibility.
+// A schema change is additive-only when every column that existed
+// before still exists after, unchanged, and no constraint changes in
+// either direction — either direction, because tightening rejects data
+// older clients hold while loosening lets newer clients write data
+// older schemas reject on sync.
 export function findAdditiveViolations(
   before: SchemaSnapshot,
   after: SchemaSnapshot,
@@ -174,12 +166,10 @@ export function findAdditiveViolations(
   for (const [table, { columns: afterColumns, uniques, checks }] of after) {
     const beforeTable = before.get(table);
 
-    // The internal-table exemption applies only at creation: a new
-    // internal table is written exclusively by app code that knows its
-    // schema, always with full rows. Once a table exists, changes are
-    // validated regardless of syncedness — older app versions can open
-    // this budget (see `checkDatabaseValidity`) and their code writes
-    // these tables with the column lists they were built with.
+    // The internal-table exemption applies only at creation; once a
+    // table exists, older app versions write it with the column lists
+    // they were built with, so changes are validated regardless of
+    // syncedness
     if (!beforeTable && nonSyncedTables.has(table)) {
       continue;
     }
@@ -194,12 +184,8 @@ export function findAdditiveViolations(
         }
         continue;
       }
-      // A table rebuild can change an existing column in place; every
-      // attribute change breaks one side of the version skew: NOT NULL
-      // and type alter what each version accepts or coerces, a
-      // different DEFAULT fills omitted columns with diverging values
-      // (and removing one breaks per-column sync inserts), and
-      // primary-key membership backs sync's addressing by id
+      // A table rebuild can change an existing column in place; any
+      // attribute change breaks one side of the version skew
       const changed = (
         ['notNull', 'pk', 'type', 'defaultValue'] as const
       ).filter(key => column[key] !== prev[key]);

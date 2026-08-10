@@ -7,8 +7,8 @@ import * as db from '#server/db';
 import { runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 
-import { notifyDroppedMessages } from './notifications';
 import { deleteStalePendingMessages } from './replay';
+import { notifyDroppedMessages } from './utils';
 
 export async function resetSync(
   keyState?,
@@ -30,23 +30,15 @@ export async function resetSync(
     return { error };
   }
 
-  // Deferred messages hold changes from a newer app version that this
-  // client acknowledged into its merkle but couldn't apply yet.
-  // Uploading this file as the new source of truth discards them for
-  // every device — reset is a destructive last-resort tool, so proceed,
-  // but tell the user afterwards (see `notifyDroppedMessages`).
-  // TODO: a pre-reset confirmation dialog would be better UX; add one
-  // in the client if this notification proves too subtle
+  // Resetting discards deferred newer-version messages for every
+  // device; the user is warned afterwards via `notifyDroppedMessages`.
+  // TODO: pre-reset confirmation dialog
   let discardedDeferredCount = 0;
 
   await runMutator(async () => {
     // Deferred messages belong to the discarded message log; replaying
-    // them later would resurrect rows hard-deleted below as empty
-    // stubs. Deleted inside the mutator so messages deferred by an
-    // in-flight sync during the cloud round-trips above are included.
-    // Stale rows (superseded by newer writes, or legacy datasets) go
-    // first, uncounted — only real user-visible losses feed the
-    // warning notification below.
+    // them later would resurrect rows hard-deleted below. Stale rows go
+    // first, uncounted, so only real losses feed the warning.
     deleteStalePendingMessages();
     discardedDeferredCount = Number(
       db.runQuery('DELETE FROM messages_pending').changes,

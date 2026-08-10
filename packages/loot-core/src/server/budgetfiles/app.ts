@@ -599,13 +599,11 @@ async function _loadBudget(id: Budget['id']): Promise<{
   }
 
   try {
-    // Apply any sync messages that were deferred because they came from
-    // a newer version of the app, now that migrations have run. Skipped
-    // when no sync server is configured: local edits made in serverless
-    // sessions aren't recorded in the crdt log, so replay couldn't tell
-    // whether a pending value is stale — the messages wait for a
-    // session with syncing enabled
-    if (getServer() || process.env.NODE_ENV === 'test') {
+    // Apply sync messages deferred from a newer app version, now that
+    // migrations have run. Skipped without a sync server: serverless
+    // edits aren't in the crdt log, so replay couldn't tell whether a
+    // pending value is stale.
+    if (getServer()) {
       replayPendingMessages();
     }
   } catch (e) {

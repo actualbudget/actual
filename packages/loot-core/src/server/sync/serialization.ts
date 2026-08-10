@@ -36,15 +36,19 @@ export function serializeValue(
 }
 
 export function deserializeValue(value: string): string | number | null {
-  const type = value[0];
-  switch (type) {
-    case '0':
-      return null;
-    case 'N':
-      return parseFloat(value.slice(2));
-    case 'S':
-      return value.slice(2);
-    default:
+  // The full prefix must match, not just the first character — a future
+  // version's extended tag like "N16:..." must throw (and so defer via
+  // `deserializeValueSafe`), not silently misdecode
+  if (value[1] === ':') {
+    switch (value[0]) {
+      case '0':
+        return null;
+      case 'N':
+        return parseFloat(value.slice(2));
+      case 'S':
+        return value.slice(2);
+      default:
+    }
   }
 
   throw new Error('Invalid type key for value: ' + value);

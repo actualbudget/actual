@@ -75,11 +75,9 @@ export function isDatabaseSchemaMismatch(meta?: unknown): boolean {
     'message' in meta.error &&
     typeof meta.error.message === 'string'
   ) {
-    // Deliberately narrower than `isMissingSchemaError`: sync defers
-    // INSERT-form errors ("has no column named") instead of surfacing
-    // them, so one that reaches the UI indicates a damaged local
-    // database — telling the user to update the app would be wrong
-    // there
+    // Narrower than `isMissingSchemaError`: sync defers the INSERT form
+    // ("has no column named"), so one reaching the UI means local
+    // damage, not version skew
     return /no such (table|column)/i.test(meta.error.message);
   }
   return false;
