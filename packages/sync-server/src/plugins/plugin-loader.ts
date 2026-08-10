@@ -37,6 +37,12 @@ export function extractZipPlugin(
   let extractPath: string | undefined;
 
   try {
+    const archiveSize = fs.statSync(zipPath).size;
+    if (archiveSize > MAX_PLUGIN_ZIP_SIZE) {
+      throw new Error(
+        `Plugin zip exceeds maximum archive size of ${MAX_PLUGIN_ZIP_SIZE} bytes`,
+      );
+    }
     const zipEntries = safeUnzipPluginArchive(fs.readFileSync(zipPath));
     extractPath = fs.mkdtempSync(path.join(os.tmpdir(), 'actual-plugin-'));
 
