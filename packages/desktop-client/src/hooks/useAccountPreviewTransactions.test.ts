@@ -117,6 +117,7 @@ describe('inverseBasedOnAccount', () => {
       amount: -100_000,
       date: '2026-08-15',
       payee: 'employer',
+      category: 'upcoming',
       is_parent: true,
       schedule: 'paycheck',
     },
@@ -159,10 +160,10 @@ describe('inverseBasedOnAccount', () => {
         account: savings.id,
         amount: 40_000,
         payee: 'to-checking',
+        category: 'upcoming',
         inversed: true,
       }),
     ]);
-    expect(result.transactions[0]).not.toHaveProperty('category');
     expect(result.transactions[0]).not.toHaveProperty('is_child');
     expect(result.transactions[0]).not.toHaveProperty('parent_id');
     expect(result.runningBalances.get('preview/savings-transfer')).toBe(

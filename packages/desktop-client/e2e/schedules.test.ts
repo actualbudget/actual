@@ -173,6 +173,7 @@ test.describe('Schedules', () => {
     });
 
     await expect(previewTransfer).toHaveCount(1);
+    await expect(previewTransfer.getByTestId('category')).toContainText('Due');
     await expect(previewTransfer.getByTestId('debit')).toHaveText('');
     await expect(previewTransfer.getByTestId('credit')).toHaveText('50.00');
   });

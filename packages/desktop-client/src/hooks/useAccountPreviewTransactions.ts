@@ -204,12 +204,14 @@ export function isScheduleRelevantToAccount({
 
 function inverseTransferForAccount({
   accountId,
+  previewStatus,
   transaction,
   getPayeeByTransferAccount,
 }: Pick<
   InverseBasedOnAccountProps,
   'accountId' | 'getPayeeByTransferAccount'
 > & {
+  previewStatus?: TransactionEntity['category'];
   transaction: TransactionEntity;
 }): AccountPreviewTransaction {
   const {
@@ -227,6 +229,7 @@ function inverseTransferForAccount({
     amount: -transaction.amount,
     payee: getPayeeByTransferAccount(transaction.account)?.id || '',
     account: accountId || '',
+    ...(previewStatus != null && { category: previewStatus }),
   };
 }
 
@@ -241,6 +244,11 @@ export function inverseBasedOnAccount({
   transactions: TransactionEntity[];
   runningBalances: Map<TransactionEntity['id'], IntegerAmount>;
 } {
+  const parentPreviewStatuses = new Map(
+    transactions
+      .filter(transaction => transaction.is_parent)
+      .map(transaction => [transaction.id, transaction.category]),
+  );
   const mappedTransactions: AccountPreviewTransaction[] = transactions.flatMap(
     transaction => {
       if (transaction.account === accountId) {
@@ -261,6 +269,9 @@ export function inverseBasedOnAccount({
         .map(candidate =>
           inverseTransferForAccount({
             accountId,
+            previewStatus: candidate.parent_id
+              ? parentPreviewStatuses.get(candidate.parent_id)
+              : candidate.category,
             transaction: candidate,
             getPayeeByTransferAccount,
           }),
