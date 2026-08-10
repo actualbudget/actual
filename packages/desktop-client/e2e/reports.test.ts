@@ -54,15 +54,14 @@ test.describe('Reports', () => {
     await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
   });
 
-  test('enables shared dashboard date controls', async () => {
-    await page.getByRole('button', { name: 'Menu' }).click();
-    await page
-      .getByRole('menu')
-      .getByRole('button', { name: 'Enable date ranges' })
-      .click();
-
+  test('shows shared dashboard date controls', async () => {
     const controls = page.getByTestId('dashboard-date-range-controls');
-    await expect(controls.getByRole('button', { name: 'Live' })).toBeVisible();
+    await expect(
+      controls.getByRole('button', { name: 'Clear' }),
+    ).not.toBeVisible();
+    await expect(
+      controls.getByRole('button', { name: 'Live' }),
+    ).not.toBeVisible();
     await expect(
       controls.getByTestId('date-range-picker-trigger'),
     ).toBeVisible();

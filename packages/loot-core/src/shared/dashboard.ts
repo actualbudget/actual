@@ -208,6 +208,7 @@ export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
     height: 4,
     x: 0,
     y: 8,
+    use_dashboard_date_range: false,
     meta: {
       name: 'Transaction Calendar',
       timeFrame: {

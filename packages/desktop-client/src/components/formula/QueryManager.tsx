@@ -11,7 +11,6 @@ import { Popover } from '@actual-app/components/popover';
 import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -348,12 +347,13 @@ function QueryItem({
       newStartDate = startDate,
       newEndDate = endDate,
       mode = timeRangeRef.current as TimeFrame['mode'],
+      newUseDashboardDateRange = useDashboardDateRange,
     ) => {
       timeRangeRef.current = mode;
       onUpdate({
         conditions,
         conditionsOp,
-        useDashboardDateRange,
+        useDashboardDateRange: newUseDashboardDateRange,
         timeFrame: {
           start: newStartDate,
           end: newEndDate,
@@ -526,7 +526,9 @@ function QueryItem({
     yearToDate: t('Year to date'),
     priorYearToDate: t('Prior year to date'),
   } satisfies Record<TimeFrame['mode'], string>;
-  const timeRangeLabel = timeRangeLabels[displayedTimeRangeMode];
+  const timeRangeLabel = isUsingDashboardDateRange
+    ? t('Dashboard')
+    : timeRangeLabels[displayedTimeRangeMode];
   const presetTimeRangeLabels = {
     full: t('All time transactions'),
     lastMonth: t('Last month transactions'),
@@ -580,31 +582,6 @@ function QueryItem({
             alignItems: 'center',
           }}
         >
-          {dashboardScope && (
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 4,
-              }}
-            >
-              <label
-                htmlFor={`formula-query-dashboard-range-${queryName}`}
-                style={{ fontSize: 12 }}
-              >
-                <Trans>Dashboard dates</Trans>
-              </label>
-              <Toggle
-                id={`formula-query-dashboard-range-${queryName}`}
-                isOn={useDashboardDateRange}
-                onToggle={value => {
-                  setUseDashboardDateRange(value);
-                  onUpdate({ ...defaultConfig, useDashboardDateRange: value });
-                }}
-              />
-            </View>
-          )}
           <View style={{ display: 'flex', flexDirection: 'row', gap: 4 }}>
             <Button
               variant="bare"
@@ -704,20 +681,35 @@ function QueryItem({
 
       <View style={{ marginBottom: 12 }}>
         <View
-          inert={isUsingDashboardDateRange}
           style={{
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'flex-end',
             gap: 8,
             marginTop: 16,
-            ...(isUsingDashboardDateRange ? { opacity: 0.5 } : null),
           }}
         >
           <Button
             style={{ minWidth: 50 }}
-            variant={displayedTimeRangeMode === 'static' ? 'normal' : 'primary'}
+            variant={
+              isUsingDashboardDateRange || displayedTimeRangeMode !== 'static'
+                ? 'primary'
+                : 'normal'
+            }
             onPress={() => {
+              if (isUsingDashboardDateRange) {
+                setUseDashboardDateRange(false);
+                onUpdate({ ...defaultConfig, useDashboardDateRange: false });
+                return;
+              }
+
+              if (timeRangeMode === 'static' && dashboardScope) {
+                setUseDashboardDateRange(true);
+                onUpdate({ ...defaultConfig, useDashboardDateRange: true });
+                return;
+              }
+
+              setUseDashboardDateRange(false);
               const newMode =
                 timeRangeMode === 'static' ? 'sliding-window' : 'static';
               const [newStart, newEnd] = calculateTimeRange(
@@ -737,6 +729,7 @@ function QueryItem({
                 newStart,
                 newEnd,
                 newMode,
+                false,
               );
             }}
           >
@@ -850,6 +843,7 @@ function QueryItem({
                 }
                 setStartDate(start);
                 setEndDate(end);
+                setUseDashboardDateRange(false);
                 timeRangeRef.current = mode;
                 sendUpdate(
                   filters.conditions,
@@ -857,6 +851,7 @@ function QueryItem({
                   start,
                   end,
                   mode,
+                  false,
                 );
                 setTimeRangeMenuOpen(false);
               }}

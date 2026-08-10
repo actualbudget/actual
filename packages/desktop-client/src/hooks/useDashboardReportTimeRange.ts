@@ -9,7 +9,6 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { calculateTimeRange } from '#components/reports/reportRanges';
-import { useDashboardPages } from '#hooks/useDashboardPages';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 
 const MODES = new Set<TimeFrame['mode']>([
@@ -51,10 +50,6 @@ export function useDashboardReportTimeRange(widget?: DashboardWidgetEntity) {
     id: widget ? undefined : (contextualWidgetId ?? undefined),
   });
   const dashboardWidget = widget ?? contextualWidget;
-  const { data: dashboards = [] } = useDashboardPages();
-  const dashboard = dashboards.find(
-    page => page.id === dashboardWidget?.dashboard_page_id,
-  );
   const start = params.get('dashboardStart');
   const end = params.get('dashboardEnd');
   const mode = params.get('dashboardMode') as TimeFrame['mode'] | null;
@@ -74,16 +69,15 @@ export function useDashboardReportTimeRange(widget?: DashboardWidgetEntity) {
     MODES.has(mode),
   );
   const dashboardScope = useMemo<DashboardDateScope | null>(() => {
-    if (!dashboard?.date_range_enabled || !dashboard.time_frame) {
+    if (!hasValidSnapshot) {
       return null;
     }
-    const persistedScope = calculateTimeRange(dashboard.time_frame);
     return {
-      start: hasValidSnapshot ? start! : persistedScope[0],
-      end: hasValidSnapshot ? end! : persistedScope[1],
-      mode: hasValidSnapshot ? mode! : persistedScope[2],
+      start: start!,
+      end: end!,
+      mode: mode!,
     };
-  }, [dashboard, end, hasValidSnapshot, mode, start]);
+  }, [end, hasValidSnapshot, mode, start]);
   const hasDashboardContext = dashboardScope !== null;
   const isUsingDashboardRange =
     hasDashboardContext && (dashboardWidget?.use_dashboard_date_range ?? true);

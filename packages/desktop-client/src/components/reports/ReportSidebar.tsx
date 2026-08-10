@@ -11,7 +11,6 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Toggle } from '@actual-app/components/toggle';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -549,25 +548,19 @@ export function ReportSidebar({
               <Trans>Date filters</Trans>
             </strong>
           </Text>
-          {onUseDashboardDateRangeChange && (
-            <View
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
-            >
-              <Toggle
-                id="custom-report-use-dashboard-date-range"
-                isOn={Boolean(useDashboardDateRange)}
-                onToggle={onUseDashboardDateRangeChange}
-              />
-              <Text>
-                <Trans>Use dashboard date range</Trans>
-              </Text>
-            </View>
-          )}
           <View style={{ flex: 1 }} />
+          {onUseDashboardDateRangeChange && (
+            <ModeButton
+              selected={Boolean(useDashboardDateRange)}
+              onSelect={() => onUseDashboardDateRangeChange(true)}
+            >
+              <Trans>Dashboard</Trans>
+            </ModeButton>
+          )}
           <ModeButton
-            selected={!customReportItems.isDateStatic}
-            isDisabled={useDashboardDateRange}
+            selected={!useDashboardDateRange && !customReportItems.isDateStatic}
             onSelect={() => {
+              onUseDashboardDateRangeChange?.(false);
               setSessionReport('isDateStatic', false);
               setIsDateStatic(false);
               onSelectRange(customReportItems.dateRange);
@@ -576,9 +569,9 @@ export function ReportSidebar({
             <Trans>Live</Trans>
           </ModeButton>
           <ModeButton
-            selected={customReportItems.isDateStatic}
-            isDisabled={useDashboardDateRange}
+            selected={!useDashboardDateRange && customReportItems.isDateStatic}
             onSelect={() => {
+              onUseDashboardDateRangeChange?.(false);
               setSessionReport('isDateStatic', true);
               setIsDateStatic(true);
               onChangeDates(

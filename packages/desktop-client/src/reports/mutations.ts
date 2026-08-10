@@ -215,31 +215,6 @@ export function useRenameDashboardPageMutation() {
   });
 }
 
-type UpdateDashboardDateRangeMutationPayload = Pick<
-  DashboardPageEntity,
-  'id' | 'date_range_enabled' | 'time_frame'
->;
-
-export function useUpdateDashboardDateRangeMutation() {
-  const queryClient = useQueryClient();
-  const dispatch = useDispatch();
-  const { t } = useTranslation();
-
-  return useMutation({
-    mutationFn: async (dashboard: UpdateDashboardDateRangeMutationPayload) =>
-      await sendThrow('dashboard-update-date-range', dashboard),
-    onSuccess: () => invalidateDashboardQueries(queryClient),
-    onError: error => {
-      console.error('Error updating dashboard date range:', error);
-      dispatchErrorNotification(
-        dispatch,
-        t('There was an error updating the dashboard date range.'),
-        error,
-      );
-    },
-  });
-}
-
 type UpdateDashboardWidgetsMutationPayload = {
   widgets: EverythingButIdOptional<Omit<DashboardWidgetEntity, 'tombstone'>>[];
 };

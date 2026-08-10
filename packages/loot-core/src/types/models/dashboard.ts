@@ -5,8 +5,6 @@ import type { RuleConditionEntity } from './rule';
 export type DashboardPageEntity = {
   id: string;
   name: string;
-  date_range_enabled: boolean;
-  time_frame: TimeFrame | null;
   tombstone: boolean;
 };
 
@@ -315,16 +313,7 @@ export type ExportImportDashboardV1 = {
   widgets: ExportImportDashboardWidget[];
 };
 
-export type ExportImportDashboardV2 = {
-  version: 2;
-  date_range_enabled: boolean;
-  time_frame: TimeFrame | null;
-  widgets: ExportImportDashboardWidget[];
-};
-
-export type ExportImportDashboard =
-  | ExportImportDashboardV1
-  | ExportImportDashboardV2;
+export type ExportImportDashboard = ExportImportDashboardV1;
 
 export type SummaryWidget = AbstractWidget<
   'summary-card',

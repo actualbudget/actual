@@ -5,7 +5,7 @@ import ReactGridLayout from 'react-grid-layout';
 import type { Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router';
+import { useLocation, useSearchParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -23,6 +23,7 @@ import type {
   DashboardWidgetEntity,
   ExportImportDashboard,
   MarkdownWidget,
+  TimeFrame,
 } from '@actual-app/core/types/models';
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
@@ -48,7 +49,6 @@ import {
   useDeleteDashboardPageMutation,
   useImportDashboardPageMutation,
   useResetDashboardPageMutation,
-  useUpdateDashboardDateRangeMutation,
   useUpdateDashboardWidgetMutation,
   useUpdateDashboardWidgetsMutation,
 } from '#reports/mutations';
@@ -112,6 +112,24 @@ function getWidgetMinWidth(widget: DashboardWidgetEntity) {
   }
 
   return 3;
+}
+
+const DASHBOARD_TIME_FRAME_MODES = new Set<TimeFrame['mode']>([
+  'sliding-window',
+  'static',
+  'full',
+  'lastMonth',
+  'lastYear',
+  'yearToDate',
+  'priorYearToDate',
+]);
+
+function isDashboardDate(value: string | null) {
+  return Boolean(
+    value &&
+    (monthUtils.isValidYearMonth(value) ||
+      monthUtils.isValidYearMonthDay(value)),
+  );
 }
 
 function getDashboardMeta<T extends DashboardWidgetEntity>(
@@ -216,6 +234,42 @@ export function Overview({ dashboard }: OverviewProps) {
     monthUtils.currentDay(),
   );
   const [allMonths, setAllMonths] = useState<Array<{ name: string }>>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const dashboardTimeFrame = useMemo<TimeFrame | null>(() => {
+    const start = searchParams.get('dashboardStart');
+    const end = searchParams.get('dashboardEnd');
+    const mode = searchParams.get('dashboardMode') as TimeFrame['mode'] | null;
+
+    if (
+      !isDashboardDate(start) ||
+      !isDashboardDate(end) ||
+      start! > end! ||
+      !mode ||
+      !DASHBOARD_TIME_FRAME_MODES.has(mode)
+    ) {
+      return null;
+    }
+
+    return { start: start!, end: end!, mode };
+  }, [searchParams]);
+  const setDashboardTimeFrameInHistory = useCallback(
+    (timeFrame: TimeFrame | null) => {
+      setSearchParams(params => {
+        if (timeFrame) {
+          params.set('dashboardStart', timeFrame.start);
+          params.set('dashboardEnd', timeFrame.end);
+          params.set('dashboardMode', timeFrame.mode);
+        } else {
+          params.delete('dashboardStart');
+          params.delete('dashboardEnd');
+          params.delete('dashboardMode');
+        }
+        params.delete('dashboardWidget');
+        return params;
+      });
+    },
+    [setSearchParams],
+  );
 
   useEffect(() => {
     async function loadTransactionRange() {
@@ -241,16 +295,16 @@ export function Overview({ dashboard }: OverviewProps) {
   }, []);
 
   const dashboardScope = useMemo<DashboardDateScope | null>(() => {
-    if (!dashboard.date_range_enabled || !dashboard.time_frame) {
+    if (!dashboardTimeFrame) {
       return null;
     }
     const [start, end, mode] = calculateTimeRange(
-      dashboard.time_frame,
+      dashboardTimeFrame,
       undefined,
       latestTransaction,
     );
     return { start, end, mode };
-  }, [dashboard, latestTransaction]);
+  }, [dashboardTimeFrame, latestTransaction]);
 
   const isLoading =
     isCustomReportsLoading || isWidgetsLoading || isDashboardPageLoading;
@@ -357,20 +411,6 @@ export function Overview({ dashboard }: OverviewProps) {
   };
 
   const resetDashboardPageMutation = useResetDashboardPageMutation();
-  const updateDashboardDateRangeMutation =
-    useUpdateDashboardDateRangeMutation();
-
-  const onToggleDashboardDateRange = () => {
-    updateDashboardDateRangeMutation.mutate({
-      id: dashboard.id,
-      date_range_enabled: !dashboard.date_range_enabled,
-      time_frame: dashboard.time_frame ?? {
-        start: monthUtils.subMonths(monthUtils.currentMonth(), 5),
-        end: monthUtils.currentMonth(),
-        mode: 'sliding-window',
-      },
-    });
-  };
 
   const onResetDashboard = async () => {
     setIsImporting(true);
@@ -425,18 +465,14 @@ export function Overview({ dashboard }: OverviewProps) {
         height: type === 'sankey-card' ? 3 : 2,
         meta,
         dashboard_page_id: dashboard.id,
-        use_dashboard_date_range: !(
-          type === 'calendar-card' && dashboard.date_range_enabled
-        ),
+        use_dashboard_date_range: type !== 'calendar-card',
       },
     });
   };
 
   const onExport = () => {
     const data = {
-      version: 2,
-      date_range_enabled: dashboard.date_range_enabled,
-      time_frame: dashboard.time_frame,
+      version: 1,
       widgets: widgets.map(widget => {
         if (isCustomReportWidget(widget)) {
           const customReport = customReportMap.get(widget.meta.id);
@@ -787,8 +823,10 @@ export function Overview({ dashboard }: OverviewProps) {
                 currentDashboard={dashboard}
               />
               <DashboardDateRangeControls
-                dashboard={dashboard}
+                timeFrame={dashboardTimeFrame}
                 scope={dashboardScope}
+                onChange={setDashboardTimeFrameInHistory}
+                onClear={() => setDashboardTimeFrameInHistory(null)}
                 allMonths={allMonths}
                 earliestTransaction={earliestTransaction}
                 latestTransaction={latestTransaction}
@@ -817,8 +855,10 @@ export function Overview({ dashboard }: OverviewProps) {
               {currentBreakpoint === 'desktop' && (
                 <>
                   <DashboardDateRangeControls
-                    dashboard={dashboard}
+                    timeFrame={dashboardTimeFrame}
                     scope={dashboardScope}
+                    onChange={setDashboardTimeFrameInHistory}
+                    onClear={() => setDashboardTimeFrameInHistory(null)}
                     allMonths={allMonths}
                     earliestTransaction={earliestTransaction}
                     latestTransaction={latestTransaction}
@@ -999,9 +1039,6 @@ export function Overview({ dashboard }: OverviewProps) {
                           slot="close"
                           onMenuSelect={item => {
                             switch (item) {
-                              case 'date-ranges':
-                                onToggleDashboardDateRange();
-                                break;
                               case 'reset':
                                 void onResetDashboard();
                                 break;
@@ -1021,13 +1058,6 @@ export function Overview({ dashboard }: OverviewProps) {
                             }
                           }}
                           items={[
-                            {
-                              name: 'date-ranges',
-                              text: dashboard.date_range_enabled
-                                ? t('Disable date ranges')
-                                : t('Enable date ranges'),
-                            },
-                            Menu.line,
                             {
                               name: 'reset',
                               text: t('Reset to default'),

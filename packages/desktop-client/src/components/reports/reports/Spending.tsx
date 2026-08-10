@@ -13,7 +13,6 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Toggle } from '@actual-app/components/toggle';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
@@ -324,29 +323,44 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         {!isNarrowWidth && (
           <SpaceBetween gap={0}>
             {hasDashboardContext && (
-              <View
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
+              <ModeButton
+                selected={isUsingDashboardRange}
+                onSelect={() =>
+                  widget &&
+                  updateDashboardWidgetMutation.mutate({
+                    widget: { id: widget.id, use_dashboard_date_range: true },
+                  })
+                }
               >
-                <Toggle
-                  id={`use-dashboard-date-range-${widget?.id}`}
-                  isOn={isUsingDashboardRange}
-                  onToggle={use_dashboard_date_range =>
-                    widget &&
-                    updateDashboardWidgetMutation.mutate({
-                      widget: { id: widget.id, use_dashboard_date_range },
-                    })
-                  }
-                />
-                <Trans>Use dashboard date range</Trans>
-              </View>
+                <Trans>Dashboard</Trans>
+              </ModeButton>
             )}
-            <Button
-              variant={isLive ? 'primary' : 'normal'}
-              isDisabled={isUsingDashboardRange}
-              onPress={() => setIsLive(state => !state)}
+            <ModeButton
+              selected={!isUsingDashboardRange && isLive}
+              onSelect={() => {
+                if (widget) {
+                  updateDashboardWidgetMutation.mutate({
+                    widget: { id: widget.id, use_dashboard_date_range: false },
+                  });
+                }
+                setIsLive(true);
+              }}
             >
-              {isLive ? t('Live') : t('Static')}
-            </Button>
+              <Trans>Live</Trans>
+            </ModeButton>
+            <ModeButton
+              selected={!isUsingDashboardRange && !isLive}
+              onSelect={() => {
+                if (widget) {
+                  updateDashboardWidgetMutation.mutate({
+                    widget: { id: widget.id, use_dashboard_date_range: false },
+                  });
+                }
+                setIsLive(false);
+              }}
+            >
+              <Trans>Static</Trans>
+            </ModeButton>
 
             <View
               style={{

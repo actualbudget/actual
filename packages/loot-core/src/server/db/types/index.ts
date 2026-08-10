@@ -263,8 +263,6 @@ export type DbCustomReport = {
 export type DbDashboardPage = {
   id: string;
   name: string;
-  date_range_enabled: 0 | 1;
-  time_frame: JsonString | null;
   tombstone: 1 | 0;
 };
 

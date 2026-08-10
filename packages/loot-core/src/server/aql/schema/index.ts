@@ -195,8 +195,6 @@ export const schema = {
   dashboard_pages: {
     id: f('id'),
     name: f('string'),
-    date_range_enabled: f('boolean'),
-    time_frame: f('json'),
     tombstone: f('boolean'),
   },
   dashboard: {

@@ -10,7 +10,6 @@ import type {
 } from '@actual-app/components/date-range-picker';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
@@ -49,6 +48,7 @@ type HeaderProps = {
   preserveRangeOnModeChange?: boolean;
   contentPadding?: number;
   resolvedTimeFrame?: DashboardDateScope;
+  dateRangeLabel?: string;
   allMonths: Array<{ name: string }>;
   earliestTransaction: string;
   latestTransaction: string;
@@ -97,6 +97,7 @@ export function Header({
   preserveRangeOnModeChange,
   contentPadding,
   resolvedTimeFrame,
+  dateRangeLabel,
   allMonths,
   earliestTransaction,
   latestTransaction,
@@ -132,6 +133,12 @@ export function Header({
     isUsingDashboardRange: useDashboardDateRange,
   } = useDashboardReportTimeRange(dashboardChild);
   const updateWidget = useUpdateDashboardWidgetMutation();
+  const canUseDashboardDateRange = Boolean(
+    !resolvedTimeFrame &&
+    hasDashboardContext &&
+    dashboardChild &&
+    dashboardChild.type !== 'formula-card',
+  );
   const [displayStart, displayEnd, displayMode] = resolvedTimeFrame
     ? [resolvedTimeFrame.start, resolvedTimeFrame.end, resolvedTimeFrame.mode]
     : useDashboardDateRange
@@ -156,10 +163,29 @@ export function Header({
     newEnd: string,
     newMode: TimeFrame['mode'],
   ) => {
-    if (resolvedTimeFrame || !useDashboardDateRange) {
+    if (
+      resolvedTimeFrame ||
+      !useDashboardDateRange ||
+      canUseDashboardDateRange
+    ) {
       onChangeDates(newStart, newEnd, newMode);
     }
   };
+  const selectWidgetTimeframe = () => {
+    if (useDashboardDateRange && dashboardChild) {
+      updateWidget.mutate({
+        widget: {
+          id: dashboardChild.id,
+          use_dashboard_date_range: false,
+        },
+      });
+    }
+  };
+  const modeLabel = useDashboardDateRange
+    ? t('Dashboard')
+    : displayMode === 'static'
+      ? t('Static')
+      : t('Live');
 
   // Live-range presets return day-shaped bounds; collapse them to months.
   function liveRangeAsMonths(
@@ -284,32 +310,30 @@ export function Header({
         }}
       >
         <SpaceBetween gap={isNarrowWidth ? 5 : undefined}>
-          {!resolvedTimeFrame &&
-            hasDashboardContext &&
-            dashboardChild?.type !== 'formula-card' && (
-              <View
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
-              >
-                <Toggle
-                  id={`use-dashboard-date-range-${dashboardChild?.id}`}
-                  isOn={useDashboardDateRange}
-                  onToggle={value =>
-                    updateWidget.mutate({
-                      widget: {
-                        id: dashboardChild!.id,
-                        use_dashboard_date_range: value,
-                      },
-                    })
-                  }
-                />
-                <Trans>Use dashboard date range</Trans>
-              </View>
-            )}
           {displayMode && !hideModeToggle && (
             <Button
-              variant={displayMode === 'static' ? 'normal' : 'primary'}
-              isDisabled={useDashboardDateRange}
+              variant={
+                useDashboardDateRange || displayMode !== 'static'
+                  ? 'primary'
+                  : 'normal'
+              }
               onPress={() => {
+                if (useDashboardDateRange) {
+                  selectWidgetTimeframe();
+                  return;
+                }
+
+                if (mode === 'static' && canUseDashboardDateRange) {
+                  updateWidget.mutate({
+                    widget: {
+                      id: dashboardChild!.id,
+                      use_dashboard_date_range: true,
+                    },
+                  });
+                  return;
+                }
+
+                selectWidgetTimeframe();
                 const newMode = mode === 'static' ? 'sliding-window' : 'static';
                 const [newStart, newEnd] =
                   newMode === 'static'
@@ -321,7 +345,7 @@ export function Header({
                 commitDates(newStart, newEnd, newMode);
               }}
             >
-              {displayMode === 'static' ? t('Static') : t('Live')}
+              {modeLabel}
             </Button>
           )}
 
@@ -372,7 +396,7 @@ export function Header({
               previousMonth: t('Previous month'),
               nextMonth: t('Next month'),
               year: t('Year'),
-              dateRange: t('Date range'),
+              dateRange: dateRangeLabel ?? t('Date range'),
             }}
             presets={presets}
             onChangeDates={(newStart, newEnd) =>

@@ -50,12 +50,7 @@ export const dashboardQueries = {
         const { data }: { data: DashboardPageEntity[] } = await aqlQuery(
           q('dashboard_pages').select('*'),
         );
-        return data.map(page => ({
-          ...page,
-          name: page.name ?? '',
-          date_range_enabled: page.date_range_enabled ?? false,
-          time_frame: page.time_frame ?? null,
-        }));
+        return data.map(page => ({ ...page, name: page.name ?? '' }));
       },
     }),
 };
