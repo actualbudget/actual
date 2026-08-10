@@ -116,9 +116,19 @@ export function CommandBar() {
         path: '/schedules',
         Icon: SvgCalendar3,
       },
-      { id: 'payees', name: t('Payees'), path: '/payees', Icon: SvgStoreFront },
-      { id: 'rules', name: t('Rules'), path: '/rules', Icon: SvgTuning },
-      { id: 'tags', name: t('Tags'), path: '/tags', Icon: SvgTag },
+      {
+        id: 'payees',
+        name: t('Payees'),
+        path: '/settings/payees',
+        Icon: SvgStoreFront,
+      },
+      {
+        id: 'rules',
+        name: t('Rules'),
+        path: '/settings/rules',
+        Icon: SvgTuning,
+      },
+      { id: 'tags', name: t('Tags'), path: '/settings/tags', Icon: SvgTag },
       { id: 'settings', name: t('Settings'), path: '/settings', Icon: SvgCog },
       {
         id: 'accounts',

@@ -42,7 +42,7 @@ export function MobilePayeeEditPage() {
         setIsLoading(false);
       } else {
         // Payee not found, navigate back to payees list
-        void navigate('/payees');
+        void navigate('/settings/payees');
       }
     }
   }, [id, payees, navigate]);
@@ -66,7 +66,7 @@ export function MobilePayeeEditPage() {
           newName: editedPayeeName.trim(),
         }),
       });
-      void navigate('/payees');
+      void navigate('/settings/payees');
     } catch (error) {
       console.error('Failed to update payee:', error);
       dispatch(

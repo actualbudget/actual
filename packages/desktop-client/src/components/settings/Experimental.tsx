@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import React from 'react';
 import type { ReactNode } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import type { FeatureFlag, ServerPrefs } from '@actual-app/core/types/prefs';
 
@@ -13,6 +14,7 @@ import { Link } from '#components/common/Link';
 import { Checkbox } from '#components/forms';
 import { useLoginMethod, useMultiuserEnabled } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useLocalPref } from '#hooks/useLocalPref';
 import { useServerPref } from '#hooks/useServerPref';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
@@ -150,9 +152,46 @@ function ServerFeatureToggle({
   );
 }
 
-export function ExperimentalFeatures() {
-  const [expanded, setExpanded] = useState(false);
+/**
+ * Lives on the Advanced page. Turning this on reveals the Experimental entry
+ * in the settings navigation, which is where the feature flags themselves are.
+ */
+export function ExperimentalSettingsToggle() {
+  const { t } = useTranslation();
+  const [showExperimental = false, setShowExperimental] = useLocalPref(
+    'settings.showExperimental',
+  );
 
+  return (
+    <Setting
+      primaryAction={
+        <Toggle
+          id="settings-showExperimental"
+          isOn={showExperimental}
+          onToggle={setShowExperimental}
+          aria-label={t('Show experimental features')}
+        />
+      }
+    >
+      <Text>
+        <Trans>
+          <strong>Experimental features.</strong> These features are not fully
+          tested and may not work as expected. THEY MAY CAUSE IRRECOVERABLE DATA
+          LOSS. They may do nothing at all. Only enable them if you know what
+          you are doing.
+        </Trans>
+      </Text>
+      <Text>
+        <Trans>
+          Turning this on adds an Experimental section to these settings, where
+          each feature can be enabled on its own.
+        </Trans>
+      </Text>
+    </Setting>
+  );
+}
+
+export function ExperimentalFeatures() {
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const showGoalTemplatesUI = goalTemplatesEnabled || goalTemplatesUIEnabled;
@@ -163,111 +202,96 @@ export function ExperimentalFeatures() {
   return (
     <Setting
       primaryAction={
-        expanded ? (
-          <View style={{ gap: '1em' }}>
-            <FeatureToggle flag="goalTemplatesEnabled">
-              <Trans>Goal templates</Trans>
-            </FeatureToggle>
-            {showGoalTemplatesUI && (
-              <View style={{ paddingLeft: 22 }}>
-                <FeatureToggle
-                  flag="goalTemplatesUIEnabled"
-                  feedbackLink="https://github.com/actualbudget/actual/issues/7692"
-                >
-                  <Trans>Subfeature: Budget automations UI</Trans>
-                </FeatureToggle>
-              </View>
-            )}
-            <FeatureToggle
-              flag="actionTemplating"
-              feedbackLink="https://github.com/actualbudget/actual/issues/3606"
-              note={
-                <Trans>
-                  Deprecated: this feature will be removed in a future release.
-                  Use Excel formula mode (Rule formulae) instead.
-                </Trans>
-              }
-            >
-              <Trans>Rule action templating</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="formulaMode"
-              feedbackLink="https://github.com/actualbudget/actual/issues/5949"
-            >
-              <Trans>Excel formula mode (Formula cards & Rule formulas)</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="currency"
-              feedbackLink="https://github.com/actualbudget/actual/issues/5191"
-            >
-              <Trans>Currency support</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="mobileCalculator"
-              feedbackLink="https://github.com/actualbudget/actual/issues/8255"
-            >
-              <Trans>Mobile calculator</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="sankeyReport"
-              feedbackLink="https://github.com/actualbudget/actual/issues/1919"
-            >
-              <Trans>Sankey report</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="balanceForecastReport"
-              feedbackLink="https://github.com/actualbudget/actual/issues/7669"
-            >
-              <Trans>Balance Forecast Report</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="budgetAnalysisReport"
-              feedbackLink="https://github.com/actualbudget/actual/pull/6742"
-            >
-              <Trans>Budget Analysis Report</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="monteCarloReport"
-              feedbackLink="https://github.com/actualbudget/actual/issues/8571"
-            >
-              <Trans>Monte Carlo Analysis Report</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="enableBanking"
-              feedbackLink="https://github.com/actualbudget/actual/issues/7799"
-            >
-              <Trans>Enable Banking sync (EU banks)</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="akahuBankSync"
-              feedbackLink="https://github.com/actualbudget/actual/issues/8020"
-            >
-              <Trans>Akahu Bank Sync (NZ banks)</Trans>
-            </FeatureToggle>
-            {showServerPrefs && (
-              <ServerFeatureToggle
-                prefName="flags.plugins"
-                disableToggle
-                feedbackLink="https://github.com/actualbudget/actual/issues/5950"
+        <View style={{ gap: '1em' }}>
+          <FeatureToggle flag="goalTemplatesEnabled">
+            <Trans>Goal templates</Trans>
+          </FeatureToggle>
+          {showGoalTemplatesUI && (
+            <View style={{ paddingLeft: 22 }}>
+              <FeatureToggle
+                flag="goalTemplatesUIEnabled"
+                feedbackLink="https://github.com/actualbudget/actual/issues/7692"
               >
-                <Trans>Client-Side plugins (soon)</Trans>
-              </ServerFeatureToggle>
-            )}
-          </View>
-        ) : (
-          <Link
-            variant="text"
-            onClick={() => setExpanded(true)}
-            data-testid="experimental-settings"
-            style={{
-              flexShrink: 0,
-              alignSelf: 'flex-start',
-              color: theme.pageTextPositive,
-            }}
+                <Trans>Subfeature: Budget automations UI</Trans>
+              </FeatureToggle>
+            </View>
+          )}
+          <FeatureToggle
+            flag="actionTemplating"
+            feedbackLink="https://github.com/actualbudget/actual/issues/3606"
+            note={
+              <Trans>
+                Deprecated: this feature will be removed in a future release.
+                Use Excel formula mode (Rule formulae) instead.
+              </Trans>
+            }
           >
-            <Trans>I understand the risks, show experimental features</Trans>
-          </Link>
-        )
+            <Trans>Rule action templating</Trans>
+          </FeatureToggle>
+          <FeatureToggle
+            flag="formulaMode"
+            feedbackLink="https://github.com/actualbudget/actual/issues/5949"
+          >
+            <Trans>Excel formula mode (Formula cards & Rule formulas)</Trans>
+          </FeatureToggle>
+          <FeatureToggle
+            flag="currency"
+            feedbackLink="https://github.com/actualbudget/actual/issues/5191"
+          >
+            <Trans>Currency support</Trans>
+          </FeatureToggle>
+          <FeatureToggle
+            flag="mobileCalculator"
+            feedbackLink="https://github.com/actualbudget/actual/issues/8255"
+          >
+            <Trans>Mobile calculator</Trans>
+          </FeatureToggle>
+          <FeatureToggle
+            flag="sankeyReport"
+            feedbackLink="https://github.com/actualbudget/actual/issues/1919"
+          >
+            <Trans>Sankey report</Trans>
+          </FeatureToggle>
+          <FeatureToggle
+            flag="balanceForecastReport"
+            feedbackLink="https://github.com/actualbudget/actual/issues/7669"
+          >
+            <Trans>Balance Forecast Report</Trans>
+          </FeatureToggle>
+          <FeatureToggle
+            flag="budgetAnalysisReport"
+            feedbackLink="https://github.com/actualbudget/actual/pull/6742"
+          >
+            <Trans>Budget Analysis Report</Trans>
+          </FeatureToggle>
+          <FeatureToggle
+            flag="monteCarloReport"
+            feedbackLink="https://github.com/actualbudget/actual/issues/8571"
+          >
+            <Trans>Monte Carlo Analysis Report</Trans>
+          </FeatureToggle>
+          <FeatureToggle
+            flag="enableBanking"
+            feedbackLink="https://github.com/actualbudget/actual/issues/7799"
+          >
+            <Trans>Enable Banking sync (EU banks)</Trans>
+          </FeatureToggle>
+          <FeatureToggle
+            flag="akahuBankSync"
+            feedbackLink="https://github.com/actualbudget/actual/issues/8020"
+          >
+            <Trans>Akahu Bank Sync (NZ banks)</Trans>
+          </FeatureToggle>
+          {showServerPrefs && (
+            <ServerFeatureToggle
+              prefName="flags.plugins"
+              disableToggle
+              feedbackLink="https://github.com/actualbudget/actual/issues/5950"
+            >
+              <Trans>Client-Side plugins (soon)</Trans>
+            </ServerFeatureToggle>
+          )}
+        </View>
       }
     >
       <Text>

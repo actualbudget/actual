@@ -9,6 +9,7 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { Page } from '#components/Page';
+import { useIsSettingsSubPage } from '#components/settings/SettingsSubPageContext';
 import { useAccounts } from '#hooks/useAccounts';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { pushModal } from '#modals/modalsSlice';
@@ -25,6 +26,7 @@ import { BuiltInProviders } from './BuiltInProviders';
 import { useBuiltInBankSyncProviders } from './useBuiltInBankSyncProviders';
 
 export function BankSync() {
+  const isSettingsSubPage = useIsSettingsSubPage();
   const { t } = useTranslation();
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
   const { data: accounts = [] } = useAccounts();
@@ -86,7 +88,8 @@ export function BankSync() {
 
   return (
     <Page
-      header={t('Bank Sync')}
+      header={isSettingsSubPage ? null : t('Bank Sync')}
+      padding={isSettingsSubPage ? 0 : undefined}
       style={{
         minHeight: 'initial',
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
