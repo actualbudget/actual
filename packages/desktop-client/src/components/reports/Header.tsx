@@ -19,7 +19,7 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
-import { getFirstDayOfWeek } from '#components/select/DateSelect';
+import { getFirstDayOfWeek } from '#components/select/getFirstDayOfWeek';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLanguage } from '#hooks/useLocale';
 
@@ -195,6 +195,12 @@ export function Header({
           <Trans>Prior year to date</Trans>,
           () =>
             liveRangeAsMonths('Prior year to date', false, 'priorYearToDate'),
+        ),
+        makePreset('current-quarter', <Trans>Current quarter</Trans>, () =>
+          liveRangeAsMonths('Current quarter', false, 'currentQuarter'),
+        ),
+        makePreset('previous-quarter', <Trans>Previous quarter</Trans>, () =>
+          liveRangeAsMonths('Previous quarter', false, 'previousQuarter'),
         ),
         // `allMonths` may still be empty before the report's async load
         // finishes.

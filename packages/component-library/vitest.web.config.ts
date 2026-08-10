@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config';
 // Any workspace package's source; node_modules stays excluded by the babel
 // plugin's default exclude.
 const reactCompilerInclude =
-  /[\\/]packages[\\/][^\\/]+[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
+  /[\\/]packages[\\/][^\\/]+[\\/]src[\\/].*\.[jt]sx?(?:$|\?)/;
 
 export default defineConfig({
   test: {

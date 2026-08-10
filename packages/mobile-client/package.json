@@ -1,6 +1,6 @@
 {
   "name": "mobile-client",
-  "version": "25.10.0",
+  "version": "26.8.1",
   "license": "MIT",
   "files": [
     "build"
