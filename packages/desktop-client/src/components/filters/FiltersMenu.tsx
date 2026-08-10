@@ -645,6 +645,7 @@ export function FilterButton<T extends RuleConditionEntity>({
 
   useEffect(() => {
     const handleCloseOuterPopovers = () => {
+      console.log('>>> handleCloseOuterPopovers called!');
       dispatch({ type: 'close' });
     };
     document.addEventListener('close-outer-popovers', handleCloseOuterPopovers);

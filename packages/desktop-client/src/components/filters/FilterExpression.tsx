@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -41,6 +41,9 @@ export function FilterExpression<T extends RuleConditionEntity>({
 }: FilterExpressionProps<T>) {
   const { t } = useTranslation();
   
+  const [editing, setEditing] = useState(false);
+  const triggerRef = useRef(null);
+
   useEffect(() => {
     const handleCloseOuterPopovers = () => {
       setEditing(false);
@@ -53,9 +56,6 @@ export function FilterExpression<T extends RuleConditionEntity>({
       );
     };
   }, []);
-
-  const [editing, setEditing] = useState(false);
-  const triggerRef = useRef(null);
 
   const field = subfieldFromFilter({ field: originalField, value });
 
