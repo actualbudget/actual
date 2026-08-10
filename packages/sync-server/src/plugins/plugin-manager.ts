@@ -131,10 +131,12 @@ function createPluginManager(pluginsDir: string) {
 
     const tempSlug = `upload-${randomUUID()}`;
     const tempZipPath = path.join(os.tmpdir(), `${tempSlug}.zip`);
-    fs.writeFileSync(tempZipPath, zipBuffer);
 
     let extractedPath: string | null = null;
+    let zipPath: string | undefined;
+    let isInstallComplete = false;
     try {
+      fs.writeFileSync(tempZipPath, zipBuffer);
       extractedPath = extractZipPlugin(tempZipPath, tempSlug);
       const manifest = validateManifest(
         JSON.parse(
@@ -147,21 +149,30 @@ function createPluginManager(pluginsDir: string) {
         throw new Error(`Plugin ${pluginSlug} is already installed`);
       }
 
-      const zipPath = getPluginZipPath(pluginSlug, manifest.version);
+      zipPath = getPluginZipPath(pluginSlug, manifest.version);
       fs.writeFileSync(zipPath, zipBuffer);
 
       await loadPluginNow(pluginSlug, extractedPath, zipPath);
       extractedPlugins.delete(tempSlug);
       extractedPlugins.set(`${pluginSlug}-${manifest.version}`, extractedPath);
       extractedPath = null;
+      isInstallComplete = true;
 
       return manifest;
     } finally {
       if (extractedPath) {
         fs.rmSync(extractedPath, { recursive: true, force: true });
       }
+      if (zipPath && !isInstallComplete) {
+        try {
+          fs.rmSync(zipPath, { force: true });
+        } catch {
+          // Preserve the installation error.
+        }
+      }
       fs.rmSync(tempZipPath, { force: true });
       extractedPlugins.delete(tempSlug);
+    }
     }
   }
 
