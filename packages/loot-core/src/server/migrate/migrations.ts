@@ -143,35 +143,82 @@ export async function applyMigration(
   ]);
 }
 
+// Migrations with ids after this point are additive-only, enforced by
+// additive-migrations.test.ts. A database containing unknown applied
+// ids from that era was touched by a newer release — including one
+// whose migration id happens to sort below ids this version already
+// knows (authored earlier, merged later) — and is still safe to open.
+// Unknown ids from before this point indicate a corrupt or
+// incompatible database.
+export const ADDITIVE_ONLY_CUTOFF = 1780606215001;
+
 function checkDatabaseValidity(
   appliedIds: number[],
   available: string[],
 ): void {
-  // Tolerate applied migrations newer than anything this app knows
-  // about: they were run by a newer version of the app on this budget.
-  // This is safe because migrations are additive-only (enforced by
-  // additive-migrations.test.ts). Unknown ids older than the newest
-  // known migration still fail below — those indicate a corrupt or
-  // incompatible database, not just a newer one.
-  const maxAvailableId = available.length
-    ? getMigrationId(available[available.length - 1])
-    : 0;
-  const hasNewerUnknownMigrations = appliedIds.some(id => id > maxAvailableId);
-  // Keep `appliedIds` intact for the error logs below so newer unknown
-  // ids stay visible in diagnostics
-  const knownAppliedIds = appliedIds.filter(id => id <= maxAvailableId);
+  // A migrated database with no migrations on disk means the install is
+  // broken — without this guard every applied id would count as
+  // "unknown but tolerable" below and the checks would pass vacuously
+  if (available.length === 0 && appliedIds.length > 0) {
+    logger.error('No migrations found on disk for a migrated database:', {
+      appliedIds,
+    });
+    throw new Error('out-of-sync-migrations');
+  }
+
+  const allAvailableIds = available.map(getMigrationId);
+  const availableIds = new Set(allAvailableIds);
+  const unknownIds = appliedIds.filter(id => !availableIds.has(id));
+
+  if (unknownIds.some(id => id <= ADDITIVE_ONLY_CUTOFF)) {
+    logger.error(
+      'Database is out of sync with migrations (unknown migration from before the additive-only era):',
+      {
+        appliedIds,
+        available,
+      },
+    );
+    throw new Error('out-of-sync-migrations');
+  }
+
+  const knownAppliedIds = appliedIds.filter(id => availableIds.has(id));
 
   // A database touched by a newer version must already contain every
   // migration this app knows (append-only migrations guarantee the newer
-  // version knew them all). A known migration missing next to a newer
+  // version knew them all). A known migration missing next to an
   // unknown one means the database is corrupt — running it now, after
   // later migrations already ran, would be unsafe.
+  if (unknownIds.length > 0 && knownAppliedIds.length !== available.length) {
+    logger.error(
+      'Database is out of sync with migrations (missing known migration next to an unknown one):',
+      {
+        appliedIds,
+        available,
+      },
+    );
+    throw new Error('out-of-sync-migrations');
+  }
+
+  // Pre-cutoff migrations shipped strictly append-only, so the applied
+  // ones must form an ordered prefix of the available list — a gap
+  // there means the database is corrupt. Post-cutoff, a gap is just a
+  // pending interleaved-id migration that `migrate` applies next.
+  const preCutoffAvailableIds = allAvailableIds.filter(
+    id => id <= ADDITIVE_ONLY_CUTOFF,
+  );
+  const preCutoffAppliedIds = knownAppliedIds.filter(
+    id => id <= ADDITIVE_ONLY_CUTOFF,
+  );
+
+  // A post-cutoff migration only ever runs after the entire pre-cutoff
+  // chain, so one applied next to a missing pre-cutoff migration means
+  // the database is corrupt
   if (
-    hasNewerUnknownMigrations &&
-    knownAppliedIds.length !== available.length
+    appliedIds.some(id => id > ADDITIVE_ONLY_CUTOFF) &&
+    preCutoffAppliedIds.length !== preCutoffAvailableIds.length
   ) {
     logger.error(
-      'Database is out of sync with migrations (missing known migration next to a newer unknown one):',
+      'Database is out of sync with migrations (missing pre-cutoff migration next to an applied post-cutoff one):',
       {
         appliedIds,
         available,
@@ -179,20 +226,8 @@ function checkDatabaseValidity(
     );
     throw new Error('out-of-sync-migrations');
   }
-
-  if (knownAppliedIds.length > available.length) {
-    logger.error(
-      'Database is out of sync with migrations (index past available):',
-      {
-        appliedIds,
-        available,
-      },
-    );
-    throw new Error('out-of-sync-migrations');
-  }
-
-  for (let i = 0; i < knownAppliedIds.length; i++) {
-    if (knownAppliedIds[i] !== getMigrationId(available[i])) {
+  for (let i = 0; i < preCutoffAppliedIds.length; i++) {
+    if (preCutoffAppliedIds[i] !== preCutoffAvailableIds[i]) {
       logger.error(
         'Database is out of sync with migrations (migration id mismatch):',
         {

@@ -599,9 +599,13 @@ async function _loadBudget(id: Budget['id']): Promise<{
   }
 
   try {
-    // Apply any sync messages that were deferred because they came from
-    // a newer version of the app, now that migrations have run
-    replayPendingMessages();
+    // Apply sync messages deferred from a newer app version, now that
+    // migrations have run. Skipped without a sync server: serverless
+    // edits aren't in the crdt log, so replay couldn't tell whether a
+    // pending value is stale.
+    if (getServer()) {
+      replayPendingMessages();
+    }
   } catch (e) {
     // Failing to replay shouldn't block loading the budget; the
     // messages stay pending

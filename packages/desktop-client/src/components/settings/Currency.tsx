@@ -66,6 +66,7 @@ export function CurrencySettings() {
         ['TWD', t('New Taiwan Dollar')],
         ['UAH', t('Ukrainian Hryvnia')],
         ['USD', t('US Dollar')],
+        ['UYU', t('Uruguayan Peso')],
         ['UZS', t('Uzbek Soum')],
       ]),
     [t],
