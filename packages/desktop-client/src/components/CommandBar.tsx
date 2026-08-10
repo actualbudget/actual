@@ -94,6 +94,7 @@ export function CommandBar() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [recentPaths, setRecentPaths] = useState<string[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
   const [budgetName] = useMetadataPref('budgetName');
@@ -236,27 +237,23 @@ export function CommandBar() {
     [accounts, customReports, dashboardPages, navigationItems, t],
   );
 
-  const eligibleItems = useMemo(
+  const allItems = useMemo(
     () => sections.flatMap(section => section.items),
     [sections],
   );
-  const [recentPaths, setRecentPaths] = useState<string[]>([]);
 
-  // Watching the router here means visits from the sidebar, links, and other
-  // screens are recorded too. Nothing is persisted, so a refresh starts fresh.
+  // Hook to track route visits and store them in state
   useEffect(() => {
     // `/reports` is an alias which redirects to the first dashboard. Do not
     // leave the alias in Recent while that redirect is resolving.
     if (
       location.pathname === '/reports' &&
       (isDashboardPagesPending || (dashboardPages ?? []).length > 0)
-    ) {
-      return;
-    }
+    )
+      {return;}
 
-    const currentItem = eligibleItems.find(
-      item => item.path === location.pathname,
-    );
+    // Ensure route path is in the list of CommandBar items before storing it in state
+    const currentItem = allItems.find(item => item.path === location.pathname);
     if (!currentItem) return;
 
     setRecentPaths(paths => {
@@ -266,24 +263,21 @@ export function CommandBar() {
         ...paths.filter(path => path !== currentItem.path),
       ];
     });
-  }, [
-    dashboardPages,
-    eligibleItems,
-    isDashboardPagesPending,
-    location.pathname,
-  ]);
+  }, [dashboardPages, allItems, isDashboardPagesPending, location.pathname]);
 
+  // Build "Recent" section with items
   const recentSectionItems: SearchableItem[] = [];
   for (const path of recentPaths) {
     if (path === location.pathname) continue;
 
-    const item = eligibleItems.find(item => item.path === path);
+    const item = allItems.find(item => item.path === path);
     if (!item) continue;
 
     recentSectionItems.push(item);
     if (recentSectionItems.length === 3) break;
   }
 
+  // Append "Recent" section to sections list if there are recent items
   const sectionsWithRecent: SearchSection[] =
     recentSectionItems.length > 0
       ? [
