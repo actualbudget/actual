@@ -1,4 +1,7 @@
 // @ts-strict-ignore
+import * as nodeFs from 'fs';
+import * as os from 'os';
+
 import { deserializeClock, getClock } from '@actual-app/crdt';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -34,10 +37,19 @@ afterEach(async () => {
   global.currentMonth = null;
 });
 
+// The budget files are copied into a unique temporary directory per
+// test. Using a fixed path shared between processes causes intermittent
+// failures (e.g. SQLITE_READONLY_DBMOVED) when concurrent test runs
+// replace the database file underneath an open connection.
+let testDocumentDir: string | null = null;
+
 async function createTestBudget(name) {
   const templatePath = fs.join(__dirname, '/../mocks/files', name);
-  const budgetPath = fs.join(__dirname, '/../mocks/files/budgets/test-budget');
-  fs._setDocumentDir(fs.join(budgetPath, '..'));
+  testDocumentDir = nodeFs.mkdtempSync(
+    fs.join(os.tmpdir(), 'actual-test-budgets-'),
+  );
+  const budgetPath = fs.join(testDocumentDir, 'test-budget');
+  fs._setDocumentDir(testDocumentDir);
 
   await fs.mkdir(budgetPath);
   await fs.copyFile(
@@ -53,14 +65,11 @@ async function createTestBudget(name) {
 describe('Budgets', () => {
   afterEach(async () => {
     fs._setDocumentDir(null);
-    const budgetPath = fs.join(
-      __dirname,
-      '/../mocks/files/budgets/test-budget',
-    );
 
-    if (await fs.exists(budgetPath)) {
-      await fs.removeDirRecursively(budgetPath);
+    if (testDocumentDir && (await fs.exists(testDocumentDir))) {
+      await fs.removeDirRecursively(testDocumentDir);
     }
+    testDocumentDir = null;
   });
 
   test('budget is successfully loaded', async () => {
