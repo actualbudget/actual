@@ -30,12 +30,14 @@ export type FormulaQueryContext = {
   queryExtractCategoryNames?: Set<string>;
   queryExtractTimeframeStartNames?: Set<string>;
   queryExtractTimeframeEndNames?: Set<string>;
+  balanceOfNames?: Set<string>;
   budgetQueryRequests?: Map<string, BudgetQueryRequest>;
   querySumPrefetch?: Map<string, number>;
   queryCountPrefetch?: Map<string, number>;
   queryExtractCategoriesPrefetch?: Map<string, string[]>;
   queryExtractTimeframeStartPrefetch?: Map<string, string>;
   queryExtractTimeframeEndPrefetch?: Map<string, string>;
+  balanceOfPrefetch?: Map<string, number>;
   budgetQueryPrefetch?: Map<string, number>;
   budgetQueryErrors?: Map<string, string>;
 };
@@ -205,7 +207,16 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       this.metadata('BALANCE_OF'),
       (accountKey: string) => {
         const ctx = this.getCustomFunctionsContext();
-        return ctx?.balanceOfPrefetch?.get(accountKey) ?? 0;
+        if (ctx?.balanceOfPrefetch) {
+          // Rule formulas: prefetched relative to the transaction being evaluated.
+          return ctx.balanceOfPrefetch.get(accountKey) ?? 0;
+        }
+
+        // Report/query formulas: no single transaction to be "before", so this
+        // resolves to the account's current balance.
+        const formulaQueryCtx = this.getFormulaQueryContext();
+        formulaQueryCtx?.balanceOfNames?.add(accountKey);
+        return formulaQueryCtx?.balanceOfPrefetch?.get(accountKey) ?? 0;
       },
     );
   }
