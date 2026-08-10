@@ -282,6 +282,22 @@ export function calculateTimeRange(
       'priorYearToDate',
     ] as const;
   }
+  if (mode === 'currentQuarter') {
+    const currentMonth = monthUtils.currentMonth();
+    return [
+      monthUtils.getQuarterStart(currentMonth),
+      monthUtils.getQuarterEnd(currentMonth),
+      'currentQuarter',
+    ] as const;
+  }
+  if (mode === 'previousQuarter') {
+    const prevQuarterMonth = monthUtils.prevQuarter(monthUtils.currentMonth());
+    return [
+      monthUtils.getQuarterStart(prevQuarterMonth),
+      monthUtils.getQuarterEnd(prevQuarterMonth),
+      'previousQuarter',
+    ] as const;
+  }
 
   return [start, end, 'static'] as const;
 }
