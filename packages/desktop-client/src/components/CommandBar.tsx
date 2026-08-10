@@ -249,8 +249,9 @@ export function CommandBar() {
     if (
       location.pathname === '/reports' &&
       (isDashboardPagesPending || (dashboardPages ?? []).length > 0)
-    )
-      {return;}
+    ) {
+      return;
+    }
 
     // Ensure route path is in the list of CommandBar items before storing it in state
     const currentItem = allItems.find(item => item.path === location.pathname);
