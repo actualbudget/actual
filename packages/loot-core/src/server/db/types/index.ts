@@ -353,6 +353,7 @@ export type DbViewSchedule = {
   _date: JsonString;
   _conditions: JsonString;
   _actions: JsonString;
+  _has_splits: 0 | 1;
 };
 
 export type DbTag = {
