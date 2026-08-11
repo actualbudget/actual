@@ -3409,14 +3409,7 @@ export const TransactionTable = forwardRef(
 
     function onCheckNewEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {
-        if (e.metaKey || e.ctrlKey) {
-          e.preventDefault();
-          e.stopPropagation();
-          afterSave(() => {
-            shouldAddAndClose.current = true;
-            forceRerender({});
-          });
-        } else if (e.shiftKey) {
+        if ((e.metaKey || e.ctrlKey) && e.shiftKey) {
           e.preventDefault();
           e.stopPropagation();
           afterSave(() => {
@@ -3425,6 +3418,13 @@ export const TransactionTable = forwardRef(
               shouldSchedule.current = true;
               forceRerender({});
             }
+          });
+        } else if (e.metaKey || e.ctrlKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          afterSave(() => {
+            shouldAddAndClose.current = true;
+            forceRerender({});
           });
         } else if (!e.shiftKey) {
           function getLastTransaction(state: RefObject<TableState>) {

@@ -1251,7 +1251,7 @@ describe('Transactions', () => {
       pushModalSpy.mockRestore();
     });
 
-    test('shift+enter creates a schedule when the date is within the upcoming window', async () => {
+    test('ctrl/cmd+shift+enter creates a schedule when the date is within the upcoming window', async () => {
       const { container, getTransactions, updateProps } = renderTransactions();
       updateProps({ isAdding: true });
 
@@ -1259,7 +1259,7 @@ describe('Transactions', () => {
       await userEvent.clear(dateInput);
       await userEvent.type(dateInput, '01/02/2017[Tab]');
 
-      await userEvent.keyboard('{Shift>}{Enter}{/Shift}');
+      await userEvent.keyboard('{Control>}{Shift>}{Enter}{/Shift}{/Control}');
 
       await waitFor(() => {
         expect(createScheduleMock).toHaveBeenCalled();
@@ -1267,7 +1267,7 @@ describe('Transactions', () => {
       expect(getTransactions().length).toBe(5);
     });
 
-    test('shift+enter opens the convert-to-schedule modal when the date is beyond the upcoming window', async () => {
+    test('ctrl/cmd+shift+enter opens the convert-to-schedule modal when the date is beyond the upcoming window', async () => {
       const pushModalSpy = vi.spyOn(modalsSlice, 'pushModal');
       const { container, getTransactions, updateProps } = renderTransactions();
       updateProps({ isAdding: true });
@@ -1276,7 +1276,7 @@ describe('Transactions', () => {
       await userEvent.clear(dateInput);
       await userEvent.type(dateInput, '02/01/2017[Tab]');
 
-      await userEvent.keyboard('{Shift>}{Enter}{/Shift}');
+      await userEvent.keyboard('{Control>}{Shift>}{Enter}{/Shift}{/Control}');
 
       await waitFor(() => {
         expect(pushModalSpy).toHaveBeenCalled();
@@ -1286,7 +1286,7 @@ describe('Transactions', () => {
       pushModalSpy.mockRestore();
     });
 
-    test('shift+enter does nothing for a non-future-dated transaction', async () => {
+    test('ctrl/cmd+shift+enter does nothing for a non-future-dated transaction', async () => {
       const { container, getTransactions, updateProps } = renderTransactions();
       updateProps({ isAdding: true });
 
@@ -1294,7 +1294,7 @@ describe('Transactions', () => {
       await userEvent.clear(input);
       await userEvent.type(input, 'test');
 
-      await userEvent.keyboard('{Shift>}{Enter}{/Shift}');
+      await userEvent.keyboard('{Control>}{Shift>}{Enter}{/Shift}{/Control}');
 
       expect(createScheduleMock).not.toHaveBeenCalled();
       expect(getTransactions().length).toBe(5);
