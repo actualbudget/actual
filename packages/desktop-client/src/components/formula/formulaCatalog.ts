@@ -1003,9 +1003,9 @@ export function getFormulaFunctionCatalog(): Record<
     BALANCE_OF: {
       name: 'BALANCE_OF',
       category: 'other',
-      modes: ['transaction'],
+      modes: ['query', 'transaction'],
       description: t(
-        'Running balance for another account (cents) at this transaction, same cutoff as balance. Use a quoted account id for a deterministic match, or a quoted account name. Use the balance variable instead for the current account.',
+        "Balance for an account. In rule formulas, this is the running balance (in cents) at this transaction, same cutoff as balance (use the balance variable instead for the current account). In report/query formulas, this is the account's current balance (in money/display units). Use a quoted account id for a deterministic match, or a quoted account name.",
       ),
       parameters: [
         {
