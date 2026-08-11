@@ -376,6 +376,8 @@ If you record a loan (mortgage, auto loan, etc.) payment as a single transaction
 
 This computes the interest portion of the payment for the month of the current transaction, for a 30-year (360-month) loan that started 2024-01-01 at 5% annual interest on a $300,000 principal. Swap `IPMT` for `PPMT` to get the principal portion instead, or use `CUMIPMT`/`CUMPRINC` with a `start_period` of `1` and that same period as `end_period` to get interest/principal paid to date.
 
+Write the principal in dollars (`-300000`), not cents. These functions return their result in the same unit you pass in, and Actual expects a numeric formula result in dollars — see [Result types](#result-types) below.
+
 ### Result types
 
 When a rule runs, Actual converts the formula result to the field type:
@@ -384,3 +386,11 @@ When a rule runs, Actual converts the formula result to the field type:
 - **date fields**: must produce a valid date
 - **boolean fields**: `TRUE`/`FALSE` (or a string that equals `"true"`/`"false"`)
 - **string fields**: converted with `String(...)`
+
+:::caution
+Numbers going **into** a formula and numbers coming **out** of one use different units.
+
+The `amount` and `balance` variables hand you integer cents, but a number your formula produces is read as **dollars** and converted to cents when Actual stores it. So a formula of `=500 + 250` sets the amount to $750.00, not $7.50.
+
+When you calculate with `amount` or `balance`, divide by 100 first so both sides are in dollars. For example, `=amount / 100 * 1.05` adds 5% to the transaction amount, while `=amount * 1.05` gives a result 100 times too large.
+:::
