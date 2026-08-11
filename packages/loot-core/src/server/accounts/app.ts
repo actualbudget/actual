@@ -1653,6 +1653,7 @@ async function importTransactions({
       opts?.defaultCleared,
       false,
       opts?.reimportDeleted,
+      opts?.rawPayeeName,
     );
     return {
       errors: [],

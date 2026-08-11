@@ -103,6 +103,44 @@ describe('Account sync', () => {
     );
   });
 
+  test('reconcile title-cases the payee name by default', async () => {
+    const { id } = await prepareDatabase();
+
+    await reconcileTransactions(id, [
+      {
+        date: '2020-01-02',
+        payee_name: 'Nintendo Store New York NY',
+        amount: 4133,
+      },
+    ]);
+
+    const payees = await getAllPayees();
+    expect(payees.length).toBe(1);
+    expect(payees[0].name).toBe('Nintendo Store New York Ny');
+  });
+
+  test('transactions-import passes rawPayeeName from opts', async () => {
+    const { id } = await prepareDatabase();
+
+    await accountsApp.handlers['transactions-import']({
+      accountId: id,
+      transactions: [
+        {
+          account: id,
+          date: '2020-01-02',
+          payee_name: 'Nintendo Store New York NY',
+          amount: 4133,
+        },
+      ],
+      isPreview: false,
+      opts: { rawPayeeName: true },
+    });
+
+    const payees = await getAllPayees();
+    expect(payees.length).toBe(1);
+    expect(payees[0].name).toBe('Nintendo Store New York NY');
+  });
+
   test('reconcile handles transactions with undefined fields', async () => {
     const { id: acctId } = await prepareDatabase();
 
