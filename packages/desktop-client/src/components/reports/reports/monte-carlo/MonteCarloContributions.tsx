@@ -94,135 +94,150 @@ export function MonteCarloContributions({
 
   return (
     <View style={{ gap: 10 }}>
-      <View style={{ ...styles.tableContainer, flex: 'unset' }}>
-        <TableHeader>
-          <Field width="flex" style={{ minWidth: 150 }}>
-            <Trans>Contribution name</Trans>
-          </Field>
-          <Field width="flex" style={{ minWidth: 160 }}>
-            <Trans>Into pot</Trans>
-          </Field>
-          <Field width="flex" style={{ minWidth: 100 }}>
-            <Trans>From age</Trans>
-          </Field>
-          <Field width="flex" style={{ minWidth: 100 }}>
-            <Trans>To age</Trans>
-          </Field>
-          <Field width="flex" style={{ minWidth: 140 }}>
-            <Trans>Amount (per year)</Trans>
-          </Field>
-          <Field width="flex" style={{ minWidth: 170 }} />
-          <Field width={36} />
-        </TableHeader>
+      <View
+        style={{
+          ...styles.tableContainer,
+          ...styles.horizontalScrollbar,
+          flex: 'unset',
+          // Scroll sideways when the columns' minimum widths don't fit,
+          // instead of clipping the end of the rows
+          overflowX: 'auto',
+        }}
+      >
+        <View style={{ minWidth: 'fit-content' }}>
+          <TableHeader>
+            <Field width="flex" style={{ minWidth: 150 }}>
+              <Trans>Contribution name</Trans>
+            </Field>
+            <Field width="flex" style={{ minWidth: 160 }}>
+              <Trans>Into pot</Trans>
+            </Field>
+            <Field width="flex" style={{ minWidth: 100 }}>
+              <Trans>From age</Trans>
+            </Field>
+            <Field width="flex" style={{ minWidth: 100 }}>
+              <Trans>To age</Trans>
+            </Field>
+            <Field width="flex" style={{ minWidth: 140 }}>
+              <Trans>Amount (per year)</Trans>
+            </Field>
+            <Field width="flex" style={{ minWidth: 170 }} />
+            <Field width={36} />
+          </TableHeader>
 
-        {contributions.map((contribution, index) => (
-          <Row
-            key={contribution.id}
-            collapsed
-            height={CONTRIBUTION_ROW_HEIGHT}
-            style={{
-              backgroundColor: theme.tableBackground,
-              ':hover': { backgroundColor: theme.tableRowBackgroundHover },
-            }}
-          >
-            <Field width="flex" style={{ minWidth: 150 }} truncate={false}>
-              <Input
-                defaultValue={contribution.name}
-                placeholder={t('Contribution {{number}}', {
-                  number: index + 1,
-                })}
-                aria-label={t('Contribution name')}
-                onUpdate={newName => {
-                  if (newName !== contribution.name) {
-                    updateContribution(contribution.id, { name: newName });
+          {contributions.map((contribution, index) => (
+            <Row
+              key={contribution.id}
+              collapsed
+              height={CONTRIBUTION_ROW_HEIGHT}
+              style={{
+                backgroundColor: theme.tableBackground,
+                ':hover': { backgroundColor: theme.tableRowBackgroundHover },
+              }}
+            >
+              <Field width="flex" style={{ minWidth: 150 }} truncate={false}>
+                <Input
+                  defaultValue={contribution.name}
+                  placeholder={t('Contribution {{number}}', {
+                    number: index + 1,
+                  })}
+                  aria-label={t('Contribution name')}
+                  onUpdate={newName => {
+                    if (newName !== contribution.name) {
+                      updateContribution(contribution.id, { name: newName });
+                    }
+                  }}
+                />
+              </Field>
+
+              <Field width="flex" style={{ minWidth: 160 }} truncate={false}>
+                <Select
+                  value={contribution.potId}
+                  onChange={value =>
+                    updateContribution(contribution.id, { potId: value })
                   }
-                }}
-              />
-            </Field>
+                  options={potOptions}
+                />
+              </Field>
 
-            <Field width="flex" style={{ minWidth: 160 }} truncate={false}>
-              <Select
-                value={contribution.potId}
-                onChange={value =>
-                  updateContribution(contribution.id, { potId: value })
-                }
-                options={potOptions}
-              />
-            </Field>
+              <Field width="flex" style={{ minWidth: 100 }} truncate={false}>
+                <MonteCarloNumberInput
+                  value={contribution.fromAge}
+                  aria-label={t('From age')}
+                  allowEmpty
+                  roundToInteger
+                  min={currentAge}
+                  max={contribution.toAge ?? targetAge}
+                  step={1}
+                  placeholder={t('Now')}
+                  onCommit={newValue =>
+                    updateContribution(contribution.id, { fromAge: newValue })
+                  }
+                />
+              </Field>
 
-            <Field width="flex" style={{ minWidth: 100 }} truncate={false}>
-              <MonteCarloNumberInput
-                value={contribution.fromAge}
-                aria-label={t('From age')}
-                allowEmpty
-                roundToInteger
-                min={currentAge}
-                max={contribution.toAge ?? targetAge}
-                step={1}
-                placeholder={t('Now')}
-                onCommit={newValue =>
-                  updateContribution(contribution.id, { fromAge: newValue })
-                }
-              />
-            </Field>
+              <Field width="flex" style={{ minWidth: 100 }} truncate={false}>
+                <MonteCarloNumberInput
+                  value={contribution.toAge}
+                  aria-label={t('To age')}
+                  allowEmpty
+                  roundToInteger
+                  min={contribution.fromAge ?? currentAge}
+                  max={targetAge}
+                  step={1}
+                  placeholder={t('End of plan')}
+                  onCommit={newValue =>
+                    updateContribution(contribution.id, { toAge: newValue })
+                  }
+                />
+              </Field>
 
-            <Field width="flex" style={{ minWidth: 100 }} truncate={false}>
-              <MonteCarloNumberInput
-                value={contribution.toAge}
-                aria-label={t('To age')}
-                allowEmpty
-                roundToInteger
-                min={contribution.fromAge ?? currentAge}
-                max={targetAge}
-                step={1}
-                placeholder={t('End of plan')}
-                onCommit={newValue =>
-                  updateContribution(contribution.id, { toAge: newValue })
-                }
-              />
-            </Field>
+              <Field width="flex" style={{ minWidth: 140 }} truncate={false}>
+                <FinancialInput
+                  value={contribution.annualAmount}
+                  aria-label={t('Amount (per year)')}
+                  onUpdate={value => {
+                    const newAmount = Math.min(MAX_AMOUNT, Math.max(0, value));
+                    if (newAmount !== contribution.annualAmount) {
+                      updateContribution(contribution.id, {
+                        annualAmount: newAmount,
+                      });
+                    }
+                  }}
+                />
+              </Field>
 
-            <Field width="flex" style={{ minWidth: 140 }} truncate={false}>
-              <FinancialInput
-                value={contribution.annualAmount}
-                aria-label={t('Amount (per year)')}
-                onUpdate={value => {
-                  const newAmount = Math.min(MAX_AMOUNT, Math.max(0, value));
-                  if (newAmount !== contribution.annualAmount) {
+              <Field width="flex" style={{ minWidth: 170 }} truncate={false}>
+                <LabeledCheckbox
+                  id={`contribution-inflation-${contribution.id}`}
+                  checked={contribution.adjustsWithInflation}
+                  onChange={event =>
                     updateContribution(contribution.id, {
-                      annualAmount: newAmount,
-                    });
+                      adjustsWithInflation: event.target.checked,
+                    })
                   }
-                }}
-              />
-            </Field>
+                >
+                  <Trans>Adjust by inflation</Trans>
+                </LabeledCheckbox>
+              </Field>
 
-            <Field width="flex" style={{ minWidth: 170 }} truncate={false}>
-              <LabeledCheckbox
-                id={`contribution-inflation-${contribution.id}`}
-                checked={contribution.adjustsWithInflation}
-                onChange={event =>
-                  updateContribution(contribution.id, {
-                    adjustsWithInflation: event.target.checked,
-                  })
-                }
+              <Field
+                width={36}
+                truncate={false}
+                style={{ alignItems: 'center' }}
               >
-                <Trans>Adjust by inflation</Trans>
-              </LabeledCheckbox>
-            </Field>
-
-            <Field width={36} truncate={false} style={{ alignItems: 'center' }}>
-              <Button
-                variant="bare"
-                aria-label={t('Remove contribution')}
-                onPress={() => removeContribution(contribution.id)}
-                style={{ padding: 6 }}
-              >
-                <SvgDelete width={12} height={12} />
-              </Button>
-            </Field>
-          </Row>
-        ))}
+                <Button
+                  variant="bare"
+                  aria-label={t('Remove contribution')}
+                  onPress={() => removeContribution(contribution.id)}
+                  style={{ padding: 6 }}
+                >
+                  <SvgDelete width={12} height={12} />
+                </Button>
+              </Field>
+            </Row>
+          ))}
+        </View>
       </View>
 
       <View style={{ flexDirection: 'row' }}>
