@@ -1,6 +1,8 @@
 ---
 name: Actual Budget
 description: Local-first personal finance, built around envelope budgeting
+# All color values are the light-theme palette mapping; dark and midnight
+# remap the same semantic roles via `theme.*` tokens (see The Semantic Token Rule).
 colors:
   actual-purple: '#8719e0'
   actual-purple-hover: '#a368fc'
@@ -87,6 +89,8 @@ The system explicitly rejects fintech-startup gloss (gradient heroes, glassmorph
 ## 2. Colors
 
 A calm navy-neutral base with one confident purple accent and strict semantic roles for money.
+
+All hex values in this file (frontmatter included) are the light-theme palette mapping. The dark and midnight themes remap the same semantic roles to different palette values, so never use these hexes directly in components — route every color through the `theme.*` semantic tokens (see The Semantic Token Rule below).
 
 ### Primary
 
