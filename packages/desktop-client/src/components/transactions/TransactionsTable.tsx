@@ -3416,6 +3416,16 @@ export const TransactionTable = forwardRef(
             shouldAddAndClose.current = true;
             forceRerender({});
           });
+        } else if (e.shiftKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          afterSave(() => {
+            const transaction = latestState.current.newTransactions[0];
+            if (transaction && isFutureTransaction(transaction)) {
+              shouldSchedule.current = true;
+              forceRerender({});
+            }
+          });
         } else if (!e.shiftKey) {
           function getLastTransaction(state: RefObject<TableState>) {
             const { newTransactions } = state.current;

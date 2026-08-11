@@ -1250,6 +1250,55 @@ describe('Transactions', () => {
       expect(getTransactions().length).toBe(5);
       pushModalSpy.mockRestore();
     });
+
+    test('shift+enter creates a schedule when the date is within the upcoming window', async () => {
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '01/02/2017[Tab]');
+
+      await userEvent.keyboard('{Shift>}{Enter}{/Shift}');
+
+      await waitFor(() => {
+        expect(createScheduleMock).toHaveBeenCalled();
+      });
+      expect(getTransactions().length).toBe(5);
+    });
+
+    test('shift+enter opens the convert-to-schedule modal when the date is beyond the upcoming window', async () => {
+      const pushModalSpy = vi.spyOn(modalsSlice, 'pushModal');
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '02/01/2017[Tab]');
+
+      await userEvent.keyboard('{Shift>}{Enter}{/Shift}');
+
+      await waitFor(() => {
+        expect(pushModalSpy).toHaveBeenCalled();
+      });
+      expect(createScheduleMock).not.toHaveBeenCalled();
+      expect(getTransactions().length).toBe(5);
+      pushModalSpy.mockRestore();
+    });
+
+    test('shift+enter does nothing for a non-future-dated transaction', async () => {
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const input = await editNewField(container, 'notes');
+      await userEvent.clear(input);
+      await userEvent.type(input, 'test');
+
+      await userEvent.keyboard('{Shift>}{Enter}{/Shift}');
+
+      expect(createScheduleMock).not.toHaveBeenCalled();
+      expect(getTransactions().length).toBe(5);
+    });
   });
 
   test('ctrl/cmd+enter adds transaction and closes form', async () => {

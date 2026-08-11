@@ -114,7 +114,7 @@ If the transaction's date is further away than your **Upcoming length** setting,
 The transaction is not posted to your register. Instead, it becomes an upcoming scheduled transaction that posts automatically on its scheduled date. You can find it and adjust its details later in [the Schedules view](#the-schedules-overview-screen).
 
 :::note
-The **Schedule** button only appears for future-dated transactions. For transactions dated today or earlier, it is hidden.
+The **Schedule** button only appears for future-dated transactions. For transactions dated today or earlier, it is hidden. As a shortcut, you can press **Shift+Enter** in the new transaction row instead of clicking **Schedule**.
 :::
 
 On mobile, a **Schedule** button appears in the transaction editor for future-dated transactions to use the same behavior.
