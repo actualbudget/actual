@@ -42,15 +42,13 @@ case "$cmd" in
 esac
 
 # Never create GitHub issues from the shell — filing an issue is a human
-# decision (.github/agents/pr-and-commit-rules.md). Matches the real gh CLI
-# form (`gh [flags] issue create …`); like the git checks below this is
-# best-effort, not evasion-proof (a hand-rolled `gh api` call is out of scope).
+# decision (.github/agents/pr-and-commit-rules.md). Requires `gh` as a whole
+# token followed by "issue create", matching the real CLI form
+# (`gh [flags] issue create …`); like the git checks below this is best-effort,
+# not evasion-proof (a hand-rolled `gh api` call is out of scope).
 case " $cmd " in
-  *" gh "*)
-    case "$cmd" in
-      *"issue create"*)
-        block "Blocked: agents must not create GitHub issues — filing an issue is a human decision (.github/agents/pr-and-commit-rules.md). Share the proposed issue title and body with the user instead." ;;
-    esac ;;
+  *" gh "*"issue create"*)
+    block "Blocked: agents must not create GitHub issues — filing an issue is a human decision (.github/agents/pr-and-commit-rules.md). Share the proposed issue title and body with the user instead." ;;
 esac
 
 # Everything below only applies to actual git invocations. Match `git` as a

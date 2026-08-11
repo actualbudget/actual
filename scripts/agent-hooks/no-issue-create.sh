@@ -19,14 +19,12 @@ block() {
 . "$(dirname "$0")/common.sh"
 require_jq
 
-input=$(cat)
-
 # Fail closed on a malformed payload — invalid JSON, or a missing/non-object
 # `.tool_input` — matching the other guards, so a payload we can't read can't
-# silently bypass the check.
-fields=$(printf '%s' "$input" | jq -e '.tool_input | objects' 2>/dev/null) ||
+# silently bypass the check. A valid payload with no method yields "" and is
+# caught by the allowlist below.
+method=$(jq -re '.tool_input | objects | .method // ""' 2>/dev/null) ||
   block "Blocked: could not read the hook payload (.tool_input). (scripts/agent-hooks/no-issue-create.sh)"
-method=$(printf '%s' "$fields" | jq -r '.method // empty')
 
 # Allowlist rather than denylist: only updates to existing issues pass, so an
 # unknown or missing method fails closed instead of slipping past as a create
@@ -36,5 +34,5 @@ case "$method" in
   create)
     block "Blocked: agents must not create GitHub issues — filing an issue is a human decision (.github/agents/pr-and-commit-rules.md). Share the proposed issue title and body with the user instead." ;;
   *)
-    block "Blocked: unrecognized issue_write method '${method:-<missing>}' — agents may only update existing issues, never create them (.github/agents/pr-and-commit-rules.md). (scripts/agent-hooks/no-issue-create.sh)" ;;
+    block "Blocked: unrecognized issue_write method '${method:-<missing>}' — agents may only update existing issues, never create them (.github/agents/pr-and-commit-rules.md). If this is a new non-create method, extend the allowlist in scripts/agent-hooks/no-issue-create.sh." ;;
 esac
