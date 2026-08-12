@@ -50,7 +50,7 @@ export const currencies: Currency[] = [
   { code: 'KRW', name: 'South Korean Won', symbol: '₩', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'LKR', name: 'Sri Lankan Rupee', symbol: 'Rs.', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'MDL', name: 'Moldovan Leu', symbol: 'L', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
-  { code: 'MKD', name: 'Macedonian Denar', symbol: 'ден', decimalPlaces: 0, numberFormat: 'dot-comma', symbolFirst: false },
+  { code: 'MKD', name: 'Macedonian Denar', symbol: 'ден', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   { code: 'MXN', name: 'Mexican Peso', symbol: '$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'MYR', name: 'Malaysian Ringgit', symbol: 'RM', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'PHP', name: 'Philippine Peso', symbol: '₱', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
