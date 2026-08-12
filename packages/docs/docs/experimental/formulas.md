@@ -92,7 +92,7 @@ If a function isn’t listed here, it still might work. Actual uses HyperFormula
 | `IFNA`                          | Query, Rules | Returns value if not #N/A error, otherwise returns alternative.                                                                                                       | `=IFNA(VLOOKUP("x", A1:B10, 2, FALSE), 0)`                                                                                    | —                                                                                                               |
 | `IFS`                           | Query, Rules | Checks multiple conditions and returns corresponding values.                                                                                                          | `=IFS(amount<0, "Expense", amount>0, "Income")`                                                                               | Repeat `(condition, value)` pairs                                                                               |
 | `INDEX`                         | Query        | Returns value at specified row and column.                                                                                                                            | `=INDEX(A1:C10, 2, 3)`                                                                                                        | —                                                                                                               |
-| `INTEGER_TO_AMOUNT`             | Query, Rules | Converts integer amount to decimal amount (e.g., 1234 -> 12.34). Transaction variables are already decimal amounts.                                                   | `=INTEGER_TO_AMOUNT(1234)`                                                                                                    | `decimal_places` (default: 2)                                                                                   |
+| `INTEGER_TO_AMOUNT`             | Query, Rules | Converts integer amount to decimal amount (e.g., 1234 -> 12.34).                                                                                                      | `=INTEGER_TO_AMOUNT(1234)`                                                                                                    | `decimal_places` (default: 2)                                                                                   |
 | `INT`                           | Rules        | Rounds down to nearest integer.                                                                                                                                       | `=INT(10.9)`                                                                                                                  | —                                                                                                               |
 | `IPMT`                          | Query, Rules | Calculates the interest portion of a loan payment for a given period.                                                                                                 | `=IPMT(0.05/12, 1, 60, 20000)`                                                                                                | —                                                                                                               |
 | `IRR`                           | Query        | Calculates internal rate of return.                                                                                                                                   | `=IRR(A1:A12)`                                                                                                                | —                                                                                                               |
@@ -328,7 +328,7 @@ Rule formulas evaluate with named variables from the transaction context, includ
 
 **Numeric variables:**
 
-- `amount` — Transaction amount, written the same way you see it in Actual (e.g., `123.45`)
+- `amount` — Transaction amount (e.g., `123.45`)
   - Positive for income, negative for expenses
 - `balance` — Account balance at this transaction, excluding the transaction itself
 - `parent_amount` — Amount of the parent transaction, available when a rule splits a transaction
@@ -347,8 +347,6 @@ Rule formulas evaluate with named variables from the transaction context, includ
 - `reconciled` — Whether transaction is reconciled (`TRUE` or `FALSE`)
 
 :::note
-Every number in a rule formula uses the same units you see in Actual, on the way in and on the way out. `=amount * 1.05` adds 5% to the transaction amount, and `=500 + 250` sets the amount to $750.00.
-
 Rule formulas used to work in cents and had to divide by 100. Any formula you saved back then was updated automatically the first time you opened your budget, so it keeps producing the same result. Those formulas now carry an extra `* 100`, which you can simplify by hand.
 :::
 
@@ -377,7 +375,7 @@ If you record a loan (mortgage, auto loan, etc.) payment as a single transaction
 
 This computes the interest portion of the payment for the month of the current transaction, for a 30-year (360-month) loan that started 2024-01-01 at 5% annual interest on a $300,000 principal. Swap `IPMT` for `PPMT` to get the principal portion instead, or use `CUMIPMT`/`CUMPRINC` with a `start_period` of `1` and that same period as `end_period` to get interest/principal paid to date.
 
-Write the principal the way you would write it in Actual (`-300000`), not in cents. These functions return their result in the same units you pass in.
+These functions return their result in the same units you pass in, so write the principal as `-300000`.
 
 ### Result types
 
@@ -387,5 +385,3 @@ When a rule runs, Actual converts the formula result to the field type:
 - **date fields**: must produce a valid date
 - **boolean fields**: `TRUE`/`FALSE` (or a string that equals `"true"`/`"false"`)
 - **string fields**: converted with `String(...)`
-
-Amount fields receive the result in the same units you see in Actual — a formula result of `750` sets the amount to $750.00.

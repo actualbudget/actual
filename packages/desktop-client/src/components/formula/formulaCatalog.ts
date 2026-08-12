@@ -510,7 +510,7 @@ export function getFormulaFunctionCatalog(): Record<
       category: 'other',
       modes: ['query', 'transaction'],
       description: t(
-        'Converts integer amount to decimal amount (e.g., 1234 -> 12.34). Transaction variables are already in decimal amounts.',
+        'Converts integer amount to decimal amount (e.g., 1234 -> 12.34).',
       ),
       parameters: [
         { name: 'integer_amount', description: t('Integer amount in cents') },
@@ -1134,7 +1134,7 @@ export function getFormulaFunctionCatalog(): Record<
       category: 'other',
       modes: ['query', 'transaction'],
       description: t(
-        "Balance for an account, in the same units shown in the app. In rule formulas, this is the running balance at this transaction, same cutoff as balance (use the balance variable instead for the current account). In report/query formulas, this is the account's current balance. Use a quoted account id for a deterministic match, or a quoted account name.",
+        "Balance for an account. In rule formulas, this is the running balance at this transaction, same cutoff as balance (use the balance variable instead for the current account). In report/query formulas, this is the account's current balance. Use a quoted account id for a deterministic match, or a quoted account name.",
       ),
       parameters: [
         {
@@ -1336,7 +1336,7 @@ export function getRuleFieldCompletions(): Completion[] {
       section: ruleFieldSection,
       boost: 5,
       info: t(
-        'Transaction amount, in the same units shown in the app. Positive for income, negative for expenses.\n\nExample: =amount * 1.05 to add 5%',
+        'Transaction amount. Use for calculations and comparisons.\n\nExample: =amount * 1.05 to add 5%',
       ),
     },
     {
@@ -1444,7 +1444,7 @@ export function getRuleFieldCompletions(): Completion[] {
       section: ruleFieldSection,
       boost: 5,
       info: t(
-        'Account balance as of the date of the transaction, excluding the transaction amount, in the same units shown in the app.\n\nExample: =IF(balance < 0, "Negative Balance", "Positive Balance")',
+        'Account balance as of the date of the transaction, excluding the transaction amount. Use for calculations and comparisons.\n\nExample: =IF(balance < 0, "Negative Balance", "Positive Balance")',
       ),
     },
     {
@@ -1453,7 +1453,7 @@ export function getRuleFieldCompletions(): Completion[] {
       section: ruleFieldSection,
       boost: 5,
       info: t(
-        'The amount of the parent transaction in split transactions, in the same units shown in the app.\n\nExample: =parent_amount * .05',
+        'The amount of the parent transaction in split transactions.\n\nExample: =parent_amount * .05',
       ),
     },
   ];
