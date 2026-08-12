@@ -18,7 +18,9 @@ export type TimeFrame = {
     | 'lastMonth'
     | 'lastYear'
     | 'yearToDate'
-    | 'priorYearToDate';
+    | 'priorYearToDate'
+    | 'currentQuarter'
+    | 'previousQuarter';
 };
 
 type AbstractWidget<
@@ -215,6 +217,22 @@ export type MonteCarloPotMeta = {
   annualFeeRate?: number;
 };
 
+/** One recurring yearly contribution into a pot over an age window */
+export type MonteCarloContributionMeta = {
+  id: string;
+  name?: string;
+  /** The pot the contribution is paid into */
+  potId?: string;
+  /** Age the contribution starts (inclusive); null/absent = starts now */
+  fromAge?: number | null;
+  /** Age the contribution stops (inclusive); null/absent = end of plan */
+  toAge?: number | null;
+  /** Yearly amount in minor units, in today's money */
+  annualAmount?: number;
+  /** Whether the amount rises with inflation */
+  adjustsWithInflation?: boolean;
+};
+
 export type MonteCarloTaxModel = 'flat' | 'bands';
 
 /** One tax band: income from `from` upward taxed at `rate` */
@@ -237,6 +255,8 @@ export type MonteCarloWidget = AbstractWidget<
     /** Minimum annual withdrawal in minor units; 0 or absent = no floor */
     minimumWithdrawal?: number;
     spendingPhases?: MonteCarloSpendingPhaseMeta[];
+    /** Recurring yearly contributions into pots */
+    contributions?: MonteCarloContributionMeta[];
     /** Mean yearly inflation as a decimal fraction; null = flat withdrawals */
     inflationMean?: number | null;
     /** Yearly inflation volatility as a decimal fraction; 0 = fixed rate */

@@ -124,6 +124,7 @@ export const schema = {
     _date: f('json/fallback'),
     _conditions: f('json'),
     _actions: f('json'),
+    _has_splits: f('boolean'),
   },
   rules: {
     id: f('id'),
@@ -344,6 +345,11 @@ export const schemaConfig: SchemaConfig = {
           _date: `json_extract(_rules.conditions, _paths.date || '.value')`,
           _conditions: '_rules.conditions',
           _actions: '_rules.actions',
+          _has_splits: `EXISTS (
+            SELECT 1
+            FROM json_each(_rules.actions) action
+            WHERE json_extract(action.value, '$.options.splitIndex') > 0
+          )`,
         });
 
         return `
