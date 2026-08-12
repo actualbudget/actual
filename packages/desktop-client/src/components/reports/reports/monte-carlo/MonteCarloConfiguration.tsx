@@ -123,8 +123,8 @@ export function MonteCarloConfiguration({
         gap: 15,
       }}
     >
-      {/* Tab bar */}
-      <View style={{ flexDirection: 'row', gap: 5 }}>
+      {/* Tab bar; wraps onto extra lines on narrow screens */}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
         <ModeButton
           selected={activeTab === 'plan'}
           onSelect={() => setActiveTab('plan')}
