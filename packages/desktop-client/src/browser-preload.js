@@ -245,9 +245,11 @@ global.Actual = {
   applyAppUpdate: async () => {
     updateSW();
 
-    // Wait for the app to reload
+    // Wait for the service worker swap to reload the page. If the new worker
+    // never takes control (e.g. the server is mid-update), force a reload so
+    // the "Update now" button doesn't hang forever with no feedback.
     await new Promise(() => {
-      // Do nothing
+      setTimeout(() => window.location.reload(), 15000);
     });
   },
 
