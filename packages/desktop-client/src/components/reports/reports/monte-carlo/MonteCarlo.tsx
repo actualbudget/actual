@@ -483,6 +483,7 @@ export function MonteCarlo() {
               simulationIndex={selectedRunIndex}
               simulationCount={result.simulationCount}
               startAge={config.currentAge}
+              hasContributions={config.contributions.length > 0}
               onBack={() => setSelectedRun(null)}
             />
           ) : (
@@ -589,14 +590,15 @@ export function MonteCarlo() {
           <Paragraph>
             <Trans>
               Each scenario replays your retirement with a different sequence of
-              yearly investment returns. Every year the withdrawal is taken
-              first, then each pot grows or shrinks with that year&apos;s
-              return. Pots with an access age stay invested but can&apos;t fund
-              withdrawals until you reach it - if the accessible pots can&apos;t
-              cover a year&apos;s withdrawal, the plan counts as having run out,
-              even if locked pots still hold money. The shaded bands show the
-              range of outcomes across all scenarios: the darker band covers the
-              middle half, and the lighter band covers 80% of them.
+              yearly investment returns. Every year, any contributions are added
+              at the start, then the withdrawal is taken, and then each pot
+              grows or shrinks with that year&apos;s return. Pots with an access
+              age stay invested but can&apos;t fund withdrawals until you reach
+              it - if the accessible pots can&apos;t cover a year&apos;s
+              withdrawal, the plan counts as having run out, even if locked pots
+              still hold money. The shaded bands show the range of outcomes
+              across all scenarios: the darker band covers the middle half, and
+              the lighter band covers 80% of them.
             </Trans>
           </Paragraph>
           <Paragraph>

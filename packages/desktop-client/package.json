@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "26.8.0",
+  "version": "26.8.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -194,6 +194,7 @@
     "react-grid-layout": "^2.2.3",
     "react-hotkeys-hook": "^5.3.3",
     "react-i18next": "^17.0.10",
+    "react-joyride": "^3.2.0",
     "react-markdown": "^10.1.0",
     "react-redux": "^9.3.0",
     "react-router": "8.3.0",

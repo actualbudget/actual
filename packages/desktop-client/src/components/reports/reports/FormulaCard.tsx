@@ -7,6 +7,7 @@ import type { FormulaWidget } from '@actual-app/core/types/models';
 import { FormulaResult } from '#components/reports/FormulaResult';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
+import { useAccounts } from '#hooks/useAccounts';
 import { useFormulaExecution } from '#hooks/useFormulaExecution';
 import { useThemeColors } from '#hooks/useThemeColors';
 
@@ -27,6 +28,7 @@ export function FormulaCard({
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const themeColors = useThemeColors();
   const containerRef = useRef<HTMLDivElement>(null);
+  const { data: accounts = [] } = useAccounts();
 
   const formula = meta?.formula || '=SUM(1, 2, 3)';
   const fontSize = meta?.fontSize;
@@ -35,10 +37,20 @@ export function FormulaCard({
   const showTitle = meta?.showTitle ?? true;
   const colorFormula = meta?.colorFormula || '';
 
+  const simpleAccounts = useMemo(
+    () =>
+      accounts
+        .filter(account => !account.tombstone)
+        .map(account => ({ id: account.id, name: account.name })),
+    [accounts],
+  );
+
   const { result, isLoading, error } = useFormulaExecution(
     formula,
     meta?.queries || {},
     meta?.queriesVersion,
+    undefined,
+    simpleAccounts,
   );
 
   const colorVariables = useMemo(
@@ -59,6 +71,7 @@ export function FormulaCard({
     meta?.queries || {},
     meta?.queriesVersion,
     colorVariables,
+    simpleAccounts,
   );
 
   // Determine the custom color from color formula result
