@@ -252,6 +252,15 @@ export function BudgetFilterButton({
     return Object.values(BUILT_IN_VIEWS).some(id => id === viewId);
   }
 
+  const builtInViewIds = viewOrder.filter(isBuiltIn);
+  const customViewIds = viewOrder.filter(viewId => !isBuiltIn(viewId));
+  const hasAvailableBuiltInViews = builtInViewIds.some(
+    viewId => getBuiltInLabel(viewId) !== null,
+  );
+  const hasCustomViews = customViewIds.some(viewId =>
+    views.some(view => view.id === viewId),
+  );
+
   return (
     <>
       <Button
@@ -294,62 +303,72 @@ export function BudgetFilterButton({
           }}
         />
 
-        {viewOrder.map(viewId => {
-          if (isBuiltIn(viewId)) {
-            const label = getBuiltInLabel(viewId);
-            if (!label) return null;
+        {builtInViewIds.map(viewId => {
+          const label = getBuiltInLabel(viewId);
+          if (!label) return null;
 
-            return (
-              <ViewListItem
-                key={viewId}
-                viewId={viewId}
-                label={label}
-                isActive={activeViewId === viewId}
-                isCustom={false}
-                onSelect={() => {
-                  onSelectView(viewId);
-                  setIsOpen(false);
-                }}
-                onReorderViewToTarget={onReorderViewToTarget}
-                dragState={dragState}
-                onDragChange={drag => {
-                  if (drag.type === 'end') {
-                    setDragState(null);
-                  } else {
-                    setDragState(drag);
-                  }
-                }}
-              />
-            );
-          } else {
-            const customView = views.find(v => v.id === viewId);
-            if (!customView) return null;
+          return (
+            <ViewListItem
+              key={viewId}
+              viewId={viewId}
+              label={label}
+              isActive={activeViewId === viewId}
+              isCustom={false}
+              onSelect={() => {
+                onSelectView(viewId);
+                setIsOpen(false);
+              }}
+              onReorderViewToTarget={onReorderViewToTarget}
+              dragState={dragState}
+              onDragChange={drag => {
+                if (drag.type === 'end') {
+                  setDragState(null);
+                } else {
+                  setDragState(drag);
+                }
+              }}
+            />
+          );
+        })}
 
-            return (
-              <ViewListItem
-                key={viewId}
-                viewId={viewId}
-                label={customView.name}
-                isActive={activeViewId === viewId}
-                isCustom
-                onSelect={() => {
-                  onSelectView(viewId);
-                  setIsOpen(false);
-                }}
-                onEdit={() => onEditView(customView.id)}
-                onDelete={() => onDeleteView(customView.id)}
-                onReorderViewToTarget={onReorderViewToTarget}
-                dragState={dragState}
-                onDragChange={drag => {
-                  if (drag.type === 'end') {
-                    setDragState(null);
-                  } else {
-                    setDragState(drag);
-                  }
-                }}
-              />
-            );
-          }
+        {hasAvailableBuiltInViews && hasCustomViews && (
+          <View
+            aria-hidden="true"
+            style={{
+              margin: '4px 0',
+              borderTop: `2px solid ${theme.tableBorderSeparator}`,
+            }}
+          />
+        )}
+
+        {customViewIds.map(viewId => {
+          const customView = views.find(view => view.id === viewId);
+          if (!customView) return null;
+
+          return (
+            <ViewListItem
+              key={viewId}
+              viewId={viewId}
+              label={customView.name}
+              isActive={activeViewId === viewId}
+              isCustom
+              onSelect={() => {
+                onSelectView(viewId);
+                setIsOpen(false);
+              }}
+              onEdit={() => onEditView(customView.id)}
+              onDelete={() => onDeleteView(customView.id)}
+              onReorderViewToTarget={onReorderViewToTarget}
+              dragState={dragState}
+              onDragChange={drag => {
+                if (drag.type === 'end') {
+                  setDragState(null);
+                } else {
+                  setDragState(drag);
+                }
+              }}
+            />
+          );
         })}
 
         <Button

@@ -220,6 +220,8 @@ export function useFocusedViews() {
 
   const reorderViewToTarget = useCallback(
     (id: string, dropPos: 'top' | 'bottom' | null, targetId: string) => {
+      if (isBuiltInView(id) !== isBuiltInView(targetId)) return;
+
       const nextOrder = [...viewOrder];
       const currentIndex = nextOrder.indexOf(id);
       if (currentIndex === -1) return;
@@ -236,7 +238,7 @@ export function useFocusedViews() {
       nextOrder.splice(targetIndex, 0, id);
       saveViewOrder(nextOrder);
     },
-    [viewOrder, saveViewOrder],
+    [viewOrder, saveViewOrder, isBuiltInView],
   );
 
   if (!isFocusedViewsEnabled) {

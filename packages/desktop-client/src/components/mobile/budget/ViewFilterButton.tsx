@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgFilter } from '@actual-app/components/icons/v1';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 import type { FocusedViewDefinition } from '@actual-app/core/types/prefs';
 
 import { BUILT_IN_VIEWS } from '#hooks/useFocusedViews';
@@ -58,23 +59,46 @@ export function ViewFilterButton({
     return Object.values(BUILT_IN_VIEWS).some(id => id === viewId);
   }
 
-  // Build the list of view items to render
-  const viewItems: Array<{ id: string | null; label: ReactNode }> = [
-    { id: null, label: <Trans>All</Trans> },
-  ];
+  const builtInViewItems = viewOrder.flatMap(viewId => {
+    if (!isBuiltIn(viewId)) return [];
 
-  for (const viewId of viewOrder) {
-    if (isBuiltIn(viewId)) {
-      const label = getBuiltInLabel(viewId);
-      if (label) {
-        viewItems.push({ id: viewId, label });
-      }
-    } else {
-      const customView = views.find(v => v.id === viewId);
-      if (customView) {
-        viewItems.push({ id: viewId, label: customView.name });
-      }
-    }
+    const label = getBuiltInLabel(viewId);
+    return label ? [{ id: viewId, label }] : [];
+  });
+  const customViewItems = viewOrder.flatMap(viewId => {
+    if (isBuiltIn(viewId)) return [];
+
+    const customView = views.find(view => view.id === viewId);
+    return customView ? [{ id: viewId, label: customView.name }] : [];
+  });
+
+  function renderViewItem(item: { id: string | null; label: ReactNode }) {
+    const isActive = item.id === activeViewId;
+
+    return (
+      <Button
+        key={item.id ?? '__all'}
+        variant="bare"
+        onPress={() => {
+          onSelectView(item.id);
+          setIsOpen(false);
+        }}
+        style={{
+          width: '100%',
+          padding: '8px 12px',
+          justifyContent: 'flex-start',
+          borderRadius: 4,
+          backgroundColor: isActive
+            ? theme.buttonPrimaryBackground
+            : 'transparent',
+          color: isActive ? theme.buttonPrimaryText : theme.buttonNormalText,
+          fontWeight: isActive ? 600 : 400,
+          fontSize: 14,
+        }}
+      >
+        {item.label}
+      </Button>
+    );
   }
 
   return (
@@ -108,38 +132,18 @@ export function ViewFilterButton({
           minWidth: 180,
         }}
       >
-        {viewItems.map(item => {
-          const isActive =
-            item.id === activeViewId ||
-            (item.id === null && activeViewId === null);
-
-          return (
-            <Button
-              key={item.id ?? '__all'}
-              variant="bare"
-              onPress={() => {
-                onSelectView(item.id);
-                setIsOpen(false);
-              }}
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                justifyContent: 'flex-start',
-                borderRadius: 4,
-                backgroundColor: isActive
-                  ? theme.buttonPrimaryBackground
-                  : 'transparent',
-                color: isActive
-                  ? theme.buttonPrimaryText
-                  : theme.buttonNormalText,
-                fontWeight: isActive ? 600 : 400,
-                fontSize: 14,
-              }}
-            >
-              {item.label}
-            </Button>
-          );
-        })}
+        {renderViewItem({ id: null, label: <Trans>All</Trans> })}
+        {builtInViewItems.map(renderViewItem)}
+        {builtInViewItems.length > 0 && customViewItems.length > 0 && (
+          <View
+            aria-hidden="true"
+            style={{
+              margin: '4px 0',
+              borderTop: `2px solid ${theme.tableBorderSeparator}`,
+            }}
+          />
+        )}
+        {customViewItems.map(renderViewItem)}
       </Popover>
     </>
   );
