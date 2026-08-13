@@ -70,7 +70,6 @@ import APIList from './APIList';
 <APIList title="Rules" sections={[
 "ConditionOrAction",
 "Rule",
-"Payee rule",
 "getRules",
 "getPayeeRules",
 "createRule",
@@ -653,10 +652,6 @@ await updateTag(id, { color: '#00ff00' });
 
 <StructType fields={objects.rule} />
 
-#### Payee Rule
-
-<StructType fields={objects.payeeRule} />
-
 #### Methods
 
 #### `getRules`
@@ -669,7 +664,7 @@ Get all rules.
 
 <Method name="getPayeeRules" args={[{ name: 'payeeId', type: "id" }]} returns="Promise<Rule[]>" />
 
-Get all rules associated with `payeeId`.
+Get all rules associated with `payeeId`. These are ordinary `Rule` objects, in the same shape `getRules` returns. A rule is associated with a payee when one of its conditions or actions has a `payee` field referencing that id, so the returned rules have no `payee_id` property.
 
 #### `createRule`
 

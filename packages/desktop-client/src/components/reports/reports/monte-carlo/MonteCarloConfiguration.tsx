@@ -18,6 +18,7 @@ import type {
 import { css } from '@emotion/css';
 import { v4 as uuidv4 } from 'uuid';
 
+import { MonteCarloContributions } from '#components/reports/reports/monte-carlo/MonteCarloContributions';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import { MonteCarloPotConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloPotConfiguration';
@@ -42,7 +43,12 @@ import {
 import { MonteCarloTaxConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloTaxConfiguration';
 import { MonteCarloWithdrawalRuleConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloWithdrawalRuleConfiguration';
 
-type ConfigurationTab = 'plan' | 'pots' | 'withdrawals' | 'tax';
+type ConfigurationTab =
+  | 'plan'
+  | 'pots'
+  | 'contributions'
+  | 'withdrawals'
+  | 'tax';
 
 const PLAN_GROUP_FIELDS_STYLE = {
   flexDirection: 'row',
@@ -117,8 +123,8 @@ export function MonteCarloConfiguration({
         gap: 15,
       }}
     >
-      {/* Tab bar */}
-      <View style={{ flexDirection: 'row', gap: 5 }}>
+      {/* Tab bar; wraps onto extra lines on narrow screens */}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
         <ModeButton
           selected={activeTab === 'plan'}
           onSelect={() => setActiveTab('plan')}
@@ -130,6 +136,12 @@ export function MonteCarloConfiguration({
           onSelect={() => setActiveTab('pots')}
         >
           <Trans>Investment pots</Trans>
+        </ModeButton>
+        <ModeButton
+          selected={activeTab === 'contributions'}
+          onSelect={() => setActiveTab('contributions')}
+        >
+          <Trans>Contributions</Trans>
         </ModeButton>
         <ModeButton
           selected={activeTab === 'withdrawals'}
@@ -145,23 +157,42 @@ export function MonteCarloConfiguration({
         </ModeButton>
       </View>
 
-      <Text style={{ color: theme.pageText }}>
-        {activeTab === 'plan'
-          ? t(
-              'Who this plan is for and how the simulation generates market returns.',
-            )
-          : activeTab === 'pots'
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+        <Text style={{ color: theme.pageText }}>
+          {activeTab === 'plan'
             ? t(
-                'The invested accounts your plan draws from - each with its own balance, allocation, and return assumptions. Drag rows to reorder pots; expand a row for access, tax and fee settings.',
+                'Who this plan is for and how the simulation generates market returns.',
               )
-            : activeTab === 'withdrawals'
+            : activeTab === 'pots'
               ? t(
-                  'How much you take out each year, and optional rules that adjust it as markets move.',
+                  'The invested accounts your plan draws from - each with its own balance, allocation, and return assumptions. Drag rows to reorder pots; expand a row for access, tax and fee settings.',
                 )
-              : t(
-                  'How withdrawals are taxed - your spending is what you keep after tax.',
-                )}
-      </Text>
+              : activeTab === 'contributions'
+                ? t(
+                    "Money you add to your pots each year, in today's money - for example pension or savings deposits while you're still earning.",
+                  )
+                : activeTab === 'withdrawals'
+                  ? t(
+                      'How much you take out each year, and optional rules that adjust it as markets move.',
+                    )
+                  : t(
+                      'How withdrawals are taxed - your spending is what you keep after tax.',
+                    )}
+        </Text>
+        {activeTab === 'contributions' && (
+          <MonteCarloHelpTooltip>
+            <Trans>
+              Each contribution is paid in at the start of every year in its age
+              window (both ages inclusive), so it earns that year&apos;s return.
+              Leave the ages blank for &ldquo;now&rdquo; and &ldquo;the end of
+              the plan&rdquo;. Tick Adjust by inflation to keep the
+              amount&apos;s buying power constant; untick it for a fixed amount
+              that shrinks in real terms. A pot can receive any number of
+              contributions - even one that is still locked for withdrawals.
+            </Trans>
+          </MonteCarloHelpTooltip>
+        )}
+      </View>
 
       {/* Plan details */}
       {activeTab === 'plan' && (
@@ -411,6 +442,10 @@ export function MonteCarloConfiguration({
                     onRemove={() =>
                       onConfigChange({
                         pots: config.pots.filter(other => other.id !== pot.id),
+                        // A removed pot takes its contributions with it
+                        contributions: config.contributions.filter(
+                          contribution => contribution.potId !== pot.id,
+                        ),
                       })
                     }
                   />
@@ -431,6 +466,17 @@ export function MonteCarloConfiguration({
             </Button>
           </View>
         </View>
+      )}
+
+      {/* Contributions */}
+      {activeTab === 'contributions' && (
+        <MonteCarloContributions
+          contributions={config.contributions}
+          pots={config.pots}
+          currentAge={config.currentAge}
+          targetAge={config.targetAge}
+          onConfigChange={onConfigChange}
+        />
       )}
 
       {/* Spending */}
