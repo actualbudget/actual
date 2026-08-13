@@ -42,6 +42,8 @@ type QueriesMap = Record<string, QueryConfig>;
 
 type FormulaCellValue = number | string | boolean | null;
 
+export type SimpleAccount = { id: string; name: string };
+
 function createFormulaQueryContext(): Required<FormulaQueryContext> {
   return {
     queryNames: new Set(),
@@ -49,12 +51,14 @@ function createFormulaQueryContext(): Required<FormulaQueryContext> {
     queryExtractCategoryNames: new Set(),
     queryExtractTimeframeStartNames: new Set(),
     queryExtractTimeframeEndNames: new Set(),
+    balanceOfNames: new Set(),
     budgetQueryRequests: new Map(),
     querySumPrefetch: new Map(),
     queryCountPrefetch: new Map(),
     queryExtractCategoriesPrefetch: new Map(),
     queryExtractTimeframeStartPrefetch: new Map(),
     queryExtractTimeframeEndPrefetch: new Map(),
+    balanceOfPrefetch: new Map(),
     budgetQueryPrefetch: new Map(),
     budgetQueryErrors: new Map(),
   };
@@ -136,6 +140,7 @@ export function useFormulaExecution(
   queries: QueriesMap,
   queriesVersion?: number,
   namedExpressions?: Record<string, number | string>,
+  accounts?: SimpleAccount[],
 ) {
   const locale = useLocale();
   const [language] = useGlobalPref('language');
@@ -183,6 +188,7 @@ export function useFormulaExecution(
         });
 
         await prefetchFormulaQueries(formulaQueryContext, queries);
+        await prefetchAccountBalances(formulaQueryContext, accounts ?? []);
 
         formulaQueryContext.budgetQueryRequests.clear();
         evaluateFormulaWithContext({
@@ -223,7 +229,15 @@ export function useFormulaExecution(
     return () => {
       cancelled = true;
     };
-  }, [formula, queriesVersion, locale, language, queries, namedExpressions]);
+  }, [
+    formula,
+    queriesVersion,
+    locale,
+    language,
+    queries,
+    namedExpressions,
+    accounts,
+  ]);
 
   return { result, isLoading, error };
 }
@@ -282,6 +296,40 @@ async function prefetchFormulaQueries(
       queryName,
       await extractQueryTimeframeEnd(queryName, queries),
     );
+  }
+}
+
+async function prefetchAccountBalances(
+  formulaQueryContext: Required<FormulaQueryContext>,
+  accounts: SimpleAccount[],
+) {
+  for (const literal of formulaQueryContext.balanceOfNames) {
+    const account =
+      accounts.find(candidate => candidate.id === literal) ??
+      accounts.find(candidate => candidate.name === literal);
+
+    if (!account) {
+      formulaQueryContext.balanceOfPrefetch.set(literal, 0);
+      continue;
+    }
+
+    formulaQueryContext.balanceOfPrefetch.set(
+      literal,
+      await fetchAccountBalance(account.id),
+    );
+  }
+}
+
+async function fetchAccountBalance(accountId: string): Promise<number> {
+  try {
+    const balanceQuery = q('transactions')
+      .filter({ account: accountId })
+      .calculate({ $sum: '$amount' });
+    const { data } = await send('query', balanceQuery.serialize());
+    return integerToAmount(data || 0, 2);
+  } catch (err) {
+    console.error('Error fetching account balance:', err);
+    return 0;
   }
 }
 

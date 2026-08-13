@@ -72,6 +72,8 @@ describe('buildDateRangePresets', () => {
       expect(keys).toContain('last-month');
       expect(keys).toContain('last-year');
       expect(keys).toContain('prior-year-to-date');
+      expect(keys).toContain('current-quarter');
+      expect(keys).toContain('previous-quarter');
     });
 
     it('includes all-time preset when includeAllTime is true', () => {
@@ -316,6 +318,32 @@ describe('buildDateRangePresets', () => {
       expect(onSelect).toHaveBeenCalledOnce();
       const [, , mode] = onSelect.mock.calls[0][0];
       expect(mode).toBe('full');
+    });
+
+    it('quarter presets return quarter month bounds and preserve their modes', () => {
+      const onSelect = vi.fn();
+      const presets = buildDateRangePresets({
+        t: mockT,
+        onSelectRange: onSelect,
+        earliestTransaction: EARLIEST_TRANSACTION,
+        latestTransaction: LATEST_TRANSACTION,
+        show1Month: false,
+        includeAllTime: true,
+      });
+
+      const currentQuarterPreset = presets.find(p => p.key === 'current-quarter');
+      const previousQuarterPreset = presets.find(
+        p => p.key === 'previous-quarter',
+      );
+
+      expect(currentQuarterPreset?.getRange()).toEqual(['2017-01', '2017-03']);
+      expect(previousQuarterPreset?.getRange()).toEqual(['2016-10', '2016-12']);
+
+      currentQuarterPreset!.onSelect();
+      previousQuarterPreset!.onSelect();
+
+      expect(onSelect.mock.calls[0][0][2]).toBe('currentQuarter');
+      expect(onSelect.mock.calls[1][0][2]).toBe('previousQuarter');
     });
   });
 });

@@ -469,6 +469,8 @@ function QueryItem({
     lastYear: t('Last year'),
     yearToDate: t('Year to date'),
     priorYearToDate: t('Prior year to date'),
+    currentQuarter: t('Current quarter'),
+    previousQuarter: t('Previous quarter'),
   } satisfies Record<TimeFrame['mode'], string>;
   const timeRangeLabel = timeRangeLabels[timeRangeMode];
   const presetTimeRangeLabels = {
@@ -477,6 +479,8 @@ function QueryItem({
     lastYear: t('Last year transactions'),
     yearToDate: t('Year to date transactions'),
     priorYearToDate: t('Prior year to date transactions'),
+    currentQuarter: t('Current quarter transactions'),
+    previousQuarter: t('Previous quarter transactions'),
   } satisfies Record<PresetTimeRangeMode, string>;
   const presetTimeRangeLabel = isPresetTimeRange
     ? presetTimeRangeLabels[timeRangeMode]

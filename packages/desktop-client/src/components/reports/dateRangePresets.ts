@@ -194,6 +194,34 @@ export function buildDateRangePresets({
         ),
       onSelectRange,
     ),
+    makePreset(
+      'current-quarter',
+      t('Current quarter'),
+      () =>
+        liveRangeAsMonths(
+          'Current quarter',
+          false,
+          'currentQuarter',
+          earliestTransaction,
+          latestTransaction,
+          firstDayOfWeekIdx,
+        ),
+      onSelectRange,
+    ),
+    makePreset(
+      'previous-quarter',
+      t('Previous quarter'),
+      () =>
+        liveRangeAsMonths(
+          'Previous quarter',
+          false,
+          'previousQuarter',
+          earliestTransaction,
+          latestTransaction,
+          firstDayOfWeekIdx,
+        ),
+      onSelectRange,
+    ),
     ...(includeAllTime
       ? [
           makePreset(
