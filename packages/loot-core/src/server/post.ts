@@ -5,6 +5,12 @@ import * as Platform from '#shared/platform';
 
 import { PostError } from './errors';
 
+export function getServerErrorReason(error) {
+  return error.reason === 'unauthorized' && error.details === 'token-not-found'
+    ? 'token-expired'
+    : error.reason;
+}
+
 function throwIfNot200(res: Response, text: string) {
   if (res.status !== 200) {
     if (res.status === 500) {
@@ -14,7 +20,7 @@ function throwIfNot200(res: Response, text: string) {
     const contentType = res.headers.get('Content-Type') ?? '';
     if (contentType.toLowerCase().indexOf('application/json') !== -1) {
       const json = JSON.parse(text);
-      throw new PostError(json.reason);
+      throw new PostError(getServerErrorReason(json));
     }
 
     // Actual Sync Server may be exposed via a tunnel (e.g. ngrok). Tunnel errors should be treated as network errors.
