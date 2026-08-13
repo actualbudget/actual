@@ -224,6 +224,85 @@ describe('formula query timeframes', () => {
   });
 });
 
+describe('BALANCE_OF in query mode', () => {
+  let queryPayloads: SerializedQuery[];
+
+  beforeEach(() => {
+    queryPayloads = [];
+    initServer({
+      'formula-load-user-preferences': async () => ({
+        currency: getCurrency('USD'),
+        numberFormat: 'comma-dot',
+        decimalPlaces: 2,
+        thousandsSeparator: ',',
+        decimalSeparator: '.',
+        locale: 'en-US',
+        currencySymbolPosition: 'before',
+        currencySpaceBetweenAmountAndSymbol: false,
+      }),
+      query: async payload => {
+        queryPayloads.push(payload as unknown as SerializedQuery);
+        return { data: 12345, dependencies: [] };
+      },
+    });
+  });
+
+  afterEach(async () => {
+    await clearServer();
+  });
+
+  it('resolves an account by id and queries its balance', async () => {
+    const { result } = renderHook(
+      () =>
+        useFormulaExecution('=BALANCE_OF("acc1")', {}, 0, undefined, [
+          { id: 'acc1', name: 'Checking' },
+        ]),
+      { wrapper: TestProviders },
+    );
+
+    await waitFor(() => expect(result.current.result).toBe(123.45));
+
+    const balanceQuery = queryPayloads.find(payload =>
+      payload.filterExpressions.some(
+        expression => (expression as { account?: string }).account === 'acc1',
+      ),
+    );
+    expect(balanceQuery).toBeDefined();
+  });
+
+  it('resolves an account by exact name', async () => {
+    const { result } = renderHook(
+      () =>
+        useFormulaExecution('=BALANCE_OF("Checking")', {}, 0, undefined, [
+          { id: 'acc1', name: 'Checking' },
+        ]),
+      { wrapper: TestProviders },
+    );
+
+    await waitFor(() => expect(result.current.result).toBe(123.45));
+
+    const balanceQuery = queryPayloads.find(payload =>
+      payload.filterExpressions.some(
+        expression => (expression as { account?: string }).account === 'acc1',
+      ),
+    );
+    expect(balanceQuery).toBeDefined();
+  });
+
+  it('returns 0 for an unknown account', async () => {
+    const { result } = renderHook(
+      () =>
+        useFormulaExecution('=BALANCE_OF("nope")', {}, 0, undefined, [
+          { id: 'acc1', name: 'Checking' },
+        ]),
+      { wrapper: TestProviders },
+    );
+
+    await waitFor(() => expect(result.current.result).toBe(0));
+    expect(queryPayloads).toHaveLength(0);
+  });
+});
+
 describe('formula execution stability', () => {
   let executionCount: number;
 
@@ -250,12 +329,16 @@ describe('formula execution stability', () => {
     await clearServer();
   });
 
-  it('does not re-execute when callers pass a new queries object each render', async () => {
-    // Callers such as FormulaCard build `queries` inline, so the object has a
-    // fresh identity on every render. Keying the effect on identity would
-    // re-execute forever, flickering the card between value and skeleton.
+  it('does not re-execute when callers pass new objects each render', async () => {
+    // Callers such as FormulaCard build `queries`/`accounts` inline, so those
+    // objects have a fresh identity on every render. Keying the effect on
+    // identity would re-execute forever, flickering the card between value and
+    // skeleton.
     const { result, rerender } = renderHook(
-      () => useFormulaExecution('=SUM(1, 2, 3)', {}, undefined, { RESULT: 0 }),
+      () =>
+        useFormulaExecution('=SUM(1, 2, 3)', {}, undefined, { RESULT: 0 }, [
+          { id: 'acc1', name: 'Checking' },
+        ]),
       { wrapper: TestProviders },
     );
 

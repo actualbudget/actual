@@ -160,6 +160,58 @@ import type {
 } from './table/utils';
 import { useTransactionRowContextActions } from './useTransactionRowContextActions';
 
+type AmountColumnWidths = {
+  amount: number; // Applies to both debit and credit columns
+  balance: number;
+};
+
+export const DEFAULT_AMOUNT_COLUMN_WIDTHS: AmountColumnWidths = {
+  amount: 100,
+  balance: 103,
+};
+
+// Tabular numerals (styles.tnum) make every digit glyph the same width, so a
+// per-character estimate is a good enough proxy for the pixel width for a
+// formatted amount. This would need to be adjusted with the font size.
+const AMOUNT_COLUMN_CHAR_WIDTH = 7;
+const AMOUNT_COLUMN_PADDING = 16;
+
+function measureAmountColumnWidth(values: string[], minWidth: number) {
+  const maxChars = values.reduce(
+    (max, value) => Math.max(max, value.length),
+    0,
+  );
+  return Math.max(
+    minWidth,
+    maxChars * AMOUNT_COLUMN_CHAR_WIDTH + AMOUNT_COLUMN_PADDING,
+  );
+}
+
+// Widths are computed from every transaction currently loaded so the
+// column doesn't jump width while scrolling.
+export function useAmountColumnWidths(
+  transactions: TransactionEntity[],
+  balances: Record<TransactionEntity['id'], IntegerAmount> | null,
+): AmountColumnWidths {
+  const debitCreditValues = transactions.map(t =>
+    integerToCurrency(Math.abs(t.amount ?? 0)),
+  );
+  const balanceValues = balances
+    ? Object.values(balances).map(balance => integerToCurrency(balance))
+    : [];
+
+  return {
+    amount: measureAmountColumnWidth(
+      debitCreditValues,
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.amount,
+    ),
+    balance: measureAmountColumnWidth(
+      balanceValues,
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.balance,
+    ),
+  };
+}
+
 type TransactionHeaderProps = {
   hasSelected: boolean;
   columns: TransactionTableColumnId[];
@@ -168,6 +220,7 @@ type TransactionHeaderProps = {
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
   ascDesc: 'asc' | 'desc';
   field: string;
+  amountColumnWidths: AmountColumnWidths;
 };
 
 const TransactionHeader = memo(
@@ -179,6 +232,7 @@ const TransactionHeader = memo(
     ascDesc,
     field,
     showSelection,
+    amountColumnWidths,
   }: TransactionHeaderProps) => {
     const dispatchSelected = useSelectedDispatch();
     const { t } = useTranslation();
@@ -245,21 +299,21 @@ const TransactionHeader = memo(
       },
       payment: {
         value: columnLabels.payment,
-        width: 100,
+        width: amountColumnWidths.amount,
         alignItems: 'flex-end',
         marginRight: -5,
         sortDirection: 'asc',
       },
       deposit: {
         value: columnLabels.deposit,
-        width: 100,
+        width: amountColumnWidths.amount,
         alignItems: 'flex-end',
         marginRight: -5,
         sortDirection: 'desc',
       },
       balance: {
         value: t('Balance'),
-        width: 103,
+        width: amountColumnWidths.balance,
         alignItems: 'flex-end',
         marginRight: -5,
       },
@@ -977,6 +1031,7 @@ type TransactionProps = {
   onDragChange?: OnDragChangeCallback<TransactionEntity>;
   onDrop?: OnDropCallback;
   index: number;
+  amountColumnWidths: AmountColumnWidths;
 };
 
 const Transaction = memo(function Transaction({
@@ -1035,6 +1090,7 @@ const Transaction = memo(function Transaction({
   onDragChange,
   onDrop,
   index,
+  amountColumnWidths,
 }: TransactionProps) {
   const { t } = useTranslation();
 
@@ -1905,7 +1961,7 @@ const Transaction = memo(function Transaction({
             key={columnId}
             /* Debit field for all transactions */
             type="input"
-            width={100}
+            width={amountColumnWidths.amount}
             name="debit"
             exposed={focusedField === 'debit'}
             focused={focusedField === 'debit'}
@@ -1940,7 +1996,7 @@ const Transaction = memo(function Transaction({
             key={columnId}
             /* Credit field for all transactions */
             type="input"
-            width={100}
+            width={amountColumnWidths.amount}
             name="credit"
             exposed={focusedField === 'credit'}
             focused={focusedField === 'credit'}
@@ -1986,7 +2042,7 @@ const Transaction = memo(function Transaction({
                   : theme.numberPositive,
             }}
             style={{ ...styles.tnum, ...amountStyle }}
-            width={103}
+            width={amountColumnWidths.balance}
             textAlign="right"
             privacyFilter
           />
@@ -2312,6 +2368,7 @@ type NewTransactionProps = {
   columns: TransactionTableColumnId[];
   balance?: number | null;
   transactions: TransactionEntity[];
+  amountColumnWidths: AmountColumnWidths;
   transferAccountsByTransaction: {
     [id: TransactionEntity['id']]: AccountEntity | null;
   };
@@ -2319,6 +2376,7 @@ type NewTransactionProps = {
 };
 function NewTransaction({
   transactions,
+  amountColumnWidths,
   accounts,
   categoryGroups,
   payees,
@@ -2384,6 +2442,7 @@ function NewTransaction({
         <Transaction
           key={transaction.id}
           index={index}
+          amountColumnWidths={amountColumnWidths}
           editing={editingTransaction === transaction.id}
           transaction={transaction}
           subtransactions={transaction.is_parent ? childTransactions : null}
@@ -2605,6 +2664,11 @@ function TransactionTableInner({
     [props.transactions, props.showReconciled],
   );
 
+  const amountColumnWidths = useAmountColumnWidths(
+    transactionsToRender,
+    props.balances,
+  );
+
   const renderRow: TableProps<TransactionEntity>['renderItem'] = ({
     item,
     index,
@@ -2702,6 +2766,7 @@ function TransactionTableInner({
         matched={isMatched?.(trans.id)}
         showZeroInDeposit={isChildDeposit}
         balance={balances?.[trans.id] ?? 0}
+        amountColumnWidths={amountColumnWidths}
         focusedField={editing ? tableNavigator.focusedField : undefined}
         accounts={accounts}
         categoryGroups={categoryGroups}
@@ -2776,6 +2841,7 @@ function TransactionTableInner({
           ascDesc={props.ascDesc}
           field={props.sortField}
           showSelection={props.showSelection}
+          amountColumnWidths={amountColumnWidths}
         />
 
         {props.isAdding && (
@@ -2786,6 +2852,7 @@ function TransactionTableInner({
           >
             <NewTransaction
               transactions={props.newTransactions}
+              amountColumnWidths={amountColumnWidths}
               transferAccountsByTransaction={
                 props.transferAccountsByTransaction
               }
