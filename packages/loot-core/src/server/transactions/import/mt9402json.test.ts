@@ -13,7 +13,11 @@ function statement(...lines: string[]) {
       return total;
     }
     const amount = Number.parseFloat(match[2].replace(',', '.'));
-    return total + (match[1].endsWith('D') ? -amount : amount);
+    // Mirror mt940js sign logic: D is negative, C is positive, R flips.
+    const isDebit = match[1].endsWith('D');
+    const isReversal = match[1].startsWith('R');
+    const signed = isDebit !== isReversal ? -amount : amount;
+    return total + signed;
   }, OPENING_BALANCE);
 
   return [
@@ -192,6 +196,22 @@ describe('mt9402json', () => {
     );
 
     expect(transactions.map(t => t.imported_id)).toEqual([null, null]);
+  });
+
+  it('treats RD (reversal of debit) as positive', () => {
+    const { transactions } = mt9402json(
+      statement(':61:2508020802RD25,00NTRFNONREF//BANKREF_RD', ':86:Refund'),
+    );
+
+    expect(transactions[0].amount).toBe(25);
+  });
+
+  it('treats RC (reversal of credit) as negative', () => {
+    const { transactions } = mt9402json(
+      statement(':61:2508020802RC25,00NTRFNONREF//BANKREF_RC', ':86:Chargeback'),
+    );
+
+    expect(transactions[0].amount).toBe(-25);
   });
 
   it('flattens transactions across multiple statements', () => {

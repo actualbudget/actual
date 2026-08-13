@@ -281,6 +281,10 @@ export function ImportTransactionsModal({
   const [startDate, setStartDate] = useState('');
   const lastParseRef = useRef<LastParse | null>(null);
 
+  // Pre-parsed formats (OFX, CAMT, MT940) already provide signed amounts,
+  // so In/Out mode should never be active for them.
+  const inOutModeEnabled = isStructuredFile(filetype) ? false : inOutMode;
+
   const getImportPreview = useCallback(
     async (
       transactions: ImportTransaction[],
@@ -294,7 +298,7 @@ export function ImportTransactionsModal({
       multiplierAmount: string,
     ) => {
       const previewTransactions = [];
-      const inOutModeEnabled = isOfxFile(filetype) ? false : inOutMode;
+      const inOutModeEnabled = isStructuredFile(filetype) ? false : inOutMode;
       const getTransDate: (trans: ImportTransaction) => string | null =
         isOfxFile(filetype)
           ? trans => trans.date ?? null
@@ -669,7 +673,7 @@ export function ImportTransactionsModal({
       const { amount } = parseAmountFields(
         trans,
         splitMode,
-        isOfxFile(filetype) ? false : inOutMode,
+        inOutModeEnabled,
         outValue,
         flipAmount,
         multiplierAmount,
@@ -907,7 +911,7 @@ export function ImportTransactionsModal({
   if (reconcile) {
     headers.unshift({ name: ' ', width: 31 });
   }
-  if (inOutMode) {
+  if (inOutModeEnabled) {
     headers.push({
       name: t('In/Out'),
       width: 90,
@@ -998,7 +1002,7 @@ export function ImportTransactionsModal({
                       dateFormat={dateFormat}
                       fieldMappings={fieldMappings}
                       splitMode={splitMode}
-                      inOutMode={inOutMode}
+                      inOutMode={inOutModeEnabled}
                       outValue={outValue}
                       flipAmount={flipAmount}
                       multiplierAmount={multiplierAmount}

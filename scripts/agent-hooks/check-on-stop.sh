@@ -18,6 +18,9 @@ fi
 ROOT=$(resolve_repo_root)
 cd "$ROOT" 2>/dev/null || exit 0
 
+export NO_COLOR=1
+export FORCE_COLOR=0
+
 # Skip if dependencies aren't installed.
 [ -f "$ROOT/node_modules/.yarn-state.yml" ] || exit 0
 
