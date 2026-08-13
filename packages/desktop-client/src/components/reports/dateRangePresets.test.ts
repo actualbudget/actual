@@ -331,7 +331,9 @@ describe('buildDateRangePresets', () => {
         includeAllTime: true,
       });
 
-      const currentQuarterPreset = presets.find(p => p.key === 'current-quarter');
+      const currentQuarterPreset = presets.find(
+        p => p.key === 'current-quarter',
+      );
       const previousQuarterPreset = presets.find(
         p => p.key === 'previous-quarter',
       );
