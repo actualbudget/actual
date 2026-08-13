@@ -17,7 +17,7 @@ import {
   PostError,
 } from './errors';
 import { runMutator } from './mutators';
-import { post } from './post';
+import { getServerErrorReason, post } from './post';
 import * as prefs from './prefs';
 import { getServer } from './server-config';
 import {
@@ -47,25 +47,24 @@ export type RemoteFile = {
 };
 
 async function checkHTTPStatus(res) {
-  if (res.status !== 200) {
-    if (res.status === 403) {
-      try {
-        const text = await res.text();
-        const data = JSON.parse(text)?.data;
-        if (data?.reason === 'token-expired') {
-          await asyncStorage.removeItem('user-token');
-          throw new HTTPError(403, 'token-expired');
-        }
-      } catch (e) {
-        if (e instanceof HTTPError) throw e;
-      }
-    }
-    return res.text().then(str => {
-      throw new HTTPError(res.status, str);
-    });
-  } else {
+  if (res.status === 200) {
     return res;
   }
+
+  const text = await res.text();
+  if (res.status === 401 || res.status === 403) {
+    try {
+      const body = JSON.parse(text);
+      const error = res.status === 403 ? body.data : body;
+      if (getServerErrorReason(error) === 'token-expired') {
+        await asyncStorage.removeItem('user-token');
+      }
+    } catch {
+      // Preserve the original HTTP error when the response is not JSON.
+    }
+  }
+
+  throw new HTTPError(res.status, text);
 }
 
 async function fetchJSON(...args: Parameters<typeof fetch>) {
