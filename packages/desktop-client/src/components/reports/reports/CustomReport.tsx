@@ -458,6 +458,10 @@ function CustomReportInner({
     report.conditionsOp,
     includeCurrentInterval,
     savedStatus,
+    // onSetAllIntervals formats the interval labels with the date preference,
+    // and being an effect event it reads it without re-triggering -- so the
+    // labels would stay stale until another dependency happened to change.
+    dateFormat,
   ]);
 
   useEffect(() => {
