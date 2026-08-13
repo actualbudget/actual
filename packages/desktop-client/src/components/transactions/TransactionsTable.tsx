@@ -23,11 +23,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import {
-  SvgLeftArrow2,
-  SvgRightArrow2,
-  SvgSplit,
-} from '@actual-app/components/icons/v0';
+import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgArrowDown,
   SvgArrowUp,
@@ -50,6 +46,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
 import { memoizeOne } from '@actual-app/core/shared/memoize';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
@@ -87,6 +84,7 @@ import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplet
 import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
+import { TransferDirectionIcon } from '#components/common/TransferDirectionIcon';
 import { getStatusProps } from '#components/schedules/StatusBadge';
 import type { StatusTypes } from '#components/schedules/StatusBadge';
 import { DateSelect } from '#components/select/DateSelect';
@@ -132,6 +130,7 @@ import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import type { SplitsExpandedContextValue } from '#hooks/useSplitsExpanded';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -161,6 +160,58 @@ import type {
 } from './table/utils';
 import { useTransactionRowContextActions } from './useTransactionRowContextActions';
 
+type AmountColumnWidths = {
+  amount: number; // Applies to both debit and credit columns
+  balance: number;
+};
+
+export const DEFAULT_AMOUNT_COLUMN_WIDTHS: AmountColumnWidths = {
+  amount: 100,
+  balance: 103,
+};
+
+// Tabular numerals (styles.tnum) make every digit glyph the same width, so a
+// per-character estimate is a good enough proxy for the pixel width for a
+// formatted amount. This would need to be adjusted with the font size.
+const AMOUNT_COLUMN_CHAR_WIDTH = 7;
+const AMOUNT_COLUMN_PADDING = 16;
+
+function measureAmountColumnWidth(values: string[], minWidth: number) {
+  const maxChars = values.reduce(
+    (max, value) => Math.max(max, value.length),
+    0,
+  );
+  return Math.max(
+    minWidth,
+    maxChars * AMOUNT_COLUMN_CHAR_WIDTH + AMOUNT_COLUMN_PADDING,
+  );
+}
+
+// Widths are computed from every transaction currently loaded so the
+// column doesn't jump width while scrolling.
+export function useAmountColumnWidths(
+  transactions: TransactionEntity[],
+  balances: Record<TransactionEntity['id'], IntegerAmount> | null,
+): AmountColumnWidths {
+  const debitCreditValues = transactions.map(t =>
+    integerToCurrency(Math.abs(t.amount ?? 0)),
+  );
+  const balanceValues = balances
+    ? Object.values(balances).map(balance => integerToCurrency(balance))
+    : [];
+
+  return {
+    amount: measureAmountColumnWidth(
+      debitCreditValues,
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.amount,
+    ),
+    balance: measureAmountColumnWidth(
+      balanceValues,
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.balance,
+    ),
+  };
+}
+
 type TransactionHeaderProps = {
   hasSelected: boolean;
   columns: TransactionTableColumnId[];
@@ -169,6 +220,7 @@ type TransactionHeaderProps = {
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
   ascDesc: 'asc' | 'desc';
   field: string;
+  amountColumnWidths: AmountColumnWidths;
 };
 
 const TransactionHeader = memo(
@@ -180,6 +232,7 @@ const TransactionHeader = memo(
     ascDesc,
     field,
     showSelection,
+    amountColumnWidths,
   }: TransactionHeaderProps) => {
     const dispatchSelected = useSelectedDispatch();
     const { t } = useTranslation();
@@ -246,21 +299,21 @@ const TransactionHeader = memo(
       },
       payment: {
         value: columnLabels.payment,
-        width: 100,
+        width: amountColumnWidths.amount,
         alignItems: 'flex-end',
         marginRight: -5,
         sortDirection: 'asc',
       },
       deposit: {
         value: columnLabels.deposit,
-        width: 100,
+        width: amountColumnWidths.amount,
         alignItems: 'flex-end',
         marginRight: -5,
         sortDirection: 'desc',
       },
       balance: {
         value: t('Balance'),
-        width: 103,
+        width: amountColumnWidths.balance,
         alignItems: 'flex-end',
         marginRight: -5,
       },
@@ -902,11 +955,10 @@ function PayeeIcons({
             }
           }}
         >
-          {isDeposit ? (
-            <SvgLeftArrow2 style={transferIconStyle} />
-          ) : (
-            <SvgRightArrow2 style={transferIconStyle} />
-          )}
+          <TransferDirectionIcon
+            isDeposit={isDeposit}
+            style={transferIconStyle}
+          />
         </Button>
       )}
     </>
@@ -971,6 +1023,7 @@ type TransactionProps = {
   draggedId?: TransactionEntity['id'] | null;
   draggedParentId?: TransactionEntity['parent_id'] | null;
   siblingCount?: number;
+  previewSiblingCount?: number;
   prevRowDate?: string | null;
   nextRowDate?: string | null;
   sortField?: string;
@@ -978,6 +1031,7 @@ type TransactionProps = {
   onDragChange?: OnDragChangeCallback<TransactionEntity>;
   onDrop?: OnDropCallback;
   index: number;
+  amountColumnWidths: AmountColumnWidths;
 };
 
 const Transaction = memo(function Transaction({
@@ -1028,6 +1082,7 @@ const Transaction = memo(function Transaction({
   draggedId,
   draggedParentId,
   siblingCount = 0,
+  previewSiblingCount = 0,
   prevRowDate,
   nextRowDate,
   sortField,
@@ -1035,6 +1090,7 @@ const Transaction = memo(function Transaction({
   onDragChange,
   onDrop,
   index,
+  amountColumnWidths,
 }: TransactionProps) {
   const { t } = useTranslation();
 
@@ -1062,6 +1118,12 @@ const Transaction = memo(function Transaction({
 
   const [showReconciliationWarning, setShowReconciliationWarning] =
     useState(false);
+  const [syncTransferDatePref, setSyncTransferDatePref] =
+    useSyncedPref('sync-transfer-date');
+  const syncTransferDate = String(syncTransferDatePref) === 'true';
+  const setSyncTransferDate = (checked: boolean) =>
+    setSyncTransferDatePref(checked ? 'true' : 'false');
+  const transferDateSyncSeq = useRef(0);
 
   const onUpdate: TransactionUpdateFunction = async (name, value) => {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
@@ -1210,6 +1272,52 @@ const Transaction = memo(function Transaction({
         ? 'amount'
         : name;
       onSave(deserialized, subtransactions, deserializedName);
+
+      if (name === 'date' && typeof value === 'string' && syncTransferDate) {
+        // transaction's own leg, or a split child's leg
+        const transferIds = [
+          transaction.transfer_id,
+          ...(subtransactions?.map(t => t.transfer_id) ?? []),
+        ].filter((id): id is string => Boolean(id));
+
+        if (transferIds.length > 0) {
+          const seq = ++transferDateSyncSeq.current;
+          void (async () => {
+            const updated: { id: string; date: string }[] = transferIds.map(
+              id => ({ id, date: value }),
+            );
+
+            // sync split parent if the other leg is a split child
+            const { data } = (await aqlQuery(
+              q('transactions')
+                .filter({ id: { $oneof: transferIds } })
+                .select(['id', 'is_child', 'parent_id']),
+            )) as {
+              data: Pick<TransactionEntity, 'id' | 'is_child' | 'parent_id'>[];
+            };
+            updated.push(
+              ...data
+                .filter(
+                  (t): t is typeof t & { parent_id: string } =>
+                    t.is_child === true && typeof t.parent_id === 'string',
+                )
+                .map(t => ({ id: t.parent_id, date: value })),
+            );
+
+            // a newer date edit started while we were querying: let it win
+            if (seq !== transferDateSyncSeq.current) {
+              return;
+            }
+
+            await send('transactions-batch-update', {
+              updated,
+              runTransfers: false,
+            });
+          })().catch(error => {
+            console.error('Failed to sync transfer date:', error);
+          });
+        }
+      }
     }
   };
 
@@ -1286,16 +1394,19 @@ const Transaction = memo(function Transaction({
   const parentId = transaction.parent_id;
   // Disable drag if this is the only transaction on its date (nothing to reorder with)
   // For child transactions, disable if there's only one sibling (nothing to reorder with)
+  // For previews, disable if there's only one preview on this date (real transactions
+  // sharing the date don't count; previews can only reorder against other previews)
   const isOnlyTransactionOnDate = isChildTransaction
     ? siblingCount <= 1
-    : prevRowDate !== transaction.date && nextRowDate !== transaction.date;
+    : isPreview
+      ? previewSiblingCount <= 1
+      : prevRowDate !== transaction.date && nextRowDate !== transaction.date;
   const previewRef = useRef<DragPreviewRenderer>(null);
   // Row-level drag must not compete with inline editors (notes, amounts,
   // payee, etc.): otherwise clicks/drags inside inputs start a reorder drag
   // instead of moving the caret or selecting text (see GH #7567).
   const allowRowDrag =
     canDrag &&
-    !isPreview &&
     !isOnlyTransactionOnDate &&
     (!editing || focusedField === 'select' || focusedField === 'cleared');
   const { dragRef, dragProps } = useDrag<TransactionEntity>({
@@ -1308,14 +1419,22 @@ const Transaction = memo(function Transaction({
 
   // Gate callbacks for non-reorderable rows (children/previews) to avoid invalid drop operations
   // For child transactions, allow drops only from siblings (same parent)
+  // For previews, allow drops only from another preview on the same date
+  const draggedIsPreview = draggedId != null && isPreviewId(draggedId);
   const isSiblingDrag = isChildTransaction && draggedParentId === parentId;
+  const isSiblingPreviewDrag =
+    isPreview && draggedIsPreview && draggedDate === transaction.date;
   const safeOnDrop: OnDropCallback | undefined = isPreview
-    ? undefined
-    : isChildTransaction
-      ? isSiblingDrag
-        ? onDrop
-        : undefined
-      : onDrop;
+    ? isSiblingPreviewDrag
+      ? onDrop
+      : undefined
+    : draggedIsPreview
+      ? undefined
+      : isChildTransaction
+        ? isSiblingDrag
+          ? onDrop
+          : undefined
+        : onDrop;
 
   const { dropRef, dropProps, dropPos } = useDrop<TransactionEntity>({
     types: 'transaction',
@@ -1328,8 +1447,12 @@ const Transaction = memo(function Transaction({
 
   // Check if this row is a valid drop target for the currently dragged transaction
   const isValidDropTarget = useMemo(() => {
-    // Non-droppable row types
-    if (isPreview) return false;
+    // Previews can only be valid drop targets for other previews on the
+    // same date. Never mix preview and real transactions.
+    if (isPreview !== draggedIsPreview) return false;
+    if (isPreview) {
+      return draggedDate === transaction.date && dropPos != null;
+    }
 
     // When dragging a child transaction, only siblings are valid targets
     if (draggedParentId) {
@@ -1364,6 +1487,7 @@ const Transaction = memo(function Transaction({
   }, [
     draggedDate,
     draggedParentId,
+    draggedIsPreview,
     parentId,
     isChildTransaction,
     isPreview,
@@ -1485,7 +1609,11 @@ const Transaction = memo(function Transaction({
             formatter={date =>
               date ? formatDate(parseISO(date), dateFormat) : ''
             }
-            onExpose={name => !isPreview && onEdit(id, name)}
+            onExpose={name => {
+              if (!isPreview) {
+                onEdit(id, name);
+              }
+            }}
             onUpdate={value => {
               onUpdate('date', value);
             }}
@@ -1506,6 +1634,13 @@ const Transaction = memo(function Transaction({
                 clearOnBlur
                 onUpdate={onUpdate}
                 onSelect={onSave}
+                transferDateSyncChecked={syncTransferDate}
+                onTransferDateSyncChange={
+                  transaction.transfer_id ||
+                  subtransactions?.some(t => t.transfer_id)
+                    ? setSyncTransferDate
+                    : undefined
+                }
               />
             )}
           </CustomCell>
@@ -1826,7 +1961,7 @@ const Transaction = memo(function Transaction({
             key={columnId}
             /* Debit field for all transactions */
             type="input"
-            width={100}
+            width={amountColumnWidths.amount}
             name="debit"
             exposed={focusedField === 'debit'}
             focused={focusedField === 'debit'}
@@ -1861,7 +1996,7 @@ const Transaction = memo(function Transaction({
             key={columnId}
             /* Credit field for all transactions */
             type="input"
-            width={100}
+            width={amountColumnWidths.amount}
             name="credit"
             exposed={focusedField === 'credit'}
             focused={focusedField === 'credit'}
@@ -1907,7 +2042,7 @@ const Transaction = memo(function Transaction({
                   : theme.numberPositive,
             }}
             style={{ ...styles.tnum, ...amountStyle }}
-            width={103}
+            width={amountColumnWidths.balance}
             textAlign="right"
             privacyFilter
           />
@@ -2233,6 +2368,7 @@ type NewTransactionProps = {
   columns: TransactionTableColumnId[];
   balance?: number | null;
   transactions: TransactionEntity[];
+  amountColumnWidths: AmountColumnWidths;
   transferAccountsByTransaction: {
     [id: TransactionEntity['id']]: AccountEntity | null;
   };
@@ -2240,6 +2376,7 @@ type NewTransactionProps = {
 };
 function NewTransaction({
   transactions,
+  amountColumnWidths,
   accounts,
   categoryGroups,
   payees,
@@ -2305,6 +2442,7 @@ function NewTransaction({
         <Transaction
           key={transaction.id}
           index={index}
+          amountColumnWidths={amountColumnWidths}
           editing={editingTransaction === transaction.id}
           transaction={transaction}
           subtransactions={transaction.is_parent ? childTransactions : null}
@@ -2526,6 +2664,11 @@ function TransactionTableInner({
     [props.transactions, props.showReconciled],
   );
 
+  const amountColumnWidths = useAmountColumnWidths(
+    transactionsToRender,
+    props.balances,
+  );
+
   const renderRow: TableProps<TransactionEntity>['renderItem'] = ({
     item,
     index,
@@ -2577,6 +2720,13 @@ function TransactionTableInner({
         ? (props.transactionsByParent[trans.parent_id]?.length ?? 0)
         : 0;
 
+    // Get preview sibling count on the same date (used for drag/drop)
+    const previewSiblingCount = isPreviewId(trans.id)
+      ? props.transactions.filter(
+          t => isPreviewId(t.id) && t.date === trans.date,
+        ).length
+      : 0;
+
     // Compute adjacent row dates for boundary drop detection
     // Use transactionsToRender (filtered list) to match rendered row indices
     // Skip non-reorderable rows (child/preview) when finding neighbors
@@ -2616,6 +2766,7 @@ function TransactionTableInner({
         matched={isMatched?.(trans.id)}
         showZeroInDeposit={isChildDeposit}
         balance={balances?.[trans.id] ?? 0}
+        amountColumnWidths={amountColumnWidths}
         focusedField={editing ? tableNavigator.focusedField : undefined}
         accounts={accounts}
         categoryGroups={categoryGroups}
@@ -2660,6 +2811,7 @@ function TransactionTableInner({
         draggedParentId={props.draggedParentId}
         draggedDate={props.draggedDate}
         siblingCount={siblingCount}
+        previewSiblingCount={previewSiblingCount}
         prevRowDate={prevRowDate}
         nextRowDate={nextRowDate}
         sortField={props.sortField}
@@ -2689,6 +2841,7 @@ function TransactionTableInner({
           ascDesc={props.ascDesc}
           field={props.sortField}
           showSelection={props.showSelection}
+          amountColumnWidths={amountColumnWidths}
         />
 
         {props.isAdding && (
@@ -2699,6 +2852,7 @@ function TransactionTableInner({
           >
             <NewTransaction
               transactions={props.newTransactions}
+              amountColumnWidths={amountColumnWidths}
               transferAccountsByTransaction={
                 props.transferAccountsByTransaction
               }

@@ -198,6 +198,11 @@ function ScheduleRow({
             onClick: () => onAction('complete', schedule.id),
             hidden: status === 'completed',
           },
+          {
+            name: 'delete',
+            text: t('Delete'),
+            onClick: () => onAction('delete', schedule.id),
+          },
         ]
       : [],
   });

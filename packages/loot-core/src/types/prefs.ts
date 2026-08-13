@@ -10,7 +10,8 @@ export type FeatureFlag =
   | 'enableBanking'
   | 'sankeyReport'
   | 'akahuBankSync'
-  | 'mobileCalculator';
+  | 'mobileCalculator'
+  | 'monteCarloReport';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -40,6 +41,7 @@ export type SyncedPrefs = Partial<
     | 'transaction-table-columns'
     | `transaction-table-columns-${string}`
     | `show-group-${string}`
+    | 'sync-transfer-date'
     // TODO: pull from src/components/modals/ImportTransactions.js
     | `parse-date-${string}-${'csv' | 'qif'}`
     | `import-reimport-deleted-${string}`
@@ -96,6 +98,7 @@ export type LocalPrefs = Partial<{
   'budget.showHiddenCategories': boolean;
   'budget.startMonth': string;
   'flags.updateNotificationShownForVersion': string;
+  'tour.introSeen': boolean;
   'schedules.showCompleted': boolean;
   reportsViewLegend: boolean;
   reportsViewSummary: boolean;
