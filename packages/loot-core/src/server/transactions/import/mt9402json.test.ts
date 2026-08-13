@@ -208,7 +208,10 @@ describe('mt9402json', () => {
 
   it('treats RC (reversal of credit) as negative', () => {
     const { transactions } = mt9402json(
-      statement(':61:2508020802RC25,00NTRFNONREF//BANKREF_RC', ':86:Chargeback'),
+      statement(
+        ':61:2508020802RC25,00NTRFNONREF//BANKREF_RC',
+        ':86:Chargeback',
+      ),
     );
 
     expect(transactions[0].amount).toBe(-25);
