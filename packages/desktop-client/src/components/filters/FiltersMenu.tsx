@@ -498,10 +498,15 @@ function ConfigureField<T extends RuleConditionEntity>({
                   : type
               }
               numberFormatType="currency"
+              zeroSign={field === 'amount' ? '+' : undefined}
               // @ts-expect-error - fix me
               value={
                 formattedValue ??
-                (op === 'oneOf' || op === 'notOneOf' ? [] : '')
+                (type === 'number'
+                  ? 0
+                  : op === 'oneOf' || op === 'notOneOf'
+                    ? []
+                    : '')
               }
               // @ts-expect-error - fix me
               multi={op === 'oneOf' || op === 'notOneOf'}
