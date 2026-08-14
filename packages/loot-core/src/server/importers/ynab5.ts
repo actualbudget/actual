@@ -861,7 +861,10 @@ export async function importTransactions(
         learnCategories: true,
         runTransfers: false,
       });
-      tick?.(toImport.length);
+      tick?.(
+        toImport.length,
+        data.accounts.find(account => account.id === accountId)?.name,
+      );
     }),
   );
 }

@@ -90,6 +90,11 @@ type ImportProgressEvent = {
   /** Items imported so far across every step, for an overall progress bar. */
   overallCurrent: number;
   overallTotal: number;
+  /**
+   * The batch that was just imported, when a step works in batches rather than
+   * one item at a time.
+   */
+  batch?: { amount: number; account: string };
 };
 
 type PrefsUpdatedEvent = undefined;

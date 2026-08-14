@@ -87,6 +87,27 @@ describe('runImportSteps', () => {
     ]);
   });
 
+  it('reports a named batch immediately, without waiting out the throttle', async () => {
+    await runImportSteps([
+      {
+        step: 'transactions',
+        total: 30,
+        run: async tick => {
+          tick(10, 'Checking');
+          tick(20, 'Savings');
+        },
+      },
+    ]);
+
+    expect(sentProgress().map(payload => payload.batch)).toEqual([
+      undefined,
+      { amount: 10, account: 'Checking' },
+      { amount: 20, account: 'Savings' },
+      undefined,
+      undefined,
+    ]);
+  });
+
   it('snaps a step to its total when the estimate was off', async () => {
     // The step only imports 1 of the 5 items it estimated, but progress still
     // has to end up complete.

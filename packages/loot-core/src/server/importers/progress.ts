@@ -2,8 +2,12 @@ import * as connection from '#platform/server/connection';
 import { logger } from '#platform/server/log';
 import type { ImportStep } from '#types/server-events';
 
-/** Reports that `count` more items of the current step have been imported. */
-export type ImportTick = (count?: number) => void;
+/**
+ * Reports that `count` more items of the current step have been imported.
+ * Steps that import a batch at a time can name the account it belonged to, so
+ * the client can say which one it just finished.
+ */
+export type ImportTick = (count?: number, account?: string) => void;
 
 type ImportStepDefinition = {
   step: ImportStep;
@@ -32,7 +36,7 @@ export async function runImportSteps(steps: ImportStepDefinition[]) {
     logger.log(`Importing ${step}...`);
     let current = 0;
 
-    const emit = () => {
+    const emit = (batch?: { amount: number; account: string }) => {
       lastSentAt = Date.now();
       connection.send('import-progress', {
         step,
@@ -40,15 +44,20 @@ export async function runImportSteps(steps: ImportStepDefinition[]) {
         total,
         overallCurrent,
         overallTotal,
+        batch,
       });
     };
 
     emit();
 
-    await run((count = 1) => {
+    await run((count = 1, account) => {
       current += count;
       overallCurrent += count;
-      if (Date.now() - lastSentAt >= MIN_EVENT_INTERVAL_MS) {
+      // Always report a named batch: they are rare, and the account name is
+      // the whole point of the message.
+      if (account !== undefined) {
+        emit({ amount: count, account });
+      } else if (Date.now() - lastSentAt >= MIN_EVENT_INTERVAL_MS) {
         emit();
       }
     });

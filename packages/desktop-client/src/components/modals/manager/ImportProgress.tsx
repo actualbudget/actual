@@ -29,7 +29,8 @@ export function ImportProgress() {
     return null;
   }
 
-  const { step, current, total, overallCurrent, overallTotal } = progress;
+  const { step, current, total, overallCurrent, overallTotal, batch } =
+    progress;
   const percentage = overallTotal ? (overallCurrent / overallTotal) * 100 : 0;
   const stepProgress = total > 0 ? ` (${current}/${total})` : '';
 
@@ -42,7 +43,9 @@ export function ImportProgress() {
         marginTop: 20,
       }}
     >
-      <Text style={styles.tnum}>{getStepText(t, step, stepProgress)}</Text>
+      <Text style={styles.tnum}>
+        {getStepText(t, step, stepProgress, batch)}
+      </Text>
       <ProgressBar
         value={percentage}
         aria-label={t('Import progress')}
@@ -74,6 +77,7 @@ function getStepText(
   t: ReturnType<typeof useTranslation>['t'],
   step: ImportStep,
   progress: string,
+  batch?: { amount: number; account: string },
 ): string {
   switch (step) {
     case 'accounts':
@@ -87,7 +91,15 @@ function getStepText(
     case 'tags':
       return t('Importing tags{{progress}}...', { progress });
     case 'transactions':
-      return t('Importing transactions{{progress}}...', { progress });
+      // Transactions go in one batch per account, so the tick reports an
+      // account that has already landed rather than one in flight.
+      return batch
+        ? t('Imported {{count}} transactions for {{account}}{{progress}}...', {
+            count: batch.amount,
+            account: batch.account,
+            progress,
+          })
+        : t('Importing transactions{{progress}}...', { progress });
     case 'scheduled-transactions':
       return t('Importing scheduled transactions{{progress}}...', { progress });
     case 'budgets':
