@@ -361,13 +361,19 @@ describe('buildDateRangePresets', () => {
         includeAllTime: true,
       });
 
-      const currentQuarterPreset = presets.find(p => p.key === 'current-quarter');
+      const currentQuarterPreset = presets.find(
+        p => p.key === 'current-quarter',
+      );
 
       expect(currentQuarterPreset?.getRange()).toEqual(['2017-01', '2017-02']);
 
       currentQuarterPreset!.onSelect();
 
-      expect(onSelect).toHaveBeenCalledWith(['2017-01', '2017-02', 'currentQuarter']);
+      expect(onSelect).toHaveBeenCalledWith([
+        '2017-01',
+        '2017-02',
+        'currentQuarter',
+      ]);
     });
   });
 });
