@@ -318,10 +318,9 @@ export function getIntervalFormat(
   if (!dayLevelIntervals.has(interval)) {
     return ReportOptions.intervalFormat.get(interval) ?? '';
   }
-  // A two-digit year keeps the tick labels as narrow as they are today; only
-  // the field ordering has to follow the preference. Falling back to
-  // 'yyyy-MM-dd' reproduces the previous hardcoded 'yy-MM-dd'.
-  return (dateFormat || 'yyyy-MM-dd').replace('yyyy', 'yy');
+  // The preference is used exactly as it is set, including a four-digit year.
+  // This does make the tick labels wider than the format they replaced.
+  return dateFormat || 'yyyy-MM-dd';
 }
 
 export type QueryDataEntity = {
