@@ -263,6 +263,50 @@ describe('sheet language', () => {
     expect(result.sql).not.toMatch('payees.id AS id');
   });
 
+  it('`$literal` treats its argument as a raw value', () => {
+    // A leading `$` would otherwise be parsed as a field reference and a
+    // leading `:` as a named parameter
+    for (const name of ['$foo', ':foo', '$', 'plain']) {
+      const result = generateSQLWithState(
+        q('payees')
+          .filter({ name: { $eq: { $literal: name } } })
+          .select('name')
+          .serialize(),
+        schemaWithRefs,
+      );
+      expect(result.sql).toMatch(`WHERE (payees.name = '${name}')`);
+      expect(result.state.namedParameters).toEqual([]);
+    }
+  });
+
+  it('`$literal` does not unescape backslashes', () => {
+    const result = generateSQLWithState(
+      q('payees')
+        .filter({ name: { $eq: { $literal: 'a\\$b' } } })
+        .select('name')
+        .serialize(),
+      schemaWithRefs,
+    );
+    expect(result.sql).toMatch(`WHERE (payees.name = 'a\\$b')`);
+  });
+
+  it('unwrapped strings still parse as field references and parameters', () => {
+    let result = generateSQLWithState(
+      q('transactions').filter({ amount: '$amount2' }).select('id').serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch(
+      'WHERE (transactions.amount = transactions.amount2)',
+    );
+
+    result = generateSQLWithState(
+      q('transactions').filter({ amount: ':foo' }).select('id').serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch('transactions.amount = ?');
+    expect(result.state.namedParameters.map(p => p.paramName)).toContain('foo');
+  });
+
   it('automatically joins tables if referenced by path', () => {
     // Join a simple table
     let result = generateSQLWithState(
