@@ -338,7 +338,9 @@ describe('buildDateRangePresets', () => {
         p => p.key === 'previous-quarter',
       );
 
-      expect(currentQuarterPreset?.getRange()).toEqual(['2017-01', '2017-03']);
+      // The current quarter is unfinished in test mode (2017-01), so it is
+      // clamped to the latest available transaction month.
+      expect(currentQuarterPreset?.getRange()).toEqual(['2017-01', '2017-01']);
       expect(previousQuarterPreset?.getRange()).toEqual(['2016-10', '2016-12']);
 
       currentQuarterPreset!.onSelect();
@@ -346,6 +348,26 @@ describe('buildDateRangePresets', () => {
 
       expect(onSelect.mock.calls[0][0][2]).toBe('currentQuarter');
       expect(onSelect.mock.calls[1][0][2]).toBe('previousQuarter');
+    });
+
+    it('clamps current-quarter preset selection to latest transaction month in unfinished quarters', () => {
+      const onSelect = vi.fn();
+      const presets = buildDateRangePresets({
+        t: mockT,
+        onSelectRange: onSelect,
+        earliestTransaction: EARLIEST_TRANSACTION,
+        latestTransaction: '2017-02-10',
+        show1Month: false,
+        includeAllTime: true,
+      });
+
+      const currentQuarterPreset = presets.find(p => p.key === 'current-quarter');
+
+      expect(currentQuarterPreset?.getRange()).toEqual(['2017-01', '2017-02']);
+
+      currentQuarterPreset!.onSelect();
+
+      expect(onSelect).toHaveBeenCalledWith(['2017-01', '2017-02', 'currentQuarter']);
     });
   });
 });

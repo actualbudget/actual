@@ -43,6 +43,22 @@ function liveRangeAsMonths(
   return [monthUtils.getMonth(rangeStart), monthUtils.getMonth(rangeEnd), mode];
 }
 
+function clampRangeToMonthBounds(
+  range: PresetRange,
+  earliestMonth: string,
+  latestMonth: string,
+): PresetRange {
+  const [start, end, mode] = range;
+  const clampedStart = start < earliestMonth ? earliestMonth : start;
+  const clampedEnd = end > latestMonth ? latestMonth : end;
+
+  if (clampedStart > clampedEnd) {
+    return [clampedStart, clampedStart, mode];
+  }
+
+  return [clampedStart, clampedEnd, mode];
+}
+
 function makePreset(
   key: string,
   label: string,
@@ -198,13 +214,17 @@ export function buildDateRangePresets({
       'current-quarter',
       t('Current quarter'),
       () =>
-        liveRangeAsMonths(
-          'Current quarter',
-          false,
-          'currentQuarter',
-          earliestTransaction,
-          latestTransaction,
-          firstDayOfWeekIdx,
+        clampRangeToMonthBounds(
+          liveRangeAsMonths(
+            'Current quarter',
+            false,
+            'currentQuarter',
+            earliestTransaction,
+            latestTransaction,
+            firstDayOfWeekIdx,
+          ),
+          earliestMonth,
+          latestMonth,
         ),
       onSelectRange,
     ),
