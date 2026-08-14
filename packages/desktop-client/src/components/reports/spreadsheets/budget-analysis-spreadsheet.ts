@@ -115,6 +115,13 @@ export function summarizeMonthCategories(
     const catBalance = (balanceCell?.value as number) || 0;
     const hasCarryover = Boolean(carryoverCell?.value);
 
+    // Detect by value, not by cell presence: `envelope-budget-month` builds
+    // its response from the category list, so it emits a cell for every
+    // category in every month and fills missing sheet values with 0. Every
+    // month therefore has all its cells, and presence tells us nothing.
+    // A zero here is unambiguous: `leftover` already folds in the previous
+    // month's balance, so a month with a real balance carrying in cannot
+    // report zero across all three.
     if (catBudgeted !== 0 || catSpent !== 0 || catBalance !== 0) {
       hasBudgetData = true;
     }

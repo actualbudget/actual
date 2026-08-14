@@ -146,6 +146,24 @@ describe('createBudgetAnalysisSpreadsheet', () => {
       });
     });
 
+    it('reports no budget data for a never-budgeted month', () => {
+      // `envelope-budget-month` emits a cell for every category in every
+      // month, so an untouched future month arrives as present-but-zero
+      // cells rather than as missing ones. Presence alone cannot distinguish
+      // it from a real month.
+      const result = summarizeMonthCategories(
+        cells({
+          'budget-c1': 0,
+          'sum-amount-c1': 0,
+          'leftover-c1': 0,
+          'carryover-c1': false,
+        }),
+        [visibleExpense],
+      );
+
+      expect(result.hasBudgetData).toBe(false);
+    });
+
     it('carries a positive balance to the next month', () => {
       const result = summarizeMonthCategories(
         cells({
