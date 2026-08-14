@@ -16,18 +16,14 @@ import { View } from '@actual-app/components/view';
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
 import type { UndoState } from '@actual-app/core/server/undo';
-import { currentDay } from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
 import {
   makeAsNonChildTransactions,
   makeChild,
-  realizeTempTransactions,
   ungroupTransaction,
   ungroupTransactions,
-  updateTransaction,
 } from '@actual-app/core/shared/transactions';
-import { applyChanges } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
@@ -50,8 +46,13 @@ import {
   useUpdateAccountMutation,
 } from '#accounts';
 import { markAccountRead } from '#accounts/accountsSlice';
+import * as reconciliation from '#accounts/reconciliation';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
+import type {
+  TransactionTableColumn,
+  TransactionTableColumnId,
+} from '#components/transactions/table/columns';
 import { TransactionList } from '#components/transactions/TransactionList';
 import { validateAccountName } from '#components/util/accountValidation';
 import { useAccountPreviewTransactions } from '#hooks/useAccountPreviewTransactions';
@@ -72,6 +73,10 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useTransactionBatchActions } from '#hooks/useTransactionBatchActions';
 import { useTransactionFilters } from '#hooks/useTransactionFilters';
 import { calculateRunningBalancesBottomUp } from '#hooks/useTransactions';
+import {
+  SPECIAL_VIEW_IDS,
+  useTransactionTableColumns,
+} from '#hooks/useTransactionTableColumns';
 import {
   openAccountCloseModal,
   pushModal,
@@ -215,15 +220,17 @@ type AccountInternalProps = {
     | undefined;
   filterConditions: RuleConditionEntity[];
   showBalances?: boolean;
-  setShowBalances: (newValue: boolean) => void;
   showNetWorthChart: boolean;
   setShowNetWorthChart: (newValue: boolean) => void;
   showCleared?: boolean;
-  setShowCleared: (newValue: boolean) => void;
   showReconciled: boolean;
   setShowReconciled: (newValue: boolean) => void;
+  showGroup: boolean;
   showExtraBalances?: boolean;
   setShowExtraBalances: (newValue: boolean) => void;
+  transactionColumns: TransactionTableColumn[];
+  columnOrder: TransactionTableColumnId[];
+  saveColumns: (columns: TransactionTableColumn[], applyToAll: boolean) => void;
   modalShowing?: boolean;
   accounts: AccountEntity[];
   newTransactions: Array<TransactionEntity['id']>;
@@ -492,6 +499,9 @@ class AccountInternal extends PureComponent<
         if (this._isOptimisticUpdate) {
           this._isOptimisticUpdate = false;
           const transactionsSnapshot = data;
+          const balances = this.state.showBalances
+            ? await this.calculateBalances()
+            : null;
           // Wrap in startTransition so React treats this as a low-priority
           // update. Without this, setState blocks the main thread for the
           // full duration of the re-render (~40–220ms with large transaction
@@ -500,7 +510,10 @@ class AccountInternal extends PureComponent<
           // into chunks and yield to the browser between them, keeping the
           // UI responsive while the row update happens in the background.
           startTransition(() => {
-            this.setState({ transactions: transactionsSnapshot });
+            this.setState({
+              transactions: transactionsSnapshot,
+              balances,
+            });
           });
           return;
         }
@@ -803,11 +816,10 @@ class AccountInternal extends PureComponent<
       | 'close'
       | 'reopen'
       | 'export'
-      | 'toggle-balance'
       | 'remove-sorting'
-      | 'toggle-cleared'
       | 'toggle-reconciled'
-      | 'toggle-net-worth-chart',
+      | 'toggle-net-worth-chart'
+      | 'manage-columns',
   ) => {
     const accountId = this.props.accountId!;
     const account = this.props.accounts.find(
@@ -853,26 +865,6 @@ class AccountInternal extends PureComponent<
         const accountName = this.getAccountTitle(account, accountId);
         void this.onExport(accountName);
         break;
-      case 'toggle-balance':
-        if (this.state.showBalances) {
-          this.props.setShowBalances(false);
-          this.setState({ showBalances: false, balances: null });
-        } else {
-          this.props.setShowBalances(true);
-          this.setState(
-            {
-              transactions: [],
-              filterConditions: [],
-              search: '',
-              sort: null,
-              showBalances: true,
-            },
-            () => {
-              this.fetchTransactions();
-            },
-          );
-        }
-        break;
       case 'remove-sorting': {
         this.setState({ sort: null }, () => {
           const filterConditions = this.state.filterConditions;
@@ -887,15 +879,6 @@ class AccountInternal extends PureComponent<
         });
         break;
       }
-      case 'toggle-cleared':
-        if (this.state.showCleared) {
-          this.props.setShowCleared(false);
-          this.setState({ showCleared: false });
-        } else {
-          this.props.setShowCleared(true);
-          this.setState({ showCleared: true });
-        }
-        break;
       case 'toggle-reconciled':
         if (this.state.showReconciled) {
           this.props.setShowReconciled(false);
@@ -916,7 +899,107 @@ class AccountInternal extends PureComponent<
           this.props.setShowNetWorthChart(true);
         }
         break;
+      case 'manage-columns':
+        this.onManageColumns();
+        break;
       default:
+    }
+  };
+
+  showAccountColumn = () => {
+    const accountId = this.props.accountId;
+    return !accountId || SPECIAL_VIEW_IDS.includes(accountId);
+  };
+
+  onManageColumns = () => {
+    const columns = this.props.transactionColumns
+      .filter(
+        column =>
+          (column.id !== 'account' || this.showAccountColumn()) &&
+          (column.id !== 'balance' || this.canCalculateBalance()),
+      )
+      .map(column => {
+        // Balance and cleared visibility can be temporarily overridden in
+        // component state (e.g. while reconciling) and may still come from
+        // the old per-account prefs, so state is the source of truth here.
+        if (column.id === 'balance') {
+          return { ...column, hidden: !this.state.showBalances };
+        }
+        if (column.id === 'cleared') {
+          // During reconciliation the cleared column is temporarily forced
+          // visible, so show the user's underlying preference instead
+          const showCleared =
+            this.state.reconcileAmount != null
+              ? this.state.prevShowCleared
+              : this.state.showCleared;
+          return { ...column, hidden: !showCleared };
+        }
+        // Group visibility may come from the legacy pref fallback rather
+        // than the saved config, so the resolved prop is the source of truth
+        if (column.id === 'group') {
+          return { ...column, hidden: !this.props.showGroup };
+        }
+        return column;
+      });
+
+    this.props.dispatch(
+      pushModal({
+        modal: {
+          name: 'transaction-table-columns',
+          options: {
+            columns,
+            onSave: this.onSaveColumns,
+          },
+        },
+      }),
+    );
+  };
+
+  onSaveColumns = (columns: TransactionTableColumn[], applyToAll: boolean) => {
+    // Columns that aren't managed in the current view (e.g. the account
+    // column on a single-account page) keep their previous position and
+    // visibility so a save here doesn't clobber them.
+    const merged = [...columns];
+    this.props.transactionColumns.forEach((column, index) => {
+      if (!merged.some(c => c.id === column.id)) {
+        merged.splice(Math.min(index, merged.length), 0, column);
+      }
+    });
+
+    this.props.saveColumns(merged, applyToAll);
+
+    // Toggling the balance column changes which queries run, so mirror the
+    // change into component state and refetch when needed.
+    const balance = columns.find(column => column.id === 'balance');
+    const isBalanceVisible = balance && !balance.hidden;
+    if (balance && isBalanceVisible !== !!this.state.showBalances) {
+      if (!isBalanceVisible) {
+        this.setState({ showBalances: false, balances: null });
+      } else {
+        this.setState(
+          {
+            transactions: [],
+            filterConditions: [],
+            search: '',
+            sort: null,
+            showBalances: true,
+          },
+          () => {
+            this.fetchTransactions();
+          },
+        );
+      }
+    }
+
+    const cleared = columns.find(column => column.id === 'cleared');
+    const isClearedVisible = cleared && !cleared.hidden;
+    if (cleared && isClearedVisible !== !!this.state.showCleared) {
+      // Also update prevShowCleared so finishing a reconciliation restores
+      // the visibility chosen here, not the stale pre-reconcile value
+      this.setState({
+        showCleared: isClearedVisible,
+        prevShowCleared: isClearedVisible,
+      });
     }
   };
 
@@ -978,36 +1061,14 @@ class AccountInternal extends PureComponent<
   };
 
   lockTransactions = async () => {
+    const { accountId } = this.props;
+    if (!accountId) {
+      return;
+    }
+
     this.setState({ workingHard: true });
 
-    const { accountId } = this.props;
-
-    const { data } = await aqlQuery(
-      q('transactions')
-        .filter({ cleared: true, reconciled: false, account: accountId })
-        .select('*')
-        .options({ splits: 'grouped' }),
-    );
-    let transactions = ungroupTransactions(data);
-
-    const changes: { updated: Array<Partial<TransactionEntity>> } = {
-      updated: [],
-    };
-
-    transactions.forEach(trans => {
-      const { diff } = updateTransaction(transactions, {
-        ...trans,
-        reconciled: true,
-      });
-
-      transactions = applyChanges(diff, transactions);
-
-      changes.updated = changes.updated
-        ? changes.updated.concat(diff.updated)
-        : diff.updated;
-    });
-
-    await send('transactions-batch-update', changes);
+    await reconciliation.lockTransactions(accountId);
     await this.refetchTransactions();
   };
 
@@ -1030,27 +1091,9 @@ class AccountInternal extends PureComponent<
 
     const { reconcileAmount } = this.state;
 
-    const { data } = await aqlQuery(
-      q('transactions')
-        .filter({ cleared: true, account: accountId })
-        .select('*')
-        .options({ splits: 'grouped' }),
+    await reconciliation.finishReconciliation(account.id, reconcileAmount, () =>
+      this.lockTransactions(),
     );
-    const transactions = ungroupTransactions(data);
-
-    let cleared = 0;
-
-    transactions.forEach(trans => {
-      if (!trans.is_parent) {
-        cleared += trans.amount;
-      }
-    });
-
-    const targetDiff = (reconcileAmount || 0) - cleared;
-
-    if (targetDiff === 0) {
-      await this.lockTransactions();
-    }
 
     const lastReconciled = new Date().getTime().toString();
     this.props.onUpdateAccount({ ...account, last_reconciled: lastReconciled });
@@ -1062,36 +1105,20 @@ class AccountInternal extends PureComponent<
   };
 
   onCreateReconciliationTransaction = async (diff: number) => {
-    // Create a new reconciliation transaction
-    const reconciliationTransactions = realizeTempTransactions([
-      {
-        id: 'temp',
-        account: this.props.accountId!,
-        cleared: true,
-        reconciled: false,
-        amount: diff,
-        date: currentDay(),
-        notes: t('Reconciliation balance adjustment'),
-      },
-    ]);
+    const { accountId } = this.props;
+    if (!accountId) {
+      return;
+    }
 
-    // Optimistic UI: update the transaction list before sending the data to the database
-    this.setState(state => ({
-      transactions: [...reconciliationTransactions, ...state.transactions],
-    }));
-
-    // run rules on the reconciliation transaction
-    const ruledTransactions = await Promise.all(
-      reconciliationTransactions.map(transaction =>
-        send('rules-run', { transaction }),
-      ),
+    await reconciliation.createReconciliationTransaction(
+      accountId,
+      diff,
+      // Optimistic UI: update the transaction list before sending the data to the database
+      reconciliationTransactions =>
+        this.setState(state => ({
+          transactions: [...reconciliationTransactions, ...state.transactions],
+        })),
     );
-
-    // sync the reconciliation transaction
-    await send('transactions-batch-update', {
-      added: ruledTransactions.filter(trans => !trans.tombstone),
-      deleted: ruledTransactions.filter(trans => trans.tombstone),
-    });
     await this.refetchTransactions();
   };
 
@@ -1826,13 +1853,10 @@ class AccountInternal extends PureComponent<
                 accountsSyncing={accountsSyncing}
                 accounts={accounts}
                 transactions={transactions}
-                showBalances={showBalances ?? false}
                 showExtraBalances={showExtraBalances ?? false}
-                showCleared={showCleared ?? false}
                 showReconciled={showReconciled ?? false}
                 showEmptyMessage={showEmptyMessage ?? false}
                 balanceQuery={balanceQuery}
-                canCalculateBalance={this?.canCalculateBalance ?? undefined}
                 filteredAmount={filteredAmount}
                 isFiltered={transactionsFiltered ?? false}
                 isSorted={this.state.sort !== null}
@@ -1894,12 +1918,9 @@ class AccountInternal extends PureComponent<
                   showBalances={!!allBalances}
                   showReconciled={showReconciled}
                   showCleared={!!showCleared}
-                  showAccount={
-                    !accountId ||
-                    accountId === 'offbudget' ||
-                    accountId === 'onbudget' ||
-                    accountId === 'uncategorized'
-                  }
+                  showGroup={this.props.showGroup}
+                  showAccount={this.showAccountColumn()}
+                  columnOrder={this.props.columnOrder}
                   allowReorder={
                     !!accountId &&
                     accountId !== 'offbudget' &&
@@ -2021,14 +2042,8 @@ export function Account() {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [hideFraction] = useSyncedPref('hideFraction');
   const [expandSplits] = useLocalPref('expand-splits');
-  const [showBalances, setShowBalances] = useSyncedPref(
-    `show-balances-${params.id}`,
-  );
   const [showNetWorthChart, setShowNetWorthChart] = useSyncedPref(
     `show-account-${params.id}-net-worth-chart`,
-  );
-  const [hideCleared, setHideCleared] = useSyncedPref(
-    `hide-cleared-${params.id}`,
   );
   const [hideReconciled, setHideReconciled] = useSyncedPref(
     `hide-reconciled-${params.id}`,
@@ -2036,6 +2051,15 @@ export function Account() {
   const [showExtraBalances, setShowExtraBalances] = useSyncedPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
+  const {
+    transactionColumns,
+    columnOrder,
+    showBalances,
+    showCleared,
+    showGroup,
+    saveColumns,
+  } = useTransactionTableColumns(params.id);
+
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const filterConditions = location?.state?.filterConditions || [];
@@ -2078,20 +2102,20 @@ export function Account() {
             dateFormat={dateFormat}
             hideFraction={String(hideFraction) === 'true'}
             expandSplits={expandSplits}
-            showBalances={String(showBalances) === 'true'}
-            setShowBalances={showBalances =>
-              setShowBalances(String(showBalances))
-            }
+            showBalances={showBalances}
             showNetWorthChart={String(showNetWorthChart) === 'true'}
             setShowNetWorthChart={val => setShowNetWorthChart(String(val))}
-            showCleared={String(hideCleared) !== 'true'}
-            setShowCleared={val => setHideCleared(String(!val))}
+            showCleared={showCleared}
             showReconciled={String(hideReconciled) !== 'true'}
             setShowReconciled={val => setHideReconciled(String(!val))}
+            showGroup={showGroup}
             showExtraBalances={String(showExtraBalances) === 'true'}
             setShowExtraBalances={extraBalances =>
               setShowExtraBalances(String(extraBalances))
             }
+            transactionColumns={transactionColumns}
+            columnOrder={columnOrder}
+            saveColumns={saveColumns}
             payees={payees}
             modalShowing={modalShowing}
             accountsSyncing={accountsSyncing}

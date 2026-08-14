@@ -293,13 +293,13 @@ export function StackedBarGraph({
                     }}
                     onMouseEnter={() => {
                       setTooltip(entry.dataKey);
-                      if (!['Group', 'Interval'].includes(groupBy)) {
+                      if (groupBy !== 'Interval') {
                         setPointer('pointer');
                       }
                     }}
                     onClick={e =>
                       ((compact && showTooltip) || !compact) &&
-                      !['Group', 'Interval'].includes(groupBy) &&
+                      groupBy !== 'Interval' &&
                       showActivity({
                         navigate,
                         categories,

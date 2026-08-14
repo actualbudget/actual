@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  budgetQueryDimensions,
+  getBudgetCategoryCompletionSection,
+  getBudgetDimensionCompletionSection,
   getDynamicReportQueryCompletions,
   getFormulaCategoryForName,
   getFormulaFunctionCatalog,
@@ -8,6 +11,7 @@ import {
   getFormulaFunctionsByMode,
   getFormulaFunctionsForMode,
   getFunctionCompletions,
+  getFunctionSignatureCompletionSection,
   getNamedVariableCompletions,
   getRuleFieldCompletions,
   sortFormulaCompletions,
@@ -45,9 +49,7 @@ describe('formulaCatalog', () => {
     expect(reportFunctions.QUERY).toBeDefined();
     expect(reportFunctions.QUERY_COUNT).toBeDefined();
     expect(reportFunctions.BUDGET_QUERY).toBeDefined();
-    expect(reportFunctions.BALANCE_OF).toBeUndefined();
 
-    expect(ruleFunctions.BALANCE_OF).toBeDefined();
     expect(ruleFunctions.QUERY).toBeUndefined();
     expect(ruleFunctions.QUERY_COUNT).toBeUndefined();
   });
@@ -61,6 +63,7 @@ describe('formulaCatalog', () => {
       'FORMATNUMBER',
       'FORMATCURRENCY',
       'INTEGER_TO_AMOUNT',
+      'BALANCE_OF',
     ]) {
       expect(reportFunctions[functionName]).toBeDefined();
       expect(ruleFunctions[functionName]).toBeDefined();
@@ -86,6 +89,47 @@ describe('formulaCatalog', () => {
     expect(labels(getRuleFieldCompletions())).toEqual(
       expect.arrayContaining(['amount', 'date', 'notes', 'balance']),
     );
+  });
+
+  it('defines budget query dimensions and sorts their sections after function groups', () => {
+    expect(budgetQueryDimensions).toEqual([
+      'budgeted',
+      'spent',
+      'balance_start',
+      'balance_end',
+      'goal',
+    ]);
+
+    const sorted = sortFormulaCompletions([
+      {
+        label: 'BUDGET_QUERY',
+        section: getFunctionSignatureCompletionSection(),
+      },
+      {
+        label: 'QUERY',
+        section: getFormulaFunctionCategoryConfig().query.section,
+      },
+      {
+        label: 'SUM',
+        section: getFormulaFunctionCategoryConfig().math.section,
+      },
+      {
+        label: 'spent',
+        section: getBudgetDimensionCompletionSection(),
+      },
+      {
+        label: 'Groceries',
+        section: getBudgetCategoryCompletionSection(),
+      },
+    ]);
+
+    expect(labels(sorted)).toEqual([
+      'BUDGET_QUERY',
+      'QUERY',
+      'SUM',
+      'spent',
+      'Groceries',
+    ]);
   });
 
   it('builds report query completions from saved query names', () => {

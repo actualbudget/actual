@@ -14,6 +14,7 @@ import { useDispatch } from '#redux';
 import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
+import { AccountReconcileModal } from './modals/AccountReconcileModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
@@ -78,6 +79,7 @@ import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
 import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
 import { TrackingBudgetSummaryModal } from './modals/TrackingBudgetSummaryModal';
+import { TransactionTableColumnsModal } from './modals/TransactionTableColumnsModal';
 import { TransferModal } from './modals/TransferModal';
 import { TransferOwnership } from './modals/TransferOwnership';
 import { UnmigrateBudgetAutomationsModal } from './modals/UnmigrateBudgetAutomationsModal';
@@ -152,6 +154,9 @@ export function Modals() {
 
         case 'confirm-transaction-edit':
           return <ConfirmTransactionEditModal key={key} {...modal.options} />;
+
+        case 'transaction-table-columns':
+          return <TransactionTableColumnsModal key={key} {...modal.options} />;
 
         case 'convert-to-schedule':
           return <ConvertToScheduleModal key={key} {...modal.options} />;
@@ -276,6 +281,9 @@ export function Modals() {
 
         case 'account-menu':
           return <AccountMenuModal key={key} {...modal.options} />;
+
+        case 'account-reconcile':
+          return <AccountReconcileModal key={key} {...modal.options} />;
 
         case 'category-menu':
           return <CategoryMenuModal key={key} {...modal.options} />;

@@ -1,3 +1,4 @@
+import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import { describe, expect, it } from 'vitest';
 
 import type {
@@ -5,6 +6,7 @@ import type {
   TransactionWithCategory,
 } from './age-of-money-spreadsheet';
 import {
+  buildTransferInclusionFilter,
   calculateAgeOfMoney,
   calculateAverageAge,
   calculateGraphData,
@@ -615,6 +617,171 @@ describe('Age of Money calculations', () => {
       });
 
       expect(result.insufficientData).toBe(false);
+    });
+  });
+
+  describe('buildTransferInclusionFilter', () => {
+    const defaultFilter = {
+      $or: [
+        { 'payee.transfer_acct': null },
+        { 'payee.transfer_acct.offbudget': true },
+      ],
+    };
+
+    it('excludes on-budget transfers when no account filter is set', () => {
+      expect(buildTransferInclusionFilter([])).toEqual(defaultFilter);
+      expect(
+        buildTransferInclusionFilter([
+          { field: 'category', op: 'is', value: 'cat-1' },
+        ]),
+      ).toEqual(defaultFilter);
+    });
+
+    it('includes transfers to filtered-out accounts for "is" account filter', () => {
+      const conditions: RuleConditionEntity[] = [
+        { field: 'account', op: 'is', value: 'chequing' },
+      ];
+
+      expect(buildTransferInclusionFilter(conditions)).toEqual({
+        $or: [
+          { 'payee.transfer_acct': null },
+          { 'payee.transfer_acct.offbudget': true },
+          {
+            $and: [
+              { 'payee.transfer_acct.offbudget': false },
+              { 'payee.transfer_acct': { $ne: 'chequing' } },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('includes only transfers to excluded accounts for "isNot" filter', () => {
+      const conditions: RuleConditionEntity[] = [
+        { field: 'account', op: 'isNot', value: 'credit-card' },
+      ];
+
+      expect(buildTransferInclusionFilter(conditions)).toEqual({
+        $or: [
+          { 'payee.transfer_acct': null },
+          { 'payee.transfer_acct.offbudget': true },
+          {
+            $and: [
+              { 'payee.transfer_acct.offbudget': false },
+              { 'payee.transfer_acct': { $eq: 'credit-card' } },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('keeps transfers within a multi-account filter excluded', () => {
+      const conditions: RuleConditionEntity[] = [
+        { field: 'account', op: 'oneOf', value: ['chequing', 'savings'] },
+      ];
+
+      expect(buildTransferInclusionFilter(conditions)).toEqual({
+        $or: [
+          { 'payee.transfer_acct': null },
+          { 'payee.transfer_acct.offbudget': true },
+          {
+            $and: [
+              { 'payee.transfer_acct.offbudget': false },
+              {
+                $and: [
+                  { 'payee.transfer_acct': { $ne: 'chequing' } },
+                  { 'payee.transfer_acct': { $ne: 'savings' } },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('treats empty oneOf as matching no accounts (inverted notOneOf is tautology)', () => {
+      // account oneOf [] inverts to notOneOf []. Everything is outside the
+      // empty set, so on-budget transfers to any counterpart are included.
+      const conditions: RuleConditionEntity[] = [
+        { field: 'account', op: 'oneOf', value: [] },
+      ];
+
+      expect(buildTransferInclusionFilter(conditions)).toEqual({
+        $or: [
+          { 'payee.transfer_acct': null },
+          { 'payee.transfer_acct.offbudget': true },
+          {
+            $and: [
+              { 'payee.transfer_acct.offbudget': false },
+              { 'payee.transfer_acct': { $ne: null } },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('combines multiple account conditions with De Morgan for and/or', () => {
+      const conditions: RuleConditionEntity[] = [
+        { field: 'account', op: 'is', value: 'a' },
+        { field: 'account', op: 'isNot', value: 'b' },
+      ];
+
+      expect(buildTransferInclusionFilter(conditions, 'and')).toEqual({
+        $or: [
+          { 'payee.transfer_acct': null },
+          { 'payee.transfer_acct.offbudget': true },
+          {
+            $and: [
+              { 'payee.transfer_acct.offbudget': false },
+              {
+                $or: [
+                  { 'payee.transfer_acct': { $ne: 'a' } },
+                  { 'payee.transfer_acct': { $eq: 'b' } },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(buildTransferInclusionFilter(conditions, 'or')).toEqual({
+        $or: [
+          { 'payee.transfer_acct': null },
+          { 'payee.transfer_acct.offbudget': true },
+          {
+            $and: [
+              { 'payee.transfer_acct.offbudget': false },
+              {
+                $and: [
+                  { 'payee.transfer_acct': { $ne: 'a' } },
+                  { 'payee.transfer_acct': { $eq: 'b' } },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('falls back to default exclusion for unsupported account ops', () => {
+      const conditions: RuleConditionEntity[] = [
+        { field: 'account', op: 'matches', value: 'cheq.*' },
+      ];
+
+      expect(buildTransferInclusionFilter(conditions)).toEqual(defaultFilter);
+    });
+
+    it('ignores customName conditions when detecting account filters', () => {
+      const conditions: RuleConditionEntity[] = [
+        {
+          field: 'account',
+          op: 'is',
+          value: 'chequing',
+          customName: 'saved-filter',
+        },
+      ];
+
+      expect(buildTransferInclusionFilter(conditions)).toEqual(defaultFilter);
     });
   });
 

@@ -92,3 +92,38 @@ test('boots, imports a budget, reads it back, and persists', async ({
   });
   expect(budgetCount).toBe(1);
 });
+
+test('supports a custom dataDir and persists it', async ({ page }) => {
+  await page.goto('/e2e/harness.html');
+
+  const result = await page.evaluate(async () => {
+    const api = await window.apiReady;
+    await api.init({ dataDir: '/budget' });
+
+    await api.runImport('e2e-custom-dir-budget', async () => {
+      const accountId = await api.createAccount({ name: 'Savings' }, 0);
+      await api.addTransactions(accountId, [
+        { date: '2024-02-01', amount: 12345, notes: 'deposit' },
+      ]);
+    });
+
+    const accounts = await api.getAccounts();
+    return { accountNames: accounts.map(a => a.name) };
+  });
+  expect(result.accountNames).toEqual(['Savings']);
+
+  // Reload the page: the budget must survive in IndexedDB.
+  await page.evaluate(async () => {
+    const api = await window.apiReady;
+    await api.shutdown();
+  });
+  await page.reload();
+  const budgetCount = await page.evaluate(async () => {
+    const api = await window.apiReady;
+    await api.init({ dataDir: '/budget' });
+    const budgets = await api.getBudgets();
+    await api.shutdown();
+    return budgets.length;
+  });
+  expect(budgetCount).toBe(1);
+});

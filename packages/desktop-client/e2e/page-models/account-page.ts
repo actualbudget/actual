@@ -159,6 +159,7 @@ export class AccountPage {
       category: row.getByTestId('category'),
       debit: row.getByTestId('debit'),
       credit: row.getByTestId('credit'),
+      balance: row.getByTestId('balance'),
     };
   }
 
@@ -174,6 +175,30 @@ export class AccountPage {
     await this.accountMenuButton.click();
     await this.page.getByRole('button', { name: 'Close Account' }).click();
     return new CloseAccountModal(this.page.getByTestId('close-account-modal'));
+  }
+
+  /**
+   * Open the "Manage table columns" modal from the account menu.
+   */
+  async openTransactionColumnsModal() {
+    await this.accountMenuButton.click();
+    await this.page
+      .getByRole('button', { name: 'Manage table columns' })
+      .click();
+    return this.page.getByTestId('transaction-table-columns-modal');
+  }
+
+  /**
+   * Set one column's visibility via the "Manage table columns" modal.
+   */
+  async setTransactionColumnVisibility(columnId: string, visible: boolean) {
+    const modal = await this.openTransactionColumnsModal();
+    const toggle = modal.locator(`#toggle-column-${columnId}`);
+    if ((await toggle.isChecked()) !== visible) {
+      await modal.locator(`label[for="toggle-column-${columnId}"]`).click();
+    }
+    await modal.getByRole('button', { name: 'Save', exact: true }).click();
+    await modal.waitFor({ state: 'hidden' });
   }
 
   /**

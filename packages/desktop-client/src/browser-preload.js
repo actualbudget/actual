@@ -21,6 +21,19 @@ const ACTUAL_VERSION = Platform.isPlaywright
     ? '.preview'
     : packageJson.version;
 
+// The OIDC callback (/openid-cb) is reached via a full-page navigation back
+// from the OpenID provider. Routing it through the SharedWorker coordinator is
+// unreliable: the returning tab can be left UNASSIGNED (no leader/backend), so
+// the token write hangs and login silently fails (worst on iOS/iPad, where the
+// pre-redirect tab never reports closing). It's a transient pre-login page with
+// no budget open, so it doesn't need multi-tab coordination — give it a direct
+// Worker so the token write resolves and login can complete. Once the user
+// opens a budget the app navigates and the next page load rejoins the
+// coordinator normally.
+const isOpenIdCallback = window.location.pathname
+  .replace(/\/+$/, '')
+  .endsWith('/openid-cb');
+
 // *** Start the backend ***
 //
 // The multi-tab coordinator (leader/follower over SharedWorker), the direct
@@ -38,8 +51,31 @@ const worker = startBrowserBackend({
   },
   createSharedWorker: () =>
     new SharedBrowserServerWorker({ name: 'actual-backend' }),
-  forceDirectWorker: Platform.isPlaywright || Platform.isIOS,
+  forceDirectWorker:
+    Platform.isPlaywright ||
+    Platform.isIOS ||
+    Platform.isAndroid ||
+    isOpenIdCallback,
 });
+
+// Ask the browser to exclude this origin's storage (the local budget database
+// in IndexedDB) from automatic eviction under storage pressure. Without this,
+// the browser is allowed to silently delete all local data, forcing a full
+// re-download of the budget and losing any changes not yet synced.
+if (navigator.storage?.persist) {
+  void navigator.storage
+    .persist()
+    .then(persisted => {
+      if (!persisted) {
+        console.warn(
+          'Persistent storage was not granted; the browser may evict local budget data under storage pressure.',
+        );
+      }
+    })
+    .catch(error => {
+      console.warn('Persistent storage request failed:', error);
+    });
+}
 
 let isUpdateReadyForDownload = false;
 let markUpdateReadyForDownload;
@@ -209,9 +245,11 @@ global.Actual = {
   applyAppUpdate: async () => {
     updateSW();
 
-    // Wait for the app to reload
+    // Wait for the service worker swap to reload the page. If the new worker
+    // never takes control (e.g. the server is mid-update), force a reload so
+    // the "Update now" button doesn't hang forever with no feedback.
     await new Promise(() => {
-      // Do nothing
+      setTimeout(() => window.location.reload(), 15000);
     });
   },
 

@@ -97,6 +97,18 @@ export function isValidYearMonth(value: string): boolean {
   return month >= 1 && month <= 12;
 }
 
+// Whether a value is day-shaped (`yyyy-MM-dd`) rather than month-shaped
+// (`yyyy-MM`).
+export function isValidYearMonthDay(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > 12) return false;
+  return day >= 1 && day <= d.getDaysInMonth(new Date(year, month - 1));
+}
+
 export function weekFromDate(
   date: DateLike,
   firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'],
@@ -172,6 +184,10 @@ export function nextMonth(month: DateLike): string {
 
 export function prevYear(month: DateLike, format = 'yyyy-MM'): string {
   return d.format(d.subMonths(_parse(month), 12), format);
+}
+
+export function prevQuarter(month: DateLike, format = 'yyyy-MM'): string {
+  return d.format(d.subMonths(_parse(month), 3), format);
 }
 
 export function prevMonth(month: DateLike): string {
@@ -399,6 +415,20 @@ export function getYearStart(month: string): string {
 
 export function getYearEnd(month: string): string {
   return getYear(month) + '-12';
+}
+
+export function getQuarter(month: string): number {
+  return Math.floor((Number(month.slice(5, 7)) - 1) / 3) + 1;
+}
+
+export function getQuarterStart(month: string): string {
+  const startMonth = (getQuarter(month) - 1) * 3 + 1;
+  return getYear(month) + '-' + String(startMonth).padStart(2, '0');
+}
+
+export function getQuarterEnd(month: string): string {
+  const endMonth = getQuarter(month) * 3;
+  return getYear(month) + '-' + String(endMonth).padStart(2, '0');
 }
 
 export function sheetForMonth(month: string): string {

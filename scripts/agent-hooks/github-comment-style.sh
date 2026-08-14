@@ -16,6 +16,11 @@ block() {
   exit 2
 }
 
+# A missing jq gets its own actionable block, distinct from the
+# malformed-payload block below.
+. "$(dirname "$0")/common.sh"
+require_jq
+
 input=$(cat)
 
 # 🤖 = U+1F916, UTF-8 F0 9F A4 96. Build it from raw bytes so the prefix check is

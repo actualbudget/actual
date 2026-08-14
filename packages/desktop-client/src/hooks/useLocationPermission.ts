@@ -4,8 +4,6 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
 import { locationService } from '#payees/location';
 
-import { useFeatureFlag } from './useFeatureFlag';
-
 export type LocationPermission = {
   isGranted: boolean;
   isPending: boolean;
@@ -13,18 +11,19 @@ export type LocationPermission = {
 };
 
 /**
- * Custom hook to manage geolocation permission status
- * Currently behind the payeeLocations feature flag
+ * Custom hook to manage geolocation permission status.
+ *
+ * Payee location functionality is only available on the mobile transaction
+ * screen, so permission is only tracked at narrow widths.
  *
  * @returns a LocationPermissions object
  */
 export function useLocationPermission(): LocationPermission {
-  const payeeLocationsEnabled = useFeatureFlag('payeeLocations');
   const { isNarrowWidth } = useResponsive();
   const [state, setState] = useState<PermissionState | null>(null);
 
   useEffect(() => {
-    if (!payeeLocationsEnabled || !isNarrowWidth) {
+    if (!isNarrowWidth) {
       setState(null);
       return;
     }
@@ -83,7 +82,7 @@ export function useLocationPermission(): LocationPermission {
         permissionStatus.removeEventListener('change', handleChange);
       }
     };
-  }, [payeeLocationsEnabled, isNarrowWidth]);
+  }, [isNarrowWidth]);
 
   const requestPermission = async () => {
     try {

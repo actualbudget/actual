@@ -52,17 +52,6 @@
           }
         ]
       }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR/scripts/agent-hooks/check-on-stop.sh\"",
-            "timeout": 600
-          }
-        ]
-      }
     ]
   }
 }

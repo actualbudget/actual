@@ -11,6 +11,7 @@ type SecondaryButtonItems = {
     | ComponentType<SVGProps<SVGElement>>
     | ComponentType<SVGProps<SVGSVGElement>>;
   onClick: () => void;
+  dataTestId?: string;
 };
 
 type SecondaryButtonsProps = {
@@ -31,6 +32,7 @@ export function SecondaryButtons({ buttons }: SecondaryButtonsProps) {
           title={item.title}
           Icon={item.Icon}
           onClick={item.onClick}
+          dataTestId={item.dataTestId}
         />
       ))}
     </View>

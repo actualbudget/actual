@@ -70,7 +70,6 @@ import APIList from './APIList';
 <APIList title="Rules" sections={[
 "ConditionOrAction",
 "Rule",
-"Payee rule",
 "getRules",
 "getPayeeRules",
 "createRule",
@@ -103,9 +102,12 @@ import APIList from './APIList';
 "getBudgets",
 "loadBudget",
 "downloadBudget",
+"importBudget",
+"exportBudget",
 "batchBudgetUpdates",
 "runQuery",
-"getIDByName"
+"getIDByName",
+"getPreferences"
 ]} />
 
 ## Types of Methods
@@ -650,10 +652,6 @@ await updateTag(id, { color: '#00ff00' });
 
 <StructType fields={objects.rule} />
 
-#### Payee Rule
-
-<StructType fields={objects.payeeRule} />
-
 #### Methods
 
 #### `getRules`
@@ -666,7 +664,7 @@ Get all rules.
 
 <Method name="getPayeeRules" args={[{ name: 'payeeId', type: "id" }]} returns="Promise<Rule[]>" />
 
-Get all rules associated with `payeeId`.
+Get all rules associated with `payeeId`. These are ordinary `Rule` objects, in the same shape `getRules` returns. A rule is associated with a payee when one of its conditions or actions has a `payee` field referencing that id, so the returned rules have no `payee_id` property.
 
 #### `createRule`
 
@@ -819,6 +817,18 @@ Load a locally cached budget file.
 
 Load a budget file. If the file exists locally, it will load from there. Otherwise, it will download the file from the server.
 
+#### `importBudget`
+
+<Method name="importBudget" args={[{ name: 'input', type: 'string | ArrayBuffer | Uint8Array' }, { name: 'options', type: "{ type?: 'actual' | 'ynab4' | 'ynab5', filename?: string }?" }]} returns="Promise<{ id: string }>" />
+
+Import a budget from an exported file and load it. `input` is either a path to the file or the raw file contents. By default the file is treated as an Actual export (a `.zip` file containing `db.sqlite` and `metadata.json`); pass `type: 'ynab4'` or `type: 'ynab5'` to import a YNAB export instead. When passing raw contents, you can supply the original file name with `filename` — some import types use it to derive the budget name. Returns the id of the imported budget, which is now the loaded budget.
+
+#### `exportBudget`
+
+<Method name="exportBudget" args={[]} returns="Promise<Uint8Array>" />
+
+Export the currently loaded budget as raw bytes in the zip format. You can save the bytes to a `.zip` file, or pass them back to `importBudget` to restore the budget later.
+
 #### `batchBudgetUpdates`
 
 <Method name="batchBudgetUpdates" args={[{ name: 'func', type: 'func' }]} returns="Promise<void>" />
@@ -842,3 +852,9 @@ get the ID for any Account, Payee, Category or Schedule by providing the corresp
 <Method name="getServerVersion" args={[]} returns="Promise<{error?: string;} | {version: string;}>" />
 
 return error or the current server versions.
+
+#### `getPreferences`
+
+<Method name="getPreferences" args={[]} returns="Promise<SyncedPrefs>" />
+
+Returns the budget's synced preferences — settings that sync across devices, such as the number format (`numberFormat`, `hideFraction`), currency (`defaultCurrencyCode`, `currencySymbolPosition`, `currencySpaceBetweenAmountAndSymbol`), date format (`dateFormat`), and first day of the week (`firstDayOfWeekIdx`). All values are strings (or `undefined` if the preference has never been set). The `SyncedPrefs` type is exported from `@actual-app/api/models`.

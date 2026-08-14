@@ -24,6 +24,7 @@ import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
 import { getLiveRange } from '#components/reports/getLiveRange';
 import {
+  asMonthSlidingTimeFrame,
   calculateTimeRange,
   getLatestRange,
   validateEnd,
@@ -184,7 +185,7 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
           <Text style={{ fontSize: 12, marginTop: 8 }}>
             <Trans>
               Queries allow you to reference filtered transaction data in your
-              formulas using QUERY('queryName') or QUERY_COUNT('queryName')
+              formulas using QUERY("queryName") or QUERY_COUNT("queryName")
             </Trans>
           </Text>
         </View>
@@ -501,6 +502,8 @@ function QueryItem({
     lastYear: t('Last year'),
     yearToDate: t('Year to date'),
     priorYearToDate: t('Prior year to date'),
+    currentQuarter: t('Current quarter'),
+    previousQuarter: t('Previous quarter'),
   } satisfies Record<TimeFrame['mode'], string>;
   const timeRangeLabel = timeRangeLabels[timeRangeMode];
   const presetTimeRangeLabels = {
@@ -509,6 +512,8 @@ function QueryItem({
     lastYear: t('Last year transactions'),
     yearToDate: t('Year to date transactions'),
     priorYearToDate: t('Prior year to date transactions'),
+    currentQuarter: t('Current quarter transactions'),
+    previousQuarter: t('Previous quarter transactions'),
   } satisfies Record<PresetTimeRangeMode, string>;
   const presetTimeRangeLabel = isPresetTimeRange
     ? presetTimeRangeLabels[timeRangeMode]
@@ -544,7 +549,7 @@ function QueryItem({
           }}
         >
           <Text style={{ fontWeight: 600, fontFamily: 'monospace' }}>
-            <Trans>QUERY('{queryName}')</Trans>
+            <Trans>QUERY("{queryName}")</Trans>
           </Text>
         </View>
         <View
@@ -669,11 +674,13 @@ function QueryItem({
             onPress={() => {
               const newMode =
                 timeRangeMode === 'static' ? 'sliding-window' : 'static';
-              const [newStart, newEnd] = calculateTimeRange({
-                start: startDate,
-                end: endDate,
-                mode: newMode,
-              });
+              const [newStart, newEnd] = calculateTimeRange(
+                asMonthSlidingTimeFrame({
+                  start: startDate,
+                  end: endDate,
+                  mode: newMode,
+                }),
+              );
 
               setStartDate(newStart);
               setEndDate(newEnd);
@@ -782,6 +789,26 @@ function QueryItem({
                     mode = 'priorYearToDate';
                     break;
                   }
+                  case 'current-quarter': {
+                    [start, end] = getLiveRange(
+                      'Current quarter',
+                      _earliestTransaction,
+                      _latestTransaction,
+                      false,
+                    );
+                    mode = 'currentQuarter';
+                    break;
+                  }
+                  case 'previous-quarter': {
+                    [start, end] = getLiveRange(
+                      'Previous quarter',
+                      _earliestTransaction,
+                      _latestTransaction,
+                      false,
+                    );
+                    mode = 'previousQuarter';
+                    break;
+                  }
                   case 'all-time': {
                     [start, end] = getLiveRange(
                       'All time',
@@ -820,6 +847,8 @@ function QueryItem({
                   name: 'prior-year-to-date',
                   text: t('Prior year to date'),
                 },
+                { name: 'current-quarter', text: t('Current quarter') },
+                { name: 'previous-quarter', text: t('Previous quarter') },
                 { name: 'all-time', text: t('All time') },
               ]}
             />

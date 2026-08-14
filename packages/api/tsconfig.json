@@ -30,13 +30,15 @@
       "path": "../crdt"
     }
   ],
-  "include": ["."],
+  "include": [".", "package.json"],
   "exclude": [
     "**/node_modules/*",
     "dist",
     "@types",
     "e2e",
     "*.config.ts",
-    "*.config.mts"
+    "*.config.mts",
+    "app/bundle.*",
+    "app/stats.json"
   ]
 }

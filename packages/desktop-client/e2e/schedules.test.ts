@@ -85,6 +85,99 @@ test.describe('Schedules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('shows a scheduled split transfer in its destination account', async () => {
+    await page.evaluate(async () => {
+      const $send = (
+        window as unknown as {
+          $send: <T>(type: string, args?: unknown) => Promise<T>;
+        }
+      ).$send;
+      const query = <T>(
+        table: string,
+        filterExpressions: unknown[],
+        selectExpressions: string[],
+      ) =>
+        $send<{ data: T[] }>('query', {
+          table,
+          tableOptions: {},
+          filterExpressions,
+          selectExpressions,
+          groupExpressions: [],
+          orderExpressions: [],
+          calculation: false,
+          rawMode: false,
+          withDead: false,
+          validateRefs: true,
+          limit: null,
+          offset: null,
+        });
+
+      const {
+        data: [destinationAccount],
+      } = await query<{ id: string }>(
+        'accounts',
+        [{ name: 'Ally Savings' }],
+        ['id'],
+      );
+      const {
+        data: [destinationPayee],
+      } = await query<{ id: string }>(
+        'payees',
+        [{ transfer_acct: destinationAccount.id }],
+        ['id'],
+      );
+      const {
+        data: [schedule],
+      } = await query<{ rule: string }>(
+        'schedules',
+        [{ name: 'Phone bills' }],
+        ['rule'],
+      );
+      const rule = await $send<{
+        actions: unknown[];
+        conditions: unknown[];
+        conditionsOp: 'and' | 'or';
+        id: string;
+        stage: 'pre' | 'post' | null;
+      }>('rule-get', { id: schedule.rule });
+
+      await $send('rule-update', {
+        ...rule,
+        actions: [
+          ...rule.actions,
+          {
+            op: 'set-split-amount',
+            value: -7_000,
+            options: { splitIndex: 1, method: 'fixed-amount' },
+          },
+          {
+            op: 'set-split-amount',
+            value: null,
+            options: { splitIndex: 2, method: 'remainder' },
+          },
+          {
+            op: 'set',
+            field: 'payee',
+            value: destinationPayee.id,
+            options: { splitIndex: 2 },
+          },
+        ],
+      });
+    });
+
+    const destinationAccountPage =
+      await navigation.goToAccountPage('Ally Savings');
+    const previewTransfer = destinationAccountPage.transactionTableRow.filter({
+      has: page.getByTestId('schedule-icon'),
+      hasText: 'Bank of America',
+    });
+
+    await expect(previewTransfer).toHaveCount(1);
+    await expect(previewTransfer.getByTestId('category')).toContainText('Due');
+    await expect(previewTransfer.getByTestId('debit')).toHaveText('');
+    await expect(previewTransfer.getByTestId('credit')).toHaveText('50.00');
+  });
+
   test('creates two new schedules, posts both transactions and later completes one', async () => {
     // Adding two schedules with the same payee and account and amount, mimicking two different subscriptions
     let scheduleEditModal = await schedulesPage.addNewSchedule();

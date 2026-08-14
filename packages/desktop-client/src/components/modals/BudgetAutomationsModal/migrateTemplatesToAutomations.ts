@@ -1,4 +1,8 @@
-import { dayFromDate, firstDayOfMonth } from '@actual-app/core/shared/months';
+import {
+  currentDate,
+  dayFromDate,
+  firstDayOfMonth,
+} from '@actual-app/core/shared/months';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 import type {
   ScheduleTemplate,
@@ -129,7 +133,7 @@ export function migrateTemplatesToAutomations(
               type: 'periodic',
               amount: contribution,
               period: { period: 'month', amount: 1 },
-              starting: dayFromDate(firstDayOfMonth(new Date())),
+              starting: dayFromDate(firstDayOfMonth(currentDate())),
               directive: 'template',
               priority: template.priority,
               ...(description ? { description } : {}),
