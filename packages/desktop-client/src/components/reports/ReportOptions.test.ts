@@ -15,28 +15,23 @@ describe('getIntervalFormat', () => {
   describe('Daily and Weekly intervals', () => {
     // These two are the only intervals whose label encodes day/month ordering,
     // so they are the only ones the preference can disagree with.
-    it.each([
-      ['MM/dd/yyyy', 'MM/dd/yy'],
-      ['dd/MM/yyyy', 'dd/MM/yy'],
-      ['yyyy-MM-dd', 'yy-MM-dd'],
-      ['MM.dd.yyyy', 'MM.dd.yy'],
-      ['dd.MM.yyyy', 'dd.MM.yy'],
-      ['dd-MM-yyyy', 'dd-MM-yy'],
-    ])('derives %s into %s', (dateFormat, expected) => {
-      expect(getIntervalFormat('Daily', dateFormat)).toBe(expected);
-      expect(getIntervalFormat('Weekly', dateFormat)).toBe(expected);
+    it.each(DATE_FORMATS)('uses %s exactly as it is set', dateFormat => {
+      expect(getIntervalFormat('Daily', dateFormat)).toBe(dateFormat);
+      expect(getIntervalFormat('Weekly', dateFormat)).toBe(dateFormat);
     });
 
-    it('keeps the two-digit year the axis labels already use', () => {
-      // Long years would widen every tick label; only the ordering is at issue.
+    it('keeps the four-digit year the preference asks for', () => {
+      // An earlier revision shortened `yyyy` to `yy` to keep tick labels narrow.
+      // That was reversed in review: a preference of `yyyy` shows as `yyyy`,
+      // even though it makes the labels wider.
       for (const dateFormat of DATE_FORMATS) {
-        expect(getIntervalFormat('Daily', dateFormat)).not.toContain('yyyy');
+        expect(getIntervalFormat('Daily', dateFormat)).toContain('yyyy');
       }
     });
 
-    it('falls back to the previous hardcoded format when no preference is set', () => {
-      expect(getIntervalFormat('Daily', undefined)).toBe('yy-MM-dd');
-      expect(getIntervalFormat('Weekly', undefined)).toBe('yy-MM-dd');
+    it('falls back to an ISO-style format when no preference is set', () => {
+      expect(getIntervalFormat('Daily', undefined)).toBe('yyyy-MM-dd');
+      expect(getIntervalFormat('Weekly', undefined)).toBe('yyyy-MM-dd');
     });
   });
 
