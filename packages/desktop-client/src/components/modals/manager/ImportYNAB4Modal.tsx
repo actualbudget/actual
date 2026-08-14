@@ -11,6 +11,7 @@ import { View } from '@actual-app/components/view';
 
 import { importBudget } from '#budgetfiles/budgetfilesSlice';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { ImportProgress } from '#components/modals/manager/ImportProgress';
 import { useNavigate } from '#hooks/useNavigate';
 import { useDispatch } from '#redux';
 
@@ -92,6 +93,7 @@ export function ImportYNAB4Modal() {
                   <Trans>Select zip file...</Trans>
                 </ButtonWithLoading>
               </View>
+              {importing && <ImportProgress />}
             </View>
           </View>
         </>

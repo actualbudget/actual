@@ -9,6 +9,8 @@ import { q } from '#shared/query';
 import { groupBy, sortByKey } from '#shared/util';
 import type { RecurConfig, RecurPattern, RuleEntity } from '#types/models';
 
+import { runImportSteps } from './progress';
+import type { ImportTick } from './progress';
 import type {
   Budget,
   Payee,
@@ -267,7 +269,11 @@ function buildRuleUpdate(
   };
 }
 
-function importAccounts(data: Budget, entityIdMap: Map<string, string>) {
+function importAccounts(
+  data: Budget,
+  entityIdMap: Map<string, string>,
+  tick: ImportTick,
+) {
   return Promise.all(
     data.accounts.map(async account => {
       if (!account.deleted) {
@@ -279,6 +285,7 @@ function importAccounts(data: Budget, entityIdMap: Map<string, string>) {
           },
         });
         entityIdMap.set(account.id, id);
+        tick();
       }
     }),
   );
@@ -287,6 +294,7 @@ function importAccounts(data: Budget, entityIdMap: Map<string, string>) {
 async function importCategories(
   data: Budget,
   entityIdMap: Map<string, string>,
+  tick: ImportTick,
 ) {
   // Hidden categories are put in its own group by YNAB,
   // so it's already handled.
@@ -390,6 +398,7 @@ async function importCategories(
         });
         groupId = createdGroup.id;
         entityIdMap.set(group.id, groupId);
+        tick();
         if (group.note) {
           void send('notes-save', {
             id: groupId,
@@ -431,6 +440,7 @@ async function importCategories(
                 hidden: cat.hidden,
               });
               entityIdMap.set(cat.id, createdCategory.id);
+              tick();
               if (cat.note) {
                 void send('notes-save', {
                   id: createdCategory.id,
@@ -445,7 +455,11 @@ async function importCategories(
   }
 }
 
-export function importPayees(data: Budget, entityIdMap: Map<string, string>) {
+export function importPayees(
+  data: Budget,
+  entityIdMap: Map<string, string>,
+  tick?: ImportTick,
+) {
   return Promise.all(
     data.payees.map(async payee => {
       if (!payee.deleted && !payee.transfer_account_id) {
@@ -453,6 +467,7 @@ export function importPayees(data: Budget, entityIdMap: Map<string, string>) {
           payee: { name: payee.name },
         });
         entityIdMap.set(payee.id, id);
+        tick?.();
       }
     }),
   );
@@ -461,6 +476,7 @@ export function importPayees(data: Budget, entityIdMap: Map<string, string>) {
 async function importPayeeLocations(
   data: Budget,
   entityIdMap: Map<string, string>,
+  tick: ImportTick,
 ) {
   // If no payee locations data provided, skip import
   if (!data?.payee_locations) {
@@ -501,6 +517,7 @@ async function importPayeeLocations(
         latitude,
         longitude,
       });
+      tick();
     } catch (error) {
       const errorMessage =
         error instanceof Error
@@ -513,10 +530,7 @@ async function importPayeeLocations(
   }
 }
 
-async function importFlagsAsTags(
-  data: Budget,
-  flagNameConflicts: Set<string>,
-): Promise<void> {
+function getTagsToCreate(data: Budget, flagNameConflicts: Set<string>) {
   const tagsToCreate = new Map<string, string | null>();
   const flaggedTransactions = getFlaggedTransactions(data);
 
@@ -549,9 +563,15 @@ async function importFlagsAsTags(
     }
   }
 
-  if (tagsToCreate.size === 0) {
-    return;
-  }
+  return tagsToCreate;
+}
+
+async function importFlagsAsTags(
+  data: Budget,
+  flagNameConflicts: Set<string>,
+  tick: ImportTick,
+): Promise<void> {
+  const tagsToCreate = getTagsToCreate(data, flagNameConflicts);
 
   await Promise.all(
     [...tagsToCreate.entries()].map(async ([tag, color]) => {
@@ -560,6 +580,7 @@ async function importFlagsAsTags(
         color,
         description: 'Imported from YNAB',
       });
+      tick();
     }),
   );
 }
@@ -568,6 +589,7 @@ export async function importTransactions(
   data: Budget,
   entityIdMap: Map<string, string>,
   flagNameConflicts: Set<string>,
+  tick?: ImportTick,
 ) {
   const payees = await send('api/payees-get');
   const categories = await send('api/categories-get');
@@ -839,6 +861,7 @@ export async function importTransactions(
         learnCategories: true,
         runTransfers: false,
       });
+      tick?.(toImport.length);
     }),
   );
 }
@@ -847,6 +870,7 @@ async function importScheduledTransactions(
   data: Budget,
   entityIdMap: Map<string, string>,
   flagNameConflicts: Set<string>,
+  tick: ImportTick,
 ) {
   const scheduledTransactions = data.scheduled_transactions;
   const scheduledSubtransactionsGrouped = groupBy(
@@ -946,6 +970,8 @@ async function importScheduledTransactions(
     if (!mappedPayeeId) {
       continue;
     }
+
+    tick();
 
     const scheduleId = await createScheduleWithUniqueName({
       name: scheduled.memo,
@@ -1090,7 +1116,11 @@ async function importScheduledTransactions(
   }
 }
 
-async function importBudgets(data: Budget, entityIdMap: Map<string, string>) {
+async function importBudgets(
+  data: Budget,
+  entityIdMap: Map<string, string>,
+  tick: ImportTick,
+) {
   // There should be info in the docs to deal with
   // no credit card category and how YNAB and Actual
   // handle differently the amount To be Budgeted
@@ -1135,6 +1165,7 @@ async function importBudgets(data: Budget, entityIdMap: Map<string, string>) {
           });
         }),
       );
+      tick();
     }
   } finally {
     await send('api/batch-budget-end');
@@ -1165,29 +1196,54 @@ export async function doImport(data: Budget) {
   const entityIdMap = new Map<string, string>();
   const flagNameConflicts = getFlagNameConflicts(data);
 
-  logger.log('Importing Accounts...');
-  await importAccounts(data, entityIdMap);
+  await runImportSteps([
+    {
+      step: 'accounts',
+      total: countLive(data.accounts),
+      run: tick => importAccounts(data, entityIdMap, tick),
+    },
+    {
+      step: 'categories',
+      total: countLive(data.category_groups) + countLive(data.categories),
+      run: tick => importCategories(data, entityIdMap, tick),
+    },
+    {
+      step: 'payees',
+      total: data.payees.filter(
+        payee => !payee.deleted && !payee.transfer_account_id,
+      ).length,
+      run: tick => importPayees(data, entityIdMap, tick),
+    },
+    {
+      step: 'payee-locations',
+      total: countLive(data.payee_locations ?? []),
+      run: tick => importPayeeLocations(data, entityIdMap, tick),
+    },
+    {
+      step: 'tags',
+      total: getTagsToCreate(data, flagNameConflicts).size,
+      run: tick => importFlagsAsTags(data, flagNameConflicts, tick),
+    },
+    {
+      step: 'transactions',
+      total: data.transactions.length,
+      run: tick =>
+        importTransactions(data, entityIdMap, flagNameConflicts, tick),
+    },
+    {
+      step: 'scheduled-transactions',
+      total: data.scheduled_transactions.length,
+      run: tick =>
+        importScheduledTransactions(data, entityIdMap, flagNameConflicts, tick),
+    },
+    {
+      step: 'budgets',
+      total: data.months.length,
+      run: tick => importBudgets(data, entityIdMap, tick),
+    },
+  ]);
+}
 
-  logger.log('Importing Categories...');
-  await importCategories(data, entityIdMap);
-
-  logger.log('Importing Payees...');
-  await importPayees(data, entityIdMap);
-
-  logger.log('Importing Payee Locations...');
-  await importPayeeLocations(data, entityIdMap);
-
-  logger.log('Importing Tags...');
-  await importFlagsAsTags(data, flagNameConflicts);
-
-  logger.log('Importing Transactions...');
-  await importTransactions(data, entityIdMap, flagNameConflicts);
-
-  logger.log('Importing Scheduled Transactions...');
-  await importScheduledTransactions(data, entityIdMap, flagNameConflicts);
-
-  logger.log('Importing Budgets...');
-  await importBudgets(data, entityIdMap);
-
-  logger.log('Setting up...');
+function countLive(entities: { deleted?: boolean }[]) {
+  return entities.filter(entity => !entity.deleted).length;
 }
