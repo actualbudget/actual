@@ -828,24 +828,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       const createSchedule = async () => {
         try {
           await createSingleTimeScheduleFromTransaction(transactionForSchedule);
-          if (
-            !isAdding &&
-            unserializedTransaction.id &&
-            !unserializedTransaction.id.startsWith('temp')
-          ) {
-            await send('transaction-delete', {
-              id: unserializedTransaction.id,
-            });
-          }
-          dispatch(
-            addNotification({
-              notification: {
-                type: 'message',
-                message: t('Schedule created successfully'),
-              },
-            }),
-          );
-          void navigate(-1);
         } catch {
           dispatch(
             addNotification({
@@ -855,7 +837,43 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               },
             }),
           );
+          return;
         }
+
+        try {
+          if (
+            !isAdding &&
+            unserializedTransaction.id &&
+            !unserializedTransaction.id.startsWith('temp')
+          ) {
+            await send('transaction-delete', {
+              id: unserializedTransaction.id,
+            });
+          }
+        } catch {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: t(
+                  'Schedule created, but the original transaction could not be deleted',
+                ),
+              },
+            }),
+          );
+          void navigate(-1);
+          return;
+        }
+
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'message',
+              message: t('Schedule created successfully'),
+            },
+          }),
+        );
+        void navigate(-1);
       };
 
       const { isBeyondWindow, daysUntilTransaction, upcomingDays } =

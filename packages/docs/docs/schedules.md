@@ -117,7 +117,7 @@ The transaction is not posted to your register. Instead, it becomes an upcoming 
 The **Schedule** button only appears for future-dated transactions. For transactions dated today or earlier, it is hidden. As a shortcut, you can press **Ctrl+Shift+Enter** (**Cmd+Shift+Enter** on macOS) in the new transaction row instead of clicking **Schedule**.
 :::
 
-On mobile, a **Schedule** button appears in the transaction editor for future-dated transactions to use the same behavior.
+On mobile, a **Schedule** button also appears in the transaction editor when you add a new future-dated transaction or edit an existing future-dated transaction. Converting an existing transaction creates the schedule and then deletes the original transaction.
 
 ## Let Actual Find Scheduled Transactions
 

@@ -3410,6 +3410,10 @@ export const TransactionTable = forwardRef(
     function onCheckNewEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {
         if ((e.metaKey || e.ctrlKey) && e.shiftKey) {
+          const current = latestState.current.newTransactions[0];
+          if (!current || !isFutureTransaction(current)) {
+            return;
+          }
           e.preventDefault();
           e.stopPropagation();
           afterSave(() => {
