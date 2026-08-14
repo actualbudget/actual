@@ -33,7 +33,10 @@ import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { buildBudgetAnalysisCsv } from '#components/reports/spreadsheets/budget-analysis-export';
-import { createBudgetAnalysisSpreadsheet } from '#components/reports/spreadsheets/budget-analysis-spreadsheet';
+import {
+  createBudgetAnalysisSpreadsheet,
+  getLastSelectableMonth,
+} from '#components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
@@ -224,12 +227,12 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
       }
 
       // Extend the selectable range to December of next year so users can
-      // plan ahead (e.g. June 2026 → December 2027).
-      const futureYear = String(Number(currentMonth.slice(0, 4)) + 1);
-      const futureMonth = `${futureYear}-12`;
+      // plan ahead (e.g. June 2026 → December 2027), without hiding
+      // transactions dated beyond that.
+      const lastMonth = getLastSelectableMonth(currentMonth, latestMonth);
 
       const allMonthsData = monthUtils
-        .rangeInclusive(earliestMonth, futureMonth)
+        .rangeInclusive(earliestMonth, lastMonth)
         .map(month => ({
           name: month,
           pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
