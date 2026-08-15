@@ -3,4 +3,4 @@ category: Enhancements
 authors: [zannis]
 ---
 
-Fit the summary report's formula on narrow screens instead of letting it overflow
+Fit the summary report on narrow screens
