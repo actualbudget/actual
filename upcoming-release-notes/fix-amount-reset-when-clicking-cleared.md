@@ -3,4 +3,4 @@ category: Bugfix
 authors: [ParaPsychic]
 ---
 
-Fix the amount resetting to zero when clicking the cleared icon while the amount textfield still has focus.
+Fix an issue where an entered amount reset to zero when the Cleared icon was clicked while the amount field was focused.
