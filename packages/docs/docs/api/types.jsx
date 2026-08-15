@@ -440,8 +440,8 @@ export const objects = {
       required: true,
       description: (
         <span>
-          Must be one of <code>pre</code>, <code>default</code>, or{' '}
-          <code>post</code>.
+          Must be one of <code>pre</code>, <code>post</code>, or{' '}
+          <code>null</code> (the default stage when none is chosen).
         </span>
       ),
     },
