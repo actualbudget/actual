@@ -44,6 +44,24 @@ type QueryConfig = {
   timeFrame?: TimeFrame;
 };
 
+export function normalizeMonthRangeForPicker(start: string, end: string) {
+  return [monthUtils.getMonth(start), monthUtils.getMonth(end)] as const;
+}
+
+export function shouldIgnoreMonthPickerNoop(
+  startDate: string,
+  endDate: string,
+  nextStart: string,
+  nextEnd: string,
+) {
+  const [currentStartMonth, currentEndMonth] = normalizeMonthRangeForPicker(
+    startDate,
+    endDate,
+  );
+
+  return currentStartMonth === nextStart && currentEndMonth === nextEnd;
+}
+
 type PresetTimeRangeMode = Exclude<
   TimeFrame['mode'],
   'sliding-window' | 'static'
@@ -486,9 +504,13 @@ function QueryItem({
     ? presetTimeRangeLabels[timeRangeMode]
     : null;
 
-  const formatDayLabel = useCallback(
-    (date: string) => monthUtils.format(date, dateFormat),
-    [dateFormat],
+  function formatDayLabel(date: string) {
+    return monthUtils.format(date, dateFormat);
+  }
+
+  const [pickerStartDate, pickerEndDate] = normalizeMonthRangeForPicker(
+    startDate,
+    endDate,
   );
 
   const presets: DateRangePreset[] = buildDateRangePresets({
@@ -688,8 +710,8 @@ function QueryItem({
             {timeRangeLabel}
           </Button>
           <DateRangePicker
-            start={startDate}
-            end={endDate}
+            start={pickerStartDate}
+            end={pickerEndDate}
             minDate={earliestMonth}
             maxDate={latestMonth}
             granularities={['month']}
@@ -709,6 +731,17 @@ function QueryItem({
             }}
             presets={presets}
             onChangeDates={(newStart, newEnd) => {
+              if (
+                shouldIgnoreMonthPickerNoop(
+                  startDate,
+                  endDate,
+                  newStart,
+                  newEnd,
+                )
+              ) {
+                return;
+              }
+
               setStartDate(newStart);
               setEndDate(newEnd);
               sendUpdate(
