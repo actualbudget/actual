@@ -18,6 +18,9 @@ const beforePackHook = async (context: AfterPackContext) => {
   }
 
   try {
+    // needed for better-sqlite3 because prebuilts are needed for each arch
+    process.env.npm_config_force_build = '1';
+
     await rebuild({
       arch,
       buildPath,
