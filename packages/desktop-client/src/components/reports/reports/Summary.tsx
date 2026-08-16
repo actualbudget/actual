@@ -319,6 +319,14 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     return format(Math.round(value), 'financial');
   };
 
+  const fractionNumberStyle = {
+    fontSize: isNarrowWidth ? '32px' : '50px',
+    width: '100%',
+    textAlign: 'center',
+  } satisfies CSSProperties;
+  const fractionRuleMargin = isNarrowWidth ? 12 : 32;
+  const totalWidth = isNarrowWidth ? '100%' : '250px';
+
   return (
     <Page
       header={
@@ -462,13 +470,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                 <SvgEquals width={50} style={{ marginLeft: 56 }} />
               )}
               <View style={{ padding: 16 }}>
-                <Text
-                  style={{
-                    fontSize: isNarrowWidth ? '32px' : '50px',
-                    width: '100%',
-                    textAlign: 'center',
-                  }}
-                >
+                <Text style={fractionNumberStyle}>
                   <PrivacyFilter>
                     <FinancialText>
                       {format(data?.dividend ?? 0, 'financial')}
@@ -478,19 +480,13 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                 <div
                   style={{
                     width: '100%',
-                    marginTop: isNarrowWidth ? 12 : 32,
-                    marginBottom: isNarrowWidth ? 12 : 32,
+                    marginTop: fractionRuleMargin,
+                    marginBottom: fractionRuleMargin,
                     borderTop: '2px solid',
                     borderBottom: '2px solid',
                   }}
                 />
-                <Text
-                  style={{
-                    fontSize: isNarrowWidth ? '32px' : '50px',
-                    width: '100%',
-                    textAlign: 'center',
-                  }}
-                >
+                <Text style={fractionNumberStyle}>
                   <PrivacyFilter>
                     {getDivisorFormatted(content.type, data?.divisor ?? 0)}
                   </PrivacyFilter>
@@ -505,8 +501,8 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             style={{
               flexGrow: isNarrowWidth ? 0 : 1,
               textAlign: 'center',
-              width: isNarrowWidth ? '100%' : '250px',
-              maxWidth: isNarrowWidth ? '100%' : '250px',
+              width: totalWidth,
+              maxWidth: totalWidth,
               justifyItems: 'center',
               alignItems: 'center',
               marginLeft: isNarrowWidth ? 0 : 16,
@@ -617,6 +613,16 @@ function SumWithRange({
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const sigmaSize = isNarrowWidth ? 34 : 50;
+  // The range labels hang outside the sigma column; `nowrap` keeps them off the glyph.
+  const rangeLabelStyle = {
+    position: 'absolute',
+    right: -30,
+    fontSize: isNarrowWidth ? '11px' : undefined,
+    whiteSpace: 'nowrap',
+  } satisfies CSSProperties;
+  const rangeLabelOffset = isNarrowWidth ? -14 : -20;
+  const sigmaColumnWidth = isNarrowWidth ? sigmaSize : 70;
+  const conditionsMargin = isNarrowWidth ? 8 : 16;
 
   return (
     <View
@@ -627,9 +633,7 @@ function SumWithRange({
         alignItems: 'center',
         position: 'relative',
         display: 'grid',
-        gridTemplateColumns: isNarrowWidth
-          ? `${sigmaSize}px 15px 1fr 15px`
-          : '70px 15px 1fr 15px',
+        gridTemplateColumns: `${sigmaColumnWidth}px 15px 1fr 15px`,
       }}
     >
       <View
@@ -640,33 +644,17 @@ function SumWithRange({
         }}
       >
         <SvgSum width={sigmaSize} height={sigmaSize} />
-        <Text
-          style={{
-            position: 'absolute',
-            right: -30,
-            top: isNarrowWidth ? -14 : -20,
-            fontSize: isNarrowWidth ? '11px' : undefined,
-          }}
-        >
-          {to}
-        </Text>
-        <Text
-          style={{
-            position: 'absolute',
-            right: -30,
-            bottom: isNarrowWidth ? -14 : -20,
-            fontSize: isNarrowWidth ? '11px' : undefined,
-          }}
-        >
+        <Text style={{ ...rangeLabelStyle, top: rangeLabelOffset }}>{to}</Text>
+        <Text style={{ ...rangeLabelStyle, bottom: rangeLabelOffset }}>
           {from}
         </Text>
       </View>
       <SvgOpenParenthesis width={15} style={{ height: '100%' }} />
       <View
         style={{
-          marginLeft: isNarrowWidth ? 8 : 16,
+          marginLeft: conditionsMargin,
           maxWidth: isNarrowWidth ? '150px' : '220px',
-          marginRight: isNarrowWidth ? 8 : 16,
+          marginRight: conditionsMargin,
         }}
       >
         {(filterObject.conditions?.length ?? 0) === 0 ? (
