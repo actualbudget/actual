@@ -37,9 +37,8 @@ describe('QueryManager month-only DateRangePicker helpers', () => {
   });
 
   it('normalizes month-only picker selection to day-shaped query bounds', () => {
-    expect(normalizeMonthPickerSelectionForQuery('2026-02', '2026-04')).toEqual([
-      '2026-02-01',
-      '2026-04-30',
-    ]);
+    expect(normalizeMonthPickerSelectionForQuery('2026-02', '2026-04')).toEqual(
+      ['2026-02-01', '2026-04-30'],
+    );
   });
 });

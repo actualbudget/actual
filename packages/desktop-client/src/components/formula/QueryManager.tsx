@@ -55,10 +55,10 @@ export function normalizeMonthPickerSelectionForQuery(
   start: string,
   end: string,
 ) {
-  return [normalizeQueryTimeFrameStart(start), normalizeQueryTimeFrameEnd(end)] satisfies [
-    string,
-    string,
-  ];
+  return [
+    normalizeQueryTimeFrameStart(start),
+    normalizeQueryTimeFrameEnd(end),
+  ] satisfies [string, string];
 }
 
 export function shouldIgnoreMonthPickerNoop(
