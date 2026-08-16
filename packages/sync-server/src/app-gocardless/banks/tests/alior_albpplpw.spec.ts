@@ -48,7 +48,7 @@ describe('alior_albpplpw', () => {
         debtorName: 'JOHN EXAMPLE',
         debtorAccount: { iban: 'PL00000000000000000987654321' },
         remittanceInformationUnstructured:
-          'Transakcja kartą debetową, ROSSMANN SP. Z O.O. 01',
+          'Transakcja kartą debetową, ROSSMANN 1234 WARSZAWA',
       };
 
       const normalizedTransaction = AliorAlbpplpw.normalizeTransaction(

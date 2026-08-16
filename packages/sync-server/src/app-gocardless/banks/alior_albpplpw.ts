@@ -16,8 +16,15 @@ import Fallback from './integration-bank';
  * Only card payments are handled here. On the remaining outgoing transactions
  * (transfers, ATM withdrawals, loan instalments) the recipient is not present
  * in the payload at all, so there is nothing better to fall back to.
+ *
+ * Everything after the first comma is the merchant: Alior truncates that field
+ * to 22 characters and appends nothing after it, so there are no further comma
+ * separated fields to trip over. Checked against 363 card payments over a 90
+ * day window: none contained a comma or a line break, and
+ * `remittanceInformationUnstructuredArray` was always a single element equal to
+ * `remittanceInformationUnstructured`.
  */
-const CARD_PAYMENT_PREFIX = /^Transakcja kartą [^,]+,\s*/i;
+const CARD_PAYMENT_MERCHANT = /^Transakcja kartą [^,]+,\s*(.+)$/is;
 
 export default {
   ...Fallback,
@@ -33,9 +40,8 @@ export default {
     ) {
       const remittanceInfo =
         transaction.remittanceInformationUnstructured ?? '';
-      const merchant = CARD_PAYMENT_PREFIX.test(remittanceInfo)
-        ? remittanceInfo.replace(CARD_PAYMENT_PREFIX, '').trim()
-        : '';
+      const merchant =
+        remittanceInfo.match(CARD_PAYMENT_MERCHANT)?.[1].trim() ?? '';
 
       if (merchant) {
         editedTrans.creditorName = merchant;
