@@ -45,7 +45,20 @@ type QueryConfig = {
 };
 
 export function normalizeMonthRangeForPicker(start: string, end: string) {
-  return [monthUtils.getMonth(start), monthUtils.getMonth(end)] as const;
+  return [monthUtils.getMonth(start), monthUtils.getMonth(end)] satisfies [
+    string,
+    string,
+  ];
+}
+
+export function normalizeMonthPickerSelectionForQuery(
+  start: string,
+  end: string,
+) {
+  return [normalizeQueryTimeFrameStart(start), normalizeQueryTimeFrameEnd(end)] satisfies [
+    string,
+    string,
+  ];
 }
 
 export function shouldIgnoreMonthPickerNoop(
@@ -742,13 +755,16 @@ function QueryItem({
                 return;
               }
 
-              setStartDate(newStart);
-              setEndDate(newEnd);
+              const [normalizedStart, normalizedEnd] =
+                normalizeMonthPickerSelectionForQuery(newStart, newEnd);
+
+              setStartDate(normalizedStart);
+              setEndDate(normalizedEnd);
               sendUpdate(
                 filters.conditions,
                 filters.conditionsOp,
-                newStart,
-                newEnd,
+                normalizedStart,
+                normalizedEnd,
                 'static',
               );
             }}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  normalizeMonthPickerSelectionForQuery,
   normalizeMonthRangeForPicker,
   shouldIgnoreMonthPickerNoop,
 } from './QueryManager';
@@ -33,5 +34,12 @@ describe('QueryManager month-only DateRangePicker helpers', () => {
         '2026-03',
       ),
     ).toBe(false);
+  });
+
+  it('normalizes month-only picker selection to day-shaped query bounds', () => {
+    expect(normalizeMonthPickerSelectionForQuery('2026-02', '2026-04')).toEqual([
+      '2026-02-01',
+      '2026-04-30',
+    ]);
   });
 });
