@@ -270,6 +270,7 @@ export type CategoryMonthProps = {
   month: string;
   category: CategoryEntity;
   editing: boolean;
+  active?: boolean;
   isLast?: boolean;
   onEdit: (id: CategoryEntity['id'] | null, month?: string) => void;
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
