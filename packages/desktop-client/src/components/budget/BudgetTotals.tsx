@@ -1,5 +1,6 @@
 import React, { memo, useRef, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import type { Ref } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
@@ -14,6 +15,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { Search } from '#components/common/Search';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
 import { RenderMonths } from './RenderMonths';
@@ -25,12 +27,18 @@ type BudgetTotalsProps = {
   toggleHiddenCategories: () => void;
   expandAllCategories: () => void;
   collapseAllCategories: () => void;
+  searchText: string;
+  onSearchTextChange: (text: string) => void;
+  searchInputRef: Ref<HTMLInputElement>;
 };
 
 export const BudgetTotals = memo(function BudgetTotals({
   toggleHiddenCategories,
   expandAllCategories,
   collapseAllCategories,
+  searchText,
+  onSearchTextChange,
+  searchInputRef,
 }: BudgetTotalsProps) {
   const { t } = useTranslation();
   const [categoryExpandedStatePref, setCategoryExpandedStatePref] =
@@ -128,8 +136,15 @@ export const BudgetTotals = memo(function BudgetTotals({
             />
           )}
         </Button>
-        <View style={{ flexGrow: '1' }}>
-          <Trans>Category</Trans>
+        <View style={{ flexGrow: 1, marginRight: 5 }}>
+          <Search
+            ref={searchInputRef}
+            value={searchText}
+            onChange={onSearchTextChange}
+            placeholder={t('Search categories')}
+            width="100%"
+            height={24}
+          />
         </View>
         <Button
           ref={triggerRef}

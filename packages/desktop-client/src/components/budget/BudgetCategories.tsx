@@ -42,6 +42,7 @@ type LocalDragState =
 
 type BudgetCategoriesProps = {
   categoryGroups: CategoryGroupEntity[];
+  searchText: string;
   editingCell: { id: string; cell: string } | null;
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
   onShowActivity: (id: CategoryEntity['id'], month?: string) => void;
@@ -63,6 +64,7 @@ type BudgetCategoriesProps = {
 export const BudgetCategories = memo<BudgetCategoriesProps>(
   ({
     categoryGroups,
+    searchText,
     editingCell,
     onBudgetAction,
     onShowActivity,
@@ -91,6 +93,11 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     const items: BudgetItem[] = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
 
+      const normalizedSearch = searchText.trim().toLowerCase();
+      const isSearching = normalizedSearch !== '';
+      const matchesSearch = (name: string) =>
+        name.toLowerCase().includes(normalizedSearch);
+
       let items: BudgetItem[] = Array.prototype.concat.apply(
         [],
         expenseGroups.map(group => {
@@ -98,24 +105,36 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
             return [];
           }
 
-          const groupCategories = group.categories?.filter(
+          let groupCategories = group.categories?.filter(
             cat => showHiddenCategories || !cat.hidden,
           );
+
+          if (isSearching && !matchesSearch(group.name)) {
+            groupCategories = groupCategories?.filter(cat =>
+              matchesSearch(cat.name),
+            );
+            // Hide the whole group when neither it nor any of its
+            // categories match the search.
+            if (!groupCategories || groupCategories.length === 0) {
+              return [];
+            }
+          }
 
           const items: BudgetItem[] = [
             { type: 'expense-group', value: { ...group } },
           ];
 
-          if (newCategoryForGroup === group.id) {
+          if (!isSearching && newCategoryForGroup === group.id) {
             items.push({ type: 'new-category' });
           }
 
+          // Force-expand groups while searching so matches are visible.
+          const collapsed =
+            !isSearching && collapsedGroupIds.includes(group.id);
+
           return [
             ...items,
-            ...(collapsedGroupIds.includes(group.id)
-              ? []
-              : groupCategories || []
-            ).map(
+            ...(collapsed ? [] : groupCategories || []).map(
               (cat): BudgetItem => ({
                 type: 'expense-category',
                 value: cat,
@@ -126,40 +145,57 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
         }),
       );
 
-      if (isAddingGroup) {
+      if (isAddingGroup && !isSearching) {
         items.push({ type: 'new-group' });
       }
 
       if (incomeGroup) {
-        const incomeCategoryItems: BudgetItem[] = [
-          { type: 'income-separator' },
-          { type: 'income-group', value: incomeGroup },
-        ];
-
-        if (newCategoryForGroup === incomeGroup.id) {
-          incomeCategoryItems.push({ type: 'new-category' });
-        }
-
-        incomeCategoryItems.push(
-          ...(collapsedGroupIds.includes(incomeGroup.id)
-            ? []
-            : incomeGroup.categories?.filter(
-                cat => showHiddenCategories || !cat.hidden,
-              ) || []
-          ).map(
-            (cat): BudgetItem => ({
-              type: 'income-category',
-              value: cat,
-            }),
-          ),
+        let incomeCategories = incomeGroup.categories?.filter(
+          cat => showHiddenCategories || !cat.hidden,
         );
 
-        items = items.concat(incomeCategoryItems);
+        const includeIncomeGroup =
+          !isSearching ||
+          matchesSearch(incomeGroup.name) ||
+          (incomeCategories?.some(cat => matchesSearch(cat.name)) ?? false);
+
+        if (includeIncomeGroup) {
+          if (isSearching && !matchesSearch(incomeGroup.name)) {
+            incomeCategories = incomeCategories?.filter(cat =>
+              matchesSearch(cat.name),
+            );
+          }
+
+          const incomeCategoryItems: BudgetItem[] = [
+            { type: 'income-separator' },
+            { type: 'income-group', value: incomeGroup },
+          ];
+
+          if (!isSearching && newCategoryForGroup === incomeGroup.id) {
+            incomeCategoryItems.push({ type: 'new-category' });
+          }
+
+          // Force-expand groups while searching so matches are visible.
+          const collapsed =
+            !isSearching && collapsedGroupIds.includes(incomeGroup.id);
+
+          incomeCategoryItems.push(
+            ...(collapsed ? [] : incomeCategories || []).map(
+              (cat): BudgetItem => ({
+                type: 'income-category',
+                value: cat,
+              }),
+            ),
+          );
+
+          items = items.concat(incomeCategoryItems);
+        }
       }
 
       return items;
     }, [
       categoryGroups,
+      searchText,
       collapsedGroupIds,
       newCategoryForGroup,
       isAddingGroup,

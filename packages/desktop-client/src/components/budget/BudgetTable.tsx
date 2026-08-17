@@ -1,5 +1,6 @@
 import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -89,8 +90,30 @@ export function BudgetTable(props: BudgetTableProps) {
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
+  const [searchText, setSearchText] = useState('');
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useHotkeys(
+    'ctrl+f, cmd+f, meta+f',
+    e => {
+      if (searchInputRef.current) {
+        if (document.activeElement === searchInputRef.current) {
+          searchInputRef.current.blur();
+        } else {
+          e.preventDefault();
+          searchInputRef.current.focus();
+        }
+      }
+    },
+    {
+      enableOnFormTags: true,
+      preventDefault: false,
+      scopes: ['app'],
+    },
+    [searchInputRef],
+  );
 
   useLayoutEffect(() => {
     const savedScrollPosition = sessionStorage.getItem(
@@ -293,6 +316,9 @@ export function BudgetTable(props: BudgetTableProps) {
           toggleHiddenCategories={toggleHiddenCategories}
           expandAllCategories={expandAllCategories}
           collapseAllCategories={collapseAllCategories}
+          searchText={searchText}
+          onSearchTextChange={setSearchText}
+          searchInputRef={searchInputRef}
         />
         <View
           ref={scrollContainerRef}
@@ -314,6 +340,7 @@ export function BudgetTable(props: BudgetTableProps) {
             <SchedulesProvider query={schedulesQuery}>
               <BudgetCategories
                 categoryGroups={categoryGroups}
+                searchText={searchText}
                 editingCell={editing}
                 onEditMonth={onEditMonth}
                 onEditName={onEditName}
