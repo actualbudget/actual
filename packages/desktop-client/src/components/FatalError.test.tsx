@@ -1,5 +1,6 @@
 import { LazyLoadFailedError } from '@actual-app/core/shared/errors';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import { TestProviders } from '#mocks';
@@ -51,6 +52,20 @@ describe('FatalError', () => {
     expect(
       screen.getByText(/problem loading the app in this browser version/i),
     ).toBeInTheDocument();
+  });
+
+  it('shows the raw payload fields in the error details, not "[object Object]"', async () => {
+    const error = {
+      type: 'app-init-failure',
+      BackendInitFailure: true,
+    };
+
+    render(<FatalError error={error} />, { wrapper: TestProviders });
+
+    await userEvent.click(screen.getByText('Show Error'));
+
+    expect(screen.getByText(/BackendInitFailure/)).toBeInTheDocument();
+    expect(screen.queryByText(/\[object Object\]/)).not.toBeInTheDocument();
   });
 
   it('renders the UI error message for a generic Error', () => {

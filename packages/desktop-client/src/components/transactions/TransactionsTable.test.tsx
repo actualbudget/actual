@@ -22,7 +22,14 @@ import type {
   TagEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
@@ -36,7 +43,11 @@ import { createTestQueryClient, TestProviders } from '#mocks';
 import { payeeQueries } from '#payees';
 import { tagQueries } from '#tags/queries';
 
-import { TransactionTable } from './TransactionsTable';
+import {
+  DEFAULT_AMOUNT_COLUMN_WIDTHS,
+  TransactionTable,
+  useAmountColumnWidths,
+} from './TransactionsTable';
 
 const queryClient = createTestQueryClient();
 
@@ -153,6 +164,10 @@ type LiveTransactionTableProps = {
   isAdding: boolean;
   onTransactionsChange?: (newTrans: TransactionEntity[]) => void;
   onCloseAddTransaction?: () => void;
+  onApplyRules?: (
+    transaction: TransactionEntity,
+    updatedFieldName?: string | null,
+  ) => Promise<TransactionEntity>;
 };
 
 function LiveTransactionTable(props: LiveTransactionTableProps) {
@@ -1052,6 +1067,30 @@ describe('Transactions', () => {
     expect(queryNewField(container, 'debit').textContent).toBe('0.00');
   });
 
+  test('clicking cleared while editing the amount keeps the amount', async () => {
+    const { container, updateProps } = renderTransactions({
+      // Rules run over the backend, so saving a new transaction only lands in
+      // state a tick later. Clicking another cell in the meantime must not
+      // read back the pre-save amount.
+      onApplyRules: async transaction => transaction,
+    });
+    updateProps({ isAdding: true });
+
+    const input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '100');
+
+    // Click "cleared" directly, without tabbing/entering out of the amount
+    // field first
+    await userEvent.click(
+      within(queryNewField(container, 'cleared')).getByTestId('cell-button'),
+    );
+
+    await waitFor(() =>
+      expect(queryNewField(container, 'debit').textContent).toBe('100.00'),
+    );
+  });
+
   test('adding a new split transaction works', async () => {
     const { container, getTransactions, updateProps } = renderTransactions();
     updateProps({ isAdding: true });
@@ -1532,5 +1571,39 @@ describe('Transactions', () => {
       // Verify the tag was added to the note correctly
       expect(getTransactions()[2].notes).toBe('spending on #coffee');
     });
+  });
+});
+
+describe('useAmountColumnWidths', () => {
+  function transaction(amount: number) {
+    return generateTransaction({ account: accounts[0].id, amount })[0];
+  }
+
+  it('does not narrow below the default minimum for short-value accounts', () => {
+    const { result } = renderHook(() =>
+      useAmountColumnWidths([transaction(150), transaction(-200)], null),
+    );
+
+    expect(result.current).toEqual(DEFAULT_AMOUNT_COLUMN_WIDTHS);
+  });
+
+  it('widens the balance column for a long formatted balance value', () => {
+    const { result } = renderHook(() =>
+      useAmountColumnWidths([transaction(150)], { 'tx-1': 123456789012345 }),
+    );
+
+    expect(result.current.balance).toBeGreaterThan(
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.balance,
+    );
+  });
+
+  it('widens the amount column for a long formatted amount', () => {
+    const { result } = renderHook(() =>
+      useAmountColumnWidths([transaction(123456789012)], null),
+    );
+
+    expect(result.current.amount).toBeGreaterThan(
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.amount,
+    );
   });
 });
