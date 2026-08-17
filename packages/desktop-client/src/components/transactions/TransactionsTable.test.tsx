@@ -28,6 +28,7 @@ import {
   renderHook,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
@@ -1082,9 +1083,7 @@ describe('Transactions', () => {
     // Click "cleared" directly, without tabbing/entering out of the amount
     // field first
     await userEvent.click(
-      queryNewField(container, 'cleared').querySelector(
-        '[data-testid="cell-button"]',
-      )!,
+      within(queryNewField(container, 'cleared')).getByTestId('cell-button'),
     );
 
     await waitFor(() =>
