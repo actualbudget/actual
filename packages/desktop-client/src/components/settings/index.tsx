@@ -28,6 +28,7 @@ import { useDispatch, useSelector } from '#redux';
 
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
+import { BankSyncSettings } from './BankSyncSettings';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { CurrencySettings } from './Currency';
 import { EncryptionSettings } from './Encryption';
@@ -242,6 +243,7 @@ export function Settings() {
         <AuthSettings />
         <EncryptionSettings />
         <BudgetTypeSettings />
+        <BankSyncSettings />
         {isElectron() && <Backups />}
         <ExportBudget />
         <AdvancedToggle>
