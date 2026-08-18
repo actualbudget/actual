@@ -15,7 +15,6 @@ import * as Platform from '@actual-app/core/shared/platform';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useMetadataPref } from '#hooks/useMetadataPref';
-import { useNavigate } from '#hooks/useNavigate';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -57,7 +56,6 @@ function EditableBudgetName() {
   const { t } = useTranslation();
   const [budgetName, setBudgetNamePref] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const { handleContextMenu } = useContextMenu({
@@ -67,11 +65,6 @@ function EditableBudgetName() {
         name: 'rename',
         text: t('Rename budget'),
         onClick: () => setEditing(true),
-      },
-      {
-        name: 'settings',
-        text: t('Settings'),
-        onClick: () => void navigate('/settings'),
       },
       isElectron() && {
         name: 'loadBackup',

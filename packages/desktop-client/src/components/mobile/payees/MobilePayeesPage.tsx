@@ -60,7 +60,7 @@ export function MobilePayeesPage() {
         } catch (error) {
           console.error('Failed to fetch payee rules:', error);
           // Fallback to general rules page
-          void navigate('/rules');
+          void navigate('/settings/rules');
           return;
         }
       }

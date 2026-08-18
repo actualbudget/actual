@@ -55,13 +55,13 @@ export function MobileRuleEditPage() {
             setRule(loadedRule);
           } else {
             // Rule not found, navigate back to rules list
-            void navigate('/rules');
+            void navigate('/settings/rules');
           }
         })
         .catch(error => {
           console.error('Failed to load rule:', error);
           // Navigate back to rules list if rule not found
-          void navigate('/rules');
+          void navigate('/settings/rules');
         })
         .finally(() => {
           setIsLoading(false);
@@ -99,7 +99,7 @@ export function MobileRuleEditPage() {
       });
     }
     // Navigate back to rules list
-    void navigate('/rules');
+    void navigate('/settings/rules');
   };
 
   const handleCancel = () => {
@@ -124,7 +124,7 @@ export function MobileRuleEditPage() {
                 showUndoNotification({
                   message: t('Rule deleted successfully'),
                 });
-                void navigate('/rules');
+                void navigate('/settings/rules');
               } catch (error) {
                 console.error('Failed to delete rule:', error);
                 dispatch(
