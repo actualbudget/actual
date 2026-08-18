@@ -2,8 +2,8 @@
 # Shared agent guard for shell/Bash commands (Claude PreToolUse[Bash],
 # Codex PreToolUse[^Bash$], Cursor beforeShellExecution via adapter).
 #
-# Deterministically enforces the project's git-safety and workspace rules that
-# used to live as prose in AGENTS.md / .github/agents/pr-and-commit-rules.md.
+# Deterministically enforces the project's git-safety, gh and workspace rules
+# that used to live as prose in AGENTS.md / .github/agents/pr-and-commit-rules.md.
 # Reads the command from `.tool_input.command` on stdin. Exit code 2 + stderr
 # blocks the call and feeds the reason back to the agent.
 #
@@ -39,6 +39,16 @@ case "$cmd" in
       *yarn*)
         block "Blocked: run yarn from the repo root, not a child workspace (AGENTS.md). Use 'yarn workspace <name> <cmd>' from the root instead." ;;
     esac ;;
+esac
+
+# Never create GitHub issues from the shell — filing an issue is a human
+# decision (.github/agents/pr-and-commit-rules.md). Requires `gh` as a whole
+# token followed by "issue create", matching the real CLI form
+# (`gh [flags] issue create …`); like the git checks below this is best-effort,
+# not evasion-proof (a hand-rolled `gh api` call is out of scope).
+case " $cmd " in
+  *" gh "*"issue create"*)
+    block "Blocked: agents must not create GitHub issues — filing an issue is a human decision (.github/agents/pr-and-commit-rules.md). Share the proposed issue title and body with the user instead." ;;
 esac
 
 # Everything below only applies to actual git invocations. Match `git` as a
