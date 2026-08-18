@@ -7,6 +7,7 @@ import { batchMessages } from '#server/sync';
 import * as rules from '#server/transactions/transaction-rules';
 import { undoable } from '#server/undo';
 import type {
+  PayeeEntity,
   RuleActionEntity,
   RuleEntity,
   TransactionEntity,
@@ -76,9 +77,9 @@ export type RulesHandlers = {
   'rule-delete-all': typeof deleteAllRules;
   'rule-apply-actions': typeof applyRuleActions;
   'rule-add-payee-rename': typeof addRulePayeeRename;
+  'rules-run': typeof runRules;
   'rules-get': typeof getRules;
   'rule-get': typeof getRule;
-  'rules-run': typeof runRules;
 };
 
 // Expose functions to the client
@@ -91,9 +92,9 @@ app.method('rule-delete', mutator(undoable(deleteRule)));
 app.method('rule-delete-all', mutator(undoable(deleteAllRules)));
 app.method('rule-apply-actions', mutator(undoable(applyRuleActions)));
 app.method('rule-add-payee-rename', mutator(addRulePayeeRename));
+app.method('rules-run', mutator(runRules));
 app.method('rules-get', getRules);
 app.method('rule-get', getRule);
-app.method('rules-run', runRules);
 
 async function ruleValidate(
   rule: Partial<RuleEntity>,
@@ -102,24 +103,20 @@ async function ruleValidate(
   return { error };
 }
 
-async function addRule(
-  rule: Omit<RuleEntity, 'id'>,
-): Promise<{ error: ValidationError } | RuleEntity> {
+async function addRule(rule: Omit<RuleEntity, 'id'>): Promise<RuleEntity> {
   const error = validateRule(rule);
   if (error) {
-    return { error };
+    throw error;
   }
 
   const id = await rules.insertRule(rule);
   return { id, ...rule };
 }
 
-async function updateRule(
-  rule: RuleEntity,
-): Promise<{ error: ValidationError } | RuleEntity> {
+async function updateRule(rule: RuleEntity): Promise<RuleEntity> {
   const error = validateRule(rule);
   if (error) {
-    return { error };
+    throw error;
   }
 
   await rules.updateRule(rule);
@@ -127,24 +124,32 @@ async function updateRule(
 }
 
 async function deleteRule(id: RuleEntity['id']) {
-  return rules.deleteRule(id);
+  const isSuccess = await rules.deleteRule(id);
+  if (!isSuccess) {
+    throw new Error(
+      'Error deleting rule. The rule may be linked to a schedule which prevents it from being deleted.',
+    );
+  }
+  return isSuccess;
 }
 
-async function deleteAllRules(
-  ids: Array<RuleEntity['id']>,
-): Promise<{ someDeletionsFailed: boolean }> {
-  let someDeletionsFailed = false;
+async function deleteAllRules(ids: Array<RuleEntity['id']>): Promise<void> {
+  const failedIds: Array<RuleEntity['id']> = [];
 
   await batchMessages(async () => {
     for (const id of ids) {
-      const res = await rules.deleteRule(id);
-      if (res === false) {
-        someDeletionsFailed = true;
+      const isSuccess = await rules.deleteRule(id);
+      if (!isSuccess) {
+        failedIds.push(id);
       }
     }
   });
 
-  return { someDeletionsFailed };
+  if (failedIds.length > 0) {
+    throw new Error(
+      `Error deleting ${failedIds.length} rules. These rules may be linked to schedules which prevents them from being deleted.`,
+    );
+  }
 }
 
 async function applyRuleActions({
@@ -165,8 +170,8 @@ async function addRulePayeeRename({
   fromNames,
   to,
 }: {
-  fromNames: string[];
-  to: string;
+  fromNames: Array<PayeeEntity['name']>;
+  to: PayeeEntity['id'];
 }): Promise<string> {
   return rules.updatePayeeRenameRule(fromNames, to);
 }

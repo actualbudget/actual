@@ -91,6 +91,7 @@ import { pagedQuery } from '#queries/pagedQuery';
 import type { PagedQuery } from '#queries/pagedQuery';
 import { useDispatch, useSelector } from '#redux';
 import type { AppDispatch } from '#redux/store';
+import { useRunRulesMutation } from '#rules/mutations';
 import { updateNewTransactions } from '#transactions/transactionsSlice';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
@@ -263,6 +264,7 @@ type AccountInternalProps = {
   onUnlinkAccount: (id: AccountEntity['id']) => void;
   onSyncAndDownload: (accountId?: AccountEntity['id']) => void;
   onCreatePayee: (name: PayeeEntity['name']) => Promise<PayeeEntity['id']>;
+  onRunRules: (transaction: TransactionEntity) => Promise<TransactionEntity>;
 };
 
 type AccountInternalState = {
@@ -731,9 +733,8 @@ class AccountInternal extends PureComponent<
       const allErrors: string[] = [];
 
       for (const transaction of transactions) {
-        const res: TransactionEntity | null = await send('rules-run', {
-          transaction,
-        });
+        const res: TransactionEntity | null =
+          await this.props.onRunRules(transaction);
         if (res) {
           changedTransactions.push(...ungroupTransaction(res));
 
@@ -1118,6 +1119,7 @@ class AccountInternal extends PureComponent<
         this.setState(state => ({
           transactions: [...reconciliationTransactions, ...state.transactions],
         })),
+      this.props.onRunRules,
     );
     await this.refetchTransactions();
   };
@@ -2085,9 +2087,13 @@ export function Account() {
   const onSyncAndDownload = (id?: AccountEntity['id']) =>
     syncAndDownload({ id });
 
-  const createPayee = useCreatePayeeMutation();
+  const { mutateAsync: createPayeeAsync } = useCreatePayeeMutation();
   const onCreatePayee = (name: PayeeEntity['name']) =>
-    createPayee.mutateAsync({ name });
+    createPayeeAsync({ name });
+
+  const { mutateAsync: runRulesAsync } = useRunRulesMutation();
+  const onRunRules = (transaction: TransactionEntity) =>
+    runRulesAsync({ transaction });
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
@@ -2130,6 +2136,7 @@ export function Account() {
             onUnlinkAccount={onUnlinkAccount}
             onSyncAndDownload={onSyncAndDownload}
             onCreatePayee={onCreatePayee}
+            onRunRules={onRunRules}
           />
         </SplitsExpandedProvider>
       </SchedulesProvider>

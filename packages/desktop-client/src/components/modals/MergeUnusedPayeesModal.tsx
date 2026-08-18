@@ -16,6 +16,7 @@ import { usePayees } from '#hooks/usePayees';
 import { replaceModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
+import { useAddPayeeRenameRuleMutation } from '#rules';
 
 const highlightStyle = { color: theme.pageTextPositive };
 
@@ -56,6 +57,9 @@ export function MergeUnusedPayeesModal({
     allPayees.filter(p => payeeIds.includes(p.id)),
   );
 
+  const { mutateAsync: addPayeeRenameRuleAsync } =
+    useAddPayeeRenameRuleMutation();
+
   const onMerge = useCallback(
     async (targetPayee: PayeeEntity) => {
       await send('payees-merge', {
@@ -65,7 +69,7 @@ export function MergeUnusedPayeesModal({
 
       let ruleId;
       if (shouldCreateRule && !isEditingRule) {
-        const id = await send('rule-add-payee-rename', {
+        const id = await addPayeeRenameRuleAsync({
           fromNames: payees.map(payee => payee.name),
           to: targetPayee.id,
         });
@@ -74,7 +78,7 @@ export function MergeUnusedPayeesModal({
 
       return ruleId;
     },
-    [shouldCreateRule, isEditingRule, payees],
+    [shouldCreateRule, isEditingRule, payees, addPayeeRenameRuleAsync],
   );
 
   const onMergeAndCreateRule = useCallback(

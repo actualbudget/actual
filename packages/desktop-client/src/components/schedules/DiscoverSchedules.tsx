@@ -168,7 +168,6 @@ export function DiscoverSchedules() {
     for (const schedule of selected) {
       const scheduleId = await send('schedule/create', {
         conditions: schedule._conditions,
-        schedule: {},
       });
 
       // Now query for matching transactions and link them automatically

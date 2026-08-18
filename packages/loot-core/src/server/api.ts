@@ -862,24 +862,20 @@ handlers['api/payee-rules-get'] = async function ({ id }) {
 
 handlers['api/rule-create'] = withMutation(async function ({ rule }) {
   checkFileOpen();
-  const addedRule = await handlers['rule-add'](rule);
-
-  if ('error' in addedRule) {
-    throw APIError('Failed creating a new rule', addedRule.error);
+  try {
+    return await handlers['rule-add'](rule);
+  } catch (error) {
+    throw APIError('Failed creating a new rule', error);
   }
-
-  return addedRule;
 });
 
 handlers['api/rule-update'] = withMutation(async function ({ rule }) {
   checkFileOpen();
-  const updatedRule = await handlers['rule-update'](rule);
-
-  if ('error' in updatedRule) {
-    throw APIError('Failed updating the rule', updatedRule.error);
+  try {
+    return await handlers['rule-update'](rule);
+  } catch (error) {
+    throw APIError('Failed updating the rule', error);
   }
-
-  return updatedRule;
 });
 
 handlers['api/rule-delete'] = withMutation(async function (id) {

@@ -22,7 +22,7 @@ import {
   FIELD_TYPES,
   getFieldError,
   getValidOps,
-  unparse,
+  unparseConditions,
 } from '@actual-app/core/shared/rules';
 import { titleFirst } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
@@ -478,17 +478,16 @@ function ConfigureField<T extends RuleConditionEntity>({
           });
         }}
       >
-        {type !== 'boolean' &&
+        {type &&
+          type !== 'boolean' &&
           (field !== 'notes' || !isTagOp(op)) &&
           (field !== 'payee' || !isIdOp(op)) &&
           (field !== 'account' || !isNoValueAccountOp(op)) && (
             <GenericInput
               ref={inputRef}
-              // @ts-expect-error - fix me
               field={
                 field === 'date' || field === 'category' ? subfield : field
               }
-              // @ts-expect-error - fix me
               type={
                 type === 'id' &&
                 (op === 'contains' ||
@@ -503,7 +502,6 @@ function ConfigureField<T extends RuleConditionEntity>({
                 formattedValue ??
                 (op === 'oneOf' || op === 'notOneOf' ? [] : '')
               }
-              // @ts-expect-error - fix me
               multi={op === 'oneOf' || op === 'notOneOf'}
               op={op}
               options={subfieldToOptions(field, subfield)}
@@ -645,7 +643,7 @@ export function FilterButton<T extends RuleConditionEntity>({
 
   async function onValidateAndApply(cond: T) {
     // @ts-expect-error - fix me
-    cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
+    cond = unparseConditions({ ...cond, type: FIELD_TYPES.get(cond.field) });
 
     if (cond.type === 'date' && cond.options) {
       if (cond.options.month) {
@@ -852,7 +850,11 @@ export function FilterEditor<T extends RuleConditionEntity>({
       dispatch={dispatch}
       onApply={cond => {
         // @ts-expect-error - fix me
-        cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
+        cond = unparseConditions({
+          ...cond,
+          // @ts-expect-error - fix me
+          type: FIELD_TYPES.get(cond.field),
+        });
 
         if (cond.type === 'date' && cond.options) {
           if (

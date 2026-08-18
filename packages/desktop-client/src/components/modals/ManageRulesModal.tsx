@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
@@ -13,17 +12,16 @@ type ManageRulesModalProps = Extract<
 
 export function ManageRulesModal({ payeeId }: ManageRulesModalProps) {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(true);
 
   return (
-    <Modal name="manage-rules" isLoading={loading}>
+    <Modal name="manage-rules">
       {({ state }) => (
         <>
           <ModalHeader
             title={t('Rules')}
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
-          <ManageRules isModal payeeId={payeeId} setLoading={setLoading} />
+          <ManageRules isModal payeeId={payeeId} />
         </>
       )}
     </Modal>

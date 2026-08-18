@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { listen, send } from '@actual-app/core/platform/client/connection';
+import { listen } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import { q } from '@actual-app/core/shared/query';
@@ -17,11 +17,11 @@ import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePayees } from '#hooks/usePayees';
+import { useRules } from '#hooks/useRules';
 import { useSchedules } from '#hooks/useSchedules';
 import { useUndo } from '#hooks/useUndo';
 import { useUrlParam } from '#hooks/useUrlParam';
-import { addNotification } from '#notifications/notificationsSlice';
-import { useDispatch } from '#redux';
+import { useDeleteRuleMutation } from '#rules';
 
 import { AddRuleButton } from './AddRuleButton';
 import { RulesList } from './RulesList';
@@ -29,13 +29,15 @@ import { RulesList } from './RulesList';
 export function MobileRulesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const [visibleRulesParam] = useUrlParam('visible-rules');
-  const [allRules, setAllRules] = useState<RuleEntity[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('');
 
+  const {
+    data: allRules = [],
+    isLoading: isRulesLoading,
+    refetch: refetchRules,
+  } = useRules();
   const { schedules = [] } = useSchedules({
     query: useMemo(() => q('schedules').select('*'), []),
   });
@@ -78,28 +80,10 @@ export function MobileRulesPage() {
         );
   }, [visibleRules, filter, filterData, schedules]);
 
-  const loadRules = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const result = await send('rules-get');
-      const rules = result || [];
-      setAllRules(rules);
-    } catch (error) {
-      console.error('Failed to load rules:', error);
-      setAllRules([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadRules();
-  }, [loadRules]);
-
   // Listen for undo events to refresh rules list
   useEffect(() => {
     const onUndo = () => {
-      void loadRules();
+      void refetchRules();
     };
 
     const lastUndoEvent = undo.getUndoState('undoEvent');
@@ -108,7 +92,7 @@ export function MobileRulesPage() {
     }
 
     return listen('undo-event', onUndo);
-  }, [loadRules]);
+  }, [refetchRules]);
 
   const handleRulePress = useCallback(
     (rule: RuleEntity) => {
@@ -124,45 +108,22 @@ export function MobileRulesPage() {
     [setFilter],
   );
 
+  const { mutate: deleteRule } = useDeleteRuleMutation();
+
   const handleRuleDelete = useCallback(
-    async (rule: RuleEntity) => {
-      try {
-        const { someDeletionsFailed } = await send('rule-delete-all', [
-          rule.id,
-        ]);
-
-        if (someDeletionsFailed) {
-          dispatch(
-            addNotification({
-              notification: {
-                type: 'warning',
-                message: t(
-                  'This rule could not be deleted because it is linked to a schedule.',
-                ),
-              },
-            }),
-          );
-        } else {
-          showUndoNotification({
-            message: t('Rule deleted successfully'),
-          });
-        }
-
-        // Refresh the rules list
-        await loadRules();
-      } catch (error) {
-        console.error('Failed to delete rule:', error);
-        dispatch(
-          addNotification({
-            notification: {
-              type: 'error',
-              message: t('Failed to delete rule. Please try again.'),
-            },
-          }),
-        );
-      }
+    (rule: RuleEntity) => {
+      deleteRule(
+        { id: rule.id },
+        {
+          onSuccess: () => {
+            showUndoNotification({
+              message: t('Rule deleted successfully'),
+            });
+          },
+        },
+      );
     },
-    [dispatch, showUndoNotification, t, loadRules],
+    [deleteRule, showUndoNotification, t],
   );
 
   return (
@@ -198,7 +159,7 @@ export function MobileRulesPage() {
       </View>
       <RulesList
         rules={filteredRules}
-        isLoading={isLoading}
+        isLoading={isRulesLoading}
         onRulePress={handleRulePress}
         onRuleDelete={handleRuleDelete}
       />

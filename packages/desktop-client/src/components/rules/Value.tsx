@@ -23,7 +23,6 @@ type ValueProps<T> = {
   field: unknown;
   valueIsRaw?: boolean;
   inline?: boolean;
-  data?: unknown;
   describe?: (item: T) => string;
   style?: CSSProperties;
 };
@@ -33,9 +32,7 @@ export function Value<T>({
   field,
   valueIsRaw,
   inline = false,
-  data: dataProp,
-  // @ts-expect-error fix this later
-  describe = x => x.name,
+  describe,
   style,
 }: ValueProps<T>) {
   const { t } = useTranslation();
@@ -55,32 +52,6 @@ export function Value<T>({
   };
   const ValueText = field === 'amount' ? FinancialText : Text;
   const locale = useLocale();
-
-  function getData() {
-    if (dataProp) {
-      return dataProp;
-    }
-
-    switch (field) {
-      case 'payee':
-        return payees;
-
-      case 'category':
-        return categories;
-
-      case 'category_group':
-        return categoryGroups;
-
-      case 'account':
-        return accounts;
-
-      default:
-        return [];
-    }
-  }
-
-  const data = getData();
-
   const [expanded, setExpanded] = useState(false);
 
   function onExpand(e) {
@@ -118,23 +89,39 @@ export function Value<T>({
         case 'payee_name':
           return value;
         case 'payee':
+          if (valueIsRaw) {
+            return value;
+          }
+          const payee = payees.find(p => p.id === value);
+          return payee ? (describe?.(value) ?? payee.name) : t('(deleted)');
         case 'category':
+          if (valueIsRaw) {
+            return value;
+          }
+          const category = categories.find(c => c.id === value);
+          return category
+            ? (describe?.(value) ?? category.name)
+            : t('(deleted)');
         case 'category_group':
+          if (valueIsRaw) {
+            return value;
+          }
+          const categoryGroup = categoryGroups.find(g => g.id === value);
+          return categoryGroup
+            ? (describe?.(value) ?? categoryGroup.name)
+            : t('(deleted)');
         case 'account':
+          if (valueIsRaw) {
+            return value;
+          }
+          const account = accounts.find(a => a.id === value);
+          return account ? (describe?.(value) ?? account.name) : t('(deleted)');
         case 'rule':
           if (valueIsRaw) {
             return value;
           }
-          if (data && Array.isArray(data)) {
-            const item = data.find(item => item.id === value);
-            if (item) {
-              return describe(item);
-            } else {
-              return t('(deleted)');
-            }
-          }
 
-          return '…';
+          return describe?.(value) ?? value;
         default:
           throw new Error(`Unknown field ${String(field)}`);
       }
