@@ -10,15 +10,35 @@ type BudgetNavigationRow =
 function flattenBudgetRows(
   categoryGroups: CategoryGroupEntity[],
   collapsedGroupIds: string[],
+  showHiddenCategories: boolean,
 ) {
+  const shouldShowHiddenCategories = Boolean(showHiddenCategories);
+
   return categoryGroups.reduce((all, group) => {
+    if (group.is_income) {
+      return all.concat(
+        { id: group.id, isGroup: true } as BudgetNavigationRow,
+        ...((collapsedGroupIds.includes(group.id)
+          ? []
+          : (group.categories || []).filter(
+              cat => shouldShowHiddenCategories || !cat.hidden,
+            )) as BudgetNavigationRow[]),
+      );
+    }
+
+    if (group.hidden && !shouldShowHiddenCategories) {
+      return all;
+    }
+
     if (collapsedGroupIds.includes(group.id)) {
       return all.concat({ id: group.id, isGroup: true });
     }
 
     return all.concat([
       { id: group.id, isGroup: true } as BudgetNavigationRow,
-      ...((group?.categories || []) as BudgetNavigationRow[]),
+      ...((group?.categories || []).filter(
+        cat => shouldShowHiddenCategories || !cat.hidden,
+      ) as BudgetNavigationRow[]),
     ]);
   }, [] as BudgetNavigationRow[]);
 }
@@ -26,11 +46,16 @@ function flattenBudgetRows(
 export function findNextBudgetCell(
   categoryGroups: CategoryGroupEntity[],
   collapsedGroupIds: string[],
+  showHiddenCategories: boolean,
   currentCell: { id: string; cell: string },
   type: string,
   dir: 1 | -1,
 ) {
-  const flattened = flattenBudgetRows(categoryGroups, collapsedGroupIds);
+  const flattened = flattenBudgetRows(
+    categoryGroups,
+    collapsedGroupIds,
+    showHiddenCategories,
+  );
   const idx = flattened.findIndex(item => item.id === currentCell.id);
   let nextIdx = idx + dir;
 

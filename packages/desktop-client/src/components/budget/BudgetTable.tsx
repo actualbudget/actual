@@ -181,6 +181,7 @@ export function BudgetTable(props: BudgetTableProps) {
       const nextCell = findNextBudgetCell(
         categoryGroups,
         collapsedGroupIds,
+        showHiddenCategories ?? false,
         editing,
         type,
         dir,
