@@ -1,6 +1,7 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import type {
   APIAccountEntity,
+  APIAccountGroupEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
   APIFileEntity,
@@ -251,6 +252,25 @@ export function deleteAccount(id: APIAccountEntity['id']) {
 
 export function getAccountBalance(id: APIAccountEntity['id'], cutoff?: Date) {
   return send('api/account-balance', { id, cutoff });
+}
+
+export function getAccountGroups() {
+  return send('api/account-groups-get');
+}
+
+export function createAccountGroup(group: Omit<APIAccountGroupEntity, 'id'>) {
+  return send('api/account-group-create', { group });
+}
+
+export function updateAccountGroup(
+  id: APIAccountGroupEntity['id'],
+  fields: Partial<Omit<APIAccountGroupEntity, 'id'>>,
+) {
+  return send('api/account-group-update', { id, fields });
+}
+
+export function deleteAccountGroup(id: APIAccountGroupEntity['id']) {
+  return send('api/account-group-delete', { id });
 }
 
 export function getCategoryGroups(options: { hidden?: boolean } = {}) {

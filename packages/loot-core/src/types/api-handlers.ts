@@ -2,6 +2,7 @@
 import type { ImportTransactionsResult } from '#server/accounts/app';
 import type {
   APIAccountEntity,
+  APIAccountGroupEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
   APIFileEntity,
@@ -163,6 +164,21 @@ export type ApiHandlers = {
     id: APIAccountEntity['id'];
     cutoff?: Date;
   }) => Promise<number>;
+
+  'api/account-groups-get': () => Promise<APIAccountGroupEntity[]>;
+
+  'api/account-group-create': (arg: {
+    group: Omit<APIAccountGroupEntity, 'id'>;
+  }) => Promise<APIAccountGroupEntity['id']>;
+
+  'api/account-group-update': (arg: {
+    id: APIAccountGroupEntity['id'];
+    fields: Partial<Omit<APIAccountGroupEntity, 'id'>>;
+  }) => Promise<void>;
+
+  'api/account-group-delete': (arg: {
+    id: APIAccountGroupEntity['id'];
+  }) => Promise<void>;
 
   'api/categories-get': (arg: {
     hidden?: boolean;

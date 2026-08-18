@@ -1,6 +1,7 @@
 import type { Budget } from '#types/budget';
 import type {
   AccountEntity,
+  AccountGroupEntity,
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
@@ -15,6 +16,7 @@ export type APIAccountEntity = Pick<AccountEntity, 'id' | 'name'> & {
   offbudget?: boolean;
   closed?: boolean;
   balance_current?: number | null;
+  account_group?: string | null;
 };
 
 export const accountModel = {
@@ -27,6 +29,7 @@ export const accountModel = {
       offbudget: account.offbudget ? true : false,
       closed: account.closed ? true : false,
       balance_current: account.balance_current ?? null,
+      account_group: account.account_group ?? null,
     };
   },
 
@@ -39,6 +42,24 @@ export const accountModel = {
       result.closed = account.closed ? 1 : 0;
     }
     return result;
+  },
+};
+
+export type APIAccountGroupEntity = Pick<AccountGroupEntity, 'id' | 'name'>;
+
+export const accountGroupModel = {
+  ...models.accountGroupModel,
+
+  toExternal(group: AccountGroupEntity): APIAccountGroupEntity {
+    return {
+      id: group.id,
+      name: group.name,
+    };
+  },
+
+  fromExternal(group: Partial<APIAccountGroupEntity>) {
+    // No translation is needed
+    return group as Partial<AccountGroupEntity>;
   },
 };
 
