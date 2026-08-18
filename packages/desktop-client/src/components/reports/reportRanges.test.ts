@@ -60,6 +60,30 @@ describe('calculateTimeRange', () => {
     expect(start).toBe('2016-12-18'); // width of 14 days preserved
     expect(mode).toBe('sliding-window');
   });
+
+  it('keeps current quarter as a live time range when restoring a saved widget', () => {
+    const [start, end, mode] = calculateTimeRange({
+      start: '2016-10',
+      end: '2016-12',
+      mode: 'currentQuarter',
+    });
+
+    expect(start).toBe('2017-01');
+    expect(end).toBe('2017-03');
+    expect(mode).toBe('currentQuarter');
+  });
+
+  it('keeps previous quarter as a live time range when restoring a saved widget', () => {
+    const [start, end, mode] = calculateTimeRange({
+      start: '2016-07',
+      end: '2016-09',
+      mode: 'previousQuarter',
+    });
+
+    expect(start).toBe('2016-10');
+    expect(end).toBe('2016-12');
+    expect(mode).toBe('previousQuarter');
+  });
 });
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'
