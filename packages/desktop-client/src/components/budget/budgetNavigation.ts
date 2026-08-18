@@ -1,4 +1,7 @@
-import type { CategoryEntity, CategoryGroupEntity } from '@actual-app/core/types/models';
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
+} from '@actual-app/core/types/models';
 
 type BudgetNavigationRow =
   | { id: CategoryGroupEntity['id']; isGroup: true }

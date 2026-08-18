@@ -17,9 +17,9 @@ import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 
 import { BudgetCategories } from './BudgetCategories';
+import { findNextBudgetCell } from './budgetNavigation';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
-import { findNextBudgetCell } from './budgetNavigation';
 import { MonthsProvider } from './MonthsContext';
 import type { MonthBounds } from './MonthsContext';
 import {

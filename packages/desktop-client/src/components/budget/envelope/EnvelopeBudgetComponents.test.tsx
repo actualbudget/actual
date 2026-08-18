@@ -1,6 +1,9 @@
-import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
+
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+
+import { ExpenseCategoryMonth } from './EnvelopeBudgetComponents';
 
 vi.mock('@actual-app/components/popover', () => ({
   Popover: ({ children, isOpen }: { children: ReactNode; isOpen: boolean }) =>
@@ -62,8 +65,6 @@ vi.mock('#hooks/useUndo', () => ({
     showUndoNotification: vi.fn(),
   }),
 }));
-
-import { ExpenseCategoryMonth } from './EnvelopeBudgetComponents';
 
 describe('ExpenseCategoryMonth', () => {
   it('keeps quick actions visible when the cell is active', () => {

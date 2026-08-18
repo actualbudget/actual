@@ -339,11 +339,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               padding: 3,
             }}
           >
-            <SvgCheveronDown
-              width={14}
-              height={14}
-              className="hover-visible"
-            />
+            <SvgCheveronDown width={14} height={14} className="hover-visible" />
           </Button>
           <Popover
             triggerRef={budgetMenuTriggerRef}

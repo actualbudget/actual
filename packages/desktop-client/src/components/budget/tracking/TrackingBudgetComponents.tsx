@@ -296,11 +296,7 @@ export const CategoryMonth = memo(function CategoryMonth({
               padding: 3,
             }}
           >
-            <SvgCheveronDown
-              width={14}
-              height={14}
-              className="hover-visible"
-            />
+            <SvgCheveronDown width={14} height={14} className="hover-visible" />
           </Button>
 
           <Popover

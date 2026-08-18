@@ -1,9 +1,8 @@
-import { describe, expect, it } from 'vitest';
-
 import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
+import { describe, expect, it } from 'vitest';
 
 import { findNextBudgetCell } from './budgetNavigation';
 
