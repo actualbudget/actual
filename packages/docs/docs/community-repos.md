@@ -10,7 +10,7 @@ for it to be added, your project must have a proper README file.
 
 ## Bank Export and Importers
 
-The following are implementations of bank syncing using the Actual API. For instructions on using them, see the respective repositories.
+The following are implementations of bank syncing using the Actual API, or converters that turn bank exports into files for Actual's import dialog. For instructions on using them, see the respective repositories.
 
 - **Akahu and Up bank sync to Actual Budget** - https://github.com/tim-smart/actualbudget-sync
 - **Enable Actual: Import transactions from European banks using Enable Banking** - https://github.com/2manyvcos/enable-actual
