@@ -95,12 +95,14 @@ async function updateAccount({
   id,
   name,
   last_reconciled,
+  account_group,
 }: Pick<AccountEntity, 'id' | 'name'> &
-  Partial<Pick<AccountEntity, 'last_reconciled'>>) {
+  Partial<Pick<AccountEntity, 'last_reconciled' | 'account_group'>>) {
   await db.update('accounts', {
     id,
     name,
     ...(last_reconciled && { last_reconciled }),
+    ...(account_group !== undefined && { account_group }),
   });
   return {};
 }
@@ -129,6 +131,7 @@ async function getAccounts(): Promise<AccountEntity[]> {
         account_sync_source: dbAccount.account_sync_source ?? null,
         last_sync: dbAccount.last_sync ?? null,
         bank_sync_status: dbAccount.bank_sync_status ?? null,
+        account_group: dbAccount.account_group ?? null,
       }) satisfies AccountEntity,
   );
 }
