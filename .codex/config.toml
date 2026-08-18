@@ -31,8 +31,8 @@
 [features]
 lifecycle_hooks = true
 
-# Block unsafe git/workspace commands ([AI] prefix, --no-verify, force-push,
-# push-to-main, git config writes, yarn-from-a-workspace).
+# Enforce the repo's shell-command policy (git safety, gh, yarn-from-a-workspace)
+# — the header of scripts/agent-hooks/git-guard.sh is the single list of rules.
 [[hooks.PreToolUse]]
 matcher = "^Bash$"
 [[hooks.PreToolUse.hooks]]
@@ -57,6 +57,17 @@ command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/format-edited-f
 [[hooks.PostToolUse.hooks]]
 type = "command"
 command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/prefer-one-component.sh"'
+
+# Block creating GitHub issues — filing an issue is a human decision. The guard
+# reads tool_input.method and only lets issue_write calls whose method is
+# "update" through (exit 2 blocks everything else). `gh issue create` from the
+# shell is blocked by the git guard above.
+[[hooks.PreToolUse]]
+matcher = "^mcp__github__issue_write$"
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/no-issue-create.sh"'
+statusMessage = "Checking GitHub issue call is not a create"
 
 # Require GitHub comments, reviews and issues to be prefixed with the robot emoji
 # 🤖. Matches the github MCP comment/review/issue writers below (add_issue_comment,
