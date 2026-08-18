@@ -90,13 +90,15 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     const [newCategoryForGroup, setNewCategoryForGroup] = useState<
       string | null
     >(null);
+    const isSearching = searchText.trim() !== '';
+
     const items: BudgetItem[] = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
 
       const normalizedSearch = searchText.trim().toLowerCase();
-      const isSearching = normalizedSearch !== '';
-      const matchesSearch = (name: string) =>
-        name.toLowerCase().includes(normalizedSearch);
+      function matchesSearch(name: string) {
+        return name.toLowerCase().includes(normalizedSearch);
+      }
 
       let items: BudgetItem[] = Array.prototype.concat.apply(
         [],
@@ -196,6 +198,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     }, [
       categoryGroups,
       searchText,
+      isSearching,
       collapsedGroupIds,
       newCategoryForGroup,
       isAddingGroup,
@@ -331,7 +334,9 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                 <ExpenseGroup
                   group={item.value}
                   editingCell={editingCell}
-                  collapsed={collapsedGroupIds.includes(item.value.id)}
+                  collapsed={
+                    !isSearching && collapsedGroupIds.includes(item.value.id)
+                  }
                   dragState={dragState}
                   onEditName={onEditName}
                   onSave={_onSaveGroup}
@@ -381,7 +386,9 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                 <IncomeGroup
                   group={item.value}
                   editingCell={editingCell}
-                  collapsed={collapsedGroupIds.includes(item.value.id)}
+                  collapsed={
+                    !isSearching && collapsedGroupIds.includes(item.value.id)
+                  }
                   onEditName={onEditName!}
                   onSave={_onSaveGroup}
                   onSortCategories={onSortCategories}
