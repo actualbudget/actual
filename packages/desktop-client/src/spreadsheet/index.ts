@@ -83,7 +83,10 @@ export type Spreadsheets = {
 
     // Balance fields
     [key: `balance-query-${string}`]: number;
-    [key: `selected-transactions-${string}`]: Array<{ id: string }>;
+    [key: `selected-transactions-${string}`]: Array<{
+      id: string;
+      parent_id: string | null;
+    }>;
     [key: `selected-balance-${string}`]: number;
   };
 };

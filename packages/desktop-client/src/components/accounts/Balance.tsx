@@ -75,11 +75,21 @@ export function SelectedBalance({
         id: { $oneof: [...selectedItems] },
         parent_id: { $oneof: [...selectedItems] },
       })
-      .select('id'),
+      .select(['id', 'parent_id']),
   });
-  const ids = new Set((rows || []).map((r: { id: string }) => r.id));
 
-  const finalIds = [...selectedItems].filter(id => !ids.has(id));
+  // When a split parent is selected together with some of its children, summing
+  // the parent would count every child of the split - including the ones that
+  // were never selected. Drop the parent instead and keep the selected
+  // children, so only what the user actually selected is counted. A parent
+  // selected on its own is left alone and still contributes the whole split.
+  const parentIdsWithSelectedChildren = new Set(
+    (rows || []).map(r => r.parent_id),
+  );
+
+  const finalIds = [...selectedItems].filter(
+    id => !parentIdsWithSelectedChildren.has(id),
+  );
   let balance = useSheetValue<'balance', `selected-balance-${string}`>({
     name: (name + '-sum') as `selected-balance-${string}`,
     query: q('transactions')
