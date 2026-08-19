@@ -198,7 +198,7 @@ export function ThemePage({
             >
               <ThemeSwatches colors={row.swatches} />
               <Text style={themeItemLabelStyle}>
-                <Highlight text={row.name} query={search} />
+                <Highlight text={t(row.name)} query={search} />
               </Text>
               {activeCustomThemeId == null &&
                 activeBuiltinTheme === row.key && <CurrentBadge />}
