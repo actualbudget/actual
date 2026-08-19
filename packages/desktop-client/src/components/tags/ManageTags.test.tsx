@@ -123,8 +123,8 @@ describe('ManageTags', () => {
       id: 'tag-1',
       tag: 'ToBeReimbursed',
     });
-    expect(
-      screen.queryByDisplayValue('ToBeReimbursed'),
-    ).not.toBeInTheDocument();
+    // No editor is left open anywhere: the navigator would otherwise carry
+    // editing on to the next row's tag field
+    expect(screen.queryAllByTestId('tag')).toHaveLength(0);
   });
 });

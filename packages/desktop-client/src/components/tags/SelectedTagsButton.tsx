@@ -1,6 +1,7 @@
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
+import type { MenuItemObject } from '@actual-app/components/menu';
 import type { TagEntity } from '@actual-app/core/types/models';
 
 import { SelectedItemsButton } from '#components/table';
@@ -69,7 +70,13 @@ export function SelectedTagsButton({ onRename }: SelectedTagsButtonProps) {
       name={c => `${c} Tags`}
       items={[
         ...(isSingleSelection
-          ? [{ name: 'rename-tag' as const, text: t('Rename'), key: 'R' }]
+          ? [
+              {
+                name: 'rename-tag',
+                text: t('Rename'),
+                key: 'R',
+              } satisfies MenuItemObject<Actions>,
+            ]
           : []),
         { name: 'delete-tags', text: t('Delete'), key: 'D' },
         { name: 'hide-tags', text: t('Hide'), key: 'H' },

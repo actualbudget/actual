@@ -42,6 +42,7 @@ export function ManageTags() {
   const selectedInst = useSelected('manage-tags', filteredTags, []);
   const tableNavigator = useTableNavigator(filteredTags, [
     'select',
+    'tag',
     'color',
     'description',
   ]);

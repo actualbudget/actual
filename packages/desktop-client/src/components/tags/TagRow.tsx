@@ -69,8 +69,9 @@ export const TagRow = memo(
       renameTag({ id: tag.id, tag: trimmed });
     };
 
-    // The 'tag' field is not part of the table navigator, so Enter must be
-    // handled here or the navigator reopens the input via flashInput
+    // Enter must be handled here: the navigator would otherwise move editing
+    // to the next row's tag field, which after the list re-sorts is an
+    // unrelated tag
     const onRenameKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter') {
         e.preventDefault();
