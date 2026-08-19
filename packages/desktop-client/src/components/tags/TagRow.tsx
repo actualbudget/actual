@@ -149,12 +149,8 @@ export const TagRow = memo(
             name="tag"
             textAlign="flex"
             exposed
-            onExpose={name => onEdit(tag.id, name)}
             value={tag.tag}
-            inputProps={{
-              value: tag.tag,
-              onUpdate: onRename,
-            }}
+            inputProps={{ onUpdate: onRename }}
           />
         ) : (
           <Cell width={250} plain style={{ padding: '5px', display: 'block' }}>

@@ -122,7 +122,7 @@ async function renameTag({
     throw new Error('Invalid tag name');
   }
 
-  const tags = await getTags();
+  const tags = await db.getTags();
   const existing = tags.find(t => t.id === id);
   if (!existing) {
     throw new Error('Tag not found');

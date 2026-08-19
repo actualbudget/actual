@@ -66,8 +66,10 @@ describe('ManageTags', () => {
     });
 
     const rename = contextMenuItem('rename');
-    expect(rename).toBeDefined();
-    await act(async () => rename!.onClick?.());
+    if (!rename) {
+      throw new Error('Rename context menu item not found');
+    }
+    await act(async () => rename.onClick?.());
   }
 
   it('offers renaming from the row context menu', async () => {

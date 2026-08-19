@@ -48,6 +48,11 @@ describe('renameTagInNotes', () => {
     expect(renameTagInNotes('#a+b', 'a+b', 'c')).toBe('#c');
   });
 
+  test('treats replacement tokens in the new name literally', () => {
+    expect(renameTagInNotes('#Food', 'Food', '$&')).toBe('#$&');
+    expect(renameTagInNotes('#Food', 'Food', "$'x$`")).toBe("#$'x$`");
+  });
+
   test('leaves notes without the tag untouched', () => {
     expect(renameTagInNotes('nothing to see here', 'Food', 'Groceries')).toBe(
       'nothing to see here',

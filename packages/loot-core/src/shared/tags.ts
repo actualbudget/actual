@@ -26,5 +26,5 @@ export function renameTagInNotes(
 ) {
   const escaped = oldTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const pattern = new RegExp(`(?<!#)#${escaped}(?=[\\s#]|$)`, 'g');
-  return notes.replace(pattern, `#${newTag}`);
+  return notes.replace(pattern, () => `#${newTag}`);
 }
