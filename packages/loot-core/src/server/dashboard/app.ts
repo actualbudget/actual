@@ -45,6 +45,7 @@ export function isWidgetType(
     'sankey-card',
     'balance-forecast-card',
     'age-of-money-card',
+    'monte-carlo-card',
   ].includes(type);
 }
 

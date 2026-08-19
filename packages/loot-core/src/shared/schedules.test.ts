@@ -5,6 +5,7 @@ import type { RuleConditionEntity, ScheduleEntity } from '#types/models';
 import * as monthUtils from './months';
 import {
   computeSchedulePreviewTransactions,
+  getHasTransactionsQuery,
   getNextDate,
   getScheduleOccurrenceMatchStartDate,
   getStatus,
@@ -266,6 +267,35 @@ describe('schedules', () => {
 
       // Should not crash; schedule with past end date produces its next_date entry only
       expect(result).toBeDefined();
+    });
+  });
+
+  describe('getHasTransactionsQuery', () => {
+    it('matches nothing when there are no schedules', () => {
+      // An empty `$or` compiles away to no constraint at all, which would make
+      // this scan every transaction in the budget. It must never do that.
+      const filters = getHasTransactionsQuery([]).serialize().filterExpressions;
+
+      expect(filters).toEqual([{ id: null }]);
+      expect(filters[0]).not.toHaveProperty('$or');
+    });
+
+    it('filters by schedule and date when schedules are given', () => {
+      const filters = getHasTransactionsQuery([
+        {
+          id: 'schedule-1',
+          next_date: '2024-03-10',
+          _conditions: [{ op: 'is', field: 'date', value: '2024-03-10' }],
+        },
+      ]).serialize().filterExpressions;
+
+      expect(filters).toEqual([
+        {
+          $or: [
+            { $and: { schedule: 'schedule-1', date: { $gte: '2024-03-10' } } },
+          ],
+        },
+      ]);
     });
   });
 

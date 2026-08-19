@@ -982,6 +982,135 @@ export function getFormulaFunctionCatalog(): Record<
         { name: 'pv', description: t('Present value') },
       ],
     },
+    IPMT: {
+      name: 'IPMT',
+      category: 'math',
+      modes: ['query', 'transaction'],
+      description: t(
+        'Calculates the interest portion of a loan payment for a given period.',
+      ),
+      parameters: [
+        { name: 'rate', description: t('Interest rate') },
+        { name: 'period', description: t('Period to calculate (1-based)') },
+        { name: 'nper', description: t('Number of periods') },
+        { name: 'pv', description: t('Present value') },
+      ],
+    },
+    PPMT: {
+      name: 'PPMT',
+      category: 'math',
+      modes: ['query', 'transaction'],
+      description: t(
+        'Calculates the principal portion of a loan payment for a given period.',
+      ),
+      parameters: [
+        { name: 'rate', description: t('Interest rate') },
+        { name: 'period', description: t('Period to calculate (1-based)') },
+        { name: 'nper', description: t('Number of periods') },
+        { name: 'pv', description: t('Present value') },
+      ],
+    },
+    NPER: {
+      name: 'NPER',
+      category: 'math',
+      modes: ['query', 'transaction'],
+      description: t(
+        'Calculates the number of payment periods for a loan or investment.',
+      ),
+      parameters: [
+        { name: 'rate', description: t('Interest rate') },
+        { name: 'pmt', description: t('Payment amount') },
+        { name: 'pv', description: t('Present value') },
+      ],
+    },
+    CUMIPMT: {
+      name: 'CUMIPMT',
+      category: 'math',
+      modes: ['query', 'transaction'],
+      description: t(
+        'Calculates cumulative interest paid between two periods.',
+      ),
+      parameters: [
+        { name: 'rate', description: t('Interest rate') },
+        { name: 'nper', description: t('Number of periods') },
+        { name: 'pv', description: t('Present value') },
+        { name: 'start_period', description: t('First period (1-based)') },
+        { name: 'end_period', description: t('Last period (1-based)') },
+        {
+          name: 'type',
+          description: t('0 = end of period, 1 = start of period'),
+        },
+      ],
+    },
+    CUMPRINC: {
+      name: 'CUMPRINC',
+      category: 'math',
+      modes: ['query', 'transaction'],
+      description: t(
+        'Calculates cumulative principal paid between two periods.',
+      ),
+      parameters: [
+        { name: 'rate', description: t('Interest rate') },
+        { name: 'nper', description: t('Number of periods') },
+        { name: 'pv', description: t('Present value') },
+        { name: 'start_period', description: t('First period (1-based)') },
+        { name: 'end_period', description: t('Last period (1-based)') },
+        {
+          name: 'type',
+          description: t('0 = end of period, 1 = start of period'),
+        },
+      ],
+    },
+    MIRR: {
+      name: 'MIRR',
+      category: 'math',
+      modes: ['query'],
+      description: t(
+        'Calculates the modified internal rate of return for a series of cash flows.',
+      ),
+      parameters: [
+        { name: 'values', description: t('Range of cash flow values') },
+        {
+          name: 'finance_rate',
+          description: t('Interest rate paid on financing'),
+        },
+        {
+          name: 'reinvest_rate',
+          description: t('Interest rate earned on reinvested cash flows'),
+        },
+      ],
+    },
+    XNPV: {
+      name: 'XNPV',
+      category: 'math',
+      modes: ['query'],
+      description: t(
+        'Calculates net present value for cash flows on irregular (dated) intervals.',
+      ),
+      parameters: [
+        { name: 'rate', description: t('Discount rate') },
+        { name: 'values', description: t('Range of cash flow values') },
+        {
+          name: 'dates',
+          description: t('Range of dates matching each cash flow'),
+        },
+      ],
+    },
+    FVSCHEDULE: {
+      name: 'FVSCHEDULE',
+      category: 'math',
+      modes: ['query'],
+      description: t(
+        'Calculates future value of a principal using a schedule of varying interest rates.',
+      ),
+      parameters: [
+        { name: 'principal', description: t('Starting principal amount') },
+        {
+          name: 'schedule',
+          description: t('Range of interest rates to apply successively'),
+        },
+      ],
+    },
     QUERY: {
       name: 'QUERY',
       category: 'query',
@@ -1003,9 +1132,9 @@ export function getFormulaFunctionCatalog(): Record<
     BALANCE_OF: {
       name: 'BALANCE_OF',
       category: 'other',
-      modes: ['transaction'],
+      modes: ['query', 'transaction'],
       description: t(
-        'Running balance for another account (cents) at this transaction, same cutoff as balance. Use a quoted account id for a deterministic match, or a quoted account name. Use the balance variable instead for the current account.',
+        "Balance for an account. In rule formulas, this is the running balance (in cents) at this transaction, same cutoff as balance (use the balance variable instead for the current account). In report/query formulas, this is the account's current balance (in money/display units). Use a quoted account id for a deterministic match, or a quoted account name.",
       ),
       parameters: [
         {

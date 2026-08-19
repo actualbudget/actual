@@ -203,7 +203,10 @@ export function FatalError({ error: rawError }: FatalErrorProps) {
     rawError instanceof Error
       ? rawError
       : rawError && typeof rawError === 'object'
-        ? Object.assign(new Error(String(rawError)), rawError)
+        ? // Plain message objects (e.g. app-init-failure payloads) stringify
+          // to "[object Object]" — keep the real fields so bug reports carry
+          // the actual cause.
+          Object.assign(new Error(JSON.stringify(rawError)), rawError)
         : new Error(String(rawError));
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
   const isLazyLoadError = error instanceof LazyLoadFailedError;

@@ -183,3 +183,45 @@ test.describe('Reports', () => {
     });
   });
 });
+
+test.describe('Reports without transactions', () => {
+  let page: Page;
+
+  test.beforeEach(async ({ browser }) => {
+    page = await browser.newPage();
+  });
+
+  test.afterEach(async () => {
+    await page?.close();
+  });
+
+  test('creates a custom report in an empty budget', async () => {
+    const pageErrors: Error[] = [];
+    page.on('pageerror', error => pageErrors.push(error));
+
+    const configurationPage = new ConfigurationPage(page);
+    const navigation = new Navigation(page);
+
+    await page.goto('/');
+    await configurationPage.startFresh();
+
+    const reportsPage = await navigation.goToReportsPage();
+    await reportsPage.waitToLoad();
+    const customReportPage = await reportsPage.goToCustomReportPage();
+
+    await expect(page).toHaveURL(/\/reports\/custom/);
+    await expect(
+      customReportPage.pageContent.getByRole('button', {
+        name: 'Total',
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      customReportPage.pageContent.getByRole('button', {
+        name: 'Time',
+        exact: true,
+      }),
+    ).toBeVisible();
+    expect(pageErrors).toEqual([]);
+  });
+});

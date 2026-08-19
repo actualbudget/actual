@@ -12,7 +12,7 @@ function normalizeStringPosix(path, allowAboveRoot) {
   for (let i = 0; i <= path.length; ++i) {
     if (i < path.length) code = path.charCodeAt(i);
     else if (code === 47 /*/*/) break;
-    else code = 47 /*/*/;
+    else code = 47; /*/*/
     if (code === 47 /*/*/) {
       if (lastSlash === i - 1 || dots === 1) {
         // NOOP

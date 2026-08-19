@@ -31,12 +31,8 @@ export function BankSync() {
   const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
   const syncSourceReadable = useMemo(() => getSyncSourceReadable(t), [t]);
-  const {
-    providers,
-    syncServerStatus,
-    showPermissionWarning,
-    providersNeedingConfiguration,
-  } = useBuiltInBankSyncProviders();
+  const { providers, syncServerStatus, permissionWarning } =
+    useBuiltInBankSyncProviders();
 
   const [hoveredAccount, setHoveredAccount] = useState<
     AccountEntity['id'] | null
@@ -101,14 +97,16 @@ export function BankSync() {
         <BuiltInProviders
           providers={providers}
           syncServerStatus={syncServerStatus}
-          showPermissionWarning={showPermissionWarning}
-          providersNeedingConfiguration={providersNeedingConfiguration}
+          permissionWarning={permissionWarning}
         />
 
         {openAccounts.length === 0 && (
           <Text style={{ fontSize: '1.1rem' }}>
             <Trans>
-              To use the bank syncing features, you must first add an account.
+              No accounts yet. Once a provider is set up, use{' '}
+              <strong>Link bank account</strong> to connect your bank and create
+              your accounts automatically. You can also add accounts manually
+              and connect them here later.
             </Trans>
           </Text>
         )}

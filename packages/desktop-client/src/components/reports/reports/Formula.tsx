@@ -19,6 +19,7 @@ import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { FormulaResult } from '#components/reports/FormulaResult';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormulaExecution } from '#hooks/useFormulaExecution';
@@ -67,6 +68,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
       grouped: [],
     },
   } = useCategories();
+  const { data: accounts = [] } = useAccounts();
 
   const [formula, setFormula] = useState(
     widget?.meta?.formula || '=SUM(1, 2, 3)',
@@ -85,11 +87,25 @@ function FormulaInner({ widget }: FormulaInnerProps) {
 
   const title = widget?.meta?.name || t('Formula');
 
+  const simpleAccounts = useMemo(
+    () =>
+      accounts
+        .filter(account => !account.tombstone)
+        .map(account => ({ id: account.id, name: account.name })),
+    [accounts],
+  );
+
   const {
     result,
     isLoading: isExecuting,
     error,
-  } = useFormulaExecution(formula, queriesRef.current, queriesVersion);
+  } = useFormulaExecution(
+    formula,
+    queriesRef.current,
+    queriesVersion,
+    undefined,
+    simpleAccounts,
+  );
 
   const colorVariables = useMemo(
     () => ({
@@ -126,6 +142,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
     queriesRef.current,
     queriesVersion,
     colorVariables,
+    simpleAccounts,
   );
 
   const handleQueriesChange = useCallback(

@@ -132,6 +132,7 @@ export function Sidebar() {
                   title: t('Add account'),
                   Icon: SvgAdd,
                   onClick: onAddAccount,
+                  dataTestId: 'sidebar-add-account',
                 },
               ]}
             />

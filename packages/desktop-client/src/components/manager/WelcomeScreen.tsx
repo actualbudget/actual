@@ -15,6 +15,7 @@ import { createBudget } from '#budgetfiles/budgetfilesSlice';
 import { Link } from '#components/common/Link';
 import { useServerURL } from '#components/ServerContext';
 import { useNavigate } from '#hooks/useNavigate';
+import { useReducedMotion } from '#hooks/useReducedMotion';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -25,16 +26,11 @@ const fadeInUp = keyframes({
 
 function entrance(delay: number) {
   return css({
-    opacity: 0,
     animationName: fadeInUp,
     animationDuration: '500ms',
     animationTimingFunction: 'ease-out',
-    animationFillMode: 'forwards',
+    animationFillMode: 'backwards',
     animationDelay: `${delay}ms`,
-    '@media (prefers-reduced-motion: reduce)': {
-      animationName: 'none',
-      opacity: 1,
-    },
   });
 }
 
@@ -43,6 +39,10 @@ export function WelcomeScreen() {
   const navigate = useNavigate();
   const serverURL = useServerURL();
   const { isNarrowWidth } = useResponsive();
+  const isReducedMotion = useReducedMotion();
+
+  const entranceClass = (delay: number) =>
+    isReducedMotion ? undefined : entrance(delay);
 
   const buttonStyle = {
     fontSize: 15,
@@ -68,7 +68,7 @@ export function WelcomeScreen() {
       }}
     >
       <View
-        className={entrance(0)}
+        className={entranceClass(0)}
         style={{ alignItems: 'center', gap: 10, flexShrink: 0 }}
       >
         <SvgLogo
@@ -91,7 +91,7 @@ export function WelcomeScreen() {
       </View>
 
       <View
-        className={entrance(150)}
+        className={entranceClass(150)}
         style={{ alignItems: 'center', flexShrink: 0 }}
       >
         <Paragraph
@@ -106,7 +106,7 @@ export function WelcomeScreen() {
       </View>
 
       <View
-        className={entrance(300)}
+        className={entranceClass(300)}
         style={{
           width: '100%',
           maxWidth: 400,
@@ -140,7 +140,7 @@ export function WelcomeScreen() {
       </View>
 
       <View
-        className={entrance(450)}
+        className={entranceClass(450)}
         style={{
           alignItems: 'center',
           gap: isNarrowWidth ? 12 : 5,

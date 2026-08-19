@@ -161,9 +161,13 @@ export async function changePassword(newPassword) {
   }
 
   const hashed = await hashPassword(newPassword);
-  accountDb.mutate("UPDATE auth SET extra_data = ? WHERE method = 'password'", [
-    hashed,
-  ]);
+  const result = accountDb.mutate(
+    "UPDATE auth SET extra_data = ? WHERE method = 'password'",
+    [hashed],
+  );
+  if (result.changes === 0) {
+    return { error: 'no-password-method' };
+  }
   return {};
 }
 

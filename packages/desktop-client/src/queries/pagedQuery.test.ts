@@ -618,4 +618,101 @@ describe('pagedQuery', () => {
 
     await wait(1000);
   });
+
+  it('does not spin forever when unsubscribed during a refetch', async () => {
+    // Regression test: unsubscribing while a refetch was in flight (e.g.
+    // switching accounts while a scroll-triggered `fetchNext` was pending)
+    // used to leave `inflightRequestId` set forever, making `fetchNext` spin
+    // in an infinite microtask loop that froze the app at 100% CPU.
+    const data = [];
+    for (let i = 0; i < 400; i++) {
+      data.push({ id: i });
+    }
+
+    // Server that blocks every page query until we release it, so the test
+    // controls exactly when each in-flight request resolves.
+    const pending = [];
+    mockServer({
+      send: async (name, args) => {
+        switch (name) {
+          case 'query': {
+            const query = args;
+            if (isCountQuery(query)) {
+              return { data: data.length, dependencies: ['transactions'] };
+            }
+            await new Promise(resolve => pending.push(resolve));
+            return {
+              data: limitOffset(
+                data.map(row => select(row, query.selectExpressions)),
+                query.limit,
+                query.offset,
+              ),
+              dependencies: ['transactions'],
+            };
+          }
+          default:
+            throw new Error(`Command not implemented: ${name}`);
+        }
+      },
+    });
+
+    const query = q('transactions').select('id');
+    const paged = pagedQuery(query, {
+      options: { onlySync: true, pageCount: 150 },
+    });
+
+    await wait(1);
+    pending.shift()();
+    await wait(1);
+    expect(paged.data.length).toBe(150);
+
+    // A scroll near the bottom starts fetching the next page...
+    let fetchNextSettled = false;
+    const fetchNextPromise = paged.fetchNext().then(() => {
+      fetchNextSettled = true;
+    });
+    await wait(1);
+
+    // ...a database change triggers a refetch while that page is loading...
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
+    await wait(1);
+
+    // ...and the account switch unsubscribes before either request finishes.
+    paged.unsubscribe();
+    while (pending.length) {
+      pending.shift()();
+    }
+
+    // Pump the microtask queue a bounded number of times. Timers never fire
+    // while `fetchNext` spins, so this must not wait on a timer.
+    for (let i = 0; i < 2000; i++) {
+      await Promise.resolve();
+    }
+
+    // The cancelled refetch must not leave a stale in-flight request id
+    // behind — `fetchNext` loops on it until it clears.
+    const internals = paged as unknown as {
+      _inflightRequestId: number | null;
+    };
+    const staleRequestId = internals._inflightRequestId;
+    // Break the loop if it is spinning, so a regression fails cleanly here
+    // instead of hanging the test worker.
+    internals._inflightRequestId = null;
+    expect(staleRequestId).toBeNull();
+
+    // fetchNext recovers: release the page request it retries and let it
+    // finish.
+    for (let i = 0; i < 20 && !fetchNextSettled; i++) {
+      while (pending.length) {
+        pending.shift()();
+      }
+      await wait(1);
+    }
+    await fetchNextPromise;
+    expect(fetchNextSettled).toBe(true);
+    expect(paged.data.length).toBe(300);
+  });
 });

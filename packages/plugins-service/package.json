@@ -15,10 +15,10 @@
     "workbox-precaching": "^7.4.1"
   },
   "devDependencies": {
-    "@types/node": "^22.19.21",
+    "@types/node": "^22.20.1",
     "@typescript/native-preview": "beta",
     "cross-env": "^10.1.0",
     "typescript-strict-plugin": "^2.4.4",
-    "vite": "^8.0.16"
+    "vite": "^8.1.5"
   }
 }

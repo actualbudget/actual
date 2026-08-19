@@ -118,7 +118,6 @@ describe('sheet language', () => {
         SELECT transactions1.id AS trans1, transactions2.id AS trans2, accounts.id AS id FROM accounts
         LEFT JOIN transactions transactions1 ON transactions1.id = accounts.trans1
         LEFT JOIN transactions transactions2 ON transactions2.id = accounts.trans2
-        WHERE 1
       `),
     );
   });
@@ -172,7 +171,6 @@ describe('sheet language', () => {
         LEFT JOIN transactions transactions1 ON transactions1.id = accounts.trans1
         LEFT JOIN transactions transactions2 ON transactions2.id = accounts.trans2
         LEFT JOIN transactions transactions3 ON transactions3.id = accounts.trans3
-        WHERE 1
       `),
     );
 
@@ -188,7 +186,6 @@ describe('sheet language', () => {
         LEFT JOIN transactions transactions2 ON transactions2.id = accounts.trans2
         LEFT JOIN transactions transactions3 ON transactions3.id = accounts.trans3
         LEFT JOIN payees payees4 ON payees4.id = transactions1.payee
-        WHERE 1
      `),
     );
   });
@@ -210,7 +207,7 @@ describe('sheet language', () => {
     expect(sqlLines(result.sql)).toEqual(
       sqlLines(`
         SELECT transactions.amount AS amount, transactions.id AS id FROM transactions
-        WHERE 1 AND transactions.tombstone = 0
+        WHERE transactions.tombstone = 0
       `),
     );
 
@@ -222,7 +219,6 @@ describe('sheet language', () => {
     expect(sqlLines(result.sql)).toEqual(
       sqlLines(`
         SELECT transactions.amount AS amount, transactions.id AS id FROM transactions
-        WHERE 1
       `),
     );
 
@@ -236,7 +232,6 @@ describe('sheet language', () => {
         SELECT transactions1.amount AS "trans.amount", payees2.name AS "trans.payee.name", accounts.id AS id FROM accounts
         LEFT JOIN transactions transactions1 ON transactions1.id = accounts.trans AND transactions1.tombstone = 0
         LEFT JOIN payees payees2 ON payees2.id = transactions1.payee AND payees2.tombstone = 0
-        WHERE 1
       `),
     );
 
@@ -373,7 +368,6 @@ describe('sheet language', () => {
       sqlLines(`
         SELECT transactions.id AS id FROM transactions
         LEFT JOIN payees payees1 ON payees1.id = transactions.payee
-        WHERE 1
         GROUP BY payees1.name
       `),
     );
@@ -398,7 +392,6 @@ describe('sheet language', () => {
       sqlLines(`
         SELECT transactions.id AS id FROM transactions
         LEFT JOIN payees payees1 ON payees1.id = transactions.payee
-        WHERE 1
         ORDER BY payees1.name
       `),
     );
@@ -558,6 +551,30 @@ describe('sheet language', () => {
     );
   });
 
+  it('ignores an empty $or filter', () => {
+    const result = generateSQLWithState(
+      q('transactions').filter({ $or: [] }).select(['id']).serialize(),
+      basicSchema,
+    );
+    expect(sqlLines(result.sql)).toEqual(
+      sqlLines(`
+        SELECT transactions.id AS id FROM transactions
+      `),
+    );
+  });
+
+  it('ignores a null $or filter', () => {
+    const result = generateSQLWithState(
+      q('transactions').filter({ $or: null }).select(['id']).serialize(),
+      basicSchema,
+    );
+    expect(sqlLines(result.sql)).toEqual(
+      sqlLines(`
+        SELECT transactions.id AS id FROM transactions
+      `),
+    );
+  });
+
   it('allows functions in `filter`', () => {
     // Allows transforming the input
     let result = generateSQLWithState(
@@ -675,7 +692,7 @@ describe('sheet language', () => {
     expect(sqlLines(result.sql)).toEqual(
       sqlLines(`
         SELECT v_transactions.amount AS amount, v_transactions.id AS id FROM v_transactions
-        WHERE 1 AND (v_transactions.amount > 0)
+        WHERE (v_transactions.amount > 0)
       `),
     );
 
@@ -699,7 +716,6 @@ describe('sheet language', () => {
       sqlLines(`
         SELECT transactions1.amount AS "trans1.amount", accounts.id AS id FROM accounts
         LEFT JOIN v_transactions transactions1 ON transactions1.id = accounts.trans1 AND (transactions1.amount > 0)
-        WHERE 1
       `),
     );
 
@@ -730,7 +746,6 @@ describe('sheet language', () => {
     expect(sqlLines(result.sql)).toEqual(
       sqlLines(`
         SELECT v_transactions.amount AS amount, v_transactions.id AS id FROM v_transactions
-        WHERE 1
       `),
     );
   });

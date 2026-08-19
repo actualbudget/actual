@@ -502,6 +502,8 @@ function QueryItem({
     lastYear: t('Last year'),
     yearToDate: t('Year to date'),
     priorYearToDate: t('Prior year to date'),
+    currentQuarter: t('Current quarter'),
+    previousQuarter: t('Previous quarter'),
   } satisfies Record<TimeFrame['mode'], string>;
   const timeRangeLabel = timeRangeLabels[timeRangeMode];
   const presetTimeRangeLabels = {
@@ -510,6 +512,8 @@ function QueryItem({
     lastYear: t('Last year transactions'),
     yearToDate: t('Year to date transactions'),
     priorYearToDate: t('Prior year to date transactions'),
+    currentQuarter: t('Current quarter transactions'),
+    previousQuarter: t('Previous quarter transactions'),
   } satisfies Record<PresetTimeRangeMode, string>;
   const presetTimeRangeLabel = isPresetTimeRange
     ? presetTimeRangeLabels[timeRangeMode]
@@ -785,6 +789,26 @@ function QueryItem({
                     mode = 'priorYearToDate';
                     break;
                   }
+                  case 'current-quarter': {
+                    [start, end] = getLiveRange(
+                      'Current quarter',
+                      _earliestTransaction,
+                      _latestTransaction,
+                      false,
+                    );
+                    mode = 'currentQuarter';
+                    break;
+                  }
+                  case 'previous-quarter': {
+                    [start, end] = getLiveRange(
+                      'Previous quarter',
+                      _earliestTransaction,
+                      _latestTransaction,
+                      false,
+                    );
+                    mode = 'previousQuarter';
+                    break;
+                  }
                   case 'all-time': {
                     [start, end] = getLiveRange(
                       'All time',
@@ -823,6 +847,8 @@ function QueryItem({
                   name: 'prior-year-to-date',
                   text: t('Prior year to date'),
                 },
+                { name: 'current-quarter', text: t('Current quarter') },
+                { name: 'previous-quarter', text: t('Previous quarter') },
                 { name: 'all-time', text: t('All time') },
               ]}
             />

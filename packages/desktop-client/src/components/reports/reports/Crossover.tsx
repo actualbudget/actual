@@ -125,7 +125,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
   // initialize once when data is available
   useEffect(() => {
-    if (selectionsInitialized || accounts.length === 0 || isCategoriesLoading) {
+    if (selectionsInitialized || isCategoriesLoading) {
       return;
     }
 
@@ -419,14 +419,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     });
   };
 
-  if (
-    !allMonths ||
-    !displayData ||
-    !start ||
-    !end ||
-    isCategoriesLoading ||
-    accounts.length === 0
-  ) {
+  if (!allMonths || !displayData || !start || !end || isCategoriesLoading) {
     return <LoadingIndicator />;
   }
 

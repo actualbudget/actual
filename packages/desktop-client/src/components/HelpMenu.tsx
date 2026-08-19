@@ -14,6 +14,8 @@ import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
+import { useTour } from './tour/TourProvider';
+
 const getPageDocs = (page: string) => {
   switch (page) {
     case '/budget':
@@ -42,6 +44,7 @@ type HelpMenuItem =
   | 'docs'
   | 'discord'
   | 'keyboard-shortcuts'
+  | 'start-tour'
   | 'goal-templates';
 
 type HelpButtonProps = {
@@ -56,6 +59,7 @@ const HelpButton = forwardRef<HTMLButtonElement, HelpButtonProps>(
         variant="bare"
         ref={ref}
         onPress={onPress}
+        data-testid="help-menu-button"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -79,6 +83,7 @@ export const HelpMenu = () => {
 
   const dispatch = useDispatch();
   const page = useLocation().pathname;
+  const { startTour } = useTour();
 
   const handleItemSelect = (item: HelpMenuItem) => {
     switch (item) {
@@ -90,6 +95,9 @@ export const HelpMenu = () => {
         break;
       case 'keyboard-shortcuts':
         dispatch(pushModal({ modal: { name: 'keyboard-shortcuts' } }));
+        break;
+      case 'start-tour':
+        startTour();
         break;
       case 'goal-templates':
         dispatch(pushModal({ modal: { name: 'goal-templates' } }));
@@ -127,6 +135,7 @@ export const HelpMenu = () => {
               text: t('Community support (Discord)'),
             },
             { name: 'keyboard-shortcuts', text: t('Keyboard shortcuts') },
+            { name: 'start-tour', text: t('Take a tour') },
             ...(showGoalTemplates && page === '/budget'
               ? [{ name: 'goal-templates', text: t('Goal templates') }]
               : []),

@@ -1,0 +1,2 @@
+-P depot-ubuntu-latest=catthehacker/ubuntu:act-latest
+-P depot-ubuntu-latest-4=catthehacker/ubuntu:act-latest

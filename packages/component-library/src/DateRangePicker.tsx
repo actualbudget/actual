@@ -260,7 +260,14 @@ export function DateRangePicker({
               {Boolean(presets?.length) && (
                 <View>
                   <Text style={sectionTitleStyle}>{labels.quickSelect}</Text>
-                  <View style={{ gap: 4 }}>
+                  <View
+                    style={{
+                      gap: 4,
+                      maxHeight: 200,
+                      overflowY: 'auto',
+                      paddingRight: 4,
+                    }}
+                  >
                     {presets?.map(preset => {
                       // Derive the active preset from the shown range instead
                       // of storing it, so it survives closing and reopening

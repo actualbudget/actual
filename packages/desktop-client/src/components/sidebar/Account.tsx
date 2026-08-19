@@ -136,7 +136,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   );
   useContextMenu({
     triggerRef,
-    enabled: account && needsTooltip,
+    enabled: account != null && needsTooltip,
     items: [
       {
         name: 'account-rename',

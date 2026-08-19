@@ -6,6 +6,7 @@ import { ButtonWithLoading } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
@@ -18,6 +19,7 @@ import {
   ModalHeader,
 } from '#components/common/Modal';
 import { FormField, FormLabel } from '#components/forms';
+import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { getSecretsError } from '#util/error';
 
@@ -28,11 +30,16 @@ type PluggyAiInitialiseProps = Extract<
 
 export const PluggyAiInitialiseModal = ({
   onSuccess,
+  credentialSource,
 }: PluggyAiInitialiseProps) => {
   const { t } = useTranslation();
+  const { cloudFileId, isAdmin: canSetGlobalCredentials } = useCurrentAccess();
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
   const [itemIds, setItemIds] = useState('');
+  const [perBudgetFile, setPerBudgetFile] = useState(
+    credentialSource === 'per-budget-file' || !canSetGlobalCredentials,
+  );
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(
@@ -54,46 +61,61 @@ export const PluggyAiInitialiseModal = ({
 
     setIsLoading(true);
 
-    let { error, reason } =
+    const fileId = perBudgetFile ? cloudFileId : null;
+    if (perBudgetFile && !fileId) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(t('Budget file ID is required.'));
+      return;
+    }
+
+    let result =
       (await send('secret-set', {
         name: 'pluggyai_clientId',
         value: clientId,
+        fileId,
       })) || {};
+    let { error, reason } = result;
 
     if (error) {
       setIsLoading(false);
       setIsValid(false);
       setError(getSecretsError(error, reason));
       return;
-    } else {
-      ({ error, reason } =
-        (await send('secret-set', {
-          name: 'pluggyai_clientSecret',
-          value: clientSecret,
-        })) || {});
-      if (error) {
-        setIsLoading(false);
-        setIsValid(false);
-        setError(getSecretsError(error, reason));
-        return;
-      } else {
-        ({ error, reason } =
-          (await send('secret-set', {
-            name: 'pluggyai_itemIds',
-            value: itemIds,
-          })) || {});
+    }
 
-        if (error) {
-          setIsLoading(false);
-          setIsValid(false);
-          setError(getSecretsError(error, reason));
-          return;
-        }
-      }
+    result =
+      (await send('secret-set', {
+        name: 'pluggyai_clientSecret',
+        value: clientSecret,
+        fileId,
+      })) || {};
+    ({ error, reason } = result);
+
+    if (error) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(getSecretsError(error, reason));
+      return;
+    }
+
+    result =
+      (await send('secret-set', {
+        name: 'pluggyai_itemIds',
+        value: itemIds,
+        fileId,
+      })) || {};
+    ({ error, reason } = result);
+
+    if (error) {
+      setIsLoading(false);
+      setIsValid(false);
+      setError(getSecretsError(error, reason));
+      return;
     }
 
     setIsValid(true);
-    onSuccess();
+    onSuccess(perBudgetFile);
     setIsLoading(false);
     close();
   };
@@ -122,6 +144,25 @@ export const PluggyAiInitialiseModal = ({
                 .
               </Trans>
             </Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
+              <Text>
+                <Trans>For this budget only</Trans>
+              </Text>
+              <Toggle
+                id="pluggyai-per-budget-file"
+                isOn={perBudgetFile}
+                isDisabled={!canSetGlobalCredentials}
+                onToggle={setPerBudgetFile}
+              />
+            </View>
 
             <FormField>
               <FormLabel title={t('Client ID:')} htmlFor="client-id-field" />

@@ -76,4 +76,43 @@ describe('getLiveRange', () => {
       expect(end).toBe('2017-01-01');
     });
   });
+
+  describe('Current quarter', () => {
+    it('returns the full quarter containing today (Q1: Jan-Mar)', () => {
+      const [start, end] = getLiveRange(
+        'Current quarter',
+        EARLIEST,
+        LATEST,
+        false,
+      );
+      // currentMonth() = '2017-01', so the quarter is Jan-Mar 2017
+      expect(start).toBe('2017-01-01');
+      expect(end).toBe('2017-03-31');
+    });
+
+    it('clamps start date to earliestTransaction when data starts later', () => {
+      const [start, end] = getLiveRange(
+        'Current quarter',
+        '2017-02-15',
+        LATEST,
+        false,
+      );
+      expect(start).toBe('2017-02-15');
+      expect(end).toBe('2017-03-31');
+    });
+  });
+
+  describe('Previous quarter', () => {
+    it('returns the full previous quarter (Q4 of the prior year: Oct-Dec)', () => {
+      const [start, end] = getLiveRange(
+        'Previous quarter',
+        EARLIEST,
+        LATEST,
+        false,
+      );
+      // currentMonth() = '2017-01', so the previous quarter is Oct-Dec 2016
+      expect(start).toBe('2016-10-01');
+      expect(end).toBe('2016-12-31');
+    });
+  });
 });

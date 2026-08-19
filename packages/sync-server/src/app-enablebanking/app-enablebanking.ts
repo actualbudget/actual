@@ -9,6 +9,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+import { isBlockedIp } from '#util/ssrf';
 
 import type {
   EnableBankingSession,
@@ -39,9 +40,21 @@ function extractPsuHeaders(req: Request): PsuHeaders {
       ? req.headers['user-agent']
       : undefined;
 
-  const headers: PsuHeaders = {};
-  if (ip) headers['Psu-Ip-Address'] = ip;
-  if (ua) headers['Psu-User-Agent'] = ua;
+  if (!ip || isBlockedIp(ip)) {
+    debug('Skipping PSU headers because PSU IP is local/private');
+    return {};
+  }
+
+  const headers: PsuHeaders = {
+    'Psu-Ip-Address': ip,
+  };
+
+  if (ua) {
+    headers['Psu-User-Agent'] = ua;
+  }
+
+  debug('Using PSU headers for public PSU IP');
+
   return headers;
 }
 

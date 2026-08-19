@@ -24,11 +24,20 @@ yourself.
 - **Exception**: if a human **explicitly asks** you to fill it out, do so **in
   Chinese**, using Chinese characters (简体中文) for all content you add.
 
+## Do not create GitHub issues
+
+**Agents must never create GitHub issues.** Filing an issue is a human
+decision — neither the GitHub MCP tools (`issue_write` with method `create`)
+nor the `gh` CLI (`gh issue create`) may be used to open one; agent hooks
+block both. If you believe an issue should exist, share the proposed title
+and body with the user and let them file it. Updating existing issues (and
+commenting on them) remains allowed.
+
 ## GitHub comment, review and issue prefix
 
 **Prefix everything you post to GitHub with the robot emoji 🤖** — pull-request
 and issue comments, pull-request reviews (including inline review comments), and
-the title and body of issues you create. This keeps agent-authored content
+the title and body of issues you edit. This keeps agent-authored content
 visibly marked. It does **not** change PR titles (still `[AI] …`) or commit
 messages (still `[AI] …`).
 

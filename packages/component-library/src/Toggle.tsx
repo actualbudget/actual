@@ -13,6 +13,7 @@ type ToggleProps = {
   onToggle?: (isOn: boolean) => void;
   className?: string;
   style?: CSSProperties;
+  'aria-label'?: string;
 };
 
 export const Toggle = ({
@@ -22,11 +23,13 @@ export const Toggle = ({
   onToggle,
   className,
   style,
+  'aria-label': ariaLabel,
 }: ToggleProps) => {
   return (
     <View style={style} className={className}>
       <input
         id={id}
+        aria-label={ariaLabel}
         checked={isOn}
         disabled={isDisabled}
         onChange={e => onToggle?.(e.target.checked)}

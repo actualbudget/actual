@@ -58,6 +58,25 @@ const worker = startBrowserBackend({
     isOpenIdCallback,
 });
 
+// Ask the browser to exclude this origin's storage (the local budget database
+// in IndexedDB) from automatic eviction under storage pressure. Without this,
+// the browser is allowed to silently delete all local data, forcing a full
+// re-download of the budget and losing any changes not yet synced.
+if (navigator.storage?.persist) {
+  void navigator.storage
+    .persist()
+    .then(persisted => {
+      if (!persisted) {
+        console.warn(
+          'Persistent storage was not granted; the browser may evict local budget data under storage pressure.',
+        );
+      }
+    })
+    .catch(error => {
+      console.warn('Persistent storage request failed:', error);
+    });
+}
+
 let isUpdateReadyForDownload = false;
 let markUpdateReadyForDownload;
 const isUpdateReadyForDownloadPromise = new Promise(resolve => {
@@ -226,9 +245,11 @@ global.Actual = {
   applyAppUpdate: async () => {
     updateSW();
 
-    // Wait for the app to reload
+    // Wait for the service worker swap to reload the page. If the new worker
+    // never takes control (e.g. the server is mid-update), force a reload so
+    // the "Update now" button doesn't hang forever with no feedback.
     await new Promise(() => {
-      // Do nothing
+      setTimeout(() => window.location.reload(), 15000);
     });
   },
 

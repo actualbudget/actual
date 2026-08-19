@@ -1,5 +1,6 @@
 import {
   addMonths,
+  currentDate,
   dayFromDate,
   firstDayOfMonth,
   monthFromDate,
@@ -43,7 +44,7 @@ export function getAutomationExamples(): AutomationExample[] {
             type: 'periodic',
             amount: 100,
             period: { period: 'month', amount: 1 },
-            starting: dayFromDate(firstDayOfMonth(new Date())),
+            starting: dayFromDate(firstDayOfMonth(currentDate())),
             priority: DEFAULT_PRIORITY,
           },
           'fixed',
@@ -59,7 +60,7 @@ export function getAutomationExamples(): AutomationExample[] {
             amount: 1200,
             // Always 12 months out so users in late-year months don't get a
             // target that's already passed.
-            month: addMonths(monthFromDate(new Date()), 12),
+            month: addMonths(monthFromDate(currentDate()), 12),
             annual: true,
             repeat: 1,
             priority: DEFAULT_PRIORITY,

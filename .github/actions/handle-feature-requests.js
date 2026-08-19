@@ -42,6 +42,9 @@ async function main() {
                 nodes {
                   id
                   number
+                  issueType {
+                    name
+                  }
                   labels(first: 10) {
                     nodes {
                       id
@@ -60,7 +63,7 @@ async function main() {
     console.log(JSON.stringify(res, null, 2));
 
     return res.data.repository.pullRequest.closingIssuesReferences.nodes.filter(
-      issue => issue.labels.nodes.some(label => label.name === 'feature'),
+      issue => issue.issueType?.name === 'Feature',
     );
   });
 

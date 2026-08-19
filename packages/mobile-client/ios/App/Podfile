@@ -12,7 +12,6 @@ def capacitor_pods
   pod 'Capacitor', :path => '../../../../node_modules/@capacitor/ios'
   pod 'CapacitorCordova', :path => '../../../../node_modules/@capacitor/ios'
   pod 'CapacitorSplashScreen', :path => '../../../../node_modules/@capacitor/splash-screen'
-  pod 'CapgoCapacitorUpdater', :path => '../../../../node_modules/@capgo/capacitor-updater'
 end
 
 target 'App' do

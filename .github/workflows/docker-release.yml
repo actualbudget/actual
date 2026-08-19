@@ -30,7 +30,7 @@ permissions:
 jobs:
   build:
     name: Build Docker image
-    runs-on: depot-ubuntu-latest
+    runs-on: depot-ubuntu-latest-4
     environment: release
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -110,7 +110,7 @@ jobs:
           context: .
           push: true
           file: packages/sync-server/docker/ubuntu.Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Build alpine image for testing

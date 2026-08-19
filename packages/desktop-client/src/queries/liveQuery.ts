@@ -215,11 +215,15 @@ export class LiveQuery<TResponse = unknown> {
         }
 
         this.onData(this.data, previousData);
-        this.inflightRequestId = null;
       }
     } catch (e) {
       console.log('Error fetching data', e);
       this.onError(e);
+    } finally {
+      // always clear the request id, to prevent an infinite loop
+      if (this.inflightRequestId === reqId) {
+        this.inflightRequestId = null;
+      }
     }
   };
 }

@@ -11,6 +11,7 @@ type LabeledCheckboxProps = {
   checked?: ComponentProps<typeof Checkbox>['checked'];
   disabled?: ComponentProps<typeof Checkbox>['disabled'];
   onChange?: ComponentProps<typeof Checkbox>['onChange'];
+  onMouseDown?: ComponentProps<typeof View>['onMouseDown'];
   children: ReactNode;
   style?: CSSProperties;
 };
@@ -20,11 +21,13 @@ export function LabeledCheckbox({
   checked,
   disabled,
   onChange,
+  onMouseDown,
   children,
   style,
 }: LabeledCheckboxProps) {
   return (
     <View
+      onMouseDown={onMouseDown}
       style={{
         flex: 1,
         flexDirection: 'row',

@@ -94,7 +94,7 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          for pkg in desktop-client desktop-electron sync-server api cli loot-core; do
+          for pkg in desktop-client desktop-electron sync-server api cli loot-core mobile-client; do
             yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts \
               --package-json "./packages/$pkg/package.json" \
               --version "$VERSION" \

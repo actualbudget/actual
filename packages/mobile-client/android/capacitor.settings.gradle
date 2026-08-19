@@ -4,6 +4,3 @@ project(':capacitor-android').projectDir = new File('../../../node_modules/@capa
 
 include ':capacitor-splash-screen'
 project(':capacitor-splash-screen').projectDir = new File('../../../node_modules/@capacitor/splash-screen/android')
-
-include ':capgo-capacitor-updater'
-project(':capgo-capacitor-updater').projectDir = new File('../../../node_modules/@capgo/capacitor-updater/android')

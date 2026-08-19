@@ -3,7 +3,6 @@ import path from 'path';
 import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
-import { AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
 
@@ -107,18 +106,20 @@ test.describe('Onboarding', () => {
   });
 
   test('creates a new empty budget file', async () => {
-    await configurationPage.startFresh();
+    const budgetPage = await configurationPage.startFresh();
 
-    const accountPage = new AccountPage(page);
+    await expect(budgetPage.budgetTable).toBeVisible();
+
+    const accountPage = await navigation.goToAccountPage('All accounts');
     await expect(accountPage.accountName).toBeVisible();
     await expect(accountPage.accountName).toHaveText('All Accounts');
     await expect(accountPage.accountBalance).toHaveText('0.00');
   });
 
   test('navigates back to start page by clicking on "no server" in an empty budget file', async () => {
-    const accountPage = await configurationPage.startFresh();
+    const budgetPage = await configurationPage.startFresh();
 
-    await expect(accountPage.transactionTable).toBeVisible();
+    await expect(budgetPage.budgetTable).toBeVisible();
 
     await navigation.clickOnNoServer();
     await page.getByRole('button', { name: 'Start using a server' }).click();

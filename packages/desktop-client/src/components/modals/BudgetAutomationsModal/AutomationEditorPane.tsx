@@ -348,6 +348,7 @@ export function AutomationEditorPane({
                 </Text>
                 <Input
                   type="number"
+                  aria-label={t('Priority')}
                   style={{ width: 64 }}
                   value={String(state.template.priority)}
                   onChangeValue={value => {

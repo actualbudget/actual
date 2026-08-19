@@ -14,6 +14,7 @@ import {
   SvgAdd,
   SvgCheveronDown,
   SvgCheveronRight,
+  SvgPiggyBank,
 } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -226,16 +227,57 @@ function AccountListItem({
   );
 }
 
-function EmptyMessage() {
+function EmptyMessage({ onAddAccount }: { onAddAccount: () => void }) {
   return (
-    <View style={{ flex: 1, padding: 30 }}>
-      <Text style={styles.text}>
+    <View
+      style={{
+        minHeight: `calc(100vh - ${MOBILE_NAV_HEIGHT}px - 140px)`,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 30,
+        gap: 15,
+      }}
+    >
+      <SvgPiggyBank
+        width={70}
+        height={70}
+        style={{ color: theme.pageTextSubdued }}
+      />
+      <Text
+        style={{
+          ...styles.largeText,
+          fontWeight: 600,
+          textAlign: 'center',
+        }}
+      >
+        <Trans>Add your first account</Trans>
+      </Text>
+      <Text
+        style={{
+          ...styles.text,
+          textAlign: 'center',
+          color: theme.pageTextLight,
+          lineHeight: 1.5,
+          maxWidth: 340,
+        }}
+      >
         <Trans>
-          For Actual to be useful, you need to <strong>add an account</strong>.
-          You can link an account to automatically download transactions, or
-          manage it locally yourself.
+          Accounts hold your transactions, like everyday spending, savings,
+          credit cards, or cash. Add one to start tracking your money.
         </Trans>
       </Text>
+      <Button
+        variant="primary"
+        style={{
+          padding: '12px 20px',
+          fontSize: 15,
+          minHeight: styles.mobileMinHeight,
+          marginTop: 10,
+        }}
+        onPress={onAddAccount}
+      >
+        <Trans>Add account</Trans>
+      </Button>
     </View>
   );
 }
@@ -312,66 +354,69 @@ function AllAccountList({
       }
       padding={0}
     >
-      {accounts.length === 0 && <EmptyMessage />}
-      <PullToRefresh onRefresh={onSync}>
-        <View
-          aria-label={t('Account list')}
-          style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
-        >
-          <AccountHeader
-            id="all"
-            name={t('All accounts')}
-            amount={getAllAccountsBalance()}
-          />
-          {onBudgetAccounts.length > 0 && (
+      {accounts.length === 0 ? (
+        <EmptyMessage onAddAccount={onAddAccount} />
+      ) : (
+        <PullToRefresh onRefresh={onSync}>
+          <View
+            aria-label={t('Account list')}
+            style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
+          >
             <AccountHeader
-              id="onbudget"
-              name={t('On budget')}
-              amount={getOnBudgetBalance()}
+              id="all"
+              name={t('All accounts')}
+              amount={getAllAccountsBalance()}
             />
-          )}
-          <AccountList
-            aria-label={t('On budget accounts')}
-            accounts={onBudgetAccounts}
-            getAccountBalance={getAccountBalance}
-            onOpenAccount={onOpenAccount}
-          />
-          {offBudgetAccounts.length > 0 && (
-            <AccountHeader
-              id="offbudget"
-              name={t('Off budget')}
-              amount={getOffBudgetBalance()}
-            />
-          )}
-          <AccountList
-            aria-label={t('Off budget accounts')}
-            accounts={offBudgetAccounts}
-            getAccountBalance={getAccountBalance}
-            onOpenAccount={onOpenAccount}
-          />
-          {closedAccounts.length > 0 && (
-            <AccountHeader
-              id="closed"
-              name={t('Closed')}
-              onPress={onToggleClosedAccounts}
-              amount={getClosedAccountsBalance()}
-              style={{ marginTop: 30 }}
-              showCheveronDown={showClosedAccounts}
-            />
-          )}
-          {showClosedAccounts && (
+            {onBudgetAccounts.length > 0 && (
+              <AccountHeader
+                id="onbudget"
+                name={t('On budget')}
+                amount={getOnBudgetBalance()}
+              />
+            )}
             <AccountList
-              aria-label={t('Closed accounts')}
-              accounts={closedAccounts}
+              aria-label={t('On budget accounts')}
+              accounts={onBudgetAccounts}
               getAccountBalance={getAccountBalance}
               onOpenAccount={onOpenAccount}
-              ref={el => {
-                if (el) closedAccountsRef.current = el;
-              }}
             />
-          )}
-        </View>
-      </PullToRefresh>
+            {offBudgetAccounts.length > 0 && (
+              <AccountHeader
+                id="offbudget"
+                name={t('Off budget')}
+                amount={getOffBudgetBalance()}
+              />
+            )}
+            <AccountList
+              aria-label={t('Off budget accounts')}
+              accounts={offBudgetAccounts}
+              getAccountBalance={getAccountBalance}
+              onOpenAccount={onOpenAccount}
+            />
+            {closedAccounts.length > 0 && (
+              <AccountHeader
+                id="closed"
+                name={t('Closed')}
+                onPress={onToggleClosedAccounts}
+                amount={getClosedAccountsBalance()}
+                style={{ marginTop: 30 }}
+                showCheveronDown={showClosedAccounts}
+              />
+            )}
+            {showClosedAccounts && (
+              <AccountList
+                aria-label={t('Closed accounts')}
+                accounts={closedAccounts}
+                getAccountBalance={getAccountBalance}
+                onOpenAccount={onOpenAccount}
+                ref={el => {
+                  if (el) closedAccountsRef.current = el;
+                }}
+              />
+            )}
+          </View>
+        </PullToRefresh>
+      )}
     </Page>
   );
 }

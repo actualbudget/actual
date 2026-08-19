@@ -22,7 +22,14 @@ import type {
   TagEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
@@ -36,7 +43,11 @@ import { createTestQueryClient, TestProviders } from '#mocks';
 import { payeeQueries } from '#payees';
 import { tagQueries } from '#tags/queries';
 
-import { TransactionTable } from './TransactionsTable';
+import {
+  DEFAULT_AMOUNT_COLUMN_WIDTHS,
+  TransactionTable,
+  useAmountColumnWidths,
+} from './TransactionsTable';
 
 const queryClient = createTestQueryClient();
 
@@ -148,10 +159,15 @@ type LiveTransactionTableProps = {
   currentAccountId: string | null;
   showAccount: boolean;
   showCategory: boolean;
+  showGroup?: boolean;
   showCleared: boolean;
   isAdding: boolean;
   onTransactionsChange?: (newTrans: TransactionEntity[]) => void;
   onCloseAddTransaction?: () => void;
+  onApplyRules?: (
+    transaction: TransactionEntity,
+    updatedFieldName?: string | null,
+  ) => Promise<TransactionEntity>;
 };
 
 function LiveTransactionTable(props: LiveTransactionTableProps) {
@@ -496,6 +512,80 @@ describe('Transactions', () => {
     });
   });
 
+  test('preview split transactions show a payee', async () => {
+    schedules = [
+      {
+        id: 'schedule-1',
+        name: 'Monthly rent',
+        rule: 'rule-1',
+        next_date: '2017-01-01',
+        completed: false,
+        posts_transaction: false,
+        tombstone: false,
+        _payee: 'alice-id',
+        _account: accounts[0].id,
+        _amount: -1000,
+        _amountOp: 'is',
+        _date: '2017-01-01',
+        _conditions: [],
+        _actions: [],
+      },
+    ];
+
+    const previewParentId = 'preview/schedule-1/2017-01-01';
+    const previewParent: TransactionEntity = {
+      id: previewParentId,
+      account: accounts[0].id,
+      amount: -1000,
+      date: '2017-01-01',
+      payee: null,
+      is_parent: true,
+      schedule: 'schedule-1',
+      cleared: false,
+      reconciled: false,
+    };
+    const previewChildren: TransactionEntity[] = [
+      {
+        id: 'preview/schedule-1-child-1',
+        account: accounts[0].id,
+        amount: -600,
+        date: '2017-01-01',
+        payee: 'alice-id',
+        is_child: true,
+        parent_id: previewParentId,
+        schedule: 'schedule-1',
+        cleared: false,
+        reconciled: false,
+      },
+      {
+        id: 'preview/schedule-1-child-2',
+        account: accounts[0].id,
+        amount: -400,
+        date: '2017-01-01',
+        payee: 'alice-id',
+        is_child: true,
+        parent_id: previewParentId,
+        schedule: 'schedule-1',
+        cleared: false,
+        reconciled: false,
+      },
+    ];
+
+    const { container } = renderTransactions({
+      transactions: [previewParent, ...previewChildren],
+      isAdding: false,
+    });
+
+    // The preview parent row should show the same computed payee a real,
+    // persisted split transaction would show (most common child payee),
+    // instead of being blank.
+    await waitFor(() => {
+      expect(queryField(container, 'payee', '', 0).textContent).toContain(
+        'Alice',
+      );
+    });
+  });
+
   test('transactions table shows the correct data', () => {
     const { container, getTransactions } = renderTransactions();
 
@@ -531,6 +621,56 @@ describe('Transactions', () => {
           integerToCurrency(transaction.amount),
         );
       }
+    });
+  });
+
+  describe('Group column', () => {
+    test('group column is hidden by default', () => {
+      const { container } = renderTransactions();
+      expect(
+        container.querySelector('[data-testid="group"]'),
+      ).not.toBeInTheDocument();
+    });
+
+    test('group column header renders when showGroup is true', () => {
+      const { container } = renderTransactions({ showGroup: true });
+      expect(
+        container.querySelector(
+          '[data-testid="transaction-table"] [data-testid="group"]',
+        ),
+      ).toBeInTheDocument();
+    });
+
+    test('group cell shows the correct group name', () => {
+      const { container } = renderTransactions({ showGroup: true });
+
+      // Transaction 0 has no category — group cell should be empty
+      expect(queryField(container, 'group', 'div', 0).textContent).toBe('');
+
+      // Transaction 1 has category "General" in group "Usual Expenses"
+      expect(queryField(container, 'group', 'div', 1).textContent).toBe(
+        'Usual Expenses',
+      );
+
+      // Transaction 2 has category "Food" in group "Usual Expenses"
+      expect(queryField(container, 'group', 'div', 2).textContent).toBe(
+        'Usual Expenses',
+      );
+    });
+
+    test('group column renders for child transactions as well', () => {
+      const transactions = generateTransactions(3, [1]);
+      transactions[0].amount = -1000;
+
+      const { container } = renderTransactions({
+        showGroup: true,
+        transactions,
+      });
+
+      const children = container.querySelectorAll(
+        '[data-testid="transaction-table"] [data-testid="group"]',
+      );
+      expect(children.length).toBe(5);
     });
   });
 
@@ -925,6 +1065,30 @@ describe('Transactions', () => {
       queryNewField(container, 'date', 'input'),
     );
     expect(queryNewField(container, 'debit').textContent).toBe('0.00');
+  });
+
+  test('clicking cleared while editing the amount keeps the amount', async () => {
+    const { container, updateProps } = renderTransactions({
+      // Rules run over the backend, so saving a new transaction only lands in
+      // state a tick later. Clicking another cell in the meantime must not
+      // read back the pre-save amount.
+      onApplyRules: async transaction => transaction,
+    });
+    updateProps({ isAdding: true });
+
+    const input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '100');
+
+    // Click "cleared" directly, without tabbing/entering out of the amount
+    // field first
+    await userEvent.click(
+      within(queryNewField(container, 'cleared')).getByTestId('cell-button'),
+    );
+
+    await waitFor(() =>
+      expect(queryNewField(container, 'debit').textContent).toBe('100.00'),
+    );
   });
 
   test('adding a new split transaction works', async () => {
@@ -1407,5 +1571,39 @@ describe('Transactions', () => {
       // Verify the tag was added to the note correctly
       expect(getTransactions()[2].notes).toBe('spending on #coffee');
     });
+  });
+});
+
+describe('useAmountColumnWidths', () => {
+  function transaction(amount: number) {
+    return generateTransaction({ account: accounts[0].id, amount })[0];
+  }
+
+  it('does not narrow below the default minimum for short-value accounts', () => {
+    const { result } = renderHook(() =>
+      useAmountColumnWidths([transaction(150), transaction(-200)], null),
+    );
+
+    expect(result.current).toEqual(DEFAULT_AMOUNT_COLUMN_WIDTHS);
+  });
+
+  it('widens the balance column for a long formatted balance value', () => {
+    const { result } = renderHook(() =>
+      useAmountColumnWidths([transaction(150)], { 'tx-1': 123456789012345 }),
+    );
+
+    expect(result.current.balance).toBeGreaterThan(
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.balance,
+    );
+  });
+
+  it('widens the amount column for a long formatted amount', () => {
+    const { result } = renderHook(() =>
+      useAmountColumnWidths([transaction(123456789012)], null),
+    );
+
+    expect(result.current.amount).toBeGreaterThan(
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.amount,
+    );
   });
 });

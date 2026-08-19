@@ -233,7 +233,7 @@ async function computeTemplates(
   const templateContexts: CategoryTemplateContext[] = [];
   let availBudget = await getSheetValue(
     monthUtils.sheetForMonth(month),
-    `to-budget`,
+    isTracking ? `total-saved` : `to-budget`,
   );
   const prioritiesSet = new Set<number>();
   const errors: string[] = [];

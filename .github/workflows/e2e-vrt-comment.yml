@@ -66,4 +66,4 @@ jobs:
             <!-- vrt-comment -->
             VRT tests ❌ failed. [View the test report](${{ steps.metadata.outputs.artifact_url }}).
 
-            To update the VRT screenshots, comment `/update-vrt` on this PR. The VRT update operation takes about 50 minutes.
+            To update the VRT screenshots, comment `/update-vrt` on this PR. The VRT update operation takes about 10 to 15 minutes.

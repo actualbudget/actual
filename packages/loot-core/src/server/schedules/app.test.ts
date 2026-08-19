@@ -162,6 +162,52 @@ describe('schedule app', () => {
       ).rejects.toThrow(/date condition is required/);
     });
 
+    it('identifies schedules with split actions', async () => {
+      const id = await createSchedule({
+        conditions: [{ op: 'is', field: 'date', value: '2020-12-20' }],
+      });
+      const { data: ruleId } = await aqlQuery(
+        q('schedules').filter({ id }).calculate('rule'),
+      );
+
+      await updateRule({
+        id: ruleId,
+        actions: [
+          {
+            op: 'set',
+            field: 'payee',
+            value: 'destination-payee',
+            options: { splitIndex: 0 },
+          },
+          { op: 'link-schedule', value: id },
+        ],
+      });
+
+      const { data: parentActionMatches } = await aqlQuery(
+        q('schedules').filter({ _has_splits: true }).select(['id']),
+      );
+      expect(parentActionMatches).toEqual([]);
+
+      await updateRule({
+        id: ruleId,
+        actions: [
+          {
+            op: 'set',
+            field: 'payee',
+            value: 'destination-payee',
+            options: { splitIndex: 1 },
+          },
+          { op: 'link-schedule', value: id },
+        ],
+      });
+
+      const { data: splitActionMatches } = await aqlQuery(
+        q('schedules').filter({ _has_splits: true }).select(['id']),
+      );
+
+      expect(splitActionMatches).toEqual([{ id }]);
+    });
+
     it('trims schedule names when creating and updating schedules', async () => {
       const id = await createSchedule({
         schedule: { name: '  Rent  ' },

@@ -4,5 +4,5 @@
     "yarn sync:tsconfig-references"
   ],
   "**/*.{js,mjs,jsx,ts,tsx,md,json,yml,yaml}": "oxfmt --no-error-on-unmatched-pattern",
-  "**/*.{js,mjs,jsx,ts,tsx}": "oxlint --fix --type-aware --quiet"
+  "**/*.{js,mjs,jsx,ts,tsx}": "oxlint --fix --type-aware --quiet --no-error-on-unmatched-pattern"
 }

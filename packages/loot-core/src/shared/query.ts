@@ -1,6 +1,6 @@
 import type { WithRequired } from '#types/util';
 
-type ObjectExpression = {
+export type ObjectExpression = {
   [key: string]: ObjectExpression | unknown;
 };
 

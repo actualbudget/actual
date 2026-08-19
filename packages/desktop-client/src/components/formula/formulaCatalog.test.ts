@@ -49,9 +49,7 @@ describe('formulaCatalog', () => {
     expect(reportFunctions.QUERY).toBeDefined();
     expect(reportFunctions.QUERY_COUNT).toBeDefined();
     expect(reportFunctions.BUDGET_QUERY).toBeDefined();
-    expect(reportFunctions.BALANCE_OF).toBeUndefined();
 
-    expect(ruleFunctions.BALANCE_OF).toBeDefined();
     expect(ruleFunctions.QUERY).toBeUndefined();
     expect(ruleFunctions.QUERY_COUNT).toBeUndefined();
   });
@@ -65,6 +63,7 @@ describe('formulaCatalog', () => {
       'FORMATNUMBER',
       'FORMATCURRENCY',
       'INTEGER_TO_AMOUNT',
+      'BALANCE_OF',
     ]) {
       expect(reportFunctions[functionName]).toBeDefined();
       expect(ruleFunctions[functionName]).toBeDefined();

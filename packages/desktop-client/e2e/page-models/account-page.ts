@@ -178,6 +178,30 @@ export class AccountPage {
   }
 
   /**
+   * Open the "Manage table columns" modal from the account menu.
+   */
+  async openTransactionColumnsModal() {
+    await this.accountMenuButton.click();
+    await this.page
+      .getByRole('button', { name: 'Manage table columns' })
+      .click();
+    return this.page.getByTestId('transaction-table-columns-modal');
+  }
+
+  /**
+   * Set one column's visibility via the "Manage table columns" modal.
+   */
+  async setTransactionColumnVisibility(columnId: string, visible: boolean) {
+    const modal = await this.openTransactionColumnsModal();
+    const toggle = modal.locator(`#toggle-column-${columnId}`);
+    if ((await toggle.isChecked()) !== visible) {
+      await modal.locator(`label[for="toggle-column-${columnId}"]`).click();
+    }
+    await modal.getByRole('button', { name: 'Save', exact: true }).click();
+    await modal.waitFor({ state: 'hidden' });
+  }
+
+  /**
    * Open the filtering popover.
    */
   async filterBy(field: string | RegExp) {

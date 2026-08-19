@@ -18,7 +18,7 @@ See the [Reports Dashboard](../reports/index.md) for more detail on these and th
 
 Actual's custom reports will allow you to create reports giving in-depth analyses on your spending habits and your income. You can find them thoroughly covered in [Custom Reports](../reports/custom-reports.md).
 
-Below are examples of reports covering *Daily Expenses* over the last six months. One report shows this as a graph, the other as a table. Note that the table version also shows the sum and average (over six months) for the various categories.
+Below are examples of reports covering _Daily Expenses_ over the last six months. One report shows this as a graph, the other as a table. Note that the table version also shows the sum and average (over six months) for the various categories.
 
 ![Custom report showing daily expenses as graph](/img/a-tour-of-actual/tour-reports-daily-expenses-graph.webp)
 

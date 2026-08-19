@@ -2,11 +2,11 @@
 
 If you want to transfer money between accounts, you will want to do it in a way that doesn't mess up reports. If you only created two transactions, Actual would have no way of knowing they are a single transfer and can be ignored in reports.
 
-When you create a transfer in Actual, those two transactions are linked and updating one always automatically updates the other. For example, if you typed something into the **Notes** column it would appear in both transactions.
+When you create a transfer in Actual, those two transactions are linked, and updating one automatically updates the other. For example, if you typed something into the **Notes** column it would appear in both transactions. Some fields are always kept in sync this way, while others will be kept independent or synced optionally. See [Modifying a Transfer](#modifying-a-transfer) below for the full breakdown.
 
 ![](/img/transfers/transfer-complete.webp)
 
-## Creating a transfer
+## Creating a Transfer
 
 In the **Payee** field of a transaction, choose the account in the dropdown you want to transfer to/from. You can press **Make Transfer** if you want to just see a list of accounts and hide other payees.
 
@@ -18,7 +18,7 @@ A transaction in the corresponding account will automatically be created.
 
 If you are importing files, it is recommended to import into a single account and create the transfer first, and then import the second account. This way the transaction in the second account is automatically reconciled to the transfer transaction. If you imported to both accounts first, you can [make a transfer from the already imported transactions](#make-a-transfer-from-two-existing-transactions).
 
-### Make a transfer from two existing transactions
+### Make a Transfer from Two Existing Transactions
 
 :::note
 This process will only apply when the below conditions are met
@@ -37,7 +37,34 @@ Make a transfer of existing transactions in the same way you [bulk-edit transact
 3. Go to the drop down top right (the arrow below "2 transactions")
 4. If the transactions are valid to be converted to a transfer, you can click **Make transfer**.
 
-## Deleting a transfer
+## Modifying a Transfer
+
+Some fields are tied together across the two halves of a transfer, and some are not.
+
+These fields always update on both sides:
+
+- **Payee**. Moving one side into a different account rewrites the payee on the other side to match.
+- **Amount**. The other side always mirrors it, so a **debit** of `10.00` stays paired with a **credit** of `10.00`.
+- **Notes**.
+- **Schedule**, if the transaction is linked to one.
+
+These fields are independent, and changing one side leaves the other side alone:
+
+- **Cleared** and **reconciled** status, since each account is reconciled against its own statement.
+- **Category**. Transfers between two On Budget accounts, or between two Off Budget accounts, have no category at all. For a transfer between an On Budget and an Off Budget account, the category lives only on the On Budget side.
+- **Date**, unless you ask for it to be synced.
+
+### Syncing the Transfer Date
+
+By default, changing the date on one side of a transfer leaves the other side where it is. This is useful when the money takes a few days to arrive, so the two accounts see the transaction on different dates, and your Actual register can match the Bank register exactly.
+
+If you want both dates to move together, tick **Sync both transfer dates** at the bottom of the date picker, then choose the new date. The other side of the transfer is moved to the same date.
+
+![Date picker for a transfer with the Sync both transfer dates checkbox ticked](/img/transfers/transfers-sync-both-dates.png)
+
+The checkbox stays ticked for future edits until you untick it, so you can pick the behavior you use most often and forget about it.
+
+## Deleting a Transfer
 
 Delete a transfer the same way you delete any transaction: hover over it and press the **X** on the left. Deleting a transfer transaction always deletes both the transaction in the currently open account, as well as the transfer transaction in the other account.
 
@@ -47,6 +74,6 @@ Transfers between On Budget accounts don't have a category. This is because the 
 
 Transfers between Off Budget and On Budget accounts are different. Only one half of the transfer exists on your budget and, from the perspective of your budget, is the same as a regular transaction. You can create these transfers just the same as an On Budget transfer, but you will be asked to assign a category on the On Budget side of the transfer.
 
-## Payee rules
+## Payee Rules
 
 Transfers are actually just custom payees, so if you want to you can [create custom rules for them](./payees.md#transfer-payees).

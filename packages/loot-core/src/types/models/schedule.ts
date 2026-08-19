@@ -1,6 +1,6 @@
 import type { AccountEntity } from './account';
 import type { PayeeEntity } from './payee';
-import type { RuleConditionEntity, RuleEntity } from './rule';
+import type { RuleActionEntity, RuleConditionEntity, RuleEntity } from './rule';
 
 export type RecurPattern = {
   value: number;
@@ -28,6 +28,7 @@ export type ScheduleEntity = {
   posts_transaction: boolean;
   custom_upcoming_length?: string | null;
   tombstone: boolean;
+  sort_order?: number;
 
   // These are special fields that are actually pulled from the
   // underlying rule
@@ -37,7 +38,8 @@ export type ScheduleEntity = {
   _amountOp: string;
   _date: RecurConfig | string;
   _conditions: RuleConditionEntity[];
-  _actions: Array<{ op: unknown }>;
+  _actions: RuleActionEntity[];
+  _has_splits?: boolean;
 };
 
 export type DiscoverScheduleEntity = {
