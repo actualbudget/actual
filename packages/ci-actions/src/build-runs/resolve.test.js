@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { resolveBuildRun } from './build-runs.mjs';
+import { resolveBuildRun } from './resolve.mjs';
 
 describe('resolveBuildRun', () => {
   it('selects the exact commit and rejects a stale API result', async () => {
@@ -72,7 +72,10 @@ describe('resolveBuildRun', () => {
 
   it('wires the workflow base lookup to the pull request base SHA', async () => {
     const workflow = await readFile(
-      new URL('../../../.github/workflows/size-compare.yml', import.meta.url),
+      new URL(
+        '../../../../.github/workflows/size-compare.yml',
+        import.meta.url,
+      ),
       'utf8',
     );
     const baseShaExpression = `${String.fromCharCode(36)}{{ github.event.pull_request.base.sha }}`;

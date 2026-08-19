@@ -59,7 +59,7 @@ jobs:
         with:
           script: |
             const { resolveBuildRun } = await import(
-              `${process.env.GITHUB_WORKSPACE}/packages/ci-actions/src/build-runs.mjs`
+              `${process.env.GITHUB_WORKSPACE}/packages/ci-actions/src/build-runs/resolve.mjs`
             );
             const baseRef = process.env.BASE_REF;
             const baseSha = process.env.BASE_SHA;

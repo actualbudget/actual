@@ -1,5 +1,5 @@
 const DEFAULT_TIMEOUT_MS = 30 * 60 * 1000;
-const DEFAULT_SLEEP_MS = 15_000;
+const DEFAULT_POLL_INTERVAL_MS = 15_000;
 
 const defaultSleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -12,7 +12,7 @@ export async function resolveBuildRun({
   notFoundHint,
   workflowId = 'build.yml',
   timeoutMs = DEFAULT_TIMEOUT_MS,
-  sleepMs = DEFAULT_SLEEP_MS,
+  sleepMs = DEFAULT_POLL_INTERVAL_MS,
   now = Date.now,
   sleep = defaultSleep,
   log,
