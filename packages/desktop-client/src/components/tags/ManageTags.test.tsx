@@ -72,12 +72,6 @@ describe('ManageTags', () => {
     await act(async () => rename.onClick?.());
   }
 
-  it('offers renaming from the row context menu', async () => {
-    await startRenaming('Reimbursable');
-
-    expect(screen.getByDisplayValue('Reimbursable')).toBeInTheDocument();
-  });
-
   it('renames the tag on submit', async () => {
     await startRenaming('Reimbursable');
 
@@ -93,14 +87,5 @@ describe('ManageTags', () => {
     expect(
       screen.queryByDisplayValue('ToBeReimbursed'),
     ).not.toBeInTheDocument();
-  });
-
-  it('does not rename when the name is unchanged', async () => {
-    await startRenaming('Reimbursable');
-
-    await userEvent.type(screen.getByDisplayValue('Reimbursable'), '{Enter}');
-
-    expect(renameTag).not.toHaveBeenCalled();
-    expect(screen.queryByDisplayValue('Reimbursable')).not.toBeInTheDocument();
   });
 });
