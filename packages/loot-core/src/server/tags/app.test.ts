@@ -77,6 +77,24 @@ describe('tags app', () => {
       ).rejects.toThrow('A tag with that name already exists');
     });
 
+    it('rejects renaming onto a deleted tag', async () => {
+      const id = await db.insertTag({
+        tag: 'Food',
+        color: null,
+        description: null,
+      });
+      const deletedId = await db.insertTag({
+        tag: 'Groceries',
+        color: null,
+        description: null,
+      });
+      await app.handlers['tags-delete']({ id: deletedId });
+
+      await expect(
+        app.handlers['tags-rename']({ id, tag: 'Groceries' }),
+      ).rejects.toThrow('A tag with that name already exists');
+    });
+
     it('rejects an unknown tag', async () => {
       await expect(
         app.handlers['tags-rename']({ id: 'missing', tag: 'Food' }),

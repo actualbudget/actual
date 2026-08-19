@@ -123,6 +123,7 @@ async function renameTag({
   }
 
   const tags = await db.getTags();
+  const allTags = await db.getAllTags();
   const existing = tags.find(t => t.id === id);
   if (!existing) {
     throw new Error('Tag not found');
@@ -130,7 +131,7 @@ async function renameTag({
   if (existing.tag === name) {
     return id;
   }
-  if (tags.some(t => t.id !== id && t.tag === name)) {
+  if (allTags.some(t => t.id !== id && t.tag === name)) {
     throw new Error('A tag with that name already exists');
   }
 
