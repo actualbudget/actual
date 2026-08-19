@@ -20,6 +20,7 @@ import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import {
   useDeleteTagsMutation,
   useHideTagsMutation,
+  useRenameTagMutation,
   useUnhideTagsMutation,
   useUpdateTagMutation,
 } from '#tags';
@@ -50,12 +51,21 @@ export const TagRow = memo(
     const triggerRef = useRef(null);
     const navigate = useNavigate();
     const { mutate: updateTag } = useUpdateTagMutation();
+    const { mutate: renameTag } = useRenameTagMutation();
     const { mutate: deleteTags } = useDeleteTagsMutation();
     const { mutate: hideTags } = useHideTagsMutation();
     const { mutate: unhideTags } = useUnhideTagsMutation();
 
     const onUpdate = (description: string) => {
       updateTag({ tag: { ...tag, description } });
+    };
+
+    const onRename = (name: string) => {
+      const trimmed = name.trim();
+      if (!trimmed || trimmed === tag.tag) {
+        return;
+      }
+      renameTag({ id: tag.id, tag: trimmed });
     };
 
     const onShowActivity = () => {
@@ -80,6 +90,11 @@ export const TagRow = memo(
     useContextMenu({
       triggerRef,
       items: [
+        {
+          name: 'rename',
+          text: t('Rename'),
+          onClick: () => onEdit(tag.id, 'tag'),
+        },
         {
           name: 'delete',
           text: t('Delete'),
@@ -128,9 +143,24 @@ export const TagRow = memo(
           selected={selected}
         />
 
-        <Cell width={250} plain style={{ padding: '5px', display: 'block' }}>
-          <TagEditor tag={tag} ref={colorButtonRef} />
-        </Cell>
+        {focusedField === 'tag' ? (
+          <InputCell
+            width={250}
+            name="tag"
+            textAlign="flex"
+            exposed
+            onExpose={name => onEdit(tag.id, name)}
+            value={tag.tag}
+            inputProps={{
+              value: tag.tag,
+              onUpdate: onRename,
+            }}
+          />
+        ) : (
+          <Cell width={250} plain style={{ padding: '5px', display: 'block' }}>
+            <TagEditor tag={tag} ref={colorButtonRef} />
+          </Cell>
+        )}
 
         <InputCell
           width="flex"
