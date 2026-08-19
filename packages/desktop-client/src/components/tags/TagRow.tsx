@@ -1,4 +1,5 @@
 import React, { memo, useRef } from 'react';
+import type { KeyboardEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowThinRight } from '@actual-app/components/icons/v1';
@@ -32,7 +33,7 @@ type TagRowProps = {
   hovered?: boolean;
   onHover: (id?: string) => void;
   focusedField: string | null;
-  onEdit: (id: string, field: string) => void;
+  onEdit: (id: string | null, field?: string) => void;
 };
 
 export const TagRow = memo(
@@ -66,6 +67,17 @@ export const TagRow = memo(
         return;
       }
       renameTag({ id: tag.id, tag: trimmed });
+    };
+
+    // The 'tag' field is not part of the table navigator, so Enter must be
+    // handled here or the navigator reopens the input via flashInput
+    const onRenameKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        onRename(e.currentTarget.value);
+        onEdit(null);
+      }
     };
 
     const onShowActivity = () => {
@@ -150,7 +162,10 @@ export const TagRow = memo(
             textAlign="flex"
             exposed
             value={tag.tag}
-            inputProps={{ onUpdate: onRename }}
+            inputProps={{
+              onUpdate: onRename,
+              onKeyDownCapture: onRenameKeyDown,
+            }}
           />
         ) : (
           <Cell width={250} plain style={{ padding: '5px', display: 'block' }}>

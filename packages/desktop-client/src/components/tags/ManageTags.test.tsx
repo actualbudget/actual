@@ -85,10 +85,14 @@ describe('ManageTags', () => {
     await userEvent.clear(input);
     await userEvent.type(input, 'ToBeReimbursed{Enter}');
 
+    expect(renameTag).toHaveBeenCalledTimes(1);
     expect(renameTag).toHaveBeenCalledWith({
       id: 'tag-1',
       tag: 'ToBeReimbursed',
     });
+    expect(
+      screen.queryByDisplayValue('ToBeReimbursed'),
+    ).not.toBeInTheDocument();
   });
 
   it('does not rename when the name is unchanged', async () => {
@@ -97,5 +101,6 @@ describe('ManageTags', () => {
     await userEvent.type(screen.getByDisplayValue('Reimbursable'), '{Enter}');
 
     expect(renameTag).not.toHaveBeenCalled();
+    expect(screen.queryByDisplayValue('Reimbursable')).not.toBeInTheDocument();
   });
 });
