@@ -23,6 +23,7 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 import {
+  act,
   fireEvent,
   render,
   renderHook,
@@ -1570,6 +1571,85 @@ describe('Transactions', () => {
 
       // Verify the tag was added to the note correctly
       expect(getTransactions()[2].notes).toBe('spending on #coffee');
+    });
+  });
+
+  describe('Notes tooltip', () => {
+    // jsdom doesn't lay out elements, so scrollWidth/clientWidth are always
+    // 0. Stub them so the truncation check has something meaningful to read.
+    let isOverflowing = false;
+    const originalScrollWidth = Object.getOwnPropertyDescriptor(
+      Element.prototype,
+      'scrollWidth',
+    )!;
+    const originalClientWidth = Object.getOwnPropertyDescriptor(
+      Element.prototype,
+      'clientWidth',
+    )!;
+
+    beforeAll(() => {
+      Object.defineProperty(Element.prototype, 'scrollWidth', {
+        configurable: true,
+        get() {
+          return isOverflowing ? 200 : 100;
+        },
+      });
+      Object.defineProperty(Element.prototype, 'clientWidth', {
+        configurable: true,
+        get() {
+          return 100;
+        },
+      });
+    });
+
+    afterAll(() => {
+      Object.defineProperty(
+        Element.prototype,
+        'scrollWidth',
+        originalScrollWidth,
+      );
+      Object.defineProperty(
+        Element.prototype,
+        'clientWidth',
+        originalClientWidth,
+      );
+    });
+
+    test('shows the full note and renders tags when the note is truncated', async () => {
+      isOverflowing = true;
+      const transactions = generateTransactions(1);
+      transactions[0].notes =
+        'a very long note about weekend spending #groceries that overflows the column';
+
+      const { container } = renderTransactions({ transactions });
+      const notesText = queryField(container, 'notes', 'span', 0);
+
+      await userEvent.hover(notesText);
+
+      const tooltip = await screen.findByRole('tooltip', {}, { timeout: 1000 });
+      expect(tooltip.textContent).toContain(
+        'a very long note about weekend spending',
+      );
+      expect(
+        within(tooltip).getByRole('button', { name: '#groceries' }),
+      ).toBeInTheDocument();
+    });
+
+    test('does not show a tooltip when the note fits without truncation', async () => {
+      isOverflowing = false;
+      const transactions = generateTransactions(1);
+      transactions[0].notes = 'short note';
+
+      const { container } = renderTransactions({ transactions });
+      const notesText = queryField(container, 'notes', 'span', 0);
+
+      await userEvent.hover(notesText);
+
+      // Wait past the tooltip's hover delay to make sure it never opens
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 700));
+      });
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
     });
   });
 });
