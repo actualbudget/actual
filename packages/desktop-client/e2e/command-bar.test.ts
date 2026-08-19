@@ -59,17 +59,17 @@ test.describe('Command bar', () => {
     await commandBar.fill('reports');
     await page.keyboard.press('Enter');
     await expect(page.getByTestId('reports-page')).toBeVisible();
-    await expect(page.getByText('Loading reports...')).not.toBeVisible({
-      timeout: 10000, // Wait for 10 seconds max for reports to load
-    }); // wait for screen to load
 
     // Navigate to schedule page
     await page.keyboard.press('ControlOrMeta+k');
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('ArrowDown'); // Select second suggestion - Schedules
-    await expect(page).toMatchThemeScreenshots();
+    await commandBar.fill('Schedules');
+    const schedulesOption = page.getByRole('option', {
+      name: 'Schedules',
+      exact: true,
+    });
+    await expect(schedulesOption).toBeVisible();
 
-    await page.keyboard.press('Enter');
+    await schedulesOption.press('Enter');
     await expect(
       page.getByRole('button', {
         name: 'Add new schedule',

@@ -19,6 +19,7 @@ import {
   SvgArrowsSynchronize,
   SvgCalendar3,
   SvgDownloadThickBottom,
+  SvgHelp,
   SvgMoonStars,
   SvgNotesPaperText,
   SvgSearchAlternate,
@@ -33,8 +34,8 @@ import { css, cx } from '@emotion/css';
 import { Command } from 'cmdk';
 import { format } from 'date-fns';
 
+import { useSyncAndDownloadMutation } from '#accounts';
 import { useAccountSyncStatus } from '#accounts/useAccountSyncStatus';
-import { sync } from '#app/appSlice';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import {
   closeCommandBar,
@@ -42,6 +43,7 @@ import {
   setCommandBarOpen,
 } from '#commandbar/commandBarSlice';
 import { AccountStatusIndicator } from '#components/accounts/AccountStatusIndicator';
+import { useTour } from '#components/tour/TourProvider';
 import { useAccounts } from '#hooks/useAccounts';
 import { useDashboardPages } from '#hooks/useDashboardPages';
 import { useGlobalPref } from '#hooks/useGlobalPref';
@@ -91,6 +93,8 @@ export function CommandBar() {
   const [page, setPage] = useState<'root' | 'themes'>('root');
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { mutate: syncAndDownload } = useSyncAndDownloadMutation();
+  const { startTour } = useTour();
   const [budgetName] = useMetadataPref('budgetName');
   const { modalStack } = useModalState();
   const [isPrivacyEnabledPref, setPrivacyEnabledPref] =
@@ -194,6 +198,35 @@ export function CommandBar() {
       return;
     }
     if (response.data) {
+      if (response.warnings?.includes('exceeds-import-size-limit')) {
+        dispatch(
+          addNotification({
+            notification: {
+              id: 'export-exceeds-import-size-limit',
+              type: 'warning',
+              sticky: true,
+              message: t(
+                'This export is larger than Actual can safely re-import. You may not be able to restore this backup.',
+              ),
+            },
+          }),
+        );
+      }
+      if (response.warnings?.includes('may-exceed-available-memory')) {
+        dispatch(
+          addNotification({
+            notification: {
+              id: 'export-may-exceed-available-memory',
+              type: 'warning',
+              sticky: true,
+              message: t(
+                'This export is larger than the memory available on this device. Restoring it here may fail.',
+              ),
+            },
+          }),
+        );
+      }
+
       void window.Actual.saveFile(
         response.data,
         `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
@@ -258,7 +291,7 @@ export function CommandBar() {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         // Do not open CommandBar if a modal is already open
-        if (modalStack.length > 0) dispatch(closeCommandBar());
+        if (modalStack.length > 0) return;
         dispatch(openCommandBar());
       }
     },
@@ -269,6 +302,21 @@ export function CommandBar() {
     document.addEventListener('keydown', openEventListener);
     return () => document.removeEventListener('keydown', openEventListener);
   }, [openEventListener]);
+
+  useEffect(() => {
+    if (!open || page !== 'themes') return;
+
+    function handleThemePageEscape(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      e.stopPropagation();
+      goBackToRoot();
+    }
+
+    window.addEventListener('keydown', handleThemePageEscape, true);
+    return () =>
+      window.removeEventListener('keydown', handleThemePageEscape, true);
+  }, [goBackToRoot, open, page]);
 
   const handleNavigate = useCallback(
     (path: string) => {
@@ -285,7 +333,7 @@ export function CommandBar() {
       id: 'sync-accounts',
       name: t('Sync all accounts'),
       Icon: SvgArrowsSynchronize,
-      run: () => void dispatch(sync()),
+      run: () => syncAndDownload({}),
     },
     {
       id: 'new-schedule',
@@ -332,6 +380,12 @@ export function CommandBar() {
       name: t('View keyboard shortcuts'),
       Icon: SvgKeyboard,
       run: () => dispatch(pushModal({ modal: { name: 'keyboard-shortcuts' } })),
+    },
+    {
+      id: 'start-tour',
+      name: t('Take a tour of {{appName}}', { appName: 'Actual' }),
+      Icon: SvgHelp,
+      run: startTour,
     },
     {
       id: 'export-budget',
@@ -522,9 +576,6 @@ export function CommandBar() {
           onKeyDown={e => {
             if (e.key === 'Backspace' && search === '' && page === 'themes') {
               goBackToRoot();
-            } else if (e.key === 'Escape' && page === 'themes') {
-              e.preventDefault();
-              goBackToRoot();
             }
           }}
           className={css({
@@ -588,7 +639,7 @@ export function CommandBar() {
                         <Command.Item
                           key={id}
                           onSelect={() => section.onSelect({ id })}
-                          value={name}
+                          value={`${section.key}:${id}`}
                           className={paletteItemClassName}
                         >
                           {leading ?? (Icon && <Icon width={15} height={15} />)}
