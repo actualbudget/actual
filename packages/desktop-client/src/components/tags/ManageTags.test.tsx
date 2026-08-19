@@ -3,7 +3,7 @@ import { MemoryRouter } from 'react-router';
 
 import { initServer } from '@actual-app/core/platform/client/connection';
 import type { TagEntity } from '@actual-app/core/types/models';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import {
@@ -71,6 +71,45 @@ describe('ManageTags', () => {
     }
     await act(async () => rename.onClick?.());
   }
+
+  async function selectTag(tagName: string) {
+    const row = screen
+      .getByText(`#${tagName}`)
+      .closest<HTMLElement>('[data-testid="row"]');
+    if (!row) {
+      throw new Error(`Row for #${tagName} not found`);
+    }
+    await userEvent.click(within(row).getByTestId('select'));
+  }
+
+  async function openSelectionMenu() {
+    await userEvent.click(screen.getByTestId('selected-tags-select-button'));
+    return screen.getByTestId('selected-tags-select-tooltip');
+  }
+
+  it('offers renaming from the selection menu for a single tag', async () => {
+    await selectTag('Reimbursable');
+
+    const menu = await openSelectionMenu();
+    await userEvent.click(within(menu).getByText('Rename'));
+
+    expect(await screen.findByDisplayValue('Reimbursable')).toBeInTheDocument();
+    // The selection is cleared so the closing menu cannot pull focus back
+    // out of the input, which would leave the delete/hide hotkeys live
+    expect(
+      screen.queryByTestId('selected-tags-select-button'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not offer renaming when several tags are selected', async () => {
+    await selectTag('Reimbursable');
+    await selectTag('Work');
+
+    const menu = await openSelectionMenu();
+
+    expect(within(menu).queryByText('Rename')).not.toBeInTheDocument();
+    expect(within(menu).getByText('Delete')).toBeInTheDocument();
+  });
 
   it('renames the tag on submit', async () => {
     await startRenaming('Reimbursable');

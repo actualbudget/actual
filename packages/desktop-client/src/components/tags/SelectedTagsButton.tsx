@@ -1,6 +1,8 @@
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
+import type { TagEntity } from '@actual-app/core/types/models';
+
 import { SelectedItemsButton } from '#components/table';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import {
@@ -9,9 +11,13 @@ import {
   useUnhideTagsMutation,
 } from '#tags';
 
-type Actions = 'delete-tags' | 'hide-tags' | 'unhide-tags';
+type Actions = 'rename-tag' | 'delete-tags' | 'hide-tags' | 'unhide-tags';
 
-export function SelectedTagsButton() {
+type SelectedTagsButtonProps = {
+  onRename: (id: TagEntity['id']) => void;
+};
+
+export function SelectedTagsButton({ onRename }: SelectedTagsButtonProps) {
   const dispatch = useSelectedDispatch();
   const { t } = useTranslation();
   const selectedItems = useSelectedItems();
@@ -26,8 +32,17 @@ export function SelectedTagsButton() {
     );
   }
 
+  // The closing menu restores focus to its trigger, so clear the selection
+  // (which unmounts this button) and open the editor once that has settled
+  function startRename(id: TagEntity['id']) {
+    dispatch({ type: 'select-none' });
+    requestAnimationFrame(() => onRename(id));
+  }
+
   function handleSelect(name: Actions, tagIds: string[]) {
-    if (name === 'delete-tags') {
+    if (name === 'rename-tag') {
+      startRename(tagIds[0]);
+    } else if (name === 'delete-tags') {
       void handleDelete(tagIds);
     } else if (name === 'hide-tags') {
       hideTags({ ids: [...tagIds] });
@@ -39,6 +54,11 @@ export function SelectedTagsButton() {
   }
 
   const enabled = !!selectedItems.size;
+  // Renaming edits a single row, so it is only offered for one selected tag
+  const isSingleSelection = selectedItems.size === 1;
+  useHotkeys('r', () => startRename([...selectedItems][0]), {
+    enabled: isSingleSelection,
+  });
   useHotkeys('d', () => handleDelete([...selectedItems]), { enabled });
   useHotkeys('h', () => hideTags({ ids: [...selectedItems] }), { enabled });
   useHotkeys('u', () => unhideTags({ ids: [...selectedItems] }), { enabled });
@@ -48,6 +68,9 @@ export function SelectedTagsButton() {
       id="selected-tags"
       name={c => `${c} Tags`}
       items={[
+        ...(isSingleSelection
+          ? [{ name: 'rename-tag' as const, text: t('Rename'), key: 'R' }]
+          : []),
         { name: 'delete-tags', text: t('Delete'), key: 'D' },
         { name: 'hide-tags', text: t('Hide'), key: 'H' },
         { name: 'unhide-tags', text: t('Unhide'), key: 'U' },
