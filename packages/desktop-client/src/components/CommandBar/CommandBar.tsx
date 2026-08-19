@@ -37,6 +37,7 @@ import { format } from 'date-fns';
 import { useSyncAndDownloadMutation } from '#accounts';
 import { useAccountSyncStatus } from '#accounts/useAccountSyncStatus';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
+import { useCommandBarCommands } from '#commandbar/commandBarRegistry';
 import {
   closeCommandBar,
   openCommandBar,
@@ -93,6 +94,7 @@ export function CommandBar() {
   const [page, setPage] = useState<'root' | 'themes'>('root');
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const contributedCommands = useCommandBarCommands();
   const { mutate: syncAndDownload } = useSyncAndDownloadMutation();
   const { startTour } = useTour();
   const [budgetName] = useMetadataPref('budgetName');
@@ -326,9 +328,10 @@ export function CommandBar() {
     [dispatch, navigate],
   );
 
-  // Built-in quick actions. Deliberately a static list (no plugin surface):
-  // each one is wired to an existing app flow that works from any page.
-  const quickActions: QuickAction[] = [
+  // Built-in quick actions. Each one is wired to an existing app flow that
+  // works from any page. Contributed commands are appended below and kept
+  // separate from these static actions.
+  const builtinQuickActions: QuickAction[] = [
     {
       id: 'sync-accounts',
       name: t('Sync all accounts'),
@@ -400,6 +403,14 @@ export function CommandBar() {
       run: () => void dispatch(closeBudget()),
     },
   ];
+  const quickActions: QuickAction[] = [
+    ...builtinQuickActions,
+    ...contributedCommands.map(command => ({
+      id: command.id,
+      name: command.label,
+      run: command.execute,
+    })),
+  ];
 
   const sections: SearchSection[] = [
     {
@@ -466,7 +477,16 @@ export function CommandBar() {
         const action = quickActions.find(action => action.id === id);
         if (!action) return;
         if (!action.keepOpen) dispatch(closeCommandBar());
-        action.run();
+        void (async () => {
+          try {
+            await action.run();
+          } catch (error) {
+            console.error('Command bar action failed', {
+              commandId: action.id,
+              error,
+            });
+          }
+        })();
       },
     },
     {
