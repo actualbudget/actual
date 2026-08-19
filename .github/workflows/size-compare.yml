@@ -60,7 +60,7 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         with:
           script: |
-            const { resolveBuildRun } = await import(
+            const { resolveBuildRun, resolveComparisonBaseRun } = await import(
               `${process.env.GITHUB_WORKSPACE}/packages/ci-actions/src/build-runs/resolve.mjs`
             );
             const baseRef = process.env.BASE_REF;
@@ -72,12 +72,13 @@ jobs:
               repo: context.repo.repo,
               log: message => core.info(message),
             };
-            const [baseRun, headRun] = await Promise.all([
-              resolveBuildRun({
+            const [baseResult, headRun] = await Promise.all([
+              resolveComparisonBaseRun({
                 ...common,
-                label: `${baseRef} base ${baseSha}`,
-                headSha: baseSha,
-                notFoundHint: `${baseRef} may be broken`,
+                baseRef,
+                baseSha,
+                headSha,
+                warning: message => core.warning(message),
               }),
               resolveBuildRun({
                 ...common,
@@ -87,7 +88,9 @@ jobs:
                   'build may still be running, have failed, or the branch may have been force-pushed',
               }),
             ]);
-            core.setOutput('base_run_id', baseRun.id);
+            core.info(`Using baseline commit ${baseResult.sha}.`);
+            core.setOutput('base_run_id', baseResult.run.id);
+            core.setOutput('base_sha', baseResult.sha);
             core.setOutput('head_run_id', headRun.id);
 
       - name: Download web build artifact from ${{github.base_ref}}
