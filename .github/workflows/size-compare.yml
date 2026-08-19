@@ -60,7 +60,7 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         with:
           script: |
-            const { resolveBuildRun, resolveComparisonBaseRun } = await import(
+            const { resolveBuildRun } = await import(
               `${process.env.GITHUB_WORKSPACE}/packages/ci-actions/src/build-runs/resolve.mjs`
             );
             const baseRef = process.env.BASE_REF;
@@ -72,13 +72,15 @@ jobs:
               repo: context.repo.repo,
               log: message => core.info(message),
             };
-            const [baseResult, headRun] = await Promise.all([
-              resolveComparisonBaseRun({
+            // `build.yml` head artifacts use `refs/pull/N/merge`, which is
+            // computed against `pull_request.base.sha`; use that exact commit
+            // for the baseline so the two artifacts are a matched pair.
+            const [baseRun, headRun] = await Promise.all([
+              resolveBuildRun({
                 ...common,
-                baseRef,
-                baseSha,
-                headSha,
-                warning: message => core.warning(message),
+                label: `${baseRef} base ${baseSha}`,
+                headSha: baseSha,
+                notFoundHint: `${baseRef} may be broken`,
               }),
               resolveBuildRun({
                 ...common,
@@ -88,9 +90,8 @@ jobs:
                   'build may still be running, have failed, or the branch may have been force-pushed',
               }),
             ]);
-            core.info(`Using baseline commit ${baseResult.sha}.`);
-            core.setOutput('base_run_id', baseResult.run.id);
-            core.setOutput('base_sha', baseResult.sha);
+            core.info(`Using baseline commit ${baseSha}.`);
+            core.setOutput('base_run_id', baseRun.id);
             core.setOutput('head_run_id', headRun.id);
 
       - name: Download web build artifact from ${{github.base_ref}}

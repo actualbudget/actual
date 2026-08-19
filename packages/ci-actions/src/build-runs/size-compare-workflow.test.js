@@ -27,10 +27,13 @@ describe('size-compare workflow', () => {
     expect(workflow).toContain(`BASE_SHA: ${baseShaExpression}`);
   });
 
-  it('passes both commits to merge-base baseline resolution', () => {
-    expect(workflow).toContain('resolveComparisonBaseRun({');
-    expect(workflow).toContain('baseSha,');
-    expect(workflow).toContain('headSha,');
-    expect(workflow).toContain("core.setOutput('base_sha', baseResult.sha)");
+  it('resolves and logs the exact event base as the baseline', () => {
+    expect(workflow).toMatch(
+      /resolveBuildRun\(\{\s+\.\.\.common,\s+label: `\$\{baseRef\} base \$\{baseSha\}`,\s+headSha: baseSha,\s+notFoundHint: `\$\{baseRef\} may be broken`,\s+\}\)/,
+    );
+    expect(workflow).toMatch(
+      /core\.info\(`Using baseline commit \$\{baseSha\}\.`\);/,
+    );
+    expect(workflow).toContain("core.setOutput('base_run_id', baseRun.id);");
   });
 });
