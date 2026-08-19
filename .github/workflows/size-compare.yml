@@ -37,10 +37,12 @@ jobs:
       contents: read
       actions: read
     steps:
-      - name: Checkout base branch
+      # `pull_request_target` runs the trusted base workflow. Keep executable
+      # helpers on that same revision; never execute code from the PR head.
+      - name: Checkout base revision
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.base_ref }}
+          ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup

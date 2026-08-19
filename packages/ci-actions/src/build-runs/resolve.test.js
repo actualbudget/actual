@@ -70,7 +70,7 @@ describe('resolveBuildRun', () => {
     ).rejects.toThrow(/No successful build\.yml run found for master base/);
   });
 
-  it('wires the workflow base lookup to the pull request base SHA', async () => {
+  it('checks out and resolves the trusted pull request base SHA', async () => {
     const workflow = await readFile(
       new URL(
         '../../../../.github/workflows/size-compare.yml',
@@ -79,7 +79,15 @@ describe('resolveBuildRun', () => {
       'utf8',
     );
     const baseShaExpression = `${String.fromCharCode(36)}{{ github.event.pull_request.base.sha }}`;
+    const headShaExpression = `${String.fromCharCode(36)}{{ github.event.pull_request.head.sha }}`;
+    const checkoutIndex = workflow.indexOf(`ref: ${baseShaExpression}`);
+    const resolverImportIndex = workflow.indexOf(
+      'packages/ci-actions/src/build-runs/resolve.mjs',
+    );
 
+    expect(checkoutIndex).toBeGreaterThan(-1);
+    expect(resolverImportIndex).toBeGreaterThan(checkoutIndex);
+    expect(workflow).not.toContain(`ref: ${headShaExpression}`);
     expect(workflow).toContain(`BASE_SHA: ${baseShaExpression}`);
     expect(workflow).toContain('const baseSha = process.env.BASE_SHA');
     expect(workflow).toContain('headSha: baseSha');
