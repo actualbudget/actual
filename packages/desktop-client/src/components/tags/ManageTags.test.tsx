@@ -101,7 +101,29 @@ describe('ManageTags', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('does not offer renaming when several tags are selected', async () => {
+  it('drops renaming from the row context menu for a multi-selection', async () => {
+    await selectTag('Reimbursable');
+    await selectTag('Work');
+    await userEvent.pointer({
+      target: screen.getByText('#Reimbursable'),
+      keys: '[MouseRight]',
+    });
+
+    expect(contextMenuItem('rename')).toBeUndefined();
+    expect(contextMenuItem('delete')).toBeDefined();
+  });
+
+  it('keeps renaming in the row context menu for one selected tag', async () => {
+    await selectTag('Reimbursable');
+    await userEvent.pointer({
+      target: screen.getByText('#Reimbursable'),
+      keys: '[MouseRight]',
+    });
+
+    expect(contextMenuItem('rename')).toBeDefined();
+  });
+
+  it('drops renaming from the selection menu for a multi-selection', async () => {
     await selectTag('Reimbursable');
     await selectTag('Work');
 

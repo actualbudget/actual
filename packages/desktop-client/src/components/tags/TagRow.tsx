@@ -99,11 +99,14 @@ export const TagRow = memo(
     };
 
     const contextActionIds = selected ? Array.from(selectedIds) : [tag.id];
+    // The other actions apply to every id above, so renaming — which edits a
+    // single row — is only offered when that is the one tag
+    const isSingleTagAction = contextActionIds.length === 1;
 
     useContextMenu({
       triggerRef,
       items: [
-        {
+        isSingleTagAction && {
           name: 'rename',
           text: t('Rename'),
           onClick: () => onEdit(tag.id, 'tag'),
