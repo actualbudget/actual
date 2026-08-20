@@ -238,9 +238,7 @@ export function createBudget(meta, categories, months) {
 }
 
 export function handleCategoryChange(months, oldValue, newValue) {
-  // The cells a category feeds into, and the deps it contributes to each
-  // one. `addDeps` and `removeDeps` must stay mirror images of each other:
-  // anything only ever added keeps counting after the category is deleted.
+  // Build list of cells and dependencies that need updated
   function getDeps(sheetName, prevSheetName, groupId, cat) {
     const deps: Array<[string, string[]]> = [
       [`group-sum-amount-${groupId}`, [`sum-amount-${cat.id}`]],
