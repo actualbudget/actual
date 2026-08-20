@@ -10,7 +10,6 @@ export const accountGroupQueries = {
       queryKey: [...accountGroupQueries.lists()],
       queryFn: () => send('account-groups-get'),
       placeholderData: [],
-      // Manually invalidated when account groups change
       staleTime: Infinity,
     }),
 };

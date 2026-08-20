@@ -102,7 +102,6 @@ export function useDeleteAccountGroupMutation() {
     },
     onSuccess: () => {
       invalidateQueries(queryClient);
-      // Deleting a group clears the group from its member accounts
       invalidateQueries(queryClient, accountQueries.lists());
     },
     onError: error => {
