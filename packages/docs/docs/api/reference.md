@@ -351,20 +351,6 @@ await updateTransaction(id, { category: foodCategory.id });
 
 <StructType fields={objects.account} />
 
-#### Account Types
-
-The account type must be one of these valid strings:
-
-- `checking`
-- `savings`
-- `credit`
-- `investment`
-- `mortgage`
-- `debt`
-- `other`
-
-The account type does not affect anything currently. It's simply extra information about the account.
-
 #### Closing Accounts
 
 Avoid setting the `closed` property directly to close an account; instead use the `closeAccount` method. If the account still has money in it you will be required to specify another account to transfer the current balance to. This will help track your money correctly.
@@ -424,11 +410,10 @@ Gets the balance for an account. If a cutoff is given, it gives the account bala
 #### Examples
 
 ```js
-// Create a savings accounts
+// Create a savings account
 createAccount({
-  name: "Ally Savings",
-  type: "savings
-})
+  name: 'Ally Savings',
+});
 ```
 
 ```js
