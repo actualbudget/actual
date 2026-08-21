@@ -7,11 +7,6 @@ import { TestProviders } from '#mocks';
 
 import { FilterEditor } from './FiltersMenu';
 
-// Regression coverage for #8725: a new amount filter opened with no value used
-// to start negative, so "greater than 150" was submitted as "greater than
-// -150" and matched almost every transaction. The sign is only observable
-// through what the editor submits, so these assert on that rather than on any
-// one input component.
 describe('FilterEditor amount sign', () => {
   const renderEditor = (
     props: Partial<ComponentProps<typeof FilterEditor>> = {},
@@ -21,8 +16,7 @@ describe('FilterEditor amount sign', () => {
       <FilterEditor
         field="amount"
         op="gt"
-        // What a freshly created filter carries: the app seeds `null`, which
-        // the editor renders as an empty value.
+        // New filters render null values as empty strings.
         value=""
         onSave={onSave}
         onClose={vi.fn()}
@@ -41,8 +35,6 @@ describe('FilterEditor amount sign', () => {
     await user.type(screen.getByRole('textbox'), '150');
     await user.click(screen.getByRole('button', { name: 'Apply' }));
 
-    // The bug submitted -15000 here, which "greater than" then matched on
-    // almost every transaction.
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({ field: 'amount', op: 'gt', value: 15000 }),
     );
