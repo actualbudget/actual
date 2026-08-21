@@ -351,20 +351,6 @@ await updateTransaction(id, { category: foodCategory.id });
 
 <StructType fields={objects.account} />
 
-#### Account Types
-
-The account type must be one of these valid strings:
-
-- `checking`
-- `savings`
-- `credit`
-- `investment`
-- `mortgage`
-- `debt`
-- `other`
-
-The account type does not affect anything currently. It's simply extra information about the account.
-
 #### Closing Accounts
 
 Avoid setting the `closed` property directly to close an account; instead use the `closeAccount` method. If the account still has money in it you will be required to specify another account to transfer the current balance to. This will help track your money correctly.
@@ -424,17 +410,60 @@ Gets the balance for an account. If a cutoff is given, it gives the account bala
 #### Examples
 
 ```js
-// Create a savings accounts
+// Create a savings account
 createAccount({
-  name: "Ally Savings",
-  type: "savings
-})
+  name: 'Ally Savings',
+});
 ```
 
 ```js
 // Get all accounts
 
 let accounts = await getAccounts();
+```
+
+## Account Groups
+
+### Account Group
+
+<StructType fields={objects.accountGroup} />
+
+Account groups let you organize accounts into named groups, for example "Savings" or "Credit Cards". An account can belong to at most one group, set through the `account_group_id` field on [`Account`](#account).
+
+#### Methods
+
+#### `getAccountGroups`
+
+<Method name="getAccountGroups" args={[]} returns="Promise<AccountGroup[]>" />
+
+Get all account groups. Returns an array of [`Account Group`](#account-group) objects.
+
+#### `createAccountGroup`
+
+<Method name="createAccountGroup" args={[{ name: 'group', type: 'AccountGroup' }]} returns="Promise<id>" />
+
+Create an account group. Returns the `id` of the new group.
+
+#### `updateAccountGroup`
+
+<Method name="updateAccountGroup" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} />
+
+Update fields of an account group. `fields` can specify the `name` field described in [`Account Group`](#account-group).
+
+#### `deleteAccountGroup`
+
+<Method name="deleteAccountGroup" args={[{ name: 'id', type: 'id' }]} />
+
+Delete an account group. Any accounts in the group are left ungrouped.
+
+#### Examples
+
+```js
+// Group two accounts under "Savings"
+
+const groupId = await createAccountGroup({ name: 'Savings' });
+await updateAccount(allySavingsId, { account_group_id: groupId });
+await updateAccount(marcusSavingsId, { account_group_id: groupId });
 ```
 
 ## Categories
