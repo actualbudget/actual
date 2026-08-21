@@ -2237,6 +2237,8 @@ function NotesCell({
 }: NotesCellProps) {
   const cellRef = useRef<HTMLDivElement | null>(null);
   const [inputValue, setInputValue] = useState(note);
+  const escapePressed = useRef(false);
+
   useEffect(() => {
     setInputValue(note);
   }, [note, setInputValue]);
@@ -2245,6 +2247,12 @@ function NotesCell({
     if (e.key === 'Enter' || e.key === 'Tab') {
       onUpdate(inputValue);
     } else if (e.key === 'Escape') {
+      if (!e.isPropagationStopped()) {
+        escapePressed.current = true;
+      }
+      if (e.target && 'value' in e.target) {
+        (e.target as HTMLInputElement).value = note;
+      }
       setInputValue(note);
     }
   }
@@ -2266,7 +2274,11 @@ function NotesCell({
       onExpose={onExpose}
       onUpdate={onUpdate}
       onKeyDown={onKeyDown}
-      onBlur={() => onUpdate(inputValue)}
+      onBlur={() => {
+        if (!escapePressed.current) {
+          onUpdate(inputValue);
+        }
+      }}
     >
       {({ inputStyle, onKeyDown, onBlur }) => (
         <TagAutocomplete
