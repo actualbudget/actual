@@ -119,6 +119,52 @@ test.describe('Accounts', () => {
     await expect(transaction.balance).toHaveText('25.00');
   });
 
+  test('bulk editing the date shows a properly formatted date picker', async () => {
+    accountPage = await navigation.goToAccountPage('Ally Savings');
+    await accountPage.waitFor();
+
+    await accountPage.selectNthTransaction(0);
+    await accountPage.clickSelectAction('Date');
+
+    const dialog = page.getByRole('dialog');
+    const calendarGrid = dialog.locator('.react-aria-CalendarGrid');
+    await expect(calendarGrid).toBeVisible();
+
+    const dialogBox = await dialog.boundingBox();
+    const calendarGridBox = await calendarGrid.boundingBox();
+    if (!dialogBox || !calendarGridBox) {
+      throw new Error('Could not measure the date picker modal');
+    }
+
+    // The calendar is horizontally centered in the modal, not pinned to a side
+    const leftGap = calendarGridBox.x - dialogBox.x;
+    const rightGap =
+      dialogBox.x +
+      dialogBox.width -
+      (calendarGridBox.x + calendarGridBox.width);
+    expect(Math.abs(leftGap - rightGap)).toBeLessThanOrEqual(2);
+
+    // The calendar is fully visible even for months spanning six rows
+    // (April 2017 relative to the pinned e2e date of January 2017)
+    await dialog.getByRole('button', { name: 'Next month' }).click();
+    await dialog.getByRole('button', { name: 'Next month' }).click();
+    await dialog.getByRole('button', { name: 'Next month' }).click();
+    await expect(dialog.locator('.calendar-header-title')).toHaveText(
+      'April 2017',
+    );
+
+    const sixRowDialogBox = await dialog.boundingBox();
+    const sixRowGridBox = await calendarGrid.boundingBox();
+    if (!sixRowDialogBox || !sixRowGridBox) {
+      throw new Error('Could not measure the date picker modal');
+    }
+    expect(sixRowGridBox.y + sixRowGridBox.height).toBeLessThanOrEqual(
+      sixRowDialogBox.y + sixRowDialogBox.height,
+    );
+
+    await expect(dialog).toMatchThemeScreenshots();
+  });
+
   test('shift-click range selection skips hidden reconciled transactions', async () => {
     accountPage = await navigation.createAccount({
       name: 'Range Select',
