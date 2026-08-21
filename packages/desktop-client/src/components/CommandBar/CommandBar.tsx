@@ -98,6 +98,7 @@ import type {
   ActionItem,
   ActionPageHeader,
   ActionSection,
+  ActionTrigger,
   QuickAction,
   SearchSection,
 } from './types';
@@ -107,6 +108,13 @@ type Page = 'root' | 'themes' | 'account-actions' | 'report-actions';
 type ContextualItem =
   | { type: 'account'; item: AccountEntity }
   | { type: 'report'; item: CustomReportEntity };
+
+function isMacPlatform() {
+  return (
+    typeof navigator !== 'undefined' &&
+    /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent)
+  );
+}
 
 export function CommandBar() {
   const { t } = useTranslation();
@@ -487,14 +495,18 @@ export function CommandBar() {
   ];
 
   const runContextualAction = useCallback(
-    (action: ActionItem) => {
+    (action: ActionItem, trigger: ActionTrigger) => {
+      const execution =
+        trigger === 'secondary' ? action.secondaryAction : action.primaryAction;
+      if (execution == null) return;
+
       // Contextual actions always close before they navigate, open a modal, or
       // start a mutation. This also keeps the palette from sitting above the
       // flow it just launched.
       dispatch(closeCommandBar());
       void (async () => {
         try {
-          await action.run();
+          await execution.run();
         } catch (error) {
           console.error('Command bar action failed', {
             commandId: action.id,
@@ -531,9 +543,23 @@ export function CommandBar() {
                 id: 'open',
                 name: t('Open'),
                 Icon: SvgWindowOpen,
-                run: async () => {
-                  await navigate(`/accounts/${contextualItem.item.id}`);
+                primaryAction: {
+                  label: t('Open'),
+                  run: async () => {
+                    await navigate(`/accounts/${contextualItem.item.id}`);
+                  },
                 },
+                ...(contextualItem.item.closed
+                  ? {
+                      secondaryAction: {
+                        label: t('Reopen account'),
+                        run: () =>
+                          reopenAccount.mutateAsync({
+                            id: contextualItem.item.id,
+                          }),
+                      },
+                    }
+                  : {}),
               },
             ],
           },
@@ -546,20 +572,28 @@ export function CommandBar() {
                     id: 'reopen',
                     name: t('Reopen account'),
                     Icon: SvgLockOpen,
-                    run: () =>
-                      reopenAccount.mutateAsync({ id: contextualItem.item.id }),
+                    primaryAction: {
+                      label: t('Reopen account'),
+                      run: () =>
+                        reopenAccount.mutateAsync({
+                          id: contextualItem.item.id,
+                        }),
+                    },
                   }
                 : {
                     id: 'close',
                     name: t('Close account'),
                     Icon: SvgClose,
                     destructive: true,
-                    run: async () => {
-                      await dispatch(
-                        openAccountCloseModal({
-                          accountId: contextualItem.item.id,
-                        }),
-                      );
+                    primaryAction: {
+                      label: t('Close account'),
+                      run: async () => {
+                        await dispatch(
+                          openAccountCloseModal({
+                            accountId: contextualItem.item.id,
+                          }),
+                        );
+                      },
                     },
                   },
             ],
@@ -575,8 +609,13 @@ export function CommandBar() {
                   id: 'open',
                   name: t('Open'),
                   Icon: SvgWindowOpen,
-                  run: async () => {
-                    await navigate(`/reports/custom/${contextualItem.item.id}`);
+                  primaryAction: {
+                    label: t('Open'),
+                    run: async () => {
+                      await navigate(
+                        `/reports/custom/${contextualItem.item.id}`,
+                      );
+                    },
                   },
                 },
               ],
@@ -699,6 +738,21 @@ export function CommandBar() {
   }));
   const hasResults = filteredSections.some(section => !!section.items.length);
   const isActionPage = page === 'account-actions' || page === 'report-actions';
+  const macPlatform = isMacPlatform();
+  const selectedContextualAction = contextualActionSections
+    .flatMap(section =>
+      section.items.map(action => ({
+        action,
+        value: `action:${section.key}:${action.id}`,
+      })),
+    )
+    .find(item => item.value === selectedValue)?.action;
+  const secondaryShortcutHint = selectedContextualAction?.secondaryAction
+    ? {
+        keys: macPlatform ? ['⌘', '↵'] : ['Ctrl', '↵'],
+        label: selectedContextualAction.secondaryAction.label,
+      }
+    : undefined;
   const commandListClassName = cx(
     css({
       flex: '1 1 auto',
@@ -827,6 +881,8 @@ export function CommandBar() {
             header={contextualHeader}
             sections={contextualActionSections}
             query={search}
+            selectedValue={selectedValue}
+            isMacPlatform={macPlatform}
             listClassName={commandListClassName}
             onQueryChange={query => {
               setSearch(query);
@@ -847,7 +903,8 @@ export function CommandBar() {
             onSelectAction={runContextualAction}
             onBack={goBackToRoot}
             primaryShortcutHint={{ keys: ['↵'], label: t('select') }}
-            secondaryShortcutHint={{ keys: ['esc'], label: t('back') }}
+            secondaryShortcutHint={secondaryShortcutHint}
+            backShortcutHint={{ keys: ['esc'], label: t('back') }}
           />
         )
       ) : (

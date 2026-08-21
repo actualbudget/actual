@@ -19,6 +19,7 @@ import type {
   ActionItem,
   ActionPageHeader,
   ActionSection,
+  ActionTrigger,
   ShortcutHint as ShortcutHintType,
 } from './types';
 
@@ -26,11 +27,14 @@ export type ActionPageProps = Readonly<{
   header: ActionPageHeader;
   sections: readonly ActionSection[];
   query: string;
+  selectedValue: string;
+  isMacPlatform: boolean;
   onQueryChange: (query: string) => void;
-  onSelectAction: (action: ActionItem) => void;
+  onSelectAction: (action: ActionItem, trigger: ActionTrigger) => void;
   onBack?: () => void;
   primaryShortcutHint?: ShortcutHintType;
   secondaryShortcutHint?: ShortcutHintType;
+  backShortcutHint?: ShortcutHintType;
   searchPlaceholder?: string;
   listClassName: string;
 }>;
@@ -111,14 +115,14 @@ function ActionRow({
   action: ActionItem;
   value: string;
   query: string;
-  onSelect: (action: ActionItem) => void;
+  onSelect: (action: ActionItem, trigger: ActionTrigger) => void;
 }) {
   const Icon = action.Icon;
   return (
     <Command.Item
       value={value}
       aria-label={action.name}
-      onSelect={() => onSelect(action)}
+      onSelect={() => onSelect(action, 'primary')}
       className={`${actionItemClassName} ${action.destructive ? destructiveActionClassName : ''}`}
     >
       {action.leading ?? (Icon ? <Icon /> : null)}
@@ -156,11 +160,14 @@ export function ActionPage({
   header,
   sections,
   query,
+  selectedValue,
+  isMacPlatform,
   onQueryChange,
   onSelectAction,
   onBack,
   primaryShortcutHint,
   secondaryShortcutHint,
+  backShortcutHint,
   searchPlaceholder,
   listClassName,
 }: ActionPageProps) {
@@ -178,6 +185,14 @@ export function ActionPage({
       ),
     }))
     .filter(section => section.items.length > 0);
+  const selectedAction = filteredSections
+    .flatMap(section =>
+      section.items.map(action => ({
+        action,
+        value: `action:${section.key}:${action.id}`,
+      })),
+    )
+    .find(item => item.value === selectedValue)?.action;
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -201,6 +216,25 @@ export function ActionPage({
         placeholder={searchPlaceholder ?? t('Search actions...')}
         aria-label={t('Search actions')}
         onKeyDown={event => {
+          if (
+            event.key === 'Enter' &&
+            (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey)
+          ) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const isExpectedSecondaryModifier = isMacPlatform
+              ? event.metaKey
+              : event.ctrlKey;
+            if (
+              isExpectedSecondaryModifier &&
+              selectedAction?.secondaryAction != null
+            ) {
+              onSelectAction(selectedAction, 'secondary');
+            }
+            return;
+          }
+
           if (event.key === 'Backspace' && query === '' && onBack != null) {
             event.preventDefault();
             onBack();
@@ -242,7 +276,9 @@ export function ActionPage({
           </Command.Empty>
         )}
       </Command.List>
-      {(primaryShortcutHint != null || secondaryShortcutHint != null) && (
+      {(primaryShortcutHint != null ||
+        secondaryShortcutHint != null ||
+        backShortcutHint != null) && (
         <View
           className={actionFooterClassName}
           aria-label={t('Keyboard shortcuts')}
@@ -253,6 +289,7 @@ export function ActionPage({
           {secondaryShortcutHint != null && (
             <ShortcutHint {...secondaryShortcutHint} />
           )}
+          {backShortcutHint != null && <ShortcutHint {...backShortcutHint} />}
         </View>
       )}
     </View>

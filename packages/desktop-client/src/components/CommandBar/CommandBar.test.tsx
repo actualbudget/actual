@@ -237,6 +237,10 @@ function ContributedCommands({
 
 describe('CommandBar', () => {
   beforeEach(() => {
+    Object.defineProperty(window.navigator, 'platform', {
+      configurable: true,
+      value: 'Linux x86_64',
+    });
     vi.stubGlobal(
       'ResizeObserver',
       class {
@@ -307,6 +311,102 @@ describe('CommandBar', () => {
       expect(mocks.navigate).toHaveBeenCalledWith('/accounts/account-1');
     });
     expect(store.getState().commandBar.open).toBe(false);
+  });
+
+  it('executes the primary action once for plain Enter', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    const store = renderOpenCommandBar();
+    await keyboardSelectRootItem('Checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+
+    fireEvent.keyDown(screen.getByPlaceholderText('Search actions...'), {
+      key: 'Enter',
+    });
+
+    await waitFor(() => {
+      expect(mocks.navigate).toHaveBeenCalledWith('/accounts/account-1');
+    });
+    expect(mocks.navigate).toHaveBeenCalledTimes(1);
+    expect(store.getState().commandBar.open).toBe(false);
+  });
+
+  it('executes only the explicit secondary action for Meta+Enter on macOS', async () => {
+    Object.defineProperty(window.navigator, 'platform', {
+      configurable: true,
+      value: 'MacIntel',
+    });
+    mockData.accounts = [{ id: 'account-1', name: 'Old checking', closed: 1 }];
+    const store = renderOpenCommandBar();
+    await keyboardSelectRootItem('Old checking');
+    fireEvent.keyDown(document, { key: 'k', metaKey: true });
+
+    const actionInput = screen.getByPlaceholderText('Search actions...');
+    expect(screen.getByLabelText('Keyboard shortcuts')).toHaveTextContent(
+      'Reopen account',
+    );
+    fireEvent.keyDown(actionInput, { key: 'Enter', metaKey: true });
+
+    await waitFor(() => {
+      expect(mocks.reopenAccount).toHaveBeenCalledWith({ id: 'account-1' });
+    });
+    expect(mocks.reopenAccount).toHaveBeenCalledTimes(1);
+    expect(mocks.navigate).not.toHaveBeenCalled();
+    expect(store.getState().commandBar.open).toBe(false);
+  });
+
+  it('executes only the explicit secondary action for Ctrl+Enter elsewhere', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Old checking', closed: 1 }];
+    const store = renderOpenCommandBar();
+    await keyboardSelectRootItem('Old checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+
+    fireEvent.keyDown(screen.getByPlaceholderText('Search actions...'), {
+      key: 'Enter',
+      ctrlKey: true,
+    });
+
+    await waitFor(() => {
+      expect(mocks.reopenAccount).toHaveBeenCalledWith({ id: 'account-1' });
+    });
+    expect(mocks.reopenAccount).toHaveBeenCalledTimes(1);
+    expect(mocks.navigate).not.toHaveBeenCalled();
+    expect(store.getState().commandBar.open).toBe(false);
+  });
+
+  it('does nothing for a modified Enter when the selected action has no secondary', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    const store = renderOpenCommandBar();
+    await keyboardSelectRootItem('Checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+
+    fireEvent.keyDown(screen.getByPlaceholderText('Search actions...'), {
+      key: 'Enter',
+      ctrlKey: true,
+    });
+
+    expect(mocks.navigate).not.toHaveBeenCalled();
+    expect(store.getState().commandBar.open).toBe(true);
+  });
+
+  it('never promotes the destructive action to a secondary shortcut', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    const store = renderOpenCommandBar();
+    await keyboardSelectRootItem('Checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+
+    const actionInput = screen.getByPlaceholderText('Search actions...');
+    fireEvent.keyDown(actionInput, { key: 'ArrowDown' });
+    expect(
+      screen.getByRole('option', { name: 'Close account' }),
+    ).toHaveAttribute('data-selected', 'true');
+    fireEvent.keyDown(actionInput, { key: 'Enter', ctrlKey: true });
+
+    expect(mocks.navigate).not.toHaveBeenCalled();
+    expect(store.getState().commandBar.open).toBe(true);
+    expect(store.getState().modals.modalStack).toEqual([]);
+    expect(
+      mocks.send.mock.calls.some(([command]) => command === 'account-close'),
+    ).toBe(false);
   });
 
   it('does not open an action page for an unsupported root item', () => {

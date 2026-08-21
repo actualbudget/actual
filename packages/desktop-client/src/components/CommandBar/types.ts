@@ -32,13 +32,21 @@ export type QuickAction = SearchableItem &
   }>;
 
 /** An action shown for a resolved item on a nested action page. */
+export type ActionExecution = Readonly<{
+  label: string;
+  run: () => void | Promise<void>;
+}>;
+
 export type ActionItem = SearchableItem &
   Readonly<{
     readonly description?: ReactNode;
     readonly shortcut?: readonly string[];
     readonly destructive?: boolean;
-    readonly run: () => void | Promise<void>;
+    readonly primaryAction: ActionExecution;
+    readonly secondaryAction?: ActionExecution;
   }>;
+
+export type ActionTrigger = 'primary' | 'secondary';
 
 export type ActionSection = Readonly<{
   readonly key: string;
