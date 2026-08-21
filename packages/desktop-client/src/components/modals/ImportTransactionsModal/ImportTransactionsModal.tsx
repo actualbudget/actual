@@ -281,6 +281,10 @@ export function ImportTransactionsModal({
   const [startDate, setStartDate] = useState('');
   const lastParseRef = useRef<LastParse | null>(null);
 
+  // Pre-parsed formats (OFX, CAMT, MT940) already provide signed amounts,
+  // so In/Out mode should never be active for them.
+  const inOutModeEnabled = isStructuredFile(filetype) ? false : inOutMode;
+
   const getImportPreview = useCallback(
     async (
       transactions: ImportTransaction[],
@@ -294,7 +298,7 @@ export function ImportTransactionsModal({
       multiplierAmount: string,
     ) => {
       const previewTransactions = [];
-      const inOutModeEnabled = isOfxFile(filetype) ? false : inOutMode;
+      const inOutModeEnabled = isStructuredFile(filetype) ? false : inOutMode;
       const getTransDate: (trans: ImportTransaction) => string | null =
         isOfxFile(filetype)
           ? trans => trans.date ?? null
@@ -551,7 +555,16 @@ export function ImportTransactionsModal({
       filters: [
         {
           name: 'Financial Files',
-          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
+          extensions: [
+            'qif',
+            'ofx',
+            'qfx',
+            'csv',
+            'tsv',
+            'xml',
+            'sta',
+            'mt940',
+          ],
         },
       ],
     });
@@ -646,10 +659,9 @@ export function ImportTransactionsModal({
 
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
-      const date =
-        isOfxFile(filetype) || isCamtFile(filetype)
-          ? trans.date
-          : parseDate(trans.date, parseDateFormat);
+      const date = isStructuredFile(filetype)
+        ? trans.date
+        : parseDate(trans.date, parseDateFormat);
       if (date == null) {
         errorMessage = t(
           'Unable to parse date {{date}} with given date format',
@@ -661,7 +673,7 @@ export function ImportTransactionsModal({
       const { amount } = parseAmountFields(
         trans,
         splitMode,
-        isOfxFile(filetype) ? false : inOutMode,
+        inOutModeEnabled,
         outValue,
         flipAmount,
         multiplierAmount,
@@ -714,7 +726,7 @@ export function ImportTransactionsModal({
       return;
     }
 
-    if (!isOfxFile(filetype) && !isCamtFile(filetype)) {
+    if (!isStructuredFile(filetype)) {
       const key = `parse-date-${accountId}-${filetype}`;
       savePrefs({ [key]: parseDateFormat });
     }
@@ -792,7 +804,7 @@ export function ImportTransactionsModal({
 
   const onImportPreview = useEffectEvent(async () => {
     // Filter by start date before preview and deduplication
-    const isPreParsed = isOfxFile(filetype) || isCamtFile(filetype);
+    const isPreParsed = isStructuredFile(filetype);
     const filteredTransactions = filterByStartDate(
       parsedTransactions,
       startDate,
@@ -899,7 +911,7 @@ export function ImportTransactionsModal({
   if (reconcile) {
     headers.unshift({ name: ' ', width: 31 });
   }
-  if (inOutMode) {
+  if (inOutModeEnabled) {
     headers.push({
       name: t('In/Out'),
       width: 90,
@@ -990,7 +1002,7 @@ export function ImportTransactionsModal({
                       dateFormat={dateFormat}
                       fieldMappings={fieldMappings}
                       splitMode={splitMode}
-                      inOutMode={inOutMode}
+                      inOutMode={inOutModeEnabled}
                       outValue={outValue}
                       flipAmount={flipAmount}
                       multiplierAmount={multiplierAmount}
@@ -1117,7 +1129,7 @@ export function ImportTransactionsModal({
             </CheckboxToggle>
           )}
 
-          {(isOfxFile(filetype) || isCamtFile(filetype)) && (
+          {isStructuredFile(filetype) && (
             <CheckboxToggle
               id="form_dont_reconcile"
               checked={reconcile}
@@ -1127,7 +1139,7 @@ export function ImportTransactionsModal({
             </CheckboxToggle>
           )}
 
-          {(isOfxFile(filetype) || isCamtFile(filetype)) && reconcile && (
+          {isStructuredFile(filetype) && reconcile && (
             <CheckboxToggle
               id="form_reimport_deleted"
               checked={reimportDeleted}
@@ -1402,4 +1414,14 @@ function isOfxFile(fileType: string) {
 
 function isCamtFile(fileType: string) {
   return fileType === 'xml';
+}
+
+function isMt940File(fileType: string) {
+  return fileType === 'sta' || fileType === 'mt940';
+}
+
+// File types whose parser already emits ISO dates and a fixed field layout, so
+// they need neither date-format detection nor field mapping.
+function isStructuredFile(fileType: string) {
+  return isOfxFile(fileType) || isCamtFile(fileType) || isMt940File(fileType);
 }

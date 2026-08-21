@@ -5,6 +5,7 @@ import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 import { looselyParseAmount } from '#shared/util';
 
+import { mt9402json } from './mt9402json';
 import { ofx2json } from './ofx2json';
 import { qif2json } from './qif2json';
 import { xmlCAMT2json } from './xmlcamt2json';
@@ -94,6 +95,9 @@ export async function parseFile(
       case '.ofx':
       case '.qfx':
         return parseOFX(filepath, options);
+      case '.sta':
+      case '.mt940':
+        return parseMT940(filepath, options);
       case '.xml':
         return parseCAMT(filepath, options);
       default:
@@ -279,6 +283,48 @@ async function parseCAMT(
 
       return {
         ...trans,
+        payee_name: payeeSource || (fallbackUsed ? memoSource : null),
+        imported_payee: payeeSource || (fallbackUsed ? memoSource : null),
+        notes: options.importNotes && !fallbackUsed ? memoSource || null : null,
+      };
+    }),
+  };
+}
+
+async function parseMT940(
+  filepath: string,
+  options: ParseFileOptions = {},
+): Promise<ParseFileResult> {
+  const errors = Array<ParseError>();
+  // Read raw bytes so the parser can detect the charset itself.
+  const contents = await fs.readFile(filepath, 'binary');
+
+  let data: ReturnType<typeof mt9402json>;
+  try {
+    data = mt9402json(contents);
+  } catch (err) {
+    logger.error(err);
+    errors.push({
+      message: "Failed parsing: doesn't look like a valid MT940 file.",
+      internal: err.stack,
+    });
+    return { errors };
+  }
+
+  const swap = options.swapPayeeAndMemo;
+
+  return {
+    errors,
+    transactions: data.transactions.map(trans => {
+      const payeeSource = swap ? trans.notes : trans.payee_name;
+      const memoSource = swap ? trans.payee_name : trans.notes;
+      const fallbackUsed = !payeeSource && swap;
+
+      return {
+        amount: trans.amount,
+        imported_id: trans.imported_id,
+        // mt940js returns a UTC-midnight Date; take the date part directly.
+        date: trans.date.toISOString().split('T')[0],
         payee_name: payeeSource || (fallbackUsed ? memoSource : null),
         imported_payee: payeeSource || (fallbackUsed ? memoSource : null),
         notes: options.importNotes && !fallbackUsed ? memoSource || null : null,
