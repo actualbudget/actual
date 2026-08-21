@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { liveQuery } from '#queries/liveQuery';
 import type { LiveQuery } from '#queries/liveQuery';
 
-import { useSchedules } from './useSchedules';
+import { getSchedulesQuery, useSchedules } from './useSchedules';
 
 vi.mock('#queries/liveQuery', () => ({
   liveQuery: vi.fn(),
@@ -78,5 +78,19 @@ describe('useSchedules', () => {
 
     expect(calls[0].unsubscribe).toHaveBeenCalled();
     expect(calls[1].unsubscribe).toHaveBeenCalled();
+  });
+});
+
+describe('getSchedulesQuery', () => {
+  it('loads split schedules for concrete account views', () => {
+    const query = getSchedulesQuery('savings');
+
+    expect(query.state.filterExpressions).toContainEqual({
+      $or: [
+        { _account: 'savings' },
+        { '_payee.transfer_acct': 'savings' },
+        { _has_splits: true },
+      ],
+    });
   });
 });
