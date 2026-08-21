@@ -424,7 +424,7 @@ let accounts = await getAccounts();
 
 ## Account Groups
 
-#### Account Group
+### Account Group
 
 <StructType fields={objects.accountGroup} />
 

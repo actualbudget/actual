@@ -76,14 +76,19 @@ export const accountModel = {
 };
 
 export const accountGroupModel = {
-  validate(
-    accountGroup: Partial<DbAccountGroup>,
+  validate<T extends Partial<DbAccountGroup>>(
+    accountGroup: T,
     { update }: { update?: boolean } = {},
-  ): DbAccountGroup {
-    requiredFields('accountGroup', accountGroup, ['name'], update);
+  ): Omit<T, 'sort_order'> {
+    requiredFields<Partial<DbAccountGroup>, 'name'>(
+      'accountGroup',
+      accountGroup,
+      ['name'],
+      update,
+    );
 
     const { sort_order: _sort_order, ...rest } = accountGroup;
-    return { ...rest } as DbAccountGroup;
+    return rest;
   },
 };
 
