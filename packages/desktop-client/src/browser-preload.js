@@ -6,6 +6,7 @@ import { registerSW } from 'virtual:pwa-register';
 import packageJson from '../package.json';
 
 import SharedBrowserServerWorker from './shared-browser-server.ts?sharedworker';
+import { getClientVersion } from './util/clientVersion';
 
 const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 
@@ -15,11 +16,12 @@ const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 // everything else.
 
 const IS_DEV = import.meta.env.DEV;
-const ACTUAL_VERSION = Platform.isPlaywright
-  ? '99.9.9'
-  : import.meta.env.REACT_APP_REVIEW_ID
-    ? '.preview'
-    : packageJson.version;
+const ACTUAL_VERSION = getClientVersion({
+  packageVersion: packageJson.version,
+  isPlaywright: Platform.isPlaywright,
+  reviewId: import.meta.env.REACT_APP_REVIEW_ID,
+  commitRef: import.meta.env.REACT_APP_COMMIT_REF,
+});
 
 // The OIDC callback (/openid-cb) is reached via a full-page navigation back
 // from the OpenID provider. Routing it through the SharedWorker coordinator is
