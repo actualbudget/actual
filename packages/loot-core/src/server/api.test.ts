@@ -138,4 +138,65 @@ describe('API handlers', () => {
       expect(group?.categories?.[0]).toHaveProperty('carryover', false);
     });
   });
+
+  describe('api/rule-create', () => {
+    beforeEach(global.emptyDatabase());
+
+    beforeEach(async () => {
+      await prefs.loadPrefs();
+    });
+
+    test.each(['default', null, 'pre', 'post'] as const)(
+      'normalizes %s input at the API boundary',
+      async stage => {
+        const rule = {
+          stage,
+          conditionsOp: 'and' as const,
+          conditions: [],
+          actions: [],
+        };
+        const internalRule = {
+          id: 'rule-id',
+          ...rule,
+          stage: stage === 'default' ? null : stage,
+        };
+
+        handlers['rule-add'] = vi.fn().mockResolvedValue(internalRule);
+
+        await expect(handlers['api/rule-create']({ rule })).resolves.toEqual(
+          internalRule,
+        );
+        expect(handlers['rule-add']).toHaveBeenCalledWith({
+          ...rule,
+          stage: internalRule.stage,
+        });
+      },
+    );
+  });
+
+  describe('api/rule-update', () => {
+    beforeEach(global.emptyDatabase());
+
+    beforeEach(async () => {
+      await prefs.loadPrefs();
+    });
+
+    test('normalizes default input at the API boundary', async () => {
+      const rule = {
+        id: 'rule-id',
+        stage: 'default' as const,
+        conditionsOp: 'and' as const,
+        conditions: [],
+        actions: [],
+      };
+      const internalRule = { ...rule, stage: null };
+
+      handlers['rule-update'] = vi.fn().mockResolvedValue(internalRule);
+
+      await expect(handlers['api/rule-update']({ rule })).resolves.toEqual(
+        internalRule,
+      );
+      expect(handlers['rule-update']).toHaveBeenCalledWith(internalRule);
+    });
+  });
 });
