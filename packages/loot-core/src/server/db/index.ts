@@ -843,9 +843,9 @@ export async function moveAccountGroup(
   const { updates, sort_order } = shoveSortOrders(groups, targetId);
   await batchMessages(async () => {
     for (const info of updates) {
-      void update('account_groups', info);
+      await update('account_groups', info);
     }
-    void update('account_groups', { id, sort_order });
+    await update('account_groups', { id, sort_order });
   });
 }
 
@@ -860,9 +860,9 @@ export async function deleteAccountGroup(group: Pick<DbAccountGroup, 'id'>) {
   // must always treat a ref to a missing/tombstoned group as ungrouped.
   await batchMessages(async () => {
     for (const account of accounts) {
-      void update('accounts', { id: account.id, account_group_id: null });
+      await update('accounts', { id: account.id, account_group_id: null });
     }
-    void delete_('account_groups', group.id);
+    await delete_('account_groups', group.id);
   });
 }
 
