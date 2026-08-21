@@ -298,6 +298,32 @@ export const ReportOptions = {
   >(intervalOptions.map(item => [item.key, item.range])),
 };
 
+// Only Daily and Weekly labels spell out a day and a month, so they are the
+// only intervals whose ordering a date-format preference can disagree with.
+// Monthly ("MMM ''yy") and Yearly ("yyyy") are unambiguous either way.
+const dayLevelIntervals = new Set(['Daily', 'Weekly']);
+
+/**
+ * The display format for an interval's labels, following the user's date
+ * format preference.
+ *
+ * @param interval one of the `intervalOptions` keys.
+ * @param dateFormat the `dateFormat` synced pref, e.g. 'MM/dd/yyyy'.
+ * @returns a date-fns format string, or '' for an unrecognised interval.
+ */
+export function getIntervalFormat(
+  interval: string,
+  dateFormat?: string,
+): string {
+  if (!dayLevelIntervals.has(interval)) {
+    return ReportOptions.intervalFormat.get(interval) ?? '';
+  }
+  // A two-digit year keeps the tick labels as narrow as they are today; only
+  // the field ordering has to follow the preference. Falling back to
+  // 'yyyy-MM-dd' reproduces the previous hardcoded 'yy-MM-dd'.
+  return (dateFormat || 'yyyy-MM-dd').replace('yyyy', 'yy');
+}
+
 export type QueryDataEntity = {
   date: string;
   category: string;
