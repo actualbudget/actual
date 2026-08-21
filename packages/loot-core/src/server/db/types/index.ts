@@ -101,6 +101,14 @@ export type DbCrdtMessage = {
   value: Uint8Array;
 };
 
+export type DbPendingMessage = {
+  timestamp: string;
+  dataset: string;
+  row: string;
+  column: string;
+  value: string;
+};
+
 export type DbNote = {
   id: string;
   note: string;
