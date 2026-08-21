@@ -388,4 +388,58 @@ describe('Categories', () => {
     categories = await db.getCategories();
     expect(categories.find(cat => cat.id === 'income1')).not.toBeDefined();
   });
+
+  test('do not count as overspent when deleted', async () => {
+    await sheet.loadSpreadsheet(db);
+
+    await runMutator(async () => {
+      await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+      await db.insertCategoryGroup({
+        id: 'group2',
+        name: 'income',
+        is_income: 1,
+      });
+      await db.insertCategory({ id: 'foo', name: 'foo', cat_group: 'group1' });
+      await db.insertCategory({ id: 'bar', name: 'bar', cat_group: 'group1' });
+      await db.insertAccount({ id: 'acct', name: 'acct' });
+
+      // A deposit straight into the category, like a refund
+      await db.insertTransaction({
+        date: '2017-01-01',
+        account: 'acct',
+        amount: 10000,
+        category: 'foo',
+      });
+    });
+
+    await budget.createAllBudgets();
+
+    // Move 1000 from `foo` to `bar`, which leaves `foo` with a negative
+    // budgeted amount
+    await budgetActions.setBudget({
+      category: 'foo',
+      month: '2017-01',
+      amount: -1000,
+    });
+    await budgetActions.setBudget({
+      category: 'bar',
+      month: '2017-01',
+      amount: 1000,
+    });
+    await sheet.waitOnSpreadsheet();
+
+    const nextSheetName = monthUtils.sheetForMonth('2017-02');
+    expect(sheet.getCellValue(nextSheetName, 'last-month-overspent')).toBe(0);
+    const toBudget = sheet.getCellValue(nextSheetName, 'to-budget');
+
+    await runHandler(handlers['category-delete'], {
+      id: 'foo',
+      transferId: 'bar',
+    });
+    await sheet.waitOnSpreadsheet();
+
+    // The deleted category should not leave any overspending behind
+    expect(sheet.getCellValue(nextSheetName, 'last-month-overspent')).toBe(0);
+    expect(sheet.getCellValue(nextSheetName, 'to-budget')).toBe(toBudget);
+  });
 });
