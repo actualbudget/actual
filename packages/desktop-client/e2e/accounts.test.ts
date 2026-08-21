@@ -1,6 +1,6 @@
 import { join } from 'path';
 
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import type { AccountPage } from './page-models/account-page';
@@ -120,6 +120,14 @@ test.describe('Accounts', () => {
   });
 
   test('bulk editing the date shows a properly formatted date picker', async () => {
+    async function measure(locator: Locator) {
+      const box = await locator.boundingBox();
+      if (!box) {
+        throw new Error('Could not measure the date picker modal');
+      }
+      return box;
+    }
+
     accountPage = await navigation.goToAccountPage('Ally Savings');
     await accountPage.waitFor();
 
@@ -130,13 +138,9 @@ test.describe('Accounts', () => {
     const calendarGrid = dialog.locator('.react-aria-CalendarGrid');
     await expect(calendarGrid).toBeVisible();
 
-    const dialogBox = await dialog.boundingBox();
-    const calendarGridBox = await calendarGrid.boundingBox();
-    if (!dialogBox || !calendarGridBox) {
-      throw new Error('Could not measure the date picker modal');
-    }
-
     // The calendar is horizontally centered in the modal, not pinned to a side
+    const dialogBox = await measure(dialog);
+    const calendarGridBox = await measure(calendarGrid);
     const leftGap = calendarGridBox.x - dialogBox.x;
     const rightGap =
       dialogBox.x +
@@ -153,16 +157,19 @@ test.describe('Accounts', () => {
       'April 2017',
     );
 
-    const sixRowDialogBox = await dialog.boundingBox();
-    const sixRowGridBox = await calendarGrid.boundingBox();
-    if (!sixRowDialogBox || !sixRowGridBox) {
-      throw new Error('Could not measure the date picker modal');
-    }
+    const sixRowDialogBox = await measure(dialog);
+    const sixRowGridBox = await measure(calendarGrid);
     expect(sixRowGridBox.y + sixRowGridBox.height).toBeLessThanOrEqual(
       sixRowDialogBox.y + sixRowDialogBox.height,
     );
 
     await expect(dialog).toMatchThemeScreenshots();
+
+    // On a wide screen the modal keeps a bounded width instead of
+    // stretching to fit the 100%-wide calendar grid
+    await page.setViewportSize({ width: 2560, height: 1080 });
+    const wideDialogBox = await measure(dialog);
+    expect(wideDialogBox.width).toBeLessThanOrEqual(700);
   });
 
   test('shift-click range selection skips hidden reconciled transactions', async () => {

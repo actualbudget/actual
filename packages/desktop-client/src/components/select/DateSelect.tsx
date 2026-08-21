@@ -231,10 +231,9 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
               boxShadow: 'none',
             },
           },
-          // Embedded pickers render into arbitrarily wide containers (e.g.
-          // the bulk edit modal): stretch the grid to the container with
-          // equal columns, same technique as DayRangeCalendar. Popovers
-          // shrink to fit, so a 100%-wide table must not apply there.
+          // Embedded: stretch the grid to the container with equal columns
+          // (same technique as DayRangeCalendar). The container must have a
+          // definite width — a 100%-wide table blows up shrink-to-fit boxes.
           embedded && {
             '& .react-aria-Calendar': { width: '100%' },
             '& .react-aria-CalendarGrid': {
