@@ -483,6 +483,7 @@ export function MonteCarlo() {
               simulationIndex={selectedRunIndex}
               simulationCount={result.simulationCount}
               startAge={config.currentAge}
+              hasContributions={config.contributions.length > 0}
               onBack={() => setSelectedRun(null)}
             />
           ) : (
@@ -589,14 +590,15 @@ export function MonteCarlo() {
           <Paragraph>
             <Trans>
               Each scenario replays your retirement with a different sequence of
-              yearly investment returns. Every year the withdrawal is taken
-              first, then each pot grows or shrinks with that year&apos;s
-              return. Pots with an access age stay invested but can&apos;t fund
-              withdrawals until you reach it - if the accessible pots can&apos;t
-              cover a year&apos;s withdrawal, the plan counts as having run out,
-              even if locked pots still hold money. The shaded bands show the
-              range of outcomes across all scenarios: the darker band covers the
-              middle half, and the lighter band covers 80% of them.
+              yearly investment returns. Every year, any contributions are added
+              at the start, then the withdrawal is taken, and then each pot
+              grows or shrinks with that year&apos;s return. Pots with an access
+              age stay invested but can&apos;t fund withdrawals until you reach
+              it - if the accessible pots can&apos;t cover a year&apos;s
+              withdrawal, the plan counts as having run out, even if locked pots
+              still hold money. The shaded bands show the range of outcomes
+              across all scenarios: the darker band covers the middle half, and
+              the lighter band covers 80% of them.
             </Trans>
           </Paragraph>
           <Paragraph>
@@ -604,8 +606,9 @@ export function MonteCarlo() {
               <Trans>
                 Keep in mind this is a simplified model: returns are drawn
                 independently each year from a normal distribution, which
-                ignores sequence-of-returns clustering, fat tails, fees, and
-                taxes. Treat the results as a rough guide, not a guarantee.
+                ignores sequence-of-returns clustering and fat tails, and fees
+                and taxes are modeled only as accurately as the rates you enter.
+                Treat the results as a rough guide, not a guarantee.
               </Trans>
             ) : config.returnModel === 'historical-bootstrap' ? (
               <Trans>
@@ -613,9 +616,10 @@ export function MonteCarlo() {
                 {{ lastYear }}, S&amp;P 500 / 10-year Treasuries / T-bills,
                 Damodaran data) drawn in random order for each pot&apos;s
                 allocation mix. Real crash years are included, but multi-year
-                momentum is lost by shuffling, fees and taxes are ignored, and
-                US history has been unusually good, so results may be optimistic
-                for globally diversified portfolios.
+                momentum is lost by shuffling, fees and taxes are only as
+                accurate as the rates you enter, and US history has been
+                unusually good, so results may be optimistic for globally
+                diversified portfolios.
               </Trans>
             ) : (
               <Trans>
@@ -624,8 +628,9 @@ export function MonteCarlo() {
                 T-bills, Damodaran data) starting from a different year,
                 wrapping around the end of the data. This preserves real crashes
                 and recoveries, but there are only as many scenarios as start
-                years, fees and taxes are ignored, and US history may be
-                optimistic for globally diversified portfolios.
+                years, fees and taxes are only as accurate as the rates you
+                enter, and US history may be optimistic for globally diversified
+                portfolios.
               </Trans>
             )}
           </Paragraph>

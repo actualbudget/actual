@@ -5,7 +5,11 @@ import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { View } from '@actual-app/components/view';
-import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+import {
+  DEFAULT_UPCOMING_SCHEDULE_DAYS,
+  isCustomUpcomingLength,
+  UPCOMING_LENGTH_PRESET_OPTIONS,
+} from '@actual-app/core/shared/schedules';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -15,26 +19,19 @@ import { CustomUpcomingLength } from './CustomUpcomingLength';
 function useUpcomingLengthOptions() {
   const { t } = useTranslation();
 
-  const upcomingLengthOptions: {
-    value: SyncedPrefs['upcomingScheduledTransactionLength'];
-    label: string;
-  }[] = [
-    { value: '1', label: t('1 day') },
-    { value: '7', label: t('1 week') },
-    { value: '14', label: t('2 weeks') },
-    { value: 'oneMonth', label: t('1 month') },
-    { value: 'currentMonth', label: t('End of the current month') },
-    { value: 'custom', label: t('Custom length') },
-  ];
+  const upcomingLengthOptions: Array<{ value: string; label: string }> =
+    UPCOMING_LENGTH_PRESET_OPTIONS.map(o => ({
+      value: o.value,
+      label: t(o.labelKey),
+    }));
+
+  upcomingLengthOptions.push({ value: 'custom', label: t('Custom length') });
 
   return { upcomingLengthOptions };
 }
 
 function nonCustomUpcomingLengthValues(value: string) {
-  return (
-    ['1', '7', '14', 'oneMonth', 'currentMonth'].findIndex(x => x === value) ===
-    -1
-  );
+  return isCustomUpcomingLength(value);
 }
 
 export function UpcomingLength() {
@@ -49,7 +46,7 @@ export function UpcomingLength() {
 
   const { upcomingLengthOptions } = useUpcomingLengthOptions();
 
-  const upcomingLength = _upcomingLength || '7';
+  const upcomingLength = _upcomingLength || DEFAULT_UPCOMING_SCHEDULE_DAYS;
 
   const [tempUpcomingLength, setTempUpcomingLength] = useState(upcomingLength);
   const [useCustomLength, setUseCustomLength] = useState(
@@ -91,7 +88,7 @@ export function UpcomingLength() {
           <View>
             <Select
               options={upcomingLengthOptions.map(x => [
-                x.value || '7',
+                x.value || DEFAULT_UPCOMING_SCHEDULE_DAYS,
                 x.label,
               ])}
               value={

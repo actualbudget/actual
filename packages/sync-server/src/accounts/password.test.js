@@ -22,6 +22,17 @@ function getStoredPasswordHash() {
   return row ? row.extra_data : null;
 }
 
+function getAuthMethods() {
+  return getAccountDb().all('SELECT method, active FROM auth ORDER BY method');
+}
+
+function insertOpenIdAuth(extraData) {
+  getAccountDb().mutate(
+    'INSERT INTO auth (method, display_name, extra_data, active) VALUES (?, ?, ?, ?)',
+    ['openid', 'OpenID', JSON.stringify(extraData), 1],
+  );
+}
+
 function ensureOwner() {
   const db = getAccountDb();
   const owner = db.first("SELECT id FROM users WHERE user_name = ''");
@@ -155,6 +166,25 @@ describe('bootstrapPassword / changePassword', () => {
 
   it('rejects an empty password on changePassword', async () => {
     expect(await changePassword('')).toEqual({ error: 'invalid-password' });
+  });
+});
+
+describe('changePassword on an OIDC-only instance', () => {
+  it('reports an error instead of silently succeeding', async () => {
+    insertOpenIdAuth({ issuer: 'https://issuer.example.com' });
+
+    expect(await changePassword('new password')).toEqual({
+      error: 'no-password-method',
+    });
+    expect(getStoredPasswordHash()).toBeNull();
+  });
+
+  it('does not disable the existing openid method', async () => {
+    insertOpenIdAuth({ issuer: 'https://issuer.example.com' });
+
+    await changePassword('new password');
+
+    expect(getAuthMethods()).toEqual([{ method: 'openid', active: 1 }]);
   });
 });
 
