@@ -2,6 +2,7 @@ import React from 'react';
 
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 import { render, screen } from '@testing-library/react';
+import type { Mock } from 'vitest';
 
 import { useCachedSchedules } from '#hooks/useCachedSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
@@ -84,6 +85,56 @@ describe('SelectedBalance – normal transactions', () => {
     );
 
     expect(screen.getByText('Selected balance:')).toBeInTheDocument();
+  });
+});
+
+describe('SelectedBalance – split transactions', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(useCachedSchedules).mockReturnValue(mockedSchedules([]));
+  });
+
+  // The rows query returns objects while the sum query returns a number, which
+  // the typed overload can't express in a single mock.
+  const mockSheetValues = vi.mocked(useSheetValue) as unknown as Mock;
+
+  function summedIds() {
+    // The second useSheetValue call is the one that sums the amounts.
+    const binding = vi.mocked(useSheetValue).mock.calls[1][0];
+    if (typeof binding === 'string' || !binding.query) {
+      throw new Error('expected the balance binding to carry a query');
+    }
+    const [filter] = binding.query.serialize().filterExpressions as Array<{
+      id: { $oneof: string[] };
+    }>;
+    return filter.id.$oneof;
+  }
+
+  test('sums only the selected children when a parent is partially selected', () => {
+    mockSheetValues
+      .mockReturnValueOnce([{ id: 'child-1', parent_id: 'parent-1' }])
+      .mockReturnValueOnce(-5951);
+
+    render(
+      <TestProviders>
+        <SelectedBalance selectedItems={new Set(['parent-1', 'child-1'])} />
+      </TestProviders>,
+    );
+
+    // The parent is dropped, so the unselected sibling is not counted.
+    expect(summedIds()).toEqual(['child-1']);
+  });
+
+  test('sums the whole split when only the parent is selected', () => {
+    mockSheetValues.mockReturnValueOnce([]).mockReturnValueOnce(-7239);
+
+    render(
+      <TestProviders>
+        <SelectedBalance selectedItems={new Set(['parent-1'])} />
+      </TestProviders>,
+    );
+
+    expect(summedIds()).toEqual(['parent-1']);
   });
 });
 
