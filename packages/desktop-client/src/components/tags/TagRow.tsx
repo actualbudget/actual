@@ -1,4 +1,5 @@
 import React, { memo, useRef } from 'react';
+import type { KeyboardEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowThinRight } from '@actual-app/components/icons/v1';
@@ -20,6 +21,7 @@ import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import {
   useDeleteTagsMutation,
   useHideTagsMutation,
+  useRenameTagMutation,
   useUnhideTagsMutation,
   useUpdateTagMutation,
 } from '#tags';
@@ -31,7 +33,7 @@ type TagRowProps = {
   hovered?: boolean;
   onHover: (id?: string) => void;
   focusedField: string | null;
-  onEdit: (id: string, field: string) => void;
+  onEdit: (id: string | null, field?: string) => void;
 };
 
 export const TagRow = memo(
@@ -50,12 +52,33 @@ export const TagRow = memo(
     const triggerRef = useRef(null);
     const navigate = useNavigate();
     const { mutate: updateTag } = useUpdateTagMutation();
+    const { mutate: renameTag } = useRenameTagMutation();
     const { mutate: deleteTags } = useDeleteTagsMutation();
     const { mutate: hideTags } = useHideTagsMutation();
     const { mutate: unhideTags } = useUnhideTagsMutation();
 
     const onUpdate = (description: string) => {
       updateTag({ tag: { ...tag, description } });
+    };
+
+    const onRename = (name: string) => {
+      const trimmed = name.trim();
+      if (!trimmed || trimmed === tag.tag) {
+        return;
+      }
+      renameTag({ id: tag.id, tag: trimmed });
+    };
+
+    // Enter must be handled here: the navigator would otherwise move editing
+    // to the next row's tag field, which after the list re-sorts is an
+    // unrelated tag
+    const onRenameKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        onRename(e.currentTarget.value);
+        onEdit(null);
+      }
     };
 
     const onShowActivity = () => {
@@ -76,10 +99,18 @@ export const TagRow = memo(
     };
 
     const contextActionIds = selected ? Array.from(selectedIds) : [tag.id];
+    // The other actions apply to every id above, so renaming — which edits a
+    // single row — is only offered when that is the one tag
+    const isSingleTagAction = contextActionIds.length === 1;
 
     useContextMenu({
       triggerRef,
       items: [
+        isSingleTagAction && {
+          name: 'rename',
+          text: t('Rename'),
+          onClick: () => onEdit(tag.id, 'tag'),
+        },
         {
           name: 'delete',
           text: t('Delete'),
@@ -128,9 +159,23 @@ export const TagRow = memo(
           selected={selected}
         />
 
-        <Cell width={250} plain style={{ padding: '5px', display: 'block' }}>
-          <TagEditor tag={tag} ref={colorButtonRef} />
-        </Cell>
+        {focusedField === 'tag' ? (
+          <InputCell
+            width={250}
+            name="tag"
+            textAlign="flex"
+            exposed
+            value={tag.tag}
+            inputProps={{
+              onUpdate: onRename,
+              onKeyDownCapture: onRenameKeyDown,
+            }}
+          />
+        ) : (
+          <Cell width={250} plain style={{ padding: '5px', display: 'block' }}>
+            <TagEditor tag={tag} ref={colorButtonRef} />
+          </Cell>
+        )}
 
         <InputCell
           width="flex"
