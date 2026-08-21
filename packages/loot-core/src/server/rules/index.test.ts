@@ -228,9 +228,13 @@ describe('Condition', () => {
     expect(cond.eval({ notes: 'f o o' })).toBe(false);
   });
 
-  test('matches handles invalid regex', () => {
-    const cond = new Condition('matches', 'notes', 'fo**', null);
-    expect(cond.eval({ notes: 'foo' })).toBe(false);
+  test.each([
+    ['notes', 'fo**'],
+    ['payee', 'trailing\\'],
+  ])('matches rejects invalid regex for %s conditions', (field, value) => {
+    expect(() => new Condition('matches', field, value, null)).toThrow(
+      'Invalid regular expression',
+    );
   });
 
   test('number validates value', () => {

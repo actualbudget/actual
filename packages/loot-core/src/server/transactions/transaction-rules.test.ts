@@ -838,6 +838,21 @@ describe('Transaction rules', () => {
       },
     ]);
   });
+
+  test.each([
+    { field: 'notes', value: 'trailing\\' },
+    { field: 'payee', value: '[unclosed' },
+  ])(
+    'invalid matches regex returns a field error for $field conditions',
+    condition => {
+      const { errors, filters } = conditionsToAQL([
+        { ...condition, op: 'matches' },
+      ]);
+
+      expect(errors).toEqual(['invalid-regex']);
+      expect(filters).toEqual([]);
+    },
+  );
 });
 
 describe('Learning categories', () => {
