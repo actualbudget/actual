@@ -34,6 +34,7 @@ import {
   categoryModel,
   payeeModel,
   remoteFileModel,
+  ruleModel,
   scheduleModel,
   tagModel,
 } from './api-models';
@@ -891,7 +892,7 @@ handlers['api/payee-rules-get'] = async function ({ id }) {
 
 handlers['api/rule-create'] = withMutation(async function ({ rule }) {
   checkFileOpen();
-  const addedRule = await handlers['rule-add'](rule);
+  const addedRule = await handlers['rule-add'](ruleModel.fromExternal(rule));
 
   if ('error' in addedRule) {
     throw APIError('Failed creating a new rule', addedRule.error);
@@ -902,7 +903,9 @@ handlers['api/rule-create'] = withMutation(async function ({ rule }) {
 
 handlers['api/rule-update'] = withMutation(async function ({ rule }) {
   checkFileOpen();
-  const updatedRule = await handlers['rule-update'](rule);
+  const updatedRule = await handlers['rule-update'](
+    ruleModel.fromExternal(rule),
+  );
 
   if ('error' in updatedRule) {
     throw APIError('Failed updating the rule', updatedRule.error);

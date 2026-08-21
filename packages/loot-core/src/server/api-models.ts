@@ -4,7 +4,9 @@ import type {
   AccountGroupEntity,
   CategoryEntity,
   CategoryGroupEntity,
+  NewRuleEntity,
   PayeeEntity,
+  RuleEntity,
   ScheduleEntity,
   TagEntity,
 } from '#types/models';
@@ -142,6 +144,23 @@ export const payeeModel = {
     // No translation is needed
     return payee as PayeeEntity;
   },
+};
+
+export type APIRuleEntity = Omit<RuleEntity, 'stage'> & {
+  stage: RuleEntity['stage'] | 'default';
+};
+
+function fromExternalRule(rule: APIRuleEntity): RuleEntity;
+function fromExternalRule(rule: Omit<APIRuleEntity, 'id'>): NewRuleEntity;
+function fromExternalRule(rule: Omit<APIRuleEntity, 'id'> | APIRuleEntity) {
+  return {
+    ...rule,
+    stage: rule.stage === 'default' ? null : rule.stage,
+  };
+}
+
+export const ruleModel = {
+  fromExternal: fromExternalRule,
 };
 
 export type APITagEntity = Pick<

@@ -6,6 +6,7 @@ import type {
   APICategoryGroupEntity,
   APIFileEntity,
   APIPayeeEntity,
+  APIRuleEntity,
   APIScheduleEntity,
   APITagEntity,
 } from '@actual-app/core/server/api-models';
@@ -382,11 +383,11 @@ export function getPayeeRules(id: RuleEntity['id']) {
   return send('api/payee-rules-get', { id });
 }
 
-export function createRule(rule: Omit<RuleEntity, 'id'>) {
+export function createRule(rule: Omit<APIRuleEntity, 'id'>) {
   return send('api/rule-create', { rule });
 }
 
-export function updateRule(rule: RuleEntity) {
+export function updateRule(rule: APIRuleEntity) {
   return send('api/rule-update', { rule });
 }
 
