@@ -7,12 +7,12 @@ import {
   setClock,
   Timestamp,
 } from '@actual-app/crdt';
-import type { Database, Statement } from '@jlongster/sql.js';
 import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '#platform/server/fs';
 import * as sqlite from '#platform/server/sqlite';
+import type { Database, Statement } from '#platform/server/sqlite';
 import {
   convertForInsert,
   convertForUpdate,
@@ -69,6 +69,7 @@ export function getDatabasePath() {
 
 export async function openDatabase(id?: string) {
   if (db) {
+    resetQueryCache();
     sqlite.closeDatabase(db);
   }
 
@@ -80,6 +81,7 @@ export async function openDatabase(id?: string) {
 
 export function closeDatabase() {
   if (db) {
+    resetQueryCache();
     sqlite.closeDatabase(db);
     setDatabase(null);
   }
@@ -144,7 +146,14 @@ export function execQuery(sql: string) {
 
 // This manages an LRU cache of prepared query statements. This is
 // only needed in hot spots when you are running lots of queries.
-let _queryCache = new LRUCache<string, Statement>({ max: 100 });
+function createQueryCache() {
+  return new LRUCache<string, Statement>({
+    max: 100,
+    dispose: statement => sqlite.finalizeStatement(statement),
+  });
+}
+
+let _queryCache = createQueryCache();
 export function cache(sql: string) {
   const cached = _queryCache.get(sql);
   if (cached) {
@@ -157,7 +166,8 @@ export function cache(sql: string) {
 }
 
 function resetQueryCache() {
-  _queryCache = new LRUCache<string, Statement>({ max: 100 });
+  _queryCache.clear();
+  _queryCache = createQueryCache();
 }
 
 export function transaction(fn: () => void) {

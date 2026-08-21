@@ -104,6 +104,7 @@ async function handleUniqueBudgetName({ name }: { name: string }) {
 }
 
 async function getBudgets() {
+  await fs.refreshPersistedHierarchy();
   const paths = await fs.listDir(fs.getDocumentDir());
   const budgets: (Budget | null)[] = await Promise.all(
     paths.map(async name => {
@@ -185,6 +186,10 @@ async function downloadBudget({
 }: {
   cloudFileId: Budget['cloudFileId'];
 }): Promise<{ id?: Budget['id']; error?: { reason: string; meta?: unknown } }> {
+  if (prefs.getPrefs()) {
+    await closeBudget();
+  }
+
   let result;
   try {
     result = await cloudStorage.download(cloudFileId);
@@ -206,7 +211,6 @@ async function downloadBudget({
   }
 
   const id = result.id;
-  await closeBudget();
   await loadBudget({ id });
   result = await syncBudget();
 
@@ -298,12 +302,11 @@ async function deleteBudget({
 
   // If a local file exists, you can delete it by passing its local id
   if (id) {
-    // opening and then closing the database is a hack to be able to delete
-    // the budget file if it hasn't been opened yet.  This needs a better
-    // way, but works for now.
     try {
-      await db.openDatabase(id);
-      db.closeDatabase();
+      await fs.refreshPersistedHierarchy();
+      if (prefs.getPrefs()?.id === id) {
+        await closeBudget();
+      }
       const budgetDir = fs.getBudgetDir(id);
       await fs.removeDirRecursively(budgetDir);
     } catch {
@@ -553,6 +556,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
   }
 
   captureBreadcrumb({ message: 'Loading budget ' + dir });
+  await fs.refreshPersistedHierarchy();
 
   if (!(await fs.exists(dir))) {
     captureException(new Error('budget directory does not exist'));
@@ -693,6 +697,9 @@ async function getBackups({ id }) {
 }
 
 async function loadBackup({ id, backupId }) {
+  if (prefs.getPrefs()?.id === id) {
+    await closeBudget();
+  }
   await _loadBackup(id, backupId);
 }
 
