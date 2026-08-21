@@ -11,7 +11,11 @@ import { useSelector } from '#redux';
 
 import { AnimatedRefresh } from './AnimatedRefresh';
 
-export function BankSyncStatus() {
+type BankSyncStatusProps = {
+  isOverlay?: boolean;
+};
+
+export function BankSyncStatus({ isOverlay = false }: BankSyncStatusProps) {
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const accountsSyncingCount = accountsSyncing.length;
   const count = accountsSyncingCount;
@@ -27,15 +31,25 @@ export function BankSyncStatus() {
 
   return (
     <View
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        marginTop: 5,
-        alignItems: 'center',
-        zIndex: 501,
-      }}
+      style={
+        isOverlay
+          ? {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              marginTop: 5,
+              alignItems: 'center',
+              zIndex: 501,
+            }
+          : {
+              zIndex: 501,
+              flexDirection: 'row',
+              flexShrink: 1,
+              overflow: 'hidden',
+              textWrap: 'nowrap',
+            }
+      }
     >
       {transitions(
         (style, item) =>
