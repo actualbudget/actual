@@ -46,6 +46,8 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
   - _Python fork of ActualTap with additional features including offline/retry support & adding multiple transactions in a single request._
 - **Actual AI** - https://github.com/sakowicz/actual-ai
   - _Categorize transactions using AI._
+- **Fiscal** - https://github.com/fiscal-sh/fscl
+  - _A headless CLI that lets AI agents like Claude Code manage your budget. It includes agent skills that teach the agent a complete budgeting workflow._
 - **Actual Helpers** - https://github.com/psybers/actual-helpers
   - _Collection of helper scripts to track home prices and car values, add loan interest transactions, track investment accounts, etc._
 - **Actual Tasks** - https://github.com/rodriguestiago0/actual_task
