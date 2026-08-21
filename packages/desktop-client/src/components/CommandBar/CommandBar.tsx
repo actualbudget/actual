@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import type { ComponentType, SVGProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -54,6 +56,12 @@ import {
   updateCommandBarFavorites,
 } from '#commandbar/commandBarFavorites';
 import type { CommandBarFavoriteRef } from '#commandbar/commandBarFavorites';
+import {
+  commandBarRecentPath,
+  commandBarRecentRefKey,
+  getCommandBarRecentRef,
+} from '#commandbar/commandBarRecent';
+import type { CommandBarRecentRef } from '#commandbar/commandBarRecent';
 import { useCommandBarCommands } from '#commandbar/commandBarRegistry';
 import {
   closeCommandBar,
@@ -118,6 +126,14 @@ type ContextualItem =
   | { type: 'account'; item: AccountEntity }
   | { type: 'report'; item: CustomReportEntity };
 
+type ResolvedRecentItem = Readonly<{
+  ref: CommandBarRecentRef;
+  key: string;
+  path: string;
+  name: string;
+  Icon: ComponentType<SVGProps<SVGSVGElement>>;
+}>;
+
 function isMacPlatform() {
   return (
     typeof navigator !== 'undefined' &&
@@ -142,10 +158,14 @@ export function CommandBar() {
   const [contextualItem, setContextualItem] = useState<ContextualItem | null>(
     null,
   );
+  const [recentRefs, setRecentRefs] = useState<readonly CommandBarRecentRef[]>(
+    [],
+  );
   const [selectedValue, setSelectedValue] = useState('');
   const [rootSearch, setRootSearch] = useState('');
   const [rootSelectedValue, setRootSelectedValue] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const contributedCommands = useCommandBarCommands();
   const { mutate: syncAndDownload } = useSyncAndDownloadMutation();
@@ -347,6 +367,31 @@ export function CommandBar() {
   const { data: allAccounts = [] } = useAccounts();
   const { data: customReports = [] } = useReports();
   const { data: dashboardPages = [] } = useDashboardPages();
+
+  useEffect(() => {
+    const recentRef = getCommandBarRecentRef(location.pathname, {
+      accounts: allAccounts,
+      dashboardPages,
+      customReports,
+    });
+    if (!recentRef) return;
+
+    setRecentRefs(currentRefs => {
+      const recentRefKey = commandBarRecentRefKey(recentRef);
+      if (currentRefs[0] != null) {
+        if (commandBarRecentRefKey(currentRefs[0]) === recentRefKey) {
+          return currentRefs;
+        }
+      }
+
+      return [
+        recentRef,
+        ...currentRefs.filter(
+          currentRef => commandBarRecentRefKey(currentRef) !== recentRefKey,
+        ),
+      ].slice(0, 4);
+    });
+  }, [allAccounts, customReports, dashboardPages, location.pathname]);
 
   const accounts = allAccounts.filter(acc => !acc.closed);
   const closedAccounts = allAccounts.filter(acc => !!acc.closed);
@@ -697,40 +742,138 @@ export function CommandBar() {
         : [];
 
   const isRootSearchEmpty = search.trim() === '';
+  const currentRecentRef = getCommandBarRecentRef(location.pathname, {
+    accounts: allAccounts,
+    dashboardPages,
+    customReports,
+  });
+  const currentRecentKey = currentRecentRef
+    ? commandBarRecentRefKey(currentRecentRef)
+    : null;
+  const recentItems = recentRefs
+    .filter(ref => commandBarRecentRefKey(ref) !== currentRecentKey)
+    .filter(ref => !favoriteKeys.has(commandBarRecentRefKey(ref)))
+    .flatMap((ref): ResolvedRecentItem[] => {
+      const key = commandBarRecentRefKey(ref);
+      if (ref.type === 'navigation') {
+        const item = navigationItems.find(item => item.id === ref.id);
+        return item
+          ? [
+              {
+                ref,
+                key,
+                path: item.path,
+                name: item.name,
+                Icon: item.Icon,
+              },
+            ]
+          : [];
+      }
+
+      if (ref.type === 'account') {
+        if (ref.id === 'onbudget' || ref.id === 'offbudget') {
+          return [
+            {
+              ref,
+              key,
+              path: commandBarRecentPath(ref),
+              name: ref.id === 'onbudget' ? t('On Budget') : t('Off Budget'),
+              Icon: SvgLibrary,
+            },
+          ];
+        }
+
+        const account = allAccounts.find(
+          item => item.id === ref.id && item.tombstone !== 1,
+        );
+        return account
+          ? [
+              {
+                ref,
+                key,
+                path: commandBarRecentPath(ref),
+                name: account.name,
+                Icon: SvgLibrary,
+              },
+            ]
+          : [];
+      }
+
+      if (ref.type === 'dashboard') {
+        const dashboardPage = dashboardPages.find(
+          item => item.id === ref.id && item.tombstone !== true,
+        );
+        return dashboardPage
+          ? [
+              {
+                ref,
+                key,
+                path: commandBarRecentPath(ref),
+                name: dashboardPage.name,
+                Icon: SvgReports,
+              },
+            ]
+          : [];
+      }
+
+      const report = customReports.find(
+        item => item.id === ref.id && item.tombstone !== true,
+      );
+      return report
+        ? [
+            {
+              ref,
+              key,
+              path: commandBarRecentPath(ref),
+              name: report.name,
+              Icon: SvgNotesPaperText,
+            },
+          ]
+        : [];
+    })
+    .slice(0, 3);
+  const recentItemKeys = new Set(recentItems.map(item => item.key));
+  const isRootItemVisible = (key: string) =>
+    !isRootSearchEmpty || (!favoriteKeys.has(key) && !recentItemKeys.has(key));
   const sections: SearchSection[] = [
     {
       key: 'accounts',
       heading: t('Accounts'),
       items: [
-        {
-          id: 'onbudget',
-          name: t('On Budget'),
-          content: (
-            <BalanceRow<'account', 'onbudget-accounts-balance'>
-              label={t('On Budget')}
-              binding={onBudgetAccountBalance()}
-              query={search}
-            />
-          ),
-          Icon: SvgLibrary,
-        },
-        {
-          id: 'offbudget',
-          name: t('Off Budget'),
-          content: (
-            <BalanceRow<'account', 'offbudget-accounts-balance'>
-              label={t('Off Budget')}
-              binding={offBudgetAccountBalance()}
-              query={search}
-            />
-          ),
-          Icon: SvgLibrary,
-        },
+        ...(isRootItemVisible('account:onbudget')
+          ? [
+              {
+                id: 'onbudget',
+                name: t('On Budget'),
+                content: (
+                  <BalanceRow<'account', 'onbudget-accounts-balance'>
+                    label={t('On Budget')}
+                    binding={onBudgetAccountBalance()}
+                    query={search}
+                  />
+                ),
+                Icon: SvgLibrary,
+              },
+            ]
+          : []),
+        ...(isRootItemVisible('account:offbudget')
+          ? [
+              {
+                id: 'offbudget',
+                name: t('Off Budget'),
+                content: (
+                  <BalanceRow<'account', 'offbudget-accounts-balance'>
+                    label={t('Off Budget')}
+                    binding={offBudgetAccountBalance()}
+                    query={search}
+                  />
+                ),
+                Icon: SvgLibrary,
+              },
+            ]
+          : []),
         ...accounts
-          .filter(
-            account =>
-              !isRootSearchEmpty || !favoriteKeys.has(`account:${account.id}`),
-          )
+          .filter(account => isRootItemVisible(`account:${account.id}`))
           .map(account => ({
             ...account,
             content: (
@@ -754,10 +897,7 @@ export function CommandBar() {
       key: 'accounts-closed',
       heading: t('Closed Accounts'),
       items: closedAccounts
-        .filter(
-          account =>
-            !isRootSearchEmpty || !favoriteKeys.has(`account:${account.id}`),
-        )
+        .filter(account => isRootItemVisible(`account:${account.id}`))
         .map(account => ({
           ...account,
           Icon: SvgLibrary,
@@ -767,7 +907,9 @@ export function CommandBar() {
     {
       key: 'navigation',
       heading: t('Navigation'),
-      items: navigationItems,
+      items: navigationItems.filter(item =>
+        isRootItemVisible(`navigation:${item.id}`),
+      ),
       onSelect: ({ id }) => {
         const item = navigationItems.find(item => item.id === id);
         if (item) handleNavigate(item.path);
@@ -796,20 +938,21 @@ export function CommandBar() {
     {
       key: 'reports',
       heading: t('Reports'),
-      items: dashboardPages.map(dashboardPage => ({
-        ...dashboardPage,
-        Icon: SvgReports,
-      })),
+      items: dashboardPages
+        .filter(dashboardPage =>
+          isRootItemVisible(`dashboard:${dashboardPage.id}`),
+        )
+        .map(dashboardPage => ({
+          ...dashboardPage,
+          Icon: SvgReports,
+        })),
       onSelect: ({ id }) => handleNavigate(`/reports/${id}`),
     },
     {
       key: 'reports-custom',
       heading: t('Custom Reports'),
       items: customReports
-        .filter(
-          report =>
-            !isRootSearchEmpty || !favoriteKeys.has(`report:${report.id}`),
-        )
+        .filter(report => isRootItemVisible(`report:${report.id}`))
         .map(report => ({
           ...report,
           Icon: SvgNotesPaperText,
@@ -833,6 +976,22 @@ export function CommandBar() {
       Icon: SvgNotesPaperText,
     };
   });
+  const recentSection: SearchSection | null =
+    isRootSearchEmpty && recentItems.length > 0
+      ? {
+          key: 'recent',
+          heading: t('Recent'),
+          items: recentItems.map(item => ({
+            id: item.key,
+            name: item.name,
+            Icon: item.Icon,
+          })),
+          onSelect: ({ id }) => {
+            const recentItem = recentItems.find(item => item.key === id);
+            if (recentItem) handleNavigate(recentItem.path);
+          },
+        }
+      : null;
   const favoriteSection: SearchSection | null =
     isRootSearchEmpty && favoriteItems.length > 0
       ? {
@@ -861,7 +1020,8 @@ export function CommandBar() {
     ),
   }));
   const hasResults = filteredSections.some(section => !!section.items.length);
-  const hasRootResults = hasResults || favoriteSection != null;
+  const hasRootResults =
+    hasResults || recentSection != null || favoriteSection != null;
   const isActionPage = page === 'account-actions' || page === 'report-actions';
   const macPlatform = isMacPlatform();
   const selectedContextualAction = contextualActionSections
@@ -1050,6 +1210,39 @@ export function CommandBar() {
             />
           ) : (
             <>
+              {recentSection != null && (
+                <Command.Group
+                  heading={recentSection.heading}
+                  className={paletteGroupClassName}
+                >
+                  {recentSection.items.map(
+                    ({ id, name, Icon, content, leading }) => (
+                      <Command.Item
+                        key={id}
+                        onSelect={() => recentSection.onSelect({ id })}
+                        value={`recent:${id}`}
+                        aria-label={name}
+                        className={paletteItemClassName}
+                      >
+                        {leading ?? (Icon && <Icon width={15} height={15} />)}
+                        {content || (
+                          <Text
+                            style={{
+                              flex: 1,
+                              minWidth: 0,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            <Highlight text={name} query={search} />
+                          </Text>
+                        )}
+                      </Command.Item>
+                    ),
+                  )}
+                </Command.Group>
+              )}
               {favoriteSection != null && (
                 <Command.Group
                   heading={favoriteSection.heading}

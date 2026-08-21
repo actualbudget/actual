@@ -1,10 +1,16 @@
 import type { ReactNode } from 'react';
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { openCommandBar } from '#commandbar/commandBarSlice';
+import { closeCommandBar, openCommandBar } from '#commandbar/commandBarSlice';
 import {
   CommandBarProvider,
   useRegisterCommandBarCommands,
@@ -34,9 +40,14 @@ const mocks = vi.hoisted(() => ({
 
 const mockData = vi.hoisted(() => ({
   budgetId: 'budget-1',
+  pathname: '/budget',
   accounts: [] as unknown[],
   customReports: [] as unknown[],
   dashboardPages: [] as unknown[],
+}));
+
+vi.mock('react-router', () => ({
+  useLocation: () => ({ pathname: mockData.pathname }),
 }));
 
 vi.mock('@actual-app/core/platform/client/connection', () => ({
@@ -215,6 +226,30 @@ function renderOpenCommandBar(children?: ReactNode) {
   return store;
 }
 
+function rerenderCommandBar(
+  view: { rerender: (ui: ReactNode) => void },
+  store: ReturnType<typeof createStore>,
+  children?: ReactNode,
+) {
+  view.rerender(
+    <TestProviders store={store}>
+      <CommandBarProvider>
+        {children}
+        <CommandBar />
+      </CommandBarProvider>
+    </TestProviders>,
+  );
+}
+
+function setCommandBarPath(
+  view: { rerender: (ui: ReactNode) => void },
+  store: ReturnType<typeof createStore>,
+  pathname: string,
+) {
+  mockData.pathname = pathname;
+  rerenderCommandBar(view, store);
+}
+
 async function keyboardSelectRootItem(name: string) {
   const input = screen.getByPlaceholderText('Search Demo budget...');
   input.focus();
@@ -263,6 +298,7 @@ describe('CommandBar', () => {
     vi.clearAllMocks();
     window.localStorage.clear();
     mockData.budgetId = 'budget-1';
+    mockData.pathname = '/budget';
     mockData.accounts = [];
     mockData.customReports = [];
     mockData.dashboardPages = [];
@@ -637,6 +673,210 @@ describe('CommandBar', () => {
     ).toEqual({
       version: 1,
       favorites: [{ type: 'account', id: 'account-1' }],
+    });
+  });
+
+  it('tracks four route-backed pages and displays the three prior pages', async () => {
+    const store = createStore();
+    store.dispatch(openCommandBar());
+    const view = renderCommandBar(store);
+
+    setCommandBarPath(view, store, '/settings');
+    setCommandBarPath(view, store, '/schedules');
+    setCommandBarPath(view, store, '/tags');
+
+    await waitFor(() => {
+      expect(screen.getByText('Recent', { exact: true })).toBeInTheDocument();
+      expect(
+        screen
+          .getAllByRole('option')
+          .slice(0, 3)
+          .map(option => option.getAttribute('aria-label')),
+      ).toEqual(['Schedules', 'Settings', 'Budget']);
+    });
+  });
+
+  it('moves a revisited page to the front of recent history', async () => {
+    const store = createStore();
+    store.dispatch(openCommandBar());
+    const view = renderCommandBar(store);
+
+    setCommandBarPath(view, store, '/settings');
+    setCommandBarPath(view, store, '/schedules');
+    setCommandBarPath(view, store, '/settings');
+    setCommandBarPath(view, store, '/tags');
+
+    await waitFor(() => {
+      expect(
+        screen
+          .getAllByRole('option')
+          .slice(0, 3)
+          .map(option => option.getAttribute('aria-label')),
+      ).toEqual(['Settings', 'Schedules', 'Budget']);
+    });
+  });
+
+  it('ignores current, unsupported, and reports redirect paths', async () => {
+    mockData.pathname = '/reports';
+    const store = createStore();
+    store.dispatch(openCommandBar());
+    const view = renderCommandBar(store);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText('Recent', { exact: true }),
+      ).not.toBeInTheDocument();
+    });
+
+    setCommandBarPath(view, store, '/settings');
+    setCommandBarPath(view, store, '/reports');
+    setCommandBarPath(view, store, '/reports/custom');
+
+    await waitFor(() => {
+      expect(screen.getByText('Recent', { exact: true })).toBeInTheDocument();
+      expect(screen.getAllByRole('option', { name: 'Settings' })).toHaveLength(
+        1,
+      );
+      expect(screen.getAllByRole('option', { name: 'Reports' })).toHaveLength(
+        1,
+      );
+    });
+  });
+
+  it('resolves renamed recent entities and hides deleted ones', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    const store = createStore();
+    store.dispatch(openCommandBar());
+    const view = renderCommandBar(store);
+
+    setCommandBarPath(view, store, '/accounts/account-1');
+    setCommandBarPath(view, store, '/settings');
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('option', { name: 'Checking' }),
+      ).toBeInTheDocument();
+    });
+
+    mockData.accounts = [
+      { id: 'account-1', name: 'Renamed checking', closed: 1 },
+    ];
+    rerenderCommandBar(view, store);
+    expect(
+      screen.getByRole('option', { name: 'Renamed checking' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('option', { name: 'Checking' }),
+    ).not.toBeInTheDocument();
+
+    mockData.accounts = [];
+    rerenderCommandBar(view, store);
+    expect(
+      screen.queryByRole('option', { name: 'Renamed checking' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('excludes favorited pages from Recent and canonical duplicates', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    window.localStorage.setItem(
+      'budget-1-commandbar.favorites',
+      JSON.stringify({
+        version: 1,
+        favorites: [{ type: 'account', id: 'account-1' }],
+      }),
+    );
+    const store = createStore();
+    store.dispatch(openCommandBar());
+    const view = renderCommandBar(store);
+
+    setCommandBarPath(view, store, '/accounts/account-1');
+    setCommandBarPath(view, store, '/settings');
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('Favorites', { exact: true }),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Recent', { exact: true })).toBeInTheDocument();
+      expect(screen.getAllByRole('option', { name: 'Checking' })).toHaveLength(
+        1,
+      );
+      expect(
+        screen
+          .getAllByRole('option')
+          .slice(0, 1)
+          .map(option => option.getAttribute('aria-label')),
+      ).toEqual(['Budget']);
+    });
+  });
+
+  it('preserves recent pages when the palette closes and reopens', async () => {
+    const store = createStore();
+    store.dispatch(openCommandBar());
+    const view = renderCommandBar(store);
+
+    setCommandBarPath(view, store, '/settings');
+    await waitFor(() => {
+      expect(
+        screen.getByRole('option', { name: 'Budget' }),
+      ).toBeInTheDocument();
+    });
+
+    act(() => {
+      void store.dispatch(closeCommandBar());
+    });
+    act(() => {
+      void store.dispatch(openCommandBar());
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Recent', { exact: true })).toBeInTheDocument();
+      expect(
+        screen.getByRole('option', { name: 'Budget' }),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('resets recent pages when the provider and budget remount', async () => {
+    const store = createStore();
+    store.dispatch(openCommandBar());
+    const view = renderCommandBar(store);
+
+    setCommandBarPath(view, store, '/settings');
+    await waitFor(() => {
+      expect(screen.getByText('Recent', { exact: true })).toBeInTheDocument();
+    });
+
+    view.unmount();
+    mockData.budgetId = 'budget-2';
+    const nextStore = createStore();
+    nextStore.dispatch(openCommandBar());
+    renderCommandBar(nextStore);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText('Recent', { exact: true }),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it('tracks dashboards and custom reports from their live catalogs', async () => {
+    mockData.dashboardPages = [{ id: 'dashboard-1', name: 'Overview' }];
+    mockData.customReports = [{ id: 'report-1', name: 'Monthly report' }];
+    const store = createStore();
+    store.dispatch(openCommandBar());
+    const view = renderCommandBar(store);
+
+    setCommandBarPath(view, store, '/reports/dashboard-1');
+    setCommandBarPath(view, store, '/reports/custom/report-1');
+    setCommandBarPath(view, store, '/budget');
+
+    await waitFor(() => {
+      expect(
+        screen
+          .getAllByRole('option')
+          .slice(0, 2)
+          .map(option => option.getAttribute('aria-label')),
+      ).toEqual(['Monthly report', 'Overview']);
     });
   });
 
