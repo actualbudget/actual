@@ -15,13 +15,16 @@ import {
   TestProviders,
 } from '#mocks';
 import { pushModal } from '#modals/modalsSlice';
+import type * as ModalsSlice from '#modals/modalsSlice';
 
 import { CommandBar } from './CommandBar';
+import { destructiveActionClassName } from './styles';
 
 const mocks = vi.hoisted(() => ({
   send: vi.fn(),
   saveFile: vi.fn(),
   syncAndDownload: vi.fn(),
+  reopenAccount: vi.fn(),
   startTour: vi.fn(),
   navigate: vi.fn(),
   setGlobalPref: vi.fn(),
@@ -40,8 +43,56 @@ vi.mock('@actual-app/core/platform/client/connection', () => ({
 }));
 
 vi.mock('#accounts', () => ({
+  accountQueries: {
+    list: () => ({
+      queryKey: ['accounts', 'lists'],
+      queryFn: () => Promise.resolve(mockData.accounts),
+    }),
+  },
   useSyncAndDownloadMutation: () => ({ mutate: mocks.syncAndDownload }),
+  useReopenAccountMutation: () => ({
+    mutate: mocks.reopenAccount,
+    mutateAsync: mocks.reopenAccount,
+  }),
 }));
+
+vi.mock('#modals/modalsSlice', async importOriginal => {
+  const actual = await importOriginal<typeof ModalsSlice>();
+  return {
+    ...actual,
+    openAccountCloseModal: ({ accountId }: { accountId: string }) =>
+      actual.pushModal({
+        modal: {
+          name: 'close-account',
+          options: {
+            account: {
+              id: accountId,
+              name: 'Checking',
+              offbudget: 0,
+              closed: 0,
+              sort_order: 0,
+              last_reconciled: null,
+              tombstone: 0,
+              account_id: null,
+              bank: null,
+              bankName: null,
+              bankId: null,
+              mask: null,
+              official_name: null,
+              balance_current: null,
+              balance_available: null,
+              balance_limit: null,
+              account_sync_source: null,
+              last_sync: null,
+              bank_sync_status: null,
+            },
+            balance: 0,
+            canDelete: false,
+          },
+        },
+      }),
+  };
+});
 
 vi.mock('#accounts/useAccountSyncStatus', () => ({
   useAccountSyncStatus: () => () => undefined,
@@ -130,10 +181,13 @@ vi.mock('./primitives', () => ({
   FooterHint: ({ children }: { children: ReactNode }) => children,
   Highlight: ({ text }: { text: string }) => text,
   KeyChip: ({ children }: { children: ReactNode }) => children,
+  ShortcutHint: ({ label }: { label: ReactNode }) => label,
 }));
 
 function createStore() {
-  return configureTestAppStore({ queryClient: createTestQueryClient() });
+  const queryClient = createTestQueryClient();
+  queryClient.setQueryData(['accounts', 'lists'], mockData.accounts);
+  return configureTestAppStore({ queryClient });
 }
 
 function renderCommandBar(
@@ -155,6 +209,19 @@ function renderOpenCommandBar(children?: ReactNode) {
   store.dispatch(openCommandBar());
   renderCommandBar(store, children);
   return store;
+}
+
+async function keyboardSelectRootItem(name: string) {
+  const input = screen.getByPlaceholderText('Search Demo budget...');
+  input.focus();
+
+  for (let i = 0; i < 50; i++) {
+    const item = screen.getByRole('option', { name });
+    if (item.getAttribute('data-selected') === 'true') return;
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+  }
+
+  throw new Error(`Could not keyboard-select ${name}`);
 }
 
 function ContributedCommands({
@@ -204,6 +271,191 @@ describe('CommandBar', () => {
     fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
 
     expect(store.getState().commandBar.open).toBe(false);
+  });
+
+  it('opens an account action page from the keyboard-selected root item', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    renderOpenCommandBar();
+
+    await keyboardSelectRootItem('Checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+
+    expect(
+      screen.getByPlaceholderText('Search actions...'),
+    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search actions...')).toHaveFocus();
+    expect(screen.getAllByRole('listbox')).toHaveLength(1);
+    expect(
+      screen.getByRole('listbox', { name: 'Available actions' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Checking')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Open' })).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveTextContent('back');
+  });
+
+  it('executes an action with keyboard navigation and Enter', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    const store = renderOpenCommandBar();
+    await keyboardSelectRootItem('Checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+
+    const actionInput = screen.getByPlaceholderText('Search actions...');
+    expect(actionInput).toHaveFocus();
+    await userEvent.setup().keyboard('{ArrowDown}{ArrowUp}{Enter}');
+
+    await waitFor(() => {
+      expect(mocks.navigate).toHaveBeenCalledWith('/accounts/account-1');
+    });
+    expect(store.getState().commandBar.open).toBe(false);
+  });
+
+  it('does not open an action page for an unsupported root item', () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    renderOpenCommandBar();
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+
+    expect(
+      screen.queryByPlaceholderText('Search actions...'),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Search Demo budget...'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveTextContent('close');
+  });
+
+  it('opens a custom-report action page from the root palette', async () => {
+    mockData.customReports = [{ id: 'report-1', name: 'Monthly report' }];
+    renderOpenCommandBar();
+
+    await keyboardSelectRootItem('Monthly report');
+    fireEvent.keyDown(document, { key: 'k', metaKey: true });
+
+    expect(
+      screen.getByPlaceholderText('Search actions...'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Monthly report')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Open' })).toBeInTheDocument();
+  });
+
+  it('restores root search and selection from an action page', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    renderOpenCommandBar();
+    const rootInput = screen.getByPlaceholderText('Search Demo budget...');
+
+    await userEvent.setup().type(rootInput, 'Checking');
+    await keyboardSelectRootItem('Checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    expect(
+      screen.getByPlaceholderText('Search actions...'),
+    ).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByPlaceholderText('Search actions...'), {
+      key: 'Backspace',
+    });
+    expect(screen.getByPlaceholderText('Search Demo budget...')).toHaveValue(
+      'Checking',
+    );
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    fireEvent.keyDown(window, { key: 'Escape' });
+
+    expect(screen.getByPlaceholderText('Search Demo budget...')).toHaveValue(
+      'Checking',
+    );
+    expect(screen.getByRole('option', { name: 'Checking' })).toHaveAttribute(
+      'data-selected',
+      'true',
+    );
+  });
+
+  it('shows close for active accounts and reopen for closed accounts', async () => {
+    mockData.accounts = [
+      { id: 'active-account', name: 'Checking', closed: 0 },
+      { id: 'closed-account', name: 'Old checking', closed: 1 },
+    ];
+    renderOpenCommandBar();
+
+    await keyboardSelectRootItem('Checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    expect(
+      screen.getByRole('option', { name: 'Close account' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('option', { name: 'Reopen account' }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    await keyboardSelectRootItem('Old checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    expect(
+      screen.getByRole('option', { name: 'Reopen account' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('option', { name: 'Close account' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('keeps action section headings and destructive styling when filtering', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    renderOpenCommandBar();
+
+    await keyboardSelectRootItem('Checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    await userEvent
+      .setup()
+      .type(screen.getByPlaceholderText('Search actions...'), 'close');
+
+    expect(screen.getByText('Additional', { exact: true })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Close account' })).toHaveClass(
+      destructiveActionClassName,
+    );
+    expect(
+      screen.queryByText('Primary', { exact: true }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('closes before executing contextual navigation', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    const store = renderOpenCommandBar();
+    await keyboardSelectRootItem('Checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+
+    mocks.navigate.mockImplementation(() => {
+      expect(store.getState().commandBar.open).toBe(false);
+    });
+    await userEvent.setup().click(screen.getByRole('option', { name: 'Open' }));
+
+    expect(mocks.navigate).toHaveBeenCalledWith('/accounts/account-1');
+  });
+
+  it('opens the close confirmation without mutating an active account', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    const store = renderOpenCommandBar();
+    mocks.send.mockImplementation(async (command: string) => {
+      if (command === 'account-properties') {
+        return { balance: 0, numTransactions: 1 };
+      }
+      if (command === 'accounts-get') return mockData.accounts;
+      return { data: 'budget-export' };
+    });
+
+    await keyboardSelectRootItem('Checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    await userEvent
+      .setup()
+      .click(screen.getByRole('option', { name: 'Close account' }));
+    expect(store.getState().commandBar.open).toBe(false);
+    await waitFor(() => {
+      expect(store.getState().modals.modalStack).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: 'close-account' }),
+        ]),
+      );
+    });
+    expect(
+      mocks.send.mock.calls.some(([command]) => command === 'account-close'),
+    ).toBe(false);
   });
 
   it('fails clearly when rendered without a command bar provider', () => {

@@ -34,7 +34,7 @@ export const paletteGroupClassName = css({
 
 export const paletteItemClassName = css({
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   gap: 10,
   padding: '7px 10px',
   margin: 0,
@@ -54,4 +54,66 @@ export const paletteItemClassName = css({
   "&[data-selected='true'] > svg": {
     color: 'var(--color-pageText)',
   },
+});
+
+export const actionHeaderClassName = css({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
+  padding: '12px 12px 10px',
+  borderBottom: '1px solid var(--color-tableBorder)',
+});
+
+export const actionHeaderIconClassName = css({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  width: 28,
+  height: 28,
+  borderRadius: 7,
+  backgroundColor: 'var(--color-pillBackground)',
+  color: 'var(--color-pageTextSubdued)',
+  '& > svg': { width: 16, height: 16 },
+});
+
+export const actionItemClassName = css({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: 10,
+  margin: 0,
+  borderRadius: 8,
+  fontSize: 13.5,
+  cursor: 'pointer',
+  '& > svg': {
+    flexShrink: 0,
+    color: 'var(--color-pageTextSubdued)',
+  },
+  "&[data-selected='true']": {
+    backgroundColor:
+      'color-mix(in srgb, var(--color-buttonPrimaryBackground) 15%, transparent)',
+  },
+  "&[data-selected='true'] > svg": {
+    color: 'var(--color-pageText)',
+  },
+  padding: '8px 10px',
+  '&[data-disabled=true]': { opacity: 0.5, cursor: 'default' },
+});
+
+export const destructiveActionClassName = css({
+  color: 'var(--color-errorText)',
+  '& > svg': { color: 'var(--color-errorText)' },
+  "&[data-selected='true']": {
+    backgroundColor:
+      'color-mix(in srgb, var(--color-errorText) 10%, transparent)',
+  },
+});
+
+export const actionFooterClassName = css({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 16,
+  minHeight: 36,
+  padding: '7px 12px',
+  borderTop: '1px solid var(--color-tableBorder)',
 });

@@ -30,3 +30,31 @@ export type QuickAction = SearchableItem &
     /** Skip the default close-on-select behavior. */
     readonly keepOpen?: boolean;
   }>;
+
+/** An action shown for a resolved item on a nested action page. */
+export type ActionItem = SearchableItem &
+  Readonly<{
+    readonly description?: ReactNode;
+    readonly shortcut?: readonly string[];
+    readonly destructive?: boolean;
+    readonly run: () => void | Promise<void>;
+  }>;
+
+export type ActionSection = Readonly<{
+  readonly key: string;
+  readonly heading: string;
+  readonly items: readonly ActionItem[];
+}>;
+
+export type ActionPageHeader = Readonly<{
+  readonly name: string;
+  readonly typeLabel: string;
+  readonly Icon?: ComponentType<SVGProps<SVGSVGElement>>;
+  readonly leading?: ReactNode;
+  readonly secondary?: ReactNode;
+}>;
+
+export type ShortcutHint = Readonly<{
+  readonly keys: readonly string[];
+  readonly label: string;
+}>;

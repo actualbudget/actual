@@ -5,15 +5,18 @@ import { Button } from '@actual-app/components/button';
 import {
   SvgAdd,
   SvgArrowLeft,
+  SvgClose,
   SvgCog,
   SvgKeyboard,
   SvgLibrary,
+  SvgLockOpen,
   SvgReports,
   SvgStoreFront,
   SvgSwap,
   SvgTag,
   SvgTuning,
   SvgWallet,
+  SvgWindowOpen,
 } from '@actual-app/components/icons/v1';
 import {
   SvgArrowsSynchronize,
@@ -29,12 +32,19 @@ import {
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
+import type {
+  AccountEntity,
+  CustomReportEntity,
+} from '@actual-app/core/types/models';
 import type { Theme } from '@actual-app/core/types/prefs';
 import { css, cx } from '@emotion/css';
 import { Command } from 'cmdk';
 import { format } from 'date-fns';
 
-import { useSyncAndDownloadMutation } from '#accounts';
+import {
+  useReopenAccountMutation,
+  useSyncAndDownloadMutation,
+} from '#accounts';
 import { useAccountSyncStatus } from '#accounts/useAccountSyncStatus';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { useCommandBarCommands } from '#commandbar/commandBarRegistry';
@@ -53,7 +63,7 @@ import { useModalState } from '#hooks/useModalState';
 import { useNavigate } from '#hooks/useNavigate';
 import { useReports } from '#hooks/useReports';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import { pushModal } from '#modals/modalsSlice';
+import { openAccountCloseModal, pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch, useSelector } from '#redux';
 import {
@@ -74,6 +84,7 @@ import {
   validateThemeCss,
 } from '#style/customThemes';
 
+import { ActionPage } from './ActionPage';
 import { BalanceRow, FooterHint, Highlight, KeyChip } from './primitives';
 import {
   dialogEnter,
@@ -83,7 +94,19 @@ import {
   paletteItemClassName,
 } from './styles';
 import { ThemePage } from './ThemePage';
-import type { QuickAction, SearchSection } from './types';
+import type {
+  ActionItem,
+  ActionPageHeader,
+  ActionSection,
+  QuickAction,
+  SearchSection,
+} from './types';
+
+type Page = 'root' | 'themes' | 'account-actions' | 'report-actions';
+
+type ContextualItem =
+  | { type: 'account'; item: AccountEntity }
+  | { type: 'report'; item: CustomReportEntity };
 
 export function CommandBar() {
   const { t } = useTranslation();
@@ -91,11 +114,18 @@ export function CommandBar() {
   const [search, setSearch] = useState('');
   // 'themes' is a nested palette page (VS Code-style): the "Change theme…"
   // action transitions into it; esc / backspace-on-empty goes back.
-  const [page, setPage] = useState<'root' | 'themes'>('root');
+  const [page, setPage] = useState<Page>('root');
+  const [contextualItem, setContextualItem] = useState<ContextualItem | null>(
+    null,
+  );
+  const [selectedValue, setSelectedValue] = useState('');
+  const [rootSearch, setRootSearch] = useState('');
+  const [rootSelectedValue, setRootSelectedValue] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const contributedCommands = useCommandBarCommands();
   const { mutate: syncAndDownload } = useSyncAndDownloadMutation();
+  const reopenAccount = useReopenAccountMutation();
   const { startTour } = useTour();
   const [budgetName] = useMetadataPref('budgetName');
   const { modalStack } = useModalState();
@@ -126,9 +156,11 @@ export function CommandBar() {
 
   const goBackToRoot = useCallback(() => {
     setPage('root');
-    setSearch('');
+    setContextualItem(null);
+    setSearch(rootSearch);
+    setSelectedValue(rootSelectedValue);
     setAnimatePageChange(true);
-  }, []);
+  }, [rootSearch, rootSelectedValue]);
 
   const applyBuiltinTheme = useCallback(
     (themeKey: Theme) => {
@@ -277,6 +309,10 @@ export function CommandBar() {
     if (!open) {
       setSearch('');
       setPage('root');
+      setContextualItem(null);
+      setSelectedValue('');
+      setRootSearch('');
+      setRootSelectedValue('');
       setAnimatePageChange(false);
     }
   }, [open]);
@@ -286,7 +322,37 @@ export function CommandBar() {
   const { data: dashboardPages = [] } = useDashboardPages();
 
   const accounts = allAccounts.filter(acc => !acc.closed);
+  const closedAccounts = allAccounts.filter(acc => !!acc.closed);
   const getAccountSyncStatus = useAccountSyncStatus();
+
+  const getContextualItem = useCallback(
+    (value: string): ContextualItem | null => {
+      const account = [...accounts, ...closedAccounts].find(
+        item => `accounts${item.closed ? '-closed' : ''}:${item.id}` === value,
+      );
+      if (account) return { type: 'account', item: account };
+
+      const report = customReports.find(
+        item => `reports-custom:${item.id}` === value,
+      );
+      return report ? { type: 'report', item: report } : null;
+    },
+    [accounts, closedAccounts, customReports],
+  );
+
+  const openSelectedContextualPage = useCallback(() => {
+    if (page !== 'root') return;
+    const item = getContextualItem(selectedValue);
+    if (!item) return;
+
+    setRootSearch(search);
+    setRootSelectedValue(selectedValue);
+    setContextualItem(item);
+    setPage(item.type === 'account' ? 'account-actions' : 'report-actions');
+    setSearch('');
+    setSelectedValue('action:primary:open');
+    setAnimatePageChange(true);
+  }, [getContextualItem, page, search, selectedValue]);
 
   const openEventListener = useCallback(
     (e: KeyboardEvent) => {
@@ -294,30 +360,35 @@ export function CommandBar() {
         e.preventDefault();
         // Do not open CommandBar if a modal is already open
         if (modalStack.length > 0) return;
-        dispatch(openCommandBar());
+        if (!open) {
+          dispatch(openCommandBar());
+        } else {
+          openSelectedContextualPage();
+        }
       }
     },
-    [dispatch, modalStack.length],
+    [dispatch, modalStack.length, open, openSelectedContextualPage],
   );
 
   useEffect(() => {
-    document.addEventListener('keydown', openEventListener);
-    return () => document.removeEventListener('keydown', openEventListener);
+    document.addEventListener('keydown', openEventListener, true);
+    return () =>
+      document.removeEventListener('keydown', openEventListener, true);
   }, [openEventListener]);
 
   useEffect(() => {
-    if (!open || page !== 'themes') return;
+    if (!open || page === 'root') return;
 
-    function handleThemePageEscape(e: KeyboardEvent) {
+    function handleNestedPageEscape(e: KeyboardEvent) {
       if (e.key !== 'Escape') return;
       e.preventDefault();
       e.stopPropagation();
       goBackToRoot();
     }
 
-    window.addEventListener('keydown', handleThemePageEscape, true);
+    window.addEventListener('keydown', handleNestedPageEscape, true);
     return () =>
-      window.removeEventListener('keydown', handleThemePageEscape, true);
+      window.removeEventListener('keydown', handleNestedPageEscape, true);
   }, [goBackToRoot, open, page]);
 
   const handleNavigate = useCallback(
@@ -373,8 +444,11 @@ export function CommandBar() {
       Icon: SvgMoonStars,
       keepOpen: true,
       run: () => {
+        setRootSearch(search);
+        setRootSelectedValue(selectedValue);
         setPage('themes');
         setSearch('');
+        setSelectedValue(`theme-builtin:${currentTheme}`);
         setAnimatePageChange(true);
       },
     },
@@ -411,6 +485,104 @@ export function CommandBar() {
       run: command.execute,
     })),
   ];
+
+  const runContextualAction = useCallback(
+    (action: ActionItem) => {
+      // Contextual actions always close before they navigate, open a modal, or
+      // start a mutation. This also keeps the palette from sitting above the
+      // flow it just launched.
+      dispatch(closeCommandBar());
+      void (async () => {
+        try {
+          await action.run();
+        } catch (error) {
+          console.error('Command bar action failed', {
+            commandId: action.id,
+            error,
+          });
+        }
+      })();
+    },
+    [dispatch],
+  );
+
+  const contextualHeader: ActionPageHeader | null = contextualItem
+    ? contextualItem.type === 'account'
+      ? {
+          name: contextualItem.item.name,
+          typeLabel: t('Account'),
+          Icon: SvgLibrary,
+        }
+      : {
+          name: contextualItem.item.name,
+          typeLabel: t('Custom report'),
+          Icon: SvgNotesPaperText,
+        }
+    : null;
+
+  const contextualActionSections: readonly ActionSection[] =
+    contextualItem?.type === 'account'
+      ? [
+          {
+            key: 'primary',
+            heading: t('Primary'),
+            items: [
+              {
+                id: 'open',
+                name: t('Open'),
+                Icon: SvgWindowOpen,
+                run: async () => {
+                  await navigate(`/accounts/${contextualItem.item.id}`);
+                },
+              },
+            ],
+          },
+          {
+            key: 'additional',
+            heading: t('Additional'),
+            items: [
+              contextualItem.item.closed
+                ? {
+                    id: 'reopen',
+                    name: t('Reopen account'),
+                    Icon: SvgLockOpen,
+                    run: () =>
+                      reopenAccount.mutateAsync({ id: contextualItem.item.id }),
+                  }
+                : {
+                    id: 'close',
+                    name: t('Close account'),
+                    Icon: SvgClose,
+                    destructive: true,
+                    run: async () => {
+                      await dispatch(
+                        openAccountCloseModal({
+                          accountId: contextualItem.item.id,
+                        }),
+                      );
+                    },
+                  },
+            ],
+          },
+        ]
+      : contextualItem?.type === 'report'
+        ? [
+            {
+              key: 'primary',
+              heading: t('Primary'),
+              items: [
+                {
+                  id: 'open',
+                  name: t('Open'),
+                  Icon: SvgWindowOpen,
+                  run: async () => {
+                    await navigate(`/reports/custom/${contextualItem.item.id}`);
+                  },
+                },
+              ],
+            },
+          ]
+        : [];
 
   const sections: SearchSection[] = [
     {
@@ -458,6 +630,15 @@ export function CommandBar() {
           ),
         })),
       ],
+      onSelect: ({ id }) => handleNavigate(`/accounts/${id}`),
+    },
+    {
+      key: 'accounts-closed',
+      heading: t('Closed Accounts'),
+      items: closedAccounts.map(account => ({
+        ...account,
+        Icon: SvgLibrary,
+      })),
       onSelect: ({ id }) => handleNavigate(`/accounts/${id}`),
     },
     {
@@ -517,11 +698,33 @@ export function CommandBar() {
     ),
   }));
   const hasResults = filteredSections.some(section => !!section.items.length);
+  const isActionPage = page === 'account-actions' || page === 'report-actions';
+  const commandListClassName = cx(
+    css({
+      flex: '1 1 auto',
+      minHeight: 0,
+      overflowY: 'auto',
+      overscrollBehavior: 'contain',
+      padding: 6,
+      // Hide the scrollbar
+      scrollbarWidth: 'none',
+      '&::-webkit-scrollbar': {
+        display: 'none',
+      },
+      // Ensure content is still scrollable
+      msOverflowStyle: 'none',
+    }),
+    // Only a page *transition* animates in — not the dialog's initial
+    // open (which remounts this same list with key="root" once).
+    animatePageChange && pageEnterClassName,
+  );
 
   return (
     <Command.Dialog
       vimBindings
       open={open}
+      value={selectedValue}
+      onValueChange={setSelectedValue}
       onOpenChange={value => dispatch(setCommandBarOpen(value))}
       label={t('Command Bar')}
       aria-label={t('Command Bar')}
@@ -558,161 +761,187 @@ export function CommandBar() {
         },
       })}
     >
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 10,
-          flexShrink: 0,
-          padding: '13px 15px',
-          borderBottom: '1px solid var(--color-tableBorder)',
-        }}
-      >
-        {page === 'themes' ? (
-          <Button
-            variant="bare"
-            aria-label={t('Back')}
-            onPress={goBackToRoot}
-            style={{ flexShrink: 0, padding: 4 }}
-          >
-            <SvgArrowLeft style={{ width: 14, height: 14 }} />
-          </Button>
-        ) : (
-          <SvgSearchAlternate
-            width={15}
-            height={15}
-            style={{ flexShrink: 0, color: 'var(--color-pageTextSubdued)' }}
-          />
-        )}
-        <Command.Input
-          autoFocus
-          placeholder={
-            page === 'themes'
-              ? t('Search themes...')
-              : t('Search {{budgetName}}...', { budgetName })
-          }
-          value={search}
-          onValueChange={setSearch}
-          onKeyDown={e => {
-            if (e.key === 'Backspace' && search === '' && page === 'themes') {
-              goBackToRoot();
-            }
+      {(page === 'root' || page === 'themes') && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+            flexShrink: 0,
+            padding: '13px 15px',
+            borderBottom: '1px solid var(--color-tableBorder)',
           }}
-          className={css({
-            flex: '1 1 auto',
-            minWidth: 0,
-            padding: 0,
-            fontSize: 16,
-            border: 'none',
-            backgroundColor: 'transparent',
-            color: 'var(--color-pageText)',
-            outline: 'none',
-            '&::placeholder': {
-              color: 'var(--color-pageTextSubdued)',
-            },
-          })}
-        />
-        <KeyChip>esc</KeyChip>
-      </View>
-      <Command.List
-        key={page}
-        className={cx(
-          css({
-            flex: '1 1 auto',
-            minHeight: 0,
-            overflowY: 'auto',
-            overscrollBehavior: 'contain',
-            padding: 6,
-            // Hide the scrollbar
-            scrollbarWidth: 'none',
-            '&::-webkit-scrollbar': {
-              display: 'none',
-            },
-            // Ensure content is still scrollable
-            msOverflowStyle: 'none',
-          }),
-          // Only a page *transition* animates in — not the dialog's initial
-          // open, which remounts this same list with key="root" once.
-          animatePageChange && pageEnterClassName,
-        )}
-      >
-        {page === 'themes' ? (
-          <ThemePage
-            search={search}
-            activeBuiltinTheme={currentTheme}
-            activeCustomThemeId={activeCustomThemeId}
-            onSelectBuiltin={applyBuiltinTheme}
-            onSelectCatalog={applyCatalogTheme}
+        >
+          {page === 'themes' ? (
+            <Button
+              variant="bare"
+              aria-label={t('Back')}
+              onPress={goBackToRoot}
+              style={{ flexShrink: 0, padding: 4 }}
+            >
+              <SvgArrowLeft style={{ width: 14, height: 14 }} />
+            </Button>
+          ) : (
+            <SvgSearchAlternate
+              width={15}
+              height={15}
+              style={{ flexShrink: 0, color: 'var(--color-pageTextSubdued)' }}
+            />
+          )}
+          <Command.Input
+            autoFocus
+            placeholder={
+              page === 'themes'
+                ? t('Search themes...')
+                : t('Search {{budgetName}}...', { budgetName })
+            }
+            value={search}
+            onValueChange={setSearch}
+            onKeyDown={e => {
+              if (e.key === 'Backspace' && search === '' && page === 'themes') {
+                e.preventDefault();
+                goBackToRoot();
+              }
+            }}
+            className={css({
+              flex: '1 1 auto',
+              minWidth: 0,
+              padding: 0,
+              fontSize: 16,
+              border: 'none',
+              backgroundColor: 'transparent',
+              color: 'var(--color-pageText)',
+              outline: 'none',
+              '&::placeholder': {
+                color: 'var(--color-pageTextSubdued)',
+              },
+            })}
           />
-        ) : (
-          <>
-            {filteredSections.map(
-              section =>
-                !!section.items.length && (
-                  <Command.Group
-                    key={section.key}
-                    heading={section.heading}
-                    className={paletteGroupClassName}
-                  >
-                    {section.items.map(
-                      ({ id, name, Icon, content, leading }) => (
-                        <Command.Item
-                          key={id}
-                          onSelect={() => section.onSelect({ id })}
-                          value={`${section.key}:${id}`}
-                          className={paletteItemClassName}
-                        >
-                          {leading ?? (Icon && <Icon width={15} height={15} />)}
-                          {content || (
-                            <Text
-                              style={{
-                                flex: 1,
-                                minWidth: 0,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
-                              <Highlight text={name} query={search} />
-                            </Text>
-                          )}
-                        </Command.Item>
-                      ),
-                    )}
-                  </Command.Group>
-                ),
-            )}
+          <KeyChip>esc</KeyChip>
+        </View>
+      )}
+      {isActionPage ? (
+        contextualHeader != null && (
+          <ActionPage
+            key={page}
+            header={contextualHeader}
+            sections={contextualActionSections}
+            query={search}
+            listClassName={commandListClassName}
+            onQueryChange={query => {
+              setSearch(query);
+              const queryLower = query.trim().toLowerCase();
+              const firstVisibleAction = contextualActionSections
+                .flatMap(section => section.items)
+                .find(action => action.name.toLowerCase().includes(queryLower));
+              setSelectedValue(
+                firstVisibleAction
+                  ? `action:${
+                      contextualActionSections.find(section =>
+                        section.items.includes(firstVisibleAction),
+                      )?.key
+                    }:${firstVisibleAction.id}`
+                  : '',
+              );
+            }}
+            onSelectAction={runContextualAction}
+            onBack={goBackToRoot}
+            primaryShortcutHint={{ keys: ['↵'], label: t('select') }}
+            secondaryShortcutHint={{ keys: ['esc'], label: t('back') }}
+          />
+        )
+      ) : (
+        <Command.List
+          key={page}
+          className={commandListClassName}
+          label={
+            page === 'themes' ? t('Available themes') : t('Available commands')
+          }
+        >
+          {page === 'themes' ? (
+            <ThemePage
+              search={search}
+              activeBuiltinTheme={currentTheme}
+              activeCustomThemeId={activeCustomThemeId}
+              onSelectBuiltin={applyBuiltinTheme}
+              onSelectCatalog={applyCatalogTheme}
+            />
+          ) : (
+            <>
+              {filteredSections.map(
+                section =>
+                  !!section.items.length && (
+                    <Command.Group
+                      key={section.key}
+                      heading={section.heading}
+                      className={paletteGroupClassName}
+                    >
+                      {section.items.map(
+                        ({ id, name, Icon, content, leading }) => (
+                          <Command.Item
+                            key={id}
+                            onSelect={() => section.onSelect({ id })}
+                            value={`${section.key}:${id}`}
+                            aria-label={name}
+                            className={paletteItemClassName}
+                          >
+                            {leading ??
+                              (Icon && <Icon width={15} height={15} />)}
+                            {content || (
+                              <Text
+                                style={{
+                                  flex: 1,
+                                  minWidth: 0,
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                <Highlight text={name} query={search} />
+                              </Text>
+                            )}
+                          </Command.Item>
+                        ),
+                      )}
+                    </Command.Group>
+                  ),
+              )}
 
-            {!hasResults && (
-              <Command.Empty
-                className={css({
-                  padding: '28px 0 32px',
-                  textAlign: 'center',
-                  fontSize: 13,
-                  color: 'var(--color-pageTextSubdued)',
-                })}
-              >
-                <Trans>No results found</Trans>
-              </Command.Empty>
-            )}
-          </>
-        )}
-      </Command.List>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 14,
-          flexShrink: 0,
-          padding: '9px 15px',
-          borderTop: '1px solid var(--color-tableBorder)',
-          backgroundColor: 'var(--color-pillBackgroundLight)',
-        }}
-      >
-        <FooterHint keys={['↑', '↓']}>{t('navigate')}</FooterHint>
-        <FooterHint keys={['↵']}>{t('select')}</FooterHint>
-        <FooterHint keys={['esc']}>{t('close')}</FooterHint>
-      </View>
+              {!hasResults && (
+                <Command.Empty
+                  className={css({
+                    padding: '28px 0 32px',
+                    textAlign: 'center',
+                    fontSize: 13,
+                    color: 'var(--color-pageTextSubdued)',
+                  })}
+                >
+                  <Trans>No results found</Trans>
+                </Command.Empty>
+              )}
+            </>
+          )}
+        </Command.List>
+      )}
+      {!isActionPage && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 14,
+            flexShrink: 0,
+            padding: '9px 15px',
+            borderTop: '1px solid var(--color-tableBorder)',
+            backgroundColor: 'var(--color-pillBackgroundLight)',
+          }}
+        >
+          <FooterHint keys={['↑', '↓']}>{t('navigate')}</FooterHint>
+          <FooterHint keys={['↵']}>{t('select')}</FooterHint>
+          <FooterHint keys={['esc']}>
+            {page === 'root' ? t('close') : t('back')}
+          </FooterHint>
+        </View>
+      )}
     </Command.Dialog>
   );
 }

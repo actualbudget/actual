@@ -68,6 +68,16 @@ export function FooterHint({
   );
 }
 
+export function ShortcutHint({
+  keys,
+  label,
+}: {
+  keys: readonly string[];
+  label: ReactNode;
+}) {
+  return <FooterHint keys={[...keys]}>{label}</FooterHint>;
+}
+
 export function BalanceRow<
   SheetName extends SheetNames,
   FieldName extends SheetFields<SheetName>,
