@@ -17,6 +17,7 @@ import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import { isElectron } from '@actual-app/core/shared/environment';
 import type { OpenIdConfig } from '@actual-app/core/types/models';
+import { startAuthentication } from '@simplewebauthn/browser';
 
 import { Link } from '#components/common/Link';
 import {
@@ -83,6 +84,76 @@ function PasswordLogin({ setError, dispatch }) {
         onPress={onSubmitPassword}
       >
         <Trans>Sign in</Trans>
+      </ButtonWithLoading>
+    </View>
+  );
+}
+
+function WebAuthnLogin({ setError, dispatch }) {
+  const [loading, setLoading] = useState(false);
+  const { isNarrowWidth } = useResponsive();
+
+  async function onSignInWithPasskey() {
+    if (loading) {
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+
+    try {
+      const { options, error: optionsError } = await send(
+        'webauthn-get-authentication-options',
+      );
+
+      if (optionsError) {
+        setError(optionsError);
+        return;
+      }
+
+      let assertion;
+      try {
+        assertion = await startAuthentication({ optionsJSON: options });
+      } catch {
+        setError('webauthn-ceremony-failed');
+        return;
+      }
+
+      const { error } = await send('webauthn-verify-authentication', {
+        response: assertion,
+      });
+
+      if (error) {
+        setError(error);
+      } else {
+        dispatch(loggedIn());
+      }
+    } catch {
+      setError('network-failure');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 15,
+      }}
+    >
+      <ButtonWithLoading
+        variant="primary"
+        isLoading={loading}
+        onPress={onSignInWithPasskey}
+        style={{
+          fontSize: 15,
+          width: isNarrowWidth ? '100%' : 220,
+          ...(isNarrowWidth ? { padding: 10 } : null),
+        }}
+      >
+        <Trans>Sign in with passkey</Trans>
       </ButtonWithLoading>
     </View>
   );
@@ -345,6 +416,15 @@ export function Login() {
         return t('Unable to contact the server');
       case 'internal-error':
         return t('Internal error');
+      case 'webauthn-not-configured':
+        return t('No passkey has been registered for this server');
+      case 'webauthn-ceremony-failed':
+        return t('Your passkey could not be verified. Please try again');
+      case 'verification-failed':
+      case 'invalid-or-expired-challenge':
+      case 'rp-id-mismatch':
+      case 'invalid-response':
+        return t('Your passkey could not be verified. Please try again');
       default:
         return t(`An unknown error occurred: {{error}}`, { error });
     }
@@ -379,6 +459,10 @@ export function Login() {
       )}
 
       {method === 'openid' && <OpenIdLogin setError={setError} />}
+
+      {method === 'webauthn' && (
+        <WebAuthnLogin setError={setError} dispatch={dispatch} />
+      )}
 
       {method === 'header' && <HeaderLogin error={error} />}
 

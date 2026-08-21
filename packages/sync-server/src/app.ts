@@ -18,6 +18,7 @@ import * as pluggai from './app-pluggyai/app-pluggyai';
 import * as secretApp from './app-secrets';
 import * as simpleFinApp from './app-simplefin/app-simplefin';
 import * as syncApp from './app-sync';
+import * as webauthnApp from './app-webauthn';
 import { config } from './load-config';
 
 const app = express();
@@ -71,6 +72,7 @@ if (config.get('corsProxy.enabled')) {
 
 app.use('/admin', adminApp.handlers);
 app.use('/openid', openidApp.handlers);
+app.use('/webauthn', webauthnApp.handlers);
 
 app.get('/mode', (req, res) => {
   res.send(config.get('mode'));

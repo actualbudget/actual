@@ -96,10 +96,11 @@ Change the default authentication method for Actual (environment variable: `ACTU
 - `"password"` (default) - This is standard password authentication
 - `"header"` - Use the HTTP header `x-actual-password` to automatically login. This is for advanced use and if not done correctly could have security implications.
 - `"openid"` - OpenId auth (in preview)
+- `"webauthn"` - Sign in with a [passkey](./webauthn-auth.md) instead of a password
 
 ## `allowedLoginMethods`
 
-The list of login methods that are permitted for auth. This defaults to `['password','header','openid']` (environment variable: `ACTUAL_ALLOWED_LOGIN_METHODS`, comma separated string).
+The list of login methods that are permitted for auth. This defaults to `['password','header','openid','webauthn']` (environment variable: `ACTUAL_ALLOWED_LOGIN_METHODS`, comma separated string).
 
 If you wish to restrict the server from accepting certain login methods, you should update this setting.
 

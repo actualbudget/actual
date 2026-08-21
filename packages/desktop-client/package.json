@@ -134,6 +134,9 @@
     "playwright": "playwright",
     "typecheck": "tsgo -b && tsc-strict"
   },
+  "dependencies": {
+    "@simplewebauthn/browser": "^13.3.0"
+  },
   "devDependencies": {
     "@actual-app/components": "workspace:*",
     "@actual-app/core": "workspace:*",
