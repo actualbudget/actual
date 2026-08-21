@@ -196,6 +196,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   month,
   category,
   editing,
+  active,
   onEdit,
   onBudgetAction,
   onShowActivity,
@@ -257,6 +258,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
     });
 
   const showScheduleIndicator = schedule && scheduleStatus;
+  const showBudgetControls = editing || active;
 
   return (
     <View
@@ -296,109 +298,105 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           handleBudgetContextMenu(e);
         }}
       >
-        {!editing && (
-          <>
-            <View
-              style={{
-                paddingLeft: 3,
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderTopWidth: 1,
-                borderBottomWidth: 1,
-                borderColor: theme.tableBorder,
+        <View
+          style={{
+            paddingLeft: 3,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderTopWidth: 1,
+            borderBottomWidth: 1,
+            borderColor: theme.tableBorder,
+          }}
+        >
+          <NotesButton
+            id={`${category.id}-${month}`}
+            defaultColor={theme.pageTextLight}
+          />
+        </View>
+        <View
+          data-testid="budget-month-actions"
+          className={`hover-expand ${
+            budgetMenuOpen || showBudgetControls ? 'force-visible' : ''
+          }`}
+          style={{
+            flexDirection: 'row',
+            flexShrink: 0,
+            paddingLeft: 3,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderTopWidth: 1,
+            borderBottomWidth: 1,
+            borderColor: theme.tableBorder,
+          }}
+        >
+          <Button
+            variant="bare"
+            onPress={() => {
+              resetBudgetPosition(2, -4);
+              setBudgetMenuOpen(true);
+            }}
+            style={{
+              padding: 3,
+            }}
+          >
+            <SvgCheveronDown width={14} height={14} className="hover-visible" />
+          </Button>
+          <Popover
+            triggerRef={budgetMenuTriggerRef}
+            placement="bottom left"
+            isOpen={budgetMenuOpen}
+            onOpenChange={() => setBudgetMenuOpen(false)}
+            style={{ width: 200 }}
+            isNonModal
+            {...budgetPosition}
+          >
+            <BudgetMenu
+              onCopyLastMonthAverage={() => {
+                onMenuAction(month, 'copy-single-last', {
+                  category: category.id,
+                });
+                showUndoNotification({
+                  message: t(`Budget set to last month's budget.`),
+                });
               }}
-            >
-              <NotesButton
-                id={`${category.id}-${month}`}
-                defaultColor={theme.pageTextLight}
-              />
-            </View>
-            <View
-              className={`hover-expand ${budgetMenuOpen ? 'force-visible' : ''}`}
-              style={{
-                flexDirection: 'row',
-                flexShrink: 1,
-                paddingLeft: 3,
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderTopWidth: 1,
-                borderBottomWidth: 1,
-                borderColor: theme.tableBorder,
-              }}
-            >
-              <Button
-                variant="bare"
-                onPress={() => {
-                  resetBudgetPosition(2, -4);
-                  setBudgetMenuOpen(true);
-                }}
-                style={{
-                  padding: 3,
-                }}
-              >
-                <SvgCheveronDown
-                  width={14}
-                  height={14}
-                  className="hover-visible"
-                />
-              </Button>
-              <Popover
-                triggerRef={budgetMenuTriggerRef}
-                placement="bottom left"
-                isOpen={budgetMenuOpen}
-                onOpenChange={() => setBudgetMenuOpen(false)}
-                style={{ width: 200 }}
-                isNonModal
-                {...budgetPosition}
-              >
-                <BudgetMenu
-                  onCopyLastMonthAverage={() => {
-                    onMenuAction(month, 'copy-single-last', {
-                      category: category.id,
-                    });
-                    showUndoNotification({
-                      message: t(`Budget set to last month's budget.`),
-                    });
-                  }}
-                  onSetMonthsAverage={numberOfMonths => {
-                    if (
-                      numberOfMonths !== 3 &&
-                      numberOfMonths !== 6 &&
-                      numberOfMonths !== 12
-                    ) {
-                      return;
-                    }
+              onSetMonthsAverage={numberOfMonths => {
+                if (
+                  numberOfMonths !== 3 &&
+                  numberOfMonths !== 6 &&
+                  numberOfMonths !== 12
+                ) {
+                  return;
+                }
 
-                    onMenuAction(month, `set-single-${numberOfMonths}-avg`, {
-                      category: category.id,
-                    });
-                    showUndoNotification({
-                      message: t(
-                        'Budget set to {{numberOfMonths}}-month average.',
-                        { numberOfMonths },
-                      ),
-                    });
-                  }}
-                  onApplyBudgetTemplate={() => {
-                    onMenuAction(month, 'apply-single-category-template', {
-                      category: category.id,
-                    });
-                    showUndoNotification({
-                      message: t(`Budget template applied.`),
-                    });
-                  }}
-                />
-              </Popover>
-            </View>
-          </>
-        )}
+                onMenuAction(month, `set-single-${numberOfMonths}-avg`, {
+                  category: category.id,
+                });
+                showUndoNotification({
+                  message: t(
+                    'Budget set to {{numberOfMonths}}-month average.',
+                    { numberOfMonths },
+                  ),
+                });
+              }}
+              onApplyBudgetTemplate={() => {
+                onMenuAction(month, 'apply-single-category-template', {
+                  category: category.id,
+                });
+                showUndoNotification({
+                  message: t(`Budget template applied.`),
+                });
+              }}
+            />
+          </Popover>
+        </View>
         <EnvelopeSheetCell
           name="budget"
           exposed={editing}
-          focused={editing}
+          focused={editing || active}
           width="flex"
+          tabIndex={!editing && active ? -1 : undefined}
           onExpose={() => onEdit(category.id, month)}
-          style={{ ...(editing && { zIndex: 100 }), ...styles.tnum }}
+          style={styles.tnum}
           textAlign="right"
           valueStyle={{
             cursor: 'default',
