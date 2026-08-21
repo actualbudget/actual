@@ -74,7 +74,7 @@ describe('API handlers', () => {
       handlers['accounts-get'] = accountsApp.handlers['accounts-get'];
     });
 
-    it('round-trips account groups and exposes account_group on accounts', async () => {
+    it('round-trips account groups and exposes account_group_id on accounts', async () => {
       const id = await handlers['api/account-group-create']({
         group: { name: 'Savings' },
       });
@@ -93,15 +93,15 @@ describe('API handlers', () => {
       await db.insertAccount({ id: 'acct1', name: 'Marcus' });
       await handlers['api/account-update']({
         id: 'acct1',
-        fields: { account_group: id },
+        fields: { account_group_id: id },
       });
       const accounts = await handlers['api/accounts-get']();
-      expect(accounts[0]).toMatchObject({ id: 'acct1', account_group: id });
+      expect(accounts[0]).toMatchObject({ id: 'acct1', account_group_id: id });
 
       await handlers['api/account-group-delete']({ id });
       await expect(handlers['api/account-groups-get']()).resolves.toEqual([]);
       const after = await handlers['api/accounts-get']();
-      expect(after[0].account_group).toBeNull();
+      expect(after[0].account_group_id).toBeNull();
     });
   });
 

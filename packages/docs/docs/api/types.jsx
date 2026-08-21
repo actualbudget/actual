@@ -172,7 +172,7 @@ export const objects = {
       ),
     },
     {
-      name: 'account_group',
+      name: 'account_group_id',
       type: 'id | null',
       description: (
         <span>

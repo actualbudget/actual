@@ -35,7 +35,7 @@ export type DbAccount = {
     | 'timed-out'
     | 'account-missing'
     | null;
-  account_group?: DbAccountGroup['id'] | null;
+  account_group_id?: DbAccountGroup['id'] | null;
 };
 
 export type DbAccountGroup = {

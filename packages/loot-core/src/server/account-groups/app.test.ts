@@ -108,12 +108,12 @@ describe('account groups app', () => {
       await accountsApp.handlers['account-update']({
         id: 'acct1',
         name: 'Amex',
-        account_group: cardsId,
+        account_group_id: cardsId,
       });
       await accountsApp.handlers['account-update']({
         id: 'acct2',
         name: 'Checking',
-        account_group: otherId,
+        account_group_id: otherId,
       });
 
       await app.handlers['account-group-delete']({ id: cardsId });
@@ -123,10 +123,10 @@ describe('account groups app', () => {
 
       const accounts = await accountsApp.handlers['accounts-get']();
       expect(
-        accounts.find(account => account.id === 'acct1')?.account_group,
+        accounts.find(account => account.id === 'acct1')?.account_group_id,
       ).toBeNull();
       expect(
-        accounts.find(account => account.id === 'acct2')?.account_group,
+        accounts.find(account => account.id === 'acct2')?.account_group_id,
       ).toBe(otherId);
     });
   });
@@ -141,10 +141,10 @@ describe('account groups app', () => {
       await accountsApp.handlers['account-update']({
         id: 'acct1',
         name: 'Marcus',
-        account_group: groupId,
+        account_group_id: groupId,
       });
       let accounts = await accountsApp.handlers['accounts-get']();
-      expect(accounts[0].account_group).toBe(groupId);
+      expect(accounts[0].account_group_id).toBe(groupId);
 
       await accountsApp.handlers['account-update']({
         id: 'acct1',
@@ -152,15 +152,15 @@ describe('account groups app', () => {
       });
       accounts = await accountsApp.handlers['accounts-get']();
       expect(accounts[0].name).toBe('Marcus Savings');
-      expect(accounts[0].account_group).toBe(groupId);
+      expect(accounts[0].account_group_id).toBe(groupId);
 
       await accountsApp.handlers['account-update']({
         id: 'acct1',
         name: 'Marcus Savings',
-        account_group: null,
+        account_group_id: null,
       });
       accounts = await accountsApp.handlers['accounts-get']();
-      expect(accounts[0].account_group).toBeNull();
+      expect(accounts[0].account_group_id).toBeNull();
     });
   });
 });

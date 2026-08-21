@@ -9,7 +9,7 @@ export type AccountEntity = {
   sort_order: number;
   last_reconciled: string | null;
   tombstone: 0 | 1;
-  account_group: AccountGroupEntity['id'] | null;
+  account_group_id: AccountGroupEntity['id'] | null;
 
   // Sync fields
   account_id: string | null;

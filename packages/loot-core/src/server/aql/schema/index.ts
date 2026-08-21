@@ -78,7 +78,7 @@ export const schema = {
     last_reconciled: f('string'),
     last_sync: f('string'),
     bank_sync_status: f('string'),
-    account_group: f('id', { ref: 'account_groups' }),
+    account_group_id: f('id', { ref: 'account_groups' }),
   },
   account_groups: {
     id: f('id'),

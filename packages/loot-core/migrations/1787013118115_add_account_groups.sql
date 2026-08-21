@@ -6,6 +6,6 @@ CREATE TABLE account_groups
    sort_order REAL,
    tombstone INTEGER DEFAULT 0);
 
-ALTER TABLE accounts ADD COLUMN account_group TEXT DEFAULT NULL;
+ALTER TABLE accounts ADD COLUMN account_group_id TEXT DEFAULT NULL;
 
 COMMIT;

@@ -851,7 +851,7 @@ export async function moveAccountGroup(
 
 export async function deleteAccountGroup(group: Pick<DbAccountGroup, 'id'>) {
   const accounts = await all<Pick<DbAccount, 'id'>>(
-    `SELECT id FROM accounts WHERE account_group = ? AND tombstone = 0`,
+    `SELECT id FROM accounts WHERE account_group_id = ? AND tombstone = 0`,
     [group.id],
   );
 
@@ -860,7 +860,7 @@ export async function deleteAccountGroup(group: Pick<DbAccountGroup, 'id'>) {
   // must always treat a ref to a missing/tombstoned group as ungrouped.
   await batchMessages(async () => {
     for (const account of accounts) {
-      void update('accounts', { id: account.id, account_group: null });
+      void update('accounts', { id: account.id, account_group_id: null });
     }
     void delete_('account_groups', group.id);
   });

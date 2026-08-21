@@ -31,7 +31,7 @@ function makeLocalAccount(
     account_sync_source: null,
     last_sync: null,
     bank_sync_status: null,
-    account_group: null,
+    account_group_id: null,
     ...overrides,
   };
 }
