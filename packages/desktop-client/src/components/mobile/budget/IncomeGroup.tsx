@@ -18,6 +18,8 @@ import { AutoTextSize } from 'auto-text-size';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CellValue } from '#components/spreadsheet/CellValue';
+import { useCategorySum } from '#hooks/useCategorySum';
+import { useFocusedViews } from '#hooks/useFocusedViews';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
@@ -90,6 +92,7 @@ export function IncomeGroup({
           onEdit={onEditCategoryGroup}
           isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
+          showHiddenCategories={showHiddenCategories}
         />
         <IncomeCategoryList
           categories={categories}
@@ -108,6 +111,7 @@ type IncomeGroupHeaderProps = {
   onEdit: (id: CategoryGroupEntity['id']) => void;
   isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
+  showHiddenCategories: boolean;
   style?: CSSProperties;
 };
 
@@ -117,6 +121,7 @@ function IncomeGroupHeader({
   onEdit,
   isCollapsed,
   onToggleCollapse,
+  showHiddenCategories,
   style,
 }: IncomeGroupHeaderProps) {
   return (
@@ -145,7 +150,11 @@ function IncomeGroupHeader({
         isCollapsed={isCollapsed}
         onToggleCollapse={onToggleCollapse}
       />
-      <IncomeGroupCells group={group} />
+      <IncomeGroupCells
+        group={group}
+        month={month}
+        showHiddenCategories={showHiddenCategories}
+      />
     </View>
   );
 }
@@ -236,11 +245,49 @@ function IncomeGroupName({
 
 type IncomeGroupCellsProps = {
   group: CategoryGroupEntity;
+  month: string;
+  showHiddenCategories: boolean;
 };
 
-function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
+function IncomeGroupCells({
+  group,
+  month,
+  showHiddenCategories,
+}: IncomeGroupCellsProps) {
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const format = useFormat();
+  const { activeViewId } = useFocusedViews();
+
+  const isViewActive = activeViewId !== null;
+  const sheetName = monthUtils.sheetForMonth(month);
+
+  const categoryIds = useMemo(
+    () =>
+      (group.categories || [])
+        .filter(c => showHiddenCategories || !c.hidden)
+        .map(c => c.id),
+    [group.categories, showHiddenCategories],
+  );
+
+  const dynamicBudgetedTracking = useCategorySum(
+    sheetName,
+    categoryIds,
+    categoryId => `budget-${categoryId}`,
+    isViewActive && budgetType === 'tracking',
+  );
+
+  const dynamicBalanceTracking = useCategorySum(
+    sheetName,
+    categoryIds,
+    categoryId => `sum-amount-${categoryId}`,
+    isViewActive && budgetType === 'tracking',
+  );
+  const dynamicBalanceEnvelope = useCategorySum(
+    sheetName,
+    categoryIds,
+    categoryId => `sum-amount-${categoryId}`,
+    isViewActive && budgetType === 'envelope',
+  );
 
   const budgeted =
     budgetType === 'tracking' ? trackingBudget.groupBudgeted(group.id) : null;
@@ -261,9 +308,99 @@ function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
         paddingRight: 5,
       }}
     >
-      {budgeted && (
-        <CellValue<'envelope-budget' | 'tracking-budget', 'group-budget'>
-          binding={budgeted}
+      {budgeted &&
+        (isViewActive ? (
+          <View>
+            <PrivacyFilter>
+              <AutoTextSize
+                key={dynamicBudgetedTracking}
+                as={Text}
+                minFontSizePx={6}
+                maxFontSizePx={12}
+                mode="oneline"
+                style={{
+                  ...styles.tnum,
+                  width: columnWidth,
+                  justifyContent: 'center',
+                  alignItems: 'flex-end',
+                  paddingLeft: 5,
+                  textAlign: 'right',
+                  fontSize: 12,
+                  fontWeight: '500',
+                }}
+              >
+                {format(dynamicBudgetedTracking, 'financial')}
+              </AutoTextSize>
+            </PrivacyFilter>
+          </View>
+        ) : (
+          <CellValue<'envelope-budget' | 'tracking-budget', 'group-budget'>
+            binding={budgeted}
+            type="financial"
+          >
+            {({ type, value }) => (
+              <View>
+                <PrivacyFilter>
+                  <AutoTextSize
+                    key={value}
+                    as={Text}
+                    minFontSizePx={6}
+                    maxFontSizePx={12}
+                    mode="oneline"
+                    style={{
+                      ...styles.tnum,
+                      width: columnWidth,
+                      justifyContent: 'center',
+                      alignItems: 'flex-end',
+                      paddingLeft: 5,
+                      textAlign: 'right',
+                      fontSize: 12,
+                      fontWeight: '500',
+                    }}
+                  >
+                    {format(value, type)}
+                  </AutoTextSize>
+                </PrivacyFilter>
+              </View>
+            )}
+          </CellValue>
+        ))}
+      {isViewActive ? (
+        <View>
+          <PrivacyFilter>
+            <AutoTextSize
+              key={
+                budgetType === 'tracking'
+                  ? dynamicBalanceTracking
+                  : dynamicBalanceEnvelope
+              }
+              as={Text}
+              minFontSizePx={6}
+              maxFontSizePx={12}
+              mode="oneline"
+              style={{
+                ...styles.tnum,
+                width: columnWidth,
+                justifyContent: 'center',
+                alignItems: 'flex-end',
+                paddingLeft: 5,
+                textAlign: 'right',
+                fontSize: 12,
+                fontWeight: '500',
+              }}
+            >
+              {format(
+                budgetType === 'tracking'
+                  ? dynamicBalanceTracking
+                  : dynamicBalanceEnvelope,
+                'financial',
+              )}
+            </AutoTextSize>
+          </PrivacyFilter>
+        </View>
+      ) : (
+        <CellValue<'envelope-budget' | 'tracking-budget', 'group-sum-amount'>
+          binding={balance}
           type="financial"
         >
           {({ type, value }) => (
@@ -293,36 +430,6 @@ function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
           )}
         </CellValue>
       )}
-      <CellValue<'envelope-budget' | 'tracking-budget', 'group-sum-amount'>
-        binding={balance}
-        type="financial"
-      >
-        {({ type, value }) => (
-          <View>
-            <PrivacyFilter>
-              <AutoTextSize
-                key={value}
-                as={Text}
-                minFontSizePx={6}
-                maxFontSizePx={12}
-                mode="oneline"
-                style={{
-                  ...styles.tnum,
-                  width: columnWidth,
-                  justifyContent: 'center',
-                  alignItems: 'flex-end',
-                  paddingLeft: 5,
-                  textAlign: 'right',
-                  fontSize: 12,
-                  fontWeight: '500',
-                }}
-              >
-                {format(value, type)}
-              </AutoTextSize>
-            </PrivacyFilter>
-          </View>
-        )}
-      </CellValue>
     </View>
   );
 }

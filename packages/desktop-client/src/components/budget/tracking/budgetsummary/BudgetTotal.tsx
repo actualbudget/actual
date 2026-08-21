@@ -8,29 +8,28 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { CellValue } from '#components/spreadsheet/CellValue';
+import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import type { Binding, SheetFields } from '#spreadsheet';
 
-type BudgetTotalProps<
-  CurrentField extends SheetFields<'tracking-budget'>,
-  TargetField extends SheetFields<'tracking-budget'>,
-> = {
+type BudgetTotalProps = {
   title: ReactNode;
-  current: Binding<'tracking-budget', CurrentField>;
-  target: Binding<'tracking-budget', TargetField>;
-  ProgressComponent: ComponentType<{ current; target }>;
+  current: Binding<'tracking-budget', SheetFields<'tracking-budget'>> | number;
+  target: Binding<'tracking-budget', SheetFields<'tracking-budget'>> | number;
+  ProgressComponent: ComponentType<{
+    current:
+      | Binding<'tracking-budget', SheetFields<'tracking-budget'>>
+      | number;
+    target: Binding<'tracking-budget', SheetFields<'tracking-budget'>> | number;
+  }>;
   style?: CSSProperties;
 };
-export function BudgetTotal<
-  CurrentField extends SheetFields<'tracking-budget'>,
-  TargetField extends SheetFields<'tracking-budget'>,
->({
+export function BudgetTotal({
   title,
   current,
   target,
   ProgressComponent,
   style,
-}: BudgetTotalProps<CurrentField, TargetField>) {
+}: BudgetTotalProps) {
   return (
     <View
       style={{
@@ -52,13 +51,31 @@ export function BudgetTotal<
           <Trans
             i18nKey="<allocatedAmount /> <italic>of <totalAmount /></italic>"
             components={{
-              allocatedAmount: <CellValue binding={current} type="financial" />,
+              allocatedAmount:
+                typeof current === 'number' ? (
+                  <CellValueText
+                    name="filtered"
+                    value={current}
+                    type="financial"
+                  />
+                ) : (
+                  <CellValue binding={current} type="financial" />
+                ),
               italic: (
                 <Text
                   style={{ color: theme.pageTextLight, fontStyle: 'italic' }}
                 />
               ),
-              totalAmount: <CellValue binding={target} type="financial" />,
+              totalAmount:
+                typeof target === 'number' ? (
+                  <CellValueText
+                    name="filtered"
+                    value={target}
+                    type="financial"
+                  />
+                ) : (
+                  <CellValue binding={target} type="financial" />
+                ),
             }}
           />
         </Text>
