@@ -33,6 +33,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 const mockData = vi.hoisted(() => ({
+  budgetId: 'budget-1',
   accounts: [] as unknown[],
   customReports: [] as unknown[],
   dashboardPages: [] as unknown[],
@@ -119,7 +120,10 @@ vi.mock('#hooks/useGlobalPref', () => ({
 }));
 
 vi.mock('#hooks/useMetadataPref', () => ({
-  useMetadataPref: () => ['Demo budget', vi.fn()],
+  useMetadataPref: (prefName: string) => [
+    prefName === 'id' ? mockData.budgetId : 'Demo budget',
+    vi.fn(),
+  ],
 }));
 
 vi.mock('#hooks/useNavigate', () => ({
@@ -257,6 +261,8 @@ describe('CommandBar', () => {
     );
     Element.prototype.scrollIntoView = vi.fn();
     vi.clearAllMocks();
+    window.localStorage.clear();
+    mockData.budgetId = 'budget-1';
     mockData.accounts = [];
     mockData.customReports = [];
     mockData.dashboardPages = [];
@@ -422,6 +428,216 @@ describe('CommandBar', () => {
       screen.getByPlaceholderText('Search Demo budget...'),
     ).toBeInTheDocument();
     expect(screen.getByRole('dialog')).toHaveTextContent('close');
+  });
+
+  it('persists an eligible favorite reference without executing the action', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    const store = renderOpenCommandBar();
+    await keyboardSelectRootItem('Checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+
+    await userEvent
+      .setup()
+      .click(screen.getByRole('button', { name: 'Add to favorites' }));
+
+    expect(store.getState().commandBar.open).toBe(true);
+    expect(mocks.navigate).not.toHaveBeenCalled();
+    expect(
+      JSON.parse(
+        window.localStorage.getItem('budget-1-commandbar.favorites') ?? '',
+      ),
+    ).toEqual({
+      version: 1,
+      favorites: [{ type: 'account', id: 'account-1' }],
+    });
+  });
+
+  it.each([
+    ['Enter', '{Enter}'],
+    ['Space', '{Space}'],
+  ])(
+    'toggles the favorite once with %s without executing the selected action',
+    async (_key, keyboardShortcut) => {
+      mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+      const store = renderOpenCommandBar();
+      await keyboardSelectRootItem('Checking');
+      fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+
+      const favoriteButton = screen.getByRole('button', {
+        name: 'Add to favorites',
+      });
+      favoriteButton.focus();
+      await userEvent.setup().keyboard(keyboardShortcut);
+
+      expect(favoriteButton).toHaveAttribute('aria-pressed', 'true');
+      expect(store.getState().commandBar.open).toBe(true);
+      expect(mocks.navigate).not.toHaveBeenCalled();
+      expect(
+        JSON.parse(
+          window.localStorage.getItem('budget-1-commandbar.favorites') ?? '',
+        ),
+      ).toEqual({
+        version: 1,
+        favorites: [{ type: 'account', id: 'account-1' }],
+      });
+    },
+  );
+
+  it('restores a stored favorite and resolves its live label', async () => {
+    mockData.accounts = [
+      { id: 'account-1', name: 'Renamed checking', closed: 0 },
+    ];
+    window.localStorage.setItem(
+      'budget-1-commandbar.favorites',
+      JSON.stringify({
+        version: 1,
+        favorites: [{ type: 'account', id: 'account-1' }],
+      }),
+    );
+    renderOpenCommandBar();
+
+    expect(screen.getByText('Favorites', { exact: true })).toBeInTheDocument();
+    expect(
+      screen.getAllByRole('option', { name: 'Renamed checking' }),
+    ).toHaveLength(1);
+
+    await keyboardSelectRootItem('Renamed checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    expect(
+      screen.getByRole('button', { name: 'Remove from favorites' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('isolates favorites by budget', () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    window.localStorage.setItem(
+      'budget-1-commandbar.favorites',
+      JSON.stringify({
+        version: 1,
+        favorites: [{ type: 'account', id: 'account-1' }],
+      }),
+    );
+    mockData.budgetId = 'budget-2';
+    renderOpenCommandBar();
+
+    expect(
+      screen.queryByText('Favorites', { exact: true }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: 'Checking' }),
+    ).toBeInTheDocument();
+  });
+
+  it('preserves stored favorite order and removes canonical duplicates', () => {
+    mockData.accounts = [
+      { id: 'account-1', name: 'Checking', closed: 0 },
+      { id: 'account-2', name: 'Savings', closed: 0 },
+    ];
+    mockData.customReports = [{ id: 'report-1', name: 'Monthly report' }];
+    window.localStorage.setItem(
+      'budget-1-commandbar.favorites',
+      JSON.stringify({
+        version: 1,
+        favorites: [
+          { type: 'report', id: 'report-1' },
+          { type: 'account', id: 'account-2' },
+          { type: 'account', id: 'account-1' },
+        ],
+      }),
+    );
+    renderOpenCommandBar();
+
+    const options = screen.getAllByRole('option');
+    expect(
+      options.slice(0, 3).map(option => option.getAttribute('aria-label')),
+    ).toEqual(['Monthly report', 'Savings', 'Checking']);
+    expect(screen.getAllByRole('option', { name: 'Checking' })).toHaveLength(1);
+    expect(
+      screen.getAllByRole('option', { name: 'Monthly report' }),
+    ).toHaveLength(1);
+  });
+
+  it('hides malformed and stale favorite references without rewriting them', () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    const stored = {
+      version: 1,
+      favorites: [
+        { type: 'account' },
+        { type: 'account', id: 'deleted-account' },
+        { type: 'report', id: 'deleted-report' },
+      ],
+    };
+    window.localStorage.setItem(
+      'budget-1-commandbar.favorites',
+      JSON.stringify(stored),
+    );
+    renderOpenCommandBar();
+
+    expect(
+      screen.queryByText('Favorites', { exact: true }),
+    ).not.toBeInTheDocument();
+    expect(window.localStorage.getItem('budget-1-commandbar.favorites')).toBe(
+      JSON.stringify(stored),
+    );
+  });
+
+  it('persists only eligible domain references when writing favorites', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    renderOpenCommandBar();
+    await userEvent
+      .setup()
+      .click(screen.getByText('Settings', { exact: true }));
+
+    expect(window.localStorage.getItem('budget-1-commandbar.favorites')).toBe(
+      null,
+    );
+  });
+
+  it('persists custom report favorites as report references', async () => {
+    mockData.customReports = [{ id: 'report-1', name: 'Monthly report' }];
+    renderOpenCommandBar();
+    await keyboardSelectRootItem('Monthly report');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+
+    await userEvent
+      .setup()
+      .click(screen.getByRole('button', { name: 'Add to favorites' }));
+
+    expect(
+      JSON.parse(
+        window.localStorage.getItem('budget-1-commandbar.favorites') ?? '',
+      ),
+    ).toEqual({
+      version: 1,
+      favorites: [{ type: 'report', id: 'report-1' }],
+    });
+  });
+
+  it('prunes stale references only during a later favorite write', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    window.localStorage.setItem(
+      'budget-1-commandbar.favorites',
+      JSON.stringify({
+        version: 1,
+        favorites: [{ type: 'account', id: 'deleted-account' }],
+      }),
+    );
+    const store = renderOpenCommandBar();
+    await keyboardSelectRootItem('Checking');
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true });
+    await userEvent
+      .setup()
+      .click(screen.getByRole('button', { name: 'Add to favorites' }));
+
+    expect(store.getState().commandBar.open).toBe(true);
+    expect(
+      JSON.parse(
+        window.localStorage.getItem('budget-1-commandbar.favorites') ?? '',
+      ),
+    ).toEqual({
+      version: 1,
+      favorites: [{ type: 'account', id: 'account-1' }],
+    });
   });
 
   it('opens a custom-report action page from the root palette', async () => {

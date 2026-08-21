@@ -60,6 +60,14 @@ export type ActionPageHeader = Readonly<{
   readonly Icon?: ComponentType<SVGProps<SVGSVGElement>>;
   readonly leading?: ReactNode;
   readonly secondary?: ReactNode;
+  readonly favorite?: FavoriteControl;
+}>;
+
+export type FavoriteControl = Readonly<{
+  readonly isPressed: boolean;
+  readonly onToggle: () => void;
+  readonly addLabel?: string;
+  readonly removeLabel?: string;
 }>;
 
 export type ShortcutHint = Readonly<{

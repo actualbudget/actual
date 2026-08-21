@@ -77,6 +77,41 @@ export const actionHeaderIconClassName = css({
   '& > svg': { width: 16, height: 16 },
 });
 
+export const favoriteButtonClassName = css({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  width: 30,
+  height: 30,
+  padding: 6,
+  border: '1px solid var(--color-tableBorder)',
+  borderRadius: 7,
+  backgroundColor: 'transparent',
+  color: 'var(--color-pageTextSubdued)',
+  cursor: 'pointer',
+  transition:
+    'color 120ms ease, background-color 120ms ease, border-color 120ms ease',
+  '& > svg': { width: 16, height: 16 },
+  '&:hover': {
+    color: 'var(--color-pageText)',
+    backgroundColor: 'var(--color-pillBackground)',
+  },
+  '&:focus-visible': {
+    outline: '2px solid var(--color-buttonPrimaryBackground)',
+    outlineOffset: 2,
+  },
+  "&[aria-pressed='true']": {
+    borderColor: 'var(--color-pageTextPositive)',
+    backgroundColor:
+      'color-mix(in srgb, var(--color-pageTextPositive) 12%, transparent)',
+    color: 'var(--color-pageTextPositive)',
+  },
+  '@media (prefers-reduced-motion: reduce)': {
+    transition: 'none',
+  },
+});
+
 export const actionItemClassName = css({
   display: 'flex',
   alignItems: 'flex-start',
