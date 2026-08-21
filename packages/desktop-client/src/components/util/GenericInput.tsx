@@ -34,7 +34,6 @@ type GenericInputProps = {
   ref?: Ref<HTMLInputElement>;
   style?: CSSProperties;
   inputStyle?: CSSProperties;
-  zeroSign?: '-' | '+';
 } & (
   | ((
       | {
@@ -453,7 +452,6 @@ export const GenericInput = ({
                   ? '+'
                   : undefined
               }
-              zeroSign={props.zeroSign}
               inputStyle={inputStyle}
             />
           );
