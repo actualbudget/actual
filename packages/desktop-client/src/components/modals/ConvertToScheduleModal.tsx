@@ -20,7 +20,6 @@ type ConvertToScheduleModalProps = Extract<
 export function ConvertToScheduleModal({
   onCancel,
   onConfirm,
-  isBeyondWindow,
   daysUntilTransaction,
   upcomingDays,
 }: ConvertToScheduleModalProps) {
@@ -45,37 +44,24 @@ export function ConvertToScheduleModal({
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ lineHeight: 1.5 }}>
-            <Block>
-              <Trans>
-                This transaction has a future date. Would you like to convert it
-                to a single-time schedule instead?
+            <Block
+              style={{
+                marginTop: 10,
+                padding: 10,
+                backgroundColor: theme.warningBackground,
+                borderRadius: 4,
+              }}
+            >
+              <Trans count={daysUntilTransaction}>
+                <strong>Warning:</strong> This transaction is{' '}
+                {{ count: daysUntilTransaction }} days away,
+              </Trans>{' '}
+              <Trans count={upcomingDays}>
+                which is beyond your configured upcoming length of{' '}
+                {{ count: upcomingDays }} days. The schedule preview will not be
+                visible in your account until it gets closer to the date.
               </Trans>
             </Block>
-            {isBeyondWindow ? (
-              <Block
-                style={{
-                  marginTop: 10,
-                  padding: 10,
-                  backgroundColor: theme.warningBackground,
-                  borderRadius: 4,
-                }}
-              >
-                <Trans>
-                  <strong>Warning:</strong> This transaction is{' '}
-                  {{ daysUntilTransaction }} days away, which is beyond your
-                  configured upcoming length of {{ upcomingDays }} days. The
-                  schedule preview will not be visible in your account until it
-                  gets closer to the date.
-                </Trans>
-              </Block>
-            ) : (
-              <Block style={{ marginTop: 10 }}>
-                <Trans>
-                  The transaction will appear as a schedule preview in your
-                  account.
-                </Trans>
-              </Block>
-            )}
             <View
               style={{
                 marginTop: 20,
@@ -95,7 +81,7 @@ export function ConvertToScheduleModal({
                   onCancel?.();
                 }}
               >
-                <Trans>No, keep as transaction</Trans>
+                <Trans>Cancel</Trans>
               </Button>
               <InitialFocus>
                 <Button
@@ -110,7 +96,7 @@ export function ConvertToScheduleModal({
                     onConfirm();
                   }}
                 >
-                  <Trans>Yes, create schedule</Trans>
+                  <Trans>Create schedule anyway</Trans>
                 </Button>
               </InitialFocus>
             </View>
