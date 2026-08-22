@@ -142,6 +142,9 @@ describe('Account sync', () => {
     const payees = await getAllPayees();
     expect(payees.length).toBe(1);
     expect(payees[0].name).toBe('Nintendo Store New York Ny');
+
+    const transactions = await getAllTransactions();
+    expect(transactions[0].imported_payee).toBe('Nintendo Store New York Ny');
   });
 
   test("transactions-import keeps the payee name with payeeNameNormalization 'original'", async () => {
@@ -189,6 +192,9 @@ describe('Account sync', () => {
     const payees = await getAllPayees();
     expect(payees.length).toBe(1);
     expect(payees[0].name).toBe('Nintendo Store New York NY');
+
+    const transactions = await getAllTransactions();
+    expect(transactions[0].imported_payee).toBe('Nintendo Store New York NY');
   });
 
   test('transactions-import rejects an unknown payeeNameNormalization', async () => {
