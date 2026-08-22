@@ -31,7 +31,7 @@ export type ImportTransactionsOpts = {
   defaultCleared?: boolean;
   dryRun?: boolean;
   reimportDeleted?: boolean;
-  rawPayeeName?: boolean;
+  payeeNameNormalization?: 'original' | 'title-case';
 };
 
 export type ApiHandlers = {

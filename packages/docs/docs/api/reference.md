@@ -279,7 +279,7 @@ This method has the following optional flags (passed as the `opts` object):
 - `defaultCleared`: whether imported transactions should be marked as cleared (defaults to `true`)
 - `dryRun`: if `true`, returns what would be added/updated without actually modifying the database (defaults to `false`)
 - `reimportDeleted`: if `true`, transactions that were previously imported and then deleted will be reimported; if `false`, they will be skipped (defaults to `true` for backward compatibility — note that the [file import UI](../transactions/importing.md#avoiding-duplicate-transactions) defaults to `false`)
-- `rawPayeeName`: if `true`, `payee_name` is used exactly as given when creating a payee, instead of being title-cased (defaults to `false`)
+- `payeeNameNormalization`: how `payee_name` is processed when creating a payee — `'title-case'` re-capitalizes each word, `'original'` keeps the name as given, apart from trimming surrounding whitespace (defaults to `'title-case'`)
 
 Example using opts:
 
