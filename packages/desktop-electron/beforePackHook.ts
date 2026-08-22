@@ -14,6 +14,7 @@ const beforePackHook = async (context: AfterPackContext) => {
 
   if (!electronVersion) {
     console.error('beforePackHook: Unable to find electron version.');
+    process.exit(1); // End the process - electron version is required
   }
 
   try {
@@ -39,6 +40,7 @@ const beforePackHook = async (context: AfterPackContext) => {
     }
   } catch (err) {
     console.error('beforePackHook:', err);
+    process.exit(1); // End the process - unsuccessful build
   }
 };
 
