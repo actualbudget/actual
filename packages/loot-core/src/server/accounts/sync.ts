@@ -604,6 +604,7 @@ export async function reconcileTransactions(
   defaultCleared = true,
   updateDates = false,
   reimportDeleted?: boolean,
+  rawPayeeName = false,
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
 
@@ -623,6 +624,7 @@ export async function reconcileTransactions(
     isBankSyncAccount,
     strictIdChecking,
     reimportDeleted,
+    rawPayeeName,
   );
 
   // Finally, generate & commit the changes
@@ -761,6 +763,7 @@ export async function matchTransactions(
   isBankSyncAccount = false,
   strictIdChecking = true,
   reimportDeletedOverride?: boolean,
+  rawPayeeName = false,
 ) {
   logger.log('Performing transaction reconciliation matching');
 
@@ -775,14 +778,9 @@ export async function matchTransactions(
 
   const hasMatched = new Set();
 
-  const transactionNormalization = isBankSyncAccount
-    ? normalizeBankSyncTransactions
-    : normalizeTransactions;
-
-  const { normalized, payeesToCreate } = await transactionNormalization(
-    transactions,
-    acctId,
-  );
+  const { normalized, payeesToCreate } = isBankSyncAccount
+    ? await normalizeBankSyncTransactions(transactions, acctId)
+    : await normalizeTransactions(transactions, acctId, { rawPayeeName });
 
   // The first pass runs the rules, and preps data for fuzzy matching
   const accounts: db.DbAccount[] = await db.getAccounts();

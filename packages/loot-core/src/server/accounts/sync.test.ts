@@ -8,6 +8,7 @@ import { setSyncingMode } from '#server/sync';
 import { handlers } from '#server/tests/mockSyncServer';
 import { insertRule, loadRules } from '#server/transactions/transaction-rules';
 import * as monthUtils from '#shared/months';
+import type { ImportTransactionsOpts } from '#types/api-handlers';
 import type { SyncedPrefs } from '#types/prefs';
 
 import { app as accountsApp } from './app';
@@ -101,6 +102,123 @@ describe('Account sync', () => {
     expect(transactions.find(t => t.amount === 5000).payee).toBe(
       payees.find(p => p.name === 'Kroger').id,
     );
+  });
+
+  test('reconcile title-cases the payee name by default', async () => {
+    const { id } = await prepareDatabase();
+
+    await reconcileTransactions(id, [
+      {
+        date: '2020-01-02',
+        payee_name: 'Nintendo Store New York NY',
+        amount: 4133,
+      },
+    ]);
+
+    const payees = await getAllPayees();
+    expect(payees.length).toBe(1);
+    expect(payees[0].name).toBe('Nintendo Store New York Ny');
+
+    const transactions = await getAllTransactions();
+    expect(transactions[0].imported_payee).toBe('Nintendo Store New York Ny');
+  });
+
+  test('transactions-import title-cases the payee name by default', async () => {
+    const { id } = await prepareDatabase();
+
+    await accountsApp.handlers['transactions-import']({
+      accountId: id,
+      transactions: [
+        {
+          account: id,
+          date: '2020-01-02',
+          payee_name: 'Nintendo Store New York NY',
+          amount: 4133,
+        },
+      ],
+      isPreview: false,
+    });
+
+    const payees = await getAllPayees();
+    expect(payees.length).toBe(1);
+    expect(payees[0].name).toBe('Nintendo Store New York Ny');
+
+    const transactions = await getAllTransactions();
+    expect(transactions[0].imported_payee).toBe('Nintendo Store New York Ny');
+  });
+
+  test("transactions-import keeps the payee name with payeeNameNormalization 'original'", async () => {
+    const { id } = await prepareDatabase();
+
+    await accountsApp.handlers['transactions-import']({
+      accountId: id,
+      transactions: [
+        {
+          account: id,
+          date: '2020-01-02',
+          payee_name: 'Nintendo Store New York NY',
+          amount: 4133,
+        },
+      ],
+      isPreview: false,
+      opts: { payeeNameNormalization: 'original' },
+    });
+
+    const payees = await getAllPayees();
+    expect(payees.length).toBe(1);
+    expect(payees[0].name).toBe('Nintendo Store New York NY');
+
+    const transactions = await getAllTransactions();
+    expect(transactions[0].imported_payee).toBe('Nintendo Store New York NY');
+  });
+
+  test("transactions-import trims the payee name with payeeNameNormalization 'original'", async () => {
+    const { id } = await prepareDatabase();
+
+    await accountsApp.handlers['transactions-import']({
+      accountId: id,
+      transactions: [
+        {
+          account: id,
+          date: '2020-01-02',
+          payee_name: '  Nintendo Store New York NY  ',
+          amount: 4133,
+        },
+      ],
+      isPreview: false,
+      opts: { payeeNameNormalization: 'original' },
+    });
+
+    const payees = await getAllPayees();
+    expect(payees.length).toBe(1);
+    expect(payees[0].name).toBe('Nintendo Store New York NY');
+
+    const transactions = await getAllTransactions();
+    expect(transactions[0].imported_payee).toBe('Nintendo Store New York NY');
+  });
+
+  test('transactions-import rejects an unknown payeeNameNormalization', async () => {
+    const { id } = await prepareDatabase();
+
+    await expect(
+      accountsApp.handlers['transactions-import']({
+        accountId: id,
+        transactions: [
+          {
+            account: id,
+            date: '2020-01-02',
+            payee_name: 'Nintendo Store New York NY',
+            amount: 4133,
+          },
+        ],
+        isPreview: false,
+        opts: {
+          payeeNameNormalization: 'titlecase',
+        } as unknown as ImportTransactionsOpts,
+      }),
+    ).rejects.toThrow(/payeeNameNormalization/);
+
+    expect(await getAllPayees()).toEqual([]);
   });
 
   test('reconcile handles transactions with undefined fields', async () => {
