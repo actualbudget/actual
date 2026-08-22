@@ -17,6 +17,17 @@ const beforePackHook = async (context: AfterPackContext) => {
     process.exit(1); // End the process - electron version is required
   }
 
+  // gyp always compiles with CC_target/CXX_target when they are set, so they
+  // must only point at the cross-compiler while building for a foreign
+  // architecture — leaving them set would cross-compile the host-arch pass too.
+  if (process.platform === 'linux' && arch === 'arm64') {
+    process.env.CC_target = 'aarch64-linux-gnu-gcc';
+    process.env.CXX_target = 'aarch64-linux-gnu-g++';
+  } else {
+    delete process.env.CC_target;
+    delete process.env.CXX_target;
+  }
+
   try {
     await rebuild({
       arch,

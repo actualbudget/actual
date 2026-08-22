@@ -110,12 +110,10 @@ jobs:
         run: |
           # better-sqlite3 has no Electron prebuilds for this Electron version,
           # so the arm64 AppImage's native modules are cross-compiled from
-          # source. node-gyp sets GYP_CROSSCOMPILE when the target arch differs
-          # from the host; gyp then compiles with CC_target/CXX_target.
+          # source. beforePackHook points CC_target/CXX_target at this
+          # toolchain during the arm64 pass.
           sudo apt-get update
           sudo apt-get install -y crossbuild-essential-arm64
-          echo "CC_target=aarch64-linux-gnu-gcc" >> "$GITHUB_ENV"
-          echo "CXX_target=aarch64-linux-gnu-g++" >> "$GITHUB_ENV"
       - name: Build Electron for Mac
         if: ${{ startsWith(matrix.os, 'macos') }}
         run: ./bin/package-electron --skip-translations
