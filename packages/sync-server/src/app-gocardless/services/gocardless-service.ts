@@ -7,6 +7,7 @@ import {
   AccountNotLinkedToRequisition,
   EndUserAgreementExpiredError,
   GenericGoCardlessError,
+  GoCardlessNotConfiguredError,
   InvalidGoCardlessTokenError,
   InvalidInputDataError,
   NotFoundError,
@@ -113,6 +114,13 @@ export const goCardlessService = {
   },
 
   setToken: async (): Promise<void> => {
+    // Without credentials the token request fails with a generic 400, which
+    // surfaces to the user as an unhelpful internal error. Fail early with a
+    // dedicated error so the client can tell them to re-enter their secrets.
+    if (!goCardlessService.isConfigured()) {
+      throw new GoCardlessNotConfiguredError();
+    }
+
     const isExpiredJwtToken = (token: string | null): boolean => {
       if (!token) return true;
       try {

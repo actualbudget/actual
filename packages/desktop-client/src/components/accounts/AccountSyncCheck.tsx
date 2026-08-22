@@ -9,13 +9,17 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
-import { useUnlinkAccountMutation } from '#accounts';
+import {
+  useSyncAndDownloadMutation,
+  useUnlinkAccountMutation,
+} from '#accounts';
 import { getFailedSyncError, isAccountFailedSync } from '#accounts/syncStatus';
 import { Link } from '#components/common/Link';
 import { authorizeBank as authorizeEnableBanking } from '#enablebanking';
 import { authorizeBank as authorizeGoCardless } from '#gocardless';
 import { useAccounts } from '#hooks/useAccounts';
 import { useFailedAccounts } from '#hooks/useFailedAccounts';
+import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
 function useErrorMessage() {
@@ -74,6 +78,16 @@ function useErrorMessage() {
           'This account was not found in SimpleFIN. Try unlinking and relinking the account.',
         );
 
+      case 'CONFIG_ERROR':
+        switch (code.toUpperCase()) {
+          case 'GOCARDLESS_NOT_CONFIGURED':
+            return t(
+              'GoCardless is not set up on this server. Credentials are stored on the server, not in your budget file, so they are not restored from a backup. Enter your secret ID and key again to reconnect.',
+            );
+          default:
+        }
+        break;
+
       default:
     }
 
@@ -115,6 +129,26 @@ export function AccountSyncCheck() {
     [dispatch],
   );
 
+  const syncAndDownload = useSyncAndDownloadMutation();
+  const setUpGoCardless = useCallback(
+    (acc: AccountEntity) => {
+      setOpen(false);
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'gocardless-init',
+            options: {
+              // Retry the sync so the account clears its failed state as soon
+              // as the credentials are back in place.
+              onSuccess: () => syncAndDownload.mutate({ id: acc.id }),
+            },
+          },
+        }),
+      );
+    },
+    [dispatch, syncAndDownload],
+  );
+
   const unlinkAccount = useUnlinkAccountMutation();
   const unlink = useCallback(
     (acc: AccountEntity) => {
@@ -144,6 +178,8 @@ export function AccountSyncCheck() {
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
     (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
+  const showGoCardlessSetup =
+    type === 'CONFIG_ERROR' && code === 'GOCARDLESS_NOT_CONFIGURED';
 
   return (
     <View>
@@ -184,7 +220,7 @@ export function AccountSyncCheck() {
         </div>
 
         <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
-          {showAuth ? (
+          {showAuth && (
             <>
               <Button onPress={() => unlink(account)}>
                 <Trans>Unlink</Trans>
@@ -198,7 +234,17 @@ export function AccountSyncCheck() {
                 <Trans>Reauthorize</Trans>
               </Button>
             </>
-          ) : (
+          )}
+          {showGoCardlessSetup && (
+            <Button
+              variant="primary"
+              autoFocus
+              onPress={() => setUpGoCardless(account)}
+            >
+              <Trans>Set up GoCardless</Trans>
+            </Button>
+          )}
+          {!showAuth && !showGoCardlessSetup && (
             <Button onPress={() => unlink(account)}>
               <Trans>Unlink account</Trans>
             </Button>

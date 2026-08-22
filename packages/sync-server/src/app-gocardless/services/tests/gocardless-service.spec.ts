@@ -5,6 +5,7 @@ import {
   AccountNotLinkedToRequisition,
   EndUserAgreementExpiredError,
   GenericGoCardlessError,
+  GoCardlessNotConfiguredError,
   InvalidGoCardlessTokenError,
   InvalidInputDataError,
   NotFoundError,
@@ -25,6 +26,7 @@ import {
   goCardlessService,
   handleGoCardlessError,
 } from '#app-gocardless/services/gocardless-service';
+import { secretsService } from '#services/secrets-service';
 
 import {
   mockAccountDetails,
@@ -72,6 +74,34 @@ describe('goCardlessService', () => {
 
   afterEach(() => {
     vi.resetAllMocks();
+  });
+
+  describe('#setToken', () => {
+    it('throws GoCardlessNotConfiguredError when secrets are missing', async () => {
+      setTokenSpy.mockRestore();
+      vi.spyOn(secretsService, 'get').mockReturnValue(null);
+
+      await expect(() => goCardlessService.setToken()).rejects.toThrow(
+        GoCardlessNotConfiguredError,
+      );
+    });
+
+    it('generates a token when secrets are configured', async () => {
+      setTokenSpy.mockRestore();
+      vi.spyOn(secretsService, 'get').mockReturnValue('secret');
+      const generateTokenSpy = vi
+        .spyOn(client, 'generateToken')
+        .mockResolvedValue({
+          access: 'access-token',
+          refresh: 'refresh-token',
+          access_expires: 86400,
+          refresh_expires: 2592000,
+        });
+
+      await goCardlessService.setToken();
+
+      expect(generateTokenSpy).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('#getLinkedRequisition', () => {
