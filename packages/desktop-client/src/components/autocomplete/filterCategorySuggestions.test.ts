@@ -31,12 +31,16 @@ describe('filterCategorySuggestions', () => {
   it('still includes categories whose group name matches', () => {
     const result = filterCategorySuggestions(suggestions, 'sav');
 
+    // Among the group-only matches, ties are broken by the length of the
+    // "<group> <name>" string being matched against (shortest first), then
+    // by match start position — see the `tiebreakers` option in
+    // `rankMatches`.
     expect(names(result)).toEqual([
       'Savings Goals',
-      'Emergency Fund',
-      'Home Repairs',
       'New Car',
       'Holidays',
+      'Home Repairs',
+      'Emergency Fund',
     ]);
   });
 
@@ -66,5 +70,18 @@ describe('filterCategorySuggestions', () => {
 
     expect(result[0].id).toBe('split');
     expect(names(result.slice(1))[0]).toBe('Savings Goals');
+  });
+
+  it('ranks an exact name match above a longer tied substring match', () => {
+    // 'Groceries Extra' is listed first, so a stable sort on a tied fzf
+    // score would otherwise leave it ahead of the exact 'Groceries' match.
+    const tiedSuggestions = [
+      { id: '1', name: 'Groceries Extra', group: food },
+      { id: '2', name: 'Groceries', group: food },
+    ];
+
+    const result = filterCategorySuggestions(tiedSuggestions, 'Groceries');
+
+    expect(names(result)).toEqual(['Groceries', 'Groceries Extra']);
   });
 });

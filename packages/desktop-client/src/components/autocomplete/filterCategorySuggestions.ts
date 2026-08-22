@@ -1,4 +1,4 @@
-import { Fzf } from 'fzf';
+import { byLengthAsc, byStartAsc, Fzf } from 'fzf';
 
 type CategorySuggestion = {
   id: string;
@@ -16,6 +16,9 @@ function rankMatches<T extends CategorySuggestion>(
     selector,
     limit: 100,
     casing: 'case-insensitive',
+    // Prefer exact/shorter matches over longer ones that merely contain the
+    // query as a substring when fzf scores them equally.
+    tiebreakers: [byLengthAsc, byStartAsc],
   })
     .find(value)
     .map(result => itemsById.get(result.item.id))
