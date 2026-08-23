@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import type { ImportTransactionsResult } from '#server/accounts/app';
+import type { PayeeNameNormalization } from '#server/accounts/sync';
 import type {
   APIAccountEntity,
   APICategoryEntity,
@@ -31,7 +32,7 @@ export type ImportTransactionsOpts = {
   defaultCleared?: boolean;
   dryRun?: boolean;
   reimportDeleted?: boolean;
-  payeeNameNormalization?: 'original' | 'title-case';
+  payeeNameNormalization?: PayeeNameNormalization;
 };
 
 export type ApiHandlers = {

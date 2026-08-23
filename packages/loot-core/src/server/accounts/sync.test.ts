@@ -308,12 +308,7 @@ describe('Account sync', () => {
     await reconcileTransactions(
       acctId,
       [{ date: '2020-01-01', imported_id: 'finid-override' }],
-      false,
-      true,
-      false,
-      true,
-      false,
-      false,
+      { reimportDeleted: false },
     );
     const transactions2 = await getAllTransactions();
     expect(transactions2.length).toBe(1);
@@ -334,12 +329,7 @@ describe('Account sync', () => {
     await reconcileTransactions(
       acctId,
       [{ date: '2020-01-01', imported_id: 'finid-override2' }],
-      false,
-      true,
-      false,
-      true,
-      false,
-      true,
+      { reimportDeleted: true },
     );
     const transactions2 = await getAllTransactions();
     expect(transactions2.length).toBe(2);
@@ -364,12 +354,7 @@ describe('Account sync', () => {
     await reconcileTransactions(
       acctId,
       [{ date: '2020-01-01', imported_id: 'finid-precedence' }],
-      false,
-      true,
-      false,
-      true,
-      false,
-      false,
+      { reimportDeleted: false },
     );
     const transactions2 = await getAllTransactions();
     expect(transactions2.length).toBe(1);
@@ -740,8 +725,7 @@ describe('Account sync', () => {
             imported_id: 'something-else-entirely',
           },
         ],
-        false,
-        false,
+        { strictIdChecking: false },
       );
 
       payees = await getAllPayees();
