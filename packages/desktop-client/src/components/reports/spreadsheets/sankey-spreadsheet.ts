@@ -645,7 +645,7 @@ async function fetchTransferData(
 
   const byId = new Map<string, TransferEntry>();
   const byAccountId = new Map<string, string>();
-  
+
   raw_results.forEach((t: TransferEntry) => {
     byId.set(String(t.id), t);
     byAccountId.set(String(t.accountId), t.accountName);
