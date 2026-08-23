@@ -125,7 +125,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
   // initialize once when data is available
   useEffect(() => {
-    if (selectionsInitialized || accounts.length === 0 || isCategoriesLoading) {
+    if (selectionsInitialized || isCategoriesLoading) {
       return;
     }
 
@@ -368,18 +368,27 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   );
 
   const data = useReport<CrossoverData>('crossover', params);
+  const [previousData, setPreviousData] = useState<CrossoverData | null>(null);
+
+  useEffect(() => {
+    if (data) {
+      setPreviousData(data);
+    }
+  }, [data]);
+
+  const displayData = data ?? previousData;
 
   // Get the default estimated return from the spreadsheet data
-  const historicalReturn = data?.historicalReturn ?? null;
+  const historicalReturn = displayData?.historicalReturn ?? null;
 
   // Get years to retire from spreadsheet data
-  const yearsToRetire = data?.yearsToRetire ?? null;
+  const yearsToRetire = displayData?.yearsToRetire ?? null;
 
   // Get target monthly income from spreadsheet data
-  const targetMonthlyIncome = data?.targetMonthlyIncome ?? null;
+  const targetMonthlyIncome = displayData?.targetMonthlyIncome ?? null;
 
   // Get target nest egg from spreadsheet data
-  const targetNestEgg = data?.targetNestEgg ?? null;
+  const targetNestEgg = displayData?.targetNestEgg ?? null;
 
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
@@ -410,14 +419,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     });
   };
 
-  if (
-    !allMonths ||
-    !data ||
-    !start ||
-    !end ||
-    isCategoriesLoading ||
-    accounts.length === 0
-  ) {
+  if (!allMonths || !displayData || !start || !end || isCategoriesLoading) {
     return <LoadingIndicator />;
   }
 
@@ -1120,7 +1122,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
               }}
             >
               <CrossoverGraph
-                graphData={data.graphData}
+                graphData={displayData.graphData}
                 style={{ height: '100%', flex: 1 }}
               />
             </View>

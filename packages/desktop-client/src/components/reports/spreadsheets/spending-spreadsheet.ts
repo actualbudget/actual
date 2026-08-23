@@ -10,7 +10,7 @@ import type {
   SpendingMonthEntity,
 } from '@actual-app/core/types/models';
 // @ts-strict-ignore
-import keyBy from 'lodash/keyBy';
+import { keyBy } from 'es-toolkit';
 
 import { resolveSpendingAverageRange } from '#components/reports/spendingAverageRange';
 import { fromDateRepr } from '#components/reports/util';
@@ -329,7 +329,7 @@ export function createSpendingSpreadsheet({
           month: month.month,
         };
       });
-      const indexedData: SpendingMonthEntity = keyBy(dayData, 'month');
+      const indexedData: SpendingMonthEntity = keyBy(dayData, d => d.month);
       return {
         months: indexedData,
         day,

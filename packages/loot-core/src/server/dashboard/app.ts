@@ -1,4 +1,4 @@
-import isMatch from 'lodash/isMatch';
+import { isMatch } from 'es-toolkit/compat';
 import { v4 as uuidv4 } from 'uuid';
 
 import { captureException } from '#platform/exceptions';
@@ -45,6 +45,7 @@ export function isWidgetType(
     'sankey-card',
     'balance-forecast-card',
     'age-of-money-card',
+    'monte-carlo-card',
   ].includes(type);
 }
 

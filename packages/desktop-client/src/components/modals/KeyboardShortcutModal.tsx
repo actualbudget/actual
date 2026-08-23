@@ -343,6 +343,13 @@ export function KeyboardShortcutModal() {
             description: t('Add transaction and close form'),
           },
           {
+            id: 'create-schedule-in-new-transaction',
+            shortcut: 'Enter',
+            meta: ctrl,
+            shift: true,
+            description: t('Turn the new transaction into a schedule'),
+          },
+          {
             id: 'move-right-when-editing',
             shortcut: 'Tab',
             description: t('Move right when editing'),

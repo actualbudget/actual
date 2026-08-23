@@ -12,6 +12,7 @@ import {
   SvgRefresh,
 } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
+import { ModeButton } from '@actual-app/components/mode-button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -26,8 +27,8 @@ import type {
   TimeFrame,
 } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
+import { debounce } from 'es-toolkit/compat';
 import type { TFunction } from 'i18next';
-import debounce from 'lodash/debounce';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
@@ -36,7 +37,6 @@ import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
-import { ModeButton } from '#components/reports/ModeButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
   buildSankeyData,
@@ -827,8 +827,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                 width: 1,
                 height: 28,
                 backgroundColor: theme.pillBorderDark,
-                marginRight: 10,
-                marginLeft: 10,
               }}
             />
             <GraphModeSelector mode={graphMode} onChange={setGraphMode} />
@@ -837,8 +835,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                 width: 1,
                 height: 28,
                 backgroundColor: theme.pillBorderDark,
-                marginRight: 10,
-                marginLeft: 10,
               }}
             />
             <TopNSelector value={topNcategories} onChange={settopNcategories} />

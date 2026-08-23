@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import debounce from 'lodash/debounce';
+import { debounce } from 'es-toolkit/compat';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';

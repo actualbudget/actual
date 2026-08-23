@@ -2,9 +2,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import promiseRetry from 'promise-retry';
-
 import { logger } from '#platform/server/log';
+import { retry as promiseRetry } from '#shared/retry';
 
 import { getDocumentDir } from './shared';
 

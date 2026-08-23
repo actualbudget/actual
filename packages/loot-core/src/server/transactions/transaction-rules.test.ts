@@ -220,6 +220,42 @@ describe('Transaction rules', () => {
     expect(transaction.category).toBe(null);
   });
 
+  test('payee rules match after a staged formula sets payee name', async () => {
+    await loadRules();
+
+    await db.insertPayee({ id: 'amazon_id', name: 'Amazon' });
+
+    await insertRule({
+      stage: 'pre',
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'imported_payee', value: 'AMZN MKTP' }],
+      actions: [
+        {
+          op: 'set',
+          field: 'payee_name',
+          value: null,
+          options: { formula: '="Amazon"' },
+        },
+      ],
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'payee', value: 'amazon_id' }],
+      actions: [{ op: 'set', field: 'category', value: 'shopping' }],
+    });
+
+    const transaction = await runRules({
+      imported_payee: 'AMZN MKTP',
+      payee: null,
+      category: null,
+    });
+
+    expect(transaction.payee).toBe('amazon_id');
+    expect(transaction.category).toBe('shopping');
+  });
+
   test('loadRules loads all the rules', async () => {
     await loadRules();
     await insertRule({
@@ -366,6 +402,96 @@ describe('Transaction rules', () => {
       amount: 50,
       notes: 'got it2',
     });
+  });
+
+  test('category_group condition matches categories in that group (live)', async () => {
+    await loadRules();
+    const billsGroupId = await db.insertCategoryGroup({ name: 'Bills' });
+    const electricId = await db.insertCategory({
+      name: 'Electric',
+      cat_group: billsGroupId,
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'category_group', value: billsGroupId }],
+      actions: [{ op: 'set', field: 'notes', value: 'bills-matched' }],
+    });
+
+    const transaction = await runRules({
+      date: '2020-01-01',
+      category: electricId,
+      notes: '',
+    });
+
+    expect(transaction.notes).toBe('bills-matched');
+    expect(transaction).not.toHaveProperty('category_group');
+  });
+
+  test('category_group condition does not match an unrelated group (live)', async () => {
+    await loadRules();
+    const billsGroupId = await db.insertCategoryGroup({ name: 'Bills' });
+    const funGroupId = await db.insertCategoryGroup({ name: 'Fun' });
+    const moviesId = await db.insertCategory({
+      name: 'Movies',
+      cat_group: funGroupId,
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'category_group', value: billsGroupId }],
+      actions: [{ op: 'set', field: 'notes', value: 'bills-matched' }],
+    });
+
+    const transaction = await runRules({
+      date: '2020-01-01',
+      category: moviesId,
+      notes: '',
+    });
+
+    expect(transaction.notes).toBe('');
+    expect(transaction).not.toHaveProperty('category_group');
+  });
+
+  test('category_group condition observes a category set earlier in the same rule chain (live)', async () => {
+    await loadRules();
+    const billsGroupId = await db.insertCategoryGroup({ name: 'Bills' });
+    const electricId = await db.insertCategory({
+      name: 'Electric',
+      cat_group: billsGroupId,
+    });
+    await db.insertPayee({ id: 'power_co_id', name: 'Power Co' });
+
+    // Runs first (pre stage): sets category based on payee. Nothing
+    // about category_group is checked here.
+    await insertRule({
+      stage: 'pre',
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'payee', value: 'power_co_id' }],
+      actions: [{ op: 'set', field: 'category', value: electricId }],
+    });
+
+    // Runs after (post stage): checks category_group. This should see
+    // the category the *first* rule just set, not whatever the
+    // transaction started with.
+    await insertRule({
+      stage: 'post',
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'category_group', value: billsGroupId }],
+      actions: [{ op: 'set', field: 'notes', value: 'bills-matched' }],
+    });
+
+    const transaction = await runRules({
+      date: '2020-01-01',
+      payee: 'power_co_id',
+      category: null,
+      notes: '',
+    });
+
+    expect(transaction.category).toBe(electricId);
+    expect(transaction.notes).toBe('bills-matched');
   });
 
   test('transactions can be queried by rule', async () => {

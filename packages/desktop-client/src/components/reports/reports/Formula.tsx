@@ -19,6 +19,8 @@ import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { FormulaResult } from '#components/reports/FormulaResult';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { useAccounts } from '#hooks/useAccounts';
+import { useCategories } from '#hooks/useCategories';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormulaExecution } from '#hooks/useFormulaExecution';
 import { useNavigate } from '#hooks/useNavigate';
@@ -60,6 +62,13 @@ function FormulaInner({ widget }: FormulaInnerProps) {
 
   const queriesRef = useRef(widget?.meta?.queries || {});
   const [queriesVersion, setQueriesVersion] = useState(0);
+  const {
+    data: { list: categories, grouped: categoryGroups } = {
+      list: [],
+      grouped: [],
+    },
+  } = useCategories();
+  const { data: accounts = [] } = useAccounts();
 
   const [formula, setFormula] = useState(
     widget?.meta?.formula || '=SUM(1, 2, 3)',
@@ -78,11 +87,25 @@ function FormulaInner({ widget }: FormulaInnerProps) {
 
   const title = widget?.meta?.name || t('Formula');
 
+  const simpleAccounts = useMemo(
+    () =>
+      accounts
+        .filter(account => !account.tombstone)
+        .map(account => ({ id: account.id, name: account.name })),
+    [accounts],
+  );
+
   const {
     result,
     isLoading: isExecuting,
     error,
-  } = useFormulaExecution(formula, queriesRef.current, queriesVersion);
+  } = useFormulaExecution(
+    formula,
+    queriesRef.current,
+    queriesVersion,
+    undefined,
+    simpleAccounts,
+  );
 
   const colorVariables = useMemo(
     () => ({
@@ -97,11 +120,29 @@ function FormulaInner({ widget }: FormulaInnerProps) {
     }),
     [result, themeColors],
   );
+  const categoryBadges = useMemo(() => {
+    const categoryGroupNames = Object.fromEntries(
+      categoryGroups.map(group => [group.id, group.name]),
+    );
+
+    return Object.fromEntries(
+      categories
+        .filter(category => !category.tombstone && !category.hidden)
+        .map(category => {
+          const groupName = categoryGroupNames[category.group];
+          return [
+            category.id,
+            groupName ? `${groupName} -> ${category.name}` : category.name,
+          ];
+        }),
+    );
+  }, [categories, categoryGroups]);
   const { result: colorResult, error: colorError } = useFormulaExecution(
     colorFormula,
     queriesRef.current,
     queriesVersion,
     colorVariables,
+    simpleAccounts,
   );
 
   const handleQueriesChange = useCallback(
@@ -335,6 +376,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
                 onChange={setFormula}
                 mode="query"
                 queries={queriesRef.current}
+                categoryBadges={categoryBadges}
                 singleLine={false}
                 showLineNumbers
               />
@@ -422,6 +464,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
                   onChange={setColorFormula}
                   mode="query"
                   queries={queriesRef.current}
+                  categoryBadges={categoryBadges}
                   singleLine
                   showLineNumbers={false}
                 />

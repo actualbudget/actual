@@ -18,7 +18,6 @@ import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createAgeOfMoneySpreadsheet } from '#components/reports/spreadsheets/age-of-money-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
 
 // Determine status color based on age
@@ -46,8 +45,6 @@ type AgeOfMoneyCardProps = {
   isEditing?: boolean;
   meta?: AgeOfMoneyWidget['meta'];
   onMetaChange: (newMeta: AgeOfMoneyWidget['meta']) => void;
-  onRemove: () => void;
-  onCopy: (targetDashboardId: string) => void;
 };
 
 export function AgeOfMoneyCard({
@@ -55,8 +52,6 @@ export function AgeOfMoneyCard({
   isEditing,
   meta = {},
   onMetaChange,
-  onRemove,
-  onCopy,
 }: AgeOfMoneyCardProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
@@ -64,9 +59,6 @@ export function AgeOfMoneyCard({
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [isCardHovered, setIsCardHovered] = useState(false);
-
-  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useDashboardWidgetCopyMenu(onCopy);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -102,27 +94,11 @@ export function AgeOfMoneyCard({
 
   return (
     <ReportCard
+      widgetId={widgetId}
       isEditing={isEditing}
       disableClick={nameMenuOpen}
       to={`/reports/age-of-money/${widgetId}`}
-      menuItems={[
-        { name: 'rename', text: t('Rename') },
-        { name: 'remove', text: t('Remove') },
-        ...copyMenuItems,
-      ]}
-      onMenuSelect={item => {
-        if (handleCopyMenuSelect(item)) return;
-        switch (item) {
-          case 'rename':
-            setNameMenuOpen(true);
-            break;
-          case 'remove':
-            onRemove();
-            break;
-          default:
-            throw new Error(`Unrecognized selection: ${item}`);
-        }
-      }}
+      onRename={() => setNameMenuOpen(true)}
     >
       <View
         style={{ flex: 1 }}

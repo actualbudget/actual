@@ -2,10 +2,12 @@
 import type { ImportTransactionsResult } from '#server/accounts/app';
 import type {
   APIAccountEntity,
+  APIAccountGroupEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
   APIFileEntity,
   APIPayeeEntity,
+  APIRuleEntity,
   APIScheduleEntity,
   APITagEntity,
 } from '#server/api-models';
@@ -18,7 +20,6 @@ import type {
   CategoryGroupEntity,
   ImportTransactionEntity,
   NearbyPayeeEntity,
-  NewRuleEntity,
   NoteEntity,
   PayeeEntity,
   PayeeLocationEntity,
@@ -164,10 +165,24 @@ export type ApiHandlers = {
     cutoff?: Date;
   }) => Promise<number>;
 
+  'api/account-groups-get': () => Promise<APIAccountGroupEntity[]>;
+
+  'api/account-group-create': (arg: {
+    group: Omit<APIAccountGroupEntity, 'id'>;
+  }) => Promise<APIAccountGroupEntity['id']>;
+
+  'api/account-group-update': (arg: {
+    id: APIAccountGroupEntity['id'];
+    fields: Partial<Omit<APIAccountGroupEntity, 'id'>>;
+  }) => Promise<void>;
+
+  'api/account-group-delete': (arg: {
+    id: APIAccountGroupEntity['id'];
+  }) => Promise<void>;
+
   'api/categories-get': (arg: {
-    grouped?: boolean;
     hidden?: boolean;
-  }) => Promise<Array<APICategoryGroupEntity | APICategoryEntity>>;
+  }) => Promise<APICategoryEntity[]>;
 
   'api/category-groups-get': (arg?: {
     hidden?: boolean;
@@ -262,9 +277,11 @@ export type ApiHandlers = {
     id: APIPayeeEntity['id'];
   }) => Promise<RuleEntity[]>;
 
-  'api/rule-create': (arg: { rule: NewRuleEntity }) => Promise<RuleEntity>;
+  'api/rule-create': (arg: {
+    rule: Omit<APIRuleEntity, 'id'>;
+  }) => Promise<RuleEntity>;
 
-  'api/rule-update': (arg: { rule: RuleEntity }) => Promise<RuleEntity>;
+  'api/rule-update': (arg: { rule: APIRuleEntity }) => Promise<RuleEntity>;
 
   'api/rule-delete': (id: RuleEntity['id']) => Promise<boolean>;
 

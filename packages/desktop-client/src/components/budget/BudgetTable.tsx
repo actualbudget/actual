@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 
 import { styles } from '@actual-app/components/styles';
@@ -89,6 +89,18 @@ export function BudgetTable(props: BudgetTableProps) {
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const savedScrollPosition = sessionStorage.getItem(
+      'budget-scroll-position',
+    );
+    if (savedScrollPosition != null && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = Number(savedScrollPosition);
+      sessionStorage.removeItem('budget-scroll-position');
+    }
+  }, []);
 
   const onEditMonth = (id: string, month: string) => {
     setEditing(id ? { id, cell: month } : null);
@@ -221,6 +233,16 @@ export function BudgetTable(props: BudgetTableProps) {
     onCollapse(categoryGroups.map(g => g.id));
   };
 
+  const _onShowActivity = (id: string, month?: string) => {
+    if (scrollContainerRef.current) {
+      sessionStorage.setItem(
+        'budget-scroll-position',
+        String(scrollContainerRef.current.scrollTop),
+      );
+    }
+    onShowActivity(id, month);
+  };
+
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
 
   return (
@@ -273,6 +295,8 @@ export function BudgetTable(props: BudgetTableProps) {
           collapseAllCategories={collapseAllCategories}
         />
         <View
+          ref={scrollContainerRef}
+          data-testid="budget-table-scroll-container"
           style={{
             overflowY: 'scroll',
             overflowAnchor: 'none',
@@ -300,7 +324,7 @@ export function BudgetTable(props: BudgetTableProps) {
                 onReorderCategory={_onReorderCategory}
                 onReorderGroup={_onReorderGroup}
                 onBudgetAction={onBudgetAction}
-                onShowActivity={onShowActivity}
+                onShowActivity={_onShowActivity}
                 onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
                 onSortCategories={onSortCategories}
               />

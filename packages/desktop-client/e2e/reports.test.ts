@@ -47,6 +47,13 @@ test.describe('Reports', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('right clicking a report card opens context menu', async () => {
+    await reportsPage.rightClickReportCard('Net Worth');
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
+  });
+
   test('loads net worth graph and checks visuals', async () => {
     await reportsPage.goToNetWorthPage();
     await expect(page).toMatchThemeScreenshots();
@@ -55,6 +62,18 @@ test.describe('Reports', () => {
   test('loads cash flow graph and checks visuals', async () => {
     await reportsPage.goToCashFlowPage();
     await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('opens the date range picker and checks visuals', async () => {
+    await reportsPage.goToNetWorthPage();
+
+    await page.getByTestId('date-range-picker-trigger').click();
+    const picker = page.locator('[data-popover]');
+    await expect(picker).toMatchThemeScreenshots();
+
+    // Switch to day granularity
+    await picker.getByRole('button', { name: 'Day', exact: true }).click();
+    await expect(picker).toMatchThemeScreenshots();
   });
 
   test.describe('balance forecast', () => {
@@ -162,5 +181,47 @@ test.describe('Reports', () => {
 
       await customReportPage.showLabelsButton.click();
     });
+  });
+});
+
+test.describe('Reports without transactions', () => {
+  let page: Page;
+
+  test.beforeEach(async ({ browser }) => {
+    page = await browser.newPage();
+  });
+
+  test.afterEach(async () => {
+    await page?.close();
+  });
+
+  test('creates a custom report in an empty budget', async () => {
+    const pageErrors: Error[] = [];
+    page.on('pageerror', error => pageErrors.push(error));
+
+    const configurationPage = new ConfigurationPage(page);
+    const navigation = new Navigation(page);
+
+    await page.goto('/');
+    await configurationPage.startFresh();
+
+    const reportsPage = await navigation.goToReportsPage();
+    await reportsPage.waitToLoad();
+    const customReportPage = await reportsPage.goToCustomReportPage();
+
+    await expect(page).toHaveURL(/\/reports\/custom/);
+    await expect(
+      customReportPage.pageContent.getByRole('button', {
+        name: 'Total',
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      customReportPage.pageContent.getByRole('button', {
+        name: 'Time',
+        exact: true,
+      }),
+    ).toBeVisible();
+    expect(pageErrors).toEqual([]);
   });
 });

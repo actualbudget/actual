@@ -2,7 +2,7 @@
 
 - **Q.** _Can I use the mobile apps with my self hosted version of Actual?_
 
-  **A.** Unfortunately, the mobile applications are deprecated. However, you can still access Actual through its web version, which functions as a native application with a responsive layout.
+  **A.** The official mobile applications are deprecated. However, Actual's web version is a responsive Progressive Web App that you can install to your home screen and use like a native app. Additionally, the community also maintains unofficial native clients. See [Community Projects](community-repos.md) for available options.
 
 - **Q.** _Can I sync my bank to Actual automatically?_
 

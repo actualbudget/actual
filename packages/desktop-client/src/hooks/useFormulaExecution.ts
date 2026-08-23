@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
 import {
@@ -17,8 +17,14 @@ import type {
 } from '@actual-app/core/types/models';
 import { HyperFormula } from 'hyperformula';
 
-import { getLiveRange } from '#components/reports/getLiveRange';
-import { calculateTimeRange } from '#components/reports/reportRanges';
+import {
+  normalizeQueryTimeFrameEnd,
+  normalizeQueryTimeFrameStart,
+} from '#components/formula/queryTimeFrame';
+import {
+  asMonthSlidingTimeFrame,
+  calculateTimeRange,
+} from '#components/reports/reportRanges';
 import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
 
 import { useGlobalPref } from './useGlobalPref';
@@ -29,12 +35,14 @@ bootstrapHyperFormula();
 type QueryConfig = {
   conditions?: RuleConditionEntity[];
   conditionsOp?: 'and' | 'or';
-  timeFrame?: TimeFrame;
+  timeFrame?: Partial<TimeFrame>;
 };
 
 type QueriesMap = Record<string, QueryConfig>;
 
 type FormulaCellValue = number | string | boolean | null;
+
+export type SimpleAccount = { id: string; name: string };
 
 function createFormulaQueryContext(): Required<FormulaQueryContext> {
   return {
@@ -43,12 +51,14 @@ function createFormulaQueryContext(): Required<FormulaQueryContext> {
     queryExtractCategoryNames: new Set(),
     queryExtractTimeframeStartNames: new Set(),
     queryExtractTimeframeEndNames: new Set(),
+    balanceOfNames: new Set(),
     budgetQueryRequests: new Map(),
     querySumPrefetch: new Map(),
     queryCountPrefetch: new Map(),
     queryExtractCategoriesPrefetch: new Map(),
     queryExtractTimeframeStartPrefetch: new Map(),
     queryExtractTimeframeEndPrefetch: new Map(),
+    balanceOfPrefetch: new Map(),
     budgetQueryPrefetch: new Map(),
     budgetQueryErrors: new Map(),
   };
@@ -130,12 +140,30 @@ export function useFormulaExecution(
   queries: QueriesMap,
   queriesVersion?: number,
   namedExpressions?: Record<string, number | string>,
+  accounts?: SimpleAccount[],
 ) {
   const locale = useLocale();
   const [language] = useGlobalPref('language');
   const [result, setResult] = useState<number | string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Callers pass `queries`/`namedExpressions`/`accounts` as plain objects, and
+  // several of them build a fresh object on every render. Keying the effect on
+  // the object identity would re-execute the formula on every render (and each
+  // execution toggles `isLoading`, which renders again — an endless loop).
+  // Depend on the serialized contents instead, and read the live objects
+  // through refs.
+  const queriesKey = JSON.stringify(queries ?? {});
+  const namedExpressionsKey = JSON.stringify(namedExpressions ?? null);
+  const accountsKey = JSON.stringify(accounts ?? null);
+
+  const queriesRef = useRef(queries);
+  queriesRef.current = queries;
+  const namedExpressionsRef = useRef(namedExpressions);
+  namedExpressionsRef.current = namedExpressions;
+  const accountsRef = useRef(accounts);
+  accountsRef.current = accounts;
 
   useEffect(() => {
     let cancelled = false;
@@ -144,8 +172,13 @@ export function useFormulaExecution(
       if (!formula || !formula.startsWith('=')) {
         setResult(null);
         setError('Formula must start with =');
+        setIsLoading(false);
         return;
       }
+
+      const currentQueries = queriesRef.current;
+      const currentNamedExpressions = namedExpressionsRef.current;
+      const currentAccounts = accountsRef.current;
 
       setIsLoading(true);
       setError(null);
@@ -172,18 +205,22 @@ export function useFormulaExecution(
           formula,
           formulaQueryContext,
           locale: formulaLocale,
-          namedExpressions,
+          namedExpressions: currentNamedExpressions,
           throwOnCellError: false,
         });
 
-        await prefetchFormulaQueries(formulaQueryContext, queries);
+        await prefetchFormulaQueries(formulaQueryContext, currentQueries);
+        await prefetchAccountBalances(
+          formulaQueryContext,
+          currentAccounts ?? [],
+        );
 
         formulaQueryContext.budgetQueryRequests.clear();
         evaluateFormulaWithContext({
           formula,
           formulaQueryContext,
           locale: formulaLocale,
-          namedExpressions,
+          namedExpressions: currentNamedExpressions,
           throwOnCellError: false,
         });
 
@@ -193,7 +230,7 @@ export function useFormulaExecution(
           formula,
           formulaQueryContext,
           locale: formulaLocale,
-          namedExpressions,
+          namedExpressions: currentNamedExpressions,
         });
 
         if (cancelled) return;
@@ -217,7 +254,15 @@ export function useFormulaExecution(
     return () => {
       cancelled = true;
     };
-  }, [formula, queriesVersion, locale, language, queries, namedExpressions]);
+  }, [
+    formula,
+    queriesVersion,
+    locale,
+    language,
+    queriesKey,
+    namedExpressionsKey,
+    accountsKey,
+  ]);
 
   return { result, isLoading, error };
 }
@@ -279,6 +324,40 @@ async function prefetchFormulaQueries(
   }
 }
 
+async function prefetchAccountBalances(
+  formulaQueryContext: Required<FormulaQueryContext>,
+  accounts: SimpleAccount[],
+) {
+  for (const literal of formulaQueryContext.balanceOfNames) {
+    const account =
+      accounts.find(candidate => candidate.id === literal) ??
+      accounts.find(candidate => candidate.name === literal);
+
+    if (!account) {
+      formulaQueryContext.balanceOfPrefetch.set(literal, 0);
+      continue;
+    }
+
+    formulaQueryContext.balanceOfPrefetch.set(
+      literal,
+      await fetchAccountBalance(account.id),
+    );
+  }
+}
+
+async function fetchAccountBalance(accountId: string): Promise<number> {
+  try {
+    const balanceQuery = q('transactions')
+      .filter({ account: accountId })
+      .calculate({ $sum: '$amount' });
+    const { data } = await send('query', balanceQuery.serialize());
+    return integerToAmount(data || 0, 2);
+  } catch (err) {
+    console.error('Error fetching account balance:', err);
+    return 0;
+  }
+}
+
 async function prefetchBudgetQueries(
   formulaQueryContext: Required<FormulaQueryContext>,
 ) {
@@ -307,43 +386,7 @@ async function prefetchBudgetQueries(
   }
 }
 
-// Helper function to convert timeFrame mode to condition string for getLiveRange
-function timeFrameModeToCondition(mode: TimeFrame['mode']): string | null {
-  // Map timeFrame modes to ReportOptions condition strings
-  switch (mode) {
-    case 'full':
-      return 'All time';
-    case 'lastMonth':
-      return 'Last month';
-    case 'lastYear':
-      return 'Last year';
-    case 'yearToDate':
-      return 'Year to date';
-    case 'priorYearToDate':
-      return 'Prior year to date';
-    case 'sliding-window':
-      // sliding-window requires actual start/end dates, not a condition
-      return null;
-    case 'static':
-      // static mode uses manually set start/end dates, not a condition
-      return null;
-    default:
-      return null;
-  }
-}
-
-function isMonthOnlyDate(s: string) {
-  // YYYY-MM
-  return s.includes('-') && s.split('-').length === 2;
-}
-
-function toMonth(dateOrMonth: string) {
-  return isMonthOnlyDate(dateOrMonth)
-    ? dateOrMonth
-    : monthUtils.monthFromDate(dateOrMonth);
-}
-
-async function buildFilteredTransactionsQuery(
+export async function buildFilteredTransactionsQuery(
   config: QueryConfig,
 ): Promise<Query> {
   const conditions = config.conditions || [];
@@ -362,75 +405,15 @@ async function buildFilteredTransactionsQuery(
 
   // Add date range filter if provided
   if (timeFrame && timeFrame.mode) {
-    let startDate: string | undefined;
-    let endDate: string | undefined;
+    const [calculatedStart, calculatedEnd] = calculateTimeRange(
+      asMonthSlidingTimeFrame(timeFrame),
+    );
+    const startDate = normalizeQueryTimeFrameStart(calculatedStart);
+    const endDate = normalizeQueryTimeFrameEnd(calculatedEnd);
 
-    if (
-      (timeFrame.mode === 'sliding-window' || timeFrame.mode === 'static') &&
-      timeFrame.start &&
-      timeFrame.end
-    ) {
-      if (timeFrame.mode === 'sliding-window') {
-        // Sliding-window should move with time. Interpret start/end as a window length
-        // (in months) and always anchor the end to the current month/day.
-        const startMonth = toMonth(timeFrame.start);
-        const endMonth = toMonth(timeFrame.end);
-        const offset = monthUtils.differenceInCalendarMonths(
-          endMonth,
-          startMonth,
-        );
-
-        const liveEndMonth = monthUtils.currentMonth();
-        const liveStartMonth = monthUtils.subMonths(liveEndMonth, offset);
-
-        startDate = monthUtils.firstDayOfMonth(liveStartMonth);
-        endDate = monthUtils.currentDay();
-      } else {
-        // Static mode: use the actual stored start/end dates.
-        // Convert month format (YYYY-MM) to full date format (YYYY-MM-DD) if needed
-        startDate = isMonthOnlyDate(timeFrame.start)
-          ? timeFrame.start + '-01'
-          : timeFrame.start;
-        endDate = isMonthOnlyDate(timeFrame.end)
-          ? monthUtils.getMonthEnd(timeFrame.end + '-01')
-          : timeFrame.end;
-      }
-    } else {
-      // For other modes, use getLiveRange with the appropriate condition
-      const condition = timeFrameModeToCondition(timeFrame.mode);
-      if (condition) {
-        // Get earliest and latest transactions for getLiveRange
-        const earliestTransaction = await send('get-earliest-transaction');
-        const latestTransaction = await send('get-latest-transaction');
-
-        const earliestDate = earliestTransaction
-          ? earliestTransaction.date
-          : monthUtils.currentDay();
-        const latestDate = latestTransaction
-          ? latestTransaction.date
-          : monthUtils.currentDay();
-
-        const [calculatedStart, calculatedEnd] = getLiveRange(
-          condition,
-          earliestDate,
-          latestDate,
-          true, // includeCurrentInterval
-        );
-
-        startDate = calculatedStart;
-        endDate = calculatedEnd;
-      } else {
-        // No valid condition found, skip date filtering entirely
-        // Continue without adding date filter
-      }
-    }
-
-    // Apply the date filter only if we have valid dates
-    if (startDate && endDate) {
-      transQuery = transQuery.filter({
-        $and: [{ date: { $gte: startDate } }, { date: { $lte: endDate } }],
-      });
-    }
+    transQuery = transQuery.filter({
+      $and: [{ date: { $gte: startDate } }, { date: { $lte: endDate } }],
+    });
   }
 
   // Add user-defined filters
@@ -619,7 +602,9 @@ async function extractQueryTimeframeStart(
     return monthUtils.currentMonth();
   }
 
-  const [startMonth] = calculateTimeRange(queryConfig.timeFrame);
+  const [startMonth] = calculateTimeRange(
+    asMonthSlidingTimeFrame(queryConfig.timeFrame),
+  );
   return startMonth;
 }
 
@@ -636,7 +621,9 @@ async function extractQueryTimeframeEnd(
     return monthUtils.currentMonth();
   }
 
-  const [, endMonth] = calculateTimeRange(queryConfig.timeFrame);
+  const [, endMonth] = calculateTimeRange(
+    asMonthSlidingTimeFrame(queryConfig.timeFrame),
+  );
   return endMonth;
 }
 

@@ -5,8 +5,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -65,9 +63,27 @@ export function SidebarCategory({
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
   const temporary = category.id === 'new';
-  const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
-    useContextMenu();
   const triggerRef = useRef(null);
+  const { handleContextMenu } = useContextMenu({
+    triggerRef,
+    items: [
+      {
+        name: 'rename',
+        text: t('Rename'),
+        onClick: () => onEditName(category.id),
+      },
+      !categoryGroup?.hidden && {
+        name: 'toggle-visibility',
+        text: category.hidden ? t('Show') : t('Hide'),
+        onClick: () => onSave({ ...category, hidden: !category.hidden }),
+      },
+      {
+        name: 'delete',
+        text: t('Delete'),
+        onClick: () => onDelete(category.id),
+      },
+    ],
+  });
 
   const displayed = (
     <View
@@ -81,7 +97,6 @@ export function SidebarCategory({
         height: 20,
       }}
       ref={triggerRef}
-      onContextMenu={handleContextMenu}
     >
       <TextOneLine data-testid="category-name">{category.name}</TextOneLine>
       <View style={{ flexShrink: 0, marginLeft: 5 }}>
@@ -89,10 +104,7 @@ export function SidebarCategory({
           variant="bare"
           className="hover-visible"
           style={{ color: 'currentColor', padding: 3 }}
-          onPress={() => {
-            resetPosition();
-            setMenuOpen(true);
-          }}
+          onPress={handleContextMenu}
         >
           <SvgCheveronDown
             width={14}
@@ -100,37 +112,6 @@ export function SidebarCategory({
             style={{ color: 'currentColor' }}
           />
         </Button>
-
-        <Popover
-          triggerRef={triggerRef}
-          placement="bottom start"
-          isOpen={menuOpen}
-          onOpenChange={() => setMenuOpen(false)}
-          style={{ width: 200, margin: 1 }}
-          isNonModal
-          {...position}
-        >
-          <Menu
-            onMenuSelect={type => {
-              if (type === 'rename') {
-                onEditName(category.id);
-              } else if (type === 'delete') {
-                onDelete(category.id);
-              } else if (type === 'toggle-visibility') {
-                onSave({ ...category, hidden: !category.hidden });
-              }
-              setMenuOpen(false);
-            }}
-            items={[
-              { name: 'rename', text: t('Rename') },
-              !categoryGroup?.hidden && {
-                name: 'toggle-visibility',
-                text: category.hidden ? t('Show') : t('Hide'),
-              },
-              { name: 'delete', text: t('Delete') },
-            ]}
-          />
-        </Popover>
       </View>
       <SidebarCategoryButtons
         category={category}

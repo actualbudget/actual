@@ -59,6 +59,43 @@ function useAddBudgetAccountOptions() {
   return { addOnBudgetAccountOption, addOffBudgetAccountOption };
 }
 
+type AddBudgetAccountOption = {
+  id: string;
+  name: string;
+};
+
+export function getSelectableAccountOptions({
+  localAccounts,
+  selectedLocalAccountIds,
+  chosenAccount,
+  syncSource,
+  addOnBudgetAccountOption,
+  addOffBudgetAccountOption,
+}: {
+  localAccounts: AccountEntity[];
+  selectedLocalAccountIds: ReadonlySet<string>;
+  chosenAccount: { id: string; name: string } | undefined;
+  syncSource: NonNullable<AccountEntity['account_sync_source']>;
+  addOnBudgetAccountOption: AddBudgetAccountOption;
+  addOffBudgetAccountOption: AddBudgetAccountOption;
+}): AutocompleteItem[] {
+  const options: AutocompleteItem[] = localAccounts.filter(account => {
+    const isCurrentSelection = account.id === chosenAccount?.id;
+
+    // Keep the current row's selection visible. Otherwise, offer only accounts
+    // that are unselected and either manual or linked to this provider.
+    return (
+      isCurrentSelection ||
+      (!selectedLocalAccountIds.has(account.id) &&
+        (account.account_sync_source == null ||
+          account.account_sync_source === syncSource))
+    );
+  });
+
+  options.push(addOnBudgetAccountOption, addOffBudgetAccountOption);
+  return options;
+}
+
 /**
  * Helper to determine if the chosen account option represents creating a new account.
  */
@@ -71,6 +108,57 @@ function isNewAccountOption(
     chosenAccountId === addOnBudgetOptionId ||
     chosenAccountId === addOffBudgetOptionId
   );
+}
+
+/**
+ * Computes which local accounts should be pre-linked to which external
+ * accounts when the modal first opens. When `upgradingAccountId` is set and
+ * there's exactly one external account that doesn't already match a known
+ * local account, it's unambiguous which row it belongs to, so it's
+ * preselected. If there's more than one unmatched external account, guessing
+ * would risk claiming the wrong row (and hiding the account from every other
+ * row's picker), so it's left for the user to pick manually.
+ */
+export function computeInitialLinkState(
+  localAccounts: AccountEntity[],
+  externalAccounts: ExternalAccount[],
+  upgradingAccountId: string | undefined,
+): {
+  initialDraftLinkAccounts: Map<string, 'linking' | 'unlinking'>;
+  initiallyChosenAccounts: Record<string, string>;
+} {
+  const externalAccountIds = new Set(externalAccounts.map(a => a.account_id));
+  const initialDraftLinkAccounts = new Map<string, 'linking' | 'unlinking'>();
+  for (const acc of localAccounts) {
+    if (acc.account_id && externalAccountIds.has(acc.account_id)) {
+      initialDraftLinkAccounts.set(acc.account_id, 'linking');
+    }
+  }
+
+  const initiallyChosenAccounts: Record<string, string> = Object.fromEntries(
+    localAccounts
+      .filter(acc => acc.account_id)
+      .map(acc => [acc.account_id, acc.id]),
+  );
+
+  const unmatchedExternalAccounts = externalAccounts.filter(
+    account => initiallyChosenAccounts[account.account_id] == null,
+  );
+
+  if (
+    upgradingAccountId &&
+    unmatchedExternalAccounts.length === 1 &&
+    !Object.values(initiallyChosenAccounts).includes(upgradingAccountId)
+  ) {
+    initiallyChosenAccounts[unmatchedExternalAccounts[0].account_id] =
+      upgradingAccountId;
+    initialDraftLinkAccounts.set(
+      unmatchedExternalAccounts[0].account_id,
+      'linking',
+    );
+  }
+
+  return { initialDraftLinkAccounts, initiallyChosenAccounts };
 }
 
 export type SelectLinkedAccountsModalProps =
@@ -161,48 +249,19 @@ export function SelectLinkedAccountsModal({
   const dispatch = useDispatch();
   const { data: allAccounts = [] } = useAccounts();
   const localAccounts = allAccounts.filter(a => a.closed === 0);
-  const { initialDraftLinkAccounts, initiallyChosenAccounts } = useMemo(() => {
-    const externalAccountIds = new Set(
-      externalAccounts?.map(a => a.account_id) || [],
-    );
-    const initialDraftLinkAccounts = new Map<string, 'linking' | 'unlinking'>();
-    for (const acc of localAccounts) {
-      if (acc.account_id && externalAccountIds.has(acc.account_id)) {
-        initialDraftLinkAccounts.set(acc.account_id, 'linking');
-      }
-    }
-
-    const initiallyChosenAccounts = Object.fromEntries(
-      localAccounts
-        .filter(acc => acc.account_id)
-        .map(acc => [acc.account_id, acc.id]),
-    );
-
-    const preselectedExternalAccount =
-      propsWithSortedExternalAccounts.externalAccounts.find(
-        account => initiallyChosenAccounts[account.account_id] == null,
-      );
-
-    if (
-      upgradingAccountId &&
-      preselectedExternalAccount &&
-      !Object.values(initiallyChosenAccounts).includes(upgradingAccountId)
-    ) {
-      initiallyChosenAccounts[preselectedExternalAccount.account_id] =
-        upgradingAccountId;
-      initialDraftLinkAccounts.set(
-        preselectedExternalAccount.account_id,
-        'linking',
-      );
-    }
-
-    return { initialDraftLinkAccounts, initiallyChosenAccounts };
-  }, [
-    localAccounts,
-    externalAccounts,
-    propsWithSortedExternalAccounts.externalAccounts,
-    upgradingAccountId,
-  ]);
+  const { initialDraftLinkAccounts, initiallyChosenAccounts } = useMemo(
+    () =>
+      computeInitialLinkState(
+        localAccounts,
+        propsWithSortedExternalAccounts.externalAccounts,
+        upgradingAccountId,
+      ),
+    [
+      localAccounts,
+      propsWithSortedExternalAccounts.externalAccounts,
+      upgradingAccountId,
+    ],
+  );
 
   const [draftLinkAccounts, setDraftLinkAccounts] = useState<
     Map<string, 'linking' | 'unlinking'>
@@ -211,7 +270,7 @@ export function SelectLinkedAccountsModal({
     initiallyChosenAccounts,
   );
   const [customStartingDates, setCustomStartingDates] = useState<
-    Record<string, StartingBalanceInfo>
+    Record<string, CustomStartingSettings>
   >({});
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
@@ -249,13 +308,9 @@ export function SelectLinkedAccountsModal({
         }
 
         // Finally link the matched account
-        const customSettings = customStartingDates[chosenExternalAccountId];
-        const startingDate =
-          customSettings?.date && customSettings.date.trim() !== ''
-            ? customSettings.date
-            : undefined;
-        const startingBalance =
-          customSettings?.amount != null ? customSettings.amount : undefined;
+        const { startingDate, startingBalance } = resolveStartingSettings(
+          customStartingDates[chosenExternalAccountId],
+        );
 
         if (propsWithSortedExternalAccounts.syncSource === 'simpleFin') {
           linkAccountSimpleFin.mutate({
@@ -342,8 +397,20 @@ export function SelectLinkedAccountsModal({
     dispatch(closeModal());
   }
 
-  const unlinkedAccounts = localAccounts.filter(
-    account => !Object.values(chosenAccounts).includes(account.id),
+  // Only reserve accounts chosen by visible rows; stale provider links should
+  // stay selectable so users can relink them after reconnecting.
+  const currentExternalAccountIds = new Set(
+    propsWithSortedExternalAccounts.externalAccounts.map(
+      account => account.account_id,
+    ),
+  );
+
+  const selectedLocalAccountIds = new Set(
+    Object.entries(chosenAccounts)
+      .filter(([externalAccountId]) =>
+        currentExternalAccountIds.has(externalAccountId),
+      )
+      .map(([, localAccountId]) => localAccountId),
   );
 
   function onSetLinkedAccount(
@@ -388,11 +455,8 @@ export function SelectLinkedAccountsModal({
   };
 
   // Memoize default starting settings to avoid repeated calculations
-  const defaultStartingSettings = useMemo<StartingBalanceInfo>(
-    () => ({
-      date: subDays(currentDay(), 89),
-      amount: 0,
-    }),
+  const defaultStartingSettings = useMemo<CustomStartingSettings>(
+    () => getDefaultStartingSettings(),
     [],
   );
 
@@ -400,13 +464,12 @@ export function SelectLinkedAccountsModal({
     if (customStartingDates[accountId]) {
       return customStartingDates[accountId];
     }
-    // Default to 89 days ago (90 days inclusive, matches server default)
     return defaultStartingSettings;
   };
 
   const setCustomStartingDate = (
     accountId: string,
-    settings: StartingBalanceInfo,
+    settings: CustomStartingSettings,
   ) => {
     setCustomStartingDates(prev => ({
       ...prev,
@@ -482,7 +545,9 @@ export function SelectLinkedAccountsModal({
                   key={account.account_id}
                   externalAccount={account}
                   chosenAccount={getChosenAccount(account.account_id)}
-                  unlinkedAccounts={unlinkedAccounts}
+                  localAccounts={localAccounts}
+                  selectedLocalAccountIds={selectedLocalAccountIds}
+                  syncSource={syncSource}
                   onSetLinkedAccount={onSetLinkedAccount}
                   customStartingDate={getCustomStartingDate(account.account_id)}
                   onSetCustomStartingDate={setCustomStartingDate}
@@ -522,7 +587,9 @@ export function SelectLinkedAccountsModal({
                       key={item.id}
                       externalAccount={item}
                       chosenAccount={chosenAccount}
-                      unlinkedAccounts={unlinkedAccounts}
+                      localAccounts={localAccounts}
+                      selectedLocalAccountIds={selectedLocalAccountIds}
+                      syncSource={syncSource}
                       onSetLinkedAccount={onSetLinkedAccount}
                       customStartingDate={getCustomStartingDate(
                         item.account_id,
@@ -584,39 +651,57 @@ type StartingBalanceInfo = {
   amount: number;
 };
 
+// The starting balance the user typed into the link modal. `amount` stays
+// undefined until they actually edit it, so that only touching the date does
+// not send a starting balance of 0 to the server - which would override the
+// balance the bank reports.
+type CustomStartingSettings = {
+  date: string;
+  amount?: number;
+};
+
+/**
+ * The settings a row starts with. The balance is deliberately absent: the
+ * server derives the opening balance from the bank unless one is supplied, so
+ * defaulting it to 0 here would silently override the real balance for anyone
+ * who only adjusts the date.
+ */
+export function getDefaultStartingSettings(): CustomStartingSettings {
+  // Default to 89 days ago (90 days inclusive, matches server default)
+  return { date: subDays(currentDay(), 89) };
+}
+
+/**
+ * Turn the row's draft settings into the arguments sent when linking. Anything
+ * the user did not fill in stays undefined so the server keeps its own default.
+ */
+export function resolveStartingSettings(
+  settings: CustomStartingSettings | undefined,
+): { startingDate?: string; startingBalance?: number } {
+  return {
+    startingDate:
+      settings?.date && settings.date.trim() !== '' ? settings.date : undefined,
+    startingBalance: settings?.amount != null ? settings.amount : undefined,
+  };
+}
+
 type SharedAccountRowProps = {
   externalAccount: ExternalAccount;
   chosenAccount: { id: string; name: string } | undefined;
-  unlinkedAccounts: AccountEntity[];
+  localAccounts: AccountEntity[];
+  selectedLocalAccountIds: ReadonlySet<string>;
+  syncSource: SelectLinkedAccountsModalProps['syncSource'];
   onSetLinkedAccount: (
     externalAccount: ExternalAccount,
     localAccountId: string | null | undefined,
   ) => void;
 };
 
-function getAvailableAccountOptions(
-  unlinkedAccounts: AccountEntity[],
-  chosenAccount: { id: string; name: string } | undefined,
-  addOnBudgetAccountOption: { id: string; name: string },
-  addOffBudgetAccountOption: { id: string; name: string },
-): AutocompleteItem[] {
-  const options: AutocompleteItem[] = [...unlinkedAccounts];
-  if (
-    chosenAccount &&
-    chosenAccount.id !== addOnBudgetAccountOption.id &&
-    chosenAccount.id !== addOffBudgetAccountOption.id
-  ) {
-    options.push(chosenAccount);
-  }
-  options.push(addOnBudgetAccountOption, addOffBudgetAccountOption);
-  return options;
-}
-
 type TableRowProps = SharedAccountRowProps & {
-  customStartingDate: StartingBalanceInfo;
+  customStartingDate: CustomStartingSettings;
   onSetCustomStartingDate: (
     accountId: string,
-    settings: StartingBalanceInfo,
+    settings: CustomStartingSettings,
   ) => void;
   showStartingOptions: boolean;
 };
@@ -655,7 +740,9 @@ function useStartingBalanceInfo(accountId: string | undefined) {
 function TableRow({
   externalAccount,
   chosenAccount,
-  unlinkedAccounts,
+  localAccounts,
+  selectedLocalAccountIds,
+  syncSource,
   onSetLinkedAccount,
   customStartingDate,
   onSetCustomStartingDate,
@@ -671,12 +758,14 @@ function TableRow({
     showStartingOptions ? undefined : chosenAccount?.id,
   );
 
-  const availableAccountOptions = getAvailableAccountOptions(
-    unlinkedAccounts,
+  const availableAccountOptions = getSelectableAccountOptions({
+    localAccounts,
+    selectedLocalAccountIds,
     chosenAccount,
+    syncSource,
     addOnBudgetAccountOption,
     addOffBudgetAccountOption,
-  );
+  });
 
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
@@ -829,10 +918,10 @@ function getInstitutionName(
 type StartingOptionsFieldsProps = {
   accountId: string;
   externalBalance: number | null | undefined;
-  customStartingDate: StartingBalanceInfo;
+  customStartingDate: CustomStartingSettings;
   onSetCustomStartingDate: (
     accountId: string,
-    settings: StartingBalanceInfo,
+    settings: CustomStartingSettings,
   ) => void;
   layout: 'inline' | 'stacked';
 };
@@ -866,7 +955,7 @@ function StartingOptionsFields({
         {/* Starting Balance */}
         <Field width={120} truncate={false} style={{ textAlign: 'right' }}>
           <AmountInput
-            value={customStartingDate.amount}
+            value={customStartingDate.amount ?? 0}
             zeroSign={zeroSign}
             onUpdate={amount =>
               onSetCustomStartingDate(accountId, {
@@ -924,7 +1013,7 @@ function StartingOptionsFields({
             <Trans>Balance on that date:</Trans>
           </Text>
           <AmountInput
-            value={customStartingDate.amount}
+            value={customStartingDate.amount ?? 0}
             zeroSign={zeroSign}
             onUpdate={amount =>
               onSetCustomStartingDate(accountId, {
@@ -941,17 +1030,19 @@ function StartingOptionsFields({
 }
 
 type AccountCardProps = SharedAccountRowProps & {
-  customStartingDate: StartingBalanceInfo;
+  customStartingDate: CustomStartingSettings;
   onSetCustomStartingDate: (
     accountId: string,
-    settings: StartingBalanceInfo,
+    settings: CustomStartingSettings,
   ) => void;
 };
 
 function AccountCard({
   externalAccount,
   chosenAccount,
-  unlinkedAccounts,
+  localAccounts,
+  selectedLocalAccountIds,
+  syncSource,
   onSetLinkedAccount,
   customStartingDate,
   onSetCustomStartingDate,
@@ -963,12 +1054,14 @@ function AccountCard({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
 
-  const availableAccountOptions = getAvailableAccountOptions(
-    unlinkedAccounts,
+  const availableAccountOptions = getSelectableAccountOptions({
+    localAccounts,
+    selectedLocalAccountIds,
     chosenAccount,
+    syncSource,
     addOnBudgetAccountOption,
     addOffBudgetAccountOption,
-  );
+  });
 
   // Only show starting date options for new accounts being created
   const shouldShowStartingOptions = isNewAccountOption(

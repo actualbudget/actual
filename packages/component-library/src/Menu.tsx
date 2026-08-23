@@ -148,6 +148,7 @@ export function Menu<const NameType = string>({
 
   return (
     <View
+      role="menu"
       className={className}
       style={{ outline: 'none', borderRadius: 4, overflow: 'hidden', ...style }}
       tabIndex={0}

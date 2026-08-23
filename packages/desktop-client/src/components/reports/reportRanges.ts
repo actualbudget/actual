@@ -189,6 +189,22 @@ export function getFullFutureRange(latestMonth?: string) {
   return [start, end, 'static'] as const;
 }
 
+// For month-granular consumers (e.g. formula queries): collapse day-shaped
+// bounds so a live range keeps sliding by whole months rather than days.
+export function asMonthSlidingTimeFrame(
+  timeFrame: Partial<TimeFrame>,
+): Partial<TimeFrame> {
+  const { start, end, mode } = timeFrame;
+  if (mode !== 'sliding-window' || !start || !end) {
+    return timeFrame;
+  }
+  return {
+    ...timeFrame,
+    start: monthUtils.getMonth(start),
+    end: monthUtils.getMonth(end),
+  };
+}
+
 export function calculateTimeRange(
   timeFrame?: Partial<TimeFrame>,
   defaultTimeFrame?: TimeFrame,
@@ -215,6 +231,20 @@ export function calculateTimeRange(
     return getFullRange(start, fullEnd);
   }
   if (mode === 'sliding-window') {
+    // Day-shaped ranges slide by days: same width, ending today.
+    if (
+      monthUtils.isValidYearMonthDay(start) &&
+      monthUtils.isValidYearMonthDay(end)
+    ) {
+      const dayOffset = monthUtils.differenceInCalendarDays(end, start);
+      const today = monthUtils.currentDay();
+      return [
+        monthUtils.subDays(today, Math.max(dayOffset, 0)),
+        today,
+        'sliding-window',
+      ] as const;
+    }
+
     const offset = monthUtils.differenceInCalendarMonths(end, start);
 
     if (start > end) {
@@ -250,6 +280,22 @@ export function calculateTimeRange(
       monthUtils.getYearStart(monthUtils.prevYear(monthUtils.currentMonth())),
       monthUtils.prevYear(monthUtils.currentDate(), 'yyyy-MM-dd'),
       'priorYearToDate',
+    ] as const;
+  }
+  if (mode === 'currentQuarter') {
+    const currentMonth = monthUtils.currentMonth();
+    return [
+      monthUtils.getQuarterStart(currentMonth),
+      monthUtils.getQuarterEnd(currentMonth),
+      'currentQuarter',
+    ] as const;
+  }
+  if (mode === 'previousQuarter') {
+    const prevQuarterMonth = monthUtils.prevQuarter(monthUtils.currentMonth());
+    return [
+      monthUtils.getQuarterStart(prevQuarterMonth),
+      monthUtils.getQuarterEnd(prevQuarterMonth),
+      'previousQuarter',
     ] as const;
   }
 

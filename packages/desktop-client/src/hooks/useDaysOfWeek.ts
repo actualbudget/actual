@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-// Follows Pikaday 'firstDay' numbering
-// https://github.com/Pikaday/Pikaday
+// 0 = Sunday, 1 = Monday, ... 6 = Saturday
 export function useDaysOfWeek() {
   const { t } = useTranslation();
 

@@ -8,11 +8,11 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { memoizeOne } from '@actual-app/core/shared/memoize';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import { groupById } from '@actual-app/core/shared/util';
 import type { Diff } from '@actual-app/core/shared/util';
 import type { PayeeEntity } from '@actual-app/core/types/models';
-import memoizeOne from 'memoize-one';
 
 import { Search } from '#components/common/Search';
 import { Cell, SelectCell, TableHeader } from '#components/table';
@@ -86,7 +86,9 @@ export const ManagePayees = ({
     let filtered = payees;
     if (filter) {
       filtered = filtered.filter(p =>
-        getNormalisedString(p.name).includes(getNormalisedString(filter)),
+        getNormalisedString(
+          (p.transfer_acct ? t('Transfer: ') : '') + p.name,
+        ).includes(getNormalisedString(filter)),
       );
     }
     if (orphanedOnly) {
@@ -95,7 +97,7 @@ export const ManagePayees = ({
       );
     }
     return filtered;
-  }, [payees, filter, orphanedOnly, orphanedPayees]);
+  }, [payees, filter, orphanedOnly, orphanedPayees, t]);
 
   const selected = useSelected('payees', filteredPayees, initialSelectedIds);
 

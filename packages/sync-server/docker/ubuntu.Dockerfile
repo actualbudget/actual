@@ -1,4 +1,4 @@
-FROM node:22-bookworm AS builder
+FROM node:24-bookworm AS builder
 
 # Install required packages
 RUN apt-get update && apt-get install -y openssl
@@ -25,7 +25,7 @@ RUN find node_modules/@actual-app -maxdepth 2 -type d \
     \( -name src -o -name e2e -o -name __tests__ -o -name __mocks__ -o -name tests -o -name test -o -name build-stats \) \
     -exec rm -rf {} +
 
-FROM node:22-bookworm-slim AS prod
+FROM node:24-bookworm-slim AS prod
 
 # Minimal runtime dependencies
 RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*

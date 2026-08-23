@@ -133,7 +133,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     [accounts, widget?.meta?.accounts],
   );
   const hasMonthOptions = allMonths != null;
-  const startDate = start + '-01';
+  // `start` may be `yyyy-MM` or `yyyy-MM-dd`; `firstDayOfMonth` handles both.
+  const startDate = monthUtils.firstDayOfMonth(start);
   const endDate = monthUtils.lastDayOfMonth(end);
   const {
     data: forecastData,
@@ -307,9 +308,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   );
   const isUpdatingForecast = isFetching && isPlaceholderData;
 
-  const scheduledOccurrenceCount = countForecastScheduledOccurrences(
-    normalizedForecastData,
-  );
+  const scheduledOccurrenceCount = countForecastScheduledOccurrences({
+    forecastData: normalizedForecastData,
+    start: chartRange.start,
+    end: chartRange.end,
+    granularity,
+  });
 
   if (!allMonths) {
     return <LoadingIndicator />;
@@ -331,7 +335,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     dataPoint => dataPoint.date === todayReferenceDate,
   );
   const headerInlineContent = (
-    <View style={{ flexDirection: 'row', gap: 10 }}>
+    <>
       {budgetType === 'tracking' && (
         <Select
           value={source}
@@ -351,7 +355,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           ['Daily', t('Daily')],
         ]}
       />
-    </View>
+    </>
   );
   const headerChildren = widget ? (
     <Button variant="primary" onPress={onSaveWidget}>
@@ -394,6 +398,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
               ? monthUtils.monthFromDate(forecastData.forecastEndDate)
               : (allMonths[0]?.name ?? monthUtils.addMonths(currentMonth, 24))
           }
+          granularities={['month', 'day']}
           mode={mode}
           onChangeDates={onChangeDates}
           filters={conditions}

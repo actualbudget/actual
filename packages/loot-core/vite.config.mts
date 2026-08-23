@@ -1,9 +1,9 @@
 import path from 'path';
 
+import { peggyLoader } from '@actual-app/vite-plugin-peggy';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
-import peggyLoader from 'vite-plugin-peggy-loader';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {

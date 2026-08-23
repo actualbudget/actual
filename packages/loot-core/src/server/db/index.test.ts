@@ -30,6 +30,22 @@ async function getTransactions(latestDate) {
 // validated in the same event loop and it's same to not await)
 
 describe('Database', () => {
+  test('all and first accept null params', async () => {
+    await db.insertAccount({ id: 'foo', name: 'bar' });
+
+    const rows = await db.all<{ id: string }>(
+      'SELECT id FROM accounts WHERE official_name IS ?',
+      [null],
+    );
+    expect(rows).toEqual([{ id: 'foo' }]);
+
+    const row = await db.first<{ id: string }>(
+      'SELECT id FROM accounts WHERE official_name IS ?',
+      [null],
+    );
+    expect(row).toEqual({ id: 'foo' });
+  });
+
   test('inserting a category works', async () => {
     await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
     await db.insertCategory({
@@ -122,6 +138,38 @@ describe('Database', () => {
       },
     ]);
     expect(await getTransactions('2018-01-05')).toMatchSnapshot();
+  });
+
+  test('schedules can be reordered', async () => {
+    await db.insertWithUUID('schedules', { id: 'sched1', sort_order: 30 });
+    await db.insertWithUUID('schedules', { id: 'sched2', sort_order: 20 });
+    await db.insertWithUUID('schedules', { id: 'sched3', sort_order: 10 });
+
+    // Move sched3 (currently last) to be right after sched1 (currently first)
+    await db.moveSchedule('sched3', 'sched1');
+
+    const rows = await db.all<{ id: string; sort_order: number }>(
+      'SELECT id, sort_order FROM schedules ORDER BY sort_order DESC, id',
+    );
+    expect(rows.map(r => r.id)).toEqual(['sched1', 'sched3', 'sched2']);
+  });
+
+  test('moving a schedule to the top uses a null targetId', async () => {
+    await db.insertWithUUID('schedules', { id: 'sched1', sort_order: 30 });
+    await db.insertWithUUID('schedules', { id: 'sched2', sort_order: 20 });
+
+    await db.moveSchedule('sched2', null);
+
+    const rows = await db.all<{ id: string; sort_order: number }>(
+      'SELECT id, sort_order FROM schedules ORDER BY sort_order DESC, id',
+    );
+    expect(rows.map(r => r.id)).toEqual(['sched2', 'sched1']);
+  });
+
+  test('moving a non-existent schedule throws', async () => {
+    await expect(db.moveSchedule('missing', null)).rejects.toThrow(
+      'Schedule not found: missing',
+    );
   });
 
   test('transactions get child transactions in the right order', async () => {

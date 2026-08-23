@@ -1,11 +1,12 @@
 import {
   addMonths,
+  currentDate,
   dayFromDate,
   firstDayOfMonth,
   monthFromDate,
 } from '@actual-app/core/shared/months';
 import type { Template } from '@actual-app/core/types/models/templates';
-import uniqueId from 'lodash/uniqueId';
+import { uniqueId } from 'es-toolkit/compat';
 
 import type { DisplayTemplateType } from './constants';
 import { DEFAULT_PRIORITY } from './reducer';
@@ -43,7 +44,7 @@ export function getAutomationExamples(): AutomationExample[] {
             type: 'periodic',
             amount: 100,
             period: { period: 'month', amount: 1 },
-            starting: dayFromDate(firstDayOfMonth(new Date())),
+            starting: dayFromDate(firstDayOfMonth(currentDate())),
             priority: DEFAULT_PRIORITY,
           },
           'fixed',
@@ -59,7 +60,7 @@ export function getAutomationExamples(): AutomationExample[] {
             amount: 1200,
             // Always 12 months out so users in late-year months don't get a
             // target that's already passed.
-            month: addMonths(monthFromDate(new Date()), 12),
+            month: addMonths(monthFromDate(currentDate()), 12),
             annual: true,
             repeat: 1,
             priority: DEFAULT_PRIORITY,

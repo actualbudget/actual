@@ -44,8 +44,8 @@ yarn start:desktop
 
 ### ⚠️ PR titles must start with `[AI]`
 
-Every pull request title must be prefixed with `[AI]` — this isn't enforced
-automatically, so you have to apply it yourself. See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md).
+Every pull request title must be prefixed with `[AI]` — you have to apply it
+yourself. See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md).
 
 ### Task Orchestration with Lage
 
@@ -263,6 +263,16 @@ Regenerate i18n files with `yarn generate:i18n`.
 Wrap standalone financial numbers with `FinancialText` (or `styles.tnum` where
 wrapping isn't possible).
 
+### 6. UI Design (impeccable skill)
+
+This repo uses the [impeccable](https://www.npmjs.com/package/impeccable)
+design skill for designing, restyling, or reviewing UI. The skill payload is
+not committed — only its hook wiring and the project design context
+(`PRODUCT.md`, `DESIGN.md`) are. `DESIGN.json` is a generated sidecar of
+`DESIGN.md`; regenerate it locally with `$impeccable document` when needed. If your harness's `skills/impeccable/`
+directory (e.g. `.claude/skills/impeccable/`) is missing, install it with
+`npx impeccable install`, then invoke `/impeccable` for design tasks.
+
 ## Code Style & Conventions
 
 ### TypeScript Guidelines
@@ -286,7 +296,7 @@ wrapping isn't possible).
 
 **React Patterns:**
 
-- The project uses **React Compiler** (`babel-plugin-react-compiler`) in the desktop-client. The compiler auto-memoizes component bodies, so you can omit manual `useCallback`, `useMemo`, and `React.memo` when adding or refactoring code; prefer inline callbacks and values unless a stable identity is required by a non-compiled dependency.
+- The project uses **React Compiler** (`babel-plugin-react-compiler`) in all app packages with React code (desktop-client, component-library). The compiler auto-memoizes component bodies, so you can omit manual `useCallback`, `useMemo`, and `React.memo` when adding or refactoring code; prefer inline callbacks and values unless a stable identity is required by a non-compiled dependency.
 - Avoid unstable nested components
 
 **JSX Style:**
@@ -348,7 +358,12 @@ describe('ComponentName', () => {
 - `/.oxlintrc.json` - Lint rules (oxlint); `/.oxfmtrc.json` - formatting (oxfmt)
 - `/.nano-staged.json` - pre-commit format/lint config (run via Husky)
 - `/.claude/settings.json`, `/.codex/config.toml`, `/.cursor/hooks.json` - agent
-  hook wiring; shared scripts live in `/scripts/agent-hooks/`
+  hook wiring; shared scripts live in `/scripts/agent-hooks/` and require `jq`
+  on PATH (a missing `jq` fails the hooks with an install message)
+- `/.agents/skills/` - symlink mirror of `/.claude/skills/` so Codex-based
+  harnesses (Codex CLI, IDE extension, ChatGPT desktop app) discover the same
+  skills; when adding a skill, create it in `/.claude/skills/` and add a
+  matching relative symlink here
 - `/tsconfig.json` - Root TypeScript configuration
 - `/.cursorignore`, `/.gitignore` - Ignored files
 - `/yarn.lock` - Dependency lockfile (Yarn 4)
@@ -357,7 +372,11 @@ describe('ComponentName', () => {
 
 - `/README.md` - Project overview
 - `/CONTRIBUTING.md` - Points to community docs
-- `/upcoming-release-notes/` - Release notes for next version
+- `/upcoming-release-notes/` - Release notes for next version. Name each file
+  with a short, descriptive slug (e.g. `add-payee-autocomplete.md`) — the PR link
+  is resolved automatically at release time, so you don't need the PR number.
+  Numeric filenames like `1234.md` also remain valid. See the release-note
+  template and rules in `packages/docs/docs/contributing/index.md`.
 - `/CODEOWNERS` - Code ownership definitions
 - `/packages/docs/` - Documentation website (Docusaurus)
 
@@ -506,7 +525,7 @@ Before committing changes, ensure:
 
 ## Pull Request Guidelines
 
-See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including title prefix requirements, labeling, and PR template handling.
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including title prefix requirements, labeling, the GitHub comment/review/issue 🤖 prefix, and PR template handling.
 
 ## Code Review Guidelines
 
@@ -582,7 +601,7 @@ When running the app for manual testing or demos, use **"View demo"** on the ini
 
 ### Gotchas
 
-- The `engines` field requires **Node.js >=22** and **Yarn ^4.9.1**. The `.nvmrc` specifies `v22/*`.
+- The `engines` field requires **Node.js >=22** and **Yarn ^4.9.1**. The `.nvmrc` specifies `v24.18.1`.
 - Pre-commit hook runs `nano-staged` (oxfmt + oxlint, configured in `.nano-staged.json`) via Husky. Run `yarn prepare` once after install to set up hooks.
 - Lage caches test results in `.lage/`. If tests behave unexpectedly, clear with `rm -rf .lage`.
 - Native modules (`better-sqlite3`, `bcrypt`) require build tools (`gcc`, `make`, `python3`). These are pre-installed in the Cloud VM.

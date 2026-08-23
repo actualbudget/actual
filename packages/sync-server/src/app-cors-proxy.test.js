@@ -264,6 +264,27 @@ describe('app-cors-proxy', () => {
       expect(res.statusCode).toBe(200);
     });
 
+    it('should allow the exact GitHub API repo URL for allowlisted repos', async () => {
+      const res = await request(app)
+        .get('/')
+        .query({ url: 'https://api.github.com/repos/user/repo1' });
+
+      expect(res.statusCode).toBe(200);
+    });
+
+    it('should block prefix-matched GitHub API repos that are not allowlisted', async () => {
+      const res = await request(app).get('/').query({
+        url: 'https://api.github.com/repos/user/repo1-private/contents/.env',
+      });
+
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error).toBe('URL not allowed');
+      expect(console.warn).toHaveBeenCalledWith(
+        'Blocked request to unauthorized URL:',
+        'https://api.github.com/repos/user/repo1-private/contents/.env',
+      );
+    });
+
     it('should allow raw.githubusercontent.com URLs for allowlisted repos', async () => {
       const res = await request(app).get('/').query({
         url: 'https://raw.githubusercontent.com/user/repo1/main/file.txt',

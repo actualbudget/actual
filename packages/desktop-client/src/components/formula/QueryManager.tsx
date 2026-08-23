@@ -24,6 +24,7 @@ import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
 import { getLiveRange } from '#components/reports/getLiveRange';
 import {
+  asMonthSlidingTimeFrame,
   calculateTimeRange,
   getLatestRange,
   validateEnd,
@@ -46,6 +47,17 @@ type QueryConfig = {
   conditionsOp?: 'and' | 'or';
   timeFrame?: TimeFrame;
 };
+
+type PresetTimeRangeMode = Exclude<
+  TimeFrame['mode'],
+  'sliding-window' | 'static'
+>;
+
+function isPresetTimeRangeMode(
+  mode: TimeFrame['mode'],
+): mode is PresetTimeRangeMode {
+  return !['sliding-window', 'static'].includes(mode);
+}
 
 type QueryManagerProps = {
   queries: Record<string, QueryConfig>;
@@ -173,7 +185,7 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
           <Text style={{ fontSize: 12, marginTop: 8 }}>
             <Trans>
               Queries allow you to reference filtered transaction data in your
-              formulas using QUERY('queryName') or QUERY_COUNT('queryName')
+              formulas using QUERY("queryName") or QUERY_COUNT("queryName")
             </Trans>
           </Text>
         </View>
@@ -480,6 +492,33 @@ function QueryItem({
     }
   }
 
+  const timeRangeMode = timeRangeRef.current as TimeFrame['mode'];
+  const isPresetTimeRange = isPresetTimeRangeMode(timeRangeMode);
+  const timeRangeLabels = {
+    'sliding-window': t('Live'),
+    static: t('Static'),
+    full: t('All time'),
+    lastMonth: t('Last month'),
+    lastYear: t('Last year'),
+    yearToDate: t('Year to date'),
+    priorYearToDate: t('Prior year to date'),
+    currentQuarter: t('Current quarter'),
+    previousQuarter: t('Previous quarter'),
+  } satisfies Record<TimeFrame['mode'], string>;
+  const timeRangeLabel = timeRangeLabels[timeRangeMode];
+  const presetTimeRangeLabels = {
+    full: t('All time transactions'),
+    lastMonth: t('Last month transactions'),
+    lastYear: t('Last year transactions'),
+    yearToDate: t('Year to date transactions'),
+    priorYearToDate: t('Prior year to date transactions'),
+    currentQuarter: t('Current quarter transactions'),
+    previousQuarter: t('Previous quarter transactions'),
+  } satisfies Record<PresetTimeRangeMode, string>;
+  const presetTimeRangeLabel = isPresetTimeRange
+    ? presetTimeRangeLabels[timeRangeMode]
+    : null;
+
   return (
     <View
       style={{
@@ -510,7 +549,7 @@ function QueryItem({
           }}
         >
           <Text style={{ fontWeight: 600, fontFamily: 'monospace' }}>
-            <Trans>QUERY('{queryName}')</Trans>
+            <Trans>QUERY("{queryName}")</Trans>
           </Text>
         </View>
         <View
@@ -630,17 +669,18 @@ function QueryItem({
           }}
         >
           <Button
-            style={{ width: 50 }}
-            variant={timeRangeRef.current === 'static' ? 'normal' : 'primary'}
+            style={{ minWidth: 50 }}
+            variant={timeRangeMode === 'static' ? 'normal' : 'primary'}
             onPress={() => {
-              const currentMode = timeRangeRef.current as TimeFrame['mode'];
               const newMode =
-                currentMode === 'static' ? 'sliding-window' : 'static';
-              const [newStart, newEnd] = calculateTimeRange({
-                start: startDate,
-                end: endDate,
-                mode: newMode,
-              });
+                timeRangeMode === 'static' ? 'sliding-window' : 'static';
+              const [newStart, newEnd] = calculateTimeRange(
+                asMonthSlidingTimeFrame({
+                  start: startDate,
+                  end: endDate,
+                  mode: newMode,
+                }),
+              );
 
               setStartDate(newStart);
               setEndDate(newEnd);
@@ -654,7 +694,7 @@ function QueryItem({
               );
             }}
           >
-            {timeRangeRef.current === 'static' ? t('Static') : t('Live')}
+            {timeRangeLabel}
           </Button>
           <Button
             ref={timeRangeMenuTriggerRef}
@@ -749,6 +789,26 @@ function QueryItem({
                     mode = 'priorYearToDate';
                     break;
                   }
+                  case 'current-quarter': {
+                    [start, end] = getLiveRange(
+                      'Current quarter',
+                      _earliestTransaction,
+                      _latestTransaction,
+                      false,
+                    );
+                    mode = 'currentQuarter';
+                    break;
+                  }
+                  case 'previous-quarter': {
+                    [start, end] = getLiveRange(
+                      'Previous quarter',
+                      _earliestTransaction,
+                      _latestTransaction,
+                      false,
+                    );
+                    mode = 'previousQuarter';
+                    break;
+                  }
                   case 'all-time': {
                     [start, end] = getLiveRange(
                       'All time',
@@ -787,13 +847,27 @@ function QueryItem({
                   name: 'prior-year-to-date',
                   text: t('Prior year to date'),
                 },
+                { name: 'current-quarter', text: t('Current quarter') },
+                { name: 'previous-quarter', text: t('Previous quarter') },
                 { name: 'all-time', text: t('All time') },
               ]}
             />
           </Popover>
         </View>
 
-        {/* Date range selectors */}
+        {presetTimeRangeLabel ? (
+          <Input
+            value={presetTimeRangeLabel}
+            readOnly
+            disabled
+            style={{
+              width: '100%',
+              marginTop: 8,
+              textAlign: 'center',
+            }}
+          />
+        ) : null}
+
         {allMonths.length > 0 && (
           <View
             style={{
@@ -805,7 +879,13 @@ function QueryItem({
             }}
           >
             <Select
+              disabled={isPresetTimeRange}
               value={fromDateRepr(startDate)}
+              defaultLabel={monthUtils.format(
+                fromDateRepr(startDate),
+                'MMMM yyyy',
+                locale,
+              )}
               onChange={newValue => {
                 const [validatedStart] = validateStart(
                   allMonths[allMonths.length - 1].name,
@@ -822,7 +902,13 @@ function QueryItem({
               <Trans>to</Trans>
             </Text>
             <Select
+              disabled={isPresetTimeRange}
               value={fromDateRepr(endDate)}
+              defaultLabel={monthUtils.format(
+                fromDateRepr(endDate),
+                'MMMM yyyy',
+                locale,
+              )}
               onChange={newValue => {
                 const [, validatedEnd] = validateEnd(
                   allMonths[allMonths.length - 1].name,

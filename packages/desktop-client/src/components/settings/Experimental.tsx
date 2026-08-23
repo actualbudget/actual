@@ -203,6 +203,12 @@ export function ExperimentalFeatures() {
               <Trans>Currency support</Trans>
             </FeatureToggle>
             <FeatureToggle
+              flag="mobileCalculator"
+              feedbackLink="https://github.com/actualbudget/actual/issues/8255"
+            >
+              <Trans>Mobile calculator</Trans>
+            </FeatureToggle>
+            <FeatureToggle
               flag="sankeyReport"
               feedbackLink="https://github.com/actualbudget/actual/issues/1919"
             >
@@ -215,22 +221,16 @@ export function ExperimentalFeatures() {
               <Trans>Balance Forecast Report</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="ageOfMoneyReport"
-              feedbackLink="https://github.com/actualbudget/actual/issues/7006"
-            >
-              <Trans>Age of Money Report</Trans>
-            </FeatureToggle>
-            <FeatureToggle
               flag="budgetAnalysisReport"
               feedbackLink="https://github.com/actualbudget/actual/pull/6742"
             >
               <Trans>Budget Analysis Report</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="payeeLocations"
-              feedbackLink="https://github.com/actualbudget/actual/issues/6706"
+              flag="monteCarloReport"
+              feedbackLink="https://github.com/actualbudget/actual/issues/8571"
             >
-              <Trans>Payee Locations</Trans>
+              <Trans>Monte Carlo Analysis Report</Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="enableBanking"

@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
+import type { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
@@ -13,6 +14,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
+import { UPCOMING_LENGTH_PRESET_OPTIONS } from '@actual-app/core/shared/schedules';
 import type {
   RecurConfig,
   ScheduleEntity,
@@ -330,10 +332,11 @@ export function ScheduleEditForm({
               htmlFor="upcoming-length-field"
             />
             {(() => {
-              const presetValues = ['1', '7', '14', 'oneMonth', 'currentMonth'];
               const isPreset =
                 fields.custom_upcoming_length != null &&
-                presetValues.includes(fields.custom_upcoming_length);
+                UPCOMING_LENGTH_PRESET_OPTIONS.some(
+                  o => o.value === fields.custom_upcoming_length,
+                );
               const isCustomValue =
                 fields.custom_upcoming_length != null && !isPreset;
               const isValidCustomFormat =
@@ -346,19 +349,21 @@ export function ScheduleEditForm({
                   ? fields.custom_upcoming_length
                   : '1-day';
 
+              const options: Array<
+                readonly [string, string] | typeof Menu.line
+              > = [
+                ['', t('Use global default')] as [string, string],
+                ...UPCOMING_LENGTH_PRESET_OPTIONS.map(
+                  o => [o.value, t(o.labelKey)] as [string, string],
+                ),
+                ['custom', t('Custom length')] as [string, string],
+              ];
+
               return (
                 <>
                   <Select
                     id="upcoming-length-field"
-                    options={[
-                      ['', t('Use global default')],
-                      ['1', t('1 day')],
-                      ['7', t('1 week')],
-                      ['14', t('2 weeks')],
-                      ['oneMonth', t('1 month')],
-                      ['currentMonth', t('End of the current month')],
-                      ['custom', t('Custom length')],
-                    ]}
+                    options={options}
                     value={
                       fields.custom_upcoming_length == null
                         ? ''

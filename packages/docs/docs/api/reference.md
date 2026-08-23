@@ -70,7 +70,6 @@ import APIList from './APIList';
 <APIList title="Rules" sections={[
 "ConditionOrAction",
 "Rule",
-"Payee rule",
 "getRules",
 "getPayeeRules",
 "createRule",
@@ -103,9 +102,12 @@ import APIList from './APIList';
 "getBudgets",
 "loadBudget",
 "downloadBudget",
+"importBudget",
+"exportBudget",
 "batchBudgetUpdates",
 "runQuery",
-"getIDByName"
+"getIDByName",
+"getPreferences"
 ]} />
 
 ## Types of Methods
@@ -349,20 +351,6 @@ await updateTransaction(id, { category: foodCategory.id });
 
 <StructType fields={objects.account} />
 
-#### Account Types
-
-The account type must be one of these valid strings:
-
-- `checking`
-- `savings`
-- `credit`
-- `investment`
-- `mortgage`
-- `debt`
-- `other`
-
-The account type does not affect anything currently. It's simply extra information about the account.
-
 #### Closing Accounts
 
 Avoid setting the `closed` property directly to close an account; instead use the `closeAccount` method. If the account still has money in it you will be required to specify another account to transfer the current balance to. This will help track your money correctly.
@@ -422,17 +410,60 @@ Gets the balance for an account. If a cutoff is given, it gives the account bala
 #### Examples
 
 ```js
-// Create a savings accounts
+// Create a savings account
 createAccount({
-  name: "Ally Savings",
-  type: "savings
-})
+  name: 'Ally Savings',
+});
 ```
 
 ```js
 // Get all accounts
 
 let accounts = await getAccounts();
+```
+
+## Account Groups
+
+### Account Group
+
+<StructType fields={objects.accountGroup} />
+
+Account groups let you organize accounts into named groups, for example "Savings" or "Credit Cards". An account can belong to at most one group, set through the `account_group_id` field on [`Account`](#account).
+
+#### Methods
+
+#### `getAccountGroups`
+
+<Method name="getAccountGroups" args={[]} returns="Promise<AccountGroup[]>" />
+
+Get all account groups. Returns an array of [`Account Group`](#account-group) objects.
+
+#### `createAccountGroup`
+
+<Method name="createAccountGroup" args={[{ name: 'group', type: 'AccountGroup' }]} returns="Promise<id>" />
+
+Create an account group. Returns the `id` of the new group.
+
+#### `updateAccountGroup`
+
+<Method name="updateAccountGroup" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} />
+
+Update fields of an account group. `fields` can specify the `name` field described in [`Account Group`](#account-group).
+
+#### `deleteAccountGroup`
+
+<Method name="deleteAccountGroup" args={[{ name: 'id', type: 'id' }]} />
+
+Delete an account group. Any accounts in the group are left ungrouped.
+
+#### Examples
+
+```js
+// Group two accounts under "Savings"
+
+const groupId = await createAccountGroup({ name: 'Savings' });
+await updateAccount(allySavingsId, { account_group_id: groupId });
+await updateAccount(marcusSavingsId, { account_group_id: groupId });
 ```
 
 ## Categories
@@ -650,10 +681,6 @@ await updateTag(id, { color: '#00ff00' });
 
 <StructType fields={objects.rule} />
 
-#### Payee Rule
-
-<StructType fields={objects.payeeRule} />
-
 #### Methods
 
 #### `getRules`
@@ -666,7 +693,7 @@ Get all rules.
 
 <Method name="getPayeeRules" args={[{ name: 'payeeId', type: "id" }]} returns="Promise<Rule[]>" />
 
-Get all rules associated with `payeeId`.
+Get all rules associated with `payeeId`. These are ordinary `Rule` objects, in the same shape `getRules` returns. A rule is associated with a payee when one of its conditions or actions has a `payee` field referencing that id, so the returned rules have no `payee_id` property.
 
 #### `createRule`
 
@@ -819,6 +846,18 @@ Load a locally cached budget file.
 
 Load a budget file. If the file exists locally, it will load from there. Otherwise, it will download the file from the server.
 
+#### `importBudget`
+
+<Method name="importBudget" args={[{ name: 'input', type: 'string | ArrayBuffer | Uint8Array' }, { name: 'options', type: "{ type?: 'actual' | 'ynab4' | 'ynab5', filename?: string }?" }]} returns="Promise<{ id: string }>" />
+
+Import a budget from an exported file and load it. `input` is either a path to the file or the raw file contents. By default the file is treated as an Actual export (a `.zip` file containing `db.sqlite` and `metadata.json`); pass `type: 'ynab4'` or `type: 'ynab5'` to import a YNAB export instead. When passing raw contents, you can supply the original file name with `filename` — some import types use it to derive the budget name. Returns the id of the imported budget, which is now the loaded budget.
+
+#### `exportBudget`
+
+<Method name="exportBudget" args={[]} returns="Promise<Uint8Array>" />
+
+Export the currently loaded budget as raw bytes in the zip format. You can save the bytes to a `.zip` file, or pass them back to `importBudget` to restore the budget later.
+
 #### `batchBudgetUpdates`
 
 <Method name="batchBudgetUpdates" args={[{ name: 'func', type: 'func' }]} returns="Promise<void>" />
@@ -842,3 +881,9 @@ get the ID for any Account, Payee, Category or Schedule by providing the corresp
 <Method name="getServerVersion" args={[]} returns="Promise<{error?: string;} | {version: string;}>" />
 
 return error or the current server versions.
+
+#### `getPreferences`
+
+<Method name="getPreferences" args={[]} returns="Promise<SyncedPrefs>" />
+
+Returns the budget's synced preferences — settings that sync across devices, such as the number format (`numberFormat`, `hideFraction`), currency (`defaultCurrencyCode`, `currencySymbolPosition`, `currencySpaceBetweenAmountAndSymbol`), date format (`dateFormat`), and first day of the week (`firstDayOfWeekIdx`). All values are strings (or `undefined` if the preference has never been set). The `SyncedPrefs` type is exported from `@actual-app/api/models`.

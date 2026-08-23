@@ -5,14 +5,7 @@ import type { CleanupTemplate } from '#types/models/cleanup-templates';
 
 import { getSheetValue, setBudget, setGoal } from './actions';
 import { storeNoteCleanups } from './cleanup-template-notes';
-
-type Notification = {
-  type?: 'message' | 'error' | 'warning' | undefined;
-  pre?: string | undefined;
-  title?: string | undefined;
-  message: string;
-  sticky?: boolean | undefined;
-};
+import type { TemplateNotification } from './template-notification';
 
 export async function cleanupTemplate({ month }: { month: string }) {
   await storeNoteCleanups();
@@ -29,6 +22,7 @@ async function applyGroupCleanups(
   sinkGroups: GroupSinkRow[],
   overspendGroups: GroupOverspendRow[],
   groupNamesById: Map<string, string>,
+  categoryNamesById: Map<string, string>,
 ) {
   const sheetName = monthUtils.sheetForMonth(month);
   const warnings = [];
@@ -48,16 +42,25 @@ async function applyGroupCleanups(
     if (sinkGroup.length > 0 || overspendGroup.length > 0) {
       //only return group source funds to To Budget if there are corresponding sinking groups or underfunded included groups
       for (let ii = 0; ii < tempSourceGroups.length; ii++) {
+        const categoryId = tempSourceGroups[ii].category;
         const balance = await getSheetValue(
           sheetName,
-          `leftover-${tempSourceGroups[ii].category}`,
+          `leftover-${categoryId}`,
         );
-        const budgeted = await getSheetValue(
-          sheetName,
-          `budget-${tempSourceGroups[ii].category}`,
-        );
+
+        // A source that is overspent has no leftover funds to send to the pool.
+        // Taking its negative balance would move the overspending onto the sink
+        // categories instead, so skip it and warn - the same way global sources
+        // are handled in processCleanup.
+        if (balance < 0) {
+          const categoryName = categoryNamesById.get(categoryId) ?? categoryId;
+          warnings.push(categoryName + ' does not have available funds.');
+          continue;
+        }
+
+        const budgeted = await getSheetValue(sheetName, `budget-${categoryId}`);
         await setBudget({
-          category: tempSourceGroups[ii].category,
+          category: categoryId,
           month,
           amount: budgeted - balance,
         });
@@ -146,7 +149,7 @@ async function applyGroupCleanups(
   return warnings;
 }
 
-async function processCleanup(month: string): Promise<Notification> {
+async function processCleanup(month: string): Promise<TemplateNotification> {
   let num_sources = 0;
   let num_sinks = 0;
   let total_weight = 0;
@@ -190,6 +193,7 @@ async function processCleanup(month: string): Promise<Notification> {
     'SELECT id, name FROM cleanup_groups WHERE tombstone = 0',
   );
   const groupNamesById = new Map(groupRows.map(g => [g.id, g.name]));
+  const categoryNamesById = new Map(categories.map(c => [c.id, c.name]));
 
   //run category groups
   const newWarnings = await applyGroupCleanups(
@@ -198,6 +202,7 @@ async function processCleanup(month: string): Promise<Notification> {
     groupSink,
     groupOverspend,
     groupNamesById,
+    categoryNamesById,
   );
   warnings.splice(1, 0, ...newWarnings);
 
@@ -310,46 +315,48 @@ async function processCleanup(month: string): Promise<Notification> {
       return {
         type: 'error',
         sticky: true,
-        message: 'There were errors interpreting some templates:',
+        message: 'template-errors',
         pre: errors.join('\n\n'),
       };
     } else if (warnings.length) {
       return {
         type: 'warning',
-        message: 'Global: Funds not available:',
+        message: 'cleanup-no-funds',
         pre: warnings.join('\n\n'),
       };
     } else {
       return {
         type: 'message',
-        message: 'All categories were up to date.',
+        message: 'cleanup-up-to-date',
       };
     }
   } else {
-    const applied = `Successfully returned funds from ${num_sources} ${
-      num_sources === 1 ? 'source' : 'sources'
-    } and funded ${num_sinks} sinking ${num_sinks === 1 ? 'fund' : 'funds'}.`;
     if (errors.length) {
       return {
+        type: 'error',
         sticky: true,
-        message: `${applied} There were errors interpreting some templates:`,
+        message: 'cleanup-applied-with-errors',
+        sourceCount: num_sources,
+        sinkCount: num_sinks,
         pre: errors.join('\n\n'),
       };
     } else if (warnings.length) {
       return {
         type: 'warning',
-        message: 'Global: Funds not available:',
+        message: 'cleanup-no-funds',
         pre: warnings.join('\n\n'),
       };
     } else if (budgetAvailable === 0) {
       return {
         type: 'message',
-        message: 'All categories were up to date.',
+        message: 'cleanup-up-to-date',
       };
     } else {
       return {
         type: 'message',
-        message: applied,
+        message: 'cleanup-applied',
+        sourceCount: num_sources,
+        sinkCount: num_sinks,
       };
     }
   }

@@ -1,6 +1,6 @@
 import { join } from 'path';
 
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import type { AccountPage } from './page-models/account-page';
@@ -42,6 +42,22 @@ test.describe('Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('account register widens amount columns for large balances', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Large Balance Account',
+      offBudget: false,
+      balance: 12345678.9,
+    });
+
+    const transaction = accountPage.getNthTransaction(0);
+    await expect(transaction.credit).toHaveText('12,345,678.90');
+
+    const creditBox = await transaction.credit.boundingBox();
+    expect(creditBox?.width).toBeGreaterThan(100); // default width is 100px
+
+    await expect(page).toMatchThemeScreenshots();
+  });
+
   test('closes an account', async () => {
     accountPage = await navigation.goToAccountPage('Roth IRA');
 
@@ -54,6 +70,106 @@ test.describe('Accounts', () => {
 
     await expect(accountPage.accountName).toHaveText('Closed: Roth IRA');
     await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('right clicking an account in sidebar opens context menu', async () => {
+    await navigation.rightClickAccount('Roth IRA');
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
+  });
+
+  test('right clicking a transaction row opens context menu', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'New Account',
+      offBudget: false,
+      balance: 100,
+    });
+
+    await accountPage.rightClickNthTransaction(0);
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Delete' })).toBeVisible();
+  });
+
+  test('updates the running balance after editing a transaction amount', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Running balance',
+      offBudget: false,
+      balance: 0,
+    });
+    await accountPage.waitFor();
+    await accountPage.createSingleTransaction({
+      payee: '',
+      notes: 'editable transaction',
+      credit: '10.00',
+    });
+
+    await accountPage.setTransactionColumnVisibility('balance', true);
+
+    const transaction = accountPage.getNthTransaction(0);
+    await expect(transaction.balance).toHaveText('10.00');
+
+    await transaction.credit.click();
+    const creditInput = transaction.credit.getByRole('textbox');
+    await creditInput.selectText();
+    await creditInput.pressSequentially('25.00');
+    await page.keyboard.press('Tab');
+
+    await expect(transaction.balance).toHaveText('25.00');
+  });
+
+  test('bulk editing the date shows a properly formatted date picker', async () => {
+    async function measure(locator: Locator) {
+      const box = await locator.boundingBox();
+      if (!box) {
+        throw new Error('Could not measure the date picker modal');
+      }
+      return box;
+    }
+
+    accountPage = await navigation.goToAccountPage('Ally Savings');
+    await accountPage.waitFor();
+
+    await accountPage.selectNthTransaction(0);
+    await accountPage.clickSelectAction('Date');
+
+    const dialog = page.getByRole('dialog');
+    const calendarGrid = dialog.locator('.react-aria-CalendarGrid');
+    await expect(calendarGrid).toBeVisible();
+
+    // The calendar is horizontally centered in the modal, not pinned to a side
+    const dialogBox = await measure(dialog);
+    const calendarGridBox = await measure(calendarGrid);
+    const leftGap = calendarGridBox.x - dialogBox.x;
+    const rightGap =
+      dialogBox.x +
+      dialogBox.width -
+      (calendarGridBox.x + calendarGridBox.width);
+    expect(Math.abs(leftGap - rightGap)).toBeLessThanOrEqual(2);
+
+    // The calendar is fully visible even for months spanning six rows
+    // (April 2017 relative to the pinned e2e date of January 2017)
+    await dialog.getByRole('button', { name: 'Next month' }).click();
+    await dialog.getByRole('button', { name: 'Next month' }).click();
+    await dialog.getByRole('button', { name: 'Next month' }).click();
+    await expect(dialog.locator('.calendar-header-title')).toHaveText(
+      'April 2017',
+    );
+
+    const sixRowDialogBox = await measure(dialog);
+    const sixRowGridBox = await measure(calendarGrid);
+    expect(sixRowGridBox.y + sixRowGridBox.height).toBeLessThanOrEqual(
+      sixRowDialogBox.y + sixRowDialogBox.height,
+    );
+
+    await expect(dialog).toMatchThemeScreenshots();
+
+    // On a wide screen the modal keeps a bounded width instead of
+    // stretching to fit the 100%-wide calendar grid
+    await page.setViewportSize({ width: 2560, height: 1080 });
+    const wideDialogBox = await measure(dialog);
+    expect(wideDialogBox.width).toBeLessThanOrEqual(700);
   });
 
   test('shift-click range selection skips hidden reconciled transactions', async () => {
@@ -92,8 +208,7 @@ test.describe('Accounts', () => {
     // Showing the running balance keeps reconciled transactions loaded
     // even when they are hidden; they must still be excluded from
     // range selection.
-    await accountPage.accountMenuButton.click();
-    await page.getByRole('button', { name: 'Show running balance' }).click();
+    await accountPage.setTransactionColumnVisibility('balance', true);
     await accountPage.accountMenuButton.click();
     await page
       .getByRole('button', { name: 'Hide reconciled transactions' })
