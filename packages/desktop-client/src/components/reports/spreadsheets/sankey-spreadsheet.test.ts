@@ -5,6 +5,7 @@ import {
   addNode,
   addPercentageLabels,
   addValueToLink,
+  aggregateTransferPairs,
   buildSankeyData,
   cleanUpNodes,
   convertToSankeyData,
@@ -569,6 +570,72 @@ describe('sankey-spreadsheet', () => {
       expect(graph.has('c_groceries')).toBe(true);
       expect(graph.has('c_salary')).toBe(true);
       expect(graph.has('p_employer')).toBe(true);
+    });
+  });
+
+  describe('aggregateTransferPairs', () => {
+    it('keeps transfer direction when source account id sorts after destination', () => {
+      const transferPairs = aggregateTransferPairs([
+        {
+          id: 'tx-1',
+          transfer_id: 'tx-2',
+          accountId: 'z-account',
+          accountName: 'Z Account',
+          amount: -125,
+        },
+        {
+          id: 'tx-2',
+          transfer_id: 'tx-1',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: 125,
+        },
+      ]);
+
+      expect(transferPairs).toEqual([
+        {
+          fromAccountId: 'z-account',
+          fromAccountName: 'Z Account',
+          toAccountId: 'a-account',
+          toAccountName: 'A Account',
+          amount: 125,
+        },
+      ]);
+    });
+
+    it('nets reciprocal transfers and omits zero-value pairs', () => {
+      const transferPairs = aggregateTransferPairs([
+        {
+          id: 'tx-1',
+          transfer_id: 'tx-2',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: -100,
+        },
+        {
+          id: 'tx-2',
+          transfer_id: 'tx-1',
+          accountId: 'z-account',
+          accountName: 'Z Account',
+          amount: 100,
+        },
+        {
+          id: 'tx-3',
+          transfer_id: 'tx-4',
+          accountId: 'z-account',
+          accountName: 'Z Account',
+          amount: -100,
+        },
+        {
+          id: 'tx-4',
+          transfer_id: 'tx-3',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: 100,
+        },
+      ]);
+
+      expect(transferPairs).toEqual([]);
     });
   });
 

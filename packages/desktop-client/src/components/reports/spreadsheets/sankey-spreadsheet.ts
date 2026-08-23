@@ -643,52 +643,52 @@ async function fetchTransferData(
       }) satisfies TransferEntry,
   );
 
+  return aggregateTransferPairs(raw_results);
+}
+
+export function aggregateTransferPairs(
+  rawResults: TransferEntry[],
+): TransferPair[] {
   const byId = new Map<string, TransferEntry>();
   const byAccountId = new Map<string, string>();
 
-  raw_results.forEach((t: TransferEntry) => {
-    byId.set(String(t.id), t);
-    byAccountId.set(String(t.accountId), t.accountName);
+  rawResults.forEach((transfer: TransferEntry) => {
+    byId.set(String(transfer.id), transfer);
+    byAccountId.set(String(transfer.accountId), transfer.accountName);
   });
 
-  const result_pairs = new Map<string, number>();
+  const resultPairs = new Map<string, number>();
 
-  raw_results.forEach((from: TransferEntry) => {
-    let to = byId.get(String(from.transfer_id));
-    if (!to) return; // counterpart not present
+  rawResults.forEach((from: TransferEntry) => {
+    const to = byId.get(String(from.transfer_id));
+    if (!to) return;
 
-    if (from.accountId > to.accountId) return; // only process one direction to avoid duplicates
+    if (from.accountId > to.accountId) return;
 
-    // Swap order if the "from" amount is positive, so that we always have the negative amount first
-    if (from.amount > 0) {
-      [from, to] = [to, from];
-    }
-    const sortedKey = [from.accountId, to.accountId].sort().join('|');
-    const toFromKey = [to.accountId, from.accountId].join('|');
+    const [accountId1, accountId2] = [from.accountId, to.accountId].sort();
+    const pairKey = `${accountId1}|${accountId2}`;
+    const sourceAccountId = from.amount < 0 ? from.accountId : to.accountId;
+    const sign = sourceAccountId === accountId1 ? 1 : -1;
+    const existingValue = resultPairs.get(pairKey) ?? 0;
 
-    const existingValue = result_pairs.get(sortedKey) ?? 0;
-
-    if (result_pairs.has(sortedKey)) {
-      if (toFromKey === sortedKey) {
-        result_pairs.set(sortedKey, existingValue - from.amount);
-      } else {
-        result_pairs.set(sortedKey, existingValue + from.amount);
-      }
-    } else {
-      result_pairs.set(sortedKey, -from.amount);
-    }
+    resultPairs.set(pairKey, existingValue + sign * Math.abs(from.amount));
   });
 
-  return Array.from(result_pairs.entries()).map(([key, value]) => {
-    const [accountId1, accountId2] = key.split('|');
-    return {
-      fromAccountId: accountId1,
-      fromAccountName: byAccountId.get(accountId1) || '',
-      toAccountId: accountId2,
-      toAccountName: byAccountId.get(accountId2) || '',
-      amount: Math.abs(value),
-    };
-  }) satisfies TransferPair[];
+  return Array.from(resultPairs.entries())
+    .filter(([, value]) => value !== 0)
+    .map(([key, value]) => {
+      const [accountId1, accountId2] = key.split('|');
+      const fromAccountId = value > 0 ? accountId1 : accountId2;
+      const toAccountId = value > 0 ? accountId2 : accountId1;
+
+      return {
+        fromAccountId,
+        fromAccountName: byAccountId.get(fromAccountId) || '',
+        toAccountId,
+        toAccountName: byAccountId.get(toAccountId) || '',
+        amount: Math.abs(value),
+      };
+    }) satisfies TransferPair[];
 }
 
 export function createBudgetGraph(
