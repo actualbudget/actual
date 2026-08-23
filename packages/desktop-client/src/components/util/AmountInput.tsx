@@ -89,11 +89,23 @@ export function AmountInput({
   const innerRef = useRef<HTMLInputElement | null>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(ref, innerRef);
 
+  // A disabled input cannot take DOM focus, so calling `.focus()` on one is
+  // silently dropped. Record the request instead and honour it once the input
+  // is enabled: on mobile split rows the row being focused is still rendered
+  // disabled while the previous row is the active edit, which left focus (and
+  // the numeric keypad) stranded on the previous split.
+  const shouldFocusRef = useRef(false);
+
   useEffect(() => {
-    if (focused) {
+    shouldFocusRef.current = focused ?? false;
+  }, [focused]);
+
+  useEffect(() => {
+    if (shouldFocusRef.current && !disabled) {
+      shouldFocusRef.current = false;
       innerRef.current?.focus();
     }
-  }, [focused]);
+  }, [focused, disabled]);
 
   useEffect(() => {
     if (sign) {
