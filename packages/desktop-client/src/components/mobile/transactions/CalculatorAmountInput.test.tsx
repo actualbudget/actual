@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 
 import { TestProviders } from '#mocks';
 
@@ -70,5 +70,31 @@ describe('CalculatorAmountInput', () => {
     rerender({ autoFocus: false, disabled: false });
 
     expect(screen.getByTestId('amount-input')).not.toHaveFocus();
+  });
+
+  it('does not re-focus the input when it is re-enabled after the focus request was already honoured', () => {
+    const { rerender } = renderCalculatorAmountInput({
+      autoFocus: true,
+      disabled: false,
+    });
+
+    const amountInput = screen.getByTestId('amount-input');
+    expect(amountInput).toHaveFocus();
+
+    // The user moves on to another field, which disables this one.
+    const otherInput = document.createElement('input');
+    document.body.appendChild(otherInput);
+    act(() => otherInput.focus());
+    rerender({ autoFocus: true, disabled: true });
+
+    // Editing the other field finishes and this one is enabled again. The
+    // focus request was already honoured, so focus must stay where the user
+    // put it.
+    rerender({ autoFocus: true, disabled: false });
+
+    expect(amountInput).not.toHaveFocus();
+    expect(otherInput).toHaveFocus();
+
+    otherInput.remove();
   });
 });
