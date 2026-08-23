@@ -608,7 +608,7 @@ async function fetchTransferData(
           { date: { $lte: monthUtils.lastDayOfMonth(end) } },
         ],
       })
-      .filter({ transfer_id: { $ne: null } })
+      .filter({ transfer_id: { $ne: null }, 'account.offbudget': false})
       .select([
         { id: 'id' },
         { amount: 'amount' },
@@ -932,8 +932,6 @@ export function createTransactionsGraph(
       );
     });
   }
-
-  console.log(graph);
 
   return graph;
 }
