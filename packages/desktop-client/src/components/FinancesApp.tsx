@@ -244,7 +244,7 @@ export function FinancesApp() {
                     }}
                   />
                   <Notifications />
-                  {isNarrowWidth && <BankSyncStatus isOverlay />}
+                  <BankSyncStatus />
                   {isNarrowWidth && <MobilePageHeaderSlot />}
 
                   <Routes>
