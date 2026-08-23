@@ -413,7 +413,8 @@ async function resolvePayee(trans, payeeName, payeesToCreate) {
   return trans.payee;
 }
 
-export type PayeeNameNormalization = 'original' | 'title-case';
+export const PAYEE_NAME_NORMALIZATIONS = ['original', 'title-case'] as const;
+export type PayeeNameNormalization = (typeof PAYEE_NAME_NORMALIZATIONS)[number];
 
 function normalizePayeeName(
   payeeName: string,
@@ -437,7 +438,9 @@ async function normalizeTransactions(
   acctId,
   {
     payeeNameNormalization = 'title-case',
-  }: { payeeNameNormalization?: PayeeNameNormalization } = {},
+  }: {
+    payeeNameNormalization?: PayeeNameNormalization;
+  } = {},
 ) {
   const payeesToCreate = new Map();
 
@@ -639,7 +642,7 @@ export async function reconcileTransactions(
     defaultCleared = true,
     updateDates = false,
     reimportDeleted,
-    payeeNameNormalization = 'title-case',
+    payeeNameNormalization,
   }: ReconcileTransactionsOptions = {},
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
@@ -798,7 +801,7 @@ export async function matchTransactions(
     isBankSyncAccount = false,
     strictIdChecking = true,
     reimportDeleted: reimportDeletedOverride,
-    payeeNameNormalization = 'title-case',
+    payeeNameNormalization,
   }: MatchTransactionsOptions = {},
 ) {
   logger.log('Performing transaction reconciliation matching');
