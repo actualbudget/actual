@@ -171,6 +171,21 @@ export const objects = {
         </span>
       ),
     },
+    {
+      name: 'account_group_id',
+      type: 'id | null',
+      description: (
+        <span>
+          The <a href="#account-group">account group</a> this account belongs
+          to. Defaults to <code>null</code>
+        </span>
+      ),
+    },
+  ],
+
+  accountGroup: [
+    { name: 'id', type: types.id },
+    { name: 'name', type: 'string', required: true },
   ],
 
   category: [

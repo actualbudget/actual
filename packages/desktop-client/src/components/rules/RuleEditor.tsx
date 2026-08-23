@@ -1015,6 +1015,7 @@ const conditionFields = [
   .concat([
     ['amount-inflow', mapField('amount', { inflow: true })],
     ['amount-outflow', mapField('amount', { outflow: true })],
+    ['cleared', mapField('cleared')],
   ]);
 
 type RuleEditorProps = {

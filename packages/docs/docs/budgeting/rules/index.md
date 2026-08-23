@@ -42,10 +42,13 @@ Conditions can use the following fields:
 - amount
 - amount (inflow)
 - amount (outflow)
+- cleared
 
 `imported payee` is different from `payee` in that it is _always_ the original text of the payee or description field when the transaction was imported. `payee` references a payee in Actual. This matters because it allows you to rename a payee before it is created in Actual. You can have several rules that all check `imported payee` and set the payee to something without worrying about them stepping on each other. (Conditions can't reliably check `payee` if previous rules changed it)
 
 The `inflow` and `outflow` versions of `amount` make it easier to work with amounts. If you only want to match expenses between 5 and 10 dollars, use `amount (outflow)` because that money is leaving the account. If you use `amount`, you'd have to use negative numbers and it's simply less convenient.
+
+The `cleared` field matches whether a transaction is marked as cleared. For transactions coming from bank sync, this lets a rule treat pending and booked transactions differently.
 
 All strings are matched case-insensitive. An `imported payee` of "PuBlix" will match a condition that is "contains 'publix'".
 
