@@ -34,6 +34,7 @@ export type DbAccount = {
     | 'rate-limit-exceeded'
     | 'timed-out'
     | 'account-missing'
+    | 'not-configured'
     | null;
 };
 
