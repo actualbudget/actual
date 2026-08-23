@@ -375,6 +375,8 @@ type OptionsButtonProps = {
   onTogglePercentages: () => void;
   groupAccounts: boolean;
   onToggleGroupAccounts: () => void;
+  showTransfers: boolean;
+  onToggleShowTransfers: () => void;
 };
 
 function OptionsButton({
@@ -382,6 +384,8 @@ function OptionsButton({
   onTogglePercentages,
   groupAccounts,
   onToggleGroupAccounts,
+  showTransfers,
+  onToggleShowTransfers,
 }: OptionsButtonProps) {
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -401,6 +405,7 @@ function OptionsButton({
           onMenuSelect={item => {
             if (item === 'show-percentages') onTogglePercentages();
             if (item === 'group-accounts') onToggleGroupAccounts();
+            if (item === 'show-transfers') onToggleShowTransfers();
           }}
           items={[
             {
@@ -412,6 +417,11 @@ function OptionsButton({
               name: 'group-accounts',
               text: t('Group accounts in Spent view'),
               toggle: groupAccounts,
+            },
+            {
+              name: 'show-transfers',
+              text: t('Show transfers in Spent view'),
+              toggle: showTransfers,
             },
           ]}
         />
@@ -505,6 +515,9 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   const [groupAccounts, setGroupAccounts] = useState(
     widget?.meta?.groupAccounts ?? false,
   );
+  const [showTransfers, setShowTransfers] = useState(
+    widget?.meta?.showTransfers ?? false,
+  );
 
   const [layerRange, setLayerRange] = useState<LayerRange>(() =>
     normalizeLayerRange(widget?.meta?.mode ?? 'spent', {
@@ -576,6 +589,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       conditionsOp,
       graphMode,
       groupAccounts,
+      showTransfers,
     );
   }, [
     datesInitialized,
@@ -586,6 +600,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     conditionsOp,
     graphMode,
     groupAccounts,
+    showTransfers,
   ]);
 
   const defaultGetBaseGraph = async (
@@ -710,6 +725,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             topNcategories,
             categorySort,
             showPercentages,
+            showTransfers,
             layerFrom,
             layerTo,
             timeFrame: {
@@ -883,6 +899,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             onTogglePercentages={() => setShowPercentages(v => !v)}
             groupAccounts={groupAccounts}
             onToggleGroupAccounts={() => setGroupAccounts(v => !v)}
+            showTransfers={showTransfers}
+            onToggleShowTransfers={() => setShowTransfers(v => !v)}
           />
         </View>
         {widget && (

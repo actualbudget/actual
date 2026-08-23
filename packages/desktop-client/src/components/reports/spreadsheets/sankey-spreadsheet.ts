@@ -81,6 +81,14 @@ type CategoryEntry = {
   payeeId?: string;
 };
 
+type TransferEntry = {
+  accountId: string;
+  accountName: string;
+  amount: number;
+  id: string;
+  transfer_id: string;
+};
+
 type SortMode = 'per-group' | 'global' | 'budget-order';
 
 type NodeKey = string;
@@ -151,6 +159,7 @@ export function createBaseGraphSpreadsheet(
   conditionsOp: 'and' | 'or' = 'and',
   mode: 'budgeted' | 'spent' = 'spent',
   groupAccounts: boolean = false,
+  showTransfers: boolean = false,
 ) {
   return async (
     _spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -164,6 +173,7 @@ export function createBaseGraphSpreadsheet(
       conditionsOp,
       mode,
       groupAccounts,
+      showTransfers,
     );
 
     setData(baseGraph);
@@ -178,9 +188,11 @@ async function createBaseGraph(
   conditionsOp: 'and' | 'or' = 'and',
   mode: 'budgeted' | 'spent' = 'spent',
   groupAccounts: boolean = false,
+  showTransfers: boolean = false,
 ): Promise<Graph> {
   let data: CategoryEntry[] = [];
   let aggregated: AggregatedBudget | undefined;
+  let transferData: TransferEntry[] | undefined;
 
   if (mode === 'budgeted') {
     ({ data, aggregated } = await createBudgetSpreadsheet(
@@ -190,19 +202,22 @@ async function createBaseGraph(
       conditionsOp,
     )());
   } else if (mode === 'spent') {
-    data = await createTransactionsSpreadsheet(
+    const res = await createTransactionsSpreadsheet(
       start,
       end,
       categories,
       conditions,
       conditionsOp,
       groupAccounts,
+      showTransfers,
     )();
+    data = res.data;
+    transferData = res.transferData;
   }
 
   return aggregated
     ? createBudgetGraph(data, aggregated)
-    : createTransactionsGraph(data);
+    : createTransactionsGraph(data, transferData, groupAccounts);
 }
 
 export function buildSankeyData(
@@ -352,6 +367,7 @@ export function createTransactionsSpreadsheet(
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
   groupAccounts: boolean,
+  showTransfers: boolean,
 ) {
   return async () => {
     // gather filters user has set
@@ -369,7 +385,17 @@ export function createTransactionsSpreadsheet(
       groupAccounts,
     );
 
-    return categoryData;
+    let transferData: TransferEntry[] = [];
+    if (showTransfers) {
+      transferData = await fetchTransferData(
+        conditionsOpKey,
+        filters,
+        start,
+        end,
+      );
+    }
+
+    return { data: categoryData, transferData };
   };
 }
 
@@ -566,6 +592,50 @@ async function fetchCategoryData(
   return allCategoryData;
 }
 
+// Fetch transactions that are transfers within the provided month range
+async function fetchTransferData(
+  conditionsOpKey: string = '$and',
+  filters: unknown[] = [],
+  start: string,
+  end: string,
+): Promise<TransferEntry[]> {
+  const results = await aqlQuery(
+    q('transactions')
+      .filter({ [conditionsOpKey]: filters })
+      .filter({
+        $and: [
+          { date: { $gte: monthUtils.firstDayOfMonth(start) } },
+          { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+        ],
+      })
+      .filter({ transfer_id: { $ne: null } })
+      .select([
+        { id: 'id' },
+        { amount: 'amount' },
+        { accountId: { $id: '$account.id' } },
+        { accountName: { $id: '$account.name' } },
+        { transfer_id: 'transfer_id' },
+      ]),
+  );
+
+  return results.data.map(
+    (row: {
+      id?: string;
+      amount?: number;
+      accountId?: string;
+      accountName?: string;
+      transfer_id?: string;
+    }) =>
+      ({
+        id: row.id ?? '',
+        amount: row.amount ?? 0,
+        accountId: row.accountId ?? '',
+        accountName: row.accountName ?? '',
+        transfer_id: row.transfer_id ?? '',
+      }) satisfies TransferEntry,
+  );
+}
+
 export function createBudgetGraph(
   categoryData: CategoryEntry[],
   aggregated: AggregatedBudget,
@@ -729,7 +799,11 @@ export function createBudgetGraph(
   return graph;
 }
 
-export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
+export function createTransactionsGraph(
+  categoryData: CategoryEntry[],
+  transferData?: TransferEntry[],
+  groupAccounts?: boolean,
+): Graph {
   function addAccountNode(accountId: string, accountName: string): void {
     if (accountId === SpecialNodeKeys.AllAccounts) {
       addNodeWithLabel(
@@ -833,6 +907,34 @@ export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
       }
     }
   });
+
+  // If transfer data is provided, add links between accounts representing transfers.
+  // Pair transactions strictly by transfer_id === id.
+  if (transferData && transferData.length > 0 && !groupAccounts) {
+    const byId = new Map<string, TransferEntry>();
+    transferData.forEach((t: TransferEntry) => byId.set(String(t.id), t));
+
+    transferData.forEach((from: TransferEntry) => {
+      const to = byId.get(String(from.transfer_id));
+      if (!to) return; // counterpart not present
+
+      // Ensure a single link per transfer pair by only processing the pair in one direction (from -> to)
+      // Amounts transferred are registered as negative (leaving the account)
+      if (String(from.amount) >= String(to.amount)) return;
+
+      addAccountNode(to.accountId, to.accountName);
+      addAccountNode(from.accountId, from.accountName);
+      addValueToLink(
+        graph,
+        from.accountId,
+        to.accountId,
+        Math.abs(from.amount),
+      );
+    });
+  }
+
+  console.log(graph);
+
   return graph;
 }
 
