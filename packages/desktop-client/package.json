@@ -34,6 +34,7 @@
     "#mocks/*": "./src/mocks/*.ts",
     "#components/forms": "./src/components/forms/index.tsx",
     "#components/banksync": "./src/components/banksync/index.tsx",
+    "#components/banksync/bankSyncErrors": "./src/components/banksync/bankSyncErrors.ts",
     "#components/banksync/bankSyncUtils": "./src/components/banksync/bankSyncUtils.ts",
     "#components/banksync/BuiltInProviders": "./src/components/banksync/BuiltInProviders.tsx",
     "#components/banksync/useBuiltInBankSyncProviders": "./src/components/banksync/useBuiltInBankSyncProviders.ts",
