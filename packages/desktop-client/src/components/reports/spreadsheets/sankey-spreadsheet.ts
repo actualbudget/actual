@@ -89,6 +89,14 @@ type TransferEntry = {
   transfer_id: string;
 };
 
+type TransferPair = {
+  fromAccountId: string;
+  fromAccountName: string;
+  toAccountId: string;
+  toAccountName: string;
+  amount: number;
+};
+
 type SortMode = 'per-group' | 'global' | 'budget-order';
 
 type NodeKey = string;
@@ -192,7 +200,7 @@ async function createBaseGraph(
 ): Promise<Graph> {
   let data: CategoryEntry[] = [];
   let aggregated: AggregatedBudget | undefined;
-  let transferData: TransferEntry[] | undefined;
+  let transferData: TransferPair[] | undefined;
 
   if (mode === 'budgeted') {
     ({ data, aggregated } = await createBudgetSpreadsheet(
@@ -385,7 +393,7 @@ export function createTransactionsSpreadsheet(
       groupAccounts,
     );
 
-    let transferData: TransferEntry[] = [];
+    let transferData: TransferPair[] = [];
     if (showTransfers) {
       transferData = await fetchTransferData(
         conditionsOpKey,
@@ -598,7 +606,7 @@ async function fetchTransferData(
   filters: unknown[] = [],
   start: string,
   end: string,
-): Promise<TransferEntry[]> {
+): Promise<TransferPair[]> {
   const results = await aqlQuery(
     q('transactions')
       .filter({ [conditionsOpKey]: filters })
@@ -618,7 +626,7 @@ async function fetchTransferData(
       ]),
   );
 
-  return results.data.map(
+  const raw_results: TransferEntry[] = results.data.map(
     (row: {
       id?: string;
       amount?: number;
@@ -634,6 +642,53 @@ async function fetchTransferData(
         transfer_id: row.transfer_id ?? '',
       }) satisfies TransferEntry,
   );
+
+  const byId = new Map<string, TransferEntry>();
+  const byAccountId = new Map<string, string>();
+  
+  raw_results.forEach((t: TransferEntry) => {
+    byId.set(String(t.id), t);
+    byAccountId.set(String(t.accountId), t.accountName);
+  });
+
+  const result_pairs = new Map<string, number>();
+
+  raw_results.forEach((from: TransferEntry) => {
+    let to = byId.get(String(from.transfer_id));
+    if (!to) return; // counterpart not present
+
+    if (from.accountId > to.accountId) return; // only process one direction to avoid duplicates
+
+    // Swap order if the "from" amount is positive, so that we always have the negative amount first
+    if (from.amount > 0) {
+      [from, to] = [to, from];
+    }
+    const sortedKey = [from.accountId, to.accountId].sort().join('|');
+    const toFromKey = [to.accountId, from.accountId].join('|');
+
+    const existingValue = result_pairs.get(sortedKey) ?? 0;
+
+    if (result_pairs.has(sortedKey)) {
+      if (toFromKey === sortedKey) {
+        result_pairs.set(sortedKey, existingValue - from.amount);
+      } else {
+        result_pairs.set(sortedKey, existingValue + from.amount);
+      }
+    } else {
+      result_pairs.set(sortedKey, -from.amount);
+    }
+  });
+
+  return Array.from(result_pairs.entries()).map(([key, value]) => {
+    const [accountId1, accountId2] = key.split('|');
+    return {
+      fromAccountId: accountId1,
+      fromAccountName: byAccountId.get(accountId1) || '',
+      toAccountId: accountId2,
+      toAccountName: byAccountId.get(accountId2) || '',
+      amount: Math.abs(value),
+    };
+  }) satisfies TransferPair[];
 }
 
 export function createBudgetGraph(
@@ -801,7 +856,7 @@ export function createBudgetGraph(
 
 export function createTransactionsGraph(
   categoryData: CategoryEntry[],
-  transferData?: TransferEntry[],
+  transferData?: TransferPair[],
   groupAccounts?: boolean,
 ): Graph {
   function addAccountNode(accountId: string, accountName: string): void {
@@ -911,25 +966,10 @@ export function createTransactionsGraph(
   // If transfer data is provided, add links between accounts representing transfers.
   // Pair transactions strictly by transfer_id === id.
   if (transferData && transferData.length > 0 && !groupAccounts) {
-    const byId = new Map<string, TransferEntry>();
-    transferData.forEach((t: TransferEntry) => byId.set(String(t.id), t));
-
-    transferData.forEach((from: TransferEntry) => {
-      const to = byId.get(String(from.transfer_id));
-      if (!to) return; // counterpart not present
-
-      // Ensure a single link per transfer pair by only processing the pair in one direction (from -> to)
-      // Amounts transferred are registered as negative (leaving the account)
-      if (String(from.amount) >= String(to.amount)) return;
-
-      addAccountNode(to.accountId, to.accountName);
-      addAccountNode(from.accountId, from.accountName);
-      addValueToLink(
-        graph,
-        from.accountId,
-        to.accountId,
-        Math.abs(from.amount),
-      );
+    transferData.forEach((pair: TransferPair) => {
+      addAccountNode(pair.fromAccountId, pair.fromAccountName);
+      addAccountNode(pair.toAccountId, pair.toAccountName);
+      addValueToLink(graph, pair.fromAccountId, pair.toAccountId, pair.amount);
     });
   }
 
