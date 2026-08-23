@@ -1103,28 +1103,35 @@ function moveToOther(
   fromNodes.forEach(([fromKey, fromData]) => {
     const linkValue = fromData.to.get(key);
     if (linkValue !== undefined) {
-      addValueToLink(graph, fromKey, otherKey, linkValue);
-      newAddTooltipInfo(
-        toolTipInfoMap,
-        fromKey,
-        otherKey,
-        graph.get(key)?.name ?? key,
-        linkValue,
-      );
+      // Avoid creating self-links (otherKey -> otherKey) which produce
+      // immediate cycles and can break recursive layer computation.
+      if (fromKey !== otherKey) {
+        addValueToLink(graph, fromKey, otherKey, linkValue);
+        newAddTooltipInfo(
+          toolTipInfoMap,
+          fromKey,
+          otherKey,
+          graph.get(key)?.name ?? key,
+          linkValue,
+        );
+      }
     }
   });
   toNodes.forEach(toKey => {
     const fromData = graph.get(key);
     const linkValue = fromData?.to.get(toKey);
     if (linkValue !== undefined) {
-      addValueToLink(graph, otherKey, toKey, linkValue);
-      newAddTooltipInfo(
-        toolTipInfoMap,
-        otherKey,
-        toKey,
-        graph.get(key)?.name ?? key,
-        linkValue,
-      );
+      // Avoid creating self-links (otherKey -> otherKey)
+      if (otherKey !== toKey) {
+        addValueToLink(graph, otherKey, toKey, linkValue);
+        newAddTooltipInfo(
+          toolTipInfoMap,
+          otherKey,
+          toKey,
+          graph.get(key)?.name ?? key,
+          linkValue,
+        );
+      }
     }
   });
 
