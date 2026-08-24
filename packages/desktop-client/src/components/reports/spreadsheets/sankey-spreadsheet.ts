@@ -113,6 +113,7 @@ export type NodeData = {
   color?: string;
 };
 export type Graph = Map<NodeKey, NodeData>;
+type VisualLayerIndex = number;
 
 type TooltipInfoMap = Map<
   NodeKey,
@@ -244,10 +245,10 @@ export function buildSankeyData(
     categorySort,
   );
   const sortedGraph = sortGraph(graph, categorySort, categories);
-  addPercentageLabels(sortedGraph);
-  addColors(sortedGraph);
   cleanUpNodes(sortedGraph);
   addHiddenNodes(sortedGraph);
+  addPercentageLabels(sortedGraph);
+  addColors(sortedGraph);
   filterGraphByLayers(sortedGraph, layerFrom, layerTo);
 
   return convertToSankeyData(sortedGraph, toolTipInfoMap);
@@ -1022,7 +1023,18 @@ export function addValueToLink(
   }
 }
 
-export function getLayer(graph: Graph, key: NodeKey): number {
+export function getLayer(
+  graph: Graph,
+  key: NodeKey,
+  layerCache?: Map<NodeKey, VisualLayerIndex>,
+): number {
+  const resolvedLayerCache = layerCache ?? new Map<NodeKey, VisualLayerIndex>();
+
+  const cachedLayer = resolvedLayerCache.get(key);
+  if (cachedLayer !== undefined) {
+    return cachedLayer;
+  }
+
   // Find parent nodes for the given key
   const parents: NodeKey[] = [];
   for (const [parentKey, data] of graph) {
@@ -1030,12 +1042,37 @@ export function getLayer(graph: Graph, key: NodeKey): number {
       parents.push(parentKey);
     }
   }
+
   if (parents.length === 0) {
     // No parents: this is a root node, layer 0
+    resolvedLayerCache.set(key, 0);
     return 0;
   }
+
   // Otherwise, 1 + max parent's layer
-  return 1 + Math.max(...parents.map(parentKey => getLayer(graph, parentKey)));
+  const layer =
+    1 +
+    Math.max(
+      ...parents.map(parentKey =>
+        getLayer(graph, parentKey, resolvedLayerCache),
+      ),
+    );
+  resolvedLayerCache.set(key, layer);
+  return layer;
+}
+
+function getComputedNodeLayers(graph: Graph): Map<NodeKey, VisualLayerIndex> {
+  const layerCache = new Map<NodeKey, VisualLayerIndex>();
+
+  for (const key of graph.keys()) {
+    getLayer(graph, key, layerCache);
+  }
+
+  return layerCache;
+}
+
+function isHiddenNodeKey(key: NodeKey): boolean {
+  return key.endsWith(SpecialNodeKeys.HiddenSuffix);
 }
 
 function groupOtherCategories(
@@ -1392,19 +1429,31 @@ export function moveNodeToStart(
   }
 }
 
-export function getNodeValue(graph: Graph, key: NodeKey): number {
+export function getNodeValue(
+  graph: Graph,
+  key: NodeKey,
+  computedLayersByNode?: Map<NodeKey, VisualLayerIndex>,
+): number {
+  const resolvedLayersByNode =
+    computedLayersByNode ?? getComputedNodeLayers(graph);
   let nodeValue: number = 0;
 
-  if (getLayer(graph, key) === 0) {
+  if ((resolvedLayersByNode.get(key) ?? 0) === 0) {
     // Look at outgoing links for root nodes
     const node = graph.get(key);
     if (node) {
-      node.to.forEach(value => {
+      node.to.forEach((value, targetKey) => {
+        if (isHiddenNodeKey(targetKey)) {
+          return;
+        }
         nodeValue += value ?? 0;
       });
     }
   } else {
-    graph.forEach(data => {
+    graph.forEach((data, sourceKey) => {
+      if (isHiddenNodeKey(sourceKey)) {
+        return;
+      }
       nodeValue += data.to.get(key) ?? 0;
     });
 
@@ -1413,7 +1462,10 @@ export function getNodeValue(graph: Graph, key: NodeKey): number {
       nodeValue = 0;
       const node = graph.get(key);
       if (node) {
-        node.to.forEach(value => {
+        node.to.forEach((value, targetKey) => {
+          if (isHiddenNodeKey(targetKey)) {
+            return;
+          }
           nodeValue += value;
         });
       }
@@ -1423,22 +1475,38 @@ export function getNodeValue(graph: Graph, key: NodeKey): number {
 }
 
 export function addPercentageLabels(graph: Graph): void {
-  const layerSums = new Map<GraphLayers, number>();
+  const layerSums = new Map<VisualLayerIndex, number>();
+  const computedLayersByNode = getComputedNodeLayers(graph);
 
-  // First pass: calculate GraphLayer sums
+  // First pass: calculate visual-layer sums
   graph.forEach((_: NodeData, key: NodeKey) => {
-    const layer = graph.get(key)?.type;
-    if (!layer) {
+    if (isHiddenNodeKey(key)) {
       return;
     }
-    const nodeValue = getNodeValue(graph, key);
+
+    const layer = computedLayersByNode.get(key);
+    if (layer === undefined) {
+      return;
+    }
+
+    const nodeValue = getNodeValue(graph, key, computedLayersByNode);
     layerSums.set(layer, (layerSums.get(layer) ?? 0) + nodeValue);
   });
 
   // Second pass: assign percentage label to each node
   graph.forEach((data: NodeData, key: NodeKey) => {
-    const layer = data.type;
-    const nodeValue = getNodeValue(graph, key);
+    if (isHiddenNodeKey(key)) {
+      data.percentageLabel = undefined;
+      return;
+    }
+
+    const layer = computedLayersByNode.get(key);
+    if (layer === undefined) {
+      data.percentageLabel = undefined;
+      return;
+    }
+
+    const nodeValue = getNodeValue(graph, key, computedLayersByNode);
     const layerTotal = layerSums.get(layer) ?? 1;
     const percentage = layerTotal ? (nodeValue / layerTotal) * 100 : 0;
     data.percentageLabel = `${percentage.toFixed(1)}%`;
@@ -1483,7 +1551,7 @@ function setColor(graph: Graph, key: NodeKey, color: string) {
   }
 }
 
-function addHiddenNodes(graph: Graph) {
+export function addHiddenNodes(graph: Graph) {
   // Nodes with parents/children different than other nodes in the same layer might end up
   // in the wrong place in the graph. This fixes that, by adding extra, hidden nodes.
 
@@ -1570,6 +1638,88 @@ function addHiddenNodes(graph: Graph) {
       }
     }
   }
+
+  ensureCategoryGroupsFollowAccountLayers(graph);
+}
+
+function ensureCategoryGroupsFollowAccountLayers(graph: Graph) {
+  let computedLayersByNode = getComputedNodeLayers(graph);
+
+  let maxVisibleAccountLayer = -1;
+  for (const [key, node] of graph) {
+    if (node.type !== GraphLayers.Account || isHiddenNodeKey(key)) {
+      continue;
+    }
+
+    const nodeLayer = computedLayersByNode.get(key);
+    if (nodeLayer !== undefined && nodeLayer > maxVisibleAccountLayer) {
+      maxVisibleAccountLayer = nodeLayer;
+    }
+  }
+
+  if (maxVisibleAccountLayer < 0) {
+    return;
+  }
+
+  const categoryGroupsToPush: NodeKey[] = [];
+  for (const [key, node] of graph) {
+    if (node.type !== GraphLayers.CategoryGroup) {
+      continue;
+    }
+
+    const nodeLayer = computedLayersByNode.get(key);
+    if (nodeLayer !== undefined && nodeLayer <= maxVisibleAccountLayer) {
+      categoryGroupsToPush.push(key);
+    }
+  }
+
+  for (const key of categoryGroupsToPush) {
+    let currentLayer = computedLayersByNode.get(key);
+    while (
+      currentLayer !== undefined &&
+      currentLayer <= maxVisibleAccountLayer
+    ) {
+      const deepestParent = getDeepestParentKey(
+        graph,
+        key,
+        computedLayersByNode,
+      );
+      if (!deepestParent) {
+        break;
+      }
+
+      const hiddenParentKey = `${key}_${GraphLayers.Account}_${currentLayer}${SpecialNodeKeys.HiddenSuffix}`;
+      addNode(graph, hiddenParentKey, GraphLayers.Account, '');
+      addValueToLink(graph, deepestParent, hiddenParentKey, -1);
+      addValueToLink(graph, hiddenParentKey, key, -1);
+
+      computedLayersByNode = getComputedNodeLayers(graph);
+      currentLayer = computedLayersByNode.get(key);
+    }
+  }
+}
+
+function getDeepestParentKey(
+  graph: Graph,
+  nodeKey: NodeKey,
+  computedLayersByNode: Map<NodeKey, VisualLayerIndex>,
+): NodeKey | undefined {
+  let deepestParent: NodeKey | undefined;
+  let deepestLayer = -Infinity;
+
+  for (const [parentKey, data] of graph) {
+    if (!data.to.has(nodeKey)) {
+      continue;
+    }
+
+    const parentLayer = computedLayersByNode.get(parentKey);
+    if (parentLayer !== undefined && parentLayer > deepestLayer) {
+      deepestLayer = parentLayer;
+      deepestParent = parentKey;
+    }
+  }
+
+  return deepestParent;
 }
 
 function buildTypeConnectivity(

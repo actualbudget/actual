@@ -2,6 +2,7 @@ import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  addHiddenNodes,
   addNode,
   addPercentageLabels,
   addValueToLink,
@@ -719,24 +720,40 @@ describe('sankey-spreadsheet', () => {
       expect(node2?.percentageLabel).toBe('75.0%');
     });
 
-    it('normalizes percentages per GraphLayer, not computed depth', () => {
+    it('normalizes percentages per computed graph layer', () => {
       const graph: Graph = new Map();
 
-      addNode(graph, 'payee', GraphLayers.IncomePayee, 'Payee');
-      addNode(graph, 'income-cat', GraphLayers.IncomeCategory, 'Income Cat');
-      addNode(graph, 'account-incoming', GraphLayers.Account, 'Account A');
-
-      addNode(graph, 'account-root', GraphLayers.Account, 'Account B');
+      addNode(graph, 'account-root', GraphLayers.Account, 'Account A');
+      addNode(graph, 'account-transfer', GraphLayers.Account, 'Account B');
       addNode(graph, 'group', GraphLayers.CategoryGroup, 'Group');
+      addNode(graph, 'category', GraphLayers.Category, 'Category');
 
-      addValueToLink(graph, 'payee', 'income-cat', 300);
-      addValueToLink(graph, 'income-cat', 'account-incoming', 300);
+      addValueToLink(graph, 'account-root', 'account-transfer', 300);
       addValueToLink(graph, 'account-root', 'group', 100);
+      addValueToLink(graph, 'group', 'category', 100);
+
+      addHiddenNodes(graph);
 
       addPercentageLabels(graph);
 
-      expect(graph.get('account-root')?.percentageLabel).toBe('25.0%');
-      expect(graph.get('account-incoming')?.percentageLabel).toBe('75.0%');
+      const percentagesByLayer = new Map<number, number>();
+
+      for (const [key, node] of graph) {
+        if (key.endsWith('__HIDDEN') || !node.percentageLabel) {
+          continue;
+        }
+
+        const layer = getLayer(graph, key);
+        const percentage = Number.parseFloat(node.percentageLabel);
+        percentagesByLayer.set(
+          layer,
+          (percentagesByLayer.get(layer) ?? 0) + percentage,
+        );
+      }
+
+      for (const total of percentagesByLayer.values()) {
+        expect(total).toBeCloseTo(100, 1);
+      }
     });
   });
 
@@ -839,6 +856,31 @@ describe('sankey-spreadsheet', () => {
       const nodeKeys = sankeyData.nodes.map(node => node.key);
       expect(nodeKeys).toContain('group-no-child_category__HIDDEN');
       expect(nodeKeys).not.toContain('group-no-child_category_group__HIDDEN');
+    });
+
+    it('keeps category groups after all account sublayers when transfers exist', () => {
+      const graph: Graph = new Map();
+
+      addNode(graph, 'account-root', GraphLayers.Account, 'Account A');
+      addNode(graph, 'account-transfer', GraphLayers.Account, 'Account B');
+      addNode(graph, 'group', GraphLayers.CategoryGroup, 'Group');
+      addNode(graph, 'category', GraphLayers.Category, 'Category');
+
+      addValueToLink(graph, 'account-root', 'account-transfer', 300);
+      addValueToLink(graph, 'account-root', 'group', 100);
+      addValueToLink(graph, 'group', 'category', 100);
+
+      const sankeyData = buildSankeyData(
+        graph,
+        100,
+        [],
+        'global',
+        GraphLayers.Account,
+        GraphLayers.Category,
+      );
+
+      const nodeKeys = sankeyData.nodes.map(node => node.key);
+      expect(nodeKeys).toContain('group_account_1__HIDDEN');
     });
   });
 
