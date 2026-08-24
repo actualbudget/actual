@@ -43,9 +43,12 @@ export class ReportsPage {
    *
    * `ReportCard` renders its children only once the card enters the viewport,
    * so an off-screen card has no title to match on — and a card added during
-   * the test may not be in the DOM yet at all. Both are handled by re-scrolling
-   * to the bottom of the dashboard (where new widgets land) until the card
-   * shows up.
+   * the test may not be in the DOM yet at all.
+   *
+   * The dashboard scrolls inside `Page`'s own `overflowY: auto` container
+   * rather than the document, so scrolling the window is a no-op here. Walk
+   * the grid items instead and bring each into view until the card renders;
+   * `ReportCard` latches `hasRendered`, so a card stays rendered once seen.
    */
   private async scrollDashboardCardIntoView(name: RegExp) {
     const card = this.pageContent
@@ -53,9 +56,17 @@ export class ReportsPage {
       .filter({ has: this.page.getByRole('heading', { name }) });
 
     await expect(async () => {
-      await this.page.evaluate(() => {
-        window.scrollTo(0, document.documentElement.scrollHeight);
-      });
+      const gridItems = this.pageContent.locator('.react-grid-item');
+      const count = await gridItems.count();
+
+      for (let i = count - 1; i >= 0; i--) {
+        await gridItems.nth(i).scrollIntoViewIfNeeded();
+
+        if (await card.isVisible()) {
+          break;
+        }
+      }
+
       await expect(card).toBeVisible({ timeout: 1000 });
     }).toPass({ timeout: 20_000 });
 
