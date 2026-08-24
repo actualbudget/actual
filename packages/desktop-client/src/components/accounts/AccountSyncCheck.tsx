@@ -13,7 +13,11 @@ import {
   useSyncAndDownloadMutation,
   useUnlinkAccountMutation,
 } from '#accounts';
-import { getFailedSyncError, isAccountFailedSync } from '#accounts/syncStatus';
+import {
+  getFailedSyncError,
+  isAccountFailedSync,
+  isGoCardlessConfigError,
+} from '#accounts/syncStatus';
 import { Link } from '#components/common/Link';
 import { authorizeBank as authorizeEnableBanking } from '#enablebanking';
 import { authorizeBank as authorizeGoCardless } from '#gocardless';
@@ -151,11 +155,16 @@ export function AccountSyncCheck() {
   const setUpGoCardless = useCallback(() => {
     setOpen(false);
     // The credentials are server-wide, so every GoCardless account that failed
-    // for want of them is retried — not just the one shown here. Accounts on
-    // other providers are left alone: they were never broken, and syncing them
-    // spends their own request allowances.
-    const goCardlessAccountIds = accounts
-      .filter(account => account.account_sync_source === 'goCardless')
+    // for want of them is retried — not just the one shown here. It stops
+    // there, though: accounts on other providers were never broken, and
+    // healthy GoCardless accounts would be resynced for nothing, spending
+    // their institution's request allowance and inviting unrelated failures.
+    const brokenGoCardlessAccountIds = accounts
+      .filter(
+        account =>
+          isAccountFailedSync(account) &&
+          isGoCardlessConfigError(getFailedSyncError(account)),
+      )
       .map(account => account.id);
 
     dispatch(
@@ -164,7 +173,7 @@ export function AccountSyncCheck() {
           name: 'gocardless-init',
           options: {
             onSuccess: () =>
-              syncAndDownload.mutate({ ids: goCardlessAccountIds }),
+              syncAndDownload.mutate({ ids: brokenGoCardlessAccountIds }),
           },
         },
       }),
@@ -200,13 +209,15 @@ export function AccountSyncCheck() {
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
     (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
+  // The condition is tracked apart from the authorization to act on it: the
+  // server's secrets are the problem either way, and unlinking is never the
+  // answer to it — it throws away a working bank link and costs a fresh
+  // consent at the bank to undo. A non-admin gets the explanation and no
+  // buttons rather than the one destructive button.
+  const goCardlessConfigError = isGoCardlessConfigError({ type, code });
   // both codes are repaired by re-entering the secrets, so a typo in the
   // replacement leads back to the form rather than to the generic dead end
-  const showGoCardlessSetup =
-    type === 'CONFIG_ERROR' &&
-    (code === 'GOCARDLESS_NOT_CONFIGURED' ||
-      code === 'GOCARDLESS_INVALID_CREDENTIALS') &&
-    isAdmin;
+  const showGoCardlessSetup = goCardlessConfigError && isAdmin;
 
   return (
     <View>
@@ -267,7 +278,7 @@ export function AccountSyncCheck() {
               <Trans>Set up GoCardless</Trans>
             </Button>
           )}
-          {!showAuth && !showGoCardlessSetup && (
+          {!showAuth && !showGoCardlessSetup && !goCardlessConfigError && (
             <Button onPress={() => unlink(account)}>
               <Trans>Unlink account</Trans>
             </Button>

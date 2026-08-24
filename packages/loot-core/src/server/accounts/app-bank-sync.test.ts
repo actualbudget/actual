@@ -283,6 +283,37 @@ describe('accountsBankSync', () => {
     expect(result.errors[0].message).toMatch(/re-enter your secret ID and key/);
   });
 
+  it('persists invalid-credentials separately from not-configured', async () => {
+    // Both are CONFIG_ERROR, but they ask different things of the user: one
+    // means nobody has entered the secrets, the other means the secrets that
+    // were entered are wrong. Collapsing them loses that on the next reload.
+    insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      bank: 'bank1',
+      account_id: 'ext-1',
+      account_sync_source: 'goCardless',
+    });
+
+    vi.mocked(bankSync.syncAccount).mockRejectedValue({
+      type: 'BankSyncError',
+      reason: 'GoCardless rejected the configured secret ID and secret key.',
+      category: 'CONFIG_ERROR',
+      code: 'GOCARDLESS_INVALID_CREDENTIALS',
+      message: 'GoCardless rejected the configured secret ID and secret key.',
+    });
+
+    const result = await accountsBankSyncHandler({ ids: ['acct1'] });
+
+    const account = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      ['acct1'],
+    );
+    expect(account!.bank_sync_status).toBe('invalid-credentials');
+    expect(result.errors[0].message).toMatch(/check them and enter them again/);
+  });
+
   it('persists failed status after an operational sync error', async () => {
     insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
     await db.insertAccount({

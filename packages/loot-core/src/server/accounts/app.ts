@@ -1428,7 +1428,12 @@ function getBankSyncStatusFromError(
     }
 
     if (err.category === 'CONFIG_ERROR') {
-      return 'not-configured';
+      // Kept apart from 'not-configured' so a reload — or another client, which
+      // never saw the sync at all — still tells the user their secrets were
+      // rejected rather than that nobody ever entered them.
+      return err.code === 'GOCARDLESS_INVALID_CREDENTIALS'
+        ? 'invalid-credentials'
+        : 'not-configured';
     }
   }
 

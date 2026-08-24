@@ -35,6 +35,7 @@ export type DbAccount = {
     | 'timed-out'
     | 'account-missing'
     | 'not-configured'
+    | 'invalid-credentials'
     | null;
   account_group_id?: DbAccountGroup['id'] | null;
 };

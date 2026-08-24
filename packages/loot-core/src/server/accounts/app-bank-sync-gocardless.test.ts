@@ -81,14 +81,17 @@ describe('GoCardless config errors from the sync server', () => {
     });
   });
 
-  it('turns a GOCARDLESS_INVALID_CREDENTIALS response into a not-configured account', async () => {
+  it('turns a GOCARDLESS_INVALID_CREDENTIALS response into an invalid-credentials account', async () => {
+    // Not 'not-configured': the two are both CONFIG_ERROR but mean different
+    // things to the user, and the persisted status is all a reloaded client
+    // has to tell them apart.
     vi.mocked(post).mockResolvedValue(
       goCardlessErrorResponse('GOCARDLESS_INVALID_CREDENTIALS'),
     );
 
     const result = await accountsBankSyncHandler({ ids: ['acct1'] });
 
-    expect(await syncedAccountStatus()).toBe('not-configured');
+    expect(await syncedAccountStatus()).toBe('invalid-credentials');
     expect(result.errors[0]).toMatchObject({
       category: 'CONFIG_ERROR',
       code: 'GOCARDLESS_INVALID_CREDENTIALS',
