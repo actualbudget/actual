@@ -353,17 +353,11 @@ function InputValue({
 
   function onKeyDown(e) {
     if (e.key === 'Escape') {
-      // Revert the DOM value to defaultValue before the navigator's
-      // Escape handler unmounts this input. Without this, the
-      // unmount-induced blur would call onUpdate with the user's
-      // pending value and commit it.
+      // Input commits the DOM value on blur, so revert it here before the
+      // navigator unmounts us. Left to bubble so the navigator can exit edit.
       e.currentTarget.value = defaultValue ?? '';
       setValue(defaultValue);
-      // Don't stopPropagation: let the bubble reach useTableNavigator
-      // so it can exit edit mode.
     } else if (e.key !== 'Enter' && e.key !== 'Tab') {
-      // Only Enter, Tab, and Escape bubble up; everything else is
-      // local to the input.
       e.stopPropagation();
     }
 
@@ -479,17 +473,31 @@ export function CustomCell({
     setPrevDefaultValue(defaultValue);
   }
 
+  // The navigator refocuses the container on Escape, which blurs us
+  // synchronously before React flushes the revert below. A ref survives that.
+  const escapePressed = useRef(false);
+
   function onBlur_(e: FocusEvent) {
     // Only save on blur if the app is focused. Blur events fire when
     // the app unfocuses, and it's unintuitive to save the value since
     // the input will be focused again when the app regains focus
     if (document.hasFocus()) {
-      onUpdate?.(value);
+      if (!escapePressed.current) {
+        onUpdate?.(value);
+      }
       fireBlur(onBlur, e);
     }
+    escapePressed.current = false;
   }
 
   function onKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      escapePressed.current = true;
+      setValue(defaultValue);
+    } else {
+      escapePressed.current = false;
+    }
+
     if (shouldSaveFromKey(e)) {
       onUpdate?.(value);
     }
@@ -1257,6 +1265,20 @@ export type TableNavigator<T extends TableItem> = {
   getNavigatorProps: (userProps: object) => object;
 };
 
+// Button/checkbox cells. CellButton.onFocus sets editingId on these to keep
+// keyboard navigation working, but nothing is actually being edited.
+const NON_EDITABLE_FIELDS = new Set([
+  'select',
+  'cleared',
+  'cancel',
+  'add',
+  'schedule',
+]);
+
+export function isEditingCell(editingId: unknown, focusedField: string) {
+  return editingId != null && !NON_EDITABLE_FIELDS.has(focusedField);
+}
+
 export function useTableNavigator<T extends TableItem>(
   data: T[],
   fields: string[] | ((item?: T) => string[]),
@@ -1265,7 +1287,8 @@ export function useTableNavigator<T extends TableItem>(
   const [editingId, setEditingId] = useState<T['id']>(null);
   const [focusedField, setFocusedField] = useState<string>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const lastEditingIdRef = useRef<T['id'] | null>(null);
+  // Lets arrow keys resume where the cursor was after Escape clears editingId.
+  const lastPositionRef = useRef<{ id: T['id']; field?: string } | null>(null);
 
   // See `onBlur` for why we need this
   const modalState = useModalState();
@@ -1281,7 +1304,7 @@ export function useTableNavigator<T extends TableItem>(
   // onEdit is passed to children, so make sure it maintains identity
   const onEdit = useCallback((id: T['id'] | null, field?: string) => {
     if (id != null) {
-      lastEditingIdRef.current = id;
+      lastPositionRef.current = { id, field };
     }
     setEditingId(id);
     setFocusedField(id ? field : null);
@@ -1335,7 +1358,8 @@ export function useTableNavigator<T extends TableItem>(
       } else if (idx >= fields.length) {
         onFocusNext();
       } else {
-        setFocusedField(fields[idx]);
+        // Via onEdit so lastPositionRef stays in sync with the cursor.
+        onEdit(editingId, fields[idx]);
       }
     }
   }
@@ -1360,12 +1384,11 @@ export function useTableNavigator<T extends TableItem>(
       }
     } else if (data.length > 0) {
       // Resume cursor from last known position, or jump to top/bottom
+      const lastPosition = lastPositionRef.current;
       let nextIdx = dir < 0 ? data.length - 1 : 0;
 
-      if (lastEditingIdRef.current != null) {
-        const idx = data.findIndex(
-          item => item.id === lastEditingIdRef.current,
-        );
+      if (lastPosition != null) {
+        const idx = data.findIndex(item => item.id === lastPosition.id);
         if (idx !== -1) {
           nextIdx = idx;
         }
@@ -1374,7 +1397,12 @@ export function useTableNavigator<T extends TableItem>(
       const next = data[nextIdx];
       const availableFields = getFields(next);
       if (availableFields.length > 0) {
-        onEdit(next.id, availableFields[0]);
+        // Rows don't all expose the same fields (splits, previews).
+        const nextField =
+          lastPosition?.field && availableFields.includes(lastPosition.field)
+            ? lastPosition.field
+            : availableFields[0];
+        onEdit(next.id, nextField);
       }
     }
   }
@@ -1444,25 +1472,18 @@ export function useTableNavigator<T extends TableItem>(
             break;
 
           case 'Escape': {
-            // Peel off one layer at a time: edit mode first, then the
-            // checkbox-selected set. Popovers (autocomplete, date
-            // picker, etc.) handle Escape themselves and stop
-            // propagation, so they're cleared before this fires.
-            //
-            // The 'select' field is the row checkbox, not a real
-            // editable cell. Clicking a checkbox sets editingId via
-            // CellButton.onFocus to keep keyboard navigation working,
-            // but visually nothing is being edited. Treat it as
-            // "not editing" so a single Escape clears the multi-select
-            // set instead of needing two presses.
-            const isCellEditing =
-              editingId != null && focusedField !== 'select';
-            if (isCellEditing) {
+            // Peel off one layer per press: edit mode, then the selection.
+            // Popovers stop propagation, so they're already closed by now.
+            if (isEditingCell(editingId, focusedField)) {
               e.preventDefault();
+              // Consumed here, so enclosing handlers don't peel a second
+              // layer off the same press.
+              e.stopPropagation();
               onEdit(null);
               containerRef.current?.focus();
             } else if (selectedItems && selectedItems.size > 0) {
               e.preventDefault();
+              e.stopPropagation();
               if (editingId != null) {
                 onEdit(null);
               }

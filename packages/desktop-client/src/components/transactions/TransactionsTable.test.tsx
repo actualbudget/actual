@@ -1146,14 +1146,21 @@ describe('Transactions', () => {
     });
     updateProps({ isAdding: true });
 
-    // While adding a transaction, pressing escape should close the
-    // new transaction form
+    // Escape peels off one layer per press: the autocomplete popup, then
+    // edit mode, and only then the new transaction form itself.
     let input = expectToBeEditingField(container, 'date', 0, true);
     await userEvent.type(input, '[Tab]');
     input = expectToBeEditingField(container, 'account', 0, true);
 
+    // Closes the popup, then exits the cell — the form is still open so
+    // anything already typed into the other cells survives.
     await userEvent.type(input, '[Escape]');
     await userEvent.type(input, '[Escape]');
+    expect(
+      container.querySelector('[data-testid="new-transaction"]'),
+    ).not.toBeNull();
+
+    await userEvent.keyboard('[Escape]');
     expect(
       container.querySelector('[data-testid="new-transaction"]'),
     ).toBeNull();

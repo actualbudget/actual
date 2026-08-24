@@ -140,9 +140,8 @@ export function TagAutocomplete({
       e.stopPropagation();
       void handleSelect(highlightedId);
     } else if (e.key === 'Escape') {
-      if (showPopup) {
-        e.stopPropagation();
-      }
+      // Popup is open (guarded above), so this press only closes it.
+      e.stopPropagation();
       setIsOpen(false);
       onKeyDown?.(e);
     } else {

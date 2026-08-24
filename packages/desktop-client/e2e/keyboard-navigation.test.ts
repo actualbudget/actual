@@ -270,49 +270,84 @@ test.describe('Keyboard navigation', () => {
       await page.keyboard.press('Escape');
       await expect(accountPage.selectButton).toBeHidden();
     });
-  });
 
-  test.describe('Demo budget', () => {
-    // Real-data sanity check that the Escape fix works against the demo
-    // budget the user lands on via "View demo". The empty test budget
-    // has $0 categories which can mask defaultValue-related bugs; the
-    // demo has populated values that exercise the formatExpr path.
-    let page: Page;
+    test('escape on a date cell reverts the typed date', async () => {
+      const accountPage = await navigation.createAccount({
+        name: 'Test Date Revert',
+        offBudget: false,
+        balance: 100,
+      });
 
-    test.beforeEach(async ({ browser }) => {
-      page = await browser.newPage();
-      const configurationPage = new ConfigurationPage(page);
-      await page.goto('/');
-      await configurationPage.clickOnNoServer();
-      const budgetPage = await configurationPage.createDemoFile();
-      await budgetPage.waitFor();
-      await page.mouse.move(0, 0);
-    });
+      const transaction = accountPage.getNthTransaction(0);
+      const dateCell = transaction.date;
+      const committedDate = await dateCell.textContent();
 
-    test.afterEach(async () => {
-      await page?.close();
-    });
-
-    test('escape on the Food cell ($400) reverts the typed value', async () => {
-      const budgetTable = page.getByTestId('budget-table');
-      const foodRow = budgetTable
-        .getByTestId('row')
-        .filter({ hasText: 'Food' })
-        .first();
-      const foodBudgetCell = foodRow.getByTestId('budget').first();
-
-      await expect(foodBudgetCell).toContainText('400');
-      const committedText = await foodBudgetCell.textContent();
-
-      await foodBudgetCell.click();
-      const input = foodBudgetCell.locator('input');
+      await dateCell.click();
+      const input = dateCell.locator('input');
       await expect(input).toBeVisible();
 
-      await page.keyboard.type('123');
+      await input.press('Control+a');
+      await page.keyboard.type('01/01/2020');
       await page.keyboard.press('Escape');
 
       await expect(input).toBeHidden();
-      expect(await foodBudgetCell.textContent()).toBe(committedText);
+      expect(await dateCell.textContent()).toBe(committedDate);
+    });
+
+    test('escape in the add-new amount field exits the cell without discarding the row', async () => {
+      const accountPage = await navigation.createAccount({
+        name: 'Test Add New Escape',
+        offBudget: false,
+        balance: 100,
+      });
+
+      await accountPage.addNewTransactionButton.click();
+      const newTransaction = accountPage.getEnteredTransaction();
+
+      await newTransaction.notes.click();
+      await page.keyboard.type('keep me');
+      await page.keyboard.press('Tab');
+
+      await newTransaction.debit.click();
+      const debitInput = newTransaction.debit.locator('input');
+      await expect(debitInput).toBeVisible();
+      await page.keyboard.type('42.00');
+      await page.keyboard.press('Escape');
+
+      // The row survives with its other values intact.
+      await expect(debitInput).toBeHidden();
+      await expect(accountPage.newTransactionRow).toBeVisible();
+      await expect(newTransaction.notes).toHaveText('keep me');
+
+      // A second Escape closes the add row.
+      await page.keyboard.press('Escape');
+      await expect(accountPage.newTransactionRow).toBeHidden();
+    });
+
+    test('escape clears the selection in one press after clicking the cleared checkbox', async () => {
+      const accountPage = await navigation.createAccount({
+        name: 'Test Cleared Escape',
+        offBudget: false,
+        balance: 100,
+      });
+
+      await accountPage.createSingleTransaction({
+        payee: 'Snack',
+        notes: 'x',
+        debit: '3.00',
+      });
+
+      await expect(accountPage.getNthTransaction(0).payee).toBeVisible();
+
+      await accountPage.selectNthTransaction(0);
+      await expect(accountPage.selectButton).toBeVisible();
+
+      // The cleared icon focuses the cell (setting editingId) without
+      // actually editing anything, so one Escape must still clear.
+      await accountPage.getNthTransaction(0).cleared.click();
+      await page.keyboard.press('Escape');
+
+      await expect(accountPage.selectButton).toBeHidden();
     });
   });
 });
