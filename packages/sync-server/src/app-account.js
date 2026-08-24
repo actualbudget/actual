@@ -12,8 +12,28 @@ import {
   needsBootstrap,
   setServerPrefs,
 } from './account-db';
+import {
+  createMfaChallenge,
+  deleteMfaChallenge,
+  getMfaChallenge,
+  recordFailedMfaAttempt,
+} from './accounts/mfa-challenge';
 import { isValidRedirectUrl, loginWithOpenIdSetup } from './accounts/openid';
-import { changePassword, loginWithPassword } from './accounts/password';
+import {
+  changePassword,
+  createPasswordSession,
+  loginWithPassword,
+  resolvePasswordUserId,
+  verifyPasswordForLogin,
+} from './accounts/password';
+import {
+  confirmTotpEnrollment,
+  disableTotp,
+  generateTotpSecret,
+  hasPendingTotpEnrollment,
+  isTotpEnabled,
+  verifyTotp,
+} from './accounts/totp';
 import { errorMiddleware, requestLoggerMiddleware } from './util/middlewares';
 import { validateAuthHeader, validateSession } from './util/validate-user';
 
@@ -32,7 +52,17 @@ const authRateLimiter = rateLimit({
   message: { status: 'error', reason: 'too-many-requests' },
 });
 
-export { app as handlers, authRateLimiter };
+// Unlike authRateLimiter this does not skip successful requests: a correct
+// password must not refund the budget for guessing 6-digit codes.
+const mfaRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  legacyHeaders: false,
+  standardHeaders: true,
+  message: { status: 'error', reason: 'too-many-requests' },
+});
+
+export { app as handlers, authRateLimiter, mfaRateLimiter };
 
 // Non-authenticated endpoints:
 //
@@ -71,7 +101,16 @@ app.get('/login-methods', (req, res) => {
   res.send({ status: 'ok', methods });
 });
 
-app.post('/login', authRateLimiter, async (req, res) => {
+// Only rate-limit the code-verification step with the stricter limiter, so a
+// normal password login is unaffected.
+function mfaStepRateLimiter(req, res, next) {
+  if ((req.body || {}).mfaToken) {
+    return mfaRateLimiter(req, res, next);
+  }
+  return next();
+}
+
+app.post('/login', authRateLimiter, mfaStepRateLimiter, async (req, res) => {
   const loginMethod = getLoginMethod(req);
   console.log('Logging in via ' + loginMethod);
   let tokenRes = null;
@@ -86,6 +125,9 @@ app.post('/login', authRateLimiter, async (req, res) => {
         return;
       } else {
         if (validateAuthHeader(req)) {
+          // TOTP is intentionally not enforced here: header auth means an
+          // upstream SSO proxy already authenticated the user, and there is no
+          // interactive step to prompt for a code. MFA belongs at that proxy.
           tokenRes = await loginWithPassword(headerVal);
         } else {
           res.send({ status: 'error', reason: 'proxy-not-trusted' });
@@ -114,9 +156,59 @@ app.post('/login', authRateLimiter, async (req, res) => {
       return;
     }
 
-    default:
-      tokenRes = await loginWithPassword(req.body.password);
+    default: {
+      // Second step: the password was already verified and a challenge issued.
+      if (req.body.mfaToken) {
+        const challenge = getMfaChallenge(req.body.mfaToken);
+
+        if (!challenge) {
+          res
+            .status(400)
+            .send({ status: 'error', reason: 'mfa-challenge-expired' });
+          return;
+        }
+
+        if (!verifyTotp(req.body.code)) {
+          const stillUsable = recordFailedMfaAttempt(req.body.mfaToken);
+          res.status(400).send({
+            status: 'error',
+            reason: stillUsable ? 'invalid-totp-code' : 'mfa-challenge-expired',
+          });
+          return;
+        }
+
+        deleteMfaChallenge(req.body.mfaToken);
+        tokenRes = createPasswordSession(challenge.user_id);
+        break;
+      }
+
+      const { error: passwordError } = await verifyPasswordForLogin(
+        req.body.password,
+      );
+      if (passwordError) {
+        res.status(400).send({ status: 'error', reason: passwordError });
+        return;
+      }
+
+      const { error: userError, userId } = resolvePasswordUserId();
+      if (userError) {
+        res.status(400).send({ status: 'error', reason: userError });
+        return;
+      }
+
+      // First factor passed but no session yet — the client must come back
+      // with a code before it gets a token.
+      if (isTotpEnabled()) {
+        res.send({
+          status: 'ok',
+          data: { mfaRequired: true, mfaToken: createMfaChallenge(userId) },
+        });
+        return;
+      }
+
+      tokenRes = createPasswordSession(userId);
       break;
+    }
   }
   const { error, token } = tokenRes;
 
@@ -156,6 +248,107 @@ app.post('/change-password', async (req, res) => {
     res.status(400).send({ status: 'error', reason: error });
     return;
   }
+
+  res.send({ status: 'ok', data: {} });
+});
+
+/**
+ * TOTP is a second factor for the shared server password, so every endpoint
+ * requires an admin session that was itself established with password auth.
+ */
+function validateTotpAdminSession(req, res) {
+  const session = validateSession(req, res);
+  if (!session) return null;
+
+  if (!isAdmin(session.user_id)) {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'permission-not-found',
+    });
+    return null;
+  }
+
+  if (session.auth_method !== 'password') {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'password-auth-not-active',
+    });
+    return null;
+  }
+
+  if (getActiveLoginMethod() === 'openid') {
+    res.status(400).send({ status: 'error', reason: 'totp-not-available' });
+    return null;
+  }
+
+  return session;
+}
+
+app.get('/totp/status', (req, res) => {
+  const session = validateSession(req, res);
+  if (!session) return;
+
+  res.send({
+    status: 'ok',
+    data: {
+      enabled: isTotpEnabled(),
+      pending: hasPendingTotpEnrollment(),
+    },
+  });
+});
+
+app.post('/totp/enroll', (req, res) => {
+  if (!validateTotpAdminSession(req, res)) return;
+
+  if (isTotpEnabled()) {
+    res.status(400).send({ status: 'error', reason: 'totp-already-enabled' });
+    return;
+  }
+
+  const { secret, otpauthUrl } = generateTotpSecret(
+    req.get('host') || undefined,
+  );
+
+  res.send({ status: 'ok', data: { secret, otpauthUrl } });
+});
+
+app.post('/totp/confirm', mfaRateLimiter, (req, res) => {
+  if (!validateTotpAdminSession(req, res)) return;
+
+  const { error } = confirmTotpEnrollment(req.body.code);
+
+  if (error) {
+    res.status(400).send({ status: 'error', reason: error });
+    return;
+  }
+
+  res.send({ status: 'ok', data: {} });
+});
+
+// Turning off a second factor is a security downgrade, so require both the
+// password and a current code.
+app.post('/totp/disable', mfaRateLimiter, async (req, res) => {
+  if (!validateTotpAdminSession(req, res)) return;
+
+  if (!isTotpEnabled()) {
+    res.status(400).send({ status: 'error', reason: 'totp-not-enabled' });
+    return;
+  }
+
+  const { error } = await verifyPasswordForLogin(req.body.password);
+  if (error) {
+    res.status(400).send({ status: 'error', reason: error });
+    return;
+  }
+
+  if (!verifyTotp(req.body.code)) {
+    res.status(400).send({ status: 'error', reason: 'invalid-totp-code' });
+    return;
+  }
+
+  disableTotp();
 
   res.send({ status: 'ok', data: {} });
 });

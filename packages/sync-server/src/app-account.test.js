@@ -1,9 +1,15 @@
+import { Secret, TOTP } from 'otpauth';
 import request from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getAccountDb, getLoginMethod, getServerPrefs } from './account-db';
 import { bootstrapPassword } from './accounts/password';
-import { handlers as app, authRateLimiter } from './app-account';
+import { confirmTotpEnrollment, generateTotpSecret } from './accounts/totp';
+import {
+  handlers as app,
+  authRateLimiter,
+  mfaRateLimiter,
+} from './app-account';
 
 const ADMIN_ROLE = 'ADMIN';
 const BASIC_ROLE = 'BASIC';
@@ -45,8 +51,33 @@ const clearAuth = () => {
   getAccountDb().mutate('DELETE FROM auth');
 };
 
+const PERIOD_MS = 30 * 1000;
+
+const totpCodeAt = (secret, timestamp) =>
+  new TOTP({
+    algorithm: 'SHA1',
+    digits: 6,
+    period: 30,
+    secret: Secret.fromBase32(secret),
+  }).generate({ timestamp });
+
+// Enable TOTP with the confirming code taken from the previous step, so codes
+// for the current step are still unused and can be spent by a login.
+const enableTotp = () => {
+  const { secret } = generateTotpSecret();
+  const past = Date.now() - PERIOD_MS;
+  confirmTotpEnrollment(totpCodeAt(secret, past), past);
+  return secret;
+};
+
+const clearTotp = () => {
+  getAccountDb().mutate('DELETE FROM auth_totp');
+  getAccountDb().mutate('DELETE FROM pending_mfa_challenges');
+};
+
 beforeEach(() => {
   authRateLimiter.resetKey('127.0.0.1');
+  mfaRateLimiter.resetKey('127.0.0.1');
 });
 
 describe('auth rate limiting', () => {
@@ -253,6 +284,133 @@ describe('/login', () => {
 
     expect(res.statusCode).toEqual(400);
     expect(res.body).toHaveProperty('reason', 'invalid-password');
+  });
+});
+
+describe('/login with TOTP enabled', () => {
+  afterEach(() => {
+    clearTotp();
+    clearAuth();
+  });
+
+  const signInWithPassword = (password = 'testpassword') =>
+    request(app).post('/login').send({ loginMethod: 'password', password });
+
+  const verifyCode = (mfaToken, code) =>
+    request(app)
+      .post('/login')
+      .send({ loginMethod: 'password', mfaToken, code });
+
+  it('returns a challenge instead of a token after the password step', async () => {
+    await bootstrapPassword('testpassword');
+    enableTotp();
+
+    const res = await signInWithPassword();
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data).toHaveProperty('mfaRequired', true);
+    expect(res.body.data).toHaveProperty('mfaToken');
+    expect(res.body.data).not.toHaveProperty('token');
+  });
+
+  it('issues a token once a valid code is presented', async () => {
+    await bootstrapPassword('testpassword');
+    const secret = enableTotp();
+
+    const { body } = await signInWithPassword();
+    const res = await verifyCode(
+      body.data.mfaToken,
+      totpCodeAt(secret, Date.now()),
+    );
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data).toHaveProperty('token');
+  });
+
+  it('does not issue a challenge for a wrong password', async () => {
+    await bootstrapPassword('testpassword');
+    enableTotp();
+
+    const res = await signInWithPassword('wrongpassword');
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty('reason', 'invalid-password');
+  });
+
+  it('rejects an invalid code', async () => {
+    await bootstrapPassword('testpassword');
+    enableTotp();
+
+    const { body } = await signInWithPassword();
+    const res = await verifyCode(body.data.mfaToken, '000000');
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty('reason', 'invalid-totp-code');
+  });
+
+  it('rejects an unknown challenge token', async () => {
+    await bootstrapPassword('testpassword');
+    const secret = enableTotp();
+
+    const res = await verifyCode(
+      'not-a-real-token',
+      totpCodeAt(secret, Date.now()),
+    );
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty('reason', 'mfa-challenge-expired');
+  });
+
+  it('destroys the challenge after too many wrong codes', async () => {
+    await bootstrapPassword('testpassword');
+    const secret = enableTotp();
+
+    const { body } = await signInWithPassword();
+    const { mfaToken } = body.data;
+
+    // The per-IP limiter would otherwise trip first; this test is about the
+    // per-challenge attempt cap, which also holds behind a shared proxy IP.
+    const attempt = code => {
+      authRateLimiter.resetKey('127.0.0.1');
+      return verifyCode(mfaToken, code);
+    };
+
+    for (let i = 0; i < 4; i++) {
+      const res = await attempt('000000');
+      expect(res.body).toHaveProperty('reason', 'invalid-totp-code');
+    }
+
+    const exhausted = await attempt('000000');
+    expect(exhausted.body).toHaveProperty('reason', 'mfa-challenge-expired');
+
+    // Even the correct code no longer works: the challenge is gone.
+    const afterwards = await attempt(totpCodeAt(secret, Date.now()));
+    expect(afterwards.body).toHaveProperty('reason', 'mfa-challenge-expired');
+  });
+
+  it('consumes the challenge so it cannot be reused', async () => {
+    await bootstrapPassword('testpassword');
+    const secret = enableTotp();
+
+    const { body } = await signInWithPassword();
+    const code = totpCodeAt(secret, Date.now());
+
+    const first = await verifyCode(body.data.mfaToken, code);
+    expect(first.statusCode).toEqual(200);
+
+    const second = await verifyCode(body.data.mfaToken, code);
+    expect(second.statusCode).toEqual(400);
+    expect(second.body).toHaveProperty('reason', 'mfa-challenge-expired');
+  });
+
+  it('does not require a code when TOTP is not enabled', async () => {
+    await bootstrapPassword('testpassword');
+
+    const res = await signInWithPassword();
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data).toHaveProperty('token');
+    expect(res.body.data).not.toHaveProperty('mfaRequired');
   });
 });
 

@@ -53,6 +53,10 @@ export default defineConfig({
           __dirname,
           'src/scripts/enable-openid.js',
         ),
+        'scripts/disable-totp': path.resolve(
+          __dirname,
+          'src/scripts/disable-totp.js',
+        ),
         'scripts/health-check': path.resolve(
           __dirname,
           'src/scripts/health-check.ts',
