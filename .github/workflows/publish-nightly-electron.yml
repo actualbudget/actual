@@ -26,8 +26,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
-            runner: depot-ubuntu-22.04-8
+          - os: ubuntu-24.04
+            runner: depot-ubuntu-24.04-8
           - os: windows-latest
             runner: depot-windows-2022-8
           - os: macos-latest
@@ -72,6 +72,16 @@ jobs:
           VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/desktop-electron/package.json --type nightly)
           sed -i "s/%RELEASE_VERSION%/$VERSION/g; s/%RELEASE_DATE%/$TODAY/g" "$METAINFO_FILE"
           flatpak run --command=flatpak-builder-lint org.flatpak.Builder appstream "$METAINFO_FILE"
+
+      - if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        name: Install arm64 cross-compilation toolchain
+        run: |
+          # better-sqlite3 has no Electron prebuilds for this Electron version,
+          # so the arm64 AppImage's native modules are cross-compiled from
+          # source. beforePackHook points CC_target/CXX_target at this
+          # toolchain during the arm64 pass.
+          sudo apt-get update
+          sudo apt-get install -y crossbuild-essential-arm64
 
       - name: Update package versions
         run: |
