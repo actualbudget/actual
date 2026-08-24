@@ -32,6 +32,9 @@ import { OpenIdForm } from './OpenIdForm';
 
 function PasswordLogin({ setError, dispatch }) {
   const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  // Set once the password is accepted and the server asks for a second factor.
+  const [mfaToken, setMfaToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
@@ -43,7 +46,7 @@ function PasswordLogin({ setError, dispatch }) {
 
     setError(null);
     setLoading(true);
-    const { error } = await send('subscribe-sign-in', {
+    const { error, mfaRequired, mfaToken } = await send('subscribe-sign-in', {
       password,
       loginMethod: 'password',
     });
@@ -51,9 +54,76 @@ function PasswordLogin({ setError, dispatch }) {
 
     if (error) {
       setError(error);
+    } else if (mfaRequired) {
+      setMfaToken(mfaToken);
     } else {
       dispatch(loggedIn());
     }
+  }
+
+  async function onSubmitCode() {
+    if (code.trim() === '' || loading || !mfaToken) {
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+    const { error } = await send('subscribe-sign-in', {
+      mfaToken,
+      code: code.trim(),
+      loginMethod: 'password',
+    });
+    setLoading(false);
+
+    if (error) {
+      setError(error);
+      // The challenge is gone: send the user back to the password step rather
+      // than leaving them on a form that can never succeed.
+      if (error === 'mfa-challenge-expired') {
+        setMfaToken(null);
+        setCode('');
+      }
+    } else {
+      dispatch(loggedIn());
+    }
+  }
+
+  if (mfaToken) {
+    return (
+      <View style={{ marginTop: 5 }}>
+        <Text style={{ marginBottom: 10 }}>
+          <Trans>Enter the code from your authenticator app.</Trans>
+        </Text>
+        <View
+          style={{
+            flexDirection: isNarrowWidth ? 'column' : 'row',
+            gap: '1rem',
+          }}
+        >
+          <BigInput
+            autoFocus
+            placeholder={t('6-digit code')}
+            inputMode="numeric"
+            value={code}
+            onChangeValue={setCode}
+            style={{ flex: 1 }}
+            onEnter={onSubmitCode}
+          />
+          <ButtonWithLoading
+            variant="primary"
+            isLoading={loading}
+            style={{
+              fontSize: 15,
+              width: isNarrowWidth ? '100%' : 170,
+              ...(isNarrowWidth ? { padding: 10 } : null),
+            }}
+            onPress={onSubmitCode}
+          >
+            <Trans>Verify</Trans>
+          </ButtonWithLoading>
+        </View>
+      </View>
+    );
   }
 
   return (
@@ -341,6 +411,12 @@ export function Login() {
         return t('Auto login failed - Proxy not trusted');
       case 'invalid-password':
         return t('Invalid password');
+      case 'invalid-totp-code':
+        return t('That code is not valid. Please try again.');
+      case 'mfa-challenge-expired':
+        return t('That took too long. Please sign in again.');
+      case 'too-many-requests':
+        return t('Too many attempts. Please wait and try again.');
       case 'network-failure':
         return t('Unable to contact the server');
       case 'internal-error':
