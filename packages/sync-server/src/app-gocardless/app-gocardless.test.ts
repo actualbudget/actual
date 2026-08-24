@@ -2,6 +2,7 @@ import express from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { GoCardlessNotConfiguredError } from './errors';
 import type { GoCardlessRequisitionId } from './gocardless-node.types';
 
 vi.mock('#util/middlewares', () => ({
@@ -14,6 +15,7 @@ vi.mock('#util/middlewares', () => ({
 vi.mock('./services/gocardless-service', () => ({
   goCardlessService: {
     createRequisition: vi.fn(),
+    getTransactionsWithBalance: vi.fn(),
   },
 }));
 
@@ -113,5 +115,48 @@ describe('/link', () => {
     expect(res.status).toBe(200);
     expect(res.headers['content-type']).toMatch(/text\/html/);
     expect(res.text).toContain('window.close()');
+  });
+});
+
+describe('/transactions', () => {
+  const getTransactionsWithBalance = vi.mocked(
+    goCardlessService.getTransactionsWithBalance,
+  );
+
+  beforeEach(() => {
+    getTransactionsWithBalance.mockReset();
+  });
+
+  const syncRequest = () =>
+    request(app).post('/transactions').send({
+      requisitionId: 'req-1',
+      accountId: 'acc-1',
+      startDate: '2024-01-01',
+      endDate: '2024-01-31',
+    });
+
+  it('reports unconfigured GoCardless credentials as a config error', async () => {
+    getTransactionsWithBalance.mockRejectedValue(
+      new GoCardlessNotConfiguredError(),
+    );
+
+    const res = await syncRequest();
+
+    expect(res.body.data).toMatchObject({
+      error_type: 'CONFIG_ERROR',
+      error_code: 'GOCARDLESS_NOT_CONFIGURED',
+      status: 'rejected',
+    });
+  });
+
+  it('still reports unrecognised failures as a generic error', async () => {
+    getTransactionsWithBalance.mockRejectedValue(new Error('boom'));
+
+    const res = await syncRequest();
+
+    expect(res.body.data).toMatchObject({
+      error_type: 'UNKNOWN',
+      error_code: 'UNKNOWN',
+    });
   });
 });

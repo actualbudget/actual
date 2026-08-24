@@ -1364,6 +1364,13 @@ function handleSyncError(
       };
     }
 
+    if (err.code === 'GOCARDLESS_NOT_CONFIGURED') {
+      return {
+        ...syncError,
+        message: `Failed syncing account ${acct.name}. GoCardless is not set up on this server — re-enter your secret ID and key to reconnect.`,
+      };
+    }
+
     return syncError;
   }
 
@@ -1411,6 +1418,10 @@ function getBankSyncStatusFromError(
 
     if (err.category === 'ACCOUNT_MISSING') {
       return 'account-missing';
+    }
+
+    if (err.category === 'CONFIG_ERROR') {
+      return 'not-configured';
     }
   }
 

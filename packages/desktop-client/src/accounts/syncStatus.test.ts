@@ -18,6 +18,7 @@ describe('syncStatus', () => {
     expect(isAccountFailedSync(makeAccount('rate-limit-exceeded'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('timed-out'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('account-missing'))).toBe(true);
+    expect(isAccountFailedSync(makeAccount('not-configured'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('pending'))).toBe(false);
     expect(isAccountFailedSync(makeAccount('sync-requested'))).toBe(false);
     expect(isAccountFailedSync(makeAccount('ok'))).toBe(false);
@@ -54,6 +55,28 @@ describe('syncStatus', () => {
     expect(getFailedSyncError(makeAccount('failed'))).toEqual({
       type: 'SYNC_ERROR',
       code: 'SYNC_ERROR',
+    });
+  });
+
+  it('distinguishes a GoCardless server that is missing its credentials', () => {
+    expect(
+      getFailedSyncError(makeAccount('not-configured', 'goCardless')),
+    ).toEqual({
+      type: 'CONFIG_ERROR',
+      code: 'GOCARDLESS_NOT_CONFIGURED',
+    });
+  });
+
+  it('falls back to a generic config error for other sync sources', () => {
+    expect(getFailedSyncError(makeAccount('not-configured'))).toEqual({
+      type: 'CONFIG_ERROR',
+      code: 'NOT_CONFIGURED',
+    });
+    expect(
+      getFailedSyncError(makeAccount('not-configured', 'simpleFin')),
+    ).toEqual({
+      type: 'CONFIG_ERROR',
+      code: 'NOT_CONFIGURED',
     });
   });
 });

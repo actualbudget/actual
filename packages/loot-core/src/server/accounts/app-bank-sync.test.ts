@@ -252,6 +252,37 @@ describe('accountsBankSync', () => {
     expect(account!.bank_sync_status).toBe('timed-out');
   });
 
+  it('persists not-configured status when the server has no GoCardless credentials', async () => {
+    insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      bank: 'bank1',
+      account_id: 'ext-1',
+      account_sync_source: 'goCardless',
+    });
+
+    vi.mocked(bankSync.syncAccount).mockRejectedValue({
+      type: 'BankSyncError',
+      reason: 'GoCardless is not configured on the server.',
+      category: 'CONFIG_ERROR',
+      code: 'GOCARDLESS_NOT_CONFIGURED',
+      message: 'GoCardless is not configured on the server.',
+    });
+
+    const result = await accountsBankSyncHandler({ ids: ['acct1'] });
+
+    const account = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      ['acct1'],
+    );
+    expect(account!.bank_sync_status).toBe('not-configured');
+
+    // The point of the fix: the user is told to re-enter their secrets rather
+    // than being shown a generic internal error.
+    expect(result.errors[0].message).toMatch(/re-enter your secret ID and key/);
+  });
+
   it('persists failed status after an operational sync error', async () => {
     insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
     await db.insertAccount({

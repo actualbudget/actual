@@ -32,6 +32,11 @@ export function getFailedSyncError(
       return { type: 'TIMED_OUT', code: 'TIMED_OUT' };
     case 'account-missing':
       return { type: 'ACCOUNT_MISSING', code: 'ACCOUNT_MISSING' };
+    case 'not-configured':
+      if (account.account_sync_source === 'goCardless') {
+        return { type: 'CONFIG_ERROR', code: 'GOCARDLESS_NOT_CONFIGURED' };
+      }
+      return { type: 'CONFIG_ERROR', code: 'NOT_CONFIGURED' };
     default:
       return { type: 'SYNC_ERROR', code: 'SYNC_ERROR' };
   }
