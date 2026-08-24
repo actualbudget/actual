@@ -751,6 +751,8 @@ describe('sankey-spreadsheet', () => {
         );
       }
 
+      expect(percentagesByLayer.size).toBeGreaterThan(0);
+
       for (const total of percentagesByLayer.values()) {
         expect(total).toBeCloseTo(100, 1);
       }
