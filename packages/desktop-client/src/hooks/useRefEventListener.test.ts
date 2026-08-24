@@ -82,6 +82,31 @@ describe('useRefEventListener', () => {
     expect(el.removeEventListener).toHaveBeenCalledTimes(1);
   });
 
+  it('rebinds when the element under the ref is swapped out for a new one', () => {
+    const el1 = makeMockElement() as unknown as HTMLElement;
+    const el2 = makeMockElement() as unknown as HTMLElement;
+    const ref = { current: el1 } as unknown as RefObject<HTMLElement | null>;
+
+    const { rerender } = renderHook(() =>
+      useRefEventListener(ref, 'click', vi.fn()),
+    );
+
+    expect(el1.addEventListener).toHaveBeenCalledTimes(1);
+
+    // Simulate React replacing the DOM node while keeping the same ref
+    // object (e.g. a cell that switches between its unexposed and exposed
+    // representations renders a brand-new trigger element).
+    ref.current = el2;
+    rerender();
+
+    expect(el1.removeEventListener).toHaveBeenCalledTimes(1);
+    expect(el2.addEventListener).toHaveBeenCalledTimes(1);
+    expect(el2.addEventListener).toHaveBeenCalledWith(
+      'click',
+      expect.any(Function),
+    );
+  });
+
   it('removes the listener on unmount', () => {
     const el = makeMockElement();
     const ref = { current: el } as unknown as RefObject<HTMLElement | null>;

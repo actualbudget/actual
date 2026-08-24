@@ -17,6 +17,16 @@ export function useRefEventListener<
   const callbackRef = useRef(callback);
   callbackRef.current = callback;
 
+  // Track which element is currently under the ref. Components such as
+  // table cells swap out their DOM node while keeping the same ref object
+  // (e.g. switching between an unexposed label and an exposed input), so
+  // the effect below must re-run when the target element itself changes,
+  // not just when the ref object or event name changes. Reading ref.current
+  // during render is safe here because the value is only consumed at
+  // effect time, after React has committed any ref updates.
+  const currentTarget =
+    ref instanceof Document || ref instanceof Window ? ref : ref.current;
+
   useEffect(() => {
     const el =
       ref instanceof Document || ref instanceof Window ? ref : ref.current;
@@ -31,5 +41,5 @@ export function useRefEventListener<
     return () => {
       el.removeEventListener(event, listener);
     };
-  }, [ref, event]);
+  }, [ref, event, currentTarget]);
 }
