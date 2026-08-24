@@ -12,8 +12,13 @@ import { send } from '@actual-app/core/platform/client/connection';
 import QRCode from 'qrcode';
 
 import { Error as ErrorAlert } from '#components/alerts';
-import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
-import { FormField } from '#components/forms';
+import {
+  Modal,
+  ModalButtons,
+  ModalCloseButton,
+  ModalHeader,
+} from '#components/common/Modal';
+import { FormField, FormLabel } from '#components/forms';
 import { popModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -36,9 +41,7 @@ export function TotpEnableModal({ onSave }: TotpEnableModalProps) {
   const errorMessages: Record<string, string> = {
     'invalid-totp-code': t('That code is not valid. Please try again.'),
     'totp-not-enrolled': t('Enrollment expired. Please start again.'),
-    'totp-already-enabled': t(
-      'Two-factor authentication is already turned on.',
-    ),
+    'totp-already-enabled': t('Two-factor authentication is already enabled.'),
     'totp-not-available': t(
       'Two-factor authentication is only available with password authentication.',
     ),
@@ -103,7 +106,7 @@ export function TotpEnableModal({ onSave }: TotpEnableModalProps) {
       {({ state }) => (
         <>
           <ModalHeader
-            title={t('Turn on two-factor authentication')}
+            title={t('Enable two-factor authentication')}
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
 
@@ -150,9 +153,10 @@ export function TotpEnableModal({ onSave }: TotpEnableModalProps) {
             )}
 
             <FormField>
+              <FormLabel title={t('Code:')} htmlFor="totp-code-field" />
               <Input
+                id="totp-code-field"
                 autoFocus
-                placeholder={t('6-digit code')}
                 inputMode="numeric"
                 value={code}
                 onChangeValue={setCode}
@@ -166,7 +170,7 @@ export function TotpEnableModal({ onSave }: TotpEnableModalProps) {
                 color: theme.pageTextLight,
               }}
               title={t(
-                'Keep a copy of the key somewhere safe. If you lose access to your authenticator app, run the disable-totp script on the server to get back in.',
+                'Keep a copy of the key somewhere safe. If you lose your authenticator app, run the disable-totp script on the server to get back in',
               )}
             />
 
@@ -175,33 +179,28 @@ export function TotpEnableModal({ onSave }: TotpEnableModalProps) {
                 ...styles.verySmallText,
                 color: theme.warningText,
               }}
-              title={t(
-                'Older versions of Actual cannot sign in once this is on. Update any other devices you use first.',
-              )}
+              title={t('Older versions of Actual will not be able to sign in')}
             />
 
             {error && <ErrorAlert>{getErrorMessage(error)}</ErrorAlert>}
-
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'flex-end',
-                gap: 10,
-              }}
-            >
-              <Button variant="bare" onPress={() => dispatch(popModal())}>
-                <Trans>Cancel</Trans>
-              </Button>
-              <ButtonWithLoading
-                variant="primary"
-                isLoading={loading}
-                isDisabled={!secret}
-                onPress={onConfirm}
-              >
-                <Trans>Turn on</Trans>
-              </ButtonWithLoading>
-            </View>
           </View>
+
+          <ModalButtons>
+            <Button
+              style={{ marginRight: 10 }}
+              onPress={() => dispatch(popModal())}
+            >
+              <Trans>Cancel</Trans>
+            </Button>
+            <ButtonWithLoading
+              variant="primary"
+              isLoading={loading}
+              isDisabled={!secret}
+              onPress={onConfirm}
+            >
+              <Trans>Enable</Trans>
+            </ButtonWithLoading>
+          </ModalButtons>
         </>
       )}
     </Modal>

@@ -55,19 +55,19 @@ describe('TotpSettings', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('offers to turn on two-factor authentication when disabled', async () => {
+  it('offers to enable two-factor authentication when disabled', async () => {
     vi.mocked(useSyncServerStatus).mockReturnValue('online');
     vi.mocked(useLoginMethod).mockReturnValue('password');
 
     render(<TotpSettings />, { wrapper: TestProviders });
 
     const button = await screen.findByRole('button', {
-      name: /turn on two-factor authentication/i,
+      name: /enable two-factor authentication/i,
     });
     await waitFor(() => expect(button).not.toBeDisabled());
   });
 
-  it('offers to turn it off when already enabled', async () => {
+  it('offers to disable it when already enabled', async () => {
     vi.mocked(useSyncServerStatus).mockReturnValue('online');
     vi.mocked(useLoginMethod).mockReturnValue('password');
     vi.mocked(send).mockResolvedValue({ enabled: true, pending: false });
@@ -76,7 +76,7 @@ describe('TotpSettings', () => {
 
     expect(
       await screen.findByRole('button', {
-        name: /turn off two-factor authentication/i,
+        name: /disable two-factor authentication/i,
       }),
     ).toBeInTheDocument();
   });
@@ -89,7 +89,7 @@ describe('TotpSettings', () => {
 
     expect(
       await screen.findByRole('button', {
-        name: /turn on two-factor authentication/i,
+        name: /enable two-factor authentication/i,
       }),
     ).toBeDisabled();
     expect(

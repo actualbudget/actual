@@ -86,15 +86,15 @@ export function TotpSettings() {
             }
           >
             {enabled ? (
-              <Trans>Turn off two-factor authentication</Trans>
+              <Trans>Disable two-factor authentication</Trans>
             ) : (
-              <Trans>Turn on two-factor authentication</Trans>
+              <Trans>Enable two-factor authentication</Trans>
             )}
           </Button>
           {!enabled && (
             <Label
               style={{ paddingTop: 5 }}
-              title={t('You will need an authenticator app on your phone.')}
+              title={t('You will need an authenticator app on your phone')}
             />
           )}
         </>

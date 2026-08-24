@@ -18,13 +18,13 @@ multi-factor authentication of their own, and Actual leaves that to them.
 Any authenticator app that supports time-based one-time passwords (TOTP), such
 as Aegis, Bitwarden, 1Password, Ente Auth, or Google Authenticator.
 
-## Turning It On
+## Enabling Two-Factor Authentication
 
 1. Open any budget file, then go to **Settings**.
-2. Under **Two-factor authentication**, click _Turn on two-factor
+2. Under **Two-factor authentication**, click _Enable two-factor
    authentication_.
 3. Scan the QR code with your authenticator app, or type the key in by hand.
-4. Enter the six-digit code your app shows, then click _Turn on_.
+4. Enter the six-digit code your app shows, then click _Enable_.
 
 Actual asks for that code before switching the feature on, so a mistyped key
 cannot lock you out.
@@ -34,9 +34,9 @@ Keep a copy of the key somewhere safe, such as a password manager. It is the
 only way to add the account to a new authenticator app later.
 :::
 
-## Turning It Off
+## Disabling Two-Factor Authentication
 
-In **Settings**, click _Turn off two-factor authentication_ and confirm with
+In **Settings**, click _Disable two-factor authentication_ and confirm with
 your server password and a current code.
 
 ## If You Lose Your Authenticator App
