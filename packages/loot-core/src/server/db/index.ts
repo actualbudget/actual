@@ -1110,9 +1110,9 @@ export function updateTag(tag: Partial<DbTag> & Pick<DbTag, 'id'>) {
 }
 
 export function findTags() {
-  return all<{ notes: string }>(
+  return all<{ id: DbTransaction['id']; notes: string }>(
     `
-      SELECT notes
+      SELECT id, notes
       FROM transactions
       WHERE tombstone = 0 AND notes LIKE ?
     `,

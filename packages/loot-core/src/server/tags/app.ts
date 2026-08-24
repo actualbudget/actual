@@ -3,6 +3,7 @@ import * as db from '#server/db';
 import { mutator } from '#server/mutators';
 import { batchMessages } from '#server/sync';
 import { undoable } from '#server/undo';
+import { renameTagInNotes } from '#shared/tags';
 import type { TagEntity } from '#types/models';
 
 export type TagsHandlers = {
@@ -13,6 +14,7 @@ export type TagsHandlers = {
   'tags-hide-all': typeof hideAllTags;
   'tags-unhide-all': typeof unhideAllTags;
   'tags-update': typeof updateTag;
+  'tags-rename': typeof renameTag;
   'tags-discover': typeof discoverTags;
 };
 
@@ -24,6 +26,7 @@ app.method('tags-delete-all', mutator(undoable(deleteAllTags)));
 app.method('tags-hide-all', mutator(undoable(hideAllTags)));
 app.method('tags-unhide-all', mutator(undoable(unhideAllTags)));
 app.method('tags-update', mutator(undoable(updateTag)));
+app.method('tags-rename', mutator(undoable(renameTag)));
 app.method('tags-discover', mutator(discoverTags));
 
 const collator = new Intl.Collator(undefined, {
@@ -107,6 +110,43 @@ async function updateTag(
     ...(hidden !== undefined ? { hidden: hidden ? 1 : 0 } : {}),
   });
   return tag;
+}
+
+async function renameTag({
+  id,
+  tag: newTag,
+}: Pick<TagEntity, 'id' | 'tag'>): Promise<TagEntity['id']> {
+  const name = newTag.trim();
+  // accept any char except whitespaces and '#', same as tag creation
+  if (!/^[^#\s]+$/.test(name)) {
+    throw new Error('Invalid tag name');
+  }
+
+  const tags = await db.getTags();
+  const allTags = await db.getAllTags();
+  const existing = tags.find(t => t.id === id);
+  if (!existing) {
+    throw new Error('Tag not found');
+  }
+  if (existing.tag === name) {
+    return id;
+  }
+  if (allTags.some(t => t.id !== id && t.tag === name)) {
+    throw new Error('A tag with that name already exists');
+  }
+
+  await batchMessages(async () => {
+    await db.updateTag({ id, tag: name });
+
+    for (const { id: transactionId, notes } of await db.findTags()) {
+      const renamed = renameTagInNotes(notes, existing.tag, name);
+      if (renamed !== notes) {
+        await db.updateTransaction({ id: transactionId, notes: renamed });
+      }
+    }
+  });
+
+  return id;
 }
 
 async function discoverTags(): Promise<TagEntity[]> {
