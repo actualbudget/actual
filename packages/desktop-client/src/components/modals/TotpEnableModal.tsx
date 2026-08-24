@@ -42,6 +42,9 @@ export function TotpEnableModal({ onSave }: TotpEnableModalProps) {
     'totp-not-available': t(
       'Two-factor authentication is only available with password authentication.',
     ),
+    'mfa-client-unsupported': t(
+      'This version of Actual is too old to use two-factor authentication. Please update it.',
+    ),
     'too-many-requests': t('Too many attempts. Please wait and try again.'),
     'network-failure': t('Unable to contact the server'),
   };
@@ -164,6 +167,16 @@ export function TotpEnableModal({ onSave }: TotpEnableModalProps) {
               }}
               title={t(
                 'Keep a copy of the key somewhere safe. If you lose access to your authenticator app, run the disable-totp script on the server to get back in.',
+              )}
+            />
+
+            <Label
+              style={{
+                ...styles.verySmallText,
+                color: theme.warningText,
+              }}
+              title={t(
+                'Older versions of Actual cannot sign in once this is on. Update any other devices you use first.',
               )}
             />
 

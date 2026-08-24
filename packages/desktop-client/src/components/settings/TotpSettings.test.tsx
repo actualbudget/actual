@@ -2,7 +2,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 import { render, screen, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { useLoginMethod } from '#components/ServerContext';
+import { useLoginMethod, useTotpSupported } from '#components/ServerContext';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { TestProviders } from '#mocks';
 
@@ -13,6 +13,7 @@ vi.mock('#hooks/useSyncServerStatus', () => ({
 }));
 vi.mock('#components/ServerContext', () => ({
   useLoginMethod: vi.fn(),
+  useTotpSupported: vi.fn(),
 }));
 vi.mock('@actual-app/core/platform/client/connection', () => ({
   send: vi.fn(),
@@ -22,6 +23,18 @@ describe('TotpSettings', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(send).mockResolvedValue({ enabled: false, pending: false });
+    vi.mocked(useTotpSupported).mockReturnValue(true);
+  });
+
+  it('does not render against a server without two-factor support', () => {
+    vi.mocked(useSyncServerStatus).mockReturnValue('online');
+    vi.mocked(useLoginMethod).mockReturnValue('password');
+    vi.mocked(useTotpSupported).mockReturnValue(false);
+
+    const { container } = render(<TotpSettings />, { wrapper: TestProviders });
+
+    expect(container.firstChild).toBeNull();
+    expect(send).not.toHaveBeenCalled();
   });
 
   it('does not render when there is no server', () => {

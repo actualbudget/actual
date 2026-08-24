@@ -82,6 +82,7 @@ async function needsBootstrap({ url }: { url?: string } = {}) {
         active: boolean;
       }>;
       multiuser: boolean;
+      supportsTotp?: boolean;
     };
   };
 
@@ -97,6 +98,8 @@ async function needsBootstrap({ url }: { url?: string } = {}) {
       { method: 'password', active: true, displayName: 'Password' },
     ],
     multiuser: res.data.multiuser || false,
+    // Absent on servers that predate two-factor support.
+    supportsTotp: res.data.supportsTotp || false,
     hasServer: true,
   };
 }
@@ -275,7 +278,12 @@ async function signIn(
     if (!serverConfig) {
       throw new Error('No sync server configured.');
     }
-    res = await post(serverConfig.SIGNUP_SERVER + '/login', loginInfo);
+    // Declares that this client understands the two-step MFA response. The
+    // server refuses (never bypasses) MFA for clients that omit it.
+    res = await post(serverConfig.SIGNUP_SERVER + '/login', {
+      ...loginInfo,
+      clientSupportsMfa: true,
+    });
   } catch (err) {
     if (err instanceof PostError) {
       return {
@@ -431,7 +439,7 @@ async function totpEnroll(): Promise<
 
     const res = await post(
       serverConfig.SIGNUP_SERVER + '/totp/enroll',
-      { token: userToken },
+      { token: userToken, clientSupportsMfa: true },
       { 'X-ACTUAL-TOKEN': userToken },
     );
 

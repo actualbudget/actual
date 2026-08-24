@@ -121,6 +121,15 @@ describe('auth rate limiting', () => {
   });
 });
 
+describe('/needs-bootstrap', () => {
+  it('advertises two-factor support so newer clients can offer it', async () => {
+    const res = await request(app).get('/needs-bootstrap');
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data).toHaveProperty('supportsTotp', true);
+  });
+});
+
 describe('/change-password', () => {
   let adminUserId,
     basicUserId,
@@ -294,12 +303,29 @@ describe('/login with TOTP enabled', () => {
   });
 
   const signInWithPassword = (password = 'testpassword') =>
-    request(app).post('/login').send({ loginMethod: 'password', password });
+    request(app)
+      .post('/login')
+      .send({ loginMethod: 'password', password, clientSupportsMfa: true });
 
   const verifyCode = (mfaToken, code) =>
     request(app)
       .post('/login')
       .send({ loginMethod: 'password', mfaToken, code });
+
+  it('refuses a client that cannot complete the second step', async () => {
+    await bootstrapPassword('testpassword');
+    enableTotp();
+
+    // An older client omits the marker. It must be refused, never let through
+    // without the second factor.
+    const res = await request(app)
+      .post('/login')
+      .send({ loginMethod: 'password', password: 'testpassword' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty('reason', 'mfa-client-unsupported');
+    expect(res.body.data).toBeUndefined();
+  });
 
   it('returns a challenge instead of a token after the password step', async () => {
     await bootstrapPassword('testpassword');

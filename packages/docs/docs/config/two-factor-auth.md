@@ -50,6 +50,16 @@ yarn workspace @actual-app/sync-server disable-totp
 
 If you run Actual in Docker, run the same command inside the container.
 
+## Client and Server Versions
+
+Both the client and the server need to support this feature:
+
+- The **Two-factor authentication** section only appears in Settings if your
+  server is new enough to support it.
+- Once it is turned on, an older client cannot sign in — it will report that it
+  is too old and needs updating. Actual never lets a client skip the code, so
+  update any device you sign in from before turning this on.
+
 ## Limitations
 
 - Two-factor authentication applies to the server password. It has no effect

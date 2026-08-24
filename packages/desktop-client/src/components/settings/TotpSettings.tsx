@@ -8,7 +8,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
-import { useLoginMethod } from '#components/ServerContext';
+import { useLoginMethod, useTotpSupported } from '#components/ServerContext';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -19,6 +19,7 @@ export function TotpSettings() {
   const { t } = useTranslation();
 
   const loginMethod = useLoginMethod();
+  const totpSupported = useTotpSupported();
   const serverStatus = useSyncServerStatus();
   const dispatch = useDispatch();
 
@@ -33,8 +34,10 @@ export function TotpSettings() {
 
   // Two-factor authentication protects the server password. With OpenID active
   // there is no password to protect, and MFA belongs to the identity provider.
+  // totpSupported keeps the section hidden against servers too old to have the
+  // endpoints at all.
   const isApplicable =
-    serverStatus !== 'no-server' && loginMethod === 'password';
+    serverStatus !== 'no-server' && loginMethod === 'password' && totpSupported;
 
   useEffect(() => {
     if (isApplicable) {

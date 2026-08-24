@@ -82,6 +82,10 @@ app.get('/needs-bootstrap', (req, res) => {
           : getLoginMethod(),
       availableLoginMethods,
       multiuser: getActiveLoginMethod() === 'openid',
+      // Lets a newer client know it may offer the TOTP settings. Older servers
+      // omit this, so the client hides the feature rather than showing controls
+      // backed by endpoints that do not exist.
+      supportsTotp: true,
     },
   });
 });
@@ -196,9 +200,20 @@ app.post('/login', authRateLimiter, mfaStepRateLimiter, async (req, res) => {
         return;
       }
 
-      // First factor passed but no session yet — the client must come back
-      // with a code before it gets a token.
       if (isTotpEnabled()) {
+        // A client that cannot complete the second step is refused outright.
+        // Treating a missing marker as "skip MFA" would make the second factor
+        // trivially bypassable by omitting a field, so this is never a fallback
+        // path — only a clearer error than failing on the challenge response.
+        if (!req.body.clientSupportsMfa) {
+          res
+            .status(400)
+            .send({ status: 'error', reason: 'mfa-client-unsupported' });
+          return;
+        }
+
+        // First factor passed but no session yet — the client must come back
+        // with a code before it gets a token.
         res.send({
           status: 'ok',
           data: { mfaRequired: true, mfaToken: createMfaChallenge(userId) },
@@ -301,6 +316,13 @@ app.get('/totp/status', (req, res) => {
 
 app.post('/totp/enroll', (req, res) => {
   if (!validateTotpAdminSession(req, res)) return;
+
+  // Refuse to arm a second factor from a client that could not then sign in
+  // with it.
+  if (!req.body.clientSupportsMfa) {
+    res.status(400).send({ status: 'error', reason: 'mfa-client-unsupported' });
+    return;
+  }
 
   if (isTotpEnabled()) {
     res.status(400).send({ status: 'error', reason: 'totp-already-enabled' });

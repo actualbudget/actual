@@ -415,6 +415,10 @@ export function Login() {
         return t('That code is not valid. Please try again.');
       case 'mfa-challenge-expired':
         return t('That took too long. Please sign in again.');
+      case 'mfa-client-unsupported':
+        return t(
+          'This version of Actual is too old to sign in with two-factor authentication. Please update it.',
+        );
       case 'too-many-requests':
         return t('Too many attempts. Please wait and try again.');
       case 'network-failure':
