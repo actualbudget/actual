@@ -2,7 +2,10 @@ import express from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { GoCardlessNotConfiguredError } from './errors';
+import {
+  GoCardlessInvalidCredentialsError,
+  GoCardlessNotConfiguredError,
+} from './errors';
 import type { GoCardlessRequisitionId } from './gocardless-node.types';
 
 vi.mock('#util/middlewares', () => ({
@@ -145,6 +148,20 @@ describe('/transactions', () => {
     expect(res.body.data).toMatchObject({
       error_type: 'CONFIG_ERROR',
       error_code: 'GOCARDLESS_NOT_CONFIGURED',
+      status: 'rejected',
+    });
+  });
+
+  it('reports rejected GoCardless credentials as a config error', async () => {
+    getTransactionsWithBalance.mockRejectedValue(
+      new GoCardlessInvalidCredentialsError(),
+    );
+
+    const res = await syncRequest();
+
+    expect(res.body.data).toMatchObject({
+      error_type: 'CONFIG_ERROR',
+      error_code: 'GOCARDLESS_INVALID_CREDENTIALS',
       status: 'rejected',
     });
   });

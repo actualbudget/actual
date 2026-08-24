@@ -1,6 +1,6 @@
 ---
-category: Bugfixes
+category: Bugfix
 authors: [zannis]
 ---
 
-Show a clear "GoCardless is not set up on this server" message with a setup shortcut instead of a generic internal error when syncing after restoring a budget onto a server without GoCardless credentials.
+Show a clear message with a setup shortcut, instead of a generic internal error, when a bank sync fails because the server is missing its GoCardless credentials or they are wrong.

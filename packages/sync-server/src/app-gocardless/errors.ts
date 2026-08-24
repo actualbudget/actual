@@ -35,6 +35,20 @@ export class GoCardlessNotConfiguredError extends Error {
   }
 }
 
+/**
+ * Thrown when GoCardless rejects the configured secret ID / secret key. Only a
+ * failed token request proves the secrets themselves are wrong; a rejection
+ * anywhere else means the session token went stale.
+ */
+export class GoCardlessInvalidCredentialsError extends Error {
+  details: unknown;
+
+  constructor(details: unknown = {}) {
+    super('GoCardless rejected the configured secret ID and secret key');
+    this.details = details;
+  }
+}
+
 export class GenericGoCardlessError extends Error {
   details: unknown;
 

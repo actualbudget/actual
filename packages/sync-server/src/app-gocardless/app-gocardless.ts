@@ -12,6 +12,7 @@ import {
   EndUserAgreementExpiredError,
   GenericGoCardlessError,
   GoCardlessClientError,
+  GoCardlessInvalidCredentialsError,
   GoCardlessNotConfiguredError,
   RateLimitError,
   RequisitionNotLinked,
@@ -311,6 +312,15 @@ app.post(
             status: 'rejected',
             reason:
               'GoCardless is not configured on the server. Re-enter your secret ID and secret key.',
+          });
+          break;
+        case error instanceof GoCardlessInvalidCredentialsError:
+          sendErrorResponse({
+            error_type: 'CONFIG_ERROR',
+            error_code: 'GOCARDLESS_INVALID_CREDENTIALS',
+            status: 'rejected',
+            reason:
+              'GoCardless rejected the configured secret ID and secret key.',
           });
           break;
         case error instanceof RequisitionNotLinked:

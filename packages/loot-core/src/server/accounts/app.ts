@@ -1371,6 +1371,13 @@ function handleSyncError(
       };
     }
 
+    if (err.code === 'GOCARDLESS_INVALID_CREDENTIALS') {
+      return {
+        ...syncError,
+        message: `Failed syncing account ${acct.name}. GoCardless rejected this server's secret ID and key — check them and enter them again.`,
+      };
+    }
+
     return syncError;
   }
 

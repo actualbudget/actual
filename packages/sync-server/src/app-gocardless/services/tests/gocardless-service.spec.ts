@@ -5,6 +5,7 @@ import {
   AccountNotLinkedToRequisition,
   EndUserAgreementExpiredError,
   GenericGoCardlessError,
+  GoCardlessInvalidCredentialsError,
   GoCardlessNotConfiguredError,
   InvalidGoCardlessTokenError,
   InvalidInputDataError,
@@ -101,6 +102,32 @@ describe('goCardlessService', () => {
       await goCardlessService.setToken();
 
       expect(generateTokenSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws GoCardlessInvalidCredentialsError when the secrets are rejected', async () => {
+      // Generating a token is the only call whose 401 means "these secrets are
+      // wrong" — everywhere else it means the session token went stale.
+      setTokenSpy.mockRestore();
+      vi.spyOn(secretsService, 'get').mockReturnValue('wrong-secret');
+      vi.spyOn(client, 'generateToken').mockRejectedValue(
+        new GoCardlessApiError('error: 401', 401, {}),
+      );
+
+      await expect(() => goCardlessService.setToken()).rejects.toThrow(
+        GoCardlessInvalidCredentialsError,
+      );
+    });
+
+    it('still reports other token failures as themselves', async () => {
+      setTokenSpy.mockRestore();
+      vi.spyOn(secretsService, 'get').mockReturnValue('secret');
+      vi.spyOn(client, 'generateToken').mockRejectedValue(
+        new GoCardlessApiError('error: 429', 429, {}),
+      );
+
+      await expect(() => goCardlessService.setToken()).rejects.toThrow(
+        RateLimitError,
+      );
     });
   });
 

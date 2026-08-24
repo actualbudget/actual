@@ -33,15 +33,36 @@ const goCardlessAccount = (id: string) =>
     bank_sync_status: 'not-configured',
   }) as AccountEntity;
 
-function setup({ isAdmin = true }: { isAdmin?: boolean } = {}) {
+const simpleFinAccount = (id: string) =>
+  ({
+    id,
+    name: `Account ${id}`,
+    account_sync_source: 'simpleFin',
+  }) as AccountEntity;
+
+function setup({
+  isAdmin = true,
+  failedSyncError,
+}: {
+  isAdmin?: boolean;
+  failedSyncError?: { type: string; code: string };
+} = {}) {
   const dispatch = vi.fn();
   const syncMutate = vi.fn();
 
   vi.mocked(useDispatch).mockReturnValue(dispatch);
   vi.mocked(useAccounts).mockReturnValue({
-    data: [goCardlessAccount('acct1'), goCardlessAccount('acct2')],
+    data: [
+      goCardlessAccount('acct1'),
+      goCardlessAccount('acct2'),
+      simpleFinAccount('acct3'),
+    ],
   } as ReturnType<typeof useAccounts>);
-  vi.mocked(useFailedAccounts).mockReturnValue(new Map());
+  vi.mocked(useFailedAccounts).mockReturnValue(
+    failedSyncError
+      ? new Map([['acct1', failedSyncError]])
+      : new Map<string, { type: string; code: string }>(),
+  );
   vi.mocked(useCurrentAccess).mockReturnValue({
     cloudFileId: 'file1',
     isAdmin,
@@ -76,9 +97,10 @@ describe('AccountSyncCheck', () => {
     ).toBeInTheDocument();
   });
 
-  it('retries every account once the server credentials are back', async () => {
+  it('retries every GoCardless account, and only those, once the server credentials are back', async () => {
     // GoCardless credentials are server-global: restoring them fixes every
-    // GoCardless account, not just the one whose banner was clicked.
+    // GoCardless account, not just the one whose banner was clicked. Accounts
+    // on other providers were never broken and are left alone.
     const { dispatch, syncMutate } = setup();
     await openBanner();
     await userEvent.click(
@@ -88,7 +110,27 @@ describe('AccountSyncCheck', () => {
     const { onSuccess } = dispatch.mock.calls[0][0].payload.modal.options;
     onSuccess();
 
-    expect(syncMutate).toHaveBeenCalledWith({});
+    expect(syncMutate).toHaveBeenCalledWith({ ids: ['acct1', 'acct2'] });
+  });
+
+  it('keeps offering the shortcut when the entered credentials were rejected', async () => {
+    // a typo in the replacement secrets has to lead back to the form, not to
+    // the generic internal-error dead end the fix exists to remove
+    setup({
+      failedSyncError: {
+        type: 'CONFIG_ERROR',
+        code: 'GOCARDLESS_INVALID_CREDENTIALS',
+      },
+    });
+    await openBanner();
+
+    expect(screen.getByText(/rejected/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /set up gocardless/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /unlink/i }),
+    ).not.toBeInTheDocument();
   });
 
   it('does not offer the shortcut to a user who cannot manage server secrets', async () => {

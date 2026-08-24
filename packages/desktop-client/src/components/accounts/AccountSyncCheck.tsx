@@ -93,6 +93,14 @@ function useErrorMessage() {
               : t(
                   'GoCardless is not set up on this server. Credentials are stored on the server, not in your budget file, so they are not restored from a backup. Ask an administrator to enter the secret ID and key again to reconnect.',
                 );
+          case 'GOCARDLESS_INVALID_CREDENTIALS':
+            return isAdmin
+              ? t(
+                  'GoCardless rejected the secret ID and key set up on this server. Check them in your GoCardless account and enter them again.',
+                )
+              : t(
+                  'GoCardless rejected the secret ID and key set up on this server. Ask an administrator to check them and enter them again.',
+                );
           default:
         }
         break;
@@ -142,19 +150,26 @@ export function AccountSyncCheck() {
   const syncAndDownload = useSyncAndDownloadMutation();
   const setUpGoCardless = useCallback(() => {
     setOpen(false);
+    // The credentials are server-wide, so every GoCardless account that failed
+    // for want of them is retried — not just the one shown here. Accounts on
+    // other providers are left alone: they were never broken, and syncing them
+    // spends their own request allowances.
+    const goCardlessAccountIds = accounts
+      .filter(account => account.account_sync_source === 'goCardless')
+      .map(account => account.id);
+
     dispatch(
       pushModal({
         modal: {
           name: 'gocardless-init',
           options: {
-            // The credentials are server-wide, so every account that failed
-            // for want of them is retried — not just the one shown here.
-            onSuccess: () => syncAndDownload.mutate({}),
+            onSuccess: () =>
+              syncAndDownload.mutate({ ids: goCardlessAccountIds }),
           },
         },
       }),
     );
-  }, [dispatch, syncAndDownload]);
+  }, [accounts, dispatch, syncAndDownload]);
 
   const unlinkAccount = useUnlinkAccountMutation();
   const unlink = useCallback(
@@ -185,8 +200,13 @@ export function AccountSyncCheck() {
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
     (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
+  // both codes are repaired by re-entering the secrets, so a typo in the
+  // replacement leads back to the form rather than to the generic dead end
   const showGoCardlessSetup =
-    type === 'CONFIG_ERROR' && code === 'GOCARDLESS_NOT_CONFIGURED' && isAdmin;
+    type === 'CONFIG_ERROR' &&
+    (code === 'GOCARDLESS_NOT_CONFIGURED' ||
+      code === 'GOCARDLESS_INVALID_CREDENTIALS') &&
+    isAdmin;
 
   return (
     <View>
