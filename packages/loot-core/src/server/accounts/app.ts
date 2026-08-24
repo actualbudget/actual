@@ -1646,16 +1646,25 @@ async function importTransactions({
     throw APIError('transactions-import: accountId must be an id');
   }
 
+  const payeeNameNormalization = opts?.payeeNameNormalization ?? 'title-case';
+  if (!bankSync.PAYEE_NAME_NORMALIZATIONS.includes(payeeNameNormalization)) {
+    throw APIError(
+      `transactions-import: payeeNameNormalization must be one of ${bankSync.PAYEE_NAME_NORMALIZATIONS.join(
+        ', ',
+      )}, got '${String(payeeNameNormalization)}'`,
+    );
+  }
+
   try {
     const reconciled = await bankSync.reconcileTransactions(
       accountId,
       transactions,
-      false,
-      true,
-      isPreview,
-      opts?.defaultCleared,
-      false,
-      opts?.reimportDeleted,
+      {
+        isPreview,
+        defaultCleared: opts?.defaultCleared,
+        reimportDeleted: opts?.reimportDeleted,
+        payeeNameNormalization,
+      },
     );
     return {
       errors: [],
