@@ -18,12 +18,14 @@ import { Link } from '#components/common/Link';
 import { authorizeBank as authorizeEnableBanking } from '#enablebanking';
 import { authorizeBank as authorizeGoCardless } from '#gocardless';
 import { useAccounts } from '#hooks/useAccounts';
+import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useFailedAccounts } from '#hooks/useFailedAccounts';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
 function useErrorMessage() {
   const { t } = useTranslation();
+  const { isAdmin } = useCurrentAccess();
   function getErrorMessage(type: string, code: string) {
     switch (type.toUpperCase()) {
       case 'ITEM_ERROR':
@@ -81,9 +83,16 @@ function useErrorMessage() {
       case 'CONFIG_ERROR':
         switch (code.toUpperCase()) {
           case 'GOCARDLESS_NOT_CONFIGURED':
-            return t(
-              'GoCardless is not set up on this server. Credentials are stored on the server, not in your budget file, so they are not restored from a backup. Enter your secret ID and key again to reconnect.',
-            );
+            // Only an administrator can set the server-wide secrets, so
+            // everybody else is pointed at one instead of at a form that
+            // would be rejected.
+            return isAdmin
+              ? t(
+                  'GoCardless is not set up on this server. Credentials are stored on the server, not in your budget file, so they are not restored from a backup. Enter your secret ID and key again to reconnect.',
+                )
+              : t(
+                  'GoCardless is not set up on this server. Credentials are stored on the server, not in your budget file, so they are not restored from a backup. Ask an administrator to enter the secret ID and key again to reconnect.',
+                );
           default:
         }
         break;
@@ -113,6 +122,7 @@ export function AccountSyncCheck() {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
   const { getErrorMessage } = useErrorMessage();
+  const { isAdmin } = useCurrentAccess();
 
   const reauth = useCallback(
     (acc: AccountEntity) => {
@@ -130,24 +140,21 @@ export function AccountSyncCheck() {
   );
 
   const syncAndDownload = useSyncAndDownloadMutation();
-  const setUpGoCardless = useCallback(
-    (acc: AccountEntity) => {
-      setOpen(false);
-      dispatch(
-        pushModal({
-          modal: {
-            name: 'gocardless-init',
-            options: {
-              // Retry the sync so the account clears its failed state as soon
-              // as the credentials are back in place.
-              onSuccess: () => syncAndDownload.mutate({ id: acc.id }),
-            },
+  const setUpGoCardless = useCallback(() => {
+    setOpen(false);
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'gocardless-init',
+          options: {
+            // The credentials are server-wide, so every account that failed
+            // for want of them is retried — not just the one shown here.
+            onSuccess: () => syncAndDownload.mutate({}),
           },
-        }),
-      );
-    },
-    [dispatch, syncAndDownload],
-  );
+        },
+      }),
+    );
+  }, [dispatch, syncAndDownload]);
 
   const unlinkAccount = useUnlinkAccountMutation();
   const unlink = useCallback(
@@ -179,7 +186,7 @@ export function AccountSyncCheck() {
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
     (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
   const showGoCardlessSetup =
-    type === 'CONFIG_ERROR' && code === 'GOCARDLESS_NOT_CONFIGURED';
+    type === 'CONFIG_ERROR' && code === 'GOCARDLESS_NOT_CONFIGURED' && isAdmin;
 
   return (
     <View>
@@ -236,11 +243,7 @@ export function AccountSyncCheck() {
             </>
           )}
           {showGoCardlessSetup && (
-            <Button
-              variant="primary"
-              autoFocus
-              onPress={() => setUpGoCardless(account)}
-            >
+            <Button variant="primary" autoFocus onPress={setUpGoCardless}>
               <Trans>Set up GoCardless</Trans>
             </Button>
           )}
