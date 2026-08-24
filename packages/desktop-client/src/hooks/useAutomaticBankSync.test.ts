@@ -11,6 +11,7 @@ const NOW = 1_700_000_000_000;
 function account(overrides: Partial<AccountEntity> = {}): AccountEntity {
   return {
     id: 'account-1',
+    account_group_id: null,
     name: 'Checking',
     offbudget: 0,
     closed: 0,
