@@ -1030,10 +1030,25 @@ export function getLayer(
 ): number {
   const resolvedLayerCache = layerCache ?? new Map<NodeKey, VisualLayerIndex>();
 
-  const cachedLayer = resolvedLayerCache.get(key);
+  return getLayerWithCycleGuard(graph, key, resolvedLayerCache, new Set());
+}
+
+function getLayerWithCycleGuard(
+  graph: Graph,
+  key: NodeKey,
+  layerCache: Map<NodeKey, VisualLayerIndex>,
+  visitedInPath: Set<NodeKey>,
+): number {
+  if (visitedInPath.has(key)) {
+    return 0;
+  }
+
+  const cachedLayer = layerCache.get(key);
   if (cachedLayer !== undefined) {
     return cachedLayer;
   }
+
+  visitedInPath.add(key);
 
   // Find parent nodes for the given key
   const parents: NodeKey[] = [];
@@ -1045,7 +1060,8 @@ export function getLayer(
 
   if (parents.length === 0) {
     // No parents: this is a root node, layer 0
-    resolvedLayerCache.set(key, 0);
+    layerCache.set(key, 0);
+    visitedInPath.delete(key);
     return 0;
   }
 
@@ -1054,10 +1070,11 @@ export function getLayer(
     1 +
     Math.max(
       ...parents.map(parentKey =>
-        getLayer(graph, parentKey, resolvedLayerCache),
+        getLayerWithCycleGuard(graph, parentKey, layerCache, visitedInPath),
       ),
     );
-  resolvedLayerCache.set(key, layer);
+  layerCache.set(key, layer);
+  visitedInPath.delete(key);
   return layer;
 }
 

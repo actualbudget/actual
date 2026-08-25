@@ -135,6 +135,19 @@ describe('sankey-spreadsheet', () => {
       expect(getLayer(graph, 'child')).toBe(1);
       expect(getLayer(graph, 'grandchild')).toBe(2);
     });
+
+    it('does not recurse infinitely when links form a cycle', () => {
+      const graph: Graph = new Map();
+      addNode(graph, 'account-a', GraphLayers.Account, 'Account A');
+      addNode(graph, 'account-b', GraphLayers.Account, 'Account B');
+      addValueToLink(graph, 'account-a', 'account-b', 100);
+      addValueToLink(graph, 'account-b', 'account-a', 80);
+
+      expect(() => getLayer(graph, 'account-a')).not.toThrow();
+      expect(() => getLayer(graph, 'account-b')).not.toThrow();
+      expect(Number.isFinite(getLayer(graph, 'account-a'))).toBe(true);
+      expect(Number.isFinite(getLayer(graph, 'account-b'))).toBe(true);
+    });
   });
 
   describe('nodesInLayer', () => {
