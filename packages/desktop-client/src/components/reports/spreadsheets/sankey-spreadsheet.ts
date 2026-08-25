@@ -1030,52 +1030,146 @@ export function getLayer(
 ): number {
   const resolvedLayerCache = layerCache ?? new Map<NodeKey, VisualLayerIndex>();
 
-  return getLayerWithCycleGuard(graph, key, resolvedLayerCache, new Set());
-}
-
-function getLayerWithCycleGuard(
-  graph: Graph,
-  key: NodeKey,
-  layerCache: Map<NodeKey, VisualLayerIndex>,
-  visitedInPath: Set<NodeKey>,
-): number {
-  if (visitedInPath.has(key)) {
-    return 0;
-  }
-
-  const cachedLayer = layerCache.get(key);
+  const cachedLayer = resolvedLayerCache.get(key);
   if (cachedLayer !== undefined) {
     return cachedLayer;
   }
 
-  visitedInPath.add(key);
-
-  // Find parent nodes for the given key
-  const parents: NodeKey[] = [];
-  for (const [parentKey, data] of graph) {
-    if (data.to.has(key)) {
-      parents.push(parentKey);
-    }
-  }
-
-  if (parents.length === 0) {
-    // No parents: this is a root node, layer 0
-    layerCache.set(key, 0);
-    visitedInPath.delete(key);
+  if (!graph.has(key)) {
+    resolvedLayerCache.set(key, 0);
     return 0;
   }
 
-  // Otherwise, 1 + max parent's layer
-  const layer =
-    1 +
-    Math.max(
-      ...parents.map(parentKey =>
-        getLayerWithCycleGuard(graph, parentKey, layerCache, visitedInPath),
-      ),
-    );
-  layerCache.set(key, layer);
-  visitedInPath.delete(key);
-  return layer;
+  const computedLayers = getLayersByStronglyConnectedComponents(graph);
+  computedLayers.forEach((layer, nodeKey) => {
+    resolvedLayerCache.set(nodeKey, layer);
+  });
+
+  return resolvedLayerCache.get(key) ?? 0;
+}
+
+function getLayersByStronglyConnectedComponents(
+  graph: Graph,
+): Map<NodeKey, VisualLayerIndex> {
+  const visitedIndex = new Map<NodeKey, number>();
+  const lowlink = new Map<NodeKey, number>();
+  const stack: NodeKey[] = [];
+  const activeStack = new Set<NodeKey>();
+  const componentByNode = new Map<NodeKey, number>();
+  const components: NodeKey[][] = [];
+  let index = 0;
+
+  function strongConnect(nodeKey: NodeKey) {
+    visitedIndex.set(nodeKey, index);
+    lowlink.set(nodeKey, index);
+    index += 1;
+    stack.push(nodeKey);
+    activeStack.add(nodeKey);
+
+    const node = graph.get(nodeKey);
+    if (node) {
+      for (const childKey of node.to.keys()) {
+        if (!graph.has(childKey)) {
+          continue;
+        }
+
+        if (!visitedIndex.has(childKey)) {
+          strongConnect(childKey);
+          lowlink.set(
+            nodeKey,
+            Math.min(lowlink.get(nodeKey) ?? 0, lowlink.get(childKey) ?? 0),
+          );
+        } else if (activeStack.has(childKey)) {
+          lowlink.set(
+            nodeKey,
+            Math.min(
+              lowlink.get(nodeKey) ?? 0,
+              visitedIndex.get(childKey) ?? 0,
+            ),
+          );
+        }
+      }
+    }
+
+    if (lowlink.get(nodeKey) === visitedIndex.get(nodeKey)) {
+      const componentIndex = components.length;
+      const componentNodes: NodeKey[] = [];
+
+      let poppedNode: NodeKey | undefined;
+      do {
+        poppedNode = stack.pop();
+        if (!poppedNode) {
+          break;
+        }
+
+        activeStack.delete(poppedNode);
+        componentByNode.set(poppedNode, componentIndex);
+        componentNodes.push(poppedNode);
+      } while (poppedNode !== nodeKey);
+
+      components.push(componentNodes);
+    }
+  }
+
+  for (const nodeKey of graph.keys()) {
+    if (!visitedIndex.has(nodeKey)) {
+      strongConnect(nodeKey);
+    }
+  }
+
+  const parentsByComponent = new Map<number, Set<number>>();
+  for (
+    let componentIndex = 0;
+    componentIndex < components.length;
+    componentIndex += 1
+  ) {
+    parentsByComponent.set(componentIndex, new Set());
+  }
+
+  for (const [sourceKey, sourceNode] of graph) {
+    const sourceComponent = componentByNode.get(sourceKey);
+    if (sourceComponent === undefined) {
+      continue;
+    }
+
+    for (const targetKey of sourceNode.to.keys()) {
+      const targetComponent = componentByNode.get(targetKey);
+      if (
+        targetComponent === undefined ||
+        targetComponent === sourceComponent
+      ) {
+        continue;
+      }
+
+      parentsByComponent.get(targetComponent)?.add(sourceComponent);
+    }
+  }
+
+  const layerByComponent = new Map<number, VisualLayerIndex>();
+  function resolveComponentLayer(componentIndex: number): VisualLayerIndex {
+    const cachedComponentLayer = layerByComponent.get(componentIndex);
+    if (cachedComponentLayer !== undefined) {
+      return cachedComponentLayer;
+    }
+
+    const parents = parentsByComponent.get(componentIndex);
+    if (!parents || parents.size === 0) {
+      layerByComponent.set(componentIndex, 0);
+      return 0;
+    }
+
+    const layer =
+      1 + Math.max(...Array.from(parents).map(resolveComponentLayer));
+    layerByComponent.set(componentIndex, layer);
+    return layer;
+  }
+
+  const layerByNode = new Map<NodeKey, VisualLayerIndex>();
+  for (const [nodeKey, componentIndex] of componentByNode) {
+    layerByNode.set(nodeKey, resolveComponentLayer(componentIndex));
+  }
+
+  return layerByNode;
 }
 
 function getComputedNodeLayers(graph: Graph): Map<NodeKey, VisualLayerIndex> {

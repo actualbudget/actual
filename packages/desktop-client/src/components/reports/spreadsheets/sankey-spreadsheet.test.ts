@@ -148,6 +148,26 @@ describe('sankey-spreadsheet', () => {
       expect(Number.isFinite(getLayer(graph, 'account-a'))).toBe(true);
       expect(Number.isFinite(getLayer(graph, 'account-b'))).toBe(true);
     });
+
+    it('uses a shared cache consistently across query orders for cyclic nodes', () => {
+      const graph: Graph = new Map();
+      addNode(graph, 'account-a', GraphLayers.Account, 'Account A');
+      addNode(graph, 'account-b', GraphLayers.Account, 'Account B');
+      addValueToLink(graph, 'account-a', 'account-b', 100);
+      addValueToLink(graph, 'account-b', 'account-a', 80);
+
+      const cacheFromAB = new Map<string, number>();
+      getLayer(graph, 'account-a', cacheFromAB);
+      getLayer(graph, 'account-b', cacheFromAB);
+
+      const cacheFromBA = new Map<string, number>();
+      getLayer(graph, 'account-b', cacheFromBA);
+      getLayer(graph, 'account-a', cacheFromBA);
+
+      expect(cacheFromAB.get('account-a')).toBe(cacheFromBA.get('account-a'));
+      expect(cacheFromAB.get('account-b')).toBe(cacheFromBA.get('account-b'));
+      expect(cacheFromAB.get('account-a')).toBe(cacheFromAB.get('account-b'));
+    });
   });
 
   describe('nodesInLayer', () => {
