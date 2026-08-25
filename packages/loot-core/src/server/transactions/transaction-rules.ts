@@ -510,7 +510,7 @@ export function conditionsToAQL(
       } else if (type === 'string') {
         return {
           [field]: {
-            $transform: !['hasTags', 'hasAnyTag'].includes(op)
+            $transform: !['matches', 'hasTags', 'hasAnyTag'].includes(op)
               ? '$lower'
               : undefined,
             [aqlOp]: value,
@@ -705,7 +705,10 @@ export function conditionsToAQL(
     }
   };
 
-  const filters = conditions.map(mapConditionToActualQL);
+  // Not every caller inspects errors. Fail closed so one invalid condition
+  // cannot silently widen a query to every transaction.
+  const filters =
+    errors.length > 0 ? [{ id: null }] : conditions.map(mapConditionToActualQL);
   return { filters, errors };
 }
 

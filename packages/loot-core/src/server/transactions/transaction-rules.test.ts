@@ -577,6 +577,21 @@ describe('Transaction rules', () => {
     expect(transactions.map(t => t.id)).toEqual(['2', '3']);
 
     transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'matches', value: '^FO+$' },
+    ]);
+    expect(transactions.map(t => t.id).sort()).toEqual(['2', '3']);
+
+    transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'matches', value: '^\\D+$' },
+    ]);
+    expect(transactions.map(t => t.id).sort()).toEqual(['1', '2', '3']);
+
+    transactions = await getMatchingTransactions([
+      { field: 'payee', op: 'matches', value: '^LOWES$' },
+    ]);
+    expect(transactions.map(t => t.id).sort()).toEqual(['3', '4', '5']);
+
+    transactions = await getMatchingTransactions([
       { field: 'notes', op: 'is', value: 'barr' },
     ]);
     expect(transactions.map(t => t.id)).toEqual(['1']);
@@ -850,9 +865,25 @@ describe('Transaction rules', () => {
       ]);
 
       expect(errors).toEqual(['invalid-regex']);
-      expect(filters).toEqual([]);
+      expect(filters).toEqual([{ id: null }]);
     },
   );
+
+  test('invalid matches regex cannot produce an unfiltered query', async () => {
+    const account = await db.insertAccount({ name: 'bank' });
+    await db.insertTransaction({
+      id: '1',
+      date: '2020-10-01',
+      account,
+      amount: 100,
+    });
+
+    const transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'matches', value: 'trailing\\' },
+    ]);
+
+    expect(transactions).toEqual([]);
+  });
 });
 
 describe('Learning categories', () => {

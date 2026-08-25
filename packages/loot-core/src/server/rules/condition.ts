@@ -165,13 +165,12 @@ export const CONDITION_TYPES = {
         return value;
       }
 
-      const normalizedValue = value.toLowerCase();
-
       if (op === 'matches') {
-        assertValidRegex(normalizedValue, fieldName);
+        assertValidRegex(value, fieldName);
+        return value;
       }
 
-      return normalizedValue;
+      return value.toLowerCase();
     },
   },
   number: {
@@ -281,7 +280,7 @@ export class Condition {
       return false;
     }
 
-    if (typeof fieldValue === 'string') {
+    if (typeof fieldValue === 'string' && this.op !== 'matches') {
       fieldValue = fieldValue.toLowerCase();
     }
 
@@ -453,7 +452,7 @@ export class Condition {
           return false;
         }
         try {
-          return new RegExp(this.value).test(fieldValue);
+          return new RegExp(this.value, 'i').test(fieldValue);
         } catch (e) {
           logger.log('invalid regexp in matches condition', e);
           return false;

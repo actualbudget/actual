@@ -237,6 +237,22 @@ describe('Condition', () => {
     );
   });
 
+  test('id matches rejects an empty regex', () => {
+    expect(() => new Condition('matches', 'payee', '', null)).toThrow(
+      'matches must have non-empty string',
+    );
+  });
+
+  test('matches preserves regex syntax and ignores case', () => {
+    const nonDigits = new Condition('matches', 'notes', '^\\D+$', null);
+    expect(nonDigits.value).toBe('^\\D+$');
+    expect(nonDigits.eval({ notes: 'ABC' })).toBe(true);
+    expect(nonDigits.eval({ notes: '123' })).toBe(false);
+
+    const uppercase = new Condition('matches', 'notes', '^FOO$', null);
+    expect(uppercase.eval({ notes: 'foo' })).toBe(true);
+  });
+
   test('number validates value', () => {
     new Condition('isapprox', 'amount', 34, null);
 
