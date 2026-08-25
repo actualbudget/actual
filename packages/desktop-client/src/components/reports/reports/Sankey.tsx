@@ -650,7 +650,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       setDatesInitialized(true);
 
       const currentMonth = monthUtils.currentMonth();
-      let earliestMonth = earliestTransaction
+      const earliestMonth = earliestTransaction
         ? monthUtils.monthFromDate(
             d.parseISO(fromDateRepr(earliestTransaction.date)),
           )
@@ -665,14 +665,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         latestTransactionMonth > currentMonth
           ? latestTransactionMonth
           : currentMonth;
-
-      // Make sure the month selects are at least populated with a
-      // year's worth of months. We can undo this when we have fancier
-      // date selects.
-      const yearAgo = monthUtils.subMonths(latestMonth, 12);
-      if (earliestMonth > yearAgo) {
-        earliestMonth = yearAgo;
-      }
 
       const allMonths = monthUtils
         .rangeInclusive(earliestMonth, latestMonth)
