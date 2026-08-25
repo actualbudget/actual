@@ -101,8 +101,16 @@ import {
 } from '#style/customThemes';
 
 import { ActionPage } from './ActionPage';
-import { BalanceRow, FooterHint, Highlight, KeyChip } from './primitives';
 import {
+  BalanceRow,
+  FooterHint,
+  Highlight,
+  KeyChip,
+  ShortcutHint,
+} from './primitives';
+import {
+  actionItemClassName,
+  destructiveActionClassName,
   dialogEnter,
   overlayEnter,
   pageEnterClassName,
@@ -451,9 +459,11 @@ export function CommandBar() {
     [accounts, closedAccounts, customReports, favoriteRefs],
   );
 
+  const selectedRootContextualItem =
+    page === 'root' ? getContextualItem(selectedValue) : null;
   const openSelectedContextualPage = useCallback(() => {
     if (page !== 'root') return;
-    const item = getContextualItem(selectedValue);
+    const item = selectedRootContextualItem;
     if (!item) return;
 
     setRootSearch(search);
@@ -463,22 +473,18 @@ export function CommandBar() {
     setSearch('');
     setSelectedValue('action:primary:open');
     setAnimatePageChange(true);
-  }, [getContextualItem, page, search, selectedValue]);
+  }, [page, search, selectedRootContextualItem, selectedValue]);
 
   const openEventListener = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        // Do not open CommandBar if a modal is already open
-        if (modalStack.length > 0) return;
-        if (!open) {
-          dispatch(openCommandBar());
-        } else {
-          openSelectedContextualPage();
-        }
-      }
+      if (e.key !== 'k' || (!e.metaKey && !e.ctrlKey) || open) return;
+
+      e.preventDefault();
+      // Do not open CommandBar if a modal is already open
+      if (modalStack.length > 0) return;
+      dispatch(openCommandBar());
     },
-    [dispatch, modalStack.length, open, openSelectedContextualPage],
+    [dispatch, modalStack.length, open],
   );
 
   useEffect(() => {
@@ -511,8 +517,7 @@ export function CommandBar() {
   );
 
   // Built-in quick actions. Each one is wired to an existing app flow that
-  // works from any page. Contributed commands are appended below and kept
-  // separate from these static actions.
+  // works from any page.
   const builtinQuickActions: QuickAction[] = [
     {
       id: 'sync-accounts',
@@ -588,17 +593,12 @@ export function CommandBar() {
       run: () => void dispatch(closeBudget()),
     },
   ];
-  const quickActions: QuickAction[] = [
-    ...builtinQuickActions,
-    ...contributedCommands.map(command => ({
-      id: command.id,
-      name: command.label,
-      run: command.execute,
-    })),
-  ];
+  const quickActions: QuickAction[] = builtinQuickActions;
 
   const runContextualAction = useCallback(
     (action: ActionItem, trigger: ActionTrigger) => {
+      if (trigger === 'secondary' && action.destructive) return;
+
       const execution =
         trigger === 'secondary' ? action.secondaryAction : action.primaryAction;
       if (execution == null) return;
@@ -961,6 +961,37 @@ export function CommandBar() {
     },
   ];
 
+  const pageActionSection: SearchSection | null =
+    contributedCommands.length > 0
+      ? {
+          key: 'page-actions',
+          heading: t('Page actions'),
+          items: contributedCommands.map(command => ({
+            id: command.id,
+            name: command.label,
+            destructive: command.destructive,
+          })),
+          onSelect: ({ id }) => {
+            const command = contributedCommands.find(
+              command => command.id === id,
+            );
+            if (!command) return;
+
+            dispatch(closeCommandBar());
+            void (async () => {
+              try {
+                await command.execute();
+              } catch (error) {
+                console.error('Command bar action failed', {
+                  commandId: command.id,
+                  error,
+                });
+              }
+            })();
+          },
+        }
+      : null;
+
   const favoriteItems = resolvedFavorites.map(({ ref, item }) => {
     if (ref.type === 'account') {
       return {
@@ -1019,7 +1050,18 @@ export function CommandBar() {
       item.name.toLowerCase().includes(searchLower),
     ),
   }));
-  const hasResults = filteredSections.some(section => !!section.items.length);
+  const filteredPageActionSection =
+    pageActionSection == null
+      ? null
+      : {
+          ...pageActionSection,
+          items: pageActionSection.items.filter(item =>
+            item.name.toLowerCase().includes(searchLower),
+          ),
+        };
+  const hasResults =
+    filteredSections.some(section => !!section.items.length) ||
+    (filteredPageActionSection?.items.length ?? 0) > 0;
   const hasRootResults =
     hasResults || recentSection != null || favoriteSection != null;
   const isActionPage = page === 'account-actions' || page === 'report-actions';
@@ -1032,12 +1074,14 @@ export function CommandBar() {
       })),
     )
     .find(item => item.value === selectedValue)?.action;
-  const secondaryShortcutHint = selectedContextualAction?.secondaryAction
-    ? {
-        keys: macPlatform ? ['⌘', '↵'] : ['Ctrl', '↵'],
-        label: selectedContextualAction.secondaryAction.label,
-      }
-    : undefined;
+  const secondaryShortcutHint =
+    selectedContextualAction?.secondaryAction != null &&
+    !selectedContextualAction.destructive
+      ? {
+          keys: ['Ctrl', '↵'],
+          label: selectedContextualAction.secondaryAction.label,
+        }
+      : undefined;
   const commandListClassName = cx(
     css({
       flex: '1 1 auto',
@@ -1068,6 +1112,33 @@ export function CommandBar() {
       label={t('Command Bar')}
       aria-label={t('Command Bar')}
       shouldFilter={false}
+      onKeyDownCapture={event => {
+        if (event.key !== 'Enter') return;
+
+        const isLiteralCtrlEnter =
+          event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey;
+        const isModifiedEnter =
+          event.ctrlKey || event.metaKey || event.altKey || event.shiftKey;
+
+        if (page === 'root' && isModifiedEnter) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (isLiteralCtrlEnter) openSelectedContextualPage();
+          return;
+        }
+
+        if (isActionPage && isModifiedEnter) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (
+            isLiteralCtrlEnter &&
+            selectedContextualAction != null &&
+            !selectedContextualAction.destructive
+          ) {
+            runContextualAction(selectedContextualAction, 'secondary');
+          }
+        }
+      }}
       overlayClassName={css({
         position: 'fixed',
         inset: 0,
@@ -1187,7 +1258,7 @@ export function CommandBar() {
             }}
             onSelectAction={runContextualAction}
             onBack={goBackToRoot}
-            primaryShortcutHint={{ keys: ['↵'], label: t('select') }}
+            primaryShortcutHint={{ keys: ['↵'], label: t('Open') }}
             secondaryShortcutHint={secondaryShortcutHint}
             backShortcutHint={{ keys: ['esc'], label: t('back') }}
           />
@@ -1243,6 +1314,46 @@ export function CommandBar() {
                   )}
                 </Command.Group>
               )}
+              {filteredPageActionSection != null &&
+                filteredPageActionSection.items.length > 0 && (
+                  <Command.Group
+                    heading={filteredPageActionSection.heading}
+                    className={paletteGroupClassName}
+                  >
+                    {filteredPageActionSection.items.map(
+                      ({ id, name, Icon, content, leading, destructive }) => (
+                        <Command.Item
+                          key={id}
+                          onSelect={() =>
+                            filteredPageActionSection.onSelect({ id })
+                          }
+                          value={`page-actions:${id}`}
+                          aria-label={name}
+                          className={
+                            destructive
+                              ? `${actionItemClassName} ${destructiveActionClassName}`
+                              : paletteItemClassName
+                          }
+                        >
+                          {leading ?? (Icon && <Icon width={15} height={15} />)}
+                          {content || (
+                            <Text
+                              style={{
+                                flex: 1,
+                                minWidth: 0,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              <Highlight text={name} query={search} />
+                            </Text>
+                          )}
+                        </Command.Item>
+                      ),
+                    )}
+                  </Command.Group>
+                )}
               {favoriteSection != null && (
                 <Command.Group
                   heading={favoriteSection.heading}
@@ -1345,6 +1456,12 @@ export function CommandBar() {
         >
           <FooterHint keys={['↑', '↓']}>{t('navigate')}</FooterHint>
           <FooterHint keys={['↵']}>{t('select')}</FooterHint>
+          {page === 'root' && selectedRootContextualItem != null && (
+            <ShortcutHint
+              keys={['Ctrl', '↵']}
+              label={<Trans>Open actions</Trans>}
+            />
+          )}
           <FooterHint keys={['esc']}>
             {page === 'root' ? t('close') : t('back')}
           </FooterHint>

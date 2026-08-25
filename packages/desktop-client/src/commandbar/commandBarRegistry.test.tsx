@@ -50,6 +50,64 @@ describe('CommandBar command registry', () => {
     ]);
   });
 
+  it('preserves destructive command metadata', () => {
+    const { result } = renderHook(
+      () =>
+        useRegisteredCommands({
+          ownerId: 'accounts',
+          commands: [
+            {
+              id: 'close',
+              label: 'Close account',
+              destructive: true,
+              execute: vi.fn(),
+            },
+          ],
+        }),
+      { wrapper },
+    );
+
+    expect(result.current[0]).toMatchObject({
+      id: 'accounts:close',
+      label: 'Close account',
+      destructive: true,
+    });
+  });
+
+  it('updates destructive metadata with command presentation', () => {
+    const { result, rerender } = renderHook(
+      props => useRegisteredCommands(props),
+      {
+        wrapper,
+        initialProps: {
+          ownerId: 'accounts',
+          commands: [
+            {
+              id: 'close',
+              label: 'Close account',
+              destructive: false,
+              execute: vi.fn(),
+            },
+          ],
+        },
+      },
+    );
+
+    rerender({
+      ownerId: 'accounts',
+      commands: [
+        {
+          id: 'close',
+          label: 'Close account',
+          destructive: true,
+          execute: vi.fn(),
+        },
+      ],
+    });
+
+    expect(result.current[0]?.destructive).toBe(true);
+  });
+
   it('preserves commands from multiple owners', () => {
     function useTwoOwners() {
       useRegisterCommandBarCommands('accounts', [

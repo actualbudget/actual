@@ -39,6 +39,7 @@ import { isAccountFailedSync } from '#accounts/syncStatus';
 import { AnimatedRefresh } from '#components/AnimatedRefresh';
 import { Search } from '#components/common/Search';
 import { FilterButton } from '#components/filters/FiltersMenu';
+import type { FilterButtonHandle } from '#components/filters/FiltersMenu';
 import { FiltersStack } from '#components/filters/FiltersStack';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 import { NotesButton } from '#components/NotesButton';
@@ -51,6 +52,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 import type { TableRef } from './Account';
+import { AccountCommandBar } from './AccountCommandBar';
 import { Balances } from './Balance';
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
@@ -195,6 +197,7 @@ export function AccountHeader({
     `show-account-${accountId}-net-worth-chart`,
   );
   const showNetWorthChart = showNetWorthChartPref === 'true';
+  const filterButtonRef = useRef<FilterButtonHandle>(null);
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
@@ -271,6 +274,18 @@ export function AccountHeader({
 
   return (
     <>
+      <AccountCommandBar
+        account={account}
+        accountId={accountId}
+        filterButtonRef={filterButtonRef}
+        splitMode={splitsExpanded.state.mode}
+        showNetWorthChart={showNetWorthChart}
+        showReconciled={showReconciled}
+        onAddTransaction={onAddTransaction}
+        onImport={onImport}
+        onToggleSplits={onToggleSplits}
+        onMenuSelect={onMenuSelect}
+      />
       <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
         <View
           style={{
@@ -368,7 +383,7 @@ export function AccountHeader({
           )}
           <View style={{ flexShrink: 0 }}>
             {/* @ts-expect-error fix me */}
-            <FilterButton onApply={onApplyFilter} />
+            <FilterButton ref={filterButtonRef} onApply={onApplyFilter} />
           </View>
           <View style={{ flex: 1 }} />
 

@@ -18,6 +18,7 @@ import type { ReactNode } from 'react';
 export type CommandBarCommand = Readonly<{
   readonly id: string;
   readonly label: string;
+  readonly destructive?: boolean;
   readonly execute: () => void | Promise<void>;
 }>;
 
@@ -119,6 +120,7 @@ class CommandBarCommandRegistry {
         Object.freeze({
           id: command.id,
           label: command.label,
+          destructive: command.destructive,
           execute: command.execute,
         }),
       ),
@@ -147,6 +149,7 @@ class CommandBarCommandRegistry {
           Object.freeze({
             id,
             label: command.label,
+            destructive: command.destructive,
             execute: () => {
               if (!this.registrations.has(registration.registrationId)) {
                 return;
@@ -187,7 +190,8 @@ function haveSamePresentation(
   return first.every(
     (command, index) =>
       command.id === second[index]?.id &&
-      command.label === second[index]?.label,
+      command.label === second[index]?.label &&
+      command.destructive === second[index]?.destructive,
   );
 }
 

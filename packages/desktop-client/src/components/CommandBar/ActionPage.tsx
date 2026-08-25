@@ -16,6 +16,8 @@ import {
   actionHeaderClassName,
   actionHeaderIconClassName,
   actionItemClassName,
+  actionRowIconClassName,
+  actionSearchClassName,
   destructiveActionClassName,
   favoriteButtonClassName,
   paletteGroupClassName,
@@ -55,7 +57,22 @@ function Header({
   const { t } = useTranslation();
   const Leading = header.Icon;
   return (
-    <View className={actionHeaderClassName} role="heading" aria-level={2}>
+    <View
+      className={actionHeaderClassName}
+      role="heading"
+      aria-level={2}
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'nowrap',
+        alignItems: 'center',
+        width: '100%',
+        height: 48,
+        minHeight: 48,
+        maxHeight: 52,
+        boxSizing: 'border-box',
+      }}
+    >
       {onBack != null && (
         <button
           type="button"
@@ -80,7 +97,16 @@ function Header({
           {header.leading ?? (Leading ? <Leading /> : null)}
         </View>
       )}
-      <View style={{ minWidth: 0, flex: 1 }}>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          minWidth: 0,
+          flex: 1,
+          overflow: 'hidden',
+        }}
+      >
         <Text
           style={{
             display: 'block',
@@ -180,7 +206,11 @@ function ActionRow({
       onSelect={() => onSelect(action, 'primary')}
       className={`${actionItemClassName} ${action.destructive ? destructiveActionClassName : ''}`}
     >
-      {action.leading ?? (Icon ? <Icon /> : null)}
+      {(action.leading != null || Icon != null) && (
+        <View className={actionRowIconClassName} aria-hidden>
+          {action.leading ?? (Icon ? <Icon /> : null)}
+        </View>
+      )}
       <View style={{ minWidth: 0, flex: 1 }}>
         <Text
           style={{
@@ -264,6 +294,7 @@ export function ActionPage({
     >
       <Header header={header} onBack={onBack} />
       <Command.Input
+        className={actionSearchClassName}
         ref={inputRef}
         autoFocus
         value={query}
@@ -294,12 +325,6 @@ export function ActionPage({
             event.preventDefault();
             onBack();
           }
-        }}
-        style={{
-          padding: '11px 12px 8px',
-          border: 0,
-          outline: 0,
-          width: '100%',
         }}
       />
       <Command.List className={listClassName} label={t('Available actions')}>

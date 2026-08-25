@@ -58,23 +58,64 @@ export const paletteItemClassName = css({
 
 export const actionHeaderClassName = css({
   display: 'flex',
+  flexDirection: 'row',
+  flexWrap: 'nowrap',
   alignItems: 'center',
   gap: 10,
-  padding: '12px 12px 10px',
+  width: '100%',
+  height: 48,
+  minHeight: 44,
+  maxHeight: 52,
+  boxSizing: 'border-box',
+  padding: '6px 12px',
   borderBottom: '1px solid var(--color-tableBorder)',
 });
 
 export const actionHeaderIconClassName = css({
   display: 'flex',
+  flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'center',
   flexShrink: 0,
-  width: 28,
-  height: 28,
+  width: 24,
+  height: 24,
   borderRadius: 7,
   backgroundColor: 'var(--color-pillBackground)',
   color: 'var(--color-pageTextSubdued)',
-  '& > svg': { width: 16, height: 16 },
+  overflow: 'hidden',
+  '& > svg, & img, & > *': {
+    display: 'block',
+    flexShrink: 0,
+    width: 18,
+    height: 18,
+    maxWidth: 18,
+    maxHeight: 18,
+  },
+});
+
+export const actionSearchClassName = css({
+  flexShrink: 0,
+  boxSizing: 'border-box',
+  width: '100%',
+  height: 42,
+  padding: '0 12px',
+  border: 0,
+  outline: 0,
+  backgroundColor: 'transparent',
+  color: 'var(--color-pageText)',
+  caretColor: 'var(--color-pageText)',
+  fontSize: 16,
+  appearance: 'none',
+  '&::placeholder': {
+    color: 'var(--color-pageTextSubdued)',
+    opacity: 1,
+  },
+  '&:focus': {
+    backgroundColor: 'transparent',
+    border: 0,
+    outline: 0,
+    boxShadow: 'none',
+  },
 });
 
 export const favoriteButtonClassName = css({
@@ -124,6 +165,9 @@ export const actionItemClassName = css({
     flexShrink: 0,
     color: 'var(--color-pageTextSubdued)',
   },
+  '&[data-selected=true] > div:first-child': {
+    color: 'var(--color-pageText)',
+  },
   "&[data-selected='true']": {
     backgroundColor:
       'color-mix(in srgb, var(--color-buttonPrimaryBackground) 15%, transparent)',
@@ -133,6 +177,25 @@ export const actionItemClassName = css({
   },
   padding: '8px 10px',
   '&[data-disabled=true]': { opacity: 0.5, cursor: 'default' },
+});
+
+export const actionRowIconClassName = css({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flex: '0 0 20px',
+  width: 20,
+  height: 20,
+  overflow: 'hidden',
+  color: 'var(--color-pageTextSubdued)',
+  '& > svg, & img, & > *': {
+    display: 'block',
+    flexShrink: 0,
+    width: 18,
+    height: 18,
+    maxWidth: 18,
+    maxHeight: 18,
+  },
 });
 
 export const destructiveActionClassName = css({

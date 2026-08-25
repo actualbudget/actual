@@ -14,6 +14,7 @@ export type SearchableItem = Readonly<{
   readonly Icon?: ComponentType<SVGProps<SVGSVGElement>>;
   /** Custom leading element; takes precedence over {@link SearchableItem.Icon `Icon`} */
   readonly leading?: ReactNode;
+  readonly destructive?: boolean;
 }>;
 
 export type SearchSection = Readonly<{
