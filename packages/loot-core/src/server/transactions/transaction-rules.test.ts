@@ -60,6 +60,16 @@ describe('Transaction rules', () => {
       }),
     ).toBe(null);
 
+    // Invalid regexes are only tolerated when loading legacy persisted rules.
+    expect(
+      makeRule({
+        conditions: JSON.stringify([
+          { op: 'matches', field: 'notes', value: '[unclosed' },
+        ]),
+        actions: '[]',
+      }),
+    ).toBe(null);
+
     // setting an invalid field
     expect(
       makeRule({
@@ -134,6 +144,49 @@ describe('Transaction rules', () => {
     expect(transaction.date).toBe('2019-05-10');
     expect(transaction.notes).toBe('Sarah');
     expect(transaction.category).toBe('food');
+  });
+
+  test('loads legacy invalid-regex rules for editing without executing them', async () => {
+    const invalidPattern = '[unclosed';
+    const id = await db.insertWithUUID('rules', {
+      stage: null,
+      conditions_op: 'and',
+      conditions: JSON.stringify([
+        { op: 'matches', field: 'notes', value: invalidPattern },
+      ]),
+      actions: JSON.stringify([
+        { op: 'set', field: 'notes', value: 'recovered' },
+      ]),
+    });
+
+    await loadRules();
+
+    const [invalidRule] = getRules();
+    expect(invalidRule.id).toBe(id);
+    expect(invalidRule.isExecutable()).toBe(false);
+    expect(invalidRule.serialize().conditions[0]).toMatchObject({
+      op: 'matches',
+      field: 'notes',
+      value: invalidPattern,
+    });
+
+    let transaction = await runRules({
+      date: '2019-05-10',
+      notes: 'unchanged',
+    });
+    expect(transaction.notes).toBe('unchanged');
+
+    await updateRule({
+      id,
+      conditions: [{ op: 'matches', field: 'notes', value: '^unchanged$' }],
+    });
+    expect(getRules()[0].isExecutable()).toBe(true);
+
+    transaction = await runRules({
+      date: '2019-05-10',
+      notes: 'unchanged',
+    });
+    expect(transaction.notes).toBe('recovered');
   });
 
   test('update a rule in the database', async () => {

@@ -2,6 +2,7 @@
 import * as dateFns from 'date-fns';
 
 import { logger } from '#platform/server/log';
+import { RuleError } from '#server/errors';
 import {
   addDays,
   isAfter,
@@ -37,6 +38,8 @@ function assertValidRegex(value, fieldName) {
     );
   }
 }
+
+const invalidConditions = new WeakSet<Condition>();
 
 export const CONDITION_TYPES = {
   date: {
@@ -231,7 +234,7 @@ export class Condition {
   unparsedValue;
   value;
 
-  constructor(op, field, value, options) {
+  constructor(op, field, value, options, { allowInvalidRegex = false } = {}) {
     const typeName = FIELD_TYPES.get(field);
     assert(typeName, 'internal', 'Invalid condition field: ' + field);
 
@@ -263,9 +266,26 @@ export class Condition {
     this.unparsedValue = value;
     this.op = op;
     this.field = field;
-    this.value = type.parse ? type.parse(op, value, field) : value;
+    try {
+      this.value = type.parse ? type.parse(op, value, field) : value;
+    } catch (error) {
+      if (
+        allowInvalidRegex &&
+        error instanceof RuleError &&
+        error.type === 'invalid-regex'
+      ) {
+        this.value = value;
+        invalidConditions.add(this);
+      } else {
+        throw error;
+      }
+    }
     this.options = options;
     this.type = typeName;
+  }
+
+  isValid(): boolean {
+    return !invalidConditions.has(this);
   }
 
   eval(object) {

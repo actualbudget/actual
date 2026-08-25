@@ -121,32 +121,46 @@ export class Rule {
   id?: string;
   stage: 'pre' | null | 'post';
 
-  constructor({
-    id,
-    stage,
-    conditionsOp,
-    conditions,
-    actions,
-  }: {
-    id?: string;
-    stage?: 'pre' | null | 'post';
-    conditionsOp;
-    conditions;
-    actions;
-  }) {
+  constructor(
+    {
+      id,
+      stage,
+      conditionsOp,
+      conditions,
+      actions,
+    }: {
+      id?: string;
+      stage?: 'pre' | null | 'post';
+      conditionsOp;
+      conditions;
+      actions;
+    },
+    {
+      allowInvalidRegex = false,
+    }: {
+      allowInvalidRegex?: boolean;
+    } = {},
+  ) {
     this.id = id;
     this.stage = stage ?? null;
     this.conditionsOp = conditionsOp;
     this.conditions = conditions.map(
-      c => new Condition(c.op, c.field, c.value, c.options),
+      c =>
+        new Condition(c.op, c.field, c.value, c.options, {
+          allowInvalidRegex,
+        }),
     );
     this.actions = actions.map(
       a => new Action(a.op, a.field, a.value, a.options),
     );
   }
 
+  isExecutable(): boolean {
+    return this.conditions.every(condition => condition.isValid());
+  }
+
   evalConditions(object): boolean {
-    if (this.conditions.length === 0) {
+    if (!this.isExecutable() || this.conditions.length === 0) {
       return false;
     }
 
