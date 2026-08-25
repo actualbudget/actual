@@ -3,6 +3,8 @@ import * as sheet from '#server/sheet';
 import { getBankSyncError } from '#shared/errors';
 import type { ServerHandlers } from '#types/server-handlers';
 
+import { app as accountGroupsApp } from './account-groups/app';
+import { app as accountsApp } from './accounts/app';
 import { installAPI } from './api';
 import { createBudget } from './budget/base';
 import * as prefs from './prefs';
@@ -52,6 +54,54 @@ describe('API handlers', () => {
       ).rejects.toThrow('Bank sync error: connection-failed');
 
       expect(getBankSyncError).toHaveBeenCalledWith('connection-failed');
+    });
+  });
+
+  describe('api/account-groups', () => {
+    beforeEach(global.emptyDatabase());
+
+    beforeEach(async () => {
+      await prefs.loadPrefs();
+
+      handlers['account-groups-get'] =
+        accountGroupsApp.handlers['account-groups-get'];
+      handlers['account-group-create'] =
+        accountGroupsApp.handlers['account-group-create'];
+      handlers['account-group-update'] =
+        accountGroupsApp.handlers['account-group-update'];
+      handlers['account-group-delete'] =
+        accountGroupsApp.handlers['account-group-delete'];
+      handlers['accounts-get'] = accountsApp.handlers['accounts-get'];
+    });
+
+    it('round-trips account groups and exposes account_group_id on accounts', async () => {
+      const id = await handlers['api/account-group-create']({
+        group: { name: 'Savings' },
+      });
+      await expect(handlers['api/account-groups-get']()).resolves.toEqual([
+        { id, name: 'Savings' },
+      ]);
+
+      await handlers['api/account-group-update']({
+        id,
+        fields: { name: 'ISAs' },
+      });
+      await expect(handlers['api/account-groups-get']()).resolves.toEqual([
+        { id, name: 'ISAs' },
+      ]);
+
+      await db.insertAccount({ id: 'acct1', name: 'Marcus' });
+      await handlers['api/account-update']({
+        id: 'acct1',
+        fields: { account_group_id: id },
+      });
+      const accounts = await handlers['api/accounts-get']();
+      expect(accounts[0]).toMatchObject({ id: 'acct1', account_group_id: id });
+
+      await handlers['api/account-group-delete']({ id });
+      await expect(handlers['api/account-groups-get']()).resolves.toEqual([]);
+      const after = await handlers['api/accounts-get']();
+      expect(after[0].account_group_id).toBeNull();
     });
   });
 
@@ -136,6 +186,67 @@ describe('API handlers', () => {
       expect(group?.categories?.[0]).toHaveProperty('received', 5000);
       expect(group?.categories?.[0]).toHaveProperty('balance', 1000);
       expect(group?.categories?.[0]).toHaveProperty('carryover', false);
+    });
+  });
+
+  describe('api/rule-create', () => {
+    beforeEach(global.emptyDatabase());
+
+    beforeEach(async () => {
+      await prefs.loadPrefs();
+    });
+
+    test.each(['default', null, 'pre', 'post'] as const)(
+      'normalizes %s input at the API boundary',
+      async stage => {
+        const rule = {
+          stage,
+          conditionsOp: 'and' as const,
+          conditions: [],
+          actions: [],
+        };
+        const internalRule = {
+          id: 'rule-id',
+          ...rule,
+          stage: stage === 'default' ? null : stage,
+        };
+
+        handlers['rule-add'] = vi.fn().mockResolvedValue(internalRule);
+
+        await expect(handlers['api/rule-create']({ rule })).resolves.toEqual(
+          internalRule,
+        );
+        expect(handlers['rule-add']).toHaveBeenCalledWith({
+          ...rule,
+          stage: internalRule.stage,
+        });
+      },
+    );
+  });
+
+  describe('api/rule-update', () => {
+    beforeEach(global.emptyDatabase());
+
+    beforeEach(async () => {
+      await prefs.loadPrefs();
+    });
+
+    test('normalizes default input at the API boundary', async () => {
+      const rule = {
+        id: 'rule-id',
+        stage: 'default' as const,
+        conditionsOp: 'and' as const,
+        conditions: [],
+        actions: [],
+      };
+      const internalRule = { ...rule, stage: null };
+
+      handlers['rule-update'] = vi.fn().mockResolvedValue(internalRule);
+
+      await expect(handlers['api/rule-update']({ rule })).resolves.toEqual(
+        internalRule,
+      );
+      expect(handlers['rule-update']).toHaveBeenCalledWith(internalRule);
     });
   });
 });
