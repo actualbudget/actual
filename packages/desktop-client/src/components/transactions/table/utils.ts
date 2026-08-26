@@ -118,24 +118,33 @@ export function selectAscDesc(
     : defaultAscDesc;
 }
 
+// An "empty" value from the perspective of rules: rules are only allowed to
+// fill fields the user left empty.
+export function isEmptyRuleTarget(value: unknown) {
+  return value == null || value === '' || value === 0 || value === false;
+}
+
 // Decides whether a rule result should be applied to a field while the user is
 // entering a new transaction. By default rules only fill fields the user left
-// empty, so their manual input isn't overwritten. The exception is the notes
-// field: append/prepend notes rules intentionally preserve the existing note and
-// add text before or after it, so we allow those through. The check stays
-// idempotent — rules are re-run on every keystroke during entry, so we must not
-// re-add text that the previous run already applied.
+// empty, so their manual input isn't overwritten. Fields the user explicitly
+// emptied (`clearedFieldNames`) also stay empty — clearing a pre-assigned
+// value is manual input too, so rules must not re-fill it on this or any later
+// run while the transaction is still being entered. The exception is the notes
+// field: append/prepend notes rules intentionally preserve the existing note
+// and add text before or after it, so we allow those through. The check stays
+// idempotent — rules are re-run on every keystroke during entry, so we must
+// not re-add text that the previous run already applied.
 export function shouldApplyRuleChange(
   field: string,
   currentValue: unknown,
   nextValue: unknown,
+  clearedFieldNames: readonly string[] = [],
 ) {
-  if (
-    currentValue == null ||
-    currentValue === '' ||
-    currentValue === 0 ||
-    currentValue === false
-  ) {
+  if (clearedFieldNames.includes(field)) {
+    return false;
+  }
+
+  if (isEmptyRuleTarget(currentValue)) {
     return true;
   }
 
