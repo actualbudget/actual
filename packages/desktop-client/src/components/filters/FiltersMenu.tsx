@@ -659,20 +659,6 @@ export function FilterButton<T extends RuleConditionEntity>({
     { fieldsOpen: false, condOpen: false, field: null, value: null },
   );
 
-  useEffect(() => {
-    const handleCloseOuterPopovers = () => {
-      console.log('>>> handleCloseOuterPopovers called!');
-      dispatch({ type: 'close' });
-    };
-    document.addEventListener('close-outer-popovers', handleCloseOuterPopovers);
-    return () => {
-      document.removeEventListener(
-        'close-outer-popovers',
-        handleCloseOuterPopovers,
-      );
-    };
-  }, []);
-
   async function onValidateAndApply(cond: T) {
     // @ts-expect-error - fix me
     cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });

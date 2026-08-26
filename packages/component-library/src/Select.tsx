@@ -114,15 +114,6 @@ export function Select<const Value = string>({
         onOpenChange={() => setIsOpen(false)}
         style={popoverStyle}
         isNonModal={isNonModal}
-        shouldCloseOnInteractOutside={element => {
-          if (isNonModal) {
-            const outerPopover = triggerRef.current?.closest('[data-popover]');
-            if (outerPopover && !outerPopover.contains(element)) {
-              document.dispatchEvent(new CustomEvent('close-outer-popovers'));
-            }
-          }
-          return true;
-        }}
       >
         <Menu
           onMenuSelect={item => {

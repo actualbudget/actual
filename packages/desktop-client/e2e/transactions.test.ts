@@ -30,6 +30,32 @@ test.describe('Transactions', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('closes the filter with one outside click while a nested select is open', async () => {
+    const filterTooltip = await accountPage.filterBy('Category');
+    await filterTooltip.locator
+      .getByRole('button', { name: 'Category', exact: true })
+      .click();
+
+    await expect(
+      page.getByRole('button', { name: 'Category group', exact: true }),
+    ).toBeVisible();
+
+    const accountNameBounds = await accountPage.accountName.boundingBox();
+    if (!accountNameBounds) {
+      throw new Error('Account name is not visible');
+    }
+
+    await page.mouse.click(
+      accountNameBounds.x + accountNameBounds.width / 2,
+      accountNameBounds.y + accountNameBounds.height / 2,
+    );
+
+    await expect(filterTooltip.locator).not.toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Category group', exact: true }),
+    ).not.toBeVisible();
+  });
+
   test.describe('filters transactions', () => {
     // Reset filters
     test.afterEach(async () => {
