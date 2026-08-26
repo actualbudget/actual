@@ -95,7 +95,6 @@ h1 {
 .section-header {
   margin-top: 10px;
   padding-top: 6px;
-  border-top: 1px solid var(--ifm-color-emphasis-200);
 }
 
 .section-header > .menu__list-item-collapsible > .menu__link {
