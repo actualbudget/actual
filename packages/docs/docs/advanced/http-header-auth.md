@@ -1,4 +1,4 @@
-# Authenticating With HTTP Headers
+# Authenticating with HTTP Headers
 
 :::note
 Client Version 24.6.0 and

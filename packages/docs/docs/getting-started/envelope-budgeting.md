@@ -1,4 +1,4 @@
-# Envelope budgeting
+# Envelope Budgeting
 
 ## Introduction
 
