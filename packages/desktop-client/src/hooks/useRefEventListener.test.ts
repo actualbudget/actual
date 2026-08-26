@@ -67,6 +67,33 @@ describe('useRefEventListener', () => {
     expect(secondCallback).toHaveBeenCalledWith(event);
   });
 
+  it('moves the listener when the ref points at a new element', () => {
+    const el1 = makeMockElement();
+    const el2 = makeMockElement();
+    const ref = { current: el1 } as unknown as RefObject<HTMLElement | null>;
+
+    const { rerender } = renderHook(() =>
+      useRefEventListener(ref, 'click', vi.fn()),
+    );
+
+    expect(el1.addEventListener).toHaveBeenCalledTimes(1);
+
+    // Simulate the trigger element unmounting and a new one mounting,
+    // e.g. a trigger button temporarily replaced by a rename input.
+    ref.current = null;
+    rerender();
+
+    expect(el1.removeEventListener).toHaveBeenCalledTimes(1);
+
+    ref.current = el2 as unknown as HTMLElement;
+    rerender();
+
+    expect(el2.addEventListener).toHaveBeenCalledTimes(1);
+
+    const registeredListener = el2.addEventListener.mock.calls[0][1];
+    expect(registeredListener).toEqual(expect.any(Function));
+  });
+
   it('rebinds when the event name changes', () => {
     const el = makeMockElement();
     const ref = { current: el } as unknown as RefObject<HTMLElement | null>;
