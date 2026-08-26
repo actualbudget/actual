@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 import type { RefObject } from 'react';
 
 export function useRefEventListener<
@@ -10,12 +10,15 @@ export function useRefEventListener<
   // oxlint-disable-next-line typescript/no-explicit-any
   callback: (this: ElementType, ev: HTMLElementEventMap[EventType]) => any,
 ) {
-  // Keep the latest callback in a ref so the effects below don't need to
-  // depend on it. Callers routinely pass a new inline function every render,
-  // which would otherwise tear down and re-add the native listener on every
-  // render instead of only when the target element or `event` change.
-  const callbackRef = useRef(callback);
-  callbackRef.current = callback;
+  // An Effect Event always sees the latest committed callback, so callers can
+  // pass a new inline function every render without tearing down and
+  // re-adding the native listener. React invokes Effect Events with
+  // `this === undefined`, so the target element is passed explicitly to
+  // preserve the callback's `this: ElementType` contract.
+  const onEvent = useEffectEvent(
+    (el: ElementType, ev: HTMLElementEventMap[EventType]) =>
+      callback.call(el, ev),
+  );
 
   const attachedRef = useRef<{
     el: EventTarget;
@@ -39,10 +42,7 @@ export function useRefEventListener<
 
     if (el && !attachedRef.current) {
       const listener: EventListener = e =>
-        callbackRef.current.call(
-          el as ElementType,
-          e as HTMLElementEventMap[EventType],
-        );
+        onEvent(el as ElementType, e as HTMLElementEventMap[EventType]);
       el.addEventListener(event, listener);
       attachedRef.current = { el, event, listener };
     }
