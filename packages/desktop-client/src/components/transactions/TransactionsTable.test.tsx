@@ -22,7 +22,15 @@ import type {
   TagEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
@@ -33,10 +41,15 @@ import { SelectedProviderWithItems } from '#hooks/useSelected';
 import { SplitsExpandedProvider } from '#hooks/useSplitsExpanded';
 import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
 import { createTestQueryClient, TestProviders } from '#mocks';
+import * as modalsSlice from '#modals/modalsSlice';
 import { payeeQueries } from '#payees';
 import { tagQueries } from '#tags/queries';
 
-import { TransactionTable } from './TransactionsTable';
+import {
+  DEFAULT_AMOUNT_COLUMN_WIDTHS,
+  TransactionTable,
+  useAmountColumnWidths,
+} from './TransactionsTable';
 
 const queryClient = createTestQueryClient();
 
@@ -105,6 +118,7 @@ vi.mock('../../hooks/useCategories', () => ({
 
 const usualGroup = categoryGroups[1];
 let schedules: ScheduleEntity[] = [];
+const createScheduleMock = vi.fn(async () => 'new-schedule');
 
 function generateTransactions(
   count: number,
@@ -153,6 +167,10 @@ type LiveTransactionTableProps = {
   isAdding: boolean;
   onTransactionsChange?: (newTrans: TransactionEntity[]) => void;
   onCloseAddTransaction?: () => void;
+  onApplyRules?: (
+    transaction: TransactionEntity,
+    updatedFieldName?: string | null,
+  ) => Promise<TransactionEntity>;
 };
 
 function LiveTransactionTable(props: LiveTransactionTableProps) {
@@ -261,11 +279,13 @@ function initBasicServer() {
       id: 'new-tag',
       ...tag,
     }),
+    'schedule/create': createScheduleMock,
   });
 }
 
 beforeEach(() => {
   schedules = [];
+  createScheduleMock.mockClear();
   initBasicServer();
 });
 
@@ -1052,6 +1072,30 @@ describe('Transactions', () => {
     expect(queryNewField(container, 'debit').textContent).toBe('0.00');
   });
 
+  test('clicking cleared while editing the amount keeps the amount', async () => {
+    const { container, updateProps } = renderTransactions({
+      // Rules run over the backend, so saving a new transaction only lands in
+      // state a tick later. Clicking another cell in the meantime must not
+      // read back the pre-save amount.
+      onApplyRules: async transaction => transaction,
+    });
+    updateProps({ isAdding: true });
+
+    const input = await editNewField(container, 'debit');
+    await userEvent.clear(input);
+    await userEvent.type(input, '100');
+
+    // Click "cleared" directly, without tabbing/entering out of the amount
+    // field first
+    await userEvent.click(
+      within(queryNewField(container, 'cleared')).getByTestId('cell-button'),
+    );
+
+    await waitFor(() =>
+      expect(queryNewField(container, 'debit').textContent).toBe('100.00'),
+    );
+  });
+
   test('adding a new split transaction works', async () => {
     const { container, getTransactions, updateProps } = renderTransactions();
     updateProps({ isAdding: true });
@@ -1124,6 +1168,177 @@ describe('Transactions', () => {
     expect(container.querySelector('[data-testid="new-transaction"]')).toBe(
       null,
     );
+  });
+
+  describe('Schedule button for future-dated new transactions', () => {
+    const scheduleButtonSelector =
+      '[data-testid="new-transaction"] [data-testid="schedule-button"]';
+
+    test('shows the Schedule button for a future-dated new transaction', async () => {
+      const { container, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '02/01/2017[Tab]');
+
+      expect(container.querySelector(scheduleButtonSelector)).toBeTruthy();
+    });
+
+    test('hides the Schedule button for a non-future-dated new transaction', () => {
+      const { container, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      expect(container.querySelector(scheduleButtonSelector)).toBeNull();
+    });
+
+    test('creates a schedule directly when the date is within the upcoming window', async () => {
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '01/02/2017[Tab]');
+
+      const scheduleButton = container.querySelector(scheduleButtonSelector)!;
+      await userEvent.click(scheduleButton);
+
+      await waitFor(() => {
+        expect(createScheduleMock).toHaveBeenCalled();
+      });
+      expect(getTransactions().length).toBe(5);
+    });
+
+    test('opens the convert-to-schedule modal when the date is beyond the upcoming window', async () => {
+      const pushModalSpy = vi.spyOn(modalsSlice, 'pushModal');
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '02/01/2017[Tab]');
+
+      const scheduleButton = container.querySelector(scheduleButtonSelector)!;
+      await userEvent.click(scheduleButton);
+
+      await waitFor(() => {
+        expect(pushModalSpy).toHaveBeenCalled();
+      });
+      expect(createScheduleMock).not.toHaveBeenCalled();
+      expect(getTransactions().length).toBe(5);
+
+      const modal = pushModalSpy.mock.calls[0][0].modal as Extract<
+        modalsSlice.Modal,
+        { name: 'convert-to-schedule' }
+      >;
+      expect(modal.name).toBe('convert-to-schedule');
+      pushModalSpy.mockRestore();
+    });
+
+    test('confirming the modal creates a schedule', async () => {
+      const pushModalSpy = vi.spyOn(modalsSlice, 'pushModal');
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '02/01/2017[Tab]');
+
+      const scheduleButton = container.querySelector(scheduleButtonSelector)!;
+      await userEvent.click(scheduleButton);
+
+      await waitFor(() => {
+        expect(pushModalSpy).toHaveBeenCalled();
+      });
+
+      const modal = pushModalSpy.mock.calls[0][0].modal as Extract<
+        modalsSlice.Modal,
+        { name: 'convert-to-schedule' }
+      >;
+      modal.options.onConfirm();
+
+      await waitFor(() => {
+        expect(createScheduleMock).toHaveBeenCalled();
+      });
+      expect(getTransactions().length).toBe(5);
+      pushModalSpy.mockRestore();
+    });
+
+    test('cancelling the modal keeps the transaction without creating a schedule', async () => {
+      const pushModalSpy = vi.spyOn(modalsSlice, 'pushModal');
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '02/01/2017[Tab]');
+
+      const scheduleButton = container.querySelector(scheduleButtonSelector)!;
+      await userEvent.click(scheduleButton);
+
+      await waitFor(() => {
+        expect(pushModalSpy).toHaveBeenCalled();
+      });
+
+      const modal = pushModalSpy.mock.calls[0][0].modal as Extract<
+        modalsSlice.Modal,
+        { name: 'convert-to-schedule' }
+      >;
+      modal.options.onCancel?.();
+
+      expect(createScheduleMock).not.toHaveBeenCalled();
+      expect(getTransactions().length).toBe(5);
+      pushModalSpy.mockRestore();
+    });
+
+    test('ctrl/cmd+shift+enter creates a schedule when the date is within the upcoming window', async () => {
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '01/02/2017[Tab]');
+
+      await userEvent.keyboard('{Control>}{Shift>}{Enter}{/Shift}{/Control}');
+
+      await waitFor(() => {
+        expect(createScheduleMock).toHaveBeenCalled();
+      });
+      expect(getTransactions().length).toBe(5);
+    });
+
+    test('ctrl/cmd+shift+enter opens the convert-to-schedule modal when the date is beyond the upcoming window', async () => {
+      const pushModalSpy = vi.spyOn(modalsSlice, 'pushModal');
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const dateInput = queryNewField(container, 'date', 'input');
+      await userEvent.clear(dateInput);
+      await userEvent.type(dateInput, '02/01/2017[Tab]');
+
+      await userEvent.keyboard('{Control>}{Shift>}{Enter}{/Shift}{/Control}');
+
+      await waitFor(() => {
+        expect(pushModalSpy).toHaveBeenCalled();
+      });
+      expect(createScheduleMock).not.toHaveBeenCalled();
+      expect(getTransactions().length).toBe(5);
+      pushModalSpy.mockRestore();
+    });
+
+    test('ctrl/cmd+shift+enter does nothing for a non-future-dated transaction', async () => {
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+
+      const input = await editNewField(container, 'notes');
+      await userEvent.clear(input);
+      await userEvent.type(input, 'test');
+
+      await userEvent.keyboard('{Control>}{Shift>}{Enter}{/Shift}{/Control}');
+
+      expect(createScheduleMock).not.toHaveBeenCalled();
+      expect(getTransactions().length).toBe(5);
+    });
   });
 
   test('ctrl/cmd+enter adds transaction and closes form', async () => {
@@ -1532,5 +1747,118 @@ describe('Transactions', () => {
       // Verify the tag was added to the note correctly
       expect(getTransactions()[2].notes).toBe('spending on #coffee');
     });
+  });
+
+  describe('Notes tooltip', () => {
+    // jsdom doesn't lay out elements, so scrollWidth/clientWidth are always
+    // 0. Stub them so the truncation check has something meaningful to read.
+    let isOverflowing = false;
+    const originalScrollWidth = Object.getOwnPropertyDescriptor(
+      Element.prototype,
+      'scrollWidth',
+    )!;
+    const originalClientWidth = Object.getOwnPropertyDescriptor(
+      Element.prototype,
+      'clientWidth',
+    )!;
+
+    beforeAll(() => {
+      Object.defineProperty(Element.prototype, 'scrollWidth', {
+        configurable: true,
+        get() {
+          return isOverflowing ? 200 : 100;
+        },
+      });
+      Object.defineProperty(Element.prototype, 'clientWidth', {
+        configurable: true,
+        get() {
+          return 100;
+        },
+      });
+    });
+
+    afterAll(() => {
+      Object.defineProperty(
+        Element.prototype,
+        'scrollWidth',
+        originalScrollWidth,
+      );
+      Object.defineProperty(
+        Element.prototype,
+        'clientWidth',
+        originalClientWidth,
+      );
+    });
+
+    test('shows the full note and renders tags when the note is truncated', async () => {
+      isOverflowing = true;
+      const transactions = generateTransactions(1);
+      transactions[0].notes =
+        'a very long note about weekend spending #groceries that overflows the column';
+
+      const { container } = renderTransactions({ transactions });
+      const notesText = queryField(container, 'notes', 'span', 0);
+
+      await userEvent.hover(notesText);
+
+      const tooltip = await screen.findByRole('tooltip', {}, { timeout: 1000 });
+      expect(tooltip.textContent).toContain(
+        'a very long note about weekend spending',
+      );
+      expect(
+        within(tooltip).getByRole('button', { name: '#groceries' }),
+      ).toBeInTheDocument();
+    });
+
+    test('does not show a tooltip when the note fits without truncation', async () => {
+      isOverflowing = false;
+      const transactions = generateTransactions(1);
+      transactions[0].notes = 'short note';
+
+      const { container } = renderTransactions({ transactions });
+      const notesText = queryField(container, 'notes', 'span', 0);
+
+      await userEvent.hover(notesText);
+
+      // Wait past the tooltip's hover delay to make sure it never opens
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 700));
+      });
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
+  });
+});
+
+describe('useAmountColumnWidths', () => {
+  function transaction(amount: number) {
+    return generateTransaction({ account: accounts[0].id, amount })[0];
+  }
+
+  it('does not narrow below the default minimum for short-value accounts', () => {
+    const { result } = renderHook(() =>
+      useAmountColumnWidths([transaction(150), transaction(-200)], null),
+    );
+
+    expect(result.current).toEqual(DEFAULT_AMOUNT_COLUMN_WIDTHS);
+  });
+
+  it('widens the balance column for a long formatted balance value', () => {
+    const { result } = renderHook(() =>
+      useAmountColumnWidths([transaction(150)], { 'tx-1': 123456789012345 }),
+    );
+
+    expect(result.current.balance).toBeGreaterThan(
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.balance,
+    );
+  });
+
+  it('widens the amount column for a long formatted amount', () => {
+    const { result } = renderHook(() =>
+      useAmountColumnWidths([transaction(123456789012)], null),
+    );
+
+    expect(result.current.amount).toBeGreaterThan(
+      DEFAULT_AMOUNT_COLUMN_WIDTHS.amount,
+    );
   });
 });

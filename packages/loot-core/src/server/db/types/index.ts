@@ -35,6 +35,14 @@ export type DbAccount = {
     | 'timed-out'
     | 'account-missing'
     | null;
+  account_group_id?: DbAccountGroup['id'] | null;
+};
+
+export type DbAccountGroup = {
+  id: string;
+  name: string;
+  sort_order: number;
+  tombstone: 1 | 0;
 };
 
 export type DbBank = {
@@ -353,6 +361,7 @@ export type DbViewSchedule = {
   _date: JsonString;
   _conditions: JsonString;
   _actions: JsonString;
+  _has_splits: 0 | 1;
 };
 
 export type DbTag = {
