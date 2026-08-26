@@ -83,24 +83,27 @@ describe('useRefEventListener', () => {
   });
 
   it('rebinds when the ref target element changes without the ref object changing', () => {
-    const elA = makeMockElement();
-    const elB = makeMockElement();
-    const ref = { current: elA } as unknown as RefObject<HTMLElement | null>;
+    const elA = document.createElement('button');
+    const elB = document.createElement('button');
+    const addListenerA = vi.spyOn(elA, 'addEventListener');
+    const removeListenerA = vi.spyOn(elA, 'removeEventListener');
+    const addListenerB = vi.spyOn(elB, 'addEventListener');
+    const ref = { current: elA } satisfies RefObject<HTMLElement | null>;
 
     const { rerender } = renderHook(() =>
       useRefEventListener(ref, 'click', vi.fn()),
     );
 
-    expect(elA.addEventListener).toHaveBeenCalledTimes(1);
+    expect(addListenerA).toHaveBeenCalledTimes(1);
 
     // Simulate a caller that conditionally unmounts the element the ref is
     // attached to and mounts a different one in its place, reusing the same
     // RefObject (e.g. swapping a button for an input while editing).
-    ref.current = elB as unknown as HTMLElement;
+    ref.current = elB;
     rerender();
 
-    expect(elA.removeEventListener).toHaveBeenCalledTimes(1);
-    expect(elB.addEventListener).toHaveBeenCalledTimes(1);
+    expect(removeListenerA).toHaveBeenCalledTimes(1);
+    expect(addListenerB).toHaveBeenCalledTimes(1);
   });
 
   it('removes the listener on unmount', () => {
