@@ -30,7 +30,7 @@ test.describe('Transactions', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('closes the filter with one outside click while a nested select is open', async () => {
+  test('closes filter popovers with one outside click', async () => {
     const filterTooltip = await accountPage.filterBy('Category');
     await filterTooltip.locator
       .getByRole('button', { name: 'Category', exact: true })
