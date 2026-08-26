@@ -1917,11 +1917,15 @@ function TransactionEditUnconnected({
             // (see shouldApplyRuleChange).
             // Or update all fields if the payee changes (assists location-based entry by
             // applying rules to prefill category, notes, etc. based on the selected payee)
+            // — except fields the user explicitly cleared, which must stay empty.
             if (
-              updatedField === 'payee' ||
-              shouldApplyRuleChange(field, newTransaction[field], diff[field], [
-                ...clearedFieldNames.current,
-              ])
+              !clearedFieldNames.current.has(field) &&
+              (updatedField === 'payee' ||
+                shouldApplyRuleChange(
+                  field,
+                  newTransaction[field],
+                  diff[field],
+                ))
             ) {
               (newTransaction as Record<string, unknown>)[field] = diff[field];
               changedFields.add(field);
