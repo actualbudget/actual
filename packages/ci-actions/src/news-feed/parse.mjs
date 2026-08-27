@@ -11,11 +11,28 @@ const AUTO_GENERATED_SENTINEL = '<!-- release-notes:auto-generated -->';
 const RELEASE_DATE_PATTERN = /^Release date:\s*(\d{4}-\d{2}-\d{2})\s*$/m;
 const DOCKER_TAG_PATTERN = /^\*\*Docker Tag:.*\*\*\s*$/m;
 const CATEGORY_HEADING_PATTERN = /^#### /m;
-const HTML_COMMENT_PATTERN = /<!--[\s\S]*?-->/g;
+// Complete comments, plus the abruptly-closed forms `<!-->` and `<!--->`.
+const HTML_COMMENT_PATTERN = /<!--[\s\S]*?-->|<!--->|<!-->/g;
+// An unterminated comment runs to the end of the input.
+const UNTERMINATED_HTML_COMMENT_PATTERN = /<!--[\s\S]*$/;
 const DATE_PREFIX_PATTERN = /^(\d{4}-\d{2}-\d{2})-(.+)$/;
 const SUMMARY_MAX_LENGTH = 200;
 
 const ignoreWarning = () => undefined;
+
+/**
+ * Removes HTML comments, repeating until none are left so that nested or
+ * overlapping markers (e.g. `<!-<!---->-` -> `<!--`) can't survive a single pass.
+ */
+export function stripHtmlComments(markdown) {
+  let previous;
+  let current = markdown;
+  do {
+    previous = current;
+    current = current.replace(HTML_COMMENT_PATTERN, '');
+  } while (current !== previous);
+  return current.replace(UNTERMINATED_HTML_COMMENT_PATTERN, '');
+}
 
 /**
  * Mirrors the GitHub/Docusaurus heading slugger closely enough for release
@@ -83,9 +100,7 @@ export function summarize(markdown, maxLength = SUMMARY_MAX_LENGTH) {
 }
 
 function cleanReleaseMarkdown(markdown) {
-  return markdown
-    .replace(DOCKER_TAG_PATTERN, '')
-    .replace(HTML_COMMENT_PATTERN, '')
+  return stripHtmlComments(markdown.replace(DOCKER_TAG_PATTERN, ''))
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
@@ -190,11 +205,9 @@ function cleanPostBody(content, siteUrl, slugsByFilename) {
     },
   );
   return absolutizeLinks(
-    withResolvedPostLinks
-      .replace(/<!--\s*truncate\s*-->/g, '')
-      .replace(/^import\s.+$/gm, '')
-      .replace(HTML_COMMENT_PATTERN, '')
-      .replace(/<\/?[A-Z][A-Za-z]*[^>]*>/g, ''),
+    stripHtmlComments(
+      withResolvedPostLinks.replace(/^import\s.+$/gm, ''),
+    ).replace(/<\/?[A-Z][A-Za-z]*[^>]*>/g, ''),
     siteUrl,
     '/blog/',
   )

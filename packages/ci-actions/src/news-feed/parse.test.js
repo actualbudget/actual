@@ -6,6 +6,7 @@ import {
   parsePost,
   parseReleases,
   slugifyHeading,
+  stripHtmlComments,
   summarize,
 } from './parse.mjs';
 
@@ -66,6 +67,16 @@ No date on this one.
 
 - something
 `;
+
+describe('stripHtmlComments', () => {
+  it('removes comments, including nested or overlapping markers', () => {
+    expect(stripHtmlComments('a <!-- x --> b')).toBe('a  b');
+    expect(stripHtmlComments('a <!-<!---->-> b')).toBe('a  b');
+    expect(stripHtmlComments('<!--<!-- x -->-->')).toBe('-->');
+    expect(stripHtmlComments('a <!-- unterminated')).toBe('a ');
+    expect(stripHtmlComments('no comments')).toBe('no comments');
+  });
+});
 
 describe('slugifyHeading', () => {
   it('mirrors the docs heading anchors', () => {

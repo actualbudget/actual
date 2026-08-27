@@ -1,0 +1,75 @@
+import { useTranslation } from 'react-i18next';
+
+import { Button } from '@actual-app/components/button';
+import { SvgNotificationsOutline } from '@actual-app/components/icons/v1';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
+
+import { useNavigate } from '#hooks/useNavigate';
+import { useNewsFeed } from '#hooks/useNewsFeed';
+
+const MAX_DISPLAYED_COUNT = 9;
+
+/**
+ * Titlebar bell that opens the "What's new" page and shows how many entries
+ * (releases and posts) the user hasn't seen yet. Hidden while the `newsFeed`
+ * experimental flag is off.
+ */
+export function WhatsNewButton() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { isEnabled, unseenCount } = useNewsFeed();
+
+  if (!isEnabled) {
+    return null;
+  }
+
+  const label =
+    unseenCount > 0
+      ? t("What's new: {{count}} unread", { count: unseenCount })
+      : t("What's new");
+  const displayedCount =
+    unseenCount > MAX_DISPLAYED_COUNT
+      ? `${MAX_DISPLAYED_COUNT}+`
+      : String(unseenCount);
+
+  return (
+    <Tooltip placement="bottom end" content={label}>
+      <View style={{ position: 'relative' }}>
+        <Button
+          variant="bare"
+          aria-label={label}
+          onPress={() => void navigate('/whats-new')}
+          data-testid="whats-new-button"
+        >
+          <SvgNotificationsOutline style={{ width: 15, height: 15 }} />
+        </Button>
+        {unseenCount > 0 && (
+          <Text
+            data-testid="whats-new-unread-count"
+            style={{
+              position: 'absolute',
+              top: -4,
+              right: -6,
+              minWidth: 14,
+              height: 14,
+              lineHeight: '14px',
+              padding: '0 4px',
+              borderRadius: 7,
+              fontSize: 10,
+              fontWeight: 700,
+              textAlign: 'center',
+              backgroundColor: theme.errorBackground,
+              color: theme.errorText,
+              pointerEvents: 'none',
+            }}
+          >
+            {displayedCount}
+          </Text>
+        )}
+      </View>
+    </Tooltip>
+  );
+}

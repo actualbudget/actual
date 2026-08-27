@@ -3,6 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { resetTestProviders, TestProviders } from '#mocks';
+import { getNewsFeedUrl } from '#news/fetchNewsFeed';
 import { newsFeedFixture } from '#news/fixtures';
 
 import { useNewsFeed } from './useNewsFeed';
@@ -66,9 +67,7 @@ describe('useNewsFeed', () => {
     });
 
     await waitFor(() => expect(result.current.entries).toHaveLength(2));
-    expect(fetchMock).toHaveBeenCalledWith(
-      'https://actualbudget.org/news.json',
-    );
+    expect(fetchMock).toHaveBeenCalledWith(getNewsFeedUrl());
     expect(result.current.unseenCount).toBe(1);
 
     result.current.markAllSeen();

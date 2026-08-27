@@ -41,6 +41,7 @@ import { MonthCountSelector } from './budget/MonthCountSelector';
 import { Link } from './common/Link';
 import { HelpMenu } from './HelpMenu';
 import { LoggedInUser } from './LoggedInUser';
+import { WhatsNewButton } from './news/WhatsNewButton';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar/SidebarProvider';
 import { ThemeSelector } from './ThemeSelector';
@@ -376,6 +377,7 @@ export function Titlebar({ style }: TitlebarProps) {
         <UncategorizedButton />
         {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
         <PrivacyButton />
+        <WhatsNewButton />
         {serverURL ? <ServerSyncButton /> : null}
         <SharedArrayBufferWarning />
         <LoggedInUser />
