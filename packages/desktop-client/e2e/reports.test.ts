@@ -139,7 +139,10 @@ test.describe('Reports', () => {
     // The picked month is the start; the end is the app's current month.
     // The mode button still presents as Live since fixed start lives
     // within it.
-    const formatOptions = { month: 'short', year: 'numeric' } as const;
+    const formatOptions = {
+      month: 'short',
+      year: 'numeric',
+    } satisfies Intl.DateTimeFormatOptions;
     const expectedStart = target.toLocaleDateString('en-US', formatOptions);
     const expectedEnd = new Date(endYear, endMonthIdx, 1).toLocaleDateString(
       'en-US',

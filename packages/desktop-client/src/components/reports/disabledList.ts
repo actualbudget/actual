@@ -66,7 +66,7 @@ const currentIntervalOptions = [
     disableInclude: true,
   },
   {
-    description: t('From start date'),
+    description: 'fromStartDate',
     disableInclude: true,
   },
 ];
