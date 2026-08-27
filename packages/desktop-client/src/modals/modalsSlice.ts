@@ -597,7 +597,6 @@ export type Modal =
       options: {
         onConfirm: () => void;
         onCancel?: () => void;
-        isBeyondWindow?: boolean;
         daysUntilTransaction?: number;
         upcomingDays?: number;
       };

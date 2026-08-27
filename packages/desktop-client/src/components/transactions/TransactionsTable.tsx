@@ -5,6 +5,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -50,6 +51,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 import { memoizeOne } from '@actual-app/core/shared/memoize';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
+import { DEFAULT_UPCOMING_SCHEDULE_DAYS } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -126,6 +128,7 @@ import { useLocalPref } from '#hooks/useLocalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { usePrevious } from '#hooks/usePrevious';
 import { useProperFocus } from '#hooks/useProperFocus';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
@@ -138,6 +141,11 @@ import { getPayeesById } from '#payees';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
 import { getStatusLabel } from '#util/schedule';
+import {
+  calculateFutureTransactionInfo,
+  createSingleTimeScheduleFromTransaction,
+  isFutureTransaction,
+} from '#util/schedule-actions';
 
 import {
   isTransactionTableColumnAvailableInChildRows,
@@ -2229,11 +2237,25 @@ function NotesCell({
   onClickTag,
   onExpose,
 }: NotesCellProps) {
-  const cellRef = useRef<HTMLDivElement | null>(null);
   const [inputValue, setInputValue] = useState(note);
   useEffect(() => {
     setInputValue(note);
   }, [note, setInputValue]);
+
+  const textRef = useRef<HTMLSpanElement | null>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+  const checkTruncated = useCallback(() => {
+    const el = textRef.current;
+    setIsTruncated(el != null && el.scrollWidth > el.clientWidth);
+  }, []);
+  const resizeRef = useResizeObserver<HTMLSpanElement>(checkTruncated);
+  const setTextRef = useCallback(
+    (el: HTMLSpanElement | null) => {
+      textRef.current = el;
+      resizeRef(el as HTMLSpanElement);
+    },
+    [resizeRef],
+  );
 
   function onKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter' || e.key === 'Tab') {
@@ -2245,9 +2267,12 @@ function NotesCell({
 
   const displayedNote = note || scheduleNote || '';
 
+  useLayoutEffect(() => {
+    checkTruncated();
+  }, [displayedNote, checkTruncated]);
+
   return (
     <CustomCell
-      innerRef={cellRef}
       width="flex"
       name="notes"
       value={displayedNote}
@@ -2261,6 +2286,25 @@ function NotesCell({
       onUpdate={onUpdate}
       onKeyDown={onKeyDown}
       onBlur={() => onUpdate(inputValue)}
+      unexposedContent={props => (
+        <Tooltip
+          content={
+            <View style={{ padding: 10, maxWidth: 400 }}>
+              <Text style={{ whiteSpace: 'pre-wrap' }}>
+                <NotesTagFormatter
+                  notes={displayedNote}
+                  onNotesTagClick={onClickTag}
+                />
+              </Text>
+            </View>
+          }
+          style={{ ...styles.tooltip }}
+          placement="bottom start"
+          triggerProps={{ delay: 500, isDisabled: !isTruncated }}
+        >
+          <UnexposedCellContent {...props} ref={setTextRef} />
+        </Tooltip>
+      )}
     >
       {({ inputStyle, onKeyDown, onBlur }) => (
         <TagAutocomplete
@@ -2345,6 +2389,7 @@ type NewTransactionProps = {
   editingTransaction: TransactionEntity['id'];
   focusedField: string;
   hideFraction: boolean;
+  onSchedule: () => void;
   onAdd: () => void;
   onAddAndClose: () => void;
   onAddSplit: (id: TransactionEntity['id']) => void;
@@ -2392,6 +2437,7 @@ function NewTransaction({
   onEdit,
   onDelete,
   onSave,
+  onSchedule,
   onAdd,
   onAddAndClose,
   onAddSplit,
@@ -2406,6 +2452,7 @@ function NewTransaction({
 }: NewTransactionProps) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
+  const isFuture = isFutureTransaction(transactions[0]);
 
   const childTransactions = transactions.filter(
     t => t.parent_id === transactions[0].id,
@@ -2413,6 +2460,8 @@ function NewTransaction({
 
   const addButtonRef = useRef(null);
   useProperFocus(addButtonRef, focusedField === 'add');
+  const scheduleButtonRef = useRef(null);
+  useProperFocus(scheduleButtonRef, focusedField === 'schedule');
   const cancelButtonRef = useRef(null);
   useProperFocus(cancelButtonRef, focusedField === 'cancel');
 
@@ -2492,6 +2541,16 @@ function NewTransaction({
         >
           <Trans>Cancel</Trans>
         </Button>
+        {isFuture && (
+          <Button
+            style={{ marginRight: 10, padding: '4px 10px' }}
+            onPress={onSchedule}
+            data-testid="schedule-button"
+            ref={scheduleButtonRef}
+          >
+            <Trans>Schedule</Trans>
+          </Button>
+        )}
         {error ? (
           <TransactionError
             error={error}
@@ -2581,6 +2640,7 @@ type TransactionTableInnerProps = {
   onBatchUnlinkSchedule: (ids: TransactionEntity['id'][]) => void;
   onCheckNewEnter: (e: KeyboardEvent) => void;
   onCheckEnter: (e: KeyboardEvent) => void;
+  onScheduleTemporary: (id?: TransactionEntity['id']) => void;
   onAddTemporary: (id?: TransactionEntity['id']) => void;
   onAddAndCloseTemporary: () => void;
   onDistributeRemainder: (id: TransactionEntity['id']) => void;
@@ -2865,6 +2925,7 @@ function TransactionTableInner({
               dateFormat={dateFormat}
               hideFraction={props.hideFraction}
               onClose={props.onCloseAddTransaction}
+              onSchedule={props.onScheduleTemporary}
               onAdd={props.onAddTemporary}
               onAddAndClose={props.onAddAndCloseTemporary}
               onAddSplit={props.onAddSplit}
@@ -3003,6 +3064,9 @@ export const TransactionTable = forwardRef(
 
     const dispatch = useDispatch();
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
+    const [upcomingLength = DEFAULT_UPCOMING_SCHEDULE_DAYS] = useSyncedPref(
+      'upcomingScheduledTransactionLength',
+    );
     const [newTransactions, setNewTransactions] = useState<TransactionEntity[]>(
       [],
     );
@@ -3206,8 +3270,14 @@ export const TransactionTable = forwardRef(
       transactionsWithExpandedSplits,
       getFieldsTableTransaction,
     );
+    const shouldSchedule = useRef(false);
     const shouldAdd = useRef(false);
     const shouldAddAndClose = useRef(false);
+    const pendingConvertToSchedule = useRef<null | {
+      daysUntilTransaction: number;
+      upcomingDays: number;
+      onConfirm: () => void;
+    }>(null);
     const latestState = useRef<TableState>({
       newTransactions: newTransactions ?? [],
       newNavigator,
@@ -3274,6 +3344,94 @@ export const TransactionTable = forwardRef(
       shouldAddAndClose.current = false;
     }
 
+    if (shouldSchedule.current) {
+      const transactions = latestState.current.newTransactions;
+      if (transactions[0] == null) {
+        shouldSchedule.current = false;
+      } else if (transactions[0].account == null) {
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: t('Account is a required field'),
+            },
+          }),
+        );
+        newNavigator.onEdit('temp', 'account');
+      } else if (transactions[0].schedule != null) {
+        // Already linked to a schedule; keep it as a transaction.
+        shouldSchedule.current = false;
+      } else {
+        const tx = transactions[0];
+        const subs = tx.is_parent
+          ? transactions.filter(t => t.parent_id === tx.id)
+          : null;
+        const transaction = subs ? groupTransaction([tx, ...subs]) : tx;
+
+        const createSchedule = () => {
+          afterSave(async () => {
+            try {
+              await createSingleTimeScheduleFromTransaction(transaction);
+              dispatch(
+                addNotification({
+                  notification: {
+                    type: 'message',
+                    message: t('Schedule created successfully'),
+                  },
+                }),
+              );
+              // Reset form like onAddTemporary does
+              setNewTransactions(
+                makeTemporaryTransactions(
+                  props.currentAccountId,
+                  props.currentCategoryId,
+                ),
+              );
+              newNavigator.onEdit('temp', 'date');
+            } catch {
+              dispatch(
+                addNotification({
+                  notification: {
+                    type: 'error',
+                    message: t('Failed to create schedule'),
+                  },
+                }),
+              );
+            }
+          });
+        };
+
+        const { isBeyondWindow, daysUntilTransaction, upcomingDays } =
+          calculateFutureTransactionInfo(transaction, upcomingLength);
+
+        if (isBeyondWindow) {
+          pendingConvertToSchedule.current = {
+            daysUntilTransaction,
+            upcomingDays,
+            onConfirm: createSchedule,
+          };
+        } else {
+          createSchedule();
+        }
+      }
+      shouldSchedule.current = false;
+    }
+
+    useEffect(() => {
+      if (pendingConvertToSchedule.current) {
+        const options = pendingConvertToSchedule.current;
+        pendingConvertToSchedule.current = null;
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'convert-to-schedule',
+              options,
+            },
+          }),
+        );
+      }
+    });
+
     useEffect(() => {
       if (savePending.current && afterSaveFunc.current) {
         const func = afterSaveFunc.current;
@@ -3301,9 +3459,17 @@ export const TransactionTable = forwardRef(
     }
 
     function getFieldsNewTransaction(item?: TransactionEntity) {
-      const fields = ['select', ...getFocusableFields(), 'cancel', 'add'];
+      const fields = [
+        'select',
+        ...getFocusableFields(),
+        'cancel',
+        'schedule',
+        'add',
+      ];
 
-      return getFields(item, fields);
+      return getFields(item, fields).filter(
+        f => f !== 'schedule' || (item ? isFutureTransaction(item) : false),
+      );
     }
 
     function getFieldsTableTransaction(item?: TransactionEntity) {
@@ -3348,7 +3514,21 @@ export const TransactionTable = forwardRef(
 
     function onCheckNewEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {
-        if (e.metaKey || e.ctrlKey) {
+        if ((e.metaKey || e.ctrlKey) && e.shiftKey) {
+          const current = latestState.current.newTransactions[0];
+          if (!current || !isFutureTransaction(current)) {
+            return;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          afterSave(() => {
+            const transaction = latestState.current.newTransactions[0];
+            if (transaction && isFutureTransaction(transaction)) {
+              shouldSchedule.current = true;
+              forceRerender({});
+            }
+          });
+        } else if (e.metaKey || e.ctrlKey) {
           e.preventDefault();
           e.stopPropagation();
           afterSave(() => {
@@ -3415,6 +3595,13 @@ export const TransactionTable = forwardRef(
         });
       }
     }
+
+    const onScheduleTemporary = useCallback(() => {
+      afterSave(() => {
+        shouldSchedule.current = true;
+        forceRerender({});
+      });
+    }, []);
 
     const onAddTemporary = useCallback(() => {
       afterSave(() => {
@@ -3801,6 +3988,7 @@ export const TransactionTable = forwardRef(
             onSplit={onSplit}
             onCheckNewEnter={onCheckNewEnter}
             onCheckEnter={onCheckEnter}
+            onScheduleTemporary={onScheduleTemporary}
             onAddTemporary={onAddTemporary}
             onAddAndCloseTemporary={onAddAndCloseTemporary}
             onAddSplit={onAddSplit}
