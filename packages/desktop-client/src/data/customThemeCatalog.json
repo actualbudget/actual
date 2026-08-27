@@ -387,5 +387,18 @@
       "#ffffff"
     ],
     "mode": "dark"
+  },
+  {
+    "name": "Palenight",
+    "repo": "mafsi/palenight-actual",
+    "colors": [
+      "#292d3e",
+      "#31364a",
+      "#697098",
+      "#c792ea",
+      "#82aaff",
+      "#c3e88d"
+    ],
+    "mode": "dark"
   }
 ]

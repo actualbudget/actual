@@ -47,6 +47,7 @@ import {
 } from 'date-fns';
 
 import { TagMultiAutocomplete } from '#components/autocomplete/TagMultiAutocomplete';
+import { AmountInput } from '#components/util/AmountInput';
 import { GenericInput } from '#components/util/GenericInput';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
@@ -114,6 +115,7 @@ function ConfigureField<T extends RuleConditionEntity>({
   const payees = usePayees();
   const field = initialField === 'category_group' ? 'category' : initialField;
   const [subfield, setSubfield] = useState(initialSubfield);
+  const fieldOptions = subfieldToOptions(field, subfield);
   const inputRef = useRef<AmountInputRef>(null);
   const prevOp = useRef<T['op'] | null>(null);
   const prevSubfield = useRef<string | null>(null);
@@ -468,9 +470,10 @@ function ConfigureField<T extends RuleConditionEntity>({
                 if (parsed == null) {
                   submitValue = value; // keep previous if parsing failed
                 } else {
-                  const opts = subfieldToOptions(field, subfield);
                   submitValue =
-                    opts?.inflow || opts?.outflow ? Math.abs(parsed) : parsed;
+                    fieldOptions?.inflow || fieldOptions?.outflow
+                      ? Math.abs(parsed)
+                      : parsed;
                 }
               }
             } catch {
@@ -487,11 +490,24 @@ function ConfigureField<T extends RuleConditionEntity>({
             field: storableField,
             op,
             value: submitValue,
-            options: subfieldToOptions(field, subfield),
+            options: fieldOptions,
           });
         }}
       >
-        {type !== 'boolean' &&
+        {field === 'amount' && (
+          <AmountInput
+            ref={inputRef}
+            value={typeof value === 'number' ? value : 0}
+            zeroSign="+"
+            sign={
+              fieldOptions?.inflow || fieldOptions?.outflow ? '+' : undefined
+            }
+            style={{ marginTop: 10 }}
+            onUpdate={v => dispatch({ type: 'set-value', value: v })}
+          />
+        )}
+        {field !== 'amount' &&
+          type !== 'boolean' &&
           (field !== 'notes' || !isTagOp(op)) &&
           (field !== 'payee' || !isIdOp(op)) &&
           (field !== 'account' || !isNoValueAccountOp(op)) && (
@@ -519,7 +535,7 @@ function ConfigureField<T extends RuleConditionEntity>({
               // @ts-expect-error - fix me
               multi={op === 'oneOf' || op === 'notOneOf'}
               op={op}
-              options={subfieldToOptions(field, subfield)}
+              options={fieldOptions}
               style={{ marginTop: 10 }}
               // oxlint-disable-next-line typescript/no-explicit-any
               onChange={(v: any) => {

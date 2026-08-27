@@ -100,6 +100,25 @@ It may also be useful to link the schedule to transactions.
 
 Once a schedule is started, Actual will search the transaction history for entries that match the schedule. You can then select the matches, and will have the option to link those transactions to the current schedule. You can click on the **Find matching transactions** button to have Actual look for matches.
 
+## Converting Future Transactions to Schedules
+
+When you add a transaction with a future date, Actual can turn it into a single-time schedule instead of posting it to your register right away.
+
+1. Navigate to the account where you want to add the transaction.
+2. Click **Add transaction** and enter a future date along with the other details of the transaction.
+3. A **Schedule** button appears in the new transaction row, next to the **Add** button.
+4. Click **Schedule** to create a single-time schedule for the transaction's date.
+
+If the transaction's date is further away than your **Upcoming length** setting, a confirmation dialog appears before the schedule is created to warn you that the schedule will not be visible in the upcoming view until it gets closer to the date. Click **Create schedule anyway** to proceed, or **Cancel** to go back to the in-progress transaction and return to editing.
+
+The transaction is not posted to your register. Instead, it becomes an upcoming scheduled transaction that posts automatically on its scheduled date. You can find it and adjust its details later in [the Schedules view](#the-schedules-overview-screen).
+
+:::note
+The **Schedule** button only appears for future-dated transactions. For transactions dated today or earlier, it is hidden. As a shortcut, you can press **Ctrl+Shift+Enter** (**Cmd+Shift+Enter** on macOS) in the new transaction row instead of clicking **Schedule**.
+:::
+
+On mobile, a **Schedule** button also appears in the transaction editor when you add a new future-dated transaction or edit an existing future-dated transaction. Converting an existing transaction creates the schedule and then deletes the original transaction.
+
 ## Let Actual Find Scheduled Transactions
 
 Instead of manually entering each schedule, you can let Actual find and suggest schedules for you.

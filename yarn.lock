@@ -13555,7 +13555,7 @@ __metadata:
     better-sqlite3: "npm:^12.11.1"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^10.1.0"
-    electron: "npm:41.10.3"
+    electron: "npm:43.4.0"
     electron-builder: "npm:26.8.1"
     typescript-strict-plugin: "npm:^2.4.4"
   languageName: unknown
@@ -14004,16 +14004,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:41.10.3":
-  version: 41.10.3
-  resolution: "electron@npm:41.10.3"
+"electron@npm:43.4.0":
+  version: 43.4.0
+  resolution: "electron@npm:43.4.0"
   dependencies:
     "@electron-internal/extract-zip": "npm:^1.0.1"
     "@electron/get": "npm:^5.0.0"
     "@types/node": "npm:^24.9.0"
   bin:
     electron: cli.js
-  checksum: 10/cda634238f7b12f87d5374c0a3af1bfe19d2b38ec6c9e08ed10d288cf4baee73da1483a5adf2a4f5ab1df87fb4f8467c4a3ed27da22cadc5ffa1585aba248990
+    install-electron: install.js
+  checksum: 10/215b76f05bd23a04040091372fedfcf36d2365362b3f15ce955e0ec0c28fed0377283b7a763ade87c473dc8377a2082b070f92cd94877d40403cf7a3c71cb0a0
   languageName: node
   linkType: hard
 

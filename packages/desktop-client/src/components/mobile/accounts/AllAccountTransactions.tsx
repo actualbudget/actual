@@ -1,10 +1,14 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router';
 
 import { send } from '@actual-app/core/platform/client/connection';
 import type { Query } from '@actual-app/core/shared/query';
 import { isPreviewId } from '@actual-app/core/shared/transactions';
-import type { TransactionEntity } from '@actual-app/core/types/models';
+import type {
+  RuleConditionEntity,
+  TransactionEntity,
+} from '@actual-app/core/types/models';
 
 import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
@@ -31,14 +35,49 @@ export function AllAccountTransactions() {
 
 function TransactionListWithPreviews() {
   const { t } = useTranslation();
-  const baseTransactionsQuery = useCallback(
+  const location = useLocation();
+  // Filter conditions passed by drill-downs (e.g. report activity)
+  const filterConditions = location?.state?.filterConditions || [];
+  const isFiltered = filterConditions.length > 0;
+
+  const makeRootTransactionsQuery = useCallback(
     () => queries.transactions().options({ splits: 'all' }).select('*'),
     [],
   );
 
-  const [transactionsQuery, setTransactionsQuery] = useState<Query>(
-    baseTransactionsQuery(),
+  const [currentQuery, setCurrentQuery] = useState<Query | undefined>(() =>
+    isFiltered ? undefined : makeRootTransactionsQuery(),
   );
+  const [transactionsQuery, setTransactionsQuery] = useState<Query | undefined>(
+    currentQuery,
+  );
+
+  useEffect(() => {
+    let isStale = false;
+
+    const applyFilters = async (conditions: RuleConditionEntity[]) => {
+      const { filters: queryFilters } = await send(
+        'make-filters-from-conditions',
+        { conditions },
+      );
+      const rootQuery = makeRootTransactionsQuery();
+      const query = rootQuery.filter({ $and: queryFilters });
+      if (!isStale) {
+        setCurrentQuery(query);
+        setTransactionsQuery(query);
+      }
+    };
+
+    const conditions = location?.state?.filterConditions;
+    if (conditions?.length) {
+      void applyFilters(conditions);
+    }
+
+    return () => {
+      isStale = true;
+    };
+  }, [location.state, makeRootTransactionsQuery]);
+
   const {
     transactions,
     isPending: isTransactionsLoading,
@@ -55,8 +94,9 @@ function TransactionListWithPreviews() {
   const navigate = useNavigate();
 
   const { isSearching, search: onSearch } = useTransactionsSearch({
-    updateQuery: setTransactionsQuery,
-    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
+    updateQuery: updateFn =>
+      setTransactionsQuery(query => (query ? updateFn(query) : query)),
+    resetQuery: () => setTransactionsQuery(currentQuery),
     dateFormat,
   });
 
@@ -119,15 +159,18 @@ function TransactionListWithPreviews() {
     [],
   );
 
-  const transactionsToDisplay = !isSearching
-    ? // Do not render child transactions in the list, unless searching
-      previewTransactions.concat(transactions.filter(t => !t.is_child))
-    : transactions;
+  const transactionsToDisplay =
+    !isSearching && !isFiltered
+      ? // Do not render child transactions in the list, unless searching or filtering
+        previewTransactions.concat(transactions.filter(t => !t.is_child))
+      : transactions;
 
   return (
     <TransactionListWithBalances
       isLoading={
-        isSearching ? isTransactionsLoading : isPreviewTransactionsLoading
+        isSearching || isFiltered
+          ? isTransactionsLoading
+          : isPreviewTransactionsLoading
       }
       transactions={transactionsToDisplay}
       balance={balanceBindings.balance}
@@ -137,6 +180,7 @@ function TransactionListWithPreviews() {
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}
       showMakeTransfer
+      filtered={isFiltered}
     />
   );
 }

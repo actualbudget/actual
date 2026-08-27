@@ -11,7 +11,11 @@ import {
   getStatus,
   getUpcomingDays,
   indexPostedScheduleTransactions,
+  isCustomUpcomingLength,
   isScheduleOccurrencePosted,
+  UPCOMING_LENGTH_PRESET_LABELS,
+  UPCOMING_LENGTH_PRESET_OPTIONS,
+  UPCOMING_LENGTH_PRESET_VALUES,
 } from './schedules';
 import type { ScheduleStatuses } from './schedules';
 
@@ -491,6 +495,35 @@ describe('schedules', () => {
 
       const result = getNextDate(dateCond, new Date(2017, 0, 1));
       expect(result).toBeNull();
+    });
+  });
+
+  describe('shared presets', () => {
+    it('preset values and options align', () => {
+      const valuesFromOptions = UPCOMING_LENGTH_PRESET_OPTIONS.map(
+        o => o.value,
+      );
+      expect(valuesFromOptions).toEqual(
+        UPCOMING_LENGTH_PRESET_VALUES as readonly string[],
+      );
+    });
+
+    it('every preset has a label entry', () => {
+      for (const v of UPCOMING_LENGTH_PRESET_VALUES) {
+        expect(UPCOMING_LENGTH_PRESET_LABELS[v]).toBeDefined();
+        expect(typeof UPCOMING_LENGTH_PRESET_LABELS[v]).toBe('string');
+      }
+    });
+
+    it('isCustomUpcomingLength recognizes presets and custom values', () => {
+      for (const v of UPCOMING_LENGTH_PRESET_VALUES) {
+        expect(isCustomUpcomingLength(v)).toBe(false);
+      }
+
+      expect(isCustomUpcomingLength('1-day')).toBe(true);
+      expect(isCustomUpcomingLength('2-week')).toBe(true);
+      expect(isCustomUpcomingLength(null)).toBe(false);
+      expect(isCustomUpcomingLength(undefined)).toBe(false);
     });
   });
 });

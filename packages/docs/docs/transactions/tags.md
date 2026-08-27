@@ -36,4 +36,5 @@ The Tag management page can be found in the sidebar under _More_. Here you can p
 - **Find Existing Tags** searches for tags already used within transactions and adds them to the list of managed tags.
 - Add a description by clicking in the description field.
 - **View Transactions** which use a given tag.
+- **Rename** a tag from the context menu (right-click menu), or from the selection menu when exactly one tag is selected. Renaming also rewrites the hashtag in every transaction note that uses it. Tag names cannot contain spaces or `#`, and cannot match an existing tag.
 - Use the context menu (right-click menu) to delete a tag from this page. It will **not** delete the tag from the transaction notes.
