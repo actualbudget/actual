@@ -48,6 +48,7 @@ function About() {
       void dispatch(getLatestAppVersion());
     });
   const dispatch = useDispatch();
+  const isNewsFeedEnabled = useFeatureFlag('newsFeed');
 
   return (
     <Setting>
@@ -105,6 +106,14 @@ function About() {
           >
             <Trans>Release Notes</Trans>
           </Link>
+          {isNewsFeedEnabled && (
+            <>
+              {' · '}
+              <Link variant="internal" to="/whats-new">
+                <Trans>What's new</Trans>
+              </Link>
+            </>
+          )}
         </Text>
       </View>
       <View>

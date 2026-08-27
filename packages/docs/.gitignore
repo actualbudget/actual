@@ -3,3 +3,6 @@ build
 
 # Auto-generated on every docs build from the repo-root upcoming-release-notes/ directory
 docs/upcoming-release-notes.md
+
+# Auto-generated on every docs build from docs/releases.md and blog/ (in-app "What's new" feed)
+static/news.json

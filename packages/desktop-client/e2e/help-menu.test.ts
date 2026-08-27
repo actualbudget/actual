@@ -2,14 +2,17 @@ import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
+import { Navigation } from './page-models/navigation';
 
 test.describe('Help menu', () => {
   let page: Page;
   let configurationPage: ConfigurationPage;
+  let navigation: Navigation;
 
   test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     configurationPage = new ConfigurationPage(page);
+    navigation = new Navigation(page);
 
     await page.goto('/');
     await configurationPage.createTestFile();
@@ -63,5 +66,36 @@ test.describe('Help menu', () => {
       keyboardShortcutsModal.getByText('Open the help menu'),
     ).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
+  });
+
+  test("Opens the What's new page when the news feed feature is enabled", async () => {
+    // Hidden while the experimental feature is off
+    await page.getByRole('button', { name: 'Help' }).click();
+    await expect(page.getByText('Keyboard shortcuts')).toBeVisible();
+    await expect(page.getByText("What's new")).not.toBeVisible();
+    await page.keyboard.press('Escape');
+
+    const settingsPage = await navigation.goToSettingsPage();
+    await settingsPage.enableExperimentalFeature(
+      'In-app news and release notes',
+    );
+    await navigation.goToBudgetPage();
+
+    await page.getByRole('button', { name: 'Help' }).click();
+    await page.getByText("What's new").click();
+
+    await expect(page).toHaveURL(/\/whats-new$/);
+    const whatsNewList = page.getByTestId('whats-new-list');
+    await expect(whatsNewList.getByText('Release 99.9.9')).toBeVisible();
+    await expect(whatsNewList.getByText('A fixture blog post')).toBeVisible();
+    await expect(
+      whatsNewList.getByRole('link', { name: 'View on actualbudget.org' }),
+    ).toHaveAttribute('href', 'https://actualbudget.org/docs/releases#9999');
+
+    await expect(whatsNewList.getByText('Bugfixes')).not.toBeVisible();
+    await whatsNewList
+      .getByRole('button', { name: 'Show all changes' })
+      .click();
+    await expect(whatsNewList.getByText('Bugfixes')).toBeVisible();
   });
 });

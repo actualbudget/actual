@@ -11,6 +11,8 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { useToggle } from 'usehooks-ts';
 
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useNavigate } from '#hooks/useNavigate';
+import { useNewsFeed } from '#hooks/useNewsFeed';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -45,7 +47,8 @@ type HelpMenuItem =
   | 'discord'
   | 'keyboard-shortcuts'
   | 'start-tour'
-  | 'goal-templates';
+  | 'goal-templates'
+  | 'whats-new';
 
 type HelpButtonProps = {
   onPress?: () => void;
@@ -77,11 +80,13 @@ HelpButton.displayName = 'HelpButton';
 
 export const HelpMenu = () => {
   const showGoalTemplates = useFeatureFlag('goalTemplatesEnabled');
+  const { isEnabled: showWhatsNew, unseenCount } = useNewsFeed();
   const { t } = useTranslation();
   const [isMenuOpen, toggleMenuOpen, setMenuOpen] = useToggle();
   const menuButtonRef = useRef(null);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const page = useLocation().pathname;
   const { startTour } = useTour();
 
@@ -101,6 +106,9 @@ export const HelpMenu = () => {
         break;
       case 'goal-templates':
         dispatch(pushModal({ modal: { name: 'goal-templates' } }));
+        break;
+      case 'whats-new':
+        void navigate('/whats-new');
         break;
       default:
         throw new Error(`Unrecognized menu option: ${String(item)}`);
@@ -135,6 +143,17 @@ export const HelpMenu = () => {
               text: t('Community support (Discord)'),
             },
             { name: 'keyboard-shortcuts', text: t('Keyboard shortcuts') },
+            ...(showWhatsNew
+              ? [
+                  {
+                    name: 'whats-new',
+                    text:
+                      unseenCount > 0
+                        ? t("What's new ({{count}})", { count: unseenCount })
+                        : t("What's new"),
+                  },
+                ]
+              : []),
             { name: 'start-tour', text: t('Take a tour') },
             ...(showGoalTemplates && page === '/budget'
               ? [{ name: 'goal-templates', text: t('Goal templates') }]

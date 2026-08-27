@@ -42,7 +42,7 @@ Changes that need to be included in the release after the cut has been made shou
 
 ### Stabilize the release
 
-- [ ] Fix spelling and add highlights in the generated release notes as needed (edit `release-notes/X.Y.Z` directly).
+- [ ] Fix spelling and add highlights in the generated release notes as needed (edit `release-notes/X.Y.Z` directly). The highlights (everything above the Docker tag line) are also what users see in the app's "What's new" panel, so keep them self-contained and written for end users.
 - [ ] Share the release PR in the release channel on Discord.
 - [ ] Wait until at least 2 other maintainers have approved the release.
 

@@ -11,7 +11,8 @@ export type FeatureFlag =
   | 'sankeyReport'
   | 'akahuBankSync'
   | 'mobileCalculator'
-  | 'monteCarloReport';
+  | 'monteCarloReport'
+  | 'newsFeed';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -142,6 +143,7 @@ export type GlobalPrefs = Partial<{
     port?: number;
   };
   notifyWhenUpdateIsAvailable: boolean;
+  lastSeenNewsDate?: string; // YYYY-MM-DD of the newest "What's new" entry the user has seen on this device
 }>;
 
 // GlobalPrefsJson represents what's saved in the global-store.json file
@@ -170,6 +172,7 @@ export type GlobalPrefsJson = Partial<{
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
   syncServerConfig?: GlobalPrefs['syncServerConfig'];
   notifyWhenUpdateIsAvailable?: GlobalPrefs['notifyWhenUpdateIsAvailable'];
+  lastSeenNewsDate?: GlobalPrefs['lastSeenNewsDate'];
 }>;
 
 export type AuthMethods = 'password' | 'openid';
