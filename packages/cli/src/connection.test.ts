@@ -146,7 +146,7 @@ describe('withConnection', () => {
     expect(api.sync).toHaveBeenCalledTimes(1);
   });
 
-  it('encrypted budget forces a sync on a read inside the TTL', async () => {
+  it('encrypted budget syncs through downloadBudget on a read inside the TTL', async () => {
     setConfig({ encryptionPassword: 'secret' });
     writeCacheState(metaDirFor('sync-1'), {
       version: 1,
@@ -157,7 +157,44 @@ describe('withConnection', () => {
       lastDownloadedAt: Date.now(),
     });
     await withConnection({}, async () => 'ok', { mutates: false });
+    expect(api.downloadBudget).toHaveBeenCalledWith('sync-1', {
+      password: 'secret',
+    });
+    expect(api.loadBudget).not.toHaveBeenCalled();
+  });
+
+  it('encrypted budget registers the encryption key before a write pushes', async () => {
+    setConfig({ encryptionPassword: 'secret' });
+    writeCacheState(metaDirFor('sync-1'), {
+      version: 1,
+      syncId: 'sync-1',
+      budgetId: 'bud-disk-1',
+      serverUrl: 'http://test',
+      lastSyncedAt: Date.now(),
+      lastDownloadedAt: Date.now(),
+    });
+    await withConnection({}, async () => 'ok', { mutates: true });
+    // `loadBudget` would leave the key unregistered and the push below would
+    // fail with `encrypt-failure`.
+    expect(api.downloadBudget).toHaveBeenCalledWith('sync-1', {
+      password: 'secret',
+    });
+    expect(api.loadBudget).not.toHaveBeenCalled();
     expect(api.sync).toHaveBeenCalledTimes(1);
+  });
+
+  it('unencrypted budget still syncs through loadBudget', async () => {
+    writeCacheState(metaDirFor('sync-1'), {
+      version: 1,
+      syncId: 'sync-1',
+      budgetId: 'bud-disk-1',
+      serverUrl: 'http://test',
+      lastSyncedAt: Date.now(),
+      lastDownloadedAt: Date.now(),
+    });
+    await withConnection({}, async () => 'ok', { mutates: true });
+    expect(api.loadBudget).toHaveBeenCalledWith('bud-disk-1');
+    expect(api.downloadBudget).not.toHaveBeenCalled();
   });
 
   it('invalidates cache when syncId changes', async () => {
