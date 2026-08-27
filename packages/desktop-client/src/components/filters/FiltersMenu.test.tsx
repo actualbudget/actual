@@ -1,4 +1,5 @@
-import React, { createRef, type ComponentProps } from 'react';
+import React, { createRef } from 'react';
+import type { ComponentProps } from 'react';
 
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -6,11 +7,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { TestProviders } from '#mocks';
 
-import {
-  FilterButton,
-  FilterEditor,
-  type FilterButtonHandle,
-} from './FiltersMenu';
+import { FilterButton, FilterEditor } from './FiltersMenu';
+import type { FilterButtonHandle } from './FiltersMenu';
 
 describe('FilterButton imperative handle', () => {
   it('opens the existing filter picker through its reducer', async () => {

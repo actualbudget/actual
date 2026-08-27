@@ -90,6 +90,7 @@ vi.mock('#modals/modalsSlice', async importOriginal => {
               last_reconciled: null,
               tombstone: 0,
               account_id: null,
+              account_group_id: null,
               bank: null,
               bankName: null,
               bankId: null,
