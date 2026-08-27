@@ -745,6 +745,11 @@ export async function advanceSchedulesService(syncSuccess) {
           break;
         }
 
+        // do not skip schedules due today
+        if (currentStatus === 'due') {
+          break;
+        }
+
         if (!isRecurringSchedule(currentSchedule)) {
           break;
         }
