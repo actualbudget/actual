@@ -716,6 +716,10 @@ export async function advanceSchedulesService(syncSuccess) {
           currentStatus === 'missed')
       ) {
         if (currentStatus === 'paid') {
+          if (currentSchedule.next_date === currentDay()) {
+            break;
+          }
+
           const updatedSchedule =
             await advanceRecurringScheduleFromNextDate(currentSchedule);
 
