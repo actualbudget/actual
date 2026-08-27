@@ -857,7 +857,7 @@ describe('schedule app', () => {
       }
     });
 
-    it('keeps a schedule posted today on its date until the next service run', async () => {
+    it('keeps a schedule posted today paid for the rest of the day', async () => {
       // In tests `currentDay()` is fixed at 2017-01-01, so that is "today".
       MockDate.set(new Date(2016, 11, 31, 12));
       schedulesApp.startServices();
@@ -925,8 +925,9 @@ describe('schedule app', () => {
 
         expect(schedule.next_date).toBe('2017-01-01');
 
-        // The next run (the following day, in production) advances the
-        // paid schedule without posting again.
+        // A same-day re-run (e.g. offline retry) neither posts again nor
+        // advances; the schedule stays paid on today's date. Advancement on
+        // a later day is covered by the catch-up tests above.
         await advanceSchedulesService(true);
 
         const { data: transactionsAfter } = await aqlQuery(
@@ -939,10 +940,10 @@ describe('schedule app', () => {
         expect(transactionsAfter).toHaveLength(1);
 
         const {
-          data: [advancedSchedule],
+          data: [scheduleAfter],
         } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
 
-        expect(advancedSchedule.next_date).toBe('2017-01-08');
+        expect(scheduleAfter.next_date).toBe('2017-01-01');
       } finally {
         MockDate.reset();
         await schedulesApp.stopServices();
