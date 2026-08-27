@@ -14,6 +14,7 @@ import remarkGfm from 'remark-gfm';
 import { Link } from '#components/common/Link';
 import { Setting } from '#components/settings/UI';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { admonitionsToBlockquotes } from '#news/admonitions';
 import type { NewsEntry } from '#news/types';
 import {
   markdownBaseStyles,
@@ -21,10 +22,13 @@ import {
   sequentialNewlinesPlugin,
 } from '#util/markdown';
 
+import { MarkdownBlockquote } from './MarkdownBlockquote';
+
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 const rehypePlugins = [
   [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }],
 ] satisfies Parameters<typeof ReactMarkdown>[0]['rehypePlugins'];
+const markdownComponents = { blockquote: MarkdownBlockquote };
 
 const markdownStyles = css(markdownBaseStyles, {
   display: 'block',
@@ -64,9 +68,11 @@ export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
               backgroundColor:
                 entry.type === 'release'
                   ? theme.noticeBackground
-                  : theme.pillBackground,
+                  : theme.pillBackgroundSelected,
               color:
-                entry.type === 'release' ? theme.noticeText : theme.pillText,
+                entry.type === 'release'
+                  ? theme.noticeText
+                  : theme.pillTextSelected,
             }}
           >
             {entry.type === 'release' ? t('Release') : t('Post')}
@@ -86,7 +92,7 @@ export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
               }}
             />
           )}
-          <Text style={{ color: theme.pageTextSubdued, fontSize: 12 }}>
+          <Text style={{ fontSize: 12 }}>
             {formatDate(parseISO(entry.date), dateFormat)}
           </Text>
         </View>
@@ -95,8 +101,9 @@ export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
           <ReactMarkdown
             remarkPlugins={remarkPlugins}
             rehypePlugins={rehypePlugins}
+            components={markdownComponents}
           >
-            {entry.body}
+            {admonitionsToBlockquotes(entry.body)}
           </ReactMarkdown>
         </Text>
 
@@ -105,8 +112,9 @@ export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
             <ReactMarkdown
               remarkPlugins={remarkPlugins}
               rehypePlugins={rehypePlugins}
+              components={markdownComponents}
             >
-              {entry.details}
+              {admonitionsToBlockquotes(entry.details ?? '')}
             </ReactMarkdown>
           </Text>
         )}

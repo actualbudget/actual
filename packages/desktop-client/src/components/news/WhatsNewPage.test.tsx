@@ -39,7 +39,7 @@ const releaseEntry: NewsEntry = {
   version: '26.8.1',
   url: 'https://actualbudget.org/docs/releases#2681',
   summary: 'A hotfix.',
-  body: 'A hotfix.\n\n- Fixes **freezes**',
+  body: 'A hotfix.\n\n- Fixes **freezes**\n\n:::warning Deprecation\n\nTemplating is deprecated.\n\n:::\n\n> Plain quote.',
   details: '#### Bugfixes\n\n- [#8628](https://example.com/8628) Fix freezes',
 };
 
@@ -94,6 +94,15 @@ describe('WhatsNewPage', () => {
     expect(
       screen.getByTestId('whats-new-entry-release-26.8.1'),
     ).toContainElement(screen.getByTitle('Unread'));
+
+    // Docusaurus admonitions render as callouts; ordinary quotes stay quotes.
+    const admonition = screen.getByTestId('admonition-warning');
+    expect(admonition).toHaveTextContent('Deprecation');
+    expect(admonition).toHaveTextContent('Templating is deprecated.');
+    expect(admonition).not.toHaveTextContent('[!warning]');
+    expect(
+      screen.getByText('Plain quote.').closest('blockquote'),
+    ).not.toBeNull();
 
     // Full changelog is collapsed until requested.
     expect(screen.queryByText('Bugfixes')).not.toBeInTheDocument();

@@ -16,7 +16,7 @@ export const newsFeedFixture: NewsFeed = {
       version: '99.9.9',
       url: 'https://actualbudget.org/docs/releases#9999',
       summary: 'A test release used by end-to-end tests.',
-      body: 'A test release used by end-to-end tests.\n\n- Adds a fixture release\n- Keeps screenshots stable',
+      body: 'A test release used by end-to-end tests.\n\n- Adds a fixture release\n- Keeps screenshots stable\n\n:::warning Deprecation\n\nRule action templating is deprecated in favour of formulae.\n\n:::\n\n:::info\nThe `edge` tag has been renamed to `nightly`.\n:::',
       details:
         '#### Features\n\n- [#1](https://github.com/actualbudget/actual/pull/1) Add a fixture feature — thanks @actual\n\n#### Bugfixes\n\n- [#2](https://github.com/actualbudget/actual/pull/2) Fix a fixture bug — thanks @actual',
     },

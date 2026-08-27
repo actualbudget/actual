@@ -47,6 +47,7 @@ export function WhatsNewPage() {
         style={{
           flexDirection: 'column',
           marginTop: 10,
+          flexShrink: 0,
           gap: 30,
           maxWidth: 800,
           paddingBottom: MOBILE_NAV_HEIGHT,
