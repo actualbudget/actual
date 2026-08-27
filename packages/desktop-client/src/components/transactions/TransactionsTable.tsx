@@ -5,6 +5,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -129,6 +130,7 @@ import { useLocalPref } from '#hooks/useLocalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { usePrevious } from '#hooks/usePrevious';
 import { useProperFocus } from '#hooks/useProperFocus';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
@@ -2266,11 +2268,25 @@ function NotesCell({
   onClickTag,
   onExpose,
 }: NotesCellProps) {
-  const cellRef = useRef<HTMLDivElement | null>(null);
   const [inputValue, setInputValue] = useState(note);
   useEffect(() => {
     setInputValue(note);
   }, [note, setInputValue]);
+
+  const textRef = useRef<HTMLSpanElement | null>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+  const checkTruncated = useCallback(() => {
+    const el = textRef.current;
+    setIsTruncated(el != null && el.scrollWidth > el.clientWidth);
+  }, []);
+  const resizeRef = useResizeObserver<HTMLSpanElement>(checkTruncated);
+  const setTextRef = useCallback(
+    (el: HTMLSpanElement | null) => {
+      textRef.current = el;
+      resizeRef(el as HTMLSpanElement);
+    },
+    [resizeRef],
+  );
 
   function onKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter' || e.key === 'Tab') {
@@ -2282,9 +2298,12 @@ function NotesCell({
 
   const displayedNote = note || scheduleNote || '';
 
+  useLayoutEffect(() => {
+    checkTruncated();
+  }, [displayedNote, checkTruncated]);
+
   return (
     <CustomCell
-      innerRef={cellRef}
       width="flex"
       name="notes"
       value={displayedNote}
@@ -2298,6 +2317,25 @@ function NotesCell({
       onUpdate={onUpdate}
       onKeyDown={onKeyDown}
       onBlur={() => onUpdate(inputValue)}
+      unexposedContent={props => (
+        <Tooltip
+          content={
+            <View style={{ padding: 10, maxWidth: 400 }}>
+              <Text style={{ whiteSpace: 'pre-wrap' }}>
+                <NotesTagFormatter
+                  notes={displayedNote}
+                  onNotesTagClick={onClickTag}
+                />
+              </Text>
+            </View>
+          }
+          style={{ ...styles.tooltip }}
+          placement="bottom start"
+          triggerProps={{ delay: 500, isDisabled: !isTruncated }}
+        >
+          <UnexposedCellContent {...props} ref={setTextRef} />
+        </Tooltip>
+      )}
     >
       {({ inputStyle, onKeyDown, onBlur }) => (
         <TagAutocomplete
