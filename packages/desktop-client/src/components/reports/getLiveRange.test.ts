@@ -115,4 +115,94 @@ describe('getLiveRange', () => {
       expect(end).toBe('2016-12-31');
     });
   });
+
+  describe('From start date', () => {
+    it('pins the saved start and ends today', () => {
+      const [start, end] = getLiveRange(
+        'fromStartDate',
+        EARLIEST,
+        LATEST,
+        false,
+        undefined,
+        '2016-03-15',
+      );
+
+      expect(start).toBe('2016-03-15');
+      expect(end).toBe('2017-01-01');
+    });
+
+    it('pads a month-shaped saved start to days', () => {
+      const [start, end] = getLiveRange(
+        'fromStartDate',
+        EARLIEST,
+        LATEST,
+        false,
+        undefined,
+        '2016-03',
+      );
+
+      expect(start).toBe('2016-03-01');
+      expect(end).toBe('2017-01-01');
+    });
+
+    it('clamps the saved start to earliestTransaction', () => {
+      const [start, end] = getLiveRange(
+        'fromStartDate',
+        EARLIEST,
+        LATEST,
+        false,
+        undefined,
+        '2014-06-01',
+      );
+
+      expect(start).toBe(EARLIEST);
+      expect(end).toBe('2017-01-01');
+    });
+
+    it('falls back to earliestTransaction without a saved start', () => {
+      const [start, end] = getLiveRange(
+        'fromStartDate',
+        EARLIEST,
+        LATEST,
+        false,
+      );
+
+      expect(start).toBe(EARLIEST);
+      expect(end).toBe('2017-01-01');
+    });
+
+    it('is not affected by the includeCurrentInterval flag', () => {
+      const [startExclude, endExclude] = getLiveRange(
+        'fromStartDate',
+        EARLIEST,
+        LATEST,
+        false,
+        undefined,
+        '2016-03-15',
+      );
+      const [startInclude, endInclude] = getLiveRange(
+        'fromStartDate',
+        EARLIEST,
+        LATEST,
+        true,
+        undefined,
+        '2016-03-15',
+      );
+
+      expect(startExclude).toBe(startInclude);
+      expect(endExclude).toBe(endInclude);
+    });
+
+    it('returns static-start mode', () => {
+      const [, , mode] = getLiveRange(
+        'fromStartDate',
+        EARLIEST,
+        LATEST,
+        false,
+        undefined,
+        '2016-03-15',
+      );
+      expect(mode).toBe('static-start');
+    });
+  });
 });

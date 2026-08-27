@@ -65,6 +65,10 @@ const currentIntervalOptions = [
     description: t('All time'),
     disableInclude: true,
   },
+  {
+    description: t('From start date'),
+    disableInclude: true,
+  },
 ];
 
 type graphOptions = {

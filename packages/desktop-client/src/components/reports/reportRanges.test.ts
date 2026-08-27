@@ -84,6 +84,44 @@ describe('calculateTimeRange', () => {
     expect(end).toBe('2016-12');
     expect(mode).toBe('previousQuarter');
   });
+
+  it('keeps a static-start window pinned at its start and ends at the current month', () => {
+    // Saved "fixed start" window; only the start is meaningful, the saved
+    // end is ignored in favor of the (then-)current month.
+    const [start, end, mode] = calculateTimeRange({
+      start: '2015-03',
+      end: '2016-08',
+      mode: 'static-start',
+    });
+
+    expect(start).toBe('2015-03');
+    expect(end).toBe('2017-01');
+    expect(mode).toBe('static-start');
+  });
+
+  it('clamps a static-start window whose start is after the current month', () => {
+    const [start, end, mode] = calculateTimeRange({
+      start: '2017-06',
+      end: '2017-08',
+      mode: 'static-start',
+    });
+
+    expect(start).toBe('2017-01');
+    expect(end).toBe('2017-01');
+    expect(mode).toBe('static-start');
+  });
+
+  it('ends a day-shaped static-start window at the end of the current month', () => {
+    const [start, end, mode] = calculateTimeRange({
+      start: '2016-12-15',
+      end: '2016-12-29',
+      mode: 'static-start',
+    });
+
+    expect(start).toBe('2016-12-15');
+    expect(end).toBe('2017-01-31');
+    expect(mode).toBe('static-start');
+  });
 });
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'

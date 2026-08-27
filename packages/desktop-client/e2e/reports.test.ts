@@ -76,6 +76,86 @@ test.describe('Reports', () => {
     await expect(picker).toMatchThemeScreenshots();
   });
 
+  test('pins a fixed start date that keeps tracking the current month', async () => {
+    await reportsPage.goToNetWorthPage();
+
+    const trigger = page.getByTestId('date-range-picker-trigger');
+    const initialLabel = await trigger.innerText();
+    // The test file pins "now" to January 2017, so read the app's current
+    // month from the range end rather than using the real clock.
+    const [, , , endShortMonth, endYearText] =
+      initialLabel.match(/(\w{3}) (\d{4}) – (\w{3}) (\d{4})/) ?? [];
+    const endYear = Number(endYearText);
+    const endMonthIdx = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ].indexOf(endShortMonth);
+    const startYear = Number(initialLabel.match(/(\d{4})/)?.[1]);
+
+    await trigger.click();
+    const picker = page.locator('[data-popover]');
+
+    // Opt into the fixed-start filter; it commits immediately and keeps
+    // the picker open so a single month click pins the start.
+    const fromStartDate = picker.getByRole('button', {
+      name: 'From start date',
+    });
+    await fromStartDate.click();
+    await expect(fromStartDate).toHaveAttribute('aria-pressed', 'true');
+
+    // While fixed start is active, no other preset may highlight even when
+    // its range coincides (Year to date also ends at the current month).
+    await expect(
+      picker.getByRole('button', { name: 'Year to date', exact: true }),
+    ).toHaveAttribute('aria-pressed', 'false');
+
+    // Pin the month before the app's current month (navigate the year grid
+    // there first if the displayed year differs).
+    const target = new Date(endYear, endMonthIdx - 1, 1);
+    const targetYear = target.getFullYear();
+    for (let year = startYear; year < targetYear; year++) {
+      await picker.getByRole('button', { name: 'Next' }).click();
+    }
+    await picker
+      .getByRole('button', {
+        name: target.toLocaleDateString('en-US', {
+          month: 'long',
+          year: 'numeric',
+        }),
+      })
+      .click();
+    await expect(picker).toBeHidden();
+
+    // The picked month is the start; the end is the app's current month.
+    // The mode button still presents as Live since fixed start lives
+    // within it.
+    const formatOptions = { month: 'short', year: 'numeric' } as const;
+    const expectedStart = target.toLocaleDateString('en-US', formatOptions);
+    const expectedEnd = new Date(endYear, endMonthIdx, 1).toLocaleDateString(
+      'en-US',
+      formatOptions,
+    );
+    await expect(trigger).toContainText(`${expectedStart} – ${expectedEnd}`);
+    await expect(page.getByRole('button', { name: 'Live' })).toBeVisible();
+
+    // Persist the widget, reload, and verify the stored fixed-start range
+    // re-resolves: the pinned start is kept while the end snaps back to
+    // the current month.
+    await page.getByRole('button', { name: 'Save widget' }).click();
+    await page.reload();
+    await expect(trigger).toContainText(`${expectedStart} – ${expectedEnd}`);
+  });
+
   test.describe('balance forecast', () => {
     test.beforeEach(async () => {
       const settingsPage = await navigation.goToSettingsPage();

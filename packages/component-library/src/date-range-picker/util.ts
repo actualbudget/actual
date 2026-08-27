@@ -21,6 +21,18 @@ export type DateRangePreset = {
   getRange: () => [string, string];
   /** Commits the preset; called on close if it is still the selection. */
   onSelect: () => void;
+  /**
+   * Commits immediately when clicked (keeping the picker open) instead of
+   * waiting for close; for presets that arm a follow-up interaction, e.g.
+   * pinning a start date the user then picks.
+   */
+  commitOnSelect?: boolean;
+  /**
+   * Overrides the default active check (range equality with the current
+   * draft). Provide `false` to keep the preset from ever highlighting, e.g.
+   * when another preset's range could coincide with it.
+   */
+  isActive?: boolean;
 };
 
 /** All user-facing strings, translated by the caller. */

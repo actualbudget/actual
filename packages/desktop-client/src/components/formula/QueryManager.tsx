@@ -385,24 +385,46 @@ function QueryItem({
   ]);
 
   function handleStartDateChange(newStart: string) {
-    setStartDate(normalizeQueryTimeFrameStart(newStart));
+    const normalized = normalizeQueryTimeFrameStart(newStart);
+    if (timeRangeRef.current === 'static-start') {
+      // In fixed-start mode a start pick moves the pinned start and lets
+      // the end keep tracking the current month.
+      const newEnd = monthUtils.currentMonth();
+      setStartDate(normalized);
+      setEndDate(newEnd);
+      sendUpdate(
+        filters.conditions,
+        filters.conditionsOp,
+        normalized,
+        newEnd,
+        'static-start',
+      );
+      return;
+    }
+    setStartDate(normalized);
     sendUpdate(
       filters.conditions,
       filters.conditionsOp,
-      normalizeQueryTimeFrameStart(newStart),
+      normalized,
       endDate,
       timeRangeRef.current as TimeFrame['mode'],
     );
   }
 
   function handleEndDateChange(newEnd: string) {
-    setEndDate(normalizeQueryTimeFrameEnd(newEnd));
+    const normalized = normalizeQueryTimeFrameEnd(newEnd);
+    // Explicitly picking an end bound in fixed-start mode freezes the range.
+    const nextMode =
+      timeRangeRef.current === 'static-start'
+        ? 'static'
+        : (timeRangeRef.current as TimeFrame['mode']);
+    setEndDate(normalized);
     sendUpdate(
       filters.conditions,
       filters.conditionsOp,
       startDate,
-      normalizeQueryTimeFrameEnd(newEnd),
-      timeRangeRef.current as TimeFrame['mode'],
+      normalized,
+      nextMode,
     );
   }
 
@@ -494,9 +516,15 @@ function QueryItem({
 
   const timeRangeMode = timeRangeRef.current as TimeFrame['mode'];
   const isPresetTimeRange = isPresetTimeRangeMode(timeRangeMode);
+  // Fixed start behaves like a preset (read-only summary, locked end) but
+  // keeps the start selectable.
+  const isFixedStartTimeRange = timeRangeMode === 'static-start';
   const timeRangeLabels = {
     'sliding-window': t('Live'),
     static: t('Static'),
+    // Stored internally by the "From start date" quick select; presented
+    // as "Live".
+    'static-start': t('Live'),
     full: t('All time'),
     lastMonth: t('Last month'),
     lastYear: t('Last year'),
@@ -514,6 +542,7 @@ function QueryItem({
     priorYearToDate: t('Prior year to date transactions'),
     currentQuarter: t('Current quarter transactions'),
     previousQuarter: t('Previous quarter transactions'),
+    'static-start': t('From start date'),
   } satisfies Record<PresetTimeRangeMode, string>;
   const presetTimeRangeLabel = isPresetTimeRange
     ? presetTimeRangeLabels[timeRangeMode]
@@ -714,9 +743,11 @@ function QueryItem({
                 let start: string, end: string, mode: TimeFrame['mode'];
                 const currentMode = timeRangeRef.current as TimeFrame['mode'];
                 // For quick selections, use the current toggle state (static vs sliding-window)
-                const quickSelectMode = ['static', 'sliding-window'].includes(
-                  currentMode,
-                )
+                const quickSelectMode = [
+                  'static',
+                  'sliding-window',
+                  'static-start',
+                ].includes(currentMode)
                   ? currentMode
                   : 'sliding-window';
 
@@ -819,6 +850,14 @@ function QueryItem({
                     mode = 'full';
                     break;
                   }
+                  case 'from-start-date': {
+                    // Pin the current start; the end keeps tracking the
+                    // current month.
+                    start = startDate;
+                    end = monthUtils.currentMonth();
+                    mode = 'static-start';
+                    break;
+                  }
                   default:
                     return;
                 }
@@ -850,6 +889,7 @@ function QueryItem({
                 { name: 'current-quarter', text: t('Current quarter') },
                 { name: 'previous-quarter', text: t('Previous quarter') },
                 { name: 'all-time', text: t('All time') },
+                { name: 'from-start-date', text: t('From start date') },
               ]}
             />
           </Popover>
@@ -879,7 +919,7 @@ function QueryItem({
             }}
           >
             <Select
-              disabled={isPresetTimeRange}
+              disabled={isPresetTimeRange && !isFixedStartTimeRange}
               value={fromDateRepr(startDate)}
               defaultLabel={monthUtils.format(
                 fromDateRepr(startDate),

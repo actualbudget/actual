@@ -171,6 +171,16 @@ export function getLatestRange(offset: number) {
   return [start, end, 'sliding-window'] as const;
 }
 
+export function getStaticStartRange(start: string) {
+  const currentMonth = monthUtils.currentMonth();
+  // Match the start's granularity so day-granular reports keep day bounds.
+  const end = monthUtils.isValidYearMonthDay(start)
+    ? monthUtils.getMonthEnd(currentMonth)
+    : currentMonth;
+
+  return [start > end ? end : start, end, 'static-start'] as const;
+}
+
 export function getNextRange(offset: number) {
   const start = monthUtils.currentMonth();
   const end = monthUtils.addMonths(start, offset);
@@ -195,7 +205,11 @@ export function asMonthSlidingTimeFrame(
   timeFrame: Partial<TimeFrame>,
 ): Partial<TimeFrame> {
   const { start, end, mode } = timeFrame;
-  if (mode !== 'sliding-window' || !start || !end) {
+  if (
+    (mode !== 'sliding-window' && mode !== 'static-start') ||
+    !start ||
+    !end
+  ) {
     return timeFrame;
   }
   return {
@@ -256,6 +270,10 @@ export function calculateTimeRange(
     }
 
     return getLatestRange(offset);
+  }
+  if (mode === 'static-start') {
+    // The start stays pinned; the end always tracks the current month.
+    return getStaticStartRange(start);
   }
   if (mode === 'lastMonth') {
     const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
