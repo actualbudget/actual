@@ -857,6 +857,98 @@ describe('schedule app', () => {
       }
     });
 
+    it('keeps a schedule posted today on its date until the next service run', async () => {
+      // In tests `currentDay()` is fixed at 2017-01-01, so that is "today".
+      MockDate.set(new Date(2016, 11, 31, 12));
+      schedulesApp.startServices();
+
+      try {
+        const accountId = await db.insertAccount({
+          name: 'Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+
+        const id = await createSchedule({
+          schedule: { posts_transaction: true },
+          conditions: [
+            {
+              op: 'is',
+              field: 'account',
+              value: accountId,
+            },
+            {
+              op: 'is',
+              field: 'amount',
+              value: -10000,
+            },
+            {
+              op: 'is',
+              field: 'date',
+              value: {
+                start: '2016-12-18',
+                frequency: 'weekly',
+                interval: 1,
+                patterns: [],
+              },
+            },
+          ],
+        });
+        const nextDateRow = await db.first<{
+          id: string;
+        }>('SELECT id FROM schedules_next_date WHERE schedule_id = ?', [id]);
+
+        await db.update('schedules_next_date', {
+          id: nextDateRow.id,
+          local_next_date: 20170101,
+          local_next_date_ts: Date.now(),
+          base_next_date: 20170101,
+          base_next_date_ts: Date.now(),
+        });
+
+        await advanceSchedulesService(true);
+
+        const { data: transactions } = await aqlQuery(
+          q('transactions')
+            .filter({ schedule: id })
+            .select(['date', 'amount'])
+            .orderBy({ date: 'asc' }),
+        );
+
+        expect(
+          transactions.map(({ date, amount }) => ({ date, amount })),
+        ).toEqual([{ date: '2017-01-01', amount: -10000 }]);
+
+        const {
+          data: [schedule],
+        } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+        expect(schedule.next_date).toBe('2017-01-01');
+
+        // The next run (the following day, in production) advances the
+        // paid schedule without posting again.
+        await advanceSchedulesService(true);
+
+        const { data: transactionsAfter } = await aqlQuery(
+          q('transactions')
+            .filter({ schedule: id })
+            .select(['date', 'amount'])
+            .orderBy({ date: 'asc' }),
+        );
+
+        expect(transactionsAfter).toHaveLength(1);
+
+        const {
+          data: [advancedSchedule],
+        } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+        expect(advancedSchedule.next_date).toBe('2017-01-08');
+      } finally {
+        MockDate.reset();
+        await schedulesApp.stopServices();
+      }
+    });
+
     it('keeps a `set amount` action in sync when the amount is edited', async () => {
       MockDate.set(new Date(2016, 11, 31, 12));
       schedulesApp.startServices();
