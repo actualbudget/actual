@@ -51,18 +51,18 @@ export function WhatsNewButton() {
             data-testid="whats-new-unread-count"
             style={{
               position: 'absolute',
-              top: -4,
-              right: -6,
-              minWidth: 14,
-              height: 14,
-              lineHeight: '14px',
+              top: -3,
+              right: -9,
+              minWidth: 16,
+              height: 16,
+              lineHeight: '16px',
               padding: '0 4px',
-              borderRadius: 7,
+              borderRadius: 8,
               fontSize: 10,
               fontWeight: 700,
               textAlign: 'center',
-              backgroundColor: theme.errorBackground,
-              color: theme.errorText,
+              backgroundColor: theme.buttonPrimaryBackground,
+              color: theme.buttonPrimaryText,
               pointerEvents: 'none',
             }}
           >
