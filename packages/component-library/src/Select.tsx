@@ -114,6 +114,7 @@ export function Select<const Value = string>({
         onOpenChange={() => setIsOpen(false)}
         style={popoverStyle}
         isNonModal={isNonModal}
+        shouldCloseParentOnInteractOutside={isNonModal}
       >
         <Menu
           onMenuSelect={item => {
