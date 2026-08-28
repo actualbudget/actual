@@ -7,7 +7,8 @@ import {
   parseReleases,
   slugifyHeading,
   stripHtmlComments,
-} from './parse.mjs';
+} from './parse';
+import type { NewsEntry } from './parse';
 
 const siteUrl = 'https://actualbudget.org';
 
@@ -94,7 +95,7 @@ describe('absolutizeLinks', () => {
   });
 
   it('leaves links it cannot parse alone and warns', () => {
-    const warnings = [];
+    const warnings: string[] = [];
     expect(
       absolutizeLinks('[x](//[)', siteUrl, '/docs/releases', message =>
         warnings.push(message),
@@ -106,7 +107,7 @@ describe('absolutizeLinks', () => {
 
 describe('parseReleases', () => {
   it('parses release sections with and without the auto-generated sentinel', () => {
-    const warnings = [];
+    const warnings: string[] = [];
     const releases = parseReleases(releasesMarkdown, {
       siteUrl,
       warn: message => warnings.push(message),
@@ -194,6 +195,7 @@ More text.
       ],
     });
 
+    expect(entry).toBeDefined();
     expect(entry).toMatchObject({
       id: 'post-design-competition-sidenav',
       type: 'post',
@@ -202,11 +204,11 @@ More text.
       url: 'https://actualbudget.org/blog/design-competition-sidenav',
       tags: ['announcement'],
     });
-    expect(entry.body).not.toContain('truncate');
-    expect(entry.body).toContain(
+    expect(entry?.body).not.toContain('truncate');
+    expect(entry?.body).toContain(
       '[link](https://actualbudget.org/blog/sidenav-voting-open)',
     );
-    expect(entry.body).toContain(
+    expect(entry?.body).toContain(
       '[docs](https://actualbudget.org/docs/settings)',
     );
   });
@@ -231,7 +233,7 @@ Body text.
   });
 
   it('skips release announcements, drafts and undated posts', () => {
-    const warnings = [];
+    const warnings: string[] = [];
     expect(
       parsePost(
         '2026-08-08-release-26-8-1.md',
@@ -272,11 +274,26 @@ x`,
 });
 
 describe('buildNewsFeed', () => {
-  function release(version, date) {
-    return { id: `release-${version}`, type: 'release', version, date };
+  function release(version: string, date: string): NewsEntry {
+    return {
+      id: `release-${version}`,
+      type: 'release',
+      title: `Release ${version}`,
+      date,
+      version,
+      url: '',
+      body: '',
+    };
   }
-  function post(slug, date) {
-    return { id: `post-${slug}`, type: 'post', date };
+  function post(slug: string, date: string): NewsEntry {
+    return {
+      id: `post-${slug}`,
+      type: 'post',
+      title: slug,
+      date,
+      url: '',
+      body: '',
+    };
   }
 
   it('merges, sorts newest first and caps each type', () => {

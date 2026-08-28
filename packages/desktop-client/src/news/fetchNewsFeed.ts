@@ -2,7 +2,7 @@ import * as Platform from '@actual-app/core/shared/platform';
 
 import { newsFeedFixture } from './fixtures';
 import { NEWS_FEED_SCHEMA_VERSION } from './types';
-import type { NewsFeed } from './types';
+import type { NewsEntry, NewsFeed } from './types';
 
 const PRODUCTION_NEWS_FEED_URL = 'https://actualbudget.org/news.json';
 
@@ -29,16 +29,39 @@ export function getNewsFeedUrl(): string {
   return PRODUCTION_NEWS_FEED_URL;
 }
 
-function isNewsFeed(value: unknown): value is NewsFeed {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-  // Runtime shape check on untrusted JSON; the cast only lets us read the two
-  // fields we validate below.
-  const candidate = value as Partial<NewsFeed>;
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isOptionalString(value: unknown): value is string | undefined {
+  return value === undefined || typeof value === 'string';
+}
+
+function isNewsEntry(value: unknown): value is NewsEntry {
   return (
-    candidate.schemaVersion === NEWS_FEED_SCHEMA_VERSION &&
-    Array.isArray(candidate.entries)
+    isRecord(value) &&
+    typeof value.id === 'string' &&
+    (value.type === 'release' || value.type === 'post') &&
+    typeof value.title === 'string' &&
+    typeof value.date === 'string' &&
+    typeof value.url === 'string' &&
+    typeof value.body === 'string' &&
+    isOptionalString(value.version) &&
+    isOptionalString(value.details) &&
+    (value.tags === undefined ||
+      (Array.isArray(value.tags) &&
+        value.tags.every(tag => typeof tag === 'string')))
+  );
+}
+
+/** Runtime shape check on the untrusted JSON we fetched. */
+function isNewsFeed(value: unknown): value is NewsFeed {
+  return (
+    isRecord(value) &&
+    value.schemaVersion === NEWS_FEED_SCHEMA_VERSION &&
+    typeof value.generatedAt === 'string' &&
+    Array.isArray(value.entries) &&
+    value.entries.every(isNewsEntry)
   );
 }
 

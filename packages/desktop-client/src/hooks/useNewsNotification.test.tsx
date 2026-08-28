@@ -90,6 +90,40 @@ describe('useNewsNotification', () => {
     });
   });
 
+  it('only marks the shown release as seen, not releases newer than the client', async () => {
+    mockIsFlagEnabled = true;
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () =>
+        Promise.resolve({
+          ...newsFeedFixture,
+          entries: [
+            {
+              ...newsFeedFixture.entries[0],
+              id: 'release-100.0.0',
+              version: '100.0.0',
+              date: '2026-02-01',
+            },
+            ...newsFeedFixture.entries,
+          ],
+        }),
+    });
+    renderHook(() => useNewsNotification(), { wrapper });
+
+    await waitFor(() =>
+      expect(store.getState().notifications.notifications).toHaveLength(1),
+    );
+    const notification = store.getState().notifications.notifications[0];
+    expect(notification.title).toBe("What's new in Actual 99.9.9");
+
+    notification.onClose?.();
+
+    // 99.9.9 is dated 2026-01-01; the not-yet-installed 100.0.0 (2026-02-01)
+    // must remain unseen so it gets its own notification after updating.
+    expect(mockSetLastSeenNewsDate).toHaveBeenCalledWith('2026-01-01');
+  });
+
   it('records the current position instead of notifying on first enable', async () => {
     mockIsFlagEnabled = true;
     mockLastSeenNewsDate = undefined;

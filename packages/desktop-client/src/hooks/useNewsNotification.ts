@@ -26,7 +26,7 @@ export function useNewsNotification() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isEnabled, entries, markAllSeen } = useNewsFeed();
+  const { isEnabled, entries } = useNewsFeed();
   const [lastSeenNewsDate, setLastSeenNewsDate] =
     useGlobalPref('lastSeenNewsDate');
 
@@ -81,7 +81,10 @@ export function useNewsNotification() {
               void navigate(WHATS_NEW_PATH);
             },
           },
-          onClose: markAllSeen,
+          // Only this release has been seen. Recording the newest feed date
+          // instead would hide releases that are newer than the running
+          // client until they were also installed.
+          onClose: () => setLastSeenNewsDate(release.date),
         },
       }),
     );
@@ -90,7 +93,6 @@ export function useNewsNotification() {
     entries,
     isEnabled,
     lastSeenNewsDate,
-    markAllSeen,
     navigate,
     setLastSeenNewsDate,
     t,

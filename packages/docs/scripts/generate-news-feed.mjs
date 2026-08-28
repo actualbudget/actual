@@ -4,6 +4,8 @@
 // every docs build and served at https://actualbudget.org/news.json.
 //
 // This runs before `docusaurus start` / `docusaurus build` (see package.json).
+// The parser is TypeScript and is imported directly, relying on Node's
+// built-in type stripping (Node 22.18+ / 24, see .nvmrc).
 
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
@@ -13,9 +15,14 @@ import {
   buildNewsFeed,
   parsePost,
   parseReleases,
-} from '@actual-app/ci-actions/src/news-feed/parse.mjs';
+} from '@actual-app/ci-actions/src/news-feed/parse.ts';
 
-const SITE_URL = 'https://actualbudget.org';
+// On Netlify deploy previews, link to the preview site so pages added in the
+// same PR resolve; everywhere else links point at the production docs.
+const SITE_URL =
+  process.env.CONTEXT === 'deploy-preview' && process.env.DEPLOY_PRIME_URL
+    ? process.env.DEPLOY_PRIME_URL
+    : 'https://actualbudget.org';
 const RELEASE_LIMIT = 10;
 const POST_LIMIT = 10;
 

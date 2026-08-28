@@ -11,6 +11,33 @@ import matter from 'gray-matter';
 // deployed client until they update - only do it for incompatible changes.
 export const NEWS_FEED_SCHEMA_VERSION = 1;
 
+export type NewsEntryType = 'release' | 'post';
+
+export type NewsEntry = {
+  id: string;
+  type: NewsEntryType;
+  title: string;
+  /** ISO date (YYYY-MM-DD) the entry was published. */
+  date: string;
+  /** Only present for `release` entries, e.g. `26.8.1`. */
+  version?: string;
+  /** Absolute link to the full content on actualbudget.org. */
+  url: string;
+  /** Markdown body (for releases: the hand-written highlights). */
+  body: string;
+  /** Releases only: markdown for the full categorized list of changes. */
+  details?: string;
+  tags?: string[];
+};
+
+export type NewsFeed = {
+  schemaVersion: number;
+  generatedAt: string;
+  entries: NewsEntry[];
+};
+
+type Warn = (message: string) => void;
+
 const AUTO_GENERATED_SENTINEL = '<!-- release-notes:auto-generated -->';
 const RELEASE_DATE_PATTERN = /^Release date:\s*(\d{4}-\d{2}-\d{2})\s*$/m;
 const DOCKER_TAG_PATTERN = /^\*\*Docker Tag:.*\*\*\s*$/gm;
@@ -21,7 +48,7 @@ const HTML_COMMENT_PATTERN = /<!--[\s\S]*?-->|<!--->|<!-->/g;
 const UNTERMINATED_HTML_COMMENT_PATTERN = /<!--[\s\S]*$/;
 const DATE_PREFIX_PATTERN = /^(\d{4}-\d{2}-\d{2})-(.+)$/;
 
-const ignoreWarning = () => undefined;
+const ignoreWarning: Warn = () => undefined;
 
 /**
  * Removes HTML comments. A single `.replace` isn't enough: overlapping markers
@@ -29,8 +56,8 @@ const ignoreWarning = () => undefined;
  * `js/incomplete-multi-character-sanitization`), so we repeat until the text
  * stops changing.
  */
-export function stripHtmlComments(markdown) {
-  let previous;
+export function stripHtmlComments(markdown: string): string {
+  let previous: string;
   let current = markdown;
   do {
     previous = current;
@@ -43,7 +70,7 @@ export function stripHtmlComments(markdown) {
  * Mirrors the GitHub/Docusaurus heading slugger closely enough for release
  * headings such as `26.8.1` (-> `2681`) and `26.5.1 & 26.5.2` (-> `2651--2652`).
  */
-export function slugifyHeading(heading) {
+export function slugifyHeading(heading: string): string {
   return heading
     .trim()
     .toLowerCase()
@@ -51,7 +78,7 @@ export function slugifyHeading(heading) {
     .replace(/ /g, '-');
 }
 
-function trimTrailingSlash(url) {
+function trimTrailingSlash(url: string): string {
   return url.replace(/\/+$/, '');
 }
 
@@ -65,19 +92,19 @@ function trimTrailingSlash(url) {
  * nested brackets in the text or `)` inside the target are left untouched.
  */
 export function absolutizeLinks(
-  markdown,
-  siteUrl,
-  basePath,
-  warn = ignoreWarning,
-) {
+  markdown: string,
+  siteUrl: string,
+  basePath: string,
+  warn: Warn = ignoreWarning,
+): string {
   const site = trimTrailingSlash(siteUrl);
   return markdown.replace(
     /(!?\[[^\]]*\]\()([^)\s]+)((?:\s+"[^"]*")?\))/g,
-    (match, prefix, target, suffix) => {
+    (match: string, prefix: string, target: string, suffix: string) => {
       if (/^(?:[a-z]+:|#|mailto:)/i.test(target)) {
         return match;
       }
-      let resolved;
+      let resolved: URL;
       try {
         resolved = new URL(target, `${site}${basePath}`);
       } catch {
@@ -94,7 +121,7 @@ export function absolutizeLinks(
   );
 }
 
-function cleanReleaseMarkdown(markdown) {
+function cleanReleaseMarkdown(markdown: string): string {
   return stripHtmlComments(markdown.replace(DOCKER_TAG_PATTERN, ''))
     .replace(/\n{3,}/g, '\n\n')
     .trim();
@@ -105,7 +132,7 @@ function cleanReleaseMarkdown(markdown) {
  * before the Docker tag / auto-generated marker / first category heading) and
  * the detailed, categorized list of changes that follows.
  */
-function splitReleaseSection(sectionBody) {
+function splitReleaseSection(sectionBody: string) {
   const withoutDate = sectionBody.replace(RELEASE_DATE_PATTERN, '');
   const boundaries = [
     withoutDate.indexOf(AUTO_GENERATED_SENTINEL),
@@ -120,15 +147,21 @@ function splitReleaseSection(sectionBody) {
   };
 }
 
+type ParseReleasesOptions = {
+  siteUrl: string;
+  limit?: number;
+  warn?: Warn;
+};
+
 /**
  * Parses `docs/releases.md` into release entries, newest first.
  */
 export function parseReleases(
-  markdown,
-  { siteUrl, limit, warn = ignoreWarning },
-) {
+  markdown: string,
+  { siteUrl, limit, warn = ignoreWarning }: ParseReleasesOptions,
+): NewsEntry[] {
   const sections = markdown.split(/^## (.+)$/m);
-  const entries = [];
+  const entries: NewsEntry[] = [];
 
   // sections[0] is the preamble; afterwards heading/body pairs alternate.
   for (let index = 1; index < sections.length; index += 2) {
@@ -173,18 +206,18 @@ export function parseReleases(
   return entries;
 }
 
-function postSlugFromFilename(filename) {
+function postSlugFromFilename(filename: string): string {
   const base = filename.replace(/\.mdx?$/, '');
   const match = base.match(DATE_PREFIX_PATTERN);
   return match ? match[2] : base;
 }
 
-function postDateFromFilename(filename) {
+function postDateFromFilename(filename: string): string | undefined {
   const match = filename.match(DATE_PREFIX_PATTERN);
   return match ? match[1] : undefined;
 }
 
-function normalizeDate(value) {
+function normalizeDate(value: unknown): string | undefined {
   if (value === undefined || value === null) {
     return undefined;
   }
@@ -194,11 +227,16 @@ function normalizeDate(value) {
   return match ? match[1] : undefined;
 }
 
-function cleanPostBody(content, siteUrl, slugsByFilename, warn) {
+function cleanPostBody(
+  content: string,
+  siteUrl: string,
+  slugsByFilename: Map<string, string>,
+  warn: Warn,
+): string {
   // Links between posts use the source filename; map them to the public slug.
   const withResolvedPostLinks = content.replace(
     /(\[[^\]]*\]\()\.\/([^)\s#]+\.mdx?)(#[^)\s]*)?\)/g,
-    (match, prefix, filename, hash = '') => {
+    (_match: string, prefix: string, filename: string, hash = '') => {
       const slug = slugsByFilename.get(filename);
       const target = slug ? `/blog/${slug}` : '/blog';
       return `${prefix}${trimTrailingSlash(siteUrl)}${target}${hash})`;
@@ -214,18 +252,29 @@ function cleanPostBody(content, siteUrl, slugsByFilename, warn) {
     .trim();
 }
 
+type ParsePostOptions = {
+  siteUrl: string;
+  /** Every post filename, used to resolve links between posts. */
+  allPostFilenames?: string[];
+  warn?: Warn;
+};
+
 /**
  * Parses a single blog post. Returns `undefined` when the post should not be
  * part of the feed (release announcements duplicate `releases.md`, drafts, or
  * posts without a resolvable date).
  */
 export function parsePost(
-  filename,
-  contents,
-  { siteUrl, allPostFilenames = [filename], warn = ignoreWarning },
-) {
+  filename: string,
+  contents: string,
+  {
+    siteUrl,
+    allPostFilenames = [filename],
+    warn = ignoreWarning,
+  }: ParsePostOptions,
+): NewsEntry | undefined {
   const { data, content } = matter(contents);
-  const tags = Array.isArray(data.tags) ? data.tags : [];
+  const tags: string[] = Array.isArray(data.tags) ? data.tags.map(String) : [];
 
   if (
     tags.includes('release') ||
@@ -244,12 +293,13 @@ export function parsePost(
   const slugsByFilename = new Map(
     allPostFilenames.map(name => [name, postSlugFromFilename(name)]),
   );
-  const slug = data.slug ?? postSlugFromFilename(filename);
+  const slug =
+    typeof data.slug === 'string' ? data.slug : postSlugFromFilename(filename);
 
   return {
     id: `post-${slug}`,
     type: 'post',
-    title: String(data.title ?? slug),
+    title: typeof data.title === 'string' ? data.title : slug,
     date,
     url: `${trimTrailingSlash(siteUrl)}/blog/${slug}`,
     body: cleanPostBody(content, siteUrl, slugsByFilename, warn),
@@ -257,7 +307,7 @@ export function parsePost(
   };
 }
 
-function compareEntries(entryA, entryB) {
+function compareEntries(entryA: NewsEntry, entryB: NewsEntry): number {
   if (entryA.date !== entryB.date) {
     return entryA.date < entryB.date ? 1 : -1;
   }
@@ -267,13 +317,21 @@ function compareEntries(entryA, entryB) {
   return 0;
 }
 
+type BuildNewsFeedOptions = {
+  releases: NewsEntry[];
+  posts: NewsEntry[];
+  generatedAt: string;
+  releaseLimit?: number;
+  postLimit?: number;
+};
+
 export function buildNewsFeed({
   releases,
   posts,
   generatedAt,
   releaseLimit = 10,
   postLimit = 10,
-}) {
+}: BuildNewsFeedOptions): NewsFeed {
   const newestReleases = [...releases]
     .sort(compareEntries)
     .slice(0, releaseLimit);
