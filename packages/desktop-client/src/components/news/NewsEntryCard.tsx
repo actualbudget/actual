@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { VisuallyHidden } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -20,7 +21,10 @@ import { MarkdownBlockquote } from './MarkdownBlockquote';
 const markdownComponents = { blockquote: MarkdownBlockquote };
 
 const markdownStyle = {
-  '& h2, & h3, & h4': { fontSize: 14, fontWeight: 600, margin: '14px 0 6px' },
+  lineHeight: 1.5,
+  '& h2, & h3, & h4': { fontSize: 14, fontWeight: 600, margin: '20px 0 8px' },
+  '& p:not(:first-child)': { marginTop: '0.75rem' },
+  '& ul, & ol': { marginTop: '0.5rem' },
   '& img': { maxWidth: '100%' },
 };
 
@@ -65,28 +69,40 @@ export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
           {entry.title}
         </Text>
         {isUnread && (
-          <View
-            role="img"
-            aria-label={t('Unread')}
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 4,
-              backgroundColor: theme.pageTextPositive,
-            }}
-          />
+          <>
+            <View
+              aria-hidden
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: theme.pageTextPositive,
+              }}
+            />
+            <VisuallyHidden>
+              <Trans>Unread</Trans>
+            </VisuallyHidden>
+          </>
         )}
         <Text style={{ fontSize: 12 }}>
           {monthUtils.format(entry.date, dateFormat, locale)}
         </Text>
       </View>
 
-      <Markdown style={markdownStyle} components={markdownComponents}>
+      <Markdown
+        style={markdownStyle}
+        components={markdownComponents}
+        preserveBlankLines={false}
+      >
         {admonitionsToBlockquotes(entry.body)}
       </Markdown>
 
       {entry.details && isShowingDetails && (
-        <Markdown style={markdownStyle} components={markdownComponents}>
+        <Markdown
+          style={markdownStyle}
+          components={markdownComponents}
+          preserveBlankLines={false}
+        >
           {admonitionsToBlockquotes(entry.details)}
         </Markdown>
       )}

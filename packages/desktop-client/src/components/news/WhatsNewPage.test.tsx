@@ -53,7 +53,6 @@ const postEntry: NewsEntry = {
   date: '2026-07-01',
   url: 'https://actualbudget.org/blog/hello',
   body: 'An announcement.',
-  tags: ['announcement'],
 };
 
 function renderPage() {
@@ -92,7 +91,7 @@ describe('WhatsNewPage', () => {
     ).toHaveAttribute('href', 'https://actualbudget.org/blog/hello');
 
     // Only the release is newer than the last seen date.
-    expect(screen.getAllByRole('img', { name: 'Unread' })).toHaveLength(1);
+    expect(screen.getAllByText('Unread')).toHaveLength(1);
 
     // Docusaurus admonitions render as callouts; ordinary quotes stay quotes.
     expect(screen.getByText('Deprecation')).toBeInTheDocument();

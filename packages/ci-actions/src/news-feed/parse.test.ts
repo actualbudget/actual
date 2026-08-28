@@ -97,7 +97,6 @@ This release promotes [Payee Locations](../../docs/transactions/payee-locations)
       expect(entry?.body).not.toContain('Docker Tag');
       expect(entry?.details).not.toContain('Docker Tag');
       expect(entry?.details).not.toContain('release-notes:auto-generated');
-      expect(entry?.tags).toBeUndefined();
     });
 
     it('handles older posts without the auto-generated marker', () => {
@@ -185,7 +184,6 @@ More text.
         title: 'Design Competition: Reimagine the Sidenav',
         date: '2026-06-27',
         url: 'https://actualbudget.org/blog/design-competition-sidenav',
-        tags: ['announcement'],
       });
       expect(entry?.body).not.toContain('truncate');
       expect(entry?.body).toContain(
@@ -193,6 +191,29 @@ More text.
       );
       expect(entry?.body).toContain(
         '[docs](https://actualbudget.org/docs/settings)',
+      );
+    });
+
+    it('drops a leading H1 that duplicates the title', () => {
+      const entry = parsePost(
+        '2026-01-17-next-steps.md',
+        `---
+title: Next Steps
+in_app_notification: true
+---
+
+# Next Steps
+
+Intro.
+
+## Later heading
+
+# Not a leading heading
+`,
+        { siteUrl },
+      );
+      expect(entry?.body).toBe(
+        'Intro.\n\n## Later heading\n\n# Not a leading heading',
       );
     });
 
@@ -304,13 +325,11 @@ describe('buildNewsFeed', () => {
         post('a', '2026-03-01'),
         release('2.0.0', '2026-02-01'),
       ],
-      generatedAt: '2026-08-27T00:00:00.000Z',
       releaseLimit: 2,
       postLimit: 1,
     });
 
     expect(feed.schemaVersion).toBe(1);
-    expect(feed.generatedAt).toBe('2026-08-27T00:00:00.000Z');
     expect(feed.entries.map(entry => entry.id)).toEqual([
       'release-3.0.0',
       'post-a',

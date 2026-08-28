@@ -14,12 +14,10 @@ export type NewsEntry = {
   body: string;
   /** Releases only: markdown for the full categorized list of changes. */
   details?: string;
-  tags?: string[];
 };
 
 export type NewsFeed = {
   schemaVersion: number;
-  generatedAt: string;
   entries: NewsEntry[];
 };
 

@@ -73,7 +73,7 @@ describe('useNewsFeed', () => {
     });
 
     await waitFor(() => expect(result.current.entries).toHaveLength(2));
-    expect(fetchMock).toHaveBeenCalledWith(getNewsFeedUrl());
+    expect(fetchMock).toHaveBeenCalledWith(await getNewsFeedUrl());
     expect(result.current.unseenCount).toBe(1);
 
     result.current.markAllSeen();

@@ -4,29 +4,34 @@ import { newsFeedFixture } from './fixtures';
 import { NEWS_FEED_SCHEMA_VERSION } from './types';
 import type { NewsEntry, NewsFeed } from './types';
 
-const PRODUCTION_NEWS_FEED_URL = 'https://actualbudget.org/news.json';
+// Released builds read the file committed on `master`, the same way the custom
+// theme catalog is fetched (hooks/useThemeCatalog.ts).
+const REPO_NEWS_FEED_URL =
+  'https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-client/src/data/news.json';
 
 /**
  * Where to load `news.json` from, in priority order:
  *
  * 1. `REACT_APP_NEWS_FEED_URL` - explicit override, e.g. in a local `.env`
- *    file in `packages/desktop-client` to point at a locally served docs build.
- * 2. Netlify PR previews (`REACT_APP_REVIEW_ID` is set) read the feed built by
- *    the matching docs preview for the same PR.
- * 3. The production docs site.
+ *    file in `packages/desktop-client`.
+ * 2. Netlify PR previews (`REACT_APP_REVIEW_ID` is set) serve the copy in
+ *    their own build, i.e. exactly the file committed on the PR branch. This
+ *    also works for PRs from forks, whose branches aren't on GitHub upstream.
+ * 3. The committed file on `master`.
  */
-export function getNewsFeedUrl(): string {
+export async function getNewsFeedUrl(): Promise<string> {
   const override = import.meta.env.REACT_APP_NEWS_FEED_URL;
   if (override) {
     return override;
   }
 
-  const reviewId = import.meta.env.REACT_APP_REVIEW_ID;
-  if (reviewId) {
-    return `https://deploy-preview-${reviewId}.www.actualbudget.org/news.json`;
+  if (import.meta.env.REACT_APP_REVIEW_ID) {
+    // `?url` makes Vite emit the file as a static asset and hand back its URL.
+    const { default: bundledUrl } = await import('../data/news.json?url');
+    return bundledUrl;
   }
 
-  return PRODUCTION_NEWS_FEED_URL;
+  return REPO_NEWS_FEED_URL;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -47,10 +52,7 @@ function isNewsEntry(value: unknown): value is NewsEntry {
     typeof value.url === 'string' &&
     typeof value.body === 'string' &&
     isOptionalString(value.version) &&
-    isOptionalString(value.details) &&
-    (value.tags === undefined ||
-      (Array.isArray(value.tags) &&
-        value.tags.every(tag => typeof tag === 'string')))
+    isOptionalString(value.details)
   );
 }
 
@@ -59,7 +61,6 @@ function isNewsFeed(value: unknown): value is NewsFeed {
   return (
     isRecord(value) &&
     value.schemaVersion === NEWS_FEED_SCHEMA_VERSION &&
-    typeof value.generatedAt === 'string' &&
     Array.isArray(value.entries) &&
     value.entries.every(isNewsEntry)
   );
@@ -70,7 +71,7 @@ export async function fetchNewsFeed(): Promise<NewsFeed> {
     return newsFeedFixture;
   }
 
-  const response = await fetch(getNewsFeedUrl());
+  const response = await fetch(await getNewsFeedUrl());
   if (!response.ok) {
     throw new Error(`Failed to load news feed (HTTP ${response.status})`);
   }

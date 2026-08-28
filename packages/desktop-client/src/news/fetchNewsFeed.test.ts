@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fetchNewsFeed, getNewsFeedUrl } from './fetchNewsFeed';
 import { newsFeedFixture } from './fixtures';
 
+vi.mock('../data/news.json?url', () => ({ default: '/assets/news.json' }));
+
 vi.mock('@actual-app/core/shared/platform', async () => {
   const actual = await vi.importActual<typeof PlatformModule>(
     '@actual-app/core/shared/platform',
@@ -16,24 +18,26 @@ describe('getNewsFeedUrl', () => {
     vi.unstubAllEnvs();
   });
 
-  it('defaults to the production docs site', () => {
+  it('defaults to the committed file on master', async () => {
     vi.stubEnv('REACT_APP_NEWS_FEED_URL', '');
     vi.stubEnv('REACT_APP_REVIEW_ID', '');
-    expect(getNewsFeedUrl()).toBe('https://actualbudget.org/news.json');
-  });
-
-  it('uses the matching docs deploy preview on PR previews', () => {
-    vi.stubEnv('REACT_APP_NEWS_FEED_URL', '');
-    vi.stubEnv('REACT_APP_REVIEW_ID', '8802');
-    expect(getNewsFeedUrl()).toBe(
-      'https://deploy-preview-8802.www.actualbudget.org/news.json',
+    await expect(getNewsFeedUrl()).resolves.toBe(
+      'https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-client/src/data/news.json',
     );
   });
 
-  it('prefers an explicit override', () => {
+  it('serves the bundled copy on PR previews', async () => {
+    vi.stubEnv('REACT_APP_NEWS_FEED_URL', '');
+    vi.stubEnv('REACT_APP_REVIEW_ID', '8802');
+    await expect(getNewsFeedUrl()).resolves.toBe('/assets/news.json');
+  });
+
+  it('prefers an explicit override', async () => {
     vi.stubEnv('REACT_APP_NEWS_FEED_URL', 'http://localhost:3000/news.json');
     vi.stubEnv('REACT_APP_REVIEW_ID', '8802');
-    expect(getNewsFeedUrl()).toBe('http://localhost:3000/news.json');
+    await expect(getNewsFeedUrl()).resolves.toBe(
+      'http://localhost:3000/news.json',
+    );
   });
 });
 
@@ -59,7 +63,7 @@ describe('fetchNewsFeed', () => {
   });
 
   it('rejects feeds with malformed entries', async () => {
-    stubResponse({ schemaVersion: 1, generatedAt: 'x', entries: [null] });
+    stubResponse({ schemaVersion: 1, entries: [null] });
     await expect(fetchNewsFeed()).rejects.toThrow(
       'Unsupported news feed format',
     );

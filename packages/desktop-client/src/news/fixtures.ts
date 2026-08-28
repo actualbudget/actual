@@ -7,7 +7,6 @@ import type { NewsFeed } from './types';
  */
 export const newsFeedFixture: NewsFeed = {
   schemaVersion: NEWS_FEED_SCHEMA_VERSION,
-  generatedAt: '2026-01-01T00:00:00.000Z',
   entries: [
     {
       id: 'release-99.9.9',
@@ -27,7 +26,6 @@ export const newsFeedFixture: NewsFeed = {
       date: '2025-12-01',
       url: 'https://actualbudget.org/blog/fixture-post',
       body: 'A test announcement used by end-to-end tests.',
-      tags: ['announcement'],
     },
   ],
 };

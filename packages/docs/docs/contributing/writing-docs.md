@@ -189,6 +189,8 @@ in_app_notification: true
 
 Posts without it stay on the website only, so use it for announcements the whole community should see and leave it off how-to articles and other evergreen content.
 
+The feed itself is the generated file `packages/desktop-client/src/data/news.json`. CI regenerates and commits it on your pull request, so check that the entry for your post looks right there; you can also run `yarn generate:news-feed` locally.
+
 ### Keyboard Shortcuts
 
 ```markdown

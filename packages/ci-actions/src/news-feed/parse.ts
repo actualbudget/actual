@@ -1,7 +1,7 @@
 // Pure helpers that turn the docs blog posts into the in-app news feed
 // (`news.json`). Release announcements are blog posts too (tagged `release`),
 // so the blog is the single source. No I/O happens here so everything can be
-// unit tested; `packages/docs/scripts/generate-news-feed.mjs` does the reading
+// unit tested; `packages/ci-actions/bin/generate-news-feed.ts` does the reading
 // and writing.
 
 import matter from 'gray-matter';
@@ -28,12 +28,10 @@ export type NewsEntry = {
   body: string;
   /** Releases only: markdown for the full categorized list of changes. */
   details?: string;
-  tags?: string[];
 };
 
 export type NewsFeed = {
   schemaVersion: number;
-  generatedAt: string;
   entries: NewsEntry[];
 };
 
@@ -47,6 +45,9 @@ const HTML_COMMENT_PATTERN = /<!--[\s\S]*?-->|<!--->|<!-->/g;
 // An unterminated comment runs to the end of the input.
 const UNTERMINATED_HTML_COMMENT_PATTERN = /<!--[\s\S]*$/;
 const DATE_PREFIX_PATTERN = /^(\d{4}-\d{2}-\d{2})-(.+)$/;
+// A markdown H1 at the very start of a post. Docusaurus treats it as the page
+// title (shown once); the app already shows the front-matter title.
+const LEADING_H1_PATTERN = /^\s*#[ \t]+[^\n]*\n/;
 // Release posts are generated with `slug: release-X.Y.Z`.
 const RELEASE_SLUG_PATTERN = /^release-(\d+\.\d+\.\d+)$/;
 
@@ -228,7 +229,11 @@ export function parsePost(
     typeof data.slug === 'string' ? data.slug : postSlugFromFilename(filename);
   const title = typeof data.title === 'string' ? data.title : slug;
   const url = `${trimTrailingSlash(siteUrl)}/blog/${slug}`;
-  const body = cleanPostBody(content, siteUrl, slugsByFilename);
+  const body = cleanPostBody(
+    content.replace(LEADING_H1_PATTERN, ''),
+    siteUrl,
+    slugsByFilename,
+  );
   const toAbsolute = (markdown: string) =>
     absolutizeLinks(markdown, siteUrl, '/blog/', warn);
 
@@ -258,7 +263,6 @@ export function parsePost(
     date,
     url,
     body: toAbsolute(tidyMarkdown(body)),
-    tags,
   };
 }
 
@@ -274,7 +278,6 @@ function compareEntries(entryA: NewsEntry, entryB: NewsEntry): number {
 
 type BuildNewsFeedOptions = {
   entries: NewsEntry[];
-  generatedAt: string;
   releaseLimit?: number;
   postLimit?: number;
 };
@@ -282,7 +285,6 @@ type BuildNewsFeedOptions = {
 /** Keeps the newest releases and posts (capped separately), newest first. */
 export function buildNewsFeed({
   entries,
-  generatedAt,
   releaseLimit = 10,
   postLimit = 10,
 }: BuildNewsFeedOptions): NewsFeed {
@@ -296,7 +298,6 @@ export function buildNewsFeed({
 
   return {
     schemaVersion: NEWS_FEED_SCHEMA_VERSION,
-    generatedAt,
     entries: [...releases, ...posts].sort(compareEntries),
   };
 }

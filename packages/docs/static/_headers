@@ -11,10 +11,3 @@
   Cache-Control: public
   Cache-Control: max-age=604800
   Cache-Control: immutable
-
-# In-app "What's new" feed. Read cross-origin by the Actual app (browser builds
-# on any host and the desktop app, which sends an `app://actual` origin).
-/news.json
-  Access-Control-Allow-Origin: *
-  Cache-Control: public
-  Cache-Control: max-age=3600
