@@ -39,3 +39,6 @@ Lage = "Lage"
 lage = "lage"
 # Hex color component (e.g. "FB BA 00" in the theming docs).
 BA = "BA"
+# FOB Statements bank sync provider (https://statements.finopsbricks.com/).
+FOB = "FOB"
+finopsbricks = "finopsbricks"
