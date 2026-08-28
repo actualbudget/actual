@@ -2,13 +2,23 @@ import { cmpSemanticVersion } from '#util/versions';
 
 import type { NewsEntry } from './types';
 
-/** Entries published after the given date (all entries when no date is known). */
+type ReleaseEntry = NewsEntry & { type: 'release'; version: string };
+
+function isRelease(entry: NewsEntry): entry is ReleaseEntry {
+  return entry.type === 'release' && entry.version !== undefined;
+}
+
+/**
+ * Entries published after the date the user last looked at the feed. Until a
+ * baseline date exists (first run) nothing counts as unseen, so a new user
+ * isn't greeted with a backlog of "unread" history.
+ */
 export function getUnseenEntries(
   entries: NewsEntry[],
   lastSeenDate: string | undefined,
 ): NewsEntry[] {
   if (!lastSeenDate) {
-    return entries;
+    return [];
   }
   return entries.filter(entry => entry.date > lastSeenDate);
 }
@@ -22,21 +32,17 @@ export function getNewestDate(entries: NewsEntry[]): string | undefined {
 }
 
 /**
- * The release the user should be told about: the newest unseen release that
- * they are already running (or newer than the one they're running would be
- * covered by the "update available" notification instead).
+ * The release to tell the user about: the newest unseen release they are
+ * already running. Releases newer than the client are left to the existing
+ * "update available" notification.
  */
 export function getReleaseToNotify(
   entries: NewsEntry[],
   clientVersion: string,
   lastSeenDate: string | undefined,
-): NewsEntry | undefined {
+): ReleaseEntry | undefined {
   return getUnseenEntries(entries, lastSeenDate)
-    .filter(
-      entry =>
-        entry.type === 'release' &&
-        entry.version !== undefined &&
-        cmpSemanticVersion(entry.version, clientVersion) <= 0,
-    )
+    .filter(isRelease)
+    .filter(entry => cmpSemanticVersion(entry.version, clientVersion) <= 0)
     .sort((entryA, entryB) => (entryA.date < entryB.date ? 1 : -1))[0];
 }

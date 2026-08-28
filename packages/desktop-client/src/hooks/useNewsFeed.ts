@@ -10,14 +10,15 @@ import { useGlobalPref } from './useGlobalPref';
 const EMPTY_ENTRIES: NewsEntry[] = [];
 
 export function useNewsFeed() {
-  const isFlagEnabled = useFeatureFlag('newsFeed');
+  const isNewsFeedFlagEnabled = useFeatureFlag('newsFeed');
   const [showNewsFeed] = useGlobalPref('showNewsFeed');
-  // Both the experimental flag and the user's own setting must be on.
-  const isEnabled = isFlagEnabled && showNewsFeed !== false;
+  // The experimental flag makes the feature available;
+  // The setting lets the user opt out of it (and of the request to actualbudget.org it makes).
+  const isEnabled = isNewsFeedFlagEnabled && Boolean(showNewsFeed);
   const [lastSeenNewsDate, setLastSeenNewsDate] =
     useGlobalPref('lastSeenNewsDate');
 
-  // `enabled: false` means no request is ever made while the flag is off.
+  // `enabled: false` means no request is ever made while the feature is off.
   const query = useQuery({ ...newsQueries.feed(), enabled: isEnabled });
   const entries = query.data?.entries ?? EMPTY_ENTRIES;
   const unseenCount = getUnseenEntries(entries, lastSeenNewsDate).length;

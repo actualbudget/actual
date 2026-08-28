@@ -143,8 +143,8 @@ export type GlobalPrefs = Partial<{
     port?: number;
   };
   notifyWhenUpdateIsAvailable: boolean;
-  lastSeenNewsDate?: string; // YYYY-MM-DD of the newest "What's new" entry the user has seen on this device
-  showNewsFeed: boolean; // Whether the "What's new" feed (bell, page, release toast) is shown on this device
+  lastSeenNewsDate: string; // YYYY-MM-DD of the newest "What's new" entry the user has seen on this device
+  showNewsFeed: boolean; // Whether the "What's new" feed (bell, page, release toast) is shown.
 }>;
 
 // GlobalPrefsJson represents what's saved in the global-store.json file

@@ -10,8 +10,6 @@ export type NewsEntry = {
   version?: string;
   /** Absolute link to the full content on actualbudget.org. */
   url: string;
-  /** Plain-text one-liner. */
-  summary: string;
   /** Markdown body (for releases: the hand-written highlights). */
   body: string;
   /** Releases only: markdown for the full categorized list of changes. */
@@ -25,4 +23,10 @@ export type NewsFeed = {
   entries: NewsEntry[];
 };
 
+/**
+ * Must match `NEWS_FEED_SCHEMA_VERSION` in
+ * packages/ci-actions/src/news-feed/parse.mjs. Feeds with any other version
+ * are rejected, so the two must be bumped together and only for incompatible
+ * changes (older clients would stop showing news until updated).
+ */
 export const NEWS_FEED_SCHEMA_VERSION = 1;

@@ -23,7 +23,6 @@ import { useServerVersion } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMetadataPref } from '#hooks/useMetadataPref';
-import { useNewsFeed } from '#hooks/useNewsFeed';
 import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 
@@ -50,8 +49,8 @@ function About() {
     });
   const dispatch = useDispatch();
   const isNewsFeedFlagEnabled = useFeatureFlag('newsFeed');
-  const { isEnabled: isNewsFeedEnabled } = useNewsFeed();
   const [showNewsFeed, setShowNewsFeedPref] = useGlobalPref('showNewsFeed');
+  const isNewsFeedEnabled = isNewsFeedFlagEnabled && Boolean(showNewsFeed);
 
   return (
     <Setting>
@@ -136,7 +135,7 @@ function About() {
           <Text style={{ display: 'flex' }}>
             <Checkbox
               id="settings-showNewsFeed"
-              checked={showNewsFeed !== false}
+              checked={showNewsFeed}
               onChange={e => setShowNewsFeedPref(e.currentTarget.checked)}
             />
             <label htmlFor="settings-showNewsFeed">

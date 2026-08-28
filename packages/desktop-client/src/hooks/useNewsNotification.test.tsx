@@ -2,10 +2,10 @@ import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router';
 
 import type * as PlatformModule from '@actual-app/core/shared/platform';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createTestAppStore, TestProviders } from '#mocks';
+import { createTestAppStore, resetTestProviders, TestProviders } from '#mocks';
 import { newsFeedFixture } from '#news/fixtures';
 
 import { useNewsNotification } from './useNewsNotification';
@@ -18,7 +18,7 @@ vi.mock('#hooks/useFeatureFlag', () => ({
   useFeatureFlag: () => mockIsFlagEnabled,
 }));
 
-let mockShowNewsFeed: boolean | undefined = undefined;
+let mockShowNewsFeed = true;
 
 vi.mock('#hooks/useGlobalPref', () => ({
   useGlobalPref: (key: string) =>
@@ -48,10 +48,11 @@ describe('useNewsNotification', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetTestProviders();
     store = createTestAppStore();
     mockIsFlagEnabled = false;
     mockLastSeenNewsDate = '2025-01-01';
-    mockShowNewsFeed = undefined;
+    mockShowNewsFeed = true;
     vi.stubGlobal('fetch', fetchMock);
     fetchMock.mockResolvedValue({
       ok: true,
@@ -68,8 +69,7 @@ describe('useNewsNotification', () => {
   it('does nothing while the feature flag is off', async () => {
     renderHook(() => useNewsNotification(), { wrapper });
 
-    // Give any (unexpected) fetch/dispatch a chance to happen.
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await act(() => Promise.resolve());
 
     expect(fetchMock).not.toHaveBeenCalled();
     expect(store.getState().notifications.notifications).toEqual([]);
@@ -106,7 +106,7 @@ describe('useNewsNotification', () => {
     mockShowNewsFeed = false;
     renderHook(() => useNewsNotification(), { wrapper });
 
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await act(() => Promise.resolve());
 
     expect(fetchMock).not.toHaveBeenCalled();
     expect(store.getState().notifications.notifications).toEqual([]);

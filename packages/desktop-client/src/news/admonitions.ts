@@ -1,12 +1,6 @@
-export type AdmonitionType = 'note' | 'tip' | 'info' | 'warning' | 'danger';
+const ADMONITION_TYPES = ['note', 'tip', 'info', 'warning', 'danger'] as const;
 
-export const ADMONITION_TYPES: AdmonitionType[] = [
-  'note',
-  'tip',
-  'info',
-  'warning',
-  'danger',
-];
+export type AdmonitionType = (typeof ADMONITION_TYPES)[number];
 
 const MARKER_PREFIX = '[!';
 const ADMONITION_BLOCK_PATTERN =
@@ -49,9 +43,11 @@ export function parseAdmonitionMarker(
   if (!match) {
     return undefined;
   }
-  const type = match[1].toLowerCase();
-  if (!ADMONITION_TYPES.some(candidate => candidate === type)) {
+  const type = ADMONITION_TYPES.find(
+    candidate => candidate === match[1].toLowerCase(),
+  );
+  if (!type) {
     return undefined;
   }
-  return { type: type as AdmonitionType, title: match[2].trim() };
+  return { type, title: match[2].trim() };
 }

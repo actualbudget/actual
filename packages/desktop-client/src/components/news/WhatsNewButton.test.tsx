@@ -47,7 +47,7 @@ describe('WhatsNewButton', () => {
     mockUnseenCount = 0;
   });
 
-  it('renders nothing while the feature flag is off', () => {
+  it('renders nothing while the news feed is disabled', () => {
     mockIsEnabled = false;
     renderButton();
     expect(screen.queryByTestId('whats-new-button')).not.toBeInTheDocument();
@@ -59,14 +59,14 @@ describe('WhatsNewButton', () => {
       screen.getByRole('button', { name: "What's new" }),
     ).toBeInTheDocument();
     expect(
-      screen.queryByTestId('whats-new-unread-count'),
+      screen.queryByTestId('whats-new-unseen-count'),
     ).not.toBeInTheDocument();
   });
 
   it('shows the unread count and caps it at 9+', () => {
     mockUnseenCount = 3;
     const { unmount } = renderButton();
-    expect(screen.getByTestId('whats-new-unread-count')).toHaveTextContent('3');
+    expect(screen.getByTestId('whats-new-unseen-count')).toHaveTextContent('3');
     expect(
       screen.getByRole('button', { name: "What's new: 3 unread" }),
     ).toBeInTheDocument();
@@ -74,7 +74,7 @@ describe('WhatsNewButton', () => {
 
     mockUnseenCount = 12;
     renderButton();
-    expect(screen.getByTestId('whats-new-unread-count')).toHaveTextContent(
+    expect(screen.getByTestId('whats-new-unseen-count')).toHaveTextContent(
       '9+',
     );
   });

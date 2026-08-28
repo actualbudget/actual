@@ -7,7 +7,6 @@ import {
   parseReleases,
   slugifyHeading,
   stripHtmlComments,
-  summarize,
 } from './parse.mjs';
 
 const siteUrl = 'https://actualbudget.org';
@@ -93,19 +92,15 @@ describe('absolutizeLinks', () => {
       '[a](https://actualbudget.org/docs/transactions/payee-locations) [b](https://actualbudget.org/docs/reports) [c](https://example.com) [d](#anchor) ![img](https://actualbudget.org/docs/img/x.png)',
     );
   });
-});
 
-describe('summarize', () => {
-  it('returns the first paragraph as plain text', () => {
+  it('leaves links it cannot parse alone and warns', () => {
+    const warnings = [];
     expect(
-      summarize('## Heading\n\nSome **bold** [link](x) text.\n\nMore'),
-    ).toBe('Some bold link text.');
-  });
-
-  it('truncates long paragraphs', () => {
-    const summary = summarize('word '.repeat(100), 50);
-    expect(summary.length).toBeLessThanOrEqual(50);
-    expect(summary.endsWith('…')).toBe(true);
+      absolutizeLinks('[x](//[)', siteUrl, '/docs/releases', message =>
+        warnings.push(message),
+      ),
+    ).toBe('[x](//[)');
+    expect(warnings).toEqual(['Leaving unparseable link "//[" as-is']);
   });
 });
 
@@ -134,8 +129,6 @@ describe('parseReleases', () => {
       date: '2026-08-07',
       version: '26.8.1',
       url: 'https://actualbudget.org/docs/releases#2681',
-      summary:
-        'This hotfix resolves some performance issues reported in 26.8.0.',
       body: 'This hotfix resolves some performance issues reported in 26.8.0.',
     });
 
@@ -207,7 +200,6 @@ More text.
       title: 'Design Competition: Reimagine the Sidenav',
       date: '2026-06-27',
       url: 'https://actualbudget.org/blog/design-competition-sidenav',
-      summary: 'The sidenav is getting some love.',
       tags: ['announcement'],
     });
     expect(entry.body).not.toContain('truncate');
@@ -234,7 +226,7 @@ Body text.
       id: 'post-automate-twist',
       date: '2024-03-25',
       url: 'https://actualbudget.org/blog/automate-twist',
-      summary: 'Body text.',
+      body: 'Body text.',
     });
   });
 

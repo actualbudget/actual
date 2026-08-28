@@ -24,7 +24,7 @@ const releasesPath = join(docsRoot, 'docs/releases.md');
 const blogDir = join(docsRoot, 'blog');
 const outputPath = join(docsRoot, 'static/news.json');
 
-const warn = message => console.warn(`[news-feed] ${message}`);
+const warn = message => console.warn(message);
 
 const releases = parseReleases(await fs.readFile(releasesPath, 'utf-8'), {
   siteUrl: SITE_URL,

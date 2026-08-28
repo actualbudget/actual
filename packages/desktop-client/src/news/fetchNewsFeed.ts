@@ -4,12 +4,12 @@ import { newsFeedFixture } from './fixtures';
 import { NEWS_FEED_SCHEMA_VERSION } from './types';
 import type { NewsFeed } from './types';
 
-export const DEFAULT_NEWS_FEED_URL = 'https://actualbudget.org/news.json';
+const PRODUCTION_NEWS_FEED_URL = 'https://actualbudget.org/news.json';
 
 /**
  * Where to load `news.json` from, in priority order:
  *
- * 1. `REACT_APP_NEWS_FEED_URL` — explicit override, e.g. in a local `.env`
+ * 1. `REACT_APP_NEWS_FEED_URL` - explicit override, e.g. in a local `.env`
  *    file in `packages/desktop-client` to point at a locally served docs build.
  * 2. Netlify PR previews (`REACT_APP_REVIEW_ID` is set) read the feed built by
  *    the matching docs preview for the same PR.
@@ -26,13 +26,15 @@ export function getNewsFeedUrl(): string {
     return `https://deploy-preview-${reviewId}.www.actualbudget.org/news.json`;
   }
 
-  return DEFAULT_NEWS_FEED_URL;
+  return PRODUCTION_NEWS_FEED_URL;
 }
 
 function isNewsFeed(value: unknown): value is NewsFeed {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
+  // Runtime shape check on untrusted JSON; the cast only lets us read the two
+  // fields we validate below.
   const candidate = value as Partial<NewsFeed>;
   return (
     candidate.schemaVersion === NEWS_FEED_SCHEMA_VERSION &&
@@ -41,7 +43,6 @@ function isNewsFeed(value: unknown): value is NewsFeed {
 }
 
 export async function fetchNewsFeed(): Promise<NewsFeed> {
-  // Keep end-to-end tests and screenshots deterministic.
   if (Platform.isPlaywright) {
     return newsFeedFixture;
   }

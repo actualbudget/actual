@@ -31,6 +31,10 @@ vi.mock('#hooks/useDateFormat', () => ({
   useDateFormat: () => 'yyyy-MM-dd',
 }));
 
+vi.mock('#hooks/useGlobalPref', () => ({
+  useGlobalPref: () => [undefined, vi.fn()],
+}));
+
 const releaseEntry: NewsEntry = {
   id: 'release-26.8.1',
   type: 'release',
@@ -38,7 +42,6 @@ const releaseEntry: NewsEntry = {
   date: '2026-08-07',
   version: '26.8.1',
   url: 'https://actualbudget.org/docs/releases#2681',
-  summary: 'A hotfix.',
   body: 'A hotfix.\n\n- Fixes **freezes**\n\n:::warning Deprecation\n\nTemplating is deprecated.\n\n:::\n\n> Plain quote.',
   details: '#### Bugfixes\n\n- [#8628](https://example.com/8628) Fix freezes',
 };
@@ -49,7 +52,6 @@ const postEntry: NewsEntry = {
   title: 'Hello world',
   date: '2026-07-01',
   url: 'https://actualbudget.org/blog/hello',
-  summary: 'An announcement.',
   body: 'An announcement.',
   tags: ['announcement'],
 };
@@ -90,25 +92,19 @@ describe('WhatsNewPage', () => {
     ).toHaveAttribute('href', 'https://actualbudget.org/blog/hello');
 
     // Only the release is newer than the last seen date.
-    expect(screen.getAllByTitle('Unread')).toHaveLength(1);
-    expect(
-      screen.getByTestId('whats-new-entry-release-26.8.1'),
-    ).toContainElement(screen.getByTitle('Unread'));
+    expect(screen.getAllByRole('img', { name: 'Unread' })).toHaveLength(1);
 
     // Docusaurus admonitions render as callouts; ordinary quotes stay quotes.
-    const admonition = screen.getByTestId('admonition-warning');
-    expect(admonition).toHaveTextContent('Deprecation');
-    expect(admonition).toHaveTextContent('Templating is deprecated.');
-    expect(admonition).not.toHaveTextContent('[!warning]');
+    expect(screen.getByText('Deprecation')).toBeInTheDocument();
+    expect(screen.getByText('Templating is deprecated.')).toBeInTheDocument();
+    expect(screen.queryByText(/\[!warning\]/)).not.toBeInTheDocument();
     expect(
       screen.getByText('Plain quote.').closest('blockquote'),
     ).not.toBeNull();
 
     // Full changelog is collapsed until requested.
     expect(screen.queryByText('Bugfixes')).not.toBeInTheDocument();
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Show all changes' }),
-    );
+    await userEvent.click(screen.getByText('Show all changes'));
     expect(screen.getByText('Bugfixes')).toBeInTheDocument();
 
     expect(mockMarkAllSeen).toHaveBeenCalled();

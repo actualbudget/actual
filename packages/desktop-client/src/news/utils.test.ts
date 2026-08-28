@@ -11,7 +11,6 @@ function release(version: string, date: string): NewsEntry {
     date,
     version,
     url: '',
-    summary: '',
     body: '',
   };
 }
@@ -23,7 +22,6 @@ function post(slug: string, date: string): NewsEntry {
     title: slug,
     date,
     url: '',
-    summary: '',
     body: '',
   };
 }
@@ -36,8 +34,8 @@ const entries = [
 ];
 
 describe('getUnseenEntries', () => {
-  it('returns everything when nothing has been seen', () => {
-    expect(getUnseenEntries(entries, undefined)).toEqual(entries);
+  it('returns nothing until a last seen date exists', () => {
+    expect(getUnseenEntries(entries, undefined)).toEqual([]);
   });
 
   it('only returns entries strictly newer than the last seen date', () => {

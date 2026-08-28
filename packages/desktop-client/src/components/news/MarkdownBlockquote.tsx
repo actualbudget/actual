@@ -3,48 +3,52 @@ import type { ComponentProps, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ExtraProps } from 'react-markdown';
 
-import { SvgExclamationSolid } from '@actual-app/components/icons/v1';
+import {
+  SvgExclamationOutline,
+  SvgInformationOutline,
+} from '@actual-app/components/icons/v1';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { Alert } from '#components/alerts';
 import { parseAdmonitionMarker } from '#news/admonitions';
 import type { AdmonitionType } from '#news/admonitions';
 
 type MarkdownBlockquoteProps = ComponentProps<'blockquote'> & ExtraProps;
 
-const admonitionColors: Record<
-  AdmonitionType,
-  { border: string; background: string; text: string }
-> = {
+const admonitionStyles: Record<AdmonitionType, ComponentProps<typeof Alert>> = {
   note: {
-    border: theme.pillBorderDark,
-    background: theme.pillBackground,
-    text: theme.pageText,
+    icon: SvgInformationOutline,
+    color: theme.pageText,
+    backgroundColor: theme.pillBackground,
   },
   tip: {
-    border: theme.noticeBorder,
-    background: theme.noticeBackground,
-    text: theme.noticeText,
+    icon: SvgInformationOutline,
+    color: theme.noticeText,
+    backgroundColor: theme.noticeBackground,
   },
   info: {
-    border: theme.pillBorderSelected,
-    background: theme.pillBackgroundSelected,
-    text: theme.pillTextSelected,
+    icon: SvgInformationOutline,
+    color: theme.pillTextSelected,
+    backgroundColor: theme.pillBackgroundSelected,
   },
   warning: {
-    border: theme.warningBorder,
-    background: theme.warningBackground,
-    text: theme.warningText,
+    icon: SvgExclamationOutline,
+    color: theme.warningText,
+    backgroundColor: theme.warningBackground,
   },
   danger: {
-    border: theme.errorBorder,
-    background: theme.errorBackground,
-    text: theme.errorText,
+    icon: SvgExclamationOutline,
+    color: theme.errorTextDarker,
+    backgroundColor: theme.errorBackground,
   },
 };
 
-function firstTextOf(node: ExtraProps['node']): string | undefined {
+// The marker paragraph is located twice: once in the hast tree (to read its
+// text) and once in the rendered React children (to drop it). Both look at
+// the first `<p>`, so they must stay in step.
+function firstParagraphText(node: ExtraProps['node']): string | undefined {
   const firstParagraph = node?.children.find(
     child => child.type === 'element' && child.tagName === 'p',
   );
@@ -68,14 +72,15 @@ function withoutFirstParagraph(children: ReactNode): ReactNode[] {
 
 /**
  * Renders markdown blockquotes, upgrading the ones produced from Docusaurus
- * admonitions (see `admonitionsToBlockquotes`) into styled callouts.
+ * admonitions (see `admonitionsToBlockquotes`) into the app's standard alert
+ * boxes so they look like they do on the website.
  */
 export function MarkdownBlockquote({
   node,
   children,
 }: MarkdownBlockquoteProps) {
   const { t } = useTranslation();
-  const marker = parseAdmonitionMarker(firstTextOf(node));
+  const marker = parseAdmonitionMarker(firstParagraphText(node));
 
   if (!marker) {
     return <blockquote>{children}</blockquote>;
@@ -88,23 +93,10 @@ export function MarkdownBlockquote({
     warning: t('Warning'),
     danger: t('Danger'),
   };
-  const colors = admonitionColors[marker.type];
 
   return (
-    <View
-      style={{
-        margin: '10px 0',
-        padding: '10px 14px',
-        borderRadius: 6,
-        borderLeft: `4px solid ${colors.border}`,
-        backgroundColor: colors.background,
-        color: colors.text,
-        gap: 4,
-      }}
-      data-testid={`admonition-${marker.type}`}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-        <SvgExclamationSolid width={13} height={13} />
+    <Alert {...admonitionStyles[marker.type]} style={{ margin: '10px 0' }}>
+      <View style={{ gap: 4 }}>
         <Text
           style={{
             fontWeight: 700,
@@ -115,10 +107,10 @@ export function MarkdownBlockquote({
         >
           {marker.title || defaultTitles[marker.type]}
         </Text>
+        <View style={{ color: theme.pageText }}>
+          {withoutFirstParagraph(children)}
+        </View>
       </View>
-      <View style={{ color: theme.pageText }}>
-        {withoutFirstParagraph(children)}
-      </View>
-    </View>
+    </Alert>
   );
 }

@@ -5,24 +5,29 @@
 
 import matter from 'gray-matter';
 
+// Must match `NEWS_FEED_SCHEMA_VERSION` in
+// packages/desktop-client/src/news/types.ts. The app rejects feeds with any
+// other version, so bumping this breaks "What's new" for every already
+// deployed client until they update - only do it for incompatible changes.
 export const NEWS_FEED_SCHEMA_VERSION = 1;
 
 const AUTO_GENERATED_SENTINEL = '<!-- release-notes:auto-generated -->';
 const RELEASE_DATE_PATTERN = /^Release date:\s*(\d{4}-\d{2}-\d{2})\s*$/m;
-const DOCKER_TAG_PATTERN = /^\*\*Docker Tag:.*\*\*\s*$/m;
+const DOCKER_TAG_PATTERN = /^\*\*Docker Tag:.*\*\*\s*$/gm;
 const CATEGORY_HEADING_PATTERN = /^#### /m;
 // Complete comments, plus the abruptly-closed forms `<!-->` and `<!--->`.
 const HTML_COMMENT_PATTERN = /<!--[\s\S]*?-->|<!--->|<!-->/g;
 // An unterminated comment runs to the end of the input.
 const UNTERMINATED_HTML_COMMENT_PATTERN = /<!--[\s\S]*$/;
 const DATE_PREFIX_PATTERN = /^(\d{4}-\d{2}-\d{2})-(.+)$/;
-const SUMMARY_MAX_LENGTH = 200;
 
 const ignoreWarning = () => undefined;
 
 /**
- * Removes HTML comments, repeating until none are left so that nested or
- * overlapping markers (e.g. `<!-<!---->-` -> `<!--`) can't survive a single pass.
+ * Removes HTML comments. A single `.replace` isn't enough: overlapping markers
+ * such as `<!-<!---->-` collapse into a fresh `<!--` after one pass (CodeQL
+ * `js/incomplete-multi-character-sanitization`), so we repeat until the text
+ * stops changing.
  */
 export function stripHtmlComments(markdown) {
   let previous;
@@ -51,11 +56,20 @@ function trimTrailingSlash(url) {
 }
 
 /**
- * Rewrites relative markdown links to absolute URLs. `basePath` is the site
- * path the source document lives at (e.g. `/docs/releases`), used to resolve
- * `../` style links; links starting with `/` are resolved against the site root.
+ * Rewrites relative markdown links to absolute URLs so they work inside the
+ * app. `basePath` is the site path the source document lives at (e.g.
+ * `/docs/releases`) and is used to resolve `../` style links; links starting
+ * with `/` resolve against the site root.
+ *
+ * Only handles the common `[text](target)` / `![alt](target "title")` shapes -
+ * nested brackets in the text or `)` inside the target are left untouched.
  */
-export function absolutizeLinks(markdown, siteUrl, basePath) {
+export function absolutizeLinks(
+  markdown,
+  siteUrl,
+  basePath,
+  warn = ignoreWarning,
+) {
   const site = trimTrailingSlash(siteUrl);
   return markdown.replace(
     /(!?\[[^\]]*\]\()([^)\s]+)((?:\s+"[^"]*")?\))/g,
@@ -63,7 +77,14 @@ export function absolutizeLinks(markdown, siteUrl, basePath) {
       if (/^(?:[a-z]+:|#|mailto:)/i.test(target)) {
         return match;
       }
-      const resolved = new URL(target, `${site}${basePath}`);
+      let resolved;
+      try {
+        resolved = new URL(target, `${site}${basePath}`);
+      } catch {
+        // A malformed link in the docs shouldn't fail the whole docs build.
+        warn(`Leaving unparseable link "${target}" as-is`);
+        return match;
+      }
       let pathname = resolved.pathname.replace(/\.mdx?$/, '');
       if (pathname !== '/') {
         pathname = trimTrailingSlash(pathname);
@@ -71,32 +92,6 @@ export function absolutizeLinks(markdown, siteUrl, basePath) {
       return `${prefix}${site}${pathname}${resolved.hash}${suffix}`;
     },
   );
-}
-
-function stripMarkdown(text) {
-  return text
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/[*_`~]/g, '')
-    .replace(/^#+\s*/gm, '')
-    .replace(/^[-*+]\s+/gm, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-export function summarize(markdown, maxLength = SUMMARY_MAX_LENGTH) {
-  const firstParagraph = markdown
-    .split(/\n\s*\n/)
-    .map(paragraph => paragraph.trim())
-    .find(paragraph => paragraph.length > 0 && !paragraph.startsWith('#'));
-  if (!firstParagraph) {
-    return '';
-  }
-  const plain = stripMarkdown(firstParagraph);
-  if (plain.length <= maxLength) {
-    return plain;
-  }
-  return `${plain.slice(0, maxLength - 1).trimEnd()}…`;
 }
 
 function cleanReleaseMarkdown(markdown) {
@@ -145,14 +140,9 @@ export function parseReleases(
       continue;
     }
 
+    // Combined headings like `26.5.1 & 26.5.2` are keyed by the first version.
     const versions = heading.split(/\s*&\s*/).map(version => version.trim());
     const section = splitReleaseSection(body);
-    const highlights = absolutizeLinks(
-      section.highlights,
-      siteUrl,
-      '/docs/releases',
-    );
-    const details = absolutizeLinks(section.details, siteUrl, '/docs/releases');
 
     entries.push({
       id: `release-${versions[0]}`,
@@ -161,9 +151,18 @@ export function parseReleases(
       date: dateMatch[1],
       version: versions[0],
       url: `${trimTrailingSlash(siteUrl)}/docs/releases#${slugifyHeading(heading)}`,
-      summary: summarize(highlights),
-      body: highlights,
-      details,
+      body: absolutizeLinks(
+        section.highlights,
+        siteUrl,
+        '/docs/releases',
+        warn,
+      ),
+      details: absolutizeLinks(
+        section.details,
+        siteUrl,
+        '/docs/releases',
+        warn,
+      ),
     });
 
     if (limit !== undefined && entries.length >= limit) {
@@ -195,7 +194,8 @@ function normalizeDate(value) {
   return match ? match[1] : undefined;
 }
 
-function cleanPostBody(content, siteUrl, slugsByFilename) {
+function cleanPostBody(content, siteUrl, slugsByFilename, warn) {
+  // Links between posts use the source filename; map them to the public slug.
   const withResolvedPostLinks = content.replace(
     /(\[[^\]]*\]\()\.\/([^)\s#]+\.mdx?)(#[^)\s]*)?\)/g,
     (match, prefix, filename, hash = '') => {
@@ -204,13 +204,12 @@ function cleanPostBody(content, siteUrl, slugsByFilename) {
       return `${prefix}${trimTrailingSlash(siteUrl)}${target}${hash})`;
     },
   );
-  return absolutizeLinks(
-    stripHtmlComments(
-      withResolvedPostLinks.replace(/^import\s.+$/gm, ''),
-    ).replace(/<\/?[A-Z][A-Za-z]*[^>]*>/g, ''),
-    siteUrl,
-    '/blog/',
-  )
+  // MDX `import` lines and capitalised JSX components (`<Tabs>`) are dropped;
+  // plain lowercase HTML is left alone and renders as text in the app.
+  const withoutMdx = stripHtmlComments(
+    withResolvedPostLinks.replace(/^import\s.+$/gm, ''),
+  ).replace(/<\/?[A-Z][A-Za-z]*[^>]*>/g, '');
+  return absolutizeLinks(withoutMdx, siteUrl, '/blog/', warn)
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
@@ -246,7 +245,6 @@ export function parsePost(
     allPostFilenames.map(name => [name, postSlugFromFilename(name)]),
   );
   const slug = data.slug ?? postSlugFromFilename(filename);
-  const body = cleanPostBody(content, siteUrl, slugsByFilename);
 
   return {
     id: `post-${slug}`,
@@ -254,8 +252,7 @@ export function parsePost(
     title: String(data.title ?? slug),
     date,
     url: `${trimTrailingSlash(siteUrl)}/blog/${slug}`,
-    summary: data.description ? String(data.description) : summarize(body),
-    body,
+    body: cleanPostBody(content, siteUrl, slugsByFilename, warn),
     tags,
   };
 }

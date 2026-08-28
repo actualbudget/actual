@@ -1,28 +1,42 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router';
 
-import { useGlobalPref } from '#hooks/useGlobalPref';
-import { useNavigate } from '#hooks/useNavigate';
-import { useNewsFeed } from '#hooks/useNewsFeed';
-import { addNotification } from '#notifications/notificationsSlice';
+import { getNewestDate, getReleaseToNotify } from '#news/utils';
+import {
+  addNotification,
+  removeNotification,
+} from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
-import { getNewestDate, getReleaseToNotify } from './utils';
+import { useGlobalPref } from './useGlobalPref';
+import { useNavigate } from './useNavigate';
+import { useNewsFeed } from './useNewsFeed';
 
-export const NEWS_RELEASE_NOTIFICATION_ID = 'news-release-notification';
+const NOTIFICATION_ID = 'news-release-notification';
+const WHATS_NEW_PATH = '/whats-new';
 
 /**
- * Shows a sticky notification the first time a new release (that the user is
- * already running) appears in the news feed. Does nothing while the
- * `newsFeed` experimental flag is off.
+ * Shows a sticky notification the first time a new release that the user is
+ * already running appears in the news feed. Does nothing while the news feed
+ * is disabled (experimental flag off or the user turned it off in settings).
  */
 export function useNewsNotification() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isEnabled, entries, markAllSeen } = useNewsFeed();
   const [lastSeenNewsDate, setLastSeenNewsDate] =
     useGlobalPref('lastSeenNewsDate');
+
+  // Reaching the page (via the bell, settings, or the notification itself)
+  // makes the notification redundant.
+  useEffect(() => {
+    if (location.pathname === WHATS_NEW_PATH) {
+      dispatch(removeNotification({ id: NOTIFICATION_ID }));
+    }
+  }, [dispatch, location.pathname]);
 
   useEffect(() => {
     if (!isEnabled || entries.length === 0) {
@@ -30,8 +44,9 @@ export function useNewsNotification() {
     }
 
     if (!lastSeenNewsDate) {
-      // First time the feature is enabled: don't notify about old news, just
-      // remember where we are so future releases trigger a notification.
+      // First time the feature is enabled: record where the feed currently is
+      // rather than notifying about old news. From here on only newer entries
+      // count as unseen.
       const newestDate = getNewestDate(entries);
       if (newestDate) {
         setLastSeenNewsDate(newestDate);
@@ -52,7 +67,7 @@ export function useNewsNotification() {
       addNotification({
         notification: {
           type: 'message',
-          id: NEWS_RELEASE_NOTIFICATION_ID,
+          id: NOTIFICATION_ID,
           sticky: true,
           title: t("What's new in Actual {{version}}", {
             version: release.version,
@@ -63,7 +78,7 @@ export function useNewsNotification() {
           button: {
             title: t("See what's new"),
             action: () => {
-              void navigate('/whats-new');
+              void navigate(WHATS_NEW_PATH);
             },
           },
           onClose: markAllSeen,

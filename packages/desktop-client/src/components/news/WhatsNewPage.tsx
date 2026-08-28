@@ -1,8 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { Link } from '#components/common/Link';
@@ -10,9 +12,7 @@ import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { Page } from '#components/Page';
 import { Setting } from '#components/settings/UI';
 import { useNewsFeed } from '#hooks/useNewsFeed';
-import { NEWS_RELEASE_NOTIFICATION_ID } from '#news/useNewsNotification';
-import { removeNotification } from '#notifications/notificationsSlice';
-import { useDispatch } from '#redux';
+import { getUnseenEntries } from '#news/utils';
 
 import { NewsEntryCard } from './NewsEntryCard';
 
@@ -21,39 +21,36 @@ const BLOG_URL = 'https://actualbudget.org/blog';
 
 export function WhatsNewPage() {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
   const { entries, isLoading, error, lastSeenNewsDate, markAllSeen } =
     useNewsFeed();
 
-  // Remember what "unread" meant when the page opened so the markers don't
-  // vanish the moment we record everything as seen.
+  // Everything is marked as seen once the page shows it, but the unread
+  // markers should reflect what was new when the page opened, so remember the
+  // starting point.
   const lastSeenOnOpen = useRef(lastSeenNewsDate);
+  const unseenOnOpen = new Set(
+    getUnseenEntries(entries, lastSeenOnOpen.current).map(entry => entry.id),
+  );
 
-  useEffect(() => {
-    dispatch(removeNotification({ id: NEWS_RELEASE_NOTIFICATION_ID }));
-  }, [dispatch]);
-
+  const markSeen = useEffectEvent(markAllSeen);
   useEffect(() => {
     if (entries.length > 0) {
-      markAllSeen();
+      markSeen();
     }
-    // Only when the entries arrive/change; `markAllSeen` is derived from them.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entries]);
 
   return (
     <Page header={t("What's new")}>
       <View
         style={{
-          flexDirection: 'column',
           marginTop: 10,
           flexShrink: 0,
           gap: 30,
           maxWidth: 800,
           paddingBottom: MOBILE_NAV_HEIGHT,
         }}
-        data-testid="whats-new-list"
       >
+        {/* The settings card is reused on purpose so this page matches Settings. */}
         <Setting>
           <Text>
             <Trans>
@@ -73,11 +70,18 @@ export function WhatsNewPage() {
 
         {isLoading && (
           <View style={{ alignItems: 'center', padding: 30 }}>
-            <AnimatedLoading style={{ width: 20, height: 20 }} />
+            <AnimatedLoading
+              style={{
+                width: 20,
+                height: 20,
+                color: theme.pageTextDark,
+                ...styles.delayedFadeIn,
+              }}
+            />
           </View>
         )}
 
-        {error && !isLoading && (
+        {error && (
           <Setting>
             <Text data-testid="whats-new-offline">
               <Trans>
@@ -102,11 +106,7 @@ export function WhatsNewPage() {
           <NewsEntryCard
             key={entry.id}
             entry={entry}
-            isUnread={
-              lastSeenOnOpen.current === undefined
-                ? false
-                : entry.date > lastSeenOnOpen.current
-            }
+            isUnread={unseenOnOpen.has(entry.id)}
           />
         ))}
       </View>

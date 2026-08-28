@@ -10,12 +10,13 @@ import { View } from '@actual-app/components/view';
 import { useNavigate } from '#hooks/useNavigate';
 import { useNewsFeed } from '#hooks/useNewsFeed';
 
+// Keeps the badge small; the feed only ever holds a couple of dozen entries.
 const MAX_DISPLAYED_COUNT = 9;
 
 /**
  * Titlebar bell that opens the "What's new" page and shows how many entries
- * (releases and posts) the user hasn't seen yet. Hidden while the `newsFeed`
- * experimental flag is off.
+ * (releases and posts) the user hasn't seen yet. Hidden while the news feed
+ * is disabled (experimental flag off or the user turned it off in settings).
  */
 export function WhatsNewButton() {
   const { t } = useTranslation();
@@ -48,7 +49,7 @@ export function WhatsNewButton() {
         </Button>
         {unseenCount > 0 && (
           <Text
-            data-testid="whats-new-unread-count"
+            data-testid="whats-new-unseen-count"
             style={{
               position: 'absolute',
               top: -3,

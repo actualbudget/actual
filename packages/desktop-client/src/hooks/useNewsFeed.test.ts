@@ -16,7 +16,7 @@ vi.mock('#hooks/useFeatureFlag', () => ({
   useFeatureFlag: () => mockIsFlagEnabled,
 }));
 
-let mockShowNewsFeed: boolean | undefined = undefined;
+let mockShowNewsFeed = true;
 
 vi.mock('#hooks/useGlobalPref', () => ({
   useGlobalPref: (key: string) =>
@@ -40,7 +40,7 @@ describe('useNewsFeed', () => {
     resetTestProviders();
     mockIsFlagEnabled = false;
     mockLastSeenNewsDate = undefined;
-    mockShowNewsFeed = undefined;
+    mockShowNewsFeed = true;
     vi.stubGlobal('fetch', fetchMock);
     fetchMock.mockResolvedValue({
       ok: true,
@@ -91,17 +91,5 @@ describe('useNewsFeed', () => {
     expect(result.current.isEnabled).toBe(false);
     expect(result.current.entries).toEqual([]);
     expect(fetchMock).not.toHaveBeenCalled();
-  });
-
-  it('treats an unset setting as on', async () => {
-    mockIsFlagEnabled = true;
-    mockShowNewsFeed = undefined;
-
-    const { result } = renderHook(() => useNewsFeed(), {
-      wrapper: TestProviders,
-    });
-
-    expect(result.current.isEnabled).toBe(true);
-    await waitFor(() => expect(result.current.entries).toHaveLength(2));
   });
 });

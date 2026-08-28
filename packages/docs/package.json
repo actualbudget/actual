@@ -6,7 +6,6 @@
     "docusaurus": "docusaurus",
     "start": "node scripts/generate-upcoming-release-notes.mjs && node scripts/generate-news-feed.mjs && docusaurus start",
     "build": "node scripts/generate-upcoming-release-notes.mjs && node scripts/generate-news-feed.mjs && docusaurus build",
-    "generate:news-feed": "node scripts/generate-news-feed.mjs",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
