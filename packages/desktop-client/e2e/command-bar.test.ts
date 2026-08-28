@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
+import { Navigation } from './page-models/navigation';
 
 test.describe('Command bar', () => {
   let page: Page;
@@ -75,5 +76,56 @@ test.describe('Command bar', () => {
         name: 'Add new schedule',
       }),
     ).toBeVisible();
+  });
+
+  async function openAllySavingsPageActions() {
+    const navigation = new Navigation(page);
+    await navigation.goToAccountPage('Ally Savings');
+
+    await page.keyboard.press('ControlOrMeta+k');
+    const commandBarInput = page.getByRole('combobox', {
+      name: 'Command Bar',
+    });
+    await expect(commandBarInput).toBeVisible();
+
+    const commandBar = page.locator('[cmdk-dialog][data-state="open"]');
+    const accountOption = commandBar.getByRole('option', {
+      name: 'Ally Savings',
+      exact: true,
+    });
+    await expect(accountOption).toBeVisible();
+
+    for (let i = 0; i < 50; i++) {
+      if ((await accountOption.getAttribute('data-selected')) === 'true') {
+        break;
+      }
+      await commandBarInput.press('ArrowDown');
+    }
+
+    await expect(accountOption).toHaveAttribute('data-selected', 'true');
+    await expect(
+      commandBar.getByRole('group', { name: 'Page actions' }),
+    ).toBeVisible();
+
+    return commandBar;
+  }
+
+  test('opens Filter from the active account Page actions', async () => {
+    const commandBar = await openAllySavingsPageActions();
+    await commandBar
+      .getByRole('option', { name: 'Filter', exact: true })
+      .click();
+
+    await expect(
+      page
+        .getByTestId('filters-select-tooltip')
+        .or(page.getByTestId('filters-menu-tooltip')),
+    ).toBeVisible();
+  });
+
+  test('captures the active account Page-actions view', async () => {
+    const commandBar = await openAllySavingsPageActions();
+
+    await expect(commandBar).toMatchThemeScreenshots();
   });
 });

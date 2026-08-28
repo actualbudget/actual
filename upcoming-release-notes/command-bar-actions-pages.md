@@ -3,4 +3,4 @@ category: Enhancements
 authors: [aelxxs]
 ---
 
-Add more actions and pages to the command bar.
+Add quick actions, account and report page actions, recent pages, and favorites to the command bar.
