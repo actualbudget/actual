@@ -144,6 +144,7 @@ export type GlobalPrefs = Partial<{
   };
   notifyWhenUpdateIsAvailable: boolean;
   lastSeenNewsDate?: string; // YYYY-MM-DD of the newest "What's new" entry the user has seen on this device
+  showNewsFeed: boolean; // Whether the "What's new" feed (bell, page, release toast) is shown on this device
 }>;
 
 // GlobalPrefsJson represents what's saved in the global-store.json file
@@ -173,6 +174,7 @@ export type GlobalPrefsJson = Partial<{
   syncServerConfig?: GlobalPrefs['syncServerConfig'];
   notifyWhenUpdateIsAvailable?: GlobalPrefs['notifyWhenUpdateIsAvailable'];
   lastSeenNewsDate?: GlobalPrefs['lastSeenNewsDate'];
+  showNewsFeed?: GlobalPrefs['showNewsFeed'];
 }>;
 
 export type AuthMethods = 'password' | 'openid';

@@ -10,7 +10,10 @@ import { useGlobalPref } from './useGlobalPref';
 const EMPTY_ENTRIES: NewsEntry[] = [];
 
 export function useNewsFeed() {
-  const isEnabled = useFeatureFlag('newsFeed');
+  const isFlagEnabled = useFeatureFlag('newsFeed');
+  const [showNewsFeed] = useGlobalPref('showNewsFeed');
+  // Both the experimental flag and the user's own setting must be on.
+  const isEnabled = isFlagEnabled && showNewsFeed !== false;
   const [lastSeenNewsDate, setLastSeenNewsDate] =
     useGlobalPref('lastSeenNewsDate');
 

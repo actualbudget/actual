@@ -23,6 +23,7 @@ import { useServerVersion } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useNewsFeed } from '#hooks/useNewsFeed';
 import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 
@@ -48,7 +49,9 @@ function About() {
       void dispatch(getLatestAppVersion());
     });
   const dispatch = useDispatch();
-  const isNewsFeedEnabled = useFeatureFlag('newsFeed');
+  const isNewsFeedFlagEnabled = useFeatureFlag('newsFeed');
+  const { isEnabled: isNewsFeedEnabled } = useNewsFeed();
+  const [showNewsFeed, setShowNewsFeedPref] = useGlobalPref('showNewsFeed');
 
   return (
     <Setting>
@@ -129,6 +132,20 @@ function About() {
             <Trans>Display a notification when updates are available</Trans>
           </label>
         </Text>
+        {isNewsFeedFlagEnabled && (
+          <Text style={{ display: 'flex' }}>
+            <Checkbox
+              id="settings-showNewsFeed"
+              checked={showNewsFeed !== false}
+              onChange={e => setShowNewsFeedPref(e.currentTarget.checked)}
+            />
+            <label htmlFor="settings-showNewsFeed">
+              <Trans>
+                Show what's new in Actual (release notes and announcements)
+              </Trans>
+            </label>
+          </Text>
+        )}
       </View>
     </Setting>
   );

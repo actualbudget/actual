@@ -16,8 +16,13 @@ vi.mock('#hooks/useFeatureFlag', () => ({
   useFeatureFlag: () => mockIsFlagEnabled,
 }));
 
+let mockShowNewsFeed: boolean | undefined = undefined;
+
 vi.mock('#hooks/useGlobalPref', () => ({
-  useGlobalPref: () => [mockLastSeenNewsDate, mockSetLastSeenNewsDate],
+  useGlobalPref: (key: string) =>
+    key === 'showNewsFeed'
+      ? [mockShowNewsFeed, vi.fn()]
+      : [mockLastSeenNewsDate, mockSetLastSeenNewsDate],
 }));
 
 vi.mock('@actual-app/core/shared/platform', async () => {
@@ -35,6 +40,7 @@ describe('useNewsFeed', () => {
     resetTestProviders();
     mockIsFlagEnabled = false;
     mockLastSeenNewsDate = undefined;
+    mockShowNewsFeed = undefined;
     vi.stubGlobal('fetch', fetchMock);
     fetchMock.mockResolvedValue({
       ok: true,
@@ -72,5 +78,30 @@ describe('useNewsFeed', () => {
 
     result.current.markAllSeen();
     expect(mockSetLastSeenNewsDate).toHaveBeenCalledWith('2026-01-01');
+  });
+
+  it('never fetches while the user has turned the news feed off', () => {
+    mockIsFlagEnabled = true;
+    mockShowNewsFeed = false;
+
+    const { result } = renderHook(() => useNewsFeed(), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.isEnabled).toBe(false);
+    expect(result.current.entries).toEqual([]);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('treats an unset setting as on', async () => {
+    mockIsFlagEnabled = true;
+    mockShowNewsFeed = undefined;
+
+    const { result } = renderHook(() => useNewsFeed(), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.isEnabled).toBe(true);
+    await waitFor(() => expect(result.current.entries).toHaveLength(2));
   });
 });

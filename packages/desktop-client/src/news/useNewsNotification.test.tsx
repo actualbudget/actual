@@ -18,8 +18,13 @@ vi.mock('#hooks/useFeatureFlag', () => ({
   useFeatureFlag: () => mockIsFlagEnabled,
 }));
 
+let mockShowNewsFeed: boolean | undefined = undefined;
+
 vi.mock('#hooks/useGlobalPref', () => ({
-  useGlobalPref: () => [mockLastSeenNewsDate, mockSetLastSeenNewsDate],
+  useGlobalPref: (key: string) =>
+    key === 'showNewsFeed'
+      ? [mockShowNewsFeed, vi.fn()]
+      : [mockLastSeenNewsDate, mockSetLastSeenNewsDate],
 }));
 
 vi.mock('@actual-app/core/shared/platform', async () => {
@@ -46,6 +51,7 @@ describe('useNewsNotification', () => {
     store = createTestAppStore();
     mockIsFlagEnabled = false;
     mockLastSeenNewsDate = '2025-01-01';
+    mockShowNewsFeed = undefined;
     vi.stubGlobal('fetch', fetchMock);
     fetchMock.mockResolvedValue({
       ok: true,
@@ -92,6 +98,17 @@ describe('useNewsNotification', () => {
     await waitFor(() =>
       expect(mockSetLastSeenNewsDate).toHaveBeenCalledWith('2026-01-01'),
     );
+    expect(store.getState().notifications.notifications).toEqual([]);
+  });
+
+  it('does nothing when the user has turned the news feed off', async () => {
+    mockIsFlagEnabled = true;
+    mockShowNewsFeed = false;
+    renderHook(() => useNewsNotification(), { wrapper });
+
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    expect(fetchMock).not.toHaveBeenCalled();
     expect(store.getState().notifications.notifications).toEqual([]);
   });
 });
