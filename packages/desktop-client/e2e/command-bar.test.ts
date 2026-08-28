@@ -88,7 +88,9 @@ test.describe('Command bar', () => {
     });
     await expect(commandBarInput).toBeVisible();
 
-    const commandBar = page.locator('[cmdk-dialog][data-state="open"]');
+    const commandBar = page.locator(
+      '[cmdk-dialog][data-state="open"] [cmdk-root]',
+    );
     const accountOption = commandBar.getByRole('option', {
       name: 'Ally Savings',
       exact: true,
