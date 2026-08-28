@@ -4,7 +4,6 @@ description: 'Actual has grown, and so has its community. To protect the privacy
 date: 2026-05-20T10:00
 slug: no-advertising-in-discord
 tags: [announcement]
-in_app_notification: true
 hide_table_of_contents: false
 authors: MatissJanis
 ---
