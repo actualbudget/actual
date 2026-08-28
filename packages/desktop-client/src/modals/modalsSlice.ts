@@ -25,6 +25,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { accountQueries } from '#accounts';
 import { resetApp, setAppState } from '#app/appSlice';
 import type { SelectLinkedAccountsModalProps } from '#components/modals/SelectLinkedAccountsModal';
+import type { TransactionTableColumn } from '#components/transactions/table/columns';
 import { createAppAsyncThunk } from '#redux';
 import { signOut } from '#users/usersSlice';
 
@@ -581,11 +582,20 @@ export type Modal =
       };
     }
   | {
+      name: 'transaction-table-columns';
+      options: {
+        columns: TransactionTableColumn[];
+        onSave: (
+          columns: TransactionTableColumn[],
+          applyToAll: boolean,
+        ) => void;
+      };
+    }
+  | {
       name: 'convert-to-schedule';
       options: {
         onConfirm: () => void;
         onCancel?: () => void;
-        isBeyondWindow?: boolean;
         daysUntilTransaction?: number;
         upcomingDays?: number;
       };

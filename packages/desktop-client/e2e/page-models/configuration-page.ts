@@ -1,6 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
 
-import { AccountPage } from './account-page';
 import { BootstrapPage } from './bootstrap-page';
 import { BudgetPage } from './budget-page';
 
@@ -51,9 +50,9 @@ export class ConfigurationPage {
   async startFresh() {
     await this.page.getByRole('button', { name: 'Start budgeting' }).click();
 
-    const accountPage = new AccountPage(this.page);
-    await accountPage.accountName.waitFor();
-    return accountPage;
+    const budgetPage = new BudgetPage(this.page);
+    await budgetPage.waitFor();
+    return budgetPage;
   }
 
   async importBudget(type: 'YNAB4' | 'nYNAB' | 'Actual', file: string) {

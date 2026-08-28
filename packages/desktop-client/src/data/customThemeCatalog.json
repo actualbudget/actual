@@ -205,7 +205,7 @@
       "#E5E7EB",
       "#1B8366"
     ],
-    "mode": "dark"
+    "mode": "light"
   },
   {
     "name": "High-contrast (Light)",
@@ -385,6 +385,19 @@
       "#f43f5e",
       "#00e676",
       "#ffffff"
+    ],
+    "mode": "dark"
+  },
+  {
+    "name": "Palenight",
+    "repo": "mafsi/palenight-actual",
+    "colors": [
+      "#292d3e",
+      "#31364a",
+      "#697098",
+      "#c792ea",
+      "#82aaff",
+      "#c3e88d"
     ],
     "mode": "dark"
   }

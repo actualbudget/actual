@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { q } from '@actual-app/core/shared/query';
-import type { Query } from '@actual-app/core/shared/query';
+import type { ObjectExpression, Query } from '@actual-app/core/shared/query';
 import {
   getHasTransactionsQuery,
   getStatus,
@@ -164,8 +164,19 @@ export function getSchedulesQuery(
     if (view === 'uncategorized') {
       query = query.filter({ next_date: null });
     } else {
+      const scheduleFilters: ObjectExpression[] = [
+        filterByAccount,
+        filterByPayee,
+      ].filter(filter => filter !== null);
+
+      if (view !== 'onbudget' && view !== 'offbudget') {
+        scheduleFilters.push({
+          _has_splits: true,
+        });
+      }
+
       query = query.filter({
-        $or: [filterByAccount, filterByPayee],
+        $or: scheduleFilters,
       });
     }
   }

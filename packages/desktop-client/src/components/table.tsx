@@ -125,14 +125,13 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
   );
 });
 
-export function UnexposedCellContent({
-  value,
-  formatter,
-  style,
-  ...props
-}: Pick<CellProps, 'value' | 'formatter' | 'style'>) {
+export const UnexposedCellContent = forwardRef<
+  HTMLSpanElement,
+  Pick<CellProps, 'value' | 'formatter' | 'style'>
+>(function UnexposedCellContent({ value, formatter, style, ...props }, ref) {
   return (
     <Text
+      innerRef={ref}
       style={{
         flexGrow: 1,
         whiteSpace: 'nowrap',
@@ -145,7 +144,7 @@ export function UnexposedCellContent({
       {formatter ? formatter(value) : value}
     </Text>
   );
-}
+});
 
 type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
   formatter?: (value: string, type?: unknown) => string | JSX.Element;
@@ -938,7 +937,7 @@ export type TableProps<T extends TableItem = TableItem> = {
     item: T;
     editing: boolean;
     focusedField: string | null;
-    onEdit: (id: T['id'], field: string) => void;
+    onEdit: TableNavigator<T>['onEdit'];
     index: number;
     position: number;
   }) => ReactNode;
@@ -1058,7 +1057,10 @@ export const Table = forwardRef(
       }
 
       if (scrollContainer.current && saveScrollWidth) {
-        setTimeout(saveScrollDelayed, 200);
+        const timeout = setTimeout(saveScrollDelayed, 200);
+        // Without this, the timer can fire after unmount and call setState
+        // on a dead component (crashes test teardown)
+        return () => clearTimeout(timeout);
       }
     });
 

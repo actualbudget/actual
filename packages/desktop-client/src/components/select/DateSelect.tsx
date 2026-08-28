@@ -24,7 +24,7 @@ import {
   Heading,
   I18nProvider,
 } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
@@ -48,26 +48,14 @@ import { css } from '@emotion/css';
 import { CalendarDate } from '@internationalized/date';
 import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
 
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { InputField } from '#components/mobile/MobileForms';
 import { useLanguage } from '#hooks/useLocale';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
-const FIRST_DAY_OF_WEEK_NAMES = [
-  'sun',
-  'mon',
-  'tue',
-  'wed',
-  'thu',
-  'fri',
-  'sat',
-] as const;
-
-type FirstDayOfWeek = (typeof FIRST_DAY_OF_WEEK_NAMES)[number];
-
-export function getFirstDayOfWeek(idx: string | undefined): FirstDayOfWeek {
-  return FIRST_DAY_OF_WEEK_NAMES[parseInt(idx || '0', 10) || 0];
-}
+import { getFirstDayOfWeek } from './getFirstDayOfWeek';
+import type { FirstDayOfWeek } from './getFirstDayOfWeek';
 
 function toCalendarDate(date: Date): CalendarDate {
   return new CalendarDate(
@@ -81,11 +69,13 @@ function fromCalendarDate(date: CalendarDate): Date {
   return new Date(date.year, date.month - 1, date.day);
 }
 
+const calendarShadow = '0 0px 4px rgba(0, 0, 0, .25)';
+
 const pickerStyles: CSSProperties = {
   '& .react-aria-Calendar': {
     color: theme.calendarText,
     background: theme.calendarBackground,
-    boxShadow: '0 0px 4px rgba(0, 0, 0, .25)',
+    boxShadow: calendarShadow,
     borderRadius: 4,
     padding: 10,
   },
@@ -157,13 +147,27 @@ type DatePickerProps = {
   firstDayOfWeek: FirstDayOfWeek;
   onUpdate: (selectedDate: Date) => void;
   onSelect: (selectedDate: Date) => void;
+  attached?: boolean;
+  embedded?: boolean;
 };
 
 type DatePickerForwardedRef = {
   handleInputKeyDown: (e: KeyboardEvent<HTMLInputElement>) => void;
 };
 const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
-  ({ value, dateFormat, locale, firstDayOfWeek, onUpdate, onSelect }, ref) => {
+  (
+    {
+      value,
+      dateFormat,
+      locale,
+      firstDayOfWeek,
+      onUpdate,
+      onSelect,
+      attached,
+      embedded,
+    },
+    ref,
+  ) => {
     const { t } = useTranslation();
     const parsedValue = value ? parse(value, dateFormat, currentDate()) : null;
     const focusedCalendarDate = toCalendarDate(
@@ -218,7 +222,28 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
 
     return (
       <View
-        className={css([pickerStyles, { flex: 1 }])}
+        className={css([
+          pickerStyles,
+          attached && {
+            '& .react-aria-Calendar': {
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+              boxShadow: 'none',
+            },
+          },
+          // Embedded: stretch the grid to the container with equal columns
+          // (same technique as DayRangeCalendar). The container must have a
+          // definite width — a 100%-wide table blows up shrink-to-fit boxes.
+          embedded && {
+            '& .react-aria-Calendar': { width: '100%' },
+            '& .react-aria-CalendarGrid': {
+              width: '100%',
+              tableLayout: 'fixed',
+            },
+            '& .react-aria-CalendarCell': { width: 'auto' },
+          },
+          { flex: 1 },
+        ])}
         data-date-picker
         onMouseDown={e => e.preventDefault()}
       >
@@ -286,6 +311,8 @@ type DateSelectProps = {
   clearOnBlur?: boolean;
   onUpdate?: (selectedDate: string) => void;
   onSelect: (selectedDate: string) => void;
+  transferDateSyncChecked?: boolean;
+  onTransferDateSyncChange?: (checked: boolean) => void;
 };
 
 function DateSelectDesktop({
@@ -302,6 +329,8 @@ function DateSelectDesktop({
   clearOnBlur = true,
   onUpdate,
   onSelect,
+  transferDateSyncChecked,
+  onTransferDateSyncChange,
 }: DateSelectProps) {
   const parsedDefaultValue = useMemo(() => {
     if (defaultValue) {
@@ -456,8 +485,7 @@ function DateSelectDesktop({
         }}
         onBlur={e => {
           // react-aria moves focus into the calendar when it's clicked; keep
-          // the picker open and pull focus back so keyboard entry still works
-          // (with pikaday, focus never left the input).
+          // the picker open and pull focus back so keyboard entry still works.
           if (
             e.relatedTarget instanceof Element &&
             e.relatedTarget.closest('[data-date-picker]')
@@ -493,22 +521,49 @@ function DateSelectDesktop({
         }}
       />
       {maybeWrapTooltip(
-        <DatePicker
-          ref={picker}
-          value={selectedValue}
-          dateFormat={dateFormat}
-          locale={locale}
-          firstDayOfWeek={firstDayOfWeek}
-          onUpdate={date => {
-            setSelectedValue(format(date, dateFormat));
-            onUpdate?.(format(date, 'yyyy-MM-dd'));
-          }}
-          onSelect={date => {
-            setValue(format(date, dateFormat));
-            onSelect(format(date, 'yyyy-MM-dd'));
-            setOpen(false);
-          }}
-        />,
+        <View
+          style={
+            onTransferDateSyncChange
+              ? { borderRadius: 4, boxShadow: calendarShadow }
+              : undefined
+          }
+        >
+          <DatePicker
+            ref={picker}
+            value={selectedValue}
+            dateFormat={dateFormat}
+            locale={locale}
+            firstDayOfWeek={firstDayOfWeek}
+            attached={!!onTransferDateSyncChange}
+            embedded={embedded}
+            onUpdate={date => {
+              setSelectedValue(format(date, dateFormat));
+              onUpdate?.(format(date, 'yyyy-MM-dd'));
+            }}
+            onSelect={date => {
+              setValue(format(date, dateFormat));
+              onSelect(format(date, 'yyyy-MM-dd'));
+              setOpen(false);
+            }}
+          />
+          {onTransferDateSyncChange && (
+            <LabeledCheckbox
+              id={`${id ?? 'date-select'}-transfer-date-sync`}
+              checked={transferDateSyncChecked}
+              onChange={e => onTransferDateSyncChange(e.target.checked)}
+              onMouseDown={e => e.preventDefault()}
+              style={{
+                padding: '6px 8px',
+                borderBottomLeftRadius: 4,
+                borderBottomRightRadius: 4,
+                backgroundColor: theme.calendarBackground,
+                color: theme.calendarText,
+              }}
+            >
+              <Trans>Sync both transfer dates</Trans>
+            </LabeledCheckbox>
+          )}
+        </View>,
       )}
     </View>
   );
@@ -517,16 +572,18 @@ function DateSelectDesktop({
 function DateSelectMobile(props: DateSelectProps) {
   const { style: inputStyle, ...restInputProps } = props.inputProps ?? {};
   return (
-    <InputField
-      id={props.id}
-      type="date"
-      value={props.value ?? ''}
-      onChange={event => {
-        props.onSelect(event.target.value);
-      }}
-      style={{ height: 28, ...inputStyle }}
-      {...restInputProps}
-    />
+    <View>
+      <InputField
+        id={props.id}
+        type="date"
+        value={props.value ?? ''}
+        onChange={event => {
+          props.onSelect(event.target.value);
+        }}
+        style={{ height: 28, ...inputStyle }}
+        {...restInputProps}
+      />
+    </View>
   );
 }
 

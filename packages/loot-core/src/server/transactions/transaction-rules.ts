@@ -334,6 +334,7 @@ export async function runRules(
   }
 
   let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
+  let lastCategoryIdForGroup: string | null = finalTrans.category ?? null;
 
   let scheduleRuleID = '';
   // Check if a schedule is attached to this transaction and if so get the rule ID attached to that schedule.
@@ -371,6 +372,10 @@ export async function runRules(
         const changes = rules[i].execActions(finalTrans);
         finalTrans = Object.assign({}, finalTrans, changes);
         await resolvePayeeNameForRules(finalTrans);
+        lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
+          finalTrans,
+          lastCategoryIdForGroup,
+        );
       } else if (RuleIdsLinkedToSchedules.includes(rules[i].id)) {
         // skip all other rules that are linked to other schedules.
         continue;
@@ -378,11 +383,19 @@ export async function runRules(
         // if a rule is not linked to a schedule, run it.
         finalTrans = rules[i].apply(finalTrans);
         await resolvePayeeNameForRules(finalTrans);
+        lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
+          finalTrans,
+          lastCategoryIdForGroup,
+        );
       }
     } else {
       // if there is no scheduleRuleID then just run all rules.
       finalTrans = rules[i].apply(finalTrans);
       await resolvePayeeNameForRules(finalTrans);
+      lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
+        finalTrans,
+        lastCategoryIdForGroup,
+      );
     }
   }
 
@@ -989,6 +1002,8 @@ export type TransactionForRules = TransactionEntity & {
   balance?: number;
   _category_name?: string;
   _account_name?: string;
+  /** The transaction's category's group id; see prepareTransactionForRules */
+  category_group?: string;
   parent_amount?: number;
   /** Prefetched cent balances for BALANCE_OF("…") in rule formulas; cleared in finalize */
   _balanceOfPrefetched?: Map<string, number>;
@@ -1095,6 +1110,16 @@ export async function prepareTransactionForRules(
     const category = await getCategory(trans.category);
     if (category) {
       r._category_name = category.name;
+
+      // Populate the group id so a `category_group` rule condition can
+      // actually match. Previously this was never set here, so
+      // Condition.eval()'s `object['category_group']` lookup always
+      // came back undefined and the condition silently never matched
+      // during live rule application (import/manual entry). The
+      // query/report path (conditionsToAQL) was unaffected, since it
+      // maps the field to a real join (`category.group`) instead of
+      // reading this property.
+      r.category_group = category.cat_group;
     }
   }
 
@@ -1120,6 +1145,35 @@ async function resolvePayeeNameForRules(
   }
 }
 
+/**
+ * `category_group` is only computed once, in prepareTransactionForRules,
+ * before any rules have run. Since rules apply as a chain and an earlier
+ * rule's action can change (or clear) `category`, a later rule's
+ * `category_group` condition would otherwise read a stale group id left
+ * over from before that change. Called after every rule application in
+ * the runRules loop; only re-resolves the group when `category` has
+ * actually changed since the last check, to avoid a database lookup on
+ * every rule when category was untouched.
+ */
+async function refreshCategoryGroupIfChanged(
+  trans: TransactionForRules,
+  lastCategoryId: string | null,
+): Promise<string | null> {
+  const currentCategoryId = trans.category ?? null;
+  if (currentCategoryId === lastCategoryId) {
+    return lastCategoryId;
+  }
+
+  if (currentCategoryId) {
+    const category = await getCategory(currentCategoryId);
+    trans.category_group = category?.cat_group;
+  } else {
+    delete trans.category_group;
+  }
+
+  return currentCategoryId;
+}
+
 export async function finalizeTransactionForRules(
   trans: TransactionEntity | TransactionForRules,
 ): Promise<TransactionEntity> {
@@ -1130,6 +1184,13 @@ export async function finalizeTransactionForRules(
 
   if ('balance' in trans) {
     delete trans.balance;
+  }
+
+  // Synthetic field used only for `category_group` condition matching;
+  // never a real transaction column, so strip it before the
+  // transaction is returned/persisted.
+  if ('category_group' in trans) {
+    delete trans.category_group;
   }
 
   if ('_balanceOfPrefetched' in trans) {

@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { currentDay, dayFromDate } from '@actual-app/core/shared/months';
 import {
@@ -83,7 +84,8 @@ export function EditFieldModal({
   const { isNarrowWidth } = useResponsive();
   let label: string;
   let editor: (props: { close: () => void }) => ReactNode;
-  let minWidth: number | undefined;
+  let width: string | undefined;
+  let height: number | 'auto' = 275;
 
   const inputStyle: CSSProperties = {
     ...(isNarrowWidth && itemStyle),
@@ -102,7 +104,10 @@ export function EditFieldModal({
     case 'date': {
       const today = currentDay();
       label = t('Date');
-      minWidth = 350;
+      // Definite width — the embedded calendar's 100%-wide grid must not
+      // size the modal (see DateSelect)
+      width = tokens.breakpoint_small;
+      height = 'auto'; // fit the calendar; 275 clips six-row months
       editor = ({ close }) => (
         <DateSelect
           value={formatDate(parseISO(today), dateFormat)}
@@ -266,9 +271,9 @@ export function EditFieldModal({
         style: {
           height: isNarrowWidth
             ? 'calc(var(--visual-viewport-height) * 0.85)'
-            : 275,
+            : height,
           padding: '15px 10px',
-          ...(minWidth && { minWidth }),
+          ...(width && { width }),
           backgroundColor: theme.menuAutoCompleteBackground,
         },
       }}
