@@ -101,7 +101,8 @@ export function absolutizeLinks(
   return markdown.replace(
     /(!?\[[^\]]*\]\()([^)\s]+)((?:\s+"[^"]*")?\))/g,
     (match: string, prefix: string, target: string, suffix: string) => {
-      if (/^(?:[a-z]+:|#|mailto:)/i.test(target)) {
+      // Already absolute (scheme, protocol-relative `//host`, or in-page anchor).
+      if (/^(?:[a-z]+:|\/\/|#)/i.test(target)) {
         return match;
       }
       let resolved: URL;

@@ -88,20 +88,22 @@ describe('slugifyHeading', () => {
 describe('absolutizeLinks', () => {
   it('resolves relative and root-relative links and leaves absolute ones', () => {
     const input =
-      '[a](../../docs/transactions/payee-locations) [b](/docs/reports/) [c](https://example.com) [d](#anchor) ![img](./img/x.png)';
+      '[a](../../docs/transactions/payee-locations) [b](/docs/reports/) [c](https://example.com) [d](#anchor) ![img](./img/x.png) [e](//example.com/page) [f](mailto:hi@example.com)';
     expect(absolutizeLinks(input, siteUrl, '/docs/releases')).toBe(
-      '[a](https://actualbudget.org/docs/transactions/payee-locations) [b](https://actualbudget.org/docs/reports) [c](https://example.com) [d](#anchor) ![img](https://actualbudget.org/docs/img/x.png)',
+      '[a](https://actualbudget.org/docs/transactions/payee-locations) [b](https://actualbudget.org/docs/reports) [c](https://example.com) [d](#anchor) ![img](https://actualbudget.org/docs/img/x.png) [e](//example.com/page) [f](mailto:hi@example.com)',
     );
   });
 
   it('leaves links it cannot parse alone and warns', () => {
     const warnings: string[] = [];
     expect(
-      absolutizeLinks('[x](//[)', siteUrl, '/docs/releases', message =>
+      // Two backslashes resolve like `//` but aren't caught by the
+      // protocol-relative check, giving an invalid host that throws.
+      absolutizeLinks('[x](\\\\[)', siteUrl, '/docs/releases', message =>
         warnings.push(message),
       ),
-    ).toBe('[x](//[)');
-    expect(warnings).toEqual(['Leaving unparseable link "//[" as-is']);
+    ).toBe('[x](\\\\[)');
+    expect(warnings).toEqual(['Leaving unparseable link "\\\\[" as-is']);
   });
 });
 
