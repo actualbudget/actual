@@ -275,6 +275,46 @@ async function downloadSimpleFinTransactions(
   return retVal;
 }
 
+async function downloadFobStatementsTransactions(
+  acctId: AccountEntity['id'],
+  since: string,
+  fileId?: string,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  logger.log('Pulling transactions from FOB Statements');
+
+  const res = await post(
+    getServer().FOBSTATEMENTS_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+      ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
+    },
+    60000,
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
+  } else if ('error' in res) {
+    throw BankSyncError('Connection', res.error);
+  }
+
+  const singleRes = res as BankSyncResponse;
+  const retVal = {
+    transactions: singleRes.transactions.all,
+    accountBalance: singleRes.balances,
+    startingBalance: singleRes.startingBalance,
+  };
+
+  logger.log('Response:', retVal);
+  return retVal;
+}
+
 async function downloadPluggyAiTransactions(
   acctId: AccountEntity['id'],
   since: string,
@@ -1222,6 +1262,12 @@ export async function syncAccount(
     download = await downloadSimpleFinTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'pluggyai') {
     download = await downloadPluggyAiTransactions(
+      acctId,
+      syncStartDate,
+      fileId,
+    );
+  } else if (acctRow.account_sync_source === 'fobStatements') {
+    download = await downloadFobStatementsTransactions(
       acctId,
       syncStartDate,
       fileId,
