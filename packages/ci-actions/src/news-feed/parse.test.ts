@@ -4,69 +4,11 @@ import {
   absolutizeLinks,
   buildNewsFeed,
   parsePost,
-  parseReleases,
-  slugifyHeading,
   stripHtmlComments,
 } from './parse';
 import type { NewsEntry } from './parse';
 
 const siteUrl = 'https://actualbudget.org';
-
-const releasesMarkdown = `# Release Notes
-
-## 26.8.1
-
-Release date: 2026-08-07
-
-This hotfix resolves some performance issues reported in 26.8.0.
-
-**Docker Tag: 26.8.1**
-
-<!-- release-notes:auto-generated -->
-
-#### Bugfixes
-
-- [#8628](https://github.com/actualbudget/actual/pull/8628) Fix freezes — thanks @someone
-
-## 26.8.0
-
-Release date: 2026-08-02
-
-This release promotes [Payee Locations](../../docs/transactions/payee-locations) to stable.
-
-- Age of Money report released
-- Day-level date ranges in [reports](/docs/reports/)
-
-**Docker Tag: 26.8.0**
-
-<!-- release-notes:auto-generated -->
-
-#### Features
-
-- [#8540](https://github.com/actualbudget/actual/pull/8540) Promote Age of Money — thanks @youngcw
-
-## 26.5.1 & 26.5.2
-
-Release date: 2026-05-08
-
-This patch release delivers bugfixes.
-
-**Note:** versions 26.5.1 and 26.5.2 are functionally identical.
-
-**Docker Tag: 26.5.1 / 26.5.2**
-
-#### Bugfixes
-
-- [#7707](https://github.com/actualbudget/actual/pull/7707) Count only failed logins — thanks @danielhopkins
-
-## 25.1.0
-
-No date on this one.
-
-#### Bugfixes
-
-- something
-`;
 
 describe('stripHtmlComments', () => {
   it('removes comments, including nested or overlapping markers', () => {
@@ -78,19 +20,12 @@ describe('stripHtmlComments', () => {
   });
 });
 
-describe('slugifyHeading', () => {
-  it('mirrors the docs heading anchors', () => {
-    expect(slugifyHeading('26.8.1')).toBe('2681');
-    expect(slugifyHeading('26.5.1 & 26.5.2')).toBe('2651--2652');
-  });
-});
-
 describe('absolutizeLinks', () => {
   it('resolves relative and root-relative links and leaves absolute ones', () => {
     const input =
       '[a](../../docs/transactions/payee-locations) [b](/docs/reports/) [c](https://example.com) [d](#anchor) ![img](./img/x.png) [e](//example.com/page) [f](mailto:hi@example.com)';
-    expect(absolutizeLinks(input, siteUrl, '/docs/releases')).toBe(
-      '[a](https://actualbudget.org/docs/transactions/payee-locations) [b](https://actualbudget.org/docs/reports) [c](https://example.com) [d](#anchor) ![img](https://actualbudget.org/docs/img/x.png) [e](//example.com/page) [f](mailto:hi@example.com)',
+    expect(absolutizeLinks(input, siteUrl, '/blog/')).toBe(
+      '[a](https://actualbudget.org/docs/transactions/payee-locations) [b](https://actualbudget.org/docs/reports) [c](https://example.com) [d](#anchor) ![img](https://actualbudget.org/blog/img/x.png) [e](//example.com/page) [f](mailto:hi@example.com)',
     );
   });
 
@@ -99,7 +34,7 @@ describe('absolutizeLinks', () => {
     expect(
       // Two backslashes resolve like `//` but aren't caught by the
       // protocol-relative check, giving an invalid host that throws.
-      absolutizeLinks('[x](\\\\[)', siteUrl, '/docs/releases', message =>
+      absolutizeLinks('[x](\\\\[)', siteUrl, '/blog/', message =>
         warnings.push(message),
       ),
     ).toBe('[x](\\\\[)');
@@ -107,75 +42,118 @@ describe('absolutizeLinks', () => {
   });
 });
 
-describe('parseReleases', () => {
-  it('parses release sections with and without the auto-generated sentinel', () => {
-    const warnings: string[] = [];
-    const releases = parseReleases(releasesMarkdown, {
-      siteUrl,
-      warn: message => warnings.push(message),
-    });
+describe('parsePost', () => {
+  describe('release posts', () => {
+    const releasePost = `---
+title: Release 26.8.0
+description: New release of Actual.
+date: 2026-08-02T10:00
+slug: release-26.8.0
+tags: [announcement, release]
+in_app_notification: true
+authors: matt-fidd
+---
 
-    expect(releases.map(release => release.id)).toEqual([
-      'release-26.8.1',
-      'release-26.8.0',
-      'release-26.5.1',
-    ]);
-    expect(warnings).toEqual([
-      'Skipping release "25.1.0": no "Release date:" line found',
-    ]);
+This release promotes [Payee Locations](../../docs/transactions/payee-locations) to stable.
 
-    const [hotfix, release, combined] = releases;
+- Age of Money report released
+- Day-level date ranges in [reports](/docs/reports/)
 
-    expect(hotfix).toMatchObject({
-      type: 'release',
-      title: 'Release 26.8.1',
-      date: '2026-08-07',
-      version: '26.8.1',
-      url: 'https://actualbudget.org/docs/releases#2681',
-      body: 'This hotfix resolves some performance issues reported in 26.8.0.',
-    });
+<!--truncate-->
 
-    expect(release.body).toBe(
-      `This release promotes [Payee Locations](https://actualbudget.org/docs/transactions/payee-locations) to stable.
+**Docker Tag: 26.8.0**
+
+<!-- release-notes:auto-generated -->
+
+#### Features
+
+- [#8540](https://github.com/actualbudget/actual/pull/8540) Promote Age of Money — thanks @youngcw
+`;
+
+    it('splits highlights from the categorized changes', () => {
+      const entry = parsePost('2026-08-02-release-26-8-0.md', releasePost, {
+        siteUrl,
+      });
+
+      expect(entry).toMatchObject({
+        id: 'release-26.8.0',
+        type: 'release',
+        title: 'Release 26.8.0',
+        date: '2026-08-02',
+        version: '26.8.0',
+        url: 'https://actualbudget.org/blog/release-26.8.0',
+      });
+      expect(entry?.body).toBe(
+        `This release promotes [Payee Locations](https://actualbudget.org/docs/transactions/payee-locations) to stable.
 
 - Age of Money report released
 - Day-level date ranges in [reports](https://actualbudget.org/docs/reports)`,
-    );
-    expect(release.body).not.toContain('Docker Tag');
-    expect(release.body).not.toContain('####');
-    expect(release.details).toBe(
-      `#### Features
+      );
+      expect(entry?.details).toBe(
+        `#### Features
 
 - [#8540](https://github.com/actualbudget/actual/pull/8540) Promote Age of Money — thanks @youngcw`,
-    );
-    expect(hotfix.details).toContain('#### Bugfixes');
-    expect(hotfix.details).not.toContain('release-notes:auto-generated');
-
-    expect(combined).toMatchObject({
-      title: 'Release 26.5.1 & 26.5.2',
-      version: '26.5.1',
-      url: 'https://actualbudget.org/docs/releases#2651--2652',
+      );
+      expect(entry?.body).not.toContain('Docker Tag');
+      expect(entry?.details).not.toContain('Docker Tag');
+      expect(entry?.details).not.toContain('release-notes:auto-generated');
+      expect(entry?.tags).toBeUndefined();
     });
-    expect(combined.body).toContain('functionally identical');
-    expect(combined.body).not.toContain('Docker Tag');
-    expect(combined.body).not.toContain('#7707');
-    expect(combined.details).toContain('#7707');
+
+    it('handles older posts without the auto-generated marker', () => {
+      const entry = parsePost(
+        '2026-05-08-release-26-5-1.md',
+        `---
+title: Release 26.5.1 & 26.5.2
+date: 2026-05-08T10:00
+slug: release-26.5.1
+tags: [announcement, release]
+in_app_notification: true
+---
+
+This patch release delivers bugfixes.
+
+**Docker Tag: 26.5.1 / 26.5.2**
+
+#### Bugfixes
+
+- [#7707](https://github.com/actualbudget/actual/pull/7707) Count only failed logins — thanks @danielhopkins
+`,
+        { siteUrl },
+      );
+
+      expect(entry).toMatchObject({
+        id: 'release-26.5.1',
+        title: 'Release 26.5.1 & 26.5.2',
+        version: '26.5.1',
+        body: 'This patch release delivers bugfixes.',
+      });
+      expect(entry?.details).toContain('#7707');
+    });
+
+    it('skips release posts with an unexpected slug and warns', () => {
+      const warnings: string[] = [];
+      expect(
+        parsePost(
+          '2026-08-02-release-26-8-0.md',
+          releasePost.replace('slug: release-26.8.0', 'slug: big-release'),
+          { siteUrl, warn: message => warnings.push(message) },
+        ),
+      ).toBeUndefined();
+      expect(warnings).toEqual([
+        'Skipping release post "2026-08-02-release-26-8-0.md": unexpected slug "big-release"',
+      ]);
+    });
   });
 
-  it('honours the limit', () => {
-    expect(parseReleases(releasesMarkdown, { siteUrl, limit: 1 })).toHaveLength(
-      1,
-    );
-  });
-});
-
-describe('parsePost', () => {
-  const post = `---
+  describe('other posts', () => {
+    const post = `---
 title: 'Design Competition: Reimagine the Sidenav'
 description: The sidenav is getting some love.
 date: 2026-06-27T10:00
 slug: design-competition-sidenav
 tags: [announcement]
+in_app_notification: true
 authors: MatissJanis
 ---
 
@@ -188,90 +166,109 @@ Intro paragraph with a [link](./2026-08-05-sidenav-voting-open.md) and [docs](/d
 More text.
 `;
 
-  it('parses front matter, rewrites links and strips the truncate marker', () => {
-    const entry = parsePost('2026-07-27-design-competition-sidenav.md', post, {
-      siteUrl,
-      allPostFilenames: [
+    it('parses front matter, rewrites links and strips the truncate marker', () => {
+      const entry = parsePost(
         '2026-07-27-design-competition-sidenav.md',
-        '2026-08-05-sidenav-voting-open.md',
-      ],
+        post,
+        {
+          siteUrl,
+          allPostFilenames: [
+            '2026-07-27-design-competition-sidenav.md',
+            '2026-08-05-sidenav-voting-open.md',
+          ],
+        },
+      );
+
+      expect(entry).toMatchObject({
+        id: 'post-design-competition-sidenav',
+        type: 'post',
+        title: 'Design Competition: Reimagine the Sidenav',
+        date: '2026-06-27',
+        url: 'https://actualbudget.org/blog/design-competition-sidenav',
+        tags: ['announcement'],
+      });
+      expect(entry?.body).not.toContain('truncate');
+      expect(entry?.body).toContain(
+        '[link](https://actualbudget.org/blog/sidenav-voting-open)',
+      );
+      expect(entry?.body).toContain(
+        '[docs](https://actualbudget.org/docs/settings)',
+      );
     });
 
-    expect(entry).toBeDefined();
-    expect(entry).toMatchObject({
-      id: 'post-design-competition-sidenav',
-      type: 'post',
-      title: 'Design Competition: Reimagine the Sidenav',
-      date: '2026-06-27',
-      url: 'https://actualbudget.org/blog/design-competition-sidenav',
-      tags: ['announcement'],
-    });
-    expect(entry?.body).not.toContain('truncate');
-    expect(entry?.body).toContain(
-      '[link](https://actualbudget.org/blog/sidenav-voting-open)',
-    );
-    expect(entry?.body).toContain(
-      '[docs](https://actualbudget.org/docs/settings)',
-    );
-  });
-
-  it('falls back to the filename for the date and slug', () => {
-    const entry = parsePost(
-      '2024-03-25-automate-twist.md',
-      `---
+    it('falls back to the filename for the date and slug', () => {
+      const entry = parsePost(
+        '2024-03-25-automate-twist.md',
+        `---
 title: Automate
+in_app_notification: true
 ---
 
 Body text.
 `,
-      { siteUrl },
-    );
-    expect(entry).toMatchObject({
-      id: 'post-automate-twist',
-      date: '2024-03-25',
-      url: 'https://actualbudget.org/blog/automate-twist',
-      body: 'Body text.',
+        { siteUrl },
+      );
+      expect(entry).toMatchObject({
+        id: 'post-automate-twist',
+        date: '2024-03-25',
+        url: 'https://actualbudget.org/blog/automate-twist',
+        body: 'Body text.',
+      });
     });
-  });
 
-  it('skips release announcements, drafts and undated posts', () => {
-    const warnings: string[] = [];
-    expect(
-      parsePost(
-        '2026-08-08-release-26-8-1.md',
-        `---
-title: Release 26.8.1
-date: 2026-08-07
-tags: [announcement, release]
+    it('skips posts that are not marked for the app', () => {
+      expect(
+        parsePost(
+          '2026-08-08-unmarked.md',
+          `---
+title: Unmarked
 ---
 x`,
-        { siteUrl },
-      ),
-    ).toBeUndefined();
-    expect(
-      parsePost(
-        '2026-08-08-something.md',
-        `---
+          { siteUrl },
+        ),
+      ).toBeUndefined();
+      expect(
+        parsePost(
+          '2026-08-08-opted-out.md',
+          `---
+title: Opted out
+in_app_notification: false
+---
+x`,
+          { siteUrl },
+        ),
+      ).toBeUndefined();
+    });
+
+    it('skips drafts and undated posts', () => {
+      const warnings: string[] = [];
+      expect(
+        parsePost(
+          '2026-08-08-something.md',
+          `---
 title: Draft
 draft: true
+in_app_notification: true
 ---
 x`,
-        { siteUrl },
-      ),
-    ).toBeUndefined();
-    expect(
-      parsePost(
-        'welcome.md',
-        `---
+          { siteUrl },
+        ),
+      ).toBeUndefined();
+      expect(
+        parsePost(
+          'welcome.md',
+          `---
 title: Welcome
+in_app_notification: true
 ---
 x`,
-        { siteUrl, warn: message => warnings.push(message) },
-      ),
-    ).toBeUndefined();
-    expect(warnings).toEqual([
-      'Skipping post "welcome.md": no date in front matter or filename',
-    ]);
+          { siteUrl, warn: message => warnings.push(message) },
+        ),
+      ).toBeUndefined();
+      expect(warnings).toEqual([
+        'Skipping post "welcome.md": no date in front matter or filename',
+      ]);
+    });
   });
 });
 
@@ -298,14 +295,15 @@ describe('buildNewsFeed', () => {
     };
   }
 
-  it('merges, sorts newest first and caps each type', () => {
+  it('sorts newest first and caps releases and posts separately', () => {
     const feed = buildNewsFeed({
-      releases: [
+      entries: [
+        post('b', '2026-02-15'),
         release('1.0.0', '2026-01-01'),
         release('3.0.0', '2026-03-01'),
+        post('a', '2026-03-01'),
         release('2.0.0', '2026-02-01'),
       ],
-      posts: [post('a', '2026-03-01'), post('b', '2026-02-15')],
       generatedAt: '2026-08-27T00:00:00.000Z',
       releaseLimit: 2,
       postLimit: 1,

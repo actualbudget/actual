@@ -160,6 +160,7 @@ description: New release of Actual.
 date: ${releaseDate}T10:00
 slug: release-${version}
 tags: [announcement, release]
+in_app_notification: true
 hide_table_of_contents: false
 authors: ${author}
 ---

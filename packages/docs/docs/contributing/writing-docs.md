@@ -175,6 +175,20 @@ Docusaurus resolves file paths at build time and converts them to the published 
 
 Blog posts and the standalone pages in `src/pages/` live outside the `docs/` folder and can't reference documentation by file path. Use relative URLs from those files instead, for example `../../docs/install/` from a blog post.
 
+### Blog Posts in the App
+
+Actual has a "What's new" page built from the blog. Release posts are included automatically (the release tooling marks them); any other post is only shown there when you opt in by adding `in_app_notification: true` to its front matter:
+
+```markdown
+---
+title: Design Competition Winner
+tags: [announcement]
+in_app_notification: true
+---
+```
+
+Posts without it stay on the website only, so use it for announcements the whole community should see and leave it off how-to articles and other evergreen content.
+
 ### Keyboard Shortcuts
 
 ```markdown
