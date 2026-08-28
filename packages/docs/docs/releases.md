@@ -7,10 +7,10 @@ Release date: 2026-09-01
 This release makes the transaction table customizable, adds an in-app tour for new users and a new experimental retirement report, as well as numerous other fixes.
 
 - Show, hide, and reorder columns in the transaction table with the new column manager
-- An in-app tour that guides first-time users through getting started
+- New users now experience an in-app tour that guides them through getting started
 - Rename a [tag](/docs/transactions/tags) from the Tags page
-- Reorder upcoming scheduled transactions by drag and drop
 - Create a schedule straight from a future-dated transaction with the new Schedule button
+- Reorder upcoming scheduled transactions by drag and drop
 - Experimental: Add a [Monte Carlo analysis report](/docs/experimental/monte-carlo-analysis) that estimates how long your savings will last in retirement
 - Experimental: Add four more currencies (Israeli New Shekel, Macedonian Denar, Peruvian Sol, Uruguayan Peso)
 - Experimental: Formula reports can use BALANCE_OF, and formula editors now autocomplete loan and investment functions
