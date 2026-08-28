@@ -18,6 +18,7 @@ import { NewsEntryCard } from './NewsEntryCard';
 
 const RELEASE_NOTES_URL = 'https://actualbudget.org/docs/releases';
 const BLOG_URL = 'https://actualbudget.org/blog';
+const DISCORD_URL = 'https://discord.gg/pRYNYr4W5A';
 
 export function WhatsNewPage() {
   const { t } = useTranslation();
@@ -50,23 +51,24 @@ export function WhatsNewPage() {
           paddingBottom: MOBILE_NAV_HEIGHT,
         }}
       >
-        {/* The settings card is reused on purpose so this page matches Settings. */}
-        <Setting>
-          <Text>
-            <Trans>
-              <strong>What's new</strong> shows recent releases and
-              announcements from Actual.
-            </Trans>
-          </Text>
-          <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
-            <Link variant="external" to={RELEASE_NOTES_URL} linkColor="purple">
-              <Trans>All release notes</Trans>
-            </Link>
-            <Link variant="external" to={BLOG_URL} linkColor="purple">
-              <Trans>Blog</Trans>
-            </Link>
-          </View>
-        </Setting>
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: 16,
+            flexWrap: 'wrap',
+            fontSize: 13,
+          }}
+        >
+          <Link variant="external" to={RELEASE_NOTES_URL} linkColor="purple">
+            <Trans>All release notes</Trans>
+          </Link>
+          <Link variant="external" to={BLOG_URL} linkColor="purple">
+            <Trans>Blog</Trans>
+          </Link>
+          <Link variant="external" to={DISCORD_URL} linkColor="purple">
+            <Trans>Community (Discord)</Trans>
+          </Link>
+        </View>
 
         {isLoading && (
           <View style={{ alignItems: 'center', padding: 30 }}>
@@ -81,6 +83,7 @@ export function WhatsNewPage() {
           </View>
         )}
 
+        {/* The settings card is reused on purpose so this page matches Settings. */}
         {error && (
           <Setting>
             <Text data-testid="whats-new-offline">

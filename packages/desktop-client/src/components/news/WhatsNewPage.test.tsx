@@ -133,6 +133,9 @@ describe('WhatsNewPage', () => {
     expect(
       screen.getByRole('link', { name: 'All release notes' }),
     ).toHaveAttribute('href', 'https://actualbudget.org/docs/releases');
+    expect(
+      screen.getByRole('link', { name: 'Community (Discord)' }),
+    ).toHaveAttribute('href', 'https://discord.gg/pRYNYr4W5A');
   });
 
   it('shows an empty state when there are no entries', () => {
