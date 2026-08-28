@@ -57,7 +57,9 @@ export function useNewsNotification() {
           title: t("What's new in Actual {{version}}", {
             version: release.version,
           }),
-          message: release.summary,
+          message: t(
+            'You are now running a new version of Actual. Take a look at what has changed.',
+          ),
           button: {
             title: t("See what's new"),
             action: () => {
