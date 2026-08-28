@@ -10,11 +10,13 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
 import { currentDay, subDays } from '@actual-app/core/shared/months';
 import type {
   AccountEntity,
   SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
+  SyncServerFobStatementsAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
@@ -24,6 +26,7 @@ import { format as formatDate, parseISO } from 'date-fns';
 import {
   useLinkAccountAkahuMutation,
   useLinkAccountEnableBankingMutation,
+  useLinkAccountFobStatementsMutation,
   useLinkAccountMutation,
   useLinkAccountPluggyAiMutation,
   useLinkAccountSimpleFinMutation,
@@ -182,6 +185,12 @@ export type SelectLinkedAccountsModalProps =
     }
   | {
       requisitionId?: undefined;
+      externalAccounts: SyncServerFobStatementsAccount[];
+      syncSource: 'fobStatements';
+      upgradingAccountId?: string;
+    }
+  | {
+      requisitionId?: undefined;
       externalAccounts: SyncServerEnableBankingAccount[];
       syncSource: 'enableBanking';
       upgradingAccountId?: string;
@@ -218,6 +227,12 @@ export function SelectLinkedAccountsModal({
           return {
             syncSource: 'pluggyai',
             externalAccounts: toSort as SyncServerPluggyAiAccount[],
+            upgradingAccountId,
+          };
+        case 'fobStatements':
+          return {
+            syncSource: 'fobStatements',
+            externalAccounts: toSort as SyncServerFobStatementsAccount[],
             upgradingAccountId,
           };
         case 'akahu':
@@ -279,6 +294,7 @@ export function SelectLinkedAccountsModal({
   const unlinkAccount = useUnlinkAccountMutation();
   const linkAccountSimpleFin = useLinkAccountSimpleFinMutation();
   const linkAccountPluggyAi = useLinkAccountPluggyAiMutation();
+  const linkAccountFobStatements = useLinkAccountFobStatementsMutation();
   const linkAccountAkahu = useLinkAccountAkahuMutation();
   const linkAccountEnableBanking = useLinkAccountEnableBankingMutation();
 
@@ -329,6 +345,23 @@ export function SelectLinkedAccountsModal({
           });
         } else if (propsWithSortedExternalAccounts.syncSource === 'pluggyai') {
           linkAccountPluggyAi.mutate({
+            externalAccount:
+              propsWithSortedExternalAccounts.externalAccounts[
+                externalAccountIndex
+              ],
+            upgradingId:
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+            offBudget,
+            startingDate,
+            startingBalance,
+          });
+        } else if (
+          propsWithSortedExternalAccounts.syncSource === 'fobStatements'
+        ) {
+          linkAccountFobStatements.mutate({
             externalAccount:
               propsWithSortedExternalAccounts.externalAccounts[
                 externalAccountIndex
@@ -559,7 +592,14 @@ export function SelectLinkedAccountsModal({
               style={{ ...styles.tableContainer, height: 300, flex: 'unset' }}
             >
               <TableHeader>
-                <Cell value={t('Institution to Sync')} width={150} />
+                <Cell
+                  value={
+                    syncSource === 'fobStatements'
+                      ? t('Account type')
+                      : t('Institution to Sync')
+                  }
+                  width={150}
+                />
                 <Cell value={t('Bank Account To Sync')} width={150} />
                 <Cell value={t('Balance')} width={120} />
                 <Cell value={t('Account in Actual')} width="flex" />
@@ -643,6 +683,7 @@ type ExternalAccount =
   | SyncServerGoCardlessAccount
   | SyncServerSimpleFinAccount
   | SyncServerPluggyAiAccount
+  | SyncServerFobStatementsAccount
   | SyncServerAkahuAccount
   | SyncServerEnableBankingAccount;
 
@@ -840,6 +881,7 @@ function TableRow({
           customStartingDate={customStartingDate}
           onSetCustomStartingDate={onSetCustomStartingDate}
           layout="inline"
+          syncSource={syncSource}
         />
       ) : (
         <>
@@ -905,6 +947,7 @@ function getInstitutionName(
     | SyncServerGoCardlessAccount
     | SyncServerSimpleFinAccount
     | SyncServerPluggyAiAccount
+    | SyncServerFobStatementsAccount
     | SyncServerEnableBankingAccount,
 ) {
   if (typeof externalAccount?.institution === 'string') {
@@ -924,6 +967,7 @@ type StartingOptionsFieldsProps = {
     settings: CustomStartingSettings,
   ) => void;
   layout: 'inline' | 'stacked';
+  syncSource: SelectLinkedAccountsModalProps['syncSource'];
 };
 
 function StartingOptionsFields({
@@ -932,8 +976,50 @@ function StartingOptionsFields({
   customStartingDate,
   onSetCustomStartingDate,
   layout,
+  syncSource,
 }: StartingOptionsFieldsProps) {
   const zeroSign = externalBalance != null && externalBalance < 0 ? '-' : '+';
+
+  // FOB Statements can report the balance as of any day, so auto-fill the
+  // starting balance to match the chosen starting date. The value comes back as
+  // a decimal in major units; the starting-balance field uses integer minor
+  // units.
+  //
+  // FOB's `as_of` is end-of-day inclusive, and transactions are imported from
+  // the starting date onward. So the opening balance must be the balance as of
+  // the day *before* the starting date, otherwise the starting date's own
+  // transactions get counted twice (once in the opening balance, once as
+  // imported transactions).
+  const handleDateChange = async (newDate: string) => {
+    onSetCustomStartingDate(accountId, {
+      ...customStartingDate,
+      date: newDate,
+    });
+
+    if (syncSource !== 'fobStatements' || !newDate) {
+      return;
+    }
+
+    try {
+      const res = await send('fobstatements-balance', {
+        accountId,
+        date: subDays(newDate, 1),
+      });
+      if (
+        res &&
+        typeof res === 'object' &&
+        'balance' in res &&
+        res.balance != null
+      ) {
+        onSetCustomStartingDate(accountId, {
+          date: newDate,
+          amount: Math.round(Number(res.balance) * 100),
+        });
+      }
+    } catch {
+      // Keep the manually entered amount if the balance lookup fails.
+    }
+  };
 
   if (layout === 'inline') {
     return (
@@ -943,12 +1029,9 @@ function StartingOptionsFields({
           <Input
             type="date"
             value={customStartingDate.date}
-            onChange={e =>
-              onSetCustomStartingDate(accountId, {
-                ...customStartingDate,
-                date: e.target.value,
-              })
-            }
+            onChange={e => {
+              void handleDateChange(e.target.value);
+            }}
             style={{ width: '100%' }}
           />
         </Field>
@@ -993,12 +1076,9 @@ function StartingOptionsFields({
           <Input
             type="date"
             value={customStartingDate.date}
-            onChange={e =>
-              onSetCustomStartingDate(accountId, {
-                ...customStartingDate,
-                date: e.target.value,
-              })
-            }
+            onChange={e => {
+              void handleDateChange(e.target.value);
+            }}
             style={{ width: '100%' }}
           />
         </View>
@@ -1217,6 +1297,7 @@ function AccountCard({
           customStartingDate={customStartingDate}
           onSetCustomStartingDate={onSetCustomStartingDate}
           layout="stacked"
+          syncSource={syncSource}
         />
       )}
 

@@ -12,6 +12,7 @@ export const BUILT_IN_BANK_SYNC_PROVIDERS = [
   'goCardless',
   'simpleFin',
   'pluggyai',
+  'fobStatements',
 ] as const satisfies BankSyncProviders[];
 
 const SYNC_PROVIDER_KEYS = [
@@ -34,6 +35,7 @@ export function getSyncSourceReadable(
     goCardless: 'GoCardless',
     simpleFin: 'SimpleFIN',
     pluggyai: 'Pluggy.ai',
+    fobStatements: 'FOB Statements',
     enableBanking: 'Enable Banking',
     akahu: 'Akahu',
     unlinked: translate('Unlinked'),

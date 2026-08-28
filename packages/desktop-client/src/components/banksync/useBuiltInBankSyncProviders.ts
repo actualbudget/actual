@@ -6,6 +6,7 @@ import type {
   AccountEntity,
   BankSyncCredentialSource,
   BankSyncProviders,
+  SyncServerFobStatementsAccount,
 } from '@actual-app/core/types/models';
 import type { SyncServerSimpleFinAccount } from '@actual-app/core/types/models/simplefin';
 
@@ -15,6 +16,7 @@ import { useAkahuStatus } from '#hooks/useAkahuStatus';
 import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useEnableBankingStatus } from '#hooks/useEnableBankingStatus';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useFobStatementsStatus } from '#hooks/useFobStatementsStatus';
 import { useGoCardlessStatus } from '#hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '#hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '#hooks/useSimpleFinStatus';
@@ -133,6 +135,8 @@ export function useBuiltInBankSyncProviders({
   const { configuredGoCardless } = useGoCardlessStatus();
   const { configuredSimpleFin } = useSimpleFinStatus();
   const { pluggyAiStatus, setPluggyAiStatus } = usePluggyAiStatus();
+  const { fobStatementsStatus, setFobStatementsStatus } =
+    useFobStatementsStatus();
   const { configuredAkahu } = useAkahuStatus(akahuEnabled);
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
     useEnableBankingStatus(enableBankingEnabled);
@@ -197,6 +201,25 @@ export function useBuiltInBankSyncProviders({
       }),
     );
   }, [dispatch, pluggyAiStatus.source, setPluggyAiStatus]);
+
+  const onFobStatementsInit = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'fobstatements-init',
+          options: {
+            onSuccess: perBudgetFile => {
+              setFobStatementsStatus({
+                configured: true,
+                source: perBudgetFile ? 'per-budget-file' : 'global',
+              });
+            },
+            credentialSource: fobStatementsStatus.source ?? 'global',
+          },
+        },
+      }),
+    );
+  }, [dispatch, fobStatementsStatus.source, setFobStatementsStatus]);
 
   const onEnableBankingInit = useCallback(() => {
     dispatch(
@@ -327,6 +350,50 @@ export function useBuiltInBankSyncProviders({
     notifyResetFailure,
     pluggyAiStatus.source,
     setPluggyAiStatus,
+    t,
+  ]);
+
+  const onFobStatementsReset = useCallback(async () => {
+    try {
+      const fileId =
+        fobStatementsStatus.source === 'per-budget-file' ? cloudFileId : null;
+      if (fobStatementsStatus.source === 'per-budget-file' && !fileId) {
+        throw new Error(t('Budget file ID is required.'));
+      }
+
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'fobstatements_apiKey',
+          value: null,
+          fileId,
+        }),
+        'Failed to clear FOB Statements API key',
+      );
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'fobstatements_apiSecret',
+          value: null,
+          fileId,
+        }),
+        'Failed to clear FOB Statements API secret',
+      );
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'fobstatements_apiUrl',
+          value: null,
+          fileId,
+        }),
+        'Failed to clear FOB Statements API URL',
+      );
+      setFobStatementsStatus(await send('fobstatements-status'));
+    } catch (error) {
+      notifyResetFailure('FOB Statements', error);
+    }
+  }, [
+    cloudFileId,
+    fobStatementsStatus.source,
+    notifyResetFailure,
+    setFobStatementsStatus,
     t,
   ]);
 
@@ -554,6 +621,59 @@ export function useBuiltInBankSyncProviders({
     upgradingAccountId,
   ]);
 
+  const onConnectFobStatements = useCallback(async () => {
+    if (!fobStatementsStatus.configured) {
+      onFobStatementsInit();
+      return;
+    }
+
+    try {
+      const results = await send('fobstatements-accounts');
+      if (results.error_code) {
+        throw new Error(results.reason || results.error_code);
+      }
+      if ('error' in results && results.error) {
+        throw new Error(results.reason || results.error);
+      }
+
+      // The sync-server already returns accounts in the shape the link modal
+      // expects, so no remapping is required here.
+      const externalAccounts = (results.accounts ??
+        []) as SyncServerFobStatementsAccount[];
+
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts,
+              syncSource: 'fobStatements',
+              upgradingAccountId,
+            },
+          },
+        }),
+      );
+    } catch (error) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            title: t('Error when trying to contact FOB Statements'),
+            message: error instanceof Error ? error.message : String(error),
+            timeout: 5000,
+          },
+        }),
+      );
+      onFobStatementsInit();
+    }
+  }, [
+    dispatch,
+    fobStatementsStatus.configured,
+    onFobStatementsInit,
+    t,
+    upgradingAccountId,
+  ]);
+
   const onConnectAkahu = useCallback(async () => {
     if (!isAkahuSetupComplete) {
       onAkahuInit();
@@ -639,6 +759,7 @@ export function useBuiltInBankSyncProviders({
     goCardless: Boolean(isGoCardlessSetupComplete),
     simpleFin: Boolean(isSimpleFinSetupComplete),
     pluggyai: Boolean(pluggyAiStatus.configured),
+    fobStatements: Boolean(fobStatementsStatus.configured),
     enableBanking: Boolean(isEnableBankingSetupComplete),
     akahu: Boolean(isAkahuSetupComplete),
   } satisfies Record<BankSyncProviders, boolean>;
@@ -681,21 +802,41 @@ export function useBuiltInBankSyncProviders({
           };
         }
 
+        if (providerId === 'pluggyai') {
+          return {
+            id: providerId,
+            displayName: 'Pluggy.ai',
+            description: t(
+              'Link a Brazilian bank account to automatically download transactions.',
+            ),
+            isConfigured: configuredProviders.pluggyai,
+            credentialSource: pluggyAiStatus.source ?? 'global',
+            supportsPerBudgetFile: true,
+            canConfigure:
+              syncServerStatus === 'online' &&
+              (isAdmin || (isFileOwner && pluggyAiStatus.source !== 'global')),
+            onConfigure: onPluggyAiInit,
+            onLink: onConnectPluggyAi,
+            onReset: onPluggyAiReset,
+          };
+        }
+
         return {
           id: providerId,
-          displayName: 'Pluggy.ai',
+          displayName: 'FOB Statements',
           description: t(
-            'Link a Brazilian bank account to automatically download transactions.',
+            'Link a bank or credit card account tracked in FOB Statements to automatically download transactions.',
           ),
-          isConfigured: configuredProviders.pluggyai,
-          credentialSource: pluggyAiStatus.source ?? 'global',
+          isConfigured: configuredProviders.fobStatements,
+          credentialSource: fobStatementsStatus.source ?? 'global',
           supportsPerBudgetFile: true,
           canConfigure:
             syncServerStatus === 'online' &&
-            (isAdmin || (isFileOwner && pluggyAiStatus.source !== 'global')),
-          onConfigure: onPluggyAiInit,
-          onLink: onConnectPluggyAi,
-          onReset: onPluggyAiReset,
+            (isAdmin ||
+              (isFileOwner && fobStatementsStatus.source !== 'global')),
+          onConfigure: onFobStatementsInit,
+          onLink: onConnectFobStatements,
+          onReset: onFobStatementsReset,
         };
       });
 
@@ -743,9 +884,11 @@ export function useBuiltInBankSyncProviders({
     configuredProviders.enableBanking,
     configuredProviders.goCardless,
     configuredProviders.pluggyai,
+    configuredProviders.fobStatements,
     configuredProviders.simpleFin,
     configuredProviders.akahu,
     pluggyAiStatus,
+    fobStatementsStatus,
     syncServerStatus,
     enableBankingEnabled,
     akahuEnabled,
@@ -756,6 +899,7 @@ export function useBuiltInBankSyncProviders({
     onConnectEnableBanking,
     onConnectGoCardless,
     onConnectPluggyAi,
+    onConnectFobStatements,
     onConnectSimpleFin,
     onAkahuInit,
     onAkahuReset,
@@ -765,6 +909,8 @@ export function useBuiltInBankSyncProviders({
     onGoCardlessReset,
     onPluggyAiInit,
     onPluggyAiReset,
+    onFobStatementsInit,
+    onFobStatementsReset,
     onSimpleFinInit,
     onSimpleFinReset,
     t,

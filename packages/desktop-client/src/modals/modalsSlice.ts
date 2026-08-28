@@ -133,6 +133,13 @@ export type Modal =
       };
     }
   | {
+      name: 'fobstatements-init';
+      options: {
+        onSuccess: (perBudgetFile: boolean) => void;
+        credentialSource: BankSyncCredentialSource;
+      };
+    }
+  | {
       name: 'akahu-init';
       options: {
         onSuccess: () => void;

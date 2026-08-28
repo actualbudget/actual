@@ -122,7 +122,14 @@ export function BankSync() {
                 </Text>
               )}
               <View style={styles.tableContainer}>
-                <AccountsHeader unlinked={syncProvider === 'unlinked'} />
+                <AccountsHeader
+                  unlinked={syncProvider === 'unlinked'}
+                  bankColumnLabel={
+                    syncProvider === 'fobStatements'
+                      ? t('Account type')
+                      : undefined
+                  }
+                />
                 <AccountsList
                   accounts={accounts}
                   hoveredAccount={hoveredAccount}

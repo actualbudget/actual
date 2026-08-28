@@ -47,6 +47,7 @@ import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal'
 import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMenuModal';
 import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
+import { FobStatementsInitialiseModal } from './modals/FobStatementsInitialiseModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
@@ -194,6 +195,9 @@ export function Modals() {
 
         case 'pluggyai-init':
           return <PluggyAiInitialiseModal key={key} {...modal.options} />;
+
+        case 'fobstatements-init':
+          return <FobStatementsInitialiseModal key={key} {...modal.options} />;
 
         case 'akahu-init':
           return <AkahuInitialiseModal key={key} {...modal.options} />;

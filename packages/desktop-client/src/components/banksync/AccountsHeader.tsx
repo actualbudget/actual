@@ -5,9 +5,15 @@ import { Cell, TableHeader } from '#components/table';
 
 type AccountsHeaderProps = {
   unlinked: boolean;
+  // Overrides the "Bank" column label. Used by providers that don't expose an
+  // institution (e.g. FOB Statements shows the account type instead).
+  bankColumnLabel?: string;
 };
 
-export function AccountsHeader({ unlinked }: AccountsHeaderProps) {
+export function AccountsHeader({
+  unlinked,
+  bankColumnLabel,
+}: AccountsHeaderProps) {
   const { t } = useTranslation();
 
   return (
@@ -20,7 +26,7 @@ export function AccountsHeader({ unlinked }: AccountsHeaderProps) {
       {!unlinked && (
         <>
           <Cell
-            value={t('Bank')}
+            value={bankColumnLabel ?? t('Bank')}
             width="flex"
             style={{ paddingLeft: '10px' }}
           />

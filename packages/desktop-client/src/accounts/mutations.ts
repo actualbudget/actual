@@ -7,6 +7,7 @@ import type {
   CategoryEntity,
   SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
+  SyncServerFobStatementsAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
@@ -494,6 +495,48 @@ export function useLinkAccountPluggyAiMutation() {
         dispatch,
         t(
           'There was an error linking the account to PluggyAI. Please try again.',
+        ),
+        error,
+      );
+    },
+  });
+}
+
+type LinkAccountFobStatementsPayload = LinkAccountBasePayload & {
+  externalAccount: SyncServerFobStatementsAccount;
+};
+
+export function useLinkAccountFobStatementsMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountFobStatementsPayload) => {
+      await send('fobstatements-accounts-link', {
+        externalAccount,
+        upgradingId,
+        offBudget,
+        startingDate,
+        startingBalance,
+      });
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateQueries(queryClient, payeeQueries.lists());
+    },
+    onError: error => {
+      console.error('Error linking account to FOB Statements:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t(
+          'There was an error linking the account to FOB Statements. Please try again.',
         ),
         error,
       );
