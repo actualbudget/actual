@@ -83,6 +83,7 @@ Release artifacts now use Node.js 24 by default, and the Ubuntu images no longer
 - [#8568](https://github.com/actualbudget/actual/pull/8568) Show a clearer error when SimpleFIN can't be reached while linking accounts, instead of wrongly reporting the token as invalid — thanks @matt-fidd
 - [#8648](https://github.com/actualbudget/actual/pull/8648) Return to login when a saved server session is no longer valid — thanks @rezanmz
 - [#8718](https://github.com/actualbudget/actual/pull/8718) Fix the "Update now" button getting stuck doing nothing, and show useful details instead of "[object Object]" on the startup error screen — thanks @MatissJanis
+- [#8801](https://github.com/actualbudget/actual/pull/8801) Keep automatically posted schedules visible as paid on the day they run instead of jumping straight to the next date — thanks @matt-fidd
 - [#8774](https://github.com/actualbudget/actual/pull/8774) Show the filtered transaction list (with a filters-applied badge) when tapping a report or budget category on mobile, instead of the unfiltered accounts screen — thanks @joelbrenstrum
 - [#8709](https://github.com/actualbudget/actual/pull/8709) Fix the Monte Carlo analysis configuration tabs and contributions table overflowing on small screens — thanks @MikesGlitch
 - [#8602](https://github.com/actualbudget/actual/pull/8602) Allow searching for 'Transfer: ' prefix on payees page — thanks @jfdoming
