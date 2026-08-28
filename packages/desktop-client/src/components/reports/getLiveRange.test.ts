@@ -204,5 +204,38 @@ describe('getLiveRange', () => {
       );
       expect(mode).toBe('static-start');
     });
+
+    it('clamps a persisted future startDate to today to avoid an inverted range', () => {
+      const [start, end, mode] = getLiveRange(
+        'fromStartDate',
+        EARLIEST,
+        LATEST,
+        false,
+        undefined,
+        '2017-06-01',
+      );
+
+      // currentDay() in test mode is '2017-01-01'; a saved start beyond
+      // today must not produce start > end.
+      expect(start).toBe('2017-01-01');
+      expect(end).toBe('2017-01-01');
+      expect(start <= end).toBe(true);
+      expect(mode).toBe('static-start');
+    });
+
+    it('clamps a persisted future month-shaped startDate after normalization', () => {
+      const [start, end] = getLiveRange(
+        'fromStartDate',
+        EARLIEST,
+        LATEST,
+        false,
+        undefined,
+        '2017-06',
+      );
+
+      // '2017-06' is padded to '2017-06-01' before clamping.
+      expect(start).toBe('2017-01-01');
+      expect(end).toBe('2017-01-01');
+    });
   });
 });

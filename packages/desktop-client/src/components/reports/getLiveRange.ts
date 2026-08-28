@@ -101,6 +101,9 @@ export function getLiveRange(
         fixedStart =
           fixedStart.length === 7 ? `${fixedStart}-01` : `${fixedStart}-01-01`;
       }
+      if (fixedStart > monthUtils.currentDay()) {
+        fixedStart = monthUtils.currentDay();
+      }
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
         fixedStart,
