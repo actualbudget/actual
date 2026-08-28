@@ -16,10 +16,9 @@ export function AutomaticSyncSettings() {
   const intervals = useMemo<Array<[string, string]>>(
     () => [
       ['0', t('Never')],
-      ['60', t('Every hour')],
-      ['360', t('Every 6 hours')],
       ['720', t('Every 12 hours')],
       ['1440', t('Every day')],
+      ['10080', t('Every week')],
     ],
     [t],
   );
