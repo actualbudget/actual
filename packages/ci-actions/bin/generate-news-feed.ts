@@ -25,6 +25,8 @@ const repoRoot = fileURLToPath(new URL('../../..', import.meta.url));
 const blogDir = join(repoRoot, 'packages/docs/blog');
 const outputPath = join(repoRoot, 'packages/desktop-client/src/data/news.json');
 
+// Link-rewriting problems are only warned about; an opted-in post that can't
+// be represented makes `parsePost` throw, which fails the run (exit code 1).
 const warn = (message: string) => console.warn(message);
 
 const postFilenames = (await fs.readdir(blogDir))

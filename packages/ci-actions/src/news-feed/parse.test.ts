@@ -130,18 +130,16 @@ This patch release delivers bugfixes.
       expect(entry?.details).toContain('#7707');
     });
 
-    it('skips release posts with an unexpected slug and warns', () => {
-      const warnings: string[] = [];
-      expect(
+    it('fails on release posts with an unexpected slug', () => {
+      expect(() =>
         parsePost(
           '2026-08-02-release-26-8-0.md',
           releasePost.replace('slug: release-26.8.0', 'slug: big-release'),
-          { siteUrl, warn: message => warnings.push(message) },
+          { siteUrl },
         ),
-      ).toBeUndefined();
-      expect(warnings).toEqual([
-        'Skipping release post "2026-08-02-release-26-8-0.md": unexpected slug "big-release"',
-      ]);
+      ).toThrow(
+        'Release post "2026-08-02-release-26-8-0.md" has an unexpected slug "big-release"',
+      );
     });
   });
 
@@ -261,8 +259,7 @@ x`,
       ).toBeUndefined();
     });
 
-    it('skips drafts and undated posts', () => {
-      const warnings: string[] = [];
+    it('skips drafts and fails on undated posts', () => {
       expect(
         parsePost(
           '2026-08-08-something.md',
@@ -275,7 +272,7 @@ x`,
           { siteUrl },
         ),
       ).toBeUndefined();
-      expect(
+      expect(() =>
         parsePost(
           'welcome.md',
           `---
@@ -283,12 +280,9 @@ title: Welcome
 in_app_notification: true
 ---
 x`,
-          { siteUrl, warn: message => warnings.push(message) },
+          { siteUrl },
         ),
-      ).toBeUndefined();
-      expect(warnings).toEqual([
-        'Skipping post "welcome.md": no date in front matter or filename',
-      ]);
+      ).toThrow('Post "welcome.md" is marked for the app but has no date');
     });
   });
 });

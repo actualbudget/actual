@@ -191,8 +191,10 @@ type ParsePostOptions = {
 
 /**
  * Parses a single blog post into a feed entry. Returns `undefined` when the
- * post should not be in the feed: not marked `in_app_notification: true`, a
- * draft, no resolvable date, or a release post with an unexpected slug.
+ * post should not be in the feed (not marked `in_app_notification: true`, or a
+ * draft). Throws when a post that opted in can't be represented - no
+ * resolvable date, or a release post with an unexpected slug - so the feed
+ * generator fails instead of silently leaving the post out.
  */
 export function parsePost(
   filename: string,
@@ -218,8 +220,9 @@ export function parsePost(
 
   const date = normalizeDate(data.date) ?? postDateFromFilename(filename);
   if (!date) {
-    warn(`Skipping post "${filename}": no date in front matter or filename`);
-    return undefined;
+    throw new Error(
+      `Post "${filename}" is marked for the app but has no date in its front matter or filename`,
+    );
   }
 
   const slugsByFilename = new Map(
@@ -240,8 +243,9 @@ export function parsePost(
   if (tags.includes('release')) {
     const versionMatch = slug.match(RELEASE_SLUG_PATTERN);
     if (!versionMatch) {
-      warn(`Skipping release post "${filename}": unexpected slug "${slug}"`);
-      return undefined;
+      throw new Error(
+        `Release post "${filename}" has an unexpected slug "${slug}" (expected release-X.Y.Z)`,
+      );
     }
     const { highlights, details } = splitReleaseBody(body);
     return {
