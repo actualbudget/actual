@@ -182,10 +182,24 @@ function cleanPostBody(
     .replace(/<\/?[A-Z][A-Za-z]*[^>]*>/g, '');
 }
 
+/**
+ * The public slug of a post: its front-matter `slug` when set, otherwise the
+ * filename without the date prefix (Docusaurus' default).
+ */
+export function getPostSlug(filename: string, contents: string): string {
+  const { data } = matter(contents);
+  return typeof data.slug === 'string'
+    ? data.slug
+    : postSlugFromFilename(filename);
+}
+
 type ParsePostOptions = {
   siteUrl: string;
-  /** Every post filename, used to resolve links between posts. */
-  allPostFilenames?: string[];
+  /**
+   * Public slug of every post keyed by filename (see `getPostSlug`), used to
+   * resolve `./other-post.md` links. Defaults to just this post.
+   */
+  postSlugs?: Map<string, string>;
   warn?: Warn;
 };
 
@@ -199,11 +213,7 @@ type ParsePostOptions = {
 export function parsePost(
   filename: string,
   contents: string,
-  {
-    siteUrl,
-    allPostFilenames = [filename],
-    warn = ignoreWarning,
-  }: ParsePostOptions,
+  { siteUrl, postSlugs, warn = ignoreWarning }: ParsePostOptions,
 ): NewsEntry | undefined {
   const { data, content } = matter(contents);
   const tags: string[] = Array.isArray(data.tags) ? data.tags.map(String) : [];
@@ -225,11 +235,8 @@ export function parsePost(
     );
   }
 
-  const slugsByFilename = new Map(
-    allPostFilenames.map(name => [name, postSlugFromFilename(name)]),
-  );
-  const slug =
-    typeof data.slug === 'string' ? data.slug : postSlugFromFilename(filename);
+  const slug = getPostSlug(filename, contents);
+  const slugsByFilename = postSlugs ?? new Map([[filename, slug]]);
   const title = typeof data.title === 'string' ? data.title : slug;
   const url = `${trimTrailingSlash(siteUrl)}/blog/${slug}`;
   const body = cleanPostBody(

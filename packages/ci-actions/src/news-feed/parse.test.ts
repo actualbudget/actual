@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   absolutizeLinks,
   buildNewsFeed,
+  getPostSlug,
   parsePost,
   stripHtmlComments,
 } from './parse';
@@ -169,10 +170,13 @@ More text.
         post,
         {
           siteUrl,
-          allPostFilenames: [
-            '2026-07-27-design-competition-sidenav.md',
-            '2026-08-05-sidenav-voting-open.md',
-          ],
+          postSlugs: new Map([
+            [
+              '2026-07-27-design-competition-sidenav.md',
+              'design-competition-sidenav',
+            ],
+            ['2026-08-05-sidenav-voting-open.md', 'sidenav-voting-open'],
+          ]),
         },
       );
 
@@ -189,6 +193,35 @@ More text.
       );
       expect(entry?.body).toContain(
         '[docs](https://actualbudget.org/docs/settings)',
+      );
+    });
+
+    it('resolves links to posts that use a custom slug', () => {
+      const target = `---
+title: Automate
+slug: 2023-12-15-automate-your-budget-with-goal-templates
+---
+x`;
+      const postSlugs = new Map([
+        [
+          '2023-12-15-automate.md',
+          getPostSlug('2023-12-15-automate.md', target),
+        ],
+        ['2024-03-25-twist.md', 'twist'],
+      ]);
+      const entry = parsePost(
+        '2024-03-25-twist.md',
+        `---
+title: Twist
+in_app_notification: true
+---
+
+Start [here](./2023-12-15-automate.md#month-ahead).
+`,
+        { siteUrl, postSlugs },
+      );
+      expect(entry?.body).toBe(
+        'Start [here](https://actualbudget.org/blog/2023-12-15-automate-your-budget-with-goal-templates#month-ahead).',
       );
     });
 

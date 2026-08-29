@@ -14,7 +14,7 @@ import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { buildNewsFeed, parsePost } from '../src/news-feed/parse';
+import { buildNewsFeed, getPostSlug, parsePost } from '../src/news-feed/parse';
 import type { NewsEntry } from '../src/news-feed/parse';
 
 const SITE_URL = 'https://actualbudget.org';
@@ -32,12 +32,27 @@ const warn = (message: string) => console.warn(message);
 const postFilenames = (await fs.readdir(blogDir))
   .filter(name => /\.mdx?$/.test(name))
   .sort();
-const entries: NewsEntry[] = [];
+const postContents = new Map<string, string>();
 for (const filename of postFilenames) {
-  const contents = await fs.readFile(join(blogDir, filename), 'utf-8');
+  postContents.set(
+    filename,
+    await fs.readFile(join(blogDir, filename), 'utf-8'),
+  );
+}
+// Links between posts are written against filenames; resolve them to the
+// slugs Docusaurus actually publishes (front matter can override the default).
+const postSlugs = new Map(
+  [...postContents].map(([filename, contents]) => [
+    filename,
+    getPostSlug(filename, contents),
+  ]),
+);
+
+const entries: NewsEntry[] = [];
+for (const [filename, contents] of postContents) {
   const entry = parsePost(filename, contents, {
     siteUrl: SITE_URL,
-    allPostFilenames: postFilenames,
+    postSlugs,
     warn,
   });
   if (entry) {
