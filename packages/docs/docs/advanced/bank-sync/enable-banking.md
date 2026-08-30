@@ -17,7 +17,7 @@ To set up Enable Banking, start by creating and signing in to your account: http
     Allowed redirect URLs: https://actualbudget.example.com/enablebanking/auth_callback
 ```
 
-  - Press **Register**
+- Press **Register**
 - Link the accounts you want in the Enable Banking interface. If you don't you won't see a list of banks or list of accounts in Actual Budget later on.
 - Copy the Application ID (`12345678-1234-1234-1234-123456789012`) before going back to Actual Budget.
 
