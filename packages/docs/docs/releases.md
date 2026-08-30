@@ -8,10 +8,10 @@ This release makes the transaction table customizable, adds an in-app tour for n
 
 - Show, hide, and reorder columns in the transaction table with the new column manager
 - New users now experience an in-app tour that guides them through getting started
-- Rename a [tag](/docs/transactions/tags) from the Tags page
+- Rename a [tag](./transactions/tags.md) from the Tags page
 - Create a schedule from a future-dated transaction with the new Schedule button
 - Reorder upcoming scheduled transactions by drag and drop
-- Experimental: Add a [Monte Carlo analysis report](/docs/experimental/monte-carlo-analysis) that estimates how long your savings will last in retirement
+- Experimental: Add a [Monte Carlo analysis report](./experimental/monte-carlo-analysis.md) that estimates how long your savings will last in retirement
 - Experimental: Add four more currencies (Israeli New Shekel, Macedonian Denar, Peruvian Sol, Uruguayan Peso)
 - Experimental: Formula reports can use BALANCE_OF, and formula editors now autocomplete loan and investment functions
 
