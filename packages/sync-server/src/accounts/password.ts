@@ -14,15 +14,18 @@ const ARGON2_OPTIONS = {
   parallelism: 1,
 };
 
-export function isValidPassword(password) {
+export function isValidPassword(password: unknown): boolean {
   return password != null && password !== '';
 }
 
-export function hashPassword(password) {
+export function hashPassword(password: string): Promise<string> {
   return argon2.hash(password, ARGON2_OPTIONS);
 }
 
-export async function verifyPassword(password, hash) {
+export async function verifyPassword(
+  password: string,
+  hash: unknown,
+): Promise<boolean> {
   if (typeof hash !== 'string') return false;
 
   if (hash.startsWith('$argon2')) {
@@ -40,11 +43,11 @@ export async function verifyPassword(password, hash) {
   }
 }
 
-function isLegacyHash(hash) {
+function isLegacyHash(hash: unknown): boolean {
   return typeof hash === 'string' && !hash.startsWith('$argon2');
 }
 
-export function setPasswordHash(hashed) {
+export function setPasswordHash(hashed: string): void {
   const accountDb = getAccountDb();
   accountDb.transaction(() => {
     accountDb.mutate('DELETE FROM auth WHERE method = ?', ['password']);
@@ -56,7 +59,9 @@ export function setPasswordHash(hashed) {
   });
 }
 
-export async function bootstrapPassword(password) {
+export async function bootstrapPassword(
+  password: string,
+): Promise<{ error?: string }> {
   if (!isValidPassword(password)) {
     return { error: 'invalid-password' };
   }
@@ -67,13 +72,15 @@ export async function bootstrapPassword(password) {
   return {};
 }
 
-export async function loginWithPassword(password) {
+export async function loginWithPassword(
+  password: string,
+): Promise<{ error: string } | { token: string }> {
   if (!isValidPassword(password)) {
     return { error: 'invalid-password' };
   }
 
   const accountDb = getAccountDb();
-  const { extra_data: passwordHash } =
+  const { extra_data: passwordHash }: { extra_data?: string | null } =
     accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
       'password',
     ]) || {};
@@ -96,17 +103,17 @@ export async function loginWithPassword(password) {
     );
   }
 
-  const sessionRow = accountDb.first(
+  const sessionRow: { token: string } | null = accountDb.first(
     'SELECT * FROM sessions WHERE auth_method = ?',
     ['password'],
   );
 
   const token = sessionRow ? sessionRow.token : uuidv4();
 
-  const { totalOfUsers } = accountDb.first(
+  const { totalOfUsers }: { totalOfUsers: number } = accountDb.first(
     'SELECT count(*) as totalOfUsers FROM users',
   );
-  let userId = null;
+  let userId: string | null = null;
   if (totalOfUsers === 0) {
     userId = uuidv4();
     accountDb.mutate(
@@ -114,7 +121,7 @@ export async function loginWithPassword(password) {
       [userId, '', '', 'ADMIN'],
     );
   } else {
-    const { id: userIdFromDb } = accountDb.first(
+    const { id: userIdFromDb }: { id: string | null } = accountDb.first(
       'SELECT id FROM users WHERE user_name = ?',
       [''],
     );
@@ -126,14 +133,15 @@ export async function loginWithPassword(password) {
     }
   }
 
-  let expiration = TOKEN_EXPIRATION_NEVER;
+  const tokenExpiration: string | number = config.get('token_expiration');
+
+  let expiration: number = TOKEN_EXPIRATION_NEVER;
   if (
-    config.get('token_expiration') !== 'never' &&
-    config.get('token_expiration') !== 'openid-provider' &&
-    typeof config.get('token_expiration') === 'number'
+    tokenExpiration !== 'never' &&
+    tokenExpiration !== 'openid-provider' &&
+    typeof tokenExpiration === 'number'
   ) {
-    expiration =
-      Math.floor(Date.now() / 1000) + config.get('token_expiration') * 60;
+    expiration = Math.floor(Date.now() / 1000) + tokenExpiration * 60;
   }
 
   if (!sessionRow) {
@@ -153,7 +161,9 @@ export async function loginWithPassword(password) {
   return { token };
 }
 
-export async function changePassword(newPassword) {
+export async function changePassword(
+  newPassword: string,
+): Promise<{ error?: string }> {
   const accountDb = getAccountDb();
 
   if (!isValidPassword(newPassword)) {
@@ -171,13 +181,13 @@ export async function changePassword(newPassword) {
   return {};
 }
 
-export async function checkPassword(password) {
+export async function checkPassword(password: string): Promise<boolean> {
   if (!isValidPassword(password)) {
     return false;
   }
 
   const accountDb = getAccountDb();
-  const { extra_data: passwordHash } =
+  const { extra_data: passwordHash }: { extra_data?: string | null } =
     accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
       'password',
     ]) || {};
