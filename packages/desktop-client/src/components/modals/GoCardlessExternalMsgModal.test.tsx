@@ -1,5 +1,6 @@
 import { sendCatch } from '@actual-app/core/platform/client/connection';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
 import { TestProviders } from '#mocks';
@@ -251,5 +252,60 @@ describe('GoCardlessExternalMsgModal - Bank list errors', () => {
     expect(
       await screen.findByText(/access credentials might be misconfigured/),
     ).toBeInTheDocument();
+  });
+
+  it('ignores the response of a request the user has already superseded', async () => {
+    type BankListResponse = Awaited<ReturnType<typeof sendCatch>>;
+
+    const resolvers: Array<(response: BankListResponse) => void> = [];
+    vi.mocked(sendCatch).mockImplementation(
+      () =>
+        new Promise<BankListResponse>(resolve => {
+          resolvers.push(resolve);
+        }),
+    );
+
+    renderModal();
+
+    // Germany is pre-selected, so its bank list is already in flight. Switch to
+    // France while that first request is still pending.
+    const countryInput = screen.getByPlaceholderText('(please select)');
+    await userEvent.clear(countryInput);
+    await userEvent.type(countryInput, 'France{Enter}');
+
+    await waitFor(() => expect(resolvers).toHaveLength(2));
+
+    // The newest request (France) lands first...
+    await act(async () => {
+      resolvers[1]({
+        data: [{ id: 'BANK_FR', name: 'French bank' }],
+        error: undefined,
+      });
+    });
+
+    // ...and the superseded German request fails afterwards.
+    await act(async () => {
+      resolvers[0]({
+        data: {
+          error_code: 'INTERNAL_ERROR',
+          error_type: 'IP address access denied',
+          error_details: {
+            status: 403,
+            summary: 'IP address access denied',
+            detail:
+              "Your IP 203.0.113.7 isn't whitelisted to perform this action",
+          },
+        },
+        error: undefined,
+      });
+    });
+
+    expect(
+      screen.queryByText(/IP address access denied/),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Failed loading available banks/),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('Choose your bank:')).toBeInTheDocument();
   });
 });
