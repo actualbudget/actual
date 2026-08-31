@@ -296,6 +296,29 @@ describe('Condition', () => {
     expect(cond.eval({ amount: 1.67 })).toBe(false);
     expect(cond.eval({ amount: 1.5 })).toBe(true);
   });
+
+  test('boolean validates value', () => {
+    new Condition('is', 'cleared', true, null);
+
+    expect(() => {
+      new Condition('is', 'cleared', 'true', null);
+    }).toThrow('Value must be a boolean');
+
+    expect(() => {
+      new Condition('is', 'cleared', null, null);
+    }).toThrow('Field cannot be empty');
+  });
+
+  test('boolean works with `is` operator', () => {
+    let cond = new Condition('is', 'cleared', true, null);
+    expect(cond.eval({ cleared: true })).toBe(true);
+    expect(cond.eval({ cleared: false })).toBe(false);
+    expect(cond.eval({})).toBe(false);
+
+    cond = new Condition('is', 'cleared', false, null);
+    expect(cond.eval({ cleared: false })).toBe(true);
+    expect(cond.eval({ cleared: true })).toBe(false);
+  });
 });
 
 describe('Action', () => {
@@ -560,6 +583,18 @@ describe('Rule', () => {
     });
     expect(rule.exec({ notes: 'James2' })).toEqual(null);
     expect(rule.apply({ notes: 'James2' })).toEqual({ notes: 'James2' });
+  });
+
+  test('rule with a cleared condition matches on cleared status', () => {
+    const rule = new Rule({
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'cleared', value: true }],
+      actions: [{ op: 'set', field: 'notes', value: 'Sarah' }],
+    });
+
+    expect(rule.exec({ cleared: true })).toEqual({ notes: 'Sarah' });
+    expect(rule.exec({ cleared: false })).toEqual(null);
+    expect(rule.exec({})).toEqual(null);
   });
 
   test('rule with `and` conditionsOp evaluates conditions as AND', () => {

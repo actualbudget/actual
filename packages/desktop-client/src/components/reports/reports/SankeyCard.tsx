@@ -103,6 +103,7 @@ export function SankeyCard({
         meta?.conditionsOp ?? 'and',
         mode,
         groupAccounts,
+        meta?.showTransfers ?? false,
       ),
     [
       start,
@@ -112,6 +113,7 @@ export function SankeyCard({
       meta?.conditionsOp,
       mode,
       groupAccounts,
+      meta?.showTransfers,
     ],
   );
   const defaultGetBaseGraph = async (
