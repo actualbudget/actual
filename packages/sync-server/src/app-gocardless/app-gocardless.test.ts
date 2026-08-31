@@ -3,6 +3,7 @@ import request from 'supertest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { GoCardlessRequisitionId } from './gocardless-node.types';
+import { mockInstitution } from './services/tests/fixtures';
 
 vi.mock('#util/middlewares', () => ({
   requestLoggerMiddleware: (_req: unknown, _res: unknown, next: () => void) =>
@@ -208,14 +209,12 @@ describe('/get-banks', () => {
   });
 
   it('still returns the bank list on success', async () => {
-    getInstitutions.mockResolvedValue([
-      { id: 'BANK_GB', name: 'Bank' },
-    ] as never);
+    getInstitutions.mockResolvedValue([mockInstitution]);
 
     const res = await request(app).post('/get-banks').send({ country: 'GB' });
 
     expect(res.body.status).toBe('ok');
-    expect(res.body.data).toEqual([{ id: 'BANK_GB', name: 'Bank' }]);
+    expect(res.body.data).toEqual([mockInstitution]);
   });
 });
 

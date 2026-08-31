@@ -34,6 +34,10 @@ function useAvailableBanks(country: string) {
   const [errorReason, setErrorReason] = useState<string | null>(null);
 
   useEffect(() => {
+    // Requests for a country the user has already moved on from must not
+    // overwrite the state of the request that replaced them.
+    let isCurrentRequest = true;
+
     async function fetch() {
       setIsError(false);
       setErrorReason(null);
@@ -48,6 +52,10 @@ function useAvailableBanks(country: string) {
 
       const { data, error } = await sendCatch('gocardless-get-banks', country);
 
+      if (!isCurrentRequest) {
+        return;
+      }
+
       if (error || !Array.isArray(data)) {
         setIsError(true);
         setErrorReason(getBankSyncErrorReason(data) ?? null);
@@ -60,6 +68,10 @@ function useAvailableBanks(country: string) {
     }
 
     void fetch();
+
+    return () => {
+      isCurrentRequest = false;
+    };
   }, [setBanks, setIsLoading, country]);
 
   return {
