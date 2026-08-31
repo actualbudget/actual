@@ -3160,6 +3160,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@docusaurus/plugin-client-redirects@npm:^3.10.2":
+  version: 3.10.2
+  resolution: "@docusaurus/plugin-client-redirects@npm:3.10.2"
+  dependencies:
+    "@docusaurus/core": "npm:3.10.2"
+    "@docusaurus/logger": "npm:3.10.2"
+    "@docusaurus/utils": "npm:3.10.2"
+    "@docusaurus/utils-common": "npm:3.10.2"
+    "@docusaurus/utils-validation": "npm:3.10.2"
+    eta: "npm:^2.2.0"
+    fs-extra: "npm:^11.1.1"
+    lodash: "npm:^4.17.21"
+    tslib: "npm:^2.6.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  checksum: 10/a88575e24ed17a7c47e799309cd17820a3d04b2cc63668a321a43bf6a6fd04ea45ab205a396d236c096de57d1b4e70480c188dc47bf2ebc00c9b2612c63ac745
+  languageName: node
+  linkType: hard
+
 "@docusaurus/plugin-content-blog@npm:3.10.2":
   version: 3.10.2
   resolution: "@docusaurus/plugin-content-blog@npm:3.10.2"
@@ -13721,6 +13741,7 @@ __metadata:
     "@actual-app/ci-actions": "workspace:*"
     "@docusaurus/core": "npm:^3.10.2"
     "@docusaurus/module-type-aliases": "npm:^3.10.2"
+    "@docusaurus/plugin-client-redirects": "npm:^3.10.2"
     "@docusaurus/plugin-content-docs": "npm:^3.10.2"
     "@docusaurus/plugin-ideal-image": "npm:^3.10.2"
     "@docusaurus/preset-classic": "npm:^3.10.2"

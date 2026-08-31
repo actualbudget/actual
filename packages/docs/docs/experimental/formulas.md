@@ -1,4 +1,4 @@
-# Excel Formula Mode (Formula cards & Rule formulas)
+# Excel Formula Mode (Formula Cards & Rule Formulas)
 
 <ExperimentalFeatureWarning issueId="5949" />
 
