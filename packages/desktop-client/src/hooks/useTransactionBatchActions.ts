@@ -302,6 +302,8 @@ export function useTransactionBatchActions() {
                 ...t,
                 cleared: false,
                 reconciled: false,
+                transfer_id: null,
+                schedule: null,
               })),
             );
           },

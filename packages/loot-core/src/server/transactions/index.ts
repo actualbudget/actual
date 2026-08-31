@@ -133,13 +133,16 @@ export async function batchUpdateTransactions({
   // Transfers update the transactions and we need to return updates
   // to the client so that can apply them. Note that added
   // transactions just return the full transaction.
-  const resultAdded = allAdded;
+  let resultAdded = allAdded;
   const resultUpdated = allUpdated;
   let transfersUpdated: Awaited<ReturnType<typeof transfer.onUpdate>>[];
 
   if (runTransfers) {
     await batchMessages(async () => {
       await Promise.all(allAdded.map(t => transfer.onInsert(t)));
+      if (addedIds.length > 0) {
+        resultAdded = await getTransactionsByIds(addedIds);
+      }
 
       // Return any updates from here
       transfersUpdated = (
