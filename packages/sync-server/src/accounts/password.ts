@@ -133,15 +133,15 @@ export async function loginWithPassword(
     }
   }
 
-  const tokenExpiration: string | number = config.get('token_expiration');
-
   let expiration: number = TOKEN_EXPIRATION_NEVER;
   if (
-    tokenExpiration !== 'never' &&
-    tokenExpiration !== 'openid-provider' &&
-    typeof tokenExpiration === 'number'
+    config.get('token_expiration') !== 'never' &&
+    config.get('token_expiration') !== 'openid-provider' &&
+    typeof config.get('token_expiration') === 'number'
   ) {
-    expiration = Math.floor(Date.now() / 1000) + tokenExpiration * 60;
+    expiration =
+      Math.floor(Date.now() / 1000) +
+      Number(config.get('token_expiration')) * 60;
   }
 
   if (!sessionRow) {
