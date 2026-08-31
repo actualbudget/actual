@@ -6,6 +6,7 @@ import {
   ungroupTransaction,
   updateTransaction,
 } from '#shared/transactions';
+import type { TransactionEntity } from '#types/models';
 
 beforeEach(global.emptyDatabase());
 
@@ -92,30 +93,35 @@ describe('Duplicate split with transfer date sync', () => {
     // For this regression test, we use the FIXED duplication (cleared) and expect date sync.
 
     const duplicated = realizeTempTransactions(
-      ungroupTransaction(grouped as any),
-    ).map(t => ({
-      ...t,
-      cleared: false,
-      reconciled: false,
-      transfer_id: null,
-      schedule: null,
-    }));
+      ungroupTransaction(grouped as unknown as TransactionEntity),
+    ).map(
+      t =>
+        ({
+          ...t,
+          cleared: false,
+          reconciled: false,
+          transfer_id: null,
+          schedule: null,
+        }) as unknown as TransactionEntity,
+    );
 
     // Verify duplicate children have no transfer_id before insert
     expect(duplicated.find(t => t.is_child)!.transfer_id).toBeNull();
 
     // Insert duplicated split via batchUpdateTransactions (which triggers transfer.onInsert)
-    await batchUpdateTransactions({ added: duplicated as any });
+    await batchUpdateTransactions({
+      added: duplicated as unknown as TransactionEntity[],
+    });
 
     // Find duplicated parent and its transfer child
-    const allTransactions = await db.all<any>(
+    const allTransactions = await db.all<db.DbViewTransaction>(
       `SELECT id, is_parent, is_child, parent_id, transfer_id, date, account FROM v_transactions WHERE tombstone = 0`,
     );
     const dupParentRow = allTransactions.find(
       r => r.is_parent === 1 && r.id !== parentId,
     );
     expect(dupParentRow).toBeDefined();
-    const dupParentId = dupParentRow.id;
+    const dupParentId = dupParentRow!.id;
 
     const dupChildren = allTransactions.filter(
       r => r.parent_id === dupParentId,
@@ -151,16 +157,21 @@ describe('Duplicate split with transfer date sync', () => {
       ...dupParent,
       subtransactions: [dupChild1, await db.getTransaction(dupChild2!.id)],
     };
-    const flat = ungroupTransaction(groupedDup as any);
+    const flat = ungroupTransaction(groupedDup as unknown as TransactionEntity);
     // Change parent date
     const newDate = '2025-02-15';
     const updatedParent = { ...dupParent, date: newDate };
     // Use shared logic to get diff (which updates children dates via makeChild)
-    const { diff } = updateTransaction(flat as any, updatedParent as any);
+    const { diff } = updateTransaction(
+      flat as unknown as TransactionEntity[],
+      updatedParent as unknown as TransactionEntity,
+    );
     // diff.updated should contain parent and children with new date
     expect(diff.updated.length).toBeGreaterThan(0);
     // Apply via batchUpdateTransactions
-    await batchUpdateTransactions({ updated: diff.updated as any });
+    await batchUpdateTransactions({
+      updated: diff.updated as unknown as TransactionEntity[],
+    });
 
     // After update, linked transfer date should equal new parent date
     const dupLinkedAfter = await db.getTransaction(dupLinkedTransferId!);
@@ -201,7 +212,7 @@ describe('Duplicate split with transfer date sync', () => {
       category: '1',
     });
     const parent = await db.getTransaction(parentId);
-    const all = await db.all<any>(
+    const all = await db.all<db.DbViewTransaction>(
       `SELECT * FROM v_transactions WHERE parent_id = ? AND tombstone = 0`,
       [parentId],
     );
@@ -210,23 +221,28 @@ describe('Duplicate split with transfer date sync', () => {
       subtransactions: await Promise.all(all.map(r => db.getTransaction(r.id))),
     };
     const duplicated = realizeTempTransactions(
-      ungroupTransaction(grouped as any),
-    ).map(t => ({
-      ...t,
-      cleared: false,
-      reconciled: false,
-      transfer_id: null,
-      schedule: null,
-    }));
-    await batchUpdateTransactions({ added: duplicated as any });
-    const allTransactions = await db.all<any>(
+      ungroupTransaction(grouped as unknown as TransactionEntity),
+    ).map(
+      t =>
+        ({
+          ...t,
+          cleared: false,
+          reconciled: false,
+          transfer_id: null,
+          schedule: null,
+        }) as unknown as TransactionEntity,
+    );
+    await batchUpdateTransactions({
+      added: duplicated as unknown as TransactionEntity[],
+    });
+    const allTransactions = await db.all<db.DbViewTransaction>(
       `SELECT * FROM v_transactions WHERE is_parent = 1 AND tombstone = 0`,
     );
     const dupParentRow = allTransactions.find(r => r.id !== parentId);
     expect(dupParentRow).toBeDefined();
-    const dupParentId = dupParentRow.id;
+    const dupParentId = dupParentRow!.id;
     const dupParent = await db.getTransaction(dupParentId);
-    const dupChildrenRows = await db.all<any>(
+    const dupChildrenRows = await db.all<db.DbViewTransaction>(
       `SELECT * FROM v_transactions WHERE parent_id = ? AND tombstone = 0`,
       [dupParentId],
     );
@@ -236,19 +252,21 @@ describe('Duplicate split with transfer date sync', () => {
         dupChildrenRows.map(r => db.getTransaction(r.id)),
       ),
     };
-    const flat = ungroupTransaction(groupedDup as any);
+    const flat = ungroupTransaction(groupedDup as unknown as TransactionEntity);
     const newDate = '2025-03-01';
     const { diff } = updateTransaction(
-      flat as any,
+      flat as unknown as TransactionEntity[],
       {
         ...dupParent,
         date: newDate,
-      } as any,
+      } as unknown as TransactionEntity,
     );
-    await batchUpdateTransactions({ updated: diff.updated as any });
+    await batchUpdateTransactions({
+      updated: diff.updated as unknown as TransactionEntity[],
+    });
     const updatedParent = await db.getTransaction(dupParentId);
     expect(updatedParent.date).toBe(newDate);
-    const updatedChildren = await db.all<any>(
+    const updatedChildren = await db.all<db.DbViewTransaction>(
       `SELECT * FROM v_transactions WHERE parent_id = ? AND tombstone = 0`,
       [dupParentId],
     );

@@ -298,13 +298,16 @@ export function useTransactionBatchActions() {
         added: transactions.reduce(
           (newTransactions: TransactionEntity[], trans: TransactionEntity) => {
             return newTransactions.concat(
-              realizeTempTransactions(ungroupTransaction(trans)).map(t => ({
-                ...t,
-                cleared: false,
-                reconciled: false,
-                transfer_id: null,
-                schedule: null,
-              })),
+              realizeTempTransactions(ungroupTransaction(trans)).map(
+                t =>
+                  ({
+                    ...t,
+                    cleared: false,
+                    reconciled: false,
+                    transfer_id: null,
+                    schedule: null,
+                  }) as unknown as TransactionEntity,
+              ),
             );
           },
           [],
