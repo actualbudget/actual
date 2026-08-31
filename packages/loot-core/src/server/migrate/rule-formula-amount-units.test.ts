@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import runMigration, {
   convertRuleFormulaCentsToAmounts,
-} from '#migrations/1786562404665_rule_formula_amount_units';
+} from '#migrations/1788193890472_rule_formula_amount_units';
 import * as db from '#server/db';
 import { Action } from '#server/rules/action';
 

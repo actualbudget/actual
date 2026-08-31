@@ -9,7 +9,7 @@ import m1722717601000 from '#migrations/1722717601000_reports_move_selected_cate
 import m1722804019000 from '#migrations/1722804019000_create_dashboard_table';
 import m1723665565000 from '#migrations/1723665565000_prefs';
 import m1765518577215 from '#migrations/1765518577215_multiple_dashboards';
-import m1786562404665 from '#migrations/1786562404665_rule_formula_amount_units';
+import m1788193890472 from '#migrations/1788193890472_rule_formula_amount_units';
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
@@ -23,7 +23,7 @@ const javascriptMigrations = {
   1722804019000: m1722804019000,
   1723665565000: m1723665565000,
   1765518577215: m1765518577215,
-  1786562404665: m1786562404665,
+  1788193890472: m1788193890472,
 };
 
 export async function withMigrationsDir(
