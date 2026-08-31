@@ -8,16 +8,16 @@ This release makes the transaction table customizable, adds an in-app tour for n
 
 - Show, hide, and reorder columns in the transaction table with the new column manager
 - New users now experience an in-app tour that guides them through getting started
-- Rename a [tag](./transactions/tags.md) from the Tags page
-- Create a schedule from a future-dated transaction with the new Schedule button
+- Rename a [tag](/docs/transactions/tags) from the Tags page
+- A new Schedule button lets you schedule future-dated transactions, replacing the "Convert to Schedule" prompt
 - Reorder upcoming scheduled transactions by drag and drop
-- Experimental: Add a [Monte Carlo analysis report](./experimental/monte-carlo-analysis.md) that estimates how long your savings will last in retirement
+- Experimental: Add a [Monte Carlo analysis report](/docs/experimental/monte-carlo-analysis) that estimates how long your savings will last in retirement
 - Experimental: Add four more currencies (Israeli New Shekel, Macedonian Denar, Peruvian Sol, Uruguayan Peso)
 - Experimental: Formula reports can use BALANCE_OF, and formula editors now autocomplete loan and investment functions
 
 :::warning Breaking change
 
-Release artifacts now use Node.js 24 by default, and the Ubuntu images no longer support 32-bit ARM devices. If you self-host on a 32-bit ARM device, switch to the Alpine image (`:26.9.0-alpine`), which still ships armv7 and armv6 builds.
+This release updated the Node version for our container images to Node 24. This means that we are dropping support for 32-bit ARM in our Ubuntu images. If you are still using this platform, we'd recommend switching to the Alpine image (`:26.9.0-alpine`), which continues to be supported.
 
 :::
 
