@@ -266,6 +266,36 @@ describe('net worth transfers', () => {
     expect(report.graphData.data.at(-1)).toMatchObject({ checking: 100_000 });
   });
 
+  it('keeps a transfer neutral when it spans the entire report range', async () => {
+    const report = await runReport({
+      accounts,
+      accountQueryResults: [90_000, [], 0, []],
+      linkedTransfers: [
+        {
+          id: 'checking-transfer',
+          account: 'checking',
+          amount: -10_000,
+          date: '2026-06-30',
+          transfer_id: 'savings-transfer',
+        },
+        {
+          id: 'savings-transfer',
+          account: 'savings',
+          amount: 10_000,
+          date: '2026-09-01',
+          transfer_id: 'checking-transfer',
+        },
+      ],
+      start: '2026-08',
+      end: '2026-08',
+      earliestTransactionDate: '2026-06-30',
+    });
+
+    expect(report.graphData.data.map(point => point.y)).toEqual([
+      100_000, 100_000,
+    ]);
+  });
+
   it.each([
     {
       interval: 'Daily',

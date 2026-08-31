@@ -238,7 +238,8 @@ export function createSpreadsheet(
       allTransferLegs = [...transferLegs, ...counterpartLegs];
     }
 
-    // Keep in-transit funds in the source account until the linked leg arrives.
+    // Prevent paired internal transfers from changing net worth between their
+    // two posting dates.
     alignInternalTransferDates(data, allTransferLegs, {
       startDate,
       endDate,
