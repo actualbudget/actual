@@ -85,6 +85,32 @@ export function useUpdateTagMutation() {
   });
 }
 
+type RenameTagPayload = {
+  id: TagEntity['id'];
+  tag: TagEntity['tag'];
+};
+
+export function useRenameTagMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ id, tag }: RenameTagPayload) => {
+      return await send('tags-rename', { id, tag });
+    },
+    onSuccess: () => invalidateQueries(queryClient),
+    onError: error => {
+      console.error('Error renaming tag:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error renaming the tag. Please try again.'),
+        error,
+      );
+    },
+  });
+}
+
 type DeleteTagPayload = {
   id: TagEntity['id'];
 };

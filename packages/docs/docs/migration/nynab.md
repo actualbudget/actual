@@ -189,7 +189,9 @@ Once you have the JSON file, proceed to [Import the JSON File](#import-the-json-
 
 ## Cleanup
 
-### Credit Cards (Fix Overspending)
+### Fix Overspending
+
+#### Credit Cards
 
 If you import credit cards with previous debt, you must handle these differently. Otherwise, your budget months will show overspending. Actual does not handle carrying over debt the same way, but offers a more manual approach.
 
@@ -201,7 +203,19 @@ If you import credit cards with previous debt, you must handle these differently
 
 A full description of how to carry over debt can be found in [our Carrying Debt article.](https://actualbudget.org/docs/budgeting/credit-cards/carrying-debt)
 
-### Hold for Next Month (Fix Money Leftover in To Budget)
+### Fix Money Leftover in To Budget
+
+There are two common reasons for leftover money in `To Budget` after a nYNAB import. Check both below.
+
+#### Credit Cards
+
+nYNAB tracks credit card spending by pulling money for each purchase into a dedicated `Credit Card Payment` category for each card, so it's ready to cover the payment later. Actual does not do this: spending stays in the category you assigned it to, and a credit card payment is a plain transfer between accounts with no category of its own. See [Credit Cards and Actual Budget](../budgeting/credit-cards/index.md) for the full explanation of how Actual handles credit cards.
+
+This matters if Actual shows money available to budget while YNAB shows `$0`, even though every category assignment and available amount already matches between the two, and every account balance matches too. In that case, YNAB's `Credit Card Payment` reserves likely fell out of sync with the real card balances at some point. Since Actual doesn't carry those payment categories, that leftover money has nowhere to go but `To Budget`.
+
+There is nothing to fix here. The money is available to budget, Actual is just showing it to you directly instead of hiding it in a per-card reserve. Budget it like any other `To Budget` balance, or use _Hold for Next Month_ to carry it forward instead.
+
+#### Hold for Next Month
 
 nYNAB calculates its `Ready to Assign` value differently than Actual's `To Budget` value.
 There is no need to worry, we can make them match exactly with a simple change.

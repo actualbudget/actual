@@ -2,9 +2,11 @@ import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  addHiddenNodes,
   addNode,
   addPercentageLabels,
   addValueToLink,
+  aggregateTransferPairs,
   buildSankeyData,
   cleanUpNodes,
   convertToSankeyData,
@@ -132,6 +134,39 @@ describe('sankey-spreadsheet', () => {
       expect(getLayer(graph, 'root')).toBe(0);
       expect(getLayer(graph, 'child')).toBe(1);
       expect(getLayer(graph, 'grandchild')).toBe(2);
+    });
+
+    it('does not recurse infinitely when links form a cycle', () => {
+      const graph: Graph = new Map();
+      addNode(graph, 'account-a', GraphLayers.Account, 'Account A');
+      addNode(graph, 'account-b', GraphLayers.Account, 'Account B');
+      addValueToLink(graph, 'account-a', 'account-b', 100);
+      addValueToLink(graph, 'account-b', 'account-a', 80);
+
+      expect(() => getLayer(graph, 'account-a')).not.toThrow();
+      expect(() => getLayer(graph, 'account-b')).not.toThrow();
+      expect(Number.isFinite(getLayer(graph, 'account-a'))).toBe(true);
+      expect(Number.isFinite(getLayer(graph, 'account-b'))).toBe(true);
+    });
+
+    it('uses a shared cache consistently across query orders for cyclic nodes', () => {
+      const graph: Graph = new Map();
+      addNode(graph, 'account-a', GraphLayers.Account, 'Account A');
+      addNode(graph, 'account-b', GraphLayers.Account, 'Account B');
+      addValueToLink(graph, 'account-a', 'account-b', 100);
+      addValueToLink(graph, 'account-b', 'account-a', 80);
+
+      const cacheFromAB = new Map<string, number>();
+      getLayer(graph, 'account-a', cacheFromAB);
+      getLayer(graph, 'account-b', cacheFromAB);
+
+      const cacheFromBA = new Map<string, number>();
+      getLayer(graph, 'account-b', cacheFromBA);
+      getLayer(graph, 'account-a', cacheFromBA);
+
+      expect(cacheFromAB.get('account-a')).toBe(cacheFromBA.get('account-a'));
+      expect(cacheFromAB.get('account-b')).toBe(cacheFromBA.get('account-b'));
+      expect(cacheFromAB.get('account-a')).toBe(cacheFromAB.get('account-b'));
     });
   });
 
@@ -572,6 +607,72 @@ describe('sankey-spreadsheet', () => {
     });
   });
 
+  describe('aggregateTransferPairs', () => {
+    it('keeps transfer direction when source account id sorts after destination', () => {
+      const transferPairs = aggregateTransferPairs([
+        {
+          id: 'tx-1',
+          transfer_id: 'tx-2',
+          accountId: 'z-account',
+          accountName: 'Z Account',
+          amount: -125,
+        },
+        {
+          id: 'tx-2',
+          transfer_id: 'tx-1',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: 125,
+        },
+      ]);
+
+      expect(transferPairs).toEqual([
+        {
+          fromAccountId: 'z-account',
+          fromAccountName: 'Z Account',
+          toAccountId: 'a-account',
+          toAccountName: 'A Account',
+          amount: 125,
+        },
+      ]);
+    });
+
+    it('nets reciprocal transfers and omits zero-value pairs', () => {
+      const transferPairs = aggregateTransferPairs([
+        {
+          id: 'tx-1',
+          transfer_id: 'tx-2',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: -100,
+        },
+        {
+          id: 'tx-2',
+          transfer_id: 'tx-1',
+          accountId: 'z-account',
+          accountName: 'Z Account',
+          amount: 100,
+        },
+        {
+          id: 'tx-3',
+          transfer_id: 'tx-4',
+          accountId: 'z-account',
+          accountName: 'Z Account',
+          amount: -100,
+        },
+        {
+          id: 'tx-4',
+          transfer_id: 'tx-3',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: 100,
+        },
+      ]);
+
+      expect(transferPairs).toEqual([]);
+    });
+  });
+
   describe('sortGraph', () => {
     it('sorts by global value when mode is global', () => {
       const graph: Graph = new Map();
@@ -652,24 +753,42 @@ describe('sankey-spreadsheet', () => {
       expect(node2?.percentageLabel).toBe('75.0%');
     });
 
-    it('normalizes percentages per GraphLayer, not computed depth', () => {
+    it('normalizes percentages per computed graph layer', () => {
       const graph: Graph = new Map();
 
-      addNode(graph, 'payee', GraphLayers.IncomePayee, 'Payee');
-      addNode(graph, 'income-cat', GraphLayers.IncomeCategory, 'Income Cat');
-      addNode(graph, 'account-incoming', GraphLayers.Account, 'Account A');
-
-      addNode(graph, 'account-root', GraphLayers.Account, 'Account B');
+      addNode(graph, 'account-root', GraphLayers.Account, 'Account A');
+      addNode(graph, 'account-transfer', GraphLayers.Account, 'Account B');
       addNode(graph, 'group', GraphLayers.CategoryGroup, 'Group');
+      addNode(graph, 'category', GraphLayers.Category, 'Category');
 
-      addValueToLink(graph, 'payee', 'income-cat', 300);
-      addValueToLink(graph, 'income-cat', 'account-incoming', 300);
+      addValueToLink(graph, 'account-root', 'account-transfer', 300);
       addValueToLink(graph, 'account-root', 'group', 100);
+      addValueToLink(graph, 'group', 'category', 100);
+
+      addHiddenNodes(graph);
 
       addPercentageLabels(graph);
 
-      expect(graph.get('account-root')?.percentageLabel).toBe('25.0%');
-      expect(graph.get('account-incoming')?.percentageLabel).toBe('75.0%');
+      const percentagesByLayer = new Map<number, number>();
+
+      for (const [key, node] of graph) {
+        if (key.endsWith('__HIDDEN') || !node.percentageLabel) {
+          continue;
+        }
+
+        const layer = getLayer(graph, key);
+        const percentage = Number.parseFloat(node.percentageLabel);
+        percentagesByLayer.set(
+          layer,
+          (percentagesByLayer.get(layer) ?? 0) + percentage,
+        );
+      }
+
+      expect(percentagesByLayer.size).toBeGreaterThan(0);
+
+      for (const total of percentagesByLayer.values()) {
+        expect(total).toBeCloseTo(100, 1);
+      }
     });
   });
 
@@ -772,6 +891,31 @@ describe('sankey-spreadsheet', () => {
       const nodeKeys = sankeyData.nodes.map(node => node.key);
       expect(nodeKeys).toContain('group-no-child_category__HIDDEN');
       expect(nodeKeys).not.toContain('group-no-child_category_group__HIDDEN');
+    });
+
+    it('keeps category groups after all account sublayers when transfers exist', () => {
+      const graph: Graph = new Map();
+
+      addNode(graph, 'account-root', GraphLayers.Account, 'Account A');
+      addNode(graph, 'account-transfer', GraphLayers.Account, 'Account B');
+      addNode(graph, 'group', GraphLayers.CategoryGroup, 'Group');
+      addNode(graph, 'category', GraphLayers.Category, 'Category');
+
+      addValueToLink(graph, 'account-root', 'account-transfer', 300);
+      addValueToLink(graph, 'account-root', 'group', 100);
+      addValueToLink(graph, 'group', 'category', 100);
+
+      const sankeyData = buildSankeyData(
+        graph,
+        100,
+        [],
+        'global',
+        GraphLayers.Account,
+        GraphLayers.Category,
+      );
+
+      const nodeKeys = sankeyData.nodes.map(node => node.key);
+      expect(nodeKeys).toContain('group_account_1__HIDDEN');
     });
   });
 
