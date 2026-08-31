@@ -17,7 +17,7 @@ This release makes the transaction table customizable, adds an in-app tour for n
 
 :::warning Breaking change
 
-Release artifacts now use Node.js 24 by default, and the Ubuntu images no longer support 32-bit ARM devices. If you self-host on a 32-bit ARM device, switch to the Alpine image (`:26.9.0-alpine`), which still ships armv7 and armv6 builds.
+This release updated the Node version for our container images to Node 24. This means that we are dropping support for 32-bit ARM in our Ubuntu images. If you are still using this platform, we'd recommend switching to the Alpine image (`:26.9.0-alpine`), which continues to be supported.
 
 :::
 
