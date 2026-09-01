@@ -37,8 +37,8 @@ export function AccountGroupPicker({
   const showCreate = trimmed.length > 0 && !exact;
   type Item = { kind: 'group'; group: AccountGroupEntity } | { kind: 'create' };
   const items: Item[] = [
-    ...matches.map(group => ({ kind: 'group' as const, group })),
-    ...(showCreate ? [{ kind: 'create' as const }] : []),
+    ...matches.map(group => ({ kind: 'group', group }) satisfies Item),
+    ...(showCreate ? [{ kind: 'create' } satisfies Item] : []),
   ];
 
   useEffect(() => {
