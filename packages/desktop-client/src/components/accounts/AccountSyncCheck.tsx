@@ -159,13 +159,21 @@ export function AccountSyncCheck() {
     // there, though: accounts on other providers were never broken, and
     // healthy GoCardless accounts would be resynced for nothing, spending
     // their institution's request allowance and inviting unrelated failures.
-    const brokenGoCardlessAccountIds = accounts
-      .filter(
-        account =>
-          isAccountFailedSync(account) &&
-          isGoCardlessConfigError(getFailedSyncError(account)),
-      )
-      .map(account => account.id);
+    // The account being viewed belongs in the set by construction — the button
+    // is on screen because it has one of these errors. It is added explicitly
+    // because the button reads the in-memory error while the filter below reads
+    // the persisted status, and the two can disagree; left to the filter alone,
+    // a disagreement yields an empty list, and syncing an empty list syncs
+    // nothing at all.
+    const brokenGoCardlessAccountIds = new Set(id ? [id] : []);
+    for (const account of accounts) {
+      if (
+        isAccountFailedSync(account) &&
+        isGoCardlessConfigError(getFailedSyncError(account))
+      ) {
+        brokenGoCardlessAccountIds.add(account.id);
+      }
+    }
 
     dispatch(
       pushModal({
@@ -173,12 +181,14 @@ export function AccountSyncCheck() {
           name: 'gocardless-init',
           options: {
             onSuccess: () =>
-              syncAndDownload.mutate({ ids: brokenGoCardlessAccountIds }),
+              syncAndDownload.mutate({
+                ids: [...brokenGoCardlessAccountIds],
+              }),
           },
         },
       }),
     );
-  }, [accounts, dispatch, syncAndDownload]);
+  }, [accounts, dispatch, id, syncAndDownload]);
 
   const unlinkAccount = useUnlinkAccountMutation();
   const unlink = useCallback(

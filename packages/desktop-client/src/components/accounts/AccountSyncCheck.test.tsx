@@ -46,22 +46,24 @@ const simpleFinAccount = (id: string) =>
 function setup({
   isAdmin = true,
   failedSyncError,
+  accounts = [
+    goCardlessAccount('acct1'),
+    goCardlessAccount('acct2'),
+    simpleFinAccount('acct3'),
+    goCardlessAccount('acct4', 'ok'),
+    goCardlessAccount('acct5', 'invalid-credentials'),
+  ],
 }: {
   isAdmin?: boolean;
   failedSyncError?: { type: string; code: string };
+  accounts?: AccountEntity[];
 } = {}) {
   const dispatch = vi.fn();
   const syncMutate = vi.fn();
 
   vi.mocked(useDispatch).mockReturnValue(dispatch);
   vi.mocked(useAccounts).mockReturnValue({
-    data: [
-      goCardlessAccount('acct1'),
-      goCardlessAccount('acct2'),
-      simpleFinAccount('acct3'),
-      goCardlessAccount('acct4', 'ok'),
-      goCardlessAccount('acct5', 'invalid-credentials'),
-    ],
+    data: accounts,
   } as ReturnType<typeof useAccounts>);
   vi.mocked(useFailedAccounts).mockReturnValue(
     failedSyncError
@@ -120,6 +122,31 @@ describe('AccountSyncCheck', () => {
     expect(syncMutate).toHaveBeenCalledWith({
       ids: ['acct1', 'acct2', 'acct5'],
     });
+  });
+
+  it('retries the account whose banner was clicked even when only this client knows it is broken', async () => {
+    // The banner reads the in-memory error first and the persisted status only
+    // as a fallback, so the two can disagree: another client can overwrite
+    // bank_sync_status with a different failure while this one still holds the
+    // configuration error that put the button on screen. Filtering on the
+    // persisted status alone then yields an empty list, and syncing an empty
+    // list syncs nothing — the button would do nothing at all.
+    const { dispatch, syncMutate } = setup({
+      accounts: [goCardlessAccount('acct1', 'failed')],
+      failedSyncError: {
+        type: 'CONFIG_ERROR',
+        code: 'GOCARDLESS_NOT_CONFIGURED',
+      },
+    });
+    await openBanner();
+    await userEvent.click(
+      screen.getByRole('button', { name: /set up gocardless/i }),
+    );
+
+    const { onSuccess } = dispatch.mock.calls[0][0].payload.modal.options;
+    onSuccess();
+
+    expect(syncMutate).toHaveBeenCalledWith({ ids: ['acct1'] });
   });
 
   it('keeps offering the shortcut when the entered credentials were rejected', async () => {
