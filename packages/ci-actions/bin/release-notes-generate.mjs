@@ -257,7 +257,7 @@ await group('Format generated files', async () => {
   });
 });
 
-// The in-app "What's new" feed is generated from the blog and committed. This
+// The in-app notifications feed is generated from the blog and committed. This
 // job pushes with GITHUB_TOKEN, which doesn't trigger the PR workflows that
 // normally regenerate it (autofix.ci), so it has to be part of this commit.
 const newsFeedPath = 'packages/desktop-client/src/data/news.json';

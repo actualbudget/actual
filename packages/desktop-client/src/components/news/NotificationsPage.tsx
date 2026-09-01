@@ -20,7 +20,7 @@ const RELEASE_NOTES_URL = 'https://actualbudget.org/docs/releases';
 const BLOG_URL = 'https://actualbudget.org/blog';
 const DISCORD_URL = 'https://discord.gg/pRYNYr4W5A';
 
-export function WhatsNewPage() {
+export function NotificationsPage() {
   const { t } = useTranslation();
   const { entries, isLoading, error, lastSeenNewsDate, markAllSeen } =
     useNewsFeed();
@@ -41,7 +41,7 @@ export function WhatsNewPage() {
   }, [entries]);
 
   return (
-    <Page header={t("What's new")}>
+    <Page header={t('Notifications')}>
       <View
         style={{
           marginTop: 10,
@@ -86,7 +86,7 @@ export function WhatsNewPage() {
         {/* The settings card is reused on purpose so this page matches Settings. */}
         {error && (
           <Setting>
-            <Text data-testid="whats-new-offline">
+            <Text data-testid="notifications-offline">
               <Trans>
                 <strong>The latest news isn't available right now.</strong>{' '}
                 Actual couldn't reach actualbudget.org, which usually means

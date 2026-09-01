@@ -1,6 +1,6 @@
 name: News feed check
 
-# The in-app "What's new" feed (packages/desktop-client/src/data/news.json) is
+# The in-app notifications feed (packages/desktop-client/src/data/news.json) is
 # generated from the blog and committed so it can be reviewed. autofix.ci
 # regenerates it on every PR; this check fails the PR if the committed copy is
 # still out of date (for example if autofix was skipped).

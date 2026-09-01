@@ -177,7 +177,7 @@ Blog posts and the standalone pages in `src/pages/` live outside the `docs/` fol
 
 ### Blog Posts in the App
 
-Actual has a "What's new" page built from the blog. Release posts are included automatically (the release tooling marks them); any other post is only shown there when you opt in by adding `in_app_notification: true` to its front matter:
+Actual has an in-app Notifications page built from the blog. Release posts are included automatically (the release tooling marks them); any other post is only shown there when you opt in by adding `in_app_notification: true` to its front matter:
 
 ```markdown
 ---

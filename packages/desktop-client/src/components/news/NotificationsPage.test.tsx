@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestProviders } from '#mocks';
 import type { NewsEntry } from '#news/types';
 
-import { WhatsNewPage } from './WhatsNewPage';
+import { NotificationsPage } from './NotificationsPage';
 
 const mockMarkAllSeen = vi.fn();
 let mockEntries: NewsEntry[] = [];
@@ -59,13 +59,13 @@ function renderPage() {
   return render(
     <TestProviders>
       <MemoryRouter>
-        <WhatsNewPage />
+        <NotificationsPage />
       </MemoryRouter>
     </TestProviders>,
   );
 }
 
-describe('WhatsNewPage', () => {
+describe('NotificationsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockEntries = [];
@@ -123,10 +123,10 @@ describe('WhatsNewPage', () => {
     mockError = new Error('offline');
     renderPage();
 
-    expect(screen.getByTestId('whats-new-offline')).toHaveTextContent(
+    expect(screen.getByTestId('notifications-offline')).toHaveTextContent(
       "The latest news isn't available right now",
     );
-    expect(screen.getByTestId('whats-new-offline')).toHaveTextContent(
+    expect(screen.getByTestId('notifications-offline')).toHaveTextContent(
       /usually means you're offline/,
     );
     expect(

@@ -110,8 +110,8 @@ function About() {
           {isNewsFeedEnabled && (
             <>
               {' · '}
-              <Link variant="internal" to="/whats-new">
-                <Trans>What's new</Trans>
+              <Link variant="internal" to="/notifications">
+                <Trans>Notifications</Trans>
               </Link>
             </>
           )}
@@ -138,7 +138,7 @@ function About() {
           />
           <label htmlFor="settings-showNewsFeed">
             <Trans>
-              Show what's new in Actual (release notes and announcements)
+              Show in-app notifications (release notes and announcements)
             </Trans>
           </label>
         </Text>

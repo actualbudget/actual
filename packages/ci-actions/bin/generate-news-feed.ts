@@ -1,5 +1,5 @@
 // Generates `packages/desktop-client/src/data/news.json` — the feed the Actual
-// app reads to show "What's new" — from the blog posts in `packages/docs/blog`
+// app reads for in-app notifications — from the blog posts in `packages/docs/blog`
 // that are marked `in_app_notification: true` (release announcements get the
 // flag from the release tooling; other posts opt in by hand).
 //

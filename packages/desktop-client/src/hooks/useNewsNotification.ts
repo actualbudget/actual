@@ -14,7 +14,7 @@ import { useNavigate } from './useNavigate';
 import { useNewsFeed } from './useNewsFeed';
 
 const NOTIFICATION_ID = 'news-release-notification';
-const WHATS_NEW_PATH = '/whats-new';
+const NOTIFICATIONS_PAGE_PATH = '/notifications';
 
 /**
  * Shows a sticky notification the first time a new release that the user is
@@ -33,7 +33,7 @@ export function useNewsNotification() {
   // Reaching the page (via the bell, settings, or the notification itself)
   // makes the notification redundant.
   useEffect(() => {
-    if (location.pathname === WHATS_NEW_PATH) {
+    if (location.pathname === NOTIFICATIONS_PAGE_PATH) {
       dispatch(removeNotification({ id: NOTIFICATION_ID }));
     }
   }, [dispatch, location.pathname]);
@@ -78,7 +78,7 @@ export function useNewsNotification() {
           button: {
             title: t("See what's new"),
             action: () => {
-              void navigate(WHATS_NEW_PATH);
+              void navigate(NOTIFICATIONS_PAGE_PATH);
             },
           },
           // Only this release has been seen. Recording the newest feed date

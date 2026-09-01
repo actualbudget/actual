@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TestProviders } from '#mocks';
 
-import { WhatsNewButton } from './WhatsNewButton';
+import { NotificationsButton } from './NotificationsButton';
 
 let mockIsEnabled = true;
 let mockUnseenCount = 0;
@@ -32,7 +32,7 @@ function renderButton() {
   return render(
     <TestProviders>
       <MemoryRouter initialEntries={['/budget']}>
-        <WhatsNewButton />
+        <NotificationsButton />
         <Routes>
           <Route path="*" element={<LocationProbe />} />
         </Routes>
@@ -41,7 +41,7 @@ function renderButton() {
   );
 }
 
-describe('WhatsNewButton', () => {
+describe('NotificationsButton', () => {
   beforeEach(() => {
     mockIsEnabled = true;
     mockUnseenCount = 0;
@@ -50,41 +50,45 @@ describe('WhatsNewButton', () => {
   it('renders nothing while the news feed is disabled', () => {
     mockIsEnabled = false;
     renderButton();
-    expect(screen.queryByTestId('whats-new-button')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('notifications-button'),
+    ).not.toBeInTheDocument();
   });
 
   it('shows the bell without a count when everything has been seen', () => {
     renderButton();
     expect(
-      screen.getByRole('button', { name: "What's new" }),
+      screen.getByRole('button', { name: 'Notifications' }),
     ).toBeInTheDocument();
     expect(
-      screen.queryByTestId('whats-new-unseen-count'),
+      screen.queryByTestId('notifications-unseen-count'),
     ).not.toBeInTheDocument();
   });
 
   it('shows the unread count and caps it at 9+', () => {
     mockUnseenCount = 3;
     const { unmount } = renderButton();
-    expect(screen.getByTestId('whats-new-unseen-count')).toHaveTextContent('3');
+    expect(screen.getByTestId('notifications-unseen-count')).toHaveTextContent(
+      '3',
+    );
     expect(
-      screen.getByRole('button', { name: "What's new: 3 unread" }),
+      screen.getByRole('button', { name: 'Notifications: 3 unread' }),
     ).toBeInTheDocument();
     unmount();
 
     mockUnseenCount = 12;
     renderButton();
-    expect(screen.getByTestId('whats-new-unseen-count')).toHaveTextContent(
+    expect(screen.getByTestId('notifications-unseen-count')).toHaveTextContent(
       '9+',
     );
   });
 
-  it("navigates to the What's new page when pressed", async () => {
+  it('navigates to the notifications page when pressed', async () => {
     renderButton();
     expect(screen.getByTestId('location')).toHaveTextContent('/budget');
 
-    await userEvent.click(screen.getByTestId('whats-new-button'));
+    await userEvent.click(screen.getByTestId('notifications-button'));
 
-    expect(screen.getByTestId('location')).toHaveTextContent('/whats-new');
+    expect(screen.getByTestId('location')).toHaveTextContent('/notifications');
   });
 });

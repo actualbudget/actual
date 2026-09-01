@@ -14,11 +14,11 @@ import { useNewsFeed } from '#hooks/useNewsFeed';
 const MAX_DISPLAYED_COUNT = 9;
 
 /**
- * Titlebar bell that opens the "What's new" page and shows how many entries
+ * Titlebar bell that opens the Notifications page and shows how many entries
  * (releases and posts) the user hasn't seen yet. Hidden while the news feed
  * is disabled (the user turned it off in settings).
  */
-export function WhatsNewButton() {
+export function NotificationsButton() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { isEnabled, unseenCount } = useNewsFeed();
@@ -29,8 +29,8 @@ export function WhatsNewButton() {
 
   const label =
     unseenCount > 0
-      ? t("What's new: {{count}} unread", { count: unseenCount })
-      : t("What's new");
+      ? t('Notifications: {{count}} unread', { count: unseenCount })
+      : t('Notifications');
   const displayedCount =
     unseenCount > MAX_DISPLAYED_COUNT
       ? `${MAX_DISPLAYED_COUNT}+`
@@ -42,14 +42,14 @@ export function WhatsNewButton() {
         <Button
           variant="bare"
           aria-label={label}
-          onPress={() => void navigate('/whats-new')}
-          data-testid="whats-new-button"
+          onPress={() => void navigate('/notifications')}
+          data-testid="notifications-button"
         >
           <SvgNotificationsOutline style={{ width: 15, height: 15 }} />
         </Button>
         {unseenCount > 0 && (
           <Text
-            data-testid="whats-new-unseen-count"
+            data-testid="notifications-unseen-count"
             style={{
               position: 'absolute',
               top: -3,

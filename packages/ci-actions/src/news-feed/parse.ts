@@ -8,7 +8,7 @@ import matter from 'gray-matter';
 
 // Must match `NEWS_FEED_SCHEMA_VERSION` in
 // packages/desktop-client/src/news/types.ts. The app rejects feeds with any
-// other version, so bumping this breaks "What's new" for every already
+// other version, so bumping this breaks in-app notifications for every already
 // deployed client until they update - only do it for incompatible changes.
 export const NEWS_FEED_SCHEMA_VERSION = 1;
 
