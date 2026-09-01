@@ -140,9 +140,12 @@ export const goCardlessService = {
         // A rejected token request is the only proof that the secrets
         // themselves are wrong. A 401 from any later call means the session
         // token went stale, so the mapping is made here and nowhere else.
+        // The request carries nothing but the secret ID and secret key, so a
+        // 400 is the same verdict: they are malformed rather than merely
+        // rejected.
         if (
           error instanceof GoCardlessApiError &&
-          error.response.status === 401
+          (error.response.status === 400 || error.response.status === 401)
         ) {
           throw new GoCardlessInvalidCredentialsError(error);
         }
