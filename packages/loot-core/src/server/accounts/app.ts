@@ -1367,14 +1367,17 @@ function handleSyncError(
     if (err.code === 'GOCARDLESS_NOT_CONFIGURED') {
       return {
         ...syncError,
-        message: `Failed syncing account ${acct.name}. GoCardless is not set up on this server — re-enter your secret ID and key to reconnect.`,
+        // The toast reaches admins and non-admins alike, so it names the
+        // repair without telling the reader to make it — only an admin can,
+        // and the popover carries the admin-specific instruction.
+        message: `Failed syncing account ${acct.name}. GoCardless is not set up on this server — its secret ID and key have to be entered again.`,
       };
     }
 
     if (err.code === 'GOCARDLESS_INVALID_CREDENTIALS') {
       return {
         ...syncError,
-        message: `Failed syncing account ${acct.name}. GoCardless rejected this server's secret ID and key — check them and enter them again.`,
+        message: `Failed syncing account ${acct.name}. GoCardless rejected this server's secret ID and key — they have to be checked and entered again.`,
       };
     }
 

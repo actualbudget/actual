@@ -278,9 +278,11 @@ describe('accountsBankSync', () => {
     );
     expect(account!.bank_sync_status).toBe('not-configured');
 
-    // The point of the fix: the user is told to re-enter their secrets rather
-    // than being shown a generic internal error.
-    expect(result.errors[0].message).toMatch(/re-enter your secret ID and key/);
+    // The point of the fix: the user is told what actually broke, rather than
+    // being shown a generic internal error.
+    expect(result.errors[0].message).toMatch(
+      /secret ID and key have to be entered again/,
+    );
   });
 
   it('persists invalid-credentials separately from not-configured', async () => {
@@ -311,7 +313,7 @@ describe('accountsBankSync', () => {
       ['acct1'],
     );
     expect(account!.bank_sync_status).toBe('invalid-credentials');
-    expect(result.errors[0].message).toMatch(/check them and enter them again/);
+    expect(result.errors[0].message).toMatch(/checked and entered again/);
   });
 
   it('persists failed status after an operational sync error', async () => {

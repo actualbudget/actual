@@ -75,9 +75,13 @@ describe('GoCardless config errors from the sync server', () => {
     expect(result.errors[0]).toMatchObject({
       category: 'CONFIG_ERROR',
       code: 'GOCARDLESS_NOT_CONFIGURED',
-      // the point of the fix: the user is told to re-enter their secrets
-      // rather than being shown a generic internal error
-      message: expect.stringMatching(/re-enter your secret ID and key/),
+      // the point of the fix: the user is told what actually broke, rather
+      // than being shown a generic internal error. The toast reaches admins
+      // and non-admins alike, so it names the repair without telling the
+      // reader to make it.
+      message: expect.stringMatching(
+        /secret ID and key have to be entered again/,
+      ),
     });
   });
 
