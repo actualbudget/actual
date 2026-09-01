@@ -7,11 +7,23 @@ import { useAccounts } from '#hooks/useAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
-// How often we check whether a sync is due. The configured interval is at least
-// an hour, so checking every minute is plenty and keeps the timer cheap.
+// How often we check whether a sync is due. A sync can only ever be late by up
+// to one check, so this just needs to stay comfortably shorter than
+// MIN_CUSTOM_INTERVAL_MINUTES below. Checking every minute keeps the timer
+// cheap while staying well inside that.
 const CHECK_INTERVAL_MS = 60 * 1000;
 
 const MINUTE_MS = 60 * 1000;
+
+/**
+ * Shortest interval the custom interval control will produce. Banks rate-limit
+ * how often accounts can be refreshed, and syncing more often than this mostly
+ * burns that allowance without returning anything new.
+ *
+ * Lives here rather than with the control so it sits next to CHECK_INTERVAL_MS:
+ * lowering it below that would make syncs land noticeably late.
+ */
+export const MIN_CUSTOM_INTERVAL_MINUTES = 15;
 
 /** Converts the `bank-sync-interval` preference (in minutes) to milliseconds. */
 export function parseBankSyncInterval(interval: string | undefined) {
