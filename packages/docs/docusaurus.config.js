@@ -107,8 +107,9 @@ module.exports = {
             position: 'left',
           },
           {
-            to: '/contact',
-            label: 'Contact',
+            type: 'docSidebar',
+            sidebarId: 'communitySidebar',
+            label: 'Community',
             position: 'left',
           },
           {
@@ -202,6 +203,21 @@ module.exports = {
       },
     }),
   plugins: [
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        redirects: [
+          {
+            from: '/contact',
+            to: '/docs/community/',
+          },
+          {
+            from: '/docs/actual-server-repo-move',
+            to: '/docs/install/',
+          },
+        ],
+      },
+    ],
     [
       '@docusaurus/plugin-ideal-image',
       {
