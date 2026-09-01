@@ -56,11 +56,7 @@ describe('BudgetName context menu', () => {
     fireEvent.contextMenu(screen.getByText('Test Budget'));
 
     expect(store.getState().contextMenu.isOpen).toBe(true);
-    expect(contextMenuItemNames()).toEqual([
-      'rename',
-      'settings',
-      'close',
-    ]);
+    expect(contextMenuItemNames()).toEqual(['rename', 'settings', 'close']);
   });
 
   it('reopens the context menu after the budget name is changed in the store', async () => {
@@ -97,10 +93,6 @@ describe('BudgetName context menu', () => {
     fireEvent.contextMenu(screen.getByText('Renamed Budget'));
 
     expect(store.getState().contextMenu.isOpen).toBe(true);
-    expect(contextMenuItemNames()).toEqual([
-      'rename',
-      'settings',
-      'close',
-    ]);
+    expect(contextMenuItemNames()).toEqual(['rename', 'settings', 'close']);
   });
 });
