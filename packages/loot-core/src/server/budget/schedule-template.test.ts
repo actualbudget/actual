@@ -3,6 +3,7 @@ import { Rule } from '#server/rules';
 import { getRuleForSchedule } from '#server/schedules/app';
 import type { Currency } from '#shared/currencies';
 import type { CategoryEntity } from '#types/models';
+import type { ScheduleTemplate } from '#types/models/templates';
 
 import { getSheetValue, isTrackingBudget } from './actions';
 import { runSchedule } from './schedule-template';
@@ -639,7 +640,7 @@ describe('runSchedule', () => {
         name: 'EveryThreeSixtyDays',
         directive: 'template',
         priority: 0,
-      } as const,
+      } satisfies ScheduleTemplate,
     ];
     mockSingleSchedule({
       start: '2026-05-15',
