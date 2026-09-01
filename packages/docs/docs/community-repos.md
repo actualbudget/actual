@@ -63,10 +63,9 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
 - **Actual Budget iOS Widget** - https://github.com/TaylorJns/Actual-Budget-iOS-Widget
   - _An iOS widget to display your Actual Budget category balances for the current month. Requires your Actual server to be accessible via HTTPS, and the **Local REST API** community project to be installed._
 - **Actual Bench** - https://github.com/x-rous/actual-bench
-
-* **actual-budget-mcp** - https://github.com/henfrydls/actual-budget-mcp
-  - _Connect Actual to Claude and other AI assistants. Ask about your budget in plain language, get spending analysis and projections, and create or edit transactions. Deletes wait for your confirmation, and an optional read only mode hides the write tools entirely._
   - _Admin and workbench companion for Actual Budget. Bulk-edit data, manage, merge and diagnose rules, 12-month budget view, snapshot inspection, and ActualQL queries - all changes staged until you save._
+- **actual-budget-mcp** - https://github.com/henfrydls/actual-budget-mcp
+  - _Connect Actual to Claude and other AI assistants. Ask about your budget in plain language, get spending analysis and projections, and create, edit, or delete transactions. Deletions wait for your confirmation, and an optional read-only mode hides the write tools entirely._
 
 ## Others
 
