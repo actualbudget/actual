@@ -64,11 +64,9 @@ export function getLoginMethod(req) {
     (req.body || { loginMethod: null }).loginMethod &&
     config.get('allowedLoginMethods').includes(req.body.loginMethod)
   ) {
-    const accountDb = getAccountDb();
-    const row = accountDb.first('SELECT method FROM auth WHERE method = ?', [
-      req.body.loginMethod,
-    ]);
-    if (row) return req.body.loginMethod;
+    // Handlers validate their own readiness (e.g. loginWithPassword
+    // returns 'invalid-password' with no hash set), so no DB row is needed here.
+    return req.body.loginMethod;
   }
 
   //BY-PASS ANY OTHER CONFIGURATION TO ENSURE HEADER AUTH

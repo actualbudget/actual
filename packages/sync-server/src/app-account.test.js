@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getAccountDb, getLoginMethod, getServerPrefs } from './account-db';
 import { bootstrapPassword } from './accounts/password';
 import { handlers as app, authRateLimiter } from './app-account';
+import { config } from './load-config';
 
 const ADMIN_ROLE = 'ADMIN';
 const BASIC_ROLE = 'BASIC';
@@ -206,16 +207,48 @@ describe('getLoginMethod()', () => {
     expect(getLoginMethod(req)).toBe('password');
   });
 
-  it('ignores a client-requested method that is not in DB', () => {
+  it('honors a client-requested allowed method even when it has no auth row', () => {
     insertAuthRow('openid', 1);
     const req = { body: { loginMethod: 'password' } };
-    expect(getLoginMethod(req)).toBe('openid');
+    expect(getLoginMethod(req)).toBe('password');
   });
 
   it('falls back to config default when auth table is empty and no req', () => {
     // auth table is empty — getActiveLoginMethod() returns undefined
     // config default for loginMethod is 'password'
     expect(getLoginMethod(undefined)).toBe('password');
+  });
+
+  describe('with header auth configured', () => {
+    const originalLoginMethod = config.get('loginMethod');
+    const originalAllowedMethods = config.get('allowedLoginMethods');
+
+    beforeEach(() => {
+      config.set('loginMethod', 'header');
+      config.set('allowedLoginMethods', ['header', 'password']);
+    });
+
+    afterEach(() => {
+      config.set('loginMethod', originalLoginMethod);
+      config.set('allowedLoginMethods', originalAllowedMethods);
+    });
+
+    it('still allows an explicit password login as a documented fallback', () => {
+      insertAuthRow('password', 1);
+      const req = { body: { loginMethod: 'password' } };
+      expect(getLoginMethod(req)).toBe('password');
+    });
+
+    it('falls back to header auth when no explicit method is requested', () => {
+      insertAuthRow('password', 1);
+      expect(getLoginMethod(undefined)).toBe('header');
+    });
+
+    it('falls back to header auth when the requested method is not allowed', () => {
+      insertAuthRow('password', 1);
+      const req = { body: { loginMethod: 'openid' } };
+      expect(getLoginMethod(req)).toBe('header');
+    });
   });
 });
 
@@ -250,6 +283,17 @@ describe('/login', () => {
     const res = await request(app)
       .post('/login')
       .send({ loginMethod: 'password', password: 'wrongpassword' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty('reason', 'invalid-password');
+  });
+
+  it('routes an explicit password login to the password handler when OpenID is the only configured method', async () => {
+    insertAuthRow('openid', 1);
+
+    const res = await request(app)
+      .post('/login')
+      .send({ loginMethod: 'password', password: 'whatever' });
 
     expect(res.statusCode).toEqual(400);
     expect(res.body).toHaveProperty('reason', 'invalid-password');
