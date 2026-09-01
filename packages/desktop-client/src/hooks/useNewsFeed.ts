@@ -4,17 +4,15 @@ import { newsQueries } from '#news/queries';
 import type { NewsEntry } from '#news/types';
 import { getNewestDate, getUnseenEntries } from '#news/utils';
 
-import { useFeatureFlag } from './useFeatureFlag';
 import { useGlobalPref } from './useGlobalPref';
 
 const EMPTY_ENTRIES: NewsEntry[] = [];
 
 export function useNewsFeed() {
-  const isNewsFeedFlagEnabled = useFeatureFlag('newsFeed');
+  // The setting (on by default) lets the user opt out of the feed and of the
+  // request it makes to GitHub.
   const [showNewsFeed] = useGlobalPref('showNewsFeed');
-  // The experimental flag makes the feature available;
-  // The setting lets the user opt out of it (and of the request to actualbudget.org it makes).
-  const isEnabled = isNewsFeedFlagEnabled && Boolean(showNewsFeed);
+  const isEnabled = Boolean(showNewsFeed);
   const [lastSeenNewsDate, setLastSeenNewsDate] =
     useGlobalPref('lastSeenNewsDate');
 

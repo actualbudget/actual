@@ -10,13 +10,8 @@ import { newsFeedFixture } from '#news/fixtures';
 
 import { useNewsNotification } from './useNewsNotification';
 
-let mockIsFlagEnabled = false;
 let mockLastSeenNewsDate: string | undefined = undefined;
 const mockSetLastSeenNewsDate = vi.fn();
-
-vi.mock('#hooks/useFeatureFlag', () => ({
-  useFeatureFlag: () => mockIsFlagEnabled,
-}));
 
 let mockShowNewsFeed = true;
 
@@ -50,7 +45,6 @@ describe('useNewsNotification', () => {
     vi.clearAllMocks();
     resetTestProviders();
     store = createTestAppStore();
-    mockIsFlagEnabled = false;
     mockLastSeenNewsDate = '2025-01-01';
     mockShowNewsFeed = true;
     vi.stubGlobal('fetch', fetchMock);
@@ -66,18 +60,7 @@ describe('useNewsNotification', () => {
     vi.unstubAllGlobals();
   });
 
-  it('does nothing while the feature flag is off', async () => {
-    renderHook(() => useNewsNotification(), { wrapper });
-
-    await act(() => Promise.resolve());
-
-    expect(fetchMock).not.toHaveBeenCalled();
-    expect(store.getState().notifications.notifications).toEqual([]);
-    expect(mockSetLastSeenNewsDate).not.toHaveBeenCalled();
-  });
-
-  it('shows a notification for an unseen release once the flag is on', async () => {
-    mockIsFlagEnabled = true;
+  it('shows a notification for an unseen release', async () => {
     renderHook(() => useNewsNotification(), { wrapper });
 
     await waitFor(() =>
@@ -91,7 +74,6 @@ describe('useNewsNotification', () => {
   });
 
   it('only marks the shown release as seen, not releases newer than the client', async () => {
-    mockIsFlagEnabled = true;
     fetchMock.mockResolvedValue({
       ok: true,
       status: 200,
@@ -125,7 +107,6 @@ describe('useNewsNotification', () => {
   });
 
   it('records the current position instead of notifying on first enable', async () => {
-    mockIsFlagEnabled = true;
     mockLastSeenNewsDate = undefined;
     renderHook(() => useNewsNotification(), { wrapper });
 
@@ -136,7 +117,6 @@ describe('useNewsNotification', () => {
   });
 
   it('does nothing when the user has turned the news feed off', async () => {
-    mockIsFlagEnabled = true;
     mockShowNewsFeed = false;
     renderHook(() => useNewsNotification(), { wrapper });
 
@@ -144,5 +124,6 @@ describe('useNewsNotification', () => {
 
     expect(fetchMock).not.toHaveBeenCalled();
     expect(store.getState().notifications.notifications).toEqual([]);
+    expect(mockSetLastSeenNewsDate).not.toHaveBeenCalled();
   });
 });

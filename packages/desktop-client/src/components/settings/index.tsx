@@ -48,9 +48,8 @@ function About() {
       void dispatch(getLatestAppVersion());
     });
   const dispatch = useDispatch();
-  const isNewsFeedFlagEnabled = useFeatureFlag('newsFeed');
   const [showNewsFeed, setShowNewsFeedPref] = useGlobalPref('showNewsFeed');
-  const isNewsFeedEnabled = isNewsFeedFlagEnabled && Boolean(showNewsFeed);
+  const isNewsFeedEnabled = Boolean(showNewsFeed);
 
   return (
     <Setting>
@@ -118,7 +117,7 @@ function About() {
           )}
         </Text>
       </View>
-      <View>
+      <View style={{ gap: 5 }}>
         <Text style={{ display: 'flex' }}>
           <Checkbox
             id="settings-notifyWhenUpdateIsAvailable"
@@ -131,20 +130,18 @@ function About() {
             <Trans>Display a notification when updates are available</Trans>
           </label>
         </Text>
-        {isNewsFeedFlagEnabled && (
-          <Text style={{ display: 'flex' }}>
-            <Checkbox
-              id="settings-showNewsFeed"
-              checked={showNewsFeed}
-              onChange={e => setShowNewsFeedPref(e.currentTarget.checked)}
-            />
-            <label htmlFor="settings-showNewsFeed">
-              <Trans>
-                Show what's new in Actual (release notes and announcements)
-              </Trans>
-            </label>
-          </Text>
-        )}
+        <Text style={{ display: 'flex' }}>
+          <Checkbox
+            id="settings-showNewsFeed"
+            checked={showNewsFeed}
+            onChange={e => setShowNewsFeedPref(e.currentTarget.checked)}
+          />
+          <label htmlFor="settings-showNewsFeed">
+            <Trans>
+              Show what's new in Actual (release notes and announcements)
+            </Trans>
+          </label>
+        </Text>
       </View>
     </Setting>
   );

@@ -8,13 +8,8 @@ import { newsFeedFixture } from '#news/fixtures';
 
 import { useNewsFeed } from './useNewsFeed';
 
-let mockIsFlagEnabled = false;
 let mockLastSeenNewsDate: string | undefined = undefined;
 const mockSetLastSeenNewsDate = vi.fn();
-
-vi.mock('#hooks/useFeatureFlag', () => ({
-  useFeatureFlag: () => mockIsFlagEnabled,
-}));
 
 let mockShowNewsFeed = true;
 
@@ -38,7 +33,6 @@ describe('useNewsFeed', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     resetTestProviders();
-    mockIsFlagEnabled = false;
     mockLastSeenNewsDate = undefined;
     mockShowNewsFeed = true;
     vi.stubGlobal('fetch', fetchMock);
@@ -53,19 +47,7 @@ describe('useNewsFeed', () => {
     vi.unstubAllGlobals();
   });
 
-  it('never fetches while the feature flag is off', async () => {
-    const { result } = renderHook(() => useNewsFeed(), {
-      wrapper: TestProviders,
-    });
-
-    expect(result.current.isEnabled).toBe(false);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.entries).toEqual([]);
-    expect(fetchMock).not.toHaveBeenCalled();
-  });
-
   it('fetches the feed and reports unseen entries when enabled', async () => {
-    mockIsFlagEnabled = true;
     mockLastSeenNewsDate = '2025-12-15';
 
     const { result } = renderHook(() => useNewsFeed(), {
@@ -81,7 +63,6 @@ describe('useNewsFeed', () => {
   });
 
   it('never fetches while the user has turned the news feed off', () => {
-    mockIsFlagEnabled = true;
     mockShowNewsFeed = false;
 
     const { result } = renderHook(() => useNewsFeed(), {
@@ -89,6 +70,7 @@ describe('useNewsFeed', () => {
     });
 
     expect(result.current.isEnabled).toBe(false);
+    expect(result.current.isLoading).toBe(false);
     expect(result.current.entries).toEqual([]);
     expect(fetchMock).not.toHaveBeenCalled();
   });

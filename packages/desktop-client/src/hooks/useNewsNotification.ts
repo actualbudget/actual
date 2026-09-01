@@ -19,7 +19,7 @@ const WHATS_NEW_PATH = '/whats-new';
 /**
  * Shows a sticky notification the first time a new release that the user is
  * already running appears in the news feed. Does nothing while the news feed
- * is disabled (experimental flag off or the user turned it off in settings).
+ * is disabled (the user turned it off in settings).
  */
 export function useNewsNotification() {
   const { t } = useTranslation();

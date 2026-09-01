@@ -16,7 +16,7 @@ const MAX_DISPLAYED_COUNT = 9;
 /**
  * Titlebar bell that opens the "What's new" page and shows how many entries
  * (releases and posts) the user hasn't seen yet. Hidden while the news feed
- * is disabled (experimental flag off or the user turned it off in settings).
+ * is disabled (the user turned it off in settings).
  */
 export function WhatsNewButton() {
   const { t } = useTranslation();
