@@ -3,4 +3,4 @@ category: Maintenance
 authors: [matt-fidd]
 ---
 
-Upsize Docker build runners
+Fix flaky e2e test caused by dropped keystrokes
