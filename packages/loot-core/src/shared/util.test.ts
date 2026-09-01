@@ -143,6 +143,46 @@ describe('utility functions', () => {
     expect(formatter.format(Number('-1.2'))).toBe('-1');
   });
 
+  test('number formatting works with small negative numbers with 2 decimal places', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: false });
+    const formatter = getNumberFormat().formatter;
+    expect(formatter.format(-0)).toBe('0.00');
+    expect(formatter.format(Number('-0.004'))).toBe('0.00');
+    // A value that still rounds away from zero keeps its sign
+    expect(formatter.format(Number('-0.005'))).toBe('-0.01');
+    expect(formatter.format(Number('-0.5'))).toBe('-0.50');
+  });
+
+  test('negative zero drops its sign in every number format', () => {
+    setNumberFormat({ format: 'dot-comma', hideFraction: false });
+    expect(getNumberFormat().formatter.format(-0)).toBe('0,00');
+
+    setNumberFormat({ format: 'space-comma', hideFraction: false });
+    expect(getNumberFormat().formatter.format(-0)).toBe('0,00');
+
+    setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
+    expect(getNumberFormat().formatter.format(-0)).toBe('0.00');
+
+    setNumberFormat({ format: 'comma-dot-in', hideFraction: false });
+    expect(getNumberFormat().formatter.format(-0)).toBe('0.00');
+  });
+
+  test('integerToCurrencyWithDecimal does not render a negative zero', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: false });
+    expect(integerToCurrencyWithDecimal(-0)).toBe('0.00');
+    expect(integerToCurrencyWithDecimal(-0, 'USD')).toBe('0.00');
+    expect(integerToCurrencyWithDecimal(-0, 'JPY')).toBe('0');
+    expect(integerToCurrencyWithDecimal(-1, 'USD')).toBe('-0.01');
+  });
+
+  test('number formatting still coerces non-numeric values', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: false });
+    const formatter = getNumberFormat().formatter;
+    // `appendDecimals` can hand the formatter a null when parsing fails
+    expect(formatter.format(null as unknown as number)).toBe('0.00');
+    expect(formatter.format(NaN)).toBe('NaN');
+  });
+
   test('currencyToAmount works with basic numbers', () => {
     expect(currencyToAmount('3')).toBe(3);
     expect(currencyToAmount('3.4')).toBe(3.4);
