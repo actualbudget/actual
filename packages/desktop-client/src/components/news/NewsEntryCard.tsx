@@ -25,6 +25,9 @@ const markdownStyle = {
   '& h2, & h3, & h4': { fontSize: 14, fontWeight: 600, margin: '20px 0 8px' },
   '& p:not(:first-child)': { marginTop: '0.75rem' },
   '& ul, & ol': { marginTop: '0.5rem' },
+  // The shared markdown style tints rules purple, which suits notes but reads
+  // as decoration here; match the body text instead.
+  '& hr': { borderBottomColor: theme.pageText },
   '& img': { maxWidth: '100%' },
 };
 
