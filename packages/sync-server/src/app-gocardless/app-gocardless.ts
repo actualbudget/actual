@@ -278,7 +278,9 @@ app.post(
         error instanceof RequisitionNotLinked ||
         error instanceof GenericGoCardlessError ||
         error instanceof GoCardlessClientError ||
-        error instanceof AccountNotLinkedToRequisition
+        error instanceof AccountNotLinkedToRequisition ||
+        error instanceof GoCardlessNotConfiguredError ||
+        error instanceof GoCardlessInvalidCredentialsError
           ? error.details
           : undefined;
 

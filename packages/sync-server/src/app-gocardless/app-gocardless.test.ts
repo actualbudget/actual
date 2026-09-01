@@ -166,6 +166,25 @@ describe('/transactions', () => {
     });
   });
 
+  it('passes on what GoCardless said about the rejected credentials', async () => {
+    // the only clue a self-hoster gets about *which* secret is wrong
+    getTransactionsWithBalance.mockRejectedValue(
+      new GoCardlessInvalidCredentialsError({
+        response: {
+          status: 400,
+          headers: {},
+          data: { secret_id: ['Must be a valid UUID.'] },
+        },
+      }),
+    );
+
+    const res = await syncRequest();
+
+    expect(res.body.data.details).toMatchObject({
+      response: { data: { secret_id: ['Must be a valid UUID.'] } },
+    });
+  });
+
   it('still reports unrecognised failures as a generic error', async () => {
     getTransactionsWithBalance.mockRejectedValue(new Error('boom'));
 
