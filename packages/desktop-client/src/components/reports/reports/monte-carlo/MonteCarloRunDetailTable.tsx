@@ -205,7 +205,7 @@ export function MonteCarloRunDetailTable({
               <Text
                 style={{
                   ...GROUP_HEADING_STYLE,
-                  width: 90,
+                  width: 110,
                   textAlign: 'right',
                 }}
               >
@@ -321,7 +321,7 @@ export function MonteCarloRunDetailTable({
                   {showInflation && (
                     // Deliberately neutral: coloring deflation "good" or
                     // inflation "bad" would oversimplify
-                    <Text style={{ width: 90, textAlign: 'right' }}>
+                    <Text style={{ width: 110, textAlign: 'right' }}>
                       {row.inflation != null && (
                         <FinancialText as="span">
                           {`${(row.inflation * 100).toFixed(2)}%`}
