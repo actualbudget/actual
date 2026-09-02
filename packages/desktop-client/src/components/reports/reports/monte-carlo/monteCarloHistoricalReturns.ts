@@ -5,9 +5,12 @@
 // Dec-over-Dec rate, which differs in some years) - sampled jointly with
 // the returns so each simulated year keeps its own inflation.
 //
-// Source: Aswath Damodaran, NYU Stern - 'Historical Returns on Stocks,
-// Bonds and Bills', https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histretSP.html
-// Data range: 1928-2025. Regenerate by re-extracting that table.
+// Returns source: Aswath Damodaran, NYU Stern - 'Historical Returns on
+// Stocks, Bonds and Bills', https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histretSP.html
+// Inflation source: BLS CPI-U annual averages, via
+// https://www.usinflationcalculator.com/inflation/historical-inflation-rates/
+// (cross-checked against https://www.minneapolisfed.org/about-us/monetary-policy/inflation-calculator/consumer-price-index-1913-).
+// Data range: 1928-2025. Regenerate by re-extracting those tables.
 //
 // Note: this is US data - the best freely available long-run series. It
 // likely overstates outcomes for globally diversified portfolios.
