@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -15,6 +15,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { UPCOMING_LENGTH_PRESET_OPTIONS } from '@actual-app/core/shared/schedules';
+import { amountToInteger } from '@actual-app/core/shared/util';
 import type {
   RecurConfig,
   ScheduleEntity,
@@ -31,14 +32,22 @@ import { SimpleTransactionsTable } from '#components/transactions/SimpleTransact
 import { AmountInput, BetweenAmountInput } from '#components/util/AmountInput';
 import { GenericInput } from '#components/util/GenericInput';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { SelectedProvider } from '#hooks/useSelected';
 import type { Actions } from '#hooks/useSelected';
 
+const FormulaEditor = lazy(() =>
+  import('#components/formula/FormulaEditor').then(module => ({
+    default: module.FormulaEditor,
+  })),
+);
+
 export type ScheduleFormFields = {
   payee: null | string;
   account: null | string;
-  amount: null | number | { num1: number; num2: number };
+  amount: null | number | { num1: number; num2: number } | string;
   amountOp: null | string;
   date: null | string | RecurConfig;
   posts_transaction: boolean;
@@ -55,12 +64,12 @@ export type ScheduleEditFormDispatch =
   | {
       type: 'set-field';
       field: 'amountOp';
-      value: 'is' | 'isbetween' | 'isapprox';
+      value: 'is' | 'isbetween' | 'isapprox' | 'formula';
     }
   | {
       type: 'set-field';
       field: 'amount';
-      value: number | { num1: number; num2: number };
+      value: number | { num1: number; num2: number } | string;
     }
   | {
       type: 'set-field';
@@ -121,6 +130,131 @@ export function ScheduleEditForm({
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { isNarrowWidth } = useResponsive();
+  const format = useFormat();
+  const formulaModeEnabled = useFeatureFlag('formulaMode');
+  // Make sure that we don't hide the formula option if formulaMode has been
+  // disabled after the schedule was created with a formula amount.
+  const showFormulaOp = formulaModeEnabled || fields.amountOp === 'formula';
+  const isFormula = fields.amountOp === 'formula';
+
+  const previewDate =
+    upcomingDates?.[0] ?? schedule?.next_date ?? monthUtils.currentDay();
+  const previewDates = useMemo(() => {
+    const dates = previewDate ? [previewDate, ...(upcomingDates ?? [])] : [];
+    return dates.filter((date, index, all) => all.indexOf(date) === index);
+  }, [previewDate, upcomingDates]);
+
+  const formulaHasBalanceOf =
+    isFormula &&
+    typeof fields.amount === 'string' &&
+    /BALANCE_OF\s*\(/i.test(fields.amount);
+
+  // Live per-occurrence preview, evaluated in the browser. BALANCE_OF
+  // resolves to 0 here (balances are prefetched server-side), so formulas
+  // that use it show a hint instead of a misleading amount.
+  const [formulaPreviews, setFormulaPreviews] = useState<
+    Map<string, { ok: number } | { error: string; soft: boolean }>
+  >(new Map());
+
+  useEffect(() => {
+    if (!isFormula || typeof fields.amount !== 'string') {
+      setFormulaPreviews(new Map());
+      return;
+    }
+    const formula = fields.amount;
+    if (!formula.startsWith('=') || formula.replace(/^=/, '').trim() === '') {
+      setFormulaPreviews(new Map());
+      return;
+    }
+
+    let cancelled = false;
+    // Debounce so rapid typing doesn't build and destroy a HyperFormula
+    // engine for every keystroke.
+    const timer = setTimeout(() => {
+      void import('@actual-app/core/shared/formulas/evaluate').then(
+        ({ evaluateFormula, FormulaEvaluationError }) => {
+          if (cancelled) {
+            return;
+          }
+          const next = new Map<
+            string,
+            { ok: number } | { error: string; soft: boolean }
+          >();
+          for (const date of previewDates) {
+            try {
+              const result = evaluateFormula(formula, {
+                date,
+                today: monthUtils.currentDay(),
+              });
+              if (typeof result !== 'number') {
+                next.set(date, {
+                  error: t('Formula did not evaluate to a number'),
+                  soft: true,
+                });
+              } else {
+                next.set(date, {
+                  ok: amountToInteger(result, format.currency.decimalPlaces),
+                });
+              }
+            } catch (e) {
+              if (
+                e instanceof FormulaEvaluationError &&
+                e.formulaErrorType === 'ERROR'
+              ) {
+                next.set(date, {
+                  error: t('Not a valid formula'),
+                  soft: true,
+                });
+              } else {
+                next.set(date, {
+                  error: e instanceof Error ? e.message : String(e),
+                  soft: false,
+                });
+              }
+            }
+          }
+          setFormulaPreviews(next);
+        },
+      );
+    }, 200);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [
+    isFormula,
+    fields.amount,
+    previewDates,
+    format.currency.decimalPlaces,
+    t,
+  ]);
+
+  function renderFormulaPreview(date: string) {
+    const preview = formulaPreviews.get(date);
+    if (!preview) {
+      return null;
+    }
+    if ('error' in preview) {
+      return (
+        <Text
+          style={{
+            fontSize: 12,
+            color: preview.soft ? theme.pageTextLight : theme.errorText,
+          }}
+        >
+          {preview.error}
+        </Text>
+      );
+    }
+    return (
+      <Text style={{ fontSize: 12, color: theme.pageTextLight }}>
+        <Trans>
+          Evaluates to {{ amount: format(preview.ok, 'financial') }} on{' '}
+          {{ date: monthUtils.format(date, dateFormat, locale) }}
+        </Trans>
+      </Text>
+    );
+  }
 
   return (
     <>
@@ -183,12 +317,19 @@ export function ScheduleEditForm({
             <SpaceBetween style={{ marginBottom: 3, alignItems: 'center' }}>
               <FormLabel
                 title={t('Amount')}
-                htmlFor="amount-field"
+                id="amount-label"
+                htmlFor={isFormula ? undefined : 'amount-field'}
                 style={{ margin: 0, flex: 1 }}
               />
               <OpSelect
-                ops={['isapprox', 'is', 'isbetween']}
-                value={fields.amountOp as 'isapprox' | 'is' | 'isbetween'}
+                ops={
+                  showFormulaOp
+                    ? ['isapprox', 'is', 'isbetween', 'formula']
+                    : ['isapprox', 'is', 'isbetween']
+                }
+                value={
+                  fields.amountOp as 'isapprox' | 'is' | 'isbetween' | 'formula'
+                }
                 formatOp={op => {
                   switch (op) {
                     case 'is':
@@ -197,6 +338,8 @@ export function ScheduleEditForm({
                       return t('is approximately');
                     case 'isbetween':
                       return t('is between');
+                    case 'formula':
+                      return t('is formula');
                     default:
                       throw new Error('Invalid op for select: ' + op);
                   }
@@ -215,7 +358,66 @@ export function ScheduleEditForm({
                 }
               />
             </SpaceBetween>
-            {fields.amountOp === 'isbetween' ? (
+            {isFormula ? (
+              <>
+                <View
+                  id="amount-field"
+                  role="group"
+                  aria-labelledby="amount-label"
+                  style={{
+                    flex: 1,
+                    border: `1px solid ${theme.formInputBorder}`,
+                    borderRadius: 4,
+                    overflow: 'visible',
+                    backgroundColor: theme.tableBackground,
+                  }}
+                >
+                  <Suspense fallback={<div style={{ height: 32 }} />}>
+                    <FormulaEditor
+                      value={
+                        typeof fields.amount === 'string' ? fields.amount : ''
+                      }
+                      onChange={value =>
+                        dispatch({
+                          type: 'set-field',
+                          field: 'amount',
+                          value: value.replace(/[\r\n]+/g, ' '),
+                        })
+                      }
+                      mode="schedule"
+                      singleLine
+                      showLineNumbers={false}
+                    />
+                  </Suspense>
+                </View>
+                {/* The preview line reserves its space so the other fields
+                    don't move around as the formula is edited. */}
+                <View
+                  style={{
+                    marginTop: 3,
+                    minHeight: 17,
+                    flexDirection: 'column',
+                    gap: 2,
+                  }}
+                >
+                  {previewDate && renderFormulaPreview(previewDate)}
+                  {previewDates.length > 1 &&
+                    upcomingDates
+                      ?.slice(1)
+                      .map(date => (
+                        <View key={date}>{renderFormulaPreview(date)}</View>
+                      ))}
+                  {formulaHasBalanceOf && (
+                    <Text style={{ fontSize: 12, color: theme.pageTextLight }}>
+                      <Trans>
+                        BALANCE_OF resolves to 0 in this preview; the actual
+                        value is fetched when the transaction is posted.
+                      </Trans>
+                    </Text>
+                  )}
+                </View>
+              </>
+            ) : fields.amountOp === 'isbetween' ? (
               <BetweenAmountInput
                 // @ts-expect-error fix me
                 defaultValue={fields.amount}

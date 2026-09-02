@@ -5,8 +5,10 @@ import * as d from 'date-fns';
 import { Condition } from '#server/rules';
 import type { RuleConditionEntity, ScheduleEntity } from '#types/models';
 
+import { evaluateFormula } from './formulas/evaluate';
 import * as monthUtils from './months';
 import { q } from './query';
+import { amountToInteger } from './util';
 
 export const DEFAULT_UPCOMING_SCHEDULE_DAYS = '7';
 
@@ -269,7 +271,8 @@ export function extractScheduleConds(conditions) {
         cond =>
           (cond.op === 'is' ||
             cond.op === 'isapprox' ||
-            cond.op === 'isbetween') &&
+            cond.op === 'isbetween' ||
+            cond.op === 'formula') &&
           cond.field === 'amount',
       ) || null,
     date:
@@ -331,13 +334,65 @@ export function getDateWithSkippedWeekend(
   return date;
 }
 
-export function getScheduledAmount(
-  amount: number | { num1: number; num2: number },
+export type ScheduledAmountContext = {
+  date?: string;
+  decimalPlaces?: number;
+  balanceOfPrefetch?: Map<string, number>;
+};
+
+/**
+ * Error-aware variant of `getScheduledAmount` for formula amounts. Callers
+ * that persist the result (e.g. posting a schedule transaction) must use
+ * this so a failing formula is reported instead of silently posting 0.
+ */
+export function evaluateScheduledAmount(
+  amount: number | { num1: number; num2: number } | string,
   inverse: boolean = false,
+  context: ScheduledAmountContext = {},
+): { amount: number; error?: unknown } {
+  if (typeof amount === 'string') {
+    try {
+      const result = evaluateFormula(
+        amount,
+        {
+          date: context.date ?? monthUtils.currentDay(),
+          today: monthUtils.currentDay(),
+        },
+        { balanceOfPrefetch: context.balanceOfPrefetch },
+      );
+      if (typeof result !== 'number') {
+        return {
+          amount: 0,
+          error: new Error('Formula did not produce a number'),
+        };
+      }
+      const num = amountToInteger(result, context.decimalPlaces ?? 2);
+      return { amount: inverse ? -num : num };
+    } catch (error) {
+      return { amount: 0, error };
+    }
+  }
+  return { amount: getScheduledAmount(amount, inverse, context) };
+}
+
+export function getScheduledAmount(
+  amount: number | { num1: number; num2: number } | string,
+  inverse: boolean = false,
+  context: ScheduledAmountContext = {},
 ): number {
   // this check is temporary, and required at the moment as a schedule rule
   // allows the amount condition to be deleted which causes a crash
   if (amount == null) return 0;
+
+  if (typeof amount === 'string') {
+    // Formula-based amount: evaluate against the occurrence date. Formula
+    // numbers are major units (e.g. `=100` means 100 currency units), so the
+    // result is converted to integer minor units using the schedule
+    // currency's decimal places. An invalid formula (e.g. still being typed)
+    // evaluates to 0 rather than crashing callers; see
+    // `evaluateScheduledAmount` for an error-aware variant.
+    return evaluateScheduledAmount(amount, inverse, context).amount;
+  }
 
   if (typeof amount === 'number') {
     return inverse ? -amount : amount;
@@ -416,6 +471,7 @@ export function computeSchedulePreviewTransactions(
   statuses: ScheduleStatuses,
   upcomingLength?: string,
   filter?: (schedule: ScheduleEntity) => boolean,
+  decimalPlaces?: number,
 ) {
   const schedulesForPreview = schedules
     .filter(s => isForPreview(s, statuses))
@@ -478,7 +534,10 @@ export function computeSchedulePreviewTransactions(
         id: 'preview/' + schedule.id + `/${date}`,
         payee: schedule._payee,
         account: schedule._account,
-        amount: getScheduledAmount(schedule._amount),
+        amount: getScheduledAmount(schedule._amount, false, {
+          date,
+          decimalPlaces,
+        }),
         date,
         schedule: schedule.id,
         forceUpcoming:

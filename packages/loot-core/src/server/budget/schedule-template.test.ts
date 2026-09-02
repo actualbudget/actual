@@ -1,8 +1,9 @@
 import * as db from '#server/db';
 import { Rule } from '#server/rules';
 import { getRuleForSchedule } from '#server/schedules/app';
+import { prefetchBalanceOfForTransaction } from '#server/transactions/transaction-rules';
 import type { Currency } from '#shared/currencies';
-import type { CategoryEntity } from '#types/models';
+import type { CategoryEntity, RuleConditionEntity } from '#types/models';
 
 import { isTrackingBudget } from './actions';
 import { runSchedule } from './schedule-template';
@@ -14,6 +15,15 @@ vi.mock('#server/schedules/app', async () => {
   return {
     ...actualModule,
     getRuleForSchedule: vi.fn(),
+  };
+});
+vi.mock('#server/transactions/transaction-rules', async () => {
+  const actualModule = await vi.importActual(
+    '#server/transactions/transaction-rules',
+  );
+  return {
+    ...actualModule,
+    prefetchBalanceOfForTransaction: vi.fn(),
   };
 });
 
@@ -31,18 +41,42 @@ const defaultCategory = { id: '1', name: 'Test Category' } as CategoryEntity;
 type RuleSpec = {
   id?: string;
   start: string;
-  amount: number;
   frequency: 'monthly' | 'yearly' | 'weekly' | 'daily';
   interval?: number;
-};
+  patterns?: Array<{ type: 'day'; value: number }>;
+} & (
+  | { amountOp?: 'is' | 'isapprox'; amount: number }
+  | { amountOp: 'isbetween'; amount: { num1: number; num2: number } }
+  | { amountOp: 'formula'; amount: string }
+);
 
-function makeRule({
-  id = 'r',
-  start,
-  amount,
-  frequency,
-  interval = 1,
-}: RuleSpec): Rule {
+function makeAmountCondition(spec: RuleSpec): RuleConditionEntity {
+  if (spec.amountOp === 'formula') {
+    return {
+      op: 'formula',
+      field: 'amount',
+      value: spec.amount,
+      type: 'string',
+    };
+  }
+  if (spec.amountOp === 'isbetween') {
+    return {
+      op: 'isbetween',
+      field: 'amount',
+      value: spec.amount,
+      type: 'number',
+    };
+  }
+  return {
+    op: spec.amountOp ?? 'is',
+    field: 'amount',
+    value: spec.amount,
+    type: 'number',
+  };
+}
+
+function makeRule(spec: RuleSpec): Rule {
+  const { id = 'r', start, frequency, interval = 1, patterns = [] } = spec;
   return new Rule({
     id,
     stage: 'pre',
@@ -55,7 +89,7 @@ function makeRule({
           start,
           interval,
           frequency,
-          patterns: [],
+          patterns,
           skipWeekend: false,
           weekendSolveMode: 'before',
           endMode: 'never',
@@ -64,7 +98,7 @@ function makeRule({
         },
         type: 'date',
       },
-      { op: 'is', field: 'amount', value: amount, type: 'number' },
+      makeAmountCondition(spec),
     ],
     actions: [],
   });
@@ -103,6 +137,7 @@ describe('runSchedule', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(db.getAccounts).mockResolvedValue([]);
+    vi.mocked(prefetchBalanceOfForTransaction).mockResolvedValue(new Map());
   });
 
   it('should return correct budget when recurring schedule set', async () => {
@@ -688,5 +723,185 @@ describe('runSchedule', () => {
       defaultCurrency,
     );
     expect(result.to_budget).toBe(0);
+  });
+
+  it('budgets a constant-formula expense schedule at the formula value', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'FormulaSchedule',
+        directive: 'template',
+        priority: 0,
+      } as const,
+    ];
+
+    mockSingleSchedule({
+      start: '2024-08-01',
+      amount: '=-100',
+      amountOp: 'formula',
+      frequency: 'monthly',
+    });
+
+    const result = await runSchedule(
+      template_lines,
+      '2024-08-01',
+      0,
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.to_budget).toBe(10000);
+  });
+
+  it('reevaluates a monthly formula schedule against each budget month independently', async () => {
+    const daysOfMonthFormula =
+      '=-DATEDIF(EOMONTH(date,-1) ,EOMONTH(date,0), "D")';
+
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'daysOfMonth',
+        directive: 'template',
+        priority: 0,
+      } as const,
+    ];
+
+    // June run
+    mockSingleSchedule({
+      start: '2026-06-15',
+      amount: daysOfMonthFormula,
+      amountOp: 'formula',
+      frequency: 'monthly',
+    });
+    const june = await runSchedule(
+      template_lines,
+      '2026-06',
+      0,
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    // July run
+    mockSingleSchedule({
+      start: '2026-06-15',
+      amount: daysOfMonthFormula,
+      amountOp: 'formula',
+      frequency: 'monthly',
+    });
+    const july = await runSchedule(
+      template_lines,
+      '2026-07',
+      0,
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(june.errors).toHaveLength(0);
+    expect(july.errors).toHaveLength(0);
+
+    expect(Math.abs(june.to_budget)).toBe(3000);
+    expect(Math.abs(july.to_budget)).toBe(3100);
+  });
+
+  it('budgets a date-dependent formula expense schedule per occurrence', async () => {
+    // Daily schedule where we spend the $DAY amount of dollars: 1+2+...+31
+    // for August.
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'DailyFormula',
+        directive: 'template',
+        priority: 0,
+      } as const,
+    ];
+    mockSingleSchedule({
+      start: '2024-08-01',
+      amount: '=-DAY(date)',
+      amountOp: 'formula',
+      frequency: 'daily',
+    });
+
+    const result = await runSchedule(
+      template_lines,
+      '2024-08-01',
+      0,
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.errors).toHaveLength(0);
+    // Sum of 1..31 = 496 dollars -> 49600 cents
+    expect(result.to_budget).toBe(49600);
+  });
+
+  it('reevaluates BALANCE_OF with a fresh prefetch for each occurrence date', async () => {
+    // Two occurrences per month; the savings balance changes mid-month. A
+    // stale single-date prefetch would use the same balance for both
+    // occurrences; the correct target sums each occurrence's own balance.
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'BalanceFormula',
+        directive: 'template',
+        priority: 0,
+      } as const,
+    ];
+    mockSingleSchedule({
+      start: '2024-07-01',
+      amount: '=-BALANCE_OF("Savings")/100',
+      amountOp: 'formula',
+      frequency: 'monthly',
+      patterns: [
+        { type: 'day', value: 1 },
+        { type: 'day', value: 15 },
+      ],
+    });
+
+    vi.mocked(prefetchBalanceOfForTransaction).mockImplementation(
+      async trans => {
+        const date = trans.date ?? '0000-00-00';
+        return new Map([['Savings', date >= '2024-07-15' ? 70000 : 50000]]);
+      },
+    );
+
+    const result = await runSchedule(
+      template_lines,
+      '2024-07',
+      0,
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.errors).toHaveLength(0);
+    // 50000 (Jul 1) + 70000 (Jul 15) = 120000 cents
+    expect(result.to_budget).toBe(120000);
+
+    // Each occurrence was prefetched with its own date.
+    const prefetchedDates = vi
+      .mocked(prefetchBalanceOfForTransaction)
+      .mock.calls.map(call => call[0].date);
+    expect(prefetchedDates).toContain('2024-07-01');
+    expect(prefetchedDates).toContain('2024-07-15');
   });
 });

@@ -1,4 +1,7 @@
 // @ts-strict-ignore
+import { getCurrency } from '#shared/currencies';
+import { setCachedUserPreferences } from '#shared/formulas/customFunctions';
+
 import {
   Action,
   Condition,
@@ -66,6 +69,76 @@ describe('Condition', () => {
     expect(cond.eval({ date: '2020-01-01' })).toBe(false);
 
     spy.mockRestore();
+  });
+
+  test('formula conditions require a formula value', () => {
+    expect(() => new Condition('formula', 'amount', 100, null)).toThrow(
+      'Formula value must be a string starting with "="',
+    );
+    expect(() => new Condition('formula', 'amount', '100', null)).toThrow(
+      'Formula value must be a string starting with "="',
+    );
+    expect(
+      () => new Condition('formula', 'amount', '=100', null),
+    ).not.toThrow();
+  });
+
+  test('formula conditions evaluate against the field value approximately', () => {
+    // =100 major units -> 10000 minor units
+    let cond = new Condition('formula', 'amount', '=100', null);
+    expect(cond.eval({ amount: 10000, date: '2020-08-10' })).toBe(true);
+    expect(cond.eval({ amount: 10001, date: '2020-08-10' })).toBe(true);
+    expect(cond.eval({ amount: 20000, date: '2020-08-10' })).toBe(false);
+
+    // Date-dependent formulas use the transaction's own date
+    cond = new Condition('formula', 'amount', '=DAY(date) * 100', null);
+    expect(cond.eval({ amount: 150000, date: '2020-08-15' })).toBe(true);
+    expect(cond.eval({ amount: 10000, date: '2020-08-15' })).toBe(false);
+  });
+
+  test('formula conditions never match non-numeric or invalid formulas', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => null);
+    let cond = new Condition('formula', 'amount', '="hello"', null);
+    expect(cond.eval({ amount: 0, date: '2020-08-10' })).toBe(false);
+
+    cond = new Condition('formula', 'amount', '=NOT_A_FUNCTION()', null);
+    expect(cond.eval({ amount: 0, date: '2020-08-10' })).toBe(false);
+
+    cond = new Condition('formula', 'amount', '=1 +', null);
+    expect(cond.eval({ amount: 0, date: '2020-08-10' })).toBe(false);
+    warnSpy.mockRestore();
+  });
+
+  test('formula conditions scale with the currency decimal places', () => {
+    const prefs = (
+      decimalPlaces: number,
+      currency = getCurrency('USD'),
+    ): Parameters<typeof setCachedUserPreferences>[0] => ({
+      currency: { ...currency, decimalPlaces },
+      numberFormat: 'comma-dot',
+      decimalPlaces,
+      thousandsSeparator: ',',
+      decimalSeparator: '.',
+      locale: 'en-US',
+      currencySymbolPosition: 'before',
+      currencySpaceBetweenAmountAndSymbol: false,
+    });
+
+    try {
+      // JPY: 0 decimal places, so =100 matches amount 100
+      setCachedUserPreferences(prefs(0, getCurrency('JPY')));
+      let cond = new Condition('formula', 'amount', '=100', null);
+      expect(cond.eval({ amount: 100, date: '2020-08-10' })).toBe(true);
+      expect(cond.eval({ amount: 10000, date: '2020-08-10' })).toBe(false);
+
+      // 3-decimal currency: =100 matches amount 100000
+      setCachedUserPreferences(prefs(3));
+      cond = new Condition('formula', 'amount', '=100', null);
+      expect(cond.eval({ amount: 100000, date: '2020-08-10' })).toBe(true);
+      expect(cond.eval({ amount: 10000, date: '2020-08-10' })).toBe(false);
+    } finally {
+      setCachedUserPreferences(prefs(2));
+    }
   });
 
   test('date restricts operators for each type', () => {

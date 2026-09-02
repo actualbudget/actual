@@ -9,23 +9,28 @@ import { addTransactions } from '#server/accounts/sync';
 import { createApp } from '#server/app';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
+import { ensureFormulaPreferencesLoaded } from '#server/formulas/bootstrap';
 import { toDateRepr } from '#server/models';
 import { mutator, runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { Rule } from '#server/rules';
+import { collectFormulasFromActions } from '#server/rules/balanceOfFormula';
 import { addSyncListener, batchMessages } from '#server/sync';
 import {
   getRules,
   insertRule,
+  prefetchBalanceOfForTransaction,
   ruleModel,
   updateRule,
 } from '#server/transactions/transaction-rules';
 import { undoable } from '#server/undo';
 import { RSchedule } from '#server/util/rschedule';
+import { getCachedFormulaPreferences } from '#shared/formulas/customFunctions';
 import { currentDay, dayFromDate, parseDate } from '#shared/months';
 import { q } from '#shared/query';
 import {
   DEFAULT_UPCOMING_SCHEDULE_DAYS,
+  evaluateScheduledAmount,
   extractScheduleConds,
   getDateWithSkippedWeekend,
   getHasTransactionsQuery,
@@ -38,6 +43,7 @@ import type {
   RuleActionEntity,
   RuleConditionEntity,
   ScheduleEntity,
+  TransactionEntity,
 } from '#types/models';
 
 import { findSchedules } from './find-schedules';
@@ -132,9 +138,16 @@ export function updateConditions(conditions, newConditions) {
 // would revert the posted amount to the old value, ignoring the edited
 // amount. Keep such actions in sync with the amount condition.
 //
-// Only plain `set amount` actions are rewritten:
-//   - Templated/formula actions (`options.template`/`options.formula`) compute
-//     their own value, so they're left untouched.
+// `set amount` actions are rewritten as follows:
+//   - When the amount condition is a formula, the action mirrors that formula
+//     (via `options.formula`) so the rule re-evaluates per transaction with
+//     that transaction's own date and balance context. If no `set amount`
+//     action exists, one is added.
+//   - When the amount condition is *not* a formula, any leftover
+//     `options.formula` is cleared so a previously-formula schedule cannot
+//     keep applying the stale formula via the action.
+//   - Templated actions (`options.template`) compute their own value, so
+//     they're left untouched.
 //   - `set-split-amount` actions have a different `op` and so are excluded by
 //     the `action.op === 'set'` check below.
 //
@@ -148,6 +161,42 @@ function updateActions(
     return null;
   }
 
+  // For formula schedules, mirror the formula into any plain `set amount`
+  // action (adding one if none exists) so the rule re-evaluates against each
+  // transaction's own date instead of carrying a stale numeric snapshot.
+  if (amountCond.op === 'formula' && typeof amountCond.value === 'string') {
+    const formula = amountCond.value;
+    let changed = false;
+    let hasSetAmountAction = false;
+    const updated = actions.map(action => {
+      if (action.op === 'set' && action.field === 'amount') {
+        hasSetAmountAction = true;
+        if (!action.options?.template && action.options?.formula !== formula) {
+          changed = true;
+          return {
+            ...action,
+            value: 0,
+            options: { ...action.options, formula },
+          };
+        }
+      }
+      return action;
+    });
+
+    if (!hasSetAmountAction) {
+      changed = true;
+      updated.push({
+        op: 'set',
+        field: 'amount',
+        value: 0,
+        options: { formula },
+        type: 'number',
+      });
+    }
+
+    return changed ? updated : null;
+  }
+
   // Mirrors how `_amount` resolves: a deleted/empty amount condition value
   // yields 0, so the action is synced to 0 too, keeping it consistent with
   // the amount the schedule actually posts.
@@ -156,16 +205,31 @@ function updateActions(
   let changed = false;
   const updated = actions.map(action => {
     if (
-      action.op === 'set' &&
-      action.field === 'amount' &&
-      !action.options?.template &&
-      !action.options?.formula &&
-      action.value !== amount
+      action.op !== 'set' ||
+      action.field !== 'amount' ||
+      action.options?.template
     ) {
+      return action;
+    }
+
+    const options = action.options;
+    if (options?.formula == null) {
+      if (action.value === amount) {
+        return action;
+      }
       changed = true;
       return { ...action, value: amount };
     }
-    return action;
+
+    // Drop a stale formula from a previously-formula schedule and replace
+    // it with the fixed amount.
+    changed = true;
+    const { formula: _drop, ...rest } = options;
+    return {
+      ...action,
+      value: amount,
+      options: Object.keys(rest).length > 0 ? rest : undefined,
+    };
   });
 
   return changed ? updated : null;
@@ -350,12 +414,20 @@ export async function createSchedule({
     }
   }
 
-  // Create the rule here based on the info
+  // Create the rule here based on the info. Formula schedules get their
+  // formula mirrored into a `set amount` action so that posting (which runs
+  // the rule's actions) re-evaluates per transaction with fresh balance
+  // context; see `updateActions`.
+  const baseActions: RuleActionEntity[] = [
+    { op: 'link-schedule', value: scheduleId },
+  ];
+  const actions = updateActions(conditions, baseActions) ?? baseActions;
+
   const ruleId = await insertRule({
     stage: null,
     conditionsOp: 'and',
     conditions,
-    actions: [{ op: 'link-schedule', value: scheduleId }],
+    actions,
   });
 
   const now = Date.now();
@@ -584,11 +656,63 @@ async function postTransactionForSchedule({
     return;
   }
 
+  const postingDate = today ? currentDay() : schedule.next_date;
+
+  await ensureFormulaPreferencesLoaded();
+  const decimalPlaces =
+    getCachedFormulaPreferences()?.currency.decimalPlaces ?? 2;
+
+  // Prefetch balances for a formula amount so BALANCE_OF() resolves to the
+  // balance "as of" the scheduled date, even if the rule's `set amount`
+  // action has been customized or removed. runRules re-evaluates the action
+  // afterwards with its own prefetch, so this only matters for the initial
+  // amount the transaction is created with.
+  let balanceOfPrefetched: Map<string, number> | undefined;
+  if (typeof schedule._amount === 'string') {
+    const rule = await getRuleForSchedule(id).catch(() => null);
+    const formulaStrings = [
+      ...collectFormulasFromActions(rule?.actions ?? []),
+      schedule._amount,
+    ];
+    const accountsMap = new Map(
+      (await db.getAccounts()).map(account => [account.id, account]),
+    );
+    const context = {
+      amount: 0,
+      category: null,
+      subtransactions: [],
+      ...(postingDate ? { date: postingDate } : {}),
+      id: null,
+      sort_order: null,
+    } as TransactionEntity;
+    balanceOfPrefetched = await prefetchBalanceOfForTransaction(
+      context,
+      accountsMap,
+      formulaStrings,
+    );
+  }
+
+  // A failing formula (e.g. BALANCE_OF referencing a deleted account) must
+  // not post a transaction with amount 0: report it and skip the posting.
+  // The schedule remains due and the failure shows up in the logs.
+  const { amount, error } = evaluateScheduledAmount(schedule._amount, false, {
+    date: postingDate,
+    decimalPlaces,
+    balanceOfPrefetch: balanceOfPrefetched,
+  });
+  if (error) {
+    logger.error(
+      `schedule: failed to evaluate formula amount for schedule ${schedule.id}:`,
+      error,
+    );
+    return;
+  }
+
   const transaction = {
     payee: schedule._payee,
     account: schedule._account,
-    amount: getScheduledAmount(schedule._amount),
-    date: today ? currentDay() : schedule.next_date,
+    amount,
+    date: postingDate,
     schedule: schedule.id,
     cleared: false,
   };

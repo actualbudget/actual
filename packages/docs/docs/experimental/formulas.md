@@ -394,3 +394,56 @@ When a rule runs, Actual converts the formula result to the field type:
 - **string fields**: converted with `String(...)`
 
 Number fields receive the result in dollars and store it in cents — see [Cents in, dollars out](#available-variables) above.
+
+## Schedule amounts — dynamic amounts for scheduled transactions
+
+> **What this PR adds vs [#8591](https://github.com/actualbudget/actual/pull/8591) (BALANCE_OF in Formula reports):**
+> [#8591](https://github.com/actualbudget/actual/pull/8591) made `BALANCE_OF` work inside **Reports → Formula cards**, where it returns the account's **current** balance in **display units** (dollars) for dashboard widgets.
+> This PR makes `BALANCE_OF` work inside **Schedules → Amount is formula**, where it returns the balance **as of each occurrence's date** in **cents**, so every future posting can be a different amount (e.g. declining loan interest). They are complementary — different modes, different cutoffs, no overlap.
+
+| Feature                                                                     | Where                             | `BALANCE_OF` returns                                         | Date context                                      | Typical use                                                      |
+| --------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------ | ------------------------------------------------- | ---------------------------------------------------------------- |
+| Rule formulas                                                               | Rules → Set field                 | cents, cutoff = transaction's `date`/`sort_order`            | `date` = transaction date                         | `=PPMT(0.05/12, DATEDIF("2024-01-01",date,"M")+1, 360, -300000)` |
+| **Schedule formulas (this PR)**                                             | **Schedules → Amount is formula** | **cents, cutoff = occurrence's date (fresh per occurrence)** | `date` = occurrence date, re-evaluated each month | `=-ABS(INTEGER_TO_AMOUNT(BALANCE_OF("Home Loan")))*0.0715/12`    |
+| Report formulas ([#8591](https://github.com/actualbudget/actual/pull/8591)) | Reports → Formula card            | dollars, current balance now                                 | no transaction date                               | `=BALANCE_OF("Checking")`                                        |
+
+Schedule formulas compute the amount of a scheduled transaction from its occurrence date (and, with `BALANCE_OF`, from the balances of other accounts). This is useful for amounts that vary over time, such as:
+
+- Credit-card statement balance payments: `=INTEGER_TO_AMOUNT(BALANCE_OF("Credit Card"))`
+- Loan principal tracking: `=-BALANCE_OF("Home Loan") / 100 / 12`
+- Costs that repeat several times in a month:
+  `=-50 * (INT((EOMONTH(date,1) - (EOMONTH(date,0)+1) - MOD(5 - WEEKDAY(EOMONTH(date,0)+1, 2) + 7, 7)) / 7) + 1)`
+
+### Home-loan interest example (real-world)
+
+Single off-budget `Home Loan` account (balance = principal, negative). Two schedules:
+
+- **`Home loan interest (auto)`** on the **4th**, into the loan account: `=-ABS(INTEGER_TO_AMOUNT(BALANCE_OF("9baa9eb2-…")))*0.0715/12` — interest for the month, re-computed from the live balance. Use the **account ID** (not name) so renames don't silently return `0`.
+- **`Home loan EMI`** on the **5th**, fixed `−₹111,854` transfer from HDFC.
+
+Principal is implicit `EMI − interest` and falls each month as `BALANCE_OF` declines — no edits needed. Each occurrence fetches a fresh balance as of the 4th, so April vs May postings differ automatically. Budget goal templates (`schedule` lines) also re-evaluate per occurrence for correct monthly targets.
+
+### Where to find the formula toggle
+
+In **More -> Schedules**, edit or create a schedule and change the **Amount** operator to **is formula**. A formula editor with autocomplete and hover help replaces the amount input, and a live preview shows what the next occurrences evaluate to.
+
+### Available variables
+
+Schedule formulas evaluate with the occurrence's own date:
+
+- `date` — The date of the schedule occurrence
+- `today` — Today's date
+
+### Units
+
+Numbers written directly in the formula are in **currency units**: `=100` means 100 currency units (for example $100.00). The result is rounded to the currency's decimal places.
+
+`BALANCE_OF("…")` returns an amount in **cents** (minor units), like in rule formulas. To use it as an amount, divide by 100 or wrap it in `INTEGER_TO_AMOUNT()`:
+
+```text
+=INTEGER_TO_AMOUNT(BALANCE_OF("Credit Card"))
+```
+
+:::note
+The schedule editor's preview resolves `BALANCE_OF` to 0 because balances are only fetched when the transaction is posted. The posted transaction always uses the balance as of the scheduled date, and each occurrence is evaluated with its own date. If a formula fails to evaluate (for example, because it references an account that was deleted), the transaction is not posted.
+:::

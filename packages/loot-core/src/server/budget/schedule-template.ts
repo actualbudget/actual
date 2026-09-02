@@ -10,6 +10,7 @@ import {
   extractScheduleConds,
   getDateWithSkippedWeekend,
   getNextDate,
+  getScheduledAmount,
 } from '#shared/schedules';
 import { amountToInteger } from '#shared/util';
 import type { CategoryEntity, TransactionEntity } from '#types/models';
@@ -59,32 +60,49 @@ async function createScheduleList(
     const conditions = rule.serialize().conditions;
     const { date: dateConditions, amount: amountCondition } =
       extractScheduleConds(conditions);
-    let scheduleAmount =
-      amountCondition.op === 'isbetween'
-        ? Math.round(amountCondition.value.num1 + amountCondition.value.num2) /
-          2
-        : amountCondition.value;
-    // Apply adjustment percentage if specified
-    if (template.adjustment !== undefined && template.adjustmentType) {
-      switch (template.adjustmentType) {
-        case 'percent': {
-          const adjustmentFactor = 1 + template.adjustment / 100;
-          scheduleAmount = scheduleAmount * adjustmentFactor;
-          break;
-        }
-        case 'fixed': {
-          const sign = scheduleAmount < 0 ? -1 : 1;
-          scheduleAmount +=
-            sign * amountToInteger(template.adjustment, currency.decimalPlaces);
-          break;
-        }
+    const isFormulaAmount =
+      amountCondition != null &&
+      amountCondition.op === 'formula' &&
+      typeof amountCondition.value === 'string';
 
-        default:
-        //no valid adjustment was found
+    // Formula numbers are major units (e.g. `=100` means 100 currency
+    // units), so the result is converted to integer minor units using the
+    // schedule currency's decimal places. BALANCE_OF returns cents, so it
+    // must be divided by 100 (or wrapped in INTEGER_TO_AMOUNT) inside the
+    // formula, matching rule-formula semantics.
+    const computeScheduleAmount = (
+      date: string | null,
+      balanceOfPrefetched?: Map<string, number>,
+    ): number => {
+      // A deleted amount condition resolves to 0, like getScheduledAmount.
+      let value = getScheduledAmount(amountCondition?.value ?? null, false, {
+        date: date ?? undefined,
+        decimalPlaces: currency.decimalPlaces,
+        ...(isFormulaAmount ? { balanceOfPrefetch: balanceOfPrefetched } : {}),
+      });
+      // Apply adjustment percentage if specified
+      if (template.adjustment !== undefined && template.adjustmentType) {
+        switch (template.adjustmentType) {
+          case 'percent': {
+            const adjustmentFactor = 1 + template.adjustment / 100;
+            value = value * adjustmentFactor;
+            break;
+          }
+          case 'fixed': {
+            const sign = value < 0 ? -1 : 1;
+            value +=
+              sign *
+              amountToInteger(template.adjustment, currency.decimalPlaces);
+            break;
+          }
+
+          default:
+          //no valid adjustment was found
+        }
       }
-    }
 
-    scheduleAmount = Math.round(scheduleAmount);
+      return Math.round(value);
+    };
 
     const next_date_string = getNextDate(
       dateConditions,
@@ -94,42 +112,66 @@ async function createScheduleList(
     // Schedule templates call rule.execActions() on the rule attached to each
     // schedule, so we prefetch balances and pass _balanceOfPrefetched here too.
     // Without that, BALANCE_OF would behave wrong or always look empty for
-    // schedule rules.
-    const formulaStrings = collectFormulasFromActions(rule.actions);
+    // schedule rules. A formula amount condition also evaluates BALANCE_OF,
+    // so its formula is prefetched alongside the actions' formulas.
+    const formulaStrings = [
+      ...collectFormulasFromActions(rule.actions),
+      ...(isFormulaAmount ? [amountCondition.value] : []),
+    ];
 
-    // Use the schedule's next occurrence date so "balance as of this moment"
-    // matches the scheduled date; id/sort_order are unset so we don't exclude a
-    // non-existent transaction from the balance query.
-    const scheduleRuleContext: TransactionEntity = {
-      amount: scheduleAmount,
-      category: category.id,
-      subtransactions: [],
-      ...(next_date_string ? { date: next_date_string } : {}),
-      id: null,
-      sort_order: null,
-    } as TransactionEntity;
-
-    const balanceOfPrefetched = await prefetchBalanceOfForTransaction(
-      scheduleRuleContext,
-      accountsMap,
-      formulaStrings,
-    );
-
-    const { amount: postRuleAmount, subtransactions } = rule.execActions({
-      ...scheduleRuleContext,
-      _balanceOfPrefetched: balanceOfPrefetched,
-    });
-    const categorySubtransactions = subtransactions?.filter(
-      t => t.category === category.id,
-    );
-
-    // Unless the current category is relevant to the schedule, target the post-rule amount.
     const sign = category.is_income ? 1 : -1;
-    const target =
-      sign *
-      (categorySubtransactions?.length
-        ? categorySubtransactions.reduce((acc, t) => acc + t.amount, 0)
-        : (postRuleAmount ?? scheduleAmount));
+
+    // Use each occurrence's date so "balance as of this moment" matches that
+    // scheduled date; id/sort_order are unset so we don't exclude a
+    // non-existent transaction from the balance query. The seed amount only
+    // matters for non-formula schedules; formula amounts are evaluated
+    // against the occurrence's own balance prefetch, so BALANCE_OF reflects
+    // the balance as of that occurrence.
+    const computeOccurrenceTarget = async (
+      date: string | null,
+      seedAmount: number = 0,
+    ): Promise<number> => {
+      const occurrenceContext: TransactionEntity = {
+        amount: seedAmount,
+        category: category.id,
+        subtransactions: [],
+        ...(date ? { date } : {}),
+        id: null,
+        sort_order: null,
+      } as TransactionEntity;
+      const balanceOfPrefetched = await prefetchBalanceOfForTransaction(
+        occurrenceContext,
+        accountsMap,
+        formulaStrings,
+      );
+      const amount = isFormulaAmount
+        ? computeScheduleAmount(date, balanceOfPrefetched)
+        : seedAmount;
+      const { amount: postRuleAmount, subtransactions } = rule.execActions({
+        ...occurrenceContext,
+        amount,
+        _balanceOfPrefetched: balanceOfPrefetched,
+      });
+      const categorySubtransactions = subtransactions?.filter(
+        t => t.category === category.id,
+      );
+
+      // Unless the current category is relevant to the schedule, target the
+      // post-rule amount.
+      return (
+        sign *
+        (categorySubtransactions?.length
+          ? categorySubtransactions.reduce((acc, t) => acc + t.amount, 0)
+          : (postRuleAmount ?? amount))
+      );
+    };
+
+    const target = isFormulaAmount
+      ? await computeOccurrenceTarget(next_date_string)
+      : await computeOccurrenceTarget(
+          next_date_string,
+          computeScheduleAmount(next_date_string),
+        );
 
     const target_interval = dateConditions.value.interval
       ? dateConditions.value.interval
@@ -181,7 +223,13 @@ async function createScheduleList(
               )
             : nextBaseDate;
           while (nextDate < nextMonth) {
-            monthlyTarget += -target;
+            // Formula amounts are re-evaluated per occurrence date with a
+            // fresh BALANCE_OF prefetch, so date- and balance-dependent
+            // formulas produce the correct per-occurrence target.
+            const occurrenceTarget = isFormulaAmount
+              ? await computeOccurrenceTarget(nextDate)
+              : target;
+            monthlyTarget += -occurrenceTarget;
             const currentDate = nextBaseDate;
             const oneDayLater = monthUtils.addDays(nextBaseDate, 1);
             nextBaseDate = getNextDate(

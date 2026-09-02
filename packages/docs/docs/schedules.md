@@ -91,6 +91,8 @@ Next to the amount field, you can select if the amount is the exact number, an a
 
 If you choose _is approximately_, the amount will be treated as an estimate, and Actual will match transactions that are plus/minus 7.5% of the amount entered. This means that if you enter $100, Actual will match transactions that are between $92.50 and $107.50.
 
+If you enable the experimental Excel formula mode, you can also choose _is formula_ and enter an Excel-style formula that is evaluated against each occurrence's date. This is useful for amounts that vary over time, such as credit-card balance payments. See [Excel formula mode - Schedule amounts](./experimental/formulas.md#schedule-amounts) for details.
+
 Enable the **Automatically add transaction** checkbox if you want the schedule to automatically enter the transaction into your account register.
 This means that the transaction will be automatically entered into the account register on all scheduled dates without requiring manual approval.
 

@@ -1,28 +1,16 @@
 // @ts-strict-ignore
 import * as dateFns from 'date-fns';
 import * as Handlebars from 'handlebars';
-import { HyperFormula } from 'hyperformula';
-import enUS from 'hyperformula/i18n/languages/enUS';
 
 import { logger } from '#platform/server/log';
 import type { TransactionForRules } from '#server/transactions/transaction-rules';
-import {
-  CustomFunctionsPlugin,
-  customFunctionsTranslations,
-} from '#shared/formulas/customFunctions';
+import { getCachedFormulaPreferences } from '#shared/formulas/customFunctions';
+import { evaluateFormula } from '#shared/formulas/evaluate';
 import { currentDay, format, parseDate } from '#shared/months';
 import { FIELD_TYPES } from '#shared/rules';
 import { amountToInteger } from '#shared/util';
 
 import { assert } from './rule-utils';
-
-if (!HyperFormula.getRegisteredLanguagesCodes().includes('enUS')) {
-  HyperFormula.registerLanguage('enUS', enUS);
-}
-HyperFormula.registerFunctionPlugin(
-  CustomFunctionsPlugin,
-  customFunctionsTranslations,
-);
 
 const ACTION_OPS = [
   'set',
@@ -295,81 +283,34 @@ export class Action {
     formula: string,
     transaction: Partial<TransactionForRules>,
   ): unknown {
-    let hfInstance: ReturnType<typeof HyperFormula.buildEmpty> | null = null;
-
-    if (!formula || !formula.startsWith('=')) {
-      throw new Error('Formula must start with =');
-    }
+    const { _balanceOfPrefetched, ...rest } = transaction;
+    const namedExpressions = {
+      ...rest,
+      today: currentDay(),
+      account_name: transaction._account_name || '',
+      category_name: transaction._category_name || '',
+    };
 
     try {
-      hfInstance = HyperFormula.buildEmpty({
-        licenseKey: 'gpl-v3',
-        language: 'enUS',
-        dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
-        context: {
-          balanceOfPrefetch: transaction['_balanceOfPrefetched'] ?? new Map(),
-        },
+      const cellValue = evaluateFormula(formula, namedExpressions, {
+        balanceOfPrefetch: _balanceOfPrefetched ?? new Map(),
       });
 
-      const sheetName = hfInstance.addSheet('Sheet1');
-      const sheetId = hfInstance.getSheetId(sheetName);
-
-      if (sheetId === undefined) {
-        throw new Error('Failed to create sheet');
-      }
-
-      const fieldValues: Partial<TransactionForRules> & {
-        today: string;
-        account_name: string;
-        category_name: string;
-      } = {
-        ...transaction,
-        today: currentDay(),
-        account_name: transaction._account_name || '',
-        category_name: transaction._category_name || '',
-      };
-
-      for (const key of Object.keys(fieldValues)) {
-        if (key === '_balanceOfPrefetched') {
-          continue;
-        }
-        let cellValue: string | number | boolean;
-        if (
-          fieldValues[key] === undefined ||
-          fieldValues[key] === null ||
-          typeof fieldValues[key] === 'object'
-        ) {
-          cellValue = '';
-        } else {
-          cellValue = fieldValues[key];
-        }
-        hfInstance.addNamedExpression(key, cellValue);
-      }
-      hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [
-        [formula],
-      ]);
-
-      const cellAddress = { sheet: sheetId, col: 0, row: 0 };
-      const cellValue = hfInstance.getCellValue(cellAddress);
-
-      if (cellValue && typeof cellValue === 'object' && 'type' in cellValue) {
-        throw new Error(`Formula error: ${cellValue.message}`);
-      }
-
       if (typeof cellValue === 'number') {
-        return amountToInteger(Math.round(cellValue * 100) / 100);
+        // Use the app currency's decimal places so formula results scale the
+        // same way as schedule amounts (getScheduledAmount), matching for
+        // zero- and non-two-decimal currencies. Falls back to 2 decimal
+        // places when the formula preferences have not been loaded yet.
+        return amountToInteger(
+          Math.round(cellValue * 100) / 100,
+          getCachedFormulaPreferences()?.currency.decimalPlaces ?? 2,
+        );
       }
 
       return cellValue;
     } catch (err) {
       logger.error('Formula execution error:', err);
       throw err;
-    } finally {
-      try {
-        hfInstance?.destroy();
-      } catch (err) {
-        logger.error('Error destroying HyperFormula instance:', err);
-      }
     }
   }
 

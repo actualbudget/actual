@@ -11,6 +11,7 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { useCachedSchedules } from './useCachedSchedules';
+import { useFormat } from './useFormat';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
 
@@ -72,6 +73,7 @@ export function usePreviewTransactions({
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
+  const format = useFormat();
 
   const scheduleTransactions = useMemo(() => {
     if (isSchedulesLoading) {
@@ -83,8 +85,16 @@ export function usePreviewTransactions({
       statuses,
       upcomingLength,
       filter,
+      format.currency.decimalPlaces,
     );
-  }, [filter, isSchedulesLoading, schedules, statuses, upcomingLength]);
+  }, [
+    filter,
+    isSchedulesLoading,
+    schedules,
+    statuses,
+    upcomingLength,
+    format.currency.decimalPlaces,
+  ]);
 
   useEffect(() => {
     let isUnmounted = false;

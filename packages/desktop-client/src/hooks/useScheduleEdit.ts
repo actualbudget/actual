@@ -42,12 +42,12 @@ type ScheduleEditAction =
   | {
       type: 'set-field';
       field: 'amountOp';
-      value: 'is' | 'isbetween' | 'isapprox';
+      value: 'is' | 'isbetween' | 'isapprox' | 'formula';
     }
   | {
       type: 'set-field';
       field: 'amount';
-      value: number | { num1: number; num2: number };
+      value: number | { num1: number; num2: number } | string;
     }
   | {
       type: 'set-field';
@@ -130,13 +130,23 @@ function createScheduleEditReducer(useGetScheduledAmount: boolean = false) {
         };
 
         // If we are changing the amount operator either to or
-        // away from the `isbetween` operator, the amount value is
-        // different and we need to convert it
+        // away from the `isbetween` or `formula` operator, the amount
+        // value is different and we need to convert it
         if (
           action.field === 'amountOp' &&
           action.value !== state.fields.amountOp
         ) {
-          if (action.value === 'isbetween') {
+          if (action.value === 'formula') {
+            // Keep any existing formula; start with `=` otherwise
+            fields.amount =
+              typeof state.fields.amount === 'string'
+                ? state.fields.amount
+                : '=';
+          } else if (state.fields.amountOp === 'formula') {
+            // Switching away from a formula resets the amount
+            fields.amount =
+              action.value === 'isbetween' ? { num1: 0, num2: 0 } : 0;
+          } else if (action.value === 'isbetween') {
             // We need a range if switching to `isbetween`
             if (useGetScheduledAmount) {
               const num = getScheduledAmount(state.fields.amount);
@@ -156,7 +166,9 @@ function createScheduleEditReducer(useGetScheduledAmount: boolean = false) {
               fields.amount =
                 typeof state.fields.amount === 'number'
                   ? state.fields.amount
-                  : state.fields.amount?.num1;
+                  : typeof state.fields.amount === 'object'
+                    ? (state.fields.amount?.num1 ?? 0)
+                    : 0;
             }
           }
         }
@@ -362,7 +374,12 @@ export function useScheduleEdit({
     let unsubscribe: (() => void) | undefined;
 
     if (state.schedule && state.transactionsMode === 'matched') {
-      const updated = updateScheduleConditions(state.schedule, state.fields);
+      // The match search cannot evaluate formula amounts (the DB layer skips
+      // them), so an incomplete formula must not block the search or clear
+      // unrelated form errors.
+      const updated = updateScheduleConditions(state.schedule, state.fields, {
+        forMatchSearch: true,
+      });
 
       if ('error' in updated) {
         dispatch({ type: 'form-error', error: updated.error });
@@ -384,25 +401,36 @@ export function useScheduleEdit({
 
       void send('make-filters-from-conditions', {
         conditions,
-      }).then(({ filters }) => {
-        if (current) {
-          const live = liveQuery<TransactionEntity>(
-            q('transactions')
-              .filter({ $and: filters })
-              .select('*')
-              .options({ splits: 'all' }),
-            {
-              onData: data =>
-                dispatch({
-                  type: 'set-transactions',
-                  transactions: data,
-                  transactionId,
-                }),
-            },
-          );
-          unsubscribe = live.unsubscribe;
-        }
-      });
+      })
+        .then(({ filters }) => {
+          if (current) {
+            const live = liveQuery<TransactionEntity>(
+              q('transactions')
+                .filter({ $and: filters })
+                .select('*')
+                .options({ splits: 'all' }),
+              {
+                onData: data =>
+                  dispatch({
+                    type: 'set-transactions',
+                    transactions: data,
+                    transactionId,
+                  }),
+              },
+            );
+            unsubscribe = live.unsubscribe;
+          }
+        })
+        .catch(error => {
+          // A failed filter request must not leave stale results silently;
+          // surface it through the same error path as validation failures.
+          if (current) {
+            dispatch({
+              type: 'form-error',
+              error: error instanceof Error ? error.message : String(error),
+            });
+          }
+        });
     }
 
     return () => {
