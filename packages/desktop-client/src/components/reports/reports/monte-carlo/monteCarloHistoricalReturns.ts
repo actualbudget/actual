@@ -1,8 +1,9 @@
 // Historical annual nominal returns for US asset classes, used by the
 // historical return models. stocks = S&P 500 total return (incl. dividends),
 // bonds = US 10-year Treasury total return, cash = 3-month T-bill,
-// inflation = US CPI-U annual average (BLS) - sampled jointly with the
-// returns so each simulated year keeps its own inflation.
+// inflation = US CPI-U annual average over annual average (BLS; not the
+// Dec-over-Dec rate, which differs in some years) - sampled jointly with
+// the returns so each simulated year keeps its own inflation.
 //
 // Source: Aswath Damodaran, NYU Stern - 'Historical Returns on Stocks,
 // Bonds and Bills', https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histretSP.html
