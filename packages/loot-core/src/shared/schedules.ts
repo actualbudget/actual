@@ -318,7 +318,7 @@ export function getNextDate(
 const MAX_ADVANCE_ATTEMPTS = 7;
 
 export function getNextDateAfter(dateCond, afterDate: string): string | null {
-  let start = d.addDays(monthUtils.parseDate(afterDate), 1);
+  let start = d.subDays(monthUtils.parseDate(afterDate), 1);
 
   for (let attempt = 0; attempt < MAX_ADVANCE_ATTEMPTS; attempt++) {
     const occurrence = getNextDate(dateCond, start, true);

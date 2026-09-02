@@ -535,6 +535,30 @@ describe('schedules', () => {
       expect(getNextDateAfter(dateCond, '2020-12-07')).toBe('2020-12-14');
     });
 
+    it('includes a weekend occurrence moved `after` the given date', () => {
+      const dateCond = weeklyOnSaturday({
+        skipWeekend: true,
+        weekendSolveMode: 'after',
+      });
+
+      expect(getNextDateAfter(dateCond, '2020-12-13')).toBe('2020-12-14');
+    });
+
+    it('does not return the same occurrence when moving `after` the weekend', () => {
+      const dateCond = {
+        op: 'isapprox',
+        value: {
+          start: '2020-12-06',
+          frequency: 'weekly',
+          patterns: [],
+          skipWeekend: true,
+          weekendSolveMode: 'after',
+        },
+      };
+
+      expect(getNextDateAfter(dateCond, '2020-12-07')).toBe('2020-12-14');
+    });
+
     it('does not return the same occurrence when moving `before` the weekend', () => {
       const dateCond = weeklyOnSaturday({
         skipWeekend: true,
