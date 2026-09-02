@@ -16,6 +16,10 @@ import {
 } from '#account-groups';
 import { useUpdateAccountMutation } from '#accounts';
 import {
+  AccountGroupAutocomplete,
+  NEW_ACCOUNT_GROUP_ID,
+} from '#components/autocomplete/AccountGroupAutocomplete';
+import {
   Modal,
   ModalCloseButton,
   ModalHeader,
@@ -24,7 +28,6 @@ import {
 import { useAccount } from '#hooks/useAccount';
 import { useAccountGroups } from '#hooks/useAccountGroups';
 
-import { AccountGroupPicker } from './AccountGroupPicker';
 import { AccountGroupRow } from './AccountGroupRow';
 import { SelectedIndicator } from './SelectedIndicator';
 
@@ -118,13 +121,27 @@ export function AccountGroupsModal({ accountId }: AccountGroupsModalProps) {
                 </Text>
               )}
               <View style={{ marginTop: 10 }}>
-                <AccountGroupPicker
+                <AccountGroupAutocomplete
+                  key={selectedGroupId ?? 'none'}
                   groups={groups}
-                  placeholder={t('Find or create a group…')}
-                  onSelect={onSelect}
-                  onCreate={async name =>
-                    await createGroup.mutateAsync({ name })
-                  }
+                  value={null}
+                  inputProps={{
+                    placeholder: t('Find or create a group…'),
+                  }}
+                  onSelect={async (groupId, rawValue) => {
+                    if (groupId === NEW_ACCOUNT_GROUP_ID) {
+                      try {
+                        const newId = await createGroup.mutateAsync({
+                          name: rawValue.trim(),
+                        });
+                        onSelect(newId);
+                      } catch {
+                        // Creation failures surface as a notification
+                      }
+                    } else if (groupId) {
+                      onSelect(groupId);
+                    }
+                  }}
                 />
               </View>
             </View>
