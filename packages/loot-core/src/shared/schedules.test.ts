@@ -583,6 +583,26 @@ describe('schedules', () => {
       expect(getNextDateAfter(dateCond, '2020-12-04')).toBe('2020-12-07');
     });
 
+    it('walks past every occurrence that resolves on or before the given date', () => {
+      /* Aug 2026 calendar for reference:
+        | Su | Mo | Tu | We | Th | Fr | Sa |
+        | 23 | 24 | 25 | 26 | 27 | 28 | 29 |
+        | 30 | 31 |
+        */
+      const dateCond = {
+        op: 'isapprox',
+        value: {
+          start: '2026-08-24',
+          frequency: 'daily',
+          patterns: [],
+          skipWeekend: true,
+          weekendSolveMode: 'before',
+        },
+      };
+
+      expect(getNextDateAfter(dateCond, '2026-08-28')).toBe('2026-08-31');
+    });
+
     it('returns null when the schedule has no further occurrences', () => {
       const dateCond = weeklyOnSaturday({
         endMode: 'after_n_occurrences',
