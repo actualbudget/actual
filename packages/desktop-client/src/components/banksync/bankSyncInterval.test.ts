@@ -17,11 +17,16 @@ describe('minutesToParts', () => {
     expect(minutesToParts(20160)).toEqual({ value: 2, unit: 'week' });
   });
 
-  it('falls back to minutes when nothing divides evenly', () => {
+  it('steps down to a smaller unit when the larger one does not divide', () => {
+    // Just over a week, but a whole number of hours.
+    expect(minutesToParts(10140)).toEqual({ value: 169, unit: 'hour' });
+    // Over a day, but not a whole number of days.
+    expect(minutesToParts(1500)).toEqual({ value: 25, unit: 'hour' });
+  });
+
+  it('falls back to minutes when no larger unit divides evenly', () => {
     expect(minutesToParts(90)).toEqual({ value: 90, unit: 'minute' });
     expect(minutesToParts(1450)).toEqual({ value: 1450, unit: 'minute' });
-    // Just over a week: days do not divide either, so minutes it is.
-    expect(minutesToParts(10140)).toEqual({ value: 169, unit: 'hour' });
   });
 
   it('defaults to one hour for values that are not a usable interval', () => {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
@@ -26,38 +26,41 @@ export function AutomaticSyncSettings() {
 
   const currentInterval = interval || '0';
 
-  // A stored value that isn't one of the presets can only have come from the
-  // custom control, so show it expanded.
-  const [showCustom, setShowCustom] = useState(
-    !isPresetInterval(currentInterval),
-  );
+  // Set when the user explicitly picks "Custom interval". Kept separate from
+  // the derivation below so choosing Custom while the interval happens to
+  // equal a preset (say a whole day) doesn't immediately collapse the fields.
+  const [choseCustom, setChoseCustom] = useState(false);
 
-  const intervals = useMemo<Array<[string, string]>>(
-    () => [
-      ['0', t('Never')],
-      ['720', t('Every 12 hours')],
-      ['1440', t('Every day')],
-      ['10080', t('Every week')],
-      [CUSTOM, t('Custom interval')],
-    ],
-    [t],
-  );
+  // `bank-sync-interval` is a synced pref, so a value can arrive from another
+  // device — or simply load — after mount. Deriving from it rather than
+  // snapshotting keeps the fields in step with whatever is stored.
+  const showCustom = choseCustom || !isPresetInterval(currentInterval);
 
-  const units = useMemo<Array<[BankSyncIntervalUnit, string]>>(
-    () => [
-      ['minute', t('minutes')],
-      ['hour', t('hours')],
-      ['day', t('days')],
-      ['week', t('weeks')],
-    ],
-    [t],
-  );
+  // Uncommitted text in the number field. Without this, clamping on every
+  // keystroke makes multi-digit minute values impossible to type: the "3" of
+  // "30" would be rewritten to the 15-minute floor.
+  const [draft, setDraft] = useState<string | null>(null);
+
+  const intervals: Array<[string, string]> = [
+    ['0', t('Never')],
+    ['720', t('Every 12 hours')],
+    ['1440', t('Every day')],
+    ['10080', t('Every week')],
+    [CUSTOM, t('Custom interval')],
+  ];
+
+  const units: Array<[BankSyncIntervalUnit, string]> = [
+    ['minute', t('minutes')],
+    ['hour', t('hours')],
+    ['day', t('days')],
+    ['week', t('weeks')],
+  ];
 
   const customParts = minutesToParts(parseInt(currentInterval, 10));
 
   function onChangeInterval(value: string) {
     if (value === CUSTOM) {
-      setShowCustom(true);
+      setChoseCustom(true);
       // Write the interval straight away, so the value shown in the custom
       // fields is the one actually in effect.
       setIntervalPref(
@@ -66,12 +69,18 @@ export function AutomaticSyncSettings() {
       return;
     }
 
-    setShowCustom(false);
+    setChoseCustom(false);
+    setDraft(null);
     setIntervalPref(value);
   }
 
   function onChangeCustom(value: number, unit: BankSyncIntervalUnit) {
+    setDraft(null);
     setIntervalPref(String(partsToMinutes(value, unit)));
+  }
+
+  function commitDraft(value: string) {
+    onChangeCustom(parseInt(value, 10), customParts.unit);
   }
 
   return (
@@ -130,18 +139,18 @@ export function AutomaticSyncSettings() {
                 customParts.unit === 'minute' ? MIN_CUSTOM_INTERVAL_MINUTES : 1
               }
               style={{ width: 70, flexShrink: 0 }}
-              value={String(customParts.value)}
-              onChangeValue={value =>
-                onChangeCustom(parseInt(value, 10), customParts.unit)
-              }
+              value={draft ?? String(customParts.value)}
+              onChangeValue={setDraft}
+              // Persist once the value is complete, not per keystroke.
+              onUpdate={commitDraft}
+              onEnter={commitDraft}
             />
+            {/* Select drops unknown props, so this cannot carry an aria-label;
+                the button's own text ("minutes", "hours", …) names it. */}
             <Select
               id="bank-sync-interval-unit"
-              aria-label={t('Interval unit')}
               value={customParts.unit}
-              onChange={unit =>
-                onChangeCustom(customParts.value, unit as BankSyncIntervalUnit)
-              }
+              onChange={unit => onChangeCustom(customParts.value, unit)}
               options={units}
               style={{ flexShrink: 0 }}
             />
