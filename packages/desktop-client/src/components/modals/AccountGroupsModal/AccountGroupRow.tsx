@@ -63,7 +63,7 @@ export function AccountGroupRow({
           name: 'confirm-delete',
           options: {
             message: t(
-              'Are you sure you want to delete the group "{{name}}"? Any accounts in it are kept and become ungrouped.',
+              'Are you sure you want to delete the group "{{name}}"? Any accounts in it will be kept but left ungrouped.',
               { name: group.name },
             ),
             onConfirm: () => deleteGroup.mutate({ id: group.id }),
