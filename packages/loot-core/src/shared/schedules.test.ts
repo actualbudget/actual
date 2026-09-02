@@ -7,6 +7,7 @@ import {
   computeSchedulePreviewTransactions,
   getHasTransactionsQuery,
   getNextDate,
+  getNextDateAfter,
   getScheduleOccurrenceMatchStartDate,
   getStatus,
   getUpcomingDays,
@@ -495,6 +496,77 @@ describe('schedules', () => {
 
       const result = getNextDate(dateCond, new Date(2017, 0, 1));
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getNextDateAfter', () => {
+    /* Dec 2020 calendar for reference:
+      | Su | Mo | Tu | We | Th | Fr | Sa |
+      |    |    | 01 | 02 | 03 | 04 | 05 |
+      | 06 | 07 | 08 | 09 | 10 | 11 | 12 |
+      | 13 | 14 | 15 | 16 | 17 | 18 | 19 |
+      | 20 | 21 | 22 | 23 | 24 | 25 | 26 |
+      | 27 | 28 | 29 | 30 | 31 |
+      */
+    function weeklyOnSaturday(extra = {}) {
+      return {
+        op: 'isapprox',
+        value: {
+          start: '2020-12-05',
+          frequency: 'weekly',
+          patterns: [],
+          ...extra,
+        },
+      };
+    }
+
+    it('returns the next occurrence after the given date', () => {
+      expect(getNextDateAfter(weeklyOnSaturday(), '2020-12-05')).toBe(
+        '2020-12-12',
+      );
+    });
+
+    it('returns the next occurrence when moving `after` the weekend', () => {
+      const dateCond = weeklyOnSaturday({
+        skipWeekend: true,
+        weekendSolveMode: 'after',
+      });
+
+      expect(getNextDateAfter(dateCond, '2020-12-07')).toBe('2020-12-14');
+    });
+
+    it('does not return the same occurrence when moving `before` the weekend', () => {
+      const dateCond = weeklyOnSaturday({
+        skipWeekend: true,
+        weekendSolveMode: 'before',
+      });
+
+      expect(getNextDateAfter(dateCond, '2020-12-04')).toBe('2020-12-11');
+    });
+
+    it('keeps a Monday occurrence that follows a `before` weekend adjustment', () => {
+      const dateCond = {
+        op: 'isapprox',
+        value: {
+          start: '2020-12-04',
+          frequency: 'daily',
+          patterns: [],
+          skipWeekend: true,
+          weekendSolveMode: 'before',
+        },
+      };
+
+      expect(getNextDateAfter(dateCond, '2020-12-04')).toBe('2020-12-07');
+    });
+
+    it('returns null when the schedule has no further occurrences', () => {
+      const dateCond = weeklyOnSaturday({
+        endMode: 'after_n_occurrences',
+        endOccurrences: 2,
+      });
+
+      expect(getNextDateAfter(dateCond, '2020-12-05')).toBe('2020-12-12');
+      expect(getNextDateAfter(dateCond, '2020-12-12')).toBeNull();
     });
   });
 
