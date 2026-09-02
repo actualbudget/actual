@@ -60,7 +60,7 @@ describe('BudgetName context menu', () => {
   });
 
   it('reopens the context menu after the budget name is changed in the store', async () => {
-    await renderBudgetName();
+    const { rerender } = await renderBudgetName();
 
     // Open and close the context menu
     fireEvent.contextMenu(screen.getByText('Test Budget'));
@@ -77,18 +77,13 @@ describe('BudgetName context menu', () => {
     // right-clicks.
     store.dispatch(mergeLocalPrefs({ budgetName: 'Renamed Budget' }));
 
-    // Re-render to pick up the new name from the store
-    const { rerender } = render(
-      <TestProviders store={store}>
-        <BudgetName />
-      </TestProviders>,
-    );
-    await act(() => Promise.resolve());
+    // Re-render using the same container so only one BudgetName tree is active.
     rerender(
       <TestProviders store={store}>
         <BudgetName />
       </TestProviders>,
     );
+    await act(() => Promise.resolve());
 
     fireEvent.contextMenu(screen.getByText('Renamed Budget'));
 
