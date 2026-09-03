@@ -146,6 +146,7 @@ const sidebars = {
                     'advanced/bank-sync/akahu',
                     'advanced/bank-sync/enable-banking',
                     'advanced/bank-sync/gocardless',
+                    'advanced/bank-sync/lhv',
                     'advanced/bank-sync/simplefin',
                     'advanced/bank-sync/pluggyai',
                   ],
