@@ -562,13 +562,31 @@ export async function runScheduleForecast(
 
   // Split the single smoothed candidate back out across the smooth
   // schedules that share this category, proportional to each schedule's
-  // own average monthly target (not the 60-month total outflow, which
-  // would understate every schedule's share by a factor of ~60).
-  const totalMonthlyTarget = smoothEntries.reduce((s, c) => s + c.target, 0);
+  // own monthly-equivalent contribution — the same normalization
+  // `runSchedule` already uses (getMonthlyBaseContribution divides a
+  // yearly/weekly/daily target down to a monthly-equivalent amount; using
+  // raw `entry.target` instead would treat a yearly schedule's full
+  // lump-sum as if it were a monthly amount, and would also understate
+  // every schedule's share relative to the 60-month total outflow, which
+  // is a different, larger quantity entirely).
+  const totalMonthlyWeight = smoothEntries.reduce(
+    (s, c) => s + getMonthlyBaseContribution(c),
+    0,
+  );
 
   for (const entry of smoothEntries) {
+    // When the smooth schedules sharing this category net to a zero total
+    // monthly-equivalent weight (e.g. two schedules with offsetting signs),
+    // dividing by zero would yield NaN or +/-Infinity — never valid for a
+    // money-typed map. Fall back to an even split across the entries,
+    // which is always finite.
     const share =
-      Math.round((entry.target / totalMonthlyTarget) * candidate) || 0;
+      totalMonthlyWeight === 0
+        ? Math.round(candidate / smoothEntries.length)
+        : Math.round(
+            (getMonthlyBaseContribution(entry) / totalMonthlyWeight) *
+              candidate,
+          ) || 0;
     perScheduleMonthly.set(
       entry.template,
       (perScheduleMonthly.get(entry.template) ?? 0) + share,

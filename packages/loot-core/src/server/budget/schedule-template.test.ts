@@ -966,6 +966,107 @@ describe('runScheduleForecast', () => {
     expect(result.to_budget).toBe(10000);
     expect(result.perScheduleMonthly.get(template_lines[1])).toBe(10000);
   });
+
+  it('splits perScheduleMonthly by monthly-equivalent contribution, not raw target, for a monthly + yearly mix', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'Monthly',
+        priority: 0,
+        directive: 'template',
+      } as const,
+      {
+        type: 'schedule',
+        name: 'Yearly',
+        priority: 0,
+        directive: 'template',
+      } as const,
+    ];
+    mockSchedulesByName({
+      Monthly: {
+        spec: { start: '2024-01-15', amount: -10000, frequency: 'monthly' },
+      },
+      Yearly: {
+        spec: { start: '2024-12-15', amount: -60000, frequency: 'yearly' },
+      },
+    });
+
+    const result = await runScheduleForecast(
+      template_lines,
+      '2024-01-01',
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    // No full-flag entries and a starting balance of 0, so the whole
+    // to_budget is the smoothed candidate.
+    const candidate = result.to_budget;
+    const monthlyShare = result.perScheduleMonthly.get(template_lines[0]);
+    const yearlyShare = result.perScheduleMonthly.get(template_lines[1]);
+    expect(monthlyShare).toBeDefined();
+    expect(yearlyShare).toBeDefined();
+    if (monthlyShare === undefined || yearlyShare === undefined) {
+      throw new Error('unreachable');
+    }
+
+    // Monthly-equivalent weights are 10000 (Monthly, target/1) and 5000
+    // (Yearly, target/1/12 = 60000/12) -- a 2:1 ratio -- not the raw
+    // 10000:60000 (1:6) ratio a naive split on entry.target would produce.
+    expect(monthlyShare / yearlyShare).toBeCloseTo(2, 1);
+    // The two shares should still (modulo per-share rounding) add back up
+    // to the single smoothed candidate.
+    expect(monthlyShare + yearlyShare).toBeGreaterThanOrEqual(candidate - 1);
+    expect(monthlyShare + yearlyShare).toBeLessThanOrEqual(candidate + 1);
+  });
+
+  it('never produces a non-finite perScheduleMonthly share when smooth schedules in one category offset to a zero net weight', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'Expense',
+        priority: 0,
+        directive: 'template',
+      } as const,
+      {
+        type: 'schedule',
+        name: 'Refund',
+        priority: 0,
+        directive: 'template',
+      } as const,
+    ];
+    mockSchedulesByName({
+      // Monthly-equivalent weight: 10000 (target / interval).
+      Expense: {
+        spec: { start: '2024-01-15', amount: -10000, frequency: 'monthly' },
+      },
+      // Monthly-equivalent weight: -120000 / 1 / 12 = -10000, exactly
+      // offsetting Expense's weight so the total nets to zero while
+      // neither individual weight is zero.
+      Refund: {
+        spec: { start: '2024-01-15', amount: 120000, frequency: 'yearly' },
+      },
+    });
+
+    const result = await runScheduleForecast(
+      template_lines,
+      '2024-01-01',
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.perScheduleMonthly.size).toBe(2);
+    for (const share of result.perScheduleMonthly.values()) {
+      expect(Number.isFinite(share)).toBe(true);
+    }
+  });
 });
 
 describe('solveMonthlyContribution', () => {
