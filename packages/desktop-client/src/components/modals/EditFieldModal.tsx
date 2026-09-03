@@ -137,6 +137,7 @@ export function EditFieldModal({
 
     case 'notes':
       label = t('Notes');
+      width = tokens.breakpoint_small;
       editor = ({ close }) => (
         <>
           <View
