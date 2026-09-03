@@ -27,7 +27,9 @@ export async function run(direction: 'up' | 'down' = 'up'): Promise<void> {
     const migrationsModules: Record<string, MigrationModule> = {};
 
     for (const key of sortedKeys) {
-      const fileName = key.split('/').pop()!;
+      // Migration titles are persisted in .migrate. Keep their original .js
+      // titles when source files are converted to TypeScript.
+      const fileName = key.split('/').pop()!.replace(/\.ts$/, '.js');
       migrationsModules[fileName] = await migrationsLoaders[key]();
     }
 
