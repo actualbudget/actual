@@ -16,7 +16,9 @@ import { PrivacyFilter } from '#components/PrivacyFilter';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import type {
   MonteCarloPot,
+  MonteCarloRuleExplanation,
   MonteCarloRunDetailRow,
+  MonteCarloWithdrawalRuleConfig,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { GROUP_HEADING_STYLE } from '#components/reports/reports/monte-carlo/monteCarloStyles';
 import { useFormat } from '#hooks/useFormat';
@@ -36,6 +38,13 @@ const POT_CELL_STYLE = {
   textAlign: 'right',
 } as const;
 
+// Enough precision that multiplying the displayed rate by the balance
+// reproduces the displayed amounts; trailing zeros trimmed so simple
+// rates still read cleanly (4% rather than 4.0000%)
+function formatRuleRate(rate: number) {
+  return `${Number((rate * 100).toFixed(4))}%`;
+}
+
 type MonteCarloRunDetailTableProps = {
   rows: MonteCarloRunDetailRow[];
   pots: MonteCarloPot[];
@@ -44,6 +53,8 @@ type MonteCarloRunDetailTableProps = {
   startAge: number;
   /** Show the Contributions columns (the plan has contributions set up) */
   hasContributions: boolean;
+  /** The configured rule, quoted in the per-year explanations */
+  withdrawalRule: MonteCarloWithdrawalRuleConfig;
   onBack: () => void;
 };
 
@@ -54,6 +65,7 @@ export function MonteCarloRunDetailTable({
   simulationCount,
   startAge,
   hasContributions,
+  withdrawalRule,
   onBack,
 }: MonteCarloRunDetailTableProps) {
   const { t } = useTranslation();
@@ -112,6 +124,154 @@ export function MonteCarloRunDetailTable({
       );
     }
     return t('Total withdrawn over this run: {{total}}.', { total });
+  }
+
+  // One sentence per rule outcome, phrased with the numbers the user
+  // configured so each year's working reads like the setup sentence
+  function getRuleExplanationSentence(explanation: MonteCarloRuleExplanation) {
+    if (explanation.kind === 'anchor') {
+      return t(
+        "Floor & ceiling: the first spending year takes the planned amount and sets the rule's rate at {{rate}} of the accessible balance; future years stay within {{floorPct}} below and {{ceilingPct}} above the planned amount.",
+        {
+          rate: formatRuleRate(explanation.rate),
+          floorPct: formatRuleRate(withdrawalRule.floorPct),
+          ceilingPct: formatRuleRate(withdrawalRule.ceilingPct),
+        },
+      );
+    }
+    if (explanation.kind === 'floor-ceiling') {
+      const values = {
+        rate: formatRuleRate(explanation.rate),
+        amount: format(explanation.unclamped, 'financial'),
+        floor: format(explanation.floor, 'financial'),
+        ceiling: format(explanation.ceiling, 'financial'),
+        floorPct: formatRuleRate(withdrawalRule.floorPct),
+        ceilingPct: formatRuleRate(withdrawalRule.ceilingPct),
+      };
+      if (explanation.applied === 'floor') {
+        return t(
+          'Floor & ceiling: {{rate}} of the accessible balance = {{amount}}, below the floor ({{floorPct}} under the planned amount: {{floor}}) - the floor applied.',
+          values,
+        );
+      }
+      if (explanation.applied === 'ceiling') {
+        return t(
+          'Floor & ceiling: {{rate}} of the accessible balance = {{amount}}, above the ceiling ({{ceilingPct}} over the planned amount: {{ceiling}}) - the ceiling applied.',
+          values,
+        );
+      }
+      return t(
+        'Floor & ceiling: {{rate}} of the accessible balance = {{amount}}, within {{floorPct}} below ({{floor}}) and {{ceilingPct}} above ({{ceiling}}) the planned amount.',
+        values,
+      );
+    }
+    // Concrete money beats abstractions: every outcome shows the rule's
+    // result next to the planned amount (any minimum floor is reported
+    // by its own line)
+    const planned = format(explanation.planned, 'financial');
+    const adjusted = format(explanation.adjusted, 'financial');
+    const hasEarlierAdjustments = explanation.factor !== 1;
+    if (explanation.rule === 'guardrails') {
+      const values = {
+        currentRate: formatRuleRate(explanation.currentRate ?? 0),
+        referenceRate: formatRuleRate(explanation.referenceRate ?? 0),
+        trigger: formatRuleRate(withdrawalRule.preservationTriggerPct),
+        prosperityTrigger: formatRuleRate(withdrawalRule.prosperityTriggerPct),
+        cut: formatRuleRate(withdrawalRule.preservationCutPct),
+        raise: formatRuleRate(withdrawalRule.prosperityIncreasePct),
+        planned,
+        adjusted,
+      };
+      if (explanation.action === 'cut') {
+        return t(
+          'Guardrails: the withdrawal rate ({{currentRate}}) rose more than {{trigger}} above the planned rate ({{referenceRate}}), so withdrawals were cut by {{cut}}: {{adjusted}} instead of the planned {{planned}}.',
+          values,
+        );
+      }
+      if (explanation.action === 'raise') {
+        return t(
+          'Guardrails: the withdrawal rate ({{currentRate}}) fell more than {{prosperityTrigger}} below the planned rate ({{referenceRate}}), so withdrawals were raised by {{raise}}: {{adjusted}} instead of the planned {{planned}}.',
+          values,
+        );
+      }
+      if (hasEarlierAdjustments) {
+        return t(
+          'Guardrails: the withdrawal rate ({{currentRate}}) stayed close to the planned rate ({{referenceRate}}) - no new change, but earlier adjustments still apply: {{adjusted}} instead of the planned {{planned}}.',
+          values,
+        );
+      }
+      return t(
+        'Guardrails: the withdrawal rate ({{currentRate}}) stayed close to the planned rate ({{referenceRate}}) - no change, taking the planned {{planned}}.',
+        values,
+      );
+    }
+    if (explanation.rule === 'ratcheting') {
+      const values = {
+        multiple: `${Number(withdrawalRule.balanceThresholdMultiple.toFixed(2))}×`,
+        years: withdrawalRule.consecutiveYears,
+        raise: formatRuleRate(withdrawalRule.ratchetIncreasePct),
+        streak: explanation.ratchetStreak ?? 0,
+        planned,
+        adjusted,
+      };
+      if (explanation.action === 'raise') {
+        return t(
+          'Ratcheting: the accessible balance stayed above {{multiple}} its starting level for {{years}} years in a row, so withdrawals were raised by {{raise}}: {{adjusted}} instead of the planned {{planned}}.',
+          values,
+        );
+      }
+      if (explanation.ratchetStreak != null && explanation.ratchetStreak > 0) {
+        return hasEarlierAdjustments
+          ? t(
+              'Ratcheting: balance above {{multiple}} its starting level for {{streak}} of {{years}} years - no raise yet, but earlier raises still apply: {{adjusted}} instead of the planned {{planned}}.',
+              values,
+            )
+          : t(
+              'Ratcheting: balance above {{multiple}} its starting level for {{streak}} of {{years}} years - no raise yet, taking the planned {{planned}}.',
+              values,
+            );
+      }
+      return hasEarlierAdjustments
+        ? t(
+            'Ratcheting: balance below {{multiple}} its starting level - the streak reset, but earlier raises still apply: {{adjusted}} instead of the planned {{planned}}.',
+            values,
+          )
+        : t(
+            'Ratcheting: balance below {{multiple}} its starting level - the streak reset, taking the planned {{planned}}.',
+            values,
+          );
+    }
+    const boundaryValues = {
+      currentRate: formatRuleRate(explanation.currentRate ?? 0),
+      upper: formatRuleRate(withdrawalRule.upperRateThreshold),
+      lower: formatRuleRate(withdrawalRule.lowerRateThreshold),
+      cut: formatRuleRate(withdrawalRule.upperCutPct),
+      raise: formatRuleRate(withdrawalRule.lowerIncreasePct),
+      planned,
+      adjusted,
+    };
+    if (explanation.action === 'cut') {
+      return t(
+        'Boundaries: the withdrawal rate ({{currentRate}}) rose above {{upper}}, so withdrawals were cut by {{cut}}: {{adjusted}} instead of the planned {{planned}}.',
+        boundaryValues,
+      );
+    }
+    if (explanation.action === 'raise') {
+      return t(
+        'Boundaries: the withdrawal rate ({{currentRate}}) fell below {{lower}}, so withdrawals were raised by {{raise}}: {{adjusted}} instead of the planned {{planned}}.',
+        boundaryValues,
+      );
+    }
+    if (hasEarlierAdjustments) {
+      return t(
+        'Boundaries: the withdrawal rate ({{currentRate}}) stayed between {{lower}} and {{upper}} - no new change, but earlier adjustments still apply: {{adjusted}} instead of the planned {{planned}}.',
+        boundaryValues,
+      );
+    }
+    return t(
+      'Boundaries: the withdrawal rate ({{currentRate}}) stayed between {{lower}} and {{upper}} - no change, taking the planned {{planned}}.',
+      boundaryValues,
+    );
   }
 
   return (
@@ -345,6 +505,29 @@ export function MonteCarloRunDetailTable({
                         </FinancialText>
                       </PrivacyFilter>
                     </Text>
+                    {row.ruleExplanation != null && (
+                      <Text style={{ fontSize: 13, color: theme.pageText }}>
+                        <PrivacyFilter>
+                          <FinancialText as="span">
+                            {getRuleExplanationSentence(row.ruleExplanation)}
+                          </FinancialText>
+                        </PrivacyFilter>
+                      </Text>
+                    )}
+                    {row.minimumApplied && (
+                      <Text style={{ fontSize: 13, color: theme.pageText }}>
+                        <PrivacyFilter>
+                          <FinancialText as="span">
+                            {t(
+                              'Raised to the minimum withdrawal: {{amount}}.',
+                              {
+                                amount: format(row.withdrawal, 'financial'),
+                              },
+                            )}
+                          </FinancialText>
+                        </PrivacyFilter>
+                      </Text>
+                    )}
                     {row.contributions > 0 && (
                       <Text style={{ fontSize: 13, color: theme.pageText }}>
                         <PrivacyFilter>

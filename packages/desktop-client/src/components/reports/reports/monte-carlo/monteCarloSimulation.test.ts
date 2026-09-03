@@ -537,6 +537,179 @@ describe('runMonteCarloSimulation', () => {
     expect(withRule.medianTotalWithdrawn).toBeLessThanOrEqual(100_000);
   });
 
+<<<<<<< Updated upstream
+=======
+  it('floor-ceiling anchors its rate in the first spending year', () => {
+    // User-reported bug: with a zero-spend phase before retirement, the
+    // rule anchored to year 1's planned spending of 0, so every
+    // retirement year withdrew the floor (planned x 0.85). The anchor
+    // must instead be set where spending starts.
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 0,
+          horizonYears: 30,
+          currentAge: 55,
+          spendingPhases: [
+            { id: 'working', name: '', fromAge: null, annualWithdrawal: 0 },
+            {
+              id: 'retired',
+              name: '',
+              fromAge: 65,
+              annualWithdrawal: 60_000,
+            },
+          ],
+          withdrawalRule: {
+            ...WITHDRAWAL_RULE_DEFAULTS,
+            type: 'floor-ceiling',
+          },
+          captureRunDetail: 0,
+        },
+        {
+          startingBalance: 1_000_000,
+          expectedReturnMean: 0.05,
+          returnStdDev: 0,
+        },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    // Accumulation years take nothing
+    for (const row of rows.slice(0, 10)) {
+      expect(row.withdrawal).toBe(0);
+    }
+    // The first retirement year withdraws exactly the planned amount
+    expect(rows[10].withdrawal).toBe(60_000);
+    // ...and explains that it anchored the rule's rate there
+    const anchorRate = 60_000 / (1_000_000 * 1.05 ** 10);
+    const anchorExplanation = rows[10].ruleExplanation;
+    if (anchorExplanation?.kind !== 'anchor') {
+      throw new Error(
+        'expected an anchor explanation on the first spending year',
+      );
+    }
+    expect(anchorExplanation.rate).toBeCloseTo(anchorRate, 12);
+    // Zero-spend years carry no explanation
+    expect(rows[0].ruleExplanation).toBeUndefined();
+    // With steady growth the rate rule rises above the plan - it must
+    // not sit pinned at the 51,000 floor
+    expect(rows[11].withdrawal).toBeGreaterThan(60_000);
+    // The following year explains the clamp arithmetic
+    const year12Balance = (1_000_000 * 1.05 ** 10 - 60_000) * 1.05;
+    const clampExplanation = rows[11].ruleExplanation;
+    if (clampExplanation?.kind !== 'floor-ceiling') {
+      throw new Error('expected a floor-ceiling explanation');
+    }
+    expect(clampExplanation).toMatchObject({
+      unclamped: Math.round(anchorRate * year12Balance),
+      floor: 51_000,
+      ceiling: 72_000,
+      applied: 'rate',
+    });
+    expect(clampExplanation.rate).toBeCloseTo(anchorRate, 12);
+    for (const row of rows.slice(11)) {
+      expect(row.withdrawal).toBeGreaterThanOrEqual(51_000);
+      expect(row.withdrawal).toBeLessThanOrEqual(72_000);
+    }
+  });
+
+  it('boundaries does not compound raises through zero-spend years', () => {
+    // A zero-spend year has a withdrawal rate of 0 - below any lower
+    // threshold - which must not be read as a "raise spending" signal
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 0,
+          horizonYears: 12,
+          currentAge: 55,
+          spendingPhases: [
+            { id: 'working', name: '', fromAge: null, annualWithdrawal: 0 },
+            {
+              id: 'retired',
+              name: '',
+              fromAge: 65,
+              annualWithdrawal: 40_000,
+            },
+          ],
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'boundaries' },
+          captureRunDetail: 0,
+        },
+        {
+          startingBalance: 1_000_000,
+          expectedReturnMean: 0,
+          returnStdDev: 0,
+        },
+      ),
+    );
+
+    expect(result.runDetail![10].withdrawal).toBe(40_000);
+    // The anchor year carries no explanation; the next year evaluates
+    // the rule (rate 40,000/960,000 = 4.17%, inside the 4-6% band)
+    expect(result.runDetail![10].ruleExplanation).toBeUndefined();
+    expect(result.runDetail![11].ruleExplanation).toEqual({
+      kind: 'factor',
+      rule: 'boundaries',
+      factor: 1,
+      planned: 40_000,
+      adjusted: 40_000,
+      action: 'none',
+      currentRate: 40_000 / 960_000,
+    });
+  });
+
+  it('ratcheting does not ratchet before spending starts', () => {
+    // Strong accumulation growth blows past the balance threshold long
+    // before retirement; the streak must not start counting until
+    // spending does
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 0,
+          horizonYears: 10,
+          currentAge: 60,
+          spendingPhases: [
+            { id: 'working', name: '', fromAge: null, annualWithdrawal: 0 },
+            {
+              id: 'retired',
+              name: '',
+              fromAge: 65,
+              annualWithdrawal: 10_000,
+            },
+          ],
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'ratcheting' },
+          captureRunDetail: 0,
+        },
+        {
+          startingBalance: 100_000,
+          expectedReturnMean: 0.2,
+          returnStdDev: 0,
+        },
+      ),
+    );
+
+    expect(result.runDetail![5].withdrawal).toBe(10_000);
+    // Streaks start counting once spending does: 1 and 2 above the
+    // threshold, then the third year ratchets
+    expect(result.runDetail![6].ruleExplanation).toEqual({
+      kind: 'factor',
+      rule: 'ratcheting',
+      factor: 1,
+      planned: 10_000,
+      adjusted: 10_000,
+      action: 'none',
+      ratchetStreak: 1,
+    });
+    expect(result.runDetail![8].ruleExplanation).toEqual({
+      kind: 'factor',
+      rule: 'ratcheting',
+      factor: 1.05,
+      planned: 10_000,
+      adjusted: 10_500,
+      action: 'raise',
+    });
+  });
+
+>>>>>>> Stashed changes
   it('floor-ceiling scales withdrawals with the pot within limits', () => {
     const base = makeParams(
       { annualWithdrawal: 10_000, horizonYears: 30 },
@@ -661,6 +834,20 @@ describe('runMonteCarloSimulation', () => {
     expect(rows[0].withdrawal).toBe(10_000);
     // Year 2's 50% cut lands well below the floor, so the floor binds
     expect(rows[1].withdrawal).toBe(8_000);
+    expect(rows[1].ruleExplanation).toEqual({
+      kind: 'factor',
+      rule: 'guardrails',
+      factor: 0.5,
+      planned: 10_000,
+      adjusted: 5_000,
+      action: 'cut',
+      currentRate: (10_000 * 1.05) / 90_000,
+      referenceRate: 10_000 / 100_000,
+    });
+    expect(rows[1].minimumApplied).toBe(true);
+    // The anchor year has neither
+    expect(rows[0].ruleExplanation).toBeUndefined();
+    expect(rows[0].minimumApplied).toBeUndefined();
     for (const row of rows.slice(1)) {
       expect(row.withdrawal).toBeGreaterThanOrEqual(8_000);
     }
@@ -1733,6 +1920,8 @@ describe('runMonteCarloSimulation', () => {
     );
 
     const rows = result.runDetail!;
+    // No withdrawal rule configured - rows carry no rule explanation
+    expect(rows[0].ruleExplanation).toBeUndefined();
     expect(rows.map(row => row.startBalance)).toEqual([
       100_000, 110_000, 120_000,
     ]);

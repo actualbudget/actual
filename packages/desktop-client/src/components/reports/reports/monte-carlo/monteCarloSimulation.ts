@@ -411,6 +411,47 @@ export type MonteCarloParams = Omit<MonteCarloConfig, 'targetAge'> & {
   deflateToTodaysMoney?: boolean;
 };
 
+/** How the active withdrawal rule arrived at a captured year's amount */
+export type MonteCarloRuleExplanation =
+  | {
+      /** Floor & ceiling's first spending year: planned amount taken
+       * as-is, and the rule's rate is set here */
+      kind: 'anchor';
+      /** planned / accessible wealth, as a decimal fraction */
+      rate: number;
+    }
+  | {
+      kind: 'floor-ceiling';
+      /** The anchored withdrawal rate, as a decimal fraction */
+      rate: number;
+      /** rate x accessible balance before clamping, in minor units */
+      unclamped: number;
+      /** The floor bound for the year, in minor units */
+      floor: number;
+      /** The ceiling bound for the year, in minor units */
+      ceiling: number;
+      /** Which bound won the clamp */
+      applied: 'floor' | 'ceiling' | 'rate';
+    }
+  | {
+      kind: 'factor';
+      rule: 'guardrails' | 'ratcheting' | 'boundaries';
+      /** The running adjustment factor after this year's decision */
+      factor: number;
+      /** The year's planned spending, in minor units (display-deflated) */
+      planned: number;
+      /** planned x factor - the rule's result before any minimum floor */
+      adjusted: number;
+      /** What this year's evaluation did to the factor */
+      action: 'cut' | 'raise' | 'none';
+      /** This year's withdrawal rate (guardrails and boundaries) */
+      currentRate?: number;
+      /** The planned-path reference rate (guardrails) */
+      referenceRate?: number;
+      /** Ratcheting only: consecutive above-threshold years so far */
+      ratchetStreak?: number;
+    };
+
 /** One simulated year of a single captured run, values in minor units */
 export type MonteCarloRunDetailRow = {
   year: number;
@@ -454,6 +495,14 @@ export type MonteCarloRunDetailRow = {
    * fraction; null when the pot had no balance or the plan failed
    */
   potReturns: Array<number | null>;
+  /**
+   * How the active withdrawal rule set this year's amount; absent when
+   * no rule ran (no rule configured, a zero-spend year, or before the
+   * first spending year). Amounts are deflated like the row's totals.
+   */
+  ruleExplanation?: MonteCarloRuleExplanation;
+  /** True when the minimum withdrawal raised the final amount */
+  minimumApplied?: boolean;
   /**
    * Set on a failure year when money remained in pots that hadn't reached
    * their access age - the plan failed despite this locked balance
@@ -1084,6 +1133,7 @@ export function runMonteCarloSimulation(
         }
 
         // Apply the dynamic withdrawal rule before taking this year's
+<<<<<<< Updated upstream
         // withdrawal (from year 2 - year 1 always uses the planned amount).
         // Rules evaluate accessible wealth only: locked pots can't fund
         // spending, so they must not drive cuts or raises until they unlock
@@ -1095,6 +1145,59 @@ export function runMonteCarloSimulation(
             planned * (1 - rule.floorPct),
             planned * (1 + rule.ceilingPct),
           );
+=======
+        // withdrawal. Rules only operate in years with planned spending,
+        // measured from the first spending year: the anchor year takes
+        // the planned amount as-is, and zero-spend years (accumulation
+        // before retirement, or a later zero phase) neither adjust nor
+        // drift them. Rules evaluate accessible wealth only: locked pots
+        // can't fund spending, so they must not drive cuts or raises
+        // until they unlock
+        // The drill-in shows how the rule arrived at each year's amount;
+        // captured only for the inspected run
+        const isCapturedRun =
+          runDetail != null && simulationIndex === captureIndex;
+        let capturedRuleExplanation: MonteCarloRuleExplanation | null = null;
+        let capturedMinimumApplied = false;
+        if (rule.type === 'floor-ceiling') {
+          if (year === firstSpendingYear) {
+            floorCeilingAnchorRate =
+              accessibleTotal > 0 ? planned / accessibleTotal : 0;
+            if (isCapturedRun) {
+              capturedRuleExplanation = {
+                kind: 'anchor',
+                rate: floorCeilingAnchorRate,
+              };
+            }
+          }
+          if (planned > 0 && year > firstSpendingYear) {
+            // A fixed share of the accessible balance, kept within
+            // limits around the planned spending
+            const unclamped = floorCeilingAnchorRate * accessibleTotal;
+            const floorAmount = planned * (1 - rule.floorPct);
+            const ceilingAmount = planned * (1 + rule.ceilingPct);
+            withdrawal = clamp(unclamped, floorAmount, ceilingAmount);
+            if (isCapturedRun) {
+              capturedRuleExplanation = {
+                kind: 'floor-ceiling',
+                rate: floorCeilingAnchorRate,
+                unclamped: toSafeAmount(Math.round(unclamped * startDeflator)),
+                floor: toSafeAmount(Math.round(floorAmount * startDeflator)),
+                ceiling: toSafeAmount(
+                  Math.round(ceilingAmount * startDeflator),
+                ),
+                applied:
+                  unclamped < floorAmount
+                    ? 'floor'
+                    : unclamped > ceilingAmount
+                      ? 'ceiling'
+                      : 'rate',
+              };
+            }
+          } else {
+            withdrawal = planned;
+          }
+>>>>>>> Stashed changes
         } else {
           if (
             year > 1 &&
@@ -1103,6 +1206,7 @@ export function runMonteCarloSimulation(
             accessibleStartByYear[year] > 0
           ) {
             const currentRate = (planned * adjustmentFactor) / accessibleTotal;
+            let ruleAction: 'cut' | 'raise' | 'none' = 'none';
             if (rule.type === 'guardrails') {
               // Drift is measured against the planned spending path, not
               // the year-1 rate, so a deliberate phase change doesn't
@@ -1115,11 +1219,13 @@ export function runMonteCarloSimulation(
                 referenceRate * (1 + rule.preservationTriggerPct)
               ) {
                 adjustmentFactor *= 1 - rule.preservationCutPct;
+                ruleAction = 'cut';
               } else if (
                 currentRate <
                 referenceRate * (1 - rule.prosperityTriggerPct)
               ) {
                 adjustmentFactor *= 1 + rule.prosperityIncreasePct;
+                ruleAction = 'raise';
               }
             } else if (rule.type === 'ratcheting') {
               if (
@@ -1130,6 +1236,7 @@ export function runMonteCarloSimulation(
                 if (ratchetStreak >= rule.consecutiveYears) {
                   adjustmentFactor *= 1 + rule.ratchetIncreasePct;
                   ratchetStreak = 0;
+                  ruleAction = 'raise';
                 }
               } else {
                 ratchetStreak = 0;
@@ -1137,9 +1244,36 @@ export function runMonteCarloSimulation(
             } else if (rule.type === 'boundaries') {
               if (currentRate > rule.upperRateThreshold) {
                 adjustmentFactor *= 1 - rule.upperCutPct;
+                ruleAction = 'cut';
               } else if (currentRate < rule.lowerRateThreshold) {
                 adjustmentFactor *= 1 + rule.lowerIncreasePct;
+                ruleAction = 'raise';
               }
+            }
+            if (
+              isCapturedRun &&
+              (rule.type === 'guardrails' ||
+                rule.type === 'ratcheting' ||
+                rule.type === 'boundaries')
+            ) {
+              capturedRuleExplanation = {
+                kind: 'factor',
+                rule: rule.type,
+                factor: adjustmentFactor,
+                planned: toSafeAmount(Math.round(planned * startDeflator)),
+                adjusted: toSafeAmount(
+                  Math.round(planned * adjustmentFactor * startDeflator),
+                ),
+                action: ruleAction,
+                ...((rule.type === 'guardrails' ||
+                  rule.type === 'boundaries') && { currentRate }),
+                ...(rule.type === 'guardrails' && {
+                  referenceRate:
+                    plannedTodayByYear[year] / accessibleStartByYear[year],
+                }),
+                ...(rule.type === 'ratcheting' &&
+                  ruleAction === 'none' && { ratchetStreak }),
+              };
             }
           }
           withdrawal = planned * adjustmentFactor;
@@ -1158,6 +1292,9 @@ export function runMonteCarloSimulation(
           withdrawal < minimumThisYear
         ) {
           withdrawal = minimumThisYear;
+          if (isCapturedRun) {
+            capturedMinimumApplied = true;
+          }
         }
 
         const yearStartTotal = total;
@@ -1446,6 +1583,10 @@ export function runMonteCarloSimulation(
           const base = {
             year,
             startBalance,
+            ...(capturedRuleExplanation != null && {
+              ruleExplanation: capturedRuleExplanation,
+            }),
+            ...(capturedMinimumApplied && { minimumApplied: true }),
             contributions,
             potContributions: emitParts(
               capturedPotContributions,
