@@ -745,5 +745,37 @@ describe('schedules', () => {
       );
       expect(result).toEqual([]);
     });
+
+    it('does not truncate occurrences when weekendSolveMode "before" shifts a date behind the search cursor', () => {
+      // Weekly on Saturday, skipWeekend + weekendSolveMode: 'before' means
+      // every occurrence is reported on the Friday before it. Querying with
+      // startDay set to a raw Saturday occurrence means getNextDate's
+      // adjusted result (the Friday before) lands *behind* the search
+      // cursor even though the schedule hasn't ended and more occurrences
+      // remain — this must not be mistaken for "the schedule ended".
+      const dateCond = {
+        op: 'isapprox' as const,
+        field: 'date' as const,
+        value: {
+          start: '2020-12-05', // a Saturday
+          interval: 1,
+          frequency: 'weekly' as const,
+          patterns: [],
+          skipWeekend: true,
+          weekendSolveMode: 'before' as const,
+          endMode: 'never' as const,
+          endOccurrences: 1,
+          endDate: '2099-01-01',
+        },
+      };
+
+      const result = getOccurrencesBetween(
+        dateCond,
+        '2020-12-05',
+        '2020-12-26',
+      );
+
+      expect(result).toEqual(['2020-12-11', '2020-12-18', '2020-12-25']);
+    });
   });
 });

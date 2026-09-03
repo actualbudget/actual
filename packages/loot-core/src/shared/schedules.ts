@@ -440,18 +440,31 @@ export function getOccurrencesBetween(
   const dates: string[] = [];
   let day = rangeStart;
   while (day < rangeEnd) {
-    const nextDate = getNextDate(dateCond, day);
-    if (nextDate === null) break;
-    const nextDateDay = d.startOfDay(monthUtils.parseDate(nextDate));
+    const dayStr = monthUtils.dayFromDate(day);
+
+    // Probe the raw, unadjusted occurrence first (mirrors getNextDateAfter).
     // getNextDate falls back to the schedule's last-ever occurrence when it
-    // finds no occurrence at or after `day` (e.g. a recurring schedule whose
-    // end date is before `day`). That fallback date isn't guaranteed to be
-    // at or after `day`, so treat it as "no more occurrences" rather than
-    // looping forever trying to advance past a date we've already passed.
-    if (nextDateDay < day) break;
-    if (nextDateDay >= rangeEnd) break;
-    if (nextDate >= startDay) dates.push(nextDate);
-    day = d.startOfDay(monthUtils.parseDate(monthUtils.addDays(nextDate, 1)));
+    // finds nothing at or after `day` (e.g. a recurring schedule whose end
+    // date is before `day`); that fallback can land before `day`, which is
+    // how we distinguish "the schedule has truly ended" from "there's an
+    // occurrence here, but skipWeekend adjustment moved it backward" — the
+    // weekend-adjusted date alone can't tell the two apart, since a
+    // `weekendSolveMode: 'before'` schedule legitimately produces adjusted
+    // dates that land behind `day` even while occurrences remain.
+    const rawDate = getNextDate(dateCond, day, true);
+    if (rawDate === null || rawDate < dayStr) break;
+
+    const adjustedDate = getNextDate(dateCond, day);
+    if (adjustedDate !== null) {
+      const adjustedDay = d.startOfDay(monthUtils.parseDate(adjustedDate));
+      if (adjustedDay >= rangeEnd) break;
+      if (adjustedDate >= startDay) dates.push(adjustedDate);
+    }
+
+    // Advance past the raw occurrence (not the possibly weekend-shifted
+    // adjusted one) so a `before` adjustment landing behind `day` doesn't
+    // stall the cursor.
+    day = d.startOfDay(monthUtils.parseDate(monthUtils.addDays(rawDate, 1)));
   }
   return dates;
 }
