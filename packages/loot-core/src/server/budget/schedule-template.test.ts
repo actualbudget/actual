@@ -756,7 +756,7 @@ describe('buildMonthlyOutflow', () => {
       defaultCurrency,
     );
 
-    vi.mocked(aqlQuery).mockResolvedValue({ data: [] } as never);
+    vi.mocked(aqlQuery).mockResolvedValue({ data: [], dependencies: [] });
 
     const outflow = await buildMonthlyOutflow(t, '2024-01-01', defaultCategory);
 
@@ -787,7 +787,8 @@ describe('buildMonthlyOutflow', () => {
 
     vi.mocked(aqlQuery).mockResolvedValue({
       data: [{ amount: -5000, date: '2024-03-10' }],
-    } as never);
+      dependencies: [],
+    });
 
     const outflow = await buildMonthlyOutflow(t, '2024-01-01', defaultCategory);
 
@@ -831,7 +832,7 @@ describe('buildMonthlyOutflow', () => {
     expect(t[0].target).toBe(5000);
     expect(t[0].perOccurrenceAmount).toBe(1000);
 
-    vi.mocked(aqlQuery).mockResolvedValue({ data: [] } as never);
+    vi.mocked(aqlQuery).mockResolvedValue({ data: [], dependencies: [] });
 
     const outflow = await buildMonthlyOutflow(t, '2024-01-01', defaultCategory);
 
@@ -844,7 +845,7 @@ describe('runScheduleForecast', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(db.getAccounts).mockResolvedValue([]);
-    vi.mocked(aqlQuery).mockResolvedValue({ data: [] } as never);
+    vi.mocked(aqlQuery).mockResolvedValue({ data: [], dependencies: [] });
   });
 
   it('contributes the exact monthly amount for a single monthly schedule', async () => {
@@ -1110,6 +1111,63 @@ describe('runScheduleForecast', () => {
       expect(Number.isFinite(share)).toBe(true);
     }
   });
+
+  it('never underfunds two annual schedules with different due dates, sharing a category (regression: actualbudget/actual#6513)', async () => {
+    // #6513: two annual schedules in one category (£100 due Feb, £90 due
+    // Mar), with £80 already banked going into January, under-budgeted
+    // every month under runSchedule's independent per-schedule remainder
+    // chaining. Assert runScheduleForecast's own postcondition directly —
+    // every projected month-end balance stays non-negative — rather than
+    // comparing its output against runSchedule's.
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'Bill A',
+        priority: 0,
+        directive: 'template',
+      } as const,
+      {
+        type: 'schedule',
+        name: 'Bill B',
+        priority: 0,
+        directive: 'template',
+      } as const,
+    ];
+    mockSchedulesByName({
+      'Bill A': {
+        spec: { start: '2025-02-15', amount: -10000, frequency: 'yearly' },
+      },
+      'Bill B': {
+        spec: { start: '2025-03-15', amount: -9000, frequency: 'yearly' },
+      },
+    });
+
+    const result = await runScheduleForecast(
+      template_lines,
+      '2025-01-01',
+      8000,
+      8000,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    const { t } = await createScheduleList(
+      template_lines as ScheduleTemplate[],
+      '2025-01-01',
+      defaultCategory,
+      defaultCurrency,
+    );
+    const outflow = await buildMonthlyOutflow(t, '2025-01-01', defaultCategory);
+    let runningBalance = 8000;
+    let minBalance = Infinity;
+    for (let i = 0; i < 60; i++) {
+      runningBalance += result.to_budget - outflow[i];
+      minBalance = Math.min(minBalance, runningBalance);
+    }
+    expect(minBalance).toBeGreaterThanOrEqual(0);
+  });
 });
 
 describe('runScheduleForecast (real AQL query path)', () => {
@@ -1228,15 +1286,16 @@ describe('solveMonthlyContribution', () => {
     expect((candidate - 1) * 31).toBeLessThan(60000);
   });
 
-  it('picks the early month with the larger threshold, not the late month with the larger raw balance', () => {
+  it('picks the month with the larger cumulative threshold, not the one with the larger raw balance', () => {
     // Regression test for a weighting bug in an earlier guess-and-correct
     // version of solveMonthlyContribution (see that function's own doc
-    // comment for the derivation). Month 0 needs 100/cent-month (weight 1); month 59 needs slightly
-    // less per-cent-month but the raw shortfall at any shared candidate
-    // is larger there purely because of the (i+1) weighting. The
-    // correct answer is governed by whichever month's *threshold*
-    // (need / (i+1)) is larger, not whichever month's raw balance is
-    // more negative — here that's month 0.
+    // comment for the derivation). Month 0's threshold is 100 (weight 1);
+    // month 59's is higher, at 149, but at any shared candidate near 149
+    // its raw shortfall (threshold gap x weight) is *smaller* than month
+    // 0's would be, purely because of the (i+1) weighting. The correct
+    // answer is governed by whichever month's *threshold* (need / (i+1))
+    // is larger — here that's month 59, not whichever month's raw balance
+    // looks more negative at some candidate.
     // Month 0's own outflow is 100 (threshold_0 = 100/1 = 100). Month
     // 59's *cumulative* outflow needs to make threshold_59 = 149, i.e.
     // cumsum_59 = 149 * 60 = 8940, with month 0's 100 already part of

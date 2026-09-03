@@ -246,7 +246,7 @@ export async function buildMonthlyOutflow(
   for (const entry of smoothEntries) {
     const occurrences = getOccurrencesBetween(
       entry.dateConditions,
-      current_month,
+      windowStart,
       windowEnd,
     );
     for (const occurrenceDate of occurrences) {

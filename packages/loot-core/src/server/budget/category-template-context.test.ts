@@ -5,6 +5,7 @@ import * as db from '#server/db';
 import type { DbCategory } from '#server/db';
 import { Rule } from '#server/rules';
 import { getRuleForSchedule } from '#server/schedules/app';
+import type { Currency } from '#shared/currencies';
 import { amountToInteger } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 import type { ByTemplate, Template } from '#types/models/templates';
@@ -1264,11 +1265,18 @@ describe('CategoryTemplateContext', () => {
             {
               op: 'is',
               field: 'date',
+              // Both schedules are non-monthly with different due dates
+              // (not one pay-month-of + one sinking): a uniform monthly
+              // schedule mixed with a single sinking schedule happens to
+              // make runSchedule and runScheduleForecast agree numerically
+              // for this fixture shape, which would let a broken dispatch
+              // gate pass unnoticed (see the differs-by-construction
+              // assertion below).
               value: isInternet
                 ? {
-                    start: '2024-01-15',
+                    start: '2024-03-15',
                     interval: 1,
-                    frequency: 'monthly',
+                    frequency: 'yearly',
                     patterns: [],
                     skipWeekend: false,
                     weekendSolveMode: 'before',
@@ -1325,6 +1333,14 @@ describe('CategoryTemplateContext', () => {
       );
       const result = await instance.runTemplatesForPriority(1, 100000, 100000);
 
+      const currency = {
+        code: 'USD',
+        symbol: '$',
+        name: 'US Dollar',
+        decimalPlaces: 2,
+        numberFormat: 'comma-dot',
+        symbolFirst: true,
+      } satisfies Currency;
       const expected = await runSchedule(
         templates,
         '2024-01',
@@ -1334,15 +1350,23 @@ describe('CategoryTemplateContext', () => {
         0,
         [],
         category,
-        {
-          code: 'USD',
-          symbol: '$',
-          name: 'US Dollar',
-          decimalPlaces: 2,
-          numberFormat: 'comma-dot',
-          symbolFirst: true,
-        },
+        currency,
       );
+      // Guard against this test coincidentally passing if the dispatch gate
+      // is broken: confirm the two algorithms actually produce different
+      // totals for this fixture before asserting which one was dispatched.
+      vi.mocked(aql.aqlQuery).mockResolvedValue({ data: [], dependencies: [] });
+      const otherAlgorithm = await runScheduleForecast(
+        templates,
+        '2024-01',
+        0,
+        0,
+        0,
+        [],
+        category,
+        currency,
+      );
+      expect(expected.to_budget).not.toBe(otherAlgorithm.to_budget);
       expect(result).toBe(expected.to_budget);
     });
 
@@ -1370,6 +1394,14 @@ describe('CategoryTemplateContext', () => {
       );
       const result = await instance.runTemplatesForPriority(1, 100000, 100000);
 
+      const currency = {
+        code: 'USD',
+        symbol: '$',
+        name: 'US Dollar',
+        decimalPlaces: 2,
+        numberFormat: 'comma-dot',
+        symbolFirst: true,
+      } satisfies Currency;
       const expected = await runScheduleForecast(
         templates,
         '2024-01',
@@ -1378,15 +1410,23 @@ describe('CategoryTemplateContext', () => {
         0,
         [],
         category,
-        {
-          code: 'USD',
-          symbol: '$',
-          name: 'US Dollar',
-          decimalPlaces: 2,
-          numberFormat: 'comma-dot',
-          symbolFirst: true,
-        },
+        currency,
       );
+      // Guard against this test coincidentally passing if the dispatch gate
+      // is broken: confirm the two algorithms actually produce different
+      // totals for this fixture before asserting which one was dispatched.
+      const otherAlgorithm = await runSchedule(
+        templates,
+        '2024-01',
+        0,
+        0,
+        0,
+        0,
+        [],
+        category,
+        currency,
+      );
+      expect(expected.to_budget).not.toBe(otherAlgorithm.to_budget);
       expect(result).toBe(expected.to_budget);
     });
   });
