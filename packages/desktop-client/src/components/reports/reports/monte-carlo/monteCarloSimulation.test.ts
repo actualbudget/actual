@@ -537,8 +537,6 @@ describe('runMonteCarloSimulation', () => {
     expect(withRule.medianTotalWithdrawn).toBeLessThanOrEqual(100_000);
   });
 
-<<<<<<< Updated upstream
-=======
   it('floor-ceiling anchors its rate in the first spending year', () => {
     // User-reported bug: with a zero-spend phase before retirement, the
     // rule anchored to year 1's planned spending of 0, so every
@@ -709,7 +707,6 @@ describe('runMonteCarloSimulation', () => {
     });
   });
 
->>>>>>> Stashed changes
   it('floor-ceiling scales withdrawals with the pot within limits', () => {
     const base = makeParams(
       { annualWithdrawal: 10_000, horizonYears: 30 },

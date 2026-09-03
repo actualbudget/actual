@@ -943,6 +943,17 @@ export function runMonteCarloSimulation(
     plannedTodayByYear[year] = amount;
   }
 
+  // The first year with planned spending - withdrawal rules anchor here
+  // and only adjust from here on, so zero-spend years (accumulation
+  // before retirement) neither trigger nor drift them
+  let firstSpendingYear = Infinity;
+  for (let year = 1; year <= horizonYears; year++) {
+    if (plannedTodayByYear[year] > 0) {
+      firstSpendingYear = year;
+      break;
+    }
+  }
+
   // Planned contributions per pot per year, in today's money - split into
   // an inflation-adjusted and a flat portion so a year's deposit is
   // flat + adjusted × cumulativeInflation. Deterministic and shared by
@@ -1047,10 +1058,6 @@ export function runMonteCarloSimulation(
     accessibleStartByYear[year] = accessibleStart;
   }
 
-  const initialRate =
-    accessibleStartByYear[1] > 0
-      ? plannedTodayByYear[1] / accessibleStartByYear[1]
-      : 0;
   const withdrawnTotals = new Float64Array(simulationCount);
   const depletionYearBySimulation = new Int32Array(simulationCount).fill(-1);
 
@@ -1069,6 +1076,10 @@ export function runMonteCarloSimulation(
     // Cuts/raises from the withdrawal rule compound here, applied on top of
     // the planned spending path (so they persist across spending phases)
     let adjustmentFactor = 1;
+    // Floor & ceiling's withdrawal rate, anchored per run in the first
+    // spending year so the first retirement withdrawal is the planned
+    // amount exactly
+    let floorCeilingAnchorRate = 0;
     // This replay's realized inflation path: each year draws its own rate
     // when inflation volatility is set
     let cumulativeInflation = 1;
@@ -1133,19 +1144,6 @@ export function runMonteCarloSimulation(
         }
 
         // Apply the dynamic withdrawal rule before taking this year's
-<<<<<<< Updated upstream
-        // withdrawal (from year 2 - year 1 always uses the planned amount).
-        // Rules evaluate accessible wealth only: locked pots can't fund
-        // spending, so they must not drive cuts or raises until they unlock
-        if (year > 1 && rule.type === 'floor-ceiling') {
-          // Recompute rule: a fixed share of the accessible balance, kept
-          // within limits around the planned spending
-          withdrawal = clamp(
-            initialRate * accessibleTotal,
-            planned * (1 - rule.floorPct),
-            planned * (1 + rule.ceilingPct),
-          );
-=======
         // withdrawal. Rules only operate in years with planned spending,
         // measured from the first spending year: the anchor year takes
         // the planned amount as-is, and zero-spend years (accumulation
@@ -1197,10 +1195,10 @@ export function runMonteCarloSimulation(
           } else {
             withdrawal = planned;
           }
->>>>>>> Stashed changes
         } else {
           if (
-            year > 1 &&
+            planned > 0 &&
+            year > firstSpendingYear &&
             rule.type !== 'none' &&
             accessibleTotal > 0 &&
             accessibleStartByYear[year] > 0
