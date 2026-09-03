@@ -23,6 +23,7 @@ export type BankSyncResponse = {
 export const SYNC_PROVIDERS = [
   'goCardless',
   'simpleFin',
+  'lhv',
   'pluggyai',
   'enableBanking',
   'akahu',

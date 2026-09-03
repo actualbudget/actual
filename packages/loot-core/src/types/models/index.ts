@@ -10,6 +10,7 @@ export type * from './enablebanking';
 export type * from './forecast';
 export type * from './gocardless';
 export type * from './import-transaction';
+export type * from './lhv';
 export type * from './nearby-payee';
 export type * from './note';
 export type * from './openid';

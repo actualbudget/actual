@@ -250,6 +250,37 @@ describe('Account sync', () => {
     );
   });
 
+  test('reconcile deduplicates repeated LHV bank references', async () => {
+    const { id: acctId } = await prepareDatabase();
+    const transaction = {
+      date: '2026-02-02',
+      amount: -1234,
+      payeeName: 'Coffee Shop',
+      imported_id: 'EE471000001020145685:BR-1',
+    };
+
+    const firstSync = await reconcileTransactions(
+      acctId,
+      [{ ...transaction }],
+      {
+        isBankSyncAccount: true,
+        strictIdChecking: false,
+      },
+    );
+    const secondSync = await reconcileTransactions(
+      acctId,
+      [{ ...transaction }],
+      {
+        isBankSyncAccount: true,
+        strictIdChecking: false,
+      },
+    );
+
+    expect(firstSync.added).toHaveLength(1);
+    expect(secondSync.added).toHaveLength(0);
+    expect(await getAllTransactions()).toHaveLength(1);
+  });
+
   test('reconcile doesnt rematch deleted transactions if reimport disabled', async () => {
     const { id: acctId } = await prepareDatabase();
     const reimportKey =
