@@ -419,16 +419,21 @@ export function scheduleIsRecurring(dateCond: Condition | null) {
   return value.type === 'recur';
 }
 
+// Weekend adjustment (getDateWithSkippedWeekend) shifts a raw occurrence by
+// at most 2 days (Saturday -> Monday for 'after', Sunday -> Friday for
+// 'before'). Pad the raw-date query window by more than that so no adjusted
+// occurrence near the edges of [startDay, endDay) can be missed.
+const WEEKEND_SHIFT_PAD_DAYS = 3;
+
 export function getOccurrencesBetween(
   dateCond,
   startDay: string,
   endDay: string,
 ): string[] {
-  const isRecurring = scheduleIsRecurring(dateCond);
-  const rangeStart = d.startOfDay(monthUtils.parseDate(startDay));
-  const rangeEnd = d.startOfDay(monthUtils.parseDate(endDay));
+  const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
+  const value = cond.getValue();
 
-  if (!isRecurring) {
+  if (value.type !== 'recur') {
     const singleDate =
       typeof dateCond.value === 'string' ? dateCond.value : null;
     if (singleDate && singleDate >= startDay && singleDate < endDay) {
@@ -437,34 +442,40 @@ export function getOccurrencesBetween(
     return [];
   }
 
+  // Build the recurrence schedule once — parsing a recurrence rule into an
+  // RSchedule is the dominant cost for sub-monthly schedules over a
+  // multi-year window when done per-occurrence (see task-6-brief.md for the
+  // measured numbers). Pull the whole padded range in a single pass instead
+  // of repeatedly probing one occurrence at a time.
+  const schedule = value.schedule;
+
+  const queryStart = d.startOfDay(
+    monthUtils.parseDate(monthUtils.addDays(startDay, -WEEKEND_SHIFT_PAD_DAYS)),
+  );
+  const queryEnd = d.startOfDay(
+    monthUtils.parseDate(monthUtils.addDays(endDay, WEEKEND_SHIFT_PAD_DAYS)),
+  );
+
+  const rawDates = schedule
+    .occurrences({ start: queryStart, end: queryEnd })
+    .toArray()
+    .map(occurrence => monthUtils.dayFromDate(occurrence.date));
+
+  if (!schedule.data.skipWeekend) {
+    return rawDates.filter(dt => dt >= startDay && dt < endDay);
+  }
+
   const dates: string[] = [];
-  let day = rangeStart;
-  while (day < rangeEnd) {
-    const dayStr = monthUtils.dayFromDate(day);
-
-    // Probe the raw, unadjusted occurrence first (mirrors getNextDateAfter).
-    // getNextDate falls back to the schedule's last-ever occurrence when it
-    // finds nothing at or after `day` (e.g. a recurring schedule whose end
-    // date is before `day`); that fallback can land before `day`, which is
-    // how we distinguish "the schedule has truly ended" from "there's an
-    // occurrence here, but skipWeekend adjustment moved it backward" — the
-    // weekend-adjusted date alone can't tell the two apart, since a
-    // `weekendSolveMode: 'before'` schedule legitimately produces adjusted
-    // dates that land behind `day` even while occurrences remain.
-    const rawDate = getNextDate(dateCond, day, true);
-    if (rawDate === null || rawDate < dayStr) break;
-
-    const adjustedDate = getNextDate(dateCond, day);
-    if (adjustedDate !== null) {
-      const adjustedDay = d.startOfDay(monthUtils.parseDate(adjustedDate));
-      if (adjustedDay >= rangeEnd) break;
-      if (adjustedDate >= startDay) dates.push(adjustedDate);
+  for (const rawDate of rawDates) {
+    const adjustedDate = monthUtils.dayFromDate(
+      getDateWithSkippedWeekend(
+        monthUtils.parseDate(rawDate),
+        schedule.data.weekendSolve,
+      ),
+    );
+    if (adjustedDate >= startDay && adjustedDate < endDay) {
+      dates.push(adjustedDate);
     }
-
-    // Advance past the raw occurrence (not the possibly weekend-shifted
-    // adjusted one) so a `before` adjustment landing behind `day` doesn't
-    // stall the cursor.
-    day = d.startOfDay(monthUtils.parseDate(monthUtils.addDays(rawDate, 1)));
   }
   return dates;
 }
