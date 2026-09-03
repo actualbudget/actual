@@ -839,5 +839,67 @@ describe('schedules', () => {
 
       expect(result).toEqual(['2020-12-25']);
     });
+
+    it('includes a raw occurrence landing before startDay when the weekend adjustment shifts it forward into range', () => {
+      // Weekly on Saturday, skipWeekend + weekendSolveMode: 'after'.
+      // Raw occurrences: 12/5, 12/12, 12/19, 12/26, ...
+      // The raw occurrence on 2020-12-05 sits 2 days before startDay, so a
+      // naive raw-range query would drop it. But its weekend-adjusted date
+      // (2020-12-07, the Monday after) lands exactly on startDay and must
+      // be included.
+      const dateCond = {
+        op: 'isapprox' as const,
+        field: 'date' as const,
+        value: {
+          start: '2020-12-05',
+          interval: 1,
+          frequency: 'weekly' as const,
+          patterns: [],
+          skipWeekend: true,
+          weekendSolveMode: 'after' as const,
+          endMode: 'never' as const,
+          endOccurrences: 1,
+          endDate: '2099-01-01',
+        },
+      };
+
+      const result = getOccurrencesBetween(
+        dateCond,
+        '2020-12-07',
+        '2020-12-12',
+      );
+
+      expect(result).toEqual(['2020-12-07']);
+    });
+
+    it('excludes a raw occurrence landing before endDay when the weekend adjustment shifts it forward out of range', () => {
+      // Same schedule as above. The raw occurrence on 2020-12-12 sits
+      // before endDay, so a naive raw-range query would keep it. But its
+      // weekend-adjusted date (2020-12-14, the Monday after) lands exactly
+      // on the exclusive endDay and must be excluded.
+      const dateCond = {
+        op: 'isapprox' as const,
+        field: 'date' as const,
+        value: {
+          start: '2020-12-05',
+          interval: 1,
+          frequency: 'weekly' as const,
+          patterns: [],
+          skipWeekend: true,
+          weekendSolveMode: 'after' as const,
+          endMode: 'never' as const,
+          endOccurrences: 1,
+          endDate: '2099-01-01',
+        },
+      };
+
+      const result = getOccurrencesBetween(
+        dateCond,
+        '2020-12-05',
+        '2020-12-14',
+      );
+
+      expect(result).toEqual(['2020-12-07']);
+    });
   });
 });

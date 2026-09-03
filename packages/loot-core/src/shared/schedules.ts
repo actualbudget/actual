@@ -419,10 +419,22 @@ export function scheduleIsRecurring(dateCond: Condition | null) {
   return value.type === 'recur';
 }
 
-// Weekend adjustment (getDateWithSkippedWeekend) shifts a raw occurrence by
-// at most 2 days (Saturday -> Monday for 'after', Sunday -> Friday for
-// 'before'). Pad the raw-date query window by more than that so no adjusted
-// occurrence near the edges of [startDay, endDay) can be missed.
+// Two independent effects can put a raw occurrence "in reach" of
+// [startDay, endDay) even though its raw timestamp falls outside the exact,
+// unpadded window — so the raw-date query below must be padded on both ends
+// to compensate for both:
+//   1. Weekend adjustment (getDateWithSkippedWeekend) shifts a raw
+//      occurrence by at most 2 days (Saturday -> Monday for 'after',
+//      Sunday -> Friday for 'before').
+//   2. recurConfigToRSchedule hardcodes `byHourOfDay: [12]`, so every raw
+//      occurrence is timestamped at *noon*, while queryStart/queryEnd below
+//      are computed with `d.startOfDay` (*midnight*). A raw occurrence
+//      dated exactly on endDay therefore has a timestamp (noon) that is
+//      *after* an unpadded, midnight-aligned queryEnd, and would be missed
+//      by the range query even before any weekend shift is considered.
+// Combined, the minimum integer number of days needed is 3 (2 days of
+// weekend shift, plus rounding the extra half-day from the noon offset up
+// to a full day) — pad by exactly that much.
 const WEEKEND_SHIFT_PAD_DAYS = 3;
 
 export function getOccurrencesBetween(
