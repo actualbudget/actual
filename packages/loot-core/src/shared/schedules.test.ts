@@ -8,6 +8,7 @@ import {
   getHasTransactionsQuery,
   getNextDate,
   getNextDateAfter,
+  getOccurrencesBetween,
   getScheduleOccurrenceMatchStartDate,
   getStatus,
   getUpcomingDays,
@@ -640,6 +641,109 @@ describe('schedules', () => {
       expect(isCustomUpcomingLength('2-week')).toBe(true);
       expect(isCustomUpcomingLength(null)).toBe(false);
       expect(isCustomUpcomingLength(undefined)).toBe(false);
+    });
+  });
+
+  describe('getOccurrencesBetween', () => {
+    it('returns every monthly occurrence within the range', () => {
+      const dateCond = {
+        op: 'is' as const,
+        field: 'date' as const,
+        value: {
+          start: '2024-01-15',
+          interval: 1,
+          frequency: 'monthly' as const,
+          patterns: [],
+          skipWeekend: false,
+          weekendSolveMode: 'before' as const,
+          endMode: 'never' as const,
+          endOccurrences: 1,
+          endDate: '2099-01-01',
+        },
+      };
+      const result = getOccurrencesBetween(
+        dateCond,
+        '2024-01-01',
+        '2024-04-01',
+      );
+      expect(result).toEqual(['2024-01-15', '2024-02-15', '2024-03-15']);
+    });
+
+    it('returns an empty array when the single non-repeating date is outside the range', () => {
+      const dateCond = {
+        op: 'is' as const,
+        field: 'date' as const,
+        value: '2023-06-01',
+      };
+      expect(
+        getOccurrencesBetween(dateCond, '2024-01-01', '2024-04-01'),
+      ).toEqual([]);
+    });
+
+    it('returns the single date when a non-repeating date is inside the range', () => {
+      const dateCond = {
+        op: 'is' as const,
+        field: 'date' as const,
+        value: '2024-02-01',
+      };
+      expect(
+        getOccurrencesBetween(dateCond, '2024-01-01', '2024-04-01'),
+      ).toEqual(['2024-02-01']);
+    });
+
+    it('excludes an occurrence that falls exactly on the exclusive endDay', () => {
+      const dateCond = {
+        op: 'is' as const,
+        field: 'date' as const,
+        value: {
+          start: '2024-01-15',
+          interval: 1,
+          frequency: 'monthly' as const,
+          patterns: [],
+          skipWeekend: false,
+          weekendSolveMode: 'before' as const,
+          endMode: 'never' as const,
+          endOccurrences: 1,
+          endDate: '2099-01-01',
+        },
+      };
+      // The next occurrence after 2024-01-15 is 2024-02-15, which is used
+      // as the (exclusive) endDay here, so it should not be included.
+      const result = getOccurrencesBetween(
+        dateCond,
+        '2024-01-01',
+        '2024-02-15',
+      );
+      expect(result).toEqual(['2024-01-15']);
+    });
+
+    it('returns an empty array without hanging when a recurring schedule ended before the range', () => {
+      const dateCond = {
+        op: 'isapprox' as const,
+        field: 'date' as const,
+        value: {
+          start: '2016-01-25',
+          interval: 1,
+          frequency: 'monthly' as const,
+          patterns: [],
+          skipWeekend: false,
+          weekendSolveMode: 'before' as const,
+          endMode: 'on_date' as const,
+          endOccurrences: 1,
+          endDate: '2016-08-25',
+        },
+      };
+      // getNextDate falls back to the schedule's last-ever occurrence
+      // (2016-08-25) when asked for the next occurrence after the schedule
+      // has ended. getOccurrencesBetween must recognize that stale fallback
+      // date is behind the search cursor and stop, rather than looping
+      // forever re-requesting the same date.
+      const result = getOccurrencesBetween(
+        dateCond,
+        '2016-08-26',
+        '2026-01-01',
+      );
+      expect(result).toEqual([]);
     });
   });
 });

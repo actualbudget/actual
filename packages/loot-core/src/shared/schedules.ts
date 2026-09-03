@@ -419,6 +419,43 @@ export function scheduleIsRecurring(dateCond: Condition | null) {
   return value.type === 'recur';
 }
 
+export function getOccurrencesBetween(
+  dateCond,
+  startDay: string,
+  endDay: string,
+): string[] {
+  const isRecurring = scheduleIsRecurring(dateCond);
+  const rangeStart = d.startOfDay(monthUtils.parseDate(startDay));
+  const rangeEnd = d.startOfDay(monthUtils.parseDate(endDay));
+
+  if (!isRecurring) {
+    const singleDate =
+      typeof dateCond.value === 'string' ? dateCond.value : null;
+    if (singleDate && singleDate >= startDay && singleDate < endDay) {
+      return [singleDate];
+    }
+    return [];
+  }
+
+  const dates: string[] = [];
+  let day = rangeStart;
+  while (day < rangeEnd) {
+    const nextDate = getNextDate(dateCond, day);
+    if (nextDate === null) break;
+    const nextDateDay = d.startOfDay(monthUtils.parseDate(nextDate));
+    // getNextDate falls back to the schedule's last-ever occurrence when it
+    // finds no occurrence at or after `day` (e.g. a recurring schedule whose
+    // end date is before `day`). That fallback date isn't guaranteed to be
+    // at or after `day`, so treat it as "no more occurrences" rather than
+    // looping forever trying to advance past a date we've already passed.
+    if (nextDateDay < day) break;
+    if (nextDateDay >= rangeEnd) break;
+    if (nextDate >= startDay) dates.push(nextDate);
+    day = d.startOfDay(monthUtils.parseDate(monthUtils.addDays(nextDate, 1)));
+  }
+  return dates;
+}
+
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
 
@@ -463,32 +500,19 @@ export function computeSchedulePreviewTransactions(
       const isRecurring = scheduleIsRecurring(dateConditions);
 
       const dates = [schedule.next_date];
-      let day = d.startOfDay(monthUtils.parseDate(schedule.next_date));
       if (isRecurring) {
-        while (day <= upcomingPeriodEnd) {
-          const nextDate = getNextDate(dateConditions, day);
-
-          if (nextDate === null) {
-            break;
-          }
-
-          if (
-            d.startOfDay(monthUtils.parseDate(nextDate)) > upcomingPeriodEnd
-          ) {
-            break;
-          }
-
-          if (dates.includes(nextDate)) {
-            day = d.startOfDay(
-              monthUtils.parseDate(monthUtils.addDays(day, 1)),
-            );
-            continue;
-          }
-
-          dates.push(nextDate);
-          day = d.startOfDay(
-            monthUtils.parseDate(monthUtils.addDays(nextDate, 1)),
-          );
+        const day = d.startOfDay(monthUtils.parseDate(schedule.next_date));
+        // getOccurrencesBetween's range is [startDay, endDay) — endDay
+        // exclusive — but upcomingPeriodEnd is meant to be an inclusive
+        // boundary (an occurrence landing exactly on it should be included),
+        // so pass the day after it.
+        const occurrences = getOccurrencesBetween(
+          dateConditions,
+          monthUtils.dayFromDate(day),
+          monthUtils.dayFromDate(monthUtils.addDays(upcomingPeriodEnd, 1)),
+        );
+        for (const occurrence of occurrences) {
+          if (!dates.includes(occurrence)) dates.push(occurrence);
         }
       }
 
