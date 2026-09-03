@@ -128,7 +128,7 @@ By default, the simulation withdraws the same (inflation-adjusted) amount every 
 
 All the rules share a few ideas:
 
-- Your **spending phases** set the planned amounts. From the second year onward, the rule adjusts what's actually taken - independently in every replay, reacting to how that replay is going. A cut or raise carries across phase boundaries: if the rule cut your spending by 10% during a rough patch, the next phase's amount starts 10% lower too.
+- Your **spending phases** set the planned amounts. The rules wake up in your first year of planned spending: that year takes the planned amount as-is, and from the next year onward the rule adjusts what's actually taken - independently in every replay, reacting to how that replay is going. Zero-spend years (for example, working years before retirement) neither trigger nor move the rules. A cut or raise carries across phase boundaries: if the rule cut your spending by 10% during a rough patch, the next phase's amount starts 10% lower too.
 - Rules usually improve your **success rate** by cutting spending in bad times, but that safety isn't free - you get it by living on less. Keep an eye on the **Median total withdrawn** stat to see what a rule costs you in income.
 - Rules only see the wealth you can actually spend. If a pension is locked until its access age, it doesn't earn you spending raises while a bridge pot pays the bills - the rules watch the accessible pots, and the pension starts counting the moment it unlocks.
 
@@ -144,7 +144,7 @@ The optimist's rule: withdrawals only ever go **up**, never down. If your balanc
 
 ### Floor & Ceiling (Bengen)
 
-Instead of a fixed amount, each year you withdraw a fixed **percentage of whatever the pots are currently worth** - so spending naturally falls in bad years and rises in good ones. To stop that swinging too wildly, the withdrawal is kept within a floor and a ceiling around your original (inflation-adjusted) amount.
+Instead of a fixed amount, each year you withdraw a fixed **percentage of whatever the pots are currently worth** - so spending naturally falls in bad years and rises in good ones. The percentage is set in your first year of planned spending (your planned amount divided by your accessible wealth at that point), and the withdrawal is then kept within a floor and a ceiling around your planned (inflation-adjusted) amount so it can't swing too wildly.
 
 ### Boundaries
 
