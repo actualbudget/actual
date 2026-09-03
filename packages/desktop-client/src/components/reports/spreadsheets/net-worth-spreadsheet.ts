@@ -9,7 +9,7 @@ import * as d from 'date-fns';
 import type { Locale } from 'date-fns';
 import { keyBy } from 'es-toolkit';
 
-import { ReportOptions } from '#components/reports/ReportOptions';
+import { getIntervalFormat } from '#components/reports/ReportOptions';
 import type { FormatType } from '#hooks/useFormat';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { aqlQuery } from '#queries/aqlQuery';
@@ -29,6 +29,7 @@ export function createSpreadsheet(
   interval: string = 'Monthly',
   firstDayOfWeekIdx: string = '0',
   format: (value: unknown, type?: FormatType) => string,
+  dateFormat?: string,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -178,6 +179,7 @@ export function createSpreadsheet(
         interval,
         firstDayOfWeekIdx,
         format,
+        dateFormat,
       ),
     );
   };
@@ -196,6 +198,7 @@ function recalculate(
   interval: string = 'Monthly',
   firstDayOfWeekIdx: string = '0',
   format: (value: unknown, type?: FormatType) => string,
+  dateFormat?: string,
 ) {
   // Get intervals using the same pattern as other working spreadsheets
   const intervals =
@@ -281,9 +284,9 @@ function recalculate(
     }
     endNetWorth = total;
 
-    // Use standardized format from ReportOptions
-    const displayFormat =
-      ReportOptions.intervalFormat.get(interval) ?? "MMM ''yy";
+    // Use standardized format from ReportOptions, following the user's date
+    // format preference for the day-level intervals.
+    const displayFormat = getIntervalFormat(interval, dateFormat) || "MMM ''yy";
 
     const tooltipFormat =
       interval === 'Daily'

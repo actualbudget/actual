@@ -6,7 +6,9 @@ import { describe, expect, it } from 'vitest';
 
 import {
   computeInitialLinkState,
+  getDefaultStartingSettings,
   getSelectableAccountOptions,
+  resolveStartingSettings,
 } from './SelectLinkedAccountsModal';
 
 function makeLocalAccount(
@@ -31,6 +33,7 @@ function makeLocalAccount(
     account_sync_source: null,
     last_sync: null,
     bank_sync_status: null,
+    account_group_id: null,
     ...overrides,
   };
 }
@@ -156,5 +159,49 @@ describe('getSelectableAccountOptions', () => {
       'Create new account',
       'Create new account (off budget)',
     ]);
+  });
+});
+
+describe('resolveStartingSettings', () => {
+  it('sends no starting balance when the user only changed the date', () => {
+    // A row starts with a default date and no balance. Editing the date keeps
+    // the rest of the settings, which must not introduce a balance of 0.
+    const settings = { ...getDefaultStartingSettings(), date: '2026-01-15' };
+
+    expect(resolveStartingSettings(settings)).toEqual({
+      startingDate: '2026-01-15',
+      startingBalance: undefined,
+    });
+  });
+
+  it('sends no starting balance when nothing was touched', () => {
+    expect(resolveStartingSettings(undefined)).toEqual({
+      startingDate: undefined,
+      startingBalance: undefined,
+    });
+  });
+
+  it('sends the balance once the user enters one', () => {
+    const settings = { ...getDefaultStartingSettings(), amount: 12345 };
+
+    expect(resolveStartingSettings(settings).startingBalance).toBe(12345);
+  });
+
+  it('sends a balance the user deliberately set to zero', () => {
+    const settings = { ...getDefaultStartingSettings(), amount: 0 };
+
+    expect(resolveStartingSettings(settings).startingBalance).toBe(0);
+  });
+
+  it('ignores a blank date', () => {
+    expect(
+      resolveStartingSettings({ date: '   ' }).startingDate,
+    ).toBeUndefined();
+  });
+});
+
+describe('getDefaultStartingSettings', () => {
+  it('does not include a starting balance', () => {
+    expect(getDefaultStartingSettings().amount).toBeUndefined();
   });
 });

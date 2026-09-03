@@ -7,11 +7,16 @@ import {
   computeSchedulePreviewTransactions,
   getHasTransactionsQuery,
   getNextDate,
+  getNextDateAfter,
   getScheduleOccurrenceMatchStartDate,
   getStatus,
   getUpcomingDays,
   indexPostedScheduleTransactions,
+  isCustomUpcomingLength,
   isScheduleOccurrencePosted,
+  UPCOMING_LENGTH_PRESET_LABELS,
+  UPCOMING_LENGTH_PRESET_OPTIONS,
+  UPCOMING_LENGTH_PRESET_VALUES,
 } from './schedules';
 import type { ScheduleStatuses } from './schedules';
 
@@ -491,6 +496,150 @@ describe('schedules', () => {
 
       const result = getNextDate(dateCond, new Date(2017, 0, 1));
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getNextDateAfter', () => {
+    /* Dec 2020 calendar for reference:
+      | Su | Mo | Tu | We | Th | Fr | Sa |
+      |    |    | 01 | 02 | 03 | 04 | 05 |
+      | 06 | 07 | 08 | 09 | 10 | 11 | 12 |
+      | 13 | 14 | 15 | 16 | 17 | 18 | 19 |
+      | 20 | 21 | 22 | 23 | 24 | 25 | 26 |
+      | 27 | 28 | 29 | 30 | 31 |
+      */
+    function weeklyOnSaturday(extra = {}) {
+      return {
+        op: 'isapprox',
+        value: {
+          start: '2020-12-05',
+          frequency: 'weekly',
+          patterns: [],
+          ...extra,
+        },
+      };
+    }
+
+    it('returns the next occurrence after the given date', () => {
+      expect(getNextDateAfter(weeklyOnSaturday(), '2020-12-05')).toBe(
+        '2020-12-12',
+      );
+    });
+
+    it('returns the next occurrence when moving `after` the weekend', () => {
+      const dateCond = weeklyOnSaturday({
+        skipWeekend: true,
+        weekendSolveMode: 'after',
+      });
+
+      expect(getNextDateAfter(dateCond, '2020-12-07')).toBe('2020-12-14');
+    });
+
+    it('includes a weekend occurrence moved `after` the given date', () => {
+      const dateCond = weeklyOnSaturday({
+        skipWeekend: true,
+        weekendSolveMode: 'after',
+      });
+
+      expect(getNextDateAfter(dateCond, '2020-12-13')).toBe('2020-12-14');
+    });
+
+    it('does not return the same occurrence when moving `after` the weekend', () => {
+      const dateCond = {
+        op: 'isapprox',
+        value: {
+          start: '2020-12-06',
+          frequency: 'weekly',
+          patterns: [],
+          skipWeekend: true,
+          weekendSolveMode: 'after',
+        },
+      };
+
+      expect(getNextDateAfter(dateCond, '2020-12-07')).toBe('2020-12-14');
+    });
+
+    it('does not return the same occurrence when moving `before` the weekend', () => {
+      const dateCond = weeklyOnSaturday({
+        skipWeekend: true,
+        weekendSolveMode: 'before',
+      });
+
+      expect(getNextDateAfter(dateCond, '2020-12-04')).toBe('2020-12-11');
+    });
+
+    it('keeps a Monday occurrence that follows a `before` weekend adjustment', () => {
+      const dateCond = {
+        op: 'isapprox',
+        value: {
+          start: '2020-12-04',
+          frequency: 'daily',
+          patterns: [],
+          skipWeekend: true,
+          weekendSolveMode: 'before',
+        },
+      };
+
+      expect(getNextDateAfter(dateCond, '2020-12-04')).toBe('2020-12-07');
+    });
+
+    it('walks past every occurrence that resolves on or before the given date', () => {
+      /* Aug 2026 calendar for reference:
+        | Su | Mo | Tu | We | Th | Fr | Sa |
+        | 23 | 24 | 25 | 26 | 27 | 28 | 29 |
+        | 30 | 31 |
+        */
+      const dateCond = {
+        op: 'isapprox',
+        value: {
+          start: '2026-08-24',
+          frequency: 'daily',
+          patterns: [],
+          skipWeekend: true,
+          weekendSolveMode: 'before',
+        },
+      };
+
+      expect(getNextDateAfter(dateCond, '2026-08-28')).toBe('2026-08-31');
+    });
+
+    it('returns null when the schedule has no further occurrences', () => {
+      const dateCond = weeklyOnSaturday({
+        endMode: 'after_n_occurrences',
+        endOccurrences: 2,
+      });
+
+      expect(getNextDateAfter(dateCond, '2020-12-05')).toBe('2020-12-12');
+      expect(getNextDateAfter(dateCond, '2020-12-12')).toBeNull();
+    });
+  });
+
+  describe('shared presets', () => {
+    it('preset values and options align', () => {
+      const valuesFromOptions = UPCOMING_LENGTH_PRESET_OPTIONS.map(
+        o => o.value,
+      );
+      expect(valuesFromOptions).toEqual(
+        UPCOMING_LENGTH_PRESET_VALUES as readonly string[],
+      );
+    });
+
+    it('every preset has a label entry', () => {
+      for (const v of UPCOMING_LENGTH_PRESET_VALUES) {
+        expect(UPCOMING_LENGTH_PRESET_LABELS[v]).toBeDefined();
+        expect(typeof UPCOMING_LENGTH_PRESET_LABELS[v]).toBe('string');
+      }
+    });
+
+    it('isCustomUpcomingLength recognizes presets and custom values', () => {
+      for (const v of UPCOMING_LENGTH_PRESET_VALUES) {
+        expect(isCustomUpcomingLength(v)).toBe(false);
+      }
+
+      expect(isCustomUpcomingLength('1-day')).toBe(true);
+      expect(isCustomUpcomingLength('2-week')).toBe(true);
+      expect(isCustomUpcomingLength(null)).toBe(false);
+      expect(isCustomUpcomingLength(undefined)).toBe(false);
     });
   });
 });

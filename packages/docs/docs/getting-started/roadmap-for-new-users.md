@@ -1,4 +1,4 @@
-# Roadmap for new users
+# Roadmap for New Users
 
 Welcome to Actual Budget, a delightful budgeting tool that meets you wherever you are in your financial journey.
 
