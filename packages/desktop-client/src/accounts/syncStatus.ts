@@ -17,7 +17,10 @@ export function getFailedSyncError(
 ): { type: string; code: string } {
   switch (account.bank_sync_status) {
     case 'reauth-required':
-      if (account.account_sync_source === 'simpleFin') {
+      if (
+        account.account_sync_source === 'simpleFin' ||
+        account.account_sync_source === 'lhv'
+      ) {
         return { type: 'INVALID_ACCESS_TOKEN', code: 'INVALID_ACCESS_TOKEN' };
       }
       return { type: 'ITEM_ERROR', code: 'ITEM_LOGIN_REQUIRED' };

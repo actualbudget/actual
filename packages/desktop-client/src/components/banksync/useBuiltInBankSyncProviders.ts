@@ -7,6 +7,7 @@ import type {
   BankSyncCredentialSource,
   BankSyncProviders,
 } from '@actual-app/core/types/models';
+import type { SyncServerLhvAccount } from '@actual-app/core/types/models/lhv';
 import type { SyncServerSimpleFinAccount } from '@actual-app/core/types/models/simplefin';
 
 import { authorizeBank as authorizeEnableBanking } from '#enablebanking';
@@ -119,6 +120,9 @@ export function useBuiltInBankSyncProviders({
   const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] = useState<
     boolean | null
   >(null);
+  const [isLhvSetupComplete, setIsLhvSetupComplete] = useState<boolean | null>(
+    null,
+  );
   const [isEnableBankingSetupComplete, setIsEnableBankingSetupComplete] =
     useState<boolean | null>(null);
   const [isAkahuSetupComplete, setIsAkahuSetupComplete] = useState<
@@ -126,6 +130,7 @@ export function useBuiltInBankSyncProviders({
   >(null);
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
     useState(false);
+  const [loadingLhvAccounts, setLoadingLhvAccounts] = useState(false);
   const [loadingAkahuAccounts, setLoadingAkahuAccounts] = useState(false);
 
   const enableBankingEnabled = useFeatureFlag('enableBanking');
@@ -144,6 +149,17 @@ export function useBuiltInBankSyncProviders({
   useEffect(() => {
     setIsSimpleFinSetupComplete(configuredSimpleFin);
   }, [configuredSimpleFin]);
+
+  useEffect(() => {
+    if (syncServerStatus !== 'online') {
+      setIsLhvSetupComplete(false);
+      return;
+    }
+
+    void send('lhv-status').then(status =>
+      setIsLhvSetupComplete(Boolean(status.configured)),
+    );
+  }, [syncServerStatus]);
 
   useEffect(() => {
     setIsEnableBankingSetupComplete(configuredEnableBanking);
@@ -178,6 +194,40 @@ export function useBuiltInBankSyncProviders({
       }),
     );
   }, [dispatch]);
+
+  const openLhvAccounts = useCallback(
+    (externalAccounts: SyncServerLhvAccount[]) => {
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts,
+              syncSource: 'lhv',
+              upgradingAccountId,
+            },
+          },
+        }),
+      );
+    },
+    [dispatch, upgradingAccountId],
+  );
+
+  const onLhvInit = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'lhv-init',
+          options: {
+            onSuccess: accounts => {
+              setIsLhvSetupComplete(true);
+              openLhvAccounts(accounts);
+            },
+          },
+        },
+      }),
+    );
+  }, [dispatch, openLhvAccounts]);
 
   const onPluggyAiInit = useCallback(() => {
     dispatch(
@@ -285,6 +335,25 @@ export function useBuiltInBankSyncProviders({
       notifyResetFailure('SimpleFIN', error);
     }
   }, [notifyResetFailure]);
+
+  const onLhvReset = useCallback(async () => {
+    try {
+      if (!cloudFileId) {
+        throw new Error(t('Budget file ID is required.'));
+      }
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'lhv_refreshToken',
+          value: null,
+          fileId: cloudFileId,
+        }),
+        'Failed to clear LHV.ai refresh token',
+      );
+      setIsLhvSetupComplete(false);
+    } catch (error) {
+      notifyResetFailure('LHV.ai', error);
+    }
+  }, [cloudFileId, notifyResetFailure, t]);
 
   const onPluggyAiReset = useCallback(async () => {
     try {
@@ -458,6 +527,53 @@ export function useBuiltInBankSyncProviders({
     onSimpleFinInit,
     t,
     upgradingAccountId,
+  ]);
+
+  const onConnectLhv = useCallback(async () => {
+    if (!isLhvSetupComplete) {
+      onLhvInit();
+      return;
+    }
+    if (loadingLhvAccounts) {
+      return;
+    }
+
+    setLoadingLhvAccounts(true);
+    try {
+      const results = await send('lhv-accounts');
+      if (results.error_code === 'INVALID_ACCESS_TOKEN') {
+        onLhvInit();
+        return;
+      }
+      if (results.error_code) {
+        throw new Error(results.reason || results.error_code);
+      }
+      if ('error' in results && results.error) {
+        throw new Error(results.reason || results.error);
+      }
+
+      openLhvAccounts(results.accounts ?? []);
+    } catch (error) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            title: t('Error when trying to contact LHV.ai'),
+            message: error instanceof Error ? error.message : String(error),
+            timeout: 5000,
+          },
+        }),
+      );
+    } finally {
+      setLoadingLhvAccounts(false);
+    }
+  }, [
+    dispatch,
+    isLhvSetupComplete,
+    loadingLhvAccounts,
+    onLhvInit,
+    openLhvAccounts,
+    t,
   ]);
 
   const onConnectEnableBanking = useCallback(async () => {
@@ -638,6 +754,7 @@ export function useBuiltInBankSyncProviders({
   const configuredProviders = {
     goCardless: Boolean(isGoCardlessSetupComplete),
     simpleFin: Boolean(isSimpleFinSetupComplete),
+    lhv: Boolean(isLhvSetupComplete),
     pluggyai: Boolean(pluggyAiStatus.configured),
     enableBanking: Boolean(isEnableBankingSetupComplete),
     akahu: Boolean(isAkahuSetupComplete),
@@ -678,6 +795,25 @@ export function useBuiltInBankSyncProviders({
             onConfigure: onSimpleFinInit,
             onLink: onConnectSimpleFin,
             onReset: onSimpleFinReset,
+          };
+        }
+
+        if (providerId === 'lhv') {
+          return {
+            id: providerId,
+            displayName: 'LHV.ai',
+            description: t(
+              'Link an LHV bank account to automatically download transactions.',
+            ),
+            isConfigured: configuredProviders.lhv,
+            credentialSource: 'per-budget-file',
+            supportsPerBudgetFile: true,
+            canConfigure:
+              syncServerStatus === 'online' && (isAdmin || isFileOwner),
+            isLoading: loadingLhvAccounts,
+            onConfigure: onLhvInit,
+            onLink: onConnectLhv,
+            onReset: onLhvReset,
           };
         }
 
@@ -744,6 +880,7 @@ export function useBuiltInBankSyncProviders({
     configuredProviders.goCardless,
     configuredProviders.pluggyai,
     configuredProviders.simpleFin,
+    configuredProviders.lhv,
     configuredProviders.akahu,
     pluggyAiStatus,
     syncServerStatus,
@@ -751,10 +888,12 @@ export function useBuiltInBankSyncProviders({
     akahuEnabled,
     isEnableBankingLoading,
     loadingSimpleFinAccounts,
+    loadingLhvAccounts,
     loadingAkahuAccounts,
     onConnectAkahu,
     onConnectEnableBanking,
     onConnectGoCardless,
+    onConnectLhv,
     onConnectPluggyAi,
     onConnectSimpleFin,
     onAkahuInit,
@@ -763,6 +902,8 @@ export function useBuiltInBankSyncProviders({
     onEnableBankingReset,
     onGoCardlessInit,
     onGoCardlessReset,
+    onLhvInit,
+    onLhvReset,
     onPluggyAiInit,
     onPluggyAiReset,
     onSimpleFinInit,

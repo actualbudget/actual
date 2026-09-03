@@ -15,7 +15,9 @@ import { Link } from '#components/common/Link';
 import { authorizeBank as authorizeEnableBanking } from '#enablebanking';
 import { authorizeBank as authorizeGoCardless } from '#gocardless';
 import { useAccounts } from '#hooks/useAccounts';
+import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useFailedAccounts } from '#hooks/useFailedAccounts';
+import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
 function useErrorMessage() {
@@ -52,7 +54,7 @@ function useErrorMessage() {
 
       case 'INVALID_ACCESS_TOKEN':
         return t(
-          'Your SimpleFIN Access Token is no longer valid. Please reset and generate a new token.',
+          'Your bank sync credentials are no longer valid. Please replace them.',
         );
 
       case 'ACCOUNT_NEEDS_ATTENTION':
@@ -96,6 +98,7 @@ export function AccountSyncCheck() {
   const failedAccounts = useFailedAccounts();
   const dispatch = useDispatch();
   const { id } = useParams();
+  const { isAdmin, isFileOwner } = useCurrentAccess();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
   const { getErrorMessage } = useErrorMessage();
@@ -109,6 +112,15 @@ export function AccountSyncCheck() {
           void authorizeEnableBanking(dispatch);
         } else if (acc.account_sync_source === 'goCardless') {
           void authorizeGoCardless(dispatch);
+        } else if (acc.account_sync_source === 'lhv') {
+          dispatch(
+            pushModal({
+              modal: {
+                name: 'lhv-init',
+                options: { onSuccess: () => setOpen(false) },
+              },
+            }),
+          );
         }
       }
     },
@@ -143,7 +155,10 @@ export function AccountSyncCheck() {
   const { type, code } = error;
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
-    (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
+    (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN') ||
+    type === 'INVALID_ACCESS_TOKEN';
+  const canReauthorize =
+    account.account_sync_source !== 'lhv' || isAdmin || isFileOwner;
 
   return (
     <View>
@@ -184,7 +199,7 @@ export function AccountSyncCheck() {
         </div>
 
         <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
-          {showAuth ? (
+          {showAuth && canReauthorize ? (
             <>
               <Button onPress={() => unlink(account)}>
                 <Trans>Unlink</Trans>

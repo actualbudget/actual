@@ -53,6 +53,7 @@ import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
 import { HoldBufferModal } from './modals/HoldBufferModal';
 import { ImportTransactionsModal } from './modals/ImportTransactionsModal';
 import { KeyboardShortcutModal } from './modals/KeyboardShortcutModal';
+import { LhvInitialiseModal } from './modals/LhvInitialiseModal';
 import { LoadBackupModal } from './modals/LoadBackupModal';
 import { ConfirmChangeDocumentDirModal } from './modals/manager/ConfirmChangeDocumentDir';
 import { DeleteFileModal } from './modals/manager/DeleteFileModal';
@@ -191,6 +192,9 @@ export function Modals() {
 
         case 'simplefin-init':
           return <SimpleFinInitialiseModal key={key} {...modal.options} />;
+
+        case 'lhv-init':
+          return <LhvInitialiseModal key={key} {...modal.options} />;
 
         case 'pluggyai-init':
           return <PluggyAiInitialiseModal key={key} {...modal.options} />;
