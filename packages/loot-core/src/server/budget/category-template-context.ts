@@ -30,10 +30,14 @@ import {
 import { runSchedule, runScheduleForecast } from './schedule-template';
 import { getActiveSchedules } from './statements';
 
-// Build-time switch: selects the 60-month-forecast smoothing algorithm
-// (runScheduleForecast) instead of today's payMonthOf/sinking heuristic
-// (runSchedule) for schedule-type templates. Not yet a user-facing or
-// per-category setting — flip to measure perf before deciding rollout.
+// Test-settable module-level switch: selects the 60-month-forecast
+// smoothing algorithm (runScheduleForecast) instead of today's
+// payMonthOf/sinking heuristic (runSchedule) for schedule-type templates.
+// This is a mutable exported object read at call time, not a build-time
+// constant — no bundler can tree-shake the disabled branch, so both code
+// paths (and their AQL imports) still ship regardless of this flag's
+// value. Not yet a user-facing or per-category setting — flip to measure
+// perf before deciding rollout.
 // See docs/superpowers/specs/2026-09-02-schedule-forecast-smoothing-design.md
 //
 // Exported as a mutable object, not a bare const, so tests can flip it

@@ -24,6 +24,14 @@ type ScheduleTemplateTarget = {
   template: ScheduleTemplate;
   name: string;
   target: number;
+  // The un-aggregated amount of a single occurrence of this schedule,
+  // computed before `target` is summed across every occurrence landing
+  // in the schedule's monthly-equivalent aggregation window below. Unlike
+  // `target` (whose value is a monthly-equivalent aggregate that
+  // `runSchedule`/`getMonthlyBaseContribution` depend on), this is the
+  // right value to multiply by an occurrence count elsewhere (e.g.
+  // `buildMonthlyOutflow`, which buckets one entry per occurrence date).
+  perOccurrenceAmount: number;
   next_date_string: string;
   target_interval: number;
   target_frequency: string | undefined;
@@ -154,6 +162,7 @@ export async function createScheduleList(
       t.push({
         template,
         target,
+        perOccurrenceAmount: target,
         next_date_string,
         target_interval,
         target_frequency,
@@ -231,6 +240,7 @@ export async function buildMonthlyOutflow(
   category: CategoryEntity,
 ): Promise<number[]> {
   const monthlyOutflow = new Array(FORECAST_MONTHS).fill(0);
+  const windowStart = monthUtils.firstDayOfMonth(current_month);
   const windowEnd = `${monthUtils.addMonths(current_month, FORECAST_MONTHS)}-01`;
 
   for (const entry of smoothEntries) {
@@ -245,7 +255,7 @@ export async function buildMonthlyOutflow(
         current_month,
       );
       if (monthIndex >= 0 && monthIndex < FORECAST_MONTHS) {
-        monthlyOutflow[monthIndex] += entry.target;
+        monthlyOutflow[monthIndex] += entry.perOccurrenceAmount;
       }
     }
   }
@@ -255,7 +265,8 @@ export async function buildMonthlyOutflow(
       .filter({
         category: category.id,
         schedule: null,
-        date: { $gte: current_month, $lt: windowEnd },
+        'account.offbudget': false,
+        date: { $gte: windowStart, $lt: windowEnd },
       })
       .select(['amount', 'date']),
   );

@@ -795,6 +795,49 @@ describe('buildMonthlyOutflow', () => {
     expect(outflow[2]).toBe(15000); // March: 10000 schedule + 5000 unlinked
     expect(outflow[3]).toBe(10000);
   });
+
+  it('buckets a weekly schedule by its per-occurrence amount, not its monthly-aggregated target', async () => {
+    // Regression test for the sub-monthly over-forecast bug: `target` on a
+    // weekly entry is the *aggregated* monthly total (createScheduleList
+    // sums every occurrence landing in its aggregation window into
+    // `target`), not a per-occurrence amount. Bucketing occurrences by
+    // `target` instead of `perOccurrenceAmount` would multiply an
+    // already-aggregated monthly total by the occurrence count again.
+    //
+    // 2024-01-01 is a Monday, so weekly-every-Monday from that date lands
+    // on 5 Mondays in January (1, 8, 15, 22, 29) and 4 in February (5, 12,
+    // 19, 26) -- a real, independently-verifiable calendar fact, not a
+    // number derived from the code under test.
+    mockSingleSchedule({
+      start: '2024-01-01',
+      amount: -1000,
+      frequency: 'weekly',
+    });
+    const template = {
+      type: 'schedule',
+      name: 'Weekly Bill',
+      priority: 0,
+      directive: 'template',
+    } as const;
+    const { t } = await createScheduleList(
+      [template],
+      '2024-01-01',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    // Sanity check on the fixture itself: target is the aggregated
+    // January total (5 occurrences), not the single-occurrence amount.
+    expect(t[0].target).toBe(5000);
+    expect(t[0].perOccurrenceAmount).toBe(1000);
+
+    vi.mocked(aqlQuery).mockResolvedValue({ data: [] } as never);
+
+    const outflow = await buildMonthlyOutflow(t, '2024-01-01', defaultCategory);
+
+    expect(outflow[0]).toBe(5000); // 5 Mondays in January x $10
+    expect(outflow[1]).toBe(4000); // 4 Mondays in February x $10
+  });
 });
 
 describe('runScheduleForecast', () => {
@@ -1065,6 +1108,111 @@ describe('runScheduleForecast', () => {
     expect(result.perScheduleMonthly.size).toBe(2);
     for (const share of result.perScheduleMonthly.values()) {
       expect(Number.isFinite(share)).toBe(true);
+    }
+  });
+});
+
+describe('runScheduleForecast (real AQL query path)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(db.getAccounts).mockResolvedValue([]);
+  });
+
+  it('builds and compiles a real unlinked-transaction query for a month-shaped current_month and a weekly schedule', async () => {
+    // Integration regression test for Fix 1 (month-shaped `current_month`
+    // like '2024-01' must not throw a CompileError from the AQL date
+    // caster, which requires day-shaped date literals) and Fix 2 (a
+    // weekly, non-monthly schedule must not be over-counted).
+    //
+    // `#server/aql` is automocked for the rest of this file (see the
+    // top-level `vi.mock('#server/aql')`), which is exactly what would
+    // hide both of these bugs: the query never actually gets built or
+    // compiled. To exercise the real query-building/compiling path we
+    // unmock just this module and re-import it (and its dependents) into
+    // a fresh module registry, while `#server/db` stays mocked -- so the
+    // real AQL compiler runs, and only the actual SQLite read at the very
+    // bottom (`db.all`) is stubbed.
+    vi.resetModules();
+    vi.doUnmock('#server/aql');
+
+    const dbMod = await import('#server/db');
+    vi.mocked(dbMod.getAccounts).mockResolvedValue([]);
+    vi.mocked(dbMod.first).mockResolvedValue({ id: 1, completed: 0 } as never);
+    // The compiler's date caster stores dates as an integer (YYYYMMDD);
+    // db.all returns raw SQLite rows, which applyTypes then converts back
+    // to a 'yyyy-MM-dd' string via convertOutputType.
+    // Return a fresh array/object on every call: `applyTypes` mutates the
+    // returned rows in place when converting output types, and this test
+    // calls the real query-building path more than once (`runScheduleForecast`
+    // internally, then again independently below to verify the result).
+    vi.mocked(dbMod.all).mockImplementation(
+      async () => [{ amount: -500, date: 20240120 }] as never,
+    );
+
+    const scheduleAppMod = await import('#server/schedules/app');
+    vi.mocked(scheduleAppMod.getRuleForSchedule).mockResolvedValue(
+      makeRule({ start: '2024-01-01', amount: -1000, frequency: 'weekly' }),
+    );
+
+    const actionsMod = await import('./actions');
+    vi.mocked(actionsMod.isTrackingBudget).mockReturnValue(false);
+
+    const scheduleTemplateMod = await import('./schedule-template');
+
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'Weekly Bill',
+        priority: 0,
+        directive: 'template',
+      } as const,
+    ];
+
+    try {
+      // Month-shaped, as the real budget engine passes it -- this is what
+      // Fix 1 makes safe to pass straight to the AQL query.
+      const result = await scheduleTemplateMod.runScheduleForecast(
+        template_lines,
+        '2024-01',
+        0,
+        0,
+        0,
+        [],
+        defaultCategory,
+        defaultCurrency,
+      );
+
+      expect(result.errors).toHaveLength(0);
+      // Re-derive the projection independently to confirm the query result
+      // (the unlinked $5 transaction on 2024-01-20) and the weekly
+      // schedule's per-occurrence amount were both folded in correctly,
+      // rather than asserting a value that could pass by coincidence.
+      const { t } = await scheduleTemplateMod.createScheduleList(
+        template_lines as ScheduleTemplate[],
+        '2024-01',
+        defaultCategory,
+        defaultCurrency,
+      );
+      const outflow = await scheduleTemplateMod.buildMonthlyOutflow(
+        t,
+        '2024-01',
+        defaultCategory,
+      );
+      // 5 Mondays in January 2024 x $10 + the $5 unlinked transaction.
+      expect(outflow[0]).toBe(5000 + 500);
+
+      let runningBalance = 0;
+      let minBalance = Infinity;
+      for (let i = 0; i < 60; i++) {
+        runningBalance += result.to_budget - outflow[i];
+        minBalance = Math.min(minBalance, runningBalance);
+      }
+      expect(minBalance).toBeGreaterThanOrEqual(0);
+    } finally {
+      // Restore the file-wide automock and module registry for any tests
+      // that run after this one.
+      vi.doMock('#server/aql');
+      vi.resetModules();
     }
   });
 });
