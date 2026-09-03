@@ -5,7 +5,7 @@ import type { Currency } from '#shared/currencies';
 import type { CategoryEntity } from '#types/models';
 
 import { isTrackingBudget } from './actions';
-import { runSchedule } from './schedule-template';
+import { createScheduleList, runSchedule } from './schedule-template';
 
 vi.mock('#server/db');
 vi.mock('./actions');
@@ -688,5 +688,36 @@ describe('runSchedule', () => {
       defaultCurrency,
     );
     expect(result.to_budget).toBe(0);
+  });
+});
+
+describe('createScheduleList', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(db.getAccounts).mockResolvedValue([]);
+  });
+
+  it('includes dateConditions on each returned entry', async () => {
+    mockSingleSchedule({
+      start: '2024-08-01',
+      amount: -10000,
+      frequency: 'monthly',
+    });
+    const template = {
+      type: 'schedule',
+      name: 'Test Schedule',
+      priority: 0,
+      directive: 'template',
+    } as const;
+
+    const { t } = await createScheduleList(
+      [template],
+      '2024-08-01',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(t[0].dateConditions).toBeDefined();
+    expect(t[0].dateConditions.value.frequency).toBe('monthly');
   });
 });

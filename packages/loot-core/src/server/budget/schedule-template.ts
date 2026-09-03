@@ -28,9 +28,10 @@ type ScheduleTemplateTarget = {
   completed: number;
   full: boolean;
   repeat: boolean;
+  dateConditions: ReturnType<typeof extractScheduleConds>['date'];
 };
 
-async function createScheduleList(
+export async function createScheduleList(
   templates: ScheduleTemplate[],
   current_month: string,
   category: CategoryEntity,
@@ -159,6 +160,7 @@ async function createScheduleList(
         full: template.full === null ? false : template.full,
         repeat: isRepeating,
         name: displayName,
+        dateConditions,
       });
       if (!completed) {
         if (isRepeating) {
