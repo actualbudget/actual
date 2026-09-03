@@ -1,15 +1,18 @@
 // @ts-strict-ignore
 
+import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { collectFormulasFromActions } from '#server/rules/balanceOfFormula';
 import { getRuleForSchedule } from '#server/schedules/app';
 import { prefetchBalanceOfForTransaction } from '#server/transactions/transaction-rules';
 import type { Currency } from '#shared/currencies';
 import * as monthUtils from '#shared/months';
+import { q } from '#shared/query';
 import {
   extractScheduleConds,
   getDateWithSkippedWeekend,
   getNextDate,
+  getOccurrencesBetween,
 } from '#shared/schedules';
 import { amountToInteger } from '#shared/util';
 import type { CategoryEntity, TransactionEntity } from '#types/models';
@@ -218,6 +221,57 @@ export async function createScheduleList(
     }
   }
   return { t: t.filter(c => c.completed === 0), errors };
+}
+
+const FORECAST_MONTHS = 60;
+
+export async function buildMonthlyOutflow(
+  smoothEntries: ScheduleTemplateTarget[],
+  current_month: string,
+  category: CategoryEntity,
+): Promise<number[]> {
+  const monthlyOutflow = new Array(FORECAST_MONTHS).fill(0);
+  const windowEnd = `${monthUtils.addMonths(current_month, FORECAST_MONTHS)}-01`;
+
+  for (const entry of smoothEntries) {
+    const occurrences = getOccurrencesBetween(
+      entry.dateConditions,
+      current_month,
+      windowEnd,
+    );
+    for (const occurrenceDate of occurrences) {
+      const monthIndex = monthUtils.differenceInCalendarMonths(
+        occurrenceDate,
+        current_month,
+      );
+      if (monthIndex >= 0 && monthIndex < FORECAST_MONTHS) {
+        monthlyOutflow[monthIndex] += entry.target;
+      }
+    }
+  }
+
+  const { data: unlinkedTransactions } = await aqlQuery(
+    q('transactions')
+      .filter({
+        category: category.id,
+        schedule: null,
+        date: { $gte: current_month, $lt: windowEnd },
+      })
+      .select(['amount', 'date']),
+  );
+
+  const sign = category.is_income ? 1 : -1;
+  for (const transaction of unlinkedTransactions) {
+    const monthIndex = monthUtils.differenceInCalendarMonths(
+      transaction.date,
+      current_month,
+    );
+    if (monthIndex >= 0 && monthIndex < FORECAST_MONTHS) {
+      monthlyOutflow[monthIndex] += sign * transaction.amount;
+    }
+  }
+
+  return monthlyOutflow;
 }
 
 function getPayMonthOfTotal(t: ScheduleTemplateTarget[]) {

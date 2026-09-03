@@ -1,3 +1,4 @@
+import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { Rule } from '#server/rules';
 import { getRuleForSchedule } from '#server/schedules/app';
@@ -5,9 +6,14 @@ import type { Currency } from '#shared/currencies';
 import type { CategoryEntity } from '#types/models';
 
 import { isTrackingBudget } from './actions';
-import { createScheduleList, runSchedule } from './schedule-template';
+import {
+  buildMonthlyOutflow,
+  createScheduleList,
+  runSchedule,
+} from './schedule-template';
 
 vi.mock('#server/db');
+vi.mock('#server/aql');
 vi.mock('./actions');
 vi.mock('#server/schedules/app', async () => {
   const actualModule = await vi.importActual('#server/schedules/app');
@@ -719,5 +725,71 @@ describe('createScheduleList', () => {
 
     expect(t[0].dateConditions).toBeDefined();
     expect(t[0].dateConditions.value.frequency).toBe('monthly');
+  });
+});
+
+describe('buildMonthlyOutflow', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(db.getAccounts).mockResolvedValue([]);
+  });
+
+  it('buckets each monthly schedule occurrence into its own month index', async () => {
+    mockSingleSchedule({
+      start: '2024-01-15',
+      amount: -10000,
+      frequency: 'monthly',
+    });
+    const template = {
+      type: 'schedule',
+      name: 'Rent',
+      priority: 0,
+      directive: 'template',
+    } as const;
+    const { t } = await createScheduleList(
+      [template],
+      '2024-01-01',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    vi.mocked(aqlQuery).mockResolvedValue({ data: [] } as never);
+
+    const outflow = await buildMonthlyOutflow(t, '2024-01-01', defaultCategory);
+
+    expect(outflow).toHaveLength(60);
+    expect(outflow[0]).toBe(10000);
+    expect(outflow[1]).toBe(10000);
+    expect(outflow[59]).toBe(10000);
+  });
+
+  it('adds an unlinked future-dated transaction only to its own month', async () => {
+    mockSingleSchedule({
+      start: '2024-01-15',
+      amount: -10000,
+      frequency: 'monthly',
+    });
+    const template = {
+      type: 'schedule',
+      name: 'Rent',
+      priority: 0,
+      directive: 'template',
+    } as const;
+    const { t } = await createScheduleList(
+      [template],
+      '2024-01-01',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    vi.mocked(aqlQuery).mockResolvedValue({
+      data: [{ amount: -5000, date: '2024-03-10' }],
+    } as never);
+
+    const outflow = await buildMonthlyOutflow(t, '2024-01-01', defaultCategory);
+
+    expect(outflow[0]).toBe(10000);
+    expect(outflow[2]).toBe(15000); // March: 10000 schedule + 5000 unlinked
+    expect(outflow[3]).toBe(10000);
   });
 });
