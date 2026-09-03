@@ -1,5 +1,5 @@
 ---
-title: 'Desktop app'
+title: 'Desktop App'
 ---
 
 The simplest way to get started with Actual is by [downloading the desktop app](../../../download). This app bundles Actual's full budgeting capabilities into a streamlined application that's perfect for users looking for a smooth, hassle-free experience.

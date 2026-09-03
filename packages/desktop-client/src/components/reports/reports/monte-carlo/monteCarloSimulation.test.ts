@@ -406,7 +406,7 @@ describe('runMonteCarloSimulation', () => {
         {
           returnModel: 'historical-bootstrap',
           historicalReturns: [
-            { year: 2000, stocks: 0.05, bonds: 0.02, cash: 0.01 },
+            { year: 2000, stocks: 0.05, bonds: 0.02, cash: 0.01, inflation: 0 },
           ],
           annualWithdrawal: 3_000,
           horizonYears: 30,
@@ -433,8 +433,8 @@ describe('runMonteCarloSimulation', () => {
         {
           returnModel: 'historical-sequence',
           historicalReturns: [
-            { year: 2000, stocks: 1, bonds: 0, cash: 0 },
-            { year: 2001, stocks: -0.5, bonds: 0, cash: 0 },
+            { year: 2000, stocks: 1, bonds: 0, cash: 0, inflation: 0 },
+            { year: 2001, stocks: -0.5, bonds: 0, cash: 0, inflation: 0 },
           ],
           annualWithdrawal: 10,
           horizonYears: 2,
@@ -451,13 +451,98 @@ describe('runMonteCarloSimulation', () => {
     expect(result.medianEndingBalance).toBe(78); // midpoint of 70 and 85
   });
 
+  it("historical models use each sampled year's own inflation", () => {
+    // Two flat-return years with very different inflation; in today's
+    // money the untouched balance shrinks by exactly each year's rate
+    const jointInflationParams = makeParams(
+      {
+        returnModel: 'historical-sequence',
+        historicalReturns: [
+          { year: 2000, stocks: 0, bonds: 0, cash: 0, inflation: 0.1 },
+          { year: 2001, stocks: 0, bonds: 0, cash: 0, inflation: 0.25 },
+        ],
+        annualWithdrawal: 0,
+        horizonYears: 2,
+        inflationMean: 0.025,
+        inflationStdDev: 0,
+        deflateToTodaysMoney: true,
+        captureRunDetail: 0,
+      },
+      { startingBalance: 100_000, allocationPreset: 'equity-100' },
+    );
+    const result = runMonteCarloSimulation(jointInflationParams);
+
+    // 100,000 / 1.1 then / (1.1 x 1.25)
+    expect(result.runDetail!.map(row => row.endBalance)).toEqual([
+      90_909, 72_727,
+    ]);
+    // Each captured year reports the sampled year's rate
+    expect(result.runDetail!.map(row => row.inflation)).toEqual([0.1, 0.25]);
+
+    // The user's inflation settings are inert under historical models -
+    // only the sampled years' inflation matters
+    const differentSettings = runMonteCarloSimulation({
+      ...jointInflationParams,
+      inflationMean: 0.9,
+      inflationStdDev: 0.5,
+    });
+    expect(differentSettings.percentileBands).toEqual(result.percentileBands);
+  });
+
+  it('disabling inflation keeps historical models flat', () => {
+    // An explicit opt-out (blank mean) wins over the sampled years'
+    // inflation - withdrawals and balances stay nominal
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          returnModel: 'historical-sequence',
+          historicalReturns: [
+            { year: 2000, stocks: 0, bonds: 0, cash: 0, inflation: 0.5 },
+            { year: 2001, stocks: 0, bonds: 0, cash: 0, inflation: 0.5 },
+          ],
+          annualWithdrawal: 0,
+          horizonYears: 2,
+          inflationMean: null,
+          captureRunDetail: 0,
+        },
+        { startingBalance: 100_000, allocationPreset: 'equity-100' },
+      ),
+    );
+
+    expect(result.runDetail!.map(row => row.endBalance)).toEqual([
+      100_000, 100_000,
+    ]);
+    expect(result.runDetail!.map(row => row.inflation)).toEqual([null, null]);
+  });
+
+  it('reports the fixed inflation rate on captured rows under the normal model', () => {
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 0,
+          horizonYears: 3,
+          inflationMean: 0.025,
+          inflationStdDev: 0,
+          captureRunDetail: 0,
+        },
+        { startingBalance: 100_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    expect(result.runDetail!.map(row => row.inflation)).toEqual([
+      0.025, 0.025, 0.025,
+    ]);
+  });
+
   it('keeps custom pots on normal draws in historical modes', () => {
     // An absurd history that would explode the balance if it were used
     const historical = runMonteCarloSimulation(
       makeParams(
         {
           returnModel: 'historical-bootstrap',
-          historicalReturns: [{ year: 2000, stocks: 9, bonds: 9, cash: 9 }],
+          historicalReturns: [
+            { year: 2000, stocks: 9, bonds: 9, cash: 9, inflation: 0 },
+          ],
         },
         { expectedReturnMean: 0.05, returnStdDev: 0 },
       ),
@@ -817,10 +902,10 @@ describe('runMonteCarloSimulation', () => {
         returnModel: 'historical-sequence',
         captureRunDetail: 0,
         historicalReturns: [
-          { year: 2001, stocks: -0.5, bonds: 0, cash: 0 },
-          { year: 2002, stocks: 1, bonds: 0, cash: 0 },
-          { year: 2003, stocks: -0.5, bonds: 0, cash: 0 },
-          { year: 2004, stocks: 1, bonds: 0, cash: 0 },
+          { year: 2001, stocks: -0.5, bonds: 0, cash: 0, inflation: 0 },
+          { year: 2002, stocks: 1, bonds: 0, cash: 0, inflation: 0 },
+          { year: 2003, stocks: -0.5, bonds: 0, cash: 0, inflation: 0 },
+          { year: 2004, stocks: 1, bonds: 0, cash: 0, inflation: 0 },
         ],
         pots: [
           makePot({

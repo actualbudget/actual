@@ -3160,6 +3160,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@docusaurus/plugin-client-redirects@npm:^3.10.2":
+  version: 3.10.2
+  resolution: "@docusaurus/plugin-client-redirects@npm:3.10.2"
+  dependencies:
+    "@docusaurus/core": "npm:3.10.2"
+    "@docusaurus/logger": "npm:3.10.2"
+    "@docusaurus/utils": "npm:3.10.2"
+    "@docusaurus/utils-common": "npm:3.10.2"
+    "@docusaurus/utils-validation": "npm:3.10.2"
+    eta: "npm:^2.2.0"
+    fs-extra: "npm:^11.1.1"
+    lodash: "npm:^4.17.21"
+    tslib: "npm:^2.6.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  checksum: 10/a88575e24ed17a7c47e799309cd17820a3d04b2cc63668a321a43bf6a6fd04ea45ab205a396d236c096de57d1b4e70480c188dc47bf2ebc00c9b2612c63ac745
+  languageName: node
+  linkType: hard
+
 "@docusaurus/plugin-content-blog@npm:3.10.2":
   version: 3.10.2
   resolution: "@docusaurus/plugin-content-blog@npm:3.10.2"
@@ -13555,7 +13575,7 @@ __metadata:
     better-sqlite3: "npm:^12.11.1"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^10.1.0"
-    electron: "npm:41.10.3"
+    electron: "npm:43.4.0"
     electron-builder: "npm:26.8.1"
     typescript-strict-plugin: "npm:^2.4.4"
   languageName: unknown
@@ -13721,6 +13741,7 @@ __metadata:
     "@actual-app/ci-actions": "workspace:*"
     "@docusaurus/core": "npm:^3.10.2"
     "@docusaurus/module-type-aliases": "npm:^3.10.2"
+    "@docusaurus/plugin-client-redirects": "npm:^3.10.2"
     "@docusaurus/plugin-content-docs": "npm:^3.10.2"
     "@docusaurus/plugin-ideal-image": "npm:^3.10.2"
     "@docusaurus/preset-classic": "npm:^3.10.2"
@@ -14004,16 +14025,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:41.10.3":
-  version: 41.10.3
-  resolution: "electron@npm:41.10.3"
+"electron@npm:43.4.0":
+  version: 43.4.0
+  resolution: "electron@npm:43.4.0"
   dependencies:
     "@electron-internal/extract-zip": "npm:^1.0.1"
     "@electron/get": "npm:^5.0.0"
     "@types/node": "npm:^24.9.0"
   bin:
     electron: cli.js
-  checksum: 10/cda634238f7b12f87d5374c0a3af1bfe19d2b38ec6c9e08ed10d288cf4baee73da1483a5adf2a4f5ab1df87fb4f8467c4a3ed27da22cadc5ffa1585aba248990
+    install-electron: install.js
+  checksum: 10/215b76f05bd23a04040091372fedfcf36d2365362b3f15ce955e0ec0c28fed0377283b7a763ade87c473dc8377a2082b070f92cd94877d40403cf7a3c71cb0a0
   languageName: node
   linkType: hard
 
@@ -20230,11 +20252,11 @@ __metadata:
   linkType: hard
 
 "nanoid@npm:^3.3.16":
-  version: 3.3.16
-  resolution: "nanoid@npm:3.3.16"
+  version: 3.3.18
+  resolution: "nanoid@npm:3.3.18"
   bin:
     nanoid: bin/nanoid.cjs
-  checksum: 10/8004af92b5541af1dbd23b69845b5026f777d5b7ef07163cea1837aae86e052ced8b383cecbf8a4f1b5e77ae207df96dc45e16b9e0fa3c4b761d085f1e42851b
+  checksum: 10/1b3b4fdac831b92b56d1dbe8b1e63a372432faf86ea383134e3b53141ef8108a60b7f84343b5cefecac9550bb74edf8164da93ea07d1c4f757039bc75d8a5d9e
   languageName: node
   linkType: hard
 
