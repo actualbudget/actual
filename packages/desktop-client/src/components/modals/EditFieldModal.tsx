@@ -15,14 +15,12 @@ import {
 } from '@actual-app/core/shared/util';
 import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
 
+import { NoteTagAutocomplete } from '#components/autocomplete/NoteTagAutocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { SectionLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { DateSelect } from '#components/select/DateSelect';
 import { useDateFormat } from '#hooks/useDateFormat';
-import { useInputRefValue } from '#hooks/useInputRefValue';
-import { useTagCSS } from '#hooks/useTagCSS';
-import { useTags } from '#hooks/useTags';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 
 const itemStyle: CSSProperties = {
@@ -57,16 +55,6 @@ export function EditFieldModal({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const noteInputRef = useRef<HTMLInputElement | null>(null);
   const noteReplaceInputRef = useRef<HTMLInputElement | null>(null);
-  const [noteValue, setNoteValue] = useInputRefValue(noteInputRef);
-  const { data: allTags = [] } = useTags();
-  const getTagCSS = useTagCSS({ ellipsis: true });
-
-  function handleTagClick(tag: string) {
-    if (!noteInputRef.current) return;
-    const separator = noteValue && !noteValue.endsWith(' ') ? ' ' : '';
-    setNoteValue(`${noteValue}${separator}#${tag} `);
-    noteInputRef.current.focus();
-  }
 
   function onSelectNote(value: NoteAmendValue, mode?: NoteAmendMode) {
     if (value != null) {
@@ -255,28 +243,7 @@ export function EditFieldModal({
                 }}
                 style={inputStyle}
               />
-              {allTags.length > 0 && (
-                <View
-                  aria-label={t('Existing tags')}
-                  style={{
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    gap: 4,
-                    marginTop: 8,
-                  }}
-                >
-                  {allTags.map(tag => (
-                    <Button
-                      key={tag.id}
-                      variant="bare"
-                      className={getTagCSS(tag.tag)}
-                      onPress={() => handleTagClick(tag.tag)}
-                    >
-                      #{tag.tag}
-                    </Button>
-                  ))}
-                </View>
-              )}
+              <NoteTagAutocomplete inputRef={noteInputRef} />
             </>
           )}
         </>
