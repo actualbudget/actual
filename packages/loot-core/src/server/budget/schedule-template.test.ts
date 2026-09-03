@@ -4,12 +4,15 @@ import { Rule } from '#server/rules';
 import { getRuleForSchedule } from '#server/schedules/app';
 import type { Currency } from '#shared/currencies';
 import type { CategoryEntity } from '#types/models';
+import type { ScheduleTemplate } from '#types/models/templates';
 
 import { isTrackingBudget } from './actions';
 import {
   buildMonthlyOutflow,
   createScheduleList,
   runSchedule,
+  runScheduleForecast,
+  solveMonthlyContribution,
 } from './schedule-template';
 
 vi.mock('#server/db');
@@ -791,5 +794,217 @@ describe('buildMonthlyOutflow', () => {
     expect(outflow[0]).toBe(10000);
     expect(outflow[2]).toBe(15000); // March: 10000 schedule + 5000 unlinked
     expect(outflow[3]).toBe(10000);
+  });
+});
+
+describe('runScheduleForecast', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(db.getAccounts).mockResolvedValue([]);
+    vi.mocked(aqlQuery).mockResolvedValue({ data: [] } as never);
+  });
+
+  it('contributes the exact monthly amount for a single monthly schedule', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'Rent',
+        priority: 0,
+        directive: 'template',
+      } as const,
+    ];
+    mockSingleSchedule({
+      start: '2024-01-15',
+      amount: -10000,
+      frequency: 'monthly',
+    });
+
+    const result = await runScheduleForecast(
+      template_lines,
+      '2024-01-01',
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.to_budget).toBe(10000);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('never projects a negative month-end balance across two schedules sharing a category', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'Monthly',
+        priority: 0,
+        directive: 'template',
+      } as const,
+      {
+        type: 'schedule',
+        name: 'Yearly',
+        priority: 0,
+        directive: 'template',
+      } as const,
+    ];
+    mockSchedulesByName({
+      Monthly: {
+        spec: { start: '2024-01-15', amount: -10000, frequency: 'monthly' },
+      },
+      Yearly: {
+        spec: { start: '2024-12-15', amount: -60000, frequency: 'yearly' },
+      },
+    });
+
+    const result = await runScheduleForecast(
+      template_lines,
+      '2024-01-01',
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    // Re-derive the projection with the returned candidate to check the
+    // postcondition directly, rather than asserting against runSchedule.
+    const { t } = await createScheduleList(
+      template_lines as ScheduleTemplate[],
+      '2024-01-01',
+      defaultCategory,
+      defaultCurrency,
+    );
+    const outflow = await buildMonthlyOutflow(t, '2024-01-01', defaultCategory);
+    let runningBalance = 0;
+    let minBalance = Infinity;
+    for (let i = 0; i < 60; i++) {
+      runningBalance += result.to_budget - outflow[i];
+      minBalance = Math.min(minBalance, runningBalance);
+    }
+    expect(minBalance).toBeGreaterThanOrEqual(0);
+    // And it should be the *minimal* such contribution: one cent less
+    // must produce a negative month somewhere.
+    let runningBalanceMinusOne = 0;
+    let wentNegative = false;
+    for (let i = 0; i < 60; i++) {
+      runningBalanceMinusOne += result.to_budget - 1 - outflow[i];
+      if (runningBalanceMinusOne < 0) wentNegative = true;
+    }
+    expect(wentNegative).toBe(true);
+  });
+
+  it('covers a same-month-due schedule in full immediately rather than smoothing it away', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'DueNow',
+        priority: 0,
+        directive: 'template',
+      } as const,
+    ];
+    mockSingleSchedule({
+      start: '2024-01-15',
+      amount: -60000,
+      frequency: 'yearly',
+    });
+
+    const result = await runScheduleForecast(
+      template_lines,
+      '2024-01-01',
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.to_budget).toBe(60000);
+  });
+
+  it('budgets full-flag schedules on top of, and separate from, the forecast', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'Full',
+        full: true,
+        priority: 0,
+        directive: 'template',
+      } as const,
+      {
+        type: 'schedule',
+        name: 'Smooth',
+        priority: 0,
+        directive: 'template',
+      } as const,
+    ];
+    mockSchedulesByName({
+      Full: {
+        spec: { start: '2024-12-15', amount: -60000, frequency: 'yearly' },
+      },
+      Smooth: {
+        spec: { start: '2024-01-15', amount: -10000, frequency: 'monthly' },
+      },
+    });
+
+    const result = await runScheduleForecast(
+      template_lines,
+      '2024-01-01',
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    // Full schedule isn't due this month, so its on-top contribution is 0;
+    // only the smooth monthly schedule contributes.
+    expect(result.to_budget).toBe(10000);
+    expect(result.perScheduleMonthly.get(template_lines[1])).toBe(10000);
+  });
+});
+
+describe('solveMonthlyContribution', () => {
+  it('finds the minimal whole-cent contribution for a single one-time bill', () => {
+    const monthlyOutflow = new Array(60).fill(0);
+    monthlyOutflow[30] = 60000; // one bill, due in month 30
+    const candidate = solveMonthlyContribution(0, monthlyOutflow);
+    // 60000 / 31 months = 1935.48 -> ceil to 1936; verify it actually
+    // covers month 30 and is the minimal such whole-cent amount.
+    expect(candidate * 31).toBeGreaterThanOrEqual(60000);
+    expect((candidate - 1) * 31).toBeLessThan(60000);
+  });
+
+  it('picks the early month with the larger threshold, not the late month with the larger raw balance', () => {
+    // Regression test for the weighting bug the closed form replaces
+    // (see the design spec's Iteration Algorithm > Derivation section).
+    // Month 0 needs 100/cent-month (weight 1); month 59 needs slightly
+    // less per-cent-month but the raw shortfall at any shared candidate
+    // is larger there purely because of the (i+1) weighting. The
+    // correct answer is governed by whichever month's *threshold*
+    // (need / (i+1)) is larger, not whichever month's raw balance is
+    // more negative — here that's month 0.
+    // Month 0's own outflow is 100 (threshold_0 = 100/1 = 100). Month
+    // 59's *cumulative* outflow needs to make threshold_59 = 149, i.e.
+    // cumsum_59 = 149 * 60 = 8940, with month 0's 100 already part of
+    // that cumulative sum.
+    const outflow = new Array(60).fill(0);
+    outflow[0] = 100;
+    outflow[59] = 8940 - 100;
+
+    const candidate = solveMonthlyContribution(0, outflow);
+    expect(candidate).toBe(149); // threshold_59, the true max — not threshold_0 (100)
+
+    let runningBalance = 0;
+    let minBalance = Infinity;
+    for (let i = 0; i < 60; i++) {
+      runningBalance += candidate - outflow[i];
+      minBalance = Math.min(minBalance, runningBalance);
+    }
+    expect(minBalance).toBeGreaterThanOrEqual(0);
   });
 });

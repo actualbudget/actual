@@ -467,3 +467,117 @@ export async function runSchedule(
   }
   return { to_budget, errors, remainder, perScheduleMonthly };
 }
+
+// Pure, synchronous: given a starting balance and a 60-length projected
+// monthly-outflow array (an entry can be negative — an unlinked inflow
+// transaction offsets that month's need), returns the minimal whole-cent
+// monthly contribution that keeps the projected balance non-negative
+// across the whole window.
+//
+// Each month i's balance is affine in `candidate`:
+//   balance[i] = startingBalance + (i + 1) * candidate - cumsum[i]
+// so balance[i] >= 0 for all i  <=>  candidate >= threshold_i for all i,
+// where threshold_i = (cumsum[i] - startingBalance) / (i + 1) does not
+// depend on candidate at all. The answer is simply max_i(threshold_i) —
+// see the design spec's Iteration Algorithm section for the derivation
+// and why an earlier guess-and-correct version of this function was
+// wrong (it operated on each month's raw balance, which is the
+// threshold gap scaled by (i + 1) — a late month's small gap can
+// produce a larger raw balance than an early month's large gap, so
+// picking the extremum of raw balance does not reliably find
+// max_i(threshold_i)).
+export function solveMonthlyContribution(
+  startingBalance: number,
+  monthlyOutflow: number[],
+): number {
+  let candidate = 0;
+  let cumsum = 0;
+
+  for (let i = 0; i < monthlyOutflow.length; i++) {
+    cumsum += monthlyOutflow[i];
+    const threshold = Math.ceil((cumsum - startingBalance) / (i + 1));
+    candidate = Math.max(candidate, threshold);
+  }
+
+  return candidate;
+}
+
+export async function runScheduleForecast(
+  template_lines: Template[],
+  current_month: string,
+  balance: number,
+  last_month_balance: number,
+  to_budget: number,
+  errors: string[],
+  category: CategoryEntity,
+  currency: Currency,
+): Promise<{
+  to_budget: number;
+  errors: string[];
+  perScheduleMonthly: Map<ScheduleTemplate, number>;
+}> {
+  const scheduleTemplates = template_lines.filter(t => t.type === 'schedule');
+  const t = await createScheduleList(
+    scheduleTemplates,
+    current_month,
+    category,
+    currency,
+  );
+  errors = errors.concat(t.errors);
+
+  const fullEntries = t.t.filter(c => c.template.full);
+  const smoothEntries = t.t.filter(c => !c.template.full);
+
+  const perScheduleMonthly = new Map<ScheduleTemplate, number>();
+  // Full-flag schedules keep today's exact runSchedule behavior: they're
+  // budgeted in full only when due this month, never smoothed and never
+  // budgeted ahead of time.
+  const fullContribution = fullEntries.reduce((sum, c) => {
+    const contribution = c.num_months === 0 ? c.target : 0;
+    perScheduleMonthly.set(
+      c.template,
+      (perScheduleMonthly.get(c.template) ?? 0) + contribution,
+    );
+    return sum + contribution;
+  }, 0);
+
+  if (smoothEntries.length === 0) {
+    return {
+      to_budget: to_budget + fullContribution,
+      errors,
+      perScheduleMonthly,
+    };
+  }
+
+  const monthlyOutflow = await buildMonthlyOutflow(
+    smoothEntries,
+    current_month,
+    category,
+  );
+  const forecastStartingBalance = balance - fullContribution;
+  const candidate = solveMonthlyContribution(
+    forecastStartingBalance,
+    monthlyOutflow,
+  );
+
+  // Split the single smoothed candidate back out across the smooth
+  // schedules that share this category, proportional to each schedule's
+  // own average monthly target (not the 60-month total outflow, which
+  // would understate every schedule's share by a factor of ~60).
+  const totalMonthlyTarget = smoothEntries.reduce((s, c) => s + c.target, 0);
+
+  for (const entry of smoothEntries) {
+    const share =
+      Math.round((entry.target / totalMonthlyTarget) * candidate) || 0;
+    perScheduleMonthly.set(
+      entry.template,
+      (perScheduleMonthly.get(entry.template) ?? 0) + share,
+    );
+  }
+
+  return {
+    to_budget: to_budget + fullContribution + candidate,
+    errors,
+    perScheduleMonthly,
+  };
+}
