@@ -1322,6 +1322,69 @@ describe('CategoryTemplateContext', () => {
       scheduleForecastConfig.enabled = false;
     });
 
+    it('dispatches to runScheduleForecast by default, without setting the gate', async () => {
+      // Must run before any other test in this block sets
+      // scheduleForecastConfig.enabled — it asserts the module's untouched
+      // initial value rather than a value a test set.
+      expect(scheduleForecastConfig.enabled).toBe(true);
+      vi.mocked(aql.aqlQuery).mockImplementation(async (query: unknown) => {
+        const queryStr = JSON.stringify(query);
+        if (queryStr.includes('transactions')) {
+          return { data: [], dependencies: [] };
+        }
+        if (queryStr.includes('hideFraction')) {
+          return { data: [{ value: 'false' }], dependencies: [] };
+        }
+        if (queryStr.includes('defaultCurrencyCode')) {
+          return { data: [{ value: 'USD' }], dependencies: [] };
+        }
+        return { data: [], dependencies: [] };
+      });
+
+      const instance = await CategoryTemplateContext.init(
+        templates,
+        category,
+        '2024-01',
+        0,
+      );
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
+
+      const currency = {
+        code: 'USD',
+        symbol: '$',
+        name: 'US Dollar',
+        decimalPlaces: 2,
+        numberFormat: 'comma-dot',
+        symbolFirst: true,
+      } satisfies Currency;
+      const expected = await runScheduleForecast(
+        templates,
+        '2024-01',
+        0,
+        0,
+        0,
+        [],
+        category,
+        currency,
+      );
+      // Guard against this test coincidentally passing if the dispatch gate
+      // is broken: confirm the two algorithms actually produce different
+      // totals for this fixture before asserting which one was dispatched.
+      const otherAlgorithm = await runSchedule(
+        templates,
+        '2024-01',
+        0,
+        0,
+        0,
+        0,
+        [],
+        category,
+        currency,
+      );
+      expect(expected.to_budget).not.toBe(otherAlgorithm.to_budget);
+      expect(result).toBe(expected.to_budget);
+    });
+
     it('dispatches to runSchedule when the gate is explicitly disabled', async () => {
       scheduleForecastConfig.enabled = false;
 
