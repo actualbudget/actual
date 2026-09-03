@@ -128,7 +128,7 @@ By default, the simulation withdraws the same (inflation-adjusted) amount every 
 
 All the rules share a few ideas:
 
-- Your **spending phases** set the planned amounts. The rules wake up in your first year of planned spending: that year takes the planned amount as-is, and from the next year onward the rule adjusts what's actually taken - independently in every replay, reacting to how that replay is going. Zero-spend years (for example, working years before retirement) neither trigger nor move the rules. A cut or raise carries across phase boundaries: if the rule cut your spending by 10% during a rough patch, the next phase's amount starts 10% lower too.
+- Your **spending phases** set the planned amounts. The rules wake up in your first year of planned spending: that year takes the planned amount (only a **Minimum withdrawal** set higher than it can override that), and from the next year onward the rule adjusts what's actually taken - independently in every replay, reacting to how that replay is going. Zero-spend years (for example, working years before retirement) neither trigger nor move the rules. A cut or raise carries across phase boundaries: if the rule cut your spending by 10% during a rough patch, the next phase's amount starts 10% lower too.
 - Rules usually improve your **success rate** by cutting spending in bad times, but that safety isn't free - you get it by living on less. Keep an eye on the **Median total withdrawn** stat to see what a rule costs you in income.
 - Rules only see the wealth you can actually spend. If a pension is locked until its access age, it doesn't earn you spending raises while a bridge pot pays the bills - the rules watch the accessible pots, and the pension starts counting the moment it unlocks.
 
