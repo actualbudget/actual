@@ -36,15 +36,15 @@ import { getActiveSchedules } from './statements';
 // This is a mutable exported object read at call time, not a build-time
 // constant — no bundler can tree-shake the disabled branch, so both code
 // paths (and their AQL imports) still ship regardless of this flag's
-// value. Not yet a user-facing or per-category setting — flip to measure
-// perf before deciding rollout.
+// value. Defaulted on for this branch/PR so reviewers exercise the new
+// algorithm directly; not yet a per-category setting.
 //
 // Exported as a mutable object, not a bare const, so tests can flip it
 // per-`describe`/`it` block and exercise both dispatch paths through the
 // same integration surface, rather than only reaching runSchedule and
 // runScheduleForecast directly (schedule-template.test.ts) or having to
 // module-mock this file to test the gate itself.
-export const scheduleForecastConfig = { enabled: false };
+export const scheduleForecastConfig = { enabled: true };
 
 export class CategoryTemplateContext {
   /*----------------------------------------------------------------------------
