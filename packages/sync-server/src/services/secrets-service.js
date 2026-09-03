@@ -12,6 +12,7 @@ export const SecretName = {
   gocardless_secretKey: 'gocardless_secretKey',
   simplefin_token: 'simplefin_token',
   simplefin_accessKey: 'simplefin_accessKey',
+  lhv_refreshToken: 'lhv_refreshToken',
   pluggyai_clientId: 'pluggyai_clientId',
   pluggyai_clientSecret: 'pluggyai_clientSecret',
   pluggyai_itemIds: 'pluggyai_itemIds',
@@ -41,7 +42,7 @@ class SecretsDb {
     }
 
     const secretKey = getSecretKey(name, fileId);
-    this.debug(`setting secret '${name}' to '${value}'`);
+    this.debug(`setting secret '${name}'`);
     return this.db.mutate(
       `INSERT OR REPLACE INTO secrets (name, value) VALUES (?, ?)`,
       [secretKey, value],

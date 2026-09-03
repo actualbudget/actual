@@ -16,9 +16,15 @@ app.use(express.json());
 app.use(requestLoggerMiddleware);
 app.use(validateSessionMiddleware);
 
+const perBudgetFileOnlySecrets = new Set([SecretName.lhv_refreshToken]);
+
 // Global secrets are admin-managed.
 function canManageGlobalSecrets(userId) {
   return isAdmin(userId);
+}
+
+function requiresBudgetFileScope(name) {
+  return perBudgetFileOnlySecrets.has(name);
 }
 
 // Per-budget-file secrets are managed by file owners
@@ -65,13 +71,24 @@ app.post('/', async (req, res) => {
       });
       return;
     }
-  } else if (!canManageGlobalSecrets(res.locals.user_id)) {
-    res.status(403).send({
-      status: 'error',
-      reason: 'not-admin',
-      details: 'You have to be admin to manage global secrets',
-    });
-    return;
+  } else {
+    if (requiresBudgetFileScope(name)) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'budget-file-secret-required',
+        details: 'This secret can only be managed per budget file',
+      });
+      return;
+    }
+
+    if (!canManageGlobalSecrets(res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'not-admin',
+        details: 'You have to be admin to manage global secrets',
+      });
+      return;
+    }
   }
 
   const secretFileId = perBudgetFile ? fileId : null;
@@ -91,6 +108,15 @@ app.delete('/:name', async (req, res) => {
   }
 
   if (!perBudgetFile) {
+    if (requiresBudgetFileScope(name)) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'budget-file-secret-required',
+        details: 'This secret can only be managed per budget file',
+      });
+      return;
+    }
+
     if (!canManageGlobalSecrets(res.locals.user_id)) {
       res.status(403).send({
         status: 'error',
@@ -138,6 +164,15 @@ app.get('/:name', async (req, res) => {
   }
 
   if (!perBudgetFile) {
+    if (requiresBudgetFileScope(name)) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'budget-file-secret-required',
+        details: 'This secret can only be managed per budget file',
+      });
+      return;
+    }
+
     if (!canManageGlobalSecrets(res.locals.user_id)) {
       res.status(403).send({
         status: 'error',
