@@ -1229,9 +1229,9 @@ describe('solveMonthlyContribution', () => {
   });
 
   it('picks the early month with the larger threshold, not the late month with the larger raw balance', () => {
-    // Regression test for the weighting bug the closed form replaces
-    // (see the design spec's Iteration Algorithm > Derivation section).
-    // Month 0 needs 100/cent-month (weight 1); month 59 needs slightly
+    // Regression test for a weighting bug in an earlier guess-and-correct
+    // version of solveMonthlyContribution (see that function's own doc
+    // comment for the derivation). Month 0 needs 100/cent-month (weight 1); month 59 needs slightly
     // less per-cent-month but the raw shortfall at any shared candidate
     // is larger there purely because of the (i+1) weighting. The
     // correct answer is governed by whichever month's *threshold*

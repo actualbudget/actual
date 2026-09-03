@@ -38,7 +38,6 @@ import { getActiveSchedules } from './statements';
 // paths (and their AQL imports) still ship regardless of this flag's
 // value. Not yet a user-facing or per-category setting — flip to measure
 // perf before deciding rollout.
-// See docs/superpowers/specs/2026-09-02-schedule-forecast-smoothing-design.md
 //
 // Exported as a mutable object, not a bare const, so tests can flip it
 // per-`describe`/`it` block and exercise both dispatch paths through the

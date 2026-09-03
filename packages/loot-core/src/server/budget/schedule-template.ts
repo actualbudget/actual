@@ -489,10 +489,9 @@ export async function runSchedule(
 //   balance[i] = startingBalance + (i + 1) * candidate - cumsum[i]
 // so balance[i] >= 0 for all i  <=>  candidate >= threshold_i for all i,
 // where threshold_i = (cumsum[i] - startingBalance) / (i + 1) does not
-// depend on candidate at all. The answer is simply max_i(threshold_i) —
-// see the design spec's Iteration Algorithm section for the derivation
-// and why an earlier guess-and-correct version of this function was
-// wrong (it operated on each month's raw balance, which is the
+// depend on candidate at all. The answer is simply max_i(threshold_i).
+// An earlier guess-and-correct version of this function was wrong: it
+// operated on each month's raw balance, which is the
 // threshold gap scaled by (i + 1) — a late month's small gap can
 // produce a larger raw balance than an early month's large gap, so
 // picking the extremum of raw balance does not reliably find
