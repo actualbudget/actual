@@ -8,11 +8,52 @@ import type { RuleConditionEntity, ScheduleEntity } from '#types/models';
 import * as monthUtils from './months';
 import { q } from './query';
 
+export const DEFAULT_UPCOMING_SCHEDULE_DAYS = '7';
+
+// Preset token values used by UI selects. Keep labels in the UI (i18n) but
+// centralize the canonical preset tokens so all components share the same set.
+export const UPCOMING_LENGTH_PRESET_VALUES = [
+  '1',
+  '7',
+  '14',
+  'oneMonth',
+  'currentMonth',
+] as const;
+
+export type UpcomingLengthPresetValue =
+  (typeof UPCOMING_LENGTH_PRESET_VALUES)[number];
+
+export const UPCOMING_LENGTH_PRESET_LABELS: Record<
+  UpcomingLengthPresetValue,
+  string
+> = {
+  '1': '1 day',
+  '7': '1 week',
+  '14': '2 weeks',
+  oneMonth: '1 month',
+  currentMonth: 'End of the current month',
+};
+
+export const UPCOMING_LENGTH_PRESET_OPTIONS: {
+  value: UpcomingLengthPresetValue;
+  labelKey: string;
+}[] = UPCOMING_LENGTH_PRESET_VALUES.map(v => ({
+  value: v,
+  labelKey: UPCOMING_LENGTH_PRESET_LABELS[v],
+}));
+
+export function isCustomUpcomingLength(value: string | null | undefined) {
+  if (value == null) return false;
+  return (
+    (UPCOMING_LENGTH_PRESET_VALUES as readonly string[]).indexOf(value) === -1
+  );
+}
+
 export function getStatus(
   nextDate: string,
   completed: boolean,
   hasTrans: boolean,
-  upcomingLength: string = '7',
+  upcomingLength: string = DEFAULT_UPCOMING_SCHEDULE_DAYS,
 ) {
   const upcomingDays = getUpcomingDays(upcomingLength);
   const today = monthUtils.currentDay();
@@ -274,6 +315,28 @@ export function getNextDate(
   return null;
 }
 
+const MAX_ADVANCE_ATTEMPTS = 7;
+
+export function getNextDateAfter(dateCond, afterDate: string): string | null {
+  let start = d.subDays(monthUtils.parseDate(afterDate), 1);
+
+  for (let attempt = 0; attempt < MAX_ADVANCE_ATTEMPTS; attempt++) {
+    const occurrence = getNextDate(dateCond, start, true);
+    if (occurrence == null || occurrence < monthUtils.dayFromDate(start)) {
+      return null;
+    }
+
+    const nextDate = getNextDate(dateCond, start);
+    if (nextDate != null && nextDate > afterDate) {
+      return nextDate;
+    }
+
+    start = d.addDays(monthUtils.parseDate(occurrence), 1);
+  }
+
+  return null;
+}
+
 export function getDateWithSkippedWeekend(
   date: Date,
   solveMode: 'after' | 'before',
@@ -306,7 +369,7 @@ export function getScheduledAmount(
 }
 
 export function getUpcomingDays(
-  upcomingLength = '7',
+  upcomingLength = DEFAULT_UPCOMING_SCHEDULE_DAYS,
   today = monthUtils.currentDay(), // for testability
 ): number {
   const month = monthUtils.getMonth(today);

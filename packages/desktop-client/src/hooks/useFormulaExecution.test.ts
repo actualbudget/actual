@@ -302,3 +302,86 @@ describe('BALANCE_OF in query mode', () => {
     expect(queryPayloads).toHaveLength(0);
   });
 });
+
+describe('formula execution stability', () => {
+  let executionCount: number;
+
+  beforeEach(() => {
+    executionCount = 0;
+    initServer({
+      'formula-load-user-preferences': async () => {
+        executionCount += 1;
+        return {
+          currency: getCurrency('USD'),
+          numberFormat: 'comma-dot',
+          decimalPlaces: 2,
+          thousandsSeparator: ',',
+          decimalSeparator: '.',
+          locale: 'en-US',
+          currencySymbolPosition: 'before',
+          currencySpaceBetweenAmountAndSymbol: false,
+        };
+      },
+    });
+  });
+
+  afterEach(async () => {
+    await clearServer();
+  });
+
+  it('does not re-execute when callers pass new objects each render', async () => {
+    // Callers such as FormulaCard build `queries`/`accounts` inline, so those
+    // objects have a fresh identity on every render. Keying the effect on
+    // identity would re-execute forever, flickering the card between value and
+    // skeleton.
+    const { result, rerender } = renderHook(
+      () =>
+        useFormulaExecution('=SUM(1, 2, 3)', {}, undefined, { RESULT: 0 }, [
+          { id: 'acc1', name: 'Checking' },
+        ]),
+      { wrapper: TestProviders },
+    );
+
+    await waitFor(() => expect(result.current.result).toBe(6));
+    expect(executionCount).toBe(1);
+
+    rerender();
+    rerender();
+    rerender();
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(executionCount).toBe(1);
+  });
+
+  it('re-executes when the queries contents actually change', async () => {
+    const { result, rerender } = renderHook(
+      ({ conditionValue }: { conditionValue: string }) =>
+        useFormulaExecution('=SUM(1, 2, 3)', {
+          Income: { conditions: [categoryCondition(conditionValue)] },
+        }),
+      {
+        wrapper: TestProviders,
+        initialProps: { conditionValue: 'income-cat' },
+      },
+    );
+
+    await waitFor(() => expect(result.current.result).toBe(6));
+    expect(executionCount).toBe(1);
+
+    rerender({ conditionValue: 'other-cat' });
+
+    await waitFor(() => expect(executionCount).toBe(2));
+  });
+
+  it('clears the loading state for a formula that does not start with =', async () => {
+    const { result } = renderHook(
+      () => useFormulaExecution('SUM(1, 2, 3)', {}),
+      { wrapper: TestProviders },
+    );
+
+    await waitFor(() =>
+      expect(result.current.error).toBe('Formula must start with ='),
+    );
+    expect(result.current.isLoading).toBe(false);
+  });
+});

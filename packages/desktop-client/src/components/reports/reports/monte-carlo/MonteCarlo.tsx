@@ -606,28 +606,34 @@ export function MonteCarlo() {
               <Trans>
                 Keep in mind this is a simplified model: returns are drawn
                 independently each year from a normal distribution, which
-                ignores sequence-of-returns clustering, fat tails, fees, and
-                taxes. Treat the results as a rough guide, not a guarantee.
+                ignores sequence-of-returns clustering and fat tails, and fees
+                and taxes are modeled only as accurately as the rates you enter.
+                Treat the results as a rough guide, not a guarantee.
               </Trans>
             ) : config.returnModel === 'historical-bootstrap' ? (
               <Trans>
                 Returns are actual US market years ({{ firstYear }}&ndash;
                 {{ lastYear }}, S&amp;P 500 / 10-year Treasuries / T-bills,
                 Damodaran data) drawn in random order for each pot&apos;s
-                allocation mix. Real crash years are included, but multi-year
-                momentum is lost by shuffling, fees and taxes are ignored, and
-                US history has been unusually good, so results may be optimistic
-                for globally diversified portfolios.
+                allocation mix. Each sampled year brings its own actual US
+                inflation with it, so high-inflation markets stay
+                high-inflation. Real crash years are included, but multi-year
+                momentum is lost by shuffling, fees and taxes are only as
+                accurate as the rates you enter, and US history has been
+                unusually good, so results may be optimistic for globally
+                diversified portfolios.
               </Trans>
             ) : (
               <Trans>
                 Each scenario replays actual US market history ({{ firstYear }}
                 &ndash;{{ lastYear }}, S&amp;P 500 / 10-year Treasuries /
                 T-bills, Damodaran data) starting from a different year,
-                wrapping around the end of the data. This preserves real crashes
+                wrapping around the end of the data. Each replayed year brings
+                its own actual US inflation with it. This preserves real crashes
                 and recoveries, but there are only as many scenarios as start
-                years, fees and taxes are ignored, and US history may be
-                optimistic for globally diversified portfolios.
+                years, fees and taxes are only as accurate as the rates you
+                enter, and US history may be optimistic for globally diversified
+                portfolios.
               </Trans>
             )}
           </Paragraph>
