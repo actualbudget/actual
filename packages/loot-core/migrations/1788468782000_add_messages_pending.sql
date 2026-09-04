@@ -2,7 +2,7 @@ BEGIN TRANSACTION;
 
 -- Sync messages deferred because they reference schema from a newer
 -- app version; see `deferMessage` and `replayPendingMessages`.
-CREATE TABLE messages_pending
+CREATE TABLE IF NOT EXISTS messages_pending
   (dataset TEXT NOT NULL,
    row TEXT NOT NULL,
    column TEXT NOT NULL,
