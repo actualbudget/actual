@@ -244,6 +244,15 @@ describe('migrations are additive-only', () => {
        ALTER TABLE foo_new RENAME TO foo;`,
     ],
     [
+      'changing a CHECK string literal case',
+      `CREATE TABLE foo
+         (id TEXT PRIMARY KEY, status TEXT CHECK(status <> 'ARCHIVED'));`,
+      `CREATE TABLE foo_new
+         (id TEXT PRIMARY KEY, status TEXT CHECK(status <> 'archived'));
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
+    [
       'adding a NOT NULL column whose DEFAULT is an explicit NULL',
       TABLE_FOO,
       `CREATE TABLE foo_new
@@ -323,6 +332,15 @@ describe('migrations are additive-only', () => {
          (id TEXT PRIMARY KEY, a TEXT CHECK(a <> ')' AND a <> 'x'));`,
       `CREATE TABLE foo_new
          (id TEXT PRIMARY KEY, a TEXT CHECK(a <> ')' AND a <> 'x'));
+       DROP TABLE foo;
+       ALTER TABLE foo_new RENAME TO foo;`,
+    ],
+    [
+      'rebuilding a table with an identical CHECK, reformatted keywords',
+      `CREATE TABLE foo
+         (id TEXT PRIMARY KEY, status TEXT CHECK(status <> 'ARCHIVED'));`,
+      `CREATE TABLE foo_new
+         (id TEXT PRIMARY KEY, status TEXT CHECK( STATUS <> 'ARCHIVED' ));
        DROP TABLE foo;
        ALTER TABLE foo_new RENAME TO foo;`,
     ],

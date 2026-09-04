@@ -40,13 +40,31 @@ function normalizeSql(sql: string): string {
 const NON_CODE =
   /'(?:[^']|'')*'|"(?:[^"]|"")*"|`(?:[^`]|``)*`|\[[^\]]*\]|--[^\n]*|\/\*[\s\S]*?\*\//g;
 
+// Lowercases SQL tokens outside quoted literals/comments so formatting
+// and keyword case differences don't register as CHECK changes, while
+// preserving string literal contents (SQLite treats 'ARCHIVED' and
+// 'archived' as different values).
+function normalizeCheckExpression(expr: string): string {
+  const normalized = normalizeSql(expr);
+  let result = '';
+  let lastIndex = 0;
+  for (const match of normalized.matchAll(NON_CODE)) {
+    const index = match.index!;
+    result += normalized.slice(lastIndex, index).toLowerCase();
+    result += match[0];
+    lastIndex = index + match[0].length;
+  }
+  result += normalized.slice(lastIndex).toLowerCase();
+  return result;
+}
+
 // Extracts each CHECK(...) expression by scanning to the balanced close
-// paren, normalized (whitespace collapsed, lowercased) so formatting
-// differences don't register as changes. The scan runs on a masked copy
-// with literals and comments blanked to spaces (length-preserving, so
-// indexes line up) — a CHECK or paren inside one can't start or end a
-// clause. Clause text is sliced from the original so literal contents
-// survive intact.
+// paren, normalized (whitespace collapsed, SQL tokens lowercased outside
+// quoted literals) so formatting differences don't register as changes.
+// The scan runs on a masked copy with literals and comments blanked to
+// spaces (length-preserving, so indexes line up) — a CHECK or paren
+// inside one can't start or end a clause. Clause text is sliced from
+// the original so literal contents survive intact.
 function checkClauses(sql: string): string[] {
   const masked = sql.replace(NON_CODE, match => ' '.repeat(match.length));
   const clauses: string[] = [];
@@ -62,7 +80,7 @@ function checkClauses(sql: string): string[] {
         depth--;
       }
     }
-    clauses.push(normalizeSql(sql.slice(start, i - 1)).toLowerCase());
+    clauses.push(normalizeCheckExpression(sql.slice(start, i - 1)));
   }
   return clauses.sort();
 }
