@@ -194,6 +194,37 @@ exports[`File import > CAMT.053 import works 1`] = `
 ]
 `;
 
+exports[`File import > handles UTF-8 encoding 1`] = `
+[
+  {
+    "acct": "one",
+    "amount": -2000,
+    "category": null,
+    "cleared": 1,
+    "date": 20221019,
+    "description": "id2",
+    "error": null,
+    "financial_id": "cafeUtf8xx",
+    "id": "id3",
+    "imported_description": "Café Métro €uro",
+    "isChild": 0,
+    "isParent": 0,
+    "location": null,
+    "notes": "Paiement 5€ — débit",
+    "parent_id": null,
+    "pending": 0,
+    "raw_synced_data": null,
+    "reconciled": 0,
+    "schedule": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": 0,
+    "tombstone": 0,
+    "transferred_id": null,
+    "type": null,
+  },
+]
+`;
+
 exports[`File import > handles html escaped plaintext 1`] = `
 [
   {
@@ -267,7 +298,38 @@ exports[`File import > handles non-ASCII characters 1`] = `
     "isChild": 0,
     "isParent": 0,
     "location": null,
-    "notes": "PWW",
+    "notes": "Mémo test: àÀçéÉèêëôû",
+    "parent_id": null,
+    "pending": 0,
+    "raw_synced_data": null,
+    "reconciled": 0,
+    "schedule": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": 0,
+    "tombstone": 0,
+    "transferred_id": null,
+    "type": null,
+  },
+]
+`;
+
+exports[`File import > handles windows-1252 charset 1`] = `
+[
+  {
+    "acct": "one",
+    "amount": -2000,
+    "category": null,
+    "cleared": 1,
+    "date": 20221019,
+    "description": "id2",
+    "error": null,
+    "financial_id": "cafe1252xx",
+    "id": "id3",
+    "imported_description": "Café Métro €uro",
+    "isChild": 0,
+    "isParent": 0,
+    "location": null,
+    "notes": "Paiement 5€ — débit",
     "parent_id": null,
     "pending": 0,
     "raw_synced_data": null,

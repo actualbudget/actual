@@ -123,9 +123,42 @@ function mapOfxTransaction(stmtTrn): OFXTransaction {
   };
 }
 
-export async function ofx2json(ofx: string): Promise<OFXParseResult> {
+function decodeOfxBytes(bytes: Uint8Array): string {
+  // OFX headers are always ASCII. Peek at the header section to detect
+  // the declared encoding before decoding the full content.
+  const headerPreview = new TextDecoder('latin1').decode(
+    bytes.subarray(0, 2048),
+  );
+
+  const encodingMatch = headerPreview.match(/^ENCODING:(.+)/m);
+  const charsetMatch = headerPreview.match(/^CHARSET:(.+)/m);
+
+  const encoding = encodingMatch?.[1]?.trim().toUpperCase();
+  const charset = charsetMatch?.[1]?.trim().toUpperCase();
+
+  if (encoding === 'UTF-8') {
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+
+  // ENCODING:USASCII — use CHARSET to pick the right code page
+  if (charset === '8859-1') {
+    return new TextDecoder('iso-8859-1').decode(bytes);
+  }
+  if (charset === '1252') {
+    return new TextDecoder('windows-1252').decode(bytes);
+  }
+
+  // Default: UTF-8 (ASCII is a subset; modern default)
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
+export async function ofx2json(
+  ofx: string | Uint8Array,
+): Promise<OFXParseResult> {
+  const ofxString = typeof ofx === 'string' ? ofx : decodeOfxBytes(ofx);
+
   // firstly, split into the header attributes and the footer sgml
-  const contents = ofx.split(/<OFX\s?>/, 2);
+  const contents = ofxString.split(/<OFX\s?>/, 2);
 
   // firstly, parse the headers
   const headerString = contents[0].split(/\r?\n/);
