@@ -14,6 +14,10 @@ Running into issues with your configuration not being interpreted correctly? Che
 
 :::
 
+:::tip
+Secrets can be read from a file rather than passed in the environment, which works with Docker secrets and Kubernetes secret volumes. Set `ACTUAL_OPENID_CLIENT_SECRET_FILE` or `ACTUAL_GITHUB_TOKEN_FILE` to the path of a file holding the value. The file wins over the plain variable, and the server stops with an error if it can't be read. The [CLI](../api/cli.md#environment-variables) supports the same suffix for its own secrets.
+:::
+
 ## `ACTUAL_DATA_DIR` (config.json: `dataDir`)
 
 This is where the server stores the budget data files (and configurations unless `ACTUAL_CONFIG_PATH` is set).
@@ -30,33 +34,6 @@ This is the path to the config file. If not specified, the server will look for 
 See the `ACTUAL_DATA_DIR` section above to override the data folder location.
 
 You can't specify this option in `config.json` since it needs to be used to find the `config.json` in the first place.
-
-## Reading a Secret From a File
-
-Secrets can be read from a file instead of being given directly. Add `_FILE` to the end of the environment variable's name and set it to the path of a file, and Actual reads the value from that file when it starts up.
-
-Passing a secret as an ordinary environment variable means it can be read back out of the running container, and in Docker or Kubernetes it usually has to be written into a deployment file first. Pointing at a file instead lets you mount the secret with the tools those systems already provide, such as Docker secrets or a Kubernetes secret volume.
-
-The following are supported:
-
-- `ACTUAL_OPENID_CLIENT_SECRET_FILE`
-- `ACTUAL_GITHUB_TOKEN_FILE`
-
-For example, to load the OpenID client secret from a mounted file:
-
-```bash
-ACTUAL_OPENID_CLIENT_SECRET_FILE=/run/secrets/openid-client-secret
-```
-
-Actual reads the whole file and removes any surrounding whitespace, so a trailing newline at the end of the file is fine.
-
-A few things worth knowing:
-
-- If you set both the plain variable and its `_FILE` version, the file wins.
-- If the file is missing or cannot be read, the server stops with an error rather than starting up without the value. This is deliberate: a server that silently started with an empty password would be far harder to spot.
-- `ACTUAL_HTTPS_KEY` and `ACTUAL_HTTPS_CERT` already accept the path to a file, so they do not need a `_FILE` version.
-
-The Actual CLI supports the same `_FILE` suffix for its own secrets. See [CLI Tool](../api/cli.md#environment-variables) for details.
 
 ## `ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB`
 

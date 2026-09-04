@@ -324,9 +324,6 @@ if (fs.existsSync(configPath)) {
 
 // `<VAR>_FILE` is applied after loadFile so it beats both config.json and the
 // plain environment variable, and before validate so the value is checked.
-// Only secrets get a _FILE variant, following the Docker secrets convention.
-// ACTUAL_HTTPS_KEY and ACTUAL_HTTPS_CERT already accept a path, so they are
-// deliberately absent.
 for (const [fileEnvVar, settingPath] of [
   ['ACTUAL_OPENID_CLIENT_SECRET_FILE', 'openId.client_secret'],
   ['ACTUAL_GITHUB_TOKEN_FILE', 'github.token'],

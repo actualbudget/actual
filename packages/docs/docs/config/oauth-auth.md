@@ -64,7 +64,7 @@ If your OpenId provider does not supports discovery, use the following variables
 - `ACTUAL_OPENID_SERVER_HOSTNAME`: Your Actual Server URL (so the provider redirects you to this)
 
 :::tip
-To keep the client secret out of your environment, set `ACTUAL_OPENID_CLIENT_SECRET_FILE` to the path of a file containing it instead. See [Reading a Secret From a File](index.md#reading-a-secret-from-a-file).
+To keep the client secret out of your environment, set `ACTUAL_OPENID_CLIENT_SECRET_FILE` to the path of a file containing it instead. See [Configuring the Server](index.md).
 :::
 
 ### Configuring OpenID Using the UI
@@ -138,11 +138,6 @@ The first user to log in with OpenID/OAuth2 will be granted admin permissions an
 
 - **Purpose:** The client secret issued by your OpenID provider.
   **Example Value:** `super-secret-value`
-
-#### `ACTUAL_OPENID_CLIENT_SECRET_FILE`
-
-- **Purpose:** The path to a file containing the client secret, read instead of `ACTUAL_OPENID_CLIENT_SECRET`. Use this to mount the secret as a file rather than passing it in the environment. See [Reading a Secret From a File](index.md#reading-a-secret-from-a-file).
-  **Example Value:** `/run/secrets/openid-client-secret`
 
 #### `ACTUAL_OPENID_SERVER_HOSTNAME`
 

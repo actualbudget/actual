@@ -131,13 +131,7 @@ async function loadConfigFile(): Promise<ConfigFileContent> {
 
 /**
  * Reads the value of a `<VAR>_FILE` environment variable, returning the
- * contents of the file it points at.
- *
- * Only an unset variable returns undefined and falls through to the plain
- * variable. A variable that is set but unreadable — including an empty value,
- * which means a mount produced no path — throws, because a secret that failed
- * to mount should stop the command rather than silently send an empty
- * password to the server.
+ * contents of the file it points at and throwing if the file is not accessible.
  */
 function readFileEnv(fileEnvVar: string): string | undefined {
   const filePath = process.env[fileEnvVar];

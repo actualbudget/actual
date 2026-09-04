@@ -7,12 +7,7 @@ type ConfigSchema = {
 
 /**
  * Reads the value of a `<VAR>_FILE` environment variable, returning the
- * contents of the file it points at.
- *
- * Only an unset variable returns undefined. A variable that is set but
- * unreadable — including an empty value, which means a mount produced no
- * path — throws, because a secret that failed to mount should stop startup
- * rather than leave the server running with an empty value.
+ * contents of the file it points at and throwing if the file is not accessible.
  */
 export function readFileEnv(
   fileEnvVar: string,
@@ -35,11 +30,6 @@ export function readFileEnv(
 /**
  * Applies a `<VAR>_FILE` override onto a convict setting, returning whether
  * one was applied.
- *
- * Must be called *after* `loadFile()` and *before* `validate()`. convict
- * re-imports the environment at the end of both `load()` and `loadFile()`, so
- * an override applied any earlier would be clobbered by the plain environment
- * variable; `set()` is not re-imported and therefore wins.
  */
 export function applyFileEnv(
   config: ConfigSchema,
