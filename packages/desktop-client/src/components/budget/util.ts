@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
@@ -172,10 +171,6 @@ export function findSortUp<T extends { id: string }>(
       return { targetId: null };
     }
   }
-}
-
-export function getScrollbarWidth() {
-  return Math.max(styles.scrollbarWidth - 2, 0);
 }
 
 export async function prewarmMonth(
