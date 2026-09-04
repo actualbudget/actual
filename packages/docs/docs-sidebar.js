@@ -271,6 +271,7 @@ const sidebars = {
             'config/https',
             'config/reverse-proxies',
             'config/oauth-auth',
+            'config/two-factor-auth',
             'config/multi-user',
             'advanced/http-header-auth',
           ],
