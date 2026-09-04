@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  canRenderDateRangePicker,
   normalizeMonthPickerSelectionForQuery,
   normalizeMonthRangeForPicker,
   shouldIgnoreMonthPickerNoop,
@@ -40,5 +41,11 @@ describe('QueryManager month-only DateRangePicker helpers', () => {
     expect(normalizeMonthPickerSelectionForQuery('2026-02', '2026-04')).toEqual(
       ['2026-02-01', '2026-04-30'],
     );
+  });
+
+  it('waits to enable the picker until transaction bounds finish loading', () => {
+    expect(canRenderDateRangePicker(false, '2026-01', '2026-12')).toBe(false);
+    expect(canRenderDateRangePicker(true, '', '2026-12')).toBe(false);
+    expect(canRenderDateRangePicker(true, '2026-01', '2026-12')).toBe(true);
   });
 });

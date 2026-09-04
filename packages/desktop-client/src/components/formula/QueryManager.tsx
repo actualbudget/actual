@@ -76,6 +76,16 @@ export function shouldIgnoreMonthPickerNoop(
   return currentStartMonth === nextStart && currentEndMonth === nextEnd;
 }
 
+export function canRenderDateRangePicker(
+  isTransactionBoundsReady: boolean,
+  earliestMonth: string,
+  latestMonth: string,
+) {
+  return (
+    isTransactionBoundsReady && Boolean(earliestMonth) && Boolean(latestMonth)
+  );
+}
+
 type PresetTimeRangeMode = Exclude<
   TimeFrame['mode'],
   'sliding-window' | 'static'
@@ -264,6 +274,8 @@ function QueryItem({
 
   const [earliestMonth, setEarliestMonth] = useState(monthUtils.currentMonth());
   const [latestMonth, setLatestMonth] = useState(monthUtils.currentMonth());
+  const [isTransactionBoundsReady, setIsTransactionBoundsReady] =
+    useState(false);
   const [earliestTransaction, setEarliestTransaction] = useState(
     monthUtils.currentDay(),
   );
@@ -332,6 +344,7 @@ function QueryItem({
 
       setEarliestMonth(computedEarliestMonth);
       setLatestMonth(computedLatestMonth);
+      setIsTransactionBoundsReady(true);
     }
     void run();
   }, []);
@@ -550,6 +563,12 @@ function QueryItem({
     includeAllTime: true,
   });
 
+  const isDateRangePickerReady = canRenderDateRangePicker(
+    isTransactionBoundsReady,
+    earliestMonth,
+    latestMonth,
+  );
+
   return (
     <View
       style={{
@@ -727,53 +746,59 @@ function QueryItem({
           >
             {timeRangeLabel}
           </Button>
-          <DateRangePicker
-            start={pickerStartDate}
-            end={pickerEndDate}
-            minDate={earliestMonth}
-            maxDate={latestMonth}
-            granularities={['month']}
-            locale={language}
-            formatDayLabel={formatDayLabel}
-            labels={{
-              selectBy: t('Select by'),
-              quickSelect: t('Quick select'),
-              month: t('Month'),
-              day: t('Day'),
-              previous: t('Previous'),
-              next: t('Next'),
-              previousMonth: t('Previous month'),
-              nextMonth: t('Next month'),
-              year: t('Year'),
-              dateRange: t('Date range'),
-            }}
-            presets={presets}
-            onChangeDates={(newStart, newEnd) => {
-              if (
-                shouldIgnoreMonthPickerNoop(
-                  startDate,
-                  endDate,
-                  newStart,
-                  newEnd,
-                )
-              ) {
-                return;
-              }
+          {isDateRangePickerReady ? (
+            <DateRangePicker
+              start={pickerStartDate}
+              end={pickerEndDate}
+              minDate={earliestMonth}
+              maxDate={latestMonth}
+              granularities={['month']}
+              locale={language}
+              formatDayLabel={formatDayLabel}
+              labels={{
+                selectBy: t('Select by'),
+                quickSelect: t('Quick select'),
+                month: t('Month'),
+                day: t('Day'),
+                previous: t('Previous'),
+                next: t('Next'),
+                previousMonth: t('Previous month'),
+                nextMonth: t('Next month'),
+                year: t('Year'),
+                dateRange: t('Date range'),
+              }}
+              presets={presets}
+              onChangeDates={(newStart, newEnd) => {
+                if (
+                  shouldIgnoreMonthPickerNoop(
+                    startDate,
+                    endDate,
+                    newStart,
+                    newEnd,
+                  )
+                ) {
+                  return;
+                }
 
-              const [normalizedStart, normalizedEnd] =
-                normalizeMonthPickerSelectionForQuery(newStart, newEnd);
+                const [normalizedStart, normalizedEnd] =
+                  normalizeMonthPickerSelectionForQuery(newStart, newEnd);
 
-              setStartDate(normalizedStart);
-              setEndDate(normalizedEnd);
-              sendUpdate(
-                filters.conditions,
-                filters.conditionsOp,
-                normalizedStart,
-                normalizedEnd,
-                'static',
-              );
-            }}
-          />
+                setStartDate(normalizedStart);
+                setEndDate(normalizedEnd);
+                sendUpdate(
+                  filters.conditions,
+                  filters.conditionsOp,
+                  normalizedStart,
+                  normalizedEnd,
+                  'static',
+                );
+              }}
+            />
+          ) : (
+            <Button variant="normal" isDisabled>
+              {timeRangeLabel}
+            </Button>
+          )}
         </View>
 
         {presetTimeRangeLabel ? (
