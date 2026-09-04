@@ -216,6 +216,7 @@ const sidebars = {
             'experimental/budget-analysis-report',
             'experimental/monte-carlo-analysis',
             'experimental/sankey-report',
+            'experimental/automatic-backups',
           ],
         },
       ],

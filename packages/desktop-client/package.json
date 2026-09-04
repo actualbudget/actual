@@ -16,6 +16,7 @@
       "default": "./src/browser-preload.js"
     },
     "#accounts": "./src/accounts/index.ts",
+    "#backups": "./src/backups/index.ts",
     "#budget": "./src/budget/index.ts",
     "#payees": "./src/payees/index.ts",
     "#queries": "./src/queries/index.ts",
@@ -104,6 +105,7 @@
     "#notes/*": "./src/notes/*.tsx",
     "#accounts/*": "./src/accounts/*.ts",
     "#app/*": "./src/app/*.ts",
+    "#backups/*": "./src/backups/*.ts",
     "#budget/*": "./src/budget/*.ts",
     "#budgetfiles/*": "./src/budgetfiles/*.ts",
     "#modals/*": "./src/modals/*.ts",
