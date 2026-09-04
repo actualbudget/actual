@@ -601,8 +601,6 @@ export function MonteCarloRunDetailTable({
                     {pots.length > 0 && (
                       <View
                         style={{
-                          // Clear breathing room between the explanation
-                          // lines and the per-pot table
                           marginTop: 14,
                           maxWidth: hasContributions ? 1150 : 1010,
                         }}
