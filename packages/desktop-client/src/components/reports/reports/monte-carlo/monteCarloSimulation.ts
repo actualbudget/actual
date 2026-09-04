@@ -426,6 +426,9 @@ export type MonteCarloRunDetailRow = {
   /** Start-of-year balance per pot, before contributions and the
    * withdrawal, same order */
   potStartBalances: number[];
+  /** The year's realized inflation rate as a decimal fraction; null when
+   * inflation is disabled */
+  inflation: number | null;
   /** Contributions paid in at the start of this year */
   contributions: number;
   /** Contribution each pot received at the start of the year, same order */
@@ -1070,6 +1073,18 @@ export function runMonteCarloSimulation(
             }
           }
         }
+        // Every pot experiences the same market year: historical models
+        // pick one history year for all pots (normally-drawn pots share
+        // one market shock scaled by their own volatility), and the same
+        // sampled year supplies this year's inflation below - keeping the
+        // historical correlation between returns and inflation
+        let historyIndex = -1;
+        if (returnModel === 'historical-bootstrap') {
+          historyIndex = Math.floor(random() * historyCount);
+        } else if (returnModel === 'historical-sequence') {
+          historyIndex = (simulationIndex + year - 1) % historyCount;
+        }
+
         let withdrawal: number;
 
         // Only pots that have reached their access age can fund this year's
@@ -1298,16 +1313,6 @@ export function runMonteCarloSimulation(
             captureTaxables(capturedPotTaxables);
           }
 
-          // Every pot experiences the same market year: historical models
-          // pick one history year for all pots, and normally-drawn pots
-          // share one market shock scaled by their own volatility. Pots
-          // holding the same investments therefore earn the same return.
-          let historyIndex = -1;
-          if (returnModel === 'historical-bootstrap') {
-            historyIndex = Math.floor(random() * historyCount);
-          } else if (returnModel === 'historical-sequence') {
-            historyIndex = (simulationIndex + year - 1) % historyCount;
-          }
           const marketShock = hasNormalDrawPot ? nextNormal() : 0;
 
           total = 0;
@@ -1343,14 +1348,20 @@ export function runMonteCarloSimulation(
           }
         }
 
-        // Realize this year's inflation, drawing a random rate when
-        // volatility is set (fixed mean otherwise)
+        // Realize this year's inflation. Historical models take the
+        // sampled year's actual US inflation - the same year that set the
+        // returns - so high-inflation years keep their high-inflation
+        // markets. The normal model draws from the user's settings
+        // (random around the mean when volatility is set, fixed otherwise)
+        let yearInflationRate: number | null = null;
         if (inflationMean != null) {
-          const yearInflation =
-            inflationStdDev > 0
-              ? Math.max(-0.9, inflationMean + inflationStdDev * nextNormal())
-              : inflationMean;
-          cumulativeInflation *= 1 + yearInflation;
+          yearInflationRate =
+            historyIndex >= 0
+              ? history[historyIndex].inflation
+              : inflationStdDev > 0
+                ? Math.max(-0.9, inflationMean + inflationStdDev * nextNormal())
+                : inflationMean;
+          cumulativeInflation *= 1 + yearInflationRate;
         }
 
         // Management fees come out at the end of the year, after growth
@@ -1446,6 +1457,8 @@ export function runMonteCarloSimulation(
           const base = {
             year,
             startBalance,
+            // A rate, not an amount - passed through undeflated
+            inflation: yearInflationRate,
             contributions,
             potContributions: emitParts(
               capturedPotContributions,

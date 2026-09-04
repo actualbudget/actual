@@ -18,6 +18,7 @@ import type {
 import { css } from '@emotion/css';
 import { v4 as uuidv4 } from 'uuid';
 
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { MonteCarloContributions } from '#components/reports/reports/monte-carlo/MonteCarloContributions';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
@@ -256,74 +257,6 @@ export function MonteCarloConfiguration({
 
           <View style={{ gap: 10 }}>
             <Text style={GROUP_HEADING_STYLE}>
-              <Trans>Inflation</Trans>
-            </Text>
-            <View style={PLAN_GROUP_FIELDS_STYLE}>
-              <View style={FIELD_STYLE}>
-                <View style={FIELD_LABEL_ROW_STYLE}>
-                  <Text style={FIELD_LABEL_STYLE}>
-                    <Trans>Mean (%)</Trans>
-                  </Text>
-                  <MonteCarloHelpTooltip>
-                    <Trans>
-                      The average yearly rise in prices. When set, your planned
-                      spending grows with it so your spending power is
-                      maintained.
-                      <br />
-                      <br />
-                      Leave blank to keep withdrawals flat.
-                    </Trans>
-                  </MonteCarloHelpTooltip>
-                </View>
-                <MonteCarloNumberInput
-                  value={config.inflationMean}
-                  aria-label={t('Inflation mean (%)')}
-                  scale={100}
-                  allowEmpty
-                  min={0}
-                  max={100}
-                  placeholder={t('None')}
-                  onCommit={newValue =>
-                    onConfigChange({ inflationMean: newValue })
-                  }
-                />
-              </View>
-
-              <View style={FIELD_STYLE}>
-                <View style={FIELD_LABEL_ROW_STYLE}>
-                  <Text style={FIELD_LABEL_STYLE}>
-                    <Trans>Std dev (%)</Trans>
-                  </Text>
-                  <MonteCarloHelpTooltip>
-                    <Trans>
-                      Real-world inflation bounces around from year to year
-                      rather than staying fixed. When set, each simulated year
-                      draws its own inflation rate around the mean.
-                      <br />
-                      <br />
-                      Around 2% matches how much US inflation has varied in
-                      recent decades. Set to 0 to use the fixed mean rate every
-                      year.
-                    </Trans>
-                  </MonteCarloHelpTooltip>
-                </View>
-                <MonteCarloNumberInput
-                  value={config.inflationStdDev}
-                  aria-label={t('Inflation std dev (%)')}
-                  scale={100}
-                  min={0}
-                  max={50}
-                  disabled={config.inflationMean == null}
-                  onCommit={newValue =>
-                    onConfigChange({ inflationStdDev: newValue ?? 0 })
-                  }
-                />
-              </View>
-            </View>
-          </View>
-
-          <View style={{ gap: 10 }}>
-            <Text style={GROUP_HEADING_STYLE}>
               <Trans>Simulation</Trans>
             </Text>
             <View style={PLAN_GROUP_FIELDS_STYLE}>
@@ -398,6 +331,118 @@ export function MonteCarloConfiguration({
                 />
               </View>
             </View>
+          </View>
+
+          <View style={{ gap: 10 }}>
+            <Text style={GROUP_HEADING_STYLE}>
+              <Trans>Inflation</Trans>
+            </Text>
+            {config.returnModel === 'normal' ? (
+              <View style={PLAN_GROUP_FIELDS_STYLE}>
+                <View style={FIELD_STYLE}>
+                  <View style={FIELD_LABEL_ROW_STYLE}>
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Mean (%)</Trans>
+                    </Text>
+                    <MonteCarloHelpTooltip>
+                      <Trans>
+                        The average yearly rise in prices. When set, your
+                        planned spending grows with it so your spending power is
+                        maintained.
+                        <br />
+                        <br />
+                        Leave blank to keep withdrawals flat.
+                      </Trans>
+                    </MonteCarloHelpTooltip>
+                  </View>
+                  <MonteCarloNumberInput
+                    value={config.inflationMean}
+                    aria-label={t('Inflation mean (%)')}
+                    scale={100}
+                    allowEmpty
+                    min={0}
+                    max={100}
+                    placeholder={t('None')}
+                    onCommit={newValue =>
+                      onConfigChange({ inflationMean: newValue })
+                    }
+                  />
+                </View>
+
+                <View style={FIELD_STYLE}>
+                  <View style={FIELD_LABEL_ROW_STYLE}>
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Std dev (%)</Trans>
+                    </Text>
+                    <MonteCarloHelpTooltip>
+                      <Trans>
+                        Real-world inflation bounces around from year to year
+                        rather than staying fixed. When set, each simulated year
+                        draws its own inflation rate around the mean.
+                        <br />
+                        <br />
+                        Around 2% matches how much US inflation has varied in
+                        recent decades. Set to 0 to use the fixed mean rate
+                        every year.
+                      </Trans>
+                    </MonteCarloHelpTooltip>
+                  </View>
+                  <MonteCarloNumberInput
+                    value={config.inflationStdDev}
+                    aria-label={t('Inflation std dev (%)')}
+                    scale={100}
+                    min={0}
+                    max={50}
+                    disabled={config.inflationMean == null}
+                    onCommit={newValue =>
+                      onConfigChange({ inflationStdDev: newValue ?? 0 })
+                    }
+                  />
+                </View>
+              </View>
+            ) : (
+              // Historical models take each sampled year's actual inflation,
+              // so the only real choice is on/off - an honest checkbox
+              // instead of number inputs whose values would be ignored. An
+              // empty label-row spacer seats the checkbox on the same
+              // baseline as the neighboring inputs.
+              <View style={{ width: 250 }}>
+                <View style={FIELD_LABEL_ROW_STYLE} />
+                <View
+                  style={{
+                    minHeight: 28,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <LabeledCheckbox
+                    id="mc-inflation-adjust"
+                    checked={config.inflationMean != null}
+                    onChange={event =>
+                      onConfigChange({
+                        inflationMean: event.target.checked
+                          ? MONTE_CARLO_DEFAULTS.inflationMean
+                          : null,
+                      })
+                    }
+                    style={{ flex: 'unset', minHeight: 'auto' }}
+                  >
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Adjust spending with inflation</Trans>
+                    </Text>
+                  </LabeledCheckbox>
+                  <MonteCarloHelpTooltip>
+                    <Trans>
+                      Historical models pair each sampled year&apos;s market
+                      returns with that same year&apos;s actual US inflation,
+                      keeping the two correlated the way they really were.
+                      Untick to keep withdrawals flat instead.
+                    </Trans>
+                  </MonteCarloHelpTooltip>
+                </View>
+              </View>
+            )}
           </View>
         </View>
       )}
