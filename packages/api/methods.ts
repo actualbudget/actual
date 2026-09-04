@@ -213,6 +213,10 @@ export function deleteTransaction(id: TransactionEntity['id']) {
   return send('api/transaction-delete', { id });
 }
 
+export function mergeTransactions(ids: TransactionEntity['id'][]) {
+  return send('api/transactions-merge', { ids });
+}
+
 export function getAccounts() {
   return send('api/accounts-get');
 }

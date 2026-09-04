@@ -20,7 +20,8 @@ import APIList from './APIList';
 "importTransactions",
 "getTransactions",
 "updateTransaction",
-"deleteTransaction"
+"deleteTransaction",
+"mergeTransactions"
 ]} />
 
 <APIList title="Accounts" sections={[
@@ -313,6 +314,21 @@ Update fields of a transaction. `fields` can specify any field described in [`Tr
 <Method name="deleteTransaction" args={[{ name: 'id', type: 'id'}]} />
 
 Delete a transaction.
+
+#### `mergeTransactions`
+
+<Method name="mergeTransactions" args={[{ name: 'ids', type: 'id[]' }]} returns="Promise<id>" />
+
+Merge exactly two transactions from the same account into one. Returns the id of the surviving transaction; the other one is deleted.
+
+The order of the ids does not decide which transaction survives:
+
+- an imported transaction is kept over a manually entered one
+- otherwise, the transaction with the earlier date is kept
+
+The surviving transaction keeps its own field values and fills in any empty ones from the deleted transaction. It is marked cleared if either transaction was.
+
+The merge fails if the two transactions are in different accounts, have different amounts, or are transfers to different accounts.
 
 #### Examples
 

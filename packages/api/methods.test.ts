@@ -954,6 +954,33 @@ describe('API CRUD operations', () => {
     expect(transactions).toHaveLength(1);
   });
 
+  // apis: mergeTransactions
+  test('Transactions: successfully merge two transactions', async () => {
+    const accountId = await api.createAccount({ name: 'test-account' }, 0);
+
+    await api.addTransactions(accountId, [
+      { date: '2023-11-03', amount: 100, notes: 'notes' },
+      { date: '2023-11-03', amount: 100, imported_id: '1' },
+    ]);
+
+    const before = await api.getTransactions(
+      accountId,
+      '2023-11-01',
+      '2023-11-30',
+    );
+    expect(before).toHaveLength(2);
+
+    const keptId = await api.mergeTransactions(before.map(t => t.id));
+
+    const after = await api.getTransactions(
+      accountId,
+      '2023-11-01',
+      '2023-11-30',
+    );
+    expect(after).toHaveLength(1);
+    expect(after[0]).toMatchObject({ id: keptId, notes: 'notes' });
+  });
+
   test('Transactions: import notes are preserved when importing', async () => {
     const accountId = await api.createAccount({ name: 'test-account' }, 0);
 
