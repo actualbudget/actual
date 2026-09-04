@@ -74,6 +74,8 @@ export function MonteCarloRunDetailTable({
 
   const lastRow = rows[rows.length - 1];
   const hasSurvived = lastRow != null && lastRow.endBalance > 0;
+  // Present whenever the plan has inflation enabled
+  const showInflation = rows.some(row => row.inflation != null);
   const allExpanded = rows.length > 0 && expandedYears.size === rows.length;
 
   function toggleYear(year: number) {
@@ -359,6 +361,17 @@ export function MonteCarloRunDetailTable({
             >
               <Trans>Return (%)</Trans>
             </Text>
+            {showInflation && (
+              <Text
+                style={{
+                  ...GROUP_HEADING_STYLE,
+                  width: 110,
+                  textAlign: 'right',
+                }}
+              >
+                <Trans>Inflation (%)</Trans>
+              </Text>
+            )}
             <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
               <Trans>Ending balance</Trans>
             </Text>
@@ -465,6 +478,17 @@ export function MonteCarloRunDetailTable({
                       <FinancialText as="span">{`${growthPct.toFixed(2)}%`}</FinancialText>
                     )}
                   </Text>
+                  {showInflation && (
+                    // Deliberately neutral: coloring deflation "good" or
+                    // inflation "bad" would oversimplify
+                    <Text style={{ width: 110, textAlign: 'right' }}>
+                      {row.inflation != null && (
+                        <FinancialText as="span">
+                          {`${(row.inflation * 100).toFixed(2)}%`}
+                        </FinancialText>
+                      )}
+                    </Text>
+                  )}
                   <Text style={AMOUNT_CELL_STYLE}>
                     <PrivacyFilter>
                       <FinancialText as="span">
