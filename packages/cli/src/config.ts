@@ -3,7 +3,12 @@ import { join } from 'path';
 
 import { cosmiconfig } from 'cosmiconfig';
 
-import { isRecord, parseBoolEnv, parseNonNegativeIntFlag } from './utils';
+import {
+  isRecord,
+  parseBoolEnv,
+  parseNonNegativeIntFlag,
+  readEnv,
+} from './utils';
 
 export type CliConfig = {
   serverUrl: string;
@@ -151,30 +156,30 @@ export async function resolveConfig(
 
   const serverUrl =
     cliOpts.serverUrl ??
-    process.env.ACTUAL_SERVER_URL ??
+    readEnv('ACTUAL_SERVER_URL') ??
     fileConfig.serverUrl ??
     '';
 
   const password =
-    cliOpts.password ?? process.env.ACTUAL_PASSWORD ?? fileConfig.password;
+    cliOpts.password ?? readEnv('ACTUAL_PASSWORD') ?? fileConfig.password;
 
   const sessionToken =
     cliOpts.sessionToken ??
-    process.env.ACTUAL_SESSION_TOKEN ??
+    readEnv('ACTUAL_SESSION_TOKEN') ??
     fileConfig.sessionToken;
 
   const syncId =
-    cliOpts.syncId ?? process.env.ACTUAL_SYNC_ID ?? fileConfig.syncId;
+    cliOpts.syncId ?? readEnv('ACTUAL_SYNC_ID') ?? fileConfig.syncId;
 
   const dataDir =
     cliOpts.dataDir ??
-    process.env.ACTUAL_DATA_DIR ??
+    readEnv('ACTUAL_DATA_DIR') ??
     fileConfig.dataDir ??
     join(homedir(), '.actual-cli', 'data');
 
   const encryptionPassword =
     cliOpts.encryptionPassword ??
-    process.env.ACTUAL_ENCRYPTION_PASSWORD ??
+    readEnv('ACTUAL_ENCRYPTION_PASSWORD') ??
     fileConfig.encryptionPassword;
 
   if (!serverUrl) {
@@ -191,10 +196,7 @@ export async function resolveConfig(
 
   const cacheTtl = validateNonNegativeInt(
     cliOpts.cacheTtl ??
-      parseNonNegativeIntEnv(
-        process.env.ACTUAL_CACHE_TTL,
-        'ACTUAL_CACHE_TTL',
-      ) ??
+      parseNonNegativeIntEnv(readEnv('ACTUAL_CACHE_TTL'), 'ACTUAL_CACHE_TTL') ??
       fileConfig.cacheTtl ??
       60,
     'cacheTtl',
@@ -203,7 +205,7 @@ export async function resolveConfig(
   const lockTimeout = validateNonNegativeInt(
     cliOpts.lockTimeout ??
       parseNonNegativeIntEnv(
-        process.env.ACTUAL_LOCK_TIMEOUT,
+        readEnv('ACTUAL_LOCK_TIMEOUT'),
         'ACTUAL_LOCK_TIMEOUT',
       ) ??
       fileConfig.lockTimeout ??
@@ -216,7 +218,7 @@ export async function resolveConfig(
   const flagNoLock = cliOpts.lock === false ? true : undefined;
   const noLock =
     flagNoLock ??
-    parseBoolEnv(process.env.ACTUAL_NO_LOCK, 'ACTUAL_NO_LOCK') ??
+    parseBoolEnv(readEnv('ACTUAL_NO_LOCK'), 'ACTUAL_NO_LOCK') ??
     fileConfig.noLock ??
     false;
 

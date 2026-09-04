@@ -6,6 +6,12 @@ import { fileURLToPath } from 'node:url';
 import convict from 'convict';
 import createDebug from 'debug';
 
+import {
+  applyFileEnvOverrides,
+  collectEnvVarBindings,
+  FILE_ENV_SUFFIX,
+} from './config-file-env';
+
 const require = createRequire(import.meta.url);
 const debug = createDebug('actual:config');
 const debugSensitive = createDebug('actual-sensitive:config');
@@ -59,7 +65,7 @@ convict.addFormat({
 });
 
 // Main config schema
-const configSchema = convict({
+const configSchemaDefinition = {
   env: {
     doc: 'The application environment.',
     format: ['production', 'development', 'test'],
@@ -296,7 +302,9 @@ const configSchema = convict({
       env: 'ACTUAL_CORS_PROXY_ENABLED',
     },
   },
-});
+};
+
+const configSchema = convict(configSchemaDefinition);
 
 let configPath = null;
 
@@ -318,6 +326,23 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 if (fs.existsSync(configPath)) {
   configSchema.loadFile(configPath);
   debug(`Config loaded`);
+}
+
+// Applied after loadFile so that `<VAR>_FILE` beats both config.json and the
+// plain environment variable, and before validate so the values are checked.
+for (const override of applyFileEnvOverrides(
+  configSchema,
+  collectEnvVarBindings(configSchemaDefinition),
+)) {
+  debug(
+    `Loaded ${override.envVar}${FILE_ENV_SUFFIX} -> ${override.path} from '${override.filePath}'`,
+  );
+
+  if (override.supersededEnvVar) {
+    debug(
+      `${override.envVar}${FILE_ENV_SUFFIX} takes precedence over ${override.envVar}`,
+    );
+  }
 }
 
 debug(`Validating config`);

@@ -52,6 +52,8 @@ Configuration is resolved in this order (highest priority first):
 | `ACTUAL_LOCK_TIMEOUT`  | Budget-dir lock wait timeout in seconds (default: 10) |
 | `ACTUAL_NO_LOCK`       | Set to `1` to disable budget-dir locking              |
 
+Any of these can be read from a file instead by adding `_FILE` to the variable name and pointing it at a file, for example `ACTUAL_PASSWORD_FILE=/run/secrets/actual-password`. Actual reads the file and strips surrounding whitespace. This keeps secrets out of the environment, which is useful with Docker secrets and Kubernetes secret volumes. If both forms are set, the file wins; if the file cannot be read, the command stops with an error instead of continuing without the value.
+
 ### Config File
 
 The CLI uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) for configuration. The config file can be anywhere between the current working directory and your home directory.
@@ -83,7 +85,7 @@ Example `.actualrc.json`:
 }
 ```
 
-**Security:** Avoid storing plaintext passwords in config files (including the `password` key above). If these files do contain passwords, set restrictive permissions (e.g. 600 on Linux), and, if they are in a git repo, add them to `.gitignore`. Prefer environment variables such as `ACTUAL_PASSWORD` or `ACTUAL_SESSION_TOKEN`, or use a session token in config instead of a password. See [Environment Variables](#environment-variables) for details.
+**Security:** Avoid storing plaintext passwords in config files (including the `password` key above). If these files do contain passwords, set restrictive permissions (e.g. 600 on Linux), and, if they are in a git repo, add them to `.gitignore`. Prefer environment variables such as `ACTUAL_PASSWORD` or `ACTUAL_SESSION_TOKEN`, or use a session token in config instead of a password. Better still, keep the secret in a file and point `ACTUAL_PASSWORD_FILE` or `ACTUAL_SESSION_TOKEN_FILE` at it. See [Environment Variables](#environment-variables) for details.
 
 ### Global Flags
 

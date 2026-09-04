@@ -37,6 +37,8 @@ The CLI requires a connection to a running Actual sync server. Configuration can
 | `ACTUAL_PASSWORD`      | Server password (one of password or token required) |
 | `ACTUAL_SESSION_TOKEN` | Session token (alternative to password)             |
 
+Any of these can be read from a file instead by adding `_FILE` to the variable name and pointing it at a file, for example `ACTUAL_PASSWORD_FILE=/run/secrets/actual-password`. Actual reads the file and strips surrounding whitespace. This keeps secrets out of the environment, which is useful with Docker secrets and Kubernetes secret volumes. If both forms are set, the file wins; if the file cannot be read, the command stops with an error instead of continuing without the value.
+
 ### CLI Flags
 
 Global flags override environment variables:
@@ -83,7 +85,7 @@ Example `.actualrc.json`:
 ```
 
 :::caution Security
-Avoid storing plaintext passwords in config files (including the `password` key above). If these files do contain passwords, set restrictive permissions (e.g. 600 on Linux), and, if they are in a git repo, add them to `.gitignore`. Prefer environment variables such as `ACTUAL_PASSWORD` or `ACTUAL_SESSION_TOKEN`, or use a session token in config instead of a password. See [Environment Variables](#environment-variables) for details.
+Avoid storing plaintext passwords in config files (including the `password` key above). If these files do contain passwords, set restrictive permissions (e.g. 600 on Linux), and, if they are in a git repo, add them to `.gitignore`. Prefer environment variables such as `ACTUAL_PASSWORD` or `ACTUAL_SESSION_TOKEN`, or use a session token in config instead of a password. Better still, keep the secret in a file and point `ACTUAL_PASSWORD_FILE` or `ACTUAL_SESSION_TOKEN_FILE` at it. See [Environment Variables](#environment-variables) for details.
 :::
 
 ## Usage
