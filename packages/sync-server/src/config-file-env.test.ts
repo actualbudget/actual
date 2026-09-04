@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { applyFileEnv, readFileEnv } from './config-file-env';
 
 describe('config file env', () => {
-  let dir: string;
+  let secretDirectory: string;
 
   const buildSchema = () =>
     convict({
@@ -24,17 +24,17 @@ describe('config file env', () => {
     });
 
   const writeSecret = (name: string, contents: string) => {
-    const filePath = join(dir, name);
+    const filePath = join(secretDirectory, name);
     writeFileSync(filePath, contents);
     return filePath;
   };
 
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), 'actual-config-file-env-'));
+    secretDirectory = mkdtempSync(join(tmpdir(), 'actual-config-file-env-'));
   });
 
   afterEach(() => {
-    rmSync(dir, { recursive: true, force: true });
+    rmSync(secretDirectory, { recursive: true, force: true });
   });
 
   describe('readFileEnv', () => {
@@ -59,7 +59,7 @@ describe('config file env', () => {
     });
 
     it('throws when the file cannot be read, naming the variable and path', () => {
-      const missing = join(dir, 'does-not-exist');
+      const missing = join(secretDirectory, 'does-not-exist');
 
       expect(() =>
         readFileEnv('TEST_SECRET_FILE', { TEST_SECRET_FILE: missing }),

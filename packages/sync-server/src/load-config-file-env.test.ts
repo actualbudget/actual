@@ -9,13 +9,13 @@ import type { config as loadedConfig } from './load-config';
 // load-config reads the environment when it is first imported, so the
 // environment has to be set up before importing it.
 describe('load-config _FILE overrides', () => {
-  let dir: string;
+  let secretDirectory: string;
   let config: typeof loadedConfig;
 
   beforeAll(async () => {
-    dir = mkdtempSync(join(tmpdir(), 'actual-load-config-'));
+    secretDirectory = mkdtempSync(join(tmpdir(), 'actual-load-config-'));
 
-    const secretPath = join(dir, 'client-secret');
+    const secretPath = join(secretDirectory, 'client-secret');
     writeFileSync(secretPath, 'secret-from-file\n');
 
     process.env.ACTUAL_OPENID_CLIENT_SECRET_FILE = secretPath;
@@ -29,7 +29,7 @@ describe('load-config _FILE overrides', () => {
   afterAll(() => {
     delete process.env.ACTUAL_OPENID_CLIENT_SECRET_FILE;
     delete process.env.ACTUAL_OPENID_CLIENT_SECRET;
-    rmSync(dir, { recursive: true, force: true });
+    rmSync(secretDirectory, { recursive: true, force: true });
   });
 
   it('loads the secret from the file, superseding the plain variable', () => {
