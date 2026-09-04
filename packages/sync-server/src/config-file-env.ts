@@ -1,132 +1,57 @@
 import fs from 'node:fs';
 
-/**
- * Suffix appended to an environment variable name to read its value from a
- * file instead. This is the convention used by Docker secrets and Kubernetes
- * file-mounted secrets, and lets deployments keep secrets out of the process
- * environment entirely.
- */
-export const FILE_ENV_SUFFIX = '_FILE';
-
-type SchemaNode = Record<string, unknown>;
-
-export type EnvVarBinding = {
-  /** The environment variable convict reads this setting from. */
-  envVar: string;
-  /** Dotted convict path, e.g. `openId.client_secret`. */
-  path: string;
-};
-
-export type AppliedOverride = EnvVarBinding & {
-  /** Path of the file the value was read from. */
-  filePath: string;
-  /** The value read from the file, already trimmed. */
-  value: string;
-  /**
-   * Whether the plain environment variable was also set, and so has been
-   * superseded by the file.
-   */
-  supersededEnvVar: boolean;
-};
-
 /** Minimal shape of a convict config; avoids depending on convict's types. */
 type ConfigSchema = {
   set(path: string, value: unknown): unknown;
 };
 
-function isPlainObject(value: unknown): value is SchemaNode {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
 /**
- * Whether a schema node describes a single setting rather than a group of
- * them. This mirrors convict's own rule in `normalizeSchema`: a non-empty
- * plain object without a `default` is a group, and anything else is a setting.
+ * Reads the value of a `<VAR>_FILE` environment variable, returning the
+ * contents of the file it points at.
  *
- * Keying off `default` rather than off reserved key names matters, because the
- * schema has a setting literally named `env` (bound to `NODE_ENV`), which a
- * keyword-based check would skip.
+ * Only an unset variable returns undefined. A variable that is set but
+ * unreadable — including an empty value, which means a mount produced no
+ * path — throws, because a secret that failed to mount should stop startup
+ * rather than leave the server running with an empty value.
  */
-function isSettingDefinition(node: SchemaNode): boolean {
-  return Object.keys(node).length === 0 || 'default' in node;
-}
+export function readFileEnv(
+  fileEnvVar: string,
+  env: NodeJS.ProcessEnv = process.env,
+): string | undefined {
+  const filePath = env[fileEnvVar];
 
-/**
- * Walks a convict schema definition and returns every setting that is bound to
- * an environment variable, paired with its dotted path.
- */
-export function collectEnvVarBindings(schema: SchemaNode): EnvVarBinding[] {
-  const bindings: EnvVarBinding[] = [];
+  if (filePath === undefined) return undefined;
 
-  function walk(group: SchemaNode, path: string) {
-    for (const [key, value] of Object.entries(group)) {
-      // Skips a group's own `doc` string, and a setting's `format` array or
-      // constructor — neither is a nested setting.
-      if (!isPlainObject(value)) continue;
-
-      const childPath = path ? `${path}.${key}` : key;
-
-      if (!isSettingDefinition(value)) {
-        walk(value, childPath);
-      } else if (typeof value.env === 'string') {
-        bindings.push({ envVar: value.env, path: childPath });
-      }
-    }
+  try {
+    return fs.readFileSync(filePath, 'utf8').trim();
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Could not read ${fileEnvVar} from '${filePath}': ${reason}`,
+    );
   }
-
-  walk(schema, '');
-
-  return bindings;
 }
 
 /**
- * Applies `<VAR>_FILE` overrides onto a convict config.
+ * Applies a `<VAR>_FILE` override onto a convict setting, returning whether
+ * one was applied.
  *
  * Must be called *after* `loadFile()` and *before* `validate()`. convict
  * re-imports the environment at the end of both `load()` and `loadFile()`, so
- * anything applied earlier would be clobbered by the plain environment
+ * an override applied any earlier would be clobbered by the plain environment
  * variable; `set()` is not re-imported and therefore wins.
- *
- * Throws if a `_FILE` variable points at something unreadable, rather than
- * silently falling back to an empty value — a secret that failed to mount
- * should stop startup, not produce a server running with broken auth.
  */
-export function applyFileEnvOverrides(
+export function applyFileEnv(
   config: ConfigSchema,
-  bindings: EnvVarBinding[],
+  fileEnvVar: string,
+  path: string,
   env: NodeJS.ProcessEnv = process.env,
-): AppliedOverride[] {
-  const applied: AppliedOverride[] = [];
+): boolean {
+  const value = readFileEnv(fileEnvVar, env);
 
-  for (const binding of bindings) {
-    const fileEnvVar = `${binding.envVar}${FILE_ENV_SUFFIX}`;
-    const filePath = env[fileEnvVar];
+  if (value === undefined) return false;
 
-    // Only an unset variable is skipped. An empty value is a misconfigured
-    // mount, and must fail rather than silently leave the setting untouched.
-    if (filePath === undefined) continue;
+  config.set(path, value);
 
-    let value;
-    try {
-      // Read directly rather than checking existence first, so a file removed
-      // in between cannot slip past as a missing value.
-      value = fs.readFileSync(filePath, 'utf8').trim();
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error);
-      throw new Error(
-        `Could not read ${fileEnvVar} from '${filePath}': ${reason}`,
-      );
-    }
-
-    config.set(binding.path, value);
-
-    applied.push({
-      ...binding,
-      filePath,
-      value,
-      supersededEnvVar: env[binding.envVar] !== undefined,
-    });
-  }
-
-  return applied;
+  return true;
 }

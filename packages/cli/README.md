@@ -41,18 +41,19 @@ Configuration is resolved in this order (highest priority first):
 
 ### Environment Variables
 
-| Variable               | Description                                           |
-| ---------------------- | ----------------------------------------------------- |
-| `ACTUAL_SERVER_URL`    | URL of the Actual sync server (required)              |
-| `ACTUAL_PASSWORD`      | Server password (required unless using token)         |
-| `ACTUAL_SESSION_TOKEN` | Session token (alternative to password)               |
-| `ACTUAL_SYNC_ID`       | Budget Sync ID (required for most commands)           |
-| `ACTUAL_DATA_DIR`      | Local directory for cached budget data                |
-| `ACTUAL_CACHE_TTL`     | Cache TTL in seconds (default: 60)                    |
-| `ACTUAL_LOCK_TIMEOUT`  | Budget-dir lock wait timeout in seconds (default: 10) |
-| `ACTUAL_NO_LOCK`       | Set to `1` to disable budget-dir locking              |
+| Variable                     | Description                                           |
+| ---------------------------- | ----------------------------------------------------- |
+| `ACTUAL_SERVER_URL`          | URL of the Actual sync server (required)              |
+| `ACTUAL_PASSWORD`            | Server password (required unless using token)         |
+| `ACTUAL_SESSION_TOKEN`       | Session token (alternative to password)               |
+| `ACTUAL_SYNC_ID`             | Budget Sync ID (required for most commands)           |
+| `ACTUAL_DATA_DIR`            | Local directory for cached budget data                |
+| `ACTUAL_CACHE_TTL`           | Cache TTL in seconds (default: 60)                    |
+| `ACTUAL_LOCK_TIMEOUT`        | Budget-dir lock wait timeout in seconds (default: 10) |
+| `ACTUAL_NO_LOCK`             | Set to `1` to disable budget-dir locking              |
+| `ACTUAL_ENCRYPTION_PASSWORD` | Password for end-to-end encrypted budget files        |
 
-Any of these can be read from a file instead by adding `_FILE` to the variable name and pointing it at a file, for example `ACTUAL_PASSWORD_FILE=/run/secrets/actual-password`. Actual reads the file and strips surrounding whitespace. This keeps secrets out of the environment, which is useful with Docker secrets and Kubernetes secret volumes. If both forms are set, the file wins; if the file cannot be read, the command stops with an error instead of continuing without the value.
+The three secrets — `ACTUAL_PASSWORD`, `ACTUAL_SESSION_TOKEN` and `ACTUAL_ENCRYPTION_PASSWORD` — can also be read from a file, by adding `_FILE` to the variable name and pointing it at a file, for example `ACTUAL_PASSWORD_FILE=/run/secrets/actual-password`. Actual reads the file and strips surrounding whitespace. This keeps secrets out of the environment, which is useful with Docker secrets and Kubernetes secret volumes. If both forms are set, the file wins; if the file cannot be read, the command stops with an error instead of continuing without the value.
 
 ### Config File
 

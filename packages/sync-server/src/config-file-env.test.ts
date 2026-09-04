@@ -5,77 +5,13 @@ import { join } from 'node:path';
 import convict from 'convict';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import {
-  applyFileEnvOverrides,
-  collectEnvVarBindings,
-} from './config-file-env';
+import { applyFileEnv, readFileEnv } from './config-file-env';
 
-describe('collectEnvVarBindings', () => {
-  it('collects top-level and nested settings with their dotted paths', () => {
-    const bindings = collectEnvVarBindings({
-      port: { doc: 'Port', format: 'port', default: 5006, env: 'TEST_PORT' },
-      openId: {
-        doc: 'OpenID settings.',
-        client_secret: { format: String, default: '', env: 'TEST_SECRET' },
-        issuer: {
-          doc: 'Issuer',
-          name: { format: String, default: '', env: 'TEST_ISSUER_NAME' },
-        },
-      },
-    });
-
-    expect(bindings).toEqual([
-      { envVar: 'TEST_PORT', path: 'port' },
-      { envVar: 'TEST_SECRET', path: 'openId.client_secret' },
-      { envVar: 'TEST_ISSUER_NAME', path: 'openId.issuer.name' },
-    ]);
-  });
-
-  it('treats a setting named "env" as a setting, not as a convict keyword', () => {
-    // The real schema has a top-level `env` setting bound to NODE_ENV, which
-    // must not be confused with the `env` keyword of a setting definition.
-    const bindings = collectEnvVarBindings({
-      env: {
-        doc: 'The application environment.',
-        format: ['production', 'development', 'test'],
-        default: 'development',
-        env: 'NODE_ENV',
-      },
-    });
-
-    expect(bindings).toEqual([{ envVar: 'NODE_ENV', path: 'env' }]);
-  });
-
-  it('ignores settings that are not bound to an environment variable', () => {
-    const bindings = collectEnvVarBindings({
-      projectRoot: { doc: 'Project root.', format: String, default: '/app' },
-    });
-
-    expect(bindings).toEqual([]);
-  });
-
-  it('does not descend into object-valued convict keywords', () => {
-    const bindings = collectEnvVarBindings({
-      group: {
-        doc: 'A group whose default is an object.',
-        nested: {
-          format: Object,
-          default: { env: 'NOT_A_SETTING' },
-          env: 'TEST_NESTED',
-        },
-      },
-    });
-
-    expect(bindings).toEqual([{ envVar: 'TEST_NESTED', path: 'group.nested' }]);
-  });
-});
-
-describe('applyFileEnvOverrides', () => {
+describe('config file env', () => {
   let dir: string;
 
   const buildSchema = () =>
     convict({
-      port: { doc: 'Port', format: 'port', default: 5006, env: 'TEST_PORT' },
       openId: {
         doc: 'OpenID settings.',
         client_secret: {
@@ -101,108 +37,89 @@ describe('applyFileEnvOverrides', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  it('reads the value from the file named by <VAR>_FILE', () => {
-    const config = buildSchema();
-    const filePath = writeSecret('secret', 'from-file');
+  describe('readFileEnv', () => {
+    it('reads the contents of the file the variable points at', () => {
+      const filePath = writeSecret('secret', 'from-file');
 
-    const applied = applyFileEnvOverrides(
-      config,
-      [{ envVar: 'TEST_SECRET', path: 'openId.client_secret' }],
-      { TEST_SECRET_FILE: filePath },
-    );
-
-    expect(config.get('openId.client_secret')).toBe('from-file');
-    expect(applied).toEqual([
-      {
-        envVar: 'TEST_SECRET',
-        path: 'openId.client_secret',
-        filePath,
-        value: 'from-file',
-        supersededEnvVar: false,
-      },
-    ]);
-  });
-
-  it('trims surrounding whitespace from the file value', () => {
-    const config = buildSchema();
-    const filePath = writeSecret('secret', '  from-file\n');
-
-    applyFileEnvOverrides(
-      config,
-      [{ envVar: 'TEST_SECRET', path: 'openId.client_secret' }],
-      { TEST_SECRET_FILE: filePath },
-    );
-
-    expect(config.get('openId.client_secret')).toBe('from-file');
-  });
-
-  it('takes precedence over the plain environment variable', () => {
-    const config = buildSchema();
-    const filePath = writeSecret('secret', 'from-file');
-
-    // convict has already imported TEST_SECRET at this point, exactly as it
-    // would at startup.
-    config.set('openId.client_secret', 'from-env');
-
-    const applied = applyFileEnvOverrides(
-      config,
-      [{ envVar: 'TEST_SECRET', path: 'openId.client_secret' }],
-      { TEST_SECRET: 'from-env', TEST_SECRET_FILE: filePath },
-    );
-
-    expect(config.get('openId.client_secret')).toBe('from-file');
-    expect(applied[0].supersededEnvVar).toBe(true);
-  });
-
-  it('leaves settings alone when no _FILE variable is set', () => {
-    const config = buildSchema();
-
-    const applied = applyFileEnvOverrides(
-      config,
-      [{ envVar: 'TEST_SECRET', path: 'openId.client_secret' }],
-      {},
-    );
-
-    expect(applied).toEqual([]);
-    expect(config.get('openId.client_secret')).toBe('');
-  });
-
-  it('coerces values for non-string formats', () => {
-    const config = buildSchema();
-    const filePath = writeSecret('port', '1234\n');
-
-    applyFileEnvOverrides(config, [{ envVar: 'TEST_PORT', path: 'port' }], {
-      TEST_PORT_FILE: filePath,
+      expect(
+        readFileEnv('TEST_SECRET_FILE', { TEST_SECRET_FILE: filePath }),
+      ).toBe('from-file');
     });
 
-    expect(config.get('port')).toBe(1234);
-    expect(() => config.validate({ allowed: 'strict' })).not.toThrow();
+    it('trims surrounding whitespace from the file value', () => {
+      const filePath = writeSecret('secret', '  from-file\n');
+
+      expect(
+        readFileEnv('TEST_SECRET_FILE', { TEST_SECRET_FILE: filePath }),
+      ).toBe('from-file');
+    });
+
+    it('returns undefined when the variable is not set', () => {
+      expect(readFileEnv('TEST_SECRET_FILE', {})).toBeUndefined();
+    });
+
+    it('throws when the file cannot be read, naming the variable and path', () => {
+      const missing = join(dir, 'does-not-exist');
+
+      expect(() =>
+        readFileEnv('TEST_SECRET_FILE', { TEST_SECRET_FILE: missing }),
+      ).toThrow(`Could not read TEST_SECRET_FILE from '${missing}'`);
+    });
+
+    it('throws when the variable is set but empty', () => {
+      // An empty value means a mount that did not produce a path. Falling back
+      // to the plain variable here would hide the misconfiguration.
+      expect(() =>
+        readFileEnv('TEST_SECRET_FILE', { TEST_SECRET_FILE: '' }),
+      ).toThrow('Could not read TEST_SECRET_FILE');
+    });
   });
 
-  it('throws when the _FILE variable is set but empty', () => {
-    const config = buildSchema();
+  describe('applyFileEnv', () => {
+    it('sets the value on the config and reports that it applied', () => {
+      const config = buildSchema();
+      const filePath = writeSecret('secret', 'from-file');
 
-    // An empty value means a mount that did not produce a path. Falling back
-    // to the plain variable here would hide the misconfiguration.
-    expect(() =>
-      applyFileEnvOverrides(
+      const applied = applyFileEnv(
         config,
-        [{ envVar: 'TEST_SECRET', path: 'openId.client_secret' }],
-        { TEST_SECRET: 'from-env', TEST_SECRET_FILE: '' },
-      ),
-    ).toThrow('Could not read TEST_SECRET_FILE');
-  });
+        'TEST_SECRET_FILE',
+        'openId.client_secret',
+        { TEST_SECRET_FILE: filePath },
+      );
 
-  it('throws when the file cannot be read, naming the variable and path', () => {
-    const config = buildSchema();
-    const missing = join(dir, 'does-not-exist');
+      expect(applied).toBe(true);
+      expect(config.get('openId.client_secret')).toBe('from-file');
+    });
 
-    expect(() =>
-      applyFileEnvOverrides(
+    it('takes precedence over the plain environment variable', () => {
+      const config = buildSchema();
+      const filePath = writeSecret('secret', 'from-file');
+
+      // convict has already imported TEST_SECRET at this point, exactly as it
+      // would at startup.
+      config.set('openId.client_secret', 'from-env');
+
+      applyFileEnv(config, 'TEST_SECRET_FILE', 'openId.client_secret', {
+        TEST_SECRET: 'from-env',
+        TEST_SECRET_FILE: filePath,
+      });
+
+      expect(config.get('openId.client_secret')).toBe('from-file');
+    });
+
+    it('leaves the setting alone when the variable is not set', () => {
+      const config = buildSchema();
+
+      const applied = applyFileEnv(
         config,
-        [{ envVar: 'TEST_SECRET', path: 'openId.client_secret' }],
-        { TEST_SECRET_FILE: missing },
-      ),
-    ).toThrow(`Could not read TEST_SECRET_FILE from '${missing}'`);
+        'TEST_SECRET_FILE',
+        'openId.client_secret',
+        {},
+      );
+
+      expect(applied).toBe(false);
+      expect(config.get('openId.client_secret')).toBe('');
+      expect(() => config.validate({ allowed: 'strict' })).not.toThrow();
+    });
   });
 });

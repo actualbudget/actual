@@ -361,17 +361,31 @@ describe('resolveConfig', () => {
       expect(config.password).toBe('filepw');
     });
 
-    it('works for non-string settings', async () => {
-      process.env.ACTUAL_CACHE_TTL_FILE = writeSecret('ttl', '120\n');
-      process.env.ACTUAL_NO_LOCK_FILE = writeSecret('nolock', 'true\n');
+    it('supports the session token and encryption password too', async () => {
+      process.env.ACTUAL_SESSION_TOKEN_FILE = writeSecret('token', 'filetok\n');
+      process.env.ACTUAL_ENCRYPTION_PASSWORD_FILE = writeSecret(
+        'enc',
+        'fileenc',
+      );
+
+      const config = await resolveConfig({ serverUrl: 'http://test' });
+
+      expect(config.sessionToken).toBe('filetok');
+      expect(config.encryptionPassword).toBe('fileenc');
+    });
+
+    it('is not offered for settings that are not secrets', async () => {
+      // Following the Docker secrets convention, only secrets get a _FILE
+      // variant. A stray one must be ignored, not silently honoured.
+      process.env.ACTUAL_SYNC_ID_FILE = writeSecret('sync', 'from-file');
+      process.env.ACTUAL_SYNC_ID = 'from-env';
 
       const config = await resolveConfig({
         serverUrl: 'http://test',
         password: 'pw',
       });
 
-      expect(config.cacheTtl).toBe(120);
-      expect(config.noLock).toBe(true);
+      expect(config.syncId).toBe('from-env');
     });
 
     it('throws when the _FILE variable is set but empty', async () => {

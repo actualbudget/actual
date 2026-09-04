@@ -177,7 +177,6 @@ export async function resolveConfig(
 
   const serverUrl =
     cliOpts.serverUrl ??
-    readFileEnv('ACTUAL_SERVER_URL_FILE') ??
     process.env.ACTUAL_SERVER_URL ??
     fileConfig.serverUrl ??
     '';
@@ -195,14 +194,10 @@ export async function resolveConfig(
     fileConfig.sessionToken;
 
   const syncId =
-    cliOpts.syncId ??
-    readFileEnv('ACTUAL_SYNC_ID_FILE') ??
-    process.env.ACTUAL_SYNC_ID ??
-    fileConfig.syncId;
+    cliOpts.syncId ?? process.env.ACTUAL_SYNC_ID ?? fileConfig.syncId;
 
   const dataDir =
     cliOpts.dataDir ??
-    readFileEnv('ACTUAL_DATA_DIR_FILE') ??
     process.env.ACTUAL_DATA_DIR ??
     fileConfig.dataDir ??
     join(homedir(), '.actual-cli', 'data');
@@ -228,7 +223,7 @@ export async function resolveConfig(
   const cacheTtl = validateNonNegativeInt(
     cliOpts.cacheTtl ??
       parseNonNegativeIntEnv(
-        readFileEnv('ACTUAL_CACHE_TTL_FILE') ?? process.env.ACTUAL_CACHE_TTL,
+        process.env.ACTUAL_CACHE_TTL,
         'ACTUAL_CACHE_TTL',
       ) ??
       fileConfig.cacheTtl ??
@@ -239,8 +234,7 @@ export async function resolveConfig(
   const lockTimeout = validateNonNegativeInt(
     cliOpts.lockTimeout ??
       parseNonNegativeIntEnv(
-        readFileEnv('ACTUAL_LOCK_TIMEOUT_FILE') ??
-          process.env.ACTUAL_LOCK_TIMEOUT,
+        process.env.ACTUAL_LOCK_TIMEOUT,
         'ACTUAL_LOCK_TIMEOUT',
       ) ??
       fileConfig.lockTimeout ??
@@ -253,10 +247,7 @@ export async function resolveConfig(
   const flagNoLock = cliOpts.lock === false ? true : undefined;
   const noLock =
     flagNoLock ??
-    parseBoolEnv(
-      readFileEnv('ACTUAL_NO_LOCK_FILE') ?? process.env.ACTUAL_NO_LOCK,
-      'ACTUAL_NO_LOCK',
-    ) ??
+    parseBoolEnv(process.env.ACTUAL_NO_LOCK, 'ACTUAL_NO_LOCK') ??
     fileConfig.noLock ??
     false;
 

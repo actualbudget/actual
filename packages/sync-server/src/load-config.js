@@ -6,11 +6,7 @@ import { fileURLToPath } from 'node:url';
 import convict from 'convict';
 import createDebug from 'debug';
 
-import {
-  applyFileEnvOverrides,
-  collectEnvVarBindings,
-  FILE_ENV_SUFFIX,
-} from './config-file-env';
+import { applyFileEnv } from './config-file-env';
 
 const require = createRequire(import.meta.url);
 const debug = createDebug('actual:config');
@@ -65,7 +61,7 @@ convict.addFormat({
 });
 
 // Main config schema
-const configSchemaDefinition = {
+const configSchema = convict({
   env: {
     doc: 'The application environment.',
     format: ['production', 'development', 'test'],
@@ -302,9 +298,7 @@ const configSchemaDefinition = {
       env: 'ACTUAL_CORS_PROXY_ENABLED',
     },
   },
-};
-
-const configSchema = convict(configSchemaDefinition);
+});
 
 let configPath = null;
 
@@ -328,20 +322,17 @@ if (fs.existsSync(configPath)) {
   debug(`Config loaded`);
 }
 
-// Applied after loadFile so that `<VAR>_FILE` beats both config.json and the
-// plain environment variable, and before validate so the values are checked.
-for (const override of applyFileEnvOverrides(
-  configSchema,
-  collectEnvVarBindings(configSchemaDefinition),
-)) {
-  debug(
-    `Loaded ${override.envVar}${FILE_ENV_SUFFIX} -> ${override.path} from '${override.filePath}'`,
-  );
-
-  if (override.supersededEnvVar) {
-    debug(
-      `${override.envVar}${FILE_ENV_SUFFIX} takes precedence over ${override.envVar}`,
-    );
+// `<VAR>_FILE` is applied after loadFile so it beats both config.json and the
+// plain environment variable, and before validate so the value is checked.
+// Only secrets get a _FILE variant, following the Docker secrets convention.
+// ACTUAL_HTTPS_KEY and ACTUAL_HTTPS_CERT already accept a path, so they are
+// deliberately absent.
+for (const [fileEnvVar, settingPath] of [
+  ['ACTUAL_OPENID_CLIENT_SECRET_FILE', 'openId.client_secret'],
+  ['ACTUAL_GITHUB_TOKEN_FILE', 'github.token'],
+]) {
+  if (applyFileEnv(configSchema, fileEnvVar, settingPath)) {
+    debug(`Loaded ${settingPath} from ${fileEnvVar}`);
   }
 }
 
