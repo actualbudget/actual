@@ -153,6 +153,7 @@ export class AccountPage {
 
   _getTransactionDetails(row: Locator) {
     return {
+      date: row.getByTestId('date'),
       account: row.getByTestId('account'),
       payee: row.getByTestId('payee'),
       notes: row.getByTestId('notes'),
@@ -160,6 +161,7 @@ export class AccountPage {
       debit: row.getByTestId('debit'),
       credit: row.getByTestId('credit'),
       balance: row.getByTestId('balance'),
+      cleared: row.getByTestId('cleared'),
     };
   }
 

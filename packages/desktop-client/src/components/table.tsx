@@ -43,7 +43,7 @@ import {
   AvoidRefocusScrollProvider,
   useProperFocus,
 } from '#hooks/useProperFocus';
-import { useSelectedItems } from '#hooks/useSelected';
+import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { useSheetValue } from '#hooks/useSheetValue';
 import type {
   Binding,
@@ -351,9 +351,12 @@ function InputValue({
   }
 
   function onKeyDown(e) {
-    // Only enter and tab to escape (which allows the user to move
-    // around)
-    if (e.key !== 'Enter' && e.key !== 'Tab') {
+    if (e.key === 'Escape') {
+      // Input commits the DOM value on blur, so revert it here before the
+      // navigator unmounts us. Left to bubble so the navigator can exit edit.
+      e.currentTarget.value = defaultValue ?? '';
+      setValue(defaultValue);
+    } else if (e.key !== 'Enter' && e.key !== 'Tab') {
       e.stopPropagation();
     }
 
@@ -363,6 +366,9 @@ function InputValue({
   }
 
   function onEscape() {
+    // Idempotent fallback in case the keydown handler above doesn't
+    // run (e.g. when this input is rendered outside a table-navigator
+    // container).
     if (value !== defaultValue) {
       setValue(defaultValue);
     }
@@ -466,17 +472,31 @@ export function CustomCell({
     setPrevDefaultValue(defaultValue);
   }
 
+  // The navigator refocuses the container on Escape, which blurs us
+  // synchronously before React flushes the revert below. A ref survives that.
+  const escapePressed = useRef(false);
+
   function onBlur_(e: FocusEvent) {
     // Only save on blur if the app is focused. Blur events fire when
     // the app unfocuses, and it's unintuitive to save the value since
     // the input will be focused again when the app regains focus
     if (document.hasFocus()) {
-      onUpdate?.(value);
+      if (!escapePressed.current) {
+        onUpdate?.(value);
+      }
       fireBlur(onBlur, e);
     }
+    escapePressed.current = false;
   }
 
   function onKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      escapePressed.current = true;
+      setValue(defaultValue);
+    } else {
+      escapePressed.current = false;
+    }
+
     if (shouldSaveFromKey(e)) {
       onUpdate?.(value);
     }
@@ -1244,6 +1264,20 @@ export type TableNavigator<T extends TableItem> = {
   getNavigatorProps: (userProps: object) => object;
 };
 
+// Button/checkbox cells. CellButton.onFocus sets editingId on these to keep
+// keyboard navigation working, but nothing is actually being edited.
+const NON_EDITABLE_FIELDS = new Set([
+  'select',
+  'cleared',
+  'cancel',
+  'add',
+  'schedule',
+]);
+
+export function isEditingCell(editingId: unknown, focusedField: string) {
+  return editingId != null && !NON_EDITABLE_FIELDS.has(focusedField);
+}
+
 export function useTableNavigator<T extends TableItem>(
   data: T[],
   fields: string[] | ((item?: T) => string[]),
@@ -1252,13 +1286,25 @@ export function useTableNavigator<T extends TableItem>(
   const [editingId, setEditingId] = useState<T['id']>(null);
   const [focusedField, setFocusedField] = useState<string>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Lets arrow keys resume where the cursor was after Escape clears editingId.
+  const lastPositionRef = useRef<{ id: T['id']; field?: string } | null>(null);
 
   // See `onBlur` for why we need this
   const modalState = useModalState();
   const modalStackLength = useRef(modalState.modalStack.length);
 
+  // Used by the Escape handler to clear the multi-select set when no
+  // cell is being edited. Both contexts return null when this hook is
+  // used outside a SelectedProvider (e.g. in the budget grid), in
+  // which case the Escape branch below is a no-op.
+  const selectedItems = useSelectedItems();
+  const selectedDispatch = useSelectedDispatch();
+
   // onEdit is passed to children, so make sure it maintains identity
   const onEdit = useCallback((id: T['id'] | null, field?: string) => {
+    if (id != null) {
+      lastPositionRef.current = { id, field };
+    }
     setEditingId(id);
     setFocusedField(id ? field : null);
   }, []);
@@ -1311,7 +1357,8 @@ export function useTableNavigator<T extends TableItem>(
       } else if (idx >= fields.length) {
         onFocusNext();
       } else {
-        setFocusedField(fields[idx]);
+        // Via onEdit so lastPositionRef stays in sync with the cursor.
+        onEdit(editingId, fields[idx]);
       }
     }
   }
@@ -1333,6 +1380,28 @@ export function useTableNavigator<T extends TableItem>(
           flashInput();
           break;
         }
+      }
+    } else if (data.length > 0) {
+      // Resume cursor from last known position, or jump to top/bottom
+      const lastPosition = lastPositionRef.current;
+      let nextIdx = dir < 0 ? data.length - 1 : 0;
+
+      if (lastPosition != null) {
+        const idx = data.findIndex(item => item.id === lastPosition.id);
+        if (idx !== -1) {
+          nextIdx = idx;
+        }
+      }
+
+      const next = data[nextIdx];
+      const availableFields = getFields(next);
+      if (availableFields.length > 0) {
+        // Rows don't all expose the same fields (splits, previews).
+        const nextField =
+          lastPosition?.field && availableFields.includes(lastPosition.field)
+            ? lastPosition.field
+            : availableFields[0];
+        onEdit(next.id, nextField);
       }
     }
   }
@@ -1400,6 +1469,27 @@ export function useTableNavigator<T extends TableItem>(
                   : 'right',
             );
             break;
+
+          case 'Escape': {
+            // Peel off one layer per press: edit mode, then the selection.
+            // Popovers stop propagation, so they're already closed by now.
+            if (isEditingCell(editingId, focusedField)) {
+              e.preventDefault();
+              // Consumed here, so enclosing handlers don't peel a second
+              // layer off the same press.
+              e.stopPropagation();
+              onEdit(null);
+              containerRef.current?.focus();
+            } else if (selectedItems && selectedItems.size > 0) {
+              e.preventDefault();
+              e.stopPropagation();
+              if (editingId != null) {
+                onEdit(null);
+              }
+              selectedDispatch?.({ type: 'select-none' });
+            }
+            break;
+          }
           default:
         }
       },
