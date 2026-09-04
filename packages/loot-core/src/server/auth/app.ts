@@ -423,9 +423,11 @@ async function totpStatus(): Promise<
   }
 }
 
-async function totpEnroll(): Promise<
-  { error: string } | { secret: string; otpauthUrl: string }
-> {
+async function totpEnroll({
+  password,
+}: {
+  password: string;
+}): Promise<{ error: string } | { secret: string; otpauthUrl: string }> {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
     return { error: 'not-logged-in' };
@@ -439,7 +441,7 @@ async function totpEnroll(): Promise<
 
     const res = await post(
       serverConfig.SIGNUP_SERVER + '/totp/enroll',
-      { token: userToken, clientSupportsMfa: true },
+      { token: userToken, password, clientSupportsMfa: true },
       { 'X-ACTUAL-TOKEN': userToken },
     );
 

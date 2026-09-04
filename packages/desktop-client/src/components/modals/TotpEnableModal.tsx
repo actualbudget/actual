@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -19,6 +19,7 @@ import {
   ModalHeader,
 } from '#components/common/Modal';
 import { FormField, FormLabel } from '#components/forms';
+import { ConfirmOldPasswordForm } from '#components/manager/subscribe/ConfirmPasswordForm';
 import { popModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -56,31 +57,19 @@ export function TotpEnableModal({ onSave }: TotpEnableModalProps) {
     return errorMessages[error] || t('Internal error');
   }
 
-  useEffect(() => {
-    let cancelled = false;
+  // Enrolling requires the password
+  async function onEnroll(password: string) {
+    setError(null);
+    const res = await send('totp-enroll', { password });
 
-    async function enroll() {
-      const res = await send('totp-enroll');
-
-      if (cancelled) {
-        return;
-      }
-
-      if ('error' in res) {
-        setError(res.error);
-        return;
-      }
-
-      setSecret(res.secret);
-      setQrDataUrl(await QRCode.toDataURL(res.otpauthUrl));
+    if ('error' in res) {
+      setError(res.error);
+      return;
     }
 
-    void enroll();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    setSecret(res.secret);
+    setQrDataUrl(await QRCode.toDataURL(res.otpauthUrl));
+  }
 
   async function onConfirm() {
     if (code.trim() === '' || loading) {
@@ -110,97 +99,126 @@ export function TotpEnableModal({ onSave }: TotpEnableModalProps) {
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
 
-          <View style={{ flexDirection: 'column', gap: 10 }}>
-            <Text>
-              <Trans>
-                Scan this code with an authenticator app, then enter the code it
-                shows to confirm it works.
-              </Trans>
-            </Text>
-
-            {qrDataUrl && (
-              <View style={{ alignItems: 'center' }}>
-                <img
-                  src={qrDataUrl}
-                  alt={t('Two-factor authentication QR code')}
-                  width={200}
-                  height={200}
-                  style={{ borderRadius: 4 }}
+          {!secret ? (
+            <View style={{ flexDirection: 'column' }}>
+              <Text>
+                <Trans>
+                  Confirm your server password to start setting up two-factor
+                  authentication.
+                </Trans>
+              </Text>
+              <FormField style={{ flex: 1 }}>
+                <ConfirmOldPasswordForm
+                  buttons={
+                    <Button
+                      variant="bare"
+                      style={{ fontSize: 15, marginRight: 10 }}
+                      onPress={() => dispatch(popModal())}
+                    >
+                      <Trans>Cancel</Trans>
+                    </Button>
+                  }
+                  onSetPassword={onEnroll}
                 />
-              </View>
-            )}
+              </FormField>
+              {error && <ErrorAlert>{getErrorMessage(error)}</ErrorAlert>}
+            </View>
+          ) : (
+            <>
+              <View style={{ flexDirection: 'column', gap: 10 }}>
+                <Text>
+                  <Trans>
+                    Scan this code with an authenticator app, then enter the
+                    code it shows to confirm it works.
+                  </Trans>
+                </Text>
 
-            {secret && (
-              <View>
+                {qrDataUrl && (
+                  <View style={{ alignItems: 'center' }}>
+                    <img
+                      src={qrDataUrl}
+                      alt={t('Two-factor authentication QR code')}
+                      width={200}
+                      height={200}
+                      style={{ borderRadius: 4 }}
+                    />
+                  </View>
+                )}
+
+                {secret && (
+                  <View>
+                    <Label
+                      style={{
+                        ...styles.verySmallText,
+                        color: theme.pageTextLight,
+                      }}
+                      title={t('Or enter this key manually:')}
+                    />
+                    <Text
+                      style={{
+                        ...styles.verySmallText,
+                        fontFamily: 'monospace',
+                        userSelect: 'all',
+                        wordBreak: 'break-all',
+                      }}
+                    >
+                      {secret}
+                    </Text>
+                  </View>
+                )}
+
+                <FormField>
+                  <FormLabel title={t('Code:')} htmlFor="totp-code-field" />
+                  <Input
+                    id="totp-code-field"
+                    autoFocus
+                    inputMode="numeric"
+                    value={code}
+                    onChangeValue={setCode}
+                    onEnter={onConfirm}
+                  />
+                </FormField>
+
                 <Label
                   style={{
                     ...styles.verySmallText,
                     color: theme.pageTextLight,
                   }}
-                  title={t('Or enter this key manually:')}
+                  title={t(
+                    'Keep a copy of the key somewhere safe. If you lose your authenticator app, run the disable-totp script on the server to get back in',
+                  )}
                 />
-                <Text
+
+                <Label
                   style={{
                     ...styles.verySmallText,
-                    fontFamily: 'monospace',
-                    userSelect: 'all',
-                    wordBreak: 'break-all',
+                    color: theme.warningText,
                   }}
-                >
-                  {secret}
-                </Text>
+                  title={t(
+                    'Older versions of Actual will not be able to sign in',
+                  )}
+                />
+
+                {error && <ErrorAlert>{getErrorMessage(error)}</ErrorAlert>}
               </View>
-            )}
 
-            <FormField>
-              <FormLabel title={t('Code:')} htmlFor="totp-code-field" />
-              <Input
-                id="totp-code-field"
-                autoFocus
-                inputMode="numeric"
-                value={code}
-                onChangeValue={setCode}
-                onEnter={onConfirm}
-              />
-            </FormField>
-
-            <Label
-              style={{
-                ...styles.verySmallText,
-                color: theme.pageTextLight,
-              }}
-              title={t(
-                'Keep a copy of the key somewhere safe. If you lose your authenticator app, run the disable-totp script on the server to get back in',
-              )}
-            />
-
-            <Label
-              style={{
-                ...styles.verySmallText,
-                color: theme.warningText,
-              }}
-              title={t('Older versions of Actual will not be able to sign in')}
-            />
-
-            {error && <ErrorAlert>{getErrorMessage(error)}</ErrorAlert>}
-          </View>
-
-          <ModalButtons>
-            <Button
-              style={{ marginRight: 10 }}
-              onPress={() => dispatch(popModal())}
-            >
-              <Trans>Cancel</Trans>
-            </Button>
-            <ButtonWithLoading
-              variant="primary"
-              isLoading={loading}
-              isDisabled={!secret}
-              onPress={onConfirm}
-            >
-              <Trans>Enable</Trans>
-            </ButtonWithLoading>
-          </ModalButtons>
+              <ModalButtons>
+                <Button
+                  style={{ marginRight: 10 }}
+                  onPress={() => dispatch(popModal())}
+                >
+                  <Trans>Cancel</Trans>
+                </Button>
+                <ButtonWithLoading
+                  variant="primary"
+                  isLoading={loading}
+                  onPress={onConfirm}
+                >
+                  <Trans>Enable</Trans>
+                </ButtonWithLoading>
+              </ModalButtons>
+            </>
+          )}
         </>
       )}
     </Modal>

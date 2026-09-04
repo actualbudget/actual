@@ -23,8 +23,9 @@ as Aegis, Bitwarden, 1Password, Ente Auth, or Google Authenticator.
 1. Open any budget file, then go to **Settings**.
 2. Under **Two-factor authentication**, click _Enable two-factor
    authentication_.
-3. Scan the QR code with your authenticator app, or type the key in by hand.
-4. Enter the six-digit code your app shows, then click _Enable_.
+3. Confirm your server password.
+4. Scan the QR code with your authenticator app, or type the key in by hand.
+5. Enter the six-digit code your app shows, then click _Enable_.
 
 Actual asks for that code before switching the feature on, so a mistyped key
 cannot lock you out.

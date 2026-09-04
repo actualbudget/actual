@@ -314,7 +314,7 @@ app.get('/totp/status', (req, res) => {
   });
 });
 
-app.post('/totp/enroll', (req, res) => {
+app.post('/totp/enroll', mfaRateLimiter, async (req, res) => {
   if (!validateTotpAdminSession(req, res)) return;
 
   // Refuse to arm a second factor from a client that could not then sign in
@@ -326,6 +326,12 @@ app.post('/totp/enroll', (req, res) => {
 
   if (isTotpEnabled()) {
     res.status(400).send({ status: 'error', reason: 'totp-already-enabled' });
+    return;
+  }
+
+  const { error } = await verifyPasswordForLogin(req.body.password);
+  if (error) {
+    res.status(400).send({ status: 'error', reason: error });
     return;
   }
 

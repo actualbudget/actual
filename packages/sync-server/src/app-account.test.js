@@ -130,6 +130,70 @@ describe('/needs-bootstrap', () => {
   });
 });
 
+describe('/totp/enroll', () => {
+  let adminUserId, adminPasswordToken;
+
+  beforeEach(async () => {
+    adminUserId = uuidv4();
+    adminPasswordToken = generateSessionToken();
+    createUser(adminUserId, 'admin', ADMIN_ROLE);
+    createSession(adminUserId, adminPasswordToken, 'password');
+    await bootstrapPassword('testpassword');
+  });
+
+  afterEach(() => {
+    deleteUser(adminUserId);
+    clearTotp();
+    clearAuth();
+  });
+
+  const enroll = body =>
+    request(app)
+      .post('/totp/enroll')
+      .set('X-ACTUAL-TOKEN', adminPasswordToken)
+      .send({ clientSupportsMfa: true, ...body });
+
+  it('refuses without a password', async () => {
+    const res = await enroll({});
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty('reason', 'invalid-password');
+  });
+
+  it('refuses a wrong password', async () => {
+    const res = await enroll({ password: 'nope' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty('reason', 'invalid-password');
+  });
+
+  it('issues a secret once the password is confirmed', async () => {
+    const res = await enroll({ password: 'testpassword' });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data).toHaveProperty('secret');
+    expect(res.body.data.otpauthUrl).toContain('otpauth://totp/');
+  });
+
+  it('still requires the MFA-capable client marker', async () => {
+    const res = await request(app)
+      .post('/totp/enroll')
+      .set('X-ACTUAL-TOKEN', adminPasswordToken)
+      .send({ password: 'testpassword' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty('reason', 'mfa-client-unsupported');
+  });
+
+  it('rejects an unauthenticated request before looking at the password', async () => {
+    const res = await request(app)
+      .post('/totp/enroll')
+      .send({ clientSupportsMfa: true, password: 'testpassword' });
+
+    expect(res.statusCode).toEqual(401);
+  });
+});
+
 describe('/change-password', () => {
   let adminUserId,
     basicUserId,
