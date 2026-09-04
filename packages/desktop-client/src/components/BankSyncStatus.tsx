@@ -2,6 +2,7 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import { animated, useTransition } from 'react-spring';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -13,6 +14,7 @@ import { AnimatedRefresh } from './AnimatedRefresh';
 
 export function BankSyncStatus() {
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
+  const { isNarrowWidth } = useResponsive();
   const accountsSyncingCount = accountsSyncing.length;
   const count = accountsSyncingCount;
 
@@ -29,7 +31,7 @@ export function BankSyncStatus() {
     <View
       style={{
         position: 'absolute',
-        top: 0,
+        top: isNarrowWidth ? 0 : 36,
         left: 0,
         right: 0,
         marginTop: 5,
