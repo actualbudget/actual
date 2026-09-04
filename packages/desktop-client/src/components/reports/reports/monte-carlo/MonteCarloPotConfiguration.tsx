@@ -76,7 +76,12 @@ export function MonteCarloPotConfiguration({
   // A linked account that has since been closed or deleted isn't in the
   // open-accounts list; keep it represented so the stored link doesn't
   // display as a blank selection
-  const openAccounts = accounts.filter(account => account.closed === 0);
+  const openAccounts = accounts
+    .filter(account => account.closed === 0)
+    // Budgeted accounts first, then off-budget, each keeping the user's
+    // sidebar drag order (the query already sorts by sort_order) - the
+    // same order the sidebar shows
+    .sort((accountA, accountB) => accountA.offbudget - accountB.offbudget);
   const linkedAccount = accounts.find(account => account.id === pot.accountId);
   const missingLinkedOptions: Array<[string, string]> =
     pot.accountId != null &&
@@ -137,7 +142,10 @@ export function MonteCarloPotConfiguration({
         >
           <Input
             // Uncontrolled on purpose: committing on blur keeps typing
-            // snappy since every config change re-runs the simulation
+            // snappy since every config change re-runs the simulation.
+            // The key remounts it when the linked account changes, so an
+            // auto-filled name actually shows up
+            key={pot.accountId ?? 'manual'}
             defaultValue={pot.name}
             placeholder={t('Pot {{number}}', { number: potNumber })}
             onUpdate={newName => {
@@ -177,9 +185,25 @@ export function MonteCarloPotConfiguration({
         >
           <Select
             value={pot.accountId ?? ''}
-            onChange={value =>
-              onPotChange({ accountId: value === '' ? null : value })
-            }
+            onChange={value => {
+              const newAccountId = value === '' ? null : value;
+              const newAccount = accounts.find(
+                account => account.id === newAccountId,
+              );
+              const previousAccount = accounts.find(
+                account => account.id === pot.accountId,
+              );
+              // Default the pot's name to the account's, but only when
+              // the current name isn't the user's own: empty, or still
+              // the auto-filled name of the previously linked account
+              const shouldFillName =
+                newAccount != null &&
+                (pot.name === '' || pot.name === previousAccount?.name);
+              onPotChange({
+                accountId: newAccountId,
+                ...(shouldFillName && { name: newAccount.name }),
+              });
+            }}
             options={[
               ['', t('None')],
               ...missingLinkedOptions,
