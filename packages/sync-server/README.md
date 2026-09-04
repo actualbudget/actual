@@ -20,6 +20,39 @@ npm install --location=global @actual-app/sync-server
 
 After installing, you can execute actual-server commands directly in your terminal.
 
+> **npm 11.16+: `allow-scripts` warnings during install**
+>
+> The install above prints warnings like:
+>
+> ```text
+> npm warn allow-scripts 2 packages have install scripts not yet covered by allowScripts:
+> npm warn allow-scripts   bcrypt@6.0.0 (install: node-gyp-build)
+> npm warn allow-scripts   better-sqlite3@12.11.1 (install: prebuild-install || node-gyp rebuild --release)
+> ```
+>
+> These are expected. `argon2`, `bcrypt` and `better-sqlite3` are native modules, and
+> their install scripts must run for the server to work. The exact list in the warning
+> depends on the release you install.
+>
+> The `npm approve-scripts` command that the warning suggests cannot record an approval
+> for a global install, because there is no project `package.json` for it to write to
+> (see [npm/cli#9457](https://github.com/npm/cli/issues/9457)). Approve them through your
+> npm config instead:
+>
+> ```ini
+> ; ~/.npmrc
+> allow-scripts=argon2,bcrypt,better-sqlite3
+> ```
+>
+> or per-install:
+>
+> ```bash
+> npm install --location=global @actual-app/sync-server --allow-scripts=argon2,bcrypt,better-sqlite3
+> ```
+>
+> From npm v12, dependency install scripts are opt-in by default. Without one of the
+> above, the native modules will not build and the server will fail to start.
+
 **Usage**
 
 ```bash
