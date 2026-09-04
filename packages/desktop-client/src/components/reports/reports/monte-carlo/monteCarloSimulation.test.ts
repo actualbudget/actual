@@ -622,6 +622,121 @@ describe('runMonteCarloSimulation', () => {
     expect(withRule.medianTotalWithdrawn).toBeLessThanOrEqual(100_000);
   });
 
+  it('floor-ceiling anchors its rate in the first spending year', () => {
+    // User-reported bug: with a zero-spend phase before retirement, the
+    // rule anchored to year 1's planned spending of 0, so every
+    // retirement year withdrew the floor (planned x 0.85). The anchor
+    // must instead be set where spending starts.
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 0,
+          horizonYears: 30,
+          currentAge: 55,
+          spendingPhases: [
+            { id: 'working', name: '', fromAge: null, annualWithdrawal: 0 },
+            {
+              id: 'retired',
+              name: '',
+              fromAge: 65,
+              annualWithdrawal: 60_000,
+            },
+          ],
+          withdrawalRule: {
+            ...WITHDRAWAL_RULE_DEFAULTS,
+            type: 'floor-ceiling',
+          },
+          captureRunDetail: 0,
+        },
+        {
+          startingBalance: 1_000_000,
+          expectedReturnMean: 0.05,
+          returnStdDev: 0,
+        },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    // Accumulation years take nothing
+    for (const row of rows.slice(0, 10)) {
+      expect(row.withdrawal).toBe(0);
+    }
+    // The first retirement year withdraws exactly the planned amount
+    expect(rows[10].withdrawal).toBe(60_000);
+    // With steady growth the rate rule rises above the plan - it must
+    // not sit pinned at the 51,000 floor
+    expect(rows[11].withdrawal).toBeGreaterThan(60_000);
+    for (const row of rows.slice(11)) {
+      expect(row.withdrawal).toBeGreaterThanOrEqual(51_000);
+      expect(row.withdrawal).toBeLessThanOrEqual(72_000);
+    }
+  });
+
+  it('boundaries does not compound raises through zero-spend years', () => {
+    // A zero-spend year has a withdrawal rate of 0 - below any lower
+    // threshold - which must not be read as a "raise spending" signal
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 0,
+          horizonYears: 12,
+          currentAge: 55,
+          spendingPhases: [
+            { id: 'working', name: '', fromAge: null, annualWithdrawal: 0 },
+            {
+              id: 'retired',
+              name: '',
+              fromAge: 65,
+              annualWithdrawal: 40_000,
+            },
+          ],
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'boundaries' },
+          captureRunDetail: 0,
+        },
+        {
+          startingBalance: 1_000_000,
+          expectedReturnMean: 0,
+          returnStdDev: 0,
+        },
+      ),
+    );
+
+    expect(result.runDetail![10].withdrawal).toBe(40_000);
+  });
+
+  it('ratcheting does not ratchet before spending starts', () => {
+    // Strong accumulation growth blows past the balance threshold long
+    // before retirement; the streak must not start counting until
+    // spending does
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 0,
+          horizonYears: 10,
+          currentAge: 60,
+          spendingPhases: [
+            { id: 'working', name: '', fromAge: null, annualWithdrawal: 0 },
+            {
+              id: 'retired',
+              name: '',
+              fromAge: 65,
+              annualWithdrawal: 10_000,
+            },
+          ],
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'ratcheting' },
+          captureRunDetail: 0,
+        },
+        {
+          startingBalance: 100_000,
+          expectedReturnMean: 0.2,
+          returnStdDev: 0,
+        },
+      ),
+    );
+
+    expect(result.runDetail![5].withdrawal).toBe(10_000);
+  });
+
   it('floor-ceiling scales withdrawals with the pot within limits', () => {
     const base = makeParams(
       { annualWithdrawal: 10_000, horizonYears: 30 },
