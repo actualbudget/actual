@@ -12,6 +12,25 @@ export function isAccountFailedSync(
   );
 }
 
+/**
+ * Whether a failure is the server missing or being rejected for its GoCardless
+ * secrets — a server-wide configuration problem rather than anything wrong with
+ * this account's bank link.
+ */
+export function isGoCardlessConfigError({
+  type,
+  code,
+}: {
+  type: string;
+  code: string;
+}) {
+  return (
+    type === 'CONFIG_ERROR' &&
+    (code === 'GOCARDLESS_NOT_CONFIGURED' ||
+      code === 'GOCARDLESS_INVALID_CREDENTIALS')
+  );
+}
+
 export function getFailedSyncError(
   account: Pick<AccountEntity, 'bank_sync_status' | 'account_sync_source'>,
 ): { type: string; code: string } {
@@ -32,6 +51,16 @@ export function getFailedSyncError(
       return { type: 'TIMED_OUT', code: 'TIMED_OUT' };
     case 'account-missing':
       return { type: 'ACCOUNT_MISSING', code: 'ACCOUNT_MISSING' };
+    case 'not-configured':
+      if (account.account_sync_source === 'goCardless') {
+        return { type: 'CONFIG_ERROR', code: 'GOCARDLESS_NOT_CONFIGURED' };
+      }
+      return { type: 'CONFIG_ERROR', code: 'NOT_CONFIGURED' };
+    case 'invalid-credentials':
+      if (account.account_sync_source === 'goCardless') {
+        return { type: 'CONFIG_ERROR', code: 'GOCARDLESS_INVALID_CREDENTIALS' };
+      }
+      return { type: 'CONFIG_ERROR', code: 'INVALID_CREDENTIALS' };
     default:
       return { type: 'SYNC_ERROR', code: 'SYNC_ERROR' };
   }

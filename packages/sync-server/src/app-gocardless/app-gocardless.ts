@@ -12,6 +12,8 @@ import {
   EndUserAgreementExpiredError,
   GenericGoCardlessError,
   GoCardlessClientError,
+  GoCardlessInvalidCredentialsError,
+  GoCardlessNotConfiguredError,
   RateLimitError,
   RequisitionNotLinked,
 } from './errors';
@@ -276,7 +278,9 @@ app.post(
         error instanceof RequisitionNotLinked ||
         error instanceof GenericGoCardlessError ||
         error instanceof GoCardlessClientError ||
-        error instanceof AccountNotLinkedToRequisition
+        error instanceof AccountNotLinkedToRequisition ||
+        error instanceof GoCardlessNotConfiguredError ||
+        error instanceof GoCardlessInvalidCredentialsError
           ? error.details
           : undefined;
 
@@ -303,6 +307,24 @@ app.post(
         });
 
       switch (true) {
+        case error instanceof GoCardlessNotConfiguredError:
+          sendErrorResponse({
+            error_type: 'CONFIG_ERROR',
+            error_code: 'GOCARDLESS_NOT_CONFIGURED',
+            status: 'rejected',
+            reason:
+              'GoCardless is not configured on the server. Re-enter your secret ID and secret key.',
+          });
+          break;
+        case error instanceof GoCardlessInvalidCredentialsError:
+          sendErrorResponse({
+            error_type: 'CONFIG_ERROR',
+            error_code: 'GOCARDLESS_INVALID_CREDENTIALS',
+            status: 'rejected',
+            reason:
+              'GoCardless rejected the configured secret ID and secret key.',
+          });
+          break;
         case error instanceof RequisitionNotLinked:
         case error instanceof EndUserAgreementExpiredError:
           sendErrorResponse({

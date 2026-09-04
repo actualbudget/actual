@@ -7,6 +7,8 @@ import {
   AccountNotLinkedToRequisition,
   EndUserAgreementExpiredError,
   GenericGoCardlessError,
+  GoCardlessInvalidCredentialsError,
+  GoCardlessNotConfiguredError,
   InvalidGoCardlessTokenError,
   InvalidInputDataError,
   NotFoundError,
@@ -113,6 +115,13 @@ export const goCardlessService = {
   },
 
   setToken: async (): Promise<void> => {
+    // Without credentials the token request fails with a generic 400, which
+    // surfaces to the user as an unhelpful internal error. Fail early with a
+    // dedicated error so the client can tell them to re-enter their secrets.
+    if (!goCardlessService.isConfigured()) {
+      throw new GoCardlessNotConfiguredError();
+    }
+
     const isExpiredJwtToken = (token: string | null): boolean => {
       if (!token) return true;
       try {
@@ -127,7 +136,22 @@ export const goCardlessService = {
     };
 
     if (isExpiredJwtToken(getGocardlessClient().token)) {
-      await client.generateToken().catch(handleGoCardlessError);
+      await client.generateToken().catch((error: unknown) => {
+        // A rejected token request is the only proof that the secrets
+        // themselves are wrong. A 401 from any later call means the session
+        // token went stale, so the mapping is made here and nowhere else.
+        // The request carries nothing but the secret ID and secret key, so a
+        // 400 is the same verdict: they are malformed rather than merely
+        // rejected.
+        if (
+          error instanceof GoCardlessApiError &&
+          (error.response.status === 400 || error.response.status === 401)
+        ) {
+          throw new GoCardlessInvalidCredentialsError(error);
+        }
+
+        return handleGoCardlessError(error);
+      });
     }
   },
 

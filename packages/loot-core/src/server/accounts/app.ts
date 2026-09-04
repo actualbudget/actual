@@ -1364,6 +1364,23 @@ function handleSyncError(
       };
     }
 
+    if (err.code === 'GOCARDLESS_NOT_CONFIGURED') {
+      return {
+        ...syncError,
+        // The toast reaches admins and non-admins alike, so it names the
+        // repair without telling the reader to make it — only an admin can,
+        // and the popover carries the admin-specific instruction.
+        message: `Failed syncing account ${acct.name}. GoCardless is not set up on this server — its secret ID and key have to be entered again.`,
+      };
+    }
+
+    if (err.code === 'GOCARDLESS_INVALID_CREDENTIALS') {
+      return {
+        ...syncError,
+        message: `Failed syncing account ${acct.name}. GoCardless rejected this server's secret ID and key — they have to be checked and entered again.`,
+      };
+    }
+
     return syncError;
   }
 
@@ -1411,6 +1428,15 @@ function getBankSyncStatusFromError(
 
     if (err.category === 'ACCOUNT_MISSING') {
       return 'account-missing';
+    }
+
+    if (err.category === 'CONFIG_ERROR') {
+      // Kept apart from 'not-configured' so a reload — or another client, which
+      // never saw the sync at all — still tells the user their secrets were
+      // rejected rather than that nobody ever entered them.
+      return err.code === 'GOCARDLESS_INVALID_CREDENTIALS'
+        ? 'invalid-credentials'
+        : 'not-configured';
     }
   }
 

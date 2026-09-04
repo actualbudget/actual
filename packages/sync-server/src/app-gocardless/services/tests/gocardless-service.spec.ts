@@ -5,6 +5,8 @@ import {
   AccountNotLinkedToRequisition,
   EndUserAgreementExpiredError,
   GenericGoCardlessError,
+  GoCardlessInvalidCredentialsError,
+  GoCardlessNotConfiguredError,
   InvalidGoCardlessTokenError,
   InvalidInputDataError,
   NotFoundError,
@@ -25,6 +27,7 @@ import {
   goCardlessService,
   handleGoCardlessError,
 } from '#app-gocardless/services/gocardless-service';
+import { secretsService } from '#services/secrets-service';
 
 import {
   mockAccountDetails,
@@ -71,7 +74,78 @@ describe('goCardlessService', () => {
   });
 
   afterEach(() => {
-    vi.resetAllMocks();
+    // Restore rather than reset: the secrets-service spies below would
+    // otherwise stay installed and return undefined for every later test.
+    vi.restoreAllMocks();
+  });
+
+  describe('#setToken', () => {
+    it('throws GoCardlessNotConfiguredError when secrets are missing', async () => {
+      setTokenSpy.mockRestore();
+      vi.spyOn(secretsService, 'get').mockReturnValue(null);
+
+      await expect(() => goCardlessService.setToken()).rejects.toThrow(
+        GoCardlessNotConfiguredError,
+      );
+    });
+
+    it('generates a token when secrets are configured', async () => {
+      setTokenSpy.mockRestore();
+      vi.spyOn(secretsService, 'get').mockReturnValue('secret');
+      const generateTokenSpy = vi
+        .spyOn(client, 'generateToken')
+        .mockResolvedValue({
+          access: 'access-token',
+          refresh: 'refresh-token',
+          access_expires: 86400,
+          refresh_expires: 2592000,
+        });
+
+      await goCardlessService.setToken();
+
+      expect(generateTokenSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('throws GoCardlessInvalidCredentialsError when the secrets are rejected', async () => {
+      // Generating a token is the only call whose 401 means "these secrets are
+      // wrong" — everywhere else it means the session token went stale.
+      setTokenSpy.mockRestore();
+      vi.spyOn(secretsService, 'get').mockReturnValue('wrong-secret');
+      vi.spyOn(client, 'generateToken').mockRejectedValue(
+        new GoCardlessApiError('error: 401', 401, {}),
+      );
+
+      await expect(() => goCardlessService.setToken()).rejects.toThrow(
+        GoCardlessInvalidCredentialsError,
+      );
+    });
+
+    it('throws GoCardlessInvalidCredentialsError when the secrets are malformed', async () => {
+      // The token request carries nothing but the secret ID and secret key, so
+      // a 400 there can only mean those are malformed — the same dead end as a
+      // 401, and the likelier one right after re-entering them by hand.
+      setTokenSpy.mockRestore();
+      vi.spyOn(secretsService, 'get').mockReturnValue('not-a-uuid');
+      vi.spyOn(client, 'generateToken').mockRejectedValue(
+        new GoCardlessApiError('error: 400', 400, {}),
+      );
+
+      await expect(() => goCardlessService.setToken()).rejects.toThrow(
+        GoCardlessInvalidCredentialsError,
+      );
+    });
+
+    it('still reports other token failures as themselves', async () => {
+      setTokenSpy.mockRestore();
+      vi.spyOn(secretsService, 'get').mockReturnValue('secret');
+      vi.spyOn(client, 'generateToken').mockRejectedValue(
+        new GoCardlessApiError('error: 429', 429, {}),
+      );
+
+      await expect(() => goCardlessService.setToken()).rejects.toThrow(
+        RateLimitError,
+      );
+    });
   });
 
   describe('#getLinkedRequisition', () => {
