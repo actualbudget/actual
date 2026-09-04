@@ -188,6 +188,10 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
+  const [budgetTypePref] = useSyncedPref('budgetType');
+  const budgetType: 'envelope' | 'tracking' =
+    budgetTypePref === 'tracking' ? 'tracking' : 'envelope';
+
   // Normalize in case a persisted timeFrame still holds `yyyy-MM-dd` values.
   const calculateIsConcise = (start: string, end: string) => {
     const startMonth = monthUtils.getMonth(start);
@@ -279,8 +283,16 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         startDate,
         endDate,
         showHiddenCategories,
+        budgetType,
       }),
-    [conditions, conditionsOp, startDate, endDate, showHiddenCategories],
+    [
+      conditions,
+      conditionsOp,
+      startDate,
+      endDate,
+      showHiddenCategories,
+      budgetType,
+    ],
   );
 
   const data = useReport('default', getGraphData);
