@@ -86,6 +86,40 @@ export function canRenderDateRangePicker(
   );
 }
 
+export function calculateDateRangeBoundMonths(
+  earliestTransaction: { date: string } | null,
+  latestTransaction: { date: string } | null,
+) {
+  const currentMonth = monthUtils.currentMonth();
+  const currentDay = monthUtils.currentDay();
+
+  const earliestTransactionDate = earliestTransaction
+    ? earliestTransaction.date
+    : currentDay;
+  const latestTransactionDate = latestTransaction
+    ? latestTransaction.date
+    : currentDay;
+
+  const computedEarliestMonth = earliestTransaction
+    ? monthUtils.getMonth(earliestTransaction.date)
+    : currentMonth;
+  const latestTransactionMonth = latestTransaction
+    ? monthUtils.getMonth(latestTransaction.date)
+    : currentMonth;
+
+  const computedLatestMonth =
+    latestTransactionMonth > currentMonth
+      ? latestTransactionMonth
+      : currentMonth;
+
+  return {
+    earliestMonth: computedEarliestMonth,
+    latestMonth: computedLatestMonth,
+    earliestTransactionDate,
+    latestTransactionDate,
+  };
+}
+
 type PresetTimeRangeMode = Exclude<
   TimeFrame['mode'],
   'sliding-window' | 'static'
@@ -308,43 +342,35 @@ function QueryItem({
   // Fetch transaction bounds for per-query date picker limits and presets.
   useEffect(() => {
     async function run() {
-      const earliestTransaction = await send('get-earliest-transaction');
-      const latestTransaction = await send('get-latest-transaction');
+      try {
+        const [earliestTransactionResult, latestTransactionResult] =
+          await Promise.all([
+            send('get-earliest-transaction').catch(() => null),
+            send('get-latest-transaction').catch(() => null),
+          ]);
 
-      const earliestTransactionDate = earliestTransaction
-        ? earliestTransaction.date
-        : monthUtils.currentDay();
-      const latestTransactionDate = latestTransaction
-        ? latestTransaction.date
-        : monthUtils.currentDay();
+        const computedBounds = calculateDateRangeBoundMonths(
+          earliestTransactionResult,
+          latestTransactionResult,
+        );
 
-      setEarliestTransaction(earliestTransactionDate);
-      setLatestTransaction(latestTransactionDate);
+        setEarliestTransaction(computedBounds.earliestTransactionDate);
+        setLatestTransaction(computedBounds.latestTransactionDate);
 
-      const currentMonth = monthUtils.currentMonth();
-      let computedEarliestMonth = earliestTransaction
-        ? monthUtils.getMonth(earliestTransaction.date)
-        : currentMonth;
-      const latestTransactionMonth = latestTransaction
-        ? monthUtils.getMonth(latestTransaction.date)
-        : currentMonth;
+        // Make sure the month selects are at least populated with a
+        // year's worth of months. We can undo this when we have fancier
+        // date selects.
+        let computedEarliestMonth = computedBounds.earliestMonth;
+        const yearAgo = monthUtils.subMonths(computedBounds.latestMonth, 12);
+        if (computedEarliestMonth > yearAgo) {
+          computedEarliestMonth = yearAgo;
+        }
 
-      const computedLatestMonth =
-        latestTransactionMonth > currentMonth
-          ? latestTransactionMonth
-          : currentMonth;
-
-      // Make sure the month selects are at least populated with a
-      // year's worth of months. We can undo this when we have fancier
-      // date selects.
-      const yearAgo = monthUtils.subMonths(computedLatestMonth, 12);
-      if (computedEarliestMonth > yearAgo) {
-        computedEarliestMonth = yearAgo;
+        setEarliestMonth(computedEarliestMonth);
+        setLatestMonth(computedBounds.latestMonth);
+      } finally {
+        setIsTransactionBoundsReady(true);
       }
-
-      setEarliestMonth(computedEarliestMonth);
-      setLatestMonth(computedLatestMonth);
-      setIsTransactionBoundsReady(true);
     }
     void run();
   }, []);
@@ -795,8 +821,12 @@ function QueryItem({
               }}
             />
           ) : (
-            <Button variant="normal" isDisabled>
-              {timeRangeLabel}
+            <Button
+              variant="normal"
+              isDisabled
+              aria-label={t('Loading date range...')}
+            >
+              {t('Loading date range...')}
             </Button>
           )}
         </View>

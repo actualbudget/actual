@@ -1,6 +1,8 @@
+import * as monthUtils from '@actual-app/core/shared/months';
 import { describe, expect, it } from 'vitest';
 
 import {
+  calculateDateRangeBoundMonths,
   canRenderDateRangePicker,
   normalizeMonthPickerSelectionForQuery,
   normalizeMonthRangeForPicker,
@@ -47,5 +49,17 @@ describe('QueryManager month-only DateRangePicker helpers', () => {
     expect(canRenderDateRangePicker(false, '2026-01', '2026-12')).toBe(false);
     expect(canRenderDateRangePicker(true, '', '2026-12')).toBe(false);
     expect(canRenderDateRangePicker(true, '2026-01', '2026-12')).toBe(true);
+  });
+
+  it('falls back to current-month bounds when transaction lookups fail', () => {
+    const currentMonth = monthUtils.currentMonth();
+    const currentDay = monthUtils.currentDay();
+
+    expect(calculateDateRangeBoundMonths(null, null)).toEqual({
+      earliestMonth: currentMonth,
+      latestMonth: currentMonth,
+      earliestTransactionDate: currentDay,
+      latestTransactionDate: currentDay,
+    });
   });
 });
