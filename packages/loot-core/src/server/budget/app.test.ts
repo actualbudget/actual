@@ -16,12 +16,12 @@ describe('category-update', () => {
     // caller changing only the group never sends `name`. Trimming it
     // unconditionally raised "Cannot read properties of undefined (reading
     // 'trim')" for every such update.
-    await expect(
-      app.handlers['category-update']({
-        id: 'category-id',
-        group: 'new-group-id',
-      } as Parameters<(typeof app.handlers)['category-update']>[0]),
-    ).resolves.not.toThrow();
+    // A rejection here is the regression; the assertions below prove what
+    // reached the database.
+    await app.handlers['category-update']({
+      id: 'category-id',
+      group: 'new-group-id',
+    } as Parameters<(typeof app.handlers)['category-update']>[0]);
 
     // db.update() writes only the keys it is handed, so `name` must be absent
     // rather than present-and-undefined, which would blank the column.
@@ -31,12 +31,10 @@ describe('category-update', () => {
   });
 
   it('still trims a name when one is supplied', async () => {
-    await expect(
-      app.handlers['category-update']({
-        id: 'category-id',
-        name: '  Groceries  ',
-      } as Parameters<(typeof app.handlers)['category-update']>[0]),
-    ).resolves.not.toThrow();
+    await app.handlers['category-update']({
+      id: 'category-id',
+      name: '  Groceries  ',
+    } as Parameters<(typeof app.handlers)['category-update']>[0]);
 
     const [updated] = vi.mocked(db.updateCategory).mock.calls[0];
     expect(updated).toMatchObject({ name: 'Groceries' });

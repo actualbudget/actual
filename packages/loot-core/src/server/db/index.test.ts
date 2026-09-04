@@ -353,9 +353,9 @@ describe('Database', () => {
       // .toUpperCase() on it unconditionally.
       const id = await db.insertCategoryGroup({ name: 'Bills' });
 
-      await expect(
-        db.updateCategoryGroup({ id, is_income: 0, hidden: 1 }),
-      ).resolves.not.toThrow();
+      // A rejection here is the regression; the assertions below prove the
+      // update still landed.
+      await db.updateCategoryGroup({ id, is_income: 0, hidden: 1 });
 
       const group = await db.first<{ hidden: number; name: string }>(
         'SELECT * FROM category_groups WHERE id = ?',
