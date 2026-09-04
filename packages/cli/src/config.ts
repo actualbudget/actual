@@ -1,14 +1,10 @@
+import { readFileSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
 
 import { cosmiconfig } from 'cosmiconfig';
 
-import {
-  isRecord,
-  parseBoolEnv,
-  parseNonNegativeIntFlag,
-  readEnv,
-} from './utils';
+import { isRecord, parseBoolEnv, parseNonNegativeIntFlag } from './utils';
 
 export type CliConfig = {
   serverUrl: string;
@@ -133,6 +129,31 @@ async function loadConfigFile(): Promise<ConfigFileContent> {
   return {};
 }
 
+/**
+ * Reads the value of a `<VAR>_FILE` environment variable, returning the
+ * contents of the file it points at.
+ *
+ * Only an unset variable returns undefined and falls through to the plain
+ * variable. A variable that is set but unreadable — including an empty value,
+ * which means a mount produced no path — throws, because a secret that failed
+ * to mount should stop the command rather than silently send an empty
+ * password to the server.
+ */
+function readFileEnv(fileEnvVar: string): string | undefined {
+  const filePath = process.env[fileEnvVar];
+
+  if (filePath === undefined) return undefined;
+
+  try {
+    return readFileSync(filePath, 'utf-8').trim();
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Could not read ${fileEnvVar} from "${filePath}": ${reason}`,
+    );
+  }
+}
+
 function parseNonNegativeIntEnv(
   raw: string | undefined,
   source: string,
@@ -156,30 +177,40 @@ export async function resolveConfig(
 
   const serverUrl =
     cliOpts.serverUrl ??
-    readEnv('ACTUAL_SERVER_URL') ??
+    readFileEnv('ACTUAL_SERVER_URL_FILE') ??
+    process.env.ACTUAL_SERVER_URL ??
     fileConfig.serverUrl ??
     '';
 
   const password =
-    cliOpts.password ?? readEnv('ACTUAL_PASSWORD') ?? fileConfig.password;
+    cliOpts.password ??
+    readFileEnv('ACTUAL_PASSWORD_FILE') ??
+    process.env.ACTUAL_PASSWORD ??
+    fileConfig.password;
 
   const sessionToken =
     cliOpts.sessionToken ??
-    readEnv('ACTUAL_SESSION_TOKEN') ??
+    readFileEnv('ACTUAL_SESSION_TOKEN_FILE') ??
+    process.env.ACTUAL_SESSION_TOKEN ??
     fileConfig.sessionToken;
 
   const syncId =
-    cliOpts.syncId ?? readEnv('ACTUAL_SYNC_ID') ?? fileConfig.syncId;
+    cliOpts.syncId ??
+    readFileEnv('ACTUAL_SYNC_ID_FILE') ??
+    process.env.ACTUAL_SYNC_ID ??
+    fileConfig.syncId;
 
   const dataDir =
     cliOpts.dataDir ??
-    readEnv('ACTUAL_DATA_DIR') ??
+    readFileEnv('ACTUAL_DATA_DIR_FILE') ??
+    process.env.ACTUAL_DATA_DIR ??
     fileConfig.dataDir ??
     join(homedir(), '.actual-cli', 'data');
 
   const encryptionPassword =
     cliOpts.encryptionPassword ??
-    readEnv('ACTUAL_ENCRYPTION_PASSWORD') ??
+    readFileEnv('ACTUAL_ENCRYPTION_PASSWORD_FILE') ??
+    process.env.ACTUAL_ENCRYPTION_PASSWORD ??
     fileConfig.encryptionPassword;
 
   if (!serverUrl) {
@@ -196,7 +227,10 @@ export async function resolveConfig(
 
   const cacheTtl = validateNonNegativeInt(
     cliOpts.cacheTtl ??
-      parseNonNegativeIntEnv(readEnv('ACTUAL_CACHE_TTL'), 'ACTUAL_CACHE_TTL') ??
+      parseNonNegativeIntEnv(
+        readFileEnv('ACTUAL_CACHE_TTL_FILE') ?? process.env.ACTUAL_CACHE_TTL,
+        'ACTUAL_CACHE_TTL',
+      ) ??
       fileConfig.cacheTtl ??
       60,
     'cacheTtl',
@@ -205,7 +239,8 @@ export async function resolveConfig(
   const lockTimeout = validateNonNegativeInt(
     cliOpts.lockTimeout ??
       parseNonNegativeIntEnv(
-        readEnv('ACTUAL_LOCK_TIMEOUT'),
+        readFileEnv('ACTUAL_LOCK_TIMEOUT_FILE') ??
+          process.env.ACTUAL_LOCK_TIMEOUT,
         'ACTUAL_LOCK_TIMEOUT',
       ) ??
       fileConfig.lockTimeout ??
@@ -218,7 +253,10 @@ export async function resolveConfig(
   const flagNoLock = cliOpts.lock === false ? true : undefined;
   const noLock =
     flagNoLock ??
-    parseBoolEnv(readEnv('ACTUAL_NO_LOCK'), 'ACTUAL_NO_LOCK') ??
+    parseBoolEnv(
+      readFileEnv('ACTUAL_NO_LOCK_FILE') ?? process.env.ACTUAL_NO_LOCK,
+      'ACTUAL_NO_LOCK',
+    ) ??
     fileConfig.noLock ??
     false;
 

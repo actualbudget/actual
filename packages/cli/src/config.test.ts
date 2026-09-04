@@ -374,6 +374,15 @@ describe('resolveConfig', () => {
       expect(config.noLock).toBe(true);
     });
 
+    it('throws when the _FILE variable is set but empty', async () => {
+      process.env.ACTUAL_PASSWORD = 'envpw';
+      process.env.ACTUAL_PASSWORD_FILE = '';
+
+      await expect(resolveConfig({ serverUrl: 'http://test' })).rejects.toThrow(
+        'Could not read ACTUAL_PASSWORD_FILE',
+      );
+    });
+
     it('throws when the file cannot be read instead of falling back', async () => {
       process.env.ACTUAL_PASSWORD = 'envpw';
       process.env.ACTUAL_PASSWORD_FILE = join(dir, 'does-not-exist');

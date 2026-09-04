@@ -30,12 +30,16 @@ The CLI requires a connection to a running Actual sync server. Configuration can
 
 ### Environment Variables
 
-| Variable               | Description                                         |
-| ---------------------- | --------------------------------------------------- |
-| `ACTUAL_SERVER_URL`    | URL of the Actual sync server (required)            |
-| `ACTUAL_SYNC_ID`       | Budget Sync ID (required for most commands)         |
-| `ACTUAL_PASSWORD`      | Server password (one of password or token required) |
-| `ACTUAL_SESSION_TOKEN` | Session token (alternative to password)             |
+| Variable               | Description                                           |
+| ---------------------- | ----------------------------------------------------- |
+| `ACTUAL_SERVER_URL`    | URL of the Actual sync server (required)              |
+| `ACTUAL_SYNC_ID`       | Budget Sync ID (required for most commands)           |
+| `ACTUAL_PASSWORD`      | Server password (one of password or token required)   |
+| `ACTUAL_SESSION_TOKEN` | Session token (alternative to password)               |
+| `ACTUAL_DATA_DIR`      | Local directory for cached budget data                |
+| `ACTUAL_CACHE_TTL`     | Cache TTL in seconds (default: 60)                    |
+| `ACTUAL_LOCK_TIMEOUT`  | Budget-dir lock wait timeout in seconds (default: 10) |
+| `ACTUAL_NO_LOCK`       | Set to `1` to disable budget-dir locking              |
 
 Any of these can be read from a file instead by adding `_FILE` to the variable name and pointing it at a file, for example `ACTUAL_PASSWORD_FILE=/run/secrets/actual-password`. Actual reads the file and strips surrounding whitespace. This keeps secrets out of the environment, which is useful with Docker secrets and Kubernetes secret volumes. If both forms are set, the file wins; if the file cannot be read, the command stops with an error instead of continuing without the value.
 

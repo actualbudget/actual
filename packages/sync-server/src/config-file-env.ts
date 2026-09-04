@@ -102,7 +102,9 @@ export function applyFileEnvOverrides(
     const fileEnvVar = `${binding.envVar}${FILE_ENV_SUFFIX}`;
     const filePath = env[fileEnvVar];
 
-    if (!filePath) continue;
+    // Only an unset variable is skipped. An empty value is a misconfigured
+    // mount, and must fail rather than silently leave the setting untouched.
+    if (filePath === undefined) continue;
 
     let value;
     try {

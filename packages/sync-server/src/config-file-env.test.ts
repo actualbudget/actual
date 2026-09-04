@@ -123,7 +123,7 @@ describe('applyFileEnvOverrides', () => {
     ]);
   });
 
-  it('strips the trailing newline that most tooling appends', () => {
+  it('trims surrounding whitespace from the file value', () => {
     const config = buildSchema();
     const filePath = writeSecret('secret', '  from-file\n');
 
@@ -177,6 +177,20 @@ describe('applyFileEnvOverrides', () => {
 
     expect(config.get('port')).toBe(1234);
     expect(() => config.validate({ allowed: 'strict' })).not.toThrow();
+  });
+
+  it('throws when the _FILE variable is set but empty', () => {
+    const config = buildSchema();
+
+    // An empty value means a mount that did not produce a path. Falling back
+    // to the plain variable here would hide the misconfiguration.
+    expect(() =>
+      applyFileEnvOverrides(
+        config,
+        [{ envVar: 'TEST_SECRET', path: 'openId.client_secret' }],
+        { TEST_SECRET: 'from-env', TEST_SECRET_FILE: '' },
+      ),
+    ).toThrow('Could not read TEST_SECRET_FILE');
   });
 
   it('throws when the file cannot be read, naming the variable and path', () => {
