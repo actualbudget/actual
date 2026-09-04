@@ -60,6 +60,7 @@
     "#components/reports/dateRangePresets": "./src/components/reports/dateRangePresets.ts",
     "#components/reports/getCustomTick": "./src/components/reports/getCustomTick.ts",
     "#components/reports/getLiveRange": "./src/components/reports/getLiveRange.ts",
+    "#components/reports/monthRange": "./src/components/reports/monthRange.ts",
     "#components/reports/graphs/showActivity": "./src/components/reports/graphs/showActivity.ts",
     "#components/reports/graphs/util/computePadding": "./src/components/reports/graphs/util/computePadding.ts",
     "#components/reports/numberFormatter": "./src/components/reports/numberFormatter.ts",

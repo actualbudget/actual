@@ -375,5 +375,22 @@ describe('buildDateRangePresets', () => {
         'currentQuarter',
       ]);
     });
+
+    it('returns latestMonth for both endpoints when the current quarter lies entirely beyond the latest transaction', () => {
+      const presets = buildDateRangePresets({
+        t: mockT,
+        onSelectRange: mockOnSelectRange,
+        earliestTransaction: EARLIEST_TRANSACTION,
+        latestTransaction: '2016-12-15',
+        show1Month: false,
+        includeAllTime: true,
+      });
+
+      const currentQuarterPreset = presets.find(
+        p => p.key === 'current-quarter',
+      );
+
+      expect(currentQuarterPreset?.getRange()).toEqual(['2016-12', '2016-12']);
+    });
   });
 });

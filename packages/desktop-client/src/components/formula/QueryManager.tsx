@@ -22,6 +22,7 @@ import type {
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
 import { buildDateRangePresets } from '#components/reports/dateRangePresets';
+import { clampMonthRangeToBounds } from '#components/reports/monthRange';
 import {
   asMonthSlidingTimeFrame,
   calculateTimeRange,
@@ -521,21 +522,25 @@ function QueryItem({
     return monthUtils.format(date, dateFormat);
   }
 
-  const [pickerStartDate, pickerEndDate] = normalizeMonthRangeForPicker(
-    startDate,
-    endDate,
+  const [pickerStartDate, pickerEndDate] = clampMonthRangeToBounds(
+    ...normalizeMonthRangeForPicker(startDate, endDate),
+    earliestMonth,
+    latestMonth,
   );
 
   const presets: DateRangePreset[] = buildDateRangePresets({
     t,
     onSelectRange: ([rangeStart, rangeEnd, rangeMode]) => {
-      setStartDate(rangeStart);
-      setEndDate(rangeEnd);
+      const [normalizedRangeStart, normalizedRangeEnd] =
+        normalizeMonthPickerSelectionForQuery(rangeStart, rangeEnd);
+
+      setStartDate(normalizedRangeStart);
+      setEndDate(normalizedRangeEnd);
       sendUpdate(
         filters.conditions,
         filters.conditionsOp,
-        rangeStart,
-        rangeEnd,
+        normalizedRangeStart,
+        normalizedRangeEnd,
         rangeMode,
       );
     },

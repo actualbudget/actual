@@ -4,6 +4,7 @@ import type { TimeFrame } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { getLiveRange } from './getLiveRange';
+import { clampMonthRangeToBounds } from './monthRange';
 import {
   getFullFutureRange,
   getFullRange,
@@ -41,22 +42,6 @@ function liveRangeAsMonths(
   );
 
   return [monthUtils.getMonth(rangeStart), monthUtils.getMonth(rangeEnd), mode];
-}
-
-function clampRangeToMonthBounds(
-  range: PresetRange,
-  earliestMonth: string,
-  latestMonth: string,
-): PresetRange {
-  const [start, end, mode] = range;
-  const clampedStart = start < earliestMonth ? earliestMonth : start;
-  const clampedEnd = end > latestMonth ? latestMonth : end;
-
-  if (clampedStart > clampedEnd) {
-    return [clampedStart, clampedStart, mode];
-  }
-
-  return [clampedStart, clampedEnd, mode];
 }
 
 function makePreset(
@@ -213,19 +198,23 @@ export function buildDateRangePresets({
     makePreset(
       'current-quarter',
       t('Current quarter'),
-      () =>
-        clampRangeToMonthBounds(
-          liveRangeAsMonths(
-            'Current quarter',
-            false,
-            'currentQuarter',
-            earliestTransaction,
-            latestTransaction,
-            firstDayOfWeekIdx,
-          ),
+      () => {
+        const [start, end, mode] = liveRangeAsMonths(
+          'Current quarter',
+          false,
+          'currentQuarter',
+          earliestTransaction,
+          latestTransaction,
+          firstDayOfWeekIdx,
+        );
+        const [clampedStart, clampedEnd] = clampMonthRangeToBounds(
+          start,
+          end,
           earliestMonth,
           latestMonth,
-        ),
+        );
+        return [clampedStart, clampedEnd, mode];
+      },
       onSelectRange,
     ),
     makePreset(
