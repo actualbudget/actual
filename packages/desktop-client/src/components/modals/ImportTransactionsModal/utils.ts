@@ -128,6 +128,10 @@ export type ImportTransaction = {
   ignored: boolean;
   selected: boolean;
   selected_merge: boolean;
+  /** The match decision from the import preview: the id of the existing
+   * transaction this row matched, null if the preview found no match, or
+   * undefined if the preview didn't decide (e.g. ignored rows). */
+  matchedTransactionId?: string | null;
   amount: number;
   inflow: number;
   outflow: number;
@@ -137,7 +141,7 @@ export type ImportTransaction = {
   notes?: string;
   category?: string;
   date?: string;
-} & Record<string, string | number | boolean>;
+} & Record<string, string | number | boolean | null>;
 
 type ImportCategory = {
   id: string;
@@ -181,6 +185,7 @@ export function applyFieldMappings(
   result.ignored = transaction.ignored;
   result.selected = transaction.selected;
   result.selected_merge = transaction.selected_merge;
+  result.matchedTransactionId = transaction.matchedTransactionId;
   result.tombstone = transaction.tombstone;
   return result as ImportTransaction;
 }
@@ -306,6 +311,7 @@ export function stripCsvImportTransaction(transaction: ImportTransaction) {
     ignored: _ignored,
     selected: _selected,
     selected_merge: _selected_merge,
+    matchedTransactionId: _matchedTransactionId,
     trx_id: _trx_id,
     tombstone: _tombstone,
     ...trans
