@@ -19,6 +19,7 @@ import type {
 } from '@actual-app/core/types/models';
 import { AutoTextSize } from 'auto-text-size';
 
+import { useToBudgetMode } from '#components/budget/envelope/useToBudgetMode';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import { PrivacyFilter } from '#components/PrivacyFilter';
@@ -28,7 +29,6 @@ import { useFormat } from '#hooks/useFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import type { Binding } from '#spreadsheet';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
 import { ExpenseGroupList } from './ExpenseGroupList';
@@ -60,14 +60,18 @@ export function getColumnWidth({
 }
 
 type ToBudgetProps = {
-  toBudget: Binding<'envelope-budget', 'to-budget'>;
+  month: string;
   onPress: () => void;
   show3Columns: boolean;
 };
 
-function ToBudget({ toBudget, onPress, show3Columns }: ToBudgetProps) {
+function ToBudget({ month, onPress, show3Columns }: ToBudgetProps) {
   const { t } = useTranslation();
-  const amount = useSheetValue(toBudget) ?? 0;
+  const { toBudgetBinding } = useToBudgetMode(month);
+  const amount = useSheetValue<
+    'envelope-budget',
+    'to-budget' | 'ready-to-assign'
+  >(toBudgetBinding) ?? 0;
   const format = useFormat();
   const sidebarColumnWidth = getColumnWidth({ show3Columns, isSidebar: true });
 
@@ -97,7 +101,10 @@ function ToBudget({ toBudget, onPress, show3Columns }: ToBudgetProps) {
               }}
             />
           </View>
-          <CellValue binding={toBudget} type="financial">
+          <CellValue<'envelope-budget', 'to-budget' | 'ready-to-assign'>
+            binding={toBudgetBinding}
+            type="financial"
+          >
             {({ type, value }) => (
               <View>
                 <PrivacyFilter>
@@ -470,7 +477,7 @@ function BudgetTableHeader({
           />
         ) : (
           <ToBudget
-            toBudget={envelopeBudget.toBudget}
+            month={month}
             onPress={onShowBudgetSummary}
             show3Columns={show3Columns}
           />

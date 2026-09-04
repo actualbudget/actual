@@ -9,6 +9,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { EnvelopeCellValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { useToBudgetMode } from '#components/budget/envelope/useToBudgetMode';
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
@@ -42,12 +43,14 @@ function makeSignedFormatter(
 }
 
 type TotalsListProps = {
+  month: string;
   prevMonthName: string;
   style?: CSSProperties;
 };
 
-export function TotalsList({ prevMonthName, style }: TotalsListProps) {
+export function TotalsList({ month, prevMonthName, style }: TotalsListProps) {
   const format = useFormat();
+  const { includesFutureAssignments } = useToBudgetMode(month);
   const signedFormatter = makeSignedFormatter(format);
   const invertedSignedFormatter = makeSignedFormatter(format, true);
   return (
@@ -139,6 +142,21 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
             />
           )}
         </EnvelopeCellValue>
+
+        {includesFutureAssignments && (
+          <EnvelopeCellValue
+            binding={envelopeBudget.budgetedInFuture}
+            type="financial"
+          >
+            {props => (
+              <CellValueText
+                {...props}
+                style={{ fontWeight: 600 }}
+                formatter={invertedSignedFormatter}
+              />
+            )}
+          </EnvelopeCellValue>
+        )}
       </View>
 
       <View>
@@ -157,6 +175,12 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
         <Block>
           <Trans>For next month</Trans>
         </Block>
+
+        {includesFutureAssignments && (
+          <Block>
+            <Trans>Budgeted in future months</Trans>
+          </Block>
+        )}
       </View>
     </View>
   );

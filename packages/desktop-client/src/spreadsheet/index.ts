@@ -38,6 +38,8 @@ export type Spreadsheets = {
     'buffered-auto': number;
     'buffered-selected': number;
     'to-budget': number | null;
+    'ready-to-assign': number | null;
+    'assigned-in-future': number;
     'from-last-month': number;
     'total-budgeted': number;
     'total-income': number;

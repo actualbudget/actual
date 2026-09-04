@@ -225,6 +225,49 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
   });
 }
 
+export function createFutureAwareToBudget(
+  months,
+  currentMonth,
+  replace = false,
+) {
+  const activeMonths = months.filter(month => month >= currentMonth);
+  const currentSheetName = monthUtils.sheetForMonth(currentMonth);
+  const futureBudgetDependencies = activeMonths
+    .slice(1)
+    .map(futureMonth =>
+      resolveName(monthUtils.sheetForMonth(futureMonth), 'total-budgeted'),
+    );
+
+  activeMonths.forEach(month => {
+    const sheetName = monthUtils.sheetForMonth(month);
+    if (replace) {
+      sheet.get().deleteCell(sheetName, 'assigned-in-future');
+      sheet.get().deleteCell(sheetName, 'ready-to-assign');
+    }
+
+    sheet.get().createDynamic(sheetName, 'assigned-in-future', {
+      initialValue: 0,
+      dependencies: futureBudgetDependencies,
+      run: (...futureBudgetedAmounts) => {
+        const futureBudgeted = sumAmounts(...futureBudgetedAmounts);
+        return futureBudgeted === 0 ? 0 : -futureBudgeted;
+      },
+    });
+    sheet.get().createDynamic(sheetName, 'ready-to-assign', {
+      initialValue: 0,
+      dependencies: [
+        resolveName(currentSheetName, 'to-budget'),
+        resolveName(currentSheetName, 'buffered-selected'),
+        'assigned-in-future',
+      ],
+      run: (toBudget, buffered, budgetedInFuture) =>
+        safeNumber(
+          number(toBudget) + number(buffered) - number(budgetedInFuture),
+        ),
+    });
+  });
+}
+
 export function createBudget(meta, categories, months) {
   // The spreadsheet is now strict - so we need to fill in some
   // default values for the month before the first month. Only do this
