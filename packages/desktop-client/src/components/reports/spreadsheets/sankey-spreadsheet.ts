@@ -1,5 +1,5 @@
 import { theme } from '@actual-app/components/theme';
-import { send } from '@actual-app/core/platform/client/connection';
+import { send, sendCatch } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
@@ -119,6 +119,27 @@ type TooltipInfoMap = Map<
   NodeKey,
   Map<NodeKey, Array<{ name: string; value: number }>>
 >;
+
+async function getBudgetMonth(
+  month: string,
+): Promise<BudgetMonthResponse | null> {
+  const { data, error } = await sendCatch('api/budget-month', {
+    month,
+  });
+
+  if (
+    error?.type === 'APIError' &&
+    error.message.startsWith('No budget exists for month: ')
+  ) {
+    return null;
+  }
+
+  if (error) {
+    throw error;
+  }
+
+  return data as unknown as BudgetMonthResponse;
+}
 
 const SpecialNodeKeys = {
   ToBudget: 'to_budget',
@@ -264,14 +285,28 @@ export function createBudgetSpreadsheet(
     const months =
       end && end !== start ? monthUtils.rangeInclusive(start, end) : [start];
 
-    const monthResponses = await Promise.all(
-      months.map(
-        m =>
-          send('api/budget-month', {
-            month: m,
-          }) as unknown as Promise<BudgetMonthResponse>,
-      ),
-    );
+    const monthResponses = (
+      await Promise.all(months.map(month => getBudgetMonth(month)))
+    ).filter((response): response is BudgetMonthResponse => response !== null);
+
+    if (monthResponses.length === 0) {
+      const emptyAggregation = {
+        toBudget: 0,
+        fromPreviousMonth: 0,
+        lastMonthOverspent: 0,
+        categoryGroupsMap: new Map<string, BudgetMonthGroup>(),
+      };
+
+      return {
+        data: [],
+        aggregated: {
+          ...emptyAggregation,
+          forNextMonth: 0,
+          startMonth: start,
+          endMonth: end,
+        },
+      };
+    }
 
     const accumulate_months = monthResponses.reduce(
       (acc, response, index) => {
@@ -350,14 +385,13 @@ export function createBudgetSpreadsheet(
       )
       .filter(entry => entry.value !== 0);
 
-    const nextMonthResponse = (await send('api/budget-month', {
-      month: monthUtils.nextMonth(end),
-    })) as unknown as BudgetMonthResponse;
+    const nextMonthResponse = await getBudgetMonth(monthUtils.nextMonth(end));
 
     const aggregated: AggregatedBudget = {
       toBudget: accumulate_months.toBudget,
       forNextMonth:
-        (nextMonthResponse.fromLastMonth ?? 0) - accumulate_months.toBudget,
+        (nextMonthResponse?.fromLastMonth ?? accumulate_months.toBudget) -
+        accumulate_months.toBudget,
       fromPreviousMonth: accumulate_months.fromPreviousMonth,
       lastMonthOverspent: accumulate_months.lastMonthOverspent,
       categoryGroupsMap: accumulate_months.categoryGroupsMap,
