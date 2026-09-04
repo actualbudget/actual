@@ -68,10 +68,10 @@ type ToBudgetProps = {
 function ToBudget({ month, onPress, show3Columns }: ToBudgetProps) {
   const { t } = useTranslation();
   const { toBudgetBinding } = useToBudgetMode(month);
-  const amount = useSheetValue<
-    'envelope-budget',
-    'to-budget' | 'ready-to-assign'
-  >(toBudgetBinding) ?? 0;
+  const amount =
+    useSheetValue<'envelope-budget', 'to-budget' | 'ready-to-assign'>(
+      toBudgetBinding,
+    ) ?? 0;
   const format = useFormat();
   const sidebarColumnWidth = getColumnWidth({ show3Columns, isSidebar: true });
 
