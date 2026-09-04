@@ -11,6 +11,7 @@ export function getLiveRange(
   latestTransaction: string,
   includeCurrentInterval: boolean,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  startDate?: string,
 ): [string, string, TimeFrame['mode']] {
   let dateStart = earliestTransaction;
   let dateEnd = latestTransaction;
@@ -91,6 +92,24 @@ export function getLiveRange(
       dateStart = earliestTransaction;
       dateEnd = latestTransaction;
       break;
+    }
+    case 'fromStartDate': {
+      // The saved start is pinned; the end always tracks today.
+      let fixedStart = startDate || earliestTransaction;
+      if (!monthUtils.isValidYearMonthDay(fixedStart)) {
+        // Pad month- or year-shaped saved bounds to days.
+        fixedStart =
+          fixedStart.length === 7 ? `${fixedStart}-01` : `${fixedStart}-01-01`;
+      }
+      if (fixedStart > monthUtils.currentDay()) {
+        fixedStart = monthUtils.currentDay();
+      }
+      [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
+        fixedStart,
+        monthUtils.currentDay(),
+      );
+      return [dateStart, dateEnd, 'static-start'];
     }
     default:
       if (typeof rangeName === 'number') {

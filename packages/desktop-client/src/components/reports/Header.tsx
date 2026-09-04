@@ -106,6 +106,36 @@ export function Header({
   const language = useLanguage();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
+  // In fixed-start mode a single pick sets the start; the end keeps tracking
+  // the current month. Any other live mode preserves the window width.
+  const isFixedStart = mode === 'static-start';
+
+  function onChangePickedDates(newStart: string, newEnd: string) {
+    if (!mode || mode === 'static') {
+      onChangeDates(newStart, newEnd, 'static');
+      return;
+    }
+    if (isFixedStart) {
+      // Manual picks keep the rolling end instead of demoting to a fully
+      // static range.
+      const [fixedStart, fixedEnd] = calculateTimeRange({
+        start: newStart,
+        end: newEnd,
+        mode: 'static-start',
+      });
+      onChangeDates(fixedStart, fixedEnd, 'static-start');
+      return;
+    }
+    // Default for live modes: keep the picked range relative — it slides
+    // forward preserving its width.
+    const [liveStart, liveEnd] = calculateTimeRange({
+      start: newStart,
+      end: newEnd,
+      mode: 'sliding-window',
+    });
+    onChangeDates(liveStart, liveEnd, 'sliding-window');
+  }
+
   // Live-range presets return day-shaped bounds; collapse them to months.
   function liveRangeAsMonths(
     rangeName: string,
@@ -214,7 +244,31 @@ export function Header({
               ),
             ]
           : []),
+        // Pins the current start and lets the end keep tracking the current
+        // month. Commits immediately and keeps the picker open so a single
+        // month click then moves the pinned start.
+        {
+          key: 'from-start-date',
+          label: <Trans>From start date</Trans>,
+          commitOnSelect: true,
+          getRange: () => [start, monthUtils.currentMonth()],
+          onSelect: () =>
+            onChangeDates(start, monthUtils.currentMonth(), 'static-start'),
+        },
       ];
+
+  // Highlighting defaults to range equality, but a fixed-start window can
+  // coincide with other presets' ranges (e.g. Year to date). While it is
+  // active, only "From start date" may appear highlighted.
+  const presetsWithActiveState = presets.map(preset => ({
+    ...preset,
+    isActive:
+      preset.key === 'from-start-date'
+        ? isFixedStart
+        : isFixedStart
+          ? false
+          : undefined,
+  }));
 
   return (
     <View
@@ -253,6 +307,7 @@ export function Header({
             start={start}
             end={end}
             granularities={granularities}
+            selectStartOnly={isFixedStart}
             // allMonths is newest-first and may be empty before reports load.
             minDate={
               allMonths.length
@@ -281,10 +336,8 @@ export function Header({
               year: t('Year'),
               dateRange: t('Date range'),
             }}
-            presets={presets}
-            onChangeDates={(newStart, newEnd) =>
-              onChangeDates(newStart, newEnd, 'static')
-            }
+            presets={presetsWithActiveState}
+            onChangeDates={onChangePickedDates}
           />
           {filters && (
             <FilterButton

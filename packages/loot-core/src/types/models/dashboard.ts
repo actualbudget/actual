@@ -12,9 +12,10 @@ export type TimeFrame = {
   start: string;
   end: string;
   mode:
-    | 'sliding-window'
-    | 'static'
-    | 'full'
+    | 'sliding-window' // "Live": width preserved, end slides to now
+    | 'static' // fixed dates
+    | 'static-start' // fixed start date, end slides to the current month
+    | 'full' // all time
     | 'lastMonth'
     | 'lastYear'
     | 'yearToDate'

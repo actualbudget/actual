@@ -45,6 +45,12 @@ type DateRangePickerProps = {
   /** Pass `['month', 'day']` for callers that handle day-shaped values. */
   granularities?: DateRangeGranularity[];
   presets?: DateRangePreset[];
+  /**
+   * A single click completes the selection (`[picked, picked]`) instead of
+   * requiring a second click for the other bound; used by callers that
+   * derive the end bound themselves (e.g. a rolling "fixed start" range).
+   */
+  selectStartOnly?: boolean;
   firstDayOfWeek?: FirstDayOfWeek;
   /** BCP 47 language tag driving all date formatting. */
   locale: string;
@@ -75,6 +81,7 @@ export function DateRangePicker({
   maxDate,
   granularities = ['month'],
   presets,
+  selectStartOnly = false,
   firstDayOfWeek = 'sun',
   locale,
   formatDayLabel,
@@ -160,6 +167,21 @@ export function DateRangePicker({
     }
   }
 
+  // In selectStartOnly mode the first click completes the pick: commit the
+  // single bound immediately and close. The caller resolves the other bound.
+  // A direct pick always wins over any previewed preset.
+  function changeDraft(nextStart: string, nextEnd: string) {
+    setDraft(nextStart, nextEnd);
+    if (!selectStartOnly) {
+      return;
+    }
+    skipCommitRef.current = true;
+    setIsOpen(false);
+    if (nextStart !== start || nextEnd !== end) {
+      onChangeDates(nextStart, nextEnd);
+    }
+  }
+
   const hasSidebar = showGranularityToggle || Boolean(presets?.length);
 
   function setDraft(nextStart: string, nextEnd: string) {
@@ -228,7 +250,7 @@ export function DateRangePicker({
                 firstDayOfWeek={firstDayOfWeek}
                 locale={locale}
                 labels={labels}
-                onChange={setDraft}
+                onChange={changeDraft}
               />
             ) : (
               <RangeSelector
@@ -238,7 +260,7 @@ export function DateRangePicker({
                 max={monthMax}
                 locale={locale}
                 labels={labels}
-                onChange={setDraft}
+                onChange={changeDraft}
               />
             )}
           </View>
@@ -269,18 +291,35 @@ export function DateRangePicker({
                     }}
                   >
                     {presets?.map(preset => {
-                      // Derive the active preset from the shown range instead
-                      // of storing it, so it survives closing and reopening
-                      // without persisting anything.
+                      // While a preset is being previewed, it alone is
+                      // active. Otherwise derive the active preset from the
+                      // shown range so it survives closing and reopening
+                      // without persisting anything; a preset may override
+                      // the check when range equality would be ambiguous.
                       const [presetStart, presetEnd] = preset.getRange();
-                      const isActive =
-                        presetStart === draftStart && presetEnd === draftEnd;
+                      const isActive = draftPreset
+                        ? draftPreset.key === preset.key
+                        : (preset.isActive ??
+                          (presetStart === draftStart &&
+                            presetEnd === draftEnd));
                       return (
                         <Button
                           key={preset.key}
                           variant={isActive ? 'primary' : 'bare'}
                           aria-pressed={isActive}
                           onPress={() => {
+                            if (preset.commitOnSelect) {
+                              // Commit immediately (the parent re-renders
+                              // with the preset's semantics) but keep the
+                              // picker open for the follow-up pick. Clear
+                              // the pending preset so closing later does
+                              // not re-commit it.
+                              setDraftStart(presetStart);
+                              setDraftEnd(presetEnd);
+                              setDraftPreset(null);
+                              preset.onSelect();
+                              return;
+                            }
                             // Preview in the draft; the commit happens on
                             // close, like manual selection.
                             setDraftStart(presetStart);

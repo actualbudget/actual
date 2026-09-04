@@ -129,6 +129,7 @@ export function ReportSidebar({
         latestTransaction,
         customReportItems.includeCurrentInterval,
         firstDayOfWeekIdx,
+        customReportItems.startDate,
       ),
     );
   };
@@ -573,41 +574,82 @@ export function ReportSidebar({
           </ModeButton>
         </SpaceBetween>
         {!customReportItems.isDateStatic ? (
-          <View
-            style={{
-              flexDirection: 'row',
-              padding: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
-              <Trans>Range:</Trans>
-            </Text>
-            <Select
-              value={customReportItems.dateRange}
-              onChange={onSelectRange}
-              options={rangeOptions}
-            />
-            {!disabledList.currentInterval.get(customReportItems.dateRange) &&
-              customReportItems.includeCurrentInterval && (
-                <Tooltip
-                  placement="bottom start"
-                  content={
-                    <Text>
-                      <Trans>Current month</Trans>
-                    </Text>
+          <>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 5,
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+                <Trans>Range:</Trans>
+              </Text>
+              <Select
+                value={customReportItems.dateRange}
+                onChange={onSelectRange}
+                options={rangeOptions}
+              />
+              {!disabledList.currentInterval.get(customReportItems.dateRange) &&
+                customReportItems.includeCurrentInterval && (
+                  <Tooltip
+                    placement="bottom start"
+                    content={
+                      <Text>
+                        <Trans>Current month</Trans>
+                      </Text>
+                    }
+                    style={{
+                      ...styles.tooltip,
+                      lineHeight: 1.5,
+                      padding: '6px 10px',
+                      marginTop: 5,
+                    }}
+                  >
+                    <Text style={{ marginLeft: 10 }}>+1</Text>
+                  </Tooltip>
+                )}
+            </View>
+            {customReportItems.dateRange === 'fromStartDate' && (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  padding: 5,
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+                  <Trans>From:</Trans>
+                </Text>
+                <Select
+                  value={customReportItems.startDate}
+                  onChange={newValue =>
+                    onChangeDates(
+                      ...getLiveRange(
+                        'fromStartDate',
+                        earliestTransaction,
+                        latestTransaction,
+                        customReportItems.includeCurrentInterval,
+                        firstDayOfWeekIdx,
+                        newValue,
+                      ),
+                    )
                   }
-                  style={{
-                    ...styles.tooltip,
-                    lineHeight: 1.5,
-                    padding: '6px 10px',
-                    marginTop: 5,
-                  }}
-                >
-                  <Text style={{ marginLeft: 10 }}>+1</Text>
-                </Tooltip>
-              )}
-          </View>
+                  defaultLabel={monthUtils.format(
+                    customReportItems.startDate,
+                    ReportOptions.intervalFormat.get(
+                      customReportItems.interval,
+                    ) || '',
+                    locale,
+                  )}
+                  options={allIntervals.map(({ name, pretty }) => [
+                    name,
+                    pretty,
+                  ])}
+                />
+              </View>
+            )}
+          </>
         ) : (
           <>
             <View

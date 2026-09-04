@@ -414,6 +414,7 @@ function CustomReportInner({
           latestTransactionDate,
           includeCurrentInterval,
           firstDayOfWeekIdx,
+          startDate,
         );
         setStartDate(dateStart);
         setEndDate(dateEnd);

@@ -65,6 +65,11 @@ const currentIntervalOptions = [
     description: t('All time'),
     disableInclude: true,
   },
+  {
+    description: t('From start date'),
+    key: 'fromStartDate',
+    disableInclude: true,
+  },
 ];
 
 type graphOptions = {
@@ -236,7 +241,10 @@ export const disabledList = {
     modeOptions.map(item => [item.description, item.disabledGraph]),
   ),
   currentInterval: new Map(
-    currentIntervalOptions.map(item => [item.description, item.disableInclude]),
+    currentIntervalOptions.map(item => [
+      (item as { key?: string; description: string }).key ?? item.description,
+      item.disableInclude,
+    ]),
   ),
 };
 

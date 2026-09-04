@@ -227,6 +227,16 @@ const dateRangeOptions: dateRangeProps[] = [
     Monthly: true,
     Yearly: true,
   },
+  {
+    description: t('From start date'),
+    key: 'fromStartDate',
+    name: 'fromStartDate',
+    type: 'Month',
+    Daily: true,
+    Weekly: true,
+    Monthly: true,
+    Yearly: true,
+  },
 ];
 
 type intervalOptionsProps = {

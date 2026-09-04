@@ -98,6 +98,7 @@ export function GetCardData({
       latestTransaction,
       report.includeCurrentInterval,
       firstDayOfWeekIdx,
+      report.startDate,
     );
     startDate = dateStart || report.startDate;
     endDate = dateEnd || report.endDate;
