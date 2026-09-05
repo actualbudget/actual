@@ -34,6 +34,7 @@ import type {
   SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
+  SyncServerLhvAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
   TransactionEntity,
@@ -58,6 +59,7 @@ export type AccountHandlers = {
   'account-properties': typeof getAccountProperties;
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
+  'lhv-accounts-link': typeof linkLhvAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
   'akahu-accounts-link': typeof linkAkahuAccount;
   'enablebanking-accounts-link': typeof linkEnableBankingAccount;
@@ -71,6 +73,7 @@ export type AccountHandlers = {
   'gocardless-poll-web-token-stop': typeof stopGoCardlessWebTokenPolling;
   'gocardless-status': typeof goCardlessStatus;
   'simplefin-status': typeof simpleFinStatus;
+  'lhv-status': typeof lhvStatus;
   'pluggyai-status': typeof pluggyAiStatus;
   'akahu-status': typeof akahuStatus;
   'enablebanking-status': typeof enableBankingStatus;
@@ -81,6 +84,7 @@ export type AccountHandlers = {
   'enablebanking-poll-auth-stop': typeof stopEnableBankingPollAuth;
   'enablebanking-configure': typeof enableBankingConfigure;
   'simplefin-accounts': typeof simpleFinAccounts;
+  'lhv-accounts': typeof lhvAccounts;
   'pluggyai-accounts': typeof pluggyAiAccounts;
   'akahu-accounts': typeof akahuAccounts;
   'gocardless-get-banks': typeof getGoCardlessBanks;
@@ -300,6 +304,76 @@ async function linkSimpleFinAccount({
     bank.bank_id,
     startingDate,
     startingBalance,
+  );
+
+  await handleSyncResponse(syncRes, id);
+
+  connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions', 'accounts'],
+  });
+
+  return 'ok';
+}
+
+async function linkLhvAccount({
+  externalAccount,
+  upgradingId,
+  offBudget = false,
+  startingDate,
+  startingBalance,
+}: LinkAccountBaseParams & {
+  externalAccount: SyncServerLhvAccount;
+}) {
+  let id;
+  const bank = await link.findOrCreateBank(
+    { name: externalAccount.institution },
+    externalAccount.orgId,
+  );
+
+  if (upgradingId) {
+    const accRow = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [upgradingId],
+    );
+
+    if (!accRow) {
+      throw new Error(`Account with ID ${upgradingId} not found.`);
+    }
+
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      bank: bank.id,
+      account_sync_source: 'lhv',
+    });
+  } else {
+    id = uuidv4();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      name: externalAccount.name,
+      official_name: externalAccount.name,
+      bank: bank.id,
+      offbudget: offBudget ? 1 : 0,
+      account_sync_source: 'lhv',
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  const syncRes = await bankSync.syncAccount(
+    undefined,
+    undefined,
+    id,
+    externalAccount.account_id,
+    bank.bank_id,
+    startingDate,
+    startingBalance,
+    getPrefs()?.cloudFileId,
   );
 
   await handleSyncResponse(syncRes, id);
@@ -910,6 +984,29 @@ async function simpleFinStatus() {
   );
 }
 
+async function lhvStatus(): Promise<BankSyncProviderStatus> {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  const fileId = getPrefs()?.cloudFileId;
+  return post(
+    serverConfig.LHV_SERVER + '/status',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+      ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
+    },
+  );
+}
+
 async function pluggyAiStatus(): Promise<BankSyncProviderStatus> {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -972,6 +1069,34 @@ async function simpleFinAccounts() {
       {},
       {
         'X-ACTUAL-TOKEN': userToken,
+      },
+      60000,
+    );
+  } catch {
+    return { error_code: 'TIMED_OUT' };
+  }
+}
+
+async function lhvAccounts() {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  try {
+    const fileId = getPrefs()?.cloudFileId;
+    return await post(
+      serverConfig.LHV_SERVER + '/accounts',
+      {},
+      {
+        'X-ACTUAL-TOKEN': userToken,
+        ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
       },
       60000,
     );
@@ -1774,6 +1899,7 @@ app.method('account-balance', getAccountBalance);
 app.method('account-properties', getAccountProperties);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
+app.method('lhv-accounts-link', linkLhvAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
 app.method('akahu-accounts-link', linkAkahuAccount);
 app.method('enablebanking-accounts-link', linkEnableBankingAccount);
@@ -1787,6 +1913,7 @@ app.method('gocardless-poll-web-token', pollGoCardlessWebToken);
 app.method('gocardless-poll-web-token-stop', stopGoCardlessWebTokenPolling);
 app.method('gocardless-status', goCardlessStatus);
 app.method('simplefin-status', simpleFinStatus);
+app.method('lhv-status', lhvStatus);
 app.method('pluggyai-status', pluggyAiStatus);
 app.method('akahu-status', akahuStatus);
 app.method('enablebanking-status', enableBankingStatus);
@@ -1797,6 +1924,7 @@ app.method('enablebanking-poll-auth', enableBankingPollAuth);
 app.method('enablebanking-poll-auth-stop', stopEnableBankingPollAuth);
 app.method('enablebanking-configure', enableBankingConfigure);
 app.method('simplefin-accounts', simpleFinAccounts);
+app.method('lhv-accounts', lhvAccounts);
 app.method('pluggyai-accounts', pluggyAiAccounts);
 app.method('akahu-accounts', akahuAccounts);
 app.method('gocardless-get-banks', getGoCardlessBanks);

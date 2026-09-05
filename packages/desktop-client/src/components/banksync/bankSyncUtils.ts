@@ -11,6 +11,7 @@ export type GroupedBankSyncAccounts = Partial<
 export const BUILT_IN_BANK_SYNC_PROVIDERS = [
   'goCardless',
   'simpleFin',
+  'lhv',
   'pluggyai',
 ] as const satisfies BankSyncProviders[];
 
@@ -33,6 +34,7 @@ export function getSyncSourceReadable(
   return {
     goCardless: 'GoCardless',
     simpleFin: 'SimpleFIN',
+    lhv: 'LHV.ai',
     pluggyai: 'Pluggy.ai',
     enableBanking: 'Enable Banking',
     akahu: 'Akahu',

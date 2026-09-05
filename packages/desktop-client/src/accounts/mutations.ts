@@ -8,6 +8,7 @@ import type {
   SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
+  SyncServerLhvAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
   TransactionEntity,
@@ -452,6 +453,48 @@ export function useLinkAccountSimpleFinMutation() {
         dispatch,
         t(
           'There was an error linking the account to SimpleFIN. Please try again.',
+        ),
+        error,
+      );
+    },
+  });
+}
+
+type LinkAccountLhvPayload = LinkAccountBasePayload & {
+  externalAccount: SyncServerLhvAccount;
+};
+
+export function useLinkAccountLhvMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountLhvPayload) => {
+      await send('lhv-accounts-link', {
+        externalAccount,
+        upgradingId,
+        offBudget,
+        startingDate,
+        startingBalance,
+      });
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateQueries(queryClient, payeeQueries.lists());
+    },
+    onError: error => {
+      console.error('Error linking account to LHV.ai:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t(
+          'There was an error linking the account to LHV.ai. Please try again.',
         ),
         error,
       );

@@ -13,6 +13,7 @@ import type {
   RuleEntity,
   ScheduleEntity,
   SyncServerEnableBankingAccount,
+  SyncServerLhvAccount,
   TransactionEntity,
   UserAccessEntity,
   UserEntity,
@@ -123,6 +124,12 @@ export type Modal =
       name: 'simplefin-init';
       options: {
         onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'lhv-init';
+      options: {
+        onSuccess: (accounts: SyncServerLhvAccount[]) => void;
       };
     }
   | {

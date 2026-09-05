@@ -275,6 +275,40 @@ async function downloadSimpleFinTransactions(
   return retVal;
 }
 
+async function downloadLhvTransactions(
+  acctId: AccountEntity['id'],
+  since: string,
+  fileId?: string,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  logger.log('Pulling transactions from LHV.ai');
+
+  const res = await post(
+    getServer().LHV_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+      ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
+    },
+    60000,
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
+  }
+
+  return {
+    transactions: res.transactions.all,
+    accountBalance: res.balances,
+    startingBalance: res.startingBalance,
+  };
+}
+
 async function downloadPluggyAiTransactions(
   acctId: AccountEntity['id'],
   since: string,
@@ -1109,6 +1143,13 @@ async function processBankSyncDownload(
         );
       }, currentBalance);
       balanceToUse = previousBalance;
+    } else if (acctRow.account_sync_source === 'lhv') {
+      const previousBalance = transactions.reduce(
+        (total, trans) =>
+          total - amountToInteger(trans.transactionAmount.amount),
+        currentBalance,
+      );
+      balanceToUse = Math.round(previousBalance);
     } else if (acctRow.account_sync_source === 'pluggyai') {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
@@ -1220,6 +1261,8 @@ export async function syncAccount(
   let download;
   if (acctRow.account_sync_source === 'simpleFin') {
     download = await downloadSimpleFinTransactions(acctId, syncStartDate);
+  } else if (acctRow.account_sync_source === 'lhv') {
+    download = await downloadLhvTransactions(acctId, syncStartDate, fileId);
   } else if (acctRow.account_sync_source === 'pluggyai') {
     download = await downloadPluggyAiTransactions(
       acctId,

@@ -291,6 +291,41 @@ describe('secretsService', () => {
       });
     });
 
+    it('rejects storing LHV.ai refresh tokens globally', async () => {
+      const res = await request(app)
+        .post('/')
+        .set('x-actual-token', 'valid-token')
+        .send({
+          name: SecretName.lhv_refreshToken,
+          value: 'refresh-token',
+        });
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toEqual({
+        status: 'error',
+        reason: 'budget-file-secret-required',
+        details: 'This secret can only be managed per budget file',
+      });
+      expect(secretsService.get(SecretName.lhv_refreshToken)).toBeNull();
+    });
+
+    it('allows storing LHV.ai refresh tokens per budget file', async () => {
+      const res = await request(app)
+        .post('/')
+        .set('X-Actual-File-Id', testFileId)
+        .set('x-actual-token', 'valid-token')
+        .send({
+          name: SecretName.lhv_refreshToken,
+          value: 'refresh-token',
+        });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toEqual({ status: 'ok' });
+      expect(secretsService.get(SecretName.lhv_refreshToken, testFileId)).toBe(
+        'refresh-token',
+      );
+    });
+
     describe('when OpenID is the active auth method', () => {
       beforeEach(() => {
         enableOpenIdAuth();
