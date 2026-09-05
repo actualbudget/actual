@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  getHistoricalMixStats,
+  getHistoricalPresetStats,
   getMonteCarloHorizonYears,
+  getPotAssetWeights,
   MAX_AMOUNT,
   MAX_HORIZON_YEARS,
   MIN_HORIZON_YEARS,
@@ -36,6 +39,9 @@ function makePot(overrides: Partial<MonteCarloPot> = {}): MonteCarloPot {
     name: 'Test pot',
     startingBalance: 50_000_000,
     allocationPreset: 'custom',
+    allocationStocks: 0.6,
+    allocationBonds: 0.4,
+    allocationCash: 0,
     expectedReturnMean: 0.06,
     returnStdDev: 0.1,
     accessAge: null,
@@ -551,6 +557,106 @@ describe('runMonteCarloSimulation', () => {
       makeParams({}, { expectedReturnMean: 0.05, returnStdDev: 0 }),
     );
     expect(historical.percentileBands).toEqual(normal.percentileBands);
+  });
+
+  it('blends a custom mix like the preset with the same weights', () => {
+    // A custom 80/20 mix must be indistinguishable from the equity-80
+    // preset under a historical model - same blended series, same runs
+    const preset = runMonteCarloSimulation(
+      makeParams(
+        { returnModel: 'historical-sequence' },
+        { allocationPreset: 'equity-80' },
+      ),
+    );
+    const customMix = runMonteCarloSimulation(
+      makeParams(
+        { returnModel: 'historical-sequence' },
+        {
+          allocationPreset: 'custom-mix',
+          allocationStocks: 0.8,
+          allocationBonds: 0.2,
+          allocationCash: 0,
+        },
+      ),
+    );
+    expect(customMix.percentileBands).toEqual(preset.percentileBands);
+    expect(customMix.successRate).toBe(preset.successRate);
+  });
+
+  it('falls back to normal draws when a custom mix does not total 100%', () => {
+    // An incomplete mix is treated like a Custom pot: an absurd history
+    // must not leak into its returns until the shares total 100%
+    const incomplete = runMonteCarloSimulation(
+      makeParams(
+        {
+          returnModel: 'historical-bootstrap',
+          historicalReturns: [
+            { year: 2000, stocks: 9, bonds: 9, cash: 9, inflation: 0 },
+          ],
+        },
+        {
+          allocationPreset: 'custom-mix',
+          allocationStocks: 0.85,
+          allocationBonds: 0.15,
+          allocationCash: 1,
+          expectedReturnMean: 0.05,
+          returnStdDev: 0,
+        },
+      ),
+    );
+    const normal = runMonteCarloSimulation(
+      makeParams({}, { expectedReturnMean: 0.05, returnStdDev: 0 }),
+    );
+    expect(incomplete.percentileBands).toEqual(normal.percentileBands);
+  });
+
+  it('keeps a zero-share custom mix on normal draws in historical modes', () => {
+    // With no usable mix the pot behaves like a Custom pot: an absurd
+    // history must not leak into its returns
+    const historical = runMonteCarloSimulation(
+      makeParams(
+        {
+          returnModel: 'historical-bootstrap',
+          historicalReturns: [
+            { year: 2000, stocks: 9, bonds: 9, cash: 9, inflation: 0 },
+          ],
+        },
+        {
+          allocationPreset: 'custom-mix',
+          allocationStocks: 0,
+          allocationBonds: 0,
+          allocationCash: 0,
+          expectedReturnMean: 0.05,
+          returnStdDev: 0,
+        },
+      ),
+    );
+    const normal = runMonteCarloSimulation(
+      makeParams({}, { expectedReturnMean: 0.05, returnStdDev: 0 }),
+    );
+    expect(historical.percentileBands).toEqual(normal.percentileBands);
+  });
+
+  it('a custom mix under the normal model uses the manual assumptions', () => {
+    // The mix only drives historical models; random draws still come
+    // from the pot's own expected return and volatility
+    const customMix = runMonteCarloSimulation(
+      makeParams(
+        {},
+        {
+          allocationPreset: 'custom-mix',
+          allocationStocks: 0.85,
+          allocationBonds: 0.15,
+          allocationCash: 0,
+          expectedReturnMean: 0.05,
+          returnStdDev: 0,
+        },
+      ),
+    );
+    const custom = runMonteCarloSimulation(
+      makeParams({}, { expectedReturnMean: 0.05, returnStdDev: 0 }),
+    );
+    expect(customMix.percentileBands).toEqual(custom.percentileBands);
   });
 
   it('guardrails raise withdrawals when the pot races ahead', () => {
@@ -2296,5 +2402,100 @@ describe('runMonteCarloSimulation', () => {
         expect(Math.abs(value)).toBeLessThanOrEqual(maxFormattable);
       }
     }
+  });
+});
+
+describe('getHistoricalPresetStats', () => {
+  const history = [
+    { year: 2000, stocks: 0.1, bonds: 0.05, cash: 0.02, inflation: 0 },
+    { year: 2001, stocks: -0.1, bonds: 0.01, cash: 0.02, inflation: 0 },
+  ];
+
+  it('blends the series by the preset weights', () => {
+    // equity-60: 0.6 x stocks + 0.4 x bonds -> [0.08, -0.056]
+    const stats = getHistoricalPresetStats('equity-60', history);
+    expect(stats.mean).toBeCloseTo(0.012, 12);
+    // Sample standard deviation of two points equidistant from the mean
+    expect(stats.stdDev).toBeCloseTo(0.068 * Math.sqrt(2), 12);
+  });
+
+  it('a cash preset tracks the cash series exactly', () => {
+    const stats = getHistoricalPresetStats('cash', history);
+    expect(stats.mean).toBeCloseTo(0.02, 12);
+    expect(stats.stdDev).toBeCloseTo(0, 12);
+  });
+
+  it('returns plausible values for the real dataset', () => {
+    const stats = getHistoricalPresetStats('equity-100');
+    // Long-run US stocks: roughly 8-15% mean, 15-25% volatility
+    expect(stats.mean).toBeGreaterThan(0.08);
+    expect(stats.mean).toBeLessThan(0.15);
+    expect(stats.stdDev).toBeGreaterThan(0.15);
+    expect(stats.stdDev).toBeLessThan(0.25);
+  });
+
+  it('matches getHistoricalMixStats for the same weights', () => {
+    const presetStats = getHistoricalPresetStats('equity-60', history);
+    const mixStats = getHistoricalMixStats(
+      { stocks: 0.6, bonds: 0.4, cash: 0 },
+      history,
+    );
+    expect(mixStats).toEqual(presetStats);
+  });
+});
+
+describe('getPotAssetWeights', () => {
+  const mixPot = (stocks: number, bonds: number, cash: number) =>
+    makePot({
+      allocationPreset: 'custom-mix',
+      allocationStocks: stocks,
+      allocationBonds: bonds,
+      allocationCash: cash,
+    });
+
+  it('returns the fixed mix behind a preset', () => {
+    expect(
+      getPotAssetWeights(makePot({ allocationPreset: 'equity-80' })),
+    ).toEqual({ stocks: 0.8, bonds: 0.2, cash: 0 });
+  });
+
+  it('returns null for custom pots', () => {
+    expect(
+      getPotAssetWeights(makePot({ allocationPreset: 'custom' })),
+    ).toBeNull();
+  });
+
+  it('returns a complete custom mix as-is', () => {
+    expect(getPotAssetWeights(mixPot(0.85, 0.15, 0))).toEqual({
+      stocks: 0.85,
+      bonds: 0.15,
+      cash: 0,
+    });
+  });
+
+  it('tolerates float dust in a complete mix and returns exact weights', () => {
+    // 0.7 + 0.3 = 0.9999999999999999 in floating point
+    const weights = getPotAssetWeights(mixPot(0.7, 0.3, 0));
+    expect(weights).not.toBeNull();
+    if (weights == null) {
+      throw new Error('expected weights');
+    }
+    expect(weights.stocks).toBeCloseTo(0.7, 12);
+    expect(weights.bonds).toBeCloseTo(0.3, 12);
+    expect(weights.stocks + weights.bonds + weights.cash).toBe(1);
+  });
+
+  it('ignores negative and non-finite shares', () => {
+    expect(getPotAssetWeights(mixPot(1, -5, Number.NaN))).toEqual({
+      stocks: 1,
+      bonds: 0,
+      cash: 0,
+    });
+  });
+
+  it('returns null when the shares do not total 100%', () => {
+    expect(getPotAssetWeights(mixPot(0, 0, 0))).toBeNull();
+    expect(getPotAssetWeights(mixPot(0.5, 0.2, 0))).toBeNull();
+    expect(getPotAssetWeights(mixPot(85, 15, 0))).toBeNull();
   });
 });
