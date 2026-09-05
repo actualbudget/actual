@@ -357,6 +357,34 @@ describe('CommandBar', () => {
     );
   });
 
+  it('wraps keyboard navigation at both ends of the root command list', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    renderOpenCommandBar();
+
+    const input = screen.getByPlaceholderText('Search Demo budget...');
+    const options = screen.getAllByRole('option');
+    const firstOption = options[0];
+    const finalOption = options[options.length - 1];
+    const user = userEvent.setup();
+    input.focus();
+
+    expect(firstOption).toHaveAttribute('data-selected', 'true');
+
+    await user.keyboard('{ArrowUp}');
+    expect(finalOption).toHaveAttribute('data-selected', 'true');
+
+    await user.keyboard('{ArrowDown}');
+    expect(firstOption).toHaveAttribute('data-selected', 'true');
+
+    for (let i = 0; i < options.length - 1; i++) {
+      await user.keyboard('{ArrowDown}');
+    }
+    expect(finalOption).toHaveAttribute('data-selected', 'true');
+
+    await user.keyboard('{ArrowDown}');
+    expect(firstOption).toHaveAttribute('data-selected', 'true');
+  });
+
   it('opens an account action page from the keyboard-selected root item', async () => {
     mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
     renderOpenCommandBar();

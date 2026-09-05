@@ -1449,6 +1449,7 @@ export function CommandBar() {
 
   return (
     <Command.Dialog
+      loop
       vimBindings
       open={open}
       value={selectedValue}
