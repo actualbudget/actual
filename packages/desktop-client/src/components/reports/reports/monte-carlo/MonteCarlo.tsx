@@ -484,6 +484,7 @@ export function MonteCarlo() {
               simulationCount={result.simulationCount}
               startAge={config.currentAge}
               hasContributions={config.contributions.length > 0}
+              withdrawalRule={resolvedConfig.withdrawalRule}
               onBack={() => setSelectedRun(null)}
             />
           ) : (
