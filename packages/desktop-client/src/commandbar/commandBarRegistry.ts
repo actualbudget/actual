@@ -262,6 +262,7 @@ function haveSamePresentation(
   return first.every(
     (command, index) =>
       command.id === second[index]?.id &&
+      command.instanceId === second[index]?.instanceId &&
       command.label === second[index]?.label &&
       command.destructive === second[index]?.destructive,
   );

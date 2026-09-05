@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
 
 import { render, screen } from '@testing-library/react';
+import { Command } from 'cmdk';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ThemePage } from './ThemePage';
 
-const translations = vi.hoisted(() => ({
+const translations: Readonly<Record<string, string>> = vi.hoisted(() => ({
   Light: 'Clair',
   Dark: 'Sombre',
   Midnight: 'Minuit',
@@ -33,24 +34,9 @@ vi.mock('#style/customThemes', () => ({
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => translations[key as keyof typeof translations] ?? key,
+    t: (key: string) => translations[key] ?? key,
   }),
   Trans: ({ children }: { children: ReactNode }) => children,
-}));
-
-vi.mock('cmdk', () => ({
-  Command: {
-    Group: ({
-      children,
-      heading,
-    }: {
-      children: ReactNode;
-      heading: string;
-    }) => <section aria-label={heading}>{children}</section>,
-    Item: ({ children }: { children: ReactNode }) => (
-      <div data-testid="theme-item">{children}</div>
-    ),
-  },
 }));
 
 vi.mock('./primitives', () => ({
@@ -63,16 +49,18 @@ describe('ThemePage', () => {
     const onSelectBuiltin = vi.fn();
 
     render(
-      <ThemePage
-        search="clair"
-        activeBuiltinTheme="light"
-        activeCustomThemeId={null}
-        onSelectBuiltin={onSelectBuiltin}
-        onSelectCatalog={vi.fn()}
-      />,
+      <Command>
+        <ThemePage
+          search="clair"
+          activeBuiltinTheme="light"
+          activeCustomThemeId={null}
+          onSelectBuiltin={onSelectBuiltin}
+          onSelectCatalog={vi.fn()}
+        />
+      </Command>,
     );
 
-    expect(screen.getByTestId('theme-item')).toHaveTextContent('Clair');
+    expect(screen.getByRole('option')).toHaveTextContent('Clair');
     expect(screen.queryByText('Sombre')).toBeNull();
   });
 });

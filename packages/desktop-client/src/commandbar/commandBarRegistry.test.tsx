@@ -370,6 +370,43 @@ describe('CommandBar command registry', () => {
       error.mockRestore();
     }
   });
+
+  it('refreshes when distinct instance ids become a collision', () => {
+    let latestCommands: readonly CommandBarCommand[] = [];
+    const observedCommands = vi.fn((commands: readonly CommandBarCommand[]) => {
+      latestCommands = commands;
+    });
+    const error = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+
+    try {
+      const view = render(
+        <ChangingInstanceIds
+          firstInstanceId="first"
+          secondInstanceId="second"
+          onCommands={observedCommands}
+        />,
+      );
+
+      expect(latestCommands).toHaveLength(2);
+
+      view.rerender(
+        <ChangingInstanceIds
+          firstInstanceId="same"
+          secondInstanceId="same"
+          onCommands={observedCommands}
+        />,
+      );
+
+      expect(latestCommands).toEqual([]);
+      expect(error).toHaveBeenCalledWith(
+        expect.stringContaining('Command bar contribution collision'),
+      );
+    } finally {
+      error.mockRestore();
+    }
+  });
 });
 
 function CleanupTest({
@@ -428,6 +465,42 @@ function SameOwner({ firstLabel }: { firstLabel: string }) {
       id: 'same',
       instanceId: firstLabel === 'First instance' ? 'first' : 'second',
       label: firstLabel,
+      execute: vi.fn(),
+    },
+  ]);
+  return null;
+}
+
+function ChangingInstanceIds({
+  firstInstanceId,
+  secondInstanceId,
+  onCommands,
+}: {
+  firstInstanceId: string;
+  secondInstanceId: string;
+  onCommands: (commands: readonly CommandBarCommand[]) => void;
+}) {
+  return (
+    <CommandBarProvider>
+      <InstanceOwner label="First instance" instanceId={firstInstanceId} />
+      <InstanceOwner label="Second instance" instanceId={secondInstanceId} />
+      <CleanupObserver onCommands={onCommands} />
+    </CommandBarProvider>
+  );
+}
+
+function InstanceOwner({
+  label,
+  instanceId,
+}: {
+  label: string;
+  instanceId: string;
+}) {
+  useRegisterCommandBarCommands('reports', [
+    {
+      id: 'same',
+      instanceId,
+      label,
       execute: vi.fn(),
     },
   ]);
