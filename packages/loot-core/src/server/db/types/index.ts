@@ -198,6 +198,7 @@ export type DbTransaction = {
   tombstone: 1 | 0;
   cleared: 1 | 0;
   reconciled: 1 | 0;
+  approved: 1 | 0;
   // Unused in the codebase
   pending?: 1 | 0 | null;
   location?: string | null;
@@ -307,6 +308,7 @@ export type DbViewTransactionInternal = {
   cleared: DbTransaction['cleared'];
   tombstone: DbTransaction['tombstone'];
   reconciled: DbTransaction['reconciled'];
+  approved: DbTransaction['approved'];
 };
 
 export type DbViewTransactionInternalAlive = DbViewTransactionInternal;
