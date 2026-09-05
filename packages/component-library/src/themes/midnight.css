@@ -58,10 +58,28 @@
   --color-sidebarItemBackgroundFailed: var(--palette-red300);
   --color-sidebarItemAccentSelected: var(--palette-purple200);
   --color-sidebarItemBackgroundHover: var(--palette-gray700);
+  --color-sidebarItemBackgroundSelected: color-mix(
+    in srgb,
+    var(--color-sidebarItemAccentSelected) 35%,
+    transparent
+  );
   --color-sidebarItemText: var(--palette-gray100);
   --color-sidebarItemTextUpdated: var(--color-sidebarItemText);
   --color-sidebarItemTextSelected: var(--palette-purple200);
   --color-sidebarBudgetName: var(--palette-gray300);
+  --color-sidebarHeaderText: var(--palette-gray100);
+  --color-sidebarTextSubdued: var(--palette-gray300);
+  --color-sidebarTextMuted: var(--palette-gray500);
+  --color-sidebarTextPositive: var(--color-sidebarItemBackgroundPositive);
+  --color-sidebarTextFailed: var(--color-sidebarItemBackgroundFailed);
+  --color-sidebarBackgroundFailedSubtle: color-mix(
+    in srgb,
+    var(--color-sidebarItemBackgroundFailed) 16%,
+    transparent
+  );
+  --color-sidebarBorder: var(--color-sidebarItemBackgroundHover);
+  --color-sidebarControlBackground: var(--color-sidebarItemBackgroundHover);
+  --color-sidebarBrand: var(--color-sidebarItemAccentSelected);
 
   --color-menuBackground: var(--palette-gray700);
   --color-menuItemBackground: var(--palette-gray200);

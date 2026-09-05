@@ -58,10 +58,38 @@
   --color-sidebarItemBackgroundFailed: var(--palette-red300);
   --color-sidebarItemBackgroundHover: var(--palette-navy800);
   --color-sidebarItemAccentSelected: var(--palette-purple200);
+  --color-sidebarItemBackgroundSelected: color-mix(
+    in srgb,
+    var(--color-sidebarItemAccentSelected) 22%,
+    transparent
+  );
   --color-sidebarItemText: var(--palette-navy150);
   --color-sidebarItemTextUpdated: var(--color-sidebarItemText);
   --color-sidebarItemTextSelected: var(--palette-purple200);
   --color-sidebarBudgetName: var(--palette-navy150);
+  --color-sidebarHeaderText: var(--palette-white);
+  --color-sidebarTextSubdued: var(--palette-navy300);
+  --color-sidebarTextMuted: var(--palette-navy500);
+  --color-sidebarTextPositive: var(--color-sidebarItemBackgroundPositive);
+  --color-sidebarTextFailed: var(--color-sidebarItemBackgroundFailed);
+  --color-sidebarBackgroundFailedSubtle: color-mix(
+    in srgb,
+    var(--color-sidebarItemBackgroundFailed) 16%,
+    transparent
+  );
+  --color-sidebarBorder: var(--color-sidebarItemBackgroundHover);
+  --color-sidebarControlBackground: var(--color-sidebarItemBackgroundHover);
+  --color-sidebarBrand: var(--color-sidebarItemAccentSelected);
+  --color-sidebarRedesignBackground: var(--palette-white);
+  --color-sidebarRedesignItemText: var(--palette-navy800);
+  --color-sidebarRedesignItemBackgroundHover: var(--palette-navy100);
+  --color-sidebarRedesignItemAccentSelected: var(--palette-purple500);
+  --color-sidebarRedesignItemTextSelected: var(--palette-purple600);
+  --color-sidebarRedesignItemBackgroundSelected: var(--palette-purple100);
+  --color-sidebarRedesignItemBackgroundFailed: var(--palette-red500);
+  --color-sidebarRedesignHeaderText: var(--palette-gray700);
+  --color-sidebarRedesignTextSubdued: var(--palette-navy600);
+  --color-sidebarRedesignTextMuted: var(--palette-navy400);
 
   --color-menuBackground: var(--palette-white);
   --color-menuItemBackground: var(--palette-navy50);
@@ -251,4 +279,41 @@
   --color-chartQual7: var(--palette-chartQual7);
   --color-chartQual8: var(--palette-chartQual8);
   --color-chartQual9: var(--palette-chartQual9);
+}
+
+/* Light-theme overrides scoped to the redesigned sidebar so the classic
+   sidebar keeps its navy styling while the newSidebarUI flag exists. This
+   block only remaps the sidebar token family onto the sidebarRedesign*
+   values declared at :root, where custom themes can override them. */
+.sidebar-redesign {
+  --color-sidebarBackground: var(--color-sidebarRedesignBackground);
+  --color-sidebarItemText: var(--color-sidebarRedesignItemText);
+  --color-sidebarItemBackgroundHover: var(
+    --color-sidebarRedesignItemBackgroundHover
+  );
+  --color-sidebarItemAccentSelected: var(
+    --color-sidebarRedesignItemAccentSelected
+  );
+  --color-sidebarItemTextSelected: var(--color-sidebarRedesignItemTextSelected);
+  --color-sidebarItemBackgroundSelected: var(
+    --color-sidebarRedesignItemBackgroundSelected
+  );
+  --color-sidebarItemBackgroundFailed: var(
+    --color-sidebarRedesignItemBackgroundFailed
+  );
+  --color-sidebarHeaderText: var(--color-sidebarRedesignHeaderText);
+  --color-sidebarTextSubdued: var(--color-sidebarRedesignTextSubdued);
+  --color-sidebarTextMuted: var(--color-sidebarRedesignTextMuted);
+  /* Derived tokens must be redeclared here: var() references in custom
+     properties resolve where the property is declared, so the :root
+     derivations would otherwise keep the classic navy values */
+  --color-sidebarTextFailed: var(--color-sidebarItemBackgroundFailed);
+  --color-sidebarBackgroundFailedSubtle: color-mix(
+    in srgb,
+    var(--color-sidebarItemBackgroundFailed) 16%,
+    transparent
+  );
+  --color-sidebarBorder: var(--color-sidebarItemBackgroundHover);
+  --color-sidebarControlBackground: var(--color-sidebarItemBackgroundHover);
+  --color-sidebarBrand: var(--color-sidebarItemAccentSelected);
 }

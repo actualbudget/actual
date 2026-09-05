@@ -128,6 +128,11 @@ export const styles: CSSProperties = {
       wordBreak: 'break-word',
     };
   },
+  ellipsisText: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
   tooltip: {
     padding: 5,
     ...shadowLarge,
