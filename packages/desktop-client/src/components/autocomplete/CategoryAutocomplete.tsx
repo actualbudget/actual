@@ -168,6 +168,7 @@ type CategoryAutocompleteProps = ComponentProps<
     props: ComponentPropsWithoutRef<typeof CategoryItem>,
   ) => ReactElement<typeof CategoryItem>;
   showHiddenCategories?: boolean;
+  footer?: ReactNode;
 };
 
 export function CategoryAutocomplete({
@@ -180,6 +181,7 @@ export function CategoryAutocomplete({
   renderCategoryItemGroupHeader,
   renderCategoryItem,
   showHiddenCategories,
+  footer,
   ...props
 }: CategoryAutocompleteProps) {
   const { data: { grouped: defaultCategoryGroups } = { grouped: [] } } =
@@ -244,6 +246,7 @@ export function CategoryAutocomplete({
           renderCategoryItem={renderCategoryItem}
           showHiddenItems={showHiddenCategories}
           showBalances={showBalances}
+          footer={footer}
         />
       )}
       {...props}

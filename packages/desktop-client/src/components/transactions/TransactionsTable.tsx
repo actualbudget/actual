@@ -29,6 +29,7 @@ import {
   SvgArrowDown,
   SvgArrowUp,
   SvgCheveronDown,
+  SvgTuning,
 } from '@actual-app/components/icons/v1';
 import {
   SvgAlertTriangle,
@@ -44,6 +45,7 @@ import {
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
@@ -124,6 +126,7 @@ import type {
   OnDragChangeCallback,
   OnDropCallback,
 } from '#hooks/useDragDrop';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { usePrevious } from '#hooks/usePrevious';
@@ -134,6 +137,7 @@ import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import type { SplitsExpandedContextValue } from '#hooks/useSplitsExpanded';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useTransactionRuleStatus } from '#hooks/useTransactionRuleStatus';
 import { pushModal } from '#modals/modalsSlice';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -1375,6 +1379,12 @@ const Transaction = memo(function Transaction({
 
   const runningBalance = !isTemporaryId(id) ? balance : balance + amount;
 
+  const isTransactionRulesUIEnabled = useFeatureFlag('transactionRulesUI');
+  const { ruleStatus, openEditRule, openCreateRule } = useTransactionRuleStatus(
+    transaction,
+    isTransactionRulesUIEnabled,
+  );
+
   // Ok this entire logic is a dirty, dirty hack.. but let me explain.
   // Problem: the split-error Popover (which has the buttons to distribute/add split)
   // renders before schedules are added to the table. After schedules finally load
@@ -1931,6 +1941,99 @@ const Transaction = memo(function Transaction({
                 onUpdate('category', value);
               }
             }}
+            unexposedContent={({ value, formatter }) => {
+              const label = formatter
+                ? formatter(value ?? '')
+                : String(value || '');
+              const hasRule =
+                isTransactionRulesUIEnabled && ruleStatus?.categorizingRule;
+              const isRuleApplied =
+                isTransactionRulesUIEnabled && ruleStatus?.isCategorizedByRule;
+              const isOverridden =
+                isTransactionRulesUIEnabled && ruleStatus?.isOverridden;
+
+              return (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <TextOneLine style={{ flex: 1, minWidth: 0 }}>
+                    {label}
+                  </TextOneLine>
+
+                  {hasRule && (
+                    <Tooltip
+                      content={
+                        <View style={{ padding: 8, maxWidth: 300, gap: 6 }}>
+                          <Text style={{ fontWeight: 600 }}>
+                            {isRuleApplied ? (
+                              <Trans>Categorized by rule</Trans>
+                            ) : (
+                              <Trans>Rule Overridden</Trans>
+                            )}
+                          </Text>
+                          {ruleStatus.ruleSummary && (
+                            <Text
+                              style={{
+                                fontSize: 11,
+                                color: theme.pageTextSubdued,
+                              }}
+                            >
+                              {ruleStatus.ruleSummary}
+                            </Text>
+                          )}
+                          <Button
+                            variant="primary"
+                            style={{
+                              height: 24,
+                              padding: '2px 8px',
+                              fontSize: 11,
+                              alignSelf: 'flex-start',
+                              marginTop: 2,
+                            }}
+                            onPress={() => {
+                              if (ruleStatus?.categorizingRule) {
+                                openEditRule(ruleStatus.categorizingRule);
+                              }
+                            }}
+                          >
+                            <Trans>Edit Rule</Trans>
+                          </Button>
+                        </View>
+                      }
+                      placement="bottom start"
+                      triggerProps={{ delay: 300, isDisabled: !selected }}
+                    >
+                      <View
+                        style={{
+                          marginLeft: 4,
+                          flexShrink: 0,
+                          cursor: selected ? 'pointer' : 'default',
+                          color: isRuleApplied
+                            ? theme.pageTextPositive
+                            : isOverridden
+                              ? theme.warningText
+                              : theme.pageTextSubdued,
+                        }}
+                        onClick={e => {
+                          if (selected && ruleStatus?.categorizingRule) {
+                            e.stopPropagation();
+                            openEditRule(ruleStatus.categorizingRule);
+                          }
+                        }}
+                      >
+                        <SvgTuning width={13} height={13} />
+                      </View>
+                    </Tooltip>
+                  )}
+                </View>
+              );
+            }}
           >
             {({
               onBlur,
@@ -1958,6 +2061,60 @@ const Transaction = memo(function Transaction({
                   onUpdate={onUpdate}
                   onSelect={onSave}
                   showHiddenCategories={showHiddenCategories}
+                  footer={
+                    isTransactionRulesUIEnabled ? (
+                      <View
+                        style={{
+                          padding: '6px 10px',
+                          borderTop: `1px solid ${theme.menuBorder}`,
+                          backgroundColor: theme.menuBackground,
+                        }}
+                      >
+                        <Button
+                          variant="bare"
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 6,
+                            color: theme.pageText,
+                            fontSize: 12,
+                            padding: '4px 8px',
+                            borderRadius: 4,
+                            width: '100%',
+                            justifyContent: 'flex-start',
+                          }}
+                          onPress={() => {
+                            if (ruleStatus?.categorizingRule) {
+                              openEditRule(ruleStatus.categorizingRule);
+                            } else {
+                              openCreateRule(transaction);
+                            }
+                          }}
+                        >
+                          <SvgTuning
+                            width={13}
+                            height={13}
+                            style={{
+                              color: ruleStatus?.categorizingRule
+                                ? ruleStatus.isCategorizedByRule
+                                  ? theme.pageTextPositive
+                                  : theme.warningText
+                                : theme.pageTextSubdued,
+                            }}
+                          />
+                          <Text>
+                            {ruleStatus?.categorizingRule ? (
+                              <Trans>Edit rule for this transaction...</Trans>
+                            ) : (
+                              <Trans>
+                                Create rule from this transaction...
+                              </Trans>
+                            )}
+                          </Text>
+                        </Button>
+                      </View>
+                    ) : undefined
+                  }
                 />
               </SheetNameProvider>
             )}

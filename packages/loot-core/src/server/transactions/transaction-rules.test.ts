@@ -5,6 +5,8 @@ import { loadMappings } from '#server/db/mappings';
 import { q } from '#shared/query';
 
 import {
+  checkTransactionRules,
+  checkTransactionsRules,
   conditionsToAQL,
   deleteRule,
   getProbableCategory,
@@ -1303,6 +1305,107 @@ describe('Learning categories', () => {
     const [rule] = getRules();
     expect(rule.conditions[0].field).toBe('imported_payee');
     expect(rule.actions[0].field).toBe('payee');
+  });
+
+  describe('Rule inspection and categorization status', () => {
+    it('detects when a transaction is categorized by an active rule', async () => {
+      await db.insertWithUUID('payees', { id: 'p1', name: 'Coffee Shop' });
+      await db.insertWithUUID('categories', { id: 'c1', name: 'Dining Out' });
+      await db.insertWithUUID('categories', { id: 'c2', name: 'Groceries' });
+
+      await db.insertWithUUID('rules', {
+        stage: null,
+        conditions_op: 'and',
+        conditions: JSON.stringify([
+          { op: 'is', field: 'payee', value: 'p1', type: 'id' },
+        ]),
+        actions: JSON.stringify([
+          { op: 'set', field: 'category', value: 'c1', type: 'id' },
+        ]),
+      });
+
+      await loadRules();
+
+      // Case 1: Transaction matches rule and is categorized as c1
+      const resApplied = await checkTransactionRules({
+        id: 't1',
+        account: 'a1',
+        payee: 'p1',
+        category: 'c1',
+        amount: -500,
+        date: '2026-09-01',
+      });
+      expect(resApplied.status).toBe('applied');
+      expect(resApplied.isCategorizedByRule).toBe(true);
+      expect(resApplied.isOverridden).toBe(false);
+      expect(resApplied.ruleCategoryId).toBe('c1');
+      expect(resApplied.categorizingRule).not.toBeNull();
+      expect(resApplied.categorizingRule.actions[0].value).toBe('c1');
+
+      // Case 2: Transaction matches rule, but has empty category (will-apply)
+      const resWillApply = await checkTransactionRules({
+        id: 't2',
+        account: 'a1',
+        payee: 'p1',
+        category: null,
+        amount: -500,
+        date: '2026-09-01',
+      });
+      expect(resWillApply.status).toBe('will-apply');
+      expect(resWillApply.isCategorizedByRule).toBe(false);
+      expect(resWillApply.isOverridden).toBe(false);
+      expect(resWillApply.ruleCategoryId).toBe('c1');
+
+      // Case 3: User manually changed category to c2 (overridden)
+      const resOverridden = await checkTransactionRules({
+        id: 't3',
+        account: 'a1',
+        payee: 'p1',
+        category: 'c2',
+        amount: -500,
+        date: '2026-09-01',
+      });
+      expect(resOverridden.status).toBe('overridden');
+      expect(resOverridden.isCategorizedByRule).toBe(false);
+      expect(resOverridden.isOverridden).toBe(true);
+      expect(resOverridden.ruleCategoryId).toBe('c1');
+
+      // Case 4: No rule for this payee
+      const resNone = await checkTransactionRules({
+        id: 't4',
+        account: 'a1',
+        payee: 'p_unknown',
+        category: 'c2',
+        amount: -500,
+        date: '2026-09-01',
+      });
+      expect(resNone.status).toBe('none');
+      expect(resNone.isCategorizedByRule).toBe(false);
+      expect(resNone.isOverridden).toBe(false);
+      expect(resNone.categorizingRule).toBeNull();
+
+      // Case 5: Batch check
+      const batchRes = await checkTransactionsRules([
+        {
+          id: 't1',
+          account: 'a1',
+          payee: 'p1',
+          category: 'c1',
+          amount: -500,
+          date: '2026-09-01',
+        },
+        {
+          id: 't3',
+          account: 'a1',
+          payee: 'p1',
+          category: 'c2',
+          amount: -500,
+          date: '2026-09-01',
+        },
+      ]);
+      expect(batchRes['t1'].isCategorizedByRule).toBe(true);
+      expect(batchRes['t3'].isOverridden).toBe(true);
+    });
   });
 
   // TODO: write tests for split transactions
