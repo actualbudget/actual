@@ -204,7 +204,7 @@ async function parseOFX(
   options: ParseFileOptions,
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
-  const contents = await fs.readFile(filepath);
+  const contents = await fs.readFile(filepath, 'binary');
 
   let data: Awaited<ReturnType<typeof ofx2json>>;
   try {
