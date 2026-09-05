@@ -701,7 +701,7 @@ export function FilterButton<T extends RuleConditionEntity>({
 
     if (error && error.conditionErrors.length > 0) {
       const field = titleFirst(mapField(cond.field));
-      alert(field + ': ' + getFieldError(error.conditionErrors[0]));
+      alert(field + ': ' + t(getFieldError(error.conditionErrors[0])));
     } else {
       // @ts-expect-error - fix me
       onApply(saved ? saved : cond);
