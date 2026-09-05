@@ -19,6 +19,10 @@ import {
   isEligibleAccountPage,
 } from './AccountCommandBar';
 
+vi.mock('#hooks/useFeatureFlag', () => ({
+  useFeatureFlag: () => false,
+}));
+
 function makeAccount(id: string, closed = false): AccountEntity {
   return {
     ...generateAccount('Checking'),
@@ -41,6 +45,7 @@ function makeLabels() {
     hideReconciledTransactions: 'Hide reconciled transactions',
     exportTransactions: 'Export',
     closeAccount: 'Close account',
+    accountGroup: 'Set account group',
   };
 }
 
@@ -79,6 +84,7 @@ function makeCommandOptions(overrides = {}) {
     onToggleSplits,
     onMenuSelect,
     labels: makeLabels(),
+    showAccountGroup: false,
     ...overrides,
   };
 }
@@ -192,6 +198,31 @@ describe('AccountCommandBar', () => {
     ]);
   });
 
+  it('registers account groups only when the sidebar feature is enabled', () => {
+    const options = makeCommandOptions();
+
+    expect(
+      createAccountCommandBarCommands(options).map(command => command.id),
+    ).not.toContain('account-group');
+    expect(
+      createAccountCommandBarCommands({
+        ...options,
+        showAccountGroup: true,
+      }).map(command => command.label),
+    ).toEqual([
+      'Add New',
+      'Import',
+      'Filter',
+      'Expand split transactions',
+      'Show balance chart',
+      'Manage table columns',
+      'Set account group',
+      'Show reconciled transactions',
+      'Export',
+      'Close account',
+    ]);
+  });
+
   it('delegates actions to existing account handlers and filter handle', () => {
     const options = makeCommandOptions();
     const commands = createAccountCommandBarCommands(options);
@@ -228,5 +259,16 @@ describe('AccountCommandBar', () => {
     expect(options.onMenuSelect).toHaveBeenCalledWith('close');
     expect(options.onAddTransaction).not.toHaveBeenCalled();
     expect(options.onImport).not.toHaveBeenCalled();
+  });
+
+  it('delegates account groups to the existing menu handler', () => {
+    const options = makeCommandOptions({ showAccountGroup: true });
+    const command = createAccountCommandBarCommands(options).find(
+      command => command.id === 'account-group',
+    );
+
+    act(() => command?.execute());
+
+    expect(options.onMenuSelect).toHaveBeenCalledWith('account-group');
   });
 });

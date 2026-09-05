@@ -6,6 +6,7 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useRegisterCommandBarCommands } from '#commandbar/commandBarRegistry';
 import type { FilterButtonHandle } from '#components/filters/FiltersMenu';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { SPECIAL_VIEW_IDS } from '#hooks/useTransactionTableColumns';
 
 type AccountPageMenuAction =
@@ -13,7 +14,8 @@ type AccountPageMenuAction =
   | 'manage-columns'
   | 'toggle-reconciled'
   | 'export'
-  | 'close';
+  | 'close'
+  | 'account-group';
 
 export type AccountCommandBarProps = {
   account?: AccountEntity;
@@ -54,6 +56,7 @@ type CommandLabels = {
   hideReconciledTransactions: string;
   exportTransactions: string;
   closeAccount: string;
+  accountGroup: string;
 };
 
 type AccountCommandBarCommandOptions = Omit<
@@ -61,6 +64,7 @@ type AccountCommandBarCommandOptions = Omit<
   'account' | 'accountId'
 > & {
   labels: CommandLabels;
+  showAccountGroup: boolean;
 };
 
 export function createAccountCommandBarCommands({
@@ -73,6 +77,7 @@ export function createAccountCommandBarCommands({
   onToggleSplits,
   onMenuSelect,
   labels,
+  showAccountGroup,
 }: AccountCommandBarCommandOptions) {
   return [
     {
@@ -108,6 +113,15 @@ export function createAccountCommandBarCommands({
       label: labels.manageTableColumns,
       execute: () => onMenuSelect('manage-columns'),
     },
+    ...(showAccountGroup
+      ? [
+          {
+            id: 'account-group',
+            label: labels.accountGroup,
+            execute: () => onMenuSelect('account-group'),
+          },
+        ]
+      : []),
     {
       id: 'toggle-reconciled',
       label: showReconciled
@@ -150,6 +164,7 @@ function EligibleAccountCommandBar({
   accountId: string;
 }) {
   const { t } = useTranslation();
+  const showAccountGroup = useFeatureFlag('newSidebarUI');
   const labels = useMemo(
     () => ({
       addNew: t('Add New'),
@@ -164,12 +179,18 @@ function EligibleAccountCommandBar({
       hideReconciledTransactions: t('Hide reconciled transactions'),
       exportTransactions: t('Export'),
       closeAccount: t('Close account'),
+      accountGroup: t('Set account group'),
     }),
     [t],
   );
   const commands = useMemo(
-    () => createAccountCommandBarCommands({ ...commandOptions, labels }),
-    [commandOptions, labels],
+    () =>
+      createAccountCommandBarCommands({
+        ...commandOptions,
+        labels,
+        showAccountGroup,
+      }),
+    [commandOptions, labels, showAccountGroup],
   );
 
   useRegisterCommandBarCommands(`account-page:${accountId}`, commands);
