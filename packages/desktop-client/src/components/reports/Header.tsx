@@ -1,5 +1,5 @@
 import type { ComponentProps, ReactNode } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { DateRangePicker } from '@actual-app/components/date-range-picker';
@@ -23,14 +23,8 @@ import { getFirstDayOfWeek } from '#components/select/getFirstDayOfWeek';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLanguage } from '#hooks/useLocale';
 
-import { getLiveRange } from './getLiveRange';
-import {
-  calculateTimeRange,
-  getFullFutureRange,
-  getFullRange,
-  getLatestRange,
-  getNextRange,
-} from './reportRanges';
+import { buildDateRangePresets } from './dateRangePresets';
+import { calculateTimeRange } from './reportRanges';
 
 type HeaderProps = {
   start: TimeFrame['start'];
@@ -106,115 +100,16 @@ export function Header({
   const language = useLanguage();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
-  // Live-range presets return day-shaped bounds; collapse them to months.
-  function liveRangeAsMonths(
-    rangeName: string,
-    includeCurrentInterval: boolean,
-    mode: TimeFrame['mode'],
-  ): [string, string, TimeFrame['mode']] {
-    const [rangeStart, rangeEnd] = getLiveRange(
-      rangeName,
-      earliestTransaction,
-      latestTransaction,
-      includeCurrentInterval,
-      firstDayOfWeekIdx,
-    );
-    return [
-      monthUtils.getMonth(rangeStart),
-      monthUtils.getMonth(rangeEnd),
-      mode,
-    ];
-  }
-
-  // The picker previews the range via getRange while staying open, then
-  // commits via onSelect on close so the preset's mode is preserved.
-  function makePreset(
-    key: string,
-    label: ReactNode,
-    getFullRange: () => readonly [string, string, TimeFrame['mode']],
-  ): DateRangePreset {
-    return {
-      key,
-      label,
-      getRange: () => {
-        const [rangeStart, rangeEnd] = getFullRange();
-        return [rangeStart, rangeEnd];
-      },
-      onSelect: () => onChangeDates(...getFullRange()),
-    };
-  }
-
-  const presets: DateRangePreset[] = showFutureRange
-    ? [
-        ...(show1Month
-          ? [
-              makePreset('next-month', <Trans>Next month</Trans>, () =>
-                getNextRange(0),
-              ),
-            ]
-          : []),
-        makePreset('next-3-months', <Trans>Next 3 months</Trans>, () =>
-          getNextRange(2),
-        ),
-        makePreset('next-6-months', <Trans>Next 6 months</Trans>, () =>
-          getNextRange(5),
-        ),
-        makePreset('next-year', <Trans>Next year</Trans>, () =>
-          getNextRange(11),
-        ),
-        makePreset('all-future', <Trans>All future</Trans>, () =>
-          getFullFutureRange(latestTransaction),
-        ),
-      ]
-    : [
-        ...(show1Month
-          ? [
-              makePreset('1-month', <Trans>1 month</Trans>, () =>
-                getLatestRange(0),
-              ),
-            ]
-          : []),
-        makePreset('3-months', <Trans>3 months</Trans>, () =>
-          getLatestRange(2),
-        ),
-        makePreset('6-months', <Trans>6 months</Trans>, () =>
-          getLatestRange(5),
-        ),
-        makePreset('1-year', <Trans>1 year</Trans>, () => getLatestRange(11)),
-        makePreset('year-to-date', <Trans>Year to date</Trans>, () =>
-          liveRangeAsMonths('Year to date', true, 'yearToDate'),
-        ),
-        makePreset('last-month', <Trans>Last month</Trans>, () =>
-          liveRangeAsMonths('Last month', false, 'lastMonth'),
-        ),
-        makePreset('last-year', <Trans>Last year</Trans>, () =>
-          liveRangeAsMonths('Last year', false, 'lastYear'),
-        ),
-        makePreset(
-          'prior-year-to-date',
-          <Trans>Prior year to date</Trans>,
-          () =>
-            liveRangeAsMonths('Prior year to date', false, 'priorYearToDate'),
-        ),
-        makePreset('current-quarter', <Trans>Current quarter</Trans>, () =>
-          liveRangeAsMonths('Current quarter', false, 'currentQuarter'),
-        ),
-        makePreset('previous-quarter', <Trans>Previous quarter</Trans>, () =>
-          liveRangeAsMonths('Previous quarter', false, 'previousQuarter'),
-        ),
-        // `allMonths` may still be empty before the report's async load
-        // finishes.
-        ...(allMonths.length
-          ? [
-              makePreset('all-time', <Trans>All time</Trans>, () =>
-                getFullRange(
-                  allMonths[allMonths.length - 1].name,
-                  allMonths[0].name,
-                ),
-              ),
-            ]
-          : []),
-      ];
+  const presets: DateRangePreset[] = buildDateRangePresets({
+    t,
+    onSelectRange: range => onChangeDates(...range),
+    earliestTransaction,
+    latestTransaction,
+    show1Month,
+    showFutureRange,
+    includeAllTime: allMonths.length > 0,
+    firstDayOfWeekIdx,
+  });
 
   return (
     <View
