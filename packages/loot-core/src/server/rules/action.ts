@@ -12,7 +12,7 @@ import {
 } from '#shared/formulas/customFunctions';
 import { currentDay, format, parseDate } from '#shared/months';
 import { FIELD_TYPES } from '#shared/rules';
-import { amountToInteger } from '#shared/util';
+import { amountToInteger, integerToAmount } from '#shared/util';
 
 import { assert } from './rule-utils';
 
@@ -33,6 +33,14 @@ const ACTION_OPS = [
   'delete-transaction',
 ] as const;
 type ActionOperator = (typeof ACTION_OPS)[number];
+
+// Transaction fields stored as integers that a formula reads as the amounts
+// shown in the app.
+const MONETARY_FORMULA_VARIABLES: ReadonlySet<string> = new Set([
+  'amount',
+  'balance',
+  'parent_amount',
+]);
 
 export class Action {
   field;
@@ -113,7 +121,7 @@ export class Action {
                   const error = `Formula for "${this.field}" must produce a numeric value. Got: ${JSON.stringify(result)}`;
                   object._ruleErrors.push(error);
                 } else {
-                  object[this.field] = numValue;
+                  object[this.field] = amountToInteger(numValue);
                 }
                 break;
               }
@@ -220,7 +228,7 @@ export class Action {
                   `Formula for split amount must produce a numeric value. Got: ${JSON.stringify(result)}`,
                 );
               } else {
-                object.amount = numValue;
+                object.amount = amountToInteger(numValue);
               }
             } catch (err) {
               object._ruleErrors.push(
@@ -291,6 +299,12 @@ export class Action {
     return variables;
   }
 
+  /**
+   * Evaluate a formula against a transaction. Monetary values are converted on
+   * the way in, so the formula both reads and returns the amounts a user sees
+   * in the app rather than the integers the transaction stores. Callers writing
+   * the result back to an amount field convert it with `amountToInteger`.
+   */
   executeFormulaSync(
     formula: string,
     transaction: Partial<TransactionForRules>,
@@ -302,13 +316,18 @@ export class Action {
     }
 
     try {
+      // The prefetched balances are integers; formulas work in amounts.
+      const balanceOfPrefetch = new Map<string, number>();
+      for (const [key, integerAmount] of transaction['_balanceOfPrefetched'] ??
+        []) {
+        balanceOfPrefetch.set(key, integerToAmount(integerAmount));
+      }
+
       hfInstance = HyperFormula.buildEmpty({
         licenseKey: 'gpl-v3',
         language: 'enUS',
         dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
-        context: {
-          balanceOfPrefetch: transaction['_balanceOfPrefetched'] ?? new Map(),
-        },
+        context: { balanceOfPrefetch },
       });
 
       const sheetName = hfInstance.addSheet('Sheet1');
@@ -333,15 +352,22 @@ export class Action {
         if (key === '_balanceOfPrefetched') {
           continue;
         }
+        const rawValue = fieldValues[key];
         let cellValue: string | number | boolean;
         if (
-          fieldValues[key] === undefined ||
-          fieldValues[key] === null ||
-          typeof fieldValues[key] === 'object'
+          rawValue === undefined ||
+          rawValue === null ||
+          typeof rawValue === 'object'
         ) {
           cellValue = '';
+        } else if (
+          MONETARY_FORMULA_VARIABLES.has(key) &&
+          typeof rawValue === 'number'
+        ) {
+          // Formulas work in amounts; the transaction stores integers.
+          cellValue = integerToAmount(rawValue);
         } else {
-          cellValue = fieldValues[key];
+          cellValue = rawValue;
         }
         hfInstance.addNamedExpression(key, cellValue);
       }
@@ -354,10 +380,6 @@ export class Action {
 
       if (cellValue && typeof cellValue === 'object' && 'type' in cellValue) {
         throw new Error(`Formula error: ${cellValue.message}`);
-      }
-
-      if (typeof cellValue === 'number') {
-        return amountToInteger(Math.round(cellValue * 100) / 100);
       }
 
       return cellValue;
