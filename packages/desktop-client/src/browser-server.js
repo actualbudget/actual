@@ -65,18 +65,6 @@ self.addEventListener('message', async event => {
         // let version = msg.version;
         const hash = msg.hash;
 
-        if (
-          !self.SharedArrayBuffer &&
-          !msg.isSharedArrayBufferOverrideEnabled
-        ) {
-          appInitFailureInterval = postMessageWithRetry({
-            type: 'app-init-failure',
-            SharedArrayBufferMissing: true,
-          });
-
-          return;
-        }
-
         // A single failed importScripts bricks the SharedWorker until
         // it's evicted, so retry in production too.
         await importScriptsWithRetry(

@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import {
   defaultDbPath,
   migrationsDir,
+  sqliteModulePath,
   sqlWasmPath,
 } from '@actual-app/core/default-filesystem';
 import babel from '@rolldown/plugin-babel';
@@ -112,7 +113,7 @@ async function extractWorkerHash(): Promise<string> {
 }
 
 // Serve loot-core worker assets with correct content types so the browser can
-// stream-compile the sql.js wasm module.
+// stream-compile the SQLite wasm module.
 const CONTENT_TYPES: Record<string, string> = {
   '.js': 'application/javascript',
   '.mjs': 'application/javascript',
@@ -129,10 +130,10 @@ async function stagePublicData(): Promise<void> {
   const migrationsDest = path.resolve(publicDataDir, 'migrations');
   await mkdir(publicDataDir, { recursive: true });
   await rm(migrationsDest, { recursive: true, force: true });
+  await rm(path.resolve(publicDir, 'sql-wasm.wasm'), { force: true });
   await Promise.all([
     cp(migrationsDir, migrationsDest, { recursive: true }),
     cp(defaultDbPath, path.resolve(publicDataDir, 'default-db.sqlite')),
-    cp(sqlWasmPath, path.resolve(publicDir, 'sql-wasm.wasm')),
   ]);
 
   const entries = await readdir(publicDataDir, {
@@ -188,8 +189,20 @@ const lootCoreBackend = (): Plugin => ({
 
     server.middlewares.use('/kcab', (req, res, next) => {
       const url = new URL(req.url ?? '/', 'http://localhost');
-      const filePath = path.join(lootCoreOutDir, url.pathname);
-      if (!filePath.startsWith(lootCoreOutDir + path.sep)) return next();
+      const sqliteAssetPath =
+        url.pathname === '/sqlite3.wasm'
+          ? sqlWasmPath
+          : url.pathname === '/sqlite3.js'
+            ? sqliteModulePath
+            : null;
+      const filePath =
+        sqliteAssetPath ?? path.join(lootCoreOutDir, url.pathname);
+      if (
+        sqliteAssetPath === null &&
+        !filePath.startsWith(lootCoreOutDir + path.sep)
+      ) {
+        return next();
+      }
       const stream = createReadStream(filePath);
       stream
         .on('open', () => {
@@ -239,10 +252,6 @@ const pluginsServiceAssets = (): Plugin => ({
 export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isVitest = process.env.VITEST === 'true';
-  const devHeaders = {
-    'Cross-Origin-Opener-Policy': 'same-origin',
-    'Cross-Origin-Embedder-Policy': 'require-corp',
-  };
 
   // Forward Netlify env variables
   if (process.env.REVIEW_ID) {
@@ -262,6 +271,10 @@ export default defineConfig(async ({ mode, command }) => {
         const hash = await extractWorkerHash();
         await rm(publicKcabDir, { recursive: true, force: true });
         await cp(lootCoreOutDir, publicKcabDir, { recursive: true });
+        await Promise.all([
+          cp(sqliteModulePath, path.resolve(publicKcabDir, 'sqlite3.js')),
+          cp(sqlWasmPath, path.resolve(publicKcabDir, 'sqlite3.wasm')),
+        ]);
         return hash;
       });
       const [, , hash] = await Promise.all([
@@ -317,7 +330,6 @@ export default defineConfig(async ({ mode, command }) => {
     },
     server: {
       host: true,
-      headers: devHeaders,
       port: +env.PORT || 5173,
       open: env.BROWSER
         ? ['chrome', 'firefox', 'edge', 'browser', 'browserPrivate'].includes(
