@@ -17,13 +17,16 @@ import {
   useUpdateAccountGroupMutation,
 } from '#account-groups';
 import { useContextMenu } from '#hooks/useContextMenu';
+import { DropHighlight, useDrop } from '#hooks/useDragDrop';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 import * as bindings from '#spreadsheet/bindings';
 
 import { CollapseChevron } from './CollapseChevron';
 import { CountPill } from './CountPill';
+import { dropTargets } from './dropTargets';
 import { SidebarBalance } from './SidebarBalance';
+import { useSidebarDragScope } from './SidebarDragScope';
 import { groupLabelStyle } from './styles';
 import { SyncErrorRollup } from './SyncErrorRollup';
 
@@ -49,6 +52,7 @@ export function AccountGroupHeader({
   const [isEditing, setIsEditing] = useState(false);
   const updateGroup = useUpdateAccountGroupMutation();
   const deleteGroup = useDeleteAccountGroupMutation();
+  const { dragType, onDrop } = useSidebarDragScope();
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   useContextMenu({
@@ -79,6 +83,12 @@ export function AccountGroupHeader({
           ),
       },
     ],
+  });
+
+  const { dropRef, dropProps, dropPos } = useDrop<{ id: string }>({
+    types: [dragType],
+    id: dropTargets.group(group.id),
+    onDrop,
   });
 
   if (isEditing) {
@@ -114,39 +124,42 @@ export function AccountGroupHeader({
   }
 
   return (
-    <Button
-      ref={triggerRef}
-      variant="bare"
-      aria-expanded={isOpen}
-      onPress={onToggle}
-      className={css({
-        '&[data-hovered], &[data-focus-visible]': {
-          backgroundColor: theme.sidebarItemBackgroundHover,
-        },
-      })}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        gap: spacing.xs,
-        paddingBlock: spacing.xs,
-        paddingLeft: spacing.xs,
-        paddingRight: spacing.sm,
-        borderRadius: radius.sm,
-        width: '100%',
-      }}
-    >
-      <CollapseChevron isOpen={isOpen} size={11} />
-      <Text style={{ ...groupLabelStyle, ...styles.ellipsisText }}>
-        {group.name}
-      </Text>
-      {!isOpen && <CountPill count={accountCount} />}
-      <SyncErrorRollup count={failedCount} />
-      <View style={{ flex: 1 }} />
-      <SidebarBalance
-        binding={bindings.accountGroupBalance(group.id, side === 'off')}
-        style={{ fontSize: 11, color: groupLabelStyle.color }}
-      />
-    </Button>
+    <View innerRef={dropRef} {...dropProps} style={{ position: 'relative' }}>
+      <DropHighlight pos={dropPos ? 'after' : null} />
+      <Button
+        ref={triggerRef}
+        variant="bare"
+        aria-expanded={isOpen}
+        onPress={onToggle}
+        className={css({
+          '&[data-hovered], &[data-focus-visible]': {
+            backgroundColor: theme.sidebarItemBackgroundHover,
+          },
+        })}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          gap: spacing.xs,
+          paddingBlock: spacing.xs,
+          paddingLeft: spacing.xs,
+          paddingRight: spacing.sm,
+          borderRadius: radius.sm,
+          width: '100%',
+        }}
+      >
+        <CollapseChevron isOpen={isOpen} size={11} />
+        <Text style={{ ...groupLabelStyle, ...styles.ellipsisText }}>
+          {group.name}
+        </Text>
+        {!isOpen && <CountPill count={accountCount} />}
+        <SyncErrorRollup count={failedCount} />
+        <View style={{ flex: 1 }} />
+        <SidebarBalance
+          binding={bindings.accountGroupBalance(group.id, side === 'off')}
+          style={{ fontSize: 11, color: groupLabelStyle.color }}
+        />
+      </Button>
+    </View>
   );
 }

@@ -14,6 +14,7 @@ import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
 import { Link } from '#components/common/Link';
 import { useContextMenu } from '#hooks/useContextMenu';
+import { DropHighlight, useDrag, useDrop } from '#hooks/useDragDrop';
 import { useUpdatedAccounts } from '#hooks/useUpdatedAccounts';
 import { openAccountCloseModal, pushModal } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
@@ -21,7 +22,9 @@ import * as bindings from '#spreadsheet/bindings';
 import { isTouchDevice } from '#util/isTouchDevice';
 
 import { AccountHoverCard } from './AccountHoverCard';
+import { dropTargets } from './dropTargets';
 import { SidebarBalance } from './SidebarBalance';
+import { useSidebarDragScope } from './SidebarDragScope';
 import { SyncDot, useSyncDotLabel } from './SyncDot';
 import type { SyncDotStatus } from './SyncDot';
 
@@ -42,6 +45,20 @@ export function AccountRow({
   const updatedAccounts = useUpdatedAccounts();
   const isUpdated = !isClosed && updatedAccounts.includes(account.id);
   const [isEditing, setIsEditing] = useState(false);
+  const { dragType, canDrag, onDragChange, onDrop } = useSidebarDragScope();
+
+  const { dragProps } = useDrag<{ id: string }>({
+    type: dragType,
+    canDrag: canDrag && !isEditing,
+    item: { id: account.id },
+    onDragChange,
+  });
+
+  const { dropRef, dropProps, dropPos } = useDrop<{ id: string }>({
+    types: [dragType],
+    id: dropTargets.account(account.id),
+    onDrop,
+  });
 
   const reopenAccount = useReopenAccountMutation();
   const updateAccount = useUpdateAccountMutation();
@@ -107,64 +124,77 @@ export function AccountRow({
       account={account}
       isDisabled={isContextMenuOpen || isEditing}
     >
-      <View innerRef={triggerRef} style={{ flexShrink: 0 }}>
-        <Link
-          variant="internal"
-          to={`/accounts/${account.id}`}
-          isDisabled={isEditing}
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing.sm,
-            paddingBlock: spacing.xs,
-            paddingInline: spacing.sm,
-            borderRadius: radius.sm,
-            fontSize: 13,
-            textDecoration: isClosed ? 'line-through' : 'none',
-            color: isClosed ? theme.sidebarTextMuted : theme.sidebarItemText,
-            ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
-            ...(isUpdated && {
-              fontWeight: 700,
-              color: theme.sidebarItemTextUpdated,
-            }),
-          }}
-          activeStyle={{
-            backgroundColor: theme.sidebarItemBackgroundSelected,
-            color: theme.sidebarItemTextSelected,
-            fontWeight: 'normal',
-          }}
-        >
-          {showSyncDot ? <SyncDot status={status} /> : null}
-          {isEditing ? (
-            <InitialFocus>
-              <Input
-                aria-label={t('Account name')}
-                style={{ flex: 1, padding: 0, fontSize: 13 }}
-                defaultValue={account.name}
-                onEnter={newAccountName => {
-                  if (newAccountName.trim() !== '') {
-                    updateAccount.mutate({
-                      account: { id: account.id, name: newAccountName },
-                    });
-                  }
-                  setIsEditing(false);
-                }}
-                onEscape={() => setIsEditing(false)}
-                onBlur={() => setIsEditing(false)}
+      <View
+        innerRef={dropRef}
+        {...dropProps}
+        style={{ flexShrink: 0, position: 'relative' }}
+      >
+        <DropHighlight pos={dropPos} />
+        <View innerRef={triggerRef}>
+          <View {...dragProps}>
+            <Link
+              variant="internal"
+              to={`/accounts/${account.id}`}
+              isDisabled={isEditing}
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: spacing.sm,
+                paddingBlock: spacing.xs,
+                paddingInline: spacing.sm,
+                borderRadius: radius.sm,
+                fontSize: 13,
+                textDecoration: isClosed ? 'line-through' : 'none',
+                color: isClosed
+                  ? theme.sidebarTextMuted
+                  : theme.sidebarItemText,
+                ':hover': {
+                  backgroundColor: theme.sidebarItemBackgroundHover,
+                },
+                ...(isUpdated && {
+                  fontWeight: 700,
+                  color: theme.sidebarItemTextUpdated,
+                }),
+              }}
+              activeStyle={{
+                backgroundColor: theme.sidebarItemBackgroundSelected,
+                color: theme.sidebarItemTextSelected,
+                fontWeight: 'normal',
+              }}
+            >
+              {showSyncDot ? <SyncDot status={status} /> : null}
+              {isEditing ? (
+                <InitialFocus>
+                  <Input
+                    aria-label={t('Account name')}
+                    style={{ flex: 1, padding: 0, fontSize: 13 }}
+                    defaultValue={account.name}
+                    onEnter={newAccountName => {
+                      if (newAccountName.trim() !== '') {
+                        updateAccount.mutate({
+                          account: { id: account.id, name: newAccountName },
+                        });
+                      }
+                      setIsEditing(false);
+                    }}
+                    onEscape={() => setIsEditing(false)}
+                    onBlur={() => setIsEditing(false)}
+                  />
+                </InitialFocus>
+              ) : (
+                <Text style={{ flex: 1, ...styles.ellipsisText }}>
+                  {account.name}
+                </Text>
+              )}
+              <Text style={styles.visuallyHidden}>{statusLabel}</Text>
+              <SidebarBalance
+                binding={bindings.accountBalance(account.id)}
+                style={{ fontSize: 12, color: 'inherit' }}
               />
-            </InitialFocus>
-          ) : (
-            <Text style={{ flex: 1, ...styles.ellipsisText }}>
-              {account.name}
-            </Text>
-          )}
-          <Text style={styles.visuallyHidden}>{statusLabel}</Text>
-          <SidebarBalance
-            binding={bindings.accountBalance(account.id)}
-            style={{ fontSize: 12, color: 'inherit' }}
-          />
-        </Link>
+            </Link>
+          </View>
+        </View>
       </View>
     </AccountHoverCard>
   );
