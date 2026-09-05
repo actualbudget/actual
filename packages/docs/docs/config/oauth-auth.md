@@ -63,6 +63,10 @@ If your OpenId provider does not supports discovery, use the following variables
 - `ACTUAL_OPENID_CLIENT_SECRET`: client_secret given by the provider
 - `ACTUAL_OPENID_SERVER_HOSTNAME`: Your Actual Server URL (so the provider redirects you to this)
 
+:::tip
+To keep the client secret out of your environment, set `ACTUAL_OPENID_CLIENT_SECRET_FILE` to the path of a file containing it instead. See [Configuring the Server](index.md).
+:::
+
 ### Configuring OpenID Using the UI
 
 Navigate into any Budget file, then in the Settings, click on _Start using OpenID_

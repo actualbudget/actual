@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
 
@@ -128,6 +129,25 @@ async function loadConfigFile(): Promise<ConfigFileContent> {
   return {};
 }
 
+/**
+ * Reads the value of a `<VAR>_FILE` environment variable, returning the
+ * contents of the file it points at and throwing if the file is not accessible.
+ */
+function readFileEnv(fileEnvVar: string): string | undefined {
+  const filePath = process.env[fileEnvVar];
+
+  if (filePath === undefined) return undefined;
+
+  try {
+    return readFileSync(filePath, 'utf-8').trim();
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Could not read ${fileEnvVar} from "${filePath}": ${reason}`,
+    );
+  }
+}
+
 function parseNonNegativeIntEnv(
   raw: string | undefined,
   source: string,
@@ -156,10 +176,14 @@ export async function resolveConfig(
     '';
 
   const password =
-    cliOpts.password ?? process.env.ACTUAL_PASSWORD ?? fileConfig.password;
+    cliOpts.password ??
+    readFileEnv('ACTUAL_PASSWORD_FILE') ??
+    process.env.ACTUAL_PASSWORD ??
+    fileConfig.password;
 
   const sessionToken =
     cliOpts.sessionToken ??
+    readFileEnv('ACTUAL_SESSION_TOKEN_FILE') ??
     process.env.ACTUAL_SESSION_TOKEN ??
     fileConfig.sessionToken;
 
@@ -174,6 +198,7 @@ export async function resolveConfig(
 
   const encryptionPassword =
     cliOpts.encryptionPassword ??
+    readFileEnv('ACTUAL_ENCRYPTION_PASSWORD_FILE') ??
     process.env.ACTUAL_ENCRYPTION_PASSWORD ??
     fileConfig.encryptionPassword;
 

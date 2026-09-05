@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url';
 import convict from 'convict';
 import createDebug from 'debug';
 
+import { applyFileEnv } from './config-file-env';
+
 const require = createRequire(import.meta.url);
 const debug = createDebug('actual:config');
 const debugSensitive = createDebug('actual-sensitive:config');
@@ -318,6 +320,17 @@ if (process.env.ACTUAL_CONFIG_PATH) {
 if (fs.existsSync(configPath)) {
   configSchema.loadFile(configPath);
   debug(`Config loaded`);
+}
+
+// `<VAR>_FILE` is applied after loadFile so it beats both config.json and the
+// plain environment variable, and before validate so the value is checked.
+for (const [fileEnvVar, settingPath] of [
+  ['ACTUAL_OPENID_CLIENT_SECRET_FILE', 'openId.client_secret'],
+  ['ACTUAL_GITHUB_TOKEN_FILE', 'github.token'],
+]) {
+  if (applyFileEnv(configSchema, fileEnvVar, settingPath)) {
+    debug(`Loaded ${settingPath} from ${fileEnvVar}`);
+  }
 }
 
 debug(`Validating config`);
