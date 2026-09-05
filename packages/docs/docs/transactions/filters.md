@@ -53,6 +53,10 @@ In the above Example we used the **Date is greater than** and **Date is less tha
 
 ![](/img/filtering/year-2.webp)
 
+:::tip
+For a date range that isn't a whole month or year, you don't have to stack a **greater than** and a **less than** filter. Select **is between** instead and enter a start and an end date, and Actual will find everything from one to the other. Both dates you enter are included in the results. The **Amount** filter offers **is between** too.
+:::
+
 ### Saving Filters
 
 To save a search, simply click on the **Unsaved filter** dropdown button above the transactions table and click **Save new filter**.

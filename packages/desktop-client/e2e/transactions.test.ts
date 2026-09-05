@@ -54,6 +54,57 @@ test.describe('Transactions', () => {
       await expect(page).toMatchThemeScreenshots();
     });
 
+    test('by date range', async () => {
+      const filterTooltip = await accountPage.filterBy('Date');
+      await filterTooltip.selectOp('is between');
+
+      // A range far in the past matches nothing. Screenshot the editor only
+      // once the bounds are filled in — a freshly picked `is between` seeds
+      // both inputs with today's date, which would date-stamp the snapshot.
+      await filterTooltip.fillRange('01/01/2000', '01/02/2000');
+      await expect(filterTooltip.locator).toMatchThemeScreenshots();
+
+      await filterTooltip.applyButton.click();
+
+      // Both bounds are kept, and shown on the filter pill
+      await expect(
+        page.getByRole('button', {
+          name: 'date is between 01/01/2000 and 01/02/2000',
+        }),
+      ).toBeVisible();
+      await expect(accountPage.transactionTable).toHaveText('No transactions');
+      await expect(page).toMatchThemeScreenshots();
+
+      // Widening the range brings the transactions back
+      await page.getByRole('button', { name: /^date is between/ }).click();
+      const editTooltip = page.getByTestId('filters-menu-tooltip');
+      await editTooltip.getByRole('textbox').nth(1).fill('12/31/2099');
+      await editTooltip.getByRole('textbox').nth(1).blur();
+      await editTooltip.getByRole('button', { name: 'Apply' }).click();
+
+      await expect(accountPage.transactionTableRow.first()).toBeVisible();
+    });
+
+    test('by amount range', async () => {
+      const filterTooltip = await accountPage.filterBy('Amount');
+      await filterTooltip.selectOp('is between');
+
+      // A range that no transaction can fall into
+      await filterTooltip.fillRange('1000000.00', '1000001.00');
+      await expect(filterTooltip.locator).toMatchThemeScreenshots();
+
+      await filterTooltip.applyButton.click();
+
+      // Both bounds are kept, and shown on the filter pill
+      await expect(
+        page.getByRole('button', {
+          name: 'amount is between 1,000,000.00 and 1,000,001.00',
+        }),
+      ).toBeVisible();
+      await expect(accountPage.transactionTable).toHaveText('No transactions');
+      await expect(page).toMatchThemeScreenshots();
+    });
+
     test('by category', async () => {
       const filterTooltip = await accountPage.filterBy('Category');
       await expect(filterTooltip.locator).toMatchThemeScreenshots();
