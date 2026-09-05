@@ -26,6 +26,7 @@ type ServerContextValue = {
   url: string | null;
   version: string;
   multiuserEnabled: boolean;
+  totpSupported: boolean;
   availableLoginMethods: LoginMethod[];
   setURL: (
     url: string,
@@ -40,6 +41,7 @@ const ServerContext = createContext<ServerContextValue>({
   url: null,
   version: '',
   multiuserEnabled: false,
+  totpSupported: false,
   availableLoginMethods: [],
   setURL: () => Promise.reject(new Error('ServerContext not initialized')),
   refreshLoginMethods: () =>
@@ -60,6 +62,10 @@ export const useMultiuserEnabled = () => {
   const loginMethod = useLoginMethod();
   return multiuserEnabled && loginMethod === 'openid';
 };
+
+// False against servers that predate two-factor support, so the client does not
+// offer controls backed by endpoints that are not there.
+export const useTotpSupported = () => useContext(ServerContext).totpSupported;
 
 export const useLoginMethod = () => {
   const availableLoginMethods = useContext(ServerContext).availableLoginMethods;
@@ -98,6 +104,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
   const [serverURL, setServerURL] = useState('');
   const [version, setVersion] = useState('');
   const [multiuserEnabled, setMultiuserEnabled] = useState(false);
+  const [totpSupported, setTotpSupported] = useState(false);
   const [availableLoginMethods, setAvailableLoginMethods] = useState<
     LoginMethod[]
   >([]);
@@ -154,6 +161,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
           if ('hasServer' in data && data.hasServer) {
             setAvailableLoginMethods(data.availableLoginMethods || []);
             setMultiuserEnabled(data.multiuser || false);
+            setTotpSupported(data.supportsTotp || false);
           }
         },
       );
@@ -178,6 +186,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
       value={{
         url: serverURL,
         multiuserEnabled,
+        totpSupported,
         availableLoginMethods,
         setURL,
         version: version ? `v${version}` : 'N/A',

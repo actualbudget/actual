@@ -38,6 +38,7 @@ import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
+import { TotpSettings } from './TotpSettings';
 import { AdvancedToggle, Setting } from './UI';
 
 function About() {
@@ -240,6 +241,7 @@ export function Settings() {
         {isCurrencyExperimentalEnabled && <CurrencySettings />}
         <LanguageSettings />
         <AuthSettings />
+        <TotpSettings />
         <EncryptionSettings />
         <BudgetTypeSettings />
         {isElectron() && <Backups />}

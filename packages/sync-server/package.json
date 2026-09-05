@@ -22,6 +22,7 @@
     "#account-db": "./src/account-db.js",
     "#load-config": "./src/load-config.js",
     "#migrations": "./src/migrations.ts",
+    "#accounts/totp": "./src/accounts/totp.ts",
     "#accounts/*": "./src/accounts/*.js",
     "#app-enablebanking/services/*": "./src/app-enablebanking/services/*.ts",
     "#app-enablebanking/utils/*": "./src/app-enablebanking/utils/*.ts",
@@ -50,6 +51,7 @@
       "#account-db": "./build/src/account-db.js",
       "#load-config": "./build/src/load-config.js",
       "#migrations": "./build/src/migrations.js",
+      "#accounts/totp": "./build/src/accounts/totp.js",
       "#accounts/*": "./build/src/accounts/*.js",
       "#app-enablebanking/services/*": "./build/src/app-enablebanking/services/*.js",
       "#app-enablebanking/utils/*": "./build/src/app-enablebanking/utils/*.js",
@@ -85,6 +87,7 @@
     "db:test-downgrade": "yarn build && cross-env NODE_ENV=test node build/scripts/run-migrations.js down",
     "reset-password": "yarn build && node build/scripts/reset-password.js",
     "disable-openid": "yarn build && node build/scripts/disable-openid.js",
+    "disable-totp": "yarn build && node build/scripts/disable-totp.js",
     "health-check": "yarn build && node build/scripts/health-check.js"
   },
   "dependencies": {
@@ -105,6 +108,7 @@
     "jws": "^4.0.1",
     "migrate": "^2.1.0",
     "openid-client": "^5.7.1",
+    "otpauth": "^9.5.1",
     "pluggy-sdk": "^0.89.0",
     "uuid": "^14.0.1",
     "winston": "^3.19.0"

@@ -646,6 +646,18 @@ export type Modal =
       };
     }
   | {
+      name: 'enable-totp';
+      options: {
+        onSave?: () => void;
+      };
+    }
+  | {
+      name: 'disable-totp';
+      options: {
+        onSave?: () => void;
+      };
+    }
+  | {
       name: 'confirm-unlink-account';
       options: {
         accountName: string;
