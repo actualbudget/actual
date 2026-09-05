@@ -76,6 +76,7 @@
     "#components/reports/useDashboardWidgetCopyMenu": "./src/components/reports/useDashboardWidgetCopyMenu.ts",
     "#components/reports/useReport": "./src/components/reports/useReport.ts",
     "#components/reports/util": "./src/components/reports/util.ts",
+    "#components/rules/rule-helpers": "./src/components/rules/rule-helpers.ts",
     "#components/schedules": "./src/components/schedules/index.tsx",
     "#components/schedules/schedule-edit-utils": "./src/components/schedules/schedule-edit-utils.ts",
     "#components/select/getFirstDayOfWeek": "./src/components/select/getFirstDayOfWeek.ts",

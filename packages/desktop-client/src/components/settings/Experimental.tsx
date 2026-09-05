@@ -165,6 +165,12 @@ export function ExperimentalFeatures() {
       primaryAction={
         expanded ? (
           <View style={{ gap: '1em' }}>
+            <FeatureToggle flag="transactionRulesUI">
+              <Trans>
+                Transaction rule visibility and actions in create/edit (Desktop
+                & Mobile)
+              </Trans>
+            </FeatureToggle>
             <FeatureToggle flag="goalTemplatesEnabled">
               <Trans>Goal templates</Trans>
             </FeatureToggle>
