@@ -232,6 +232,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Monte Carlo Analysis Report</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="automaticBackups">
+              <Trans>Automatic backups (web app)</Trans>
+            </FeatureToggle>
             <FeatureToggle
               flag="enableBanking"
               feedbackLink="https://github.com/actualbudget/actual/issues/7799"

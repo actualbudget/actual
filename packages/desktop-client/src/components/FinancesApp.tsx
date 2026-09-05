@@ -12,6 +12,7 @@ import * as undo from '@actual-app/core/platform/client/undo';
 import { getLatestAppVersion, sync } from '#app/appSlice';
 import { ProtectedRoute } from '#auth/ProtectedRoute';
 import { Permissions } from '#auth/types';
+import { useBackupScheduler } from '#hooks/useBackupScheduler';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
@@ -91,6 +92,7 @@ function RouterBehaviors() {
 export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
   useMetaThemeColor(theme.mobileViewTheme);
+  useBackupScheduler();
 
   const location = useLocation();
   const dispatch = useDispatch();
