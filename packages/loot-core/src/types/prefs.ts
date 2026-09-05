@@ -142,6 +142,8 @@ export type GlobalPrefs = Partial<{
     port?: number;
   };
   notifyWhenUpdateIsAvailable: boolean;
+  lastSeenNewsDate: string; // YYYY-MM-DD of the newest news entry the user has seen on this device
+  showNewsFeed: boolean; // Whether in-app notifications (bell, Notifications page, release toast) are shown.
 }>;
 
 // GlobalPrefsJson represents what's saved in the global-store.json file
@@ -170,6 +172,8 @@ export type GlobalPrefsJson = Partial<{
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
   syncServerConfig?: GlobalPrefs['syncServerConfig'];
   notifyWhenUpdateIsAvailable?: GlobalPrefs['notifyWhenUpdateIsAvailable'];
+  lastSeenNewsDate?: GlobalPrefs['lastSeenNewsDate'];
+  showNewsFeed?: GlobalPrefs['showNewsFeed'];
 }>;
 
 export type AuthMethods = 'password' | 'openid';

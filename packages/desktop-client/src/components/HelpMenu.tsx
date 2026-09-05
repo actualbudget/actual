@@ -30,6 +30,8 @@ const getPageDocs = (page: string) => {
       return 'https://actualbudget.org/docs/budgeting/rules';
     case '/settings':
       return 'https://actualbudget.org/docs/settings';
+    case '/notifications':
+      return 'https://actualbudget.org/docs/notifications';
     default:
       // All pages under /accounts, plus any missing pages
       return 'https://actualbudget.org/docs';

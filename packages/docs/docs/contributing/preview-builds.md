@@ -12,6 +12,8 @@ Three previews are deployed per PR:
 
 The exact URLs are also posted as a comment on each PR by the Netlify bot.
 
+The demo preview serves its in-app notifications feed from its own build (`packages/desktop-client/src/data/news.json` as committed on the PR branch), so a blog post added in the PR shows up in the app preview once CI has regenerated the feed. When running locally, set `REACT_APP_NEWS_FEED_URL` in a `.env` file in `packages/desktop-client` to point the app at any other feed URL.
+
 :::info
 There is no sync server on preview builds so when asked "Where's the server" select "Don't use a server." Alternatively, you can use your own self-hosted server. You should exercise caution when using a server with preview builds because they are much more likely to have bugs that could damage your budget. Consider running a separate local server for preview builds.
 :::

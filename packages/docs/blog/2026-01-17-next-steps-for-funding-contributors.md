@@ -4,6 +4,7 @@ description: Expanding upon our successful contributor compensation system, we'r
 date: 2026-01-17T10:00
 slug: next-steps-for-funding-contributors
 tags: [announcement]
+in_app_notification: true
 hide_table_of_contents: false
 authors: MatissJanis
 ---

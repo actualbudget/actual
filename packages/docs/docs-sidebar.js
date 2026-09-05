@@ -198,6 +198,7 @@ const sidebars = {
         },
         'settings/index',
         'custom-themes',
+        'notifications',
         {
           type: 'category',
           label: 'Experimental Features',
