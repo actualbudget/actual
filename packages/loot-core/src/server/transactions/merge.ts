@@ -15,9 +15,9 @@ export async function mergeTransactions(
 ): Promise<TransactionEntity['id']> {
   // make sure all values have ids
   const txIds = transactions?.map(x => x?.id).filter(Boolean) || [];
-  if (txIds.length !== 2) {
+  if (txIds.length !== 2 || new Set(txIds).size !== 2) {
     throw new Error(
-      'Merging is only possible with 2 transactions, but found ' +
+      'Merging is only possible with 2 distinct transactions, but found ' +
         JSON.stringify(transactions),
     );
   }
