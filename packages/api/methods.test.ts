@@ -970,7 +970,7 @@ describe('API CRUD operations', () => {
     );
     expect(before).toHaveLength(2);
 
-    const keptId = await api.mergeTransactions(before.map(t => t.id));
+    const keptId = await api.mergeTransactions([before[0].id, before[1].id]);
 
     const after = await api.getTransactions(
       accountId,

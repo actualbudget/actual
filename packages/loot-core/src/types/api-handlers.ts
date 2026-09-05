@@ -135,7 +135,7 @@ export type ApiHandlers = {
   }) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['deleted']>;
 
   'api/transactions-merge': (arg: {
-    ids: TransactionEntity['id'][];
+    ids: [TransactionEntity['id'], TransactionEntity['id']];
   }) => Promise<TransactionEntity['id']>;
 
   'api/sync': () => Promise<void>;
