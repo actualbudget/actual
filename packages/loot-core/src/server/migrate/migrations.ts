@@ -38,7 +38,7 @@ export function getMigrationsDir(): string {
   return MIGRATIONS_DIR;
 }
 
-function getMigrationId(name: string): number {
+export function getMigrationId(name: string): number {
   return parseInt(name.match(/^(\d)+/)[0]);
 }
 
@@ -143,13 +143,36 @@ export async function applyMigration(
   ]);
 }
 
+// Migrations with ids after this point are additive-only, enforced by
+// additive-migrations.test.ts. A database containing unknown applied
+// ids from that era was touched by a newer release — including one
+// whose migration id happens to sort below ids this version already
+// knows (authored earlier, merged later) — and is still safe to open.
+// Unknown ids from before this point indicate a corrupt or
+// incompatible database.
+export const ADDITIVE_ONLY_CUTOFF = 1780606215001;
+
 function checkDatabaseValidity(
   appliedIds: number[],
   available: string[],
 ): void {
-  if (appliedIds.length > available.length) {
+  // A migrated database with no migrations on disk means the install is
+  // broken — without this guard every applied id would count as
+  // "unknown but tolerable" below and the checks would pass vacuously
+  if (available.length === 0 && appliedIds.length > 0) {
+    logger.error('No migrations found on disk for a migrated database:', {
+      appliedIds,
+    });
+    throw new Error('out-of-sync-migrations');
+  }
+
+  const allAvailableIds = available.map(getMigrationId);
+  const availableIds = new Set(allAvailableIds);
+  const unknownIds = appliedIds.filter(id => !availableIds.has(id));
+
+  if (unknownIds.some(id => id <= ADDITIVE_ONLY_CUTOFF)) {
     logger.error(
-      'Database is out of sync with migrations (index past available):',
+      'Database is out of sync with migrations (unknown migration from before the additive-only era):',
       {
         appliedIds,
         available,
@@ -158,8 +181,53 @@ function checkDatabaseValidity(
     throw new Error('out-of-sync-migrations');
   }
 
-  for (let i = 0; i < appliedIds.length; i++) {
-    if (appliedIds[i] !== getMigrationId(available[i])) {
+  const knownAppliedIds = appliedIds.filter(id => availableIds.has(id));
+
+  // A database touched by a newer version must already contain every
+  // migration this app knows (append-only migrations guarantee the newer
+  // version knew them all). A known migration missing next to an
+  // unknown one means the database is corrupt — running it now, after
+  // later migrations already ran, would be unsafe.
+  if (unknownIds.length > 0 && knownAppliedIds.length !== available.length) {
+    logger.error(
+      'Database is out of sync with migrations (missing known migration next to an unknown one):',
+      {
+        appliedIds,
+        available,
+      },
+    );
+    throw new Error('out-of-sync-migrations');
+  }
+
+  // Pre-cutoff migrations shipped strictly append-only, so the applied
+  // ones must form an ordered prefix of the available list — a gap
+  // there means the database is corrupt. Post-cutoff, a gap is just a
+  // pending interleaved-id migration that `migrate` applies next.
+  const preCutoffAvailableIds = allAvailableIds.filter(
+    id => id <= ADDITIVE_ONLY_CUTOFF,
+  );
+  const preCutoffAppliedIds = knownAppliedIds.filter(
+    id => id <= ADDITIVE_ONLY_CUTOFF,
+  );
+
+  // A post-cutoff migration only ever runs after the entire pre-cutoff
+  // chain, so one applied next to a missing pre-cutoff migration means
+  // the database is corrupt
+  if (
+    appliedIds.some(id => id > ADDITIVE_ONLY_CUTOFF) &&
+    preCutoffAppliedIds.length !== preCutoffAvailableIds.length
+  ) {
+    logger.error(
+      'Database is out of sync with migrations (missing pre-cutoff migration next to an applied post-cutoff one):',
+      {
+        appliedIds,
+        available,
+      },
+    );
+    throw new Error('out-of-sync-migrations');
+  }
+  for (let i = 0; i < preCutoffAppliedIds.length; i++) {
+    if (preCutoffAppliedIds[i] !== preCutoffAvailableIds[i]) {
       logger.error(
         'Database is out of sync with migrations (migration id mismatch):',
         {

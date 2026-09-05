@@ -1,4 +1,5 @@
 import { listen, send } from '@actual-app/core/platform/client/connection';
+import type { ServerEvents } from '@actual-app/core/types/server-events';
 import type { QueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 
@@ -16,6 +17,34 @@ import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
+
+// Notifications for sync events that can fire during budget load
+const syncNotifications: Partial<
+  Record<ServerEvents['sync-event']['type'], () => Notification>
+> = {
+  'deferred-messages': () => ({
+    id: 'deferred-messages',
+    type: 'message',
+    // Sticky: firing during budget load, it would otherwise
+    // auto-dismiss before the user can read it
+    sticky: true,
+    title: t('Update available'),
+    message: t(
+      'Some synced changes were made with a newer version of Actual. ' +
+        'They will show up here once you update this app.',
+    ),
+  }),
+  'dropped-messages': () => ({
+    id: 'dropped-messages',
+    type: 'warning',
+    sticky: true,
+    title: t('Some changes could not be applied'),
+    message: t(
+      'Some changes made on another device could not be applied ' +
+        'on this device, so your devices may show different values.',
+    ),
+  }),
+};
 
 export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
   // TODO: Should this run on mobile too?
@@ -38,7 +67,20 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
 
   const unlistenSuccess = listen('sync-event', event => {
     const prefs = store.getState().prefs.local;
-    if (!prefs || !prefs.id) {
+    const hasBudget = Boolean(prefs && prefs.id);
+
+    const makeNotification = syncNotifications[event.type];
+    if (makeNotification) {
+      // Accept these while a budget is loaded OR still loading (prefs
+      // arrive only after the load completes); with neither, the user
+      // has left the budget and the notification would lack context
+      if (hasBudget || store.getState().app.loadingText != null) {
+        store.dispatch(addNotification({ notification: makeNotification() }));
+      }
+      return;
+    }
+
+    if (!hasBudget) {
       // Do nothing if no budget is loaded
       return;
     }
