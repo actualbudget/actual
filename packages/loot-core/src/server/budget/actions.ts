@@ -585,7 +585,16 @@ export async function transferAvailable({
   category: string;
 }): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
-  const leftover = await getSheetValue(sheetName, 'to-budget');
+  const toBudgetMode = db.firstSync<Pick<db.DbPreference, 'value'>>(
+    `SELECT value FROM preferences WHERE id = ?`,
+    ['toBudgetMode'],
+  );
+  const availableCell =
+    toBudgetMode?.value === 'include-future' &&
+    month >= monthUtils.currentMonth()
+      ? 'ready-to-assign'
+      : 'to-budget';
+  const leftover = await getSheetValue(sheetName, availableCell);
   amount = Math.max(Math.min(amount, leftover), 0);
 
   const budgeted = await getSheetValue(sheetName, 'budget-' + category);

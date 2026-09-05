@@ -25,6 +25,7 @@ import type {
 import { css, cx } from '@emotion/css';
 
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { useToBudgetMode } from '#components/budget/envelope/useToBudgetMode';
 import { makeAmountFullStyle } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
 import { useCategories } from '#hooks/useCategories';
@@ -373,7 +374,8 @@ function CategoryItem({
   >(balanceBinding);
 
   const isToBudgetItem = item.id === 'to-budget';
-  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget);
+  const { toBudgetBinding } = useToBudgetMode();
+  const toBudget = useEnvelopeSheetValue(toBudgetBinding);
 
   return (
     <button

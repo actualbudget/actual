@@ -221,6 +221,8 @@ async function envelopeBudgetMonth({ month }: { month: string }) {
     value('buffered'),
     value('total-budgeted'),
     value('to-budget'),
+    value('ready-to-assign'),
+    value('assigned-in-future'),
 
     value('from-last-month'),
     value('total-income'),

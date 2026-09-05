@@ -8,8 +8,8 @@ import { CoverMenu } from '#components/budget/envelope/CoverMenu';
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
 import { HoldMenu } from '#components/budget/envelope/HoldMenu';
 import { TransferMenu } from '#components/budget/envelope/TransferMenu';
+import { useToBudgetMode } from '#components/budget/envelope/useToBudgetMode';
 import { useFormat } from '#hooks/useFormat';
-import { envelopeBudget } from '#spreadsheet/bindings';
 
 import { ToBudgetAmount } from './ToBudgetAmount';
 import { ToBudgetMenu } from './ToBudgetMenu';
@@ -33,6 +33,7 @@ export function ToBudget({
   const [menuStep, _setMenuStep] = useState<string>('actions');
   const triggerRef = useRef(null);
   const format = useFormat();
+  const { toBudgetBinding } = useToBudgetMode(month);
 
   const ref = useRef<HTMLSpanElement>(null);
   const setMenuStep = useCallback(
@@ -43,7 +44,7 @@ export function ToBudget({
     [ref, _setMenuStep],
   );
   const availableValue = useEnvelopeSheetValue({
-    name: envelopeBudget.toBudget,
+    name: toBudgetBinding,
     value: 0,
   });
   if (typeof availableValue !== 'number' && availableValue !== null) {
@@ -71,6 +72,7 @@ export function ToBudget({
     <>
       <View ref={triggerRef}>
         <ToBudgetAmount
+          month={month}
           onClick={() => {
             resetPosition();
             setMenuOpen(true);
