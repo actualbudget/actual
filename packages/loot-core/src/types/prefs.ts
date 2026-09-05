@@ -42,6 +42,9 @@ export type SyncedPrefs = Partial<
     | `transaction-table-columns-${string}`
     | `show-group-${string}`
     | 'sync-transfer-date'
+    // Number of minutes between automatic bank syncs. '0' (or unset) disables
+    // automatic syncing.
+    | 'bank-sync-interval'
     // TODO: pull from src/components/modals/ImportTransactions.js
     | `parse-date-${string}-${'csv' | 'qif'}`
     | `import-reimport-deleted-${string}`
@@ -106,6 +109,12 @@ export type LocalPrefs = Partial<{
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
   'mobile.bankSyncProvidersCollapsed': boolean;
+  /**
+   * Timestamp (epoch ms) of the last automatic bank sync attempted by this
+   * device. Tracked locally so a failing account can't cause repeated
+   * back-to-back sync attempts.
+   */
+  'bankSync.lastAutomaticRun': number;
 }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;
