@@ -17,12 +17,14 @@ import { View } from '@actual-app/components/view';
 import type { MonteCarloAllocationPreset } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
+import { FinancialText } from '#components/FinancialText';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import { POT_COLUMNS } from '#components/reports/reports/monte-carlo/MonteCarloPotsTableHeader';
 import {
   ALLOCATION_PRESETS,
+  getHistoricalPresetStats,
   MAX_AMOUNT,
   MAX_ANNUAL_FEE_RATE,
   MAX_WITHDRAWAL_TAX_RATE,
@@ -68,10 +70,13 @@ export function MonteCarloPotConfiguration({
   const { data: accounts = [] } = useAccounts();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Historical models derive this pot's returns from its allocation mix;
-  // the manual return/volatility only apply to Custom pots there
-  const isManualReturnDisabled =
-    usesHistoricalReturns && pot.allocationPreset !== 'custom';
+  // Historical models derive this pot's returns from its allocation mix,
+  // so preset pots show the mix's measured history instead of editable
+  // assumptions; the manual return/volatility only apply to Custom pots
+  const historicalPresetStats =
+    usesHistoricalReturns && pot.allocationPreset !== 'custom'
+      ? getHistoricalPresetStats(pot.allocationPreset)
+      : null;
 
   // A linked account that has since been closed or deleted isn't in the
   // open-accounts list; keep it represented so the stored link doesn't
@@ -249,20 +254,32 @@ export function MonteCarloPotConfiguration({
           style={{ minWidth: POT_COLUMNS.expectedReturn }}
           truncate={false}
         >
-          <MonteCarloNumberInput
-            value={pot.expectedReturnMean}
-            aria-label={t('Expected return (%)')}
-            scale={100}
-            min={-100}
-            max={100}
-            disabled={isManualReturnDisabled}
-            onCommit={newValue =>
-              onPotChange({
-                expectedReturnMean: newValue ?? 0,
-                allocationPreset: 'custom',
-              })
-            }
-          />
+          {historicalPresetStats != null ? (
+            // Historical models take real blended returns for preset
+            // pots, so show what the mix actually measured rather than
+            // the preset's ignored assumption
+            <Text style={{ color: theme.tableText }}>
+              <FinancialText as="span">
+                {t('{{value}} (historical)', {
+                  value: `${(historicalPresetStats.mean * 100).toFixed(1)}%`,
+                })}
+              </FinancialText>
+            </Text>
+          ) : (
+            <MonteCarloNumberInput
+              value={pot.expectedReturnMean}
+              aria-label={t('Expected return (%)')}
+              scale={100}
+              min={-100}
+              max={100}
+              onCommit={newValue =>
+                onPotChange({
+                  expectedReturnMean: newValue ?? 0,
+                  allocationPreset: 'custom',
+                })
+              }
+            />
+          )}
         </Field>
 
         <Field
@@ -270,20 +287,29 @@ export function MonteCarloPotConfiguration({
           style={{ minWidth: POT_COLUMNS.volatility }}
           truncate={false}
         >
-          <MonteCarloNumberInput
-            value={pot.returnStdDev}
-            aria-label={t('Volatility (std dev %)')}
-            scale={100}
-            min={0}
-            max={100}
-            disabled={isManualReturnDisabled}
-            onCommit={newValue =>
-              onPotChange({
-                returnStdDev: newValue ?? 0,
-                allocationPreset: 'custom',
-              })
-            }
-          />
+          {historicalPresetStats != null ? (
+            <Text style={{ color: theme.tableText }}>
+              <FinancialText as="span">
+                {t('{{value}} (historical)', {
+                  value: `${(historicalPresetStats.stdDev * 100).toFixed(1)}%`,
+                })}
+              </FinancialText>
+            </Text>
+          ) : (
+            <MonteCarloNumberInput
+              value={pot.returnStdDev}
+              aria-label={t('Volatility (std dev %)')}
+              scale={100}
+              min={0}
+              max={100}
+              onCommit={newValue =>
+                onPotChange({
+                  returnStdDev: newValue ?? 0,
+                  allocationPreset: 'custom',
+                })
+              }
+            />
+          )}
         </Field>
 
         <Field

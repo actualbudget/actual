@@ -74,6 +74,12 @@ export function MonteCarloPotsTableHeader() {
               A one-click starting point that fills in a typical expected return
               and volatility for the selected mix of stocks and bonds. You can
               still override both values.
+              <br />
+              <br />
+              With a historical return model, the preset is also the pot&apos;s
+              real asset mix: its stock, bond and cash shares take each sampled
+              year&apos;s actual S&amp;P 500, 10-year Treasury and T-bill
+              returns.
             </Trans>
           </MonteCarloHelpTooltip>
         </View>
@@ -91,6 +97,12 @@ export function MonteCarloPotsTableHeader() {
             <Trans>
               The average yearly investment return before inflation. Each
               simulated year draws a random return around this average.
+              <br />
+              <br />
+              Only used by the random model and by Custom pots - under a
+              historical model, preset pots take real returns for their mix
+              instead, and this cell shows the mix&apos;s measured historical
+              average.
             </Trans>
           </MonteCarloHelpTooltip>
         </View>
@@ -109,6 +121,11 @@ export function MonteCarloPotsTableHeader() {
               How much returns swing from year to year. Higher volatility means
               bigger ups and downs, which makes running out of money more likely
               even with the same average return.
+              <br />
+              <br />
+              Only used by the random model and by Custom pots - under a
+              historical model, preset pots show how much their mix really swung
+              across the whole dataset.
             </Trans>
           </MonteCarloHelpTooltip>
         </View>

@@ -42,6 +42,50 @@ const PRESET_ASSET_WEIGHTS: Record<
   cash: { stocks: 0, bonds: 0, cash: 1 },
 };
 
+const historicalPresetStatsCache = new Map<
+  Exclude<MonteCarloAllocationPreset, 'custom'>,
+  { mean: number; stdDev: number }
+>();
+
+/**
+ * The measured mean and volatility (sample standard deviation) of a
+ * preset's blended historical series - what a preset pot actually
+ * experiences under the historical return models. The `history`
+ * parameter exists for tests; calls with the default dataset are
+ * cached.
+ */
+export function getHistoricalPresetStats(
+  preset: Exclude<MonteCarloAllocationPreset, 'custom'>,
+  history: HistoricalAnnualReturn[] = HISTORICAL_ANNUAL_RETURNS,
+): { mean: number; stdDev: number } {
+  const isDefaultHistory = history === HISTORICAL_ANNUAL_RETURNS;
+  if (isDefaultHistory) {
+    const cached = historicalPresetStatsCache.get(preset);
+    if (cached != null) {
+      return cached;
+    }
+  }
+
+  const weights = PRESET_ASSET_WEIGHTS[preset];
+  const blended = history.map(
+    year =>
+      weights.stocks * year.stocks +
+      weights.bonds * year.bonds +
+      weights.cash * year.cash,
+  );
+  const mean = blended.reduce((sum, value) => sum + value, 0) / blended.length;
+  const variance =
+    blended.length > 1
+      ? blended.reduce((sum, value) => sum + (value - mean) ** 2, 0) /
+        (blended.length - 1)
+      : 0;
+  const stats = { mean, stdDev: Math.sqrt(variance) };
+  if (isDefaultHistory) {
+    historicalPresetStatsCache.set(preset, stats);
+  }
+  return stats;
+}
+
 /**
  * Money inputs above this are clamped (1e14 minor units = 1 trillion major
  * units); keeps even heavily compounded results within the range the

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  getHistoricalPresetStats,
   getMonteCarloHorizonYears,
   MAX_AMOUNT,
   MAX_HORIZON_YEARS,
@@ -2096,5 +2097,35 @@ describe('runMonteCarloSimulation', () => {
         expect(Math.abs(value)).toBeLessThanOrEqual(maxFormattable);
       }
     }
+  });
+});
+
+describe('getHistoricalPresetStats', () => {
+  const history = [
+    { year: 2000, stocks: 0.1, bonds: 0.05, cash: 0.02, inflation: 0 },
+    { year: 2001, stocks: -0.1, bonds: 0.01, cash: 0.02, inflation: 0 },
+  ];
+
+  it('blends the series by the preset weights', () => {
+    // equity-60: 0.6 x stocks + 0.4 x bonds -> [0.08, -0.056]
+    const stats = getHistoricalPresetStats('equity-60', history);
+    expect(stats.mean).toBeCloseTo(0.012, 12);
+    // Sample standard deviation of two points equidistant from the mean
+    expect(stats.stdDev).toBeCloseTo(0.068 * Math.sqrt(2), 12);
+  });
+
+  it('a cash preset tracks the cash series exactly', () => {
+    const stats = getHistoricalPresetStats('cash', history);
+    expect(stats.mean).toBeCloseTo(0.02, 12);
+    expect(stats.stdDev).toBeCloseTo(0, 12);
+  });
+
+  it('returns plausible values for the real dataset', () => {
+    const stats = getHistoricalPresetStats('equity-100');
+    // Long-run US stocks: roughly 8-15% mean, 15-25% volatility
+    expect(stats.mean).toBeGreaterThan(0.08);
+    expect(stats.mean).toBeLessThan(0.15);
+    expect(stats.stdDev).toBeGreaterThan(0.15);
+    expect(stats.stdDev).toBeLessThan(0.25);
   });
 });
