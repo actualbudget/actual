@@ -393,9 +393,9 @@ export function MonteCarloPotConfiguration({
                 </Text>
                 <MonteCarloHelpTooltip>
                   <Trans>
-                    The share of this pot held in each asset class. The three
-                    shares must total 100% - until they do, the pot falls back
-                    to the expected return and volatility you enter.
+                    The share of this pot held in each asset class. The
+                    allocation must total 100% - until it does, the pot falls
+                    back to the expected return and volatility you enter.
                     <br />
                     <br />
                     The mix drives this pot&apos;s returns under the historical
@@ -465,13 +465,18 @@ export function MonteCarloPotConfiguration({
                 </View>
               </View>
               {isMixIncomplete && (
-                <Text style={{ color: theme.errorText }}>
+                // width 0 keeps the message from widening the group (it
+                // would push the other groups aside); minWidth stretches
+                // it back to the share inputs' width, wrapping the text
+                <Text
+                  style={{ color: theme.errorText, width: 0, minWidth: '100%' }}
+                >
                   <Trans>
-                    Shares must total 100% - currently{' '}
+                    The allocation must total 100% - currently{' '}
                     {{
                       total: `${parseFloat((mixShareTotal * 100).toFixed(2))}%`,
                     }}
-                    . Until they do, this pot uses your expected return and
+                    . Until it does, this pot uses your expected return and
                     volatility instead of the mix.
                   </Trans>
                 </Text>
