@@ -140,11 +140,11 @@ describe('account groups app', () => {
 
       await accountsApp.handlers['account-update']({
         id: 'acct1',
-        name: 'Marcus',
         account_group_id: groupId,
       });
       let accounts = await accountsApp.handlers['accounts-get']();
       expect(accounts[0].account_group_id).toBe(groupId);
+      expect(accounts[0].name).toBe('Marcus');
 
       await accountsApp.handlers['account-update']({
         id: 'acct1',
