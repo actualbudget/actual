@@ -143,7 +143,7 @@ export function BalanceForecastCard({
     forecastData: normalizedForecastData,
     start: chartRange.start,
     end: chartRange.end,
-    granularity: 'Monthly',
+    granularity,
   });
   const hasFilters =
     !isTrackingBudgetForecast && (meta?.conditions?.length ?? 0) > 0;
