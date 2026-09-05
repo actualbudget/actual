@@ -23,7 +23,11 @@ import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
-import { BUILT_IN_BANK_SYNC_PROVIDERS } from './bankSyncUtils';
+import type { PluggyAiAccount } from './bankSyncUtils';
+import {
+  BUILT_IN_BANK_SYNC_PROVIDERS,
+  mapPluggyAiExternalAccounts,
+} from './bankSyncUtils';
 
 type ProviderAction = () => void | Promise<void>;
 
@@ -35,19 +39,6 @@ type SimpleFinAccount = {
     name: string;
     domain: string;
     id: string;
-  };
-};
-
-type PluggyAiAccount = {
-  id: string;
-  name: string;
-  type: 'BANK' | string;
-  taxNumber: string;
-  owner: string;
-  balance: number;
-  bankData: {
-    automaticallyInvestedBalance: number;
-    closingBalance: number;
   };
 };
 
@@ -503,24 +494,9 @@ export function useBuiltInBankSyncProviders({
       if ('error' in results) {
         throw new Error(results.error);
       }
-
-      const externalAccounts = (results.accounts as PluggyAiAccount[]).map(
-        oldAccount => ({
-          account_id: oldAccount.id,
-          name: `${oldAccount.name.trim()} - ${
-            oldAccount.type === 'BANK' ? oldAccount.taxNumber : oldAccount.owner
-          }`,
-          institution: oldAccount.name,
-          orgDomain: null,
-          orgId: oldAccount.id,
-          balance:
-            oldAccount.type === 'BANK'
-              ? oldAccount.bankData.automaticallyInvestedBalance +
-                oldAccount.bankData.closingBalance
-              : oldAccount.balance,
-        }),
+      const externalAccounts = mapPluggyAiExternalAccounts(
+        results.accounts as PluggyAiAccount[],
       );
-
       dispatch(
         pushModal({
           modal: {
