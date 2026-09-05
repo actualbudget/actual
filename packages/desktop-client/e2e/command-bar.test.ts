@@ -125,9 +125,125 @@ test.describe('Command bar', () => {
     ).toBeVisible();
   });
 
-  test('captures the active account Page-actions view', async () => {
+  async function openAllyPageAction(actionName: string) {
     const commandBar = await openAllySavingsPageActions();
+    const commandBarInput = commandBar.getByRole('combobox', {
+      name: 'Command Bar',
+    });
+    await commandBarInput.fill(actionName);
 
-    await expect(commandBar).toMatchThemeScreenshots();
+    const actionOption = commandBar.getByRole('option', {
+      name: actionName,
+      exact: true,
+    });
+    await expect(actionOption).toBeVisible();
+    await expect(actionOption).toHaveAttribute('data-selected', 'true');
+    await commandBarInput.press('Control+Enter');
+
+    await expect(
+      commandBar.getByPlaceholder('Search actions...'),
+    ).toBeVisible();
+    await expect(
+      commandBar.getByText('Page actions', { exact: true }),
+    ).toBeVisible();
+    await expect(
+      commandBar.getByRole('option', { name: actionName, exact: true }),
+    ).toBeVisible();
+
+    return commandBar;
+  }
+
+  test('captures the Import page-action view', async () => {
+    const actionPage = await openAllyPageAction('Import');
+
+    await expect(actionPage).toMatchThemeScreenshots();
+  });
+
+  async function openMainDashboardActionPage() {
+    await page.keyboard.press('ControlOrMeta+k');
+    const commandBarInput = page.getByRole('combobox', {
+      name: 'Command Bar',
+    });
+    await expect(commandBarInput).toBeVisible();
+
+    const commandBar = page.locator(
+      '[cmdk-dialog][data-state="open"] [cmdk-root]',
+    );
+    await commandBarInput.fill('Main');
+
+    const mainOption = commandBar.getByRole('option', {
+      name: 'Main',
+      exact: true,
+    });
+    await expect(mainOption).toBeVisible();
+    await expect(mainOption).toHaveAttribute('data-selected', 'true');
+    await commandBarInput.press('Control+Enter');
+
+    await expect(
+      commandBar.getByPlaceholder('Search actions...'),
+    ).toBeVisible();
+    await expect(
+      commandBar.getByText('Reports', { exact: true }),
+    ).toBeVisible();
+
+    return commandBar;
+  }
+
+  test('captures the Main dashboard action-page view', async () => {
+    const actionPage = await openMainDashboardActionPage();
+
+    await expect(actionPage).toMatchThemeScreenshots();
+  });
+
+  test('captures the Main dashboard remove-favorite action-page view', async () => {
+    const actionPage = await openMainDashboardActionPage();
+    await actionPage
+      .getByRole('option', { name: 'Add to favorites', exact: true })
+      .click();
+
+    await expect(
+      actionPage.getByRole('option', {
+        name: 'Remove from favorites',
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      actionPage.getByText('Reports', { exact: true }),
+    ).toBeVisible();
+
+    await expect(actionPage).toMatchThemeScreenshots();
+  });
+
+  async function openThemesPage() {
+    await page.keyboard.press('ControlOrMeta+k');
+    const commandBarInput = page.getByRole('combobox', {
+      name: 'Command Bar',
+    });
+    await expect(commandBarInput).toBeVisible();
+
+    const commandBar = page.locator(
+      '[cmdk-dialog][data-state="open"] [cmdk-root]',
+    );
+    await commandBarInput.fill('Change theme…');
+
+    const themesOption = commandBar.getByRole('option', {
+      name: 'Change theme…',
+      exact: true,
+    });
+    await expect(themesOption).toBeVisible();
+    await themesOption.press('Enter');
+
+    await expect(commandBar.getByPlaceholder('Search themes...')).toBeVisible();
+    await expect(
+      commandBar.getByRole('group', { name: 'Built-in themes' }),
+    ).toBeVisible();
+
+    return commandBar;
+  }
+
+  test('captures the Themes page view', async () => {
+    const themesPage = await openThemesPage();
+
+    await expect(themesPage).toMatchThemeScreenshots();
   });
 });

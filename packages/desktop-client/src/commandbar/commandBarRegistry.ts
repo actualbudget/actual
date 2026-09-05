@@ -17,6 +17,9 @@ import type { ReactNode } from 'react';
  */
 export type CommandBarCommand = Readonly<{
   readonly id: string;
+  readonly ownerId?: string;
+  readonly commandId?: string;
+  readonly instanceId?: string;
   readonly label: string;
   readonly destructive?: boolean;
   readonly execute: () => void | Promise<void>;
@@ -96,6 +99,19 @@ class CommandBarCommandRegistry {
     ownerId: string,
     commands: readonly CommandBarCommand[],
   ): readonly CommandBarCommand[] {
+    const invalidInstanceIds = commands.filter(
+      command =>
+        command.instanceId !== undefined &&
+        (typeof command.instanceId !== 'string' ||
+          command.instanceId.length === 0),
+    );
+    if (invalidInstanceIds.length > 0) {
+      console.error(
+        `Command bar contribution from owner "${ownerId}" was rejected: ` +
+          'instanceId must be a non-empty string when supplied.',
+      );
+      return [];
+    }
     const seenCommandIds = new Set<string>();
     const duplicateCommandIds = new Set<string>();
 
@@ -119,6 +135,9 @@ class CommandBarCommandRegistry {
       commands.map(command =>
         Object.freeze({
           id: command.id,
+          ownerId,
+          commandId: command.id,
+          instanceId: command.instanceId,
           label: command.label,
           destructive: command.destructive,
           execute: command.execute,
@@ -128,26 +147,62 @@ class CommandBarCommandRegistry {
   }
 
   private refresh() {
+    const commandGroups = new Map<string, CommandBarCommand[]>();
+    for (const registration of this.registrations.values()) {
+      for (const command of registration.commands) {
+        const key = `${registration.ownerId}\u0000${command.id}`;
+        const group = commandGroups.get(key) ?? [];
+        group.push(command);
+        commandGroups.set(key, group);
+      }
+    }
+    const ambiguousCommands = new Set<CommandBarCommand>();
+    for (const [key, commands] of commandGroups) {
+      if (commands.length < 2) continue;
+      const instanceIds = commands.map(command => command.instanceId);
+      if (
+        instanceIds.some(instanceId => !instanceId) ||
+        new Set(instanceIds).size !== instanceIds.length
+      ) {
+        console.error(
+          `Command bar contribution collision for "${key.replace('\u0000', ':')}". ` +
+            'Concurrent registrations must provide unique instanceId values; the conflicting rows were omitted.',
+        );
+        for (const command of commands) ambiguousCommands.add(command);
+      }
+    }
     const baseIdCounts = new Map<string, number>();
     for (const registration of this.registrations.values()) {
       for (const command of registration.commands) {
-        const baseId = getCommandBaseId(registration.ownerId, command.id);
+        if (ambiguousCommands.has(command)) continue;
+        const baseId = getCommandBaseId(
+          registration.ownerId,
+          command.id,
+          command.instanceId,
+        );
         baseIdCounts.set(baseId, (baseIdCounts.get(baseId) ?? 0) + 1);
       }
     }
-
     const nextSnapshot: CommandBarCommand[] = [];
     for (const registration of this.registrations.values()) {
       for (const command of registration.commands) {
-        const baseId = getCommandBaseId(registration.ownerId, command.id);
-        const id =
-          baseIdCounts.get(baseId) === 1
-            ? baseId
-            : `${baseId}:${registration.registrationId}`;
+        if (ambiguousCommands.has(command)) continue;
+        const id = getCommandBaseId(
+          registration.ownerId,
+          command.id,
+          command.instanceId,
+        );
+        const displayId =
+          baseIdCounts.get(id) === 1
+            ? id
+            : `${id}:${registration.registrationId}`;
 
         nextSnapshot.push(
           Object.freeze({
-            id,
+            id: displayId,
+            ownerId: registration.ownerId,
+            commandId: command.id,
+            instanceId: command.instanceId,
             label: command.label,
             destructive: command.destructive,
             execute: () => {
@@ -173,7 +228,14 @@ class CommandBarCommandRegistry {
   }
 }
 
-function getCommandBaseId(ownerId: string, commandId: string) {
+function getCommandBaseId(
+  ownerId: string,
+  commandId: string,
+  instanceId?: string,
+) {
+  if (instanceId != null) {
+    return `command:${ownerId.length}:${ownerId}:${commandId.length}:${commandId}:${instanceId.length}:${instanceId}`;
+  }
   // Keep the familiar owner:id form for the common case. If either value can
   // contain the delimiter, length-prefix both values so the pair is unambiguous.
   if (!ownerId.includes(':') && !commandId.includes(':')) {

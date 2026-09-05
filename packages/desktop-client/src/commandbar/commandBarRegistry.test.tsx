@@ -344,6 +344,32 @@ describe('CommandBar command registry', () => {
       consoleError.mockRestore();
     }
   });
+
+  it('omits ambiguous concurrent registrations without stable instance ids', () => {
+    const error = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+    try {
+      const { result } = renderHook(
+        () => {
+          useRegisterCommandBarCommands('reports', [
+            { id: 'same', label: 'First', execute: vi.fn() },
+          ]);
+          useRegisterCommandBarCommands('reports', [
+            { id: 'same', label: 'Second', execute: vi.fn() },
+          ]);
+          return useCommandBarCommands();
+        },
+        { wrapper },
+      );
+      expect(result.current).toEqual([]);
+      expect(error).toHaveBeenCalledWith(
+        expect.stringContaining('unique instanceId'),
+      );
+    } finally {
+      error.mockRestore();
+    }
+  });
 });
 
 function CleanupTest({
@@ -398,7 +424,12 @@ function ConcurrentOwnerTest({
 
 function SameOwner({ firstLabel }: { firstLabel: string }) {
   useRegisterCommandBarCommands('reports', [
-    { id: 'same', label: firstLabel, execute: vi.fn() },
+    {
+      id: 'same',
+      instanceId: firstLabel === 'First instance' ? 'first' : 'second',
+      label: firstLabel,
+      execute: vi.fn(),
+    },
   ]);
   return null;
 }

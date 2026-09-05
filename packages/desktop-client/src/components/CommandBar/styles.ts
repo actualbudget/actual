@@ -209,9 +209,19 @@ export const destructiveActionClassName = css({
 
 export const actionFooterClassName = css({
   display: 'flex',
+  flexDirection: 'row',
   alignItems: 'center',
+  flexWrap: 'nowrap',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  boxSizing: 'border-box',
+  minWidth: 0,
+  lineHeight: '16px',
   gap: 16,
   minHeight: 36,
   padding: '7px 12px',
   borderTop: '1px solid var(--color-tableBorder)',
+  '& > *': {
+    flex: '0 0 auto',
+  },
 });

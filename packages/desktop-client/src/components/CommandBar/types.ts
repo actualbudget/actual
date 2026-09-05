@@ -43,6 +43,7 @@ export type ActionItem = SearchableItem &
     readonly description?: ReactNode;
     readonly shortcut?: readonly string[];
     readonly destructive?: boolean;
+    readonly keepOpen?: boolean;
     readonly primaryAction: ActionExecution;
     readonly secondaryAction?: ActionExecution;
   }>;

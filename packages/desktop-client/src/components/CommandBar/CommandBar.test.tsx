@@ -376,6 +376,7 @@ describe('CommandBar', () => {
     expect(screen.getByText('Checking')).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Open' })).toBeInTheDocument();
     expect(screen.getByRole('dialog')).toHaveTextContent('back');
+    expect(screen.getByLabelText('Keyboard shortcuts')).toBeInTheDocument();
   });
 
   it('executes an action with keyboard navigation and Enter', async () => {
@@ -510,21 +511,23 @@ describe('CommandBar', () => {
     ).toBe(false);
   });
 
-  it('does not open an action page for an unsupported root item', async () => {
+  it('opens an action page for a navigation root item', async () => {
     mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
     renderOpenCommandBar();
 
-    await keyboardSelectRootItem('Settings');
-    expect(screen.getByRole('dialog')).not.toHaveTextContent('Open actions');
+    const rootInput = screen.getByPlaceholderText('Search Demo budget...');
+    await userEvent.setup().type(rootInput, 'Settings');
+    await waitFor(() =>
+      expect(
+        screen.getByRole('option', { name: 'Settings' }),
+      ).toBeInTheDocument(),
+    );
     openSelectedContextualActions();
 
     expect(
-      screen.queryByPlaceholderText('Search actions...'),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText('Search Demo budget...'),
+      screen.getByPlaceholderText('Search actions...'),
     ).toBeInTheDocument();
-    expect(screen.getByRole('dialog')).toHaveTextContent('close');
+    expect(screen.getByRole('dialog')).toHaveTextContent('back');
   });
 
   it('does not open contextual actions for Cmd+Enter at the root', async () => {
@@ -550,9 +553,14 @@ describe('CommandBar', () => {
     await keyboardSelectRootItem('Checking');
     openSelectedContextualActions();
 
+    expect(
+      screen
+        .getByRole('option', { name: 'Add to favorites' })
+        .querySelector('svg'),
+    ).toBeInTheDocument();
     await userEvent
       .setup()
-      .click(screen.getByRole('button', { name: 'Add to favorites' }));
+      .click(screen.getByRole('option', { name: 'Add to favorites' }));
 
     expect(store.getState().commandBar.open).toBe(true);
     expect(mocks.navigate).not.toHaveBeenCalled();
@@ -561,41 +569,57 @@ describe('CommandBar', () => {
         window.localStorage.getItem('budget-1-commandbar.favorites') ?? '',
       ),
     ).toEqual({
-      version: 1,
+      version: 2,
       favorites: [{ type: 'account', id: 'account-1' }],
     });
   });
 
-  it.each([
-    ['Enter', '{Enter}'],
-    ['Space', '{Space}'],
-  ])(
-    'toggles the favorite once with %s without executing the selected action',
-    async (_key, keyboardShortcut) => {
-      mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
-      const store = renderOpenCommandBar();
-      await keyboardSelectRootItem('Checking');
-      openSelectedContextualActions();
+  it('renders a distinct icon for the remove-favorite action', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    const store = renderOpenCommandBar();
+    await keyboardSelectRootItem('Checking');
+    openSelectedContextualActions();
 
-      const favoriteButton = screen.getByRole('button', {
-        name: 'Add to favorites',
-      });
-      favoriteButton.focus();
-      await userEvent.setup().keyboard(keyboardShortcut);
+    const addFavorite = screen.getByRole('option', {
+      name: 'Add to favorites',
+    });
+    const addIcon = addFavorite.querySelector('svg');
+    expect(addIcon).toBeInTheDocument();
 
-      expect(favoriteButton).toHaveAttribute('aria-pressed', 'true');
-      expect(store.getState().commandBar.open).toBe(true);
-      expect(mocks.navigate).not.toHaveBeenCalled();
-      expect(
-        JSON.parse(
-          window.localStorage.getItem('budget-1-commandbar.favorites') ?? '',
-        ),
-      ).toEqual({
-        version: 1,
-        favorites: [{ type: 'account', id: 'account-1' }],
-      });
-    },
-  );
+    await userEvent.setup().click(addFavorite);
+
+    const removeFavorite = screen.getByRole('option', {
+      name: 'Remove from favorites',
+    });
+    const removeIcon = removeFavorite.querySelector('svg');
+    expect(removeIcon).toBeInTheDocument();
+    expect(removeIcon?.outerHTML).not.toBe(addIcon?.outerHTML);
+    expect(store.getState().commandBar.open).toBe(true);
+  });
+
+  it('toggles the favorite once through cmdk keyboard selection', async () => {
+    mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
+    const store = renderOpenCommandBar();
+    await keyboardSelectRootItem('Checking');
+    openSelectedContextualActions();
+
+    expect(screen.getByPlaceholderText('Search actions...')).toHaveFocus();
+    await userEvent.setup().keyboard('{ArrowUp}{Enter}');
+
+    expect(
+      screen.getByRole('option', { name: 'Remove from favorites' }),
+    ).toBeInTheDocument();
+    expect(store.getState().commandBar.open).toBe(true);
+    expect(mocks.navigate).not.toHaveBeenCalled();
+    expect(
+      JSON.parse(
+        window.localStorage.getItem('budget-1-commandbar.favorites') ?? '',
+      ),
+    ).toEqual({
+      version: 2,
+      favorites: [{ type: 'account', id: 'account-1' }],
+    });
+  });
 
   it('restores a stored favorite and resolves its live label', async () => {
     mockData.accounts = [
@@ -618,8 +642,8 @@ describe('CommandBar', () => {
     await keyboardSelectRootItem('Renamed checking');
     openSelectedContextualActions();
     expect(
-      screen.getByRole('button', { name: 'Remove from favorites' }),
-    ).toHaveAttribute('aria-pressed', 'true');
+      screen.getByRole('option', { name: 'Remove from favorites' }),
+    ).toBeInTheDocument();
   });
 
   it('isolates favorites by budget', () => {
@@ -674,7 +698,7 @@ describe('CommandBar', () => {
   it('hides malformed and stale favorite references without rewriting them', () => {
     mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
     const stored = {
-      version: 1,
+      version: 2,
       favorites: [
         { type: 'account' },
         { type: 'account', id: 'deleted-account' },
@@ -715,19 +739,19 @@ describe('CommandBar', () => {
 
     await userEvent
       .setup()
-      .click(screen.getByRole('button', { name: 'Add to favorites' }));
+      .click(screen.getByRole('option', { name: 'Add to favorites' }));
 
     expect(
       JSON.parse(
         window.localStorage.getItem('budget-1-commandbar.favorites') ?? '',
       ),
     ).toEqual({
-      version: 1,
+      version: 2,
       favorites: [{ type: 'report', id: 'report-1' }],
     });
   });
 
-  it('prunes stale references only during a later favorite write', async () => {
+  it('retains stale references during a later favorite write', async () => {
     mockData.accounts = [{ id: 'account-1', name: 'Checking', closed: 0 }];
     window.localStorage.setItem(
       'budget-1-commandbar.favorites',
@@ -741,7 +765,7 @@ describe('CommandBar', () => {
     openSelectedContextualActions();
     await userEvent
       .setup()
-      .click(screen.getByRole('button', { name: 'Add to favorites' }));
+      .click(screen.getByRole('option', { name: 'Add to favorites' }));
 
     expect(store.getState().commandBar.open).toBe(true);
     expect(
@@ -749,8 +773,11 @@ describe('CommandBar', () => {
         window.localStorage.getItem('budget-1-commandbar.favorites') ?? '',
       ),
     ).toEqual({
-      version: 1,
-      favorites: [{ type: 'account', id: 'account-1' }],
+      version: 2,
+      favorites: [
+        { type: 'account', id: 'deleted-account' },
+        { type: 'account', id: 'account-1' },
+      ],
     });
   });
 
@@ -759,7 +786,10 @@ describe('CommandBar', () => {
     store.dispatch(openCommandBar());
     const view = renderCommandBar(store);
 
-    setCommandBarPath(view, store, '/settings');
+    await act(async () => {
+      setCommandBarPath(view, store, '/settings');
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
     setCommandBarPath(view, store, '/schedules');
     setCommandBarPath(view, store, '/tags');
 
@@ -969,7 +999,21 @@ describe('CommandBar', () => {
       screen.getByPlaceholderText('Search actions...'),
     ).toBeInTheDocument();
     expect(screen.getByText('Monthly report')).toBeInTheDocument();
+    expect(
+      screen.getByText('Custom Reports', { exact: true }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Open' })).toBeInTheDocument();
+  });
+
+  it('labels dashboard report action pages as Reports', async () => {
+    mockData.dashboardPages = [{ id: 'main', name: 'Main' }];
+    renderOpenCommandBar();
+
+    await keyboardSelectRootItem('Main');
+    openSelectedContextualActions();
+
+    expect(screen.getAllByText('Main')).not.toHaveLength(0);
+    expect(screen.getByText('Reports', { exact: true })).toBeInTheDocument();
   });
 
   it('restores root search and selection from an action page', async () => {
@@ -1421,5 +1465,133 @@ describe('CommandBar', () => {
       }),
     );
     consoleError.mockRestore();
+  });
+
+  it('opens the same action page from a recent root row with Ctrl+Enter', async () => {
+    const store = createStore();
+    store.dispatch(openCommandBar());
+    const view = renderCommandBar(store);
+    setCommandBarPath(view, store, '/settings');
+    setCommandBarPath(view, store, '/budget');
+
+    await waitFor(() => expect(screen.getByText('Recent')).toBeInTheDocument());
+    const rootInput = screen.getByPlaceholderText('Search Demo budget...');
+    await userEvent.setup().type(rootInput, 'Settings');
+    await waitFor(() =>
+      expect(
+        screen.getByRole('option', { name: 'Settings' }),
+      ).toBeInTheDocument(),
+    );
+    openSelectedContextualActions();
+
+    expect(
+      screen.getByPlaceholderText('Search actions...'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: 'Settings' }),
+    ).toBeInTheDocument();
+  });
+
+  it('restores root search and selection after detailed Change Theme', async () => {
+    renderOpenCommandBar();
+    const rootInput = screen.getByPlaceholderText('Search Demo budget...');
+    await userEvent.setup().type(rootInput, 'Change theme');
+    await waitFor(() =>
+      expect(
+        screen.getByRole('option', { name: 'Change theme…' }),
+      ).toBeInTheDocument(),
+    );
+    await keyboardSelectRootItem('Change theme…');
+    await waitFor(() =>
+      expect(
+        screen.getByRole('option', { name: 'Change theme…' }),
+      ).toHaveAttribute('data-selected', 'true'),
+    );
+    openSelectedContextualActions();
+
+    await userEvent
+      .setup()
+      .click(screen.getByRole('option', { name: 'Change theme…' }));
+    expect(screen.getByPlaceholderText('Search themes...')).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: 'Escape' });
+
+    expect(screen.getByPlaceholderText('Search Demo budget...')).toHaveValue(
+      'Change theme',
+    );
+    expect(
+      screen.getByRole('option', { name: 'Change theme…' }),
+    ).toHaveAttribute('data-selected', 'true');
+  });
+
+  it('keeps distinct duplicate page-action instances executable', async () => {
+    const first = vi.fn();
+    const second = vi.fn();
+    const store = renderOpenCommandBar(
+      <>
+        <ContributedCommands
+          commands={[
+            { id: 'same', instanceId: 'first', label: 'First', execute: first },
+          ]}
+        />
+        <ContributedCommands
+          commands={[
+            {
+              id: 'same',
+              instanceId: 'second',
+              label: 'Second',
+              execute: second,
+            },
+          ]}
+        />
+      </>,
+    );
+
+    await userEvent.setup().click(screen.getByText('First', { exact: true }));
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(store.getState().commandBar.open).toBe(false);
+  });
+
+  it('shows a favorited page action again when searching the root', async () => {
+    renderOpenCommandBar(
+      <ContributedCommands
+        commands={[
+          { id: 'searchable', label: 'Searchable action', execute: vi.fn() },
+        ]}
+      />,
+    );
+    await keyboardSelectRootItem('Searchable action');
+    openSelectedContextualActions();
+    await userEvent
+      .setup()
+      .click(screen.getByRole('option', { name: 'Add to favorites' }));
+    fireEvent.keyDown(window, { key: 'Escape' });
+
+    const rootInput = screen.getByPlaceholderText('Search Demo budget...');
+    await userEvent.setup().type(rootInput, 'Searchable');
+    expect(
+      screen.getByRole('option', { name: 'Searchable action' }),
+    ).toBeInTheDocument();
+  });
+
+  it('returns safely to root when a page action unregisters while open', async () => {
+    const execute = vi.fn();
+    const store = createStore();
+    store.dispatch(openCommandBar());
+    const view = renderCommandBar(
+      store,
+      <ContributedCommands
+        commands={[{ id: 'temporary', label: 'Temporary action', execute }]}
+      />,
+    );
+    await keyboardSelectRootItem('Temporary action');
+    openSelectedContextualActions();
+
+    rerenderCommandBar(view, store);
+    await waitFor(() =>
+      expect(
+        screen.getByPlaceholderText('Search Demo budget...'),
+      ).toBeInTheDocument(),
+    );
+    expect(execute).not.toHaveBeenCalled();
   });
 });

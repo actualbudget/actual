@@ -1,11 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import {
-  SvgArrowLeft,
-  SvgBookmark,
-  SvgBookmarkOutline,
-} from '@actual-app/components/icons/v1';
+import { SvgArrowLeft } from '@actual-app/components/icons/v1';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { Command } from 'cmdk';
@@ -19,7 +15,6 @@ import {
   actionRowIconClassName,
   actionSearchClassName,
   destructiveActionClassName,
-  favoriteButtonClassName,
   paletteGroupClassName,
 } from './styles';
 import type {
@@ -27,7 +22,6 @@ import type {
   ActionPageHeader,
   ActionSection,
   ActionTrigger,
-  FavoriteControl,
   ShortcutHint as ShortcutHintType,
 } from './types';
 
@@ -142,48 +136,7 @@ function Header({
           {header.secondary}
         </Text>
       )}
-      {header.favorite != null && <FavoriteButton favorite={header.favorite} />}
     </View>
-  );
-}
-
-function FavoriteButton({ favorite }: { favorite: FavoriteControl }) {
-  const { t } = useTranslation();
-  const label = favorite.isPressed
-    ? (favorite.removeLabel ?? t('Remove from favorites'))
-    : (favorite.addLabel ?? t('Add to favorites'));
-  const Icon = favorite.isPressed ? SvgBookmark : SvgBookmarkOutline;
-
-  return (
-    <button
-      type="button"
-      className={favoriteButtonClassName}
-      aria-label={label}
-      aria-pressed={favorite.isPressed}
-      title={label}
-      onPointerDown={event => event.stopPropagation()}
-      onKeyDown={event => {
-        if (
-          event.key !== 'Enter' &&
-          event.key !== ' ' &&
-          event.key !== 'Space'
-        ) {
-          return;
-        }
-
-        event.preventDefault();
-        event.stopPropagation();
-        favorite.onToggle();
-      }}
-      onClick={event => {
-        event.preventDefault();
-        event.stopPropagation();
-        if (event.detail === 0) return;
-        favorite.onToggle();
-      }}
-    >
-      <Icon aria-hidden />
-    </button>
   );
 }
 
@@ -203,6 +156,16 @@ function ActionRow({
     <Command.Item
       value={value}
       aria-label={action.name}
+      onKeyDown={event => {
+        if (
+          action.id === 'favorite' &&
+          (event.key === 'Enter' || event.key === ' ' || event.key === 'Space')
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+          onSelect(action, 'primary');
+        }
+      }}
       onSelect={() => onSelect(action, 'primary')}
       className={`${actionItemClassName} ${action.destructive ? destructiveActionClassName : ''}`}
     >

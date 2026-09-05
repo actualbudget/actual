@@ -33,6 +33,7 @@ export function KeyChip({ children }: { children: ReactNode }) {
         backgroundColor: 'var(--color-pillBackground)',
         borderRadius: 5,
         fontSize: 10.5,
+        lineHeight: '12px',
         fontWeight: 600,
         letterSpacing: 0.2,
         color: 'var(--color-pillTextSubdued)',
@@ -56,12 +57,22 @@ export function FooterHint({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 5,
+        flexShrink: 0,
+        whiteSpace: 'nowrap',
+        lineHeight: '16px',
       }}
     >
       {keys.map(key => (
         <KeyChip key={key}>{key}</KeyChip>
       ))}
-      <Text style={{ fontSize: 11.5, color: 'var(--color-pageTextSubdued)' }}>
+      <Text
+        style={{
+          fontSize: 11.5,
+          lineHeight: '16px',
+          whiteSpace: 'nowrap',
+          color: 'var(--color-pageTextSubdued)',
+        }}
+      >
         {children}
       </Text>
     </View>

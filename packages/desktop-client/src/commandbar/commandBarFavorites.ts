@@ -12,7 +12,8 @@ export type {
   CommandBarFavoritesPref,
 } from '@actual-app/core/types/prefs';
 
-export const COMMAND_BAR_FAVORITES_VERSION = 1 as const;
+export const COMMAND_BAR_FAVORITES_VERSION = 2 as const;
+const LEGACY_COMMAND_BAR_FAVORITES_VERSION = 1;
 
 export type ResolvedCommandBarFavorite =
   | {
@@ -29,16 +30,42 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isFavoriteRef(value: unknown): value is CommandBarFavoriteRef {
+  if (!isRecord(value)) return false;
+  if (
+    (value.type === 'navigation' ||
+      value.type === 'account' ||
+      value.type === 'dashboard' ||
+      value.type === 'report' ||
+      value.type === 'quick-action') &&
+    typeof value.id === 'string'
+  ) {
+    return value.id.length > 0;
+  }
   return (
-    isRecord(value) &&
-    (value.type === 'account' || value.type === 'report') &&
-    typeof value.id === 'string' &&
-    value.id.length > 0
+    value.type === 'page-action' &&
+    typeof value.ownerId === 'string' &&
+    value.ownerId.length > 0 &&
+    typeof value.commandId === 'string' &&
+    value.commandId.length > 0 &&
+    (value.instanceId === undefined ||
+      (typeof value.instanceId === 'string' && value.instanceId.length > 0))
   );
 }
 
 export function favoriteRefKey(ref: CommandBarFavoriteRef): string {
-  return `${ref.type}:${ref.id}`;
+  return ref.type === 'page-action'
+    ? getCommandBaseId(ref.ownerId, ref.commandId, ref.instanceId)
+    : `${ref.type}:${ref.id}`;
+}
+
+function getCommandBaseId(
+  ownerId: string,
+  commandId: string,
+  instanceId?: string,
+) {
+  return instanceId == null
+    ? `command:${ownerId.length}:${ownerId}:${commandId.length}:${commandId}`
+    : `command:${ownerId.length}:${ownerId}:${commandId.length}:${commandId}:${instanceId.length}:${instanceId}`;
 }
 
 export function parseCommandBarFavorites(
@@ -46,7 +73,8 @@ export function parseCommandBarFavorites(
 ): CommandBarFavoriteRef[] {
   if (
     !isRecord(value) ||
-    value.version !== COMMAND_BAR_FAVORITES_VERSION ||
+    (value.version !== COMMAND_BAR_FAVORITES_VERSION &&
+      value.version !== LEGACY_COMMAND_BAR_FAVORITES_VERSION) ||
     !Array.isArray(value.favorites)
   ) {
     return [];
@@ -59,7 +87,18 @@ export function parseCommandBarFavorites(
     const key = favoriteRefKey(candidate);
     if (seen.has(key)) continue;
     seen.add(key);
-    favorites.push({ type: candidate.type, id: candidate.id });
+    favorites.push(
+      candidate.type === 'page-action'
+        ? {
+            type: candidate.type,
+            ownerId: candidate.ownerId,
+            commandId: candidate.commandId,
+            ...(candidate.instanceId != null
+              ? { instanceId: candidate.instanceId }
+              : {}),
+          }
+        : { type: candidate.type, id: candidate.id },
+    );
   }
   return favorites;
 }
@@ -69,29 +108,34 @@ export function serializeCommandBarFavorites(
 ): CommandBarFavoritesPref {
   return {
     version: COMMAND_BAR_FAVORITES_VERSION,
-    favorites: favorites.map(({ type, id }) => ({ type, id })),
+    favorites: favorites.map(favorite =>
+      favorite.type === 'page-action'
+        ? {
+            type: favorite.type,
+            ownerId: favorite.ownerId,
+            commandId: favorite.commandId,
+            ...(favorite.instanceId != null
+              ? { instanceId: favorite.instanceId }
+              : {}),
+          }
+        : { type: favorite.type, id: favorite.id },
+    ),
   };
 }
 
 /**
- * Apply an explicit favorite toggle. Stale entries are intentionally removed
- * here, rather than while resolving/rendering, so reads remain side-effect
- * free.
+ * Apply an explicit favorite toggle. Stale entries remain untouched until
+ * explicitly removed, so reads and routine toggles are side-effect free.
  */
 export function updateCommandBarFavorites(
   stored: unknown,
-  eligible: readonly CommandBarFavoriteRef[],
+  _eligible: readonly CommandBarFavoriteRef[],
   toggled: CommandBarFavoriteRef,
 ): CommandBarFavoritesPref {
-  const eligibleKeys = new Set(eligible.map(favoriteRefKey));
-  const current = parseCommandBarFavorites(stored).filter(ref =>
-    eligibleKeys.has(favoriteRefKey(ref)),
-  );
+  // Unmounted/deleted entries are deliberately retained. They may become
+  // resolvable again, and routine toggles must never silently reorder/prune.
+  const current = parseCommandBarFavorites(stored);
   const toggledKey = favoriteRefKey(toggled);
-
-  if (!eligibleKeys.has(toggledKey)) {
-    return serializeCommandBarFavorites(current);
-  }
 
   return serializeCommandBarFavorites(
     current.some(ref => favoriteRefKey(ref) === toggledKey)
@@ -114,6 +158,7 @@ export function resolveCommandBarFavorites(
       return account ? [{ ref: favorite, item: account }] : [];
     }
 
+    if (favorite.type !== 'report') return [];
     const report = reportById.get(favorite.id);
     return report ? [{ ref: favorite, item: report }] : [];
   });
