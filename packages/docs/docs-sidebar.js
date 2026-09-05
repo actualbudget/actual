@@ -25,21 +25,17 @@ const sidebars = {
   ],
   docs: [
     'index',
-    'vision',
-    'releases',
-    'upcoming-release-notes',
     {
       type: 'category',
       label: 'Getting Started',
-      collapsible: false,
-      className: 'no-indent',
+      collapsed: false,
+      className: 'no-indent section-header',
       items: [
         'getting-started/roadmap-for-new-users',
-        'getting-started/envelope-budgeting',
-        'getting-started/tracking-budget',
         {
           type: 'category',
-          label: 'Installation and Configuration',
+          label: 'Installing Actual',
+          collapsed: true,
           link: {
             type: 'doc',
             id: 'install/index',
@@ -57,7 +53,6 @@ const sidebars = {
                 'install/build-from-source',
               ],
             },
-
             {
               type: 'category',
               label: 'In the Cloud',
@@ -65,42 +60,30 @@ const sidebars = {
               className: 'no-indent',
               items: ['install/pikapods', 'install/fly'],
             },
-            {
-              type: 'category',
-              label: 'Configuration',
-              collapsible: false,
-              className: 'no-indent',
-              items: [
-                'config/index',
-                'config/https',
-                'config/reverse-proxies',
-                'config/oauth-auth',
-                'config/multi-user',
-                'advanced/http-header-auth',
-              ],
-            },
           ],
         },
-
+        'getting-started/starting-fresh',
+        'getting-started/envelope-budgeting',
+        'getting-started/tracking-budget',
         {
           type: 'category',
-          label: 'Migration',
+          label: 'Switching from Another App',
           link: {
             type: 'doc',
             id: 'migration/index',
           },
           items: ['migration/ynab4', 'migration/nynab'],
         },
+        'getting-started/tips-tricks',
       ],
     },
 
     {
       type: 'category',
       label: 'Using Actual',
-      collapsible: false,
-      className: 'no-indent',
+      collapsed: true,
+      className: 'no-indent section-header',
       items: [
-        'getting-started/starting-fresh',
         {
           type: 'category',
           label: 'Budgeting',
@@ -144,8 +127,53 @@ const sidebars = {
             id: 'accounts/index',
           },
           items: [
-            'transactions/filters',
-            'transactions/transfers',
+            'accounts/reconciliation',
+            {
+              type: 'category',
+              label: 'Importing Transactions',
+              collapsible: false,
+              className: 'no-indent',
+              items: [
+                'transactions/importing',
+                {
+                  type: 'category',
+                  label: 'Connecting Your Bank',
+                  link: {
+                    type: 'doc',
+                    id: 'advanced/bank-sync',
+                  },
+                  items: [
+                    'advanced/bank-sync/akahu',
+                    'advanced/bank-sync/enable-banking',
+                    'advanced/bank-sync/gocardless',
+                    'advanced/bank-sync/simplefin',
+                    'advanced/bank-sync/pluggyai',
+                  ],
+                },
+                'advanced/scripts/modify-transfers',
+              ],
+            },
+            {
+              type: 'category',
+              label: 'Working with Transactions',
+              collapsible: false,
+              className: 'no-indent',
+              items: [
+                'transactions/filters',
+                'transactions/transfers',
+                'transactions/merging',
+                'transactions/bulk-editing',
+                'transactions/split-transactions',
+                'transactions/tags',
+              ],
+            },
+            {
+              type: 'category',
+              label: 'Payees',
+              collapsible: false,
+              className: 'no-indent',
+              items: ['transactions/payees', 'transactions/payee-locations'],
+            },
             {
               type: 'category',
               label: 'Rules',
@@ -156,35 +184,11 @@ const sidebars = {
               },
               items: ['budgeting/rules/custom'],
             },
-            'transactions/importing',
-            'transactions/merging',
-            'accounts/reconciliation',
-            'transactions/payees',
-            'transactions/payee-locations',
-            'transactions/bulk-editing',
-            'transactions/tags',
-            'transactions/split-transactions',
-            {
-              type: 'category',
-              label: 'Connecting Your Bank',
-              link: {
-                type: 'doc',
-                id: 'advanced/bank-sync',
-              },
-              items: [
-                'advanced/bank-sync/akahu',
-                'advanced/bank-sync/enable-banking',
-                'advanced/bank-sync/gocardless',
-                'advanced/bank-sync/simplefin',
-                'advanced/bank-sync/pluggyai',
-              ],
-            },
-            'advanced/scripts/modify-transfers',
           ],
         },
         {
           type: 'category',
-          label: 'Reports Dashboard',
+          label: 'Reports',
           collapsed: true,
           link: {
             type: 'doc',
@@ -192,20 +196,11 @@ const sidebars = {
           },
           items: ['reports/custom-reports'],
         },
-        {
-          type: 'category',
-          label: 'Backup & Restore',
-          collapsed: true,
-          items: ['backup-restore/backup', 'backup-restore/restore'],
-        },
         'settings/index',
         'custom-themes',
-        'getting-started/sync',
-        'getting-started/manage-files',
-
         {
           type: 'category',
-          label: 'Experimental features',
+          label: 'Experimental Features',
           collapsed: true,
           link: {
             type: 'doc',
@@ -223,8 +218,57 @@ const sidebars = {
             'experimental/sankey-report',
           ],
         },
-        'getting-started/tips-tricks',
+      ],
+    },
 
+    {
+      type: 'category',
+      label: 'Sync & Data Safety',
+      collapsed: true,
+      className: 'no-indent section-header',
+      items: [
+        'getting-started/sync',
+        'getting-started/manage-files',
+        {
+          type: 'category',
+          label: 'Backup & Restore',
+          collapsed: true,
+          items: ['backup-restore/backup', 'backup-restore/restore'],
+        },
+      ],
+    },
+
+    {
+      type: 'category',
+      label: 'Self-Hosting Your Server',
+      collapsed: true,
+      className: 'no-indent section-header',
+      items: [
+        {
+          type: 'category',
+          label: 'Server Configuration',
+          collapsed: true,
+          link: {
+            type: 'doc',
+            id: 'config/index',
+          },
+          items: [
+            'config/https',
+            'config/reverse-proxies',
+            'config/oauth-auth',
+            'config/multi-user',
+            'advanced/http-header-auth',
+          ],
+        },
+      ],
+    },
+
+    {
+      type: 'category',
+      label: 'For Developers',
+      collapsed: true,
+      className: 'no-indent section-header',
+      items: [
         {
           type: 'category',
           label: 'API',
@@ -250,11 +294,10 @@ const sidebars = {
     {
       type: 'category',
       label: 'Help & Support',
-      collapsible: false,
-      className: 'no-indent',
+      collapsed: true,
+      className: 'no-indent section-header',
       items: [
         'faq',
-        'actual-server-repo-move',
         {
           type: 'category',
           label: 'Troubleshooting',
@@ -266,8 +309,22 @@ const sidebars = {
             'troubleshooting/edge-browser',
           ],
         },
-        'community-repos',
       ],
+    },
+  ],
+  communitySidebar: [
+    'community/index',
+    'vision',
+    'community-repos',
+    {
+      type: 'link',
+      label: 'Open Bug Reports',
+      href: 'https://github.com/actualbudget/actual/issues',
+    },
+    {
+      type: 'link',
+      label: 'Feature Requests',
+      href: 'https://github.com/actualbudget/actual/issues?q=label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc+',
     },
     {
       type: 'category',
@@ -278,16 +335,6 @@ const sidebars = {
       },
       collapsed: true,
       items: [
-        {
-          type: 'link',
-          label: 'Open Bug Reports',
-          href: 'https://github.com/actualbudget/actual/issues',
-        },
-        {
-          type: 'link',
-          label: 'Feature Requests',
-          href: 'https://github.com/actualbudget/actual/issues?q=label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc+',
-        },
         {
           type: 'category',
           label: 'The Actual Project Structure',
@@ -335,6 +382,13 @@ const sidebars = {
           ],
         },
       ],
+    },
+    'releases',
+    'upcoming-release-notes',
+    {
+      type: 'link',
+      label: 'Chat with us on Discord',
+      href: 'https://discord.gg/8JfAXSgfRf',
     },
   ],
 };

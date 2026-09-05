@@ -1,4 +1,4 @@
-# Authenticating With an OpenID Provider
+# Authenticating with an OpenID Provider
 
 ## Setup
 

@@ -1,4 +1,4 @@
-# Strategies For Handling Joint Accounts
+# Strategies for Handling Joint Accounts
 
 ## Introduction
 

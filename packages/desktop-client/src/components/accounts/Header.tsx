@@ -45,6 +45,7 @@ import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 import { NotesButton } from '#components/NotesButton';
 import { SelectedTransactionsButton } from '#components/transactions/SelectedTransactionsButton';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
@@ -747,7 +748,8 @@ type AccountMenuProps = {
       | 'remove-sorting'
       | 'toggle-reconciled'
       | 'toggle-net-worth-chart'
-      | 'manage-columns',
+      | 'manage-columns'
+      | 'account-group',
   ) => void;
 };
 
@@ -761,6 +763,7 @@ function AccountMenu({
 }: AccountMenuProps) {
   const { t } = useTranslation();
   const syncServerStatus = useSyncServerStatus();
+  const newSidebarUIEnabled = useFeatureFlag('newSidebarUI');
 
   return (
     <Menu
@@ -787,6 +790,14 @@ function AccountMenu({
           name: 'manage-columns',
           text: t('Manage table columns'),
         },
+        ...(newSidebarUIEnabled
+          ? [
+              {
+                name: 'account-group',
+                text: t('Set account group'),
+              } as const,
+            ]
+          : []),
         {
           name: 'toggle-reconciled',
           text: showReconciled
