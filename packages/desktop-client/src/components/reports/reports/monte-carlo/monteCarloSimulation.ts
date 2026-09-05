@@ -536,6 +536,9 @@ export type MonteCarloRunDetailRow = {
   /** Start-of-year balance per pot, before contributions and the
    * withdrawal, same order */
   potStartBalances: number[];
+  /** The year's realized inflation rate as a decimal fraction; null when
+   * inflation is disabled */
+  inflation: number | null;
   /** Contributions paid in at the start of this year */
   contributions: number;
   /** Contribution each pot received at the start of the year, same order */
@@ -1009,6 +1012,17 @@ export function runMonteCarloSimulation(
     plannedTodayByYear[year] = amount;
   }
 
+  // The first year with planned spending - withdrawal rules anchor here
+  // and only adjust from here on, so zero-spend years (accumulation
+  // before retirement) neither trigger nor drift them
+  let firstSpendingYear = Infinity;
+  for (let year = 1; year <= horizonYears; year++) {
+    if (plannedTodayByYear[year] > 0) {
+      firstSpendingYear = year;
+      break;
+    }
+  }
+
   // Planned contributions per pot per year, in today's money - split into
   // an inflation-adjusted and a flat portion so a year's deposit is
   // flat + adjusted × cumulativeInflation. Deterministic and shared by
@@ -1113,10 +1127,6 @@ export function runMonteCarloSimulation(
     accessibleStartByYear[year] = accessibleStart;
   }
 
-  const initialRate =
-    accessibleStartByYear[1] > 0
-      ? plannedTodayByYear[1] / accessibleStartByYear[1]
-      : 0;
   const withdrawnTotals = new Float64Array(simulationCount);
   const depletionYearBySimulation = new Int32Array(simulationCount).fill(-1);
 
@@ -1135,6 +1145,10 @@ export function runMonteCarloSimulation(
     // Cuts/raises from the withdrawal rule compound here, applied on top of
     // the planned spending path (so they persist across spending phases)
     let adjustmentFactor = 1;
+    // Floor & ceiling's withdrawal rate, anchored per run in the first
+    // spending year so the first retirement withdrawal is the planned
+    // amount exactly
+    let floorCeilingAnchorRate = 0;
     // This replay's realized inflation path: each year draws its own rate
     // when inflation volatility is set
     let cumulativeInflation = 1;
@@ -1185,6 +1199,18 @@ export function runMonteCarloSimulation(
             }
           }
         }
+        // Every pot experiences the same market year: historical models
+        // pick one history year for all pots (normally-drawn pots share
+        // one market shock scaled by their own volatility), and the same
+        // sampled year supplies this year's inflation below - keeping the
+        // historical correlation between returns and inflation
+        let historyIndex = -1;
+        if (returnModel === 'historical-bootstrap') {
+          historyIndex = Math.floor(random() * historyCount);
+        } else if (returnModel === 'historical-sequence') {
+          historyIndex = (simulationIndex + year - 1) % historyCount;
+        }
+
         let withdrawal: number;
 
         // Only pots that have reached their access age can fund this year's
@@ -1199,20 +1225,32 @@ export function runMonteCarloSimulation(
         }
 
         // Apply the dynamic withdrawal rule before taking this year's
-        // withdrawal (from year 2 - year 1 always uses the planned amount).
-        // Rules evaluate accessible wealth only: locked pots can't fund
-        // spending, so they must not drive cuts or raises until they unlock
-        if (year > 1 && rule.type === 'floor-ceiling') {
-          // Recompute rule: a fixed share of the accessible balance, kept
-          // within limits around the planned spending
-          withdrawal = clamp(
-            initialRate * accessibleTotal,
-            planned * (1 - rule.floorPct),
-            planned * (1 + rule.ceilingPct),
-          );
+        // withdrawal. Rules only operate in years with planned spending,
+        // measured from the first spending year: the anchor year takes
+        // the planned amount as-is, and zero-spend years (accumulation
+        // before retirement, or a later zero phase) neither adjust nor
+        // drift them. Rules evaluate accessible wealth only: locked pots
+        // can't fund spending, so they must not drive cuts or raises
+        // until they unlock
+        if (rule.type === 'floor-ceiling') {
+          if (year === firstSpendingYear) {
+            floorCeilingAnchorRate =
+              accessibleTotal > 0 ? planned / accessibleTotal : 0;
+          }
+          withdrawal =
+            planned > 0 && year > firstSpendingYear
+              ? // A fixed share of the accessible balance, kept within
+                // limits around the planned spending
+                clamp(
+                  floorCeilingAnchorRate * accessibleTotal,
+                  planned * (1 - rule.floorPct),
+                  planned * (1 + rule.ceilingPct),
+                )
+              : planned;
         } else {
           if (
-            year > 1 &&
+            planned > 0 &&
+            year > firstSpendingYear &&
             rule.type !== 'none' &&
             accessibleTotal > 0 &&
             accessibleStartByYear[year] > 0
@@ -1413,16 +1451,6 @@ export function runMonteCarloSimulation(
             captureTaxables(capturedPotTaxables);
           }
 
-          // Every pot experiences the same market year: historical models
-          // pick one history year for all pots, and normally-drawn pots
-          // share one market shock scaled by their own volatility. Pots
-          // holding the same investments therefore earn the same return.
-          let historyIndex = -1;
-          if (returnModel === 'historical-bootstrap') {
-            historyIndex = Math.floor(random() * historyCount);
-          } else if (returnModel === 'historical-sequence') {
-            historyIndex = (simulationIndex + year - 1) % historyCount;
-          }
           const marketShock = hasNormalDrawPot ? nextNormal() : 0;
 
           total = 0;
@@ -1458,14 +1486,20 @@ export function runMonteCarloSimulation(
           }
         }
 
-        // Realize this year's inflation, drawing a random rate when
-        // volatility is set (fixed mean otherwise)
+        // Realize this year's inflation. Historical models take the
+        // sampled year's actual US inflation - the same year that set the
+        // returns - so high-inflation years keep their high-inflation
+        // markets. The normal model draws from the user's settings
+        // (random around the mean when volatility is set, fixed otherwise)
+        let yearInflationRate: number | null = null;
         if (inflationMean != null) {
-          const yearInflation =
-            inflationStdDev > 0
-              ? Math.max(-0.9, inflationMean + inflationStdDev * nextNormal())
-              : inflationMean;
-          cumulativeInflation *= 1 + yearInflation;
+          yearInflationRate =
+            historyIndex >= 0
+              ? history[historyIndex].inflation
+              : inflationStdDev > 0
+                ? Math.max(-0.9, inflationMean + inflationStdDev * nextNormal())
+                : inflationMean;
+          cumulativeInflation *= 1 + yearInflationRate;
         }
 
         // Management fees come out at the end of the year, after growth
@@ -1561,6 +1595,8 @@ export function runMonteCarloSimulation(
           const base = {
             year,
             startBalance,
+            // A rate, not an amount - passed through undeflated
+            inflation: yearInflationRate,
             contributions,
             potContributions: emitParts(
               capturedPotContributions,

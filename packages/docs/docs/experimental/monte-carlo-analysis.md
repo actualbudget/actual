@@ -42,19 +42,19 @@ The configuration area at the top of the report is organized into five tabs.
 
 ![The Plan Details tab](/img/experimental/monte-carlo-analysis/monte-carlo-plan-details.png)
 
-The tab is organized into three small groups - **Your plan**, **Inflation** and **Simulation**:
+The tab is organized into three small groups - **Your plan**, **Simulation** and **Inflation**:
 
 - **Your current age** and **Pot must last until age** - these two numbers define the period being tested. If you're 40 and want the money to last until you're 95, the report simulates 55 years.
 - **Return model** - how the simulation invents each year's investment returns:
   - **Random (normal distribution)**: each year's return is drawn randomly around the expected return and volatility you set on each pot. Think of it as a weighted coin flip, year after year. Every pot lives through the same simulated market year - a good year is good for all your pots, scaled by each pot's volatility - so two pots holding the same investments earn the same return.
-  - **Historical returns, shuffled**: instead of invented numbers, each simulated year is a real year from US market history (1928 onwards), picked in random order. Real crashes like 1931 and 2008 are in the deck.
-  - **Historical sequences (replay)**: each replay is actual history, played in order from a different starting year - "what if you retired in 1929?", "what if you retired in 1972?", and so on. This is the strictest test of bad timing, because real crashes and recoveries happen in their true order.
+  - **Historical returns, shuffled**: instead of invented numbers, each simulated year is a real year from US market history (1928 onwards), picked in random order. Real crashes like 1931 and 2008 are in the deck, and each sampled year brings its own actual US inflation with it, so high-inflation years keep their high-inflation markets.
+  - **Historical sequences (replay)**: each replay is actual history, played in order from a different starting year - "what if you retired in 1929?", "what if you retired in 1972?", and so on. Each replayed year brings its own actual US inflation with it. This is the strictest test of bad timing, because real crashes and recoveries happen in their true order.
 
-  Both historical models only change returns for pots with an asset mix - an allocation preset, or a complete custom mix. A **Custom** pot always draws random returns around its own expected return and volatility, which is useful for assets history can't stand in for, such as an annuity or property. It also means that if every pot is Custom, a historical model behaves just like the random model.
+  Both historical models only take real returns for pots with an asset mix - an allocation preset, or a complete custom mix. A **Custom** pot always draws random returns around its own expected return and volatility, which is useful for assets history can't stand in for, such as an annuity or property. If every pot is Custom, a historical model's returns behave just like the random model's - though spending still follows each historical year's real inflation.
 
-- **Inflation - Mean (%)** - the average yearly rise in prices. When set, your planned spending grows with it so your spending power keeps up. Leave it blank to take exactly the same amount every year.
-- **Inflation - Std dev (%)** - real-world inflation bounces around from year to year rather than staying fixed. When set, each simulated year draws its own inflation rate around the mean, separately in every replay. The default of 2% is roughly how much US inflation has varied in recent decades; set it to 0 to use the fixed mean rate every year.
 - **Simulations** - how many replays to run (1,000 to 10,000). More replays give steadier numbers but take slightly longer. When using historical sequences, this field is disabled because there is exactly one replay per historical starting year.
+- **Inflation - Mean (%)** - the average yearly rise in prices. When set, your planned spending grows with it so your spending power keeps up. Leave it blank to take exactly the same amount every year. With a historical return model, the two inflation inputs are replaced by an **Adjust spending with inflation** checkbox: each simulated year then uses that year's actual US inflation, keeping inflation and market returns paired the way they really were.
+- **Inflation - Std dev (%)** - real-world inflation bounces around from year to year rather than staying fixed. When set, each simulated year draws its own inflation rate around the mean, separately in every replay. The default of 2% is roughly how much US inflation has varied in recent decades; set it to 0 to use the fixed mean rate every year. Only used by the random return model.
 
 ### Investment Pots
 
@@ -132,7 +132,7 @@ By default, the simulation withdraws the same (inflation-adjusted) amount every 
 
 All the rules share a few ideas:
 
-- Your **spending phases** set the planned amounts. From the second year onward, the rule adjusts what's actually taken - independently in every replay, reacting to how that replay is going. A cut or raise carries across phase boundaries: if the rule cut your spending by 10% during a rough patch, the next phase's amount starts 10% lower too.
+- Your **spending phases** set the planned amounts. The rules wake up in your first year of planned spending: that year takes the planned amount (only a **Minimum withdrawal** set higher than it can override that), and from the next year onward the rule adjusts what's actually taken - independently in every replay, reacting to how that replay is going. Zero-spend years (for example, working years before retirement) neither trigger nor move the rules. A cut or raise carries across phase boundaries: if the rule cut your spending by 10% during a rough patch, the next phase's amount starts 10% lower too.
 - Rules usually improve your **success rate** by cutting spending in bad times, but that safety isn't free - you get it by living on less. Keep an eye on the **Median total withdrawn** stat to see what a rule costs you in income.
 - Rules only see the wealth you can actually spend. If a pension is locked until its access age, it doesn't earn you spending raises while a bridge pot pays the bills - the rules watch the accessible pots, and the pension starts counting the moment it unlocks.
 
@@ -148,7 +148,7 @@ The optimist's rule: withdrawals only ever go **up**, never down. If your balanc
 
 ### Floor & Ceiling (Bengen)
 
-Instead of a fixed amount, each year you withdraw a fixed **percentage of whatever the pots are currently worth** - so spending naturally falls in bad years and rises in good ones. To stop that swinging too wildly, the withdrawal is kept within a floor and a ceiling around your original (inflation-adjusted) amount.
+Instead of a fixed amount, each year you withdraw a fixed **percentage of whatever the pots are currently worth** - so spending naturally falls in bad years and rises in good ones. The percentage is set in your first year of planned spending (your planned amount divided by your accessible wealth at that point), and the withdrawal is then kept within a floor and a ceiling around your planned (inflation-adjusted) amount so it can't swing too wildly.
 
 ### Boundaries
 
@@ -190,7 +190,7 @@ This bar chart only counts the replays that failed, showing at which age they ra
 
 ![The simulation runs table](/img/experimental/monte-carlo-analysis/monte-carlo-runs.png)
 
-Switch the results view from **Chart** to **Runs** to see every replay listed from worst outcome to best. Rather than paging through thousands of runs, use the **Jump to** dropdown to go straight to the worst, median or best run - or the 25th/75th percentile for a typically-bad or typically-good outcome - with the run highlighted so you can click into it. Click any run to walk through it year by year: the balance at the start of each year, the contributions paid in (when your plan has any), the withdrawal taken, the investment growth in that year (as money and as a percentage), and the balance at the end. Expand a year with the arrow at the start of its row (or use **Expand all years**) for the fully labeled breakdown: the withdrawal split into gross, tax and money to spend; the contributions added; the fees paid; and a small table showing each pot's balance at the start of the year, what was contributed into it, what it contributed to the withdrawal, how much of that counted as taxable income, the tax paid on its share, the fee it was charged that year, its return that year, and its ending balance - so you can watch, for example, the cash pot covering spending after a crash while the stock pots are left alone. With the tax-bands model, the per-pot tax is the year's tax bill shared out in proportion to each pot's taxable income.
+Switch the results view from **Chart** to **Runs** to see every replay listed from worst outcome to best. Rather than paging through thousands of runs, use the **Jump to** dropdown to go straight to the worst, median or best run - or the 25th/75th percentile for a typically-bad or typically-good outcome - with the run highlighted so you can click into it. Click any run to walk through it year by year: the balance at the start of each year, the contributions paid in (when your plan has any), the withdrawal taken, the investment growth in that year (as money and as a percentage), the year's inflation rate (when inflation is enabled), and the balance at the end. Expand a year with the arrow at the start of its row (or use **Expand all years**) for the fully labeled breakdown: the withdrawal split into gross, tax and money to spend; the contributions added; the fees paid; and a small table showing each pot's balance at the start of the year, what was contributed into it, what it contributed to the withdrawal, how much of that counted as taxable income, the tax paid on its share, the fee it was charged that year, its return that year, and its ending balance - so you can watch, for example, the cash pot covering spending after a crash while the stock pots are left alone. With the tax-bands model, the per-pot tax is the year's tax bill shared out in proportion to each pot's taxable income.
 
 ![The simulation run table](/img/experimental/monte-carlo-analysis/monte-carlo-run.png)
 
