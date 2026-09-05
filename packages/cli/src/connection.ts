@@ -127,6 +127,19 @@ export async function withConnection<T>(
         info(`Using cached budget (synced ${age}s ago)...`, globalOpts.verbose);
         await api.loadBudget(decision.state.budgetId);
         state = decision.state;
+      } else if (config.encryptionPassword) {
+        info(`Syncing budget ${config.syncId}...`, globalOpts.verbose);
+        // `loadBudget` does not register the end-to-end encryption key, so a
+        // later push fails with `encrypt-failure` / `isMissingKey`. Reads still
+        // work, which makes the failure look like a broken budget file rather
+        // than a missing key. `downloadBudget` registers the key via `key-test`
+        // and, when the budget already exists locally, just loads and syncs it
+        // instead of re-downloading, so this costs nothing extra.
+        await api.downloadBudget(config.syncId, {
+          password: config.encryptionPassword,
+        });
+        state = { ...decision.state, lastSyncedAt: Date.now() };
+        writeCacheState(meta, state);
       } else {
         info(`Syncing budget ${config.syncId}...`, globalOpts.verbose);
         await api.loadBudget(decision.state.budgetId);
