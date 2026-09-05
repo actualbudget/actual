@@ -173,9 +173,10 @@ export function ThemePage({
   const { data: catalog, isLoading, error } = useThemeCatalog();
 
   const query = search.trim().toLowerCase();
-  const matchingBuiltins = BUILTIN_THEME_ROWS.filter(row =>
-    row.name.toLowerCase().includes(query),
-  );
+  const matchingBuiltins = BUILTIN_THEME_ROWS.map(row => ({
+    ...row,
+    label: t(row.name),
+  })).filter(row => row.label.toLowerCase().includes(query));
   const matchingCatalog = (catalog ?? []).filter(
     item =>
       item.name.toLowerCase().includes(query) ||
@@ -198,7 +199,7 @@ export function ThemePage({
             >
               <ThemeSwatches colors={row.swatches} />
               <Text style={themeItemLabelStyle}>
-                <Highlight text={t(row.name)} query={search} />
+                <Highlight text={row.label} query={search} />
               </Text>
               {activeCustomThemeId == null &&
                 activeBuiltinTheme === row.key && <CurrentBadge />}

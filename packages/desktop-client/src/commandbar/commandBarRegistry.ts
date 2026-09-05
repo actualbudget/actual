@@ -37,31 +37,42 @@ type RegistrationHandle = {
   unregister: () => void;
 };
 
-class CommandBarCommandRegistry {
-  private readonly registrations = new Map<number, OwnerRegistration>();
-  private readonly listeners = new Set<() => void>();
-  private snapshot: readonly CommandBarCommand[] = [];
-  private nextRegistrationId = 1;
+type CommandBarCommandRegistry = {
+  getSnapshot: () => readonly CommandBarCommand[];
+  subscribe: (listener: () => void) => () => boolean;
+  register: (
+    ownerId: string,
+    commands: readonly CommandBarCommand[],
+  ) => RegistrationHandle;
+};
 
-  getSnapshot = (): readonly CommandBarCommand[] => this.snapshot;
+function createCommandBarCommandRegistry(): CommandBarCommandRegistry {
+  const registrations = new Map<number, OwnerRegistration>();
+  const listeners = new Set<() => void>();
+  let snapshot: readonly CommandBarCommand[] = [];
+  let nextRegistrationId = 1;
 
-  subscribe = (listener: () => void) => {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  };
+  function getSnapshot(): readonly CommandBarCommand[] {
+    return snapshot;
+  }
 
-  register(
+  function subscribe(listener: () => void) {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  }
+
+  function register(
     ownerId: string,
     commands: readonly CommandBarCommand[],
   ): RegistrationHandle {
     const registration: OwnerRegistration = {
-      registrationId: this.nextRegistrationId++,
+      registrationId: nextRegistrationId++,
       ownerId,
-      commands: this.normalizeCommands(ownerId, commands),
+      commands: normalizeCommands(ownerId, commands),
       submittedCommands: commands,
     };
-    this.registrations.set(registration.registrationId, registration);
-    this.refresh();
+    registrations.set(registration.registrationId, registration);
+    refresh();
 
     let isRegistered = true;
     return {
@@ -71,31 +82,28 @@ class CommandBarCommandRegistry {
         }
 
         registration.submittedCommands = nextCommands;
-        const normalizedCommands = this.normalizeCommands(
-          ownerId,
-          nextCommands,
-        );
+        const normalizedCommands = normalizeCommands(ownerId, nextCommands);
         const presentationChanged = !haveSamePresentation(
           registration.commands,
           normalizedCommands,
         );
         registration.commands = normalizedCommands;
         if (presentationChanged) {
-          this.refresh();
+          refresh();
         }
       },
       unregister: () => {
         if (!isRegistered) return;
         isRegistered = false;
 
-        if (this.registrations.delete(registration.registrationId)) {
-          this.refresh();
+        if (registrations.delete(registration.registrationId)) {
+          refresh();
         }
       },
     };
   }
 
-  private normalizeCommands(
+  function normalizeCommands(
     ownerId: string,
     commands: readonly CommandBarCommand[],
   ): readonly CommandBarCommand[] {
@@ -146,9 +154,9 @@ class CommandBarCommandRegistry {
     );
   }
 
-  private refresh() {
+  function refresh() {
     const commandGroups = new Map<string, CommandBarCommand[]>();
-    for (const registration of this.registrations.values()) {
+    for (const registration of registrations.values()) {
       for (const command of registration.commands) {
         const key = `${registration.ownerId}\u0000${command.id}`;
         const group = commandGroups.get(key) ?? [];
@@ -172,7 +180,7 @@ class CommandBarCommandRegistry {
       }
     }
     const baseIdCounts = new Map<string, number>();
-    for (const registration of this.registrations.values()) {
+    for (const registration of registrations.values()) {
       for (const command of registration.commands) {
         if (ambiguousCommands.has(command)) continue;
         const baseId = getCommandBaseId(
@@ -184,7 +192,7 @@ class CommandBarCommandRegistry {
       }
     }
     const nextSnapshot: CommandBarCommand[] = [];
-    for (const registration of this.registrations.values()) {
+    for (const registration of registrations.values()) {
       for (const command of registration.commands) {
         if (ambiguousCommands.has(command)) continue;
         const id = getCommandBaseId(
@@ -206,7 +214,7 @@ class CommandBarCommandRegistry {
             label: command.label,
             destructive: command.destructive,
             execute: () => {
-              if (!this.registrations.has(registration.registrationId)) {
+              if (!registrations.has(registration.registrationId)) {
                 return;
               }
               const latestCommand = registration.commands.find(
@@ -219,13 +227,15 @@ class CommandBarCommandRegistry {
       }
     }
 
-    if (haveSamePresentation(this.snapshot, nextSnapshot)) {
+    if (haveSamePresentation(snapshot, nextSnapshot)) {
       return;
     }
 
-    this.snapshot = Object.freeze(nextSnapshot);
-    for (const listener of this.listeners) listener();
+    snapshot = Object.freeze(nextSnapshot);
+    for (const listener of listeners) listener();
   }
+
+  return { getSnapshot, subscribe, register };
 }
 
 function getCommandBaseId(
@@ -265,7 +275,7 @@ type CommandBarProviderProps = {
 };
 
 export function CommandBarProvider({ children }: CommandBarProviderProps) {
-  const [registry] = useState(() => new CommandBarCommandRegistry());
+  const [registry] = useState(() => createCommandBarCommandRegistry());
 
   return createElement(
     CommandBarRegistryContext.Provider,
