@@ -81,6 +81,7 @@
     "#components/transactions/table/columns": "./src/components/transactions/table/columns.ts",
     "#components/transactions/table/utils": "./src/components/transactions/table/utils.ts",
     "#components/util/accountValidation": "./src/components/util/accountValidation.ts",
+    "#components/util/betweenRange": "./src/components/util/betweenRange.ts",
     "#components/util/countries": "./src/components/util/countries.ts",
     "#components/util/localeToCountry": "./src/components/util/localeToCountry.ts",
     "#components/*": "./src/components/*.tsx",
