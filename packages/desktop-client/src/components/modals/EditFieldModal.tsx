@@ -15,6 +15,7 @@ import {
 } from '@actual-app/core/shared/util';
 import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
 
+import { NoteTagAutocomplete } from '#components/autocomplete/NoteTagAutocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { SectionLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
@@ -124,6 +125,7 @@ export function EditFieldModal({
 
     case 'notes':
       label = t('Notes');
+      width = tokens.breakpoint_small;
       editor = ({ close }) => (
         <>
           <View
@@ -231,15 +233,18 @@ export function EditFieldModal({
               />
             </View>
           ) : (
-            <Input
-              ref={noteInputRef}
-              autoFocus
-              onEnter={value => {
-                onSelectNote(value, noteAmend);
-                close();
-              }}
-              style={inputStyle}
-            />
+            <>
+              <Input
+                ref={noteInputRef}
+                autoFocus
+                onEnter={value => {
+                  onSelectNote(value, noteAmend);
+                  close();
+                }}
+                style={inputStyle}
+              />
+              <NoteTagAutocomplete inputRef={noteInputRef} />
+            </>
           )}
         </>
       );
