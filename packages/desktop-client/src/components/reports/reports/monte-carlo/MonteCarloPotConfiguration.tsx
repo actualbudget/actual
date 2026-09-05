@@ -24,7 +24,8 @@ import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/M
 import { POT_COLUMNS } from '#components/reports/reports/monte-carlo/MonteCarloPotsTableHeader';
 import {
   ALLOCATION_PRESETS,
-  getHistoricalPresetStats,
+  getHistoricalMixStats,
+  getPotAssetWeights,
   MAX_AMOUNT,
   MAX_ANNUAL_FEE_RATE,
   MAX_WITHDRAWAL_TAX_RATE,
@@ -71,12 +72,25 @@ export function MonteCarloPotConfiguration({
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Historical models derive this pot's returns from its allocation mix,
-  // so preset pots show the mix's measured history instead of editable
-  // assumptions; the manual return/volatility only apply to Custom pots
-  const historicalPresetStats =
-    usesHistoricalReturns && pot.allocationPreset !== 'custom'
-      ? getHistoricalPresetStats(pot.allocationPreset)
-      : null;
+  // so pots with one (presets and custom mixes) show the mix's measured
+  // history instead of editable assumptions; the manual return/volatility
+  // only apply to pots without a mix
+  const assetWeights = usesHistoricalReturns ? getPotAssetWeights(pot) : null;
+  const historicalMixStats =
+    assetWeights != null ? getHistoricalMixStats(assetWeights) : null;
+
+  // A custom mix only counts once its shares total 100% (matching
+  // getPotAssetWeights, tolerance included); until then the pot falls
+  // back to its manual return/volatility and the UI warns
+  const sanitizeShare = (share: number) =>
+    Number.isFinite(share) && share > 0 ? share : 0;
+  const mixShareTotal =
+    sanitizeShare(pot.allocationStocks) +
+    sanitizeShare(pot.allocationBonds) +
+    sanitizeShare(pot.allocationCash);
+  const isMixIncomplete =
+    pot.allocationPreset === 'custom-mix' &&
+    Math.abs(mixShareTotal - 1) >= 1e-9;
 
   // A linked account that has since been closed or deleted isn't in the
   // open-accounts list; keep it represented so the stored link doesn't
@@ -230,6 +244,23 @@ export function MonteCarloPotConfiguration({
               const preset = value as MonteCarloAllocationPreset;
               if (preset === 'custom') {
                 onPotChange({ allocationPreset: preset });
+              } else if (preset === 'custom-mix') {
+                // Seed the mix from the preset being left, so tweaking
+                // a preset (e.g. 80/20 to 85/15) starts from its shares
+                const presetWeights =
+                  pot.allocationPreset !== 'custom-mix'
+                    ? getPotAssetWeights(pot)
+                    : null;
+                onPotChange({
+                  allocationPreset: preset,
+                  ...(presetWeights != null && {
+                    allocationStocks: presetWeights.stocks,
+                    allocationBonds: presetWeights.bonds,
+                    allocationCash: presetWeights.cash,
+                  }),
+                });
+                // The mix's share inputs live in the expanded panel
+                setIsExpanded(true);
               } else {
                 onPotChange({
                   allocationPreset: preset,
@@ -244,6 +275,7 @@ export function MonteCarloPotConfiguration({
               ['equity-60', t('60% stocks / 40% bonds')],
               ['equity-40', t('40% stocks / 60% bonds')],
               ['cash', t('Cash / money market')],
+              ['custom-mix', t('Custom mix')],
               ['custom', t('Custom')],
             ]}
           />
@@ -254,14 +286,14 @@ export function MonteCarloPotConfiguration({
           style={{ minWidth: POT_COLUMNS.expectedReturn }}
           truncate={false}
         >
-          {historicalPresetStats != null ? (
-            // Historical models take real blended returns for preset
-            // pots, so show what the mix actually measured rather than
-            // the preset's ignored assumption
+          {historicalMixStats != null ? (
+            // Historical models take real blended returns for pots with
+            // an asset mix, so show what the mix actually measured
+            // rather than an ignored assumption
             <Text style={{ color: theme.tableText }}>
               <FinancialText as="span">
                 {t('{{value}} (historical)', {
-                  value: `${(historicalPresetStats.mean * 100).toFixed(1)}%`,
+                  value: `${(historicalMixStats.mean * 100).toFixed(1)}%`,
                 })}
               </FinancialText>
             </Text>
@@ -275,7 +307,12 @@ export function MonteCarloPotConfiguration({
               onCommit={newValue =>
                 onPotChange({
                   expectedReturnMean: newValue ?? 0,
-                  allocationPreset: 'custom',
+                  // Typing a value only detaches a real preset; a custom
+                  // mix keeps its mix (these are its random-model inputs)
+                  allocationPreset:
+                    pot.allocationPreset === 'custom-mix'
+                      ? 'custom-mix'
+                      : 'custom',
                 })
               }
             />
@@ -287,11 +324,11 @@ export function MonteCarloPotConfiguration({
           style={{ minWidth: POT_COLUMNS.volatility }}
           truncate={false}
         >
-          {historicalPresetStats != null ? (
+          {historicalMixStats != null ? (
             <Text style={{ color: theme.tableText }}>
               <FinancialText as="span">
                 {t('{{value}} (historical)', {
-                  value: `${(historicalPresetStats.stdDev * 100).toFixed(1)}%`,
+                  value: `${(historicalMixStats.stdDev * 100).toFixed(1)}%`,
                 })}
               </FinancialText>
             </Text>
@@ -305,7 +342,10 @@ export function MonteCarloPotConfiguration({
               onCommit={newValue =>
                 onPotChange({
                   returnStdDev: newValue ?? 0,
-                  allocationPreset: 'custom',
+                  allocationPreset:
+                    pot.allocationPreset === 'custom-mix'
+                      ? 'custom-mix'
+                      : 'custom',
                 })
               }
             />
@@ -343,6 +383,102 @@ export function MonteCarloPotConfiguration({
             columnGap: 40,
           }}
         >
+          {pot.allocationPreset === 'custom-mix' && (
+            <View style={{ gap: 10 }}>
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+              >
+                <Text style={GROUP_HEADING_STYLE}>
+                  <Trans>Allocation</Trans>
+                </Text>
+                <MonteCarloHelpTooltip>
+                  <Trans>
+                    The share of this pot held in each asset class. The three
+                    shares must total 100% - until they do, the pot falls back
+                    to the expected return and volatility you enter.
+                    <br />
+                    <br />
+                    The mix drives this pot&apos;s returns under the historical
+                    return models. The random model still uses the expected
+                    return and volatility you enter.
+                  </Trans>
+                </MonteCarloHelpTooltip>
+              </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  alignItems: 'flex-end',
+                  gap: 20,
+                }}
+              >
+                <View style={FIELD_STYLE}>
+                  <View style={FIELD_LABEL_ROW_STYLE}>
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Stocks (%)</Trans>
+                    </Text>
+                  </View>
+                  <MonteCarloNumberInput
+                    value={pot.allocationStocks}
+                    aria-label={t('Stocks (%)')}
+                    scale={100}
+                    min={0}
+                    max={100}
+                    onCommit={newValue =>
+                      onPotChange({ allocationStocks: newValue ?? 0 })
+                    }
+                  />
+                </View>
+                <View style={FIELD_STYLE}>
+                  <View style={FIELD_LABEL_ROW_STYLE}>
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Bonds (%)</Trans>
+                    </Text>
+                  </View>
+                  <MonteCarloNumberInput
+                    value={pot.allocationBonds}
+                    aria-label={t('Bonds (%)')}
+                    scale={100}
+                    min={0}
+                    max={100}
+                    onCommit={newValue =>
+                      onPotChange({ allocationBonds: newValue ?? 0 })
+                    }
+                  />
+                </View>
+                <View style={FIELD_STYLE}>
+                  <View style={FIELD_LABEL_ROW_STYLE}>
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Cash (%)</Trans>
+                    </Text>
+                  </View>
+                  <MonteCarloNumberInput
+                    value={pot.allocationCash}
+                    aria-label={t('Cash (%)')}
+                    scale={100}
+                    min={0}
+                    max={100}
+                    onCommit={newValue =>
+                      onPotChange({ allocationCash: newValue ?? 0 })
+                    }
+                  />
+                </View>
+              </View>
+              {isMixIncomplete && (
+                <Text style={{ color: theme.errorText }}>
+                  <Trans>
+                    Shares must total 100% - currently{' '}
+                    {{
+                      total: `${parseFloat((mixShareTotal * 100).toFixed(2))}%`,
+                    }}
+                    . Until they do, this pot uses your expected return and
+                    volatility instead of the mix.
+                  </Trans>
+                </Text>
+              )}
+            </View>
+          )}
+
           <View style={{ gap: 10 }}>
             <Text style={GROUP_HEADING_STYLE}>
               <Trans>Access</Trans>
