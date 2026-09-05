@@ -83,6 +83,7 @@ export { SvgCheveronOutlineLeft } from './CheveronOutlineLeft';
 export { SvgCheveronOutlineRight } from './CheveronOutlineRight';
 export { SvgCheveronOutlineUp } from './CheveronOutlineUp';
 export { SvgCheveronRight } from './CheveronRight';
+export { SvgCheveronUpDown } from './CheveronUpDown';
 export { SvgCheveronUp } from './CheveronUp';
 export { SvgClipboard } from './Clipboard';
 export { SvgCloseOutline } from './CloseOutline';
