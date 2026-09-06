@@ -91,6 +91,24 @@ export type MetadataPrefs = Partial<{
 /**
  * Local preferences applicable to a single device. Stored in local storage.
  */
+export type CommandBarFavoriteRef =
+  | Readonly<{ type: 'navigation'; id: string }>
+  | Readonly<{ type: 'account'; id: string }>
+  | Readonly<{ type: 'dashboard'; id: string }>
+  | Readonly<{ type: 'report'; id: string }>
+  | Readonly<{ type: 'quick-action'; id: string }>
+  | Readonly<{
+      type: 'page-action';
+      ownerId: string;
+      commandId: string;
+      instanceId?: string;
+    }>;
+
+export type CommandBarFavoritesPref = Readonly<{
+  version: 2;
+  favorites: readonly CommandBarFavoriteRef[];
+}>;
+
 export type LocalPrefs = Partial<{
   'ui.showClosedAccounts': boolean;
   'expand-splits': boolean;
@@ -107,6 +125,7 @@ export type LocalPrefs = Partial<{
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
   'mobile.bankSyncProvidersCollapsed': boolean;
+  'commandbar.favorites': CommandBarFavoritesPref;
 }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;

@@ -1,5 +1,18 @@
-import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import type { ComponentProps } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
+import type {
+  ComponentProps,
+  ForwardedRef,
+  ReactElement,
+  RefAttributes,
+} from 'react';
 import { FocusScope } from 'react-aria';
 import { Form } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -577,6 +590,10 @@ type FilterButtonProps<T extends RuleConditionEntity> = {
   include?: string[];
 };
 
+export type FilterButtonHandle = {
+  open: () => void;
+};
+
 /**
  * Returns whether a filter field should be shown in the picker.
  *
@@ -598,13 +615,10 @@ function shouldShowFilterField(
 /**
  * Shared filter picker used by reports to choose and apply filter conditions.
  */
-export function FilterButton<T extends RuleConditionEntity>({
-  onApply,
-  compact,
-  hover,
-  exclude,
-  include,
-}: FilterButtonProps<T>) {
+function FilterButtonImpl<T extends RuleConditionEntity>(
+  { onApply, compact, hover, exclude, include }: FilterButtonProps<T>,
+  ref: ForwardedRef<FilterButtonHandle>,
+) {
   const { t } = useTranslation();
   const filters = useTransactionFilters();
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -657,6 +671,14 @@ export function FilterButton<T extends RuleConditionEntity>({
       }
     },
     { fieldsOpen: false, condOpen: false, field: null, value: null },
+  );
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      open: () => dispatch({ type: 'select-field' }),
+    }),
+    [dispatch],
   );
 
   async function onValidateAndApply(cond: T) {
@@ -827,6 +849,12 @@ export function FilterButton<T extends RuleConditionEntity>({
     </View>
   );
 }
+
+export const FilterButton = forwardRef(FilterButtonImpl) as <
+  T extends RuleConditionEntity,
+>(
+  props: FilterButtonProps<T> & RefAttributes<FilterButtonHandle>,
+) => ReactElement;
 
 type FilterEditorProps<T extends RuleConditionEntity> = FilterReducerState<T> &
   Pick<T, 'options'> & {
