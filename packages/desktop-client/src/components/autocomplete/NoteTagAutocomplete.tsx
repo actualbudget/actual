@@ -10,6 +10,7 @@ import { css } from '@emotion/css';
 import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
 import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useInputRefValue } from '#hooks/useInputRefValue';
+import { useRefEventListener } from '#hooks/useRefEventListener';
 import { useTagCSS } from '#hooks/useTagCSS';
 import { useFilteredTags } from '#hooks/useTags';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -73,6 +74,19 @@ export function NoteTagAutocomplete({ inputRef }: NoteTagAutocompleteProps) {
       console.trace(e);
     }
   }
+
+  useRefEventListener(inputRef, 'keydown', e => {
+    if (e.key !== 'Tab') return;
+    if (filteredTags.length) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleSelect(filteredTags[0].tag);
+    } else if (showNewTag) {
+      e.preventDefault();
+      e.stopPropagation();
+      void handleCreate(currentWordNoHash);
+    }
+  });
 
   const hideScrollbar = css({
     'scrollbar-width': 'none',

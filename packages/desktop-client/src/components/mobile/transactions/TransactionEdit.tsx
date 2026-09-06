@@ -7,12 +7,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { ReactNode, RefObject } from 'react';
+import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
-import { SvgHash, SvgSplit } from '@actual-app/components/icons/v0';
+import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgAdd,
   SvgCalendar,
@@ -71,6 +71,7 @@ import {
   parseISO,
 } from 'date-fns';
 
+import { NoteInsertHashButton } from '#components/autocomplete/NoteInsertHashButton';
 import { NoteTagAutocomplete } from '#components/autocomplete/NoteTagAutocomplete';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import {
@@ -84,9 +85,7 @@ import { MobilePageHeader, Page } from '#components/Page';
 import { shouldApplyRuleChange } from '#components/transactions/table/utils';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
-import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useDateFormat } from '#hooks/useDateFormat';
-import { useInputRefValue } from '#hooks/useInputRefValue';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
 import { useNavigate } from '#hooks/useNavigate';
@@ -550,7 +549,7 @@ const ChildTransactionEdit = forwardRef<
           <InputField
             ref={noteRef}
             iconStart={<SvgNotesPaper width={17} height={17} />}
-            iconEnd={<NoteInsertHashButton noteRef={noteRef} />}
+            iconEnd={<NoteInsertHashButton inputRef={noteRef} />}
             placeholder={t('Add a note (optional)')}
             disabled={
               !!editingField &&
@@ -1491,7 +1490,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             <InputField
               ref={noteRef}
               iconStart={<SvgNotesPaper width={17} height={17} />}
-              iconEnd={<NoteInsertHashButton noteRef={noteRef} />}
+              iconEnd={<NoteInsertHashButton inputRef={noteRef} />}
               placeholder={t('Add a note (optional)')}
               disabled={
                 !!editingField &&
@@ -1545,50 +1544,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     );
   },
 );
-
-function NoteInsertHashButton({
-  noteRef,
-}: {
-  noteRef: RefObject<HTMLInputElement | null>;
-}) {
-  const { t } = useTranslation();
-  const [inputValue, setInputValue] = useInputRefValue(noteRef);
-  const [_, setCursorPosition] = useCursorPosition(noteRef);
-
-  return (
-    <Button
-      variant="bare"
-      aria-label={t('Add tag')}
-      style={{ color: 'inherit', padding: 1 }}
-      onPointerDown={e => e.preventDefault()}
-      onClick={() => {
-        if (!noteRef.current) return;
-        const isFocused = document.activeElement === noteRef.current;
-        const start = isFocused
-          ? (noteRef.current.selectionStart ?? 0)
-          : inputValue.length;
-        const end = isFocused
-          ? (noteRef.current.selectionEnd ?? 0)
-          : inputValue.length;
-
-        const before = inputValue.substring(0, start);
-        const after = inputValue.substring(end);
-
-        const space = start === 0 || before.match(/\s$/) ? '' : ' ';
-
-        setInputValue(before + space + '#' + after);
-        noteRef.current.focus();
-        setCursorPosition(start + 1 + space.length);
-        // so Safari requires that I do noteRef.current.focus() synchronously,
-        // but Chrome doesn't work unless I do it after. We do both this way.
-        // If the element is already focused, these invocations have no effect
-        setTimeout(() => noteRef.current?.focus(), 1);
-      }}
-    >
-      <SvgHash width={17} height={17} />
-    </Button>
-  );
-}
 
 function isTemporary(transaction: TransactionEntity) {
   return transaction.id.indexOf('temp') === 0;

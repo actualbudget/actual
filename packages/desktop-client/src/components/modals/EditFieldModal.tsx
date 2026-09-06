@@ -15,10 +15,12 @@ import {
 } from '@actual-app/core/shared/util';
 import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
 
+import { NoteInsertHashButton } from '#components/autocomplete/NoteInsertHashButton';
 import { NoteTagAutocomplete } from '#components/autocomplete/NoteTagAutocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { SectionLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
+import { InputField } from '#components/mobile/MobileForms';
 import { DateSelect } from '#components/select/DateSelect';
 import { useDateFormat } from '#hooks/useDateFormat';
 import type { Modal as ModalType } from '#modals/modalsSlice';
@@ -234,15 +236,28 @@ export function EditFieldModal({
             </View>
           ) : (
             <>
-              <Input
-                ref={noteInputRef}
-                autoFocus
-                onEnter={value => {
-                  onSelectNote(value, noteAmend);
-                  close();
-                }}
-                style={inputStyle}
-              />
+              {isNarrowWidth ? (
+                <InputField
+                  ref={noteInputRef}
+                  autoFocus
+                  iconEnd={<NoteInsertHashButton inputRef={noteInputRef} />}
+                  onEnter={value => {
+                    onSelectNote(value, noteAmend);
+                    close();
+                  }}
+                  style={inputStyle}
+                />
+              ) : (
+                <Input
+                  ref={noteInputRef}
+                  autoFocus
+                  onEnter={value => {
+                    onSelectNote(value, noteAmend);
+                    close();
+                  }}
+                  style={inputStyle}
+                />
+              )}
               <NoteTagAutocomplete inputRef={noteInputRef} />
             </>
           )}
