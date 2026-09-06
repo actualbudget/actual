@@ -30,7 +30,13 @@ export function SidebarIconButton({
       isDisabled={isDisabled}
       onPress={onPress}
       className={css({
-        '&:hover': {
+        color: isToggledOn
+          ? theme.sidebarItemTextSelected
+          : theme.sidebarTextSubdued,
+        backgroundColor: isToggledOn
+          ? theme.sidebarControlBackground
+          : 'transparent',
+        '&[data-hovered], &[data-focus-visible]': {
           backgroundColor: theme.sidebarControlBackground,
           color: theme.sidebarItemTextSelected,
         },
@@ -40,12 +46,6 @@ export function SidebarIconButton({
         height: 18,
         padding: 0,
         borderRadius: radius.sm,
-        color: isToggledOn
-          ? theme.sidebarItemTextSelected
-          : theme.sidebarTextSubdued,
-        backgroundColor: isToggledOn
-          ? theme.sidebarControlBackground
-          : 'transparent',
       }}
     >
       <Icon width={12} height={12} style={{ flexShrink: 0 }} />

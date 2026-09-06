@@ -1,9 +1,11 @@
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { AccountGroupEntity } from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
 
 import * as bindings from '#spreadsheet/bindings';
 
@@ -35,6 +37,11 @@ export function AccountGroupHeader({
       variant="bare"
       aria-expanded={isOpen}
       onPress={onToggle}
+      className={css({
+        '&[data-hovered], &[data-focus-visible]': {
+          backgroundColor: theme.sidebarItemBackgroundHover,
+        },
+      })}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -43,7 +50,6 @@ export function AccountGroupHeader({
         padding: `${spacing.xs}px ${spacing.sm}px ${spacing.xs}px ${spacing.xs}px`,
         borderRadius: radius.sm,
         width: '100%',
-        backgroundColor: 'transparent',
       }}
     >
       <CollapseChevron isOpen={isOpen} size={11} />

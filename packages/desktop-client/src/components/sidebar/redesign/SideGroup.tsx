@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
+import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { css } from '@emotion/css';
 
 import { Link } from '#components/common/Link';
 import type { Binding } from '#spreadsheet';
@@ -64,7 +65,16 @@ export function SideGroup({
               : t('Expand {{section}}', { section: label })
           }
           onPress={onToggle}
-          style={{ padding: 0, flexShrink: 0, backgroundColor: 'transparent' }}
+          className={css({
+            '&[data-hovered], &[data-focus-visible]': {
+              backgroundColor: theme.sidebarItemBackgroundHover,
+            },
+          })}
+          style={{
+            padding: spacing.xxs,
+            flexShrink: 0,
+            borderRadius: radius.sm,
+          }}
         >
           <CollapseChevron isOpen={isOpen} />
         </Button>

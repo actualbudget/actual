@@ -3,9 +3,10 @@ import { Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { spacing } from '@actual-app/components/tokens';
+import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
 
 import { AccountRow } from './AccountRow';
 import { CollapseChevron } from './CollapseChevron';
@@ -33,14 +34,19 @@ export function ClosedSection({
         variant="bare"
         aria-expanded={isOpen}
         onPress={onToggle}
+        className={css({
+          '&[data-hovered], &[data-focus-visible]': {
+            backgroundColor: theme.sidebarItemBackgroundHover,
+          },
+        })}
         style={{
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'flex-start',
           gap: spacing.xs,
           padding: `${spacing.xs}px ${spacing.sm}px ${spacing.xs}px ${spacing.xs}px`,
+          borderRadius: radius.sm,
           width: '100%',
-          backgroundColor: 'transparent',
         }}
       >
         <CollapseChevron isOpen={isOpen} color={theme.sidebarTextMuted} />
