@@ -85,7 +85,7 @@ export function SideGroup({
           activeStyle={{ color: theme.sidebarItemTextSelected }}
         >
           <Text style={sectionLabelStyle}>{label}</Text>
-          <CountPill count={sideData.accountCount} />
+          {!isOpen && <CountPill count={sideData.accountCount} />}
           <SyncErrorRollup count={sideData.failedCount} />
           <View style={{ flex: 1 }} />
           <SidebarBalance

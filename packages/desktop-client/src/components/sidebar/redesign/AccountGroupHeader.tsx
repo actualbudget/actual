@@ -50,7 +50,7 @@ export function AccountGroupHeader({
       <Text style={{ ...groupLabelStyle, ...styles.ellipsisText }}>
         {group.name}
       </Text>
-      <CountPill count={accountCount} />
+      {!isOpen && <CountPill count={accountCount} />}
       <SyncErrorRollup count={failedCount} />
       <View style={{ flex: 1 }} />
       <SidebarBalance

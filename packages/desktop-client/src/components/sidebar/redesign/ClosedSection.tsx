@@ -47,7 +47,7 @@ export function ClosedSection({
         <Text style={{ ...sectionLabelStyle, color: theme.sidebarTextMuted }}>
           <Trans>Closed</Trans>
         </Text>
-        <CountPill count={accounts.length} />
+        {!isOpen && <CountPill count={accounts.length} />}
       </Button>
       {isOpen && (
         <View style={{ paddingLeft: spacing.xs }}>
