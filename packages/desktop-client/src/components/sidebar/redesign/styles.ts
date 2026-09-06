@@ -2,10 +2,8 @@ import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 
 export const sectionLabelStyle = {
-  fontSize: 11,
-  fontWeight: 700,
-  letterSpacing: '0.05em',
-  textTransform: 'uppercase',
+  fontSize: 13,
+  fontWeight: 600,
 } satisfies CSSProperties;
 
 export const groupLabelStyle = {
