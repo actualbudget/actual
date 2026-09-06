@@ -40,7 +40,7 @@ export function AccountGroupHeader({
         alignItems: 'center',
         justifyContent: 'flex-start',
         gap: spacing.xs,
-        padding: `${spacing.xxs}px ${spacing.sm}px ${spacing.xxs}px ${spacing.xs}px`,
+        padding: `${spacing.xs}px ${spacing.sm}px ${spacing.xs}px ${spacing.xs}px`,
         borderRadius: radius.sm,
         width: '100%',
         backgroundColor: 'transparent',
