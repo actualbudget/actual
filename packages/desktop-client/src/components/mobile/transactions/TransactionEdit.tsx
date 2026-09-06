@@ -21,6 +21,7 @@ import {
   SvgPiggyBank,
   SvgTag,
   SvgTrash,
+  SvgTuning,
   SvgUser,
   SvgWallet,
 } from '@actual-app/components/icons/v1';
@@ -87,6 +88,7 @@ import { useCategories } from '#hooks/useCategories';
 import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
 import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useInputRefValue } from '#hooks/useInputRefValue';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
@@ -100,6 +102,7 @@ import {
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useTagCSS } from '#hooks/useTagCSS';
 import { useFilteredTags } from '#hooks/useTags';
+import { useTransactionRuleStatus } from '#hooks/useTransactionRuleStatus';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useSavePayeeLocationMutation } from '#payees';
@@ -663,6 +666,13 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const { data: { grouped: categoryGroups } = { grouped: [] } } =
       useCategories();
     const noteRef = useRef<HTMLInputElement | null>(null);
+
+    const isTransactionRulesUIEnabled = useFeatureFlag('transactionRulesUI');
+    const { ruleStatus, openEditRule, openCreateRule } =
+      useTransactionRuleStatus(
+        unserializedTransactions[0],
+        isTransactionRulesUIEnabled,
+      );
 
     useEffect(() => {
       if (window.history.length === 1) {
@@ -1393,36 +1403,95 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             />
           ))}
 
-          {transaction.amount !== 0 && childTransactions.length === 0 && (
-            <View style={{ alignItems: 'center' }}>
-              <Button
-                variant="bare"
-                isDisabled={!!editingField}
-                style={{
-                  height: 40,
-                  borderWidth: 0,
-                  marginLeft: styles.mobileEditingPadding,
-                  marginRight: styles.mobileEditingPadding,
-                  marginTop: 10,
-                  backgroundColor: 'transparent',
-                }}
-                onPress={() => onSplit(transaction.id)}
-              >
-                <SvgSplit
-                  width={17}
-                  height={17}
-                  style={{ color: theme.formLabelText }}
-                />
-                <Text
+          {childTransactions.length === 0 && (
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 16,
+                marginTop: 10,
+                marginLeft: styles.mobileEditingPadding,
+                marginRight: styles.mobileEditingPadding,
+              }}
+            >
+              {transaction.amount !== 0 && (
+                <Button
+                  variant="bare"
+                  isDisabled={!!editingField}
                   style={{
-                    marginLeft: 5,
-                    userSelect: 'none',
-                    color: theme.formLabelText,
+                    height: 40,
+                    borderWidth: 0,
+                    backgroundColor: 'transparent',
+                  }}
+                  onPress={() => onSplit(transaction.id)}
+                >
+                  <SvgSplit
+                    width={17}
+                    height={17}
+                    style={{ color: theme.formLabelText }}
+                  />
+                  <Text
+                    style={{
+                      marginLeft: 5,
+                      userSelect: 'none',
+                      color: theme.formLabelText,
+                    }}
+                  >
+                    <Trans>Split</Trans>
+                  </Text>
+                </Button>
+              )}
+
+              {isTransactionRulesUIEnabled && (
+                <Button
+                  variant="bare"
+                  isDisabled={!!editingField}
+                  style={{
+                    height: 40,
+                    borderWidth: 0,
+                    backgroundColor: 'transparent',
+                  }}
+                  onPress={() => {
+                    if (ruleStatus?.categorizingRule) {
+                      openEditRule(ruleStatus.categorizingRule);
+                    } else if (unserializedTransactions[0]) {
+                      openCreateRule(unserializedTransactions[0]);
+                    }
                   }}
                 >
-                  <Trans>Split</Trans>
-                </Text>
-              </Button>
+                  <SvgTuning
+                    width={17}
+                    height={17}
+                    style={{
+                      color: ruleStatus?.isCategorizedByRule
+                        ? theme.pageTextPositive
+                        : ruleStatus?.isOverridden
+                          ? theme.warningText
+                          : theme.formLabelText,
+                    }}
+                  />
+                  <Text
+                    style={{
+                      marginLeft: 5,
+                      userSelect: 'none',
+                      color: ruleStatus?.isCategorizedByRule
+                        ? theme.pageTextPositive
+                        : ruleStatus?.isOverridden
+                          ? theme.warningText
+                          : theme.formLabelText,
+                    }}
+                  >
+                    {ruleStatus?.isCategorizedByRule ? (
+                      <Trans>Rule Active</Trans>
+                    ) : ruleStatus?.isOverridden ? (
+                      <Trans>Rule (Overridden)</Trans>
+                    ) : (
+                      <Trans>Create Rule</Trans>
+                    )}
+                  </Text>
+                </Button>
+              )}
             </View>
           )}
 

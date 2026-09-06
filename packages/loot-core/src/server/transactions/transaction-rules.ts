@@ -402,6 +402,150 @@ export async function runRules(
   return await finalizeTransactionForRules(finalTrans);
 }
 
+export type TransactionRuleStatus = {
+  categorizingRule: RuleEntity | null;
+  status: 'applied' | 'will-apply' | 'overridden' | 'none';
+  isCategorizedByRule: boolean;
+  isOverridden: boolean;
+  ruleCategoryId: string | null;
+  ruleSummary: string | null;
+  matchedRules: RuleEntity[];
+};
+
+export async function checkTransactionRules(
+  trans: TransactionEntity,
+  accounts: Map<string, db.DbAccount> | null = null,
+): Promise<TransactionRuleStatus> {
+  await ensureFormulaPreferencesLoaded();
+
+  let accountsMap: Map<string, db.DbAccount> = null;
+  if (accounts === null) {
+    accountsMap = new Map(
+      (await db.getAccounts()).map(account => [account.id, account]),
+    );
+  } else {
+    accountsMap = accounts;
+  }
+
+  const finalTrans = await prepareTransactionForRules(
+    { ...trans },
+    accountsMap,
+  );
+
+  let scheduleRuleID = '';
+  if (trans.schedule != null) {
+    const ruleId = await getRuleIdFromScheduleId(trans.schedule);
+    if (ruleId != null) {
+      scheduleRuleID = ruleId;
+    }
+  }
+
+  const RuleIdsLinkedToSchedules =
+    await getAllRuleIdsFromSchedules(scheduleRuleID);
+
+  const rules = rankRules(
+    fastSetMerge(
+      firstcharIndexer.getApplicableRules(trans),
+      payeeIndexer.getApplicableRules(trans),
+    ),
+  );
+
+  const formulaStrings = rules.flatMap(rule =>
+    collectFormulasFromActions(rule.actions),
+  );
+  finalTrans._balanceOfPrefetched = await prefetchBalanceOfForTransaction(
+    finalTrans,
+    accountsMap,
+    formulaStrings,
+  );
+
+  let categorizingRule: RuleEntity | null = null;
+  let ruleCategoryId: string | null = null;
+  const matchedRules: RuleEntity[] = [];
+
+  for (let i = 0; i < rules.length; i++) {
+    const currentRule = rules[i];
+    let matched = false;
+
+    if (scheduleRuleID !== '') {
+      if (currentRule.id === scheduleRuleID) {
+        matched = true;
+      } else if (RuleIdsLinkedToSchedules.includes(currentRule.id)) {
+        continue;
+      } else {
+        matched = currentRule.evalConditions(finalTrans);
+      }
+    } else {
+      matched = currentRule.evalConditions(finalTrans);
+    }
+
+    if (matched) {
+      matchedRules.push(currentRule.serialize());
+
+      for (const action of currentRule.actions) {
+        if (action.field === 'category' && action.op === 'set') {
+          categorizingRule = currentRule.serialize();
+          ruleCategoryId = String(action.value);
+        }
+      }
+    }
+  }
+
+  let status: TransactionRuleStatus['status'] = 'none';
+  if (categorizingRule != null && ruleCategoryId != null) {
+    if (trans.category === ruleCategoryId) {
+      status = 'applied';
+    } else if (!trans.category) {
+      status = 'will-apply';
+    } else {
+      status = 'overridden';
+    }
+  }
+
+  let ruleSummary: string | null = null;
+  if (categorizingRule && categorizingRule.conditions.length > 0) {
+    ruleSummary = categorizingRule.conditions
+      .map(c => {
+        const valStr =
+          typeof c.value === 'object' && c.value !== null
+            ? JSON.stringify(c.value)
+            : String(c.value ?? '');
+        return `${String(c.field)} ${String(c.op)} ${valStr}`;
+      })
+      .join(', ');
+  }
+
+  return {
+    categorizingRule,
+    status,
+    isCategorizedByRule: status === 'applied',
+    isOverridden: status === 'overridden',
+    ruleCategoryId,
+    ruleSummary,
+    matchedRules,
+  };
+}
+
+export async function checkTransactionsRules(
+  transactions: TransactionEntity[],
+): Promise<Record<string, TransactionRuleStatus>> {
+  if (!transactions || transactions.length === 0) {
+    return {};
+  }
+
+  const accounts: db.DbAccount[] = await db.getAccounts();
+  const accountsMap = new Map(accounts.map(account => [account.id, account]));
+
+  const results: Record<string, TransactionRuleStatus> = {};
+  for (const trans of transactions) {
+    const status = await checkTransactionRules(trans, accountsMap);
+    if (trans.id) {
+      results[trans.id] = status;
+    }
+  }
+  return results;
+}
+
 function conditionSpecialCases(cond: Condition | null): Condition | null {
   if (!cond) {
     return cond;
