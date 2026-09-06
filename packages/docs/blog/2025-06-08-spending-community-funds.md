@@ -4,6 +4,7 @@ description: We're proposing a system to pay core maintainers for essential admi
 date: 2025-06-08T16:00
 slug: spending-community-funds
 tags: [announcement]
+in_app_notification: true
 hide_table_of_contents: false
 authors: MatissJanis
 ---
