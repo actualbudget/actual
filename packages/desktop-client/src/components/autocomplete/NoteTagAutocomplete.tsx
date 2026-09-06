@@ -34,10 +34,17 @@ export function NoteTagAutocomplete({ inputRef }: NoteTagAutocompleteProps) {
   const [cursorPosition] = useCursorPosition(inputRef);
   const [startIdx, endIdx] = useCurrentWordRange(note, cursorPosition);
   const currentWord = note.slice(startIdx, endIdx);
-  const currentWordNoHash = currentWord.replace(/^#+/, '');
-  const { data: filteredTags, refetch } = useFilteredTags(currentWord, true);
+  // `##name` is the escape sequence for a literal `#name` (see docs), so only
+  // a word with exactly one leading `#` is eligible for tag completion.
+  const leadingHashCount = currentWord.match(/^#+/)?.[0].length ?? 0;
+  const hasSingleLeadingHash = leadingHashCount === 1;
+  const currentWordNoHash = hasSingleLeadingHash ? currentWord.slice(1) : '';
+  const { data: filteredTags, refetch } = useFilteredTags(
+    hasSingleLeadingHash ? currentWord : '',
+    true,
+  );
   const showNewTag =
-    currentWord.startsWith('#') &&
+    hasSingleLeadingHash &&
     currentWordNoHash &&
     !filteredTags.some(tag => tag.tag === currentWordNoHash);
 
