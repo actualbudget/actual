@@ -58,6 +58,21 @@ command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/format-edited-f
 type = "command"
 command = '"$(git rev-parse --show-toplevel)/scripts/agent-hooks/prefer-one-component.sh"'
 
+# Run the Impeccable design checks when the optional skill is installed.
+[[hooks.PostToolUse]]
+matcher = "^apply_patch$|^Write$|^Edit$"
+[[hooks.PostToolUse.hooks]]
+type = "command"
+command = '[ ! -f ".agents/skills/impeccable/scripts/hook.mjs" ] || node ".agents/skills/impeccable/scripts/hook.mjs"'
+timeout = 5
+statusMessage = "Checking UI changes"
+
+[[hooks.Stop]]
+[[hooks.Stop.hooks]]
+type = "command"
+command = 'if [ -f ".agents/skills/impeccable/scripts/hook.mjs" ]; then node ".agents/skills/impeccable/scripts/hook.mjs"; else echo "The impeccable design skill is recommended for UI work in this repo but is not installed in this checkout. Install it with: npx impeccable install"; fi'
+timeout = 30
+statusMessage = "Design deep pass"
 # Block creating GitHub issues — filing an issue is a human decision. The guard
 # reads tool_input.method and only lets issue_write calls whose method is
 # "update" through (exit 2 blocks everything else). `gh issue create` from the

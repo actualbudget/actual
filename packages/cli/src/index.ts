@@ -1,17 +1,20 @@
 import { Command, Option } from 'commander';
 
 import { registerAccountsCommand } from './commands/accounts';
+import { registerAutomationsCommand } from './commands/automations';
 import { registerBudgetsCommand } from './commands/budgets';
 import { registerCategoriesCommand } from './commands/categories';
 import { registerCategoryGroupsCommand } from './commands/category-groups';
 import { registerPayeesCommand } from './commands/payees';
 import { registerQueryCommand } from './commands/query';
+import { registerReportsCommand } from './commands/reports';
 import { registerRulesCommand } from './commands/rules';
 import { registerSchedulesCommand } from './commands/schedules';
 import { registerServerCommand } from './commands/server';
 import { registerSyncCommand } from './commands/sync';
 import { registerTagsCommand } from './commands/tags';
 import { registerTransactionsCommand } from './commands/transactions';
+import { resolveDefaultFormat } from './config';
 import { parseNonNegativeIntFlag } from './utils';
 
 declare const __CLI_VERSION__: string;
@@ -51,13 +54,21 @@ program
     'Disable the budget directory lock (use with care, env: ACTUAL_NO_LOCK)',
   )
   .addOption(
-    new Option('--format <format>', 'Output format: json, table, csv')
-      .choices(['json', 'table', 'csv'] as const)
-      .default('json'),
+    new Option(
+      '--format <format>',
+      'Output format: json, table, csv (env: ACTUAL_FORMAT; config: "format"; default: json)',
+    ).choices(['json', 'table', 'csv'] as const),
   )
-  .option('--verbose', 'Show informational messages', false);
+  .option('--verbose', 'Show informational messages', false)
+  .hook('preAction', async () => {
+    if (program.opts().format === undefined) {
+      program.setOptionValue('format', await resolveDefaultFormat());
+    }
+  });
 
 registerAccountsCommand(program);
+registerAutomationsCommand(program);
+registerReportsCommand(program);
 registerBudgetsCommand(program);
 registerCategoriesCommand(program);
 registerCategoryGroupsCommand(program);

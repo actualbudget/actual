@@ -13,6 +13,20 @@ import { resolveConfig } from './config';
 import { acquireExclusive, acquireShared } from './lock';
 import type { Release } from './lock';
 
+type Backend = NonNullable<Awaited<ReturnType<typeof api.init>>>;
+
+// The CLI bundle is ESM while @actual-app/api ships CommonJS, so the `internal`
+// named export is a snapshot taken before init() runs. Keep the handle that
+// init() returns so commands can reach loot-core handlers directly.
+let backend: Backend | null = null;
+
+export function getBackend(): Backend {
+  if (!backend) {
+    throw new Error('Not connected to a budget');
+  }
+  return backend;
+}
+
 type ConnectionOptions = {
   mutates: boolean;
   skipBudget?: boolean;
@@ -47,14 +61,14 @@ export async function withConnection<T>(
   info(`Connecting to ${config.serverUrl}...`, globalOpts.verbose);
 
   if (config.sessionToken) {
-    await api.init({
+    backend = await api.init({
       serverURL: config.serverUrl,
       dataDir: config.dataDir,
       sessionToken: config.sessionToken,
       verbose: globalOpts.verbose,
     });
   } else if (config.password) {
-    await api.init({
+    backend = await api.init({
       serverURL: config.serverUrl,
       dataDir: config.dataDir,
       password: config.password,
@@ -150,5 +164,6 @@ export async function withConnection<T>(
     }
   } finally {
     await api.shutdown();
+    backend = null;
   }
 }

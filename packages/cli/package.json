@@ -21,9 +21,11 @@
     "#commands/*": "./src/commands/*.ts",
     "#config": "./src/config.ts",
     "#connection": "./src/connection.ts",
+    "#csv": "./src/csv.ts",
     "#input": "./src/input.ts",
     "#lock": "./src/lock.ts",
     "#output": "./src/output.ts",
+    "#resolve": "./src/resolve.ts",
     "#utils": "./src/utils.ts"
   },
   "scripts": {

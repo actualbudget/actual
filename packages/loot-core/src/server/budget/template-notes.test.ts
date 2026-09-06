@@ -31,6 +31,11 @@ function mockDbUpdate() {
   vi.mocked(db.updateWithSchema).mockResolvedValue(undefined);
 }
 
+beforeEach(() => {
+  // Percentage templates look up their category reference when unparsing.
+  vi.mocked(db.getCategories).mockResolvedValue([]);
+});
+
 describe('storeNoteTemplates', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -524,5 +529,84 @@ describe('unparse descriptions', () => {
     ]);
 
     expect(serialized).toBe('first\nsecond\n#template 10');
+  });
+});
+
+describe('unparse percentage categories', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  function mockGetCategories(categories: Array<{ id: string; name: string }>) {
+    vi.mocked(db.getCategories).mockResolvedValue(
+      categories.map(({ id, name }) => ({
+        id,
+        name,
+        is_income: 1,
+        cat_group: 'group1',
+        sort_order: 0,
+        hidden: 0,
+        tombstone: 0,
+      })) satisfies db.DbCategory[],
+    );
+  }
+
+  it('renders a category id as the category name', async () => {
+    mockGetCategories([{ id: 'income-cat-id', name: 'Paycheck' }]);
+
+    const serialized = await unparse([
+      {
+        type: 'percentage',
+        percent: 25,
+        previous: false,
+        category: 'income-cat-id',
+        priority: 5,
+        directive: 'template',
+      },
+    ]);
+
+    expect(serialized).toBe('#template-5 25% of Paycheck');
+  });
+
+  it('keeps the previous keyword when resolving an id', async () => {
+    mockGetCategories([{ id: 'income-cat-id', name: 'Paycheck' }]);
+
+    const serialized = await unparse([
+      {
+        type: 'percentage',
+        percent: 75,
+        previous: true,
+        category: 'income-cat-id',
+        priority: 0,
+        directive: 'template',
+      },
+    ]);
+
+    expect(serialized).toBe('#template 75% of previous Paycheck');
+  });
+
+  it('keeps a value that is not a category id unchanged', async () => {
+    mockGetCategories([]);
+
+    const serialized = await unparse([
+      {
+        type: 'percentage',
+        percent: 10,
+        previous: false,
+        category: 'all income',
+        priority: 0,
+        directive: 'template',
+      },
+    ]);
+
+    expect(serialized).toBe('#template 10% of all income');
+  });
+
+  it('does not query the database when there are no percentage templates', async () => {
+    await unparse([
+      { type: 'simple', monthly: 10, priority: 0, directive: 'template' },
+    ]);
+
+    expect(db.getCategories).not.toHaveBeenCalled();
   });
 });

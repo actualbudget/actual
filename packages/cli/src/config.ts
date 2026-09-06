@@ -3,6 +3,8 @@ import { join } from 'path';
 
 import { cosmiconfig } from 'cosmiconfig';
 
+import type { OutputFormat } from './output';
+import { isOutputFormat, OUTPUT_FORMATS } from './output';
 import { isRecord, parseBoolEnv, parseNonNegativeIntFlag } from './utils';
 
 export type CliConfig = {
@@ -47,6 +49,7 @@ const stringKeys = [
 
 const numberKeys = ['cacheTtl', 'lockTimeout'] as const;
 const booleanKeys = ['noLock'] as const;
+const formatKeys = ['format'] as const;
 
 type ConfigFileContent = {
   serverUrl?: string;
@@ -58,12 +61,14 @@ type ConfigFileContent = {
   cacheTtl?: number;
   lockTimeout?: number;
   noLock?: boolean;
+  format?: OutputFormat;
 };
 
 const configFileKeys: readonly string[] = [
   ...stringKeys,
   ...numberKeys,
   ...booleanKeys,
+  ...formatKeys,
 ];
 
 function validateConfigFileContent(value: unknown): ConfigFileContent {
@@ -103,8 +108,31 @@ function validateConfigFileContent(value: unknown): ConfigFileContent {
         `Invalid config file: key "${key}" must be a boolean, got ${typeof v}`,
       );
     }
+    if ((formatKeys as readonly string[]).includes(key) && !isOutputFormat(v)) {
+      throw new Error(
+        `Invalid config file: key "${key}" must be one of ${OUTPUT_FORMATS.join(', ')}`,
+      );
+    }
   }
   return value as ConfigFileContent;
+}
+
+/**
+ * Default output format when --format is not passed: ACTUAL_FORMAT env var,
+ * then the config file's "format" key, then json.
+ */
+export async function resolveDefaultFormat(): Promise<OutputFormat> {
+  const fromEnv = process.env.ACTUAL_FORMAT;
+  if (fromEnv !== undefined) {
+    if (!isOutputFormat(fromEnv)) {
+      throw new Error(
+        `Invalid ACTUAL_FORMAT: "${fromEnv}". Expected one of ${OUTPUT_FORMATS.join(', ')}.`,
+      );
+    }
+    return fromEnv;
+  }
+  const fileConfig = await loadConfigFile();
+  return fileConfig.format ?? 'json';
 }
 
 async function loadConfigFile(): Promise<ConfigFileContent> {

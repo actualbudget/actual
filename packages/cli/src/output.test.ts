@@ -61,17 +61,38 @@ describe('formatOutput', () => {
       expect(result).toContain('b');
     });
 
-    it('formats amount fields as decimal values', () => {
+    it('formats amount fields as grouped decimal values', () => {
       const data = [{ name: 'Groceries', amount: -250000 }];
       const result = formatOutput(data, 'table');
-      expect(result).toContain('-2500.00');
+      expect(result).toContain('-2,500.00');
       expect(result).not.toContain('-250000');
     });
 
-    it('formats balance fields as decimal values', () => {
+    it('formats balance fields as grouped decimal values', () => {
       const data = [{ id: 'acc1', balance: 166500 }];
       const result = formatOutput(data, 'table');
-      expect(result).toContain('1665.00');
+      expect(result).toContain('1,665.00');
+    });
+
+    it('formats camel-cased summary amount fields', () => {
+      const data = { toBudget: 12345, totalSpent: -100 };
+      const result = formatOutput(data, 'table');
+      expect(result).toContain('123.45');
+      expect(result).toContain('-1.00');
+    });
+
+    it('uses the union of keys across rows', () => {
+      const data = [{ a: 1 }, { b: 2 }];
+      const result = formatOutput(data, 'table');
+      expect(result).toContain('a');
+      expect(result).toContain('b');
+    });
+
+    it('renders nested objects as JSON instead of [object Object]', () => {
+      const data = [{ templates: [{ type: 'simple' }] }];
+      const result = formatOutput(data, 'table');
+      expect(result).toContain('"simple"');
+      expect(result).not.toContain('[object Object]');
     });
 
     it('formats budgeted and spent fields as decimal values', () => {

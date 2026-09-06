@@ -1,3 +1,4 @@
+import * as db from '#server/db';
 import type { RefillTemplate, Template } from '#types/models/templates';
 
 import { storeTemplates } from './goal-template';
@@ -168,6 +169,7 @@ function prefixFromPriority(priority: number | null): string {
 function templateToLine(
   template: Template,
   refill: RefillTemplate | undefined,
+  categoryNamesById: Map<string, string>,
 ): string | null {
   if (template.type === 'error') {
     return null;
@@ -209,8 +211,12 @@ function templateToLine(
     }
     case 'percentage': {
       // #template[-prio] <percent>% of [previous ]<category>
+      // The category is stored either as a name (text templates) or as an id
+      // (UI-managed templates), but the note syntax only reads back as a name.
       const prev = template.previous ? 'previous ' : '';
-      return `${prefix} ${trimTrailingZeros(template.percent)}% of ${prev}${template.category}`.trim();
+      const category =
+        categoryNamesById.get(template.category) ?? template.category;
+      return `${prefix} ${trimTrailingZeros(template.percent)}% of ${prev}${category}`.trim();
     }
     case 'periodic': {
       // #template[-prio] <amount> repeat every <n> <period>(s) starting <date> [limit]
@@ -279,15 +285,36 @@ function templateToLine(
   }
 }
 
+/**
+ * Percentage templates hold an income category name or an income category id.
+ * Look up the ids so they render as names; anything that is not an id (a name,
+ * or a special source like "all income") simply finds no match and is kept.
+ */
+async function getCategoryNamesById(
+  templates: Template[],
+): Promise<Map<string, string>> {
+  const references = templates
+    .filter(t => t.type === 'percentage')
+    .map(t => t.category);
+
+  if (references.length === 0) {
+    return new Map();
+  }
+
+  const categories = await db.getCategories([...new Set(references)]);
+  return new Map(categories.map(category => [category.id, category.name]));
+}
+
 export async function unparse(templates: Template[]): Promise<string> {
   // Refill will be merged into the limit template if both exist
   // Assumption: at most one limit and one refill template per category
   const refill = templates.find(t => t.type === 'refill');
   const withoutRefill = templates.filter(t => t.type !== 'refill');
+  const categoryNamesById = await getCategoryNamesById(withoutRefill);
 
   return withoutRefill
     .flatMap(template => {
-      const line = templateToLine(template, refill);
+      const line = templateToLine(template, refill, categoryNamesById);
       if (line == null) {
         return [];
       }
