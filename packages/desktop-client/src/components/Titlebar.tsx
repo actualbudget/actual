@@ -5,7 +5,11 @@ import { Route, Routes, useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgArrowLeft, SvgBackward, SvgForward } from '@actual-app/components/icons/v1';
+import {
+  SvgArrowLeft,
+  SvgBackward,
+  SvgForward,
+} from '@actual-app/components/icons/v1';
 import {
   SvgAlertTriangle,
   SvgNavigationMenu,
