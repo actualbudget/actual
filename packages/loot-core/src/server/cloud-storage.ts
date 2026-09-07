@@ -334,7 +334,6 @@ export async function upload() {
     res = await fetchJSON(getServer().SYNC_SERVER + '/upload-user-file', {
       method: 'POST',
       headers: {
-        'Content-Length': String(uploadContent.length),
         'Content-Type': 'application/encrypted-file',
         'X-ACTUAL-TOKEN': userToken,
         'X-ACTUAL-FILE-ID': cloudFileId,
