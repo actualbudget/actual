@@ -48,7 +48,7 @@ describe('TotpEnableModal', () => {
     await userEvent.click(submitPassword());
 
     expect(
-      await screen.findByText('The password is not valid. Please try again.'),
+      await screen.findByText('Invalid password'),
     ).toBeInTheDocument();
     expect(screen.queryByLabelText('Code:')).not.toBeInTheDocument();
   });
