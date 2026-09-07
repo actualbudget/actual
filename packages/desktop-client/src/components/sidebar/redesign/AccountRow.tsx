@@ -17,9 +17,14 @@ import type { SyncDotStatus } from './SyncDot';
 type AccountRowProps = {
   account: AccountEntity;
   isClosed?: boolean;
+  showSyncDot?: boolean;
 };
 
-export function AccountRow({ account, isClosed }: AccountRowProps) {
+export function AccountRow({
+  account,
+  isClosed,
+  showSyncDot,
+}: AccountRowProps) {
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const updatedAccounts = useUpdatedAccounts();
   const isUpdated = !isClosed && updatedAccounts.includes(account.id);
@@ -62,7 +67,7 @@ export function AccountRow({ account, isClosed }: AccountRowProps) {
         fontWeight: 'normal',
       }}
     >
-      <SyncDot status={status} />
+      {showSyncDot ? <SyncDot status={status} /> : null}
       <Text style={{ flex: 1, ...styles.ellipsisText }}>{account.name}</Text>
       <Text style={styles.visuallyHidden}>{statusLabel}</Text>
       <SidebarBalance

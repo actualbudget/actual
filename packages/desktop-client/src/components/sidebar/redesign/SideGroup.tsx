@@ -21,6 +21,7 @@ import type { GroupBucket, SidebarAccountSide } from './useSidebarAccountTree';
 type SideGroupProps = {
   label: string;
   side: 'on' | 'off';
+  showSyncDot: boolean;
   sideData: SidebarAccountSide;
   totalBinding: Binding<
     'account',
@@ -36,6 +37,7 @@ type SideGroupProps = {
 export function SideGroup({
   label,
   side,
+  showSyncDot,
   sideData,
   totalBinding,
   balanceTestId,
@@ -111,6 +113,7 @@ export function SideGroup({
             key={bucket.group?.id ?? 'ungrouped'}
             bucket={bucket}
             side={side}
+            showSyncDot={showSyncDot}
             isOpen={isBucketOpen(bucket)}
             onToggle={() => onToggleBucket(bucket)}
           />
