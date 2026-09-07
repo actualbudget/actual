@@ -80,6 +80,18 @@ describe('confirmTotpEnrollment', () => {
     expect(hasPendingTotpEnrollment()).toBe(false);
   });
 
+  it('cannot confirm the same enrollment twice', () => {
+    const secret = enroll();
+    const code = codeAt(secret, NOW);
+
+    expect(confirmTotpEnrollment(code, NOW)).toEqual({});
+    // A second confirmation of an already-enabled row must not re-enable it.
+    expect(
+      confirmTotpEnrollment(codeAt(secret, NOW + PERIOD_MS), NOW + PERIOD_MS)
+        .error,
+    ).toEqual('totp-already-enabled');
+  });
+
   it('errors when nothing is enrolled', () => {
     expect(confirmTotpEnrollment('123456', NOW).error).toEqual(
       'totp-not-enrolled',
@@ -108,6 +120,35 @@ describe('verifyTotp', () => {
   it('rejects codes outside the window', () => {
     const secret = enabledSecret();
     expect(verifyTotp(codeAt(secret, NOW + 5 * PERIOD_MS), NOW)).toBe(false);
+  });
+
+  it('consumes the step in the write, not in the preceding read', () => {
+    const secret = enabledSecret();
+    const code = codeAt(secret, NOW);
+    const step = Math.floor(NOW / 1000 / 30);
+
+    expect(verifyTotp(code, NOW)).toBe(true);
+
+    // Simulate the read half of a racing caller having already happened: it
+    // read the pre-consumption row and considers the code fresh. The write
+    // must still refuse it.
+    getAccountDb().mutate(
+      'UPDATE auth_totp SET last_used_step = ? WHERE id = 1',
+      [step],
+    );
+    expect(verifyTotp(code, NOW)).toBe(false);
+  });
+
+  it('does not authenticate when the row is not confirmed', () => {
+    const secret = enabledSecret();
+    const code = codeAt(secret, NOW);
+
+    // Only the conditional write enforces this once the early check passes.
+    getAccountDb().mutate(
+      'UPDATE auth_totp SET confirmed = 0, last_used_step = NULL WHERE id = 1',
+    );
+
+    expect(verifyTotp(code, NOW)).toBe(false);
   });
 
   it('rejects a replayed code', () => {

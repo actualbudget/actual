@@ -117,11 +117,26 @@ function validateCode(
   return { valid: true, step };
 }
 
-function markStepUsed(step: number): void {
-  getAccountDb().mutate(
-    'UPDATE auth_totp SET last_used_step = ? WHERE id = 1',
-    [step],
+/**
+ * Claim a step for a login, returning whether this caller got it.
+ *
+ * The freshness test lives in the WHERE clause rather than in a preceding read,
+ * so the step can only be consumed once even if two callers race the same code.
+ * Relying on the earlier read would make that guarantee depend on the runtime
+ * never interleaving the read and the write — true for a single synchronous
+ * Node process today, but not something to bake in.
+ */
+function consumeStep(step: number): boolean {
+  const { changes } = getAccountDb().mutate(
+    `UPDATE auth_totp
+        SET last_used_step = ?
+      WHERE id = 1
+        AND confirmed = 1
+        AND (last_used_step IS NULL OR last_used_step < ?)`,
+    [step, step],
   );
+
+  return changes === 1;
 }
 
 /**
@@ -146,10 +161,19 @@ export function confirmTotpEnrollment(
     return { error: 'invalid-totp-code' };
   }
 
-  getAccountDb().mutate(
-    'UPDATE auth_totp SET confirmed = 1, last_used_step = ? WHERE id = 1',
+  // `confirmed = 0` in the WHERE clause makes this single-shot: two concurrent
+  // confirmations cannot both enable the same enrollment.
+  const { changes } = getAccountDb().mutate(
+    `UPDATE auth_totp
+        SET confirmed = 1, last_used_step = ?
+      WHERE id = 1
+        AND confirmed = 0`,
     [step!],
   );
+
+  if (changes !== 1) {
+    return { error: 'totp-already-enabled' };
+  }
 
   return {};
 }
@@ -170,8 +194,9 @@ export function verifyTotp(
     return false;
   }
 
-  markStepUsed(step!);
-  return true;
+  // The conditional write is the authorisation decision: if it changed no rows
+  // the step was already spent, so this code does not authenticate.
+  return consumeStep(step!);
 }
 
 export function disableTotp(): void {
