@@ -448,3 +448,11 @@ export function getServerVersion() {
 export function getPreferences(): Promise<SyncedPrefs> {
   return send('preferences/get');
 }
+
+/** Set a single synced preference (e.g. `csv-mappings-<accountId>`). */
+export function setPreference(
+  id: keyof SyncedPrefs,
+  value: string | undefined,
+) {
+  return send('preferences/save', { id, value });
+}
