@@ -4,6 +4,7 @@ description: Actual has started receiving what can only be described as AI slop 
 date: 2025-11-15T10:00
 slug: fighting-ai-slop
 tags: [announcement]
+in_app_notification: true
 hide_table_of_contents: false
 authors: MatissJanis
 ---
