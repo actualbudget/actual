@@ -27,11 +27,8 @@ export class AccountNotLinkedToRequisition extends Error {
  * they are not carried over when a budget is restored onto another server.
  */
 export class GoCardlessNotConfiguredError extends Error {
-  details: unknown;
-
   constructor() {
     super('GoCardless is not configured on this server');
-    this.details = {};
   }
 }
 
@@ -41,11 +38,12 @@ export class GoCardlessNotConfiguredError extends Error {
  * anywhere else means the session token went stale.
  */
 export class GoCardlessInvalidCredentialsError extends Error {
-  details: unknown;
-
-  constructor(details: unknown = {}) {
+  // Deliberately carries no serialisable payload. GoCardless's rejection body
+  // is already written to the server log by the API client that received it,
+  // which is where the admin who can fix the secrets will look; sending it on
+  // to every authenticated client would widen what they can see for nothing.
+  constructor() {
     super('GoCardless rejected the configured secret ID and secret key');
-    this.details = details;
   }
 }
 

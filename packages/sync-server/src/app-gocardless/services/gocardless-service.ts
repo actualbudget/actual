@@ -147,7 +147,7 @@ export const goCardlessService = {
           error instanceof GoCardlessApiError &&
           (error.response.status === 400 || error.response.status === 401)
         ) {
-          throw new GoCardlessInvalidCredentialsError(error);
+          throw new GoCardlessInvalidCredentialsError();
         }
 
         return handleGoCardlessError(error);

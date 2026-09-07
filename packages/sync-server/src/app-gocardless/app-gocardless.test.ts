@@ -166,23 +166,19 @@ describe('/transactions', () => {
     });
   });
 
-  it('passes on what GoCardless said about the rejected credentials', async () => {
-    // the only clue a self-hoster gets about *which* secret is wrong
+  it('keeps the raw GoCardless rejection out of the response', async () => {
+    // The client only ever reads the error code, so shipping the provider's
+    // raw reply would widen what an authenticated caller can see for nothing.
+    // The full body is already written to the server log, where the admin who
+    // can act on it will find it.
     getTransactionsWithBalance.mockRejectedValue(
-      new GoCardlessInvalidCredentialsError({
-        response: {
-          status: 400,
-          headers: {},
-          data: { secret_id: ['Must be a valid UUID.'] },
-        },
-      }),
+      new GoCardlessInvalidCredentialsError(),
     );
 
     const res = await syncRequest();
 
-    expect(res.body.data.details).toMatchObject({
-      response: { data: { secret_id: ['Must be a valid UUID.'] } },
-    });
+    expect(res.body.data.details).toBeUndefined();
+    expect(res.body.data.reason).toMatch(/secret ID and secret key/);
   });
 
   it('still reports unrecognised failures as a generic error', async () => {
