@@ -1139,6 +1139,56 @@ describe('Transactions', () => {
     expect(getTransactions()[2].amount).toBe(-1000);
   });
 
+  test('selecting split with the keyboard keeps focus on the parent payment field', async () => {
+    const { container, updateProps } = renderTransactions();
+    updateProps({ isAdding: true });
+
+    const input = await editNewField(container, 'category');
+    expect(screen.getByTestId('autocomplete')).toBeTruthy();
+    expect(screen.getByTestId('split-transaction-button')).toBeTruthy();
+
+    // Nothing is highlighted on open; ArrowDown highlights Split (index 0).
+    await userEvent.keyboard('[ArrowDown]');
+    await userEvent.type(input, '[Enter]');
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+
+    await waitFor(() => {
+      expect(
+        container.querySelectorAll(
+          '[data-testid="new-transaction"] [data-testid="debit"]',
+        ).length,
+      ).toBeGreaterThan(1);
+    });
+
+    expectToBeEditingField(container, 'debit', 0, true);
+  });
+
+  test('selecting split after visiting payment keeps focus on the parent payment field', async () => {
+    const { container, updateProps } = renderTransactions();
+    updateProps({ isAdding: true });
+
+    // Tabbing through payment saves 0, so amount is no longer null.
+    const debitInput = await editNewField(container, 'debit');
+    await userEvent.type(debitInput, '[Tab]');
+
+    const input = await editNewField(container, 'category');
+    await userEvent.keyboard('[ArrowDown]');
+    await userEvent.type(input, '[Enter]');
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+
+    await waitFor(() => {
+      expect(
+        container.querySelectorAll(
+          '[data-testid="new-transaction"] [data-testid="debit"]',
+        ).length,
+      ).toBeGreaterThan(1);
+    });
+
+    expectToBeEditingField(container, 'debit', 0, true);
+  });
+
   test('escape closes the new transaction rows', async () => {
     const { container, updateProps } = renderTransactions({
       onCloseAddTransaction: () => {
