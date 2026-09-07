@@ -155,17 +155,31 @@ export function ServerProvider({ children }: { children: ReactNode }) {
   }, [dispatch, serverURL]);
 
   useEffect(() => {
-    if (serverURL) {
-      void send('subscribe-needs-bootstrap').then(
-        (data: Awaited<ReturnType<Handlers['subscribe-needs-bootstrap']>>) => {
-          if ('hasServer' in data && data.hasServer) {
-            setAvailableLoginMethods(data.availableLoginMethods || []);
-            setMultiuserEnabled(data.multiuser || false);
-            setTotpSupported(data.supportsTotp || false);
-          }
-        },
-      );
+    if (!serverURL) {
+      return;
     }
+
+    // Each server URL kicks off its own request, and they can come back out of
+    // order — an unreachable server sits on a long timeout while the next one
+    // answers immediately. A reply from the previous server must not overwrite
+    // the current one's capabilities.
+    let cancelled = false;
+
+    void send('subscribe-needs-bootstrap').then(
+      (data: Awaited<ReturnType<Handlers['subscribe-needs-bootstrap']>>) => {
+        if (cancelled || !('hasServer' in data) || !data.hasServer) {
+          return;
+        }
+
+        setAvailableLoginMethods(data.availableLoginMethods || []);
+        setMultiuserEnabled(data.multiuser || false);
+        setTotpSupported(data.supportsTotp || false);
+      },
+    );
+
+    return () => {
+      cancelled = true;
+    };
   }, [serverURL]);
 
   const setURL = useCallback(
