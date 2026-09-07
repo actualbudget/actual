@@ -3,7 +3,6 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { Route, Routes, useLocation } from 'react-router';
 
-
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgArrowLeft, SvgBackward, SvgForward } from '@actual-app/components/icons/v1';
@@ -24,7 +23,6 @@ import { isDevelopmentEnvironment } from '@actual-app/core/shared/environment';
 import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
 
-
 import { sync } from '#app/appSlice';
 import { SharedArrayBufferWarning } from '#components/SharedArrayBufferWarning';
 import { useGlobalPref } from '#hooks/useGlobalPref';
@@ -37,7 +35,6 @@ import { useUndo } from '#hooks/useUndo';
 import { useDispatch } from '#redux';
 import * as bindings from '#spreadsheet/bindings';
 
-
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
@@ -49,13 +46,11 @@ import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar/SidebarProvider';
 import { ThemeSelector } from './ThemeSelector';
 
-
 function UncategorizedButton() {
   const count: number | null = useSheetValue(bindings.uncategorizedCount());
   if (count === null || count <= 0) {
     return null;
   }
-
 
   return (
     <Link
@@ -71,11 +66,9 @@ function UncategorizedButton() {
   );
 }
 
-
 type PrivacyButtonProps = {
   style?: CSSProperties;
 };
-
 
 function PrivacyButton({ style }: PrivacyButtonProps) {
   const { t } = useTranslation();
@@ -83,9 +76,7 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
     useSyncedPref('isPrivacyEnabled');
   const isPrivacyEnabled = String(isPrivacyEnabledPref) === 'true';
 
-
   const privacyIconStyle = { width: 15, height: 15 };
-
 
   useHotkeys(
     'shift+ctrl+p, shift+cmd+p, shift+meta+p',
@@ -98,7 +89,6 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
     },
     [setPrivacyEnabledPref, isPrivacyEnabled],
   );
-
 
   return (
     <Tooltip
@@ -131,7 +121,6 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
   );
 }
 
-
 type ServerSyncButtonProps = {
   style?: CSSProperties;
   isMobile?: boolean;
@@ -144,7 +133,6 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
   const { isSyncing: syncing, syncState } = useSyncStatus({
     syncingEndDelayMs: 200,
   });
-
 
   const mobileColor =
     syncState === 'error'
@@ -163,13 +151,11 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
         ? theme.buttonBareDisabledText
         : theme.buttonBareText;
 
-
   const activeStyle = isMobile
     ? {
         color: mobileColor,
       }
     : {};
-
 
   const hoveredStyle = isMobile
     ? {
@@ -177,7 +163,6 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
         background: theme.mobileHeaderTextHover,
       }
     : {};
-
 
   const mobileIconStyle = {
     color: mobileColor,
@@ -187,7 +172,6 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
     paddingRight: 3,
   };
 
-
   const mobileTextStyle = {
     ...styles.text,
     fontWeight: 500,
@@ -195,9 +179,7 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
     marginRight: 5,
   };
 
-
   const onSync = () => dispatch(sync());
-
 
   useHotkeys(
     'ctrl+s, cmd+s, meta+s',
@@ -209,7 +191,6 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
     },
     [onSync],
   );
-
 
   const tooltipContent =
     syncState === 'error' ? (
@@ -226,7 +207,6 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
         devices
       </Trans>
     );
-
 
   return (
     <Tooltip placement="bottom end" content={tooltipContent}>
@@ -271,7 +251,6 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
   );
 }
 
-
 function UndoRedoButtons() {
   const { t } = useTranslation();
   const { undo, redo } = useUndo();
@@ -292,10 +271,8 @@ function UndoRedoButtons() {
   );
 }
 
-
 function BudgetTitlebar() {
   const [maxMonths, setMaxMonthsPref] = useGlobalPref('maxMonths');
-
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -307,11 +284,9 @@ function BudgetTitlebar() {
   );
 }
 
-
 type TitlebarProps = {
   style?: CSSProperties;
 };
-
 
 export function Titlebar({ style }: TitlebarProps) {
   const { t } = useTranslation();
@@ -322,7 +297,6 @@ export function Titlebar({ style }: TitlebarProps) {
   const serverURL = useServerURL();
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
   const isTestEnv = useIsTestEnv();
-
 
   return isNarrowWidth ? null : (
     <View
@@ -364,7 +338,6 @@ export function Titlebar({ style }: TitlebarProps) {
         </Button>
       )}
 
-
       <Routes>
         <Route
           path="*"
@@ -382,9 +355,7 @@ export function Titlebar({ style }: TitlebarProps) {
           }
         />
 
-
         <Route path="/accounts/:id" element={<AccountSyncCheck />} />
-
 
         <Route path="/budget" element={<BudgetTitlebar />} />
       </Routes>
