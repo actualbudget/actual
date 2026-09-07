@@ -38,9 +38,9 @@ export function TotpDisableModal({ onSave }: TotpDisableModalProps) {
 
   const errorMessages: Record<string, string> = {
     'invalid-password': t('Invalid password'),
-    'invalid-totp-code': t('That code is not valid. Please try again.'),
-    'totp-not-enabled': t('Two-factor authentication is already disabled.'),
-    'too-many-requests': t('Too many attempts. Please wait and try again.'),
+    'invalid-totp-code': t('That code is not valid. Please try again'),
+    'totp-not-enabled': t('Two-factor authentication is already disabled'),
+    'too-many-requests': t('Too many attempts. Please wait and try again'),
     'network-failure': t('Unable to contact the server'),
   };
 

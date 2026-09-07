@@ -40,16 +40,17 @@ export function TotpEnableModal({ onSave }: TotpEnableModalProps) {
   const [error, setError] = useState<string | null>(null);
 
   const errorMessages: Record<string, string> = {
-    'invalid-totp-code': t('That code is not valid. Please try again.'),
-    'totp-not-enrolled': t('Enrollment expired. Please start again.'),
-    'totp-already-enabled': t('Two-factor authentication is already enabled.'),
+    'invalid-password': t('Invalid password'),
+    'invalid-totp-code': t('That code is not valid. Please try again'),
+    'totp-not-enrolled': t('Enrollment expired. Please start again'),
+    'totp-already-enabled': t('Two-factor authentication is already enabled'),
     'totp-not-available': t(
-      'Two-factor authentication is only available with password authentication.',
+      'Two-factor authentication is only available with password authentication',
     ),
     'mfa-client-unsupported': t(
-      'This version of Actual is too old to use two-factor authentication. Please update it.',
+      'This version of Actual is too old to use two-factor authentication. Please update it',
     ),
-    'too-many-requests': t('Too many attempts. Please wait and try again.'),
+    'too-many-requests': t('Too many attempts. Please wait and try again'),
     'network-failure': t('Unable to contact the server'),
   };
 
