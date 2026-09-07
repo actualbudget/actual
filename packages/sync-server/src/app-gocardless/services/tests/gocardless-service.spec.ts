@@ -27,7 +27,7 @@ import {
   goCardlessService,
   handleGoCardlessError,
 } from '#app-gocardless/services/gocardless-service';
-import { secretsService } from '#services/secrets-service';
+import { SecretName, secretsService } from '#services/secrets-service';
 
 import {
   mockAccountDetails,
@@ -44,6 +44,18 @@ import {
   mockRequisitionWithExampleAccounts,
   mockTransactions,
 } from './fixtures';
+
+// setToken only asks for a new token when the one it holds has expired, so a
+// cached client is only observable through a token that still has time on it.
+const unexpiredTokenFor = (secretId: string): string => {
+  const payload = Buffer.from(
+    JSON.stringify({
+      sub: secretId,
+      exp: Math.floor(Date.now() / 1000) + 3600,
+    }),
+  ).toString('base64url');
+  return `header.${payload}.signature`;
+};
 
 describe('goCardlessService', () => {
   const accountId = mockAccountMetaData.id;
@@ -145,6 +157,49 @@ describe('goCardlessService', () => {
       await expect(() => goCardlessService.setToken()).rejects.toThrow(
         RateLimitError,
       );
+    });
+
+    it('does not reuse a client built from previously configured secrets', async () => {
+      // Restoring a backup and re-entering the secrets changes the configured
+      // pair while the process keeps running. Keeping a client per pair would
+      // let a later request pick up an earlier pair's client — and its
+      // still-valid session token — instead of the credentials configured now.
+      setTokenSpy.mockRestore();
+
+      const configured: Record<string, string> = {};
+      vi.spyOn(secretsService, 'get').mockImplementation(
+        (name: string) => configured[name] ?? null,
+      );
+
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockImplementation(async (_url, init) => {
+          const { secret_id: secretId } = JSON.parse(String(init?.body));
+          return new Response(
+            JSON.stringify({
+              access: unexpiredTokenFor(secretId),
+              refresh: 'refresh-token',
+              access_expires: 86400,
+              refresh_expires: 2592000,
+            }),
+            { status: 200, headers: { 'content-type': 'application/json' } },
+          );
+        });
+
+      const configureAndSync = async (secretId: string) => {
+        configured[SecretName.gocardless_secretId] = secretId;
+        configured[SecretName.gocardless_secretKey] = `${secretId}-key`;
+        await goCardlessService.setToken();
+      };
+
+      await configureAndSync('secret-a');
+      await configureAndSync('secret-b');
+      await configureAndSync('secret-a');
+
+      const requestedSecretIds = fetchSpy.mock.calls.map(
+        ([, init]) => JSON.parse(String(init?.body)).secret_id,
+      );
+      expect(requestedSecretIds).toEqual(['secret-a', 'secret-b', 'secret-a']);
     });
   });
 

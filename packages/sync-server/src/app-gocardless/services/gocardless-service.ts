@@ -43,7 +43,12 @@ import { SecretName, secretsService } from '#services/secrets-service';
 import type { AccountDetailsResponse, TokenResponse } from './gocardless-api';
 import { GoCardlessApi, GoCardlessApiError } from './gocardless-api';
 
-const clients = new Map<string, GoCardlessApi>();
+// Only the credentials currently configured are cached. Keeping a client per
+// secret pair meant every pair a server had ever used stayed in memory for the
+// process's lifetime, and re-entering an earlier pair — the ordinary outcome of
+// restoring a backup — handed back that pair's client along with the session
+// token it was still holding.
+let cachedClient: { hash: string; api: GoCardlessApi } | null = null;
 
 const getGocardlessClient = (): GoCardlessApi => {
   const secrets = {
@@ -53,13 +58,11 @@ const getGocardlessClient = (): GoCardlessApi => {
 
   const hash = JSON.stringify(secrets);
 
-  let client = clients.get(hash);
-  if (!client) {
-    client = new GoCardlessApi(secrets);
-    clients.set(hash, client);
+  if (!cachedClient || cachedClient.hash !== hash) {
+    cachedClient = { hash, api: new GoCardlessApi(secrets) };
   }
 
-  return client;
+  return cachedClient.api;
 };
 
 const isEuaExpiredError = (error: unknown): boolean => {
