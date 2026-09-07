@@ -4,6 +4,7 @@ import { q } from '@actual-app/core/shared/query';
 import type {
   AccountEntity,
   RuleConditionEntity,
+  TransactionEntity,
 } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 import type { Locale } from 'date-fns';
@@ -17,6 +18,27 @@ import { aqlQuery } from '#queries/aqlQuery';
 type Balance = {
   date: string;
   amount: number;
+};
+
+type AccountBalanceData = {
+  id: string;
+  name: string;
+  balances: Record<string, Balance>;
+  starting: number;
+};
+
+type TransferLeg = Pick<
+  TransactionEntity,
+  'id' | 'account' | 'amount' | 'date'
+> & {
+  transfer_id: string;
+};
+
+type IntervalRange = {
+  startDate: string;
+  endDate: string;
+  interval: string;
+  firstDayOfWeekIdx: string;
 };
 
 export function createSpreadsheet(
@@ -95,7 +117,24 @@ export function createSpreadsheet(
       }
     }
 
-    const data = await Promise.all(
+    const accountIds = accounts.map(account => account.id);
+    const transferLegsPromise =
+      accountIds.length === 0
+        ? Promise.resolve<TransferLeg[]>([])
+        : aqlQuery(
+            q('transactions')
+              .filter({
+                [conditionsOpKey]: filters,
+              })
+              .filter({
+                account: { $oneof: accountIds },
+                transfer_id: { $ne: null },
+                date: { $lte: endDate },
+              })
+              .select(['id', 'account', 'amount', 'date', 'transfer_id']),
+          ).then(({ data }: { data: TransferLeg[] }) => data);
+
+    const accountDataPromise = Promise.all(
       accounts.map(async acct => {
         const [starting, balances]: [number, Balance[]] = await Promise.all([
           aqlQuery(
@@ -169,6 +208,45 @@ export function createSpreadsheet(
         };
       }),
     );
+    const [data, transferLegs] = await Promise.all([
+      accountDataPromise,
+      transferLegsPromise,
+    ]);
+
+    const loadedTransferIds = new Set(transferLegs.map(leg => leg.id));
+    const missingCounterpartIds = [
+      ...new Set(
+        transferLegs
+          .map(leg => leg.transfer_id)
+          .filter(id => !loadedTransferIds.has(id)),
+      ),
+    ];
+
+    let allTransferLegs = transferLegs;
+    if (missingCounterpartIds.length > 0) {
+      const counterpartLegs: TransferLeg[] = await aqlQuery(
+        q('transactions')
+          .filter({
+            [conditionsOpKey]: filters,
+          })
+          .filter({
+            id: { $oneof: missingCounterpartIds },
+            account: { $oneof: accountIds },
+            transfer_id: { $ne: null },
+          })
+          .select(['id', 'account', 'amount', 'date', 'transfer_id']),
+      ).then(({ data }: { data: TransferLeg[] }) => data);
+      allTransferLegs = [...transferLegs, ...counterpartLegs];
+    }
+
+    // Prevent paired internal transfers from changing net worth between their
+    // two posting dates.
+    alignInternalTransferDates(data, allTransferLegs, {
+      startDate,
+      endDate,
+      interval,
+      firstDayOfWeekIdx,
+    });
 
     setData(
       recalculate(
@@ -185,13 +263,106 @@ export function createSpreadsheet(
   };
 }
 
+function alignInternalTransferDates(
+  data: AccountBalanceData[],
+  transferLegs: TransferLeg[],
+  range: IntervalRange,
+) {
+  const accountsById = new Map(data.map(account => [account.id, account]));
+  const transfersById = new Map(transferLegs.map(leg => [leg.id, leg]));
+  const processed = new Set<string>();
+
+  transferLegs.forEach(leg => {
+    if (processed.has(leg.id)) {
+      return;
+    }
+
+    const counterpart = transfersById.get(leg.transfer_id);
+    if (
+      !counterpart ||
+      counterpart.transfer_id !== leg.id ||
+      counterpart.account === leg.account ||
+      counterpart.amount + leg.amount !== 0 ||
+      !accountsById.has(leg.account) ||
+      !accountsById.has(counterpart.account)
+    ) {
+      return;
+    }
+
+    processed.add(leg.id);
+    processed.add(counterpart.id);
+
+    if (leg.date === counterpart.date) {
+      return;
+    }
+
+    const [earlier, later] =
+      leg.date < counterpart.date ? [leg, counterpart] : [counterpart, leg];
+
+    const account = accountsById.get(earlier.account);
+    if (account) {
+      moveTransferLeg(account, earlier, later.date, range);
+    }
+  });
+}
+
+function moveTransferLeg(
+  account: AccountBalanceData,
+  leg: TransferLeg,
+  laterDate: string,
+  range: IntervalRange,
+) {
+  const { startDate, endDate, interval, firstDayOfWeekIdx } = range;
+  if (laterDate < startDate) {
+    return;
+  }
+
+  if (leg.date < startDate) {
+    account.starting -= leg.amount;
+  } else {
+    if (leg.date > endDate) {
+      return;
+    }
+    const originalKey = getIntervalKey(leg.date, interval, firstDayOfWeekIdx);
+    const originalBalance = account.balances[originalKey];
+    if (!originalBalance) {
+      return;
+    }
+    originalBalance.amount -= leg.amount;
+  }
+
+  if (laterDate > endDate) {
+    return;
+  }
+
+  const intervalKey = getIntervalKey(laterDate, interval, firstDayOfWeekIdx);
+  const balance = account.balances[intervalKey];
+  if (balance) {
+    balance.amount += leg.amount;
+  } else {
+    account.balances[intervalKey] = { date: intervalKey, amount: leg.amount };
+  }
+}
+
+function getIntervalKey(
+  date: string,
+  interval: string,
+  firstDayOfWeekIdx: string,
+) {
+  if (interval === 'Daily') {
+    return date;
+  }
+  if (interval === 'Weekly') {
+    return monthUtils.weekFromDate(date, firstDayOfWeekIdx);
+  }
+  if (interval === 'Yearly') {
+    return date.slice(0, 4);
+  }
+  return monthUtils.getMonth(date);
+}
+
 function recalculate(
-  data: Array<{
-    id: string;
-    name: string;
-    balances: Record<string, Balance>;
-    starting: number;
-  }>,
+  data: AccountBalanceData[],
   startDate: string,
   endDate: string,
   locale: Locale,
