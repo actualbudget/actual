@@ -60,6 +60,12 @@ export type Modal =
       name: 'add-local-account';
     }
   | {
+      name: 'account-groups';
+      options: {
+        accountId: AccountEntity['id'];
+      };
+    }
+  | {
       name: 'close-account';
       options: {
         account: AccountEntity;

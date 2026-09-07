@@ -61,6 +61,7 @@ export function BalanceForecastCard({
       ? 'tracking-budget'
       : 'schedules';
   const isTrackingBudgetForecast = source === 'tracking-budget';
+  const granularity = meta?.granularity || 'Monthly';
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -124,7 +125,7 @@ export function BalanceForecastCard({
     forecastData: normalizedForecastData,
     start: chartRange.start,
     end: chartRange.end,
-    granularity: 'Monthly',
+    granularity,
   });
   const endingPoint = chartData.at(-1);
   const lowestPoint = getLowestChartDataPoint(chartData);
@@ -142,7 +143,7 @@ export function BalanceForecastCard({
     forecastData: normalizedForecastData,
     start: chartRange.start,
     end: chartRange.end,
-    granularity: 'Monthly',
+    granularity,
   });
   const hasFilters =
     !isTrackingBudgetForecast && (meta?.conditions?.length ?? 0) > 0;
