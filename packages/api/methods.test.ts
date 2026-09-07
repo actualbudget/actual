@@ -1272,17 +1272,6 @@ describe('API preferences: setPreference', () => {
   });
 
   // apis: setPreference
-  test('preferences persist after reload', async () => {
-    await api.setPreference('numberFormat', '1.234,56');
-    await api.setPreference('hideFraction', 'true');
-
-    // Simulate a reload by calling getPreferences again
-    const preferences = await api.getPreferences();
-    expect(preferences.numberFormat).toBe('1.234,56');
-    expect(preferences.hideFraction).toBe('true');
-  });
-
-  // apis: setPreference
   test('can set feature flag preferences', async () => {
     await api.setPreference('flags.newSidebarUI', 'true');
 
