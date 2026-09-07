@@ -55,7 +55,20 @@ describe('isAutomaticSyncDue', () => {
     intervalMs: HOUR,
     lastAutomaticRun: undefined,
     accounts: [account()],
+    isServerOnline: true,
   };
+
+  it('is not due while the sync server is unreachable', () => {
+    expect(isAutomaticSyncDue({ ...base, isServerOnline: false })).toBe(false);
+  });
+
+  it('becomes due again as soon as the server is reachable', () => {
+    // Being offline must not consume the interval: the caller only records an
+    // attempt when this returns true, so a sync fires on the next check rather
+    // than waiting out another interval.
+    expect(isAutomaticSyncDue({ ...base, isServerOnline: false })).toBe(false);
+    expect(isAutomaticSyncDue({ ...base, isServerOnline: true })).toBe(true);
+  });
 
   it('is not due when automatic syncing is disabled', () => {
     expect(isAutomaticSyncDue({ ...base, intervalMs: 0 })).toBe(false);

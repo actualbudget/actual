@@ -6,6 +6,7 @@ import { useSyncAndDownloadMutation } from '#accounts';
 import { useAccounts } from '#hooks/useAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 // How often we check whether a sync is due. A sync can only ever be late by up
 // to one check, so this just needs to stay comfortably shorter than
@@ -37,6 +38,8 @@ type IsAutomaticSyncDueArgs = {
   /** Epoch ms of the last automatic sync attempted by this device. */
   lastAutomaticRun: number | undefined;
   accounts: AccountEntity[];
+  /** Bank sync goes through the sync server, so it must be reachable. */
+  isServerOnline: boolean;
 };
 
 /**
@@ -52,8 +55,13 @@ export function isAutomaticSyncDue({
   intervalMs,
   lastAutomaticRun,
   accounts,
+  isServerOnline,
 }: IsAutomaticSyncDueArgs) {
   if (intervalMs <= 0) {
+    return false;
+  }
+
+  if (!isServerOnline) {
     return false;
   }
 
@@ -93,13 +101,22 @@ export function useAutomaticBankSync() {
   );
   const { data: accounts = [] } = useAccounts();
   const syncAndDownload = useSyncAndDownloadMutation();
+  const serverStatus = useSyncServerStatus();
 
   const intervalMs = parseBankSyncInterval(interval);
 
   const maybeSync = useEffectEvent(() => {
     const now = Date.now();
 
-    if (!isAutomaticSyncDue({ now, intervalMs, lastAutomaticRun, accounts })) {
+    if (
+      !isAutomaticSyncDue({
+        now,
+        intervalMs,
+        lastAutomaticRun,
+        accounts,
+        isServerOnline: serverStatus === 'online',
+      })
+    ) {
       return;
     }
 
