@@ -5,6 +5,7 @@ import {
   parseBankSyncInterval,
 } from './useAutomaticBankSync';
 
+const MINUTE = 60 * 1000;
 const HOUR = 60 * 60 * 1000;
 const NOW = 1_700_000_000_000;
 
@@ -100,6 +101,61 @@ describe('isAutomaticSyncDue', () => {
     ).toBe(false);
   });
 
+  it('is due when one account is overdue even if another just synced', () => {
+    // A manual sync of a single account used to postpone every account until
+    // the next interval.
+    expect(
+      isAutomaticSyncDue({
+        ...base,
+        accounts: [
+          account({ id: 'recent', last_sync: String(NOW - MINUTE) }),
+          account({ id: 'stale', last_sync: String(NOW - 2 * HOUR) }),
+        ],
+      }),
+    ).toBe(true);
+  });
+
+  it('is not due while every account has synced within the interval', () => {
+    expect(
+      isAutomaticSyncDue({
+        ...base,
+        accounts: [
+          account({ id: 'a', last_sync: String(NOW - MINUTE) }),
+          account({ id: 'b', last_sync: String(NOW - 30 * MINUTE) }),
+        ],
+      }),
+    ).toBe(false);
+  });
+
+  it('is due when one account has never synced', () => {
+    expect(
+      isAutomaticSyncDue({
+        ...base,
+        accounts: [
+          account({ id: 'a', last_sync: String(NOW - MINUTE) }),
+          account({ id: 'never', last_sync: null }),
+        ],
+      }),
+    ).toBe(true);
+  });
+
+  it('does not let a closed account force a sync', () => {
+    // A closed account with an ancient last_sync must not force a sync.
+    expect(
+      isAutomaticSyncDue({
+        ...base,
+        accounts: [
+          account({ id: 'a', last_sync: String(NOW - MINUTE) }),
+          account({
+            id: 'closed',
+            closed: 1,
+            last_sync: String(NOW - 5 * HOUR),
+          }),
+        ],
+      }),
+    ).toBe(false);
+  });
+
   it('is due once the last sync is older than the interval', () => {
     expect(
       isAutomaticSyncDue({
@@ -109,16 +165,18 @@ describe('isAutomaticSyncDue', () => {
     ).toBe(true);
   });
 
-  it('uses the most recently synced account as the reference point', () => {
+  it('uses the oldest synced account as the reference point', () => {
+    // Previously the most recent sync was used, so the recently-synced account
+    // below would have suppressed the sync the stale one needs.
     expect(
       isAutomaticSyncDue({
         ...base,
         accounts: [
           account({ id: 'a', last_sync: String(NOW - 5 * HOUR) }),
-          account({ id: 'b', last_sync: String(NOW - 10 * 60 * 1000) }),
+          account({ id: 'b', last_sync: String(NOW - 10 * MINUTE) }),
         ],
       }),
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('ignores unlinked accounts when looking for the last sync', () => {

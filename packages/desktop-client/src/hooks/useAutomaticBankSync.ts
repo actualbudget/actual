@@ -45,10 +45,19 @@ type IsAutomaticSyncDueArgs = {
 /**
  * Decides whether an automatic bank sync should run right now.
  *
- * The most recent successful sync of any linked account is used as the
- * reference point. Because `last_sync` is synced between devices, manual syncs
- * and syncs performed by other devices also count — so having Actual open on
- * several devices doesn't multiply the number of requests made to the bank.
+ * The *oldest* successful sync across linked accounts is the reference point,
+ * so a single account being refreshed does not hold back the others. Using the
+ * most recent one instead meant manually syncing one account postponed every
+ * account until the next interval.
+ *
+ * A sync covers every linked account rather than just the overdue ones, because
+ * the underlying sync mutation takes one account or all of them and refuses to
+ * run in parallel. So an account that synced recently can be swept along early
+ * — bounded at one extra refresh per interval, which is the lesser problem.
+ *
+ * Because `last_sync` is synced between devices, manual syncs and syncs from
+ * other devices still count, so several open devices don't multiply the number
+ * of requests made to the bank.
  */
 export function isAutomaticSyncDue({
   now,
@@ -80,14 +89,15 @@ export function isAutomaticSyncDue({
     return false;
   }
 
-  const lastSync = Math.max(
-    0,
+  // No zero seed here: an account that has never synced parses to 0, which is
+  // already the oldest possible value and makes the sync due.
+  const oldestSync = Math.min(
     ...linkedAccounts.map(
       ({ last_sync }) => parseInt(last_sync ?? '0', 10) || 0,
     ),
   );
 
-  return now - lastSync >= intervalMs;
+  return now - oldestSync >= intervalMs;
 }
 
 /**
