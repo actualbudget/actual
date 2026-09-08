@@ -4,13 +4,16 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { View } from '@actual-app/components/view';
 import { useDebounceCallback } from 'usehooks-ts';
 
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
+import { SidebarRedesign } from './redesign/SidebarRedesign';
 import { Sidebar } from './Sidebar';
 import { useSidebar } from './SidebarProvider';
 
 export function FloatableSidebar() {
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
+  const newSidebarUIEnabled = useFeatureFlag('newSidebarUI');
 
   const sidebar = useSidebar();
   const { isNarrowWidth } = useResponsive();
@@ -55,7 +58,7 @@ export function FloatableSidebar() {
           'transform .5s, box-shadow .5s, border-radius .5s, bottom .5s',
       }}
     >
-      <Sidebar />
+      {newSidebarUIEnabled ? <SidebarRedesign /> : <Sidebar />}
     </View>
   );
 }

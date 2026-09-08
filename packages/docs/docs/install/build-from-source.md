@@ -1,4 +1,4 @@
-# Build from source
+# Build from Source
 
 :::info
 

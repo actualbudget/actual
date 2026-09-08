@@ -14,6 +14,10 @@ Running into issues with your configuration not being interpreted correctly? Che
 
 :::
 
+:::tip
+Secrets can be read from a file rather than passed in the environment, which works with Docker secrets and Kubernetes secret volumes. Set `ACTUAL_OPENID_CLIENT_SECRET_FILE` or `ACTUAL_GITHUB_TOKEN_FILE` to the path of a file holding the value. `_FILE`-suffixed environment variables take priority over regular ones. The [CLI](../api/cli.md#environment-variables) supports the same suffix for its own secrets.
+:::
+
 ## `ACTUAL_DATA_DIR` (config.json: `dataDir`)
 
 This is where the server stores the budget data files (and configurations unless `ACTUAL_CONFIG_PATH` is set).

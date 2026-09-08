@@ -315,6 +315,28 @@ export function getNextDate(
   return null;
 }
 
+const MAX_ADVANCE_ATTEMPTS = 7;
+
+export function getNextDateAfter(dateCond, afterDate: string): string | null {
+  let start = d.subDays(monthUtils.parseDate(afterDate), 1);
+
+  for (let attempt = 0; attempt < MAX_ADVANCE_ATTEMPTS; attempt++) {
+    const occurrence = getNextDate(dateCond, start, true);
+    if (occurrence == null || occurrence < monthUtils.dayFromDate(start)) {
+      return null;
+    }
+
+    const nextDate = getNextDate(dateCond, start);
+    if (nextDate != null && nextDate > afterDate) {
+      return nextDate;
+    }
+
+    start = d.addDays(monthUtils.parseDate(occurrence), 1);
+  }
+
+  return null;
+}
+
 export function getDateWithSkippedWeekend(
   date: Date,
   solveMode: 'after' | 'before',
