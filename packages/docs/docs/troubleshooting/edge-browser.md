@@ -1,4 +1,4 @@
-# Microsoft Edge browser
+# Microsoft Edge Browser
 
 ## Common Problems
 

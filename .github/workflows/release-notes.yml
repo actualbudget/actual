@@ -5,11 +5,6 @@ on:
   push:
     branches:
       - release
-  workflow_run: # zizmor: ignore[dangerous-triggers]
-    workflows: ['Cut release branch']
-    types:
-      - completed
-    branches: [master]
 
 permissions: {}
 
@@ -73,10 +68,7 @@ jobs:
         uses: ./.github/actions/release-notes/check
 
   generate-release-notes:
-    if: >-
-      github.event_name == 'push'
-      || (github.event_name == 'workflow_run'
-          && github.event.workflow_run.conclusion == 'success')
+    if: github.event_name == 'push'
     runs-on: depot-ubuntu-latest
     environment: release
     permissions:
@@ -92,7 +84,22 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "notes_branch=release-notes/$version" >> "$GITHUB_OUTPUT"
 
+          # Pushes to release can happen outside a cut (e.g. hotfix commits
+          # landing before the version bump). Only generate notes when the cut
+          # has opened the notes branch and the version has not shipped yet.
+          repo_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+          if git ls-remote --exit-code "$repo_url" "refs/tags/v$version" >/dev/null 2>&1; then
+            echo "Tag v$version already published; skipping generation"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          elif ! git ls-remote --exit-code "$repo_url" "refs/heads/release-notes/$version" >/dev/null 2>&1; then
+            echo "Notes branch release-notes/$version does not exist yet; skipping generation"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout release-notes branch
+        if: steps.version.outputs.skip != 'true'
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ steps.version.outputs.notes_branch }}
@@ -100,6 +107,7 @@ jobs:
           persist-credentials: true
 
       - name: Generate release notes
+        if: steps.version.outputs.skip != 'true'
         uses: ./.github/actions/release-notes/generate
         with:
           release-branch: release
