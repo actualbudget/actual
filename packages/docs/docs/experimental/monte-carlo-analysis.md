@@ -180,6 +180,20 @@ The chart shows your total balance from your current age to your target age - bu
 
 The dropdown above the chart switches views. **Single worst run** shows the one unluckiest replay in full. The **Worst-case**, **Pessimistic**, **Median** and **Optimistic** views each trace a single percentile - for example, the pessimistic line is the level that 70% of replays stayed above.
 
+### The Cashflow Chart
+
+Switch the results view from **Chart** to **Cashflow** to see the money moving in and out of your pots each year, for one simulated run at a time:
+
+- **Above zero**: money coming in - each pot's withdrawal for the year (one color per pot), plus each contribution being paid in (one color per contribution).
+- **Below zero**: money going out - the year's planned spending, colored by the spending phase it belongs to, plus the tax paid on withdrawals.
+- **The line** is the net cashflow of your pots: withdrawals minus contributions - how much the pots paid out over what was paid in that year.
+
+The line sits above zero while you live off your pots (they're paying out more than they receive) and dips below zero during accumulation years, when contributions outweigh withdrawals. A year where you withdraw 50,000 while still contributing 20,000 shows a net cashflow of 30,000 - the pots shrank by that much before market growth. Management fees don't appear here - they are charged inside the pots and never pass through your hands, and the run detail table lists them.
+
+The spending bars show the _plan_ - the phase amount, adjusted for inflation and any withdrawal rule - rather than the money actually delivered. That's what makes trouble visible: in a shortfall year the withdrawal bars fall visibly short of the spending bar, and when a minimum withdrawal forces out more than the plan asked for, the bars overshoot it.
+
+Use the dropdown above the chart to pick which run to look at: the worst run, a typically-bad or typically-good outcome (the 25th and 75th percentiles), the median, or the best run. These are the same runs the **Jump to** dropdown in the runs view lands on. The chart also appears above the year-by-year table when you click into any individual run, so you can see that specific run's flows at a glance.
+
 ### When Did the Pot Run Out?
 
 ![The depletion histogram](/img/experimental/monte-carlo-analysis/monte-carlo-histogram.png)

@@ -9,6 +9,7 @@ import { View } from '@actual-app/components/view';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import { rankSimulationsWorstFirst } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { GROUP_HEADING_STYLE } from '#components/reports/reports/monte-carlo/monteCarloStyles';
 import { useFormat } from '#hooks/useFormat';
 
@@ -52,34 +53,10 @@ export function MonteCarloRunsTable({
     setHighlightedRank(rank);
   }
 
-  // Rank every run: by ending balance, using the depletion year to order
-  // the failed runs (which all end at zero) among themselves
-  const rankedIndices = Array.from(
-    { length: simulationCount },
-    (_, index) => index,
+  const rankedIndices = rankSimulationsWorstFirst(
+    endingBalances,
+    depletionYearBySimulation,
   );
-  rankedIndices.sort((runA, runB) => {
-    const balanceDiff = endingBalances[runA] - endingBalances[runB];
-    if (balanceDiff !== 0) {
-      return balanceDiff;
-    }
-    // Survivors (-1) rank after any depleted run; explicit branches so
-    // two survivors compare as a tie instead of Infinity - Infinity
-    const runADepletionYear = depletionYearBySimulation[runA];
-    const runBDepletionYear = depletionYearBySimulation[runB];
-    const runASurvived = runADepletionYear === -1;
-    const runBSurvived = runBDepletionYear === -1;
-    if (runASurvived && runBSurvived) {
-      return 0;
-    }
-    if (runASurvived) {
-      return 1;
-    }
-    if (runBSurvived) {
-      return -1;
-    }
-    return runADepletionYear - runBDepletionYear;
-  });
   if (sortOrder === 'best-first') {
     rankedIndices.reverse();
   }

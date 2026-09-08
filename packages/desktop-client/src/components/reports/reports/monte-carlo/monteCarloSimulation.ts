@@ -203,6 +203,31 @@ export function sortMonteCarloSpendingPhases(
   );
 }
 
+/**
+ * The spending phase active at the given age: the last started phase in
+ * starting-age order, defaulting to the earliest phase before any has
+ * started. The engine's planned-spending schedule and the cashflow
+ * chart's phase attribution both resolve through here so they can't
+ * disagree.
+ */
+export function getActiveSpendingPhase(
+  phases: MonteCarloSpendingPhase[],
+  age: number,
+): MonteCarloSpendingPhase {
+  const sorted = phases.length
+    ? sortMonteCarloSpendingPhases(phases)
+    : [createMonteCarloSpendingPhase('phase-1')];
+  let active = sorted[0];
+  for (const phase of sorted) {
+    if (phase.fromAge == null || phase.fromAge <= age) {
+      active = phase;
+    } else {
+      break;
+    }
+  }
+  return active;
+}
+
 /** One recurring yearly contribution into a pot over an age window */
 export type MonteCarloContribution = {
   id: string;
@@ -569,6 +594,12 @@ export type MonteCarloRunDetailRow = {
   startBalance: number;
   /** Amount actually withdrawn (the accessible remainder on failure) */
   withdrawal: number;
+  /**
+   * The year's planned net spending: the phase schedule, inflated, after
+   * the withdrawal rule's adjustment but before the minimum floor and
+   * affordability capping
+   */
+  plannedSpending: number;
   /** Investment gain/loss applied after the withdrawal */
   growth: number;
   endBalance: number;
@@ -584,6 +615,11 @@ export type MonteCarloRunDetailRow = {
   contributions: number;
   /** Contribution each pot received at the start of the year, same order */
   potContributions: number[];
+  /**
+   * Deposit each configured contribution made this year, in the order the
+   * contributions are configured (zero outside its age window)
+   */
+  contributionAmounts: number[];
   /** How much of this year's withdrawal each pot funded (gross), same order */
   potWithdrawals: number[];
   /**
@@ -710,6 +746,45 @@ function percentileOfSorted(sorted: Float64Array, percentile: number) {
   }
   const weight = position - lower;
   return sorted[lower] * (1 - weight) + sorted[upper] * weight;
+}
+
+/**
+ * Every simulation index ranked worst-first: by ending balance, using the
+ * depletion year to order the failed runs (which all end at zero) among
+ * themselves. Shared by the runs table and the cashflow scenario picker so
+ * percentile jumps land on the same runs.
+ */
+export function rankSimulationsWorstFirst(
+  endingBalances: Float64Array,
+  depletionYearBySimulation: Int32Array,
+): number[] {
+  const rankedIndices = Array.from(
+    { length: endingBalances.length },
+    (_, index) => index,
+  );
+  rankedIndices.sort((runA, runB) => {
+    const balanceDiff = endingBalances[runA] - endingBalances[runB];
+    if (balanceDiff !== 0) {
+      return balanceDiff;
+    }
+    // Survivors (-1) rank after any depleted run; explicit branches so
+    // two survivors compare as a tie instead of Infinity - Infinity
+    const runADepletionYear = depletionYearBySimulation[runA];
+    const runBDepletionYear = depletionYearBySimulation[runB];
+    const runASurvived = runADepletionYear === -1;
+    const runBSurvived = runBDepletionYear === -1;
+    if (runASurvived && runBSurvived) {
+      return 0;
+    }
+    if (runASurvived) {
+      return 1;
+    }
+    if (runBSurvived) {
+      return -1;
+    }
+    return runADepletionYear - runBDepletionYear;
+  });
+  return rankedIndices;
 }
 
 /**
@@ -1044,21 +1119,14 @@ export function runMonteCarloSimulation(
   // The planned spending path in today's money: the active phase's amount
   // for every year. Inflation is applied per simulation, since each replay
   // draws its own inflation path when volatility is set.
-  const spendingPhases = params.spendingPhases.length
-    ? sortMonteCarloSpendingPhases(params.spendingPhases)
-    : [createMonteCarloSpendingPhase('phase-1')];
   const plannedTodayByYear = new Float64Array(horizonYears + 1);
   for (let year = 1; year <= horizonYears; year++) {
     const age = params.currentAge + year - 1;
-    let amount = clamp(spendingPhases[0].annualWithdrawal, 0, MAX_AMOUNT);
-    for (const phase of spendingPhases) {
-      if (phase.fromAge == null || phase.fromAge <= age) {
-        amount = clamp(phase.annualWithdrawal, 0, MAX_AMOUNT);
-      } else {
-        break;
-      }
-    }
-    plannedTodayByYear[year] = amount;
+    plannedTodayByYear[year] = clamp(
+      getActiveSpendingPhase(params.spendingPhases, age).annualWithdrawal,
+      0,
+      MAX_AMOUNT,
+    );
   }
 
   // The first year with planned spending - withdrawal rules anchor here
@@ -1226,11 +1294,41 @@ export function runMonteCarloSimulation(
           runDetail && simulationIndex === captureIndex
             ? new Array<number>(potCount).fill(0)
             : null;
+        // One entry per configured contribution, so the cashflow chart can
+        // split the year's deposits by their source
+        const capturedContributionAmounts = capturedPotContributions
+          ? new Array<number>(params.contributions.length).fill(0)
+          : null;
         if (hasContributions) {
           if (capturedPotContributions) {
             // The drill-in shows contributions as their own step, so its
             // Start balance column needs the pre-contribution snapshot
             preContributionPotBalances = Array.from(potBalances);
+          }
+          if (capturedContributionAmounts) {
+            // Mirror the precompute's eligibility rules per contribution;
+            // the per-pot deposits below are these same amounts grouped
+            // by pot, so the two views reconcile
+            const age = params.currentAge + year - 1;
+            for (
+              let contributionIndex = 0;
+              contributionIndex < params.contributions.length;
+              contributionIndex++
+            ) {
+              const contribution = params.contributions[contributionIndex];
+              const amount = clamp(contribution.annualAmount, 0, MAX_AMOUNT);
+              if (
+                amount <= 0 ||
+                !pots.some(pot => pot.id === contribution.potId) ||
+                (contribution.fromAge != null && age < contribution.fromAge) ||
+                (contribution.toAge != null && age > contribution.toAge)
+              ) {
+                continue;
+              }
+              capturedContributionAmounts[contributionIndex] =
+                amount *
+                (contribution.adjustsWithInflation ? cumulativeInflation : 1);
+            }
           }
           const flatContributions = flatContributionsByYear[year];
           const adjustedContributions = adjustedContributionsByYear[year];
@@ -1406,6 +1504,13 @@ export function runMonteCarloSimulation(
           }
           withdrawal = planned * adjustmentFactor;
         }
+        // The year's planned net spending: the phase schedule, inflated,
+        // after the withdrawal rule's adjustment but before the minimum
+        // floor and before affordability capping. The cashflow chart plots
+        // it against the actual withdrawal so surpluses and shortfalls
+        // stand out
+        const plannedSpendingThisYear = withdrawal;
+
         // The minimum floor belongs to the withdrawal rule system (the UI
         // only offers it alongside a rule); with no rule active the planned
         // spending is taken as-is. It guards against rule-driven cuts, so
@@ -1707,6 +1812,7 @@ export function runMonteCarloSimulation(
           const base = {
             year,
             startBalance,
+            plannedSpending: emit(plannedSpendingThisYear, startDeflator),
             ...(capturedRuleExplanation != null && {
               ruleExplanation: capturedRuleExplanation,
             }),
@@ -1716,6 +1822,11 @@ export function runMonteCarloSimulation(
             contributions,
             potContributions: emitParts(
               capturedPotContributions,
+              startDeflator,
+              contributions,
+            ),
+            contributionAmounts: emitParts(
+              capturedContributionAmounts,
               startDeflator,
               contributions,
             ),

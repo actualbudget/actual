@@ -19,6 +19,7 @@ import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import { MonteCarloCashflowGraph } from '#components/reports/graphs/MonteCarloCashflowGraph';
 import { MonteCarloGraph } from '#components/reports/graphs/MonteCarloGraph';
 import type { MonteCarloGraphView } from '#components/reports/graphs/MonteCarloGraphTooltip';
 import { MonteCarloHistogram } from '#components/reports/graphs/MonteCarloHistogram';
@@ -31,6 +32,7 @@ import {
   getMonteCarloHorizonYears,
   MONTE_CARLO_DEFAULTS,
   monteCarloConfigFromMeta,
+  rankSimulationsWorstFirst,
   runMonteCarloSimulation,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type { MonteCarloConfig } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
@@ -47,6 +49,19 @@ const firstYear = HISTORICAL_ANNUAL_RETURNS[0].year;
 const lastYear =
   HISTORICAL_ANNUAL_RETURNS[HISTORICAL_ANNUAL_RETURNS.length - 1].year;
 
+/** Which run of the ranked outcomes the cashflow view charts */
+type CashflowScenario = 'worst' | 'p25' | 'median' | 'p75' | 'best';
+
+// Position of each scenario in the worst-first ranking (0 = worst run,
+// 1 = best run) - the same percentiles the runs table can jump to
+const CASHFLOW_SCENARIO_PERCENTILES: Record<CashflowScenario, number> = {
+  worst: 0,
+  p25: 0.25,
+  median: 0.5,
+  p75: 0.75,
+  best: 1,
+};
+
 export function MonteCarlo() {
   const params = useParams();
   const { data: widget, isLoading } = useDashboardWidget<MonteCarloWidget>({
@@ -62,7 +77,11 @@ export function MonteCarlo() {
 
   const [config, setConfig] = useState<MonteCarloConfig>(MONTE_CARLO_DEFAULTS);
   const [graphView, setGraphView] = useState<MonteCarloGraphView>('all');
-  const [resultsView, setResultsView] = useState<'chart' | 'runs'>('chart');
+  const [resultsView, setResultsView] = useState<'chart' | 'cashflow' | 'runs'>(
+    'chart',
+  );
+  const [cashflowScenario, setCashflowScenario] =
+    useState<CashflowScenario>('median');
   const [showTodaysMoney, setShowTodaysMoney] = useState(true);
   // A selected run refers to a specific simulation, so the selection is
   // stored with the config it belongs to and silently expires when the
@@ -160,13 +179,33 @@ export function MonteCarlo() {
   };
   const result = runMonteCarloSimulation(simulationParams);
 
+  // The cashflow view charts one run picked by ranked percentile - the
+  // same worst-first ranking the runs table shows
+  const cashflowRunIndex =
+    resultsView === 'cashflow'
+      ? rankSimulationsWorstFirst(
+          result.endingBalances,
+          result.depletionYearBySimulation,
+        )[
+          Math.round(
+            CASHFLOW_SCENARIO_PERCENTILES[cashflowScenario] *
+              (result.simulationCount - 1),
+          )
+        ]
+      : null;
+
+  // The run whose year-by-year detail is on screen: the cashflow view's
+  // scenario, or the drill-in's selection from the runs table
+  const detailRunIndex =
+    resultsView === 'cashflow' ? cashflowRunIndex : selectedRunIndex;
+
   // Runs are seeded, so re-running with a capture index reproduces the
   // selected run exactly; only computed while a run is being inspected
   const runDetailRows =
-    selectedRunIndex != null
+    detailRunIndex != null
       ? runMonteCarloSimulation({
           ...simulationParams,
-          captureRunDetail: selectedRunIndex,
+          captureRunDetail: detailRunIndex,
         }).runDetail
       : null;
 
@@ -409,6 +448,8 @@ export function MonteCarlo() {
               <Text style={{ ...styles.mediumText, fontWeight: 600 }}>
                 {resultsView === 'chart' ? (
                   <Trans>Portfolio performance</Trans>
+                ) : resultsView === 'cashflow' ? (
+                  <Trans>Cashflow</Trans>
                 ) : (
                   <Trans>Simulation runs</Trans>
                 )}
@@ -419,6 +460,12 @@ export function MonteCarlo() {
                   onSelect={() => setResultsView('chart')}
                 >
                   <Trans>Chart</Trans>
+                </ModeButton>
+                <ModeButton
+                  selected={resultsView === 'cashflow'}
+                  onSelect={() => setResultsView('cashflow')}
+                >
+                  <Trans>Cashflow</Trans>
                 </ModeButton>
                 <ModeButton
                   selected={resultsView === 'runs'}
@@ -439,6 +486,22 @@ export function MonteCarlo() {
                   ['pessimistic', t('Pessimistic scenario (30th percentile)')],
                   ['median', t('Median scenario (50th percentile)')],
                   ['optimistic', t('Optimistic scenario (70th percentile)')],
+                ]}
+                style={{ width: 280 }}
+              />
+            )}
+            {resultsView === 'cashflow' && (
+              <Select
+                value={cashflowScenario}
+                onChange={value =>
+                  setCashflowScenario(value as CashflowScenario)
+                }
+                options={[
+                  ['worst', t('Worst run')],
+                  ['p25', t('Bottom quartile (25th percentile)')],
+                  ['median', t('Median scenario (50th percentile)')],
+                  ['p75', t('Top quartile (75th percentile)')],
+                  ['best', t('Best run')],
                 ]}
                 style={{ width: 280 }}
               />
@@ -476,6 +539,31 @@ export function MonteCarlo() {
                 style={{ height: '100%', flex: 1 }}
               />
             </>
+          ) : resultsView === 'cashflow' ? (
+            runDetailRows != null && (
+              <>
+                <Text
+                  style={{
+                    color: theme.pageText,
+                    marginBottom: 10,
+                    flexShrink: 0,
+                  }}
+                >
+                  <Trans>
+                    Money flowing in and out each year of this simulated run:
+                    withdrawals and contributions above zero, planned spending
+                    and tax below.
+                  </Trans>
+                </Text>
+                <MonteCarloCashflowGraph
+                  rows={runDetailRows}
+                  pots={resolvedConfig.pots}
+                  contributions={resolvedConfig.contributions}
+                  spendingPhases={resolvedConfig.spendingPhases}
+                  startAge={config.currentAge}
+                />
+              </>
+            )
           ) : selectedRunIndex != null && runDetailRows != null ? (
             <MonteCarloRunDetailTable
               rows={runDetailRows}
@@ -485,6 +573,16 @@ export function MonteCarlo() {
               startAge={config.currentAge}
               hasContributions={config.contributions.length > 0}
               withdrawalRule={resolvedConfig.withdrawalRule}
+              cashflowGraph={
+                <MonteCarloCashflowGraph
+                  rows={runDetailRows}
+                  pots={resolvedConfig.pots}
+                  contributions={resolvedConfig.contributions}
+                  spendingPhases={resolvedConfig.spendingPhases}
+                  startAge={config.currentAge}
+                  style={{ marginBottom: 15 }}
+                />
+              }
               onBack={() => setSelectedRun(null)}
             />
           ) : (
