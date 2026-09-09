@@ -39,7 +39,8 @@ export function AccountsHeaderRow({
         flexDirection: 'row',
         alignItems: 'center',
         gap: spacing.xs,
-        padding: `${spacing.xs}px ${spacing.sm}px`,
+        paddingBlock: spacing.xs,
+        paddingInline: spacing.sm,
       }}
     >
       <Link

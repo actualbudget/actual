@@ -12,7 +12,7 @@ export function CountPill({ count }: CountPillProps) {
       style={{
         fontSize: 10,
         fontWeight: 600,
-        padding: `0 ${spacing.xs}px`,
+        paddingInline: spacing.xs,
         borderRadius: radius.pill,
         backgroundColor: theme.sidebarControlBackground,
         color: theme.sidebarTextMuted,

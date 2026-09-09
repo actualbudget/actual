@@ -55,7 +55,9 @@ export function SideGroup({
           flexDirection: 'row',
           alignItems: 'center',
           gap: spacing.xs,
-          padding: `${spacing.xs}px ${spacing.sm}px ${spacing.xs}px ${spacing.xs}px`,
+          paddingBlock: spacing.xs,
+          paddingLeft: spacing.xs,
+          paddingRight: spacing.sm,
         }}
       >
         <Button

@@ -27,7 +27,7 @@ export function SyncErrorRollup({ count }: SyncErrorRollupProps) {
         flexDirection: 'row',
         alignItems: 'center',
         gap: spacing.xs,
-        padding: `0 ${spacing.xs}px`,
+        paddingInline: spacing.xs,
         borderRadius: radius.pill,
         backgroundColor: theme.sidebarBackgroundFailedSubtle,
         flexShrink: 0,

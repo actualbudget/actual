@@ -47,7 +47,9 @@ export function AccountGroupHeader({
         alignItems: 'center',
         justifyContent: 'flex-start',
         gap: spacing.xs,
-        padding: `${spacing.xs}px ${spacing.sm}px ${spacing.xs}px ${spacing.xs}px`,
+        paddingBlock: spacing.xs,
+        paddingLeft: spacing.xs,
+        paddingRight: spacing.sm,
         borderRadius: radius.sm,
         width: '100%',
       }}
