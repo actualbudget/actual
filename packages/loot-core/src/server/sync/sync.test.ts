@@ -211,6 +211,44 @@ describe('Sync', () => {
   });
 });
 
+describe('receiveMessages', () => {
+  it('restores the clock if a message in the batch triggers clock drift', async () => {
+    void prefs.loadPrefs();
+    void prefs.savePrefs({ groupId: 'group' });
+
+    const before = getClock().timestamp.toString();
+
+    const okMessage = {
+      dataset: 'transactions',
+      row: 'foo',
+      column: 'amount',
+      value: 3200,
+      timestamp: new Timestamp(Date.now(), 0, '0000000000000001'),
+    };
+    const driftedMessage = {
+      dataset: 'transactions',
+      row: 'foo',
+      column: 'amount',
+      value: 4200,
+      timestamp: new Timestamp(
+        Date.now() + 10 * 60 * 1000,
+        0,
+        '0000000000000002',
+      ),
+    };
+
+    let error;
+    try {
+      await receiveMessages([okMessage, driftedMessage]);
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeTruthy();
+    expect(getClock().timestamp.toString()).toEqual(before);
+  });
+});
+
 function registerBudgetMonths(months) {
   const createdMonths = new Set();
   for (const month of months) {
