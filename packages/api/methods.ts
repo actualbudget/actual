@@ -449,9 +449,9 @@ export function getPreferences(): Promise<SyncedPrefs> {
   return send('preferences/get');
 }
 
-export function setPreference(
-  id: keyof SyncedPrefs,
-  value: string | undefined,
+export function setPreference<T extends keyof SyncedPrefs>(
+  id: T,
+  value: SyncedPrefs[T] | undefined,
 ): Promise<void> {
   return send('preferences/save', { id, value });
 }

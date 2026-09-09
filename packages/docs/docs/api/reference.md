@@ -910,4 +910,4 @@ Returns the budget's synced preferences — settings that sync across devices, s
 
 <Method name="setPreference" args={[{ name: 'id', type: 'keyof SyncedPrefs' }, { name: 'value', type: 'string | undefined' }]} returns="Promise<void>" />
 
-Sets a single synced preference. The `id` must be a valid SyncedPrefs key. The `value` is a string or `undefined`.
+Sets a single synced preference. The `id` must be a valid SyncedPrefs key.
