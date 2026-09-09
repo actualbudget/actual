@@ -213,6 +213,12 @@ export function deleteTransaction(id: TransactionEntity['id']) {
   return send('api/transaction-delete', { id });
 }
 
+export function mergeTransactions(
+  ids: [TransactionEntity['id'], TransactionEntity['id']],
+) {
+  return send('api/transactions-merge', { ids });
+}
+
 export function getAccounts() {
   return send('api/accounts-get');
 }
@@ -441,4 +447,11 @@ export function getServerVersion() {
 /** Read the budget's synced preferences (number format, currency, etc.). */
 export function getPreferences(): Promise<SyncedPrefs> {
   return send('preferences/get');
+}
+
+export function setPreference<T extends keyof SyncedPrefs>(
+  id: T,
+  value: SyncedPrefs[T] | undefined,
+): Promise<void> {
+  return send('preferences/save', { id, value });
 }

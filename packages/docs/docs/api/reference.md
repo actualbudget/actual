@@ -20,7 +20,8 @@ import APIList from './APIList';
 "importTransactions",
 "getTransactions",
 "updateTransaction",
-"deleteTransaction"
+"deleteTransaction",
+"mergeTransactions"
 ]} />
 
 <APIList title="Accounts" sections={[
@@ -107,7 +108,8 @@ import APIList from './APIList';
 "batchBudgetUpdates",
 "runQuery",
 "getIDByName",
-"getPreferences"
+"getPreferences",
+"setPreference"
 ]} />
 
 ## Types of Methods
@@ -313,6 +315,21 @@ Update fields of a transaction. `fields` can specify any field described in [`Tr
 <Method name="deleteTransaction" args={[{ name: 'id', type: 'id'}]} />
 
 Delete a transaction.
+
+#### `mergeTransactions`
+
+<Method name="mergeTransactions" args={[{ name: 'ids', type: 'id[]' }]} returns="Promise<id>" />
+
+Merge exactly two distinct transactions from the same account into one. Returns the id of the surviving transaction; the other one is deleted.
+
+The order of the ids does not decide which transaction survives:
+
+- an imported transaction is kept over a manually entered one
+- otherwise, the transaction with the earlier date is kept
+
+The surviving transaction keeps its own field values and fills in any empty ones from the deleted transaction. It is marked cleared if either transaction was.
+
+The merge fails if you pass the same id twice, or if the two transactions are in different accounts, have different amounts, or are transfers to different accounts.
 
 #### Examples
 
@@ -888,3 +905,9 @@ return error or the current server versions.
 <Method name="getPreferences" args={[]} returns="Promise<SyncedPrefs>" />
 
 Returns the budget's synced preferences — settings that sync across devices, such as the number format (`numberFormat`, `hideFraction`), currency (`defaultCurrencyCode`, `currencySymbolPosition`, `currencySpaceBetweenAmountAndSymbol`), date format (`dateFormat`), and first day of the week (`firstDayOfWeekIdx`). All values are strings (or `undefined` if the preference has never been set). The `SyncedPrefs` type is exported from `@actual-app/api/models`.
+
+#### `setPreference`
+
+<Method name="setPreference" args={[{ name: 'id', type: 'keyof SyncedPrefs' }, { name: 'value', type: 'string | undefined' }]} returns="Promise<void>" />
+
+Sets a single synced preference. The `id` must be a valid SyncedPrefs key.
