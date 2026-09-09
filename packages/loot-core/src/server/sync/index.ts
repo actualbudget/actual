@@ -635,48 +635,48 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
 export const applyMessages = sequential(_applyMessages);
 
 export function receiveMessages(messages: Message[]): Promise<Message[]> {
-  // Timestamp.recv() mutates the shared clock immediately, but the
-  // messages might not be applied if the transaction fails.
-  // Restore the clock in that case so a failed batch can't bump it.
-  const timestamp = getClock().timestamp;
-  const savedMillis = timestamp.millis();
-  const savedCounter = timestamp.counter();
+  return runMutator(async () => {
+    // Timestamp.recv() mutates the shared clock immediately, but the
+    // messages might not be applied if the transaction fails.
+    // Restore the clock in that case so a failed batch can't bump it.
+    const timestamp = getClock().timestamp;
+    const savedMillis = timestamp.millis();
+    const savedCounter = timestamp.counter();
 
-  function restoreClock() {
-    timestamp.setMillis(savedMillis);
-    timestamp.setCounter(savedCounter);
-  }
+    function restoreClock() {
+      timestamp.setMillis(savedMillis);
+      timestamp.setCounter(savedCounter);
+    }
 
-  try {
-    // Receiving the latest timestamp preserves the clock and drift check while
-    // advancing the counter once per batch.
-    let latest = null;
-    for (const { timestamp } of messages) {
-      if (
-        latest === null ||
-        timestamp.millis() > latest.millis() ||
-        (timestamp.millis() === latest.millis() &&
-          timestamp.counter() > latest.counter())
-      ) {
-        latest = timestamp;
+    try {
+      // Receiving the latest timestamp preserves the clock and drift check while
+      // advancing the counter once per batch.
+      let latest = null;
+      for (const { timestamp } of messages) {
+        if (
+          latest === null ||
+          timestamp.millis() > latest.millis() ||
+          (timestamp.millis() === latest.millis() &&
+            timestamp.counter() > latest.counter())
+        ) {
+          latest = timestamp;
+        }
       }
-    }
-    if (latest !== null) {
-      Timestamp.recv(latest);
-    }
-  } catch (e) {
-    restoreClock();
-    if (e instanceof Timestamp.ClockDriftError) {
-      throw new SyncError('clock-drift');
-    }
-    throw e;
-  }
+      if (latest !== null) {
+        Timestamp.recv(latest);
+      }
 
-  // Inbound messages may come from a newer version of the app, so
-  // unknown-schema errors defer instead of failing the batch
-  return runMutator(() => applyMessages(messages, true)).catch(e => {
-    restoreClock();
-    throw e;
+      // Inbound messages may come from a newer version of the app, so
+      // unknown-schema errors defer instead of failing the batch
+      return await applyMessages(messages, true);
+    } catch (e) {
+      restoreClock();
+
+      if (e instanceof Timestamp.ClockDriftError) {
+        throw new SyncError('clock-drift');
+      }
+      throw e;
+    }
   });
 }
 
