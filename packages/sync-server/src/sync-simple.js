@@ -16,11 +16,15 @@ import { getPathForGroupFile } from './util/paths';
 // forever and break sync for every device in the group.
 const MAX_FUTURE_DRIFT_MS = 24 * 60 * 60 * 1000; // 1 day
 
-export class ClockDriftError extends Error {}
+export const CLOCK_DRIFT_ERROR_CODE = 'clock-drift';
+
+function createClockDriftError(message) {
+  return Object.assign(new Error(message), { code: CLOCK_DRIFT_ERROR_CODE });
+}
 
 function isTimestampTooFarInFuture(timestamp) {
   const parsed = Timestamp.parse(timestamp);
-  return !parsed || parsed.millis() - Date.now() > MAX_FUTURE_DRIFT_MS;
+  return !parsed || parsed.millis() - Date.now() >= MAX_FUTURE_DRIFT_MS;
 }
 
 function getGroupDb(groupId) {
@@ -44,7 +48,7 @@ function addMessages(db, messages) {
     if (messages.length > 0) {
       for (const msg of messages) {
         if (isTimestampTooFarInFuture(msg.timestamp)) {
-          throw new ClockDriftError(
+          throw createClockDriftError(
             'Rejecting sync message with timestamp too far in the future: ' +
               msg.timestamp,
           );
