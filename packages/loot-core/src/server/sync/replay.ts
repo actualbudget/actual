@@ -3,6 +3,7 @@ import { logger } from '#platform/server/log';
 import * as db from '#server/db';
 import { isMissingSchemaError } from '#shared/errors';
 
+import { PENDING_MESSAGES_TABLE_SQL } from './messages-pending';
 import { deserializeValue } from './serialization';
 import {
   notifyDeferredMessages,
@@ -27,6 +28,10 @@ type ReplayOutcome =
 // unknown-format value defers even when its column exists). Also used
 // by `resetSync` so its discard warning only counts real losses.
 export function deleteStalePendingMessages(): void {
+  // The table may not exist yet when the served migration files are
+  // older than the code (stale service-worker cache, unrebuilt dev
+  // environment) — create it rather than failing every budget load
+  db.execQuery(PENDING_MESSAGES_TABLE_SQL);
   db.runQuery(`
     DELETE FROM messages_pending
       WHERE EXISTS

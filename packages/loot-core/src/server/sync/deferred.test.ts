@@ -34,6 +34,30 @@ function getPending(): db.DbPendingMessage[] {
 }
 
 describe('Deferred sync messages (newer schema)', () => {
+  it('works even when the messages_pending migration never ran', async () => {
+    // Code newer than the schema: the served migration files can lag
+    // behind the app (stale service-worker cache, unrebuilt dev env)
+    db.execQuery('DROP TABLE messages_pending');
+
+    // Budget load must not throw...
+    replayPendingMessages();
+
+    // ...and deferral must still store the message, not fail the batch
+    await applyMessages(
+      [
+        {
+          dataset: 'transactions',
+          row: 't1',
+          column: 'brand_new_column',
+          value: 'hello',
+          timestamp: sendTimestamp(),
+        },
+      ],
+      true,
+    );
+    expect(getPending().length).toBe(1);
+  });
+
   it('defers messages for unknown columns without failing the batch', async () => {
     await applyMessages(
       [

@@ -31,6 +31,7 @@ import { getIn, setIn } from '#shared/util';
 import type { MetadataPrefs } from '#types/prefs';
 
 import * as encoder from './encoder';
+import { PENDING_MESSAGES_TABLE_SQL } from './messages-pending';
 import { rebuildMerkleHash } from './repair';
 import {
   deserializeValueSafe,
@@ -90,6 +91,9 @@ export function checkSyncingMode(mode: SyncingMode): boolean {
 // cell is kept — replay is last-write-wins per cell anyway, and this
 // bounds the table while the client stays on an old version.
 function deferMessage(msg: Message) {
+  // The table may not exist yet when the served migration files are
+  // older than the code — create it rather than failing the sync batch
+  db.execQuery(PENDING_MESSAGES_TABLE_SQL);
   db.runQuery(
     db.cache(
       `INSERT INTO messages_pending (timestamp, dataset, row, column, value)
