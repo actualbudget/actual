@@ -99,10 +99,23 @@ async function writeStore(): Promise<void> {
 
   try {
     await fs.promises.writeFile(tmpPath, JSON.stringify(store), 'utf8');
-    await fs.promises.rename(tmpPath, storePath);
+    try {
+      await fs.promises.rename(tmpPath, storePath);
+    } catch (renameErr: unknown) {
+      const code = (renameErr as NodeJS.ErrnoException)?.code;
+      if (code === 'EXDEV') {
+        // Cross-device rename (e.g. Microsoft Store install on Windows where
+        // the temp and target are on different volumes). Fall back to
+        // copy+unlink which works across devices.
+        await fs.promises.copyFile(tmpPath, storePath);
+        await fs.promises.rm(tmpPath, { force: true });
+      } else {
+        throw renameErr;
+      }
+    }
   } catch (err) {
     // Best-effort cleanup of the temp file; ignore failures (it may never have
-    // been created).
+    // been created, or was already removed by the EXDEV fallback).
     try {
       await fs.promises.rm(tmpPath, { force: true });
     } catch {}
