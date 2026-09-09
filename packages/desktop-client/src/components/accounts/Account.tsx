@@ -560,7 +560,6 @@ class AccountInternal extends PureComponent<
       },
       options: {
         pageCount: 150,
-        onlySync: true,
       },
     });
   }
