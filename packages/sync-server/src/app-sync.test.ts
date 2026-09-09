@@ -2,7 +2,12 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 
-import { create, SyncRequestSchema, toBinary } from '@actual-app/crdt';
+import {
+  create,
+  MessageEnvelopeSchema,
+  SyncRequestSchema,
+  toBinary,
+} from '@actual-app/crdt';
 import request from 'supertest';
 
 import { getAccountDb } from './account-db';
@@ -1533,6 +1538,31 @@ describe('/sync', () => {
 
     expect(res.statusCode).toEqual(403);
     expect(res.text).toEqual('file-access-not-allowed');
+  });
+
+  it('returns 400 if a message timestamp is too far in the future', async () => {
+    const fileId = crypto.randomBytes(16).toString('hex');
+    const groupId = 'group-id';
+    const keyId = 'key-id';
+    const syncVersion = 2;
+    const encryptMeta = JSON.stringify({ keyId });
+
+    addMockFile(fileId, groupId, keyId, encryptMeta, syncVersion);
+
+    const syncRequest = createMinimalSyncRequest(fileId, groupId, keyId);
+    const farFutureMillis = Date.now() + 2 * 24 * 60 * 60 * 1000; // 2 days
+    syncRequest.messages = [
+      create(MessageEnvelopeSchema, {
+        timestamp: `${new Date(farFutureMillis).toISOString()}-0000-0000000000000000`,
+        isEncrypted: false,
+        content: new Uint8Array(),
+      }),
+    ];
+
+    const res = await sendSyncRequest(syncRequest);
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.text).toEqual('clock-drift');
   });
 
   it("allows an admin to sync another user's file", async () => {
