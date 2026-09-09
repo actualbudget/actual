@@ -28,11 +28,19 @@ import {
   createBaseGraphSpreadsheet,
   isGraphLayer,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
-import type { GraphLayers } from '#components/reports/spreadsheets/sankey-spreadsheet';
+import type {
+  Graph,
+  GraphLayers,
+} from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
 import { useLocale } from '#hooks/useLocale';
 import { useResizeObserver } from '#hooks/useResizeObserver';
+
+const defaultGetBaseGraph = async (
+  _spreadsheet: unknown,
+  setData: (data: Graph) => void,
+) => setData(new Map());
 
 type SankeyCardProps = {
   widgetId: string;
@@ -49,12 +57,9 @@ export function SankeyCard({
   const { t } = useTranslation();
   const locale = useLocale();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
-  const [transactionBounds, setTransactionBounds] = useState(() => {
-    const today = monthUtils.currentDay();
-    return { earliest: today, latest: today };
-  });
-  const earliestTransaction = transactionBounds.earliest;
-  const latestTransaction = transactionBounds.latest;
+  const [earliestTransaction, setEarliestTransaction] = useState('');
+  const [latestTransaction, setLatestTransaction] = useState('');
+  const [datesInitialized, setDatesInitialized] = useState(false);
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
 
@@ -64,10 +69,9 @@ export function SankeyCard({
       send('get-latest-transaction'),
     ]).then(([earliest, latest]) => {
       const today = monthUtils.currentDay();
-      setTransactionBounds({
-        earliest: earliest?.date ?? today,
-        latest: latest?.date ?? today,
-      });
+      setEarliestTransaction(earliest?.date ?? today);
+      setLatestTransaction(latest?.date ?? today);
+      setDatesInitialized(true);
     });
   }, []);
 
@@ -119,6 +123,10 @@ export function SankeyCard({
   const groupAccounts = meta?.groupAccounts ?? false;
 
   const baseGraphParams = useMemo(() => {
+    if (!datesInitialized) {
+      return null;
+    }
+
     const [boundedStart, boundedEnd] = boundMonthRangeFromDates(
       earliestTransaction,
       latestTransaction,
@@ -137,6 +145,7 @@ export function SankeyCard({
       meta?.showTransfers ?? false,
     );
   }, [
+    datesInitialized,
     earliestTransaction,
     latestTransaction,
     start,
@@ -149,7 +158,7 @@ export function SankeyCard({
     meta?.showTransfers,
   ]);
 
-  const baseGraph = useReport('sankey', baseGraphParams);
+  const baseGraph = useReport('sankey', baseGraphParams ?? defaultGetBaseGraph);
   const baseGraphRef = useRef(baseGraph);
 
   useEffect(() => {
