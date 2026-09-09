@@ -600,6 +600,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       showTransfers,
     );
   }, [
+    earliestTransaction,
+    latestTransaction,
     datesInitialized,
     start,
     end,
