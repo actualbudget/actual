@@ -63,7 +63,7 @@ function makeEntry(name: string, value: number): TooltipEntry {
 
 // recharts hands the payload over in reverse order, and the tooltip reverses
 // it back, so the payload here is written last-category-first
-function renderTooltip(entries: TooltipEntry[]) {
+function renderTooltip(entries: TooltipEntry[], { compact = true } = {}) {
   tooltipPayload = entries.slice(0).reverse();
 
   render(
@@ -82,7 +82,7 @@ function renderTooltip(entries: TooltipEntry[]) {
           }
           filters={[]}
           groupBy="Category"
-          compact
+          compact={compact}
           viewLabels={false}
           balanceTypeOp="totalDebts"
         />
@@ -129,5 +129,22 @@ describe('StackedBarGraph tooltip', () => {
 
     expect(screen.queryByText('Gifts')).not.toBeInTheDocument();
     expect(document.body).toHaveTextContent('...');
+  });
+
+  it('never truncates outside compact mode', () => {
+    renderTooltip(
+      [
+        makeEntry('Food', 1000),
+        makeEntry('Bills', 2000),
+        makeEntry('Fun', 3000),
+        makeEntry('Rent', 4000),
+        makeEntry('Travel', 5000),
+        makeEntry('Gifts', 6000),
+      ],
+      { compact: false },
+    );
+
+    expect(screen.getByText('Gifts')).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent('...');
   });
 });
