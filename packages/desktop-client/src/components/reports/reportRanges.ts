@@ -126,6 +126,20 @@ export function boundMonthRange(
   return [boundedStart, boundedEnd];
 }
 
+export function boundMonthRangeFromDates(
+  earliestDate: string,
+  latestDate: string,
+  start: string,
+  end: string,
+): [string, string] {
+  return boundMonthRange(
+    monthUtils.getMonth(earliestDate),
+    monthUtils.getMonth(latestDate),
+    monthUtils.getMonth(start),
+    monthUtils.getMonth(end),
+  );
+}
+
 function boundedRange(
   earliest: string,
   latest: string,
