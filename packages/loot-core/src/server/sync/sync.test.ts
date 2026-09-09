@@ -194,6 +194,51 @@ describe('receiveMessages', () => {
     expect(error).toBeTruthy();
     expect(getClock().timestamp.toString()).toEqual(before);
   });
+
+  it('safely handles concurrent batches where the first fails and the second succeeds', async () => {
+    void prefs.loadPrefs();
+    void prefs.savePrefs({ groupId: 'group' });
+
+    const now = Date.now();
+
+    // Batch 1: 1 valid message and 1 message with clock-drift
+    const batch1ValidMsg = {
+      dataset: 'transactions',
+      row: 'foo',
+      column: 'amount',
+      value: 1111,
+      timestamp: new Timestamp(now + 1000, 0, '0000000000000001'),
+    };
+    const batch1DriftedMsg = {
+      dataset: 'transactions',
+      row: 'foo',
+      column: 'amount',
+      value: 2222,
+      timestamp: new Timestamp(now + 10 * 60 * 1000, 0, '0000000000000002'),
+    };
+
+    // Batch 2: 1 valid message
+    const batch2ValidMsg = {
+      dataset: 'transactions',
+      row: 'bar',
+      column: 'amount',
+      value: 3333,
+      timestamp: new Timestamp(now + 2000, 0, '0000000000000003'),
+    };
+
+    const batch1Promise = receiveMessages([batch1ValidMsg, batch1DriftedMsg]);
+    const batch2Promise = receiveMessages([batch2ValidMsg]);
+
+    const results = await Promise.allSettled([batch1Promise, batch2Promise]);
+
+    expect(results[0].status).toBe('rejected');
+    expect(results[1].status).toBe('fulfilled');
+
+    // The final clock state timestamp should match only Batch 2's
+    expect(getClock().timestamp.millis()).toEqual(
+      batch2ValidMsg.timestamp.millis(),
+    );
+  });
 });
 
 function registerBudgetMonths(months) {
