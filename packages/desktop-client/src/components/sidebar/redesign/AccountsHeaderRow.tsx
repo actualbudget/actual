@@ -1,6 +1,10 @@
 import { Trans, useTranslation } from 'react-i18next';
 
-import { SvgAdd, SvgCheveronUpDown } from '@actual-app/components/icons/v1';
+import {
+  SvgAdd,
+  SvgCheveronDownUp,
+  SvgCheveronUpDown,
+} from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
@@ -53,7 +57,7 @@ export function AccountsHeaderRow({
         <Trans>Accounts</Trans>
       </Link>
       <SidebarIconButton
-        Icon={SvgCheveronUpDown}
+        Icon={allOpen ? SvgCheveronDownUp : SvgCheveronUpDown}
         label={allOpen ? t('Collapse all groups') : t('Expand all groups')}
         onPress={onToggleAll}
       />

@@ -76,6 +76,7 @@ export { SvgChatBubbleDots } from './ChatBubbleDots';
 export { SvgCheckAlternative } from './CheckAlternative';
 export { SvgCheckmarkOutline } from './CheckmarkOutline';
 export { SvgCheckmark } from './Checkmark';
+export { SvgCheveronDownUp } from './CheveronDownUp';
 export { SvgCheveronDown } from './CheveronDown';
 export { SvgCheveronLeft } from './CheveronLeft';
 export { SvgCheveronOutlineDown } from './CheveronOutlineDown';
