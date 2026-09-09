@@ -9,7 +9,13 @@ import * as mockSyncServer from '#server/tests/mockSyncServer';
 import * as encoder from './encoder';
 import { isError } from './utils';
 
-import { applyMessages, fullSync, sendMessages, setSyncingMode } from './index';
+import {
+  applyMessages,
+  fullSync,
+  receiveMessages,
+  sendMessages,
+  setSyncingMode,
+} from './index';
 
 beforeEach(() => {
   mockSyncServer.reset();
@@ -149,6 +155,44 @@ describe('Sync', () => {
     if (isError(result)) throw result.error;
     expect(result.messages.length).toBe(2);
     expect(mockSyncServer.getMessages().length).toBe(3);
+  });
+});
+
+describe('receiveMessages', () => {
+  it('restores the clock if a message in the batch triggers clock drift', async () => {
+    void prefs.loadPrefs();
+    void prefs.savePrefs({ groupId: 'group' });
+
+    const before = getClock().timestamp.toString();
+
+    const okMessage = {
+      dataset: 'transactions',
+      row: 'foo',
+      column: 'amount',
+      value: 3200,
+      timestamp: new Timestamp(Date.now(), 0, '0000000000000001'),
+    };
+    const driftedMessage = {
+      dataset: 'transactions',
+      row: 'foo',
+      column: 'amount',
+      value: 4200,
+      timestamp: new Timestamp(
+        Date.now() + 10 * 60 * 1000,
+        0,
+        '0000000000000002',
+      ),
+    };
+
+    let error;
+    try {
+      await receiveMessages([okMessage, driftedMessage]);
+    } catch (e) {
+      error = e;
+    }
+
+    expect(error).toBeTruthy();
+    expect(getClock().timestamp.toString()).toEqual(before);
   });
 });
 
