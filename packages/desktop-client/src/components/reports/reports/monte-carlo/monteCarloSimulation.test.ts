@@ -672,6 +672,69 @@ describe('runMonteCarloSimulation', () => {
     expect(shortfallYear.plannedSpending).toBe(10_000);
     expect(shortfallYear.withdrawal).toBe(5_000);
     expect(shortfallYear.endBalance).toBe(0);
+
+    // The year after the failure is still captured - as a synthetic
+    // unfunded row for the cashflow chart
+    const unfundedYear = result.runDetail![1];
+    expect(unfundedYear.afterDepletion).toBe(true);
+    expect(unfundedYear.plannedSpending).toBe(10_000);
+    expect(unfundedYear.withdrawal).toBe(0);
+    expect(unfundedYear.endBalance).toBe(0);
+  });
+
+  it('captures the unfunded years after a failure at frozen prices', () => {
+    // Fails in year 2; the remaining years chart the plan's spending at
+    // the price level reached by the failure year, since no further
+    // inflation is realized on a dead run
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 10_000,
+          horizonYears: 4,
+          inflationMean: 0.1,
+          inflationStdDev: 0,
+          captureRunDetail: 0,
+        },
+        { startingBalance: 15_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    expect(rows).toHaveLength(4);
+    // Year 1 spends 10,000; year 2 needs 11,000 but only 5,000 remains
+    expect(rows.map(row => row.afterDepletion ?? false)).toEqual([
+      false,
+      false,
+      true,
+      true,
+    ]);
+    expect(rows.map(row => row.withdrawal)).toEqual([10_000, 5_000, 0, 0]);
+    // The failure year still realizes its own inflation (cumulative
+    // 1.21 after year 2); the unfunded years stay at that level rather
+    // than compounding on
+    expect(rows.map(row => row.plannedSpending)).toEqual([
+      10_000, 11_000, 12_100, 12_100,
+    ]);
+    // No inflation is realized on synthetic years
+    expect(rows[2].inflation).toBeNull();
+    expect(rows[3].inflation).toBeNull();
+    // Per-pot arrays keep their shape
+    expect(rows[3].potWithdrawals).toEqual([0]);
+    expect(rows[3].potBalances).toEqual([0]);
+  });
+
+  it('captures no synthetic rows for a surviving run', () => {
+    const result = runMonteCarloSimulation(
+      makeParams(
+        { annualWithdrawal: 1_000, horizonYears: 5, captureRunDetail: 0 },
+        { startingBalance: 100_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    expect(result.runDetail!).toHaveLength(5);
+    expect(
+      result.runDetail!.every(row => row.afterDepletion === undefined),
+    ).toBe(true);
   });
 
   it('keeps custom pots on normal draws in historical modes', () => {
@@ -1576,10 +1639,13 @@ describe('runMonteCarloSimulation', () => {
       expect(row.growth).toBe(Math.round(balance - afterWithdrawal));
     }
 
-    // Rows stop at the depletion year
-    const lastRow = rows![rows!.length - 1];
-    expect(lastRow.year).toBe(result.medianDepletionYear);
-    expect(lastRow.endBalance).toBe(0);
+    // Funded rows stop at the depletion year; the capture continues to
+    // the horizon with synthetic unfunded rows for the cashflow chart
+    const fundedRows = rows!.filter(row => !row.afterDepletion);
+    const lastFundedRow = fundedRows[fundedRows.length - 1];
+    expect(lastFundedRow.year).toBe(result.medianDepletionYear);
+    expect(lastFundedRow.endBalance).toBe(0);
+    expect(rows!).toHaveLength(30);
   });
 
   it('replays a volatile run identically to the original', () => {
@@ -1600,8 +1666,10 @@ describe('runMonteCarloSimulation', () => {
         Math.round(original.endingBalances[simulationIndex]),
       );
     } else {
-      expect(rows).toHaveLength(depletionYear);
-      expect(rows[rows.length - 1].endBalance).toBe(0);
+      expect(rows).toHaveLength(original.horizonYears);
+      const fundedRows = rows.filter(row => !row.afterDepletion);
+      expect(fundedRows).toHaveLength(depletionYear);
+      expect(fundedRows[fundedRows.length - 1].endBalance).toBe(0);
     }
   });
 
@@ -1630,7 +1698,8 @@ describe('runMonteCarloSimulation', () => {
     );
 
     const rows = result.runDetail!;
-    const failureRow = rows[rows.length - 1];
+    const fundedRows = rows.filter(row => !row.afterDepletion);
+    const failureRow = fundedRows[fundedRows.length - 1];
     // y1 70, y2 40, y3 10 accessible; year 4 fails with 10 reachable
     expect(failureRow.year).toBe(4);
     expect(failureRow.withdrawal).toBe(10);
@@ -1880,8 +1949,10 @@ describe('runMonteCarloSimulation', () => {
 
     expect(result.successRate).toBe(0);
     expect(result.medianDepletionYear).toBe(10);
+    // 10 funded years plus 2 synthetic unfunded years to the horizon
     const rows = result.runDetail!;
-    expect(rows).toHaveLength(10);
+    expect(rows).toHaveLength(12);
+    expect(rows.filter(row => !row.afterDepletion)).toHaveLength(10);
     for (const row of rows.slice(0, 9)) {
       expect(row.withdrawal).toBe(10_000);
       expect(row.taxPaid).toBe(2_000);

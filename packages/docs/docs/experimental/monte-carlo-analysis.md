@@ -186,9 +186,10 @@ Switch the results view from **Chart** to **Cashflow** to see the money moving i
 
 - **Above zero**: money coming in - each pot's withdrawal for the year (one color per pot), plus each contribution being paid in (one color per contribution).
 - **Below zero**: money going out - the year's planned spending, colored by the spending phase it belongs to, plus the tax paid on withdrawals.
-- **The line** is the net cashflow of your pots: withdrawals minus contributions - how much the pots paid out over what was paid in that year.
 
-The line sits above zero while you live off your pots (they're paying out more than they receive) and dips below zero during accumulation years, when contributions outweigh withdrawals. A year where you withdraw 50,000 while still contributing 20,000 shows a net cashflow of 30,000 - the pots shrank by that much before market growth. Management fees don't appear here - they are charged inside the pots and never pass through your hands, and the run detail table lists them.
+Management fees don't appear here - they are charged inside the pots and never pass through your hands, and the run detail table lists them.
+
+On a run that fails, the chart doesn't stop at the failure year: the remaining years keep showing the spending the plan still called for, dimmed, with nothing coming in to fund it - so the size of the gap is visible at a glance. Prices on those dimmed bars are held at the failure year's level, since a dead run no longer experiences inflation.
 
 The spending bars show the _plan_ - the phase amount, adjusted for inflation and any withdrawal rule - rather than the money actually delivered. That's what makes trouble visible: in a shortfall year the withdrawal bars fall visibly short of the spending bar, and when a minimum withdrawal forces out more than the plan asked for, the bars overshoot it.
 

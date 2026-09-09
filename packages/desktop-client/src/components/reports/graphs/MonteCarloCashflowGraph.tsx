@@ -1,14 +1,13 @@
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import type { CSSProperties } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import {
   Bar,
   CartesianGrid,
+  Cell,
   ComposedChart,
-  Line,
   ReferenceLine,
   Tooltip,
   XAxis,
@@ -39,7 +38,6 @@ import type {
   MonteCarloRunDetailRow,
   MonteCarloSpendingPhase,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
-import { GROUP_HEADING_STYLE } from '#components/reports/reports/monte-carlo/monteCarloStyles';
 import { useFormat } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
@@ -60,12 +58,10 @@ type MonteCarloCashflowGraphProps = {
 /**
  * Yearly cashflow of a single simulated run: money in above zero (each
  * pot's gross withdrawal, plus contributions), money out below zero (the
- * planned spending, colored by its spending phase, plus tax), and a net
- * line showing the pots' drawdown (withdrawals minus contributions).
- * Spending shows the plan rather than the delivered amount, so in a
- * shortfall year the withdrawal bars visibly fall short of the spending
- * bar. Fees stay out of the chart - they never pass through the user's
- * hands.
+ * planned spending, colored by its spending phase, plus tax). Spending
+ * shows the plan rather than the delivered amount, so in a shortfall
+ * year the withdrawal bars visibly fall short of the spending bar. Fees
+ * stay out of the chart - they never pass through the user's hands.
  */
 export function MonteCarloCashflowGraph({
   style,
@@ -142,7 +138,9 @@ export function MonteCarloCashflowGraph({
   ];
 
   // The tooltip's headed sections: per-pot rows under Withdrawals,
-  // per-phase rows under Spending; Contributions and Tax stand alone
+  // per-phase rows under Spending; Contributions and Tax stand alone.
+  // Tax sits between Withdrawals and Spending so the deduction chain
+  // reads in order: gross withdrawal, minus tax, leaves spending
   const tooltipGroups: MonteCarloCashflowTooltipGroup[] = [
     {
       key: 'withdrawals',
@@ -160,12 +158,6 @@ export function MonteCarloCashflowGraph({
           },
         ]
       : []),
-    {
-      key: 'spending',
-      heading: t('Spending'),
-      series: phaseSeries,
-      listMembers: true,
-    },
     ...(hasTax
       ? [
           {
@@ -176,6 +168,12 @@ export function MonteCarloCashflowGraph({
           },
         ]
       : []),
+    {
+      key: 'spending',
+      heading: t('Spending'),
+      series: phaseSeries,
+      listMembers: true,
+    },
   ];
 
   const data: MonteCarloCashflowDataPoint[] = rows.map(row => {
@@ -197,11 +195,9 @@ export function MonteCarloCashflowGraph({
     if (hasTax) {
       point.tax = -row.taxPaid;
     }
-    // The pots' net drawdown: what they paid out over what went in.
-    // Positive while living off the pots, negative while accumulating -
-    // NOT the sum of the bars, since the withdrawal and the spending it
-    // funds are the same money seen twice
-    point.net = row.withdrawal - row.contributions;
+    // Numeric flag (the datum type is number-valued): 1 marks a year
+    // after the plan ran out, drawn dimmed with an unfunded-plan note
+    point.afterDepletion = row.afterDepletion ? 1 : 0;
     return point;
   });
 
@@ -270,16 +266,19 @@ export function MonteCarloCashflowGraph({
                 fill={series.color}
                 maxBarSize={MAX_BAR_SIZE}
                 {...animationProps}
-              />
+              >
+                {/* After the plan runs out only spending remains; dim
+                    those bars so they read as planned-but-unfunded */}
+                {phaseSeries.includes(series) &&
+                  data.map(point => (
+                    <Cell
+                      key={point.year}
+                      fill={series.color}
+                      fillOpacity={point.afterDepletion === 1 ? 0.45 : 1}
+                    />
+                  ))}
+              </Bar>
             ))}
-            <Line
-              type="monotone"
-              dataKey="net"
-              dot={false}
-              stroke={theme.pageTextLight}
-              strokeWidth={2}
-              {...animationProps}
-            />
           </ComposedChart>
         )}
       </Container>
@@ -301,25 +300,6 @@ export function MonteCarloCashflowGraph({
             heading={t('Money out')}
             series={outflowSeries}
           />
-          <View style={{ gap: 6 }}>
-            <Text style={GROUP_HEADING_STYLE}>
-              <Trans>Net</Trans>
-            </Text>
-            <View
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-            >
-              <View
-                style={{
-                  width: 12,
-                  height: 2,
-                  backgroundColor: theme.pageTextLight,
-                }}
-              />
-              <Text>
-                <Trans>Net cashflow</Trans>
-              </Text>
-            </View>
-          </View>
         </View>
       )}
     </View>

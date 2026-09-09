@@ -657,6 +657,14 @@ export type MonteCarloRunDetailRow = {
    * their access age - the plan failed despite this locked balance
    */
   inaccessibleBalance?: number;
+  /**
+   * A synthetic year after the plan ran out: nothing was withdrawn or
+   * earned, and plannedSpending records what the plan still called for
+   * (at the failure year's price level - inflation stops being realized
+   * once the run is depleted). The cashflow chart plots these; the run
+   * detail table hides them.
+   */
+  afterDepletion?: boolean;
 };
 
 export type MonteCarloPercentileBand = {
@@ -1900,8 +1908,42 @@ export function runMonteCarloSimulation(
         balancesByYear[year][simulationIndex] = toSafeAmount(
           total * endDeflator,
         );
+      } else if (runDetail && simulationIndex === captureIndex) {
+        // Capture-only: chart the plan's unfunded tail. Nothing moves
+        // and no RNG is drawn (adding draws here would shift the stream
+        // and change results), so cumulativeInflation stays frozen at
+        // the failure year's level and plannedSpending is priced there
+        const frozenDeflator = deflate ? 1 / cumulativeInflation : 1;
+        runDetail.push({
+          year,
+          afterDepletion: true,
+          startBalance: 0,
+          plannedSpending: toSafeAmount(
+            Math.round(
+              plannedTodayByYear[year] * cumulativeInflation * frozenDeflator,
+            ),
+          ),
+          withdrawal: 0,
+          growth: 0,
+          endBalance: 0,
+          potBalances: new Array<number>(potCount).fill(0),
+          potStartBalances: new Array<number>(potCount).fill(0),
+          inflation: null,
+          contributions: 0,
+          potContributions: new Array<number>(potCount).fill(0),
+          contributionAmounts: new Array<number>(
+            params.contributions.length,
+          ).fill(0),
+          potWithdrawals: new Array<number>(potCount).fill(0),
+          potTaxes: new Array<number>(potCount).fill(0),
+          potTaxables: new Array<number>(potCount).fill(0),
+          taxPaid: 0,
+          feesPaid: 0,
+          potFees: new Array<number>(potCount).fill(0),
+          potReturns: new Array<number | null>(potCount).fill(null),
+        });
       }
-      // Post-depletion years stay at zero (total is 0 here)
+      // Post-depletion years otherwise stay at zero (total is 0 here)
     }
 
     withdrawnTotals[simulationIndex] = withdrawnSum;

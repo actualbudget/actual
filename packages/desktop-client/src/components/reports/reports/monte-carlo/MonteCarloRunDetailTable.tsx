@@ -62,7 +62,7 @@ type MonteCarloRunDetailTableProps = {
 };
 
 export function MonteCarloRunDetailTable({
-  rows,
+  rows: capturedRows,
   pots,
   simulationIndex,
   simulationCount,
@@ -75,6 +75,11 @@ export function MonteCarloRunDetailTable({
   const { t } = useTranslation();
   const format = useFormat();
   const [expandedYears, setExpandedYears] = useState<Set<number>>(new Set());
+
+  // The cashflow chart plots the synthetic unfunded years after a
+  // failure; here they'd just be rows of zeros, so the table ends at
+  // the failure year
+  const rows = capturedRows.filter(row => !row.afterDepletion);
 
   const lastRow = rows[rows.length - 1];
   const hasSurvived = lastRow != null && lastRow.endBalance > 0;

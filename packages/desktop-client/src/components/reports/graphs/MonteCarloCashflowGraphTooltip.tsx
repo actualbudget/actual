@@ -1,4 +1,4 @@
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -91,6 +91,13 @@ export function MonteCarloCashflowGraphTooltip({
       <div style={{ marginBottom: 10 }}>
         <strong>{t('Age {{age}}', { age: point.age })}</strong>
       </div>
+      {point.afterDepletion === 1 && (
+        <div
+          style={{ marginBottom: 10, maxWidth: 220, color: theme.errorText }}
+        >
+          {t('The pots had already run out - this spending went unfunded.')}
+        </div>
+      )}
       <div style={{ lineHeight: 1.5 }}>
         {sections.map(group => (
           <View key={group.key} className={css({ display: 'flex' })}>
@@ -155,14 +162,6 @@ export function MonteCarloCashflowGraphTooltip({
               ))}
           </View>
         ))}
-        <View className={VALUE_ROW_STYLE} style={{ marginTop: 6 }}>
-          <strong>
-            <Trans>Net cashflow</Trans>
-          </strong>
-          <strong>
-            <FinancialText>{format(point.net, 'financial')}</FinancialText>
-          </strong>
-        </View>
       </div>
     </div>
   );
