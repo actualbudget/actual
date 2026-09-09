@@ -1,3 +1,4 @@
+import { amountToInteger } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   BankSyncProviders,
@@ -77,6 +78,49 @@ export function groupBankSyncAccounts(
   }
 
   return sortedAccounts;
+}
+
+export type PluggyAiAccount = {
+  id: string;
+  name: string;
+  type: 'BANK' | string;
+  taxNumber: string;
+  owner: string;
+  balance: number;
+  bankData: {
+    automaticallyInvestedBalance: number;
+    closingBalance: number;
+  };
+};
+
+export type PluggyAiExternalAccount = {
+  account_id: string;
+  name: string;
+  institution: string;
+  orgDomain: null;
+  orgId: string;
+  balance: number;
+};
+
+export function mapPluggyAiExternalAccounts(
+  accounts: PluggyAiAccount[],
+): PluggyAiExternalAccount[] {
+  return accounts.map(oldAccount => ({
+    account_id: oldAccount.id,
+    name: `${oldAccount.name.trim()} - ${
+      oldAccount.type === 'BANK' ? oldAccount.taxNumber : oldAccount.owner
+    }`,
+    institution: oldAccount.name,
+    orgDomain: null,
+    orgId: oldAccount.id,
+    balance:
+      oldAccount.type === 'BANK'
+        ? amountToInteger(
+            oldAccount.bankData.automaticallyInvestedBalance +
+              oldAccount.bankData.closingBalance,
+          )
+        : amountToInteger(oldAccount.balance),
+  }));
 }
 
 export function getGroupedBankSyncEntries(
