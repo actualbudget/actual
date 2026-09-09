@@ -37,10 +37,7 @@ import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
-import {
-  boundMonthRange,
-  calculateTimeRange,
-} from '#components/reports/reportRanges';
+import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
   buildSankeyData,
   createBaseGraphSpreadsheet,
@@ -657,6 +654,16 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         : monthUtils.currentDay();
       setLatestTransaction(latestTransactionDate);
 
+      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        undefined,
+        latestTransactionDate,
+      );
+      setStart(initialStart);
+      setEnd(initialEnd);
+      setTimeFrameMode(initialMode);
+      setDatesInitialized(true);
+
       const currentMonth = monthUtils.currentMonth();
       const earliestMonth = earliestTransaction
         ? monthUtils.monthFromDate(
@@ -674,24 +681,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
           ? latestTransactionMonth
           : currentMonth;
 
-      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-        widget?.meta?.timeFrame,
-        undefined,
-        latestTransactionDate,
-      );
-
-      const [boundedStart, boundedEnd] = boundMonthRange(
-        earliestMonth,
-        latestMonth,
-        initialStart,
-        initialEnd,
-      );
-
-      setStart(boundedStart);
-      setEnd(boundedEnd);
-      setTimeFrameMode(initialMode);
-      setDatesInitialized(true);
-
       const allMonths = monthUtils
         .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
@@ -705,24 +694,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     void run();
   }, [locale, widget?.meta?.timeFrame]);
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
-    if (!allMonths.length) {
-      setStart(start);
-      setEnd(monthUtils.isBefore(end, start) ? start : end);
-      setTimeFrameMode(mode);
-      return;
-    }
-
-    const earliestMonth = allMonths[allMonths.length - 1].name;
-    const latestMonth = allMonths[0].name;
-    const [boundedStart, boundedEnd] = boundMonthRange(
-      earliestMonth,
-      latestMonth,
-      start,
-      end,
-    );
-
-    setStart(boundedStart);
-    setEnd(boundedEnd);
+    setStart(start);
+    setEnd(end);
     setTimeFrameMode(mode);
   }
 
