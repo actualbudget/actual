@@ -766,7 +766,10 @@ async function _fullSync(
     // false. In that case, we don't reset the counter but it should be
     // very unlikely that this happens enough to hit the loop limit.
 
-    if ((count >= 10 && diffTime === prevDiffTime) || count >= 100) {
+    if (
+      (count >= 10 && diffTime === prevDiffTime && res.messages.length === 0) ||
+      count >= 100
+    ) {
       logger.info('SENT -------');
       logger.info(JSON.stringify(messages));
       logger.info('RECEIVED -------');
