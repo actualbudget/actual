@@ -192,7 +192,7 @@ app.post('/sync', async (req, res): Promise<void> => {
   try {
     ({ trie, newMessages } = simpleSync.sync(messages, since, groupId));
   } catch (e) {
-    if (e instanceof simpleSync.ClockDriftError) {
+    if (e.code === simpleSync.CLOCK_DRIFT_ERROR_CODE) {
       res.status(400).send('clock-drift');
       return;
     }
