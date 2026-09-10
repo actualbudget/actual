@@ -9,6 +9,8 @@ title: 'Easypanel'
 3. Search for **Actual Budget** and select it
 4. Click **Create** to deploy the service
 
+![Actual deployed on Easypanel](/img/install/easypanel_deployed.png)
+
 Easypanel runs the [official Actual Docker image](https://ghcr.io/actualbudget/actual) for you and exposes it through a domain, so no manual reverse proxy configuration is required.
 
 See the [official Actual Budget template on Easypanel](https://easypanel.io/templates/actualbudget) for more details.
