@@ -106,7 +106,7 @@
     "migrate": "^2.1.0",
     "openid-client": "^5.7.1",
     "pluggy-sdk": "^0.89.0",
-    "uuid": "^14.0.1",
+    "uuid": "^14.0.2",
     "winston": "^3.19.0"
   },
   "devDependencies": {
