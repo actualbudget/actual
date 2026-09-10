@@ -182,6 +182,8 @@ The dropdown above the chart switches views. **Single worst run** shows the one 
 
 ### The Cashflow Chart
 
+![The cashflow chart](/img/experimental/monte-carlo-analysis/monte-carlo-cashflow-chart.png)
+
 Switch the results view from **Chart** to **Cashflow** to see the money moving in and out of your pots each year, for one simulated run at a time:
 
 - **Above zero**: money coming in - each pot's withdrawal for the year (one color per pot), plus each contribution being paid in (one color per contribution).
