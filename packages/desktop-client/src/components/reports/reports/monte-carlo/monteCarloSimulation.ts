@@ -19,7 +19,7 @@ import type { HistoricalAnnualReturn } from './monteCarloHistoricalReturns';
 // These are deliberately easy to tweak; they only auto-fill the mean/stdDev
 // inputs in the UI - the simulation itself reads just the numeric values.
 export const ALLOCATION_PRESETS: Record<
-  Exclude<MonteCarloAllocationPreset, 'custom'>,
+  Exclude<MonteCarloAllocationPreset, 'custom' | 'custom-mix'>,
   { mean: number; stdDev: number }
 > = {
   'equity-100': { mean: 0.07, stdDev: 0.15 },
@@ -29,11 +29,18 @@ export const ALLOCATION_PRESETS: Record<
   cash: { mean: 0.03, stdDev: 0.015 },
 };
 
+/** Relative shares of each asset class in a pot's portfolio */
+export type MonteCarloAssetWeights = {
+  stocks: number;
+  bonds: number;
+  cash: number;
+};
+
 // Asset mix behind each preset, used by the historical return models to
 // blend the stocks/bonds/cash series into a single yearly return per pot
 const PRESET_ASSET_WEIGHTS: Record<
-  Exclude<MonteCarloAllocationPreset, 'custom'>,
-  { stocks: number; bonds: number; cash: number }
+  Exclude<MonteCarloAllocationPreset, 'custom' | 'custom-mix'>,
+  MonteCarloAssetWeights
 > = {
   'equity-100': { stocks: 1, bonds: 0, cash: 0 },
   'equity-80': { stocks: 0.8, bonds: 0.2, cash: 0 },
@@ -41,6 +48,96 @@ const PRESET_ASSET_WEIGHTS: Record<
   'equity-40': { stocks: 0.4, bonds: 0.6, cash: 0 },
   cash: { stocks: 0, bonds: 0, cash: 1 },
 };
+
+/**
+ * The asset mix that drives a pot's returns under the historical models:
+ * the preset's fixed mix, or the pot's own shares for 'custom-mix'.
+ * Null when the pot has no usable mix - 'custom' pots, or a custom mix
+ * whose shares don't total 100% - and falls back to normal draws from
+ * its manual return/volatility.
+ */
+export function getPotAssetWeights(
+  pot: Pick<
+    MonteCarloPot,
+    | 'allocationPreset'
+    | 'allocationStocks'
+    | 'allocationBonds'
+    | 'allocationCash'
+  >,
+): MonteCarloAssetWeights | null {
+  if (pot.allocationPreset === 'custom') {
+    return null;
+  }
+  if (pot.allocationPreset === 'custom-mix') {
+    const sanitize = (share: number) =>
+      Number.isFinite(share) && share > 0 ? share : 0;
+    const stocks = sanitize(pot.allocationStocks);
+    const bonds = sanitize(pot.allocationBonds);
+    const cash = sanitize(pot.allocationCash);
+    const total = stocks + bonds + cash;
+    // Only a complete mix is usable; the tolerance absorbs float dust
+    // like 0.7 + 0.3 = 0.9999999999999999
+    if (Math.abs(total - 1) >= 1e-9) {
+      return null;
+    }
+    // Divide the dust out so the returned weights sum to exactly 1
+    return { stocks: stocks / total, bonds: bonds / total, cash: cash / total };
+  }
+  return PRESET_ASSET_WEIGHTS[pot.allocationPreset];
+}
+
+const historicalPresetStatsCache = new Map<
+  Exclude<MonteCarloAllocationPreset, 'custom' | 'custom-mix'>,
+  { mean: number; stdDev: number }
+>();
+
+/**
+ * The measured mean and volatility (sample standard deviation) of an
+ * asset mix's blended historical series - what a pot with that mix
+ * actually experiences under the historical return models. The
+ * `history` parameter exists for tests.
+ */
+export function getHistoricalMixStats(
+  weights: MonteCarloAssetWeights,
+  history: HistoricalAnnualReturn[] = HISTORICAL_ANNUAL_RETURNS,
+): { mean: number; stdDev: number } {
+  const blended = history.map(
+    year =>
+      weights.stocks * year.stocks +
+      weights.bonds * year.bonds +
+      weights.cash * year.cash,
+  );
+  const mean = blended.reduce((sum, value) => sum + value, 0) / blended.length;
+  const variance =
+    blended.length > 1
+      ? blended.reduce((sum, value) => sum + (value - mean) ** 2, 0) /
+        (blended.length - 1)
+      : 0;
+  return { mean, stdDev: Math.sqrt(variance) };
+}
+
+/**
+ * `getHistoricalMixStats` for a preset's fixed mix; calls with the
+ * default dataset are cached.
+ */
+export function getHistoricalPresetStats(
+  preset: Exclude<MonteCarloAllocationPreset, 'custom' | 'custom-mix'>,
+  history: HistoricalAnnualReturn[] = HISTORICAL_ANNUAL_RETURNS,
+): { mean: number; stdDev: number } {
+  const isDefaultHistory = history === HISTORICAL_ANNUAL_RETURNS;
+  if (isDefaultHistory) {
+    const cached = historicalPresetStatsCache.get(preset);
+    if (cached != null) {
+      return cached;
+    }
+  }
+
+  const stats = getHistoricalMixStats(PRESET_ASSET_WEIGHTS[preset], history);
+  if (isDefaultHistory) {
+    historicalPresetStatsCache.set(preset, stats);
+  }
+  return stats;
+}
 
 /**
  * Money inputs above this are clamped (1e14 minor units = 1 trillion major
@@ -143,6 +240,13 @@ export type MonteCarloPot = {
   name: string;
   startingBalance: number; // integer minor units (cents)
   allocationPreset: MonteCarloAllocationPreset;
+  /**
+   * Asset shares for the 'custom-mix' allocation, as decimal fractions.
+   * Relative shares - normalized to sum to 1 by getPotAssetWeights
+   */
+  allocationStocks: number;
+  allocationBonds: number;
+  allocationCash: number;
   expectedReturnMean: number; // decimal fraction
   returnStdDev: number; // decimal fraction
   /** Age from which the pot can fund withdrawals; null = immediately */
@@ -170,6 +274,9 @@ export function createMonteCarloPot(id: string): MonteCarloPot {
     name: '',
     startingBalance: 50_000_000, // 500,000.00 in minor units
     allocationPreset: 'equity-60',
+    allocationStocks: PRESET_ASSET_WEIGHTS['equity-60'].stocks,
+    allocationBonds: PRESET_ASSET_WEIGHTS['equity-60'].bonds,
+    allocationCash: PRESET_ASSET_WEIGHTS['equity-60'].cash,
     expectedReturnMean: ALLOCATION_PRESETS['equity-60'].mean,
     returnStdDev: ALLOCATION_PRESETS['equity-60'].stdDev,
     accessAge: null,
@@ -294,6 +401,9 @@ function potFromMeta(potMeta: MonteCarloPotMeta, index: number): MonteCarloPot {
     name: potMeta.name ?? defaults.name,
     startingBalance: potMeta.startingBalance ?? defaults.startingBalance,
     allocationPreset: potMeta.allocationPreset ?? defaults.allocationPreset,
+    allocationStocks: potMeta.allocationStocks ?? defaults.allocationStocks,
+    allocationBonds: potMeta.allocationBonds ?? defaults.allocationBonds,
+    allocationCash: potMeta.allocationCash ?? defaults.allocationCash,
     expectedReturnMean:
       potMeta.expectedReturnMean ?? defaults.expectedReturnMean,
     returnStdDev: potMeta.returnStdDev ?? defaults.returnStdDev,
@@ -411,6 +521,47 @@ export type MonteCarloParams = Omit<MonteCarloConfig, 'targetAge'> & {
   deflateToTodaysMoney?: boolean;
 };
 
+/** How the active withdrawal rule arrived at a captured year's amount */
+export type MonteCarloRuleExplanation =
+  | {
+      /** Floor & ceiling's first spending year: planned amount taken
+       * as-is, and the rule's rate is set here */
+      kind: 'anchor';
+      /** planned / accessible wealth, as a decimal fraction */
+      rate: number;
+    }
+  | {
+      kind: 'floor-ceiling';
+      /** The anchored withdrawal rate, as a decimal fraction */
+      rate: number;
+      /** rate x accessible balance before clamping, in minor units */
+      unclamped: number;
+      /** The floor bound for the year, in minor units */
+      floor: number;
+      /** The ceiling bound for the year, in minor units */
+      ceiling: number;
+      /** Which bound won the clamp */
+      applied: 'floor' | 'ceiling' | 'rate';
+    }
+  | {
+      kind: 'factor';
+      rule: 'guardrails' | 'ratcheting' | 'boundaries';
+      /** The running adjustment factor after this year's decision */
+      factor: number;
+      /** The year's planned spending, in minor units (display-deflated) */
+      planned: number;
+      /** planned x factor - the rule's result before any minimum floor */
+      adjusted: number;
+      /** What this year's evaluation did to the factor */
+      action: 'cut' | 'raise' | 'none';
+      /** This year's withdrawal rate (guardrails and boundaries) */
+      currentRate?: number;
+      /** The planned-path reference rate (guardrails) */
+      referenceRate?: number;
+      /** Ratcheting only: consecutive above-threshold years so far */
+      ratchetStreak?: number;
+    };
+
 /** One simulated year of a single captured run, values in minor units */
 export type MonteCarloRunDetailRow = {
   year: number;
@@ -457,6 +608,14 @@ export type MonteCarloRunDetailRow = {
    * fraction; null when the pot had no balance or the plan failed
    */
   potReturns: Array<number | null>;
+  /**
+   * How the active withdrawal rule set this year's amount; absent when
+   * no rule ran (no rule configured, a zero-spend year, or before the
+   * first spending year). Amounts are deflated like the row's totals.
+   */
+  ruleExplanation?: MonteCarloRuleExplanation;
+  /** True when the minimum withdrawal raised the final amount */
+  minimumApplied?: boolean;
   /**
    * Set on a failure year when money remained in pots that hadn't reached
    * their access age - the plan failed despite this locked balance
@@ -845,14 +1004,19 @@ export function runMonteCarloSimulation(
     : HISTORICAL_ANNUAL_RETURNS;
   const historyCount = history.length;
 
-  // For historical models, each preset pot gets the blended return of its
-  // asset mix in every historical year. 'custom' pots have no asset mix, so
-  // they keep using normal draws around their own mean/volatility.
+  // For historical models, each pot with an asset mix (a preset's fixed
+  // mix, or a custom mix's own shares) gets the blended return of that mix
+  // in every historical year. Pots without one ('custom', or a custom mix
+  // whose shares sum to zero) keep using normal draws around their own
+  // mean/volatility.
   const potHistoricalReturns: Array<Float64Array | null> = pots.map(pot => {
-    if (returnModel === 'normal' || pot.allocationPreset === 'custom') {
+    if (returnModel === 'normal') {
       return null;
     }
-    const weights = PRESET_ASSET_WEIGHTS[pot.allocationPreset];
+    const weights = getPotAssetWeights(pot);
+    if (weights == null) {
+      return null;
+    }
     const blended = new Float64Array(historyCount);
     for (let historyIndex = 0; historyIndex < historyCount; historyIndex++) {
       blended[historyIndex] =
@@ -1117,21 +1281,50 @@ export function runMonteCarloSimulation(
         // drift them. Rules evaluate accessible wealth only: locked pots
         // can't fund spending, so they must not drive cuts or raises
         // until they unlock
+        // The drill-in shows how the rule arrived at each year's amount;
+        // captured only for the inspected run
+        const isCapturedRun =
+          runDetail != null && simulationIndex === captureIndex;
+        let capturedRuleExplanation: MonteCarloRuleExplanation | null = null;
+        let capturedMinimumApplied = false;
         if (rule.type === 'floor-ceiling') {
           if (year === firstSpendingYear) {
             floorCeilingAnchorRate =
               accessibleTotal > 0 ? planned / accessibleTotal : 0;
+            if (isCapturedRun) {
+              capturedRuleExplanation = {
+                kind: 'anchor',
+                rate: floorCeilingAnchorRate,
+              };
+            }
           }
-          withdrawal =
-            planned > 0 && year > firstSpendingYear
-              ? // A fixed share of the accessible balance, kept within
-                // limits around the planned spending
-                clamp(
-                  floorCeilingAnchorRate * accessibleTotal,
-                  planned * (1 - rule.floorPct),
-                  planned * (1 + rule.ceilingPct),
-                )
-              : planned;
+          if (planned > 0 && year > firstSpendingYear) {
+            // A fixed share of the accessible balance, kept within
+            // limits around the planned spending
+            const unclamped = floorCeilingAnchorRate * accessibleTotal;
+            const floorAmount = planned * (1 - rule.floorPct);
+            const ceilingAmount = planned * (1 + rule.ceilingPct);
+            withdrawal = clamp(unclamped, floorAmount, ceilingAmount);
+            if (isCapturedRun) {
+              capturedRuleExplanation = {
+                kind: 'floor-ceiling',
+                rate: floorCeilingAnchorRate,
+                unclamped: toSafeAmount(Math.round(unclamped * startDeflator)),
+                floor: toSafeAmount(Math.round(floorAmount * startDeflator)),
+                ceiling: toSafeAmount(
+                  Math.round(ceilingAmount * startDeflator),
+                ),
+                applied:
+                  unclamped < floorAmount
+                    ? 'floor'
+                    : unclamped > ceilingAmount
+                      ? 'ceiling'
+                      : 'rate',
+              };
+            }
+          } else {
+            withdrawal = planned;
+          }
         } else {
           if (
             planned > 0 &&
@@ -1141,6 +1334,7 @@ export function runMonteCarloSimulation(
             accessibleStartByYear[year] > 0
           ) {
             const currentRate = (planned * adjustmentFactor) / accessibleTotal;
+            let ruleAction: 'cut' | 'raise' | 'none' = 'none';
             if (rule.type === 'guardrails') {
               // Drift is measured against the planned spending path, not
               // the year-1 rate, so a deliberate phase change doesn't
@@ -1153,11 +1347,13 @@ export function runMonteCarloSimulation(
                 referenceRate * (1 + rule.preservationTriggerPct)
               ) {
                 adjustmentFactor *= 1 - rule.preservationCutPct;
+                ruleAction = 'cut';
               } else if (
                 currentRate <
                 referenceRate * (1 - rule.prosperityTriggerPct)
               ) {
                 adjustmentFactor *= 1 + rule.prosperityIncreasePct;
+                ruleAction = 'raise';
               }
             } else if (rule.type === 'ratcheting') {
               if (
@@ -1168,6 +1364,7 @@ export function runMonteCarloSimulation(
                 if (ratchetStreak >= rule.consecutiveYears) {
                   adjustmentFactor *= 1 + rule.ratchetIncreasePct;
                   ratchetStreak = 0;
+                  ruleAction = 'raise';
                 }
               } else {
                 ratchetStreak = 0;
@@ -1175,9 +1372,36 @@ export function runMonteCarloSimulation(
             } else if (rule.type === 'boundaries') {
               if (currentRate > rule.upperRateThreshold) {
                 adjustmentFactor *= 1 - rule.upperCutPct;
+                ruleAction = 'cut';
               } else if (currentRate < rule.lowerRateThreshold) {
                 adjustmentFactor *= 1 + rule.lowerIncreasePct;
+                ruleAction = 'raise';
               }
+            }
+            if (
+              isCapturedRun &&
+              (rule.type === 'guardrails' ||
+                rule.type === 'ratcheting' ||
+                rule.type === 'boundaries')
+            ) {
+              capturedRuleExplanation = {
+                kind: 'factor',
+                rule: rule.type,
+                factor: adjustmentFactor,
+                planned: toSafeAmount(Math.round(planned * startDeflator)),
+                adjusted: toSafeAmount(
+                  Math.round(planned * adjustmentFactor * startDeflator),
+                ),
+                action: ruleAction,
+                ...((rule.type === 'guardrails' ||
+                  rule.type === 'boundaries') && { currentRate }),
+                ...(rule.type === 'guardrails' && {
+                  referenceRate:
+                    plannedTodayByYear[year] / accessibleStartByYear[year],
+                }),
+                ...(rule.type === 'ratcheting' &&
+                  ruleAction === 'none' && { ratchetStreak }),
+              };
             }
           }
           withdrawal = planned * adjustmentFactor;
@@ -1196,6 +1420,9 @@ export function runMonteCarloSimulation(
           withdrawal < minimumThisYear
         ) {
           withdrawal = minimumThisYear;
+          if (isCapturedRun) {
+            capturedMinimumApplied = true;
+          }
         }
 
         const yearStartTotal = total;
@@ -1480,6 +1707,10 @@ export function runMonteCarloSimulation(
           const base = {
             year,
             startBalance,
+            ...(capturedRuleExplanation != null && {
+              ruleExplanation: capturedRuleExplanation,
+            }),
+            ...(capturedMinimumApplied && { minimumApplied: true }),
             // A rate, not an amount - passed through undeflated
             inflation: yearInflationRate,
             contributions,

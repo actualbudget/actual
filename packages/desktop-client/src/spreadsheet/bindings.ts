@@ -1,6 +1,7 @@
 import { q } from '@actual-app/core/shared/query';
 import type {
   AccountEntity,
+  AccountGroupEntity,
   CategoryEntity,
 } from '@actual-app/core/types/models';
 
@@ -83,6 +84,23 @@ export function closedAccountBalance() {
       .filter({ 'account.closed': true })
       .calculate({ $sum: '$amount' }),
   } satisfies Binding<'account', 'closed-accounts-balance'>;
+}
+
+export function accountGroupBalance(
+  groupId: AccountGroupEntity['id'],
+  offbudget: boolean,
+) {
+  return {
+    name: `account-group-balance-${groupId}-${offbudget ? 'off' : 'on'}`,
+    query: q('transactions')
+      .filter({
+        'account.account_group_id': groupId,
+        'account.offbudget': offbudget,
+        'account.closed': false,
+      })
+      .options({ splits: 'none' })
+      .calculate({ $sum: '$amount' }),
+  } satisfies Binding<'account', `account-group-balance-${string}`>;
 }
 
 export function categoryBalance(
