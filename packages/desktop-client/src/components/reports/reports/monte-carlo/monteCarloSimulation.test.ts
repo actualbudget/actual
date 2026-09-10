@@ -723,6 +723,34 @@ describe('runMonteCarloSimulation', () => {
     expect(rows[3].potBalances).toEqual([0]);
   });
 
+  it('keeps the rule-adjusted plan on the unfunded years after a failure', () => {
+    // Guardrails keeps cutting spending as the crash drives the withdrawal
+    // rate up, until the pot can't fund even the cut amount. The tail must
+    // carry that running cut forward, not jump back to the full schedule
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 4_000,
+          horizonYears: 12,
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
+          captureRunDetail: 0,
+        },
+        { startingBalance: 100_000, expectedReturnMean: -0.5, returnStdDev: 0 },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    const fundedRows = rows.filter(row => !row.afterDepletion);
+    const failureRow = fundedRows[fundedRows.length - 1];
+    const unfundedRows = rows.filter(row => row.afterDepletion);
+    expect(unfundedRows.length).toBeGreaterThan(0);
+    // The failure year's plan already carried several compounded cuts
+    expect(failureRow.plannedSpending).toBeLessThan(4_000);
+    for (const row of unfundedRows) {
+      expect(row.plannedSpending).toBe(failureRow.plannedSpending);
+    }
+  });
+
   it('captures no synthetic rows for a surviving run', () => {
     const result = runMonteCarloSimulation(
       makeParams(

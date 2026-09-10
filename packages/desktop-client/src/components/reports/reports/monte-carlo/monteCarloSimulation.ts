@@ -1928,7 +1928,10 @@ export function runMonteCarloSimulation(
         // Capture-only: chart the plan's unfunded tail. Nothing moves
         // and no RNG is drawn (adding draws here would shift the stream
         // and change results), so cumulativeInflation stays frozen at
-        // the failure year's level and plannedSpending is priced there
+        // the failure year's level and plannedSpending is priced there.
+        // The withdrawal rule's running adjustment persists too, so the
+        // tail continues the funded years' plan rather than jumping
+        // back to the unadjusted schedule (a no-op for rules without one)
         const frozenDeflator = deflate ? 1 / cumulativeInflation : 1;
         runDetail.push({
           year,
@@ -1936,7 +1939,10 @@ export function runMonteCarloSimulation(
           startBalance: 0,
           plannedSpending: toSafeAmount(
             Math.round(
-              plannedTodayByYear[year] * cumulativeInflation * frozenDeflator,
+              plannedTodayByYear[year] *
+                adjustmentFactor *
+                cumulativeInflation *
+                frozenDeflator,
             ),
           ),
           withdrawal: 0,

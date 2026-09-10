@@ -11,10 +11,11 @@ import type {
 import { buildMonteCarloCashflowChart } from './monteCarloCashflowChart';
 
 // Interpolates like i18next so labels can be asserted literally
-const t = ((key: string, options?: Record<string, unknown>) =>
-  key.replace(/{{(\w+)}}/g, (_, name) =>
-    String(options?.[name]),
-  )) as unknown as TFunction;
+const translate = ((key: string, options?: Record<string, unknown>) =>
+  key.replace(/{{\w+}}/g, placeholder => {
+    const name = placeholder.slice('{{'.length, -'}}'.length);
+    return String(options?.[name]);
+  })) as unknown as TFunction;
 
 function makePot(id: string, name = ''): MonteCarloPot {
   return {
@@ -107,7 +108,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions,
       spendingPhases: phases,
       startAge: 60,
-      t,
+      translate,
     });
 
     expect(
@@ -160,7 +161,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions: [],
       spendingPhases: phases,
       startAge: 60,
-      t,
+      translate,
     });
 
     // Ages 60, 61 fall in phase 1; age 62 switches to phase 2
@@ -180,7 +181,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions,
       spendingPhases: phases,
       startAge: 60,
-      t,
+      translate,
     });
 
     expect(chart.outflowSeries.map(series => series.kind)).toEqual([
@@ -200,7 +201,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions: [],
       spendingPhases: [],
       startAge: 60,
-      t,
+      translate,
     });
 
     expect(chart.outflowSeries.map(series => series.label)).toEqual([
@@ -217,7 +218,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions: [],
       spendingPhases: [makePhase('late', 70), makePhase('early', null)],
       startAge: 60,
-      t,
+      translate,
     });
 
     // Resolved (age) order is early, late - but labels keep editor numbers
@@ -237,7 +238,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions: [],
       spendingPhases: phases,
       startAge: 60,
-      t,
+      translate,
     });
 
     expect(chart.data.map(point => point.afterDepletion)).toEqual([

@@ -71,7 +71,7 @@ export function MonteCarloCashflowGraph({
       contributions,
       spendingPhases,
       startAge,
-      t,
+      translate: t,
     });
 
   return (

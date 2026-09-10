@@ -23,14 +23,14 @@ type SortOrder = 'worst-first' | 'best-first';
  * chart's scenario picker so both land on the same runs.
  */
 export function getRunPercentileOptions(
-  t: (key: string) => string,
+  translate: (key: string) => string,
 ): Array<[string, string]> {
   return [
-    ['0', t('Worst run')],
-    ['0.25', t('25th percentile')],
-    ['0.5', t('Median run')],
-    ['0.75', t('75th percentile')],
-    ['1', t('Best run')],
+    ['0', translate('Worst run')],
+    ['0.25', translate('25th percentile')],
+    ['0.5', translate('Median run')],
+    ['0.75', translate('75th percentile')],
+    ['1', translate('Best run')],
   ];
 }
 
