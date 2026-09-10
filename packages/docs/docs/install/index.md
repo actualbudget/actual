@@ -52,6 +52,7 @@ While running a server can be a complicated endeavor, we've tried to make it fai
   - You can run the server with a simple command using the [Server CLI](./cli-tool.md)
   - [Fly.io](./fly.md) also offers cloud hosting for a similar amount of money.
   - If you want to use Docker, we have instructions for [using our provided Docker containers](./docker.md).
+  - If you use [Easypanel](https://easypanel.io/), you can deploy Actual with [our official one-click template](./easypanel.md).
   - You could [build Actual from source](./build-from-source.md) on macOS, Windows, or Linux if you don't want to use a tool like Docker. (This method is the best option if you want to contribute to Actual's development!)
 
 Once you've set up your server, you can [configure it](../config/index.md) to change a few of the ways it works.
