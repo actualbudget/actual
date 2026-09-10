@@ -5,33 +5,12 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { FinancialText } from '#components/FinancialText';
+import { MonteCarloCashflowSwatch } from '#components/reports/graphs/MonteCarloCashflowSwatch';
+import type {
+  MonteCarloCashflowDataPoint,
+  MonteCarloCashflowTooltipGroup,
+} from '#components/reports/graphs/util/monteCarloCashflowChart';
 import { useFormat } from '#hooks/useFormat';
-
-/** One bar series of the cashflow chart: a pot, a phase, tax, ... */
-export type MonteCarloCashflowSeries = {
-  /** The datum key the chart plots for this series */
-  key: string;
-  label: string;
-  color: string;
-};
-
-/**
- * A headed section of the cashflow tooltip - e.g. "Withdrawals" with a
- * row per pot. A single-series group (Contributions, Tax) sets
- * listMembers false so the heading row alone carries its value.
- */
-export type MonteCarloCashflowTooltipGroup = {
-  key: string;
-  heading: string;
-  series: MonteCarloCashflowSeries[];
-  listMembers: boolean;
-};
-
-/**
- * One charted year. Besides the fixed fields it carries one entry per
- * series key: positive for money in, negative for money out.
- */
-export type MonteCarloCashflowDataPoint = Record<string, number>;
 
 type PayloadItem = {
   payload: MonteCarloCashflowDataPoint;
@@ -51,6 +30,13 @@ const VALUE_ROW_STYLE = css({
   gap: 20,
 });
 
+const LABEL_STYLE = css({
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 6,
+});
+
 export function MonteCarloCashflowGraphTooltip({
   active,
   payload,
@@ -63,10 +49,11 @@ export function MonteCarloCashflowGraphTooltip({
     return null;
   }
   const point = payload[0].payload;
+  // Only series with money moving this year, and only groups with any
   const sections = groups
     .map(group => {
       const members = group.series
-        .map(series => ({ ...series, value: point[series.key] ?? 0 }))
+        .map(series => ({ ...series, value: point.amounts[series.key] ?? 0 }))
         .filter(series => series.value !== 0);
       return {
         ...group,
@@ -91,7 +78,7 @@ export function MonteCarloCashflowGraphTooltip({
       <div style={{ marginBottom: 10 }}>
         <strong>{t('Age {{age}}', { age: point.age })}</strong>
       </div>
-      {point.afterDepletion === 1 && (
+      {point.afterDepletion && (
         <div
           style={{ marginBottom: 10, maxWidth: 220, color: theme.errorText }}
         >
@@ -100,25 +87,11 @@ export function MonteCarloCashflowGraphTooltip({
       )}
       <div style={{ lineHeight: 1.5 }}>
         {sections.map(group => (
-          <View key={group.key} className={css({ display: 'flex' })}>
+          <View key={group.key}>
             <View className={VALUE_ROW_STYLE}>
-              <View
-                className={css({
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 6,
-                })}
-              >
+              <View className={LABEL_STYLE}>
                 {!group.listMembers && (
-                  <div
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: 2,
-                      backgroundColor: group.members[0].color,
-                    }}
-                  />
+                  <MonteCarloCashflowSwatch color={group.members[0].color} />
                 )}
                 <strong>{group.heading}</strong>
               </View>
@@ -135,22 +108,8 @@ export function MonteCarloCashflowGraphTooltip({
                   className={VALUE_ROW_STYLE}
                   style={{ paddingLeft: 16 }}
                 >
-                  <View
-                    className={css({
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 6,
-                    })}
-                  >
-                    <div
-                      style={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: 2,
-                        backgroundColor: member.color,
-                      }}
-                    />
+                  <View className={LABEL_STYLE}>
+                    <MonteCarloCashflowSwatch color={member.color} />
                     <div>{member.label}</div>
                   </View>
                   <div>

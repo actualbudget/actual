@@ -1,7 +1,8 @@
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import type { MonteCarloCashflowSeries } from '#components/reports/graphs/MonteCarloCashflowGraphTooltip';
+import { MonteCarloCashflowSwatch } from '#components/reports/graphs/MonteCarloCashflowSwatch';
+import type { MonteCarloCashflowSeries } from '#components/reports/graphs/util/monteCarloCashflowChart';
 import { GROUP_HEADING_STYLE } from '#components/reports/reports/monte-carlo/monteCarloStyles';
 
 type MonteCarloCashflowLegendGroupProps = {
@@ -30,14 +31,7 @@ export function MonteCarloCashflowLegendGroup({
             key={entry.key}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
           >
-            <View
-              style={{
-                width: 12,
-                height: 12,
-                borderRadius: 2,
-                backgroundColor: entry.color,
-              }}
-            />
+            <MonteCarloCashflowSwatch color={entry.color} size={12} />
             <Text>{entry.label}</Text>
           </View>
         ))}

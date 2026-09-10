@@ -14,24 +14,13 @@ import {
   YAxis,
 } from 'recharts';
 
-import {
-  getColorScale,
-  useRechartsAnimation,
-} from '#components/reports/chart-theme';
+import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
-import type {
-  MonteCarloCashflowDataPoint,
-  MonteCarloCashflowSeries,
-  MonteCarloCashflowTooltipGroup,
-} from '#components/reports/graphs/MonteCarloCashflowGraphTooltip';
 import { MonteCarloCashflowGraphTooltip } from '#components/reports/graphs/MonteCarloCashflowGraphTooltip';
 import { MonteCarloCashflowLegendGroup } from '#components/reports/graphs/MonteCarloCashflowLegendGroup';
 import { computePadding } from '#components/reports/graphs/util/computePadding';
-import {
-  createMonteCarloSpendingPhase,
-  getActiveSpendingPhase,
-  MAX_FORMATTABLE_AMOUNT,
-} from '#components/reports/reports/monte-carlo/monteCarloSimulation';
+import { buildMonteCarloCashflowChart } from '#components/reports/graphs/util/monteCarloCashflowChart';
+import { useMonteCarloTickFormatter } from '#components/reports/graphs/util/useMonteCarloTickFormatter';
 import type {
   MonteCarloContribution,
   MonteCarloPot,
@@ -39,11 +28,14 @@ import type {
   MonteCarloSpendingPhase,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { useFormat } from '#hooks/useFormat';
-import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 const MAX_BAR_SIZE = 50;
 
+/** Bars for years after the plan ran out are dimmed to this opacity */
+const UNFUNDED_BAR_OPACITY = 0.45;
+
 type MonteCarloCashflowGraphProps = {
+  /** Applies to the whole block (chart plus legend); the chart itself is Container's default height */
   style?: CSSProperties;
   /** The captured run to chart, one row per simulated year */
   rows: MonteCarloRunDetailRow[];
@@ -52,16 +44,12 @@ type MonteCarloCashflowGraphProps = {
   spendingPhases: MonteCarloSpendingPhase[];
   /** The user's current age; the x-axis shows startAge + year - 1 */
   startAge: number;
-  showLegend?: boolean;
 };
 
 /**
- * Yearly cashflow of a single simulated run: money in above zero (each
- * pot's gross withdrawal, plus contributions), money out below zero (the
- * planned spending, colored by its spending phase, plus tax). Spending
- * shows the plan rather than the delivered amount, so in a shortfall
- * year the withdrawal bars visibly fall short of the spending bar. Fees
- * stay out of the chart - they never pass through the user's hands.
+ * Yearly cashflow of a single simulated run as stacked bars: money in
+ * above zero, money out below. See buildMonteCarloCashflowChart for
+ * what the series are and how spending is attributed.
  */
 export function MonteCarloCashflowGraph({
   style,
@@ -70,155 +58,21 @@ export function MonteCarloCashflowGraph({
   contributions,
   spendingPhases,
   startAge,
-  showLegend = true,
 }: MonteCarloCashflowGraphProps) {
   const { t } = useTranslation();
-  const privacyMode = usePrivacyMode();
   const format = useFormat();
+  const tickFormatter = useMonteCarloTickFormatter();
   const animationProps = useRechartsAnimation({ animationDuration: 1000 });
-  const colorScale = getColorScale('qualitative');
 
-  // The engine falls back to a default phase when none are configured;
-  // mirror it so every year has a phase to attribute spending to
-  const phases = spendingPhases.length
-    ? spendingPhases
-    : [createMonteCarloSpendingPhase('phase-1')];
-
-  const hasTax = rows.some(row => row.taxPaid !== 0);
-
-  const potSeries: MonteCarloCashflowSeries[] = pots.map((pot, potIndex) => ({
-    key: `pot${potIndex}`,
-    label: pot.name || t('Pot {{number}}', { number: potIndex + 1 }),
-    color: colorScale[potIndex % colorScale.length],
-  }));
-  // Only contributions that deposit something in this run get a series -
-  // one per configured contribution, so deposits split by their source
-  const contributionSeries: MonteCarloCashflowSeries[] = contributions.flatMap(
-    (contribution, contributionIndex) =>
-      rows.some(row => row.contributionAmounts[contributionIndex] !== 0)
-        ? [
-            {
-              key: `contribution${contributionIndex}`,
-              label:
-                contribution.name ||
-                t('Contribution {{number}}', {
-                  number: contributionIndex + 1,
-                }),
-              color:
-                colorScale[
-                  (pots.length + contributionIndex) % colorScale.length
-                ],
-            },
-          ]
-        : [],
-  );
-  const phaseSeries: MonteCarloCashflowSeries[] = phases.map(
-    (phase, phaseIndex) => ({
-      key: `phase${phaseIndex}`,
-      label: phase.name || t('Phase {{number}}', { number: phaseIndex + 1 }),
-      color:
-        colorScale[
-          (pots.length + contributions.length + phaseIndex) % colorScale.length
-        ],
-    }),
-  );
-  const taxSeries: MonteCarloCashflowSeries = {
-    key: 'tax',
-    label: t('Tax'),
-    color: theme.reportsNumberNegative,
-  };
-
-  const inflowSeries: MonteCarloCashflowSeries[] = [
-    ...potSeries,
-    ...contributionSeries,
-  ];
-  const outflowSeries: MonteCarloCashflowSeries[] = [
-    ...phaseSeries,
-    ...(hasTax ? [taxSeries] : []),
-  ];
-
-  // The tooltip's headed sections: per-pot rows under Withdrawals,
-  // per-phase rows under Spending; Contributions and Tax stand alone.
-  // Tax sits between Withdrawals and Spending so the deduction chain
-  // reads in order: gross withdrawal, minus tax, leaves spending
-  const tooltipGroups: MonteCarloCashflowTooltipGroup[] = [
-    {
-      key: 'withdrawals',
-      heading: t('Withdrawals'),
-      series: potSeries,
-      listMembers: true,
-    },
-    ...(contributionSeries.length > 0
-      ? [
-          {
-            key: 'contributions',
-            heading: t('Contributions'),
-            series: contributionSeries,
-            listMembers: true,
-          },
-        ]
-      : []),
-    ...(hasTax
-      ? [
-          {
-            key: 'tax',
-            heading: t('Tax'),
-            series: [taxSeries],
-            listMembers: false,
-          },
-        ]
-      : []),
-    {
-      key: 'spending',
-      heading: t('Spending'),
-      series: phaseSeries,
-      listMembers: true,
-    },
-  ];
-
-  const data: MonteCarloCashflowDataPoint[] = rows.map(row => {
-    const age = startAge + row.year - 1;
-    const point: MonteCarloCashflowDataPoint = { year: row.year, age };
-    pots.forEach((_, potIndex) => {
-      point[`pot${potIndex}`] = row.potWithdrawals[potIndex] ?? 0;
+  const { data, inflowSeries, outflowSeries, tooltipGroups, stackExtents } =
+    buildMonteCarloCashflowChart({
+      rows,
+      pots,
+      contributions,
+      spendingPhases,
+      startAge,
+      t,
     });
-    contributions.forEach((_, contributionIndex) => {
-      point[`contribution${contributionIndex}`] =
-        row.contributionAmounts[contributionIndex] ?? 0;
-    });
-    // The year's planned spend belongs to whichever phase is active
-    const activePhaseId = getActiveSpendingPhase(phases, age).id;
-    phases.forEach((phase, phaseIndex) => {
-      point[`phase${phaseIndex}`] =
-        phase.id === activePhaseId ? -row.plannedSpending : 0;
-    });
-    if (hasTax) {
-      point.tax = -row.taxPaid;
-    }
-    // Numeric flag (the datum type is number-valued): 1 marks a year
-    // after the plan ran out, drawn dimmed with an unfunded-plan note
-    point.afterDepletion = row.afterDepletion ? 1 : 0;
-    return point;
-  });
-
-  const tickFormatter = (tick: number) => {
-    if (privacyMode) {
-      return '...';
-    }
-    // Recharts can synthesize ticks beyond the (already clamped) data
-    // extremes; keep them within what the formatter accepts
-    const safeTick = Math.min(
-      Math.max(Math.round(tick), -MAX_FORMATTABLE_AMOUNT),
-      MAX_FORMATTABLE_AMOUNT,
-    );
-    return `${format(safeTick, 'financial-no-decimals')}`;
-  };
-
-  // Pad the left margin for the widest tick either side of zero
-  const stackExtents = data.flatMap(point => [
-    inflowSeries.reduce((sum, series) => sum + (point[series.key] ?? 0), 0),
-    outflowSeries.reduce((sum, series) => sum + (point[series.key] ?? 0), 0),
-  ]);
 
   return (
     <View style={style}>
@@ -261,20 +115,22 @@ export function MonteCarloCashflowGraph({
             {[...inflowSeries, ...outflowSeries].map(series => (
               <Bar
                 key={series.key}
-                dataKey={series.key}
+                dataKey={`amounts.${series.key}`}
                 stackId="flow"
                 fill={series.color}
                 maxBarSize={MAX_BAR_SIZE}
                 {...animationProps}
               >
-                {/* After the plan runs out only spending remains; dim
-                    those bars so they read as planned-but-unfunded */}
-                {phaseSeries.includes(series) &&
+                {/* Only spending remains after the plan runs out; dim it
+                    so those years read as planned-but-unfunded */}
+                {series.kind === 'phase' &&
                   data.map(point => (
                     <Cell
                       key={point.year}
                       fill={series.color}
-                      fillOpacity={point.afterDepletion === 1 ? 0.45 : 1}
+                      fillOpacity={
+                        point.afterDepletion ? UNFUNDED_BAR_OPACITY : 1
+                      }
                     />
                   ))}
               </Bar>
@@ -282,26 +138,24 @@ export function MonteCarloCashflowGraph({
           </ComposedChart>
         )}
       </Container>
-      {showLegend && (
-        <View
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            columnGap: 40,
-            rowGap: 10,
-            marginTop: 10,
-          }}
-        >
-          <MonteCarloCashflowLegendGroup
-            heading={t('Money in')}
-            series={inflowSeries}
-          />
-          <MonteCarloCashflowLegendGroup
-            heading={t('Money out')}
-            series={outflowSeries}
-          />
-        </View>
-      )}
+      <View
+        style={{
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          columnGap: 40,
+          rowGap: 10,
+          marginTop: 10,
+        }}
+      >
+        <MonteCarloCashflowLegendGroup
+          heading={t('Money in')}
+          series={inflowSeries}
+        />
+        <MonteCarloCashflowLegendGroup
+          heading={t('Money out')}
+          series={outflowSeries}
+        />
+      </View>
     </View>
   );
 }

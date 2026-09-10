@@ -17,6 +17,23 @@ const PAGE_SIZE = 20;
 
 type SortOrder = 'worst-first' | 'best-first';
 
+/**
+ * The percentiles of the worst-first ranking a user can jump to (0 =
+ * worst run, 1 = best run), as Select options. Shared with the cashflow
+ * chart's scenario picker so both land on the same runs.
+ */
+export function getRunPercentileOptions(
+  t: (key: string) => string,
+): Array<[string, string]> {
+  return [
+    ['0', t('Worst run')],
+    ['0.25', t('25th percentile')],
+    ['0.5', t('Median run')],
+    ['0.75', t('75th percentile')],
+    ['1', t('Best run')],
+  ];
+}
+
 type MonteCarloRunsTableProps = {
   endingBalances: Float64Array;
   depletionYearBySimulation: Int32Array;
@@ -227,14 +244,7 @@ export function MonteCarloRunsTable({
               jumpToPercentile(Number(value));
             }
           }}
-          options={[
-            ['', t('Jump to…')],
-            ['0', t('Worst run')],
-            ['0.25', t('25th percentile')],
-            ['0.5', t('Median run')],
-            ['0.75', t('75th percentile')],
-            ['1', t('Best run')],
-          ]}
+          options={[['', t('Jump to…')], ...getRunPercentileOptions(t)]}
           style={{ width: 170 }}
         />
         <Button
