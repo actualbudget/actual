@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import darkThemeCss from '@actual-app/components/themes/dark.css?inline';
 import lightThemeCss from '@actual-app/components/themes/light.css?inline';
@@ -9,20 +9,18 @@ import type { DarkTheme, Theme } from '@actual-app/core/types/prefs';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
 import {
+  isBaseTheme,
   migrateLegacyOverride,
   parseInstalledTheme,
   validateThemeCss,
 } from './customThemes';
-import type { BaseTheme } from './customThemes';
 
 const themes = {
   light: { name: 'Light', colors: lightThemeCss },
   dark: { name: 'Dark', colors: darkThemeCss },
   midnight: { name: 'Midnight', colors: midnightThemeCss },
-  auto: { name: 'System default', colors: darkThemeCss },
+  auto: { name: 'System default' },
 } as const;
-
-type ThemeKey = keyof typeof themes;
 
 export const themeOptions = Object.entries(themes).map(
   ([key, { name }]) => [key, name] as [Theme, string],
@@ -88,8 +86,11 @@ function useMigrateLegacyOverride() {
   ]);
 }
 
-function getBaseThemeColors(baseTheme: BaseTheme) {
-  return themes[baseTheme]?.colors;
+function getBaseThemeColors(baseTheme: string | undefined) {
+  // Theme prefs are untrusted strings; unknown values resolve to undefined.
+  return baseTheme !== undefined && isBaseTheme(baseTheme)
+    ? themes[baseTheme].colors
+    : undefined;
 }
 
 export function ThemeStyle() {
@@ -101,74 +102,38 @@ export function ThemeStyle() {
   const [installedCustomDarkThemeJson] = useGlobalPref(
     'installedCustomDarkTheme',
   );
-  const [themeColors, setThemeColors] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    if (activeTheme === 'auto') {
-      const installedLight = parseInstalledTheme(installedCustomLightThemeJson);
-      const installedDark = parseInstalledTheme(installedCustomDarkThemeJson);
-
-      const lightColors =
-        (installedLight?.baseTheme &&
-          getBaseThemeColors(installedLight.baseTheme)) ||
-        themes['light'].colors;
-      const darkColors =
-        (installedDark?.baseTheme &&
-          getBaseThemeColors(installedDark.baseTheme)) ||
-        themes[darkThemePreference].colors;
-
-      function darkThemeMediaQueryListener(event: MediaQueryListEvent) {
-        if (event.matches) {
-          setThemeColors(darkColors);
-        } else {
-          setThemeColors(lightColors);
-        }
-      }
-      const darkThemeMediaQuery = window.matchMedia(
-        '(prefers-color-scheme: dark)',
-      );
-
-      darkThemeMediaQuery.addEventListener(
-        'change',
-        darkThemeMediaQueryListener,
-      );
-
-      if (darkThemeMediaQuery.matches) {
-        setThemeColors(darkColors);
-      } else {
-        setThemeColors(lightColors);
-      }
-
-      return () => {
-        darkThemeMediaQuery.removeEventListener(
-          'change',
-          darkThemeMediaQueryListener,
-        );
-      };
-    } else {
-      const installedTheme = parseInstalledTheme(installedCustomLightThemeJson);
-      if (installedTheme?.baseTheme) {
-        setThemeColors(
-          getBaseThemeColors(installedTheme.baseTheme) ??
-            themes[activeTheme as ThemeKey]?.colors,
-        );
-      } else {
-        setThemeColors(themes[activeTheme as ThemeKey]?.colors);
-      }
-    }
-  }, [
-    activeTheme,
-    darkThemePreference,
-    installedCustomLightThemeJson,
-    installedCustomDarkThemeJson,
-  ]);
+  // Rendered rather than injected from an effect so the CSS variables exist
+  // in the same commit as any consumer effect that reads them.
+  const themeColors =
+    getBaseThemeColors(
+      parseInstalledTheme(installedCustomLightThemeJson)?.baseTheme,
+    ) ?? getBaseThemeColors(activeTheme === 'auto' ? 'light' : activeTheme);
 
   if (!themeColors) return null;
+
+  if (activeTheme !== 'auto') {
+    return (
+      <>
+        <style>{paletteCss}</style>
+        <style>{themeColors}</style>
+      </>
+    );
+  }
+
+  // Let the browser pick the sheet so system theme changes need no re-render.
+  const darkColors =
+    getBaseThemeColors(
+      parseInstalledTheme(installedCustomDarkThemeJson)?.baseTheme,
+    ) ??
+    getBaseThemeColors(darkThemePreference) ??
+    themes.dark.colors;
 
   return (
     <>
       <style>{paletteCss}</style>
-      <style>{themeColors}</style>
+      <style media="(prefers-color-scheme: light)">{themeColors}</style>
+      <style media="(prefers-color-scheme: dark)">{darkColors}</style>
     </>
   );
 }
