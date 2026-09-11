@@ -1,405 +1,320 @@
-// @ts-strict-ignore
-import { SQLiteFS } from 'absurd-sql';
-import IndexedDBBackend from 'absurd-sql/dist/indexeddb-backend';
-
-import * as connection from '#platform/server/connection';
-import { join } from '#platform/server/fs/path-join';
 import * as idb from '#platform/server/indexeddb';
-import { logger } from '#platform/server/log';
-import { _getModule } from '#platform/server/sqlite';
-import type { SqlJsModule } from '#platform/server/sqlite';
+import {
+  exportDatabasePath,
+  importDatabasePath,
+  removeDatabasePath,
+} from '#platform/server/sqlite';
 
-import { _setDocumentDir as _setDocumentDirShared } from './shared';
+import { join } from './path-join';
+import {
+  getBudgetDir,
+  getDocumentDir,
+  _setDocumentDir as setSharedDocumentDir,
+} from './shared';
 
-let FS: SqlJsModule['FS'] = null;
-let BFS = null;
-const NO_PERSIST = false;
+type FileContents = string | Uint8Array;
+type FileInput = string | ArrayBuffer | ArrayBufferView;
+
+const DATABASE_PATH = /\.sqlite(?:\.tmp)?$/;
+
+const directories = new Set<string>();
+const files = new Set<string>();
+const transientFiles = new Map<string, FileContents>();
+const requiredDirectories = new Set<string>();
+const explicitDirectories = new Set<string>();
+const persistedFiles = new Set<string>();
+
+let customPersistedRoot: string | null = null;
 
 export const bundledDatabasePath: string = '/default-db.sqlite';
 export const migrationsPath: string = '/migrations';
 export const demoBudgetPath: string = '/demo-budget';
-export { join };
-export { getDocumentDir, getBudgetDir } from './shared';
+export { getBudgetDir, getDocumentDir, join };
 export const getDataDir = () => process.env.ACTUAL_DATA_DIR;
 
-// The active document dir is persisted alongside the built-in /documents
-let customPersistedRoot: string | null = null;
+function normalizePath(filepath: string) {
+  const absolutePath = filepath.startsWith('/') ? filepath : `/${filepath}`;
+  const normalizedPath = join('/', absolutePath);
+  return normalizedPath.replace(/\/+$/, '') || '/';
+}
 
-function normalizePath(filepath: string): string {
-  const absolute = filepath.startsWith('/') ? filepath : '/' + filepath;
-  let end = absolute.length;
-  while (end > 0 && absolute[end - 1] === '/') {
-    end--;
+function parentPath(filepath: string) {
+  const normalizedPath = normalizePath(filepath);
+  if (normalizedPath === '/') {
+    return '/';
   }
-  return absolute.slice(0, end);
+  return normalizedPath.slice(0, normalizedPath.lastIndexOf('/')) || '/';
 }
 
-function isUnderRoot(path: string, root: string): boolean {
-  return path === root || path.startsWith(root + '/');
+function isUnderRoot(path: string, root: string) {
+  return path === root || path.startsWith(`${root}/`);
 }
 
-function isPersistedPath(filepath: string): boolean {
+function isPersistedPath(filepath: string) {
   const path = normalizePath(filepath);
   return (
     isUnderRoot(path, '/documents') ||
-    (customPersistedRoot != null && isUnderRoot(path, customPersistedRoot))
+    (customPersistedRoot !== null && isUnderRoot(path, customPersistedRoot))
   );
 }
 
-export const _setDocumentDir = dir => {
-  const normalized = typeof dir === 'string' ? normalizePath(dir) : '';
-  if (normalized !== '') {
-    customPersistedRoot = normalized;
-    if (FS) {
-      _mkdirRecursively(normalized);
-    }
+function isDatabasePath(filepath: string) {
+  const path = normalizePath(filepath);
+  return isPersistedPath(path) && DATABASE_PATH.test(path);
+}
+
+function ensureDirectory(filepath: string) {
+  const path = normalizePath(filepath);
+  if (files.has(path)) {
+    throw new Error(`Path is already a file: ${path}`);
   }
-  return _setDocumentDirShared(dir);
+  if (path !== '/') {
+    ensureDirectory(parentPath(path));
+  }
+  directories.add(path);
+}
+
+function addRequiredDirectory(filepath: string) {
+  const path = normalizePath(filepath);
+  requiredDirectories.add(path);
+  ensureDirectory(path);
+}
+
+function rebuildDirectoryHierarchy() {
+  directories.clear();
+  directories.add('/');
+
+  const addAncestors = (filepath: string) => {
+    let path = normalizePath(filepath);
+    while (path !== '/') {
+      directories.add(path);
+      path = parentPath(path);
+    }
+  };
+
+  for (const directory of [...requiredDirectories, ...explicitDirectories]) {
+    addAncestors(directory);
+  }
+  for (const filepath of files) {
+    addAncestors(parentPath(filepath));
+  }
+}
+
+function retirePersistedDirectoryPlaceholders(filepath: string) {
+  let directory = parentPath(filepath);
+  while (isPersistedPath(directory)) {
+    if (!requiredDirectories.has(directory)) {
+      explicitDirectories.delete(directory);
+    }
+    if (directory === '/') {
+      break;
+    }
+    directory = parentPath(directory);
+  }
+}
+
+function addFile(filepath: string) {
+  const path = normalizePath(filepath);
+  if (directories.has(path)) {
+    throw new Error(`Path is already a directory: ${path}`);
+  }
+  ensureDirectory(parentPath(path));
+  files.add(path);
+}
+
+function cloneBytes(value: ArrayBuffer | ArrayBufferView) {
+  if (value instanceof ArrayBuffer) {
+    return new Uint8Array(value.slice(0));
+  }
+  return new Uint8Array(
+    value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength),
+  );
+}
+
+function normalizeContents(value: FileInput): FileContents {
+  return typeof value === 'string' ? value : cloneBytes(value);
+}
+
+function contentsToBytes(value: FileContents) {
+  return typeof value === 'string'
+    ? new TextEncoder().encode(value)
+    : value.slice();
+}
+
+function inferBackupModifiedTime(filepath: string) {
+  const filename = normalizePath(filepath).split('/').at(-1);
+  const match = filename?.match(
+    /^(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})-(\d{2})\.zip$/,
+  );
+  if (match === undefined || match === null) {
+    return undefined;
+  }
+
+  const [, year, month, day, hour, minute, second] = match;
+  const date = new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day),
+    Number(hour),
+    Number(minute),
+    Number(second),
+  );
+  return Number.isNaN(date.getTime()) ? undefined : date.getTime();
+}
+
+async function getStoredFile(filepath: string) {
+  const database = await idb.openDatabase();
+  const { store } = idb.getStore(database, 'files');
+  return await idb.get(store, normalizePath(filepath));
+}
+
+async function storeFile(file: idb.StoredFile) {
+  const database = await idb.openDatabase();
+  const { store } = idb.getStore(database, 'files');
+  await idb.set(store, file);
+}
+
+async function deleteStoredFile(filepath: string) {
+  const database = await idb.openDatabase();
+  const { store } = idb.getStore(database, 'files');
+  await idb.del(store, normalizePath(filepath));
+}
+
+export const _setDocumentDir = (dir: string) => {
+  const root = normalizePath(dir);
+  customPersistedRoot = root;
+  addRequiredDirectory(root);
+  return setSharedDocumentDir(root);
 };
 
-export const pathToId = function (filepath: string): string {
-  return filepath.replace(/^\//, '').replace(/\//g, '-');
-};
+export const pathToId = (filepath: string) =>
+  filepath.replace(/^\//, '').replaceAll('/', '-');
 
-function _exists(filepath: string): boolean {
-  try {
-    FS.readlink(filepath);
-    return true;
-  } catch {}
-
-  try {
-    FS.stat(filepath);
-    return true;
-  } catch {}
-  return false;
-}
-
-function _mkdirRecursively(dir) {
-  const parts = dir.split('/').filter(str => str !== '');
-  let path = '';
-  for (const part of parts) {
-    path += '/' + part;
-    if (!_exists(path)) {
-      FS.mkdir(path);
-    }
-  }
-}
-
-function _createPersistedFile(filepath: string) {
-  if (filepath.endsWith('.sqlite')) {
-    // If it doesn't exist, we need to create a symlink
-    if (!_exists(filepath)) {
-      FS.symlink('/blocked/' + pathToId(filepath), filepath);
-    }
-  } else {
-    // The contents are actually stored in IndexedDB. We only write to
-    // the in-memory fs to take advantage of the file hierarchy
-    FS.writeFile(filepath, '!$@) this should never read !$@)');
-  }
-}
-
-function _createFile(filepath: string) {
-  // This can create the file. Check if it exists, if not create a
-  // symlink if it's a sqlite file. Otherwise store in idb
-
-  if (!NO_PERSIST && isPersistedPath(filepath)) {
-    _createPersistedFile(filepath);
-  }
-
-  return filepath;
-}
-
-async function _readFile(
-  filepath: string,
-  opts: { encoding: 'utf8' },
-): Promise<string>;
-async function _readFile(
-  filepath: string,
-  opts?: { encoding: 'binary' },
-): Promise<Uint8Array>;
-async function _readFile(
-  filepath: string,
-  opts?: { encoding: 'utf8' } | { encoding: 'binary' },
-): Promise<string | Uint8Array> {
-  // We persist stuff in /documents, but don't need to handle sqlite
-  // file specifically because those are symlinked to a separate
-  // filesystem and will be handled in the BlockedFS
-  if (
-    !NO_PERSIST &&
-    isPersistedPath(filepath) &&
-    !filepath.endsWith('.sqlite')
-  ) {
-    if (!_exists(filepath)) {
-      throw new Error('File does not exist: ' + filepath);
-    }
-
-    // Grab contents from IDB
-    const { store } = idb.getStore(await idb.getDatabase(), 'files');
-    const item = await idb.get(store, filepath);
-
-    if (item == null) {
-      throw new Error('File does not exist: ' + filepath);
-    }
-
-    if (opts?.encoding === 'utf8' && ArrayBuffer.isView(item.contents)) {
-      return String.fromCharCode.apply(
-        null,
-        new Uint16Array(item.contents.buffer),
-      );
-    }
-
-    return item.contents;
-  } else {
-    if (opts?.encoding === 'utf8') {
-      return FS.readFile(resolveLink(filepath), { encoding: 'utf8' });
-    } else if (opts?.encoding === 'binary') {
-      return FS.readFile(resolveLink(filepath), { encoding: 'binary' });
-    } else {
-      return FS.readFile(resolveLink(filepath));
-    }
-  }
-}
-
-function resolveLink(path: string): string {
-  try {
-    const { node } = FS.lookupPath(path, { follow: false });
-    return node.link ? FS.readlink(path) : path;
-  } catch {
-    return path;
-  }
-}
-
-async function _writeFile(filepath: string, contents): Promise<boolean> {
-  if (contents instanceof ArrayBuffer) {
-    contents = new Uint8Array(contents);
-  } else if (ArrayBuffer.isView(contents)) {
-    contents = new Uint8Array(contents.buffer);
-  }
-
-  // We always create the file if it doesn't exist, and this function
-  // setups up the file depending on its type
-  _createFile(filepath);
-
-  if (!NO_PERSIST && isPersistedPath(filepath)) {
-    const isDb = filepath.endsWith('.sqlite');
-
-    // Write to IDB
-    const { store } = idb.getStore(await idb.getDatabase(), 'files');
-
-    if (isDb) {
-      // We never write the contents of the database to idb ourselves.
-      // It gets handled via a symlink to the blocked fs (created by
-      // `_createFile` above). However, we still need to record an
-      // entry for the db file so the fs gets properly constructed on
-      // startup
-      await idb.set(store, { filepath, contents: '' });
-
-      // Actually persist the data by going the FS, which will pass
-      // the data through the symlink to the blocked fs. For some
-      // reason we need to resolve symlinks ourselves.
-      await Promise.resolve();
-      FS.writeFile(resolveLink(filepath), contents);
-    } else {
-      await idb.set(store, { filepath, contents });
-    }
-  } else {
-    FS.writeFile(resolveLink(filepath), contents);
-  }
-  return true;
-}
-
-async function _copySqlFile(
-  frompath: string,
-  topath: string,
-): Promise<boolean> {
-  _createFile(topath);
-
-  const { store } = idb.getStore(await idb.getDatabase(), 'files');
-  await idb.set(store, { filepath: topath, contents: '' });
-  const fromitem = await idb.get(store, frompath);
-  const fromDbPath = pathToId(fromitem.filepath);
-  const toDbPath = pathToId(topath);
-
-  const fromfile = BFS.backend.createFile(fromDbPath);
-  const tofile = BFS.backend.createFile(toDbPath);
-
-  try {
-    fromfile.open();
-    tofile.open();
-    const fileSize = fromfile.meta.size;
-    const blockSize = fromfile.meta.blockSize;
-
-    const buffer = new ArrayBuffer(blockSize);
-    const bufferView = new Uint8Array(buffer);
-
-    for (let i = 0; i < fileSize; i += blockSize) {
-      const bytesToRead = Math.min(blockSize, fileSize - i);
-      fromfile.read(bufferView, 0, bytesToRead, i);
-      tofile.write(bufferView, 0, bytesToRead, i);
-    }
-  } catch (error) {
-    tofile.close();
-    fromfile.close();
-    await _removeFile(toDbPath);
-    logger.error('Failed to copy database file', error);
-    return false;
-  } finally {
-    tofile.close();
-    fromfile.close();
-  }
-
-  return true;
-}
-
-async function _removeFile(filepath: string) {
-  if (!NO_PERSIST && isPersistedPath(filepath)) {
-    const isDb = filepath.endsWith('.sqlite');
-
-    // Remove from IDB
-    const { store } = idb.getStore(await idb.getDatabase(), 'files');
-    await idb.del(store, filepath);
-
-    // If this is the database, is has been symlinked and we want to
-    // remove the actual contents
-    if (isDb) {
-      const linked = resolveLink(filepath);
-      // Be resilient to fs corruption: don't throw an error by trying
-      // to remove a file that doesn't exist. For some reason the db
-      // file is gone? It's ok, just ignore it
-      if (_exists(linked)) {
-        FS.unlink(linked);
-      }
-    }
-  }
-
-  // Finally, remove any in-memory instance
-  FS.unlink(filepath);
-}
-
-// Load files from the server that should exist by default
 async function populateDefaultFilesystem() {
-  const index = await (
-    await fetch(process.env.PUBLIC_URL + 'data-file-index.txt')
-  ).text();
-  const files = index
+  const response = await fetch(`${process.env.PUBLIC_URL}data-file-index.txt`);
+  const filenames = (await response.text())
     .split('\n')
-    .map(name => name.trim())
-    .filter(name => name !== '');
-  const fetchFile = url => fetch(url).then(res => res.arrayBuffer());
+    .map(filename => filename.trim())
+    .filter(Boolean);
 
-  // This is hardcoded. We know we must create the migrations
-  // directory, it's not worth complicating the index to support
-  // creating arbitrary folders.
-  await mkdir('/migrations');
-  await mkdir('/demo-budget');
+  addRequiredDirectory(migrationsPath);
+  addRequiredDirectory(demoBudgetPath);
 
   await Promise.all(
-    files.map(async file => {
-      const contents = await fetchFile(process.env.PUBLIC_URL + 'data/' + file);
-      // `.data` lets shipped JS files escape bundler import-analysis.
-      await _writeFile('/' + file.replace(/\.data$/, ''), contents);
+    filenames.map(async filename => {
+      const fileResponse = await fetch(
+        `${process.env.PUBLIC_URL}data/${filename}`,
+      );
+      const contents = await fileResponse.arrayBuffer();
+      const path = `/${filename.replace(/\.data$/, '')}`;
+      transientFiles.set(normalizePath(path), cloneBytes(contents));
+      addFile(path);
     }),
   );
 }
 
-const populateFileHierarchy = async function () {
-  const { store } = idb.getStore(await idb.getDatabase(), 'files');
-  const req = store.getAllKeys();
-  const paths: string[] = await new Promise((resolve, reject) => {
-    // @ts-expect-error fix me
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror = e => reject(e);
-  });
+export async function refreshPersistedHierarchy() {
+  const filepaths = await idb.getPersistedFilepaths();
+  const nextPersistedFiles = new Set(filepaths.map(normalizePath));
 
-  for (const path of paths) {
-    _mkdirRecursively(basename(path));
-    _createPersistedFile(path);
+  for (const path of persistedFiles) {
+    files.delete(path);
   }
-};
+  persistedFiles.clear();
+  for (const path of nextPersistedFiles) {
+    files.add(path);
+    persistedFiles.add(path);
+    retirePersistedDirectoryPlaceholders(path);
+  }
+  rebuildDirectoryHierarchy();
+}
 
-export const init = async function () {
-  const Module = _getModule();
-  FS = Module.FS;
+export async function init() {
+  directories.clear();
+  files.clear();
+  transientFiles.clear();
+  requiredDirectories.clear();
+  explicitDirectories.clear();
+  persistedFiles.clear();
+  customPersistedRoot = null;
 
-  // When a user "uploads" a file, we just put it in memory in this
-  // dir and the backend takes it from there
-  FS.mkdir('/uploads');
+  addRequiredDirectory('/');
+  addRequiredDirectory('/uploads');
+  addRequiredDirectory('/documents');
+  await populateDefaultFilesystem();
+  await refreshPersistedHierarchy();
+}
 
-  // Files in /documents are actually read/written from idb.
-  // Everything in there is automatically persisted
-  FS.mkdir('/documents');
+export const basename = parentPath;
 
-  // Files in /blocked are handled by the BlockedFS, which is a
-  // special fs that persists files in blocks. This is necessary
-  // for sqlite3
-  FS.mkdir('/blocked');
-
-  // Jest doesn't support workers. Right now we disable the blocked fs
-  // backend under testing and just test that the directory structure
-  // is created correctly. We assume the the absurd-sql project tests
-  // the blocked fs enough. Additionally, we don't populate the
-  // default files in testing.
-  if (process.env.NODE_ENV !== 'test') {
-    const backend = new IndexedDBBackend(() => {
-      connection.send('fallback-write-error');
-    });
-    BFS = new SQLiteFS(FS, backend);
-    Module.register_for_idb(BFS);
-
-    FS.mount(BFS, {}, '/blocked');
-
-    await populateDefaultFilesystem();
+export async function listDir(filepath: string) {
+  const directory = normalizePath(filepath);
+  if (isPersistedPath(directory)) {
+    await refreshPersistedHierarchy();
+  }
+  if (!directories.has(directory)) {
+    throw new Error(`Directory does not exist: ${directory}`);
   }
 
-  await populateFileHierarchy();
-};
-
-export const basename = function (filepath) {
-  const parts = filepath.split('/');
-  return parts.slice(0, -1).join('/');
-};
-
-export const listDir = async function (filepath) {
-  const paths = FS.readdir(filepath);
-  return paths.filter(p => p !== '.' && p !== '..');
-};
-
-export const exists = async function (filepath) {
-  return _exists(filepath);
-};
-
-export const mkdir = async function (filepath) {
-  FS.mkdir(filepath);
-};
-
-export const size = async function (filepath) {
-  const attrs = FS.stat(resolveLink(filepath));
-  return attrs.size;
-};
-
-export const copyFile = async function (
-  frompath: string,
-  topath: string,
-): Promise<boolean> {
-  let result = false;
-  try {
-    const contents = await _readFile(frompath);
-    result = await _writeFile(topath, contents);
-  } catch (error) {
-    if (frompath.endsWith('.sqlite') || topath.endsWith('.sqlite')) {
-      try {
-        result = await _copySqlFile(frompath, topath);
-      } catch (secondError) {
-        throw new Error(
-          `Failed to copy SQL file from ${frompath} to ${topath}: ${secondError.message}`,
-        );
-      }
-    } else {
-      throw error;
+  const prefix = directory === '/' ? '/' : `${directory}/`;
+  const children = new Set<string>();
+  for (const path of [...directories, ...files]) {
+    if (path === directory || !path.startsWith(prefix)) {
+      continue;
     }
+    children.add(path.slice(prefix.length).split('/')[0]);
   }
-  return result;
-};
+  return [...children];
+}
+
+export async function exists(filepath: string) {
+  const path = normalizePath(filepath);
+  return directories.has(path) || files.has(path);
+}
+
+export async function mkdir(filepath: string) {
+  const path = normalizePath(filepath);
+  if (files.has(path) || directories.has(path)) {
+    throw new Error(`Path already exists: ${path}`);
+  }
+  const parent = parentPath(path);
+  if (!directories.has(parent)) {
+    throw new Error(`Parent directory does not exist: ${parent}`);
+  }
+  directories.add(path);
+  explicitDirectories.add(path);
+}
+
+async function readBytes(filepath: string) {
+  const path = normalizePath(filepath);
+  if (isPersistedPath(path)) {
+    await refreshPersistedHierarchy();
+  }
+  if (!files.has(path)) {
+    throw new Error(`File does not exist: ${path}`);
+  }
+
+  if (isDatabasePath(path)) {
+    return await exportDatabasePath(path);
+  }
+
+  const contents = isPersistedPath(path)
+    ? (await getStoredFile(path))?.contents
+    : transientFiles.get(path);
+  if (contents === undefined) {
+    throw new Error(`File does not exist: ${path}`);
+  }
+  return contentsToBytes(contents);
+}
+
+export async function size(filepath: string) {
+  return (await readBytes(filepath)).byteLength;
+}
+
+export async function copyFile(frompath: string, topath: string) {
+  await writeFile(topath, await readBytes(frompath));
+  return true;
+}
 
 export async function readFile(
   filepath: string,
@@ -412,46 +327,128 @@ export async function readFile(
 export async function readFile(
   filepath: string,
   encoding: 'binary' | 'utf8' = 'utf8',
-) {
-  if (encoding === 'utf8') {
-    return _readFile(filepath, { encoding });
-  }
-
-  return _readFile(filepath, { encoding });
+): Promise<string | Uint8Array> {
+  const contents = await readBytes(filepath);
+  return encoding === 'binary' ? contents : new TextDecoder().decode(contents);
 }
 
-export const writeFile = async function (filepath: string, contents) {
-  return _writeFile(filepath, contents);
-};
+export async function writeFile(filepath: string, value: FileInput) {
+  const path = normalizePath(filepath);
+  const contents = normalizeContents(value);
+  if (directories.has(path)) {
+    throw new Error(`Path is already a directory: ${path}`);
+  }
+  const parent = parentPath(path);
+  if (!directories.has(parent)) {
+    throw new Error(`Parent directory does not exist: ${parent}`);
+  }
 
-export const removeFile = async function (filepath: string) {
-  return _removeFile(filepath);
-};
+  if (isDatabasePath(path)) {
+    await importDatabasePath(path, contentsToBytes(contents));
+    await storeFile({
+      filepath: path,
+      contents: '',
+      modifiedTime: Date.now(),
+    });
+  } else if (isPersistedPath(path)) {
+    await storeFile({
+      filepath: path,
+      contents,
+      modifiedTime: Date.now(),
+    });
+  } else {
+    transientFiles.set(path, contents);
+  }
 
-export const removeDir = async function (filepath) {
-  FS.rmdir(filepath);
-};
+  addFile(path);
+  if (isPersistedPath(path)) {
+    persistedFiles.add(path);
+    retirePersistedDirectoryPlaceholders(path);
+  }
+  return true;
+}
 
-export const removeDirRecursively = async function (dirpath) {
-  if (await exists(dirpath)) {
-    for (const file of await listDir(dirpath)) {
-      const fullpath = join(dirpath, file);
-      // `true` here means to not follow symlinks
-      const attr = FS.stat(fullpath, true);
+export async function removeFile(filepath: string) {
+  const path = normalizePath(filepath);
+  if (isPersistedPath(path)) {
+    await refreshPersistedHierarchy();
+  }
+  if (!files.has(path)) {
+    throw new Error(`File does not exist: ${path}`);
+  }
 
-      if (FS.isDir(attr.mode)) {
-        await removeDirRecursively(fullpath);
-      } else {
-        await removeFile(fullpath);
-      }
+  if (isDatabasePath(path)) {
+    await removeDatabasePath(path);
+    await deleteStoredFile(path);
+  } else if (isPersistedPath(path)) {
+    await deleteStoredFile(path);
+  } else {
+    transientFiles.delete(path);
+  }
+  files.delete(path);
+  persistedFiles.delete(path);
+}
+
+export async function removeDir(filepath: string) {
+  const path = normalizePath(filepath);
+  if (isPersistedPath(path)) {
+    await refreshPersistedHierarchy();
+  }
+  if (!directories.has(path)) {
+    throw new Error(`Directory does not exist: ${path}`);
+  }
+  if ((await listDir(path)).length > 0) {
+    throw new Error(`Directory is not empty: ${path}`);
+  }
+  if (path === '/') {
+    throw new Error('Cannot remove the filesystem root');
+  }
+  directories.delete(path);
+  explicitDirectories.delete(path);
+}
+
+export async function removeDirRecursively(filepath: string) {
+  const path = normalizePath(filepath);
+  if (!(await exists(path))) {
+    return;
+  }
+
+  for (const child of await listDir(path)) {
+    const childPath = join(path, child);
+    if (directories.has(childPath)) {
+      await removeDirRecursively(childPath);
+    } else {
+      await removeFile(childPath);
+    }
+  }
+  if (isPersistedPath(path)) {
+    await refreshPersistedHierarchy();
+  }
+  if (directories.has(path)) {
+    await removeDir(path);
+  }
+}
+
+export async function getModifiedTime(filepath: string): Promise<Date> {
+  const path = normalizePath(filepath);
+  if (!files.has(path)) {
+    throw new Error(`File does not exist: ${path}`);
+  }
+
+  if (isPersistedPath(path)) {
+    const modifiedTime = (await getStoredFile(path))?.modifiedTime;
+    if (modifiedTime !== undefined) {
+      return new Date(modifiedTime);
     }
 
-    await removeDir(dirpath);
+    // Browser backups written before modified times were persisted have no
+    // stored timestamp. Their filenames include the creation timestamp, so
+    // preserve backup rotation order instead of collapsing them into the epoch.
+    const inferredModifiedTime = inferBackupModifiedTime(path);
+    if (inferredModifiedTime !== undefined) {
+      return new Date(inferredModifiedTime);
+    }
   }
-};
 
-export const getModifiedTime = async (_filepath: string): Promise<Date> => {
-  throw new Error(
-    'getModifiedTime not supported on the web (only used for backups)',
-  );
-};
+  return new Date(0);
+}

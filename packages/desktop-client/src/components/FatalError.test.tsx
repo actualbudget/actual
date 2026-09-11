@@ -8,18 +8,6 @@ import { TestProviders } from '#mocks';
 import { FatalError } from './FatalError';
 
 describe('FatalError', () => {
-  it('renders the SharedArrayBuffer message for a non-Error AppError payload', () => {
-    // matches what browser-server.js posts and what initAll().catch passes
-    const error = {
-      type: 'app-init-failure',
-      SharedArrayBufferMissing: true,
-    };
-
-    render(<FatalError error={error} />, { wrapper: TestProviders });
-
-    expect(screen.getAllByText(/SharedArrayBuffer/).length).toBeGreaterThan(0);
-  });
-
   it('renders the IndexedDB message for a non-Error AppError payload', () => {
     const error = {
       type: 'app-init-failure',

@@ -23,6 +23,9 @@ export const init: typeof T.init = async () => {
   // Nothing to do
 };
 
+export const refreshPersistedHierarchy: typeof T.refreshPersistedHierarchy =
+  async () => undefined;
+
 export const getDataDir: typeof T.getDataDir = () => {
   if (!process.env.ACTUAL_DATA_DIR) {
     throw new Error('ACTUAL_DATA_DIR env variable is required');
@@ -130,21 +133,34 @@ export const writeFile: typeof T.writeFile = async (filepath, contents) => {
     await promiseRetry(
       (retry, attempt) => {
         return new Promise((resolve, reject) => {
-          fs.writeFile(filepath, contents, 'utf8', err => {
-            if (err) {
-              logger.error(
-                `Failed to write to ${filepath}. Attempted ${attempt} times. Something is locking the file - potentially a virus scanner or backup software.`,
-              );
-              reject(err);
-            } else {
-              if (attempt > 1) {
-                logger.info(
-                  `Successfully recovered from file lock. It took ${attempt} retries`,
+          fs.writeFile(
+            filepath,
+            typeof contents === 'string'
+              ? contents
+              : contents instanceof ArrayBuffer
+                ? new Uint8Array(contents)
+                : new Uint8Array(
+                    contents.buffer,
+                    contents.byteOffset,
+                    contents.byteLength,
+                  ),
+            'utf8',
+            err => {
+              if (err) {
+                logger.error(
+                  `Failed to write to ${filepath}. Attempted ${attempt} times. Something is locking the file - potentially a virus scanner or backup software.`,
                 );
+                reject(err);
+              } else {
+                if (attempt > 1) {
+                  logger.info(
+                    `Successfully recovered from file lock. It took ${attempt} retries`,
+                  );
+                }
+                resolve(undefined);
               }
-              resolve(undefined);
-            }
-          });
+            },
+          );
         }).catch(retry);
       },
       {

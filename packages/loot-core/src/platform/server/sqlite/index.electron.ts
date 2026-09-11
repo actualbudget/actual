@@ -10,6 +10,8 @@ import type { SqlParam } from './types';
 import { unicodeLike } from './unicodeLike';
 
 export type { SqlParam } from './types';
+export type Database = SQL.Database;
+export type Statement = SQL.Statement;
 
 function verifyParamTypes(sql, arr) {
   arr.forEach(val => {
@@ -24,8 +26,8 @@ export async function init() {
   // No need to initialise on electron
 }
 
-// Parity with the browser sqlite backend (which instantiates sql.js from an
-// embedded wasm binary). better-sqlite3 has no wasm, so this is a no-op; it
+// Parity with the browser SQLite backend (which instantiates SQLite from an
+// embedded WASM binary). better-sqlite3 has no WASM, so this is a no-op; it
 // exists so callers can reference `setWasmBinary` regardless of platform.
 export function setWasmBinary(_binary: ArrayBuffer | Uint8Array) {
   // no-op on native sqlite
@@ -33,6 +35,13 @@ export function setWasmBinary(_binary: ArrayBuffer | Uint8Array) {
 
 export function prepare(db, sql) {
   return db.prepare(sql);
+}
+
+// better-sqlite3 owns the native statement lifecycle and invalidates prepared
+// statements when their database closes. The browser adapter needs an explicit
+// finalize, so expose the same cross-platform hook as a no-op here.
+export function finalizeStatement(_statement: SQL.Statement) {
+  return undefined;
 }
 
 export function runQuery(

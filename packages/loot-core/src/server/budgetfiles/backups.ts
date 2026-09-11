@@ -1,4 +1,3 @@
-import type { Database } from '@jlongster/sql.js';
 // @ts-strict-ignore
 import * as dateFns from 'date-fns';
 
@@ -6,6 +5,7 @@ import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
+import type { Database } from '#platform/server/sqlite';
 import * as cloudStorage from '#server/cloud-storage';
 import * as prefs from '#server/prefs';
 import { safeUnzip, safeZip } from '#server/util/zip';

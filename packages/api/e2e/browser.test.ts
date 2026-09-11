@@ -5,7 +5,8 @@ import { expect, test } from '@playwright/test';
 type Api = {
   init(config: { dataDir: string }): Promise<unknown>;
   shutdown(): Promise<void>;
-  getBudgets(): Promise<unknown[]>;
+  getBudgets(): Promise<Array<{ id: string }>>;
+  loadBudget(budgetId: string): Promise<void>;
   getAccounts(): Promise<Array<{ id: string; name: string }>>;
   runImport(budgetName: string, func: () => Promise<void>): Promise<void>;
   createAccount(account: { name: string }, balance?: number): Promise<string>;
@@ -76,6 +77,24 @@ test('boots, imports a budget, reads it back, and persists', async ({
   });
   expect(result.accountNames).toEqual(['Checking']);
   expect(result.amounts).toEqual([-1250, 50000]);
+
+  // Lifecycle calls must serialize. Otherwise one shutdown can terminate a
+  // replacement Worker, or the old Worker can retain the per-budget pool.
+  const accountsAfterReinit = await page.evaluate(async () => {
+    const api = await window.apiReady;
+    await Promise.all([
+      api.shutdown(),
+      api.init({ dataDir: '/documents' }),
+      api.init({ dataDir: '/documents' }),
+    ]);
+    const [budget] = await api.getBudgets();
+    if (budget === undefined) {
+      throw new Error('Expected the imported budget');
+    }
+    await api.loadBudget(budget.id);
+    return (await api.getAccounts()).map(account => account.name);
+  });
+  expect(accountsAfterReinit).toEqual(['Checking']);
 
   // Reload the page: the budget must survive in IndexedDB.
   await page.evaluate(async () => {

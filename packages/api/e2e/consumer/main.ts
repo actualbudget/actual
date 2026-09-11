@@ -1,7 +1,6 @@
 // A minimal third-party consumer of @actual-app/api. It does nothing special:
-// just `import` the package and `init()`. The only host requirement is COOP/COEP
-// headers, which serve-dist.mjs sets. This fixture is bundled for production by
-// global-setup.ts, exercising a consumer bundler processing dist/browser.js.
+// just `import` the package and `init()`. This fixture is bundled for production
+// by global-setup.ts, exercising a consumer bundler processing dist/browser.js.
 import * as api from '@actual-app/api';
 
 const out = document.getElementById('out');

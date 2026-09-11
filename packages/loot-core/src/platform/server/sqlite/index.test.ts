@@ -1,108 +1,105 @@
-// @ts-strict-ignore
-import { patchFetchForSqlJS } from '#mocks/util';
+import { readFile } from 'node:fs/promises';
 
-import { execQuery, init, openDatabase, runQuery, transaction } from './index';
+import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+import type { Database, Sqlite3Static } from '@sqlite.org/sqlite-wasm';
+
+import {
+  closeDatabase,
+  execQuery,
+  init,
+  openDatabase,
+  prepare,
+  runQuery,
+  setWasmBinary,
+  transaction,
+} from './index';
+
+let sqlite3: Sqlite3Static;
+let db: Database;
 
 beforeAll(async () => {
-  const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;
-  patchFetchForSqlJS(baseURL);
-
-  return init({ baseURL });
+  setWasmBinary(
+    await readFile(
+      `${__dirname}/../../../../../../node_modules/@sqlite.org/sqlite-wasm/dist/sqlite3.wasm`,
+    ),
+  );
+  await init();
+  sqlite3 = await sqlite3InitModule();
 });
 
-const initSQL = `
-CREATE TABLE numbers (id TEXT PRIMARY KEY, number INTEGER);
-CREATE TABLE textstrings (id TEXT PRIMARY KEY, string TEXT);
-`;
+beforeEach(() => {
+  db = new sqlite3.oo1.DB();
+  execQuery(db, 'CREATE TABLE data (id TEXT PRIMARY KEY, value INTEGER)');
+});
 
-describe('Web sqlite', () => {
-  it('should rollback transactions', async () => {
-    const db = await openDatabase();
-    execQuery(db, initSQL);
+afterEach(() => {
+  db.close();
+});
 
-    runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 4)");
+describe('browser SQLite adapter', () => {
+  it('reuses prepared statements synchronously', () => {
+    const statement = prepare(db, 'INSERT INTO data (id, value) VALUES (?, ?)');
 
-    let rows = runQuery(db, 'SELECT * FROM numbers', null, true);
-    expect(rows.length).toBe(1);
-    // @ts-expect-error Property 'number' does not exist on type 'unknown'
-    expect(rows[0].number).toBe(4);
+    runQuery(db, statement, ['one', 1]);
+    runQuery(db, statement, ['two', 2]);
 
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => null);
-    expect(() => {
-      transaction(db, () => {
-        runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id2', 5)");
-        runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id3', 6)");
-        // Insert an invalid one that will error
-        runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 1)");
-      });
-    }).toThrow(/constraint failed/);
-    consoleSpy.mockRestore();
-
-    // Nothing should have changed in the db
-    rows = runQuery(db, 'SELECT * FROM numbers', null, true);
-    expect(rows.length).toBe(1);
-    // @ts-expect-error Property 'number' does not exist on type 'unknown'
-    expect(rows[0].number).toBe(4);
-  });
-
-  it('should support nested transactions', async () => {
-    const db = await openDatabase();
-    execQuery(db, initSQL);
-
-    runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 4)");
-
-    let rows = runQuery(db, 'SELECT * FROM numbers', null, true);
-    expect(rows.length).toBe(1);
-    // @ts-expect-error Property 'number' does not exist on type 'unknown'
-    expect(rows[0].number).toBe(4);
-
-    transaction(db, () => {
-      runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id2', 5)");
-      runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id3', 6)");
-
-      // Only this transaction should fail
-      const consoleSpy = vi
-        .spyOn(console, 'log')
-        .mockImplementation(() => null);
-      expect(() => {
-        transaction(db, () => {
-          runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id4', 7)");
-          // Insert an invalid one that will error
-          runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 1)");
-        });
-      }).toThrow(/constraint failed/);
-      consoleSpy.mockRestore();
-    });
-
-    // Nothing should have changed in the db
-    rows = runQuery(db, 'SELECT * FROM numbers', null, true);
-    expect(rows.length).toBe(3);
-    // @ts-expect-error Property 'number' does not exist on type 'unknown'
-    expect(rows[0].number).toBe(4);
-    // @ts-expect-error Property 'number' does not exist on type 'unknown'
-    expect(rows[1].number).toBe(5);
-    // @ts-expect-error Property 'number' does not exist on type 'unknown'
-    expect(rows[2].number).toBe(6);
-  });
-
-  it('should match regex on text fields', async () => {
-    const db = await openDatabase();
-    execQuery(db, initSQL);
-
-    runQuery(
+    const rows = runQuery<{ id: string; value: number }>(
       db,
-      "INSERT INTO textstrings (id, string) VALUES ('id1', 'not empty string')",
-    );
-    runQuery(db, "INSERT INTO textstrings (id) VALUES ('id2')");
-
-    const rows = runQuery(
-      db,
-      'SELECT id FROM textstrings where REGEXP("n.", string)',
-      null,
+      'SELECT * FROM data ORDER BY id',
+      [],
       true,
     );
-    expect(rows.length).toBe(1);
-    // @ts-expect-error Property 'id' does not exist on type 'unknown'
-    expect(rows[0].id).toBe('id1');
+    expect(rows).toEqual([
+      { id: 'one', value: 1 },
+      { id: 'two', value: 2 },
+    ]);
+    expect(Object.getPrototypeOf(rows[0])).toBe(Object.prototype);
+
+    statement.finalize();
+  });
+
+  it('rolls back a nested savepoint without losing the outer transaction', () => {
+    transaction(db, () => {
+      runQuery(db, "INSERT INTO data VALUES ('outer', 1)");
+
+      expect(() => {
+        transaction(db, () => {
+          runQuery(db, "INSERT INTO data VALUES ('nested', 2)");
+          runQuery(db, "INSERT INTO data VALUES ('outer', 3)");
+        });
+      }).toThrow();
+
+      runQuery(db, "INSERT INTO data VALUES ('after', 4)");
+    });
+
+    expect(
+      runQuery<{ id: string }>(db, 'SELECT id FROM data ORDER BY id', [], true),
+    ).toEqual([{ id: 'after' }, { id: 'outer' }]);
+  });
+
+  it('reopens a serialized database whose header says it uses WAL', async () => {
+    const source = new sqlite3.oo1.DB();
+    source.exec(
+      "CREATE TABLE example (value TEXT); INSERT INTO example VALUES ('saved')",
+    );
+    const bytes = sqlite3.capi.sqlite3_js_db_export(source);
+    source.close();
+
+    bytes[18] = 2;
+    bytes[19] = 2;
+
+    const imported = await openDatabase(bytes);
+    try {
+      expect(
+        runQuery<{ value: string }>(
+          imported,
+          'SELECT value FROM example',
+          [],
+          true,
+        ),
+      ).toEqual([{ value: 'saved' }]);
+    } finally {
+      closeDatabase(imported);
+    }
   });
 });

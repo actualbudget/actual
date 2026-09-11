@@ -6,6 +6,8 @@ import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
+import { omitSqliteWorker1 } from '../loot-core/vite/omit-sqlite-worker1.mts';
+
 const distDir = path.resolve(__dirname, 'dist');
 
 // Embed loot-core's default filesystem (wasm + default DB + migrations) into
@@ -64,7 +66,7 @@ export default defineConfig({
   ],
   worker: {
     format: 'iife',
-    plugins: () => [embeddedAssets(), peggyLoader()],
+    plugins: () => [omitSqliteWorker1(), embeddedAssets(), peggyLoader()],
   },
   build: {
     target: 'esnext',

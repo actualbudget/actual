@@ -1,6 +1,6 @@
 // Web Worker entry for the browser build; owns the real loot-core backend.
 //
-// Fully self-contained: the sql.js wasm and the default filesystem data
+// Fully self-contained: the SQLite WASM binary and the default filesystem data
 // (migrations + default budget DB) are embedded at build time. The worker
 // performs NO `PUBLIC_URL` asset fetches, so a consumer needs to serve no extra
 // files and configure no bundler — just `import` the package and `init()`.

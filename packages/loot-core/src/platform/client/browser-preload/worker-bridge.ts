@@ -1,5 +1,3 @@
-import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
-
 import { logger } from '#platform/server/log';
 
 type BridgeMessage = { type?: string; [key: string]: unknown };
@@ -224,19 +222,10 @@ export class WorkerBridge {
     this._terminateLocalBackendWorker();
     const localWorker = new Worker(this.backendWorkerUrl);
     this.localBackendWorker = localWorker;
-    initSQLBackend(localWorker);
 
     const sharedPort = this._sharedPort;
     localWorker.onmessage = workerEvent => {
       const workerMsg = workerEvent.data as BridgeMessage;
-      // absurd-sql internal messages are handled by initSQLBackend
-      if (
-        workerMsg &&
-        typeof workerMsg.type === 'string' &&
-        workerMsg.type.startsWith('__absurd:')
-      ) {
-        return;
-      }
       // After the backend connects, automatically reload the budget that was
       // open before the leader left (e.g. page refresh). This lets other tabs
       // continue working without being sent to the budget list.

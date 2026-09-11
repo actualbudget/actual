@@ -37,7 +37,7 @@ const isOpenIdCallback = window.location.pathname
 // *** Start the backend ***
 //
 // The multi-tab coordinator (leader/follower over SharedWorker), the direct
-// Worker fallback, and the absurd-sql worker bridge now all live in loot-core
+// Worker fallback and coordination live in loot-core
 // (packages/loot-core/src/platform/client/browser-preload). We only hand it
 // the desktop-specific inputs: the worker asset URL, a SharedWorker factory,
 // and the init payload.

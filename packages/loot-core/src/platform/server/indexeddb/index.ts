@@ -5,7 +5,7 @@ let openedDb: null | ReturnType<typeof _openDatabase> = _openDatabase();
 // The web version uses IndexedDB to store data
 function _openDatabase() {
   return new Promise<IDBDatabase>((resolve, reject) => {
-    const dbVersion = 9;
+    const dbVersion = 10;
     const openRequest = indexedDB.open('actual', dbVersion);
 
     openRequest.onupgradeneeded = function (e) {
@@ -58,7 +58,22 @@ function _openDatabase() {
   });
 }
 
-type Data = { filepath: string; contents: string };
+export type StoredFile = {
+  filepath: string;
+  contents: string | Uint8Array;
+  modifiedTime?: number;
+};
+
+export async function getPersistedFilepaths() {
+  const database = await openDatabase();
+  const transaction = database.transaction('files', 'readonly');
+  const request = transaction.objectStore('files').getAllKeys();
+  const keys = await new Promise<IDBValidKey[]>((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+  return keys.filter((key): key is string => typeof key === 'string');
+}
 
 export const getStore = function (db: IDBDatabase, name: string) {
   const trans = db.transaction([name], 'readwrite');
@@ -69,7 +84,7 @@ export const get = async function (
   store: IDBObjectStore,
   key: IDBValidKey | IDBKeyRange,
 ) {
-  return new Promise<Data>((resolve, reject) => {
+  return new Promise<StoredFile | undefined>((resolve, reject) => {
     const req = store.get(key);
     req.onsuccess = () => {
       resolve(req.result);
@@ -78,7 +93,7 @@ export const get = async function (
   });
 };
 
-export const set = async function (store: IDBObjectStore, item: Data) {
+export const set = async function (store: IDBObjectStore, item: StoredFile) {
   return new Promise((resolve, reject) => {
     const req = store.put(item);
     req.onsuccess = () => resolve(undefined);

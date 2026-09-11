@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import * as sqlite from '#platform/server/sqlite';
+
 import * as db from './index';
 
 beforeEach(global.emptyDatabase());
@@ -30,6 +32,15 @@ async function getTransactions(latestDate) {
 // validated in the same event loop and it's same to not await)
 
 describe('Database', () => {
+  test('finalizes cached statements before closing', () => {
+    const finalizeStatement = vi.spyOn(sqlite, 'finalizeStatement');
+
+    db.cache('SELECT 1');
+    db.closeDatabase();
+
+    expect(finalizeStatement).toHaveBeenCalledOnce();
+  });
+
   test('all and first accept null params', async () => {
     await db.insertAccount({ id: 'foo', name: 'bar' });
 

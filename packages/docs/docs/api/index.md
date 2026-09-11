@@ -103,15 +103,11 @@ console.log(await api.getAccounts());
 await api.shutdown();
 ```
 
-Behind the scenes, `init` starts a Web Worker running the same budget engine the Actual web app uses, backed by SQLite compiled to WebAssembly. Your budget data is stored in the browser's IndexedDB and stays on the device.
+Behind the scenes, `init` starts a Web Worker running the same budget engine the Actual web app uses, backed by SQLite compiled to WebAssembly. Database bytes are stored in the browser's origin-private file system, while supporting files and markers are stored in IndexedDB. Everything stays on the device.
 
-In the browser, `dataDir` is a path inside the worker's virtual file system rather than a folder on disk. It is optional: it defaults to `/documents`, and if you pass a custom path it is created automatically and persisted to IndexedDB just the same.
+In the browser, `dataDir` is a path inside the worker's virtual file system rather than a folder on disk. It is optional, defaults to `/documents`, and is created automatically when you pass a custom path.
 
-The browser build is fully self-contained: the Web Worker and its WebAssembly and data files are inlined into the package. There are no extra files to copy or serve, and no bundler configuration is required (no `optimizeDeps` tweaks, no worker or asset plugins). Importing the package and calling `init()` is all that's needed.
-
-:::caution Cross-origin isolation is required
-The engine uses `SharedArrayBuffer`, so the page that runs the API must be served **cross-origin isolated**: over HTTPS, with `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`. This is a hosting/server requirement (it cannot be bundled away). See [Enabling SharedArrayBuffer Access](../troubleshooting/shared-array-buffer.md). In local development, set the same headers on your dev server (for example via a small Vite middleware plugin).
-:::
+The browser build is fully self-contained: the Web Worker and its WebAssembly and data files are inlined into the package. There are no extra files to copy or serve, no cross-origin isolation headers to configure, and no bundler configuration is required (no `optimizeDeps` tweaks, no worker or asset plugins). Importing the package and calling `init()` is all that's needed.
 
 ## Handling Errors
 

@@ -47,6 +47,7 @@ export function createCoordinator({
   const budgetGroups = new Map<string, BudgetGroup>();
   const portToBudget = new Map<CoordinatorPort, string>();
   const unassignedPorts = new Set<CoordinatorPort>();
+  let temporaryGroupCounter = 0;
 
   // ── Console forwarding ─────────────────────────────────────────────────
 
@@ -105,6 +106,10 @@ export function createCoordinator({
       requestNames: new Map(),
       requestBudgetIds: new Map(),
     };
+  }
+
+  function temporaryGroupId(prefix: '__creating-' | '__deleting-') {
+    return `${prefix}${Date.now()}-${temporaryGroupCounter++}`;
   }
 
   function broadcastConnect(budgetId: string) {
@@ -379,16 +384,32 @@ export function createCoordinator({
   function removePortFromGroup(port: CoordinatorPort, budgetId: string) {
     const group = budgetGroups.get(budgetId);
     if (!group) return;
-    group.followers.delete(port);
+
+    if (group.leaderPort === port) {
+      if (group.followers.size > 0) {
+        const candidate = group.followers.values().next()
+          .value as CoordinatorPort;
+        group.followers.delete(candidate);
+        electLeader(budgetId, candidate, budgetId);
+      } else {
+        budgetGroups.delete(budgetId);
+      }
+    } else {
+      group.followers.delete(port);
+    }
+
     for (const [id, p] of group.requestToPort) {
       if (p === port) {
         group.requestToPort.delete(id);
         group.requestNames.delete(id);
       }
     }
+    if (portToBudget.get(port) === budgetId) {
+      portToBudget.delete(port);
+    }
   }
 
-  function evictGroup(budgetId: string, excludePort: CoordinatorPort) {
+  function evictGroup(budgetId: string, excludePort: CoordinatorPort | null) {
     const group = budgetGroups.get(budgetId);
     if (!group) return;
 
@@ -422,6 +443,38 @@ export function createCoordinator({
     }
   }
 
+  function startTemporaryOperation(
+    prefix: '__creating-' | '__deleting-',
+    port: CoordinatorPort,
+    msg: Record<string, unknown>,
+  ) {
+    const tempId = temporaryGroupId(prefix);
+    electLeader(tempId, port, null, msg);
+    const group = budgetGroups.get(tempId);
+    if (group && msg.id) {
+      group.requestToPort.set(msg.id as string, port);
+      group.requestNames.set(msg.id as string, msg.name as string);
+    }
+    return tempId;
+  }
+
+  function moveLeaderToTemporaryOperation(
+    prefix: '__creating-' | '__deleting-',
+    port: CoordinatorPort,
+    oldBudgetId: string,
+    msg: Record<string, unknown>,
+  ) {
+    const tempId = temporaryGroupId(prefix);
+    handleBudgetLoaded(port, oldBudgetId, tempId);
+    const group = budgetGroups.get(tempId);
+    if (group && msg.id) {
+      group.requestToPort.set(msg.id as string, port);
+      group.requestNames.set(msg.id as string, msg.name as string);
+    }
+    group?.leaderPort.postMessage({ type: '__to-worker', msg });
+    return tempId;
+  }
+
   // ── Budget lifecycle helpers ──────────────────────────────────────────
 
   function handleBudgetLoaded(
@@ -446,7 +499,18 @@ export function createCoordinator({
 
       for (const p of oldGroup.followers) {
         portToBudget.set(p, newBudgetId);
+        p.postMessage({
+          type: '__role-change',
+          role: 'FOLLOWER',
+          budgetId: newBudgetId,
+        });
       }
+
+      leaderPort.postMessage({
+        type: '__role-change',
+        role: 'LEADER',
+        budgetId: newBudgetId,
+      });
 
       logger.log(
         `[SharedWorker] Budget loaded: "${newBudgetId}" (leader + ${oldGroup.followers.size} follower(s))`,
@@ -659,6 +723,38 @@ export function createCoordinator({
 
         // ── Request interception & routing ─────────────────────────
 
+        // An upload for a budget which is already open must run in that
+        // budget's Worker. Running it in an arbitrary connected Worker would
+        // either contend for the same persistent pool or fail because that
+        // Worker already has another budget's preferences loaded. The target
+        // Worker already has the requested preferences, so omit the id.
+        if (msg.name === 'upload-budget' && msg.args) {
+          const budgetId = (msg.args as Record<string, unknown>).id;
+          const targetGroup =
+            typeof budgetId === 'string'
+              ? budgetGroups.get(budgetId)
+              : undefined;
+          if (targetGroup?.backendConnected) {
+            const args = { ...(msg.args as Record<string, unknown>) };
+            delete args.id;
+            const routedMsg = { ...msg, args };
+
+            if (msg.id) {
+              targetGroup.requestToPort.set(msg.id as string, port);
+              targetGroup.requestNames.set(
+                msg.id as string,
+                msg.name as string,
+              );
+            }
+            targetGroup.leaderPort.postMessage({
+              type: '__to-worker',
+              msg: routedMsg,
+            });
+            logState(`Routed upload for open budget "${String(budgetId)}"`);
+            return;
+          }
+        }
+
         if (
           msg.name === 'load-budget' &&
           msg.args &&
@@ -666,6 +762,18 @@ export function createCoordinator({
         ) {
           const budgetId = (msg.args as Record<string, unknown>).id as string;
           const existingGroup = budgetGroups.get(budgetId);
+
+          if (existingGroup?.leaderPort === port) {
+            existingGroup.requestToPort.set(msg.id as string, port);
+            existingGroup.requestNames.set(
+              msg.id as string,
+              msg.name as string,
+            );
+            existingGroup.requestBudgetIds.set(msg.id as string, budgetId);
+            existingGroup.leaderPort.postMessage({ type: '__to-worker', msg });
+            logState(`Leader reloaded budget "${budgetId}"`);
+            return;
+          }
 
           if (existingGroup && existingGroup.backendConnected) {
             addFollower(budgetId, port);
@@ -766,12 +874,61 @@ export function createCoordinator({
           }
         }
 
+        // A duplicate reads the source database. If another Worker currently
+        // owns that logical budget, terminate it before starting the copy.
+        if (msg.name === 'duplicate-budget' && msg.args) {
+          const targetId = (msg.args as Record<string, unknown>).id;
+          const targetGroup =
+            typeof targetId === 'string'
+              ? budgetGroups.get(targetId)
+              : undefined;
+          if (targetGroup && targetGroup.leaderPort !== port) {
+            const isTargetMember = isGroupMember(targetGroup, port);
+            evictGroup(targetId as string, port);
+            logState(
+              `Released source budget "${String(targetId)}" for duplication`,
+            );
+
+            if (isTargetMember) {
+              const tempId = startTemporaryOperation('__creating-', port, msg);
+              logState(
+                `Tab became leader for budget duplication ("${tempId}")`,
+              );
+              return;
+            }
+          }
+        }
+
+        // Restoring a backup atomically replaces the target database. Run it
+        // in a fresh Worker after closing the current owner, then let the
+        // caller's subsequent load-budget request promote that temporary
+        // group back to the real budget ID.
+        if (msg.name === 'backup-load' && msg.args) {
+          const targetId = (msg.args as Record<string, unknown>).id;
+          if (typeof targetId === 'string') {
+            evictGroup(targetId, null);
+          }
+          const tempId = startTemporaryOperation('__creating-', port, msg);
+          logState(
+            `Released budget "${String(targetId)}" for backup restore ("${tempId}")`,
+          );
+          return;
+        }
+
         // delete-budget: if another group is running this budget, evict it
         if (msg.name === 'delete-budget' && msg.args) {
           const targetId = (msg.args as Record<string, unknown>).id as string;
-          if (targetId && budgetGroups.has(targetId)) {
-            evictGroup(targetId, port);
+          const targetGroup = targetId ? budgetGroups.get(targetId) : undefined;
+          const requesterWasTargetMember =
+            targetGroup !== undefined && isGroupMember(targetGroup, port);
+          if (targetGroup !== undefined) {
+            evictGroup(targetId, null);
             logState(`Evicted group for deleted budget "${targetId}"`);
+          }
+          if (requesterWasTargetMember) {
+            const tempId = startTemporaryOperation('__deleting-', port, msg);
+            logState(`Budget owner started deletion ("${tempId}")`);
+            return;
           }
           let hasConnected = false;
           for (const [, g] of budgetGroups) {
@@ -781,7 +938,7 @@ export function createCoordinator({
             }
           }
           if (!hasConnected) {
-            const tempId = '__deleting-' + Date.now();
+            const tempId = temporaryGroupId('__deleting-');
             electLeader(tempId, port, null, msg);
             const newGroup = budgetGroups.get(tempId);
             if (newGroup && msg.id) {
@@ -798,19 +955,37 @@ export function createCoordinator({
           msg.name === 'create-budget' ||
           msg.name === 'create-demo-budget' ||
           msg.name === 'import-budget' ||
+          msg.name === 'download-budget' ||
           msg.name === 'duplicate-budget' ||
           msg.name === 'delete-budget'
         ) {
           if (msg.name === 'create-demo-budget') {
-            evictGroup('_demo-budget', port);
+            if (budgetGroups.get('_demo-budget')?.leaderPort !== port) {
+              evictGroup('_demo-budget', port);
+            }
           } else if (
             msg.name === 'create-budget' &&
             msg.args &&
             (msg.args as Record<string, unknown>).testMode
           ) {
-            evictGroup('_test-budget', port);
+            if (budgetGroups.get('_test-budget')?.leaderPort !== port) {
+              evictGroup('_test-budget', port);
+            }
           }
-          if (group && port === group.leaderPort) {
+          if (group && port === group.leaderPort && portBudget === '__lobby') {
+            // The first tab starts as the lobby leader. Move that existing
+            // Worker into a temporary creation group before it loads a budget,
+            // otherwise the coordinator still sees a lobby and can elect a
+            // second Worker for the same budget.
+            const tempId = moveLeaderToTemporaryOperation(
+              '__creating-',
+              port,
+              '__lobby',
+              msg,
+            );
+            logState(`Lobby started budget creation ("${tempId}")`);
+            return;
+          } else if (group && port === group.leaderPort) {
             for (const p of group.followers) {
               p.postMessage({ type: 'push', name: 'show-budgets' });
               portToBudget.delete(p);
@@ -822,13 +997,25 @@ export function createCoordinator({
               );
               group.followers.clear();
             }
+            const prefix =
+              msg.name === 'delete-budget' ? '__deleting-' : '__creating-';
+            const tempId = moveLeaderToTemporaryOperation(
+              prefix,
+              port,
+              portBudget!,
+              msg,
+            );
+            logState(
+              `Leader started budget-replacing "${String(msg.name)}" ("${tempId}")`,
+            );
+            return;
           } else {
             if (group) {
               group.followers.delete(port);
               portToBudget.delete(port);
               unassignedPorts.add(port);
             }
-            const tempId = '__creating-' + Date.now();
+            const tempId = temporaryGroupId('__creating-');
             electLeader(tempId, port, null, msg);
             const newGroup = budgetGroups.get(tempId);
             if (newGroup && msg.id) {
