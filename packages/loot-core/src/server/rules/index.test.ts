@@ -943,7 +943,7 @@ describe('Rule', () => {
               options: {
                 splitIndex: 1,
                 method: 'formula',
-                formula: '=INTEGER_TO_AMOUNT(parent_amount) * 0.5',
+                formula: '=parent_amount * 0.5',
               },
             },
             {
@@ -958,7 +958,7 @@ describe('Rule', () => {
           ],
         });
 
-        // Fixed amount 10000 (100 in formula = $100.00 = 10000 cents), remainder = 10000
+        // Half of the $200.00 parent is $100.00, remainder = $100.00
         expect(
           rule.exec({ imported_payee: 'James', amount: 20000 }),
         ).toMatchObject({

@@ -1005,7 +1005,10 @@ export type TransactionForRules = TransactionEntity & {
   /** The transaction's category's group id; see prepareTransactionForRules */
   category_group?: string;
   parent_amount?: number;
-  /** Prefetched cent balances for BALANCE_OF("…") in rule formulas; cleared in finalize */
+  /**
+   * Prefetched integer balances for BALANCE_OF("…") in rule formulas; converted
+   * to amounts at the formula boundary in executeFormulaSync, cleared in finalize
+   */
   _balanceOfPrefetched?: Map<string, number>;
 };
 
