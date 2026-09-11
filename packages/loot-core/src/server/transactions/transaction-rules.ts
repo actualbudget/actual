@@ -600,13 +600,20 @@ export function conditionsToAQL(
       case 'isNot':
         return apply(field, '$ne', value);
 
-      case 'isbetween':
-        // This operator is only applicable to the specific `between`
-        // number type so we don't use `apply`
+      case 'isbetween': {
         const [low, high] = sortNumbers(value.num1, value.num2);
+        if (type === 'number') {
+          // `apply` is what folds in the inflow/outflow sign handling, the
+          // same way `Condition.eval` normalizes the sign before comparing
+          return {
+            $and: [apply(field, '$gte', low), apply(field, '$lte', high)],
+          };
+        }
+        // Dates carry plain `YYYY-MM-DD` bounds, which compare directly
         return {
           [field]: [{ $gte: low }, { $lte: high }],
         };
+      }
       case 'contains':
         // Running contains with id will automatically reach into
         // the `name` of the referenced table and do a string match

@@ -313,4 +313,24 @@ class FilterTooltip {
     this.locator = locator;
     this.applyButton = locator.getByRole('button', { name: 'Apply' });
   }
+
+  /**
+   * Pick one of the operator buttons, e.g. "is between".
+   */
+  async selectOp(name: string) {
+    await this.locator.getByRole('button', { name, exact: true }).click();
+  }
+
+  /**
+   * Fill both bounds of an "is between" filter. Each field is committed on
+   * blur, so blur it rather than pressing Enter (which submits the form).
+   */
+  async fillRange(from: string, to: string) {
+    const fields = this.locator.getByRole('textbox');
+
+    await fields.nth(0).fill(from);
+    await fields.nth(0).blur();
+    await fields.nth(1).fill(to);
+    await fields.nth(1).blur();
+  }
 }
