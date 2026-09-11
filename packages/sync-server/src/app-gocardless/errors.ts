@@ -21,6 +21,32 @@ export class AccountNotLinkedToRequisition extends Error {
   }
 }
 
+/**
+ * Thrown when the server has no GoCardless secret ID / secret key configured.
+ * Secrets live in the server's account database, not in the budget file, so
+ * they are not carried over when a budget is restored onto another server.
+ */
+export class GoCardlessNotConfiguredError extends Error {
+  constructor() {
+    super('GoCardless is not configured on this server');
+  }
+}
+
+/**
+ * Thrown when GoCardless rejects the configured secret ID / secret key. Only a
+ * failed token request proves the secrets themselves are wrong; a rejection
+ * anywhere else means the session token went stale.
+ */
+export class GoCardlessInvalidCredentialsError extends Error {
+  // Deliberately carries no serialisable payload. GoCardless's rejection body
+  // is already written to the server log by the API client that received it,
+  // which is where the admin who can fix the secrets will look; sending it on
+  // to every authenticated client would widen what they can see for nothing.
+  constructor() {
+    super('GoCardless rejected the configured secret ID and secret key');
+  }
+}
+
 export class GenericGoCardlessError extends Error {
   details: unknown;
 
