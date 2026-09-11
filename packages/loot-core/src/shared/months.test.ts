@@ -4,6 +4,22 @@ test('range returns a full range', () => {
   expect(monthUtils.range('2016-10', '2018-01')).toMatchSnapshot();
 });
 
+test('budget sheet names round trip to months', () => {
+  expect(monthUtils.monthFromSheet(monthUtils.sheetForMonth('2024-01'))).toBe(
+    '2024-01',
+  );
+  expect(monthUtils.monthFromSheet(monthUtils.sheetForMonth('2024-12'))).toBe(
+    '2024-12',
+  );
+});
+
+test('monthFromSheet rejects invalid budget sheet names', () => {
+  expect(monthUtils.monthFromSheet('budget202400')).toBeNull();
+  expect(monthUtils.monthFromSheet('budget202413')).toBeNull();
+  expect(monthUtils.monthFromSheet('budget2024-01')).toBeNull();
+  expect(monthUtils.monthFromSheet('__global')).toBeNull();
+});
+
 test('getQuarter returns the quarter number for a given month', () => {
   expect(monthUtils.getQuarter('2024-01')).toBe(1);
   expect(monthUtils.getQuarter('2024-03')).toBe(1);

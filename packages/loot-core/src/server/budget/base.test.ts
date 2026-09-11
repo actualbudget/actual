@@ -3,6 +3,7 @@ import * as sheet from '#server/sheet';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
 
+import { setBudget, setBuffer } from './actions';
 import { createAllBudgets } from './base';
 
 beforeEach(() => {
@@ -10,6 +11,166 @@ beforeEach(() => {
 });
 
 describe('Base budget', () => {
+  it('subtracts future assignments from current and future To Budget values', async () => {
+    await sheet.loadSpreadsheet(db);
+
+    await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
+    await db.insertCategoryGroup({
+      id: 'income',
+      name: 'Income',
+      is_income: 1,
+    });
+    const expenseCategory = await db.insertCategory({
+      name: 'Bills',
+      cat_group: 'expenses',
+    });
+    const incomeCategory = await db.insertCategory({
+      name: 'Paycheck',
+      cat_group: 'income',
+      is_income: 1,
+    });
+    await db.insertAccount({ id: 'account', name: 'Checking' });
+
+    const currentMonth = monthUtils.currentMonth();
+    const nextMonth = monthUtils.nextMonth(currentMonth);
+    const followingMonth = monthUtils.nextMonth(nextMonth);
+
+    await createAllBudgets();
+    await db.insertTransaction({
+      date: `${currentMonth}-15`,
+      amount: 10000,
+      account: 'account',
+      category: incomeCategory,
+    });
+    await setBudget({
+      month: nextMonth,
+      category: expenseCategory,
+      amount: 5000,
+    });
+    await setBudget({
+      month: followingMonth,
+      category: expenseCategory,
+      amount: 2000,
+    });
+    await sheet.waitOnSpreadsheet();
+
+    const currentSheet = monthUtils.sheetForMonth(currentMonth);
+    const nextSheet = monthUtils.sheetForMonth(nextMonth);
+    const followingSheet = monthUtils.sheetForMonth(followingMonth);
+    expect(sheet.getCellValue(currentSheet, 'to-budget')).toBe(10000);
+    expect(sheet.getCellValue(currentSheet, 'assigned-in-future')).toBe(7000);
+    expect(sheet.getCellValue(currentSheet, 'ready-to-assign')).toBe(3000);
+    expect(sheet.getCellValue(nextSheet, 'assigned-in-future')).toBe(7000);
+    expect(sheet.getCellValue(nextSheet, 'ready-to-assign')).toBe(3000);
+    expect(sheet.getCellValue(followingSheet, 'assigned-in-future')).toBe(7000);
+    expect(sheet.getCellValue(followingSheet, 'ready-to-assign')).toBe(3000);
+  });
+
+  it('restores a current-month hold before subtracting future assignments', async () => {
+    await sheet.loadSpreadsheet(db);
+
+    await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
+    await db.insertCategoryGroup({
+      id: 'income',
+      name: 'Income',
+      is_income: 1,
+    });
+    const expenseCategory = await db.insertCategory({
+      name: 'Bills',
+      cat_group: 'expenses',
+    });
+    const incomeCategory = await db.insertCategory({
+      name: 'Paycheck',
+      cat_group: 'income',
+      is_income: 1,
+    });
+    await db.insertAccount({ id: 'account', name: 'Checking' });
+
+    const currentMonth = monthUtils.currentMonth();
+    const nextMonth = monthUtils.nextMonth(currentMonth);
+    const followingMonth = monthUtils.nextMonth(nextMonth);
+
+    await createAllBudgets();
+    await db.insertTransaction({
+      date: `${currentMonth}-15`,
+      amount: 10000,
+      account: 'account',
+      category: incomeCategory,
+    });
+    await setBuffer(currentMonth, 10000);
+    await setBudget({
+      month: nextMonth,
+      category: expenseCategory,
+      amount: 5000,
+    });
+    await setBuffer(nextMonth, 5000);
+    await setBudget({
+      month: followingMonth,
+      category: expenseCategory,
+      amount: 2000,
+    });
+    await setBuffer(followingMonth, 3000);
+    await sheet.waitOnSpreadsheet();
+
+    for (const month of [currentMonth, nextMonth, followingMonth]) {
+      const sheetName = monthUtils.sheetForMonth(month);
+      expect(sheet.getCellValue(sheetName, 'to-budget')).toBe(0);
+      expect(sheet.getCellValue(sheetName, 'assigned-in-future')).toBe(7000);
+      expect(sheet.getCellValue(sheetName, 'ready-to-assign')).toBe(3000);
+    }
+  });
+
+  it('does not count future income, activity, or buffering as assignments', async () => {
+    await sheet.loadSpreadsheet(db);
+
+    await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
+    await db.insertCategoryGroup({
+      id: 'income',
+      name: 'Income',
+      is_income: 1,
+    });
+    const expenseCategory = await db.insertCategory({
+      name: 'Bills',
+      cat_group: 'expenses',
+    });
+    const incomeCategory = await db.insertCategory({
+      name: 'Paycheck',
+      cat_group: 'income',
+      is_income: 1,
+    });
+    await db.insertAccount({ id: 'account', name: 'Checking' });
+
+    const currentMonth = monthUtils.currentMonth();
+    const nextMonth = monthUtils.nextMonth(currentMonth);
+
+    await createAllBudgets();
+    await db.insertTransaction({
+      date: `${currentMonth}-15`,
+      amount: 10000,
+      account: 'account',
+      category: incomeCategory,
+    });
+    await db.insertTransaction({
+      date: `${nextMonth}-10`,
+      amount: -5000,
+      account: 'account',
+      category: expenseCategory,
+    });
+    await db.insertTransaction({
+      date: `${nextMonth}-15`,
+      amount: 2000,
+      account: 'account',
+      category: incomeCategory,
+    });
+    await setBuffer(nextMonth, 3000);
+    await sheet.waitOnSpreadsheet();
+
+    const currentSheet = monthUtils.sheetForMonth(currentMonth);
+    expect(sheet.getCellValue(currentSheet, 'to-budget')).toBe(10000);
+    expect(sheet.getCellValue(currentSheet, 'assigned-in-future')).toBe(0);
+    expect(sheet.getCellValue(currentSheet, 'ready-to-assign')).toBe(10000);
+  });
+
   it('Recomputes budget cells when account fields change', async () => {
     await sheet.loadSpreadsheet(db);
 
