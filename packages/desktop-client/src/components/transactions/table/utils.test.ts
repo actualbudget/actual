@@ -65,6 +65,29 @@ describe('shouldApplyRuleChange', () => {
       false,
     );
   });
+
+  test('keeps a field empty when the user explicitly cleared it', () => {
+    // Clearing a pre-assigned value (e.g. a category learned from the payee)
+    // is manual input too — rules must not re-fill it, neither on the run for
+    // the clear itself nor on later runs triggered by other field edits.
+    expect(shouldApplyRuleChange('category', null, 'food', ['category'])).toBe(
+      false,
+    );
+    expect(shouldApplyRuleChange('notes', '', 'memo', ['notes'])).toBe(false);
+  });
+
+  test('still fills empty fields the user has not explicitly cleared', () => {
+    expect(shouldApplyRuleChange('category', null, 'food', [])).toBe(true);
+    expect(shouldApplyRuleChange('category', null, 'food', ['notes'])).toBe(
+      true,
+    );
+  });
+
+  test('still applies notes append rules while other fields are cleared', () => {
+    expect(
+      shouldApplyRuleChange('notes', 'Coffee', 'Coffee Tip', ['category']),
+    ).toBe(true);
+  });
 });
 
 describe('deserializeTransaction', () => {
