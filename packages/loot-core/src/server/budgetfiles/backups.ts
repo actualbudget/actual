@@ -9,7 +9,7 @@ import * as sqlite from '#platform/server/sqlite';
 import * as cloudStorage from '#server/cloud-storage';
 import * as prefs from '#server/prefs';
 import { safeUnzip, safeZip } from '#server/util/zip';
-import * as monthUtils from '#shared/months';
+import { makeBackupFilename, selectBackupsToRemove } from '#shared/backups';
 
 // A special backup that represents the latest version of the db that
 // can be reverted to after loading a backup
@@ -78,29 +78,8 @@ export async function getAvailableBackups(id: string): Promise<Backup[]> {
   }));
 }
 
-export async function updateBackups(backups) {
-  const byDay = backups.reduce((groups, backup) => {
-    const day = dateFns.format(backup.date, 'yyyy-MM-dd');
-    groups[day] = groups[day] || [];
-    groups[day].push(backup);
-    return groups;
-  }, {});
-
-  const removed = [];
-  for (const day of Object.keys(byDay)) {
-    const dayBackups = byDay[day];
-    const isToday = day === monthUtils.currentDay();
-    // Allow 3 backups of the current day (so fine-grained edits are
-    // kept around). Otherwise only keep around one backup per day.
-    // And only keep a total of 10 backups.
-    for (const backup of dayBackups.slice(isToday ? 3 : 1)) {
-      removed.push(backup.id);
-    }
-  }
-
-  // Get the list of remaining backups and only keep the latest 10
-  const currentBackups = backups.filter(backup => !removed.includes(backup.id));
-  return removed.concat(currentBackups.slice(10).map(backup => backup.id));
+export async function updateBackups(backups: BackupWithDate[]) {
+  return selectBackupsToRemove(backups);
 }
 
 export async function makeBackup(id: string) {
@@ -113,7 +92,7 @@ export async function makeBackup(id: string) {
     await fs.removeFile(fs.join(fs.getBudgetDir(id), LATEST_BACKUP_FILENAME));
   }
 
-  const backupId = `${dateFns.format(new Date(), 'yyyy-MM-dd_HH-mm-ss')}.zip`;
+  const backupId = makeBackupFilename(new Date());
   const backupPath = fs.join(budgetDir, 'backups', backupId);
 
   if (!(await fs.exists(fs.join(budgetDir, 'backups')))) {
