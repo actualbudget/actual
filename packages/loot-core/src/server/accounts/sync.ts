@@ -751,7 +751,11 @@ export async function reconcileTransactions(
       }
     } else {
       // Insert a new transaction
-      const { forceAddTransaction: _forceAddTransaction, ...newTrans } = trans;
+      const {
+        forceAddTransaction: _forceAddTransaction,
+        matchedTransactionId: _matchedTransactionId,
+        ...newTrans
+      } = trans;
       const finalTransaction = {
         ...newTrans,
         id: uuidv4(),
@@ -839,10 +843,38 @@ export async function matchTransactions(
     let match = null;
     let fuzzyDataset = null;
 
-    // First, match with an existing transaction's imported_id. This
-    // is the highest fidelity match and should always be attempted
-    // first.
-    if (trans.imported_id) {
+    // If the caller already ran a preview and pinned this transaction's
+    // match decision, honor it instead of re-running matching. The fuzzy
+    // passes below are greedy and stateful, so re-running them on a
+    // different set of transactions (e.g. after the user deselected some
+    // rows in the import dialog) can pick different matches than the
+    // preview showed — silently merging transactions the preview presented
+    // as new. A pinned id of null means the preview found no match, so the
+    // transaction is added as new. The field comes in on import payloads
+    // (see ImportTransactionEntity) and is not part of TransactionEntity.
+    const { matchedTransactionId } = trans as {
+      matchedTransactionId?: string | null;
+    };
+    const hasPinnedMatch = matchedTransactionId !== undefined;
+
+    if (hasPinnedMatch) {
+      if (matchedTransactionId) {
+        const table = reimportDeleted
+          ? 'v_transactions'
+          : 'v_transactions_internal';
+        match = await db.first<db.DbTransaction>(
+          `SELECT * FROM ${table} WHERE id = ? AND account = ?`,
+          [matchedTransactionId, acctId],
+        );
+
+        if (match) {
+          hasMatched.add(match.id);
+        }
+      }
+    } else if (trans.imported_id) {
+      // First, match with an existing transaction's imported_id. This
+      // is the highest fidelity match and should always be attempted
+      // first.
       const table = reimportDeleted
         ? 'v_transactions'
         : 'v_transactions_internal';
@@ -857,7 +889,7 @@ export async function matchTransactions(
     }
 
     // If it didn't match, query data needed for fuzzy matching
-    if (!match) {
+    if (!match && !hasPinnedMatch) {
       // Fuzzy matching looks 7 days ahead and 7 days back. This
       // needs to select all fields that need to be read from the
       // matched transaction. See the final pass below for the needed
