@@ -242,18 +242,11 @@ export function Budget() {
 
   return (
     <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
-      {/*
-        In a previous iteration, the wrapper needs `overflow: hidden` for
-        some reason. Without it at certain dimensions the width/height
-        that autosizer gives us is slightly wrong, causing scrollbars to
-        appear. We might not need it anymore?
-      */}
       <View
         style={{
           ...styles.page,
           paddingLeft: 8,
           paddingRight: 8,
-          overflow: 'hidden',
         }}
       >
         <View style={{ flex: 1 }}>{table}</View>

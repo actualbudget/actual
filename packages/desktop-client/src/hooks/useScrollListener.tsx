@@ -27,6 +27,7 @@ type RegisterScrollListener = (
 
 type IScrollContext = {
   registerScrollListener: RegisterScrollListener;
+  scrollableRef: RefObject<Element | null>;
 };
 
 const ScrollContext = createContext<IScrollContext | undefined>(undefined);
@@ -195,7 +196,7 @@ export function ScrollProvider<T extends Element>({
   );
 
   return (
-    <ScrollContext.Provider value={{ registerScrollListener }}>
+    <ScrollContext.Provider value={{ registerScrollListener, scrollableRef }}>
       {children}
     </ScrollContext.Provider>
   );
@@ -218,4 +219,17 @@ export function useScrollListener(listener: ScrollListener) {
   useEffect(() => {
     return registerScrollListener(listener);
   }, [listener, registerScrollListener]);
+}
+
+/**
+ * A hook to access the ref of the app's page-level scroll container
+ * (the element that owns the scrollbar for the routed page's content).
+ */
+export function useScrollableRef() {
+  const context = useContext(ScrollContext);
+  if (!context) {
+    throw new Error('useScrollableRef must be used within a ScrollProvider');
+  }
+
+  return context.scrollableRef;
 }

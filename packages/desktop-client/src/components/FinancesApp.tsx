@@ -231,6 +231,7 @@ export function FinancesApp() {
               <MobilePageHeaderProvider>
                 <View
                   ref={scrollableRef}
+                  data-testid="page-scroll-container"
                   style={{
                     flex: 1,
                     overflow: 'auto',
@@ -240,10 +241,9 @@ export function FinancesApp() {
                   <Titlebar
                     style={{
                       WebkitAppRegion: 'drag',
-                      position: 'absolute',
+                      position: 'sticky',
                       top: 0,
-                      left: 0,
-                      right: 0,
+                      backgroundColor: theme.pageBackground,
                       zIndex: 1000,
                     }}
                   />

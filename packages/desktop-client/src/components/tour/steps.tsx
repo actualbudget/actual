@@ -56,7 +56,6 @@ function getBudgetTourSteps({ navigate, budgetType }: TourStepDeps): Step[] {
     {
       id: 'budget-table',
       target: '[data-testid="budget-table"]',
-      scrollTarget: '[data-testid="budget-table-scroll-container"]',
       placement: 'center',
       before: async () => {
         if (window.location.pathname !== '/budget') {

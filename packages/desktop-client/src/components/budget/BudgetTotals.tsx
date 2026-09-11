@@ -17,7 +17,6 @@ import { View } from '@actual-app/components/view';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
 import { RenderMonths } from './RenderMonths';
-import { getScrollbarWidth } from './util';
 
 import { useBudgetComponents } from '.';
 
@@ -68,7 +67,7 @@ export const BudgetTotals = memo(function BudgetTotals({
         flexShrink: 0,
         boxShadow: styles.cardShadow,
         marginLeft: 5,
-        marginRight: 5 + getScrollbarWidth(),
+        marginRight: 5,
         borderRadius: '4px 4px 0 0',
         borderBottom: '1px solid ' + theme.tableBorder,
         '& .hover-visible': {
