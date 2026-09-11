@@ -166,6 +166,47 @@ test.describe('Reports', () => {
       await customReportPage.showLegendButton.click();
     });
 
+    for (const graph of ['Bar Graph', 'Line Graph']) {
+      test(`${graph} keeps its height when the legend needs scrolling`, async () => {
+        await page.setViewportSize({ width: 1280, height: 700 });
+        await customReportPage.selectMode('time');
+        await customReportPage.selectViz(graph);
+        await page
+          .getByRole('button', { name: 'Options', exact: true })
+          .click();
+        await page
+          .getByRole('button', { name: 'Show empty rows', exact: true })
+          .click();
+        await page.keyboard.press('Escape');
+
+        const content = page.locator('#custom-report-content');
+        const chart = content.locator('.recharts-wrapper');
+        await expect(chart).toBeVisible();
+        const originalHeight = await chart.evaluate(el => el.clientHeight);
+
+        await customReportPage.showSummaryButton.click();
+        await customReportPage.showLegendButton.click();
+
+        await expect
+          .poll(() => chart.evaluate(el => el.clientHeight))
+          .toBe(originalHeight);
+        const legend = content
+          .getByText('Category', { exact: true })
+          .locator('..');
+        await expect
+          .poll(() => legend.evaluate(el => el.scrollHeight > el.clientHeight))
+          .toBe(true);
+        await legend.hover();
+        await page.mouse.wheel(0, 500);
+        await expect
+          .poll(() => legend.evaluate(el => el.scrollTop))
+          .toBeGreaterThan(0);
+        await expect
+          .poll(() => chart.evaluate(el => el.clientHeight))
+          .toBe(originalHeight);
+      });
+    }
+
     test('Validates that "show summary" button shows the summary', async () => {
       await customReportPage.selectViz('Bar Graph');
       await customReportPage.showSummaryButton.click();
