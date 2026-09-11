@@ -416,4 +416,26 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
         .flatMap(firstOrIncorrect),
     ).toStrictEqual(['Payees']);
   });
+
+  test('ranks an exact payee match above a longer tied substring match', async () => {
+    // 'Amazon Prime' is listed first, so a stable sort on a tied fzf score
+    // would otherwise leave it ahead of the exact 'Amazon' match.
+    const payees = [makePayee('Amazon Prime'), makePayee('Amazon')];
+    const autocomplete = renderPayeeAutocomplete({ payees });
+    await clickAutocomplete(autocomplete);
+
+    const input = autocomplete.querySelector('input')!;
+    await userEvent.type(input, 'Amazon');
+    await waitForAutocomplete();
+
+    expect(
+      [
+        ...screen
+          .getByTestId('autocomplete')
+          .querySelectorAll(ALL_PAYEE_ITEMS_SELECTOR),
+      ]
+        .map(e => e.getAttribute('data-testid'))
+        .flatMap(firstOrIncorrect),
+    ).toStrictEqual(['Amazon', 'Amazon Prime']);
+  });
 });
