@@ -19,6 +19,7 @@ import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createBudgetAnalysisSpreadsheet } from '#components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 type BudgetAnalysisCardProps = {
   widgetId: string;
@@ -39,6 +40,10 @@ export function BudgetAnalysisCard({
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
+  const [budgetTypePref] = useSyncedPref('budgetType');
+  const budgetType: 'envelope' | 'tracking' =
+    budgetTypePref === 'tracking' ? 'tracking' : 'envelope';
+
   const timeFrame = meta?.timeFrame ?? {
     start: monthUtils.subMonths(monthUtils.currentMonth(), 5),
     end: monthUtils.currentMonth(),
@@ -58,6 +63,7 @@ export function BudgetAnalysisCard({
       startDate,
       endDate,
       showHiddenCategories: meta?.showHiddenCategories ?? false,
+      budgetType,
     });
   }, [
     meta?.conditions,
@@ -65,6 +71,7 @@ export function BudgetAnalysisCard({
     meta?.showHiddenCategories,
     startDate,
     endDate,
+    budgetType,
   ]);
 
   const data = useReport('default', getGraphData);

@@ -34,6 +34,7 @@ type createBudgetAnalysisSpreadsheetProps = {
   startDate: string;
   endDate: string;
   showHiddenCategories?: boolean;
+  budgetType?: 'envelope' | 'tracking';
 };
 
 export function isBaseCategory(
@@ -58,19 +59,63 @@ export function getLastSelectableMonth(
   return latestMonth > futureMonth ? latestMonth : futureMonth;
 }
 
+export type CategoryBalanceInput = {
+  balance: number;
+  hasCarryover: boolean;
+};
+
+export type CategoryBalanceResult = {
+  /** Amount that rolls forward into next month's opening balance. */
+  carryoverToNextMonth: number;
+  /** Negative amount reset this month because carryover was off (envelope mode only). */
+  overspending: number;
+};
+
+/**
+ * Determines how a single category's end-of-month leftover affects next
+ * month's running balance.
+ *
+ * Envelope mode clamps a non-carried leftover to `leftover-pos` (see
+ * `packages/loot-core/src/server/budget/envelope.ts`): a positive leftover
+ * always carries forward, and a negative leftover only carries forward when
+ * the category's carryover flag is on — otherwise it's reset to 0 and the
+ * reset amount is surfaced separately (mirroring `last-month-overspent`).
+ *
+ * Tracking mode has no such clamp (see
+ * `packages/loot-core/src/server/budget/tracking.ts`): the previous
+ * leftover — positive or negative — only carries forward when the
+ * category's carryover flag is on. When it's off, the leftover simply
+ * resets to 0 with no separate "overspending" bucket.
+ */
+export function resolveCategoryBalanceCarryover(
+  { balance, hasCarryover }: CategoryBalanceInput,
+  budgetType: 'envelope' | 'tracking',
+): CategoryBalanceResult {
+  if (budgetType === 'tracking') {
+    return hasCarryover
+      ? { carryoverToNextMonth: balance, overspending: 0 }
+      : { carryoverToNextMonth: 0, overspending: 0 };
+  }
+
+  if (balance > 0 || (balance < 0 && hasCarryover)) {
+    return { carryoverToNextMonth: balance, overspending: 0 };
+  }
+  return { carryoverToNextMonth: 0, overspending: Math.min(0, balance) };
+}
+
 export type MonthCategoryTotals = {
   budgeted: number;
   spent: number;
   /**
-   * Sum of category balances that roll into the next month: positive balances
-   * always roll over, negative ones only when the category has carryover
-   * ("rollover overspending") enabled.
+   * Sum of category balances that roll into the next month, per
+   * resolveCategoryBalanceCarryover.
    */
   carryoverToNextMonth: number;
   /**
    * Sum of negative balances for categories without carryover enabled. These
    * are zeroed out at the month boundary and surface as next month's
    * overspending adjustment instead of reducing the running balance.
+   * Always 0 for tracking budgets (see resolveCategoryBalanceCarryover).
    */
   overspendingThisMonth: number;
   /**
@@ -88,6 +133,7 @@ export type MonthCategoryTotals = {
 export function summarizeMonthCategories(
   monthData: BudgetMonthCell[],
   categoriesToInclude: CategoryEntity[],
+  budgetType: 'envelope' | 'tracking' = 'envelope',
 ): MonthCategoryTotals {
   let budgeted = 0;
   let spent = 0;
@@ -115,13 +161,13 @@ export function summarizeMonthCategories(
     const catBalance = (balanceCell?.value as number) || 0;
     const hasCarryover = Boolean(carryoverCell?.value);
 
-    // Detect by value, not by cell presence: `envelope-budget-month` builds
-    // its response from the category list, so it emits a cell for every
-    // category in every month and fills missing sheet values with 0. Every
-    // month therefore has all its cells, and presence tells us nothing.
-    // A zero here is unambiguous: `leftover` already folds in the previous
-    // month's balance, so a month with a real balance carrying in cannot
-    // report zero across all three.
+    // Detect by value, not by cell presence: both `envelope-budget-month`
+    // and `tracking-budget-month` build their response from the category
+    // list, so they emit a cell for every category in every month and fill
+    // missing sheet values with 0. Every month therefore has all its cells,
+    // and presence tells us nothing. A zero here is unambiguous: `leftover`
+    // already folds in the previous month's balance, so a month with a real
+    // balance carrying in cannot report zero across all three.
     if (catBudgeted !== 0 || catSpent !== 0 || catBalance !== 0) {
       hasBudgetData = true;
     }
@@ -129,16 +175,12 @@ export function summarizeMonthCategories(
     budgeted += catBudgeted;
     spent += catSpent;
 
-    // Add to next month's carryover if:
-    // - Balance is positive (always carries over), OR
-    // - Balance is negative AND carryover is enabled
-    if (catBalance > 0 || (catBalance < 0 && hasCarryover)) {
-      carryoverToNextMonth += catBalance;
-    } else if (catBalance < 0 && !hasCarryover) {
-      // If balance is negative and carryover is NOT enabled,
-      // this will be zeroed out and becomes next month's overspending adjustment
-      overspendingThisMonth += catBalance; // Keep as negative
-    }
+    const categoryResult = resolveCategoryBalanceCarryover(
+      { balance: catBalance, hasCarryover },
+      budgetType,
+    );
+    carryoverToNextMonth += categoryResult.carryoverToNextMonth;
+    overspendingThisMonth += categoryResult.overspending;
   }
 
   return {
@@ -177,6 +219,7 @@ export function createBudgetAnalysisSpreadsheet({
   startDate,
   endDate,
   showHiddenCategories = false,
+  budgetType = 'envelope',
 }: createBudgetAnalysisSpreadsheetProps) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -300,13 +343,21 @@ export function createBudgetAnalysisSpreadsheet({
 
     const intervalData: BudgetAnalysisIntervalData[] = [];
 
+    // The envelope and tracking budget types compute rollover/carryover
+    // differently (see resolveCategoryBalanceCarryover), and the server
+    // exposes them via different spreadsheet endpoints.
+    const budgetMonthEndpoint =
+      budgetType === 'tracking'
+        ? 'tracking-budget-month'
+        : 'envelope-budget-month';
+
     // Track running balance that respects carryover flags
     // Get the balance from the month before the start period to initialize properly
     const monthBeforeStart = monthUtils.subMonths(
       monthUtils.getMonth(startDate),
       1,
     );
-    const prevMonthData = await send('envelope-budget-month', {
+    const prevMonthData = await send(budgetMonthEndpoint, {
       month: monthBeforeStart,
     });
 
@@ -314,6 +365,7 @@ export function createBudgetAnalysisSpreadsheet({
     let runningBalance = summarizeMonthCategories(
       prevMonthData,
       categoriesToInclude,
+      budgetType,
     ).carryoverToNextMonth;
 
     // Track totals across all months
@@ -328,7 +380,7 @@ export function createBudgetAnalysisSpreadsheet({
     for (const month of intervals) {
       // Get budget values from the server for this month
       // This uses the same calculations as the budget page
-      const monthData = await send('envelope-budget-month', { month });
+      const monthData = await send(budgetMonthEndpoint, { month });
 
       const {
         budgeted,
@@ -336,12 +388,15 @@ export function createBudgetAnalysisSpreadsheet({
         carryoverToNextMonth,
         overspendingThisMonth,
         hasBudgetData,
-      } = summarizeMonthCategories(monthData, categoriesToInclude);
+      } = summarizeMonthCategories(monthData, categoriesToInclude, budgetType);
 
-      // Apply overspending adjustment from previous month (negative value)
+      // Overspending adjustment from previous month, shown for context
+      // (negative value). It is not added into `monthBalance`: overspent,
+      // non-carried leftovers were already excluded from `runningBalance`
+      // when they were reset, so re-applying them here would double-count.
       const overspendingAdjustment = overspendingFromPrevMonth;
 
-      // This month's balance = budgeted + spent + running balance + overspending adjustment
+      // This month's balance = budgeted + spent + running balance
       const monthBalance = budgeted + spent + runningBalance;
 
       // Update totals
