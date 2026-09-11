@@ -43,6 +43,7 @@ type LocalDragState =
 type BudgetCategoriesProps = {
   categoryGroups: CategoryGroupEntity[];
   editingCell: { id: string; cell: string } | null;
+  focusedCell: { id: string; cell: string } | null;
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
   onShowActivity: (id: CategoryEntity['id'], month?: string) => void;
   onEditName: (id: CategoryEntity['id']) => void;
@@ -64,6 +65,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
   ({
     categoryGroups,
     editingCell,
+    focusedCell,
     onBudgetAction,
     onShowActivity,
     onEditName,
@@ -316,6 +318,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   cat={item.value}
                   categoryGroup={item.group}
                   editingCell={editingCell}
+                  focusedCell={focusedCell}
                   dragState={dragState}
                   onEditName={onEditName}
                   onEditMonth={onEditMonth}
@@ -359,6 +362,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                 <IncomeCategory
                   cat={item.value}
                   editingCell={editingCell}
+                  focusedCell={focusedCell}
                   isLast={idx === items.length - 1}
                   onEditName={onEditName}
                   onEditMonth={onEditMonth}
