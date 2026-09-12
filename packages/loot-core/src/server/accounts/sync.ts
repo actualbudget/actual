@@ -853,6 +853,17 @@ export async function matchTransactions(
 
       if (match) {
         hasMatched.add(match.id);
+
+        if (isBankSyncAccount && match.is_parent) {
+          const children = await db.all<Pick<db.DbViewTransaction, 'id'>>(
+            'SELECT id FROM v_transactions WHERE parent_id = ?',
+            [match.id],
+          );
+
+          for (const child of children) {
+            hasMatched.add(child.id);
+          }
+        }
       }
     }
 
