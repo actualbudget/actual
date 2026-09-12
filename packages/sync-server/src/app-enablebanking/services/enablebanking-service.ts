@@ -17,8 +17,8 @@ export type EnableBankingTransaction = {
   entry_reference?: string;
   transaction_id?: string;
   transaction_amount: { currency: string; amount: string };
-  creditor?: { name?: string };
-  debtor?: { name?: string };
+  creditor?: { name?: string; postal_address?: { address_line?: string[] } };
+  debtor?: { name?: string; postal_address?: { address_line?: string[] } };
   credit_debit_indicator?: 'CRDT' | 'DBIT';
   status?: 'BOOK' | 'PDNG';
   booking_date?: string;
@@ -203,6 +203,21 @@ function cleanRemittanceArray(arr: string[]): string[] {
   return arr.map(stripSepaPrefix).filter(Boolean);
 }
 
+// Some ASPSPs (e.g. ING on current accounts) leave creditor/debtor `name` empty
+// and put the counterparty in postal_address.address_line instead. Fall back to
+// that so the payee is the real merchant/party rather than the remittance text
+// (which would otherwise be duplicated into both payee and notes).
+// See https://github.com/actualbudget/actual/issues/7799#issuecomment-4732007929
+function partyName(
+  party?: EnableBankingTransaction['creditor'],
+): string | undefined {
+  if (party?.name) {
+    return party.name;
+  }
+  const lines = party?.postal_address?.address_line?.filter(Boolean);
+  return lines && lines.length > 0 ? lines.join(' ').trim() : undefined;
+}
+
 export function normalizeTransaction(
   tx: EnableBankingTransaction,
 ): BankSyncTransaction {
@@ -211,15 +226,18 @@ export function normalizeTransaction(
     tx.booking_date || tx.value_date || tx.transaction_date || '';
   const valueDate = tx.value_date;
 
+  const creditorName = partyName(tx.creditor);
+  const debtorName = partyName(tx.debtor);
+
   let payeeName = '';
-  if (tx.credit_debit_indicator === 'CRDT' && tx.debtor?.name) {
-    payeeName = tx.debtor.name;
-  } else if (tx.credit_debit_indicator === 'DBIT' && tx.creditor?.name) {
-    payeeName = tx.creditor.name;
-  } else if (tx.creditor?.name) {
-    payeeName = tx.creditor.name;
-  } else if (tx.debtor?.name) {
-    payeeName = tx.debtor.name;
+  if (tx.credit_debit_indicator === 'CRDT' && debtorName) {
+    payeeName = debtorName;
+  } else if (tx.credit_debit_indicator === 'DBIT' && creditorName) {
+    payeeName = creditorName;
+  } else if (creditorName) {
+    payeeName = creditorName;
+  } else if (debtorName) {
+    payeeName = debtorName;
   } else if (
     tx.remittance_information &&
     tx.remittance_information.length > 0
