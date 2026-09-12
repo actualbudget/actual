@@ -9,7 +9,13 @@ import * as mockSyncServer from '#server/tests/mockSyncServer';
 import * as encoder from './encoder';
 import { isError } from './utils';
 
-import { applyMessages, fullSync, sendMessages, setSyncingMode } from './index';
+import {
+  applyMessages,
+  fullSync,
+  receiveMessages,
+  sendMessages,
+  setSyncingMode,
+} from './index';
 
 beforeEach(() => {
   mockSyncServer.reset();
@@ -149,6 +155,58 @@ describe('Sync', () => {
     if (isError(result)) throw result.error;
     expect(result.messages.length).toBe(2);
     expect(mockSyncServer.getMessages().length).toBe(3);
+  });
+
+  it('should advance the clock once per received batch', async () => {
+    // `Date.now()` is frozen here, standing in for the 100ms rounding Firefox
+    // applies under resistFingerprinting. The counter only resets when
+    // `Date.now()` advances, so one tick per message overflowed its 16 bits
+    // once a sync carried more than 65535 of them.
+    const node = '0000testinguuid2';
+    const base = Date.parse('1970-01-02T00:00:00.000Z');
+
+    const messages = [];
+    for (let i = 0; i < 100; i++) {
+      messages.push({
+        dataset: 'transactions',
+        row: 'foo',
+        column: 'amount',
+        value: 'N:1',
+        timestamp: Timestamp.parse(
+          `${new Date(base + i).toISOString()}-0000-${node}`,
+        ),
+      });
+    }
+
+    await receiveMessages(messages);
+
+    expect(getClock().timestamp.counter()).toBeLessThanOrEqual(1);
+
+    // The clock must still sort above every timestamp it received.
+    const latest = messages[messages.length - 1].timestamp.toString();
+    expect(getClock().timestamp.toString() > latest).toBe(true);
+  });
+
+  it('should reject a batch holding a far-future timestamp', () => {
+    // `toISOString` writes years above 9999 as `+010000-…`, which sorts below
+    // every normal timestamp. The batch maximum must not rank it last, which
+    // would let it skip the clock drift check.
+    const message = (millis: number) => ({
+      dataset: 'transactions',
+      row: 'foo',
+      column: 'amount',
+      value: 'N:1',
+      timestamp: Timestamp.parse(
+        `${new Date(millis).toISOString()}-0000-0000testinguuid2`,
+      ),
+    });
+
+    expect(() =>
+      receiveMessages([
+        message(Date.parse('1970-01-02T00:00:00.000Z')),
+        message(253402300800000),
+      ]),
+    ).toThrow(expect.objectContaining({ reason: 'clock-drift' }));
   });
 });
 
