@@ -93,6 +93,10 @@ const transactionNamedExpressionBadges: Record<string, string> = {
   reconciled: 'reconciled',
   balance: 'balance',
   parent_amount: 'parent_amount',
+  parent_notes: 'parent_notes',
+  parent_imported_payee: 'parent_imported_payee',
+  parent_payee: 'parent_payee',
+  parent_account: 'parent_account',
 };
 
 const queryNameFunctions = new Set([
