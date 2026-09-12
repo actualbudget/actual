@@ -420,6 +420,21 @@ describe('File import', () => {
     });
   });
 
+  test('csv import does not misdetect utf-8 with dense nul padding as utf-16', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/utf-8-nul-padding.csv',
+      { hasHeaderRow: true, skipEndLines: 1 },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(1);
+    expect(transactions[0]).toMatchObject({
+      Date: '2025.12.04',
+      Payee: 'Café Rémy',
+      Amount: '100.25',
+    });
+  });
+
   test('csv import treats explicit auto encoding as detection', async () => {
     const { errors, transactions } = await parseFile(
       __dirname + '/../../../mocks/files/utf-16le.csv',

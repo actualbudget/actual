@@ -1210,13 +1210,13 @@ export function ImportTransactionsModal({
                         id="csv-encoding-select"
                         options={[
                           ['auto', t('Auto (detect)')],
-                          ['utf-8', 'UTF-8'],
-                          ['utf-16le', 'UTF-16 LE'],
-                          ['utf-16be', 'UTF-16 BE'],
-                          ['windows-1252', 'Windows-1252'],
-                          ['windows-1250', 'Windows-1250'],
-                          ['iso-8859-1', 'ISO-8859-1'],
-                          ['iso-8859-2', 'ISO-8859-2'],
+                          ['utf-8', t('UTF-8')],
+                          ['utf-16le', t('UTF-16 LE')],
+                          ['utf-16be', t('UTF-16 BE')],
+                          ['windows-1252', t('Windows-1252')],
+                          ['windows-1250', t('Windows-1250')],
+                          ['iso-8859-1', t('ISO-8859-1')],
+                          ['iso-8859-2', t('ISO-8859-2')],
                         ]}
                         value={csvEncoding}
                         onChange={value => {

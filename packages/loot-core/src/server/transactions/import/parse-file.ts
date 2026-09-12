@@ -118,7 +118,11 @@ function detectBomlessUtf16(bytes: Uint8Array): string | null {
 
   // Text never contains NUL bytes, so a significant NUL presence indicates
   // UTF-16; the dominant parity of their positions gives the endianness.
-  if (evenNuls + oddNuls < bytes.length / 10) {
+  // Contiguous NUL padding splits evenly across both parities, so require
+  // one parity to clearly dominate before treating the file as UTF-16.
+  const nulCount = evenNuls + oddNuls;
+  const dominantNuls = Math.max(evenNuls, oddNuls);
+  if (nulCount < bytes.length / 10 || dominantNuls / nulCount < 0.9) {
     return null;
   }
 
