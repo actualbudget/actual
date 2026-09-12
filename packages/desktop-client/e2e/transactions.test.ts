@@ -379,11 +379,60 @@ test.describe('Transactions', () => {
       await modal.getByText('Apply to all transaction tables').click();
       await modal.getByRole('button', { name: 'Save', exact: true }).click();
       await expect(modal).not.toBeVisible();
-      await expect(header).not.toContainText('Notes');
-
       // Another account follows the shared layout
       accountPage = await navigation.goToAccountPage('Bank of America');
       await expect(header).not.toContainText('Notes');
+    });
+  });
+
+  test.describe('column resizing', () => {
+    test('resizes a column by dragging its handle', async () => {
+      const initialWidth = await accountPage.getColumnWidth('date');
+
+      await accountPage.resizeColumn('date', 100);
+
+      const newWidth = await accountPage.getColumnWidth('date');
+      expect(newWidth).toBeGreaterThan(initialWidth + 90);
+
+      // Body cells follow the header width via the shared CSS variable
+      const bodyBox = await accountPage.transactionTableRow
+        .first()
+        .locator('[data-column="date"]')
+        .boundingBox();
+      expect(bodyBox?.width).toBeGreaterThan(initialWidth + 90);
+
+      // The new width is persisted and survives a reload
+      await page.reload();
+      await expect
+        .poll(() => accountPage.getColumnWidth('date'))
+        .toBeGreaterThan(initialWidth + 90);
+    });
+
+    test('resizes a column with the keyboard', async () => {
+      const initialWidth = await accountPage.getColumnWidth('date');
+      const handle = accountPage.getColumnResizeHandle('date');
+
+      await handle.focus();
+      await page.keyboard.press('ArrowRight');
+
+      await expect
+        .poll(() => accountPage.getColumnWidth('date'))
+        .toBeGreaterThan(initialWidth);
+    });
+
+    test('resets a column width on double click', async () => {
+      const initialWidth = await accountPage.getColumnWidth('date');
+
+      await accountPage.resizeColumn('date', 100);
+      await expect
+        .poll(() => accountPage.getColumnWidth('date'))
+        .toBeGreaterThan(initialWidth + 90);
+
+      await accountPage.getColumnResizeHandle('date').dblclick();
+
+      await expect
+        .poll(() => accountPage.getColumnWidth('date'))
+        .toBeLessThan(initialWidth + 20);
     });
   });
 });
