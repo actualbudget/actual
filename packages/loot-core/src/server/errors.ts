@@ -69,6 +69,33 @@ export class SyncError extends Error {
   }
 }
 
+/**
+ * Thrown when the folder Actual stores budget files in cannot be created or
+ * accessed (for example, Windows Controlled Folder Access blocking
+ * `Documents\Actual`). Carries the path and the underlying filesystem error
+ * code so the UI can tell the user exactly what went wrong.
+ */
+export class DocumentDirError extends Error {
+  type: 'DocumentDirError';
+  path: string;
+  code: string | undefined;
+
+  constructor(path: string, cause: unknown) {
+    const code =
+      cause && typeof cause === 'object' && 'code' in cause
+        ? String(cause.code)
+        : undefined;
+    const causeMessage = cause instanceof Error ? cause.message : String(cause);
+
+    super(`DocumentDirError: could not access ${path} (${causeMessage})`, {
+      cause,
+    });
+    this.type = 'DocumentDirError';
+    this.path = path;
+    this.code = code;
+  }
+}
+
 export class ValidationError extends Error {}
 
 export class TransactionError extends Error {}
