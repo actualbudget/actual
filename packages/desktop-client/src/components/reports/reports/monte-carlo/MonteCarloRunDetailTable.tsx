@@ -1,4 +1,5 @@
 import { Fragment, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -55,6 +56,8 @@ type MonteCarloRunDetailTableProps = {
   hasContributions: boolean;
   /** The configured rule, quoted in the per-year explanations */
   withdrawalRule: MonteCarloWithdrawalRuleConfig;
+  /** Rendered between the header row and the table - the cashflow chart */
+  cashflowGraph?: ReactNode;
   onBack: () => void;
 };
 
@@ -66,6 +69,7 @@ export function MonteCarloRunDetailTable({
   startAge,
   hasContributions,
   withdrawalRule,
+  cashflowGraph,
   onBack,
 }: MonteCarloRunDetailTableProps) {
   const { t } = useTranslation();
@@ -320,6 +324,8 @@ export function MonteCarloRunDetailTable({
           )}
         </Button>
       </View>
+
+      {cashflowGraph}
 
       <Text style={{ fontSize: 13, color: theme.pageText, marginBottom: 10 }}>
         <PrivacyFilter>

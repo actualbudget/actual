@@ -108,7 +108,8 @@ import APIList from './APIList';
 "batchBudgetUpdates",
 "runQuery",
 "getIDByName",
-"getPreferences"
+"getPreferences",
+"setPreference"
 ]} />
 
 ## Types of Methods
@@ -904,3 +905,9 @@ return error or the current server versions.
 <Method name="getPreferences" args={[]} returns="Promise<SyncedPrefs>" />
 
 Returns the budget's synced preferences — settings that sync across devices, such as the number format (`numberFormat`, `hideFraction`), currency (`defaultCurrencyCode`, `currencySymbolPosition`, `currencySpaceBetweenAmountAndSymbol`), date format (`dateFormat`), and first day of the week (`firstDayOfWeekIdx`). All values are strings (or `undefined` if the preference has never been set). The `SyncedPrefs` type is exported from `@actual-app/api/models`.
+
+#### `setPreference`
+
+<Method name="setPreference" args={[{ name: 'id', type: 'keyof SyncedPrefs' }, { name: 'value', type: 'string | undefined' }]} returns="Promise<void>" />
+
+Sets a single synced preference. The `id` must be a valid SyncedPrefs key.
