@@ -457,7 +457,7 @@ function getCompileError(error, stack) {
 
 //// Compiler
 
-function compileLiteral(value) {
+function compileLiteral(value, { unescape = true } = {}) {
   if (value === undefined) {
     throw new CompileError('`undefined` is not a valid query value');
   } else if (value === null) {
@@ -466,8 +466,11 @@ function compileLiteral(value) {
     return typed(nativeDateToInt(value), 'date', { literal: true });
   } else if (typeof value === 'string') {
     // Allow user to escape $, and quote the string to make it a
-    // string literal in the output
-    value = value.replace(/\\\$/g, '$');
+    // string literal in the output. Values coming from `$literal` are
+    // already raw, so they must not be unescaped again.
+    if (unescape) {
+      value = value.replace(/\\\$/g, '$');
+    }
     return typed(value, 'string', { literal: true });
   } else if (typeof value === 'boolean') {
     return typed(value ? 1 : 0, 'boolean', { literal: true });
@@ -534,8 +537,10 @@ const compileFunction = saveStack('function', (state, func) => {
   }
 
   let args = argExprs;
-  // `$condition` is a special-case where it will be evaluated later
-  if (name !== '$condition') {
+  // `$condition` is a special-case where it will be evaluated later, and
+  // `$literal` takes its argument raw so that it is never parsed as a
+  // field reference or a named parameter
+  if (name !== '$condition' && name !== '$literal') {
     args = argExprs.map(arg => compileExpr(state, arg));
   }
 
@@ -633,11 +638,8 @@ const compileFunction = saveStack('function', (state, func) => {
       return typed(`${arg1} COLLATE NOCASE`, args[0].type);
 
     case '$literal': {
-      validateArgLength(args, 1);
-      if (!args[0].literal) {
-        throw new CompileError('Literal not passed to $literal');
-      }
-      return args[0];
+      validateArgLength(argExprs, 1);
+      return compileLiteral(argExprs[0], { unescape: false });
     }
     default:
       throw new CompileError(`Unknown function: ${name}`);
