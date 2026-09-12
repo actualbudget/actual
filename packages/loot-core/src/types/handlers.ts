@@ -4,6 +4,7 @@ import type { AdminHandlers } from '#server/admin/app';
 import type { AuthHandlers } from '#server/auth/app';
 import type { BudgetHandlers } from '#server/budget/app';
 import type { BudgetFileHandlers } from '#server/budgetfiles/app';
+import type { ChangeLogHandlers } from '#server/changelog/app';
 import type { DashboardHandlers } from '#server/dashboard/app';
 import type { EncryptionHandlers } from '#server/encryption/app';
 import type { FiltersHandlers } from '#server/filters/app';
@@ -47,6 +48,7 @@ export type Handlers = {} & ServerHandlers &
   BudgetFileHandlers &
   EncryptionHandlers &
   TagsHandlers &
+  ChangeLogHandlers &
   AuthHandlers;
 
 export type HandlerFunctions = Handlers[keyof Handlers];

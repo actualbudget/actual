@@ -8,6 +8,7 @@ import { ReportsPage } from './reports-page';
 import { RulesPage } from './rules-page';
 import { SchedulesPage } from './schedules-page';
 import { SettingsPage } from './settings-page';
+import { TransactionChangesPage } from './transaction-changes-page';
 
 type AccountEntry = {
   name: string;
@@ -149,6 +150,29 @@ export class Navigation {
     await settingsLink.click();
 
     return new SettingsPage(this.page);
+  }
+
+  /**
+   * Only reachable while the `changeLog` feature flag is enabled -- the
+   * sidebar entry and the route itself are both gated on it.
+   */
+  async goToTransactionChangesPage() {
+    const changesLink = this.page.getByRole('link', {
+      name: 'Transaction Changes',
+    });
+
+    // Expand the "more" menu only if it is not already expanded. Callers that
+    // have just turned the flag on must wait for this entry to appear first,
+    // otherwise this reads "hidden" and collapses an already-open menu.
+    if (!(await changesLink.isVisible())) {
+      await this.page.getByRole('button', { name: 'More' }).click();
+    }
+
+    await changesLink.click();
+
+    const transactionChangesPage = new TransactionChangesPage(this.page);
+    await transactionChangesPage.waitFor();
+    return transactionChangesPage;
   }
 
   async createAccount(data: AccountEntry) {

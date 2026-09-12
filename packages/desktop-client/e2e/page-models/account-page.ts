@@ -132,6 +132,21 @@ export class AccountPage {
     await this.cancelTransactionButton.click();
   }
 
+  /**
+   * Edit fields of an existing transaction in place. Passing more than one
+   * field edits them all before leaving the row, which the register saves as
+   * a single change.
+   * 0-based index
+   */
+  async editNthTransaction(index: number, transaction: TransactionEntry) {
+    await this._fillTransactionFields(
+      this.transactionTableRow.nth(index),
+      transaction,
+    );
+    // Leave the row so the pending edit is committed.
+    await this.page.keyboard.press('Escape');
+  }
+
   async selectNthTransaction(index: number) {
     const row = this.transactionTableRow.nth(index);
     await row.getByTestId('select').click();
