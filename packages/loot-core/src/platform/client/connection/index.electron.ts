@@ -10,12 +10,27 @@ const listeners = new Map();
 let messageQueue = [];
 let socketClient = null;
 
+// Set once the backend process reports it could not start. From then on every
+// pending and future request is rejected with the failure payload so the app
+// surfaces it (via the FatalError modal) instead of waiting forever.
+let appInitFailure = null;
+
+function rejectAllPendingRequests(failure) {
+  for (const handler of replyHandlers.values()) {
+    handler.reject(failure);
+  }
+  replyHandlers.clear();
+}
+
 function connectSocket(onOpen) {
   global.Actual.ipcConnect(function (client) {
     client.on('message', data => {
       const msg = data;
 
-      if (msg.type === 'error') {
+      if (msg.type === 'app-init-failure') {
+        appInitFailure = msg;
+        rejectAllPendingRequests(msg);
+      } else if (msg.type === 'error') {
         // An error happened while handling a message so cleanup the
         // current reply handler and reject the promise. The error will
         // be propagated to the caller through this promise rejection.
@@ -90,6 +105,11 @@ export const send: T.Send = function (
 ): ReturnType<T.Send> {
   const [name, args, { catchErrors = false } = {}] = params;
   return new Promise((resolve, reject) => {
+    if (appInitFailure) {
+      reject(appInitFailure);
+      return;
+    }
+
     const id = uuidv4();
     replyHandlers.set(id, { resolve, reject });
 

@@ -31,6 +31,13 @@ type Actual = {
     currentBudgetDirectory: string,
     newDirectory: string,
   ) => Promise<void>;
+  /**
+   * Persists the budget data folder directly from the desktop app's main
+   * process, so it works even when the backend failed to start. Validates
+   * that the folder exists and is writable. The app must be relaunched
+   * afterwards for the change to take effect.
+   */
+  setDocumentDir: (directory: string) => Promise<void>;
   applyAppUpdate: () => Promise<void>;
   ipcConnect: (callback: (client: IpcClient) => void) => void;
   getServerSocket: () => Promise<Worker | null>;

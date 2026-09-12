@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { createServer } from 'http';
 import type { Server } from 'http';
-import { cp, mkdir, rm } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'path';
 
 import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
@@ -27,6 +27,7 @@ import type {
 
 import { getMenu } from './menu';
 import { retry as promiseRetry } from './retry';
+import type { AppInitFailurePayload } from './server';
 import {
   get as getWindowState,
   listen as listenToWindowState,
@@ -69,6 +70,11 @@ if (isPlaywrightTest) {
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
 let syncServerProcess: UtilityProcess | null;
+
+// The last startup failure reported by (or observed on) the backend process.
+// Kept so a renderer that connects after the failure was posted still gets
+// told about it instead of waiting forever for a reply.
+let lastAppInitFailure: AppInitFailurePayload | null = null;
 
 let oAuthServer: ReturnType<typeof createServer> | null;
 
@@ -143,15 +149,13 @@ if (isDev) {
   process.traceProcessWarnings = true;
 }
 
+const getGlobalPrefsPath = () =>
+  path.join(process.env.ACTUAL_DATA_DIR!, 'global-store.json');
+
 async function loadGlobalPrefs() {
   let state: GlobalPrefsJson = {};
   try {
-    state = JSON.parse(
-      fs.readFileSync(
-        path.join(process.env.ACTUAL_DATA_DIR!, 'global-store.json'),
-        'utf8',
-      ),
-    );
+    state = JSON.parse(fs.readFileSync(getGlobalPrefsPath(), 'utf8'));
   } catch {
     logMessage('info', 'Could not load global state - using defaults');
     state = {};
@@ -160,7 +164,34 @@ async function loadGlobalPrefs() {
   return state;
 }
 
+// Writes the global preferences file atomically (temp file + rename), the same
+// way loot-core's asyncStorage does. Only meant to be used while the backend
+// process is not running, otherwise the two would race for the file.
+async function saveGlobalPrefs(state: GlobalPrefsJson) {
+  const globalPrefsPath = getGlobalPrefsPath();
+  const temporaryPath = `${globalPrefsPath}.${process.pid}.main.tmp`;
+
+  try {
+    await writeFile(temporaryPath, JSON.stringify(state), 'utf8');
+    await rename(temporaryPath, globalPrefsPath);
+  } catch (error) {
+    await rm(temporaryPath, { force: true }).catch(() => undefined);
+    throw error;
+  }
+}
+
+function reportAppInitFailure(payload: AppInitFailurePayload) {
+  lastAppInitFailure = payload;
+  logMessage('error', `Backend failed to start: ${payload.message}`);
+
+  if (clientWin) {
+    clientWin.webContents.send('message', payload);
+  }
+}
+
 async function createBackgroundProcess() {
+  lastAppInitFailure = null;
+
   const globalPrefs = await loadGlobalPrefs(); // ensures we have the latest settings - even when restarting the server
   let envVariables: Env = {
     ...process.env, // required
@@ -198,7 +229,9 @@ async function createBackgroundProcess() {
     logMessage('error', `Server Log: ${chunk.toString('utf8')}`);
   });
 
-  serverProcess.on('message', msg => {
+  const startedProcess = serverProcess;
+
+  startedProcess.on('message', msg => {
     switch (msg.type) {
       case 'captureEvent':
       case 'captureBreadcrumb':
@@ -210,9 +243,32 @@ async function createBackgroundProcess() {
           clientWin.webContents.send('message', msg);
         }
         break;
+      case 'app-init-failure':
+        reportAppInitFailure(msg as AppInitFailurePayload);
+        break;
       default:
         logMessage('info', 'Unknown server message: ' + msg.type);
     }
+  });
+
+  startedProcess.on('exit', code => {
+    // `serverProcess` is cleared before an intentional kill (restart / quit),
+    // so if it still points at this process the exit was unexpected.
+    if (serverProcess !== startedProcess) {
+      return;
+    }
+    serverProcess = null;
+
+    // A failure that was already reported is more specific than "it exited".
+    if (lastAppInitFailure) {
+      return;
+    }
+
+    reportAppInitFailure({
+      type: 'app-init-failure',
+      BackendInitFailure: true,
+      message: `The backend process exited unexpectedly (exit code ${code})`,
+    });
   });
 }
 
@@ -534,8 +590,9 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   if (serverProcess) {
-    serverProcess.kill();
+    const processToKill = serverProcess;
     serverProcess = null;
+    processToKill.kill();
   }
 });
 
@@ -575,11 +632,45 @@ ipcMain.handle('start-oauth-server', async () => {
 
 ipcMain.handle('restart-server', () => {
   if (serverProcess) {
-    serverProcess.kill();
+    const processToKill = serverProcess;
     serverProcess = null;
+    processToKill.kill();
   }
 
   void createBackgroundProcess();
+});
+
+// Lets the user pick a new budget data folder from the startup error screen,
+// when the backend (which normally owns the global preferences) is not
+// running. The app is relaunched by the renderer afterwards.
+ipcMain.handle('set-document-dir', async (_event, directory: string) => {
+  if (!directory) {
+    throw new Error('A directory must be provided');
+  }
+
+  if (!fs.existsSync(directory)) {
+    throw new Error(`The directory does not exist: ${directory}`);
+  }
+
+  // Probe that we can actually create something inside the chosen folder.
+  // Permission checks alone don't catch things like Windows Controlled Folder
+  // Access, which blocks writes without changing the folder's permissions.
+  const probePrefix = path.join(directory, '.actual-write-test-');
+  let probeDirectory: string;
+  try {
+    probeDirectory = await mkdtemp(probePrefix);
+  } catch (error) {
+    throw new Error(
+      `Actual is not allowed to create files in ${directory}: ${String(error)}`,
+    );
+  }
+  await rm(probeDirectory, { recursive: true, force: true }).catch(
+    () => undefined,
+  );
+
+  const globalPrefs = await loadGlobalPrefs();
+  await saveGlobalPrefs({ ...globalPrefs, 'document-dir': directory });
+  logMessage('info', `Budget data folder changed to: ${directory}`);
 });
 
 ipcMain.handle('relaunch', () => {
@@ -640,7 +731,12 @@ ipcMain.handle('open-in-file-manager', (event, filepath) => {
 });
 
 ipcMain.on('message', (_event, msg) => {
-  if (!serverProcess) {
+  if (!serverProcess || lastAppInitFailure) {
+    // The backend isn't there to answer. If we know why, tell the renderer
+    // (again) so its pending requests reject instead of hanging forever.
+    if (lastAppInitFailure && clientWin) {
+      clientWin.webContents.send('message', lastAppInitFailure);
+    }
     return;
   }
 
