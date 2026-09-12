@@ -490,13 +490,16 @@ describe('enableBankingService', () => {
       expect(result).toHaveLength(0);
     });
 
-    it('breaks out of pagination when continuation_key repeats', async () => {
+    it('discards the repeated page when continuation_key repeats', async () => {
+      // Some ASPSPs (e.g. Trade Republic) answer a continuation_key request
+      // with the exact same page and the exact same key again. The repeated
+      // page must not be appended, otherwise every transaction is duplicated.
       mockFetchResponse({
         transactions: [mockCreditTransaction],
         continuation_key: 'stuck-key',
       });
       mockFetchResponse({
-        transactions: [mockDebitTransaction],
+        transactions: [mockCreditTransaction],
         continuation_key: 'stuck-key',
       });
 
@@ -507,7 +510,7 @@ describe('enableBankingService', () => {
       );
 
       expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(1);
     });
   });
 

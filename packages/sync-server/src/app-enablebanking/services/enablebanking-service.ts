@@ -437,8 +437,9 @@ export const enableBankingService = {
         continuationKey,
         psuHeaders,
       );
-      allTransactions.push(...result.transactions);
-
+      // Some ASPSPs (e.g. Trade Republic) return the same continuation_key
+      // together with the same page of transactions again. Detect the repeat
+      // before appending, otherwise the whole page is imported twice.
       if (
         result.continuation_key &&
         result.continuation_key === continuationKey
@@ -446,6 +447,7 @@ export const enableBankingService = {
         break;
       }
 
+      allTransactions.push(...result.transactions);
       continuationKey = result.continuation_key;
       iteration++;
     } while (continuationKey && iteration < maxIterations);
