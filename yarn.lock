@@ -44,6 +44,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@actual-app/bank-sync-plugin-dummy@workspace:packages/bank-sync-plugin-dummy":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/bank-sync-plugin-dummy@workspace:packages/bank-sync-plugin-dummy"
+  dependencies:
+    fflate: "npm:^0.8.3"
+    typescript: "npm:^6.0.3"
+  languageName: unknown
+  linkType: soft
+
 "@actual-app/ci-actions@workspace:*, @actual-app/ci-actions@workspace:packages/ci-actions":
   version: 0.0.0-use.local
   resolution: "@actual-app/ci-actions@workspace:packages/ci-actions"
@@ -203,6 +212,7 @@ __metadata:
     express: "npm:^5.2.1"
     express-rate-limit: "npm:^8.6.0"
     express-winston: "npm:^4.2.0"
+    fflate: "npm:^0.8.3"
     http-proxy-middleware: "npm:^4.2.0"
     ipaddr.js: "npm:^2.4.0"
     jws: "npm:^4.0.1"

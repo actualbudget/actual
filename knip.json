@@ -23,6 +23,9 @@
         "@jlongster/sql.js"
       ]
     },
+    "packages/bank-sync-plugin-dummy": {
+      "entry": ["src/manifest.ts"]
+    },
     "packages/ci-actions": {
       "entry": ["bin/*.ts"],
       "ignoreBinaries": ["bin/tsx"],
