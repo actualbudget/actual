@@ -201,10 +201,12 @@ async function setupDocumentsDir() {
 async function ensureUsable(dir) {
   await fs.listDir(dir);
 
-  const probeDir = fs.join(dir, '.actual-write-test');
-  if (await fs.exists(probeDir)) {
-    await fs.removeDir(probeDir);
-  }
+  // Unique per run so we never touch (let alone delete) something the user
+  // put there; only the directory this call created is removed.
+  const probeName = `.actual-write-test-${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2)}`;
+  const probeDir = fs.join(dir, probeName);
   await fs.mkdir(probeDir);
   await fs.removeDir(probeDir);
 }

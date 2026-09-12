@@ -209,8 +209,14 @@ function ChooseDocumentDirButton() {
       await window.Actual.setDocumentDir(chosenDirectory);
       window.Actual.relaunch();
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      setChooseError(t("That folder can't be used: {{message}}", { message }));
+      // The raw failure (path, IPC wrapping, OS error text) goes to the
+      // console for diagnosis; the user gets a plain explanation.
+      console.error('Could not change the data folder', error);
+      setChooseError(
+        t(
+          "That folder can't be used. Make sure it exists and that Actual is allowed to create files in it.",
+        ),
+      );
       setIsChanging(false);
     }
   }

@@ -1,7 +1,15 @@
 import fs from 'fs';
 import { createServer } from 'http';
 import type { Server } from 'http';
-import { cp, mkdir, mkdtemp, rename, rm, writeFile } from 'node:fs/promises';
+import {
+  cp,
+  mkdir,
+  mkdtemp,
+  readFile,
+  rename,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import path from 'path';
 
 import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
@@ -162,6 +170,27 @@ async function loadGlobalPrefs() {
   }
 
   return state;
+}
+
+// Like loadGlobalPrefs, but only a missing file falls back to defaults; a
+// read or parse failure is propagated so callers doing read-modify-write don't
+// overwrite a store they couldn't read.
+async function loadGlobalPrefsStrict(): Promise<GlobalPrefsJson> {
+  let contents: string;
+  try {
+    contents = await readFile(getGlobalPrefsPath(), 'utf8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return {};
+    }
+    throw error;
+  }
+
+  const parsed: unknown = JSON.parse(contents);
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Global preferences file is not a JSON object');
+  }
+  return parsed as GlobalPrefsJson;
 }
 
 // Writes the global preferences file atomically (temp file + rename), the same
@@ -668,7 +697,9 @@ ipcMain.handle('set-document-dir', async (_event, directory: string) => {
     () => undefined,
   );
 
-  const globalPrefs = await loadGlobalPrefs();
+  // Strict read: a corrupt or unreadable store must not be silently replaced
+  // by `{ document-dir }`, which would wipe the user's other preferences.
+  const globalPrefs = await loadGlobalPrefsStrict();
   await saveGlobalPrefs({ ...globalPrefs, 'document-dir': directory });
   logMessage('info', `Budget data folder changed to: ${directory}`);
 });
