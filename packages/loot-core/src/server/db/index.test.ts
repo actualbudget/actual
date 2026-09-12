@@ -345,4 +345,33 @@ describe('Database', () => {
     expect(rows.length).toBe(1);
     expect(rows[0].id).toBe('trans1');
   });
+
+  describe('updateCategoryGroup', () => {
+    test('updates a group without a name', async () => {
+      // api/category-group-update forwards the caller's Partial, so hiding a
+      // group sends no name at all. The duplicate-name guard used to call
+      // .toUpperCase() on it unconditionally.
+      const id = await db.insertCategoryGroup({ name: 'Bills' });
+
+      // A rejection here is the regression; the assertions below prove the
+      // update still landed.
+      await db.updateCategoryGroup({ id, is_income: 0, hidden: 1 });
+
+      const group = await db.first<{ hidden: number; name: string }>(
+        'SELECT * FROM category_groups WHERE id = ?',
+        [id],
+      );
+      expect(group.hidden).toBe(1);
+      expect(group.name).toBe('Bills');
+    });
+
+    test('still rejects a rename onto an existing group', async () => {
+      await db.insertCategoryGroup({ name: 'Bills' });
+      const id = await db.insertCategoryGroup({ name: 'Savings' });
+
+      await expect(
+        db.updateCategoryGroup({ id, is_income: 0, name: 'bills' }),
+      ).rejects.toThrow("'Bills' category group already exists");
+    });
+  });
 });
