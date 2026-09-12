@@ -238,6 +238,8 @@ function EditorButtons({ onAdd, onDelete }) {
 }
 
 function FieldError({ type }) {
+  const { t } = useTranslation();
+
   return (
     <Text
       style={{
@@ -247,7 +249,7 @@ function FieldError({ type }) {
         marginBottom: 5,
       }}
     >
-      {getFieldError(type)}
+      {t(getFieldError(type))}
     </Text>
   );
 }

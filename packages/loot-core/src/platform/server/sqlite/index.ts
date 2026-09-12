@@ -196,7 +196,7 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
 }
 
 function regexp(regex: string, text: string) {
-  return new RegExp(regex).test(text || '') ? 1 : 0;
+  return new RegExp(regex, 'i').test(text || '') ? 1 : 0;
 }
 
 export async function openDatabase(pathOrBuffer?: string | Uint8Array) {

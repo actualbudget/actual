@@ -228,9 +228,29 @@ describe('Condition', () => {
     expect(cond.eval({ notes: 'f o o' })).toBe(false);
   });
 
-  test('matches handles invalid regex', () => {
-    const cond = new Condition('matches', 'notes', 'fo**', null);
-    expect(cond.eval({ notes: 'foo' })).toBe(false);
+  test.each([
+    ['notes', 'fo**'],
+    ['payee', 'trailing\\'],
+  ])('matches rejects invalid regex for %s conditions', (field, value) => {
+    expect(() => new Condition('matches', field, value, null)).toThrow(
+      'Invalid regular expression',
+    );
+  });
+
+  test('id matches rejects an empty regex', () => {
+    expect(() => new Condition('matches', 'payee', '', null)).toThrow(
+      'matches must have non-empty string',
+    );
+  });
+
+  test('matches preserves regex syntax and ignores case', () => {
+    const nonDigits = new Condition('matches', 'notes', '^\\D+$', null);
+    expect(nonDigits.value).toBe('^\\D+$');
+    expect(nonDigits.eval({ notes: 'ABC' })).toBe(true);
+    expect(nonDigits.eval({ notes: '123' })).toBe(false);
+
+    const uppercase = new Condition('matches', 'notes', '^FOO$', null);
+    expect(uppercase.eval({ notes: 'foo' })).toBe(true);
   });
 
   test('number validates value', () => {

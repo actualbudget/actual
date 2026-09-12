@@ -85,7 +85,7 @@ describe('Web sqlite', () => {
     expect(rows[2].number).toBe(6);
   });
 
-  it('should match regex on text fields', async () => {
+  it('should match regex on text fields case-insensitively', async () => {
     const db = await openDatabase();
     execQuery(db, initSQL);
 
@@ -97,7 +97,7 @@ describe('Web sqlite', () => {
 
     const rows = runQuery(
       db,
-      'SELECT id FROM textstrings where REGEXP("n.", string)',
+      'SELECT id FROM textstrings where REGEXP("N.", string)',
       null,
       true,
     );

@@ -167,10 +167,10 @@ export const ruleModel = {
   },
 };
 
-export function makeRule(data) {
+export function makeRule(data, { allowInvalidRegex = false } = {}) {
   let rule;
   try {
-    rule = new Rule(ruleModel.toJS(data));
+    rule = new Rule(ruleModel.toJS(data), { allowInvalidRegex });
   } catch (e) {
     logger.warn('Invalid rule', e);
     if (e instanceof RuleError) {
@@ -185,6 +185,14 @@ export function makeRule(data) {
   migrateIds(rule, getMappings());
 
   return rule;
+}
+
+function addRuleToState(rule: Rule) {
+  allRules.set(rule.id, rule);
+  if (rule.isExecutable()) {
+    firstcharIndexer.index(rule);
+    payeeIndexer.index(rule);
+  }
 }
 
 export async function loadRules() {
@@ -202,11 +210,9 @@ export async function loadRules() {
       desc.stage = 'pre';
     }
 
-    const rule = makeRule(desc);
+    const rule = makeRule(desc, { allowInvalidRegex: true });
     if (rule) {
-      allRules.set(rule.id, rule);
-      firstcharIndexer.index(rule);
-      payeeIndexer.index(rule);
+      addRuleToState(rule);
     }
   }
 
@@ -265,15 +271,13 @@ function onApplySync(oldValues, newValues) {
           }
         } else {
           // Inserted/updated
-          const rule = makeRule(newValue);
+          const rule = makeRule(newValue, { allowInvalidRegex: true });
           if (rule) {
             if (oldRule) {
               firstcharIndexer.remove(oldRule);
               payeeIndexer.remove(oldRule);
             }
-            allRules.set(newValue.id, rule);
-            firstcharIndexer.index(rule);
-            payeeIndexer.index(rule);
+            addRuleToState(rule);
           }
         }
       });
@@ -510,7 +514,7 @@ export function conditionsToAQL(
       } else if (type === 'string') {
         return {
           [field]: {
-            $transform: !['hasTags', 'hasAnyTag'].includes(op)
+            $transform: !['matches', 'hasTags', 'hasAnyTag'].includes(op)
               ? '$lower'
               : undefined,
             [aqlOp]: value,
@@ -705,7 +709,10 @@ export function conditionsToAQL(
     }
   };
 
-  const filters = conditions.map(mapConditionToActualQL);
+  // Not every caller inspects errors. Fail closed so one invalid condition
+  // cannot silently widen a query to every transaction.
+  const filters =
+    errors.length > 0 ? [{ id: null }] : conditions.map(mapConditionToActualQL);
   return { filters, errors };
 }
 

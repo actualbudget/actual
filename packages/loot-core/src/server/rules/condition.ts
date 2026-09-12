@@ -2,6 +2,7 @@
 import * as dateFns from 'date-fns';
 
 import { logger } from '#platform/server/log';
+import { RuleError } from '#server/errors';
 import {
   addDays,
   isAfter,
@@ -25,6 +26,20 @@ import {
   parseDateString,
   parseRecurDate,
 } from './rule-utils';
+
+function assertValidRegex(value, fieldName) {
+  try {
+    new RegExp(value);
+  } catch {
+    assert(
+      false,
+      'invalid-regex',
+      `Invalid regular expression (field: ${fieldName})`,
+    );
+  }
+}
+
+const invalidConditions = new WeakSet<Condition>();
 
 export const CONDITION_TYPES = {
   date: {
@@ -86,6 +101,21 @@ export const CONDITION_TYPES = {
         );
         return value;
       }
+
+      if (op === 'matches') {
+        assert(
+          typeof value === 'string',
+          'not-string',
+          `Invalid string value (field: ${fieldName})`,
+        );
+        assert(
+          value.length > 0,
+          'no-empty-string',
+          `${op} must have non-empty string (field: ${fieldName})`,
+        );
+        assertValidRegex(value, fieldName);
+      }
+
       return value;
     },
   },
@@ -135,6 +165,11 @@ export const CONDITION_TYPES = {
       }
 
       if (op === 'hasTags' || op === 'hasAnyTag') {
+        return value;
+      }
+
+      if (op === 'matches') {
+        assertValidRegex(value, fieldName);
         return value;
       }
 
@@ -199,7 +234,7 @@ export class Condition {
   unparsedValue;
   value;
 
-  constructor(op, field, value, options) {
+  constructor(op, field, value, options, { allowInvalidRegex = false } = {}) {
     const typeName = FIELD_TYPES.get(field);
     assert(typeName, 'internal', 'Invalid condition field: ' + field);
 
@@ -231,9 +266,26 @@ export class Condition {
     this.unparsedValue = value;
     this.op = op;
     this.field = field;
-    this.value = type.parse ? type.parse(op, value, field) : value;
+    try {
+      this.value = type.parse ? type.parse(op, value, field) : value;
+    } catch (error) {
+      if (
+        allowInvalidRegex &&
+        error instanceof RuleError &&
+        error.type === 'invalid-regex'
+      ) {
+        this.value = value;
+        invalidConditions.add(this);
+      } else {
+        throw error;
+      }
+    }
     this.options = options;
     this.type = typeName;
+  }
+
+  isValid(): boolean {
+    return !invalidConditions.has(this);
   }
 
   eval(object) {
@@ -248,7 +300,7 @@ export class Condition {
       return false;
     }
 
-    if (typeof fieldValue === 'string') {
+    if (typeof fieldValue === 'string' && this.op !== 'matches') {
       fieldValue = fieldValue.toLowerCase();
     }
 
@@ -420,7 +472,7 @@ export class Condition {
           return false;
         }
         try {
-          return new RegExp(this.value).test(fieldValue);
+          return new RegExp(this.value, 'i').test(fieldValue);
         } catch (e) {
           logger.log('invalid regexp in matches condition', e);
           return false;
