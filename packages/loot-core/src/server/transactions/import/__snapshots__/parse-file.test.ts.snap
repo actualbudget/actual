@@ -5,6 +5,7 @@ exports[`File import > CAMT.053 import works 1`] = `
   {
     "acct": "one",
     "amount": 60,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20131230,
@@ -33,6 +34,7 @@ exports[`File import > CAMT.053 import works 1`] = `
   {
     "acct": "one",
     "amount": 50,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20131230,
@@ -61,6 +63,7 @@ exports[`File import > CAMT.053 import works 1`] = `
   {
     "acct": "one",
     "amount": -8985,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20240311,
@@ -87,6 +90,7 @@ exports[`File import > CAMT.053 import works 1`] = `
   {
     "acct": "one",
     "amount": 120,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20140105,
@@ -116,6 +120,7 @@ exports[`File import > CAMT.053 import works 1`] = `
   {
     "acct": "one",
     "amount": -8000,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20240312,
@@ -142,6 +147,7 @@ exports[`File import > CAMT.053 import works 1`] = `
   {
     "acct": "one",
     "amount": 225,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20140103,
@@ -168,6 +174,7 @@ exports[`File import > CAMT.053 import works 1`] = `
   {
     "acct": "one",
     "amount": 120,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20140103,
@@ -230,6 +237,7 @@ exports[`File import > handles html escaped plaintext 1`] = `
   {
     "acct": "one",
     "amount": -100,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20230509,
@@ -256,6 +264,7 @@ exports[`File import > handles html escaped plaintext 1`] = `
   {
     "acct": "one",
     "amount": -100,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20230301,
@@ -287,6 +296,7 @@ exports[`File import > handles non-ASCII characters 1`] = `
   {
     "acct": "one",
     "amount": -2000,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20221019,
@@ -349,6 +359,7 @@ exports[`File import > import notes are respected when importing > transactions 
   {
     "acct": "one",
     "amount": -3000,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190123,
@@ -375,6 +386,7 @@ exports[`File import > import notes are respected when importing > transactions 
   {
     "acct": "one",
     "amount": -377,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190123,
@@ -401,6 +413,7 @@ exports[`File import > import notes are respected when importing > transactions 
   {
     "acct": "one",
     "amount": -962,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190123,
@@ -427,6 +440,7 @@ exports[`File import > import notes are respected when importing > transactions 
   {
     "acct": "one",
     "amount": -11599,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -453,6 +467,7 @@ exports[`File import > import notes are respected when importing > transactions 
   {
     "acct": "one",
     "amount": -1034,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -479,6 +494,7 @@ exports[`File import > import notes are respected when importing > transactions 
   {
     "acct": "one",
     "amount": -2253,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -505,6 +521,7 @@ exports[`File import > import notes are respected when importing > transactions 
   {
     "acct": "one",
     "amount": -10871,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -531,6 +548,7 @@ exports[`File import > import notes are respected when importing > transactions 
   {
     "acct": "one",
     "amount": -2500,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -557,6 +575,7 @@ exports[`File import > import notes are respected when importing > transactions 
   {
     "acct": "one",
     "amount": -3238,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -583,6 +602,7 @@ exports[`File import > import notes are respected when importing > transactions 
   {
     "acct": "one",
     "amount": -607,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -614,6 +634,7 @@ exports[`File import > ofx import works (credit card) 1`] = `
   {
     "acct": "one",
     "amount": -600,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20230330,
@@ -645,6 +666,7 @@ exports[`File import > ofx import works 1`] = `
   {
     "acct": "one",
     "amount": -3000,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190123,
@@ -671,6 +693,7 @@ exports[`File import > ofx import works 1`] = `
   {
     "acct": "one",
     "amount": -377,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190123,
@@ -697,6 +720,7 @@ exports[`File import > ofx import works 1`] = `
   {
     "acct": "one",
     "amount": -962,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190123,
@@ -723,6 +747,7 @@ exports[`File import > ofx import works 1`] = `
   {
     "acct": "one",
     "amount": -11599,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -749,6 +774,7 @@ exports[`File import > ofx import works 1`] = `
   {
     "acct": "one",
     "amount": -1034,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -775,6 +801,7 @@ exports[`File import > ofx import works 1`] = `
   {
     "acct": "one",
     "amount": -2253,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -801,6 +828,7 @@ exports[`File import > ofx import works 1`] = `
   {
     "acct": "one",
     "amount": -10871,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -827,6 +855,7 @@ exports[`File import > ofx import works 1`] = `
   {
     "acct": "one",
     "amount": -2500,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -853,6 +882,7 @@ exports[`File import > ofx import works 1`] = `
   {
     "acct": "one",
     "amount": -3238,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -879,6 +909,7 @@ exports[`File import > ofx import works 1`] = `
   {
     "acct": "one",
     "amount": -607,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -910,6 +941,7 @@ exports[`File import > qfx import works 1`] = `
   {
     "acct": "one",
     "amount": -3000,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190123,
@@ -936,6 +968,7 @@ exports[`File import > qfx import works 1`] = `
   {
     "acct": "one",
     "amount": -377,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190123,
@@ -962,6 +995,7 @@ exports[`File import > qfx import works 1`] = `
   {
     "acct": "one",
     "amount": -962,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190123,
@@ -988,6 +1022,7 @@ exports[`File import > qfx import works 1`] = `
   {
     "acct": "one",
     "amount": -11599,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -1014,6 +1049,7 @@ exports[`File import > qfx import works 1`] = `
   {
     "acct": "one",
     "amount": -1034,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -1040,6 +1076,7 @@ exports[`File import > qfx import works 1`] = `
   {
     "acct": "one",
     "amount": -2253,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -1066,6 +1103,7 @@ exports[`File import > qfx import works 1`] = `
   {
     "acct": "one",
     "amount": -10871,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -1092,6 +1130,7 @@ exports[`File import > qfx import works 1`] = `
   {
     "acct": "one",
     "amount": -2500,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -1118,6 +1157,7 @@ exports[`File import > qfx import works 1`] = `
   {
     "acct": "one",
     "amount": -3238,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -1144,6 +1184,7 @@ exports[`File import > qfx import works 1`] = `
   {
     "acct": "one",
     "amount": -607,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20190122,
@@ -1175,6 +1216,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -2500,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181219,
@@ -1201,6 +1243,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -4500,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181219,
@@ -1227,6 +1270,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -3133,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181219,
@@ -1253,6 +1297,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -631,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181219,
@@ -1279,6 +1324,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -4192,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181219,
@@ -1305,6 +1351,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -2401,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181219,
@@ -1331,6 +1378,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -1200,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181219,
@@ -1357,6 +1405,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": 87485,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181220,
@@ -1383,6 +1432,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -1263,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181220,
@@ -1409,6 +1459,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -3600,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181220,
@@ -1435,6 +1486,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -521,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181221,
@@ -1461,6 +1513,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -3470,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181221,
@@ -1487,6 +1540,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -541,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181221,
@@ -1513,6 +1567,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -10529,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181221,
@@ -1539,6 +1594,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -736,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181221,
@@ -1565,6 +1621,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -1285,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181221,
@@ -1591,6 +1648,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -1299,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181221,
@@ -1617,6 +1675,7 @@ exports[`File import > qif import works 1`] = `
   {
     "acct": "one",
     "amount": -6278,
+    "approved": 1,
     "category": null,
     "cleared": 1,
     "date": 20181221,
