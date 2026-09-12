@@ -5,7 +5,12 @@ import type {
 } from '@actual-app/core/types/models';
 import { describe, expect, it } from 'vitest';
 
-import { buildAccountSide, getEffectiveGroupId } from './useSidebarAccountTree';
+import {
+  buildAccountSide,
+  filterSidebarTree,
+  getEffectiveGroupId,
+} from './useSidebarAccountTree';
+import type { SidebarAccountTree } from './useSidebarAccountTree';
 
 function makeAccount(
   name: string,
@@ -80,5 +85,44 @@ describe('buildAccountSide', () => {
     expect(side.buckets.map(bucket => bucket.group?.id)).toEqual(['g1']);
     expect(side.buckets[0].failedCount).toBe(1);
     expect(side.failedCount).toBe(1);
+  });
+});
+
+describe('filterSidebarTree', () => {
+  const groups = [makeGroup('g1', 'Savings')];
+  const tree: SidebarAccountTree = {
+    onBudget: buildAccountSide(
+      [
+        makeAccount('Checking'),
+        makeAccount('Premium Saver', { account_group_id: 'g1' }),
+      ],
+      groups,
+    ),
+    offBudget: buildAccountSide([makeAccount('House')], groups),
+    closed: [makeAccount('Old Checking', { closed: 1 })],
+  };
+
+  it('returns the tree unchanged for an empty query', () => {
+    expect(filterSidebarTree(tree, '')).toBe(tree);
+  });
+
+  it('filters rows but keeps side counts for the full side', () => {
+    const filtered = filterSidebarTree(tree, 'saver');
+
+    expect(
+      filtered.onBudget.buckets.flatMap(bucket =>
+        bucket.accounts.map(account => account.name),
+      ),
+    ).toEqual(['Premium Saver']);
+    expect(filtered.onBudget.accountCount).toBe(2);
+    expect(filtered.offBudget.buckets).toEqual([]);
+    expect(filtered.closed).toEqual([]);
+  });
+
+  it('matches closed accounts too', () => {
+    const filtered = filterSidebarTree(tree, 'old');
+    expect(filtered.closed.map(account => account.name)).toEqual([
+      'Old Checking',
+    ]);
   });
 });
