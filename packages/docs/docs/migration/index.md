@@ -1,4 +1,4 @@
-# Migration Overview
+# Switching from Another App
 
 Keeping your existing transaction history is important. If you already use a different app, you probably want to migrate it over into Actual.
 

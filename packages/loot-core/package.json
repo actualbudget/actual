@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/core",
-  "version": "26.8.1",
+  "version": "26.9.0",
   "description": "",
   "license": "ISC",
   "repository": {
@@ -201,7 +201,7 @@
     "@rschedule/standard-date-adapter": "^1.5.0",
     "absurd-sql": "0.0.54",
     "better-sqlite3": "^12.11.1",
-    "csv-parse": "^7.0.1",
+    "csv-parse": "^7.0.2",
     "csv-stringify": "^6.8.1",
     "date-fns": "^4.4.0",
     "es-toolkit": "^1.49.0",
@@ -210,7 +210,7 @@
     "hyperformula": "^3.3.0",
     "lru-cache": "^11.5.2",
     "mitt": "^3.0.1",
-    "uuid": "^14.0.1",
+    "uuid": "^14.0.2",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
@@ -239,7 +239,7 @@
     "util": "^0.12.5",
     "vite": "^8.1.5",
     "vite-plugin-node-polyfills": "patch:vite-plugin-node-polyfills@npm%3A0.28.0#~/.yarn/patches/vite-plugin-node-polyfills-npm-0.28.0-bac39616ee.patch",
-    "vitest": "^4.1.10",
+    "vitest": "^5.0.0",
     "yargs": "^18.0.0"
   }
 }

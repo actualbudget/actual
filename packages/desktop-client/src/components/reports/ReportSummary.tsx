@@ -13,10 +13,11 @@ import type {
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 
-import { ReportOptions } from './ReportOptions';
+import { getIntervalFormat, ReportOptions } from './ReportOptions';
 
 type ReportSummaryProps = {
   startDate: string;
@@ -38,6 +39,8 @@ export function ReportSummary({
   const locale = useLocale();
   const { t } = useTranslation();
   const format = useFormat();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const intervalFormat = getIntervalFormat(interval, dateFormat);
 
   const net =
     balanceTypeOp === 'netAssets'
@@ -71,27 +74,10 @@ export function ReportSummary({
             fontWeight: 600,
           }}
         >
-          {monthUtils.format(
-            startDate,
-            ReportOptions.intervalFormat.get(interval) || '',
-            locale,
-          )}
-          {monthUtils.format(
-            startDate,
-            ReportOptions.intervalFormat.get(interval) || '',
-            locale,
-          ) !==
-            monthUtils.format(
-              endDate,
-              ReportOptions.intervalFormat.get(interval) || '',
-              locale,
-            ) &&
-            ` ${t('to')} ` +
-              monthUtils.format(
-                endDate,
-                ReportOptions.intervalFormat.get(interval) || '',
-                locale,
-              )}
+          {monthUtils.format(startDate, intervalFormat, locale)}
+          {monthUtils.format(startDate, intervalFormat, locale) !==
+            monthUtils.format(endDate, intervalFormat, locale) &&
+            ` ${t('to')} ` + monthUtils.format(endDate, intervalFormat, locale)}
         </Text>
       </View>
       <View

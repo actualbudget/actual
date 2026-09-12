@@ -4,6 +4,7 @@ description: Our 3-month trial of paying core maintainers has been a success. We
 date: 2025-10-06T10:00
 slug: continuing-to-reward-contributors
 tags: [announcement]
+in_app_notification: true
 hide_table_of_contents: false
 authors: MatissJanis
 ---

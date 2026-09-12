@@ -3,6 +3,7 @@ import type { FeatureFlag } from '@actual-app/core/types/prefs';
 import { useSyncedPref } from './useSyncedPref';
 
 const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
+  newSidebarUI: false,
   goalTemplatesEnabled: false,
   goalTemplatesUIEnabled: false,
   actionTemplating: false,

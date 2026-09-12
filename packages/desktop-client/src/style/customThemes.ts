@@ -5,6 +5,10 @@
 export const BASE_THEME_OPTIONS = ['light', 'dark', 'midnight'] as const;
 export type BaseTheme = (typeof BASE_THEME_OPTIONS)[number];
 
+export function isBaseTheme(value: string): value is BaseTheme {
+  return (BASE_THEME_OPTIONS as readonly string[]).includes(value);
+}
+
 export type CatalogTheme = {
   name: string;
   repo: string;
@@ -674,11 +678,9 @@ export function parseInstalledTheme(
       };
       if (
         typeof parsed.baseTheme === 'string' &&
-        BASE_THEME_OPTIONS.includes(
-          parsed.baseTheme as (typeof BASE_THEME_OPTIONS)[number],
-        )
+        isBaseTheme(parsed.baseTheme)
       ) {
-        result.baseTheme = parsed.baseTheme as BaseTheme;
+        result.baseTheme = parsed.baseTheme;
       }
       return result;
     }
