@@ -400,5 +400,18 @@
       "#c3e88d"
     ],
     "mode": "dark"
+  },
+  {
+    "name": "Karma",
+    "repo": "sreetamdas/karma",
+    "colors": [
+      "#0a0e14",
+      "#af98e6",
+      "#7bd88f",
+      "#fc618d",
+      "#fd9353",
+      "#5ad4e6"
+    ],
+    "mode": "dark"
   }
 ]
