@@ -12,6 +12,7 @@ import * as undo from '@actual-app/core/platform/client/undo';
 import { getLatestAppVersion, sync } from '#app/appSlice';
 import { ProtectedRoute } from '#auth/ProtectedRoute';
 import { Permissions } from '#auth/types';
+import { useAutomaticBankSync } from '#hooks/useAutomaticBankSync';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
@@ -108,6 +109,7 @@ export function FinancesApp() {
 
   const multiuserEnabled = useMultiuserEnabled();
 
+  useAutomaticBankSync();
   useNewsNotification();
 
   const init = useEffectEvent(() => {
