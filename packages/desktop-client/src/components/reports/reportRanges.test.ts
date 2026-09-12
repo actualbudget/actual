@@ -2,6 +2,7 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { describe, expect, it } from 'vitest';
 
 import {
+  boundMonthRange,
   calculateSpendingReportTimeRange,
   calculateTimeRange,
   getFullFutureRange,
@@ -160,5 +161,25 @@ describe('getFullFutureRange', () => {
       monthUtils.addMonths(start, 24),
       'static',
     ]);
+  });
+});
+
+describe('boundMonthRange', () => {
+  it('keeps a range that is already within bounds', () => {
+    expect(boundMonthRange('2026-08', '2026-09', '2026-08', '2026-09')).toEqual(
+      ['2026-08', '2026-09'],
+    );
+  });
+
+  it('bounds both ends to the available range', () => {
+    expect(boundMonthRange('2026-08', '2026-09', '2025-10', '2027-01')).toEqual(
+      ['2026-08', '2026-09'],
+    );
+  });
+
+  it('collapses to a single month when the bounded end is before start', () => {
+    expect(boundMonthRange('2026-08', '2026-09', '2026-09', '2026-07')).toEqual(
+      ['2026-09', '2026-09'],
+    );
   });
 });

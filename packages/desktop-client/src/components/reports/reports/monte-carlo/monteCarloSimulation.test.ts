@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  getHistoricalMixStats,
+  getHistoricalPresetStats,
   getMonteCarloHorizonYears,
+  getPotAssetWeights,
   MAX_AMOUNT,
   MAX_HORIZON_YEARS,
   MIN_HORIZON_YEARS,
@@ -36,6 +39,9 @@ function makePot(overrides: Partial<MonteCarloPot> = {}): MonteCarloPot {
     name: 'Test pot',
     startingBalance: 50_000_000,
     allocationPreset: 'custom',
+    allocationStocks: 0.6,
+    allocationBonds: 0.4,
+    allocationCash: 0,
     expectedReturnMean: 0.06,
     returnStdDev: 0.1,
     accessAge: null,
@@ -534,6 +540,231 @@ describe('runMonteCarloSimulation', () => {
     ]);
   });
 
+  it('captures the planned spending, inflation-adjusted, on each row', () => {
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 10_000,
+          horizonYears: 3,
+          inflationMean: 0.1,
+          inflationStdDev: 0,
+          captureRunDetail: 0,
+        },
+        { startingBalance: 1_000_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    expect(rows.map(row => row.plannedSpending)).toEqual([
+      10_000, 11_000, 12_100,
+    ]);
+    // Fully funded and untaxed, so the withdrawal matches the plan
+    expect(rows.map(row => row.withdrawal)).toEqual([10_000, 11_000, 12_100]);
+  });
+
+  it('captures each contribution separately on the rows', () => {
+    // One flat and one inflation-adjusted contribution into the same pot,
+    // with different age windows
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 0,
+          horizonYears: 3,
+          inflationMean: 0.1,
+          inflationStdDev: 0,
+          contributions: [
+            makeContribution({
+              id: 'contribution-1',
+              annualAmount: 10_000,
+              adjustsWithInflation: false,
+            }),
+            makeContribution({
+              id: 'contribution-2',
+              annualAmount: 5_000,
+              fromAge: 61,
+              adjustsWithInflation: true,
+            }),
+          ],
+          captureRunDetail: 0,
+        },
+        { startingBalance: 100_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    // Age 60: only the flat one; 61: 5,000 x 1.1; 62: 5,000 x 1.21
+    expect(rows.map(row => row.contributionAmounts)).toEqual([
+      [10_000, 0],
+      [10_000, 5_500],
+      [10_000, 6_050],
+    ]);
+    // Each year's parts reconcile with the row's contribution total
+    for (const row of rows) {
+      const partsTotal = row.contributionAmounts.reduce(
+        (sum, amount) => sum + amount,
+        0,
+      );
+      expect(partsTotal).toBe(row.contributions);
+    }
+  });
+
+  it('captures zero planned spending through accumulation phases', () => {
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          spendingPhases: [
+            { id: 'phase-1', name: '', fromAge: null, annualWithdrawal: 0 },
+            { id: 'phase-2', name: '', fromAge: 62, annualWithdrawal: 24_000 },
+          ],
+          horizonYears: 4,
+          captureRunDetail: 0,
+        },
+        { startingBalance: 1_000_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    // Ages 60-61 accumulate, ages 62-63 spend
+    expect(result.runDetail!.map(row => row.plannedSpending)).toEqual([
+      0, 0, 24_000, 24_000,
+    ]);
+  });
+
+  it('planned spending stays below the withdrawal when the minimum overrides a rule cut', () => {
+    // A crash pushes the withdrawal rate above the guardrails trigger, so
+    // the rule cuts spending - but the minimum pulls it back up. The
+    // captured plan is the rule's cut amount, the withdrawal the minimum
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 4_000,
+          horizonYears: 2,
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
+          minimumWithdrawal: 4_000,
+          captureRunDetail: 0,
+        },
+        { startingBalance: 100_000, expectedReturnMean: -0.5, returnStdDev: 0 },
+      ),
+    );
+
+    const cutYear = result.runDetail![1];
+    expect(cutYear.minimumApplied).toBe(true);
+    if (cutYear.ruleExplanation?.kind !== 'factor') {
+      throw new Error('expected a factor rule explanation');
+    }
+    expect(cutYear.plannedSpending).toBe(cutYear.ruleExplanation.adjusted);
+    expect(cutYear.withdrawal).toBe(4_000);
+    expect(cutYear.plannedSpending).toBeLessThan(cutYear.withdrawal);
+  });
+
+  it('planned spending stays above the withdrawal on a shortfall year', () => {
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 10_000,
+          horizonYears: 2,
+          captureRunDetail: 0,
+        },
+        { startingBalance: 5_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    const shortfallYear = result.runDetail![0];
+    expect(shortfallYear.plannedSpending).toBe(10_000);
+    expect(shortfallYear.withdrawal).toBe(5_000);
+    expect(shortfallYear.endBalance).toBe(0);
+
+    // The year after the failure is still captured - as a synthetic
+    // unfunded row for the cashflow chart
+    const unfundedYear = result.runDetail![1];
+    expect(unfundedYear.afterDepletion).toBe(true);
+    expect(unfundedYear.plannedSpending).toBe(10_000);
+    expect(unfundedYear.withdrawal).toBe(0);
+    expect(unfundedYear.endBalance).toBe(0);
+  });
+
+  it('captures the unfunded years after a failure at frozen prices', () => {
+    // Fails in year 2; the remaining years chart the plan's spending at
+    // the price level reached by the failure year, since no further
+    // inflation is realized on a dead run
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 10_000,
+          horizonYears: 4,
+          inflationMean: 0.1,
+          inflationStdDev: 0,
+          captureRunDetail: 0,
+        },
+        { startingBalance: 15_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    expect(rows).toHaveLength(4);
+    // Year 1 spends 10,000; year 2 needs 11,000 but only 5,000 remains
+    expect(rows.map(row => row.afterDepletion ?? false)).toEqual([
+      false,
+      false,
+      true,
+      true,
+    ]);
+    expect(rows.map(row => row.withdrawal)).toEqual([10_000, 5_000, 0, 0]);
+    // The failure year still realizes its own inflation (cumulative
+    // 1.21 after year 2); the unfunded years stay at that level rather
+    // than compounding on
+    expect(rows.map(row => row.plannedSpending)).toEqual([
+      10_000, 11_000, 12_100, 12_100,
+    ]);
+    // No inflation is realized on synthetic years
+    expect(rows[2].inflation).toBeNull();
+    expect(rows[3].inflation).toBeNull();
+    // Per-pot arrays keep their shape
+    expect(rows[3].potWithdrawals).toEqual([0]);
+    expect(rows[3].potBalances).toEqual([0]);
+  });
+
+  it('keeps the rule-adjusted plan on the unfunded years after a failure', () => {
+    // Guardrails keeps cutting spending as the crash drives the withdrawal
+    // rate up, until the pot can't fund even the cut amount. The tail must
+    // carry that running cut forward, not jump back to the full schedule
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 4_000,
+          horizonYears: 12,
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
+          captureRunDetail: 0,
+        },
+        { startingBalance: 100_000, expectedReturnMean: -0.5, returnStdDev: 0 },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    const fundedRows = rows.filter(row => !row.afterDepletion);
+    const failureRow = fundedRows[fundedRows.length - 1];
+    const unfundedRows = rows.filter(row => row.afterDepletion);
+    expect(unfundedRows.length).toBeGreaterThan(0);
+    // The failure year's plan already carried several compounded cuts
+    expect(failureRow.plannedSpending).toBeLessThan(4_000);
+    for (const row of unfundedRows) {
+      expect(row.plannedSpending).toBe(failureRow.plannedSpending);
+    }
+  });
+
+  it('captures no synthetic rows for a surviving run', () => {
+    const result = runMonteCarloSimulation(
+      makeParams(
+        { annualWithdrawal: 1_000, horizonYears: 5, captureRunDetail: 0 },
+        { startingBalance: 100_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+
+    expect(result.runDetail!).toHaveLength(5);
+    expect(
+      result.runDetail!.every(row => row.afterDepletion === undefined),
+    ).toBe(true);
+  });
+
   it('keeps custom pots on normal draws in historical modes', () => {
     // An absurd history that would explode the balance if it were used
     const historical = runMonteCarloSimulation(
@@ -551,6 +782,106 @@ describe('runMonteCarloSimulation', () => {
       makeParams({}, { expectedReturnMean: 0.05, returnStdDev: 0 }),
     );
     expect(historical.percentileBands).toEqual(normal.percentileBands);
+  });
+
+  it('blends a custom mix like the preset with the same weights', () => {
+    // A custom 80/20 mix must be indistinguishable from the equity-80
+    // preset under a historical model - same blended series, same runs
+    const preset = runMonteCarloSimulation(
+      makeParams(
+        { returnModel: 'historical-sequence' },
+        { allocationPreset: 'equity-80' },
+      ),
+    );
+    const customMix = runMonteCarloSimulation(
+      makeParams(
+        { returnModel: 'historical-sequence' },
+        {
+          allocationPreset: 'custom-mix',
+          allocationStocks: 0.8,
+          allocationBonds: 0.2,
+          allocationCash: 0,
+        },
+      ),
+    );
+    expect(customMix.percentileBands).toEqual(preset.percentileBands);
+    expect(customMix.successRate).toBe(preset.successRate);
+  });
+
+  it('falls back to normal draws when a custom mix does not total 100%', () => {
+    // An incomplete mix is treated like a Custom pot: an absurd history
+    // must not leak into its returns until the shares total 100%
+    const incomplete = runMonteCarloSimulation(
+      makeParams(
+        {
+          returnModel: 'historical-bootstrap',
+          historicalReturns: [
+            { year: 2000, stocks: 9, bonds: 9, cash: 9, inflation: 0 },
+          ],
+        },
+        {
+          allocationPreset: 'custom-mix',
+          allocationStocks: 0.85,
+          allocationBonds: 0.15,
+          allocationCash: 1,
+          expectedReturnMean: 0.05,
+          returnStdDev: 0,
+        },
+      ),
+    );
+    const normal = runMonteCarloSimulation(
+      makeParams({}, { expectedReturnMean: 0.05, returnStdDev: 0 }),
+    );
+    expect(incomplete.percentileBands).toEqual(normal.percentileBands);
+  });
+
+  it('keeps a zero-share custom mix on normal draws in historical modes', () => {
+    // With no usable mix the pot behaves like a Custom pot: an absurd
+    // history must not leak into its returns
+    const historical = runMonteCarloSimulation(
+      makeParams(
+        {
+          returnModel: 'historical-bootstrap',
+          historicalReturns: [
+            { year: 2000, stocks: 9, bonds: 9, cash: 9, inflation: 0 },
+          ],
+        },
+        {
+          allocationPreset: 'custom-mix',
+          allocationStocks: 0,
+          allocationBonds: 0,
+          allocationCash: 0,
+          expectedReturnMean: 0.05,
+          returnStdDev: 0,
+        },
+      ),
+    );
+    const normal = runMonteCarloSimulation(
+      makeParams({}, { expectedReturnMean: 0.05, returnStdDev: 0 }),
+    );
+    expect(historical.percentileBands).toEqual(normal.percentileBands);
+  });
+
+  it('a custom mix under the normal model uses the manual assumptions', () => {
+    // The mix only drives historical models; random draws still come
+    // from the pot's own expected return and volatility
+    const customMix = runMonteCarloSimulation(
+      makeParams(
+        {},
+        {
+          allocationPreset: 'custom-mix',
+          allocationStocks: 0.85,
+          allocationBonds: 0.15,
+          allocationCash: 0,
+          expectedReturnMean: 0.05,
+          returnStdDev: 0,
+        },
+      ),
+    );
+    const custom = runMonteCarloSimulation(
+      makeParams({}, { expectedReturnMean: 0.05, returnStdDev: 0 }),
+    );
+    expect(customMix.percentileBands).toEqual(custom.percentileBands);
   });
 
   it('guardrails raise withdrawals when the pot races ahead', () => {
@@ -620,6 +951,176 @@ describe('runMonteCarloSimulation', () => {
     expect(withRule.medianDepletionYear ?? Infinity).toBeGreaterThan(10);
     // The extra years come at the cost of income
     expect(withRule.medianTotalWithdrawn).toBeLessThanOrEqual(100_000);
+  });
+
+  it('floor-ceiling anchors its rate in the first spending year', () => {
+    // User-reported bug: with a zero-spend phase before retirement, the
+    // rule anchored to year 1's planned spending of 0, so every
+    // retirement year withdrew the floor (planned x 0.85). The anchor
+    // must instead be set where spending starts.
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 0,
+          horizonYears: 30,
+          currentAge: 55,
+          spendingPhases: [
+            { id: 'working', name: '', fromAge: null, annualWithdrawal: 0 },
+            {
+              id: 'retired',
+              name: '',
+              fromAge: 65,
+              annualWithdrawal: 60_000,
+            },
+          ],
+          withdrawalRule: {
+            ...WITHDRAWAL_RULE_DEFAULTS,
+            type: 'floor-ceiling',
+          },
+          captureRunDetail: 0,
+        },
+        {
+          startingBalance: 1_000_000,
+          expectedReturnMean: 0.05,
+          returnStdDev: 0,
+        },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    // Accumulation years take nothing
+    for (const row of rows.slice(0, 10)) {
+      expect(row.withdrawal).toBe(0);
+    }
+    // The first retirement year withdraws exactly the planned amount
+    expect(rows[10].withdrawal).toBe(60_000);
+    // ...and explains that it anchored the rule's rate there
+    const anchorRate = 60_000 / (1_000_000 * 1.05 ** 10);
+    const anchorExplanation = rows[10].ruleExplanation;
+    if (anchorExplanation?.kind !== 'anchor') {
+      throw new Error(
+        'expected an anchor explanation on the first spending year',
+      );
+    }
+    expect(anchorExplanation.rate).toBeCloseTo(anchorRate, 12);
+    // Zero-spend years carry no explanation
+    expect(rows[0].ruleExplanation).toBeUndefined();
+    // With steady growth the rate rule rises above the plan - it must
+    // not sit pinned at the 51,000 floor
+    expect(rows[11].withdrawal).toBeGreaterThan(60_000);
+    // The following year explains the clamp arithmetic
+    const year12Balance = (1_000_000 * 1.05 ** 10 - 60_000) * 1.05;
+    const clampExplanation = rows[11].ruleExplanation;
+    if (clampExplanation?.kind !== 'floor-ceiling') {
+      throw new Error('expected a floor-ceiling explanation');
+    }
+    expect(clampExplanation).toMatchObject({
+      unclamped: Math.round(anchorRate * year12Balance),
+      floor: 51_000,
+      ceiling: 72_000,
+      applied: 'rate',
+    });
+    expect(clampExplanation.rate).toBeCloseTo(anchorRate, 12);
+    for (const row of rows.slice(11)) {
+      expect(row.withdrawal).toBeGreaterThanOrEqual(51_000);
+      expect(row.withdrawal).toBeLessThanOrEqual(72_000);
+    }
+  });
+
+  it('boundaries does not compound raises through zero-spend years', () => {
+    // A zero-spend year has a withdrawal rate of 0 - below any lower
+    // threshold - which must not be read as a "raise spending" signal
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 0,
+          horizonYears: 12,
+          currentAge: 55,
+          spendingPhases: [
+            { id: 'working', name: '', fromAge: null, annualWithdrawal: 0 },
+            {
+              id: 'retired',
+              name: '',
+              fromAge: 65,
+              annualWithdrawal: 40_000,
+            },
+          ],
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'boundaries' },
+          captureRunDetail: 0,
+        },
+        {
+          startingBalance: 1_000_000,
+          expectedReturnMean: 0,
+          returnStdDev: 0,
+        },
+      ),
+    );
+
+    expect(result.runDetail![10].withdrawal).toBe(40_000);
+    // The anchor year carries no explanation; the next year evaluates
+    // the rule (rate 40,000/960,000 = 4.17%, inside the 4-6% band)
+    expect(result.runDetail![10].ruleExplanation).toBeUndefined();
+    expect(result.runDetail![11].ruleExplanation).toEqual({
+      kind: 'factor',
+      rule: 'boundaries',
+      factor: 1,
+      planned: 40_000,
+      adjusted: 40_000,
+      action: 'none',
+      currentRate: 40_000 / 960_000,
+    });
+  });
+
+  it('ratcheting does not ratchet before spending starts', () => {
+    // Strong accumulation growth blows past the balance threshold long
+    // before retirement; the streak must not start counting until
+    // spending does
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 0,
+          horizonYears: 10,
+          currentAge: 60,
+          spendingPhases: [
+            { id: 'working', name: '', fromAge: null, annualWithdrawal: 0 },
+            {
+              id: 'retired',
+              name: '',
+              fromAge: 65,
+              annualWithdrawal: 10_000,
+            },
+          ],
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'ratcheting' },
+          captureRunDetail: 0,
+        },
+        {
+          startingBalance: 100_000,
+          expectedReturnMean: 0.2,
+          returnStdDev: 0,
+        },
+      ),
+    );
+
+    expect(result.runDetail![5].withdrawal).toBe(10_000);
+    // Streaks start counting once spending does: 1 and 2 above the
+    // threshold, then the third year ratchets
+    expect(result.runDetail![6].ruleExplanation).toEqual({
+      kind: 'factor',
+      rule: 'ratcheting',
+      factor: 1,
+      planned: 10_000,
+      adjusted: 10_000,
+      action: 'none',
+      ratchetStreak: 1,
+    });
+    expect(result.runDetail![8].ruleExplanation).toEqual({
+      kind: 'factor',
+      rule: 'ratcheting',
+      factor: 1.05,
+      planned: 10_000,
+      adjusted: 10_500,
+      action: 'raise',
+    });
   });
 
   it('floor-ceiling scales withdrawals with the pot within limits', () => {
@@ -746,6 +1247,20 @@ describe('runMonteCarloSimulation', () => {
     expect(rows[0].withdrawal).toBe(10_000);
     // Year 2's 50% cut lands well below the floor, so the floor binds
     expect(rows[1].withdrawal).toBe(8_000);
+    expect(rows[1].ruleExplanation).toEqual({
+      kind: 'factor',
+      rule: 'guardrails',
+      factor: 0.5,
+      planned: 10_000,
+      adjusted: 5_000,
+      action: 'cut',
+      currentRate: (10_000 * 1.05) / 90_000,
+      referenceRate: 10_000 / 100_000,
+    });
+    expect(rows[1].minimumApplied).toBe(true);
+    // The anchor year has neither
+    expect(rows[0].ruleExplanation).toBeUndefined();
+    expect(rows[0].minimumApplied).toBeUndefined();
     for (const row of rows.slice(1)) {
       expect(row.withdrawal).toBeGreaterThanOrEqual(8_000);
     }
@@ -1152,10 +1667,13 @@ describe('runMonteCarloSimulation', () => {
       expect(row.growth).toBe(Math.round(balance - afterWithdrawal));
     }
 
-    // Rows stop at the depletion year
-    const lastRow = rows![rows!.length - 1];
-    expect(lastRow.year).toBe(result.medianDepletionYear);
-    expect(lastRow.endBalance).toBe(0);
+    // Funded rows stop at the depletion year; the capture continues to
+    // the horizon with synthetic unfunded rows for the cashflow chart
+    const fundedRows = rows!.filter(row => !row.afterDepletion);
+    const lastFundedRow = fundedRows[fundedRows.length - 1];
+    expect(lastFundedRow.year).toBe(result.medianDepletionYear);
+    expect(lastFundedRow.endBalance).toBe(0);
+    expect(rows!).toHaveLength(30);
   });
 
   it('replays a volatile run identically to the original', () => {
@@ -1176,8 +1694,10 @@ describe('runMonteCarloSimulation', () => {
         Math.round(original.endingBalances[simulationIndex]),
       );
     } else {
-      expect(rows).toHaveLength(depletionYear);
-      expect(rows[rows.length - 1].endBalance).toBe(0);
+      expect(rows).toHaveLength(original.horizonYears);
+      const fundedRows = rows.filter(row => !row.afterDepletion);
+      expect(fundedRows).toHaveLength(depletionYear);
+      expect(fundedRows[fundedRows.length - 1].endBalance).toBe(0);
     }
   });
 
@@ -1206,7 +1726,8 @@ describe('runMonteCarloSimulation', () => {
     );
 
     const rows = result.runDetail!;
-    const failureRow = rows[rows.length - 1];
+    const fundedRows = rows.filter(row => !row.afterDepletion);
+    const failureRow = fundedRows[fundedRows.length - 1];
     // y1 70, y2 40, y3 10 accessible; year 4 fails with 10 reachable
     expect(failureRow.year).toBe(4);
     expect(failureRow.withdrawal).toBe(10);
@@ -1456,8 +1977,10 @@ describe('runMonteCarloSimulation', () => {
 
     expect(result.successRate).toBe(0);
     expect(result.medianDepletionYear).toBe(10);
+    // 10 funded years plus 2 synthetic unfunded years to the horizon
     const rows = result.runDetail!;
-    expect(rows).toHaveLength(10);
+    expect(rows).toHaveLength(12);
+    expect(rows.filter(row => !row.afterDepletion)).toHaveLength(10);
     for (const row of rows.slice(0, 9)) {
       expect(row.withdrawal).toBe(10_000);
       expect(row.taxPaid).toBe(2_000);
@@ -1818,6 +2341,8 @@ describe('runMonteCarloSimulation', () => {
     );
 
     const rows = result.runDetail!;
+    // No withdrawal rule configured - rows carry no rule explanation
+    expect(rows[0].ruleExplanation).toBeUndefined();
     expect(rows.map(row => row.startBalance)).toEqual([
       100_000, 110_000, 120_000,
     ]);
@@ -2181,5 +2706,100 @@ describe('runMonteCarloSimulation', () => {
         expect(Math.abs(value)).toBeLessThanOrEqual(maxFormattable);
       }
     }
+  });
+});
+
+describe('getHistoricalPresetStats', () => {
+  const history = [
+    { year: 2000, stocks: 0.1, bonds: 0.05, cash: 0.02, inflation: 0 },
+    { year: 2001, stocks: -0.1, bonds: 0.01, cash: 0.02, inflation: 0 },
+  ];
+
+  it('blends the series by the preset weights', () => {
+    // equity-60: 0.6 x stocks + 0.4 x bonds -> [0.08, -0.056]
+    const stats = getHistoricalPresetStats('equity-60', history);
+    expect(stats.mean).toBeCloseTo(0.012, 12);
+    // Sample standard deviation of two points equidistant from the mean
+    expect(stats.stdDev).toBeCloseTo(0.068 * Math.sqrt(2), 12);
+  });
+
+  it('a cash preset tracks the cash series exactly', () => {
+    const stats = getHistoricalPresetStats('cash', history);
+    expect(stats.mean).toBeCloseTo(0.02, 12);
+    expect(stats.stdDev).toBeCloseTo(0, 12);
+  });
+
+  it('returns plausible values for the real dataset', () => {
+    const stats = getHistoricalPresetStats('equity-100');
+    // Long-run US stocks: roughly 8-15% mean, 15-25% volatility
+    expect(stats.mean).toBeGreaterThan(0.08);
+    expect(stats.mean).toBeLessThan(0.15);
+    expect(stats.stdDev).toBeGreaterThan(0.15);
+    expect(stats.stdDev).toBeLessThan(0.25);
+  });
+
+  it('matches getHistoricalMixStats for the same weights', () => {
+    const presetStats = getHistoricalPresetStats('equity-60', history);
+    const mixStats = getHistoricalMixStats(
+      { stocks: 0.6, bonds: 0.4, cash: 0 },
+      history,
+    );
+    expect(mixStats).toEqual(presetStats);
+  });
+});
+
+describe('getPotAssetWeights', () => {
+  const mixPot = (stocks: number, bonds: number, cash: number) =>
+    makePot({
+      allocationPreset: 'custom-mix',
+      allocationStocks: stocks,
+      allocationBonds: bonds,
+      allocationCash: cash,
+    });
+
+  it('returns the fixed mix behind a preset', () => {
+    expect(
+      getPotAssetWeights(makePot({ allocationPreset: 'equity-80' })),
+    ).toEqual({ stocks: 0.8, bonds: 0.2, cash: 0 });
+  });
+
+  it('returns null for custom pots', () => {
+    expect(
+      getPotAssetWeights(makePot({ allocationPreset: 'custom' })),
+    ).toBeNull();
+  });
+
+  it('returns a complete custom mix as-is', () => {
+    expect(getPotAssetWeights(mixPot(0.85, 0.15, 0))).toEqual({
+      stocks: 0.85,
+      bonds: 0.15,
+      cash: 0,
+    });
+  });
+
+  it('tolerates float dust in a complete mix and returns exact weights', () => {
+    // 0.7 + 0.3 = 0.9999999999999999 in floating point
+    const weights = getPotAssetWeights(mixPot(0.7, 0.3, 0));
+    expect(weights).not.toBeNull();
+    if (weights == null) {
+      throw new Error('expected weights');
+    }
+    expect(weights.stocks).toBeCloseTo(0.7, 12);
+    expect(weights.bonds).toBeCloseTo(0.3, 12);
+    expect(weights.stocks + weights.bonds + weights.cash).toBe(1);
+  });
+
+  it('ignores negative and non-finite shares', () => {
+    expect(getPotAssetWeights(mixPot(1, -5, Number.NaN))).toEqual({
+      stocks: 1,
+      bonds: 0,
+      cash: 0,
+    });
+  });
+
+  it('returns null when the shares do not total 100%', () => {
+    expect(getPotAssetWeights(mixPot(0, 0, 0))).toBeNull();
+    expect(getPotAssetWeights(mixPot(0.5, 0.2, 0))).toBeNull();
+    expect(getPotAssetWeights(mixPot(85, 15, 0))).toBeNull();
   });
 });

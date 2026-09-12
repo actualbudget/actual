@@ -26,6 +26,7 @@ import {
   setSyncingMode,
 } from '#server/sync';
 import * as syncMigrations from '#server/sync/migrate';
+import { replayPendingMessages } from '#server/sync/replay';
 import * as rules from '#server/transactions/transaction-rules';
 import { clearUndo } from '#server/undo';
 import { updateVersion } from '#server/update';
@@ -595,6 +596,20 @@ async function _loadBudget(id: Budget['id']): Promise<{
 
     await closeBudget();
     return result;
+  }
+
+  try {
+    // Apply sync messages deferred from a newer app version, now that
+    // migrations have run. Skipped without a sync server: serverless
+    // edits aren't in the crdt log, so replay couldn't tell whether a
+    // pending value is stale.
+    if (getServer()) {
+      replayPendingMessages();
+    }
+  } catch (e) {
+    // Failing to replay shouldn't block loading the budget; the
+    // messages stay pending
+    captureException(e);
   }
 
   await db.loadClock();

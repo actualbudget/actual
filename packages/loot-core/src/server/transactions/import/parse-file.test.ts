@@ -207,6 +207,34 @@ describe('File import', () => {
     expect(await getTransactions('one')).toMatchSnapshot();
   });
 
+  test('handles windows-1252 charset', async () => {
+    await prefs.loadPrefs();
+    await db.insertAccount({ id: 'one', name: 'one' });
+
+    const { errors } = await importFileWithRealTime(
+      'one',
+      __dirname + '/../../../mocks/files/1252.qfx',
+      'yyyy-MM-dd',
+      { importNotes: true },
+    );
+    expect(errors.length).toBe(0);
+    expect(await getTransactions('one')).toMatchSnapshot();
+  });
+
+  test('handles UTF-8 encoding', async () => {
+    await prefs.loadPrefs();
+    await db.insertAccount({ id: 'one', name: 'one' });
+
+    const { errors } = await importFileWithRealTime(
+      'one',
+      __dirname + '/../../../mocks/files/utf-8.qfx',
+      'yyyy-MM-dd',
+      { importNotes: true },
+    );
+    expect(errors.length).toBe(0);
+    expect(await getTransactions('one')).toMatchSnapshot();
+  });
+
   test('handles html escaped plaintext', async () => {
     await prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });
@@ -416,5 +444,20 @@ describe('File import', () => {
     expect(errors.length).toBe(1);
     expect(transactions).toHaveLength(0);
     expect(errors[0].message).toContain('Failed parsing');
+  });
+
+  test('CAMT import respects ISO-8859-1 encoding', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/camt/camt.latin1.xml',
+      { importNotes: true },
+    );
+    expect(errors.length).toBe(0);
+    expect(transactions).toMatchObject([
+      { notes: 'M-Überschusssparen' },
+      {
+        payee_name: 'Grüße aus München',
+        notes: 'Restaurant Schrödingers Katze und Café Ünique',
+      },
+    ]);
   });
 });

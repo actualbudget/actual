@@ -1,0 +1,47 @@
+name: News feed check
+
+# The in-app notifications feed (packages/desktop-client/src/data/news.json) is
+# generated from the blog and committed so it can be reviewed. autofix.ci
+# regenerates it on every PR; this check fails the PR if the committed copy is
+# still out of date (for example if autofix was skipped).
+
+on:
+  pull_request:
+    paths:
+      - 'packages/docs/blog/**'
+      - 'packages/desktop-client/src/data/news.json'
+      - 'packages/ci-actions/src/news-feed/**'
+      - 'packages/ci-actions/bin/generate-news-feed.ts'
+      - '.github/workflows/news-feed-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check-news-feed:
+    runs-on: depot-ubuntu-latest
+    name: Ensure news.json is up to date
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+
+      - name: Regenerate news feed
+        run: yarn generate:news-feed
+
+      - name: Verify the committed feed matches
+        run: |
+          set -euo pipefail
+
+          if ! git diff --quiet -- packages/desktop-client/src/data/news.json; then
+            git --no-pager diff -- packages/desktop-client/src/data/news.json
+            echo "::error file=packages/desktop-client/src/data/news.json::news.json is out of date. Run \`yarn generate:news-feed\` and commit the result (autofix.ci normally does this for you)."
+            exit 1
+          fi
+
+          echo "news.json is up to date."
