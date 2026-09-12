@@ -164,40 +164,29 @@ export function BudgetTable(props: BudgetTableProps) {
   };
 
   const moveVertically = (dir: 1 | -1) => {
-    const flattened = categoryGroups.reduce(
-      (all, group) => {
-        if (collapsedGroupIds.includes(group.id)) {
-          return all.concat({ id: group.id, isGroup: true });
-        }
-        return all.concat([
-          { id: group.id, isGroup: true },
-          ...(group?.categories || []),
-        ]);
-      },
-      [] as Array<
-        { id: CategoryGroupEntity['id']; isGroup: boolean } | CategoryEntity
-      >,
-    );
+    const navigableCategories = categoryGroups.flatMap(group => {
+      const isHiddenExpenseGroup =
+        !group.is_income && group.hidden && !showHiddenCategories;
+
+      if (collapsedGroupIds.includes(group.id) || isHiddenExpenseGroup) {
+        return [];
+      }
+
+      return (group.categories || []).filter(
+        category =>
+          (showHiddenCategories || !category.hidden) &&
+          (type === 'tracking' || !category.is_income),
+      );
+    });
 
     if (editing) {
-      const idx = flattened.findIndex(item => item.id === editing.id);
-      let nextIdx = idx + dir;
+      const idx = navigableCategories.findIndex(
+        category => category.id === editing.id,
+      );
+      const next = navigableCategories[idx + dir];
 
-      while (nextIdx >= 0 && nextIdx < flattened.length) {
-        const next = flattened[nextIdx];
-
-        if ('isGroup' in next && next.isGroup) {
-          nextIdx += dir;
-          continue;
-        } else if (
-          type === 'tracking' ||
-          ('is_income' in next && !next.is_income)
-        ) {
-          onEditMonth(next.id, editing.cell);
-          return;
-        } else {
-          break;
-        }
+      if (next) {
+        onEditMonth(next.id, editing.cell);
       }
     }
   };
