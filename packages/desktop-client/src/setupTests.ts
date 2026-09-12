@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import type { ReactNode } from 'react';
 
 import { resetTestProviders } from './mocks';
