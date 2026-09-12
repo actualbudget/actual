@@ -419,6 +419,79 @@ export function scheduleIsRecurring(dateCond: Condition | null) {
   return value.type === 'recur';
 }
 
+// Two independent effects can put a raw occurrence "in reach" of
+// [startDay, endDay) even though its raw timestamp falls outside the exact,
+// unpadded window — so the raw-date query below must be padded on both ends
+// to compensate for both:
+//   1. Weekend adjustment (getDateWithSkippedWeekend) shifts a raw
+//      occurrence by at most 2 days (Saturday -> Monday for 'after',
+//      Sunday -> Friday for 'before').
+//   2. recurConfigToRSchedule hardcodes `byHourOfDay: [12]`, so every raw
+//      occurrence is timestamped at *noon*, while queryStart/queryEnd below
+//      are computed with `d.startOfDay` (*midnight*). A raw occurrence
+//      dated exactly on endDay therefore has a timestamp (noon) that is
+//      *after* an unpadded, midnight-aligned queryEnd, and would be missed
+//      by the range query even before any weekend shift is considered.
+// Combined, the minimum integer number of days needed is 3 (2 days of
+// weekend shift, plus rounding the extra half-day from the noon offset up
+// to a full day) — pad by exactly that much.
+const WEEKEND_SHIFT_PAD_DAYS = 3;
+
+export function getOccurrencesBetween(
+  dateCond,
+  startDay: string,
+  endDay: string,
+): string[] {
+  const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
+  const value = cond.getValue();
+
+  if (value.type !== 'recur') {
+    const singleDate =
+      typeof dateCond.value === 'string' ? dateCond.value : null;
+    if (singleDate && singleDate >= startDay && singleDate < endDay) {
+      return [singleDate];
+    }
+    return [];
+  }
+
+  // Build the recurrence schedule once — parsing a recurrence rule into an
+  // RSchedule is the dominant cost for sub-monthly schedules over a
+  // multi-year window when done per-occurrence (see task-6-brief.md for the
+  // measured numbers). Pull the whole padded range in a single pass instead
+  // of repeatedly probing one occurrence at a time.
+  const schedule = value.schedule;
+
+  const queryStart = d.startOfDay(
+    monthUtils.parseDate(monthUtils.addDays(startDay, -WEEKEND_SHIFT_PAD_DAYS)),
+  );
+  const queryEnd = d.startOfDay(
+    monthUtils.parseDate(monthUtils.addDays(endDay, WEEKEND_SHIFT_PAD_DAYS)),
+  );
+
+  const rawDates = schedule
+    .occurrences({ start: queryStart, end: queryEnd })
+    .toArray()
+    .map(occurrence => monthUtils.dayFromDate(occurrence.date));
+
+  if (!schedule.data.skipWeekend) {
+    return rawDates.filter(dt => dt >= startDay && dt < endDay);
+  }
+
+  const dates: string[] = [];
+  for (const rawDate of rawDates) {
+    const adjustedDate = monthUtils.dayFromDate(
+      getDateWithSkippedWeekend(
+        monthUtils.parseDate(rawDate),
+        schedule.data.weekendSolve,
+      ),
+    );
+    if (adjustedDate >= startDay && adjustedDate < endDay) {
+      dates.push(adjustedDate);
+    }
+  }
+  return dates;
+}
+
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
 
@@ -463,32 +536,19 @@ export function computeSchedulePreviewTransactions(
       const isRecurring = scheduleIsRecurring(dateConditions);
 
       const dates = [schedule.next_date];
-      let day = d.startOfDay(monthUtils.parseDate(schedule.next_date));
       if (isRecurring) {
-        while (day <= upcomingPeriodEnd) {
-          const nextDate = getNextDate(dateConditions, day);
-
-          if (nextDate === null) {
-            break;
-          }
-
-          if (
-            d.startOfDay(monthUtils.parseDate(nextDate)) > upcomingPeriodEnd
-          ) {
-            break;
-          }
-
-          if (dates.includes(nextDate)) {
-            day = d.startOfDay(
-              monthUtils.parseDate(monthUtils.addDays(day, 1)),
-            );
-            continue;
-          }
-
-          dates.push(nextDate);
-          day = d.startOfDay(
-            monthUtils.parseDate(monthUtils.addDays(nextDate, 1)),
-          );
+        const day = d.startOfDay(monthUtils.parseDate(schedule.next_date));
+        // getOccurrencesBetween's range is [startDay, endDay) — endDay
+        // exclusive — but upcomingPeriodEnd is meant to be an inclusive
+        // boundary (an occurrence landing exactly on it should be included),
+        // so pass the day after it.
+        const occurrences = getOccurrencesBetween(
+          dateConditions,
+          monthUtils.dayFromDate(day),
+          monthUtils.dayFromDate(monthUtils.addDays(upcomingPeriodEnd, 1)),
+        );
+        for (const occurrence of occurrences) {
+          if (!dates.includes(occurrence)) dates.push(occurrence);
         }
       }
 
