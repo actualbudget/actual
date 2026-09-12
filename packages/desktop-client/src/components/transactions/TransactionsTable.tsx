@@ -97,6 +97,7 @@ import {
   DeleteCell,
   Field,
   InputCell,
+  isEditingCell,
   Row,
   SelectCell,
   Table,
@@ -2238,8 +2239,11 @@ function NotesCell({
   onExpose,
 }: NotesCellProps) {
   const [inputValue, setInputValue] = useState(note);
+  const escapePressed = useRef(false);
+
   useEffect(() => {
     setInputValue(note);
+    escapePressed.current = false;
   }, [note, setInputValue]);
 
   const textRef = useRef<HTMLSpanElement | null>(null);
@@ -2261,7 +2265,15 @@ function NotesCell({
     if (e.key === 'Enter' || e.key === 'Tab') {
       onUpdate(inputValue);
     } else if (e.key === 'Escape') {
+      // Only reached once the tag dropdown is closed — while it's open it
+      // swallows Escape, so that press just closes the popup.
+      escapePressed.current = true;
+      if (e.target instanceof HTMLInputElement) {
+        e.target.value = note;
+      }
       setInputValue(note);
+    } else {
+      escapePressed.current = false;
     }
   }
 
@@ -2285,7 +2297,12 @@ function NotesCell({
       onExpose={onExpose}
       onUpdate={onUpdate}
       onKeyDown={onKeyDown}
-      onBlur={() => onUpdate(inputValue)}
+      onBlur={() => {
+        if (!escapePressed.current) {
+          onUpdate(inputValue);
+        }
+        escapePressed.current = false;
+      }}
       unexposedContent={props => (
         <Tooltip
           content={
@@ -2481,11 +2498,6 @@ function NewTransaction({
         backgroundColor: theme.tableBackground,
       }}
       data-testid="new-transaction"
-      onKeyDown={e => {
-        if (e.key === 'Escape') {
-          onClose();
-        }
-      }}
     >
       {transactions.map((transaction, index) => (
         <Transaction
@@ -2906,8 +2918,25 @@ function TransactionTableInner({
 
         {props.isAdding && (
           <View
+            // Focusable so exiting a cell can park focus here and keep
+            // routing keys to the navigator (same as Table does).
+            tabIndex={0}
+            style={{ outline: 'none' }}
             {...newNavigator.getNavigatorProps({
-              onKeyDown: (e: KeyboardEvent) => props.onCheckNewEnter(e),
+              onKeyDown: (e: KeyboardEvent) => {
+                props.onCheckNewEnter(e);
+                // Escape exits the focused cell first; only cancel the whole
+                // row once nothing is being edited, or typed values are lost.
+                if (
+                  e.key === 'Escape' &&
+                  !isEditingCell(
+                    newNavigator.editingId,
+                    newNavigator.focusedField,
+                  )
+                ) {
+                  props.onCloseAddTransaction();
+                }
+              },
             })}
           >
             <NewTransaction

@@ -347,6 +347,7 @@ function DateSelectDesktop({
   const [open, setOpen] = useState(embedded || isOpen || false);
   const innerRef = useRef<HTMLInputElement | null>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(innerRef, ref);
+  const escapePressed = useRef(false);
 
   const [selectedValue, setSelectedValue] = useState(value);
 
@@ -389,6 +390,10 @@ function DateSelectDesktop({
   }, [value]);
 
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== 'Escape') {
+      escapePressed.current = false;
+    }
+
     if (
       ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key) &&
       !e.shiftKey &&
@@ -410,8 +415,13 @@ function DateSelectDesktop({
           setOpen(false);
         }
       } else {
+        // Exiting edit blurs us synchronously, before these state updates
+        // flush, so guard the blur-save with a ref instead.
+        escapePressed.current = true;
         setOpen(true);
         onUpdate?.(defaultValue);
+        // Let the owning cell revert and skip its own blur-save too.
+        inputProps?.onKeyDown?.(e);
       }
     } else if (shouldSaveFromKey(e)) {
       if (selectedValue) {
@@ -497,6 +507,11 @@ function DateSelectDesktop({
             setOpen(false);
           }
           inputProps?.onBlur?.(e);
+
+          if (escapePressed.current) {
+            escapePressed.current = false;
+            return;
+          }
 
           if (clearOnBlur) {
             // If value is empty, reset to previously selected value
