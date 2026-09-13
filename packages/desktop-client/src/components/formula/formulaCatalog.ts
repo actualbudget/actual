@@ -1456,6 +1456,42 @@ export function getRuleFieldCompletions(): Completion[] {
         'The amount of the parent transaction in cents in split transactions.\n\nExample: =(parent_amount / 100) * .05',
       ),
     },
+    {
+      label: 'parent_notes',
+      type: 'variable',
+      section: ruleFieldSection,
+      boost: 5,
+      info: t(
+        'Notes of the parent transaction in split rules. Empty when absent.',
+      ),
+    },
+    {
+      label: 'parent_imported_payee',
+      type: 'variable',
+      section: ruleFieldSection,
+      boost: 5,
+      info: t(
+        'Imported payee text of the parent transaction in split rules. Empty when absent.',
+      ),
+    },
+    {
+      label: 'parent_payee',
+      type: 'variable',
+      section: ruleFieldSection,
+      boost: 5,
+      info: t(
+        'Payee ID of the parent transaction in split rules. Empty when absent.',
+      ),
+    },
+    {
+      label: 'parent_account',
+      type: 'variable',
+      section: ruleFieldSection,
+      boost: 5,
+      info: t(
+        'Account ID of the parent transaction in split rules. Empty when absent.',
+      ),
+    },
   ];
 }
 
