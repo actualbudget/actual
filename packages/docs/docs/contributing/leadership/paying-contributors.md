@@ -6,7 +6,7 @@ A list of the core contributors can be found in [this page](https://github.com/o
 
 ## How the Payment System Works
 
-We allocate a monthly review stipend pool ($1000/month) distributed among reviewers based on the **size of PRs they review** — using **lines of code changed (LOC)** as a proxy for effort. In addition to PR reviews, we recognize contributions around **issue triage** and **resolution**, which are essential to keeping the project healthy and user-friendly.
+We allocate a monthly review stipend pool ($2,000 per month) distributed among reviewers based on the **size of PRs they review** — using **lines of code changed (LOC)** as a proxy for effort. In addition to PR reviews, we recognize contributions around **issue triage** and **resolution**, which are essential to keeping the project healthy and user-friendly.
 
 Points are automatically calculated for all **public members of the Actual Budget organization** through our [GitHub workflow](https://github.com/actualbudget/actual/blob/master/.github/scripts/count-points.mjs). Refer to the workflow documentation for the current point values assigned to different contributor actions.
 
@@ -16,11 +16,11 @@ Jack earned 10 points. Nancy earned 15 points.
 
 Total points earned: 25
 
-Value of each point: $1000 / 25 = $40
+Value of each point: $2,000 / 25 = $80
 
-Jack (Dublin) receives: 10 \* $40 = $400
+Jack (Dublin) receives: 10 \* $80 = $800
 
-Nancy (Amsterdam) receives: 15 \* $40 = $600
+Nancy (Amsterdam) receives: 15 \* $80 = $1,200
 
 ## Questions and Answers
 
@@ -46,9 +46,9 @@ You are responsible for handling your taxes. Tax obligations depend on your loca
 
 #### Will this system use up the entire budget?
 
-No. We currently receive between USD 1,500 and USD 2,000 each month. The allocation for this system is USD 1,000 per month, resulting in a net positive of $500–1,000 per month. You can see the details on our [open collective page](https://opencollective.com/actual).
+No. We currently receive between USD 3,000 and USD 3,500 each month on average. The allocation for this system is USD 2,000 per month, resulting in a net positive of USD 1,000–1,500 per month. You can see the details on our [open collective page](https://opencollective.com/actual).
 
-#### What if a month is slow? Do we still pay out USD 1,000?
+#### What if a month is slow? Do we still pay out USD 2,000?
 
 No. If fewer than 20 points are earned in total by the core maintainers in a month, the total payout drops to USD 500.
 
