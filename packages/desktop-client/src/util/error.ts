@@ -1,4 +1,8 @@
-import { getUnsafeZipMeta, toMB } from '@actual-app/core/shared/errors';
+import {
+  getUnsafeZipMeta,
+  isDatabaseSchemaMismatch,
+  toMB,
+} from '@actual-app/core/shared/errors';
 import type { UnsafeZipMeta } from '@actual-app/core/shared/errors';
 import { t } from 'i18next';
 
@@ -83,21 +87,6 @@ export function getUploadError({ reason, meta }: ErrorWithMeta) {
         { reason },
       );
   }
-}
-
-function isDatabaseSchemaMismatch(meta?: unknown): boolean {
-  if (
-    meta &&
-    typeof meta === 'object' &&
-    'error' in meta &&
-    meta.error &&
-    typeof meta.error === 'object' &&
-    'message' in meta.error &&
-    typeof meta.error.message === 'string'
-  ) {
-    return /no such (column|table)/i.test(meta.error.message);
-  }
-  return false;
 }
 
 function getSchemaMismatchError() {
