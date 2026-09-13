@@ -1005,6 +1005,10 @@ export type TransactionForRules = TransactionEntity & {
   /** The transaction's category's group id; see prepareTransactionForRules */
   category_group?: string;
   parent_amount?: number;
+  parent_notes?: string;
+  parent_imported_payee?: string;
+  parent_payee?: string;
+  parent_account?: string;
   /** Prefetched cent balances for BALANCE_OF("…") in rule formulas; cleared in finalize */
   _balanceOfPrefetched?: Map<string, number>;
 };
@@ -1197,8 +1201,16 @@ export async function finalizeTransactionForRules(
     delete trans._balanceOfPrefetched;
   }
 
-  if ('parent_amount' in trans) {
-    delete trans.parent_amount;
+  for (const field of [
+    'parent_amount',
+    'parent_notes',
+    'parent_imported_payee',
+    'parent_payee',
+    'parent_account',
+  ] as const) {
+    if (field in trans) {
+      delete trans[field];
+    }
   }
 
   if (trans.subtransactions?.length) {
@@ -1211,8 +1223,16 @@ export async function finalizeTransactionForRules(
         delete stx._balanceOfPrefetched;
       }
 
-      if ('parent_amount' in stx) {
-        delete stx.parent_amount;
+      for (const field of [
+        'parent_amount',
+        'parent_notes',
+        'parent_imported_payee',
+        'parent_payee',
+        'parent_account',
+      ] as const) {
+        if (field in stx) {
+          delete stx[field];
+        }
       }
     });
   }
