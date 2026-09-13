@@ -1,4 +1,5 @@
-import { homedir } from 'os';
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { homedir, tmpdir } from 'os';
 import { join } from 'path';
 
 import { resolveConfig } from './config';
@@ -21,7 +22,7 @@ function mockConfigFile(config: Record<string, unknown> | null) {
 
 describe('resolveConfig', () => {
   const savedEnv: Record<string, string | undefined> = {};
-  const envKeys = [
+  const baseEnvKeys = [
     'ACTUAL_SERVER_URL',
     'ACTUAL_PASSWORD',
     'ACTUAL_SESSION_TOKEN',
@@ -32,6 +33,7 @@ describe('resolveConfig', () => {
     'ACTUAL_LOCK_TIMEOUT',
     'ACTUAL_NO_LOCK',
   ];
+  const envKeys = [...baseEnvKeys, ...baseEnvKeys.map(key => `${key}_FILE`)];
 
   beforeEach(() => {
     for (const key of envKeys) {
@@ -302,6 +304,106 @@ describe('resolveConfig', () => {
       });
 
       expect(config.serverUrl).toBe('http://test');
+    });
+  });
+
+  describe('_FILE environment variables', () => {
+    let dir: string;
+
+    const writeSecret = (name: string, contents: string) => {
+      const filePath = join(dir, name);
+      writeFileSync(filePath, contents);
+      return filePath;
+    };
+
+    beforeEach(() => {
+      dir = mkdtempSync(join(tmpdir(), 'actual-cli-config-'));
+    });
+
+    afterEach(() => {
+      rmSync(dir, { recursive: true, force: true });
+    });
+
+    it('reads a value from the file it points at, trimming whitespace', async () => {
+      process.env.ACTUAL_PASSWORD_FILE = writeSecret('password', 'filepw\n');
+
+      const config = await resolveConfig({ serverUrl: 'http://test' });
+
+      expect(config.password).toBe('filepw');
+    });
+
+    it('takes precedence over the plain environment variable', async () => {
+      process.env.ACTUAL_PASSWORD = 'envpw';
+      process.env.ACTUAL_PASSWORD_FILE = writeSecret('password', 'filepw');
+
+      const config = await resolveConfig({ serverUrl: 'http://test' });
+
+      expect(config.password).toBe('filepw');
+    });
+
+    it('still loses to a CLI flag', async () => {
+      process.env.ACTUAL_PASSWORD_FILE = writeSecret('password', 'filepw');
+
+      const config = await resolveConfig({
+        serverUrl: 'http://test',
+        password: 'flagpw',
+      });
+
+      expect(config.password).toBe('flagpw');
+    });
+
+    it('takes precedence over the config file', async () => {
+      process.env.ACTUAL_PASSWORD_FILE = writeSecret('password', 'filepw');
+      mockConfigFile({ password: 'configpw' });
+
+      const config = await resolveConfig({ serverUrl: 'http://test' });
+
+      expect(config.password).toBe('filepw');
+    });
+
+    it('supports the session token and encryption password too', async () => {
+      process.env.ACTUAL_SESSION_TOKEN_FILE = writeSecret('token', 'filetok\n');
+      process.env.ACTUAL_ENCRYPTION_PASSWORD_FILE = writeSecret(
+        'enc',
+        'fileenc',
+      );
+
+      const config = await resolveConfig({ serverUrl: 'http://test' });
+
+      expect(config.sessionToken).toBe('filetok');
+      expect(config.encryptionPassword).toBe('fileenc');
+    });
+
+    it('is not offered for settings that are not secrets', async () => {
+      // Following the Docker secrets convention, only secrets get a _FILE
+      // variant. A stray one must be ignored, not silently honoured.
+      process.env.ACTUAL_SYNC_ID_FILE = writeSecret('sync', 'from-file');
+      process.env.ACTUAL_SYNC_ID = 'from-env';
+
+      const config = await resolveConfig({
+        serverUrl: 'http://test',
+        password: 'pw',
+      });
+
+      expect(config.syncId).toBe('from-env');
+    });
+
+    it('throws when the _FILE variable is set but empty', async () => {
+      process.env.ACTUAL_PASSWORD = 'envpw';
+      process.env.ACTUAL_PASSWORD_FILE = '';
+
+      await expect(resolveConfig({ serverUrl: 'http://test' })).rejects.toThrow(
+        'Could not read ACTUAL_PASSWORD_FILE',
+      );
+    });
+
+    it('throws when the file cannot be read instead of falling back', async () => {
+      process.env.ACTUAL_PASSWORD = 'envpw';
+      process.env.ACTUAL_PASSWORD_FILE = join(dir, 'does-not-exist');
+
+      await expect(resolveConfig({ serverUrl: 'http://test' })).rejects.toThrow(
+        'Could not read ACTUAL_PASSWORD_FILE',
+      );
     });
   });
 });

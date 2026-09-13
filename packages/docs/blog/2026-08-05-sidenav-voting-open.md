@@ -4,6 +4,7 @@ description: The submissions are in, the finalists are up, and now it's your tur
 date: 2026-08-05T10:00
 slug: sidenav-voting-open
 tags: [announcement]
+in_app_notification: true
 hide_table_of_contents: false
 authors: MatissJanis
 ---
