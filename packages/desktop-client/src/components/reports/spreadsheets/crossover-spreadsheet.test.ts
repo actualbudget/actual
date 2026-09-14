@@ -5,7 +5,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createCrossoverSpreadsheet } from './crossover-spreadsheet';
-import type { CrossoverData } from './crossover-spreadsheet';
+import type { CrossoverData, CrossoverParams } from './crossover-spreadsheet';
 
 vi.mock(
   '@actual-app/core/platform/client/connection',
@@ -41,7 +41,10 @@ function matches(transaction: Transaction, expression: unknown): boolean {
   });
 }
 
-async function runReport(transactions: Transaction[]) {
+async function runReport(
+  transactions: Transaction[],
+  params: Partial<CrossoverParams> = {},
+) {
   initServer({
     query: async query => {
       const rows = transactions.filter(t =>
@@ -75,6 +78,7 @@ async function runReport(transactions: Transaction[]) {
     estimatedReturn: 0,
     expectedContribution: 0,
     projectionType: 'mean',
+    ...params,
   });
   // The crossover factory does not use its spreadsheet dependency.
   await spreadsheet(undefined as never, data => {
@@ -127,6 +131,33 @@ describe('crossover spreadsheet', () => {
     expect(projected[0].nestEgg).toBe(150_000);
     // Partial month spending is still excluded from projected expenses
     expect(projected[0].expenses).toBe(1_000);
+  });
+
+  it('does not model contribution or growth for the current month', async () => {
+    const report = await runReport(
+      [
+        ...baseTransactions,
+        // Contribution already recorded this month
+        {
+          account: 'brokerage',
+          category: null,
+          amount: 500,
+          date: '2026-09-01',
+        },
+      ],
+      { expectedContribution: 500, estimatedReturn: 0.12 },
+    );
+
+    const projected = report.graphData.data.filter(p => p.isProjection);
+
+    // The current month shows the actual balance, counting the contribution once
+    expect(projected[0].x).toBe('Sep 2026');
+    expect(projected[0].nestEgg).toBe(100_500);
+    // Modeled contribution and growth start the following month
+    expect(projected[1].x).toBe('Oct 2026');
+    expect(projected[1].nestEgg).toBe(
+      Math.round(101_000 * Math.pow(1.12, 1 / 12)),
+    );
   });
 
   it('ignores balance changes after the range when it ends in the past', async () => {

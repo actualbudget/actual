@@ -386,15 +386,23 @@ function recalculate(
       flatExpense = calculateMean(y);
     }
 
+    // When the range ends last month, the first projected month is the
+    // current month and its balance already includes this month's recorded
+    // transactions, so don't model contribution or growth for it again.
+    const firstProjectedMonthIsActual =
+      monthUtils.addMonths(params.end, 1) === monthUtils.currentMonth();
+
     for (let i = 1; i <= maxProjectionMonths; i++) {
       monthCursor = d.addMonths(monthCursor, 1);
 
-      // Add contribution BEFORE applying growth
-      projectedBalance = projectedBalance + monthlyContribution;
+      if (i > 1 || !firstProjectedMonthIsActual) {
+        // Add contribution BEFORE applying growth
+        projectedBalance = projectedBalance + monthlyContribution;
 
-      // Then grow balance
-      if (monthlyReturn != null) {
-        projectedBalance = projectedBalance * (1 + monthlyReturn);
+        // Then grow balance
+        if (monthlyReturn != null) {
+          projectedBalance = projectedBalance * (1 + monthlyReturn);
+        }
       }
 
       const projectedIncome = projectedBalance * monthlySWR;
