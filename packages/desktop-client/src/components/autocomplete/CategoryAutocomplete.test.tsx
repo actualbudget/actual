@@ -64,6 +64,13 @@ describe('CategoryAutocomplete create option', () => {
     });
   });
 
+  // Spies must be undone even when a test fails mid-way, or a suppressed
+  // console.error leaks into the tests that follow. Neither the Vitest config
+  // nor setupTests restores mocks, so do it here.
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   // Mirrors the transactions cell: the parent owns the selected id and feeds it
   // back in, which is what the field displays.
   function ControlledCategoryAutocomplete({
@@ -236,8 +243,12 @@ describe('CategoryAutocomplete create option', () => {
     expect(categoryCreate).toHaveBeenCalledTimes(2);
     expect(onSelect).toHaveBeenCalledWith('new-category-id', 'Takeaway');
 
-    expect(consoleError).toHaveBeenCalled();
-    consoleError.mockRestore();
+    // setupTests reports unhandled rejections through console.error as
+    // 'REJECTION', so the mutation's own log being the only entry is what
+    // shows the rejection was handled rather than left dangling.
+    expect(consoleError.mock.calls.map(call => String(call[0]))).toEqual([
+      'Error creating category:',
+    ]);
   });
 
   it('creates an income category when an income group is chosen', async () => {
