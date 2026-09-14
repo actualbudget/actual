@@ -6,7 +6,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
-import { useCreateCategoryMutation } from '#budget/mutations';
 import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
 import { createTestQueryClient, TestProviders } from '#mocks';
 
@@ -16,10 +15,6 @@ vi.mock(
   '@actual-app/core/platform/client/connection',
   () => import('#mocks/connection'),
 );
-
-vi.mock('#budget/mutations', () => ({
-  useCreateCategoryMutation: vi.fn(),
-}));
 
 const categoryGroups: CategoryGroupEntity[] = [
   {
@@ -53,20 +48,20 @@ function waitForAutocomplete() {
 
 describe('CategoryAutocomplete create option', () => {
   const queryClient = createTestQueryClient();
-  const mutateAsync = vi.fn();
+  // The real `useCreateCategoryMutation` runs, so creation is asserted through
+  // the request it sends rather than through a mocked hook.
+  const categoryCreate = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    categoryCreate.mockResolvedValue('new-category-id');
     // CategoryItem reads balances through the spreadsheet even when they are
     // hidden, so the provider needs a backing server.
     initServer({
       query: async () => ({ data: [], dependencies: [] }),
       'get-cell': async () => ({ name: 'test-cell', value: 0 }),
+      'category-create': categoryCreate,
     });
-    mutateAsync.mockResolvedValue('new-category-id');
-    vi.mocked(useCreateCategoryMutation).mockReturnValue({
-      mutateAsync,
-    } as unknown as ReturnType<typeof useCreateCategoryMutation>);
   });
 
   // Mirrors the transactions cell: the parent owns the selected id and feeds it
@@ -171,18 +166,18 @@ describe('CategoryAutocomplete create option', () => {
 
     // Step two: the list now shows groups, and nothing has been created or
     // selected yet.
-    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(categoryCreate).not.toHaveBeenCalled();
     expect(onSelect).not.toHaveBeenCalled();
     expect(screen.getByTestId('Food-category-group-item')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('Food-category-group-item'));
     await waitForAutocomplete();
 
-    expect(mutateAsync).toHaveBeenCalledWith({
+    expect(categoryCreate).toHaveBeenCalledWith({
       name: 'Takeaway',
       groupId: 'group-food',
       isIncome: false,
-      isHidden: false,
+      hidden: false,
     });
     expect(onSelect).toHaveBeenCalledWith('new-category-id', 'Takeaway');
   });
@@ -203,6 +198,48 @@ describe('CategoryAutocomplete create option', () => {
     expect(container.querySelector('input')!).toHaveValue('Takeaway');
   });
 
+  it('stays on the group step so a failed creation can be retried', async () => {
+    categoryCreate.mockRejectedValueOnce(new Error('category-create failed'));
+    // The mutation logs the failure it reports to the user; keep it out of the
+    // test output.
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+    const { container, onSelect } = renderAutocomplete({
+      showCreateOption: true,
+    });
+    await type(container, 'Takeaway');
+
+    await userEvent.click(screen.getByTestId('create-category-button'));
+    await waitForAutocomplete();
+
+    await userEvent.click(screen.getByTestId('Food-category-group-item'));
+    await waitForAutocomplete();
+
+    // The mutation surfaces the error itself. Nothing is selected, and the
+    // typed name is still held — the placeholder is the group step's — so the
+    // user can retry instead of starting over.
+    expect(onSelect).not.toHaveBeenCalled();
+    expect(container.querySelector('input')!).toHaveAttribute(
+      'placeholder',
+      'Choose a group for "Takeaway"',
+    );
+
+    // Choosing a group closed the dropdown and left its name in the input, so
+    // retrying means typing again — which is what reopens the list.
+    await userEvent.clear(container.querySelector('input')!);
+    await type(container, 'Food');
+
+    await userEvent.click(screen.getByTestId('Food-category-group-item'));
+    await waitForAutocomplete();
+
+    expect(categoryCreate).toHaveBeenCalledTimes(2);
+    expect(onSelect).toHaveBeenCalledWith('new-category-id', 'Takeaway');
+
+    expect(consoleError).toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+
   it('creates an income category when an income group is chosen', async () => {
     const { container } = renderAutocomplete({ showCreateOption: true });
     await type(container, 'Bonus');
@@ -213,11 +250,11 @@ describe('CategoryAutocomplete create option', () => {
     await userEvent.click(screen.getByTestId('Income-category-group-item'));
     await waitForAutocomplete();
 
-    expect(mutateAsync).toHaveBeenCalledWith({
+    expect(categoryCreate).toHaveBeenCalledWith({
       name: 'Bonus',
       groupId: 'group-income',
       isIncome: true,
-      isHidden: false,
+      hidden: false,
     });
   });
 
@@ -233,7 +270,7 @@ describe('CategoryAutocomplete create option', () => {
     await userEvent.keyboard('{Enter}');
     await waitForAutocomplete();
 
-    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(categoryCreate).not.toHaveBeenCalled();
     expect(screen.getByTestId('Food-category-group-item')).toBeInTheDocument();
 
     // The group step starts with an empty input, and Autocomplete highlights
@@ -242,11 +279,11 @@ describe('CategoryAutocomplete create option', () => {
     await userEvent.keyboard('Food{Enter}');
     await waitForAutocomplete();
 
-    expect(mutateAsync).toHaveBeenCalledWith({
+    expect(categoryCreate).toHaveBeenCalledWith({
       name: 'Takeaway',
       groupId: 'group-food',
       isIncome: false,
-      isHidden: false,
+      hidden: false,
     });
     expect(onSelect).toHaveBeenCalledWith('new-category-id', 'Takeaway');
   });
@@ -262,11 +299,11 @@ describe('CategoryAutocomplete create option', () => {
     await userEvent.keyboard('{ArrowDown}{ArrowDown}{Enter}');
     await waitForAutocomplete();
 
-    expect(mutateAsync).toHaveBeenCalledWith({
+    expect(categoryCreate).toHaveBeenCalledWith({
       name: 'Bonus',
       groupId: 'group-income',
       isIncome: true,
-      isHidden: false,
+      hidden: false,
     });
   });
 
@@ -280,7 +317,7 @@ describe('CategoryAutocomplete create option', () => {
     await waitForAutocomplete();
 
     // The existing category must win, not a new one with the same name.
-    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(categoryCreate).not.toHaveBeenCalled();
     expect(onSelect).toHaveBeenCalledWith('cat-groceries', expect.anything());
   });
 });
