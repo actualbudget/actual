@@ -1174,14 +1174,14 @@ describe('Transactions', () => {
     });
     updateProps({ isAdding: true });
 
-    // Tabbing through payment saves 0, so amount is no longer null.
+    // Tabbing through payment saves debit 0 as -0 (negated), so amount is no longer null.
     const debitInput = await editNewField(container, 'debit');
     await userEvent.type(debitInput, '[Tab]');
-    await waitFor(() =>
-      expect(appliedTransactions).toContainEqual(
-        expect.objectContaining({ amount: 0 }),
-      ),
-    );
+    await waitFor(() => {
+      const appliedAmount = appliedTransactions.at(-1)?.amount;
+      expect(appliedAmount == null).toBe(false);
+      expect(appliedAmount === 0).toBe(true);
+    });
 
     const input = await editNewField(container, 'category');
     await userEvent.keyboard('[ArrowDown]');
