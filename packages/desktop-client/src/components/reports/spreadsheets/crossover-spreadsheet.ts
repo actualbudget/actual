@@ -144,6 +144,15 @@ export function createCrossoverSpreadsheet({
       return data as MonthlyAgg[];
     })();
 
+    // The current month is excluded from the report range because partial
+    // months understate expenses. Balances don't have that problem, so when
+    // the range ends last month, also fetch this month's balance changes to
+    // seed the projection with today's balances.
+    const balancesEnd =
+      monthUtils.addMonths(end, 1) === monthUtils.currentMonth()
+        ? monthUtils.currentMonth()
+        : end;
+
     // Compute monthly balances for selected accounts (historical returns)
     const historicalBalancesPromise = Promise.all(
       incomeAccountIds.map(async accountId => {
@@ -166,7 +175,9 @@ export function createCrossoverSpreadsheet({
               date: { $gte: monthUtils.firstDayOfMonth(start) },
             })
             .filter({
-              $and: [{ date: { $lte: monthUtils.lastDayOfMonth(end) } }],
+              $and: [
+                { date: { $lte: monthUtils.lastDayOfMonth(balancesEnd) } },
+              ],
             })
             .groupBy({ $month: '$date' })
             .select([
@@ -242,8 +253,16 @@ function recalculate(
 
   // Build total balances across selected accounts per month for CAGR calculation (historical returns)
   const historicalBalances: number[] = months.map(() => 0);
+  // Balance changes after the range (the current, partial month)
+  let balanceChangeAfterEnd = 0;
 
   for (const acct of historicalAccounts) {
+    for (const b of acct.balances) {
+      if (monthUtils.isAfter(b.date, params.end)) {
+        balanceChangeAfterEnd += b.amount;
+      }
+    }
+
     // Calculate running balance for each month
     // Start with the account's starting balance (balance at the end of the first month)
     let runningBalance = acct.starting;
@@ -350,7 +369,7 @@ function recalculate(
     }
     // Project up to 600 months max to avoid infinite loops (50 years)
     const maxProjectionMonths = 600;
-    let projectedBalance = lastBalance;
+    let projectedBalance = lastBalance + balanceChangeAfterEnd;
     let monthCursor = d.parseISO(months[months.length - 1] + '-01');
     let flatExpense = 0;
 
