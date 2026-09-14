@@ -135,7 +135,7 @@ To enable this:
 1. Click on an account.
 2. Click on the 3 dots to show the actions menu.
 3. Select "Manage table columns".
-4. Check or uncheck "Running balance"
+4. Check "Running balance"
 
 A new column should appear which shows the balance of the account after each transaction:
 
