@@ -377,21 +377,30 @@ export function getNumberFormat({
         };
 
   const intlFormatter = new Intl.NumberFormat(locale, fractionDigitsOptions);
-  const { maximumFractionDigits } = fractionDigitsOptions;
+
+  // Intl keeps the minus sign on anything that rounds to zero, so -0.004 renders
+  // as "-0.00". Ask Intl what it rounded to rather than rounding a second time,
+  // so the two can never disagree about where the boundary is.
+  const roundsToNegativeZero = (value: number) => {
+    const parts = intlFormatter.formatToParts(value);
+    const digits = parts.filter(
+      part => part.type === 'integer' || part.type === 'fraction',
+    );
+    return (
+      digits.length > 0 &&
+      digits.every(part => /^0+$/.test(part.value)) &&
+      parts.some(part => part.type === 'minusSign')
+    );
+  };
 
   // Wrapper to handle -0 edge case
   // Normalize apostrophe-dot to U+2019 for consistency across
   // Node/ICU versions (https://github.com/nodejs/node/issues/61861)
   const formatter = {
     format: (value: number) => {
-      // Intl keeps the minus sign on anything that rounds to zero, so -0.004
-      // renders as "-0.00". toFixed rounds half away from zero, as Intl does.
-      const normalized =
-        Number.isFinite(value) &&
-        Number(value.toFixed(maximumFractionDigits)) === 0
-          ? 0
-          : value;
-      let formatted = intlFormatter.format(normalized);
+      let formatted = intlFormatter.format(
+        roundsToNegativeZero(value) ? 0 : value,
+      );
       if (currentFormat === 'apostrophe-dot') {
         formatted = formatted.replace(/'/g, '\u2019');
       }

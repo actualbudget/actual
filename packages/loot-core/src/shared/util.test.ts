@@ -175,6 +175,14 @@ describe('utility functions', () => {
     expect(integerToCurrencyWithDecimal(-1, 'USD')).toBe('-0.01');
   });
 
+  test('the sign is kept whenever Intl itself still rounds away from zero', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: false });
+    const formatter = getNumberFormat({ decimalPlaces: 6 }).formatter;
+    // -5e-7 rounds to -0.000001 at six places, so it is not a zero
+    expect(formatter.format(-5e-7)).toBe('-0.000001');
+    expect(formatter.format(-4e-7)).toBe('0.000000');
+  });
+
   test('number formatting still coerces non-numeric values', () => {
     setNumberFormat({ format: 'comma-dot', hideFraction: false });
     const formatter = getNumberFormat().formatter;
