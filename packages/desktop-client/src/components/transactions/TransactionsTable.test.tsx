@@ -1165,12 +1165,23 @@ describe('Transactions', () => {
   });
 
   test('selecting split after visiting payment keeps focus on the parent payment field', async () => {
-    const { container, updateProps } = renderTransactions();
+    const appliedTransactions: TransactionEntity[] = [];
+    const { container, updateProps } = renderTransactions({
+      onApplyRules: async transaction => {
+        appliedTransactions.push(transaction);
+        return transaction;
+      },
+    });
     updateProps({ isAdding: true });
 
     // Tabbing through payment saves 0, so amount is no longer null.
     const debitInput = await editNewField(container, 'debit');
     await userEvent.type(debitInput, '[Tab]');
+    await waitFor(() =>
+      expect(appliedTransactions).toContainEqual(
+        expect.objectContaining({ amount: 0 }),
+      ),
+    );
 
     const input = await editNewField(container, 'category');
     await userEvent.keyboard('[ArrowDown]');
