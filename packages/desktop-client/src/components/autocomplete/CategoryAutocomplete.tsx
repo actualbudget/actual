@@ -335,6 +335,12 @@ export function CategoryAutocomplete({
           });
           setPendingName(null);
           onSelectSingle?.(categoryId, name);
+        })
+        .catch(() => {
+          // The mutation's own onError raises the notification, so there is
+          // nothing to report here. The group step is deliberately left open:
+          // picking a group again retries, and the typed name survives. Blur
+          // clears it either way.
         });
       return;
     }
