@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { initServer } from '@actual-app/core/platform/client/connection';
 import type { CategoryGroupEntity } from '@actual-app/core/types/models';
 import { render, screen } from '@testing-library/react';
@@ -67,6 +69,36 @@ describe('CategoryAutocomplete create option', () => {
     } as unknown as ReturnType<typeof useCreateCategoryMutation>);
   });
 
+  // Mirrors the transactions cell: the parent owns the selected id and feeds it
+  // back in, which is what the field displays.
+  function ControlledCategoryAutocomplete({
+    onSelect,
+    ...props
+  }: {
+    onSelect: (id: string | null, value: string) => void;
+    showCreateOption?: boolean;
+  }) {
+    const [value, setValue] = useState<string | null>(null);
+
+    return (
+      <CategoryAutocomplete
+        categoryGroups={categoryGroups}
+        value={value}
+        type="single"
+        embedded={false}
+        // Mirrors TransactionsTable: the cell keeps the input focused,
+        // which is what reopens the dropdown after switching steps.
+        focused
+        showBalances={false}
+        onSelect={(id, selectedValue) => {
+          setValue(id);
+          onSelect(id, selectedValue);
+        }}
+        {...props}
+      />
+    );
+  }
+
   function renderAutocomplete(props?: { showCreateOption?: boolean }) {
     const onSelect = vi.fn();
 
@@ -74,18 +106,7 @@ describe('CategoryAutocomplete create option', () => {
       <TestProviders queryClient={queryClient}>
         <SpreadsheetProvider>
           <div data-testid="autocomplete-test">
-            <CategoryAutocomplete
-              categoryGroups={categoryGroups}
-              value={null}
-              type="single"
-              embedded={false}
-              // Mirrors TransactionsTable: the cell keeps the input focused,
-              // which is what reopens the dropdown after switching steps.
-              focused
-              showBalances={false}
-              onSelect={onSelect}
-              {...props}
-            />
+            <ControlledCategoryAutocomplete onSelect={onSelect} {...props} />
           </div>
         </SpreadsheetProvider>
       </TestProviders>,
@@ -164,6 +185,22 @@ describe('CategoryAutocomplete create option', () => {
       isHidden: false,
     });
     expect(onSelect).toHaveBeenCalledWith('new-category-id', 'Takeaway');
+  });
+
+  it('shows the new category in the field before the list refreshes', async () => {
+    const { container } = renderAutocomplete({ showCreateOption: true });
+    await type(container, 'Takeaway');
+
+    await userEvent.click(screen.getByTestId('create-category-button'));
+    await waitForAutocomplete();
+
+    await userEvent.click(screen.getByTestId('Food-category-group-item'));
+    await waitForAutocomplete();
+
+    // `categoryGroups` never gains the new category here, standing in for the
+    // real gap before the invalidated categories query refetches. The field
+    // must still show what was just created, without waiting for a blur.
+    expect(container.querySelector('input')!).toHaveValue('Takeaway');
   });
 
   it('creates an income category when an income group is chosen', async () => {

@@ -170,7 +170,6 @@ function CategoryList({
               : {};
             const { onClick, ...restCreateButtonProps } = createButtonProps;
             return renderCreateCategoryButton({
-              key: 'new',
               ...restCreateButtonProps,
               onClick,
               categoryName: createCategoryName ?? '',
@@ -241,6 +240,15 @@ export function CategoryAutocomplete({
   // Tracked so the create row can echo what was typed.
   const [rawInput, setRawInput] = useState('');
 
+  // `category-create` only invalidates the categories query, so a category we
+  // just made isn't in `useCategories()` for another render or two. Autocomplete
+  // resolves its display text by looking the selected id up in `suggestions`
+  // (and returns null in strict mode when it misses), so without this stand-in
+  // the field goes blank right after creating. Dropped as soon as the real list
+  // catches up.
+  const [createdCategory, setCreatedCategory] =
+    useState<CategoryAutocompleteItem | null>(null);
+
   const categorySuggestions: CategoryAutocompleteItem[] = useMemo(() => {
     const allSuggestions = groups.reduce(
       (list, group) =>
@@ -257,16 +265,25 @@ export function CategoryAutocomplete({
         : [],
     );
 
-    if (!showHiddenCategories) {
-      return allSuggestions.filter(
-        suggestion =>
-          suggestion.id === 'split' ||
-          (!suggestion.hidden && !suggestion.group?.hidden),
-      );
+    const visibleSuggestions = showHiddenCategories
+      ? allSuggestions
+      : allSuggestions.filter(
+          suggestion =>
+            suggestion.id === 'split' ||
+            (!suggestion.hidden && !suggestion.group?.hidden),
+        );
+
+    if (
+      createdCategory &&
+      !visibleSuggestions.some(
+        suggestion => suggestion.id === createdCategory.id,
+      )
+    ) {
+      return [...visibleSuggestions, createdCategory];
     }
 
-    return allSuggestions;
-  }, [groups, showSplitOption, showHiddenCategories]);
+    return visibleSuggestions;
+  }, [groups, showSplitOption, showHiddenCategories, createdCategory]);
 
   // Second step: the same input now filters groups instead of categories.
   const groupSuggestions: CategoryAutocompleteItem[] = useMemo(
@@ -309,6 +326,13 @@ export function CategoryAutocomplete({
           isHidden: false,
         })
         .then(categoryId => {
+          setCreatedCategory({
+            id: categoryId,
+            name,
+            group: group ?? undefined,
+            is_income: !!group?.is_income,
+            hidden: false,
+          });
           setPendingName(null);
           onSelectSingle?.(categoryId, name);
         });
