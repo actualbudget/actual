@@ -1,8 +1,6 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 
-import { styles } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { q } from '@actual-app/core/shared/query';
 import type {
@@ -15,18 +13,14 @@ import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
+import { useScrollableRef } from '#hooks/useScrollListener';
 
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
 import { MonthsProvider } from './MonthsContext';
 import type { MonthBounds } from './MonthsContext';
-import {
-  findSortDown,
-  findSortUp,
-  getScrollbarWidth,
-  separateGroups,
-} from './util';
+import { findSortDown, findSortUp, separateGroups } from './util';
 
 type BudgetTableProps = {
   type: string;
@@ -90,17 +84,17 @@ export function BudgetTable(props: BudgetTableProps) {
     null,
   );
 
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollableRef = useScrollableRef();
 
   useLayoutEffect(() => {
     const savedScrollPosition = sessionStorage.getItem(
       'budget-scroll-position',
     );
-    if (savedScrollPosition != null && scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = Number(savedScrollPosition);
+    if (savedScrollPosition != null && scrollableRef.current) {
+      scrollableRef.current.scrollTop = Number(savedScrollPosition);
       sessionStorage.removeItem('budget-scroll-position');
     }
-  }, []);
+  }, [scrollableRef]);
 
   const onEditMonth = (id: string, month: string) => {
     setEditing(id ? { id, cell: month } : null);
@@ -234,10 +228,10 @@ export function BudgetTable(props: BudgetTableProps) {
   };
 
   const _onShowActivity = (id: string, month?: string) => {
-    if (scrollContainerRef.current) {
+    if (scrollableRef.current) {
       sessionStorage.setItem(
         'budget-scroll-position',
-        String(scrollContainerRef.current.scrollTop),
+        String(scrollableRef.current.scrollTop),
       );
     }
     onShowActivity(id, month);
@@ -246,21 +240,7 @@ export function BudgetTable(props: BudgetTableProps) {
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
 
   return (
-    <View
-      data-testid="budget-table"
-      style={{
-        flex: 1,
-        ...(styles.lightScrollbar && {
-          '& ::-webkit-scrollbar': {
-            backgroundColor: 'transparent',
-          },
-          '& ::-webkit-scrollbar-thumb:vertical': {
-            backgroundColor: theme.pageTextSubdued,
-            // changed from tableHeaderBackground. pageTextSubdued is always visible on pageBackground
-          },
-        }),
-      }}
-    >
+    <View data-testid="budget-table" style={{ flex: 1 }}>
       <View
         style={{
           flexDirection: 'row',
@@ -269,7 +249,7 @@ export function BudgetTable(props: BudgetTableProps) {
           // This is necessary to align with the table because the
           // table has this padding to allow the shadow to show
           paddingLeft: 5,
-          paddingRight: 5 + getScrollbarWidth(),
+          paddingRight: 5,
         }}
       >
         <View style={{ width: 200 + 100 * categoryExpandedState }} />
@@ -295,41 +275,31 @@ export function BudgetTable(props: BudgetTableProps) {
           collapseAllCategories={collapseAllCategories}
         />
         <View
-          ref={scrollContainerRef}
-          data-testid="budget-table-scroll-container"
           style={{
-            overflowY: 'scroll',
-            overflowAnchor: 'none',
-            flex: 1,
+            flexShrink: 0,
             paddingLeft: 5,
             paddingRight: 5,
           }}
+          onKeyDown={onKeyDown}
         >
-          <View
-            style={{
-              flexShrink: 0,
-            }}
-            onKeyDown={onKeyDown}
-          >
-            <SchedulesProvider query={schedulesQuery}>
-              <BudgetCategories
-                categoryGroups={categoryGroups}
-                editingCell={editing}
-                onEditMonth={onEditMonth}
-                onEditName={onEditName}
-                onSaveCategory={onSaveCategory}
-                onSaveGroup={onSaveGroup}
-                onDeleteCategory={onDeleteCategory}
-                onDeleteGroup={onDeleteGroup}
-                onReorderCategory={_onReorderCategory}
-                onReorderGroup={_onReorderGroup}
-                onBudgetAction={onBudgetAction}
-                onShowActivity={_onShowActivity}
-                onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
-                onSortCategories={onSortCategories}
-              />
-            </SchedulesProvider>
-          </View>
+          <SchedulesProvider query={schedulesQuery}>
+            <BudgetCategories
+              categoryGroups={categoryGroups}
+              editingCell={editing}
+              onEditMonth={onEditMonth}
+              onEditName={onEditName}
+              onSaveCategory={onSaveCategory}
+              onSaveGroup={onSaveGroup}
+              onDeleteCategory={onDeleteCategory}
+              onDeleteGroup={onDeleteGroup}
+              onReorderCategory={_onReorderCategory}
+              onReorderGroup={_onReorderGroup}
+              onBudgetAction={onBudgetAction}
+              onShowActivity={_onShowActivity}
+              onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
+              onSortCategories={onSortCategories}
+            />
+          </SchedulesProvider>
         </View>
       </MonthsProvider>
     </View>

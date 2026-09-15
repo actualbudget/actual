@@ -10,7 +10,7 @@ export class BudgetPage {
   readonly budgetTableTotals: Locator;
   readonly selectedMonthButton: Locator;
   readonly nextMonthButton: Locator;
-  readonly budgetTableScrollContainer: Locator;
+  readonly pageScrollContainer: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -20,25 +20,23 @@ export class BudgetPage {
     this.budgetTableTotals = this.budgetTable.getByTestId('budget-totals');
     this.selectedMonthButton = page.getByTestId('selected-budget-month');
     this.nextMonthButton = page.getByTitle('Next month');
-    this.budgetTableScrollContainer = page.getByTestId(
-      'budget-table-scroll-container',
-    );
+    this.pageScrollContainer = page.getByTestId('page-scroll-container');
   }
 
   async getScrollTop() {
-    return this.budgetTableScrollContainer.evaluate(el => el.scrollTop);
+    return this.pageScrollContainer.evaluate(el => el.scrollTop);
   }
 
   async scrollToBottom() {
-    await this.budgetTableScrollContainer.evaluate(el => {
+    await this.pageScrollContainer.evaluate(el => {
       el.scrollTop = el.scrollHeight;
     });
   }
 
   /**
    * Wait for the budget page to finish loading. The budget-table is
-   * inside AutoSizer which returns null until layout provides width/
-   * height, so it only appears after the page has fully mounted.
+   * inside AutoSizer which returns null until layout provides a width,
+   * so it only appears after the page has fully mounted.
    */
   async waitFor(...options: Parameters<Locator['waitFor']>) {
     await this.budgetTable.waitFor(...options);
@@ -186,10 +184,10 @@ export class BudgetPage {
     // position is not changed before the click handler captures it.
     const clicked = await this.page.evaluate(() => {
       const container = document.querySelector(
-        '[data-testid="budget-table-scroll-container"]',
+        '[data-testid="page-scroll-container"]',
       );
       if (!container) {
-        throw new Error('Budget scroll container not found');
+        throw new Error('Page scroll container not found');
       }
       const containerRect = container.getBoundingClientRect();
       const cells = container.querySelectorAll<HTMLElement>(

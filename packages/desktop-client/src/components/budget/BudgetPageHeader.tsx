@@ -7,7 +7,6 @@ import { View } from '@actual-app/components/view';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
 import { MonthPicker } from './MonthPicker';
-import { getScrollbarWidth } from './util';
 
 type BudgetPageHeaderProps = {
   startMonth: string;
@@ -32,7 +31,7 @@ export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
       >
         <View
           style={{
-            marginRight: 5 + getScrollbarWidth() - offsetMultipleMonths,
+            marginRight: 5 - offsetMultipleMonths,
           }}
         >
           <MonthPicker
