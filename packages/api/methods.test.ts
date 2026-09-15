@@ -251,6 +251,44 @@ describe('API CRUD operations', () => {
     );
   });
 
+  test('Categories: updateCategory rejects an empty group instead of orphaning the category', async () => {
+    const groupId = await api.createCategoryGroup({ name: 'test-group' });
+    const categoryId = await api.createCategory({
+      name: 'test-budget',
+      group_id: groupId,
+    });
+
+    for (const group_id of ['', null]) {
+      await expect(
+        api.updateCategory(categoryId, {
+          name: 'test-budget',
+          group_id,
+        } as never),
+      ).rejects.toThrow('groupId cannot be empty');
+    }
+
+    // The category is untouched and still listed under its group.
+    const categories = await api.getCategories();
+    expect(categories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: categoryId, group_id: groupId }),
+      ]),
+    );
+
+    // Leaving group_id out of an update is still fine. (`name` is sent
+    // because omitting it is a separate, open bug: #8857.)
+    await api.updateCategory(categoryId, { name: 'test-budget', hidden: true });
+    expect(await api.getCategories()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: categoryId,
+          group_id: groupId,
+          hidden: true,
+        }),
+      ]),
+    );
+  });
+
   // apis: createCategory, getCategories, updateCategory, deleteCategory
   test('Categories: successfully update categories', async () => {
     const month = '2023-10';
