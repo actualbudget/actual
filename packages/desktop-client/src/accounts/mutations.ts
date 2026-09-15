@@ -585,7 +585,55 @@ export function useLinkAccountEnableBankingMutation() {
 
 type SyncAccountsPayload = {
   id?: AccountEntity['id'] | undefined;
+  /**
+   * The accounts to sync, for a selection that is neither a single account nor
+   * one of the groups `id` can name. Takes precedence over `id`.
+   */
+  ids?: Array<AccountEntity['id']> | undefined;
 };
+
+function isSyncable({ bank, closed, tombstone }: AccountEntity) {
+  return !!bank && !closed && !tombstone;
+}
+
+function bySyncOrder(a: AccountEntity, b: AccountEntity) {
+  return a.offbudget === b.offbudget
+    ? a.sort_order - b.sort_order
+    : a.offbudget - b.offbudget;
+}
+
+export function getAccountIdsToSync(
+  accounts: AccountEntity[],
+  { id, ids }: SyncAccountsPayload,
+): Array<AccountEntity['id']> {
+  if (ids) {
+    const selected = new Set(ids);
+    return accounts
+      .filter(account => selected.has(account.id) && isSyncable(account))
+      .sort(bySyncOrder)
+      .map(({ id }) => id);
+  }
+
+  if (id === 'offbudget' || id === 'onbudget') {
+    const targetOffbudget = id === 'offbudget' ? 1 : 0;
+    return accounts
+      .filter(
+        account => isSyncable(account) && account.offbudget === targetOffbudget,
+      )
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map(({ id }) => id);
+  }
+
+  if (id) {
+    return [id];
+  }
+
+  // Default: all accounts
+  return accounts
+    .filter(isSyncable)
+    .sort(bySyncOrder)
+    .map(({ id }) => id);
+}
 
 export function useSyncAccountsMutation() {
   const queryClient = useQueryClient();
@@ -596,7 +644,7 @@ export function useSyncAccountsMutation() {
   const store = useStore();
 
   return useMutation({
-    mutationFn: async ({ id }: SyncAccountsPayload) => {
+    mutationFn: async ({ id, ids }: SyncAccountsPayload) => {
       const {
         account: { accountsSyncing = [] },
       } = store.getState();
@@ -612,31 +660,7 @@ export function useSyncAccountsMutation() {
         return false;
       }
 
-      let accountIdsToSync: string[];
-      if (id === 'offbudget' || id === 'onbudget') {
-        const targetOffbudget = id === 'offbudget' ? 1 : 0;
-        accountIdsToSync = accounts
-          .filter(
-            ({ bank, closed, tombstone, offbudget }) =>
-              !!bank && !closed && !tombstone && offbudget === targetOffbudget,
-          )
-          .sort((a, b) => a.sort_order - b.sort_order)
-          .map(({ id }) => id);
-      } else if (id) {
-        accountIdsToSync = [id];
-      } else {
-        // Default: all accounts
-        accountIdsToSync = accounts
-          .filter(
-            ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
-          )
-          .sort((a, b) =>
-            a.offbudget === b.offbudget
-              ? a.sort_order - b.sort_order
-              : a.offbudget - b.offbudget,
-          )
-          .map(({ id }) => id);
-      }
+      let accountIdsToSync = getAccountIdsToSync(accounts, { id, ids });
 
       dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
 
@@ -794,6 +818,7 @@ function handleSyncResponse(
 
 type SyncAndDownloadPayload = {
   id?: AccountEntity['id'];
+  ids?: Array<AccountEntity['id']>;
 };
 
 export function useSyncAndDownloadMutation() {
@@ -804,7 +829,7 @@ export function useSyncAndDownloadMutation() {
   const syncAccounts = useSyncAccountsMutation();
 
   return useMutation({
-    mutationFn: async ({ id }: SyncAndDownloadPayload) => {
+    mutationFn: async ({ id, ids }: SyncAndDownloadPayload) => {
       // It is *critical* that we sync first because of transaction
       // reconciliation. We want to get all transactions that other
       // clients have already made, so that imported transactions can be
@@ -815,7 +840,7 @@ export function useSyncAndDownloadMutation() {
         return { error: syncState.error };
       }
 
-      const hasDownloaded = await syncAccounts.mutateAsync({ id });
+      const hasDownloaded = await syncAccounts.mutateAsync({ id, ids });
 
       if (hasDownloaded) {
         // Sync again afterwards if new transactions were created
