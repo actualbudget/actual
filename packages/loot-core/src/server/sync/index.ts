@@ -524,17 +524,8 @@ export const applyMessages = sequential(_applyMessages);
 
 export function receiveMessages(messages: Message[]): Promise<Message[]> {
   try {
-    // Receive only the latest timestamp. The clock lands in the same place and
-    // the drift check still sees the furthest-ahead message, but the 16-bit
-    // counter advances once per batch instead of once per message. Per-message
-    // `recv` overflows that counter on a large sync when `Date.now()` is coarse
-    // (Firefox rounds it to 100ms under resistFingerprinting, which LibreWolf
-    // enables by default).
-    //
-    // Rank on millis and counter, the fields `recv` reads. The serialized form
-    // sorts a year-10000 timestamp below every other one, which would let it
-    // skip the drift check: `toISOString` writes it `+010000-…`, and `+` sorts
-    // under the digits.
+    // Receiving the latest timestamp preserves the clock and drift check while
+    // advancing the counter once per batch.
     let latest = null;
     for (const { timestamp } of messages) {
       if (

@@ -180,7 +180,7 @@ describe('Sync', () => {
 
     await receiveMessages(messages);
 
-    expect(getClock().timestamp.counter()).toBeLessThanOrEqual(1);
+    expect(getClock().timestamp.counter()).toBe(0);
 
     // The clock must still sort above every timestamp it received.
     const latest = messages[messages.length - 1].timestamp.toString();
