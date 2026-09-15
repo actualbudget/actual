@@ -75,6 +75,36 @@ export function buildAccountSide(
   };
 }
 
+function filterAccounts(accounts: AccountEntity[], query: string) {
+  return accounts.filter(account => account.name.toLowerCase().includes(query));
+}
+
+function filterSide(side: SidebarAccountSide, query: string) {
+  return {
+    ...side,
+    buckets: side.buckets
+      .map(bucket => ({
+        ...bucket,
+        accounts: filterAccounts(bucket.accounts, query),
+      }))
+      .filter(bucket => bucket.accounts.length > 0),
+  };
+}
+
+export function filterSidebarTree(
+  tree: SidebarAccountTree,
+  query: string,
+): SidebarAccountTree {
+  if (!query) {
+    return tree;
+  }
+  return {
+    onBudget: filterSide(tree.onBudget, query),
+    offBudget: filterSide(tree.offBudget, query),
+    closed: filterAccounts(tree.closed, query),
+  };
+}
+
 export function useSidebarAccountTree(): SidebarAccountTree {
   const { data: groups = [] } = useAccountGroups();
   const { data: onBudgetAccounts = [] } = useOnBudgetAccounts();
