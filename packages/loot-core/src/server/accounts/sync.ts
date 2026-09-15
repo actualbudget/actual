@@ -358,6 +358,7 @@ async function downloadAkahuTransactions(
 async function downloadEnableBankingTransactions(
   acctId: string,
   since: string,
+  aspspName?: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -369,6 +370,7 @@ async function downloadEnableBankingTransactions(
     {
       accountId: acctId,
       startDate: since,
+      aspspName,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -1238,7 +1240,12 @@ export async function syncAccount(
       newAccount,
     );
   } else if (acctRow.account_sync_source === 'enableBanking') {
-    download = await downloadEnableBankingTransactions(acctId, syncStartDate);
+    const bankRow = await db.select('banks', acctRow.bank);
+    download = await downloadEnableBankingTransactions(
+      acctId,
+      syncStartDate,
+      bankRow?.name,
+    );
   } else {
     throw new Error(
       `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,
