@@ -646,7 +646,19 @@ const compileFunction = saveStack('function', (state, func) => {
 
 const compileOp = saveStack('op', (state, fieldRef, opData) => {
   const { $transform, ...opExpr } = opData;
-  const [op] = Object.keys(opExpr);
+  const ops = Object.keys(opExpr);
+  if (ops.length > 1) {
+    // Only one operator can be compiled per object. Historically the extra
+    // operators were silently dropped, which turned a range like
+    // `{ $gte: a, $lt: b }` into just `>= a`. Fail loudly instead and point
+    // at the supported form.
+    throw new CompileError(
+      `Multiple operators on the field "${fieldRef}" are not supported ` +
+        `(${ops.join(', ')}). Use an array of conditions instead: ` +
+        `{ ${fieldRef}: [${ops.map(o => `{ ${o}: ... }`).join(', ')}] }`,
+    );
+  }
+  const [op] = ops;
 
   const rhs = compileExpr(state, opData[op]);
 

@@ -979,3 +979,41 @@ describe('Type conversions', () => {
     expect(result.sql).toMatch('WHERE (payees1.id IS NOT NULL)');
   });
 });
+
+describe('Filter operators', () => {
+  it('rejects multiple operators in one object instead of dropping them', () => {
+    expect(() => {
+      generateSQLWithState(
+        q('transactions')
+          .filter({ date: { $gte: '2025-03-01', $lt: '2025-04-01' } })
+          .select(['id'])
+          .serialize(),
+        schemaWithRefs,
+      );
+    }).toThrow(/Multiple operators on the field "date".*\$gte, \$lt/);
+  });
+
+  it('accepts the array form for multiple operators on one field', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .filter({ date: [{ $gte: '2025-03-01' }, { $lt: '2025-04-01' }] })
+        .select(['id'])
+        .serialize(),
+      schemaWithRefs,
+    );
+    expect(result.sql).toMatch(/date >= /);
+    expect(result.sql).toMatch(/date < /);
+  });
+
+  it('still allows $transform alongside a single operator', () => {
+    expect(() => {
+      generateSQLWithState(
+        q('transactions')
+          .filter({ date: { $transform: '$month', $eq: '2025-03' } })
+          .select(['id'])
+          .serialize(),
+        schemaWithRefs,
+      );
+    }).not.toThrow();
+  });
+});
