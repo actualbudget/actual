@@ -3,13 +3,20 @@ import { vi } from 'vitest';
 import * as aql from '#server/aql';
 import * as db from '#server/db';
 import type { DbCategory } from '#server/db';
+import { Rule } from '#server/rules';
+import { getRuleForSchedule } from '#server/schedules/app';
+import type { Currency } from '#shared/currencies';
 import { amountToInteger } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 import type { ByTemplate, Template } from '#types/models/templates';
 
 import * as actions from './actions';
-import { CategoryTemplateContext } from './category-template-context';
+import {
+  CategoryTemplateContext,
+  scheduleForecastConfig,
+} from './category-template-context';
 import { distributeRemainder } from './goal-template';
+import { runSchedule, runScheduleForecast } from './schedule-template';
 import * as statements from './statements';
 
 // Mock getSheetValue and getCategories
@@ -22,7 +29,14 @@ vi.mock('./actions', () => ({
 
 vi.mock('#server/db', () => ({
   getCategories: vi.fn(),
+  first: vi.fn(),
+  getAccounts: vi.fn(),
 }));
+
+vi.mock('#server/schedules/app', async () => {
+  const actualModule = await vi.importActual('#server/schedules/app');
+  return { ...actualModule, getRuleForSchedule: vi.fn() };
+});
 
 vi.mock('#server/aql', () => ({
   aqlQuery: vi.fn(),
@@ -1206,6 +1220,277 @@ describe('CategoryTemplateContext', () => {
       );
       const result = instance.runRemainder(99, 100);
       expect(result).toBe(99);
+    });
+  });
+
+  describe('schedule template gating', () => {
+    const category: CategoryEntity = {
+      id: 'gate-cat',
+      name: 'Gate Category',
+      group: 'g',
+      is_income: false,
+    };
+    const templates: Template[] = [
+      {
+        type: 'schedule',
+        name: 'Internet',
+        directive: 'template',
+        priority: 1,
+      },
+      {
+        type: 'schedule',
+        name: 'Insurance',
+        directive: 'template',
+        priority: 1,
+      },
+    ];
+
+    function mockTwoSchedules() {
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue([
+        { name: 'Internet', id: 's1' },
+        { name: 'Insurance', id: 's2' },
+      ] as Awaited<ReturnType<typeof statements.getActiveSchedules>>);
+      vi.mocked(db.getAccounts).mockResolvedValue([]);
+      vi.mocked(db.first).mockImplementation(async (_q, params?: unknown[]) => {
+        const name = (params as string[] | undefined)?.[0] ?? '';
+        return { id: name === 'Internet' ? 1 : 2, completed: 0 };
+      });
+      vi.mocked(getRuleForSchedule).mockImplementation(async id => {
+        const isInternet = Number(id) === 1;
+        return new Rule({
+          id: String(id),
+          stage: 'pre',
+          conditionsOp: 'and',
+          conditions: [
+            {
+              op: 'is',
+              field: 'date',
+              // Both schedules are non-monthly with different due dates
+              // (not one pay-month-of + one sinking): a uniform monthly
+              // schedule mixed with a single sinking schedule happens to
+              // make runSchedule and runScheduleForecast agree numerically
+              // for this fixture shape, which would let a broken dispatch
+              // gate pass unnoticed (see the differs-by-construction
+              // assertion below).
+              value: isInternet
+                ? {
+                    start: '2024-03-15',
+                    interval: 1,
+                    frequency: 'yearly',
+                    patterns: [],
+                    skipWeekend: false,
+                    weekendSolveMode: 'before',
+                    endMode: 'never',
+                    endOccurrences: 1,
+                    endDate: '2099-01-01',
+                  }
+                : {
+                    start: '2024-12-15',
+                    interval: 1,
+                    frequency: 'yearly',
+                    patterns: [],
+                    skipWeekend: false,
+                    weekendSolveMode: 'before',
+                    endMode: 'never',
+                    endOccurrences: 1,
+                    endDate: '2099-01-01',
+                  },
+              type: 'date',
+            },
+            {
+              op: 'is',
+              field: 'amount',
+              value: isInternet ? -10000 : -60000,
+              type: 'number',
+            },
+          ],
+          actions: [],
+        });
+      });
+      vi.mocked(actions.isTrackingBudget).mockReturnValue(false);
+    }
+
+    beforeEach(() => {
+      mockPreferences(false, 'USD');
+      vi.mocked(actions.getSheetValue).mockResolvedValue(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValue(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValue(false);
+      mockTwoSchedules();
+    });
+
+    afterEach(() => {
+      scheduleForecastConfig.enabled = false;
+    });
+
+    it('dispatches to runScheduleForecast by default, without setting the gate', async () => {
+      // Must run before any other test in this block sets
+      // scheduleForecastConfig.enabled — it asserts the module's untouched
+      // initial value rather than a value a test set.
+      expect(scheduleForecastConfig.enabled).toBe(true);
+      vi.mocked(aql.aqlQuery).mockImplementation(async (query: unknown) => {
+        const queryStr = JSON.stringify(query);
+        if (queryStr.includes('transactions')) {
+          return { data: [], dependencies: [] };
+        }
+        if (queryStr.includes('hideFraction')) {
+          return { data: [{ value: 'false' }], dependencies: [] };
+        }
+        if (queryStr.includes('defaultCurrencyCode')) {
+          return { data: [{ value: 'USD' }], dependencies: [] };
+        }
+        return { data: [], dependencies: [] };
+      });
+
+      const instance = await CategoryTemplateContext.init(
+        templates,
+        category,
+        '2024-01',
+        0,
+      );
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
+
+      const currency = {
+        code: 'USD',
+        symbol: '$',
+        name: 'US Dollar',
+        decimalPlaces: 2,
+        numberFormat: 'comma-dot',
+        symbolFirst: true,
+      } satisfies Currency;
+      const expected = await runScheduleForecast(
+        templates,
+        '2024-01',
+        0,
+        0,
+        0,
+        [],
+        category,
+        currency,
+      );
+      // Guard against this test coincidentally passing if the dispatch gate
+      // is broken: confirm the two algorithms actually produce different
+      // totals for this fixture before asserting which one was dispatched.
+      const otherAlgorithm = await runSchedule(
+        templates,
+        '2024-01',
+        0,
+        0,
+        0,
+        0,
+        [],
+        category,
+        currency,
+      );
+      expect(expected.to_budget).not.toBe(otherAlgorithm.to_budget);
+      expect(result).toBe(expected.to_budget);
+    });
+
+    it('dispatches to runSchedule when the gate is explicitly disabled', async () => {
+      scheduleForecastConfig.enabled = false;
+
+      const instance = await CategoryTemplateContext.init(
+        templates,
+        category,
+        '2024-01',
+        0,
+      );
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
+
+      const currency = {
+        code: 'USD',
+        symbol: '$',
+        name: 'US Dollar',
+        decimalPlaces: 2,
+        numberFormat: 'comma-dot',
+        symbolFirst: true,
+      } satisfies Currency;
+      const expected = await runSchedule(
+        templates,
+        '2024-01',
+        0,
+        0,
+        0,
+        0,
+        [],
+        category,
+        currency,
+      );
+      // Guard against this test coincidentally passing if the dispatch gate
+      // is broken: confirm the two algorithms actually produce different
+      // totals for this fixture before asserting which one was dispatched.
+      vi.mocked(aql.aqlQuery).mockResolvedValue({ data: [], dependencies: [] });
+      const otherAlgorithm = await runScheduleForecast(
+        templates,
+        '2024-01',
+        0,
+        0,
+        0,
+        [],
+        category,
+        currency,
+      );
+      expect(expected.to_budget).not.toBe(otherAlgorithm.to_budget);
+      expect(result).toBe(expected.to_budget);
+    });
+
+    it('dispatches to runScheduleForecast when the gate is explicitly enabled', async () => {
+      scheduleForecastConfig.enabled = true;
+      vi.mocked(aql.aqlQuery).mockImplementation(async (query: unknown) => {
+        const queryStr = JSON.stringify(query);
+        if (queryStr.includes('transactions')) {
+          return { data: [], dependencies: [] };
+        }
+        if (queryStr.includes('hideFraction')) {
+          return { data: [{ value: 'false' }], dependencies: [] };
+        }
+        if (queryStr.includes('defaultCurrencyCode')) {
+          return { data: [{ value: 'USD' }], dependencies: [] };
+        }
+        return { data: [], dependencies: [] };
+      });
+
+      const instance = await CategoryTemplateContext.init(
+        templates,
+        category,
+        '2024-01',
+        0,
+      );
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
+
+      const currency = {
+        code: 'USD',
+        symbol: '$',
+        name: 'US Dollar',
+        decimalPlaces: 2,
+        numberFormat: 'comma-dot',
+        symbolFirst: true,
+      } satisfies Currency;
+      const expected = await runScheduleForecast(
+        templates,
+        '2024-01',
+        0,
+        0,
+        0,
+        [],
+        category,
+        currency,
+      );
+      // Guard against this test coincidentally passing if the dispatch gate
+      // is broken: confirm the two algorithms actually produce different
+      // totals for this fixture before asserting which one was dispatched.
+      const otherAlgorithm = await runSchedule(
+        templates,
+        '2024-01',
+        0,
+        0,
+        0,
+        0,
+        [],
+        category,
+        currency,
+      );
+      expect(expected.to_budget).not.toBe(otherAlgorithm.to_budget);
+      expect(result).toBe(expected.to_budget);
     });
   });
 
