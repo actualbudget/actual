@@ -334,7 +334,10 @@ async function updateCategory(category: CategoryEntity): Promise<void> {
     await db.updateCategory(
       categoryModel.toDb({
         ...category,
-        name: category.name.trim(),
+        // The API types `fields` as a Partial, and db.update() only writes the
+        // keys it is given, so a partial that omits `name` must stay omitted
+        // rather than being trimmed into a TypeError.
+        ...(category.name !== undefined && { name: category.name.trim() }),
       }),
     );
   } catch (e) {
