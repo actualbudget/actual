@@ -176,6 +176,7 @@ type LastParse = {
 const parseOptionKeys = [
   'hasHeaderRow',
   'delimiter',
+  'encoding',
   'fallbackMissingPayeeToMemo',
   'swapPayeeAndMemo',
   'skipStartLines',
@@ -241,6 +242,9 @@ export function ImportTransactionsModal({
   const [delimiter, setDelimiter] = useState(
     prefs[`csv-delimiter-${accountId}`] ||
       (filename.endsWith('.tsv') ? '\t' : ','),
+  );
+  const [csvEncoding, setCsvEncoding] = useState(
+    prefs[`csv-encoding-${accountId}`] || 'auto',
   );
   const [skipStartLines, setSkipStartLines] = useState(
     parseInt(prefs[`csv-skip-start-lines-${accountId}`], 10) || 0,
@@ -477,6 +481,7 @@ export function ImportTransactionsModal({
     const fileType = getFileType(originalFileName);
     const parseOptions = getParseOptions(fileType, {
       delimiter,
+      encoding: csvEncoding,
       hasHeaderRow,
       skipStartLines,
       skipEndLines,
@@ -509,6 +514,7 @@ export function ImportTransactionsModal({
   }, [
     originalFileName,
     delimiter,
+    csvEncoding,
     hasHeaderRow,
     skipStartLines,
     skipEndLines,
@@ -559,6 +565,7 @@ export function ImportTransactionsModal({
     const fileType = getFileType(res[0]);
     const parseOptions = getParseOptions(fileType, {
       delimiter,
+      encoding: csvEncoding,
       hasHeaderRow,
       skipStartLines,
       skipEndLines,
@@ -733,6 +740,7 @@ export function ImportTransactionsModal({
         [`csv-mappings-${accountId}`]: JSON.stringify(fieldMappings),
       });
       savePrefs({ [`csv-delimiter-${accountId}`]: delimiter });
+      savePrefs({ [`csv-encoding-${accountId}`]: csvEncoding });
       savePrefs({ [`csv-has-header-${accountId}`]: String(hasHeaderRow) });
       savePrefs({
         [`csv-skip-start-lines-${accountId}`]: String(skipStartLines),
@@ -1189,6 +1197,35 @@ export function ImportTransactionsModal({
                       />
                     </label>
                     <label
+                      htmlFor="csv-encoding-select"
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: 5,
+                        alignItems: 'baseline',
+                      }}
+                    >
+                      <Trans>Encoding:</Trans>
+                      <Select
+                        id="csv-encoding-select"
+                        options={[
+                          ['auto', t('Auto (detect)')],
+                          ['utf-8', t('UTF-8')],
+                          ['utf-16le', t('UTF-16 LE')],
+                          ['utf-16be', t('UTF-16 BE')],
+                          ['windows-1252', t('Windows-1252')],
+                          ['windows-1250', t('Windows-1250')],
+                          ['iso-8859-1', t('ISO-8859-1')],
+                          ['iso-8859-2', t('ISO-8859-2')],
+                        ]}
+                        value={csvEncoding}
+                        onChange={value => {
+                          setCsvEncoding(value);
+                        }}
+                        style={{ width: 130 }}
+                      />
+                    </label>
+                    <label
                       htmlFor="csv-skip-start-lines"
                       style={{
                         display: 'flex',
@@ -1355,8 +1392,9 @@ export function ImportTransactionsModal({
 
 function getParseOptions(fileType: string, options: ParseFileOptions = {}) {
   if (fileType === 'csv') {
-    const { delimiter, hasHeaderRow, skipStartLines, skipEndLines } = options;
-    return { delimiter, hasHeaderRow, skipStartLines, skipEndLines };
+    const { delimiter, encoding, hasHeaderRow, skipStartLines, skipEndLines } =
+      options;
+    return { delimiter, encoding, hasHeaderRow, skipStartLines, skipEndLines };
   }
   if (isOfxFile(fileType)) {
     const { fallbackMissingPayeeToMemo, importNotes, swapPayeeAndMemo } =

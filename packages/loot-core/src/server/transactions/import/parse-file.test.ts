@@ -263,6 +263,204 @@ describe('File import', () => {
     expect(await getTransactions('one')).toMatchSnapshot();
   });
 
+  test('csv import works (utf-16le bank export)', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/utf-16le.csv',
+      { hasHeaderRow: true },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(2);
+    expect(transactions[0]).toMatchObject({
+      'Könyvelés dátuma': '2025.12.04',
+      Összeg: '100',
+      Devizanem: 'HUF',
+    });
+  });
+
+  test('csv import works (utf-16be)', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/utf-16be.csv',
+      { hasHeaderRow: true },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(2);
+    expect(transactions[0]).toMatchObject({
+      'Könyvelés dátuma': '2025.12.04',
+      Összeg: '100',
+      Devizanem: 'HUF',
+    });
+  });
+
+  test('csv import works (utf-8 with bom)', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/utf-8-bom.csv',
+      { hasHeaderRow: true },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(2);
+    expect(transactions[0]).toMatchObject({
+      'Könyvelés dátuma': '2025.12.04',
+      Összeg: '100',
+      Devizanem: 'HUF',
+    });
+  });
+
+  test('csv import skips start lines on utf-16le files', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/utf-16le.csv',
+      { hasHeaderRow: false, skipStartLines: 1 },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(2);
+    const rows = transactions as string[][];
+    expect(rows[0][0]).toBe('tariff package name');
+  });
+
+  test('csv import respects manual encoding override', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/windows-1252.csv',
+      { hasHeaderRow: true, encoding: 'windows-1252' },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(2);
+    expect(transactions[0]).toMatchObject({
+      Date: '2025.12.04',
+      Payee: 'Café Rémy',
+      Amount: '100.25',
+    });
+    expect(transactions[1]).toMatchObject({
+      Date: '2025.12.05',
+      Payee: 'Boulangerie Müller',
+      Amount: '-42.10',
+    });
+  });
+
+  test('csv import auto-detects utf-16le without bom', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/utf-16le-nobom.csv',
+      { hasHeaderRow: true },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(2);
+    expect(transactions[0]).toMatchObject({
+      'Könyvelés dátuma': '2025.12.04',
+      Összeg: '100',
+      Devizanem: 'HUF',
+    });
+  });
+
+  test('csv import auto-detects utf-16be without bom', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/utf-16be-nobom.csv',
+      { hasHeaderRow: true },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(2);
+    expect(transactions[0]).toMatchObject({
+      'Könyvelés dátuma': '2025.12.04',
+      Összeg: '100',
+      Devizanem: 'HUF',
+    });
+  });
+
+  test('csv import auto-detects windows-1252', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/windows-1252.csv',
+      { hasHeaderRow: true },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(2);
+    expect(transactions[0]).toMatchObject({
+      Date: '2025.12.04',
+      Payee: 'Café Rémy',
+      Amount: '100.25',
+    });
+    expect(transactions[1]).toMatchObject({
+      Date: '2025.12.05',
+      Payee: 'Boulangerie Müller',
+      Amount: '-42.10',
+    });
+  });
+
+  test('csv import keeps utf-8 with a corrupted byte', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/utf-8-corrupted.csv',
+      { hasHeaderRow: true },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(1);
+    expect(transactions[0]).toMatchObject({
+      Date: '2025.12.04',
+      Payee: 'Café R\uFFFDémy',
+      Amount: '100.25',
+    });
+  });
+
+  test('csv import does not misdetect utf-8 with nul padding as utf-16', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/utf-8-nuls.csv',
+      { hasHeaderRow: true, skipEndLines: 1 },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(1);
+    expect(transactions[0]).toMatchObject({
+      Date: '2025.12.04',
+      Payee: 'Café Rémy',
+      Amount: '100.25',
+    });
+  });
+
+  test('csv import does not misdetect utf-8 with dense nul padding as utf-16', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/utf-8-nul-padding.csv',
+      { hasHeaderRow: true, skipEndLines: 1 },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(1);
+    expect(transactions[0]).toMatchObject({
+      Date: '2025.12.04',
+      Payee: 'Café Rémy',
+      Amount: '100.25',
+    });
+  });
+
+  test('csv import treats explicit auto encoding as detection', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/utf-16le.csv',
+      { hasHeaderRow: true, encoding: 'auto' },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(2);
+    expect(transactions[0]).toMatchObject({
+      'Könyvelés dátuma': '2025.12.04',
+      Összeg: '100',
+      Devizanem: 'HUF',
+    });
+  });
+
+  test('csv import rejects an invalid encoding', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/utf-8-bom.csv',
+      { hasHeaderRow: true, encoding: 'not-an-encoding' },
+    );
+
+    expect(errors.length).toBe(1);
+    expect(transactions).toHaveLength(0);
+    expect(errors[0].message).toContain('Failed parsing');
+  });
+
   test('CAMT import respects ISO-8859-1 encoding', async () => {
     const { errors, transactions } = await parseFile(
       __dirname + '/../../../mocks/files/camt/camt.latin1.xml',

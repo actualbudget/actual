@@ -54,6 +54,81 @@ type StructuredTransaction = {
   category?: string | null;
 };
 
+/**
+ * Decode raw CSV file bytes into a string. A user-provided encoding always
+ * wins; otherwise the encoding is detected in layers: the byte order mark,
+ * BOM-less UTF-16 (text never contains NUL bytes), strict UTF-8 validation,
+ * and finally a windows-1252 fallback which also decodes ISO-8859-1 content.
+ */
+function decodeCsvBytes(bytes: Uint8Array, encoding?: string): string {
+  if (encoding && encoding !== 'auto') {
+    return new TextDecoder(encoding).decode(bytes);
+  }
+
+  if (
+    bytes.length >= 3 &&
+    bytes[0] === 0xff &&
+    bytes[1] === 0xfe &&
+    bytes[2] !== 0x00
+  ) {
+    return new TextDecoder('utf-16le').decode(bytes);
+  }
+
+  if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+    return new TextDecoder('utf-16be').decode(bytes);
+  }
+
+  const bomlessUtf16 = detectBomlessUtf16(bytes);
+  if (bomlessUtf16 != null) {
+    return new TextDecoder(bomlessUtf16).decode(bytes);
+  }
+
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  } catch {
+    // A mostly-valid UTF-8 file (a few corrupted bytes) decodes better as
+    // UTF-8 with replacement characters than as windows-1252; a genuine
+    // legacy code page file turns almost every non-ASCII byte into one.
+    const loose = new TextDecoder('utf-8').decode(bytes);
+    const replacements = (loose.match(/\uFFFD/g) || []).length;
+    let highBytes = 0;
+    for (let i = 0; i < bytes.length; i++) {
+      if (bytes[i] >= 0x80) {
+        highBytes++;
+      }
+    }
+    return highBytes > 0 && replacements / highBytes < 0.5
+      ? loose
+      : new TextDecoder('windows-1252').decode(bytes);
+  }
+}
+
+function detectBomlessUtf16(bytes: Uint8Array): string | null {
+  let evenNuls = 0;
+  let oddNuls = 0;
+  for (let i = 0; i < bytes.length; i++) {
+    if (bytes[i] === 0x00) {
+      if (i % 2 === 0) {
+        evenNuls++;
+      } else {
+        oddNuls++;
+      }
+    }
+  }
+
+  // Text never contains NUL bytes, so a significant NUL presence indicates
+  // UTF-16; the dominant parity of their positions gives the endianness.
+  // Contiguous NUL padding splits evenly across both parities, so require
+  // one parity to clearly dominate before treating the file as UTF-16.
+  const nulCount = evenNuls + oddNuls;
+  const dominantNuls = Math.max(evenNuls, oddNuls);
+  if (nulCount < bytes.length / 10 || dominantNuls / nulCount < 0.9) {
+    return null;
+  }
+
+  return evenNuls > oddNuls ? 'utf-16be' : 'utf-16le';
+}
+
 // CSV files return raw data that are not guaranteed to be StructuredTransactions
 type CsvTransaction = Record<string, string> | string[];
 
@@ -73,6 +148,7 @@ export type ParseFileOptions = {
   skipStartLines?: number;
   skipEndLines?: number;
   importNotes?: boolean;
+  encoding?: string;
 };
 
 export async function parseFile(
@@ -112,7 +188,18 @@ async function parseCSV(
   options: ParseFileOptions,
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
-  let contents = await fs.readFile(filepath);
+  const bytes = await fs.readFile(filepath, 'binary');
+
+  let contents: string;
+  try {
+    contents = decodeCsvBytes(bytes, options.encoding);
+  } catch (err) {
+    errors.push({
+      message: 'Failed parsing: ' + err.message,
+      internal: err.message,
+    });
+    return { errors, transactions: [] };
+  }
 
   const skipStart = Math.max(0, options.skipStartLines || 0);
   const skipEnd = Math.max(0, options.skipEndLines || 0);
