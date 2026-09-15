@@ -825,6 +825,167 @@ describe('Transaction rules', () => {
     expect(transactions.map(t => t.id)).toEqual(['2']);
   });
 
+  test('date isbetween builds an inclusive range condition', () => {
+    const { filters } = conditionsToAQL([
+      {
+        field: 'date',
+        op: 'isbetween',
+        value: { num1: '2020-10-05', num2: '2020-10-15' },
+      },
+    ]);
+    expect(filters).toStrictEqual([
+      { date: [{ $gte: '2020-10-05' }, { $lte: '2020-10-15' }] },
+    ]);
+
+    // The bounds may be given in either order
+    const { filters: reversed } = conditionsToAQL([
+      {
+        field: 'date',
+        op: 'isbetween',
+        value: { num1: '2020-10-15', num2: '2020-10-05' },
+      },
+    ]);
+    expect(reversed).toStrictEqual(filters);
+  });
+
+  test('transactions can be queried by a date range', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    const payeeId = await db.insertPayee({ name: 'payee' });
+
+    for (const [id, date] of [
+      ['1', '2020-10-04'],
+      ['2', '2020-10-05'],
+      ['3', '2020-10-10'],
+      ['4', '2020-10-15'],
+      ['5', '2020-10-16'],
+    ]) {
+      await db.insertTransaction({
+        id,
+        date,
+        account,
+        payee: payeeId,
+        amount: 1,
+      });
+    }
+
+    // Both bounds are inclusive
+    const transactions = await getMatchingTransactions([
+      {
+        field: 'date',
+        op: 'isbetween',
+        value: { num1: '2020-10-05', num2: '2020-10-15' },
+      },
+    ]);
+    expect(transactions.map(t => t.id).sort()).toEqual(['2', '3', '4']);
+  });
+
+  test('amount isbetween builds an inclusive range condition', () => {
+    const { filters } = conditionsToAQL([
+      { field: 'amount', op: 'isbetween', value: { num1: 1000, num2: 5000 } },
+    ]);
+    expect(filters).toStrictEqual([
+      { $and: [{ amount: { $gte: 1000 } }, { amount: { $lte: 5000 } }] },
+    ]);
+
+    // The bounds may be given in either order
+    const { filters: reversed } = conditionsToAQL([
+      { field: 'amount', op: 'isbetween', value: { num1: 5000, num2: 1000 } },
+    ]);
+    expect(reversed).toStrictEqual(filters);
+  });
+
+  test('amount isbetween keeps the inflow/outflow sign handling', () => {
+    const { filters: outflow } = conditionsToAQL([
+      {
+        field: 'amount',
+        op: 'isbetween',
+        options: { outflow: true },
+        value: { num1: 1000, num2: 5000 },
+      },
+    ]);
+    expect(outflow).toStrictEqual([
+      {
+        $and: [
+          {
+            $and: [
+              { amount: { $lt: 0 } },
+              { amount: { $transform: '$neg', $gte: 1000 } },
+            ],
+          },
+          {
+            $and: [
+              { amount: { $lt: 0 } },
+              { amount: { $transform: '$neg', $lte: 5000 } },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    const { filters: inflow } = conditionsToAQL([
+      {
+        field: 'amount',
+        op: 'isbetween',
+        options: { inflow: true },
+        value: { num1: 1000, num2: 5000 },
+      },
+    ]);
+    expect(inflow).toStrictEqual([
+      {
+        $and: [
+          { $and: [{ amount: { $gt: 0 } }, { amount: { $gte: 1000 } }] },
+          { $and: [{ amount: { $gt: 0 } }, { amount: { $lte: 5000 } }] },
+        ],
+      },
+    ]);
+  });
+
+  test('transactions can be queried by an outflow amount range', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    const payeeId = await db.insertPayee({ name: 'payee' });
+
+    for (const [id, amount] of [
+      ['1', -500],
+      ['2', -1000],
+      ['3', -3000],
+      ['4', -5000],
+      ['5', -6000],
+      // An inflow of the same magnitude must not be picked up
+      ['6', 3000],
+    ]) {
+      await db.insertTransaction({
+        id,
+        date: '2020-10-01',
+        account,
+        payee: payeeId,
+        amount,
+      });
+    }
+
+    // Outflow bounds are positive magnitudes, and both are inclusive
+    const transactions = await getMatchingTransactions([
+      {
+        field: 'amount',
+        op: 'isbetween',
+        options: { outflow: true },
+        value: { num1: 1000, num2: 5000 },
+      },
+    ]);
+    expect(transactions.map(t => t.id).sort()).toEqual(['2', '3', '4']);
+
+    const inflowTransactions = await getMatchingTransactions([
+      {
+        field: 'amount',
+        op: 'isbetween',
+        options: { inflow: true },
+        value: { num1: 1000, num2: 5000 },
+      },
+    ]);
+    expect(inflowTransactions.map(t => t.id)).toEqual(['6']);
+  });
+
   test('and sub expression builds $and condition', async () => {
     const conds = [{ field: 'category', op: 'is', value: null }];
     const { filters } = conditionsToAQL(conds);

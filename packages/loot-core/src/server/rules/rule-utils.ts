@@ -272,3 +272,20 @@ export function parseBetweenAmount(between) {
   }
   return { type: 'between', num1, num2 };
 }
+
+export function parseBetweenDate(between) {
+  if (between == null || typeof between !== 'object') {
+    return null;
+  }
+
+  const { num1, num2 } = between;
+  const parsed1 = parseDateString(num1);
+  const parsed2 = parseDateString(num2);
+
+  // Only full `YYYY-MM-DD` dates make sense as range bounds
+  if (parsed1?.type !== 'date' || parsed2?.type !== 'date') {
+    return null;
+  }
+
+  return { type: 'between', num1: parsed1.date, num2: parsed2.date };
+}
