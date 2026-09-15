@@ -10,12 +10,14 @@ import {
   SvgReports,
   SvgStoreFront,
   SvgTag,
+  SvgTime,
   SvgTuning,
   SvgWallet,
 } from '@actual-app/components/icons/v1';
 import { SvgCalendar3 } from '@actual-app/components/icons/v2';
 import { View } from '@actual-app/components/view';
 
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
@@ -31,11 +33,14 @@ export function PrimaryButtons() {
   const syncServerStatus = useSyncServerStatus();
   const isTestEnv = useIsTestEnv();
   const isUsingServer = syncServerStatus !== 'no-server' || isTestEnv;
+  const isChangeLogEnabled = useFeatureFlag('changeLog');
 
   const isActive = [
     '/payees',
     '/rules',
     '/bank-sync',
+    '/tags',
+    '/transaction-changes',
     '/settings',
     '/tools',
   ].some(route => location.pathname.startsWith(route));
@@ -86,6 +91,14 @@ export function PrimaryButtons() {
             to="/tags"
             indent={15}
           />
+          {isChangeLogEnabled && (
+            <SecondaryItem
+              title={t('Transaction Changes')}
+              Icon={SvgTime}
+              to="/transaction-changes"
+              indent={15}
+            />
+          )}
           <SecondaryItem
             title={t('Settings')}
             Icon={SvgCog}
