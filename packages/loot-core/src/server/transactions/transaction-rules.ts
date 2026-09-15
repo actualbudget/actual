@@ -333,7 +333,19 @@ export async function runRules(
     accountsMap = accounts;
   }
 
-  let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
+  const rules = rankRules(
+    fastSetMerge(
+      firstcharIndexer.getApplicableRules(trans),
+      payeeIndexer.getApplicableRules(trans),
+    ),
+  );
+
+  // The running balance is a query over every earlier transaction in
+  // the account, so only pay for it when one of the rules that can
+  // run here actually uses it
+  let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap, {
+    includeBalance: rules.some(rule => actionsReferenceBalance(rule.actions)),
+  });
   let lastCategoryIdForGroup: string | null = finalTrans.category ?? null;
 
   let scheduleRuleID = '';
@@ -347,13 +359,6 @@ export async function runRules(
 
   const RuleIdsLinkedToSchedules =
     await getAllRuleIdsFromSchedules(scheduleRuleID);
-
-  const rules = rankRules(
-    fastSetMerge(
-      firstcharIndexer.getApplicableRules(trans),
-      payeeIndexer.getApplicableRules(trans),
-    ),
-  );
 
   const formulaStrings = rules.flatMap(rule =>
     collectFormulasFromActions(rule.actions),
@@ -755,9 +760,10 @@ export async function applyActions(
 
   const accounts: db.DbAccount[] = await db.getAccounts();
   const accountsMap = new Map(accounts.map(account => [account.id, account]));
+  const includeBalance = actionsReferenceBalance(parsedActions);
   const transactionsForRules = await Promise.all(
-    transactions.map(transactions =>
-      prepareTransactionForRules(transactions, accountsMap),
+    transactions.map(transaction =>
+      prepareTransactionForRules(transaction, accountsMap, { includeBalance }),
     ),
   );
 
@@ -1084,9 +1090,28 @@ export async function prefetchBalanceOfForTransaction(
   return map;
 }
 
+const BALANCE_VARIABLE = /\bbalance\b/i;
+
+// Whether any of these actions can read the transaction's running
+// balance: Handlebars templates via `{{balance}}` and formulas via the
+// `balance` variable. `BALANCE_OF(...)` is a different, prefetched value
+// and does not count.
+export function actionsReferenceBalance(
+  actions: Array<{ options?: { template?: string; formula?: string } }>,
+): boolean {
+  return actions.some(action => {
+    const { template, formula } = action.options ?? {};
+    return (
+      (typeof template === 'string' && BALANCE_VARIABLE.test(template)) ||
+      (typeof formula === 'string' && BALANCE_VARIABLE.test(formula))
+    );
+  });
+}
+
 export async function prepareTransactionForRules(
   trans: TransactionEntity,
   accounts: Map<string, db.DbAccount> | null = null,
+  { includeBalance = true }: { includeBalance?: boolean } = {},
 ): Promise<TransactionForRules> {
   const r: TransactionForRules = { ...trans };
   if (trans.payee) {
@@ -1107,7 +1132,12 @@ export async function prepareTransactionForRules(
       r._account_name = r._account?.name || '';
     }
 
-    r.balance = await getRunningBalanceBeforeTransaction(trans, trans.account);
+    if (includeBalance) {
+      r.balance = await getRunningBalanceBeforeTransaction(
+        trans,
+        trans.account,
+      );
+    }
   }
 
   if (trans.category) {
