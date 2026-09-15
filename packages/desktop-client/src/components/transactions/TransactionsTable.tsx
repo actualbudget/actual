@@ -3744,24 +3744,19 @@ export const TransactionTable = forwardRef(
         if (isTemporaryId(id)) {
           const { newNavigator } = latestState.current;
           const newTrans = latestState.current.newTransactions;
-          const { data, diff } = splitTransaction(
+          const { data } = splitTransaction(
             newTrans,
             id,
             makeEmptySplitSubtransactions,
           );
           setNewTransactions(data);
 
-          // Jump next to "debit" field if it is empty
-          // Otherwise jump to the same field as before, but downwards
-          // to the added split transaction
-          if (newTrans[0].amount === null) {
-            newNavigator.onEdit(newTrans[0].id, 'debit');
-          } else {
-            newNavigator.onEdit(
-              diff.added[0].id,
-              latestState.current.newNavigator.focusedField,
-            );
-          }
+          // Stay on the parent amount field when split is first enabled
+          // so the user can enter the parent amount before the split lines.
+          newNavigator.onEdit(
+            newTrans[0].id,
+            newTrans[0].amount > 0 ? 'credit' : 'debit',
+          );
         } else {
           const trans = latestState.current.transactions.find(t => t.id === id);
           const newId = onSplitProp(id);
