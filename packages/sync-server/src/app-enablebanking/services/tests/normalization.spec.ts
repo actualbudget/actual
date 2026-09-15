@@ -17,6 +17,8 @@ import {
   mockSessionAccount,
   mockSessionAccountMinimal,
   mockSessionAccountNoName,
+  mockTransactionCreditorPostalAddress,
+  mockTransactionDebtorPostalAddress,
   mockTransactionMinimal,
   mockTransactionNoPayee,
 } from './fixtures';
@@ -57,6 +59,20 @@ describe('normalizeTransaction', () => {
   it('should fall back to remittance_information for payee when no creditor/debtor', () => {
     const result = normalizeTransaction(mockTransactionNoPayee);
     expect(result.payeeName).toBe('Transfer from savings');
+  });
+
+  it('should fall back to creditor postal_address for DBIT when name is missing', () => {
+    const result = normalizeTransaction(mockTransactionCreditorPostalAddress);
+    // ING leaves creditor.name null; the merchant is in postal_address.address_line.
+    expect(result.payeeName).toBe('ACME STORE WARSAW');
+    // The payee must not collapse to the remittance, which becomes the notes.
+    expect(result.payeeName).not.toBe(result.notes);
+  });
+
+  it('should fall back to debtor postal_address for CRDT when name is missing', () => {
+    const result = normalizeTransaction(mockTransactionDebtorPostalAddress);
+    expect(result.payeeName).toBe('SOME CLIENT LTD');
+    expect(result.payeeName).not.toBe(result.notes);
   });
 
   it('should join remittance_information with space', () => {
