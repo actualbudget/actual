@@ -11,6 +11,22 @@ import { openDatabase } from './db';
 import messagesSql from './sql/messages.sql?raw';
 import { getPathForGroupFile } from './util/paths';
 
+// A client with a badly drifted clock can send a timestamp far in the
+// future, which would otherwise get baked into the shared merkle trie
+// forever and break sync for every device in the group.
+const MAX_FUTURE_DRIFT_MS = 24 * 60 * 60 * 1000; // 1 day
+
+export const CLOCK_DRIFT_ERROR_CODE = 'clock-drift';
+
+function createClockDriftError(message) {
+  return Object.assign(new Error(message), { code: CLOCK_DRIFT_ERROR_CODE });
+}
+
+function isTimestampTooFarInFuture(timestamp) {
+  const parsed = Timestamp.parse(timestamp);
+  return !parsed || parsed.millis() - Date.now() >= MAX_FUTURE_DRIFT_MS;
+}
+
 function getGroupDb(groupId) {
   const path = getPathForGroupFile(groupId);
   const needsInit = !existsSync(path);
@@ -31,6 +47,13 @@ function addMessages(db, messages) {
 
     if (messages.length > 0) {
       for (const msg of messages) {
+        if (isTimestampTooFarInFuture(msg.timestamp)) {
+          throw createClockDriftError(
+            'Rejecting sync message with timestamp too far in the future: ' +
+              msg.timestamp,
+          );
+        }
+
         const info = db.mutate(
           `INSERT OR IGNORE INTO messages_binary (timestamp, is_encrypted, content)
              VALUES (?, ?, ?)`,
@@ -70,25 +93,27 @@ function getMerkle(db) {
 
 export function sync(messages, since, groupId) {
   const db = getGroupDb(groupId);
-  const newMessages = db.all(
-    `SELECT * FROM messages_binary
-         WHERE timestamp > ?
-         ORDER BY timestamp`,
-    [since],
-  );
+  try {
+    const newMessages = db.all(
+      `SELECT * FROM messages_binary
+           WHERE timestamp > ?
+           ORDER BY timestamp`,
+      [since],
+    );
 
-  const trie = addMessages(db, messages);
+    const trie = addMessages(db, messages);
 
-  db.close();
-
-  return {
-    trie,
-    newMessages: newMessages.map(msg =>
-      create(MessageEnvelopeSchema, {
-        timestamp: msg.timestamp,
-        isEncrypted: msg.is_encrypted === 1,
-        content: msg.content,
-      }),
-    ),
-  };
+    return {
+      trie,
+      newMessages: newMessages.map(msg =>
+        create(MessageEnvelopeSchema, {
+          timestamp: msg.timestamp,
+          isEncrypted: msg.is_encrypted === 1,
+          content: msg.content,
+        }),
+      ),
+    };
+  } finally {
+    db.close();
+  }
 }
