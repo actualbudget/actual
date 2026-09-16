@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import type {
   MonteCarloContribution,
+  MonteCarloIncomeStream,
   MonteCarloPot,
   MonteCarloRunDetailRow,
   MonteCarloSpendingPhase,
@@ -47,6 +48,21 @@ function makeContribution(id: string, name = ''): MonteCarloContribution {
     toAge: null,
     annualAmount: 0,
     adjustsWithInflation: false,
+    sourceIncomeStreamId: null,
+    beforeTax: false,
+  };
+}
+
+function makeIncomeStream(id: string, name = ''): MonteCarloIncomeStream {
+  return {
+    id,
+    name,
+    fromAge: null,
+    toAge: null,
+    annualAmount: 0,
+    adjustsWithInflation: false,
+    taxRate: 0,
+    taxableFraction: 1,
   };
 }
 
@@ -65,11 +81,16 @@ function makeRow(
     startBalance: 0,
     withdrawal: 0,
     plannedSpending: 0,
+    spent: 0,
     growth: 0,
     endBalance: 0,
     potBalances: [],
     potStartBalances: [],
     inflation: null,
+    income: 0,
+    incomeAmounts: [],
+    incomeTax: 0,
+    unspentIncome: 0,
     contributions: 0,
     potContributions: [],
     contributionAmounts: [],
@@ -89,14 +110,20 @@ const contributions = [
   makeContribution('contribution-1', 'Salary sacrifice'),
   makeContribution('contribution-2'),
 ];
+const incomeStreams = [
+  makeIncomeStream('income-1', 'State pension'),
+  makeIncomeStream('income-2'),
+];
 const phases = [makePhase('phase-1', null, 'Early'), makePhase('phase-2', 62)];
 
 describe('buildMonteCarloCashflowChart', () => {
-  it('builds one series per pot, active contribution and phase', () => {
+  it('builds one series per pot, active income, phase and active contribution', () => {
     const rows = [
       makeRow({
         year: 1,
         potWithdrawals: [30_000, 10_000],
+        incomeAmounts: [12_000, 0],
+        incomeTax: 500,
         contributionAmounts: [5_000, 0],
         plannedSpending: 38_000,
         taxPaid: 2_000,
@@ -106,6 +133,7 @@ describe('buildMonteCarloCashflowChart', () => {
       rows,
       pots,
       contributions,
+      incomeStreams,
       spendingPhases: phases,
       startAge: 60,
       translate,
@@ -116,8 +144,8 @@ describe('buildMonteCarloCashflowChart', () => {
     ).toEqual([
       ['pot', 'Pension'],
       ['pot', 'Pot 2'],
-      // The second contribution never deposits anything, so no series
-      ['contribution', 'Salary sacrifice'],
+      // The second stream never pays anything, so no series
+      ['income', 'State pension'],
     ]);
     expect(
       chart.outflowSeries.map(series => [series.kind, series.label]),
@@ -125,12 +153,15 @@ describe('buildMonteCarloCashflowChart', () => {
       ['phase', 'Early'],
       ['phase', 'Phase 2'],
       ['tax', 'Tax'],
+      // The second contribution never deposits anything, so no series
+      ['contribution', 'Salary sacrifice'],
     ]);
     expect(chart.tooltipGroups.map(group => group.key)).toEqual([
       'withdrawals',
-      'contributions',
+      'income',
       'tax',
       'spending',
+      'contributions',
     ]);
 
     const [point] = chart.data;
@@ -139,14 +170,17 @@ describe('buildMonteCarloCashflowChart', () => {
     expect(point.amounts).toEqual({
       pot0: 30_000,
       pot1: 10_000,
-      contribution0: 5_000,
-      contribution1: 0,
+      income0: 12_000,
+      income1: 0,
       // Age 60 is before phase 2 starts, so the plan belongs to phase 1
       phase0: -38_000,
       phase1: 0,
-      tax0: -2_000,
+      // Tax on withdrawals and on income together
+      tax0: -2_500,
+      contribution0: -5_000,
+      contribution1: 0,
     });
-    expect(chart.stackExtents).toEqual([45_000, -40_000]);
+    expect(chart.stackExtents).toEqual([52_000, -45_500]);
   });
 
   it('attributes each year to the phase active at that age', () => {
@@ -159,6 +193,7 @@ describe('buildMonteCarloCashflowChart', () => {
       rows,
       pots,
       contributions: [],
+      incomeStreams: [],
       spendingPhases: phases,
       startAge: 60,
       translate,
@@ -174,16 +209,21 @@ describe('buildMonteCarloCashflowChart', () => {
     ]);
   });
 
-  it('omits tax and contribution groups when nothing was paid', () => {
+  it('omits tax, income and contribution groups when nothing moved', () => {
     const chart = buildMonteCarloCashflowChart({
       rows: [makeRow({ year: 1, potWithdrawals: [100, 0] })],
       pots,
       contributions,
+      incomeStreams,
       spendingPhases: phases,
       startAge: 60,
       translate,
     });
 
+    expect(chart.inflowSeries.map(series => series.kind)).toEqual([
+      'pot',
+      'pot',
+    ]);
     expect(chart.outflowSeries.map(series => series.kind)).toEqual([
       'phase',
       'phase',
@@ -194,11 +234,32 @@ describe('buildMonteCarloCashflowChart', () => {
     ]);
   });
 
+  it('shows the tax group for income tax alone', () => {
+    const chart = buildMonteCarloCashflowChart({
+      rows: [makeRow({ year: 1, incomeAmounts: [1_000, 0], incomeTax: 200 })],
+      pots,
+      contributions: [],
+      incomeStreams,
+      spendingPhases: phases,
+      startAge: 60,
+      translate,
+    });
+
+    expect(chart.tooltipGroups.map(group => group.key)).toEqual([
+      'withdrawals',
+      'income',
+      'tax',
+      'spending',
+    ]);
+    expect(chart.data[0].amounts.tax0).toBe(-200);
+  });
+
   it('falls back to a single phase when none are configured', () => {
     const chart = buildMonteCarloCashflowChart({
       rows: [makeRow({ year: 1, plannedSpending: 500 })],
       pots,
       contributions: [],
+      incomeStreams: [],
       spendingPhases: [],
       startAge: 60,
       translate,
@@ -216,6 +277,7 @@ describe('buildMonteCarloCashflowChart', () => {
       rows: [],
       pots,
       contributions: [],
+      incomeStreams: [],
       spendingPhases: [makePhase('late', 70), makePhase('early', null)],
       startAge: 60,
       translate,
@@ -228,14 +290,15 @@ describe('buildMonteCarloCashflowChart', () => {
     ]);
   });
 
-  it('flags the synthetic years after a failure', () => {
+  it('carries the unfunded and unspent flags for the tooltip', () => {
     const chart = buildMonteCarloCashflowChart({
       rows: [
-        makeRow({ year: 1, plannedSpending: 100 }),
+        makeRow({ year: 1, plannedSpending: 100, unspentIncome: 250 }),
         makeRow({ year: 2, plannedSpending: 100, afterDepletion: true }),
       ],
       pots,
       contributions: [],
+      incomeStreams: [],
       spendingPhases: phases,
       startAge: 60,
       translate,
@@ -245,5 +308,6 @@ describe('buildMonteCarloCashflowChart', () => {
       false,
       true,
     ]);
+    expect(chart.data.map(point => point.unspentIncome)).toEqual([250, 0]);
   });
 });

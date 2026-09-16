@@ -21,6 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { MonteCarloContributions } from '#components/reports/reports/monte-carlo/MonteCarloContributions';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
+import { MonteCarloIncomeStreams } from '#components/reports/reports/monte-carlo/MonteCarloIncomeStreams';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import { MonteCarloPotConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloPotConfiguration';
 import { MonteCarloPotsTableHeader } from '#components/reports/reports/monte-carlo/MonteCarloPotsTableHeader';
@@ -48,6 +49,7 @@ type ConfigurationTab =
   | 'plan'
   | 'pots'
   | 'contributions'
+  | 'income'
   | 'withdrawals'
   | 'tax';
 
@@ -139,6 +141,12 @@ export function MonteCarloConfiguration({
           <Trans>Investment pots</Trans>
         </ModeButton>
         <ModeButton
+          selected={activeTab === 'income'}
+          onSelect={() => setActiveTab('income')}
+        >
+          <Trans>Income</Trans>
+        </ModeButton>
+        <ModeButton
           selected={activeTab === 'contributions'}
           onSelect={() => setActiveTab('contributions')}
         >
@@ -170,15 +178,19 @@ export function MonteCarloConfiguration({
                 )
               : activeTab === 'contributions'
                 ? t(
-                    "Money you add to your pots each year, in today's money - for example pension or savings deposits while you're still earning.",
+                    "Money you add to your pots each year, in today's money - paid from one of your income streams, or from outside the plan.",
                   )
-                : activeTab === 'withdrawals'
+                : activeTab === 'income'
                   ? t(
-                      'How much you take out each year, and optional rules that adjust it as markets move.',
+                      "Money you receive each year without drawing on your pots, in today's money - a state pension, an annuity, rental or part-time work. It pays for spending first; the pots fund the rest.",
                     )
-                  : t(
-                      'How withdrawals are taxed - your spending is what you keep after tax.',
-                    )}
+                  : activeTab === 'withdrawals'
+                    ? t(
+                        'How much you take out each year, and optional rules that adjust it as markets move.',
+                      )
+                    : t(
+                        'How withdrawals are taxed - your spending is what you keep after tax.',
+                      )}
         </Text>
         {activeTab === 'contributions' && (
           <MonteCarloHelpTooltip>
@@ -190,6 +202,26 @@ export function MonteCarloConfiguration({
               amount&apos;s buying power constant; untick it for a fixed amount
               that shrinks in real terms. A pot can receive any number of
               contributions - even one that is still locked for withdrawals.
+              <br />
+              <br />
+              A contribution paid from an income stream is capped at what that
+              stream brings in that year. Tick Before tax for a workplace
+              pension or salary sacrifice, which is deducted before the
+              income&apos;s tax is worked out.
+            </Trans>
+          </MonteCarloHelpTooltip>
+        )}
+        {activeTab === 'income' && (
+          <MonteCarloHelpTooltip>
+            <Trans>
+              Each income stream arrives every year in its age window (both ages
+              inclusive), taxed the same way as pot withdrawals: at its own rate
+              under the flat model, or by its taxable portion under the bands
+              model, where it uses up the lower bands before any pot withdrawal
+              is taxed. What is left after tax and any contributions paid from
+              it goes towards the year&apos;s spending; the pots only fund the
+              remainder. Income beyond that is unspent and leaves the plan -
+              route it into a pot with a contribution if you want to keep it.
             </Trans>
           </MonteCarloHelpTooltip>
         )}
@@ -518,6 +550,19 @@ export function MonteCarloConfiguration({
         <MonteCarloContributions
           contributions={config.contributions}
           pots={config.pots}
+          incomeStreams={config.incomeStreams}
+          currentAge={config.currentAge}
+          targetAge={config.targetAge}
+          onConfigChange={onConfigChange}
+        />
+      )}
+
+      {/* Income */}
+      {activeTab === 'income' && (
+        <MonteCarloIncomeStreams
+          incomeStreams={config.incomeStreams}
+          contributions={config.contributions}
+          usesTaxBands={config.taxModel === 'bands'}
           currentAge={config.currentAge}
           targetAge={config.targetAge}
           onConfigChange={onConfigChange}

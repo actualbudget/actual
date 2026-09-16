@@ -2,6 +2,7 @@ import { MAX_SAFE_NUMBER } from '@actual-app/core/shared/util';
 import type {
   MonteCarloAllocationPreset,
   MonteCarloContributionMeta,
+  MonteCarloIncomeStreamMeta,
   MonteCarloPotMeta,
   MonteCarloReturnModel,
   MonteCarloSpendingPhaseMeta,
@@ -251,6 +252,16 @@ export type MonteCarloContribution = {
   annualAmount: number;
   /** Whether the amount rises with inflation */
   adjustsWithInflation: boolean;
+  /**
+   * Income stream the contribution is paid out of - capped at what that
+   * stream pays in the year; null = money from outside the plan
+   */
+  sourceIncomeStreamId: string | null;
+  /**
+   * Whether an income-sourced contribution comes out of the stream's
+   * gross before its tax is worked out (salary sacrifice)
+   */
+  beforeTax: boolean;
 };
 
 export function createMonteCarloContribution(
@@ -265,6 +276,46 @@ export function createMonteCarloContribution(
     toAge: null,
     annualAmount: 1_000_000, // 10,000.00 in minor units
     adjustsWithInflation: true,
+    sourceIncomeStreamId: null,
+    beforeTax: false,
+  };
+}
+
+/**
+ * One recurring yearly income received without drawing on the pots
+ * (state pension, annuity, rental, part-time work) over an age window.
+ * Net of its tax it pays for the year's spending first; the pots fund
+ * the rest.
+ */
+export type MonteCarloIncomeStream = {
+  id: string;
+  name: string;
+  /** Age the income starts (inclusive); null = starts now */
+  fromAge: number | null;
+  /** Age the income stops (inclusive); null = end of plan */
+  toAge: number | null;
+  /** Yearly gross amount in minor units, in today's money */
+  annualAmount: number;
+  /** Whether the amount rises with inflation */
+  adjustsWithInflation: boolean;
+  /** Flat tax model: effective tax rate on the income (decimal fraction) */
+  taxRate: number;
+  /** Bands tax model: share of the income that counts as taxable */
+  taxableFraction: number;
+};
+
+export function createMonteCarloIncomeStream(
+  id: string,
+): MonteCarloIncomeStream {
+  return {
+    id,
+    name: '',
+    fromAge: null,
+    toAge: null,
+    annualAmount: 1_000_000, // 10,000.00 in minor units
+    adjustsWithInflation: true,
+    taxRate: 0,
+    taxableFraction: 1,
   };
 }
 
@@ -386,6 +437,8 @@ export type MonteCarloConfig = {
   spendingPhases: MonteCarloSpendingPhase[];
   /** Recurring yearly contributions paid into pots */
   contributions: MonteCarloContribution[];
+  /** Recurring yearly income that pays for spending before the pots */
+  incomeStreams: MonteCarloIncomeStream[];
   /** Mean yearly inflation as a decimal fraction; null = flat withdrawals */
   inflationMean: number | null;
   /** Yearly inflation volatility as a decimal fraction; 0 = fixed rate */
@@ -408,6 +461,7 @@ export const MONTE_CARLO_DEFAULTS: MonteCarloConfig = {
   minimumWithdrawal: 0,
   spendingPhases: [createMonteCarloSpendingPhase('phase-1')],
   contributions: [],
+  incomeStreams: [],
   inflationMean: 0.025,
   inflationStdDev: 0.02,
   taxModel: 'flat',
@@ -495,6 +549,29 @@ function contributionFromMeta(
     annualAmount: contributionMeta.annualAmount ?? defaults.annualAmount,
     adjustsWithInflation:
       contributionMeta.adjustsWithInflation ?? defaults.adjustsWithInflation,
+    sourceIncomeStreamId: contributionMeta.sourceIncomeStreamId ?? null,
+    beforeTax: contributionMeta.beforeTax ?? defaults.beforeTax,
+  };
+}
+
+function incomeStreamFromMeta(
+  incomeStreamMeta: MonteCarloIncomeStreamMeta,
+  index: number,
+): MonteCarloIncomeStream {
+  const defaults = createMonteCarloIncomeStream(
+    incomeStreamMeta.id || `income-${index + 1}`,
+  );
+  return {
+    ...defaults,
+    name: incomeStreamMeta.name ?? defaults.name,
+    fromAge: incomeStreamMeta.fromAge ?? null,
+    toAge: incomeStreamMeta.toAge ?? null,
+    annualAmount: incomeStreamMeta.annualAmount ?? defaults.annualAmount,
+    adjustsWithInflation:
+      incomeStreamMeta.adjustsWithInflation ?? defaults.adjustsWithInflation,
+    taxRate: incomeStreamMeta.taxRate ?? defaults.taxRate,
+    taxableFraction:
+      incomeStreamMeta.taxableFraction ?? defaults.taxableFraction,
   };
 }
 
@@ -516,6 +593,9 @@ export function monteCarloConfigFromMeta(
       : [createMonteCarloSpendingPhase('phase-1')],
     contributions: meta?.contributions?.length
       ? meta.contributions.map(contributionFromMeta)
+      : [],
+    incomeStreams: meta?.incomeStreams?.length
+      ? meta.incomeStreams.map(incomeStreamFromMeta)
       : [],
     inflationMean:
       meta?.inflationMean !== undefined
@@ -609,6 +689,12 @@ export type MonteCarloRunDetailRow = {
    * affordability capping
    */
   plannedSpending: number;
+  /**
+   * The money that actually reached spending: net income put towards it
+   * plus the withdrawal net of tax. Below plannedSpending on a shortfall
+   * year, above it when the minimum withdrawal forced out more
+   */
+  spent: number;
   /** Investment gain/loss applied after the withdrawal */
   growth: number;
   endBalance: number;
@@ -620,6 +706,20 @@ export type MonteCarloRunDetailRow = {
   /** The year's realized inflation rate as a decimal fraction; null when
    * inflation is disabled */
   inflation: number | null;
+  /** Gross income received this year, across every stream */
+  income: number;
+  /**
+   * Gross income from each configured stream, in the order the streams
+   * are configured (zero outside its age window)
+   */
+  incomeAmounts: number[];
+  /** Tax paid on this year's income (0 with no tax model) */
+  incomeTax: number;
+  /**
+   * Net income left after sourced contributions and the year's planned
+   * spending - it leaves the plan (0 when the income was fully used)
+   */
+  unspentIncome: number;
   /** Contributions paid in at the start of this year */
   contributions: number;
   /** Contribution each pot received at the start of the year, same order */
@@ -876,6 +976,23 @@ export function runMonteCarloSimulation(
         potTaxableFractions.some(fraction => fraction > 0)
       : potTaxRates.some(rate => rate > 0);
 
+  // Income streams are taxed the same two ways as pots. Under the bands
+  // model their taxable income fills the lower bands first, so the year's
+  // pot withdrawals are taxed at the marginal rate above it.
+  const incomeStreams = params.incomeStreams;
+  const incomeCount = incomeStreams.length;
+  const incomeTaxRates = incomeStreams.map(incomeStream =>
+    clamp(incomeStream.taxRate, 0, MAX_WITHDRAWAL_TAX_RATE),
+  );
+  const incomeTaxableFractions = incomeStreams.map(incomeStream =>
+    clamp(incomeStream.taxableFraction, 0, 1),
+  );
+  const hasIncomeTax =
+    taxModel === 'bands'
+      ? taxBands.some(band => band.rate > 0) &&
+        incomeTaxableFractions.some(fraction => fraction > 0)
+      : incomeTaxRates.some(rate => rate > 0);
+
   // --- Fees --------------------------------------------------------------
   const potFeeFixed = pots.map(pot =>
     clamp(pot.annualFeeFixed ?? 0, 0, MAX_AMOUNT),
@@ -915,8 +1032,13 @@ export function runMonteCarloSimulation(
 
   // Tax due on the takes currently in potTakes. Band thresholds are in
   // today's money, so taxable income is deflated by the replay's inflation
-  // path before banding (thresholds effectively rise with inflation)
-  function taxForTakes(cumulativeInflationNow: number) {
+  // path before banding (thresholds effectively rise with inflation).
+  // Under the bands model the year's income has already used up the
+  // lower bands, so the takes are taxed as the slice above it.
+  function taxForTakes(
+    cumulativeInflationNow: number,
+    taxableIncomeBase: number,
+  ) {
     if (!hasTax) {
       return 0;
     }
@@ -931,7 +1053,12 @@ export function runMonteCarloSimulation(
     for (let potIndex = 0; potIndex < potCount; potIndex++) {
       taxable += potTakes[potIndex] * potTaxableFractions[potIndex];
     }
-    return bandTax(taxable / cumulativeInflationNow) * cumulativeInflationNow;
+    const baseToday = taxableIncomeBase / cumulativeInflationNow;
+    return (
+      (bandTax(baseToday + taxable / cumulativeInflationNow) -
+        bandTax(baseToday)) *
+      cumulativeInflationNow
+    );
   }
 
   // The slice of each pot's take (currently in potTakes) that was assessed
@@ -1147,70 +1274,215 @@ export function runMonteCarloSimulation(
     );
   }
 
-  // The first year with planned spending - withdrawal rules anchor here
-  // and only adjust from here on, so zero-spend years (accumulation
-  // before retirement) neither trigger nor drift them
-  let firstSpendingYear = Infinity;
-  for (let year = 1; year <= horizonYears; year++) {
-    if (plannedTodayByYear[year] > 0) {
-      firstSpendingYear = year;
-      break;
+  // Scheduled amounts per year in today's money - split into an
+  // inflation-adjusted and a flat portion so a year's amount is
+  // flat + adjusted × cumulativeInflation. Deterministic and shared by
+  // every replay. One array per year for contributions (indexed by
+  // configured contribution) and for income streams (indexed by stream).
+  function scheduleByYear(
+    items: Array<{
+      fromAge: number | null;
+      toAge: number | null;
+      annualAmount: number;
+      adjustsWithInflation: boolean;
+    }>,
+  ) {
+    const flatByYear: Float64Array[] = [];
+    const adjustedByYear: Float64Array[] = [];
+    for (let year = 0; year <= horizonYears; year++) {
+      flatByYear.push(new Float64Array(items.length));
+      adjustedByYear.push(new Float64Array(items.length));
     }
+    items.forEach((item, itemIndex) => {
+      const amount = clamp(item.annualAmount, 0, MAX_AMOUNT);
+      for (let year = 1; year <= horizonYears; year++) {
+        const age = params.currentAge + year - 1;
+        if (item.fromAge != null && age < item.fromAge) {
+          continue;
+        }
+        if (item.toAge != null && age > item.toAge) {
+          continue;
+        }
+        const target = item.adjustsWithInflation ? adjustedByYear : flatByYear;
+        target[year][itemIndex] = amount;
+      }
+    });
+    return { flatByYear, adjustedByYear };
   }
 
-  // Planned contributions per year, in today's money - split into an
-  // inflation-adjusted and a flat portion so a year's deposit is
-  // flat + adjusted × cumulativeInflation. Deterministic and shared by
-  // every replay. Kept per pot (what the simulation deposits) and per
-  // contribution (what the captured run reports, so the cashflow chart
-  // can split deposits by source). Contributions into unknown pots (e.g.
-  // a pot that was deleted) are ignored.
+  // Contributions into unknown pots (e.g. a pot that was deleted) or out
+  // of unknown income streams are ignored
   const contributionCount = params.contributions.length;
-  const flatContributionsByYear: Float64Array[] = [];
-  const adjustedContributionsByYear: Float64Array[] = [];
-  const flatContributionAmountsByYear: Float64Array[] = [];
-  const adjustedContributionAmountsByYear: Float64Array[] = [];
-  for (let year = 0; year <= horizonYears; year++) {
-    flatContributionsByYear.push(new Float64Array(potCount));
-    adjustedContributionsByYear.push(new Float64Array(potCount));
-    flatContributionAmountsByYear.push(new Float64Array(contributionCount));
-    adjustedContributionAmountsByYear.push(new Float64Array(contributionCount));
-  }
-  // While deposits are still to come, an empty pot isn't a dead plan -
-  // depletion is only declared after the final contribution year
-  let lastContributionYear = 0;
-  let hasContributions = false;
-  for (
-    let contributionIndex = 0;
-    contributionIndex < contributionCount;
-    contributionIndex++
+  const contributionPotIndex = params.contributions.map(contribution =>
+    pots.findIndex(pot => pot.id === contribution.potId),
+  );
+  const contributionSourceIndex = params.contributions.map(contribution =>
+    contribution.sourceIncomeStreamId == null
+      ? -1
+      : incomeStreams.findIndex(
+          incomeStream => incomeStream.id === contribution.sourceIncomeStreamId,
+        ),
+  );
+  const contributionBeforeTax = params.contributions.map(
+    contribution => contribution.beforeTax,
+  );
+  const contributionSchedule = scheduleByYear(
+    params.contributions.map((contribution, contributionIndex) =>
+      contributionPotIndex[contributionIndex] === -1 ||
+      (contribution.sourceIncomeStreamId != null &&
+        contributionSourceIndex[contributionIndex] === -1)
+        ? { ...contribution, annualAmount: 0 }
+        : contribution,
+    ),
+  );
+  const hasContributions = contributionSchedule.flatByYear.some(
+    (flat, year) =>
+      flat.some(amount => amount > 0) ||
+      contributionSchedule.adjustedByYear[year].some(amount => amount > 0),
+  );
+  const incomeSchedule = scheduleByYear(incomeStreams);
+
+  // Scratch space for settleYearFlows: the year's realized amount per
+  // contribution and gross income per stream (reused across every
+  // simulated year to avoid allocating in the hot loop)
+  const yearContributionAmounts = new Float64Array(contributionCount);
+  const yearIncomeGross = new Float64Array(incomeCount);
+  const yearIncomeRemaining = new Float64Array(incomeCount);
+
+  /**
+   * Settles a year's income and contributions at the given price level,
+   * filling yearContributionAmounts and yearIncomeGross:
+   * 1. each stream's gross for the year;
+   * 2. before-tax contributions come out of their stream's gross
+   *    (capped at it) - salary sacrifice;
+   * 3. each stream is taxed on what's left;
+   * 4. after-tax contributions come out of their stream's net (capped);
+   * 5. what remains of the income is spendable.
+   * Contributions from outside the plan are paid in full. Sourced
+   * contributions are settled in configured order when several draw on
+   * one stream.
+   */
+  function settleYearFlows(
+    year: number,
+    cumulativeInflationNow: number,
+    withContributions: boolean,
   ) {
-    const contribution = params.contributions[contributionIndex];
-    const potIndex = pots.findIndex(pot => pot.id === contribution.potId);
-    const amount = clamp(contribution.annualAmount, 0, MAX_AMOUNT);
-    if (potIndex === -1 || amount <= 0) {
-      continue;
+    const flatIncome = incomeSchedule.flatByYear[year];
+    const adjustedIncome = incomeSchedule.adjustedByYear[year];
+    let grossIncome = 0;
+    for (let incomeIndex = 0; incomeIndex < incomeCount; incomeIndex++) {
+      const gross =
+        flatIncome[incomeIndex] +
+        adjustedIncome[incomeIndex] * cumulativeInflationNow;
+      yearIncomeGross[incomeIndex] = gross;
+      yearIncomeRemaining[incomeIndex] = gross;
+      grossIncome += gross;
     }
-    for (let year = 1; year <= horizonYears; year++) {
-      const age = params.currentAge + year - 1;
-      if (contribution.fromAge != null && age < contribution.fromAge) {
-        continue;
+
+    const flatContributions = contributionSchedule.flatByYear[year];
+    const adjustedContributions = contributionSchedule.adjustedByYear[year];
+    yearContributionAmounts.fill(0);
+    if (withContributions) {
+      for (
+        let contributionIndex = 0;
+        contributionIndex < contributionCount;
+        contributionIndex++
+      ) {
+        const scheduled =
+          flatContributions[contributionIndex] +
+          adjustedContributions[contributionIndex] * cumulativeInflationNow;
+        const sourceIndex = contributionSourceIndex[contributionIndex];
+        if (sourceIndex === -1) {
+          yearContributionAmounts[contributionIndex] = scheduled;
+        } else if (contributionBeforeTax[contributionIndex]) {
+          const amount = Math.min(scheduled, yearIncomeRemaining[sourceIndex]);
+          yearIncomeRemaining[sourceIndex] -= amount;
+          yearContributionAmounts[contributionIndex] = amount;
+        }
       }
-      if (contribution.toAge != null && age > contribution.toAge) {
-        continue;
+    }
+
+    // Tax each stream on its gross after before-tax deductions; under
+    // the bands model the pooled taxable income is banded once and the
+    // tax shared out in proportion to each stream's taxable share
+    let incomeTax = 0;
+    let taxableIncomeBase = 0;
+    if (hasIncomeTax && taxModel === 'flat') {
+      for (let incomeIndex = 0; incomeIndex < incomeCount; incomeIndex++) {
+        const tax =
+          yearIncomeRemaining[incomeIndex] * incomeTaxRates[incomeIndex];
+        yearIncomeRemaining[incomeIndex] -= tax;
+        incomeTax += tax;
       }
-      const byPot = contribution.adjustsWithInflation
-        ? adjustedContributionsByYear
-        : flatContributionsByYear;
-      const byContribution = contribution.adjustsWithInflation
-        ? adjustedContributionAmountsByYear
-        : flatContributionAmountsByYear;
-      byPot[year][potIndex] += amount;
-      byContribution[year][contributionIndex] = amount;
-      hasContributions = true;
-      if (year > lastContributionYear) {
-        lastContributionYear = year;
+    } else if (taxModel === 'bands') {
+      for (let incomeIndex = 0; incomeIndex < incomeCount; incomeIndex++) {
+        taxableIncomeBase +=
+          yearIncomeRemaining[incomeIndex] *
+          incomeTaxableFractions[incomeIndex];
       }
+      if (hasIncomeTax && taxableIncomeBase > 0) {
+        incomeTax =
+          bandTax(taxableIncomeBase / cumulativeInflationNow) *
+          cumulativeInflationNow;
+        for (let incomeIndex = 0; incomeIndex < incomeCount; incomeIndex++) {
+          yearIncomeRemaining[incomeIndex] -=
+            incomeTax *
+            ((yearIncomeRemaining[incomeIndex] *
+              incomeTaxableFractions[incomeIndex]) /
+              taxableIncomeBase);
+        }
+      }
+    }
+
+    if (withContributions) {
+      for (
+        let contributionIndex = 0;
+        contributionIndex < contributionCount;
+        contributionIndex++
+      ) {
+        const sourceIndex = contributionSourceIndex[contributionIndex];
+        if (sourceIndex === -1 || contributionBeforeTax[contributionIndex]) {
+          continue;
+        }
+        const scheduled =
+          flatContributions[contributionIndex] +
+          adjustedContributions[contributionIndex] * cumulativeInflationNow;
+        const amount = Math.min(scheduled, yearIncomeRemaining[sourceIndex]);
+        yearIncomeRemaining[sourceIndex] -= amount;
+        yearContributionAmounts[contributionIndex] = amount;
+      }
+    }
+
+    let spendableIncome = 0;
+    for (let incomeIndex = 0; incomeIndex < incomeCount; incomeIndex++) {
+      spendableIncome += yearIncomeRemaining[incomeIndex];
+    }
+    return { grossIncome, incomeTax, taxableIncomeBase, spendableIncome };
+  }
+
+  // The part of each year's planned spending the pots have to fund, in
+  // today's money, after the income the year brings in. Withdrawal rules
+  // anchor and measure against this path - they manage what the portfolio
+  // pays out, not spending the income already covers. (An anchor at
+  // today's prices; the in-year requirement uses the realized amounts.)
+  const potFundedPlannedTodayByYear = new Float64Array(horizonYears + 1);
+  for (let year = 1; year <= horizonYears; year++) {
+    const { spendableIncome } = settleYearFlows(year, 1, true);
+    potFundedPlannedTodayByYear[year] = Math.max(
+      0,
+      plannedTodayByYear[year] - spendableIncome,
+    );
+  }
+
+  // The first year the pots fund spending - withdrawal rules anchor here
+  // and only adjust from here on, so years with nothing to withdraw
+  // (accumulation before retirement, or income covering everything)
+  // neither trigger nor drift them
+  let firstSpendingYear = Infinity;
+  for (let year = 1; year <= horizonYears; year++) {
+    if (potFundedPlannedTodayByYear[year] > 0) {
+      firstSpendingYear = year;
+      break;
     }
   }
 
@@ -1313,12 +1585,18 @@ export function runMonteCarloSimulation(
     for (let year = 1; year <= horizonYears; year++) {
       if (!depleted) {
         const startDeflator = deflate ? 1 / cumulativeInflation : 1;
-        const planned = plannedTodayByYear[year] * cumulativeInflation;
 
-        // Contributions land at the start of the year, before the
-        // withdrawal: new money can fund this year's spending and earns
-        // this year's return. Locked pots receive deposits too - the
-        // access age only gates withdrawals.
+        // The year's income arrives and its contributions are settled
+        // (see settleYearFlows), then the deposits land in the pots at the
+        // start of the year, before the withdrawal: new money can fund
+        // this year's spending and earns this year's return. Locked pots
+        // receive deposits too - the access age only gates withdrawals.
+        const {
+          grossIncome: grossIncomeThisYear,
+          incomeTax: incomeTaxThisYear,
+          taxableIncomeBase,
+          spendableIncome,
+        } = settleYearFlows(year, cumulativeInflation, true);
         let contributionsThisYear = 0;
         let preContributionPotBalances: number[] | null = null;
         // Always sized to the pots when capturing, like the other per-pot
@@ -1328,48 +1606,44 @@ export function runMonteCarloSimulation(
           runDetail && simulationIndex === captureIndex
             ? new Array<number>(potCount).fill(0)
             : null;
-        // One entry per configured contribution, so the cashflow chart can
-        // split the year's deposits by their source
-        const capturedContributionAmounts = capturedPotContributions
-          ? new Array<number>(contributionCount).fill(0)
-          : null;
         if (hasContributions) {
           if (capturedPotContributions) {
             // The drill-in shows contributions as their own step, so its
             // Start balance column needs the pre-contribution snapshot
             preContributionPotBalances = Array.from(potBalances);
           }
-          if (capturedContributionAmounts) {
-            // The same deposits as the per-pot loop below, grouped by
-            // source instead of by pot
-            const flatAmounts = flatContributionAmountsByYear[year];
-            const adjustedAmounts = adjustedContributionAmountsByYear[year];
-            for (
-              let contributionIndex = 0;
-              contributionIndex < contributionCount;
-              contributionIndex++
-            ) {
-              capturedContributionAmounts[contributionIndex] =
-                flatAmounts[contributionIndex] +
-                adjustedAmounts[contributionIndex] * cumulativeInflation;
-            }
-          }
-          const flatContributions = flatContributionsByYear[year];
-          const adjustedContributions = adjustedContributionsByYear[year];
-          for (let potIndex = 0; potIndex < potCount; potIndex++) {
-            const deposit =
-              flatContributions[potIndex] +
-              adjustedContributions[potIndex] * cumulativeInflation;
+          for (
+            let contributionIndex = 0;
+            contributionIndex < contributionCount;
+            contributionIndex++
+          ) {
+            const deposit = yearContributionAmounts[contributionIndex];
             if (deposit > 0) {
+              const potIndex = contributionPotIndex[contributionIndex];
               potBalances[potIndex] += deposit;
               total += deposit;
               contributionsThisYear += deposit;
               if (capturedPotContributions) {
-                capturedPotContributions[potIndex] = deposit;
+                capturedPotContributions[potIndex] += deposit;
               }
             }
           }
         }
+        // One entry per configured contribution, so the cashflow chart can
+        // split the year's deposits by their source
+        const capturedContributionAmounts = capturedPotContributions
+          ? Array.from(yearContributionAmounts)
+          : null;
+
+        // Income pays for the year's spending first; the pots fund only
+        // the rest. Everything below - the withdrawal rule, the minimum
+        // floor, the requirement the pots must meet - works on that
+        // pot-funded plan. Income beyond the plan is unspent: it leaves
+        // the model (route it into a pot with a contribution if wanted)
+        const totalPlanned = plannedTodayByYear[year] * cumulativeInflation;
+        const incomeTowardsSpending = Math.min(spendableIncome, totalPlanned);
+        const planned = totalPlanned - incomeTowardsSpending;
+        const unspentIncome = spendableIncome - incomeTowardsSpending;
         // Every pot experiences the same market year: historical models
         // pick one history year for all pots (normally-drawn pots share
         // one market shock scaled by their own volatility), and the same
@@ -1463,7 +1737,7 @@ export function runMonteCarloSimulation(
               // read as a trigger - only market-driven drift does.
               // Identical to the year-1 anchor for single-phase plans.
               const referenceRate =
-                plannedTodayByYear[year] / accessibleStartByYear[year];
+                potFundedPlannedTodayByYear[year] / accessibleStartByYear[year];
               if (
                 currentRate >
                 referenceRate * (1 + rule.preservationTriggerPct)
@@ -1519,7 +1793,8 @@ export function runMonteCarloSimulation(
                   rule.type === 'boundaries') && { currentRate }),
                 ...(rule.type === 'guardrails' && {
                   referenceRate:
-                    plannedTodayByYear[year] / accessibleStartByYear[year],
+                    potFundedPlannedTodayByYear[year] /
+                    accessibleStartByYear[year],
                 }),
                 ...(rule.type === 'ratcheting' &&
                   ruleAction === 'none' && { ratchetStreak }),
@@ -1528,12 +1803,12 @@ export function runMonteCarloSimulation(
           }
           withdrawal = planned * adjustmentFactor;
         }
-        // The year's planned net spending: the phase schedule, inflated,
-        // after the withdrawal rule's adjustment but before the minimum
-        // floor and before affordability capping. The cashflow chart plots
-        // it against the actual withdrawal so surpluses and shortfalls
-        // stand out
-        const plannedSpendingThisYear = withdrawal;
+        // The year's planned net spending: the part income covers plus the
+        // pot-funded part after the withdrawal rule's adjustment, before
+        // the minimum floor and before affordability capping. The cashflow
+        // chart plots it against the actual flows so surpluses and
+        // shortfalls stand out
+        const plannedSpendingThisYear = incomeTowardsSpending + withdrawal;
 
         // The minimum floor belongs to the withdrawal rule system (the UI
         // only offers it alongside a rule); with no rule active the planned
@@ -1602,7 +1877,8 @@ export function runMonteCarloSimulation(
             lastAccessibleIndex,
           );
           accessibleNetCapacity =
-            accessibleTotal - taxForTakes(cumulativeInflation);
+            accessibleTotal -
+            taxForTakes(cumulativeInflation, taxableIncomeBase);
         }
 
         // A shortfall needs an actual requirement: a zero-spend year with
@@ -1660,7 +1936,9 @@ export function runMonteCarloSimulation(
                 accessibleTotal,
                 lastAccessibleIndex,
               );
-              const next = netRequired + taxForTakes(cumulativeInflation);
+              const next =
+                netRequired +
+                taxForTakes(cumulativeInflation, taxableIncomeBase);
               if (Math.abs(next - grossTotal) <= 1e-7 * Math.max(1, next)) {
                 grossTotal = next;
                 break;
@@ -1714,17 +1992,9 @@ export function runMonteCarloSimulation(
             }
             total += potBalances[potIndex];
           }
-          if (total <= 0) {
-            total = 0;
-            // An empty balance with deposits still to come isn't a dead
-            // plan - future contributions re-seed the pots. This year's
-            // deposits have already landed, so >= is the right bound.
-            if (year >= lastContributionYear) {
-              depleted = true;
-              simulationDepletionYear = year;
-              depletionCounts[year]++;
-            }
-          }
+          // Empty pots are not a failure in themselves: the plan only
+          // fails in a year whose spending can't be funded (the shortfall
+          // above). Future contributions or income may still carry it.
         }
 
         // Realize this year's inflation. Historical models take the
@@ -1767,15 +2037,6 @@ export function runMonteCarloSimulation(
           total = 0;
           for (let potIndex = 0; potIndex < potCount; potIndex++) {
             total += potBalances[potIndex];
-          }
-          if (total <= 0) {
-            total = 0;
-            // Same future-deposits guard as the post-growth check
-            if (year >= lastContributionYear) {
-              depleted = true;
-              simulationDepletionYear = year;
-              depletionCounts[year]++;
-            }
           }
         }
         const endDeflator = deflate ? 1 / cumulativeInflation : 1;
@@ -1833,16 +2094,22 @@ export function runMonteCarloSimulation(
           const contributions = emit(contributionsThisYear, startDeflator);
           const withdrawal = emit(withdrawalTaken, startDeflator);
           const taxPaid = emit(withdrawalTaken - netDelivered, startDeflator);
+          const income = emit(grossIncomeThisYear, startDeflator);
           const base = {
             year,
             startBalance,
             plannedSpending: emit(plannedSpendingThisYear, startDeflator),
+            spent: emit(incomeTowardsSpending + netDelivered, startDeflator),
             ...(capturedRuleExplanation != null && {
               ruleExplanation: capturedRuleExplanation,
             }),
             ...(capturedMinimumApplied && { minimumApplied: true }),
             // A rate, not an amount - passed through undeflated
             inflation: yearInflationRate,
+            income,
+            incomeAmounts: emitParts(yearIncomeGross, startDeflator, income),
+            incomeTax: emit(incomeTaxThisYear, startDeflator),
+            unspentIncome: emit(unspentIncome, startDeflator),
             contributions,
             potContributions: emitParts(
               capturedPotContributions,
@@ -1928,29 +2195,50 @@ export function runMonteCarloSimulation(
         // Capture-only: chart the plan's unfunded tail. Nothing moves
         // and no RNG is drawn (adding draws here would shift the stream
         // and change results), so cumulativeInflation stays frozen at
-        // the failure year's level and plannedSpending is priced there.
-        // The withdrawal rule's running adjustment persists too, so the
-        // tail continues the funded years' plan rather than jumping
-        // back to the unadjusted schedule (a no-op for rules without one)
+        // the failure year's level and amounts are priced there. Income
+        // keeps arriving and still covers what it can; the withdrawal
+        // rule's running adjustment persists on the pot-funded part, so
+        // the tail continues the funded years' plan rather than jumping
+        // back to the unadjusted schedule (a no-op for rules without one).
+        // Contributions stop - there is no live plan to pay into.
         const frozenDeflator = deflate ? 1 / cumulativeInflation : 1;
+        const emitFrozen = (value: number) =>
+          toSafeAmount(Math.round(value * frozenDeflator));
+        const {
+          grossIncome: tailGrossIncome,
+          incomeTax: tailIncomeTax,
+          spendableIncome: tailSpendableIncome,
+        } = settleYearFlows(year, cumulativeInflation, false);
+        const tailTotalPlanned = plannedTodayByYear[year] * cumulativeInflation;
+        const tailIncomeTowardsSpending = Math.min(
+          tailSpendableIncome,
+          tailTotalPlanned,
+        );
+        const tailIncome = emitFrozen(tailGrossIncome);
         runDetail.push({
           year,
           afterDepletion: true,
           startBalance: 0,
-          plannedSpending: toSafeAmount(
-            Math.round(
-              plannedTodayByYear[year] *
-                adjustmentFactor *
-                cumulativeInflation *
-                frozenDeflator,
-            ),
+          plannedSpending: emitFrozen(
+            tailIncomeTowardsSpending +
+              (tailTotalPlanned - tailIncomeTowardsSpending) * adjustmentFactor,
           ),
+          // Only the income still reaches spending once the pots are gone
+          spent: emitFrozen(tailIncomeTowardsSpending),
           withdrawal: 0,
           growth: 0,
           endBalance: 0,
           potBalances: new Array<number>(potCount).fill(0),
           potStartBalances: new Array<number>(potCount).fill(0),
           inflation: null,
+          income: tailIncome,
+          incomeAmounts: Array.from(yearIncomeGross, gross =>
+            emitFrozen(gross),
+          ),
+          incomeTax: emitFrozen(tailIncomeTax),
+          unspentIncome: emitFrozen(
+            tailSpendableIncome - tailIncomeTowardsSpending,
+          ),
           contributions: 0,
           potContributions: new Array<number>(potCount).fill(0),
           contributionAmounts: new Array<number>(contributionCount).fill(0),

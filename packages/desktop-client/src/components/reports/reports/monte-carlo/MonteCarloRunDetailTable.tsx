@@ -16,6 +16,7 @@ import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import type {
+  MonteCarloIncomeStream,
   MonteCarloPot,
   MonteCarloRuleExplanation,
   MonteCarloRunDetailRow,
@@ -54,6 +55,8 @@ type MonteCarloRunDetailTableProps = {
   startAge: number;
   /** Show the Contributions columns (the plan has contributions set up) */
   hasContributions: boolean;
+  /** The plan's income streams; the Income column shows when there are any */
+  incomeStreams: MonteCarloIncomeStream[];
   /** The configured rule, quoted in the per-year explanations */
   withdrawalRule: MonteCarloWithdrawalRuleConfig;
   /** Rendered between the header row and the table - the cashflow chart */
@@ -68,6 +71,7 @@ export function MonteCarloRunDetailTable({
   simulationCount,
   startAge,
   hasContributions,
+  incomeStreams,
   withdrawalRule,
   cashflowGraph,
   onBack,
@@ -76,6 +80,7 @@ export function MonteCarloRunDetailTable({
   const format = useFormat();
   const [expandedYears, setExpandedYears] = useState<Set<number>>(new Set());
 
+  const hasIncome = incomeStreams.length > 0;
   const lastRow = rows[rows.length - 1];
   const hasSurvived = lastRow != null && lastRow.endBalance > 0;
   // Present whenever the plan has inflation enabled
@@ -99,10 +104,70 @@ export function MonteCarloRunDetailTable({
   let totalWithdrawn = 0;
   let totalTax = 0;
   let totalFees = 0;
+  let totalIncome = 0;
+  let totalIncomeTax = 0;
   for (const row of rows) {
     totalWithdrawn += row.withdrawal;
     totalTax += row.taxPaid;
     totalFees += row.feesPaid;
+    totalIncome += row.income;
+    totalIncomeTax += row.incomeTax;
+  }
+
+  function getIncomeTotalsSentence() {
+    const total = format(totalIncome, 'financial');
+    const tax = format(totalIncomeTax, 'financial');
+    if (totalIncomeTax > 0) {
+      return t(
+        'Income received over this run: {{total}}, of which {{tax}} tax.',
+        {
+          total,
+          tax,
+        },
+      );
+    }
+    return t('Income received over this run: {{total}}.', { total });
+  }
+
+  // How the year's actual spending compares with the plan: on target, a
+  // shortfall (the pots couldn't cover it), or above it (the minimum
+  // withdrawal forced out more)
+  function getSpentSentence(row: MonteCarloRunDetailRow) {
+    const spent = format(row.spent, 'financial');
+    const planned = format(row.plannedSpending, 'financial');
+    if (row.spent < row.plannedSpending) {
+      return t(
+        'Spent: {{spent}} of the {{planned}} planned - {{shortfall}} short.',
+        {
+          spent,
+          planned,
+          shortfall: format(row.plannedSpending - row.spent, 'financial'),
+        },
+      );
+    }
+    if (row.spent > row.plannedSpending) {
+      return t(
+        'Spent: {{spent}} - {{extra}} more than the {{planned}} planned.',
+        {
+          spent,
+          planned,
+          extra: format(row.spent - row.plannedSpending, 'financial'),
+        },
+      );
+    }
+    return t('Spent: {{spent}}, as planned.', { spent });
+  }
+
+  // "State pension: 12,000.00" - the per-stream lines under a year's
+  // income sentence when more than one stream is configured
+  function getIncomeStreamLine(incomeIndex: number, amount: number) {
+    const incomeStream = incomeStreams[incomeIndex];
+    return t('{{name}}: {{amount}}', {
+      name:
+        incomeStream.name ||
+        t('Income {{number}}', { number: incomeIndex + 1 }),
+      amount: format(amount, 'financial'),
+    });
   }
 
   // Four sentence variants so each language can phrase the combinations
@@ -331,6 +396,16 @@ export function MonteCarloRunDetailTable({
         <PrivacyFilter>
           <FinancialText as="span">{getTotalsSentence()}</FinancialText>
         </PrivacyFilter>
+        {totalIncome > 0 && (
+          <>
+            {' '}
+            <PrivacyFilter>
+              <FinancialText as="span">
+                {getIncomeTotalsSentence()}
+              </FinancialText>
+            </PrivacyFilter>
+          </>
+        )}
       </Text>
 
       <View style={{ ...styles.horizontalScrollbar, overflowX: 'auto' }}>
@@ -356,8 +431,16 @@ export function MonteCarloRunDetailTable({
                 <Trans>Contributions</Trans>
               </Text>
             )}
+            {hasIncome && (
+              <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
+                <Trans>Income (net)</Trans>
+              </Text>
+            )}
             <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
               <Trans>Withdrawal</Trans>
+            </Text>
+            <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
+              <Trans>Spent</Trans>
             </Text>
             <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
               <Trans>Investment growth</Trans>
@@ -446,10 +529,34 @@ export function MonteCarloRunDetailTable({
                       </PrivacyFilter>
                     </Text>
                   )}
+                  {hasIncome && (
+                    <Text style={AMOUNT_CELL_STYLE}>
+                      <PrivacyFilter>
+                        <FinancialText as="span">
+                          {format(row.income - row.incomeTax, 'financial')}
+                        </FinancialText>
+                      </PrivacyFilter>
+                    </Text>
+                  )}
                   <Text style={AMOUNT_CELL_STYLE}>
                     <PrivacyFilter>
                       <FinancialText as="span">
                         {format(row.withdrawal, 'financial')}
+                      </FinancialText>
+                    </PrivacyFilter>
+                  </Text>
+                  <Text
+                    style={{
+                      ...AMOUNT_CELL_STYLE,
+                      // A year that couldn't be fully paid for stands out
+                      ...(row.spent < row.plannedSpending && {
+                        color: theme.reportsNumberNegative,
+                      }),
+                    }}
+                  >
+                    <PrivacyFilter>
+                      <FinancialText as="span">
+                        {format(row.spent, 'financial')}
                       </FinancialText>
                     </PrivacyFilter>
                   </Text>
@@ -517,6 +624,52 @@ export function MonteCarloRunDetailTable({
                       gap: 4,
                     }}
                   >
+                    {row.income > 0 && (
+                      <Text style={{ fontSize: 13, color: theme.pageText }}>
+                        <PrivacyFilter>
+                          <FinancialText as="span">
+                            {row.incomeTax > 0
+                              ? t(
+                                  'Income: {{gross}} gross − {{tax}} tax = {{net}} received.',
+                                  {
+                                    gross: format(row.income, 'financial'),
+                                    tax: format(row.incomeTax, 'financial'),
+                                    net: format(
+                                      row.income - row.incomeTax,
+                                      'financial',
+                                    ),
+                                  },
+                                )
+                              : t('Income: {{gross}}, untaxed.', {
+                                  gross: format(row.income, 'financial'),
+                                })}
+                            {incomeStreams.length > 1 &&
+                              ` (${row.incomeAmounts
+                                .map((amount, incomeIndex) =>
+                                  amount > 0
+                                    ? getIncomeStreamLine(incomeIndex, amount)
+                                    : null,
+                                )
+                                .filter(line => line != null)
+                                .join('; ')})`}
+                          </FinancialText>
+                        </PrivacyFilter>
+                      </Text>
+                    )}
+                    {row.unspentIncome > 0 && (
+                      <Text style={{ fontSize: 13, color: theme.pageText }}>
+                        <PrivacyFilter>
+                          <FinancialText as="span">
+                            {t(
+                              'Unspent income: {{amount}} - more came in than the plan spends, and it leaves the plan.',
+                              {
+                                amount: format(row.unspentIncome, 'financial'),
+                              },
+                            )}
+                          </FinancialText>
+                        </PrivacyFilter>
+                      </Text>
+                    )}
                     <Text style={{ fontSize: 13, color: theme.pageText }}>
                       <PrivacyFilter>
                         <FinancialText as="span">
@@ -532,6 +685,13 @@ export function MonteCarloRunDetailTable({
                             : t('Withdrawal: {{gross}}, untaxed.', {
                                 gross: format(row.withdrawal, 'financial'),
                               })}
+                        </FinancialText>
+                      </PrivacyFilter>
+                    </Text>
+                    <Text style={{ fontSize: 13, color: theme.pageText }}>
+                      <PrivacyFilter>
+                        <FinancialText as="span">
+                          {getSpentSentence(row)}
                         </FinancialText>
                       </PrivacyFilter>
                     </Text>

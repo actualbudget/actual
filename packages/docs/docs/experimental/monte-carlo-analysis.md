@@ -36,7 +36,7 @@ The report works immediately with sensible example numbers filled in, so you can
 
 ## Setting Up Your Plan
 
-The configuration area at the top of the report is organized into five tabs.
+The configuration area at the top of the report is organized into six tabs.
 
 ### Plan Details
 
@@ -83,6 +83,20 @@ Drag a pot's row to reorder the list - the order matters if you choose to drain 
 The access age setting is what lets the report model the classic "bridge gap": retiring at 48 with a big pension you can't open until 57, and a smaller pot that has to carry you across those nine years. If the bridge pot runs dry too soon, the plan fails - even though the pension money exists.
 :::
 
+### Income
+
+Income streams are money you receive each year without drawing on your pots - a state pension, a defined-benefit pension, an annuity, rental income, or part-time work in early retirement. They matter because they pay for your spending _first_: with £40,000 of yearly spending and a £12,000 state pension, the pots only need to fund £28,000, and the withdrawal rules and the failure test both work on that smaller amount. Each stream has:
+
+- **Income name** - anything you like, such as "State pension".
+- **From age** and **To age** - the years the income arrives, inclusive at both ends. Leave **From age** blank to start now, and **To age** blank to keep receiving it until the end of the plan.
+- **Amount (per year)** - the gross yearly amount, in today's money, before any tax.
+- **Tax (%)** (or **Taxable portion (%)** with the bands model) - how the income is taxed, exactly as for pot withdrawals: an effective rate under the flat model, or the share that counts as taxable income under the bands model. Under the bands model, income fills your lower tax bands first, so any pot withdrawal in the same year is taxed at the correct, higher marginal rate.
+- **Adjust by inflation** - tick this for income that rises with prices (most state pensions do); untick it for a fixed amount, such as a level annuity, which buys a little less each year as prices rise.
+
+Income you don't need is **unspent**: once the year's contributions paid from it and its spending are covered, anything left leaves the plan - it isn't invested and doesn't help later years. If you'd rather keep it, route it into a pot with a contribution whose **Paid from** is that income stream. The run drill-in and the cashflow chart both point out unspent income so it doesn't go unnoticed.
+
+A plan whose income covers its spending doesn't need the pots at all, and empty pots are not a failure on their own - the plan only fails in a year whose spending can't be paid for from income and pots together.
+
 ### Contributions
 
 ![The Contributions tab](/img/experimental/monte-carlo-analysis/monte-carlo-contributions.png)
@@ -91,6 +105,7 @@ If you're still earning, you can model the money you add to your pots each year 
 
 - **Contribution name** - anything you like, such as "Pension contributions".
 - **Into pot** - the pot the money is paid into. A pot can receive any number of contributions, and contributions can go into a pot that is still locked for withdrawals - the access age only controls when money can come _out_.
+- **Paid from** - where the money comes from. **Outside the plan** (the default) means money the simulation doesn't otherwise know about. Choosing one of your [income streams](#income) instead pays the contribution out of that income: it is capped at what the stream brings in that year, and it is zero in years the stream pays nothing. Tick **Before tax** for a workplace pension or salary sacrifice - the contribution is deducted before the income's tax is worked out, so it lowers that year's tax bill.
 - **From age** and **To age** - the years the contribution runs, inclusive at both ends. Leave **From age** blank to start now, and **To age** blank to keep contributing until the end of the plan.
 - **Amount (per year)** - how much is added each year, in today's money. The money is paid in at the start of each year, so it earns that year's investment return.
 - **Adjust by inflation** - tick this if the contribution will grow with prices over time (for example, a percentage of a salary that keeps pace with inflation). Untick it for a fixed amount, which buys a little less each year as prices rise.
@@ -121,6 +136,8 @@ Withdrawing money from a pension or a taxable account usually costs more than th
 - **Tax bands (progressive)** - enter your own tax brackets: yearly income thresholds and the rate above each one (your tax-free allowance is simply the first band at 0%). Each pot then declares its **Taxable portion (%)** - how much of a withdrawal counts as taxable income: a pension with a 25% tax-free lump portion is 75, a tax-free account is 0, and a taxable account is roughly the share of each withdrawal that is gains. The bands apply to each year's combined taxable withdrawals across all pots, and the thresholds are in today's money - they rise with inflation in the simulation.
 
 With either model, the run drill-in shows each year's gross withdrawal with the tax paid underneath, so you can see exactly what your spending actually costs.
+
+[Income streams](#income) are taxed the same way, using their own rate or taxable portion. Under the bands model the year's income is banded first and the pot withdrawals are taxed as the slice above it - so a taxable pension that uses up your tax-free allowance makes every withdrawal that year cost more, just as it does in real life.
 
 :::note
 This is a deliberate approximation, not a tax calculator. It doesn't track capital-gains cost basis, model frozen thresholds, or know any country's actual rules - and tax law changes every year. Treat the rates and bands as your own honest estimates.
@@ -162,7 +179,7 @@ By default, every money figure in the results is shown in **today's money** - wh
 
 ![The results summary](/img/experimental/monte-carlo-analysis/monte-carlo-results.png)
 
-- **Success rate** - the big number: the percentage of replays in which your money lasted the full time. There's no single "right" target, but many planners aim for 80–90%.
+- **Success rate** - the big number: the percentage of replays in which every year's spending was paid for, from income and pots together. There's no single "right" target, but many planners aim for 80–90%. (Running the pots down to nothing isn't a failure by itself - only a year whose spending goes unfunded is.)
 - **Median ending balance** - in the middle-of-the-road replay, how much was left at the end.
 - **Median total withdrawn** - how much income the middle replay actually paid you over the whole period. Especially useful when comparing withdrawal rules.
 - **Chance of running out of money** - the flip side of the success rate.
@@ -184,12 +201,12 @@ The dropdown above the chart switches views. **Single worst run** shows the one 
 
 ![The cashflow chart](/img/experimental/monte-carlo-analysis/monte-carlo-cashflow-chart.png)
 
-Switch the results view from **Chart** to **Cashflow** to see the money moving in and out of your pots each year, for one simulated run at a time:
+Switch the results view from **Chart** to **Cashflow** to see the money flowing through your hands each year, for one simulated run at a time:
 
-- **Above zero**: money coming in - each pot's withdrawal for the year (one color per pot), plus each contribution being paid in (one color per contribution).
-- **Below zero**: money going out - the year's planned spending, colored by the spending phase it belongs to, plus the tax paid on withdrawals.
+- **Above zero**: money coming in - each pot's withdrawal for the year (one color per pot), plus each income stream (one color per stream).
+- **Below zero**: money going out - the year's planned spending, colored by the spending phase it belongs to; the tax paid on withdrawals and income; and each contribution being paid into a pot (one color per contribution).
 
-Management fees don't appear here - they are charged inside the pots and never pass through your hands, and the run detail table lists them.
+Management fees don't appear here - they are charged inside the pots and never pass through your hands, and the run detail table lists them. Income you didn't need shows up as inflows that outweigh the outflows, and the tooltip names the unspent amount.
 
 On a run that fails, the chart doesn't stop at the failure year: the remaining years keep showing the spending the plan still called for, dimmed, with nothing coming in to fund it - so the size of the gap is visible at a glance. Those dimmed bars are held at the failure year's level - its price level, since a dead run no longer experiences inflation, and any cut or raise a withdrawal rule had in force at the time.
 
@@ -207,11 +224,11 @@ This bar chart only counts the replays that failed, showing at which age they ra
 
 ![The simulation runs table](/img/experimental/monte-carlo-analysis/monte-carlo-runs.png)
 
-Switch the results view from **Chart** to **Runs** to see every replay listed from worst outcome to best. Rather than paging through thousands of runs, use the **Jump to** dropdown to go straight to the worst, median or best run - or the 25th/75th percentile for a typically-bad or typically-good outcome - with the run highlighted so you can click into it. Click any run to walk through it year by year: the balance at the start of each year, the contributions paid in (when your plan has any), the withdrawal taken, the investment growth in that year (as money and as a percentage), the year's inflation rate (when inflation is enabled), and the balance at the end. Expand a year with the arrow at the start of its row (or use **Expand all years**) for the fully labeled breakdown: the withdrawal split into gross, tax and money to spend; when a withdrawal rule is active, a sentence showing how the rule arrived at that year's amount (and whether the minimum withdrawal stepped in); the contributions added; the fees paid; and a small table showing each pot's balance at the start of the year, what was contributed into it, what it contributed to the withdrawal, how much of that counted as taxable income, the tax paid on its share, the fee it was charged that year, its return that year, and its ending balance - so you can watch, for example, the cash pot covering spending after a crash while the stock pots are left alone. With the tax-bands model, the per-pot tax is the year's tax bill shared out in proportion to each pot's taxable income.
+Switch the results view from **Chart** to **Runs** to see every replay listed from worst outcome to best. Rather than paging through thousands of runs, use the **Jump to** dropdown to go straight to the worst, median or best run - or the 25th/75th percentile for a typically-bad or typically-good outcome - with the run highlighted so you can click into it. Click any run to walk through it year by year: the balance at the start of each year, the contributions paid in (when your plan has any), the net income received (when your plan has income streams), the withdrawal taken, what was actually spent (income and withdrawal together, net of tax - shown in red when it fell short of the plan), the investment growth in that year (as money and as a percentage), the year's inflation rate (when inflation is enabled), and the balance at the end. Expand a year with the arrow at the start of its row (or use **Expand all years**) for the fully labeled breakdown: the income received, split into gross, tax and net (and per stream when you have several), with any unspent income called out; the withdrawal split into gross, tax and money to spend; how the year's spending compared with the plan (as planned, short by an amount, or over it because of the minimum withdrawal); when a withdrawal rule is active, a sentence showing how the rule arrived at that year's amount (and whether the minimum withdrawal stepped in); the contributions added; the fees paid; and a small table showing each pot's balance at the start of the year, what was contributed into it, what it contributed to the withdrawal, how much of that counted as taxable income, the tax paid on its share, the fee it was charged that year, its return that year, and its ending balance - so you can watch, for example, the cash pot covering spending after a crash while the stock pots are left alone. With the tax-bands model, the per-pot tax is the year's tax bill shared out in proportion to each pot's taxable income.
 
 ![The simulation run table](/img/experimental/monte-carlo-analysis/monte-carlo-run.png)
 
-Above the year-by-year table, a summary line totals the run: how much was withdrawn over the whole replay, how much of that went to tax, and how much was paid in fees on top.
+Above the year-by-year table, a summary line totals the run: how much was withdrawn over the whole replay, how much of that went to tax, how much was paid in fees on top, and - when the plan has income streams - how much income was received and the tax paid on it.
 
 If a run failed while money was still locked in an inaccessible pot, the table says so explicitly, so you can tell the difference between "the market ate my savings" and "the money existed but I couldn't reach it yet."
 

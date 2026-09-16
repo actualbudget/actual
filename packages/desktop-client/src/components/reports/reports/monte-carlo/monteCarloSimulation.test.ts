@@ -14,6 +14,7 @@ import {
 } from './monteCarloSimulation';
 import type {
   MonteCarloContribution,
+  MonteCarloIncomeStream,
   MonteCarloParams,
   MonteCarloPot,
 } from './monteCarloSimulation';
@@ -29,6 +30,24 @@ function makeContribution(
     toAge: null,
     annualAmount: 1_000_000,
     adjustsWithInflation: false,
+    sourceIncomeStreamId: null,
+    beforeTax: false,
+    ...overrides,
+  };
+}
+
+function makeIncomeStream(
+  overrides: Partial<MonteCarloIncomeStream> = {},
+): MonteCarloIncomeStream {
+  return {
+    id: 'income-1',
+    name: 'Test income',
+    fromAge: null,
+    toAge: null,
+    annualAmount: 1_000_000,
+    adjustsWithInflation: false,
+    taxRate: 0,
+    taxableFraction: 1,
     ...overrides,
   };
 }
@@ -72,6 +91,7 @@ function makeParams(
       { id: 'phase-1', name: '', fromAge: null, annualWithdrawal },
     ],
     contributions: [],
+    incomeStreams: [],
     inflationMean: null,
     inflationStdDev: 0,
     taxModel: 'flat',
@@ -2634,21 +2654,386 @@ describe('runMonteCarloSimulation', () => {
     }
   });
 
-  it('fees alone can deplete a plan', () => {
+  it('fees can empty a pot, and the plan fails once spending goes unfunded', () => {
+    // A 400 fee drains 1,000 by year 3; nothing is spent until age 64
+    // (year 5), so the plan only fails there, when the first bill can't
+    // be paid
+    const feeDrainedPot = {
+      startingBalance: 1_000,
+      expectedReturnMean: 0,
+      returnStdDev: 0,
+      annualFeeFixed: 400,
+    };
     const result = runMonteCarloSimulation(
       makeParams(
-        { annualWithdrawal: 0, horizonYears: 5 },
         {
-          startingBalance: 1_000,
-          expectedReturnMean: 0,
-          returnStdDev: 0,
-          annualFeeFixed: 400,
+          spendingPhases: [
+            { id: 'phase-1', name: '', fromAge: null, annualWithdrawal: 0 },
+            { id: 'phase-2', name: '', fromAge: 64, annualWithdrawal: 100 },
+          ],
+          horizonYears: 6,
         },
+        feeDrainedPot,
       ),
     );
-
     expect(result.successRate).toBe(0);
-    expect(result.medianDepletionYear).toBe(3);
+    expect(result.medianDepletionYear).toBe(5);
+
+    // With nothing to fund, empty pots are not a failure
+    const nothingToFund = runMonteCarloSimulation(
+      makeParams({ annualWithdrawal: 0, horizonYears: 5 }, feeDrainedPot),
+    );
+    expect(nothingToFund.successRate).toBe(1);
+    expect(nothingToFund.medianEndingBalance).toBe(0);
+  });
+
+  describe('income streams', () => {
+    it('income pays for spending first and the pots fund the rest', () => {
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            annualWithdrawal: 4_000,
+            horizonYears: 3,
+            incomeStreams: [makeIncomeStream({ annualAmount: 1_200 })],
+            captureRunDetail: 0,
+          },
+          { startingBalance: 100_000, expectedReturnMean: 0, returnStdDev: 0 },
+        ),
+      );
+
+      const rows = result.runDetail!;
+      expect(rows.map(row => row.withdrawal)).toEqual([2_800, 2_800, 2_800]);
+      expect(rows.map(row => row.income)).toEqual([1_200, 1_200, 1_200]);
+      expect(rows[0].incomeAmounts).toEqual([1_200]);
+      expect(rows[0].incomeTax).toBe(0);
+      expect(rows[0].unspentIncome).toBe(0);
+      // The plan is still the household's 4,000
+      expect(rows[0].plannedSpending).toBe(4_000);
+      expect(result.medianEndingBalance).toBe(100_000 - 3 * 2_800);
+    });
+
+    it('respects the income age window and the flat tax rate', () => {
+      // 1,000 gross at 20% tax from age 61 to 62 (years 2 and 3)
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            annualWithdrawal: 4_000,
+            horizonYears: 4,
+            incomeStreams: [
+              makeIncomeStream({
+                annualAmount: 1_000,
+                fromAge: 61,
+                toAge: 62,
+                taxRate: 0.2,
+              }),
+            ],
+            captureRunDetail: 0,
+          },
+          { startingBalance: 100_000, expectedReturnMean: 0, returnStdDev: 0 },
+        ),
+      );
+
+      const rows = result.runDetail!;
+      expect(rows.map(row => row.income)).toEqual([0, 1_000, 1_000, 0]);
+      expect(rows.map(row => row.incomeTax)).toEqual([0, 200, 200, 0]);
+      // 800 net offsets the 4,000 plan
+      expect(rows.map(row => row.withdrawal)).toEqual([
+        4_000, 3_200, 3_200, 4_000,
+      ]);
+    });
+
+    it('under tax bands, income fills the lower bands and pot withdrawals stack on top', () => {
+      // 20% above 1,000: a 1,500 pension is taxed 100 and leaves 1,400
+      // net. The pots must deliver 600 net - entirely inside the 20% band
+      // now that the pension has used the tax-free allowance, so the
+      // gross-up is 750 (tax 150), where alone it would have been untaxed
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            annualWithdrawal: 2_000,
+            horizonYears: 1,
+            taxModel: 'bands',
+            taxBands: [
+              { id: 'band-1', from: 0, rate: 0 },
+              { id: 'band-2', from: 1_000, rate: 0.2 },
+            ],
+            incomeStreams: [makeIncomeStream({ annualAmount: 1_500 })],
+            captureRunDetail: 0,
+          },
+          { startingBalance: 100_000, expectedReturnMean: 0, returnStdDev: 0 },
+        ),
+      );
+
+      const [row] = result.runDetail!;
+      expect(row.incomeTax).toBe(100);
+      expect(row.withdrawal).toBe(750);
+      expect(row.taxPaid).toBe(150);
+      expect(row.plannedSpending).toBe(2_000);
+    });
+
+    it('caps an income-sourced contribution at what the stream pays', () => {
+      // 1,500 wanted from a 1,000 stream that stops at age 61
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            annualWithdrawal: 0,
+            horizonYears: 3,
+            incomeStreams: [
+              makeIncomeStream({ annualAmount: 1_000, toAge: 61 }),
+            ],
+            contributions: [
+              makeContribution({
+                annualAmount: 1_500,
+                sourceIncomeStreamId: 'income-1',
+              }),
+            ],
+            captureRunDetail: 0,
+          },
+          { startingBalance: 0, expectedReturnMean: 0, returnStdDev: 0 },
+        ),
+      );
+
+      const rows = result.runDetail!;
+      expect(rows.map(row => row.contributions)).toEqual([1_000, 1_000, 0]);
+      expect(rows.map(row => row.contributionAmounts[0])).toEqual([
+        1_000, 1_000, 0,
+      ]);
+      expect(rows.map(row => row.unspentIncome)).toEqual([0, 0, 0]);
+      expect(result.medianEndingBalance).toBe(2_000);
+    });
+
+    it('a before-tax contribution reduces the income tax; an after-tax one does not', () => {
+      const income = makeIncomeStream({ annualAmount: 1_000, taxRate: 0.2 });
+      const sourced = (beforeTax: boolean) =>
+        runMonteCarloSimulation(
+          makeParams(
+            {
+              annualWithdrawal: 0,
+              horizonYears: 1,
+              incomeStreams: [income],
+              contributions: [
+                makeContribution({
+                  annualAmount: 400,
+                  sourceIncomeStreamId: 'income-1',
+                  beforeTax,
+                }),
+              ],
+              captureRunDetail: 0,
+            },
+            { startingBalance: 0, expectedReturnMean: 0, returnStdDev: 0 },
+          ),
+        ).runDetail![0];
+
+      // Salary sacrifice: tax on the remaining 600, leaving 480 to spend
+      const beforeTax = sourced(true);
+      expect(beforeTax.contributions).toBe(400);
+      expect(beforeTax.incomeTax).toBe(120);
+      expect(beforeTax.unspentIncome).toBe(480);
+      // After tax: 200 tax on the full 1,000, then 400 out of the 800 net
+      const afterTax = sourced(false);
+      expect(afterTax.contributions).toBe(400);
+      expect(afterTax.incomeTax).toBe(200);
+      expect(afterTax.unspentIncome).toBe(400);
+    });
+
+    it('a before-tax contribution reduces taxable income under the bands model', () => {
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            annualWithdrawal: 0,
+            horizonYears: 1,
+            taxModel: 'bands',
+            taxBands: [
+              { id: 'band-1', from: 0, rate: 0 },
+              { id: 'band-2', from: 1_000, rate: 0.2 },
+            ],
+            incomeStreams: [makeIncomeStream({ annualAmount: 1_500 })],
+            contributions: [
+              makeContribution({
+                annualAmount: 600,
+                sourceIncomeStreamId: 'income-1',
+                beforeTax: true,
+              }),
+            ],
+            captureRunDetail: 0,
+          },
+          { startingBalance: 0, expectedReturnMean: 0, returnStdDev: 0 },
+        ),
+      );
+
+      const [row] = result.runDetail!;
+      // 1,500 - 600 = 900 taxable, below the 1,000 threshold
+      expect(row.incomeTax).toBe(0);
+      expect(row.contributions).toBe(600);
+      expect(row.unspentIncome).toBe(900);
+    });
+
+    it('income beyond the plan is unspent and leaves the pots untouched', () => {
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            annualWithdrawal: 400,
+            horizonYears: 2,
+            incomeStreams: [makeIncomeStream({ annualAmount: 1_000 })],
+            captureRunDetail: 0,
+          },
+          { startingBalance: 5_000, expectedReturnMean: 0, returnStdDev: 0 },
+        ),
+      );
+
+      const rows = result.runDetail!;
+      expect(rows.map(row => row.withdrawal)).toEqual([0, 0]);
+      expect(rows.map(row => row.unspentIncome)).toEqual([600, 600]);
+      expect(result.medianEndingBalance).toBe(5_000);
+    });
+
+    it('a plan whose income covers its spending survives with empty pots', () => {
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            annualWithdrawal: 800,
+            horizonYears: 10,
+            incomeStreams: [makeIncomeStream({ annualAmount: 1_000 })],
+          },
+          { startingBalance: 0, expectedReturnMean: 0, returnStdDev: 0 },
+        ),
+      );
+
+      expect(result.successRate).toBe(1);
+      expect(result.medianEndingBalance).toBe(0);
+    });
+
+    it('withdrawal rules work on the pot-funded part of the plan', () => {
+      // 4,000 planned, 2,000 covered by income: the rule sees a 2,000
+      // withdrawal, not the household's 4,000
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            annualWithdrawal: 4_000,
+            horizonYears: 3,
+            withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
+            incomeStreams: [makeIncomeStream({ annualAmount: 2_000 })],
+            captureRunDetail: 0,
+          },
+          { startingBalance: 100_000, expectedReturnMean: 0, returnStdDev: 0 },
+        ),
+      );
+
+      const explanation = result.runDetail![1].ruleExplanation;
+      if (explanation?.kind !== 'factor') {
+        throw new Error('expected a factor rule explanation');
+      }
+      expect(explanation.planned).toBe(2_000);
+      expect(explanation.action).toBe('none');
+      expect(result.runDetail![1].withdrawal).toBe(2_000);
+    });
+
+    it('the minimum withdrawal does not apply when income covers the plan', () => {
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            annualWithdrawal: 2_000,
+            horizonYears: 2,
+            withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
+            minimumWithdrawal: 3_000,
+            incomeStreams: [makeIncomeStream({ annualAmount: 2_000 })],
+            captureRunDetail: 0,
+          },
+          { startingBalance: 100_000, expectedReturnMean: 0, returnStdDev: 0 },
+        ),
+      );
+
+      const rows = result.runDetail!;
+      expect(rows.map(row => row.withdrawal)).toEqual([0, 0]);
+      expect(rows.every(row => row.minimumApplied === undefined)).toBe(true);
+    });
+
+    it('the unfunded tail after a failure keeps receiving income', () => {
+      // 1,000 planned, 400 income: the 500 pot can't fund the 600 gap in
+      // year 1. The tail still shows the income and the full plan
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            annualWithdrawal: 1_000,
+            horizonYears: 3,
+            incomeStreams: [makeIncomeStream({ annualAmount: 400 })],
+            captureRunDetail: 0,
+          },
+          { startingBalance: 500, expectedReturnMean: 0, returnStdDev: 0 },
+        ),
+      );
+
+      const rows = result.runDetail!;
+      expect(rows.map(row => row.afterDepletion ?? false)).toEqual([
+        false,
+        true,
+        true,
+      ]);
+      expect(rows.map(row => row.income)).toEqual([400, 400, 400]);
+      expect(rows.map(row => row.plannedSpending)).toEqual([
+        1_000, 1_000, 1_000,
+      ]);
+      expect(rows[2].unspentIncome).toBe(0);
+    });
+
+    it('captures what actually reached spending each year', () => {
+      // 1,200 income + 2,800 net withdrawal fund the 4,000 plan until the
+      // 5,000 pot runs dry in year 2; the tail only has the income
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            annualWithdrawal: 4_000,
+            horizonYears: 3,
+            incomeStreams: [makeIncomeStream({ annualAmount: 1_200 })],
+            captureRunDetail: 0,
+          },
+          { startingBalance: 5_000, expectedReturnMean: 0, returnStdDev: 0 },
+        ),
+      );
+
+      const rows = result.runDetail!;
+      expect(rows.map(row => row.plannedSpending)).toEqual([
+        4_000, 4_000, 4_000,
+      ]);
+      // Year 2 fails: the remaining 2,200 plus the income is all that's
+      // spent; year 3 is the unfunded tail with only the income
+      expect(rows.map(row => row.spent)).toEqual([4_000, 3_400, 1_200]);
+      expect(rows.map(row => row.afterDepletion ?? false)).toEqual([
+        false,
+        false,
+        true,
+      ]);
+    });
+
+    it('reconciles each stream to the row total in the run detail', () => {
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            annualWithdrawal: 0,
+            horizonYears: 2,
+            inflationMean: 0.1,
+            inflationStdDev: 0,
+            deflateToTodaysMoney: true,
+            incomeStreams: [
+              makeIncomeStream({ id: 'income-1', annualAmount: 1_001 }),
+              makeIncomeStream({
+                id: 'income-2',
+                annualAmount: 333,
+                adjustsWithInflation: true,
+              }),
+            ],
+            captureRunDetail: 0,
+          },
+          { startingBalance: 0, expectedReturnMean: 0, returnStdDev: 0 },
+        ),
+      );
+
+      for (const row of result.runDetail!) {
+        expect(row.incomeAmounts.reduce((sum, amount) => sum + amount, 0)).toBe(
+          row.income,
+        );
+      }
+    });
   });
 
   it('keeps every output formatter-safe under absurdly large configs', () => {

@@ -239,6 +239,37 @@ export type MonteCarloContributionMeta = {
   annualAmount?: number;
   /** Whether the amount rises with inflation */
   adjustsWithInflation?: boolean;
+  /**
+   * Income stream the contribution is paid out of; null/absent = money
+   * from outside the plan
+   */
+  sourceIncomeStreamId?: string | null;
+  /**
+   * Whether an income-sourced contribution comes out of the stream's
+   * gross before its tax is worked out (salary sacrifice)
+   */
+  beforeTax?: boolean;
+};
+
+/**
+ * One recurring yearly income received without drawing on the pots
+ * (state pension, annuity, rental, part-time work) over an age window
+ */
+export type MonteCarloIncomeStreamMeta = {
+  id: string;
+  name?: string;
+  /** Age the income starts (inclusive); null/absent = starts now */
+  fromAge?: number | null;
+  /** Age the income stops (inclusive); null/absent = end of plan */
+  toAge?: number | null;
+  /** Yearly gross amount in minor units, in today's money */
+  annualAmount?: number;
+  /** Whether the amount rises with inflation */
+  adjustsWithInflation?: boolean;
+  /** Flat tax model: effective tax rate on the income (0.2 = 20%) */
+  taxRate?: number;
+  /** Bands tax model: share of the income that counts as taxable */
+  taxableFraction?: number;
 };
 
 export type MonteCarloTaxModel = 'flat' | 'bands';
@@ -265,6 +296,8 @@ export type MonteCarloWidget = AbstractWidget<
     spendingPhases?: MonteCarloSpendingPhaseMeta[];
     /** Recurring yearly contributions into pots */
     contributions?: MonteCarloContributionMeta[];
+    /** Recurring yearly income that pays for spending before the pots */
+    incomeStreams?: MonteCarloIncomeStreamMeta[];
     /** Mean yearly inflation as a decimal fraction; null = flat withdrawals */
     inflationMean?: number | null;
     /** Yearly inflation volatility as a decimal fraction; 0 = fixed rate */
