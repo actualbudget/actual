@@ -524,9 +524,22 @@ export const applyMessages = sequential(_applyMessages);
 
 export function receiveMessages(messages: Message[]): Promise<Message[]> {
   try {
-    messages.forEach(msg => {
-      Timestamp.recv(msg.timestamp);
-    });
+    // Receiving the latest timestamp preserves the clock and drift check while
+    // advancing the counter once per batch.
+    let latest = null;
+    for (const { timestamp } of messages) {
+      if (
+        latest === null ||
+        timestamp.millis() > latest.millis() ||
+        (timestamp.millis() === latest.millis() &&
+          timestamp.counter() > latest.counter())
+      ) {
+        latest = timestamp;
+      }
+    }
+    if (latest !== null) {
+      Timestamp.recv(latest);
+    }
   } catch (e) {
     if (e instanceof Timestamp.ClockDriftError) {
       throw new SyncError('clock-drift');

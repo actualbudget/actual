@@ -267,4 +267,10 @@ global.Actual = {
   moveBudgetDirectory: () => {
     // Only for electron app
   },
+
+  setDocumentDir: async () => {
+    throw new Error(
+      'Changing the data folder is only available in the desktop app',
+    );
+  },
 };
