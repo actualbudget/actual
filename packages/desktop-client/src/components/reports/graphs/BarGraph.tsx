@@ -342,6 +342,8 @@ export function BarGraph({
                       field: groupBy.toLowerCase(),
                       id: item.id,
                       uncategorizedId: itemPayload?.uncategorizedId,
+                      bucketTagNames: item.payload.bucketTagNames,
+                      scopeTagNames: data.scopeTagNames,
                     })
                   );
                 }}
