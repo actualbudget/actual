@@ -418,14 +418,15 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
   });
 
   test('ranks an exact payee match above a longer tied substring match', async () => {
-    // 'Amazon Prime' is listed first, so a stable sort on a tied fzf score
-    // would otherwise leave it ahead of the exact 'Amazon' match.
-    const payees = [makePayee('Amazon Prime'), makePayee('Amazon')];
+    // Payees are already alpha-sorted, so 'AAA Google' is listed first;
+    // a stable sort on a tied fzf score would otherwise leave it ahead of
+    // the exact 'Google' match.
+    const payees = [makePayee('AAA Google'), makePayee('Google')];
     const autocomplete = renderPayeeAutocomplete({ payees });
     await clickAutocomplete(autocomplete);
 
     const input = autocomplete.querySelector('input')!;
-    await userEvent.type(input, 'Amazon');
+    await userEvent.type(input, 'Google');
     await waitForAutocomplete();
 
     expect(
@@ -436,6 +437,6 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
       ]
         .map(e => e.getAttribute('data-testid'))
         .flatMap(firstOrIncorrect),
-    ).toStrictEqual(['Amazon', 'Amazon Prime']);
+    ).toStrictEqual(['Google', 'AAA Google']);
   });
 });
