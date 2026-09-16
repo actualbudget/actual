@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
+import { AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import type { CustomReportPage } from './page-models/custom-report-page';
 import { Navigation } from './page-models/navigation';
@@ -126,6 +127,116 @@ test.describe('Reports', () => {
       await page.addStyleTag({
         content: '[role="tooltip"] { display: none !important; }',
       });
+    });
+
+    test('splits transactions into exact tag buckets and scopes them', async () => {
+      test.setTimeout(90_000);
+      await page.getByRole('button', { name: 'More', exact: true }).click();
+      await page.getByRole('link', { name: 'Tags', exact: true }).click();
+      await page.getByRole('button', { name: 'Add New', exact: true }).click();
+      for (const tag of ['red', 'circle']) {
+        await page.getByPlaceholder('New tag', { exact: true }).fill(tag);
+        await page.getByTestId('new-tag').getByTestId('add-button').click();
+        await expect(page.getByText(`#${tag}`, { exact: true })).toBeVisible();
+      }
+
+      const accountPage = await navigation.goToAccountPage(
+        'Capital One Checking',
+      );
+      await accountPage.createSingleTransaction({
+        debit: '10.00',
+        payee: 'Kroger',
+        notes: '#red',
+        category: 'Food',
+      });
+      await accountPage.createSingleTransaction({
+        debit: '20.00',
+        payee: 'Kroger',
+        notes: '#circle',
+        category: 'Food',
+      });
+      await accountPage.createSingleTransaction({
+        debit: '30.00',
+        payee: 'Kroger',
+        notes: '#red #circle',
+        category: 'Food',
+      });
+
+      reportsPage = await navigation.goToReportsPage();
+      await reportsPage.waitToLoad();
+      customReportPage = await reportsPage.goToCustomReportPage();
+
+      const splitRow = page.getByText('Split:', { exact: true }).locator('..');
+      await splitRow.getByRole('button').click();
+      await page.getByRole('button', { name: 'Tag', exact: true }).click();
+      await customReportPage.selectViz('Data Table');
+
+      await expect(page.getByText('#red', { exact: true })).toBeVisible();
+      await expect(page.getByText('#circle', { exact: true })).toBeVisible();
+      await expect(
+        page.getByText('#circle + #red', { exact: true }),
+      ).toBeVisible();
+      await expect(page.getByTestId('report-row-#circle + #red')).toContainText(
+        '-30.00',
+      );
+
+      await page.getByRole('button', { name: 'Tag scope: All tags' }).click();
+      const tagScopePopover = page.locator('[data-popover]');
+      await expect(tagScopePopover).toMatchThemeScreenshots();
+      await page.keyboard.press('Escape');
+      const typeRow = page.getByText('Type:', { exact: true }).locator('..');
+      await expect(splitRow).toMatchThemeScreenshots();
+
+      await page
+        .getByTestId('report-row-#circle + #red')
+        .getByText('-30.00', { exact: true })
+        .click();
+      await page.waitForURL('**/accounts');
+
+      const drilldownAccountPage = new AccountPage(page);
+      await expect(
+        drilldownAccountPage.transactionTable
+          .getByTestId('notes')
+          .filter({ hasText: '#red #circle' }),
+      ).toHaveCount(1);
+      const visibleTagNotes = (
+        await drilldownAccountPage.transactionTable
+          .getByTestId('notes')
+          .allTextContents()
+      ).filter(note => note.includes('#'));
+      expect(visibleTagNotes).toEqual(['#red #circle']);
+
+      await page.goBack();
+      await page.getByTestId('reports-page').waitFor();
+      await splitRow.getByRole('button').click();
+      await page.getByRole('button', { name: 'Tag', exact: true }).click();
+      await customReportPage.selectViz('Data Table');
+      await page.getByRole('button', { name: 'Tag scope: All tags' }).click();
+      const scopedTagPopover = page.getByTestId('tag-scope-popover');
+      await scopedTagPopover
+        .getByRole('textbox', { name: 'Search tags' })
+        .fill('red');
+      await scopedTagPopover
+        .getByRole('button', { name: '#red', exact: true })
+        .click();
+      await expect(
+        scopedTagPopover.locator('button').filter({ hasText: '#red' }),
+      ).toBeVisible();
+      await page.keyboard.press('Escape');
+
+      await expect(
+        page.getByRole('button', { name: 'Tag scope: #red' }),
+      ).toBeVisible();
+      await expect(page.getByTestId('report-row-#red')).toContainText('-40.00');
+      await expect(
+        page.getByText('#circle + #red', { exact: true }),
+      ).not.toBeVisible();
+
+      await typeRow
+        .getByRole('button', { name: 'Payment', exact: true })
+        .click();
+      await page.getByRole('button', { name: 'Budgeted', exact: true }).click();
+      await expect(splitRow.getByRole('button')).toHaveText('Category');
     });
 
     test('Switches to Data Table and checks the visuals', async () => {
