@@ -2928,6 +2928,40 @@ describe('runMonteCarloSimulation', () => {
       expect(result.runDetail![1].withdrawal).toBe(2_000);
     });
 
+    it('the minimum withdrawal is a spending floor that income counts towards', () => {
+      // 2,000 planned, 1,000 covered by income, 1,800 floor: a crash makes
+      // guardrails cut the pot-funded 1,000 by 10% a year (900, 810, 729)
+      // until the floor bites - and the pots only top spending up to it,
+      // so the floor withdrawal is 800, not 1,800
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            annualWithdrawal: 2_000,
+            horizonYears: 4,
+            withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
+            minimumWithdrawal: 1_800,
+            incomeStreams: [makeIncomeStream({ annualAmount: 1_000 })],
+            captureRunDetail: 0,
+          },
+          {
+            startingBalance: 100_000,
+            expectedReturnMean: -0.5,
+            returnStdDev: 0,
+          },
+        ),
+      );
+
+      const rows = result.runDetail!;
+      expect(rows.map(row => row.withdrawal)).toEqual([1_000, 900, 810, 800]);
+      expect(rows.map(row => row.minimumApplied ?? false)).toEqual([
+        false,
+        false,
+        false,
+        true,
+      ]);
+      expect(rows[3].spent).toBe(1_800);
+    });
+
     it('the minimum withdrawal does not apply when income covers the plan', () => {
       const result = runMonteCarloSimulation(
         makeParams(

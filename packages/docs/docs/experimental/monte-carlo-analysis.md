@@ -153,7 +153,7 @@ All the rules share a few ideas:
 - Rules usually improve your **success rate** by cutting spending in bad times, but that safety isn't free - you get it by living on less. Keep an eye on the **Median total withdrawn** stat to see what a rule costs you in income.
 - Rules only see the wealth you can actually spend. If a pension is locked until its access age, it doesn't earn you spending raises while a bridge pot pays the bills - the rules watch the accessible pots, and the pension starts counting the moment it unlocks.
 
-If you set a **Minimum withdrawal**, your yearly spending never drops below that amount, no matter what the rule says. It only applies in years you actually plan to spend - a spending phase set to 0 (for example, years before retirement while your salary covers your costs) takes nothing. Like your spending phases, it's an amount in today's money - it rises with inflation so its spending power holds steady.
+If you set a **Minimum withdrawal**, your yearly spending never drops below that amount, no matter what the rule says. [Income streams](#income) count towards it, so the pots only withdraw enough to top your spending up to the floor - a 12,000 floor with a 10,000 state pension means the pots never pay less than 2,000. It only applies in years you actually plan to spend - a spending phase set to 0 (for example, years before retirement while your salary covers your costs) takes nothing. Like your spending phases, it's an amount in today's money - it rises with inflation so its spending power holds steady.
 
 ### Guardrails (Guyton-Klinger)
 

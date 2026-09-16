@@ -1815,15 +1815,21 @@ export function runMonteCarloSimulation(
         // spending is taken as-is. It guards against rule-driven cuts, so
         // it only applies in years with planned spending - a deliberate
         // zero-spend phase takes nothing. Like the phase amounts it's in
-        // today's money, so it rises with this replay's inflation path
+        // today's money, so it rises with this replay's inflation path.
+        // It is a floor on spending, so income counts towards it and the
+        // pots only top the year up to it
         const minimumThisYear = minimumWithdrawal * cumulativeInflation;
+        const minimumFromPots = Math.max(
+          0,
+          minimumThisYear - incomeTowardsSpending,
+        );
         if (
           rule.type !== 'none' &&
           minimumWithdrawal > 0 &&
           planned > 0 &&
-          withdrawal < minimumThisYear
+          withdrawal < minimumFromPots
         ) {
-          withdrawal = minimumThisYear;
+          withdrawal = minimumFromPots;
           if (isCapturedRun) {
             capturedMinimumApplied = true;
           }
