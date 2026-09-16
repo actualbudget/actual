@@ -90,6 +90,12 @@ export async function bootstrap(loginSettings, forced = false) {
   const passEnabled = 'password' in loginSettings;
   const openIdEnabled = 'openId' in loginSettings;
 
+  // When OpenID setup fails at startup the auth table stays empty, so the
+  // server still looks un-bootstrapped. Never let a password claim it then.
+  if (passEnabled && config.get('enforceOpenId')) {
+    return { error: 'openid-enforced' };
+  }
+
   const accountDb = getAccountDb();
 
   let passwordHash;
