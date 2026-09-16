@@ -4,7 +4,7 @@ import * as sheet from '#server/sheet';
 import * as monthUtils from '#shared/months';
 
 import { setBudget, setBuffer } from './actions';
-import { createAllBudgets } from './base';
+import { createAllBudgets, createBudget, getBudgetRange } from './base';
 
 beforeEach(() => {
   return global.emptyDatabase()();
@@ -169,6 +169,65 @@ describe('Base budget', () => {
     expect(sheet.getCellValue(currentSheet, 'to-budget')).toBe(10000);
     expect(sheet.getCellValue(currentSheet, 'assigned-in-future')).toBe(0);
     expect(sheet.getCellValue(currentSheet, 'ready-to-assign')).toBe(10000);
+  });
+
+  it('rebuilds future-aware dependencies when the current month changes', async () => {
+    const originalCurrentMonth = global.currentMonth;
+    global.currentMonth = '2023-12';
+
+    try {
+      await sheet.loadSpreadsheet(db);
+
+      await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
+      await db.insertCategoryGroup({
+        id: 'income',
+        name: 'Income',
+        is_income: 1,
+      });
+      const expenseCategory = await db.insertCategory({
+        name: 'Bills',
+        cat_group: 'expenses',
+      });
+      const incomeCategory = await db.insertCategory({
+        name: 'Paycheck',
+        cat_group: 'income',
+        is_income: 1,
+      });
+      await db.insertAccount({ id: 'account', name: 'Checking' });
+
+      const rolloverMonth = '2024-01';
+      const finalFutureMonth = monthUtils.addMonths(rolloverMonth, 12);
+      const { range } = getBudgetRange(global.currentMonth, rolloverMonth);
+      await createBudget(range);
+
+      await db.insertTransaction({
+        date: `${rolloverMonth}-15`,
+        amount: 10000,
+        account: 'account',
+        category: incomeCategory,
+      });
+      await setBudget({
+        month: rolloverMonth,
+        category: expenseCategory,
+        amount: 5000,
+      });
+      await setBudget({
+        month: finalFutureMonth,
+        category: expenseCategory,
+        amount: 2000,
+      });
+
+      global.currentMonth = rolloverMonth;
+      await createAllBudgets();
+
+      const rolloverSheet = monthUtils.sheetForMonth(rolloverMonth);
+      expect(sheet.getCellValue(rolloverSheet, 'assigned-in-future')).toBe(
+        2000,
+      );
+      expect(sheet.getCellValue(rolloverSheet, 'ready-to-assign')).toBe(3000);
+    } finally {
+      global.currentMonth = originalCurrentMonth;
+    }
   });
 
   it('Recomputes budget cells when account fields change', async () => {

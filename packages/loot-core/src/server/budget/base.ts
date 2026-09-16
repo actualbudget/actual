@@ -405,7 +405,7 @@ export async function createAllBudgets() {
     await createBudget(range);
   } else if (getBudgetType() === 'envelope') {
     sheet.startTransaction();
-    envelopeBudget.createFutureAwareToBudget(range, currentMonth);
+    envelopeBudget.createFutureAwareToBudget(range, currentMonth, true);
     sheet.endTransaction();
     await sheet.waitOnSpreadsheet();
   }
