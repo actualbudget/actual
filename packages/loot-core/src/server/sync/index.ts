@@ -421,6 +421,7 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
   }
 
   const prefsToSet: MetadataPrefs = {};
+  let budgetTypeToSet: Message['value'] | undefined;
   const deferredMessages = new Set<Message>();
   const idsPerTable: Record<string, string[]> = {};
   let oldData: DataMap = new Map();
@@ -497,9 +498,11 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
 
             // Special treatment for some synced prefs. Applied messages
             // only — an old or deferred message must not flip the
-            // in-memory budget type
+            // in-memory budget type. Remember it here and switch after
+            // the commit: switching mutates the in-memory spreadsheet,
+            // which a rollback could not undo
             if (dataset === 'preferences' && row === 'budgetType') {
-              void setBudgetType(value);
+              budgetTypeToSet = value;
             }
           }
         } else {
@@ -539,6 +542,10 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
 
   // The transaction succeeded, so we can update in-memory objects now
   undo.appendMessages(messages, oldData);
+
+  if (budgetTypeToSet !== undefined) {
+    void setBudgetType(budgetTypeToSet);
+  }
 
   if (checkSyncingMode('enabled')) {
     // Update the in-memory clock.
