@@ -155,6 +155,14 @@ function AppInner() {
 }
 
 function ErrorFallback({ error }: FallbackProps) {
+  const dispatch = useDispatch();
+
+  // If startup failed mid-way, a loading message is still set. That hides
+  // every modal (see modalsSlice), including the FatalError one, so clear it.
+  useEffect(() => {
+    dispatch(setAppState({ loadingText: null }));
+  }, [dispatch]);
+
   return (
     <>
       <AppBackground />
