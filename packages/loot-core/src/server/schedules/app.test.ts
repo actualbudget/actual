@@ -1143,7 +1143,11 @@ describe('schedule app', () => {
   });
 
   describe('auto-post service throttling', () => {
-    const dateCondition = { op: 'is', field: 'date', value: '2020-12-01' };
+    const dateCondition = {
+      op: 'is',
+      field: 'date',
+      value: '2020-12-01',
+    } as const;
 
     beforeEach(async () => {
       await prefs.loadPrefs();
