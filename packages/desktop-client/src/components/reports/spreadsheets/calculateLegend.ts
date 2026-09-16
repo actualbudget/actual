@@ -73,6 +73,8 @@ export function calculateLegend(
       dataKey: item.id || item.name || '', // Use id for unique data lookup
       uncategorizedId:
         'uncategorizedId' in item.data ? item.data.uncategorizedId : undefined,
+      bucketTagNames:
+        'bucketTagNames' in item.data ? item.data.bucketTagNames : undefined,
     };
   });
   return legend;

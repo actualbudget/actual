@@ -3,6 +3,7 @@ import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 // @ts-strict-ignore
 import { q } from '#shared/query';
+import { extractTagsFromText, makeExactTagSetQueryFilter } from '#shared/tags';
 
 import {
   conditionsToAQL,
@@ -664,6 +665,120 @@ describe('Transaction rules', () => {
     ]);
 
     expect(transactions.map(t => t.id)).toEqual(['2']);
+  });
+
+  test('exact tag drill-down agrees with tag extraction at hashtag and regex boundaries', async () => {
+    const account = await db.insertAccount({ name: 'bank' });
+    const scope = ['red', 'circle', '$splurge', 'a.b', 'a+b', 'Red'];
+    const notes = [
+      '#red#circle',
+      '##red',
+      '#red##circle',
+      '#redder',
+      'text#red',
+      '#Red',
+      '#red #red',
+      '#$splurge',
+      '#a.b',
+      '#axb',
+      '#a+b',
+      '#red\n#circle',
+      null,
+    ];
+    for (const [index, note] of notes.entries()) {
+      await db.insertTransaction({
+        id: String(index),
+        date: '2026-01-01',
+        account,
+        notes: note,
+        amount: 100,
+      });
+    }
+
+    for (const note of notes) {
+      const bucket = extractTagsFromText(note ?? '')
+        .filter(tag => scope.includes(tag))
+        .sort();
+      const { data } = await aqlQuery(
+        q('transactions')
+          .filter(makeExactTagSetQueryFilter(bucket, scope))
+          .select('id'),
+      );
+      const expectedIds = notes.flatMap((candidate, index) => {
+        const tags = extractTagsFromText(candidate ?? '')
+          .filter(tag => scope.includes(tag))
+          .sort();
+        return JSON.stringify(tags) === JSON.stringify(bucket)
+          ? [String(index)]
+          : [];
+      });
+      expect(data.map(row => row.id).sort()).toEqual(expectedIds.sort());
+    }
+
+    const { data } = await aqlQuery(
+      q('transactions').filter(makeExactTagSetQueryFilter([], [])).select('id'),
+    );
+    expect(data).toHaveLength(notes.length);
+  });
+
+  test('transactions can be queried by their exact tag set within a scope', async () => {
+    const account = await db.insertAccount({ name: 'bank' });
+    const payee = await db.insertPayee({ name: 'payee' });
+    const notes = [
+      '#red',
+      '#circle #red',
+      '#red #blue',
+      '#redder',
+      null,
+      '#blue',
+    ];
+
+    await Promise.all(
+      notes.map((note, index) =>
+        db.insertTransaction({
+          id: String(index + 1),
+          date: '2020-10-01',
+          account,
+          payee,
+          notes: note,
+          amount: 123,
+        }),
+      ),
+    );
+
+    async function query(tagNames: string[], scopeTagNames: string[]) {
+      const { data } = await aqlQuery(
+        q('transactions')
+          .filter(makeExactTagSetQueryFilter(tagNames, scopeTagNames))
+          .select('id'),
+      );
+      return data.map(transaction => transaction.id);
+    }
+
+    await expect(
+      query(
+        ['circle', 'red'],
+        [
+          'mortgage',
+          'circle',
+          'red',
+          'groceries',
+          '$splurge',
+          'online-shopping',
+          'subscription',
+          'utilities',
+        ],
+      ),
+    ).resolves.toEqual(['2']);
+    await expect(query(['red'], ['circle', 'red'])).resolves.toEqual([
+      '1',
+      '3',
+    ]);
+    await expect(query([], ['circle', 'red'])).resolves.toEqual([
+      '4',
+      '5',
+      '6',
+    ]);
   });
 
   test('transactions can be queried by hasTags if no "#" is included', async () => {
