@@ -869,7 +869,7 @@ export async function importTransactions(
   );
 }
 
-async function importScheduledTransactions(
+export async function importScheduledTransactions(
   data: Budget,
   entityIdMap: Map<string, string>,
   flagNameConflicts: Set<string>,
@@ -892,6 +892,7 @@ async function importScheduledTransactions(
   const scheduleCategoryMap = new Map<string, string>();
   const scheduleSplitsMap = new Map<string, ScheduledSubtransaction[]>();
   const schedulePayeeMap = new Map<string, string>();
+  const deferredTicks = new Map<string, ImportTick>();
 
   async function createScheduleWithUniqueName(params: {
     name: string;
@@ -974,8 +975,6 @@ async function importScheduledTransactions(
       continue;
     }
 
-    tick();
-
     const scheduleId = await createScheduleWithUniqueName({
       name: scheduled.memo,
       posts_transaction: false,
@@ -1011,11 +1010,17 @@ async function importScheduledTransactions(
 
     if (scheduledSubtransactions.length > 0) {
       scheduleSplitsMap.set(scheduleId, scheduledSubtransactions);
+      deferredTicks.set(scheduleId, tick);
     } else if (!scheduled.transfer_account_id && scheduled.category_id) {
       const mappedCategoryId = entityIdMap.get(scheduled.category_id);
       if (mappedCategoryId) {
         scheduleCategoryMap.set(scheduleId, mappedCategoryId);
+        deferredTicks.set(scheduleId, tick);
       }
+    }
+
+    if (!deferredTicks.has(scheduleId)) {
+      tick();
     }
   }
 
@@ -1023,6 +1028,7 @@ async function importScheduledTransactions(
     for (const [scheduleId, categoryId] of scheduleCategoryMap.entries()) {
       const rule = await getRuleForSchedule(scheduleId);
       if (!rule) {
+        deferredTicks.get(scheduleId)?.();
         continue;
       }
 
@@ -1036,11 +1042,13 @@ async function importScheduledTransactions(
       await send('api/rule-update', {
         rule: buildRuleUpdate(rule, actions),
       });
+      deferredTicks.get(scheduleId)?.();
     }
 
     for (const [scheduleId, subtransactions] of scheduleSplitsMap.entries()) {
       const rule = await getRuleForSchedule(scheduleId);
       if (!rule) {
+        deferredTicks.get(scheduleId)?.();
         continue;
       }
 
@@ -1115,6 +1123,7 @@ async function importScheduledTransactions(
       await send('api/rule-update', {
         rule: buildRuleUpdate(rule, actions),
       });
+      deferredTicks.get(scheduleId)?.();
     }
   }
 }
