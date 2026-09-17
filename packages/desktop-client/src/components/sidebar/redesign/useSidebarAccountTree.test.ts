@@ -125,4 +125,26 @@ describe('filterSidebarTree', () => {
       'Old Checking',
     ]);
   });
+
+  it('matches every account in a group whose name matches', () => {
+    const filtered = filterSidebarTree(tree, 'savings');
+
+    expect(filtered.onBudget.buckets.map(bucket => bucket.group?.id)).toEqual([
+      'g1',
+    ]);
+    expect(filtered.onBudget.buckets[0].accounts.map(a => a.name)).toEqual([
+      'Premium Saver',
+    ]);
+  });
+
+  it('matches a query spanning the group and account names', () => {
+    const filtered = filterSidebarTree(tree, 'savings prem');
+
+    expect(filtered.onBudget.buckets[0].accounts.map(a => a.name)).toEqual([
+      'Premium Saver',
+    ]);
+    expect(filterSidebarTree(tree, 'checking prem').onBudget.buckets).toEqual(
+      [],
+    );
+  });
 });

@@ -34,7 +34,7 @@ export function AccountSearchField({
         <Input
           value={value}
           aria-label={t('Find account')}
-          placeholder={t('Find account…')}
+          placeholder={t('Find account')}
           onChangeValue={onChange}
           onEscape={onClose}
           style={{
