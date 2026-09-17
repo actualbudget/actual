@@ -119,7 +119,7 @@ export function ImportYNAB5Modal() {
                   </ButtonWithLoading>
                 </View>
               )}
-              {importing && <ImportProgress />}
+              <ImportProgress />
             </View>
           </View>
         </>

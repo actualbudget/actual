@@ -100,7 +100,7 @@ export function ImportYNAB4Modal() {
                   </ButtonWithLoading>
                 </View>
               )}
-              {importing && <ImportProgress />}
+              <ImportProgress />
             </View>
           </View>
         </>
