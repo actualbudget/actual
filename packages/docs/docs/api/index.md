@@ -157,7 +157,7 @@ These are the codes for the common failures:
 | `missing-key`            | The budget file is end-to-end encrypted, and no encryption password was given.                       |
 | `decrypt-failure`        | The budget file could not be decrypted — the encryption password is wrong.                           |
 | `old-key-style`          | The budget file uses an old, unsupported encryption key style.                                       |
-| `out-of-sync-migrations` | The budget file needs a newer version of Actual — update the API package.                            |
+| `out-of-sync-migrations` | The budget file is damaged or from a version too old to open. Files from a newer Actual open fine.   |
 
 :::note
 `code` is present for the common connection and download failures listed above. Other errors may only carry a `message`, so always keep a fallback.
