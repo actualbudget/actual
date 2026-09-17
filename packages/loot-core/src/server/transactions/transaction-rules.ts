@@ -340,13 +340,25 @@ export async function runRules(
     ),
   );
 
-  // The running balance is a query over every earlier transaction in
-  // the account, so only pay for it when one of the rules that can
-  // run here actually uses it
   let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap, {
-    includeBalance: rules.some(rule => actionsReferenceBalance(rule.actions)),
+    includeBalance: false,
   });
   let lastCategoryIdForGroup: string | null = finalTrans.category ?? null;
+
+  // The running balance is a query over every earlier transaction in
+  // the account, so fetch it at most once, and only for a rule that is
+  // about to run and actually reads it. `rules` is only the candidates
+  // from the indexers, so checking their actions up front isn't enough.
+  let hasBalance = false;
+  async function ensureBalanceFor(rule: { actions: Action[] }) {
+    if (!hasBalance && trans.account && actionsReferenceBalance(rule.actions)) {
+      finalTrans.balance = await getRunningBalanceBeforeTransaction(
+        trans,
+        trans.account,
+      );
+      hasBalance = true;
+    }
+  }
 
   let scheduleRuleID = '';
   // Check if a schedule is attached to this transaction and if so get the rule ID attached to that schedule.
@@ -374,6 +386,7 @@ export async function runRules(
     if (scheduleRuleID !== '') {
       if (rules[i].id === scheduleRuleID) {
         // bypass condition checking to run the rule even if the transaction date falls outside of the schedule's date range.
+        await ensureBalanceFor(rules[i]);
         const changes = rules[i].execActions(finalTrans);
         finalTrans = Object.assign({}, finalTrans, changes);
         await resolvePayeeNameForRules(finalTrans);
@@ -386,7 +399,14 @@ export async function runRules(
         continue;
       } else {
         // if a rule is not linked to a schedule, run it.
-        finalTrans = rules[i].apply(finalTrans);
+        if (rules[i].evalConditions(finalTrans)) {
+          await ensureBalanceFor(rules[i]);
+          finalTrans = Object.assign(
+            {},
+            finalTrans,
+            rules[i].execActions(finalTrans),
+          );
+        }
         await resolvePayeeNameForRules(finalTrans);
         lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
           finalTrans,
@@ -395,7 +415,14 @@ export async function runRules(
       }
     } else {
       // if there is no scheduleRuleID then just run all rules.
-      finalTrans = rules[i].apply(finalTrans);
+      if (rules[i].evalConditions(finalTrans)) {
+        await ensureBalanceFor(rules[i]);
+        finalTrans = Object.assign(
+          {},
+          finalTrans,
+          rules[i].execActions(finalTrans),
+        );
+      }
       await resolvePayeeNameForRules(finalTrans);
       lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
         finalTrans,
