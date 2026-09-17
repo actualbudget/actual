@@ -340,6 +340,23 @@ describe('File import', () => {
     });
   });
 
+  test('csv import accepts iso-8859-1 as a windows-1252 alias', async () => {
+    // TextDecoder resolves the iso-8859-1 label to windows-1252 per the
+    // WHATWG encoding spec, so both encodings decode the file identically.
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/windows-1252.csv',
+      { hasHeaderRow: true, encoding: 'iso-8859-1' },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toHaveLength(2);
+    expect(transactions[0]).toMatchObject({
+      Date: '2025.12.04',
+      Payee: 'Café Rémy',
+      Amount: '100.25',
+    });
+  });
+
   test('csv import auto-detects utf-16le without bom', async () => {
     const { errors, transactions } = await parseFile(
       __dirname + '/../../../mocks/files/utf-16le-nobom.csv',

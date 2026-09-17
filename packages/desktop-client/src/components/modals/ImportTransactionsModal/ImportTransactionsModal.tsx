@@ -1215,7 +1215,6 @@ export function ImportTransactionsModal({
                           ['utf-16be', t('UTF-16 BE')],
                           ['windows-1252', t('Windows-1252')],
                           ['windows-1250', t('Windows-1250')],
-                          ['iso-8859-1', t('ISO-8859-1')],
                           ['iso-8859-2', t('ISO-8859-2')],
                         ]}
                         value={csvEncoding}

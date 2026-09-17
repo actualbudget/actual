@@ -62,6 +62,9 @@ type StructuredTransaction = {
  */
 function decodeCsvBytes(bytes: Uint8Array, encoding?: string): string {
   if (encoding && encoding !== 'auto') {
+    // Per the WHATWG encoding spec, the iso-8859-1 label resolves to the
+    // windows-1252 decoder; no browser provides a true ISO-8859-1 decoder,
+    // and windows-1252 gives better results for legacy CSV content anyway.
     return new TextDecoder(encoding).decode(bytes);
   }
 
