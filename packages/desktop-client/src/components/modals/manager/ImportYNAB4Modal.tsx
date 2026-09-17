@@ -51,12 +51,18 @@ export function ImportYNAB4Modal() {
   }
 
   return (
-    <Modal name="import-ynab4" containerProps={{ style: { width: 400 } }}>
+    <Modal
+      name="import-ynab4"
+      isDismissable={!importing}
+      containerProps={{ style: { width: 400 } }}
+    >
       {({ state }) => (
         <>
           <ModalHeader
             title={t('Import from YNAB4')}
-            rightContent={<ModalCloseButton onPress={() => state.close()} />}
+            rightContent={
+              !importing && <ModalCloseButton onPress={() => state.close()} />
+            }
           />
           <View style={{ ...styles.smallText, lineHeight: 1.5, marginTop: 20 }}>
             {error && (
@@ -83,16 +89,17 @@ export function ImportYNAB4Modal() {
                   folder". Upload the zipped folder for importing.
                 </Trans>
               </Paragraph>
-              <View>
-                <ButtonWithLoading
-                  variant="primary"
-                  autoFocus
-                  isLoading={importing}
-                  onPress={onImport}
-                >
-                  <Trans>Select zip file...</Trans>
-                </ButtonWithLoading>
-              </View>
+              {!importing && (
+                <View>
+                  <ButtonWithLoading
+                    variant="primary"
+                    autoFocus
+                    onPress={onImport}
+                  >
+                    <Trans>Select zip file...</Trans>
+                  </ButtonWithLoading>
+                </View>
+              )}
               {importing && <ImportProgress />}
             </View>
           </View>
