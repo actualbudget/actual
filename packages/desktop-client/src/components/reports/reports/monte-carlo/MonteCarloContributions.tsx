@@ -169,15 +169,14 @@ export function MonteCarloContributions({
                     take the money out of the income before its tax is worked
                     out, like a workplace pension or salary sacrifice - the
                     stream then pays less tax. Leave it unticked to save from
-                    income that has already been taxed, like an ISA or brokerage
-                    deposit.
+                    income that has already been taxed.
                     <br />
                     <br />
                     For example, a 10,000 contribution from a 12,000 income
                     taxed at 20%: before tax, only the remaining 2,000 is taxed
                     (400); after tax, the full 12,000 is taxed (2,400) and the
                     contribution comes out of what is left. A state pension is
-                    taxed as you receive it, so it stays unticked.
+                    usually taxed as you receive it, so it stays unticked.
                   </Trans>
                 </MonteCarloHelpTooltip>
               </View>

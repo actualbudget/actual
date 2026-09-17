@@ -85,6 +85,8 @@ The access age setting is what lets the report model the classic "bridge gap": r
 
 ### Income
 
+![The Income tab](/img/experimental/monte-carlo-analysis/monte-carlo-income.png)
+
 Income streams are money you receive each year without drawing on your pots - a state pension, a defined-benefit pension, an annuity, rental income, or part-time work in early retirement. They matter because they pay for your spending _first_: with £40,000 of yearly spending and a £12,000 state pension, the pots only need to fund £28,000, and the withdrawal rules and the failure test both work on that smaller amount. Each stream has:
 
 - **Income name** - anything you like, such as "State pension".
