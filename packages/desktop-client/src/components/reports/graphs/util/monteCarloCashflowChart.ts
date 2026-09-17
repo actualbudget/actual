@@ -4,6 +4,8 @@ import type { TFunction } from 'i18next';
 import { getColorScale } from '#components/reports/chart-theme';
 import {
   getActiveSpendingPhase,
+  getMonteCarloPotLabel,
+  getMonteCarloSurplusPotLabel,
   resolveSpendingPhases,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type {
@@ -19,7 +21,8 @@ export type MonteCarloCashflowSeriesKind =
   | 'income'
   | 'phase'
   | 'tax'
-  | 'contribution';
+  | 'contribution'
+  | 'surplus';
 
 /** One stacked bar series of the cashflow chart */
 export type MonteCarloCashflowSeries = {
@@ -89,7 +92,8 @@ function seriesKey(kind: MonteCarloCashflowSeriesKind, index: number) {
  * household's yearly cashflow. Money in above zero: each pot's gross
  * withdrawal and each income stream's gross. Money out below zero: the
  * planned spending (coloured by its spending phase), tax on withdrawals
- * and income, and each contribution paid into a pot. Spending shows the
+ * and income, each contribution paid into a pot, and money saved into
+ * the surplus pot. Spending shows the
  * plan rather than the delivered amount, so in a shortfall year the
  * inflows visibly fall short of the spending bar. Fees stay out - they
  * never pass through the user's hands.
@@ -117,7 +121,7 @@ export function buildMonteCarloCashflowChart({
   const potSeries: MonteCarloCashflowSeries[] = pots.map((pot, potIndex) => ({
     key: seriesKey('pot', potIndex),
     kind: 'pot',
-    label: pot.name || translate('Pot {{number}}', { number: potIndex + 1 }),
+    label: getMonteCarloPotLabel(pots, potIndex, translate),
     color: inflowColor(potIndex),
   }));
   // Only streams that pay something in this run get a series
@@ -178,11 +182,23 @@ export function buildMonteCarloCashflowChart({
         : [],
   );
 
+  // Money the plan saved into its surplus pot instead of spending
+  const hasSurplus = rows.some(row => row.surplusSaved > 0);
+  const surplusSeries: MonteCarloCashflowSeries = {
+    key: seriesKey('surplus', 0),
+    kind: 'surplus',
+    label: translate('Saved into {{pot}}', {
+      pot: getMonteCarloSurplusPotLabel(pots, translate),
+    }),
+    color: outflowColor(phases.length + contributions.length),
+  };
+
   const inflowSeries = [...potSeries, ...incomeSeries];
   const outflowSeries = [
     ...phaseSeries,
     ...(hasTax ? [taxSeries] : []),
     ...contributionSeries,
+    ...(hasSurplus ? [surplusSeries] : []),
   ];
 
   // Tax sits between the inflows and Spending so the deduction chain
@@ -230,6 +246,16 @@ export function buildMonteCarloCashflowChart({
           },
         ]
       : []),
+    ...(hasSurplus
+      ? [
+          {
+            key: 'surplus',
+            heading: translate('Saved'),
+            series: [surplusSeries],
+            listMembers: false,
+          },
+        ]
+      : []),
   ];
 
   const data = rows.map((row): MonteCarloCashflowDataPoint => {
@@ -257,11 +283,15 @@ export function buildMonteCarloCashflowChart({
       amounts[seriesKey('contribution', contributionIndex)] =
         deposited > 0 ? -deposited : 0;
     });
+    if (hasSurplus) {
+      amounts[surplusSeries.key] = row.surplusSaved > 0 ? -row.surplusSaved : 0;
+    }
     return {
       year: row.year,
       age,
       afterDepletion: row.afterDepletion === true,
-      unspentIncome: row.unspentIncome,
+      // Only income that actually left the plan counts as unspent
+      unspentIncome: row.surplusSaved > 0 ? 0 : row.unspentIncome,
       amounts,
     };
   });

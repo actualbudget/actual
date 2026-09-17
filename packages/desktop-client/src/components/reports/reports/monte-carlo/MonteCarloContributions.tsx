@@ -18,6 +18,7 @@ import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/M
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import {
   createMonteCarloContribution,
+  getMonteCarloPotLabel,
   MAX_AMOUNT,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type {
@@ -96,10 +97,7 @@ export function MonteCarloContributions({
 
   const potOptions = pots.map(
     (pot, potIndex) =>
-      [pot.id, pot.name || t('Pot {{number}}', { number: potIndex + 1 })] as [
-        string,
-        string,
-      ],
+      [pot.id, getMonteCarloPotLabel(pots, potIndex, t)] as [string, string],
   );
   const sourceOptions: SelectOption[] = [
     [OUTSIDE_SOURCE, t('Outside the plan')],

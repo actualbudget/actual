@@ -27,6 +27,8 @@ import { MonteCarloPotConfiguration } from '#components/reports/reports/monte-ca
 import { MonteCarloPotsTableHeader } from '#components/reports/reports/monte-carlo/MonteCarloPotsTableHeader';
 import {
   createMonteCarloPot,
+  createMonteCarloSurplusPot,
+  getMonteCarloPotLabel,
   MAX_SIMULATION_COUNT,
   MIN_SIMULATION_COUNT,
   MONTE_CARLO_DEFAULTS,
@@ -70,6 +72,34 @@ export function MonteCarloConfiguration({
 }: MonteCarloConfigurationProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<ConfigurationTab>('plan');
+
+  // Whether unspent money is kept is simply whether a surplus pot exists
+  const keepsSurplus = config.pots.some(pot => pot.isSurplus);
+  const ordinaryPotCount = config.pots.filter(pot => !pot.isSurplus).length;
+
+  function onKeepSurplusChange(keep: boolean) {
+    if (keep) {
+      // First in the list, matching the order it's drawn on
+      onConfigChange({
+        pots: [createMonteCarloSurplusPot(uuidv4()), ...config.pots],
+      });
+    } else {
+      // The surplus pot only exists while unspent money is kept; it
+      // takes its contributions with it, and the plan always keeps a pot
+      const surplusPotIds = config.pots
+        .filter(pot => pot.isSurplus)
+        .map(pot => pot.id);
+      const remainingPots = config.pots.filter(pot => !pot.isSurplus);
+      onConfigChange({
+        pots: remainingPots.length
+          ? remainingPots
+          : [createMonteCarloPot(uuidv4())],
+        contributions: config.contributions.filter(
+          contribution => !surplusPotIds.includes(contribution.potId),
+        ),
+      });
+    }
+  }
 
   function onPotChange(potId: string, changes: Partial<MonteCarloPot>) {
     onConfigChange({
@@ -220,8 +250,11 @@ export function MonteCarloConfiguration({
               model, where it uses up the lower bands before any pot withdrawal
               is taxed. What is left after tax and any contributions paid from
               it goes towards the year&apos;s spending; the pots only fund the
-              remainder. Income beyond that is unspent and leaves the plan -
-              route it into a pot with a contribution if you want to keep it.
+              remainder. Income beyond that is unspent: it is saved into the
+              Surplus cash pot, or leaves the plan if you tick Assume any
+              unspent money is spent under Manage surplus on the Plan details
+              tab. You can also route specific amounts into a pot with a
+              contribution.
             </Trans>
           </MonteCarloHelpTooltip>
         )}
@@ -476,6 +509,53 @@ export function MonteCarloConfiguration({
               </View>
             )}
           </View>
+
+          <View style={{ gap: 10, flexBasis: '100%' }}>
+            <Text style={GROUP_HEADING_STYLE}>
+              <Trans>Manage surplus</Trans>
+            </Text>
+            <Text style={{ color: theme.pageText }}>
+              <Trans>
+                Money the plan doesn&apos;t spend - such as income beyond your
+                spending - is saved into a Surplus cash pot. Tick the box to
+                treat it as spent and gone instead.
+              </Trans>
+            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+                // Sized to its content so the help icon sits by the label
+                // rather than at the far end of the full-width group
+                alignSelf: 'flex-start',
+              }}
+            >
+              <LabeledCheckbox
+                id="mc-assume-surplus-spent"
+                checked={!keepsSurplus}
+                onChange={event => onKeepSurplusChange(!event.target.checked)}
+              >
+                <Trans>Assume any unspent money is spent</Trans>
+              </LabeledCheckbox>
+              <MonteCarloHelpTooltip>
+                <Trans>
+                  The Surplus cash pot is created automatically. Everything the
+                  plan doesn&apos;t spend goes into it - income beyond your
+                  spending, and anything a minimum withdrawal forced out above
+                  the plan - and it is drawn on before any other pot when
+                  spending needs funding.
+                  <br />
+                  <br />
+                  It starts empty and holds cash - no access age, no tax, no
+                  fees - and you can move money on from it with a contribution.
+                  It can&apos;t be edited or deleted from the pots list; tick
+                  the box to remove it, along with any contributions paid into
+                  it, and untick it to bring it back empty.
+                </Trans>
+              </MonteCarloHelpTooltip>
+            </View>
+          </View>
         </View>
       )}
 
@@ -511,8 +591,13 @@ export function MonteCarloConfiguration({
                   <MonteCarloPotConfiguration
                     key={pot.id}
                     pot={pot}
-                    potNumber={config.pots.indexOf(pot) + 1}
-                    canRemove={config.pots.length > 1}
+                    potLabel={getMonteCarloPotLabel(
+                      config.pots,
+                      config.pots.indexOf(pot),
+                      t,
+                    )}
+                    // The surplus pot is managed by the Manage surplus toggle
+                    canRemove={ordinaryPotCount > 1 && !pot.isSurplus}
                     usesHistoricalReturns={config.returnModel !== 'normal'}
                     usesTaxBands={config.taxModel === 'bands'}
                     onPotChange={changes => onPotChange(pot.id, changes)}

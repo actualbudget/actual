@@ -15,6 +15,10 @@ import { View } from '@actual-app/components/view';
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
+import {
+  getMonteCarloPotLabel,
+  getMonteCarloSurplusPotLabel,
+} from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type {
   MonteCarloIncomeStream,
   MonteCarloPot,
@@ -81,6 +85,8 @@ export function MonteCarloRunDetailTable({
   const [expandedYears, setExpandedYears] = useState<Set<number>>(new Set());
 
   const hasIncome = incomeStreams.length > 0;
+  const surplusPotName = getMonteCarloSurplusPotLabel(pots, t);
+  const hasSurplusPot = pots.some(pot => pot.isSurplus);
   const lastRow = rows[rows.length - 1];
   const hasSurvived = lastRow != null && lastRow.endBalance > 0;
   // Present whenever the plan has inflation enabled
@@ -473,7 +479,10 @@ export function MonteCarloRunDetailTable({
             // came in and the withdrawal went out; no growth on a failure
             // year (the plan stops there)
             const growthBase =
-              row.startBalance + row.contributions - row.withdrawal;
+              row.startBalance +
+              row.contributions +
+              row.surplusSaved -
+              row.withdrawal;
             const growthPct =
               !isFailureRow && growthBase > 0
                 ? (row.growth / growthBase) * 100
@@ -524,7 +533,10 @@ export function MonteCarloRunDetailTable({
                     <Text style={AMOUNT_CELL_STYLE}>
                       <PrivacyFilter>
                         <FinancialText as="span">
-                          {format(row.contributions, 'financial')}
+                          {format(
+                            row.contributions + row.surplusSaved,
+                            'financial',
+                          )}
                         </FinancialText>
                       </PrivacyFilter>
                     </Text>
@@ -656,7 +668,7 @@ export function MonteCarloRunDetailTable({
                         </PrivacyFilter>
                       </Text>
                     )}
-                    {row.unspentIncome > 0 && (
+                    {row.unspentIncome > 0 && row.surplusSaved === 0 && (
                       <Text style={{ fontSize: 13, color: theme.pageText }}>
                         <PrivacyFilter>
                           <FinancialText as="span">
@@ -664,6 +676,21 @@ export function MonteCarloRunDetailTable({
                               'Unspent income: {{amount}} - more came in than the plan spends, and it leaves the plan.',
                               {
                                 amount: format(row.unspentIncome, 'financial'),
+                              },
+                            )}
+                          </FinancialText>
+                        </PrivacyFilter>
+                      </Text>
+                    )}
+                    {row.surplusSaved > 0 && (
+                      <Text style={{ fontSize: 13, color: theme.pageText }}>
+                        <PrivacyFilter>
+                          <FinancialText as="span">
+                            {t(
+                              "Saved into {{pot}}: {{amount}} - money the plan didn't spend this year.",
+                              {
+                                pot: surplusPotName,
+                                amount: format(row.surplusSaved, 'financial'),
                               },
                             )}
                           </FinancialText>
@@ -798,15 +825,29 @@ export function MonteCarloRunDetailTable({
                             <Trans>Start balance</Trans>
                           </Text>
                           {hasContributions && (
-                            <Text
+                            <View
                               style={{
-                                ...GROUP_HEADING_STYLE,
-                                ...POT_CELL_STYLE,
                                 width: 130,
+                                flexShrink: 0,
+                                flexDirection: 'row',
+                                justifyContent: 'flex-end',
+                                alignItems: 'center',
+                                gap: 4,
                               }}
                             >
-                              <Trans>Contributed</Trans>
-                            </Text>
+                              <Text style={GROUP_HEADING_STYLE}>
+                                <Trans>Contributed</Trans>
+                              </Text>
+                              {hasSurplusPot && (
+                                <MonteCarloHelpTooltip placement="bottom end">
+                                  <Trans>
+                                    For the {{ surplusPotName }} pot this is the
+                                    money the plan didn&apos;t spend that year,
+                                    saved into it before growth.
+                                  </Trans>
+                                </MonteCarloHelpTooltip>
+                              )}
+                            </View>
                           )}
                           <Text
                             style={{
@@ -905,10 +946,7 @@ export function MonteCarloRunDetailTable({
                               }}
                             >
                               <Text style={{ flex: 1, minWidth: 120 }}>
-                                {pot.name ||
-                                  t('Pot {{number}}', {
-                                    number: potIndex + 1,
-                                  })}
+                                {getMonteCarloPotLabel(pots, potIndex, t)}
                               </Text>
                               <Text style={{ ...POT_CELL_STYLE, width: 130 }}>
                                 <PrivacyFilter>
@@ -925,7 +963,10 @@ export function MonteCarloRunDetailTable({
                                   <PrivacyFilter>
                                     <FinancialText as="span">
                                       {format(
-                                        row.potContributions[potIndex] ?? 0,
+                                        (row.potContributions[potIndex] ?? 0) +
+                                          (pot.isSurplus
+                                            ? row.surplusSaved
+                                            : 0),
                                         'financial',
                                       )}
                                     </FinancialText>

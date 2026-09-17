@@ -564,7 +564,10 @@ export function MonteCarlo() {
               simulationIndex={selectedRunIndex}
               simulationCount={result.simulationCount}
               startAge={config.currentAge}
-              hasContributions={config.contributions.length > 0}
+              hasContributions={
+                config.contributions.length > 0 ||
+                config.pots.some(pot => pot.isSurplus)
+              }
               incomeStreams={resolvedConfig.incomeStreams}
               withdrawalRule={resolvedConfig.withdrawalRule}
               cashflowGraph={

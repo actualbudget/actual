@@ -4,11 +4,14 @@ import {
   getHistoricalMixStats,
   getHistoricalPresetStats,
   getMonteCarloHorizonYears,
+  getMonteCarloPotLabel,
   getPotAssetWeights,
   MAX_AMOUNT,
   MAX_HORIZON_YEARS,
   MIN_HORIZON_YEARS,
   MIN_SIMULATION_COUNT,
+  MONTE_CARLO_DEFAULTS,
+  monteCarloConfigFromMeta,
   runMonteCarloSimulation,
   WITHDRAWAL_RULE_DEFAULTS,
 } from './monteCarloSimulation';
@@ -70,6 +73,7 @@ function makePot(overrides: Partial<MonteCarloPot> = {}): MonteCarloPot {
     annualFeeFixed: 0,
     feeAdjustsWithInflation: false,
     annualFeeRate: 0,
+    isSurplus: false,
     ...overrides,
   };
 }
@@ -126,6 +130,38 @@ function deterministicDepletionYear(
   }
   return null;
 }
+
+describe('surplus pot defaults', () => {
+  it('starts new plans with a surplus cash pot ahead of an ordinary pot', () => {
+    expect(MONTE_CARLO_DEFAULTS.pots.map(pot => pot.isSurplus)).toEqual([
+      true,
+      false,
+    ]);
+    expect(MONTE_CARLO_DEFAULTS.pots[0].startingBalance).toBe(0);
+  });
+
+  it('keeps saved plans without a surplus pot unchanged', () => {
+    const config = monteCarloConfigFromMeta({
+      pots: [{ id: 'saved-pot', startingBalance: 500_000 }],
+    });
+    expect(config.pots.map(pot => pot.isSurplus)).toEqual([false]);
+  });
+
+  it('numbers ordinary pots without counting the surplus pot', () => {
+    const translate = (key: string, options?: Record<string, unknown>) =>
+      key.replace('{{number}}', String(options?.number));
+    const pots = MONTE_CARLO_DEFAULTS.pots;
+    expect(getMonteCarloPotLabel(pots, 0, translate)).toBe('Surplus cash');
+    expect(getMonteCarloPotLabel(pots, 1, translate)).toBe('Pot 1');
+    expect(
+      getMonteCarloPotLabel(
+        [...pots, { ...pots[1], name: 'ISA' }],
+        2,
+        translate,
+      ),
+    ).toBe('ISA');
+  });
+});
 
 describe('getMonteCarloHorizonYears', () => {
   it('derives the horizon from the configured ages', () => {
@@ -3037,6 +3073,110 @@ describe('runMonteCarloSimulation', () => {
         false,
         true,
       ]);
+    });
+
+    it('saves unspent income into the surplus pot and draws on it first', () => {
+      // 1,000 income against a 400 plan for two years, then no income:
+      // the 600 left each year is saved, and once the income stops the
+      // plan is paid from the surplus pot before the main pot is touched
+      const result = runMonteCarloSimulation(
+        makeParams({
+          annualWithdrawal: 400,
+          // The surplus pot is pinned to the cash preset, so give it a
+          // zero-return history to keep the arithmetic exact; the custom
+          // main pot keeps its own draws under historical models
+          returnModel: 'historical-bootstrap',
+          historicalReturns: [
+            { year: 2000, stocks: 0, bonds: 0, cash: 0, inflation: 0 },
+          ],
+          horizonYears: 4,
+          incomeStreams: [makeIncomeStream({ annualAmount: 1_000, toAge: 61 })],
+          pots: [
+            makePot({
+              id: 'surplus',
+              isSurplus: true,
+              startingBalance: 0,
+              expectedReturnMean: 0,
+              returnStdDev: 0,
+            }),
+            makePot({
+              id: 'main',
+              startingBalance: 5_000,
+              expectedReturnMean: 0,
+              returnStdDev: 0,
+            }),
+          ],
+          captureRunDetail: 0,
+        }),
+      );
+
+      const rows = result.runDetail!;
+      expect(rows.map(row => row.surplusSaved)).toEqual([600, 600, 0, 0]);
+      expect(rows.map(row => row.potWithdrawals)).toEqual([
+        [0, 0],
+        [0, 0],
+        [400, 0],
+        [400, 0],
+      ]);
+      expect(rows.map(row => row.potBalances)).toEqual([
+        [600, 5_000],
+        [1_200, 5_000],
+        [800, 5_000],
+        [400, 5_000],
+      ]);
+      for (const row of rows) {
+        expect(
+          row.startBalance +
+            row.contributions +
+            row.surplusSaved -
+            row.withdrawal +
+            row.growth -
+            row.feesPaid,
+        ).toBe(row.endBalance);
+      }
+    });
+
+    it('saves what the minimum withdrawal forces out above the plan', () => {
+      // The spending-floor scenario again, now with a surplus pot: the
+      // 800 floor withdrawal is 71 above the rule's 729 plan, and that
+      // 71 is saved rather than lost
+      const result = runMonteCarloSimulation(
+        makeParams({
+          annualWithdrawal: 2_000,
+          // The surplus pot is pinned to the cash preset, so give it a
+          // zero-return history to keep the arithmetic exact; the custom
+          // main pot keeps its own draws under historical models
+          returnModel: 'historical-bootstrap',
+          historicalReturns: [
+            { year: 2000, stocks: 0, bonds: 0, cash: 0, inflation: 0 },
+          ],
+          horizonYears: 4,
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
+          minimumWithdrawal: 1_800,
+          incomeStreams: [makeIncomeStream({ annualAmount: 1_000 })],
+          pots: [
+            makePot({
+              id: 'surplus',
+              isSurplus: true,
+              startingBalance: 0,
+              expectedReturnMean: 0,
+              returnStdDev: 0,
+            }),
+            makePot({
+              id: 'main',
+              startingBalance: 100_000,
+              expectedReturnMean: -0.5,
+              returnStdDev: 0,
+            }),
+          ],
+          captureRunDetail: 0,
+        }),
+      );
+
+      const rows = result.runDetail!;
+      expect(rows.map(row => row.withdrawal)).toEqual([1_000, 900, 810, 800]);
+      expect(rows.map(row => row.surplusSaved)).toEqual([0, 0, 0, 71]);
+      expect(rows[3].potBalances[0]).toBe(71);
     });
 
     it('reconciles each stream to the row total in the run detail', () => {

@@ -351,6 +351,13 @@ export type MonteCarloPot = {
   feeAdjustsWithInflation: boolean;
   /** Yearly fee as a fraction of the end-of-year balance */
   annualFeeRate: number;
+  /**
+   * The plan's surplus pot: unspent money (income beyond the plan, and
+   * anything the minimum withdrawal forced out above it) is saved into it
+   * each year, and it is drawn on before any other pot. At most one pot
+   * is flagged; none = unspent money leaves the plan.
+   */
+  isSurplus: boolean;
 };
 
 export function createMonteCarloPot(id: string): MonteCarloPot {
@@ -371,7 +378,60 @@ export function createMonteCarloPot(id: string): MonteCarloPot {
     annualFeeFixed: 0,
     feeAdjustsWithInflation: false,
     annualFeeRate: 0,
+    isSurplus: false,
   };
+}
+
+/**
+ * The pot that keeps a plan's unspent money: a cash pot starting empty,
+ * immediately accessible, untaxed and fee-free
+ */
+export function createMonteCarloSurplusPot(id: string): MonteCarloPot {
+  return {
+    ...createMonteCarloPot(id),
+    startingBalance: 0,
+    allocationPreset: 'cash',
+    allocationStocks: PRESET_ASSET_WEIGHTS.cash.stocks,
+    allocationBonds: PRESET_ASSET_WEIGHTS.cash.bonds,
+    allocationCash: PRESET_ASSET_WEIGHTS.cash.cash,
+    expectedReturnMean: ALLOCATION_PRESETS.cash.mean,
+    returnStdDev: ALLOCATION_PRESETS.cash.stdDev,
+    isSurplus: true,
+  };
+}
+
+/**
+ * How a pot is referred to in the UI: its name, or a fallback - "Surplus
+ * cash" for the surplus pot, otherwise "Pot N" numbered among the
+ * ordinary pots so the surplus pot doesn't shift the numbering
+ */
+export function getMonteCarloPotLabel(
+  pots: MonteCarloPot[],
+  potIndex: number,
+  translate: (key: string, options?: Record<string, unknown>) => string,
+): string {
+  const pot = pots[potIndex];
+  if (pot.name) {
+    return pot.name;
+  }
+  if (pot.isSurplus) {
+    return translate('Surplus cash');
+  }
+  const ordinal = pots
+    .slice(0, potIndex + 1)
+    .filter(other => !other.isSurplus).length;
+  return translate('Pot {{number}}', { number: ordinal });
+}
+
+/** Label for the surplus pot, whether or not the plan currently has one */
+export function getMonteCarloSurplusPotLabel(
+  pots: MonteCarloPot[],
+  translate: (key: string, options?: Record<string, unknown>) => string,
+): string {
+  const surplusPotIndex = pots.findIndex(pot => pot.isSurplus);
+  return surplusPotIndex >= 0
+    ? getMonteCarloPotLabel(pots, surplusPotIndex, translate)
+    : translate('Surplus cash');
 }
 
 /** One tax band: annual taxable income from `from` upward taxed at `rate` */
@@ -454,7 +514,10 @@ export type MonteCarloConfig = {
 };
 
 export const MONTE_CARLO_DEFAULTS: MonteCarloConfig = {
-  pots: [createMonteCarloPot('pot-1')],
+  pots: [
+    createMonteCarloSurplusPot('surplus-pot'),
+    createMonteCarloPot('pot-1'),
+  ],
   withdrawalStrategy: 'proportional',
   returnModel: 'normal',
   withdrawalRule: WITHDRAWAL_RULE_DEFAULTS,
@@ -503,6 +566,7 @@ function potFromMeta(potMeta: MonteCarloPotMeta, index: number): MonteCarloPot {
     feeAdjustsWithInflation:
       potMeta.feeAdjustsWithInflation ?? defaults.feeAdjustsWithInflation,
     annualFeeRate: potMeta.annualFeeRate ?? defaults.annualFeeRate,
+    isSurplus: potMeta.isSurplus ?? defaults.isSurplus,
   };
 }
 
@@ -581,7 +645,7 @@ export function monteCarloConfigFromMeta(
   return {
     pots: meta?.pots?.length
       ? meta.pots.map(potFromMeta)
-      : [createMonteCarloPot('pot-1')],
+      : MONTE_CARLO_DEFAULTS.pots,
     withdrawalStrategy:
       meta?.withdrawalStrategy ?? MONTE_CARLO_DEFAULTS.withdrawalStrategy,
     returnModel: meta?.returnModel ?? MONTE_CARLO_DEFAULTS.returnModel,
@@ -717,9 +781,17 @@ export type MonteCarloRunDetailRow = {
   incomeTax: number;
   /**
    * Net income left after sourced contributions and the year's planned
-   * spending - it leaves the plan (0 when the income was fully used)
+   * spending (0 when the income was fully used). Saved into the surplus
+   * pot when the plan has one, otherwise it leaves the plan
    */
   unspentIncome: number;
+  /**
+   * Money saved into the surplus pot this year: unspent income plus
+   * anything the minimum withdrawal forced out above the plan. Part of the
+   * balance chain: start + contributions + surplusSaved - withdrawal +
+   * growth - fees = end. 0 without a surplus pot
+   */
+  surplusSaved: number;
   /** Contributions paid in at the start of this year */
   contributions: number;
   /** Contribution each pot received at the start of the year, same order */
@@ -920,7 +992,16 @@ export function rankSimulationsWorstFirst(
 export function runMonteCarloSimulation(
   params: MonteCarloParams,
 ): MonteCarloResult {
-  const pots = params.pots.length > 0 ? params.pots : MONTE_CARLO_DEFAULTS.pots;
+  // The surplus pot's semantics are fixed - empty to start, cash,
+  // immediately accessible, untaxed, fee-free - whatever the stored meta
+  // says, so it can only ever hold what the plan didn't spend
+  const pots = (
+    params.pots.length > 0 ? params.pots : MONTE_CARLO_DEFAULTS.pots
+  ).map(pot =>
+    pot.isSurplus
+      ? { ...createMonteCarloSurplusPot(pot.id), name: pot.name }
+      : pot,
+  );
   const potCount = pots.length;
   const potStartBalances = pots.map(pot =>
     clamp(pot.startingBalance, 0, MAX_AMOUNT),
@@ -1102,19 +1183,50 @@ export function runMonteCarloSimulation(
     }
   }
 
-  // Split a gross withdrawal across pots per the configured order, without
-  // mutating balances; writes each pot's take into potTakes. Mirrors the
-  // strategies' semantics exactly (same arithmetic as the pre-tax split).
+  // The plan's surplus pot, if it has one: unspent money is saved into it
+  // and it is drawn on before any other pot
+  const surplusPotIndex = pots.findIndex(pot => pot.isSurplus);
+
+  // Whether the withdrawal strategy may draw on a pot this year: it has
+  // unlocked, and it isn't the surplus pot (which is always drawn first,
+  // ahead of every strategy)
+  function canDrain(potIndex: number, year: number) {
+    return year >= potAccessFromYear[potIndex] && potIndex !== surplusPotIndex;
+  }
+
+  // Split a gross withdrawal across pots, without mutating balances;
+  // writes each pot's take into potTakes. The surplus pot goes first,
+  // then the configured strategy splits the rest across the other pots.
   function computeTakes(
     grossTotal: number,
     year: number,
     accessibleTotal: number,
-    lastAccessibleIndex: number,
   ) {
     potTakes.fill(0);
     if (grossTotal <= 0 || accessibleTotal <= 0) {
       return;
     }
+    let remainingGross = grossTotal;
+    let remainingAccessible = accessibleTotal;
+    if (surplusPotIndex !== -1 && year >= potAccessFromYear[surplusPotIndex]) {
+      const take = Math.min(potBalances[surplusPotIndex], remainingGross);
+      potTakes[surplusPotIndex] = take;
+      remainingGross -= take;
+      remainingAccessible -= potBalances[surplusPotIndex];
+    }
+    if (remainingGross > 0 && remainingAccessible > 0) {
+      splitAcrossPots(remainingGross, year, remainingAccessible);
+    }
+  }
+
+  // The configured strategy's split of a gross amount across the pots it
+  // may draw on. Mirrors the strategies' semantics exactly (same
+  // arithmetic as the pre-tax split).
+  function splitAcrossPots(
+    grossTotal: number,
+    year: number,
+    accessibleTotal: number,
+  ) {
     if (isSequential || isBestPerformer) {
       if (isBestPerformer) {
         // Drain the pot with the highest return last year first; ties
@@ -1134,7 +1246,7 @@ export function runMonteCarloSimulation(
         orderIndex++
       ) {
         const potIndex = isBestPerformer ? drainOrder[orderIndex] : orderIndex;
-        if (year < potAccessFromYear[potIndex]) {
+        if (!canDrain(potIndex, year)) {
           continue;
         }
         const take = Math.min(potBalances[potIndex], remaining);
@@ -1149,7 +1261,7 @@ export function runMonteCarloSimulation(
       // comes from overweight pots, most overweight first
       let targetAccessible = 0;
       for (let potIndex = 0; potIndex < potCount; potIndex++) {
-        if (year >= potAccessFromYear[potIndex]) {
+        if (canDrain(potIndex, year)) {
           targetAccessible += potStartBalances[potIndex];
         }
       }
@@ -1157,7 +1269,7 @@ export function runMonteCarloSimulation(
       for (let potIndex = 0; potIndex < potCount; potIndex++) {
         drainOrder[potIndex] = potIndex;
         potIdealBalances[potIndex] =
-          year >= potAccessFromYear[potIndex] && targetAccessible > 0
+          canDrain(potIndex, year) && targetAccessible > 0
             ? (potStartBalances[potIndex] / targetAccessible) * remainingTotal
             : 0;
       }
@@ -1174,7 +1286,7 @@ export function runMonteCarloSimulation(
         orderIndex++
       ) {
         const potIndex = drainOrder[orderIndex];
-        if (year < potAccessFromYear[potIndex]) {
+        if (!canDrain(potIndex, year)) {
           continue;
         }
         const excess = potBalances[potIndex] - potIdealBalances[potIndex];
@@ -1188,7 +1300,7 @@ export function runMonteCarloSimulation(
       // Float-drift safety net: drain any accessible pot for whatever
       // tiny residue the excess passes left behind
       for (let potIndex = 0; potIndex < potCount && remaining > 0; potIndex++) {
-        if (year < potAccessFromYear[potIndex]) {
+        if (!canDrain(potIndex, year)) {
           continue;
         }
         const take = Math.min(
@@ -1199,20 +1311,26 @@ export function runMonteCarloSimulation(
         remaining -= take;
       }
     } else {
-      // Proportional split across accessible pots; the last accessible
-      // pot takes the remainder so the total drops by exactly the
-      // withdrawal (no float drift)
+      // Proportional split across the pots in play; the last of them
+      // takes the remainder so the total drops by exactly the withdrawal
+      // (no float drift)
+      let lastDrainableIndex = -1;
+      for (let potIndex = 0; potIndex < potCount; potIndex++) {
+        if (canDrain(potIndex, year)) {
+          lastDrainableIndex = potIndex;
+        }
+      }
       let remaining = grossTotal;
-      for (let potIndex = 0; potIndex < lastAccessibleIndex; potIndex++) {
-        if (year < potAccessFromYear[potIndex]) {
+      for (let potIndex = 0; potIndex < lastDrainableIndex; potIndex++) {
+        if (!canDrain(potIndex, year)) {
           continue;
         }
         const take = grossTotal * (potBalances[potIndex] / accessibleTotal);
         potTakes[potIndex] = take;
         remaining -= take;
       }
-      if (lastAccessibleIndex >= 0) {
-        potTakes[lastAccessibleIndex] = remaining;
+      if (lastDrainableIndex >= 0) {
+        potTakes[lastDrainableIndex] = remaining;
       }
     }
   }
@@ -1661,11 +1779,9 @@ export function runMonteCarloSimulation(
         // Only pots that have reached their access age can fund this year's
         // withdrawal; locked pots stay invested but untouchable
         let accessibleTotal = 0;
-        let lastAccessibleIndex = -1;
         for (let potIndex = 0; potIndex < potCount; potIndex++) {
           if (year >= potAccessFromYear[potIndex]) {
             accessibleTotal += potBalances[potIndex];
-            lastAccessibleIndex = potIndex;
           }
         }
 
@@ -1842,6 +1958,8 @@ export function runMonteCarloSimulation(
         let withdrawalTaken: number;
         let netDelivered: number;
         let fundingShortfall = false;
+        // Unspent money saved into the surplus pot this year (0 without one)
+        let surplusSavedThisYear = 0;
 
         // Per-pot balances at the point of failure: accessible pots are
         // consumed, locked pots keep their money
@@ -1876,12 +1994,7 @@ export function runMonteCarloSimulation(
         // the plan funds this year
         let accessibleNetCapacity = accessibleTotal;
         if (hasTax && accessibleTotal * minNetFactor <= netRequired) {
-          computeTakes(
-            accessibleTotal,
-            year,
-            accessibleTotal,
-            lastAccessibleIndex,
-          );
+          computeTakes(accessibleTotal, year, accessibleTotal);
           accessibleNetCapacity =
             accessibleTotal -
             taxForTakes(cumulativeInflation, taxableIncomeBase);
@@ -1936,12 +2049,7 @@ export function runMonteCarloSimulation(
           let grossTotal = netRequired;
           if (hasTax) {
             for (let iteration = 0; iteration < 40; iteration++) {
-              computeTakes(
-                grossTotal,
-                year,
-                accessibleTotal,
-                lastAccessibleIndex,
-              );
+              computeTakes(grossTotal, year, accessibleTotal);
               const next =
                 netRequired +
                 taxForTakes(cumulativeInflation, taxableIncomeBase);
@@ -1954,7 +2062,7 @@ export function runMonteCarloSimulation(
             grossTotal = Math.min(grossTotal, accessibleTotal);
           }
 
-          computeTakes(grossTotal, year, accessibleTotal, lastAccessibleIndex);
+          computeTakes(grossTotal, year, accessibleTotal);
           for (let potIndex = 0; potIndex < potCount; potIndex++) {
             potBalances[potIndex] -= potTakes[potIndex];
           }
@@ -1974,6 +2082,19 @@ export function runMonteCarloSimulation(
           }
           if (capturedPotTaxables && hasTax) {
             captureTaxables(capturedPotTaxables);
+          }
+
+          // Money that reached the household but wasn't spent - income the
+          // plan didn't need, plus anything the minimum withdrawal forced
+          // out above the plan - is saved into the surplus pot before
+          // growth, like a contribution. Without a surplus pot it leaves
+          // the plan.
+          if (surplusPotIndex !== -1) {
+            const plannedFromPots =
+              plannedSpendingThisYear - incomeTowardsSpending;
+            surplusSavedThisYear =
+              unspentIncome + Math.max(0, netDelivered - plannedFromPots);
+            potBalances[surplusPotIndex] += surplusSavedThisYear;
           }
 
           const marketShock = hasNormalDrawPot ? nextNormal() : 0;
@@ -2116,6 +2237,7 @@ export function runMonteCarloSimulation(
             incomeAmounts: emitParts(yearIncomeGross, startDeflator, income),
             incomeTax: emit(incomeTaxThisYear, startDeflator),
             unspentIncome: emit(unspentIncome, startDeflator),
+            surplusSaved: emit(surplusSavedThisYear, startDeflator),
             contributions,
             potContributions: emitParts(
               capturedPotContributions,
@@ -2177,7 +2299,8 @@ export function runMonteCarloSimulation(
               growth: toSafeAmount(
                 Math.round(
                   (total + feesThisYear) * endDeflator -
-                    (yearStartTotal - withdrawalTaken) * startDeflator,
+                    (yearStartTotal - withdrawalTaken + surplusSavedThisYear) *
+                      startDeflator,
                 ),
               ),
               feesPaid,
@@ -2245,6 +2368,7 @@ export function runMonteCarloSimulation(
           unspentIncome: emitFrozen(
             tailSpendableIncome - tailIncomeTowardsSpending,
           ),
+          surplusSaved: 0,
           contributions: 0,
           potContributions: new Array<number>(potCount).fill(0),
           contributionAmounts: new Array<number>(contributionCount).fill(0),

@@ -36,6 +36,7 @@ function makePot(id: string, name = ''): MonteCarloPot {
     annualFeeFixed: 0,
     feeAdjustsWithInflation: false,
     annualFeeRate: 0,
+    isSurplus: false,
   };
 }
 
@@ -91,6 +92,7 @@ function makeRow(
     incomeAmounts: [],
     incomeTax: 0,
     unspentIncome: 0,
+    surplusSaved: 0,
     contributions: 0,
     potContributions: [],
     contributionAmounts: [],
@@ -288,6 +290,40 @@ describe('buildMonteCarloCashflowChart', () => {
       'Phase 2',
       'Phase 1',
     ]);
+  });
+
+  it('shows money saved into the surplus pot as an outflow', () => {
+    const surplusPot = { ...makePot('surplus', 'Rainy day'), isSurplus: true };
+    const chart = buildMonteCarloCashflowChart({
+      rows: [
+        makeRow({
+          year: 1,
+          incomeAmounts: [1_000, 0],
+          unspentIncome: 600,
+          surplusSaved: 600,
+        }),
+      ],
+      pots: [surplusPot, ...pots],
+      contributions: [],
+      incomeStreams,
+      spendingPhases: phases,
+      startAge: 60,
+      translate,
+    });
+
+    const surplusSeries = chart.outflowSeries.find(
+      series => series.kind === 'surplus',
+    );
+    expect(surplusSeries?.label).toBe('Saved into Rainy day');
+    expect(chart.tooltipGroups.map(group => group.key)).toEqual([
+      'withdrawals',
+      'income',
+      'spending',
+      'surplus',
+    ]);
+    expect(chart.data[0].amounts.surplus0).toBe(-600);
+    // Saved money isn't unspent
+    expect(chart.data[0].unspentIncome).toBe(0);
   });
 
   it('carries the unfunded and unspent flags for the tooltip', () => {

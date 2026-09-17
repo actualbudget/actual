@@ -223,6 +223,11 @@ export type MonteCarloPotMeta = {
   feeAdjustsWithInflation?: boolean;
   /** Yearly fee as a fraction of the end-of-year balance (0.0022 = 0.22%) */
   annualFeeRate?: number;
+  /**
+   * The plan's surplus pot: unspent money is saved into it each year and
+   * it is drawn on before any other pot. At most one pot is flagged.
+   */
+  isSurplus?: boolean;
 };
 
 /** One recurring yearly contribution into a pot over an age window */
