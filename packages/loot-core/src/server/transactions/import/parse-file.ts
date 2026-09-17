@@ -204,7 +204,7 @@ async function parseOFX(
   options: ParseFileOptions,
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
-  const contents = await fs.readFile(filepath);
+  const contents = await fs.readFile(filepath, 'binary');
 
   let data: Awaited<ReturnType<typeof ofx2json>>;
   try {
@@ -254,7 +254,9 @@ async function parseCAMT(
   options: ParseFileOptions = {},
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
-  const contents = await fs.readFile(filepath);
+  // Read the raw bytes so xmlCAMT2json can honor the encoding declared in
+  // the XML header instead of decoding the file as UTF-8.
+  const contents = await fs.readFile(filepath, 'binary');
 
   let data: Awaited<ReturnType<typeof xmlCAMT2json>>;
   try {
