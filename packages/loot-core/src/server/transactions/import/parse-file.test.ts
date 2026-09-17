@@ -342,17 +342,18 @@ describe('File import', () => {
 
   test('csv import accepts iso-8859-1 as a windows-1252 alias', async () => {
     // TextDecoder resolves the iso-8859-1 label to windows-1252 per the
-    // WHATWG encoding spec, so both encodings decode the file identically.
+    // WHATWG encoding spec. The € byte (0x80) proves it: windows-1252 decodes
+    // it as €, while a true ISO-8859-1 decoder would yield a C1 control char.
     const { errors, transactions } = await parseFile(
-      __dirname + '/../../../mocks/files/windows-1252.csv',
+      __dirname + '/../../../mocks/files/windows-1252-euro.csv',
       { hasHeaderRow: true, encoding: 'iso-8859-1' },
     );
 
     expect(errors.length).toBe(0);
-    expect(transactions).toHaveLength(2);
+    expect(transactions).toHaveLength(1);
     expect(transactions[0]).toMatchObject({
       Date: '2025.12.04',
-      Payee: 'Café Rémy',
+      Payee: 'Café €Rémy',
       Amount: '100.25',
     });
   });
