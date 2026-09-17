@@ -39,6 +39,19 @@ describe('Merging fails for invalid quantity', () => {
     ).rejects.toThrow('Cannot merge transactions with different amounts');
   });
 
+  it('fails when the same transaction is passed twice', async () => {
+    await prepareDatabase();
+    const t1 = await db.insertTransaction({
+      account: 'one',
+      date: '2025-01-01',
+      amount: 10,
+    });
+    await expect(() =>
+      mergeTransactions([{ id: t1 }, { id: t1 }]),
+    ).rejects.toThrow('Merging is only possible with 2 distinct transactions');
+    expect(await db.getTransaction(t1)).toBeTruthy();
+  });
+
   it("fails when transaction id doesn't exist", async () => {
     await prepareDatabase();
     const t1 = await db.insertTransaction({
