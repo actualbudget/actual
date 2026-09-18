@@ -15,13 +15,22 @@ import { View } from '@actual-app/components/view';
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
+import {
+  getMonteCarloPotLabel,
+  getMonteCarloSurplusPotLabel,
+} from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type {
+  MonteCarloIncomeStream,
   MonteCarloPot,
   MonteCarloRuleExplanation,
   MonteCarloRunDetailRow,
   MonteCarloWithdrawalRuleConfig,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { GROUP_HEADING_STYLE } from '#components/reports/reports/monte-carlo/monteCarloStyles';
+import {
+  buildMonteCarloYearStory,
+  formatRuleRate,
+} from '#components/reports/reports/monte-carlo/monteCarloYearStory';
 import { useFormat } from '#hooks/useFormat';
 
 // The minWidth keeps amounts readable on narrow screens - the table
@@ -39,13 +48,6 @@ const POT_CELL_STYLE = {
   textAlign: 'right',
 } as const;
 
-// Enough precision that multiplying the displayed rate by the balance
-// reproduces the displayed amounts; trailing zeros trimmed so simple
-// rates still read cleanly (4% rather than 4.0000%)
-function formatRuleRate(rate: number) {
-  return `${Number((rate * 100).toFixed(4))}%`;
-}
-
 type MonteCarloRunDetailTableProps = {
   rows: MonteCarloRunDetailRow[];
   pots: MonteCarloPot[];
@@ -54,6 +56,8 @@ type MonteCarloRunDetailTableProps = {
   startAge: number;
   /** Show the Contributions columns (the plan has contributions set up) */
   hasContributions: boolean;
+  /** The plan's income streams; the Income column shows when there are any */
+  incomeStreams: MonteCarloIncomeStream[];
   /** The configured rule, quoted in the per-year explanations */
   withdrawalRule: MonteCarloWithdrawalRuleConfig;
   /** Rendered between the header row and the table - the cashflow chart */
@@ -68,6 +72,7 @@ export function MonteCarloRunDetailTable({
   simulationCount,
   startAge,
   hasContributions,
+  incomeStreams,
   withdrawalRule,
   cashflowGraph,
   onBack,
@@ -75,23 +80,43 @@ export function MonteCarloRunDetailTable({
   const { t } = useTranslation();
   const format = useFormat();
   const [expandedYears, setExpandedYears] = useState<Set<number>>(new Set());
+  // Years whose detailed working is shown under the summary
+  const [workingYears, setWorkingYears] = useState<Set<number>>(new Set());
 
+  const hasIncome = incomeStreams.length > 0;
+  const surplusPotName = getMonteCarloSurplusPotLabel(pots, t);
+  const hasSurplusPot = pots.some(pot => pot.isSurplus);
   const lastRow = rows[rows.length - 1];
   const hasSurvived = lastRow != null && lastRow.endBalance > 0;
   // Present whenever the plan has inflation enabled
   const showInflation = rows.some(row => row.inflation != null);
   const allExpanded = rows.length > 0 && expandedYears.size === rows.length;
 
+  function toggleInSet(previous: Set<number>, year: number) {
+    const next = new Set(previous);
+    if (next.has(year)) {
+      next.delete(year);
+    } else {
+      next.add(year);
+    }
+    return next;
+  }
+
   function toggleYear(year: number) {
-    setExpandedYears(previous => {
-      const next = new Set(previous);
-      if (next.has(year)) {
+    if (expandedYears.has(year)) {
+      // Collapsing a year hides its working too, so reopening it starts
+      // from the summary again
+      setWorkingYears(previous => {
+        const next = new Set(previous);
         next.delete(year);
-      } else {
-        next.add(year);
-      }
-      return next;
-    });
+        return next;
+      });
+    }
+    setExpandedYears(previous => toggleInSet(previous, year));
+  }
+
+  function toggleWorking(year: number) {
+    setWorkingYears(previous => toggleInSet(previous, year));
   }
 
   // Run-level cost of the plan: what left the pots, and how much of it
@@ -99,10 +124,76 @@ export function MonteCarloRunDetailTable({
   let totalWithdrawn = 0;
   let totalTax = 0;
   let totalFees = 0;
+  let totalIncome = 0;
+  let totalIncomeTax = 0;
   for (const row of rows) {
     totalWithdrawn += row.withdrawal;
     totalTax += row.taxPaid;
     totalFees += row.feesPaid;
+    totalIncome += row.income;
+    totalIncomeTax += row.incomeTax;
+  }
+
+  function getIncomeTotalsSentence() {
+    const total = format(totalIncome, 'financial');
+    const tax = format(totalIncomeTax, 'financial');
+    if (totalIncomeTax > 0) {
+      return t(
+        'Income received over this run: {{total}}, of which {{tax}} tax.',
+        {
+          total,
+          tax,
+        },
+      );
+    }
+    return t('Income received over this run: {{total}}.', { total });
+  }
+
+  // How the year's actual spending compares with the plan: on target or a
+  // shortfall (the pots couldn't cover it)
+  function getSpentSentence(row: MonteCarloRunDetailRow) {
+    const spent = format(row.spent, 'financial');
+    const planned = format(row.plannedSpending, 'financial');
+    if (row.spent < row.plannedSpending) {
+      return t(
+        'Spent: {{spent}} of the {{planned}} planned - {{shortfall}} short.',
+        {
+          spent,
+          planned,
+          shortfall: format(row.plannedSpending - row.spent, 'financial'),
+        },
+      );
+    }
+    if (row.spent > row.plannedSpending) {
+      return t(
+        'Spent: {{spent}} - {{extra}} more than the {{planned}} planned.',
+        {
+          spent,
+          planned,
+          extra: format(row.spent - row.plannedSpending, 'financial'),
+        },
+      );
+    }
+    return t('Spent: {{spent}}, as planned.', { spent });
+  }
+
+  function getSavedSentence(row: MonteCarloRunDetailRow) {
+    return t(
+      'Saved into {{pot}}: {{amount}} - income beyond what the plan spends.',
+      { pot: surplusPotName, amount: format(row.surplusSaved, 'financial') },
+    );
+  }
+
+  // "State pension: 12,000.00" - the per-stream lines under a year's
+  // income sentence when more than one stream is configured
+  function getIncomeStreamLine(incomeIndex: number, amount: number) {
+    const incomeStream = incomeStreams[incomeIndex];
+    return t('{{name}}: {{amount}}', {
+      name:
+        incomeStream.name ||
+        t('Income {{number}}', { number: incomeIndex + 1 }),
+      amount: format(amount, 'financial'),
+    });
   }
 
   // Four sentence variants so each language can phrase the combinations
@@ -310,11 +401,14 @@ export function MonteCarloRunDetailTable({
         </Text>
         <Button
           variant="bare"
-          onPress={() =>
+          onPress={() => {
             setExpandedYears(
               allExpanded ? new Set() : new Set(rows.map(row => row.year)),
-            )
-          }
+            );
+            if (allExpanded) {
+              setWorkingYears(new Set());
+            }
+          }}
           style={{ marginLeft: 'auto', color: theme.pageText }}
         >
           {allExpanded ? (
@@ -331,6 +425,16 @@ export function MonteCarloRunDetailTable({
         <PrivacyFilter>
           <FinancialText as="span">{getTotalsSentence()}</FinancialText>
         </PrivacyFilter>
+        {totalIncome > 0 && (
+          <>
+            {' '}
+            <PrivacyFilter>
+              <FinancialText as="span">
+                {getIncomeTotalsSentence()}
+              </FinancialText>
+            </PrivacyFilter>
+          </>
+        )}
       </Text>
 
       <View style={{ ...styles.horizontalScrollbar, overflowX: 'auto' }}>
@@ -356,8 +460,16 @@ export function MonteCarloRunDetailTable({
                 <Trans>Contributions</Trans>
               </Text>
             )}
+            {hasIncome && (
+              <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
+                <Trans>Income (net)</Trans>
+              </Text>
+            )}
             <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
               <Trans>Withdrawal</Trans>
+            </Text>
+            <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
+              <Trans>Spent</Trans>
             </Text>
             <Text style={{ ...GROUP_HEADING_STYLE, ...AMOUNT_CELL_STYLE }}>
               <Trans>Investment growth</Trans>
@@ -386,11 +498,15 @@ export function MonteCarloRunDetailTable({
           {rows.map(row => {
             const isFailureRow = row === lastRow && !hasSurvived;
             const isExpanded = expandedYears.has(row.year);
+            const showsWorking = workingYears.has(row.year);
             // Growth applies to what stayed invested after contributions
             // came in and the withdrawal went out; no growth on a failure
             // year (the plan stops there)
             const growthBase =
-              row.startBalance + row.contributions - row.withdrawal;
+              row.startBalance +
+              row.contributions +
+              row.surplusSaved -
+              row.withdrawal;
             const growthPct =
               !isFailureRow && growthBase > 0
                 ? (row.growth / growthBase) * 100
@@ -441,7 +557,19 @@ export function MonteCarloRunDetailTable({
                     <Text style={AMOUNT_CELL_STYLE}>
                       <PrivacyFilter>
                         <FinancialText as="span">
-                          {format(row.contributions, 'financial')}
+                          {format(
+                            row.contributions + row.surplusSaved,
+                            'financial',
+                          )}
+                        </FinancialText>
+                      </PrivacyFilter>
+                    </Text>
+                  )}
+                  {hasIncome && (
+                    <Text style={AMOUNT_CELL_STYLE}>
+                      <PrivacyFilter>
+                        <FinancialText as="span">
+                          {format(row.income - row.incomeTax, 'financial')}
                         </FinancialText>
                       </PrivacyFilter>
                     </Text>
@@ -450,6 +578,21 @@ export function MonteCarloRunDetailTable({
                     <PrivacyFilter>
                       <FinancialText as="span">
                         {format(row.withdrawal, 'financial')}
+                      </FinancialText>
+                    </PrivacyFilter>
+                  </Text>
+                  <Text
+                    style={{
+                      ...AMOUNT_CELL_STYLE,
+                      // A year that couldn't be fully paid for stands out
+                      ...(row.spent < row.plannedSpending && {
+                        color: theme.reportsNumberNegative,
+                      }),
+                    }}
+                  >
+                    <PrivacyFilter>
+                      <FinancialText as="span">
+                        {format(row.spent, 'financial')}
                       </FinancialText>
                     </PrivacyFilter>
                   </Text>
@@ -520,88 +663,201 @@ export function MonteCarloRunDetailTable({
                     <Text style={{ fontSize: 13, color: theme.pageText }}>
                       <PrivacyFilter>
                         <FinancialText as="span">
-                          {row.taxPaid > 0
-                            ? t(
-                                'Withdrawal: {{gross}} gross − {{tax}} tax = {{net}} to spend.',
-                                {
-                                  gross: format(row.withdrawal, 'financial'),
-                                  tax: format(row.taxPaid, 'financial'),
-                                  net: format(netSpending, 'financial'),
-                                },
-                              )
-                            : t('Withdrawal: {{gross}}, untaxed.', {
-                                gross: format(row.withdrawal, 'financial'),
-                              })}
+                          {buildMonteCarloYearStory({
+                            row,
+                            withdrawalRule,
+                            surplusPotName,
+                            hasSurplusPot,
+                            format,
+                            translate: t,
+                          }).join(' ')}
                         </FinancialText>
                       </PrivacyFilter>
                     </Text>
-                    {row.ruleExplanation != null && (
-                      <Text style={{ fontSize: 13, color: theme.pageText }}>
-                        <PrivacyFilter>
-                          <FinancialText as="span">
-                            {getRuleExplanationSentence(row.ruleExplanation)}
-                          </FinancialText>
-                        </PrivacyFilter>
-                      </Text>
-                    )}
-                    {row.minimumApplied && (
-                      <Text style={{ fontSize: 13, color: theme.pageText }}>
-                        <PrivacyFilter>
-                          <FinancialText as="span">
-                            {t(
-                              'Raised to the minimum withdrawal: {{amount}}.',
-                              {
-                                amount: format(row.withdrawal, 'financial'),
-                              },
-                            )}
-                          </FinancialText>
-                        </PrivacyFilter>
-                      </Text>
-                    )}
-                    {row.contributions > 0 && (
-                      <Text style={{ fontSize: 13, color: theme.pageText }}>
-                        <PrivacyFilter>
-                          <FinancialText as="span">
-                            {t(
-                              'Contributions: {{amount}}, added at the start of the year.',
-                              {
-                                amount: format(row.contributions, 'financial'),
-                              },
-                            )}
-                          </FinancialText>
-                        </PrivacyFilter>
-                      </Text>
-                    )}
-                    {row.feesPaid > 0 && (
-                      <Text style={{ fontSize: 13, color: theme.pageText }}>
-                        <PrivacyFilter>
-                          <FinancialText as="span">
-                            {t(
-                              'Fees paid: {{amount}}, charged at the end of the year.',
-                              {
-                                amount: format(row.feesPaid, 'financial'),
-                              },
-                            )}
-                          </FinancialText>
-                        </PrivacyFilter>
-                      </Text>
-                    )}
-                    {row.inaccessibleBalance != null && (
-                      <Text style={{ fontSize: 13, color: theme.pageText }}>
-                        <PrivacyFilter>
-                          <FinancialText as="span">
-                            {t(
-                              '{{amount}} remained locked in pots that had not reached their access age.',
-                              {
-                                amount: format(
-                                  row.inaccessibleBalance,
-                                  'financial',
-                                ),
-                              },
-                            )}
-                          </FinancialText>
-                        </PrivacyFilter>
-                      </Text>
+                    <Button
+                      variant="bare"
+                      onPress={() => toggleWorking(row.year)}
+                      style={{
+                        alignSelf: 'flex-start',
+                        padding: 0,
+                        color: theme.pageTextLight,
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      {showsWorking ? (
+                        <Trans>Hide the working</Trans>
+                      ) : (
+                        <Trans>Show the working</Trans>
+                      )}
+                    </Button>
+                    {showsWorking && (
+                      <View style={{ gap: 4, marginTop: 6 }}>
+                        {row.ruleExplanation != null && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {getRuleExplanationSentence(
+                                  row.ruleExplanation,
+                                )}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        {row.minimumApplied && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {t(
+                                  'Raised to the minimum spending: {{amount}}.',
+                                  {
+                                    amount: format(
+                                      row.plannedSpending,
+                                      'financial',
+                                    ),
+                                  },
+                                )}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        {row.income > 0 && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {row.incomeTax > 0
+                                  ? t(
+                                      'Income: {{gross}} gross − {{tax}} tax = {{net}} received.',
+                                      {
+                                        gross: format(row.income, 'financial'),
+                                        tax: format(row.incomeTax, 'financial'),
+                                        net: format(
+                                          row.income - row.incomeTax,
+                                          'financial',
+                                        ),
+                                      },
+                                    )
+                                  : t('Income: {{gross}}, untaxed.', {
+                                      gross: format(row.income, 'financial'),
+                                    })}
+                                {incomeStreams.length > 1 &&
+                                  ` (${row.incomeAmounts
+                                    .map((amount, incomeIndex) =>
+                                      amount > 0
+                                        ? getIncomeStreamLine(
+                                            incomeIndex,
+                                            amount,
+                                          )
+                                        : null,
+                                    )
+                                    .filter(line => line != null)
+                                    .join('; ')})`}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        <Text style={{ fontSize: 13, color: theme.pageText }}>
+                          <PrivacyFilter>
+                            <FinancialText as="span">
+                              {row.taxPaid > 0
+                                ? t(
+                                    'Withdrawal: {{gross}} gross − {{tax}} tax = {{net}} to spend.',
+                                    {
+                                      gross: format(
+                                        row.withdrawal,
+                                        'financial',
+                                      ),
+                                      tax: format(row.taxPaid, 'financial'),
+                                      net: format(netSpending, 'financial'),
+                                    },
+                                  )
+                                : t('Withdrawal: {{gross}}, untaxed.', {
+                                    gross: format(row.withdrawal, 'financial'),
+                                  })}
+                            </FinancialText>
+                          </PrivacyFilter>
+                        </Text>
+                        <Text style={{ fontSize: 13, color: theme.pageText }}>
+                          <PrivacyFilter>
+                            <FinancialText as="span">
+                              {getSpentSentence(row)}
+                            </FinancialText>
+                          </PrivacyFilter>
+                        </Text>
+                        {row.surplusSaved > 0 && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {getSavedSentence(row)}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        {row.unspentIncome > 0 && row.surplusSaved === 0 && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {t(
+                                  'Unspent income: {{amount}} - more came in than the plan spends, and it leaves the plan.',
+                                  {
+                                    amount: format(
+                                      row.unspentIncome,
+                                      'financial',
+                                    ),
+                                  },
+                                )}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        {row.contributions > 0 && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {t(
+                                  'Contributions: {{amount}}, added at the start of the year.',
+                                  {
+                                    amount: format(
+                                      row.contributions,
+                                      'financial',
+                                    ),
+                                  },
+                                )}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        {row.feesPaid > 0 && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {t(
+                                  'Fees paid: {{amount}}, charged at the end of the year.',
+                                  {
+                                    amount: format(row.feesPaid, 'financial'),
+                                  },
+                                )}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        {row.inaccessibleBalance != null && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {t(
+                                  '{{amount}} remained locked in pots that had not reached their access age.',
+                                  {
+                                    amount: format(
+                                      row.inaccessibleBalance,
+                                      'financial',
+                                    ),
+                                  },
+                                )}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                      </View>
                     )}
 
                     {pots.length > 0 && (
@@ -638,15 +894,29 @@ export function MonteCarloRunDetailTable({
                             <Trans>Start balance</Trans>
                           </Text>
                           {hasContributions && (
-                            <Text
+                            <View
                               style={{
-                                ...GROUP_HEADING_STYLE,
-                                ...POT_CELL_STYLE,
                                 width: 130,
+                                flexShrink: 0,
+                                flexDirection: 'row',
+                                justifyContent: 'flex-end',
+                                alignItems: 'center',
+                                gap: 4,
                               }}
                             >
-                              <Trans>Contributed</Trans>
-                            </Text>
+                              <Text style={GROUP_HEADING_STYLE}>
+                                <Trans>Contributed</Trans>
+                              </Text>
+                              {hasSurplusPot && (
+                                <MonteCarloHelpTooltip placement="bottom end">
+                                  <Trans>
+                                    For the {{ surplusPotName }} pot this is the
+                                    money the plan didn&apos;t spend that year,
+                                    saved into it before growth.
+                                  </Trans>
+                                </MonteCarloHelpTooltip>
+                              )}
+                            </View>
                           )}
                           <Text
                             style={{
@@ -745,10 +1015,7 @@ export function MonteCarloRunDetailTable({
                               }}
                             >
                               <Text style={{ flex: 1, minWidth: 120 }}>
-                                {pot.name ||
-                                  t('Pot {{number}}', {
-                                    number: potIndex + 1,
-                                  })}
+                                {getMonteCarloPotLabel(pots, potIndex, t)}
                               </Text>
                               <Text style={{ ...POT_CELL_STYLE, width: 130 }}>
                                 <PrivacyFilter>
@@ -765,7 +1032,10 @@ export function MonteCarloRunDetailTable({
                                   <PrivacyFilter>
                                     <FinancialText as="span">
                                       {format(
-                                        row.potContributions[potIndex] ?? 0,
+                                        (row.potContributions[potIndex] ?? 0) +
+                                          (pot.isSurplus
+                                            ? row.surplusSaved
+                                            : 0),
                                         'financial',
                                       )}
                                     </FinancialText>
