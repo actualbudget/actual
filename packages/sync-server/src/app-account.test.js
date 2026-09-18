@@ -206,10 +206,10 @@ describe('getLoginMethod()', () => {
     expect(getLoginMethod(req)).toBe('password');
   });
 
-  it('ignores a client-requested method that is not in DB', () => {
+  it('honors a client-requested allowed method even when it has no auth row', () => {
     insertAuthRow('openid', 1);
     const req = { body: { loginMethod: 'password' } };
-    expect(getLoginMethod(req)).toBe('openid');
+    expect(getLoginMethod(req)).toBe('password');
   });
 
   it('falls back to config default when auth table is empty and no req', () => {
@@ -253,6 +253,32 @@ describe('/login', () => {
 
     expect(res.statusCode).toEqual(400);
     expect(res.body).toHaveProperty('reason', 'invalid-password');
+  });
+
+  it('should route an explicit password login to the password handler when OpenID is the only configured method', async () => {
+    // Simulate an OpenID-only env bootstrap (app.ts run()): only an openid row exists.
+    insertAuthRow('openid', 1);
+
+    const res = await request(app)
+      .post('/login')
+      .send({ loginMethod: 'password', password: 'whatever' });
+
+    // The request must NOT be diverted into the OpenID redirect flow.
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.reason).not.toEqual('Invalid redirect URL');
+    expect(res.body.reason).toEqual('invalid-password');
+  });
+
+  it('should not silently fall back to password when openid is explicitly requested but not configured', async () => {
+    await bootstrapPassword('testpassword');
+    // only a password row exists; no openid row
+
+    const res = await request(app)
+      .post('/login')
+      .send({ loginMethod: 'openid', returnUrl: 'http://localhost/callback' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.reason).toEqual('Invalid redirect URL');
   });
 });
 
