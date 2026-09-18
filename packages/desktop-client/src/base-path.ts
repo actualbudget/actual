@@ -11,6 +11,10 @@ export function getBasePath(value: string): string {
   return `/${path.replace(/^\/+|\/+$/g, '')}`;
 }
 
+export function getCurrentDomainUrl(origin: string, basePath: string): string {
+  return `${origin}${getBasePath(basePath)}`;
+}
+
 export function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

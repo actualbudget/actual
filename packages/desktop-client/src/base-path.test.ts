@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   escapeRegExp,
   getBasePath,
+  getCurrentDomainUrl,
   stripBasePath,
   withBasePath,
 } from './base-path';
@@ -20,6 +21,14 @@ describe('base path', () => {
     expect(withBasePath('/', '/static/app.js')).toBe('/static/app.js');
   });
 
+  it('builds current-domain server URLs under the configured base path', () => {
+    expect(getCurrentDomainUrl('https://example.com', '/finances/')).toBe(
+      'https://example.com/finances',
+    );
+    expect(getCurrentDomainUrl('https://example.com', '/')).toBe(
+      'https://example.com',
+    );
+  });
   it('rejects unsafe or ambiguous configured paths', () => {
     expect(() => getBasePath('../x')).toThrow(/ACTUAL_BASE_PATH/);
     expect(() => getBasePath('/finances?x=1')).toThrow(/ACTUAL_BASE_PATH/);

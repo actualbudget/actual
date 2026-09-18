@@ -12,6 +12,7 @@ import { View } from '@actual-app/components/view';
 import { isElectron } from '@actual-app/core/shared/environment';
 import { css } from '@emotion/css';
 
+import { getCurrentDomainUrl } from '#base-path';
 import { Link } from '#components/common/Link';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { useServerURL, useSetServerURL } from '#components/ServerContext';
@@ -345,7 +346,9 @@ export function ConfigServer() {
   }
 
   function onSameDomain() {
-    setUrl(window.location.origin);
+    setUrl(
+      getCurrentDomainUrl(window.location.origin, import.meta.env.BASE_URL),
+    );
   }
 
   async function onSelectSelfSignedCertificate() {
