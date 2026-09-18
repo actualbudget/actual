@@ -10,6 +10,7 @@ import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { useToggle } from 'usehooks-ts';
 
+import { getBasePath, stripBasePath } from '#base-path';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -39,7 +40,14 @@ const getPageDocs = (page: string) => {
 };
 
 function openDocsForCurrentPage() {
-  window.Actual.openURLInBrowser(getPageDocs(window.location.pathname));
+  window.Actual.openURLInBrowser(
+    getPageDocs(
+      stripBasePath(
+        getBasePath(import.meta.env.BASE_URL),
+        window.location.pathname,
+      ),
+    ),
+  );
 }
 
 type HelpMenuItem =

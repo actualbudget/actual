@@ -662,8 +662,13 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     useEffect(() => {
       if (window.history.length === 1) {
-        window.history.replaceState(null, 'Actual Budget', '/');
-        window.history.pushState(null, 'Add Transaction', '/transactions/new');
+        const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+        window.history.replaceState(null, 'Actual Budget', `${basePath}/`);
+        window.history.pushState(
+          null,
+          'Add Transaction',
+          `${basePath}/transactions/new`,
+        );
       }
     }, []);
 

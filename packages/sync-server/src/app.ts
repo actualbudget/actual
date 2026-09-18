@@ -18,10 +18,23 @@ import * as pluggai from './app-pluggyai/app-pluggyai';
 import * as secretApp from './app-secrets';
 import * as simpleFinApp from './app-simplefin/app-simplefin';
 import * as syncApp from './app-sync';
+import { normalizeBasePath } from './base-path.js';
 import { config } from './load-config';
 
 const app = express();
 
+const basePath = normalizeBasePath(config.get('basePath'));
+
+// Strip the configured prefix before the existing route/static handlers. This
+// preserves all existing route definitions and keeps root deployments intact.
+if (basePath) {
+  app.use((req, res, next) => {
+    if (req.path === basePath) return res.redirect(301, `${basePath}/`);
+    if (!req.path.startsWith(`${basePath}/`)) return res.sendStatus(404);
+    req.url = req.url.slice(basePath.length) || '/';
+    next();
+  });
+}
 process.on('unhandledRejection', reason => {
   console.log('Rejection:', reason);
 });
@@ -232,3 +245,5 @@ export async function run() {
     });
   }
 }
+
+export { app };

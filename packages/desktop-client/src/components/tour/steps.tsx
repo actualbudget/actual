@@ -3,6 +3,7 @@ import type { Step } from 'react-joyride';
 
 import * as monthUtils from '@actual-app/core/shared/months';
 
+import { getBasePath, stripBasePath } from '#base-path';
 import { Link } from '#components/common/Link';
 
 import type { TourId } from './TourProvider';
@@ -59,7 +60,12 @@ function getBudgetTourSteps({ navigate, budgetType }: TourStepDeps): Step[] {
       scrollTarget: '[data-testid="budget-table-scroll-container"]',
       placement: 'center',
       before: async () => {
-        if (window.location.pathname !== '/budget') {
+        if (
+          stripBasePath(
+            getBasePath(import.meta.env.BASE_URL),
+            window.location.pathname,
+          ) !== '/budget'
+        ) {
           navigate('/budget');
         }
         await waitForElement('[data-testid="budget-table"]');

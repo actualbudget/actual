@@ -16,6 +16,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { OpenIdConfig } from '@actual-app/core/types/models';
 
+import { getBasePath } from '#base-path';
 import { Link } from '#components/common/Link';
 import { FormField, FormLabel } from '#components/forms';
 import { useServerURL } from '#components/ServerContext';
@@ -257,7 +258,7 @@ const openIdProviders: (OpenIdProviderOption | typeof Menu.line)[] = [
       clientId: (location: Location, serverUrl: string) =>
         serverUrl
           ? serverUrl
-          : window.location.href.replace(location.pathname, ''),
+          : `${window.location.origin}${getBasePath(import.meta.env.BASE_URL)}`,
       clientIdRequired: true,
       clientSecretRequired: true,
       clientSecretDisabled: true,

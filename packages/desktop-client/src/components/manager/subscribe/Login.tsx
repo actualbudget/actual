@@ -18,6 +18,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 import { isElectron } from '@actual-app/core/shared/environment';
 import type { OpenIdConfig } from '@actual-app/core/types/models';
 
+import { withBasePath } from '#base-path';
 import { Link } from '#components/common/Link';
 import {
   useAvailableLoginMethods,
@@ -127,7 +128,7 @@ function OpenIdLogin({ setError }) {
     const { error, redirectUrl } = await send('subscribe-sign-in', {
       returnUrl: isElectron()
         ? await window.Actual.startOAuthServer()
-        : window.location.origin,
+        : `${window.location.origin}${withBasePath(import.meta.env.BASE_URL, '/').slice(0, -1)}`,
       loginMethod: 'openid',
       password: firstLoginPassword,
     });
