@@ -16,6 +16,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 
 import { setAppState, sync } from '#app/appSlice';
+import { getBasePath } from '#base-path';
 import { closeBudget, loadBudget } from '#budgetfiles/budgetfilesSlice';
 import { handleGlobalEvents } from '#global-events';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
@@ -202,7 +203,7 @@ export function App() {
   const [theme] = useTheme();
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={getBasePath(import.meta.env.BASE_URL)}>
       <ExposeNavigate />
       <HotkeysProvider initiallyActiveScopes={['app']}>
         <SpreadsheetProvider>

@@ -8,6 +8,8 @@ import { t } from 'i18next';
 import { pushModal } from '#modals/modalsSlice';
 import type { AppDispatch } from '#redux/store';
 
+import { withBasePath } from './base-path';
+
 function _authorize(
   dispatch: AppDispatch,
   {
@@ -32,7 +34,7 @@ function _authorize(
             psuType = 'personal',
             onStateReady,
           }) => {
-            const redirectUrl = `${window.location.origin}/enablebanking/auth_callback`;
+            const redirectUrl = `${window.location.origin}${withBasePath(import.meta.env.BASE_URL, '/enablebanking/auth_callback')}`;
             const resp = await sendCatch('enablebanking-start-auth', {
               aspspId,
               country,

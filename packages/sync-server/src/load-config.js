@@ -120,6 +120,13 @@ const configSchema = convict({
     default: actualAppWebBuildPath,
     env: 'ACTUAL_WEB_ROOT',
   },
+  basePath: {
+    doc: 'URL path prefix used to host Actual below the domain root.',
+    format: String,
+    default: '/',
+    env: 'ACTUAL_BASE_PATH',
+  },
+
   loginMethod: {
     doc: 'Authentication method.',
     format: ['password', 'header', 'openid'],

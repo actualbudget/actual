@@ -21,6 +21,8 @@ import { build, defineConfig, loadEnv } from 'vite';
 import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+import { escapeRegExp } from './src/base-path';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Compile every workspace package that ships React components. Workspace
 // imports resolve to their real paths under packages/<name>/src, so any
@@ -238,6 +240,16 @@ const pluginsServiceAssets = (): Plugin => ({
 
 export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const basePath = env.ACTUAL_BASE_PATH?.trim() || '/';
+  if (
+    /\s|[?#]/.test(basePath) ||
+    basePath.split('/').some(segment => segment === '.' || segment === '..')
+  ) {
+    throw new Error(`Invalid ACTUAL_BASE_PATH: ${env.ACTUAL_BASE_PATH}`);
+  }
+  const normalizedBasePath =
+    basePath === '/' ? '/' : `/${basePath.replace(/^\/+|\/+$/g, '')}/`;
+
   const isVitest = process.env.VITEST === 'true';
   const devHeaders = {
     'Cross-Origin-Opener-Policy': 'same-origin',
@@ -279,7 +291,7 @@ export default defineConfig(async ({ mode, command }) => {
   const browserOpen = env.BROWSER_OPEN ? `//${env.BROWSER_OPEN}` : true;
 
   return {
-    base: '/',
+    base: normalizedBasePath,
     envPrefix: 'REACT_APP_',
     build: {
       minify: 'oxc',
@@ -368,17 +380,21 @@ export default defineConfig(async ({ mode, command }) => {
                 '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
               ],
               ignoreURLParametersMatching: [/^v$/],
-              navigateFallback: '/index.html',
+              navigateFallback: `${normalizedBasePath}index.html`,
               maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
               navigateFallbackDenylist: [
-                /^\/account\/.*$/,
-                /^\/admin\/.*$/,
-                /^\/secret\/.*$/,
-                /^\/openid\/.*$/,
-                /^\/plugins\/.*$/,
-                /^\/kcab\/.*$/,
-                /^\/plugin-data\/.*$/,
-                /^\/enablebanking\/.*$/,
+                new RegExp(`^${escapeRegExp(normalizedBasePath)}account/.*$`),
+                new RegExp(`^${escapeRegExp(normalizedBasePath)}admin/.*$`),
+                new RegExp(`^${escapeRegExp(normalizedBasePath)}secret/.*$`),
+                new RegExp(`^${escapeRegExp(normalizedBasePath)}openid/.*$`),
+                new RegExp(`^${escapeRegExp(normalizedBasePath)}plugins/.*$`),
+                new RegExp(`^${escapeRegExp(normalizedBasePath)}kcab/.*$`),
+                new RegExp(
+                  `^${escapeRegExp(normalizedBasePath)}plugin-data/.*$`,
+                ),
+                new RegExp(
+                  `^${escapeRegExp(normalizedBasePath)}enablebanking/.*$`,
+                ),
               ],
             },
           }),
