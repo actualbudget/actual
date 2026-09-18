@@ -352,9 +352,8 @@ export type MonteCarloPot = {
   /** Yearly fee as a fraction of the end-of-year balance */
   annualFeeRate: number;
   /**
-   * The plan's surplus pot: unspent money (income beyond the plan, and
-   * anything the minimum withdrawal forced out above it) is saved into it
-   * each year, and it is drawn on before any other pot. At most one pot
+   * The plan's surplus pot: income beyond the plan's spending is saved
+   * into it each year, and it is drawn on before any other pot. At most one pot
    * is flagged; none = unspent money leaves the plan.
    */
   isSurplus: boolean;
@@ -494,8 +493,8 @@ export type MonteCarloConfig = {
   returnModel: MonteCarloReturnModel;
   /** Dynamic withdrawal adjustment rule applied at the start of each year */
   withdrawalRule: MonteCarloWithdrawalRuleConfig;
-  /** Minimum annual withdrawal in minor units; 0 = no floor */
-  minimumWithdrawal: number;
+  /** Minimum yearly spending in minor units (today's money); 0 = no floor */
+  minimumSpending: number;
   /** The planned spending path; each phase runs until the next one starts */
   spendingPhases: MonteCarloSpendingPhase[];
   /** Recurring yearly contributions paid into pots */
@@ -524,7 +523,7 @@ export const MONTE_CARLO_DEFAULTS: MonteCarloConfig = {
   withdrawalStrategy: 'proportional',
   returnModel: 'normal',
   withdrawalRule: WITHDRAWAL_RULE_DEFAULTS,
-  minimumWithdrawal: 0,
+  minimumSpending: 0,
   spendingPhases: [createMonteCarloSpendingPhase('phase-1')],
   contributions: [],
   incomeStreams: [],
@@ -653,8 +652,8 @@ export function monteCarloConfigFromMeta(
       meta?.withdrawalStrategy ?? MONTE_CARLO_DEFAULTS.withdrawalStrategy,
     returnModel: meta?.returnModel ?? MONTE_CARLO_DEFAULTS.returnModel,
     withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, ...meta?.withdrawalRule },
-    minimumWithdrawal:
-      meta?.minimumWithdrawal ?? MONTE_CARLO_DEFAULTS.minimumWithdrawal,
+    minimumSpending:
+      meta?.minimumSpending ?? MONTE_CARLO_DEFAULTS.minimumSpending,
     spendingPhases: meta?.spendingPhases?.length
       ? meta.spendingPhases.map(spendingPhaseFromMeta)
       : [createMonteCarloSpendingPhase('phase-1')],
@@ -752,15 +751,14 @@ export type MonteCarloRunDetailRow = {
   withdrawal: number;
   /**
    * The year's planned net spending: the phase schedule, inflated, after
-   * the withdrawal rule's adjustment but before the minimum floor and
-   * affordability capping
+   * the withdrawal rule's adjustment and the minimum spending floor, but
+   * before affordability capping
    */
   plannedSpending: number;
   /**
    * The money that actually reached spending: net income put towards it
    * plus the withdrawal net of tax. Below plannedSpending on a shortfall
-   * year, above it when the minimum withdrawal forced out more and no
-   * surplus pot saved the extra
+   * year, equal to it otherwise
    */
   spent: number;
   /** Investment gain/loss applied after the withdrawal */
@@ -790,8 +788,7 @@ export type MonteCarloRunDetailRow = {
    */
   unspentIncome: number;
   /**
-   * Money saved into the surplus pot this year: unspent income plus
-   * anything the minimum withdrawal forced out above the plan. Part of the
+   * Unspent income saved into the surplus pot this year. Part of the
    * balance chain: start + contributions + surplusSaved - withdrawal +
    * growth - fees = end. 0 without a surplus pot
    */
@@ -835,7 +832,7 @@ export type MonteCarloRunDetailRow = {
    * first spending year). Amounts are deflated like the row's totals.
    */
   ruleExplanation?: MonteCarloRuleExplanation;
-  /** True when the minimum withdrawal raised the final amount */
+  /** True when the minimum spending floor lifted this year's plan */
   minimumApplied?: boolean;
   /**
    * Set on a failure year when money remained in pots that hadn't reached
@@ -1647,7 +1644,7 @@ export function runMonteCarloSimulation(
   const potBalances = new Float64Array(potCount);
 
   const rule = params.withdrawalRule;
-  const minimumWithdrawal = clamp(params.minimumWithdrawal, 0, MAX_AMOUNT);
+  const minimumSpending = clamp(params.minimumSpending, 0, MAX_AMOUNT);
 
   // Keep every emitted amount within the range the formatter accepts -
   // absurd configs flat-line at the cap instead of crashing the report.
@@ -1923,14 +1920,7 @@ export function runMonteCarloSimulation(
           }
           withdrawal = planned * adjustmentFactor;
         }
-        // The year's planned net spending: the part income covers plus the
-        // pot-funded part after the withdrawal rule's adjustment, before
-        // the minimum floor and before affordability capping. The cashflow
-        // chart plots it against the actual flows so surpluses and
-        // shortfalls stand out
-        const plannedSpendingThisYear = incomeTowardsSpending + withdrawal;
-
-        // The minimum floor belongs to the withdrawal rule system (the UI
+        // The minimum spending floor belongs to the withdrawal rule system (the UI
         // only offers it alongside a rule); with no rule active the planned
         // spending is taken as-is. It guards against rule-driven cuts, so
         // it only applies in years with planned spending - a deliberate
@@ -1938,14 +1928,14 @@ export function runMonteCarloSimulation(
         // today's money, so it rises with this replay's inflation path.
         // It is a floor on spending, so income counts towards it and the
         // pots only top the year up to it
-        const minimumThisYear = minimumWithdrawal * cumulativeInflation;
+        const minimumThisYear = minimumSpending * cumulativeInflation;
         const minimumFromPots = Math.max(
           0,
           minimumThisYear - incomeTowardsSpending,
         );
         if (
           rule.type !== 'none' &&
-          minimumWithdrawal > 0 &&
+          minimumSpending > 0 &&
           planned > 0 &&
           withdrawal < minimumFromPots
         ) {
@@ -1954,6 +1944,12 @@ export function runMonteCarloSimulation(
             capturedMinimumApplied = true;
           }
         }
+
+        // The year's planned net spending: the part income covers plus the
+        // pot-funded part after the withdrawal rule's adjustment and the
+        // spending floor, before affordability capping. The cashflow chart
+        // plots it against the actual flows so shortfalls stand out
+        const plannedSpendingThisYear = incomeTowardsSpending + withdrawal;
 
         const yearStartTotal = total;
         // The spending requirement is net of tax; withdrawalTaken is the
@@ -2090,16 +2086,11 @@ export function runMonteCarloSimulation(
             captureTaxables(capturedPotTaxables);
           }
 
-          // Money that reached the household but wasn't spent - income the
-          // plan didn't need, plus anything the minimum withdrawal forced
-          // out above the plan - is saved into the surplus pot before
-          // growth, like a contribution. Without a surplus pot it leaves
-          // the plan.
+          // Income the plan didn't need is saved into the surplus pot
+          // before growth, like a contribution. Without a surplus pot it
+          // leaves the plan.
           if (surplusPotIndex !== -1) {
-            const plannedFromPots =
-              plannedSpendingThisYear - incomeTowardsSpending;
-            surplusSavedThisYear =
-              unspentIncome + Math.max(0, netDelivered - plannedFromPots);
+            surplusSavedThisYear = unspentIncome;
             potBalances[surplusPotIndex] += surplusSavedThisYear;
           }
 
@@ -2232,14 +2223,7 @@ export function runMonteCarloSimulation(
             year,
             startBalance,
             plannedSpending: emit(plannedSpendingThisYear, startDeflator),
-            // Anything the minimum withdrawal forced out above the plan
-            // counts as spent only when there's no surplus pot to save it
-            spent: emit(
-              incomeTowardsSpending +
-                netDelivered -
-                (surplusSavedThisYear - unspentIncome),
-              startDeflator,
-            ),
+            spent: emit(incomeTowardsSpending + netDelivered, startDeflator),
             ...(capturedRuleExplanation != null && {
               ruleExplanation: capturedRuleExplanation,
             }),

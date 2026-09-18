@@ -28,7 +28,7 @@ type MonteCarloYearStoryInput = {
 /**
  * The plain-English summary of one simulated year, as a few sentences
  * that follow cause to effect: what the withdrawal rule decided and why,
- * whether the minimum withdrawal stepped in, how the year's spending was
+ * whether the minimum spending floor stepped in, how the year's spending was
  * funded, and where any money the plan didn't spend ended up. The
  * numbers behind each decision live in the detailed lines, not here
  */
@@ -56,21 +56,21 @@ export function buildMonteCarloYearStory({
   }
 
   if (row.minimumApplied) {
-    const withdrawal = format(row.withdrawal, 'financial');
+    const planned = format(row.plannedSpending, 'financial');
     sentences.push(
       ruleSentence != null
         ? translate(
-            'The minimum withdrawal then lifted the withdrawal to {{withdrawal}}.',
-            { withdrawal },
+            'The minimum spending floor then lifted it to {{planned}}.',
+            { planned },
           )
         : translate(
-            "The minimum withdrawal raised this year's withdrawal to {{withdrawal}}, above the {{planned}} planned.",
-            { withdrawal, planned: format(row.plannedSpending, 'financial') },
+            "The minimum spending floor set this year's spending at {{planned}}.",
+            { planned },
           ),
     );
   }
 
-  sentences.push(...getFundingSentences(row, hasSurplusPot, format, translate));
+  sentences.push(...getFundingSentences(row, format, translate));
 
   const surplusSentence = getSurplusSentence(
     row,
@@ -198,7 +198,6 @@ function getRuleDecisionSentence(
 // How the year's spending was paid for, or that it couldn't be
 function getFundingSentences(
   row: MonteCarloRunDetailRow,
-  hasSurplusPot: boolean,
   format: MonteCarloYearStoryInput['format'],
   translate: TFunction,
 ): string[] {
@@ -221,10 +220,8 @@ function getFundingSentences(
     return sentences;
   }
   if (row.income > 0) {
-    // What the pots put towards spending: the withdrawal net of tax and
-    // of anything the minimum floor forced out that went to the surplus pot
-    const overshootSaved = Math.max(0, row.surplusSaved - row.unspentIncome);
-    const netFromPots = row.withdrawal - row.taxPaid - overshootSaved;
+    // What the pots put towards spending: the withdrawal net of tax
+    const netFromPots = row.withdrawal - row.taxPaid;
     if (netFromPots <= 0) {
       return [
         translate(
@@ -265,14 +262,6 @@ function getFundingSentences(
       ),
     ];
   }
-  if (row.spent > row.plannedSpending && !hasSurplusPot) {
-    return [
-      translate(
-        'Spent {{spent}} from the pots - {{extra}} above the plan, because of the minimum withdrawal.',
-        { spent, extra: format(row.spent - row.plannedSpending, 'financial') },
-      ),
-    ];
-  }
   return [
     translate('Spent {{spent}} as planned, funded from the pots.', { spent }),
   ];
@@ -287,27 +276,9 @@ function getSurplusSentence(
   translate: TFunction,
 ): string | null {
   if (hasSurplusPot && row.surplusSaved > 0) {
-    const overshoot = row.surplusSaved - row.unspentIncome;
-    const values = {
-      pot: surplusPotName,
-      unspent: format(row.unspentIncome, 'financial'),
-      overshoot: format(overshoot, 'financial'),
-    };
-    if (row.unspentIncome > 0 && overshoot > 0) {
-      return translate(
-        '{{unspent}} of income beyond the plan and the {{overshoot}} the minimum withdrawal took out above it were saved into {{pot}}.',
-        values,
-      );
-    }
-    if (overshoot > 0) {
-      return translate(
-        'The {{overshoot}} above the plan was saved into {{pot}}.',
-        values,
-      );
-    }
     return translate(
       '{{unspent}} of income beyond the plan was saved into {{pot}}.',
-      values,
+      { pot: surplusPotName, unspent: format(row.surplusSaved, 'financial') },
     );
   }
   if (row.unspentIncome > 0) {

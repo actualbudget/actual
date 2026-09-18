@@ -65,14 +65,13 @@ function story(
 }
 
 describe('buildMonteCarloYearStory', () => {
-  it('chains a guardrails cut, the minimum floor and the saved overshoot', () => {
-    // The screenshot year: 40,000 planned, cut by 25% to 16,875, lifted to
-    // the 20,000 minimum, and the 3,125 difference saved
+  it('chains a guardrails cut and the spending floor that overrode it', () => {
+    // The screenshot year: 40,000 planned, cut by 25% to 16,875, then
+    // lifted to the 20,000 minimum spending
     const row = makeRow({
       withdrawal: 20_000,
-      plannedSpending: 16_875,
-      spent: 16_875,
-      surplusSaved: 3_125,
+      plannedSpending: 20_000,
+      spent: 20_000,
       minimumApplied: true,
       ruleExplanation: {
         kind: 'factor',
@@ -87,9 +86,8 @@ describe('buildMonteCarloYearStory', () => {
     });
     expect(story(row, { hasSurplusPot: true })).toEqual([
       "Guardrails cut this year's spending from 40000.00 to 16875.00 because the withdrawal rate had climbed too far above the plan.",
-      'The minimum withdrawal then lifted the withdrawal to 20000.00.',
-      'Spent 16875.00 as planned, funded from the pots.',
-      'The 3125.00 above the plan was saved into Surplus cash.',
+      'The minimum spending floor then lifted it to 20000.00.',
+      'Spent 20000.00 as planned, funded from the pots.',
     ]);
   });
 
@@ -199,16 +197,16 @@ describe('buildMonteCarloYearStory', () => {
     );
   });
 
-  it('phrases the minimum on its own when no rule sentence precedes it', () => {
+  it('phrases the floor on its own when no rule sentence precedes it', () => {
     const row = makeRow({
       withdrawal: 5_000,
-      plannedSpending: 4_000,
+      plannedSpending: 5_000,
       spent: 5_000,
       minimumApplied: true,
     });
     expect(story(row)).toEqual([
-      "The minimum withdrawal raised this year's withdrawal to 5000.00, above the 4000.00 planned.",
-      'Spent 5000.00 from the pots - 1000.00 above the plan, because of the minimum withdrawal.',
+      "The minimum spending floor set this year's spending at 5000.00.",
+      'Spent 5000.00 as planned, funded from the pots.',
     ]);
   });
 
@@ -248,14 +246,11 @@ describe('buildMonteCarloYearStory', () => {
       contributions: 12_547.6,
       withdrawal: 24_282.41,
       taxPaid: 4_282.41,
-      plannedSpending: 18_841.6,
-      spent: 18_841.6,
-      surplusSaved: 1_158.4,
-      minimumApplied: true,
+      plannedSpending: 20_000,
+      spent: 20_000,
     });
-    expect(story(allContributed, { hasSurplusPot: true }).slice(1)).toEqual([
-      'The 12547.60 income all went into contributions, so the 18841.60 spent came from the pots.',
-      'The 1158.40 above the plan was saved into Surplus cash.',
+    expect(story(allContributed, { hasSurplusPot: true })).toEqual([
+      'The 12547.60 income all went into contributions, so the 20000.00 spent came from the pots.',
     ]);
 
     const partlyContributed = makeRow({
@@ -281,24 +276,6 @@ describe('buildMonteCarloYearStory', () => {
     expect(story(row)[0]).toBe(
       'Income covered 1000.00 of the 4000.00 spent; withdrawals covered the rest.',
     );
-  });
-
-  it('combines unspent income and a saved overshoot', () => {
-    const row = makeRow({
-      income: 5_000,
-      incomeAmounts: [5_000],
-      withdrawal: 500,
-      unspentIncome: 1_000,
-      surplusSaved: 1_500,
-      minimumApplied: true,
-      plannedSpending: 4_000,
-      spent: 4_000,
-    });
-    expect(story(row, { hasSurplusPot: true }).slice(1)).toEqual([
-      // The 500 withdrawn all went to the surplus pot, not to spending
-      'Income covered all of the 4000.00 spent, so nothing had to come from the pots.',
-      '1000.00 of income beyond the plan and the 500.00 the minimum withdrawal took out above it were saved into Surplus cash.',
-    ]);
   });
 
   it('reports a shortfall and any locked money', () => {

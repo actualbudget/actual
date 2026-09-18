@@ -297,7 +297,7 @@ export type MonteCarloWidget = AbstractWidget<
     returnModel?: MonteCarloReturnModel;
     withdrawalRule?: MonteCarloWithdrawalRuleMeta;
     /** Minimum annual withdrawal in minor units; 0 or absent = no floor */
-    minimumWithdrawal?: number;
+    minimumSpending?: number;
     spendingPhases?: MonteCarloSpendingPhaseMeta[];
     /** Recurring yearly contributions into pots */
     contributions?: MonteCarloContributionMeta[];

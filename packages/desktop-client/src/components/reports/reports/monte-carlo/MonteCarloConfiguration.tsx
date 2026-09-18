@@ -540,11 +540,9 @@ export function MonteCarloConfiguration({
               </LabeledCheckbox>
               <MonteCarloHelpTooltip>
                 <Trans>
-                  The Surplus cash pot is created automatically. Everything the
-                  plan doesn&apos;t spend goes into it - income beyond your
-                  spending, and anything a minimum withdrawal forced out above
-                  the plan - and it is drawn on before any other pot when
-                  spending needs funding.
+                  The Surplus cash pot is created automatically. Income beyond
+                  your spending goes into it, and it is drawn on before any
+                  other pot when spending needs funding.
                   <br />
                   <br />
                   It starts empty and holds cash - no access age, no tax, no
@@ -719,14 +717,14 @@ export function MonteCarloConfiguration({
           </View>
           <MonteCarloWithdrawalRuleConfiguration
             rule={config.withdrawalRule}
-            minimumWithdrawal={config.minimumWithdrawal}
+            minimumSpending={config.minimumSpending}
             onRuleChange={changes =>
               onConfigChange({
                 withdrawalRule: { ...config.withdrawalRule, ...changes },
               })
             }
-            onMinimumWithdrawalChange={value =>
-              onConfigChange({ minimumWithdrawal: value })
+            onMinimumSpendingChange={value =>
+              onConfigChange({ minimumSpending: value })
             }
           />
         </View>

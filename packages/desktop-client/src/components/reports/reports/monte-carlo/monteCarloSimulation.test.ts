@@ -89,7 +89,7 @@ function makeParams(
     withdrawalStrategy: 'proportional',
     returnModel: 'normal',
     withdrawalRule: WITHDRAWAL_RULE_DEFAULTS,
-    minimumWithdrawal: 0,
+    minimumSpending: 0,
     currentAge: 60,
     spendingPhases: [
       { id: 'phase-1', name: '', fromAge: null, annualWithdrawal },
@@ -693,17 +693,19 @@ describe('runMonteCarloSimulation', () => {
     ]);
   });
 
-  it('planned spending stays below the withdrawal when the minimum overrides a rule cut', () => {
+  it('planned spending rises to the floor when the minimum overrides a rule cut', () => {
     // A crash pushes the withdrawal rate above the guardrails trigger, so
-    // the rule cuts spending - but the minimum pulls it back up. The
-    // captured plan is the rule's cut amount, the withdrawal the minimum
+    // the rule cuts spending - but the minimum spending floor pulls the
+    // plan back up: the floor is what the household lives on, so both the
+    // plan and the withdrawal sit at it, and the rule's cut amount is only
+    // kept in the explanation
     const result = runMonteCarloSimulation(
       makeParams(
         {
           annualWithdrawal: 4_000,
           horizonYears: 2,
           withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
-          minimumWithdrawal: 4_000,
+          minimumSpending: 4_000,
           captureRunDetail: 0,
         },
         { startingBalance: 100_000, expectedReturnMean: -0.5, returnStdDev: 0 },
@@ -715,9 +717,10 @@ describe('runMonteCarloSimulation', () => {
     if (cutYear.ruleExplanation?.kind !== 'factor') {
       throw new Error('expected a factor rule explanation');
     }
-    expect(cutYear.plannedSpending).toBe(cutYear.ruleExplanation.adjusted);
+    expect(cutYear.ruleExplanation.adjusted).toBeLessThan(4_000);
     expect(cutYear.withdrawal).toBe(4_000);
-    expect(cutYear.plannedSpending).toBeLessThan(cutYear.withdrawal);
+    expect(cutYear.plannedSpending).toBe(4_000);
+    expect(cutYear.spent).toBe(4_000);
   });
 
   it('planned spending stays above the withdrawal on a shortfall year', () => {
@@ -1231,7 +1234,7 @@ describe('runMonteCarloSimulation', () => {
     );
   });
 
-  it('minimum withdrawal floor neutralizes rule cuts', () => {
+  it('minimum spending floor neutralizes rule cuts', () => {
     const base = makeParams(
       { annualWithdrawal: 10_000, horizonYears: 30 },
       { startingBalance: 100_000, expectedReturnMean: 0, returnStdDev: 0 },
@@ -1240,7 +1243,7 @@ describe('runMonteCarloSimulation', () => {
     const cutsFloored = runMonteCarloSimulation({
       ...base,
       withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'boundaries' },
-      minimumWithdrawal: 10_000,
+      minimumSpending: 10_000,
     });
 
     expect(cutsFloored.percentileBands).toEqual(withoutRule.percentileBands);
@@ -1249,7 +1252,7 @@ describe('runMonteCarloSimulation', () => {
     );
   });
 
-  it('takes nothing in zero-spend phases even with a minimum withdrawal', () => {
+  it('takes nothing in zero-spend phases even with a minimum spending floor', () => {
     // Working years first (costs covered by salary), retirement at 65;
     // the floor guards against rule-driven cuts and must not invent
     // withdrawals during a deliberate zero-spend phase
@@ -1261,7 +1264,7 @@ describe('runMonteCarloSimulation', () => {
         {
           horizonYears: 8,
           captureRunDetail: 0,
-          minimumWithdrawal: 15_000,
+          minimumSpending: 15_000,
           withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
           spendingPhases: [
             { id: 'working', name: '', fromAge: null, annualWithdrawal: 0 },
@@ -1283,7 +1286,7 @@ describe('runMonteCarloSimulation', () => {
     }
   });
 
-  it("keeps the minimum withdrawal floor in today's money under inflation", () => {
+  it("keeps the minimum spending floor in today's money under inflation", () => {
     // Guardrails cut hard while prices rise; the floor must rise with
     // inflation too, so in today's money withdrawals never dip below it
     const result = runMonteCarloSimulation(
@@ -1295,7 +1298,7 @@ describe('runMonteCarloSimulation', () => {
           inflationStdDev: 0,
           deflateToTodaysMoney: true,
           captureRunDetail: 0,
-          minimumWithdrawal: 8_000,
+          minimumSpending: 8_000,
           withdrawalRule: {
             ...WITHDRAWAL_RULE_DEFAULTS,
             type: 'guardrails',
@@ -1887,14 +1890,14 @@ describe('runMonteCarloSimulation', () => {
     ]);
   });
 
-  it('ignores the minimum withdrawal floor when no rule is active', () => {
+  it('ignores the minimum spending floor when no rule is active', () => {
     // A leftover floor higher than the planned spending must not raise
     // withdrawals once the rule is switched back to None
     const result = runMonteCarloSimulation(
       makeParams(
         {
           annualWithdrawal: 10_000,
-          minimumWithdrawal: 20_000,
+          minimumSpending: 20_000,
           horizonYears: 10,
         },
         { startingBalance: 500_000, expectedReturnMean: 0, returnStdDev: 0 },
@@ -2974,7 +2977,7 @@ describe('runMonteCarloSimulation', () => {
       expect(result.runDetail![1].withdrawal).toBe(2_000);
     });
 
-    it('the minimum withdrawal is a spending floor that income counts towards', () => {
+    it('the minimum spending floor counts income towards it', () => {
       // 2,000 planned, 1,000 covered by income, 1,800 floor: a crash makes
       // guardrails cut the pot-funded 1,000 by 10% a year (900, 810, 729)
       // until the floor bites - and the pots only top spending up to it,
@@ -2985,7 +2988,7 @@ describe('runMonteCarloSimulation', () => {
             annualWithdrawal: 2_000,
             horizonYears: 4,
             withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
-            minimumWithdrawal: 1_800,
+            minimumSpending: 1_800,
             incomeStreams: [makeIncomeStream({ annualAmount: 1_000 })],
             captureRunDetail: 0,
           },
@@ -3005,17 +3008,18 @@ describe('runMonteCarloSimulation', () => {
         false,
         true,
       ]);
+      expect(rows[3].plannedSpending).toBe(1_800);
       expect(rows[3].spent).toBe(1_800);
     });
 
-    it('the minimum withdrawal does not apply when income covers the plan', () => {
+    it('the minimum spending floor does not apply when income covers the plan', () => {
       const result = runMonteCarloSimulation(
         makeParams(
           {
             annualWithdrawal: 2_000,
             horizonYears: 2,
             withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
-            minimumWithdrawal: 3_000,
+            minimumSpending: 3_000,
             incomeStreams: [makeIncomeStream({ annualAmount: 2_000 })],
             captureRunDetail: 0,
           },
@@ -3146,10 +3150,10 @@ describe('runMonteCarloSimulation', () => {
       }
     });
 
-    it('saves what the minimum withdrawal forces out above the plan', () => {
+    it('lifts the plan to the spending floor instead of saving the difference', () => {
       // The spending-floor scenario again, now with a surplus pot: the
-      // 800 floor withdrawal is 71 above the rule's 729 plan, and that
-      // 71 is saved rather than lost
+      // 800 floor withdrawal is 71 above the rule's 729, but the floor is
+      // money to live on, so the plan rises to it and nothing is saved
       const result = runMonteCarloSimulation(
         makeParams({
           annualWithdrawal: 2_000,
@@ -3162,7 +3166,7 @@ describe('runMonteCarloSimulation', () => {
           ],
           horizonYears: 4,
           withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
-          minimumWithdrawal: 1_800,
+          minimumSpending: 1_800,
           incomeStreams: [makeIncomeStream({ annualAmount: 1_000 })],
           pots: [
             makePot({
@@ -3185,11 +3189,10 @@ describe('runMonteCarloSimulation', () => {
 
       const rows = result.runDetail!;
       expect(rows.map(row => row.withdrawal)).toEqual([1_000, 900, 810, 800]);
-      expect(rows.map(row => row.surplusSaved)).toEqual([0, 0, 0, 71]);
-      expect(rows[3].potBalances[0]).toBe(71);
-      // The saved 71 wasn't spent: 1,000 income + 800 withdrawn - 71
-      expect(rows[3].spent).toBe(1_729);
-      expect(rows[3].spent).toBe(rows[3].plannedSpending);
+      expect(rows.map(row => row.surplusSaved)).toEqual([0, 0, 0, 0]);
+      expect(rows[3].potBalances[0]).toBe(0);
+      expect(rows[3].plannedSpending).toBe(1_800);
+      expect(rows[3].spent).toBe(1_800);
     });
 
     it('survives on income that passes through a pot each year', () => {

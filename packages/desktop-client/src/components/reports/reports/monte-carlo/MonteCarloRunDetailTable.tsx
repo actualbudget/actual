@@ -149,9 +149,8 @@ export function MonteCarloRunDetailTable({
     return t('Income received over this run: {{total}}.', { total });
   }
 
-  // How the year's actual spending compares with the plan: on target, a
-  // shortfall (the pots couldn't cover it), or above it (the minimum
-  // withdrawal forced out more)
+  // How the year's actual spending compares with the plan: on target or a
+  // shortfall (the pots couldn't cover it)
   function getSpentSentence(row: MonteCarloRunDetailRow) {
     const spent = format(row.spent, 'financial');
     const planned = format(row.plannedSpending, 'financial');
@@ -178,31 +177,10 @@ export function MonteCarloRunDetailTable({
     return t('Spent: {{spent}}, as planned.', { spent });
   }
 
-  // Where the money saved into the surplus pot came from: income beyond
-  // the plan, the minimum withdrawal's overshoot, or both
   function getSavedSentence(row: MonteCarloRunDetailRow) {
-    const overshoot = row.surplusSaved - row.unspentIncome;
-    const values = {
-      pot: surplusPotName,
-      amount: format(row.surplusSaved, 'financial'),
-      unspent: format(row.unspentIncome, 'financial'),
-      overshoot: format(overshoot, 'financial'),
-    };
-    if (row.unspentIncome > 0 && overshoot > 0) {
-      return t(
-        'Saved into {{pot}}: {{amount}} - {{unspent}} of income beyond the plan and {{overshoot}} the minimum withdrawal took out above it.',
-        values,
-      );
-    }
-    if (overshoot > 0) {
-      return t(
-        'Saved into {{pot}}: {{amount}} - the minimum withdrawal took out more than the plan needed.',
-        values,
-      );
-    }
     return t(
       'Saved into {{pot}}: {{amount}} - income beyond what the plan spends.',
-      values,
+      { pot: surplusPotName, amount: format(row.surplusSaved, 'financial') },
     );
   }
 
@@ -730,9 +708,12 @@ export function MonteCarloRunDetailTable({
                             <PrivacyFilter>
                               <FinancialText as="span">
                                 {t(
-                                  'Raised to the minimum withdrawal: {{amount}}.',
+                                  'Raised to the minimum spending: {{amount}}.',
                                   {
-                                    amount: format(row.withdrawal, 'financial'),
+                                    amount: format(
+                                      row.plannedSpending,
+                                      'financial',
+                                    ),
                                   },
                                 )}
                               </FinancialText>
