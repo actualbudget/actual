@@ -396,6 +396,9 @@ export function createMonteCarloSurplusPot(id: string): MonteCarloPot {
     allocationCash: PRESET_ASSET_WEIGHTS.cash.cash,
     expectedReturnMean: ALLOCATION_PRESETS.cash.mean,
     returnStdDev: ALLOCATION_PRESETS.cash.stdDev,
+    // Already-taxed money: nothing to tax on the way out under either model
+    withdrawalTaxRate: 0,
+    taxableFraction: 0,
     isSurplus: true,
   };
 }

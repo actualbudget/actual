@@ -548,10 +548,9 @@ export function MonteCarloConfiguration({
                   <br />
                   <br />
                   It starts empty and holds cash - no access age, no tax, no
-                  fees - and you can move money on from it with a contribution.
-                  It can&apos;t be edited or deleted from the pots list; tick
-                  the box to remove it, along with any contributions paid into
-                  it, and untick it to bring it back empty.
+                  fees. It can&apos;t be edited or deleted from the pots list;
+                  tick the box to remove it, along with any contributions paid
+                  into it, and untick it to bring it back empty.
                 </Trans>
               </MonteCarloHelpTooltip>
             </View>

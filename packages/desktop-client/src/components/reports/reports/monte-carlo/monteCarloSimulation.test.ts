@@ -137,7 +137,14 @@ describe('surplus pot defaults', () => {
       true,
       false,
     ]);
-    expect(MONTE_CARLO_DEFAULTS.pots[0].startingBalance).toBe(0);
+    expect(MONTE_CARLO_DEFAULTS.pots[0]).toMatchObject({
+      startingBalance: 0,
+      accessAge: null,
+      withdrawalTaxRate: 0,
+      taxableFraction: 0,
+      annualFeeRate: 0,
+      annualFeeFixed: 0,
+    });
   });
 
   it('keeps saved plans without a surplus pot unchanged', () => {

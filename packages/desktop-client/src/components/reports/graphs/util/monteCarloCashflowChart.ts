@@ -131,12 +131,12 @@ export function buildMonteCarloCashflowChart({
         ? [
             {
               key: seriesKey('income', incomeIndex),
-              kind: 'income' as const,
+              kind: 'income',
               label:
                 incomeStream.name ||
                 translate('Income {{number}}', { number: incomeIndex + 1 }),
               color: inflowColor(pots.length + incomeIndex),
-            },
+            } satisfies MonteCarloCashflowSeries,
           ]
         : [],
   );
@@ -170,14 +170,14 @@ export function buildMonteCarloCashflowChart({
         ? [
             {
               key: seriesKey('contribution', contributionIndex),
-              kind: 'contribution' as const,
+              kind: 'contribution',
               label:
                 contribution.name ||
                 translate('Contribution {{number}}', {
                   number: contributionIndex + 1,
                 }),
               color: outflowColor(phases.length + contributionIndex),
-            },
+            } satisfies MonteCarloCashflowSeries,
           ]
         : [],
   );

@@ -155,9 +155,8 @@ export function MonteCarloPotConfiguration({
                   withdrawal forced out above the plan - is saved here each
                   year, and it is drawn on before any other pot when spending
                   needs funding. It starts empty and holds cash: no access age,
-                  no tax, no fees. Move money on from it with a contribution. To
-                  remove it, tick Assume any unspent money is spent under Manage
-                  surplus on the Plan details tab.
+                  no tax, no fees. To remove it, tick Assume any unspent money
+                  is spent under Manage surplus on the Plan details tab.
                 </Trans>
               </MonteCarloHelpTooltip>
             </View>

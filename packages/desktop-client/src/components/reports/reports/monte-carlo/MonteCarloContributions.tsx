@@ -6,7 +6,10 @@ import { SvgAdd } from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
-import type { SelectOption } from '@actual-app/components/select';
+import type {
+  SelectHeading,
+  SelectOption,
+} from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -80,7 +83,11 @@ export function MonteCarloContributions({
     onConfigChange({
       contributions: [
         ...contributions,
-        createMonteCarloContribution(uuidv4(), pots[0].id),
+        createMonteCarloContribution(
+          uuidv4(),
+          // The surplus pot is managed by the plan, so start on an ordinary one
+          (pots.find(pot => !pot.isSurplus) ?? pots[0]).id,
+        ),
       ],
     });
   }
@@ -97,12 +104,15 @@ export function MonteCarloContributions({
 
   const potOptions = pots.map(
     (pot, potIndex) =>
-      [pot.id, getMonteCarloPotLabel(pots, potIndex, t)] as [string, string],
+      [pot.id, getMonteCarloPotLabel(pots, potIndex, t)] satisfies [
+        string,
+        string,
+      ],
   );
   const sourceOptions: SelectOption[] = [
     [OUTSIDE_SOURCE, t('Outside the plan')],
     ...(incomeStreams.length > 0
-      ? [[Menu.label, t('Income streams')] as const]
+      ? [[Menu.label, t('Income streams')] satisfies SelectHeading]
       : []),
     ...incomeStreams.map(
       (incomeStream, incomeIndex) =>
@@ -110,7 +120,7 @@ export function MonteCarloContributions({
           incomeStream.id,
           incomeStream.name ||
             t('Income {{number}}', { number: incomeIndex + 1 }),
-        ] as [string, string],
+        ] satisfies [string, string],
     ),
   ];
 
