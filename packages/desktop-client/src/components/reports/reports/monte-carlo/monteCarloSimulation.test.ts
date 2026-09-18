@@ -275,7 +275,8 @@ describe('runMonteCarloSimulation', () => {
     );
     expect(inflated.medianDepletionYear).toBe(3);
 
-    // Flat withdrawals last one year longer: y4 hits exactly 0
+    // Flat withdrawals last longer: y4 empties the pot to the penny,
+    // which still funds that year, so the shortfall comes in y5
     const flat = runMonteCarloSimulation(
       makeParams(
         { annualWithdrawal: 50, inflationMean: null, horizonYears: 10 },
@@ -286,7 +287,7 @@ describe('runMonteCarloSimulation', () => {
         },
       ),
     );
-    expect(flat.medianDepletionYear).toBe(4);
+    expect(flat.medianDepletionYear).toBe(5);
   });
 
   it('is deterministic for a given seed', () => {
@@ -992,19 +993,20 @@ describe('runMonteCarloSimulation', () => {
   });
 
   it('boundaries cut withdrawals and extend survival', () => {
-    // 10% withdrawal rate on a flat pot depletes in exactly year 10
+    // 10% withdrawal rate on a flat pot empties it in year 10, so year
+    // 11 is the first that can't be funded
     const base = makeParams(
       { annualWithdrawal: 10_000, horizonYears: 30 },
       { startingBalance: 100_000, expectedReturnMean: 0, returnStdDev: 0 },
     );
     const withoutRule = runMonteCarloSimulation(base);
-    expect(withoutRule.medianDepletionYear).toBe(10);
+    expect(withoutRule.medianDepletionYear).toBe(11);
 
     const withRule = runMonteCarloSimulation({
       ...base,
       withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'boundaries' },
     });
-    expect(withRule.medianDepletionYear ?? Infinity).toBeGreaterThan(10);
+    expect(withRule.medianDepletionYear ?? Infinity).toBeGreaterThan(11);
     // The extra years come at the cost of income
     expect(withRule.medianTotalWithdrawn).toBeLessThanOrEqual(100_000);
   });
@@ -1392,7 +1394,8 @@ describe('runMonteCarloSimulation', () => {
 
   it('sequential order skips locked pots until they unlock', () => {
     // The first-listed pot is locked past the horizon, so sequential
-    // withdrawals drain the second pot: 100 at 10/year fails in year 10
+    // withdrawals drain the second pot: 100 at 10/year empties it in
+    // year 10 and fails in year 11
     const result = runMonteCarloSimulation(
       makeParams({
         withdrawalStrategy: 'sequential',
@@ -1416,7 +1419,7 @@ describe('runMonteCarloSimulation', () => {
       }),
     );
 
-    expect(result.medianDepletionYear).toBe(10);
+    expect(result.medianDepletionYear).toBe(11);
   });
 
   it('best-performer order drains the pot with the highest return last year', () => {
@@ -3180,6 +3183,46 @@ describe('runMonteCarloSimulation', () => {
       // The saved 71 wasn't spent: 1,000 income + 800 withdrawn - 71
       expect(rows[3].spent).toBe(1_729);
       expect(rows[3].spent).toBe(rows[3].plannedSpending);
+    });
+
+    it('survives on income that passes through a pot each year', () => {
+      // Empty pots, 40k untaxed income paid into the cash pot by a
+      // sourced contribution, and 40k spending: every year empties the
+      // pot to the penny and is still fully funded
+      const result = runMonteCarloSimulation(
+        makeParams({
+          annualWithdrawal: 40_000,
+          horizonYears: 5,
+          incomeStreams: [
+            makeIncomeStream({ id: 'salary', annualAmount: 40_000 }),
+          ],
+          contributions: [
+            makeContribution({
+              potId: 'cash',
+              sourceIncomeStreamId: 'salary',
+              annualAmount: 40_000,
+            }),
+          ],
+          pots: [
+            makePot({
+              id: 'cash',
+              startingBalance: 0,
+              expectedReturnMean: 0,
+              returnStdDev: 0,
+            }),
+          ],
+          captureRunDetail: 0,
+        }),
+      );
+
+      expect(result.successRate).toBe(1);
+      const rows = result.runDetail!;
+      expect(rows).toHaveLength(5);
+      expect(rows.map(row => row.withdrawal)).toEqual(
+        new Array(5).fill(40_000),
+      );
+      expect(rows.map(row => row.spent)).toEqual(new Array(5).fill(40_000));
+      expect(rows.map(row => row.endBalance)).toEqual(new Array(5).fill(0));
     });
 
     it('reconciles each stream to the row total in the run detail', () => {

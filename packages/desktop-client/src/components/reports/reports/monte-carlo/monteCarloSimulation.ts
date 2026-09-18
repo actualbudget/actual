@@ -2003,8 +2003,10 @@ export function runMonteCarloSimulation(
 
         // A shortfall needs an actual requirement: a zero-spend year with
         // nothing accessible (e.g. before delayed contributions start, or
-        // while every pot is still locked) is not a failure
-        if (netRequired > 0 && accessibleNetCapacity <= netRequired) {
+        // while every pot is still locked) is not a failure. Exactly enough
+        // is enough - a pot emptied to the penny funded the year, and next
+        // year's income or contributions may refill it
+        if (netRequired > 0 && accessibleNetCapacity < netRequired) {
           fundingShortfall = true;
           // The accessible pots can't cover this year's spending (locked
           // pots may still hold money, but the plan failed to fund it);
