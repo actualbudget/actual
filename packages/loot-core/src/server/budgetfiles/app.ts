@@ -659,15 +659,29 @@ async function _loadBudget(id: Budget['id']): Promise<{
 
   clearUndo();
 
+  // The change log reads the local CRDT message log, which `applyMessages`
+  // only writes when syncing is 'enabled' or 'offline'. A budget with no sync
+  // server records nothing at all, so opt those budgets into 'offline' --
+  // full local CRDT bookkeeping with no network access whatsoever, which both
+  // `scheduleFullSync` and `_fullSync` explicitly refuse. Gated on the feature
+  // flag so budgets that never open the change log keep the cheaper behaviour.
+  const { value: changeLogFlag = 'false' } =
+    (await db.first<Pick<db.DbPreference, 'value'>>(
+      'SELECT value from preferences WHERE id = ?',
+      ['flags.changeLog'],
+    )) ?? {};
+  const localSyncingMode =
+    String(changeLogFlag) === 'true' ? 'offline' : 'disabled';
+
   // Ensure that syncing is enabled
   if (process.env.NODE_ENV !== 'test') {
     if (id === DEMO_BUDGET_ID) {
-      setSyncingMode('disabled');
+      setSyncingMode(localSyncingMode);
     } else {
       if (getServer()) {
         setSyncingMode('enabled');
       } else {
-        setSyncingMode('disabled');
+        setSyncingMode(localSyncingMode);
       }
 
       await asyncStorage.setItem('lastBudget', id);
