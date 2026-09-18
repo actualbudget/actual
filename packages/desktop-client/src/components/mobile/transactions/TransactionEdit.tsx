@@ -994,6 +994,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   modal: {
                     name: 'payee-autocomplete',
                     options: {
+                      showNoneOption: !!transactionToEdit.payee,
                       onSelect: payeeId => {
                         void onUpdateInner(transactionToEdit, name, payeeId);
                       },
