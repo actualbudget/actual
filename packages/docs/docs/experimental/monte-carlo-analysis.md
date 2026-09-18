@@ -36,13 +36,13 @@ The report works immediately with sensible example numbers filled in, so you can
 
 ## Setting Up Your Plan
 
-The configuration area at the top of the report is organized into five tabs.
+The configuration area at the top of the report is organized into six tabs.
 
 ### Plan Details
 
 ![The Plan Details tab](/img/experimental/monte-carlo-analysis/monte-carlo-plan-details.png)
 
-The tab is organized into three small groups - **Your plan**, **Simulation** and **Inflation**:
+The tab is organized into four small groups - **Your plan**, **Simulation**, **Inflation** and **Manage surplus**:
 
 - **Your current age** and **Pot must last until age** - these two numbers define the period being tested. If you're 40 and want the money to last until you're 95, the report simulates 55 years.
 - **Return model** - how the simulation invents each year's investment returns:
@@ -55,6 +55,7 @@ The tab is organized into three small groups - **Your plan**, **Simulation** and
 - **Simulations** - how many replays to run (1,000 to 10,000). More replays give steadier numbers but take slightly longer. When using historical sequences, this field is disabled because there is exactly one replay per historical starting year.
 - **Inflation - Mean (%)** - the average yearly rise in prices. When set, your planned spending grows with it so your spending power keeps up. Leave it blank to take exactly the same amount every year. With a historical return model, the two inflation inputs are replaced by an **Adjust spending with inflation** checkbox: each simulated year then uses that year's actual US inflation, keeping inflation and market returns paired the way they really were.
 - **Inflation - Std dev (%)** - real-world inflation bounces around from year to year rather than staying fixed. When set, each simulated year draws its own inflation rate around the mean, separately in every replay. The default of 2% is roughly how much US inflation has varied in recent decades; set it to 0 to use the fixed mean rate every year. Only used by the random return model.
+- **Manage surplus - Assume any unspent money is spent** - what happens to money the plan doesn't spend in a year, such as income beyond your spending. Unticked (the default), a **Surplus cash** pot holds everything the plan doesn't spend and is drawn on first when spending needs funding; tick it and unspent money simply leaves the plan. See [Income](#income) for the details.
 
 ### Investment Pots
 
@@ -83,6 +84,25 @@ Drag a pot's row to reorder the list - the order matters if you choose to drain 
 The access age setting is what lets the report model the classic "bridge gap": retiring at 48 with a big pension you can't open until 57, and a smaller pot that has to carry you across those nine years. If the bridge pot runs dry too soon, the plan fails - even though the pension money exists.
 :::
 
+### Income
+
+![The Income tab](/img/experimental/monte-carlo-analysis/monte-carlo-income.png)
+
+Income streams are money you receive each year without drawing on your pots - a state pension, a defined-benefit pension, an annuity, rental income, or part-time work in early retirement. They matter because they pay for your spending _first_: with £40,000 of yearly spending and a £12,000 state pension, the pots only need to fund £28,000, and the withdrawal rules and the failure test both work on that smaller amount. Each stream has:
+
+- **Income name** - anything you like, such as "State pension".
+- **From age** and **To age** - the years the income arrives, inclusive at both ends. Leave **From age** blank to start now, and **To age** blank to keep receiving it until the end of the plan.
+- **Amount (per year)** - the gross yearly amount, in today's money, before any tax.
+- **Tax (%)** (or **Taxable portion (%)** with the bands model) - how the income is taxed, exactly as for pot withdrawals: an effective rate under the flat model, or the share that counts as taxable income under the bands model. Under the bands model, income fills your lower tax bands first, so any pot withdrawal in the same year is taxed at the correct, higher marginal rate.
+- **Adjust by inflation** - tick this for income that rises with prices (most state pensions do); untick it for a fixed amount, such as a level annuity, which buys a little less each year as prices rise.
+
+Income you don't need is **unspent**: once the year's contributions paid from it and its spending are covered, anything left is dealt with according to the **Manage surplus** setting on the Plan Details tab:
+
+- **Assume any unspent money is spent** unticked (the default for new plans): a **Surplus cash** pot sits at the top of your pots. Income beyond your spending is saved into it at the start of the year (so it earns that year's return), and it is always the first pot drawn on when spending needs funding. It starts empty and holds cash - no access age, no tax, no fees - and its settings can't be changed in the pots list. Tick the setting to remove it, along with any contributions paid into it.
+- **Ticked**: unspent money leaves the plan - it isn't invested and doesn't help later years. The run drill-in and the cashflow chart both point out unspent income so it doesn't go unnoticed, and you can route specific amounts into a pot with a contribution whose **Paid from** is that income stream. Plans saved before this setting existed keep this behaviour; untick the box to add the Surplus cash pot.
+
+A plan whose income covers its spending doesn't need the pots at all, and empty pots are not a failure on their own - the plan only fails in a year whose spending can't be paid for from income and pots together.
+
 ### Contributions
 
 ![The Contributions tab](/img/experimental/monte-carlo-analysis/monte-carlo-contributions.png)
@@ -91,6 +111,7 @@ If you're still earning, you can model the money you add to your pots each year 
 
 - **Contribution name** - anything you like, such as "Pension contributions".
 - **Into pot** - the pot the money is paid into. A pot can receive any number of contributions, and contributions can go into a pot that is still locked for withdrawals - the access age only controls when money can come _out_.
+- **Paid from** - where the money comes from. **Outside the plan** (the default) means money the simulation doesn't otherwise know about. Choosing one of your [income streams](#income) instead pays the contribution out of that income: it is capped at what the stream brings in that year, and it is zero in years the stream pays nothing. Tick **Before tax** for a workplace pension or salary sacrifice - the contribution is deducted before the income's tax is worked out, so it lowers that year's tax bill.
 - **From age** and **To age** - the years the contribution runs, inclusive at both ends. Leave **From age** blank to start now, and **To age** blank to keep contributing until the end of the plan.
 - **Amount (per year)** - how much is added each year, in today's money. The money is paid in at the start of each year, so it earns that year's investment return.
 - **Adjust by inflation** - tick this if the contribution will grow with prices over time (for example, a percentage of a salary that keeps pace with inflation). Untick it for a fixed amount, which buys a little less each year as prices rise.
@@ -107,7 +128,7 @@ Contributions pair naturally with a spending phase set to 0: while you're workin
   - **Drain pots in order**: empty the first pot in your list before touching the next - for example, spend your taxable account first and let the pension keep compounding. Pots that haven't reached their access age are skipped until they unlock.
   - **Spend from the best performer first**: each year, the withdrawal comes from the pot that earned the highest return _last_ year. This is the classic "bucket strategy" instinct: after a stock crash, live off your cash and give the crashed pot time to recover; in a boom year, spend from stocks and leave the cash reserve alone. The first year (when there's no track record yet) uses your listed order, and locked pots are skipped here too.
   - **Keep pots at their target mix**: each pot's share of your starting balances becomes its target weight, and withdrawals come from whichever pots have grown above their target - most overweight first - pulling the portfolio back toward the mix you chose. This behaves like the best-performer option in booms and crashes (trim stocks after a good run, spend cash and bonds after a crash) but without slowly drifting your money into low-growth pots, because it always steers back to your chosen mix. If you want a permanent cash buffer, give the cash pot the share you want to maintain and this order will keep it topped up in spirit - by spending it only when it's above its target share.
-- **Withdrawal rule** and **Minimum withdrawal** - see the next section.
+- **Withdrawal rule** and **Minimum spending** - see the next section.
 
 The inflation settings that grow your spending over time live on the [Plan Details](#plan-details) tab.
 
@@ -122,6 +143,8 @@ Withdrawing money from a pension or a taxable account usually costs more than th
 
 With either model, the run drill-in shows each year's gross withdrawal with the tax paid underneath, so you can see exactly what your spending actually costs.
 
+[Income streams](#income) are taxed the same way, using their own rate or taxable portion. Under the bands model the year's income is banded first and the pot withdrawals are taxed as the slice above it - so a taxable pension that uses up your tax-free allowance makes every withdrawal that year cost more, just as it does in real life.
+
 :::note
 This is a deliberate approximation, not a tax calculator. It doesn't track capital-gains cost basis, model frozen thresholds, or know any country's actual rules - and tax law changes every year. Treat the rates and bands as your own honest estimates.
 :::
@@ -132,11 +155,11 @@ By default, the simulation withdraws the same (inflation-adjusted) amount every 
 
 All the rules share a few ideas:
 
-- Your **spending phases** set the planned amounts. The rules wake up in your first year of planned spending: that year takes the planned amount (only a **Minimum withdrawal** set higher than it can override that), and from the next year onward the rule adjusts what's actually taken - independently in every replay, reacting to how that replay is going. Zero-spend years (for example, working years before retirement) neither trigger nor move the rules. A cut or raise carries across phase boundaries: if the rule cut your spending by 10% during a rough patch, the next phase's amount starts 10% lower too.
+- Your **spending phases** set the planned amounts. The rules wake up in your first year of planned spending: that year takes the planned amount (only a **Minimum spending** set higher than it can override that), and from the next year onward the rule adjusts what's actually taken - independently in every replay, reacting to how that replay is going. Zero-spend years (for example, working years before retirement) neither trigger nor move the rules. A cut or raise carries across phase boundaries: if the rule cut your spending by 10% during a rough patch, the next phase's amount starts 10% lower too.
 - Rules usually improve your **success rate** by cutting spending in bad times, but that safety isn't free - you get it by living on less. Keep an eye on the **Median total withdrawn** stat to see what a rule costs you in income.
 - Rules only see the wealth you can actually spend. If a pension is locked until its access age, it doesn't earn you spending raises while a bridge pot pays the bills - the rules watch the accessible pots, and the pension starts counting the moment it unlocks.
 
-If you set a **Minimum withdrawal**, your yearly spending never drops below that amount, no matter what the rule says. It only applies in years you actually plan to spend - a spending phase set to 0 (for example, years before retirement while your salary covers your costs) takes nothing. Like your spending phases, it's an amount in today's money - it rises with inflation so its spending power holds steady.
+If you set a **Minimum spending**, your yearly spending never drops below that amount, no matter what the rule says - it is the lowest amount you need to live on, so when the rule cuts below it the plan is lifted back up to it and that is what gets spent. [Income streams](#income) count towards it, so the pots only withdraw enough to top your spending up to the floor - a 12,000 floor with a 10,000 state pension means the pots never pay less than 2,000. It only applies in years you actually plan to spend - a spending phase set to 0 (for example, years before retirement while your salary covers your costs) takes nothing. Like your spending phases, it's an amount in today's money - it rises with inflation so its spending power holds steady.
 
 ### Guardrails (Guyton-Klinger)
 
@@ -162,7 +185,7 @@ By default, every money figure in the results is shown in **today's money** - wh
 
 ![The results summary](/img/experimental/monte-carlo-analysis/monte-carlo-results.png)
 
-- **Success rate** - the big number: the percentage of replays in which your money lasted the full time. There's no single "right" target, but many planners aim for 80–90%.
+- **Success rate** - the big number: the percentage of replays in which every year's spending was paid for, from income and pots together. There's no single "right" target, but many planners aim for 80–90%. (Running the pots down to nothing isn't a failure by itself - only a year whose spending goes unfunded is.)
 - **Median ending balance** - in the middle-of-the-road replay, how much was left at the end.
 - **Median total withdrawn** - how much income the middle replay actually paid you over the whole period. Especially useful when comparing withdrawal rules.
 - **Chance of running out of money** - the flip side of the success rate.
@@ -184,16 +207,16 @@ The dropdown above the chart switches views. **Single worst run** shows the one 
 
 ![The cashflow chart](/img/experimental/monte-carlo-analysis/monte-carlo-cashflow-chart.png)
 
-Switch the results view from **Chart** to **Cashflow** to see the money moving in and out of your pots each year, for one simulated run at a time:
+Switch the results view from **Chart** to **Cashflow** to see the money flowing through your hands each year, for one simulated run at a time:
 
-- **Above zero**: money coming in - each pot's withdrawal for the year (one color per pot), plus each contribution being paid in (one color per contribution).
-- **Below zero**: money going out - the year's planned spending, colored by the spending phase it belongs to, plus the tax paid on withdrawals.
+- **Above zero**: money coming in - each pot's withdrawal for the year (one color per pot), plus each income stream (one color per stream).
+- **Below zero**: money going out - the year's planned spending, colored by the spending phase it belongs to; the tax paid on withdrawals and income; each contribution being paid into a pot (one color per contribution); and money saved into your surplus pot, if you keep unspent money.
 
-Management fees don't appear here - they are charged inside the pots and never pass through your hands, and the run detail table lists them.
+Management fees don't appear here - they are charged inside the pots and never pass through your hands, and the run detail table lists them. Income you didn't need shows up as inflows that outweigh the outflows, and the tooltip names the unspent amount.
 
 On a run that fails, the chart doesn't stop at the failure year: the remaining years keep showing the spending the plan still called for, dimmed, with nothing coming in to fund it - so the size of the gap is visible at a glance. Those dimmed bars are held at the failure year's level - its price level, since a dead run no longer experiences inflation, and any cut or raise a withdrawal rule had in force at the time.
 
-The spending bars show the _plan_ - the phase amount, adjusted for inflation and any withdrawal rule - rather than the money actually delivered. That's what makes trouble visible: in a shortfall year the withdrawal bars fall visibly short of the spending bar, and when a minimum withdrawal forces out more than the plan asked for, the bars overshoot it.
+The spending bars show the _plan_ - the phase amount, adjusted for inflation, any withdrawal rule and the minimum spending floor - rather than the money actually delivered. That's what makes trouble visible: in a shortfall year the withdrawal bars fall visibly short of the spending bar.
 
 Use the dropdown above the chart to pick which run to look at: the worst run, a typically-bad or typically-good outcome (the 25th and 75th percentiles), the median, or the best run. These are the same runs the **Jump to** dropdown in the runs view lands on. The chart also appears above the year-by-year table when you click into any individual run, so you can see that specific run's flows at a glance.
 
@@ -207,11 +230,11 @@ This bar chart only counts the replays that failed, showing at which age they ra
 
 ![The simulation runs table](/img/experimental/monte-carlo-analysis/monte-carlo-runs.png)
 
-Switch the results view from **Chart** to **Runs** to see every replay listed from worst outcome to best. Rather than paging through thousands of runs, use the **Jump to** dropdown to go straight to the worst, median or best run - or the 25th/75th percentile for a typically-bad or typically-good outcome - with the run highlighted so you can click into it. Click any run to walk through it year by year: the balance at the start of each year, the contributions paid in (when your plan has any), the withdrawal taken, the investment growth in that year (as money and as a percentage), the year's inflation rate (when inflation is enabled), and the balance at the end. Expand a year with the arrow at the start of its row (or use **Expand all years**) for the fully labeled breakdown: the withdrawal split into gross, tax and money to spend; when a withdrawal rule is active, a sentence showing how the rule arrived at that year's amount (and whether the minimum withdrawal stepped in); the contributions added; the fees paid; and a small table showing each pot's balance at the start of the year, what was contributed into it, what it contributed to the withdrawal, how much of that counted as taxable income, the tax paid on its share, the fee it was charged that year, its return that year, and its ending balance - so you can watch, for example, the cash pot covering spending after a crash while the stock pots are left alone. With the tax-bands model, the per-pot tax is the year's tax bill shared out in proportion to each pot's taxable income.
+Switch the results view from **Chart** to **Runs** to see every replay listed from worst outcome to best. Rather than paging through thousands of runs, use the **Jump to** dropdown to go straight to the worst, median or best run - or the 25th/75th percentile for a typically-bad or typically-good outcome - with the run highlighted so you can click into it. Click any run to walk through it year by year: the balance at the start of each year, the contributions paid in (when your plan has any, including money saved into the Surplus cash pot), the net income received (when your plan has income streams), the withdrawal taken, what was actually spent (income and withdrawal together, net of tax - shown in red when it fell short of the plan), the investment growth in that year (as money and as a percentage), the year's inflation rate (when inflation is enabled), and the balance at the end. Expand a year with the arrow at the start of its row (or use **Expand all years**) and it opens with a short plain-English summary of what happened that year and why: any change the withdrawal rule made and what triggered it, whether the minimum spending floor stepped in, how the year's spending was funded (income, pots, or a shortfall), and where any money the plan didn't spend went. Below it sits the pot table described further down. Click **Show the working** for the fully labeled breakdown behind the summary: the income received, split into gross, tax and net (and per stream when you have several), with any unspent income called out; the withdrawal split into gross, tax and money to spend; how the year's spending compared with the plan (as planned, or short by an amount); when a withdrawal rule is active, a sentence showing how the rule arrived at that year's amount (and whether the minimum spending floor stepped in); the contributions added; the fees paid; and a small table showing each pot's balance at the start of the year, what was contributed into it (for the Surplus cash pot, the money saved into it that year), what it contributed to the withdrawal, how much of that counted as taxable income, the tax paid on its share, the fee it was charged that year, its return that year, and its ending balance - so you can watch, for example, the cash pot covering spending after a crash while the stock pots are left alone. With the tax-bands model, the per-pot tax is the year's tax bill shared out in proportion to each pot's taxable income.
 
 ![The simulation run table](/img/experimental/monte-carlo-analysis/monte-carlo-run.png)
 
-Above the year-by-year table, a summary line totals the run: how much was withdrawn over the whole replay, how much of that went to tax, and how much was paid in fees on top.
+Above the year-by-year table, a summary line totals the run: how much was withdrawn over the whole replay, how much of that went to tax, how much was paid in fees on top, and - when the plan has income streams - how much income was received and the tax paid on it.
 
 If a run failed while money was still locked in an inaccessible pot, the table says so explicitly, so you can tell the difference between "the market ate my savings" and "the money existed but I couldn't reach it yet."
 
