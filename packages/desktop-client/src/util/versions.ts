@@ -8,7 +8,7 @@ function parseSemanticVersion(versionString): [number, number, number] {
     .map(n => parseInt(n));
 }
 
-function cmpSemanticVersion(
+export function cmpSemanticVersion(
   versionStringA: string,
   versionStringB: string,
 ): number {

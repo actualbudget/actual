@@ -613,6 +613,11 @@ handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
   return handlers['transactions-batch-update'](diff)['deleted'];
 });
 
+handlers['api/transactions-merge'] = withMutation(async function ({ ids }) {
+  checkFileOpen();
+  return handlers['transactions-merge'](ids.map(id => ({ id })));
+});
+
 handlers['api/accounts-get'] = async function () {
   checkFileOpen();
   const accounts: AccountEntity[] = await handlers['accounts-get']();

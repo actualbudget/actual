@@ -130,6 +130,7 @@ export type MonteCarloAllocationPreset =
   | 'equity-60'
   | 'equity-40'
   | 'cash'
+  | 'custom-mix'
   | 'custom';
 
 export type MonteCarloWithdrawalStrategy =
@@ -190,6 +191,13 @@ export type MonteCarloPotMeta = {
   name?: string;
   startingBalance?: number; // integer minor units (cents)
   allocationPreset?: MonteCarloAllocationPreset;
+  /**
+   * Asset shares for the 'custom-mix' allocation, as decimal fractions
+   * (0.85 = 85%). Relative shares - they are normalized to sum to 1
+   */
+  allocationStocks?: number;
+  allocationBonds?: number;
+  allocationCash?: number;
   expectedReturnMean?: number; // decimal fraction (0.06 = 6%)
   returnStdDev?: number; // decimal fraction
   /** Age from which the pot can fund withdrawals; null = immediately */

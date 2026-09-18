@@ -10,7 +10,7 @@ for it to be added, your project must have a proper README file.
 
 ## Bank Export and Importers
 
-The following are implementations of bank syncing using the Actual API. For instructions on using them, see the respective repositories.
+The following are implementations of bank syncing using the Actual API, or converters that turn bank exports into files for Actual's import dialog. For instructions on using them, see the respective repositories.
 
 - **Akahu and Up bank sync to Actual Budget** - https://github.com/tim-smart/actualbudget-sync
 - **Enable Actual: Import transactions from European banks using Enable Banking** - https://github.com/2manyvcos/enable-actual
@@ -18,6 +18,7 @@ The following are implementations of bank syncing using the Actual API. For inst
 - **Lunch Flow: Import transactions from GoCardless, MX, Finicity, Finverse, and more** - https://github.com/lunchflow/actual-flow
 - **MoneyMan an israel banks importer** - https://github.com/daniel-hauser/moneyman
 - **Plaid bank sync** - https://github.com/youngcw/actualplaid
+- **US bank statement converter (BofA, Chase, Citi, Amex CSV and Chase PDF) to Actual-ready CSV** - https://github.com/Ildana-ai/bank2actual
 - **ANZ Plus bank PDF to OFX converter** - [PDFtoOFX](https://github.com/spydisec/PDFtoOFX/)
 - **German DKB and Comdirect banks importer** - https://github.com/FridoE/actual-bank-importer
 
@@ -64,6 +65,8 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
   - _An iOS widget to display your Actual Budget category balances for the current month. Requires your Actual server to be accessible via HTTPS, and the **Local REST API** community project to be installed._
 - **Actual Bench** - https://github.com/x-rous/actual-bench
   - _Admin and workbench companion for Actual Budget. Bulk-edit data, manage, merge and diagnose rules, 12-month budget view, snapshot inspection, and ActualQL queries - all changes staged until you save._
+- **actual-budget-mcp** - https://github.com/henfrydls/actual-budget-mcp
+  - _Connect Actual to Claude and other AI assistants. Ask about your budget in plain language, get spending analysis and projections, and create, edit, or delete transactions. Deletions wait for your confirmation, and an optional read-only mode hides the write tools entirely._
 
 ## Others
 

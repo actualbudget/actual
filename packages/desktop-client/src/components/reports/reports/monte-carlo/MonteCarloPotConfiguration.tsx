@@ -17,12 +17,15 @@ import { View } from '@actual-app/components/view';
 import type { MonteCarloAllocationPreset } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
+import { FinancialText } from '#components/FinancialText';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import { POT_COLUMNS } from '#components/reports/reports/monte-carlo/MonteCarloPotsTableHeader';
 import {
   ALLOCATION_PRESETS,
+  getHistoricalMixStats,
+  getPotAssetWeights,
   MAX_AMOUNT,
   MAX_ANNUAL_FEE_RATE,
   MAX_WITHDRAWAL_TAX_RATE,
@@ -68,15 +71,36 @@ export function MonteCarloPotConfiguration({
   const { data: accounts = [] } = useAccounts();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Historical models derive this pot's returns from its allocation mix;
-  // the manual return/volatility only apply to Custom pots there
-  const isManualReturnDisabled =
-    usesHistoricalReturns && pot.allocationPreset !== 'custom';
+  // Historical models derive this pot's returns from its allocation mix,
+  // so pots with one (presets and custom mixes) show the mix's measured
+  // history instead of editable assumptions; the manual return/volatility
+  // only apply to pots without a mix
+  const assetWeights = usesHistoricalReturns ? getPotAssetWeights(pot) : null;
+  const historicalMixStats =
+    assetWeights != null ? getHistoricalMixStats(assetWeights) : null;
+
+  // A custom mix only counts once its shares total 100% (matching
+  // getPotAssetWeights, tolerance included); until then the pot falls
+  // back to its manual return/volatility and the UI warns
+  const sanitizeShare = (share: number) =>
+    Number.isFinite(share) && share > 0 ? share : 0;
+  const mixShareTotal =
+    sanitizeShare(pot.allocationStocks) +
+    sanitizeShare(pot.allocationBonds) +
+    sanitizeShare(pot.allocationCash);
+  const isMixIncomplete =
+    pot.allocationPreset === 'custom-mix' &&
+    Math.abs(mixShareTotal - 1) >= 1e-9;
 
   // A linked account that has since been closed or deleted isn't in the
   // open-accounts list; keep it represented so the stored link doesn't
   // display as a blank selection
-  const openAccounts = accounts.filter(account => account.closed === 0);
+  const openAccounts = accounts
+    .filter(account => account.closed === 0)
+    // Budgeted accounts first, then off-budget, each keeping the user's
+    // sidebar drag order (the query already sorts by sort_order) - the
+    // same order the sidebar shows
+    .sort((accountA, accountB) => accountA.offbudget - accountB.offbudget);
   const linkedAccount = accounts.find(account => account.id === pot.accountId);
   const missingLinkedOptions: Array<[string, string]> =
     pot.accountId != null &&
@@ -137,7 +161,10 @@ export function MonteCarloPotConfiguration({
         >
           <Input
             // Uncontrolled on purpose: committing on blur keeps typing
-            // snappy since every config change re-runs the simulation
+            // snappy since every config change re-runs the simulation.
+            // The key remounts it when the linked account changes, so an
+            // auto-filled name actually shows up
+            key={pot.accountId ?? 'manual'}
             defaultValue={pot.name}
             placeholder={t('Pot {{number}}', { number: potNumber })}
             onUpdate={newName => {
@@ -177,9 +204,25 @@ export function MonteCarloPotConfiguration({
         >
           <Select
             value={pot.accountId ?? ''}
-            onChange={value =>
-              onPotChange({ accountId: value === '' ? null : value })
-            }
+            onChange={value => {
+              const newAccountId = value === '' ? null : value;
+              const newAccount = accounts.find(
+                account => account.id === newAccountId,
+              );
+              const previousAccount = accounts.find(
+                account => account.id === pot.accountId,
+              );
+              // Default the pot's name to the account's, but only when
+              // the current name isn't the user's own: empty, or still
+              // the auto-filled name of the previously linked account
+              const shouldFillName =
+                newAccount != null &&
+                (pot.name === '' || pot.name === previousAccount?.name);
+              onPotChange({
+                accountId: newAccountId,
+                ...(shouldFillName && { name: newAccount.name }),
+              });
+            }}
             options={[
               ['', t('None')],
               ...missingLinkedOptions,
@@ -201,6 +244,23 @@ export function MonteCarloPotConfiguration({
               const preset = value as MonteCarloAllocationPreset;
               if (preset === 'custom') {
                 onPotChange({ allocationPreset: preset });
+              } else if (preset === 'custom-mix') {
+                // Seed the mix from the preset being left, so tweaking
+                // a preset (e.g. 80/20 to 85/15) starts from its shares
+                const presetWeights =
+                  pot.allocationPreset !== 'custom-mix'
+                    ? getPotAssetWeights(pot)
+                    : null;
+                onPotChange({
+                  allocationPreset: preset,
+                  ...(presetWeights != null && {
+                    allocationStocks: presetWeights.stocks,
+                    allocationBonds: presetWeights.bonds,
+                    allocationCash: presetWeights.cash,
+                  }),
+                });
+                // The mix's share inputs live in the expanded panel
+                setIsExpanded(true);
               } else {
                 onPotChange({
                   allocationPreset: preset,
@@ -215,6 +275,7 @@ export function MonteCarloPotConfiguration({
               ['equity-60', t('60% stocks / 40% bonds')],
               ['equity-40', t('40% stocks / 60% bonds')],
               ['cash', t('Cash / money market')],
+              ['custom-mix', t('Custom mix')],
               ['custom', t('Custom')],
             ]}
           />
@@ -225,20 +286,37 @@ export function MonteCarloPotConfiguration({
           style={{ minWidth: POT_COLUMNS.expectedReturn }}
           truncate={false}
         >
-          <MonteCarloNumberInput
-            value={pot.expectedReturnMean}
-            aria-label={t('Expected return (%)')}
-            scale={100}
-            min={-100}
-            max={100}
-            disabled={isManualReturnDisabled}
-            onCommit={newValue =>
-              onPotChange({
-                expectedReturnMean: newValue ?? 0,
-                allocationPreset: 'custom',
-              })
-            }
-          />
+          {historicalMixStats != null ? (
+            // Historical models take real blended returns for pots with
+            // an asset mix, so show what the mix actually measured
+            // rather than an ignored assumption
+            <Text style={{ color: theme.tableText }}>
+              <FinancialText as="span">
+                {t('{{value}} (historical)', {
+                  value: `${(historicalMixStats.mean * 100).toFixed(1)}%`,
+                })}
+              </FinancialText>
+            </Text>
+          ) : (
+            <MonteCarloNumberInput
+              value={pot.expectedReturnMean}
+              aria-label={t('Expected return (%)')}
+              scale={100}
+              min={-100}
+              max={100}
+              onCommit={newValue =>
+                onPotChange({
+                  expectedReturnMean: newValue ?? 0,
+                  // Typing a value only detaches a real preset; a custom
+                  // mix keeps its mix (these are its random-model inputs)
+                  allocationPreset:
+                    pot.allocationPreset === 'custom-mix'
+                      ? 'custom-mix'
+                      : 'custom',
+                })
+              }
+            />
+          )}
         </Field>
 
         <Field
@@ -246,20 +324,32 @@ export function MonteCarloPotConfiguration({
           style={{ minWidth: POT_COLUMNS.volatility }}
           truncate={false}
         >
-          <MonteCarloNumberInput
-            value={pot.returnStdDev}
-            aria-label={t('Volatility (std dev %)')}
-            scale={100}
-            min={0}
-            max={100}
-            disabled={isManualReturnDisabled}
-            onCommit={newValue =>
-              onPotChange({
-                returnStdDev: newValue ?? 0,
-                allocationPreset: 'custom',
-              })
-            }
-          />
+          {historicalMixStats != null ? (
+            <Text style={{ color: theme.tableText }}>
+              <FinancialText as="span">
+                {t('{{value}} (historical)', {
+                  value: `${(historicalMixStats.stdDev * 100).toFixed(1)}%`,
+                })}
+              </FinancialText>
+            </Text>
+          ) : (
+            <MonteCarloNumberInput
+              value={pot.returnStdDev}
+              aria-label={t('Volatility (std dev %)')}
+              scale={100}
+              min={0}
+              max={100}
+              onCommit={newValue =>
+                onPotChange({
+                  returnStdDev: newValue ?? 0,
+                  allocationPreset:
+                    pot.allocationPreset === 'custom-mix'
+                      ? 'custom-mix'
+                      : 'custom',
+                })
+              }
+            />
+          )}
         </Field>
 
         <Field
@@ -293,6 +383,107 @@ export function MonteCarloPotConfiguration({
             columnGap: 40,
           }}
         >
+          {pot.allocationPreset === 'custom-mix' && (
+            <View style={{ gap: 10 }}>
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+              >
+                <Text style={GROUP_HEADING_STYLE}>
+                  <Trans>Allocation</Trans>
+                </Text>
+                <MonteCarloHelpTooltip>
+                  <Trans>
+                    The share of this pot held in each asset class. The
+                    allocation must total 100% - until it does, the pot falls
+                    back to the expected return and volatility you enter.
+                    <br />
+                    <br />
+                    The mix drives this pot&apos;s returns under the historical
+                    return models. The random model still uses the expected
+                    return and volatility you enter.
+                  </Trans>
+                </MonteCarloHelpTooltip>
+              </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  flexWrap: 'wrap',
+                  alignItems: 'flex-end',
+                  gap: 20,
+                }}
+              >
+                <View style={FIELD_STYLE}>
+                  <View style={FIELD_LABEL_ROW_STYLE}>
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Stocks (%)</Trans>
+                    </Text>
+                  </View>
+                  <MonteCarloNumberInput
+                    value={pot.allocationStocks}
+                    aria-label={t('Stocks (%)')}
+                    scale={100}
+                    min={0}
+                    max={100}
+                    onCommit={newValue =>
+                      onPotChange({ allocationStocks: newValue ?? 0 })
+                    }
+                  />
+                </View>
+                <View style={FIELD_STYLE}>
+                  <View style={FIELD_LABEL_ROW_STYLE}>
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Bonds (%)</Trans>
+                    </Text>
+                  </View>
+                  <MonteCarloNumberInput
+                    value={pot.allocationBonds}
+                    aria-label={t('Bonds (%)')}
+                    scale={100}
+                    min={0}
+                    max={100}
+                    onCommit={newValue =>
+                      onPotChange({ allocationBonds: newValue ?? 0 })
+                    }
+                  />
+                </View>
+                <View style={FIELD_STYLE}>
+                  <View style={FIELD_LABEL_ROW_STYLE}>
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Cash (%)</Trans>
+                    </Text>
+                  </View>
+                  <MonteCarloNumberInput
+                    value={pot.allocationCash}
+                    aria-label={t('Cash (%)')}
+                    scale={100}
+                    min={0}
+                    max={100}
+                    onCommit={newValue =>
+                      onPotChange({ allocationCash: newValue ?? 0 })
+                    }
+                  />
+                </View>
+              </View>
+              {isMixIncomplete && (
+                // width 0 keeps the message from widening the group (it
+                // would push the other groups aside); minWidth stretches
+                // it back to the share inputs' width, wrapping the text
+                <Text
+                  style={{ color: theme.errorText, width: 0, minWidth: '100%' }}
+                >
+                  <Trans>
+                    The allocation must total 100% - currently{' '}
+                    {{
+                      total: `${parseFloat((mixShareTotal * 100).toFixed(2))}%`,
+                    }}
+                    . Until it does, this pot uses your expected return and
+                    volatility instead of the mix.
+                  </Trans>
+                </Text>
+              )}
+            </View>
+          )}
+
           <View style={{ gap: 10 }}>
             <Text style={GROUP_HEADING_STYLE}>
               <Trans>Access</Trans>

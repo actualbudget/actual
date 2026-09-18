@@ -1,4 +1,4 @@
-# Backing up Your Actual Budget
+# Backing Up Your Actual Budget
 
 :::note
 

@@ -19,6 +19,7 @@ import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import { MonteCarloCashflowGraph } from '#components/reports/graphs/MonteCarloCashflowGraph';
 import { MonteCarloGraph } from '#components/reports/graphs/MonteCarloGraph';
 import type { MonteCarloGraphView } from '#components/reports/graphs/MonteCarloGraphTooltip';
 import { MonteCarloHistogram } from '#components/reports/graphs/MonteCarloHistogram';
@@ -26,11 +27,15 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { MonteCarloConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloConfiguration';
 import { HISTORICAL_ANNUAL_RETURNS } from '#components/reports/reports/monte-carlo/monteCarloHistoricalReturns';
 import { MonteCarloRunDetailTable } from '#components/reports/reports/monte-carlo/MonteCarloRunDetailTable';
-import { MonteCarloRunsTable } from '#components/reports/reports/monte-carlo/MonteCarloRunsTable';
+import {
+  getRunPercentileOptions,
+  MonteCarloRunsTable,
+} from '#components/reports/reports/monte-carlo/MonteCarloRunsTable';
 import {
   getMonteCarloHorizonYears,
   MONTE_CARLO_DEFAULTS,
   monteCarloConfigFromMeta,
+  rankSimulationsWorstFirst,
   runMonteCarloSimulation,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import type { MonteCarloConfig } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
@@ -62,7 +67,13 @@ export function MonteCarlo() {
 
   const [config, setConfig] = useState<MonteCarloConfig>(MONTE_CARLO_DEFAULTS);
   const [graphView, setGraphView] = useState<MonteCarloGraphView>('all');
-  const [resultsView, setResultsView] = useState<'chart' | 'runs'>('chart');
+  const [resultsView, setResultsView] = useState<'chart' | 'cashflow' | 'runs'>(
+    'chart',
+  );
+  // Which run the cashflow view charts, as a percentile of the worst-first
+  // ranking (0 = worst run, 1 = best run) - the runs table's Jump to
+  // percentiles, so both land on the same runs
+  const [cashflowPercentile, setCashflowPercentile] = useState(0.5);
   const [showTodaysMoney, setShowTodaysMoney] = useState(true);
   // A selected run refers to a specific simulation, so the selection is
   // stored with the config it belongs to and silently expires when the
@@ -160,15 +171,44 @@ export function MonteCarlo() {
   };
   const result = runMonteCarloSimulation(simulationParams);
 
+  // The cashflow view charts one run picked by percentile of the same
+  // worst-first ranking the runs table shows
+  let cashflowRunIndex: number | null = null;
+  if (resultsView === 'cashflow') {
+    const rankedRunIndices = rankSimulationsWorstFirst(
+      result.endingBalances,
+      result.depletionYearBySimulation,
+    );
+    const scenarioRank = Math.round(
+      cashflowPercentile * (result.simulationCount - 1),
+    );
+    cashflowRunIndex = rankedRunIndices[scenarioRank];
+  }
+
+  // The run whose year-by-year detail is on screen: the cashflow view's
+  // scenario, or the drill-in's selection from the runs table
+  const detailRunIndex =
+    resultsView === 'cashflow' ? cashflowRunIndex : selectedRunIndex;
+
   // Runs are seeded, so re-running with a capture index reproduces the
   // selected run exactly; only computed while a run is being inspected
   const runDetailRows =
-    selectedRunIndex != null
+    detailRunIndex != null
       ? runMonteCarloSimulation({
           ...simulationParams,
-          captureRunDetail: selectedRunIndex,
+          captureRunDetail: detailRunIndex,
         }).runDetail
       : null;
+  // After a failure the capture continues with synthetic unfunded years
+  // for the cashflow chart; the year-by-year table ends at the failure
+  const fundedRunDetailRows =
+    runDetailRows?.filter(row => !row.afterDepletion) ?? null;
+  const cashflowGraphProps = {
+    pots: resolvedConfig.pots,
+    contributions: resolvedConfig.contributions,
+    spendingPhases: resolvedConfig.spendingPhases,
+    startAge: config.currentAge,
+  };
 
   // The age the simulation actually runs to (differs from targetAge only
   // when the configured ages produce a clamped horizon)
@@ -409,6 +449,8 @@ export function MonteCarlo() {
               <Text style={{ ...styles.mediumText, fontWeight: 600 }}>
                 {resultsView === 'chart' ? (
                   <Trans>Portfolio performance</Trans>
+                ) : resultsView === 'cashflow' ? (
+                  <Trans>Cashflow</Trans>
                 ) : (
                   <Trans>Simulation runs</Trans>
                 )}
@@ -419,6 +461,12 @@ export function MonteCarlo() {
                   onSelect={() => setResultsView('chart')}
                 >
                   <Trans>Chart</Trans>
+                </ModeButton>
+                <ModeButton
+                  selected={resultsView === 'cashflow'}
+                  onSelect={() => setResultsView('cashflow')}
+                >
+                  <Trans>Cashflow</Trans>
                 </ModeButton>
                 <ModeButton
                   selected={resultsView === 'runs'}
@@ -441,6 +489,14 @@ export function MonteCarlo() {
                   ['optimistic', t('Optimistic scenario (70th percentile)')],
                 ]}
                 style={{ width: 280 }}
+              />
+            )}
+            {resultsView === 'cashflow' && (
+              <Select
+                value={String(cashflowPercentile)}
+                onChange={value => setCashflowPercentile(Number(value))}
+                options={getRunPercentileOptions(t)}
+                style={{ width: 200 }}
               />
             )}
           </View>
@@ -476,14 +532,46 @@ export function MonteCarlo() {
                 style={{ height: '100%', flex: 1 }}
               />
             </>
-          ) : selectedRunIndex != null && runDetailRows != null ? (
+          ) : resultsView === 'cashflow' ? (
+            runDetailRows != null && (
+              <>
+                <Text
+                  style={{
+                    color: theme.pageText,
+                    marginBottom: 10,
+                    flexShrink: 0,
+                  }}
+                >
+                  <Trans>
+                    Money flowing in and out each year of this simulated run:
+                    withdrawals and contributions above zero, planned spending
+                    and tax below.
+                  </Trans>
+                </Text>
+                <MonteCarloCashflowGraph
+                  rows={runDetailRows}
+                  {...cashflowGraphProps}
+                />
+              </>
+            )
+          ) : selectedRunIndex != null &&
+            runDetailRows != null &&
+            fundedRunDetailRows != null ? (
             <MonteCarloRunDetailTable
-              rows={runDetailRows}
+              rows={fundedRunDetailRows}
               pots={resolvedConfig.pots}
               simulationIndex={selectedRunIndex}
               simulationCount={result.simulationCount}
               startAge={config.currentAge}
               hasContributions={config.contributions.length > 0}
+              withdrawalRule={resolvedConfig.withdrawalRule}
+              cashflowGraph={
+                <MonteCarloCashflowGraph
+                  rows={runDetailRows}
+                  {...cashflowGraphProps}
+                  style={{ marginBottom: 15 }}
+                />
+              }
               onBack={() => setSelectedRun(null)}
             />
           ) : (
@@ -615,7 +703,9 @@ export function MonteCarlo() {
                 Returns are actual US market years ({{ firstYear }}&ndash;
                 {{ lastYear }}, S&amp;P 500 / 10-year Treasuries / T-bills,
                 Damodaran data) drawn in random order for each pot&apos;s
-                allocation mix. Real crash years are included, but multi-year
+                allocation mix. Each sampled year brings its own actual US
+                inflation with it, so high-inflation markets stay
+                high-inflation. Real crash years are included, but multi-year
                 momentum is lost by shuffling, fees and taxes are only as
                 accurate as the rates you enter, and US history has been
                 unusually good, so results may be optimistic for globally
@@ -626,7 +716,8 @@ export function MonteCarlo() {
                 Each scenario replays actual US market history ({{ firstYear }}
                 &ndash;{{ lastYear }}, S&amp;P 500 / 10-year Treasuries /
                 T-bills, Damodaran data) starting from a different year,
-                wrapping around the end of the data. This preserves real crashes
+                wrapping around the end of the data. Each replayed year brings
+                its own actual US inflation with it. This preserves real crashes
                 and recoveries, but there are only as many scenarios as start
                 years, fees and taxes are only as accurate as the rates you
                 enter, and US history may be optimistic for globally diversified

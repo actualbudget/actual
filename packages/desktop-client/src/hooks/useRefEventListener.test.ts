@@ -1,6 +1,7 @@
+import { createElement, useRef } from 'react';
 import type { RefObject } from 'react';
 
-import { renderHook } from '@testing-library/react';
+import { render, renderHook, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { useRefEventListener } from './useRefEventListener';
@@ -93,5 +94,89 @@ describe('useRefEventListener', () => {
     unmount();
 
     expect(el.removeEventListener).toHaveBeenCalledTimes(1);
+  });
+
+  it('rebinds when the ref points at a different element', () => {
+    const first = makeMockElement();
+    const second = makeMockElement();
+    const ref = { current: first } as unknown as RefObject<HTMLElement | null>;
+
+    const { rerender } = renderHook(() =>
+      useRefEventListener(ref, 'click', vi.fn()),
+    );
+
+    ref.current = second as unknown as HTMLElement;
+    rerender();
+
+    expect(first.removeEventListener).toHaveBeenCalledTimes(1);
+    expect(second.addEventListener).toHaveBeenCalledTimes(1);
+  });
+
+  it('unbinds while the ref is empty and rebinds when it fills again', () => {
+    const first = makeMockElement();
+    const second = makeMockElement();
+    const ref = { current: first } as unknown as RefObject<HTMLElement | null>;
+
+    const { rerender, unmount } = renderHook(() =>
+      useRefEventListener(ref, 'click', vi.fn()),
+    );
+
+    ref.current = null;
+    rerender();
+
+    expect(first.removeEventListener).toHaveBeenCalledTimes(1);
+
+    ref.current = second as unknown as HTMLElement;
+    rerender();
+
+    expect(second.addEventListener).toHaveBeenCalledTimes(1);
+
+    unmount();
+
+    expect(second.removeEventListener).toHaveBeenCalledTimes(1);
+  });
+
+  it('binds an element that only appears after the first render', () => {
+    const el = makeMockElement();
+    const ref = { current: null } as unknown as RefObject<HTMLElement | null>;
+
+    const { rerender } = renderHook(() =>
+      useRefEventListener(ref, 'click', vi.fn()),
+    );
+
+    expect(el.addEventListener).not.toHaveBeenCalled();
+
+    ref.current = el as unknown as HTMLElement;
+    rerender();
+
+    expect(el.addEventListener).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps delivering events to a conditionally rendered target that remounts', () => {
+    const callback = vi.fn();
+
+    function Trigger({ showTarget }: { showTarget: boolean }) {
+      const ref = useRef<HTMLButtonElement | null>(null);
+      useRefEventListener(ref, 'click', callback);
+
+      return showTarget
+        ? createElement('button', { ref })
+        : createElement('input');
+    }
+
+    const { rerender } = render(createElement(Trigger, { showTarget: true }));
+
+    screen.getByRole('button').click();
+
+    expect(callback).toHaveBeenCalledTimes(1);
+
+    // An editable cell swaps its display node out for an input and back again,
+    // so the target that returns is a different DOM node than the original.
+    rerender(createElement(Trigger, { showTarget: false }));
+    rerender(createElement(Trigger, { showTarget: true }));
+
+    screen.getByRole('button').click();
+
+    expect(callback).toHaveBeenCalledTimes(2);
   });
 });

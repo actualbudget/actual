@@ -21,9 +21,13 @@ export const categoryOrder = [
   'Maintenance',
 ];
 
-export async function parseReleaseNotes(dir, owner, repo, historyRef) {
+export async function parseReleaseNotes(dir, owner, repo, historyRef, only) {
+  const allowed = only == null ? null : new Set(only);
   const files = (await fs.readdir(dir)).filter(
-    f => f.endsWith('.md') && f !== 'README.md',
+    f =>
+      f.endsWith('.md') &&
+      f !== 'README.md' &&
+      (allowed == null || allowed.has(f)),
   );
   const notes = files.map(async name => {
     const content = await fs.readFile(join(dir, name), 'utf-8');

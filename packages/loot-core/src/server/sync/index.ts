@@ -26,12 +26,20 @@ import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
 import * as undo from '#server/undo';
 import { once, sequential } from '#shared/async';
+import { isMissingSchemaError } from '#shared/errors';
 import { getIn, setIn } from '#shared/util';
 import type { MetadataPrefs } from '#types/prefs';
 
 import * as encoder from './encoder';
+import { PENDING_MESSAGES_TABLE_SQL } from './messages-pending';
 import { rebuildMerkleHash } from './repair';
-import { isError } from './utils';
+import {
+  deserializeValueSafe,
+  isUnknownFormatValue,
+  serializeValue,
+} from './serialization';
+import type { UnknownFormatValue } from './serialization';
+import { isError, notifyDeferredMessages, quoteSqlId } from './utils';
 
 export { makeTestMessage } from './make-test-message';
 export { resetSync } from './reset';
@@ -77,38 +85,96 @@ export function checkSyncingMode(mode: SyncingMode): boolean {
   }
 }
 
-function apply(msg: Message, prev?: boolean) {
+// Record a message that can't be applied yet because it targets schema
+// from a newer version. It's replayed by `replayPendingMessages` once a
+// migration adds the missing table/column. Only the newest value per
+// cell is kept — replay is last-write-wins per cell anyway, and this
+// bounds the table while the client stays on an old version.
+function deferMessage(msg: Message) {
+  // The table may not exist yet when the served migration files are
+  // older than the code — create it rather than failing the sync batch
+  db.execQuery(PENDING_MESSAGES_TABLE_SQL);
+  db.runQuery(
+    db.cache(
+      `INSERT INTO messages_pending (timestamp, dataset, row, column, value)
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT(dataset, row, column) DO UPDATE
+           SET timestamp = excluded.timestamp, value = excluded.value
+           WHERE excluded.timestamp > messages_pending.timestamp`,
+    ),
+    [
+      msg.timestamp.toString(),
+      msg.dataset,
+      msg.row,
+      msg.column,
+      serializeValue(msg.value),
+    ],
+  );
+}
+
+// Returns false when the message was deferred because it references
+// schema this client doesn't have yet (sent by a newer version).
+// Deferral only makes sense for inbound messages; for locally-created
+// messages a missing table/column is a bug and must surface as an
+// apply-failure.
+function apply(
+  msg: Message,
+  prev?: boolean,
+  deferUnknownSchema?: boolean,
+): boolean {
   const { dataset, row, column, value } = msg;
 
   if (dataset === 'prefs') {
     // Do nothing, it doesn't exist in the db
+  } else if (dataset === 'spreadsheet_cells') {
+    // Legacy dataset keyed by `name`, not `id`, so the write below
+    // could never apply; it's a derived cache, so ignore the message
+  } else if (isUnknownFormatValue(value)) {
+    // The value was serialized by a newer version in a format this one
+    // can't decode — defer it whole, like a missing table/column
+    if (deferUnknownSchema) {
+      deferMessage(msg);
+      return false;
+    }
+    throw new SyncError('invalid-schema', {
+      error: { message: 'Unknown value format: ' + value.raw, stack: '' },
+      query: {
+        sql: `INSERT INTO ${quoteSqlId(dataset)} (id, ${quoteSqlId(column)}) VALUES (?, ?)`,
+        params: [row, value.raw],
+      },
+    });
   } else {
     let query;
     try {
       if (prev) {
         query = {
-          sql: `UPDATE ${dataset} SET ${column} = ? WHERE id = ?`,
+          sql: `UPDATE ${quoteSqlId(dataset)} SET ${quoteSqlId(column)} = ? WHERE id = ?`,
           params: [value, row],
         };
       } else {
         query = {
-          sql: `INSERT INTO ${dataset} (id, ${column}) VALUES (?, ?)`,
+          sql: `INSERT INTO ${quoteSqlId(dataset)} (id, ${quoteSqlId(column)}) VALUES (?, ?)`,
           params: [row, value],
         };
       }
 
       db.runQuery(db.cache(query.sql), query.params);
     } catch (error) {
+      if (deferUnknownSchema && isMissingSchemaError(error)) {
+        deferMessage(msg);
+        return false;
+      }
       throw new SyncError('invalid-schema', {
         error: { message: error.message, stack: error.stack },
         query,
       });
     }
   }
+  return true;
 }
 
 // TODO: convert to `whereIn`
-async function fetchAll(table, ids) {
+function fetchAll(table: string, ids: string[]) {
   let results = [];
 
   // was 500, but that caused a stack overflow in Safari
@@ -117,7 +183,7 @@ async function fetchAll(table, ids) {
   for (let i = 0; i < ids.length; i += batchSize) {
     const partIds = ids.slice(i, i + batchSize);
     let sql;
-    let column = `${table}.id`;
+    let column = `${quoteSqlId(table)}.id`;
 
     // We have to provide *mapped* data so the spreadsheet works. The functions
     // which trigger budget changes based on data changes assumes data has been
@@ -131,7 +197,7 @@ async function fetchAll(table, ids) {
       `;
       column = 't.id';
     } else {
-      sql = `SELECT * FROM ${table}`;
+      sql = `SELECT * FROM ${quoteSqlId(table)}`;
     }
 
     sql += ` WHERE `;
@@ -141,6 +207,11 @@ async function fetchAll(table, ids) {
       const rows = db.runQuery(sql, partIds, true);
       results = results.concat(rows);
     } catch (error) {
+      if (isMissingSchemaError(error)) {
+        // The table comes from a newer version of the app; its messages
+        // will be deferred by `apply`
+        break;
+      }
       throw new SyncError('invalid-schema', {
         error: {
           message: error.message,
@@ -154,35 +225,23 @@ async function fetchAll(table, ids) {
   return results;
 }
 
-export function serializeValue(value: string | number | null): string {
-  if (value === null) {
-    return '0:';
-  } else if (typeof value === 'number') {
-    return 'N:' + value;
-  } else if (typeof value === 'string') {
-    return 'S:' + value;
-  }
-
-  throw new Error('Unserializable value type: ' + JSON.stringify(value));
-}
-
-export function deserializeValue(value: string): string | number | null {
-  const type = value[0];
-  switch (type) {
-    case '0':
-      return null;
-    case 'N':
-      return parseFloat(value.slice(2));
-    case 'S':
-      return value.slice(2);
-    default:
-  }
-
-  throw new Error('Invalid type key for value: ' + value);
-}
-
 // TODO make this type stricter.
 type DataMap = Map<string, unknown>;
+
+function fetchData(idsPerTable: Record<string, string[]>): DataMap {
+  const data: DataMap = new Map();
+
+  for (const table of Object.keys(idsPerTable)) {
+    const rows = fetchAll(table, idsPerTable[table]);
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      setIn(data, [table, row.id], row);
+    }
+  }
+
+  return data;
+}
 type SyncListener = (oldData: DataMap, newData: DataMap) => unknown;
 let _syncListeners: SyncListener[] = [];
 
@@ -194,28 +253,110 @@ export function addSyncListener(func: SyncListener) {
   };
 }
 
-async function compareMessages(messages: Message[]): Promise<Message[]> {
-  const newMessages = [];
+// Cells per `messages_crdt` lookup in `compareMessages`. The last chunk
+// is padded up to one of these sizes so only a handful of distinct
+// prepared statements ever live in `db.cache`. 100 terms is well inside
+// SQLITE_MAX_EXPR_DEPTH and still uses the messages_crdt_search index.
+const COMPARE_CHUNK_SIZES = [1, 10, 100];
+const compareMessagesSqlByTermCount = new Map<number, string>();
 
-  for (let i = 0; i < messages.length; i++) {
-    const message = messages[i];
-    const { dataset, row, column, timestamp } = message;
-    const timestampStr = timestamp.toString();
+function compareMessagesSql(termCount: number): string {
+  let sql = compareMessagesSqlByTermCount.get(termCount);
+  if (sql == null) {
+    const term = '(dataset = ? AND row = ? AND column = ? AND timestamp >= ?)';
+    sql =
+      'SELECT dataset, row, column, timestamp FROM messages_crdt WHERE ' +
+      Array(termCount).fill(term).join(' OR ');
+    compareMessagesSqlByTermCount.set(termCount, sql);
+  }
+  return sql;
+}
 
-    const res = db.runQuery<Pick<db.DbCrdtMessage, 'timestamp'>>(
-      db.cache(
-        'SELECT timestamp FROM messages_crdt WHERE dataset = ? AND row = ? AND column = ? AND timestamp >= ?',
-      ),
-      [dataset, row, column, timestampStr],
-      true,
+type CompareKey = {
+  dataset: string;
+  row: string;
+  column: string;
+  timestamp: string;
+};
+
+function cellKey(dataset: string, row: string, column: string): string {
+  return `${dataset}\0${row}\0${column}`;
+}
+
+// Filters out messages that are already in the crdt log and flags a
+// message as "old" when a later value for the same cell already exists.
+// Old messages aren't applied but still go into the merkle trie.
+//
+// This does one query per chunk of distinct cells rather than one per
+// message: on the web backend every statement outside a transaction is
+// a separate lock/commit cycle against IndexedDB, and bulk edits and
+// incoming syncs can carry thousands of messages.
+function compareMessages(messages: Message[]): Message[] {
+  if (messages.length === 0) {
+    return [];
+  }
+
+  // The oldest timestamp per cell in this batch. Log rows at or after
+  // it cover every message for that cell.
+  const cells = new Map<string, CompareKey>();
+  for (const message of messages) {
+    const { dataset, row, column } = message;
+    const timestampStr = message.timestamp.toString();
+    const key = cellKey(dataset, row, column);
+    const existing = cells.get(key);
+    if (!existing || timestampStr < existing.timestamp) {
+      cells.set(key, { dataset, row, column, timestamp: timestampStr });
+    }
+  }
+
+  const loggedTimestamps = new Map<string, string[]>();
+  const cellList = [...cells.values()];
+  const largestChunk = COMPARE_CHUNK_SIZES[COMPARE_CHUNK_SIZES.length - 1];
+  for (let start = 0; start < cellList.length; start += largestChunk) {
+    const chunk = cellList.slice(start, start + largestChunk);
+    const chunkSize = COMPARE_CHUNK_SIZES.find(size => size >= chunk.length);
+    // Pad with a repeated cell so the statement shape matches a bucket
+    while (chunk.length < chunkSize) {
+      chunk.push(chunk[chunk.length - 1]);
+    }
+
+    const params = chunk.flatMap(cell => [
+      cell.dataset,
+      cell.row,
+      cell.column,
+      cell.timestamp,
+    ]);
+    const rows = db.runQuery<
+      Pick<db.DbCrdtMessage, 'dataset' | 'row' | 'column' | 'timestamp'>
+    >(db.cache(compareMessagesSql(chunkSize)), params, true);
+
+    for (const logged of rows) {
+      const key = cellKey(logged.dataset, logged.row, logged.column);
+      const timestamps = loggedTimestamps.get(key);
+      if (timestamps) {
+        timestamps.push(logged.timestamp);
+      } else {
+        loggedTimestamps.set(key, [logged.timestamp]);
+      }
+    }
+  }
+
+  const newMessages: Message[] = [];
+  for (const message of messages) {
+    const timestampStr = message.timestamp.toString();
+    const logged = loggedTimestamps.get(
+      cellKey(message.dataset, message.row, message.column),
     );
 
-    // Returned message is any one that is "later" than this message,
-    // meaning if the result exists this message is an old one
-    if (res.length === 0) {
+    if (!logged) {
       newMessages.push(message);
-    } else if (res[0].timestamp !== timestampStr) {
+    } else if (logged.includes(timestampStr)) {
+      // Exactly this message is already in the log: nothing to do
+    } else if (logged.some(timestamp => timestamp > timestampStr)) {
+      // A later message for this cell exists, so this one is old
       newMessages.push({ ...message, old: true });
+    } else {
+      newMessages.push(message);
     }
   }
 
@@ -255,63 +396,14 @@ export type Message = {
   old?: unknown;
   row: string;
   timestamp: Timestamp;
-  value: string | number | null;
+  value: string | number | null | UnknownFormatValue;
 };
 
-export const applyMessages = sequential(async (messages: Message[]) => {
+async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
   if (checkSyncingMode('import')) {
     applyMessagesForImport(messages);
     return undefined;
-  } else if (checkSyncingMode('enabled')) {
-    // Compare the messages with the existing crdt. This filters out
-    // already applied messages and determines if a message is old or
-    // not. An "old" message doesn't need to be applied, but it still
-    // needs to be put into the merkle trie to maintain the hash.
-    messages = await compareMessages(messages);
   }
-
-  messages = [...messages].sort((m1, m2) => {
-    const t1 = m1.timestamp ? m1.timestamp.toString() : '';
-    const t2 = m2.timestamp ? m2.timestamp.toString() : '';
-    if (t1 < t2) {
-      return -1;
-    } else if (t1 > t2) {
-      return 1;
-    }
-    return 0;
-  });
-
-  const idsPerTable: Record<string, string[]> = {};
-  messages.forEach(msg => {
-    if (msg.dataset === 'prefs') {
-      return;
-    }
-
-    if (idsPerTable[msg.dataset] == null) {
-      idsPerTable[msg.dataset] = [];
-    }
-    idsPerTable[msg.dataset].push(msg.row);
-  });
-
-  async function fetchData(): Promise<DataMap> {
-    const data = new Map();
-
-    for (const table of Object.keys(idsPerTable)) {
-      const rows = await fetchAll(table, idsPerTable[table]);
-
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        setIn(data, [table, row.id], row);
-      }
-    }
-
-    return data;
-  }
-
-  const prefsToSet: MetadataPrefs = {};
-  const oldData = await fetchData();
-
-  undo.appendMessages(messages, oldData);
 
   // It's important to not mutate the clock while processing the
   // messages. We only want to mutate it if the transaction succeeds.
@@ -328,45 +420,107 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     sheet.get().startCacheBarrier();
   }
 
-  // Now that we have all of the data, go through and apply the
-  // messages carefully. This transaction is **crucial**: it
-  // guarantees that everything is atomically committed to the
-  // database, and if any part of it fails everything aborts and
-  // nothing is changed. This is critical to maintain consistency. We
-  // also avoid any side effects to in-memory objects, and apply them
-  // after this succeeds.
+  const prefsToSet: MetadataPrefs = {};
+  let budgetTypeToSet: Message['value'] | undefined;
+  const deferredMessages = new Set<Message>();
+  const idsPerTable: Record<string, string[]> = {};
+  let oldData: DataMap = new Map();
+  let newData: DataMap = new Map();
+
+  // Everything that touches the database runs in one transaction: the
+  // crdt lookup, reading the affected rows before and after, and the
+  // writes themselves. This transaction is **crucial**: it guarantees
+  // that everything is atomically committed to the database, and if
+  // any part of it fails everything aborts and nothing is changed. It
+  // also matters for speed: on the web backend every statement outside
+  // a transaction is a separate lock/commit cycle against IndexedDB. We
+  // avoid any side effects to in-memory objects, and apply them after
+  // this succeeds.
   db.transaction(() => {
+    if (checkSyncingMode('enabled')) {
+      // Compare the messages with the existing crdt. This filters out
+      // already applied messages and determines if a message is old or
+      // not. An "old" message doesn't need to be applied, but it still
+      // needs to be put into the merkle trie to maintain the hash.
+      messages = compareMessages(messages);
+    }
+
+    messages = [...messages].sort((m1, m2) => {
+      const t1 = m1.timestamp ? m1.timestamp.toString() : '';
+      const t2 = m2.timestamp ? m2.timestamp.toString() : '';
+      if (t1 < t2) {
+        return -1;
+      } else if (t1 > t2) {
+        return 1;
+      }
+      return 0;
+    });
+
+    messages.forEach(msg => {
+      if (msg.dataset === 'prefs') {
+        return;
+      }
+
+      if (idsPerTable[msg.dataset] == null) {
+        idsPerTable[msg.dataset] = [];
+      }
+      idsPerTable[msg.dataset].push(msg.row);
+    });
+
+    oldData = fetchData(idsPerTable);
+
+    // Now that we have all of the data, go through and apply the
+    // messages carefully.
     const added = new Set();
 
     for (const msg of messages) {
       const { dataset, row, column, timestamp, value } = msg;
 
       if (!msg.old) {
-        apply(msg, getIn(oldData, [dataset, row]) || added.has(dataset + row));
+        const applied = apply(
+          msg,
+          getIn(oldData, [dataset, row]) || added.has(dataset + row),
+          deferUnknownSchema,
+        );
 
-        if (dataset === 'prefs') {
-          prefsToSet[row] = value;
+        if (applied) {
+          if (dataset === 'prefs') {
+            // An unknown-format pref value can't be stored or replayed
+            // (prefs aren't a table) — leave the local pref as-is
+            if (!isUnknownFormatValue(value)) {
+              prefsToSet[row] = value;
+            }
+          } else {
+            // Keep track of which items have been added it in this sync
+            // so it knows whether they already exist in the db or not. We
+            // ignore any changes to the spreadsheet.
+            added.add(dataset + row);
+
+            // Special treatment for some synced prefs. Applied messages
+            // only — an old or deferred message must not flip the
+            // in-memory budget type. Remember it here and switch after
+            // the commit: switching mutates the in-memory spreadsheet,
+            // which a rollback could not undo
+            if (dataset === 'preferences' && row === 'budgetType') {
+              budgetTypeToSet = value;
+            }
+          }
         } else {
-          // Keep track of which items have been added it in this sync
-          // so it knows whether they already exist in the db or not. We
-          // ignore any changes to the spreadsheet.
-          added.add(dataset + row);
+          // Deferred messages must not be tracked in `added`: their
+          // row wasn't created, so a later message for a known column
+          // still needs to INSERT it
+          deferredMessages.add(msg);
         }
       }
 
       if (checkSyncingMode('enabled')) {
         db.runQuery(
           db.cache(`INSERT INTO messages_crdt (timestamp, dataset, row, column, value)
-           VALUES (?, ?, ?, ?, ?)`),
+         VALUES (?, ?, ?, ?, ?)`),
           [timestamp.toString(), dataset, row, column, serializeValue(value)],
         );
 
         currentMerkle = merkle.insert(currentMerkle, timestamp);
-      }
-
-      // Special treatment for some synced prefs
-      if (dataset === 'preferences' && row === 'budgetType') {
-        void setBudgetType(value);
       }
     }
 
@@ -382,11 +536,19 @@ export const applyMessages = sequential(async (messages: Message[]) => {
         [serializeClock({ ...clock, merkle: currentMerkle })],
       );
     }
+
+    newData = fetchData(idsPerTable);
   });
 
+  // The transaction succeeded, so we can update in-memory objects now
+  undo.appendMessages(messages, oldData);
+
+  if (budgetTypeToSet !== undefined) {
+    void setBudgetType(budgetTypeToSet);
+  }
+
   if (checkSyncingMode('enabled')) {
-    // The transaction succeeded, so we can update in-memory objects
-    // now. Update the in-memory clock.
+    // Update the in-memory clock.
     clock.merkle = currentMerkle;
   }
 
@@ -395,8 +557,6 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     void prefs.savePrefs(prefsToSet, { avoidSync: true });
     connection.send('prefs-updated');
   }
-
-  const newData = await fetchData();
 
   // In testing, sometimes the spreadsheet isn't loaded, and that's ok
   if (sheet.get()) {
@@ -433,7 +593,11 @@ export const applyMessages = sequential(async (messages: Message[]) => {
 
   _syncListeners.forEach(func => func(oldData, newData));
 
-  const tables = getTablesFromMessages(messages.filter(msg => !msg.old));
+  // Only tables that actually changed — deferred messages wrote
+  // nothing, so they must not trigger client cache invalidation
+  const tables = getTablesFromMessages(
+    messages.filter(msg => !msg.old && !deferredMessages.has(msg)),
+  );
   app.events.emit('sync', {
     type: 'applied',
     tables,
@@ -441,14 +605,39 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     prevData: oldData,
   });
 
-  return messages;
-});
+  if (deferredMessages.size > 0) {
+    notifyDeferredMessages();
+  }
+
+  // Deferred messages wrote nothing, so they don't count as received
+  // — this also keeps their tables out of the `success` event in
+  // `fullSync`. Old messages stay: they were processed (merkled),
+  // just superseded.
+  return deferredMessages.size === 0
+    ? messages
+    : messages.filter(msg => !deferredMessages.has(msg));
+}
+
+export const applyMessages = sequential(_applyMessages);
 
 export function receiveMessages(messages: Message[]): Promise<Message[]> {
   try {
-    messages.forEach(msg => {
-      Timestamp.recv(msg.timestamp);
-    });
+    // Receiving the latest timestamp preserves the clock and drift check while
+    // advancing the counter once per batch.
+    let latest = null;
+    for (const { timestamp } of messages) {
+      if (
+        latest === null ||
+        timestamp.millis() > latest.millis() ||
+        (timestamp.millis() === latest.millis() &&
+          timestamp.counter() > latest.counter())
+      ) {
+        latest = timestamp;
+      }
+    }
+    if (latest !== null) {
+      Timestamp.recv(latest);
+    }
   } catch (e) {
     if (e instanceof Timestamp.ClockDriftError) {
       throw new SyncError('clock-drift');
@@ -456,7 +645,9 @@ export function receiveMessages(messages: Message[]): Promise<Message[]> {
     throw e;
   }
 
-  return runMutator(() => applyMessages(messages));
+  // Inbound messages may come from a newer version of the app, so
+  // unknown-schema errors defer instead of failing the batch
+  return runMutator(() => applyMessages(messages, true));
 }
 
 async function errorHandler(e: Error) {
@@ -744,7 +935,7 @@ async function _fullSync(
     receivedMessages = await receiveMessages(
       res.messages.map(msg => ({
         ...msg,
-        value: deserializeValue(msg.value as string),
+        value: deserializeValueSafe(msg.value as string),
       })),
     );
   }
