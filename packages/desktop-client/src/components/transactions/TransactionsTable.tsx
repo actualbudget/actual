@@ -241,6 +241,21 @@ const TRANSACTION_TABLE_COLUMN_WIDTHS: Record<string, number | 'flex'> = {
   balance: DEFAULT_AMOUNT_COLUMN_WIDTHS.balance,
 };
 
+// Per-column shrink floors (px). Static on purpose — measuring the widest
+// value in every row would be expensive, so each column just gets a floor
+// that keeps its own header/values readable.
+const TRANSACTION_TABLE_COLUMN_MIN_WIDTHS: Record<string, number> = {
+  date: 80,
+  account: 80,
+  payee: 100,
+  notes: 100,
+  group: 80,
+  category: 100,
+  payment: 80,
+  deposit: 80,
+  balance: 80,
+};
+
 type TransactionHeaderProps = {
   hasSelected: boolean;
   columns: TransactionTableColumnId[];
@@ -2930,6 +2945,7 @@ function TransactionTableInner({
     <ColumnWidthsProvider
       tableId="transactions"
       defaultWidths={defaultColumnWidths}
+      minWidths={TRANSACTION_TABLE_COLUMN_MIN_WIDTHS}
     >
       <View
         innerRef={containerRef}

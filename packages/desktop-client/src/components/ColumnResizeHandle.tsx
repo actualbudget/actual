@@ -8,10 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 
-import {
-  MIN_COLUMN_WIDTH,
-  useColumnWidthsContext,
-} from '#hooks/useColumnWidths';
+import { useColumnWidthsContext } from '#hooks/useColumnWidths';
 
 const KEYBOARD_RESIZE_STEP = 10;
 
@@ -75,10 +72,7 @@ export function ColumnResizeHandle({ columnName }: ColumnResizeHandleProps) {
     e.stopPropagation();
 
     const delta = (e.key === 'ArrowRight' ? 1 : -1) * KEYBOARD_RESIZE_STEP;
-    context.setColumnWidth(
-      columnName,
-      context.getColumnWidth(columnName) + delta,
-    );
+    context.resizeColumnBy(columnName, delta);
   };
 
   const onDoubleClick = (e: ReactMouseEvent<HTMLDivElement>) => {
@@ -95,7 +89,9 @@ export function ColumnResizeHandle({ columnName }: ColumnResizeHandleProps) {
       aria-orientation="vertical"
       aria-label={t('Resize column')}
       aria-valuenow={typeof width === 'number' ? Math.round(width) : undefined}
-      aria-valuemin={typeof width === 'number' ? MIN_COLUMN_WIDTH : undefined}
+      aria-valuemin={
+        typeof width === 'number' ? context.getMinWidth(columnName) : undefined
+      }
       tabIndex={0}
       data-testid={`resize-handle-${columnName}`}
       data-resize-handle

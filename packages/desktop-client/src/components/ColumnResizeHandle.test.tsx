@@ -23,10 +23,13 @@ vi.mock('#hooks/useColumnWidths', async importOriginal => {
 function makeContext(): ColumnWidthsContextValue {
   return {
     widths: { date: 110 },
+    isResizing: false,
     containerRef: { current: null },
     setContainerRef: vi.fn(),
     getColumnWidth: vi.fn(() => 110),
+    getMinWidth: vi.fn(() => 50),
     setColumnWidth: vi.fn(),
+    resizeColumnBy: vi.fn(),
     onResizeStart: vi.fn(),
     onResize: vi.fn(),
     onResizeEnd: vi.fn(),
@@ -100,11 +103,10 @@ describe('ColumnResizeHandle', () => {
     const { handle } = renderHandle();
 
     fireEvent.keyDown(handle, { key: 'ArrowRight' });
-    expect(context.getColumnWidth).toHaveBeenCalledWith('date');
-    expect(context.setColumnWidth).toHaveBeenCalledWith('date', 120);
+    expect(context.resizeColumnBy).toHaveBeenCalledWith('date', 10);
 
     fireEvent.keyDown(handle, { key: 'ArrowLeft' });
-    expect(context.setColumnWidth).toHaveBeenCalledWith('date', 100);
+    expect(context.resizeColumnBy).toHaveBeenCalledWith('date', -10);
   });
 
   it('resets the column width on double click', () => {

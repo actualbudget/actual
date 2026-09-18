@@ -37,7 +37,10 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useColumnWidthsContext } from '#hooks/useColumnWidths';
+import {
+  MIN_COLUMN_WIDTH,
+  useColumnWidthsContext,
+} from '#hooks/useColumnWidths';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
 import { useMergedRefs } from '#hooks/useMergedRefs';
@@ -93,14 +96,21 @@ type FieldProps = ComponentProps<typeof View> & {
 function getWidthStyle(
   width: CSSProperties['width'] | undefined,
   ctxWidth: number | 'flex' | undefined,
-  columnName?: string,
+  columnName: string | undefined,
+  isResizing: boolean,
 ): CSSProperties {
-  if (ctxWidth !== undefined) {
-    // Flex columns have a minimum width so a very wide neighbor cannot
-    // collapse them
-    return ctxWidth === 'flex'
-      ? { flex: 1, flexBasis: 0, minWidth: 50 }
-      : { width: `var(--col-${columnName}-width)` };
+  // During a resize every named column is pinned to its CSS variable so
+  // the cascade can drive widths directly.
+  if (columnName != null && (ctxWidth !== undefined || isResizing)) {
+    if (!isResizing && ctxWidth === 'flex') {
+      // Flex columns have a minimum width so a very wide neighbor cannot
+      // collapse them
+      return { flex: 1, flexBasis: 0, minWidth: MIN_COLUMN_WIDTH };
+    }
+    // Fixed columns opt out of flexbox shrinking entirely so their width is
+    // exactly what the user set (otherwise an over-constrained row silently
+    // shrinks them, which makes a drag feel damped).
+    return { width: `var(--col-${columnName}-width)`, flexShrink: 0 };
   }
   return width === 'flex' ? { flex: 1, flexBasis: 0 } : { width };
 }
@@ -120,7 +130,12 @@ function useColumnWidthStyle(
       ? columnWidthsCtx.widths[effectiveColumnName]
       : undefined;
   return {
-    widthStyle: getWidthStyle(width, ctxWidth, effectiveColumnName),
+    widthStyle: getWidthStyle(
+      width,
+      ctxWidth,
+      effectiveColumnName,
+      !!columnWidthsCtx?.isResizing,
+    ),
     effectiveColumnName,
     hasResizeContext: !!(columnWidthsCtx && effectiveColumnName),
   };
