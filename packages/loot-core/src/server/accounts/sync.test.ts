@@ -740,6 +740,8 @@ describe('Account sync', () => {
 });
 
 describe('SimpleFin batch sync', () => {
+  let previousGoCardlessTransactionsHandler;
+
   function mockSimpleFinTransactions(response) {
     vi.mocked(asyncStorage.getItem).mockResolvedValue('test-token');
     handlers['/simplefin/transactions'] = () => response;
@@ -747,6 +749,12 @@ describe('SimpleFin batch sync', () => {
 
   afterEach(() => {
     delete handlers['/simplefin/transactions'];
+    if (previousGoCardlessTransactionsHandler) {
+      handlers['/gocardless/transactions'] =
+        previousGoCardlessTransactionsHandler;
+    } else {
+      delete handlers['/gocardless/transactions'];
+    }
   });
 
   test('does not emit transaction CRDT messages when provider category appears later', async () => {
@@ -973,6 +981,8 @@ describe('SimpleFin batch sync', () => {
       transfer_acct: acctId,
     });
 
+    previousGoCardlessTransactionsHandler =
+      handlers['/gocardless/transactions'];
     handlers['/gocardless/transactions'] = () => ({
       error_type: 'GOCARDLESS_NOT_CONFIGURED',
       error_code: 'GOCARDLESS_NOT_CONFIGURED',
