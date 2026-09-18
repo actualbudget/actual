@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -40,5 +43,39 @@ describe('base path', () => {
     expect(stripBasePath('/finances', '/finance/budget')).toBe(
       '/finance/budget',
     );
+  });
+
+  it('sets loot-core PUBLIC_URL before browser staging in dev and build', () => {
+    const viteConfig = readFileSync(resolve('vite.config.mts'), 'utf8');
+    const publicUrlAssignment = viteConfig.indexOf(
+      'process.env.PUBLIC_URL = normalizedBasePath',
+    );
+    const stagingBranch = viteConfig.indexOf("if (command === 'build')");
+
+    expect(publicUrlAssignment).toBeGreaterThanOrEqual(0);
+    expect(publicUrlAssignment).toBeLessThan(stagingBranch);
+  });
+
+  it('keeps generated document and manifest assets under the configured base path', () => {
+    const html = readFileSync(resolve('index.html'), 'utf8');
+    expect(html).toContain('href="%BASE_URL%favicon.ico"');
+    expect(html).toContain('href="%BASE_URL%site.webmanifest"');
+
+    const manifest = JSON.parse(
+      readFileSync(resolve('public/site.webmanifest'), 'utf8'),
+    ) as {
+      icons: Array<{ src: string }>;
+      shortcuts: Array<{ url: string; icons: Array<{ src: string }> }>;
+      screenshots: Array<{ src: string }>;
+    };
+    const urls = [
+      ...manifest.icons.map(icon => icon.src),
+      ...manifest.shortcuts.flatMap(shortcut => [
+        shortcut.url,
+        ...shortcut.icons.map(icon => icon.src),
+      ]),
+      ...manifest.screenshots.map(screenshot => screenshot.src),
+    ];
+    expect(urls.every(url => !url.startsWith('/'))).toBe(true);
   });
 });

@@ -40,6 +40,10 @@ let SQL: SqlJsModule | null = null;
 // every other consumer (web app and Node build never call `setWasmBinary`).
 let wasmBinaryOverride: ArrayBuffer | Uint8Array | undefined;
 
+export function getSqlWasmUrl(baseURL: string, file = 'sql-wasm.wasm') {
+  return `${baseURL.replace(/\/?$/, '/')}${file}`;
+}
+
 export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
   wasmBinaryOverride = binary;
 }
@@ -52,7 +56,7 @@ export async function init({
   // we're returning a real one for correct semantics
   return new Promise((resolve, reject) => {
     initSqlJS({
-      locateFile: file => baseURL + file,
+      locateFile: file => getSqlWasmUrl(baseURL, file),
       ...(wasmBinary ? { wasmBinary: wasmBinary as ArrayBuffer } : {}),
     }).then(
       sql => {

@@ -265,6 +265,7 @@ export default defineConfig(async ({ mode, command }) => {
   // Electron packaging (--mode=desktop) bundles loot-core directly, so skip
   // all browser-only staging there.
   if (mode !== 'desktop') {
+    process.env.PUBLIC_URL = normalizedBasePath;
     if (command === 'build') {
       const stageKcab = build({
         configFile: lootCoreConfig,
