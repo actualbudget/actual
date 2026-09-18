@@ -21,6 +21,7 @@ The following are implementations of bank syncing using the Actual API, or conve
 - **US bank statement converter (BofA, Chase, Citi, Amex CSV and Chase PDF) to Actual-ready CSV** - https://github.com/Ildana-ai/bank2actual
 - **ANZ Plus bank PDF to OFX converter** - [PDFtoOFX](https://github.com/spydisec/PDFtoOFX/)
 - **German DKB and Comdirect banks importer** - https://github.com/FridoE/actual-bank-importer
+- **Indian bank statement converter (CSV, Excel, HTML and PDF) to Actual-ready CSV, resolving UPI references to merchant names** - https://github.com/emilgeo/actual-india-import
 
 ## Other Importers
 
