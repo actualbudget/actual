@@ -7,6 +7,8 @@ import {
   AccountNotLinkedToRequisition,
   EndUserAgreementExpiredError,
   GenericGoCardlessError,
+  GoCardlessInvalidCredentialsError,
+  GoCardlessNotConfiguredError,
   InvalidGoCardlessTokenError,
   InvalidInputDataError,
   NotFoundError,
@@ -41,7 +43,12 @@ import { SecretName, secretsService } from '#services/secrets-service';
 import type { AccountDetailsResponse, TokenResponse } from './gocardless-api';
 import { GoCardlessApi, GoCardlessApiError } from './gocardless-api';
 
-const clients = new Map<string, GoCardlessApi>();
+// Only the credentials currently configured are cached. Keeping a client per
+// secret pair meant every pair a server had ever used stayed in memory for the
+// process's lifetime, and re-entering an earlier pair — the ordinary outcome of
+// restoring a backup — handed back that pair's client along with the session
+// token it was still holding.
+let cachedClient: { hash: string; api: GoCardlessApi } | null = null;
 
 const getGocardlessClient = (): GoCardlessApi => {
   const secrets = {
@@ -51,13 +58,11 @@ const getGocardlessClient = (): GoCardlessApi => {
 
   const hash = JSON.stringify(secrets);
 
-  let client = clients.get(hash);
-  if (!client) {
-    client = new GoCardlessApi(secrets);
-    clients.set(hash, client);
+  if (!cachedClient || cachedClient.hash !== hash) {
+    cachedClient = { hash, api: new GoCardlessApi(secrets) };
   }
 
-  return client;
+  return cachedClient.api;
 };
 
 const isEuaExpiredError = (error: unknown): boolean => {
@@ -113,6 +118,13 @@ export const goCardlessService = {
   },
 
   setToken: async (): Promise<void> => {
+    // Without credentials the token request fails with a generic 400, which
+    // surfaces to the user as an unhelpful internal error. Fail early with a
+    // dedicated error so the client can tell them to re-enter their secrets.
+    if (!goCardlessService.isConfigured()) {
+      throw new GoCardlessNotConfiguredError();
+    }
+
     const isExpiredJwtToken = (token: string | null): boolean => {
       if (!token) return true;
       try {
@@ -127,7 +139,22 @@ export const goCardlessService = {
     };
 
     if (isExpiredJwtToken(getGocardlessClient().token)) {
-      await client.generateToken().catch(handleGoCardlessError);
+      await client.generateToken().catch((error: unknown) => {
+        // A rejected token request is the only proof that the secrets
+        // themselves are wrong. A 401 from any later call means the session
+        // token went stale, so the mapping is made here and nowhere else.
+        // The request carries nothing but the secret ID and secret key, so a
+        // 400 is the same verdict: they are malformed rather than merely
+        // rejected.
+        if (
+          error instanceof GoCardlessApiError &&
+          (error.response.status === 400 || error.response.status === 401)
+        ) {
+          throw new GoCardlessInvalidCredentialsError();
+        }
+
+        return handleGoCardlessError(error);
+      });
     }
   },
 
