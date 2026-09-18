@@ -391,20 +391,25 @@ export async function insertCategoryGroup(
 }
 
 export async function updateCategoryGroup(
-  group: WithRequired<Partial<DbCategoryGroup>, 'id' | 'name' | 'is_income'>,
+  group: WithRequired<Partial<DbCategoryGroup>, 'id' | 'is_income'>,
 ) {
-  const existingGroup = await first<
-    Pick<DbCategoryGroup, 'id' | 'name' | 'hidden'>
-  >(
-    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? AND id != ? AND tombstone = 0 LIMIT 1`,
-    [group.name.toUpperCase(), group.id],
-  );
-  if (existingGroup) {
-    throw new Error(
-      `A ${
-        existingGroup.hidden ? 'hidden ' : ''
-      }'${existingGroup.name}' category group already exists.`,
+  // An update that does not touch the name cannot introduce a duplicate, and
+  // `name` is genuinely absent on one: api/category-group-update forwards the
+  // caller's Partial, and update() writes only the keys it is given.
+  if (group.name !== undefined) {
+    const existingGroup = await first<
+      Pick<DbCategoryGroup, 'id' | 'name' | 'hidden'>
+    >(
+      `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? AND id != ? AND tombstone = 0 LIMIT 1`,
+      [group.name.toUpperCase(), group.id],
     );
+    if (existingGroup) {
+      throw new Error(
+        `A ${
+          existingGroup.hidden ? 'hidden ' : ''
+        }'${existingGroup.name}' category group already exists.`,
+      );
+    }
   }
   group = categoryGroupModel.validate(group, { update: true });
   return update('category_groups', group);
