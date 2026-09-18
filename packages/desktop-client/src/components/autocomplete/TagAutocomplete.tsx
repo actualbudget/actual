@@ -31,7 +31,6 @@ export type TagAutocompleteProps = {
 
 export function TagAutocomplete({
   inputValue,
-
   setInputValue,
   onBlur,
   inputStyle,
@@ -141,7 +140,12 @@ export function TagAutocomplete({
       e.stopPropagation();
       void handleSelect(highlightedId);
     } else if (e.key === 'Escape') {
+      // Popup is open (guarded above), so this press only closes it.
+      e.stopPropagation();
       setIsOpen(false);
+      onKeyDown?.(e);
+    } else {
+      onKeyDown?.(e);
     }
 
     setHighlightedIdx(idx =>
