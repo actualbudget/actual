@@ -756,7 +756,8 @@ export type MonteCarloRunDetailRow = {
   /**
    * The money that actually reached spending: net income put towards it
    * plus the withdrawal net of tax. Below plannedSpending on a shortfall
-   * year, above it when the minimum withdrawal forced out more
+   * year, above it when the minimum withdrawal forced out more and no
+   * surplus pot saved the extra
    */
   spent: number;
   /** Investment gain/loss applied after the withdrawal */
@@ -2226,7 +2227,14 @@ export function runMonteCarloSimulation(
             year,
             startBalance,
             plannedSpending: emit(plannedSpendingThisYear, startDeflator),
-            spent: emit(incomeTowardsSpending + netDelivered, startDeflator),
+            // Anything the minimum withdrawal forced out above the plan
+            // counts as spent only when there's no surplus pot to save it
+            spent: emit(
+              incomeTowardsSpending +
+                netDelivered -
+                (surplusSavedThisYear - unspentIncome),
+              startDeflator,
+            ),
             ...(capturedRuleExplanation != null && {
               ruleExplanation: capturedRuleExplanation,
             }),

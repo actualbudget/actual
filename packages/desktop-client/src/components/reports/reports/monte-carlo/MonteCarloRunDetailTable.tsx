@@ -27,6 +27,10 @@ import type {
   MonteCarloWithdrawalRuleConfig,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { GROUP_HEADING_STYLE } from '#components/reports/reports/monte-carlo/monteCarloStyles';
+import {
+  buildMonteCarloYearStory,
+  formatRuleRate,
+} from '#components/reports/reports/monte-carlo/monteCarloYearStory';
 import { useFormat } from '#hooks/useFormat';
 
 // The minWidth keeps amounts readable on narrow screens - the table
@@ -43,13 +47,6 @@ const POT_CELL_STYLE = {
   flexShrink: 0,
   textAlign: 'right',
 } as const;
-
-// Enough precision that multiplying the displayed rate by the balance
-// reproduces the displayed amounts; trailing zeros trimmed so simple
-// rates still read cleanly (4% rather than 4.0000%)
-function formatRuleRate(rate: number) {
-  return `${Number((rate * 100).toFixed(4))}%`;
-}
 
 type MonteCarloRunDetailTableProps = {
   rows: MonteCarloRunDetailRow[];
@@ -83,6 +80,8 @@ export function MonteCarloRunDetailTable({
   const { t } = useTranslation();
   const format = useFormat();
   const [expandedYears, setExpandedYears] = useState<Set<number>>(new Set());
+  // Years whose detailed working is shown under the summary
+  const [workingYears, setWorkingYears] = useState<Set<number>>(new Set());
 
   const hasIncome = incomeStreams.length > 0;
   const surplusPotName = getMonteCarloSurplusPotLabel(pots, t);
@@ -93,16 +92,31 @@ export function MonteCarloRunDetailTable({
   const showInflation = rows.some(row => row.inflation != null);
   const allExpanded = rows.length > 0 && expandedYears.size === rows.length;
 
+  function toggleInSet(previous: Set<number>, year: number) {
+    const next = new Set(previous);
+    if (next.has(year)) {
+      next.delete(year);
+    } else {
+      next.add(year);
+    }
+    return next;
+  }
+
   function toggleYear(year: number) {
-    setExpandedYears(previous => {
-      const next = new Set(previous);
-      if (next.has(year)) {
+    if (expandedYears.has(year)) {
+      // Collapsing a year hides its working too, so reopening it starts
+      // from the summary again
+      setWorkingYears(previous => {
+        const next = new Set(previous);
         next.delete(year);
-      } else {
-        next.add(year);
-      }
-      return next;
-    });
+        return next;
+      });
+    }
+    setExpandedYears(previous => toggleInSet(previous, year));
+  }
+
+  function toggleWorking(year: number) {
+    setWorkingYears(previous => toggleInSet(previous, year));
   }
 
   // Run-level cost of the plan: what left the pots, and how much of it
@@ -162,6 +176,34 @@ export function MonteCarloRunDetailTable({
       );
     }
     return t('Spent: {{spent}}, as planned.', { spent });
+  }
+
+  // Where the money saved into the surplus pot came from: income beyond
+  // the plan, the minimum withdrawal's overshoot, or both
+  function getSavedSentence(row: MonteCarloRunDetailRow) {
+    const overshoot = row.surplusSaved - row.unspentIncome;
+    const values = {
+      pot: surplusPotName,
+      amount: format(row.surplusSaved, 'financial'),
+      unspent: format(row.unspentIncome, 'financial'),
+      overshoot: format(overshoot, 'financial'),
+    };
+    if (row.unspentIncome > 0 && overshoot > 0) {
+      return t(
+        'Saved into {{pot}}: {{amount}} - {{unspent}} of income beyond the plan and {{overshoot}} the minimum withdrawal took out above it.',
+        values,
+      );
+    }
+    if (overshoot > 0) {
+      return t(
+        'Saved into {{pot}}: {{amount}} - the minimum withdrawal took out more than the plan needed.',
+        values,
+      );
+    }
+    return t(
+      'Saved into {{pot}}: {{amount}} - income beyond what the plan spends.',
+      values,
+    );
   }
 
   // "State pension: 12,000.00" - the per-stream lines under a year's
@@ -381,11 +423,14 @@ export function MonteCarloRunDetailTable({
         </Text>
         <Button
           variant="bare"
-          onPress={() =>
+          onPress={() => {
             setExpandedYears(
               allExpanded ? new Set() : new Set(rows.map(row => row.year)),
-            )
-          }
+            );
+            if (allExpanded) {
+              setWorkingYears(new Set());
+            }
+          }}
           style={{ marginLeft: 'auto', color: theme.pageText }}
         >
           {allExpanded ? (
@@ -475,6 +520,7 @@ export function MonteCarloRunDetailTable({
           {rows.map(row => {
             const isFailureRow = row === lastRow && !hasSurvived;
             const isExpanded = expandedYears.has(row.year);
+            const showsWorking = workingYears.has(row.year);
             // Growth applies to what stayed invested after contributions
             // came in and the withdrawal went out; no growth on a failure
             // year (the plan stops there)
@@ -636,159 +682,201 @@ export function MonteCarloRunDetailTable({
                       gap: 4,
                     }}
                   >
-                    {row.income > 0 && (
-                      <Text style={{ fontSize: 13, color: theme.pageText }}>
-                        <PrivacyFilter>
-                          <FinancialText as="span">
-                            {row.incomeTax > 0
-                              ? t(
-                                  'Income: {{gross}} gross − {{tax}} tax = {{net}} received.',
+                    <Text style={{ fontSize: 13, color: theme.pageText }}>
+                      <PrivacyFilter>
+                        <FinancialText as="span">
+                          {buildMonteCarloYearStory({
+                            row,
+                            withdrawalRule,
+                            surplusPotName,
+                            hasSurplusPot,
+                            format,
+                            translate: t,
+                          }).join(' ')}
+                        </FinancialText>
+                      </PrivacyFilter>
+                    </Text>
+                    <Button
+                      variant="bare"
+                      onPress={() => toggleWorking(row.year)}
+                      style={{
+                        alignSelf: 'flex-start',
+                        padding: 0,
+                        color: theme.pageTextLight,
+                        textDecoration: 'underline',
+                      }}
+                    >
+                      {showsWorking ? (
+                        <Trans>Hide the working</Trans>
+                      ) : (
+                        <Trans>Show the working</Trans>
+                      )}
+                    </Button>
+                    {showsWorking && (
+                      <View style={{ gap: 4, marginTop: 6 }}>
+                        {row.ruleExplanation != null && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {getRuleExplanationSentence(
+                                  row.ruleExplanation,
+                                )}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        {row.minimumApplied && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {t(
+                                  'Raised to the minimum withdrawal: {{amount}}.',
                                   {
-                                    gross: format(row.income, 'financial'),
-                                    tax: format(row.incomeTax, 'financial'),
-                                    net: format(
-                                      row.income - row.incomeTax,
+                                    amount: format(row.withdrawal, 'financial'),
+                                  },
+                                )}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        {row.income > 0 && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {row.incomeTax > 0
+                                  ? t(
+                                      'Income: {{gross}} gross − {{tax}} tax = {{net}} received.',
+                                      {
+                                        gross: format(row.income, 'financial'),
+                                        tax: format(row.incomeTax, 'financial'),
+                                        net: format(
+                                          row.income - row.incomeTax,
+                                          'financial',
+                                        ),
+                                      },
+                                    )
+                                  : t('Income: {{gross}}, untaxed.', {
+                                      gross: format(row.income, 'financial'),
+                                    })}
+                                {incomeStreams.length > 1 &&
+                                  ` (${row.incomeAmounts
+                                    .map((amount, incomeIndex) =>
+                                      amount > 0
+                                        ? getIncomeStreamLine(
+                                            incomeIndex,
+                                            amount,
+                                          )
+                                        : null,
+                                    )
+                                    .filter(line => line != null)
+                                    .join('; ')})`}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        <Text style={{ fontSize: 13, color: theme.pageText }}>
+                          <PrivacyFilter>
+                            <FinancialText as="span">
+                              {row.taxPaid > 0
+                                ? t(
+                                    'Withdrawal: {{gross}} gross − {{tax}} tax = {{net}} to spend.',
+                                    {
+                                      gross: format(
+                                        row.withdrawal,
+                                        'financial',
+                                      ),
+                                      tax: format(row.taxPaid, 'financial'),
+                                      net: format(netSpending, 'financial'),
+                                    },
+                                  )
+                                : t('Withdrawal: {{gross}}, untaxed.', {
+                                    gross: format(row.withdrawal, 'financial'),
+                                  })}
+                            </FinancialText>
+                          </PrivacyFilter>
+                        </Text>
+                        <Text style={{ fontSize: 13, color: theme.pageText }}>
+                          <PrivacyFilter>
+                            <FinancialText as="span">
+                              {getSpentSentence(row)}
+                            </FinancialText>
+                          </PrivacyFilter>
+                        </Text>
+                        {row.surplusSaved > 0 && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {getSavedSentence(row)}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        {row.unspentIncome > 0 && row.surplusSaved === 0 && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {t(
+                                  'Unspent income: {{amount}} - more came in than the plan spends, and it leaves the plan.',
+                                  {
+                                    amount: format(
+                                      row.unspentIncome,
                                       'financial',
                                     ),
                                   },
-                                )
-                              : t('Income: {{gross}}, untaxed.', {
-                                  gross: format(row.income, 'financial'),
-                                })}
-                            {incomeStreams.length > 1 &&
-                              ` (${row.incomeAmounts
-                                .map((amount, incomeIndex) =>
-                                  amount > 0
-                                    ? getIncomeStreamLine(incomeIndex, amount)
-                                    : null,
-                                )
-                                .filter(line => line != null)
-                                .join('; ')})`}
-                          </FinancialText>
-                        </PrivacyFilter>
-                      </Text>
-                    )}
-                    {row.unspentIncome > 0 && row.surplusSaved === 0 && (
-                      <Text style={{ fontSize: 13, color: theme.pageText }}>
-                        <PrivacyFilter>
-                          <FinancialText as="span">
-                            {t(
-                              'Unspent income: {{amount}} - more came in than the plan spends, and it leaves the plan.',
-                              {
-                                amount: format(row.unspentIncome, 'financial'),
-                              },
-                            )}
-                          </FinancialText>
-                        </PrivacyFilter>
-                      </Text>
-                    )}
-                    {row.surplusSaved > 0 && (
-                      <Text style={{ fontSize: 13, color: theme.pageText }}>
-                        <PrivacyFilter>
-                          <FinancialText as="span">
-                            {t(
-                              "Saved into {{pot}}: {{amount}} - money the plan didn't spend this year.",
-                              {
-                                pot: surplusPotName,
-                                amount: format(row.surplusSaved, 'financial'),
-                              },
-                            )}
-                          </FinancialText>
-                        </PrivacyFilter>
-                      </Text>
-                    )}
-                    <Text style={{ fontSize: 13, color: theme.pageText }}>
-                      <PrivacyFilter>
-                        <FinancialText as="span">
-                          {row.taxPaid > 0
-                            ? t(
-                                'Withdrawal: {{gross}} gross − {{tax}} tax = {{net}} to spend.',
-                                {
-                                  gross: format(row.withdrawal, 'financial'),
-                                  tax: format(row.taxPaid, 'financial'),
-                                  net: format(netSpending, 'financial'),
-                                },
-                              )
-                            : t('Withdrawal: {{gross}}, untaxed.', {
-                                gross: format(row.withdrawal, 'financial'),
-                              })}
-                        </FinancialText>
-                      </PrivacyFilter>
-                    </Text>
-                    <Text style={{ fontSize: 13, color: theme.pageText }}>
-                      <PrivacyFilter>
-                        <FinancialText as="span">
-                          {getSpentSentence(row)}
-                        </FinancialText>
-                      </PrivacyFilter>
-                    </Text>
-                    {row.ruleExplanation != null && (
-                      <Text style={{ fontSize: 13, color: theme.pageText }}>
-                        <PrivacyFilter>
-                          <FinancialText as="span">
-                            {getRuleExplanationSentence(row.ruleExplanation)}
-                          </FinancialText>
-                        </PrivacyFilter>
-                      </Text>
-                    )}
-                    {row.minimumApplied && (
-                      <Text style={{ fontSize: 13, color: theme.pageText }}>
-                        <PrivacyFilter>
-                          <FinancialText as="span">
-                            {t(
-                              'Raised to the minimum withdrawal: {{amount}}.',
-                              {
-                                amount: format(row.withdrawal, 'financial'),
-                              },
-                            )}
-                          </FinancialText>
-                        </PrivacyFilter>
-                      </Text>
-                    )}
-                    {row.contributions > 0 && (
-                      <Text style={{ fontSize: 13, color: theme.pageText }}>
-                        <PrivacyFilter>
-                          <FinancialText as="span">
-                            {t(
-                              'Contributions: {{amount}}, added at the start of the year.',
-                              {
-                                amount: format(row.contributions, 'financial'),
-                              },
-                            )}
-                          </FinancialText>
-                        </PrivacyFilter>
-                      </Text>
-                    )}
-                    {row.feesPaid > 0 && (
-                      <Text style={{ fontSize: 13, color: theme.pageText }}>
-                        <PrivacyFilter>
-                          <FinancialText as="span">
-                            {t(
-                              'Fees paid: {{amount}}, charged at the end of the year.',
-                              {
-                                amount: format(row.feesPaid, 'financial'),
-                              },
-                            )}
-                          </FinancialText>
-                        </PrivacyFilter>
-                      </Text>
-                    )}
-                    {row.inaccessibleBalance != null && (
-                      <Text style={{ fontSize: 13, color: theme.pageText }}>
-                        <PrivacyFilter>
-                          <FinancialText as="span">
-                            {t(
-                              '{{amount}} remained locked in pots that had not reached their access age.',
-                              {
-                                amount: format(
-                                  row.inaccessibleBalance,
-                                  'financial',
-                                ),
-                              },
-                            )}
-                          </FinancialText>
-                        </PrivacyFilter>
-                      </Text>
+                                )}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        {row.contributions > 0 && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {t(
+                                  'Contributions: {{amount}}, added at the start of the year.',
+                                  {
+                                    amount: format(
+                                      row.contributions,
+                                      'financial',
+                                    ),
+                                  },
+                                )}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        {row.feesPaid > 0 && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {t(
+                                  'Fees paid: {{amount}}, charged at the end of the year.',
+                                  {
+                                    amount: format(row.feesPaid, 'financial'),
+                                  },
+                                )}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                        {row.inaccessibleBalance != null && (
+                          <Text style={{ fontSize: 13, color: theme.pageText }}>
+                            <PrivacyFilter>
+                              <FinancialText as="span">
+                                {t(
+                                  '{{amount}} remained locked in pots that had not reached their access age.',
+                                  {
+                                    amount: format(
+                                      row.inaccessibleBalance,
+                                      'financial',
+                                    ),
+                                  },
+                                )}
+                              </FinancialText>
+                            </PrivacyFilter>
+                          </Text>
+                        )}
+                      </View>
                     )}
 
                     {pots.length > 0 && (

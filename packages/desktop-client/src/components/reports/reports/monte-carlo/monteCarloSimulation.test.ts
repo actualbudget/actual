@@ -3177,6 +3177,9 @@ describe('runMonteCarloSimulation', () => {
       expect(rows.map(row => row.withdrawal)).toEqual([1_000, 900, 810, 800]);
       expect(rows.map(row => row.surplusSaved)).toEqual([0, 0, 0, 71]);
       expect(rows[3].potBalances[0]).toBe(71);
+      // The saved 71 wasn't spent: 1,000 income + 800 withdrawn - 71
+      expect(rows[3].spent).toBe(1_729);
+      expect(rows[3].spent).toBe(rows[3].plannedSpending);
     });
 
     it('reconciles each stream to the row total in the run detail', () => {
