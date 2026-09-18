@@ -1234,6 +1234,32 @@ describe('runMonteCarloSimulation', () => {
     );
   });
 
+  it('keeps the spending floor on the unfunded tail after a failure', () => {
+    // A small pot under guardrails: repeated cuts would take the rule's
+    // plan below the 1,800 floor, so the post-failure rows must still
+    // chart the floor rather than the cut-down figure
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          annualWithdrawal: 2_000,
+          horizonYears: 8,
+          inflationMean: null,
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
+          minimumSpending: 1_800,
+          captureRunDetail: 0,
+        },
+        { startingBalance: 5_000, expectedReturnMean: -0.5, returnStdDev: 0 },
+      ),
+    );
+
+    const rows = result.runDetail!;
+    const tailRows = rows.filter(row => row.afterDepletion);
+    expect(tailRows.length).toBeGreaterThan(0);
+    expect(tailRows.map(row => row.plannedSpending)).toEqual(
+      tailRows.map(() => 1_800),
+    );
+  });
+
   it('minimum spending floor neutralizes rule cuts', () => {
     const base = makeParams(
       { annualWithdrawal: 10_000, horizonYears: 30 },
