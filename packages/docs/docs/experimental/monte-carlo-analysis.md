@@ -216,7 +216,7 @@ Management fees don't appear here - they are charged inside the pots and never p
 
 On a run that fails, the chart doesn't stop at the failure year: the remaining years keep showing the spending the plan still called for, dimmed, with nothing coming in to fund it - so the size of the gap is visible at a glance. Those dimmed bars are held at the failure year's level - its price level, since a dead run no longer experiences inflation, and any cut or raise a withdrawal rule had in force at the time.
 
-The spending bars show the _plan_ - the phase amount, adjusted for inflation and any withdrawal rule - rather than the money actually delivered. That's what makes trouble visible: in a shortfall year the withdrawal bars fall visibly short of the spending bar.
+The spending bars show the _plan_ - the phase amount, adjusted for inflation, any withdrawal rule and the minimum spending floor - rather than the money actually delivered. That's what makes trouble visible: in a shortfall year the withdrawal bars fall visibly short of the spending bar.
 
 Use the dropdown above the chart to pick which run to look at: the worst run, a typically-bad or typically-good outcome (the 25th and 75th percentiles), the median, or the best run. These are the same runs the **Jump to** dropdown in the runs view lands on. The chart also appears above the year-by-year table when you click into any individual run, so you can see that specific run's flows at a glance.
 
