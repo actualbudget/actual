@@ -32,16 +32,16 @@ const INLINE_INPUT_STYLE = {
 
 type MonteCarloWithdrawalRuleConfigurationProps = {
   rule: MonteCarloWithdrawalRuleConfig;
-  minimumWithdrawal: number;
+  minimumSpending: number;
   onRuleChange: (changes: Partial<MonteCarloWithdrawalRuleConfig>) => void;
-  onMinimumWithdrawalChange: (value: number) => void;
+  onMinimumSpendingChange: (value: number) => void;
 };
 
 export function MonteCarloWithdrawalRuleConfiguration({
   rule,
-  minimumWithdrawal,
+  minimumSpending,
   onRuleChange,
-  onMinimumWithdrawalChange,
+  onMinimumSpendingChange,
 }: MonteCarloWithdrawalRuleConfigurationProps) {
   const { t } = useTranslation();
 
@@ -80,22 +80,25 @@ export function MonteCarloWithdrawalRuleConfiguration({
           <View style={FIELD_STYLE}>
             <View style={FIELD_LABEL_ROW_STYLE}>
               <Text style={FIELD_LABEL_STYLE}>
-                <Trans>Minimum withdrawal</Trans>
+                <Trans>Minimum spending</Trans>
               </Text>
               <MonteCarloHelpTooltip>
                 <Trans>
-                  The annual withdrawal never drops below this amount, no matter
-                  what the rule says. It only applies in years with planned
-                  spending - a spending phase set to 0 takes nothing. Like your
-                  planned spending, it&apos;s in today&apos;s money and rises
-                  with inflation. Set to 0 for no floor.
+                  The lowest amount you need to live on in any year, no matter
+                  what the rule says: when the rule cuts below it, the plan is
+                  lifted back up to it and that is what gets spent. Income
+                  counts towards it, so the pots only withdraw enough to top it
+                  up. It only applies in years with planned spending - a
+                  spending phase set to 0 takes nothing. Like your planned
+                  spending, it&apos;s in today&apos;s money and rises with
+                  inflation. Set to 0 for no floor.
                 </Trans>
               </MonteCarloHelpTooltip>
             </View>
             <FinancialInput
-              value={minimumWithdrawal}
+              value={minimumSpending}
               onUpdate={value =>
-                onMinimumWithdrawalChange(
+                onMinimumSpendingChange(
                   Math.min(MAX_AMOUNT, Math.max(0, value)),
                 )
               }
