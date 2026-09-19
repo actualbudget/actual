@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import type { ComponentProps } from 'react';
 
 import { Button } from '@actual-app/components/button';
@@ -7,6 +6,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import type { View } from '@actual-app/components/view';
 import { extractTagsForFilter } from '@actual-app/core/shared/tags';
+import type { TagEntity } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
 import { useTagCSS } from '#hooks/useTagCSS';
@@ -15,38 +15,43 @@ import { filterTags, useTags } from '#hooks/useTags';
 import { Autocomplete } from './Autocomplete';
 import type { AutocompleteItem } from './Autocomplete';
 
-export function TagMultiAutocomplete({
-  value,
-  setValue,
-}: {
-  value: string;
-  setValue: (value: string) => void;
-}) {
-  const tags = useMemo(() => {
-    return extractTagsForFilter(value);
-  }, [value]);
-  const { data: allTags } = useTags();
-  const allTagItems = useMemo(
-    () =>
-      allTags?.map(tag => ({
-        ...tag,
-        id: '#' + tag.tag,
-        name: '#' + tag.tag,
-      })) ?? [],
-    [allTags],
-  );
+type TagMultiAutocompleteProps = {
+  tags?: TagEntity[];
+  inputProps?: ComponentProps<typeof Autocomplete>['inputProps'];
+  containerProps?: ComponentProps<typeof Autocomplete>['containerProps'];
+  embedded?: boolean;
+} & (
+  | { mode?: 'names'; value: string; setValue: (value: string) => void }
+  | { mode: 'ids'; value: string[]; setValue: (value: string[]) => void }
+);
 
-  function handleSelect(ids: string[]) {
-    setValue(ids.join(' '));
-  }
+export function TagMultiAutocomplete(props: TagMultiAutocompleteProps) {
+  const { tags, inputProps, containerProps, embedded } = props;
+  const { data: loadedTags = [] } = useTags();
+  const availableTags = tags ?? loadedTags;
+  const tagItems = availableTags.map(tag => ({
+    ...tag,
+    id: props.mode === 'ids' ? tag.id : '#' + tag.tag,
+    name: '#' + tag.tag,
+  }));
 
   return (
-    <Autocomplete<(typeof allTagItems)[number]>
-      value={tags}
+    <Autocomplete<(typeof tagItems)[number]>
+      value={
+        props.mode === 'ids' ? props.value : extractTagsForFilter(props.value)
+      }
+      embedded={embedded}
+      containerProps={containerProps}
       strict
       type="multi"
-      onSelect={handleSelect}
-      suggestions={allTagItems}
+      onSelect={ids => {
+        if (props.mode === 'ids') {
+          props.setValue(ids);
+        } else {
+          props.setValue(ids.join(' '));
+        }
+      }}
+      suggestions={tagItems}
       filterSuggestions={filterTags}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <TagList
@@ -56,7 +61,7 @@ export function TagMultiAutocomplete({
         />
       )}
       renderMultiItem={TagMultiItem}
-      inputProps={{ placeholder: 'Choose tags' }}
+      inputProps={{ placeholder: 'Choose tags', ...inputProps }}
     />
   );
 }

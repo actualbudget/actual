@@ -18,7 +18,9 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   CustomReportEntity,
+  CustomReportTagScope,
   sortByOpType,
+  TagEntity,
   TimeFrame,
   TransactionEntity,
 } from '@actual-app/core/types/models';
@@ -35,16 +37,19 @@ import { getIntervalFormat, ReportOptions } from './ReportOptions';
 import type { dateRangeProps } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
+import { TagScopeSelector } from './TagScopeSelector';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;
   selectedCategories: CategoryEntity[];
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
+  tags: TagEntity[];
   dateRangeLine: number;
   allIntervals: { name: string; pretty: string }[];
   setDateRange: (value: CustomReportEntity['dateRange']) => void;
   setGraphType: (value: CustomReportEntity['graphType']) => void;
   setGroupBy: (value: CustomReportEntity['groupBy']) => void;
+  setTagScope: (value: CustomReportTagScope) => void;
   setInterval: (value: CustomReportEntity['interval']) => void;
   setBalanceType: (value: CustomReportEntity['balanceType']) => void;
   setSortBy: (value: CustomReportEntity['sortBy']) => void;
@@ -83,11 +88,13 @@ export function ReportSidebar({
   customReportItems,
   selectedCategories,
   categories,
+  tags,
   dateRangeLine,
   allIntervals,
   setDateRange,
   setGraphType,
   setGroupBy,
+  setTagScope,
   setInterval,
   setBalanceType,
   setSortBy,
@@ -181,16 +188,23 @@ export function ReportSidebar({
     defaultItems(cond);
   };
 
+  const onChangeTagScope = (scope: CustomReportTagScope) => {
+    setSessionReport('tagScope', scope);
+    onReportChange({ type: 'modify' });
+    setTagScope(scope);
+  };
+
   const onChangeBalanceType = (cond: string) => {
     setSessionReport('balanceType', cond);
     onReportChange({ type: 'modify' });
     setBalanceType(cond);
 
     if (cond === 'Budgeted') {
-      // Budgeted does not support Payee and Account splits
+      // Budgeted does not support Payee, Account, or Tag splits
       if (
         customReportItems.groupBy === 'Payee' ||
-        customReportItems.groupBy === 'Account'
+        customReportItems.groupBy === 'Account' ||
+        customReportItems.groupBy === 'Tag'
       ) {
         setSessionReport('groupBy', 'Category');
         setGroupBy('Category');
@@ -310,10 +324,27 @@ export function ReportSidebar({
             ])}
             disabledKeys={
               customReportItems.balanceType === 'Budgeted'
-                ? [...new Set([...disabledItems('split'), 'Payee', 'Account'])]
+                ? [
+                    ...new Set([
+                      ...disabledItems('split'),
+                      'Payee',
+                      'Account',
+                      'Tag',
+                    ]),
+                  ]
                 : disabledItems('split')
             }
+            style={{ minWidth: 0 }}
           />
+          {customReportItems.groupBy === 'Tag' && (
+            <View style={{ marginLeft: 5, minWidth: 0 }}>
+              <TagScopeSelector
+                tags={tags}
+                tagScope={customReportItems.tagScope}
+                onChange={onChangeTagScope}
+              />
+            </View>
+          )}
         </View>
 
         <View
