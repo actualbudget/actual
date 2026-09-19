@@ -740,6 +740,8 @@ describe('Account sync', () => {
 });
 
 describe('SimpleFin batch sync', () => {
+  let previousGoCardlessTransactionsHandler;
+
   function mockSimpleFinTransactions(response) {
     vi.mocked(asyncStorage.getItem).mockResolvedValue('test-token');
     handlers['/simplefin/transactions'] = () => response;
@@ -747,6 +749,12 @@ describe('SimpleFin batch sync', () => {
 
   afterEach(() => {
     delete handlers['/simplefin/transactions'];
+    if (previousGoCardlessTransactionsHandler) {
+      handlers['/gocardless/transactions'] =
+        previousGoCardlessTransactionsHandler;
+    } else {
+      delete handlers['/gocardless/transactions'];
+    }
   });
 
   test('does not emit transaction CRDT messages when provider category appears later', async () => {
@@ -946,5 +954,57 @@ describe('SimpleFin batch sync', () => {
     expect(missingResult).toBeDefined();
     expect(missingResult.res.error_code).toBe('ACCOUNT_MISSING');
     expect(missingResult.res.error_type).toBe('ACCOUNT_MISSING');
+  });
+
+  test('preserves GOCARDLESS_NOT_CONFIGURED error through bank sync pipeline', async () => {
+    vi.mocked(asyncStorage.getItem).mockResolvedValue('test-token');
+    vi.mocked(asyncStorage.multiGet).mockResolvedValue({
+      'user-id': 'user-1',
+      'user-key': 'key-1',
+    });
+
+    db.runQuery(
+      'INSERT INTO banks (id, bank_id, name, tombstone) VALUES (?, ?, ?, 0)',
+      ['bank-1', 'gc-bank', 'GoCardless Bank'],
+    );
+
+    const acctId = await db.insertAccount({
+      id: 'acct-gc-1',
+      account_id: 'ext-gc-1',
+      name: 'GoCardless Checking',
+      bank: 'bank-1',
+      account_sync_source: 'goCardless',
+    });
+    await db.insertPayee({
+      id: 'transfer-' + acctId,
+      name: '',
+      transfer_acct: acctId,
+    });
+
+    previousGoCardlessTransactionsHandler =
+      handlers['/gocardless/transactions'];
+    handlers['/gocardless/transactions'] = () => ({
+      error_type: 'GOCARDLESS_NOT_CONFIGURED',
+      error_code: 'GOCARDLESS_NOT_CONFIGURED',
+      reason: 'GoCardless credentials are missing',
+    });
+
+    const result = await accountsApp.handlers['accounts-bank-sync']({
+      ids: [acctId],
+    });
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toMatchObject({
+      type: 'SyncError',
+      accountId: acctId,
+      category: 'GOCARDLESS_NOT_CONFIGURED',
+      code: 'GOCARDLESS_NOT_CONFIGURED',
+    });
+
+    const account = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [acctId],
+    );
+    expect(account!.bank_sync_status).toBe('failed');
   });
 });
