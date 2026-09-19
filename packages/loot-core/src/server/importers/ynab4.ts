@@ -138,7 +138,7 @@ async function importPayees(
   }
 }
 
-async function importTransactions(
+export async function importTransactions(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
   tick: ImportTick,
@@ -214,7 +214,10 @@ async function importTransactions(
 
             return {
               transfer_id: transferId,
-              payee,
+              // Only set payee when resolved. YNAB4 stores the payee on the
+              // parent only, so an undefined key here would stop makeChild
+              // from falling back to the parent's payee.
+              ...(payee != null ? { payee } : {}),
               imported_payee,
             };
           }
