@@ -102,6 +102,35 @@ export const mockTransactionNoPayee = {
   remittance_information: ['Transfer from savings'],
 } satisfies EnableBankingTransaction;
 
+// ING (and some other ASPSPs) leave the structured creditor/debtor `name` empty on
+// current-account transactions and put the counterparty in postal_address.address_line.
+// The remittance is generic text that must not become the payee.
+export const mockTransactionCreditorPostalAddress = {
+  entry_reference: 'ref-005',
+  transaction_amount: { currency: 'EUR', amount: '30.00' },
+  creditor: {
+    postal_address: { address_line: ['ACME STORE WARSAW'] },
+  },
+  debtor: { postal_address: { address_line: ['ACCOUNT HOLDER'] } },
+  credit_debit_indicator: 'DBIT',
+  status: 'BOOK',
+  booking_date: '2026-03-05',
+  remittance_information: ['Card payment 16-03-2026 no 1234xx5678'],
+} satisfies EnableBankingTransaction;
+
+export const mockTransactionDebtorPostalAddress = {
+  entry_reference: 'ref-006',
+  transaction_amount: { currency: 'EUR', amount: '100.00' },
+  creditor: { postal_address: { address_line: ['ACCOUNT HOLDER'] } },
+  debtor: {
+    postal_address: { address_line: ['SOME CLIENT LTD'] },
+  },
+  credit_debit_indicator: 'CRDT',
+  status: 'BOOK',
+  booking_date: '2026-03-06',
+  remittance_information: ['Invoice 1-2026'],
+} satisfies EnableBankingTransaction;
+
 export const mockTransactionMinimal = {
   transaction_amount: { currency: 'EUR', amount: '1.23' },
   status: 'BOOK',
