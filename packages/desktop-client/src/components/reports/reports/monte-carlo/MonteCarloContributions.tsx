@@ -15,6 +15,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import { v4 as uuidv4 } from 'uuid';
 
 import { FinancialText } from '#components/FinancialText';
@@ -409,20 +410,23 @@ export function MonteCarloContributions({
                     }}
                   >
                     <Text style={{ color: theme.warningText, fontSize: 13 }}>
-                      <PrivacyFilter>
-                        <FinancialText as="span">
-                          {t(
-                            '{{stream}} pays {{amount}} a year, so no more than that - less any tax, unless Before tax is ticked - can be paid in from it.',
+                      <Trans>
+                        {{ stream: getIncomeStreamLabel(sourceIndex) }} pays{' '}
+                        <PrivacyFilter>
+                          <FinancialText as="span">
                             {
-                              stream: getIncomeStreamLabel(sourceIndex),
-                              amount: format(
-                                sourceStream.annualAmount,
-                                'financial',
-                              ),
-                            },
-                          )}
-                        </FinancialText>
-                      </PrivacyFilter>
+                              {
+                                amount: format(
+                                  sourceStream.annualAmount,
+                                  'financial',
+                                ),
+                              } as TransObjectLiteral
+                            }
+                          </FinancialText>
+                        </PrivacyFilter>{' '}
+                        a year, so no more than that - less any tax, unless
+                        Before tax is ticked - can be paid in from it.
+                      </Trans>
                     </Text>
                   </View>
                 )}
