@@ -160,16 +160,58 @@ if (isDev) {
 const getGlobalPrefsPath = () =>
   path.join(process.env.ACTUAL_DATA_DIR!, 'global-store.json');
 
-async function loadGlobalPrefs() {
-  let state: GlobalPrefsJson = {};
+// Complete copy of the store, written ahead of an in-place overwrite by the
+// EXDEV fallback in saveGlobalPrefs (and by loot-core's asyncStorage), so an
+// interrupted overwrite can be recovered from.
+const getGlobalPrefsRecoveryPath = () => `${getGlobalPrefsPath()}.bak`;
+
+function parseGlobalPrefs(contents: string): GlobalPrefsJson {
+  const parsed: unknown = JSON.parse(contents);
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Global preferences file is not a JSON object');
+  }
+  // The shape was checked above; the field values are trusted as written by
+  // the app itself, the same way loot-core's asyncStorage treats them.
+  return parsed as GlobalPrefsJson;
+}
+
+function loadGlobalPrefsRecovery(): GlobalPrefsJson | null {
   try {
-    state = JSON.parse(fs.readFileSync(getGlobalPrefsPath(), 'utf8'));
+    return parseGlobalPrefs(
+      fs.readFileSync(getGlobalPrefsRecoveryPath(), 'utf8'),
+    );
   } catch {
-    logMessage('info', 'Could not load global state - using defaults');
-    state = {};
+    return null;
+  }
+}
+
+async function loadGlobalPrefs() {
+  let contents: string;
+  try {
+    contents = fs.readFileSync(getGlobalPrefsPath(), 'utf8');
+  } catch (error) {
+    // A missing file is a fresh install: start from defaults, the same as
+    // loot-core does, without consulting any leftover recovery copy.
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      logMessage(
+        'error',
+        `Could not read global state - using defaults: ${String(error)}`,
+      );
+    }
+    return {};
   }
 
-  return state;
+  try {
+    return parseGlobalPrefs(contents);
+  } catch {
+    const recovered = loadGlobalPrefsRecovery();
+    if (recovered) {
+      logMessage('info', 'Loaded global state from its recovery copy');
+      return recovered;
+    }
+    logMessage('info', 'Could not parse global state - using defaults');
+    return {};
+  }
 }
 
 // Like loadGlobalPrefs, but only a missing file falls back to defaults; a
@@ -186,11 +228,16 @@ async function loadGlobalPrefsStrict(): Promise<GlobalPrefsJson> {
     throw error;
   }
 
-  const parsed: unknown = JSON.parse(contents);
-  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('Global preferences file is not a JSON object');
+  try {
+    return parseGlobalPrefs(contents);
+  } catch (error) {
+    const recovered = loadGlobalPrefsRecovery();
+    if (recovered) {
+      logMessage('info', 'Loaded global state from its recovery copy');
+      return recovered;
+    }
+    throw error;
   }
-  return parsed as GlobalPrefsJson;
 }
 
 // Writes the global preferences file atomically (temp file + rename), the same
@@ -200,11 +247,43 @@ async function saveGlobalPrefs(state: GlobalPrefsJson) {
   const globalPrefsPath = getGlobalPrefsPath();
   const temporaryPath = `${globalPrefsPath}.${process.pid}.main.tmp`;
 
+  const contents = JSON.stringify(state);
+
   try {
-    await writeFile(temporaryPath, JSON.stringify(state), 'utf8');
+    await writeFile(temporaryPath, contents, 'utf8');
     await rename(temporaryPath, globalPrefsPath);
+    // The atomic path never leaves a torn file, so any recovery copy from an
+    // earlier in-place write is stale now; drop it.
+    await rm(getGlobalPrefsRecoveryPath(), { force: true }).catch(
+      () => undefined,
+    );
   } catch (error) {
     await rm(temporaryPath, { force: true }).catch(() => undefined);
+
+    if ((error as NodeJS.ErrnoException).code === 'EXDEV') {
+      // Sandboxed installs (e.g. the Microsoft Store package) virtualise the
+      // app data folder, so renaming into it fails as a cross-device move.
+      // Write in place instead; losing atomicity beats failing outright.
+      logMessage(
+        'info',
+        `Could not atomically replace ${globalPrefsPath} (EXDEV); writing it in place instead`,
+      );
+      // Write-ahead copy: land the complete new contents in the recovery file
+      // first, then overwrite in place. If the copy can't be written, refuse
+      // to save rather than risk leaving a torn store as the only copy.
+      try {
+        await writeFile(getGlobalPrefsRecoveryPath(), contents, 'utf8');
+      } catch (recoveryError) {
+        logMessage(
+          'error',
+          `Could not write the global preferences recovery copy; not overwriting the store: ${String(recoveryError)}`,
+        );
+        throw recoveryError;
+      }
+      await writeFile(globalPrefsPath, contents, 'utf8');
+      return;
+    }
+
     throw error;
   }
 }
