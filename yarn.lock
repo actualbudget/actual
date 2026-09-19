@@ -9950,6 +9950,8 @@ __metadata:
       built: true
     bcrypt:
       built: true
+    better-sqlite3:
+      built: false
     electron:
       built: true
     esbuild:

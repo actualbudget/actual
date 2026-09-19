@@ -99,6 +99,9 @@
     "bcrypt": {
       "built": true
     },
+    "better-sqlite3": {
+      "built": false
+    },
     "electron": {
       "built": true
     },
