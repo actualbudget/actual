@@ -1,6 +1,6 @@
 import { getAccountDb } from '../src/account-db';
 
-export const up = async function () {
+export const up = async function (): Promise<void> {
   await getAccountDb().exec(`
     CREATE TABLE IF NOT EXISTS auth
       (password TEXT PRIMARY KEY);
@@ -21,7 +21,7 @@ export const up = async function () {
   `);
 };
 
-export const down = async function () {
+export const down = async function (): Promise<void> {
   await getAccountDb().exec(`
     DROP TABLE auth;
     DROP TABLE sessions;
