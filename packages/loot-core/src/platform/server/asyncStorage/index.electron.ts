@@ -101,6 +101,36 @@ function loadStore(storePath: string): GlobalPrefsJson {
   }
 }
 
+// Copies the active store over the recovery file, but only when the active
+// file is itself valid: after an interrupted in-place write it may be
+// truncated, and copying that would destroy the only good copy left.
+async function backupStore(storePath: string): Promise<void> {
+  let contents: string;
+  try {
+    contents = await fs.promises.readFile(storePath, 'utf8');
+  } catch (err) {
+    if (err?.code !== 'ENOENT') {
+      logger.warn('Could not read global preferences to back them up', err);
+    }
+    return;
+  }
+
+  try {
+    parseStore(contents);
+  } catch {
+    logger.warn(
+      `Not backing up ${storePath}: it is not valid, keeping the existing recovery copy`,
+    );
+    return;
+  }
+
+  try {
+    await fs.promises.writeFile(getRecoveryPath(storePath), contents, 'utf8');
+  } catch (err) {
+    logger.warn('Could not back up global preferences', err);
+  }
+}
+
 function _saveStore(): Promise<void> {
   if (!persisted) {
     return Promise.resolve();
@@ -145,13 +175,7 @@ async function writeStore(): Promise<void> {
       );
       // Keep the current (complete) store as a recovery copy first, so a
       // crash mid-overwrite doesn't cost the user their preferences.
-      try {
-        await fs.promises.copyFile(storePath, getRecoveryPath(storePath));
-      } catch (copyErr) {
-        if (copyErr?.code !== 'ENOENT') {
-          logger.warn('Could not back up global preferences', copyErr);
-        }
-      }
+      await backupStore(storePath);
       await fs.promises.writeFile(storePath, contents, 'utf8');
       return;
     }

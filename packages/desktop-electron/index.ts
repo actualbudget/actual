@@ -2,7 +2,6 @@ import fs from 'fs';
 import { createServer } from 'http';
 import type { Server } from 'http';
 import {
-  copyFile,
   cp,
   mkdir,
   mkdtemp,
@@ -223,6 +222,43 @@ async function loadGlobalPrefsStrict(): Promise<GlobalPrefsJson> {
   }
 }
 
+// Copies the active store over the recovery file, but only when the active
+// file is valid: a truncated file from an interrupted in-place write must not
+// replace the last good copy.
+async function backupGlobalPrefs() {
+  let contents: string;
+  try {
+    contents = await readFile(getGlobalPrefsPath(), 'utf8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      logMessage(
+        'error',
+        `Could not read global preferences to back them up: ${String(error)}`,
+      );
+    }
+    return;
+  }
+
+  try {
+    parseGlobalPrefs(contents);
+  } catch {
+    logMessage(
+      'info',
+      'Not backing up global preferences: the file is not valid, keeping the existing recovery copy',
+    );
+    return;
+  }
+
+  try {
+    await writeFile(getGlobalPrefsRecoveryPath(), contents, 'utf8');
+  } catch (error) {
+    logMessage(
+      'error',
+      `Could not back up global preferences: ${String(error)}`,
+    );
+  }
+}
+
 // Writes the global preferences file atomically (temp file + rename), the same
 // way loot-core's asyncStorage does. Only meant to be used while the backend
 // process is not running, otherwise the two would race for the file.
@@ -248,16 +284,7 @@ async function saveGlobalPrefs(state: GlobalPrefsJson) {
       );
       // Keep the current store as a recovery copy so an interrupted overwrite
       // can be recovered by the loaders above.
-      await copyFile(globalPrefsPath, getGlobalPrefsRecoveryPath()).catch(
-        (copyError: NodeJS.ErrnoException) => {
-          if (copyError.code !== 'ENOENT') {
-            logMessage(
-              'error',
-              `Could not back up global preferences: ${String(copyError)}`,
-            );
-          }
-        },
-      );
+      await backupGlobalPrefs();
       await writeFile(globalPrefsPath, contents, 'utf8');
       return;
     }
