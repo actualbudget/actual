@@ -3,8 +3,10 @@ import type { Query } from '@actual-app/core/shared/query';
 import type {
   AccountEntity,
   CategoryEntity,
+  CustomReportTagScope,
   PayeeEntity,
   RuleConditionEntity,
+  TagEntity,
 } from '@actual-app/core/types/models';
 
 import { aqlQuery } from '#queries/aqlQuery';
@@ -39,7 +41,7 @@ export function indexCashFlow<
 
 /**
  * Checks if the given conditions have issues
- * (i.e. non-existing category/payee/account being used).
+ * (i.e. a non-existing category/payee/account/tag being used).
  */
 
 export function calculateHasWarning(
@@ -48,15 +50,27 @@ export function calculateHasWarning(
     categories,
     accounts,
     payees,
+    tags = [],
+    tagScope,
   }: {
     categories: CategoryEntity[];
     accounts: AccountEntity[];
     payees: PayeeEntity[];
+    tags?: TagEntity[];
+    tagScope?: CustomReportTagScope;
   },
 ) {
   const categoryIds = new Set(categories.map(({ id }) => id));
   const payeeIds = new Set(payees.map(({ id }) => id));
   const accountIds = new Set(accounts.map(({ id }) => id));
+  const tagIds = new Set(tags.filter(tag => !tag.hidden).map(({ id }) => id));
+
+  if (
+    tagScope?.mode === 'selected' &&
+    tagScope.tagIds.some(id => !tagIds.has(id))
+  ) {
+    return true;
+  }
 
   if (!conditions) {
     return false;

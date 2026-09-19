@@ -738,6 +738,10 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
       return `REGEXP(${right}, ${left})`;
     }
+    case '$notregexp': {
+      const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
+      return `(NOT REGEXP(${right}, ${left}) OR ${left} IS NULL)`;
+    }
     case '$notlike': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
       return `(NOT UNICODE_LIKE(${getNormalisedString(right)}, NORMALISE(${left}))\n OR ${left} IS NULL)`;
