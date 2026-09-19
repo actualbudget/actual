@@ -44,6 +44,13 @@ export type ImportTransactionEntity = {
   /** A flag indicating if the transaction has cleared or not */
   cleared?: boolean;
 
+  /** Set by the import preview flow to pin the match decision shown in the
+   * preview: the id of the existing transaction this one matched, or null if
+   * the preview found no match. When present, importing skips the fuzzy
+   * matching for this transaction and honors the pinned decision instead.
+   * When absent, transactions are matched normally. */
+  matchedTransactionId?: string | null;
+
   /** An array of subtransactions for a split transaction.
    * Only available in get or create/import requests.
    * If amounts don't equal total amount, API call will succeed but error will show in app */
