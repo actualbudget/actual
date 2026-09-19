@@ -18,9 +18,9 @@ import { useUpdatedAccounts } from '#hooks/useUpdatedAccounts';
 import { openAccountCloseModal, pushModal } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
 import * as bindings from '#spreadsheet/bindings';
+import { isTouchDevice } from '#util/isTouchDevice';
 
 import { AccountHoverCard } from './AccountHoverCard';
-import { isTouchDevice } from './isTouchDevice';
 import { SidebarBalance } from './SidebarBalance';
 import { SyncDot, useSyncDotLabel } from './SyncDot';
 import type { SyncDotStatus } from './SyncDot';

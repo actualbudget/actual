@@ -20,8 +20,7 @@ import { Notes } from '#components/Notes';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useNotes } from '#hooks/useNotes';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-
-import { isTouchDevice } from './isTouchDevice';
+import { isTouchDevice } from '#util/isTouchDevice';
 
 type AccountHoverCardProps = {
   account: AccountEntity;
