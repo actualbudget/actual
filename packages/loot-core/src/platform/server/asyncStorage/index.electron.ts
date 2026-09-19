@@ -30,6 +30,28 @@ export const init: T.Init = function ({ persist = true } = {}) {
   persisted = persist;
 };
 
+// Sibling file holding the last known-good store. Only written by the
+// non-atomic EXDEV fallback in writeStore, right before it overwrites the
+// store in place, so an interrupted write can be recovered from.
+const getRecoveryPath = (storePath: string) => `${storePath}.bak`;
+
+function parseStore(contents: string): GlobalPrefsJson {
+  const parsed = JSON.parse(contents);
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Global preferences are not a JSON object');
+  }
+  return parsed;
+}
+
+function loadRecoveryStore(storePath: string): GlobalPrefsJson | null {
+  const recoveryPath = getRecoveryPath(storePath);
+  try {
+    return parseStore(fs.readFileSync(recoveryPath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
 function loadStore(storePath: string): GlobalPrefsJson {
   let contents: string;
   try {
@@ -44,15 +66,7 @@ function loadStore(storePath: string): GlobalPrefsJson {
   }
 
   try {
-    const parsed = JSON.parse(contents);
-    if (
-      parsed === null ||
-      typeof parsed !== 'object' ||
-      Array.isArray(parsed)
-    ) {
-      throw new Error('Global preferences are not a JSON object');
-    }
-    return parsed;
+    return parseStore(contents);
   } catch (err) {
     // The file exists but isn't a usable preferences object - either invalid
     // JSON (most likely truncated by an interrupted write, e.g. the process was
@@ -63,15 +77,26 @@ function loadStore(storePath: string): GlobalPrefsJson {
     try {
       fs.writeFileSync(backupPath, contents, 'utf8');
       logger.error(
-        `Could not parse global preferences at ${storePath}; backed up the corrupt file to ${backupPath} and started with defaults`,
+        `Could not parse global preferences at ${storePath}; backed up the corrupt file to ${backupPath}`,
         err,
       );
     } catch (backupErr) {
       logger.error(
-        `Could not parse global preferences at ${storePath}, and failed to back up the corrupt file; starting with defaults`,
+        `Could not parse global preferences at ${storePath}, and failed to back up the corrupt file`,
         backupErr,
       );
     }
+
+    // An in-place write (EXDEV fallback) may have been interrupted; prefer the
+    // copy it took beforehand over starting from scratch.
+    const recovered = loadRecoveryStore(storePath);
+    if (recovered) {
+      logger.warn(
+        `Recovered global preferences from ${getRecoveryPath(storePath)}`,
+      );
+      return recovered;
+    }
+    logger.error('No usable global preferences found; starting with defaults');
     return {};
   }
 }
@@ -118,6 +143,15 @@ async function writeStore(): Promise<void> {
       logger.warn(
         `Could not atomically replace ${storePath} (EXDEV); writing it in place instead`,
       );
+      // Keep the current (complete) store as a recovery copy first, so a
+      // crash mid-overwrite doesn't cost the user their preferences.
+      try {
+        await fs.promises.copyFile(storePath, getRecoveryPath(storePath));
+      } catch (copyErr) {
+        if (copyErr?.code !== 'ENOENT') {
+          logger.warn('Could not back up global preferences', copyErr);
+        }
+      }
       await fs.promises.writeFile(storePath, contents, 'utf8');
       return;
     }
