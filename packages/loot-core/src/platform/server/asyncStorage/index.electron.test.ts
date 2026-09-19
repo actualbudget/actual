@@ -216,6 +216,44 @@ describe('electron asyncStorage', () => {
     }
   });
 
+  it('leaves the active file untouched when the recovery copy cannot be written', async () => {
+    const renameSpy = vi
+      .spyOn(fs.promises, 'rename')
+      .mockRejectedValue(Object.assign(new Error('EXDEV'), { code: 'EXDEV' }));
+
+    try {
+      asyncStorage.init();
+      await asyncStorage.setItem('language', 'en');
+      const before = fs.readFileSync(storePath(), 'utf8');
+
+      // Make only the recovery-copy write fail.
+      const realWriteFile = fs.promises.writeFile;
+      const writeSpy = vi
+        .spyOn(fs.promises, 'writeFile')
+        .mockImplementation((target, ...rest) => {
+          if (target === `${storePath()}.bak`) {
+            return Promise.reject(
+              Object.assign(new Error('ENOSPC'), { code: 'ENOSPC' }),
+            );
+          }
+          return realWriteFile(target, ...rest);
+        });
+
+      try {
+        await expect(asyncStorage.setItem('theme', 'dark')).rejects.toThrow(
+          'ENOSPC',
+        );
+      } finally {
+        writeSpy.mockRestore();
+      }
+
+      // The save was refused, so the store on disk is exactly as it was.
+      expect(fs.readFileSync(storePath(), 'utf8')).toBe(before);
+    } finally {
+      renameSpy.mockRestore();
+    }
+  });
+
   it('still rejects when the rename fails for another reason', async () => {
     const renameSpy = vi
       .spyOn(fs.promises, 'rename')

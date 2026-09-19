@@ -252,10 +252,13 @@ async function backupGlobalPrefs() {
   try {
     await writeFile(getGlobalPrefsRecoveryPath(), contents, 'utf8');
   } catch (error) {
+    // Without a recovery copy the in-place overwrite would be the only copy,
+    // so refuse to save rather than risk losing the current preferences.
     logMessage(
       'error',
-      `Could not back up global preferences: ${String(error)}`,
+      `Could not back up global preferences; not overwriting the store: ${String(error)}`,
     );
+    throw error;
   }
 }
 

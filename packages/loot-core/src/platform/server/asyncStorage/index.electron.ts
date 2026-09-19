@@ -127,7 +127,13 @@ async function backupStore(storePath: string): Promise<void> {
   try {
     await fs.promises.writeFile(getRecoveryPath(storePath), contents, 'utf8');
   } catch (err) {
-    logger.warn('Could not back up global preferences', err);
+    // Without a recovery copy the in-place overwrite would be the only copy,
+    // so refuse to save rather than risk losing the current preferences.
+    logger.error(
+      'Could not back up global preferences; not overwriting the store',
+      err,
+    );
+    throw err;
   }
 }
 
