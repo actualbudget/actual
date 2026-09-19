@@ -20,6 +20,10 @@ You can export your data from Actual at any time. To do so:
 
 3. Save the file somewhere on your computer - that is it -- you're done.
 
+## Automatic Backups in the Browser
+
+Actual can also save backups automatically to a folder on your device when you use it in a web browser. This is an experimental feature; see [Automatic Backups](../experimental/automatic-backups.md) for how to turn it on and use it.
+
 ## Manually Creating a Backup From the Desktop App
 
 This will force a backup to be created right now. Do this if you are going to do something that you might want to revert later (and don't want to use [undo](../getting-started/tips-tricks.md#undo-redo)).

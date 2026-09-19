@@ -12,6 +12,7 @@ export type FeatureFlag =
   | 'sankeyReport'
   | 'akahuBankSync'
   | 'mobileCalculator'
+  | 'automaticBackups'
   | 'monteCarloReport';
 
 /**
@@ -108,6 +109,8 @@ export type LocalPrefs = Partial<{
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
   'mobile.bankSyncProvidersCollapsed': boolean;
+  'backups.lastBackupAt': string;
+  'backups.lastChangeAt': string;
 }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;
