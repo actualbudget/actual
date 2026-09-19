@@ -9,7 +9,10 @@ import type {
 
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
-import type { AccountGroupEntity } from '@actual-app/core/types/models';
+import type {
+  AccountEntity,
+  AccountGroupEntity,
+} from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
 import { useMoveAccountGroupMutation } from '#account-groups';
@@ -25,9 +28,13 @@ import type { GroupBucket } from './useSidebarAccountTree';
 
 export type AccountTreeSide = 'on' | 'off' | 'closed';
 
-type DraggedNode = SidebarTreeNode & {
-  groupId: AccountGroupEntity['id'] | null;
-};
+type DraggedNode =
+  | {
+      kind: 'account';
+      accountId: AccountEntity['id'];
+      groupId: AccountGroupEntity['id'] | null;
+    }
+  | { kind: 'group'; groupId: AccountGroupEntity['id'] };
 
 type UseAccountTreeDragAndDropArgs = {
   side: AccountTreeSide;
@@ -174,7 +181,11 @@ export function useAccountTreeDragAndDrop({
     onDragStart: e => {
       const [key] = e.keys;
       const node = key == null ? null : parseTreeKey(key);
-      setDragged(node == null ? null : { ...node, groupId: groupOfNode(node) });
+      setDragged(
+        node?.kind === 'account'
+          ? { ...node, groupId: groupOfNode(node) }
+          : node,
+      );
       if (node?.kind === 'group') {
         collapseTimer.current = window.setTimeout(
           () => setIsDraggingGroup(true),
