@@ -192,9 +192,17 @@ describe('electron asyncStorage', () => {
 
     try {
       asyncStorage.init();
-      // Let the queued repair write run to completion and Node report any
-      // rejection that was left unhandled.
-      await new Promise(resolve => setTimeout(resolve, 0));
+      // The repair write does real filesystem work before it reaches the
+      // failing recovery-copy write, so wait for that call rather than a
+      // fixed number of ticks, then let the rejection propagate.
+      await vi.waitFor(() => {
+        expect(writeSpy).toHaveBeenCalledWith(
+          `${storePath()}.bak`,
+          expect.anything(),
+          'utf8',
+        );
+      });
+      await new Promise(resolve => setImmediate(resolve));
       await new Promise(resolve => setImmediate(resolve));
 
       expect(unhandledRejections).toEqual([]);
