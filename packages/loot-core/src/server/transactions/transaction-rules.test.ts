@@ -5,6 +5,7 @@ import { loadMappings } from '#server/db/mappings';
 import { q } from '#shared/query';
 
 import {
+  actionsReferenceBalance,
   conditionsToAQL,
   deleteRule,
   getProbableCategory,
@@ -1306,4 +1307,161 @@ describe('Learning categories', () => {
   });
 
   // TODO: write tests for split transactions
+});
+
+// Counts prepared statements that aggregate amounts, which is what the
+// running-balance query does and nothing else in `runRules` does
+function countRunningBalanceQueries() {
+  const rawDb = db.getDatabase() as unknown as {
+    prepare: (sql: string) => unknown;
+  };
+  const originalPrepare = rawDb.prepare.bind(rawDb);
+  let count = 0;
+  rawDb.prepare = (sql: string) => {
+    if (/SUM\(/i.test(sql)) {
+      count++;
+    }
+    return originalPrepare(sql);
+  };
+  return () => count;
+}
+
+describe('Running balance for rules', () => {
+  test('actionsReferenceBalance only flags templates and formulas that use it', () => {
+    expect(
+      actionsReferenceBalance([
+        { options: { template: 'Balance: {{balance}}' } },
+      ]),
+    ).toBe(true);
+    expect(
+      actionsReferenceBalance([
+        { options: { template: '{{add balance amount}}' } },
+      ]),
+    ).toBe(true);
+    expect(
+      actionsReferenceBalance([{ options: { formula: '=balance * 2' } }]),
+    ).toBe(true);
+
+    expect(actionsReferenceBalance([])).toBe(false);
+    expect(actionsReferenceBalance([{}])).toBe(false);
+    expect(
+      actionsReferenceBalance([{ options: { template: 'well balanced' } }]),
+    ).toBe(false);
+    expect(
+      actionsReferenceBalance([
+        { options: { formula: '=BALANCE_OF("Savings") * 2' } },
+      ]),
+    ).toBe(false);
+  });
+
+  test('a template that uses the balance still sees the running balance', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    await db.insertTransaction({
+      account,
+      date: '2020-01-01',
+      amount: 1000,
+    });
+    await db.insertTransaction({
+      account,
+      date: '2020-01-02',
+      amount: 2500,
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'contains', field: 'imported_payee', value: 'kroger' },
+      ],
+      actions: [
+        {
+          op: 'set',
+          field: 'notes',
+          value: '',
+          options: { template: 'Balance: {{balance}}' },
+        },
+      ],
+    });
+
+    const queries = countRunningBalanceQueries();
+    const transaction = await runRules({
+      imported_payee: 'kroger',
+      account,
+      date: '2020-01-03',
+      amount: 50,
+    });
+
+    expect(transaction.notes).toBe('Balance: 3500');
+    expect(transaction).not.toHaveProperty('balance');
+    expect(queries()).toBe(1);
+  });
+
+  test('a rule that uses the balance but does not match runs no query', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    await db.insertTransaction({
+      account,
+      date: '2020-01-01',
+      amount: 1000,
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'contains', field: 'imported_payee', value: 'walmart' },
+      ],
+      actions: [
+        {
+          op: 'set',
+          field: 'notes',
+          value: '',
+          options: { template: 'Balance: {{balance}}' },
+        },
+      ],
+    });
+
+    const queries = countRunningBalanceQueries();
+    const transaction = await runRules({
+      imported_payee: 'kroger',
+      account,
+      date: '2020-01-03',
+      amount: 50,
+    });
+
+    expect(transaction.notes).toBeUndefined();
+    expect(queries()).toBe(0);
+  });
+
+  test('rules that do not use the balance still apply normally', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    await db.insertTransaction({
+      account,
+      date: '2020-01-01',
+      amount: 1000,
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'contains', field: 'imported_payee', value: 'kroger' },
+      ],
+      actions: [{ op: 'set', field: 'notes', value: 'plain' }],
+    });
+
+    const queries = countRunningBalanceQueries();
+    const transaction = await runRules({
+      imported_payee: 'kroger',
+      account,
+      date: '2020-01-03',
+      amount: 50,
+    });
+
+    expect(transaction.notes).toBe('plain');
+    expect(transaction).not.toHaveProperty('balance');
+    expect(queries()).toBe(0);
+  });
 });
