@@ -16,6 +16,7 @@ import { useDispatch } from '#redux';
 
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';
+import { AutomaticSyncSettings } from './AutomaticSyncSettings';
 import {
   getGroupedBankSyncEntries,
   getSyncSourceReadable,
@@ -50,6 +51,7 @@ export function BankSync() {
     () => accounts.filter(account => !account.closed),
     [accounts],
   );
+  const hasLinkedAccounts = openAccounts.some(account => !!account.bank);
 
   const onAction = async (account: AccountEntity, action: 'link' | 'edit') => {
     switch (action) {
@@ -99,6 +101,8 @@ export function BankSync() {
           syncServerStatus={syncServerStatus}
           permissionWarning={permissionWarning}
         />
+
+        {hasLinkedAccounts && <AutomaticSyncSettings />}
 
         {openAccounts.length === 0 && (
           <Text style={{ fontSize: '1.1rem' }}>
