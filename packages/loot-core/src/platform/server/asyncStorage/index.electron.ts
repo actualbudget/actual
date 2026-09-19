@@ -28,8 +28,10 @@ export const init: T.Init = function ({ persist = true } = {}) {
     store = loaded.store;
     if (loaded.recovered) {
       // The active file is damaged; rewrite it from the recovered state now
-      // rather than leaving it broken until the next preference change.
-      void _saveStore();
+      // rather than leaving it broken until the next preference change. A
+      // failure here is already logged by writeStore and must not take the
+      // process down: the recovered store is still valid in memory.
+      _saveStore().catch(() => undefined);
     }
   } else {
     store = {};

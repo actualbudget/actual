@@ -131,6 +131,10 @@ describe('electron asyncStorage', () => {
     await asyncStorage.setItem('language', 'en');
 
     expect(fs.existsSync(`${storePath()}.bak`)).toBe(false);
+    // The stale copy never leaked into the active store.
+    expect(JSON.parse(fs.readFileSync(storePath(), 'utf8'))).toEqual({
+      language: 'en',
+    });
   });
 
   it('recovers from the backup copy when the store file is malformed', async () => {
@@ -157,6 +161,50 @@ describe('electron asyncStorage', () => {
       language: 'en',
       theme: 'dark',
     });
+  });
+
+  it('survives the repair write failing after a recovery', async () => {
+    fs.writeFileSync(`${storePath()}.bak`, JSON.stringify({ language: 'en' }));
+    fs.writeFileSync(storePath(), '{"language": "en", "the');
+    const renameSpy = vi
+      .spyOn(fs.promises, 'rename')
+      .mockRejectedValue(Object.assign(new Error('EXDEV'), { code: 'EXDEV' }));
+    // The write-ahead copy can't be written, so the repair is refused.
+    const realWriteFile = fs.promises.writeFile;
+    const writeSpy = vi
+      .spyOn(fs.promises, 'writeFile')
+      .mockImplementation((target, ...rest) => {
+        if (target === `${storePath()}.bak`) {
+          return Promise.reject(
+            Object.assign(new Error('ENOSPC'), { code: 'ENOSPC' }),
+          );
+        }
+        return realWriteFile(target, ...rest);
+      });
+
+    // Observe rejections nobody handled: the repair write is fire-and-forget,
+    // so a leak here would only ever show up as a process-level warning.
+    const unhandledRejections: unknown[] = [];
+    const onUnhandledRejection = (reason: unknown) => {
+      unhandledRejections.push(reason);
+    };
+    process.on('unhandledRejection', onUnhandledRejection);
+
+    try {
+      asyncStorage.init();
+      // Let the queued repair write run to completion and Node report any
+      // rejection that was left unhandled.
+      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(unhandledRejections).toEqual([]);
+      // The recovered store is still the live one in memory.
+      expect(await asyncStorage.getItem('language')).toBe('en');
+    } finally {
+      process.off('unhandledRejection', onUnhandledRejection);
+      writeSpy.mockRestore();
+      renameSpy.mockRestore();
+    }
   });
 
   it('ignores a malformed backup copy and falls back to defaults', async () => {

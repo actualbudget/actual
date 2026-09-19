@@ -193,7 +193,10 @@ async function loadGlobalPrefs() {
     // A missing file is a fresh install: start from defaults, the same as
     // loot-core does, without consulting any leftover recovery copy.
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-      logMessage('info', 'Could not read global state - using defaults');
+      logMessage(
+        'error',
+        `Could not read global state - using defaults: ${String(error)}`,
+      );
     }
     return {};
   }
