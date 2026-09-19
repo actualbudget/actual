@@ -47,7 +47,7 @@ export function AccountRow({
   const [isEditing, setIsEditing] = useState(false);
   const { dragType, canDrag, onDragChange, onDrop } = useSidebarDragScope();
 
-  const { dragProps } = useDrag<{ id: string }>({
+  const { dragProps, isDragging } = useDrag<{ id: string }>({
     type: dragType,
     canDrag: canDrag && !isEditing,
     item: { id: account.id },
@@ -129,7 +129,7 @@ export function AccountRow({
         {...dropProps}
         style={{ flexShrink: 0, position: 'relative' }}
       >
-        <DropHighlight pos={dropPos} />
+        <DropHighlight pos={isDragging ? null : dropPos} />
         <View innerRef={triggerRef}>
           <View {...dragProps}>
             <Link
