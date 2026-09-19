@@ -2341,13 +2341,26 @@ export function runMonteCarloSimulation(
           tailTotalPlanned,
         );
         const tailIncome = emitFrozen(tailGrossIncome);
+        // The pot-funded part of the plan, with the rule's adjustment and
+        // the spending floor applied exactly as in a funded year
+        const tailPotFundedPlan = tailTotalPlanned - tailIncomeTowardsSpending;
+        let tailAdjustedPlan = tailPotFundedPlan * adjustmentFactor;
+        if (
+          rule.type !== 'none' &&
+          minimumSpending > 0 &&
+          tailPotFundedPlan > 0
+        ) {
+          tailAdjustedPlan = Math.max(
+            tailAdjustedPlan,
+            minimumSpending * cumulativeInflation - tailIncomeTowardsSpending,
+          );
+        }
         runDetail.push({
           year,
           afterDepletion: true,
           startBalance: 0,
           plannedSpending: emitFrozen(
-            tailIncomeTowardsSpending +
-              (tailTotalPlanned - tailIncomeTowardsSpending) * adjustmentFactor,
+            tailIncomeTowardsSpending + Math.max(0, tailAdjustedPlan),
           ),
           // Only the income still reaches spending once the pots are gone
           spent: emitFrozen(tailIncomeTowardsSpending),
