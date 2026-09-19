@@ -96,6 +96,7 @@ export function AccountGroupHeader({
         <CollapseChevron isOpen={isOpen} size={11} />
         <InitialFocus>
           <Input
+            aria-label={t('Group name')}
             style={{ flex: 1, padding: 0, fontSize: 12 }}
             defaultValue={group.name}
             onEnter={newGroupName => {

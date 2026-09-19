@@ -139,6 +139,7 @@ export function AccountRow({
           {isEditing ? (
             <InitialFocus>
               <Input
+                aria-label={t('Account name')}
                 style={{ flex: 1, padding: 0, fontSize: 13 }}
                 defaultValue={account.name}
                 onEnter={newAccountName => {
