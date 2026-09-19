@@ -101,7 +101,7 @@ describe('electron asyncStorage', () => {
     }
   });
 
-  it('keeps a recovery copy of the previous store when writing in place', async () => {
+  it('writes the new store to the recovery copy ahead of the in-place write', async () => {
     const renameSpy = vi
       .spyOn(fs.promises, 'rename')
       .mockRejectedValue(Object.assign(new Error('EXDEV'), { code: 'EXDEV' }));
@@ -109,21 +109,28 @@ describe('electron asyncStorage', () => {
     try {
       asyncStorage.init();
       await asyncStorage.setItem('language', 'en');
-      // No store existed before the first write, so nothing to back up yet.
-      expect(fs.existsSync(`${storePath()}.bak`)).toBe(false);
-
       await asyncStorage.setItem('theme', 'dark');
-      // The copy holds the complete store from before the overwrite.
+
+      // The copy holds the complete latest store, not the previous one.
+      const expected = { language: 'en', theme: 'dark' };
       expect(JSON.parse(fs.readFileSync(`${storePath()}.bak`, 'utf8'))).toEqual(
-        { language: 'en' },
+        expected,
       );
-      expect(JSON.parse(fs.readFileSync(storePath(), 'utf8'))).toEqual({
-        language: 'en',
-        theme: 'dark',
-      });
+      expect(JSON.parse(fs.readFileSync(storePath(), 'utf8'))).toEqual(
+        expected,
+      );
     } finally {
       renameSpy.mockRestore();
     }
+  });
+
+  it('removes a stale recovery copy once an atomic write succeeds', async () => {
+    fs.writeFileSync(`${storePath()}.bak`, JSON.stringify({ language: 'fr' }));
+
+    asyncStorage.init();
+    await asyncStorage.setItem('language', 'en');
+
+    expect(fs.existsSync(`${storePath()}.bak`)).toBe(false);
   });
 
   it('recovers from the backup copy when the store file is malformed', async () => {
@@ -138,6 +145,20 @@ describe('electron asyncStorage', () => {
     expect(fs.existsSync(`${storePath()}.corrupt`)).toBe(true);
   });
 
+  it('repairs the damaged store file after recovering', async () => {
+    fs.writeFileSync(`${storePath()}.bak`, JSON.stringify({ language: 'en' }));
+    fs.writeFileSync(storePath(), '{"language": "en", "the');
+
+    asyncStorage.init();
+    // Any queued write (including the repair) completes before this resolves.
+    await asyncStorage.setItem('theme', 'dark');
+
+    expect(JSON.parse(fs.readFileSync(storePath(), 'utf8'))).toEqual({
+      language: 'en',
+      theme: 'dark',
+    });
+  });
+
   it('ignores a malformed backup copy and falls back to defaults', async () => {
     fs.writeFileSync(`${storePath()}.bak`, 'also broken');
     fs.writeFileSync(storePath(), 'broken');
@@ -145,32 +166,6 @@ describe('electron asyncStorage', () => {
     asyncStorage.init();
 
     expect(await asyncStorage.getItem('language')).toBeUndefined();
-  });
-
-  it('does not replace a valid recovery copy with a malformed active file', async () => {
-    fs.writeFileSync(`${storePath()}.bak`, JSON.stringify({ language: 'en' }));
-    // A previous in-place write was interrupted, leaving a truncated store.
-    fs.writeFileSync(storePath(), '{"language": "en", "the');
-    const renameSpy = vi
-      .spyOn(fs.promises, 'rename')
-      .mockRejectedValue(Object.assign(new Error('EXDEV'), { code: 'EXDEV' }));
-
-    try {
-      // Loads from the recovery copy, then saves in place again (EXDEV).
-      asyncStorage.init();
-      await asyncStorage.setItem('theme', 'dark');
-
-      // The good copy was kept rather than overwritten with the truncated file.
-      expect(JSON.parse(fs.readFileSync(`${storePath()}.bak`, 'utf8'))).toEqual(
-        { language: 'en' },
-      );
-      expect(JSON.parse(fs.readFileSync(storePath(), 'utf8'))).toEqual({
-        language: 'en',
-        theme: 'dark',
-      });
-    } finally {
-      renameSpy.mockRestore();
-    }
   });
 
   it('keeps the recovery copy intact when the in-place write itself fails', async () => {
@@ -204,13 +199,14 @@ describe('electron asyncStorage', () => {
         writeSpy.mockRestore();
       }
 
-      // The recovery copy still holds the last complete store, and a fresh
-      // init after the failed write still sees it via the active file.
+      // The recovery copy already holds the complete new state, so nothing is
+      // lost even though the active file was never updated.
       expect(JSON.parse(fs.readFileSync(`${storePath()}.bak`, 'utf8'))).toEqual(
-        { language: 'en' },
+        { language: 'en', theme: 'dark' },
       );
-      asyncStorage.init();
-      expect(await asyncStorage.getItem('language')).toBe('en');
+      expect(JSON.parse(fs.readFileSync(storePath(), 'utf8'))).toEqual({
+        language: 'en',
+      });
     } finally {
       renameSpy.mockRestore();
     }

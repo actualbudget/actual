@@ -21,18 +21,25 @@ let writeCounter = 0;
 let pendingSave: Promise<void> = Promise.resolve();
 
 export const init: T.Init = function ({ persist = true } = {}) {
+  persisted = persist;
+
   if (persist) {
-    store = loadStore(getStorePath());
+    const loaded = loadStore(getStorePath());
+    store = loaded.store;
+    if (loaded.recovered) {
+      // The active file is damaged; rewrite it from the recovered state now
+      // rather than leaving it broken until the next preference change.
+      void _saveStore();
+    }
   } else {
     store = {};
   }
-
-  persisted = persist;
 };
 
-// Sibling file holding the last known-good store. Only written by the
-// non-atomic EXDEV fallback in writeStore, right before it overwrites the
-// store in place, so an interrupted write can be recovered from.
+// Sibling file holding a complete copy of the store. Only written by the
+// non-atomic EXDEV fallback in writeStore, ahead of overwriting the store in
+// place, so an interrupted overwrite can be recovered from. Cleared again by
+// the atomic path, which never leaves a torn file behind.
 const getRecoveryPath = (storePath: string) => `${storePath}.bak`;
 
 function parseStore(contents: string): GlobalPrefsJson {
@@ -52,7 +59,13 @@ function loadRecoveryStore(storePath: string): GlobalPrefsJson | null {
   }
 }
 
-function loadStore(storePath: string): GlobalPrefsJson {
+type LoadedStore = {
+  store: GlobalPrefsJson;
+  // True when the active file was unusable and the recovery copy was used.
+  recovered: boolean;
+};
+
+function loadStore(storePath: string): LoadedStore {
   let contents: string;
   try {
     contents = fs.readFileSync(storePath, 'utf8');
@@ -62,11 +75,11 @@ function loadStore(storePath: string): GlobalPrefsJson {
     if (err?.code !== 'ENOENT') {
       logger.error('Could not read global preferences, using defaults', err);
     }
-    return {};
+    return { store: {}, recovered: false };
   }
 
   try {
-    return parseStore(contents);
+    return { store: parseStore(contents), recovered: false };
   } catch (err) {
     // The file exists but isn't a usable preferences object - either invalid
     // JSON (most likely truncated by an interrupted write, e.g. the process was
@@ -87,53 +100,18 @@ function loadStore(storePath: string): GlobalPrefsJson {
       );
     }
 
-    // An in-place write (EXDEV fallback) may have been interrupted; prefer the
-    // copy it took beforehand over starting from scratch.
+    // An in-place write (EXDEV fallback) may have been interrupted; it wrote
+    // the complete new state to the recovery copy first, so prefer that over
+    // starting from scratch.
     const recovered = loadRecoveryStore(storePath);
     if (recovered) {
       logger.warn(
         `Recovered global preferences from ${getRecoveryPath(storePath)}`,
       );
-      return recovered;
+      return { store: recovered, recovered: true };
     }
     logger.error('No usable global preferences found; starting with defaults');
-    return {};
-  }
-}
-
-// Copies the active store over the recovery file, but only when the active
-// file is itself valid: after an interrupted in-place write it may be
-// truncated, and copying that would destroy the only good copy left.
-async function backupStore(storePath: string): Promise<void> {
-  let contents: string;
-  try {
-    contents = await fs.promises.readFile(storePath, 'utf8');
-  } catch (err) {
-    if (err?.code !== 'ENOENT') {
-      logger.warn('Could not read global preferences to back them up', err);
-    }
-    return;
-  }
-
-  try {
-    parseStore(contents);
-  } catch {
-    logger.warn(
-      `Not backing up ${storePath}: it is not valid, keeping the existing recovery copy`,
-    );
-    return;
-  }
-
-  try {
-    await fs.promises.writeFile(getRecoveryPath(storePath), contents, 'utf8');
-  } catch (err) {
-    // Without a recovery copy the in-place overwrite would be the only copy,
-    // so refuse to save rather than risk losing the current preferences.
-    logger.error(
-      'Could not back up global preferences; not overwriting the store',
-      err,
-    );
-    throw err;
+    return { store: {}, recovered: false };
   }
 }
 
@@ -163,6 +141,12 @@ async function writeStore(): Promise<void> {
   try {
     await fs.promises.writeFile(tmpPath, contents, 'utf8');
     await fs.promises.rename(tmpPath, storePath);
+    // The atomic path never leaves a torn file, so a recovery copy from an
+    // earlier in-place write is now stale; drop it so it can't resurrect old
+    // preferences if the store is ever damaged some other way.
+    await fs.promises
+      .rm(getRecoveryPath(storePath), { force: true })
+      .catch(() => undefined);
   } catch (err) {
     // Best-effort cleanup of the temp file; ignore failures (it may never have
     // been created).
@@ -179,9 +163,24 @@ async function writeStore(): Promise<void> {
       logger.warn(
         `Could not atomically replace ${storePath} (EXDEV); writing it in place instead`,
       );
-      // Keep the current (complete) store as a recovery copy first, so a
-      // crash mid-overwrite doesn't cost the user their preferences.
-      await backupStore(storePath);
+      // Write-ahead copy: land the complete new contents in the recovery file
+      // first, then overwrite the store in place. If the in-place write is
+      // interrupted, loadStore recovers the new state from the copy. If the
+      // copy itself can't be written, refuse to save rather than risk leaving
+      // a torn store as the only copy.
+      try {
+        await fs.promises.writeFile(
+          getRecoveryPath(storePath),
+          contents,
+          'utf8',
+        );
+      } catch (recoveryErr) {
+        logger.error(
+          'Could not write the global preferences recovery copy; not overwriting the store',
+          recoveryErr,
+        );
+        throw recoveryErr;
+      }
       await fs.promises.writeFile(storePath, contents, 'utf8');
       return;
     }

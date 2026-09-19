@@ -160,8 +160,9 @@ if (isDev) {
 const getGlobalPrefsPath = () =>
   path.join(process.env.ACTUAL_DATA_DIR!, 'global-store.json');
 
-// Last known-good copy, written by the EXDEV fallback in saveGlobalPrefs (and
-// by loot-core's asyncStorage) before overwriting the store in place.
+// Complete copy of the store, written ahead of an in-place overwrite by the
+// EXDEV fallback in saveGlobalPrefs (and by loot-core's asyncStorage), so an
+// interrupted overwrite can be recovered from.
 const getGlobalPrefsRecoveryPath = () => `${getGlobalPrefsPath()}.bak`;
 
 function parseGlobalPrefs(contents: string): GlobalPrefsJson {
@@ -169,6 +170,8 @@ function parseGlobalPrefs(contents: string): GlobalPrefsJson {
   if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
     throw new Error('Global preferences file is not a JSON object');
   }
+  // The shape was checked above; the field values are trusted as written by
+  // the app itself, the same way loot-core's asyncStorage treats them.
   return parsed as GlobalPrefsJson;
 }
 
@@ -183,15 +186,27 @@ function loadGlobalPrefsRecovery(): GlobalPrefsJson | null {
 }
 
 async function loadGlobalPrefs() {
+  let contents: string;
   try {
-    return parseGlobalPrefs(fs.readFileSync(getGlobalPrefsPath(), 'utf8'));
+    contents = fs.readFileSync(getGlobalPrefsPath(), 'utf8');
+  } catch (error) {
+    // A missing file is a fresh install: start from defaults, the same as
+    // loot-core does, without consulting any leftover recovery copy.
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      logMessage('info', 'Could not read global state - using defaults');
+    }
+    return {};
+  }
+
+  try {
+    return parseGlobalPrefs(contents);
   } catch {
     const recovered = loadGlobalPrefsRecovery();
     if (recovered) {
       logMessage('info', 'Loaded global state from its recovery copy');
       return recovered;
     }
-    logMessage('info', 'Could not load global state - using defaults');
+    logMessage('info', 'Could not parse global state - using defaults');
     return {};
   }
 }
@@ -222,46 +237,6 @@ async function loadGlobalPrefsStrict(): Promise<GlobalPrefsJson> {
   }
 }
 
-// Copies the active store over the recovery file, but only when the active
-// file is valid: a truncated file from an interrupted in-place write must not
-// replace the last good copy.
-async function backupGlobalPrefs() {
-  let contents: string;
-  try {
-    contents = await readFile(getGlobalPrefsPath(), 'utf8');
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-      logMessage(
-        'error',
-        `Could not read global preferences to back them up: ${String(error)}`,
-      );
-    }
-    return;
-  }
-
-  try {
-    parseGlobalPrefs(contents);
-  } catch {
-    logMessage(
-      'info',
-      'Not backing up global preferences: the file is not valid, keeping the existing recovery copy',
-    );
-    return;
-  }
-
-  try {
-    await writeFile(getGlobalPrefsRecoveryPath(), contents, 'utf8');
-  } catch (error) {
-    // Without a recovery copy the in-place overwrite would be the only copy,
-    // so refuse to save rather than risk losing the current preferences.
-    logMessage(
-      'error',
-      `Could not back up global preferences; not overwriting the store: ${String(error)}`,
-    );
-    throw error;
-  }
-}
-
 // Writes the global preferences file atomically (temp file + rename), the same
 // way loot-core's asyncStorage does. Only meant to be used while the backend
 // process is not running, otherwise the two would race for the file.
@@ -274,6 +249,11 @@ async function saveGlobalPrefs(state: GlobalPrefsJson) {
   try {
     await writeFile(temporaryPath, contents, 'utf8');
     await rename(temporaryPath, globalPrefsPath);
+    // The atomic path never leaves a torn file, so any recovery copy from an
+    // earlier in-place write is stale now; drop it.
+    await rm(getGlobalPrefsRecoveryPath(), { force: true }).catch(
+      () => undefined,
+    );
   } catch (error) {
     await rm(temporaryPath, { force: true }).catch(() => undefined);
 
@@ -285,9 +265,18 @@ async function saveGlobalPrefs(state: GlobalPrefsJson) {
         'info',
         `Could not atomically replace ${globalPrefsPath} (EXDEV); writing it in place instead`,
       );
-      // Keep the current store as a recovery copy so an interrupted overwrite
-      // can be recovered by the loaders above.
-      await backupGlobalPrefs();
+      // Write-ahead copy: land the complete new contents in the recovery file
+      // first, then overwrite in place. If the copy can't be written, refuse
+      // to save rather than risk leaving a torn store as the only copy.
+      try {
+        await writeFile(getGlobalPrefsRecoveryPath(), contents, 'utf8');
+      } catch (recoveryError) {
+        logMessage(
+          'error',
+          `Could not write the global preferences recovery copy; not overwriting the store: ${String(recoveryError)}`,
+        );
+        throw recoveryError;
+      }
       await writeFile(globalPrefsPath, contents, 'utf8');
       return;
     }
