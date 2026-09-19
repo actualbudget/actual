@@ -55,7 +55,12 @@ describe('parseDropTarget', () => {
       kind: 'group',
       groupId: 'g1',
     });
+    expect(parseDropTarget(dropTargets.ungrouped('off'))).toEqual({
+      kind: 'ungrouped',
+      side: 'off',
+    });
     expect(parseDropTarget('abc')).toBeNull();
+    expect(parseDropTarget('ungrouped:sideways')).toBeNull();
   });
 });
 
@@ -135,6 +140,41 @@ describe('computeAccountMove', () => {
 
   it('returns null for unknown dragged accounts', () => {
     expect(move('nope', 'before', dropTargets.account('a'))).toBeNull();
+  });
+
+  it('drops onto the side header to ungroup and move to the top of the side', () => {
+    expect(move('b', 'before', dropTargets.ungrouped('on'))).toEqual({
+      id: 'b',
+      targetId: 'a',
+      accountGroupId: null,
+    });
+    expect(move('a', 'before', dropTargets.ungrouped('on'))).toEqual({
+      id: 'a',
+      targetId: 'b',
+      accountGroupId: null,
+    });
+  });
+
+  it('moves a loose account to the top of the side without touching its group', () => {
+    expect(move('c', 'before', dropTargets.ungrouped('on'))).toEqual({
+      id: 'c',
+      targetId: 'a',
+      accountGroupId: undefined,
+    });
+  });
+
+  it('ignores side header drops that would change nothing', () => {
+    const looseFirst = [makeAccount('x'), ...accounts];
+    expect(
+      computeAccountMove({
+        accounts: looseFirst,
+        liveGroupIds,
+        draggedId: 'x',
+        dropPos: 'before',
+        target: { kind: 'ungrouped', side: 'on' },
+      }),
+    ).toBeNull();
+    expect(move('closed1', 'before', dropTargets.ungrouped('on'))).toBeNull();
   });
 });
 

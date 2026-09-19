@@ -8,14 +8,18 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { Link } from '#components/common/Link';
+import { DropHighlight, useDrop } from '#hooks/useDragDrop';
 import type { Binding } from '#spreadsheet';
 
 import { CollapseChevron } from './CollapseChevron';
 import { CountPill } from './CountPill';
+import { dropTargets } from './dropTargets';
 import { SidebarAccountGroup } from './SidebarAccountGroup';
 import { SidebarBalance } from './SidebarBalance';
-import { sectionLabelStyle } from './styles';
+import { useSidebarDragScope } from './SidebarDragScope';
+import { dropLineOffset, sectionLabelStyle } from './styles';
 import { SyncErrorRollup } from './SyncErrorRollup';
+import { dropZoneId } from './useAccountReorder';
 import type { GroupBucket, SidebarAccountSide } from './useSidebarAccountTree';
 
 type SideGroupProps = {
@@ -47,10 +51,23 @@ export function SideGroup({
   onToggleBucket,
 }: SideGroupProps) {
   const { t } = useTranslation();
+  const { dragType, onDrop, onDropTargetOver, activeDropPos } =
+    useSidebarDragScope();
+
+  const dropTargetId = dropTargets.ungrouped(side);
+  const { dropRef, dropProps } = useDrop<{ id: string }>({
+    types: [dragType],
+    id: dropTargetId,
+    onDrop,
+    onDragOver: () =>
+      onDropTargetOver(dropTargetId, dropZoneId(side, null), 'after'),
+  });
 
   return (
     <View style={{ marginTop: spacing.xxs }}>
       <View
+        innerRef={dropRef}
+        {...dropProps}
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -60,6 +77,10 @@ export function SideGroup({
           paddingRight: spacing.sm,
         }}
       >
+        <DropHighlight
+          pos={activeDropPos(dropTargetId)}
+          offset={{ ...dropLineOffset, left: spacing.xs }}
+        />
         <Button
           variant="bare"
           aria-expanded={isOpen}

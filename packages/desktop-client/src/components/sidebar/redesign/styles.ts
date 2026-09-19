@@ -1,5 +1,6 @@
 import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { radius } from '@actual-app/components/tokens';
 
 export const sectionLabelStyle = {
   fontSize: 13,
@@ -13,3 +14,9 @@ export const groupLabelStyle = {
 } satisfies CSSProperties;
 
 export const dropLineOffset = { top: -1.5, bottom: -1.5 };
+
+export const dropZoneStyle = {
+  backgroundColor: theme.sidebarItemBackgroundHover,
+  boxShadow: `inset 0 0 0 1px ${theme.sidebarItemAccentSelected}`,
+  borderRadius: radius.sm,
+} satisfies CSSProperties;

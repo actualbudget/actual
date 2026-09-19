@@ -42,6 +42,26 @@ export function computeAccountMove({
     return null;
   }
 
+  if (target.kind === 'ungrouped') {
+    if (draggedAccount.closed) {
+      return null;
+    }
+    const sideAccounts = accounts.filter(
+      account =>
+        !account.closed && account.offbudget === draggedAccount.offbudget,
+    );
+    const isGrouped = getEffectiveGroupId(draggedAccount, liveGroupIds) != null;
+    if (!isGrouped && sideAccounts[0]?.id === draggedId) {
+      return null;
+    }
+    const firstOther = sideAccounts.find(account => account.id !== draggedId);
+    return {
+      id: draggedId,
+      targetId: firstOther?.id ?? null,
+      accountGroupId: isGrouped ? null : undefined,
+    };
+  }
+
   if (target.kind === 'group') {
     const firstMember = accounts.find(
       account =>

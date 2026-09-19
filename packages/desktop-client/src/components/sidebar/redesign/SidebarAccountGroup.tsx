@@ -1,18 +1,12 @@
-import { theme } from '@actual-app/components/theme';
-import { radius, spacing } from '@actual-app/components/tokens';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { AccountGroupHeader } from './AccountGroupHeader';
 import { AccountRow } from './AccountRow';
 import { useSidebarDragScope } from './SidebarDragScope';
+import { dropZoneStyle } from './styles';
 import { dropZoneId } from './useAccountReorder';
 import type { GroupBucket } from './useSidebarAccountTree';
-
-const dropZoneStyle = {
-  backgroundColor: theme.sidebarItemBackgroundHover,
-  boxShadow: `inset 0 0 0 1px ${theme.sidebarItemAccentSelected}`,
-  borderRadius: radius.sm,
-};
 
 type SidebarAccountGroupProps = {
   bucket: GroupBucket;
