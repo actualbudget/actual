@@ -27,7 +27,7 @@ import { CountPill } from './CountPill';
 import { dropTargets } from './dropTargets';
 import { SidebarBalance } from './SidebarBalance';
 import { useSidebarDragScope } from './SidebarDragScope';
-import { groupLabelStyle } from './styles';
+import { dropLineOffset, groupLabelStyle } from './styles';
 import { SyncErrorRollup } from './SyncErrorRollup';
 
 type AccountGroupHeaderProps = {
@@ -37,6 +37,7 @@ type AccountGroupHeaderProps = {
   failedCount: number;
   isOpen: boolean;
   onToggle: () => void;
+  dropZoneId: string;
 };
 
 export function AccountGroupHeader({
@@ -46,13 +47,15 @@ export function AccountGroupHeader({
   failedCount,
   isOpen,
   onToggle,
+  dropZoneId,
 }: AccountGroupHeaderProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const updateGroup = useUpdateAccountGroupMutation();
   const deleteGroup = useDeleteAccountGroupMutation();
-  const { dragType, onDrop } = useSidebarDragScope();
+  const { dragType, onDrop, onDropTargetOver, activeDropPos } =
+    useSidebarDragScope();
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   useContextMenu({
@@ -85,10 +88,12 @@ export function AccountGroupHeader({
     ],
   });
 
-  const { dropRef, dropProps, dropPos } = useDrop<{ id: string }>({
+  const dropTargetId = dropTargets.group(group.id);
+  const { dropRef, dropProps } = useDrop<{ id: string }>({
     types: [dragType],
-    id: dropTargets.group(group.id),
+    id: dropTargetId,
     onDrop,
+    onDragOver: () => onDropTargetOver(dropTargetId, dropZoneId, 'after'),
   });
 
   if (isEditing) {
@@ -125,7 +130,10 @@ export function AccountGroupHeader({
 
   return (
     <View innerRef={dropRef} {...dropProps} style={{ position: 'relative' }}>
-      <DropHighlight pos={dropPos ? 'after' : null} />
+      <DropHighlight
+        pos={activeDropPos(dropTargetId)}
+        offset={{ ...dropLineOffset, left: spacing.sm }}
+      />
       <Button
         ref={triggerRef}
         variant="bare"

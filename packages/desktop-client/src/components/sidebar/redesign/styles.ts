@@ -11,3 +11,5 @@ export const groupLabelStyle = {
   fontWeight: 600,
   color: theme.sidebarTextSubdued,
 } satisfies CSSProperties;
+
+export const dropLineOffset = { top: -1.5, bottom: -1.5 };

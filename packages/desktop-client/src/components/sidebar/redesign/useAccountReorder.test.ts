@@ -3,7 +3,10 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 import { describe, expect, it } from 'vitest';
 
 import { dropTargets, parseDropTarget } from './dropTargets';
-import { computeAccountMove } from './useAccountReorder';
+import {
+  computeAccountMove,
+  shouldHighlightDropZone,
+} from './useAccountReorder';
 
 function makeAccount(
   id: string,
@@ -132,5 +135,58 @@ describe('computeAccountMove', () => {
 
   it('returns null for unknown dragged accounts', () => {
     expect(move('nope', 'before', dropTargets.account('a'))).toBeNull();
+  });
+});
+
+describe('shouldHighlightDropZone', () => {
+  it('highlights a hovered group other than the one being dragged from', () => {
+    expect(
+      shouldHighlightDropZone({
+        draggedZoneId: 'on:g1',
+        hoveredZoneId: 'on:g2',
+        zoneId: 'on:g2',
+      }),
+    ).toBe(true);
+    expect(
+      shouldHighlightDropZone({
+        draggedZoneId: 'on:g1',
+        hoveredZoneId: 'on:',
+        zoneId: 'on:',
+      }),
+    ).toBe(true);
+  });
+
+  it('never highlights the group the account came from', () => {
+    expect(
+      shouldHighlightDropZone({
+        draggedZoneId: 'on:g1',
+        hoveredZoneId: 'on:g1',
+        zoneId: 'on:g1',
+      }),
+    ).toBe(false);
+    expect(
+      shouldHighlightDropZone({
+        draggedZoneId: 'on:',
+        hoveredZoneId: 'on:',
+        zoneId: 'on:',
+      }),
+    ).toBe(false);
+  });
+
+  it('highlights nothing outside a drag or for groups not hovered', () => {
+    expect(
+      shouldHighlightDropZone({
+        draggedZoneId: undefined,
+        hoveredZoneId: 'on:g2',
+        zoneId: 'on:g2',
+      }),
+    ).toBe(false);
+    expect(
+      shouldHighlightDropZone({
+        draggedZoneId: 'on:g1',
+        hoveredZoneId: 'on:g2',
+        zoneId: 'on:g3',
+      }),
+    ).toBe(false);
   });
 });

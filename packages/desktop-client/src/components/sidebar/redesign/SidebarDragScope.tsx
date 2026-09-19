@@ -1,13 +1,24 @@
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 
-import type { OnDragChangeCallback, OnDropCallback } from '#hooks/useDragDrop';
+import type {
+  DropPosition,
+  OnDragChangeCallback,
+  OnDropCallback,
+} from '#hooks/useDragDrop';
 
 export type SidebarDragScope = {
   dragType: string;
   canDrag: boolean;
   onDragChange: OnDragChangeCallback<{ id: string }>;
   onDrop: OnDropCallback;
+  onDropTargetOver: (
+    targetId: string,
+    zoneId: string | undefined,
+    pos: DropPosition,
+  ) => void;
+  activeDropPos: (targetId: string) => DropPosition | null;
+  isDropZoneHighlighted: (zoneId: string) => boolean;
 };
 
 const SidebarDragScopeContext = createContext<SidebarDragScope | null>(null);

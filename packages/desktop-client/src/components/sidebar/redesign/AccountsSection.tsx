@@ -43,6 +43,7 @@ export function AccountsSection() {
 
   return (
     <View
+      onDragOver={reorder.onListDragOver}
       style={{
         flexGrow: 1,
         minHeight: 0,
@@ -72,6 +73,9 @@ export function AccountsSection() {
               canDrag: reorder.canDrag,
               onDragChange: reorder.onDragChange,
               onDrop: reorder.onDrop,
+              onDropTargetOver: reorder.onDropTargetOver,
+              activeDropPos: reorder.activeDropPos,
+              isDropZoneHighlighted: reorder.isDropZoneHighlighted,
             }}
           >
             <SideGroup
@@ -97,6 +101,9 @@ export function AccountsSection() {
               canDrag: reorder.canDrag,
               onDragChange: reorder.onDragChange,
               onDrop: reorder.onDrop,
+              onDropTargetOver: reorder.onDropTargetOver,
+              activeDropPos: reorder.activeDropPos,
+              isDropZoneHighlighted: reorder.isDropZoneHighlighted,
             }}
           >
             <SideGroup
@@ -121,6 +128,9 @@ export function AccountsSection() {
             canDrag: reorder.canDrag,
             onDragChange: reorder.onDragChange,
             onDrop: reorder.onDrop,
+            onDropTargetOver: reorder.onDropTargetOver,
+            activeDropPos: reorder.activeDropPos,
+            isDropZoneHighlighted: reorder.isDropZoneHighlighted,
           }}
         >
           <ClosedSection

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type {
   AccountEntity,
@@ -83,6 +83,37 @@ export function computeAccountMove({
   return { id: draggedId, targetId, accountGroupId };
 }
 
+export function dropZoneId(
+  side: 'on' | 'off',
+  groupId: AccountGroupEntity['id'] | null,
+): string {
+  return `${side}:${groupId ?? ''}`;
+}
+
+export function shouldHighlightDropZone({
+  draggedZoneId,
+  hoveredZoneId,
+  zoneId,
+}: {
+  draggedZoneId: string | undefined;
+  hoveredZoneId: string | undefined;
+  zoneId: string;
+}): boolean {
+  return (
+    draggedZoneId !== undefined &&
+    hoveredZoneId === zoneId &&
+    draggedZoneId !== zoneId
+  );
+}
+
+type ActiveDropTarget = {
+  targetId: string;
+  zoneId: string | undefined;
+  pos: DropPosition;
+};
+
+const DRAG_IDLE_CLEAR_MS = 600;
+
 export function useAccountReorder({
   isDragDisabled,
 }: {
@@ -92,15 +123,90 @@ export function useAccountReorder({
   isDragging: boolean;
   onDragChange: OnDragChangeCallback<{ id: string }>;
   onDrop: OnDropCallback;
+  onListDragOver: () => void;
+  onDropTargetOver: (
+    targetId: string,
+    zoneId: string | undefined,
+    pos: DropPosition,
+  ) => void;
+  activeDropPos: (targetId: string) => DropPosition | null;
+  isDropZoneHighlighted: (zoneId: string) => boolean;
 } {
   const { data: accounts = [] } = useAccounts();
   const { data: accountGroups = [] } = useAccountGroups();
   const moveAccount = useMoveAccountMutation();
   const [isDragging, setIsDragging] = useState(false);
+  const [draggedZoneId, setDraggedZoneId] = useState<string | undefined>(
+    undefined,
+  );
+  const [activeTarget, setActiveTarget] = useState<ActiveDropTarget | null>(
+    null,
+  );
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearIdleTimer = () => {
+    if (idleTimer.current != null) {
+      clearTimeout(idleTimer.current);
+      idleTimer.current = null;
+    }
+  };
+
+  useEffect(() => clearIdleTimer, []);
 
   const onDragChange: OnDragChangeCallback<{ id: string }> = drag => {
     setIsDragging(drag.state === 'start');
+    if (drag.state === 'start-preview' && drag.item != null) {
+      const draggedAccount = accounts.find(
+        account => account.id === drag.item?.id,
+      );
+      setDraggedZoneId(
+        draggedAccount == null || draggedAccount.closed
+          ? undefined
+          : dropZoneId(
+              draggedAccount.offbudget ? 'off' : 'on',
+              getEffectiveGroupId(
+                draggedAccount,
+                new Set(accountGroups.map(group => group.id)),
+              ),
+            ),
+      );
+    }
+    if (drag.state === 'end') {
+      clearIdleTimer();
+      setDraggedZoneId(undefined);
+      setActiveTarget(null);
+    }
   };
+
+  const onListDragOver = () => {
+    clearIdleTimer();
+    idleTimer.current = setTimeout(() => {
+      idleTimer.current = null;
+      setActiveTarget(null);
+    }, DRAG_IDLE_CLEAR_MS);
+  };
+
+  const onDropTargetOver = (
+    targetId: string,
+    zoneId: string | undefined,
+    pos: DropPosition,
+  ) => {
+    setActiveTarget(current =>
+      current?.targetId === targetId && current.pos === pos
+        ? current
+        : { targetId, zoneId, pos },
+    );
+  };
+
+  const activeDropPos = (targetId: string) =>
+    activeTarget?.targetId === targetId ? activeTarget.pos : null;
+
+  const isDropZoneHighlighted = (zoneId: string) =>
+    shouldHighlightDropZone({
+      draggedZoneId,
+      hoveredZoneId: activeTarget?.zoneId,
+      zoneId,
+    });
 
   const onDrop: OnDropCallback = (id, dropPos, targetId) => {
     const target = parseDropTarget(targetId);
@@ -120,5 +226,14 @@ export function useAccountReorder({
     }
   };
 
-  return { canDrag: !isDragDisabled, isDragging, onDragChange, onDrop };
+  return {
+    canDrag: !isDragDisabled,
+    isDragging,
+    onDragChange,
+    onDrop,
+    onListDragOver,
+    onDropTargetOver,
+    activeDropPos,
+    isDropZoneHighlighted,
+  };
 }

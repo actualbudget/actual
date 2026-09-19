@@ -25,6 +25,7 @@ import { AccountHoverCard } from './AccountHoverCard';
 import { dropTargets } from './dropTargets';
 import { SidebarBalance } from './SidebarBalance';
 import { useSidebarDragScope } from './SidebarDragScope';
+import { dropLineOffset } from './styles';
 import { SyncDot, useSyncDotLabel } from './SyncDot';
 import type { SyncDotStatus } from './SyncDot';
 
@@ -32,12 +33,14 @@ type AccountRowProps = {
   account: AccountEntity;
   isClosed?: boolean;
   showSyncDot?: boolean;
+  dropZoneId?: string;
 };
 
 export function AccountRow({
   account,
   isClosed,
   showSyncDot,
+  dropZoneId,
 }: AccountRowProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -45,7 +48,14 @@ export function AccountRow({
   const updatedAccounts = useUpdatedAccounts();
   const isUpdated = !isClosed && updatedAccounts.includes(account.id);
   const [isEditing, setIsEditing] = useState(false);
-  const { dragType, canDrag, onDragChange, onDrop } = useSidebarDragScope();
+  const {
+    dragType,
+    canDrag,
+    onDragChange,
+    onDrop,
+    onDropTargetOver,
+    activeDropPos,
+  } = useSidebarDragScope();
 
   const { dragProps, isDragging } = useDrag<{ id: string }>({
     type: dragType,
@@ -54,11 +64,15 @@ export function AccountRow({
     onDragChange,
   });
 
-  const { dropRef, dropProps, dropPos } = useDrop<{ id: string }>({
+  const dropTargetId = dropTargets.account(account.id);
+  const { dropRef, dropProps } = useDrop<{ id: string }>({
     types: [dragType],
-    id: dropTargets.account(account.id),
+    id: dropTargetId,
     onDrop,
+    onDragOver: pos => onDropTargetOver(dropTargetId, dropZoneId, pos),
   });
+
+  const highlightPos = isDragging ? null : activeDropPos(dropTargetId);
 
   const reopenAccount = useReopenAccountMutation();
   const updateAccount = useUpdateAccountMutation();
@@ -129,7 +143,7 @@ export function AccountRow({
         {...dropProps}
         style={{ flexShrink: 0, position: 'relative' }}
       >
-        <DropHighlight pos={isDragging ? null : dropPos} />
+        <DropHighlight pos={highlightPos} offset={dropLineOffset} />
         <View innerRef={triggerRef}>
           <View {...dragProps}>
             <Link

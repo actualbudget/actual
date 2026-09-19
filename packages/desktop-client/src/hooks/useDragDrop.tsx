@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { Context, RefObject } from 'react';
+import type { Context, DragEvent as ReactDragEvent, RefObject } from 'react';
 import {
   useDrag as useReactAriaDrag,
   useDrop as useReactAriaDrop,
@@ -276,6 +276,8 @@ export type UseDropArgs = {
   onDrop?: OnDropCallback;
   /** MIGRATION: Use onDropActivate option in useDragAndDrop instead */
   onLongHover?: OnLongHoverCallback;
+  /** Called on every dragover while the cursor is inside this target */
+  onDragOver?: (pos: DropPosition) => void;
 };
 
 /**
@@ -291,6 +293,7 @@ export function useDrop<T extends { id: string }>({
   id,
   onDrop,
   onLongHover,
+  onDragOver,
 }: UseDropArgs): {
   dropRef: RefObject<HTMLDivElement | null>;
   dropProps: DropResult['dropProps'];
@@ -298,12 +301,11 @@ export function useDrop<T extends { id: string }>({
   isDropTarget: boolean;
 } {
   const dropRef = useRef<HTMLDivElement>(null);
+  const acceptedTypes = Array.isArray(types) ? types : [types];
   const [dropPos, setDropPos] = useState<DropPosition | null>(null);
   // Track if cursor is actually within this element's bounds (not just drag preview overlap)
   const [isCursorOver, setIsCursorOver] = useState(false);
   const lastClientY = useRef<number | null>(null);
-  // Track if react-aria thinks we're a drop target (needed to attach dragover listener)
-  const [isDropActive, setIsDropActive] = useState(false);
 
   // Reset state when cursor leaves
   useEffect(() => {
@@ -313,8 +315,6 @@ export function useDrop<T extends { id: string }>({
     }
   }, [isCursorOver]);
 
-  const acceptedTypes = Array.isArray(types) ? types : [types];
-
   const { dropProps, isDropTarget }: DropResult = useReactAriaDrop({
     ref: dropRef as RefObject<HTMLDivElement | null>,
     getDropOperation(dragTypes) {
@@ -322,17 +322,12 @@ export function useDrop<T extends { id: string }>({
       const hasAcceptedType = acceptedTypes.some(t => dragTypes.has(t));
       return hasAcceptedType ? 'move' : 'cancel';
     },
-    onDropEnter() {
-      // Mark that a drag is active over this element (enables dragover listener)
-      setIsDropActive(true);
-    },
     onDropActivate() {
       // MIGRATION: This is already using react-aria's built-in long hover.
       // With useDragAndDrop, use the onDropActivate option directly.
       void onLongHover?.();
     },
     onDropExit() {
-      setIsDropActive(false);
       setIsCursorOver(false);
     },
     async onDrop(e) {
@@ -395,49 +390,45 @@ export function useDrop<T extends { id: string }>({
 
   // MIGRATION: This manual dragover tracking is not needed with
   // useDragAndDrop - the collection component handles it automatically.
-  useEffect(() => {
-    if (!isDropActive) return;
+  const handleDragOver = (e: ReactDragEvent<HTMLElement>) => {
+    dropProps.onDragOver?.(e);
+    if (!dropRef.current) return;
 
-    const handleDragOver = (e: DragEvent) => {
-      if (!dropRef.current) return;
+    const dragTypes = e.dataTransfer?.types ?? [];
+    if (!acceptedTypes.some(t => dragTypes.includes(t))) {
+      return;
+    }
 
-      const rect = dropRef.current.getBoundingClientRect();
-      const { clientX, clientY } = e;
+    const rect = dropRef.current.getBoundingClientRect();
+    const { clientX, clientY } = e;
 
-      // Check if cursor is actually within this element's bounds
-      const cursorInBounds =
-        clientX >= rect.left &&
-        clientX <= rect.right &&
-        clientY >= rect.top &&
-        clientY <= rect.bottom;
+    // Check if cursor is actually within this element's bounds
+    const cursorInBounds =
+      clientX >= rect.left &&
+      clientX <= rect.right &&
+      clientY >= rect.top &&
+      clientY <= rect.bottom;
 
-      if (!cursorInBounds) {
-        setIsCursorOver(false);
-        return;
-      }
+    if (!cursorInBounds) {
+      setIsCursorOver(false);
+      return;
+    }
 
-      setIsCursorOver(true);
-      lastClientY.current = clientY;
+    setIsCursorOver(true);
+    lastClientY.current = clientY;
 
-      const hoverMiddleY = (rect.bottom - rect.top) / 2;
-      const hoverClientY = clientY - rect.top;
-      const newPos: DropPosition =
-        hoverClientY < hoverMiddleY ? 'before' : 'after';
+    const hoverMiddleY = (rect.bottom - rect.top) / 2;
+    const hoverClientY = clientY - rect.top;
+    const newPos: DropPosition =
+      hoverClientY < hoverMiddleY ? 'before' : 'after';
 
-      setDropPos(newPos);
-    };
-
-    const element = dropRef.current;
-    element?.addEventListener('dragover', handleDragOver);
-
-    return () => {
-      element?.removeEventListener('dragover', handleDragOver);
-    };
-  }, [isDropActive, dropRef]);
+    setDropPos(newPos);
+    onDragOver?.(newPos);
+  };
 
   return {
     dropRef,
-    dropProps,
+    dropProps: { ...dropProps, onDragOver: handleDragOver },
     dropPos: isCursorOver ? dropPos : null,
     isDropTarget,
   };
@@ -479,6 +470,8 @@ type DropHighlightProps = {
   offset?: {
     top?: number;
     bottom?: number;
+    left?: number;
+    right?: number;
   };
 };
 
@@ -507,8 +500,8 @@ export function DropHighlight({ pos, offset }: DropHighlightProps) {
     <View
       style={{
         position: 'absolute',
-        left: 2,
-        right: 2,
+        left: 2 + (offset?.left ?? 0),
+        right: 2 + (offset?.right ?? 0),
         borderRadius: 3,
         height: 3,
         background: theme.pageTextLink,
