@@ -32,6 +32,7 @@ import * as bindings from '#spreadsheet/bindings';
 import { AccountRow } from './AccountRow';
 import { CollapseChevron } from './CollapseChevron';
 import { CountPill } from './CountPill';
+import { DragHandle } from './DragHandle';
 import { SidebarBalance } from './SidebarBalance';
 import { dropZoneStyle, groupLabelStyle } from './styles';
 import { SyncErrorRollup } from './SyncErrorRollup';
@@ -179,6 +180,7 @@ export function AccountGroupHeader({
                 />
               </>
             )}
+            <DragHandle />
           </View>
         )}
       </TreeItemContent>

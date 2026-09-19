@@ -23,6 +23,7 @@ import * as bindings from '#spreadsheet/bindings';
 import { isTouchDevice } from '#util/isTouchDevice';
 
 import { AccountHoverCard } from './AccountHoverCard';
+import { DragHandle } from './DragHandle';
 import { SidebarBalance } from './SidebarBalance';
 import { SyncDot, useSyncDotLabel } from './SyncDot';
 import type { SyncDotStatus } from './SyncDot';
@@ -189,6 +190,7 @@ export function AccountRow({
                 binding={bindings.accountBalance(account.id)}
                 style={{ fontSize: 12, color: 'inherit' }}
               />
+              <DragHandle />
             </View>
           </AccountHoverCard>
         )}
