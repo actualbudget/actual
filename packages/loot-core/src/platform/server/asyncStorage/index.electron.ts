@@ -97,8 +97,10 @@ async function writeStore(): Promise<void> {
   // mid-write (such as during an app update).
   const tmpPath = `${storePath}.${process.pid}.${writeCounter++}.tmp`;
 
+  const contents = JSON.stringify(store);
+
   try {
-    await fs.promises.writeFile(tmpPath, JSON.stringify(store), 'utf8');
+    await fs.promises.writeFile(tmpPath, contents, 'utf8');
     await fs.promises.rename(tmpPath, storePath);
   } catch (err) {
     // Best-effort cleanup of the temp file; ignore failures (it may never have
@@ -106,6 +108,20 @@ async function writeStore(): Promise<void> {
     try {
       await fs.promises.rm(tmpPath, { force: true });
     } catch {}
+
+    if (err?.code === 'EXDEV') {
+      // Some sandboxed installs (e.g. the Microsoft Store / MSIX package on
+      // Windows) virtualise the app data folder so that renaming into it
+      // counts as crossing filesystems. Fall back to writing the file in
+      // place: not atomic, but far better than never being able to save
+      // preferences at all.
+      logger.warn(
+        `Could not atomically replace ${storePath} (EXDEV); writing it in place instead`,
+      );
+      await fs.promises.writeFile(storePath, contents, 'utf8');
+      return;
+    }
+
     throw err;
   }
 }

@@ -200,11 +200,26 @@ async function saveGlobalPrefs(state: GlobalPrefsJson) {
   const globalPrefsPath = getGlobalPrefsPath();
   const temporaryPath = `${globalPrefsPath}.${process.pid}.main.tmp`;
 
+  const contents = JSON.stringify(state);
+
   try {
-    await writeFile(temporaryPath, JSON.stringify(state), 'utf8');
+    await writeFile(temporaryPath, contents, 'utf8');
     await rename(temporaryPath, globalPrefsPath);
   } catch (error) {
     await rm(temporaryPath, { force: true }).catch(() => undefined);
+
+    if ((error as NodeJS.ErrnoException).code === 'EXDEV') {
+      // Sandboxed installs (e.g. the Microsoft Store package) virtualise the
+      // app data folder, so renaming into it fails as a cross-device move.
+      // Write in place instead; losing atomicity beats failing outright.
+      logMessage(
+        'info',
+        `Could not atomically replace ${globalPrefsPath} (EXDEV); writing it in place instead`,
+      );
+      await writeFile(globalPrefsPath, contents, 'utf8');
+      return;
+    }
+
     throw error;
   }
 }

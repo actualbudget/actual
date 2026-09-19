@@ -72,6 +72,53 @@ describe('electron asyncStorage', () => {
     ).toEqual([]);
   });
 
+  it('falls back to writing in place when the rename crosses filesystems', async () => {
+    // Sandboxed installs (e.g. the Microsoft Store package) virtualise the
+    // app data folder, so the temp-file rename fails with EXDEV.
+    const crossDeviceError = Object.assign(
+      new Error('EXDEV: cross-device link not permitted'),
+      { code: 'EXDEV' },
+    );
+    const renameSpy = vi
+      .spyOn(fs.promises, 'rename')
+      .mockRejectedValue(crossDeviceError);
+
+    try {
+      asyncStorage.init();
+      await asyncStorage.setItem('language', 'en');
+      await asyncStorage.setItem('theme', 'dark');
+
+      expect(renameSpy).toHaveBeenCalled();
+      expect(JSON.parse(fs.readFileSync(storePath(), 'utf8'))).toEqual({
+        language: 'en',
+        theme: 'dark',
+      });
+      expect(
+        fs.readdirSync(dataDir).filter(name => name.endsWith('.tmp')),
+      ).toEqual([]);
+    } finally {
+      renameSpy.mockRestore();
+    }
+  });
+
+  it('still rejects when the rename fails for another reason', async () => {
+    const renameSpy = vi
+      .spyOn(fs.promises, 'rename')
+      .mockRejectedValue(
+        Object.assign(new Error('EACCES'), { code: 'EACCES' }),
+      );
+
+    try {
+      asyncStorage.init();
+      await expect(asyncStorage.setItem('language', 'en')).rejects.toThrow(
+        'EACCES',
+      );
+      expect(fs.existsSync(storePath())).toBe(false);
+    } finally {
+      renameSpy.mockRestore();
+    }
+  });
+
   it('starts empty without a backup when no store file exists', () => {
     asyncStorage.init();
 
