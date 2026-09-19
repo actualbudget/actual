@@ -77,12 +77,32 @@ describe('computeAccountMove', () => {
     });
   });
 
-  it('inserts before the raw successor when dropping after a row', () => {
+  it('inserts before the next account on the same side when dropping after a row', () => {
     expect(move('a', after('b'))).toEqual({
       id: 'a',
       targetId: 'c',
       accountGroupId: undefined,
     });
+  });
+
+  it('skips accounts outside the sort partition when finding the successor', () => {
+    const mixed = [
+      makeAccount('on1'),
+      makeAccount('off1', { offbudget: 1 }),
+      makeAccount('on2'),
+      makeAccount('on3'),
+      makeAccount('closedA', { closed: 1 }),
+      makeAccount('off2', { offbudget: 1 }),
+      makeAccount('closedB', { closed: 1 }),
+      makeAccount('closedC', { closed: 1 }),
+    ];
+    const moveMixed = (draggedId: string, target: AccountDropTarget) =>
+      computeAccountMove({ accounts: mixed, liveGroupIds, draggedId, target });
+
+    expect(moveMixed('on3', after('on1'))?.targetId).toBe('on2');
+    expect(moveMixed('on1', after('on3'))?.targetId).toBe('closedA');
+    expect(moveMixed('closedC', after('closedA'))?.targetId).toBe('closedB');
+    expect(moveMixed('closedB', after('on3'))?.targetId).toBe(null);
   });
 
   it('appends at the end when dropping after the last account', () => {

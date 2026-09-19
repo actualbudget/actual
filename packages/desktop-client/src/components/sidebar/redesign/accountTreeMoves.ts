@@ -64,9 +64,14 @@ export function computeAccountMove({
 
   let targetId: AccountEntity['id'] | null = target.accountId;
   if (target.position === 'after') {
-    const idx = accounts.findIndex(account => account.id === target.accountId);
+    const siblings = accounts.filter(account =>
+      draggedAccount.closed
+        ? account.closed
+        : account.offbudget === draggedAccount.offbudget,
+    );
+    const idx = siblings.findIndex(account => account.id === target.accountId);
     targetId =
-      idx >= 0 && idx + 1 < accounts.length ? accounts[idx + 1].id : null;
+      idx >= 0 && idx + 1 < siblings.length ? siblings[idx + 1].id : null;
   }
 
   let accountGroupId: AccountGroupEntity['id'] | null | undefined;
