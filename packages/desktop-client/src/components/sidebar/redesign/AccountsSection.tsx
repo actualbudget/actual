@@ -9,7 +9,9 @@ import * as bindings from '#spreadsheet/bindings';
 import { AccountSearchField } from './AccountSearchField';
 import { AccountsHeaderRow } from './AccountsHeaderRow';
 import { ClosedSection } from './ClosedSection';
+import { SidebarDragScopeProvider } from './SidebarDragScope';
 import { SideGroup } from './SideGroup';
+import { useAccountReorder } from './useAccountReorder';
 import {
   filterSidebarTree,
   useSidebarAccountTree,
@@ -25,6 +27,7 @@ export function AccountsSection() {
   const isSearching = trimmedQuery !== '';
 
   const collapse = useSidebarCollapseState({ tree, isSearching });
+  const reorder = useAccountReorder({ isDragDisabled: isSearching });
 
   const onToggleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
@@ -40,6 +43,7 @@ export function AccountsSection() {
 
   return (
     <View
+      onDragOver={reorder.onListDragOver}
       style={{
         flexGrow: 1,
         minHeight: 0,
@@ -63,39 +67,81 @@ export function AccountsSection() {
           />
         )}
         {tree.onBudget.buckets.length > 0 && (
-          <SideGroup
-            label={t('On budget')}
-            side="on"
-            showSyncDot={showSyncDot}
-            sideData={visibleTree.onBudget}
-            totalBinding={bindings.onBudgetAccountBalance()}
-            balanceTestId="sidebar-on-budget-balance"
-            isOpen={collapse.isOpen('onbudget')}
-            onToggle={() => collapse.toggle('onbudget')}
-            isBucketOpen={bucket => collapse.isOpen(bucketKey('on', bucket))}
-            onToggleBucket={bucket => collapse.toggle(bucketKey('on', bucket))}
-          />
+          <SidebarDragScopeProvider
+            scope={{
+              dragType: 'sidebar-account-on',
+              canDrag: reorder.canDrag,
+              onDragChange: reorder.onDragChange,
+              onDrop: reorder.onDrop,
+              onDropTargetOver: reorder.onDropTargetOver,
+              activeDropPos: reorder.activeDropPos,
+              isDropZoneHighlighted: reorder.isDropZoneHighlighted,
+            }}
+          >
+            <SideGroup
+              label={t('On budget')}
+              side="on"
+              showSyncDot={showSyncDot}
+              sideData={visibleTree.onBudget}
+              totalBinding={bindings.onBudgetAccountBalance()}
+              balanceTestId="sidebar-on-budget-balance"
+              isOpen={collapse.isOpen('onbudget')}
+              onToggle={() => collapse.toggle('onbudget')}
+              isBucketOpen={bucket => collapse.isOpen(bucketKey('on', bucket))}
+              onToggleBucket={bucket =>
+                collapse.toggle(bucketKey('on', bucket))
+              }
+            />
+          </SidebarDragScopeProvider>
         )}
         {tree.offBudget.buckets.length > 0 && (
-          <SideGroup
-            label={t('Off budget')}
-            side="off"
-            showSyncDot={showSyncDot}
-            sideData={visibleTree.offBudget}
-            totalBinding={bindings.offBudgetAccountBalance()}
-            balanceTestId="sidebar-off-budget-balance"
-            isOpen={collapse.isOpen('offbudget')}
-            onToggle={() => collapse.toggle('offbudget')}
-            isBucketOpen={bucket => collapse.isOpen(bucketKey('off', bucket))}
-            onToggleBucket={bucket => collapse.toggle(bucketKey('off', bucket))}
-          />
+          <SidebarDragScopeProvider
+            scope={{
+              dragType: 'sidebar-account-off',
+              canDrag: reorder.canDrag,
+              onDragChange: reorder.onDragChange,
+              onDrop: reorder.onDrop,
+              onDropTargetOver: reorder.onDropTargetOver,
+              activeDropPos: reorder.activeDropPos,
+              isDropZoneHighlighted: reorder.isDropZoneHighlighted,
+            }}
+          >
+            <SideGroup
+              label={t('Off budget')}
+              side="off"
+              showSyncDot={showSyncDot}
+              sideData={visibleTree.offBudget}
+              totalBinding={bindings.offBudgetAccountBalance()}
+              balanceTestId="sidebar-off-budget-balance"
+              isOpen={collapse.isOpen('offbudget')}
+              onToggle={() => collapse.toggle('offbudget')}
+              isBucketOpen={bucket => collapse.isOpen(bucketKey('off', bucket))}
+              onToggleBucket={bucket =>
+                collapse.toggle(bucketKey('off', bucket))
+              }
+            />
+          </SidebarDragScopeProvider>
         )}
-        <ClosedSection
-          accounts={visibleTree.closed}
-          isOpen={collapse.isOpen('closed')}
-          onToggle={() => collapse.toggle('closed')}
+        <SidebarDragScopeProvider
+          scope={{
+            dragType: 'sidebar-account-closed',
+            canDrag: reorder.canDrag,
+            onDragChange: reorder.onDragChange,
+            onDrop: reorder.onDrop,
+            onDropTargetOver: reorder.onDropTargetOver,
+            activeDropPos: reorder.activeDropPos,
+            isDropZoneHighlighted: reorder.isDropZoneHighlighted,
+          }}
+        >
+          <ClosedSection
+            accounts={visibleTree.closed}
+            isOpen={collapse.isOpen('closed')}
+            onToggle={() => collapse.toggle('closed')}
+          />
+        </SidebarDragScopeProvider>
+        <View
+          style={{ height: reorder.isDragging ? spacing.xl : spacing.md }}
         />
-        <View style={{ height: spacing.md }} />
       </View>
     </View>
   );
