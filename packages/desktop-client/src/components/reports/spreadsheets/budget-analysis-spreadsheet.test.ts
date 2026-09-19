@@ -5,6 +5,7 @@ import {
   getLastSelectableMonth,
   getNextRunningBalance,
   isBaseCategory,
+  resolveCategoryBalanceCarryover,
   summarizeMonthCategories,
 } from './budget-analysis-spreadsheet';
 import type { BudgetMonthCell } from './budgetMonthCell';
@@ -147,10 +148,10 @@ describe('createBudgetAnalysisSpreadsheet', () => {
     });
 
     it('reports no budget data for a never-budgeted month', () => {
-      // `envelope-budget-month` emits a cell for every category in every
-      // month, so an untouched future month arrives as present-but-zero
-      // cells rather than as missing ones. Presence alone cannot distinguish
-      // it from a real month.
+      // Both `envelope-budget-month` and `tracking-budget-month` emit a cell
+      // for every category in every month, so an untouched future month
+      // arrives as present-but-zero cells rather than as missing ones.
+      // Presence alone cannot distinguish it from a real month.
       const result = summarizeMonthCategories(
         cells({
           'budget-c1': 0,
@@ -164,7 +165,7 @@ describe('createBudgetAnalysisSpreadsheet', () => {
       expect(result.hasBudgetData).toBe(false);
     });
 
-    it('carries a positive balance to the next month', () => {
+    it('carries a positive balance to the next month under envelope budgeting', () => {
       const result = summarizeMonthCategories(
         cells({
           'budget-c1': 10000,
@@ -173,6 +174,7 @@ describe('createBudgetAnalysisSpreadsheet', () => {
           'carryover-c1': false,
         }),
         [visibleExpense],
+        'envelope',
       );
 
       expect(result.carryoverToNextMonth).toBe(6000);
@@ -180,7 +182,27 @@ describe('createBudgetAnalysisSpreadsheet', () => {
       expect(result.hasBudgetData).toBe(true);
     });
 
-    it('treats an overspend without carryover as an overspending adjustment', () => {
+    it('resets a positive balance under tracking budgeting when carryover is off', () => {
+      // Unlike envelope, tracking budgets only carry a leftover forward when
+      // the category's carryover flag is on — a positive leftover does not
+      // get special-cased. See resolveCategoryBalanceCarryover.
+      const result = summarizeMonthCategories(
+        cells({
+          'budget-c1': 10000,
+          'sum-amount-c1': -4000,
+          'leftover-c1': 6000,
+          'carryover-c1': false,
+        }),
+        [visibleExpense],
+        'tracking',
+      );
+
+      expect(result.carryoverToNextMonth).toBe(0);
+      expect(result.overspendingThisMonth).toBe(0);
+      expect(result.hasBudgetData).toBe(true);
+    });
+
+    it('treats an overspend without carryover as an overspending adjustment under envelope budgeting', () => {
       const result = summarizeMonthCategories(
         cells({
           'budget-c1': 0,
@@ -189,6 +211,7 @@ describe('createBudgetAnalysisSpreadsheet', () => {
           'carryover-c1': false,
         }),
         [visibleExpense],
+        'envelope',
       );
 
       expect(result.carryoverToNextMonth).toBe(0);
@@ -196,20 +219,43 @@ describe('createBudgetAnalysisSpreadsheet', () => {
       expect(result.hasBudgetData).toBe(true);
     });
 
-    it('carries a negative balance forward when carryover is enabled', () => {
+    it('resets an overspend with no overspending bucket under tracking budgeting', () => {
+      // Tracking mode has no last-month-overspent equivalent: a non-carried
+      // negative leftover just resets to 0, it isn't recaptured anywhere.
       const result = summarizeMonthCategories(
         cells({
           'budget-c1': 0,
           'sum-amount-c1': -10000,
           'leftover-c1': -10000,
-          'carryover-c1': true,
+          'carryover-c1': false,
         }),
         [visibleExpense],
+        'tracking',
       );
 
-      expect(result.carryoverToNextMonth).toBe(-10000);
+      expect(result.carryoverToNextMonth).toBe(0);
       expect(result.overspendingThisMonth).toBe(0);
+      expect(result.hasBudgetData).toBe(true);
     });
+
+    it.each(['envelope', 'tracking'] as const)(
+      'carries a negative balance forward when carryover is enabled (%s)',
+      budgetType => {
+        const result = summarizeMonthCategories(
+          cells({
+            'budget-c1': 0,
+            'sum-amount-c1': -10000,
+            'leftover-c1': -10000,
+            'carryover-c1': true,
+          }),
+          [visibleExpense],
+          budgetType,
+        );
+
+        expect(result.carryoverToNextMonth).toBe(-10000);
+        expect(result.overspendingThisMonth).toBe(0);
+      },
+    );
 
     it('only counts the categories it is given', () => {
       const result = summarizeMonthCategories(
@@ -290,6 +336,71 @@ describe('createBudgetAnalysisSpreadsheet', () => {
       }
 
       expect(runningBalance).toBe(0);
+    });
+  });
+});
+
+describe('resolveCategoryBalanceCarryover', () => {
+  // Exhaustive matrix: every combination of budget type, carryover flag,
+  // and balance sign that resolveCategoryBalanceCarryover branches on.
+  // Envelope and tracking only disagree on one cell (positive balance,
+  // carryover off) and on the negative/carryover-off overspending bucket —
+  // every other cell behaves identically between the two modes.
+  describe.each(['envelope', 'tracking'] as const)('%s budgets', budgetType => {
+    it.each([
+      // [balance, hasCarryover, expected]
+      [100, true, { carryoverToNextMonth: 100, overspending: 0 }],
+      [-50, true, { carryoverToNextMonth: -50, overspending: 0 }],
+      [0, true, { carryoverToNextMonth: 0, overspending: 0 }],
+      [0, false, { carryoverToNextMonth: 0, overspending: 0 }],
+    ])('balance=%s, carryover=%s -> %o', (balance, hasCarryover, expected) => {
+      expect(
+        resolveCategoryBalanceCarryover({ balance, hasCarryover }, budgetType),
+      ).toEqual(expected);
+    });
+
+    it('carries a positive balance forward when carryover is off (mode-specific)', () => {
+      const result = resolveCategoryBalanceCarryover(
+        { balance: 100, hasCarryover: false },
+        budgetType,
+      );
+
+      // Envelope always carries a positive leftover forward (leftover-pos
+      // clamp is a no-op for positive values, per envelope.ts). Tracking
+      // only carries forward when the flag is on (per tracking.ts's plain
+      // `carryover ? prevLeftover : 0` fallback), so an untracked positive
+      // leftover resets to 0 just like a negative one would. This is the
+      // divergence a user hits directly: budgeting $100 for Clothing with
+      // $43.56 spent leaves a $56.44 leftover that carries forward every
+      // month under envelope, but evaporates each month under tracking
+      // unless the category's carryover flag is turned on.
+      if (budgetType === 'envelope') {
+        expect(result).toEqual({ carryoverToNextMonth: 100, overspending: 0 });
+      } else {
+        expect(result).toEqual({ carryoverToNextMonth: 0, overspending: 0 });
+      }
+    });
+
+    it('resets a negative balance to zero when carryover is off (mode-specific)', () => {
+      const result = resolveCategoryBalanceCarryover(
+        { balance: -75, hasCarryover: false },
+        budgetType,
+      );
+
+      expect(result.carryoverToNextMonth).toBe(0);
+
+      if (budgetType === 'envelope') {
+        // Mirrors envelope.ts leftover-pos: a non-carried negative leftover
+        // is clamped to 0 going forward, and the negative remainder is what
+        // last-month-overspent recaptures.
+        expect(result.overspending).toBe(-75);
+      } else {
+        // Mirrors tracking.ts leftover formula: the `carryover ?
+        // prevLeftover : 0` fallback is a literal 0, not a clamp, and
+        // tracking mode has no last-month-overspent equivalent to
+        // recapture the difference.
+        expect(result.overspending).toBe(0);
+      }
     });
   });
 });
