@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getAccountDb } from './account-db';
+import { getAccountDb, hasPermission } from './account-db';
 import { handlers as app } from './app-admin';
 
 const ADMIN_ROLE = 'ADMIN';
@@ -191,6 +191,30 @@ describe('/admin', () => {
         expect(res.body.data).toHaveProperty('id');
 
         createdUserId = res.body.data.id;
+
+        const { role } = getAccountDb().first(
+          'SELECT role FROM users WHERE id = ?',
+          [createdUserId],
+        );
+        expect(role).toBe(BASIC_ROLE);
+      });
+
+      it('should store the role the request asked for', async () => {
+        const res = await request(app)
+          .post('/users')
+          .send({
+            userName: 'user-admin',
+            displayName: 'User Admin',
+            enabled: 1,
+            owner: 0,
+            role: ADMIN_ROLE,
+          })
+          .set('x-actual-token', sessionToken);
+
+        expect(res.statusCode).toEqual(200);
+        createdUserId = res.body.data.id;
+
+        expect(hasPermission(createdUserId, ADMIN_ROLE)).toBe(true);
       });
 
       it('should return 400 if the user already exists', async () => {
