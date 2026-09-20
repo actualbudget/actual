@@ -57,7 +57,7 @@
   "dependencies": {
     "@actual-app/core": "workspace:*",
     "@actual-app/crdt": "workspace:*",
-    "better-sqlite3": "^12.11.1",
+    "better-sqlite3": "^13.0.3",
     "compare-versions": "^6.1.1",
     "uuid": "^14.0.2"
   },
@@ -72,6 +72,6 @@
     "vitest": "^5.0.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   }
 }

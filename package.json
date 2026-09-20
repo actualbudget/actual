@@ -100,7 +100,7 @@
       "built": true
     },
     "better-sqlite3": {
-      "built": true
+      "built": false
     },
     "electron": {
       "built": true
