@@ -23,6 +23,7 @@ import { buildMonteCarloCashflowChart } from '#components/reports/graphs/util/mo
 import { useMonteCarloTickFormatter } from '#components/reports/graphs/util/useMonteCarloTickFormatter';
 import type {
   MonteCarloContribution,
+  MonteCarloIncomeStream,
   MonteCarloPot,
   MonteCarloRunDetailRow,
   MonteCarloSpendingPhase,
@@ -41,6 +42,7 @@ type MonteCarloCashflowGraphProps = {
   rows: MonteCarloRunDetailRow[];
   pots: MonteCarloPot[];
   contributions: MonteCarloContribution[];
+  incomeStreams: MonteCarloIncomeStream[];
   spendingPhases: MonteCarloSpendingPhase[];
   /** The user's current age; the x-axis shows startAge + year - 1 */
   startAge: number;
@@ -56,6 +58,7 @@ export function MonteCarloCashflowGraph({
   rows,
   pots,
   contributions,
+  incomeStreams,
   spendingPhases,
   startAge,
 }: MonteCarloCashflowGraphProps) {
@@ -69,6 +72,7 @@ export function MonteCarloCashflowGraph({
       rows,
       pots,
       contributions,
+      incomeStreams,
       spendingPhases,
       startAge,
       translate: t,

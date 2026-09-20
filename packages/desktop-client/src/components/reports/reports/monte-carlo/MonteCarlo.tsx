@@ -206,6 +206,7 @@ export function MonteCarlo() {
   const cashflowGraphProps = {
     pots: resolvedConfig.pots,
     contributions: resolvedConfig.contributions,
+    incomeStreams: resolvedConfig.incomeStreams,
     spendingPhases: resolvedConfig.spendingPhases,
     startAge: config.currentAge,
   };
@@ -544,8 +545,8 @@ export function MonteCarlo() {
                 >
                   <Trans>
                     Money flowing in and out each year of this simulated run:
-                    withdrawals and contributions above zero, planned spending
-                    and tax below.
+                    withdrawals and income above zero; planned spending, tax,
+                    contributions and money saved into the surplus pot below.
                   </Trans>
                 </Text>
                 <MonteCarloCashflowGraph
@@ -563,7 +564,11 @@ export function MonteCarlo() {
               simulationIndex={selectedRunIndex}
               simulationCount={result.simulationCount}
               startAge={config.currentAge}
-              hasContributions={config.contributions.length > 0}
+              hasContributions={
+                config.contributions.length > 0 ||
+                config.pots.some(pot => pot.isSurplus)
+              }
+              incomeStreams={resolvedConfig.incomeStreams}
               withdrawalRule={resolvedConfig.withdrawalRule}
               cashflowGraph={
                 <MonteCarloCashflowGraph
@@ -678,13 +683,17 @@ export function MonteCarlo() {
           <Paragraph>
             <Trans>
               Each scenario replays your retirement with a different sequence of
-              yearly investment returns. Every year, any contributions are added
-              at the start, then the withdrawal is taken, and then each pot
-              grows or shrinks with that year&apos;s return. Pots with an access
-              age stay invested but can&apos;t fund withdrawals until you reach
-              it - if the accessible pots can&apos;t cover a year&apos;s
-              withdrawal, the plan counts as having run out, even if locked pots
-              still hold money. The shaded bands show the range of outcomes
+              yearly investment returns. Every year, any income arrives and any
+              contributions are paid in at the start - some of them out of that
+              income; the income then pays for the year&apos;s spending first
+              and the withdrawal covers the rest; anything left unspent is saved
+              into the Surplus cash pot for later years when the plan keeps one,
+              and otherwise leaves the plan; and then each pot grows or shrinks
+              with that year&apos;s return. Pots with an access age stay
+              invested but can&apos;t fund withdrawals until you reach it - if
+              the accessible pots can&apos;t cover what a year&apos;s spending
+              still needs, the plan counts as having run out, even if locked
+              pots still hold money. The shaded bands show the range of outcomes
               across all scenarios: the darker band covers the middle half, and
               the lighter band covers 80% of them.
             </Trans>
