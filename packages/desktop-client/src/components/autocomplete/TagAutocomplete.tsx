@@ -143,7 +143,7 @@ export function TagAutocomplete({
       // Popup is open (guarded above), so this press only closes it.
       e.stopPropagation();
       setIsOpen(false);
-      onKeyDown?.(e);
+      return;
     } else {
       onKeyDown?.(e);
     }

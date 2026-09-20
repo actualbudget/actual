@@ -97,7 +97,6 @@ import {
   DeleteCell,
   Field,
   InputCell,
-  isEditingCell,
   Row,
   SelectCell,
   Table,
@@ -474,6 +473,7 @@ type StatusCellProps = {
   isChild?: boolean;
   isPreview?: boolean;
   onEdit: TransactionEditFunction;
+  onFocusCell?: (id: TransactionEntity['id'], field?: string) => void;
   onUpdate: TransactionUpdateFunction;
 };
 
@@ -485,6 +485,7 @@ function StatusCell({
   isChild,
   isPreview,
   onEdit,
+  onFocusCell,
   onUpdate,
 }: StatusCellProps) {
   const isClearedField =
@@ -540,6 +541,13 @@ function StatusCell({
         }}
         disabled={isPreview || isChild}
         onEdit={() => onEdit(id, 'cleared')}
+        onFocus={() => {
+          if (onFocusCell) {
+            onFocusCell(id, 'cleared');
+          } else {
+            onEdit(id, 'cleared');
+          }
+        }}
         onSelect={onSelect}
       >
         {createElement(statusProps.Icon, {
@@ -1003,6 +1011,8 @@ type TransactionProps = {
     name: string,
   ) => void;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
+  onFocusCell?: (id: TransactionEntity['id'], field?: string) => void;
+  onExit?: () => void;
   onDelete: (id: TransactionEntity['id']) => void;
   onBatchDelete?: (ids: TransactionEntity['id'][]) => void;
   onBatchDuplicate?: (ids: TransactionEntity['id'][]) => void;
@@ -1066,6 +1076,8 @@ const Transaction = memo(function Transaction({
   hideFraction,
   onSave,
   onEdit,
+  onFocusCell,
+  onExit,
   onDelete,
   onBatchDelete,
   onBatchDuplicate,
@@ -1576,6 +1588,13 @@ const Transaction = memo(function Transaction({
         });
       }}
       onEdit={() => onEdit(id, 'select')}
+      onFocus={() => {
+        if (onFocusCell) {
+          onFocusCell(id, 'select');
+        } else {
+          onEdit(id, 'select');
+        }
+      }}
       selected={selected}
       style={{ ...(isChild && { borderLeftWidth: 1 }) }}
       value={
@@ -1626,6 +1645,7 @@ const Transaction = memo(function Transaction({
             onUpdate={value => {
               onUpdate('date', value);
             }}
+            onExit={onExit}
           >
             {({
               onBlur,
@@ -1634,6 +1654,7 @@ const Transaction = memo(function Transaction({
               onSave,
               shouldSaveFromKey,
               inputStyle,
+              editSession,
             }) => (
               <DateSelect
                 value={date || ''}
@@ -1643,6 +1664,7 @@ const Transaction = memo(function Transaction({
                 clearOnBlur
                 onUpdate={onUpdate}
                 onSelect={onSave}
+                editSession={editSession}
                 transferDateSyncChecked={syncTransferDate}
                 onTransferDateSyncChange={
                   transaction.transfer_id ||
@@ -1751,6 +1773,7 @@ const Transaction = memo(function Transaction({
               onUpdate('notes', value?.trim());
             }}
             onExpose={name => !isPreview && onEdit(id, name)}
+            onExit={onExit}
           />
         );
       case 'group':
@@ -1878,6 +1901,7 @@ const Transaction = memo(function Transaction({
             exposed={focusedField === 'category'}
             focused={focusedField === 'category'}
             onExpose={name => onEdit(id, name)}
+            onExit={onExit}
             value={
               isOffBudget
                 ? t('Off budget')
@@ -1983,6 +2007,7 @@ const Transaction = memo(function Transaction({
             textAlign="right"
             title={debit}
             onExpose={name => !isPreview && onEdit(id, name)}
+            onExit={onExit}
             style={{
               ...(isParent && { fontStyle: 'italic' }),
               ...styles.tnum,
@@ -2018,6 +2043,7 @@ const Transaction = memo(function Transaction({
             textAlign="right"
             title={credit}
             onExpose={name => !isPreview && onEdit(id, name)}
+            onExit={onExit}
             style={{
               ...(isParent && { fontStyle: 'italic' }),
               ...styles.tnum,
@@ -2076,6 +2102,7 @@ const Transaction = memo(function Transaction({
             }
             isChild={isChild}
             onEdit={onEdit}
+            onFocusCell={onFocusCell}
             onUpdate={onUpdate}
           />
         );
@@ -2227,6 +2254,7 @@ type NotesCellProps = {
   onUpdate: (value: string) => void;
   onClickTag: (tag: string) => void;
   onExpose: (name: string) => void;
+  onExit?: () => void;
 };
 
 function NotesCell({
@@ -2237,15 +2265,8 @@ function NotesCell({
   onUpdate,
   onClickTag,
   onExpose,
+  onExit,
 }: NotesCellProps) {
-  const [inputValue, setInputValue] = useState(note);
-  const escapePressed = useRef(false);
-
-  useEffect(() => {
-    setInputValue(note);
-    escapePressed.current = false;
-  }, [note, setInputValue]);
-
   const textRef = useRef<HTMLSpanElement | null>(null);
   const [isTruncated, setIsTruncated] = useState(false);
   const checkTruncated = useCallback(() => {
@@ -2260,22 +2281,6 @@ function NotesCell({
     },
     [resizeRef],
   );
-
-  function onKeyDown(e: KeyboardEvent) {
-    if (e.key === 'Enter' || e.key === 'Tab') {
-      onUpdate(inputValue);
-    } else if (e.key === 'Escape') {
-      // Only reached once the tag dropdown is closed — while it's open it
-      // swallows Escape, so that press just closes the popup.
-      escapePressed.current = true;
-      if (e.target instanceof HTMLInputElement) {
-        e.target.value = note;
-      }
-      setInputValue(note);
-    } else {
-      escapePressed.current = false;
-    }
-  }
 
   const displayedNote = note || scheduleNote || '';
 
@@ -2296,13 +2301,7 @@ function NotesCell({
       exposed={focused}
       onExpose={onExpose}
       onUpdate={onUpdate}
-      onKeyDown={onKeyDown}
-      onBlur={() => {
-        if (!escapePressed.current) {
-          onUpdate(inputValue);
-        }
-        escapePressed.current = false;
-      }}
+      onExit={onExit}
       unexposedContent={props => (
         <Tooltip
           content={
@@ -2323,14 +2322,13 @@ function NotesCell({
         </Tooltip>
       )}
     >
-      {({ inputStyle, onKeyDown, onBlur }) => (
+      {({ inputStyle, onKeyDown, onBlur, value, setValue }) => (
         <TagAutocomplete
-          inputValue={inputValue}
-          setInputValue={setInputValue}
+          inputValue={value}
+          setInputValue={setValue}
           inputStyle={inputStyle}
           onBlur={onBlur}
           onKeyDown={onKeyDown}
-          onUpdate={onUpdate}
         />
       )}
     </CustomCell>
@@ -2416,6 +2414,8 @@ type NewTransactionProps = {
   onDelete: (id: TransactionEntity['id']) => void;
   onDistributeRemainder: (id: TransactionEntity['id']) => void;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
+  onFocusCell?: (id: TransactionEntity['id'], field?: string) => void;
+  onExit?: () => void;
   onManagePayees: (id: PayeeEntity['id'] | undefined) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
@@ -2452,6 +2452,8 @@ function NewTransaction({
   onSplit,
   onToggleSplit,
   onEdit,
+  onFocusCell,
+  onExit,
   onDelete,
   onSave,
   onSchedule,
@@ -2520,6 +2522,8 @@ function NewTransaction({
           hideFraction={!!hideFraction}
           expanded
           onEdit={onEdit}
+          onFocusCell={onFocusCell}
+          onExit={onExit}
           onSave={onSave}
           onSplit={onSplit}
           onToggleSplit={onToggleSplit}
@@ -2846,6 +2850,8 @@ function TransactionTableInner({
         dateFormat={dateFormat}
         hideFraction={hideFraction}
         onEdit={tableNavigator.onEdit}
+        onFocusCell={tableNavigator.focusCell}
+        onExit={tableNavigator.exitEdit}
         onSave={props.onSave}
         onDelete={props.onDelete}
         onBatchDelete={props.onBatchDelete}
@@ -2927,13 +2933,7 @@ function TransactionTableInner({
                 props.onCheckNewEnter(e);
                 // Escape exits the focused cell first; only cancel the whole
                 // row once nothing is being edited, or typed values are lost.
-                if (
-                  e.key === 'Escape' &&
-                  !isEditingCell(
-                    newNavigator.editingId,
-                    newNavigator.focusedField,
-                  )
-                ) {
+                if (e.key === 'Escape' && !newNavigator.isEditing) {
                   props.onCloseAddTransaction();
                 }
               },
@@ -2961,6 +2961,8 @@ function TransactionTableInner({
               onToggleSplit={props.onToggleSplit}
               onSplit={props.onSplit}
               onEdit={newNavigator.onEdit}
+              onFocusCell={newNavigator.focusCell}
+              onExit={newNavigator.exitEdit}
               onSave={props.onSave}
               onDelete={props.onDelete}
               onManagePayees={props.onManagePayees}

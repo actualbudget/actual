@@ -320,12 +320,124 @@ const readonlyInputStyle = {
   '::selection': { backgroundColor: theme.formInputTextReadOnlySelection },
 };
 
+type EditSessionState = 'active' | 'committed' | 'canceled';
+
+export type UseCellEditorOptions<T> = {
+  committedValue: T;
+  onUpdate?: (value: T) => void;
+  onExit?: () => void;
+  onKeyDown?: (e: KeyboardEvent) => void;
+  onBlur?: (e: FocusEvent) => void;
+};
+
+export function useCellEditor<T>({
+  committedValue,
+  onUpdate,
+  onExit,
+  onKeyDown: userOnKeyDown,
+  onBlur: userOnBlur,
+}: UseCellEditorOptions<T>) {
+  const [value, setValue] = useState<T>(committedValue);
+  const [prevCommittedValue, setPrevCommittedValue] =
+    useState<T>(committedValue);
+  const sessionState = useRef<EditSessionState>('active');
+  const valueRef = useRef<T>(committedValue);
+  valueRef.current = value;
+
+  if (prevCommittedValue !== committedValue) {
+    setValue(committedValue);
+    setPrevCommittedValue(committedValue);
+    sessionState.current = 'active';
+    valueRef.current = committedValue;
+  }
+
+  const setValueWrapped = useCallback((next: T | ((prev: T) => T)) => {
+    sessionState.current = 'active';
+    setValue(prev => {
+      const resolved =
+        typeof next === 'function' ? (next as (prev: T) => T)(prev) : next;
+      valueRef.current = resolved;
+      return resolved;
+    });
+  }, []);
+
+  const cancelEdit = useCallback(() => {
+    if (sessionState.current !== 'active') {
+      return;
+    }
+    sessionState.current = 'canceled';
+    setValue(committedValue);
+    valueRef.current = committedValue;
+    onExit?.();
+  }, [committedValue, onExit]);
+
+  const commitEdit = useCallback(
+    (newValue?: T) => {
+      if (sessionState.current !== 'active') {
+        return;
+      }
+      sessionState.current = 'committed';
+      const val = newValue !== undefined ? newValue : valueRef.current;
+      setValue(val);
+      valueRef.current = val;
+      onUpdate?.(val);
+    },
+    [onUpdate],
+  );
+
+  const onKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      userOnKeyDown?.(e);
+      if (e.defaultPrevented || e.isPropagationStopped()) {
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        if (e.target instanceof HTMLInputElement) {
+          e.target.value = String(committedValue ?? '');
+        }
+        cancelEdit();
+        if (onExit) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+    },
+    [cancelEdit, committedValue, onExit, userOnKeyDown],
+  );
+
+  const onBlur = useCallback(
+    (e: FocusEvent) => {
+      if (sessionState.current === 'canceled') {
+        return;
+      }
+      if (sessionState.current === 'active') {
+        sessionState.current = 'committed';
+        onUpdate?.(valueRef.current);
+      }
+      userOnBlur?.(e);
+    },
+    [onUpdate, userOnBlur],
+  );
+
+  return {
+    value,
+    setValue: setValueWrapped,
+    onKeyDown,
+    onBlur,
+    cancelEdit,
+    commitEdit,
+    sessionState,
+  };
+}
+
 type InputValueProps = Omit<
   ComponentProps<typeof Input>,
   'value' | 'onUpdate'
 > & {
   value?: string;
   onUpdate?: (newValue: string) => void;
+  onExit?: () => void;
 } & {
   [key: `data-${string}`]: unknown;
 };
@@ -334,45 +446,17 @@ function InputValue({
   value: defaultValue,
   onUpdate,
   onBlur,
+  onExit,
+  onKeyDown: userOnKeyDown,
   ...props
 }: InputValueProps) {
-  const [value, setValue] = useState(defaultValue);
-  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
-
-  if (prevDefaultValue !== defaultValue) {
-    setValue(defaultValue);
-    setPrevDefaultValue(defaultValue);
-  }
-
-  function onBlur_(e) {
-    if (onBlur) {
-      fireBlur(onBlur, e);
-    }
-  }
-
-  function onKeyDown(e) {
-    if (e.key === 'Escape') {
-      // Input commits the DOM value on blur, so revert it here before the
-      // navigator unmounts us. Left to bubble so the navigator can exit edit.
-      e.currentTarget.value = defaultValue ?? '';
-      setValue(defaultValue);
-    } else if (e.key !== 'Enter' && e.key !== 'Tab') {
-      e.stopPropagation();
-    }
-
-    if (shouldSaveFromKey(e)) {
-      onUpdate?.(value);
-    }
-  }
-
-  function onEscape() {
-    // Idempotent fallback in case the keydown handler above doesn't
-    // run (e.g. when this input is rendered outside a table-navigator
-    // container).
-    if (value !== defaultValue) {
-      setValue(defaultValue);
-    }
-  }
+  const committedValue = defaultValue ?? '';
+  const cellEditor = useCellEditor({
+    committedValue,
+    onUpdate,
+    onExit,
+    onBlur: onBlur ? e => fireBlur(onBlur, e) : undefined,
+  });
 
   const ops = ['+', '-', '*', '/', '^'];
 
@@ -382,21 +466,40 @@ function InputValue({
 
   function setValue_(text) {
     if (valueIsASingleOperator(text)) {
-      setValue(defaultValue + text);
+      cellEditor.setValue(defaultValue + text);
     } else {
-      setValue(text);
+      cellEditor.setValue(text);
+    }
+  }
+
+  function onKeyDown_(e: KeyboardEvent<HTMLInputElement>) {
+    userOnKeyDown?.(e);
+    if (e.defaultPrevented || e.isPropagationStopped()) {
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      cellEditor.onKeyDown(e);
+      return;
+    }
+
+    if (e.key !== 'Enter' && e.key !== 'Tab') {
+      e.stopPropagation();
+    }
+
+    if (shouldSaveFromKey(e)) {
+      cellEditor.commitEdit();
     }
   }
 
   return (
     <Input
       {...props}
-      value={value}
+      value={cellEditor.value}
       onChangeValue={setValue_}
-      onBlur={onBlur_}
-      onUpdate={onUpdate}
-      onKeyDown={onKeyDown}
-      onEscape={onEscape}
+      onBlur={cellEditor.onBlur}
+      onUpdate={undefined}
+      onKeyDown={onKeyDown_}
       style={{
         ...inputCellStyle,
         ...(props.readOnly ? readonlyInputStyle : null),
@@ -410,12 +513,14 @@ type InputCellProps = ComponentProps<typeof Cell> & {
   inputProps?: ComponentProps<typeof InputValue>;
   onUpdate?: ComponentProps<typeof InputValue>['onUpdate'];
   onBlur?: ComponentProps<typeof InputValue>['onBlur'];
+  onExit?: ComponentProps<typeof InputValue>['onExit'];
   textAlign?: CSSProperties['textAlign'];
 };
 export function InputCell({
   inputProps,
   onUpdate,
   onBlur,
+  onExit,
   textAlign,
   ...props
 }: InputCellProps) {
@@ -426,6 +531,7 @@ export function InputCell({
           value={props.value}
           onUpdate={onUpdate}
           onBlur={onBlur}
+          onExit={onExit}
           style={{ textAlign, ...(inputProps && inputProps.style) }}
           {...inputProps}
         />
@@ -444,77 +550,88 @@ function shouldSaveFromKey(e: KeyboardEvent) {
   }
 }
 
-type CustomCellRenderProps = {
+export type CellEditSession<T = string | undefined> = {
+  committedValue: T;
+  onUpdateDraft?: (value: T) => void;
+  onCommit: (value: T) => void;
+  onCancel: () => void;
+  onExit?: () => void;
+};
+
+export type CustomCellRenderProps<T = string | undefined> = {
   onBlur: (ev: FocusEvent) => void;
   onKeyDown: (ev: KeyboardEvent) => void;
-  onUpdate: (value: string) => void;
-  onSave: (value: string) => void;
+  onUpdate: (value: T) => void;
+  onSave: (value: T) => void;
   shouldSaveFromKey: (ev: KeyboardEvent) => boolean;
   inputStyle: CSSProperties;
+  value: T;
+  setValue: (value: T) => void;
+  editSession: CellEditSession<T>;
 };
-type CustomCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
-  children?: (props: CustomCellRenderProps) => ReactNode;
-  onUpdate?: (value: string) => void;
+type CustomCellProps<T = string | undefined> = Omit<
+  ComponentProps<typeof Cell>,
+  'children' | 'value'
+> & {
+  value?: T;
+  children?: (props: CustomCellRenderProps<T>) => ReactNode;
+  onUpdate?: (value: T) => void;
   onBlur?: (ev: UIEvent<unknown>) => void;
+  onExit?: () => void;
 };
-export function CustomCell({
+export function CustomCell<T = string | undefined>({
   value: defaultValue,
   children,
   onUpdate,
   onBlur,
+  onExit,
   ...props
-}: CustomCellProps) {
-  const [value, setValue] = useState(defaultValue);
-  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
+}: CustomCellProps<T>) {
+  const cellEditor = useCellEditor<T>({
+    committedValue: defaultValue as T,
+    onUpdate,
+    onExit,
+    onBlur: onBlur ? (e: FocusEvent) => fireBlur(onBlur, e) : undefined,
+  });
 
-  if (prevDefaultValue !== defaultValue) {
-    setValue(defaultValue);
-    setPrevDefaultValue(defaultValue);
-  }
-
-  // The navigator refocuses the container on Escape, which blurs us
-  // synchronously before React flushes the revert below. A ref survives that.
-  const escapePressed = useRef(false);
-
-  function onBlur_(e: FocusEvent) {
-    // Only save on blur if the app is focused. Blur events fire when
-    // the app unfocuses, and it's unintuitive to save the value since
-    // the input will be focused again when the app regains focus
-    if (document.hasFocus()) {
-      if (!escapePressed.current) {
-        onUpdate?.(value);
-      }
-      fireBlur(onBlur, e);
-    }
-    escapePressed.current = false;
-  }
-
-  function onKeyDown(e: KeyboardEvent) {
+  function onKeyDown_(e: KeyboardEvent) {
     if (e.key === 'Escape') {
-      escapePressed.current = true;
-      setValue(defaultValue);
-    } else {
-      escapePressed.current = false;
+      cellEditor.onKeyDown(e);
+      return;
     }
 
     if (shouldSaveFromKey(e)) {
-      onUpdate?.(value);
+      cellEditor.commitEdit();
     }
   }
 
+  const editSession: CellEditSession<T> = {
+    committedValue: defaultValue as T,
+    onUpdateDraft: val => cellEditor.setValue(val),
+    onCommit: val => {
+      cellEditor.commitEdit(val);
+    },
+    onCancel: () => {
+      cellEditor.cancelEdit();
+    },
+    onExit,
+  };
+
   return (
-    <Cell {...props} value={defaultValue}>
+    <Cell {...props} value={defaultValue as unknown as string}>
       {() =>
         children?.({
-          onBlur: onBlur_,
-          onKeyDown,
-          onUpdate: val => setValue(val),
+          onBlur: cellEditor.onBlur,
+          onKeyDown: onKeyDown_,
+          onUpdate: val => cellEditor.setValue(val),
           onSave: val => {
-            setValue(val);
-            onUpdate?.(val);
+            cellEditor.commitEdit(val);
           },
           shouldSaveFromKey,
           inputStyle: inputCellStyle,
+          value: cellEditor.value,
+          setValue: cellEditor.setValue,
+          editSession,
         })
       }
     </Cell>
@@ -550,6 +667,7 @@ type CellButtonProps = {
   clickBehavior?: string;
   onSelect?: (e) => void;
   onEdit?: () => void;
+  onFocus?: () => void;
   className?: string;
 };
 export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
@@ -563,6 +681,7 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
       clickBehavior,
       onSelect,
       onEdit,
+      onFocus,
       className,
     },
     ref,
@@ -628,7 +747,13 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
               },
           ...style,
         }}
-        onFocus={() => onEdit && onEdit()}
+        onFocus={() => {
+          if (onFocus) {
+            onFocus();
+          } else {
+            onEdit?.();
+          }
+        }}
         data-testid="cell-button"
         onClick={
           clickBehavior === 'none'
@@ -636,7 +761,11 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             : e => {
                 if (!disabled) {
                   onSelect?.(e);
-                  onEdit?.();
+                  if (onFocus) {
+                    onFocus();
+                  } else {
+                    onEdit?.();
+                  }
                 }
               }
         }
@@ -652,6 +781,7 @@ CellButton.displayName = 'CellButton';
 type SelectCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
   partial?: boolean;
   onEdit?: () => void;
+  onFocus?: () => void;
   onSelect?: (e) => void;
   icon?: ReactNode;
   buttonProps?: Partial<CellButtonProps>;
@@ -662,6 +792,7 @@ export function SelectCell({
   style,
   onSelect,
   onEdit,
+  onFocus,
   icon = <SvgCheckmark width={6} height={6} />,
   buttonProps = {},
   ...props
@@ -676,7 +807,11 @@ export function SelectCell({
       onClick={e => {
         e.stopPropagation();
         onSelect?.(e);
-        onEdit?.();
+        if (onFocus) {
+          onFocus();
+        } else {
+          onEdit?.();
+        }
       }}
     >
       {() => (
@@ -700,6 +835,7 @@ export function SelectCell({
             },
           }}
           onEdit={onEdit}
+          onFocus={onFocus}
           onSelect={onSelect}
           clickBehavior="none"
           {...buttonProps}
@@ -958,6 +1094,8 @@ export type TableProps<T extends TableItem = TableItem> = {
     editing: boolean;
     focusedField: string | null;
     onEdit: TableNavigator<T>['onEdit'];
+    onExit?: () => void;
+    onFocusCell?: (id: T['id'] | null, field?: string) => void;
     index: number;
     position: number;
   }) => ReactNode;
@@ -999,14 +1137,27 @@ export const Table = forwardRef(
   ) => {
     if (!navigator) {
       navigator = {
+        cursor: null,
+        isEditing: false,
+        focusCell: () => {},
+        beginEdit: () => {},
+        exitEdit: () => {},
         onEdit: () => {},
-        editingId: null,
-        focusedField: null,
-        getNavigatorProps: props => props,
+        editingId: null as unknown as TableItem['id'],
+        focusedField: null as unknown as string,
+        getNavigatorProps: (props =>
+          props) as TableNavigator<TableItem>['getNavigatorProps'],
       };
     }
 
-    const { onEdit, editingId, focusedField, getNavigatorProps } = navigator;
+    const {
+      onEdit,
+      exitEdit,
+      focusCell,
+      editingId,
+      focusedField,
+      getNavigatorProps,
+    } = navigator;
     const list = useRef(null);
     const listContainerInnerRef = useRef<HTMLDivElement>(null);
     const listContainer = listContainerRef || listContainerInnerRef;
@@ -1101,8 +1252,10 @@ export const Table = forwardRef(
       const row = renderItem({
         item,
         editing,
-        focusedField: editing && focusedField,
+        focusedField: editing ? focusedField : null,
         onEdit,
+        onExit: exitEdit,
+        onFocusCell: focusCell,
         index,
         position: style.top,
       });
@@ -1257,37 +1410,37 @@ export const Table = forwardRef(
 // @ts-expect-error fix me
 Table.displayName = 'Table';
 
-export type TableNavigator<T extends TableItem> = {
+export type TableCursor<T extends TableItem = TableItem> = {
+  id: T['id'];
+  field?: string;
+} | null;
+
+export type TableNavigator<T extends TableItem = TableItem> = {
+  cursor: TableCursor<T>;
+  isEditing: boolean;
+  focusCell: (id: T['id'] | null, field?: string) => void;
+  beginEdit: (id: T['id'], field?: string) => void;
+  exitEdit: () => void;
   onEdit: (id: T['id'] | null, field?: string) => void;
   editingId: T['id'];
   focusedField: string;
-  getNavigatorProps: (userProps: object) => object;
+  getNavigatorProps: <P extends object>(
+    userProps?: P,
+  ) => P & {
+    innerRef: RefObject<HTMLDivElement | null>;
+    onKeyDown: (e: KeyboardEvent) => void;
+    onBlur: (e: FocusEvent) => void;
+  };
 };
-
-// Button/checkbox cells. CellButton.onFocus sets editingId on these to keep
-// keyboard navigation working, but nothing is actually being edited.
-const NON_EDITABLE_FIELDS = new Set([
-  'select',
-  'cleared',
-  'cancel',
-  'add',
-  'schedule',
-]);
-
-export function isEditingCell(editingId: unknown, focusedField: string) {
-  return editingId != null && !NON_EDITABLE_FIELDS.has(focusedField);
-}
 
 export function useTableNavigator<T extends TableItem>(
   data: T[],
   fields: string[] | ((item?: T) => string[]),
 ): TableNavigator<T> {
   const getFields = typeof fields !== 'function' ? () => fields : fields;
-  const [editingId, setEditingId] = useState<T['id']>(null);
-  const [focusedField, setFocusedField] = useState<string>(null);
+  const [cursor, setCursor] = useState<TableCursor<T>>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  // Lets arrow keys resume where the cursor was after Escape clears editingId.
-  const lastPositionRef = useRef<{ id: T['id']; field?: string } | null>(null);
 
   // See `onBlur` for why we need this
   const modalState = useModalState();
@@ -1300,80 +1453,110 @@ export function useTableNavigator<T extends TableItem>(
   const selectedItems = useSelectedItems();
   const selectedDispatch = useSelectedDispatch();
 
-  // onEdit is passed to children, so make sure it maintains identity
-  const onEdit = useCallback((id: T['id'] | null, field?: string) => {
-    if (id != null) {
-      lastPositionRef.current = { id, field };
+  const focusCell = useCallback((id: T['id'] | null, field?: string) => {
+    if (id == null) {
+      setCursor(null);
+      setIsEditing(false);
+    } else {
+      setCursor({ id, field });
+      setIsEditing(false);
     }
-    setEditingId(id);
-    setFocusedField(id ? field : null);
   }, []);
+
+  const beginEdit = useCallback((id: T['id'], field?: string) => {
+    setCursor({ id, field });
+    setIsEditing(true);
+  }, []);
+
+  const exitEdit = useCallback(() => {
+    setIsEditing(false);
+    containerRef.current?.focus();
+  }, []);
+
+  const onEdit = useCallback(
+    (id: T['id'] | null, field?: string) => {
+      if (id == null) {
+        exitEdit();
+      } else {
+        beginEdit(id, field);
+      }
+    },
+    [beginEdit, exitEdit],
+  );
+
+  const editingId = (isEditing && cursor
+    ? cursor.id
+    : null) as unknown as T['id'];
+  const focusedField = (cursor
+    ? (cursor.field ?? null)
+    : null) as unknown as string;
 
   function flashInput() {
     // Force the container to be focused which suppresses the "space
     // pages down" behavior. If we don't do this and the user presses
     // up + space down quickly while nothing is focused, it would page
     // down.
-    containerRef.current.focus();
+    containerRef.current?.focus();
+    const currentCursor = cursor;
+    setIsEditing(false);
 
-    // Not ideal, but works for now. Let the UI show the input
-    // go away, and then bring it back on the same row/field
-    onEdit(null);
-
-    setTimeout(() => {
-      onEdit(editingId, focusedField);
-    }, 100);
+    if (currentCursor) {
+      setTimeout(() => {
+        beginEdit(currentCursor.id, currentCursor.field);
+      }, 100);
+    }
   }
 
   function onFocusPrevious() {
-    const idx = data.findIndex(item => item.id === editingId);
+    if (!cursor) return;
+    const idx = data.findIndex(item => item.id === cursor.id);
     if (idx > 0) {
       const item = data[idx - 1];
       const fields = getFields(item);
-      onEdit(item.id, fields[fields.length - 1]);
+      beginEdit(item.id, fields[fields.length - 1]);
     } else {
       flashInput();
     }
   }
 
   function onFocusNext() {
-    const idx = data.findIndex(item => item.id === editingId);
+    if (!cursor) return;
+    const idx = data.findIndex(item => item.id === cursor.id);
     if (idx < data.length - 1) {
       const item = data[idx + 1];
       const fields = getFields(item);
-      onEdit(item.id, fields[0]);
+      beginEdit(item.id, fields[0]);
     } else {
       flashInput();
     }
   }
 
-  function moveHorizontally(dir) {
-    if (editingId) {
-      const fields = getFields(data.find(item => item.id === editingId));
-      const idx = fields.indexOf(focusedField) + dir;
+  function moveHorizontally(dir: number) {
+    if (cursor) {
+      const fields = getFields(data.find(item => item.id === cursor.id));
+      const idx = fields.indexOf(cursor.field) + dir;
 
       if (idx < 0) {
         onFocusPrevious();
       } else if (idx >= fields.length) {
         onFocusNext();
       } else {
-        // Via onEdit so lastPositionRef stays in sync with the cursor.
-        onEdit(editingId, fields[idx]);
+        beginEdit(cursor.id, fields[idx]);
       }
     }
   }
 
-  function moveVertically(dir) {
-    if (editingId) {
-      const idx = data.findIndex(item => item.id === editingId);
+  function moveVertically(dir: number) {
+    if (cursor) {
+      const idx = data.findIndex(item => item.id === cursor.id);
       let nextIdx = idx;
 
       while (true) {
         nextIdx = nextIdx + dir;
         if (nextIdx >= 0 && nextIdx < data.length) {
           const next = data[nextIdx];
-          if (getFields(next).includes(focusedField)) {
-            onEdit(next.id, focusedField);
+          if (getFields(next).includes(cursor.field)) {
+            beginEdit(next.id, cursor.field);
             break;
           }
         } else {
@@ -1382,31 +1565,16 @@ export function useTableNavigator<T extends TableItem>(
         }
       }
     } else if (data.length > 0) {
-      // Resume cursor from last known position, or jump to top/bottom
-      const lastPosition = lastPositionRef.current;
-      let nextIdx = dir < 0 ? data.length - 1 : 0;
-
-      if (lastPosition != null) {
-        const idx = data.findIndex(item => item.id === lastPosition.id);
-        if (idx !== -1) {
-          nextIdx = idx;
-        }
-      }
-
+      const nextIdx = dir < 0 ? data.length - 1 : 0;
       const next = data[nextIdx];
       const availableFields = getFields(next);
       if (availableFields.length > 0) {
-        // Rows don't all expose the same fields (splits, previews).
-        const nextField =
-          lastPosition?.field && availableFields.includes(lastPosition.field)
-            ? lastPosition.field
-            : availableFields[0];
-        onEdit(next.id, nextField);
+        beginEdit(next.id, availableFields[0]);
       }
     }
   }
 
-  function onMove(dir) {
+  function onMove(dir: 'left' | 'right' | 'up' | 'down') {
     switch (dir) {
       case 'left':
         moveHorizontally(-1);
@@ -1425,13 +1593,15 @@ export function useTableNavigator<T extends TableItem>(
     }
   }
 
-  function getNavigatorProps(userProps) {
+  function getNavigatorProps<
+    P extends { onKeyDown?: (e: KeyboardEvent) => void },
+  >(userProps?: P) {
     return {
       ...userProps,
 
       innerRef: containerRef,
 
-      onKeyDown: e => {
+      onKeyDown: (e: KeyboardEvent) => {
         userProps?.onKeyDown?.(e);
         if (e.isPropagationStopped()) {
           return;
@@ -1440,7 +1610,7 @@ export function useTableNavigator<T extends TableItem>(
         switch (e.key) {
           case 'ArrowUp':
           case 'k':
-            if (e.target.tagName !== 'INPUT') {
+            if (!(e.target instanceof HTMLInputElement)) {
               e.preventDefault();
               onMove('up');
             }
@@ -1448,7 +1618,7 @@ export function useTableNavigator<T extends TableItem>(
 
           case 'ArrowDown':
           case 'j':
-            if (e.target.tagName !== 'INPUT') {
+            if (!(e.target instanceof HTMLInputElement)) {
               e.preventDefault();
               onMove('down');
             }
@@ -1471,21 +1641,13 @@ export function useTableNavigator<T extends TableItem>(
             break;
 
           case 'Escape': {
-            // Peel off one layer per press: edit mode, then the selection.
-            // Popovers stop propagation, so they're already closed by now.
-            if (isEditingCell(editingId, focusedField)) {
+            if (isEditing) {
               e.preventDefault();
-              // Consumed here, so enclosing handlers don't peel a second
-              // layer off the same press.
               e.stopPropagation();
-              onEdit(null);
-              containerRef.current?.focus();
+              exitEdit();
             } else if (selectedItems && selectedItems.size > 0) {
               e.preventDefault();
               e.stopPropagation();
-              if (editingId != null) {
-                onEdit(null);
-              }
               selectedDispatch?.({ type: 'select-none' });
             }
             break;
@@ -1494,7 +1656,7 @@ export function useTableNavigator<T extends TableItem>(
         }
       },
 
-      onBlur: e => {
+      onBlur: (e: FocusEvent) => {
         // We want to hide the editing field if the user clicked away
         // from the table. We use `relatedTarget` to figure out where
         // the focus is going, and if it's nothing (the user clicked
@@ -1514,15 +1676,25 @@ export function useTableNavigator<T extends TableItem>(
         if (
           document.hasFocus() &&
           (e.relatedTarget == null ||
-            !containerRef.current.contains(e.relatedTarget) ||
+            !containerRef.current?.contains(e.relatedTarget) ||
             containerRef.current === e.relatedTarget) &&
           prevNumModals === numModals
         ) {
-          onEdit(null);
+          exitEdit();
         }
       },
     };
   }
 
-  return { onEdit, editingId, focusedField, getNavigatorProps };
+  return {
+    cursor,
+    isEditing,
+    focusCell,
+    beginEdit,
+    exitEdit,
+    onEdit,
+    editingId,
+    focusedField,
+    getNavigatorProps,
+  };
 }
