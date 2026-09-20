@@ -13,8 +13,10 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { CategoryBalanceFilter } from '@actual-app/core/types/prefs';
 
 import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useLocalPref } from '#hooks/useLocalPref';
 
 import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
@@ -36,6 +38,9 @@ export const BudgetTotals = memo(function BudgetTotals({
   const [categoryExpandedStatePref, setCategoryExpandedStatePref] =
     useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
+  const [balanceFilter = 'all', setBalanceFilter] = useLocalPref(
+    'budget.categoryBalanceFilter',
+  );
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -153,7 +158,15 @@ export const BudgetTotals = memo(function BudgetTotals({
         >
           <Menu
             onMenuSelect={type => {
-              if (type === 'toggle-visibility') {
+              if (type.startsWith('filter:')) {
+                const value = type.slice('filter:'.length);
+                // Selecting the active filter again clears it
+                setBalanceFilter(
+                  value === balanceFilter
+                    ? 'all'
+                    : (value as CategoryBalanceFilter),
+                );
+              } else if (type === 'toggle-visibility') {
                 toggleHiddenCategories();
               } else if (type === 'expandAllCategories') {
                 expandAllCategories();
@@ -167,6 +180,28 @@ export const BudgetTotals = memo(function BudgetTotals({
                 name: 'toggle-visibility',
                 text: t('Toggle hidden categories'),
               },
+              Menu.line,
+              {
+                name: t('Filter Categories'),
+                type: Menu.label,
+                text: t('Filter Categories'),
+              },
+              {
+                name: 'filter:available',
+                text: t('Balance available'),
+                toggle: balanceFilter === 'available',
+              },
+              {
+                name: 'filter:no-balance',
+                text: t('No balance'),
+                toggle: balanceFilter === 'no-balance',
+              },
+              {
+                name: 'filter:overspent',
+                text: t('Overspent'),
+                toggle: balanceFilter === 'overspent',
+              },
+              Menu.line,
               {
                 name: 'expandAllCategories',
                 text: t('Expand all'),

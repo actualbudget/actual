@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useCallback, useContext, useMemo, useState } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -11,6 +11,7 @@ import type {
 import { DropHighlightPosContext } from '#components/sort';
 import type { DragState, OnDropCallback } from '#components/sort';
 import { Row } from '#components/table';
+import { useCategoryBalances } from '#hooks/useCategoryBalances';
 import { useLocalPref } from '#hooks/useLocalPref';
 
 import { ExpenseCategory } from './ExpenseCategory';
@@ -18,6 +19,7 @@ import { ExpenseGroup } from './ExpenseGroup';
 import { IncomeCategory } from './IncomeCategory';
 import { IncomeGroup } from './IncomeGroup';
 import { IncomeHeader } from './IncomeHeader';
+import { MonthsContext } from './MonthsContext';
 import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
 import { separateGroups } from './util';
@@ -80,6 +82,45 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
       useLocalPref('budget.collapsed');
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
+    const [balanceFilter = 'all'] = useLocalPref(
+      'budget.categoryBalanceFilter',
+    );
+    const { months = [] } = useContext(MonthsContext) ?? {};
+    const isFiltering = balanceFilter !== 'all';
+
+    const expenseCategoryIds = useMemo(
+      () =>
+        separateGroups(categoryGroups)[0].flatMap(
+          group => group.categories?.map(cat => cat.id) ?? [],
+        ),
+      [categoryGroups],
+    );
+    const categoryBalances = useCategoryBalances(
+      expenseCategoryIds,
+      months,
+      isFiltering,
+    );
+
+    // A category matches if it matches in any of the displayed months.
+    const matchesBalanceFilter = useCallback(
+      (id: CategoryEntity['id']) => {
+        const balances = categoryBalances.get(id);
+        if (!balances) {
+          return false;
+        }
+        switch (balanceFilter) {
+          case 'available':
+            return balances.some(b => b > 0);
+          case 'no-balance':
+            return balances.some(b => b === 0);
+          case 'overspent':
+            return balances.some(b => b < 0);
+          default:
+            return true;
+        }
+      },
+      [balanceFilter, categoryBalances],
+    );
     function onCollapse(value: Array<CategoryGroupEntity['id']>) {
       setCollapsedGroupIdsPref(value);
     }
@@ -99,8 +140,18 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
           }
 
           const groupCategories = group.categories?.filter(
-            cat => showHiddenCategories || !cat.hidden,
+            cat =>
+              (showHiddenCategories || !cat.hidden) &&
+              (!isFiltering || matchesBalanceFilter(cat.id)),
           );
+
+          if (
+            isFiltering &&
+            !groupCategories?.length &&
+            newCategoryForGroup !== group.id
+          ) {
+            return [];
+          }
 
           const items: BudgetItem[] = [
             { type: 'expense-group', value: { ...group } },
@@ -130,7 +181,8 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
         items.push({ type: 'new-group' });
       }
 
-      if (incomeGroup) {
+      // Income categories have no balance, so they are hidden while filtering
+      if (incomeGroup && !isFiltering) {
         const incomeCategoryItems: BudgetItem[] = [
           { type: 'income-separator' },
           { type: 'income-group', value: incomeGroup },
@@ -164,6 +216,8 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
       newCategoryForGroup,
       isAddingGroup,
       showHiddenCategories,
+      isFiltering,
+      matchesBalanceFilter,
     ]);
 
     const [dragState, setDragState] = useState<LocalDragState>(null);
