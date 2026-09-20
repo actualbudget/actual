@@ -41,6 +41,11 @@ export const BudgetTotals = memo(function BudgetTotals({
   const [balanceFilter = 'all', setBalanceFilter] = useLocalPref(
     'budget.categoryBalanceFilter',
   );
+  const balanceFilterItems = [
+    { value: 'available', text: t('Balance available') },
+    { value: 'no-balance', text: t('No balance') },
+    { value: 'overspent', text: t('Overspent') },
+  ] satisfies Array<{ value: CategoryBalanceFilter; text: string }>;
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -158,13 +163,13 @@ export const BudgetTotals = memo(function BudgetTotals({
         >
           <Menu
             onMenuSelect={type => {
-              if (type.startsWith('filter:')) {
-                const value = type.slice('filter:'.length);
+              const filterItem = balanceFilterItems.find(
+                item => `filter:${item.value}` === type,
+              );
+              if (filterItem) {
                 // Selecting the active filter again clears it
                 setBalanceFilter(
-                  value === balanceFilter
-                    ? 'all'
-                    : (value as CategoryBalanceFilter),
+                  filterItem.value === balanceFilter ? 'all' : filterItem.value,
                 );
               } else if (type === 'toggle-visibility') {
                 toggleHiddenCategories();
@@ -186,21 +191,11 @@ export const BudgetTotals = memo(function BudgetTotals({
                 type: Menu.label,
                 text: t('Filter Categories'),
               },
-              {
-                name: 'filter:available',
-                text: t('Balance available'),
-                toggle: balanceFilter === 'available',
-              },
-              {
-                name: 'filter:no-balance',
-                text: t('No balance'),
-                toggle: balanceFilter === 'no-balance',
-              },
-              {
-                name: 'filter:overspent',
-                text: t('Overspent'),
-                toggle: balanceFilter === 'overspent',
-              },
+              ...balanceFilterItems.map(item => ({
+                name: `filter:${item.value}`,
+                text: item.text,
+                toggle: balanceFilter === item.value,
+              })),
               Menu.line,
               {
                 name: 'expandAllCategories',

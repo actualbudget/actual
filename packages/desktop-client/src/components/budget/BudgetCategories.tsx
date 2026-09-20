@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useContext, useMemo, useState } from 'react';
+import React, { memo, useContext, useMemo, useState } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -89,12 +89,8 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     const { months = [] } = useContext(MonthsContext) ?? {};
     const isFiltering = balanceFilter !== 'all';
 
-    const expenseCategoryIds = useMemo(
-      () =>
-        separateGroups(categoryGroups)[0].flatMap(
-          group => group.categories?.map(cat => cat.id) ?? [],
-        ),
-      [categoryGroups],
+    const expenseCategoryIds = separateGroups(categoryGroups)[0].flatMap(
+      group => group.categories?.map(cat => cat.id) ?? [],
     );
     const categoryBalances = useCategoryBalances(
       expenseCategoryIds,
@@ -102,11 +98,6 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
       isFiltering,
     );
 
-    const matchesBalanceFilter = useCallback(
-      (id: CategoryEntity['id']) =>
-        matchesCategoryBalanceFilter(balanceFilter, categoryBalances.get(id)),
-      [balanceFilter, categoryBalances],
-    );
     function onCollapse(value: Array<CategoryGroupEntity['id']>) {
       setCollapsedGroupIdsPref(value);
     }
@@ -128,7 +119,11 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
           const groupCategories = group.categories?.filter(
             cat =>
               (showHiddenCategories || !cat.hidden) &&
-              (!isFiltering || matchesBalanceFilter(cat.id)),
+              (!isFiltering ||
+                matchesCategoryBalanceFilter(
+                  balanceFilter,
+                  categoryBalances.get(cat.id),
+                )),
           );
 
           if (
@@ -203,7 +198,8 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
       isAddingGroup,
       showHiddenCategories,
       isFiltering,
-      matchesBalanceFilter,
+      balanceFilter,
+      categoryBalances,
     ]);
 
     const [dragState, setDragState] = useState<LocalDragState>(null);

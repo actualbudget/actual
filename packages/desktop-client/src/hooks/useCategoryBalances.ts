@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { CategoryEntity } from '@actual-app/core/types/models';
@@ -15,6 +15,7 @@ export function useCategoryBalances(
   const spreadsheet = useSpreadsheet();
   const [balances, setBalances] = useState<Record<string, number>>({});
 
+  // Serialized so the effect only re-runs when the actual values change.
   const idsKey = categoryIds.join(',');
   const monthsKey = months.join(',');
 
@@ -23,8 +24,11 @@ export function useCategoryBalances(
       return;
     }
 
-    const unbinds = months.flatMap(month =>
-      categoryIds.map(id => {
+    const ids = idsKey ? idsKey.split(',') : [];
+    const monthList = monthsKey ? monthsKey.split(',') : [];
+
+    const unbinds = monthList.flatMap(month =>
+      ids.map(id => {
         const key = `${month}!${id}`;
         return spreadsheet.bind(
           monthUtils.sheetForMonth(month),
@@ -40,24 +44,18 @@ export function useCategoryBalances(
     );
 
     return () => unbinds.forEach(unbind => unbind());
-    // idsKey/monthsKey are stable serializations of the arrays
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spreadsheet, enabled, idsKey, monthsKey]);
 
-  return useMemo(() => {
-    const result = new Map<CategoryEntity['id'], number[]>();
-    if (enabled) {
-      for (const id of categoryIds) {
-        const values = months
-          .map(month => balances[`${month}!${id}`])
-          .filter(v => v !== undefined);
-        if (values.length > 0) {
-          result.set(id, values);
-        }
+  const result = new Map<CategoryEntity['id'], number[]>();
+  if (enabled) {
+    for (const id of categoryIds) {
+      const values = months
+        .map(month => balances[`${month}!${id}`])
+        .filter(value => value !== undefined);
+      if (values.length > 0) {
+        result.set(id, values);
       }
     }
-    return result;
-    // idsKey/monthsKey are stable serializations of the arrays
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, balances, idsKey, monthsKey]);
+  }
+  return result;
 }
