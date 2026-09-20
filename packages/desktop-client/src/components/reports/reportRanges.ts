@@ -213,6 +213,25 @@ export function getLatestRange(offset: number) {
   return [start, end, 'sliding-window'] as const;
 }
 
+// Keeps the start fixed and lets the end follow today: day-shaped ranges end
+// on today's date, month-shaped ones on the current month.
+export function getUntilTodayRange(start: string, end: string) {
+  const isDayShaped =
+    monthUtils.isValidYearMonthDay(start) &&
+    monthUtils.isValidYearMonthDay(end);
+  const today = isDayShaped
+    ? monthUtils.currentDay()
+    : monthUtils.currentMonth();
+  const rangeStart = isDayShaped ? start : monthUtils.getMonth(start);
+
+  // A start in the future would otherwise produce an inverted range.
+  return [
+    rangeStart,
+    today < rangeStart ? rangeStart : today,
+    'until-today',
+  ] as const;
+}
+
 export function getNextRange(offset: number) {
   const start = monthUtils.currentMonth();
   const end = monthUtils.addMonths(start, offset);
@@ -298,6 +317,9 @@ export function calculateTimeRange(
     }
 
     return getLatestRange(offset);
+  }
+  if (mode === 'until-today') {
+    return getUntilTodayRange(start, end);
   }
   if (mode === 'lastMonth') {
     const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);

@@ -13,6 +13,8 @@ export type TimeFrame = {
   end: string;
   mode:
     | 'sliding-window'
+    // Fixed start date, end always moves along with today.
+    | 'until-today'
     | 'static'
     | 'full'
     | 'lastMonth'
