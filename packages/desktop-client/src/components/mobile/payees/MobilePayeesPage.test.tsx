@@ -1,4 +1,5 @@
 import React from 'react';
+import { MemoryRouter, useLocation } from 'react-router';
 
 import type { PayeeEntity } from '@actual-app/core/types/models';
 import { render, screen } from '@testing-library/react';
@@ -33,6 +34,11 @@ const mockPayees: PayeeEntity[] = [
   },
 ];
 
+function LocationSearch() {
+  const location = useLocation();
+  return <div data-testid="location-search">{location.search}</div>;
+}
+
 describe('MobilePayeesPage', () => {
   const mockNavigate = vi.fn();
   const queryClient = createTestQueryClient();
@@ -52,10 +58,13 @@ describe('MobilePayeesPage', () => {
     );
   });
 
-  const renderPayeesPage = () => {
+  const renderPayeesPage = (initialEntry = '/payees') => {
     return render(
       <TestProviders queryClient={queryClient}>
-        <MobilePayeesPage />
+        <MemoryRouter initialEntries={[initialEntry]}>
+          <MobilePayeesPage />
+          <LocationSearch />
+        </MemoryRouter>
       </TestProviders>,
     );
   };
@@ -136,6 +145,37 @@ describe('MobilePayeesPage', () => {
     await user.click(payeeButton);
 
     expect(mockNavigate).toBeCalledWith('/payees/payee-1');
+  });
+
+  it('keeps the filter in the URL so it survives leaving the page', async () => {
+    const user = userEvent.setup();
+    renderPayeesPage();
+
+    const searchBox = screen.getByPlaceholderText(/filter payees/i);
+    await user.type(searchBox, 'Grocery');
+
+    expect(screen.getByTestId('location-search')).toHaveTextContent(
+      'filter=Grocery',
+    );
+  });
+
+  it('restores the filter from the URL', () => {
+    renderPayeesPage('/payees?filter=Grocery');
+
+    expect(screen.getByPlaceholderText(/filter payees/i)).toHaveValue(
+      'Grocery',
+    );
+    expect(screen.getByText('Grocery Store')).toBeInTheDocument();
+    expect(screen.queryByText('Gas Station')).not.toBeInTheDocument();
+  });
+
+  it('carries the filter to the payee edit page', async () => {
+    const user = userEvent.setup();
+    renderPayeesPage('/payees?filter=Grocery');
+
+    await user.click(screen.getByText('Grocery Store'));
+
+    expect(mockNavigate).toBeCalledWith('/payees/payee-1?filter=Grocery');
   });
 
   it('shows empty state when no payees match filter', async () => {

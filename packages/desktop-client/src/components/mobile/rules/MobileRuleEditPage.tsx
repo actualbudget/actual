@@ -26,6 +26,8 @@ export function MobileRuleEditPage() {
   const location = useLocation();
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
+  // Carries the rules list filter so it survives the round trip.
+  const rulesListPath = `/rules${location.search}`;
 
   const [rule, setRule] = useState<RuleEntity | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,19 +57,19 @@ export function MobileRuleEditPage() {
             setRule(loadedRule);
           } else {
             // Rule not found, navigate back to rules list
-            void navigate('/rules');
+            void navigate(rulesListPath);
           }
         })
         .catch(error => {
           console.error('Failed to load rule:', error);
           // Navigate back to rules list if rule not found
-          void navigate('/rules');
+          void navigate(rulesListPath);
         })
         .finally(() => {
           setIsLoading(false);
         });
     }
-  }, [id, navigate]);
+  }, [id, navigate, rulesListPath]);
 
   // If no rule is provided, create a new one
   const defaultRule: NewRuleEntity = rule || {
@@ -99,7 +101,7 @@ export function MobileRuleEditPage() {
       });
     }
     // Navigate back to rules list
-    void navigate('/rules');
+    void navigate(rulesListPath);
   };
 
   const handleCancel = () => {
@@ -124,7 +126,7 @@ export function MobileRuleEditPage() {
                 showUndoNotification({
                   message: t('Rule deleted successfully'),
                 });
-                void navigate('/rules');
+                void navigate(rulesListPath);
               } catch (error) {
                 console.error('Failed to delete rule:', error);
                 dispatch(
