@@ -14,6 +14,7 @@ import { Row } from '#components/table';
 import { useCategoryBalances } from '#hooks/useCategoryBalances';
 import { useLocalPref } from '#hooks/useLocalPref';
 
+import { matchesCategoryBalanceFilter } from './categoryBalanceFilter';
 import { ExpenseCategory } from './ExpenseCategory';
 import { ExpenseGroup } from './ExpenseGroup';
 import { IncomeCategory } from './IncomeCategory';
@@ -101,24 +102,9 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
       isFiltering,
     );
 
-    // A category matches if it matches in any of the displayed months.
     const matchesBalanceFilter = useCallback(
-      (id: CategoryEntity['id']) => {
-        const balances = categoryBalances.get(id);
-        if (!balances) {
-          return false;
-        }
-        switch (balanceFilter) {
-          case 'available':
-            return balances.some(b => b > 0);
-          case 'no-balance':
-            return balances.some(b => b === 0);
-          case 'overspent':
-            return balances.some(b => b < 0);
-          default:
-            return true;
-        }
-      },
+      (id: CategoryEntity['id']) =>
+        matchesCategoryBalanceFilter(balanceFilter, categoryBalances.get(id)),
       [balanceFilter, categoryBalances],
     );
     function onCollapse(value: Array<CategoryGroupEntity['id']>) {
