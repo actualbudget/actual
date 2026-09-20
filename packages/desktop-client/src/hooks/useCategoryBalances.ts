@@ -5,6 +5,11 @@ import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { useSpreadsheet } from './useSpreadsheet';
 
+type Subscription = {
+  key: string;
+  balances: Record<string, number>;
+};
+
 // Returns, for each category, its balance in each of the given months.
 // Values that have not loaded yet are missing from the result.
 export function useCategoryBalances(
@@ -13,11 +18,18 @@ export function useCategoryBalances(
   enabled: boolean,
 ): Map<CategoryEntity['id'], number[]> {
   const spreadsheet = useSpreadsheet();
-  const [balances, setBalances] = useState<Record<string, number>>({});
 
   // Serialized so the effect only re-runs when the actual values change.
   const idsKey = categoryIds.join(',');
   const monthsKey = months.join(',');
+  const subscriptionKey = enabled ? `${idsKey}|${monthsKey}` : '';
+
+  // Balances are tagged with the subscription they were loaded for, so values
+  // from an earlier subscription are never exposed.
+  const [subscription, setSubscription] = useState<Subscription>({
+    key: '',
+    balances: {},
+  });
 
   useEffect(() => {
     if (!enabled) {
@@ -29,28 +41,41 @@ export function useCategoryBalances(
 
     const unbinds = monthList.flatMap(month =>
       ids.map(id => {
-        const key = `${month}!${id}`;
+        const cell = `${month}!${id}`;
         return spreadsheet.bind(
           monthUtils.sheetForMonth(month),
           `leftover-${id}`,
           result => {
             const value = typeof result.value === 'number' ? result.value : 0;
-            setBalances(prev =>
-              prev[key] === value ? prev : { ...prev, [key]: value },
-            );
+            setSubscription(prev => {
+              const current = prev.key === subscriptionKey;
+              if (current && prev.balances[cell] === value) {
+                return prev;
+              }
+              return {
+                key: subscriptionKey,
+                balances: {
+                  ...(current ? prev.balances : {}),
+                  [cell]: value,
+                },
+              };
+            });
           },
         );
       }),
     );
 
-    return () => unbinds.forEach(unbind => unbind());
-  }, [spreadsheet, enabled, idsKey, monthsKey]);
+    return () => {
+      unbinds.forEach(unbind => unbind());
+      setSubscription({ key: '', balances: {} });
+    };
+  }, [spreadsheet, enabled, idsKey, monthsKey, subscriptionKey]);
 
   const result = new Map<CategoryEntity['id'], number[]>();
-  if (enabled) {
+  if (enabled && subscription.key === subscriptionKey) {
     for (const id of categoryIds) {
       const values = months
-        .map(month => balances[`${month}!${id}`])
+        .map(month => subscription.balances[`${month}!${id}`])
         .filter(value => value !== undefined);
       if (values.length > 0) {
         result.set(id, values);
