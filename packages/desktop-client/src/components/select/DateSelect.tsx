@@ -420,15 +420,26 @@ function DateSelectDesktop({
       setValue(parsedDefaultValue);
       setSelectedValue(parsedDefaultValue);
 
-      if (open) {
-        if (!embedded) {
-          e.stopPropagation();
-        }
+      if (parsedDefaultValue === value) {
+        if (open) {
+          if (!embedded) {
+            e.stopPropagation();
+          }
 
+          setOpen(false);
+        } else if (editSession) {
+          e.stopPropagation();
+          editSession.onCancel();
+        }
+      } else {
         setOpen(false);
-      } else if (editSession) {
-        e.stopPropagation();
-        editSession.onCancel();
+        if (editSession) {
+          e.stopPropagation();
+          editSession.onCancel();
+        } else {
+          onUpdate?.(defaultValue);
+          inputProps?.onKeyDown?.(e);
+        }
       }
     } else if (shouldSaveFromKey(e)) {
       const targetDate = selectedValue || value;
