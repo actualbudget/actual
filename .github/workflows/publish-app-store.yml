@@ -1,0 +1,299 @@
+name: Publish App Store
+
+# Builds the iOS app from a release tag and uploads it to App Store Connect.
+#
+# Required secrets (in the `release` environment):
+#   APPLE_TEAM_ID                     - Apple Developer team ID (already used by the Electron release).
+#   APPLE_IOS_CERTIFICATE_BASE64      - base64 of the "Apple Distribution" certificate + private key (.p12).
+#   APPLE_IOS_CERTIFICATE_PASSWORD    - password protecting that .p12.
+#   APP_STORE_CONNECT_KEY_ID          - App Store Connect API key ID.
+#   APP_STORE_CONNECT_ISSUER_ID       - App Store Connect API issuer ID.
+#   APP_STORE_CONNECT_PRIVATE_KEY     - base64 of the App Store Connect API key (.p8).
+#
+# The API key needs the "App Manager" role so that xcodebuild can create and
+# download the App Store provisioning profile on the fly.
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v25.3.0)'
+        required: true
+        type: string
+      dry_run:
+        description: 'Only validate the build, do not upload it to App Store Connect'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: publish-app-store
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish-app-store:
+    runs-on: depot-macos-latest
+    environment: release
+    # Pre-releases can't be shipped to the App Store: CFBundleShortVersionString
+    # has to be a plain `x.y.z` version.
+    if: ${{ github.event.repository.fork == false && github.event.release.prerelease != true }}
+    steps:
+      - name: Resolve version
+        id: resolve_version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          if [[ "$EVENT_NAME" == "release" ]]; then
+            TAG="$RELEASE_TAG"
+          else
+            TAG="$INPUT_TAG"
+          fi
+
+          if [[ -z "$TAG" ]]; then
+            echo "::error::No tag provided"
+            exit 1
+          fi
+
+          # The App Store only accepts plain v-prefixed semver (e.g. v25.3.0).
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid tag format: $TAG (expected v-prefixed semver without a pre-release suffix, e.g. v25.3.0)"
+            exit 1
+          fi
+
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved tag=$TAG version=$VERSION"
+
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ steps.resolve_version.outputs.tag }}
+          persist-credentials: false
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
+
+      - name: Show toolchain versions
+        run: |
+          xcodebuild -version
+          pod --version
+
+      - name: Import signing certificate
+        env:
+          APPLE_IOS_CERTIFICATE_BASE64: ${{ secrets.APPLE_IOS_CERTIFICATE_BASE64 }}
+          APPLE_IOS_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_IOS_CERTIFICATE_PASSWORD }}
+        run: |
+          if [[ -z "$APPLE_IOS_CERTIFICATE_BASE64" ]]; then
+            echo "::error::APPLE_IOS_CERTIFICATE_BASE64 is not set"
+            exit 1
+          fi
+
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-store-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -base64 32)"
+          CERTIFICATE_PATH="$RUNNER_TEMP/ios-distribution.p12"
+
+          printf '%s' "$APPLE_IOS_CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          # Keep the keychain unlocked for the duration of the job (6 hours).
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" \
+            -P "$APPLE_IOS_CERTIFICATE_PASSWORD" \
+            -f pkcs12 \
+            -k "$KEYCHAIN_PATH" \
+            -T /usr/bin/codesign \
+            -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" > /dev/null
+          # Prepend our keychain to the search list, keeping the existing ones.
+          # shellcheck disable=SC2046
+          security list-keychain -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '" ')
+
+          rm -f "$CERTIFICATE_PATH"
+
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+
+      - name: Install App Store Connect API key
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+        run: |
+          if [[ -z "$APP_STORE_CONNECT_KEY_ID" || -z "$APP_STORE_CONNECT_PRIVATE_KEY" ]]; then
+            echo "::error::App Store Connect API key secrets are not set"
+            exit 1
+          fi
+
+          # `altool` discovers the key by convention from this directory.
+          KEY_DIR="$HOME/.appstoreconnect/private_keys"
+          KEY_PATH="$KEY_DIR/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+
+          mkdir -p "$KEY_DIR"
+          printf '%s' "$APP_STORE_CONNECT_PRIVATE_KEY" | base64 --decode > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+
+          echo "ASC_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+
+      - name: Build web bundle
+        # Translations were already downloaded by the setup action.
+        run: yarn build:browser --skip-translations
+
+      - name: Sync Capacitor iOS project
+        working-directory: packages/mobile-client
+        env:
+          # Production drops the dev-only cleartext/localhost server config.
+          NODE_ENV: production
+        run: yarn sync:ios
+
+      - name: Archive app
+        id: archive
+        working-directory: packages/mobile-client
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          VERSION: ${{ steps.resolve_version.outputs.version }}
+        run: |
+          # CFBundleVersion has to be unique and increasing for a given
+          # CFBundleShortVersionString. The run number increases with every run
+          # of this workflow, the attempt number keeps re-runs unique.
+          BUILD_NUMBER="${GITHUB_RUN_NUMBER}.${GITHUB_RUN_ATTEMPT}"
+          ARCHIVE_PATH="$PWD/build/App.xcarchive"
+
+          echo "Archiving version $VERSION build $BUILD_NUMBER"
+
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$ARCHIVE_PATH" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            MARKETING_VERSION="$VERSION" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH" \
+            archive
+
+          echo "archive-path=$ARCHIVE_PATH" >> "$GITHUB_OUTPUT"
+          echo "build-number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+
+      - name: Export IPA
+        id: export
+        working-directory: packages/mobile-client
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          ARCHIVE_PATH: ${{ steps.archive.outputs.archive-path }}
+        run: |
+          EXPORT_PATH="$PWD/build/ipa"
+          EXPORT_OPTIONS="$RUNNER_TEMP/ExportOptions.plist"
+
+          cat > "$EXPORT_OPTIONS" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>destination</key>
+            <string>export</string>
+            <key>teamID</key>
+            <string>${APPLE_TEAM_ID}</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>uploadSymbols</key>
+            <true/>
+            <key>manageAppVersionAndBuildNumber</key>
+            <false/>
+          </dict>
+          </plist>
+          PLIST
+
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$ARCHIVE_PATH" \
+            -exportOptionsPlist "$EXPORT_OPTIONS" \
+            -exportPath "$EXPORT_PATH" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID"
+
+          IPA_PATH=$(find "$EXPORT_PATH" -maxdepth 1 -name '*.ipa' | head -n 1)
+          if [[ -z "$IPA_PATH" ]]; then
+            echo "::error::No .ipa was produced by xcodebuild -exportArchive"
+            exit 1
+          fi
+
+          echo "Exported $IPA_PATH"
+          echo "ipa-path=$IPA_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: actual-ios-${{ steps.resolve_version.outputs.version }}
+          path: packages/mobile-client/build/ipa/*.ipa
+
+      - name: Upload to App Store Connect
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          IPA_PATH: ${{ steps.export.outputs.ipa-path }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          # A dry run stops at validation, which checks the package against the
+          # App Store rules without creating a build in App Store Connect.
+          if [[ "$DRY_RUN" == "true" ]]; then
+            COMMAND="--validate-app"
+          else
+            COMMAND="--upload-app"
+          fi
+
+          # altool talks to Apple over the network and is occasionally flaky.
+          for attempt in 1 2 3; do
+            if xcrun altool "$COMMAND" \
+              --file "$IPA_PATH" \
+              --type ios \
+              --apiKey "$APP_STORE_CONNECT_KEY_ID" \
+              --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"; then
+              echo "altool $COMMAND succeeded"
+              exit 0
+            fi
+
+            if [[ "$attempt" -lt 3 ]]; then
+              echo "::warning::altool $COMMAND failed (attempt $attempt/3), retrying"
+              sleep $((attempt * 30))
+            fi
+          done
+
+          echo "::error::altool $COMMAND failed after 3 attempts"
+          exit 1
+
+      - name: Clean up signing assets
+        if: ${{ always() }}
+        run: |
+          if [[ -n "${KEYCHAIN_PATH:-}" && -f "$KEYCHAIN_PATH" ]]; then
+            security delete-keychain "$KEYCHAIN_PATH"
+          fi
+          rm -rf "$HOME/.appstoreconnect/private_keys"
