@@ -11,6 +11,7 @@ import type { Handlers } from '#types/handlers';
 import { app as accountGroupsApp } from './account-groups/app';
 import { app as accountsApp } from './accounts/app';
 import { app as adminApp } from './admin/app';
+import { app as amountEncodingApp } from './amount-encoding/app';
 import { installAPI } from './api';
 import { aqlQuery } from './aql';
 import { app as authApp } from './auth/app';
@@ -130,6 +131,7 @@ handlers = installAPI(handlers) as Handlers;
 // A hack for now until we clean up everything
 app.handlers = handlers;
 app.combine(
+  amountEncodingApp,
   authApp,
   schedulesApp,
   budgetApp,
