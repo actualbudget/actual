@@ -7,6 +7,8 @@ import { safeUnzip } from '#server/util/zip';
 import * as monthUtils from '#shared/months';
 import { amountToInteger, groupBy, sortByKey } from '#shared/util';
 
+import { runImportSteps } from './progress';
+import type { ImportTick } from './progress';
 import type * as YNAB4 from './ynab4-types';
 
 // Importer
@@ -14,6 +16,7 @@ import type * as YNAB4 from './ynab4-types';
 async function importAccounts(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
+  tick: ImportTick,
 ) {
   const accounts = sortByKey(data.accounts, 'sortableIndex');
 
@@ -28,6 +31,7 @@ async function importAccounts(
           },
         });
         entityIdMap.set(account.entityId, id);
+        tick();
       }
     }),
   );
@@ -36,6 +40,7 @@ async function importAccounts(
 async function importCategories(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
+  tick: ImportTick,
 ) {
   const masterCategories = sortByKey(data.masterCategories, 'sortableIndex');
 
@@ -54,6 +59,7 @@ async function importCategories(
           },
         });
         entityIdMap.set(masterCategory.entityId, id);
+        tick();
         if (masterCategory.note) {
           void send('notes-save', {
             id,
@@ -95,6 +101,7 @@ async function importCategories(
                 },
               });
               entityIdMap.set(category.entityId, id);
+              tick();
               if (category.note) {
                 void send('notes-save', {
                   id,
@@ -112,6 +119,7 @@ async function importCategories(
 async function importPayees(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
+  tick: ImportTick,
 ) {
   for (const payee of data.payees) {
     if (!payee.isTombstone) {
@@ -125,6 +133,7 @@ async function importPayees(
       // TODO: import payee rules
 
       entityIdMap.set(payee.entityId, id);
+      tick();
     }
   }
 }
@@ -132,6 +141,7 @@ async function importPayees(
 async function importTransactions(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
+  tick: ImportTick,
 ) {
   const categories = await send('api/categories-get');
   const incomeCategoryId: string = categories.find(
@@ -248,6 +258,11 @@ async function importTransactions(
         learnCategories: true,
         runTransfers: false,
       });
+      tick(
+        toImport.length,
+        data.accounts.find(account => account.entityId === accountId)
+          ?.accountName,
+      );
     }),
   );
 }
@@ -285,6 +300,7 @@ function fillInBudgets(
 async function importBudgets(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
+  tick: ImportTick,
 ) {
   const budgets = sortByKey(data.monthlyBudgets, 'month');
 
@@ -326,6 +342,7 @@ async function importBudgets(
           }
         }),
       );
+      tick();
     }
   } finally {
     await send('api/batch-budget-end');
@@ -377,22 +394,38 @@ function findLatestDevice(
 export async function doImport(data: YNAB4.YFull) {
   const entityIdMap = new Map<string, string>();
 
-  logger.log('Importing Accounts...');
-  await importAccounts(data, entityIdMap);
-
-  logger.log('Importing Categories...');
-  await importCategories(data, entityIdMap);
-
-  logger.log('Importing Payees...');
-  await importPayees(data, entityIdMap);
-
-  logger.log('Importing Transactions...');
-  await importTransactions(data, entityIdMap);
-
-  logger.log('Importing Budgets...');
-  await importBudgets(data, entityIdMap);
-
-  logger.log('Setting up...');
+  await runImportSteps([
+    {
+      step: 'accounts',
+      total: countLive(data.accounts),
+      run: tick => importAccounts(data, entityIdMap, tick),
+    },
+    {
+      step: 'categories',
+      total:
+        countLive(data.masterCategories) +
+        data.masterCategories.reduce(
+          (count, group) => count + countLive(group.subCategories ?? []),
+          0,
+        ),
+      run: tick => importCategories(data, entityIdMap, tick),
+    },
+    {
+      step: 'payees',
+      total: countLive(data.payees),
+      run: tick => importPayees(data, entityIdMap, tick),
+    },
+    {
+      step: 'transactions',
+      total: data.transactions.length,
+      run: tick => importTransactions(data, entityIdMap, tick),
+    },
+    {
+      step: 'budgets',
+      total: data.monthlyBudgets.length,
+      run: tick => importBudgets(data, entityIdMap, tick),
+    },
+  ]);
 }
 
 export function getBudgetName(filepath) {
@@ -475,4 +508,8 @@ export function parseFile(buffer: Buffer): YNAB4.YFull {
   } catch {
     throw new Error('Error parsing Budget.yfull file');
   }
+}
+
+function countLive(entities: { isTombstone?: boolean }[]) {
+  return entities.filter(entity => !entity.isTombstone).length;
 }

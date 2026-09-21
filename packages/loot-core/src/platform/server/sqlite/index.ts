@@ -218,9 +218,13 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
           // @ts-expect-error 2nd argument missed in sql.js types
           { filename: true },
         );
+        // absurd-sql serves every page cache miss with a synchronous
+        // round trip to IndexedDB, so allow the cache to hold a whole
+        // large budget file. SQLite allocates cache pages lazily, so
+        // small files don't pay for the ceiling. The value is in KiB.
         db.exec(`
           PRAGMA journal_mode=MEMORY;
-          PRAGMA cache_size=-10000;
+          PRAGMA cache_size=-64000;
         `);
       }
     }
