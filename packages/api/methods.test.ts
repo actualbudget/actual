@@ -1306,3 +1306,78 @@ describe('API preferences: setPreference', () => {
     );
   });
 });
+
+describe('Dashboard and widget operations', () => {
+  beforeEach(async () => {
+    await api.loadBudget(budgetName);
+  });
+
+  test('successfully manages dashboard pages and widgets', async () => {
+    // 1. Get existing dashboard pages
+    const pages = await api.getDashboardPages();
+    expect(pages.length).toBeGreaterThan(0);
+
+    // 2. Create a new dashboard page
+    const pageId = await api.createDashboardPage('Custom Page');
+    expect(typeof pageId).toBe('string');
+
+    // 3. Rename dashboard page
+    await api.renameDashboardPage(pageId, 'Renamed Page');
+    const updatedPages = await api.getDashboardPages();
+    const renamed = updatedPages.find(p => p.id === pageId);
+    expect(renamed?.name).toBe('Renamed Page');
+
+    // 4. Add widget with explicit coordinates
+    await api.addDashboardWidget({
+      type: 'net-worth-card',
+      width: 6,
+      height: 3,
+      x: 0,
+      y: 0,
+      dashboard_page_id: pageId,
+    });
+
+    // 5. Add widget with auto-calculated coordinates
+    await api.addDashboardWidget({
+      type: 'cash-flow-card',
+      width: 6,
+      height: 3,
+      dashboard_page_id: pageId,
+    });
+
+    // 6. Get widgets for the page
+    const widgets = await api.getDashboardWidgets(pageId);
+    expect(widgets.length).toBe(2);
+    const netWorth = widgets.find(w => w.type === 'net-worth-card');
+    expect(netWorth).toBeDefined();
+    expect(netWorth?.width).toBe(6);
+
+    // 7. Update widget
+    if (netWorth) {
+      await api.updateDashboardWidget({
+        id: netWorth.id,
+        width: 12,
+      });
+      const reloadedWidgets = await api.getDashboardWidgets(pageId);
+      const updatedWidget = reloadedWidgets.find(w => w.id === netWorth.id);
+      expect(updatedWidget?.width).toBe(12);
+
+      // 8. Update dashboard layout batch
+      await api.updateDashboard([{ id: netWorth.id, x: 1, y: 1 }]);
+      const batchWidgets = await api.getDashboardWidgets(pageId);
+      const batchUpdated = batchWidgets.find(w => w.id === netWorth.id);
+      expect(batchUpdated?.x).toBe(1);
+
+      // 9. Remove widget
+      await api.removeDashboardWidget(netWorth.id);
+      const remainingWidgets = await api.getDashboardWidgets(pageId);
+      expect(remainingWidgets.find(w => w.id === netWorth.id)).toBeUndefined();
+      expect(remainingWidgets.length).toBe(1);
+    }
+
+    // 10. Delete the custom dashboard page
+    await api.deleteDashboardPage(pageId);
+    const finalPages = await api.getDashboardPages();
+    expect(finalPages.find(p => p.id === pageId)).toBeUndefined();
+  });
+});
