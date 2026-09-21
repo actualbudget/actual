@@ -6,6 +6,10 @@ import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
+import {
+  databaseEntries,
+  readDatabaseEntries,
+} from '#server/amount-encoding/files';
 import * as cloudStorage from '#server/cloud-storage';
 import * as prefs from '#server/prefs';
 import { safeUnzip, safeZip } from '#server/util/zip';
@@ -127,7 +131,7 @@ export async function makeBackup(id: string) {
     `db.${Date.now()}.sqlite.tmp`,
   );
 
-  await fs.copyFile(fs.join(budgetDir, 'db.sqlite'), tempDbPath);
+  await fs.copyFile(fs.join(fs.getBudgetDir(id), 'db.sqlite'), tempDbPath);
 
   let db: Database | undefined;
 
@@ -142,8 +146,11 @@ export async function makeBackup(id: string) {
       fs.join(budgetDir, 'metadata.json'),
       'binary',
     );
+    const backupMetadata = JSON.parse(
+      Buffer.from(metaContent).toString('utf8'),
+    );
     const zipped = safeZip({
-      'db.sqlite': dbContent,
+      ...databaseEntries(dbContent, Boolean(backupMetadata.amountEncoding)),
       'metadata.json': metaContent,
     });
     await fs.writeFile(backupPath, zipped);
@@ -171,7 +178,7 @@ export async function loadBackup(id: string, backupId: string) {
     // If this is the first time we're loading a backup, save the
     // current version so the user can easily revert back to it
     await fs.copyFile(
-      fs.join(budgetDir, 'db.sqlite'),
+      fs.join(fs.getBudgetDir(id), 'db.sqlite'),
       fs.join(budgetDir, LATEST_BACKUP_FILENAME),
     );
 
@@ -194,12 +201,12 @@ export async function loadBackup(id: string, backupId: string) {
     // If reverting back to the latest, copy and delete the latest
     // backup
     await fs.copyFile(
-      fs.join(budgetDir, LATEST_BACKUP_FILENAME),
-      fs.join(budgetDir, 'db.sqlite'),
-    );
-    await fs.copyFile(
       fs.join(budgetDir, 'metadata.latest.json'),
       fs.join(budgetDir, 'metadata.json'),
+    );
+    await fs.copyFile(
+      fs.join(budgetDir, LATEST_BACKUP_FILENAME),
+      fs.join(budgetDir, 'db.sqlite'),
     );
     await fs.removeFile(fs.join(budgetDir, LATEST_BACKUP_FILENAME));
     await fs.removeFile(fs.join(budgetDir, 'metadata.latest.json'));
@@ -216,20 +223,6 @@ export async function loadBackup(id: string, backupId: string) {
     // so it's safe to load our prefs in. We need to forget about any
     // syncing data if we are loading a backup (the current sync data
     // will be restored if the user reverts to the original version)
-    await prefs.loadPrefs(id);
-    await prefs.savePrefs({
-      groupId: null,
-      lastSyncedTimestamp: null,
-      lastUploaded: null,
-    });
-
-    // Re-upload the new file
-    try {
-      await cloudStorage.upload();
-    } catch {}
-
-    prefs.unloadPrefs();
-
     const zipContent = await fs.readFile(
       fs.join(budgetDir, 'backups', backupId),
       'binary',
@@ -245,12 +238,31 @@ export async function loadBackup(id: string, backupId: string) {
     if (!entries['db.sqlite'] || !entries['metadata.json']) {
       throw new Error('Backup zip file is missing db.sqlite or metadata.json');
     }
-
-    await fs.writeFile(fs.join(budgetDir, 'db.sqlite'), entries['db.sqlite']);
+    const backupMetadata = JSON.parse(
+      Buffer.from(entries['metadata.json']).toString('utf8'),
+    );
+    const databaseEntry = readDatabaseEntries(entries);
+    if (databaseEntry.isProtected !== Boolean(backupMetadata.amountEncoding)) {
+      throw new Error('Backup amount encoding does not match its database');
+    }
+    await fs.writeFile(
+      fs.join(budgetDir, 'db.sqlite'),
+      new Uint8Array(databaseEntry.content),
+    );
     await fs.writeFile(
       fs.join(budgetDir, 'metadata.json'),
       entries['metadata.json'],
     );
+    await prefs.loadPrefs(id);
+    await prefs.savePrefs({
+      groupId: null,
+      lastSyncedTimestamp: null,
+      lastUploaded: null,
+    });
+    try {
+      await cloudStorage.upload();
+    } catch {}
+    prefs.unloadPrefs();
   }
 }
 

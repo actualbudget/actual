@@ -63,6 +63,11 @@ export function SyncStatusLine() {
       color: theme.sidebarTextSubdued,
       label: t('Sync disabled'),
     },
+    'pending-transition': {
+      Icon: SvgCloudUnknown,
+      color: theme.sidebarTextSubdued,
+      label: t('Currency change pending'),
+    },
     synced: {
       Icon: SvgCloudCheck,
       color: theme.sidebarTextPositive,

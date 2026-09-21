@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Navigate, Outlet } from 'react-router';
+import { Navigate, Outlet, useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -271,6 +271,15 @@ export function GeneralSettings() {
   const { isNarrowWidth } = useResponsive();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
   const serverURL = useServerURL();
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (hash !== '#export-data') return;
+    const frame = requestAnimationFrame(() =>
+      document.getElementById('export-data')?.scrollIntoView(),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [hash]);
 
   return (
     <SettingsSections title={t('General')}>
@@ -291,7 +300,9 @@ export function GeneralSettings() {
       )}
       <SettingsGroup title={t('Data')}>
         {isElectron() && <Backups />}
-        <ExportBudget />
+        <View id="export-data">
+          <ExportBudget />
+        </View>
       </SettingsGroup>
     </SettingsSections>
   );

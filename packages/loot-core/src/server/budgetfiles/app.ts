@@ -7,6 +7,7 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
+import { recoverLocalEncoding } from '#server/amount-encoding/files';
 import { createApp } from '#server/app';
 import * as budget from '#server/budget/base';
 import * as cloudStorage from '#server/cloud-storage';
@@ -632,6 +633,11 @@ async function _loadBudget(id: Budget['id']): Promise<{
 
   try {
     await updateVersion();
+    // The preferences table exists after schema migration. Its encoding and
+    // recovery state commit atomically with the amounts in SQLite.
+    const database = db.getDatabase();
+    if (!database) throw new Error('amount-encoding-budget-not-open');
+    await prefs.savePrefs(recoverLocalEncoding(database), { avoidSync: true });
   } catch (e) {
     logger.warn('Error updating', e);
     let result;

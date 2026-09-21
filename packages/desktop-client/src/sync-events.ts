@@ -171,13 +171,21 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           queryKey: reportQueries.lists(),
         });
       }
+    } else if (event.type === 'pending-transition') {
+      void store.dispatch(loadPrefs());
     } else if (event.type === 'error') {
       let notif: Notification | null = null;
       const learnMore = `[${t('Learn more')}](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)`;
       const githubIssueLink =
         'https://github.com/actualbudget/actual/issues/new?assignees=&labels=bug&template=bug-report.yml&title=%5BBug%5D%3A+';
 
-      switch (event.subtype) {
+      // Unregistered local files have no cloud id to send to the sync server.
+      const subtype =
+        event.subtype === 'invalid fileId' &&
+        !store.getState().prefs.local.cloudFileId
+          ? 'file-not-found'
+          : event.subtype;
+      switch (subtype) {
         case 'out-of-sync':
           if (attemptedSyncRepair) {
             notif = {
