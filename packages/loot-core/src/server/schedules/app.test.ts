@@ -1184,6 +1184,19 @@ describe('schedule app', () => {
       expect(prefs.getPrefs().lastScheduleRun).toBeUndefined();
     });
 
+    it('clears the marker when updating a schedule that already posts transactions', async () => {
+      const id = await createSchedule({
+        schedule: { posts_transaction: true },
+        conditions: [dateCondition],
+      });
+
+      await prefs.savePrefs({ lastScheduleRun: '2020-12-01' });
+
+      await updateSchedule({ schedule: { id, name: 'Renamed schedule' } });
+
+      expect(prefs.getPrefs().lastScheduleRun).toBeUndefined();
+    });
+
     it('keeps the marker when updating a schedule that does not post transactions', async () => {
       const id = await createSchedule({ conditions: [dateCondition] });
 
