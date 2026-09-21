@@ -220,7 +220,13 @@ export function ImportTransactionsModal({
     parsed: boolean;
     message: string;
   } | null>(null);
-  const [filename, setFilename] = useState(originalFileName);
+  // A file selection is a parse request, not just a name. Each selection stores a new request
+  // object, so picking the same path again still re-parses: the file on disk may have changed,
+  // and the button that picks it only appears once a parse has failed.
+  const [parseRequest, setParseRequest] = useState({
+    filename: originalFileName,
+  });
+  const filename = parseRequest.filename;
   const [transactions, setTransactions] = useState<ImportTransaction[]>([]);
   const [parsedTransactions, setParsedTransactions] = useState<
     ImportTransaction[]
@@ -381,7 +387,6 @@ export function ImportTransactionsModal({
       setLoadingState('parsing');
 
       const filetype = getFileType(filename);
-      setFilename(filename);
       setFileType(filetype);
 
       const { errors, transactions: parsedTransactions = [] } = await send(
@@ -474,7 +479,8 @@ export function ImportTransactionsModal({
   }
 
   useEffect(() => {
-    const fileType = getFileType(originalFileName);
+    const { filename } = parseRequest;
+    const fileType = getFileType(filename);
     const parseOptions = getParseOptions(fileType, {
       delimiter,
       hasHeaderRow,
@@ -492,22 +498,22 @@ export function ImportTransactionsModal({
     const lastParse = lastParseRef.current;
     const shouldPreserveImportSettings = shouldPreserveImportSettingsForParse(
       lastParse,
-      originalFileName,
+      filename,
       fileType,
       parseOptions,
     );
 
     lastParseRef.current = {
-      filename: originalFileName,
+      filename,
       fileType,
       options: parseOptions,
     };
 
-    void parse(originalFileName, parseOptions, {
+    void parse(filename, parseOptions, {
       preserveImportSettings: shouldPreserveImportSettings,
     });
   }, [
-    originalFileName,
+    parseRequest,
     delimiter,
     hasHeaderRow,
     skipStartLines,
@@ -556,23 +562,13 @@ export function ImportTransactionsModal({
       ],
     });
 
-    const fileType = getFileType(res[0]);
-    const parseOptions = getParseOptions(fileType, {
-      delimiter,
-      hasHeaderRow,
-      skipStartLines,
-      skipEndLines,
-      fallbackMissingPayeeToMemo,
-      importNotes,
-      swapPayeeAndMemo: getSwapOption(
-        fileType,
-        ofxSwapPayeeAndMemo,
-        qifSwapPayeeAndMemo,
-        camtSwapPayeeAndMemo,
-      ),
-    });
+    if (!res?.[0]) {
+      return;
+    }
 
-    void parse(res[0], parseOptions);
+    // Selecting a file only records the request: the parsing effect owns every parse, so the
+    // file it parses is always the one the modal is showing.
+    setParseRequest({ filename: res[0] });
   }
 
   function onUpdateFields(field, name) {
