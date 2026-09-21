@@ -55,6 +55,22 @@ async function saveSyncedPrefs({
     return;
   }
 
+  const hasAmountEncoding = Boolean(_getMetadataPrefs()?.amountEncoding);
+  if (
+    (id === 'amountEncoding' ||
+      id === 'flags.currencyPrecision' ||
+      (id === 'defaultCurrencyCode' && hasAmountEncoding)) &&
+    value !==
+      (
+        await db.first<{ value: string }>(
+          'SELECT value FROM preferences WHERE id = ?',
+          [id],
+        )
+      )?.value
+  ) {
+    throw new Error('amount-encoding-transition-required');
+  }
+
   await db.update('preferences', {
     id,
     value,
@@ -232,11 +248,15 @@ async function saveMetadataPrefs(prefsToSet: MetadataPrefs) {
       throw new Error('No sync server set');
     }
 
-    await post(syncServer + '/update-user-filename', {
-      token: userToken,
-      fileId: cloudFileId,
-      name: prefsToSet.budgetName,
-    });
+    await post(
+      syncServer + '/update-user-filename',
+      {
+        token: userToken,
+        fileId: cloudFileId,
+        name: prefsToSet.budgetName,
+      },
+      { 'X-ACTUAL-AMOUNT-ENCODING': '1' },
+    );
   }
 
   await _saveMetadataPrefs(prefsToSet);

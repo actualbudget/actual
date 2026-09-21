@@ -826,7 +826,7 @@ export async function initialFullSync(): Promise<{
 }
 
 type FullSyncResult =
-  | { messages: Message[] }
+  | { messages: Message[]; pendingTransition?: true }
   | { error: { message: string; reason: string; meta: unknown } };
 
 let runningFullSync: Promise<FullSyncResult> | null = null;
@@ -917,6 +917,11 @@ async function runFullSync(): Promise<FullSyncResult> {
     return { error: { message: e.message, reason: e.reason, meta: e.meta } };
   }
 
+  if (messages === null) {
+    app.events.emit('sync', { type: 'pending-transition' });
+    return { messages: [], pendingTransition: true };
+  }
+
   const tables = getTablesFromMessages(messages);
 
   app.events.emit('sync', {
@@ -931,7 +936,7 @@ async function _fullSync(
   sinceTimestamp: string,
   count: number,
   prevDiffTime: number,
-): Promise<Message[]> {
+): Promise<Message[] | null> {
   const {
     id: currentId,
     cloudFileId,
@@ -947,6 +952,10 @@ async function _fullSync(
     !currentId
   ) {
     return [];
+  }
+
+  if (prefs.getPrefs()?.amountEncodingTransition) {
+    return null;
   }
 
   // Snapshot the point at which we are currently syncing
@@ -980,6 +989,7 @@ async function _fullSync(
     buffer,
     {
       'X-ACTUAL-TOKEN': userToken,
+      'X-ACTUAL-AMOUNT-ENCODING': '1',
     },
   );
 
@@ -1073,18 +1083,14 @@ async function _fullSync(
       throw new SyncError('out-of-sync');
     }
 
-    receivedMessages = receivedMessages.concat(
-      await _fullSync(
-        new Timestamp(diffTime, 0, '0').toString(),
-        // If something local changed while we were syncing, always
-        // reset, token the counter. We never want to think syncing failed
-        // because we tried to syncing many times and couldn't sync,
-        // but it was because the user kept changing stuff in the
-        // middle of syncing.
-        localTimeChanged ? 0 : count + 1,
-        diffTime,
-      ),
+    const nextMessages = await _fullSync(
+      new Timestamp(diffTime, 0, '0').toString(),
+      // Local changes restart the retry count rather than exhausting it.
+      localTimeChanged ? 0 : count + 1,
+      diffTime,
     );
+    if (nextMessages === null) return null;
+    receivedMessages = receivedMessages.concat(nextMessages);
   } else {
     // All synced up, store the current time as a simple optimization for the next sync
     const requiresUpdate =
