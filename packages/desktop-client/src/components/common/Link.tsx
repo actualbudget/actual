@@ -28,6 +28,7 @@ type ButtonLinkProps = Omit<
 };
 
 type InternalLinkProps = {
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
   to?: string;
   style?: CSSProperties;
   activeStyle?: CSSProperties;
@@ -120,6 +121,7 @@ const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
 };
 
 const InternalLink = ({
+  onClick,
   to,
   style,
   activeStyle,
@@ -137,6 +139,8 @@ const InternalLink = ({
       onClick={e => {
         if (isDisabled) {
           e.preventDefault();
+        } else {
+          onClick?.(e);
         }
       }}
     >

@@ -7,14 +7,16 @@ import { currencies, getCurrency } from '@actual-app/core/shared/currencies';
 import { css } from '@emotion/css';
 
 import { Checkbox } from '#components/forms';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { SettingsGroup } from './SettingsGroup';
 import { SettingsRow } from './SettingsRow';
 
-export function CurrencySettings() {
+export function useCurrencyOptions() {
   const { t } = useTranslation();
-
   const currencyTranslations = useMemo(
     () =>
       new Map<string, string>([
@@ -77,6 +79,25 @@ export function CurrencySettings() {
     [t],
   );
 
+  return currencies.map(currency => {
+    const translatedName =
+      currencyTranslations.get(currency.code) ?? currency.name;
+    if (currency.code === '') {
+      return [currency.code, translatedName] as const;
+    }
+    return [
+      currency.code,
+      `${currency.code} - ${translatedName} (${currency.symbol})`,
+    ] as const;
+  });
+}
+
+export function CurrencySettings() {
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const precisionEnabled = useFeatureFlag('currencyPrecision');
+  const currencyOptions = useCurrencyOptions();
+
   const [defaultCurrencyCode, setDefaultCurrencyCodePref] = useSyncedPref(
     'defaultCurrencyCode',
   );
@@ -97,19 +118,18 @@ export function CurrencySettings() {
     },
   });
 
-  const currencyOptions: [string, string][] = currencies.map(currency => {
-    const translatedName =
-      currencyTranslations.get(currency.code) ?? currency.name;
-    if (currency.code === '') {
-      return [currency.code, translatedName];
-    }
-    return [
-      currency.code,
-      `${currency.code} - ${translatedName} (${currency.symbol})`,
-    ];
-  });
-
   const handleCurrencyChange = (code: string) => {
+    if (precisionEnabled) {
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'amount-encoding',
+            options: { enabled: true, currencyCode: code },
+          },
+        }),
+      );
+      return;
+    }
     setDefaultCurrencyCodePref(code);
     if (code !== '') {
       const cur = getCurrency(code);
@@ -150,6 +170,7 @@ export function CurrencySettings() {
         title={t('Default currency')}
         control={
           <Select
+            id="default-currency-select"
             value={selectedCurrencyCode}
             onChange={handleCurrencyChange}
             options={currencyOptions}

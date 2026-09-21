@@ -631,6 +631,10 @@ export type Modal =
       };
     }
   | {
+      name: 'amount-encoding';
+      options: { enabled: boolean; currencyCode: string };
+    }
+  | {
       name: 'confirm-delete';
       options: {
         message: string;

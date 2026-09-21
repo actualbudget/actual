@@ -38,7 +38,12 @@ export const init: T.Init = function (_socketName, handlers) {
             captureException(nativeError);
           }
 
-          if (!catchErrors) {
+          // A pending precision change blocks edits on purpose; the client
+          // offers its retry dialog instead of a generic error.
+          if (
+            !catchErrors &&
+            nativeError?.message !== 'amount-encoding-transition-pending'
+          ) {
             // Notify the frontend that something bad happend
             send('server-error');
           }

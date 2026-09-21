@@ -11,9 +11,12 @@ import { Permissions } from '#auth/types';
 import { Checkbox } from '#components/forms';
 import { useLoginMethod, useMultiuserEnabled } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useServerPref } from '#hooks/useServerPref';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { FeatureControl } from './FeatureControl';
 import { SettingsGroup } from './SettingsGroup';
@@ -30,6 +33,7 @@ type FeatureToggleProps = {
   isSubFeature?: boolean;
   subFeatures?: ReactNode;
   onDisable?: () => void;
+  onChange?: () => void;
 };
 
 function FeatureToggle({
@@ -42,6 +46,7 @@ function FeatureToggle({
   isSubFeature = false,
   subFeatures,
   onDisable,
+  onChange,
 }: FeatureToggleProps) {
   const enabled = useFeatureFlag(flagName);
   const [_, setFlagPref] = useSyncedPref(`flags.${flagName}`);
@@ -63,6 +68,10 @@ function FeatureToggle({
             id={id}
             checked={enabled}
             onChange={() => {
+              if (onChange) {
+                onChange();
+                return;
+              }
               setFlagPref(String(!enabled));
               if (enabled) {
                 onDisable?.();
@@ -160,10 +169,16 @@ function ServerFeatureToggle({
 
 export function ExperimentalFeatures() {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const [currencyCode = ''] = useSyncedPref('defaultCurrencyCode');
+  const [pending] = useMetadataPref('amountEncodingTransition');
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const [, setGoalTemplatesUIPref] = useSyncedPref(
     'flags.goalTemplatesUIEnabled',
   );
+
+  const currencyEnabled = useFeatureFlag('currency');
+  const currencyPrecisionEnabled = useFeatureFlag('currencyPrecision');
 
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
@@ -214,7 +229,51 @@ export function ExperimentalFeatures() {
       </FeatureToggle>
       <FeatureToggle
         flag="currency"
+        disableToggle={currencyPrecisionEnabled}
+        error={
+          <Trans>Disable per-currency precision before currency support.</Trans>
+        }
         feedbackLink="https://github.com/actualbudget/actual/issues/5191"
+        subFeatures={
+          currencyEnabled && (
+            <FeatureToggle
+              flag="currencyPrecision"
+              onChange={() =>
+                dispatch(
+                  pushModal({
+                    modal: {
+                      name: 'amount-encoding',
+                      options: {
+                        enabled: !currencyPrecisionEnabled,
+                        currencyCode,
+                      },
+                    },
+                  }),
+                )
+              }
+              note={
+                <>
+                  <Trans>
+                    Experimental preview. Stored amounts are converted when the
+                    decimal precision changes. A backup is recommended before
+                    continuing.
+                  </Trans>
+                  {pending && (
+                    <Text style={{ color: theme.errorText }}>
+                      <Trans>
+                        A precision change is unfinished. Open this setting to
+                        retry it.
+                      </Trans>
+                    </Text>
+                  )}
+                </>
+              }
+              isSubFeature
+            >
+              <Trans>Per-currency decimal precision</Trans>
+            </FeatureToggle>
+          )
+        }
       >
         <Trans>Currency support</Trans>
       </FeatureToggle>

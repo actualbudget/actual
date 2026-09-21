@@ -25,6 +25,7 @@ import {
 import {
   name as modalsSliceName,
   reducer as modalsSliceReducer,
+  pushModal,
 } from '#modals/modalsSlice';
 import {
   addNotification,
@@ -57,10 +58,36 @@ const rootReducer = combineReducers({
 });
 
 const notifyOnRejectedActionsMiddleware = createListenerMiddleware();
-notifyOnRejectedActionsMiddleware.startListening({
+notifyOnRejectedActionsMiddleware.startListening.withTypes<
+  RootState,
+  AppDispatch
+>()({
   matcher: isRejected,
-  effect: (action, { dispatch }) => {
+  effect: (action, { dispatch, ...listenerApi }) => {
     console.error(action.error);
+    // An unfinished precision change blocks every edit; offer its retry
+    // instead of reporting each blocked edit.
+    if (action.error.message === 'amount-encoding-transition-pending') {
+      const { prefs, modals } = listenerApi.getState();
+      const pending = prefs.local.amountEncodingTransition;
+      const isOpen = modals.modalStack.some(
+        modal => modal.name === 'amount-encoding',
+      );
+      if (pending && !isOpen) {
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'amount-encoding',
+              options: {
+                enabled: pending.targetEncoding != null,
+                currencyCode: pending.targetCurrencyCode,
+              },
+            },
+          }),
+        );
+      }
+      return;
+    }
     dispatch(
       addNotification({
         notification: {

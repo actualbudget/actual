@@ -18,6 +18,7 @@ import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AccountReconcileModal } from './modals/AccountReconcileModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
 import { AllAccountsMenuModal } from './modals/AllAccountsMenuModal';
+import { AmountEncodingModal } from './modals/AmountEncodingModal';
 import { ApiKeyModal } from './modals/ApiKeyModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
@@ -174,6 +175,9 @@ export function Modals() {
 
         case 'confirm-delete':
           return <ConfirmDeleteModal key={key} {...modal.options} />;
+
+        case 'amount-encoding':
+          return <AmountEncodingModal key={key} {...modal.options} />;
 
         case 'copy-widget-to-dashboard':
           return <CopyWidgetToDashboardModal key={key} {...modal.options} />;
