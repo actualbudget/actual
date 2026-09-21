@@ -1,6 +1,16 @@
 name: Publish App Store
 
-# Builds the iOS app from a release tag and uploads it to App Store Connect.
+# Builds the iOS app and uploads it to App Store Connect.
+#
+# TEMPORARY: this runs on every push to `master` so that we get continuous
+# TestFlight builds while the pipeline is being bedded in. Once we are happy
+# with it, swap the `push` trigger below for:
+#
+#   on:
+#     release:
+#       types: [published]
+#
+# and take the version from the release tag instead of the package version.
 #
 # Required secrets (in the `release` environment):
 #   APPLE_TEAM_ID                     - Apple Developer team ID (already used by the Electron release).
@@ -18,14 +28,11 @@ defaults:
     shell: bash
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - master
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Release tag (e.g. v25.3.0)'
-        required: true
-        type: string
       dry_run:
         description: 'Only validate the build, do not upload it to App Store Connect'
         required: false
@@ -34,6 +41,8 @@ on:
 
 concurrency:
   group: publish-app-store
+  # Every merge gets published, so let queued runs drain rather than killing
+  # a build (or an in-flight upload) half way through.
   cancel-in-progress: false
 
 permissions:
@@ -43,43 +52,11 @@ jobs:
   publish-app-store:
     runs-on: depot-macos-latest
     environment: release
-    # Pre-releases can't be shipped to the App Store: CFBundleShortVersionString
-    # has to be a plain `x.y.z` version.
-    if: ${{ github.event.repository.fork == false && github.event.release.prerelease != true }}
+    if: ${{ github.event.repository.fork == false }}
     steps:
-      - name: Resolve version
-        id: resolve_version
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          INPUT_TAG: ${{ inputs.tag }}
-        run: |
-          if [[ "$EVENT_NAME" == "release" ]]; then
-            TAG="$RELEASE_TAG"
-          else
-            TAG="$INPUT_TAG"
-          fi
-
-          if [[ -z "$TAG" ]]; then
-            echo "::error::No tag provided"
-            exit 1
-          fi
-
-          # The App Store only accepts plain v-prefixed semver (e.g. v25.3.0).
-          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::Invalid tag format: $TAG (expected v-prefixed semver without a pre-release suffix, e.g. v25.3.0)"
-            exit 1
-          fi
-
-          VERSION="${TAG#v}"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Resolved tag=$TAG version=$VERSION"
-
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ steps.resolve_version.outputs.tag }}
           persist-credentials: false
 
       - name: Set up environment
@@ -87,6 +64,22 @@ jobs:
         with:
           # Avoid restoring potentially poisoned caches in release jobs.
           cache: 'false'
+
+      - name: Resolve version
+        id: resolve_version
+        run: |
+          # All packages are versioned together, so the mobile package version
+          # is the version this commit would ship as.
+          VERSION=$(node -p "require('./packages/mobile-client/package.json').version")
+
+          # The App Store only accepts a plain `x.y.z` CFBundleShortVersionString.
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Unsupported version: $VERSION (expected plain semver, e.g. 25.3.0)"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved version=$VERSION"
 
       - name: Show toolchain versions
         run: |
@@ -252,7 +245,7 @@ jobs:
       - name: Upload IPA artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: actual-ios-${{ steps.resolve_version.outputs.version }}
+          name: actual-ios-${{ steps.resolve_version.outputs.version }}-${{ steps.archive.outputs.build-number }}
           path: packages/mobile-client/build/ipa/*.ipa
 
       - name: Upload to App Store Connect

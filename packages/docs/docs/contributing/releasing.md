@@ -62,8 +62,6 @@ Docker images should be automatically released and pushed to Docker Hub; confirm
 
 For the Windows Store desktop app, a submission will be automatically uploaded and submitted for certification. The certification process can take up to 3 business days; once complete the app will be in the Store. You can check the update status [on the partner dashboard](https://partner.microsoft.com/en-us/dashboard) if you have permission. Note that the Store UI will not correctly reflect the submission status for about 30 minutes after submission.
 
-For the iOS app, nothing happens yet at this point - the App Store upload is triggered when the GitHub release is published (see [Finalize the release](#finalize-the-release)).
-
 Finally, a draft GitHub release should be automatically created; confirm [on the releases page](https://github.com/actualbudget/actual/releases).
 
 ### Verify the release
@@ -73,18 +71,26 @@ Finally, a draft GitHub release should be automatically created; confirm [on the
 
 ### Finalize the release
 
-- [ ] Un-draft the GitHub release which will send announcement notifications to all apps, create a PR to the [Actual Flathub Repository](https://github.com/flathub/com.actualbudget.actual/pulls) and upload the iOS app to App Store Connect.
+- [ ] Un-draft the GitHub release which will send announcement notifications to all apps and create a PR to the [Actual Flathub Repository](https://github.com/flathub/com.actualbudget.actual/pulls).
 - [ ] Send an announcement on Discord and Twitter.
 - [ ] Approve and merge the [Flathub Release PR](https://github.com/flathub/com.actualbudget.actual/pulls) to master. After merge, it can take anywhere from hours to a few days before the app will be available in the Flathub Store.
-- [ ] Submit the new iOS build for review in App Store Connect (see [Publishing the iOS app](#publishing-the-ios-app)).
+- [ ] Pick the iOS build matching this version in App Store Connect and submit it for review (see [Publishing the iOS app](#publishing-the-ios-app)).
 
 ## Publishing the iOS app
 
-The iOS app is built and uploaded by the [Publish App Store workflow](https://github.com/actualbudget/actual/actions/workflows/publish-app-store.yml). It runs automatically when a GitHub release is published, and can also be run manually for a given tag. The manual run has a `dry_run` option that builds and validates the app without creating a build in App Store Connect - useful when changing the pipeline itself.
+The iOS app is built and uploaded by the [Publish App Store workflow](https://github.com/actualbudget/actual/actions/workflows/publish-app-store.yml).
 
-The workflow builds the web bundle, syncs it into the Capacitor iOS project, archives and exports a signed `.ipa`, and uploads it to App Store Connect. The uploaded build becomes available in TestFlight once Apple finishes processing it, which usually takes a few minutes. Releasing it to the App Store is still a manual step: pick the build in App Store Connect, fill in the "What's New" text and submit it for review.
+:::note
 
-The app version comes from the release tag, so only plain `vX.Y.Z` tags are accepted - pre-releases are skipped. The build number is derived from the workflow run number, which means every run produces a unique, increasing build number.
+For now the workflow runs on **every push to `master`**, so each merge produces a new TestFlight build. Once the pipeline has proven itself the trigger will move to the release, matching how the other stores are published. The workflow file documents the change needed.
+
+:::
+
+It can also be run manually, which offers a `dry_run` option that builds and validates the app without creating a build in App Store Connect - useful when changing the pipeline itself.
+
+The workflow builds the web bundle, syncs it into the Capacitor iOS project, archives and exports a signed `.ipa`, and uploads it to App Store Connect. The uploaded build becomes available in TestFlight once Apple finishes processing it, which usually takes a few minutes. Releasing it to the App Store is always a manual step: pick the build in App Store Connect, fill in the "What's New" text and submit it for review.
+
+The app version is read from `packages/mobile-client/package.json`, which is bumped when the release is cut. Because master keeps that version between releases, several builds will share the same version - they are told apart by the build number, which is derived from the workflow run and attempt numbers so that it is always unique and increasing.
 
 ### Required secrets
 
