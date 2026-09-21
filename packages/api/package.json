@@ -57,9 +57,9 @@
   "dependencies": {
     "@actual-app/core": "workspace:*",
     "@actual-app/crdt": "workspace:*",
-    "better-sqlite3": "^12.11.1",
+    "better-sqlite3": "^13.0.3",
     "compare-versions": "^6.1.1",
-    "uuid": "^14.0.1"
+    "uuid": "^14.0.2"
   },
   "devDependencies": {
     "@actual-app/vite-plugin-peggy": "workspace:*",
@@ -69,9 +69,9 @@
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.1.5",
     "vite-plugin-node-polyfills": "patch:vite-plugin-node-polyfills@npm%3A0.28.0#~/.yarn/patches/vite-plugin-node-polyfills-npm-0.28.0-bac39616ee.patch",
-    "vitest": "^4.1.10"
+    "vitest": "^5.0.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   }
 }

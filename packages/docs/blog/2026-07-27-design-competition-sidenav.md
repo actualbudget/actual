@@ -4,6 +4,7 @@ description: The sidenav is one of the most-used parts of Actual Budget, and we 
 date: 2026-06-27T10:00
 slug: design-competition-sidenav
 tags: [announcement]
+in_app_notification: true
 hide_table_of_contents: false
 authors: MatissJanis
 ---

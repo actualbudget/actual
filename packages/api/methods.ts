@@ -448,3 +448,10 @@ export function getServerVersion() {
 export function getPreferences(): Promise<SyncedPrefs> {
   return send('preferences/get');
 }
+
+export function setPreference<T extends keyof SyncedPrefs>(
+  id: T,
+  value: SyncedPrefs[T] | undefined,
+): Promise<void> {
+  return send('preferences/save', { id, value });
+}
