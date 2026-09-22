@@ -6,6 +6,7 @@ import { fromDateRepr } from '#server/models';
 import { collectFormulasFromActions } from '#server/rules/balanceOfFormula';
 import { getRuleForSchedule } from '#server/schedules/app';
 import { prefetchBalanceOfForTransaction } from '#server/transactions/transaction-rules';
+import { getRecordedAmountPrecision } from '#server/util/currency';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import {
@@ -46,6 +47,7 @@ export async function createScheduleList(
   const t: Array<ScheduleTemplateTarget> = [];
   const accounts = (await db.getAccounts()) ?? [];
   const accountsMap = new Map(accounts.map(a => [a.id, a]));
+  const amountPrecision = getRecordedAmountPrecision();
 
   for (const template of templates) {
     // Prefer scheduleId so renames don't break the lookup; fall back to name
@@ -107,7 +109,8 @@ export async function createScheduleList(
         }
         case 'fixed': {
           const sign = scheduleAmount < 0 ? -1 : 1;
-          scheduleAmount += sign * amountToInteger(template.adjustment);
+          scheduleAmount +=
+            sign * amountToInteger(template.adjustment, amountPrecision);
           break;
         }
 
@@ -150,10 +153,13 @@ export async function createScheduleList(
       formulaStrings,
     );
 
-    const { amount: postRuleAmount, subtransactions } = rule.execActions({
-      ...scheduleRuleContext,
-      _balanceOfPrefetched: balanceOfPrefetched,
-    });
+    const { amount: postRuleAmount, subtransactions } = rule.execActions(
+      {
+        ...scheduleRuleContext,
+        _balanceOfPrefetched: balanceOfPrefetched,
+      },
+      amountPrecision,
+    );
     const categorySubtransactions = subtransactions?.filter(
       t => t.category === category.id,
     );

@@ -43,6 +43,8 @@ export type FormulaQueryContext = {
 };
 
 type CustomFunctionsContext = {
+  /** Recorded budget precision; INTEGER_TO_AMOUNT defaults to it. */
+  amountPrecision?: number;
   balanceOfPrefetch?: Map<string, number>;
   formulaQuery?: FormulaQueryContext;
 };
@@ -183,7 +185,11 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       ast.args,
       state,
       this.metadata('INTEGER_TO_AMOUNT'),
-      (integerAmount: number, decimalPlaces: number = 2) => {
+      (
+        integerAmount: number,
+        decimalPlaces: number = this.getCustomFunctionsContext()
+          ?.amountPrecision ?? 2,
+      ) => {
         return integerToAmount(integerAmount, decimalPlaces);
       },
     );
@@ -474,11 +480,7 @@ CustomFunctionsPlugin.implementedFunctions = {
     method: 'integerToAmount',
     parameters: [
       { argumentType: FunctionArgumentType.NUMBER },
-      {
-        argumentType: FunctionArgumentType.NUMBER,
-        optionalArg: true,
-        defaultValue: 2,
-      },
+      { argumentType: FunctionArgumentType.NUMBER, optionalArg: true },
     ],
   },
   QUERY: {

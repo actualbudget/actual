@@ -4,7 +4,7 @@ import type { TransactionForRules } from '#server/transactions/transaction-rules
 import { getCurrency } from '#shared/currencies';
 import { setCachedUserPreferences } from '#shared/formulas/customFunctions';
 
-import { Action } from './action';
+import { Action, encodeFormulaAmount } from './action';
 
 describe('Formula-based rule actions', () => {
   beforeEach(() => {
@@ -217,6 +217,34 @@ describe('Formula-based rule actions', () => {
 
     expect(transaction.amount).toBe(-10500);
   });
+
+  it.each([
+    [0, 2468],
+    [3, 2468],
+  ])(
+    'INTEGER_TO_AMOUNT defaults to the recorded %sdp precision',
+    (precision, expected) => {
+      const action = new Action('set', 'amount', null, {
+        formula: '=INTEGER_TO_AMOUNT(1234) * 2',
+      });
+      const transaction = { amount: 0 };
+      action.exec(transaction, precision);
+      expect(transaction.amount).toBe(expected);
+    },
+  );
+
+  it.each([
+    [0, 1234],
+    [3, 1234],
+  ])(
+    'round-trips the amount field at the recorded %sdp precision',
+    (precision, amount) => {
+      const action = new Action('set', 'amount', null, { formula: '=amount' });
+      const transaction = { amount };
+      action.exec(transaction, precision);
+      expect(transaction.amount).toBe(amount);
+    },
+  );
 
   it('should execute formula and convert to string type', () => {
     const action = new Action('set', 'notes', null, {
@@ -522,5 +550,29 @@ describe('Formula-based rule actions', () => {
     action.exec(transaction);
 
     expect(transaction.notes).toBe('fallback');
+  });
+
+  it.each([
+    [0, '=500 + 250', 750],
+    [2, '=5 + 2.5', 750],
+    [3, '=1.234', 1234],
+  ])('encodes formula amounts at %sdp', (precision, formula, expected) => {
+    const action = new Action('set', 'amount', null, { formula });
+    const transaction = { amount: 0 };
+    action.exec(transaction, precision);
+    expect(transaction.amount).toBe(expected);
+  });
+
+  it('rounds positive and negative ties to even', () => {
+    expect(encodeFormulaAmount(1.225, 2)).toBe(122);
+    expect(encodeFormulaAmount(1.235, 2)).toBe(124);
+    expect(encodeFormulaAmount(-1.225, 2)).toBe(-122);
+    expect(encodeFormulaAmount(-1.235, 2)).toBe(-124);
+  });
+
+  it('rejects nonfinite and overflowing formula amounts', () => {
+    expect(() => encodeFormulaAmount(Number.NaN, 2)).toThrow();
+    expect(() => encodeFormulaAmount(Number.POSITIVE_INFINITY, 2)).toThrow();
+    expect(() => encodeFormulaAmount(Number.MAX_SAFE_INTEGER, 2)).toThrow();
   });
 });

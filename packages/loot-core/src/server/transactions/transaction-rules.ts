@@ -30,6 +30,7 @@ import {
   resolveAccountIdForBalanceOf,
 } from '#server/rules/balanceOfFormula';
 import { addSyncListener, batchMessages } from '#server/sync';
+import { getRecordedAmountPrecision } from '#server/util/currency';
 import {
   addDays,
   currentDay,
@@ -333,6 +334,7 @@ const NULLABLE_RULE_FIELDS = ['payee', 'category'] as const;
 export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
+  amountPrecision = getRecordedAmountPrecision(),
 ) {
   await ensureFormulaPreferencesLoaded();
 
@@ -418,7 +420,7 @@ export async function runRules(
       if (rules[i].id === scheduleRuleID) {
         // bypass condition checking to run the rule even if the transaction date falls outside of the schedule's date range.
         await ensureBalanceFor(rules[i]);
-        const changes = rules[i].execActions(finalTrans);
+        const changes = rules[i].execActions(finalTrans, amountPrecision);
         finalTrans = Object.assign({}, finalTrans, changes);
         await resolvePayeeNameForRules(finalTrans);
         lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
@@ -435,7 +437,7 @@ export async function runRules(
           finalTrans = Object.assign(
             {},
             finalTrans,
-            rules[i].execActions(finalTrans),
+            rules[i].execActions(finalTrans, amountPrecision),
           );
         }
         await resolvePayeeNameForRules(finalTrans);
@@ -454,7 +456,7 @@ export async function runRules(
         finalTrans = Object.assign(
           {},
           finalTrans,
-          rules[i].execActions(finalTrans),
+          rules[i].execActions(finalTrans, amountPrecision),
         );
       }
       await resolvePayeeNameForRules(finalTrans);
@@ -859,8 +861,11 @@ export async function applyActions(
     trans._balanceOfPrefetched = balanceOfPrefetchResults[i];
   });
 
+  const amountPrecision = getRecordedAmountPrecision();
   const updated = transactionsForRules.flatMap(trans => {
-    return ungroupTransaction(execActions(parsedActions, trans));
+    return ungroupTransaction(
+      execActions(parsedActions, trans, amountPrecision),
+    );
   });
 
   const finalized: TransactionEntity[] = [];

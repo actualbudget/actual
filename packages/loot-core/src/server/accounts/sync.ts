@@ -894,7 +894,7 @@ export async function matchTransactions(
     subtransactions,
   } of normalized) {
     // Run the rules
-    const trans = await runRules(originalTrans, accountsMap);
+    const trans = await runRules(originalTrans, accountsMap, amountPrecision);
 
     let match = null;
     let fuzzyDataset = null;
