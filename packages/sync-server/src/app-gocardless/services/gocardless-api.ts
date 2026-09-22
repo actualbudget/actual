@@ -18,7 +18,7 @@ const ALLOWED_ORIGIN = new URL(BASE_URL).origin;
 
 export type TokenResponse = {
   access: string;
-  refresh: string;
+  refresh?: string;
   access_expires: number;
   refresh_expires: number;
 };
@@ -58,6 +58,9 @@ export class GoCardlessApi {
   #secretId: string | null;
   #secretKey: string | null;
   #token: string | null = null;
+  #refreshToken: string | null = null;
+  #accessExpiresAt: number | null = null;
+  #refreshPromise: Promise<void> | null = null;
 
   constructor({
     secretId,
@@ -86,6 +89,37 @@ export class GoCardlessApi {
     this.#token = value;
   }
 
+  async #refreshIfNeeded(): Promise<void> {
+    if (
+      this.#accessExpiresAt !== null &&
+      Math.floor(Date.now() / 1000) + 60 < this.#accessExpiresAt
+    ) {
+      return;
+    }
+
+    if (this.#refreshPromise) {
+      return this.#refreshPromise;
+    }
+
+    this.#refreshPromise = (async () => {
+      try {
+        if (this.#refreshToken) {
+          try {
+            await this.exchangeToken({ refreshToken: this.#refreshToken });
+            return;
+          } catch {
+            // fall through to generateToken()
+          }
+        }
+        await this.generateToken();
+      } finally {
+        this.#refreshPromise = null;
+      }
+    })();
+
+    return this.#refreshPromise;
+  }
+
   async #request<T>(
     endpoint: string,
     {
@@ -96,6 +130,10 @@ export class GoCardlessApi {
       body?: Record<string, unknown>;
     } = {},
   ): Promise<T> {
+    if (!endpoint.startsWith('/token/')) {
+      await this.#refreshIfNeeded();
+    }
+
     const headers: Record<string, string> = {
       accept: 'application/json',
       'Content-Type': 'application/json',
@@ -153,6 +191,10 @@ export class GoCardlessApi {
       },
     });
     this.#token = data.access;
+    this.#accessExpiresAt = Math.floor(Date.now() / 1000) + data.access_expires;
+    if (data.refresh) {
+      this.#refreshToken = data.refresh;
+    }
     return data;
   }
 
@@ -166,6 +208,10 @@ export class GoCardlessApi {
       body: { refresh: refreshToken },
     });
     this.#token = data.access;
+    this.#accessExpiresAt = Math.floor(Date.now() / 1000) + data.access_expires;
+    if (data.refresh) {
+      this.#refreshToken = data.refresh;
+    }
     return data;
   }
 
