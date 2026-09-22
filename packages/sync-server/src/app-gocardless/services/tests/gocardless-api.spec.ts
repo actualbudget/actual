@@ -160,7 +160,9 @@ describe('GoCardlessApi token refresh', () => {
     expect(fetchMock).toHaveBeenCalledTimes(5);
   });
 
-  test('failed exchangeToken falls back to generateToken', async () => {
+  test('failed exchangeToken falls back to generateToken and logs the failure', async () => {
+    const noop = () => undefined;
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(noop);
     const api = newApi();
     fetchMock.mockResolvedValueOnce(
       jsonResponse({
@@ -192,6 +194,12 @@ describe('GoCardlessApi token refresh', () => {
     expect(urlOf(fetchMock.mock.calls[1])).toContain('/token/refresh/');
     expect(urlOf(fetchMock.mock.calls[2])).toContain('/token/new/');
     expect(urlOf(fetchMock.mock.calls[3])).toContain('/accounts/');
+
+    // The failed refresh must not be swallowed silently.
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining('GoCardless token refresh failed'),
+      expect.any(GoCardlessApiError),
+    );
   });
 
   test('both refresh paths failing propagates the error and never calls the endpoint', async () => {

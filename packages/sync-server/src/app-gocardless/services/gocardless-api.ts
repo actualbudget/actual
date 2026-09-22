@@ -93,10 +93,6 @@ export class GoCardlessApi {
     return this.#token;
   }
 
-  set token(value: string | null) {
-    this.#token = value;
-  }
-
   #storeTokenResponse(data: TokenResponse): void {
     this.#token = data.access;
     this.#accessExpiresAt = nowInSeconds() + data.access_expires;
@@ -123,8 +119,11 @@ export class GoCardlessApi {
           try {
             await this.exchangeToken({ refreshToken: this.#refreshToken });
             return;
-          } catch {
-            // fall through to generateToken()
+          } catch (err) {
+            console.log(
+              'GoCardless token refresh failed, falling back to generateToken()',
+              err,
+            );
           }
         }
         await this.generateToken();
