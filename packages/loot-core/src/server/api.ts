@@ -3,6 +3,7 @@ import { getClock } from '@actual-app/crdt';
 
 import * as connection from '#platform/server/connection';
 import { logger } from '#platform/server/log';
+import { initializeImportedAmountEncoding } from '#server/util/currency';
 import {
   getBankSyncError,
   getDownloadError,
@@ -385,12 +386,14 @@ handlers['api/bank-sync'] = async function (args) {
   return { newTransactions, matchedTransactions, updatedAccounts };
 };
 
-handlers['api/start-import'] = async function ({ budgetName }) {
+handlers['api/start-import'] = async function ({ budgetName, currencyCode }) {
   // Notify UI to close budget
   await handlers['close-budget']();
 
   // Create the budget
   await handlers['create-budget']({ budgetName, avoidUpload: true });
+
+  await initializeImportedAmountEncoding(currencyCode ?? '');
 
   // Clear out the default expense categories
   db.runQuery('DELETE FROM categories WHERE is_income = 0');

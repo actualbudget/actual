@@ -3,7 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { send } from '#server/main-app';
 import { makeChild } from '#shared/transactions';
 
-import { doImport, getBudgetNotes, importTransactions } from './ynab4';
+import {
+  amountFromYnab,
+  doImport,
+  getBudgetNotes,
+  getCurrencyCode,
+  importTransactions,
+} from './ynab4';
 import type { MonthlyBudget, MonthlySubCategoryBudget } from './ynab4-types';
 import type * as YNAB4 from './ynab4-types';
 
@@ -87,6 +93,7 @@ describe('importTransactions', () => {
         transactions: [split, transferIn],
       } as unknown as YNAB4.YFull,
       entityIdMap,
+      2,
       vi.fn(),
     );
 
@@ -261,5 +268,34 @@ describe('getBudgetNotes', () => {
     } satisfies MonthlyBudget;
 
     expect(getBudgetNotes(budget, entityIdMap)).toEqual([]);
+  });
+});
+
+describe('YNAB4 currency metadata', () => {
+  it('uses the source ISO code and keeps missing metadata empty', () => {
+    expect(
+      getCurrencyCode({
+        budgetMetaData: { currencyISOSymbol: 'JPY' },
+      } as Parameters<typeof getCurrencyCode>[0]),
+    ).toBe('JPY');
+    expect(
+      getCurrencyCode({ budgetMetaData: {} } as Parameters<
+        typeof getCurrencyCode
+      >[0]),
+    ).toBe('');
+  });
+});
+
+describe('YNAB4 major-unit amounts', () => {
+  it('encodes source amounts at the recorded destination precision', () => {
+    expect(amountFromYnab(1234, 0)).toBe(1234);
+    expect(amountFromYnab(12.34, 2)).toBe(1234);
+    expect(amountFromYnab(1.234, 3)).toBe(1234);
+  });
+
+  it('rejects invalid and overflowing source amounts', () => {
+    expect(() => amountFromYnab(Number.NaN, 2)).toThrow();
+    expect(() => amountFromYnab(Number.POSITIVE_INFINITY, 2)).toThrow();
+    expect(() => amountFromYnab(Number.MAX_SAFE_INTEGER, 2)).toThrow();
   });
 });

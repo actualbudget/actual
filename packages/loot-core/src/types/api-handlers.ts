@@ -55,7 +55,10 @@ export type ApiHandlers = {
 
   'api/get-budgets': () => Promise<APIFileEntity[]>;
 
-  'api/start-import': (arg: { budgetName: string }) => Promise<void>;
+  'api/start-import': (arg: {
+    budgetName: string;
+    currencyCode?: string;
+  }) => Promise<void>;
 
   'api/finish-import': () => Promise<void>;
 
