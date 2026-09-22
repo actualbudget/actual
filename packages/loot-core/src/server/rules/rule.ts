@@ -12,9 +12,13 @@ import type { RuleEntity } from '#types/models';
 import { Action } from './action';
 import { Condition } from './condition';
 
-function execNonSplitActions(actions: Action[], transaction) {
+function execNonSplitActions(
+  actions: Action[],
+  transaction,
+  amountPrecision = 2,
+) {
   const update = transaction;
-  actions.forEach(action => action.exec(update));
+  actions.forEach(action => action.exec(update, amountPrecision));
   return update;
 }
 
@@ -23,7 +27,7 @@ function getSplitRemainder(transactions) {
   return error ? error.difference : 0;
 }
 
-function execSplitActions(actions: Action[], transaction) {
+function execSplitActions(actions: Action[], transaction, amountPrecision = 2) {
   const splitAmountActions = actions.filter(
     action => action.op === 'set-split-amount',
   );
@@ -56,7 +60,7 @@ function execSplitActions(actions: Action[], transaction) {
     newTransactions[splitTransactionIndex].balance = transaction.balance;
     newTransactions[splitTransactionIndex]._balanceOfPrefetched =
       transaction._balanceOfPrefetched;
-    action.exec(newTransactions[splitTransactionIndex]);
+    action.exec(newTransactions[splitTransactionIndex], amountPrecision);
   });
 
   // Distribute to fixed-percent splits.
@@ -100,7 +104,11 @@ function execSplitActions(actions: Action[], transaction) {
   return recalculateSplit(groupTransaction(newTransactions));
 }
 
-export function execActions(actions: Action[], transaction) {
+export function execActions(
+  actions: Action[],
+  transaction,
+  amountPrecision = 2,
+) {
   const parentActions = actions.filter(action => !action.options?.splitIndex);
   const childActions = actions.filter(action => action.options?.splitIndex);
   const totalSplitCount =
@@ -109,7 +117,11 @@ export function execActions(actions: Action[], transaction) {
       0,
     ) + 1;
 
-  const nonSplitResult = execNonSplitActions(parentActions, transaction);
+  const nonSplitResult = execNonSplitActions(
+    parentActions,
+    transaction,
+    amountPrecision,
+  );
   if (totalSplitCount === 1) {
     // No splits, no need to do anything else.
     return nonSplitResult;
@@ -120,7 +132,7 @@ export function execActions(actions: Action[], transaction) {
     return nonSplitResult;
   }
 
-  return execSplitActions(childActions, nonSplitResult);
+  return execSplitActions(childActions, nonSplitResult, amountPrecision);
 }
 
 export class Rule {
@@ -165,10 +177,14 @@ export class Rule {
     });
   }
 
-  execActions<T>(object: T): Partial<T> {
-    const result = execActions(this.actions, {
-      ...object,
-    });
+  execActions<T>(object: T, amountPrecision = 2): Partial<T> {
+    const result = execActions(
+      this.actions,
+      {
+        ...object,
+      },
+      amountPrecision,
+    );
     const changes = Object.keys(result).reduce((prev, cur) => {
       if (result[cur] !== object[cur]) {
         prev[cur] = result[cur];
@@ -178,16 +194,16 @@ export class Rule {
     return changes;
   }
 
-  exec(object) {
+  exec(object, amountPrecision = 2) {
     if (this.evalConditions(object)) {
-      return this.execActions(object);
+      return this.execActions(object, amountPrecision);
     }
     return null;
   }
 
   // Apply is similar to exec but applies the changes for you
-  apply(object) {
-    const changes = this.exec(object);
+  apply(object, amountPrecision = 2) {
+    const changes = this.exec(object, amountPrecision);
     return Object.assign({}, object, changes);
   }
 
