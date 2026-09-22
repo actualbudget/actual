@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '#platform/server/log';
 import { send } from '#server/main-app';
+import { getRecordedAmountPrecision } from '#server/util/currency';
 import { safeUnzip } from '#server/util/zip';
 import * as monthUtils from '#shared/months';
 import { amountToInteger, groupBy, sortByKey } from '#shared/util';
@@ -12,6 +13,14 @@ import type { ImportTick } from './progress';
 import type * as YNAB4 from './ynab4-types';
 
 // Importer
+
+export function amountFromYnab(amount: number, destinationPrecision: number) {
+  const encoded = amountToInteger(amount, destinationPrecision);
+  if (!Number.isSafeInteger(encoded)) {
+    throw new Error('Invalid YNAB4 amount');
+  }
+  return encoded;
+}
 
 async function importAccounts(
   data: YNAB4.YFull,
@@ -141,6 +150,7 @@ async function importPayees(
 export async function importTransactions(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
+  destinationPrecision: number,
   tick: ImportTick,
 ) {
   const categories = await send('api/categories-get');
@@ -221,7 +231,7 @@ export async function importTransactions(
 
           const newTransaction = {
             id,
-            amount: amountToInteger(transaction.amount),
+            amount: amountFromYnab(transaction.amount, destinationPrecision),
             category: isOffBudget(entityIdMap.get(accountId))
               ? null
               : getCategory(transaction.categoryId),
@@ -240,7 +250,7 @@ export async function importTransactions(
                 .map(t => {
                   return {
                     id: entityIdMap.get(t.entityId),
-                    amount: amountToInteger(t.amount),
+                    amount: amountFromYnab(t.amount, destinationPrecision),
                     category: getCategory(t.categoryId),
                     notes: t.memo || null,
                     ...transferProperties(t),
@@ -326,6 +336,7 @@ export function getBudgetNotes(
 async function importBudgets(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
+  destinationPrecision: number,
   tick: ImportTick,
 ) {
   const budgets = sortByKey(data.monthlyBudgets, 'month');
@@ -344,7 +355,10 @@ async function importBudgets(
 
       await Promise.all(
         filled.map(async catBudget => {
-          const amount = amountToInteger(catBudget.budgeted);
+          const amount = amountFromYnab(
+            catBudget.budgeted,
+            destinationPrecision,
+          );
           const catId = entityIdMap.get(catBudget.categoryId);
           const month = monthUtils.monthFromDate(budget.month);
           if (!catId) {
@@ -423,6 +437,7 @@ function findLatestDevice(
 
 export async function doImport(data: YNAB4.YFull) {
   const entityIdMap = new Map<string, string>();
+  const destinationPrecision = getRecordedAmountPrecision();
 
   await runImportSteps([
     {
@@ -448,12 +463,13 @@ export async function doImport(data: YNAB4.YFull) {
     {
       step: 'transactions',
       total: data.transactions.length,
-      run: tick => importTransactions(data, entityIdMap, tick),
+      run: tick =>
+        importTransactions(data, entityIdMap, destinationPrecision, tick),
     },
     {
       step: 'budgets',
       total: data.monthlyBudgets.length,
-      run: tick => importBudgets(data, entityIdMap, tick),
+      run: tick => importBudgets(data, entityIdMap, destinationPrecision, tick),
     },
   ]);
 }
@@ -475,6 +491,10 @@ export function getBudgetName(filepath) {
     return null;
   }
   return m[1];
+}
+
+export function getCurrencyCode(data: YNAB4.YFull) {
+  return data.budgetMetaData.currencyISOSymbol ?? '';
 }
 
 function getFile(entries: string[], path: string) {

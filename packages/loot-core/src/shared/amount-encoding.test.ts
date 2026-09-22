@@ -1,4 +1,8 @@
-import { parseAmountEncoding, reviewedAmountEncoding } from './amount-encoding';
+import {
+  importedCurrencyCode,
+  parseAmountEncoding,
+  reviewedAmountEncoding,
+} from './amount-encoding';
 
 describe('amount encoding metadata', () => {
   it('uses the reviewed snapshot without changing runtime currency metadata', () => {
@@ -20,6 +24,12 @@ describe('amount encoding metadata', () => {
     expect(() => reviewedAmountEncoding('XYZ')).toThrow();
     expect(() => parseAmountEncoding('{"version":2}')).toThrow();
     expect(parseAmountEncoding(undefined)).toBeNull();
+  });
+
+  it('imports unreviewed source currencies as legacy 2dp budgets', () => {
+    expect(importedCurrencyCode('JPY')).toBe('JPY');
+    expect(importedCurrencyCode('XAU')).toBe('');
+    expect(importedCurrencyCode('')).toBe('');
   });
 });
 

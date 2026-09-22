@@ -28,7 +28,9 @@ export function parseAmountEncoding(
 export function reviewedAmountEncoding(currencyCode: string): AmountEncoding {
   if (
     !currencyCode ||
-    !currencies.some(currency => currency.code === currencyCode)
+    !currencies.some(
+      currency => currency.code !== '' && currency.code === currencyCode,
+    )
   ) {
     throw new Error('amount-encoding-unreviewed-currency');
   }
@@ -37,4 +39,14 @@ export function reviewedAmountEncoding(currencyCode: string): AmountEncoding {
     currencyCode,
     precision: getDecimalPlaces(currencyCode),
   };
+}
+
+/** Imported budgets keep only reviewed source currencies; others stay legacy 2dp. */
+export function importedCurrencyCode(currencyCode: string): string {
+  return currencyCode &&
+    currencies.some(
+      currency => currency.code !== '' && currency.code === currencyCode,
+    )
+    ? currencyCode
+    : '';
 }
