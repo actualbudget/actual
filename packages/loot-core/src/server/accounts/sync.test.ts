@@ -17,6 +17,8 @@ import { app as accountsApp } from './app';
 import {
   addTransactions,
   compareFuzzyMatchCandidates,
+  encodeBankAmount,
+  encodeStartingBalance,
   reconcileTransactions,
   simpleFinBatchSync,
 } from './sync';
@@ -986,6 +988,42 @@ describe('Account sync', () => {
       expect(transactions[0].amount).toBe(-1239);
     },
   );
+});
+
+describe('bank amount normalization', () => {
+  it.each([
+    ['1234', 0, 1234],
+    ['12.34', 2, 1234],
+    [1.234, 3, 1234],
+    [0, 3, 0],
+    ['-1.235', 2, -124],
+  ])('encodes %s at %sdp', (value, precision, expected) => {
+    expect(encodeBankAmount(value, precision)).toBe(expected);
+  });
+
+  it.each(['not-a-number', Number.NaN, Number.POSITIVE_INFINITY])(
+    'rejects invalid amount %s',
+    value => {
+      expect(() => encodeBankAmount(value, 2)).toThrow('Invalid bank amount');
+    },
+  );
+
+  it('subtracts provider transactions once before encoding', () => {
+    expect(
+      encodeStartingBalance(
+        1500,
+        [
+          { transactionAmount: { amount: '250.00' } },
+          { transactionAmount: { amount: 100.5 } },
+        ],
+        2,
+      ),
+    ).toBe(114950);
+  });
+
+  it('keeps a provider-derived starting balance when transactions are omitted', () => {
+    expect(encodeStartingBalance(1149.5, [], 2)).toBe(114950);
+  });
 });
 
 describe('SimpleFin batch sync', () => {

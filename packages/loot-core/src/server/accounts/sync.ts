@@ -14,6 +14,7 @@ import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
 import { batchUpdateTransactions } from '#server/transactions';
 import { runRules } from '#server/transactions/transaction-rules';
+import { getRecordedAmountPrecision } from '#server/util/currency';
 import {
   defaultMappings,
   mappingsFromString,
@@ -523,7 +524,11 @@ async function normalizeTransactions(
   return { normalized, payeesToCreate };
 }
 
-async function normalizeBankSyncTransactions(transactions, acctId) {
+async function normalizeBankSyncTransactions(
+  transactions,
+  acctId,
+  amountPrecision: number,
+) {
   const payeesToCreate = new Map();
 
   const [customMappingsRaw, importPending, importNotes] = await Promise.all([
@@ -590,7 +595,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     normalized.push({
       payee_name: payeeName,
       trans: {
-        amount: amountToInteger(trans.amount),
+        amount: encodeBankAmount(trans.amount, amountPrecision),
         payee: trans.payee,
         account: trans.account,
         date,
@@ -625,6 +630,7 @@ export type MatchTransactionsOptions = {
   strictIdChecking?: boolean;
   reimportDeleted?: boolean;
   payeeNameNormalization?: PayeeNameNormalization;
+  amountPrecision?: number;
 };
 
 export type ReconcileTransactionsOptions = MatchTransactionsOptions & {
@@ -655,6 +661,7 @@ export async function reconcileTransactions(
     updateDates = false,
     reimportDeleted,
     payeeNameNormalization,
+    amountPrecision,
   }: ReconcileTransactionsOptions = {},
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
@@ -674,6 +681,7 @@ export async function reconcileTransactions(
     strictIdChecking,
     reimportDeleted,
     payeeNameNormalization,
+    amountPrecision,
   });
 
   // Finally, generate & commit the changes
@@ -848,6 +856,7 @@ export async function matchTransactions(
     strictIdChecking = true,
     reimportDeleted: reimportDeletedOverride,
     payeeNameNormalization,
+    amountPrecision,
   }: MatchTransactionsOptions = {},
 ) {
   logger.log('Performing transaction reconciliation matching');
@@ -865,7 +874,11 @@ export async function matchTransactions(
   const exactMatchedParentIds = new Set<db.DbViewTransaction['id']>();
 
   const { normalized, payeesToCreate } = isBankSyncAccount
-    ? await normalizeBankSyncTransactions(transactions, acctId)
+    ? await normalizeBankSyncTransactions(
+        transactions,
+        acctId,
+        amountPrecision ?? getRecordedAmountPrecision(),
+      )
     : await normalizeTransactions(transactions, acctId, {
         payeeNameNormalization,
       });
@@ -1111,6 +1124,30 @@ export async function addTransactions(
   return newTransactions;
 }
 
+export function encodeBankAmount(
+  value: string | number,
+  amountPrecision: number,
+): number {
+  const amount = Number(value);
+  const encoded = amountToInteger(amount, amountPrecision);
+  if (!Number.isFinite(amount) || !Number.isSafeInteger(encoded)) {
+    throw new Error('Invalid bank amount');
+  }
+  return encoded;
+}
+
+export function encodeStartingBalance(
+  currentBalanceAmount: number,
+  transactions: Array<{ transactionAmount: { amount: string | number } }>,
+  amountPrecision: number,
+): number {
+  const previousBalance = transactions.reduce(
+    (total, trans) => total - Number(trans.transactionAmount.amount),
+    currentBalanceAmount,
+  );
+  return encodeBankAmount(previousBalance, amountPrecision);
+}
+
 async function processBankSyncDownload(
   download,
   id,
@@ -1119,6 +1156,7 @@ async function processBankSyncDownload(
   customStartingBalance?: number,
   customStartingDate?: string,
 ) {
+  const amountPrecision = getRecordedAmountPrecision();
   // If syncing an account from sync source it must not use strictIdChecking. This allows
   // the fuzzy search to match transactions where the import IDs are different. It is a known quirk
   // that account sync sources can give two different transaction IDs even though it's the same transaction.
@@ -1144,23 +1182,27 @@ async function processBankSyncDownload(
 
   if (initialSync) {
     const { transactions } = download;
-    let balanceToUse = currentBalance;
+    const currentBalanceAmount = currentBalance / 100;
+    let balanceToUse =
+      currentBalance === null
+        ? null
+        : encodeStartingBalance(currentBalanceAmount, [], amountPrecision);
 
     // Use custom starting balance if provided, otherwise calculate it
     if (customStartingBalance !== undefined) {
       balanceToUse = customStartingBalance;
     } else if (acctRow.account_sync_source === 'simpleFin') {
-      const previousBalance = transactions.reduce((total, trans) => {
-        return total - amountToInteger(trans.transactionAmount.amount);
-      }, currentBalance);
-      balanceToUse = previousBalance;
-    } else if (acctRow.account_sync_source === 'pluggyai') {
-      const currentBalance = download.startingBalance;
-      const previousBalance = transactions.reduce(
-        (total, trans) => total - trans.transactionAmount.amount * 100,
-        currentBalance,
+      balanceToUse = encodeStartingBalance(
+        currentBalanceAmount,
+        transactions,
+        amountPrecision,
       );
-      balanceToUse = Math.round(previousBalance);
+    } else if (acctRow.account_sync_source === 'pluggyai') {
+      balanceToUse = encodeStartingBalance(
+        currentBalanceAmount,
+        transactions,
+        amountPrecision,
+      );
     } else if (
       acctRow.account_sync_source === 'enableBanking' &&
       currentBalance !== null
@@ -1169,18 +1211,17 @@ async function processBankSyncDownload(
       const importable = importPending
         ? transactions
         : transactions.filter(trans => Boolean(trans.booked));
-      const previousBalance = importable.reduce((total, trans) => {
-        return total - amountToInteger(trans.transactionAmount.amount);
-      }, currentBalance);
-      balanceToUse = previousBalance;
-    } else if (acctRow.account_sync_source === 'akahu') {
-      const currentBalance = download.startingBalance;
-      const previousBalance = transactions.reduce(
-        (total, trans) =>
-          total - amountToInteger(trans.transactionAmount.amount),
-        currentBalance,
+      balanceToUse = encodeStartingBalance(
+        currentBalanceAmount,
+        importable,
+        amountPrecision,
       );
-      balanceToUse = Math.round(previousBalance);
+    } else if (acctRow.account_sync_source === 'akahu') {
+      balanceToUse = encodeStartingBalance(
+        currentBalanceAmount,
+        transactions,
+        amountPrecision,
+      );
     }
 
     const oldestTransaction = transactions[transactions.length - 1];
@@ -1217,6 +1258,7 @@ async function processBankSyncDownload(
         isBankSyncAccount: true,
         strictIdChecking: useStrictIdChecking,
         updateDates,
+        amountPrecision,
       });
       return {
         ...result,
