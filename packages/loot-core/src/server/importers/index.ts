@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import { logger } from '#platform/server/log';
 import { handlers } from '#server/main';
+import { importedCurrencyCode } from '#shared/amount-encoding';
 
 import { importActual } from './actual';
 import * as YNAB4 from './ynab4';
@@ -11,6 +12,7 @@ export type ImportableBudgetType = 'ynab4' | 'ynab5' | 'actual';
 type Importer = {
   parseFile(buffer: Buffer): unknown;
   getBudgetName(filepath: string, data: unknown): string | null;
+  getCurrencyCode(data: unknown): string;
   doImport(data: unknown): Promise<void>;
 };
 
@@ -31,18 +33,36 @@ export async function handleBudgetImport(
   try {
     let data;
     let budgetName: string;
+    let currencyCode: string;
     try {
       data = importer.parseFile(buffer);
       budgetName = importer.getBudgetName(filepath, data);
     } catch (e) {
       logger.error('failed to parse file', e);
+      return { error: 'not-' + type };
     }
     if (!budgetName) {
       return { error: 'not-' + type };
     }
 
     try {
-      await handlers['api/start-import']({ budgetName });
+      const sourceCurrencyCode = importer.getCurrencyCode(data);
+      currencyCode = importedCurrencyCode(sourceCurrencyCode);
+      if (sourceCurrencyCode && !currencyCode) {
+        logger.warn(
+          `Importing unreviewed currency ${sourceCurrencyCode} without a currency at 2 decimal places`,
+        );
+      }
+    } catch (e) {
+      logger.error('failed to read import currency', e);
+      return { error: 'unknown' };
+    }
+
+    try {
+      await handlers['api/start-import']({
+        budgetName,
+        currencyCode,
+      });
     } catch (e) {
       logger.error('failed to start import', e);
       return { error: 'unknown' };
