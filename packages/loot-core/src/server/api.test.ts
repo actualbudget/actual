@@ -222,6 +222,53 @@ describe('API handlers', () => {
     });
   });
 
+  describe('api/account-create', () => {
+    beforeEach(global.emptyDatabase());
+    beforeEach(() => prefs.loadPrefs());
+
+    it.each([
+      [undefined, 1234, 12.34],
+      [0, -1234, -1234],
+      [2, 1234, 12.34],
+      [3, 1234, 1.234],
+    ])(
+      'preserves raw integer input at recorded precision %s',
+      async (precision, initialBalance, expected) => {
+        if (precision !== undefined) {
+          await prefs.savePrefs({
+            amountEncoding: JSON.stringify({
+              version: 1,
+              currencyCode: 'USD',
+              precision,
+            }),
+          });
+        }
+        handlers['account-create'] = vi.fn().mockResolvedValue('account-id');
+
+        await handlers['api/account-create']({
+          account: { name: 'Checking' },
+          initialBalance,
+        });
+
+        expect(handlers['account-create']).toHaveBeenCalledWith({
+          name: 'Checking',
+          offBudget: undefined,
+          closed: undefined,
+          balance: expected,
+        });
+      },
+    );
+
+    it('rejects noninteger API balances', async () => {
+      await expect(
+        handlers['api/account-create']({
+          account: { name: 'Checking' },
+          initialBalance: 1.5,
+        }),
+      ).rejects.toThrow('Invalid initial balance');
+    });
+  });
+
   describe('api/budget-month', () => {
     beforeEach(global.emptyDatabase());
 
