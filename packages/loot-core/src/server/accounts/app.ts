@@ -19,6 +19,7 @@ import { getPrefs } from '#server/prefs';
 import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
 import { undoable, withUndo } from '#server/undo';
+import { getRecordedAmountPrecision } from '#server/util/currency';
 import { isNonProductionEnvironment } from '#shared/environment';
 import { dayFromDate } from '#shared/months';
 import * as monthUtils from '#shared/months';
@@ -565,6 +566,14 @@ async function createAccount({
   offBudget?: boolean | undefined;
   closed?: boolean | undefined;
 }) {
+  const amount =
+    balance != null && balance !== 0
+      ? amountToInteger(balance, getRecordedAmountPrecision())
+      : 0;
+  if (!Number.isSafeInteger(amount)) {
+    throw new Error('Invalid starting balance');
+  }
+
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
     offbudget: offBudget ? 1 : 0,
@@ -576,12 +585,11 @@ async function createAccount({
     transfer_acct: id,
   });
 
-  if (balance != null && balance !== 0) {
+  if (amount !== 0) {
     const payee = await getStartingBalancePayee();
-
     await db.insertTransaction({
       account: id,
-      amount: amountToInteger(balance),
+      amount,
       category: offBudget ? null : payee.category,
       payee: payee.id,
       date: monthUtils.currentDay(),
