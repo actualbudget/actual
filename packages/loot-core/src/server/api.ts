@@ -54,6 +54,7 @@ import * as prefs from './prefs';
 import { getScheduleDates } from './schedules/occurrences';
 import * as sheet from './sheet';
 import { batchMessages, setSyncingMode } from './sync';
+import { getRecordedAmountPrecision } from './util/currency';
 
 let IMPORT_MODE = false;
 
@@ -779,13 +780,17 @@ handlers['api/account-create'] = withMutation(async function ({
   initialBalance = null,
 }) {
   checkFileOpen();
+  if (initialBalance != null && !Number.isSafeInteger(initialBalance)) {
+    throw new Error('Invalid initial balance');
+  }
   return handlers['account-create']({
     name: account.name,
     offBudget: account.offbudget,
     closed: account.closed,
-    // Current the API expects an amount but it really should expect
-    // an integer
-    balance: initialBalance != null ? integerToAmount(initialBalance) : null,
+    balance:
+      initialBalance != null
+        ? integerToAmount(initialBalance, getRecordedAmountPrecision())
+        : null,
   });
 });
 
