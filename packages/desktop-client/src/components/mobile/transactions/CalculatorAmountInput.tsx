@@ -12,10 +12,16 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
 import { isIOS } from '@actual-app/core/shared/platform';
-import { amountToCurrency } from '@actual-app/core/shared/util';
+import {
+  amountToInteger,
+  getNumberFormat,
+  integerToAmount,
+  MAX_SAFE_NUMBER,
+} from '@actual-app/core/shared/util';
 import { css, cx } from '@emotion/css';
 
 import { makeAmountFullStyle } from '#components/budget/util';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 
 import { CalculatorKeyboard } from './CalculatorKeyboard';
 
@@ -80,6 +86,7 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   keyboardHeader,
   ...props
 }: CalculatorAmountInputProps) {
+  const precision = useAmountPrecision();
   const internalInputRef = useRef<HTMLInputElement>(null);
   const inputRef = props.inputRef ?? internalInputRef;
   const [iosInitialInteraction, setIosInitialInteraction] = useState(
@@ -87,7 +94,9 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   );
 
   const [liveValue, setLiveValue] = useState(() => value);
-  const [expression, setExpression] = useState(() => formatAmount(liveValue));
+  const [expression, setExpression] = useState(() =>
+    formatAmount(liveValue, precision),
+  );
   const valueIsNegative = () =>
     isNegativeAmount(negate && value === 0 ? -value : value);
   const isNegative = useRef(valueIsNegative());
@@ -121,7 +130,7 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
     }
 
     if (negate && isNegative.current) {
-      setExpression(formatAmount(-value));
+      setExpression(formatAmount(-value, precision));
     }
     setTimeout(() => {
       const input = inputRef.current;
@@ -130,7 +139,15 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
     }, 0);
 
     setFocused(true);
-  }, [inputRef, setExpression, negate, isNegative, value, setFocused]);
+  }, [
+    inputRef,
+    setExpression,
+    negate,
+    isNegative,
+    value,
+    setFocused,
+    precision,
+  ]);
 
   const onInputBlur = useCallback(() => {
     if (isKeepingFocusRef.current) {
@@ -139,20 +156,27 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
     }
 
     setFocused(false);
-    setExpression(formatAmount(liveValue));
-    if (value === liveValue) {
+    const amount = integerToAmount(
+      amountToInteger(liveValue, precision),
+      precision,
+    );
+    setLiveValue(amount);
+    setExpression(formatAmount(amount, precision));
+    if (value === amount) {
       return true;
     }
-    onChange?.(liveValue);
+    onChange?.(amount);
     return true;
-  }, [setExpression, value, liveValue, onChange, inputRef]);
+  }, [setExpression, value, liveValue, onChange, inputRef, precision]);
 
   const onChangeAmount = useCallback(
     (amount: number) => {
       setLiveValue(amount);
-      setExpression(formatAmount(negate ? Math.abs(amount) : amount));
+      setExpression(
+        formatAmount(negate ? Math.abs(amount) : amount, precision),
+      );
     },
-    [setExpression, setLiveValue, negate],
+    [setExpression, setLiveValue, negate, precision],
   );
 
   const onChangeExpression = useCallback(
@@ -161,20 +185,39 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
 
       setExpression(text);
       const amount = text.trim() === '' ? 0 : evalArithmetic(text);
+      // An incomplete expression such as "12+" keeps the last valid value.
       if (amount === null) {
+        return;
+      }
+      const integer = amountToInteger(amount, precision);
+      if (
+        !Number.isSafeInteger(integer) ||
+        Math.abs(integer) > MAX_SAFE_NUMBER
+      ) {
+        setLiveValue(value);
         return;
       }
       setLiveValue(negate && isNegative.current ? -amount : amount);
     },
-    [setExpression, setLiveValue, setIosInitialInteraction, negate, isNegative],
+    [
+      setExpression,
+      setLiveValue,
+      setIosInitialInteraction,
+      negate,
+      isNegative,
+      precision,
+      value,
+    ],
   );
 
   const valueRef = useRef(value);
-  if (value !== valueRef.current) {
+  const precisionRef = useRef(precision);
+  if (value !== valueRef.current || precision !== precisionRef.current) {
     valueRef.current = value;
+    precisionRef.current = precision;
     isNegative.current = valueIsNegative();
     setLiveValue(value);
-    setExpression(formatAmount(value));
+    setExpression(formatAmount(value, precision));
   }
 
   useLayoutEffect(() => {
@@ -191,7 +234,9 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
         data-testid="amount-input"
         type="text"
         value={expression}
-        placeholder="0.00"
+        placeholder={getNumberFormat({
+          decimalPlaces: precision,
+        }).formatter.format(0)}
         onChange={e => onChangeExpression(e.target.value)}
         onFocus={e => {
           onInputFocus();
@@ -273,8 +318,10 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   );
 });
 
-function formatAmount(value: number) {
-  return value === 0 ? '' : amountToCurrency(value);
+function formatAmount(value: number, precision: number) {
+  return value === 0
+    ? ''
+    : getNumberFormat({ decimalPlaces: precision }).formatter.format(value);
 }
 
 function isNegativeAmount(value: number) {

@@ -1,0 +1,92 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`desktop reads stored precision 0 and returns integers 1`] = `
+<input
+  class="css-1io3eos"
+  data-rac=""
+  inputmode="decimal"
+  style="font-feature-settings: "tnum", "ss01", "ss04";"
+  value="1,234"
+/>
+`;
+
+exports[`desktop reads stored precision 2 and returns integers 1`] = `
+<input
+  class="css-1io3eos"
+  data-rac=""
+  inputmode="decimal"
+  style="font-feature-settings: "tnum", "ss01", "ss04";"
+  value="12.34"
+/>
+`;
+
+exports[`desktop reads stored precision 3 and returns integers 1`] = `
+<input
+  class="css-1io3eos"
+  data-rac=""
+  inputmode="decimal"
+  style="font-feature-settings: "tnum", "ss01", "ss04";"
+  value="1.234"
+/>
+`;
+
+exports[`desktop reads stored precision undefined and returns integers 1`] = `
+<input
+  class="css-1io3eos"
+  data-rac=""
+  inputmode="decimal"
+  style="font-feature-settings: "tnum", "ss01", "ss04";"
+  value="12.34"
+/>
+`;
+
+exports[`mobile calculator false > amount preserves 3dp major units and clears 1`] = `
+<input
+  autocapitalize="none"
+  data-testid="amount-input"
+  inputmode="decimal"
+  style="flex: 1 1 0%; text-align: center; position: absolute;"
+  type="text"
+  value="5.123"
+/>
+`;
+
+exports[`mobile calculator false > split preserves 3dp major units and clears 1`] = `
+<input
+  class="css-1io3eos"
+  data-focus-visible="true"
+  data-focused="true"
+  data-rac=""
+  inputmode="decimal"
+  style="font-size: 13px; text-align: right; min-width: 0px; font-feature-settings: "tnum", "ss01", "ss04";"
+  value="5.123"
+/>
+`;
+
+exports[`mobile calculator true > amount preserves 3dp major units and clears 1`] = `
+<input
+  autocapitalize="none"
+  class="css-15w775m"
+  data-focused="true"
+  data-testid="amount-input"
+  inputmode="none"
+  placeholder="0.000"
+  style="color: var(--color-numberPositive); scroll-margin-top: 100px; box-shadow: none; font-size: 14px; outline: 0px; height: 40px;"
+  type="text"
+  value="5.123"
+/>
+`;
+
+exports[`mobile calculator true > split preserves 3dp major units and clears 1`] = `
+<input
+  autocapitalize="none"
+  class="css-15w775m"
+  data-focused="true"
+  data-testid="amount-input"
+  inputmode="none"
+  placeholder="0.000"
+  style="color: var(--color-numberPositive); scroll-margin-top: 100px; box-shadow: none; font-size: 13px; outline: 0px; height: 40px; margin-right: 8px; text-align: right; min-width: 0px;"
+  type="text"
+  value="5.123"
+/>
+`;
