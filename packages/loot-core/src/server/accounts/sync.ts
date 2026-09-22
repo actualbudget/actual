@@ -926,7 +926,21 @@ export async function matchTransactions(
       // transactions date. i.e. if the original transaction is in 21-02-2024 and
       // the matched transactions are: 20-02-2024, 21-02-2024, 29-02-2024 then
       // the resulting data-set should be: 21-02-2024, 20-02-2024, 29-02-2024.
+      //
+      // Candidates that already carry their own imported_id (from a
+      // previous, unrelated sync) sort after ones that don't. Without
+      // this, a same-distance tie between an already-imported row and a
+      // fresh one is effectively arbitrary, and picking the already-
+      // imported one means the merge below silently overwrites its
+      // imported_id/payee/notes with this transaction's data instead of
+      // matching the row that's actually a good candidate for it.
       fuzzyDataset = fuzzyDataset.sort((a, b) => {
+        const aHasImportedId = a.imported_id != null ? 1 : 0;
+        const bHasImportedId = b.imported_id != null ? 1 : 0;
+        if (aHasImportedId !== bHasImportedId) {
+          return aHasImportedId - bHasImportedId;
+        }
+
         const aDistance = Math.abs(
           dateFns.differenceInMilliseconds(
             dateFns.parseISO(trans.date),
@@ -939,7 +953,12 @@ export async function matchTransactions(
             dateFns.parseISO(db.fromDateRepr(b.date)),
           ),
         );
-        return aDistance > bDistance ? 1 : -1;
+        // Fixed: the original comparator (`aDistance > bDistance ? 1 : -1`)
+        // never returned 0, so equal-distance candidates -- a common case,
+        // e.g. two transactions dated the same day -- had their relative
+        // order rewritten by an invalid, non-transitive comparator instead
+        // of a stable one.
+        return aDistance - bDistance;
       });
     }
 

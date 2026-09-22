@@ -639,6 +639,65 @@ describe('Account sync', () => {
   });
 
   test(
+    'given two equally-dated candidates, an unlinked one is preferred over ' +
+      'one that already has its own imported_id',
+    async () => {
+      const { id } = await prepareDatabase();
+
+      // Both candidates are tied on date-distance to the incoming
+      // transaction, so without a tie-break on imported_id, which one wins
+      // depends on sort_order and is otherwise arbitrary. Setting sort_order
+      // explicitly pins that down instead of leaving it to insertion-order
+      // timing -- so this test actually distinguishes the fix from the bug.
+      await db.insertTransaction({
+        id: 'already-imported',
+        account: id,
+        amount: -1239,
+        date: '2024-04-05',
+        imported_id: 'existing-import-id',
+        sort_order: 100,
+      });
+      await db.insertTransaction({
+        id: 'not-yet-imported',
+        account: id,
+        amount: -1239,
+        date: '2024-04-05',
+        sort_order: 200,
+      });
+
+      // Neither candidate's date matches the incoming transaction's date
+      // any more closely than the other, so the two are tied on distance --
+      // the tie should be broken in favor of the row that isn't already
+      // linked to some other bank transaction.
+      await reconcileTransactions(
+        id,
+        [
+          {
+            date: '2024-04-05',
+            amount: -1239,
+            payee_name: 'Acme Inc.',
+            imported_id: 'new-import-id',
+          },
+        ],
+        { strictIdChecking: false },
+      );
+
+      const transactions = await getAllTransactions();
+      expect(transactions.length).toBe(2);
+
+      const alreadyImported = transactions.find(
+        t => t.id === 'already-imported',
+      );
+      expect(alreadyImported.imported_id).toBe('existing-import-id');
+
+      const notYetImported = transactions.find(
+        t => t.id === 'not-yet-imported',
+      );
+      expect(notYetImported.imported_id).toBe('new-import-id');
+    },
+  );
+
+  test(
     'given an imported tx with no imported_id, ' +
       'when using fuzzy search V2, existing transaction has an imported_id, matches amount, and is within 7 days of imported tx, ' +
       'then imported tx should reconcile with existing transaction from fuzzy match',
