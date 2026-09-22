@@ -17,6 +17,11 @@ function urlOf(call: unknown[]): string {
   return target instanceof URL ? target.pathname : String(target);
 }
 
+function authHeaderOf(call: unknown[]): string | undefined {
+  const init = call[1] as RequestInit | undefined;
+  return (init?.headers as Record<string, string> | undefined)?.Authorization;
+}
+
 describe('GoCardlessApi token refresh', () => {
   let fetchMock: ReturnType<typeof vi.fn>;
 
@@ -85,6 +90,7 @@ describe('GoCardlessApi token refresh', () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(urlOf(fetchMock.mock.calls[1])).toContain('/token/refresh/');
     expect(urlOf(fetchMock.mock.calls[2])).toContain('/accounts/');
+    expect(authHeaderOf(fetchMock.mock.calls[2])).toBe('Bearer access-2');
   });
 
   test('expired token refreshes via exchangeToken and preserves refresh token across a missing refresh field', async () => {
@@ -111,6 +117,7 @@ describe('GoCardlessApi token refresh', () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(urlOf(fetchMock.mock.calls[1])).toContain('/token/refresh/');
     expect(urlOf(fetchMock.mock.calls[2])).toContain('/accounts/');
+    expect(authHeaderOf(fetchMock.mock.calls[2])).toBe('Bearer access-2');
 
     // Force a second expiry and confirm the refresh token survived the
     // missing `refresh` field in the previous refresh response.
@@ -125,6 +132,7 @@ describe('GoCardlessApi token refresh', () => {
     expect(fetchMock).toHaveBeenCalledTimes(5);
     expect(urlOf(fetchMock.mock.calls[3])).toContain('/token/refresh/');
     expect(urlOf(fetchMock.mock.calls[4])).toContain('/accounts/');
+    expect(authHeaderOf(fetchMock.mock.calls[4])).toBe('Bearer access-3');
   });
 
   test('concurrent calls during expiry share a single refresh', async () => {
@@ -194,6 +202,7 @@ describe('GoCardlessApi token refresh', () => {
     expect(urlOf(fetchMock.mock.calls[1])).toContain('/token/refresh/');
     expect(urlOf(fetchMock.mock.calls[2])).toContain('/token/new/');
     expect(urlOf(fetchMock.mock.calls[3])).toContain('/accounts/');
+    expect(authHeaderOf(fetchMock.mock.calls[3])).toBe('Bearer access-2');
 
     // The failed refresh must not be swallowed silently.
     expect(logSpy).toHaveBeenCalledWith(
