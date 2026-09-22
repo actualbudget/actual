@@ -3,6 +3,8 @@ import * as db from '#server/db';
 import { Rule } from '#server/rules';
 import { getRuleForSchedule } from '#server/schedules/app';
 import type { Currency } from '#shared/currencies';
+import * as monthUtils from '#shared/months';
+import type { q } from '#shared/query';
 import type { CategoryEntity } from '#types/models';
 import type { ScheduleTemplate } from '#types/models/templates';
 
@@ -18,6 +20,13 @@ import {
 vi.mock('#server/db');
 vi.mock('#server/aql');
 vi.mock('./actions');
+// currentDay() is pinned to 2017-01-01 under test; keep that by default and
+// let the "relative to today" tests pin their own date.
+vi.mock('#shared/months', async () => {
+  const actualModule =
+    await vi.importActual<typeof monthUtils>('#shared/months');
+  return { ...actualModule, currentDay: vi.fn(actualModule.currentDay) };
+});
 vi.mock('#server/schedules/app', async () => {
   const actualModule = await vi.importActual('#server/schedules/app');
   return {
@@ -838,6 +847,393 @@ describe('buildMonthlyOutflow', () => {
 
     expect(outflow[0]).toBe(5000); // 5 Mondays in January x $10
     expect(outflow[1]).toBe(4000); // 4 Mondays in February x $10
+  });
+});
+
+describe('buildMonthlyOutflow relative to today', () => {
+  const rentTemplate = {
+    type: 'schedule',
+    name: 'Rent',
+    priority: 0,
+    directive: 'template',
+  } as const;
+
+  // A monthly $100 rent due on the 25th, with the schedule's stored
+  // next_date (the first unpaid occurrence) given as a date repr.
+  function mockRent(nextDateRepr: number | null) {
+    mockSingleSchedule({
+      start: '2024-01-25',
+      amount: -10000,
+      frequency: 'monthly',
+    });
+    vi.mocked(db.first).mockResolvedValue({
+      id: 1,
+      completed: 0,
+      next_date: nextDateRepr,
+    });
+  }
+
+  type QueryKind = 'posted' | 'unlinked' | 'linked';
+
+  // buildMonthlyOutflow issues up to three transaction queries; tell them
+  // apart by their filters, since the aqlQuery mock ignores them.
+  function queryKind(query: ReturnType<typeof q>): QueryKind {
+    const filters: ReadonlyArray<Record<string, unknown>> =
+      query.serialize().filterExpressions;
+    if (filters.some(f => 'schedule' in f && f.schedule === null)) {
+      return 'unlinked';
+    }
+    return filters.some(f => 'category' in f) ? 'posted' : 'linked';
+  }
+
+  type MockTransaction = {
+    amount: number;
+    date: string;
+    schedule?: number | null;
+  };
+
+  // Answers each query the way the database would: the transactions inside
+  // its date range, limited to unlinked or linked ones where it asks.
+  function mockTransactionQueries(transactions: MockTransaction[]) {
+    vi.mocked(aqlQuery).mockImplementation(async rawQuery => {
+      const query = rawQuery as ReturnType<typeof q>;
+      const kind = queryKind(query);
+      const range = dateFilter(kind, query) as { $gte: string; $lt: string };
+      const data = transactions.filter(
+        t =>
+          t.date >= range.$gte &&
+          t.date < range.$lt &&
+          (kind === 'posted' ||
+            (kind === 'unlinked' ? t.schedule == null : t.schedule != null)),
+      );
+      return { data, dependencies: [] };
+    });
+  }
+
+  function dateFilter(kind: QueryKind, query?: ReturnType<typeof q>) {
+    query ??= vi
+      .mocked(aqlQuery)
+      .mock.calls.map(([call]) => call as ReturnType<typeof q>)
+      .find(call => queryKind(call) === kind);
+    return query
+      ?.serialize()
+      .filterExpressions.find((f: Record<string, unknown>) => 'date' in f)
+      ?.date;
+  }
+
+  function unlinkedDateFilter() {
+    return dateFilter('unlinked');
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(db.getAccounts).mockResolvedValue([]);
+    vi.mocked(aqlQuery).mockResolvedValue({ data: [], dependencies: [] });
+  });
+
+  afterEach(() => {
+    // Restores the real (test-pinned) implementation passed to vi.fn.
+    vi.mocked(monthUtils.currentDay).mockReset();
+  });
+
+  it('reads the stored next_date into storedNextDate', async () => {
+    mockRent(20241025);
+    const { t } = await createScheduleList(
+      [rentTemplate],
+      '2024-11',
+      defaultCategory,
+      defaultCurrency,
+    );
+    expect(t[0].storedNextDate).toBe('2024-10-25');
+  });
+
+  it('counts only future-dated unlinked transactions when re-running a past month', async () => {
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-09-15');
+    mockRent(20240925);
+    const { t } = await createScheduleList(
+      [rentTemplate],
+      '2024-06',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    await buildMonthlyOutflow(t, '2024-06', defaultCategory);
+
+    expect(unlinkedDateFilter()).toEqual({
+      $gte: '2024-09-16',
+      $lt: '2029-06-01',
+    });
+  });
+
+  it('still counts unlinked spending already posted in the current month', async () => {
+    // Sep 15, budgeting September: a $40 unlinked purchase on Sep 5 has to
+    // be covered alongside the $100 rent, which isn't due until Sep 25.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-09-15');
+    mockRent(20240925);
+    mockTransactionQueries([{ amount: -4000, date: '2024-09-05' }]);
+
+    const result = await runScheduleForecast(
+      [rentTemplate],
+      '2024-09',
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(dateFilter('posted')).toEqual({
+      $gte: '2024-09-01',
+      $lt: '2024-09-16',
+    });
+    expect(unlinkedDateFilter()).toEqual({
+      $gte: '2024-09-16',
+      $lt: '2029-09-01',
+    });
+    expect(result.to_budget).toBe(14000);
+  });
+
+  it('does not double-count a hand-entered, unlinked payment of a bill already due this month', async () => {
+    // Sep 26, re-running September: rent (Sep 25) was paid by hand and not
+    // linked. It can't be told apart from the rent itself, so the month
+    // needs max($100 due, $100 spent), not both.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-09-26');
+    mockRent(20240925);
+    mockTransactionQueries([{ amount: -10000, date: '2024-09-25' }]);
+
+    const result = await runScheduleForecast(
+      [rentTemplate],
+      '2024-09',
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.to_budget).toBe(10000);
+  });
+
+  it('does not double-count a linked payment made before its due date this month', async () => {
+    // Sep 21, re-running September: rent (Sep 25) was paid and linked on
+    // Sep 20. The linked payment marks the Sep 25 occurrence as elapsed.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-09-21');
+    mockRent(20240925);
+    mockTransactionQueries([
+      { amount: -10000, date: '2024-09-20', schedule: 1 },
+    ]);
+    const { t } = await createScheduleList(
+      [rentTemplate],
+      '2024-09',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    const outflow = await buildMonthlyOutflow(t, '2024-09', defaultCategory);
+
+    expect(outflow[0]).toBe(10000);
+  });
+
+  it("attributes a late linked payment to last month's occurrence, not this month's", async () => {
+    // Sep 15: August's rent (Aug 25) was paid late, linked, on Sep 2. It's
+    // nearer Aug 25 than Sep 25, so September's rent is still due.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-09-15');
+    mockRent(20240925);
+    mockTransactionQueries([
+      { amount: -10000, date: '2024-09-02', schedule: 1 },
+    ]);
+    const { t } = await createScheduleList(
+      [rentTemplate],
+      '2024-09',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    const outflow = await buildMonthlyOutflow(t, '2024-09', defaultCategory);
+
+    expect(outflow[0]).toBe(20000); // the $100 already spent + Sep 25's $100
+  });
+
+  it.each([
+    ['rent posted unlinked', [-10000], 10000],
+    ['rent plus a $40 unlinked extra', [-10000, -4000], 14000],
+    ['rent that came in at $105', [-10500], 10500],
+    ['rent that came in at $95', [-9500], 10000],
+  ])(
+    're-running a past month counts the larger of scheduled and actual spending: %s',
+    async (_label, amounts, expected) => {
+      vi.mocked(monthUtils.currentDay).mockReturnValue('2024-09-15');
+      mockRent(20240925);
+      mockTransactionQueries(
+        amounts.map(amount => ({ amount, date: '2024-06-25' })),
+      );
+      const { t } = await createScheduleList(
+        [rentTemplate],
+        '2024-06',
+        defaultCategory,
+        defaultCurrency,
+      );
+
+      const outflow = await buildMonthlyOutflow(t, '2024-06', defaultCategory);
+
+      expect(dateFilter('posted')).toEqual({
+        $gte: '2024-06-01',
+        $lt: '2024-07-01',
+      });
+      expect(outflow[0]).toBe(expected);
+      expect(outflow[1]).toBe(10000);
+    },
+  );
+
+  it('starts the unlinked-transaction window at the budget month when budgeting ahead', async () => {
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-10-20');
+    mockRent(20241125);
+    const { t } = await createScheduleList(
+      [rentTemplate],
+      '2024-11',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    await buildMonthlyOutflow(t, '2024-11', defaultCategory);
+
+    expect(unlinkedDateFilter()).toEqual({
+      $gte: '2024-11-01',
+      $lt: '2029-11-01',
+    });
+  });
+
+  it('counts an unpaid occurrence due before the budget month against month 0', async () => {
+    // Budgeting November on Oct 20; October's rent (Oct 25) hasn't posted,
+    // so the carried-over balance still holds the money for it.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-10-20');
+    mockRent(20241025);
+    const { t } = await createScheduleList(
+      [rentTemplate],
+      '2024-11',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
+
+    expect(outflow[0]).toBe(20000); // October's pending rent + November's
+    expect(outflow[1]).toBe(10000);
+  });
+
+  it('settles a pending occurrence with a linked payment made before its due date', async () => {
+    // Oct 21: October's rent (Oct 25) was paid and linked on Oct 20.
+    // next_date hasn't advanced, but the payment is already out of the
+    // carried-over balance, so October isn't pending.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-10-21');
+    mockRent(20241025);
+    mockTransactionQueries([
+      { amount: -10000, date: '2024-10-20', schedule: 1 },
+    ]);
+    const { t } = await createScheduleList(
+      [rentTemplate],
+      '2024-11',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
+
+    expect(dateFilter('linked')).toEqual({
+      $gte: '2024-09-01',
+      $lt: '2024-11-01',
+    });
+    expect(outflow[0]).toBe(10000);
+  });
+
+  it('does not settle a pending occurrence with an unlinked payment', async () => {
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-10-21');
+    mockRent(20241025);
+    mockTransactionQueries([{ amount: -10000, date: '2024-10-20' }]);
+    const { t } = await createScheduleList(
+      [rentTemplate],
+      '2024-11',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
+
+    expect(outflow[0]).toBe(20000);
+  });
+
+  it("does not settle a pending occurrence with a late payment of last month's", async () => {
+    // Oct 20: September's rent was paid late, linked, on Oct 3. It's nearer
+    // Sep 25 than Oct 25, so October's rent is still pending.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-10-20');
+    mockRent(20241025);
+    mockTransactionQueries([
+      { amount: -10000, date: '2024-10-03', schedule: 1 },
+    ]);
+    const { t } = await createScheduleList(
+      [rentTemplate],
+      '2024-11',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
+
+    expect(outflow[0]).toBe(20000);
+  });
+
+  it('adds nothing extra once the prior occurrence has posted', async () => {
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-10-26');
+    mockRent(20241125);
+    const { t } = await createScheduleList(
+      [rentTemplate],
+      '2024-11',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
+
+    expect(outflow[0]).toBe(10000);
+  });
+
+  it('ignores occurrences missed before the real current month', async () => {
+    // next_date stuck in June (never paid); only October's occurrence,
+    // which is still ahead of today, counts as pending.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-10-20');
+    mockRent(20240625);
+    const { t } = await createScheduleList(
+      [rentTemplate],
+      '2024-11',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
+
+    expect(outflow[0]).toBe(20000);
+  });
+
+  it('budgets November in full when October rent is still unpaid', async () => {
+    // Regression for budgeting next month early: October's $100 is still
+    // in the balance but is spoken for, so November needs its own $100.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-10-20');
+    mockRent(20241025);
+
+    const result = await runScheduleForecast(
+      [rentTemplate],
+      '2024-11',
+      10000,
+      10000,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.to_budget).toBe(10000);
   });
 });
 

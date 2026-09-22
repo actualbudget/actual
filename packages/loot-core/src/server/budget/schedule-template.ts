@@ -2,6 +2,7 @@
 
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
+import { fromDateRepr } from '#server/models';
 import { collectFormulasFromActions } from '#server/rules/balanceOfFormula';
 import { getRuleForSchedule } from '#server/schedules/app';
 import { prefetchBalanceOfForTransaction } from '#server/transactions/transaction-rules';
@@ -33,6 +34,12 @@ type ScheduleTemplateTarget = {
   // `buildMonthlyOutflow`, which buckets one entry per occurrence date).
   perOccurrenceAmount: number;
   next_date_string: string;
+  // The schedule's own stored next_date: the first occurrence not yet
+  // paid, weekend-adjusted. Unlike `next_date_string` (computed from
+  // `current_month`), this reflects what has actually posted. Null when
+  // the schedule has no next-date row.
+  storedNextDate: string | null;
+  scheduleId: string;
   target_interval: number;
   target_frequency: string | undefined;
   num_months: number;
@@ -57,16 +64,31 @@ export async function createScheduleList(
     // Prefer scheduleId so renames don't break the lookup; fall back to name
     // for notes-source templates (and legacy ui-source data) that only carry
     // the name.
+    // next_date mirrors the v_schedules view's computed column.
     const {
       id: sid,
       name: scheduleName,
       completed,
-    } = await db.first<Pick<db.DbSchedule, 'id' | 'name' | 'completed'>>(
-      template.scheduleId
-        ? 'SELECT id, name, completed FROM schedules WHERE id = ? AND tombstone = 0'
-        : 'SELECT id, name, completed FROM schedules WHERE TRIM(name) = ? AND tombstone = 0',
+      next_date: storedNextDateRepr,
+    } = await db.first<
+      Pick<db.DbSchedule, 'id' | 'name' | 'completed'> & {
+        next_date: number | null;
+      }
+    >(
+      `SELECT s.id, s.name, s.completed,
+         CASE
+           WHEN nd.local_next_date_ts = nd.base_next_date_ts THEN nd.local_next_date
+           ELSE nd.base_next_date
+         END AS next_date
+       FROM schedules s
+       LEFT JOIN schedules_next_date nd ON nd.schedule_id = s.id
+       WHERE ${template.scheduleId ? 's.id = ?' : 'TRIM(s.name) = ?'} AND s.tombstone = 0`,
       [template.scheduleId ?? template.name],
     );
+    const storedNextDate =
+      typeof storedNextDateRepr === 'number'
+        ? fromDateRepr(storedNextDateRepr)
+        : null;
     const rule = await getRuleForSchedule(sid);
     const conditions = rule.serialize().conditions;
     const { date: dateConditions, amount: amountCondition } =
@@ -164,6 +186,8 @@ export async function createScheduleList(
         target,
         perOccurrenceAmount: target,
         next_date_string,
+        storedNextDate,
+        scheduleId: sid,
         target_interval,
         target_frequency,
         num_months,
@@ -234,6 +258,49 @@ export async function createScheduleList(
 
 const FORECAST_MONTHS = 60;
 
+type PostedTransaction = {
+  amount?: number;
+  date: string;
+  schedule: string | null;
+};
+
+// How many of this schedule's linked payments settle one of its
+// occurrences in [rangeStart, rangeEnd). The link says which schedule a
+// payment belongs to; each payment is attributed to that schedule's
+// nearest occurrence, so an early payment settles the upcoming occurrence
+// and a late one settles the previous occurrence, not the next.
+function countLinkedPayments(
+  entry: ScheduleTemplateTarget,
+  transactions: PostedTransaction[],
+  rangeStart: string,
+  rangeEnd: string,
+): number {
+  const linked = transactions.filter(
+    transaction => transaction.schedule === entry.scheduleId,
+  );
+  if (linked.length === 0) return 0;
+
+  const nearby = getOccurrencesBetween(
+    entry.dateConditions,
+    `${monthUtils.subMonths(rangeStart, 1)}-01`,
+    `${monthUtils.addMonths(rangeEnd, 1)}-01`,
+  );
+  return linked.filter(transaction => {
+    let nearest: string | null = null;
+    let nearestDistance = Infinity;
+    for (const occurrenceDate of nearby) {
+      const distance = Math.abs(
+        monthUtils.differenceInCalendarDays(transaction.date, occurrenceDate),
+      );
+      if (distance <= nearestDistance) {
+        nearest = occurrenceDate;
+        nearestDistance = distance;
+      }
+    }
+    return nearest !== null && nearest >= rangeStart && nearest < rangeEnd;
+  }).length;
+}
+
 export async function buildMonthlyOutflow(
   smoothEntries: ScheduleTemplateTarget[],
   current_month: string,
@@ -242,36 +309,148 @@ export async function buildMonthlyOutflow(
   const monthlyOutflow = new Array(FORECAST_MONTHS).fill(0);
   const windowStart = monthUtils.firstDayOfMonth(current_month);
   const windowEnd = `${monthUtils.addMonths(current_month, FORECAST_MONTHS)}-01`;
+  const today = monthUtils.currentDay();
+  const currentMonthStart = monthUtils.firstDayOfMonth(today);
+  const isBudgetingAhead = windowStart > currentMonthStart;
 
+  // When budgeting ahead (current_month after the real current month), the
+  // carried-over balance still holds money for occurrences due between now
+  // and the window that haven't posted yet. Count those against month 0 so
+  // that money isn't treated as free. Occurrences missed before the real
+  // current month are ignored, so a long-stale next_date can't pile up.
+  const pendingEntries = isBudgetingAhead
+    ? smoothEntries.filter(
+        entry => entry.storedNextDate && entry.storedNextDate < windowStart,
+      )
+    : [];
+  // next_date only advances once its date has passed, so a payment made
+  // early leaves it in place. A linked payment already in the carried-over
+  // balance (dated before the budget month) settles its nearest pending
+  // occurrence.
+  let linkedBeforeWindow: PostedTransaction[] = [];
+  if (pendingEntries.length > 0) {
+    ({ data: linkedBeforeWindow } = await aqlQuery(
+      q('transactions')
+        .filter({
+          schedule: { $oneof: pendingEntries.map(entry => entry.scheduleId) },
+          date: {
+            $gte: `${monthUtils.subMonths(currentMonthStart, 1)}-01`,
+            $lt: windowStart,
+          },
+        })
+        .options({ splits: 'none' })
+        .select(['date', 'schedule']),
+    ));
+  }
+  for (const entry of pendingEntries) {
+    const pendingFrom =
+      entry.storedNextDate > currentMonthStart
+        ? entry.storedNextDate
+        : currentMonthStart;
+    const pending = getOccurrencesBetween(
+      entry.dateConditions,
+      pendingFrom,
+      windowStart,
+    );
+    const settled = countLinkedPayments(
+      entry,
+      linkedBeforeWindow,
+      pendingFrom,
+      windowStart,
+    );
+    monthlyOutflow[0] +=
+      Math.max(0, pending.length - settled) * entry.perOccurrenceAmount;
+  }
+
+  // When budgeting the current or a past month, part (or all) of the
+  // budget month has already happened. For that part, the category needs
+  // whichever is larger: the occurrences due by today, or what was
+  // actually spent by today (linked or not). An unlinked transaction can't
+  // be told apart from a payment of the schedule, so a bill paid by hand
+  // isn't counted twice; a bill that came in higher than scheduled counts
+  // at its real amount; one that came in lower still reserves the
+  // scheduled amount, since the rest may yet be due. A linked payment marks
+  // one of its schedule's occurrences this month as elapsed even if it is
+  // due after today, so an early payment isn't counted twice either.
+  const tomorrow = monthUtils.addDays(today, 1);
+  const budgetMonthEnd = monthUtils.firstDayOfMonth(
+    monthUtils.addMonths(current_month, 1),
+  );
+  const postedEnd = tomorrow < budgetMonthEnd ? tomorrow : budgetMonthEnd;
+  const sign = category.is_income ? 1 : -1;
+
+  let postedTransactions: PostedTransaction[] = [];
+  if (!isBudgetingAhead) {
+    ({ data: postedTransactions } = await aqlQuery(
+      q('transactions')
+        .filter({
+          category: category.id,
+          'account.offbudget': false,
+          date: { $gte: windowStart, $lt: postedEnd },
+        })
+        .select(['amount', 'date', 'schedule']),
+    ));
+  }
+
+  let dueByToday = 0;
   for (const entry of smoothEntries) {
     const occurrences = getOccurrencesBetween(
       entry.dateConditions,
       windowStart,
       windowEnd,
     );
+    const paidThisMonth = isBudgetingAhead
+      ? 0
+      : countLinkedPayments(
+          entry,
+          postedTransactions,
+          windowStart,
+          budgetMonthEnd,
+        );
+    let indexInBudgetMonth = 0;
     for (const occurrenceDate of occurrences) {
       const monthIndex = monthUtils.differenceInCalendarMonths(
         occurrenceDate,
         current_month,
       );
-      if (monthIndex >= 0 && monthIndex < FORECAST_MONTHS) {
+      const isElapsed =
+        !isBudgetingAhead &&
+        monthIndex === 0 &&
+        (occurrenceDate < postedEnd || indexInBudgetMonth < paidThisMonth);
+      if (monthIndex === 0) indexInBudgetMonth++;
+      if (isElapsed) {
+        dueByToday += entry.perOccurrenceAmount;
+      } else if (monthIndex >= 0 && monthIndex < FORECAST_MONTHS) {
         monthlyOutflow[monthIndex] += entry.perOccurrenceAmount;
       }
     }
   }
 
+  if (!isBudgetingAhead) {
+    const spentByToday = postedTransactions.reduce(
+      (sum, transaction) => sum + sign * transaction.amount,
+      0,
+    );
+    monthlyOutflow[0] += Math.max(dueByToday, spentByToday);
+  }
+
+  // Unlinked transactions not covered above count at their own month.
+  // Budgeting ahead, that's all of them from the budget month on. Otherwise
+  // only future-dated ones count: when re-running a past month, spending
+  // posted since then belongs to those later months' own budgets, and
+  // counting it here would fund it twice.
+  const unlinkedStart = isBudgetingAhead ? windowStart : tomorrow;
   const { data: unlinkedTransactions } = await aqlQuery(
     q('transactions')
       .filter({
         category: category.id,
         schedule: null,
         'account.offbudget': false,
-        date: { $gte: windowStart, $lt: windowEnd },
+        date: { $gte: unlinkedStart, $lt: windowEnd },
       })
       .select(['amount', 'date']),
   );
 
-  const sign = category.is_income ? 1 : -1;
   for (const transaction of unlinkedTransactions) {
     const monthIndex = monthUtils.differenceInCalendarMonths(
       transaction.date,
