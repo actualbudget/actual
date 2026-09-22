@@ -794,6 +794,58 @@ export async function reconcileTransactions(
   };
 }
 
+// Greedily assigns each unmatched entry in `dataList` the closest
+// still-available candidate from its own `fuzzyDataset`, processing
+// entries in ascending order of that distance instead of `dataList`'s own
+// order. Recomputes the best remaining candidate for every unmatched
+// entry on each round, since claiming a candidate can change what's left
+// available to the others. `hasMatched` is shared across both
+// fuzzy-matching passes (and the id/imported_id pass before them), so a
+// candidate claimed here can't be claimed again
+// later.
+function assignClosestCandidateFirst(dataList, hasMatched, isEligible) {
+  const results = [...dataList];
+  const remaining = [];
+  results.forEach((data, index) => {
+    if (!data.match && data.fuzzyDataset) remaining.push(index);
+  });
+
+  while (remaining.length > 0) {
+    let bestPos = -1;
+    let bestCandidate = null;
+    let bestDistance = Infinity;
+
+    for (let i = 0; i < remaining.length; i++) {
+      const data = results[remaining[i]];
+      const candidate = data.fuzzyDataset.find(
+        row => !hasMatched.has(row.id) && isEligible(data, row),
+      );
+      if (!candidate) continue;
+
+      const distance = Math.abs(
+        dateFns.differenceInMilliseconds(
+          dateFns.parseISO(data.trans.date),
+          dateFns.parseISO(db.fromDateRepr(candidate.date)),
+        ),
+      );
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestPos = i;
+        bestCandidate = candidate;
+      }
+    }
+
+    if (bestPos === -1) break;
+
+    const index = remaining[bestPos];
+    hasMatched.add(bestCandidate.id);
+    results[index] = { ...results[index], match: bestCandidate };
+    remaining.splice(bestPos, 1);
+  }
+
+  return results;
+}
+
 export async function matchTransactions(
   acctId,
   transactions,
@@ -957,35 +1009,29 @@ export async function matchTransactions(
   // matching always happens first, i.e. a transaction should match
   // match with low fidelity if a later transaction is going to match
   // the same one with high fidelity.
-  const transactionsStep2 = transactionsStep1.map(data => {
-    if (!data.match && data.fuzzyDataset) {
-      // Try to find one where the payees match.
-      const match = data.fuzzyDataset.find(
-        row => !hasMatched.has(row.id) && data.trans.payee === row.payee,
-      );
-
-      if (match) {
-        hasMatched.add(match.id);
-        return { ...data, match };
-      }
-    }
-    return data;
-  });
+  //
+  // Uses assignClosestCandidateFirst (see below) instead of a plain
+  // .map() -- within each pass, transactions are assigned in order of how
+  // close their own best remaining candidate is, not in whatever order
+  // the bank returned them. A plain per-transaction .map() lets an
+  // earlier-in-the-batch transaction claim a candidate purely because its
+  // turn came first, even when a later transaction in the same batch is a
+  // much closer (e.g. exact-date) match for it.
+  const transactionsStep2 = assignClosestCandidateFirst(
+    transactionsStep1,
+    hasMatched,
+    (data, row) => data.trans.payee === row.payee,
+  );
 
   // The final fuzzy matching pass. This is the lowest fidelity
   // matching: it just find the first transaction that hasn't been
   // matched yet. Remember the dataset only contains transactions
   // around the same date with the same amount.
-  const transactionsStep3 = transactionsStep2.map(data => {
-    if (!data.match && data.fuzzyDataset) {
-      const match = data.fuzzyDataset.find(row => !hasMatched.has(row.id));
-      if (match) {
-        hasMatched.add(match.id);
-        return { ...data, match };
-      }
-    }
-    return data;
-  });
+  const transactionsStep3 = assignClosestCandidateFirst(
+    transactionsStep2,
+    hasMatched,
+    () => true,
+  );
 
   return {
     payeesToCreate,
