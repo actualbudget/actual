@@ -16,6 +16,14 @@ import type {
 const BASE_URL = 'https://bankaccountdata.gocardless.com/api/v2';
 const ALLOWED_ORIGIN = new URL(BASE_URL).origin;
 
+// Refresh the access token this many seconds before it actually expires, so
+// requests never race a token that expires mid-flight.
+const TOKEN_REFRESH_BUFFER_SECONDS = 60;
+
+function nowInSeconds(): number {
+  return Math.floor(Date.now() / 1000);
+}
+
 export type TokenResponse = {
   access: string;
   refresh?: string;
@@ -89,10 +97,18 @@ export class GoCardlessApi {
     this.#token = value;
   }
 
+  #storeTokenResponse(data: TokenResponse): void {
+    this.#token = data.access;
+    this.#accessExpiresAt = nowInSeconds() + data.access_expires;
+    if (data.refresh) {
+      this.#refreshToken = data.refresh;
+    }
+  }
+
   async #refreshIfNeeded(): Promise<void> {
     if (
       this.#accessExpiresAt !== null &&
-      Math.floor(Date.now() / 1000) + 60 < this.#accessExpiresAt
+      nowInSeconds() + TOKEN_REFRESH_BUFFER_SECONDS < this.#accessExpiresAt
     ) {
       return;
     }
@@ -190,11 +206,7 @@ export class GoCardlessApi {
         secret_key: this.#secretKey,
       },
     });
-    this.#token = data.access;
-    this.#accessExpiresAt = Math.floor(Date.now() / 1000) + data.access_expires;
-    if (data.refresh) {
-      this.#refreshToken = data.refresh;
-    }
+    this.#storeTokenResponse(data);
     return data;
   }
 
@@ -207,11 +219,7 @@ export class GoCardlessApi {
       method: 'POST',
       body: { refresh: refreshToken },
     });
-    this.#token = data.access;
-    this.#accessExpiresAt = Math.floor(Date.now() / 1000) + data.access_expires;
-    if (data.refresh) {
-      this.#refreshToken = data.refresh;
-    }
+    this.#storeTokenResponse(data);
     return data;
   }
 
