@@ -2,6 +2,7 @@
 import { stringify as csvStringify } from 'csv-stringify/sync';
 
 import { aqlQuery } from '#server/aql';
+import { getRecordedAmountPrecision } from '#server/util/currency';
 import { integerToAmount } from '#shared/util';
 
 const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
@@ -20,6 +21,7 @@ export async function exportToCSV(
   categoryGroups,
   payees,
 ) {
+  const precision = getRecordedAmountPrecision();
   const accountNamesById = accounts.reduce((reduced, { id, name }) => {
     reduced[id] = name;
     return reduced;
@@ -57,7 +59,7 @@ export async function exportToCSV(
       Payee: payeeNamesById[payee],
       Notes: notes,
       Category: categoryNamesById[category],
-      Amount: amount == null ? 0 : integerToAmount(amount),
+      Amount: amount == null ? 0 : integerToAmount(amount, precision),
       Cleared: cleared,
       Reconciled: reconciled,
     }),
@@ -67,6 +69,7 @@ export async function exportToCSV(
 }
 
 export async function exportQueryToCSV(query) {
+  const precision = getRecordedAmountPrecision();
   const { data: transactions } = await aqlQuery(
     query
       .select([
@@ -127,8 +130,10 @@ export async function exportQueryToCSV(query) {
         ? 0
         : trans.Amount == null
           ? 0
-          : integerToAmount(trans.Amount),
-      Split_Amount: trans.IsParent ? integerToAmount(trans.Amount) : 0,
+          : integerToAmount(trans.Amount, precision),
+      Split_Amount: trans.IsParent
+        ? integerToAmount(trans.Amount, precision)
+        : 0,
       Cleared:
         trans.Reconciled === true
           ? 'Reconciled'
