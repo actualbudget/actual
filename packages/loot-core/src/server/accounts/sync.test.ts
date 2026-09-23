@@ -645,24 +645,24 @@ describe('Account sync', () => {
       const { id } = await prepareDatabase();
 
       // Both candidates are tied on date-distance to the incoming
-      // transaction, so without a tie-break on imported_id, which one wins
-      // depends on sort_order and is otherwise arbitrary. Setting sort_order
-      // explicitly pins that down instead of leaving it to insertion-order
-      // timing -- so this test actually distinguishes the fix from the bug.
+      // transaction, so which one wins depends entirely on the comparator's
+      // imported_id tie-break -- not on whatever order the fuzzy-match query
+      // happens to read rows in. (v_transactions is read through several
+      // joined views, and that read order can't be reliably pinned from a
+      // test via fields like sort_order; the comparator itself is what has
+      // to resolve the tie, regardless of input order.)
       await db.insertTransaction({
         id: 'already-imported',
         account: id,
         amount: -1239,
         date: '2024-04-05',
         imported_id: 'existing-import-id',
-        sort_order: 100,
       });
       await db.insertTransaction({
         id: 'not-yet-imported',
         account: id,
         amount: -1239,
         date: '2024-04-05',
-        sort_order: 200,
       });
 
       // Neither candidate's date matches the incoming transaction's date
