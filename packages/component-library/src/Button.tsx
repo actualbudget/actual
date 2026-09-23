@@ -7,6 +7,12 @@ import { css, cx } from '@emotion/css';
 import { AnimatedLoading } from './icons/AnimatedLoading';
 import { styles } from './styles';
 import { theme } from './theme';
+import {
+  componentSizeControl,
+  componentSizeText,
+  sizeResponsiveStyles,
+  type ComponentSize,
+} from './tokens';
 import { View } from './View';
 
 const backgroundColor: {
@@ -123,8 +129,64 @@ const _getActiveStyles = (
   }
 };
 
-type ButtonProps = ComponentPropsWithoutRef<typeof ReactAriaButton> & {
+// Builds the padding/typography overrides for an explicit `size`, varying
+// by breakpoint via media queries (no per-instance hooks). Bare buttons
+// use uniform padding; framed buttons use the paddingX/paddingY split.
+const getButtonSizeOverrides = (
+  size: ComponentSize,
+  isBare: boolean,
+): Record<string, unknown> => {
+  const control = componentSizeControl[size];
+  const text = componentSizeText[size];
+
+  const getGroupStyles = (group: keyof typeof control) => {
+    const { paddingY, paddingX, minHeight } = control[group];
+    const { fontSize, lineHeight } = text[group];
+
+    return {
+      padding: isBare ? `${paddingY}px` : `${paddingY}px ${paddingX}px`,
+      ...(minHeight != null ? { minHeight } : null),
+      fontSize,
+      lineHeight,
+    };
+  };
+
+  return sizeResponsiveStyles({
+    narrow: getGroupStyles('narrow'),
+    small: getGroupStyles('small'),
+    medium: getGroupStyles('medium'),
+    wide: getGroupStyles('wide'),
+  });
+};
+
+const buttonSizeOverrides: Record<
+  ComponentSize,
+  { bare: Record<string, unknown>; framed: Record<string, unknown> }
+> = {
+  small: {
+    bare: getButtonSizeOverrides('small', true),
+    framed: getButtonSizeOverrides('small', false),
+  },
+  medium: {
+    bare: getButtonSizeOverrides('medium', true),
+    framed: getButtonSizeOverrides('medium', false),
+  },
+  large: {
+    bare: getButtonSizeOverrides('large', true),
+    framed: getButtonSizeOverrides('large', false),
+  },
+  'extra-large': {
+    bare: getButtonSizeOverrides('extra-large', true),
+    framed: getButtonSizeOverrides('extra-large', false),
+  },
+};
+
+type ButtonProps = Omit<
+  ComponentPropsWithoutRef<typeof ReactAriaButton>,
+  'size'
+> & {
   variant?: ButtonVariant;
+  size?: ComponentSize;
   bounce?: boolean;
   children?: ReactNode;
 };
@@ -133,10 +195,20 @@ type ButtonVariant = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
-    const { children, variant = 'normal', bounce = true, ...restProps } = props;
+    const {
+      children,
+      variant = 'normal',
+      bounce = true,
+      size,
+      ...restProps
+    } = props;
 
     const variantWithDisabled: ButtonVariant | `${ButtonVariant}Disabled` =
       props.isDisabled ? `${variant}Disabled` : variant;
+
+    const sizeOverrides = size
+      ? buttonSizeOverrides[size][variant === 'bare' ? 'bare' : 'framed']
+      : null;
 
     const defaultButtonClassName: string = useMemo(
       () =>
@@ -155,10 +227,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           transition: 'box-shadow .25s',
           WebkitAppRegion: 'no-drag',
           ...styles.smallText,
+          ...sizeOverrides,
           '&[data-hovered]': _getHoveredStyles(variant),
           '&[data-pressed]': _getActiveStyles(variant, bounce),
         }),
-      [bounce, variant, variantWithDisabled],
+      [bounce, variant, variantWithDisabled, sizeOverrides],
     );
 
     const className = restProps.className;
