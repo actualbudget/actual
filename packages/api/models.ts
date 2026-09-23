@@ -6,3 +6,4 @@ export type {
   DashboardWidgetEntity,
   NewDashboardWidgetEntity,
 } from '@actual-app/core/types/models';
+export type { AddDashboardWidgetInput } from './methods';
