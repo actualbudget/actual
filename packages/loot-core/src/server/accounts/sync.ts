@@ -955,7 +955,6 @@ export async function matchTransactions(
       // transactions date. i.e. if the original transaction is in 21-02-2024 and
       // the matched transactions are: 20-02-2024, 21-02-2024, 29-02-2024 then
       // the resulting data-set should be: 21-02-2024, 20-02-2024, 29-02-2024.
-      // See compareFuzzyMatchCandidates for the same-distance tie-break.
       fuzzyDataset = fuzzyDataset.sort((a, b) =>
         compareFuzzyMatchCandidates(trans.date, a, b),
       );
