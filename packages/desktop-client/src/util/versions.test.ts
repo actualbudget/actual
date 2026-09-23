@@ -39,6 +39,16 @@ describe('computeClientVersion', () => {
     );
   });
 
+  it('prefers the preview marker when both a review ID and commit ref are set', () => {
+    expect(
+      computeClientVersion({
+        ...base,
+        reviewId: 'review-123',
+        commitRef: 'e18c8adddee6dc699ff8a8a8c65aa93e97b3a81d',
+      }),
+    ).toBe('.preview');
+  });
+
   it('appends a short commit ref as semver build metadata when present', () => {
     expect(
       computeClientVersion({
