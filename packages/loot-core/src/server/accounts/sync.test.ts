@@ -14,6 +14,7 @@ import type { SyncedPrefs } from '#types/prefs';
 import { app as accountsApp } from './app';
 import {
   addTransactions,
+  compareFuzzyMatchCandidates,
   reconcileTransactions,
   simpleFinBatchSync,
 } from './sync';
@@ -638,6 +639,53 @@ describe('Account sync', () => {
     ).toBe(-1239);
   });
 
+  describe('compareFuzzyMatchCandidates', () => {
+    const transDate = '2024-04-05';
+    const alreadyImported = {
+      date: db.toDateRepr('2024-04-05'),
+      imported_id: 'existing-import-id',
+    };
+    const notYetImported = {
+      date: db.toDateRepr('2024-04-05'),
+      imported_id: null,
+    };
+
+    test(
+      'breaks a same-distance tie by preferring the unlinked candidate, ' +
+        'regardless of which candidate is passed in first',
+      () => {
+        // Feed the comparator the already-imported candidate first -- the
+        // pre-fix comparator (`aDistance - bDistance`, which never returns 0
+        // for equal distances) would have kept it first. The sort must
+        // still put the unlinked candidate ahead of it either way.
+        expect(
+          [alreadyImported, notYetImported].sort((a, b) =>
+            compareFuzzyMatchCandidates(transDate, a, b),
+          ),
+        ).toEqual([notYetImported, alreadyImported]);
+
+        expect(
+          [notYetImported, alreadyImported].sort((a, b) =>
+            compareFuzzyMatchCandidates(transDate, a, b),
+          ),
+        ).toEqual([notYetImported, alreadyImported]);
+      },
+    );
+
+    test('prefers the closer date over imported_id status', () => {
+      const fartherButUnlinked = {
+        date: db.toDateRepr('2024-04-08'),
+        imported_id: null,
+      };
+
+      expect(
+        [fartherButUnlinked, alreadyImported].sort((a, b) =>
+          compareFuzzyMatchCandidates(transDate, a, b),
+        ),
+      ).toEqual([alreadyImported, fartherButUnlinked]);
+    });
+  });
+
   test(
     'given two equally-dated candidates, an unlinked one is preferred over ' +
       'one that already has its own imported_id',
@@ -645,12 +693,10 @@ describe('Account sync', () => {
       const { id } = await prepareDatabase();
 
       // Both candidates are tied on date-distance to the incoming
-      // transaction, so which one wins depends entirely on the comparator's
-      // imported_id tie-break -- not on whatever order the fuzzy-match query
-      // happens to read rows in. (v_transactions is read through several
-      // joined views, and that read order can't be reliably pinned from a
-      // test via fields like sort_order; the comparator itself is what has
-      // to resolve the tie, regardless of input order.)
+      // transaction, so which one wins depends on the comparator's
+      // imported_id tie-break, verified directly (independent of DB read
+      // order) in the compareFuzzyMatchCandidates tests above. This test
+      // covers the same scenario end-to-end through reconcileTransactions.
       await db.insertTransaction({
         id: 'already-imported',
         account: id,
