@@ -1364,7 +1364,6 @@ export function createCustomReportPlan({
     sheetName,
     'accounts-query',
     q('accounts')
-      .filter({ closed: false })
       .select(['id', 'name', 'sort_order'])
       .orderBy('sort_order')
       .orderBy('name')

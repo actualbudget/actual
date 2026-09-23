@@ -802,6 +802,7 @@ export function createFormulaReportPlan({
   });
 
   return {
+    dependsOnBudget: true,
     queryCells,
     rootName: resolveName(sheetName, 'data'),
     sheetName,

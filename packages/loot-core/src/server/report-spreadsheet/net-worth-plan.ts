@@ -102,7 +102,6 @@ function getReportDates({
 
 function makeAccountsQuery() {
   return q('accounts')
-    .filter({ closed: false })
     .select(['id', 'name'])
     .orderBy('sort_order')
     .orderBy('name')
@@ -147,6 +146,8 @@ function makeBalancesQuery({
   return q('transactions')
     .filter({
       [conditionsOpKey]: conditionsToFilters(conditions),
+    })
+    .filter({
       $and: [{ date: { $gte: startDate } }, { date: { $lte: endDate } }],
     })
     .groupBy(['account', intervalGroup])

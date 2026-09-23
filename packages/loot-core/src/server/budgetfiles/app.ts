@@ -622,21 +622,22 @@ async function _loadBudget(id: Budget['id']): Promise<{
 
   try {
     await sheet.loadSpreadsheet(db, onSheetChange);
+
+    // Set the budget type and finish its cells before computing report values.
+    const { value: budgetType = 'envelope' } =
+      (await db.first<Pick<db.DbPreference, 'value'>>(
+        'SELECT value from preferences WHERE id = ?',
+        ['budgetType'],
+      )) ?? {};
+    sheet.get().meta().budgetType = budgetType as prefs.BudgetType;
+    await budget.createAllBudgets();
+    await sheet.waitOnSpreadsheet();
     await reportSpreadsheet.loadReportSpreadsheetCache();
   } catch (e) {
     captureException(e);
     await closeBudget();
     return { error: 'opening-budget' };
   }
-
-  // This is a bit leaky, but we need to set the initial budget type
-  const { value: budgetType = 'envelope' } =
-    (await db.first<Pick<db.DbPreference, 'value'>>(
-      'SELECT value from preferences WHERE id = ?',
-      ['budgetType'],
-    )) ?? {};
-  sheet.get().meta().budgetType = budgetType as prefs.BudgetType;
-  await budget.createAllBudgets();
 
   // Load all the in-memory state
   await mappings.loadMappings();

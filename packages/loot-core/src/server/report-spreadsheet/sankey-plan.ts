@@ -780,6 +780,7 @@ export function createSankeyReportPlan({
   sheet.createStatic(sheetName, 'data', null);
 
   return {
+    dependsOnBudget: mode === 'budgeted',
     compute: async () => {
       const categories = await db.getCategoriesGrouped();
       const graph =

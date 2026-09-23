@@ -341,6 +341,7 @@ export function createBudgetAnalysisReportPlan({
   });
 
   return {
+    dependsOnBudget: true,
     queryCells,
     rootName: resolveName(sheetName, 'data'),
     sheetName,

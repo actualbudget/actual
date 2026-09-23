@@ -3,6 +3,7 @@ import { logger } from '#platform/server/log';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { reportModel } from '#server/reports/app';
+import * as budgetSheet from '#server/sheet';
 import { Spreadsheet } from '#server/spreadsheet/spreadsheet';
 import { q } from '#shared/query';
 import type {
@@ -50,6 +51,27 @@ const activePlanKeys = new Map<DashboardWidgetEntity['id'], string>();
 const rootCells = new Map<string, ReportPlan>();
 const pendingComputes = new Set<Promise<void>>();
 let cacheLoaded = false;
+let subscribedBudgetSheet: Spreadsheet | undefined;
+let unsubscribeBudgetSheet: (() => void) | undefined;
+
+function subscribeToBudgetChanges(): void {
+  const spreadsheet = budgetSheet.get();
+  if (spreadsheet === subscribedBudgetSheet) {
+    return;
+  }
+
+  unsubscribeBudgetSheet?.();
+  subscribedBudgetSheet = spreadsheet;
+  unsubscribeBudgetSheet = spreadsheet?.addEventListener('change', () => {
+    // Budget-derived reports must refresh after their input cells finish,
+    // including changes that have no transaction query in the report itself.
+    for (const plan of activePlans.values()) {
+      if (plan.dependsOnBudget) {
+        queueWidgetRecompute(plan);
+      }
+    }
+  });
+}
 
 function hasOpenDatabase(): boolean {
   return db.getDatabase() != null;
@@ -141,7 +163,7 @@ function runPlanCompute(plan: ReportPlan): void {
 }
 
 function createReportSheet() {
-  const spreadsheet = new Spreadsheet(names =>
+  const spreadsheet = new Spreadsheet((names: string[]) =>
     saveCachedReportCells(spreadsheet, names),
   );
   spreadsheet.addEventListener('change', ({ names }: { names: string[] }) => {
@@ -178,6 +200,9 @@ function createReportSheet() {
 }
 
 export function unloadReportSpreadsheet(): void {
+  unsubscribeBudgetSheet?.();
+  unsubscribeBudgetSheet = undefined;
+  subscribedBudgetSheet = undefined;
   reportSheet.unload();
   activePlans.clear();
   activePlanKeys.clear();
@@ -216,6 +241,7 @@ function waitOnReportSheet(): Promise<void> {
 }
 
 export async function waitOnReportSpreadsheet(): Promise<void> {
+  await budgetSheet.waitOnSpreadsheet();
   await waitOnReportSheet();
 
   while (pendingComputes.size > 0) {
@@ -290,9 +316,11 @@ function readPlan(plan: ReportPlan): ReportSpreadsheetCell {
 function getWidgetPlanKey(
   widget: DashboardWidgetEntity,
   context: ReportContext,
+  report: CustomReportEntity | null,
 ) {
   return stableStringify({
     context,
+    report,
     widget: {
       id: widget.id,
       meta: widget.meta,
@@ -350,7 +378,11 @@ async function registerWidget(
   widget: DashboardWidgetEntity,
   context: ReportContext,
 ): Promise<ReportSpreadsheetCell | null> {
-  const planKey = getWidgetPlanKey(widget, context);
+  const report =
+    widget.type === 'custom-report'
+      ? await getCustomReport(widget.meta.id)
+      : null;
+  const planKey = getWidgetPlanKey(widget, context, report);
   const activePlan = activePlans.get(widget.id);
   if (activePlan && activePlanKeys.get(widget.id) === planKey) {
     return readPlan(activePlan);
@@ -412,7 +444,6 @@ async function registerWidget(
   }
 
   if (widget.type === 'custom-report') {
-    const report = await getCustomReport(widget.meta.id);
     if (!report) {
       return null;
     }
@@ -494,6 +525,8 @@ export async function prepareDashboard({
 }: {
   dashboardPageId: DashboardPageEntity['id'];
 }): Promise<{ cells: ReportSpreadsheetValues }> {
+  subscribeToBudgetChanges();
+  await budgetSheet.waitOnSpreadsheet();
   loadCachedReportCells();
 
   const { data } = await aqlQuery(
@@ -532,16 +565,17 @@ export async function recomputeWidget({
 }: {
   widgetId: DashboardWidgetEntity['id'];
 }): Promise<ReportSpreadsheetCell | null> {
+  subscribeToBudgetChanges();
+  await budgetSheet.waitOnSpreadsheet();
   loadCachedReportCells();
 
-  let plan = activePlans.get(widgetId);
-  if (!plan) {
-    const widget = await getWidget(widgetId);
-    if (widget) {
-      const cell = await registerWidget(widget, await getReportContext());
-      plan = cell ? activePlans.get(widgetId) : undefined;
-    }
+  const widget = await getWidget(widgetId);
+  if (!widget) {
+    return null;
   }
+
+  const cell = await registerWidget(widget, await getReportContext());
+  const plan = cell ? activePlans.get(widgetId) : undefined;
 
   if (!plan) {
     return null;
