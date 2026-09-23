@@ -801,46 +801,36 @@ export async function reconcileTransactions(
 // entry on each round, since claiming a candidate can change what's left
 // available to the others. `hasMatched` is shared across both
 // fuzzy-matching passes (and the id/imported_id pass before them), so a
-// candidate claimed here can't be claimed again
-// later.
-function assignClosestCandidateFirst(dataList, hasMatched, isEligible) {
-  const results = [...dataList];
-  const remaining = [];
-  results.forEach((data, index) => {
-    if (!data.match && data.fuzzyDataset) remaining.push(index);
-  });
+// candidate claimed here can't be claimed again later.
+function greedilyAssignCandidates(dataList, hasMatched, isEligible) {
+  const results = dataList.map(d => ({ ...d }));
 
-  while (remaining.length > 0) {
-    let bestPos = -1;
-    let bestCandidate = null;
-    let bestDistance = Infinity;
+  const getDistance = (data, row) =>
+    Math.abs(
+      dateFns.differenceInMilliseconds(
+        dateFns.parseISO(data.trans.date),
+        dateFns.parseISO(db.fromDateRepr(row.date)),
+      ),
+    );
 
-    for (let i = 0; i < remaining.length; i++) {
-      const data = results[remaining[i]];
-      const candidate = data.fuzzyDataset.find(
-        row => !hasMatched.has(row.id) && isEligible(data, row),
-      );
-      if (!candidate) continue;
+  while (true) {
+    let best = { distance: Infinity, data: null, candidate: null };
+    for (const data of results) {
+      if (data.match || !data.fuzzyDataset) continue;
 
-      const distance = Math.abs(
-        dateFns.differenceInMilliseconds(
-          dateFns.parseISO(data.trans.date),
-          dateFns.parseISO(db.fromDateRepr(candidate.date)),
-        ),
-      );
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        bestPos = i;
-        bestCandidate = candidate;
+      for (const row of data.fuzzyDataset) {
+        if (hasMatched.has(row.id) || !isEligible(data, row)) continue;
+
+        const dist = getDistance(data, row);
+        if (dist < best.distance) {
+          best = { distance: dist, data, candidate: row };
+        }
       }
     }
 
-    if (bestPos === -1) break;
-
-    const index = remaining[bestPos];
-    hasMatched.add(bestCandidate.id);
-    results[index] = { ...results[index], match: bestCandidate };
-    remaining.splice(bestPos, 1);
+    if (!best.candidate) break;
+    hasMatched.add(best.candidate.id);
+    best.data.match = best.candidate;
   }
 
   return results;
@@ -1007,27 +997,22 @@ export async function matchTransactions(
   // Next, do the fuzzy matching. This first pass matches based on the
   // payee id. We do this in multiple passes so that higher fidelity
   // matching always happens first, i.e. a transaction should match
-  // match with low fidelity if a later transaction is going to match
+  // with low fidelity if a later transaction is going to match
   // the same one with high fidelity.
   //
-  // Uses assignClosestCandidateFirst (see below) instead of a plain
-  // .map() -- within each pass, transactions are assigned in order of how
-  // close their own best remaining candidate is, not in whatever order
-  // the bank returned them. A plain per-transaction .map() lets an
-  // earlier-in-the-batch transaction claim a candidate purely because its
-  // turn came first, even when a later transaction in the same batch is a
-  // much closer (e.g. exact-date) match for it.
-  const transactionsStep2 = assignClosestCandidateFirst(
+  // Transactions are assigned in order of how close their own best
+  // remaining candidate is, not in whatever order the bank returned them.
+  const transactionsStep2 = greedilyAssignCandidates(
     transactionsStep1,
     hasMatched,
     (data, row) => data.trans.payee === row.payee,
   );
 
   // The final fuzzy matching pass. This is the lowest fidelity
-  // matching: it just find the first transaction that hasn't been
+  // matching: it just finds the first transaction that hasn't been
   // matched yet. Remember the dataset only contains transactions
   // around the same date with the same amount.
-  const transactionsStep3 = assignClosestCandidateFirst(
+  const transactionsStep3 = greedilyAssignCandidates(
     transactionsStep2,
     hasMatched,
     () => true,
