@@ -414,11 +414,12 @@ describe('Sync account balance cells', () => {
     await sheet.loadSpreadsheet(db);
 
     const spreadsheet = sheet.get();
-    const sumOf = (filter: Record<string, unknown>) =>
-      q('transactions')
+    function sumOf(filter: Record<string, unknown>) {
+      return q('transactions')
         .filter(filter)
         .calculate({ $sum: '$amount' })
         .serialize();
+    }
     spreadsheet.createQuery(
       '__global',
       'onbudget-accounts-balance',
