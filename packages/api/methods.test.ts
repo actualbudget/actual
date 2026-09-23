@@ -1349,11 +1349,13 @@ describe('Dashboard and widget operations', () => {
     const widgets = await api.getDashboardWidgets(pageId);
     expect(widgets.length).toBe(2);
     const netWorth = widgets.find(w => w.type === 'net-worth-card');
+    const cashFlow = widgets.find(w => w.type === 'cash-flow-card');
     expect(netWorth).toBeDefined();
+    expect(cashFlow).toBeDefined();
     expect(netWorth?.width).toBe(6);
 
-    // 7. Update widget
-    if (netWorth) {
+    // 7. Update single widget
+    if (netWorth && cashFlow) {
       await api.updateDashboardWidget({
         id: netWorth.id,
         width: 12,
@@ -1362,11 +1364,16 @@ describe('Dashboard and widget operations', () => {
       const updatedWidget = reloadedWidgets.find(w => w.id === netWorth.id);
       expect(updatedWidget?.width).toBe(12);
 
-      // 8. Update dashboard layout batch
-      await api.updateDashboard([{ id: netWorth.id, x: 1, y: 1 }]);
+      // 8. Update dashboard layout batch with multiple widgets
+      await api.updateDashboard([
+        { id: netWorth.id, x: 1, y: 1 },
+        { id: cashFlow.id, x: 7, y: 1 },
+      ]);
       const batchWidgets = await api.getDashboardWidgets(pageId);
-      const batchUpdated = batchWidgets.find(w => w.id === netWorth.id);
-      expect(batchUpdated?.x).toBe(1);
+      const batchUpdatedNetWorth = batchWidgets.find(w => w.id === netWorth.id);
+      const batchUpdatedCashFlow = batchWidgets.find(w => w.id === cashFlow.id);
+      expect(batchUpdatedNetWorth?.x).toBe(1);
+      expect(batchUpdatedCashFlow?.x).toBe(7);
 
       // 9. Remove widget
       await api.removeDashboardWidget(netWorth.id);
