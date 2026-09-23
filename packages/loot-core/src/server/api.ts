@@ -25,6 +25,7 @@ import type {
 } from '#types/models';
 import type { ServerHandlers } from '#types/server-handlers';
 
+import type { SyncResponse } from './accounts/app';
 import { addTransactions } from './accounts/sync';
 import {
   accountGroupModel,
@@ -286,13 +287,27 @@ handlers['api/sync'] = async function () {
 handlers['api/bank-sync'] = async function (args) {
   const batchSync = args?.accountId == null;
   const allErrors = [];
+  // `accounts-bank-sync` and `simplefin-batch-sync` already reconcile each
+  // account and report what that produced. Collect it here so API consumers can
+  // tell "synced, nothing new" from "synced, transactions are waiting" without
+  // diffing the transaction table themselves.
+  const newTransactions = [];
+  const matchedTransactions = [];
+  const updatedAccounts = [];
+
+  const collect = (res: SyncResponse) => {
+    newTransactions.push(...res.newTransactions);
+    matchedTransactions.push(...res.matchedTransactions);
+    updatedAccounts.push(...res.updatedAccounts);
+  };
 
   if (!batchSync) {
-    const { errors } = await handlers['accounts-bank-sync']({
+    const res = await handlers['accounts-bank-sync']({
       ids: [args.accountId],
     });
 
-    allErrors.push(...errors);
+    allErrors.push(...res.errors);
+    collect(res);
   } else {
     const accountsData = await handlers['accounts-get']();
     const accountIdsToSync = accountsData.map(a => a.id);
@@ -306,20 +321,26 @@ handlers['api/bank-sync'] = async function (args) {
         ids: simpleFinAccountIds,
       });
 
-      res.forEach(a => allErrors.push(...a.res.errors));
+      res.forEach(a => {
+        allErrors.push(...a.res.errors);
+        collect(a.res);
+      });
     }
 
-    const { errors } = await handlers['accounts-bank-sync']({
+    const res = await handlers['accounts-bank-sync']({
       ids: accountIdsToSync.filter(a => !simpleFinAccountIds.includes(a)),
     });
 
-    allErrors.push(...errors);
+    allErrors.push(...res.errors);
+    collect(res);
   }
 
   const errors = allErrors.filter(e => e != null);
   if (errors.length > 0) {
     throw withErrorCode(new Error(getBankSyncError(errors[0])), errors[0].code);
   }
+
+  return { newTransactions, matchedTransactions, updatedAccounts };
 };
 
 handlers['api/start-import'] = async function ({ budgetName }) {

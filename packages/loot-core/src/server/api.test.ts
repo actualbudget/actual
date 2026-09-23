@@ -33,10 +33,25 @@ describe('API handlers', () => {
   });
 
   describe('api/bank-sync', () => {
+    const syncResult = ({
+      newTransactions = [],
+      matchedTransactions = [],
+      updatedAccounts = [],
+      errors = [],
+    }: {
+      newTransactions?: string[];
+      matchedTransactions?: string[];
+      updatedAccounts?: string[];
+      errors?: string[];
+    } = {}) => ({
+      newTransactions,
+      matchedTransactions,
+      updatedAccounts,
+      errors,
+    });
+
     it('should sync a single account when accountId is provided', async () => {
-      handlers['accounts-bank-sync'] = vi
-        .fn()
-        .mockResolvedValue({ errors: [] });
+      handlers['accounts-bank-sync'] = vi.fn().mockResolvedValue(syncResult());
 
       await handlers['api/bank-sync']({ accountId: 'account1' });
       expect(handlers['accounts-bank-sync']).toHaveBeenCalledWith({
@@ -45,15 +60,100 @@ describe('API handlers', () => {
     });
 
     it('should handle errors in non batch sync', async () => {
-      handlers['accounts-bank-sync'] = vi.fn().mockResolvedValue({
-        errors: ['connection-failed'],
-      });
+      handlers['accounts-bank-sync'] = vi
+        .fn()
+        .mockResolvedValue(syncResult({ errors: ['connection-failed'] }));
 
       await expect(
         handlers['api/bank-sync']({ accountId: 'account2' }),
       ).rejects.toThrow('Bank sync error: connection-failed');
 
       expect(getBankSyncError).toHaveBeenCalledWith('connection-failed');
+    });
+
+    it('returns what the sync reconciled for a single account', async () => {
+      handlers['accounts-bank-sync'] = vi.fn().mockResolvedValue(
+        syncResult({
+          newTransactions: ['t1', 't2'],
+          matchedTransactions: ['t3'],
+          updatedAccounts: ['account1'],
+        }),
+      );
+
+      await expect(
+        handlers['api/bank-sync']({ accountId: 'account1' }),
+      ).resolves.toEqual({
+        newTransactions: ['t1', 't2'],
+        matchedTransactions: ['t3'],
+        updatedAccounts: ['account1'],
+      });
+    });
+
+    it('returns empty arrays when a sync reconciled nothing', async () => {
+      handlers['accounts-bank-sync'] = vi.fn().mockResolvedValue(syncResult());
+
+      // The caller has to be able to tell this apart from a sync that imported
+      // something; both are successful, so an error is not the signal.
+      await expect(
+        handlers['api/bank-sync']({ accountId: 'account1' }),
+      ).resolves.toEqual({
+        newTransactions: [],
+        matchedTransactions: [],
+        updatedAccounts: [],
+      });
+    });
+
+    it('merges results across both paths of a batch sync', async () => {
+      handlers['accounts-get'] = vi.fn().mockResolvedValue([
+        { id: 'simplefin1', account_sync_source: 'simpleFin' },
+        { id: 'gocardless1', account_sync_source: 'goCardless' },
+      ]);
+      handlers['simplefin-batch-sync'] = vi.fn().mockResolvedValue([
+        {
+          accountId: 'simplefin1',
+          res: syncResult({
+            newTransactions: ['sf1'],
+            updatedAccounts: ['simplefin1'],
+          }),
+        },
+      ]);
+      handlers['accounts-bank-sync'] = vi.fn().mockResolvedValue(
+        syncResult({
+          newTransactions: ['gc1'],
+          matchedTransactions: ['gc2'],
+          updatedAccounts: ['gocardless1'],
+        }),
+      );
+
+      await expect(handlers['api/bank-sync']()).resolves.toEqual({
+        newTransactions: ['sf1', 'gc1'],
+        matchedTransactions: ['gc2'],
+        updatedAccounts: ['simplefin1', 'gocardless1'],
+      });
+
+      // SimpleFIN accounts go through their own batch endpoint and must not be
+      // synced a second time by the generic path.
+      expect(handlers['accounts-bank-sync']).toHaveBeenCalledWith({
+        ids: ['gocardless1'],
+      });
+    });
+
+    it('still throws on error rather than returning partial results', async () => {
+      handlers['accounts-get'] = vi
+        .fn()
+        .mockResolvedValue([
+          { id: 'gocardless1', account_sync_source: 'goCardless' },
+        ]);
+      handlers['accounts-bank-sync'] = vi.fn().mockResolvedValue(
+        syncResult({
+          newTransactions: ['gc1'],
+          errors: ['connection-failed'],
+        }),
+      );
+
+      await expect(handlers['api/bank-sync']()).rejects.toThrow(
+        'Bank sync error: connection-failed',
+      );
     });
   });
 
