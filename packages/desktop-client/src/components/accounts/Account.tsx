@@ -57,6 +57,7 @@ import { TransactionList } from '#components/transactions/TransactionList';
 import { validateAccountName } from '#components/util/accountValidation';
 import { useAccountPreviewTransactions } from '#hooks/useAccountPreviewTransactions';
 import { useAccounts } from '#hooks/useAccounts';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -257,6 +258,7 @@ type AccountInternalProps = {
   location: ReturnType<typeof useLocation>;
   dateFormat: ReturnType<typeof useDateFormat>;
   currencySymbol: string;
+  precision: number;
   payees: PayeeEntity[];
   categoryGroups: CategoryGroupEntity[];
   hideFraction: boolean;
@@ -417,6 +419,9 @@ class AccountInternal extends PureComponent<
   }
 
   componentDidUpdate(prevProps: AccountInternalProps) {
+    if (prevProps.precision !== this.props.precision && this.state.search) {
+      this.onSearchDone();
+    }
     // If the active account changes - close the transaction entry mode
     if (this.state.isAdding && this.props.accountId !== prevProps.accountId) {
       this.setState({ isAdding: false });
@@ -656,6 +661,7 @@ class AccountInternal extends PureComponent<
           this.state.search,
           this.props.dateFormat,
           this.props.currencySymbol,
+          this.props.precision,
         ),
         true,
       );
@@ -2149,6 +2155,7 @@ export function Account() {
   const { data: payees = [] } = usePayees();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const currencySymbol = useFormat().currency.symbol;
+  const precision = useAmountPrecision();
   const [hideFraction] = useSyncedPref('hideFraction');
   const [expandSplits] = useLocalPref('expand-splits');
   const [showNetWorthChart, setShowNetWorthChart] = useSyncedPref(
@@ -2210,6 +2217,7 @@ export function Account() {
             accounts={accounts}
             dateFormat={dateFormat}
             currencySymbol={currencySymbol}
+            precision={precision}
             hideFraction={String(hideFraction) === 'true'}
             expandSplits={expandSplits}
             showBalances={showBalances}
