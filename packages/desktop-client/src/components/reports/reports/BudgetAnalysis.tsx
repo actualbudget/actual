@@ -39,6 +39,7 @@ import {
 } from '#components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -146,7 +147,8 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const format = useFormat();
+  const precision = useAmountPrecision();
+  const format = useFormat(precision);
 
   const {
     conditions,
@@ -343,7 +345,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
 
   const onExportCsv = async () => {
     if (!data) return;
-    const csv = buildBudgetAnalysisCsv(data.intervalData);
+    const csv = buildBudgetAnalysisCsv(data.intervalData, precision);
     const reportName = (widget?.meta?.name || t('Budget Analysis'))
       .replace(/[^a-z0-9]/gi, '-')
       .toLowerCase();
