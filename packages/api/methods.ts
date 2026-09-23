@@ -22,10 +22,7 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
-import type {
-  EverythingButIdOptional,
-  WithOptional,
-} from '@actual-app/core/types/util';
+import type { EverythingButIdOptional } from '@actual-app/core/types/util';
 
 import { q } from './app/query';
 
@@ -509,16 +506,17 @@ export async function getDashboardWidgets(
   })) as DashboardWidgetEntity[];
 }
 
-export async function addDashboardWidget(
-  widget: WithOptional<
-    Omit<DashboardWidgetEntity, 'id' | 'tombstone' | 'meta'>,
-    'x' | 'y'
-  > & {
+export type AddDashboardWidgetInput = Omit<
+  DashboardWidgetEntity,
+  'id' | 'tombstone' | 'meta' | 'x' | 'y' | 'dashboard_page_id'
+> &
+  ({ x: number; y: number } | { x?: never; y?: never }) & {
     meta?: Record<string, unknown> | null;
     dashboard_page_id?: string;
     id?: string;
-  },
-) {
+  };
+
+export async function addDashboardWidget(widget: AddDashboardWidgetInput) {
   let dashboardPageId = widget.dashboard_page_id;
   if (!dashboardPageId) {
     const pages = await getDashboardPages();
