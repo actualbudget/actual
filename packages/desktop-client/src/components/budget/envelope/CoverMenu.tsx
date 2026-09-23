@@ -9,7 +9,9 @@ import { View } from '@actual-app/components/view';
 import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
 import {
   amountToInteger,
+  getNumberFormat,
   integerToCurrency,
+  MAX_SAFE_NUMBER,
 } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { CategoryEntity } from '@actual-app/core/types/models';
@@ -19,6 +21,7 @@ import {
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
 } from '#components/budget/util';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCategories } from '#hooks/useCategories';
 
 type CoverMenuProps = {
@@ -37,6 +40,7 @@ export function CoverMenu({
   onClose,
 }: CoverMenuProps) {
   const { t } = useTranslation();
+  const precision = useAmountPrecision();
 
   const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
     useCategories();
@@ -53,13 +57,24 @@ export function CoverMenu({
       : categoryGroups;
   }, [categoryId, showToBeBudgeted, originalCategoryGroups]);
 
-  const _initialAmount = integerToCurrency(Math.abs(initialAmount ?? 0));
+  const _initialAmount = integerToCurrency(
+    Math.abs(initialAmount ?? 0),
+    getNumberFormat({ decimalPlaces: precision }).formatter,
+    precision,
+  );
   const [amount, setAmount] = useState<string>(_initialAmount);
 
   function _onSubmit() {
     const parsedAmount = evalArithmetic(amount || '');
-    if (parsedAmount && fromCategoryId) {
-      onSubmit(amountToInteger(parsedAmount), fromCategoryId);
+    const storedAmount =
+      parsedAmount === null ? NaN : amountToInteger(parsedAmount, precision);
+    if (
+      parsedAmount &&
+      Number.isSafeInteger(storedAmount) &&
+      Math.abs(storedAmount) <= MAX_SAFE_NUMBER &&
+      fromCategoryId
+    ) {
+      onSubmit(storedAmount, fromCategoryId);
     }
     onClose();
   }
