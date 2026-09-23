@@ -25,7 +25,16 @@ function dateToInt(date) {
 
 function addTombstone(schema, tableName, tableId, whereStr) {
   const hasTombstone = schema[tableName].tombstone != null;
-  return hasTombstone ? `${whereStr} AND ${tableId}.tombstone = 0` : whereStr;
+  if (!hasTombstone) {
+    return whereStr;
+  }
+  return whereStr
+    ? `${whereStr} AND ${tableId}.tombstone = 0`
+    : `WHERE ${tableId}.tombstone = 0`;
+}
+
+export function appendWhere(whereStr: string, condition: string) {
+  return whereStr ? `${whereStr} AND ${condition}` : `WHERE ${condition}`;
 }
 
 function popPath(path) {
@@ -811,7 +820,16 @@ function compileAnd(state, conds) {
 }
 
 const compileWhere = saveStack('filter', (state, conds) => {
-  return compileAnd(state, conds);
+  // Unlike compileAnd, an empty top-level filter omits the WHERE clause
+  // entirely instead of emitting the always-true `1` placeholder.
+  if (!conds) {
+    return null;
+  }
+  const res = compileConditions(state, conds);
+  if (res.length === 0) {
+    return null;
+  }
+  return '(' + res.join('\n  AND ') + ')';
 });
 
 function compileJoins(state, tableRef, internalTableFilters) {
@@ -1132,17 +1150,18 @@ export function compileQuery(
       orderExpressions,
     );
 
+    where = '';
     if (filterExpressions.length > 0) {
       const result = compileWhere(state, filterExpressions);
-      where = 'WHERE ' + result;
-    } else {
-      where = 'WHERE 1';
+      if (result) {
+        where = 'WHERE ' + result;
+      }
     }
 
     if (!rawMode) {
       const filters = internalTableFilters(tableName);
       if (filters.length > 0) {
-        where += ' AND ' + compileAnd(state, filters);
+        where = appendWhere(where, compileAnd(state, filters));
       }
     }
 

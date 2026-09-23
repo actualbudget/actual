@@ -1,10 +1,26 @@
 {
   "version": 1,
   "hooks": {
-    "beforeShellExecution": [{ "command": "./.cursor/hooks/guard-shell.sh" }],
-    "beforeMCPExecution": [
-      { "command": "./.cursor/hooks/before-mcp-github.sh" }
+    "beforeShellExecution": [
+      {
+        "command": "./.cursor/hooks/guard-shell.sh"
+      }
     ],
-    "afterFileEdit": [{ "command": "./.cursor/hooks/after-file-edit.sh" }]
+    "beforeMCPExecution": [
+      {
+        "command": "./.cursor/hooks/before-mcp-github.sh"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "./.cursor/hooks/after-file-edit.sh"
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "[ ! -f \".cursor/skills/impeccable/scripts/hook-before-edit.mjs\" ] || node \".cursor/skills/impeccable/scripts/hook-before-edit.mjs\"",
+        "timeout": 5
+      }
+    ]
   }
 }

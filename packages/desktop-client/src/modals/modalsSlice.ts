@@ -60,6 +60,12 @@ export type Modal =
       name: 'add-local-account';
     }
   | {
+      name: 'account-groups';
+      options: {
+        accountId: AccountEntity['id'];
+      };
+    }
+  | {
       name: 'close-account';
       options: {
         account: AccountEntity;
@@ -596,7 +602,6 @@ export type Modal =
       options: {
         onConfirm: () => void;
         onCancel?: () => void;
-        isBeyondWindow?: boolean;
         daysUntilTransaction?: number;
         upcomingDays?: number;
       };

@@ -128,6 +128,26 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
+    description: t('Current quarter'),
+    key: 'Current quarter',
+    name: 'currentQuarter',
+    type: 'Month',
+    Daily: true,
+    Weekly: true,
+    Monthly: true,
+    Yearly: false,
+  },
+  {
+    description: t('Previous quarter'),
+    key: 'Previous quarter',
+    name: 'previousQuarter',
+    type: 'Month',
+    Daily: true,
+    Weekly: true,
+    Monthly: true,
+    Yearly: false,
+  },
+  {
     description: t('Last 30 days'),
     key: 'Last 30 days',
     name: 'last30Days',
@@ -277,6 +297,31 @@ export const ReportOptions = {
     | 'yearRangeInclusive'
   >(intervalOptions.map(item => [item.key, item.range])),
 };
+
+// Only Daily and Weekly labels spell out a day and a month, so they are the
+// only intervals whose ordering a date-format preference can disagree with.
+// Monthly ("MMM ''yy") and Yearly ("yyyy") are unambiguous either way.
+const dayLevelIntervals = new Set(['Daily', 'Weekly']);
+
+/**
+ * The display format for an interval's labels, following the user's date
+ * format preference.
+ *
+ * @param interval one of the `intervalOptions` keys.
+ * @param dateFormat the `dateFormat` synced pref, e.g. 'MM/dd/yyyy'.
+ * @returns a date-fns format string, or '' for an unrecognised interval.
+ */
+export function getIntervalFormat(
+  interval: string,
+  dateFormat?: string,
+): string {
+  if (!dayLevelIntervals.has(interval)) {
+    return ReportOptions.intervalFormat.get(interval) ?? '';
+  }
+  // The preference is used exactly as it is set, including a four-digit year.
+  // This does make the tick labels wider than the format they replaced.
+  return dateFormat || 'yyyy-MM-dd';
+}
 
 export type QueryDataEntity = {
   date: string;

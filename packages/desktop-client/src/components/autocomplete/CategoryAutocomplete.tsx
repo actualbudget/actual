@@ -73,52 +73,17 @@ function CategoryList({
   showBalances,
 }: CategoryListProps) {
   const { t } = useTranslation();
-  const { splitTransaction, groupedCategories } = useMemo(() => {
-    return items.reduce(
-      (acc, item, index) => {
-        if (item.id === 'split') {
-          acc.splitTransaction = { ...item, highlightedIndex: index };
-          return acc;
-        }
-
-        const groupId = item.group?.id || '';
-        const existing = acc.groupedCategories.find(
-          x => x.group?.id === groupId,
-        );
-        const itemWithIndex = {
-          ...item,
-          highlightedIndex: index,
+  const splitTransactionIndex = items.findIndex(item => item.id === 'split');
+  const splitTransaction =
+    splitTransactionIndex === -1
+      ? null
+      : {
+          ...items[splitTransactionIndex],
+          highlightedIndex: splitTransactionIndex,
         };
-
-        if (!existing) {
-          acc.groupedCategories.push({
-            group: item.group ?? null,
-            categories: [itemWithIndex],
-          });
-        } else {
-          existing.categories.push(itemWithIndex);
-        }
-
-        return acc;
-      },
-      {
-        splitTransaction: null,
-        groupedCategories: [],
-      } as {
-        splitTransaction:
-          | (CategoryAutocompleteItem & {
-              highlightedIndex: number;
-            })
-          | null;
-        groupedCategories: Array<{
-          group: CategoryGroupEntity | null;
-          categories: Array<
-            CategoryAutocompleteItem & { highlightedIndex: number }
-          >;
-        }>;
-      },
-    );
-  }, [items]);
+  const categoryItems = items
+    .map((item, index) => ({ ...item, highlightedIndex: index }))
+    .filter(item => item.id !== 'split');
 
   return (
     <View>
@@ -145,37 +110,39 @@ function CategoryList({
               embedded,
             });
           })()}
-        {groupedCategories.map(({ group, categories }) => {
+        {categoryItems.map((item, index) => {
+          const group = item.group;
+
           if (!group) {
             return null;
           }
 
+          const previousGroup = categoryItems[index - 1]?.group;
+          const showGroupHeader = previousGroup?.id !== group.id;
+
           return (
-            <Fragment key={group.id}>
-              {renderCategoryItemGroupHeader({
-                title: `${group.name}${group.hidden ? ` ${t('(hidden)')}` : ''}`,
+            <Fragment key={item.id}>
+              {showGroupHeader &&
+                renderCategoryItemGroupHeader({
+                  title: `${group.name}${group.hidden ? ` ${t('(hidden)')}` : ''}`,
+                  style: {
+                    ...(showHiddenItems &&
+                      group.hidden && { color: theme.pageTextSubdued }),
+                  },
+                })}
+              {renderCategoryItem({
+                ...(getItemProps ? getItemProps({ item }) : {}),
+                item,
+                highlighted: highlightedIndex === item.highlightedIndex,
+                embedded,
                 style: {
                   ...(showHiddenItems &&
-                    group.hidden && { color: theme.pageTextSubdued }),
+                    (item.hidden || group.hidden) && {
+                      color: theme.pageTextSubdued,
+                    }),
                 },
+                showBalances,
               })}
-              {categories.map(item => (
-                <Fragment key={item.id}>
-                  {renderCategoryItem({
-                    ...(getItemProps ? getItemProps({ item }) : {}),
-                    item,
-                    highlighted: highlightedIndex === item.highlightedIndex,
-                    embedded,
-                    style: {
-                      ...(showHiddenItems &&
-                        (item.hidden || group.hidden) && {
-                          color: theme.pageTextSubdued,
-                        }),
-                    },
-                    showBalances,
-                  })}
-                </Fragment>
-              ))}
             </Fragment>
           );
         })}

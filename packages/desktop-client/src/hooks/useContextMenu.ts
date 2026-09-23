@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import type { RefObject } from 'react';
 
 import type { Falsy } from '@actual-app/core/types/util';
@@ -23,10 +23,6 @@ export function useContextMenu({
   items,
 }: UseContextMenuProps) {
   const dispatch = useDispatch();
-
-  // Store actions in a ref to avoid re-binding the event listener on every render
-  const actionsRef = useRef(items);
-  actionsRef.current = items;
 
   const processedItems = items.filter(
     item => item && (typeof item === 'symbol' || !item.hidden),

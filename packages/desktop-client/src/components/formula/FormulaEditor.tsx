@@ -447,9 +447,10 @@ export function FormulaEditor({
             top: timeframePicker.anchorRect.bottom + 4,
             left: Math.min(
               timeframePicker.anchorRect.left,
-              window.innerWidth - 260,
+              window.innerWidth - TIMEFRAME_PICKER_WIDTH,
             ),
-            minWidth: 225,
+            // Definite width required by the embedded calendar (see DateSelect)
+            width: TIMEFRAME_PICKER_WIDTH,
           }}
           onMouseDown={event => {
             event.stopPropagation();
@@ -468,6 +469,8 @@ export function FormulaEditor({
     </>
   );
 }
+
+const TIMEFRAME_PICKER_WIDTH = 260;
 
 const pickerActionButtonStyle = {
   border: 0,

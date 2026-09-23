@@ -119,6 +119,8 @@ const DASHBOARD_TIME_FRAME_MODES = new Set<TimeFrame['mode']>([
   'lastYear',
   'yearToDate',
   'priorYearToDate',
+  'currentQuarter',
+  'previousQuarter',
 ]);
 
 function isDashboardDate(value: string | null) {

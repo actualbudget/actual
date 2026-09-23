@@ -171,6 +171,21 @@ export const objects = {
         </span>
       ),
     },
+    {
+      name: 'account_group_id',
+      type: 'id | null',
+      description: (
+        <span>
+          The <a href="#account-group">account group</a> this account belongs
+          to. Defaults to <code>null</code>
+        </span>
+      ),
+    },
+  ],
+
+  accountGroup: [
+    { name: 'id', type: types.id },
+    { name: 'name', type: 'string', required: true },
   ],
 
   category: [
@@ -434,33 +449,6 @@ export const objects = {
 
   rule: [
     { name: 'id', type: types.id },
-    {
-      name: 'stage',
-      type: 'string',
-      required: true,
-      description: (
-        <span>
-          Must be one of <code>pre</code>, <code>default</code>, or{' '}
-          <code>post</code>.
-        </span>
-      ),
-    },
-    {
-      name: 'conditionsOp',
-      type: 'string',
-      description: (
-        <span>
-          Must be one of <code>and</code> or <code>or</code>.
-        </span>
-      ),
-    },
-    { name: 'conditions', type: 'ConditionOrAction[]' },
-    { name: 'actions', type: 'ConditionOrAction[]' },
-  ],
-
-  payeeRule: [
-    { name: 'id', type: types.id },
-    { name: 'payee_id', type: types.id, required: true },
     {
       name: 'stage',
       type: 'string',

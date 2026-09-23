@@ -20,7 +20,7 @@ If you're new to Actual, consult the [roadmap for new users](./getting-started/r
 
 If you're new to budgeting, read about [envelope budgeting](./getting-started/envelope-budgeting.md).
 
-For help and support, [reach out to the maintainers and community](../contact).
+For help and support, [reach out to the maintainers and community](community/index.md).
 
 ## Want to Contribute?
 

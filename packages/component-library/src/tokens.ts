@@ -33,3 +33,21 @@ export const tokens: BreakpointsPx = Object.entries(
   }),
   {} as BreakpointsPx,
 );
+
+type SpacingSize = 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+
+export const spacing: Record<SpacingSize, number> = {
+  xxs: 2,
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 24,
+};
+
+type RadiusSize = 'sm' | 'pill';
+
+export const radius: Record<RadiusSize, number> = {
+  sm: 4,
+  pill: 999,
+};

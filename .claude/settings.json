@@ -1,5 +1,15 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -d \"$CLAUDE_PROJECT_DIR/.claude/skills/impeccable\" ] || echo 'The impeccable design skill is recommended for UI work in this repo but is not installed in this checkout. Before doing design/UI work, offer to install it with: npx impeccable install (then use /impeccable). See the UI Design section in AGENTS.md.'"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit|NotebookEdit",
@@ -35,6 +45,15 @@
         ]
       },
       {
+        "matcher": "mcp__github__issue_write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/scripts/agent-hooks/no-issue-create.sh\""
+          }
+        ]
+      },
+      {
         "matcher": "mcp__github__(add_issue_comment|add_comment_to_pending_review|add_reply_to_pull_request_comment|pull_request_review_write|issue_write|sub_issue_write)",
         "hooks": [
           {
@@ -49,17 +68,6 @@
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR/scripts/agent-hooks/pr-template-blank.sh\""
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR/scripts/agent-hooks/check-on-stop.sh\"",
-            "timeout": 600
           }
         ]
       }

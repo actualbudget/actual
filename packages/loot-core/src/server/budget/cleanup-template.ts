@@ -22,6 +22,7 @@ async function applyGroupCleanups(
   sinkGroups: GroupSinkRow[],
   overspendGroups: GroupOverspendRow[],
   groupNamesById: Map<string, string>,
+  categoryNamesById: Map<string, string>,
 ) {
   const sheetName = monthUtils.sheetForMonth(month);
   const warnings = [];
@@ -41,16 +42,25 @@ async function applyGroupCleanups(
     if (sinkGroup.length > 0 || overspendGroup.length > 0) {
       //only return group source funds to To Budget if there are corresponding sinking groups or underfunded included groups
       for (let ii = 0; ii < tempSourceGroups.length; ii++) {
+        const categoryId = tempSourceGroups[ii].category;
         const balance = await getSheetValue(
           sheetName,
-          `leftover-${tempSourceGroups[ii].category}`,
+          `leftover-${categoryId}`,
         );
-        const budgeted = await getSheetValue(
-          sheetName,
-          `budget-${tempSourceGroups[ii].category}`,
-        );
+
+        // A source that is overspent has no leftover funds to send to the pool.
+        // Taking its negative balance would move the overspending onto the sink
+        // categories instead, so skip it and warn - the same way global sources
+        // are handled in processCleanup.
+        if (balance < 0) {
+          const categoryName = categoryNamesById.get(categoryId) ?? categoryId;
+          warnings.push(categoryName + ' does not have available funds.');
+          continue;
+        }
+
+        const budgeted = await getSheetValue(sheetName, `budget-${categoryId}`);
         await setBudget({
-          category: tempSourceGroups[ii].category,
+          category: categoryId,
           month,
           amount: budgeted - balance,
         });
@@ -183,6 +193,7 @@ async function processCleanup(month: string): Promise<TemplateNotification> {
     'SELECT id, name FROM cleanup_groups WHERE tombstone = 0',
   );
   const groupNamesById = new Map(groupRows.map(g => [g.id, g.name]));
+  const categoryNamesById = new Map(categories.map(c => [c.id, c.name]));
 
   //run category groups
   const newWarnings = await applyGroupCleanups(
@@ -191,6 +202,7 @@ async function processCleanup(month: string): Promise<TemplateNotification> {
     groupSink,
     groupOverspend,
     groupNamesById,
+    categoryNamesById,
   );
   warnings.splice(1, 0, ...newWarnings);
 

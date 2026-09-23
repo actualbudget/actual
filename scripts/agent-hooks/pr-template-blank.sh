@@ -20,8 +20,12 @@ block() {
 
 input=$(cat)
 
-# Resolve the repo root regardless of which agent invoked us, then the template.
 . "$(dirname "$0")/common.sh"
+# A missing jq fails closed here; the fail-open below is only for payloads jq
+# itself can't make sense of.
+require_jq
+
+# Resolve the repo root regardless of which agent invoked us, then the template.
 ROOT=$(resolve_repo_root)
 template="$ROOT/.github/PULL_REQUEST_TEMPLATE.md"
 

@@ -3,26 +3,27 @@ import React from 'react';
 import { theme } from '@actual-app/components/theme';
 import type { TagEntity } from '@actual-app/core/types/models';
 
-import { Table, useTableNavigator } from '#components/table';
+import { Table } from '#components/table';
+import type { TableNavigator } from '#components/table';
 
 import { TagRow } from './TagRow';
 
 type TagsListProps = {
+  navigator: TableNavigator<TagEntity>;
   tags: TagEntity[];
   hoveredTag?: string;
   onHover: (id?: string) => void;
 };
 
-export function TagsList({ tags, hoveredTag, onHover }: TagsListProps) {
-  const tableNavigator = useTableNavigator(tags, [
-    'select',
-    'color',
-    'description',
-  ]);
-
+export function TagsList({
+  navigator,
+  tags,
+  hoveredTag,
+  onHover,
+}: TagsListProps) {
   return (
     <Table
-      navigator={tableNavigator}
+      navigator={navigator}
       items={tags}
       backgroundColor={theme.tableBackground}
       renderItem={({ item: tag, focusedField, onEdit }) => {

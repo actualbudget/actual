@@ -134,7 +134,9 @@ jobs:
       contents: read
       id-token: write # Authenticate to Depot via GitHub OIDC for test reporting
     container:
-      image: mcr.microsoft.com/playwright:v1.61.1-jammy
+      # noble (gcc 13) is required to compile native modules against Electron 43+ headers;
+      # jammy's gcc 11/12 cannot parse them. Keep in sync with the desktop-vrt job in vrt-update-generate.yml.
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:

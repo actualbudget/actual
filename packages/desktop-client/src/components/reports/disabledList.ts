@@ -38,6 +38,14 @@ const currentIntervalOptions = [
     disableInclude: true,
   },
   {
+    description: t('Current quarter'),
+    disableInclude: true,
+  },
+  {
+    description: t('Previous quarter'),
+    disableInclude: true,
+  },
+  {
     description: t('Last 30 days'),
     disableInclude: true,
   },

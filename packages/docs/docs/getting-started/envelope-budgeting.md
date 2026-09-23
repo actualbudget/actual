@@ -1,4 +1,4 @@
-# Envelope budgeting
+# Envelope Budgeting
 
 ## Introduction
 
@@ -45,7 +45,7 @@ is working towards your financial goals.
 
 ## Zero-Sum Budgeting Strategies you can use
 
-Every one has a different situation so there isn't a once size fits all way to assign your available funds.
+Every one has a different situation so there isn't a one size fits all way to assign your available funds.
 Detailed below are a few strategies you can use.
 
 ### The Basics of Zero-Sum Budgeting

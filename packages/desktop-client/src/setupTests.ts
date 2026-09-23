@@ -1,10 +1,25 @@
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import type { ReactNode } from 'react';
 
 import { resetTestProviders } from './mocks';
 
 global.IS_TESTING = true;
 global.Actual = {} as typeof global.Actual;
+
+// jsdom doesn't implement ResizeObserver. Components that only use it to
+// react to layout changes (rather than asserting on it) can run against a
+// no-op stub.
+global.ResizeObserver = class {
+  observe() {
+    // no-op
+  }
+  unobserve() {
+    // no-op
+  }
+  disconnect() {
+    // no-op
+  }
+};
 
 type Size = { height: number; width: number };
 

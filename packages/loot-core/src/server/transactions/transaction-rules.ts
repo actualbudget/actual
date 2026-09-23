@@ -333,7 +333,32 @@ export async function runRules(
     accountsMap = accounts;
   }
 
-  let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
+  const rules = rankRules(
+    fastSetMerge(
+      firstcharIndexer.getApplicableRules(trans),
+      payeeIndexer.getApplicableRules(trans),
+    ),
+  );
+
+  let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap, {
+    includeBalance: false,
+  });
+  let lastCategoryIdForGroup: string | null = finalTrans.category ?? null;
+
+  // The running balance is a query over every earlier transaction in
+  // the account, so fetch it at most once, and only for a rule that is
+  // about to run and actually reads it. `rules` is only the candidates
+  // from the indexers, so checking their actions up front isn't enough.
+  let hasBalance = false;
+  async function ensureBalanceFor(rule: { actions: Action[] }) {
+    if (!hasBalance && trans.account && actionsReferenceBalance(rule.actions)) {
+      finalTrans.balance = await getRunningBalanceBeforeTransaction(
+        trans,
+        trans.account,
+      );
+      hasBalance = true;
+    }
+  }
 
   let scheduleRuleID = '';
   // Check if a schedule is attached to this transaction and if so get the rule ID attached to that schedule.
@@ -346,13 +371,6 @@ export async function runRules(
 
   const RuleIdsLinkedToSchedules =
     await getAllRuleIdsFromSchedules(scheduleRuleID);
-
-  const rules = rankRules(
-    fastSetMerge(
-      firstcharIndexer.getApplicableRules(trans),
-      payeeIndexer.getApplicableRules(trans),
-    ),
-  );
 
   const formulaStrings = rules.flatMap(rule =>
     collectFormulasFromActions(rule.actions),
@@ -368,21 +386,48 @@ export async function runRules(
     if (scheduleRuleID !== '') {
       if (rules[i].id === scheduleRuleID) {
         // bypass condition checking to run the rule even if the transaction date falls outside of the schedule's date range.
+        await ensureBalanceFor(rules[i]);
         const changes = rules[i].execActions(finalTrans);
         finalTrans = Object.assign({}, finalTrans, changes);
         await resolvePayeeNameForRules(finalTrans);
+        lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
+          finalTrans,
+          lastCategoryIdForGroup,
+        );
       } else if (RuleIdsLinkedToSchedules.includes(rules[i].id)) {
         // skip all other rules that are linked to other schedules.
         continue;
       } else {
         // if a rule is not linked to a schedule, run it.
-        finalTrans = rules[i].apply(finalTrans);
+        if (rules[i].evalConditions(finalTrans)) {
+          await ensureBalanceFor(rules[i]);
+          finalTrans = Object.assign(
+            {},
+            finalTrans,
+            rules[i].execActions(finalTrans),
+          );
+        }
         await resolvePayeeNameForRules(finalTrans);
+        lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
+          finalTrans,
+          lastCategoryIdForGroup,
+        );
       }
     } else {
       // if there is no scheduleRuleID then just run all rules.
-      finalTrans = rules[i].apply(finalTrans);
+      if (rules[i].evalConditions(finalTrans)) {
+        await ensureBalanceFor(rules[i]);
+        finalTrans = Object.assign(
+          {},
+          finalTrans,
+          rules[i].execActions(finalTrans),
+        );
+      }
       await resolvePayeeNameForRules(finalTrans);
+      lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
+        finalTrans,
+        lastCategoryIdForGroup,
+      );
     }
   }
 
@@ -742,9 +787,10 @@ export async function applyActions(
 
   const accounts: db.DbAccount[] = await db.getAccounts();
   const accountsMap = new Map(accounts.map(account => [account.id, account]));
+  const includeBalance = actionsReferenceBalance(parsedActions);
   const transactionsForRules = await Promise.all(
-    transactions.map(transactions =>
-      prepareTransactionForRules(transactions, accountsMap),
+    transactions.map(transaction =>
+      prepareTransactionForRules(transaction, accountsMap, { includeBalance }),
     ),
   );
 
@@ -989,7 +1035,13 @@ export type TransactionForRules = TransactionEntity & {
   balance?: number;
   _category_name?: string;
   _account_name?: string;
+  /** The transaction's category's group id; see prepareTransactionForRules */
+  category_group?: string;
   parent_amount?: number;
+  parent_notes?: string;
+  parent_imported_payee?: string;
+  parent_payee?: string;
+  parent_account?: string;
   /** Prefetched cent balances for BALANCE_OF("…") in rule formulas; cleared in finalize */
   _balanceOfPrefetched?: Map<string, number>;
 };
@@ -1065,9 +1117,28 @@ export async function prefetchBalanceOfForTransaction(
   return map;
 }
 
+const BALANCE_VARIABLE = /\bbalance\b/i;
+
+// Whether any of these actions can read the transaction's running
+// balance: Handlebars templates via `{{balance}}` and formulas via the
+// `balance` variable. `BALANCE_OF(...)` is a different, prefetched value
+// and does not count.
+export function actionsReferenceBalance(
+  actions: Array<{ options?: { template?: string; formula?: string } }>,
+): boolean {
+  return actions.some(action => {
+    const { template, formula } = action.options ?? {};
+    return (
+      (typeof template === 'string' && BALANCE_VARIABLE.test(template)) ||
+      (typeof formula === 'string' && BALANCE_VARIABLE.test(formula))
+    );
+  });
+}
+
 export async function prepareTransactionForRules(
   trans: TransactionEntity,
   accounts: Map<string, db.DbAccount> | null = null,
+  { includeBalance = true }: { includeBalance?: boolean } = {},
 ): Promise<TransactionForRules> {
   const r: TransactionForRules = { ...trans };
   if (trans.payee) {
@@ -1088,13 +1159,28 @@ export async function prepareTransactionForRules(
       r._account_name = r._account?.name || '';
     }
 
-    r.balance = await getRunningBalanceBeforeTransaction(trans, trans.account);
+    if (includeBalance) {
+      r.balance = await getRunningBalanceBeforeTransaction(
+        trans,
+        trans.account,
+      );
+    }
   }
 
   if (trans.category) {
     const category = await getCategory(trans.category);
     if (category) {
       r._category_name = category.name;
+
+      // Populate the group id so a `category_group` rule condition can
+      // actually match. Previously this was never set here, so
+      // Condition.eval()'s `object['category_group']` lookup always
+      // came back undefined and the condition silently never matched
+      // during live rule application (import/manual entry). The
+      // query/report path (conditionsToAQL) was unaffected, since it
+      // maps the field to a real join (`category.group`) instead of
+      // reading this property.
+      r.category_group = category.cat_group;
     }
   }
 
@@ -1120,6 +1206,35 @@ async function resolvePayeeNameForRules(
   }
 }
 
+/**
+ * `category_group` is only computed once, in prepareTransactionForRules,
+ * before any rules have run. Since rules apply as a chain and an earlier
+ * rule's action can change (or clear) `category`, a later rule's
+ * `category_group` condition would otherwise read a stale group id left
+ * over from before that change. Called after every rule application in
+ * the runRules loop; only re-resolves the group when `category` has
+ * actually changed since the last check, to avoid a database lookup on
+ * every rule when category was untouched.
+ */
+async function refreshCategoryGroupIfChanged(
+  trans: TransactionForRules,
+  lastCategoryId: string | null,
+): Promise<string | null> {
+  const currentCategoryId = trans.category ?? null;
+  if (currentCategoryId === lastCategoryId) {
+    return lastCategoryId;
+  }
+
+  if (currentCategoryId) {
+    const category = await getCategory(currentCategoryId);
+    trans.category_group = category?.cat_group;
+  } else {
+    delete trans.category_group;
+  }
+
+  return currentCategoryId;
+}
+
 export async function finalizeTransactionForRules(
   trans: TransactionEntity | TransactionForRules,
 ): Promise<TransactionEntity> {
@@ -1132,12 +1247,27 @@ export async function finalizeTransactionForRules(
     delete trans.balance;
   }
 
+  // Synthetic field used only for `category_group` condition matching;
+  // never a real transaction column, so strip it before the
+  // transaction is returned/persisted.
+  if ('category_group' in trans) {
+    delete trans.category_group;
+  }
+
   if ('_balanceOfPrefetched' in trans) {
     delete trans._balanceOfPrefetched;
   }
 
-  if ('parent_amount' in trans) {
-    delete trans.parent_amount;
+  for (const field of [
+    'parent_amount',
+    'parent_notes',
+    'parent_imported_payee',
+    'parent_payee',
+    'parent_account',
+  ] as const) {
+    if (field in trans) {
+      delete trans[field];
+    }
   }
 
   if (trans.subtransactions?.length) {
@@ -1150,8 +1280,16 @@ export async function finalizeTransactionForRules(
         delete stx._balanceOfPrefetched;
       }
 
-      if ('parent_amount' in stx) {
-        delete stx.parent_amount;
+      for (const field of [
+        'parent_amount',
+        'parent_notes',
+        'parent_imported_payee',
+        'parent_payee',
+        'parent_account',
+      ] as const) {
+        if (field in stx) {
+          delete stx[field];
+        }
       }
     });
   }

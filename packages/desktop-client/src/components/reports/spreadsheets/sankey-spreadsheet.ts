@@ -81,6 +81,22 @@ type CategoryEntry = {
   payeeId?: string;
 };
 
+type TransferEntry = {
+  accountId: string;
+  accountName: string;
+  amount: number;
+  id: string;
+  transfer_id: string;
+};
+
+type TransferPair = {
+  fromAccountId: string;
+  fromAccountName: string;
+  toAccountId: string;
+  toAccountName: string;
+  amount: number;
+};
+
 type SortMode = 'per-group' | 'global' | 'budget-order';
 
 type NodeKey = string;
@@ -97,6 +113,7 @@ export type NodeData = {
   color?: string;
 };
 export type Graph = Map<NodeKey, NodeData>;
+type VisualLayerIndex = number;
 
 type TooltipInfoMap = Map<
   NodeKey,
@@ -151,6 +168,7 @@ export function createBaseGraphSpreadsheet(
   conditionsOp: 'and' | 'or' = 'and',
   mode: 'budgeted' | 'spent' = 'spent',
   groupAccounts: boolean = false,
+  showTransfers: boolean = false,
 ) {
   return async (
     _spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -164,6 +182,7 @@ export function createBaseGraphSpreadsheet(
       conditionsOp,
       mode,
       groupAccounts,
+      showTransfers,
     );
 
     setData(baseGraph);
@@ -178,9 +197,11 @@ async function createBaseGraph(
   conditionsOp: 'and' | 'or' = 'and',
   mode: 'budgeted' | 'spent' = 'spent',
   groupAccounts: boolean = false,
+  showTransfers: boolean = false,
 ): Promise<Graph> {
   let data: CategoryEntry[] = [];
   let aggregated: AggregatedBudget | undefined;
+  let transferData: TransferPair[] | undefined;
 
   if (mode === 'budgeted') {
     ({ data, aggregated } = await createBudgetSpreadsheet(
@@ -190,19 +211,22 @@ async function createBaseGraph(
       conditionsOp,
     )());
   } else if (mode === 'spent') {
-    data = await createTransactionsSpreadsheet(
+    const res = await createTransactionsSpreadsheet(
       start,
       end,
       categories,
       conditions,
       conditionsOp,
       groupAccounts,
+      showTransfers,
     )();
+    data = res.data;
+    transferData = res.transferData;
   }
 
   return aggregated
     ? createBudgetGraph(data, aggregated)
-    : createTransactionsGraph(data);
+    : createTransactionsGraph(data, transferData, groupAccounts);
 }
 
 export function buildSankeyData(
@@ -221,10 +245,10 @@ export function buildSankeyData(
     categorySort,
   );
   const sortedGraph = sortGraph(graph, categorySort, categories);
-  addPercentageLabels(sortedGraph);
-  addColors(sortedGraph);
   cleanUpNodes(sortedGraph);
   addHiddenNodes(sortedGraph);
+  addPercentageLabels(sortedGraph);
+  addColors(sortedGraph);
   filterGraphByLayers(sortedGraph, layerFrom, layerTo);
 
   return convertToSankeyData(sortedGraph, toolTipInfoMap);
@@ -352,6 +376,7 @@ export function createTransactionsSpreadsheet(
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
   groupAccounts: boolean,
+  showTransfers: boolean,
 ) {
   return async () => {
     // gather filters user has set
@@ -369,7 +394,17 @@ export function createTransactionsSpreadsheet(
       groupAccounts,
     );
 
-    return categoryData;
+    let transferData: TransferPair[] = [];
+    if (showTransfers) {
+      transferData = await fetchTransferData(
+        conditionsOpKey,
+        filters,
+        start,
+        end,
+      );
+    }
+
+    return { data: categoryData, transferData };
   };
 }
 
@@ -566,6 +601,97 @@ async function fetchCategoryData(
   return allCategoryData;
 }
 
+// Fetch transactions that are transfers within the provided month range
+async function fetchTransferData(
+  conditionsOpKey: string = '$and',
+  filters: unknown[] = [],
+  start: string,
+  end: string,
+): Promise<TransferPair[]> {
+  const results = await aqlQuery(
+    q('transactions')
+      .filter({ [conditionsOpKey]: filters })
+      .filter({
+        $and: [
+          { date: { $gte: monthUtils.firstDayOfMonth(start) } },
+          { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+        ],
+      })
+      .filter({ transfer_id: { $ne: null }, 'account.offbudget': false })
+      .select([
+        { id: 'id' },
+        { amount: 'amount' },
+        { accountId: { $id: '$account.id' } },
+        { accountName: { $id: '$account.name' } },
+        { transfer_id: 'transfer_id' },
+      ]),
+  );
+
+  const raw_results: TransferEntry[] = results.data.map(
+    (row: {
+      id?: string;
+      amount?: number;
+      accountId?: string;
+      accountName?: string;
+      transfer_id?: string;
+    }) =>
+      ({
+        id: row.id ?? '',
+        amount: row.amount ?? 0,
+        accountId: row.accountId ?? '',
+        accountName: row.accountName ?? '',
+        transfer_id: row.transfer_id ?? '',
+      }) satisfies TransferEntry,
+  );
+
+  return aggregateTransferPairs(raw_results);
+}
+
+export function aggregateTransferPairs(
+  rawResults: TransferEntry[],
+): TransferPair[] {
+  const byId = new Map<string, TransferEntry>();
+  const byAccountId = new Map<string, string>();
+
+  rawResults.forEach((transfer: TransferEntry) => {
+    byId.set(String(transfer.id), transfer);
+    byAccountId.set(String(transfer.accountId), transfer.accountName);
+  });
+
+  const resultPairs = new Map<string, number>();
+
+  rawResults.forEach((from: TransferEntry) => {
+    const to = byId.get(String(from.transfer_id));
+    if (!to) return;
+
+    if (from.accountId > to.accountId) return;
+
+    const [accountId1, accountId2] = [from.accountId, to.accountId].sort();
+    const pairKey = `${accountId1}|${accountId2}`;
+    const sourceAccountId = from.amount < 0 ? from.accountId : to.accountId;
+    const sign = sourceAccountId === accountId1 ? 1 : -1;
+    const existingValue = resultPairs.get(pairKey) ?? 0;
+
+    resultPairs.set(pairKey, existingValue + sign * Math.abs(from.amount));
+  });
+
+  return Array.from(resultPairs.entries())
+    .filter(([, value]) => value !== 0)
+    .map(([key, value]) => {
+      const [accountId1, accountId2] = key.split('|');
+      const fromAccountId = value > 0 ? accountId1 : accountId2;
+      const toAccountId = value > 0 ? accountId2 : accountId1;
+
+      return {
+        fromAccountId,
+        fromAccountName: byAccountId.get(fromAccountId) || '',
+        toAccountId,
+        toAccountName: byAccountId.get(toAccountId) || '',
+        amount: Math.abs(value),
+      };
+    }) satisfies TransferPair[];
+}
+
 export function createBudgetGraph(
   categoryData: CategoryEntry[],
   aggregated: AggregatedBudget,
@@ -729,7 +855,11 @@ export function createBudgetGraph(
   return graph;
 }
 
-export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
+export function createTransactionsGraph(
+  categoryData: CategoryEntry[],
+  transferData?: TransferPair[],
+  groupAccounts?: boolean,
+): Graph {
   function addAccountNode(accountId: string, accountName: string): void {
     if (accountId === SpecialNodeKeys.AllAccounts) {
       addNodeWithLabel(
@@ -833,6 +963,17 @@ export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
       }
     }
   });
+
+  // If transfer data is provided, add links between accounts representing transfers.
+  // Pair transactions strictly by transfer_id === id.
+  if (transferData && transferData.length > 0 && !groupAccounts) {
+    transferData.forEach((pair: TransferPair) => {
+      addAccountNode(pair.fromAccountId, pair.fromAccountName);
+      addAccountNode(pair.toAccountId, pair.toAccountName);
+      addValueToLink(graph, pair.fromAccountId, pair.toAccountId, pair.amount);
+    });
+  }
+
   return graph;
 }
 
@@ -882,20 +1023,167 @@ export function addValueToLink(
   }
 }
 
-export function getLayer(graph: Graph, key: NodeKey): number {
-  // Find parent nodes for the given key
-  const parents: NodeKey[] = [];
-  for (const [parentKey, data] of graph) {
-    if (data.to.has(key)) {
-      parents.push(parentKey);
-    }
+export function getLayer(
+  graph: Graph,
+  key: NodeKey,
+  layerCache?: Map<NodeKey, VisualLayerIndex>,
+): number {
+  const resolvedLayerCache = layerCache ?? new Map<NodeKey, VisualLayerIndex>();
+
+  const cachedLayer = resolvedLayerCache.get(key);
+  if (cachedLayer !== undefined) {
+    return cachedLayer;
   }
-  if (parents.length === 0) {
-    // No parents: this is a root node, layer 0
+
+  if (!graph.has(key)) {
+    resolvedLayerCache.set(key, 0);
     return 0;
   }
-  // Otherwise, 1 + max parent's layer
-  return 1 + Math.max(...parents.map(parentKey => getLayer(graph, parentKey)));
+
+  const computedLayers = getLayersByStronglyConnectedComponents(graph);
+  computedLayers.forEach((layer, nodeKey) => {
+    resolvedLayerCache.set(nodeKey, layer);
+  });
+
+  return resolvedLayerCache.get(key) ?? 0;
+}
+
+function getLayersByStronglyConnectedComponents(
+  graph: Graph,
+): Map<NodeKey, VisualLayerIndex> {
+  const visitedIndex = new Map<NodeKey, number>();
+  const lowlink = new Map<NodeKey, number>();
+  const stack: NodeKey[] = [];
+  const activeStack = new Set<NodeKey>();
+  const componentByNode = new Map<NodeKey, number>();
+  const components: NodeKey[][] = [];
+  let index = 0;
+
+  function strongConnect(nodeKey: NodeKey) {
+    visitedIndex.set(nodeKey, index);
+    lowlink.set(nodeKey, index);
+    index += 1;
+    stack.push(nodeKey);
+    activeStack.add(nodeKey);
+
+    const node = graph.get(nodeKey);
+    if (node) {
+      for (const childKey of node.to.keys()) {
+        if (!graph.has(childKey)) {
+          continue;
+        }
+
+        if (!visitedIndex.has(childKey)) {
+          strongConnect(childKey);
+          lowlink.set(
+            nodeKey,
+            Math.min(lowlink.get(nodeKey) ?? 0, lowlink.get(childKey) ?? 0),
+          );
+        } else if (activeStack.has(childKey)) {
+          lowlink.set(
+            nodeKey,
+            Math.min(
+              lowlink.get(nodeKey) ?? 0,
+              visitedIndex.get(childKey) ?? 0,
+            ),
+          );
+        }
+      }
+    }
+
+    if (lowlink.get(nodeKey) === visitedIndex.get(nodeKey)) {
+      const componentIndex = components.length;
+      const componentNodes: NodeKey[] = [];
+
+      let poppedNode: NodeKey | undefined;
+      do {
+        poppedNode = stack.pop();
+        if (!poppedNode) {
+          break;
+        }
+
+        activeStack.delete(poppedNode);
+        componentByNode.set(poppedNode, componentIndex);
+        componentNodes.push(poppedNode);
+      } while (poppedNode !== nodeKey);
+
+      components.push(componentNodes);
+    }
+  }
+
+  for (const nodeKey of graph.keys()) {
+    if (!visitedIndex.has(nodeKey)) {
+      strongConnect(nodeKey);
+    }
+  }
+
+  const parentsByComponent = new Map<number, Set<number>>();
+  for (
+    let componentIndex = 0;
+    componentIndex < components.length;
+    componentIndex += 1
+  ) {
+    parentsByComponent.set(componentIndex, new Set());
+  }
+
+  for (const [sourceKey, sourceNode] of graph) {
+    const sourceComponent = componentByNode.get(sourceKey);
+    if (sourceComponent === undefined) {
+      continue;
+    }
+
+    for (const targetKey of sourceNode.to.keys()) {
+      const targetComponent = componentByNode.get(targetKey);
+      if (
+        targetComponent === undefined ||
+        targetComponent === sourceComponent
+      ) {
+        continue;
+      }
+
+      parentsByComponent.get(targetComponent)?.add(sourceComponent);
+    }
+  }
+
+  const layerByComponent = new Map<number, VisualLayerIndex>();
+  function resolveComponentLayer(componentIndex: number): VisualLayerIndex {
+    const cachedComponentLayer = layerByComponent.get(componentIndex);
+    if (cachedComponentLayer !== undefined) {
+      return cachedComponentLayer;
+    }
+
+    const parents = parentsByComponent.get(componentIndex);
+    if (!parents || parents.size === 0) {
+      layerByComponent.set(componentIndex, 0);
+      return 0;
+    }
+
+    const layer =
+      1 + Math.max(...Array.from(parents).map(resolveComponentLayer));
+    layerByComponent.set(componentIndex, layer);
+    return layer;
+  }
+
+  const layerByNode = new Map<NodeKey, VisualLayerIndex>();
+  for (const [nodeKey, componentIndex] of componentByNode) {
+    layerByNode.set(nodeKey, resolveComponentLayer(componentIndex));
+  }
+
+  return layerByNode;
+}
+
+function getComputedNodeLayers(graph: Graph): Map<NodeKey, VisualLayerIndex> {
+  const layerCache = new Map<NodeKey, VisualLayerIndex>();
+
+  for (const key of graph.keys()) {
+    getLayer(graph, key, layerCache);
+  }
+
+  return layerCache;
+}
+
+function isHiddenNodeKey(key: NodeKey): boolean {
+  return key.endsWith(SpecialNodeKeys.HiddenSuffix);
 }
 
 function groupOtherCategories(
@@ -1001,28 +1289,35 @@ function moveToOther(
   fromNodes.forEach(([fromKey, fromData]) => {
     const linkValue = fromData.to.get(key);
     if (linkValue !== undefined) {
-      addValueToLink(graph, fromKey, otherKey, linkValue);
-      newAddTooltipInfo(
-        toolTipInfoMap,
-        fromKey,
-        otherKey,
-        graph.get(key)?.name ?? key,
-        linkValue,
-      );
+      // Avoid creating self-links (otherKey -> otherKey) which produce
+      // immediate cycles and can break recursive layer computation.
+      if (fromKey !== otherKey) {
+        addValueToLink(graph, fromKey, otherKey, linkValue);
+        newAddTooltipInfo(
+          toolTipInfoMap,
+          fromKey,
+          otherKey,
+          graph.get(key)?.name ?? key,
+          linkValue,
+        );
+      }
     }
   });
   toNodes.forEach(toKey => {
     const fromData = graph.get(key);
     const linkValue = fromData?.to.get(toKey);
     if (linkValue !== undefined) {
-      addValueToLink(graph, otherKey, toKey, linkValue);
-      newAddTooltipInfo(
-        toolTipInfoMap,
-        otherKey,
-        toKey,
-        graph.get(key)?.name ?? key,
-        linkValue,
-      );
+      // Avoid creating self-links (otherKey -> otherKey)
+      if (otherKey !== toKey) {
+        addValueToLink(graph, otherKey, toKey, linkValue);
+        newAddTooltipInfo(
+          toolTipInfoMap,
+          otherKey,
+          toKey,
+          graph.get(key)?.name ?? key,
+          linkValue,
+        );
+      }
     }
   });
 
@@ -1245,19 +1540,31 @@ export function moveNodeToStart(
   }
 }
 
-export function getNodeValue(graph: Graph, key: NodeKey): number {
+export function getNodeValue(
+  graph: Graph,
+  key: NodeKey,
+  computedLayersByNode?: Map<NodeKey, VisualLayerIndex>,
+): number {
+  const resolvedLayersByNode =
+    computedLayersByNode ?? getComputedNodeLayers(graph);
   let nodeValue: number = 0;
 
-  if (getLayer(graph, key) === 0) {
+  if ((resolvedLayersByNode.get(key) ?? 0) === 0) {
     // Look at outgoing links for root nodes
     const node = graph.get(key);
     if (node) {
-      node.to.forEach(value => {
+      node.to.forEach((value, targetKey) => {
+        if (isHiddenNodeKey(targetKey)) {
+          return;
+        }
         nodeValue += value ?? 0;
       });
     }
   } else {
-    graph.forEach(data => {
+    graph.forEach((data, sourceKey) => {
+      if (isHiddenNodeKey(sourceKey)) {
+        return;
+      }
       nodeValue += data.to.get(key) ?? 0;
     });
 
@@ -1266,7 +1573,10 @@ export function getNodeValue(graph: Graph, key: NodeKey): number {
       nodeValue = 0;
       const node = graph.get(key);
       if (node) {
-        node.to.forEach(value => {
+        node.to.forEach((value, targetKey) => {
+          if (isHiddenNodeKey(targetKey)) {
+            return;
+          }
           nodeValue += value;
         });
       }
@@ -1276,22 +1586,38 @@ export function getNodeValue(graph: Graph, key: NodeKey): number {
 }
 
 export function addPercentageLabels(graph: Graph): void {
-  const layerSums = new Map<GraphLayers, number>();
+  const layerSums = new Map<VisualLayerIndex, number>();
+  const computedLayersByNode = getComputedNodeLayers(graph);
 
-  // First pass: calculate GraphLayer sums
+  // First pass: calculate visual-layer sums
   graph.forEach((_: NodeData, key: NodeKey) => {
-    const layer = graph.get(key)?.type;
-    if (!layer) {
+    if (isHiddenNodeKey(key)) {
       return;
     }
-    const nodeValue = getNodeValue(graph, key);
+
+    const layer = computedLayersByNode.get(key);
+    if (layer === undefined) {
+      return;
+    }
+
+    const nodeValue = getNodeValue(graph, key, computedLayersByNode);
     layerSums.set(layer, (layerSums.get(layer) ?? 0) + nodeValue);
   });
 
   // Second pass: assign percentage label to each node
   graph.forEach((data: NodeData, key: NodeKey) => {
-    const layer = data.type;
-    const nodeValue = getNodeValue(graph, key);
+    if (isHiddenNodeKey(key)) {
+      data.percentageLabel = undefined;
+      return;
+    }
+
+    const layer = computedLayersByNode.get(key);
+    if (layer === undefined) {
+      data.percentageLabel = undefined;
+      return;
+    }
+
+    const nodeValue = getNodeValue(graph, key, computedLayersByNode);
     const layerTotal = layerSums.get(layer) ?? 1;
     const percentage = layerTotal ? (nodeValue / layerTotal) * 100 : 0;
     data.percentageLabel = `${percentage.toFixed(1)}%`;
@@ -1336,7 +1662,7 @@ function setColor(graph: Graph, key: NodeKey, color: string) {
   }
 }
 
-function addHiddenNodes(graph: Graph) {
+export function addHiddenNodes(graph: Graph) {
   // Nodes with parents/children different than other nodes in the same layer might end up
   // in the wrong place in the graph. This fixes that, by adding extra, hidden nodes.
 
@@ -1423,6 +1749,88 @@ function addHiddenNodes(graph: Graph) {
       }
     }
   }
+
+  ensureCategoryGroupsFollowAccountLayers(graph);
+}
+
+function ensureCategoryGroupsFollowAccountLayers(graph: Graph) {
+  let computedLayersByNode = getComputedNodeLayers(graph);
+
+  let maxVisibleAccountLayer = -1;
+  for (const [key, node] of graph) {
+    if (node.type !== GraphLayers.Account || isHiddenNodeKey(key)) {
+      continue;
+    }
+
+    const nodeLayer = computedLayersByNode.get(key);
+    if (nodeLayer !== undefined && nodeLayer > maxVisibleAccountLayer) {
+      maxVisibleAccountLayer = nodeLayer;
+    }
+  }
+
+  if (maxVisibleAccountLayer < 0) {
+    return;
+  }
+
+  const categoryGroupsToPush: NodeKey[] = [];
+  for (const [key, node] of graph) {
+    if (node.type !== GraphLayers.CategoryGroup) {
+      continue;
+    }
+
+    const nodeLayer = computedLayersByNode.get(key);
+    if (nodeLayer !== undefined && nodeLayer <= maxVisibleAccountLayer) {
+      categoryGroupsToPush.push(key);
+    }
+  }
+
+  for (const key of categoryGroupsToPush) {
+    let currentLayer = computedLayersByNode.get(key);
+    while (
+      currentLayer !== undefined &&
+      currentLayer <= maxVisibleAccountLayer
+    ) {
+      const deepestParent = getDeepestParentKey(
+        graph,
+        key,
+        computedLayersByNode,
+      );
+      if (!deepestParent) {
+        break;
+      }
+
+      const hiddenParentKey = `${key}_${GraphLayers.Account}_${currentLayer}${SpecialNodeKeys.HiddenSuffix}`;
+      addNode(graph, hiddenParentKey, GraphLayers.Account, '');
+      addValueToLink(graph, deepestParent, hiddenParentKey, -1);
+      addValueToLink(graph, hiddenParentKey, key, -1);
+
+      computedLayersByNode = getComputedNodeLayers(graph);
+      currentLayer = computedLayersByNode.get(key);
+    }
+  }
+}
+
+function getDeepestParentKey(
+  graph: Graph,
+  nodeKey: NodeKey,
+  computedLayersByNode: Map<NodeKey, VisualLayerIndex>,
+): NodeKey | undefined {
+  let deepestParent: NodeKey | undefined;
+  let deepestLayer = -Infinity;
+
+  for (const [parentKey, data] of graph) {
+    if (!data.to.has(nodeKey)) {
+      continue;
+    }
+
+    const parentLayer = computedLayersByNode.get(parentKey);
+    if (parentLayer !== undefined && parentLayer > deepestLayer) {
+      deepestLayer = parentLayer;
+      deepestParent = parentKey;
+    }
+  }
+
+  return deepestParent;
 }
 
 function buildTypeConnectivity(

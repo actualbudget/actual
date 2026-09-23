@@ -19,6 +19,8 @@ const MODES = new Set<TimeFrame['mode']>([
   'lastYear',
   'yearToDate',
   'priorYearToDate',
+  'currentQuarter',
+  'previousQuarter',
 ]);
 
 export function resolveDashboardTimeRange(

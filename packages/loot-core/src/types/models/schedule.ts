@@ -1,6 +1,6 @@
 import type { AccountEntity } from './account';
 import type { PayeeEntity } from './payee';
-import type { RuleConditionEntity, RuleEntity } from './rule';
+import type { RuleActionEntity, RuleConditionEntity, RuleEntity } from './rule';
 
 export type RecurPattern = {
   value: number;
@@ -38,7 +38,8 @@ export type ScheduleEntity = {
   _amountOp: string;
   _date: RecurConfig | string;
   _conditions: RuleConditionEntity[];
-  _actions: Array<{ op: unknown }>;
+  _actions: RuleActionEntity[];
+  _has_splits?: boolean;
 };
 
 export type DiscoverScheduleEntity = {

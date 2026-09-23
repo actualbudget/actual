@@ -37,85 +37,74 @@ jobs:
       contents: read
       actions: read
     steps:
-      - name: Checkout base branch
+      # `pull_request_target` runs the trusted base workflow. Keep executable
+      # helpers on that same revision; never execute code from the PR head.
+      - name: Checkout base revision
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.base_ref }}
+          ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
 
-      # Resolve one successful `build.yml` run for each side (master and PR
-      # head) up front, then pin every download below to its `run_id`. This
-      # ensures artifact downloads are consistent and prevents race conditions.
+      # Resolve one successful `build.yml` run for each exact commit (base and
+      # PR head) up front, then pin every download below to its `run_id`.
       - name: Resolve build runs
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         id: build-runs
         env:
           BASE_REF: ${{ github.base_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         with:
           script: |
-            const TIMEOUT_MS = 30 * 60 * 1000;
-            const SLEEP_MS = 15000;
-
-            async function resolveRun({ label, filter, notFoundHint }) {
-              const deadline = Date.now() + TIMEOUT_MS;
-              while (true) {
-                const { data } = await github.rest.actions.listWorkflowRuns({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  workflow_id: 'build.yml',
-                  ...filter,
-                  status: 'success',
-                  per_page: 1,
-                });
-                if (data.workflow_runs.length > 0) {
-                  const run = data.workflow_runs[0];
-                  core.info(`Found ${label} build run ${run.id} (${run.html_url})`);
-                  return run.id;
-                }
-                if (Date.now() > deadline) {
-                  throw new Error(
-                    `No successful build.yml run found for ${label} within 30 min — ${notFoundHint}.`,
-                  );
-                }
-                core.info(`No successful ${label} build run yet — sleeping 15s.`);
-                await new Promise(r => setTimeout(r, SLEEP_MS));
-              }
-            }
-
+            const { resolveBuildRun } = await import(
+              `${process.env.GITHUB_WORKSPACE}/packages/ci-actions/src/build-runs/resolve.mjs`
+            );
             const baseRef = process.env.BASE_REF;
+            const baseSha = process.env.BASE_SHA;
             const headSha = process.env.HEAD_SHA;
-            const [masterRunId, headRunId] = await Promise.all([
-              resolveRun({
-                label: baseRef,
-                filter: { branch: baseRef },
+            const common = {
+              github,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              log: message => core.info(message),
+            };
+            // `build.yml` head artifacts use `refs/pull/N/merge`, which is
+            // computed against `pull_request.base.sha`; use that exact commit
+            // for the baseline so the two artifacts are a matched pair.
+            const [baseRun, headRun] = await Promise.all([
+              resolveBuildRun({
+                ...common,
+                label: `${baseRef} base ${baseSha}`,
+                headSha: baseSha,
                 notFoundHint: `${baseRef} may be broken`,
               }),
-              resolveRun({
+              resolveBuildRun({
+                ...common,
                 label: `PR head ${headSha}`,
-                filter: { head_sha: headSha },
+                headSha,
                 notFoundHint:
                   'build may still be running, have failed, or the branch may have been force-pushed',
               }),
             ]);
-            core.setOutput('master_run_id', masterRunId);
-            core.setOutput('head_run_id', headRunId);
+            core.info(`Using baseline commit ${baseSha}.`);
+            core.setOutput('base_run_id', baseRun.id);
+            core.setOutput('head_run_id', headRun.id);
 
       - name: Download web build artifact from ${{github.base_ref}}
         uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
-          run_id: ${{ steps.build-runs.outputs.master_run_id }}
+          run_id: ${{ steps.build-runs.outputs.base_run_id }}
           workflow: build.yml
           name: build-stats
           path: base
       - name: Download API build artifact from ${{github.base_ref}}
         uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
-          run_id: ${{ steps.build-runs.outputs.master_run_id }}
+          run_id: ${{ steps.build-runs.outputs.base_run_id }}
           workflow: build.yml
           name: api-build-stats
           path: base
@@ -136,7 +125,7 @@ jobs:
       - name: Download CLI build artifact from ${{github.base_ref}}
         uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
-          run_id: ${{ steps.build-runs.outputs.master_run_id }}
+          run_id: ${{ steps.build-runs.outputs.base_run_id }}
           workflow: build.yml
           name: cli-build-stats
           path: base
@@ -150,7 +139,7 @@ jobs:
       - name: Download CRDT build artifact from ${{github.base_ref}}
         uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
-          run_id: ${{ steps.build-runs.outputs.master_run_id }}
+          run_id: ${{ steps.build-runs.outputs.base_run_id }}
           workflow: build.yml
           name: crdt-build-stats
           path: base

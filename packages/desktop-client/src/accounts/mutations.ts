@@ -151,7 +151,7 @@ export function useReopenAccountMutation() {
 }
 
 type UpdateAccountPayload = {
-  account: AccountEntity;
+  account: Pick<AccountEntity, 'id'> & Partial<AccountEntity>;
 };
 
 export function useUpdateAccountMutation() {

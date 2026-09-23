@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { q } from '@actual-app/core/shared/query';
-import type { Query } from '@actual-app/core/shared/query';
+import type { ObjectExpression, Query } from '@actual-app/core/shared/query';
 import {
   getHasTransactionsQuery,
   getStatus,
@@ -106,6 +106,10 @@ export function useSchedules({
 
     scheduleQueryRef.current = liveQuery<ScheduleEntity>(query, {
       onData: async schedules => {
+        // `onData` fires again whenever the schedules change, so tear down the
+        // previous status query first. Otherwise each refresh orphans a live
+        // query that stays subscribed to sync events and keeps re-running.
+        statusQueryRef.current?.unsubscribe();
         statusQueryRef.current = loadStatuses(
           schedules,
           (statuses: ScheduleStatuses) => {
@@ -160,8 +164,19 @@ export function getSchedulesQuery(
     if (view === 'uncategorized') {
       query = query.filter({ next_date: null });
     } else {
+      const scheduleFilters: ObjectExpression[] = [
+        filterByAccount,
+        filterByPayee,
+      ].filter(filter => filter !== null);
+
+      if (view !== 'onbudget' && view !== 'offbudget') {
+        scheduleFilters.push({
+          _has_splits: true,
+        });
+      }
+
       query = query.filter({
-        $or: [filterByAccount, filterByPayee],
+        $or: scheduleFilters,
       });
     }
   }

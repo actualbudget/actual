@@ -50,6 +50,33 @@ export function getLiveRange(
       );
       break;
     }
+    case 'currentQuarter': {
+      const quarterStart = monthUtils.getQuarterStart(
+        monthUtils.getMonth(referenceDate),
+      );
+      const quarterEnd = monthUtils.getQuarterEnd(
+        monthUtils.getMonth(referenceDate),
+      );
+      [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
+        quarterStart + '-01',
+        monthUtils.lastDayOfMonth(quarterEnd),
+      );
+      break;
+    }
+    case 'previousQuarter': {
+      const prevQuarterMonth = monthUtils.prevQuarter(
+        monthUtils.getMonth(referenceDate),
+      );
+      const quarterStart = monthUtils.getQuarterStart(prevQuarterMonth);
+      const quarterEnd = monthUtils.getQuarterEnd(prevQuarterMonth);
+      [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
+        quarterStart + '-01',
+        monthUtils.lastDayOfMonth(quarterEnd),
+      );
+      break;
+    }
     case 'last30Days': {
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,

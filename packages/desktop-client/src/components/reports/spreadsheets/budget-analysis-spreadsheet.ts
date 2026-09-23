@@ -43,6 +43,134 @@ export function isBaseCategory(
   return !cat.is_income && (showHiddenCategories || !cat.hidden);
 }
 
+/**
+ * Last month the date pickers offer.
+ *
+ * The range runs through December of next year so the report can be used for
+ * planning ahead, but it never cuts off existing data: if a transaction is
+ * dated even further out, that month stays selectable.
+ */
+export function getLastSelectableMonth(
+  currentMonth: string,
+  latestMonth: string,
+): string {
+  const futureMonth = `${Number(currentMonth.slice(0, 4)) + 1}-12`;
+  return latestMonth > futureMonth ? latestMonth : futureMonth;
+}
+
+export type MonthCategoryTotals = {
+  budgeted: number;
+  spent: number;
+  /**
+   * Sum of category balances that roll into the next month: positive balances
+   * always roll over, negative ones only when the category has carryover
+   * ("rollover overspending") enabled.
+   */
+  carryoverToNextMonth: number;
+  /**
+   * Sum of negative balances for categories without carryover enabled. These
+   * are zeroed out at the month boundary and surface as next month's
+   * overspending adjustment instead of reducing the running balance.
+   */
+  overspendingThisMonth: number;
+  /**
+   * Whether the month returned any budget data at all. Months in the future
+   * that have never been budgeted come back with every cell empty; there is
+   * nothing to carry over from them, so the running balance must pass through
+   * untouched rather than being reset to zero.
+   */
+  hasBudgetData: boolean;
+};
+
+/**
+ * Reduce a month's raw budget cells down to the totals the report needs.
+ */
+export function summarizeMonthCategories(
+  monthData: BudgetMonthCell[],
+  categoriesToInclude: CategoryEntity[],
+): MonthCategoryTotals {
+  let budgeted = 0;
+  let spent = 0;
+  let carryoverToNextMonth = 0;
+  let overspendingThisMonth = 0;
+  let hasBudgetData = false;
+
+  for (const cat of categoriesToInclude) {
+    // Find the budget, spent, balance, and carryover flag for this category
+    const budgetCell = monthData.find((cell: BudgetMonthCell) =>
+      cell.name.endsWith(`budget-${cat.id}`),
+    );
+    const spentCell = monthData.find((cell: BudgetMonthCell) =>
+      cell.name.endsWith(`sum-amount-${cat.id}`),
+    );
+    const balanceCell = monthData.find((cell: BudgetMonthCell) =>
+      cell.name.endsWith(`leftover-${cat.id}`),
+    );
+    const carryoverCell = monthData.find((cell: BudgetMonthCell) =>
+      cell.name.endsWith(`carryover-${cat.id}`),
+    );
+
+    const catBudgeted = (budgetCell?.value as number) || 0;
+    const catSpent = (spentCell?.value as number) || 0;
+    const catBalance = (balanceCell?.value as number) || 0;
+    const hasCarryover = Boolean(carryoverCell?.value);
+
+    // Detect by value, not by cell presence: `envelope-budget-month` builds
+    // its response from the category list, so it emits a cell for every
+    // category in every month and fills missing sheet values with 0. Every
+    // month therefore has all its cells, and presence tells us nothing.
+    // A zero here is unambiguous: `leftover` already folds in the previous
+    // month's balance, so a month with a real balance carrying in cannot
+    // report zero across all three.
+    if (catBudgeted !== 0 || catSpent !== 0 || catBalance !== 0) {
+      hasBudgetData = true;
+    }
+
+    budgeted += catBudgeted;
+    spent += catSpent;
+
+    // Add to next month's carryover if:
+    // - Balance is positive (always carries over), OR
+    // - Balance is negative AND carryover is enabled
+    if (catBalance > 0 || (catBalance < 0 && hasCarryover)) {
+      carryoverToNextMonth += catBalance;
+    } else if (catBalance < 0 && !hasCarryover) {
+      // If balance is negative and carryover is NOT enabled,
+      // this will be zeroed out and becomes next month's overspending adjustment
+      overspendingThisMonth += catBalance; // Keep as negative
+    }
+  }
+
+  return {
+    budgeted,
+    spent,
+    carryoverToNextMonth,
+    overspendingThisMonth,
+    hasBudgetData,
+  };
+}
+
+/**
+ * The balance that seeds the following month.
+ *
+ * Months with budget data hand off only what actually carries over, so
+ * overspending in a category without carryover enabled is reset rather than
+ * dragged forward. Months with no data at all (typically future months that
+ * have never been budgeted) have nothing to carry over and must leave the
+ * running balance untouched.
+ */
+export function getNextRunningBalance({
+  hasBudgetData,
+  carryoverToNextMonth,
+  runningBalance,
+}: {
+  hasBudgetData: boolean;
+  carryoverToNextMonth: number;
+  runningBalance: number;
+}): number {
+  return hasBudgetData ? carryoverToNextMonth : runningBalance;
+}
+
 export function createBudgetAnalysisSpreadsheet({
   conditions = [],
   conditionsOp = 'and',
@@ -174,7 +302,6 @@ export function createBudgetAnalysisSpreadsheet({
 
     // Track running balance that respects carryover flags
     // Get the balance from the month before the start period to initialize properly
-    let runningBalance = 0;
     const monthBeforeStart = monthUtils.subMonths(
       monthUtils.getMonth(startDate),
       1,
@@ -184,22 +311,10 @@ export function createBudgetAnalysisSpreadsheet({
     });
 
     // Calculate the carryover from the previous month
-    for (const cat of categoriesToInclude) {
-      const balanceCell = prevMonthData.find((cell: BudgetMonthCell) =>
-        cell.name.endsWith(`leftover-${cat.id}`),
-      );
-      const carryoverCell = prevMonthData.find((cell: BudgetMonthCell) =>
-        cell.name.endsWith(`carryover-${cat.id}`),
-      );
-
-      const catBalance = (balanceCell?.value as number) || 0;
-      const hasCarryover = Boolean(carryoverCell?.value);
-
-      // Add to running balance if it would carry over
-      if (catBalance > 0 || (catBalance < 0 && hasCarryover)) {
-        runningBalance += catBalance;
-      }
-    }
+    let runningBalance = summarizeMonthCategories(
+      prevMonthData,
+      categoriesToInclude,
+    ).carryoverToNextMonth;
 
     // Track totals across all months
     let totalBudgeted = 0;
@@ -215,48 +330,13 @@ export function createBudgetAnalysisSpreadsheet({
       // This uses the same calculations as the budget page
       const monthData = await send('envelope-budget-month', { month });
 
-      let budgeted = 0;
-      let spent = 0;
-      let overspendingThisMonth = 0;
-
-      // Track what will carry over to next month
-      let carryoverToNextMonth = 0;
-
-      // Sum up values for categories we're interested in
-      for (const cat of categoriesToInclude) {
-        // Find the budget, spent, balance, and carryover flag for this category
-        const budgetCell = monthData.find((cell: BudgetMonthCell) =>
-          cell.name.endsWith(`budget-${cat.id}`),
-        );
-        const spentCell = monthData.find((cell: BudgetMonthCell) =>
-          cell.name.endsWith(`sum-amount-${cat.id}`),
-        );
-        const balanceCell = monthData.find((cell: BudgetMonthCell) =>
-          cell.name.endsWith(`leftover-${cat.id}`),
-        );
-        const carryoverCell = monthData.find((cell: BudgetMonthCell) =>
-          cell.name.endsWith(`carryover-${cat.id}`),
-        );
-
-        const catBudgeted = (budgetCell?.value as number) || 0;
-        const catSpent = (spentCell?.value as number) || 0;
-        const catBalance = (balanceCell?.value as number) || 0;
-        const hasCarryover = Boolean(carryoverCell?.value);
-
-        budgeted += catBudgeted;
-        spent += catSpent;
-
-        // Add to next month's carryover if:
-        // - Balance is positive (always carries over), OR
-        // - Balance is negative AND carryover is enabled
-        if (catBalance > 0 || (catBalance < 0 && hasCarryover)) {
-          carryoverToNextMonth += catBalance;
-        } else if (catBalance < 0 && !hasCarryover) {
-          // If balance is negative and carryover is NOT enabled,
-          // this will be zeroed out and becomes next month's overspending adjustment
-          overspendingThisMonth += catBalance; // Keep as negative
-        }
-      }
+      const {
+        budgeted,
+        spent,
+        carryoverToNextMonth,
+        overspendingThisMonth,
+        hasBudgetData,
+      } = summarizeMonthCategories(monthData, categoriesToInclude);
 
       // Apply overspending adjustment from previous month (negative value)
       const overspendingAdjustment = overspendingFromPrevMonth;
@@ -272,13 +352,16 @@ export function createBudgetAnalysisSpreadsheet({
       intervalData.push({
         date: month,
         budgeted,
-        spent, // Display as positive
+        spent,
         balance: monthBalance,
-        overspendingAdjustment: Math.abs(overspendingAdjustment), // Display as positive
+        overspendingAdjustment: Math.abs(overspendingAdjustment),
       });
 
-      // Update running balance for next month
-      runningBalance = carryoverToNextMonth;
+      runningBalance = getNextRunningBalance({
+        hasBudgetData,
+        carryoverToNextMonth,
+        runningBalance,
+      });
       // Save this month's overspending to apply in next month
       overspendingFromPrevMonth = overspendingThisMonth;
     }

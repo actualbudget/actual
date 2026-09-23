@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "26.8.0",
+  "version": "26.9.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -15,6 +15,7 @@
       "electron-renderer": "./src/browser-preload.electron.ts",
       "default": "./src/browser-preload.js"
     },
+    "#account-groups": "./src/account-groups/index.ts",
     "#accounts": "./src/accounts/index.ts",
     "#budget": "./src/budget/index.ts",
     "#payees": "./src/payees/index.ts",
@@ -57,16 +58,21 @@
     "#components/reports/chart-theme": "./src/components/reports/chart-theme.ts",
     "#components/reports/constants": "./src/components/reports/constants.ts",
     "#components/reports/disabledList": "./src/components/reports/disabledList.ts",
+    "#components/reports/dateRangePresets": "./src/components/reports/dateRangePresets.ts",
     "#components/reports/getCustomTick": "./src/components/reports/getCustomTick.ts",
     "#components/reports/getLiveRange": "./src/components/reports/getLiveRange.ts",
+    "#components/reports/monthRange": "./src/components/reports/monthRange.ts",
     "#components/reports/graphs/showActivity": "./src/components/reports/graphs/showActivity.ts",
     "#components/reports/graphs/util/computePadding": "./src/components/reports/graphs/util/computePadding.ts",
+    "#components/reports/graphs/util/monteCarloCashflowChart": "./src/components/reports/graphs/util/monteCarloCashflowChart.ts",
+    "#components/reports/graphs/util/useMonteCarloTickFormatter": "./src/components/reports/graphs/util/useMonteCarloTickFormatter.ts",
     "#components/reports/numberFormatter": "./src/components/reports/numberFormatter.ts",
     "#components/reports/ReportOptions": "./src/components/reports/ReportOptions.ts",
     "#components/reports/reportRanges": "./src/components/reports/reportRanges.ts",
     "#components/reports/reports/monte-carlo/monteCarloHistoricalReturns": "./src/components/reports/reports/monte-carlo/monteCarloHistoricalReturns.ts",
     "#components/reports/reports/monte-carlo/monteCarloSimulation": "./src/components/reports/reports/monte-carlo/monteCarloSimulation.ts",
     "#components/reports/reports/monte-carlo/monteCarloStyles": "./src/components/reports/reports/monte-carlo/monteCarloStyles.ts",
+    "#components/reports/reports/monte-carlo/monteCarloYearStory": "./src/components/reports/reports/monte-carlo/monteCarloYearStory.ts",
     "#components/reports/reports/monte-carlo/useResolvedMonteCarloConfig": "./src/components/reports/reports/monte-carlo/useResolvedMonteCarloConfig.ts",
     "#components/reports/setSessionReport": "./src/components/reports/setSessionReport.ts",
     "#components/reports/spendingAverageRange": "./src/components/reports/spendingAverageRange.ts",
@@ -107,6 +113,7 @@
     "#budget/*": "./src/budget/*.ts",
     "#budgetfiles/*": "./src/budgetfiles/*.ts",
     "#modals/*": "./src/modals/*.ts",
+    "#news/*": "./src/news/*.ts",
     "#notifications/*": "./src/notifications/*.ts",
     "#payees/*": "./src/payees/*.ts",
     "#prefs/*": "./src/prefs/*.ts",
@@ -193,6 +200,7 @@
     "react-grid-layout": "^2.2.3",
     "react-hotkeys-hook": "^5.3.3",
     "react-i18next": "^17.0.10",
+    "react-joyride": "^3.2.0",
     "react-markdown": "^10.1.0",
     "react-redux": "^9.3.0",
     "react-router": "8.3.0",
@@ -208,9 +216,9 @@
     "sass": "^1.101.0",
     "typescript-strict-plugin": "^2.4.4",
     "usehooks-ts": "^3.1.1",
-    "uuid": "^14.0.1",
+    "uuid": "^14.0.2",
     "vite": "^8.1.5",
     "vite-plugin-pwa": "^1.3.0",
-    "vitest": "^4.1.10"
+    "vitest": "^5.0.0"
   }
 }

@@ -20,7 +20,8 @@ import APIList from './APIList';
 "importTransactions",
 "getTransactions",
 "updateTransaction",
-"deleteTransaction"
+"deleteTransaction",
+"mergeTransactions"
 ]} />
 
 <APIList title="Accounts" sections={[
@@ -70,7 +71,6 @@ import APIList from './APIList';
 <APIList title="Rules" sections={[
 "ConditionOrAction",
 "Rule",
-"Payee rule",
 "getRules",
 "getPayeeRules",
 "createRule",
@@ -108,7 +108,8 @@ import APIList from './APIList';
 "batchBudgetUpdates",
 "runQuery",
 "getIDByName",
-"getPreferences"
+"getPreferences",
+"setPreference"
 ]} />
 
 ## Types of Methods
@@ -280,6 +281,7 @@ This method has the following optional flags (passed as the `opts` object):
 - `defaultCleared`: whether imported transactions should be marked as cleared (defaults to `true`)
 - `dryRun`: if `true`, returns what would be added/updated without actually modifying the database (defaults to `false`)
 - `reimportDeleted`: if `true`, transactions that were previously imported and then deleted will be reimported; if `false`, they will be skipped (defaults to `true` for backward compatibility — note that the [file import UI](../transactions/importing.md#avoiding-duplicate-transactions) defaults to `false`)
+- `payeeNameNormalization`: how `payee_name` is processed when creating a payee — `'title-case'` re-capitalizes each word, `'original'` keeps the name as given, apart from trimming surrounding whitespace (defaults to `'title-case'`)
 
 Example using opts:
 
@@ -313,6 +315,21 @@ Update fields of a transaction. `fields` can specify any field described in [`Tr
 <Method name="deleteTransaction" args={[{ name: 'id', type: 'id'}]} />
 
 Delete a transaction.
+
+#### `mergeTransactions`
+
+<Method name="mergeTransactions" args={[{ name: 'ids', type: 'id[]' }]} returns="Promise<id>" />
+
+Merge exactly two distinct transactions from the same account into one. Returns the id of the surviving transaction; the other one is deleted.
+
+The order of the ids does not decide which transaction survives:
+
+- an imported transaction is kept over a manually entered one
+- otherwise, the transaction with the earlier date is kept
+
+The surviving transaction keeps its own field values and fills in any empty ones from the deleted transaction. It is marked cleared if either transaction was.
+
+The merge fails if you pass the same id twice, or if the two transactions are in different accounts, have different amounts, or are transfers to different accounts.
 
 #### Examples
 
@@ -351,20 +368,6 @@ await updateTransaction(id, { category: foodCategory.id });
 #### Account
 
 <StructType fields={objects.account} />
-
-#### Account Types
-
-The account type must be one of these valid strings:
-
-- `checking`
-- `savings`
-- `credit`
-- `investment`
-- `mortgage`
-- `debt`
-- `other`
-
-The account type does not affect anything currently. It's simply extra information about the account.
 
 #### Closing Accounts
 
@@ -425,17 +428,60 @@ Gets the balance for an account. If a cutoff is given, it gives the account bala
 #### Examples
 
 ```js
-// Create a savings accounts
+// Create a savings account
 createAccount({
-  name: "Ally Savings",
-  type: "savings
-})
+  name: 'Ally Savings',
+});
 ```
 
 ```js
 // Get all accounts
 
 let accounts = await getAccounts();
+```
+
+## Account Groups
+
+### Account Group
+
+<StructType fields={objects.accountGroup} />
+
+Account groups let you organize accounts into named groups, for example "Savings" or "Credit Cards". An account can belong to at most one group, set through the `account_group_id` field on [`Account`](#account).
+
+#### Methods
+
+#### `getAccountGroups`
+
+<Method name="getAccountGroups" args={[]} returns="Promise<AccountGroup[]>" />
+
+Get all account groups. Returns an array of [`Account Group`](#account-group) objects.
+
+#### `createAccountGroup`
+
+<Method name="createAccountGroup" args={[{ name: 'group', type: 'AccountGroup' }]} returns="Promise<id>" />
+
+Create an account group. Returns the `id` of the new group.
+
+#### `updateAccountGroup`
+
+<Method name="updateAccountGroup" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} />
+
+Update fields of an account group. `fields` can specify the `name` field described in [`Account Group`](#account-group).
+
+#### `deleteAccountGroup`
+
+<Method name="deleteAccountGroup" args={[{ name: 'id', type: 'id' }]} />
+
+Delete an account group. Any accounts in the group are left ungrouped.
+
+#### Examples
+
+```js
+// Group two accounts under "Savings"
+
+const groupId = await createAccountGroup({ name: 'Savings' });
+await updateAccount(allySavingsId, { account_group_id: groupId });
+await updateAccount(marcusSavingsId, { account_group_id: groupId });
 ```
 
 ## Categories
@@ -653,10 +699,6 @@ await updateTag(id, { color: '#00ff00' });
 
 <StructType fields={objects.rule} />
 
-#### Payee Rule
-
-<StructType fields={objects.payeeRule} />
-
 #### Methods
 
 #### `getRules`
@@ -669,7 +711,7 @@ Get all rules.
 
 <Method name="getPayeeRules" args={[{ name: 'payeeId', type: "id" }]} returns="Promise<Rule[]>" />
 
-Get all rules associated with `payeeId`.
+Get all rules associated with `payeeId`. These are ordinary `Rule` objects, in the same shape `getRules` returns. A rule is associated with a payee when one of its conditions or actions has a `payee` field referencing that id, so the returned rules have no `payee_id` property.
 
 #### `createRule`
 
@@ -863,3 +905,9 @@ return error or the current server versions.
 <Method name="getPreferences" args={[]} returns="Promise<SyncedPrefs>" />
 
 Returns the budget's synced preferences — settings that sync across devices, such as the number format (`numberFormat`, `hideFraction`), currency (`defaultCurrencyCode`, `currencySymbolPosition`, `currencySpaceBetweenAmountAndSymbol`), date format (`dateFormat`), and first day of the week (`firstDayOfWeekIdx`). All values are strings (or `undefined` if the preference has never been set). The `SyncedPrefs` type is exported from `@actual-app/api/models`.
+
+#### `setPreference`
+
+<Method name="setPreference" args={[{ name: 'id', type: 'keyof SyncedPrefs' }, { name: 'value', type: 'string | undefined' }]} returns="Promise<void>" />
+
+Sets a single synced preference. The `id` must be a valid SyncedPrefs key.

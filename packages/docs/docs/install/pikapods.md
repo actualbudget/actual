@@ -112,7 +112,9 @@ Keep your Actual Budget password safe, as it cannot be retrieved. If you forget 
 
 ## Using a PWA (Progressive Web App) {#using-a-pwa}
 
-When using Actual Server over the internet, we suggest using a PWA web client. After you login and open Actual Budget, it's easy to set up a PWA from your browser of choice.
+Modern browsers let you install a website on your device so it behaves like a standalone app. This is known as a Progressive Web App (PWA). If you access Actual Server over the internet, installing it as a PWA gives you quicker access and an app-like experience.
+
+After logging in and opening Actual Budget, you can install it as a PWA directly from your browser.
 
 Here's some help with a few common desktop browsers.
 

@@ -18,12 +18,17 @@ import type {
 import { css } from '@emotion/css';
 import { v4 as uuidv4 } from 'uuid';
 
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
+import { MonteCarloContributions } from '#components/reports/reports/monte-carlo/MonteCarloContributions';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
+import { MonteCarloIncomeStreams } from '#components/reports/reports/monte-carlo/MonteCarloIncomeStreams';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import { MonteCarloPotConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloPotConfiguration';
 import { MonteCarloPotsTableHeader } from '#components/reports/reports/monte-carlo/MonteCarloPotsTableHeader';
 import {
   createMonteCarloPot,
+  createMonteCarloSurplusPot,
+  getMonteCarloPotLabel,
   MAX_SIMULATION_COUNT,
   MIN_SIMULATION_COUNT,
   MONTE_CARLO_DEFAULTS,
@@ -42,7 +47,13 @@ import {
 import { MonteCarloTaxConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloTaxConfiguration';
 import { MonteCarloWithdrawalRuleConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloWithdrawalRuleConfiguration';
 
-type ConfigurationTab = 'plan' | 'pots' | 'withdrawals' | 'tax';
+type ConfigurationTab =
+  | 'plan'
+  | 'pots'
+  | 'contributions'
+  | 'income'
+  | 'withdrawals'
+  | 'tax';
 
 const PLAN_GROUP_FIELDS_STYLE = {
   flexDirection: 'row',
@@ -61,6 +72,34 @@ export function MonteCarloConfiguration({
 }: MonteCarloConfigurationProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<ConfigurationTab>('plan');
+
+  // Whether unspent money is kept is simply whether a surplus pot exists
+  const keepsSurplus = config.pots.some(pot => pot.isSurplus);
+  const ordinaryPotCount = config.pots.filter(pot => !pot.isSurplus).length;
+
+  function onKeepSurplusChange(keep: boolean) {
+    if (keep) {
+      // First in the list, matching the order it's drawn on
+      onConfigChange({
+        pots: [createMonteCarloSurplusPot(uuidv4()), ...config.pots],
+      });
+    } else {
+      // The surplus pot only exists while unspent money is kept; it
+      // takes its contributions with it, and the plan always keeps a pot
+      const surplusPotIds = config.pots
+        .filter(pot => pot.isSurplus)
+        .map(pot => pot.id);
+      const remainingPots = config.pots.filter(pot => !pot.isSurplus);
+      onConfigChange({
+        pots: remainingPots.length
+          ? remainingPots
+          : [createMonteCarloPot(uuidv4())],
+        contributions: config.contributions.filter(
+          contribution => !surplusPotIds.includes(contribution.potId),
+        ),
+      });
+    }
+  }
 
   function onPotChange(potId: string, changes: Partial<MonteCarloPot>) {
     onConfigChange({
@@ -117,8 +156,8 @@ export function MonteCarloConfiguration({
         gap: 15,
       }}
     >
-      {/* Tab bar */}
-      <View style={{ flexDirection: 'row', gap: 5 }}>
+      {/* Tab bar; wraps onto extra lines on narrow screens */}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
         <ModeButton
           selected={activeTab === 'plan'}
           onSelect={() => setActiveTab('plan')}
@@ -130,6 +169,18 @@ export function MonteCarloConfiguration({
           onSelect={() => setActiveTab('pots')}
         >
           <Trans>Investment pots</Trans>
+        </ModeButton>
+        <ModeButton
+          selected={activeTab === 'income'}
+          onSelect={() => setActiveTab('income')}
+        >
+          <Trans>Income</Trans>
+        </ModeButton>
+        <ModeButton
+          selected={activeTab === 'contributions'}
+          onSelect={() => setActiveTab('contributions')}
+        >
+          <Trans>Contributions</Trans>
         </ModeButton>
         <ModeButton
           selected={activeTab === 'withdrawals'}
@@ -145,23 +196,69 @@ export function MonteCarloConfiguration({
         </ModeButton>
       </View>
 
-      <Text style={{ color: theme.pageText }}>
-        {activeTab === 'plan'
-          ? t(
-              'Who this plan is for and how the simulation generates market returns.',
-            )
-          : activeTab === 'pots'
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+        <Text style={{ color: theme.pageText }}>
+          {activeTab === 'plan'
             ? t(
-                'The invested accounts your plan draws from - each with its own balance, allocation, and return assumptions. Drag rows to reorder pots; expand a row for access, tax and fee settings.',
+                'Who this plan is for and how the simulation generates market returns.',
               )
-            : activeTab === 'withdrawals'
+            : activeTab === 'pots'
               ? t(
-                  'How much you take out each year, and optional rules that adjust it as markets move.',
+                  'The invested accounts your plan draws from - each with its own balance, allocation, and return assumptions. Drag rows to reorder pots; expand a row for access, tax and fee settings.',
                 )
-              : t(
-                  'How withdrawals are taxed - your spending is what you keep after tax.',
-                )}
-      </Text>
+              : activeTab === 'contributions'
+                ? t(
+                    "Money you add to your pots each year, in today's money - paid from one of your income streams, or from outside the plan.",
+                  )
+                : activeTab === 'income'
+                  ? t(
+                      "Money you receive each year without drawing on your pots, in today's money - a state pension, an annuity, rental or part-time work. It pays for spending first; the pots fund the rest.",
+                    )
+                  : activeTab === 'withdrawals'
+                    ? t(
+                        'How much you take out each year, and optional rules that adjust it as markets move.',
+                      )
+                    : t(
+                        'How withdrawals are taxed - your spending is what you keep after tax.',
+                      )}
+        </Text>
+        {activeTab === 'contributions' && (
+          <MonteCarloHelpTooltip>
+            <Trans>
+              Each contribution is paid in at the start of every year in its age
+              window (both ages inclusive), so it earns that year&apos;s return.
+              Leave the ages blank for &ldquo;now&rdquo; and &ldquo;the end of
+              the plan&rdquo;. Tick Adjust by inflation to keep the
+              amount&apos;s buying power constant; untick it for a fixed amount
+              that shrinks in real terms. A pot can receive any number of
+              contributions - even one that is still locked for withdrawals.
+              <br />
+              <br />
+              A contribution paid from an income stream is capped at what that
+              stream brings in that year. Tick Before tax for a workplace
+              pension or salary sacrifice, which is deducted before the
+              income&apos;s tax is worked out.
+            </Trans>
+          </MonteCarloHelpTooltip>
+        )}
+        {activeTab === 'income' && (
+          <MonteCarloHelpTooltip>
+            <Trans>
+              Each income stream arrives every year in its age window (both ages
+              inclusive), taxed the same way as pot withdrawals: at its own rate
+              under the flat model, or by its taxable portion under the bands
+              model, where it uses up the lower bands before any pot withdrawal
+              is taxed. What is left after tax and any contributions paid from
+              it goes towards the year&apos;s spending; the pots only fund the
+              remainder. Income beyond that is unspent: it is saved into the
+              Surplus cash pot, or leaves the plan if you tick Assume any
+              unspent money is spent under Manage surplus on the Plan details
+              tab. You can also route specific amounts into a pot with a
+              contribution.
+            </Trans>
+          </MonteCarloHelpTooltip>
+        )}
+      </View>
 
       {/* Plan details */}
       {activeTab === 'plan' && (
@@ -217,74 +314,6 @@ export function MonteCarloConfiguration({
                     onConfigChange({
                       targetAge: newValue ?? MONTE_CARLO_DEFAULTS.targetAge,
                     })
-                  }
-                />
-              </View>
-            </View>
-          </View>
-
-          <View style={{ gap: 10 }}>
-            <Text style={GROUP_HEADING_STYLE}>
-              <Trans>Inflation</Trans>
-            </Text>
-            <View style={PLAN_GROUP_FIELDS_STYLE}>
-              <View style={FIELD_STYLE}>
-                <View style={FIELD_LABEL_ROW_STYLE}>
-                  <Text style={FIELD_LABEL_STYLE}>
-                    <Trans>Mean (%)</Trans>
-                  </Text>
-                  <MonteCarloHelpTooltip>
-                    <Trans>
-                      The average yearly rise in prices. When set, your planned
-                      spending grows with it so your spending power is
-                      maintained.
-                      <br />
-                      <br />
-                      Leave blank to keep withdrawals flat.
-                    </Trans>
-                  </MonteCarloHelpTooltip>
-                </View>
-                <MonteCarloNumberInput
-                  value={config.inflationMean}
-                  aria-label={t('Inflation mean (%)')}
-                  scale={100}
-                  allowEmpty
-                  min={0}
-                  max={100}
-                  placeholder={t('None')}
-                  onCommit={newValue =>
-                    onConfigChange({ inflationMean: newValue })
-                  }
-                />
-              </View>
-
-              <View style={FIELD_STYLE}>
-                <View style={FIELD_LABEL_ROW_STYLE}>
-                  <Text style={FIELD_LABEL_STYLE}>
-                    <Trans>Std dev (%)</Trans>
-                  </Text>
-                  <MonteCarloHelpTooltip>
-                    <Trans>
-                      Real-world inflation bounces around from year to year
-                      rather than staying fixed. When set, each simulated year
-                      draws its own inflation rate around the mean.
-                      <br />
-                      <br />
-                      Around 2% matches how much US inflation has varied in
-                      recent decades. Set to 0 to use the fixed mean rate every
-                      year.
-                    </Trans>
-                  </MonteCarloHelpTooltip>
-                </View>
-                <MonteCarloNumberInput
-                  value={config.inflationStdDev}
-                  aria-label={t('Inflation std dev (%)')}
-                  scale={100}
-                  min={0}
-                  max={50}
-                  disabled={config.inflationMean == null}
-                  onCommit={newValue =>
-                    onConfigChange({ inflationStdDev: newValue ?? 0 })
                   }
                 />
               </View>
@@ -368,6 +397,162 @@ export function MonteCarloConfiguration({
               </View>
             </View>
           </View>
+
+          <View style={{ gap: 10 }}>
+            <Text style={GROUP_HEADING_STYLE}>
+              <Trans>Inflation</Trans>
+            </Text>
+            {config.returnModel === 'normal' ? (
+              <View style={PLAN_GROUP_FIELDS_STYLE}>
+                <View style={FIELD_STYLE}>
+                  <View style={FIELD_LABEL_ROW_STYLE}>
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Mean (%)</Trans>
+                    </Text>
+                    <MonteCarloHelpTooltip>
+                      <Trans>
+                        The average yearly rise in prices. When set, your
+                        planned spending grows with it so your spending power is
+                        maintained.
+                        <br />
+                        <br />
+                        Leave blank to keep withdrawals flat.
+                      </Trans>
+                    </MonteCarloHelpTooltip>
+                  </View>
+                  <MonteCarloNumberInput
+                    value={config.inflationMean}
+                    aria-label={t('Inflation mean (%)')}
+                    scale={100}
+                    allowEmpty
+                    min={0}
+                    max={100}
+                    placeholder={t('None')}
+                    onCommit={newValue =>
+                      onConfigChange({ inflationMean: newValue })
+                    }
+                  />
+                </View>
+
+                <View style={FIELD_STYLE}>
+                  <View style={FIELD_LABEL_ROW_STYLE}>
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Std dev (%)</Trans>
+                    </Text>
+                    <MonteCarloHelpTooltip>
+                      <Trans>
+                        Real-world inflation bounces around from year to year
+                        rather than staying fixed. When set, each simulated year
+                        draws its own inflation rate around the mean.
+                        <br />
+                        <br />
+                        Around 2% matches how much US inflation has varied in
+                        recent decades. Set to 0 to use the fixed mean rate
+                        every year.
+                      </Trans>
+                    </MonteCarloHelpTooltip>
+                  </View>
+                  <MonteCarloNumberInput
+                    value={config.inflationStdDev}
+                    aria-label={t('Inflation std dev (%)')}
+                    scale={100}
+                    min={0}
+                    max={50}
+                    disabled={config.inflationMean == null}
+                    onCommit={newValue =>
+                      onConfigChange({ inflationStdDev: newValue ?? 0 })
+                    }
+                  />
+                </View>
+              </View>
+            ) : (
+              // Historical models take each sampled year's actual inflation,
+              // so the only real choice is on/off - an honest checkbox
+              // instead of number inputs whose values would be ignored. An
+              // empty label-row spacer seats the checkbox on the same
+              // baseline as the neighboring inputs.
+              <View style={{ width: 250 }}>
+                <View style={FIELD_LABEL_ROW_STYLE} />
+                <View
+                  style={{
+                    minHeight: 28,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <LabeledCheckbox
+                    id="mc-inflation-adjust"
+                    checked={config.inflationMean != null}
+                    onChange={event =>
+                      onConfigChange({
+                        inflationMean: event.target.checked
+                          ? MONTE_CARLO_DEFAULTS.inflationMean
+                          : null,
+                      })
+                    }
+                    style={{ flex: 'unset', minHeight: 'auto' }}
+                  >
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Adjust spending with inflation</Trans>
+                    </Text>
+                  </LabeledCheckbox>
+                  <MonteCarloHelpTooltip>
+                    <Trans>
+                      Historical models pair each sampled year&apos;s market
+                      returns with that same year&apos;s actual US inflation,
+                      keeping the two correlated the way they really were.
+                      Untick to keep withdrawals flat instead.
+                    </Trans>
+                  </MonteCarloHelpTooltip>
+                </View>
+              </View>
+            )}
+          </View>
+
+          <View style={{ gap: 10, flexBasis: '100%' }}>
+            <Text style={GROUP_HEADING_STYLE}>
+              <Trans>Manage surplus</Trans>
+            </Text>
+            <Text style={{ color: theme.pageText }}>
+              <Trans>
+                Money the plan doesn&apos;t spend - such as income beyond your
+                spending - is saved into a Surplus cash pot. Tick the box to
+                treat it as spent and gone instead.
+              </Trans>
+            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+                // Sized to its content so the help icon sits by the label
+                // rather than at the far end of the full-width group
+                alignSelf: 'flex-start',
+              }}
+            >
+              <LabeledCheckbox
+                id="mc-assume-surplus-spent"
+                checked={!keepsSurplus}
+                onChange={event => onKeepSurplusChange(!event.target.checked)}
+              >
+                <Trans>Assume any unspent money is spent</Trans>
+              </LabeledCheckbox>
+              <MonteCarloHelpTooltip>
+                <Trans>
+                  The Surplus cash pot is created automatically. Income beyond
+                  your spending goes into it, and it is drawn on before any
+                  other pot when spending needs funding.
+                  <br />
+                  <br />
+                  It starts empty and holds cash - no access age, no tax, no
+                  fees. It can&apos;t be edited or deleted from the pots list;
+                  tick the box to remove it, along with any contributions paid
+                  into it, and untick it to bring it back empty.
+                </Trans>
+              </MonteCarloHelpTooltip>
+            </View>
+          </View>
         </View>
       )}
 
@@ -403,14 +588,23 @@ export function MonteCarloConfiguration({
                   <MonteCarloPotConfiguration
                     key={pot.id}
                     pot={pot}
-                    potNumber={config.pots.indexOf(pot) + 1}
-                    canRemove={config.pots.length > 1}
+                    potLabel={getMonteCarloPotLabel(
+                      config.pots,
+                      config.pots.indexOf(pot),
+                      t,
+                    )}
+                    // The surplus pot is managed by the Manage surplus toggle
+                    canRemove={ordinaryPotCount > 1 && !pot.isSurplus}
                     usesHistoricalReturns={config.returnModel !== 'normal'}
                     usesTaxBands={config.taxModel === 'bands'}
                     onPotChange={changes => onPotChange(pot.id, changes)}
                     onRemove={() =>
                       onConfigChange({
                         pots: config.pots.filter(other => other.id !== pot.id),
+                        // A removed pot takes its contributions with it
+                        contributions: config.contributions.filter(
+                          contribution => contribution.potId !== pot.id,
+                        ),
                       })
                     }
                   />
@@ -431,6 +625,30 @@ export function MonteCarloConfiguration({
             </Button>
           </View>
         </View>
+      )}
+
+      {/* Contributions */}
+      {activeTab === 'contributions' && (
+        <MonteCarloContributions
+          contributions={config.contributions}
+          pots={config.pots}
+          incomeStreams={config.incomeStreams}
+          currentAge={config.currentAge}
+          targetAge={config.targetAge}
+          onConfigChange={onConfigChange}
+        />
+      )}
+
+      {/* Income */}
+      {activeTab === 'income' && (
+        <MonteCarloIncomeStreams
+          incomeStreams={config.incomeStreams}
+          contributions={config.contributions}
+          usesTaxBands={config.taxModel === 'bands'}
+          currentAge={config.currentAge}
+          targetAge={config.targetAge}
+          onConfigChange={onConfigChange}
+        />
       )}
 
       {/* Spending */}
@@ -499,14 +717,14 @@ export function MonteCarloConfiguration({
           </View>
           <MonteCarloWithdrawalRuleConfiguration
             rule={config.withdrawalRule}
-            minimumWithdrawal={config.minimumWithdrawal}
+            minimumSpending={config.minimumSpending}
             onRuleChange={changes =>
               onConfigChange({
                 withdrawalRule: { ...config.withdrawalRule, ...changes },
               })
             }
-            onMinimumWithdrawalChange={value =>
-              onConfigChange({ minimumWithdrawal: value })
+            onMinimumSpendingChange={value =>
+              onConfigChange({ minimumSpending: value })
             }
           />
         </View>

@@ -81,7 +81,9 @@ export function deserializeTransaction(
   }
 
   amount =
-    amount != null ? amountToInteger(amount) : originalTransaction.amount;
+    amount != null
+      ? amountToInteger(amount)
+      : (realTransaction.amount ?? originalTransaction.amount);
   let date = originalDate;
   if (date == null) {
     date = originalTransaction.date || currentDay();

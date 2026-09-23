@@ -28,7 +28,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // automatically. Third-party code is never compiled: the babel plugin's
 // default exclude (node_modules) still applies alongside this include.
 const reactCompilerInclude =
-  /[\\/]packages[\\/][^\\/]+[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
+  /[\\/]packages[\\/][^\\/]+[\\/]src[\\/].*\.[jt]sx?(?:$|\?)/;
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',

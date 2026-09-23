@@ -7,6 +7,13 @@
 # (no @ts-strict-ignore, one component per file) are advisory, not enforced.
 # Cursor input on stdin: { file_path, edits, ... }.
 
+# jq is a hard prerequisite. afterFileEdit cannot block, so surface an advisory
+# instead of silently skipping the formatting and new-file checks.
+command -v jq >/dev/null 2>&1 || {
+  echo "[actual] Advisory: the agent hooks require jq, which was not found on PATH — formatting and new-file checks were skipped. Install jq (https://jqlang.org)."
+  exit 0
+}
+
 input=$(cat)
 file=$(printf '%s' "$input" | jq -r '.file_path // empty')
 [ -n "$file" ] && [ -f "$file" ] || exit 0

@@ -7,12 +7,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { ReactNode, RefObject } from 'react';
+import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
-import { SvgHash, SvgSplit } from '@actual-app/components/icons/v0';
+import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgAdd,
   SvgCalendar,
@@ -38,7 +38,7 @@ import { DEFAULT_MAX_DISTANCE_METERS } from '@actual-app/core/shared/constants';
 import { calculateDistance } from '@actual-app/core/shared/location-utils';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import { getUpcomingDays } from '@actual-app/core/shared/schedules';
+import { DEFAULT_UPCOMING_SCHEDULE_DAYS } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -64,7 +64,6 @@ import type {
   PayeeEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
-import { css } from '@emotion/css';
 import {
   format as formatDate,
   isValid as isValidDate,
@@ -72,6 +71,8 @@ import {
   parseISO,
 } from 'date-fns';
 
+import { NoteInsertHashButton } from '#components/autocomplete/NoteInsertHashButton';
+import { NoteTagAutocomplete } from '#components/autocomplete/NoteTagAutocomplete';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import {
   FieldLabel,
@@ -82,13 +83,9 @@ import {
 import { getPrettyPayee } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import { shouldApplyRuleChange } from '#components/transactions/table/utils';
-import { createSingleTimeScheduleFromTransaction } from '#components/transactions/TransactionList';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
-import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
-import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useDateFormat } from '#hooks/useDateFormat';
-import { useInputRefValue } from '#hooks/useInputRefValue';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
 import { useNavigate } from '#hooks/useNavigate';
@@ -99,8 +96,6 @@ import {
   useSingleActiveEditForm,
 } from '#hooks/useSingleActiveEditForm';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import { useTagCSS } from '#hooks/useTagCSS';
-import { useFilteredTags } from '#hooks/useTags';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useSavePayeeLocationMutation } from '#payees';
@@ -109,6 +104,11 @@ import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch, useSelector } from '#redux';
 import { setLastTransaction } from '#transactions/transactionsSlice';
 import { getStatusLabel } from '#util/schedule';
+import {
+  calculateFutureTransactionInfo,
+  createSingleTimeScheduleFromTransaction,
+  isFutureTransaction,
+} from '#util/schedule-actions';
 
 import { AmountInput } from './AmountInput';
 import { SplitAmountInput } from './SplitAmountInput';
@@ -232,10 +232,12 @@ type FooterProps = {
   isAdding: boolean;
   onAdd: () => void;
   onSave: () => void;
+  onSchedule: () => void;
   onSplit: (id: TransactionEntity['id']) => void;
   onAddSplit: (id: TransactionEntity['id']) => void;
   onEmptySplitFound: (id: TransactionEntity['id']) => void;
   editingField?: string;
+  isFuture: boolean;
   onEditField: (
     id: TransactionEntity['id'],
     field: 'category' | 'payee' | 'account' | 'date' | 'amount' | 'notes',
@@ -247,11 +249,13 @@ function Footer({
   isAdding,
   onAdd,
   onSave,
+  onSchedule,
   onSplit,
   onAddSplit,
   onEmptySplitFound,
   editingField,
   onEditField,
+  isFuture,
 }: FooterProps) {
   const [transaction, ...childTransactions] = transactions;
   const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
@@ -278,8 +282,27 @@ function Footer({
         backgroundColor: theme.tableHeaderBackground,
         borderTopWidth: 1,
         borderColor: theme.tableBorder,
+        gap: 8,
       }}
     >
+      {isFuture && (
+        <Button
+          variant="normal"
+          style={{ height: styles.mobileMinHeight }}
+          isDisabled={!!editingField}
+          onPress={onSchedule}
+        >
+          <SvgCalendar width={17} height={17} />
+          <Text
+            style={{
+              ...styles.text,
+              marginLeft: 6,
+            }}
+          >
+            <Trans>Schedule</Trans>
+          </Text>
+        </Button>
+      )}
       {transaction.error?.type === 'SplitTransactionError' ? (
         <Button
           variant="primary"
@@ -452,7 +475,11 @@ const ChildTransactionEdit = forwardRef<
             <FieldLabel title={t('Payee')} />
             <TapField
               icon={<SvgUser width={17} height={17} />}
-              placeholder={t('Who did you pay?')}
+              placeholder={
+                transaction.amount > 0
+                  ? t('Who paid you?')
+                  : t('Who did you pay?')
+              }
               rightContent={dropdownChevron}
               isDisabled={
                 !!editingField &&
@@ -522,7 +549,7 @@ const ChildTransactionEdit = forwardRef<
           <InputField
             ref={noteRef}
             iconStart={<SvgNotesPaper width={17} height={17} />}
-            iconEnd={<NoteInsertHashButton noteRef={noteRef} />}
+            iconEnd={<NoteInsertHashButton inputRef={noteRef} />}
             placeholder={t('Add a note (optional)')}
             disabled={
               !!editingField &&
@@ -619,7 +646,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
-    const [upcomingLength = '7'] = useSyncedPref(
+    const [upcomingLength = DEFAULT_UPCOMING_SCHEDULE_DAYS] = useSyncedPref(
       'upcomingScheduledTransactionLength',
     );
     const transactions = useMemo(
@@ -641,6 +668,10 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     }, []);
 
     const [transaction, ...childTransactions] = transactions;
+
+    const isFuture =
+      unserializedTransactions.length > 0 &&
+      isFutureTransaction(unserializedTransactions[0]);
 
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
@@ -698,8 +729,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     );
 
     const onSaveInner = useCallback(async () => {
-      const [unserializedTransaction] = unserializedTransactions;
-
       const onConfirmSave = () => {
         let transactionsToSave = unserializedTransactions;
         if (isAdding) {
@@ -711,71 +740,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         onSave(transactionsToSave);
         void navigate(-1);
       };
-
-      const today = monthUtils.currentDay();
-      const isFuture = unserializedTransaction.date > today;
-      const isLinkedToSchedule = !!unserializedTransaction.schedule;
-
-      if (isFuture && !isLinkedToSchedule) {
-        const upcomingDays = getUpcomingDays(upcomingLength, today);
-        const daysUntilTransaction = monthUtils.differenceInCalendarDays(
-          unserializedTransaction.date,
-          today,
-        );
-        const isBeyondWindow = daysUntilTransaction > upcomingDays;
-
-        dispatch(
-          pushModal({
-            modal: {
-              name: 'convert-to-schedule',
-              options: {
-                isBeyondWindow,
-                daysUntilTransaction,
-                upcomingDays,
-                onConfirm: async () => {
-                  if (
-                    !isAdding &&
-                    unserializedTransaction.id &&
-                    !unserializedTransaction.id.startsWith('temp')
-                  ) {
-                    await send('transaction-delete', {
-                      id: unserializedTransaction.id,
-                    });
-                  }
-
-                  const transactionForSchedule =
-                    unserializedTransaction.is_parent
-                      ? {
-                          ...unserializedTransaction,
-                          subtransactions: unserializedTransactions.filter(
-                            t =>
-                              t.is_child &&
-                              t.parent_id === unserializedTransaction.id,
-                          ),
-                        }
-                      : unserializedTransaction;
-
-                  await createSingleTimeScheduleFromTransaction(
-                    transactionForSchedule,
-                  );
-
-                  dispatch(
-                    addNotification({
-                      notification: {
-                        type: 'message',
-                        message: t('Schedule created successfully'),
-                      },
-                    }),
-                  );
-                  void navigate(-1);
-                },
-                onCancel: onConfirmSave,
-              },
-            },
-          }),
-        );
-        return;
-      }
 
       if (unserializedTransactions.some(t => t.reconciled)) {
         // On mobile any save gives the warning.
@@ -826,11 +790,111 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           onConfirmSave();
         }
       }
+    }, [isAdding, dispatch, navigate, onSave, unserializedTransactions, t]);
+
+    const onSchedule = useCallback(async () => {
+      const [unserializedTransaction] = unserializedTransactions;
+
+      if (!unserializedTransaction.account) {
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: t('Account is a required field'),
+            },
+          }),
+        );
+        return;
+      }
+
+      // Already linked to a schedule; keep it as a transaction.
+      if (unserializedTransaction.schedule) {
+        return;
+      }
+
+      const transactionForSchedule = unserializedTransaction.is_parent
+        ? {
+            ...unserializedTransaction,
+            subtransactions: unserializedTransactions.filter(
+              t => t.is_child && t.parent_id === unserializedTransaction.id,
+            ),
+          }
+        : unserializedTransaction;
+
+      const createSchedule = async () => {
+        try {
+          await createSingleTimeScheduleFromTransaction(transactionForSchedule);
+        } catch {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: t('Failed to create schedule'),
+              },
+            }),
+          );
+          return;
+        }
+
+        try {
+          if (
+            !isAdding &&
+            unserializedTransaction.id &&
+            !unserializedTransaction.id.startsWith('temp')
+          ) {
+            await send('transaction-delete', {
+              id: unserializedTransaction.id,
+            });
+          }
+        } catch {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: t(
+                  'Schedule created, but the original transaction could not be deleted',
+                ),
+              },
+            }),
+          );
+          void navigate(-1);
+          return;
+        }
+
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'message',
+              message: t('Schedule created successfully'),
+            },
+          }),
+        );
+        void navigate(-1);
+      };
+
+      const { isBeyondWindow, daysUntilTransaction, upcomingDays } =
+        calculateFutureTransactionInfo(transactionForSchedule, upcomingLength);
+
+      if (isBeyondWindow) {
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'convert-to-schedule',
+              options: {
+                daysUntilTransaction,
+                upcomingDays,
+                onConfirm: createSchedule,
+              },
+            },
+          }),
+        );
+      } else {
+        await createSchedule();
+      }
     }, [
       isAdding,
       dispatch,
       navigate,
-      onSave,
       unserializedTransactions,
       upcomingLength,
       t,
@@ -1122,10 +1186,12 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             isAdding={isAdding}
             onAdd={onSaveInner}
             onSave={onSaveInner}
+            onSchedule={onSchedule}
             onSplit={onSplit}
             onAddSplit={onAddSplit}
             onEmptySplitFound={onEmptySplitFound}
             editingField={editingField}
+            isFuture={isFuture}
             onEditField={onEditFieldInner}
           />
         }
@@ -1163,7 +1229,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             <FieldLabel title={t('Payee')} />
             <TapField
               icon={<SvgUser width={17} height={17} />}
-              placeholder={t('Who did you pay?')}
+              placeholder={
+                transaction.amount > 0
+                  ? t('Who paid you?')
+                  : t('Who did you pay?')
+              }
               textStyle={{
                 ...(transaction.is_parent && {
                   fontStyle: 'italic',
@@ -1420,7 +1490,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             <InputField
               ref={noteRef}
               iconStart={<SvgNotesPaper width={17} height={17} />}
-              iconEnd={<NoteInsertHashButton noteRef={noteRef} />}
+              iconEnd={<NoteInsertHashButton inputRef={noteRef} />}
               placeholder={t('Add a note (optional)')}
               disabled={
                 !!editingField &&
@@ -1474,195 +1544,6 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     );
   },
 );
-
-function NoteInsertHashButton({
-  noteRef,
-}: {
-  noteRef: RefObject<HTMLInputElement | null>;
-}) {
-  const { t } = useTranslation();
-  const [inputValue, setInputValue] = useInputRefValue(noteRef);
-  const [_, setCursorPosition] = useCursorPosition(noteRef);
-
-  return (
-    <Button
-      variant="bare"
-      aria-label={t('Add tag')}
-      style={{ color: 'inherit', padding: 1 }}
-      onPointerDown={e => e.preventDefault()}
-      onClick={() => {
-        if (!noteRef.current) return;
-        const isFocused = document.activeElement === noteRef.current;
-        const start = isFocused
-          ? (noteRef.current.selectionStart ?? 0)
-          : inputValue.length;
-        const end = isFocused
-          ? (noteRef.current.selectionEnd ?? 0)
-          : inputValue.length;
-
-        const before = inputValue.substring(0, start);
-        const after = inputValue.substring(end);
-
-        const space = start === 0 || before.match(/\s$/) ? '' : ' ';
-
-        setInputValue(before + space + '#' + after);
-        noteRef.current.focus();
-        setCursorPosition(start + 1 + space.length);
-        // so Safari requires that I do noteRef.current.focus() synchronously,
-        // but Chrome doesn't work unless I do it after. We do both this way.
-        // If the element is already focused, these invocations have no effect
-        setTimeout(() => noteRef.current?.focus(), 1);
-      }}
-    >
-      <SvgHash width={17} height={17} />
-    </Button>
-  );
-}
-
-function NoteTagAutocomplete({
-  inputRef,
-}: {
-  inputRef: RefObject<HTMLInputElement | null>;
-}) {
-  const dispatch = useDispatch();
-  // Yes, there is a lot of ref usages in this component. Here's the motivation
-  // 1. This component purely modifies HTML Input state, app state is handled elsewhere
-  // 2. This component deals with cursor state, which is not easily accessible through regular React code
-  // 3. Child transaction notes (transaction.notes) does not update until blur, so we have to use input state
-  // 4. Given we are already using inputRef in multiple locations, I elected to simplify the props to just the ref and use HTML/JS events
-
-  const [note, setNote] = useInputRefValue(inputRef);
-
-  const [cursorPosition] = useCursorPosition(inputRef);
-  const [startIdx, endIdx] = useCurrentWordRange(note, cursorPosition);
-  const currentWord = note.slice(startIdx, endIdx);
-  const currentWordNoHash = currentWord.replace(/^#+/, '');
-  const { data: filteredTags, refetch } = useFilteredTags(currentWord, true);
-  const showNewTag =
-    currentWord.startsWith('#') &&
-    currentWordNoHash &&
-    !filteredTags.some(tag => tag.tag === currentWordNoHash);
-
-  const getTagCSS = useTagCSS({ ellipsis: true });
-
-  function handleSelect(tag: string) {
-    if (!inputRef.current) return;
-    const newValue =
-      note.slice(0, startIdx) + '#' + tag + ' ' + note.slice(endIdx);
-    setNote(newValue);
-    const newPos = startIdx + tag.length + 2;
-
-    inputRef.current.setSelectionRange(newPos, newPos);
-    document.dispatchEvent(new Event('selectionchange'));
-  }
-
-  async function handleCreate(tag: string) {
-    if (!inputRef.current) return;
-    try {
-      await send('tags-create', { tag });
-      void refetch();
-      handleSelect(tag);
-    } catch (e) {
-      dispatch(
-        addNotification({
-          notification: {
-            type: 'error',
-            message: 'Failed to add tag, check logs',
-          },
-        }),
-      );
-      console.trace(e);
-    }
-  }
-
-  const hideScrollbar = css({
-    'scrollbar-width': 'none',
-    '-ms-overflow-style': 'none',
-    '&::-webkit-scrollbar': {
-      display: 'none',
-    },
-  });
-
-  return (
-    <View
-      style={{
-        width: '100%',
-        padding: '4px 8px 4px 8px',
-        borderRadius: 30,
-        overflowX: 'auto',
-        height: filteredTags.length || showNewTag ? 30 : 0,
-        transitionProperty: 'height',
-        transitionDuration: '100ms',
-      }}
-      className={hideScrollbar}
-    >
-      <View
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'end',
-          flexWrap: 'nowrap',
-          gap: 4,
-          paddingRight: 8,
-        }}
-      >
-        {filteredTags.map(tag => (
-          <div key={tag.id}>
-            <button
-              type="button"
-              style={{
-                border: 'none',
-                height: 22,
-                maxWidth: '50dvw',
-              }}
-              className={getTagCSS(tag.tag)}
-              onMouseDown={e => e.preventDefault()} // stops input from losing focus
-              onClick={() => handleSelect(tag.tag)}
-            >
-              #{tag.tag}
-            </button>
-          </div>
-        ))}
-        {showNewTag && (
-          <button
-            type="button"
-            style={{
-              padding: '1px 1px 1px 9px',
-              borderRadius: 12,
-              borderWidth: 0,
-              backgroundColor: theme.noticeBackground,
-              color: theme.noticeTextDark,
-              display: 'flex',
-              alignItems: 'center',
-              flexWrap: 'nowrap',
-              gap: 4,
-            }}
-            onMouseDown={e => e.preventDefault()} // stops input from losing focus
-            onClick={() => handleCreate(currentWordNoHash)}
-          >
-            <SvgAdd height={8} width={8} />
-            <span style={{ whiteSpace: 'nowrap' }}>
-              <Trans>Create tag</Trans>
-            </span>
-            <div
-              style={{
-                borderWidth: 0,
-                height: 20,
-                maxWidth: '50dvw',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: 'inline-block',
-              }}
-              className={getTagCSS('')}
-            >
-              #{currentWordNoHash}
-            </div>
-          </button>
-        )}
-      </View>
-    </View>
-  );
-}
 
 function isTemporary(transaction: TransactionEntity) {
   return transaction.id.indexOf('temp') === 0;

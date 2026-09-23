@@ -62,9 +62,11 @@ export function useAccountPreviewTransactions({
 
   const accountSchedulesFilter = useCallback(
     (schedule: ScheduleEntity) =>
-      !accountId ||
-      schedule._account === accountId ||
-      getTransferAccountByPayee(schedule._payee)?.id === accountId,
+      isScheduleRelevantToAccount({
+        accountId,
+        schedule,
+        getTransferAccountByPayee,
+      }),
     [accountId, getTransferAccountByPayee],
   );
 
@@ -152,7 +154,86 @@ type InverseBasedOnAccountProps = {
   ) => AccountEntity | null;
 };
 
-function inverseBasedOnAccount({
+type AccountPreviewTransaction = TransactionEntity & {
+  inversed: boolean;
+};
+
+type ScheduleRelevantToAccountProps = Pick<
+  InverseBasedOnAccountProps,
+  'accountId' | 'getTransferAccountByPayee'
+> & {
+  schedule: ScheduleEntity;
+};
+
+export function isScheduleRelevantToAccount({
+  accountId,
+  schedule,
+  getTransferAccountByPayee,
+}: ScheduleRelevantToAccountProps): boolean {
+  if (!accountId) {
+    return true;
+  }
+
+  if (
+    schedule._account === accountId ||
+    getTransferAccountByPayee(schedule._payee)?.id === accountId
+  ) {
+    return true;
+  }
+
+  return schedule._actions.some(action => {
+    if (
+      action.op !== 'set' ||
+      (action.field !== 'payee' && action.field !== 'description') ||
+      !action.options?.splitIndex
+    ) {
+      return false;
+    }
+
+    if (
+      action.options.formula != null ||
+      action.options.template != null ||
+      typeof action.value !== 'string'
+    ) {
+      return true;
+    }
+
+    return getTransferAccountByPayee(action.value)?.id === accountId;
+  });
+}
+
+function inverseTransferForAccount({
+  accountId,
+  previewStatus,
+  transaction,
+  getPayeeByTransferAccount,
+}: Pick<
+  InverseBasedOnAccountProps,
+  'accountId' | 'getPayeeByTransferAccount'
+> & {
+  previewStatus?: TransactionEntity['category'];
+  transaction: TransactionEntity;
+}): AccountPreviewTransaction {
+  const {
+    category: _category,
+    is_child: _isChild,
+    is_parent: _isParent,
+    parent_id: _parentId,
+    subtransactions: _subtransactions,
+    ...standaloneTransaction
+  } = transaction;
+
+  return {
+    ...standaloneTransaction,
+    inversed: true,
+    amount: -transaction.amount,
+    payee: getPayeeByTransferAccount(transaction.account)?.id || '',
+    account: accountId || '',
+    ...(previewStatus != null && { category: previewStatus }),
+  };
+}
+
+export function inverseBasedOnAccount({
   accountId,
   transactions,
   runningBalances,
@@ -163,31 +244,40 @@ function inverseBasedOnAccount({
   transactions: TransactionEntity[];
   runningBalances: Map<TransactionEntity['id'], IntegerAmount>;
 } {
-  const mappedTransactions = transactions.map(transaction => {
-    const inverse = transaction.account !== accountId;
-    const subtransactions = transaction.subtransactions?.map(st => ({
-      ...st,
-      amount: inverse ? -st.amount : st.amount,
-      payee:
-        (inverse ? getPayeeByTransferAccount(st.account)?.id : st.payee) || '',
-      account: inverse
-        ? getTransferAccountByPayee(st.payee)?.id || ''
-        : st.account,
-    }));
-    return {
-      inversed: inverse,
-      ...transaction,
-      amount: inverse ? -transaction.amount : transaction.amount,
-      payee:
-        (inverse
-          ? getPayeeByTransferAccount(transaction.account)?.id
-          : transaction.payee) || '',
-      account: inverse
-        ? getTransferAccountByPayee(transaction.payee)?.id || ''
-        : transaction.account,
-      ...(subtransactions && { subtransactions }),
-    };
-  });
+  const parentPreviewStatuses = new Map(
+    transactions
+      .filter(transaction => transaction.is_parent)
+      .map(transaction => [transaction.id, transaction.category]),
+  );
+  const mappedTransactions: AccountPreviewTransaction[] = transactions.flatMap(
+    transaction => {
+      if (transaction.account === accountId) {
+        return [{ inversed: false, ...transaction }];
+      }
+
+      const candidates = transaction.subtransactions
+        ? transaction.subtransactions
+        : transaction.is_parent
+          ? []
+          : [transaction];
+
+      return candidates
+        .filter(
+          candidate =>
+            getTransferAccountByPayee(candidate.payee)?.id === accountId,
+        )
+        .map(candidate =>
+          inverseTransferForAccount({
+            accountId,
+            previewStatus: candidate.parent_id
+              ? parentPreviewStatuses.get(candidate.parent_id)
+              : candidate.category,
+            transaction: candidate,
+            getPayeeByTransferAccount,
+          }),
+        );
+    },
+  );
 
   // Recalculate running balances if any transaction was inversed.
   // This is necessary because the running balances are calculated based on the

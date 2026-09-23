@@ -54,6 +54,29 @@ describe('postBinary', () => {
     expect((error as PostError).reason).toBe('network-failure');
     expect((error as PostError).cause).toBe(underlying);
   });
+
+  it('treats a missing server session as an expired token', async () => {
+    mockedFetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          status: 'error',
+          reason: 'unauthorized',
+          details: 'token-not-found',
+        }),
+        {
+          status: 401,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      ),
+    );
+
+    const error = await captureError(
+      postBinary('https://test.env/sync/sync', new Uint8Array([1]), {}),
+    );
+
+    expect(error).toBeInstanceOf(PostError);
+    expect((error as PostError).reason).toBe('token-expired');
+  });
 });
 
 describe('post', () => {

@@ -186,6 +186,10 @@ export function prevYear(month: DateLike, format = 'yyyy-MM'): string {
   return d.format(d.subMonths(_parse(month), 12), format);
 }
 
+export function prevQuarter(month: DateLike, format = 'yyyy-MM'): string {
+  return d.format(d.subMonths(_parse(month), 3), format);
+}
+
 export function prevMonth(month: DateLike): string {
   return d.format(d.subMonths(_parse(month), 1), 'yyyy-MM');
 }
@@ -411,6 +415,20 @@ export function getYearStart(month: string): string {
 
 export function getYearEnd(month: string): string {
   return getYear(month) + '-12';
+}
+
+export function getQuarter(month: string): number {
+  return Math.floor((Number(month.slice(5, 7)) - 1) / 3) + 1;
+}
+
+export function getQuarterStart(month: string): string {
+  const startMonth = (getQuarter(month) - 1) * 3 + 1;
+  return getYear(month) + '-' + String(startMonth).padStart(2, '0');
+}
+
+export function getQuarterEnd(month: string): string {
+  const endMonth = getQuarter(month) * 3;
+  return getYear(month) + '-' + String(endMonth).padStart(2, '0');
 }
 
 export function sheetForMonth(month: string): string {

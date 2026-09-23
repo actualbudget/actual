@@ -1,6 +1,6 @@
 {
   "name": "desktop-electron",
-  "version": "26.8.0",
+  "version": "26.9.0",
   "description": "A simple and powerful personal finance system",
   "author": "Actual",
   "main": "build/desktop-electron/index.js",
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
-    "better-sqlite3": "^12.11.1"
+    "better-sqlite3": "^13.0.3"
   },
   "devDependencies": {
     "@actual-app/core": "workspace:*",
@@ -27,7 +27,7 @@
     "@typescript/native-preview": "beta",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
-    "electron": "41.7.1",
+    "electron": "43.4.0",
     "electron-builder": "26.8.1",
     "typescript-strict-plugin": "^2.4.4"
   },
@@ -38,7 +38,7 @@
       "!node_modules/@actual-app/web",
       "node_modules/@actual-app/web/build",
       "node_modules/@actual-app/web/package.json",
-      "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
+      "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,prebuilds,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
       "!**/*.js.map",
       "!**/stats.json",
       "!build/client-build/sql-wasm.wasm",
