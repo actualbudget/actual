@@ -794,27 +794,25 @@ export async function reconcileTransactions(
   };
 }
 
-// Ranks fuzzy-match candidates by distance from transDate, nearest first. On
-// a same-distance tie, a candidate that already carries its own imported_id
-// (from a previous, unrelated sync) ranks after one that doesn't -- otherwise
-// the tie is effectively arbitrary, and picking the already-imported one
-// means the merge below silently overwrites its imported_id/payee/notes with
-// this transaction's data instead of matching the row that's actually a good
-// candidate for it.
+// Ranks fuzzy-match candidates by distance from transaction date, nearest first.
+// On a same-distance tie, a candidate that already carries its own imported_id
+// (from a previous, unrelated sync) ranks after one that doesn't. Without this
+// tie-break, picking the already-imported one would lead the fuzzy match merge
+// to silently overwrite imported_id/payee/notes with this transaction's data.
 export function compareFuzzyMatchCandidates(
-  transDate: string,
+  transactionDate: string,
   a: Pick<db.DbViewTransaction, 'date' | 'imported_id'>,
   b: Pick<db.DbViewTransaction, 'date' | 'imported_id'>,
 ): number {
   const aDistance = Math.abs(
     dateFns.differenceInMilliseconds(
-      dateFns.parseISO(transDate),
+      dateFns.parseISO(transactionDate),
       dateFns.parseISO(db.fromDateRepr(a.date)),
     ),
   );
   const bDistance = Math.abs(
     dateFns.differenceInMilliseconds(
-      dateFns.parseISO(transDate),
+      dateFns.parseISO(transactionDate),
       dateFns.parseISO(db.fromDateRepr(b.date)),
     ),
   );
