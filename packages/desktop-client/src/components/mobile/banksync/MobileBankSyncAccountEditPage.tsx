@@ -127,7 +127,7 @@ export function MobileBankSyncAccountEditPage() {
           }}
         >
           <View style={{ padding: 16 }}>
-            <Text style={{ fontSize: 15, marginBottom: 10 }}>
+            <Text size="large" style={{ marginBottom: 10 }}>
               <Trans>Field mapping</Trans>
             </Text>
 
@@ -140,7 +140,7 @@ export function MobileBankSyncAccountEditPage() {
               isMobile
             />
 
-            <Text style={{ fontSize: 15, marginTop: 20, marginBottom: 10 }}>
+            <Text size="large" style={{ marginTop: 20, marginBottom: 10 }}>
               <Trans>Options</Trans>
             </Text>
 

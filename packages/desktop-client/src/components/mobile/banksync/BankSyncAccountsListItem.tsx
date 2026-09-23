@@ -50,8 +50,8 @@ export function BankSyncAccountsListItem({
           style={{ flex: 1, alignItems: 'flex-start' }}
         >
           <Text
+            size="large"
             style={{
-              fontSize: 15,
               fontWeight: 500,
               color: theme.tableText,
             }}
@@ -60,8 +60,8 @@ export function BankSyncAccountsListItem({
           </Text>
           {isLinked && (
             <Text
+              size="medium"
               style={{
-                fontSize: 13,
                 color: theme.pageTextSubdued,
               }}
             >
@@ -70,8 +70,8 @@ export function BankSyncAccountsListItem({
           )}
           {isLinked && lastSyncString && (
             <Text
+              size="medium"
               style={{
-                fontSize: 13,
                 color: theme.pageTextSubdued,
               }}
               data-vrt-mask

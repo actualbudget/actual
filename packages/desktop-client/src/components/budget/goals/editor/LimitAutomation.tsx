@@ -129,8 +129,8 @@ export const LimitAutomation = ({
       </SpaceBetween>
 
       <Text
+        size="small"
         style={{
-          fontSize: 12,
           color: theme.pageTextLight,
           display: 'block',
           marginTop: 8,

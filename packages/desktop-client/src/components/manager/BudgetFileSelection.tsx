@@ -249,8 +249,8 @@ function BudgetFileState({ file, currentUserId }: BudgetFileStateProps) {
               <Trans>Owner:</Trans>
             </Text>
             <Text
+              size="small"
               style={{
-                ...styles.verySmallText,
                 color: theme.pageTextLight,
                 paddingLeft: 10,
               }}

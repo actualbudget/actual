@@ -297,13 +297,13 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
             }}
           >
             <Text
+              size="large"
               style={{
                 ...makeAmountFullStyle(value, {
                   positiveColor: theme.numberPositive,
                   negativeColor: theme.numberNegative,
                   zeroColor: theme.numberNeutral,
                 }),
-                fontSize: 15,
                 userSelect: 'none',
                 ...textStyle,
               }}

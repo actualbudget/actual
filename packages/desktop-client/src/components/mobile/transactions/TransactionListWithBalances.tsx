@@ -196,7 +196,7 @@ function AppliedFiltersChip() {
       }}
     >
       <SvgFilter width={12} height={12} style={{ flexShrink: 0 }} />
-      <Text style={{ fontSize: 12, fontWeight: 500 }}>
+      <Text size="small" style={{ fontWeight: 500 }}>
         <Trans>Filters applied</Trans>
       </Text>
     </View>
