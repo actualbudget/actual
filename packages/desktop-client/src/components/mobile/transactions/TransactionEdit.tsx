@@ -53,9 +53,11 @@ import {
   applyFindReplace,
   diffItems,
   getChangedValues,
+  getNumberFormat,
   groupById,
   integerToAmount,
   integerToCurrency,
+  MAX_SAFE_NUMBER,
   titleFirst,
 } from '@actual-app/core/shared/util';
 import type {
@@ -92,6 +94,7 @@ import {
   trackClearedField,
 } from '#components/transactions/table/utils';
 import { useAccounts } from '#hooks/useAccounts';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
@@ -125,22 +128,24 @@ function getFieldName(transactionId: TransactionEntity['id'], field: string) {
   return `${field}-${transactionId}`;
 }
 
-function serializeTransaction(
+export function serializeTransaction(
   transaction: TransactionEntity,
   dateFormat: string,
+  precision = 2,
 ) {
   const { date, amount } = transaction;
   return {
     ...transaction,
     date: formatDate(parseISO(date), dateFormat),
-    amount: integerToAmount(amount || 0),
+    amount: integerToAmount(amount || 0, precision),
   };
 }
 
-function deserializeTransaction(
+export function deserializeTransaction(
   transaction: TransactionEntity,
   originalTransaction: TransactionEntity | null,
   dateFormat: string,
+  precision = 2,
 ) {
   const { amount, date: originalDate, ...realTransaction } = transaction;
 
@@ -174,7 +179,15 @@ function deserializeTransaction(
       monthUtils.currentDay();
   }
 
-  return { ...realTransaction, date, amount: amountToInteger(amount || 0) };
+  const encoded = amountToInteger(amount || 0, precision);
+  return {
+    ...realTransaction,
+    date,
+    amount:
+      Number.isSafeInteger(encoded) && Math.abs(encoded) <= MAX_SAFE_NUMBER
+        ? encoded
+        : (originalTransaction?.amount ?? 0),
+  };
 }
 
 export function lookupName(items: CategoryEntity[], id?: CategoryEntity['id']) {
@@ -265,6 +278,8 @@ function Footer({
   onEditField,
   isFuture,
 }: FooterProps) {
+  const precision = useAmountPrecision();
+  const formatter = getNumberFormat({ decimalPlaces: precision }).formatter;
   const [transaction, ...childTransactions] = transactions;
   const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
   const onClickRemainingSplit = () => {
@@ -333,6 +348,8 @@ function Footer({
                     transaction.amount > 0
                       ? transaction.error.difference
                       : -transaction.error.difference,
+                    formatter,
+                    precision,
                   ),
                 }}{' '}
                 left
@@ -345,6 +362,8 @@ function Footer({
                     transaction.amount > 0
                       ? transaction.error.difference
                       : -transaction.error.difference,
+                    formatter,
+                    precision,
                   ),
                 }}
               </Trans>
@@ -651,6 +670,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     nearestPayee,
   }) {
     const { t } = useTranslation();
+    const precision = useAmountPrecision();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
@@ -660,9 +680,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const transactions = useMemo(
       () =>
         unserializedTransactions.map(t =>
-          serializeTransaction(t, dateFormat),
+          serializeTransaction(t, dateFormat, precision),
         ) || [],
-      [unserializedTransactions, dateFormat],
+      [unserializedTransactions, dateFormat, precision],
     );
     const { data: { grouped: categoryGroups } = { grouped: [] } } =
       useCategories();
@@ -1418,7 +1438,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     void onUpdateInner(
                       childTrans,
                       'amount',
-                      integerToAmount(remaining),
+                      integerToAmount(remaining, precision),
                     );
                   }}
                 />
@@ -1606,6 +1626,7 @@ function TransactionEditUnconnected({
   dateFormat,
 }: TransactionEditUnconnectedProps) {
   const { t } = useTranslation();
+  const precision = useAmountPrecision();
   const { transactionId } = useParams();
   const { state: locationState } = useLocation();
   const [searchParams] = useSearchParams();
@@ -1694,6 +1715,10 @@ function TransactionEditUnconnected({
 
   useEffect(() => {
     if (isAdding.current) {
+      const requestedAmount = amountToInteger(
+        parseFloat(searchParams.get('amount') || '') || 0,
+        precision,
+      );
       setTransactions([
         {
           id: 'temp',
@@ -1711,9 +1736,11 @@ function TransactionEditUnconnected({
             lastTransaction?.account ||
             null,
           category: searchParamCategory || locationState?.categoryId || null,
-          amount: -amountToInteger(
-            parseFloat(searchParams.get('amount') || '') || 0,
-          ),
+          amount:
+            Number.isSafeInteger(requestedAmount) &&
+            Math.abs(requestedAmount) <= MAX_SAFE_NUMBER
+              ? -requestedAmount
+              : 0,
           cleared: searchParams.get('cleared') === 'true',
           notes: searchParams.get('notes') || '',
         },
@@ -1727,6 +1754,7 @@ function TransactionEditUnconnected({
     searchParamCategory,
     searchParamPayee,
     searchParams,
+    precision,
   ]);
 
   // Fields the user explicitly emptied while entering the new transaction,
@@ -1744,6 +1772,7 @@ function TransactionEditUnconnected({
         serializedTransaction,
         null,
         dateFormat,
+        precision,
       );
 
       // Run the rules to auto-fill in any data. Right now we only do
@@ -1896,7 +1925,7 @@ function TransactionEditUnconnected({
         }
       }
     },
-    [dateFormat, isLocationGranted],
+    [dateFormat, isLocationGranted, precision],
   );
 
   const onSave = useCallback(
@@ -2005,11 +2034,11 @@ function TransactionEditUnconnected({
     }
 
     const updated = {
-      ...serializeTransaction(transaction, dateFormat),
+      ...serializeTransaction(transaction, dateFormat, precision),
       payee: nearestPayee.id,
     };
     void onUpdate(updated, 'payee');
-  }, [transactions, nearestPayee, onUpdate, dateFormat]);
+  }, [transactions, nearestPayee, onUpdate, dateFormat, precision]);
 
   if (accounts.length === 0) {
     return (
@@ -2175,6 +2204,7 @@ function FillRemainingButton({
   readonly remaining: number;
   readonly onPress: () => void;
 }) {
+  const precision = useAmountPrecision();
   return (
     <Button
       variant="primary"
@@ -2192,7 +2222,11 @@ function FillRemainingButton({
         <Trans>
           Use remaining:{' '}
           {{
-            amount: integerToCurrency(Math.abs(remaining)),
+            amount: integerToCurrency(
+              Math.abs(remaining),
+              getNumberFormat({ decimalPlaces: precision }).formatter,
+              precision,
+            ),
           }}
         </Trans>
       </Text>

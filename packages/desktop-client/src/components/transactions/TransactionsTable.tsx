@@ -64,8 +64,8 @@ import {
   updateTransaction,
 } from '@actual-app/core/shared/transactions';
 import {
-  amountToCurrency,
   currencyToAmount,
+  getNumberFormat,
   integerToCurrency,
   titleFirst,
 } from '@actual-app/core/shared/util';
@@ -109,6 +109,7 @@ import type {
   TableNavigator,
   TableProps,
 } from '#components/table';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import {
   SchedulesProvider,
   useCachedSchedules,
@@ -203,12 +204,19 @@ function measureAmountColumnWidth(values: string[], minWidth: number) {
 export function useAmountColumnWidths(
   transactions: TransactionEntity[],
   balances: Record<TransactionEntity['id'], IntegerAmount> | null,
+  hideFraction = false,
 ): AmountColumnWidths {
+  const precision = useAmountPrecision();
+  const formatter = getNumberFormat({
+    decimalPlaces: hideFraction ? 0 : precision,
+  }).formatter;
   const debitCreditValues = transactions.map(t =>
-    integerToCurrency(Math.abs(t.amount ?? 0)),
+    integerToCurrency(Math.abs(t.amount ?? 0), formatter, precision),
   );
   const balanceValues = balances
-    ? Object.values(balances).map(balance => integerToCurrency(balance))
+    ? Object.values(balances).map(balance =>
+        integerToCurrency(balance, formatter, precision),
+      )
     : [];
 
   return {
@@ -1122,6 +1130,14 @@ const Transaction = memo(function Transaction({
   amountColumnWidths,
 }: TransactionProps) {
   const { t } = useTranslation();
+  const precision = useAmountPrecision();
+  const amountFormatter = useMemo(
+    () =>
+      getNumberFormat({
+        decimalPlaces: hideFraction ? 0 : precision,
+      }).formatter,
+    [hideFraction, precision],
+  );
 
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
@@ -1129,20 +1145,23 @@ const Transaction = memo(function Transaction({
 
   const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
+  const [prevPrecision, setPrevPrecision] = useState(precision);
   const [transaction, setTransaction] = useState(() =>
-    serializeTransaction(originalTransaction, showZeroInDeposit),
+    serializeTransaction(originalTransaction, showZeroInDeposit, precision),
   );
   const isPreview = isPreviewId(transaction.id);
 
   if (
     originalTransaction !== prevTransaction ||
-    showZeroInDeposit !== prevShowZero
+    showZeroInDeposit !== prevShowZero ||
+    precision !== prevPrecision
   ) {
     setTransaction(
-      serializeTransaction(originalTransaction, showZeroInDeposit),
+      serializeTransaction(originalTransaction, showZeroInDeposit, precision),
     );
     setPrevTransaction(originalTransaction);
     setPrevShowZero(showZeroInDeposit);
+    setPrevPrecision(precision);
   }
 
   const [showReconciliationWarning, setShowReconciliationWarning] =
@@ -1292,10 +1311,13 @@ const Transaction = memo(function Transaction({
       const deserialized = deserializeTransaction(
         newTransaction,
         originalTransaction,
+        precision,
       );
       // Run the transaction through the formatting so that we know
       // it's always showing the formatted result
-      setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
+      setTransaction(
+        serializeTransaction(deserialized, showZeroInDeposit, precision),
+      );
 
       const deserializedName = ['credit', 'debit'].includes(name)
         ? 'amount'
@@ -2009,10 +2031,12 @@ const Transaction = memo(function Transaction({
             name="debit"
             exposed={focusedField === 'debit'}
             focused={focusedField === 'debit'}
-            value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
+            value={
+              debit === '' && credit === '' ? amountFormatter.format(0) : debit
+            }
             formatter={value =>
               // reformat value so since we might have kept decimals
-              value ? amountToCurrency(currencyToAmount(value) || 0) : ''
+              value ? amountFormatter.format(currencyToAmount(value) || 0) : ''
             }
             valueStyle={valueStyle}
             textAlign="right"
@@ -2025,7 +2049,9 @@ const Transaction = memo(function Transaction({
             }}
             inputProps={{
               value:
-                debit === '' && credit === '' ? amountToCurrency(0) : debit,
+                debit === '' && credit === ''
+                  ? amountFormatter.format(0)
+                  : debit,
               onUpdate: onUpdate.bind(null, 'debit'),
               'data-1p-ignore': true,
             }}
@@ -2047,7 +2073,7 @@ const Transaction = memo(function Transaction({
             value={credit}
             formatter={value =>
               // reformat value so since we might have kept decimals
-              value ? amountToCurrency(currencyToAmount(value) || 0) : ''
+              value ? amountFormatter.format(currencyToAmount(value) || 0) : ''
             }
             valueStyle={valueStyle}
             textAlign="right"
@@ -2077,7 +2103,7 @@ const Transaction = memo(function Transaction({
             value={
               runningBalance == null || isChild || isTemporaryId(id)
                 ? ''
-                : integerToCurrency(runningBalance)
+                : integerToCurrency(runningBalance, amountFormatter, precision)
             }
             valueStyle={{
               color:
@@ -2258,7 +2284,7 @@ const Transaction = memo(function Transaction({
                 textAlign: 'right',
               }}
             >
-              {integerToCurrency(amount)}
+              {integerToCurrency(amount, amountFormatter, precision)}
             </Text>
           </View>
         )}
@@ -2372,6 +2398,7 @@ function NotesCell({
 type TransactionErrorProps = {
   error: NonNullable<TransactionEntity['error']>;
   isDeposit: boolean;
+  hideFraction?: boolean;
   onAddSplit: () => void;
   onDistributeRemainder: () => void;
   style?: CSSProperties;
@@ -2382,8 +2409,13 @@ function TransactionError({
   isDeposit,
   onAddSplit,
   onDistributeRemainder,
+  hideFraction = false,
   style,
 }: TransactionErrorProps) {
+  const precision = useAmountPrecision();
+  const formatter = getNumberFormat({
+    decimalPlaces: hideFraction ? 0 : precision,
+  }).formatter;
   switch (error.type) {
     case 'SplitTransactionError':
       if (error.version === 1) {
@@ -2403,6 +2435,8 @@ function TransactionError({
               <Text style={{ fontWeight: 500 }}>
                 {integerToCurrency(
                   isDeposit ? error.difference : -error.difference,
+                  formatter,
+                  precision,
                 )}
               </Text>
             </Text>
@@ -2604,6 +2638,7 @@ function NewTransaction({
           <TransactionError
             error={error}
             isDeposit={isDeposit}
+            hideFraction={hideFraction}
             onAddSplit={() => onAddSplit(transactions[0].id)}
             onDistributeRemainder={() =>
               onDistributeRemainder(transactions[0].id)
@@ -2782,6 +2817,7 @@ function TransactionTableInner({
   const amountColumnWidths = useAmountColumnWidths(
     transactionsToRender,
     props.balances,
+    props.hideFraction,
   );
 
   const renderRow: TableProps<TransactionEntity>['renderItem'] = ({
@@ -2911,6 +2947,7 @@ function TransactionTableInner({
             <TransactionError
               error={error}
               isDeposit={!!isChildDeposit}
+              hideFraction={hideFraction}
               onAddSplit={() => props.onAddSplit(trans.id)}
               onDistributeRemainder={() =>
                 props.onDistributeRemainder(trans.id)
