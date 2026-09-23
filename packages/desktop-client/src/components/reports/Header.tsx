@@ -27,7 +27,6 @@ import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange'
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLanguage, useLocale } from '#hooks/useLocale';
-import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 import { getLiveRange } from './getLiveRange';
 import {
@@ -131,8 +130,8 @@ export function Header({
     dashboardScope,
     hasDashboardContext,
     isUsingDashboardRange: useDashboardDateRange,
+    setUseDashboardDateRange,
   } = useDashboardReportTimeRange(dashboardChild);
-  const updateWidget = useUpdateDashboardWidgetMutation();
   const canUseDashboardDateRange = Boolean(
     !resolvedTimeFrame &&
     hasDashboardContext &&
@@ -173,12 +172,7 @@ export function Header({
   };
   const selectWidgetTimeframe = () => {
     if (useDashboardDateRange && dashboardChild) {
-      updateWidget.mutate({
-        widget: {
-          id: dashboardChild.id,
-          use_dashboard_date_range: false,
-        },
-      });
+      setUseDashboardDateRange(false);
     }
   };
   const modeLabel = useDashboardDateRange
@@ -324,12 +318,7 @@ export function Header({
                 }
 
                 if (mode === 'static' && canUseDashboardDateRange) {
-                  updateWidget.mutate({
-                    widget: {
-                      id: dashboardChild!.id,
-                      use_dashboard_date_range: true,
-                    },
-                  });
+                  setUseDashboardDateRange(true);
                   return;
                 }
 

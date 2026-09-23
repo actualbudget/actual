@@ -70,7 +70,6 @@ import { usePayees } from '#hooks/usePayees';
 import { useReport as useCustomReport } from '#hooks/useReport';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 /**
  * Transform `selectedCategories` into `conditions`.
@@ -194,12 +193,11 @@ function CustomReportInner({
     ...session,
   };
   const {
-    dashboardWidget,
     dashboardScope,
     hasDashboardContext,
     isUsingDashboardRange,
+    setUseDashboardDateRange,
   } = useDashboardReportTimeRange();
-  const updateDashboardWidget = useUpdateDashboardWidgetMutation();
 
   const [allIntervals, setAllIntervals] = useState<
     Array<{
@@ -362,6 +360,7 @@ function CustomReportInner({
     firstDayOfWeekIdx,
     interval,
     isUsingDashboardRange,
+    setUseDashboardDateRange,
     latestTransactionDate,
     loadReport.dateRange,
     loadReport.endDate,
@@ -998,15 +997,7 @@ function CustomReportInner({
             isComplexCategoryCondition={isComplexCategoryCondition}
             useDashboardDateRange={isUsingDashboardRange}
             onUseDashboardDateRangeChange={
-              hasDashboardContext && dashboardWidget
-                ? use_dashboard_date_range =>
-                    updateDashboardWidget.mutate({
-                      widget: {
-                        id: dashboardWidget.id,
-                        use_dashboard_date_range,
-                      },
-                    })
-                : undefined
+              hasDashboardContext ? setUseDashboardDateRange : undefined
             }
           />
         )}

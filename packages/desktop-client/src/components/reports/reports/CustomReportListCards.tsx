@@ -13,7 +13,6 @@ import type { CustomReportEntity } from '@actual-app/core/types/models';
 
 import { useDashboardDateScope } from '#components/reports/DashboardDateScope';
 import { DateRange } from '#components/reports/DateRange';
-import { getLiveRange } from '#components/reports/getLiveRange';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import {
@@ -35,14 +34,12 @@ type CustomReportListCardsProps = {
   widgetId: string;
   isEditing?: boolean;
   report?: CustomReportEntity;
-  useDashboardDateRange?: boolean;
 };
 
 export function CustomReportListCards({
   widgetId,
   isEditing,
   report,
-  useDashboardDateRange,
 }: CustomReportListCardsProps) {
   // It's possible for a dashboard to reference a non-existing
   // custom report
@@ -59,7 +56,6 @@ export function CustomReportListCards({
       widgetId={widgetId}
       isEditing={isEditing}
       report={report}
-      useDashboardDateRange={useDashboardDateRange}
     />
   );
 }
@@ -68,7 +64,6 @@ function CustomReportListCardsInner({
   widgetId,
   isEditing,
   report,
-  useDashboardDateRange,
 }: CustomReportListCardsProps & {
   report: CustomReportEntity;
 }) {
@@ -111,24 +106,11 @@ function CustomReportListCardsInner({
   const updateReportMutation = useUpdateReportMutation();
   let effectiveReport = report;
   if (dashboardScope) {
-    let startDate = report.startDate;
-    let endDate = report.endDate;
-    if (useDashboardDateRange ?? true) {
-      [startDate, endDate] = normalizeCustomReportDateRange(
-        report.interval,
-        dashboardScope.start,
-        dashboardScope.end,
-      );
-    } else if (!report.isDateStatic) {
-      [startDate, endDate] = getLiveRange(
-        report.dateRange,
-        earliestTransaction,
-        latestTransaction,
-        report.includeCurrentInterval,
-        firstDayOfWeekIdx,
-        dashboardScope.end,
-      );
-    }
+    const [startDate, endDate] = normalizeCustomReportDateRange(
+      report.interval,
+      dashboardScope.start,
+      dashboardScope.end,
+    );
     effectiveReport = {
       ...report,
       startDate,

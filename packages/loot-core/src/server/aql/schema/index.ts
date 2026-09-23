@@ -200,7 +200,6 @@ export const schema = {
   dashboard: {
     id: f('id'),
     dashboard_page_id: f('id', { ref: 'dashboard_pages' }),
-    use_dashboard_date_range: f('boolean'),
     type: f('string', { required: true }),
     width: f('integer', { required: true }),
     height: f('integer', { required: true }),

@@ -33,7 +33,6 @@ type AbstractWidget<
 > = {
   id: string;
   dashboard_page_id: string;
-  use_dashboard_date_range?: boolean;
   type: T;
   x: number;
   y: number;

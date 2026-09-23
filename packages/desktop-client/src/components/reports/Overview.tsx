@@ -60,10 +60,7 @@ import { DashboardDateScopeProvider } from './DashboardDateScope';
 import { DashboardHeader } from './DashboardHeader';
 import { DashboardSelector } from './DashboardSelector';
 import { LoadingIndicator } from './LoadingIndicator';
-import {
-  calculateSpendingReportTimeRange,
-  calculateTimeRange,
-} from './reportRanges';
+import { calculateTimeRange } from './reportRanges';
 import { AgeOfMoneyCard } from './reports/AgeOfMoneyCard';
 import { BalanceForecastCard } from './reports/BalanceForecastCard';
 import { BudgetAnalysisCard } from './reports/BudgetAnalysisCard';
@@ -160,16 +157,10 @@ function getDashboardMeta<T extends DashboardWidgetEntity>(
     isLive: false;
   } | null = null;
   if (widget.type === 'spending-card') {
-    const [compare, compareTo] =
-      (widget.use_dashboard_date_range ?? true)
-        ? [dashboardScope.start, dashboardScope.end]
-        : calculateSpendingReportTimeRange(
-            widget.meta ?? {},
-            dashboardScope.end,
-          );
+    const [compare, compareTo] = [dashboardScope.start, dashboardScope.end];
     spendingRange = { compare, compareTo, isLive: false };
   }
-  if (usesTimeFrame && (widget.use_dashboard_date_range ?? true)) {
+  if (usesTimeFrame && widget.type !== 'calendar-card') {
     timeFrame = {
       start: dashboardScope.start,
       end: dashboardScope.end,
@@ -465,7 +456,6 @@ export function Overview({ dashboard }: OverviewProps) {
         height: type === 'sankey-card' ? 3 : 2,
         meta,
         dashboard_page_id: dashboard.id,
-        use_dashboard_date_range: type !== 'calendar-card',
       },
     });
   };
@@ -739,7 +729,6 @@ export function Overview({ dashboard }: OverviewProps) {
           <CustomReportListCards
             {...common}
             report={customReportMap.get(widget.meta.id)}
-            useDashboardDateRange={widget.use_dashboard_date_range}
           />
         );
       case 'summary-card':

@@ -269,7 +269,6 @@ export type DbDashboardPage = {
 export type DbDashboard = {
   id: string;
   dashboard_page_id: string;
-  use_dashboard_date_range: 1 | 0;
   type: string;
   width: number;
   height: number;

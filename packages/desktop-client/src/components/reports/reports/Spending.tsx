@@ -98,8 +98,12 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const [allIntervals, setAllIntervals] = useState(emptyIntervals);
 
   const initialReportMode = widget?.meta?.mode ?? 'single-month';
-  const { dashboardScope, hasDashboardContext, isUsingDashboardRange } =
-    useDashboardReportTimeRange(widget);
+  const {
+    dashboardScope,
+    hasDashboardContext,
+    isUsingDashboardRange,
+    setUseDashboardDateRange,
+  } = useDashboardReportTimeRange(widget);
   const [initialCompare, initialCompareTo] =
     isUsingDashboardRange && dashboardScope
       ? [dashboardScope.start, dashboardScope.end]
@@ -325,12 +329,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             {hasDashboardContext && (
               <ModeButton
                 selected={isUsingDashboardRange}
-                onSelect={() =>
-                  widget &&
-                  updateDashboardWidgetMutation.mutate({
-                    widget: { id: widget.id, use_dashboard_date_range: true },
-                  })
-                }
+                onSelect={() => setUseDashboardDateRange(true)}
               >
                 <Trans>Dashboard</Trans>
               </ModeButton>
@@ -338,11 +337,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             <ModeButton
               selected={!isUsingDashboardRange && isLive}
               onSelect={() => {
-                if (widget) {
-                  updateDashboardWidgetMutation.mutate({
-                    widget: { id: widget.id, use_dashboard_date_range: false },
-                  });
-                }
+                setUseDashboardDateRange(false);
                 setIsLive(true);
               }}
             >
@@ -351,11 +346,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             <ModeButton
               selected={!isUsingDashboardRange && !isLive}
               onSelect={() => {
-                if (widget) {
-                  updateDashboardWidgetMutation.mutate({
-                    widget: { id: widget.id, use_dashboard_date_range: false },
-                  });
-                }
+                setUseDashboardDateRange(false);
                 setIsLive(false);
               }}
             >

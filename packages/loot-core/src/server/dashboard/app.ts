@@ -253,12 +253,7 @@ async function copyDashboardWidget({
         meta: widget.meta ? JSON.parse(widget.meta) : {},
         dashboard_page_id: targetDashboardPageId,
       };
-      await addDashboardWidget({
-        ...newWidget,
-        use_dashboard_date_range: Boolean(
-          widget.use_dashboard_date_range ?? true,
-        ),
-      });
+      await addDashboardWidget(newWidget);
     } else {
       throw new Error(`Unsupported widget type: ${widget.type}`);
     }
@@ -309,7 +304,6 @@ async function importDashboard({
             x: widget.x,
             y: widget.y,
             dashboard_page_id: dashboardPageId,
-            use_dashboard_date_range: widget.use_dashboard_date_range ?? true,
             meta: isExportedCustomReportWidget(widget)
               ? { id: widget.meta.id }
               : widget.meta,

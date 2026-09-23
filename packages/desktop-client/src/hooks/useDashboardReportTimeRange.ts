@@ -44,7 +44,7 @@ export function resolveDashboardTimeRange(
 }
 
 export function useDashboardReportTimeRange(widget?: DashboardWidgetEntity) {
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const contextualWidgetId = params.get('dashboardWidget');
   const { data: contextualWidget } = useDashboardWidget<DashboardWidgetEntity>({
     id: widget ? undefined : (contextualWidgetId ?? undefined),
@@ -80,7 +80,21 @@ export function useDashboardReportTimeRange(widget?: DashboardWidgetEntity) {
   }, [end, hasValidSnapshot, mode, start]);
   const hasDashboardContext = dashboardScope !== null;
   const isUsingDashboardRange =
-    hasDashboardContext && (dashboardWidget?.use_dashboard_date_range ?? true);
+    hasDashboardContext &&
+    (params.has('useDashboardDateRange')
+      ? params.get('useDashboardDateRange') === 'true'
+      : dashboardWidget?.type !== 'calendar-card');
+
+  function setUseDashboardDateRange(value: boolean) {
+    setParams(
+      previous => {
+        const next = new URLSearchParams(previous);
+        next.set('useDashboardDateRange', String(value));
+        return next;
+      },
+      { replace: true },
+    );
+  }
 
   const resolve = useCallback(
     (
@@ -105,5 +119,6 @@ export function useDashboardReportTimeRange(widget?: DashboardWidgetEntity) {
     dashboardWidget,
     hasDashboardContext,
     isUsingDashboardRange,
+    setUseDashboardDateRange,
   };
 }
