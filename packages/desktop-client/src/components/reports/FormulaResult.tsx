@@ -5,6 +5,7 @@ import { View } from '@actual-app/components/view';
 import { amountToInteger } from '@actual-app/core/shared/util';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useFormat } from '#hooks/useFormat';
 
 import { ReportCardValueSkeleton } from './ReportCardValueSkeleton';
@@ -30,6 +31,7 @@ export function FormulaResult({
   customColor = null,
 }: FormulaResultProps) {
   const format = useFormat();
+  const precision = useAmountPrecision();
 
   // Format the display value - just show what we got
   const displayValue = useMemo(() => {
@@ -38,11 +40,11 @@ export function FormulaResult({
     } else if (value === null || value === undefined) {
       return '';
     } else if (typeof value === 'number') {
-      return format(amountToInteger(value), 'financial');
+      return format(amountToInteger(value, precision), 'financial');
     } else {
       return String(value);
     }
-  }, [error, value, format]);
+  }, [error, value, format, precision]);
 
   const lines = displayValue.split(/\r?\n/);
   const lineCount = lines.length;
