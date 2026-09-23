@@ -9,17 +9,27 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
-import { useUnlinkAccountMutation } from '#accounts';
-import { getFailedSyncError, isAccountFailedSync } from '#accounts/syncStatus';
+import {
+  useSyncAndDownloadMutation,
+  useUnlinkAccountMutation,
+} from '#accounts';
+import {
+  getFailedSyncError,
+  isAccountFailedSync,
+  isGoCardlessConfigError,
+} from '#accounts/syncStatus';
 import { Link } from '#components/common/Link';
 import { authorizeBank as authorizeEnableBanking } from '#enablebanking';
 import { authorizeBank as authorizeGoCardless } from '#gocardless';
 import { useAccounts } from '#hooks/useAccounts';
+import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useFailedAccounts } from '#hooks/useFailedAccounts';
+import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
 function useErrorMessage() {
   const { t } = useTranslation();
+  const { isAdmin } = useCurrentAccess();
   function getErrorMessage(type: string, code: string) {
     switch (type.toUpperCase()) {
       case 'ITEM_ERROR':
@@ -74,6 +84,31 @@ function useErrorMessage() {
           'This account was not found in SimpleFIN. Try unlinking and relinking the account.',
         );
 
+      case 'CONFIG_ERROR':
+        switch (code.toUpperCase()) {
+          case 'GOCARDLESS_NOT_CONFIGURED':
+            // Only an administrator can set the server-wide secrets, so
+            // everybody else is pointed at one instead of at a form that
+            // would be rejected.
+            return isAdmin
+              ? t(
+                  'GoCardless is not set up on this server. Credentials are stored on the server, not in your budget file, so they are not restored from a backup. Enter your secret ID and key again to reconnect.',
+                )
+              : t(
+                  'GoCardless is not set up on this server. Credentials are stored on the server, not in your budget file, so they are not restored from a backup. Ask an administrator to enter the secret ID and key again to reconnect.',
+                );
+          case 'GOCARDLESS_INVALID_CREDENTIALS':
+            return isAdmin
+              ? t(
+                  'GoCardless rejected the secret ID and key set up on this server. Check them in your GoCardless account and enter them again.',
+                )
+              : t(
+                  'GoCardless rejected the secret ID and key set up on this server. Ask an administrator to check them and enter them again.',
+                );
+          default:
+        }
+        break;
+
       default:
     }
 
@@ -99,6 +134,7 @@ export function AccountSyncCheck() {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
   const { getErrorMessage } = useErrorMessage();
+  const { isAdmin } = useCurrentAccess();
 
   const reauth = useCallback(
     (acc: AccountEntity) => {
@@ -114,6 +150,45 @@ export function AccountSyncCheck() {
     },
     [dispatch],
   );
+
+  const syncAndDownload = useSyncAndDownloadMutation();
+  const setUpGoCardless = useCallback(() => {
+    setOpen(false);
+    // The credentials are server-wide, so every GoCardless account that failed
+    // for want of them is retried — not just the one shown here. It stops
+    // there, though: accounts on other providers were never broken, and
+    // healthy GoCardless accounts would be resynced for nothing, spending
+    // their institution's request allowance and inviting unrelated failures.
+    // The account being viewed belongs in the set by construction — the button
+    // is on screen because it has one of these errors. It is added explicitly
+    // because the button reads the in-memory error while the filter below reads
+    // the persisted status, and the two can disagree; left to the filter alone,
+    // a disagreement yields an empty list, and syncing an empty list syncs
+    // nothing at all.
+    const brokenGoCardlessAccountIds = new Set(id ? [id] : []);
+    for (const account of accounts) {
+      if (
+        isAccountFailedSync(account) &&
+        isGoCardlessConfigError(getFailedSyncError(account))
+      ) {
+        brokenGoCardlessAccountIds.add(account.id);
+      }
+    }
+
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'gocardless-init',
+          options: {
+            onSuccess: () =>
+              syncAndDownload.mutate({
+                ids: [...brokenGoCardlessAccountIds],
+              }),
+          },
+        },
+      }),
+    );
+  }, [accounts, dispatch, id, syncAndDownload]);
 
   const unlinkAccount = useUnlinkAccountMutation();
   const unlink = useCallback(
@@ -144,6 +219,15 @@ export function AccountSyncCheck() {
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
     (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
+  // The condition is tracked apart from the authorization to act on it: the
+  // server's secrets are the problem either way, and unlinking is never the
+  // answer to it — it throws away a working bank link and costs a fresh
+  // consent at the bank to undo. A non-admin gets the explanation and no
+  // buttons rather than the one destructive button.
+  const goCardlessConfigError = isGoCardlessConfigError({ type, code });
+  // both codes are repaired by re-entering the secrets, so a typo in the
+  // replacement leads back to the form rather than to the generic dead end
+  const showGoCardlessSetup = goCardlessConfigError && isAdmin;
 
   return (
     <View>
@@ -184,7 +268,7 @@ export function AccountSyncCheck() {
         </div>
 
         <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
-          {showAuth ? (
+          {showAuth && (
             <>
               <Button onPress={() => unlink(account)}>
                 <Trans>Unlink</Trans>
@@ -198,7 +282,13 @@ export function AccountSyncCheck() {
                 <Trans>Reauthorize</Trans>
               </Button>
             </>
-          ) : (
+          )}
+          {showGoCardlessSetup && (
+            <Button variant="primary" autoFocus onPress={setUpGoCardless}>
+              <Trans>Set up GoCardless</Trans>
+            </Button>
+          )}
+          {!showAuth && !showGoCardlessSetup && !goCardlessConfigError && (
             <Button onPress={() => unlink(account)}>
               <Trans>Unlink account</Trans>
             </Button>
