@@ -114,15 +114,15 @@ test.describe('Budget', () => {
   });
 
   test('tab from a category group name moves to its first visible category', async () => {
-    await budgetPage.rightClickCategoryGroup('Usual Expenses');
-    await page.getByRole('button', { name: 'Rename' }).click();
-
     const rows = budgetPage.budgetTable.getByTestId('row');
     const groupRowIndex = await rows.evaluateAll(allRows =>
       allRows.findIndex(row => row.textContent?.includes('Usual Expenses')),
     );
     expect(groupRowIndex).toBeGreaterThanOrEqual(0);
     const firstCategoryRow = rows.nth(groupRowIndex + 1);
+
+    await budgetPage.rightClickCategoryGroup('Usual Expenses');
+    await page.getByRole('button', { name: 'Rename' }).click();
 
     const groupNameInput = page.locator('input').filter({
       hasValue: 'Usual Expenses',
