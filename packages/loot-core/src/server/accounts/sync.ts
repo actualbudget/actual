@@ -935,8 +935,8 @@ export async function matchTransactions(
       // imported_id/payee/notes with this transaction's data instead of
       // matching the row that's actually a good candidate for it.
       fuzzyDataset = fuzzyDataset.sort((a, b) => {
-        const aHasImportedId = a.imported_id != null ? 1 : 0;
-        const bHasImportedId = b.imported_id != null ? 1 : 0;
+        const aHasImportedId = Number(a.imported_id != null);
+        const bHasImportedId = Number(b.imported_id != null);
         if (aHasImportedId !== bHasImportedId) {
           return aHasImportedId - bHasImportedId;
         }
@@ -953,11 +953,6 @@ export async function matchTransactions(
             dateFns.parseISO(db.fromDateRepr(b.date)),
           ),
         );
-        // Fixed: the original comparator (`aDistance > bDistance ? 1 : -1`)
-        // never returned 0, so equal-distance candidates -- a common case,
-        // e.g. two transactions dated the same day -- had their relative
-        // order rewritten by an invalid, non-transitive comparator instead
-        // of a stable one.
         return aDistance - bDistance;
       });
     }
