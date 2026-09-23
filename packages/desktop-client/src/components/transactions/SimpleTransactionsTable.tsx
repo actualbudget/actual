@@ -16,6 +16,7 @@ import { FinancialText } from '#components/FinancialText';
 import { Cell, Field, Row, SelectCell, Table } from '#components/table';
 import { DisplayId } from '#components/util/DisplayId';
 import { useAccount } from '#hooks/useAccount';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCategory } from '#hooks/useCategory';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
@@ -178,7 +179,7 @@ export function SimpleTransactionsTable({
   fields = ['date', 'payee', 'amount'],
   style,
 }: SimpleTransactionsTableProps) {
-  const format = useFormat();
+  const format = useFormat(useAmountPrecision());
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();

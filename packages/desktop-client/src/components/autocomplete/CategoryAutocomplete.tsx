@@ -17,7 +17,6 @@ import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { integerToCurrency } from '@actual-app/core/shared/util';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
@@ -27,7 +26,9 @@ import { css, cx } from '@emotion/css';
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCategories } from '#hooks/useCategories';
+import { useFormat } from '#hooks/useFormat';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
@@ -354,6 +355,7 @@ function CategoryItem({
 }: CategoryItemProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+  const format = useFormat(useAmountPrecision());
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.mobileMenuItem,
@@ -422,7 +424,7 @@ function CategoryItem({
                 <>
                   {' '}
                   <FinancialText>
-                    {integerToCurrency(toBudget || 0)}
+                    {format(toBudget || 0, 'financial')}
                   </FinancialText>
                 </>
               )
@@ -430,7 +432,7 @@ function CategoryItem({
                 <>
                   {' '}
                   <FinancialText>
-                    {integerToCurrency(balance || 0)}
+                    {format(balance || 0, 'financial')}
                   </FinancialText>
                 </>
               )}
