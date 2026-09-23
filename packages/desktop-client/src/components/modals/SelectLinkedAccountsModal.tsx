@@ -982,9 +982,9 @@ function StartingOptionsFields({
       <View style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <View>
           <Text
+            size="medium"
             style={{
               marginBottom: 4,
-              fontSize: 13,
               color: theme.pageTextSubdued,
             }}
           >
@@ -1004,9 +1004,9 @@ function StartingOptionsFields({
         </View>
         <View>
           <Text
+            size="medium"
             style={{
               marginBottom: 4,
-              fontSize: 13,
               color: theme.pageTextSubdued,
             }}
           >

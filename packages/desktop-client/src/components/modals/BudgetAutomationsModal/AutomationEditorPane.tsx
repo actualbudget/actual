@@ -230,8 +230,8 @@ export function AutomationEditorPane({
                 <AutomationErrorTitle error={activeError} />
               </Text>
               <Text
+                size="small"
                 style={{
-                  fontSize: 12,
                   marginTop: 2,
                   color: 'inherit',
                   display: 'block',
@@ -288,8 +288,8 @@ export function AutomationEditorPane({
             >
               {NON_CONTRIBUTION_TYPES.has(state.displayType) && (
                 <Text
+                  size="small"
                   style={{
-                    fontSize: 12,
                     color: theme.pageTextLight,
                     display: 'block',
                     marginBottom: 4,
