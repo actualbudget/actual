@@ -117,7 +117,7 @@ export function AccountGroupHeader({
               alignItems: 'center',
               gap: spacing.xs,
               paddingBlock: spacing.xs,
-              paddingLeft: spacing.sm,
+              paddingLeft: spacing.xs,
               paddingRight: spacing.sm,
               borderRadius: radius.sm,
               cursor: 'pointer',
@@ -136,7 +136,7 @@ export function AccountGroupHeader({
               className={css({
                 display: 'flex',
                 alignItems: 'center',
-                padding: 0,
+                padding: spacing.xxs,
                 border: 'none',
                 background: 'none',
                 color: 'inherit',
@@ -144,7 +144,7 @@ export function AccountGroupHeader({
                 outline: 'none',
               })}
             >
-              <CollapseChevron isOpen={isExpanded} size={11} />
+              <CollapseChevron isOpen={isExpanded} />
             </Button>
             {isEditing ? (
               <InitialFocus>

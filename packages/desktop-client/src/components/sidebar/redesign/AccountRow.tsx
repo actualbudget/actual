@@ -152,15 +152,23 @@ export function AccountRow({
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                gap: spacing.sm,
+                gap: spacing.xs,
                 paddingBlock: spacing.xs,
                 paddingRight: spacing.sm,
-                paddingLeft: level > 1 ? spacing.md + spacing.sm : spacing.md,
+                paddingLeft: level > 1 ? spacing.xs + spacing.sm : spacing.xs,
                 fontSize: 13,
                 textDecoration: isClosed ? 'line-through' : 'none',
               }}
             >
-              {showSyncDot ? <SyncDot status={status} /> : null}
+              <View
+                style={{
+                  width: spacing.lg,
+                  flexShrink: 0,
+                  alignItems: 'center',
+                }}
+              >
+                {showSyncDot && <SyncDot status={status} />}
+              </View>
               {isEditing ? (
                 <InitialFocus>
                   <Input
@@ -188,7 +196,11 @@ export function AccountRow({
               <Text style={styles.visuallyHidden}>{statusLabel}</Text>
               <SidebarBalance
                 binding={bindings.accountBalance(account.id)}
-                style={{ fontSize: 12, color: 'inherit' }}
+                style={{
+                  fontSize: 12,
+                  color: 'inherit',
+                  marginLeft: spacing.xs,
+                }}
               />
               <DragHandle />
             </View>
