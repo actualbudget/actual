@@ -796,8 +796,9 @@ export async function reconcileTransactions(
 
 // Greedily assigns each unmatched entry in `dataList` the closest
 // still-available candidate from its own `fuzzyDataset`, processing
-// entries in ascending order of that distance instead of `dataList`'s own
-// order. Recomputes the best remaining candidate for every unmatched
+// entries in ascending order of that distance instead of relying solely
+// on `dataList`'s own order. (`dataList` order is still used as a
+// tie-breaker.) Recomputes the best remaining candidate for every unmatched
 // entry on each round, since claiming a candidate can change what's left
 // available to the others. `hasMatched` is shared across both
 // fuzzy-matching passes (and the id/imported_id pass before them), so a
