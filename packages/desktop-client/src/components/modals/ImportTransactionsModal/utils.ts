@@ -1,5 +1,8 @@
 import { format as formatDate_ } from '@actual-app/core/shared/months';
-import { looselyParseAmount } from '@actual-app/core/shared/util';
+import {
+  amountToInteger,
+  looselyParseAmount,
+} from '@actual-app/core/shared/util';
 import * as d from 'date-fns';
 
 export type DateFormat =
@@ -188,13 +191,18 @@ export function applyFieldMappings(
 function parseAmount(
   amount: number | string | undefined | null,
   mapper: (parsed: number) => number,
+  precision = 2,
 ) {
   if (amount == null) {
     return null;
   }
 
   const parsed =
-    typeof amount === 'string' ? looselyParseAmount(amount) : amount;
+    typeof amount === 'string'
+      ? precision === 3 && /^-?\d+[.,]\d{3}$/.test(amount.trim())
+        ? Number(amount.trim().replace(',', '.'))
+        : looselyParseAmount(amount)
+      : amount;
 
   if (parsed === null) {
     return null;
@@ -204,12 +212,18 @@ function parseAmount(
 }
 
 export function parseAmountFields(
-  trans: Partial<ImportTransaction>,
+  trans: {
+    amount?: number | string;
+    outflow?: number | string;
+    inflow?: number | string;
+    inOut?: string;
+  },
   splitMode: boolean,
   inOutMode: boolean,
   outValue: string,
   flipAmount: boolean,
   multiplierAmount: string,
+  precision = 2,
 ) {
   const multiplier = parseFloat(multiplierAmount) || 1.0;
 
@@ -228,12 +242,13 @@ export function parseAmountFields(
     // Split mode is a little weird; first we look for an outflow and
     // if that has a value, we never want to show a number in the
     // inflow. Same for `amount`; we choose outflow first and then inflow
-    value.outflow = parseAmount(trans.outflow, n => -Math.abs(n)) || 0;
+    value.outflow =
+      parseAmount(trans.outflow, n => -Math.abs(n), precision) || 0;
     value.inflow = value.outflow
       ? 0
-      : parseAmount(trans.inflow, n => Math.abs(n)) || 0;
+      : parseAmount(trans.inflow, n => Math.abs(n), precision) || 0;
   } else {
-    const amount = parseAmount(trans.amount, n => n) || 0;
+    const amount = parseAmount(trans.amount, n => n, precision) || 0;
     if (amount >= 0) value.inflow = amount;
     else value.outflow = amount;
   }
@@ -276,6 +291,49 @@ export function parseAmountFields(
       inflow: null,
     };
   }
+}
+
+export function parseImportAmount(
+  trans: {
+    amount?: number | string;
+    outflow?: number | string;
+    inflow?: number | string;
+    inOut?: string;
+  },
+  splitMode: boolean,
+  inOutMode: boolean,
+  outValue: string,
+  flipAmount: boolean,
+  multiplierAmount: string,
+  precision: number,
+): number | null {
+  const fields =
+    splitMode && !inOutMode ? [trans.outflow, trans.inflow] : [trans.amount];
+  if (
+    fields.every(field => field == null || field === '') ||
+    fields.some(
+      field =>
+        field != null &&
+        field !== '' &&
+        (typeof field === 'number'
+          ? !Number.isFinite(field)
+          : looselyParseAmount(field) == null),
+    )
+  ) {
+    return null;
+  }
+
+  const { amount } = parseAmountFields(
+    trans,
+    splitMode,
+    inOutMode,
+    outValue,
+    flipAmount,
+    multiplierAmount,
+    precision,
+  );
+  const encoded = amountToInteger(amount, precision);
+  return Number.isSafeInteger(encoded) ? encoded : null;
 }
 
 export function filterByStartDate(
