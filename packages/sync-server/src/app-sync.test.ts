@@ -476,6 +476,22 @@ describe('/upload-user-file', () => {
     expect(res.text).toBe('invalid fileId');
   });
 
+  it.each(['invalid/group', ['group1', 'group2']])(
+    'returns 400 for invalid x-actual-group-id header %j',
+    async groupId => {
+      const res = await request(app)
+        .post('/upload-user-file')
+        .set('x-actual-token', 'valid-token')
+        .set('x-actual-file-id', 'test-file-id')
+        .set('x-actual-name', 'test-file')
+        .set({ 'x-actual-group-id': groupId })
+        .send(Buffer.from('file content'));
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.text).toBe('invalid groupId');
+    },
+  );
+
   it('uploads a new file successfully', async () => {
     const fileId = generateFileId();
     const fileName = 'test-file.txt';

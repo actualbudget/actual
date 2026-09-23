@@ -1,13 +1,26 @@
+import type { File } from './services/files-service';
+
+type UploadValidationError = 'file-has-reset' | 'file-has-new-key';
+type SyncValidationError =
+  | UploadValidationError
+  | 'file-old-version'
+  | 'file-needs-upload'
+  | 'file-key-mismatch';
+
 // This is a version representing the internal format of sync
 // messages. When this changes, all sync files need to be reset. We
 // will check this version when syncing and notify the user if they
 // need to reset.
 const SYNC_FORMAT_VERSION = 2;
 
-const validateSyncedFile = (groupId, keyId, currentFile) => {
+function validateSyncedFile(
+  groupId: string | null,
+  keyId: string | null,
+  currentFile: File,
+): SyncValidationError | null {
   if (
     currentFile.syncVersion == null ||
-    currentFile.syncVersion < SYNC_FORMAT_VERSION
+    Number(currentFile.syncVersion) < SYNC_FORMAT_VERSION
   ) {
     return 'file-old-version';
   }
@@ -22,7 +35,7 @@ const validateSyncedFile = (groupId, keyId, currentFile) => {
   // encrypted with the same key it is registered with (this might
   // be wrong if there was an error during the key creation
   // process)
-  const uploadedKeyId = currentFile.encryptMeta
+  const uploadedKeyId: string | null | undefined = currentFile.encryptMeta
     ? JSON.parse(currentFile.encryptMeta).keyId
     : null;
   if (uploadedKeyId !== currentFile.encryptKeyId) {
@@ -44,9 +57,13 @@ const validateSyncedFile = (groupId, keyId, currentFile) => {
   }
 
   return null;
-};
+}
 
-const validateUploadedFile = (groupId, keyId, currentFile) => {
+function validateUploadedFile(
+  groupId: string | null,
+  keyId: string | null,
+  currentFile: File | null | undefined,
+): UploadValidationError | null {
   if (!currentFile) {
     // File is new, so no need to validate
     return null;
@@ -72,6 +89,6 @@ const validateUploadedFile = (groupId, keyId, currentFile) => {
   }
 
   return null;
-};
+}
 
 export { validateSyncedFile, validateUploadedFile };

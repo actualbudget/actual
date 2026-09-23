@@ -321,7 +321,7 @@ app.post('/upload-user-file', async (req, res) => {
   const syncFormatVersion = extractSingleHeader(req, res, 'x-actual-format');
   if (res.headersSent) return;
 
-  if (!!groupId && (typeof groupId !== 'string' || !isValidGroupId(groupId))) {
+  if (Array.isArray(groupId) || (groupId && !isValidGroupId(groupId))) {
     res.status(400).send('invalid groupId');
     return;
   }
