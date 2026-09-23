@@ -652,6 +652,19 @@ export function generateThemeId(urlOrRepo: string): string {
   return `theme-${Math.abs(hash).toString(36)}`;
 }
 
+export function validateThemeCssSafely(
+  css: string | undefined,
+  onError?: (error: unknown) => void,
+): string {
+  if (!css?.trim()) return '';
+  try {
+    return validateThemeCss(css);
+  } catch (error) {
+    onError?.(error);
+    return '';
+  }
+}
+
 export function usesRedesignSidebarPalette(css: string): boolean {
   const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
   return (

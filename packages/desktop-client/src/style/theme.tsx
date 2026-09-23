@@ -14,7 +14,7 @@ import {
   migrateLegacyOverride,
   parseInstalledTheme,
   usesRedesignSidebarPalette,
-  validateThemeCss,
+  validateThemeCssSafely,
 } from './customThemes';
 
 const themes = {
@@ -119,7 +119,9 @@ export function ThemeStyle() {
   const sidebarRedesignCss =
     themeColors === themes.light.colors &&
     usesRedesignSidebarPalette(
-      [customLightTheme?.cssContent, customCssOverride].join('\n'),
+      [customLightTheme?.cssContent, customCssOverride]
+        .map(css => validateThemeCssSafely(css))
+        .join('\n'),
     )
       ? sidebarRedesignLightCss
       : null;
@@ -175,15 +177,10 @@ export function CustomThemeStyle() {
   const [customCssOverride] = useGlobalPref('customCssOverride');
 
   const validatedCss = useMemo(() => {
-    const safeValidate = (css: string | undefined, errorLabel: string) => {
-      if (!css?.trim()) return '';
-      try {
-        return validateThemeCss(css);
-      } catch (error) {
-        console.error(errorLabel, { error });
-        return '';
-      }
-    };
+    const safeValidate = (css: string | undefined, errorLabel: string) =>
+      validateThemeCssSafely(css, error =>
+        console.error(errorLabel, { error }),
+      );
 
     let baseCss = '';
     if (activeTheme === 'auto') {
