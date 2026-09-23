@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from 'react';
+import { useContext, useState } from 'react';
 import {
   Button,
   TreeItem,
@@ -61,9 +61,9 @@ export function AccountGroupHeader({
   const updateGroup = useUpdateAccountGroupMutation();
   const deleteGroup = useDeleteAccountGroupMutation();
 
-  const triggerRef = useRef<HTMLDivElement>(null);
+  const [rowElement, setRowElement] = useState<HTMLDivElement | null>(null);
   useContextMenu({
-    triggerRef,
+    triggerRef: { current: rowElement },
     items: [
       {
         name: 'account-group-rename',
@@ -97,7 +97,7 @@ export function AccountGroupHeader({
 
   return (
     <TreeItem
-      ref={triggerRef}
+      ref={setRowElement}
       id={key}
       textValue={group.name}
       onAction={() => treeState?.toggleKey(key)}

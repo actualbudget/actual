@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { TreeItem, TreeItemContent } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
@@ -59,9 +59,9 @@ export function AccountRow({
         typeof i === 'object' && 'name' in i && i.name.startsWith('account-'),
     ),
   );
-  const triggerRef = useRef<HTMLDivElement>(null);
+  const [rowElement, setRowElement] = useState<HTMLDivElement | null>(null);
   useContextMenu({
-    triggerRef,
+    triggerRef: { current: rowElement },
     enabled: !isTouchDevice(),
     items: [
       {
@@ -111,7 +111,7 @@ export function AccountRow({
 
   return (
     <TreeItem
-      ref={triggerRef}
+      ref={setRowElement}
       id={treeKeys.account(account.id)}
       textValue={account.name}
       href={isEditing ? undefined : href}
