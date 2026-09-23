@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -106,7 +106,9 @@ export function MonteCarlo() {
     setSelectionsInitialized(true);
   }, [selectionsInitialized, isLoading, widget?.meta]);
 
-  const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
+  // Only the stable `mutate` is kept: the mutation result is a new object
+  // every render, and closing over it would defeat memoisation below
+  const { mutate: updateWidget } = useUpdateDashboardWidgetMutation();
 
   async function onSaveWidget() {
     // The save button only renders when a widget exists
@@ -114,7 +116,7 @@ export function MonteCarlo() {
       return;
     }
 
-    updateDashboardWidgetMutation.mutate(
+    updateWidget(
       {
         widget: {
           id: widget.id,
@@ -149,7 +151,7 @@ export function MonteCarlo() {
     }
 
     const name = newName || t('Monte Carlo Analysis');
-    updateDashboardWidgetMutation.mutate({
+    updateWidget({
       widget: {
         id: widget.id,
         meta: {
@@ -160,30 +162,44 @@ export function MonteCarlo() {
     });
   };
 
-  if (isLoading || !selectionsInitialized) {
-    return <LoadingIndicator />;
-  }
+  // The simulation is the expensive part of this page (thousands of
+  // runs on the main thread), so it is memoised by hand on its actual
+  // inputs: view switches, run selection and other UI state must not
+  // re-run it. Nothing runs until the saved config has been loaded
+  const simulation = useMemo(() => {
+    if (!selectionsInitialized) {
+      return null;
+    }
+    const params = {
+      ...resolvedConfig,
+      horizonYears: getMonteCarloHorizonYears(resolvedConfig),
+      deflateToTodaysMoney: showTodaysMoney,
+    };
+    return { params, result: runMonteCarloSimulation(params) };
+  }, [resolvedConfig, showTodaysMoney, selectionsInitialized]);
 
-  const simulationParams = {
-    ...resolvedConfig,
-    horizonYears: getMonteCarloHorizonYears(resolvedConfig),
-    deflateToTodaysMoney: showTodaysMoney,
-  };
-  const result = runMonteCarloSimulation(simulationParams);
+  // The worst-first ranking shared by the runs table and the cashflow
+  // view's percentile picker, sorted once per simulation
+  const rankedRunIndices = useMemo(
+    () =>
+      simulation == null
+        ? null
+        : rankSimulationsWorstFirst(
+            simulation.result.endingBalances,
+            simulation.result.depletionYearBySimulation,
+          ),
+    [simulation],
+  );
 
-  // The cashflow view charts one run picked by percentile of the same
-  // worst-first ranking the runs table shows
-  let cashflowRunIndex: number | null = null;
-  if (resultsView === 'cashflow') {
-    const rankedRunIndices = rankSimulationsWorstFirst(
-      result.endingBalances,
-      result.depletionYearBySimulation,
-    );
-    const scenarioRank = Math.round(
-      cashflowPercentile * (result.simulationCount - 1),
-    );
-    cashflowRunIndex = rankedRunIndices[scenarioRank];
-  }
+  // The cashflow view charts one run picked by percentile of the ranking
+  const cashflowRunIndex =
+    resultsView === 'cashflow' && simulation != null && rankedRunIndices != null
+      ? rankedRunIndices[
+          Math.round(
+            cashflowPercentile * (simulation.result.simulationCount - 1),
+          )
+        ]
+      : null;
 
   // The run whose year-by-year detail is on screen: the cashflow view's
   // scenario, or the drill-in's selection from the runs table
@@ -191,14 +207,29 @@ export function MonteCarlo() {
     resultsView === 'cashflow' ? cashflowRunIndex : selectedRunIndex;
 
   // Runs are seeded, so re-running with a capture index reproduces the
-  // selected run exactly; only computed while a run is being inspected
-  const runDetailRows =
-    detailRunIndex != null
-      ? runMonteCarloSimulation({
-          ...simulationParams,
-          captureRunDetail: detailRunIndex,
-        }).runDetail
-      : null;
+  // selected run exactly; only computed while a run is being inspected,
+  // and once per run rather than on every render
+  const runDetailRows = useMemo(
+    () =>
+      simulation == null || detailRunIndex == null
+        ? null
+        : runMonteCarloSimulation({
+            ...simulation.params,
+            captureRunDetail: detailRunIndex,
+          }).runDetail,
+    [simulation, detailRunIndex],
+  );
+
+  if (
+    isLoading ||
+    !selectionsInitialized ||
+    simulation == null ||
+    rankedRunIndices == null
+  ) {
+    return <LoadingIndicator />;
+  }
+
+  const { result } = simulation;
   // After a failure the capture continues with synthetic unfunded years
   // for the cashflow chart; the year-by-year table ends at the failure
   const fundedRunDetailRows =
@@ -206,6 +237,7 @@ export function MonteCarlo() {
   const cashflowGraphProps = {
     pots: resolvedConfig.pots,
     contributions: resolvedConfig.contributions,
+    incomeStreams: resolvedConfig.incomeStreams,
     spendingPhases: resolvedConfig.spendingPhases,
     startAge: config.currentAge,
   };
@@ -544,8 +576,8 @@ export function MonteCarlo() {
                 >
                   <Trans>
                     Money flowing in and out each year of this simulated run:
-                    withdrawals and contributions above zero, planned spending
-                    and tax below.
+                    withdrawals and income above zero; planned spending, tax,
+                    contributions and money saved into the surplus pot below.
                   </Trans>
                 </Text>
                 <MonteCarloCashflowGraph
@@ -563,7 +595,11 @@ export function MonteCarlo() {
               simulationIndex={selectedRunIndex}
               simulationCount={result.simulationCount}
               startAge={config.currentAge}
-              hasContributions={config.contributions.length > 0}
+              hasContributions={
+                config.contributions.length > 0 ||
+                config.pots.some(pot => pot.isSurplus)
+              }
+              incomeStreams={resolvedConfig.incomeStreams}
               withdrawalRule={resolvedConfig.withdrawalRule}
               cashflowGraph={
                 <MonteCarloCashflowGraph
@@ -576,6 +612,7 @@ export function MonteCarlo() {
             />
           ) : (
             <MonteCarloRunsTable
+              rankedIndices={rankedRunIndices}
               endingBalances={result.endingBalances}
               depletionYearBySimulation={result.depletionYearBySimulation}
               totalWithdrawnBySimulation={result.totalWithdrawnBySimulation}
@@ -678,13 +715,17 @@ export function MonteCarlo() {
           <Paragraph>
             <Trans>
               Each scenario replays your retirement with a different sequence of
-              yearly investment returns. Every year, any contributions are added
-              at the start, then the withdrawal is taken, and then each pot
-              grows or shrinks with that year&apos;s return. Pots with an access
-              age stay invested but can&apos;t fund withdrawals until you reach
-              it - if the accessible pots can&apos;t cover a year&apos;s
-              withdrawal, the plan counts as having run out, even if locked pots
-              still hold money. The shaded bands show the range of outcomes
+              yearly investment returns. Every year, any income arrives and any
+              contributions are paid in at the start - some of them out of that
+              income; the income then pays for the year&apos;s spending first
+              and the withdrawal covers the rest; anything left unspent is saved
+              into the Surplus cash pot for later years when the plan keeps one,
+              and otherwise leaves the plan; and then each pot grows or shrinks
+              with that year&apos;s return. Pots with an access age stay
+              invested but can&apos;t fund withdrawals until you reach it - if
+              the accessible pots can&apos;t cover what a year&apos;s spending
+              still needs, the plan counts as having run out, even if locked
+              pots still hold money. The shaded bands show the range of outcomes
               across all scenarios: the darker band covers the middle half, and
               the lighter band covers 80% of them.
             </Trans>

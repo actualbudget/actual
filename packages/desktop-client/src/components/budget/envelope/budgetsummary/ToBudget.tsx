@@ -68,6 +68,11 @@ export function ToBudget({
     setMenuOpen(true);
   };
 
+  const closeMenu = () => {
+    setMenuStep('actions');
+    setMenuOpen(false);
+  };
+
   return (
     <>
       <View ref={triggerRef}>
@@ -89,10 +94,7 @@ export function ToBudget({
         triggerRef={triggerRef}
         placement="bottom"
         isOpen={menuOpen}
-        onOpenChange={() => {
-          setMenuStep('actions');
-          setMenuOpen(false);
-        }}
+        onOpenChange={closeMenu}
         style={{ width: 200, margin: 1 }}
         isNonModal
         {...position}
@@ -113,7 +115,7 @@ export function ToBudget({
           )}
           {menuStep === 'buffer' && (
             <HoldMenu
-              onClose={() => setMenuOpen(false)}
+              onClose={closeMenu}
               onSubmit={amount => {
                 onBudgetAction(month, 'hold', { amount });
               }}
@@ -122,7 +124,7 @@ export function ToBudget({
           {menuStep === 'transfer' && (
             <TransferMenu
               initialAmount={availableValue}
-              onClose={() => setMenuOpen(false)}
+              onClose={closeMenu}
               onSubmit={(amount, categoryId) => {
                 onBudgetAction(month, 'transfer-available', {
                   amount,
@@ -135,7 +137,7 @@ export function ToBudget({
             <CoverMenu
               showToBeBudgeted={false}
               initialAmount={availableValue}
-              onClose={() => setMenuOpen(false)}
+              onClose={closeMenu}
               onSubmit={(amount, categoryId) => {
                 onBudgetAction(month, 'cover-overbudgeted', {
                   category: categoryId,
