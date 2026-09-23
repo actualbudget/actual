@@ -147,7 +147,9 @@ const getButtonSizeOverrides = (
       padding: isBare ? `${paddingY}px` : `${paddingY}px ${paddingX}px`,
       ...(minHeight != null ? { minHeight } : null),
       fontSize,
-      lineHeight,
+      // Medium matches today's default look, which inherits line-height;
+      // only the other sizes force their scale line-height.
+      ...(size === 'medium' ? {} : { lineHeight }),
     };
   };
 

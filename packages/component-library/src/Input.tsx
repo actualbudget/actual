@@ -44,7 +44,9 @@ const getInputSizeStyles = (size: ComponentSize): Record<string, unknown> => {
       padding: paddingY,
       ...(minHeight != null ? { minHeight } : null),
       fontSize,
-      lineHeight,
+      // Medium matches today's default look, which inherits line-height;
+      // only the other sizes force their scale line-height.
+      ...(size === 'medium' ? {} : { lineHeight }),
     };
   };
 
