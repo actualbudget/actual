@@ -138,7 +138,7 @@ describe('Text size', () => {
 
     // Base (narrow) value; steps down to 15px from the small breakpoint.
     expect(computed.fontSize).toBe('16px');
-    expect(computed.lineHeight).toBe('22');
+    expect(computed.lineHeight).toBe('22px');
     expectMediaDeclaration(text, '@media (min-width: 512px)', 'font-size:15px');
   });
 });

@@ -74,7 +74,10 @@ const breakpointGroupMediaQueries: Record<
 
 type ComponentSizeTextValues = {
   fontSize: number;
-  lineHeight: number;
+  // lineHeight is on emotion's unitless list, so a plain number would
+  // render as a multiplier (e.g. `line-height: 18` = 18x). Always a
+  // px string so the value renders as an absolute line box.
+  lineHeight: string;
 };
 
 type ComponentSizeControlValues = {
@@ -91,28 +94,28 @@ export const componentSizeText: Record<
   Record<BreakpointGroup, ComponentSizeTextValues>
 > = {
   small: {
-    narrow: { fontSize: 12, lineHeight: 16 },
-    small: { fontSize: 12, lineHeight: 16 },
-    medium: { fontSize: 12, lineHeight: 16 },
-    wide: { fontSize: 12, lineHeight: 16 },
+    narrow: { fontSize: 12, lineHeight: '16px' },
+    small: { fontSize: 12, lineHeight: '16px' },
+    medium: { fontSize: 12, lineHeight: '16px' },
+    wide: { fontSize: 12, lineHeight: '16px' },
   },
   medium: {
-    narrow: { fontSize: 13, lineHeight: 18 },
-    small: { fontSize: 13, lineHeight: 18 },
-    medium: { fontSize: 13, lineHeight: 18 },
-    wide: { fontSize: 13, lineHeight: 18 },
+    narrow: { fontSize: 13, lineHeight: '18px' },
+    small: { fontSize: 13, lineHeight: '18px' },
+    medium: { fontSize: 13, lineHeight: '18px' },
+    wide: { fontSize: 13, lineHeight: '18px' },
   },
   large: {
-    narrow: { fontSize: 16, lineHeight: 22 },
-    small: { fontSize: 15, lineHeight: 20 },
-    medium: { fontSize: 15, lineHeight: 20 },
-    wide: { fontSize: 15, lineHeight: 20 },
+    narrow: { fontSize: 16, lineHeight: '22px' },
+    small: { fontSize: 15, lineHeight: '20px' },
+    medium: { fontSize: 15, lineHeight: '20px' },
+    wide: { fontSize: 15, lineHeight: '20px' },
   },
   'extra-large': {
-    narrow: { fontSize: 17, lineHeight: 24 },
-    small: { fontSize: 17, lineHeight: 24 },
-    medium: { fontSize: 16, lineHeight: 22 },
-    wide: { fontSize: 16, lineHeight: 22 },
+    narrow: { fontSize: 17, lineHeight: '24px' },
+    small: { fontSize: 17, lineHeight: '24px' },
+    medium: { fontSize: 16, lineHeight: '22px' },
+    wide: { fontSize: 16, lineHeight: '22px' },
   },
 };
 
