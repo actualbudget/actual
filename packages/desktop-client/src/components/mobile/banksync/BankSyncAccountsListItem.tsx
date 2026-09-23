@@ -43,7 +43,7 @@ export function BankSyncAccountsListItem({
       }}
       onClick={() => onAction(account, isLinked ? 'edit' : 'link')}
     >
-      <SpaceBetween gap={60}>
+      <SpaceBetween gap={16}>
         <SpaceBetween
           direction="vertical"
           gap={5}
