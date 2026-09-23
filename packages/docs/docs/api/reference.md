@@ -836,7 +836,7 @@ Synchronizes the locally cached budget files with the server's copy.
 
 #### `runBankSync`
 
-<Method name="runBankSync" args={[{ properties: [{ name: 'accountId', type: 'string' }] }]} returns="Promise<BankSyncResult>" />
+<Method name="runBankSync" args={[{ properties: [{ name: 'accountId', type: 'string' }] }]} returns="Promise<{ newTransactions, matchedTransactions, updatedAccounts }>" />
 
 Run the 3rd party (GoCardless, SimpleFIN) bank sync operation. This will download the transactions and insert them into the ledger.
 

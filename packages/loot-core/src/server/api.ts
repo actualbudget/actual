@@ -295,10 +295,14 @@ handlers['api/bank-sync'] = async function (args) {
   const matchedTransactions = [];
   const updatedAccounts = [];
 
+  // Appended one at a time rather than spread: these lists are as long as the
+  // sync is big, and spreading a large array into push() passes every element
+  // as an argument. `allErrors` above is bounded by the account count, so it
+  // keeps the spread it already used.
   const collect = (res: SyncResponse) => {
-    newTransactions.push(...res.newTransactions);
-    matchedTransactions.push(...res.matchedTransactions);
-    updatedAccounts.push(...res.updatedAccounts);
+    for (const id of res.newTransactions) newTransactions.push(id);
+    for (const id of res.matchedTransactions) matchedTransactions.push(id);
+    for (const id of res.updatedAccounts) updatedAccounts.push(id);
   };
 
   if (!batchSync) {

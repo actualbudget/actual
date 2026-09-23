@@ -1,3 +1,4 @@
+import type { SyncResponseWithErrors } from '#server/accounts/app';
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 import { getBankSyncError } from '#shared/errors';
@@ -10,7 +11,7 @@ import { createBudget } from './budget/base';
 import * as prefs from './prefs';
 
 vi.mock('#shared/errors', () => ({
-  getBankSyncError: vi.fn(error => `Bank sync error: ${error}`),
+  getBankSyncError: vi.fn(error => `Bank sync error: ${error.message}`),
 }));
 
 describe('API handlers', () => {
@@ -38,17 +39,23 @@ describe('API handlers', () => {
       matchedTransactions = [],
       updatedAccounts = [],
       errors = [],
-    }: {
-      newTransactions?: string[];
-      matchedTransactions?: string[];
-      updatedAccounts?: string[];
-      errors?: string[];
-    } = {}) => ({
+    }: Partial<SyncResponseWithErrors> = {}): SyncResponseWithErrors => ({
       newTransactions,
       matchedTransactions,
       updatedAccounts,
       errors,
     });
+
+    // A real sync error is an object, and the handler reads two fields off it:
+    // getBankSyncError(errors[0]) for the message and errors[0].code for the
+    // code it attaches. A bare string satisfies neither.
+    const syncError = {
+      type: 'SyncError' as const,
+      accountId: 'account2',
+      message: 'connection-failed',
+      category: 'ACCOUNT_NEEDS_ATTENTION',
+      code: 'ACCOUNT_NEEDS_ATTENTION',
+    };
 
     it('should sync a single account when accountId is provided', async () => {
       handlers['accounts-bank-sync'] = vi.fn().mockResolvedValue(syncResult());
@@ -62,13 +69,23 @@ describe('API handlers', () => {
     it('should handle errors in non batch sync', async () => {
       handlers['accounts-bank-sync'] = vi
         .fn()
-        .mockResolvedValue(syncResult({ errors: ['connection-failed'] }));
+        .mockResolvedValue(syncResult({ errors: [syncError] }));
 
       await expect(
         handlers['api/bank-sync']({ accountId: 'account2' }),
       ).rejects.toThrow('Bank sync error: connection-failed');
 
-      expect(getBankSyncError).toHaveBeenCalledWith('connection-failed');
+      expect(getBankSyncError).toHaveBeenCalledWith(syncError);
+    });
+
+    it('attaches the error code to the thrown error', async () => {
+      handlers['accounts-bank-sync'] = vi
+        .fn()
+        .mockResolvedValue(syncResult({ errors: [syncError] }));
+
+      await expect(
+        handlers['api/bank-sync']({ accountId: 'account2' }),
+      ).rejects.toMatchObject({ code: 'ACCOUNT_NEEDS_ATTENTION' });
     });
 
     it('returns what the sync reconciled for a single account', async () => {
@@ -147,7 +164,7 @@ describe('API handlers', () => {
       handlers['accounts-bank-sync'] = vi.fn().mockResolvedValue(
         syncResult({
           newTransactions: ['gc1'],
-          errors: ['connection-failed'],
+          errors: [syncError],
         }),
       );
 
