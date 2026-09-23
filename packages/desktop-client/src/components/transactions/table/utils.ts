@@ -2,7 +2,9 @@ import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
 import { currentDay } from '@actual-app/core/shared/months';
 import {
   amountToInteger,
-  integerToCurrencyWithDecimal,
+  getNumberFormat,
+  integerToCurrency,
+  MAX_SAFE_NUMBER,
 } from '@actual-app/core/shared/util';
 import type { CurrencyAmount } from '@actual-app/core/shared/util';
 import type {
@@ -31,6 +33,7 @@ export type TransactionUpdateFunction = <T extends keyof SerializedTransaction>(
 export function serializeTransaction(
   transaction: TransactionEntity,
   showZeroInDeposit?: boolean,
+  precision = 2,
 ): SerializedTransaction {
   const { amount, date: originalDate } = transaction;
 
@@ -61,14 +64,31 @@ export function serializeTransaction(
   return {
     ...transaction,
     date,
-    debit: debit != null ? integerToCurrencyWithDecimal(debit) : '',
-    credit: credit != null ? integerToCurrencyWithDecimal(credit) : '',
+    debit:
+      debit != null
+        ? integerToCurrency(
+            debit,
+            getNumberFormat({ decimalPlaces: precision, hideFraction: false })
+              .formatter,
+            precision,
+          )
+        : '',
+    credit:
+      credit != null
+        ? integerToCurrency(
+            credit,
+            getNumberFormat({ decimalPlaces: precision, hideFraction: false })
+              .formatter,
+            precision,
+          )
+        : '',
   };
 }
 
 export function deserializeTransaction(
   transaction: SerializedTransaction,
   originalTransaction: TransactionEntity,
+  precision = 2,
 ) {
   const { debit, credit, date: originalDate, ...realTransaction } = transaction;
 
@@ -80,9 +100,12 @@ export function deserializeTransaction(
     amount = evalArithmetic(credit, null);
   }
 
+  const encoded = amount == null ? null : amountToInteger(amount, precision);
   amount =
-    amount != null
-      ? amountToInteger(amount)
+    encoded != null &&
+    Number.isSafeInteger(encoded) &&
+    Math.abs(encoded) <= MAX_SAFE_NUMBER
+      ? encoded
       : (realTransaction.amount ?? originalTransaction.amount);
   let date = originalDate;
   if (date == null) {
