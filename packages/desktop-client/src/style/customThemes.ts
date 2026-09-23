@@ -652,6 +652,14 @@ export function generateThemeId(urlOrRepo: string): string {
   return `theme-${Math.abs(hash).toString(36)}`;
 }
 
+export function usesRedesignSidebarPalette(css: string): boolean {
+  const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  return (
+    /--color-sidebarRedesign[A-Za-z]*\s*:/.test(declarations) ||
+    !/--color-sidebar(?!Redesign)[A-Za-z]*\s*:/.test(declarations)
+  );
+}
+
 /**
  * Parse the installed theme JSON from global prefs.
  * Returns a single InstalledTheme or null if none is installed.
