@@ -183,6 +183,21 @@ export function BudgetTable(props: BudgetTableProps) {
       const idx = navigableCategories.findIndex(
         category => category.id === editing.id,
       );
+
+      if (idx === -1) {
+        const group = categoryGroups.find(({ id }) => id === editing.id);
+        const firstCategory = group?.categories?.find(category =>
+          navigableCategories.some(
+            navigableCategory => navigableCategory.id === category.id,
+          ),
+        );
+
+        if (dir > 0 && firstCategory) {
+          onEditMonth(firstCategory.id, editing.cell);
+        }
+        return;
+      }
+
       const next = navigableCategories[idx + dir];
 
       if (next) {

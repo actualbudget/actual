@@ -113,6 +113,25 @@ test.describe('Budget', () => {
     await expect(savingsInput).toBeFocused();
   });
 
+  test('tab from a category group name moves to its first visible category', async () => {
+    await budgetPage.rightClickCategoryGroup('Usual Expenses');
+    await page.getByRole('button', { name: 'Rename' }).click();
+
+    const rows = budgetPage.budgetTable.getByTestId('row');
+    const groupRowIndex = await rows.evaluateAll(allRows =>
+      allRows.findIndex(row => row.textContent?.includes('Usual Expenses')),
+    );
+    expect(groupRowIndex).toBeGreaterThanOrEqual(0);
+    const firstCategoryRow = rows.nth(groupRowIndex + 1);
+
+    const groupNameInput = page.locator('input').filter({
+      hasValue: 'Usual Expenses',
+    });
+    await groupNameInput.press('Tab');
+
+    await expect(firstCategoryRow.locator('input')).toBeFocused();
+  });
+
   test('clicking on spent amounts opens a transaction page', async () => {
     const accountPage = await budgetPage.clickOnSpentAmountForRow(1);
     expect(page.url()).toContain('/accounts');
