@@ -250,6 +250,14 @@ export default defineConfig(async ({ mode, command }) => {
     process.env.REACT_APP_BRANCH = process.env.BRANCH;
   }
 
+  // Netlify sets COMMIT_REF; GitHub Actions sets GITHUB_SHA (e.g. the
+  // Docker/npm nightly builds). Forward whichever is present so edge/nightly
+  // builds can show which commit they were built from.
+  const commitRef = process.env.COMMIT_REF || process.env.GITHUB_SHA;
+  if (commitRef) {
+    process.env.REACT_APP_COMMIT_REF = commitRef;
+  }
+
   // Electron packaging (--mode=desktop) bundles loot-core directly, so skip
   // all browser-only staging there.
   if (mode !== 'desktop') {
