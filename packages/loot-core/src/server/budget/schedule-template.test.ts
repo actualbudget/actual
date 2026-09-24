@@ -898,11 +898,11 @@ describe('buildMonthlyOutflow relative to today', () => {
     vi.mocked(aqlQuery).mockImplementation(async rawQuery => {
       const query = rawQuery as ReturnType<typeof q>;
       const kind = queryKind(query);
-      const range = dateFilter(kind, query) as { $gte: string; $lt: string };
+      const range = dateFilter(kind, query);
       const data = transactions.filter(
         t =>
-          t.date >= range.$gte &&
-          t.date < range.$lt &&
+          (range.$gte === undefined || t.date >= range.$gte) &&
+          (range.$lt === undefined || t.date < range.$lt) &&
           (kind === 'posted' ||
             (kind === 'unlinked' ? t.schedule == null : t.schedule != null)),
       );
@@ -910,15 +910,28 @@ describe('buildMonthlyOutflow relative to today', () => {
     });
   }
 
-  function dateFilter(kind: QueryKind, query?: ReturnType<typeof q>) {
+  type DateRange = { $gte?: string; $lt?: string };
+
+  // The date range a query actually applies, read the way AQL compiles it:
+  // an array of operator objects is ANDed together, but an object with
+  // several operators only applies its first one.
+  function dateFilter(
+    kind: QueryKind,
+    query?: ReturnType<typeof q>,
+  ): DateRange {
     query ??= vi
       .mocked(aqlQuery)
       .mock.calls.map(([call]) => call as ReturnType<typeof q>)
       .find(call => queryKind(call) === kind);
-    return query
+    const date = query
       ?.serialize()
       .filterExpressions.find((f: Record<string, unknown>) => 'date' in f)
-      ?.date;
+      ?.date as DateRange | DateRange[] | undefined;
+    if (date === undefined) return {};
+    const operators = Array.isArray(date) ? date : [date];
+    return Object.fromEntries(
+      operators.map(operator => Object.entries(operator)[0]),
+    );
   }
 
   function unlinkedDateFilter() {
@@ -1214,6 +1227,70 @@ describe('buildMonthlyOutflow relative to today', () => {
     const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
 
     expect(outflow[0]).toBe(20000);
+  });
+
+  it("does not settle a pending quarterly occurrence with a late payment of the previous quarter's", async () => {
+    // Quarterly $300 due Jan 28, Apr 28, Jul 28. On Apr 20, budgeting
+    // July: January's bill was paid late, linked, on Mar 12. That's nearer
+    // Jan 28 than Apr 28, so April's occurrence is still pending.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-04-20');
+    mockSingleSchedule({
+      start: '2024-01-28',
+      amount: -30000,
+      frequency: 'monthly',
+      interval: 3,
+    });
+    vi.mocked(db.first).mockResolvedValue({
+      id: 1,
+      completed: 0,
+      next_date: 20240428,
+    });
+    mockTransactionQueries([
+      { amount: -30000, date: '2024-03-12', schedule: 1 },
+    ]);
+    const { t } = await createScheduleList(
+      [rentTemplate],
+      '2024-07',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    const outflow = await buildMonthlyOutflow(t, '2024-07', defaultCategory);
+
+    expect(outflow[0]).toBe(60000); // April's pending $300 + July's
+  });
+
+  it('settles a pending occurrence only once when it was paid in parts', async () => {
+    // Every two weeks, $100, due Oct 12 and Oct 26. On Oct 10, budgeting
+    // November: the Oct 12 bill was paid in two linked $50 parts. Both are
+    // nearest Oct 12, so Oct 26 is still pending.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-10-10');
+    mockSingleSchedule({
+      start: '2024-09-28',
+      amount: -10000,
+      frequency: 'weekly',
+      interval: 2,
+    });
+    vi.mocked(db.first).mockResolvedValue({
+      id: 1,
+      completed: 0,
+      next_date: 20241012,
+    });
+    mockTransactionQueries([
+      { amount: -5000, date: '2024-10-09', schedule: 1 },
+      { amount: -5000, date: '2024-10-10', schedule: 1 },
+    ]);
+    const { t } = await createScheduleList(
+      [rentTemplate],
+      '2024-11',
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
+
+    // Oct 26 pending + Nov 9 + Nov 23
+    expect(outflow[0]).toBe(30000);
   });
 
   it('budgets November in full when October rent is still unpaid', async () => {

@@ -264,11 +264,17 @@ type PostedTransaction = {
   schedule: string | null;
 };
 
-// How many of this schedule's linked payments settle one of its
-// occurrences in [rangeStart, rangeEnd). The link says which schedule a
-// payment belongs to; each payment is attributed to that schedule's
-// nearest occurrence, so an early payment settles the upcoming occurrence
-// and a late one settles the previous occurrence, not the next.
+// How far either side of a range to look for the occurrence nearest a
+// linked payment. It has to reach the occurrence before and after any
+// payment, so it covers schedules that recur as rarely as every two years.
+const LINKED_PAYMENT_SEARCH_MONTHS = 25;
+
+// How many of this schedule's occurrences in [rangeStart, rangeEnd) are
+// settled by its linked payments. The link says which schedule a payment
+// belongs to; each payment is attributed to that schedule's nearest
+// occurrence, so an early payment settles the upcoming occurrence and a
+// late one settles the previous occurrence, not the next. Several payments
+// nearest the same occurrence (a bill paid in parts) settle it only once.
 function countLinkedPayments(
   entry: ScheduleTemplateTarget,
   transactions: PostedTransaction[],
@@ -282,10 +288,11 @@ function countLinkedPayments(
 
   const nearby = getOccurrencesBetween(
     entry.dateConditions,
-    `${monthUtils.subMonths(rangeStart, 1)}-01`,
-    `${monthUtils.addMonths(rangeEnd, 1)}-01`,
+    `${monthUtils.subMonths(rangeStart, LINKED_PAYMENT_SEARCH_MONTHS)}-01`,
+    `${monthUtils.addMonths(rangeEnd, LINKED_PAYMENT_SEARCH_MONTHS)}-01`,
   );
-  return linked.filter(transaction => {
+  const settled = new Set<string>();
+  for (const transaction of linked) {
     let nearest: string | null = null;
     let nearestDistance = Infinity;
     for (const occurrenceDate of nearby) {
@@ -297,8 +304,11 @@ function countLinkedPayments(
         nearestDistance = distance;
       }
     }
-    return nearest !== null && nearest >= rangeStart && nearest < rangeEnd;
-  }).length;
+    if (nearest !== null && nearest >= rangeStart && nearest < rangeEnd) {
+      settled.add(nearest);
+    }
+  }
+  return settled.size;
 }
 
 export async function buildMonthlyOutflow(
@@ -333,10 +343,10 @@ export async function buildMonthlyOutflow(
       q('transactions')
         .filter({
           schedule: { $oneof: pendingEntries.map(entry => entry.scheduleId) },
-          date: {
-            $gte: `${monthUtils.subMonths(currentMonthStart, 1)}-01`,
-            $lt: windowStart,
-          },
+          date: [
+            { $gte: `${monthUtils.subMonths(currentMonthStart, 1)}-01` },
+            { $lt: windowStart },
+          ],
         })
         .options({ splits: 'none' })
         .select(['date', 'schedule']),
@@ -386,7 +396,7 @@ export async function buildMonthlyOutflow(
         .filter({
           category: category.id,
           'account.offbudget': false,
-          date: { $gte: windowStart, $lt: postedEnd },
+          date: [{ $gte: windowStart }, { $lt: postedEnd }],
         })
         .select(['amount', 'date', 'schedule']),
     ));
@@ -446,7 +456,7 @@ export async function buildMonthlyOutflow(
         category: category.id,
         schedule: null,
         'account.offbudget': false,
-        date: { $gte: unlinkedStart, $lt: windowEnd },
+        date: [{ $gte: unlinkedStart }, { $lt: windowEnd }],
       })
       .select(['amount', 'date']),
   );
