@@ -994,7 +994,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                       color: theme.warningText,
                     }}
                   >
-                    <Text style={{ fontSize: 13 }}>
+                    <Text size="medium">
                       <Trans>
                         Filters on <strong>{ignoredFilterFieldsList}</strong>{' '}
                         are ignored in <strong>Budgeted</strong> mode.

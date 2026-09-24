@@ -64,11 +64,11 @@ export function ChangePassword() {
 
       {error && (
         <Text
+          size="large"
           style={{
             marginTop: 20,
             color: theme.errorText,
             borderRadius: 4,
-            fontSize: 15,
           }}
         >
           {getErrorMessage(error)}
@@ -77,11 +77,11 @@ export function ChangePassword() {
 
       {msg && (
         <Text
+          size="large"
           style={{
             marginTop: 20,
             color: theme.noticeTextLight,
             borderRadius: 4,
-            fontSize: 15,
           }}
         >
           {msg}

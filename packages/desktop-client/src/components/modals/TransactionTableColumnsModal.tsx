@@ -170,10 +170,10 @@ export function TransactionTableColumnsModal({
                   <Trans>Apply to all transaction tables</Trans>
                 </Text>
                 <Text
+                  size="small"
                   style={{
                     display: 'block',
                     color: theme.pageTextSubdued,
-                    fontSize: 12,
                     marginTop: 2,
                   }}
                 >

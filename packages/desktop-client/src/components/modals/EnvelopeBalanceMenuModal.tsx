@@ -62,12 +62,7 @@ export function EnvelopeBalanceMenuModal({
               marginBottom: 20,
             }}
           >
-            <Text
-              style={{
-                fontSize: 17,
-                fontWeight: 400,
-              }}
-            >
+            <Text size="extra-large" style={{ fontWeight: 400 }}>
               <Trans>Balance</Trans>
             </Text>
             <BalanceWithCarryover

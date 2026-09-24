@@ -196,7 +196,7 @@ export function EnableBankingInitialiseModal({
                 <SvgCheckCircle1
                   style={{ width: 14, height: 14, color: theme.noticeText }}
                 />
-                <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
+                <Text size="small" style={{ color: theme.pageTextSubdued }}>
                   {keyFileName}
                 </Text>
               </View>
