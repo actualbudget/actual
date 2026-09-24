@@ -330,6 +330,13 @@ async function createCategory({
 }
 
 async function updateCategory(category: CategoryEntity): Promise<void> {
+  // A partial update leaves `group` undefined, which keeps the current group.
+  // Null or an empty string would orphan the category: the row stays in the
+  // table but belongs to no group, so getCategories() can no longer list it.
+  if (category.group !== undefined && !category.group) {
+    throw APIError('Updating a category: groupId cannot be empty');
+  }
+
   try {
     await db.updateCategory(
       categoryModel.toDb({
