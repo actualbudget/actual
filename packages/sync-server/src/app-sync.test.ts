@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import fsPromises from 'node:fs/promises';
 
 import { create, SyncRequestSchema, toBinary } from '@actual-app/crdt';
 import request from 'supertest';
@@ -739,6 +740,52 @@ describe('/upload-user-file', () => {
       fileId,
     ]);
     expect(rows[0].name).toEqual('admin-renamed.txt');
+  });
+
+  it('does not corrupt the existing file when the write fails partway through', async () => {
+    const fileId = generateFileId();
+    const groupId = 'write-failure-group-id';
+    const keyId = 'key-id';
+    const syncVersion = 2;
+    const encryptMeta = JSON.stringify({ keyId });
+    const originalContent = 'original good content';
+    const filePath = getPathForUserFile(fileId);
+
+    getAccountDb().mutate(
+      'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, encrypt_keyid) VALUES (?, ?, ?, ?, ?, ?)',
+      [fileId, groupId, syncVersion, 'racing.txt', encryptMeta, keyId],
+    );
+    fs.writeFileSync(filePath, originalContent);
+    onTestFinished(() => {
+      try {
+        fs.unlinkSync(filePath);
+      } catch {}
+    });
+
+    // Simulate a write that dies partway through (disk full, process killed,
+    // etc): whatever fs.writeFile is called with, some bytes land on disk
+    // before it rejects.
+    const writeFileSpy = vi
+      .spyOn(fsPromises, 'writeFile')
+      .mockImplementationOnce(async (path: fs.PathLike) => {
+        fs.writeFileSync(path, 'PARTIAL-GARBAGE');
+        throw new Error('simulated disk failure');
+      });
+    onTestFinished(() => writeFileSpy.mockRestore());
+
+    const res = await request(app)
+      .post('/upload-user-file')
+      .set('Content-Type', 'application/encrypted-file')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-name', 'racing.txt')
+      .set('x-actual-file-id', fileId)
+      .set('x-actual-group-id', groupId)
+      .set('x-actual-format', syncVersion.toString())
+      .set('x-actual-encrypt-meta', encryptMeta)
+      .send(Buffer.from('new content that should not land'));
+
+    expect(res.statusCode).toEqual(500);
+    expect(fs.readFileSync(filePath, 'utf8')).toEqual(originalContent);
   });
 });
 

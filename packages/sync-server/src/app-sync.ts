@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { Buffer } from 'node:buffer';
+import { randomBytes } from 'node:crypto';
 import fs from 'node:fs/promises';
 import { resolve } from 'node:path';
 
@@ -359,9 +360,13 @@ app.post('/upload-user-file', async (req, res) => {
     return;
   }
 
+  const finalPath = getPathForUserFile(fileId);
+  const tmpPath = `${finalPath}.${process.pid}-${randomBytes(4).toString('hex')}.tmp`;
   try {
-    await fs.writeFile(getPathForUserFile(fileId), req.body);
+    await fs.writeFile(tmpPath, req.body);
+    await fs.rename(tmpPath, finalPath);
   } catch (err) {
+    await fs.rm(tmpPath, { force: true }).catch(() => undefined);
     console.log('Error writing file', err);
     res.status(500).send({ status: 'error' });
     return;
