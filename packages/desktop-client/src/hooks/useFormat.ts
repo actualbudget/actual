@@ -15,6 +15,7 @@ import {
 } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 
+import { useAmountPrecision } from './useAmountPrecision';
 import { useSyncedPref } from './useSyncedPref';
 
 export type FormatType =
@@ -109,6 +110,8 @@ function format(
 }
 
 export function useFormat(storedPrecision?: number): UseFormatResult {
+  const recordedPrecision = useAmountPrecision();
+  const [encoding] = useSyncedPref('amountEncoding');
   const [numberFormatPref] = useSyncedPref('numberFormat');
   const [hideFractionPref] = useSyncedPref('hideFraction');
   const [defaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
@@ -120,7 +123,7 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
   const activeCurrency = useMemo(() => {
     return getCurrency(defaultCurrencyCodePref || '');
   }, [defaultCurrencyCodePref]);
-  const precision = storedPrecision ?? 2;
+  const precision = storedPrecision ?? recordedPrecision;
 
   const numberFormatConfig = useMemo(
     () =>
@@ -179,7 +182,8 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
           displayDecimalPlaces = 0;
         } else {
           displayDecimalPlaces =
-            storedPrecision ?? activeCurrency.decimalPlaces;
+            storedPrecision ??
+            (encoding ? recordedPrecision : activeCurrency.decimalPlaces);
         }
       }
 
@@ -214,6 +218,8 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
     },
     [
       activeCurrency,
+      encoding,
+      recordedPrecision,
       precision,
       storedPrecision,
       numberFormatConfig,
@@ -236,10 +242,10 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
     (value: IntegerAmount) => {
       const amount = toAmount(value);
       const decimalPlaces =
-        hideFractionPref === 'true' && storedPrecision === undefined
-          ? 0
-          : storedPrecision !== undefined
-            ? precision
+        storedPrecision !== undefined || encoding
+          ? precision
+          : hideFractionPref === 'true'
+            ? 0
             : value % 100 !== 0
               ? 2
               : activeCurrency.decimalPlaces;
@@ -251,10 +257,11 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
     },
     [
       toAmount,
-      activeCurrency.decimalPlaces,
-      hideFractionPref,
       precision,
       storedPrecision,
+      encoding,
+      hideFractionPref,
+      activeCurrency.decimalPlaces,
       numberFormatConfig.format,
     ],
   );
