@@ -806,32 +806,34 @@ export async function reconcileTransactions(
 function greedilyAssignCandidates(dataList, hasMatched, isEligible) {
   const results = dataList.map(d => ({ ...d }));
 
-  const getDistance = (data, row) =>
-    Math.abs(
-      dateFns.differenceInMilliseconds(
-        dateFns.parseISO(data.trans.date),
-        dateFns.parseISO(db.fromDateRepr(row.date)),
-      ),
-    );
+  const edges = [];
+  results.forEach((data, dataIndex) => {
+    if (data.match || !data.fuzzyDataset) return;
+    const transDate = dateFns.parseISO(data.trans.date);
+    data.fuzzyDataset.forEach((row, rowIndex) => {
+      if (hasMatched.has(row.id) || !isEligible(data, row)) return;
+      const distance = Math.abs(
+        dateFns.differenceInMilliseconds(
+          transDate,
+          dateFns.parseISO(db.fromDateRepr(row.date)),
+        ),
+      );
+      if (!Number.isFinite(distance)) return;
+      edges.push({ distance, dataIndex, rowIndex, data, row });
+    });
+  });
 
-  while (true) {
-    let best = { distance: Infinity, data: null, candidate: null };
-    for (const data of results) {
-      if (data.match || !data.fuzzyDataset) continue;
+  edges.sort(
+    (a, b) =>
+      a.distance - b.distance ||
+      a.dataIndex - b.dataIndex ||
+      a.rowIndex - b.rowIndex,
+  );
 
-      for (const row of data.fuzzyDataset) {
-        if (hasMatched.has(row.id) || !isEligible(data, row)) continue;
-
-        const dist = getDistance(data, row);
-        if (dist < best.distance) {
-          best = { distance: dist, data, candidate: row };
-        }
-      }
-    }
-
-    if (!best.candidate) break;
-    hasMatched.add(best.candidate.id);
-    best.data.match = best.candidate;
+  for (const { data, row } of edges) {
+    if (data.match || hasMatched.has(row.id)) continue;
+    hasMatched.add(row.id);
+    data.match = row;
   }
 
   return results;
