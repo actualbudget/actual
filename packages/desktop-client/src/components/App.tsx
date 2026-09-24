@@ -37,6 +37,7 @@ import { ExposeNavigate } from '#util/router-tools';
 
 import { AppBackground } from './AppBackground';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
+import { AriaRouterProvider } from './common/AriaRouterProvider';
 import { DevelopmentTopBar } from './DevelopmentTopBar';
 import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';
@@ -204,46 +205,50 @@ export function App() {
   return (
     <BrowserRouter>
       <ExposeNavigate />
-      <HotkeysProvider initiallyActiveScopes={['app']}>
-        <SpreadsheetProvider>
-          <SidebarProvider>
-            <BudgetMonthCountProvider>
-              <DndProvider backend={HTML5Backend}>
-                <View
-                  data-theme={theme}
-                  style={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
+      <AriaRouterProvider>
+        <HotkeysProvider initiallyActiveScopes={['app']}>
+          <SpreadsheetProvider>
+            <SidebarProvider>
+              <BudgetMonthCountProvider>
+                <DndProvider backend={HTML5Backend}>
                   <View
-                    key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
+                    data-theme={theme}
                     style={{
-                      flexGrow: 1,
-                      overflow: 'hidden',
-                      ...styles.lightScrollbar,
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
                     }}
                   >
-                    <ErrorBoundary FallbackComponent={ErrorFallback}>
-                      {import.meta.env.REACT_APP_REVIEW_ID && !isTestEnv && (
-                        <DevelopmentTopBar />
-                      )}
-                      <AppInner />
-                    </ErrorBoundary>
-                    <ThemeStyle />
-                    <CustomThemeStyle />
-                    <ErrorBoundary FallbackComponent={FatalError}>
-                      <Modals />
-                    </ErrorBoundary>
-                    <UpdateNotification />
+                    <View
+                      key={
+                        hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
+                      }
+                      style={{
+                        flexGrow: 1,
+                        overflow: 'hidden',
+                        ...styles.lightScrollbar,
+                      }}
+                    >
+                      <ErrorBoundary FallbackComponent={ErrorFallback}>
+                        {import.meta.env.REACT_APP_REVIEW_ID && !isTestEnv && (
+                          <DevelopmentTopBar />
+                        )}
+                        <AppInner />
+                      </ErrorBoundary>
+                      <ThemeStyle />
+                      <CustomThemeStyle />
+                      <ErrorBoundary FallbackComponent={FatalError}>
+                        <Modals />
+                      </ErrorBoundary>
+                      <UpdateNotification />
+                    </View>
                   </View>
-                </View>
-              </DndProvider>
-            </BudgetMonthCountProvider>
-          </SidebarProvider>
-        </SpreadsheetProvider>
-      </HotkeysProvider>
+                </DndProvider>
+              </BudgetMonthCountProvider>
+            </SidebarProvider>
+          </SpreadsheetProvider>
+        </HotkeysProvider>
+      </AriaRouterProvider>
     </BrowserRouter>
   );
 }
