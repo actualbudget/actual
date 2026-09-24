@@ -218,41 +218,17 @@ export function ThemeSettings() {
               }}
             >
               <Column title={t('Theme')}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 8,
-                  }}
-                >
-                  <Select<string>
-                    onChange={handleThemeChange}
-                    value={getCurrentValue()}
-                    options={buildOptions()}
-                    className={css({
-                      '&[data-hovered]': {
-                        backgroundColor: themeStyle.buttonNormalBackgroundHover,
-                      },
-                      maxWidth: '100%',
-                    })}
-                  />
-                  {hasCustomCssOverride && (
-                    <Button
-                      variant="bare"
-                      aria-label={t(
-                        'Custom CSS override active — click to edit',
-                      )}
-                      onPress={handleEditOverride}
-                      style={{
-                        color: themeStyle.pageTextPositive,
-                        gap: 6,
-                      }}
-                    >
-                      <Trans>Custom CSS is active</Trans>
-                      <SvgCode style={{ width: 14, height: 14 }} />
-                    </Button>
-                  )}
-                </View>
+                <Select<string>
+                  onChange={handleThemeChange}
+                  value={getCurrentValue()}
+                  options={buildOptions()}
+                  className={css({
+                    '&[data-hovered]': {
+                      backgroundColor: themeStyle.buttonNormalBackgroundHover,
+                    },
+                    maxWidth: '100%',
+                  })}
+                />
               </Column>
               {theme === 'auto' && (
                 <>
@@ -295,6 +271,22 @@ export function ThemeSettings() {
                 </>
               )}
             </View>
+          )}
+
+          {!showInstaller && hasCustomCssOverride && (
+            <Button
+              variant="bare"
+              aria-label={t('Custom CSS override active — click to edit')}
+              onPress={handleEditOverride}
+              style={{
+                alignSelf: 'flex-start',
+                color: themeStyle.pageTextPositive,
+                gap: 6,
+              }}
+            >
+              <Trans>Custom CSS is active</Trans>
+              <SvgCode style={{ width: 14, height: 14 }} />
+            </Button>
           )}
 
           {showInstaller && (
