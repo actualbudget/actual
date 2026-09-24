@@ -54,6 +54,20 @@ test.describe('Reports', () => {
     await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
   });
 
+  test('shows shared dashboard date controls', async () => {
+    const controls = page.getByTestId('dashboard-date-range-controls');
+    await expect(
+      controls.getByRole('button', { name: 'Clear' }),
+    ).not.toBeVisible();
+    await expect(
+      controls.getByRole('button', { name: 'Live' }),
+    ).not.toBeVisible();
+    await expect(
+      controls.getByTestId('date-range-picker-trigger'),
+    ).toBeVisible();
+    await expect(controls).toMatchThemeScreenshots();
+  });
+
   test('loads net worth graph and checks visuals', async () => {
     await reportsPage.goToNetWorthPage();
     await expect(page).toMatchThemeScreenshots();

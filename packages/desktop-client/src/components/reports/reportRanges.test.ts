@@ -62,6 +62,44 @@ describe('calculateTimeRange', () => {
     expect(mode).toBe('sliding-window');
   });
 
+  it('anchors live month and preset ranges to an explicit date', () => {
+    expect(
+      calculateTimeRange(
+        { start: '2025-01', end: '2025-06', mode: 'sliding-window' },
+        undefined,
+        undefined,
+        '2026-08-31',
+      ),
+    ).toEqual(['2026-03', '2026-08', 'sliding-window']);
+    expect(
+      calculateTimeRange(
+        { start: '', end: '', mode: 'yearToDate' },
+        undefined,
+        undefined,
+        '2026-08-31',
+      ),
+    ).toEqual(['2026-01', '2026-08', 'yearToDate']);
+  });
+
+  it('anchors quarter ranges to the dashboard reference date', () => {
+    expect(
+      calculateTimeRange(
+        { start: '', end: '', mode: 'currentQuarter' },
+        undefined,
+        undefined,
+        '2026-08-31',
+      ),
+    ).toEqual(['2026-07', '2026-09', 'currentQuarter']);
+    expect(
+      calculateTimeRange(
+        { start: '', end: '', mode: 'previousQuarter' },
+        undefined,
+        undefined,
+        '2026-08-31',
+      ),
+    ).toEqual(['2026-04', '2026-06', 'previousQuarter']);
+  });
+
   it('keeps current quarter as a live time range when restoring a saved widget', () => {
     const [start, end, mode] = calculateTimeRange({
       start: '2016-10',
@@ -138,6 +176,15 @@ describe('calculateSpendingReportTimeRange', () => {
 
     expect(compare).toBe('2017-01');
     expect(compareTo).toBe('2017-01');
+  });
+
+  it('uses an explicit reference month for a live report without saved dates', () => {
+    expect(
+      calculateSpendingReportTimeRange(
+        { isLive: true, mode: 'single-month' },
+        '2026-08-31',
+      ),
+    ).toEqual(['2026-08', '2026-07']);
   });
 });
 

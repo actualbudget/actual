@@ -34,12 +34,12 @@ import { CategorySelector } from '#components/reports/CategorySelector';
 import { CrossoverGraph } from '#components/reports/graphs/CrossoverGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
-import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createCrossoverSpreadsheet } from '#components/reports/spreadsheets/crossover-spreadsheet';
 import type { CrossoverData } from '#components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -72,6 +72,11 @@ export function Crossover() {
 type CrossoverInnerProps = { widget?: CrossoverWidget };
 
 function CrossoverInner({ widget }: CrossoverInnerProps) {
+  const {
+    resolve: resolveTimeRange,
+    hasDashboardContext,
+    isUsingDashboardRange,
+  } = useDashboardReportTimeRange(widget);
   const locale = useLocale();
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -199,7 +204,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
   useEffect(() => {
     if (latestTransaction && allMonths?.length) {
-      const [initialStart, initialEnd, mode] = calculateTimeRange(
+      const [initialStart, initialEnd, mode] = resolveTimeRange(
         widget?.meta?.timeFrame,
         defaultTimeFrame,
         latestTransaction,
@@ -208,6 +213,13 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       const latestMonth = allMonths[0].name;
       let start = initialStart;
       let end = initialEnd;
+
+      if (hasDashboardContext) {
+        setStart(start);
+        setEnd(end);
+        setMode(mode);
+        return;
+      }
 
       const clampMonth = (m: string) => {
         if (monthUtils.isBefore(m, earliestMonth)) return earliestMonth;
@@ -234,7 +246,13 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       setEnd(end);
       setMode(mode);
     }
-  }, [latestTransaction, widget?.meta?.timeFrame, allMonths]);
+  }, [
+    latestTransaction,
+    widget?.meta?.timeFrame,
+    allMonths,
+    resolveTimeRange,
+    hasDashboardContext,
+  ]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     if (!allMonths?.length) {
@@ -300,7 +318,9 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
             projectionType,
             expenseAdjustmentFactor,
             showHiddenCategories,
-            timeFrame: { start, end, mode },
+            timeFrame: isUsingDashboardRange
+              ? widget.meta?.timeFrame
+              : { start, end, mode },
           },
         },
       },

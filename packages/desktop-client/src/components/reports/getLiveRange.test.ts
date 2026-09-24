@@ -77,6 +77,19 @@ describe('getLiveRange', () => {
     });
   });
 
+  it('uses an explicit reference date for live ranges', () => {
+    expect(
+      getLiveRange(
+        'Last 30 days',
+        EARLIEST,
+        LATEST,
+        false,
+        undefined,
+        '2026-08-31',
+      ).slice(0, 2),
+    ).toEqual(['2026-08-02', '2026-08-31']);
+  });
+
   describe('Current quarter', () => {
     it('returns the full quarter containing today (Q1: Jan-Mar)', () => {
       const [start, end] = getLiveRange(

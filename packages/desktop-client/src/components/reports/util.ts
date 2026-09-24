@@ -1,3 +1,4 @@
+import * as monthUtils from '@actual-app/core/shared/months';
 // @ts-strict-ignore
 import type { Query } from '@actual-app/core/shared/query';
 import type {
@@ -11,6 +12,20 @@ import { aqlQuery } from '#queries/aqlQuery';
 
 export function fromDateRepr(date: string): string {
   return date.slice(0, 7);
+}
+
+export function normalizeCustomReportDateRange(
+  interval: string,
+  start: string,
+  end: string,
+): [string, string] {
+  if (interval === 'Monthly') {
+    return [monthUtils.monthFromDate(start), monthUtils.monthFromDate(end)];
+  }
+  if (interval === 'Yearly') {
+    return [monthUtils.yearFromDate(start), monthUtils.yearFromDate(end)];
+  }
+  return [monthUtils.firstDayOfMonth(start), monthUtils.lastDayOfMonth(end)];
 }
 
 export async function runAll(

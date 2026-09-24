@@ -44,6 +44,7 @@ import {
 import { createSpendingSpreadsheet } from '#components/reports/spreadsheets/spending-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -97,9 +98,19 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const [allIntervals, setAllIntervals] = useState(emptyIntervals);
 
   const initialReportMode = widget?.meta?.mode ?? 'single-month';
-  const [initialCompare, initialCompareTo] = calculateSpendingReportTimeRange(
-    widget?.meta ?? {},
-  );
+  const {
+    dashboardScope,
+    hasDashboardContext,
+    isUsingDashboardRange,
+    setUseDashboardDateRange,
+  } = useDashboardReportTimeRange(widget);
+  const [initialCompare, initialCompareTo] =
+    isUsingDashboardRange && dashboardScope
+      ? [dashboardScope.start, dashboardScope.end]
+      : calculateSpendingReportTimeRange(
+          widget?.meta ?? {},
+          dashboardScope?.end,
+        );
   const [compare, setCompare] = useState(initialCompare);
   const [compareTo, setCompareTo] = useState(initialCompareTo);
   const [averageRange, setAverageRange] = useState(
@@ -108,6 +119,17 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const [isLive, setIsLive] = useState(widget?.meta?.isLive ?? true);
 
   const [reportMode, setReportMode] = useState(initialReportMode);
+  useEffect(() => {
+    const [nextCompare, nextCompareTo] =
+      isUsingDashboardRange && dashboardScope
+        ? [dashboardScope.start, dashboardScope.end]
+        : calculateSpendingReportTimeRange(
+            widget?.meta ?? {},
+            dashboardScope?.end,
+          );
+    setCompare(nextCompare);
+    setCompareTo(nextCompareTo);
+  }, [dashboardScope, isUsingDashboardRange, widget?.meta]);
 
   useEffect(() => {
     async function run() {
@@ -180,10 +202,12 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             ...(widget.meta ?? {}),
             conditions,
             conditionsOp,
-            compare,
-            compareTo,
+            compare: isUsingDashboardRange ? widget.meta?.compare : compare,
+            compareTo: isUsingDashboardRange
+              ? widget.meta?.compareTo
+              : compareTo,
             averageRange,
-            isLive,
+            isLive: isUsingDashboardRange ? widget.meta?.isLive : isLive,
             mode: reportMode,
           },
         },
@@ -302,12 +326,32 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
       >
         {!isNarrowWidth && (
           <SpaceBetween gap={0}>
-            <Button
-              variant={isLive ? 'primary' : 'normal'}
-              onPress={() => setIsLive(state => !state)}
+            {hasDashboardContext && (
+              <ModeButton
+                selected={isUsingDashboardRange}
+                onSelect={() => setUseDashboardDateRange(true)}
+              >
+                <Trans>Dashboard</Trans>
+              </ModeButton>
+            )}
+            <ModeButton
+              selected={!isUsingDashboardRange && isLive}
+              onSelect={() => {
+                setUseDashboardDateRange(false);
+                setIsLive(true);
+              }}
             >
-              {isLive ? t('Live') : t('Static')}
-            </Button>
+              <Trans>Live</Trans>
+            </ModeButton>
+            <ModeButton
+              selected={!isUsingDashboardRange && !isLive}
+              onSelect={() => {
+                setUseDashboardDateRange(false);
+                setIsLive(false);
+              }}
+            >
+              <Trans>Static</Trans>
+            </ModeButton>
 
             <View
               style={{
@@ -326,6 +370,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               <Select
                 value={compare}
                 onChange={setCompare}
+                disabled={isUsingDashboardRange}
                 options={allIntervals.map(
                   ({ name, pretty }) => [name, pretty] as const,
                 )}
@@ -339,7 +384,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 value={comparisonValue}
                 onChange={onComparisonChange}
                 options={comparisonOptions}
-                disabled={reportMode === 'budget'}
+                disabled={reportMode === 'budget' || isUsingDashboardRange}
                 style={{ width: 150 }}
                 popoverStyle={{ width: 150 }}
               />
@@ -358,6 +403,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             <SpaceBetween gap={5}>
               <ModeButton
                 selected={reportMode === 'single-month'}
+                isDisabled={isUsingDashboardRange}
                 style={{
                   backgroundColor: 'inherit',
                 }}
@@ -369,6 +415,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               </ModeButton>
               <ModeButton
                 selected={reportMode === 'budget'}
+                isDisabled={isUsingDashboardRange}
                 onSelect={() => {
                   setReportMode('budget');
                 }}
@@ -380,6 +427,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               </ModeButton>
               <ModeButton
                 selected={reportMode === 'average'}
+                isDisabled={isUsingDashboardRange}
                 onSelect={() => {
                   setReportMode('average');
                 }}

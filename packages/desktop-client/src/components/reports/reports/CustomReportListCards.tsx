@@ -11,10 +11,14 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { CustomReportEntity } from '@actual-app/core/types/models';
 
+import { useDashboardDateScope } from '#components/reports/DashboardDateScope';
 import { DateRange } from '#components/reports/DateRange';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
-import { calculateHasWarning } from '#components/reports/util';
+import {
+  calculateHasWarning,
+  normalizeCustomReportDateRange,
+} from '#components/reports/util';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { usePayees } from '#hooks/usePayees';
@@ -64,6 +68,7 @@ function CustomReportListCardsInner({
   report: CustomReportEntity;
 }) {
   const { t } = useTranslation();
+  const dashboardScope = useDashboardDateScope();
 
   const dispatch = useDispatch();
 
@@ -99,6 +104,20 @@ function CustomReportListCardsInner({
   }, []);
 
   const updateReportMutation = useUpdateReportMutation();
+  let effectiveReport = report;
+  if (dashboardScope) {
+    const [startDate, endDate] = normalizeCustomReportDateRange(
+      report.interval,
+      dashboardScope.start,
+      dashboardScope.end,
+    );
+    effectiveReport = {
+      ...report,
+      startDate,
+      endDate,
+      isDateStatic: true,
+    };
+  }
 
   const onSaveName = async (name: string) => {
     const updatedReport = {
@@ -151,8 +170,11 @@ function CustomReportListCardsInner({
               onChange={onSaveName}
               onClose={() => setNameMenuOpen(false)}
             />
-            {report.isDateStatic ? (
-              <DateRange start={report.startDate} end={report.endDate} />
+            {effectiveReport.isDateStatic ? (
+              <DateRange
+                start={effectiveReport.startDate}
+                end={effectiveReport.endDate}
+              />
             ) : (
               <Text style={{ color: theme.pageTextSubdued }}>
                 {t(report.dateRange)}
@@ -161,7 +183,7 @@ function CustomReportListCardsInner({
           </View>
         </View>
         <GetCardData
-          report={report}
+          report={effectiveReport}
           payees={payees}
           accounts={accounts}
           categories={categories}

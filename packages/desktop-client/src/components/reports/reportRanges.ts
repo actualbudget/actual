@@ -181,9 +181,10 @@ export function getSpecificRange(
   addNumber: number | null,
   type?: string,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  referenceDate = monthUtils.currentDay(),
 ) {
-  const currentDay = monthUtils.currentDay();
-  const currentWeek = monthUtils.currentWeek(firstDayOfWeekIdx);
+  const currentDay = referenceDate;
+  const currentWeek = monthUtils.weekFromDate(referenceDate, firstDayOfWeekIdx);
 
   let dateStart = monthUtils.subMonths(currentDay, offset) + '-01';
   let dateEnd = monthUtils.getMonthEnd(
@@ -206,8 +207,10 @@ export function getFullRange(start: string, end: string) {
   return [start, end, 'full'] as const;
 }
 
-export function getLatestRange(offset: number) {
-  const end = monthUtils.currentMonth();
+export function getLatestRange(offset: number, referenceDate?: string) {
+  const end = referenceDate
+    ? monthUtils.getMonth(referenceDate)
+    : monthUtils.currentMonth();
   const start = monthUtils.subMonths(end, offset);
 
   return [start, end, 'sliding-window'] as const;
@@ -251,7 +254,12 @@ export function calculateTimeRange(
   timeFrame?: Partial<TimeFrame>,
   defaultTimeFrame?: TimeFrame,
   latestTransaction?: string,
+  referenceDate?: string,
 ) {
+  const referenceDay = referenceDate ?? monthUtils.currentDay();
+  const referenceMonth = referenceDate
+    ? monthUtils.getMonth(referenceDate)
+    : monthUtils.currentMonth();
   const start =
     timeFrame?.start ??
     defaultTimeFrame?.start ??
@@ -264,7 +272,7 @@ export function calculateTimeRange(
     const latestTransactionMonth = latestTransaction
       ? monthUtils.monthFromDate(latestTransaction)
       : null;
-    const currentMonth = monthUtils.currentMonth();
+    const currentMonth = referenceMonth;
     const fullEnd =
       latestTransactionMonth &&
       monthUtils.isAfter(latestTransactionMonth, currentMonth)
@@ -279,7 +287,7 @@ export function calculateTimeRange(
       monthUtils.isValidYearMonthDay(end)
     ) {
       const dayOffset = monthUtils.differenceInCalendarDays(end, start);
-      const today = monthUtils.currentDay();
+      const today = referenceDay;
       return [
         monthUtils.subDays(today, Math.max(dayOffset, 0)),
         today,
@@ -291,41 +299,41 @@ export function calculateTimeRange(
 
     if (start > end) {
       return [
-        monthUtils.currentMonth(),
-        monthUtils.subMonths(monthUtils.currentMonth(), -offset),
+        referenceMonth,
+        monthUtils.subMonths(referenceMonth, -offset),
         'sliding-window',
       ] as const;
     }
 
-    return getLatestRange(offset);
+    return getLatestRange(offset, referenceDate);
   }
   if (mode === 'lastMonth') {
-    const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
+    const lastMonth = monthUtils.subMonths(referenceMonth, 1);
     return [lastMonth, lastMonth, 'lastMonth'] as const;
   }
   if (mode === 'lastYear') {
     return [
-      monthUtils.getYearStart(monthUtils.prevYear(monthUtils.currentMonth())),
-      monthUtils.getYearEnd(monthUtils.prevYear(monthUtils.currentDate())),
+      monthUtils.getYearStart(monthUtils.prevYear(referenceMonth)),
+      monthUtils.getYearEnd(monthUtils.prevYear(referenceMonth)),
       'lastYear',
     ] as const;
   }
   if (mode === 'yearToDate') {
     return [
-      monthUtils.currentYear() + '-01',
-      monthUtils.currentMonth(),
+      monthUtils.getYearStart(referenceMonth),
+      referenceMonth,
       'yearToDate',
     ] as const;
   }
   if (mode === 'priorYearToDate') {
     return [
-      monthUtils.getYearStart(monthUtils.prevYear(monthUtils.currentMonth())),
-      monthUtils.prevYear(monthUtils.currentDate(), 'yyyy-MM-dd'),
+      monthUtils.getYearStart(monthUtils.prevYear(referenceMonth)),
+      monthUtils.prevYear(referenceDay, 'yyyy-MM-dd'),
       'priorYearToDate',
     ] as const;
   }
   if (mode === 'currentQuarter') {
-    const currentMonth = monthUtils.currentMonth();
+    const currentMonth = referenceMonth;
     return [
       monthUtils.getQuarterStart(currentMonth),
       monthUtils.getQuarterEnd(currentMonth),
@@ -333,7 +341,7 @@ export function calculateTimeRange(
     ] as const;
   }
   if (mode === 'previousQuarter') {
-    const prevQuarterMonth = monthUtils.prevQuarter(monthUtils.currentMonth());
+    const prevQuarterMonth = monthUtils.prevQuarter(referenceMonth);
     return [
       monthUtils.getQuarterStart(prevQuarterMonth),
       monthUtils.getQuarterEnd(prevQuarterMonth),
@@ -344,19 +352,25 @@ export function calculateTimeRange(
   return [start, end, 'static'] as const;
 }
 
-export function calculateSpendingReportTimeRange({
-  compare,
-  compareTo,
-  isLive = true,
-  mode = 'single-month',
-}: {
-  compare?: string;
-  compareTo?: string;
-  isLive?: boolean;
-  mode?: 'budget' | 'average' | 'single-month';
-}): [string, string] {
+export function calculateSpendingReportTimeRange(
+  {
+    compare,
+    compareTo,
+    isLive = true,
+    mode = 'single-month',
+  }: {
+    compare?: string;
+    compareTo?: string;
+    isLive?: boolean;
+    mode?: 'budget' | 'average' | 'single-month';
+  },
+  referenceDate?: string,
+): [string, string] {
+  const referenceMonth = referenceDate
+    ? monthUtils.getMonth(referenceDate)
+    : monthUtils.currentMonth();
   if (['budget', 'average'].includes(mode) && isLive) {
-    const month = compare ?? monthUtils.currentMonth();
+    const month = compare ?? referenceMonth;
     return [month, month];
   }
 
@@ -371,10 +385,12 @@ export function calculateSpendingReportTimeRange({
       mode: (isLive ?? true) ? 'sliding-window' : 'static',
     },
     {
-      start: monthUtils.currentMonth(),
-      end: monthUtils.subMonths(monthUtils.currentMonth(), 1),
+      start: referenceMonth,
+      end: monthUtils.subMonths(referenceMonth, 1),
       mode: 'sliding-window',
     },
+    undefined,
+    referenceDate,
   );
   return [start, end];
 }

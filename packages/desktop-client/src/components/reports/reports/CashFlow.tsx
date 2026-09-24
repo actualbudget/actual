@@ -28,9 +28,9 @@ import { Change } from '#components/reports/Change';
 import { CashFlowGraph } from '#components/reports/graphs/CashFlowGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
-import { calculateTimeRange } from '#components/reports/reportRanges';
 import { cashFlowByDate } from '#components/reports/spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '#components/reports/useReport';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -68,6 +68,8 @@ type CashFlowInnerProps = {
 };
 
 function CashFlowInner({ widget }: CashFlowInnerProps) {
+  const { resolve: resolveTimeRange, isUsingDashboardRange } =
+    useDashboardReportTimeRange(widget);
   const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -99,7 +101,6 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   const [latestTransaction, setLatestTransaction] = useState('');
 
   const [isConcise, setIsConcise] = useState(false);
-
   useEffect(() => {
     const numDays = d.differenceInCalendarDays(
       d.parseISO(end),
@@ -165,7 +166,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
 
   useEffect(() => {
     if (latestTransaction) {
-      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+      const [initialStart, initialEnd, initialMode] = resolveTimeRange(
         widget?.meta?.timeFrame,
         defaultTimeFrame,
         latestTransaction,
@@ -174,7 +175,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
       setEnd(initialEnd);
       setMode(initialMode);
     }
-  }, [latestTransaction, widget?.meta?.timeFrame]);
+  }, [latestTransaction, widget?.meta?.timeFrame, resolveTimeRange]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
@@ -199,11 +200,13 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
             ...(widget.meta ?? {}),
             conditions,
             conditionsOp,
-            timeFrame: {
-              start,
-              end,
-              mode,
-            },
+            timeFrame: isUsingDashboardRange
+              ? widget.meta?.timeFrame
+              : {
+                  start,
+                  end,
+                  mode,
+                },
             showBalance,
           },
         },
