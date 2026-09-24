@@ -166,7 +166,7 @@ test.describe('Reports', () => {
       await customReportPage.showLegendButton.click();
     });
 
-    for (const graph of ['Bar Graph', 'Line Graph']) {
+    ['Bar Graph', 'Line Graph'].forEach(graph => {
       test(`${graph} keeps its height when the legend needs scrolling`, async () => {
         await page.setViewportSize({ width: 1280, height: 700 });
         await customReportPage.selectMode('time');
@@ -205,7 +205,7 @@ test.describe('Reports', () => {
           .poll(() => chart.evaluate(el => el.clientHeight))
           .toBe(originalHeight);
       });
-    }
+    });
 
     test('Validates that "show summary" button shows the summary', async () => {
       await customReportPage.selectViz('Bar Graph');
