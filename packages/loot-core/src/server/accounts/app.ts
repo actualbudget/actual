@@ -801,23 +801,16 @@ async function pollGoCardlessWebToken({
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return { error: 'unknown' };
 
-  const startTime = Date.now();
   stopPolling = false;
 
   async function getData(
     cb: (
       data:
-        | { status: 'timeout' }
         | { status: 'unknown'; message?: string }
         | { status: 'success'; data: GoCardlessToken },
     ) => void,
   ) {
     if (stopPolling) {
-      return;
-    }
-
-    if (Date.now() - startTime >= 1000 * 60 * 10) {
-      cb({ status: 'timeout' });
       return;
     }
 
@@ -852,11 +845,6 @@ async function pollGoCardlessWebToken({
     void getData(data => {
       if (data.status === 'success') {
         resolve({ data: data.data });
-        return;
-      }
-
-      if (data.status === 'timeout') {
-        resolve({ error: data.status });
         return;
       }
 
