@@ -36,13 +36,11 @@ function getNumPossibleMonths(width: number, categoryWidth: number) {
 
 type DynamicBudgetTableProps = {
   width: number;
-  height: number;
 } & AutoSizingBudgetTableProps;
 
 const DynamicBudgetTable = ({
   type,
   width,
-  height,
   prewarmStartMonth,
   startMonth,
   maxMonths = 3,
@@ -142,9 +140,8 @@ const DynamicBudgetTable = ({
     <View
       style={{
         width,
-        height,
         alignItems: 'center',
-        opacity: width <= 0 || height <= 0 ? 0 : 1,
+        opacity: width <= 0 ? 0 : 1,
       }}
     >
       <View style={{ width: '100%', maxWidth }}>
@@ -183,12 +180,12 @@ type AutoSizingBudgetTableProps = Omit<
 export const AutoSizingBudgetTable = (props: AutoSizingBudgetTableProps) => {
   return (
     <AutoSizer
-      renderProp={({ width = 0, height = 0 }) => {
-        if (width === 0 || height === 0) {
+      renderProp={({ width = 0 }) => {
+        if (width === 0) {
           return null;
         }
 
-        return <DynamicBudgetTable width={width} height={height} {...props} />;
+        return <DynamicBudgetTable width={width} {...props} />;
       }}
     />
   );
