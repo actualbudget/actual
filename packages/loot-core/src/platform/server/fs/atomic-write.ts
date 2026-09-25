@@ -16,7 +16,7 @@ async function withLockRetry<T>(
   op: () => Promise<T>,
   describe: (attempt: number) => string,
 ): Promise<T> {
-  return promiseRetry(async (retry, attempt) => {
+  return promiseRetry<T>(async (retry, attempt) => {
     try {
       const result = await op();
       if (attempt > 1) {
@@ -26,8 +26,11 @@ async function withLockRetry<T>(
       }
       return result;
     } catch (err) {
-      logger.error(`${describe(attempt)}. Something is locking the file - potentially a virus scanner or backup software.`);
-      return retry(err);
+      logger.error(
+        `${describe(attempt)}. Something is locking the file - potentially a virus scanner or backup software.`,
+      );
+      retry(err);
+      throw err;
     }
   }, retryOptions);
 }

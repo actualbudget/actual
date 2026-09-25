@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { atomicWriteFile } from './atomic-write';
+
 import type * as T from './index';
 
 export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
@@ -125,6 +126,7 @@ export const readFile: typeof T.readFile = (
 
 export const writeFile: typeof T.writeFile = async (filepath, contents) => {
   await atomicWriteFile(filepath, contents);
+  return undefined;
 };
 
 export const removeFile: typeof T.removeFile = filepath => {

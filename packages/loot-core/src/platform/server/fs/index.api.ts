@@ -112,6 +112,7 @@ export const readFile: typeof T.readFile = (
 
 export const writeFile: typeof T.writeFile = async (filepath, contents) => {
   await atomicWriteFile(filepath, contents);
+  return undefined;
 };
 
 export const removeFile: typeof T.removeFile = filepath => {

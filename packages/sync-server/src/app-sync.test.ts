@@ -767,8 +767,8 @@ describe('/upload-user-file', () => {
     // before it rejects.
     const writeFileSpy = vi
       .spyOn(fsPromises, 'writeFile')
-      .mockImplementationOnce(async (path: fs.PathLike) => {
-        fs.writeFileSync(path, 'PARTIAL-GARBAGE');
+      .mockImplementationOnce(async path => {
+        fs.writeFileSync(path as fs.PathLike, 'PARTIAL-GARBAGE');
         throw new Error('simulated disk failure');
       });
     onTestFinished(() => writeFileSpy.mockRestore());
