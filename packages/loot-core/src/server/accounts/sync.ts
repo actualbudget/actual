@@ -794,6 +794,51 @@ export async function reconcileTransactions(
   };
 }
 
+// Greedily assigns each unmatched entry in `dataList` the closest
+// still-available candidate from its own `fuzzyDataset`, processing
+// entries in ascending order of that distance instead of relying solely
+// on `dataList`'s own order. (`dataList` order is still used as a
+// tie-breaker.) Recomputes the best remaining candidate for every unmatched
+// entry on each round, since claiming a candidate can change what's left
+// available to the others. `hasMatched` is shared across both
+// fuzzy-matching passes (and the id/imported_id pass before them), so a
+// candidate claimed here can't be claimed again later.
+function greedilyAssignCandidates(dataList, hasMatched, isEligible) {
+  const results = dataList.map(d => ({ ...d }));
+
+  const edges = [];
+  results.forEach((data, dataIndex) => {
+    if (data.match || !data.fuzzyDataset) return;
+    const transDate = dateFns.parseISO(data.trans.date);
+    data.fuzzyDataset.forEach((row, rowIndex) => {
+      if (hasMatched.has(row.id) || !isEligible(data, row)) return;
+      const distance = Math.abs(
+        dateFns.differenceInMilliseconds(
+          transDate,
+          dateFns.parseISO(db.fromDateRepr(row.date)),
+        ),
+      );
+      if (!Number.isFinite(distance)) return;
+      edges.push({ distance, dataIndex, rowIndex, data, row });
+    });
+  });
+
+  edges.sort(
+    (a, b) =>
+      a.distance - b.distance ||
+      a.dataIndex - b.dataIndex ||
+      a.rowIndex - b.rowIndex,
+  );
+
+  for (const { data, row } of edges) {
+    if (data.match || hasMatched.has(row.id)) continue;
+    hasMatched.add(row.id);
+    data.match = row;
+  }
+
+  return results;
+}
+
 export async function matchTransactions(
   acctId,
   transactions,
@@ -955,37 +1000,26 @@ export async function matchTransactions(
   // Next, do the fuzzy matching. This first pass matches based on the
   // payee id. We do this in multiple passes so that higher fidelity
   // matching always happens first, i.e. a transaction should match
-  // match with low fidelity if a later transaction is going to match
+  // with low fidelity if a later transaction is going to match
   // the same one with high fidelity.
-  const transactionsStep2 = transactionsStep1.map(data => {
-    if (!data.match && data.fuzzyDataset) {
-      // Try to find one where the payees match.
-      const match = data.fuzzyDataset.find(
-        row => !hasMatched.has(row.id) && data.trans.payee === row.payee,
-      );
-
-      if (match) {
-        hasMatched.add(match.id);
-        return { ...data, match };
-      }
-    }
-    return data;
-  });
+  //
+  // Transactions are assigned in order of how close their own best
+  // remaining candidate is, not in whatever order the bank returned them.
+  const transactionsStep2 = greedilyAssignCandidates(
+    transactionsStep1,
+    hasMatched,
+    (data, row) => data.trans.payee === row.payee,
+  );
 
   // The final fuzzy matching pass. This is the lowest fidelity
-  // matching: it just find the first transaction that hasn't been
+  // matching: it just finds the first transaction that hasn't been
   // matched yet. Remember the dataset only contains transactions
   // around the same date with the same amount.
-  const transactionsStep3 = transactionsStep2.map(data => {
-    if (!data.match && data.fuzzyDataset) {
-      const match = data.fuzzyDataset.find(row => !hasMatched.has(row.id));
-      if (match) {
-        hasMatched.add(match.id);
-        return { ...data, match };
-      }
-    }
-    return data;
-  });
+  const transactionsStep3 = greedilyAssignCandidates(
+    transactionsStep2,
+    hasMatched,
+    () => true,
+  );
 
   return {
     payeesToCreate,

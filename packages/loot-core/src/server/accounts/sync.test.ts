@@ -639,6 +639,55 @@ describe('Account sync', () => {
   });
 
   test(
+    'given two same-amount incoming transactions in one sync batch, ' +
+      'the one closer in date to an existing candidate wins the match',
+    async () => {
+      const { id } = await prepareDatabase();
+
+      await db.insertTransaction({
+        id: 'existing',
+        account: id,
+        amount: -1239,
+        date: '2024-04-12',
+      });
+
+      // `early` (four days off) is listed before `exact` (same day as the
+      // existing transaction) in the batch. Assigning matches in array
+      // order would let `early` claim `existing` first, purely because
+      // its turn came first, leaving the closer `exact` transaction to
+      // insert as an unrelated new transaction instead.
+      await reconcileTransactions(
+        id,
+        [
+          {
+            date: '2024-04-08',
+            amount: -1239,
+            payee_name: 'Acme Inc.',
+            imported_id: 'early',
+          },
+          {
+            date: '2024-04-12',
+            amount: -1239,
+            payee_name: 'Acme Inc.',
+            imported_id: 'exact',
+          },
+        ],
+        { strictIdChecking: false },
+      );
+
+      const transactions = await getAllTransactions();
+      expect(transactions.length).toBe(2);
+
+      const existing = transactions.find(t => t.id === 'existing');
+      expect(existing.imported_id).toBe('exact');
+
+      const early = transactions.find(t => t.imported_id === 'early');
+      expect(early).toBeTruthy();
+      expect(early.id).not.toBe('existing');
+    },
+  );
+
+  test(
     'given an imported tx with no imported_id, ' +
       'when using fuzzy search V2, existing transaction has an imported_id, matches amount, and is within 7 days of imported tx, ' +
       'then imported tx should reconcile with existing transaction from fuzzy match',
