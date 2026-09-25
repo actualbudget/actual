@@ -9,6 +9,7 @@ import {
   SvgReports,
   SvgStoreFront,
   SvgTag,
+  SvgTime,
   SvgTuning,
   SvgWallet,
 } from '@actual-app/components/icons/v1';
@@ -25,6 +26,7 @@ import { Command } from 'cmdk';
 
 import { useAccounts } from '#hooks/useAccounts';
 import { useDashboardPages } from '#hooks/useDashboardPages';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useModalState } from '#hooks/useModalState';
 import { useNavigate } from '#hooks/useNavigate';
@@ -100,6 +102,7 @@ export function CommandBar() {
   const [budgetName] = useMetadataPref('budgetName');
   const { modalStack } = useModalState();
   const { startTour } = useTour();
+  const isChangeLogEnabled = useFeatureFlag('changeLog');
 
   const navigationItems = useMemo(
     () => [
@@ -119,6 +122,16 @@ export function CommandBar() {
       { id: 'payees', name: t('Payees'), path: '/payees', Icon: SvgStoreFront },
       { id: 'rules', name: t('Rules'), path: '/rules', Icon: SvgTuning },
       { id: 'tags', name: t('Tags'), path: '/tags', Icon: SvgTag },
+      ...(isChangeLogEnabled
+        ? [
+            {
+              id: 'transaction-changes',
+              name: t('Transaction Changes'),
+              path: '/transaction-changes',
+              Icon: SvgTime,
+            },
+          ]
+        : []),
       { id: 'settings', name: t('Settings'), path: '/settings', Icon: SvgCog },
       {
         id: 'accounts',
@@ -133,7 +146,7 @@ export function CommandBar() {
         Icon: SvgLibrary,
       },
     ],
-    [t],
+    [isChangeLogEnabled, t],
   );
 
   useEffect(() => {

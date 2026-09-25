@@ -12,6 +12,7 @@ import * as undo from '@actual-app/core/platform/client/undo';
 import { getLatestAppVersion, sync } from '#app/appSlice';
 import { ProtectedRoute } from '#auth/ProtectedRoute';
 import { Permissions } from '#auth/types';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
@@ -24,6 +25,7 @@ import { useDispatch, useSelector } from '#redux';
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { UserDirectoryPage } from './admin/UserDirectory/UserDirectoryPage';
 import { BankSyncStatus } from './BankSyncStatus';
+import { ChangeLogPage } from './changelog/ChangeLogPage';
 import { CommandBar } from './CommandBar';
 import { ContextMenu } from './ContextMenu';
 import { EnableBankingCallback } from './EnableBankingCallback';
@@ -107,6 +109,7 @@ export function FinancesApp() {
   );
 
   const multiuserEnabled = useMultiuserEnabled();
+  const isChangeLogEnabled = useFeatureFlag('changeLog');
 
   useNewsNotification();
 
@@ -371,6 +374,16 @@ export function FinancesApp() {
                       path="/notifications"
                       element={<NotificationsPage />}
                     />
+                    {isChangeLogEnabled && (
+                      <Route
+                        path="/transaction-changes"
+                        element={
+                          <NarrowNotSupported>
+                            <ChangeLogPage />
+                          </NarrowNotSupported>
+                        }
+                      />
+                    )}
                     <Route path="/settings" element={<Settings />} />
 
                     <Route

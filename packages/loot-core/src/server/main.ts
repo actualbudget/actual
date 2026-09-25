@@ -16,6 +16,7 @@ import { aqlQuery } from './aql';
 import { app as authApp } from './auth/app';
 import { app as budgetApp } from './budget/app';
 import { app as budgetFilesApp } from './budgetfiles/app';
+import { app as changeLogApp } from './changelog/app';
 import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
 import * as encryption from './encryption';
@@ -152,6 +153,7 @@ app.combine(
   budgetFilesApp,
   encryptionApp,
   tagsApp,
+  changeLogApp,
 );
 
 export function getDefaultDocumentDir() {
