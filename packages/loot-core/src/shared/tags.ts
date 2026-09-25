@@ -1,3 +1,5 @@
+import type { ObjectExpression } from './query';
+
 // for a given string, returns an array of unique words
 // (whitespace-separated) with only a single # prepended,
 // so "one #one ##one ##two three" becomes
@@ -27,4 +29,47 @@ export function renameTagInNotes(
   const escaped = oldTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const pattern = new RegExp(`(?<!#)#${escaped}(?=[\\s#]|$)`, 'g');
   return notes.replace(pattern, () => `#${newTag}`);
+}
+
+export function extractTagsFromText(value: string): string[] {
+  if (!value) return [];
+
+  const tags: string[] = [];
+  const seenTags = new Set<string>();
+  for (const match of value.matchAll(/(?<!#)#([^#\s]+)/g)) {
+    const tag = match[1];
+    if (!seenTags.has(tag)) {
+      seenTags.add(tag);
+      tags.push(tag);
+    }
+  }
+
+  return tags;
+}
+
+export function makeTagAqlRegex(tag: string): string {
+  const tagWithHash = tag.startsWith('#') ? tag : `#${tag}`;
+  const escapedTag = tagWithHash
+    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    // AQL unescapes `\$`, so a character class is needed for a literal `$`.
+    .replace(/\\\$/g, '[$]');
+
+  return `(^|[^#])${escapedTag}([\\s#]|$)`;
+}
+
+export function makeExactTagSetQueryFilter(
+  bucketTagNames: string[],
+  scopeTagNames: string[],
+): ObjectExpression {
+  const bucketTags = new Set(bucketTagNames);
+  const includedTagFilters = bucketTagNames.map(tag => ({
+    notes: { $regexp: makeTagAqlRegex(tag) },
+  }));
+  const excludedTagFilters = scopeTagNames
+    .filter(tag => !bucketTags.has(tag))
+    .map(tag => ({
+      notes: { $notregexp: makeTagAqlRegex(tag) },
+    }));
+
+  return { $and: [...includedTagFilters, ...excludedTagFilters] };
 }

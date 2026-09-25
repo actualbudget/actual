@@ -24,6 +24,7 @@ export async function fetchSpreadsheetQueryData({
   conditionsOpKey,
   filters,
   budgetType,
+  groupBy,
 }: {
   balanceTypeOp: balanceTypeOpType | undefined;
   startDate: string;
@@ -36,6 +37,7 @@ export async function fetchSpreadsheetQueryData({
   conditionsOpKey: string;
   filters: unknown[];
   budgetType?: SyncedPrefs['budgetType'];
+  groupBy?: string;
 }): Promise<{ assets: QueryDataEntity[]; debts: QueryDataEntity[] }> {
   if (balanceTypeOp === 'totalBudgeted') {
     return fetchBudgetData({
@@ -59,6 +61,7 @@ export async function fetchSpreadsheetQueryData({
         interval,
         conditionsOpKey,
         filters,
+        groupBy,
       ),
     ).then(({ data }) => data),
     aqlQuery(
@@ -69,6 +72,7 @@ export async function fetchSpreadsheetQueryData({
         interval,
         conditionsOpKey,
         filters,
+        groupBy,
       ),
     ).then(({ data }) => data),
   ]);

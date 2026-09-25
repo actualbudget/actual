@@ -102,3 +102,30 @@ describe('tags app', () => {
     });
   });
 });
+
+it('discovers unique tags using exact hashtag boundaries', async () => {
+  const account = await db.insertAccount({ name: 'Checking' });
+  const existingId = await db.insertTag({ tag: 'red' });
+  for (const notes of [
+    '#red#circle #red ##ignored',
+    '#circle #Red #$splurge',
+  ]) {
+    await db.insertTransaction({
+      date: '2026-01-01',
+      account,
+      notes,
+      amount: -100,
+    });
+  }
+
+  const tags = await app.handlers['tags-discover']();
+
+  expect(tags.map(tag => tag.tag).sort()).toEqual([
+    '$splurge',
+    'Red',
+    'circle',
+    'red',
+  ]);
+  expect(tags.find(tag => tag.tag === 'red')?.id).toBe(existingId);
+  expect(await db.getTags()).toHaveLength(4);
+});

@@ -1,3 +1,4 @@
+import { makeExactTagSetQueryFilter } from '@actual-app/core/shared/tags';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -14,6 +15,37 @@ const categories: { grouped: CategoryGroupEntity[]; list: CategoryEntity[] } = {
 const accounts: AccountEntity[] = [];
 
 describe('showActivity', () => {
+  it('uses the exact tag query filter when opening report activity', () => {
+    const navigate = vi.fn();
+
+    showActivity({
+      navigate,
+      categories,
+      accounts,
+      balanceTypeOp: 'totalAssets',
+      filters: [],
+      showHiddenCategories: true,
+      showOffBudget: true,
+      type: 'totals',
+      startDate: '2026-05-24',
+      endDate: '2026-05-30',
+      field: 'tag',
+      id: 'tag-group:circle-id:red-id',
+      bucketTagNames: ['circle', 'red'],
+      scopeTagNames: ['circle', 'red', 'blue'],
+    });
+
+    const [, options] = navigate.mock.calls[0];
+    expect(options.state.filterConditions).toContainEqual(
+      expect.objectContaining({
+        queryFilter: makeExactTagSetQueryFilter(
+          ['circle', 'red'],
+          ['circle', 'red', 'blue'],
+        ),
+      }),
+    );
+  });
+
   it('adds a transfer filter for the virtual Transfers category', () => {
     const navigate = vi.fn();
 
