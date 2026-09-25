@@ -73,7 +73,17 @@ export function MonteCarloPotsTableHeader() {
             <Trans>
               A one-click starting point that fills in a typical expected return
               and volatility for the selected mix of stocks and bonds. You can
-              still override both values.
+              still override both values, or pick Custom mix to enter your own
+              stock, bond and cash percentages in the pot&apos;s expanded
+              settings.
+              <br />
+              <br />
+              With a historical return model, the mix is also the pot&apos;s
+              real asset mix: its stock, bond and cash shares take each sampled
+              year&apos;s actual S&amp;P 500, 10-year Treasury and T-bill
+              returns. Custom pots have no mix and always draw random returns
+              from their typed values, so historical models only affect pots
+              with one.
             </Trans>
           </MonteCarloHelpTooltip>
         </View>
@@ -91,6 +101,12 @@ export function MonteCarloPotsTableHeader() {
             <Trans>
               The average yearly investment return before inflation. Each
               simulated year draws a random return around this average.
+              <br />
+              <br />
+              Only used by the random model and by Custom pots - under a
+              historical model, pots with an asset mix (a preset or a custom
+              mix) take real returns for it instead, and this cell shows the
+              mix&apos;s measured historical average.
             </Trans>
           </MonteCarloHelpTooltip>
         </View>
@@ -109,6 +125,11 @@ export function MonteCarloPotsTableHeader() {
               How much returns swing from year to year. Higher volatility means
               bigger ups and downs, which makes running out of money more likely
               even with the same average return.
+              <br />
+              <br />
+              Only used by the random model and by Custom pots - under a
+              historical model, pots with an asset mix show how much that mix
+              really swung across the whole dataset.
             </Trans>
           </MonteCarloHelpTooltip>
         </View>

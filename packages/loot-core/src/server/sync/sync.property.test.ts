@@ -9,6 +9,7 @@ import * as sheet from '#server/sheet';
 import * as mockSyncServer from '#server/tests/mockSyncServer';
 
 import * as encoder from './encoder';
+import { serializeValue } from './serialization';
 import { isError } from './utils';
 
 import * as sync from './index';
@@ -257,7 +258,7 @@ async function run(msgs) {
       Timestamp.zero,
       res.secondMessages.map(x => ({
         ...x,
-        value: sync.serializeValue(x.value),
+        value: serializeValue(x.value),
         timestamp: x.timestamp.toString(),
       })),
     ),
@@ -276,7 +277,7 @@ async function run(msgs) {
       Timestamp.zero,
       res.secondMessages.map(x => ({
         ...x,
-        value: sync.serializeValue(x.value),
+        value: serializeValue(x.value),
         timestamp: x.timestamp.toString(),
       })),
     ),

@@ -22,14 +22,13 @@ import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
+import { isTouchDevice } from '#util/isTouchDevice';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
 const RADIAN = Math.PI / 180;
-
-const canDeviceHover = () => window.matchMedia('(hover: hover)').matches;
 
 type ClickablePieItem = PieSectorDataItem &
   Partial<Pick<GroupedEntity, 'id' | 'uncategorizedId'>>;
@@ -487,18 +486,18 @@ export function DonutGraph({
                     }}
                     onMouseLeave={() => setPointer('')}
                     onMouseEnter={(_, index) => {
-                      if (canDeviceHover()) {
+                      if (!isTouchDevice()) {
                         setActiveGroupIndex(index);
                         setActiveRing('group');
                       }
                     }}
                     onClick={(item: ClickablePieItem, index) => {
-                      if (!canDeviceHover()) {
+                      if (isTouchDevice()) {
                         setActiveGroupIndex(index);
                         setActiveRing('group');
                       }
                       if (
-                        (canDeviceHover() || activeGroupIndex === index) &&
+                        (!isTouchDevice() || activeGroupIndex === index) &&
                         ((compact && showTooltip) || !compact)
                       ) {
                         showActivity({
@@ -569,19 +568,19 @@ export function DonutGraph({
                     }}
                     onMouseLeave={() => setPointer('')}
                     onMouseEnter={(_, index) => {
-                      if (canDeviceHover()) {
+                      if (!isTouchDevice()) {
                         setActiveCategoryIndex(index);
                         setActiveRing('category');
                         setPointer('pointer');
                       }
                     }}
                     onClick={(item: ClickablePieItem, index) => {
-                      if (!canDeviceHover()) {
+                      if (isTouchDevice()) {
                         setActiveCategoryIndex(index);
                         setActiveRing('category');
                       }
                       if (
-                        (canDeviceHover() || activeCategoryIndex === index) &&
+                        (!isTouchDevice() || activeCategoryIndex === index) &&
                         ((compact && showTooltip) || !compact)
                       ) {
                         showActivity({
@@ -664,7 +663,7 @@ export function DonutGraph({
                   }}
                   onMouseLeave={() => setPointer('')}
                   onMouseEnter={(_, index) => {
-                    if (canDeviceHover()) {
+                    if (!isTouchDevice()) {
                       setActiveIndex(index);
                       if (groupBy !== 'Interval') {
                         setPointer('pointer');
@@ -672,12 +671,12 @@ export function DonutGraph({
                     }
                   }}
                   onClick={(item: ClickablePieItem, index) => {
-                    if (!canDeviceHover()) {
+                    if (isTouchDevice()) {
                       setActiveIndex(index);
                     }
                     if (
                       groupBy !== 'Interval' &&
-                      (canDeviceHover() || activeIndex === index) &&
+                      (!isTouchDevice() || activeIndex === index) &&
                       ((compact && showTooltip) || !compact)
                     ) {
                       showActivity({

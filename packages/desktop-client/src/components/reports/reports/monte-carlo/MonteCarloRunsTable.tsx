@@ -16,7 +16,26 @@ const PAGE_SIZE = 20;
 
 type SortOrder = 'worst-first' | 'best-first';
 
+/**
+ * The percentiles of the worst-first ranking a user can jump to (0 =
+ * worst run, 1 = best run), as Select options. Shared with the cashflow
+ * chart's scenario picker so both land on the same runs.
+ */
+export function getRunPercentileOptions(
+  translate: (key: string) => string,
+): Array<[string, string]> {
+  return [
+    ['0', translate('Worst run')],
+    ['0.25', translate('25th percentile')],
+    ['0.5', translate('Median run')],
+    ['0.75', translate('75th percentile')],
+    ['1', translate('Best run')],
+  ];
+}
+
 type MonteCarloRunsTableProps = {
+  /** Every run's index, worst outcome first (ranked once by the parent) */
+  rankedIndices: number[];
   endingBalances: Float64Array;
   depletionYearBySimulation: Int32Array;
   totalWithdrawnBySimulation: Float64Array;
@@ -25,6 +44,7 @@ type MonteCarloRunsTableProps = {
 };
 
 export function MonteCarloRunsTable({
+  rankedIndices,
   endingBalances,
   depletionYearBySimulation,
   totalWithdrawnBySimulation,
@@ -38,7 +58,7 @@ export function MonteCarloRunsTable({
   const [page, setPage] = useState(0);
   const [highlightedRank, setHighlightedRank] = useState<number | null>(null);
 
-  const simulationCount = endingBalances.length;
+  const simulationCount = rankedIndices.length;
 
   // Jump straight to a given percentile of the ranked outcomes (0 = worst,
   // 1 = best), landing on its page and highlighting the exact run
@@ -52,42 +72,20 @@ export function MonteCarloRunsTable({
     setHighlightedRank(rank);
   }
 
-  // Rank every run: by ending balance, using the depletion year to order
-  // the failed runs (which all end at zero) among themselves
-  const rankedIndices = Array.from(
-    { length: simulationCount },
-    (_, index) => index,
-  );
-  rankedIndices.sort((runA, runB) => {
-    const balanceDiff = endingBalances[runA] - endingBalances[runB];
-    if (balanceDiff !== 0) {
-      return balanceDiff;
-    }
-    // Survivors (-1) rank after any depleted run; explicit branches so
-    // two survivors compare as a tie instead of Infinity - Infinity
-    const runADepletionYear = depletionYearBySimulation[runA];
-    const runBDepletionYear = depletionYearBySimulation[runB];
-    const runASurvived = runADepletionYear === -1;
-    const runBSurvived = runBDepletionYear === -1;
-    if (runASurvived && runBSurvived) {
-      return 0;
-    }
-    if (runASurvived) {
-      return 1;
-    }
-    if (runBSurvived) {
-      return -1;
-    }
-    return runADepletionYear - runBDepletionYear;
-  });
-  if (sortOrder === 'best-first') {
-    rankedIndices.reverse();
-  }
-
   const pageCount = Math.max(1, Math.ceil(simulationCount / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount - 1);
   const pageStart = currentPage * PAGE_SIZE;
-  const pageIndices = rankedIndices.slice(pageStart, pageStart + PAGE_SIZE);
+  // Best-first reads the same ranking from the other end, so no copy of
+  // the full list is made for either order
+  const pageIndices = Array.from(
+    { length: Math.max(0, Math.min(PAGE_SIZE, simulationCount - pageStart)) },
+    (_, offset) => {
+      const rank = pageStart + offset;
+      return rankedIndices[
+        sortOrder === 'best-first' ? simulationCount - 1 - rank : rank
+      ];
+    },
+  );
 
   return (
     <View>
@@ -250,14 +248,7 @@ export function MonteCarloRunsTable({
               jumpToPercentile(Number(value));
             }
           }}
-          options={[
-            ['', t('Jump to…')],
-            ['0', t('Worst run')],
-            ['0.25', t('25th percentile')],
-            ['0.5', t('Median run')],
-            ['0.75', t('75th percentile')],
-            ['1', t('Best run')],
-          ]}
+          options={[['', t('Jump to…')], ...getRunPercentileOptions(t)]}
           style={{ width: 170 }}
         />
         <Button
