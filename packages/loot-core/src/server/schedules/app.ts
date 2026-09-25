@@ -301,6 +301,23 @@ async function moveSchedule({
   return {};
 }
 
+// The auto-posting service is throttled to one run per day through the
+// `lastScheduleRun` pref (see the `sync` event listener at the bottom of this
+// file). A schedule that posts transactions can be created or edited after
+// that run has already happened and still be due today, in which case it
+// would not be posted until the next day. Clearing the marker lets the
+// service run again for the current day; it only posts occurrences that do
+// not have a transaction yet, so an extra run is harmless.
+async function allowAutoPostingToRunAgainToday(postsTransaction: boolean) {
+  if (!postsTransaction) {
+    return;
+  }
+
+  if (prefs.getPrefs()?.lastScheduleRun) {
+    await prefs.savePrefs({ lastScheduleRun: undefined });
+  }
+}
+
 export async function createSchedule({
   schedule = null,
   conditions = [],
@@ -354,6 +371,8 @@ export async function createSchedule({
     id: scheduleId,
     rule: ruleId,
   });
+
+  await allowAutoPostingToRunAgainToday(scheduleFields?.posts_transaction);
 
   return scheduleId;
 }
@@ -448,6 +467,12 @@ export async function updateSchedule({
 
     await db.updateWithSchema('schedules', scheduleFields);
   });
+
+  const postsTransaction =
+    scheduleFields.posts_transaction ??
+    (await getSchedule(scheduleFields.id))?.posts_transaction;
+
+  await allowAutoPostingToRunAgainToday(postsTransaction);
 
   return scheduleFields.id;
 }
