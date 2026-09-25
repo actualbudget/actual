@@ -435,6 +435,11 @@ export function sheetForMonth(month: string): string {
   return 'budget' + month.replace('-', '');
 }
 
+export function monthFromSheet(sheetName: string): string | null {
+  const match = /^budget(\d{4})(0[1-9]|1[0-2])$/.exec(sheetName);
+  return match ? `${match[1]}-${match[2]}` : null;
+}
+
 export function nameForMonth(month: DateLike, locale?: Locale): string {
   return d.format(_parse(month), "MMMM ''yy", { locale });
 }
