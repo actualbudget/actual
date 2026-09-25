@@ -3,7 +3,32 @@ import fsPromises from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { preserveMode, sweepOrphanedTempFiles } from './paths';
+import { config } from '#load-config';
+
+import {
+  getPathForUserFile,
+  preserveMode,
+  sweepOrphanedTempFiles,
+} from './paths';
+import type { FileId } from './paths';
+
+describe('getPathForUserFile', () => {
+  it('builds the blob path inside the user files directory', () => {
+    const userFilesDir = path.resolve(config.get('userFiles'));
+
+    expect(getPathForUserFile('abc-123' as FileId)).toBe(
+      path.join(userFilesDir, 'file-abc-123.blob'),
+    );
+  });
+
+  it('rejects an id that would escape the user files directory', () => {
+    // Cast past the branded type: this id would fail isValidFileId, and the
+    // point is that the path builder refuses it even if a caller skips that.
+    expect(() => getPathForUserFile('x/../../escape' as FileId)).toThrow(
+      'Invalid file id',
+    );
+  });
+});
 
 describe('sweepOrphanedTempFiles', () => {
   let dir: string;

@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 
 import { config } from '#load-config';
 
@@ -19,7 +19,15 @@ export function isValidGroupId(id: string): id is GroupId {
 }
 
 export function getPathForUserFile(fileId: FileId) {
-  return join(resolve(config.get('userFiles')), `file-${fileId}.blob`);
+  const userFilesDir = resolve(config.get('userFiles'));
+  const filePath = resolve(userFilesDir, `file-${fileId}.blob`);
+  // isValidFileId already rules out traversal; this makes the containment
+  // explicit where the path is built, so the guarantee doesn't depend on
+  // every caller having validated the id first.
+  if (!filePath.startsWith(userFilesDir + sep)) {
+    throw new Error('Invalid file id');
+  }
+  return filePath;
 }
 
 export function getPathForGroupFile(groupId: GroupId) {
