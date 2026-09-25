@@ -443,3 +443,118 @@ describe('Categories', () => {
     expect(sheet.getCellValue(nextSheetName, 'to-budget')).toBe(toBudget);
   });
 });
+
+describe('Mutator shutdown', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  function deferred() {
+    let resolve;
+    const promise = new Promise(resolvePromise => {
+      resolve = resolvePromise;
+    });
+    return { promise, resolve };
+  }
+
+  function startCloseBudget() {
+    return runHandler(handlers['close-budget'], undefined, {
+      name: 'close-budget',
+    });
+  }
+
+  test('waits for a running mutator before closing the database', async () => {
+    vi.useFakeTimers();
+    const gate = deferred();
+    const mutatorPromise = runMutator(async () => {
+      await gate.promise;
+      await db.first('SELECT 1');
+    });
+    const closePromise = startCloseBudget();
+
+    try {
+      await vi.advanceTimersByTimeAsync(200);
+      expect(db.getDatabase()).not.toBeNull();
+
+      gate.resolve();
+      await expect(mutatorPromise).resolves.toBeUndefined();
+      await vi.runAllTimersAsync();
+      await expect(closePromise).resolves.toBe('ok');
+    } finally {
+      gate.resolve();
+      await vi.runAllTimersAsync();
+      await Promise.allSettled([mutatorPromise, closePromise]);
+    }
+  });
+
+  test('waits for queued mutators before closing the database', async () => {
+    vi.useFakeTimers();
+    const gate = deferred();
+    const events = [];
+    const firstPromise = runMutator(async () => {
+      events.push('first-start');
+      await gate.promise;
+      events.push('first-finish');
+    });
+    const secondPromise = runMutator(async () => {
+      events.push('second-start');
+      await db.first('SELECT 1');
+      events.push('second-finish');
+    });
+    const closePromise = startCloseBudget();
+
+    try {
+      await vi.advanceTimersByTimeAsync(200);
+      expect(db.getDatabase()).not.toBeNull();
+      expect(events).toEqual(['first-start']);
+
+      gate.resolve();
+      await expect(firstPromise).resolves.toBeUndefined();
+      await expect(secondPromise).resolves.toBeUndefined();
+      await vi.runAllTimersAsync();
+      await expect(closePromise).resolves.toBe('ok');
+      expect(events).toEqual([
+        'first-start',
+        'first-finish',
+        'second-start',
+        'second-finish',
+      ]);
+    } finally {
+      gate.resolve();
+      await vi.runAllTimersAsync();
+      await Promise.allSettled([firstPromise, secondPromise, closePromise]);
+    }
+  });
+
+  test('continues closing when a mutator rejects', async () => {
+    vi.useFakeTimers();
+    const gate = deferred();
+    const rejectingPromise = runMutator(async () => {
+      await gate.promise;
+      throw new Error('mutator failed');
+    });
+    const succeedingPromise = runMutator(async () => {
+      await db.first('SELECT 1');
+    });
+    const closePromise = startCloseBudget();
+
+    try {
+      await vi.advanceTimersByTimeAsync(200);
+      expect(db.getDatabase()).not.toBeNull();
+
+      gate.resolve();
+      await expect(rejectingPromise).rejects.toThrow('mutator failed');
+      await expect(succeedingPromise).resolves.toBeUndefined();
+      await vi.runAllTimersAsync();
+      await expect(closePromise).resolves.toBe('ok');
+    } finally {
+      gate.resolve();
+      await vi.runAllTimersAsync();
+      await Promise.allSettled([
+        rejectingPromise,
+        succeedingPromise,
+        closePromise,
+      ]);
+    }
+  });
+});

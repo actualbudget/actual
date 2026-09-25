@@ -4,6 +4,7 @@ import { sequential } from '#shared/async';
 import type { HandlerFunctions, Handlers } from '#types/handlers';
 
 const runningMethods = new Set();
+const runningMutators = new Set<Promise<unknown>>();
 
 let currentContext = null;
 const mutatingMethods = new WeakMap();
@@ -24,9 +25,12 @@ async function flushRunningMethods() {
   // Give the client some time to invoke new requests
   await wait(200);
 
-  while (runningMethods.size > 0) {
+  while (runningMethods.size > 0 || runningMutators.size > 0) {
     // Wait for all of them; rejections already went to their callers.
-    await Promise.allSettled([...runningMethods.values()]);
+    await Promise.allSettled([
+      ...runningMethods.values(),
+      ...runningMutators.values(),
+    ]);
 
     // We give clients more time to make other requests. This lets them continue
     // to do an async workflow
@@ -57,9 +61,8 @@ export async function runHandler<T extends Handlers[keyof Handlers]>(
   }
 
   // When closing a file, it clears out all global state for the file. That
-  // means any async workflows currently executed would be cut off. We handle
-  // this by letting all async workflows finish executing before closing the
-  // file
+  // means any async workflows or mutators currently executing would be cut
+  // off. We handle this by letting them finish before closing the file.
   if (name === 'close-budget') {
     await flushRunningMethods();
   }
@@ -95,7 +98,19 @@ function _runMutator<T extends () => Promise<unknown>>(
   }) as Promise<Awaited<ReturnType<T>>>;
 }
 // Type cast needed as TS looses types over nested generic returns
-export const runMutator = sequential(_runMutator) as typeof _runMutator;
+const runMutatorSequential = sequential(_runMutator) as typeof _runMutator;
+
+export function runMutator<T extends () => Promise<unknown>>(
+  func: T,
+  initialContext = {},
+): Promise<Awaited<ReturnType<T>>> {
+  const promise = runMutatorSequential(func, initialContext);
+  runningMutators.add(promise);
+
+  const remove = () => runningMutators.delete(promise);
+  void promise.then(remove, remove);
+  return promise;
+}
 
 export function withMutatorContext<T>(
   context: { undoListening: boolean; undoTag?: unknown },
