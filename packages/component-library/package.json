@@ -44,6 +44,7 @@
     "./theme": "./src/theme.ts",
     "./themes/palette.css": "./src/themes/palette.css",
     "./themes/light.css": "./src/themes/light.css",
+    "./themes/sidebar-redesign-light.css": "./src/themes/sidebar-redesign-light.css",
     "./themes/dark.css": "./src/themes/dark.css",
     "./themes/midnight.css": "./src/themes/midnight.css",
     "./tokens": "./src/tokens.ts",
