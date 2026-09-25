@@ -787,6 +787,93 @@ describe('/upload-user-file', () => {
     expect(res.statusCode).toEqual(500);
     expect(fs.readFileSync(filePath, 'utf8')).toEqual(originalContent);
   });
+
+  it('removes an orphaned temp file left by a previous crashed upload to the same file', async () => {
+    const fileId = generateFileId();
+    const groupId = 'orphan-cleanup-group-id';
+    const keyId = 'key-id';
+    const syncVersion = 2;
+    const encryptMeta = JSON.stringify({ keyId });
+    const filePath = getPathForUserFile(fileId);
+    const orphan = `${filePath}.12345-deadbeef.tmp`;
+
+    getAccountDb().mutate(
+      'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, encrypt_keyid) VALUES (?, ?, ?, ?, ?, ?)',
+      [fileId, groupId, syncVersion, 'orphan.txt', encryptMeta, keyId],
+    );
+    fs.writeFileSync(filePath, 'original content');
+    fs.writeFileSync(orphan, 'leftover from a crash');
+    onTestFinished(() => {
+      try {
+        fs.unlinkSync(filePath);
+      } catch {}
+      try {
+        fs.unlinkSync(orphan);
+      } catch {}
+    });
+
+    const res = await request(app)
+      .post('/upload-user-file')
+      .set('Content-Type', 'application/encrypted-file')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-name', 'orphan.txt')
+      .set('x-actual-file-id', fileId)
+      .set('x-actual-group-id', groupId)
+      .set('x-actual-format', syncVersion.toString())
+      .set('x-actual-encrypt-meta', encryptMeta)
+      .send(Buffer.from('new content'));
+
+    expect(res.statusCode).toEqual(200);
+    expect(fs.existsSync(orphan)).toBe(false);
+  });
+
+  it('does not sweep the temp file of an in-flight upload to the same file', async () => {
+    const fileId = generateFileId();
+    const groupId = 'in-flight-group-id';
+    const keyId = 'key-id';
+    const syncVersion = 2;
+    const encryptMeta = JSON.stringify({ keyId });
+    const filePath = getPathForUserFile(fileId);
+
+    getAccountDb().mutate(
+      'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, encrypt_keyid) VALUES (?, ?, ?, ?, ?, ?)',
+      [fileId, groupId, syncVersion, 'in-flight.txt', encryptMeta, keyId],
+    );
+    fs.writeFileSync(filePath, 'original content');
+    onTestFinished(() => {
+      try {
+        fs.unlinkSync(filePath);
+      } catch {}
+    });
+
+    const upload = (body: string) =>
+      request(app)
+        .post('/upload-user-file')
+        .set('Content-Type', 'application/encrypted-file')
+        .set('x-actual-token', 'valid-token')
+        .set('x-actual-name', 'in-flight.txt')
+        .set('x-actual-file-id', fileId)
+        .set('x-actual-group-id', groupId)
+        .set('x-actual-format', syncVersion.toString())
+        .set('x-actual-encrypt-meta', encryptMeta)
+        .send(Buffer.from(body));
+
+    // Pause the first upload after its temp file lands on disk, and run a
+    // second upload of the same file to completion inside that window.
+    const realWriteFile = fsPromises.writeFile;
+    const writeFileSpy = vi
+      .spyOn(fsPromises, 'writeFile')
+      .mockImplementationOnce(async (...args) => {
+        await realWriteFile(...args);
+        await upload('second upload');
+      });
+    onTestFinished(() => writeFileSpy.mockRestore());
+
+    const res = await upload('first upload');
+
+    expect(res.statusCode).toEqual(200);
+    expect(fs.readFileSync(filePath, 'utf8')).toEqual('first upload');
+  });
 });
 
 describe('/download-user-file', () => {

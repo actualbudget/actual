@@ -39,6 +39,7 @@ import {
   getPathForUserFile,
   isValidFileId,
   isValidGroupId,
+  sweepOrphanedTempFiles,
 } from './util/paths';
 import type { GroupId } from './util/paths';
 
@@ -296,6 +297,8 @@ app.post('/reset-user-file', async (req, res) => {
   res.send(OK_RESPONSE);
 });
 
+const inFlightUploadTempPaths = new Set<string>();
+
 app.post('/upload-user-file', async (req, res) => {
   if (typeof req.headers['x-actual-name'] !== 'string') {
     // FIXME: Not sure how this cannot be a string when the header is
@@ -362,7 +365,9 @@ app.post('/upload-user-file', async (req, res) => {
 
   const finalPath = getPathForUserFile(fileId);
   const tmpPath = `${finalPath}.${process.pid}-${randomBytes(4).toString('hex')}.tmp`;
+  inFlightUploadTempPaths.add(tmpPath);
   try {
+    await sweepOrphanedTempFiles(finalPath, inFlightUploadTempPaths);
     await fs.writeFile(tmpPath, req.body);
     await fs.rename(tmpPath, finalPath);
   } catch (err) {
@@ -370,6 +375,8 @@ app.post('/upload-user-file', async (req, res) => {
     console.log('Error writing file', err);
     res.status(500).send({ status: 'error' });
     return;
+  } finally {
+    inFlightUploadTempPaths.delete(tmpPath);
   }
 
   if (!currentFile) {
