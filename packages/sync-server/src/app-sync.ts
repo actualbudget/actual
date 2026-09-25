@@ -2,7 +2,7 @@
 import { Buffer } from 'node:buffer';
 import { randomBytes } from 'node:crypto';
 import fs from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 
 import {
   create,
@@ -39,6 +39,7 @@ import {
   getPathForUserFile,
   isValidFileId,
   isValidGroupId,
+  preserveMode,
   sweepOrphanedTempFiles,
 } from './util/paths';
 import type { GroupId } from './util/paths';
@@ -367,8 +368,9 @@ app.post('/upload-user-file', async (req, res) => {
   const tmpPath = `${finalPath}.${process.pid}-${randomBytes(4).toString('hex')}.tmp`;
   inFlightUploadTempPaths.add(tmpPath);
   try {
-    await sweepOrphanedTempFiles(finalPath, inFlightUploadTempPaths);
+    await sweepOrphanedTempFiles(dirname(finalPath), inFlightUploadTempPaths);
     await fs.writeFile(tmpPath, req.body);
+    await preserveMode(tmpPath, finalPath);
     await fs.rename(tmpPath, finalPath);
   } catch (err) {
     await fs.rm(tmpPath, { force: true }).catch(() => undefined);

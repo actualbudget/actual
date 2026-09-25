@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -17,8 +16,29 @@ export async function resolveWriteTarget(filepath: string): Promise<string> {
     }
   }
 
+  // realpath also fails for a symlink whose target doesn't exist yet; follow
+  // it by hand so the write creates that target instead of replacing the link.
+  // A symlink loop fails realpath with ELOOP above, so this can't recurse forever.
+  const linkTarget = await readSymlink(filepath);
+  if (linkTarget !== null) {
+    return resolveWriteTarget(path.resolve(path.dirname(filepath), linkTarget));
+  }
+
   const realDir = await fs.promises.realpath(path.dirname(filepath));
   return path.join(realDir, path.basename(filepath));
+}
+
+async function readSymlink(filepath: string): Promise<string | null> {
+  try {
+    return await fs.promises.readlink(filepath);
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    // ENOENT: nothing at this path. EINVAL: it exists but isn't a symlink.
+    if (code === 'ENOENT' || code === 'EINVAL') {
+      return null;
+    }
+    throw err;
+  }
 }
 
 const retryOptions = {
@@ -52,50 +72,51 @@ async function withLockRetry<T>(
 }
 
 // Carries the previous file's permission mode over to the replacement, since
-// a fresh write would otherwise get the process's default mode. A no-op for
-// a brand-new file, and for platforms (Windows) where chmod doesn't carry
-// meaningful permission bits.
+// a fresh write would otherwise get the process's default mode. Best-effort:
+// some filesystems (network shares, restricted containers) refuse chmod, and
+// losing the mode must not fail the write itself.
 async function preserveMode(tmpPath: string, target: string): Promise<void> {
   try {
     const { mode } = await fs.promises.stat(target);
     await fs.promises.chmod(tmpPath, mode);
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
-      throw err;
+      logger.warn(`Could not preserve file mode for ${target}`, err);
     }
   }
 }
 
-// Temp files this process is currently writing. Assumes a single process owns
-// the data directory, so any other matching temp file is a crash leftover.
+// Matches only the temp names atomicWriteFile creates:
+// `<name>.<pid>.<8 hex chars>.tmp`.
+const TEMP_FILE_PATTERN = /\.\d+\.[0-9a-f]{8}\.tmp$/;
+
+// Assumes a single process owns the data directory: any matching temp file
+// that isn't one of this process's in-flight writes is a crash leftover from
+// a previous run, so each directory only needs sweeping once per run.
 const inFlightTempPaths = new Set<string>();
+const sweptDirectories = new Set<string>();
 
-// Removes temp files left behind by a previous write to this exact target
-// that never got cleaned up - e.g. the process was killed before the catch
-// block's own cleanup ran. Skips this process's own in-flight writes.
-async function sweepOrphanedTempFiles(target: string): Promise<void> {
-  const dir = path.dirname(target);
-  const prefix = `${path.basename(target)}.`;
-
-  let entries: string[];
-  try {
-    entries = await fs.promises.readdir(dir);
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-      return;
-    }
-    throw err;
+// Best-effort: failing to clean up leftovers must not fail the write itself.
+async function sweepOrphanedTempFiles(dir: string): Promise<void> {
+  if (sweptDirectories.has(dir)) {
+    return;
   }
+  sweptDirectories.add(dir);
 
-  await Promise.all(
-    entries
-      .filter(name => name.startsWith(prefix) && name.endsWith('.tmp'))
-      .map(name => path.join(dir, name))
-      .filter(tmpPath => !inFlightTempPaths.has(tmpPath))
-      .map(tmpPath =>
-        fs.promises.rm(tmpPath, { force: true }).catch(() => undefined),
-      ),
-  );
+  try {
+    const entries = await fs.promises.readdir(dir);
+    await Promise.all(
+      entries
+        .filter(name => TEMP_FILE_PATTERN.test(name))
+        .map(name => path.join(dir, name))
+        .filter(tmpPath => !inFlightTempPaths.has(tmpPath))
+        .map(tmpPath => fs.promises.rm(tmpPath, { force: true })),
+    );
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+      logger.warn(`Could not clean up leftover temp files in ${dir}`, err);
+    }
+  }
 }
 
 // Writes `contents` to `filepath` atomically: the contents are written to a
@@ -111,7 +132,7 @@ export async function atomicWriteFile(
   const tmpPath = `${target}.${process.pid}.${crypto.randomBytes(4).toString('hex')}.tmp`;
 
   inFlightTempPaths.add(tmpPath);
-  await sweepOrphanedTempFiles(target);
+  await sweepOrphanedTempFiles(path.dirname(target));
 
   try {
     await withLockRetry(
