@@ -1,9 +1,15 @@
 import request from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getAccountDb, getLoginMethod, getServerPrefs } from './account-db';
+import {
+  getAccountDb,
+  getLoginMethod,
+  getServerPrefs,
+  needsBootstrap,
+} from './account-db';
 import { bootstrapPassword } from './accounts/password';
 import { handlers as app, authRateLimiter } from './app-account';
+import { config } from './load-config';
 
 const ADMIN_ROLE = 'ADMIN';
 const BASIC_ROLE = 'BASIC';
@@ -253,6 +259,45 @@ describe('/login', () => {
 
     expect(res.statusCode).toEqual(400);
     expect(res.body).toHaveProperty('reason', 'invalid-password');
+  });
+});
+
+describe('/bootstrap', () => {
+  const originalEnforceOpenId = config.get('enforceOpenId');
+
+  afterEach(() => {
+    config.set('enforceOpenId', originalEnforceOpenId);
+    clearAuth();
+  });
+
+  it('should refuse to set a password when OpenID is enforced', async () => {
+    // Startup OpenID setup can fail (e.g. the issuer is unreachable), which
+    // leaves the auth table empty and the server looking un-bootstrapped.
+    config.set('enforceOpenId', true);
+
+    const res = await request(app)
+      .post('/bootstrap')
+      .send({ password: 'testpassword' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toEqual({ status: 'error', reason: 'openid-enforced' });
+    expect(needsBootstrap()).toBe(true);
+  });
+
+  it('should set a password when OpenID is not enforced', async () => {
+    config.set('enforceOpenId', false);
+
+    const res = await request(app)
+      .post('/bootstrap')
+      .send({ password: 'testpassword' });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data).toHaveProperty('token');
+    expect(needsBootstrap()).toBe(false);
+
+    getAccountDb().mutate('DELETE FROM sessions WHERE token = ?', [
+      res.body.data.token,
+    ]);
   });
 });
 
