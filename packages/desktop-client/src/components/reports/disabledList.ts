@@ -24,47 +24,23 @@ const intervalOptions = [
   },
 ];
 
-const currentIntervalOptions = [
-  {
-    description: t('This week'),
-    disableInclude: true,
-  },
-  {
-    description: t('This month'),
-    disableInclude: true,
-  },
-  {
-    description: t('Last month'),
-    disableInclude: true,
-  },
-  {
-    description: t('Current quarter'),
-    disableInclude: true,
-  },
-  {
-    description: t('Previous quarter'),
-    disableInclude: true,
-  },
-  {
-    description: t('Last 30 days'),
-    disableInclude: true,
-  },
-  {
-    description: t('Year to date'),
-    disableInclude: true,
-  },
-  {
-    description: t('Last year'),
-    disableInclude: true,
-  },
-  {
-    description: t('Prior year to date'),
-    disableInclude: true,
-  },
-  {
-    description: t('All time'),
-    disableInclude: true,
-  },
+// A range only disables this toggle when `getLiveRange` ignores the flag: the ranges it resolves
+// by name, and `This week` / `This month`, whose numeric branch already ends in the current
+// period. The offset ranges (`Last week`, `Last month`, `Last 3/6/12 months`) all extend to the
+// current period when it is on, so they leave it enabled.
+//
+// Keyed by `ReportOptions.dateRange` keys, which is what a report stores and what every lookup
+// passes. Keying by the translated description silently disabled nothing outside English.
+const currentIntervalDisabled = [
+  'This week',
+  'This month',
+  'Current quarter',
+  'Previous quarter',
+  'Last 30 days',
+  'Year to date',
+  'Last year',
+  'Prior year to date',
+  'All time',
 ];
 
 type graphOptions = {
@@ -235,9 +211,7 @@ export const disabledList = {
   modeGraphsMap: new Map(
     modeOptions.map(item => [item.description, item.disabledGraph]),
   ),
-  currentInterval: new Map(
-    currentIntervalOptions.map(item => [item.description, item.disableInclude]),
-  ),
+  currentInterval: new Map(currentIntervalDisabled.map(key => [key, true])),
 };
 
 export const defaultsList = {
