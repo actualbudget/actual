@@ -18,6 +18,7 @@
 /* Derived tokens are redeclared because var() references in custom
    properties resolve where the property is declared. */
 .sidebar-redesign {
+  border-right: 2px solid #e9ecf0;
   --color-sidebarBackground: var(--color-sidebarRedesignBackground);
   --color-sidebarItemText: var(--color-sidebarRedesignItemText);
   --color-sidebarItemBackgroundHover: var(
