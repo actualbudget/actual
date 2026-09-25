@@ -177,11 +177,23 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
     setExpression(formatAmount(value));
   }
 
+  // A disabled input cannot take DOM focus, so calling `.focus()` on one is
+  // silently dropped. Record the request instead and honour it once the input
+  // is enabled: on mobile split rows the row being focused is still rendered
+  // disabled while the previous row is the active edit, which left focus (and
+  // the keyboard) stranded on the previous split.
+  const shouldFocusRef = useRef(false);
+
   useLayoutEffect(() => {
-    if (autoFocus) {
+    shouldFocusRef.current = autoFocus;
+  }, [autoFocus]);
+
+  useLayoutEffect(() => {
+    if (shouldFocusRef.current && !props.disabled) {
+      shouldFocusRef.current = false;
       inputRef.current?.focus();
     }
-  }, [inputRef, autoFocus]);
+  }, [inputRef, autoFocus, props.disabled]);
 
   return (
     <>
