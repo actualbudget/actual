@@ -324,13 +324,17 @@ describe('atomicWriteFile lock retries', () => {
   }
 
   // Skips the real backoff delays while letting real file I/O complete.
+  // Keeps advancing until the write settles rather than for a fixed number of
+  // turns: on a slow machine the real I/O can outlast any fixed budget, and a
+  // backoff timer scheduled after the loop gives up would never fire. A
+  // genuine hang still fails on the test timeout.
   async function settleWithFakeTimers(promise: Promise<void>) {
     let isSettled = false;
     const tracked = promise.finally(() => {
       isSettled = true;
     });
     tracked.catch(() => undefined);
-    for (let i = 0; i < 100 && !isSettled; i++) {
+    while (!isSettled) {
       await new Promise(resolve => setImmediate(resolve));
       await vi.advanceTimersByTimeAsync(500);
     }
