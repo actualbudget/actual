@@ -28,6 +28,7 @@ it.each([
       ),
     });
     expect(result.current(1234, 'financial')).toBe(expected);
+    expect(result.current.precision).toBe(precision);
     expect(result.current.forEdit(1234)).toBe(expected);
     expect(result.current.fromEdit(expected)).toBe(1234);
   },

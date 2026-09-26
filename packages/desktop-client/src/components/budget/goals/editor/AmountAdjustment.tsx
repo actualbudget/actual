@@ -14,6 +14,7 @@ import type { Action } from '#components/budget/goals/actions';
 import { FormField, FormLabel } from '#components/forms';
 import { AmountInput } from '#components/util/AmountInput';
 import { PercentInput } from '#components/util/PercentInput';
+import { useFormat } from '#hooks/useFormat';
 
 type AdjustableTemplate =
   | ScheduleTemplate
@@ -43,6 +44,7 @@ export const AmountAdjustment = ({
   dispatch,
 }: AmountAdjustmentProps) => {
   const { t } = useTranslation();
+  const format = useFormat();
 
   const enabled = template.adjustment !== undefined;
   const adjustmentType: AdjustmentType = template.adjustmentType ?? 'percent';
@@ -107,8 +109,10 @@ export const AmountAdjustment = ({
               <AmountInput
                 id="adjustment-amount-field"
                 zeroSign="+"
-                value={amountToInteger(adjustment)}
-                onUpdate={next => apply(integerToAmount(next), 'fixed')}
+                value={amountToInteger(adjustment, format.precision)}
+                onUpdate={next =>
+                  apply(integerToAmount(next, format.precision), 'fixed')
+                }
                 style={{ flex: 'none', width: 140 }}
               />
             ) : (

@@ -8,6 +8,7 @@ import { createApp } from '#server/app';
 import { createAllBudgets } from '#server/budget/base';
 import * as cloudStorage from '#server/cloud-storage';
 import * as db from '#server/db';
+import { resetFormulaPreferencesCache } from '#server/formulas/bootstrap';
 import { mutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
@@ -54,21 +55,14 @@ function sourceToken() {
 }
 
 async function preflight({
-  enabled,
   currencyCode,
 }: {
-  enabled: boolean;
   currencyCode: string;
 }): Promise<Preflight> {
   const metadata = prefs.getPrefs();
   if (!metadata?.id) throw new Error('amount-encoding-budget-not-open');
   const source = parseAmountEncoding(metadata.amountEncoding);
-  if (enabled && !currencyCode) {
-    throw new Error('amount-encoding-currency-required');
-  }
-  const target = enabled
-    ? reviewedAmountEncoding(currencyCode)
-    : { version: 0 as const, currencyCode, precision: 2 };
+  const target = reviewedAmountEncoding(currencyCode);
   if (metadata.cloudFileId) {
     if (!metadata.groupId) {
       throw new Error('amount-encoding-sync-reset-required');
@@ -90,18 +84,16 @@ async function preflight({
 }
 
 async function transition({
-  enabled,
   currencyCode,
   sourceToken: expectedSourceToken,
 }: {
-  enabled: boolean;
   currencyCode: string;
   sourceToken: string;
 }) {
   if (sourceToken() !== expectedSourceToken) {
     return { error: 'amount-encoding-stale', retryable: false };
   }
-  const checked = await preflight({ enabled, currencyCode });
+  const checked = await preflight({ currencyCode });
   if (checked.pending) {
     const pending = prefs.getPrefs()?.amountEncodingTransition;
     if (pending && pending.targetCurrencyCode !== currencyCode) {
@@ -119,7 +111,7 @@ async function transition({
   }
   const metadata = prefs.getPrefs();
   if (!metadata?.id) throw new Error('amount-encoding-budget-not-open');
-  const targetEncoding = enabled ? JSON.stringify(checked.target) : null;
+  const targetEncoding = JSON.stringify(checked.target);
   if (
     metadata.amountEncoding === targetEncoding &&
     checked.source.currencyCode === checked.target.currencyCode
@@ -156,10 +148,6 @@ async function transition({
         'INSERT OR REPLACE INTO preferences (id, value) VALUES (?, ?)',
         ['defaultCurrencyCode', checked.target.currencyCode],
       );
-      db.runQuery(
-        'INSERT OR REPLACE INTO preferences (id, value) VALUES (?, ?)',
-        ['flags.currencyPrecision', enabled ? 'true' : 'false'],
-      );
       // Display preferences follow a new currency; otherwise they stay the user's.
       if (
         checked.target.currencyCode &&
@@ -171,7 +159,10 @@ async function transition({
           ['hideFraction', 'false'],
           [
             'currencySpaceBetweenAmountAndSymbol',
-            currency.symbolFirst ? 'false' : 'true',
+            // A currency code used as the symbol (e.g. "CHF 100") needs a space
+            !currency.symbolFirst || currency.symbol === currency.code
+              ? 'true'
+              : 'false',
           ],
           ['currencySymbolPosition', currency.symbolFirst ? 'before' : 'after'],
         ]) {
@@ -181,14 +172,10 @@ async function transition({
           );
         }
       }
-      if (targetEncoding) {
-        db.runQuery(
-          'INSERT OR REPLACE INTO preferences (id, value) VALUES (?, ?)',
-          ['amountEncoding', targetEncoding],
-        );
-      } else {
-        db.runQuery("DELETE FROM preferences WHERE id = 'amountEncoding'");
-      }
+      db.runQuery(
+        'INSERT OR REPLACE INTO preferences (id, value) VALUES (?, ?)',
+        ['amountEncoding', targetEncoding],
+      );
       if (pending) {
         db.runQuery(
           'INSERT OR REPLACE INTO preferences (id, value) VALUES (?, ?)',
@@ -200,9 +187,10 @@ async function transition({
     committed = true;
 
     await prefs.savePrefs({
-      amountEncoding: targetEncoding ?? undefined,
+      amountEncoding: targetEncoding,
       amountEncodingTransition: pending,
     });
+    resetFormulaPreferencesCache();
     await db.loadClock();
     if (checked.source.precision !== checked.target.precision) {
       await rebuildSpreadsheet();

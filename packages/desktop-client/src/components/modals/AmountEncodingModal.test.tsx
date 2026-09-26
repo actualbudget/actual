@@ -46,7 +46,7 @@ it.each([true, false])(
       <TestProviders>
         <MemoryRouter>
           <HotkeysProvider>
-            <AmountEncodingModal enabled currencyCode="USD" />
+            <AmountEncodingModal currencyCode="USD" />
           </HotkeysProvider>
         </MemoryRouter>
       </TestProviders>,
@@ -94,7 +94,7 @@ it('selects a currency in the modal when the budget has none', async () => {
     <TestProviders>
       <MemoryRouter>
         <HotkeysProvider>
-          <AmountEncodingModal enabled currencyCode="" />
+          <AmountEncodingModal currencyCode="" />
         </HotkeysProvider>
       </MemoryRouter>
     </TestProviders>,
@@ -116,12 +116,39 @@ it('selects a currency in the modal when the budget has none', async () => {
   await userEvent.click(confirm);
   await waitFor(() =>
     expect(transition).toHaveBeenCalledWith({
-      enabled: true,
       currencyCode: 'JPY',
       sourceToken: 'source',
     }),
   );
 });
+it('keeps the graduation prompt open and links to existing backup settings', async () => {
+  initServer({
+    'backups-get': async () => [],
+    'amount-encoding/preflight': async () => ({
+      sourceToken: 'source',
+      source: { version: 0, currencyCode: 'JPY', precision: 2 },
+      target: { version: 1, currencyCode: 'JPY', precision: 0 },
+      pending: false,
+    }),
+  });
+  render(
+    <TestProviders>
+      <MemoryRouter>
+        <HotkeysProvider>
+          <AmountEncodingModal currencyCode="JPY" required />
+        </HotkeysProvider>
+      </MemoryRouter>
+    </TestProviders>,
+  );
+  expect(screen.queryByRole('button', { name: 'Cancel' })).toBeNull();
+  expect(
+    screen.getByRole('link', { name: 'Go to backup and export settings' }),
+  ).toHaveAttribute('href', '/settings/general#export-data');
+  expect(
+    await screen.findByRole('button', { name: 'Confirm precision change' }),
+  ).toBeEnabled();
+});
+
 it('does not retry a pending change for a different currency', async () => {
   metadataPrefs.amountEncodingTransition = {
     id: 'pending',
@@ -150,7 +177,7 @@ it('does not retry a pending change for a different currency', async () => {
     <TestProviders>
       <MemoryRouter>
         <HotkeysProvider>
-          <AmountEncodingModal enabled currencyCode="EUR" />
+          <AmountEncodingModal currencyCode="EUR" />
         </HotkeysProvider>
       </MemoryRouter>
     </TestProviders>,

@@ -79,7 +79,6 @@ notifyOnRejectedActionsMiddleware.startListening.withTypes<
             modal: {
               name: 'amount-encoding',
               options: {
-                enabled: pending.targetEncoding != null,
                 currencyCode: pending.targetCurrencyCode,
               },
             },

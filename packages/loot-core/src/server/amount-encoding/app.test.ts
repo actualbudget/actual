@@ -36,7 +36,7 @@ for (const [currencyCode, targetPrecision] of [
       db.execQuery(
         "INSERT INTO transactions (id, amount) VALUES ('amount', 123450)",
       );
-      const options = { enabled: true, currencyCode };
+      const options = { currencyCode };
       const { sourceToken } =
         await app.handlers['amount-encoding/preflight'](options);
       expect(
@@ -66,8 +66,8 @@ for (const [currencyCode, targetPrecision] of [
   );
 }
 
-async function changePrecision(enabled: boolean, currencyCode: string) {
-  const options = { enabled, currencyCode };
+async function changePrecision(currencyCode: string) {
+  const options = { currencyCode };
   const { sourceToken } =
     await app.handlers['amount-encoding/preflight'](options);
   return app.handlers['amount-encoding/transition']({
@@ -77,16 +77,18 @@ async function changePrecision(enabled: boolean, currencyCode: string) {
 }
 
 describe('in-place precision changes', () => {
-  it('requires a currency before enabling precision', async () => {
-    await expect(
-      app.handlers['amount-encoding/preflight']({
-        enabled: true,
-        currencyCode: '',
-      }),
-    ).rejects.toThrow('amount-encoding-currency-required');
+  it('keeps a budget without a currency at two decimal places', async () => {
+    const result = await app.handlers['amount-encoding/preflight']({
+      currencyCode: '',
+    });
+    expect(result.target).toEqual({
+      version: 1,
+      currencyCode: '',
+      precision: 2,
+    });
   });
 
-  it('converts and reverses in the open database without exporting a copy', async () => {
+  it('converts legacy amounts in the open database without exporting a copy', async () => {
     vi.spyOn(sqlite, 'exportDatabase').mockImplementation(() => {
       throw new Error('Precision changes must not export the database');
     });
@@ -95,19 +97,13 @@ describe('in-place precision changes', () => {
       "INSERT INTO transactions (id, amount) VALUES ('amount', 123400); INSERT INTO kvcache_key (id, key) VALUES (1, 42);",
     );
 
-    expect(await changePrecision(true, 'JPY')).toEqual({});
+    expect(await changePrecision('JPY')).toEqual({});
     expect(db.getDatabase()).toBe(database);
     expect(db.firstSync('SELECT key FROM kvcache_key')).toBeNull();
     expect(
       db.firstSync<{ amount: number }>('SELECT amount FROM transactions')
         ?.amount,
     ).toBe(1234);
-    expect(await changePrecision(false, 'JPY')).toEqual({});
-    expect(db.getDatabase()).toBe(database);
-    expect(
-      db.firstSync<{ amount: number }>('SELECT amount FROM transactions')
-        ?.amount,
-    ).toBe(123400);
   });
 
   it('does not migrate amounts when the precision stays the same', async () => {
@@ -115,8 +111,8 @@ describe('in-place precision changes', () => {
     db.execQuery(
       "INSERT INTO transactions (id, amount, isParent) VALUES ('amount', 1234, 1)",
     );
-    expect(await changePrecision(true, 'USD')).toEqual({});
-    expect(await changePrecision(true, 'EUR')).toEqual({});
+    expect(await changePrecision('USD')).toEqual({});
+    expect(await changePrecision('EUR')).toEqual({});
     expect(
       db.firstSync<{ amount: number }>('SELECT amount FROM transactions')
         ?.amount,
@@ -132,13 +128,13 @@ describe('in-place precision changes', () => {
         "SELECT value FROM preferences WHERE id = 'hideFraction'",
       )?.value;
 
-    expect(await changePrecision(true, 'JPY')).toEqual({});
+    expect(await changePrecision('JPY')).toEqual({});
     expect(hideFraction()).toBe('true');
-    expect(await changePrecision(true, 'EUR')).toEqual({});
+    expect(await changePrecision('EUR')).toEqual({});
     expect(hideFraction()).toBe('false');
   });
 
-  it('reverses an existing 3dp encoding through the SQLite path', async () => {
+  it('changes an existing 3dp encoding through the SQLite path', async () => {
     const encoding = JSON.stringify({
       version: 1,
       currencyCode: 'KWD',
@@ -150,19 +146,21 @@ describe('in-place precision changes', () => {
       INSERT INTO transactions (id, amount) VALUES ('amount', 1230);
     `);
 
-    expect(await changePrecision(false, 'USD')).toEqual({});
+    expect(await changePrecision('USD')).toEqual({});
     expect(
       db.firstSync<{ amount: number }>('SELECT amount FROM transactions')
         ?.amount,
     ).toBe(123);
-    expect(prefs.getPrefs().amountEncoding).toBeUndefined();
+    expect(prefs.getPrefs().amountEncoding).toBe(
+      JSON.stringify({ version: 1, currencyCode: 'USD', precision: 2 }),
+    );
   });
 
   it('rejects stale work before changing encoding or amounts', async () => {
     db.execQuery(
       "INSERT INTO transactions (id, amount) VALUES ('amount', 123400)",
     );
-    const options = { enabled: true, currencyCode: 'JPY' };
+    const options = { currencyCode: 'JPY' };
     const { sourceToken } =
       await app.handlers['amount-encoding/preflight'](options);
     db.runQuery(
@@ -187,7 +185,7 @@ describe('in-place precision changes', () => {
       INSERT INTO transactions (id, amount) VALUES ('amount', 123400);
       INSERT INTO rules (id, conditions) VALUES ('bad', '{}');
     `);
-    expect(await changePrecision(true, 'JPY')).toMatchObject({
+    expect(await changePrecision('JPY')).toMatchObject({
       retryable: false,
     });
     expect(prefs.getPrefs().amountEncoding).toBeUndefined();
@@ -207,7 +205,7 @@ describe('in-place precision changes', () => {
     db.execQuery(
       "INSERT INTO transactions (id, amount) VALUES ('amount', 123400)",
     );
-    const options = { enabled: true, currencyCode: 'JPY' };
+    const options = { currencyCode: 'JPY' };
     vi.spyOn(cloudStorage, 'supportsAmountEncoding').mockResolvedValue(true);
     const { sourceToken } =
       await app.handlers['amount-encoding/preflight'](options);
@@ -242,7 +240,7 @@ describe('in-place precision changes', () => {
     db.execQuery(
       "INSERT INTO transactions (id, amount) VALUES ('amount', 123400)",
     );
-    expect(await changePrecision(true, 'JPY')).toMatchObject({
+    expect(await changePrecision('JPY')).toMatchObject({
       retryable: true,
     });
     expect(prefs.getPrefs().amountEncodingTransition).toBeDefined();
@@ -261,13 +259,11 @@ describe('in-place precision changes', () => {
     const publish = vi
       .spyOn(cloudStorage, 'publishAmountEncodingTransition')
       .mockRejectedValueOnce(new Error('offline'));
-    expect(await changePrecision(true, 'JPY')).toMatchObject({
-      retryable: true,
-    });
+    expect(await changePrecision('JPY')).toMatchObject({ retryable: true });
     const pending = prefs.getPrefs().amountEncodingTransition;
     expect(pending?.targetCurrencyCode).toBe('JPY');
 
-    const options = { enabled: true, currencyCode: 'EUR' };
+    const options = { currencyCode: 'EUR' };
     const { sourceToken } =
       await app.handlers['amount-encoding/preflight'](options);
     expect(
@@ -326,7 +322,7 @@ describe('spreadsheet after a precision change', () => {
       123400,
     );
 
-    expect(await changePrecision(true, 'JPY')).toEqual({});
+    expect(await changePrecision('JPY')).toEqual({});
     await sheet.waitOnSpreadsheet();
 
     expect(sheet.getCellValue('__global', 'onbudget-accounts-balance')).toBe(

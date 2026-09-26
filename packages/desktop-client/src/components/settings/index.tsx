@@ -21,11 +21,9 @@ import { Checkbox, FormField, FormLabel } from '#components/forms';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useServerURL, useServerVersion } from '#components/ServerContext';
-import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMetadataPref } from '#hooks/useMetadataPref';
-import { useSyncedPref } from '#hooks/useSyncedPref';
-import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
+import { loadPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 
 import { ApiKeys } from './ApiKeys';
@@ -278,7 +276,6 @@ export function GeneralSettings() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const [fileId] = useMetadataPref('cloudFileId');
-  const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
   const serverURL = useServerURL();
   const { hash } = useLocation();
 
@@ -296,7 +293,7 @@ export function GeneralSettings() {
       <ThemeSettings />
       {!isNarrowWidth && <SidebarSettings />}
       <FormatSettings />
-      {isCurrencyExperimentalEnabled && <CurrencySettings />}
+      <CurrencySettings />
       <LanguageSettings />
       <SettingsGroup title={t('Budget')}>
         <BudgetTypeSettings />
@@ -347,10 +344,6 @@ export function Settings() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const dispatch = useDispatch();
-  const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
-  const [defaultCurrencyCode] = useSyncedPref('defaultCurrencyCode');
-  const hasDefaultCurrencyCode =
-    defaultCurrencyCode != null && defaultCurrencyCode !== '';
 
   useEffect(() => {
     const unlisten = listen('prefs-updated', () => {
@@ -360,12 +353,6 @@ export function Settings() {
     void dispatch(loadPrefs());
     return () => unlisten();
   }, [dispatch]);
-
-  useEffect(() => {
-    if (!isCurrencyExperimentalEnabled && hasDefaultCurrencyCode) {
-      void dispatch(saveSyncedPrefs({ prefs: { defaultCurrencyCode: '' } }));
-    }
-  }, [dispatch, isCurrencyExperimentalEnabled, hasDefaultCurrencyCode]);
 
   if (isNarrowWidth) {
     return <Outlet />;

@@ -16,6 +16,7 @@ import {
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 
 import { useAmountPrecision } from './useAmountPrecision';
+import { useFeatureFlag } from './useFeatureFlag';
 import { useSyncedPref } from './useSyncedPref';
 
 export type FormatType =
@@ -34,6 +35,7 @@ export type UseFormatResult = {
     defaultValue?: number | null,
   ) => IntegerAmount | null;
   currency: Currency;
+  precision: number;
 };
 
 export type FormatResult = {
@@ -115,6 +117,9 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
   const [numberFormatPref] = useSyncedPref('numberFormat');
   const [hideFractionPref] = useSyncedPref('hideFraction');
   const [defaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
+  // A currency saved while Currency support was on shows no symbol once it
+  // is off; its recorded precision still applies.
+  const showCurrencySymbol = useFeatureFlag('currency');
   const [symbolPositionPref] = useSyncedPref('currencySymbolPosition');
   const [spaceEnabledPref] = useSyncedPref(
     'currencySpaceBetweenAmountAndSymbol',
@@ -200,7 +205,12 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
       );
 
       let styledValue = formattedString;
-      if (isFinancialType && activeCurrency && activeCurrency.code !== '') {
+      if (
+        isFinancialType &&
+        showCurrencySymbol &&
+        activeCurrency &&
+        activeCurrency.code !== ''
+      ) {
         styledValue = applyCurrencyStyling(
           formattedString,
           activeCurrency.symbol,
@@ -218,6 +228,7 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
     },
     [
       activeCurrency,
+      showCurrencySymbol,
       encoding,
       recordedPrecision,
       precision,
@@ -314,5 +325,6 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
     forEdit,
     fromEdit,
     currency: activeCurrency,
+    precision,
   });
 }

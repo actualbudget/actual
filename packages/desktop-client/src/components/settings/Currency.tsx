@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Select } from '@actual-app/components/select';
 import { theme } from '@actual-app/components/theme';
 import { currencies, getCurrency } from '@actual-app/core/shared/currencies';
@@ -94,13 +95,12 @@ export function useCurrencyOptions() {
 
 export function CurrencySettings() {
   const { t } = useTranslation();
+  const currencyEnabled = useFeatureFlag('currency');
   const dispatch = useDispatch();
-  const precisionEnabled = useFeatureFlag('currencyPrecision');
   const currencyOptions = useCurrencyOptions();
 
-  const [defaultCurrencyCode, setDefaultCurrencyCodePref] = useSyncedPref(
-    'defaultCurrencyCode',
-  );
+  const [defaultCurrencyCode] = useSyncedPref('defaultCurrencyCode');
+  const [amountEncoding] = useSyncedPref('amountEncoding');
   const selectedCurrencyCode = defaultCurrencyCode || '';
 
   const [symbolPosition, setSymbolPositionPref] = useSyncedPref(
@@ -109,8 +109,6 @@ export function CurrencySettings() {
   const [spaceEnabled, setSpaceEnabledPref] = useSyncedPref(
     'currencySpaceBetweenAmountAndSymbol',
   );
-  const [, setNumberFormatPref] = useSyncedPref('numberFormat');
-  const [, setHideFractionPref] = useSyncedPref('hideFraction');
 
   const selectButtonClassName = css({
     '&[data-hovered]': {
@@ -119,27 +117,11 @@ export function CurrencySettings() {
   });
 
   const handleCurrencyChange = (code: string) => {
-    if (precisionEnabled) {
-      dispatch(
-        pushModal({
-          modal: {
-            name: 'amount-encoding',
-            options: { enabled: true, currencyCode: code },
-          },
-        }),
-      );
-      return;
-    }
-    setDefaultCurrencyCodePref(code);
-    if (code !== '') {
-      const cur = getCurrency(code);
-      setNumberFormatPref(cur.numberFormat);
-      setHideFractionPref(cur.decimalPlaces === 0 ? 'true' : 'false');
-      // A currency code used as the symbol (e.g. "CHF 100") needs a space
-      const isSpaceEnabled = !cur.symbolFirst || cur.symbol === cur.code;
-      setSpaceEnabledPref(isSpaceEnabled ? 'true' : 'false');
-      setSymbolPositionPref(cur.symbolFirst ? 'before' : 'after');
-    }
+    dispatch(
+      pushModal({
+        modal: { name: 'amount-encoding', options: { currencyCode: code } },
+      }),
+    );
   };
 
   const symbolPositionOptions = useMemo(() => {
@@ -158,6 +140,9 @@ export function CurrencySettings() {
       },
     ];
   }, [selectedCurrencyCode, spaceEnabled, t]);
+
+  // Choosing a currency stays behind the Currency support experiment.
+  if (!currencyEnabled) return null;
 
   return (
     <SettingsGroup
@@ -178,7 +163,16 @@ export function CurrencySettings() {
             style={{ maxWidth: '100%' }}
           />
         }
-      />
+      >
+        {!amountEncoding && selectedCurrencyCode && (
+          <Button
+            onPress={() => handleCurrencyChange(selectedCurrencyCode)}
+            style={{ alignSelf: 'flex-start' }}
+          >
+            <Trans>Finish currency setup</Trans>
+          </Button>
+        )}
+      </SettingsRow>
       {selectedCurrencyCode !== '' && (
         <SettingsRow
           title={t('Symbol position')}

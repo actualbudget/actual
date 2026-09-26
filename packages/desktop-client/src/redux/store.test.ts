@@ -36,7 +36,7 @@ describe('rejected action notifications', () => {
     expect(modals.modalStack).toMatchObject([
       {
         name: 'amount-encoding',
-        options: { enabled: true, currencyCode: 'JPY' },
+        options: { currencyCode: 'JPY' },
       },
     ]);
     expect(notifications.notifications).toEqual([]);

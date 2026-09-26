@@ -424,7 +424,7 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
           : prefs.currency.symbol;
         const actualDecimals = hasDecimalsArg
           ? (decimals ?? 2)
-          : prefs.currency.decimalPlaces;
+          : prefs.decimalPlaces;
         const actualThousandsSeparator =
           hasThousandsSeparatorArg && thousandsSeparator !== undefined
             ? thousandsSeparator
