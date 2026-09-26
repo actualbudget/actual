@@ -34,6 +34,7 @@ import {
   validateSessionMiddleware,
 } from './util/middlewares';
 import {
+  atomicWriteUserFile,
   getPathForGroupFile,
   getPathForUserFile,
   isValidFileId,
@@ -360,7 +361,7 @@ app.post('/upload-user-file', async (req, res) => {
   }
 
   try {
-    await fs.writeFile(getPathForUserFile(fileId), req.body);
+    await atomicWriteUserFile(getPathForUserFile(fileId), req.body);
   } catch (err) {
     console.log('Error writing file', err);
     res.status(500).send({ status: 'error' });
