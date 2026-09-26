@@ -35,21 +35,37 @@ export function getPathForGroupFile(groupId: GroupId) {
   return join(resolve(config.get('userFiles')), `group-${groupId}.sqlite`);
 }
 
-// Carries the previous file's permission mode over to the replacement, since
-// a fresh write would otherwise get the process's default mode. Best-effort:
-// some filesystems (network shares, restricted containers) refuse chmod, and
-// losing the mode must not fail the upload.
-export async function preserveMode(
-  tmpPath: string,
-  target: string,
-): Promise<void> {
+// The existing file's permission bits, so the replacement can keep them (a
+// fresh file would otherwise get the process's default mode). Undefined when
+// there is no existing file, or its mode can't be read.
+async function readMode(target: string): Promise<number | undefined> {
   try {
     const { mode } = await fs.stat(target);
-    await fs.chmod(tmpPath, mode);
+    return mode & 0o7777;
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
-      console.warn(`Could not preserve file mode for ${target}`, err);
+      console.warn(`Could not read file mode for ${target}`, err);
     }
+    return undefined;
+  }
+}
+
+// The temp file is created with `mode` already, but the umask can strip bits
+// at creation, so set it exactly afterwards. Best-effort: some filesystems
+// (network shares, restricted containers) refuse chmod, and losing the mode
+// must not fail the upload.
+async function applyMode(
+  tmpPath: string,
+  mode: number | undefined,
+  target: string,
+): Promise<void> {
+  if (mode === undefined) {
+    return;
+  }
+  try {
+    await fs.chmod(tmpPath, mode);
+  } catch (err) {
+    console.warn(`Could not preserve file mode for ${target}`, err);
   }
 }
 
@@ -141,8 +157,13 @@ export async function atomicWriteUserFile(
   inFlightTempPaths.add(tmpPath);
   try {
     await sweepOrphanedTempFiles(dirname(target), inFlightTempPaths);
-    await fs.writeFile(tmpPath, contents);
-    await preserveMode(tmpPath, target);
+    // Create the temp file with the original's mode from the start, so the
+    // new contents are never more readable than the file they replace.
+    const mode = await readMode(target);
+    // flush: fsync before the rename, so after a power loss the target holds
+    // either the old or the new contents, not a renamed but unwritten file.
+    await fs.writeFile(tmpPath, contents, { flush: true, mode });
+    await applyMode(tmpPath, mode, target);
     await fs.rename(tmpPath, target);
   } catch (err) {
     await fs.rm(tmpPath, { force: true }).catch(() => undefined);

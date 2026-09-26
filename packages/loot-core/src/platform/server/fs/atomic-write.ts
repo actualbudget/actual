@@ -71,18 +71,37 @@ async function withLockRetry<T>(
   }, retryOptions);
 }
 
-// Carries the previous file's permission mode over to the replacement, since
-// a fresh write would otherwise get the process's default mode. Best-effort:
-// some filesystems (network shares, restricted containers) refuse chmod, and
-// losing the mode must not fail the write itself.
-async function preserveMode(tmpPath: string, target: string): Promise<void> {
+// The existing file's permission bits, so the replacement can keep them (a
+// fresh file would otherwise get the process's default mode). Undefined when
+// there is no existing file, or its mode can't be read.
+async function readMode(target: string): Promise<number | undefined> {
   try {
     const { mode } = await fs.promises.stat(target);
-    await fs.promises.chmod(tmpPath, mode);
+    return mode & 0o7777;
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
-      logger.warn(`Could not preserve file mode for ${target}`, err);
+      logger.warn(`Could not read file mode for ${target}`, err);
     }
+    return undefined;
+  }
+}
+
+// The temp file is created with `mode` already, but the umask can strip bits
+// at creation, so set it exactly afterwards. Best-effort: some filesystems
+// (network shares, restricted containers) refuse chmod, and losing the mode
+// must not fail the write itself.
+async function applyMode(
+  tmpPath: string,
+  mode: number | undefined,
+  target: string,
+): Promise<void> {
+  if (mode === undefined) {
+    return;
+  }
+  try {
+    await fs.promises.chmod(tmpPath, mode);
+  } catch (err) {
+    logger.warn(`Could not preserve file mode for ${target}`, err);
   }
 }
 
@@ -135,12 +154,23 @@ export async function atomicWriteFile(
   await sweepOrphanedTempFiles(path.dirname(target));
 
   try {
+    // Create the temp file with the original's mode from the start, so the
+    // new contents are never more readable than the file they replace.
+    const mode = await readMode(target);
+
+    // flush: fsync before the rename, so after a power loss the target holds
+    // either the old or the new contents, not a renamed but unwritten file.
     await withLockRetry(
-      () => fs.promises.writeFile(tmpPath, contents, 'utf8'),
+      () =>
+        fs.promises.writeFile(tmpPath, contents, {
+          encoding: 'utf8',
+          flush: true,
+          mode,
+        }),
       attempt => `Failed to write to ${tmpPath}. Attempted ${attempt} times`,
     );
 
-    await preserveMode(tmpPath, target);
+    await applyMode(tmpPath, mode, target);
 
     await withLockRetry(
       () => fs.promises.rename(tmpPath, target),

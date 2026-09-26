@@ -8,7 +8,6 @@ import { config } from '#load-config';
 import {
   atomicWriteUserFile,
   getPathForUserFile,
-  preserveMode,
   sweepOrphanedTempFiles,
 } from './paths';
 import type { FileId } from './paths';
@@ -80,31 +79,6 @@ describe('sweepOrphanedTempFiles', () => {
   });
 });
 
-describe('preserveMode', () => {
-  let dir: string;
-
-  beforeEach(() => {
-    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'actual-mode-test-'));
-  });
-
-  afterEach(() => {
-    fs.rmSync(dir, { recursive: true, force: true });
-    vi.restoreAllMocks();
-  });
-
-  it('does not throw when the filesystem refuses to change permissions', async () => {
-    const target = path.join(dir, 'file-abc.blob');
-    const tmpPath = `${target}.12345-deadbeef.tmp`;
-    fs.writeFileSync(target, 'original');
-    fs.writeFileSync(tmpPath, 'new');
-    vi.spyOn(fsPromises, 'chmod').mockRejectedValueOnce(
-      Object.assign(new Error('operation not permitted'), { code: 'EPERM' }),
-    );
-
-    await expect(preserveMode(tmpPath, target)).resolves.toBeUndefined();
-  });
-});
-
 describe('atomicWriteUserFile', () => {
   let dir: string;
 
@@ -147,6 +121,60 @@ describe('atomicWriteUserFile', () => {
 
     expect(fs.lstatSync(symlinkPath).isSymbolicLink()).toBe(true);
     expect(fs.readFileSync(missingTarget, 'utf8')).toBe('new content');
+  });
+
+  it('still writes when the filesystem refuses to change permissions', async () => {
+    const target = path.join(dir, 'file-abc.blob');
+    fs.writeFileSync(target, 'original', { mode: 0o600 });
+    const chmodSpy = vi
+      .spyOn(fsPromises, 'chmod')
+      .mockRejectedValueOnce(
+        Object.assign(new Error('operation not permitted'), { code: 'EPERM' }),
+      );
+    onTestFinished(() => chmodSpy.mockRestore());
+
+    await atomicWriteUserFile(target, Buffer.from('new content'));
+
+    expect(fs.readFileSync(target, 'utf8')).toBe('new content');
+  });
+
+  it.skipIf(process.platform === 'win32')(
+    'never exposes the new contents with a wider mode than the original',
+    async () => {
+      const target = path.join(dir, 'file-abc.blob');
+      fs.writeFileSync(target, 'original', { mode: 0o600 });
+
+      const realWriteFile = fsPromises.writeFile;
+      let modeWhenWritten: number | undefined;
+      const writeFileSpy = vi
+        .spyOn(fsPromises, 'writeFile')
+        .mockImplementationOnce(
+          async (...args: Parameters<typeof realWriteFile>) => {
+            await realWriteFile(...args);
+            modeWhenWritten = fs.statSync(args[0] as fs.PathLike).mode;
+          },
+        );
+      onTestFinished(() => writeFileSpy.mockRestore());
+
+      await atomicWriteUserFile(target, Buffer.from('new content'));
+
+      expect((modeWhenWritten ?? 0) & 0o777).toBe(0o600);
+    },
+  );
+
+  it('flushes the temp file to disk before renaming it into place', async () => {
+    const target = path.join(dir, 'file-abc.blob');
+    const writeFileSpy = vi.spyOn(fsPromises, 'writeFile');
+    onTestFinished(() => writeFileSpy.mockRestore());
+    const contents = Buffer.from('new content');
+
+    await atomicWriteUserFile(target, contents);
+
+    expect(writeFileSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/\.tmp$/),
+      contents,
+      expect.objectContaining({ flush: true }),
+    );
   });
 
   it('puts the temp file next to the real target, not the symlink', async () => {

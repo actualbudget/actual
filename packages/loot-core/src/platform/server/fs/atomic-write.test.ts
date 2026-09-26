@@ -207,6 +207,42 @@ describe('atomicWriteFile', () => {
     },
   );
 
+  test.skipIf(process.platform === 'win32')(
+    'never exposes the new contents with a wider mode than the original',
+    async () => {
+      const target = path.join(dir, 'metadata.json');
+      fsSync.writeFileSync(target, 'original content', { mode: 0o600 });
+
+      const { atomicWriteFile } = await loadAtomicWriteFileWithFastRetry();
+      const realWriteFile = fsSync.promises.writeFile;
+      let modeWhenWritten: number | undefined;
+      vi.spyOn(fsSync.promises, 'writeFile').mockImplementationOnce(
+        async (...args: Parameters<typeof realWriteFile>) => {
+          await realWriteFile(...args);
+          modeWhenWritten = fsSync.statSync(args[0] as fsSync.PathLike).mode;
+        },
+      );
+
+      await atomicWriteFile(target, 'new content');
+
+      expect((modeWhenWritten ?? 0) & 0o777).toBe(0o600);
+    },
+  );
+
+  test('flushes the temp file to disk before renaming it into place', async () => {
+    const target = path.join(dir, 'metadata.json');
+    const { atomicWriteFile } = await loadAtomicWriteFileWithFastRetry();
+    const writeFileSpy = vi.spyOn(fsSync.promises, 'writeFile');
+
+    await atomicWriteFile(target, 'new content');
+
+    expect(writeFileSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/\.tmp$/),
+      'new content',
+      expect.objectContaining({ flush: true }),
+    );
+  });
+
   test('removes an orphaned temp file left by a previous crashed write to the same target', async () => {
     const target = path.join(dir, 'metadata.json');
     fsSync.writeFileSync(target, 'original content');
