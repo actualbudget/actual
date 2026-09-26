@@ -13,13 +13,13 @@
   --color-sidebarRedesignHeaderText: var(--palette-gray700);
   --color-sidebarRedesignTextSubdued: var(--palette-navy600);
   --color-sidebarRedesignTextMuted: var(--palette-navy400);
-  --color-sidebarRedesignBorder: #e9ecf0;
+  --color-sidebarRedesignRightBorder: var(--palette-border);
 }
 
 /* Derived tokens are redeclared because var() references in custom
    properties resolve where the property is declared. */
 .sidebar-redesign {
-  border-right: 2px solid var(--color-sidebarRedesignBorder);
+  border-right: 2px solid var(--color-sidebarRedesignRightBorder);
   --color-sidebarBackground: var(--color-sidebarRedesignBackground);
   --color-sidebarItemText: var(--color-sidebarRedesignItemText);
   --color-sidebarItemBackgroundHover: var(
