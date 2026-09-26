@@ -1224,6 +1224,91 @@ test('Schedules: successfully complete schedules operations', async () => {
   );
 });
 
+describe('API schedules: getScheduleDates', () => {
+  beforeEach(async () => {
+    await api.loadBudget(budgetName);
+  });
+
+  // apis: createSchedule, getSchedules, getScheduleDates
+  test('expands the date of a stored schedule', async () => {
+    const id = await api.createSchedule({
+      name: 'rent',
+      amount: -120000,
+      amountOp: 'is',
+      posts_transaction: false,
+      date: {
+        frequency: 'monthly',
+        start: '2024-06-01',
+        skipWeekend: true,
+        weekendSolveMode: 'after',
+        endMode: 'never',
+      },
+    });
+    const [schedule] = (await api.getSchedules()).filter(s => s.id === id);
+
+    expect(
+      await api.getScheduleDates(schedule.date, {
+        start: '2024-06-01',
+        end: '2024-09-30',
+      }),
+    ).toEqual(['2024-06-03', '2024-07-01', '2024-08-01', '2024-09-02']);
+  });
+
+  // apis: getScheduleDates
+  test('expands a single date', async () => {
+    expect(
+      await api.getScheduleDates('2024-06-13', {
+        start: '2024-06-01',
+        end: '2024-06-30',
+      }),
+    ).toEqual(['2024-06-13']);
+  });
+
+  // apis: getScheduleDates
+  test('starts from today when no start is given', async () => {
+    // Tests run with today pinned to 2017-01-01.
+    expect(
+      await api.getScheduleDates(
+        { frequency: 'yearly', start: '2016-03-01' },
+        { count: 1 },
+      ),
+    ).toEqual(['2017-03-01']);
+  });
+
+  // apis: getScheduleDates
+  test('rejects invalid requests', async () => {
+    const daily = { frequency: 'daily', start: '2024-01-01' } as const;
+
+    await expect(
+      api.getScheduleDates(daily, { start: '2024-13-01', count: 1 }),
+    ).rejects.toThrow('Invalid start date');
+    await expect(
+      api.getScheduleDates(daily, { start: '2024-02-01', end: '2024-01-01' }),
+    ).rejects.toThrow('is before start');
+    await expect(
+      api.getScheduleDates(daily, { start: '2024-01-01', count: -1 }),
+    ).rejects.toThrow('count must be a non-negative integer');
+    await expect(
+      api.getScheduleDates(daily, { start: '2024-01-01' }),
+    ).rejects.toThrow('needs an `end` date or a `count`');
+    await expect(
+      api.getScheduleDates(
+        { ...daily, endMode: 'after_n_occurrences', endOccurrences: 0 },
+        { start: '2024-01-01' },
+      ),
+    ).rejects.toThrow('endOccurrences must be a positive integer');
+    await expect(
+      api.getScheduleDates(
+        { ...daily, endMode: 'on_date', endDate: 'soon' },
+        { start: '2024-01-01' },
+      ),
+    ).rejects.toThrow('Invalid recurrence end date');
+    await expect(
+      api.getScheduleDates('06/13/2024', { start: '2024-01-01' }),
+    ).rejects.toThrow('Invalid schedule date');
+  });
+});
+
 // apis: getPreferences
 test('Preferences: successfully read synced preferences', async () => {
   await api.loadBudget(budgetName);

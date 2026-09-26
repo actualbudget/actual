@@ -84,7 +84,8 @@ import APIList from './APIList';
 "getSchedules",
 "createSchedule",
 "updateSchedule",
-"deleteSchedule"
+"deleteSchedule",
+"getScheduleDates"
 ]} />
 
 <APIList title="Notes" sections={[
@@ -787,6 +788,44 @@ Update fields of a rule. `fields` can specify any field described in [`Schedule`
 #### `deleteSchedule`
 
 <Method name="deleteSchedule" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
+
+#### `getScheduleDates`
+
+<Method name="getScheduleDates" args={[{ name: 'date', type: 'date | RecurConfig' }, { name: 'options', type: '{ start?: date, end?: date, count?: number }' }]} returns="Promise<date[]>" />
+
+Expands the `date` of a [`Schedule`](#schedule) into the dates it falls on, in ascending order. Pass a schedule's `date` field as returned by `getSchedules`, or any [`RecurConfig`](#recurconfig).
+
+Every recurrence setting is taken into account: `frequency`, `interval`, `patterns` (including the last day or the last weekday of the month), `endMode` and, when `skipWeekend` is set, the move to the Friday before or the Monday after the weekend (`weekendSolveMode`).
+
+- `start`: first date to include. Defaults to today.
+- `end`: last date to include.
+- `count`: maximum number of dates to return.
+
+The window applies to the dates after the weekend move, so the result matches the dates Actual shows for the schedule. A recurrence that never ends needs an `end` or a `count`.
+
+```js
+const [rent] = await api.getSchedules();
+
+// Every date the schedule falls on in 2025
+await api.getScheduleDates(rent.date, {
+  start: '2025-01-01',
+  end: '2025-12-31',
+});
+
+// The next three dates from today
+await api.getScheduleDates(rent.date, { count: 3 });
+
+// The same helper works on a recurrence that is not saved yet
+await api.getScheduleDates(
+  {
+    frequency: 'monthly',
+    start: '2025-01-01',
+    patterns: [{ type: 'FR', value: -1 }],
+  },
+  { start: '2025-01-01', count: 2 },
+);
+// ['2025-01-31', '2025-02-28']
+```
 
 ## Notes
 
