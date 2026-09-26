@@ -26,6 +26,16 @@ describe('getGoalDifference', () => {
     });
   });
 
+  it('greys a balance that displays as zero when fractions are hidden', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    expect(makeBalanceAmountStyle(40)).toEqual({
+      color: theme.budgetNumberZero,
+    });
+    expect(makeBalanceAmountStyle(-40)).toEqual({
+      color: theme.budgetNumberZero,
+    });
+  });
+
   it('measures whole units for currencies without decimals', () => {
     expect(getGoalDifference(3995000, 4004900, 0)).toBe(-9900);
     // ¥39,950.50 shows as ¥39,951, even with decimals shown

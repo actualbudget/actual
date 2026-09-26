@@ -7,11 +7,10 @@ import {
 export async function initializeImportedAmountEncoding(
   currencyCode: string,
 ): Promise<number> {
-  if (!currencyCode) return 2;
   const encoding = reviewedAmountEncoding(currencyCode);
   const value = JSON.stringify(encoding);
   db.runQuery(
-    "INSERT OR REPLACE INTO preferences (id, value) VALUES ('defaultCurrencyCode', ?), ('flags.currencyPrecision', 'true'), ('amountEncoding', ?)",
+    "INSERT OR REPLACE INTO preferences (id, value) VALUES ('defaultCurrencyCode', ?), ('amountEncoding', ?)",
     [currencyCode, value],
   );
   await prefs.savePrefs({ amountEncoding: value });

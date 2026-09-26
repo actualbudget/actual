@@ -34,6 +34,7 @@ export type UseFormatResult = {
     defaultValue?: number | null,
   ) => IntegerAmount | null;
   currency: Currency;
+  precision: number;
 };
 
 export type FormatResult = {
@@ -314,5 +315,6 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
     forEdit,
     fromEdit,
     currency: activeCurrency,
+    precision,
   });
 }

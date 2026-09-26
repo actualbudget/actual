@@ -608,7 +608,7 @@ export type Modal =
     }
   | {
       name: 'amount-encoding';
-      options: { enabled: boolean; currencyCode: string };
+      options: { currencyCode: string; required?: boolean };
     }
   | {
       name: 'confirm-delete';
