@@ -44,6 +44,7 @@ import {
   uniqueBudgetName,
   validateBudgetName,
 } from '#server/util/budget-name';
+import { initializeImportedAmountEncoding } from '#server/util/currency';
 import * as Platform from '#shared/platform';
 import type { Budget } from '#types/budget';
 
@@ -515,6 +516,8 @@ async function createBudget({
     logger.log('Error creating budget: ' + error);
     return { error };
   }
+
+  await initializeImportedAmountEncoding('');
 
   if (!avoidUpload && !testMode) {
     try {

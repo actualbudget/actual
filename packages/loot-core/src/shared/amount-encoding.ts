@@ -15,7 +15,7 @@ export function parseAmountEncoding(
     !parsed ||
     parsed.version !== 1 ||
     typeof parsed.currencyCode !== 'string' ||
-    !/^[A-Z]{3}$/.test(parsed.currencyCode) ||
+    !/^(?:[A-Z]{3})?$/.test(parsed.currencyCode) ||
     !Number.isInteger(parsed.precision) ||
     parsed.precision < 0 ||
     parsed.precision > 15
@@ -26,8 +26,10 @@ export function parseAmountEncoding(
 }
 
 export function reviewedAmountEncoding(currencyCode: string): AmountEncoding {
+  if (currencyCode === '') {
+    return { version: 1, currencyCode: '', precision: 2 };
+  }
   if (
-    !currencyCode ||
     !currencies.some(
       currency => currency.code !== '' && currency.code === currencyCode,
     )

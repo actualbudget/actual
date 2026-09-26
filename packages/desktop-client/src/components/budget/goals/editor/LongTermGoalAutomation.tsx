@@ -8,6 +8,7 @@ import { updateTemplate } from '#components/budget/goals/actions';
 import type { Action } from '#components/budget/goals/actions';
 import { FormField, FormLabel } from '#components/forms';
 import { AmountInput } from '#components/util/AmountInput';
+import { useFormat } from '#hooks/useFormat';
 
 type LongTermGoalAutomationProps = {
   template: GoalTemplate;
@@ -19,7 +20,8 @@ export function LongTermGoalAutomation({
   dispatch,
 }: LongTermGoalAutomationProps) {
   const { t } = useTranslation();
-  const amount = amountToInteger(template.amount);
+  const format = useFormat();
+  const amount = amountToInteger(template.amount, format.precision);
 
   return (
     <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
@@ -33,7 +35,7 @@ export function LongTermGoalAutomation({
             dispatch(
               updateTemplate({
                 type: 'goal',
-                amount: integerToAmount(value),
+                amount: integerToAmount(value, format.precision),
               }),
             )
           }
