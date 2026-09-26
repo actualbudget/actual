@@ -27,6 +27,7 @@ type ExpenseCategoryProps = {
   cat: CategoryEntity;
   categoryGroup?: CategoryGroupEntity;
   editingCell: { id: string; cell: string } | null;
+  focusedCell: { id: string; cell: string } | null;
   dragState: DragState<CategoryEntity> | DragState<CategoryGroupEntity> | null;
   onEditName?: ComponentProps<typeof SidebarCategory>['onEditName'];
   onEditMonth?: (id: CategoryEntity['id'], month: string) => void;
@@ -42,6 +43,7 @@ export function ExpenseCategory({
   cat,
   categoryGroup,
   editingCell,
+  focusedCell,
   dragState,
   onEditName,
   onEditMonth,
@@ -110,6 +112,14 @@ export function ExpenseCategory({
                 editingCell &&
                 editingCell.id === cat.id &&
                 editingCell.cell === month
+              }
+              active={
+                (editingCell &&
+                  editingCell.id === cat.id &&
+                  editingCell.cell === month) ||
+                (focusedCell &&
+                  focusedCell.id === cat.id &&
+                  focusedCell.cell === month)
               }
               category={cat}
               onEdit={onEditMonth}
