@@ -15,7 +15,10 @@ export function FixedAutomationReadOnly({
   template,
 }: FixedAutomationReadOnlyProps) {
   const format = useFormat();
-  const amount = format(amountToInteger(template.amount), 'financial');
+  const amount = format(
+    amountToInteger(template.amount, format.precision),
+    'financial',
+  );
   const periodAmount = template.period?.amount ?? 1;
   const periodUnit = template.period?.period ?? 'month';
 

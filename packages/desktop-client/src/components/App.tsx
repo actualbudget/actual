@@ -4,10 +4,13 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ErrorBoundary, useErrorBoundary } from 'react-error-boundary';
 import type { FallbackProps } from 'react-error-boundary';
 import { HotkeysProvider } from 'react-hotkeys-hook';
-import { useTranslation } from 'react-i18next';
-import { BrowserRouter } from 'react-router';
+import { Trans, useTranslation } from 'react-i18next';
+import { BrowserRouter, useLocation } from 'react-router';
 
+import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import {
   init as initConnection,
@@ -20,9 +23,11 @@ import { closeBudget, loadBudget } from '#budgetfiles/budgetfilesSlice';
 import { handleGlobalEvents } from '#global-events';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useModalState } from '#hooks/useModalState';
 import { useOnVisible } from '#hooks/useOnVisible';
 import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
 import { setI18NextLanguage } from '#i18n';
+import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { loadGlobalPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector, useStore } from '#redux';
@@ -46,6 +51,64 @@ import { Modals } from './Modals';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
 
+function openBudgetUpdate(currencyCode: string) {
+  return pushModal({
+    modal: {
+      name: 'amount-encoding',
+      options: { currencyCode, required: true },
+    },
+  });
+}
+
+function PrecisionGraduationGate({ currencyCode }: { currencyCode: string }) {
+  const dispatch = useDispatch();
+  const { activeModal } = useModalState();
+  useEffect(() => {
+    if (!activeModal) dispatch(openBudgetUpdate(currencyCode));
+  }, [activeModal, currencyCode, dispatch]);
+
+  return (
+    <>
+      <AppBackground />
+      <View
+        style={{
+          position: 'absolute',
+          inset: 0,
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 20,
+        }}
+      >
+        <View
+          style={{
+            alignItems: 'center',
+            gap: 15,
+            maxWidth: 420,
+            textAlign: 'center',
+            color: theme.pageText,
+          }}
+        >
+          <Text style={{ ...styles.veryLargeText, fontWeight: 600 }}>
+            <Trans>Update this budget</Trans>
+          </Text>
+          <Text style={{ fontSize: 15, color: theme.pageTextLight }}>
+            <Trans>
+              This budget needs a one-time update to how it stores amounts
+              before you can keep using it.
+            </Trans>
+          </Text>
+          <Button
+            variant="primary"
+            onPress={() => dispatch(openBudgetUpdate(currencyCode))}
+          >
+            <Trans>Continue budget update</Trans>
+          </Button>
+        </View>
+      </View>
+    </>
+  );
+}
+
 function AppInner() {
   const [budgetId] = useMetadataPref('id');
   const [cloudFileId] = useMetadataPref('cloudFileId');
@@ -53,6 +116,13 @@ function AppInner() {
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const dispatch = useDispatch();
   const userData = useSelector(state => state.user.data);
+  const amountEncoding = useSelector(
+    state => state.prefs.synced.amountEncoding,
+  );
+  const currencyCode = useSelector(
+    state => state.prefs.synced.defaultCurrencyCode ?? '',
+  );
+  const location = useLocation();
 
   useEffect(() => {
     setI18NextLanguage(null);
@@ -156,6 +226,15 @@ function AppInner() {
     }
   }, [dispatch, t, userData?.tokenExpired]);
 
+  if (
+    budgetId &&
+    currencyCode &&
+    !amountEncoding &&
+    location.pathname !== '/settings' &&
+    !location.pathname.startsWith('/settings/')
+  ) {
+    return <PrecisionGraduationGate currencyCode={currencyCode} />;
+  }
   return budgetId ? <FinancesApp /> : <ManagementApp />;
 }
 
