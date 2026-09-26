@@ -6,6 +6,7 @@ import path from 'node:path';
 import { config } from '#load-config';
 
 import {
+  atomicWriteUserFile,
   getPathForUserFile,
   preserveMode,
   sweepOrphanedTempFiles,
@@ -101,5 +102,68 @@ describe('preserveMode', () => {
     );
 
     await expect(preserveMode(tmpPath, target)).resolves.toBeUndefined();
+  });
+});
+
+describe('atomicWriteUserFile', () => {
+  let dir: string;
+
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'actual-atomic-test-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('replaces the file and leaves no temp file behind', async () => {
+    const target = path.join(dir, 'file-abc.blob');
+    fs.writeFileSync(target, 'original');
+
+    await atomicWriteUserFile(target, Buffer.from('new content'));
+
+    expect(fs.readFileSync(target, 'utf8')).toBe('new content');
+    expect(fs.readdirSync(dir).filter(f => f.endsWith('.tmp'))).toEqual([]);
+  });
+
+  it('writes through a symlink instead of replacing it', async () => {
+    const realTarget = path.join(dir, 'real.blob');
+    const symlinkPath = path.join(dir, 'file-abc.blob');
+    fs.writeFileSync(realTarget, 'original');
+    fs.symlinkSync(realTarget, symlinkPath);
+
+    await atomicWriteUserFile(symlinkPath, Buffer.from('new content'));
+
+    expect(fs.lstatSync(symlinkPath).isSymbolicLink()).toBe(true);
+    expect(fs.readFileSync(realTarget, 'utf8')).toBe('new content');
+  });
+
+  it('creates the missing file behind a dangling symlink instead of replacing the link', async () => {
+    const missingTarget = path.join(dir, 'real.blob');
+    const symlinkPath = path.join(dir, 'file-abc.blob');
+    fs.symlinkSync(missingTarget, symlinkPath);
+
+    await atomicWriteUserFile(symlinkPath, Buffer.from('new content'));
+
+    expect(fs.lstatSync(symlinkPath).isSymbolicLink()).toBe(true);
+    expect(fs.readFileSync(missingTarget, 'utf8')).toBe('new content');
+  });
+
+  it('puts the temp file next to the real target, not the symlink', async () => {
+    const realDir = path.join(dir, 'elsewhere');
+    fs.mkdirSync(realDir);
+    const realTarget = path.join(realDir, 'real.blob');
+    const symlinkPath = path.join(dir, 'file-abc.blob');
+    fs.writeFileSync(realTarget, 'original');
+    fs.symlinkSync(realTarget, symlinkPath);
+
+    const writeFileSpy = vi.spyOn(fsPromises, 'writeFile');
+    onTestFinished(() => writeFileSpy.mockRestore());
+
+    await atomicWriteUserFile(symlinkPath, Buffer.from('new content'));
+
+    const tmpPath = String(writeFileSpy.mock.calls[0][0]);
+    expect(path.dirname(tmpPath)).toBe(fs.realpathSync(realDir));
+    expect(fs.readFileSync(realTarget, 'utf8')).toBe('new content');
   });
 });

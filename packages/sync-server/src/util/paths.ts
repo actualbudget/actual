@@ -1,5 +1,6 @@
+import { randomBytes } from 'node:crypto';
 import fs from 'node:fs/promises';
-import { join, resolve, sep } from 'node:path';
+import { basename, dirname, join, resolve, sep } from 'node:path';
 
 import { config } from '#load-config';
 
@@ -85,5 +86,68 @@ export async function sweepOrphanedTempFiles(
     if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
       console.warn(`Could not clean up leftover temp files in ${dir}`, err);
     }
+  }
+}
+
+// Follows symlinks so a write lands on the real underlying file instead of
+// replacing the symlink itself.
+export async function resolveWriteTarget(filepath: string): Promise<string> {
+  try {
+    return await fs.realpath(filepath);
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw err;
+    }
+  }
+
+  // realpath also fails for a symlink whose target doesn't exist yet; follow
+  // it by hand so the write creates that target instead of replacing the link.
+  // A symlink loop fails realpath with ELOOP above, so this can't recurse forever.
+  const linkTarget = await readSymlink(filepath);
+  if (linkTarget !== null) {
+    return resolveWriteTarget(resolve(dirname(filepath), linkTarget));
+  }
+
+  const realDir = await fs.realpath(dirname(filepath));
+  return join(realDir, basename(filepath));
+}
+
+async function readSymlink(filepath: string): Promise<string | null> {
+  try {
+    return await fs.readlink(filepath);
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    // ENOENT: nothing at this path. EINVAL: it exists but isn't a symlink.
+    if (code === 'ENOENT' || code === 'EINVAL') {
+      return null;
+    }
+    throw err;
+  }
+}
+
+const inFlightTempPaths = new Set<string>();
+
+// Replaces the file at `filepath` atomically: the contents are written to a
+// temp file next to the real target (following symlinks), then renamed over
+// it. A concurrent reader (a backup tool, a download) always sees either the
+// complete old file or the complete new one, never a torn write.
+export async function atomicWriteUserFile(
+  filepath: string,
+  contents: NodeJS.ArrayBufferView | string,
+): Promise<void> {
+  const target = await resolveWriteTarget(filepath);
+  const tmpPath = `${target}.${process.pid}-${randomBytes(4).toString('hex')}.tmp`;
+
+  inFlightTempPaths.add(tmpPath);
+  try {
+    await sweepOrphanedTempFiles(dirname(target), inFlightTempPaths);
+    await fs.writeFile(tmpPath, contents);
+    await preserveMode(tmpPath, target);
+    await fs.rename(tmpPath, target);
+  } catch (err) {
+    await fs.rm(tmpPath, { force: true }).catch(() => undefined);
+    throw err;
+  } finally {
+    inFlightTempPaths.delete(tmpPath);
   }
 }

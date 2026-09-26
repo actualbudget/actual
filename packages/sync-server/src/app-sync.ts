@@ -1,8 +1,7 @@
 // @ts-strict-ignore
 import { Buffer } from 'node:buffer';
-import { randomBytes } from 'node:crypto';
 import fs from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
 
 import {
   create,
@@ -35,12 +34,11 @@ import {
   validateSessionMiddleware,
 } from './util/middlewares';
 import {
+  atomicWriteUserFile,
   getPathForGroupFile,
   getPathForUserFile,
   isValidFileId,
   isValidGroupId,
-  preserveMode,
-  sweepOrphanedTempFiles,
 } from './util/paths';
 import type { GroupId } from './util/paths';
 
@@ -298,8 +296,6 @@ app.post('/reset-user-file', async (req, res) => {
   res.send(OK_RESPONSE);
 });
 
-const inFlightUploadTempPaths = new Set<string>();
-
 app.post('/upload-user-file', async (req, res) => {
   if (typeof req.headers['x-actual-name'] !== 'string') {
     // FIXME: Not sure how this cannot be a string when the header is
@@ -364,21 +360,12 @@ app.post('/upload-user-file', async (req, res) => {
     return;
   }
 
-  const finalPath = getPathForUserFile(fileId);
-  const tmpPath = `${finalPath}.${process.pid}-${randomBytes(4).toString('hex')}.tmp`;
-  inFlightUploadTempPaths.add(tmpPath);
   try {
-    await sweepOrphanedTempFiles(dirname(finalPath), inFlightUploadTempPaths);
-    await fs.writeFile(tmpPath, req.body);
-    await preserveMode(tmpPath, finalPath);
-    await fs.rename(tmpPath, finalPath);
+    await atomicWriteUserFile(getPathForUserFile(fileId), req.body);
   } catch (err) {
-    await fs.rm(tmpPath, { force: true }).catch(() => undefined);
     console.log('Error writing file', err);
     res.status(500).send({ status: 'error' });
     return;
-  } finally {
-    inFlightUploadTempPaths.delete(tmpPath);
   }
 
   if (!currentFile) {
