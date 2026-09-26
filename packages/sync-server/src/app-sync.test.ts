@@ -825,7 +825,7 @@ describe('/upload-user-file', () => {
     },
   );
 
-  it('does not sweep the temp file of an in-flight upload to the same file', async () => {
+  it('concurrent uploads of the same file use separate temp files', async () => {
     const fileId = generateFileId();
     const groupId = 'in-flight-group-id';
     const keyId = 'key-id';

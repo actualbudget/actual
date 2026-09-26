@@ -133,7 +133,7 @@ describe('atomicWriteFile', () => {
     expect(fsSync.readFileSync(target, 'utf8')).toBe('original good content');
   });
 
-  test('does not sweep the temp file of an in-flight write to the same target', async () => {
+  test('concurrent writes to the same target use separate temp files', async () => {
     const target = path.join(dir, 'metadata.json');
     fsSync.writeFileSync(target, 'original content');
 
