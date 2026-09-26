@@ -29,9 +29,11 @@ export type PreferencesHandlers = {
 export const app = createApp<PreferencesHandlers>();
 
 const FORMULA_FORMAT_SYNCED_PREFS = new Set<keyof SyncedPrefs>([
+  'flags.currency',
   'numberFormat',
   'hideFraction',
   'defaultCurrencyCode',
+  'amountEncoding',
   'currencySymbolPosition',
   'currencySpaceBetweenAmountAndSymbol',
 ]);
@@ -58,7 +60,6 @@ async function saveSyncedPrefs({
   const hasAmountEncoding = Boolean(_getMetadataPrefs()?.amountEncoding);
   if (
     (id === 'amountEncoding' ||
-      id === 'flags.currencyPrecision' ||
       (id === 'defaultCurrencyCode' && hasAmountEncoding)) &&
     value !==
       (

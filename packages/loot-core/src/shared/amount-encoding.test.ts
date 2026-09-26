@@ -19,9 +19,18 @@ describe('amount encoding metadata', () => {
     ).toEqual({ version: 1, currencyCode: 'RSD', precision: 0 });
   });
 
-  it('rejects empty, unreviewed and malformed encoding data', () => {
-    expect(() => reviewedAmountEncoding('')).toThrow();
+  it('keeps empty currency at 2dp and rejects unreviewed encoding', () => {
+    expect(reviewedAmountEncoding('')).toEqual({
+      version: 1,
+      currencyCode: '',
+      precision: 2,
+    });
     expect(() => reviewedAmountEncoding('XYZ')).toThrow();
+    expect(
+      parseAmountEncoding(
+        JSON.stringify({ version: 1, currencyCode: '', precision: 2 }),
+      ),
+    ).toEqual({ version: 1, currencyCode: '', precision: 2 });
     expect(() => parseAmountEncoding('{"version":2}')).toThrow();
     expect(parseAmountEncoding(undefined)).toBeNull();
   });

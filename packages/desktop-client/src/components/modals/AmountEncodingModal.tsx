@@ -13,10 +13,13 @@ import { Modal, ModalHeader } from '#components/common/Modal';
 import { Checkbox } from '#components/forms';
 import { useCurrencyOptions } from '#components/settings/Currency';
 import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { loadPrefs } from '#prefs/prefsSlice';
+import { useDispatch } from '#redux';
 
 type Props = {
-  enabled: boolean;
   currencyCode: string;
+  required?: boolean;
 };
 
 type Preflight = {
@@ -26,10 +29,12 @@ type Preflight = {
   pending: boolean;
 };
 
-export function AmountEncodingModal({ enabled, currencyCode }: Props) {
+export function AmountEncodingModal({ currencyCode, required = false }: Props) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const currencyOptions = useCurrencyOptions();
   const [budgetId] = useMetadataPref('id');
+  const [amountEncoding] = useSyncedPref('amountEncoding');
   const [pending] = useMetadataPref('amountEncodingTransition');
   const [lastBackup, setLastBackup] = useState<string>();
   const [backupConfirmed, setBackupConfirmed] = useState(false);
@@ -68,11 +73,10 @@ export function AmountEncodingModal({ enabled, currencyCode }: Props) {
     let cancelled = false;
     setPreflight(undefined);
     setError(false);
-    if (enabled && !selectedCurrencyCode) {
+    if (!selectedCurrencyCode && !amountEncoding) {
       return;
     }
     send('amount-encoding/preflight', {
-      enabled,
       currencyCode: selectedCurrencyCode,
     }).then(
       result => {
@@ -88,7 +92,7 @@ export function AmountEncodingModal({ enabled, currencyCode }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [enabled, selectedCurrencyCode]);
+  }, [amountEncoding, selectedCurrencyCode]);
 
   async function confirm(close: () => void) {
     if (pendingMismatch) return;
@@ -99,7 +103,6 @@ export function AmountEncodingModal({ enabled, currencyCode }: Props) {
         ? await send('amount-encoding/retry')
         : preflight &&
           (await send('amount-encoding/transition', {
-            enabled,
             currencyCode: selectedCurrencyCode,
             sourceToken: preflight.sourceToken,
           }));
@@ -108,6 +111,7 @@ export function AmountEncodingModal({ enabled, currencyCode }: Props) {
         setRetryable(Boolean(result?.retryable));
         return;
       }
+      if (required) await dispatch(loadPrefs());
       close();
     } catch {
       setError(true);
@@ -119,8 +123,8 @@ export function AmountEncodingModal({ enabled, currencyCode }: Props) {
   return (
     <Modal
       name="amount-encoding"
-      isDismissable={!busy}
-      isKeyboardDismissDisabled={busy}
+      isDismissable={!busy && !required}
+      isKeyboardDismissDisabled={busy || required}
     >
       {({ state }) => (
         <>
@@ -134,14 +138,12 @@ export function AmountEncodingModal({ enabled, currencyCode }: Props) {
           <View style={{ gap: 16, maxWidth: 600 }}>
             <Text>
               <Trans>
-                Per-currency decimal precision is experimental. Some workflows
-                are still being updated and may show incorrect amounts. Have you
-                made a backup using the backup and export settings? We recommend
-                a backup before continuing. You can continue without making or
-                confirming a backup.
+                Have you made a backup using the backup and export settings? We
+                recommend a backup before continuing. You can continue without
+                making or confirming a backup.
               </Trans>
             </Text>
-            {(pendingMismatch || (enabled && !currencyCode)) && (
+            {(pendingMismatch || (!currencyCode && !amountEncoding)) && (
               <Select
                 value={selectedCurrencyCode}
                 defaultLabel={t('Select a currency')}
@@ -176,13 +178,11 @@ export function AmountEncodingModal({ enabled, currencyCode }: Props) {
               <Trans>I have made a backup</Trans>
             </label>
             {changesPrecision &&
-              (!enabled ||
-                preflight.target.precision < preflight.source.precision) && (
+              preflight.target.precision < preflight.source.precision && (
                 <Text style={{ color: theme.warningText }}>
                   <Trans>
                     Reducing precision rounds amounts and can permanently lose
-                    minor units. Disabling this feature restores two decimal
-                    places but cannot recover units lost by earlier rounding.
+                    minor units.
                   </Trans>
                 </Text>
               )}
@@ -218,7 +218,7 @@ export function AmountEncodingModal({ enabled, currencyCode }: Props) {
                   The precision change could not complete. Check your
                   connection. If retry is unavailable, close this dialog and try
                   again to check the current budget. A currency must be selected
-                  to enable decimal precision.
+                  to continue.
                 </Trans>
               </Text>
             )}
@@ -229,9 +229,11 @@ export function AmountEncodingModal({ enabled, currencyCode }: Props) {
                 gap: 10,
               }}
             >
-              <Button onPress={() => state.close()} isDisabled={busy}>
-                <Trans>Cancel</Trans>
-              </Button>
+              {!required && (
+                <Button onPress={() => state.close()} isDisabled={busy}>
+                  <Trans>Cancel</Trans>
+                </Button>
+              )}
               <ButtonWithLoading
                 variant="primary"
                 isLoading={busy}

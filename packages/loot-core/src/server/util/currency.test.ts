@@ -21,11 +21,13 @@ describe('initializeImportedAmountEncoding', () => {
     );
   });
 
-  it('keeps legacy encoding when source currency metadata is missing', async () => {
+  it('records a no-symbol two-decimal encoding when currency is missing', async () => {
     await initializeImportedAmountEncoding('');
     expect(
       db.firstSync("SELECT value FROM preferences WHERE id = 'amountEncoding'"),
-    ).toBeNull();
+    ).toEqual({
+      value: JSON.stringify({ version: 1, currencyCode: '', precision: 2 }),
+    });
   });
 
   it('rejects unknown source currencies', async () => {

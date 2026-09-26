@@ -54,6 +54,7 @@ it('shows the selected symbol with the recorded scale', () => {
   const store = createTestAppStore();
   store.dispatch(
     mergeSyncedPrefs({
+      'flags.currency': 'true',
       defaultCurrencyCode: 'USD',
       amountEncoding: JSON.stringify({
         version: 1,

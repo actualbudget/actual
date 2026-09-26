@@ -9,11 +9,7 @@ beforeEach(global.emptyDatabase());
 beforeEach(() => prefs.loadPrefs());
 
 describe('protected amount encoding preferences', () => {
-  it.each([
-    'amountEncoding',
-    'flags.currencyPrecision',
-    'defaultCurrencyCode',
-  ] as const)(
+  it.each(['amountEncoding', 'defaultCurrencyCode'] as const)(
     'rejects direct changes to %s while precision is active',
     async id => {
       const encoding = JSON.stringify({
@@ -25,7 +21,6 @@ describe('protected amount encoding preferences', () => {
       db.execQuery(`
         INSERT INTO preferences (id, value) VALUES
           ('amountEncoding', '${encoding}'),
-          ('flags.currencyPrecision', 'true'),
           ('defaultCurrencyCode', 'JPY');
       `);
 
