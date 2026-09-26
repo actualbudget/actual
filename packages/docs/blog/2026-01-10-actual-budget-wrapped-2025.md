@@ -4,6 +4,7 @@ description: We created a small app to help you look back at your financial year
 date: 2026-01-10T10:00
 slug: actual-budget-wrapped-2025
 tags: [announcement]
+in_app_notification: true
 hide_table_of_contents: false
 authors: MatissJanis
 ---

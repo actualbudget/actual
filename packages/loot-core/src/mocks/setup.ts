@@ -28,6 +28,73 @@ setSyncingMode('disabled');
 // Set a mock url for the testing server
 setServer('https://test.env');
 
+const WINDOWS_1252_LOOKUP: Record<number, string> = {
+  0x80: '€',
+  0x82: '‚',
+  0x83: 'ƒ',
+  0x84: '„',
+  0x85: '…',
+  0x86: '†',
+  0x87: '‡',
+  0x88: 'ˆ',
+  0x89: '‰',
+  0x8a: 'Š',
+  0x8b: '‹',
+  0x8c: 'Œ',
+  0x8e: 'Ž',
+  0x91: '\u2018',
+  0x92: '\u2019',
+  0x93: '\u201C',
+  0x94: '\u201D',
+  0x95: '•',
+  0x96: '–',
+  0x97: '—',
+  0x98: '˜',
+  0x99: '™',
+  0x9a: 'š',
+  0x9b: '›',
+  0x9c: 'œ',
+  0x9e: 'ž',
+  0x9f: 'Ÿ',
+};
+
+const NativeTextDecoder = global.TextDecoder;
+if (
+  new NativeTextDecoder('windows-1252').decode(new Uint8Array([0x80])) !== '€'
+) {
+  // @ts-expect-error TextDecoder polyfill for Node test environment
+  global.TextDecoder = class TextDecoder extends NativeTextDecoder {
+    #encoding: string;
+    constructor(label = 'utf-8', options?: TextDecoderOptions) {
+      super(label, options);
+      this.#encoding = (label || 'utf-8').toLowerCase();
+    }
+    decode(input?: BufferSource, options?: TextDecodeOptions): string {
+      if (
+        this.#encoding === 'windows-1252' ||
+        this.#encoding === 'iso-8859-1'
+      ) {
+        if (!input) return '';
+        const bytes =
+          input instanceof Uint8Array
+            ? input
+            : new Uint8Array(
+                ArrayBuffer.isView(input)
+                  ? input.buffer
+                  : (input as ArrayBuffer),
+              );
+        let res = '';
+        for (let i = 0; i < bytes.length; i++) {
+          const b = bytes[i];
+          res += WINDOWS_1252_LOOKUP[b] || String.fromCharCode(b);
+        }
+        return res;
+      }
+      return super.decode(input, options);
+    }
+  };
+}
+
 process.on('unhandledRejection', reason => {
   console.log('REJECTION', reason);
 });

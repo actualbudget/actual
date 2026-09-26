@@ -85,6 +85,54 @@ describe('Web sqlite', () => {
     expect(rows[2].number).toBe(6);
   });
 
+  it('should use the crdt index for a batched cell lookup', async () => {
+    // Mirrors the query `compareMessages` in server/sync builds for a
+    // full chunk. If the planner ever falls back to a table scan on the
+    // web build's SQLite, bulk edits get slow again.
+    const db = await openDatabase();
+    execQuery(
+      db,
+      `
+      CREATE TABLE messages_crdt (
+        id INTEGER PRIMARY KEY,
+        timestamp TEXT NOT NULL UNIQUE,
+        dataset TEXT NOT NULL,
+        row TEXT NOT NULL,
+        column TEXT NOT NULL,
+        value BLOB NOT NULL
+      );
+      CREATE INDEX messages_crdt_search ON messages_crdt(dataset, row, column, timestamp);
+      `,
+    );
+
+    const termCount = 100;
+    const term = '(dataset = ? AND row = ? AND column = ? AND timestamp >= ?)';
+    const sql =
+      'SELECT dataset, row, column, timestamp FROM messages_crdt WHERE ' +
+      Array(termCount).fill(term).join(' OR ');
+    const params = Array.from({ length: termCount }, (_, index) => [
+      'transactions',
+      `row${index}`,
+      'amount',
+      '2024-01-01T00:00:00.000Z-0000-0000000000000000',
+    ]).flat();
+
+    const plan = runQuery<{ detail: string }>(
+      db,
+      'EXPLAIN QUERY PLAN ' + sql,
+      params,
+      true,
+    );
+    expect(plan.length).toBeGreaterThan(0);
+    expect(plan.some(step => step.detail.includes('SCAN'))).toBe(false);
+    expect(
+      plan.some(step => step.detail.includes('messages_crdt_search')),
+    ).toBe(true);
+
+    // And the query itself runs within the parameter limits
+    expect(runQuery(db, sql, params, true)).toEqual([]);
+  });
+
   it('should match regex on text fields', async () => {
     const db = await openDatabase();
     execQuery(db, initSQL);

@@ -39,6 +39,7 @@ import { fromDateRepr } from '#components/reports/util';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCspNetWorthData } from '#hooks/useCspNetWorthData';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
+import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
@@ -124,6 +125,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   const reportParams = useMemo(
     () =>
@@ -137,6 +139,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         interval,
         firstDayOfWeekIdx,
         format,
+        dateFormat,
       ),
     [
       start,
@@ -148,6 +151,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
       interval,
       firstDayOfWeekIdx,
       format,
+      dateFormat,
     ],
   );
   const data = useReport('net_worth', reportParams);

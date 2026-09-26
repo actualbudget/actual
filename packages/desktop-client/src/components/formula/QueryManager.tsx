@@ -3,12 +3,12 @@ import { Dialog, DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { DateRangePicker } from '@actual-app/components/date-range-picker';
+import type { DateRangePreset } from '@actual-app/components/date-range-picker';
 import { SvgCopy, SvgTrash } from '@actual-app/components/icons/v1';
 import { SvgDownloadThickBottom } from '@actual-app/components/icons/v2';
 import { Input } from '@actual-app/components/input';
-import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
-import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -18,20 +18,17 @@ import type {
   RuleConditionEntity,
   TimeFrame,
 } from '@actual-app/core/types/models';
-import { parseISO } from 'date-fns';
 
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
-import { getLiveRange } from '#components/reports/getLiveRange';
+import { buildDateRangePresets } from '#components/reports/dateRangePresets';
+import { clampMonthRangeToBounds } from '#components/reports/monthRange';
 import {
   asMonthSlidingTimeFrame,
   calculateTimeRange,
-  getLatestRange,
-  validateEnd,
-  validateStart,
 } from '#components/reports/reportRanges';
-import { fromDateRepr } from '#components/reports/util';
-import { useLocale } from '#hooks/useLocale';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useLanguage } from '#hooks/useLocale';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
@@ -47,6 +44,81 @@ type QueryConfig = {
   conditionsOp?: 'and' | 'or';
   timeFrame?: TimeFrame;
 };
+
+export function normalizeMonthRangeForPicker(start: string, end: string) {
+  return [monthUtils.getMonth(start), monthUtils.getMonth(end)] satisfies [
+    string,
+    string,
+  ];
+}
+
+export function normalizeMonthPickerSelectionForQuery(
+  start: string,
+  end: string,
+) {
+  return [
+    normalizeQueryTimeFrameStart(start),
+    normalizeQueryTimeFrameEnd(end),
+  ] satisfies [string, string];
+}
+
+export function shouldIgnoreMonthPickerNoop(
+  startDate: string,
+  endDate: string,
+  nextStart: string,
+  nextEnd: string,
+) {
+  const [currentStartMonth, currentEndMonth] = normalizeMonthRangeForPicker(
+    startDate,
+    endDate,
+  );
+
+  return currentStartMonth === nextStart && currentEndMonth === nextEnd;
+}
+
+export function canRenderDateRangePicker(
+  isTransactionBoundsReady: boolean,
+  earliestMonth: string,
+  latestMonth: string,
+) {
+  return (
+    isTransactionBoundsReady && Boolean(earliestMonth) && Boolean(latestMonth)
+  );
+}
+
+export function calculateDateRangeBoundMonths(
+  earliestTransaction: { date: string } | null,
+  latestTransaction: { date: string } | null,
+) {
+  const currentMonth = monthUtils.currentMonth();
+  const currentDay = monthUtils.currentDay();
+
+  const earliestTransactionDate = earliestTransaction
+    ? earliestTransaction.date
+    : currentDay;
+  const latestTransactionDate = latestTransaction
+    ? latestTransaction.date
+    : currentDay;
+
+  const computedEarliestMonth = earliestTransaction
+    ? monthUtils.getMonth(earliestTransaction.date)
+    : currentMonth;
+  const latestTransactionMonth = latestTransaction
+    ? monthUtils.getMonth(latestTransaction.date)
+    : currentMonth;
+
+  const computedLatestMonth =
+    latestTransactionMonth > currentMonth
+      ? latestTransactionMonth
+      : currentMonth;
+
+  return {
+    earliestMonth: computedEarliestMonth,
+    latestMonth: computedLatestMonth,
+    earliestTransactionDate,
+    latestTransactionDate,
+  };
+}
 
 type PresetTimeRangeMode = Exclude<
   TimeFrame['mode'],
@@ -219,12 +291,11 @@ function QueryItem({
   onUpdate,
   onRemove,
 }: QueryItemProps) {
-  const locale = useLocale();
+  const language = useLanguage();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
   const [importJsonText, setImportJsonText] = useState('');
   const dispatch = useDispatch<AppDispatch>();
-  const timeRangeMenuTriggerRef = useRef(null);
-  const [timeRangeMenuOpen, setTimeRangeMenuOpen] = useState(false);
 
   // Time range state
   const [startDate, setStartDate] = useState(
@@ -235,15 +306,16 @@ function QueryItem({
     defaultConfig.timeFrame?.end || monthUtils.currentDay(),
   );
 
-  // Months data for range picker
-  const [allMonths, setAllMonths] = useState<
-    Array<{
-      name: string;
-      pretty: string;
-    }>
-  >([]);
-  const [_earliestTransaction, setEarliestTransaction] = useState('');
-  const [_latestTransaction, setLatestTransaction] = useState('');
+  const [earliestMonth, setEarliestMonth] = useState(monthUtils.currentMonth());
+  const [latestMonth, setLatestMonth] = useState(monthUtils.currentMonth());
+  const [isTransactionBoundsReady, setIsTransactionBoundsReady] =
+    useState(false);
+  const [earliestTransaction, setEarliestTransaction] = useState(
+    monthUtils.currentDay(),
+  );
+  const [latestTransaction, setLatestTransaction] = useState(
+    monthUtils.currentDay(),
+  );
 
   const timeRangeRef = useRef<string>(
     defaultConfig.timeFrame?.mode || 'sliding-window',
@@ -267,53 +339,41 @@ function QueryItem({
     }
   }, [defaultConfig]);
 
-  // Fetch transaction data for month range picker
+  // Fetch transaction bounds for per-query date picker limits and presets.
   useEffect(() => {
     async function run() {
-      const earliestTransaction = await send('get-earliest-transaction');
-      setEarliestTransaction(
-        earliestTransaction
-          ? earliestTransaction.date
-          : monthUtils.currentDay(),
-      );
+      try {
+        const [earliestTransactionResult, latestTransactionResult] =
+          await Promise.all([
+            send('get-earliest-transaction').catch(() => null),
+            send('get-latest-transaction').catch(() => null),
+          ]);
 
-      const latestTransaction = await send('get-latest-transaction');
-      setLatestTransaction(
-        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
-      );
+        const computedBounds = calculateDateRangeBoundMonths(
+          earliestTransactionResult,
+          latestTransactionResult,
+        );
 
-      const currentMonth = monthUtils.currentMonth();
-      let earliestMonth = earliestTransaction
-        ? monthUtils.monthFromDate(
-            parseISO(fromDateRepr(earliestTransaction.date)),
-          )
-        : currentMonth;
-      const latestMonth = latestTransaction
-        ? monthUtils.monthFromDate(
-            parseISO(fromDateRepr(latestTransaction.date)),
-          )
-        : currentMonth;
+        setEarliestTransaction(computedBounds.earliestTransactionDate);
+        setLatestTransaction(computedBounds.latestTransactionDate);
 
-      // Make sure the month selects are at least populated with a
-      // year's worth of months. We can undo this when we have fancier
-      // date selects.
-      const yearAgo = monthUtils.subMonths(latestMonth, 12);
-      if (earliestMonth > yearAgo) {
-        earliestMonth = yearAgo;
+        // Make sure the month selects are at least populated with a
+        // year's worth of months. We can undo this when we have fancier
+        // date selects.
+        let computedEarliestMonth = computedBounds.earliestMonth;
+        const yearAgo = monthUtils.subMonths(computedBounds.latestMonth, 12);
+        if (computedEarliestMonth > yearAgo) {
+          computedEarliestMonth = yearAgo;
+        }
+
+        setEarliestMonth(computedEarliestMonth);
+        setLatestMonth(computedBounds.latestMonth);
+      } finally {
+        setIsTransactionBoundsReady(true);
       }
-
-      const allMonths = monthUtils
-        .rangeInclusive(earliestMonth, latestMonth)
-        .map(month => ({
-          name: month,
-          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
-        }))
-        .reverse();
-
-      setAllMonths(allMonths);
     }
     void run();
-  }, [locale]);
+  }, []);
 
   const filters = useRuleConditionFilters(
     conditionsRef.current,
@@ -383,28 +443,6 @@ function QueryItem({
     endDate,
     sendUpdate,
   ]);
-
-  function handleStartDateChange(newStart: string) {
-    setStartDate(normalizeQueryTimeFrameStart(newStart));
-    sendUpdate(
-      filters.conditions,
-      filters.conditionsOp,
-      normalizeQueryTimeFrameStart(newStart),
-      endDate,
-      timeRangeRef.current as TimeFrame['mode'],
-    );
-  }
-
-  function handleEndDateChange(newEnd: string) {
-    setEndDate(normalizeQueryTimeFrameEnd(newEnd));
-    sendUpdate(
-      filters.conditions,
-      filters.conditionsOp,
-      startDate,
-      normalizeQueryTimeFrameEnd(newEnd),
-      timeRangeRef.current as TimeFrame['mode'],
-    );
-  }
 
   async function handleExport() {
     const config = {
@@ -518,6 +556,44 @@ function QueryItem({
   const presetTimeRangeLabel = isPresetTimeRange
     ? presetTimeRangeLabels[timeRangeMode]
     : null;
+
+  function formatDayLabel(date: string) {
+    return monthUtils.format(date, dateFormat);
+  }
+
+  const [pickerStartDate, pickerEndDate] = clampMonthRangeToBounds(
+    ...normalizeMonthRangeForPicker(startDate, endDate),
+    earliestMonth,
+    latestMonth,
+  );
+
+  const presets: DateRangePreset[] = buildDateRangePresets({
+    t,
+    onSelectRange: ([rangeStart, rangeEnd, rangeMode]) => {
+      const [normalizedRangeStart, normalizedRangeEnd] =
+        normalizeMonthPickerSelectionForQuery(rangeStart, rangeEnd);
+
+      setStartDate(normalizedRangeStart);
+      setEndDate(normalizedRangeEnd);
+      sendUpdate(
+        filters.conditions,
+        filters.conditionsOp,
+        normalizedRangeStart,
+        normalizedRangeEnd,
+        rangeMode,
+      );
+    },
+    earliestTransaction,
+    latestTransaction,
+    show1Month: true,
+    includeAllTime: true,
+  });
+
+  const isDateRangePickerReady = canRenderDateRangePicker(
+    isTransactionBoundsReady,
+    earliestMonth,
+    latestMonth,
+  );
 
   return (
     <View
@@ -666,6 +742,7 @@ function QueryItem({
             justifyContent: 'flex-end',
             gap: 8,
             marginTop: 16,
+            alignItems: 'center',
           }}
         >
           <Button
@@ -684,7 +761,6 @@ function QueryItem({
 
               setStartDate(newStart);
               setEndDate(newEnd);
-              timeRangeRef.current = newMode;
               sendUpdate(
                 filters.conditions,
                 filters.conditionsOp,
@@ -696,163 +772,63 @@ function QueryItem({
           >
             {timeRangeLabel}
           </Button>
-          <Button
-            ref={timeRangeMenuTriggerRef}
-            variant="bare"
-            onPress={() => setTimeRangeMenuOpen(true)}
-          >
-            ⋮
-          </Button>
-          <Popover
-            triggerRef={timeRangeMenuTriggerRef}
-            placement="bottom start"
-            isOpen={timeRangeMenuOpen}
-            onOpenChange={() => setTimeRangeMenuOpen(false)}
-          >
-            <Menu
-              onMenuSelect={item => {
-                let start: string, end: string, mode: TimeFrame['mode'];
-                const currentMode = timeRangeRef.current as TimeFrame['mode'];
-                // For quick selections, use the current toggle state (static vs sliding-window)
-                const quickSelectMode = ['static', 'sliding-window'].includes(
-                  currentMode,
-                )
-                  ? currentMode
-                  : 'sliding-window';
-
-                switch (item) {
-                  case 'last-month': {
-                    const prevMonth = monthUtils.subMonths(
-                      monthUtils.currentMonth(),
-                      1,
-                    );
-                    start = monthUtils.firstDayOfMonth(prevMonth);
-                    end = monthUtils.lastDayOfMonth(prevMonth);
-                    mode = 'lastMonth';
-                    break;
-                  }
-                  case '1-month': {
-                    const [startMonth, endMonth] = getLatestRange(0);
-                    start = monthUtils.firstDayOfMonth(startMonth);
-                    end = monthUtils.lastDayOfMonth(endMonth);
-                    mode = quickSelectMode;
-                    break;
-                  }
-                  case '3-months': {
-                    const [startMonth, endMonth] = getLatestRange(2);
-                    start = monthUtils.firstDayOfMonth(startMonth);
-                    end = monthUtils.lastDayOfMonth(endMonth);
-                    mode = quickSelectMode;
-                    break;
-                  }
-                  case '6-months': {
-                    const [startMonth, endMonth] = getLatestRange(5);
-                    start = monthUtils.firstDayOfMonth(startMonth);
-                    end = monthUtils.lastDayOfMonth(endMonth);
-                    mode = quickSelectMode;
-                    break;
-                  }
-                  case '1-year': {
-                    const [startMonth, endMonth] = getLatestRange(11);
-                    start = monthUtils.firstDayOfMonth(startMonth);
-                    end = monthUtils.lastDayOfMonth(endMonth);
-                    mode = quickSelectMode;
-                    break;
-                  }
-                  case 'year-to-date': {
-                    [start, end] = getLiveRange(
-                      'Year to date',
-                      _earliestTransaction,
-                      _latestTransaction,
-                      true,
-                    );
-                    mode = 'yearToDate';
-                    break;
-                  }
-                  case 'last-year': {
-                    [start, end] = getLiveRange(
-                      'Last year',
-                      _earliestTransaction,
-                      _latestTransaction,
-                      false,
-                    );
-                    mode = 'lastYear';
-                    break;
-                  }
-                  case 'prior-year-to-date': {
-                    [start, end] = getLiveRange(
-                      'Prior year to date',
-                      _earliestTransaction,
-                      _latestTransaction,
-                      false,
-                    );
-                    mode = 'priorYearToDate';
-                    break;
-                  }
-                  case 'current-quarter': {
-                    [start, end] = getLiveRange(
-                      'Current quarter',
-                      _earliestTransaction,
-                      _latestTransaction,
-                      false,
-                    );
-                    mode = 'currentQuarter';
-                    break;
-                  }
-                  case 'previous-quarter': {
-                    [start, end] = getLiveRange(
-                      'Previous quarter',
-                      _earliestTransaction,
-                      _latestTransaction,
-                      false,
-                    );
-                    mode = 'previousQuarter';
-                    break;
-                  }
-                  case 'all-time': {
-                    [start, end] = getLiveRange(
-                      'All time',
-                      _earliestTransaction,
-                      _latestTransaction,
-                      true,
-                    );
-                    mode = 'full';
-                    break;
-                  }
-                  default:
-                    return;
+          {isDateRangePickerReady ? (
+            <DateRangePicker
+              start={pickerStartDate}
+              end={pickerEndDate}
+              minDate={earliestMonth}
+              maxDate={latestMonth}
+              granularities={['month']}
+              locale={language}
+              formatDayLabel={formatDayLabel}
+              labels={{
+                selectBy: t('Select by'),
+                quickSelect: t('Quick select'),
+                month: t('Month'),
+                day: t('Day'),
+                previous: t('Previous'),
+                next: t('Next'),
+                previousMonth: t('Previous month'),
+                nextMonth: t('Next month'),
+                year: t('Year'),
+                dateRange: t('Date range'),
+              }}
+              presets={presets}
+              onChangeDates={(newStart, newEnd) => {
+                if (
+                  shouldIgnoreMonthPickerNoop(
+                    startDate,
+                    endDate,
+                    newStart,
+                    newEnd,
+                  )
+                ) {
+                  return;
                 }
-                setStartDate(start);
-                setEndDate(end);
-                timeRangeRef.current = mode;
+
+                const [normalizedStart, normalizedEnd] =
+                  normalizeMonthPickerSelectionForQuery(newStart, newEnd);
+
+                setStartDate(normalizedStart);
+                setEndDate(normalizedEnd);
                 sendUpdate(
                   filters.conditions,
                   filters.conditionsOp,
-                  start,
-                  end,
-                  mode,
+                  normalizedStart,
+                  normalizedEnd,
+                  'static',
                 );
-                setTimeRangeMenuOpen(false);
               }}
-              items={[
-                { name: '1-month', text: t('1 month') },
-                { name: '3-months', text: t('3 months') },
-                { name: '6-months', text: t('6 months') },
-                { name: '1-year', text: t('1 year') },
-                Menu.line,
-                { name: 'year-to-date', text: t('Year to date') },
-                { name: 'last-month', text: t('Last month') },
-                { name: 'last-year', text: t('Last year') },
-                {
-                  name: 'prior-year-to-date',
-                  text: t('Prior year to date'),
-                },
-                { name: 'current-quarter', text: t('Current quarter') },
-                { name: 'previous-quarter', text: t('Previous quarter') },
-                { name: 'all-time', text: t('All time') },
-              ]}
             />
-          </Popover>
+          ) : (
+            <Button
+              variant="normal"
+              isDisabled
+              aria-label={t('Loading date range...')}
+            >
+              {t('Loading date range...')}
+            </Button>
+          )}
         </View>
 
         {presetTimeRangeLabel ? (
@@ -867,62 +843,6 @@ function QueryItem({
             }}
           />
         ) : null}
-
-        {allMonths.length > 0 && (
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              gap: 10,
-              marginTop: 8,
-              alignItems: 'center',
-            }}
-          >
-            <Select
-              disabled={isPresetTimeRange}
-              value={fromDateRepr(startDate)}
-              defaultLabel={monthUtils.format(
-                fromDateRepr(startDate),
-                'MMMM yyyy',
-                locale,
-              )}
-              onChange={newValue => {
-                const [validatedStart] = validateStart(
-                  allMonths[allMonths.length - 1].name,
-                  allMonths[0].name,
-                  newValue,
-                  fromDateRepr(endDate),
-                );
-                handleStartDateChange(validatedStart);
-              }}
-              options={allMonths.map(({ name, pretty }) => [name, pretty])}
-              style={{ flex: 1 }}
-            />
-            <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
-              <Trans>to</Trans>
-            </Text>
-            <Select
-              disabled={isPresetTimeRange}
-              value={fromDateRepr(endDate)}
-              defaultLabel={monthUtils.format(
-                fromDateRepr(endDate),
-                'MMMM yyyy',
-                locale,
-              )}
-              onChange={newValue => {
-                const [, validatedEnd] = validateEnd(
-                  allMonths[allMonths.length - 1].name,
-                  allMonths[0].name,
-                  fromDateRepr(startDate),
-                  newValue,
-                );
-                handleEndDateChange(validatedEnd);
-              }}
-              options={allMonths.map(({ name, pretty }) => [name, pretty])}
-              style={{ flex: 1 }}
-            />
-          </View>
-        )}
       </View>
 
       <View style={{ marginBottom: 8, flex: 1 }}>

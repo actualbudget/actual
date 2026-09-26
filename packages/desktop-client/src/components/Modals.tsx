@@ -13,6 +13,7 @@ import { useDispatch } from '#redux';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
+import { AccountGroupsModal } from './modals/AccountGroupsModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AccountReconcileModal } from './modals/AccountReconcileModal';
 import { AICategorizeReviewModal } from './modals/AICategorizeReviewModal';
@@ -141,9 +142,13 @@ export function Modals() {
           return <CreateAccountModal key={key} {...modal.options} />;
 
         case 'add-local-account':
-          return <CreateLocalAccountModal key={modal.name} />;
+          return <CreateLocalAccountModal key={key} />;
+
         case 'add-asset-account':
-          return <CreateAssetAccountModal key={modal.name} />;
+          return <CreateAssetAccountModal key={key} />;
+
+        case 'account-groups':
+          return <AccountGroupsModal key={key} {...modal.options} />;
         case 'close-account':
           return <CloseAccountModal key={key} {...modal.options} />;
 

@@ -26,6 +26,7 @@ import { amountToInteger } from '#shared/util';
 import type { ImportTransactionsOpts } from '#types/api-handlers';
 import type {
   AccountEntity,
+  AccountGroupEntity,
   BankSyncProviderStatus,
   BankSyncStatus,
   CategoryEntity,
@@ -118,10 +119,11 @@ async function updateAccount({
   account_id,
   account_sync_source,
   account_group_id,
-}: Pick<AccountEntity, 'id' | 'name'> &
+}: Pick<AccountEntity, 'id'> &
   Partial<
     Pick<
       AccountEntity,
+      | 'name'
       | 'offbudget'
       | 'last_reconciled'
       | 'account_id'
@@ -131,7 +133,7 @@ async function updateAccount({
   >) {
   await db.update('accounts', {
     id,
-    name,
+    ...(name !== undefined && { name }),
     ...(offbudget !== undefined && { offbudget }),
     ...(last_reconciled && { last_reconciled }),
     ...(account_id && { account_id }),
@@ -757,11 +759,13 @@ async function reopenAccount({ id }: { id: AccountEntity['id'] }) {
 async function moveAccount({
   id,
   targetId,
+  accountGroupId,
 }: {
   id: AccountEntity['id'];
   targetId: AccountEntity['id'] | null;
+  accountGroupId?: AccountGroupEntity['id'] | null;
 }) {
-  await db.moveAccount(id, targetId);
+  await db.moveAccount(id, targetId, accountGroupId);
 }
 
 async function setSecret({

@@ -65,6 +65,12 @@ export type Modal =
       name: 'add-asset-account';
     }
   | {
+      name: 'account-groups';
+      options: {
+        accountId: AccountEntity['id'];
+      };
+    }
+  | {
       name: 'close-account';
       options: {
         account: AccountEntity;
