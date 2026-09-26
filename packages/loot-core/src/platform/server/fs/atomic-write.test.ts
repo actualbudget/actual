@@ -325,6 +325,17 @@ describe('atomicWriteFile', () => {
     expect(readdirSpy).toHaveBeenCalledTimes(1);
   });
 
+  test('writes binary contents byte-for-byte', async () => {
+    // Backups and downloaded budgets write db.sqlite as raw bytes.
+    const target = path.join(dir, 'db.sqlite');
+    const bytes = new Uint8Array([0x00, 0xff, 0x53, 0x51, 0x4c, 0x80]);
+    const { atomicWriteFile } = await loadAtomicWriteFileWithFastRetry();
+
+    await atomicWriteFile(target, bytes);
+
+    expect(new Uint8Array(fsSync.readFileSync(target))).toEqual(bytes);
+  });
+
   test('a successful write leaves no temp file behind', async () => {
     const target = path.join(dir, 'metadata.json');
     const { atomicWriteFile } = await loadAtomicWriteFileWithFastRetry();

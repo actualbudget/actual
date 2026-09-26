@@ -145,7 +145,7 @@ async function sweepOrphanedTempFiles(dir: string): Promise<void> {
 // this process is killed mid-write.
 export async function atomicWriteFile(
   filepath: string,
-  contents: string,
+  contents: string | NodeJS.ArrayBufferView,
 ): Promise<void> {
   const target = await resolveWriteTarget(filepath);
   const tmpPath = `${target}.${process.pid}.${crypto.randomBytes(4).toString('hex')}.tmp`;
