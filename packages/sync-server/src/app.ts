@@ -264,7 +264,11 @@ export async function run() {
       });
     }
   } else if (socket) {
-    listenOnUnixSocket(http.createServer(app), socket, sendServerStartedMessage);
+    listenOnUnixSocket(
+      http.createServer(app),
+      socket,
+      sendServerStartedMessage,
+    );
   } else {
     app.listen(port, hostname, () => {
       sendServerStartedMessage();
