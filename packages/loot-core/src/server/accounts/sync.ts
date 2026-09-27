@@ -19,6 +19,7 @@ import {
   defaultMappings,
   mappingsFromString,
 } from '#server/util/custom-sync-mapping';
+import { rescaleAmount, rescaleDecimalAmount } from '#shared/amount-rescale';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import {
@@ -29,6 +30,7 @@ import {
   amountToInteger,
   hasFieldsChanged,
   integerToAmount,
+  MAX_SAFE_NUMBER,
 } from '#shared/util';
 import type {
   AccountEntity,
@@ -1123,24 +1125,62 @@ export function encodeBankAmount(
   value: string | number,
   amountPrecision: number,
 ): number {
-  const amount = Number(value);
-  const encoded = amountToInteger(amount, amountPrecision);
-  if (!Number.isFinite(amount) || !Number.isSafeInteger(encoded)) {
+  let encoded: number;
+  if (typeof value === 'string') {
+    if (value.length > 32) {
+      throw new Error('Invalid bank amount');
+    }
+    try {
+      encoded = rescaleDecimalAmount(value, amountPrecision);
+    } catch {
+      throw new Error('Invalid bank amount');
+    }
+  } else {
+    encoded = amountToInteger(value, amountPrecision);
+  }
+  if (!Number.isSafeInteger(encoded) || Math.abs(encoded) > MAX_SAFE_NUMBER) {
     throw new Error('Invalid bank amount');
   }
   return encoded;
 }
 
+export function encodeBankWireBalance(
+  value: string | number,
+  amountPrecision: number,
+): number {
+  if (typeof value === 'string') {
+    return encodeBankAmount(value, amountPrecision);
+  }
+  if (typeof value !== 'number' || !Number.isSafeInteger(value)) {
+    throw new Error('Invalid bank balance');
+  }
+  try {
+    const encoded = rescaleAmount(value, 2, amountPrecision)!;
+    if (Math.abs(encoded) > MAX_SAFE_NUMBER) {
+      throw new Error('Invalid bank balance');
+    }
+    return encoded;
+  } catch {
+    throw new Error('Invalid bank balance');
+  }
+}
+
 export function encodeStartingBalance(
-  currentBalanceAmount: number,
+  currentBalance: string | number,
   transactions: Array<{ transactionAmount: { amount: string | number } }>,
   amountPrecision: number,
 ): number {
   const previousBalance = transactions.reduce(
-    (total, trans) => total - Number(trans.transactionAmount.amount),
-    currentBalanceAmount,
+    (total, trans) =>
+      total -
+      BigInt(encodeBankAmount(trans.transactionAmount.amount, amountPrecision)),
+    BigInt(encodeBankWireBalance(currentBalance, amountPrecision)),
   );
-  return encodeBankAmount(previousBalance, amountPrecision);
+  const result = Number(previousBalance);
+  if (!Number.isSafeInteger(result) || Math.abs(result) > MAX_SAFE_NUMBER) {
+    throw new Error('Invalid bank balance');
+  }
+  return result;
 }
 
 async function processBankSyncDownload(
@@ -1177,9 +1217,8 @@ async function processBankSyncDownload(
 
   if (initialSync) {
     const { transactions } = download;
-    const currentBalanceAmount = currentBalance / 100;
     let balanceToUse = encodeStartingBalance(
-      currentBalanceAmount,
+      currentBalance,
       [],
       amountPrecision,
     );
@@ -1189,13 +1228,13 @@ async function processBankSyncDownload(
       balanceToUse = customStartingBalance;
     } else if (acctRow.account_sync_source === 'simpleFin') {
       balanceToUse = encodeStartingBalance(
-        currentBalanceAmount,
+        currentBalance,
         transactions,
         amountPrecision,
       );
     } else if (acctRow.account_sync_source === 'pluggyai') {
       balanceToUse = encodeStartingBalance(
-        currentBalanceAmount,
+        currentBalance,
         transactions,
         amountPrecision,
       );
@@ -1209,13 +1248,13 @@ async function processBankSyncDownload(
         ? transactions
         : transactions.filter(trans => Boolean(trans.booked));
       balanceToUse = encodeStartingBalance(
-        currentBalanceAmount,
+        currentBalance,
         importable,
         amountPrecision,
       );
     } else if (acctRow.account_sync_source === 'akahu') {
       balanceToUse = encodeStartingBalance(
-        currentBalanceAmount,
+        currentBalance,
         transactions,
         amountPrecision,
       );
@@ -1276,7 +1315,10 @@ async function processBankSyncDownload(
     );
 
     if (currentBalance != null) {
-      await updateAccountBalance(id, currentBalance);
+      await updateAccountBalance(
+        id,
+        encodeBankWireBalance(currentBalance, amountPrecision),
+      );
     }
 
     return result;
