@@ -1,4 +1,6 @@
 import fs, { readFileSync } from 'node:fs';
+import http from 'node:http';
+import net from 'node:net';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -197,6 +199,32 @@ function sendServerStartedMessage() {
   );
 }
 
+function listenOnUnixSocket(
+  server: http.Server,
+  socket: string,
+  onListening: () => void,
+) {
+  server.once('error', (err: NodeJS.ErrnoException) => {
+    if (err.code !== 'EADDRINUSE') {
+      throw err;
+    }
+    const probe = net.connect({ path: socket });
+    probe.once('connect', () => {
+      probe.destroy();
+      throw new Error(`another server is already listening on ${socket}`);
+    });
+    probe.once('error', (probeErr: NodeJS.ErrnoException) => {
+      if (probeErr.code === 'ECONNREFUSED' || probeErr.code === 'ENOENT') {
+        fs.rmSync(socket, { force: true });
+        server.listen(socket, onListening);
+      } else {
+        throw err;
+      }
+    });
+  });
+  server.listen(socket, onListening);
+}
+
 export async function run() {
   const portVal = config.get('port');
   const port = typeof portVal === 'string' ? parseInt(portVal) : portVal;
@@ -229,18 +257,14 @@ export async function run() {
     };
     const server = https.createServer(httpsOptions, app);
     if (socket) {
-      server.listen(socket, () => {
-        sendServerStartedMessage();
-      });
+      listenOnUnixSocket(server, socket, sendServerStartedMessage);
     } else {
       server.listen(port, hostname, () => {
         sendServerStartedMessage();
       });
     }
   } else if (socket) {
-    app.listen(socket, () => {
-      sendServerStartedMessage();
-    });
+    listenOnUnixSocket(http.createServer(app), socket, sendServerStartedMessage);
   } else {
     app.listen(port, hostname, () => {
       sendServerStartedMessage();
