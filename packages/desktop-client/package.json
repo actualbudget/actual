@@ -72,6 +72,7 @@
     "#components/reports/reports/monte-carlo/monteCarloHistoricalReturns": "./src/components/reports/reports/monte-carlo/monteCarloHistoricalReturns.ts",
     "#components/reports/reports/monte-carlo/monteCarloSimulation": "./src/components/reports/reports/monte-carlo/monteCarloSimulation.ts",
     "#components/reports/reports/monte-carlo/monteCarloStyles": "./src/components/reports/reports/monte-carlo/monteCarloStyles.ts",
+    "#components/reports/reports/monte-carlo/monteCarloYearStory": "./src/components/reports/reports/monte-carlo/monteCarloYearStory.ts",
     "#components/reports/reports/monte-carlo/useResolvedMonteCarloConfig": "./src/components/reports/reports/monte-carlo/useResolvedMonteCarloConfig.ts",
     "#components/reports/setSessionReport": "./src/components/reports/setSessionReport.ts",
     "#components/reports/spendingAverageRange": "./src/components/reports/spendingAverageRange.ts",

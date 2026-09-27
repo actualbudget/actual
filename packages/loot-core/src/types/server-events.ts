@@ -71,6 +71,32 @@ type OrphanedPayeesEvent = {
   updatedPayeeIds: string[];
 };
 
+export type ImportStep =
+  | 'accounts'
+  | 'categories'
+  | 'payees'
+  | 'payee-locations'
+  | 'tags'
+  | 'transactions'
+  | 'scheduled-transactions'
+  | 'budgets'
+  | 'finishing';
+
+type ImportProgressEvent = {
+  step: ImportStep;
+  /** Items imported so far in this step. `total` is 0 when it has no count. */
+  current: number;
+  total: number;
+  /** Items imported so far across every step, for an overall progress bar. */
+  overallCurrent: number;
+  overallTotal: number;
+  /**
+   * The batch that was just imported, when a step works in batches rather than
+   * one item at a time.
+   */
+  batch?: { amount: number; account: string };
+};
+
 type PrefsUpdatedEvent = undefined;
 type SchedulesOfflineEvent = undefined;
 type ServerErrorEvent = undefined;
@@ -85,6 +111,7 @@ export type ServerEvents = {
   'fallback-write-error': FallbackWriteErrorEvent;
   'finish-import': FinishImportEvent;
   'finish-load': FinishLoadEvent;
+  'import-progress': ImportProgressEvent;
   'indexeddb-quota-error': IndexeddbQuotaErrorEvent;
   'orphaned-payees': OrphanedPayeesEvent;
   'prefs-updated': PrefsUpdatedEvent;

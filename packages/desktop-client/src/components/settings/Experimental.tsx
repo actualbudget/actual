@@ -208,8 +208,11 @@ export function ExperimentalFeatures() {
             >
               <Trans>Mobile calculator</Trans>
             </FeatureToggle>
-            <FeatureToggle flag="newSidebarUI">
-              <Trans>New sidebar UI</Trans>
+            <FeatureToggle
+              flag="newSidebarUI"
+              feedbackLink="https://github.com/actualbudget/actual/issues/9007"
+            >
+              <Trans>Redesigned sidebar</Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="sankeyReport"
