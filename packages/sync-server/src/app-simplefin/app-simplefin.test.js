@@ -282,6 +282,69 @@ describe('app-simplefin', () => {
   });
 
   describe('/transactions', () => {
+    it.each(['1234', '1234.5', '1234.50', '-12.345', '0'])(
+      'preserves decimal balance %s from the provider',
+      async balance => {
+        secretsService.set(SecretName.simplefin_accessKey, VALID_ACCESS_KEY);
+        mockFetch({
+          accounts: okResponse(
+            JSON.stringify({
+              accounts: [
+                {
+                  id: 'account-1',
+                  org: { name: 'Example' },
+                  balance,
+                  'balance-date': 1782864000,
+                  currency: 'USD',
+                  transactions: [],
+                },
+              ],
+              errors: [],
+            }),
+          ),
+        });
+
+        const res = await post('/transactions').send({
+          accountId: 'account-1',
+          startDate: '2026-07-01',
+        });
+
+        expect(res.body.data.startingBalance).toBe(balance);
+        expect(res.body.data.transactions.all).toEqual([]);
+      },
+    );
+
+    it('rejects a non-string provider balance', async () => {
+      secretsService.set(SecretName.simplefin_accessKey, VALID_ACCESS_KEY);
+      mockFetch({
+        accounts: okResponse(
+          JSON.stringify({
+            accounts: [
+              {
+                id: 'account-1',
+                org: { name: 'Example' },
+                balance: 1234.5,
+                'balance-date': 1782864000,
+                currency: 'USD',
+                transactions: [],
+              },
+            ],
+            errors: [],
+          }),
+        ),
+      });
+
+      const res = await post('/transactions').send({
+        accountId: 'account-1',
+        startDate: '2026-07-01',
+      });
+
+      expect(res.body.data).toMatchObject({
+        error_code: 'INTERNAL_ERROR',
+        error_type: 'Invalid SimpleFIN balance',
+      });
+    });
+
     it('reports an invalid token when the cached access key is not an access URL', async () => {
       secretsService.set(
         SecretName.simplefin_accessKey,

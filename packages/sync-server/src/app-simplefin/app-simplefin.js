@@ -252,7 +252,10 @@ function getAccountResponse(results, accountId, startDate) {
     });
   }
 
-  const startingBalance = parseInt(account.balance.replace('.', ''));
+  if (typeof account.balance !== 'string') {
+    throw new Error('Invalid SimpleFIN balance');
+  }
+  const startingBalance = account.balance;
   const date = getDate(new Date(account['balance-date'] * 1000));
 
   const balances = [
