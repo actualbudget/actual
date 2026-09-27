@@ -57,12 +57,12 @@ percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, pr
 		/ percent:percent _ of _ { return { percent: percent, prev: false}}
 
 periodCount = 'day'i { return {period: 'day', amount: 1 }}
-           / n: number _ 'days'i _ { return { period: 'day', amount: +n }} 
+           / n: positiveInterval _ 'days'i _ { return { period: 'day', amount: +n }}
            / week _ { return {period: 'week', amount: 1 }}
-           / n: number _ weeks { return {period: 'week', amount: +n }}
-           / n: number _ 'months'i _ {return {period: 'month', amount: +n }}
+           / n: positiveInterval _ weeks { return {period: 'week', amount: +n }}
+           / n: positiveInterval _ 'months'i _ {return {period: 'month', amount: +n }}
            / 'year'i _ { return {period: 'year', amount: 1 }}
-           / n: number _ 'years'i _ { return { period: 'year', amount: +n }}
+           / n: positiveInterval _ 'years'i _ { return { period: 'year', amount: +n }}
 
 spendFrom = _ 'spend'i _ 'from'i _ month: month { return month }
 
@@ -87,6 +87,7 @@ __ "mandatory whitespace" = [ \t]+ { return text() }
 d 'digit' = [0-9]
 number 'number' = $(d+)
 positive = $([1-9][0-9]*)
+positiveInterval = $('0'* [1-9][0-9]*)
 amount 'amount' = currencySymbol? _? amount: $('-'?d+ ('.' (d d?)?)?) { return +amount }
 percent 'percentage' = percent: $(d+ ('.' (d+)?)?) _? '%' { return percent }
 year 'year' = $(d d d d)

@@ -3,6 +3,7 @@ import { vi } from 'vitest';
 import * as aql from '#server/aql';
 import * as db from '#server/db';
 import type { DbCategory } from '#server/db';
+import * as monthUtils from '#shared/months';
 import { amountToInteger } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 import type { ByTemplate, Template } from '#types/models/templates';
@@ -354,6 +355,57 @@ describe('CategoryTemplateContext', () => {
       };
       instance = new TestCategoryTemplateContext([], category, '2024-01', 0, 0);
     });
+
+    it.each([
+      0,
+      -1,
+      0.5,
+      Number.NaN,
+      Number.POSITIVE_INFINITY,
+      Number.MAX_SAFE_INTEGER + 1,
+    ])(
+      'rejects an invalid interval (%s) before running a periodic template',
+      interval => {
+        expect(() =>
+          CategoryTemplateContext.runPeriodic(
+            {
+              type: 'periodic',
+              amount: 100,
+              period: { period: 'day', amount: interval },
+              starting: '2023-12-01',
+              directive: 'template',
+              priority: 0,
+            },
+            instance,
+          ),
+        ).toThrow('Periodic template interval must be a positive integer');
+      },
+    );
+
+    it.each(['2023-12-01', '2024-01-01'])(
+      'rejects a stalled date shift in either loop (starting %s)',
+      starting => {
+        const shift = vi.spyOn(monthUtils, 'addDays').mockReturnValue(starting);
+        try {
+          expect(() =>
+            CategoryTemplateContext.runPeriodic(
+              {
+                type: 'periodic',
+                amount: 100,
+                period: { period: 'day', amount: 1 },
+                starting,
+                directive: 'template',
+                priority: 0,
+              },
+              instance,
+            ),
+          ).toThrow('Periodic template interval must advance the date');
+          expect(shift).toHaveBeenCalledOnce();
+        } finally {
+          shift.mockRestore();
+        }
+      },
+    );
 
     //5 mondays in January 2024
     it('should calculate weekly amount for single week', () => {

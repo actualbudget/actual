@@ -526,3 +526,38 @@ describe('unparse descriptions', () => {
     expect(serialized).toBe('first\nsecond\n#template 10');
   });
 });
+
+describe('periodic template intervals', () => {
+  it.each(['days', 'weeks', 'months', 'years'])(
+    'rejects a zero-%s interval in legacy notes',
+    unit => {
+      expect(() =>
+        parse(`#template 100 repeat every 0 ${unit} starting 2026-09-01`),
+      ).toThrow();
+    },
+  );
+  it.each(['days', 'weeks', 'months', 'years'])(
+    'continues to parse positive %s intervals',
+    unit => {
+      expect(
+        parse(`#template 100 repeat every 2 ${unit} starting 2026-09-01`),
+      ).toMatchObject({
+        type: 'periodic',
+        period: { amount: 2 },
+      });
+    },
+  );
+  it('preserves a positive interval with leading zeroes', () => {
+    expect(
+      parse('#template 100 repeat every 002 days starting 2026-09-01'),
+    ).toMatchObject({
+      type: 'periodic',
+      period: { period: 'day', amount: 2 },
+    });
+  });
+  it('rejects a zero interval with leading zeroes', () => {
+    expect(() =>
+      parse('#template 100 repeat every 000 days starting 2026-09-01'),
+    ).toThrow();
+  });
+});
