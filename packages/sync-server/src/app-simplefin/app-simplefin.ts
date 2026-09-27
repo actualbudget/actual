@@ -4,7 +4,6 @@ import type { NextFunction, Request, Response } from 'express';
 import { fetch } from 'undici';
 
 import { handleError } from '#app-gocardless/util/handle-error';
-import { amountToInteger } from '#app-gocardless/utils';
 import { config } from '#load-config';
 import { SecretName, secretsService } from '#services/secrets-service';
 import * as UserService from '#services/user-service';
@@ -335,7 +334,10 @@ function getAccountResponse(
     });
   }
 
-  const startingBalance = amountToInteger(account.balance);
+  if (typeof account.balance !== 'string') {
+    throw new Error('Invalid SimpleFIN balance');
+  }
+  const startingBalance = account.balance;
   const date = getDate(new Date(account['balance-date'] * 1000));
 
   const balances = [
