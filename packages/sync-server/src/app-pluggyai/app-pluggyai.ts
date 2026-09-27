@@ -248,10 +248,12 @@ bankSync.post(
       const booked = [];
       const pending = [];
 
-      for (const trans of Object.values<unknown>(transactions)) {
-        if (!isTransaction(trans)) {
+      for (const providerTrans of Object.values<unknown>(transactions)) {
+        if (!isTransaction(providerTrans)) {
           continue;
         }
+        // The rows are changed below; leave the provider's objects intact.
+        const trans = { ...providerTrans };
 
         const transactionDate = trans.date;
 
@@ -267,8 +269,13 @@ bankSync.post(
           trans.amount *= -1;
         }
 
-        let amountInCurrency = trans.amountInAccountCurrency ?? trans.amount;
-        amountInCurrency = Math.round(amountInCurrency * 100) / 100;
+        const amountInCurrency = trans.amountInAccountCurrency ?? trans.amount;
+        if (
+          typeof amountInCurrency !== 'number' ||
+          !Number.isFinite(amountInCurrency)
+        ) {
+          throw new Error('Invalid Pluggy transaction amount');
+        }
 
         const newTrans = {
           booked: !(trans.status === 'PENDING'),
@@ -276,7 +283,7 @@ bankSync.post(
           payeeName: getPayeeName(trans),
           notes: trans.descriptionRaw || trans.description,
           transactionAmount: {
-            amount: amountInCurrency,
+            amount: String(amountInCurrency),
             currency: trans.currencyCode,
           },
           transactionId: trans.id,

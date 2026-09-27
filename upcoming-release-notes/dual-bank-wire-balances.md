@@ -3,4 +3,4 @@ category: Enhancements
 authors: [StephenBrown2]
 ---
 
-Bank sync now reads legacy cent balances and decimal-string balances.
+Preserve decimal precision in bank sync (requires the matching sync-server upgrade).

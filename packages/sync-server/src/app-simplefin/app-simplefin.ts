@@ -368,6 +368,9 @@ function getAccountResponse(
   }
 
   for (const trans of account.transactions) {
+    if (typeof trans.amount !== 'string') {
+      throw new Error('Invalid SimpleFIN transaction amount');
+    }
     let isBooked: boolean;
     let dateToUse: number | undefined;
 
