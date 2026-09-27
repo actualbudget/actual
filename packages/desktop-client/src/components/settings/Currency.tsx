@@ -52,6 +52,7 @@ export function useCurrencyOptions() {
         ['JOD', t('Jordanian Dinar')],
         ['JPY', t('Japanese Yen')],
         ['KRW', t('South Korean Won')],
+        ['KWD', t('Kuwaiti Dinar')],
         ['LKR', t('Sri Lankan Rupee')],
         ['MDL', t('Moldovan Leu')],
         ['MKD', t('Macedonian Denar')],
