@@ -49,7 +49,7 @@ async function importFileWithRealTime(
   global.restoreDateNow();
   const { errors, transactions: originalTransactions } = await parseFile(
     filepath,
-    options,
+    { ...options, amountPrecision: 2 },
   );
   global.restoreFakeDateNow();
 
@@ -58,7 +58,7 @@ async function importFileWithRealTime(
     // oxlint-disable-next-line typescript/no-explicit-any
     transactions = (transactions as any[]).map(trans => ({
       ...trans,
-      amount: amountToInteger(trans.amount),
+      amount: amountToInteger(trans.amount, 2),
       date: dateFormat
         ? d.format(d.parse(trans.date, dateFormat, new Date()), 'yyyy-MM-dd')
         : trans.date,
@@ -89,6 +89,7 @@ describe('File import', () => {
   test('qif import preserves categories', async () => {
     const { errors, transactions } = await parseFile(
       __dirname + '/../../../mocks/files/qif-category.qif',
+      { amountPrecision: 2 },
     );
 
     expect(errors.length).toBe(0);
@@ -96,6 +97,21 @@ describe('File import', () => {
       { payee_name: 'Outlet', category: 'Shopping' },
       { payee_name: 'GroceriesYou', category: 'Groceries' },
     ]);
+  });
+
+  test('qif parsing requires destination precision', async () => {
+    await expect(
+      parseFile(__dirname + '/../../../mocks/files/qif-category.qif'),
+    ).rejects.toThrow('parseQIF: amount precision is required');
+  });
+
+  test('qif parsing preserves a three-decimal amount', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/data-3dp.qif',
+      { amountPrecision: 3 },
+    );
+    expect(errors).toEqual([]);
+    expect(transactions).toMatchObject([{ amount: -12.345 }]);
   });
 
   test('ofx import works', async () => {

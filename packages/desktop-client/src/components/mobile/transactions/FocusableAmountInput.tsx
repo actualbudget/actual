@@ -126,7 +126,8 @@ const AmountInput = memo(function AmountInput({
   // can see stale `text=''` and save 0 instead of the typed amount.
   const applyText = (rawInput?: string) => {
     const domText = rawInput ?? inputRef.current?.value ?? text;
-    const parsed = currencyToAmount(domText) || 0;
+    const parsed =
+      currencyToAmount(domText, getNumberFormat().thousandsSeparator) || 0;
     const hasPendingInput = editing || domText !== inputValue;
     const newValue = hasPendingInput ? parsed : value;
     const integer = amountToInteger(newValue, precision);
@@ -196,7 +197,10 @@ const AmountInput = memo(function AmountInput({
       return;
     }
     e.preventDefault();
-    const amount = currencyToAmount(e.clipboardData.getData('text'));
+    const amount = currencyToAmount(
+      e.clipboardData.getData('text'),
+      getNumberFormat().thousandsSeparator,
+    );
     if (amount === null) return;
     updateText(formatter.format(Math.abs(amount)));
   };
@@ -315,7 +319,9 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   };
 
   const handleChangeValue = (text: string) => {
-    setLiveValue(currencyToAmount(text) || 0);
+    setLiveValue(
+      currencyToAmount(text, getNumberFormat().thousandsSeparator) || 0,
+    );
     onChangeValue?.(text);
   };
 
