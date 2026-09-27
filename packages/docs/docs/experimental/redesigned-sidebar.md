@@ -118,7 +118,7 @@ Accounts and groups can also be moved with the keyboard. Move the focus to an ac
 
 Click the magnifying glass next to the **Accounts** heading and type part of an account or group name. The list shows only the matching accounts.
 
-<img width="270" alt="Searching for sav shows the Savings group and the Ally Savings account" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-search@2x.png" />
+<img width="270" alt="A search that matches the Savings group and the Ally Savings account" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-search@2x.png" />
 
 All groups are expanded while searching. Click the **×** at the end of the search box to close it and show the full list again.
 
