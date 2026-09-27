@@ -125,6 +125,11 @@ export function Select<const Value = string>({
         placement="bottom start"
         isOpen={isOpen}
         onOpenChange={() => setIsOpen(false)}
+        // A modal popover renders a full-viewport underlay that swallows the
+        // next click, so a `Select` opened inside another popover would eat
+        // the click meant to dismiss its parent. Menu-like overlays
+        // (autocomplete, date select, context menu) are all non-modal.
+        isNonModal
         style={popoverStyle}
       >
         <Menu<Value>
