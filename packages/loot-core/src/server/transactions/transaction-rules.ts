@@ -318,6 +318,8 @@ export async function getAllRuleIdsFromSchedules(
 }
 
 // Runner
+const NULLABLE_RULE_FIELDS = ['payee', 'category'] as const;
+
 export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
@@ -340,9 +342,24 @@ export async function runRules(
     ),
   );
 
-  let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap, {
-    includeBalance: false,
-  });
+  // Bank sync and the client can leave `payee` or `category` out entirely
+  // when the transaction has none. A condition never matches a missing
+  // field, so a "payee is nothing" rule would silently skip such a
+  // transaction. Match against null instead, and drop the field again
+  // afterwards so the returned shape matches the input.
+  const missingNullableFields = NULLABLE_RULE_FIELDS.filter(
+    field => trans[field] === undefined,
+  );
+  const normalizedTrans = { ...trans };
+  for (const field of missingNullableFields) {
+    normalizedTrans[field] = null;
+  }
+
+  let finalTrans = await prepareTransactionForRules(
+    normalizedTrans,
+    accountsMap,
+    { includeBalance: false },
+  );
   let lastCategoryIdForGroup: string | null = finalTrans.category ?? null;
 
   // The running balance is a query over every earlier transaction in
@@ -431,7 +448,13 @@ export async function runRules(
     }
   }
 
-  return await finalizeTransactionForRules(finalTrans);
+  const result = await finalizeTransactionForRules(finalTrans);
+  for (const field of missingNullableFields) {
+    if (result[field] === null) {
+      delete result[field];
+    }
+  }
+  return result;
 }
 
 function conditionSpecialCases(cond: Condition | null): Condition | null {
