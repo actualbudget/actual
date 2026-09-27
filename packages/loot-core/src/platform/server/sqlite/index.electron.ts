@@ -71,8 +71,23 @@ export function execQuery(db: SQL.Database, sql: string) {
   db.exec(sql);
 }
 
-export function transaction(db: SQL.Database, fn: () => void) {
-  db.transaction(fn)();
+export type TransactionOptions = {
+  // Take the write lock up front (`BEGIN IMMEDIATE`). Only matters on
+  // the web backend, but keep the signature the same on every platform.
+  immediate?: boolean;
+};
+
+export function transaction(
+  db: SQL.Database,
+  fn: () => void,
+  { immediate = false }: TransactionOptions = {},
+) {
+  const run = db.transaction(fn);
+  if (immediate) {
+    run.immediate();
+  } else {
+    run();
+  }
 }
 
 // **Important**: this is an unsafe function since sqlite executes
