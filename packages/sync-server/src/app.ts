@@ -189,8 +189,11 @@ function sendServerStartedMessage() {
   // oxlint-disable-next-line typescript/ban-ts-comment
   // @ts-ignore-error electron types
   process.parentPort?.postMessage({ type: 'server-started' });
+  const socket = config.get('socket');
   console.log(
-    'Listening on ' + config.get('hostname') + ':' + config.get('port') + '...',
+    'Listening on ' +
+      (socket ? socket : config.get('hostname') + ':' + config.get('port')) +
+      '...',
   );
 }
 
@@ -198,6 +201,7 @@ export async function run() {
   const portVal = config.get('port');
   const port = typeof portVal === 'string' ? parseInt(portVal) : portVal;
   const hostname = config.get('hostname');
+  const socket = config.get('socket');
   const openIdConfig = config?.getProperties()?.openId;
   if (
     openIdConfig?.discoveryURL ||
@@ -223,7 +227,18 @@ export async function run() {
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    https.createServer(httpsOptions, app).listen(port, hostname, () => {
+    const server = https.createServer(httpsOptions, app);
+    if (socket) {
+      server.listen(socket, () => {
+        sendServerStartedMessage();
+      });
+    } else {
+      server.listen(port, hostname, () => {
+        sendServerStartedMessage();
+      });
+    }
+  } else if (socket) {
+    app.listen(socket, () => {
       sendServerStartedMessage();
     });
   } else {
