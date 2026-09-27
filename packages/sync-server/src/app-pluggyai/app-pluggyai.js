@@ -164,12 +164,15 @@ app.post(
 
       const account = await pluggyaiService.getAccountById(accountId, fileId);
 
-      let startingBalance = parseInt(
-        Math.round(account.balance * 100).toString(),
-      );
-      if (account.type === 'CREDIT') {
-        startingBalance = -startingBalance;
+      if (
+        typeof account.balance !== 'number' ||
+        !Number.isFinite(account.balance)
+      ) {
+        throw new Error('Invalid Pluggy balance');
       }
+      const startingBalance = String(
+        account.type === 'CREDIT' ? -account.balance : account.balance,
+      );
       const date = getDate(account.updatedAt);
 
       const balances = [
