@@ -6,9 +6,9 @@ import { describe, expect, it } from 'vitest';
 
 import {
   computeInitialLinkState,
-  externalBalanceToInteger,
   getDefaultStartingSettings,
   getSelectableAccountOptions,
+  previewBalance,
   resolveStartingSettings,
 } from './SelectLinkedAccountsModal';
 
@@ -207,24 +207,27 @@ describe('getDefaultStartingSettings', () => {
   });
 });
 
-describe('externalBalanceToInteger', () => {
+describe('previewBalance', () => {
+  it('encodes decimal balances and hides values the budget cannot store', () => {
+    expect(previewBalance('12.345', 3)).toBe(12345);
+    expect(previewBalance('12.34', 0)).toBe(12);
+    expect(previewBalance(1234, 2)).toBe(123400);
+    expect(previewBalance('9'.repeat(30), 2)).toBeNull();
+  });
+
   it.each([
     [27903.6 + 55807.2, 8371080],
     [1234.5, 123450],
     ['-100', -10000],
     [0, 0],
   ])('converts %s to integer cents', (balance, expected) => {
-    expect(externalBalanceToInteger(balance, 'pluggyai')).toBe(expected);
-  });
-
-  it('keeps Enable Banking balances, which are already in cents', () => {
-    expect(externalBalanceToInteger(123456, 'enableBanking')).toBe(123456);
+    expect(previewBalance(balance, 2)).toBe(expected);
   });
 
   it.each([null, undefined, '   ', NaN, 'abc', 1e14])(
     'returns unknown for a missing or invalid balance (%s)',
     balance => {
-      expect(externalBalanceToInteger(balance, 'pluggyai')).toBeNull();
+      expect(previewBalance(balance, 2)).toBeNull();
     },
   );
 });

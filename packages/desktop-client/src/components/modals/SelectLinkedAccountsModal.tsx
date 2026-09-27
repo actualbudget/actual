@@ -11,6 +11,7 @@ import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { rescaleDecimalAmount } from '@actual-app/core/shared/amount-rescale';
 import { currentDay, subDays } from '@actual-app/core/shared/months';
 import { amountToInteger, MAX_SAFE_NUMBER } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
@@ -417,11 +418,7 @@ export function SelectLinkedAccountsModal({
   );
 
   function onSetLinkedAccount(
-    externalAccount:
-      | SyncServerGoCardlessAccount
-      | SyncServerSimpleFinAccount
-      | SyncServerPluggyAiAccount
-      | SyncServerAkahuAccount,
+    externalAccount: { account_id: string },
     localAccountId: string | null | undefined,
   ) {
     setChosenAccounts(accounts => {
@@ -664,26 +661,6 @@ type CustomStartingSettings = {
 };
 
 /**
- * Converts a provider balance to integer cents, or `null` if it is missing,
- * invalid, or too large to format. Enable Banking already reports cents; other
- * providers report decimal amounts.
- */
-export function externalBalanceToInteger(
-  balance: number | string | null | undefined,
-  syncSource: SelectLinkedAccountsModalProps['syncSource'],
-): IntegerAmount | null {
-  if (balance == null || (typeof balance === 'string' && !balance.trim())) {
-    return null;
-  }
-  const value = Number(balance);
-  const amount =
-    syncSource === 'enableBanking' ? value : amountToInteger(value, 2);
-  return Number.isInteger(amount) && Math.abs(amount) <= MAX_SAFE_NUMBER
-    ? amount
-    : null;
-}
-
-/**
  * The settings a row starts with. The balance is deliberately absent: the
  * server derives the opening balance from the bank unless one is supplied, so
  * defaulting it to 0 here would silently override the real balance for anyone
@@ -728,6 +705,25 @@ type TableRowProps = SharedAccountRowProps & {
   ) => void;
   showStartingOptions: boolean;
 };
+
+// Providers send decimal amounts, as strings or numbers. A balance the budget
+// cannot store shows as unknown instead of breaking the list.
+export function previewBalance(
+  balance: ExternalAccount['balance'] | null | undefined,
+  precision: number,
+): IntegerAmount | null {
+  if (balance == null) return null;
+  if (typeof balance === 'number') {
+    if (!Number.isFinite(balance)) return null;
+    const amount = amountToInteger(balance, precision);
+    return Math.abs(amount) <= MAX_SAFE_NUMBER ? amount : null;
+  }
+  try {
+    return rescaleDecimalAmount(balance, precision);
+  } catch {
+    return null;
+  }
+}
 
 function useStartingBalanceInfo(accountId: string | undefined) {
   const [info, setInfo] = useState<StartingBalanceInfo | null>(null);
@@ -775,9 +771,9 @@ function TableRow({
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
   const format = useFormat();
+  const balance = previewBalance(externalAccount.balance, format.precision);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
-  const balance = externalBalanceToInteger(externalAccount.balance, syncSource);
   const startingBalanceInfo = useStartingBalanceInfo(
     showStartingOptions ? undefined : chosenAccount?.id,
   );
@@ -939,7 +935,7 @@ function getInstitutionName(
 
 type StartingOptionsFieldsProps = {
   accountId: string;
-  externalBalance: number | null | undefined;
+  externalBalance: number | string | null | undefined;
   customStartingDate: CustomStartingSettings;
   onSetCustomStartingDate: (
     accountId: string,
@@ -955,7 +951,8 @@ function StartingOptionsFields({
   onSetCustomStartingDate,
   layout,
 }: StartingOptionsFieldsProps) {
-  const zeroSign = externalBalance != null && externalBalance < 0 ? '-' : '+';
+  const zeroSign =
+    externalBalance != null && Number(externalBalance) < 0 ? '-' : '+';
 
   if (layout === 'inline') {
     return (
@@ -1073,9 +1070,9 @@ function AccountCard({
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
   const format = useFormat();
+  const balance = previewBalance(externalAccount.balance, format.precision);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
-  const balance = externalBalanceToInteger(externalAccount.balance, syncSource);
 
   const availableAccountOptions = getSelectableAccountOptions({
     localAccounts,

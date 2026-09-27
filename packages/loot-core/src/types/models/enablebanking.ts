@@ -62,5 +62,5 @@ export type SyncServerEnableBankingAccount = {
   account_id: string;
   name: string;
   institution: string;
-  balance: number;
+  balance: string;
 };
