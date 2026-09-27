@@ -46,6 +46,22 @@ export function rescaleAmount(
     : safeAmount(roundEven(integerAmount(amount) * targetScale, sourceScale));
 }
 
+/** Parse decimal major units and round only after scaling to destination units. */
+export function rescaleDecimalAmount(
+  amount: string,
+  targetPrecision: number,
+): number {
+  if (!/^-?\d+(?:\.\d+)?$/.test(amount)) {
+    throw new Error('Invalid decimal amount');
+  }
+  const [whole, fraction = ''] = amount.replace('-', '').split('.');
+  const sign = amount.startsWith('-') ? -1n : 1n;
+  const sourceScale = scaleForPrecision(fraction.length);
+  const targetScale = scaleForPrecision(targetPrecision);
+  const unscaled = sign * BigInt(whole + fraction);
+  return safeAmount(roundEven(unscaled * targetScale, sourceScale));
+}
+
 /** Allocate a rounded parent total across its children without changing order. */
 export function rescaleAmountGroup(
   rows: ReadonlyArray<{ id: string; amount: number }>,

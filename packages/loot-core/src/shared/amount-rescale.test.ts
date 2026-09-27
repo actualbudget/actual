@@ -1,4 +1,8 @@
-import { rescaleAmount, rescaleAmountGroup } from './amount-rescale';
+import {
+  rescaleAmount,
+  rescaleAmountGroup,
+  rescaleDecimalAmount,
+} from './amount-rescale';
 
 describe('encoding amount rescale', () => {
   it.each([
@@ -112,5 +116,19 @@ describe('encoding amount rescale', () => {
         2,
       ),
     ).toThrow();
+  });
+});
+
+describe('decimal amount rescale', () => {
+  it.each([
+    ['123', 0, 123],
+    ['123.45', 2, 12345],
+    ['-123.456', 3, -123456],
+  ])('rescales %s to %sdp as %s', (amount, precision, expected) => {
+    expect(rescaleDecimalAmount(amount, precision)).toBe(expected);
+  });
+
+  it('rejects amounts beyond the safe integer range', () => {
+    expect(() => rescaleDecimalAmount('9007199254740992', 0)).toThrow();
   });
 });
