@@ -18,6 +18,7 @@ import {
   addTransactions,
   compareFuzzyMatchCandidates,
   encodeBankAmount,
+  encodeBankWireBalance,
   encodeStartingBalance,
   reconcileTransactions,
   simpleFinBatchSync,
@@ -994,24 +995,49 @@ describe('bank amount normalization', () => {
   it.each([
     ['1234', 0, 1234],
     ['12.34', 2, 1234],
+    ['1.234', 3, 1234],
     [1.234, 3, 1234],
     [0, 3, 0],
     ['-1.235', 2, -124],
+    ['22517998136852.470', 2, 2251799813685247],
   ])('encodes %s at %sdp', (value, precision, expected) => {
     expect(encodeBankAmount(value, precision)).toBe(expected);
   });
 
-  it.each(['not-a-number', Number.NaN, Number.POSITIVE_INFINITY])(
-    'rejects invalid amount %s',
+  it.each([
+    'not-a-number',
+    '1e3',
+    ' 12.34',
+    'Infinity',
+    Number.NaN,
+    Number.POSITIVE_INFINITY,
+  ])('rejects invalid amount %s', value => {
+    expect(() => encodeBankAmount(value, 2)).toThrow('Invalid bank amount');
+  });
+
+  it.each([
+    [123456, 2, 123456],
+    [123456, 3, 1234560],
+    [123456, 0, 1235],
+    ['1234.567', 3, 1234567],
+    ['-12.345', 3, -12345],
+    ['0', 2, 0],
+    [0, 2, 0],
+  ])('decodes wire balance %s at %sdp', (value, precision, expected) => {
+    expect(encodeBankWireBalance(value, precision)).toBe(expected);
+  });
+
+  it.each([1.5, Number.NaN, Number.POSITIVE_INFINITY, '1e3', '12.3.4', null])(
+    'rejects invalid wire balance %s',
     value => {
-      expect(() => encodeBankAmount(value, 2)).toThrow('Invalid bank amount');
+      expect(() => encodeBankWireBalance(value, 2)).toThrow();
     },
   );
 
   it('subtracts provider transactions once before encoding', () => {
     expect(
       encodeStartingBalance(
-        1500,
+        150000,
         [
           { transactionAmount: { amount: '250.00' } },
           { transactionAmount: { amount: 100.5 } },
@@ -1022,7 +1048,31 @@ describe('bank amount normalization', () => {
   });
 
   it('keeps a provider-derived starting balance when transactions are omitted', () => {
-    expect(encodeStartingBalance(1149.5, [], 2)).toBe(114950);
+    expect(encodeStartingBalance(114950, [], 2)).toBe(114950);
+    expect(encodeStartingBalance('1149.500', [], 3)).toBe(1149500);
+  });
+
+  it('subtracts mixed transaction forms at three decimal places', () => {
+    expect(
+      encodeStartingBalance(
+        '1500.125',
+        [
+          { transactionAmount: { amount: '250.005' } },
+          { transactionAmount: { amount: 100.5 } },
+        ],
+        3,
+      ),
+    ).toBe(1149620);
+  });
+
+  it('rejects malformed transaction amounts in a mixed batch', () => {
+    expect(() =>
+      encodeStartingBalance(
+        150000,
+        [{ transactionAmount: { amount: '1e3' } }],
+        2,
+      ),
+    ).toThrow('Invalid bank amount');
   });
 });
 
@@ -1085,6 +1135,36 @@ describe('SimpleFin batch sync', () => {
       }
     },
   );
+
+  test('stores a decimal-string wire balance in recorded units', async () => {
+    const accountId = await db.insertAccount({
+      id: 'string-balance-account',
+      account_id: 'provider-string-balance',
+      name: 'String Balance',
+      account_sync_source: 'simpleFin',
+    });
+    mockSimpleFinTransactions({
+      'provider-string-balance': {
+        transactions: { all: [], booked: [], pending: [] },
+        balances: [],
+        startingBalance: '12.34',
+      },
+      errors: {},
+    });
+
+    setSyncingMode('offline');
+    try {
+      await accountsApp.handlers['simplefin-batch-sync']({ ids: [accountId] });
+      await accountsApp.handlers['simplefin-batch-sync']({ ids: [accountId] });
+      expect(
+        db.firstSync('SELECT balance_current FROM accounts WHERE id = ?', [
+          accountId,
+        ]),
+      ).toEqual({ balance_current: 1234 });
+    } finally {
+      setSyncingMode('disabled');
+    }
+  });
 
   test('does not emit transaction CRDT messages when provider category appears later', async () => {
     const providerAccountId = 'sf-account-1';
