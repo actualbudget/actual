@@ -5,6 +5,7 @@ import { send } from '#server/main-app';
 import {
   getBudgetName,
   importPayees,
+  importScheduledTransactions,
   importTransactions,
   parseFile,
 } from './ynab5';
@@ -166,6 +167,90 @@ describe('importTransactions', () => {
 
     expect(outImported.transfer_id).toBe(inImported.id);
     expect(inImported.transfer_id).toBe(outImported.id);
+  });
+});
+
+describe('importScheduledTransactions', () => {
+  function makeScheduledTransaction() {
+    return {
+      id: 'scheduled-1',
+      account_id: 'ynab-account-1',
+      payee_id: 'ynab-payee-1',
+      category_id: 'ynab-category-1',
+      amount: -1000,
+      memo: '',
+      frequency: 'never',
+      date_next: '2026-02-01',
+      date_first: '2026-02-01',
+      deleted: false,
+    };
+  }
+
+  const entityIdMap = new Map<string, string>([
+    ['ynab-account-1', 'actual-account-1'],
+    ['ynab-payee-1', 'actual-payee-1'],
+    ['ynab-category-1', 'actual-category-1'],
+  ]);
+
+  it('advances progress after its category rule update completes', async () => {
+    const tick = vi.fn();
+    const rule = {
+      id: 'rule-1',
+      stage: null,
+      conditions_op: 'and',
+      conditions: '[]',
+      actions: '[]',
+    };
+    let queryCount = 0;
+
+    vi.mocked(send).mockImplementation(async name => {
+      if (name === 'api/payees-get') return [];
+      if (name === 'api/schedule-create') return 'schedule-1';
+      if (name === 'api/query') {
+        queryCount += 1;
+        return queryCount === 1 ? { data: 'rule-1' } : { data: [rule] };
+      }
+      if (name === 'api/rule-update') {
+        expect(tick).not.toHaveBeenCalled();
+        return null;
+      }
+      throw new Error(`Unexpected send call: ${name}`);
+    });
+
+    await importScheduledTransactions(
+      {
+        scheduled_transactions: [makeScheduledTransaction()],
+        scheduled_subtransactions: [],
+      } as unknown as Parameters<typeof importScheduledTransactions>[0],
+      entityIdMap,
+      new Set(),
+      tick,
+    );
+
+    expect(tick).toHaveBeenCalledOnce();
+  });
+
+  it('does not advance progress when schedule creation fails', async () => {
+    const tick = vi.fn();
+    vi.mocked(send).mockImplementation(async name => {
+      if (name === 'api/payees-get') return [];
+      if (name === 'api/schedule-create') throw new Error('create failed');
+      throw new Error(`Unexpected send call: ${name}`);
+    });
+
+    await expect(
+      importScheduledTransactions(
+        {
+          scheduled_transactions: [makeScheduledTransaction()],
+          scheduled_subtransactions: [],
+        } as unknown as Parameters<typeof importScheduledTransactions>[0],
+        entityIdMap,
+        new Set(),
+        tick,
+      ),
+    ).rejects.toThrow('create failed');
+
+    expect(tick).not.toHaveBeenCalled();
   });
 });
 
