@@ -12,7 +12,7 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { toRelaxedNumber } from '@actual-app/core/shared/util';
+import { integerToAmount } from '@actual-app/core/shared/util';
 
 import { useCreateAccountMutation } from '#accounts';
 import { Link } from '#components/common/Link';
@@ -26,6 +26,7 @@ import {
 import { Checkbox } from '#components/forms';
 import { validateAccountName } from '#components/util/accountValidation';
 import { useAccounts } from '#hooks/useAccounts';
+import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { closeModal } from '#modals/modalsSlice';
@@ -37,14 +38,13 @@ export function CreateLocalAccountModal() {
   const dispatch = useDispatch();
   const isUsingServer = useSyncServerStatus() !== 'no-server';
   const { data: accounts = [] } = useAccounts();
+  const format = useFormat();
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
 
   const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
-
-  const validateBalance = balance => !isNaN(parseFloat(balance));
 
   const validateAndSetName = (name: string) => {
     const nameError = validateAccountName(name, '', accounts);
@@ -63,14 +63,15 @@ export function CreateLocalAccountModal() {
 
     const nameError = validateAccountName(name, '', accounts);
 
-    const balanceError = !validateBalance(balance);
+    const encodedBalance = format.fromEdit(balance);
+    const balanceError = encodedBalance === null;
     setBalanceError(balanceError);
 
-    if (!nameError && !balanceError) {
+    if (!nameError && encodedBalance !== null) {
       createAccount.mutate(
         {
           name,
-          balance: toRelaxedNumber(balance),
+          balance: integerToAmount(encodedBalance, format.precision),
           offBudget: offbudget,
         },
         {
@@ -211,7 +212,7 @@ export function CreateLocalAccountModal() {
                   onUpdate={value => {
                     const balance = value.trim();
                     setBalance(balance);
-                    if (validateBalance(balance) && balanceError) {
+                    if (format.fromEdit(balance) !== null && balanceError) {
                       setBalanceError(false);
                     }
                   }}

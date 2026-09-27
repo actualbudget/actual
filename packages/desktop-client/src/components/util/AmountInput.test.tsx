@@ -245,3 +245,16 @@ it('preserves stored fractions when focusing an amount with fractions hidden', (
   fireEvent.blur(input);
   expect(onUpdate).toHaveBeenLastCalledWith(1234);
 });
+
+it('enters whole yen at legacy storage precision with automatic decimals', () => {
+  prefs.precision = undefined;
+  store.dispatch(mergeSyncedPrefs({ defaultCurrencyCode: 'JPY' }));
+  const onUpdate = vi.fn();
+  renderInput(<AmountInput value={0} autoDecimals onUpdate={onUpdate} />);
+  const input = screen.getByRole('textbox');
+  fireEvent.focus(input);
+  fireEvent.change(input, { target: { value: '1500' } });
+  expect(input).toHaveValue('1,500');
+  fireEvent.blur(input);
+  expect(onUpdate).toHaveBeenLastCalledWith(-150000);
+});

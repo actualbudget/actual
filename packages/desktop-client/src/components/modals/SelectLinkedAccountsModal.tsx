@@ -677,7 +677,7 @@ export function externalBalanceToInteger(
   }
   const value = Number(balance);
   const amount =
-    syncSource === 'enableBanking' ? value : amountToInteger(value);
+    syncSource === 'enableBanking' ? value : amountToInteger(value, 2);
   return Number.isInteger(amount) && Math.abs(amount) <= MAX_SAFE_NUMBER
     ? amount
     : null;

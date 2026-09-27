@@ -2035,7 +2035,14 @@ const Transaction = memo(function Transaction({
             }
             formatter={value =>
               // reformat value so since we might have kept decimals
-              value ? amountFormatter.format(currencyToAmount(value) || 0) : ''
+              value
+                ? amountFormatter.format(
+                    currencyToAmount(
+                      value,
+                      getNumberFormat().thousandsSeparator,
+                    ) || 0,
+                  )
+                : ''
             }
             valueStyle={valueStyle}
             textAlign="right"
@@ -2072,7 +2079,14 @@ const Transaction = memo(function Transaction({
             value={credit}
             formatter={value =>
               // reformat value so since we might have kept decimals
-              value ? amountFormatter.format(currencyToAmount(value) || 0) : ''
+              value
+                ? amountFormatter.format(
+                    currencyToAmount(
+                      value,
+                      getNumberFormat().thousandsSeparator,
+                    ) || 0,
+                  )
+                : ''
             }
             valueStyle={valueStyle}
             textAlign="right"
