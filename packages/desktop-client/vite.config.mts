@@ -151,11 +151,7 @@ async function stagePublicData(): Promise<void> {
         .replaceAll(path.sep, '/'),
     )
     // Only list files the backend needs and the workbox precache globs
-    // cover. Anything else (dotfiles such as the legacy
-    // `.force-copy-windows` marker, or `migrations/README.md`) is not
-    // precached, so a PWA opened offline fails to fetch it and startup
-    // breaks with an app-init-failure (issues #7886 and the offline
-    // regression after #8519).
+    // cover; anything else fails to load offline and breaks startup.
     .filter(file => !file.split('/').some(part => part.startsWith('.')))
     .filter(file => DATA_FILE_EXTENSIONS.has(path.extname(file)))
     .sort();
