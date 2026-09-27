@@ -227,7 +227,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
     it('should return 0 when no transactions or balances are provided', () => {
       const startingBalance =
         SpkMarburgBiedenkopfHeladef1mar.calculateStartingBalance([], []);
-      expect(startingBalance).toEqual(0);
+      expect(startingBalance).toEqual('0');
     });
 
     it('should calculate the starting balance correctly', () => {
@@ -245,7 +245,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
           balances,
         );
 
-      expect(startingBalance).toEqual(334611);
+      expect(startingBalance).toEqual('3346.11');
     });
 
     it('returns the same balance amount when no transactions', () => {
@@ -256,7 +256,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
           transactions,
           balances,
         ),
-      ).toEqual(359687);
+      ).toEqual('3596.87');
     });
   });
 });

@@ -205,7 +205,7 @@ export const goCardlessService = {
   ): Promise<{
     balances: Balance[];
     institutionId: GoCardlessInstitutionId;
-    startingBalance: number;
+    startingBalance: string;
     transactions: {
       booked: Transaction[];
       pending: Transaction[];

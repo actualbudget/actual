@@ -43,5 +43,68 @@ export const sortByBookingDateOrValueDate = <T extends Transaction>(
     return 0;
   });
 
-export const amountToInteger = (n: string | number): number =>
-  Math.round(Number(n) * 100);
+export function sumDecimalAmounts(amounts: string[]): string {
+  const parsed = amounts.map(amount => {
+    if (
+      typeof amount !== 'string' ||
+      amount.length > 32 ||
+      !/^-?\d+(?:\.\d+)?$/.test(amount)
+    ) {
+      throw new Error('Invalid GoCardless amount');
+    }
+    const [whole, fraction = ''] = amount.replace('-', '').split('.');
+    if (fraction.length > 15) {
+      throw new Error('Invalid GoCardless amount');
+    }
+    return {
+      value: BigInt(whole + fraction) * (amount.startsWith('-') ? -1n : 1n),
+      precision: fraction.length,
+    };
+  });
+  const precision = parsed.reduce(
+    (maximum, amount) => Math.max(maximum, amount.precision),
+    0,
+  );
+  const total = parsed.reduce(
+    (sum, amount) =>
+      sum + amount.value * 10n ** BigInt(precision - amount.precision),
+    0n,
+  );
+  const digits = (total < 0n ? -total : total)
+    .toString()
+    .padStart(precision + 1, '0');
+  const result = `${total < 0n ? '-' : ''}${
+    precision
+      ? `${digits.slice(0, -precision)}.${digits.slice(-precision)}`
+      : digits
+  }`;
+  if (result.length > 32) {
+    throw new Error('GoCardless amount exceeds wire limit');
+  }
+  return result;
+}
+
+export function startingBalanceFromTransactions(
+  balance: string,
+  transactions: Transaction[],
+): string {
+  return subtractDecimalAmounts(
+    balance,
+    transactions.map(transaction => transaction.transactionAmount.amount),
+  );
+}
+
+export function subtractDecimalAmounts(
+  balance: string,
+  amounts: string[],
+): string {
+  return sumDecimalAmounts([
+    balance,
+    ...amounts.map(amount => {
+      if (typeof amount !== 'string') {
+        throw new Error('Invalid GoCardless amount');
+      }
+      return amount.startsWith('-') ? amount.slice(1) : `-${amount}`;
+    }),
+  ]);
+}
