@@ -436,7 +436,11 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
   // a transaction is a separate lock/commit cycle against IndexedDB. We
   // avoid any side effects to in-memory objects, and apply them after
   // this succeeds.
-  db.transaction(() => {
+  //
+  // `immediate` takes the write lock before the reads below. Reading
+  // first and upgrading the lock later trips an absurd-sql bug on the
+  // web (a cursor kept across the upgrade) that stalls the backend.
+  const applyInTransaction = () => {
     if (checkSyncingMode('enabled')) {
       // Compare the messages with the existing crdt. This filters out
       // already applied messages and determines if a message is old or
@@ -538,7 +542,8 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
     }
 
     newData = fetchData(idsPerTable);
-  });
+  };
+  db.transaction(applyInTransaction, { immediate: true });
 
   // The transaction succeeded, so we can update in-memory objects now
   undo.appendMessages(messages, oldData);
