@@ -466,9 +466,9 @@ describe('normalizeTransactions without a bank-provided id', () => {
 });
 
 describe('normalizeBalance', () => {
-  it('should convert string amount to integer cents', () => {
+  it('preserves the decimal amount string', () => {
     const result = normalizeBalance(mockBalance);
-    expect(result.balanceAmount.amount).toBe(123456);
+    expect(result.balanceAmount.amount).toBe('1234.56');
     expect(result.balanceAmount.currency).toBe('EUR');
     expect(result.balanceType).toBe('CLAV');
     expect(result.referenceDate).toBe('2026-03-24');
@@ -476,7 +476,7 @@ describe('normalizeBalance', () => {
 
   it('should handle negative amounts', () => {
     const result = normalizeBalance(mockNegativeBalance);
-    expect(result.balanceAmount.amount).toBe(-5075);
+    expect(result.balanceAmount.amount).toBe('-50.75');
     expect(result.balanceType).toBe('XPCD');
   });
 
@@ -485,8 +485,28 @@ describe('normalizeBalance', () => {
       balance_amount: { currency: 'EUR', amount: '100' },
       balance_type: 'CLAV',
     });
-    expect(result.balanceAmount.amount).toBe(10000);
+    expect(result.balanceAmount.amount).toBe('100');
   });
+
+  it('keeps a third decimal place', () => {
+    const result = normalizeBalance({
+      balance_amount: { currency: 'KWD', amount: '1.234' },
+      balance_type: 'CLAV',
+    });
+    expect(result.balanceAmount.amount).toBe('1.234');
+  });
+
+  it.each(['', '1e3', '1.2.3', ' 1.00', 'NaN'])(
+    'rejects invalid balance %s',
+    amount => {
+      expect(() =>
+        normalizeBalance({
+          balance_amount: { currency: 'EUR', amount },
+          balance_type: 'CLAV',
+        }),
+      ).toThrow('Invalid Enable Banking balance');
+    },
+  );
 });
 
 describe('normalizeAccount', () => {
