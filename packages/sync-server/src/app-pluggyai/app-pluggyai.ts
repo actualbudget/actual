@@ -217,12 +217,15 @@ bankSync.post(
         res.locals.allowGlobalBankSync,
       );
 
-      let startingBalance = parseInt(
-        Math.round(account.balance * 100).toString(),
-      );
-      if (account.type === 'CREDIT') {
-        startingBalance = -startingBalance;
+      if (
+        typeof account.balance !== 'number' ||
+        !Number.isFinite(account.balance)
+      ) {
+        throw new Error('Invalid Pluggy balance');
       }
+      const startingBalance = String(
+        account.type === 'CREDIT' ? -account.balance : account.balance,
+      );
       // The Pluggy API returns `updatedAt` on accounts, but the SDK's
       // `Account` type leaves it out.
       if (!('updatedAt' in account) || !(account.updatedAt instanceof Date)) {
