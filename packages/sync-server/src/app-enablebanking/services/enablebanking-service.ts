@@ -77,7 +77,7 @@ type BankSyncTransaction = EnableBankingTransaction & {
 };
 
 type BankSyncBalance = {
-  balanceAmount: { amount: number; currency: string };
+  balanceAmount: { amount: string; currency: string };
   balanceType: string;
   referenceDate?: string;
 };
@@ -286,7 +286,15 @@ export function isImportableTransaction(tx: BankSyncTransaction): boolean {
 }
 
 export function normalizeBalance(bal: EnableBankingBalance): BankSyncBalance {
-  const amount = Math.round(parseFloat(bal.balance_amount.amount) * 100);
+  const amount = bal.balance_amount?.amount;
+  if (
+    typeof amount !== 'string' ||
+    amount.length > 32 ||
+    !/^-?\d+(?:\.\d+)?$/.test(amount) ||
+    (amount.split('.')[1]?.length ?? 0) > 15
+  ) {
+    throw new Error('Invalid Enable Banking balance');
+  }
   return {
     balanceAmount: {
       amount,

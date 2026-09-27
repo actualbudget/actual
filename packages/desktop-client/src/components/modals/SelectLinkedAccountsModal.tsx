@@ -11,6 +11,7 @@ import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { rescaleDecimalAmount } from '@actual-app/core/shared/amount-rescale';
 import { currentDay, subDays } from '@actual-app/core/shared/months';
 import type {
   AccountEntity,
@@ -415,11 +416,7 @@ export function SelectLinkedAccountsModal({
   );
 
   function onSetLinkedAccount(
-    externalAccount:
-      | SyncServerGoCardlessAccount
-      | SyncServerSimpleFinAccount
-      | SyncServerPluggyAiAccount
-      | SyncServerAkahuAccount,
+    externalAccount: { account_id: string },
     localAccountId: string | null | undefined,
   ) {
     setChosenAccounts(accounts => {
@@ -707,6 +704,20 @@ type TableRowProps = SharedAccountRowProps & {
   showStartingOptions: boolean;
 };
 
+// A balance the budget cannot store shows as unknown instead of breaking the list.
+export function previewBalance(
+  balance: ExternalAccount['balance'],
+  precision: number,
+): number | null {
+  if (balance == null) return null;
+  if (typeof balance !== 'string') return balance;
+  try {
+    return rescaleDecimalAmount(balance, precision);
+  } catch {
+    return null;
+  }
+}
+
 function useStartingBalanceInfo(accountId: string | undefined) {
   const [info, setInfo] = useState<StartingBalanceInfo | null>(null);
 
@@ -753,6 +764,7 @@ function TableRow({
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
   const format = useFormat();
+  const balance = previewBalance(externalAccount.balance, format.precision);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
   const startingBalanceInfo = useStartingBalanceInfo(
@@ -801,10 +813,8 @@ function TableRow({
       {/* Balance */}
       <Field width={120} style={{ textAlign: 'right' }}>
         <PrivacyFilter>
-          {externalAccount.balance != null ? (
-            <FinancialText>
-              {format(externalAccount.balance.toString(), 'financial')}
-            </FinancialText>
+          {balance != null ? (
+            <FinancialText>{format(balance, 'financial')}</FinancialText>
           ) : (
             t('Unknown')
           )}
@@ -918,7 +928,7 @@ function getInstitutionName(
 
 type StartingOptionsFieldsProps = {
   accountId: string;
-  externalBalance: number | null | undefined;
+  externalBalance: number | string | null | undefined;
   customStartingDate: CustomStartingSettings;
   onSetCustomStartingDate: (
     accountId: string,
@@ -934,7 +944,8 @@ function StartingOptionsFields({
   onSetCustomStartingDate,
   layout,
 }: StartingOptionsFieldsProps) {
-  const zeroSign = externalBalance != null && externalBalance < 0 ? '-' : '+';
+  const zeroSign =
+    externalBalance != null && Number(externalBalance) < 0 ? '-' : '+';
 
   if (layout === 'inline') {
     return (
@@ -1052,6 +1063,7 @@ function AccountCard({
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
   const format = useFormat();
+  const balance = previewBalance(externalAccount.balance, format.precision);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
 
@@ -1118,10 +1130,8 @@ function AccountCard({
       >
         <Trans>Balance:</Trans>{' '}
         <PrivacyFilter>
-          {externalAccount.balance != null ? (
-            <FinancialText>
-              {format(externalAccount.balance.toString(), 'financial')}
-            </FinancialText>
+          {balance != null ? (
+            <FinancialText>{format(balance, 'financial')}</FinancialText>
           ) : (
             t('Unknown')
           )}

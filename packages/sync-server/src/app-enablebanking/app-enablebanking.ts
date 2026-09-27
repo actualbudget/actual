@@ -105,7 +105,7 @@ async function buildSessionResult(
 
       return {
         ...normalized,
-        balance: preferredBalance ? preferredBalance.balanceAmount.amount : 0,
+        balance: preferredBalance ? preferredBalance.balanceAmount.amount : '0',
         balances,
       };
     }),
@@ -557,7 +557,7 @@ app.post(
       const balances = balanceResult.balances.map(normalizeBalance);
 
       // Determine starting balance, preferring CLAV balance type
-      let startingBalance = 0;
+      let startingBalance = '0';
       if (balances.length > 0) {
         const preferredBalance =
           balances.find(b => b.balanceType === 'CLAV') ?? balances[0];
