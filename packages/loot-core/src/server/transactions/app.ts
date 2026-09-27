@@ -3,6 +3,7 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { mutator } from '#server/mutators';
 import { undoable } from '#server/undo';
+import { getRecordedAmountPrecision } from '#server/util/currency';
 import { q, Query } from '#shared/query';
 import type { QueryState } from '#shared/query';
 import type {
@@ -103,7 +104,10 @@ async function parseTransactionsFile({
   filepath: string;
   options: ParseFileOptions;
 }) {
-  return parseFile(filepath, options);
+  return parseFile(filepath, {
+    ...options,
+    amountPrecision: getRecordedAmountPrecision(),
+  });
 }
 
 async function exportTransactions({

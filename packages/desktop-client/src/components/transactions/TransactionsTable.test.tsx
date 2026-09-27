@@ -12,7 +12,10 @@ import {
   splitTransaction,
   updateTransaction,
 } from '@actual-app/core/shared/transactions';
-import { integerToCurrency } from '@actual-app/core/shared/util';
+import {
+  getNumberFormat,
+  integerToCurrency,
+} from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -666,7 +669,11 @@ describe('Transactions', () => {
       );
       if (transaction.amount < 0) {
         expect(queryField(container, 'debit', 'div', idx).textContent).toBe(
-          integerToCurrency(-transaction.amount),
+          integerToCurrency(
+            -transaction.amount,
+            getNumberFormat().formatter,
+            2,
+          ),
         );
         expect(queryField(container, 'credit', 'div', idx).textContent).toBe(
           '',
@@ -674,7 +681,7 @@ describe('Transactions', () => {
       } else {
         expect(queryField(container, 'debit', 'div', idx).textContent).toBe('');
         expect(queryField(container, 'credit', 'div', idx).textContent).toBe(
-          integerToCurrency(transaction.amount),
+          integerToCurrency(transaction.amount, getNumberFormat().formatter, 2),
         );
       }
     });

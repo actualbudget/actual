@@ -1,7 +1,7 @@
 import * as monthUtils from '@actual-app/core/shared/months';
 import {
-  amountToCurrency,
   currencyToAmount,
+  getNumberFormat,
 } from '@actual-app/core/shared/util';
 import type { Page } from '@playwright/test';
 
@@ -77,7 +77,9 @@ async function getAverageMonthAmounts(
       throw new Error('Failed to get average month amounts');
     }
 
-    amounts.push(currencyToAmount(spent) ?? 0);
+    amounts.push(
+      currencyToAmount(spent, getNumberFormat().thousandsSeparator) ?? 0,
+    );
 
     if (i < numberOfMonths - 1) {
       selectedMonth = await budgetPage.goToPreviousMonth();
@@ -374,7 +376,9 @@ budgetTypes.forEach(budgetType => {
       const budgetedButton =
         await budgetPage.getButtonForBudgeted(categoryName);
 
-      await expect(budgetedButton).toHaveText(amountToCurrency(budgetAmount));
+      await expect(budgetedButton).toHaveText(
+        getNumberFormat({ decimalPlaces: 2 }).formatter.format(budgetAmount),
+      );
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -424,7 +428,9 @@ budgetTypes.forEach(budgetType => {
           await budgetPage.getButtonForBudgeted(categoryName);
 
         await expect(budgetedButton).toHaveText(
-          amountToCurrency(Math.abs(averageSpent)),
+          getNumberFormat({ decimalPlaces: 2 }).formatter.format(
+            Math.abs(averageSpent),
+          ),
         );
         await expect(page).toMatchThemeScreenshots();
       });
@@ -473,7 +479,9 @@ budgetTypes.forEach(budgetType => {
       await budgetMenuModal.applyBudgetTemplate();
 
       await expect(budgetedButton).toHaveText(
-        amountToCurrency(amountToTemplate),
+        getNumberFormat({ decimalPlaces: 2 }).formatter.format(
+          amountToTemplate,
+        ),
       );
       await expect(page).toMatchThemeScreenshots();
     });
