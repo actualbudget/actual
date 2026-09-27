@@ -183,7 +183,7 @@ describe('IngPlIngbplpw', () => {
         balances,
       );
 
-      expect(startingBalance).toEqual(50000);
+      expect(startingBalance).toEqual('500.00');
     });
 
     it('returns the same balance amount when no transactions', () => {
@@ -197,7 +197,7 @@ describe('IngPlIngbplpw', () => {
       ];
       expect(
         IngPlIngbplpw.calculateStartingBalance(transactions, balances),
-      ).toEqual(50000);
+      ).toEqual('500.00');
     });
   });
 });

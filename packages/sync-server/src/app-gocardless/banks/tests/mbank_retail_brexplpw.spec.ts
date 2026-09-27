@@ -153,7 +153,7 @@ describe('MbankRetailBrexplpw', () => {
 
       expect(
         MbankRetailBrexplpw.calculateStartingBalance(transactions, balances),
-      ).toEqual(100000);
+      ).toEqual('1000.00');
     });
 
     it('returns the balance minus the available transactions', () => {
@@ -168,7 +168,7 @@ describe('MbankRetailBrexplpw', () => {
 
       expect(
         MbankRetailBrexplpw.calculateStartingBalance(transactions, balances),
-      ).toEqual(49950);
+      ).toEqual('499.50');
     });
   });
 });
