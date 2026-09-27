@@ -1,8 +1,9 @@
-import { currencyToAmount } from './util';
+import { currencyToAmount, getNumberFormat } from './util';
 
 type ParserState = {
   str: string;
   index: number;
+  thousandsSeparator: string;
 };
 
 type Operator = '+' | '-' | '*' | '/' | '^';
@@ -68,7 +69,7 @@ function parsePrimary(state: ParserState): number {
     fail(state, 'Unexpected character');
   }
 
-  const number = currencyToAmount(numberStr);
+  const number = currencyToAmount(numberStr, state.thousandsSeparator);
   if (number === null) {
     fail(state, 'Invalid number format');
   }
@@ -121,7 +122,11 @@ function parseAdditive(state: ParserState): AstNode {
 const parseOperator = parseAdditive;
 
 function parse(expression: string): AstNode {
-  const state = { str: expression.replace(/\s/g, ''), index: 0 };
+  const state = {
+    str: expression.replace(/\s/g, ''),
+    index: 0,
+    thousandsSeparator: getNumberFormat().thousandsSeparator,
+  };
   return parseOperator(state);
 }
 

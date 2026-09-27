@@ -293,7 +293,10 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
         (numericValue === null || isNaN(numericValue)) &&
         !/[*/^()]/.test(normalized)
       ) {
-        numericValue = currencyToAmount(normalized);
+        numericValue = currencyToAmount(
+          normalized,
+          getNumberFormat(numberFormatConfig).thousandsSeparator,
+        );
       }
 
       if (numericValue !== null && Number.isFinite(numericValue)) {
@@ -308,7 +311,7 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
 
       return defaultValue;
     },
-    [fromAmount],
+    [fromAmount, numberFormatConfig],
   );
 
   return Object.assign(formatDisplay, {

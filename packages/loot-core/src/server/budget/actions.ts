@@ -7,7 +7,7 @@ import { batchMessages } from '#server/sync';
 import { getRecordedAmountPrecision } from '#server/util/currency';
 import { getLocale } from '#shared/locale';
 import * as monthUtils from '#shared/months';
-import { integerToCurrency, safeNumber } from '#shared/util';
+import { getNumberFormat, integerToCurrency, safeNumber } from '#shared/util';
 import type { IntegerAmount } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 
@@ -729,10 +729,11 @@ async function addMovementNotes({
   to: CategoryEntity['id'] | 'to-budget' | 'overbudgeted';
   from: CategoryEntity['id'] | 'to-budget';
 }) {
+  const precision = getRecordedAmountPrecision();
   const displayAmount = integerToCurrency(
     amount,
-    undefined,
-    getRecordedAmountPrecision(),
+    getNumberFormat({ decimalPlaces: precision }).formatter,
+    precision,
   );
 
   const monthBudgetNotesId = `budget-${month}`;

@@ -198,11 +198,7 @@ function parseAmount(
   }
 
   const parsed =
-    typeof amount === 'string'
-      ? precision === 3 && /^-?\d+[.,]\d{3}$/.test(amount.trim())
-        ? Number(amount.trim().replace(',', '.'))
-        : looselyParseAmount(amount)
-      : amount;
+    typeof amount === 'string' ? looselyParseAmount(amount, precision) : amount;
 
   if (parsed === null) {
     return null;
@@ -317,7 +313,7 @@ export function parseImportAmount(
         field !== '' &&
         (typeof field === 'number'
           ? !Number.isFinite(field)
-          : looselyParseAmount(field) == null),
+          : looselyParseAmount(field, precision) == null),
     )
   ) {
     return null;

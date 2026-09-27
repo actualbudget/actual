@@ -42,6 +42,23 @@ test.describe('Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('creates an account using the recorded currency precision', async () => {
+    await navigation.goToSettingsPage();
+    await page.locator('#default-currency-select').click();
+    await page.getByRole('button', { name: 'JPY - Japanese Yen (¥)' }).click();
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Confirm precision change' })
+      .click();
+
+    accountPage = await navigation.createAccount({
+      name: 'Yen Account',
+      offBudget: false,
+      balance: 123.45,
+    });
+    await expect(accountPage.getNthTransaction(0).credit).toHaveText('123');
+  });
+
   test('account register widens amount columns for large balances', async () => {
     accountPage = await navigation.createAccount({
       name: 'Large Balance Account',
@@ -565,6 +582,22 @@ test.describe('Accounts', () => {
       });
       await expect(expense.getByTestId('category')).toHaveText('Food');
       await expect(income.getByTestId('category')).toHaveText('Income');
+    });
+
+    test('imports QIF amounts with recorded precision', async () => {
+      const fileChooserPromise = page.waitForEvent('filechooser');
+      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles(
+        join(__dirname, '../../loot-core/src/mocks/files/data.qif'),
+      );
+
+      const importButton = page.getByRole('button', {
+        name: /Import \d+ transactions/,
+      });
+      await expect(importButton).toBeVisible();
+      await importButton.click();
+      await expect(importButton).not.toBeVisible();
     });
 
     test('import csv file twice', async () => {
