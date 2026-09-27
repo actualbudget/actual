@@ -4,7 +4,15 @@
 
 Release date: 2026-10-01
 
-- TODO: Add release highlights
+This release speeds up transaction editing, makes syncing more resilient to version mismatches, adds an in-app Notifications page, and introduces an experimental redesigned sidebar with account groups, as well as numerous other fixes.
+
+- Speeds up transaction editing, especially in larger budgets
+- Adds a [Notifications](./notifications.md) page to catch up on what's new in each release without leaving the app
+- Makes Actual more resilient to version mismatches, improving syncing between devices running different versions
+- Improves bank file imports, fixing accented letters (like é or ü) showing up garbled and supporting more CSV formats
+- Experimental: Adds a redesigned sidebar, based on the winning entry from the [sidenav design competition](../blog/sidenav-design-winner), that lets you organise accounts into groups, reorder them by drag and drop, and search them
+- Experimental: Adds income streams, a yearly cashflow chart, custom stocks/bonds/cash mixes and much more to the [Monte Carlo analysis report](./experimental/monte-carlo-analysis.md)
+- Experimental: Adds an option to show transfers in the spent view of the [Sankey report](./experimental/sankey-report.md)
 
 **Docker Tag: 26.10.0**
 
