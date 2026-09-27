@@ -268,7 +268,9 @@ export function appendDecimals(
   }
   return getNumberFormat({
     decimalPlaces: hideDecimals ? 0 : decimalPlaces,
-  }).formatter.format(currencyToAmount(sign + result) ?? 0);
+  }).formatter.format(
+    currencyToAmount(sign + result, getNumberFormat().thousandsSeparator) ?? 0,
+  );
 }
 
 const NUMBER_FORMATS = [
@@ -403,6 +405,7 @@ export function getNumberFormat({
 
   return {
     value: currentFormat,
+    hideFraction: currentHideFraction,
     thousandsSeparator,
     decimalSeparator,
     formatter,
@@ -422,7 +425,8 @@ export type Amount = number;
 export type CurrencyAmount = string;
 /**
  * The amount with the decimal point removed.
- * For example, 123.45 would be 12345.
+ * Its implied decimals come from the recorded amount encoding. Legacy amounts
+ * use two implied decimals, so 123.45 is 12345 regardless of currency.
  */
 export type IntegerAmount = number;
 
@@ -450,58 +454,23 @@ export function safeNumber(value: number) {
   return value;
 }
 
-export function toRelaxedNumber(currencyAmount: CurrencyAmount): Amount {
-  return integerToAmount(currencyToInteger(currencyAmount) || 0);
-}
-
 export function integerToCurrency(
   integerAmount: IntegerAmount,
-  formatter = getNumberFormat().formatter,
-  decimalPlaces: number = 2,
+  formatter: { format(value: number): string },
+  decimalPlaces: number,
 ) {
   return formatter.format(
     integerToAmount(safeNumber(integerAmount), decimalPlaces),
   );
 }
 
-export function integerToCurrencyWithDecimal(
-  integerAmount: IntegerAmount,
-  currencyCode?: string,
-) {
-  if (currencyCode !== undefined) {
-    const dp = getDecimalPlaces(currencyCode);
-    return integerToCurrency(
-      integerAmount,
-      getNumberFormat({ ...numberFormatConfig, decimalPlaces: dp }).formatter,
-    );
+export function currencyToAmount(
+  currencyAmount: string,
+  thousandsSeparator: string,
+): Amount | null {
+  if (typeof thousandsSeparator !== 'string') {
+    throw new Error('currencyToAmount: thousands separator is required');
   }
-
-  // If decimal digits exist, keep them. Otherwise format them as usual.
-  if (integerAmount % 100 !== 0) {
-    return integerToCurrency(
-      integerAmount,
-      getNumberFormat({
-        ...numberFormatConfig,
-        hideFraction: false,
-      }).formatter,
-    );
-  }
-
-  return integerToCurrency(integerAmount);
-}
-
-export function amountToCurrency(amount: Amount): CurrencyAmount {
-  return getNumberFormat().formatter.format(amount);
-}
-
-export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
-  return getNumberFormat({
-    ...numberFormatConfig,
-    hideFraction: true,
-  }).formatter.format(amount);
-}
-
-export function currencyToAmount(currencyAmount: string): Amount | null {
   currencyAmount = currencyAmount.replace(/\u2212/g, '-');
 
   let integer, fraction;
@@ -511,7 +480,7 @@ export function currencyToAmount(currencyAmount: string): Amount | null {
 
   if (
     !match ||
-    (match[0] === getNumberFormat().thousandsSeparator &&
+    (match[0] === thousandsSeparator &&
       match.index + 4 <= currencyAmount.length)
   ) {
     fraction = null;
@@ -525,13 +494,6 @@ export function currencyToAmount(currencyAmount: string): Amount | null {
   return isNaN(amount) ? null : amount;
 }
 
-export function currencyToInteger(
-  currencyAmount: CurrencyAmount,
-): IntegerAmount | null {
-  const amount = currencyToAmount(currencyAmount);
-  return amount == null ? null : amountToInteger(amount);
-}
-
 export function stringToInteger(str: string): number | null {
   const amount = parseInt(
     str.replace(/\u2212/g, '-').replace(/[^-0-9.,]/g, ''),
@@ -542,10 +504,26 @@ export function stringToInteger(str: string): number | null {
   return null;
 }
 
+function resolveDecimalPlaces(precisionOrCurrency: number | string): number {
+  const decimalPlaces =
+    typeof precisionOrCurrency === 'string'
+      ? getDecimalPlaces(precisionOrCurrency)
+      : precisionOrCurrency;
+  if (
+    !Number.isInteger(decimalPlaces) ||
+    decimalPlaces < 0 ||
+    decimalPlaces > 15
+  ) {
+    throw new Error('Invalid decimal precision');
+  }
+  return decimalPlaces;
+}
+
 export function amountToInteger(
   amount: Amount,
-  decimalPlaces: number = 2,
+  precisionOrCurrency: number | string,
 ): IntegerAmount {
+  const decimalPlaces = resolveDecimalPlaces(precisionOrCurrency);
   const scaled = amount * Math.pow(10, decimalPlaces);
   // Banker's rounding: .5 ties go to the even neighbour.
   const low = Math.floor(scaled);
@@ -568,9 +546,9 @@ function isDecimalTie(amount: Amount, decimalPlaces: number): boolean {
 
 export function integerToAmount(
   integerAmount: IntegerAmount,
-  decimalPlaces: number = 2,
+  precisionOrCurrency: number | string,
 ): Amount {
-  const divisor = Math.pow(10, decimalPlaces);
+  const divisor = Math.pow(10, resolveDecimalPlaces(precisionOrCurrency));
   return integerAmount / divisor;
 }
 
@@ -578,14 +556,17 @@ export function integerToAmount(
 // financial files and we don't want to parse based on the user's
 // number format, because the user could be importing from many
 // currencies. We extract out the numbers and just ignore separators.
-export function looselyParseAmount(amount: string) {
+export function looselyParseAmount(amount: string, precision: number) {
+  if (!Number.isInteger(precision) || precision < 0 || precision > 15) {
+    throw new Error('looselyParseAmount: invalid decimal precision');
+  }
   function safeNumber(v: number): null | number {
-    if (isNaN(v)) {
+    if (!Number.isFinite(v)) {
       return null;
     }
 
-    const value = v * 100;
-    if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
+    const value = Math.round(v * 10 ** precision);
+    if (!Number.isSafeInteger(value) || Math.abs(value) > MAX_SAFE_NUMBER) {
       return null;
     }
 
@@ -608,11 +589,20 @@ export function looselyParseAmount(amount: string) {
   }
 
   // Look for a decimal marker, then look for either 1-2 or 4-9 decimal places.
-  // This avoids matching against 3 places which may not actually be decimal.
+  // Three trailing digits are a decimal fraction only for 3dp destinations.
   // Only digits count as places, so a currency symbol or code after the
   // number does not change how many there are.
-  const m = amount.match(/[.,](\d{4,9}|\d{1,2})[^\d.,]*$/);
-  if (!m || m.index === undefined) {
+  const m = amount.match(
+    precision === 3
+      ? /[.,](\d{1,9})[^\d.,]*$/
+      : /[.,](\d{4,9}|\d{1,2})[^\d.,]*$/,
+  );
+  // A separator repeated before three trailing digits groups thousands.
+  const grouped =
+    m?.index !== undefined &&
+    m[1].length === 3 &&
+    amount.slice(0, m.index).includes(m[0][0]);
+  if (!m || m.index === undefined || grouped) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }
 

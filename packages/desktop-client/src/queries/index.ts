@@ -10,6 +10,7 @@ import type { Query } from '@actual-app/core/shared/query';
 import {
   amountToInteger,
   currencyToAmount,
+  getNumberFormat,
   MAX_SAFE_NUMBER,
 } from '@actual-app/core/shared/util';
 import type { AccountEntity } from '@actual-app/core/types/models';
@@ -103,8 +104,9 @@ export function transactionsSearch(
       )
     : search;
   const textOnly = /\p{L}/u.test(amountSearch);
+  const thousandsSeparator = getNumberFormat().thousandsSeparator;
   const parseStoredAmount = (text: string) => {
-    const major = currencyToAmount(text);
+    const major = currencyToAmount(text, thousandsSeparator);
     if (major === null) return null;
     const scaled = major * 10 ** precision;
     const stored = amountToInteger(major, precision);
@@ -127,7 +129,9 @@ export function transactionsSearch(
     !comparison && !range && !textOnly ? amountSearch.trim() : null;
   const amount = plainAmount !== null ? parseStoredAmount(plainAmount) : null;
   const majorAmount =
-    plainAmount !== null ? currencyToAmount(plainAmount) : null;
+    plainAmount !== null
+      ? currencyToAmount(plainAmount, thousandsSeparator)
+      : null;
   const comparisonOperator =
     comparison &&
     (

@@ -30,7 +30,7 @@ describe('buildBudgetAnalysisCsv', () => {
     ['with rows', rows],
     ['with no rows', []],
   ])('starts with one UTF-8 byte order mark %s', (_name, input) => {
-    expect(buildBudgetAnalysisCsv(input).lastIndexOf('\uFEFF')).toBe(0);
+    expect(buildBudgetAnalysisCsv(input, 2).lastIndexOf('\uFEFF')).toBe(0);
   });
 
   it('produces a header row and one data row per interval', () => {
