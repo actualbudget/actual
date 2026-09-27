@@ -569,20 +569,29 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
     // Transfers insert the source row in one sync batch and the counterparty in
     // a second. triggerDatabaseChanges should dirty aggregate query cells, but
     // explicitly recompute global account totals so the second batch always
-    // refreshes sidebar "All accounts" / On budget / etc. (see bindings.ts).
+    // refreshes sidebar "All accounts" / On budget / account group subtotals /
+    // etc. (see bindings.ts).
     if (idsPerTable.transactions?.length) {
       const s = sheet.get();
-      const globalAggregateCells = [
-        'accounts-balance',
-        'onbudget-accounts-balance',
-        'offbudget-accounts-balance',
-        'closed-accounts-balance',
-      ] as const;
-      for (const cellName of globalAggregateCells) {
-        const fullName = resolveName('__global', cellName);
-        if (s.hasCell(fullName)) {
-          s.recompute(fullName);
-        }
+      const globalAggregateCells = new Set(
+        [
+          'accounts-balance',
+          'onbudget-accounts-balance',
+          'offbudget-accounts-balance',
+          'closed-accounts-balance',
+        ].map(cellName => resolveName('__global', cellName)),
+      );
+      const accountGroupCellPrefix = resolveName(
+        '__global',
+        'account-group-balance-',
+      );
+      const cellsToRecompute = [...s.getNodes().keys()].filter(
+        name =>
+          globalAggregateCells.has(name) ||
+          name.startsWith(accountGroupCellPrefix),
+      );
+      for (const name of cellsToRecompute) {
+        s.recompute(name);
       }
     }
 

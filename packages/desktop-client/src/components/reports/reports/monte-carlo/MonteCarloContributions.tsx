@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -14,9 +15,12 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import { v4 as uuidv4 } from 'uuid';
 
+import { FinancialText } from '#components/FinancialText';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
+import { PrivacyFilter } from '#components/PrivacyFilter';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import {
@@ -32,6 +36,7 @@ import type {
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { Field, Row, TableHeader } from '#components/table';
 import { FinancialInput } from '#components/util/FinancialInput';
+import { useFormat } from '#hooks/useFormat';
 
 const CONTRIBUTION_ROW_HEIGHT = 43;
 
@@ -57,6 +62,7 @@ export function MonteCarloContributions({
   onConfigChange,
 }: MonteCarloContributionsProps) {
   const { t } = useTranslation();
+  const format = useFormat();
 
   function updateContribution(
     contributionId: string,
@@ -109,6 +115,14 @@ export function MonteCarloContributions({
         string,
       ],
   );
+  // Named as the Paid from dropdown lists them
+  function getIncomeStreamLabel(incomeIndex: number) {
+    const incomeStream = incomeStreams[incomeIndex];
+    return (
+      incomeStream.name || t('Income {{number}}', { number: incomeIndex + 1 })
+    );
+  }
+
   const sourceOptions: SelectOption[] = [
     [OUTSIDE_SOURCE, t('Outside the plan')],
     ...(incomeStreams.length > 0
@@ -116,11 +130,10 @@ export function MonteCarloContributions({
       : []),
     ...incomeStreams.map(
       (incomeStream, incomeIndex) =>
-        [
-          incomeStream.id,
-          incomeStream.name ||
-            t('Income {{number}}', { number: incomeIndex + 1 }),
-        ] satisfies [string, string],
+        [incomeStream.id, getIncomeStreamLabel(incomeIndex)] satisfies [
+          string,
+          string,
+        ],
     ),
   ];
 
@@ -192,149 +205,234 @@ export function MonteCarloContributions({
             <Field width={36} />
           </TableHeader>
 
-          {contributions.map((contribution, index) => (
-            <Row
-              key={contribution.id}
-              collapsed
-              height={CONTRIBUTION_ROW_HEIGHT}
-              style={{
-                backgroundColor: theme.tableBackground,
-                ':hover': { backgroundColor: theme.tableRowBackgroundHover },
-              }}
-            >
-              <Field width="flex" style={{ minWidth: 150 }} truncate={false}>
-                <Input
-                  defaultValue={contribution.name}
-                  placeholder={t('Contribution {{number}}', {
-                    number: index + 1,
-                  })}
-                  aria-label={t('Contribution name')}
-                  onUpdate={newName => {
-                    if (newName !== contribution.name) {
-                      updateContribution(contribution.id, { name: newName });
-                    }
+          {contributions.map((contribution, index) => {
+            // A contribution paid from an income stream can only ever take
+            // what the stream brings in, so say so when the amount is more
+            const sourceIndex = incomeStreams.findIndex(
+              incomeStream =>
+                incomeStream.id === contribution.sourceIncomeStreamId,
+            );
+            const sourceStream =
+              sourceIndex >= 0 ? incomeStreams[sourceIndex] : null;
+            const exceedsSource =
+              sourceStream != null &&
+              contribution.annualAmount > sourceStream.annualAmount;
+            return (
+              <Fragment key={contribution.id}>
+                <Row
+                  collapsed
+                  height={CONTRIBUTION_ROW_HEIGHT}
+                  style={{
+                    backgroundColor: theme.tableBackground,
+                    ':hover': {
+                      backgroundColor: theme.tableRowBackgroundHover,
+                    },
                   }}
-                />
-              </Field>
-
-              <Field width="flex" style={{ minWidth: 160 }} truncate={false}>
-                <Select
-                  value={contribution.potId}
-                  onChange={value =>
-                    updateContribution(contribution.id, { potId: value })
-                  }
-                  options={potOptions}
-                />
-              </Field>
-
-              <Field width="flex" style={{ minWidth: 160 }} truncate={false}>
-                <Select
-                  value={contribution.sourceIncomeStreamId ?? OUTSIDE_SOURCE}
-                  onChange={value =>
-                    updateContribution(contribution.id, {
-                      sourceIncomeStreamId:
-                        value === OUTSIDE_SOURCE ? null : value,
-                      // Before tax only means something for income
-                      ...(value === OUTSIDE_SOURCE && { beforeTax: false }),
-                    })
-                  }
-                  options={sourceOptions}
-                />
-              </Field>
-
-              <Field width="flex" style={{ minWidth: 100 }} truncate={false}>
-                <MonteCarloNumberInput
-                  value={contribution.fromAge}
-                  aria-label={t('From age')}
-                  allowEmpty
-                  roundToInteger
-                  min={currentAge}
-                  max={contribution.toAge ?? targetAge}
-                  step={1}
-                  placeholder={t('Now')}
-                  onCommit={newValue =>
-                    updateContribution(contribution.id, { fromAge: newValue })
-                  }
-                />
-              </Field>
-
-              <Field width="flex" style={{ minWidth: 100 }} truncate={false}>
-                <MonteCarloNumberInput
-                  value={contribution.toAge}
-                  aria-label={t('To age')}
-                  allowEmpty
-                  roundToInteger
-                  min={contribution.fromAge ?? currentAge}
-                  max={targetAge}
-                  step={1}
-                  placeholder={t('End of plan')}
-                  onCommit={newValue =>
-                    updateContribution(contribution.id, { toAge: newValue })
-                  }
-                />
-              </Field>
-
-              <Field width="flex" style={{ minWidth: 140 }} truncate={false}>
-                <FinancialInput
-                  value={contribution.annualAmount}
-                  aria-label={t('Amount (per year)')}
-                  onUpdate={value => {
-                    const newAmount = Math.min(MAX_AMOUNT, Math.max(0, value));
-                    if (newAmount !== contribution.annualAmount) {
-                      updateContribution(contribution.id, {
-                        annualAmount: newAmount,
-                      });
-                    }
-                  }}
-                />
-              </Field>
-
-              <Field width="flex" style={{ minWidth: 170 }} truncate={false}>
-                <LabeledCheckbox
-                  id={`contribution-inflation-${contribution.id}`}
-                  checked={contribution.adjustsWithInflation}
-                  onChange={event =>
-                    updateContribution(contribution.id, {
-                      adjustsWithInflation: event.target.checked,
-                    })
-                  }
                 >
-                  <Trans>Adjust by inflation</Trans>
-                </LabeledCheckbox>
-              </Field>
-
-              <Field width="flex" style={{ minWidth: 120 }} truncate={false}>
-                {contribution.sourceIncomeStreamId != null && (
-                  <LabeledCheckbox
-                    id={`contribution-before-tax-${contribution.id}`}
-                    checked={contribution.beforeTax}
-                    onChange={event =>
-                      updateContribution(contribution.id, {
-                        beforeTax: event.target.checked,
-                      })
-                    }
+                  <Field
+                    width="flex"
+                    style={{ minWidth: 150 }}
+                    truncate={false}
                   >
-                    <Trans>Before tax</Trans>
-                  </LabeledCheckbox>
-                )}
-              </Field>
+                    <Input
+                      defaultValue={contribution.name}
+                      placeholder={t('Contribution {{number}}', {
+                        number: index + 1,
+                      })}
+                      aria-label={t('Contribution name')}
+                      onUpdate={newName => {
+                        if (newName !== contribution.name) {
+                          updateContribution(contribution.id, {
+                            name: newName,
+                          });
+                        }
+                      }}
+                    />
+                  </Field>
 
-              <Field
-                width={36}
-                truncate={false}
-                style={{ alignItems: 'center' }}
-              >
-                <Button
-                  variant="bare"
-                  aria-label={t('Remove contribution')}
-                  onPress={() => removeContribution(contribution.id)}
-                  style={{ padding: 6 }}
-                >
-                  <SvgDelete width={12} height={12} />
-                </Button>
-              </Field>
-            </Row>
-          ))}
+                  <Field
+                    width="flex"
+                    style={{ minWidth: 160 }}
+                    truncate={false}
+                  >
+                    <Select
+                      value={contribution.potId}
+                      onChange={value =>
+                        updateContribution(contribution.id, { potId: value })
+                      }
+                      options={potOptions}
+                    />
+                  </Field>
+
+                  <Field
+                    width="flex"
+                    style={{ minWidth: 160 }}
+                    truncate={false}
+                  >
+                    <Select
+                      value={
+                        contribution.sourceIncomeStreamId ?? OUTSIDE_SOURCE
+                      }
+                      onChange={value =>
+                        updateContribution(contribution.id, {
+                          sourceIncomeStreamId:
+                            value === OUTSIDE_SOURCE ? null : value,
+                          // Before tax only means something for income
+                          ...(value === OUTSIDE_SOURCE && { beforeTax: false }),
+                        })
+                      }
+                      options={sourceOptions}
+                    />
+                  </Field>
+
+                  <Field
+                    width="flex"
+                    style={{ minWidth: 100 }}
+                    truncate={false}
+                  >
+                    <MonteCarloNumberInput
+                      value={contribution.fromAge}
+                      aria-label={t('From age')}
+                      allowEmpty
+                      roundToInteger
+                      min={currentAge}
+                      max={contribution.toAge ?? targetAge}
+                      step={1}
+                      placeholder={t('Now')}
+                      onCommit={newValue =>
+                        updateContribution(contribution.id, {
+                          fromAge: newValue,
+                        })
+                      }
+                    />
+                  </Field>
+
+                  <Field
+                    width="flex"
+                    style={{ minWidth: 100 }}
+                    truncate={false}
+                  >
+                    <MonteCarloNumberInput
+                      value={contribution.toAge}
+                      aria-label={t('To age')}
+                      allowEmpty
+                      roundToInteger
+                      min={contribution.fromAge ?? currentAge}
+                      max={targetAge}
+                      step={1}
+                      placeholder={t('End of plan')}
+                      onCommit={newValue =>
+                        updateContribution(contribution.id, { toAge: newValue })
+                      }
+                    />
+                  </Field>
+
+                  <Field
+                    width="flex"
+                    style={{ minWidth: 140 }}
+                    truncate={false}
+                  >
+                    <FinancialInput
+                      value={contribution.annualAmount}
+                      aria-label={t('Amount (per year)')}
+                      onUpdate={value => {
+                        const newAmount = Math.min(
+                          MAX_AMOUNT,
+                          Math.max(0, value),
+                        );
+                        if (newAmount !== contribution.annualAmount) {
+                          updateContribution(contribution.id, {
+                            annualAmount: newAmount,
+                          });
+                        }
+                      }}
+                    />
+                  </Field>
+
+                  <Field
+                    width="flex"
+                    style={{ minWidth: 170 }}
+                    truncate={false}
+                  >
+                    <LabeledCheckbox
+                      id={`contribution-inflation-${contribution.id}`}
+                      checked={contribution.adjustsWithInflation}
+                      onChange={event =>
+                        updateContribution(contribution.id, {
+                          adjustsWithInflation: event.target.checked,
+                        })
+                      }
+                    >
+                      <Trans>Adjust by inflation</Trans>
+                    </LabeledCheckbox>
+                  </Field>
+
+                  <Field
+                    width="flex"
+                    style={{ minWidth: 120 }}
+                    truncate={false}
+                  >
+                    {contribution.sourceIncomeStreamId != null && (
+                      <LabeledCheckbox
+                        id={`contribution-before-tax-${contribution.id}`}
+                        checked={contribution.beforeTax}
+                        onChange={event =>
+                          updateContribution(contribution.id, {
+                            beforeTax: event.target.checked,
+                          })
+                        }
+                      >
+                        <Trans>Before tax</Trans>
+                      </LabeledCheckbox>
+                    )}
+                  </Field>
+
+                  <Field
+                    width={36}
+                    truncate={false}
+                    style={{ alignItems: 'center' }}
+                  >
+                    <Button
+                      variant="bare"
+                      aria-label={t('Remove contribution')}
+                      onPress={() => removeContribution(contribution.id)}
+                      style={{ padding: 6 }}
+                    >
+                      <SvgDelete width={12} height={12} />
+                    </Button>
+                  </Field>
+                </Row>
+                {exceedsSource && (
+                  <View
+                    style={{
+                      backgroundColor: theme.tableBackground,
+                      padding: '2px 10px 8px',
+                    }}
+                  >
+                    <Text style={{ color: theme.warningText, fontSize: 13 }}>
+                      <Trans>
+                        {{ stream: getIncomeStreamLabel(sourceIndex) }} pays{' '}
+                        <PrivacyFilter>
+                          <FinancialText as="span">
+                            {
+                              {
+                                amount: format(
+                                  sourceStream.annualAmount,
+                                  'financial',
+                                ),
+                              } as TransObjectLiteral
+                            }
+                          </FinancialText>
+                        </PrivacyFilter>{' '}
+                        a year, so no more than that - less any tax, unless
+                        Before tax is ticked - can be paid in from it.
+                      </Trans>
+                    </Text>
+                  </View>
+                )}
+              </Fragment>
+            );
+          })}
         </View>
       </View>
 

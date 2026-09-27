@@ -758,6 +758,7 @@ export function deleteAccount(account) {
 export async function moveAccount(
   id: DbAccount['id'],
   targetId: DbAccount['id'] | null,
+  accountGroupId?: DbAccountGroup['id'] | null,
 ) {
   const account = await first<DbAccount>(
     'SELECT * FROM accounts WHERE id = ?',
@@ -780,7 +781,13 @@ export async function moveAccount(
     for (const info of updates) {
       void update('accounts', info);
     }
-    void update('accounts', { id, sort_order });
+    void update('accounts', {
+      id,
+      sort_order,
+      ...(accountGroupId !== undefined && {
+        account_group_id: accountGroupId,
+      }),
+    });
   });
 }
 
