@@ -282,6 +282,9 @@ function getAccountResponse(results, accountId, startDate) {
   const pending = [];
 
   for (const trans of account.transactions) {
+    if (typeof trans.amount !== 'string') {
+      throw new Error('Invalid SimpleFIN transaction amount');
+    }
     const newTrans = {};
 
     let dateToUse = 0;

@@ -19,7 +19,7 @@ import {
   defaultMappings,
   mappingsFromString,
 } from '#server/util/custom-sync-mapping';
-import { rescaleAmount, rescaleDecimalAmount } from '#shared/amount-rescale';
+import { rescaleDecimalAmount } from '#shared/amount-rescale';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import {
@@ -27,7 +27,6 @@ import {
   recalculateSplit,
 } from '#shared/transactions';
 import {
-  amountToInteger,
   hasFieldsChanged,
   integerToAmount,
   MAX_SAFE_NUMBER,
@@ -261,7 +260,7 @@ async function downloadSimpleFinTransactions(
           retVal[accountId] = {
             transactions: [],
             accountBalance: [],
-            startingBalance: 0,
+            startingBalance: '0',
             error_type: error.error_type,
             error_code: error.error_code,
           };
@@ -550,9 +549,7 @@ async function normalizeBankSyncTransactions(
 
     if (!importPending && !trans.cleared) continue;
 
-    if (!trans.amount) {
-      trans.amount = trans.transactionAmount.amount;
-    }
+    trans.amount = trans.transactionAmount.amount;
 
     const mapping = mappings.get(trans.amount <= 0 ? 'payment' : 'deposit');
 
@@ -1122,21 +1119,17 @@ export async function addTransactions(
 }
 
 export function encodeBankAmount(
-  value: string | number,
+  value: string,
   amountPrecision: number,
 ): number {
+  if (typeof value !== 'string' || value.length > 32) {
+    throw new Error('Invalid bank amount');
+  }
   let encoded: number;
-  if (typeof value === 'string') {
-    if (value.length > 32) {
-      throw new Error('Invalid bank amount');
-    }
-    try {
-      encoded = rescaleDecimalAmount(value, amountPrecision);
-    } catch {
-      throw new Error('Invalid bank amount');
-    }
-  } else {
-    encoded = amountToInteger(value, amountPrecision);
+  try {
+    encoded = rescaleDecimalAmount(value, amountPrecision);
+  } catch {
+    throw new Error('Invalid bank amount');
   }
   if (!Number.isSafeInteger(encoded) || Math.abs(encoded) > MAX_SAFE_NUMBER) {
     throw new Error('Invalid bank amount');
@@ -1144,37 +1137,16 @@ export function encodeBankAmount(
   return encoded;
 }
 
-export function encodeBankWireBalance(
-  value: string | number,
-  amountPrecision: number,
-): number {
-  if (typeof value === 'string') {
-    return encodeBankAmount(value, amountPrecision);
-  }
-  if (typeof value !== 'number' || !Number.isSafeInteger(value)) {
-    throw new Error('Invalid bank balance');
-  }
-  try {
-    const encoded = rescaleAmount(value, 2, amountPrecision)!;
-    if (Math.abs(encoded) > MAX_SAFE_NUMBER) {
-      throw new Error('Invalid bank balance');
-    }
-    return encoded;
-  } catch {
-    throw new Error('Invalid bank balance');
-  }
-}
-
 export function encodeStartingBalance(
-  currentBalance: string | number,
-  transactions: Array<{ transactionAmount: { amount: string | number } }>,
+  currentBalance: string,
+  transactions: Array<{ transactionAmount: { amount: string } }>,
   amountPrecision: number,
 ): number {
   const previousBalance = transactions.reduce(
     (total, trans) =>
       total -
       BigInt(encodeBankAmount(trans.transactionAmount.amount, amountPrecision)),
-    BigInt(encodeBankWireBalance(currentBalance, amountPrecision)),
+    BigInt(encodeBankAmount(currentBalance, amountPrecision)),
   );
   const result = Number(previousBalance);
   if (!Number.isSafeInteger(result) || Math.abs(result) > MAX_SAFE_NUMBER) {
@@ -1317,7 +1289,7 @@ async function processBankSyncDownload(
     if (currentBalance != null) {
       await updateAccountBalance(
         id,
-        encodeBankWireBalance(currentBalance, amountPrecision),
+        encodeBankAmount(currentBalance, amountPrecision),
       );
     }
 

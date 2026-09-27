@@ -345,6 +345,53 @@ describe('app-simplefin', () => {
       });
     });
 
+    it.each([
+      ['1.234', '1.234'],
+      [1.234, null],
+    ])('handles transaction amount %s', async (amount, expected) => {
+      secretsService.set(SecretName.simplefin_accessKey, VALID_ACCESS_KEY);
+      mockFetch({
+        accounts: okResponse(
+          JSON.stringify({
+            accounts: [
+              {
+                id: 'account-1',
+                org: { name: 'Example' },
+                balance: '12.34',
+                'balance-date': 1782864000,
+                currency: 'USD',
+                transactions: [
+                  {
+                    id: 'transaction-1',
+                    amount,
+                    transacted_at: 1782864000,
+                    posted: 1782864000,
+                    payee: 'Example',
+                  },
+                ],
+              },
+            ],
+            errors: [],
+          }),
+        ),
+      });
+
+      const res = await post('/transactions').send({
+        accountId: 'account-1',
+        startDate: '2026-07-01',
+      });
+
+      if (expected) {
+        expect(res.body.data.transactions.all[0].transactionAmount.amount).toBe(
+          expected,
+        );
+      } else {
+        expect(res.body.data.error_type).toBe(
+          'Invalid SimpleFIN transaction amount',
+        );
+      }
+    });
+
     it('reports an invalid token when the cached access key is not an access URL', async () => {
       secretsService.set(
         SecretName.simplefin_accessKey,
