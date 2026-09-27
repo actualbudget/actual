@@ -164,6 +164,45 @@ export const getCspSpentAmount = (
   return Math.abs(actuals[cat.id] ?? 0);
 };
 
+export function calculateForwardAmortization(
+  monthlySums: Record<string, number>,
+  periodMonths: number,
+): Record<string, number> {
+  const sortedMonths = Object.keys(monthlySums).sort();
+
+  let lastCoveredMonth: string | null = null;
+  const monthlyAllocation: Record<string, number> = {};
+
+  for (const m of sortedMonths) {
+    const totalAmount = Math.abs(monthlySums[m] || 0);
+    if (totalAmount === 0) continue;
+
+    const monthlyAmount = Math.round(totalAmount / periodMonths);
+
+    // If this payment was made in the final month of the previous coverage period,
+    // it's an early renewal (e.g. paying July-Dec bill on June 28 when June is the 6th month of Jan-Jun).
+    // Automatically queue it to start the following month (July) so it doesn't double-count!
+    let startMonth = m;
+    if (lastCoveredMonth && m === lastCoveredMonth) {
+      startMonth = monthUtils.addMonths(lastCoveredMonth, 1);
+    }
+
+    const endMonth = monthUtils.addMonths(startMonth, periodMonths - 1);
+    if (!lastCoveredMonth || endMonth > lastCoveredMonth) {
+      lastCoveredMonth = endMonth;
+    }
+
+    let cursor = startMonth;
+    for (let i = 0; i < periodMonths; i++) {
+      monthlyAllocation[cursor] =
+        (monthlyAllocation[cursor] || 0) + monthlyAmount;
+      cursor = monthUtils.addMonths(cursor, 1);
+    }
+  }
+
+  return monthlyAllocation;
+}
+
 export function useCspCategoryAudits(
   month: string,
   categories: CSPCategoryEntity[],
@@ -176,8 +215,16 @@ export function useCspCategoryAudits(
   return useQuery({
     queryKey: ['csp-category-audits', month, categoryHash, budgetStartMonth],
     queryFn: async () => {
+      const amortizedCats = categories.filter(
+        c => c.moving_average_months != null && c.moving_average_months > 0,
+      );
+
+      if (amortizedCats.length === 0) {
+        return {};
+      }
+
       let maxWindow = 12;
-      categories.forEach(c => {
+      amortizedCats.forEach(c => {
         if (
           c.moving_average_months != null &&
           c.moving_average_months > maxWindow
@@ -186,12 +233,13 @@ export function useCspCategoryAudits(
         }
       });
 
-      const diff = budgetStartMonth
-        ? monthUtils.differenceInCalendarMonths(month, budgetStartMonth)
-        : maxWindow;
-      const availableMonths = Math.max(1, diff + 1);
-      const globalDivisor = Math.min(maxWindow, availableMonths);
-      const earliestStartMonth = monthUtils.subMonths(month, globalDivisor - 1);
+      // Look back far enough to catch any previous coverage period that chains into `month`.
+      // Up to maxWindow * 2 months back (e.g. 24 or 48 months), or budgetStartMonth.
+      const earliestStartMonth = budgetStartMonth
+        ? budgetStartMonth
+        : monthUtils.subMonths(month, maxWindow * 2);
+
+      const amortizedCatIds = amortizedCats.map(c => c.id);
 
       const { data } = await send(
         'query',
@@ -199,7 +247,7 @@ export function useCspCategoryAudits(
           .filter({
             tombstone: false,
             'account.offbudget': false,
-            csp_category: { $ne: null },
+            csp_category: { $oneof: amortizedCatIds },
             date: {
               $transform: '$month',
               $gte: earliestStartMonth,
@@ -207,6 +255,8 @@ export function useCspCategoryAudits(
             },
           })
           .select([
+            'id',
+            'date',
             'csp_category',
             { month: { $month: '$date' } },
             'amount',
@@ -217,42 +267,24 @@ export function useCspCategoryAudits(
 
       const sumsByCatAndMonth: Record<string, Record<string, number>> = {};
       for (const row of data) {
-        const amount = row.amount;
-
-        if (!sumsByCatAndMonth[row.csp_category]) {
-          sumsByCatAndMonth[row.csp_category] = {};
+        const catId = row.csp_category;
+        if (!sumsByCatAndMonth[catId]) {
+          sumsByCatAndMonth[catId] = {};
         }
-        sumsByCatAndMonth[row.csp_category][row.month] =
-          (sumsByCatAndMonth[row.csp_category][row.month] || 0) + amount;
-      }
-
-      const sumsByCat: Record<string, { month: string; sum: number }[]> = {};
-      for (const catId in sumsByCatAndMonth) {
-        sumsByCat[catId] = Object.keys(sumsByCatAndMonth[catId]).map(m => ({
-          month: m,
-          sum: sumsByCatAndMonth[catId][m],
-        }));
+        sumsByCatAndMonth[catId][row.month] =
+          (sumsByCatAndMonth[catId][row.month] || 0) + row.amount;
       }
 
       const audits: Record<string, CspAudit> = {};
 
-      for (const cat of categories) {
+      for (const cat of amortizedCats) {
         const N = cat.moving_average_months || 12;
-        const catDivisor = Math.min(N, availableMonths);
-        const catStartMonth = monthUtils.subMonths(month, catDivisor - 1);
-
-        const catData = sumsByCat[cat.id] || [];
-        let totalSum = 0;
-        for (const row of catData) {
-          if (row.month >= catStartMonth && row.month <= month) {
-            totalSum += row.sum;
-          }
-        }
-
-        const actualAverage = Math.round(Math.abs(totalSum) / catDivisor);
+        const catMonths = sumsByCatAndMonth[cat.id] || {};
+        const monthlyAllocation = calculateForwardAmortization(catMonths, N);
+        const actualAmount = monthlyAllocation[month] || 0;
 
         audits[cat.id] = {
-          average: actualAverage,
+          average: actualAmount,
           deviation: 0,
           flag: null,
         };
@@ -1341,10 +1373,7 @@ export function Csp() {
 
     if (month) {
       if (movingAverageMonths && movingAverageMonths > 1) {
-        const catStartMonth = monthUtils.subMonths(
-          month,
-          movingAverageMonths - 1,
-        );
+        const catStartMonth = monthUtils.subMonths(month, movingAverageMonths);
         dateConditions = [
           {
             field: 'date',
