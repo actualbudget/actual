@@ -504,7 +504,7 @@ async function createWindow() {
   // hit when middle-clicking buttons or <a href/> with a target set to _blank
   // always deny, optionally redirect to browser
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (isExternalUrl(url)) {
+    if (isExternalUrl(url) && isAllowedExternalUrl(url)) {
       void shell.openExternal(url);
     }
 
@@ -515,8 +515,11 @@ async function createWindow() {
   // optionally redirect to browser
   win.webContents.on('will-navigate', (event, url) => {
     if (isExternalUrl(url)) {
-      void shell.openExternal(url);
+      // Never let the app window navigate away, whether or not we open the URL
       event.preventDefault();
+      if (isAllowedExternalUrl(url)) {
+        void shell.openExternal(url);
+      }
     }
   });
 
@@ -536,6 +539,19 @@ async function createWindow() {
 
 function isExternalUrl(url: string) {
   return !url.includes('localhost:') && !url.includes('app://');
+}
+
+// Only these schemes may ever be handed to the OS via shell.openExternal.
+// Anything else (ms-msdt:, search-ms:, vscode://, file://, javascript:, ...)
+// would invoke an arbitrary protocol handler with attacker-controlled input.
+const ALLOWED_EXTERNAL_PROTOCOLS = new Set(['http:', 'https:']);
+
+function isAllowedExternalUrl(url: string) {
+  try {
+    return ALLOWED_EXTERNAL_PROTOCOLS.has(new URL(url).protocol);
+  } catch {
+    return false;
+  }
 }
 
 app.setAppUserModelId('com.actualbudget.actual');
@@ -753,7 +769,13 @@ ipcMain.handle(
   },
 );
 
-ipcMain.handle('open-external-url', (event, url) => {
+ipcMain.handle('open-external-url', (event, url: string) => {
+  if (!isAllowedExternalUrl(url)) {
+    console.warn(
+      `Refusing to open external URL with disallowed scheme: ${url}`,
+    );
+    return;
+  }
   void shell.openExternal(url);
 });
 

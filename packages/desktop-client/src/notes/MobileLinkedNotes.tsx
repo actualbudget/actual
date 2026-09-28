@@ -50,9 +50,11 @@ export function MobileLinkedNotes({
         );
       }
     } else {
-      // Open URL in browser
+      // Open URL in browser (only http/https URLs are ever opened)
       const normalizedUrl = normalizeUrl(url);
-      window.Actual?.openURLInBrowser(normalizedUrl);
+      if (normalizedUrl) {
+        window.Actual?.openURLInBrowser(normalizedUrl);
+      }
     }
   };
 

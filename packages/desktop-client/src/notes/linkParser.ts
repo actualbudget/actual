@@ -26,15 +26,24 @@ function stripTrailingPunctuation(url: string): string {
   return url.replace(TRAILING_PUNCTUATION_REGEX, '');
 }
 
-/**
- * Normalizes a URL by adding protocol if missing
- */
-export function normalizeUrl(rawUrl: string): string {
-  // Already has protocol
-  if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
-    return rawUrl;
-  }
+// Only these schemes are ever opened from a note link. Anything else
+// (ms-msdt:, search-ms:, vscode://, javascript:, data:, ...) could invoke an
+// arbitrary protocol handler on the user's machine, so it is rejected.
+const ALLOWED_LINK_PROTOCOLS = new Set(['http:', 'https:']);
 
+function hasAllowedProtocol(url: string): boolean {
+  try {
+    return ALLOWED_LINK_PROTOCOLS.has(new URL(url).protocol);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Normalizes a URL by adding protocol if missing.
+ * Returns null when the URL uses a scheme that must not be opened.
+ */
+export function normalizeUrl(rawUrl: string): string | null {
   // www. URL - add https://
   if (rawUrl.startsWith('www.')) {
     return `https://${rawUrl}`;
@@ -45,7 +54,12 @@ export function normalizeUrl(rawUrl: string): string {
     return `file://${rawUrl}`;
   }
 
-  return rawUrl;
+  // Anything else must be an http(s) URL
+  if (hasAllowedProtocol(rawUrl)) {
+    return rawUrl;
+  }
+
+  return null;
 }
 
 /**
@@ -110,19 +124,25 @@ export function parseNotes(notes: string): ParsedSegment[] {
         segments.push(...parseTextWithTags(textBefore));
       }
 
-      // Add the link segment
       const [fullMatch, displayText, url] = markdownMatch;
       const isFilePath =
         url.startsWith('/') ||
         /^[A-Z]:\\/i.test(url) ||
         url.startsWith('file://');
-      segments.push({
-        type: 'link',
-        content: fullMatch,
-        displayText,
-        url,
-        isFilePath,
-      });
+
+      if (isFilePath || normalizeUrl(url) !== null) {
+        // Add the link segment
+        segments.push({
+          type: 'link',
+          content: fullMatch,
+          displayText,
+          url,
+          isFilePath,
+        });
+      } else {
+        // Unsupported scheme: render the markdown literally as plain text
+        segments.push({ type: 'text', content: fullMatch });
+      }
 
       remaining = remaining.slice(markdownMatch.index + fullMatch.length);
       continue;
