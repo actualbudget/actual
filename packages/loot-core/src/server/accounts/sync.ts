@@ -843,6 +843,7 @@ export async function matchTransactions(
         ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
 
   const hasMatched = new Set();
+  const exactMatchedParentIds = new Set<db.DbViewTransaction['id']>();
 
   const { normalized, payeesToCreate } = isBankSyncAccount
     ? await normalizeBankSyncTransactions(transactions, acctId)
@@ -880,6 +881,10 @@ export async function matchTransactions(
 
       if (match) {
         hasMatched.add(match.id);
+
+        if (isBankSyncAccount && match.is_parent) {
+          exactMatchedParentIds.add(match.id);
+        }
       }
     }
 
@@ -899,6 +904,7 @@ export async function matchTransactions(
             db.DbViewTransaction,
             | 'id'
             | 'is_parent'
+            | 'parent_id'
             | 'date'
             | 'imported_id'
             | 'payee'
@@ -910,7 +916,7 @@ export async function matchTransactions(
             | 'amount'
           >
         >(
-          `SELECT id, is_parent, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
+          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
           FROM v_transactions
           WHERE
             -- If both ids are set, and we didn't match earlier then skip dedup
@@ -931,6 +937,7 @@ export async function matchTransactions(
             db.DbViewTransaction,
             | 'id'
             | 'is_parent'
+            | 'parent_id'
             | 'date'
             | 'imported_id'
             | 'payee'
@@ -942,7 +949,7 @@ export async function matchTransactions(
             | 'amount'
           >
         >(
-          `SELECT id, is_parent, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
+          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
           FROM v_transactions
           WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
           [sevenDaysBefore, sevenDaysAfter, trans.amount || 0, acctId],
@@ -976,7 +983,10 @@ export async function matchTransactions(
     if (!data.match && data.fuzzyDataset) {
       // Try to find one where the payees match.
       const match = data.fuzzyDataset.find(
-        row => !hasMatched.has(row.id) && data.trans.payee === row.payee,
+        row =>
+          !hasMatched.has(row.id) &&
+          !exactMatchedParentIds.has(row.parent_id) &&
+          data.trans.payee === row.payee,
       );
 
       if (match) {
@@ -993,7 +1003,10 @@ export async function matchTransactions(
   // around the same date with the same amount.
   const transactionsStep3 = transactionsStep2.map(data => {
     if (!data.match && data.fuzzyDataset) {
-      const match = data.fuzzyDataset.find(row => !hasMatched.has(row.id));
+      const match = data.fuzzyDataset.find(
+        row =>
+          !hasMatched.has(row.id) && !exactMatchedParentIds.has(row.parent_id),
+      );
       if (match) {
         hasMatched.add(match.id);
         return { ...data, match };
