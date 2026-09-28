@@ -3,7 +3,7 @@ import { logger } from '#platform/server/log';
 import { createApp } from '#server/app';
 import * as encryption from '#server/encryption';
 import { PostError } from '#server/errors';
-import { get, post } from '#server/post';
+import { del, get, patch, post } from '#server/post';
 import { getServer, isValidBaseURL } from '#server/server-config';
 import type { OpenIdConfig } from '#types/models';
 
@@ -20,6 +20,10 @@ export type AuthHandlers = {
   'enable-openid': typeof enableOpenId;
   'get-openid-config': typeof getOpenIdConfig;
   'enable-password': typeof enablePassword;
+  'api-tokens-list': typeof listApiTokens;
+  'api-tokens-create': typeof createApiToken;
+  'api-tokens-revoke': typeof revokeApiToken;
+  'api-tokens-update': typeof updateApiToken;
 };
 
 export const app = createApp<AuthHandlers>();
@@ -35,6 +39,10 @@ app.method('subscribe-set-token', setToken);
 app.method('enable-openid', enableOpenId);
 app.method('get-openid-config', getOpenIdConfig);
 app.method('enable-password', enablePassword);
+app.method('api-tokens-list', listApiTokens);
+app.method('api-tokens-create', createApiToken);
+app.method('api-tokens-revoke', revokeApiToken);
+app.method('api-tokens-update', updateApiToken);
 
 async function didBootstrap() {
   return Boolean(await asyncStorage.getItem('did-bootstrap'));
@@ -133,7 +141,6 @@ async function getLoginMethods() {
         error: err.reason || 'network-failure',
       };
     }
-
     throw err;
   }
 
@@ -384,4 +391,150 @@ async function enablePassword(passwordConfig: { password: string }) {
     throw err;
   }
   return {};
+}
+
+// API Token management handlers
+export type ApiToken = {
+  id: string;
+  name: string;
+  prefix: string;
+  createdAt: number;
+  lastUsedAt: number | null;
+  expiresAt: number;
+  enabled: boolean;
+  budgetIds: string[];
+};
+
+export type ApiTokenCreateResult = ApiToken & {
+  token: string; // Only returned on creation
+};
+
+async function listApiTokens(): Promise<
+  { data: ApiToken[] } | { error: string }
+> {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    return { error: 'not-logged-in' };
+  }
+
+  try {
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+
+    const res = await get(serverConfig.BASE_SERVER + '/api-tokens', {
+      headers: {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    });
+
+    const parsed = JSON.parse(res);
+    if (parsed.status === 'ok') {
+      return { data: parsed.data };
+    }
+    return { error: parsed.reason || 'unknown-error' };
+  } catch {
+    return { error: 'network-failure' };
+  }
+}
+
+async function createApiToken(params: {
+  name: string;
+  budgetIds: string[];
+  expiresAt?: number | null;
+}): Promise<{ data: ApiTokenCreateResult } | { error: string }> {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    return { error: 'not-logged-in' };
+  }
+
+  try {
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+
+    const data = await post(
+      serverConfig.BASE_SERVER + '/api-tokens',
+      {
+        name: params.name,
+        budgetIds: params.budgetIds,
+        expiresAt: params.expiresAt ?? null,
+      },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+
+    return { data };
+  } catch (err) {
+    if (err instanceof PostError) {
+      return { error: err.reason || 'network-failure' };
+    }
+    return { error: 'network-failure' };
+  }
+}
+
+async function revokeApiToken(params: {
+  tokenId: string;
+}): Promise<{ success: boolean } | { error: string }> {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    return { error: 'not-logged-in' };
+  }
+
+  try {
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+
+    await del(
+      serverConfig.BASE_SERVER + '/api-tokens/' + params.tokenId,
+      undefined,
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+
+    return { success: true };
+  } catch (err) {
+    if (err instanceof PostError) {
+      return { error: err.reason || 'network-failure' };
+    }
+    return { error: 'network-failure' };
+  }
+}
+
+async function updateApiToken(params: {
+  tokenId: string;
+  enabled: boolean;
+}): Promise<{ success: boolean } | { error: string }> {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    return { error: 'not-logged-in' };
+  }
+
+  try {
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+
+    await patch(
+      serverConfig.BASE_SERVER + '/api-tokens/' + params.tokenId,
+      { enabled: params.enabled },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+
+    return { success: true };
+  } catch (err) {
+    if (err instanceof PostError) {
+      return { error: err.reason || 'network-failure' };
+    }
+    return { error: 'network-failure' };
+  }
 }
