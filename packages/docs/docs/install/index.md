@@ -73,9 +73,7 @@ Content contained on external links is not managed or maintained by the Actual B
 - [Home Assistant](https://github.com/sztupy/hassio-actualbudget/blob/main/README.md)
 - [Hostim](https://hostim.dev/docs/templates/actual) - one-click managed Docker hosting with a persistent volume and free SSL.
 - [Proxmox VE Helper-Scripts](https://community-scripts.github.io/ProxmoxVE/scripts?id=actualbudget)
-- Syncloud - a server OS for a Raspberry Pi, a spare PC or a VPS, which installs Actual from an app store
-  - [Actual Budget on Syncloud](https://syncloud.org/en/actual-budget)
-  - [Setting up a device](https://syncloud.org/setup)
+- [Syncloud](https://syncloud.org/en/actual-budget)
 - Synology NAS
   - [Marius Bogdan Lixandru's guide](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/)
   - [Adam Millerchip's guide](https://adamu.jp/blog/actual_budget_nas)
