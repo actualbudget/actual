@@ -322,7 +322,7 @@ app.post('/upload-user-file', async (req, res) => {
   if (res.headersSent) return;
 
   let groupId: GroupId | null = null;
-  if (groupIdHeader) {
+  if (groupIdHeader !== undefined) {
     if (typeof groupIdHeader !== 'string' || !isValidGroupId(groupIdHeader)) {
       res.status(400).send('invalid groupId');
       return;
