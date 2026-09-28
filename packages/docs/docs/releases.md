@@ -61,6 +61,7 @@ This release speeds up transaction editing, makes syncing more resilient to vers
 - [#8973](https://github.com/actualbudget/actual/pull/8973) Fix YNAB4 import so non-transfer split children keep the parent transaction's payee. — thanks @costajohnt
 - [#8818](https://github.com/actualbudget/actual/pull/8818) Fixes a typo on the "Envelope Budgeting" page of the docs. — thanks @chris-t-jansen
 - [#8994](https://github.com/actualbudget/actual/pull/8994) Keep account group totals in the experimental new sidebar up to date after syncing transfers from another device — thanks @matt-fidd
+- [#9027](https://github.com/actualbudget/actual/pull/9027) Fix a rare freeze when saving a change in the browser — thanks @MikesGlitch
 - [#8913](https://github.com/actualbudget/actual/pull/8913) Fix special characters (ä, ö, ü) being garbled when importing CAMT bank files — thanks @P1tt187
 - [#8763](https://github.com/actualbudget/actual/pull/8763) Fix the budget category and group menus not opening after a rename until the page is reloaded — thanks @MannXo
 - [#8829](https://github.com/actualbudget/actual/pull/8829) Keep net worth reports stable while linked transfers cross reporting intervals — thanks @sambai-dev
@@ -72,6 +73,7 @@ This release speeds up transaction editing, makes syncing more resilient to vers
 - [#8861](https://github.com/actualbudget/actual/pull/8861) Fix Monte Carlo withdrawal rules misbehaving when retirement starts after years of zero planned spending — thanks @MikesGlitch
 - [#8964](https://github.com/actualbudget/actual/pull/8964) Fix the Monte Carlo cashflow chart showing spending below the minimum spending floor in the years after a plan runs out — thanks @MikesGlitch
 - [#9003](https://github.com/actualbudget/actual/pull/9003) Fix light custom themes losing their sidebar colours in the experimental new sidebar — thanks @matt-fidd
+- [#9025](https://github.com/actualbudget/actual/pull/9025) Fix the app failing to start when opened offline in the browser — thanks @MikesGlitch
 - [#8874](https://github.com/actualbudget/actual/pull/8874) Fix corrupted accented characters when importing OFX/QFX files. — thanks @flafleur
 - [#8715](https://github.com/actualbudget/actual/pull/8715) Show daily and weekly report dates using your chosen date format — thanks @Divergent-Code
 - [#8854](https://github.com/actualbudget/actual/pull/8854) Fix schedules set to run before the weekend getting stuck on the same date and no longer posting — thanks @matt-fidd
