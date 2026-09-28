@@ -356,32 +356,6 @@ describe('CategoryTemplateContext', () => {
       instance = new TestCategoryTemplateContext([], category, '2024-01', 0, 0);
     });
 
-    it.each([
-      0,
-      -1,
-      0.5,
-      Number.NaN,
-      Number.POSITIVE_INFINITY,
-      Number.MAX_SAFE_INTEGER + 1,
-    ])(
-      'rejects an invalid interval (%s) before running a periodic template',
-      interval => {
-        expect(() =>
-          CategoryTemplateContext.runPeriodic(
-            {
-              type: 'periodic',
-              amount: 100,
-              period: { period: 'day', amount: interval },
-              starting: '2023-12-01',
-              directive: 'template',
-              priority: 0,
-            },
-            instance,
-          ),
-        ).toThrow('Periodic template interval must be a positive integer');
-      },
-    );
-
     it.each(['2023-12-01', '2024-01-01'])(
       'rejects a stalled date shift in either loop (starting %s)',
       starting => {
@@ -2006,6 +1980,31 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(actions.getSheetValue).mockResolvedValue(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValue(false);
       vi.mocked(actions.isTrackingBudget).mockReturnValue(false);
+    });
+
+    it.each([
+      0,
+      -1,
+      0.5,
+      Number.NaN,
+      Number.POSITIVE_INFINITY,
+      Number.MAX_SAFE_INTEGER + 1,
+    ])('rejects an invalid saved repeat interval (%s)', async interval => {
+      const templates: Template[] = [
+        {
+          type: 'periodic',
+          amount: 100,
+          period: { period: 'day', amount: interval },
+          starting: '2023-12-01',
+          directive: 'template',
+          priority: 0,
+        },
+      ];
+      await expect(
+        CategoryTemplateContext.init(templates, category, '2024-01', 0),
+      ).rejects.toThrow(
+        'Template repeat interval must be a whole number greater than 0',
+      );
     });
 
     it('throws when a schedule template references a non-existent schedule', async () => {

@@ -57,13 +57,6 @@ export class CategoryTemplateContext {
     budgeted: number,
     skipAvailableClamp: boolean = false,
   ) {
-    // Saved/synced goal_def JSON bypasses the note grammar.
-    for (const template of templates) {
-      if (template.type === 'periodic') {
-        CategoryTemplateContext.checkPeriodicInterval(template);
-      }
-    }
-
     // get all the needed setup values
     const lastMonthSheet = monthUtils.sheetForMonth(
       monthUtils.subMonths(month, 1),
@@ -86,6 +79,7 @@ export class CategoryTemplateContext {
     }
 
     // run all checks
+    CategoryTemplateContext.checkPeriodicInterval(templates);
     await CategoryTemplateContext.checkByAndScheduleAndSpend(templates, month);
     await CategoryTemplateContext.checkPercentage(templates);
 
@@ -475,11 +469,17 @@ export class CategoryTemplateContext {
 
   //-----------------------------------------------------------------------------
   //  Template Validation
-  private static checkPeriodicInterval(template: PeriodicTemplate) {
-    const interval = template.period?.amount;
-    if (!Number.isSafeInteger(interval) || interval < 1) {
-      throw new Error('Periodic template interval must be a positive integer');
-    }
+  private static checkPeriodicInterval(templates: Template[]) {
+    templates
+      .filter(template => template.type === 'periodic')
+      .forEach(template => {
+        const interval = template.period?.amount;
+        if (!Number.isSafeInteger(interval) || interval < 1) {
+          throw new Error(
+            'Template repeat interval must be a whole number greater than 0',
+          );
+        }
+      });
   }
 
   static async checkByAndScheduleAndSpend(
@@ -715,7 +715,6 @@ export class CategoryTemplateContext {
     template: PeriodicTemplate,
     templateContext: CategoryTemplateContext,
   ): number {
-    CategoryTemplateContext.checkPeriodicInterval(template);
     let toBudget = 0;
     const amount = amountToInteger(
       template.amount,
