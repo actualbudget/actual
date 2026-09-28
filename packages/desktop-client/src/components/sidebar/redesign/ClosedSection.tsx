@@ -1,4 +1,4 @@
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
@@ -8,7 +8,7 @@ import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
-import { AccountRow } from './AccountRow';
+import { AccountTree } from './AccountTree';
 import { CollapseChevron } from './CollapseChevron';
 import { CountPill } from './CountPill';
 import { sectionLabelStyle } from './styles';
@@ -17,13 +17,17 @@ type ClosedSectionProps = {
   accounts: AccountEntity[];
   isOpen: boolean;
   onToggle: () => void;
+  isDragDisabled: boolean;
 };
 
 export function ClosedSection({
   accounts,
   isOpen,
   onToggle,
+  isDragDisabled,
 }: ClosedSectionProps) {
+  const { t } = useTranslation();
+
   if (accounts.length === 0) {
     return null;
   }
@@ -43,9 +47,9 @@ export function ClosedSection({
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'flex-start',
-          gap: spacing.xs,
+          gap: spacing.xs + spacing.xxs,
           paddingBlock: spacing.xs,
-          paddingLeft: spacing.xs,
+          paddingLeft: spacing.xs + spacing.xxs,
           paddingRight: spacing.sm,
           borderRadius: radius.sm,
           width: '100%',
@@ -58,11 +62,13 @@ export function ClosedSection({
         {!isOpen && <CountPill count={accounts.length} />}
       </Button>
       {isOpen && (
-        <View style={{ paddingLeft: spacing.xs }}>
-          {accounts.map(account => (
-            <AccountRow key={account.id} account={account} isClosed />
-          ))}
-        </View>
+        <AccountTree
+          label={t('Closed accounts')}
+          side="closed"
+          buckets={[{ group: null, accounts, failedCount: 0 }]}
+          showSyncDot={false}
+          isDragDisabled={isDragDisabled}
+        />
       )}
     </View>
   );
