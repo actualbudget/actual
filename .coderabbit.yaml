@@ -8,6 +8,9 @@ reviews:
   request_changes_workflow: true
   review_status: false
   high_level_summary: false
+  slop_detection:
+    enabled: true
+    label: 'possible slop'
   finishing_touches:
     docstrings:
       enabled: false
