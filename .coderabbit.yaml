@@ -10,7 +10,7 @@ reviews:
   high_level_summary: false
   slop_detection:
     enabled: true
-    label: 'possible slop'
+    label: 'possible low quality'
   finishing_touches:
     docstrings:
       enabled: false
