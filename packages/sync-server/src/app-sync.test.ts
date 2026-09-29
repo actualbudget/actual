@@ -476,6 +476,34 @@ describe('/upload-user-file', () => {
     expect(res.text).toBe('invalid fileId');
   });
 
+  it('returns 400 for an empty x-actual-group-id header', async () => {
+    const res = await request(app)
+      .post('/upload-user-file')
+      .set('Content-Type', 'application/encrypted-file')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-name', 'test-file')
+      .set('x-actual-file-id', generateFileId())
+      .set('x-actual-group-id', '')
+      .send(Buffer.from('file content'));
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.text).toBe('invalid groupId');
+  });
+
+  it('returns 400 for an invalid x-actual-group-id header', async () => {
+    const res = await request(app)
+      .post('/upload-user-file')
+      .set('Content-Type', 'application/encrypted-file')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-name', 'test-file')
+      .set('x-actual-file-id', generateFileId())
+      .set('x-actual-group-id', 'group@2026')
+      .send(Buffer.from('file content'));
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.text).toBe('invalid groupId');
+  });
+
   it('uploads a new file successfully', async () => {
     const fileId = generateFileId();
     const fileName = 'test-file.txt';

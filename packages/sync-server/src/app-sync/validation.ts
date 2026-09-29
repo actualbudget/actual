@@ -1,13 +1,30 @@
+import type { File } from '#app-sync/services/files-service';
+
 // This is a version representing the internal format of sync
 // messages. When this changes, all sync files need to be reset. We
 // will check this version when syncing and notify the user if they
 // need to reset.
 const SYNC_FORMAT_VERSION = 2;
 
-const validateSyncedFile = (groupId, keyId, currentFile) => {
+export type SyncedFileValidationError =
+  | 'file-old-version'
+  | 'file-needs-upload'
+  | 'file-key-mismatch'
+  | 'file-has-reset'
+  | 'file-has-new-key';
+
+export type UploadedFileValidationError = 'file-has-reset' | 'file-has-new-key';
+
+const validateSyncedFile = (
+  groupId: string | null,
+  keyId: string | null,
+  currentFile: File,
+): SyncedFileValidationError | null => {
+  // `syncVersion` is stored in a SMALLINT column but is typed as a string
+  // on `File`, so coerce it before comparing it to the current version.
   if (
     currentFile.syncVersion == null ||
-    currentFile.syncVersion < SYNC_FORMAT_VERSION
+    Number(currentFile.syncVersion) < SYNC_FORMAT_VERSION
   ) {
     return 'file-old-version';
   }
@@ -46,7 +63,11 @@ const validateSyncedFile = (groupId, keyId, currentFile) => {
   return null;
 };
 
-const validateUploadedFile = (groupId, keyId, currentFile) => {
+const validateUploadedFile = (
+  groupId: string | null,
+  keyId: string | null,
+  currentFile: File | null,
+): UploadedFileValidationError | null => {
   if (!currentFile) {
     // File is new, so no need to validate
     return null;
