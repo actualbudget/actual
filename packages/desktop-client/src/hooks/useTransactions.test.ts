@@ -40,9 +40,9 @@ describe('calculateRunningBalancesTopDown', () => {
   });
 
   test("does not assume the last transaction is the account's first", () => {
-    // Hiding reconciled transactions (or paging) drops older transactions
-    // from the list. The earliest transaction still shown must carry the
-    // balance after it, not its own amount (#9040).
+    // Before every page has loaded, the list ends short of the account's
+    // first transaction. The last loaded transaction must carry the balance
+    // after it, not its own amount (#9040).
     const balances = calculateRunningBalancesTopDown(
       [newest, oldest],
       'all',
