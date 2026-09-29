@@ -85,6 +85,46 @@ describe('Web sqlite', () => {
     expect(rows[2].number).toBe(6);
   });
 
+  it('should support immediate transactions with rollback and nesting', async () => {
+    const db = await openDatabase();
+    execQuery(db, initSQL);
+
+    transaction(
+      db,
+      () => {
+        runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 1)");
+        // Nested transactions become savepoints regardless of the mode
+        transaction(
+          db,
+          () => {
+            runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id2', 2)");
+          },
+          { immediate: true },
+        );
+      },
+      { immediate: true },
+    );
+    expect(runQuery(db, 'SELECT * FROM numbers', null, true).length).toBe(2);
+
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => null);
+    expect(() => {
+      transaction(
+        db,
+        () => {
+          runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id3', 3)");
+          runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 1)");
+        },
+        { immediate: true },
+      );
+    }).toThrow(/constraint failed/);
+    consoleSpy.mockRestore();
+
+    expect(runQuery(db, 'SELECT * FROM numbers', null, true).length).toBe(2);
+    // The failed transaction must have released the write lock
+    runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id4', 4)");
+    expect(runQuery(db, 'SELECT * FROM numbers', null, true).length).toBe(3);
+  });
+
   it('should use the crdt index for a batched cell lookup', async () => {
     // Mirrors the query `compareMessages` in server/sync builds for a
     // full chunk. If the planner ever falls back to a table scan on the

@@ -138,7 +138,7 @@ async function importPayees(
   }
 }
 
-async function importTransactions(
+export async function importTransactions(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
   tick: ImportTick,
@@ -214,7 +214,7 @@ async function importTransactions(
 
             return {
               transfer_id: transferId,
-              payee,
+              ...(payee != null ? { payee } : {}),
               imported_payee,
             };
           }
