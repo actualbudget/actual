@@ -242,13 +242,11 @@ export function calculateRunningBalancesTopDown(
         return acc;
       }
 
-      if (index === arr.length - 1) {
-        // This is the last transaction in the list,
-        // so we set the running balance to the amount of the transaction
-        acc.set(transaction.id, transaction.amount);
-        return acc;
-      }
-
+      // Every other transaction, the last one included, is the previous
+      // running balance minus the previous amount. The last transaction in
+      // the list is not necessarily the account's first: older transactions
+      // may be hidden (reconciled) or not loaded yet, so its running balance
+      // cannot be assumed to be its own amount.
       const previousTransaction = arr[index - 1];
       const previousRunningBalance = acc.get(previousTransaction.id) ?? 0;
       const previousAmount = previousTransaction.amount ?? 0;
