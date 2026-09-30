@@ -47,6 +47,9 @@ type ScheduleTemplateTarget = {
   full: boolean;
   repeat: boolean;
   dateConditions: ReturnType<typeof extractScheduleConds>['date'];
+  // Its last occurrence falls before current_month. Only kept when
+  // createScheduleList is asked to keep past-due schedules.
+  isPastDue: boolean;
 };
 
 export async function createScheduleList(
@@ -54,6 +57,10 @@ export async function createScheduleList(
   current_month: string,
   category: CategoryEntity,
   currency: Currency,
+  // Keep a schedule whose last occurrence is before current_month instead
+  // of rejecting it as past. It may still be unpaid, and money carried into
+  // current_month has to cover it.
+  keepPastDue = false,
 ) {
   const t: Array<ScheduleTemplateTarget> = [];
   const errors: string[] = [];
@@ -177,7 +184,8 @@ export async function createScheduleList(
       current_month,
     );
     const displayName = scheduleName ?? template.name ?? '';
-    if (num_months < 0) {
+    const isPastDue = num_months < 0;
+    if (isPastDue && !keepPastDue) {
       //non-repeating schedules could be negative
       errors.push(`Schedule ${displayName} is in the Past.`);
     } else {
@@ -197,9 +205,10 @@ export async function createScheduleList(
         repeat: isRepeating,
         name: displayName,
         dateConditions,
+        isPastDue,
       });
       if (!completed) {
-        if (isRepeating) {
+        if (isRepeating && !isPastDue) {
           let monthlyTarget = 0;
           const nextMonth = monthUtils.addMonths(
             current_month,
@@ -721,10 +730,13 @@ export async function runScheduleForecast(
     current_month,
     category,
     currency,
+    true,
   );
   errors = errors.concat(t.errors);
 
-  const fullEntries = t.t.filter(c => c.template.full);
+  // Past-due schedules only matter to the forecast, which reserves the ones
+  // still unpaid out of the carried-over balance.
+  const fullEntries = t.t.filter(c => c.template.full && !c.isPastDue);
   const smoothEntries = t.t.filter(c => !c.template.full);
 
   const perScheduleMonthly = new Map<ScheduleTemplate, number>();
@@ -768,12 +780,17 @@ export async function runScheduleForecast(
   // lump-sum as if it were a monthly amount, and would also understate
   // every schedule's share relative to the 60-month total outflow, which
   // is a different, larger quantity entirely).
-  const totalMonthlyWeight = smoothEntries.reduce(
+  // A past-due schedule has no monthly equivalent going forward, so it only
+  // shares when nothing else in the category is left to take the amount.
+  const upcomingEntries = smoothEntries.filter(c => !c.isPastDue);
+  const splitEntries =
+    upcomingEntries.length > 0 ? upcomingEntries : smoothEntries;
+  const totalMonthlyWeight = splitEntries.reduce(
     (s, c) => s + getMonthlyBaseContribution(c),
     0,
   );
 
-  for (const entry of smoothEntries) {
+  for (const entry of splitEntries) {
     // When the smooth schedules sharing this category net to a zero total
     // monthly-equivalent weight (e.g. two schedules with offsetting signs),
     // dividing by zero would yield NaN or +/-Infinity — never valid for a
@@ -781,7 +798,7 @@ export async function runScheduleForecast(
     // which is always finite.
     const share =
       totalMonthlyWeight === 0
-        ? Math.round(candidate / smoothEntries.length)
+        ? Math.round(candidate / splitEntries.length)
         : Math.round(
             (getMonthlyBaseContribution(entry) / totalMonthlyWeight) *
               candidate,
