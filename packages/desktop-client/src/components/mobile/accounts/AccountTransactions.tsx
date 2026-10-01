@@ -149,6 +149,7 @@ function TransactionListWithPreviews({
     runningBalances,
     isPending: isTransactionsLoading,
     isFetchingNextPage: isLoadingMoreTransactions,
+    isFetchNextPageError: hasLoadingMoreTransactionsFailed,
     hasNextPage: hasMoreTransactions,
     fetchNextPage: fetchMoreTransactions,
   } = useTransactions({
@@ -187,10 +188,13 @@ function TransactionListWithPreviews({
 
   const visibleTransactions = useMemo(
     () =>
-      hideReconciledTransactions
-        ? transactions.filter(t => !t.reconciled)
-        : transactions,
-    [transactions, hideReconciledTransactions],
+      transactions.filter(
+        t =>
+          !(hideReconciledTransactions && t.reconciled) &&
+          // Do not render child transactions in the list, unless searching
+          (isSearching || !t.is_child),
+      ),
+    [transactions, hideReconciledTransactions, isSearching],
   );
 
   // The next page loads when the list is scrolled to its end. Dropping
@@ -202,6 +206,7 @@ function TransactionListWithPreviews({
       !filterReconciledInQuery &&
       !isTransactionsLoading &&
       !isLoadingMoreTransactions &&
+      !hasLoadingMoreTransactionsFailed &&
       hasMoreTransactions &&
       visibleTransactions.length < MIN_VISIBLE_TRANSACTIONS
     ) {
@@ -212,6 +217,7 @@ function TransactionListWithPreviews({
     filterReconciledInQuery,
     isTransactionsLoading,
     isLoadingMoreTransactions,
+    hasLoadingMoreTransactionsFailed,
     hasMoreTransactions,
     visibleTransactions.length,
     fetchMoreTransactions,
@@ -346,10 +352,7 @@ function TransactionListWithPreviews({
   const previewTransactionsToDisplay = isReconciling ? [] : previewTransactions;
 
   const transactionsToDisplay = !isSearching
-    ? // Do not render child transactions in the list, unless searching
-      previewTransactionsToDisplay.concat(
-        visibleTransactions.filter(t => !t.is_child),
-      )
+    ? previewTransactionsToDisplay.concat(visibleTransactions)
     : visibleTransactions;
 
   return (
