@@ -31,6 +31,37 @@ export type UndoState = {
   undoTag: string;
 };
 
+export type UndoAvailability = {
+  canUndo: boolean;
+  canRedo: boolean;
+};
+
+let lastAvailability: UndoAvailability = { canUndo: false, canRedo: false };
+
+export function getUndoAvailability(): UndoAvailability {
+  return {
+    canUndo: MESSAGE_HISTORY.slice(0, CURSOR + 1).some(
+      entry => entry.type === 'messages',
+    ),
+    canRedo: MESSAGE_HISTORY.slice(CURSOR + 1).some(
+      entry => entry.type === 'messages',
+    ),
+  };
+}
+
+// Tell the client when undo or redo becomes available or unavailable, so
+// controls such as the title bar buttons can be enabled or disabled.
+function notifyUndoAvailability() {
+  const next = getUndoAvailability();
+  if (
+    next.canUndo !== lastAvailability.canUndo ||
+    next.canRedo !== lastAvailability.canRedo
+  ) {
+    lastAvailability = next;
+    connection.send('undo-availability-changed', next);
+  }
+}
+
 function trimHistory() {
   MESSAGE_HISTORY = MESSAGE_HISTORY.slice(0, CURSOR + 1);
 
@@ -58,12 +89,14 @@ export function appendMessages(messages, oldData) {
       undoTag,
     });
     CURSOR++;
+    notifyUndoAvailability();
   }
 }
 
 export function clearUndo() {
   MESSAGE_HISTORY = [{ type: 'marker' }];
   CURSOR = 0;
+  notifyUndoAvailability();
 }
 
 export function withUndo<T>(
@@ -85,6 +118,8 @@ export function withUndo<T>(
     MESSAGE_HISTORY.push(marker);
     CURSOR++;
   }
+
+  notifyUndoAvailability();
 
   return withMutatorContext(
     { undoListening: true, undoTag: context.undoTag },
@@ -156,6 +191,8 @@ export async function undo() {
 
     await applyUndoAction(toApply, meta, entries[0].undoTag);
   }
+
+  notifyUndoAvailability();
 }
 
 function undoMessage(message, oldData) {
@@ -234,6 +271,8 @@ export async function redo() {
 
     await applyUndoAction(toApply, meta, entries[entries.length - 1].undoTag);
   }
+
+  notifyUndoAvailability();
 }
 
 function redoResurrections(messages, oldData): Message[] {

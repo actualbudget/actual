@@ -42,7 +42,7 @@ import { app as tagsApp } from './tags/app';
 import { app as toolsApp } from './tools/app';
 import { app as transactionsApp } from './transactions/app';
 import * as rules from './transactions/transaction-rules';
-import { redo, undo } from './undo';
+import { getUndoAvailability, redo, undo } from './undo';
 
 // handlers
 
@@ -57,6 +57,10 @@ handlers['undo'] = mutator(async function () {
 handlers['redo'] = mutator(function () {
   return redo();
 });
+
+handlers['undo-availability'] = async function () {
+  return getUndoAvailability();
+};
 
 handlers['make-filters-from-conditions'] = async function ({
   conditions,

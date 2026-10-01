@@ -7,8 +7,8 @@ import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgArrowLeft,
-  SvgBackward,
-  SvgForward,
+  SvgRedo,
+  SvgUndo,
 } from '@actual-app/components/icons/v1';
 import {
   SvgAlertTriangle,
@@ -36,6 +36,7 @@ import { useSheetValue } from '#hooks/useSheetValue';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncStatus } from '#hooks/useSyncStatus';
 import { useUndo } from '#hooks/useUndo';
+import { useUndoAvailability } from '#hooks/useUndoAvailability';
 import { useDispatch } from '#redux';
 import * as bindings from '#spreadsheet/bindings';
 
@@ -258,17 +259,28 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
 function UndoRedoButtons() {
   const { t } = useTranslation();
   const { undo, redo } = useUndo();
+  const { canUndo, canRedo } = useUndoAvailability();
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <Tooltip placement="bottom end" content={t('Undo')}>
-        <Button variant="bare" aria-label={t('Undo')} onPress={undo}>
-          <SvgBackward width={15} height={15} />
+        <Button
+          variant="bare"
+          aria-label={t('Undo')}
+          isDisabled={!canUndo}
+          onPress={undo}
+        >
+          <SvgUndo width={15} height={15} />
         </Button>
       </Tooltip>
       <Tooltip placement="bottom end" content={t('Redo')}>
-        <Button variant="bare" aria-label={t('Redo')} onPress={redo}>
-          <SvgForward width={15} height={15} />
+        <Button
+          variant="bare"
+          aria-label={t('Redo')}
+          isDisabled={!canRedo}
+          onPress={redo}
+        >
+          <SvgRedo width={15} height={15} />
         </Button>
       </Tooltip>
     </View>

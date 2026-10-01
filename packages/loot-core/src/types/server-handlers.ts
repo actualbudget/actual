@@ -1,8 +1,10 @@
+import type { UndoAvailability } from '#server/undo';
 import type { QueryState } from '#shared/query';
 
 export type ServerHandlers = {
   undo: () => Promise<void>;
   redo: () => Promise<void>;
+  'undo-availability': () => Promise<UndoAvailability>;
 
   'make-filters-from-conditions': (arg: {
     conditions: unknown;
