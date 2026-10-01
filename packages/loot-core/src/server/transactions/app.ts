@@ -18,6 +18,7 @@ import {
   hashAccountHint,
   pairAccountHint,
 } from './import/account-pairing';
+import { findSuggestedAccount } from './import/account-suggestion';
 import { parseFile } from './import/parse-file';
 import type { ParseFileOptions } from './import/parse-file';
 import { mergeTransactions } from './merge';
@@ -125,17 +126,30 @@ async function detectImportAccount({
 }): Promise<{
   hintId: string | null;
   matchedAccountId: string | null;
+  suggestedAccountId: string | null;
 }> {
-  // CSV files carry no account identifier, so skip parsing them here.
+  // CSV files carry no account identifier, and their payee column isn't
+  // known until the user maps columns, so they are neither matched nor
+  // suggested.
   if (/\.(csv|tsv)$/i.test(filepath)) {
-    return { hintId: null, matchedAccountId: null };
+    return { hintId: null, matchedAccountId: null, suggestedAccountId: null };
   }
-  const { accountHint } = await parseFile(filepath, options);
-  if (!accountHint) {
-    return { hintId: null, matchedAccountId: null };
+  const { accountHint, transactions } = await parseFile(filepath, options);
+
+  let hintId: string | null = null;
+  let matchedAccountId: string | null = null;
+  if (accountHint) {
+    hintId = await hashAccountHint(accountHint);
+    matchedAccountId = await findPairedAccount(hintId);
   }
-  const hintId = await hashAccountHint(accountHint);
-  return { hintId, matchedAccountId: await findPairedAccount(hintId) };
+
+  // Only guess when the identifier didn't settle it.
+  const suggestedAccountId = matchedAccountId
+    ? null
+    : await findSuggestedAccount(
+        (transactions ?? []) as Parameters<typeof findSuggestedAccount>[0],
+      );
+  return { hintId, matchedAccountId, suggestedAccountId };
 }
 
 async function pairImportAccount({

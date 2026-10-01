@@ -12,17 +12,21 @@ test.describe('Import account matching', () => {
   let navigation: Navigation;
   let accountA: AccountPage;
 
-  async function chooseFile(startImport: () => Promise<void>) {
+  async function chooseFile(
+    startImport: () => Promise<void>,
+    file = 'test-account.ofx',
+  ) {
     const fileChooserPromise = page.waitForEvent('filechooser');
     await startImport();
     const fileChooser = await fileChooserPromise;
-    await fileChooser.setFiles(join(__dirname, 'data/test-account.ofx'));
+    await fileChooser.setFiles(join(__dirname, 'data', file));
   }
 
-  async function importFromAllAccounts() {
+  async function importFromAllAccounts(file?: string) {
     await page.getByRole('link', { name: /^All accounts/ }).click();
-    await chooseFile(() =>
-      page.getByRole('button', { name: 'Import', exact: true }).click(),
+    await chooseFile(
+      () => page.getByRole('button', { name: 'Import', exact: true }).click(),
+      file,
     );
   }
 
@@ -127,5 +131,22 @@ test.describe('Import account matching', () => {
         /previously linked to Match A\. It is now linked to Match B/,
       ),
     ).toBeVisible();
+  });
+
+  test('suggests an account from similar transactions when the file has no identifier', async () => {
+    // Give Match A some history with the payees the QIF file contains.
+    await importFromAllAccounts();
+    await pickAccount('Match A');
+    await finishImport();
+
+    await importFromAllAccounts('test-no-account.qif');
+    await expect(page.getByRole('dialog')).toContainText(
+      'This looks like Match A.',
+    );
+    // A suggestion never skips the confirm step.
+    await expect(page.getByRole('button', { name: 'Continue' })).toBeDisabled();
+
+    await page.getByRole('button', { name: 'Use Match A' }).click();
+    await expect(page.getByRole('button', { name: 'Continue' })).toBeEnabled();
   });
 });

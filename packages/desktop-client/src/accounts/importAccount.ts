@@ -8,6 +8,8 @@ import type { AppDispatch } from '#redux/store';
 type ImportAccountDetection = {
   hintId: string | null;
   matchedAccountId: AccountEntity['id'] | null;
+  // A guess from similar transactions, only given when nothing matched.
+  suggestedAccountId: AccountEntity['id'] | null;
 };
 
 // Reads the account identifier from a file and looks up the account it was
@@ -18,7 +20,7 @@ export async function detectImportAccount(
   try {
     return await send('transactions-detect-account', { filepath });
   } catch {
-    return { hintId: null, matchedAccountId: null };
+    return { hintId: null, matchedAccountId: null, suggestedAccountId: null };
   }
 }
 

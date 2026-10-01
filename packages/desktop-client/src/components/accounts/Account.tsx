@@ -643,7 +643,8 @@ class AccountInternal extends PureComponent<
     }
 
     const filename = res[0];
-    const { hintId, matchedAccountId } = await detectImportAccount(filename);
+    const { hintId, matchedAccountId, suggestedAccountId } =
+      await detectImportAccount(filename);
     const onImported = (didChange: boolean) => {
       if (didChange) {
         this.fetchTransactions();
@@ -661,6 +662,7 @@ class AccountInternal extends PureComponent<
               filename,
               hintId,
               matchedAccountId,
+              suggestedAccountId,
               startedFromAccountId: account?.id,
               onImported,
             },

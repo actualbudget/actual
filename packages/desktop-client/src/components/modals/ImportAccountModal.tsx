@@ -28,6 +28,7 @@ export function ImportAccountModal({
   filename,
   hintId,
   matchedAccountId,
+  suggestedAccountId,
   startedFromAccountId,
   onImported,
 }: ImportAccountModalProps) {
@@ -36,6 +37,9 @@ export function ImportAccountModal({
   const { data: accounts = [] } = useAccounts();
 
   const matched = accounts.find(account => account.id === matchedAccountId);
+  const suggested = matched
+    ? undefined
+    : accounts.find(account => account.id === suggestedAccountId);
   const startedFrom = accounts.find(
     account => account.id === startedFromAccountId,
   );
@@ -153,6 +157,35 @@ export function ImportAccountModal({
                   <Trans>Which account is this file for?</Trans>
                 )}
               </Paragraph>
+              {suggested && accountId !== suggested.id && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
+                    marginBottom: 10,
+                  }}
+                >
+                  <Text style={{ color: theme.pageTextSubdued }}>
+                    <Trans>
+                      This looks like{' '}
+                      <strong>
+                        {{ accountName: suggested.name } as TransObjectLiteral}
+                      </strong>
+                      .
+                    </Trans>
+                  </Text>
+                  <Button
+                    variant="bare"
+                    onPress={() => setAccountId(suggested.id)}
+                  >
+                    <Trans>
+                      Use{' '}
+                      {{ accountName: suggested.name } as TransObjectLiteral}
+                    </Trans>
+                  </Button>
+                </View>
+              )}
               <View style={{ marginBottom: 15 }}>
                 <AccountAutocomplete
                   includeClosedAccounts={false}

@@ -57,6 +57,7 @@ export type Modal =
         // Opaque id of the account identifier found in the file, if any.
         hintId: string | null;
         matchedAccountId: string | null;
+        suggestedAccountId: string | null;
         // Account page the import was started from, if any.
         startedFromAccountId?: string;
         onImported: (didChange: boolean) => void;
