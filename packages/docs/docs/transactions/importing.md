@@ -17,6 +17,40 @@ Actual supports importing CSV, QIF, OFX, QFX and CAMT files. Your bank probably 
 1. Open the account you want to import transactions into.
 2. Press the **Import** button and select the file.
 
+You can also start from **All Accounts** and let Actual work out which account the file belongs to. See [Importing From All Accounts](#importing-from-all-accounts) below.
+
+## Importing From All Accounts
+
+You don't have to open an account first. Starting from **All Accounts** saves a few clicks and helps you avoid importing a file into the wrong account.
+
+1. Open **All Accounts**.
+2. Press the **Import** button, or press <Key mod="ctrl" k="i" />, and select the file.
+3. Check the account that Actual selected, or choose one, and press **Continue**.
+4. Finish the import as usual.
+
+Actual always asks you to confirm the account before the import starts.
+
+### How Actual Finds the Account
+
+OFX, QFX, QIF and CAMT files usually say which bank account they were exported from. Actual remembers this the first time you import a file into an account, so the next file from the same bank account is matched automatically.
+
+- **The file matches an account:** Actual selects that account. You can still choose a different one.
+- **The file doesn't match an account yet:** Choose the account yourself. Actual remembers your choice once the import finishes.
+- **Actual finds similar transactions:** If the payees in the file already appear in only one of your accounts, Actual says "This looks like" followed by that account, and offers a **Use** button. Nothing is selected until you press it.
+- **CSV files:** These don't say which account they belong to, so you always choose the account.
+
+### Importing From an Account Page
+
+If you start from an account page, the import goes straight ahead as before. The only exception is when the file looks like it belongs to a different account. Then Actual warns you and lets you import into the account it recognized, or into the one you started from anyway.
+
+### Changing the Account for a File
+
+If you import a file into a different account than the one Actual remembered, Actual updates what it remembers and shows a notice once the import is done. Transactions you already imported are not changed.
+
+:::note
+Actual stores only a scrambled (hashed) version of the account number found in a file, never the number itself. This keeps the number from being readable by accident, for example in a shared budget file, but it is not strong protection against someone determined to recover a short account number.
+:::
+
 ## Import CSV Files
 
 If your bank doesn't support downloading financial files, you can import a CSV file instead.
