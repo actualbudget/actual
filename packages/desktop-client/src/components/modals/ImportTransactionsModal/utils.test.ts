@@ -1,7 +1,45 @@
-import { filterByStartDate, parseCategoryFields, parseDate } from './utils';
+import {
+  applyFieldMappings,
+  filterByStartDate,
+  parseAmountFields,
+  parseCategoryFields,
+  parseDate,
+} from './utils';
 import type { ImportTransaction } from './utils';
 
 describe('Import transactions', () => {
+  it('keeps a single decimal digit before a currency suffix in the import preview', () => {
+    const mapped = applyFieldMappings(
+      {
+        trx_id: '0',
+        existing: false,
+        ignored: false,
+        selected: true,
+        selected_merge: false,
+        amount: 0,
+        inflow: 0,
+        outflow: 0,
+        inOut: '',
+        csvAmount: ' -110.7 €',
+      },
+      {
+        date: null,
+        amount: 'csvAmount',
+        payee: null,
+        notes: null,
+        inOut: null,
+        category: null,
+        outflow: null,
+        inflow: null,
+      },
+    );
+    expect(parseAmountFields(mapped, false, false, '', false, '1')).toEqual({
+      amount: -110.7,
+      inflow: null,
+      outflow: null,
+    });
+  });
+
   describe('date parsing', () => {
     const invalidInputs: Array<{
       str: Parameters<typeof parseDate>[0];
