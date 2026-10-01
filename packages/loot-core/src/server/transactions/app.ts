@@ -13,6 +13,11 @@ import type {
 } from '#types/models';
 
 import { exportQueryToCSV, exportToCSV } from './export/export-to-csv';
+import {
+  findPairedAccount,
+  hashAccountHint,
+  pairAccountHint,
+} from './import/account-pairing';
 import { parseFile } from './import/parse-file';
 import type { ParseFileOptions } from './import/parse-file';
 import { mergeTransactions } from './merge';
@@ -26,6 +31,8 @@ export type TransactionHandlers = {
   'transaction-delete': typeof deleteTransaction;
   'transaction-move': typeof moveTransaction;
   'transactions-parse-file': typeof parseTransactionsFile;
+  'transactions-detect-account': typeof detectImportAccount;
+  'transactions-pair-account': typeof pairImportAccount;
   'transactions-export': typeof exportTransactions;
   'transactions-export-query': typeof exportTransactionsQuery;
   'transactions-merge': typeof mergeTransactions;
@@ -106,6 +113,37 @@ async function parseTransactionsFile({
   return parseFile(filepath, options);
 }
 
+// Reads only the account identifier from a file. The raw identifier never
+// leaves the backend: the client gets an opaque `hintId` to pass back to
+// `transactions-pair-account` after a successful import.
+async function detectImportAccount({
+  filepath,
+  options,
+}: {
+  filepath: string;
+  options?: ParseFileOptions;
+}): Promise<{
+  hintId: string | null;
+  matchedAccountId: string | null;
+}> {
+  const { accountHint } = await parseFile(filepath, options);
+  if (!accountHint) {
+    return { hintId: null, matchedAccountId: null };
+  }
+  const hintId = await hashAccountHint(accountHint);
+  return { hintId, matchedAccountId: await findPairedAccount(hintId) };
+}
+
+async function pairImportAccount({
+  hintId,
+  accountId,
+}: {
+  hintId: string;
+  accountId: string;
+}) {
+  return pairAccountHint(hintId, accountId);
+}
+
 async function exportTransactions({
   transactions,
   accounts,
@@ -163,6 +201,8 @@ app.method('transaction-update', mutator(updateTransaction));
 app.method('transaction-delete', mutator(deleteTransaction));
 app.method('transaction-move', mutator(undoable(moveTransaction)));
 app.method('transactions-parse-file', mutator(parseTransactionsFile));
+app.method('transactions-detect-account', detectImportAccount);
+app.method('transactions-pair-account', mutator(pairImportAccount));
 app.method('transactions-export', mutator(exportTransactions));
 app.method('transactions-export-query', mutator(exportTransactionsQuery));
 app.method('get-earliest-transaction', getEarliestTransaction);

@@ -45,6 +45,12 @@ export type DbAccountGroup = {
   tombstone: 1 | 0;
 };
 
+export type DbAccountImportRef = {
+  id: string;
+  account: DbAccount['id'];
+  tombstone: 1 | 0;
+};
+
 export type DbBank = {
   id: string;
   bank_id: string;
