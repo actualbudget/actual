@@ -8,6 +8,7 @@ import { app as accountsApp } from './accounts/app';
 import { installAPI } from './api';
 import { createBudget } from './budget/base';
 import * as prefs from './prefs';
+import { app as transactionsApp } from './transactions/app';
 
 vi.mock('#shared/errors', () => ({
   getBankSyncError: vi.fn(error => `Bank sync error: ${error}`),
@@ -54,6 +55,187 @@ describe('API handlers', () => {
       ).rejects.toThrow('Bank sync error: connection-failed');
 
       expect(getBankSyncError).toHaveBeenCalledWith('connection-failed');
+    });
+  });
+
+  describe('api/transaction-update', () => {
+    beforeEach(global.emptyDatabase());
+
+    beforeEach(async () => {
+      await prefs.loadPrefs();
+      handlers['transactions-batch-update'] =
+        transactionsApp.handlers['transactions-batch-update'];
+      await db.insertAccount({ id: 'split-account', name: 'Checking' });
+      await db.insertCategoryGroup({ id: 'split-group', name: 'Expenses' });
+      await db.insertCategory({
+        id: 'split-category',
+        name: 'Groceries',
+        cat_group: 'split-group',
+      });
+      await db.insertPayee({ id: 'split-payee', name: 'Shop' });
+      await db.insertTransaction({
+        id: 'split-parent',
+        account: 'split-account',
+        date: '2026-01-05',
+        amount: -3000,
+        is_parent: true,
+        payee: 'split-payee',
+        notes: 'Parent note',
+        cleared: true,
+        reconciled: false,
+        sort_order: 100,
+      });
+      for (const [id, amount, sortOrder] of [
+        ['split-child', -2000, -1],
+        ['split-sibling', -1000, -2],
+      ] as const) {
+        await db.insertTransaction({
+          id,
+          account: 'split-account',
+          date: '2026-01-05',
+          amount,
+          category: 'split-category',
+          payee: 'split-payee',
+          parent_id: 'split-parent',
+          is_child: true,
+          notes: 'Child note',
+          cleared: true,
+          reconciled: false,
+          sort_order: sortOrder,
+        });
+      }
+    });
+
+    it('preserves a child and its split when only notes are updated', async () => {
+      const child = await db.getTransaction('split-child');
+      const sibling = await db.getTransaction('split-sibling');
+      const parent = await db.getTransaction('split-parent');
+
+      const result = await handlers['api/transaction-update']({
+        id: 'split-child',
+        fields: { notes: 'New notes' },
+      });
+
+      expect(await db.getTransaction('split-child')).toEqual({
+        ...child,
+        notes: 'New notes',
+      });
+      expect(await db.getTransaction('split-sibling')).toEqual(sibling);
+      expect(await db.getTransaction('split-parent')).toEqual(parent);
+      expect(result).toEqual(expect.any(Array));
+    });
+
+    it('preserves the amount and category when explicitly clearing a child payee', async () => {
+      await handlers['api/transaction-update']({
+        id: 'split-child',
+        fields: { payee: null },
+      });
+
+      expect(await db.getTransaction('split-child')).toMatchObject({
+        amount: -2000,
+        category: 'split-category',
+        notes: 'Child note',
+        payee: null,
+        sort_order: -1,
+      });
+      expect(await db.getTransaction('split-parent')).toMatchObject({
+        amount: -3000,
+        error: null,
+      });
+    });
+
+    it('applies an explicit zero amount without clearing other child fields', async () => {
+      await handlers['api/transaction-update']({
+        id: 'split-child',
+        fields: { amount: 0 },
+      });
+
+      expect(await db.getTransaction('split-child')).toMatchObject({
+        amount: 0,
+        category: 'split-category',
+        notes: 'Child note',
+        payee: 'split-payee',
+      });
+      expect(await db.getTransaction('split-parent')).toMatchObject({
+        amount: -3000,
+        error: { type: 'SplitTransactionError', difference: -2000 },
+      });
+    });
+
+    it('keeps consecutive partial updates and recalculates the split difference', async () => {
+      await handlers['api/transaction-update']({
+        id: 'split-child',
+        fields: { notes: 'Updated notes' },
+      });
+      await handlers['api/transaction-update']({
+        id: 'split-child',
+        fields: { amount: -2500 },
+      });
+
+      expect(await db.getTransaction('split-child')).toMatchObject({
+        amount: -2500,
+        notes: 'Updated notes',
+        category: 'split-category',
+        sort_order: -1,
+      });
+      expect(await db.getTransaction('split-sibling')).toMatchObject({
+        amount: -1000,
+        notes: 'Child note',
+        category: 'split-category',
+      });
+      expect(await db.getTransaction('split-parent')).toMatchObject({
+        amount: -3000,
+        error: { type: 'SplitTransactionError', difference: 500 },
+      });
+    });
+
+    it('does not change transactions or call the batch for a missing ID', async () => {
+      const before = await db.getTransactions('split-account');
+      const batch = vi.spyOn(handlers, 'transactions-batch-update');
+
+      await expect(
+        handlers['api/transaction-update']({
+          id: 'missing-transaction',
+          fields: { notes: 'New notes' },
+        }),
+      ).resolves.toEqual([]);
+
+      expect(batch).not.toHaveBeenCalled();
+      expect(await db.getTransactions('split-account')).toEqual(before);
+      batch.mockRestore();
+    });
+
+    it('waits for the asynchronous batch and returns its updated transactions', async () => {
+      const updated = [
+        {
+          id: 'split-child',
+          account: 'split-account',
+          date: '2026-01-05',
+          amount: -2000,
+        },
+      ];
+      const batchResult = { added: [], updated, deleted: [], errors: [] };
+      let finishBatch: ((value: typeof batchResult) => void) | undefined;
+      handlers['transactions-batch-update'] = vi.fn(
+        () =>
+          new Promise<typeof batchResult>(resolve => (finishBatch = resolve)),
+      );
+      let completed = false;
+      const update = handlers['api/transaction-update']({
+        id: 'split-child',
+        fields: { notes: 'New notes' },
+      });
+      void update.then(() => (completed = true));
+
+      await vi.waitFor(() => {
+        expect(handlers['transactions-batch-update']).toHaveBeenCalledOnce();
+      });
+      try {
+        expect(completed).toBe(false);
+      } finally {
+        finishBatch?.(batchResult);
+      }
+      await expect(update).resolves.toEqual(updated);
     });
   });
 
