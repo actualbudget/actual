@@ -14,10 +14,32 @@ export type TourStepDeps = {
   budgetType: 'envelope' | 'tracking';
 };
 
+function getDisplayedMonths(): string[] {
+  return Array.from(
+    document.querySelectorAll<HTMLElement>(
+      '[data-testid="selected-budget-month"]',
+    ),
+  )
+    .map(element => element.dataset.month)
+    .filter((month): month is string => Boolean(month));
+}
+
+// The budget summaries strip also renders the month before and after the
+// displayed months (clipped by its container) so it can animate between
+// months, so a summary being in the DOM does not mean it is on screen. Only
+// target the current month while the month picker shows it as displayed, and
+// otherwise fall back to the first displayed month.
 function findBudgetSummary(): HTMLElement | null {
+  const displayedMonths = getDisplayedMonths();
+  const currentMonth = monthUtils.currentMonth();
+  const month =
+    displayedMonths.length === 0 || displayedMonths.includes(currentMonth)
+      ? currentMonth
+      : displayedMonths[0];
+
   return (
     document.querySelector<HTMLElement>(
-      `[data-testid="budget-summary"][data-month="${monthUtils.currentMonth()}"]`,
+      `[data-testid="budget-summary"][data-month="${month}"]`,
     ) ?? document.querySelector<HTMLElement>('[data-testid="budget-summary"]')
   );
 }

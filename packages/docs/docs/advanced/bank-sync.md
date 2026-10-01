@@ -23,7 +23,16 @@ Here are a couple of considerations to know about before making the decision to 
 
 Actual does **not** sync bank data automatically. To fetch new transactions manually:
 
+#### On Desktop
+
 - To sync all accounts: click **All Accounts** in the sidebar, then click **Bank Sync**.
 - To sync a single account: open the account and click the Bank Sync button.
 
   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-10.webp)
+
+#### On Mobile
+
+- To sync all linked accounts: open **Accounts**, scroll to the top of the account list, then pull down and release to refresh.
+- To sync a single account: open the account, scroll to the top of its transaction list, then pull down and release to refresh.
+
+Pulling down to refresh on the **Budget** screen syncs your budget with the server, but does **not** fetch new bank transactions.

@@ -26,7 +26,6 @@ import type {
   SankeyWidget,
   TimeFrame,
 } from '@actual-app/core/types/models';
-import * as d from 'date-fns';
 import { debounce } from 'es-toolkit/compat';
 import type { TFunction } from 'i18next';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
@@ -37,7 +36,10 @@ import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
-import { calculateTimeRange } from '#components/reports/reportRanges';
+import {
+  boundMonthRangeFromDates,
+  calculateTimeRange,
+} from '#components/reports/reportRanges';
 import {
   buildSankeyData,
   createBaseGraphSpreadsheet,
@@ -46,7 +48,6 @@ import {
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import type { Graph } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
-import { fromDateRepr } from '#components/reports/util';
 import { useCategories } from '#hooks/useCategories';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormatList } from '#hooks/useFormatList';
@@ -581,9 +582,16 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       return null;
     }
 
-    return createBaseGraphSpreadsheet(
+    const [boundedStart, boundedEnd] = boundMonthRangeFromDates(
+      earliestTransaction,
+      latestTransaction,
       start,
       end,
+    );
+
+    return createBaseGraphSpreadsheet(
+      boundedStart,
+      boundedEnd,
       groupedCategories,
       conditions,
       conditionsOp,
@@ -592,6 +600,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       showTransfers,
     );
   }, [
+    earliestTransaction,
+    latestTransaction,
     datesInitialized,
     start,
     end,
@@ -665,29 +675,13 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       setDatesInitialized(true);
 
       const currentMonth = monthUtils.currentMonth();
-      let earliestMonth = earliestTransaction
-        ? monthUtils.monthFromDate(
-            d.parseISO(fromDateRepr(earliestTransaction.date)),
-          )
-        : currentMonth;
-      const latestTransactionMonth = latestTransaction
-        ? monthUtils.monthFromDate(
-            d.parseISO(fromDateRepr(latestTransaction.date)),
-          )
-        : currentMonth;
+      const earliestMonth = monthUtils.getMonth(earliestTransactionDate);
+      const latestTransactionMonth = monthUtils.getMonth(latestTransactionDate);
 
       const latestMonth =
         latestTransactionMonth > currentMonth
           ? latestTransactionMonth
           : currentMonth;
-
-      // Make sure the month selects are at least populated with a
-      // year's worth of months. We can undo this when we have fancier
-      // date selects.
-      const yearAgo = monthUtils.subMonths(latestMonth, 12);
-      if (earliestMonth > yearAgo) {
-        earliestMonth = yearAgo;
-      }
 
       const allMonths = monthUtils
         .rangeInclusive(earliestMonth, latestMonth)

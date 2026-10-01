@@ -36,3 +36,18 @@ export function getPrettyPayee({
 
   return '';
 }
+
+/**
+ * Returns `search` with the `filter` param set to `filter` — or removed when
+ * it is empty — leaving any other params intact.
+ */
+export function withFilterParam(search: string, filter: string) {
+  const params = new URLSearchParams(search);
+  if (filter) {
+    params.set('filter', filter);
+  } else {
+    params.delete('filter');
+  }
+  const next = params.toString();
+  return next ? `?${next}` : '';
+}

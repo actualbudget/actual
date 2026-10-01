@@ -369,6 +369,11 @@ export class Action {
         } else {
           cellValue = rawValue;
         }
+        // Parent text is data, even when it looks like a spreadsheet formula,
+        // date or number. The apostrophe is HyperFormula's literal-text escape.
+        if (key.startsWith('parent_') && typeof cellValue === 'string') {
+          cellValue = `'${cellValue}`;
+        }
         hfInstance.addNamedExpression(key, cellValue);
       }
       hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [
