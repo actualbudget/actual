@@ -72,11 +72,8 @@ export function Crossover() {
 type CrossoverInnerProps = { widget?: CrossoverWidget };
 
 function CrossoverInner({ widget }: CrossoverInnerProps) {
-  const {
-    resolve: resolveTimeRange,
-    hasDashboardContext,
-    isUsingDashboardRange,
-  } = useDashboardReportTimeRange(widget);
+  const { resolve: resolveTimeRange, isUsingDashboardRange } =
+    useDashboardReportTimeRange(widget);
   const locale = useLocale();
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -214,7 +211,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       let start = initialStart;
       let end = initialEnd;
 
-      if (hasDashboardContext) {
+      if (isUsingDashboardRange) {
         setStart(start);
         setEnd(end);
         setMode(mode);
@@ -251,7 +248,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     widget?.meta?.timeFrame,
     allMonths,
     resolveTimeRange,
-    hasDashboardContext,
+    isUsingDashboardRange,
   ]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {

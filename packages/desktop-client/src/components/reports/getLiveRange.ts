@@ -3,7 +3,11 @@ import type { TimeFrame } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { ReportOptions } from './ReportOptions';
-import { getSpecificRange, validateRange } from './reportRanges';
+import {
+  getSpecificRange,
+  toReferenceDay,
+  validateRange,
+} from './reportRanges';
 
 export function getLiveRange(
   cond: string,
@@ -13,6 +17,7 @@ export function getLiveRange(
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
   referenceDate = monthUtils.currentDay(),
 ): [string, string, TimeFrame['mode']] {
+  referenceDate = toReferenceDay(referenceDate);
   let dateStart = earliestTransaction;
   let dateEnd = latestTransaction;
   const rangeName = ReportOptions.dateRangeMap.get(cond);

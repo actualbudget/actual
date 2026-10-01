@@ -76,6 +76,7 @@ type ReportSidebarProps = {
   earliestTransaction: TransactionEntity['date'];
   latestTransaction: TransactionEntity['date'];
   firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
+  referenceDate?: string;
   isComplexCategoryCondition?: boolean;
   useDashboardDateRange?: boolean;
   onUseDashboardDateRangeChange?: (value: boolean) => void;
@@ -111,6 +112,7 @@ export function ReportSidebar({
   earliestTransaction,
   latestTransaction,
   firstDayOfWeekIdx,
+  referenceDate,
   isComplexCategoryCondition = false,
   useDashboardDateRange,
   onUseDashboardDateRangeChange,
@@ -133,6 +135,7 @@ export function ReportSidebar({
         latestTransaction,
         customReportItems.includeCurrentInterval,
         firstDayOfWeekIdx,
+        referenceDate,
       ),
     );
   };

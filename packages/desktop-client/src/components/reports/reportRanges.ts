@@ -176,6 +176,15 @@ function boundedRange(
   return [start, end, 'static'];
 }
 
+export function toReferenceDay(referenceDate: string) {
+  if (!monthUtils.isValidYearMonth(referenceDate)) {
+    return referenceDate;
+  }
+  return referenceDate === monthUtils.currentMonth()
+    ? monthUtils.currentDay()
+    : monthUtils.lastDayOfMonth(referenceDate);
+}
+
 export function getSpecificRange(
   offset: number,
   addNumber: number | null,
@@ -183,8 +192,8 @@ export function getSpecificRange(
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
   referenceDate = monthUtils.currentDay(),
 ) {
-  const currentDay = referenceDate;
-  const currentWeek = monthUtils.weekFromDate(referenceDate, firstDayOfWeekIdx);
+  const currentDay = toReferenceDay(referenceDate);
+  const currentWeek = monthUtils.weekFromDate(currentDay, firstDayOfWeekIdx);
 
   let dateStart = monthUtils.subMonths(currentDay, offset) + '-01';
   let dateEnd = monthUtils.getMonthEnd(
@@ -256,7 +265,7 @@ export function calculateTimeRange(
   latestTransaction?: string,
   referenceDate?: string,
 ) {
-  const referenceDay = referenceDate ?? monthUtils.currentDay();
+  const referenceDay = toReferenceDay(referenceDate ?? monthUtils.currentDay());
   const referenceMonth = referenceDate
     ? monthUtils.getMonth(referenceDate)
     : monthUtils.currentMonth();

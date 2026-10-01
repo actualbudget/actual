@@ -159,7 +159,7 @@ function getDashboardMeta<T extends DashboardWidgetEntity>(
     isLive: false;
   } | null = null;
   if (widget.type === 'spending-card') {
-    const [compare, compareTo] = [dashboardScope.start, dashboardScope.end];
+    const [compare, compareTo] = [dashboardScope.end, dashboardScope.start];
     spendingRange = { compare, compareTo, isLive: false };
   }
   if (usesTimeFrame && widget.type !== 'calendar-card') {

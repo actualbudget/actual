@@ -464,13 +464,14 @@ function CustomReportInner({
       isDateStatic: CustomReportEntity['isDateStatic'],
       includeCurrentInterval: CustomReportEntity['includeCurrentInterval'],
     ) => {
-      if (!isDateStatic) {
+      if (!isDateStatic && !isUsingDashboardRange) {
         const [dateStart, dateEnd] = getLiveRange(
           dateRange,
           earliestTransactionDate,
           latestTransactionDate,
           includeCurrentInterval,
           firstDayOfWeekIdx,
+          dashboardScope?.end,
         );
         setStartDate(dateStart);
         setEndDate(dateEnd);
@@ -985,6 +986,7 @@ function CustomReportInner({
             earliestTransaction={earliestTransactionDate}
             latestTransaction={latestTransactionDate}
             firstDayOfWeekIdx={firstDayOfWeekIdx}
+            referenceDate={dashboardScope?.end}
             isComplexCategoryCondition={isComplexCategoryCondition}
             useDashboardDateRange={isUsingDashboardRange}
             onUseDashboardDateRangeChange={

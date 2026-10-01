@@ -106,7 +106,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   } = useDashboardReportTimeRange(widget);
   const [initialCompare, initialCompareTo] =
     isUsingDashboardRange && dashboardScope
-      ? [dashboardScope.start, dashboardScope.end]
+      ? [dashboardScope.end, dashboardScope.start]
       : calculateSpendingReportTimeRange(
           widget?.meta ?? {},
           dashboardScope?.end,
@@ -122,7 +122,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   useEffect(() => {
     const [nextCompare, nextCompareTo] =
       isUsingDashboardRange && dashboardScope
-        ? [dashboardScope.start, dashboardScope.end]
+        ? [dashboardScope.end, dashboardScope.start]
         : calculateSpendingReportTimeRange(
             widget?.meta ?? {},
             dashboardScope?.end,

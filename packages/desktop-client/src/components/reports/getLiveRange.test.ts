@@ -129,3 +129,31 @@ describe('getLiveRange', () => {
     });
   });
 });
+
+describe('month-shaped dashboard references', () => {
+  it.each([
+    ['Last 30 days', '2026-08-02', '2026-08-31'],
+    ['Year to date', '2026-01-01', '2026-08-31'],
+    ['Prior year to date', '2025-01-01', '2025-08-31'],
+  ])(
+    'anchors %s to the last day of a historical month',
+    (range, start, end) => {
+      expect(
+        getLiveRange(range, EARLIEST, LATEST, false, undefined, '2026-08'),
+      ).toEqual([start, end, 'sliding-window']);
+    },
+  );
+
+  it('anchors the current month to today', () => {
+    expect(
+      getLiveRange(
+        'Last 30 days',
+        EARLIEST,
+        LATEST,
+        false,
+        undefined,
+        '2017-01',
+      ),
+    ).toEqual(['2016-12-03', '2017-01-01', 'sliding-window']);
+  });
+});
