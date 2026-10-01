@@ -70,11 +70,15 @@ test.describe('Reports', () => {
 
   test('loads net worth graph and checks visuals', async () => {
     await reportsPage.goToNetWorthPage();
+    // Keep the navigation click from leaving an incidental chart tooltip open.
+    await page.mouse.move(0, 0);
     await expect(page).toMatchThemeScreenshots();
   });
 
   test('loads cash flow graph and checks visuals', async () => {
     await reportsPage.goToCashFlowPage();
+    // Keep the navigation click from leaving an incidental chart tooltip open.
+    await page.mouse.move(0, 0);
     await expect(page).toMatchThemeScreenshots();
   });
 

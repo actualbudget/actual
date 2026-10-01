@@ -362,7 +362,6 @@ function CustomReportInner({
     firstDayOfWeekIdx,
     interval,
     isUsingDashboardRange,
-    setUseDashboardDateRange,
     latestTransactionDate,
     loadReport.dateRange,
     loadReport.endDate,
