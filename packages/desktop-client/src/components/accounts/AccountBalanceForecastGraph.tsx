@@ -22,8 +22,8 @@ import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
-import { useLocale } from '#hooks/useLocale';
 
 import {
   clampRange,
@@ -41,11 +41,10 @@ import type {
   DailyBalancePoint,
 } from './balanceHistoryGraphData';
 
-const LABEL_WIDTH = 110;
+const LABEL_WIDTH = 90;
 const OVERVIEW_HEIGHT = 18;
 const OVERVIEW_GAP = 4;
 const MIN_RANGE_DAYS = 7;
-const DATE_FORMAT = 'MMM d, yyyy';
 const GRADIENT_ID = 'account-balance-forecast-gradient';
 
 function clampDate(date: string, min: string, max: string) {
@@ -72,7 +71,7 @@ export function AccountBalanceForecastGraph({
   ref,
 }: AccountBalanceForecastGraphProps) {
   const format = useFormat();
-  const locale = useLocale();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [range, setRange] = useState<BalanceGraphRange | null>(null);
   const [hoveredDate, setHoveredDate] = useState<string | null>(null);
   const [draggedDate, setDraggedDate] = useState<string | null>(null);
@@ -90,8 +89,7 @@ export function AccountBalanceForecastGraph({
     ? getBalanceChange(points, visibleRange.start, visibleRange.end)
     : 0;
 
-  const formatDate = (date: string) =>
-    monthUtils.format(date, DATE_FORMAT, locale);
+  const formatDate = (date: string) => monthUtils.format(date, dateFormat);
 
   return (
     <View ref={ref} style={{ margin: 10, ...style }}>
@@ -102,11 +100,11 @@ export function AccountBalanceForecastGraph({
           }
 
           if (!visibleRange) {
-            return (
+            return isLoading ? (
               <div style={{ width, height }}>
                 <LoadingIndicator />
               </div>
-            );
+            ) : null;
           }
 
           const chartWidth = width - LABEL_WIDTH;
@@ -272,7 +270,7 @@ function RangeOverview({
   onDrag,
 }: RangeOverviewProps) {
   const { t } = useTranslation();
-  const locale = useLocale();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const drag = useRef<RangeDrag | null>(null);
 
   const fullRange = {
@@ -377,7 +375,7 @@ function RangeOverview({
 
   const renderHandle = (edge: 'start' | 'end') => {
     const date = edge === 'start' ? range.start : range.end;
-    const label = monthUtils.format(date, DATE_FORMAT, locale);
+    const label = monthUtils.format(date, dateFormat);
     return (
       <div
         role="slider"

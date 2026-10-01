@@ -66,11 +66,17 @@ export function useAccountBalanceForecast({
   const { data: accounts = [] } = useAccounts();
   const { schedules } = useCachedSchedules();
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
+  // Both are tagged with the account they belong to, so switching accounts
+  // never projects or shows another account's balances.
   const [dateRange, setDateRange] = useState<{
+    accountId: AccountView;
     first: string | null;
     last: string | null;
   } | null>(null);
-  const [points, setPoints] = useState<DailyBalancePoint[]>([]);
+  const [forecast, setForecast] = useState<{
+    accountId: AccountView;
+    points: DailyBalancePoint[];
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const today = monthUtils.currentDay();
 
@@ -80,7 +86,16 @@ export function useAccountBalanceForecast({
     }
 
     // Re-run whenever the account's transactions change, so the projection
-    // stays in sync with edits made in the table below.
+    // stays in sync with edits made in the table below. The range is only
+    // reported once both ends are known.
+    let first: string | null | undefined;
+    let last: string | null | undefined;
+    const report = () => {
+      if (first !== undefined && last !== undefined) {
+        setDateRange({ accountId, first, last });
+      }
+    };
+
     const rangeQuery = queries
       .transactions(accountId)
       .options({ splits: 'none' })
@@ -88,21 +103,19 @@ export function useAccountBalanceForecast({
     const firstLive = liveQuery<{ date: string }>(
       rangeQuery.orderBy({ date: 'asc' }).limit(1),
       {
-        onData: data =>
-          setDateRange(range => ({
-            first: data[0]?.date ?? null,
-            last: range?.last ?? null,
-          })),
+        onData: data => {
+          first = data[0]?.date ?? null;
+          report();
+        },
       },
     );
     const lastLive = liveQuery<{ date: string }>(
       rangeQuery.orderBy({ date: 'desc' }).limit(1),
       {
-        onData: data =>
-          setDateRange(range => ({
-            first: range?.first ?? null,
-            last: data[0]?.date ?? null,
-          })),
+        onData: data => {
+          last = data[0]?.date ?? null;
+          report();
+        },
       },
     );
 
@@ -113,22 +126,26 @@ export function useAccountBalanceForecast({
   }, [accountId, isEnabled]);
 
   const accountIdsKey = resolveAccountIds(accountId, accounts).join(',');
+  const currentRange =
+    dateRange !== null && dateRange.accountId === accountId ? dateRange : null;
   const upcomingEndDate = monthUtils.addDays(
     today,
     getUpcomingDays(upcomingLength),
   );
-  const endDate = [upcomingEndDate, dateRange?.last, minEndDate]
+  const endDate = [upcomingEndDate, currentRange?.last, minEndDate]
     .filter((date): date is string => !!date)
     .reduce((max, date) => (date > max ? date : max), today);
   const startDate =
-    dateRange?.first && dateRange.first < today ? dateRange.first : today;
+    currentRange?.first && currentRange.first < today
+      ? currentRange.first
+      : today;
 
   useEffect(() => {
-    if (!isEnabled || !isForecastSupported(accountId) || dateRange === null) {
+    if (!isEnabled || !isForecastSupported(accountId) || !currentRange) {
       return;
     }
     if (accountIdsKey === '') {
-      setPoints([]);
+      setForecast({ accountId, points: [] });
       setIsLoading(false);
       return;
     }
@@ -136,19 +153,30 @@ export function useAccountBalanceForecast({
     let isUnmounted = false;
     setIsLoading(true);
 
-    void send('forecast/generate', {
+    send('forecast/generate', {
       accountIds: accountIdsKey.split(','),
       startDate,
       endDate,
       source: 'schedules',
       includeAccountlessSchedules:
         accountId === undefined || accountId === 'onbudget',
-    }).then(result => {
-      if (!isUnmounted) {
-        setPoints(buildDailyBalancePoints(result.dataPoints, today));
-        setIsLoading(false);
-      }
-    });
+    })
+      .then(result => {
+        if (!isUnmounted) {
+          setForecast({
+            accountId,
+            points: buildDailyBalancePoints(result.dataPoints, today),
+          });
+          setIsLoading(false);
+        }
+      })
+      .catch(error => {
+        console.error('Error generating the account forecast:', error);
+        if (!isUnmounted) {
+          setForecast({ accountId, points: [] });
+          setIsLoading(false);
+        }
+      });
 
     return () => {
       isUnmounted = true;
@@ -157,12 +185,17 @@ export function useAccountBalanceForecast({
     isEnabled,
     accountId,
     accountIdsKey,
-    dateRange,
+    currentRange,
     startDate,
     endDate,
     today,
     schedules,
   ]);
 
-  return { points, today, isLoading };
+  const isCurrent = forecast !== null && forecast.accountId === accountId;
+  return {
+    points: isCurrent ? forecast.points : [],
+    today,
+    isLoading: isLoading || !isCurrent,
+  };
 }
