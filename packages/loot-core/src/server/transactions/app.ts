@@ -126,6 +126,10 @@ async function detectImportAccount({
   hintId: string | null;
   matchedAccountId: string | null;
 }> {
+  // CSV files carry no account identifier, so skip parsing them here.
+  if (/\.(csv|tsv)$/i.test(filepath)) {
+    return { hintId: null, matchedAccountId: null };
+  }
   const { accountHint } = await parseFile(filepath, options);
   if (!accountHint) {
     return { hintId: null, matchedAccountId: null };

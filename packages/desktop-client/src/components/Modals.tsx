@@ -52,6 +52,7 @@ import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
 import { HoldBufferModal } from './modals/HoldBufferModal';
+import { ImportAccountModal } from './modals/ImportAccountModal';
 import { ImportTransactionsModal } from './modals/ImportTransactionsModal';
 import { KeyboardShortcutModal } from './modals/KeyboardShortcutModal';
 import { LoadBackupModal } from './modals/LoadBackupModal';
@@ -128,6 +129,9 @@ export function Modals() {
         case 'keyboard-shortcuts':
           // don't show the hotkey help modal when a budget is not open
           return budgetId ? <KeyboardShortcutModal key={key} /> : null;
+
+        case 'import-account':
+          return <ImportAccountModal key={key} {...modal.options} />;
 
         case 'import-transactions':
           return <ImportTransactionsModal key={key} {...modal.options} />;

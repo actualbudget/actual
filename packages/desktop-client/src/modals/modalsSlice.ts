@@ -51,6 +51,18 @@ export type Modal =
       };
     }
   | {
+      name: 'import-account';
+      options: {
+        filename: string;
+        // Opaque id of the account identifier found in the file, if any.
+        hintId: string | null;
+        matchedAccountId: string | null;
+        // Account page the import was started from, if any.
+        startedFromAccountId?: string;
+        onImported: (didChange: boolean) => void;
+      };
+    }
+  | {
       name: 'add-account';
       options: {
         upgradingAccountId?: string;
