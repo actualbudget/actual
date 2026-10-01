@@ -101,9 +101,17 @@ export function parseNotes(notes: string): ParsedSegment[] {
   let remaining = notes;
 
   while (remaining.length > 0) {
-    // Check for markdown link first (highest priority)
     const markdownMatch = remaining.match(MARKDOWN_LINK_REGEX);
-    if (markdownMatch && markdownMatch.index !== undefined) {
+    const urlMatch = remaining.match(FULL_URL_REGEX);
+    const wwwMatch = remaining.match(WWW_URL_REGEX);
+    const firstLinkIndex = Math.min(
+      markdownMatch?.index ?? Infinity,
+      urlMatch?.index ?? Infinity,
+      wwwMatch?.index ?? Infinity,
+    );
+
+    // Parse links in text order, keeping markdown priority at the same position.
+    if (markdownMatch && markdownMatch.index === firstLinkIndex) {
       // Add text before the link
       if (markdownMatch.index > 0) {
         const textBefore = remaining.slice(0, markdownMatch.index);
@@ -129,8 +137,7 @@ export function parseNotes(notes: string): ParsedSegment[] {
     }
 
     // Check for plain URLs (http://, https://)
-    const urlMatch = remaining.match(FULL_URL_REGEX);
-    if (urlMatch && urlMatch.index !== undefined) {
+    if (urlMatch && urlMatch.index === firstLinkIndex) {
       // Add text before the URL
       if (urlMatch.index > 0) {
         const textBefore = remaining.slice(0, urlMatch.index);
@@ -155,8 +162,7 @@ export function parseNotes(notes: string): ParsedSegment[] {
     }
 
     // Check for www. URLs
-    const wwwMatch = remaining.match(WWW_URL_REGEX);
-    if (wwwMatch && wwwMatch.index !== undefined) {
+    if (wwwMatch && wwwMatch.index === firstLinkIndex) {
       // Add text before the URL
       if (wwwMatch.index > 0) {
         const textBefore = remaining.slice(0, wwwMatch.index);
