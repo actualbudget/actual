@@ -416,4 +416,27 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
         .flatMap(firstOrIncorrect),
     ).toStrictEqual(['Payees']);
   });
+
+  test('ranks an exact payee match above a longer tied substring match', async () => {
+    // Payees are already alpha-sorted, so 'AAA Google' is listed first;
+    // a stable sort on a tied fzf score would otherwise leave it ahead of
+    // the exact 'Google' match.
+    const payees = [makePayee('AAA Google'), makePayee('Google')];
+    const autocomplete = renderPayeeAutocomplete({ payees });
+    await clickAutocomplete(autocomplete);
+
+    const input = autocomplete.querySelector('input')!;
+    await userEvent.type(input, 'Google');
+    await waitForAutocomplete();
+
+    expect(
+      [
+        ...screen
+          .getByTestId('autocomplete')
+          .querySelectorAll(ALL_PAYEE_ITEMS_SELECTOR),
+      ]
+        .map(e => e.getAttribute('data-testid'))
+        .flatMap(firstOrIncorrect),
+    ).toStrictEqual(['Google', 'AAA Google']);
+  });
 });

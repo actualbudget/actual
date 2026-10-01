@@ -1243,3 +1243,66 @@ test('Preferences: successfully read synced preferences', async () => {
     hideFraction: 'true',
   });
 });
+
+describe('API preferences: setPreference', () => {
+  beforeEach(async () => {
+    await api.loadBudget(budgetName);
+  });
+
+  // apis: setPreference
+  test('successfully sets a single preference', async () => {
+    await api.setPreference('numberFormat', '1,234.5');
+
+    const preferences = await api.getPreferences();
+    expect(preferences.numberFormat).toBe('1,234.5');
+  });
+
+  // apis: setPreference
+  test('can set multiple preferences', async () => {
+    await api.setPreference('numberFormat', '1,234.5');
+    await api.setPreference('hideFraction', 'true');
+    await api.setPreference('defaultCurrencyCode', 'USD');
+
+    const preferences = await api.getPreferences();
+    expect(preferences).toMatchObject({
+      numberFormat: '1,234.5',
+      hideFraction: 'true',
+      defaultCurrencyCode: 'USD',
+    });
+  });
+
+  // apis: setPreference
+  test('can set feature flag preferences', async () => {
+    await api.setPreference('flags.newSidebarUI', 'true');
+
+    const preferences = await api.getPreferences();
+    expect(preferences['flags.newSidebarUI']).toBe('true');
+  });
+
+  // apis: setPreference
+  test('can set account-specific preferences', async () => {
+    const accountId = 'test-account-123';
+    await api.setPreference(
+      `show-account-${accountId}-net-worth-chart`,
+      'false',
+    );
+
+    const preferences = await api.getPreferences();
+    expect(preferences[`show-account-${accountId}-net-worth-chart`]).toBe(
+      'false',
+    );
+  });
+
+  // apis: setPreference
+  test('can set CSV import preferences', async () => {
+    await api.setPreference(
+      `csv-mappings-${budgetName}`,
+      'col1:name,col2:amount',
+    );
+
+    const preferences = await api.getPreferences();
+    expect(preferences[`csv-mappings-${budgetName}`]).toBe(
+      'col1:name,col2:amount',
+    );
+  });
+});

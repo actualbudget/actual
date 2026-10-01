@@ -5,6 +5,10 @@
 export const BASE_THEME_OPTIONS = ['light', 'dark', 'midnight'] as const;
 export type BaseTheme = (typeof BASE_THEME_OPTIONS)[number];
 
+export function isBaseTheme(value: string): value is BaseTheme {
+  return (BASE_THEME_OPTIONS as readonly string[]).includes(value);
+}
+
 export type CatalogTheme = {
   name: string;
   repo: string;
@@ -648,6 +652,27 @@ export function generateThemeId(urlOrRepo: string): string {
   return `theme-${Math.abs(hash).toString(36)}`;
 }
 
+export function validateThemeCssSafely(
+  css: string | undefined,
+  onError?: (error: unknown) => void,
+): string {
+  if (!css?.trim()) return '';
+  try {
+    return validateThemeCss(css);
+  } catch (error) {
+    onError?.(error);
+    return '';
+  }
+}
+
+export function usesRedesignSidebarPalette(css: string): boolean {
+  const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  return (
+    /--color-sidebarRedesign[A-Za-z]*\s*:/.test(declarations) ||
+    !/--color-sidebar(?!Redesign)[A-Za-z]*\s*:/.test(declarations)
+  );
+}
+
 /**
  * Parse the installed theme JSON from global prefs.
  * Returns a single InstalledTheme or null if none is installed.
@@ -674,11 +699,9 @@ export function parseInstalledTheme(
       };
       if (
         typeof parsed.baseTheme === 'string' &&
-        BASE_THEME_OPTIONS.includes(
-          parsed.baseTheme as (typeof BASE_THEME_OPTIONS)[number],
-        )
+        isBaseTheme(parsed.baseTheme)
       ) {
-        result.baseTheme = parsed.baseTheme as BaseTheme;
+        result.baseTheme = parsed.baseTheme;
       }
       return result;
     }

@@ -93,7 +93,7 @@
     "akahu": "^2.5.1",
     "argon2": "^0.44.0",
     "bcrypt": "^6.0.0",
-    "better-sqlite3": "^12.11.1",
+    "better-sqlite3": "^13.0.3",
     "convict": "^6.2.5",
     "cors": "^2.8.6",
     "date-fns": "^4.4.0",
@@ -106,12 +106,12 @@
     "migrate": "^2.1.0",
     "openid-client": "^5.7.1",
     "pluggy-sdk": "^0.89.0",
-    "uuid": "^14.0.1",
+    "uuid": "^14.0.2",
     "winston": "^3.19.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
-    "@types/better-sqlite3": "^7.6.13",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/convict": "^6",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
@@ -125,7 +125,7 @@
     "supertest": "^7.2.2",
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.1.5",
-    "vitest": "^4.1.10"
+    "vitest": "^5.0.0"
   },
   "engines": {
     "node": ">=22"
