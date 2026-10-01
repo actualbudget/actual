@@ -433,14 +433,26 @@ export function isForPreview(
   );
 }
 
+/**
+ * When `endDate` is given, previews are generated up to that date for every
+ * schedule, regardless of the upcoming length or the schedule's own status.
+ */
 export function computeSchedulePreviewTransactions(
   schedules: readonly ScheduleEntity[],
   statuses: ScheduleStatuses,
   upcomingLength?: string,
   filter?: (schedule: ScheduleEntity) => boolean,
+  endDate?: string,
 ) {
   const schedulesForPreview = schedules
-    .filter(s => isForPreview(s, statuses))
+    .filter(
+      s =>
+        isForPreview(s, statuses) ||
+        (endDate != null &&
+          !s.completed &&
+          statuses.get(s.id) === 'scheduled' &&
+          s.next_date <= endDate),
+    )
     .filter(filter ? filter : () => true);
 
   const today = d.startOfDay(monthUtils.parseDate(monthUtils.currentDay()));
@@ -451,7 +463,8 @@ export function computeSchedulePreviewTransactions(
         schedule.custom_upcoming_length ?? upcomingLength;
       const upcomingPeriodEnd = d.startOfDay(
         monthUtils.parseDate(
-          monthUtils.addDays(today, getUpcomingDays(effectiveUpcomingLength)),
+          endDate ??
+            monthUtils.addDays(today, getUpcomingDays(effectiveUpcomingLength)),
         ),
       );
 
@@ -496,17 +509,19 @@ export function computeSchedulePreviewTransactions(
         dates.shift();
       }
 
-      return dates.map(date => ({
-        id: 'preview/' + schedule.id + `/${date}`,
-        payee: schedule._payee,
-        account: schedule._account,
-        amount: getScheduledAmount(schedule._amount),
-        date,
-        schedule: schedule.id,
-        forceUpcoming:
-          (date !== schedule.next_date || status === 'paid') &&
-          date >= monthUtils.currentDay(),
-      }));
+      return dates
+        .filter(date => endDate == null || date <= endDate)
+        .map(date => ({
+          id: 'preview/' + schedule.id + `/${date}`,
+          payee: schedule._payee,
+          account: schedule._account,
+          amount: getScheduledAmount(schedule._amount),
+          date,
+          schedule: schedule.id,
+          forceUpcoming:
+            (date !== schedule.next_date || status === 'paid') &&
+            date >= monthUtils.currentDay(),
+        }));
     })
     .sort(
       (a, b) =>
