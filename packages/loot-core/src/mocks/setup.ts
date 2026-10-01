@@ -62,7 +62,6 @@ const NativeTextDecoder = global.TextDecoder;
 if (
   new NativeTextDecoder('windows-1252').decode(new Uint8Array([0x80])) !== '€'
 ) {
-  // @ts-expect-error TextDecoder polyfill for Node test environment
   global.TextDecoder = class TextDecoder extends NativeTextDecoder {
     #encoding: string;
     constructor(label = 'utf-8', options?: TextDecoderOptions) {
