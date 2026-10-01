@@ -234,11 +234,13 @@ export class GoCardlessApi {
     maxHistoricalDays = 90,
     accessValidForDays = 90,
     accessScope = ['balances', 'details', 'transactions'],
+    reconfirmation = false,
   }: {
     institutionId: GoCardlessInstitutionId;
     maxHistoricalDays?: number;
     accessValidForDays?: number;
     accessScope?: string[];
+    reconfirmation?: boolean;
   }): Promise<AgreementResponse> {
     return this.#request<AgreementResponse>('/agreements/enduser/', {
       method: 'POST',
@@ -246,6 +248,7 @@ export class GoCardlessApi {
         institution_id: institutionId,
         max_historical_days: maxHistoricalDays,
         access_valid_for_days: accessValidForDays,
+        ...(reconfirmation ? { reconfirmation: true } : {}),
         access_scope: accessScope,
       },
     });
@@ -299,6 +302,7 @@ export class GoCardlessApi {
     ssn = null,
     redirectImmediate = false,
     accountSelection = false,
+    reconfirmation = false,
   }: {
     redirectUrl: string;
     institutionId: GoCardlessInstitutionId;
@@ -309,11 +313,13 @@ export class GoCardlessApi {
     ssn?: string | null;
     redirectImmediate?: boolean;
     accountSelection?: boolean;
+    reconfirmation?: boolean;
   }): Promise<Requisition> {
     const agreement = await this.createAgreement({
       institutionId,
       maxHistoricalDays: Number(maxHistoricalDays),
       accessValidForDays: Number(accessValidForDays),
+      reconfirmation,
     });
 
     return this.createRequisition({
