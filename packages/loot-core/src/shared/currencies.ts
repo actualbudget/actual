@@ -48,6 +48,7 @@ export const currencies: Currency[] = [
   { code: 'IQD', name: 'Iraqi Dinar', symbol: 'IQD', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'IRR', name: 'Iranian Rial', symbol: '﷼', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: false },
   { code: 'JMD', name: 'Jamaican Dollar', symbol: 'J$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'JOD', name: 'Jordanian Dinar', symbol: 'JOD', decimalPlaces: 3, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'JPY', name: 'Japanese Yen', symbol: '¥', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'KRW', name: 'South Korean Won', symbol: '₩', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'LKR', name: 'Sri Lankan Rupee', symbol: 'Rs.', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },

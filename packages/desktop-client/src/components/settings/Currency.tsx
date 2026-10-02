@@ -49,6 +49,7 @@ export function useCurrencyOptions() {
         ['IQD', t('Iraqi Dinar')],
         ['IRR', t('Iranian Rial')],
         ['JMD', t('Jamaican Dollar')],
+        ['JOD', t('Jordanian Dinar')],
         ['JPY', t('Japanese Yen')],
         ['KRW', t('South Korean Won')],
         ['LKR', t('Sri Lankan Rupee')],
