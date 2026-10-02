@@ -43,6 +43,12 @@ export function reviewedAmountEncoding(currencyCode: string): AmountEncoding {
   };
 }
 
+export function isReviewedCurrency(currencyCode: string): boolean {
+  return currencies.some(
+    currency => currency.code !== '' && currency.code === currencyCode,
+  );
+}
+
 /** Imported budgets keep only reviewed source currencies; others stay legacy 2dp. */
 export function importedCurrencyCode(currencyCode: string): string {
   return currencyCode &&
