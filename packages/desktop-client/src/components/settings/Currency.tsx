@@ -46,6 +46,7 @@ export function useCurrencyOptions() {
         ['IDR', t('Indonesian Rupiah')],
         ['ILS', t('Israeli New Shekel')],
         ['INR', t('Indian Rupee')],
+        ['IQD', t('Iraqi Dinar')],
         ['IRR', t('Iranian Rial')],
         ['JMD', t('Jamaican Dollar')],
         ['JPY', t('Japanese Yen')],
