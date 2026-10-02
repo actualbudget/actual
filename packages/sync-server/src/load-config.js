@@ -90,6 +90,12 @@ const configSchema = convict({
     default: process.env.PORT ? process.env.PORT : 5006,
     env: 'ACTUAL_PORT',
   },
+  socket: {
+    doc: 'Unix socket to listen on. When set, port and hostname are ignored.',
+    format: String,
+    default: '',
+    env: 'ACTUAL_SOCKET',
+  },
   hostname: {
     doc: 'Server hostname.',
     format: String,
