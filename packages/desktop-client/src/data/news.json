@@ -5,7 +5,7 @@
       "id": "release-26.10.0",
       "type": "release",
       "title": "Release 26.10.0",
-      "date": "2026-10-01",
+      "date": "2026-10-02",
       "version": "26.10.0",
       "url": "https://actualbudget.org/blog/release-26.10.0",
       "body": "This release speeds up transaction editing, makes syncing more resilient to version mismatches, adds an in-app Notifications page, and introduces an experimental redesigned sidebar with account groups, as well as numerous other fixes.\n\n- Speeds up transaction editing, especially in larger budgets\n- Adds a [Notifications](https://actualbudget.org/docs/notifications) page to catch up on what's new in each release without leaving the app\n- Makes Actual more resilient to version mismatches, improving syncing between devices running different versions\n- Improves bank file imports, fixing accented letters (like é or ü) showing up garbled and supporting more CSV formats\n- Experimental: Adds a [redesigned sidebar](https://actualbudget.org/docs/experimental/redesigned-sidebar), based on the winning entry from the [sidenav design competition](https://actualbudget.org/blog/sidenav-design-winner), that lets you organise accounts into groups, reorder them by drag and drop, and search them\n- Experimental: Adds income streams, a yearly cashflow chart, custom stocks/bonds/cash mixes and much more to the [Monte Carlo analysis report](https://actualbudget.org/docs/experimental/monte-carlo-analysis)\n- Experimental: Adds an option to show transfers in the spent view of the [Sankey report](https://actualbudget.org/docs/experimental/sankey-report)",
