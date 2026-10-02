@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
+import type { AmountFormatOptions } from '@actual-app/core/server/api-models';
 import type { RuleEntity } from '@actual-app/core/types/models';
 import { vi } from 'vitest';
 
@@ -400,6 +401,10 @@ describe('API CRUD operations', () => {
 
     expect(await api.getAccountBalance(accountId1)).toEqual(1000);
     expect(await api.getAccountBalance(accountId2)).toEqual(0);
+    const options: AmountFormatOptions = { amountFormat: 'money' };
+    expect(await api.getAccountBalance(accountId1, undefined, options)).toEqual(
+      { amount: 1000, currencyCode: '' },
+    );
 
     await api.updateAccount(accountId1, { offbudget: false });
     await api.closeAccount(accountId1, accountId2);

@@ -9,9 +9,11 @@ import { FormError } from '@actual-app/components/form-error';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { InlineField } from '@actual-app/components/inline-field';
 import { Input } from '@actual-app/components/input';
+import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { isReviewedCurrency } from '@actual-app/core/shared/amount-encoding';
 import { integerToAmount } from '@actual-app/core/shared/util';
 
 import { useCreateAccountMutation } from '#accounts';
@@ -24,10 +26,13 @@ import {
   ModalTitle,
 } from '#components/common/Modal';
 import { Checkbox } from '#components/forms';
+import { useCurrencyOptions } from '#components/settings/Currency';
 import { validateAccountName } from '#components/util/accountValidation';
 import { useAccounts } from '#hooks/useAccounts';
 import { useFormat } from '#hooks/useFormat';
+import { useMulticurrencyAvailable } from '#hooks/useMulticurrencyAvailable';
 import { useNavigate } from '#hooks/useNavigate';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { closeModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -42,6 +47,15 @@ export function CreateLocalAccountModal() {
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
+  const multicurrencyAvailable = useMulticurrencyAvailable();
+  const [budgetCurrencyCode = ''] = useSyncedPref('defaultCurrencyCode');
+  const currencyOptions = useCurrencyOptions().filter(([code]) =>
+    isReviewedCurrency(code),
+  );
+  // Foreign accounts stay unavailable until foreign posting is supported.
+  const foreignCurrencyCodes = currencyOptions
+    .map(([code]) => code)
+    .filter(code => code !== budgetCurrencyCode);
 
   const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
@@ -73,6 +87,7 @@ export function CreateLocalAccountModal() {
           name,
           balance: integerToAmount(encodedBalance, format.precision),
           offBudget: offbudget,
+          ...(multicurrencyAvailable && { currency: budgetCurrencyCode }),
         },
         {
           onSuccess: id => {
@@ -202,6 +217,31 @@ export function CreateLocalAccountModal() {
                   </div>
                 </View>
               </View>
+
+              {multicurrencyAvailable && (
+                <>
+                  <InlineField label={t('Currency')} width="100%">
+                    <Select
+                      id="account-currency-select"
+                      value={budgetCurrencyCode}
+                      options={currencyOptions}
+                      disabledKeys={foreignCurrencyCodes}
+                      style={{ flex: 1 }}
+                    />
+                  </InlineField>
+                  <Text
+                    style={{
+                      marginLeft: 75,
+                      fontSize: '0.8em',
+                      color: theme.pageTextLight,
+                    }}
+                  >
+                    <Trans>
+                      Accounts in other currencies are not available yet.
+                    </Trans>
+                  </Text>
+                </>
+              )}
 
               <InlineField label={t('Balance')} width="100%">
                 <Input
