@@ -83,6 +83,20 @@ describe('utility functions', () => {
     expect(looselyParseAmount(' 3.45 ')).toBe(3.45);
   });
 
+  test.each([
+    [' -110.7 €', -110.7],
+    [' -116.62 €', -116.62],
+    ['3.4 EUR', 3.4],
+    ['3,4 €', 3.4],
+    ['3.456 €', 3456],
+    ['(3.45) €', -3.45],
+  ] as const)(
+    'parses amounts with a currency suffix: %s',
+    (input, expected) => {
+      expect(looselyParseAmount(input)).toBe(expected);
+    },
+  );
+
   test('number formatting works with comma-dot format', () => {
     setNumberFormat({ format: 'comma-dot', hideFraction: false });
     let formatter = getNumberFormat().formatter;

@@ -576,7 +576,8 @@ export function looselyParseAmount(amount: string) {
     return v.replace(/[^0-9-]/g, '');
   }
 
-  amount = amount.trim();
+  // Currency suffixes must not count as decimal digits or hide closing parentheses.
+  amount = amount.trim().replace(/[^\d.,()\u2212-]+$/u, '');
 
   if (amount.startsWith('(') && amount.endsWith(')')) {
     // Remove Unicode minus inside parentheses before converting to ASCII minus
