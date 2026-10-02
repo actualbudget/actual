@@ -60,6 +60,7 @@ export function useCurrencyOptions() {
         ['MXN', t('Mexican Peso')],
         ['MYR', t('Malaysian Ringgit')],
         ['NOK', t('Norwegian Krone')],
+        ['NZD', t('New Zealand Dollar')],
         ['PEN', t('Peruvian Sol')],
         ['PHP', t('Philippine Peso')],
         ['PKR', t('Pakistani Rupee')],
