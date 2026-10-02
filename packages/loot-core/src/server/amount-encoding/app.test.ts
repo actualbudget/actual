@@ -106,6 +106,24 @@ describe('in-place precision changes', () => {
     ).toBe(1234);
   });
 
+  it('rescales an existing BHD budget from its recorded 2dp encoding', async () => {
+    db.runQuery(
+      "INSERT INTO preferences (id, value) VALUES ('defaultCurrencyCode', 'BHD')",
+    );
+    db.execQuery(
+      "INSERT INTO transactions (id, amount) VALUES ('amount', 1234)",
+    );
+
+    expect(await changePrecision('BHD')).toEqual({});
+    expect(
+      db.firstSync<{ amount: number }>('SELECT amount FROM transactions')
+        ?.amount,
+    ).toBe(12340);
+    expect(prefs.getPrefs().amountEncoding).toBe(
+      JSON.stringify({ version: 1, currencyCode: 'BHD', precision: 3 }),
+    );
+  });
+
   it('does not migrate amounts when the precision stays the same', async () => {
     // An invalid split would reject a rescale, but no rescale is needed here.
     db.execQuery(
