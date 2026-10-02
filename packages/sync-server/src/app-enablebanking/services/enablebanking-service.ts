@@ -437,7 +437,6 @@ export const enableBankingService = {
         continuationKey,
         psuHeaders,
       );
-      allTransactions.push(...result.transactions);
 
       if (
         result.continuation_key &&
@@ -446,6 +445,7 @@ export const enableBankingService = {
         break;
       }
 
+      allTransactions.push(...result.transactions);
       continuationKey = result.continuation_key;
       iteration++;
     } while (continuationKey && iteration < maxIterations);
