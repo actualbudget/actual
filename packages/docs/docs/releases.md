@@ -70,6 +70,7 @@ This release speeds up transaction editing, makes syncing more resilient to vers
 - [#8911](https://github.com/actualbudget/actual/pull/8911) Keep custom report charts at a stable height when scrolling a long legend. — thanks @femedici
 - [#8798](https://github.com/actualbudget/actual/pull/8798) add vite-plugin-peggy workspace to sync-server.Dockerfile — thanks @ahawkins318
 - [#8811](https://github.com/actualbudget/actual/pull/8811) Rank exact payee matches above longer tied substring matches in autocomplete — thanks @J-LCRX
+- [#9071](https://github.com/actualbudget/actual/pull/9071) Fix the date picker not opening on mobile in recent versions of Chrome — thanks @MikesGlitch
 - [#8861](https://github.com/actualbudget/actual/pull/8861) Fix Monte Carlo withdrawal rules misbehaving when retirement starts after years of zero planned spending — thanks @MikesGlitch
 - [#8964](https://github.com/actualbudget/actual/pull/8964) Fix the Monte Carlo cashflow chart showing spending below the minimum spending floor in the years after a plan runs out — thanks @MikesGlitch
 - [#9003](https://github.com/actualbudget/actual/pull/9003) Fix light custom themes losing their sidebar colours in the experimental new sidebar — thanks @matt-fidd
