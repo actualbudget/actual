@@ -1,33 +1,29 @@
-import { useEffect, useMemo, useState } from 'react';
-import type { RefObject } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
- * Check if the given element (by ref) is visible in the viewport.
+ * Check if the given element is visible in the viewport.
+ *
+ * The element is passed directly (tracked as state through a callback ref)
+ * rather than as a ref object, so the observer follows the element when it is
+ * replaced, e.g. when a dashboard card is remounted on toggling edit mode.
  */
-export function useIsInViewport(ref: RefObject<Element | null>) {
+export function useIsInViewport(element: Element | null) {
   const [isIntersecting, setIsIntersecting] = useState(false);
 
-  const observer = useMemo(
-    () =>
-      new IntersectionObserver(([entry]) =>
-        setIsIntersecting(entry.isIntersecting),
-      ),
-    [],
-  );
-
   useEffect(() => {
-    const view = ref.current;
-
-    if (!view) {
+    if (!element) {
       return;
     }
 
-    observer.observe(view);
+    const observer = new IntersectionObserver(([entry]) =>
+      setIsIntersecting(entry.isIntersecting),
+    );
+    observer.observe(element);
 
     return () => {
       observer.disconnect();
     };
-  }, [ref, observer]);
+  }, [element]);
 
   return isIntersecting;
 }
