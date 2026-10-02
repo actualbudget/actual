@@ -82,6 +82,7 @@ export function useCurrencyOptions() {
         ['USD', t('US Dollar')],
         ['UYU', t('Uruguayan Peso')],
         ['UZS', t('Uzbek Soum')],
+        ['XOF', t('West African CFA Franc')],
         ['ZAR', t('South African Rand')],
       ]),
     [t],
