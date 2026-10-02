@@ -19,12 +19,23 @@ import type {
   GoCardlessInstitutionId,
   GoCardlessRequisitionId,
 } from '#app-gocardless/gocardless-node.types';
-import { GoCardlessApiError } from '#app-gocardless/services/gocardless-api';
+import {
+  GoCardlessApi,
+  GoCardlessApiError,
+} from '#app-gocardless/services/gocardless-api';
 import {
   client,
   goCardlessService,
   handleGoCardlessError,
 } from '#app-gocardless/services/gocardless-service';
+
+vi.mock('#services/secrets-service', () => ({
+  SecretName: {
+    gocardless_secretId: 'gocardless_secretId',
+    gocardless_secretKey: 'gocardless_secretKey',
+  },
+  secretsService: { get: () => 'test-secret' },
+}));
 
 import {
   mockAccountDetails,
@@ -328,6 +339,32 @@ describe('goCardlessService', () => {
       expect(createRequisitionSpy).toHaveBeenCalledWith(
         expect.objectContaining({ accessValidForDays: '90' }),
       );
+    });
+  });
+
+  describe('#initSession', () => {
+    it('forwards reconfirmation to the GoCardless API client', async () => {
+      const apiSpy = vi
+        .spyOn(GoCardlessApi.prototype, 'initSession')
+        .mockResolvedValue(mockCreateRequisition);
+
+      await client.initSession({
+        redirectUrl: 'https://exemple.com/gocardless/link',
+        institutionId: 'some-institution-id' as GoCardlessInstitutionId,
+        referenceId: null,
+        accessValidForDays: 90,
+        maxHistoricalDays: 89,
+        userLanguage: 'en',
+        ssn: null,
+        redirectImmediate: false,
+        accountSelection: false,
+        reconfirmation: true,
+      });
+
+      expect(apiSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ reconfirmation: true }),
+      );
+      apiSpy.mockRestore();
     });
   });
 

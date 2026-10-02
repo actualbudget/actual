@@ -533,6 +533,7 @@ export const client = {
     ssn,
     redirectImmediate,
     accountSelection,
+    reconfirmation,
   }: {
     redirectUrl: string;
     institutionId: GoCardlessInstitutionId;
@@ -543,6 +544,7 @@ export const client = {
     ssn: string | null;
     redirectImmediate: boolean;
     accountSelection: boolean;
+    reconfirmation?: boolean;
   }): Promise<Requisition> =>
     await getGocardlessClient().initSession({
       redirectUrl,
@@ -554,6 +556,7 @@ export const client = {
       ssn,
       redirectImmediate,
       accountSelection,
+      reconfirmation,
     }),
   generateToken: async (): Promise<TokenResponse> =>
     await getGocardlessClient().generateToken(),
