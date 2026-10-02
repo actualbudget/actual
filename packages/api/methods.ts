@@ -1,20 +1,29 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import type {
+  AmountFormat,
+  AmountFormatOptions,
+  AmountInput,
+  APIAccountCreateEntity,
   APIAccountEntity,
   APIAccountGroupEntity,
+  APIAccountUpdateFields,
+  APIBudgetMonth,
   APICategoryEntity,
   APICategoryGroupEntity,
   APIFileEntity,
+  APIImportTransactionInput,
+  APIMoneyTransactionEntity,
   APIPayeeEntity,
   APIRuleEntity,
   APIScheduleEntity,
   APITagEntity,
+  APITransactionUpdateFields,
 } from '@actual-app/core/server/api-models';
 import type { ImportableBudgetType } from '@actual-app/core/server/importers/index';
+import type { Money } from '@actual-app/core/shared/money';
 import type { Query } from '@actual-app/core/shared/query';
 import type { ImportTransactionsOpts } from '@actual-app/core/types/api-handlers';
 import type {
-  ImportTransactionEntity,
   NoteEntity,
   RuleEntity,
   TransactionEntity,
@@ -148,14 +157,40 @@ export function getBudgetMonths() {
   return send('api/budget-months');
 }
 
-export function getBudgetMonth(month: string) {
-  return send('api/budget-month', { month });
+/**
+ * Amounts are budget-currency integers. Pass `{ amountFormat: 'money' }` to
+ * receive Money values in the budget currency.
+ * Raw integers are the default during dual support; raw-integer responses
+ * will be removed 12 months after Money support ships.
+ */
+export function getBudgetMonth(
+  month: string,
+  options?: { amountFormat?: 'raw' },
+): Promise<APIBudgetMonth>;
+export function getBudgetMonth(
+  month: string,
+  options: { amountFormat: 'money' },
+): Promise<APIBudgetMonth<Money>>;
+export function getBudgetMonth(
+  month: string,
+  options?: AmountFormatOptions,
+): Promise<APIBudgetMonth | APIBudgetMonth<Money>>;
+export function getBudgetMonth(
+  month: string,
+  options?: { amountFormat?: AmountFormat },
+) {
+  return send('api/budget-month', { month, options });
 }
 
+/**
+ * `value` is a budget-currency integer or Money in the budget currency.
+ * Raw integers are accepted during dual support; raw-integer support will
+ * be removed 12 months after Money support ships.
+ */
 export function setBudgetAmount(
   month: string,
   categoryId: APICategoryEntity['id'],
-  value: number,
+  value: AmountInput,
 ) {
   return send('api/budget-set-amount', { month, categoryId, amount: value });
 }
@@ -168,9 +203,14 @@ export function setBudgetCarryover(
   return send('api/budget-set-carryover', { month, categoryId, flag });
 }
 
+/**
+ * Amounts are account-native integers or Money in the account currency.
+ * Raw integers are accepted during dual support; raw-integer support will
+ * be removed 12 months after Money support ships.
+ */
 export function addTransactions(
   accountId: APIAccountEntity['id'],
-  transactions: Omit<ImportTransactionEntity, 'account'>[],
+  transactions: Omit<APIImportTransactionInput, 'account'>[],
   {
     learnCategories = false,
     runTransfers = false,
@@ -184,9 +224,14 @@ export function addTransactions(
   });
 }
 
+/**
+ * Amounts are account-native integers or Money in the account currency.
+ * Raw integers are accepted during dual support; raw-integer support will
+ * be removed 12 months after Money support ships.
+ */
 export function importTransactions(
   accountId: APIAccountEntity['id'],
-  transactions: ImportTransactionEntity[],
+  transactions: APIImportTransactionInput[],
   opts: ImportTransactionsOpts = {
     defaultCleared: true,
     dryRun: false,
@@ -200,17 +245,52 @@ export function importTransactions(
   });
 }
 
+/**
+ * Amounts are account-native integers. Pass `{ amountFormat: 'money' }` to
+ * receive Money values in the account currency.
+ * Raw integers are the default during dual support; raw-integer responses
+ * will be removed 12 months after Money support ships.
+ */
 export function getTransactions(
   accountId: APIAccountEntity['id'],
   startDate: string,
   endDate: string,
+  options?: { amountFormat?: 'raw' },
+): Promise<TransactionEntity[]>;
+export function getTransactions(
+  accountId: APIAccountEntity['id'],
+  startDate: string,
+  endDate: string,
+  options: { amountFormat: 'money' },
+): Promise<APIMoneyTransactionEntity[]>;
+export function getTransactions(
+  accountId: APIAccountEntity['id'],
+  startDate: string,
+  endDate: string,
+  options?: AmountFormatOptions,
+): Promise<TransactionEntity[] | APIMoneyTransactionEntity[]>;
+export function getTransactions(
+  accountId: APIAccountEntity['id'],
+  startDate: string,
+  endDate: string,
+  options?: { amountFormat?: AmountFormat },
 ) {
-  return send('api/transactions-get', { accountId, startDate, endDate });
+  return send('api/transactions-get', {
+    accountId,
+    startDate,
+    endDate,
+    options,
+  });
 }
 
+/**
+ * `amount` is an account-native integer or Money in the account currency.
+ * Raw integers are accepted during dual support; raw-integer support will
+ * be removed 12 months after Money support ships.
+ */
 export function updateTransaction(
   id: TransactionEntity['id'],
-  fields: Partial<TransactionEntity>,
+  fields: APITransactionUpdateFields,
 ) {
   return send('api/transaction-update', { id, fields });
 }
@@ -229,16 +309,22 @@ export function getAccounts() {
   return send('api/accounts-get');
 }
 
+/**
+ * Omit `currency` to inherit the budget currency. `initialBalance` is an
+ * account-native integer or Money in the account currency.
+ * Raw integers are accepted during dual support; raw-integer support will
+ * be removed 12 months after Money support ships.
+ */
 export function createAccount(
-  account: Omit<APIAccountEntity, 'id'>,
-  initialBalance?: number,
+  account: APIAccountCreateEntity,
+  initialBalance?: AmountInput,
 ) {
   return send('api/account-create', { account, initialBalance });
 }
 
 export function updateAccount(
   id: APIAccountEntity['id'],
-  fields: Partial<APIAccountEntity>,
+  fields: APIAccountUpdateFields,
 ) {
   return send('api/account-update', { id, fields });
 }
@@ -263,8 +349,33 @@ export function deleteAccount(id: APIAccountEntity['id']) {
   return send('api/account-delete', { id });
 }
 
-export function getAccountBalance(id: APIAccountEntity['id'], cutoff?: Date) {
-  return send('api/account-balance', { id, cutoff });
+/**
+ * The balance is an account-native integer. Pass `{ amountFormat: 'money' }`
+ * to receive Money in the account currency.
+ * Raw integers are the default during dual support; raw-integer responses
+ * will be removed 12 months after Money support ships.
+ */
+export function getAccountBalance(
+  id: APIAccountEntity['id'],
+  cutoff?: Date,
+  options?: { amountFormat?: 'raw' },
+): Promise<number>;
+export function getAccountBalance(
+  id: APIAccountEntity['id'],
+  cutoff: Date | undefined,
+  options: { amountFormat: 'money' },
+): Promise<Money>;
+export function getAccountBalance(
+  id: APIAccountEntity['id'],
+  cutoff?: Date,
+  options?: AmountFormatOptions,
+): Promise<number | Money>;
+export function getAccountBalance(
+  id: APIAccountEntity['id'],
+  cutoff?: Date,
+  options?: { amountFormat?: AmountFormat },
+) {
+  return send('api/account-balance', { id, cutoff, options });
 }
 
 export function getAccountGroups() {

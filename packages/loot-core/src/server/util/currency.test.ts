@@ -1,7 +1,12 @@
 import * as db from '#server/db';
 import * as prefs from '#server/prefs';
 
-import { initializeImportedAmountEncoding } from './currency';
+import {
+  getAccountCurrency,
+  initializeImportedAmountEncoding,
+  isMulticurrencyAvailable,
+  resolveAccountCurrencyInput,
+} from './currency';
 
 beforeEach(global.emptyDatabase());
 
@@ -33,6 +38,125 @@ describe('initializeImportedAmountEncoding', () => {
   it('rejects unknown source currencies', async () => {
     await expect(initializeImportedAmountEncoding('XYZ')).rejects.toThrow(
       'amount-encoding-unreviewed-currency',
+    );
+  });
+});
+
+describe('account currency', () => {
+  async function setBudgetCurrency(currencyCode: string, precision: number) {
+    await db.update('preferences', {
+      id: 'defaultCurrencyCode',
+      value: currencyCode,
+    });
+    await prefs.savePrefs({
+      amountEncoding: JSON.stringify({ version: 1, currencyCode, precision }),
+    });
+  }
+
+  async function enableMulticurrency() {
+    await db.update('preferences', { id: 'flags.currency', value: 'true' });
+    await db.update('preferences', {
+      id: 'flags.multicurrency',
+      value: 'true',
+    });
+  }
+
+  beforeEach(async () => {
+    await prefs.loadPrefs();
+  });
+
+  it.each([
+    ['', undefined, 2],
+    ['USD', 2, 2],
+    ['JPY', 0, 0],
+    ['KWD', 3, 3],
+  ])(
+    'resolves inherited %s accounts from the recorded encoding',
+    async (code, precision, expected) => {
+      if (precision !== undefined) await setBudgetCurrency(code, precision);
+      await db.insertAccount({ id: 'acct1', name: 'Checking' });
+      expect(await getAccountCurrency('acct1')).toEqual({
+        currencyCode: code,
+        precision: expected,
+      });
+    },
+  );
+
+  it('uses the recorded precision rather than the currency table', async () => {
+    // A budget recorded before a precision correction keeps its scale.
+    await setBudgetCurrency('JPY', 2);
+    await db.insertAccount({ id: 'acct1', name: 'Checking' });
+    expect(await getAccountCurrency('acct1')).toEqual({
+      currencyCode: 'JPY',
+      precision: 2,
+    });
+  });
+
+  it('requires both flags and a recorded budget currency', async () => {
+    expect(await isMulticurrencyAvailable()).toBe(false);
+    await enableMulticurrency();
+    expect(await isMulticurrencyAvailable()).toBe(false);
+    await setBudgetCurrency('USD', 2);
+    expect(await isMulticurrencyAvailable()).toBe(true);
+    await db.update('preferences', { id: 'flags.currency', value: 'false' });
+    expect(await isMulticurrencyAvailable()).toBe(false);
+  });
+
+  it('normalizes the budget currency to inheritance', async () => {
+    await setBudgetCurrency('USD', 2);
+    expect(await resolveAccountCurrencyInput(undefined)).toBeUndefined();
+    expect(await resolveAccountCurrencyInput(null)).toBeNull();
+    expect(await resolveAccountCurrencyInput('USD')).toBeNull();
+  });
+
+  it('checks errors in order', async () => {
+    await setBudgetCurrency('USD', 2);
+    await db.insertAccount({ id: 'empty', name: 'Empty' });
+    await db.insertAccount({ id: 'used', name: 'Used' });
+    await db.insertTransaction({
+      account: 'used',
+      date: '2026-03-01',
+      amount: 100,
+    });
+
+    for (const invalid of ['usd', 'US', 'XXX', 7]) {
+      await expect(
+        resolveAccountCurrencyInput(invalid, 'used'),
+      ).rejects.toThrow('account-currency-invalid');
+    }
+    await expect(resolveAccountCurrencyInput('JPY', 'used')).rejects.toThrow(
+      'account-currency-immutable',
+    );
+    await expect(resolveAccountCurrencyInput('USD', 'used')).resolves.toBe(
+      null,
+    );
+    await expect(resolveAccountCurrencyInput('JPY', 'empty')).rejects.toThrow(
+      'multicurrency-unavailable',
+    );
+    await enableMulticurrency();
+    await expect(resolveAccountCurrencyInput('JPY', 'empty')).rejects.toThrow(
+      'account-currency-foreign-unavailable',
+    );
+    await expect(resolveAccountCurrencyInput('JPY')).rejects.toThrow(
+      'account-currency-foreign-unavailable',
+    );
+  });
+
+  it('requires the recorded budget currency to be reviewed', async () => {
+    await enableMulticurrency();
+    await setBudgetCurrency('CLF', 4);
+    expect(await isMulticurrencyAvailable()).toBe(false);
+  });
+
+  it('normalizes the budget currency before validating it', async () => {
+    expect(await resolveAccountCurrencyInput('')).toBeNull();
+  });
+
+  it('treats an empty budget currency as legacy', async () => {
+    await enableMulticurrency();
+    expect(await isMulticurrencyAvailable()).toBe(false);
+    await expect(resolveAccountCurrencyInput('USD')).rejects.toThrow(
+      'multicurrency-unavailable',
     );
   });
 });
