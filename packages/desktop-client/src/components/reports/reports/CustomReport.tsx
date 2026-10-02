@@ -1001,7 +1001,7 @@ function CustomReportInner({
             style={{
               backgroundColor: theme.tableBackground,
               flexDirection: 'row',
-              flex: '1 0 auto',
+              flex: 1,
             }}
           >
             <View

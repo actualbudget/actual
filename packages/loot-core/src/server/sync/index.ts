@@ -436,7 +436,11 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
   // a transaction is a separate lock/commit cycle against IndexedDB. We
   // avoid any side effects to in-memory objects, and apply them after
   // this succeeds.
-  db.transaction(() => {
+  //
+  // `immediate` takes the write lock before the reads below. Reading
+  // first and upgrading the lock later trips an absurd-sql bug on the
+  // web (a cursor kept across the upgrade) that stalls the backend.
+  const applyInTransaction = () => {
     if (checkSyncingMode('enabled')) {
       // Compare the messages with the existing crdt. This filters out
       // already applied messages and determines if a message is old or
@@ -538,7 +542,8 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
     }
 
     newData = fetchData(idsPerTable);
-  });
+  };
+  db.transaction(applyInTransaction, { immediate: true });
 
   // The transaction succeeded, so we can update in-memory objects now
   undo.appendMessages(messages, oldData);
@@ -569,20 +574,29 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
     // Transfers insert the source row in one sync batch and the counterparty in
     // a second. triggerDatabaseChanges should dirty aggregate query cells, but
     // explicitly recompute global account totals so the second batch always
-    // refreshes sidebar "All accounts" / On budget / etc. (see bindings.ts).
+    // refreshes sidebar "All accounts" / On budget / account group subtotals /
+    // etc. (see bindings.ts).
     if (idsPerTable.transactions?.length) {
       const s = sheet.get();
-      const globalAggregateCells = [
-        'accounts-balance',
-        'onbudget-accounts-balance',
-        'offbudget-accounts-balance',
-        'closed-accounts-balance',
-      ] as const;
-      for (const cellName of globalAggregateCells) {
-        const fullName = resolveName('__global', cellName);
-        if (s.hasCell(fullName)) {
-          s.recompute(fullName);
-        }
+      const globalAggregateCells = new Set(
+        [
+          'accounts-balance',
+          'onbudget-accounts-balance',
+          'offbudget-accounts-balance',
+          'closed-accounts-balance',
+        ].map(cellName => resolveName('__global', cellName)),
+      );
+      const accountGroupCellPrefix = resolveName(
+        '__global',
+        'account-group-balance-',
+      );
+      const cellsToRecompute = [...s.getNodes().keys()].filter(
+        name =>
+          globalAggregateCells.has(name) ||
+          name.startsWith(accountGroupCellPrefix),
+      );
+      for (const name of cellsToRecompute) {
+        s.recompute(name);
       }
     }
 
