@@ -61,6 +61,7 @@ export function useCurrencyOptions() {
         ['MYR', t('Malaysian Ringgit')],
         ['NOK', t('Norwegian Krone')],
         ['NZD', t('New Zealand Dollar')],
+        ['OMR', t('Omani Rial')],
         ['PEN', t('Peruvian Sol')],
         ['PHP', t('Philippine Peso')],
         ['PKR', t('Pakistani Rupee')],
