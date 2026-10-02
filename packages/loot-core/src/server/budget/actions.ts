@@ -27,6 +27,17 @@ export async function getSheetBoolean(
   return typeof node.value === 'boolean' ? node.value : false;
 }
 
+function getAvailableCell(month: string): 'ready-to-assign' | 'to-budget' {
+  const toBudgetMode = db.firstSync<Pick<db.DbPreference, 'value'>>(
+    `SELECT value FROM preferences WHERE id = ?`,
+    ['toBudgetMode'],
+  );
+  return toBudgetMode?.value === 'include-future' &&
+    month >= monthUtils.currentMonth()
+    ? 'ready-to-assign'
+    : 'to-budget';
+}
+
 // We want to only allow the positive movement of money back and
 // forth. buffered should never be allowed to go into the negative,
 // and you shouldn't be allowed to pull non-existent money from
@@ -496,7 +507,7 @@ export async function holdForNextMonth({
   );
 
   const sheetName = monthUtils.sheetForMonth(month);
-  const toBudget = await getSheetValue(sheetName, 'to-budget');
+  const toBudget = await getSheetValue(sheetName, getAvailableCell(month));
 
   if (toBudget > 0) {
     const bufferedAmount = calcBufferedAmount(
@@ -532,7 +543,7 @@ export async function coverOverspending({
   const toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
   const leftoverFrom = await getSheetValue(
     sheetName,
-    from === 'to-budget' ? 'to-budget' : 'leftover-' + from,
+    from === 'to-budget' ? getAvailableCell(month) : 'leftover-' + from,
   );
 
   // Cover provided amount (can be partial) or full overspending amount.
@@ -585,16 +596,7 @@ export async function transferAvailable({
   category: string;
 }): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
-  const toBudgetMode = db.firstSync<Pick<db.DbPreference, 'value'>>(
-    `SELECT value FROM preferences WHERE id = ?`,
-    ['toBudgetMode'],
-  );
-  const availableCell =
-    toBudgetMode?.value === 'include-future' &&
-    month >= monthUtils.currentMonth()
-      ? 'ready-to-assign'
-      : 'to-budget';
-  const leftover = await getSheetValue(sheetName, availableCell);
+  const leftover = await getSheetValue(sheetName, getAvailableCell(month));
   amount = Math.max(Math.min(amount, leftover), 0);
 
   const budgeted = await getSheetValue(sheetName, 'budget-' + category);
@@ -623,7 +625,7 @@ export async function coverOverbudgeted({
   const amountToCover = amount
     ? // Covering in the app provides a positive amount to cover so we invert it here
       -amount
-    : await getSheetValue(sheetName, 'to-budget');
+    : await getSheetValue(sheetName, getAvailableCell(month));
 
   if (amountToCover >= 0 || categoryLeftover <= 0) {
     return;
