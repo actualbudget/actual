@@ -2,7 +2,7 @@
 
 ## 26.10.0
 
-Release date: 2026-10-01
+Release date: 2026-10-02
 
 This release speeds up transaction editing, makes syncing more resilient to version mismatches, adds an in-app Notifications page, and introduces an experimental redesigned sidebar with account groups, as well as numerous other fixes.
 
