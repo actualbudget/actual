@@ -89,7 +89,7 @@ export function CategoryAutocompleteModal({
                 name={month ? monthUtils.sheetForMonth(month) : ''}
               >
                 <CategoryAutocomplete
-                  focused
+                  focused={!isNarrowWidth}
                   embedded
                   closeOnBlur={false}
                   closeOnSelect={closeOnSelect}
