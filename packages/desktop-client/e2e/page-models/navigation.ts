@@ -11,7 +11,7 @@ import { SettingsPage } from './settings-page';
 
 type AccountEntry = {
   name: string;
-  balance: number;
+  balance: number | string;
   offBudget: boolean;
 };
 

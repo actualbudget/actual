@@ -74,6 +74,7 @@ export function useCurrencyOptions() {
         ['SEK', t('Swedish Krona')],
         ['SGD', t('Singapore Dollar')],
         ['THB', t('Thai Baht')],
+        ['TND', t('Tunisian Dinar')],
         ['TRY', t('Turkish Lira')],
         ['TWD', t('New Taiwan Dollar')],
         ['TZS', t('Tanzanian Shilling')],
