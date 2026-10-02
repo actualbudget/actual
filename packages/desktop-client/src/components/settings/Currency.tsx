@@ -54,6 +54,7 @@ export function useCurrencyOptions() {
         ['KRW', t('South Korean Won')],
         ['KWD', t('Kuwaiti Dinar')],
         ['LKR', t('Sri Lankan Rupee')],
+        ['LYD', t('Libyan Dinar')],
         ['MDL', t('Moldovan Leu')],
         ['MKD', t('Macedonian Denar')],
         ['MXN', t('Mexican Peso')],
