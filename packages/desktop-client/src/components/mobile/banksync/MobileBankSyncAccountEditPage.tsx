@@ -39,6 +39,10 @@ export function MobileBankSyncAccountEditPage() {
     setImportTransactions,
     updateDates,
     setUpdateDates,
+    dedupSubsources,
+    setDedupSubsources,
+    autoReconcile,
+    setAutoReconcile,
     mappings,
     setMapping,
     fields,
@@ -155,6 +159,10 @@ export function MobileBankSyncAccountEditPage() {
               setImportTransactions={setImportTransactions}
               updateDates={updateDates}
               setUpdateDates={setUpdateDates}
+              dedupSubsources={dedupSubsources}
+              setDedupSubsources={setDedupSubsources}
+              autoReconcile={autoReconcile}
+              setAutoReconcile={setAutoReconcile}
               helpMode="mobile"
             />
           </View>

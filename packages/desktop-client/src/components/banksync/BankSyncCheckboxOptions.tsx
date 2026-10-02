@@ -155,6 +155,10 @@ type BankSyncCheckboxOptionsProps = {
   setImportTransactions: (value: boolean) => void;
   updateDates: boolean;
   setUpdateDates: (value: boolean) => void;
+  dedupSubsources?: boolean;
+  setDedupSubsources?: (value: boolean) => void;
+  autoReconcile?: boolean;
+  setAutoReconcile?: (value: boolean) => void;
   helpMode?: 'desktop' | 'mobile';
 };
 
@@ -169,6 +173,10 @@ export function BankSyncCheckboxOptions({
   setImportTransactions,
   updateDates,
   setUpdateDates,
+  dedupSubsources,
+  setDedupSubsources,
+  autoReconcile,
+  setAutoReconcile,
   helpMode = 'desktop',
 }: BankSyncCheckboxOptionsProps) {
   const { t } = useTranslation();
@@ -221,6 +229,21 @@ export function BankSyncCheckboxOptions({
         <Trans>Update Dates</Trans>
       </CheckboxOptionWithHelp>
 
+      {setDedupSubsources && (
+        <CheckboxOptionWithHelp
+          id="form_dedup_subsources"
+          checked={Boolean(dedupSubsources)}
+          onChange={() => setDedupSubsources(!dedupSubsources)}
+          disabled={!importTransactions}
+          helpText={t(
+            'Automatically detect and filter out duplicate sub-source transactions (such as 401(k) contribution sub-accounts) when an aggregate transaction exists.',
+          )}
+          helpMode={helpMode}
+        >
+          <Trans>Deduplicate sub-source transactions</Trans>
+        </CheckboxOptionWithHelp>
+      )}
+
       <CheckboxOptionWithHelp
         id="form_import_transactions"
         checked={!importTransactions}
@@ -232,6 +255,20 @@ export function BankSyncCheckboxOptions({
       >
         <Trans>Investment Account</Trans>
       </CheckboxOptionWithHelp>
+
+      {setAutoReconcile && (
+        <CheckboxOptionWithHelp
+          id="form_auto_reconcile"
+          checked={Boolean(autoReconcile)}
+          onChange={() => setAutoReconcile(!autoReconcile)}
+          helpText={t(
+            'Automatically create a Market Fluctuation adjustment transaction during bank sync so the account balance always matches the reported bank balance without manual reconciliation.',
+          )}
+          helpMode={helpMode}
+        >
+          <Trans>Automatically reconcile account balance</Trans>
+        </CheckboxOptionWithHelp>
+      )}
     </>
   );
 }

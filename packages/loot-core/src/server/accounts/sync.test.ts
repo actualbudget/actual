@@ -14,6 +14,7 @@ import type { SyncedPrefs } from '#types/prefs';
 import { app as accountsApp } from './app';
 import {
   addTransactions,
+  deduplicateSubsourceTransactions,
   reconcileTransactions,
   simpleFinBatchSync,
   syncAccount,
@@ -1056,6 +1057,199 @@ describe('SimpleFin batch sync', () => {
       const calledUrl = mockFetch.mock.calls[0][0] as string;
       expect(calledUrl).toContain('vin=vin999');
       expect(calledUrl).toContain('mileage=60000');
+    });
+  });
+
+  describe('deduplicateSubsourceTransactions', () => {
+    test('drops duplicate sub-source transactions when an aggregate transaction exists', () => {
+      const transactions = [
+        {
+          date: '2026-09-11',
+          payeeName: 'Instl Index Trust',
+          transactionAmount: { amount: '1976.70' },
+          transactionId: 'agg-1',
+        },
+        {
+          date: '2026-09-11',
+          payeeName: 'Instl Index Trust',
+          transactionAmount: { amount: '1057.80' },
+          transactionId: 'sub-1',
+        },
+        {
+          date: '2026-09-11',
+          payeeName: 'Instl Index Trust',
+          transactionAmount: { amount: '1057.80' },
+          transactionId: 'sub-2',
+        },
+        {
+          date: '2026-09-11',
+          payeeName: 'Instl Ext Market Idx',
+          transactionAmount: { amount: '658.90' },
+          transactionId: 'agg-2',
+        },
+        {
+          date: '2026-09-11',
+          payeeName: 'Instl Ext Market Idx',
+          transactionAmount: { amount: '352.60' },
+          transactionId: 'sub-3',
+        },
+        {
+          date: '2026-09-11',
+          payeeName: 'Instl Ext Market Idx',
+          transactionAmount: { amount: '352.60' },
+          transactionId: 'sub-4',
+        },
+      ];
+
+      const result = deduplicateSubsourceTransactions(transactions);
+      expect(result).toHaveLength(2);
+      expect(result.map(t => t.transactionId)).toEqual(['agg-1', 'agg-2']);
+    });
+
+    test('drops identical duplicate transactions even when no larger aggregate exists', () => {
+      const transactions = [
+        {
+          date: '2026-09-11',
+          payeeName: 'Instl Index Trust',
+          transactionAmount: { amount: '1057.80' },
+          transactionId: 'sub-1',
+        },
+        {
+          date: '2026-09-11',
+          payeeName: 'Instl Index Trust',
+          transactionAmount: { amount: '1057.80' },
+          transactionId: 'sub-2',
+        },
+      ];
+
+      const result = deduplicateSubsourceTransactions(transactions);
+      expect(result).toHaveLength(1);
+      expect(result[0].transactionId).toBe('sub-1');
+    });
+
+    test('preserves single transactions across different dates and payees (like dividends)', () => {
+      const transactions = [
+        {
+          date: '2026-09-18',
+          payeeName: 'Em Market S Inx Inst Plus',
+          transactionAmount: { amount: '2.88' },
+          transactionId: 'div-1',
+        },
+        {
+          date: '2026-04-10',
+          payeeName: 'Instl Index Trust',
+          transactionAmount: { amount: '765.75' },
+          transactionId: 'buy-1',
+        },
+      ];
+
+      const result = deduplicateSubsourceTransactions(transactions);
+      expect(result).toHaveLength(2);
+    });
+
+    test('sync-dedup-subsources preference applies deduplication during bank sync', async () => {
+      const providerAccountId = 'sfin-401k';
+      const acctId = await db.insertAccount({
+        id: '401k-test-acct',
+        account_id: providerAccountId,
+        name: '401k Test',
+        account_sync_source: 'simpleFin',
+      });
+
+      // Enable sync-dedup-subsources
+      db.runQuery(
+        "INSERT INTO preferences (id, value) VALUES ('sync-dedup-subsources-401k-test-acct', 'true')",
+      );
+
+      mockSimpleFinTransactions({
+        [providerAccountId]: {
+          transactions: {
+            all: [
+              {
+                date: '2026-09-11',
+                payeeName: 'Instl Index Trust',
+                transactionAmount: { amount: '1976.70' },
+                transactionId: 'agg-1',
+                booked: true,
+              },
+              {
+                date: '2026-09-11',
+                payeeName: 'Instl Index Trust',
+                transactionAmount: { amount: '1057.80' },
+                transactionId: 'sub-1',
+                booked: true,
+              },
+              {
+                date: '2026-09-11',
+                payeeName: 'Instl Index Trust',
+                transactionAmount: { amount: '1057.80' },
+                transactionId: 'sub-2',
+                booked: true,
+              },
+            ],
+            booked: [],
+            pending: [],
+          },
+          balances: [],
+          startingBalance: 197670,
+        },
+        errors: {},
+      });
+
+      await accountsApp.handlers['simplefin-batch-sync']({ ids: [acctId] });
+
+      const transactions = (await getAllTransactions()).filter(
+        t => !t.starting_balance_flag,
+      );
+      expect(transactions).toHaveLength(1);
+      expect(transactions[0].amount).toBe(197670);
+    });
+
+    test('sync-auto-reconcile creates market fluctuation transaction to balance ledger', async () => {
+      const providerAccountId = 'sfin-invest';
+      const acctId = await db.insertAccount({
+        id: 'invest-test-acct',
+        account_id: providerAccountId,
+        name: 'Investment Test',
+        account_sync_source: 'simpleFin',
+      });
+
+      // Enable sync-auto-reconcile
+      db.runQuery(
+        "INSERT INTO preferences (id, value) VALUES ('sync-auto-reconcile-invest-test-acct', 'true')",
+      );
+
+      // Initial sync with starting balance of 100000 ($1,000.00)
+      mockSimpleFinTransactions({
+        [providerAccountId]: {
+          transactions: { all: [], booked: [], pending: [] },
+          balances: [],
+          startingBalance: 100000,
+        },
+        errors: {},
+      });
+      await accountsApp.handlers['simplefin-batch-sync']({ ids: [acctId] });
+
+      // Second sync: bank reports balance increased to 105000 ($1,050.00) due to market gain
+      mockSimpleFinTransactions({
+        [providerAccountId]: {
+          transactions: { all: [], booked: [], pending: [] },
+          balances: [],
+          startingBalance: 105000,
+        },
+        errors: {},
+      });
+      await accountsApp.handlers['simplefin-batch-sync']({ ids: [acctId] });
+
+      const all = await getAllTransactions();
+      const adjustment = all.find(t => !t.starting_balance_flag);
+      expect(adjustment).toBeDefined();
+      expect(adjustment!.amount).toBe(5000); // +$50.00
+      expect(adjustment!.reconciled).toBe(1);
+
+      // Verify total ledger balance matches bank balance exactly
+      const total = all.reduce((sum, t) => sum + t.amount, 0);
+      expect(total).toBe(105000);
     });
   });
 });

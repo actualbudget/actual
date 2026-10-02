@@ -35,6 +35,12 @@ export function useBankSyncAccountSettings(accountId: string) {
   const [savedUpdateDates = false, setSavedUpdateDates] = useSyncedPref(
     `sync-update-dates-${accountId}`,
   );
+  const [savedDedupSubsources = false, setSavedDedupSubsources] = useSyncedPref(
+    `sync-dedup-subsources-${accountId}`,
+  );
+  const [savedAutoReconcile = false, setSavedAutoReconcile] = useSyncedPref(
+    `sync-auto-reconcile-${accountId}`,
+  );
 
   const [transactionDirection, setTransactionDirection] =
     useState<TransactionDirection>('payment');
@@ -55,6 +61,12 @@ export function useBankSyncAccountSettings(accountId: string) {
   );
   const [updateDates, setUpdateDates] = useState(
     String(savedUpdateDates) === 'true',
+  );
+  const [dedupSubsources, setDedupSubsources] = useState(
+    String(savedDedupSubsources) === 'true',
+  );
+  const [autoReconcile, setAutoReconcile] = useState(
+    String(savedAutoReconcile) === 'true',
   );
 
   const transactionQuery = q('transactions')
@@ -92,6 +104,8 @@ export function useBankSyncAccountSettings(accountId: string) {
     setSavedReimportDeleted(String(reimportDeleted));
     setSavedImportTransactions(String(importTransactions));
     setSavedUpdateDates(String(updateDates));
+    setSavedDedupSubsources(String(dedupSubsources));
+    setSavedAutoReconcile(String(autoReconcile));
   };
 
   const setMapping = (field: string, value: string) => {
@@ -120,6 +134,10 @@ export function useBankSyncAccountSettings(accountId: string) {
     setImportTransactions,
     updateDates,
     setUpdateDates,
+    dedupSubsources,
+    setDedupSubsources,
+    autoReconcile,
+    setAutoReconcile,
     mappings,
     setMapping,
     exampleTransaction,

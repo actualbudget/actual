@@ -68,6 +68,80 @@ function getAccountBalance(account) {
   }
 }
 
+export function deduplicateSubsourceTransactions<
+  T extends {
+    date?: string;
+    payeeName?: string;
+    payee?: string;
+    amount?: number | string;
+    transactionAmount?: { amount: number | string };
+  },
+>(transactions: T[]): T[] {
+  if (!transactions || transactions.length === 0) return [];
+
+  // Group transactions by date and payee
+  const groups = new Map<string, T[]>();
+
+  for (const trans of transactions) {
+    const date = trans.date || '';
+    const payee = (trans.payeeName || trans.payee || '').trim().toLowerCase();
+    const key = `${date}___${payee}`;
+
+    const list = groups.get(key);
+    if (list) {
+      list.push(trans);
+    } else {
+      groups.set(key, [trans]);
+    }
+  }
+
+  const toDrop = new Set<T>();
+
+  for (const [, group] of groups) {
+    if (group.length <= 1) continue;
+
+    // Parse amounts in cents
+    const parsed = group.map(t => {
+      const raw = t.amount ?? t.transactionAmount?.amount ?? 0;
+      const num = amountToInteger(
+        typeof raw === 'number' ? raw : Number(raw) || 0,
+      );
+      return { trans: t, intAmount: num };
+    });
+
+    const allPositive = parsed.every(p => p.intAmount > 0);
+    if (!allPositive) continue;
+
+    // Find the maximum amount in this group
+    let maxItem = parsed[0];
+    for (const p of parsed) {
+      if (p.intAmount > maxItem.intAmount) {
+        maxItem = p;
+      }
+    }
+
+    const hasSmallerSubsources = parsed.some(
+      p => p.intAmount < maxItem.intAmount,
+    );
+    const hasDuplicateAmounts = parsed.some((p, i) =>
+      parsed.some((other, j) => i !== j && p.intAmount === other.intAmount),
+    );
+
+    if (hasSmallerSubsources || hasDuplicateAmounts) {
+      let keptMax = false;
+      for (const p of parsed) {
+        if (p.intAmount === maxItem.intAmount && !keptMax) {
+          keptMax = true;
+        } else {
+          toDrop.add(p.trans);
+        }
+      }
+    }
+  }
+
+  return transactions.filter(t => !toDrop.has(t));
+}
+
 async function updateAccountBalance(id: AccountEntity['id'], balance: number) {
   await db.update('accounts', { id, balance_current: balance });
 }
@@ -1221,14 +1295,32 @@ async function processBankSyncDownload(
       .select('value'),
   ).then(data => String(data?.data?.[0]?.value ?? 'false') === 'true');
 
+  const dedupSubsources = await aqlQuery(
+    q('preferences')
+      .filter({ id: `sync-dedup-subsources-${id}` })
+      .select('value'),
+  ).then(data => String(data?.data?.[0]?.value ?? 'false') === 'true');
+
+  const autoReconcile = await aqlQuery(
+    q('preferences')
+      .filter({ id: `sync-auto-reconcile-${id}` })
+      .select('value'),
+  ).then(data => String(data?.data?.[0]?.value ?? 'false') === 'true');
+
   /** Starting balance is actually the current balance of the account. */
-  const {
-    transactions: originalTransactions,
-    startingBalance: currentBalance,
-  } = download;
+  const { startingBalance: currentBalance } = download;
+  let originalTransactions = download.transactions;
+
+  if (dedupSubsources && originalTransactions) {
+    originalTransactions =
+      deduplicateSubsourceTransactions(originalTransactions);
+  }
 
   if (initialSync) {
-    const { transactions } = download;
+    const transactions =
+      dedupSubsources && download.transactions
+        ? deduplicateSubsourceTransactions(download.transactions)
+        : download.transactions;
     let balanceToUse = currentBalance;
 
     // Use custom starting balance if provided, otherwise calculate it
@@ -1323,6 +1415,41 @@ async function processBankSyncDownload(
         updateDates,
       },
     );
+
+    if (autoReconcile && currentBalance != null) {
+      const balanceRow = await db.first<{ balance: number | null }>(
+        'SELECT SUM(amount) as balance FROM v_transactions_internal_alive WHERE account = ?',
+        [id],
+      );
+      const currentLedgerBalance = balanceRow?.balance ?? 0;
+      const diff = currentBalance - currentLedgerBalance;
+
+      // Safety check: do not auto-reconcile if bank reports 0 on an account with balance > $1,000
+      const isGlitch = currentBalance === 0 && currentLedgerBalance > 100000;
+
+      if (!isGlitch && diff !== 0) {
+        let payee = await db.first<db.DbPayee>(
+          'SELECT * FROM payees WHERE name = ? AND tombstone = 0',
+          ['Market Fluctuation'],
+        );
+        if (!payee) {
+          const payeeId = await db.insertPayee({ name: 'Market Fluctuation' });
+          payee = { id: payeeId, name: 'Market Fluctuation' } as db.DbPayee;
+        }
+
+        const adjustmentId = await db.insertTransaction({
+          account: id,
+          amount: diff,
+          date: monthUtils.currentDay(),
+          payee: payee.id,
+          notes: 'Automatic market value adjustment from bank sync',
+          cleared: true,
+          reconciled: true,
+        });
+
+        result.added = [adjustmentId, ...result.added];
+      }
+    }
 
     if (currentBalance != null) {
       await updateAccountBalance(id, currentBalance);

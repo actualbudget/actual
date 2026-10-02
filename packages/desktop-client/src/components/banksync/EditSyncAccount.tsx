@@ -160,6 +160,10 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     setImportTransactions,
     updateDates,
     setUpdateDates,
+    dedupSubsources,
+    setDedupSubsources,
+    autoReconcile,
+    setAutoReconcile,
     mappings,
     setMapping,
     fields,
@@ -241,6 +245,10 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             setImportTransactions={setImportTransactions}
             updateDates={updateDates}
             setUpdateDates={setUpdateDates}
+            dedupSubsources={dedupSubsources}
+            setDedupSubsources={setDedupSubsources}
+            autoReconcile={autoReconcile}
+            setAutoReconcile={setAutoReconcile}
             helpMode="desktop"
           />
 
