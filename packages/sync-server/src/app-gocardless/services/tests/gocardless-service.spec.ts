@@ -29,14 +29,6 @@ import {
   handleGoCardlessError,
 } from '#app-gocardless/services/gocardless-service';
 
-vi.mock('#services/secrets-service', () => ({
-  SecretName: {
-    gocardless_secretId: 'gocardless_secretId',
-    gocardless_secretKey: 'gocardless_secretKey',
-  },
-  secretsService: { get: () => 'test-secret' },
-}));
-
 import {
   mockAccountDetails,
   mockAccountMetaData,
@@ -52,6 +44,14 @@ import {
   mockRequisitionWithExampleAccounts,
   mockTransactions,
 } from './fixtures';
+
+vi.mock('#services/secrets-service', () => ({
+  SecretName: {
+    gocardless_secretId: 'gocardless_secretId',
+    gocardless_secretKey: 'gocardless_secretKey',
+  },
+  secretsService: { get: () => 'test-secret' },
+}));
 
 describe('goCardlessService', () => {
   const accountId = mockAccountMetaData.id;
