@@ -1,0 +1,41 @@
+# Depot CI Migration
+# Source: .github/workflows/count-points.yml
+#
+# Changes made:
+# - Rewrote .github/ path references to .depot/
+
+name: Count points
+
+on:
+  schedule:
+    # Run at 00:00 on the first day of every month
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+    inputs:
+      startDate:
+        description: 'Start date for point counter (YYYY-MM-DD)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  count-points:
+    runs-on: depot-ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Count points
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          START_DATE: ${{ inputs.startDate }}
+        run: node .github/scripts/count-points.mjs

@@ -1,0 +1,37 @@
+# Depot CI Migration
+# Source: .github/workflows/autofix.yml
+#
+# Changes made:
+# - Rewrote .github/ path references to .depot/
+
+name: autofix.ci
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  autofix:
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+      # Regenerates packages/desktop-client/src/data/news.json from the blog so
+      # the reviewed file is always current; autofix.ci commits any change.
+      - name: Generate news feed
+        run: yarn generate:news-feed
+      - name: Format code
+        run: yarn lint:fix
+      - uses: autofix-ci/action@7a166d7532b277f34e16238930461bf77f9d7ed8 # v1.3.3

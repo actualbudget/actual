@@ -1,0 +1,172 @@
+# Depot CI Migration
+# Source: .github/workflows/electron-master.yml
+#
+# Changes made:
+# - Rewrote .github/ path references to .depot/
+# - Changed GitHub runs-on labels to their Depot equivalents
+
+name: Electron Master
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI: true
+
+on:
+  push:
+    tags:
+      - v**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  create-release:
+    permissions:
+      contents: write
+    runs-on: depot-ubuntu-latest # was: ubuntu-latest. Mapped standard GitHub runner to Depot equivalent.
+    steps:
+      - name: Process release version
+        id: process_version
+        run: |
+          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+          RELEASE_NOTES: |
+            :link: [View release notes](https://actualbudget.org/blog/release-${{ steps.process_version.outputs.version }})
+
+            ## Desktop releases
+            Please note: Microsoft store updates can sometimes lag behind the main release by a couple of days while they verify the new version.
+
+            <p>
+              <a href="https://apps.microsoft.com/detail/9p2hmlhsdbrm?cid=Github+Releases&mode=direct"><img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200" /></a>
+              <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="12" height="1" alt="" />
+              <a href="https://flathub.org/apps/com.actualbudget.actual"><img width="165" style="margin-left:12px;" alt="Get it on Flathub" src="https://flathub.org/api/badge?locale=en" /></a>
+            </p>
+        run: |
+          # don't create duplicates
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --draft --title "$TAG" --notes "$RELEASE_NOTES"
+          fi
+
+  build:
+    needs: create-release
+    # this is so the assets can be added to the release
+    permissions:
+      contents: write
+    environment: release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            runner: depot-ubuntu-24.04-8
+          - os: windows-2022
+            runner: depot-windows-2022-8
+          - os: macos-latest
+            runner: depot-macos-latest
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - if: ${{ startsWith(matrix.os, 'windows') }}
+        run: pip.exe install setuptools
+      - if: ${{ ! startsWith(matrix.os, 'windows') }}
+        run: |
+          mkdir .venv
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install setuptools
+      - name: Process release version
+        id: process_version
+        run: |
+          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        name: Setup Flatpak dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install flatpak -y
+          sudo apt-get install flatpak-builder -y
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install org.freedesktop.Sdk//24.08 -y
+          sudo flatpak install org.freedesktop.Platform//24.08 -y
+          sudo flatpak install org.electronjs.Electron2.BaseApp//24.08 -y
+          sudo flatpak install org.flatpak.Builder -y
+
+          METAINFO_FILE="packages/desktop-electron/extra-resources/linux/com.actualbudget.actual.metainfo.xml"
+          TODAY=$(date +%Y-%m-%d)
+          VERSION=${STEPS_PROCESS_VERSION_OUTPUTS_VERSION}
+          sed -i "s/%RELEASE_VERSION%/$VERSION/g; s/%RELEASE_DATE%/$TODAY/g" "$METAINFO_FILE"
+          flatpak run --command=flatpak-builder-lint org.flatpak.Builder appstream "$METAINFO_FILE"
+        env:
+          STEPS_PROCESS_VERSION_OUTPUTS_VERSION: ${{ steps.process_version.outputs.version }}
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
+      - if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        name: Install arm64 cross-compilation toolchain
+        run: |
+          # better-sqlite3 has no Electron prebuilds for this Electron version,
+          # so the arm64 AppImage's native modules are cross-compiled from
+          # source. beforePackHook points CC_target/CXX_target at this
+          # toolchain during the arm64 pass.
+          sudo apt-get update
+          sudo apt-get install -y crossbuild-essential-arm64
+      - name: Build Electron for Mac
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        run: ./bin/package-electron --skip-translations
+        env:
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - name: Build Electron
+        if: ${{ ! startsWith(matrix.os, 'macos') }}
+        run: ./bin/package-electron --skip-translations
+      - name: Upload Build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: actual-electron-${{ matrix.os }}
+          path: |
+            packages/desktop-electron/dist/*.dmg
+            packages/desktop-electron/dist/*.exe
+            !packages/desktop-electron/dist/Actual-windows.exe
+            packages/desktop-electron/dist/*.AppImage
+            packages/desktop-electron/dist/*.flatpak
+      - name: Upload Windows Store Build
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: actual-electron-${{ matrix.os }}-appx
+          path: |
+            packages/desktop-electron/dist/*.appx
+      - name: Add to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          shopt -s extglob nullglob
+          files=(
+            packages/desktop-electron/dist/*.dmg
+            packages/desktop-electron/dist/!(Actual-windows).exe
+            packages/desktop-electron/dist/*.AppImage
+            packages/desktop-electron/dist/*.flatpak
+            packages/desktop-electron/dist/*.appx
+          )
+          if [ ${#files[@]} -gt 0 ]; then
+            gh release upload "$TAG" --clobber "${files[@]}"
+          fi
+
+    outputs:
+      version: ${{ steps.process_version.outputs.version }}

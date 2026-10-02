@@ -1,0 +1,59 @@
+# Depot CI Migration
+# Source: .github/workflows/netlify-release.yml
+#
+# Changes made:
+# - Rewrote .github/ path references to .depot/
+
+name: Deploy Netlify Release
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI: true
+
+on:
+  push:
+    tags:
+      - v**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: depot-ubuntu-latest
+    environment: release
+    steps:
+      - name: Repository Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
+
+      - name: Install Netlify
+        run: npm install netlify-cli@17.10.1 -g
+
+      - name: Build Actual
+        run: yarn build:browser
+
+      - name: Deploy to Netlify
+        id: netlify_deploy
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_API_TOKEN }}
+        run: |
+          netlify deploy \
+            --dir packages/desktop-client/build \
+            --filter @actual-app/web \
+            --prod

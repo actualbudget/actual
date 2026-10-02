@@ -1,0 +1,56 @@
+# Depot CI Migration
+# Source: .github/workflows/stale.yml
+#
+# No changes were necessary.
+
+name: 'Close stale PRs'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+  workflow_dispatch: # Allow manual triggering
+permissions: {}
+
+jobs:
+  stale:
+    permissions:
+      pull-requests: write
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/stale@b5d41d4e1d5dceea10e7104786b73624c18a190f # v10.2.0
+        with:
+          stale-pr-message: 'This PR is stale because it has been open 14 days with no activity. Remove stale label or comment or this will be closed in 3 days.'
+          close-pr-message: 'This PR was closed because it has been stalled for 3 days with no activity. If you would like to resume working on this, please reach out to the maintainer team on Discord or leave a comment here to have it reopened.'
+          days-before-stale: 14
+          days-before-close: 3
+          days-before-issue-stale: -1
+          include-only-assigned: true
+  stale-wip:
+    permissions:
+      pull-requests: write
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/stale@b5d41d4e1d5dceea10e7104786b73624c18a190f # v10.2.0
+        with:
+          stale-pr-message: ':wave: Hi! It looks like this PR has not had any changes for a week now. Would you like someone to review this PR? If so - please remove the "[WIP]" prefix from the PR title. That will let the community know that this PR is open for a review. Otherwise, comment or push a change, or this will be closed in 7 days.'
+          close-pr-message: 'This PR was closed because it has been marked as WIP with no activity for 14 days. If you would like to resume working on this, please reach out to the maintainer team on Discord or leave a comment here to have it reopened.'
+          days-before-stale: 7
+          any-of-labels: ':construction: WIP'
+          days-before-close: 7
+          days-before-issue-stale: -1
+
+  stale-needs-info:
+    permissions:
+      issues: write
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/stale@b5d41d4e1d5dceea10e7104786b73624c18a190f # v10.2.0
+        with:
+          stale-issue-label: 'needs info'
+          days-before-stale: -1
+          days-before-close: 7
+          close-issue-message: 'This issue has been automatically closed because there have been no comments for 7 days after the "needs info" label was added. If you still need help, please feel free to reopen the issue with the requested information.'
+          remove-stale-when-updated: false
+          stale-pr-message: '' # Disable PR processing
+          close-pr-message: '' # Disable PR processing
+          days-before-pr-stale: -1 # Disable PR processing
+          days-before-pr-close: -1 # Disable PR processing

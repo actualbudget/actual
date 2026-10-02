@@ -1,0 +1,174 @@
+# Depot CI Migration
+# Source: .github/workflows/check.yml
+#
+# Changes made:
+# - Rewrote .github/ path references to .depot/
+
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+jobs:
+  setup:
+    runs-on: depot-ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+  constraints:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Check dependency version consistency
+        run: yarn constraints
+      - name: Check tsconfig project references are in sync
+        run: yarn check:tsconfig-references
+  lint:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Lint
+        run: yarn lint
+  knip:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Build plugins service
+        run: yarn build:plugins-service
+      - name: Check for unused files, dependencies and exports
+        run: yarn knip
+  typecheck:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Typecheck
+        run: yarn typecheck
+  validate-cli:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Build Web
+        run: yarn build:server
+      - name: Check that the built CLI works
+        run: node packages/sync-server/build/bin/actual-server.js --version
+  test:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Authenticate to Depot via GitHub OIDC for test reporting
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Test
+        run: yarn test
+      - name: Report test results to Depot
+        uses: depot/test-report-action@2ad5779840a9c63e884fa26f11d019768a27a941 # v1.0.1
+        if: ${{ !cancelled() && github.event_name == 'push' }}
+        with:
+          path: |
+            bin/test-results/junit*.xml
+            packages/*/test-results/junit*.xml
+  check-gh-actions:
+    runs-on: depot-ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@71321a20a9ded102f6e9ce5718a2fcec2c4f70d8 # v0.5.2
+
+  migrations:
+    needs: setup
+    if: github.event_name == 'pull_request'
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          # Full history so the migration check can diff against the merge
+          # base with master; blobless to keep the large repo checkout fast
+          # (ls-tree and merge-base only need commits and trees)
+          fetch-depth: 0
+          filter: blob:none
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Check migrations
+        run: yarn workspace @actual-app/ci-actions tsx bin/check-migrations.ts
+      - name: Save PR number for the warnings comment workflow
+        if: always() && hashFiles('packages/ci-actions/migration-warnings.json') != ''
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: echo "$PR_NUMBER" > packages/ci-actions/migration-warnings-pr.txt
+      # Consumed by migration-warnings-comment.yml, which posts the advisory
+      # warnings as a PR comment (this job's token is read-only on fork PRs,
+      # so it can't comment itself).
+      - name: Upload warnings for the comment workflow
+        if: always() && hashFiles('packages/ci-actions/migration-warnings.json') != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: migration-warnings
+          path: |
+            packages/ci-actions/migration-warnings.json
+            packages/ci-actions/migration-warnings-pr.txt

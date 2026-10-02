@@ -1,0 +1,198 @@
+# Depot CI Migration
+# Source: .github/workflows/size-compare.yml
+#
+# Changes made:
+# - Rewrote .github/ path references to .depot/
+
+name: Compare Sizes
+
+##########################################################################################
+# WARNING! This workflow uses the 'pull_request_target' event. That mans that it will    #
+# always run in the context of the main actualbudget/actual repo, even if the PR is from #
+# a fork. This is necessary to get access to a GitHub token that can post a comment on   #
+# the PR. Be VERY CAREFUL about adding things to this workflow, since forks can inject   #
+# arbitrary code into their branch, and can pollute the artifacts we download. Arbitrary #
+# code execution in this workflow could lead to a compromise of the main repo.           #
+##########################################################################################
+# See: https://securitylab.github.com/research/github-actions-preventing-pwn-requests    #
+##########################################################################################
+
+on:
+  # See banner above: checks out base ref only; PR-side artifacts are
+  # treated as data (JSON stats) and never executed.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    paths:
+      - 'packages/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.depot/workflows/size-compare.yml'
+      - '!packages/sync-server/**' # Sync server changes don't affect the size of the web/api
+      - '!packages/ci-actions/**' # CI actions changes don't affect the size of the web/api
+      - '!packages/docs/**' # Docs changes don't affect the size of the web/api
+      - '!packages/eslint-plugin-actual/**' # Eslint plugin changes don't affect the size of the web/api
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    runs-on: depot-ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+      actions: read
+    steps:
+      # `pull_request_target` runs the trusted base workflow. Keep executable
+      # helpers on that same revision; never execute code from the PR head.
+      - name: Checkout base revision
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+
+      # Resolve one successful `build.yml` run for each exact commit (base and
+      # PR head) up front, then pin every download below to its `run_id`.
+      - name: Resolve build runs
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        id: build-runs
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        with:
+          script: |
+            const { resolveBuildRun } = await import(
+              `${process.env.GITHUB_WORKSPACE}/packages/ci-actions/src/build-runs/resolve.mjs`
+            );
+            const baseRef = process.env.BASE_REF;
+            const baseSha = process.env.BASE_SHA;
+            const headSha = process.env.HEAD_SHA;
+            const common = {
+              github,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              log: message => core.info(message),
+            };
+            // `build.yml` head artifacts use `refs/pull/N/merge`, which is
+            // computed against `pull_request.base.sha`; use that exact commit
+            // for the baseline so the two artifacts are a matched pair.
+            const [baseRun, headRun] = await Promise.all([
+              resolveBuildRun({
+                ...common,
+                label: `${baseRef} base ${baseSha}`,
+                headSha: baseSha,
+                notFoundHint: `${baseRef} may be broken`,
+              }),
+              resolveBuildRun({
+                ...common,
+                label: `PR head ${headSha}`,
+                headSha,
+                notFoundHint:
+                  'build may still be running, have failed, or the branch may have been force-pushed',
+              }),
+            ]);
+            core.info(`Using baseline commit ${baseSha}.`);
+            core.setOutput('base_run_id', baseRun.id);
+            core.setOutput('head_run_id', headRun.id);
+
+      - name: Download web build artifact from ${{github.base_ref}}
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
+        with:
+          run_id: ${{ steps.build-runs.outputs.base_run_id }}
+          workflow: build.yml
+          name: build-stats
+          path: base
+      - name: Download API build artifact from ${{github.base_ref}}
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
+        with:
+          run_id: ${{ steps.build-runs.outputs.base_run_id }}
+          workflow: build.yml
+          name: api-build-stats
+          path: base
+      - name: Download build stats from PR
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
+        with:
+          run_id: ${{ steps.build-runs.outputs.head_run_id }}
+          workflow: build.yml
+          name: build-stats
+          path: head
+      - name: Download API stats from PR
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
+        with:
+          run_id: ${{ steps.build-runs.outputs.head_run_id }}
+          workflow: build.yml
+          name: api-build-stats
+          path: head
+      - name: Download CLI build artifact from ${{github.base_ref}}
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
+        with:
+          run_id: ${{ steps.build-runs.outputs.base_run_id }}
+          workflow: build.yml
+          name: cli-build-stats
+          path: base
+      - name: Download CLI stats from PR
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
+        with:
+          run_id: ${{ steps.build-runs.outputs.head_run_id }}
+          workflow: build.yml
+          name: cli-build-stats
+          path: head
+      - name: Download CRDT build artifact from ${{github.base_ref}}
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
+        with:
+          run_id: ${{ steps.build-runs.outputs.base_run_id }}
+          workflow: build.yml
+          name: crdt-build-stats
+          path: base
+      - name: Download CRDT stats from PR
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
+        with:
+          run_id: ${{ steps.build-runs.outputs.head_run_id }}
+          workflow: build.yml
+          name: crdt-build-stats
+          path: head
+      - name: Strip content hashes from stats files
+        run: |
+          if [ -f ./head/web-stats.json ]; then
+            sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./head/web-stats.json
+            sed -i -E 's/\.[0-9a-zA-Z_-]{8,}\.chunk\././g' ./head/web-stats.json
+          fi
+          if [ -f ./base/web-stats.json ]; then
+            sed -i -E 's/index\.[0-9a-zA-Z_-]{8,}\./index./g' ./base/web-stats.json
+            sed -i -E 's/\.[0-9a-zA-Z_-]{8,}\.chunk\././g' ./base/web-stats.json
+          fi
+          for file in ./head/*.json ./base/*.json; do
+            if [ -f "$file" ]; then
+              sed -i -E 's/\.[0-9a-f]{8,}\././g' "$file"
+            fi
+          done
+      - name: Generate combined bundle stats comment
+        run: |
+          node packages/ci-actions/bin/bundle-stats-comment.mjs \
+            --base desktop-client=./base/web-stats.json \
+            --base loot-core=./base/loot-core-stats.json \
+            --base api=./base/api-stats.json \
+            --base cli=./base/cli-stats.json \
+            --base crdt=./base/crdt-stats.json \
+            --head desktop-client=./head/web-stats.json \
+            --head loot-core=./head/loot-core-stats.json \
+            --head api=./head/api-stats.json \
+            --head cli=./head/cli-stats.json \
+            --head crdt=./head/crdt-stats.json \
+            --identifier combined \
+            --format pr-body > bundle-stats-comment.md
+      - name: Post combined bundle stats comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          node packages/ci-actions/bin/update-bundle-stats-comment.mjs \
+            --comment-file bundle-stats-comment.md \
+            --identifier combined \
+            --target pr-body

@@ -1,0 +1,112 @@
+# Depot CI Migration
+# Source: .github/workflows/i18n-string-extract-master.yml
+#
+# No changes were necessary.
+
+name: Extract and upload i18n strings
+
+on:
+  schedule:
+    # 4am UTC
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract-and-upload-i18n-strings:
+    runs-on: depot-ubuntu-latest
+    environment: i18n
+    if: github.repository == 'actualbudget/actual'
+    steps:
+      - name: Check out main repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          path: actual
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./actual/.github/actions/setup
+        with:
+          working-directory: actual
+          download-translations: false # As we'll manually clone instead
+      - name: Configure Git config
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Configure i18n client
+        run: |
+          pip install wlc
+      - name: Configure Weblate API credentials
+        env:
+          WEBLATE_API_KEY: ${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}
+        run: |
+          # Write the API key to wlc's config file instead of passing it on
+          # the command line, so the secret doesn't appear in process listings.
+          mkdir -p "$HOME/.config"
+          umask 077
+          cat > "$HOME/.config/weblate" <<EOF
+          [keys]
+          https://hosted.weblate.org/api/ = ${WEBLATE_API_KEY}
+          [weblate]
+          retries = 5
+          status_forcelist = 423
+          allowed_methods = POST
+          backoff_factor = 5
+          EOF
+
+      - name: Lock translations
+        run: |
+          wlc \
+            --url https://hosted.weblate.org/api/ \
+            lock \
+            actualbudget/actual
+
+      - name: Update VCS with latest translations
+        run: |
+          wlc \
+            --url https://hosted.weblate.org/api/ \
+            push \
+            actualbudget/actual
+      - name: Check out updated translations
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ssh-key: ${{ secrets.STRING_IMPORT_DEPLOY_KEY }}
+          repository: actualbudget/translations
+          path: translations
+          # Need to be able to push back extracted strings
+          persist-credentials: true
+      - name: Generate i18n strings
+        working-directory: actual
+        run: |
+          mkdir -p packages/desktop-client/locale/
+          cp ../translations/en.json packages/desktop-client/locale/
+          yarn generate:i18n
+          if [[ ! -f packages/desktop-client/locale/en.json ]]; then
+            echo "File packages/desktop-client/locale/en.json not found. Ensure the file was generated correctly."
+            exit 1
+          fi
+      - name: Check in new i18n strings
+        working-directory: translations
+        run: |
+          cp ../actual/packages/desktop-client/locale/en.json .
+          git add .
+          if git commit -m "Update source strings"; then
+            git push
+          else
+            echo "No changes to commit"
+          fi
+      - name: Update Weblate with latest translations
+        run: |
+          wlc \
+            --url https://hosted.weblate.org/api/ \
+            pull \
+            actualbudget/actual
+
+      - name: Unlock translations
+        if: always() # Clean up even on failure
+        run: |
+          wlc \
+            --url https://hosted.weblate.org/api/ \
+            unlock \
+            actualbudget/actual

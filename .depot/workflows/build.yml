@@ -1,0 +1,187 @@
+# Depot CI Migration
+# Source: .github/workflows/build.yml
+#
+# Changes made:
+# - Rewrote .github/ path references to .depot/
+
+name: Build
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI: true
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+jobs:
+  setup:
+    runs-on: depot-ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+
+  api:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Build API
+        run: yarn build:api
+      - name: Create package tgz
+        run: cd packages/api && yarn pack && mv package.tgz actual-api.tgz
+      - name: Prepare bundle stats artifact
+        run: cp packages/api/app/stats.json api-stats.json
+      - name: Upload Build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: actual-api
+          path: packages/api/actual-api.tgz
+      - name: Upload API bundle stats
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: api-build-stats
+          path: api-stats.json
+
+  crdt:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Build CRDT
+        run: cd packages/crdt && yarn build
+      - name: Create package tgz
+        run: cd packages/crdt && yarn pack && mv package.tgz actual-crdt.tgz
+      - name: Prepare bundle stats artifact
+        run: cp packages/crdt/dist/stats.json crdt-stats.json
+      - name: Upload Build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: actual-crdt
+          path: packages/crdt/actual-crdt.tgz
+      - name: Upload CRDT bundle stats
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: crdt-build-stats
+          path: crdt-stats.json
+
+  web:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+      - name: Build Web
+        run: yarn build:browser
+      - name: Upload Build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: actual-web
+          path: packages/desktop-client/build
+      - name: Upload Build Stats
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-stats
+          path: packages/desktop-client/build-stats
+
+  mobile:
+    needs: setup
+    runs-on: depot-macos-latest
+    env:
+      ANDROID_HOME: /Users/runner/Library/Android/sdk
+      ANDROID_SDK_ROOT: /Users/runner/Library/Android/sdk
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+      - name: Build Mobile Apps
+        run: yarn build:mobile
+      - name: Upload Build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: actual-mobile
+          path: packages/mobile-client/build
+
+  cli:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Build CLI
+        run: yarn build:cli
+      - name: Create package tgz
+        run: cd packages/cli && yarn pack && mv package.tgz actual-cli.tgz
+      - name: Prepare bundle stats artifact
+        run: cp packages/cli/dist/stats.json cli-stats.json
+      - name: Upload Build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: actual-cli
+          path: packages/cli/actual-cli.tgz
+      - name: Upload CLI bundle stats
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cli-build-stats
+          path: cli-stats.json
+
+  server:
+    needs: setup
+    runs-on: depot-ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.depot/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Build Server
+        run: yarn workspace @actual-app/sync-server build
+      - name: Upload Build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sync-server
+          path: packages/sync-server/build
