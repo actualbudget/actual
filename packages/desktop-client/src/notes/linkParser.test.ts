@@ -2,6 +2,51 @@ import { parseNotes } from './linkParser';
 
 describe('linkParser', () => {
   describe('parseNotes', () => {
+    describe('mixed link formats', () => {
+      it.each([
+        [
+          'https://first.example [second](https://second.example)',
+          ['https://first.example', 'https://second.example'],
+        ],
+        [
+          'www.first.example https://second.example',
+          ['www.first.example', 'https://second.example'],
+        ],
+        [
+          'www.first.example [second](https://second.example)',
+          ['www.first.example', 'https://second.example'],
+        ],
+        [
+          'https://first.example www.second.example [third](https://third.example)',
+          [
+            'https://first.example',
+            'www.second.example',
+            'https://third.example',
+          ],
+        ],
+        [
+          '[https://label.example](https://destination.example)',
+          ['https://destination.example'],
+        ],
+        [
+          '[www.label.example](https://destination.example)',
+          ['https://destination.example'],
+        ],
+        [
+          '#tag https://first.example. [second](https://second.example) #other',
+          ['https://first.example', 'https://second.example'],
+        ],
+      ] as const)('recognizes every link in %s', (notes, expectedUrls) => {
+        const segments = parseNotes(notes);
+        expect(
+          segments
+            .filter(segment => segment.type === 'link')
+            .map(segment => segment.url),
+        ).toEqual(expectedUrls);
+        expect(segments.map(segment => segment.content).join('')).toBe(notes);
+      });
+    });
+
     describe('URL trailing punctuation handling', () => {
       it('should strip trailing period from https URL', () => {
         const result = parseNotes('Check out https://example.com.');
