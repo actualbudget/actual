@@ -28,6 +28,7 @@ While ranking works for the most part, you might want to say "this rule _always_
 - `contains`/`does not contain` matches a substring
 - `matches` is a [regular expressions](https://regextutorial.org/)
 - `one of`/`not one of` is a multi-select
+- `is between` matches a date or an amount that falls in a range. Both ends of the range are included, so `is between` 1st January and 31st January matches transactions on either of those days as well as every day in between
 
 ### Fields
 

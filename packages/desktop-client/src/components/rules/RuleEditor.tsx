@@ -48,6 +48,11 @@ import { FinancialText } from '#components/FinancialText';
 import { StatusBadge } from '#components/schedules/StatusBadge';
 import { SimpleTransactionsTable } from '#components/transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '#components/util/AmountInput';
+import { BetweenDateInput } from '#components/util/BetweenDateInput';
+import {
+  normalizeConditionRange,
+  rangeForCondition,
+} from '#components/util/betweenRange';
 import { DisplayId } from '#components/util/DisplayId';
 import { GenericInput } from '#components/util/GenericInput';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -281,6 +286,7 @@ function ConditionEditor({
     error,
     inputKey,
   } = condition;
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   const translatedConditions = useMemo(() => {
     const retValue = [...conditionFields];
@@ -309,6 +315,16 @@ function ConditionEditor({
       <BetweenAmountInput
         key={inputKey}
         defaultValue={value}
+        onChange={v => onChange('value', v)}
+      />
+    );
+  } else if (type === 'date' && op === 'isbetween') {
+    valueEditor = (
+      <BetweenDateInput
+        key={inputKey}
+        // Both bounds are filled in when the condition enters state
+        value={value}
+        dateFormat={dateFormat}
         onChange={v => onChange('value', v)}
       />
     );
@@ -931,15 +947,9 @@ function ConditionsList({
             // tries to parse the value as a float and we had to
             // special-case isbetween. I don't know why we need that
             // behavior and we can probably get rid of `makeValue`
-            return makeValue(
-              {
-                num1: cond.value,
-                num2: cond.value,
-              },
-              { ...cond, op: value },
-            );
+            return makeValue(rangeForCondition(cond), { ...cond, op: value });
           } else if (cond.op === 'isbetween' && op !== 'isbetween') {
-            return makeValue(cond.value.num1 || 0, {
+            return makeValue(rangeForCondition(cond).num1, {
               ...cond,
               op: value,
             });
@@ -1035,7 +1045,10 @@ export function RuleEditor({
 }: RuleEditorProps) {
   const { t } = useTranslation();
   const [conditions, setConditions] = useState(
-    defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuidv4() })),
+    defaultRule.conditions
+      .map(parse)
+      .map(normalizeConditionRange)
+      .map(c => ({ ...c, inputKey: uuidv4() })),
   );
   const [actionSplits, setActionSplits] = useState(() => {
     const parsedActions = defaultRule.actions.map(parse);
