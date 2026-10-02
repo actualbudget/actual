@@ -40,6 +40,8 @@ const mocks = vi.hoisted(() => ({
   setGlobalPref: vi.fn(),
   setPrivacyPref: vi.fn(),
   switchTheme: vi.fn(),
+  balanceRow: vi.fn(({ label }: { label: string }) => label),
+  accountStatusIndicator: vi.fn(() => null),
 }));
 
 const mockData = vi.hoisted(() => ({
@@ -116,7 +118,7 @@ vi.mock('#accounts/useAccountSyncStatus', () => ({
 }));
 
 vi.mock('#components/accounts/AccountStatusIndicator', () => ({
-  AccountStatusIndicator: () => null,
+  AccountStatusIndicator: mocks.accountStatusIndicator,
 }));
 
 vi.mock('#components/tour/TourProvider', () => ({
@@ -197,7 +199,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('./primitives', () => ({
-  BalanceRow: ({ label }: { label: string }) => label,
+  BalanceRow: mocks.balanceRow,
   FooterHint: ({ children }: { children: ReactNode }) => children,
   Highlight: ({ text }: { text: string }) => text,
   KeyChip: ({ children }: { children: ReactNode }) => children,
@@ -355,6 +357,37 @@ describe('CommandBar', () => {
       'data-selected',
       'true',
     );
+  });
+
+  it('filters account rows before rendering unrelated balance details', async () => {
+    mockData.accounts = [
+      { id: 'account-1', name: 'Matching Account', closed: 0 },
+      { id: 'account-2', name: 'Unrelated Account', closed: 0 },
+    ];
+    renderOpenCommandBar();
+    mocks.balanceRow.mockClear();
+    mocks.accountStatusIndicator.mockClear();
+
+    const input = screen.getByPlaceholderText('Search Demo budget...');
+    await userEvent.setup().type(input, 'Matching');
+
+    const renderedBalanceRowLabels = mocks.balanceRow.mock.calls.map(
+      ([props]) => props.label,
+    );
+    expect(renderedBalanceRowLabels).not.toContain('Unrelated Account');
+    expect(mocks.accountStatusIndicator).toHaveBeenCalled();
+
+    expect(
+      screen.getByRole('option', {
+        name: 'Matching Account',
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('option', {
+        name: 'Unrelated Account',
+      }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Unrelated Account')).not.toBeInTheDocument();
   });
 
   it('wraps keyboard navigation at both ends of the root command list', async () => {

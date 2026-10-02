@@ -356,13 +356,6 @@ export function CommandBar() {
       id: 'accounts',
       name: t('All Accounts'),
       path: '/accounts',
-      content: (
-        <BalanceRow<'account', 'accounts-balance'>
-          label={t('All Accounts')}
-          binding={allAccountBalance()}
-          query={search}
-        />
-      ),
       Icon: SvgLibrary,
     },
   ];
@@ -384,6 +377,10 @@ export function CommandBar() {
   const { data: allAccounts = [] } = useAccounts();
   const { data: customReports = [] } = useReports();
   const { data: dashboardPages = [] } = useDashboardPages();
+  const searchLower = search.toLowerCase();
+  const isRootSearchEmpty = search.trim() === '';
+  const matchesSearch = (name: string) =>
+    name.toLowerCase().includes(searchLower);
 
   // Canonical root-group presentation for action-page subtitles. This is
   // resolved from the reference so Recent and Favorites retain their origin.
@@ -789,7 +786,6 @@ export function CommandBar() {
           ]
         : [];
 
-  const isRootSearchEmpty = search.trim() === '';
   const currentRecentRef = getCommandBarRecentRef(location.pathname, {
     accounts: allAccounts,
     dashboardPages,
@@ -888,7 +884,8 @@ export function CommandBar() {
       key: 'accounts',
       heading: t('Accounts'),
       items: [
-        ...(isRootItemVisible('account:onbudget')
+        ...(isRootItemVisible('account:onbudget') &&
+        matchesSearch(t('On Budget'))
           ? [
               {
                 id: 'onbudget',
@@ -904,7 +901,8 @@ export function CommandBar() {
               },
             ]
           : []),
-        ...(isRootItemVisible('account:offbudget')
+        ...(isRootItemVisible('account:offbudget') &&
+        matchesSearch(t('Off Budget'))
           ? [
               {
                 id: 'offbudget',
@@ -921,7 +919,11 @@ export function CommandBar() {
             ]
           : []),
         ...accounts
-          .filter(account => isRootItemVisible(`account:${account.id}`))
+          .filter(
+            account =>
+              isRootItemVisible(`account:${account.id}`) &&
+              matchesSearch(account.name),
+          )
           .map(account => ({
             ...account,
             content: (
@@ -945,7 +947,11 @@ export function CommandBar() {
       key: 'accounts-closed',
       heading: t('Closed Accounts'),
       items: closedAccounts
-        .filter(account => isRootItemVisible(`account:${account.id}`))
+        .filter(
+          account =>
+            isRootItemVisible(`account:${account.id}`) &&
+            matchesSearch(account.name),
+        )
         .map(account => ({
           ...account,
           Icon: SvgLibrary,
@@ -955,9 +961,26 @@ export function CommandBar() {
     {
       key: 'navigation',
       heading: t('Navigation'),
-      items: navigationItems.filter(item =>
-        isRootItemVisible(`navigation:${item.id}`),
-      ),
+      items: navigationItems
+        .filter(
+          item =>
+            isRootItemVisible(`navigation:${item.id}`) &&
+            matchesSearch(item.name),
+        )
+        .map(item =>
+          item.id === 'accounts'
+            ? {
+                ...item,
+                content: (
+                  <BalanceRow<'account', 'accounts-balance'>
+                    label={item.name}
+                    binding={allAccountBalance()}
+                    query={search}
+                  />
+                ),
+              }
+            : item,
+        ),
       onSelect: ({ id }) => {
         const item = navigationItems.find(item => item.id === id);
         if (item) handleNavigate(item.path);
@@ -966,8 +989,10 @@ export function CommandBar() {
     {
       key: 'actions',
       heading: t('Quick actions'),
-      items: quickActions.filter(action =>
-        isRootItemVisible(`quick-action:${action.id}`),
+      items: quickActions.filter(
+        action =>
+          isRootItemVisible(`quick-action:${action.id}`) &&
+          matchesSearch(action.name),
       ),
       onSelect: ({ id }) => {
         const action = quickActions.find(action => action.id === id);
@@ -989,8 +1014,10 @@ export function CommandBar() {
       key: 'reports',
       heading: t('Reports'),
       items: dashboardPages
-        .filter(dashboardPage =>
-          isRootItemVisible(`dashboard:${dashboardPage.id}`),
+        .filter(
+          dashboardPage =>
+            isRootItemVisible(`dashboard:${dashboardPage.id}`) &&
+            matchesSearch(dashboardPage.name),
         )
         .map(dashboardPage => ({
           ...dashboardPage,
@@ -1002,7 +1029,11 @@ export function CommandBar() {
       key: 'reports-custom',
       heading: t('Custom Reports'),
       items: customReports
-        .filter(report => isRootItemVisible(`report:${report.id}`))
+        .filter(
+          report =>
+            isRootItemVisible(`report:${report.id}`) &&
+            matchesSearch(report.name),
+        )
         .map(report => ({
           ...report,
           Icon: SvgNotesPaperText,
@@ -1019,17 +1050,18 @@ export function CommandBar() {
           items: contributedCommands
             .filter(
               command =>
-                !isRootSearchEmpty ||
-                !favoriteKeys.has(
-                  favoriteRefKey({
-                    type: 'page-action',
-                    ownerId: command.ownerId ?? '',
-                    commandId: command.commandId ?? command.id,
-                    ...(command.instanceId != null
-                      ? { instanceId: command.instanceId }
-                      : {}),
-                  }),
-                ),
+                (!isRootSearchEmpty ||
+                  !favoriteKeys.has(
+                    favoriteRefKey({
+                      type: 'page-action',
+                      ownerId: command.ownerId ?? '',
+                      commandId: command.commandId ?? command.id,
+                      ...(command.instanceId != null
+                        ? { instanceId: command.instanceId }
+                        : {}),
+                    }),
+                  )) &&
+                matchesSearch(command.label),
             )
             .map(command => ({
               id: command.id,
@@ -1375,7 +1407,6 @@ export function CommandBar() {
     }
   }, [actionPageRef, genericActionSections.length, goBackToRoot, open, page]);
 
-  const searchLower = search.toLowerCase();
   const filteredSections = sections.map(section => ({
     ...section,
     items: section.items.filter(item =>
@@ -1480,7 +1511,6 @@ export function CommandBar() {
         inset: 0,
         zIndex: 3000,
         backgroundColor: 'rgba(1, 4, 9, 0.45)',
-        backdropFilter: 'blur(2px)',
         '@media (prefers-reduced-motion: no-preference)': {
           animation: `${overlayEnter} 0.14s ease`,
         },
