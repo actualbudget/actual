@@ -38,6 +38,7 @@ export type DbAccount = {
     | 'not-configured'
     | null;
   account_group_id?: DbAccountGroup['id'] | null;
+  currency?: string | null;
 };
 
 export type DbAccountGroup = {

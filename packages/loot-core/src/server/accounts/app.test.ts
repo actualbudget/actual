@@ -62,3 +62,69 @@ describe('account starting balance encoding', () => {
     expect(db.firstSync('SELECT id FROM accounts')).toBeNull();
   });
 });
+
+describe('account currency', () => {
+  const updateAccount = app.handlers['account-update'];
+
+  async function setBudgetCurrency(currencyCode: string, precision: number) {
+    await db.update('preferences', {
+      id: 'defaultCurrencyCode',
+      value: currencyCode,
+    });
+    await prefs.savePrefs({
+      amountEncoding: JSON.stringify({ version: 1, currencyCode, precision }),
+    });
+  }
+
+  it('stores the budget currency as inherited', async () => {
+    await setBudgetCurrency('JPY', 0);
+    const id = await createAccount({ name: 'Wallet', currency: 'JPY' });
+    expect(
+      db.firstSync<{ currency: string | null }>(
+        'SELECT currency FROM accounts WHERE id = ?',
+        [id],
+      )?.currency,
+    ).toBeNull();
+  });
+
+  it('keeps inherited JPY integers unchanged', async () => {
+    await setBudgetCurrency('JPY', 0);
+    const id = await createAccount({ name: 'Wallet', balanceInteger: 1000 });
+    expect(
+      db.firstSync<{ amount: number }>(
+        'SELECT amount FROM transactions WHERE acct = ?',
+        [id],
+      )?.amount,
+    ).toBe(1000);
+  });
+
+  it('rejects foreign creation before foreign posting exists', async () => {
+    await setBudgetCurrency('JPY', 0);
+    await expect(
+      createAccount({ name: 'Dollars', currency: 'USD' }),
+    ).rejects.toThrow('multicurrency-unavailable');
+    expect(db.firstSync('SELECT id FROM accounts')).toBeNull();
+  });
+
+  it('rejects both balance forms together', async () => {
+    for (const balance of [1, 0]) {
+      await expect(
+        createAccount({ name: 'Checking', balance, balanceInteger: 100 }),
+      ).rejects.toThrow('Supply either balance or balanceInteger');
+    }
+    expect(db.firstSync('SELECT id FROM accounts')).toBeNull();
+  });
+
+  it('rejects currency changes on populated accounts', async () => {
+    await setBudgetCurrency('USD', 2);
+    const id = await createAccount({ name: 'Checking', balanceInteger: 100 });
+    await expect(updateAccount({ id, currency: 'EUR' })).rejects.toThrow(
+      'account-currency-immutable',
+    );
+    // Stale full-account updates from the UI keep the inherited value.
+    await updateAccount({ id, name: 'Renamed', currency: null });
+    expect(
+      db.firstSync('SELECT name, currency FROM accounts WHERE id = ?', [id]),
+    ).toEqual({ name: 'Renamed', currency: null });
+  });
+});

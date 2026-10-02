@@ -19,7 +19,10 @@ import { getPrefs } from '#server/prefs';
 import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
 import { undoable, withUndo } from '#server/undo';
-import { getRecordedAmountPrecision } from '#server/util/currency';
+import {
+  getRecordedAmountPrecision,
+  resolveAccountCurrencyInput,
+} from '#server/util/currency';
 import { isNonProductionEnvironment } from '#shared/environment';
 import { dayFromDate } from '#shared/months';
 import * as monthUtils from '#shared/months';
@@ -98,15 +101,21 @@ async function updateAccount({
   name,
   last_reconciled,
   account_group_id,
+  currency,
 }: Pick<AccountEntity, 'id'> &
   Partial<
-    Pick<AccountEntity, 'name' | 'last_reconciled' | 'account_group_id'>
+    Pick<
+      AccountEntity,
+      'name' | 'last_reconciled' | 'account_group_id' | 'currency'
+    >
   >) {
+  const resolvedCurrency = await resolveAccountCurrencyInput(currency, id);
   await db.update('accounts', {
     id,
     ...(name !== undefined && { name }),
     ...(last_reconciled && { last_reconciled }),
     ...(account_group_id !== undefined && { account_group_id }),
+    ...(resolvedCurrency !== undefined && { currency: resolvedCurrency }),
   });
   return {};
 }
@@ -136,6 +145,7 @@ async function getAccounts(): Promise<AccountEntity[]> {
         last_sync: dbAccount.last_sync ?? null,
         bank_sync_status: dbAccount.bank_sync_status ?? null,
         account_group_id: dbAccount.account_group_id ?? null,
+        currency: dbAccount.currency ?? null,
       }) satisfies AccountEntity,
   );
 }
@@ -557,27 +567,40 @@ async function linkEnableBankingAccount({
 
 async function createAccount({
   name,
-  balance = 0,
+  balance,
+  balanceInteger,
   offBudget = false,
   closed = false,
+  currency,
 }: {
   name: string;
-  balance?: number | undefined;
+  /** Major units, parsed by the UI at the recorded precision. */
+  balance?: number | null | undefined;
+  /** Already-encoded minor units; persisted without a floating-point trip. */
+  balanceInteger?: number | undefined;
   offBudget?: boolean | undefined;
   closed?: boolean | undefined;
+  currency?: string | null | undefined;
 }) {
+  if (balanceInteger !== undefined && balance != null) {
+    throw new Error('Supply either balance or balanceInteger');
+  }
   const amount =
-    balance != null && balance !== 0
-      ? amountToInteger(balance, getRecordedAmountPrecision())
-      : 0;
+    balanceInteger !== undefined
+      ? balanceInteger
+      : balance != null && balance !== 0
+        ? amountToInteger(balance, getRecordedAmountPrecision())
+        : 0;
   if (!Number.isSafeInteger(amount)) {
     throw new Error('Invalid starting balance');
   }
+  const resolvedCurrency = await resolveAccountCurrencyInput(currency);
 
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
     offbudget: offBudget ? 1 : 0,
     closed: closed ? 1 : 0,
+    ...(resolvedCurrency !== undefined && { currency: resolvedCurrency }),
   });
 
   await db.insertPayee({

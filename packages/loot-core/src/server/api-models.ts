@@ -1,14 +1,17 @@
+import type { Money } from '#shared/money';
 import type { Budget } from '#types/budget';
 import type {
   AccountEntity,
   AccountGroupEntity,
   CategoryEntity,
   CategoryGroupEntity,
+  ImportTransactionEntity,
   NewRuleEntity,
   PayeeEntity,
   RuleEntity,
   ScheduleEntity,
   TagEntity,
+  TransactionEntity,
 } from '#types/models';
 
 import type { RemoteFile } from './cloud-storage';
@@ -19,12 +22,89 @@ export type APIAccountEntity = Pick<AccountEntity, 'id' | 'name'> & {
   closed?: boolean;
   balance_current?: number | null;
   account_group_id?: string | null;
+  /** Effective currency code; inherited accounts report the budget currency. */
+  currency: string;
+};
+
+/** Omit currency or pass null to inherit the budget currency. */
+export type APIAccountCreateEntity = Omit<
+  APIAccountEntity,
+  'id' | 'currency'
+> & {
+  currency?: string | null;
+};
+
+export type APIAccountUpdateFields = Partial<
+  Omit<APIAccountEntity, 'id' | 'currency'>
+> & {
+  currency?: string | null;
+};
+
+/**
+ * Raw integers remain the default during dual support. Raw-integer support
+ * will be removed 12 months after Money support ships.
+ */
+export type AmountFormat = 'raw' | 'money';
+export type AmountFormatOptions = { amountFormat?: AmountFormat };
+export type AmountInput = number | Money;
+
+export type APIImportTransactionInput = Omit<
+  ImportTransactionEntity,
+  'amount' | 'subtransactions'
+> & {
+  amount?: AmountInput;
+  subtransactions?: Array<
+    Omit<
+      NonNullable<ImportTransactionEntity['subtransactions']>[number],
+      'amount'
+    > & {
+      amount: AmountInput;
+    }
+  >;
+};
+
+export type APITransactionUpdateFields = Omit<
+  Partial<TransactionEntity>,
+  'amount' | 'subtransactions'
+> & {
+  amount?: AmountInput;
+  subtransactions?: Array<
+    Omit<TransactionEntity, 'amount'> & { amount: AmountInput }
+  >;
+};
+
+export type APIMoneyTransactionEntity = Omit<
+  TransactionEntity,
+  'amount' | 'subtransactions'
+> & {
+  amount: Money;
+  subtransactions?: APIMoneyTransactionEntity[];
+};
+
+export type APIBudgetMonth<A extends number | Money = number> = {
+  month: string;
+  incomeAvailable: A;
+  lastMonthOverspent: A;
+  forNextMonth: A;
+  totalBudgeted: A;
+  toBudget: A;
+
+  fromLastMonth: A;
+  totalIncome: A;
+  totalSpent: A;
+  totalBalance: A;
+  categoryGroups: Array<
+    Record<string, unknown> & { categories?: Record<string, unknown>[] }
+  >;
 };
 
 export const accountModel = {
   ...models.accountModel,
 
-  toExternal(account: AccountEntity): APIAccountEntity {
+  toExternal(
+    account: AccountEntity,
+    budgetCurrencyCode: string,
+  ): APIAccountEntity {
     return {
       id: account.id,
       name: account.name,
@@ -32,10 +112,11 @@ export const accountModel = {
       closed: account.closed ? true : false,
       balance_current: account.balance_current ?? null,
       account_group_id: account.account_group_id ?? null,
+      currency: account.currency || budgetCurrencyCode,
     };
   },
 
-  fromExternal(account: APIAccountEntity) {
+  fromExternal(account: APIAccountUpdateFields) {
     const result = { ...account } as unknown as AccountEntity;
     if ('offbudget' in account) {
       result.offbudget = account.offbudget ? 1 : 0;

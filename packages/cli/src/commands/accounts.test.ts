@@ -64,7 +64,13 @@ describe('accounts commands', () => {
   describe('list', () => {
     it('calls api.getAccounts and prints result with computed balance', async () => {
       const accounts = [
-        { id: '1', name: 'Checking', offbudget: false, closed: false },
+        {
+          id: '1',
+          name: 'Checking',
+          offbudget: false,
+          closed: false,
+          currency: '',
+        },
       ];
       vi.mocked(api.getAccounts).mockResolvedValue(accounts);
 
@@ -96,8 +102,20 @@ describe('accounts commands', () => {
 
     it('filters out closed accounts by default', async () => {
       vi.mocked(api.getAccounts).mockResolvedValue([
-        { id: '1', name: 'Open', offbudget: false, closed: false },
-        { id: '2', name: 'Closed', offbudget: false, closed: true },
+        {
+          id: '1',
+          name: 'Open',
+          offbudget: false,
+          closed: false,
+          currency: '',
+        },
+        {
+          id: '2',
+          name: 'Closed',
+          offbudget: false,
+          closed: true,
+          currency: '',
+        },
       ]);
 
       await run(['accounts', 'list']);
@@ -118,8 +136,20 @@ describe('accounts commands', () => {
 
     it('includes closed accounts when --include-closed is passed', async () => {
       vi.mocked(api.getAccounts).mockResolvedValue([
-        { id: '1', name: 'Open', offbudget: false, closed: false },
-        { id: '2', name: 'Closed', offbudget: false, closed: true },
+        {
+          id: '1',
+          name: 'Open',
+          offbudget: false,
+          closed: false,
+          currency: '',
+        },
+        {
+          id: '2',
+          name: 'Closed',
+          offbudget: false,
+          closed: true,
+          currency: '',
+        },
       ]);
 
       await run(['accounts', 'list', '--include-closed']);
@@ -134,8 +164,20 @@ describe('accounts commands', () => {
 
     it('sorts on-budget accounts before off-budget', async () => {
       vi.mocked(api.getAccounts).mockResolvedValue([
-        { id: '1', name: 'OffBudget', offbudget: true, closed: false },
-        { id: '2', name: 'OnBudget', offbudget: false, closed: false },
+        {
+          id: '1',
+          name: 'OffBudget',
+          offbudget: true,
+          closed: false,
+          currency: '',
+        },
+        {
+          id: '2',
+          name: 'OnBudget',
+          offbudget: false,
+          closed: false,
+          currency: '',
+        },
       ]);
 
       await run(['accounts', 'list']);
