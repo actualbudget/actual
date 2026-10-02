@@ -31,7 +31,6 @@ import { Change } from '#components/reports/Change';
 import { BudgetAnalysisGraph } from '#components/reports/graphs/BudgetAnalysisGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
-import { calculateTimeRange } from '#components/reports/reportRanges';
 import { buildBudgetAnalysisCsv } from '#components/reports/spreadsheets/budget-analysis-export';
 import {
   createBudgetAnalysisSpreadsheet,
@@ -39,6 +38,7 @@ import {
 } from '#components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -143,6 +143,8 @@ type BudgetAnalysisInternalProps = {
 };
 
 function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
+  const { resolve: resolveTimeRange, isUsingDashboardRange } =
+    useDashboardReportTimeRange(widget);
   const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -242,7 +244,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
       setAllMonths(allMonthsData);
 
       if (widget?.meta?.timeFrame) {
-        const [calculatedStart, calculatedEnd] = calculateTimeRange(
+        const [calculatedStart, calculatedEnd] = resolveTimeRange(
           widget.meta.timeFrame,
           undefined,
           latestTransDate,
@@ -253,7 +255,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
 
         setIsConcise(calculateIsConcise(calculatedStart, calculatedEnd));
       } else {
-        const [liveStart, liveEnd] = calculateTimeRange({
+        const [liveStart, liveEnd] = resolveTimeRange({
           start: monthUtils.subMonths(currentMonth, 5),
           end: currentMonth,
           mode: 'sliding-window',
@@ -265,7 +267,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
       }
     }
     void run();
-  }, [locale, widget?.meta?.timeFrame]);
+  }, [locale, widget?.meta?.timeFrame, resolveTimeRange]);
 
   // `start`/`end` may be `yyyy-MM` or `yyyy-MM-dd`; collapse to months first.
   const startDate = `${monthUtils.getMonth(start)}-01`;
@@ -314,11 +316,13 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
             ...(widget.meta ?? {}),
             conditions,
             conditionsOp,
-            timeFrame: {
-              start,
-              end,
-              mode,
-            },
+            timeFrame: isUsingDashboardRange
+              ? widget.meta?.timeFrame
+              : {
+                  start,
+                  end,
+                  mode,
+                },
             graphType,
             showBalance,
             balanceOnly: !showCategories,

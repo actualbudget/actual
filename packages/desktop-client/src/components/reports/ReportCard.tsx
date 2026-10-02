@@ -19,6 +19,10 @@ import {
 } from '#reports/mutations';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
+import {
+  addDashboardDateScopeToUrl,
+  useDashboardDateScope,
+} from './DashboardDateScope';
 
 type ReportCardProps = {
   widgetId: string;
@@ -47,6 +51,7 @@ export function ReportCard({
   const isInViewport = useIsInViewport(ref);
   const [hasRendered, setHasRendered] = useState(false);
   const navigate = useNavigate();
+  const dashboardScope = useDashboardDateScope();
   const { isNarrowWidth } = useResponsive();
   const containerProps = {
     flex: isNarrowWidth ? '1 1' : `0 0 calc(${size * 100}% / 3 - 20px)`,
@@ -110,7 +115,14 @@ export function ReportCard({
       <Layout {...layoutProps}>
         <Button
           variant="bare"
-          onPress={() => navigate(to, { state: { goBack: true } })}
+          onPress={() =>
+            navigate(
+              dashboardScope
+                ? addDashboardDateScopeToUrl(to, dashboardScope, widgetId)
+                : to,
+              { state: { goBack: true } },
+            )
+          }
           style={{
             height: '100%',
             width: '100%',

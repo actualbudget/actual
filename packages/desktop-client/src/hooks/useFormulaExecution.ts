@@ -12,8 +12,9 @@ import type { Query } from '@actual-app/core/shared/query';
 import { integerToAmount } from '@actual-app/core/shared/util';
 import type {
   CategoryEntity,
+  DashboardDateScope,
+  FormulaQueryConfig,
   RuleConditionEntity,
-  TimeFrame,
 } from '@actual-app/core/types/models';
 import { HyperFormula } from 'hyperformula';
 
@@ -32,11 +33,7 @@ import { useLocale } from './useLocale';
 
 bootstrapHyperFormula();
 
-type QueryConfig = {
-  conditions?: RuleConditionEntity[];
-  conditionsOp?: 'and' | 'or';
-  timeFrame?: Partial<TimeFrame>;
-};
+type QueryConfig = FormulaQueryConfig;
 
 type QueriesMap = Record<string, QueryConfig>;
 
@@ -141,6 +138,7 @@ export function useFormulaExecution(
   queriesVersion?: number,
   namedExpressions?: Record<string, number | string>,
   accounts?: SimpleAccount[],
+  dashboardScope?: DashboardDateScope | null,
 ) {
   const locale = useLocale();
   const [language] = useGlobalPref('language');
@@ -154,6 +152,9 @@ export function useFormulaExecution(
   // execution toggles `isLoading`, which renders again — an endless loop).
   // Depend on the serialized contents instead, and read the live objects
   // through refs.
+  const dashboardScopeKey = JSON.stringify(dashboardScope ?? null);
+  const dashboardScopeRef = useRef(dashboardScope);
+  dashboardScopeRef.current = dashboardScope;
   const queriesKey = JSON.stringify(queries ?? {});
   const namedExpressionsKey = JSON.stringify(namedExpressions ?? null);
   const accountsKey = JSON.stringify(accounts ?? null);
@@ -209,7 +210,11 @@ export function useFormulaExecution(
           throwOnCellError: false,
         });
 
-        await prefetchFormulaQueries(formulaQueryContext, currentQueries);
+        const effectiveQueries = applyDashboardScopeToFormulaQueries(
+          currentQueries,
+          dashboardScopeRef.current,
+        );
+        await prefetchFormulaQueries(formulaQueryContext, effectiveQueries);
         await prefetchAccountBalances(
           formulaQueryContext,
           currentAccounts ?? [],
@@ -262,9 +267,46 @@ export function useFormulaExecution(
     queriesKey,
     namedExpressionsKey,
     accountsKey,
+    dashboardScopeKey,
   ]);
 
   return { result, isLoading, error };
+}
+
+export function applyDashboardScopeToFormulaQueries(
+  queries: QueriesMap,
+  dashboardScope?: DashboardDateScope | null,
+): QueriesMap {
+  if (!dashboardScope) {
+    return queries;
+  }
+  return Object.fromEntries(
+    Object.entries(queries).map(([name, query]) => {
+      let timeFrame = query.timeFrame;
+      if (query.useDashboardDateRange ?? true) {
+        timeFrame = {
+          start: dashboardScope.start,
+          end: dashboardScope.end,
+          mode: 'static',
+        };
+      } else if (timeFrame && timeFrame.mode !== 'static') {
+        const [start, end] = calculateTimeRange(
+          asMonthSlidingTimeFrame(timeFrame),
+          undefined,
+          undefined,
+          dashboardScope.end,
+        );
+        timeFrame = { start, end, mode: 'static' };
+      }
+      return [
+        name,
+        {
+          ...query,
+          timeFrame,
+        },
+      ];
+    }),
+  );
 }
 
 async function prefetchFormulaQueries(
@@ -399,7 +441,6 @@ export async function buildFilteredTransactionsQuery(
   });
 
   const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
-
   // Start building the query
   let transQuery = q('transactions');
 

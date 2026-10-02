@@ -23,6 +23,7 @@ type BuildDateRangePresetsOptions = {
   showFutureRange?: boolean;
   includeAllTime?: boolean;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  referenceDate?: string;
 };
 
 function liveRangeAsMonths(
@@ -32,6 +33,7 @@ function liveRangeAsMonths(
   earliestTransaction: string,
   latestTransaction: string,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  referenceDate?: string,
 ): PresetRange {
   const [rangeStart, rangeEnd] = getLiveRange(
     rangeName,
@@ -39,6 +41,7 @@ function liveRangeAsMonths(
     latestTransaction,
     includeCurrentInterval,
     firstDayOfWeekIdx,
+    referenceDate,
   );
 
   return [monthUtils.getMonth(rangeStart), monthUtils.getMonth(rangeEnd), mode];
@@ -72,6 +75,7 @@ export function buildDateRangePresets({
   showFutureRange = false,
   includeAllTime = true,
   firstDayOfWeekIdx,
+  referenceDate,
 }: BuildDateRangePresetsOptions): DateRangePreset[] {
   const earliestMonth = monthUtils.getMonth(earliestTransaction);
   const latestMonth = monthUtils.getMonth(latestTransaction);
@@ -121,7 +125,7 @@ export function buildDateRangePresets({
           makePreset(
             '1-month',
             t('1 month'),
-            () => getLatestRange(0),
+            () => getLatestRange(0, referenceDate),
             onSelectRange,
           ),
         ]
@@ -129,16 +133,21 @@ export function buildDateRangePresets({
     makePreset(
       '3-months',
       t('3 months'),
-      () => getLatestRange(2),
+      () => getLatestRange(2, referenceDate),
       onSelectRange,
     ),
     makePreset(
       '6-months',
       t('6 months'),
-      () => getLatestRange(5),
+      () => getLatestRange(5, referenceDate),
       onSelectRange,
     ),
-    makePreset('1-year', t('1 year'), () => getLatestRange(11), onSelectRange),
+    makePreset(
+      '1-year',
+      t('1 year'),
+      () => getLatestRange(11, referenceDate),
+      onSelectRange,
+    ),
     makePreset(
       'year-to-date',
       t('Year to date'),
@@ -150,6 +159,7 @@ export function buildDateRangePresets({
           earliestTransaction,
           latestTransaction,
           firstDayOfWeekIdx,
+          referenceDate,
         ),
       onSelectRange,
     ),
@@ -164,6 +174,7 @@ export function buildDateRangePresets({
           earliestTransaction,
           latestTransaction,
           firstDayOfWeekIdx,
+          referenceDate,
         ),
       onSelectRange,
     ),
@@ -178,6 +189,7 @@ export function buildDateRangePresets({
           earliestTransaction,
           latestTransaction,
           firstDayOfWeekIdx,
+          referenceDate,
         ),
       onSelectRange,
     ),
@@ -192,6 +204,7 @@ export function buildDateRangePresets({
           earliestTransaction,
           latestTransaction,
           firstDayOfWeekIdx,
+          referenceDate,
         ),
       onSelectRange,
     ),
@@ -206,6 +219,7 @@ export function buildDateRangePresets({
           earliestTransaction,
           latestTransaction,
           firstDayOfWeekIdx,
+          referenceDate,
         );
         const [clampedStart, clampedEnd] = clampMonthRangeToBounds(
           start,
@@ -228,6 +242,7 @@ export function buildDateRangePresets({
           earliestTransaction,
           latestTransaction,
           firstDayOfWeekIdx,
+          referenceDate,
         ),
       onSelectRange,
     ),

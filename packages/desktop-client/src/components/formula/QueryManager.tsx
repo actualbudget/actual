@@ -15,6 +15,8 @@ import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
+  DashboardDateScope,
+  FormulaQueryConfig,
   RuleConditionEntity,
   TimeFrame,
 } from '@actual-app/core/types/models';
@@ -38,12 +40,6 @@ import {
   normalizeQueryTimeFrameEnd,
   normalizeQueryTimeFrameStart,
 } from './queryTimeFrame';
-
-type QueryConfig = {
-  conditions?: RuleConditionEntity[];
-  conditionsOp?: 'and' | 'or';
-  timeFrame?: TimeFrame;
-};
 
 export function normalizeMonthRangeForPicker(start: string, end: string) {
   return [monthUtils.getMonth(start), monthUtils.getMonth(end)] satisfies [
@@ -132,11 +128,16 @@ function isPresetTimeRangeMode(
 }
 
 type QueryManagerProps = {
-  queries: Record<string, QueryConfig>;
-  onQueriesChange: (queries: Record<string, QueryConfig>) => void;
+  queries: Record<string, FormulaQueryConfig>;
+  onQueriesChange: (queries: Record<string, FormulaQueryConfig>) => void;
+  dashboardScope?: DashboardDateScope | null;
 };
 
-export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
+export function QueryManager({
+  queries,
+  onQueriesChange,
+  dashboardScope,
+}: QueryManagerProps) {
   const { t } = useTranslation();
   const [newQueryName, setNewQueryName] = useState('');
   const [isAddingQuery, setIsAddingQuery] = useState(false);
@@ -167,6 +168,7 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
           end: monthUtils.currentDay(),
           mode: 'sliding-window',
         },
+        ...(dashboardScope ? { useDashboardDateRange: true } : null),
       },
     });
 
@@ -180,7 +182,7 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
     onQueriesChange(newQueries);
   }
 
-  function handleUpdateQuery(queryName: string, config: QueryConfig) {
+  function handleUpdateQuery(queryName: string, config: FormulaQueryConfig) {
     onQueriesChange({
       ...queries,
       [queryName]: config,
@@ -270,6 +272,7 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
               defaultConfig={config}
               onUpdate={newConfig => handleUpdateQuery(queryName, newConfig)}
               onRemove={() => handleRemoveQuery(queryName)}
+              dashboardScope={dashboardScope}
             />
           ))}
         </View>
@@ -280,9 +283,10 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
 
 type QueryItemProps = {
   queryName: string;
-  defaultConfig: QueryConfig;
-  onUpdate: (config: QueryConfig) => void;
+  defaultConfig: FormulaQueryConfig;
+  onUpdate: (config: FormulaQueryConfig) => void;
   onRemove: () => void;
+  dashboardScope?: DashboardDateScope | null;
 };
 
 function QueryItem({
@@ -290,12 +294,16 @@ function QueryItem({
   defaultConfig,
   onUpdate,
   onRemove,
+  dashboardScope,
 }: QueryItemProps) {
   const language = useLanguage();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
   const [importJsonText, setImportJsonText] = useState('');
   const dispatch = useDispatch<AppDispatch>();
+  const [useDashboardDateRange, setUseDashboardDateRange] = useState(
+    defaultConfig.useDashboardDateRange ?? true,
+  );
 
   // Time range state
   const [startDate, setStartDate] = useState(
@@ -399,11 +407,13 @@ function QueryItem({
       newStartDate = startDate,
       newEndDate = endDate,
       mode = timeRangeRef.current as TimeFrame['mode'],
+      newUseDashboardDateRange = useDashboardDateRange,
     ) => {
       timeRangeRef.current = mode;
       onUpdate({
         conditions,
         conditionsOp,
+        useDashboardDateRange: newUseDashboardDateRange,
         timeFrame: {
           start: newStartDate,
           end: newEndDate,
@@ -418,6 +428,7 @@ function QueryItem({
       startDate,
       endDate,
       onUpdate,
+      useDashboardDateRange,
     ],
   );
 
@@ -531,6 +542,18 @@ function QueryItem({
   }
 
   const timeRangeMode = timeRangeRef.current as TimeFrame['mode'];
+  const isUsingDashboardDateRange = Boolean(
+    dashboardScope && useDashboardDateRange,
+  );
+  const displayedStartDate = isUsingDashboardDateRange
+    ? (dashboardScope?.start ?? startDate)
+    : startDate;
+  const displayedEndDate = isUsingDashboardDateRange
+    ? (dashboardScope?.end ?? endDate)
+    : endDate;
+  const displayedTimeRangeMode = isUsingDashboardDateRange
+    ? (dashboardScope?.mode ?? timeRangeMode)
+    : timeRangeMode;
   const isPresetTimeRange = isPresetTimeRangeMode(timeRangeMode);
   const timeRangeLabels = {
     'sliding-window': t('Live'),
@@ -543,7 +566,9 @@ function QueryItem({
     currentQuarter: t('Current quarter'),
     previousQuarter: t('Previous quarter'),
   } satisfies Record<TimeFrame['mode'], string>;
-  const timeRangeLabel = timeRangeLabels[timeRangeMode];
+  const timeRangeLabel = isUsingDashboardDateRange
+    ? t('Dashboard')
+    : timeRangeLabels[displayedTimeRangeMode];
   const presetTimeRangeLabels = {
     full: t('All time transactions'),
     lastMonth: t('Last month transactions'),
@@ -562,7 +587,7 @@ function QueryItem({
   }
 
   const [pickerStartDate, pickerEndDate] = clampMonthRangeToBounds(
-    ...normalizeMonthRangeForPicker(startDate, endDate),
+    ...normalizeMonthRangeForPicker(displayedStartDate, displayedEndDate),
     earliestMonth,
     latestMonth,
   );
@@ -573,6 +598,7 @@ function QueryItem({
       const [normalizedRangeStart, normalizedRangeEnd] =
         normalizeMonthPickerSelectionForQuery(rangeStart, rangeEnd);
 
+      setUseDashboardDateRange(false);
       setStartDate(normalizedRangeStart);
       setEndDate(normalizedRangeEnd);
       sendUpdate(
@@ -581,12 +607,14 @@ function QueryItem({
         normalizedRangeStart,
         normalizedRangeEnd,
         rangeMode,
+        false,
       );
     },
     earliestTransaction,
     latestTransaction,
     show1Month: true,
     includeAllTime: true,
+    referenceDate: dashboardScope?.end,
   });
 
   const isDateRangePickerReady = canRenderDateRangePicker(
@@ -747,8 +775,25 @@ function QueryItem({
         >
           <Button
             style={{ minWidth: 50 }}
-            variant={timeRangeMode === 'static' ? 'normal' : 'primary'}
+            variant={
+              isUsingDashboardDateRange || displayedTimeRangeMode !== 'static'
+                ? 'primary'
+                : 'normal'
+            }
             onPress={() => {
+              if (isUsingDashboardDateRange) {
+                setUseDashboardDateRange(false);
+                onUpdate({ ...defaultConfig, useDashboardDateRange: false });
+                return;
+              }
+
+              if (timeRangeMode === 'static' && dashboardScope) {
+                setUseDashboardDateRange(true);
+                onUpdate({ ...defaultConfig, useDashboardDateRange: true });
+                return;
+              }
+
+              setUseDashboardDateRange(false);
               const newMode =
                 timeRangeMode === 'static' ? 'sliding-window' : 'static';
               const [newStart, newEnd] = calculateTimeRange(
@@ -767,6 +812,7 @@ function QueryItem({
                 newStart,
                 newEnd,
                 newMode,
+                false,
               );
             }}
           >
@@ -774,6 +820,7 @@ function QueryItem({
           </Button>
           {isDateRangePickerReady ? (
             <DateRangePicker
+              isDisabled={isUsingDashboardDateRange}
               start={pickerStartDate}
               end={pickerEndDate}
               minDate={earliestMonth}
@@ -809,6 +856,7 @@ function QueryItem({
                 const [normalizedStart, normalizedEnd] =
                   normalizeMonthPickerSelectionForQuery(newStart, newEnd);
 
+                setUseDashboardDateRange(false);
                 setStartDate(normalizedStart);
                 setEndDate(normalizedEnd);
                 sendUpdate(
@@ -817,6 +865,7 @@ function QueryItem({
                   normalizedStart,
                   normalizedEnd,
                   'static',
+                  false,
                 );
               }}
             />
@@ -831,7 +880,7 @@ function QueryItem({
           )}
         </View>
 
-        {presetTimeRangeLabel ? (
+        {!isUsingDashboardDateRange && presetTimeRangeLabel ? (
           <Input
             value={presetTimeRangeLabel}
             readOnly

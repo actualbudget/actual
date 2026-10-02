@@ -33,11 +33,11 @@ import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
-import { calculateTimeRange } from '#components/reports/reportRanges';
 import { summarySpreadsheet } from '#components/reports/spreadsheets/summary-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { FieldSelect } from '#components/rules/RuleEditor';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -69,6 +69,8 @@ type SummaryInnerProps = {
 type FilterObject = ReturnType<typeof useRuleConditionFilters>;
 
 function SummaryInner({ widget }: SummaryInnerProps) {
+  const { resolve: resolveTimeRange, isUsingDashboardRange } =
+    useDashboardReportTimeRange(widget);
   const locale = useLocale();
   const { t } = useTranslation();
   const format = useFormat();
@@ -112,7 +114,6 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       ? (content?.divisorConditionsOp ?? 'and')
       : 'and',
   );
-
   const params = useMemo(
     () =>
       summarySpreadsheet(
@@ -123,14 +124,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         content,
         locale,
       ),
-    [
-      start,
-      end,
-      dividendFilters.conditions,
-      dividendFilters.conditionsOp,
-      content,
-      locale,
-    ],
+    [start, end, dividendFilters, content, locale],
   );
 
   const data = useReport('summary', params);
@@ -209,7 +203,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
 
   useEffect(() => {
     if (latestTransaction) {
-      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+      const [initialStart, initialEnd, initialMode] = resolveTimeRange(
         widget?.meta?.timeFrame,
         {
           start: monthUtils.dayFromDate(monthUtils.currentMonth()),
@@ -222,7 +216,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       setEnd(initialEnd);
       setMode(initialMode);
     }
-  }, [latestTransaction, widget?.meta?.timeFrame]);
+  }, [latestTransaction, widget?.meta?.timeFrame, resolveTimeRange]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -284,11 +278,13 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             ...(widget.meta ?? {}),
             conditions: dividendFilters.conditions,
             conditionsOp: dividendFilters.conditionsOp,
-            timeFrame: {
-              start,
-              end,
-              mode,
-            },
+            timeFrame: isUsingDashboardRange
+              ? widget.meta?.timeFrame
+              : {
+                  start,
+                  end,
+                  mode,
+                },
             content: JSON.stringify(content),
           },
         },

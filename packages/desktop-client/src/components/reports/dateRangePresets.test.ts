@@ -11,6 +11,28 @@ describe('buildDateRangePresets', () => {
   const mockOnSelectRange = vi.fn();
   const mockT = (text: string) => text;
 
+  it('uses the dashboard reference date for live presets', () => {
+    const presets = buildDateRangePresets({
+      t: mockT,
+      onSelectRange: mockOnSelectRange,
+      earliestTransaction: EARLIEST_TRANSACTION,
+      latestTransaction: '2026-12-31',
+      referenceDate: '2026-08-31',
+      show1Month: true,
+    });
+    expect(presets.find(p => p.key === '1-month')?.getRange()).toEqual([
+      '2026-08',
+      '2026-08',
+    ]);
+    expect(presets.find(p => p.key === 'current-quarter')?.getRange()).toEqual([
+      '2026-07',
+      '2026-09',
+    ]);
+    expect(presets.find(p => p.key === 'previous-quarter')?.getRange()).toEqual(
+      ['2026-04', '2026-06'],
+    );
+  });
+
   describe('past presets (default, non-future)', () => {
     it('builds 1-month preset when show1Month is true', () => {
       const presets = buildDateRangePresets({

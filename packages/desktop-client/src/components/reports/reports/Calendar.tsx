@@ -40,7 +40,6 @@ import { DateRange } from '#components/reports/DateRange';
 import { CalendarGraph } from '#components/reports/graphs/CalendarGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
-import { calculateTimeRange } from '#components/reports/reportRanges';
 import { calendarSpreadsheet } from '#components/reports/spreadsheets/calendar-spreadsheet';
 import type { CalendarDataType } from '#components/reports/spreadsheets/calendar-spreadsheet';
 import { useReport } from '#components/reports/useReport';
@@ -50,6 +49,7 @@ import { TransactionList } from '#components/transactions/TransactionList';
 import { useAccounts } from '#hooks/useAccounts';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { DisplayPayeeProvider } from '#hooks/useDisplayPayee';
@@ -93,6 +93,8 @@ type CalendarInnerProps = {
 };
 
 function CalendarInner({ widget, parameters }: CalendarInnerProps) {
+  const { resolve: resolveTimeRange, isUsingDashboardRange } =
+    useDashboardReportTimeRange(widget);
   const locale = useLocale();
   const { t } = useTranslation();
   const format = useFormat();
@@ -134,7 +136,6 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     widget?.meta?.conditions,
     widget?.meta?.conditionsOp,
   );
-
   useEffect(() => {
     const day = parameters.get('day');
     const month = parameters.get('month');
@@ -301,7 +302,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
   useEffect(() => {
     if (latestTransaction) {
-      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+      const [initialStart, initialEnd, initialMode] = resolveTimeRange(
         widget?.meta?.timeFrame,
         {
           start: monthUtils.dayFromDate(monthUtils.currentMonth()),
@@ -314,7 +315,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       setEnd(initialEnd);
       setMode(initialMode);
     }
-  }, [latestTransaction, widget?.meta?.timeFrame]);
+  }, [latestTransaction, widget?.meta?.timeFrame, resolveTimeRange]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -360,11 +361,13 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
             ...(widget.meta ?? {}),
             conditions,
             conditionsOp,
-            timeFrame: {
-              start,
-              end,
-              mode,
-            },
+            timeFrame: isUsingDashboardRange
+              ? widget.meta?.timeFrame
+              : {
+                  start,
+                  end,
+                  mode,
+                },
           },
         },
       },

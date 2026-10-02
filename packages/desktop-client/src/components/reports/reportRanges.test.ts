@@ -7,6 +7,7 @@ import {
   calculateTimeRange,
   getFullFutureRange,
   getLatestRange,
+  getSpecificRange,
 } from './reportRanges';
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'
@@ -60,6 +61,44 @@ describe('calculateTimeRange', () => {
     expect(end).toBe('2017-01-01'); // currentDay() in test mode
     expect(start).toBe('2016-12-18'); // width of 14 days preserved
     expect(mode).toBe('sliding-window');
+  });
+
+  it('anchors live month and preset ranges to an explicit date', () => {
+    expect(
+      calculateTimeRange(
+        { start: '2025-01', end: '2025-06', mode: 'sliding-window' },
+        undefined,
+        undefined,
+        '2026-08-31',
+      ),
+    ).toEqual(['2026-03', '2026-08', 'sliding-window']);
+    expect(
+      calculateTimeRange(
+        { start: '', end: '', mode: 'yearToDate' },
+        undefined,
+        undefined,
+        '2026-08-31',
+      ),
+    ).toEqual(['2026-01', '2026-08', 'yearToDate']);
+  });
+
+  it('anchors quarter ranges to the dashboard reference date', () => {
+    expect(
+      calculateTimeRange(
+        { start: '', end: '', mode: 'currentQuarter' },
+        undefined,
+        undefined,
+        '2026-08-31',
+      ),
+    ).toEqual(['2026-07', '2026-09', 'currentQuarter']);
+    expect(
+      calculateTimeRange(
+        { start: '', end: '', mode: 'previousQuarter' },
+        undefined,
+        undefined,
+        '2026-08-31',
+      ),
+    ).toEqual(['2026-04', '2026-06', 'previousQuarter']);
   });
 
   it('keeps current quarter as a live time range when restoring a saved widget', () => {
@@ -139,6 +178,15 @@ describe('calculateSpendingReportTimeRange', () => {
     expect(compare).toBe('2017-01');
     expect(compareTo).toBe('2017-01');
   });
+
+  it('uses an explicit reference month for a live report without saved dates', () => {
+    expect(
+      calculateSpendingReportTimeRange(
+        { isLive: true, mode: 'single-month' },
+        '2026-08-31',
+      ),
+    ).toEqual(['2026-08', '2026-07']);
+  });
 });
 
 describe('getFullFutureRange', () => {
@@ -180,6 +228,29 @@ describe('boundMonthRange', () => {
   it('collapses to a single month when the bounded end is before start', () => {
     expect(boundMonthRange('2026-08', '2026-09', '2026-09', '2026-07')).toEqual(
       ['2026-09', '2026-09'],
+    );
+  });
+});
+
+describe('month-shaped dashboard references', () => {
+  it.each([
+    ['2026-08', '2026-08-17', '2026-08-31'],
+    ['2017-01', '2016-12-18', '2017-01-01'],
+    ['2024-02', '2024-02-15', '2024-02-29'],
+  ])('keeps a day window anchored to %s', (reference, start, end) => {
+    expect(
+      calculateTimeRange(
+        { start: '2016-12-15', end: '2016-12-29', mode: 'sliding-window' },
+        undefined,
+        undefined,
+        reference,
+      ),
+    ).toEqual([start, end, 'sliding-window']);
+  });
+
+  it('anchors weekly ranges to the end of a historical month', () => {
+    expect(getSpecificRange(1, null, 'Week', '0', '2026-08')).toEqual(
+      getSpecificRange(1, null, 'Week', '0', '2026-08-31'),
     );
   });
 });

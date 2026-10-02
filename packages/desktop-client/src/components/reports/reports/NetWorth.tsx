@@ -32,11 +32,11 @@ import { NetWorthGraph } from '#components/reports/graphs/NetWorthGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportOptions } from '#components/reports/ReportOptions';
-import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '#components/reports/spreadsheets/net-worth-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { useAccounts } from '#hooks/useAccounts';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
@@ -67,6 +67,8 @@ type NetWorthInnerProps = {
 };
 
 function NetWorthInner({ widget }: NetWorthInnerProps) {
+  const { resolve: resolveTimeRange, isUsingDashboardRange } =
+    useDashboardReportTimeRange(widget);
   const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -121,7 +123,6 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   );
 
   const [latestTransaction, setLatestTransaction] = useState('');
-
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -208,7 +209,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
 
   useEffect(() => {
     if (latestTransaction) {
-      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+      const [initialStart, initialEnd, initialMode] = resolveTimeRange(
         widget?.meta?.timeFrame,
         undefined,
         latestTransaction,
@@ -217,7 +218,12 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
       setEnd(initialEnd);
       setModeAndInterval(initialMode);
     }
-  }, [latestTransaction, widget?.meta?.timeFrame, setModeAndInterval]);
+  }, [
+    latestTransaction,
+    widget?.meta?.timeFrame,
+    setModeAndInterval,
+    resolveTimeRange,
+  ]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
@@ -242,11 +248,13 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
             conditionsOp,
             interval,
             mode: graphMode,
-            timeFrame: {
-              start,
-              end,
-              mode,
-            },
+            timeFrame: isUsingDashboardRange
+              ? widget.meta?.timeFrame
+              : {
+                  start,
+                  end,
+                  mode,
+                },
           },
         },
       },

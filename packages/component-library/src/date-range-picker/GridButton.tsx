@@ -10,6 +10,8 @@ type GridButtonProps = {
   disabled: boolean;
   /** Marks the current month/day so it stands out even when not selected. */
   isToday?: boolean;
+  /** Marks an externally referenced current month. */
+  isReferenceDate?: boolean;
   /** Where the cell falls in the range band (or the hover preview). */
   position?: RangePosition;
   /** Full accessible name (e.g. the complete localized date). */
@@ -24,6 +26,7 @@ export function GridButton({
   selected,
   disabled,
   isToday = false,
+  isReferenceDate = false,
   position = null,
   label,
   onSelect,
@@ -38,6 +41,7 @@ export function GridButton({
       isDisabled={disabled}
       aria-label={label}
       aria-pressed={selected}
+      aria-current={isToday || isReferenceDate ? 'date' : undefined}
       onPress={onSelect}
       onHoverStart={onHover}
       style={{
@@ -51,6 +55,12 @@ export function GridButton({
           fontWeight: 'bold',
           // Inset ring marks the current period without shifting layout.
           boxShadow: `inset 0 0 0 1px ${theme.pageTextPositive}`,
+          ...(!selected && { color: theme.pageTextPositive }),
+        }),
+        ...(isReferenceDate && {
+          fontWeight: 'bold',
+          outline: `1px dashed ${theme.pageTextPositive}`,
+          outlineOffset: -2,
           ...(!selected && { color: theme.pageTextPositive }),
         }),
         ...(inRange &&
