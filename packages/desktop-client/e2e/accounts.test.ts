@@ -42,22 +42,29 @@ test.describe('Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('creates an account using the recorded currency precision', async () => {
-    await navigation.goToSettingsPage();
-    await page.locator('#default-currency-select').click();
-    await page.getByRole('button', { name: 'JPY - Japanese Yen (¥)' }).click();
-    await page
-      .getByRole('dialog')
-      .getByRole('button', { name: 'Confirm precision change' })
-      .click();
+  for (const [currency, name, balance, displayed] of [
+    ['JPY - Japanese Yen (¥)', 'Yen Account', 123.45, '123'],
+    ['BHD - Bahraini Dinar (BHD)', 'Dinar Account', 123.456, '123.456'],
+  ] as const) {
+    test(`creates an account using the recorded precision for ${currency}`, async () => {
+      await navigation.goToSettingsPage();
+      await page.locator('#default-currency-select').click();
+      await page.getByRole('button', { name: currency }).click();
+      await page
+        .getByRole('dialog')
+        .getByRole('button', { name: 'Confirm precision change' })
+        .click();
 
-    accountPage = await navigation.createAccount({
-      name: 'Yen Account',
-      offBudget: false,
-      balance: 123.45,
+      accountPage = await navigation.createAccount({
+        name,
+        offBudget: false,
+        balance,
+      });
+      await expect(accountPage.getNthTransaction(0).credit).toHaveText(
+        displayed,
+      );
     });
-    await expect(accountPage.getNthTransaction(0).credit).toHaveText('123');
-  });
+  }
 
   test('account register widens amount columns for large balances', async () => {
     accountPage = await navigation.createAccount({

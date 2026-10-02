@@ -25,6 +25,7 @@ export function useCurrencyOptions() {
         ['ARS', t('Argentinian Peso')],
         ['AUD', t('Australian Dollar')],
         ['BDT', t('Bangladeshi Taka')],
+        ['BHD', t('Bahraini Dinar')],
         ['BRL', t('Brazilian Real')],
         ['BYN', t('Belarusian Ruble')],
         ['CAD', t('Canadian Dollar')],
