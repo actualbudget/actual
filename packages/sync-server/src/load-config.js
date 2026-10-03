@@ -23,10 +23,20 @@ const defaultDataDir = process.env.ACTUAL_DATA_DIR
 
 debug(`Project root: '${projectRoot}'`);
 
-const actualAppWebBuildPath = path.join(
-  path.dirname(require.resolve('@actual-app/web/package.json')),
-  'build',
-);
+function resolveWebBuildPath() {
+  try {
+    return path.join(
+      path.dirname(require.resolve('@actual-app/web/package.json')),
+      'build',
+    );
+  } catch {
+    // Not resolvable when the web build is served separately (e.g. Cloudflare
+    // Workers static assets).
+    return '';
+  }
+}
+
+const actualAppWebBuildPath = resolveWebBuildPath();
 debug(`Actual web build path: '${actualAppWebBuildPath}'`);
 
 // Custom formats
