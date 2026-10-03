@@ -43,6 +43,7 @@ import { FiltersStack } from '#components/filters/FiltersStack';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 import { NotesButton } from '#components/NotesButton';
 import { SelectedTransactionsButton } from '#components/transactions/SelectedTransactionsButton';
+import { BudgetCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocale } from '#hooks/useLocale';
@@ -320,15 +321,18 @@ export function AccountHeader({
             />
           </View>
 
-          <BalanceHistoryGraph
-            ref={graphRef}
-            accountId={accountId}
-            style={{
-              height: 'calc(5vh + 5vw)',
-              margin: 0,
-              display: showNetWorthChart ? 'flex' : 'none',
-            }}
-          />
+          {/* The history graph charts stored base amounts. */}
+          <BudgetCurrencyFormat>
+            <BalanceHistoryGraph
+              ref={graphRef}
+              accountId={accountId}
+              style={{
+                height: 'calc(5vh + 5vw)',
+                margin: 0,
+                display: showNetWorthChart ? 'flex' : 'none',
+              }}
+            />
+          </BudgetCurrencyFormat>
         </View>
         <SpaceBetween gap={10} style={{ marginTop: 12 }}>
           {canSync && (
@@ -368,8 +372,11 @@ export function AccountHeader({
             </Button>
           )}
           <View style={{ flexShrink: 0 }}>
-            {/* @ts-expect-error fix me */}
-            <FilterButton onApply={onApplyFilter} />
+            {/* Filters match stored base amounts, so they use budget format. */}
+            <BudgetCurrencyFormat>
+              {/* @ts-expect-error fix me */}
+              <FilterButton onApply={onApplyFilter} />
+            </BudgetCurrencyFormat>
           </View>
           <View style={{ flex: 1 }} />
 
@@ -563,17 +570,19 @@ export function AccountHeader({
           )}
         </SpaceBetween>
         {filterConditions?.length > 0 && (
-          <FiltersStack
-            conditions={filterConditions}
-            conditionsOp={filterConditionsOp}
-            onUpdateFilter={onUpdateFilter}
-            onDeleteFilter={onDeleteFilter}
-            onClearFilters={onClearFilters}
-            onReloadSavedFilter={onReloadSavedFilter}
-            filterId={filterId}
-            savedFilters={savedFilters}
-            onConditionsOpChange={onConditionsOpChange}
-          />
+          <BudgetCurrencyFormat>
+            <FiltersStack
+              conditions={filterConditions}
+              conditionsOp={filterConditionsOp}
+              onUpdateFilter={onUpdateFilter}
+              onDeleteFilter={onDeleteFilter}
+              onClearFilters={onClearFilters}
+              onReloadSavedFilter={onReloadSavedFilter}
+              filterId={filterId}
+              savedFilters={savedFilters}
+              onConditionsOpChange={onConditionsOpChange}
+            />
+          </BudgetCurrencyFormat>
         )}
       </View>
       {reconcileAmount != null && (
