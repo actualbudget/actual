@@ -273,6 +273,101 @@ describe('schedules', () => {
       // Should not crash; schedule with past end date produces its next_date entry only
       expect(result).toBeDefined();
     });
+
+    describe('endDate', () => {
+      function makeSchedule(
+        overrides: Partial<ScheduleEntity> &
+          Pick<ScheduleEntity, 'id' | 'next_date' | '_conditions'>,
+      ): ScheduleEntity {
+        return {
+          rule: 'rule-1',
+          completed: false,
+          posts_transaction: false,
+          tombstone: false,
+          _payee: 'payee-1',
+          _account: 'acct-1',
+          _amount: -10000,
+          _amountOp: 'is',
+          _date: overrides.next_date,
+          _actions: [],
+          ...overrides,
+        };
+      }
+
+      const monthlySchedule = makeSchedule({
+        id: 'sched-monthly',
+        next_date: '2017-01-05',
+        _conditions: [
+          {
+            field: 'date',
+            op: 'isapprox',
+            value: { start: '2017-01-05', frequency: 'monthly' },
+          },
+        ],
+      });
+
+      it('generates previews up to endDate instead of the upcoming length', () => {
+        const statuses: ScheduleStatuses = new Map([
+          ['sched-monthly', 'upcoming'],
+        ]);
+        const result = computeSchedulePreviewTransactions(
+          [monthlySchedule],
+          statuses,
+          '7',
+          undefined,
+          '2017-04-30',
+        );
+
+        expect(result.map(r => r.date).sort()).toEqual([
+          '2017-01-05',
+          '2017-02-05',
+          '2017-03-05',
+          '2017-04-05',
+        ]);
+      });
+
+      it('includes schedules outside the upcoming length that start before endDate', () => {
+        const schedule = makeSchedule({
+          id: 'sched-once',
+          next_date: '2017-03-10',
+          _conditions: [{ field: 'date', op: 'is', value: '2017-03-10' }],
+        });
+        const statuses: ScheduleStatuses = new Map([
+          ['sched-once', 'scheduled'],
+        ]);
+
+        expect(
+          computeSchedulePreviewTransactions([schedule], statuses, '7'),
+        ).toHaveLength(0);
+        expect(
+          computeSchedulePreviewTransactions(
+            [schedule],
+            statuses,
+            '7',
+            undefined,
+            '2017-03-31',
+          ).map(r => r.date),
+        ).toEqual(['2017-03-10']);
+      });
+
+      it('never returns previews after endDate', () => {
+        const statuses: ScheduleStatuses = new Map([
+          ['sched-monthly', 'upcoming'],
+        ]);
+        const result = computeSchedulePreviewTransactions(
+          [monthlySchedule],
+          statuses,
+          '1-year',
+          undefined,
+          '2017-02-10',
+        );
+
+        expect(result.map(r => r.date).sort()).toEqual([
+          '2017-01-05',
+          '2017-02-05',
+        ]);
+      });
+    });
   });
 
   describe('getHasTransactionsQuery', () => {

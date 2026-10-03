@@ -26,6 +26,10 @@ type UsePreviewTransactionsProps = {
      * This is ignored if `calculateRunningBalances` is false.
      */
     startingBalance?: IntegerAmount;
+    /**
+     * Generate previews up to this date instead of the upcoming length.
+     */
+    endDate?: string;
   };
 };
 
@@ -83,8 +87,16 @@ export function usePreviewTransactions({
       statuses,
       upcomingLength,
       filter,
+      options?.endDate,
     );
-  }, [filter, isSchedulesLoading, schedules, statuses, upcomingLength]);
+  }, [
+    filter,
+    isSchedulesLoading,
+    schedules,
+    statuses,
+    upcomingLength,
+    options?.endDate,
+  ]);
 
   useEffect(() => {
     let isUnmounted = false;
