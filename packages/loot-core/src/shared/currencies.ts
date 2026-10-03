@@ -53,6 +53,7 @@ export const currencies: Currency[] = [
   { code: 'MKD', name: 'Macedonian Denar', symbol: 'ден', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   { code: 'MXN', name: 'Mexican Peso', symbol: '$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'MYR', name: 'Malaysian Ringgit', symbol: 'RM', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'PEN', name: 'Peruvian Sol', symbol: 'S/', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'PHP', name: 'Philippine Peso', symbol: '₱', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'PKR', name: 'Pakistani Rupee', symbol: 'Rs.', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'PLN', name: 'Polish Złoty', symbol: 'zł', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },

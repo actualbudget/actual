@@ -270,7 +270,7 @@ export function SelectLinkedAccountsModal({
     initiallyChosenAccounts,
   );
   const [customStartingDates, setCustomStartingDates] = useState<
-    Record<string, StartingBalanceInfo>
+    Record<string, CustomStartingSettings>
   >({});
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
@@ -308,13 +308,9 @@ export function SelectLinkedAccountsModal({
         }
 
         // Finally link the matched account
-        const customSettings = customStartingDates[chosenExternalAccountId];
-        const startingDate =
-          customSettings?.date && customSettings.date.trim() !== ''
-            ? customSettings.date
-            : undefined;
-        const startingBalance =
-          customSettings?.amount != null ? customSettings.amount : undefined;
+        const { startingDate, startingBalance } = resolveStartingSettings(
+          customStartingDates[chosenExternalAccountId],
+        );
 
         if (propsWithSortedExternalAccounts.syncSource === 'simpleFin') {
           linkAccountSimpleFin.mutate({
@@ -459,11 +455,8 @@ export function SelectLinkedAccountsModal({
   };
 
   // Memoize default starting settings to avoid repeated calculations
-  const defaultStartingSettings = useMemo<StartingBalanceInfo>(
-    () => ({
-      date: subDays(currentDay(), 89),
-      amount: 0,
-    }),
+  const defaultStartingSettings = useMemo<CustomStartingSettings>(
+    () => getDefaultStartingSettings(),
     [],
   );
 
@@ -471,13 +464,12 @@ export function SelectLinkedAccountsModal({
     if (customStartingDates[accountId]) {
       return customStartingDates[accountId];
     }
-    // Default to 89 days ago (90 days inclusive, matches server default)
     return defaultStartingSettings;
   };
 
   const setCustomStartingDate = (
     accountId: string,
-    settings: StartingBalanceInfo,
+    settings: CustomStartingSettings,
   ) => {
     setCustomStartingDates(prev => ({
       ...prev,
@@ -659,6 +651,40 @@ type StartingBalanceInfo = {
   amount: number;
 };
 
+// The starting balance the user typed into the link modal. `amount` stays
+// undefined until they actually edit it, so that only touching the date does
+// not send a starting balance of 0 to the server - which would override the
+// balance the bank reports.
+type CustomStartingSettings = {
+  date: string;
+  amount?: number;
+};
+
+/**
+ * The settings a row starts with. The balance is deliberately absent: the
+ * server derives the opening balance from the bank unless one is supplied, so
+ * defaulting it to 0 here would silently override the real balance for anyone
+ * who only adjusts the date.
+ */
+export function getDefaultStartingSettings(): CustomStartingSettings {
+  // Default to 89 days ago (90 days inclusive, matches server default)
+  return { date: subDays(currentDay(), 89) };
+}
+
+/**
+ * Turn the row's draft settings into the arguments sent when linking. Anything
+ * the user did not fill in stays undefined so the server keeps its own default.
+ */
+export function resolveStartingSettings(
+  settings: CustomStartingSettings | undefined,
+): { startingDate?: string; startingBalance?: number } {
+  return {
+    startingDate:
+      settings?.date && settings.date.trim() !== '' ? settings.date : undefined,
+    startingBalance: settings?.amount != null ? settings.amount : undefined,
+  };
+}
+
 type SharedAccountRowProps = {
   externalAccount: ExternalAccount;
   chosenAccount: { id: string; name: string } | undefined;
@@ -672,10 +698,10 @@ type SharedAccountRowProps = {
 };
 
 type TableRowProps = SharedAccountRowProps & {
-  customStartingDate: StartingBalanceInfo;
+  customStartingDate: CustomStartingSettings;
   onSetCustomStartingDate: (
     accountId: string,
-    settings: StartingBalanceInfo,
+    settings: CustomStartingSettings,
   ) => void;
   showStartingOptions: boolean;
 };
@@ -892,10 +918,10 @@ function getInstitutionName(
 type StartingOptionsFieldsProps = {
   accountId: string;
   externalBalance: number | null | undefined;
-  customStartingDate: StartingBalanceInfo;
+  customStartingDate: CustomStartingSettings;
   onSetCustomStartingDate: (
     accountId: string,
-    settings: StartingBalanceInfo,
+    settings: CustomStartingSettings,
   ) => void;
   layout: 'inline' | 'stacked';
 };
@@ -929,7 +955,7 @@ function StartingOptionsFields({
         {/* Starting Balance */}
         <Field width={120} truncate={false} style={{ textAlign: 'right' }}>
           <AmountInput
-            value={customStartingDate.amount}
+            value={customStartingDate.amount ?? 0}
             zeroSign={zeroSign}
             onUpdate={amount =>
               onSetCustomStartingDate(accountId, {
@@ -987,7 +1013,7 @@ function StartingOptionsFields({
             <Trans>Balance on that date:</Trans>
           </Text>
           <AmountInput
-            value={customStartingDate.amount}
+            value={customStartingDate.amount ?? 0}
             zeroSign={zeroSign}
             onUpdate={amount =>
               onSetCustomStartingDate(accountId, {
@@ -1004,10 +1030,10 @@ function StartingOptionsFields({
 }
 
 type AccountCardProps = SharedAccountRowProps & {
-  customStartingDate: StartingBalanceInfo;
+  customStartingDate: CustomStartingSettings;
   onSetCustomStartingDate: (
     accountId: string,
-    settings: StartingBalanceInfo,
+    settings: CustomStartingSettings,
   ) => void;
 };
 

@@ -8,6 +8,7 @@ import {
   useDragAndDrop,
 } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
+import { Navigate, useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -41,6 +42,9 @@ import type { Binding, SheetFields } from '#spreadsheet';
 import * as bindings from '#spreadsheet/bindings';
 
 const ROW_HEIGHT = 60;
+
+// Virtual account id for the all-accounts transaction list (/accounts/all)
+export const ALL_ACCOUNTS_ID = 'all';
 
 type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
   id: string;
@@ -363,7 +367,7 @@ function AllAccountList({
             style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
           >
             <AccountHeader
-              id="all"
+              id={ALL_ACCOUNTS_ID}
               name={t('All accounts')}
               amount={getAllAccountsBalance()}
             />
@@ -541,6 +545,7 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
 AccountList.displayName = 'AccountList';
 
 export function AccountsPage() {
+  const location = useLocation();
   const dispatch = useDispatch();
   const { data: accounts = [] } = useAccounts();
   const [_numberFormat] = useSyncedPref('numberFormat');
@@ -564,6 +569,19 @@ export function AccountsPage() {
   const onSync = useCallback(async () => {
     syncAndDownload.mutate({});
   }, [syncAndDownload]);
+
+  // Drill-downs (e.g. report activity) land on /accounts with filter
+  // conditions in the location state; show them as filtered transactions.
+  const filterConditions = location?.state?.filterConditions || [];
+  if (filterConditions.length > 0) {
+    return (
+      <Navigate
+        to={`/accounts/${ALL_ACCOUNTS_ID}`}
+        state={location.state}
+        replace
+      />
+    );
+  }
 
   return (
     <View style={{ flex: 1 }}>
