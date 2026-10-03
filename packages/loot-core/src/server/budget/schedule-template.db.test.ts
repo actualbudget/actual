@@ -306,6 +306,57 @@ describe('runScheduleForecast against a real database', () => {
     expect(result.to_budget).toBe(2500);
   });
 
+  it('asks a past month for the same amount before and after a schedule completes', async () => {
+    // Oct 3, re-running August. Bill A posted Oct 1 and was completed.
+    // From August, that payment is still a $100 outflow two months out,
+    // alongside Bill B's $90 three months out: $190 over four months.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-03');
+    const { category, payBill, templates, scheduleIds } =
+      await setUpOneTimeBills();
+    await payBill('Bill A', '2026-10-01', -10000);
+    await updateSchedule({
+      schedule: { id: scheduleIds['Bill A'], completed: true },
+    });
+
+    const result = await runScheduleForecast(
+      templates,
+      '2026-08',
+      0,
+      0,
+      0,
+      [],
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(4750);
+  });
+
+  it('counts a completed schedule payment dated later this month', async () => {
+    // Oct 3: Bill A was entered for Oct 20 and marked completed by hand.
+    // The payment is still ahead of today, so October has to cover it.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-03');
+    const { category, payBill, templates, scheduleIds } =
+      await setUpOneTimeBills();
+    await payBill('Bill A', '2026-10-20', -10000);
+    await updateSchedule({
+      schedule: { id: scheduleIds['Bill A'], completed: true },
+    });
+
+    const result = await runScheduleForecast(
+      [templates[0]],
+      '2026-10',
+      7500,
+      7500,
+      0,
+      [],
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(2500);
+  });
+
   it('reserves nothing for a completed schedule when budgeting ahead', async () => {
     // Oct 3, budgeting November. Bill A completed, its payment already in
     // the carry-in. Only Bill B is left to cover.
