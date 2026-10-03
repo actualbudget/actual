@@ -60,6 +60,10 @@ export function AccountTransactions({
   );
 }
 
+// One page of useTransactions, so a filtered list fills the screen the way an
+// unfiltered first page does.
+const MIN_VISIBLE_TRANSACTIONS = 50;
+
 function TransactionListWithPreviews({
   account,
 }: {
@@ -83,16 +87,24 @@ function TransactionListWithPreviews({
     : parsedReconcileAmount;
   const isReconciling = reconcileAmount != null;
 
+  const hideReconciledTransactions =
+    hideReconciled === 'true' && !isReconciling;
+  // Like the desktop account view: while running balances are shown, hidden
+  // reconciled transactions are still loaded so the balance walk sees every
+  // transaction, and they are dropped when rendering instead.
+  const filterReconciledInQuery =
+    hideReconciledTransactions && showRunningBalances !== 'true';
+
   const baseTransactionsQuery = useCallback(() => {
     let query = queries
       .transactions(account.id)
       .options({ splits: 'all' })
       .select('*');
-    if (hideReconciled === 'true' && !isReconciling) {
+    if (filterReconciledInQuery) {
       query = query.filter({ reconciled: { $eq: false } });
     }
     return query;
-  }, [account.id, hideReconciled, isReconciling]);
+  }, [account.id, filterReconciledInQuery]);
   const [transactionsQuery, setTransactionsQuery] = useState<Query>(
     baseTransactionsQuery(),
   );
@@ -137,6 +149,8 @@ function TransactionListWithPreviews({
     runningBalances,
     isPending: isTransactionsLoading,
     isFetchingNextPage: isLoadingMoreTransactions,
+    isFetchNextPageError: hasLoadingMoreTransactionsFailed,
+    hasNextPage: hasMoreTransactions,
     fetchNextPage: fetchMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
@@ -171,6 +185,43 @@ function TransactionListWithPreviews({
       ]),
     [runningBalances, previewRunningBalances],
   );
+
+  const visibleTransactions = useMemo(
+    () =>
+      transactions.filter(
+        t =>
+          !(hideReconciledTransactions && t.reconciled) &&
+          // Do not render child transactions in the list, unless searching
+          (isSearching || !t.is_child),
+      ),
+    [transactions, hideReconciledTransactions, isSearching],
+  );
+
+  // The next page loads when the list is scrolled to its end. Dropping
+  // reconciled rows after loading can leave too few rows to scroll, so keep
+  // loading until a page's worth is visible or nothing is left.
+  useEffect(() => {
+    if (
+      hideReconciledTransactions &&
+      !filterReconciledInQuery &&
+      !isTransactionsLoading &&
+      !isLoadingMoreTransactions &&
+      !hasLoadingMoreTransactionsFailed &&
+      hasMoreTransactions &&
+      visibleTransactions.length < MIN_VISIBLE_TRANSACTIONS
+    ) {
+      void fetchMoreTransactions();
+    }
+  }, [
+    hideReconciledTransactions,
+    filterReconciledInQuery,
+    isTransactionsLoading,
+    isLoadingMoreTransactions,
+    hasLoadingMoreTransactionsFailed,
+    hasMoreTransactions,
+    visibleTransactions.length,
+    fetchMoreTransactions,
+  ]);
 
   useEffect(() => {
     if (account.id) {
@@ -301,9 +352,8 @@ function TransactionListWithPreviews({
   const previewTransactionsToDisplay = isReconciling ? [] : previewTransactions;
 
   const transactionsToDisplay = !isSearching
-    ? // Do not render child transactions in the list, unless searching
-      previewTransactionsToDisplay.concat(transactions.filter(t => !t.is_child))
-    : transactions;
+    ? previewTransactionsToDisplay.concat(visibleTransactions)
+    : visibleTransactions;
 
   return (
     <>
