@@ -14,12 +14,17 @@ import type { ImportableBudgetType } from '@actual-app/core/server/importers/ind
 import type { Query } from '@actual-app/core/shared/query';
 import type { ImportTransactionsOpts } from '@actual-app/core/types/api-handlers';
 import type {
+  DashboardPageEntity,
+  DashboardWidgetEntity,
   ImportTransactionEntity,
   NoteEntity,
   RuleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+import type { EverythingButIdOptional } from '@actual-app/core/types/util';
+
+import { q } from './app/query';
 
 export { q } from './app/query';
 
@@ -454,4 +459,97 @@ export function setPreference<T extends keyof SyncedPrefs>(
   value: SyncedPrefs[T] | undefined,
 ): Promise<void> {
   return send('preferences/save', { id, value });
+}
+
+export async function getDashboardPages(): Promise<DashboardPageEntity[]> {
+  const result = (await aqlQuery(q('dashboard_pages').select('*'))) as {
+    data: DashboardPageEntity[];
+  };
+  return result.data.map(page => ({
+    ...page,
+    name: page.name ?? '',
+  }));
+}
+
+export function createDashboardPage(name: string) {
+  return send('dashboard-create', { name });
+}
+
+export function renameDashboardPage(id: string, name: string) {
+  return send('dashboard-rename', { id, name });
+}
+
+export function deleteDashboardPage(id: string) {
+  return send('dashboard-delete', id);
+}
+
+export function resetDashboard(id: string) {
+  return send('dashboard-reset', id);
+}
+
+export async function getDashboardWidgets(
+  pageId?: string,
+): Promise<DashboardWidgetEntity[]> {
+  let query = q('dashboard').select('*');
+  if (pageId) {
+    query = query.filter({ dashboard_page_id: pageId });
+  }
+  const result = (await aqlQuery(query)) as {
+    data: (DashboardWidgetEntity & {
+      meta?: string | Record<string, unknown>;
+    })[];
+  };
+  return result.data.map(widget => ({
+    ...widget,
+    meta:
+      typeof widget.meta === 'string' ? JSON.parse(widget.meta) : widget.meta,
+  })) as DashboardWidgetEntity[];
+}
+
+export type AddDashboardWidgetInput = Omit<
+  DashboardWidgetEntity,
+  'id' | 'tombstone' | 'meta' | 'x' | 'y' | 'dashboard_page_id'
+> &
+  ({ x: number; y: number } | { x?: never; y?: never }) & {
+    meta?: Record<string, unknown> | null;
+    dashboard_page_id?: string;
+    id?: string;
+  };
+
+export async function addDashboardWidget(widget: AddDashboardWidgetInput) {
+  let dashboardPageId = widget.dashboard_page_id;
+  if (!dashboardPageId) {
+    const pages = await getDashboardPages();
+    if (pages.length > 0) {
+      dashboardPageId = pages[0].id;
+    }
+  }
+  if (!dashboardPageId) {
+    throw new Error('No dashboard page found to add widget to');
+  }
+  return send('dashboard-add-widget', {
+    meta: null,
+    ...widget,
+    dashboard_page_id: dashboardPageId,
+  });
+}
+
+export function updateDashboardWidget(
+  widget: EverythingButIdOptional<Omit<DashboardWidgetEntity, 'tombstone'>>,
+) {
+  return send('dashboard-update-widget', widget);
+}
+
+export function removeDashboardWidget(id: string) {
+  return send('dashboard-remove-widget', id);
+}
+
+export function updateDashboard(
+  widgets: EverythingButIdOptional<Omit<DashboardWidgetEntity, 'tombstone'>>[],
+) {
+  return send('dashboard-update', widgets);
+}
+
+export function copyDashboardWidget(id: string, targetDashboardPageId: string) {
+  return send('dashboard-copy-widget', { id, targetDashboardPageId });
 }
