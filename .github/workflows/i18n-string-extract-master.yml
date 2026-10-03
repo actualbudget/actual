@@ -43,6 +43,11 @@ jobs:
           cat > "$HOME/.config/weblate" <<EOF
           [keys]
           https://hosted.weblate.org/api/ = ${WEBLATE_API_KEY}
+          [weblate]
+          retries = 5
+          status_forcelist = 423
+          allowed_methods = POST
+          backoff_factor = 5
           EOF
 
       - name: Lock translations

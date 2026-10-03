@@ -26,6 +26,7 @@ import { amountToInteger } from '#shared/util';
 import type { ImportTransactionsOpts } from '#types/api-handlers';
 import type {
   AccountEntity,
+  AccountGroupEntity,
   BankSyncProviderStatus,
   BankSyncStatus,
   CategoryEntity,
@@ -710,11 +711,13 @@ async function reopenAccount({ id }: { id: AccountEntity['id'] }) {
 async function moveAccount({
   id,
   targetId,
+  accountGroupId,
 }: {
   id: AccountEntity['id'];
   targetId: AccountEntity['id'] | null;
+  accountGroupId?: AccountGroupEntity['id'] | null;
 }) {
-  await db.moveAccount(id, targetId);
+  await db.moveAccount(id, targetId, accountGroupId);
 }
 
 async function setSecret({
