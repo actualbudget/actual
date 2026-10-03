@@ -70,6 +70,7 @@ export function CurrencySettings() {
         ['USD', t('US Dollar')],
         ['UYU', t('Uruguayan Peso')],
         ['UZS', t('Uzbek Soum')],
+        ['ZAR', t('South African Rand')],
       ]),
     [t],
   );
