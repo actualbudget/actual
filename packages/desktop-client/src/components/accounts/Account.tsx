@@ -16,11 +16,14 @@ import { View } from '@actual-app/components/view';
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
 import type { UndoState } from '@actual-app/core/server/undo';
+import { getCurrency } from '@actual-app/core/shared/currencies';
+import { currentDay } from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
 import {
   makeAsNonChildTransactions,
   makeChild,
+  realizeTempTransactions,
   ungroupTransaction,
   ungroupTransactions,
 } from '@actual-app/core/shared/transactions';
@@ -47,6 +50,7 @@ import {
 } from '#accounts';
 import { markAccountRead } from '#accounts/accountsSlice';
 import * as reconciliation from '#accounts/reconciliation';
+import { fromRegisterView, toRegisterView } from '#accounts/registerView';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 import type {
@@ -55,6 +59,7 @@ import type {
 } from '#components/transactions/table/columns';
 import { TransactionList } from '#components/transactions/TransactionList';
 import { validateAccountName } from '#components/util/accountValidation';
+import { AccountCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useAccountPreviewTransactions } from '#hooks/useAccountPreviewTransactions';
 import { useAccounts } from '#hooks/useAccounts';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
@@ -192,7 +197,7 @@ function AllTransactions({
   return children(allTransactions, allBalances);
 }
 
-function getField(field?: string) {
+function getField(field?: string, amountField = 'amount') {
   if (!field) {
     return 'date';
   }
@@ -205,9 +210,8 @@ function getField(field?: string) {
     case 'category':
       return 'category.name';
     case 'payment':
-      return 'amount';
     case 'deposit':
-      return 'amount';
+      return amountField;
     default:
       return field;
   }
@@ -510,7 +514,10 @@ class AccountInternal extends PureComponent<
 
     const paged = pagedQuery<TransactionEntity>(query.select('*'), {
       onData: async (groupedData, prevData) => {
-        const data = ungroupTransactions([...groupedData]);
+        const data = toRegisterView(
+          ungroupTransactions([...groupedData]),
+          !!this.getForeignAccount(),
+        );
         const firstLoad = prevData == null;
 
         // Fast path for optimistic updates (e.g. field edits): skip the
@@ -662,13 +669,18 @@ class AccountInternal extends PureComponent<
         this.state.filterConditions.length > 0,
       );
     } else {
+      const foreignAccount = this.getForeignAccount();
       this.updateQuery(
         queries.transactionsSearch(
           this.currentQuery,
           this.state.search,
           this.props.dateFormat,
-          this.props.currencySymbol,
-          this.props.precision,
+          // A foreign register searches its own currency's amounts and symbol.
+          foreignAccount?.currency
+            ? getCurrency(foreignAccount.currency).symbol
+            : this.props.currencySymbol,
+          foreignAccount?.currency_precision ?? this.props.precision,
+          foreignAccount ? 'transaction_amount' : 'amount',
         ),
         true,
       );
@@ -753,8 +765,10 @@ class AccountInternal extends PureComponent<
       if (updatedTransaction._deleted) {
         return data.filter(t => t.id !== updatedTransaction.id);
       } else {
+        // The paged cache holds stored rows; the register edits the view.
+        const [stored] = fromRegisterView([updatedTransaction]);
         return data.map(t => {
-          return t.id === updatedTransaction.id ? updatedTransaction : t;
+          return t.id === updatedTransaction.id ? stored : t;
         });
       }
     });
@@ -787,9 +801,15 @@ class AccountInternal extends PureComponent<
 
     const { data }: { data: { id: string; balance: number }[] } =
       await aqlQuery(
-        this.paged.query
-          .options({ splits: 'none' })
-          .select([{ balance: { $sumOver: '$amount' } }]),
+        this.paged.query.options({ splits: 'none' }).select([
+          {
+            balance: {
+              $sumOver: this.getForeignAccount()
+                ? '$transaction_amount'
+                : '$amount',
+            },
+          },
+        ]),
       );
 
     return data.reduce((balances: Record<string, number>, row) => {
@@ -802,8 +822,9 @@ class AccountInternal extends PureComponent<
     try {
       this.setState({ workingHard: true });
       // Bulk fetch transactions
-      const transactions = this.state.transactions.filter(trans =>
-        ids.includes(trans.id),
+      // Rules and writes work on stored rows, never the native view.
+      const transactions = fromRegisterView(
+        this.state.transactions.filter(trans => ids.includes(trans.id)),
       );
       const changedTransactions: TransactionEntity[] = [];
       const allErrors: string[] = [];
@@ -1111,10 +1132,47 @@ class AccountInternal extends PureComponent<
   }
 
   getBalanceQuery(id?: string) {
+    // A foreign account's header shows its native balance.
+    const foreign = this.getForeignAccount();
     return {
-      name: `balance-query-${id}`,
-      query: this.makeRootTransactionsQuery().calculate({ $sum: '$amount' }),
+      name: `balance-query-${id}${foreign ? '-native' : ''}`,
+      query: this.makeRootTransactionsQuery().calculate({
+        $sum: foreign ? '$transaction_amount' : '$amount',
+      }),
     } as const;
+  }
+
+  /**
+   * Split changes recompute base amounts but not native ones, so they are
+   * unavailable for foreign rows until foreign splits are supported.
+   */
+  rejectForeignSplitChange(transactions: TransactionEntity[]) {
+    const isForeign = transactions.some(
+      trans =>
+        this.props.accounts.find(acct => acct.id === trans.account)?.currency,
+    );
+    if (isForeign) {
+      this.setState({ workingHard: false });
+      this.props.dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('Splitting foreign transactions is not available yet.'),
+          },
+        }),
+      );
+    }
+    return isForeign;
+  }
+
+  /** The viewed account when it is a foreign-currency account. */
+  getForeignAccount() {
+    const account = this.props.accounts.find(
+      acct => acct.id === this.props.accountId,
+    );
+    return account?.currency && account.currency_precision != null
+      ? account
+      : undefined;
   }
 
   getFilteredAmount = async () => {
@@ -1123,7 +1181,9 @@ class AccountInternal extends PureComponent<
     }
 
     const { data: amount } = await aqlQuery(
-      this.paged.query.calculate({ $sum: '$amount' }),
+      this.paged.query.calculate({
+        $sum: this.getForeignAccount() ? '$transaction_amount' : '$amount',
+      }),
     );
     return amount;
   };
@@ -1194,6 +1254,38 @@ class AccountInternal extends PureComponent<
       return;
     }
 
+    // A foreign adjustment is a new foreign entry: the native difference
+    // goes through the conversion dialog and the atomic posting handler.
+    const foreign = this.getForeignAccount();
+    if (foreign?.currency && foreign.currency_precision != null) {
+      const [draft] = realizeTempTransactions([
+        {
+          id: 'temp',
+          account: accountId,
+          cleared: true,
+          reconciled: false,
+          amount: diff,
+          date: currentDay(),
+          notes: t('Reconciliation balance adjustment'),
+        },
+      ]);
+      const { amount, ...rest } = draft;
+      this.props.dispatch(
+        pushModal({
+          modal: {
+            name: 'foreign-amount',
+            options: {
+              transaction: { ...rest, transaction_amount: amount },
+              currencyCode: foreign.currency,
+              nativePrecision: foreign.currency_precision,
+              onPosted: () => void this.refetchTransactions(),
+            },
+          },
+        }),
+      );
+      return;
+    }
+
     await reconciliation.createReconciliationTransaction(
       accountId,
       diff,
@@ -1253,6 +1345,9 @@ class AccountInternal extends PureComponent<
     if (!transactions || transactions.length === 0) {
       return;
     }
+    if (this.rejectForeignSplitChange(transactions)) {
+      return;
+    }
 
     const [firstTransaction] = transactions;
     const parentTransaction = {
@@ -1288,6 +1383,9 @@ class AccountInternal extends PureComponent<
     );
 
     const groupedTransactions: TransactionEntity[] = data;
+    if (this.rejectForeignSplitChange(groupedTransactions)) {
+      return;
+    }
 
     let changes: {
       updated: TransactionEntity[];
@@ -1710,10 +1808,18 @@ class AccountInternal extends PureComponent<
   ) => {
     const filterConditions = this.state.filterConditions;
     const isFiltered = filterConditions.length > 0;
-    const sortField = getField(!field ? this.state.sort?.field : field);
+    // A foreign register shows and sorts native amounts.
+    const amountField = this.getForeignAccount()
+      ? 'transaction_amount'
+      : 'amount';
+    const sortField = getField(
+      !field ? this.state.sort?.field : field,
+      amountField,
+    );
     const sortAscDesc = !ascDesc ? this.state.sort?.ascDesc : ascDesc;
     const sortPrevField = getField(
       !prevField ? this.state.sort?.prevField : prevField,
+      amountField,
     );
     const sortPrevAscDesc = !prevField
       ? this.state.sort?.prevAscDesc
@@ -1934,147 +2040,151 @@ class AccountInternal extends PureComponent<
             registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
             selectAllFilter={selectAllFilter}
           >
-            <View style={styles.page}>
-              <AccountHeader
-                tableRef={this.table}
-                isNameEditable={isNameEditable ?? false}
-                workingHard={workingHard ?? false}
-                accountId={accountId}
-                account={account}
-                filterId={filterId}
-                savedFilters={this.props.savedFilters}
-                accountName={accountName}
-                accountsSyncing={accountsSyncing}
-                accounts={accounts}
-                transactions={transactions}
-                showExtraBalances={showExtraBalances ?? false}
-                showReconciled={showReconciled ?? false}
-                showEmptyMessage={showEmptyMessage ?? false}
-                balanceQuery={balanceQuery}
-                filteredAmount={filteredAmount}
-                isFiltered={transactionsFiltered ?? false}
-                isSorted={this.state.sort !== null}
-                reconcileAmount={reconcileAmount}
-                search={this.state.search}
-                // @ts-expect-error fix me
-                filterConditions={this.state.filterConditions}
-                filterConditionsOp={this.state.filterConditionsOp}
-                onSearch={this.onSearch}
-                onShowTransactions={this.onShowTransactions}
-                onMenuSelect={this.onMenuSelect}
-                onAddTransaction={this.onAddTransaction}
-                onToggleExtraBalances={this.onToggleExtraBalances}
-                onSaveName={this.onSaveName}
-                saveNameError={this.state.nameError}
-                onReconcile={this.onReconcile}
-                onDoneReconciling={this.onDoneReconciling}
-                onCreateReconciliationTransaction={
-                  this.onCreateReconciliationTransaction
-                }
-                onSync={this.onSync}
-                onImport={this.onImport}
-                onBatchDelete={this.onBatchDelete}
-                onBatchDuplicate={this.onBatchDuplicate}
-                onRunRules={this.onRunRules}
-                onBatchEdit={this.onBatchEdit}
-                onBatchLinkSchedule={this.onBatchLinkSchedule}
-                onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}
-                onCreateRule={this.onCreateRule}
-                onUpdateFilter={this.onUpdateFilter}
-                onClearFilters={this.onClearFilters}
-                onReloadSavedFilter={this.onReloadSavedFilter}
-                onConditionsOpChange={this.onConditionsOpChange}
-                onDeleteFilter={this.onDeleteFilter}
-                onApplyFilter={this.onApplyFilter}
-                onScheduleAction={this.onScheduleAction}
-                onSetTransfer={this.onSetTransfer}
-                onMakeAsSplitTransaction={this.onMakeAsSplitTransaction}
-                onMakeAsNonSplitTransactions={this.onMakeAsNonSplitTransactions}
-                onMergeTransactions={this.onMergeTransactions}
-              />
-
-              <View style={{ flex: 1 }}>
-                <TransactionList
-                  headerContent={undefined}
-                  // @ts-expect-error - fix me
+            <AccountCurrencyFormat account={this.getForeignAccount()}>
+              <View style={styles.page}>
+                <AccountHeader
                   tableRef={this.table}
+                  isNameEditable={isNameEditable ?? false}
+                  workingHard={workingHard ?? false}
+                  accountId={accountId}
                   account={account}
-                  transactions={transactions}
-                  allTransactions={allTransactions}
-                  loadMoreTransactions={() =>
-                    this.paged && this.paged.fetchNext()
-                  }
+                  filterId={filterId}
+                  savedFilters={this.props.savedFilters}
+                  accountName={accountName}
+                  accountsSyncing={accountsSyncing}
                   accounts={accounts}
-                  category={category}
-                  categoryGroups={categoryGroups}
-                  payees={payees}
-                  balances={allBalances}
-                  showBalances={!!allBalances}
-                  showReconciled={showReconciled}
-                  showCleared={!!showCleared}
-                  showGroup={this.props.showGroup}
-                  showAccount={this.showAccountColumn()}
-                  columnOrder={this.props.columnOrder}
-                  allowReorder={
-                    !!accountId &&
-                    accountId !== 'offbudget' &&
-                    accountId !== 'onbudget' &&
-                    accountId !== 'uncategorized'
+                  transactions={transactions}
+                  showExtraBalances={showExtraBalances ?? false}
+                  showReconciled={showReconciled ?? false}
+                  showEmptyMessage={showEmptyMessage ?? false}
+                  balanceQuery={balanceQuery}
+                  filteredAmount={filteredAmount}
+                  isFiltered={transactionsFiltered ?? false}
+                  isSorted={this.state.sort !== null}
+                  reconcileAmount={reconcileAmount}
+                  search={this.state.search}
+                  // @ts-expect-error fix me
+                  filterConditions={this.state.filterConditions}
+                  filterConditionsOp={this.state.filterConditionsOp}
+                  onSearch={this.onSearch}
+                  onShowTransactions={this.onShowTransactions}
+                  onMenuSelect={this.onMenuSelect}
+                  onAddTransaction={this.onAddTransaction}
+                  onToggleExtraBalances={this.onToggleExtraBalances}
+                  onSaveName={this.onSaveName}
+                  saveNameError={this.state.nameError}
+                  onReconcile={this.onReconcile}
+                  onDoneReconciling={this.onDoneReconciling}
+                  onCreateReconciliationTransaction={
+                    this.onCreateReconciliationTransaction
                   }
-                  isAdding={this.state.isAdding}
-                  isNew={this.isNew}
-                  isMatched={this.isMatched}
-                  isFiltered={transactionsFiltered}
-                  dateFormat={dateFormat}
-                  hideFraction={hideFraction}
-                  renderEmpty={() =>
-                    showEmptyMessage ? (
-                      <AccountEmptyMessage
-                        onAdd={() =>
-                          this.props.dispatch(
-                            replaceModal({
-                              modal: { name: 'add-account', options: {} },
-                            }),
-                          )
-                        }
-                      />
-                    ) : !loading ? (
-                      <View
-                        style={{
-                          color: theme.tableText,
-                          marginTop: 20,
-                          textAlign: 'center',
-                          fontStyle: 'italic',
-                        }}
-                      >
-                        <Trans>No transactions</Trans>
-                      </View>
-                    ) : null
-                  }
-                  onSort={this.onSort}
-                  sortField={this.state.sort?.field ?? ''}
-                  ascDesc={this.state.sort?.ascDesc ?? 'asc'}
-                  onChange={this.onTransactionsChange}
+                  onSync={this.onSync}
+                  onImport={this.onImport}
                   onBatchDelete={this.onBatchDelete}
                   onBatchDuplicate={this.onBatchDuplicate}
+                  onRunRules={this.onRunRules}
+                  onBatchEdit={this.onBatchEdit}
                   onBatchLinkSchedule={this.onBatchLinkSchedule}
                   onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}
                   onCreateRule={this.onCreateRule}
+                  onUpdateFilter={this.onUpdateFilter}
+                  onClearFilters={this.onClearFilters}
+                  onReloadSavedFilter={this.onReloadSavedFilter}
+                  onConditionsOpChange={this.onConditionsOpChange}
+                  onDeleteFilter={this.onDeleteFilter}
+                  onApplyFilter={this.onApplyFilter}
                   onScheduleAction={this.onScheduleAction}
+                  onSetTransfer={this.onSetTransfer}
+                  onMakeAsSplitTransaction={this.onMakeAsSplitTransaction}
                   onMakeAsNonSplitTransactions={
                     this.onMakeAsNonSplitTransactions
                   }
-                  onRefetch={this.refetchTransactions}
-                  focusedTransactionId={this.state.focusedTransactionId}
-                  onFocusedTransactionShown={this.onFocusedTransactionShown}
-                  onCloseAddTransaction={() =>
-                    this.setState({ isAdding: false })
-                  }
-                  onCreatePayee={this.onCreatePayee}
-                  onApplyFilter={this.onApplyFilter}
+                  onMergeTransactions={this.onMergeTransactions}
                 />
+
+                <View style={{ flex: 1 }}>
+                  <TransactionList
+                    headerContent={undefined}
+                    // @ts-expect-error - fix me
+                    tableRef={this.table}
+                    account={account}
+                    transactions={transactions}
+                    allTransactions={allTransactions}
+                    loadMoreTransactions={() =>
+                      this.paged && this.paged.fetchNext()
+                    }
+                    accounts={accounts}
+                    category={category}
+                    categoryGroups={categoryGroups}
+                    payees={payees}
+                    balances={allBalances}
+                    showBalances={!!allBalances}
+                    showReconciled={showReconciled}
+                    showCleared={!!showCleared}
+                    showGroup={this.props.showGroup}
+                    showAccount={this.showAccountColumn()}
+                    columnOrder={this.props.columnOrder}
+                    allowReorder={
+                      !!accountId &&
+                      accountId !== 'offbudget' &&
+                      accountId !== 'onbudget' &&
+                      accountId !== 'uncategorized'
+                    }
+                    isAdding={this.state.isAdding}
+                    isNew={this.isNew}
+                    isMatched={this.isMatched}
+                    isFiltered={transactionsFiltered}
+                    dateFormat={dateFormat}
+                    hideFraction={hideFraction}
+                    renderEmpty={() =>
+                      showEmptyMessage ? (
+                        <AccountEmptyMessage
+                          onAdd={() =>
+                            this.props.dispatch(
+                              replaceModal({
+                                modal: { name: 'add-account', options: {} },
+                              }),
+                            )
+                          }
+                        />
+                      ) : !loading ? (
+                        <View
+                          style={{
+                            color: theme.tableText,
+                            marginTop: 20,
+                            textAlign: 'center',
+                            fontStyle: 'italic',
+                          }}
+                        >
+                          <Trans>No transactions</Trans>
+                        </View>
+                      ) : null
+                    }
+                    onSort={this.onSort}
+                    sortField={this.state.sort?.field ?? ''}
+                    ascDesc={this.state.sort?.ascDesc ?? 'asc'}
+                    onChange={this.onTransactionsChange}
+                    onBatchDelete={this.onBatchDelete}
+                    onBatchDuplicate={this.onBatchDuplicate}
+                    onBatchLinkSchedule={this.onBatchLinkSchedule}
+                    onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}
+                    onCreateRule={this.onCreateRule}
+                    onScheduleAction={this.onScheduleAction}
+                    onMakeAsNonSplitTransactions={
+                      this.onMakeAsNonSplitTransactions
+                    }
+                    onRefetch={this.refetchTransactions}
+                    focusedTransactionId={this.state.focusedTransactionId}
+                    onFocusedTransactionShown={this.onFocusedTransactionShown}
+                    onCloseAddTransaction={() =>
+                      this.setState({ isAdding: false })
+                    }
+                    onCreatePayee={this.onCreatePayee}
+                    onApplyFilter={this.onApplyFilter}
+                  />
+                </View>
               </View>
-            </View>
+            </AccountCurrencyFormat>
           </SelectedProviderWithItems>
         )}
       </AllTransactions>

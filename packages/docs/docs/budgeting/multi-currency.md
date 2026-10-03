@@ -1,8 +1,6 @@
 # Multi-currency
 
-This example budget is for a family that has a Paris apartment they sublease to a brother-in-law and parents they visit in Mexico. BNP Paribas is their euro bank, and BBVA México is their peso bank. Résidences Saint-Martin SARL, the landlord, and the family members in this example are fictional.
-
-A budget has one currency. This page uses US dollars. The BNP Paribas account is in euros, for rent in France. The BBVA México account is in Mexican pesos, for gifts and remittances. Balances on the budget are shown in dollars. A saved exchange rate converts a foreign starting balance into that dollar amount.
+This example budget is for a family that has a Paris apartment they sublease to a brother-in-law and parents they visit in Mexico. The budget uses US dollars. BNP Paribas holds euros for the Paris rent and sublease receipts. BBVA México holds pesos for visits, gifts and remittances to the parents. The budget total stays in dollars. A foreign account shows its own currency. A saved exchange rate converts its transactions into dollars. Résidences Saint-Martin SARL, the landlord, and the family members in this example are fictional.
 
 <ExperimentalFeatureWarning issueId="5191" />
 
@@ -25,6 +23,18 @@ That setting also updates the number format. You can change the symbol position 
 Back in **Settings**, **Experimental**, turn on **Multiple currencies**. It stays off until the budget has a default currency.
 
 <img width="643" alt="Currency support and Multiple currencies turned on" src="/img/budgeting/multi-currency-experimental@2x.png" />
+
+## The family example
+
+The registers show five months of the family budget, from June through October 2026, with opening balances on May 31. Each month, BNP Paribas pays €950 to Résidences Saint-Martin SARL and receives €950 from Thomas Martin, the brother-in-law. The entries offset, leaving the opening €2,000 balance. Rent uses Paris rent, and the receipt uses Sublease income.
+
+<img width="860" alt="BNP Paribas with five months of Paris rent and matching sublease income, keeping a 2000 euro balance" src="/img/budgeting/family-bnp-history.png" />
+
+Each month, BBVA México sends an 800 peso remittance to Elena García and a 150 peso gift to José García. Both use Family support. After five months, the 5,000 peso opening balance falls to 250 pesos.
+
+<img width="860" alt="BBVA México with five months of remittances and gifts for Elena and José García, leaving 250 pesos" src="/img/budgeting/family-bbva-history.png" />
+
+The workflow examples below use separate checkpoints so each calculation can be followed on its own.
 
 ## Save exchange rates
 
@@ -52,10 +62,20 @@ Create three accounts:
 
 If no rate is saved for today, the dialog adds **Base amount** and says: "No exchange rate is saved for today. Enter the starting balance in the budget currency."
 
-After you create the BNP Paribas account, the header shows the dollar balance.
+The BNP Paribas account then shows €2,000.00. Its register lists the starting balance as a 2,000.00 deposit. **All accounts** in the sidebar counts the $2,200.00 dollar amount. The peso account uses $, so its 5,000.00 peso balance looks like $5,000.00. That row is pesos. **All accounts** is dollars.
 
-<img width="860" alt="BNP Paribas header showing a balance of $2,200.00" src="/img/budgeting/multi-currency-eur-balance@2x.png" />
+## Enter a payment
 
-The register lists that starting balance as 2,200.00. The sidebar uses the same dollar figure.
+Open the BNP Paribas account and click **Add New**. Enter the payee **Résidences Saint-Martin SARL** and a payment of 950.00. That amount is euros. **Add** opens **Convert to budget currency**.
 
-Adding a payment in the euro or peso account does not save. Actual reports that something internally went wrong. Enter the rent, the gifts, and the remittances in Checking, in dollars. The foreign accounts hold the starting balance.
+The dialog shows -€950.00, then -$1,045.00 at the saved standing rate from 2026-10-31, with EUR first. Leave **Base amount** and the rate empty. That uses the amount shown. Click **Save**.
+
+The new row stays open after the payment is saved. Click **Cancel** to close it.
+
+<img width="506" alt="Convert to budget currency for a 950 euro rent payment, shown as -$1,045.00 at 1 USD = 0.909091 EUR" src="/img/budgeting/multi-currency-convert@2x.png" />
+
+The account balance is then €1,050.00: the 2,000.00 starting balance minus the 950.00 rent. The register shows the payment as 950.00.
+
+<img width="860" alt="BNP Paribas with a balance of €1,050.00, a 950.00 rent payment to Résidences Saint-Martin SARL, and a 2,000.00 starting balance" src="/img/budgeting/multi-currency-eur-register@2x.png" />
+
+A saved amount in the euro or peso account cannot be changed, split, or scheduled.

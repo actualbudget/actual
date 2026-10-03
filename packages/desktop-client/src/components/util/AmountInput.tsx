@@ -18,6 +18,7 @@ import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import { css, cx } from '@emotion/css';
 
+import { useCurrencyFormatOverride } from '#hooks/currencyFormatContext';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useFormat } from '#hooks/useFormat';
 import { useMergedRefs } from '#hooks/useMergedRefs';
@@ -66,7 +67,8 @@ export function AmountInput({
   const { t } = useTranslation();
   const precision = useAmountPrecision();
   const [encoding] = useSyncedPref('amountEncoding');
-  const format = useFormat(encoding ? precision : undefined);
+  const override = useCurrencyFormatOverride();
+  const format = useFormat(encoding || override ? precision : undefined);
   const [symbol, setSymbol] = useState<'+' | '-'>(() => {
     if (sign) return sign;
     return initialValue === 0 ? zeroSign : initialValue > 0 ? '+' : '-';
@@ -152,7 +154,7 @@ export function AmountInput({
         // Typed digits are in the currency's smallest unit (cents, whole yen)
         const amount = integerToAmount(
           parseInt(digits, 10),
-          encoding ? precision : format.currency.decimalPlaces,
+          encoding || override ? precision : format.currency.decimalPlaces,
         );
         newText = format.forEdit(amountToInteger(amount, precision));
       }

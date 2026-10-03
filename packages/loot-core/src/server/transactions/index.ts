@@ -38,6 +38,16 @@ async function getTransactionsByIds(
   );
 }
 
+/** Off-budget account transactions and split parents have no category. */
+export function clearDisallowedCategory(
+  transaction: Pick<TransactionEntity, 'category' | 'is_parent'>,
+  account: Pick<db.DbAccount, 'offbudget'> | null | undefined,
+) {
+  if (transaction.is_parent || account?.offbudget === 1) {
+    transaction.category = null;
+  }
+}
+
 export async function batchUpdateTransactions({
   added,
   deleted,
@@ -91,11 +101,10 @@ export async function batchUpdateTransactions({
     if (added) {
       addedIds = await Promise.all(
         added.map(async t => {
-          // Offbudget account transactions and parent transactions should not have categories.
-          const account = accounts.find(acct => acct.id === t.account);
-          if (t.is_parent || account?.offbudget === 1) {
-            t.category = null;
-          }
+          clearDisallowedCategory(
+            t,
+            accounts.find(acct => acct.id === t.account),
+          );
           return db.insertTransaction(t);
         }),
       );
@@ -117,12 +126,11 @@ export async function batchUpdateTransactions({
       await Promise.all(
         updated.map(async t => {
           if (t.account) {
-            // Moving transactions off budget should always clear the
-            // category. Parent transactions should not have categories.
-            const account = accounts.find(acct => acct.id === t.account);
-            if (t.is_parent || account?.offbudget === 1) {
-              t.category = null;
-            }
+            // Moving transactions off budget always clears the category.
+            clearDisallowedCategory(
+              t,
+              accounts.find(acct => acct.id === t.account),
+            );
           }
 
           await db.updateTransaction(t);

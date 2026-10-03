@@ -89,6 +89,8 @@ export function transactionsSearch(
   dateFormat: SyncedPrefs['dateFormat'],
   currencySymbol: string,
   precision = 2,
+  // A foreign account's register searches its native amounts.
+  amountField: 'amount' | 'transaction_amount' = 'amount',
 ) {
   // currencyToAmount ignores letters, so "35mm" would match the amount 35.
   // Letters make a search text-only, except a leading or trailing currency
@@ -166,23 +168,23 @@ export function transactionsSearch(
         isDateValid(parsedDate) && { date: dayFromDate(parsedDate) },
         comparisonAmount != null &&
           comparisonOperator && {
-            amount: { [comparisonOperator]: comparisonAmount },
+            [amountField]: { [comparisonOperator]: comparisonAmount },
           },
         rangeStart != null &&
           rangeEnd != null &&
           rangeStart <= rangeEnd && {
             $and: [
-              { amount: { $gte: rangeStart } },
-              { amount: { $lte: rangeEnd } },
+              { [amountField]: { $gte: rangeStart } },
+              { [amountField]: { $lte: rangeEnd } },
             ],
           },
         amount != null && {
-          amount: { $transform: '$abs', $eq: Math.abs(amount) },
+          [amountField]: { $transform: '$abs', $eq: Math.abs(amount) },
         },
         amount != null &&
           majorAmount != null &&
           Number.isInteger(majorAmount) && {
-            amount: {
+            [amountField]: {
               $transform: { $abs: { $idiv: ['$', 10 ** precision] } },
               $eq: Math.abs(majorAmount),
             },
