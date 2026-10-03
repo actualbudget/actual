@@ -94,6 +94,7 @@ export function ReportTable({
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
         interval={interval}
+        scopeTagNames={data.scopeTagNames}
       />
     );
   };
@@ -125,6 +126,7 @@ export function ReportTable({
         handleScroll={handleScroll}
         height={32 + scrollWidthTotals}
         interval={interval}
+        scopeTagNames={data.scopeTagNames}
         colorized
       />
     );
