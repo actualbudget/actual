@@ -15,6 +15,7 @@ import { css } from '@emotion/css';
 
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
+import { AccountCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useUpdatedAccounts } from '#hooks/useUpdatedAccounts';
 import { openAccountCloseModal, pushModal } from '#modals/modalsSlice';
@@ -197,14 +198,16 @@ export function AccountRow({
                 </Text>
               )}
               <Text style={styles.visuallyHidden}>{statusLabel}</Text>
-              <SidebarBalance
-                binding={bindings.accountBalance(account.id)}
-                style={{
-                  fontSize: 12,
-                  color: 'inherit',
-                  marginLeft: spacing.xs,
-                }}
-              />
+              <AccountCurrencyFormat account={account}>
+                <SidebarBalance
+                  binding={bindings.accountDisplayBalance(account)}
+                  style={{
+                    fontSize: 12,
+                    color: 'inherit',
+                    marginLeft: spacing.xs,
+                  }}
+                />
+              </AccountCurrencyFormat>
               <DragHandle />
             </View>
           </AccountHoverCard>

@@ -134,11 +134,19 @@ export function ReconcileMenu({
   onClose,
 }: ReconcileMenuProps) {
   const balanceQuery = bindings.accountBalance(account.id);
-  const clearedBalance = useSheetValue<'account', `balance-${string}-cleared`>({
-    name: (balanceQuery.name + '-cleared') as `balance-${string}-cleared`,
-    value: null,
-    query: balanceQuery.query.filter({ cleared: true }),
-  });
+  // Foreign accounts reconcile against their native cleared balance.
+  const clearedBalance = useSheetValue<
+    'account',
+    `balance-${string}-cleared` | 'nativeBalanceCleared'
+  >(
+    account.currency
+      ? bindings.accountNativeBalanceCleared(account.id)
+      : {
+          name: (balanceQuery.name + '-cleared') as `balance-${string}-cleared`,
+          value: null,
+          query: balanceQuery.query.filter({ cleared: true }),
+        },
+  );
   const lastSyncedBalance = account.balance_current;
   const format = useFormat(useAmountPrecision());
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';

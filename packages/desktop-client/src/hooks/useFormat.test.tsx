@@ -3,6 +3,7 @@ import { renderHook } from '@testing-library/react';
 import { createTestAppStore, TestProviders } from '#mocks';
 import { mergeSyncedPrefs } from '#prefs/prefsSlice';
 
+import { CurrencyFormatProvider } from './currencyFormatContext';
 import { useFormat } from './useFormat';
 
 it.each([
@@ -75,3 +76,28 @@ it('uses legacy 2dp until a currency transition records a new encoding', () => {
   expect(result.current.forEdit(1234)).toBe('12.34');
   expect(result.current.fromEdit('12.34')).toBe(1234);
 });
+it.each([
+  ['KWD', 3, '1.234'],
+  ['JPY', 0, '1,234'],
+  ['IQD', 3, '1.234'],
+] as const)(
+  'keeps a %s account encoding inside a legacy budget',
+  (currencyCode, precision, amount) => {
+    const store = createTestAppStore();
+    const { result } = renderHook(() => useFormat(), {
+      wrapper: ({ children }) => (
+        <TestProviders store={store}>
+          <CurrencyFormatProvider
+            currencyCode={currencyCode}
+            precision={precision}
+          >
+            {children}
+          </CurrencyFormatProvider>
+        </TestProviders>
+      ),
+    });
+    expect(result.current(1234, 'financial')).toContain(amount);
+    expect(result.current.forEdit(1234)).toBe(amount);
+    expect(result.current.fromEdit(amount)).toBe(1234);
+  },
+);

@@ -81,12 +81,15 @@ export function SelectedBalance({
   const ids = new Set((rows || []).map((r: { id: string }) => r.id));
 
   const finalIds = [...selectedItems].filter(id => !ids.has(id));
+  // A foreign account's register shows native amounts, so it sums them.
+  const isForeign = !!account?.currency;
   let balance = useSheetValue<'balance', `selected-balance-${string}`>({
-    name: (name + '-sum') as `selected-balance-${string}`,
+    name: (name +
+      (isForeign ? '-native-sum' : '-sum')) as `selected-balance-${string}`,
     query: q('transactions')
       .filter({ id: { $oneof: finalIds } })
       .options({ splits: 'all' })
-      .calculate({ $sum: '$amount' }),
+      .calculate({ $sum: isForeign ? '$transaction_amount' : '$amount' }),
   });
 
   let scheduleBalance = 0;

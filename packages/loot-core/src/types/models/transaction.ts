@@ -31,6 +31,8 @@ export type TransactionEntity = {
   schedule?: ScheduleEntity['id'];
   subtransactions?: TransactionEntity[];
   _unmatched?: boolean;
+  /** View-only: stored base amount while a foreign register shows native. */
+  _baseAmount?: IntegerAmount;
   _deleted?: boolean;
   error?: {
     type: 'SplitTransactionError';

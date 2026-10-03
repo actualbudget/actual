@@ -24,6 +24,7 @@ import {
 import { css } from '@emotion/css';
 
 import { makeAmountFullStyle } from '#components/budget/util';
+import { useCurrencyFormatOverride } from '#hooks/currencyFormatContext';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -50,10 +51,12 @@ const AmountInput = memo(function AmountInput({
 }: AmountInputProps) {
   const precision = useAmountPrecision();
   const [encoding] = useSyncedPref('amountEncoding');
+  const override = useCurrencyFormatOverride();
   const [currencyCode] = useSyncedPref('defaultCurrencyCode');
-  const displayPrecision = encoding
-    ? precision
-    : getCurrency(currencyCode || '').decimalPlaces;
+  const displayPrecision =
+    encoding || override
+      ? precision
+      : getCurrency(currencyCode || '').decimalPlaces;
   const formatter = getNumberFormat({
     decimalPlaces: displayPrecision,
   }).formatter;
@@ -220,10 +223,12 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
 }: FocusableAmountInputProps) {
   const precision = useAmountPrecision();
   const [encoding] = useSyncedPref('amountEncoding');
+  const override = useCurrencyFormatOverride();
   const [currencyCode] = useSyncedPref('defaultCurrencyCode');
-  const displayPrecision = encoding
-    ? precision
-    : getCurrency(currencyCode || '').decimalPlaces;
+  const displayPrecision =
+    encoding || override
+      ? precision
+      : getCurrency(currencyCode || '').decimalPlaces;
   const formatter = getNumberFormat({
     decimalPlaces: displayPrecision,
   }).formatter;

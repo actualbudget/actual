@@ -580,6 +580,21 @@ export type Modal =
       };
     }
   | {
+      name: 'foreign-amount';
+      options: {
+        /** New foreign draft with its native amount in transaction_amount. */
+        transaction: Omit<
+          TransactionEntity,
+          'amount' | 'transaction_amount'
+        > & {
+          transaction_amount: number;
+        };
+        currencyCode: string;
+        nativePrecision: number;
+        onPosted: () => void;
+      };
+    }
+  | {
       name: 'confirm-transaction-edit';
       options: {
         onConfirm: () => void;

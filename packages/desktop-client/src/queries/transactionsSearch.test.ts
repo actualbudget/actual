@@ -44,3 +44,19 @@ it('does not emit an amount predicate for malformed or overflowing input', () =>
     expect(JSON.stringify(search(text, 3))).not.toContain('"$gt"');
   }
 });
+
+it('searches native amounts in a foreign register', () => {
+  const filter = JSON.stringify(
+    transactionsSearch(
+      q('transactions'),
+      '1500',
+      'MM/dd/yyyy',
+      '',
+      0,
+      'transaction_amount',
+    ).serialize().filterExpressions[0],
+  );
+  expect(filter).toContain('"transaction_amount"');
+  expect(filter).toContain('"$eq":1500');
+  expect(filter).not.toContain('"amount"');
+});

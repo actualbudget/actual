@@ -50,6 +50,47 @@ export function accountBalanceUncleared(accountId: AccountEntity['id']) {
   } satisfies Binding<'account', 'balanceUncleared'>;
 }
 
+// Native bindings sum account-native units. They have their own cell names
+// so base consumers (reports, aggregates, mobile) keep base semantics.
+export function accountNativeBalance(accountId: AccountEntity['id']) {
+  return {
+    name: accountParametrizedField('nativeBalance')(accountId),
+    query: q('transactions')
+      .filter({ account: accountId })
+      .options({ splits: 'none' })
+      .calculate({ $sum: '$transaction_amount' }),
+  } satisfies Binding<'account', 'nativeBalance'>;
+}
+
+export function accountNativeBalanceCleared(accountId: AccountEntity['id']) {
+  return {
+    name: accountParametrizedField('nativeBalanceCleared')(accountId),
+    query: q('transactions')
+      .filter({ account: accountId, cleared: true })
+      .options({ splits: 'none' })
+      .calculate({ $sum: '$transaction_amount' }),
+  } satisfies Binding<'account', 'nativeBalanceCleared'>;
+}
+
+export function accountNativeBalanceUncleared(accountId: AccountEntity['id']) {
+  return {
+    name: accountParametrizedField('nativeBalanceUncleared')(accountId),
+    query: q('transactions')
+      .filter({ account: accountId, cleared: false })
+      .options({ splits: 'none' })
+      .calculate({ $sum: '$transaction_amount' }),
+  } satisfies Binding<'account', 'nativeBalanceUncleared'>;
+}
+
+/** The balance an account's own displays show: native for foreign accounts. */
+export function accountDisplayBalance(
+  account: Pick<AccountEntity, 'id' | 'currency'>,
+) {
+  return account.currency
+    ? accountNativeBalance(account.id)
+    : accountBalance(account.id);
+}
+
 export function allAccountBalance() {
   return {
     query: q('transactions')

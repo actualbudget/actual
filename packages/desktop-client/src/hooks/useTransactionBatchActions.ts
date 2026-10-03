@@ -20,13 +20,16 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 
+import { useAccounts } from '#hooks/useAccounts';
 import { pushModal } from '#modals/modalsSlice';
 import type {
   ConfirmTransactionEditReason,
   Modal as ModalType,
 } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
+import { incompatibleAccountIds } from '#util/account-encoding';
 
 type BatchReconciledReason = Extract<
   ConfirmTransactionEditReason,
@@ -78,6 +81,7 @@ type BatchUnlinkScheduleProps = {
 export function useTransactionBatchActions() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const { data: accounts = [] } = useAccounts();
 
   const onBatchEdit = async ({ name, ids, onSuccess }: BatchEditProps) => {
     const { data } = await aqlQuery(
@@ -87,6 +91,24 @@ export function useTransactionBatchActions() {
         .options({ splits: 'grouped' }),
     );
     const transactions = ungroupTransactions(data as TransactionEntity[]);
+    const accountsById = new Map(
+      accounts.map(account => [account.id, account]),
+    );
+    if (
+      name === 'amount' &&
+      transactions.some(trans => accountsById.get(trans.account)?.currency)
+    ) {
+      // Foreign amounts are frozen until foreign edits are supported.
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('Editing foreign amounts is not available yet.'),
+          },
+        }),
+      );
+      return;
+    }
 
     const onChange = async (
       name: keyof TransactionEntity,
@@ -203,6 +225,10 @@ export function useTransactionBatchActions() {
             name: 'account-autocomplete',
             options: {
               onSelect: accountId => onChange(name, accountId),
+              hiddenAccounts: incompatibleAccountIds(
+                accounts,
+                transactions.map(trans => accountsById.get(trans.account)),
+              ),
             },
           },
         }),
@@ -408,6 +434,24 @@ export function useTransactionBatchActions() {
         .select('*')
         .options({ splits: 'grouped' }),
     );
+    // Schedules for accounts in other currencies arrive later.
+    if (
+      (transactions as TransactionEntity[]).some(
+        trans => accounts.find(acct => acct.id === trans.account)?.currency,
+      )
+    ) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t(
+              'Transactions in other currencies cannot be linked to schedules yet.',
+            ),
+          },
+        }),
+      );
+      return;
+    }
 
     dispatch(
       pushModal({

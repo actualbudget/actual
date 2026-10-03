@@ -194,10 +194,61 @@ export function TransactionList({
   const onAdd = useCallback(
     async (newTransactions: TransactionEntity[]) => {
       newTransactions = realizeTempTransactions(newTransactions);
+      const [parent] = newTransactions;
+      // A foreign register's draft carries its native amount in `amount`;
+      // it is posted only through the atomic foreign entry handler.
+      if (
+        account?.currency &&
+        account.currency_precision != null &&
+        parent?.account === account.id
+      ) {
+        const {
+          amount,
+          _baseAmount: _base,
+          subtransactions: _subtransactions,
+          ...rest
+        } = parent;
+        const draft = {
+          ...rest,
+          transaction_amount: amount,
+          // A new payee is created with the posting, never before it.
+          ...(rest.payee?.startsWith('new:') && {
+            payee: null,
+            payee_name: rest.payee.slice('new:'.length),
+          }),
+        };
+        if (amount === 0) {
+          // Zero converts to zero; anything else (such as a rule changing
+          // the date) is resolved in the conversion dialog.
+          const result = await send('transactions/post-foreign-entry', {
+            transaction: draft,
+          });
+          if (result.status === 'ok') {
+            onRefetch();
+            return;
+          }
+        }
+        // The table calls onAdd while rendering; open the modal after it.
+        await Promise.resolve();
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'foreign-amount',
+              options: {
+                transaction: draft,
+                currencyCode: account.currency,
+                nativePrecision: account.currency_precision,
+                onPosted: onRefetch,
+              },
+            },
+          }),
+        );
+        return;
+      }
       await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
       onRefetch();
     },
-    [isLearnCategoriesEnabled, onRefetch],
+    [account, dispatch, isLearnCategoriesEnabled, onRefetch],
   );
 
   const onSave = useCallback(

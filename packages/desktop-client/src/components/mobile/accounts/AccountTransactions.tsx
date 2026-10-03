@@ -78,9 +78,12 @@ function TransactionListWithPreviews({
     searchParams.get('reconcile') ?? '',
     10,
   );
-  const reconcileAmount = Number.isNaN(parsedReconcileAmount)
-    ? null
-    : parsedReconcileAmount;
+  // Foreign accounts are reconciled on desktop until mobile shows native
+  // amounts, so a reconcile link does nothing for them.
+  const reconcileAmount =
+    Number.isNaN(parsedReconcileAmount) || account.currency
+      ? null
+      : parsedReconcileAmount;
   const isReconciling = reconcileAmount != null;
 
   const baseTransactionsQuery = useCallback(() => {

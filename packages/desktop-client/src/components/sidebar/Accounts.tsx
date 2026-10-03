@@ -124,7 +124,7 @@ export function Accounts() {
             failed={isAccountFailedSync(account)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
-            query={bindings.accountBalance(account.id)}
+            query={bindings.accountDisplayBalance(account)}
             onDragChange={onDragChange}
             onDrop={onReorder}
             outerStyle={makeDropPadding(i)}
@@ -156,7 +156,7 @@ export function Accounts() {
             failed={isAccountFailedSync(account)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
-            query={bindings.accountBalance(account.id)}
+            query={bindings.accountDisplayBalance(account)}
             onDragChange={onDragChange}
             onDrop={onReorder}
             outerStyle={makeDropPadding(i)}
@@ -183,7 +183,7 @@ export function Accounts() {
               name={account.name}
               account={account}
               to={getAccountPath(account)}
-              query={bindings.accountBalance(account.id)}
+              query={bindings.accountDisplayBalance(account)}
               onDragChange={onDragChange}
               onDrop={onReorder}
             />

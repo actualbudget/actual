@@ -1,6 +1,7 @@
 import {
   addUtcDays,
   baseToNative,
+  invertRate,
   isCanonicalTimestamp,
   isValidDate,
   nativeToBase,
@@ -103,6 +104,20 @@ describe('conversion', () => {
 
   it('supports reviewed precisions beyond 0, 2 and 3', () => {
     expect(nativeToBase(12345678, 8, 4, '1')).toBe(1235);
+  });
+});
+
+describe('invertRate', () => {
+  it('returns the reciprocal rounded to 15 places', () => {
+    expect(invertRate('0.0063')).toBe('158.73015873015873');
+    expect(invertRate('158.73015873015873')).toBe('0.0063');
+    expect(invertRate('4')).toBe('0.25');
+    expect(invertRate('0.5')).toBe('2');
+  });
+
+  it('handles the smallest and largest reciprocals', () => {
+    expect(invertRate('999999999999')).toBe('0.000000000001');
+    expect(() => invertRate('0.000000000000001')).toThrow('rate-invalid');
   });
 });
 
