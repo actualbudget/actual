@@ -31,7 +31,6 @@ import {
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import { DEFAULT_MAX_DISTANCE_METERS } from '@actual-app/core/shared/constants';
@@ -917,6 +916,29 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       [onClearActiveEdit, onUpdate],
     );
 
+    const onUnlockReconciledInner = useCallback(
+      (serializedTransaction: TransactionEntity) => {
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'confirm-transaction-edit',
+              options: {
+                confirmReason: 'unlockReconciled',
+                onConfirm: () => {
+                  void onUpdateInner(
+                    serializedTransaction,
+                    'reconciled',
+                    false,
+                  );
+                },
+              },
+            },
+          }),
+        );
+      },
+      [dispatch, onUpdateInner],
+    );
+
     const onTotalAmountUpdate = useCallback(
       (value: number) => {
         if (transaction.amount !== value) {
@@ -994,6 +1016,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   modal: {
                     name: 'payee-autocomplete',
                     options: {
+                      showNoneOption: !!transactionToEdit.payee,
                       onSelect: payeeId => {
                         void onUpdateInner(transactionToEdit, name, payeeId);
                       },
@@ -1471,7 +1494,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             {transaction.reconciled ? (
               <View style={{ alignItems: 'center' }}>
                 <FieldLabel title={t('Reconciled')} />
-                <Toggle id="Reconciled" isOn isDisabled />
+                <ToggleField
+                  id="reconciled"
+                  isOn
+                  onToggle={() => onUnlockReconciledInner(transaction)}
+                />
               </View>
             ) : (
               <View style={{ alignItems: 'center' }}>

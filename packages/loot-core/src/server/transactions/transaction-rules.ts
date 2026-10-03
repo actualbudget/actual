@@ -39,7 +39,7 @@ import {
 } from '#shared/months';
 import { q } from '#shared/query';
 import { getApproxNumberThreshold, sortNumbers } from '#shared/rules';
-import { extractTagsForFilter } from '#shared/tags';
+import { extractTagsForFilter, makeTagAqlRegex } from '#shared/tags';
 import { ungroupTransaction } from '#shared/transactions';
 import { fastSetMerge, partitionByField } from '#shared/util';
 import type {
@@ -677,13 +677,7 @@ export function conditionsToAQL(
         }
 
         return {
-          $and: tagValues.map(v => {
-            const escapedTag = v
-              .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-              .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
-            const pattern = `(?<!#)${escapedTag}([\\s#]|$)`;
-            return apply(field, '$regexp', pattern);
-          }),
+          $and: tagValues.map(v => apply(field, '$regexp', makeTagAqlRegex(v))),
         };
       }
 
@@ -693,13 +687,7 @@ export function conditionsToAQL(
           return { id: null };
         }
         return {
-          $or: tagValues.map(v => {
-            const escapedTag = v
-              .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-              .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
-            const pattern = `(?<!#)${escapedTag}([\\s#]|$)`;
-            return apply(field, '$regexp', pattern);
-          }),
+          $or: tagValues.map(v => apply(field, '$regexp', makeTagAqlRegex(v))),
         };
       }
 
