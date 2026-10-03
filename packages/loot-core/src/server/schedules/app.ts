@@ -14,6 +14,7 @@ import { mutator, runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { Rule } from '#server/rules';
 import { addSyncListener, batchMessages } from '#server/sync';
+import { isForeignAccount } from '#server/transactions/foreign-guard';
 import {
   getRules,
   insertRule,
@@ -334,6 +335,18 @@ async function allowAutoPostingToRunAgainToday(postsTransaction: boolean) {
   }
 }
 
+// Foreign-account schedules get native estimates in a later stage.
+async function rejectForeignScheduleAccount(accountId: unknown) {
+  if (typeof accountId === 'string' && (await isForeignAccount(accountId))) {
+    throw new Error('multicurrency-schedule-unavailable');
+  }
+}
+
+// The same effective account that schedule execution uses.
+function conditionAccount(conditions: RuleConditionEntity[] | undefined) {
+  return conditions ? extractScheduleConds(conditions).account?.value : null;
+}
+
 export async function createSchedule({
   schedule = null,
   conditions = [],
@@ -342,6 +355,7 @@ export async function createSchedule({
   conditions?: RuleConditionEntity[];
 } = {}): Promise<ScheduleEntity['id']> {
   const scheduleId = schedule?.id || uuidv4();
+  await rejectForeignScheduleAccount(conditionAccount(conditions));
 
   const { date: dateCond } = extractScheduleConds(conditions);
   if (dateCond == null) {
@@ -407,6 +421,11 @@ export async function updateSchedule({
   if (schedule.rule) {
     throw new Error('You cannot change the rule of a schedule');
   }
+  const { data: existing } = await aqlQuery(
+    q('schedules').filter({ id: schedule.id }).select('_account'),
+  );
+  await rejectForeignScheduleAccount(conditionAccount(conditions));
+  await rejectForeignScheduleAccount(existing?.[0]?._account);
   const scheduleFields = { ...schedule };
   if ('name' in scheduleFields) {
     scheduleFields.name = normalizeScheduleName(scheduleFields.name);
@@ -599,6 +618,7 @@ async function postTransactionForSchedule({
   if (schedule == null || schedule._account == null) {
     return;
   }
+  await rejectForeignScheduleAccount(schedule._account);
 
   const transaction = {
     payee: schedule._payee,

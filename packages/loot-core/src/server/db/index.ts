@@ -29,6 +29,8 @@ import {
   toDateRepr,
 } from '#server/models';
 import { batchMessages, sendMessages } from '#server/sync';
+import { validateTransactionWrite } from '#server/transactions/foreign-guard';
+import { accountCurrencyFields } from '#server/util/currency';
 import * as monthUtils from '#shared/months';
 import { groupById } from '#shared/util';
 import type { TransactionEntity } from '#types/models';
@@ -742,6 +744,19 @@ export function getAccounts() {
 }
 
 export async function insertAccount(account) {
+  if (account.currency !== undefined) {
+    // batchMessages resolves to void, so capture the generated id.
+    let id: DbAccount['id'];
+    await batchMessages(async () => {
+      const fields = await accountCurrencyFields(account.currency);
+      id = await insertAccountRow({ ...account, ...fields });
+    });
+    return id;
+  }
+  return insertAccountRow(account);
+}
+
+async function insertAccountRow(account) {
   const accounts = await all<DbAccount>(
     'SELECT * FROM accounts WHERE offbudget = ? ORDER BY sort_order, name',
     [account.offbudget ? 1 : 0],
@@ -754,7 +769,16 @@ export async function insertAccount(account) {
   return insertWithUUID('accounts', account);
 }
 
-export function updateAccount(account) {
+export async function updateAccount(account) {
+  if (account.currency !== undefined) {
+    return batchMessages(async () => {
+      const fields = await accountCurrencyFields(account.currency);
+      await update(
+        'accounts',
+        accountModel.validate({ ...account, ...fields }, { update: true }),
+      );
+    });
+  }
   account = accountModel.validate(account, { update: true });
   return update('accounts', account);
 }
@@ -904,14 +928,30 @@ export async function getTransactions(accountId: DbTransaction['acct']) {
   );
 }
 
-export function insertTransaction(
+export async function insertTransaction(
   transaction,
 ): Promise<TransactionEntity['id']> {
-  return insertWithSchema('transactions', transaction);
+  let id: TransactionEntity['id'];
+  // One batch: the row and its authority cell commit together.
+  await batchMessages(async () => {
+    const { pair } = await validateTransactionWrite(transaction);
+    id = await insertWithSchema('transactions', transaction);
+    if (pair) {
+      // amount_pair is internal and not in the AQL schema.
+      await update('transactions', { id, amount_pair: pair });
+    }
+  });
+  return id;
 }
 
-export function updateTransaction(transaction) {
-  return updateWithSchema('transactions', transaction);
+export async function updateTransaction(transaction) {
+  await batchMessages(async () => {
+    const { pair } = await validateTransactionWrite(transaction);
+    await updateWithSchema('transactions', transaction);
+    if (pair) {
+      await update('transactions', { id: transaction.id, amount_pair: pair });
+    }
+  });
 }
 
 export async function deleteTransaction(transaction) {

@@ -19,6 +19,7 @@ function account(overrides: Partial<AccountEntity> = {}): AccountEntity {
     sort_order: 0,
     last_reconciled: null,
     currency: null,
+    currency_precision: null,
     tombstone: 0,
     account_id: 'bank-account-1',
     bank: 'bank-1',

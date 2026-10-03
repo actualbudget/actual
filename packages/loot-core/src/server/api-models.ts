@@ -48,36 +48,50 @@ export type AmountFormat = 'raw' | 'money';
 export type AmountFormatOptions = { amountFormat?: AmountFormat };
 export type AmountInput = number | Money;
 
+/**
+ * `amount` is the budget-base integer (or Money in the budget currency);
+ * `transaction_amount` is the account-native integer (or Money in the
+ * account currency) and is required for foreign-currency accounts.
+ */
 export type APIImportTransactionInput = Omit<
   ImportTransactionEntity,
   'amount' | 'subtransactions'
 > & {
   amount?: AmountInput;
+  transaction_amount?: AmountInput | null;
   subtransactions?: Array<
     Omit<
       NonNullable<ImportTransactionEntity['subtransactions']>[number],
       'amount'
     > & {
       amount: AmountInput;
+      transaction_amount?: AmountInput | null;
     }
   >;
 };
 
 export type APITransactionUpdateFields = Omit<
   Partial<TransactionEntity>,
-  'amount' | 'subtransactions'
+  'amount' | 'transaction_amount' | 'subtransactions'
 > & {
   amount?: AmountInput;
+  transaction_amount?: AmountInput | null;
   subtransactions?: Array<
-    Omit<TransactionEntity, 'amount'> & { amount: AmountInput }
+    Omit<TransactionEntity, 'amount' | 'transaction_amount'> & {
+      amount: AmountInput;
+      transaction_amount?: AmountInput | null;
+    }
   >;
 };
 
 export type APIMoneyTransactionEntity = Omit<
   TransactionEntity,
-  'amount' | 'subtransactions'
+  'amount' | 'transaction_amount' | 'subtransactions'
 > & {
+  /** Budget currency. */
   amount: Money;
+  /** Account currency, foreign-currency accounts only. */
+  transaction_amount?: Money | null;
   subtransactions?: APIMoneyTransactionEntity[];
 };
 

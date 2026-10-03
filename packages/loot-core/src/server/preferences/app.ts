@@ -13,6 +13,10 @@ import {
 } from '#server/prefs';
 import { getServer } from '#server/server-config';
 import { undoable } from '#server/undo';
+import {
+  assertBaseCurrencyChangeAllowed,
+  BASE_CURRENCY_LOCK,
+} from '#server/util/currency';
 import { stringToInteger } from '#shared/util';
 import type { GlobalPrefs, MetadataPrefs, SyncedPrefs } from '#types/prefs';
 
@@ -54,6 +58,12 @@ async function saveSyncedPrefs({
 }) {
   if (!id) {
     return;
+  }
+  if (id === BASE_CURRENCY_LOCK) {
+    throw new Error('base-currency-lock-protected');
+  }
+  if (id === 'defaultCurrencyCode') {
+    await assertBaseCurrencyChangeAllowed(value ?? '');
   }
 
   const hasAmountEncoding = Boolean(_getMetadataPrefs()?.amountEncoding);

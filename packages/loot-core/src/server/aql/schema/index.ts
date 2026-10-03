@@ -40,6 +40,8 @@ export const schema = {
     account: f('id', { ref: 'accounts', required: true }),
     category: f('id', { ref: 'categories' }),
     amount: f('integer', { default: 0, required: true }),
+    // Account-native integer for foreign-currency accounts; amount is base.
+    transaction_amount: f('integer'),
     payee: f('id', { ref: 'payees' }),
     notes: f('string'),
     date: f('date', { required: true }),
@@ -80,6 +82,7 @@ export const schema = {
     bank_sync_status: f('string'),
     account_group_id: f('id', { ref: 'account_groups' }),
     currency: f('string'),
+    currency_precision: f('integer'),
   },
   account_groups: {
     id: f('id'),

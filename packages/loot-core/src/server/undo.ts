@@ -43,8 +43,17 @@ function trimHistory() {
   }
 }
 
-export function appendMessages(messages, oldData) {
+// The permanent base-currency lock is never undone or redone.
+function isUndoable(message) {
+  return !(
+    message.dataset === 'preferences' &&
+    message.row === 'multicurrencyBaseCurrency'
+  );
+}
+
+export function appendMessages(allMessages, oldData) {
   const context = getMutatorContext();
+  const messages = allMessages.filter(isUndoable);
 
   if (context.undoListening && messages.length > 0) {
     trimHistory();

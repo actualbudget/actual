@@ -43,15 +43,48 @@ function deriveExchangeRate(value: unknown) {
   }
 }
 
+export function amountPair(amount: number, transactionAmount: number): string {
+  if (
+    !Number.isSafeInteger(amount) ||
+    !Number.isSafeInteger(transactionAmount)
+  ) {
+    throw new Error('foreign-pair-required');
+  }
+  return `${amount}:${transactionAmount}`;
+}
+
+export function parseAmountPair(
+  value: unknown,
+): { amount: number; transaction_amount: number } | null {
+  return deriveTransactionAmounts(value);
+}
+
+function deriveTransactionAmounts(value: unknown) {
+  if (typeof value !== 'string') return null;
+  const match = /^(-?\d+):(-?\d+)$/.exec(value);
+  if (!match) return null;
+  const amount = Number(match[1]);
+  const transactionAmount = Number(match[2]);
+  if (
+    !Number.isSafeInteger(amount) ||
+    !Number.isSafeInteger(transactionAmount)
+  ) {
+    return null;
+  }
+  return { amount, transaction_amount: transactionAmount };
+}
+
 const COUPLED_TABLES: Record<string, CoupledTable> = {
   exchange_rates: { authority: 'spec', derive: deriveExchangeRate },
+  transactions: { authority: 'amount_pair', derive: deriveTransactionAmounts },
 };
 
 function deriveRows(
   table: string,
   { authority, derive }: CoupledTable,
   rows: Array<Record<string, unknown>>,
-) {
+): boolean {
+  let changedAny = false;
   for (const row of rows) {
     const derived = derive(row[authority]);
     if (!derived) continue;
@@ -59,11 +92,13 @@ function deriveRows(
       ([column, value]) => row[column] !== value,
     );
     if (changed.length === 0) continue;
+    changedAny = true;
     db.runQuery(
       `UPDATE ${table} SET ${changed.map(([column]) => `${column} = ?`).join(', ')} WHERE id = ?`,
       [...changed.map(([, value]) => value), row.id as string],
     );
   }
+  return changedAny;
 }
 
 /** Recompute dependent columns for the rows touched by an apply batch. */
@@ -92,11 +127,27 @@ export function deriveCoupledCells(idsPerTable: Record<string, string[]>) {
   }
 }
 
-/** Full pass used after deferred replay and when a budget loads. */
-export function deriveAllCoupledCells() {
+/**
+ * Budget-load pass: changed amounts invalidate any warm spreadsheet cache
+ * computed from the pre-derivation values.
+ */
+export function deriveCoupledCellsForLoad() {
+  db.transaction(() => {
+    if (deriveAllCoupledCells().has('transactions')) {
+      db.runQuery('DELETE FROM kvcache_key');
+    }
+  });
+}
+
+/**
+ * Full pass used after deferred replay and when a budget loads. Returns the
+ * tables whose dependent columns changed.
+ */
+export function deriveAllCoupledCells(): Set<string> {
+  const changedTables = new Set<string>();
   for (const [table, coupled] of Object.entries(COUPLED_TABLES)) {
     try {
-      deriveRows(
+      const changed = deriveRows(
         table,
         coupled,
         db.runQuery<Record<string, unknown>>(
@@ -105,9 +156,11 @@ export function deriveAllCoupledCells() {
           true,
         ),
       );
+      if (changed) changedTables.add(table);
     } catch (e) {
       // The table or column may not exist before its migration runs.
       if (!isMissingSchemaError(e)) throw e;
     }
   }
+  return changedTables;
 }

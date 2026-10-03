@@ -4,6 +4,7 @@ import { payeeModel } from '#server/models';
 import { mutator } from '#server/mutators';
 import { getCompletedScheduleRuleIds } from '#server/schedules/app';
 import { batchMessages } from '#server/sync';
+import { isForeignAccount } from '#server/transactions/foreign-guard';
 import * as rules from '#server/transactions/transaction-rules';
 import { undoable } from '#server/undo';
 import { DEFAULT_MAX_DISTANCE_METERS } from '#shared/constants';
@@ -97,6 +98,22 @@ async function mergePayees({
   targetId: PayeeEntity['id'];
   mergeIds: Array<PayeeEntity['id']>;
 }) {
+  // Merging into a transfer payee would turn foreign transactions into
+  // transfers without a transaction write.
+  const target = await db.first<Pick<db.DbPayee, 'transfer_acct'>>(
+    'SELECT transfer_acct FROM payees WHERE id = ?',
+    [targetId],
+  );
+  if (target?.transfer_acct) {
+    for (const id of mergeIds) {
+      if (
+        (await isPayeeUsedByForeignTransaction(id)) ||
+        (await isForeignAccount(target.transfer_acct))
+      ) {
+        throw new Error('multicurrency-transfer-unavailable');
+      }
+    }
+  }
   await db.mergePayees(targetId, mergeIds);
 }
 
@@ -105,6 +122,10 @@ async function batchChangePayees({
   deleted,
   updated,
 }: Partial<Diff<PayeeEntity>>): Promise<void> {
+  await rejectForeignTransferTargetChanges([
+    ...(added ?? []),
+    ...(updated ?? []),
+  ]);
   await batchMessages(async () => {
     if (deleted) {
       await Promise.all(
@@ -126,6 +147,47 @@ async function batchChangePayees({
       );
     }
   });
+}
+
+// Transactions keep raw payee ids; merged payees resolve through mappings.
+// Tombstoned rows count because undo can restore them.
+async function isPayeeUsedByForeignTransaction(payeeId: string) {
+  return Boolean(
+    await db.first(
+      `SELECT 1 FROM transactions t
+         JOIN accounts a ON a.id = t.acct
+         LEFT JOIN payee_mapping pm ON pm.id = t.description
+         WHERE COALESCE(pm.targetId, t.description) = ?
+           AND a.currency IS NOT NULL
+         LIMIT 1`,
+      [payeeId],
+    ),
+  );
+}
+
+// Turning a payee into (or out of) a transfer payee would create or break a
+// transfer without a transaction write, so it is checked here.
+async function rejectForeignTransferTargetChanges(
+  payees: Array<Partial<PayeeEntity>>,
+) {
+  for (const payee of payees) {
+    if (!('transfer_acct' in payee) || !payee.id) continue;
+    const existing = await db.first<Pick<db.DbPayee, 'transfer_acct'>>(
+      'SELECT transfer_acct FROM payees WHERE id = ?',
+      [payee.id],
+    );
+    const previous = existing?.transfer_acct ?? null;
+    const next = payee.transfer_acct ?? null;
+    if (previous === next) continue;
+    const usedByForeign = await isPayeeUsedByForeignTransaction(payee.id);
+    if (
+      usedByForeign ||
+      (previous && (await isForeignAccount(previous))) ||
+      (next && (await isForeignAccount(next)))
+    ) {
+      throw new Error('multicurrency-transfer-unavailable');
+    }
+  }
 }
 
 async function checkOrphanedPayees({

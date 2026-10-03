@@ -1,0 +1,7 @@
+BEGIN TRANSACTION;
+
+ALTER TABLE transactions ADD COLUMN transaction_amount INTEGER DEFAULT NULL;
+ALTER TABLE transactions ADD COLUMN amount_pair TEXT DEFAULT NULL;
+ALTER TABLE accounts ADD COLUMN currency_precision INTEGER DEFAULT NULL;
+
+COMMIT;
