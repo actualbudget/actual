@@ -642,10 +642,20 @@ export function receiveMessages(messages: Message[]): Promise<Message[]> {
     const timestamp = getClock().timestamp;
     const savedMillis = timestamp.millis();
     const savedCounter = timestamp.counter();
+    let recvMillis = savedMillis;
+    let recvCounter = savedCounter;
 
     function restoreClock() {
-      timestamp.setMillis(savedMillis);
-      timestamp.setCounter(savedCounter);
+      // Non-mutator handlers (e.g. `save-prefs`) can call Timestamp.send()
+      // while we wait on applyMessages; only roll back if nothing advanced
+      // the clock past the post-recv state.
+      if (
+        timestamp.millis() === recvMillis &&
+        timestamp.counter() === recvCounter
+      ) {
+        timestamp.setMillis(savedMillis);
+        timestamp.setCounter(savedCounter);
+      }
     }
 
     try {
@@ -665,17 +675,19 @@ export function receiveMessages(messages: Message[]): Promise<Message[]> {
       if (latest !== null) {
         Timestamp.recv(latest);
       }
+      recvMillis = timestamp.millis();
+      recvCounter = timestamp.counter();
 
       // Inbound messages may come from a newer version of the app, so
       // unknown-schema errors defer instead of failing the batch
       return await applyMessages(messages, true);
-    } catch (e) {
+    } catch (error) {
       restoreClock();
 
-      if (e instanceof Timestamp.ClockDriftError) {
+      if (error instanceof Timestamp.ClockDriftError) {
         throw new SyncError('clock-drift');
       }
-      throw e;
+      throw error;
     }
   });
 }

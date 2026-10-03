@@ -248,6 +248,40 @@ describe('receiveMessages', () => {
     expect(getClock().timestamp.toString()).toEqual(before);
   });
 
+  it('restores the clock when a message fails to apply after recv', async () => {
+    void prefs.loadPrefs();
+    void prefs.savePrefs({ groupId: 'group' });
+
+    const before = getClock().timestamp.toString();
+
+    // Two messages sharing one timestamp: the second violates the
+    // `messages_crdt.timestamp` UNIQUE constraint inside the transaction,
+    // after recv() has already bumped the clock
+    const shared = new Timestamp(Date.now() + 5000, 0, '0000000000000001');
+    const messages = [
+      {
+        dataset: 'transactions',
+        row: 'foo',
+        column: 'amount',
+        value: 3200,
+        timestamp: shared,
+      },
+      {
+        dataset: 'transactions',
+        row: 'bar',
+        column: 'amount',
+        value: 4200,
+        timestamp: shared,
+      },
+    ];
+
+    await expect(receiveMessages(messages)).rejects.toThrow(
+      /UNIQUE constraint failed/,
+    );
+
+    expect(getClock().timestamp.toString()).toEqual(before);
+  });
+
   it('safely handles concurrent batches where the first fails and the second succeeds', async () => {
     void prefs.loadPrefs();
     void prefs.savePrefs({ groupId: 'group' });
