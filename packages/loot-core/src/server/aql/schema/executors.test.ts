@@ -37,7 +37,7 @@ function aliveTransactions(arr) {
 async function insertTransactions(transactions, payeeIds?: string[]) {
   return batchMessages(async () => {
     for (const trans of transactions) {
-      void db.insertTransaction(trans);
+      await db.insertTransaction(trans);
     }
 
     if (payeeIds) {
