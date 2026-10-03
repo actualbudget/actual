@@ -8,11 +8,13 @@ import createDebug from 'debug';
 
 import { applyFileEnv } from './config-file-env';
 
-const require = createRequire(import.meta.url);
 const debug = createDebug('actual:config');
 const debugSensitive = createDebug('actual-sensitive:config');
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// import.meta.url is undefined in Cloudflare Workers bundles, where there is
+// no project directory on disk.
+const moduleUrl = import.meta.url;
+const __dirname = moduleUrl ? path.dirname(fileURLToPath(moduleUrl)) : '/';
 
 const projectRoot = path.dirname(__dirname).replace(/[\\/]build$/, '');
 const defaultDataDir = process.env.ACTUAL_DATA_DIR
@@ -25,6 +27,7 @@ debug(`Project root: '${projectRoot}'`);
 
 function resolveWebBuildPath() {
   try {
+    const require = createRequire(moduleUrl);
     return path.join(
       path.dirname(require.resolve('@actual-app/web/package.json')),
       'build',

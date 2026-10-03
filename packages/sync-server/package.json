@@ -18,14 +18,26 @@
   ],
   "type": "module",
   "imports": {
-    "#db": "./src/db.js",
+    "#db": {
+      "workerd": "./src/db.workerd.js",
+      "default": "./src/db.js"
+    },
     "#account-db": "./src/account-db.js",
+    "#create-app": "./src/create-app.ts",
     "#load-config": "./src/load-config.js",
     "#migrations": "./src/migrations.ts",
-    "#password-hash": "./src/accounts/password-hash.js",
-    "#storage": "./src/storage/node.ts",
+    "#password-hash": {
+      "workerd": "./src/accounts/password-hash.workerd.js",
+      "default": "./src/accounts/password-hash.js"
+    },
+    "#storage": {
+      "workerd": "./src/storage/workerd.ts",
+      "default": "./src/storage/node.ts"
+    },
     "#storage/types": "./src/storage/types.ts",
     "#sync-simple": "./src/sync-simple.js",
+    "#sync-core": "./src/sync-core.js",
+    "#workerd/runtime": "./src/workerd/runtime.ts",
     "#accounts/*": "./src/accounts/*.js",
     "#app-enablebanking/services/*": "./src/app-enablebanking/services/*.ts",
     "#app-enablebanking/utils/*": "./src/app-enablebanking/utils/*.ts",
@@ -46,7 +58,8 @@
     "#scripts/*": "./src/scripts/*.js",
     "#services/*": "./src/services/*.js",
     "#util/title": "./src/util/title/index.js",
-    "#util/*": "./src/util/*.ts"
+    "#util/*": "./src/util/*.ts",
+    "#package.json": "./package.json"
   },
   "publishConfig": {
     "imports": {
@@ -89,7 +102,12 @@
     "db:test-downgrade": "yarn build && cross-env NODE_ENV=test node build/scripts/run-migrations.js down",
     "reset-password": "yarn build && node build/scripts/reset-password.js",
     "disable-openid": "yarn build && node build/scripts/disable-openid.js",
-    "health-check": "yarn build && node build/scripts/health-check.js"
+    "health-check": "yarn build && node build/scripts/health-check.js",
+    "cf:build": "vite build --config cloudflare/vite.config.mts",
+    "cf:dev": "yarn cf:build && wrangler dev -c cloudflare/dist/actual_sync_server/wrangler.json --persist-to cloudflare/.wrangler/state",
+    "cf:deploy": "yarn cf:build && wrangler deploy -c cloudflare/dist/actual_sync_server/wrangler.json",
+    "cf:types": "wrangler types -c cloudflare/wrangler.jsonc cloudflare/worker-configuration.d.ts",
+    "cf:typecheck": "tsgo -p cloudflare/tsconfig.json"
   },
   "dependencies": {
     "@actual-app/crdt": "workspace:*",
@@ -116,6 +134,8 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1",
+    "@cloudflare/workers-types": "^5",
     "@types/bcrypt": "^6.0.0",
     "@types/better-sqlite3": "^9.6.0",
     "@types/convict": "^6",
@@ -131,7 +151,8 @@
     "supertest": "^7.2.2",
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.1.5",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.0",
+    "wrangler": "^4"
   },
   "engines": {
     "node": ">=22"

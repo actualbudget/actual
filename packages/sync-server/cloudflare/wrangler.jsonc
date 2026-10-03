@@ -1,0 +1,68 @@
+{
+  "$schema": "../../../node_modules/wrangler/config-schema.json",
+  "name": "actual-sync-server",
+  "main": "./src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // The web app (yarn build:browser). Everything not listed in
+  // run_worker_first is served straight from here, with the COOP/COEP
+  // headers from its _headers file and index.html as the SPA fallback.
+  "assets": {
+    "directory": "../../desktop-client/build",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/account",
+      "/account/*",
+      "/admin",
+      "/admin/*",
+      "/akahu/*",
+      "/cors-proxy",
+      "/cors-proxy/*",
+      "/enablebanking/*",
+      "/gocardless/*",
+      "/health",
+      "/info",
+      "/metrics",
+      "/mode",
+      "/openid/*",
+      "/pluggyai/*",
+      "/secret",
+      "/secret/*",
+      "/simplefin/*",
+      "/sync/*",
+    ],
+  },
+
+  "durable_objects": {
+    "bindings": [
+      { "name": "ACTUAL_SERVER", "class_name": "ActualServer" },
+      { "name": "SYNC_GROUP", "class_name": "SyncGroup" },
+    ],
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["ActualServer", "SyncGroup"] },
+  ],
+
+  "r2_buckets": [
+    { "binding": "USER_FILES", "bucket_name": "actual-user-files" },
+  ],
+
+  "vars": {
+    // node:fs in Workers only allows writes under /tmp. Nothing durable is
+    // stored there; the create-folders migration just needs somewhere to mkdir.
+    "ACTUAL_DATA_DIR": "/tmp",
+    // The only hop in front of Express is our own Worker, which replaces
+    // X-Forwarded-For with Cloudflare's CF-Connecting-IP. Trusting it gives
+    // req.ip the real client address (used by the rate limiter). Express's
+    // proxy-addr rejects /0, hence the two halves per address family.
+    "ACTUAL_TRUSTED_PROXIES": "0.0.0.0/1,128.0.0.0/1,::/1,8000::/1",
+  },
+
+  "limits": {
+    // argon2id password hashing takes ~120ms of CPU.
+    "cpu_ms": 30000,
+  },
+
+  "observability": { "enabled": true },
+}

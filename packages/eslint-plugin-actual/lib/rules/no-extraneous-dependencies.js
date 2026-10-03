@@ -57,7 +57,9 @@ function isExternalImport(source) {
   if (
     source.startsWith('.') ||
     source.startsWith('#') ||
-    source.startsWith('virtual:')
+    source.startsWith('virtual:') ||
+    // Modules provided by the Cloudflare Workers runtime
+    source.startsWith('cloudflare:')
   ) {
     return false;
   }
