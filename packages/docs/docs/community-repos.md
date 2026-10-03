@@ -21,6 +21,7 @@ The following are implementations of bank syncing using the Actual API, or conve
 - **US bank statement converter (BofA, Chase, Citi, Amex CSV and Chase PDF) to Actual-ready CSV** - https://github.com/Ildana-ai/bank2actual
 - **ANZ Plus bank PDF to OFX converter** - [PDFtoOFX](https://github.com/spydisec/PDFtoOFX/)
 - **German DKB and Comdirect banks importer** - https://github.com/FridoE/actual-bank-importer
+- **ofxsplit: split an OFX or QFX export that holds several accounts into one file per account for Actual's import dialog** - https://github.com/Rezarys/ofxsplit
 
 ## Other Importers
 
