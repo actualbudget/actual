@@ -169,8 +169,8 @@ export function AutomationListRow({
           }}
         >
           <Text
+            size="small"
             style={{
-              fontSize: 12,
               fontWeight: 600,
               fontVariantNumeric: 'tabular-nums',
               color:

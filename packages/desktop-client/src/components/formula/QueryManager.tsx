@@ -254,7 +254,7 @@ export function QueryManager({ queries, onQueriesChange }: QueryManagerProps) {
               No queries defined. Click 'Add Query' to create your first query.
             </Trans>
           </Text>
-          <Text style={{ fontSize: 12, marginTop: 8 }}>
+          <Text size="small" style={{ marginTop: 8 }}>
             <Trans>
               Queries allow you to reference filtered transaction data in your
               formulas using QUERY("queryName") or QUERY_COUNT("queryName")
@@ -665,8 +665,8 @@ function QueryItem({
                       <Trans>Import Query Configuration</Trans>
                     </Text>
                     <Text
+                      size="small"
                       style={{
-                        fontSize: 12,
                         color: theme.pageTextSubdued,
                         marginBottom: 8,
                       }}
@@ -847,8 +847,8 @@ function QueryItem({
 
       <View style={{ marginBottom: 8, flex: 1 }}>
         <Text
+          size="small"
           style={{
-            fontSize: 12,
             fontWeight: 500,
             marginBottom: 6,
             color: theme.pageTextSubdued,

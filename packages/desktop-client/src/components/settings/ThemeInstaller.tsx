@@ -219,10 +219,10 @@ export function ThemeInstaller({
       </Text>
       {catalogError ? (
         <Text
+          size="small"
           style={{
             color: themeStyle.errorText,
             marginBottom: 12,
-            fontSize: 12,
           }}
         >
           <Trans>
@@ -447,10 +447,10 @@ export function ThemeInstaller({
       {/* Error Message */}
       {error && (
         <Text
+          size="small"
           style={{
             color: themeStyle.errorText,
             marginBottom: 12,
-            fontSize: 12,
           }}
         >
           {error}

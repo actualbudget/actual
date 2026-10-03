@@ -87,7 +87,7 @@ export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
             </VisuallyHidden>
           </>
         )}
-        <Text style={{ fontSize: 12 }}>
+        <Text size="small">
           {monthUtils.format(entry.date, dateFormat, locale)}
         </Text>
       </View>

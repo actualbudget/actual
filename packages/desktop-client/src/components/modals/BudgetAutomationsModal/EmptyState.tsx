@@ -50,8 +50,8 @@ export function EmptyState({ onAdd }: EmptyStateProps) {
         <Trans>No automations yet</Trans>
       </Text>
       <Text
+        size="medium"
         style={{
-          fontSize: 13,
           color: theme.pageTextLight,
           marginTop: 4,
           marginBottom: 22,
@@ -112,8 +112,8 @@ export function EmptyState({ onAdd }: EmptyStateProps) {
                 <Icon width={16} height={16} />
               </View>
               <Text
+                size="medium"
                 style={{
-                  fontSize: 13,
                   fontWeight: 600,
                   color: theme.pageText,
                 }}

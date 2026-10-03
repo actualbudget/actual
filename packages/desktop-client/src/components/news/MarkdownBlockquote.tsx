@@ -98,9 +98,9 @@ export function MarkdownBlockquote({
     <Alert {...admonitionStyles[marker.type]} style={{ margin: '10px 0' }}>
       <View style={{ gap: 4 }}>
         <Text
+          size="small"
           style={{
             fontWeight: 700,
-            fontSize: 12,
             textTransform: 'uppercase',
             letterSpacing: 0.5,
           }}

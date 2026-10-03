@@ -43,15 +43,15 @@ export function BankSyncAccountsListItem({
       }}
       onClick={() => onAction(account, isLinked ? 'edit' : 'link')}
     >
-      <SpaceBetween gap={60}>
+      <SpaceBetween gap={16}>
         <SpaceBetween
           direction="vertical"
           gap={5}
           style={{ flex: 1, alignItems: 'flex-start' }}
         >
           <Text
+            size="large"
             style={{
-              fontSize: 15,
               fontWeight: 500,
               color: theme.tableText,
             }}
@@ -60,8 +60,8 @@ export function BankSyncAccountsListItem({
           </Text>
           {isLinked && (
             <Text
+              size="medium"
               style={{
-                fontSize: 13,
                 color: theme.pageTextSubdued,
               }}
             >
@@ -70,8 +70,8 @@ export function BankSyncAccountsListItem({
           )}
           {isLinked && lastSyncString && (
             <Text
+              size="medium"
               style={{
-                fontSize: 13,
                 color: theme.pageTextSubdued,
               }}
               data-vrt-mask
