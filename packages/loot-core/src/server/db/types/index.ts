@@ -375,6 +375,18 @@ export type DbViewSchedule = {
   _has_splits: 0 | 1;
 };
 
+export type DbExchangeRate = {
+  id: string;
+  base_currency: string;
+  quote_currency: string;
+  rate: string;
+  kind: 'dated' | 'standing' | 'fetched';
+  source: string;
+  timestamp: string;
+  spec?: string | null;
+  tombstone: 1 | 0;
+};
+
 export type DbTag = {
   id: string;
   tag: string;

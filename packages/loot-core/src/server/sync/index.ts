@@ -30,6 +30,7 @@ import { isMissingSchemaError } from '#shared/errors';
 import { getIn, setIn } from '#shared/util';
 import type { MetadataPrefs } from '#types/prefs';
 
+import { deriveCoupledCells } from './coupled-cells';
 import * as encoder from './encoder';
 import { PENDING_MESSAGES_TABLE_SQL } from './messages-pending';
 import { rebuildMerkleHash } from './repair';
@@ -371,6 +372,10 @@ function compareMessages(messages: Message[]): Message[] {
 // depend on having both old and new data which we don't quere here
 function applyMessagesForImport(messages: Message[]): void {
   db.transaction(() => {
+    const idsPerTable: Record<string, string[]> = {};
+    for (const msg of messages) {
+      (idsPerTable[msg.dataset] ??= []).push(msg.row);
+    }
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
       const { dataset } = msg;
@@ -387,6 +392,7 @@ function applyMessagesForImport(messages: Message[]): void {
         }
       }
     }
+    deriveCoupledCells(idsPerTable);
   });
 }
 
@@ -543,6 +549,8 @@ async function _applyMessages(messages: Message[], isReceived = false) {
       );
     }
 
+    // Coupled columns must be coherent before anything observes newData.
+    deriveCoupledCells(idsPerTable);
     newData = fetchData(idsPerTable);
   };
   if (isReceived) {

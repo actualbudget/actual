@@ -8,6 +8,7 @@ import { app as accountGroupsApp } from './account-groups/app';
 import { app as accountsApp } from './accounts/app';
 import { installAPI } from './api';
 import { createBudget } from './budget/base';
+import { runMutator } from './mutators';
 import * as prefs from './prefs';
 
 vi.mock('#shared/errors', () => ({
@@ -351,6 +352,23 @@ describe('API handlers', () => {
       expect(group?.categories?.[0]).toHaveProperty('received', 5000);
       expect(group?.categories?.[0]).toHaveProperty('balance', 1000);
       expect(group?.categories?.[0]).toHaveProperty('carryover', false);
+    });
+
+    it('validates the month inside the queue for Money reads', async () => {
+      let release: (() => void) | undefined;
+      const blocker = runMutator(
+        () => new Promise<void>(resolve => (release = resolve)),
+      );
+      const read = handlers['api/budget-month']({
+        month: '2026-03',
+        options: { amountFormat: 'money' },
+      });
+      await new Promise(resolve => setTimeout(resolve, 20));
+      expect(handlers['get-budget-bounds']).not.toHaveBeenCalled();
+      release?.();
+      await blocker;
+      await read;
+      expect(handlers['get-budget-bounds']).toHaveBeenCalled();
     });
 
     it.each(['envelope', 'tracking'] as const)(

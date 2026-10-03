@@ -225,6 +225,18 @@ export const schema = {
     created_at: f('integer', { required: true }),
     tombstone: f('boolean'),
   },
+  exchange_rates: {
+    id: f('id'),
+    base_currency: f('string', { required: true }),
+    quote_currency: f('string', { required: true }),
+    rate: f('string', { required: true }),
+    kind: f('string', { required: true }),
+    source: f('string', { required: true }),
+    timestamp: f('string', { required: true }),
+    // Internal authority cell; see server/sync/coupled-cells.ts.
+    spec: f('string'),
+    tombstone: f('boolean'),
+  },
 };
 
 export const schemaConfig: SchemaConfig = {

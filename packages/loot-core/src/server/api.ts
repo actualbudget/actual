@@ -510,13 +510,15 @@ function encodeTransactionMoney(transaction, currencyCode: string) {
 
 handlers['api/budget-month'] = async function ({ month, options }) {
   checkFileOpen();
-  await validateMonth(month);
   const asMoney = amountFormatIsMoney(options?.amountFormat);
   return asMoney
     ? runMutator(() => readBudgetMonth(true))
     : readBudgetMonth(false);
 
   async function readBudgetMonth(asMoney: boolean) {
+    // Month validation creates budget cells, so a queued Money read must
+    // run it after any encoding transition has reloaded the spreadsheet.
+    await validateMonth(month);
     // Queued Money reads cannot interleave with an encoding transition.
     if (asMoney) await sheet.waitOnSpreadsheet();
     const budgetCurrencyCode = await getDefaultCurrencyCode();
