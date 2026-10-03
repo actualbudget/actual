@@ -69,10 +69,15 @@ export async function unlockTransaction(
   await send('transactions-batch-update', { updated: diff.updated });
 }
 
+/** Cleared balance in the account's own units (native for foreign accounts). */
 export async function getClearedBalance(accountId: AccountEntity['id']) {
-  const { data } = await aqlQuery(
-    bindings.accountBalanceCleared(accountId).query,
+  const { data: accounts } = await aqlQuery(
+    q('accounts').filter({ id: accountId }).select('currency'),
   );
+  const binding = accounts?.[0]?.currency
+    ? bindings.accountNativeBalanceCleared(accountId)
+    : bindings.accountBalanceCleared(accountId);
+  const { data } = await aqlQuery(binding.query);
 
   return data ?? 0;
 }

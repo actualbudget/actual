@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event';
 
 import { AmountInput as MobileAmountInput } from '#components/mobile/transactions/AmountInput';
 import { SplitAmountInput } from '#components/mobile/transactions/SplitAmountInput';
+import { CurrencyFormatProvider } from '#hooks/currencyFormatContext';
 import { createTestAppStore, TestProviders } from '#mocks';
 import { mergeSyncedPrefs } from '#prefs/prefsSlice';
 
@@ -257,4 +258,36 @@ it('enters whole yen at legacy storage precision with automatic decimals', () =>
   expect(input).toHaveValue('1,500');
   fireEvent.blur(input);
   expect(onUpdate).toHaveBeenLastCalledWith(-150000);
+});
+
+it('uses the foreign account precision for automatic decimal entry in a legacy budget', () => {
+  prefs.precision = undefined;
+  const onUpdate = vi.fn();
+  renderInput(
+    <CurrencyFormatProvider currencyCode="IQD" precision={3}>
+      <AmountInput value={1234} autoDecimals onUpdate={onUpdate} zeroSign="+" />
+    </CurrencyFormatProvider>,
+  );
+  const input = screen.getByRole('textbox');
+  fireEvent.focus(input);
+  fireEvent.change(input, { target: { value: '5123' } });
+  expect(input).toHaveValue('5.123');
+  fireEvent.blur(input);
+  expect(onUpdate).toHaveBeenLastCalledWith(5123);
+});
+
+it('uses the foreign account precision for mobile entry in a legacy budget', () => {
+  prefs.precision = undefined;
+  const onChange = vi.fn();
+  renderInput(
+    <CurrencyFormatProvider currencyCode="IQD" precision={3}>
+      <MobileAmountInput autoFocus value={1.234} onChange={onChange} />
+    </CurrencyFormatProvider>,
+  );
+  const input = screen.getByRole('textbox');
+  fireEvent.focus(input);
+  fireEvent.change(input, { target: { value: '5123' } });
+  expect(input).toHaveValue('5.123');
+  fireEvent.blur(input);
+  expect(onChange).toHaveBeenLastCalledWith(5.123);
 });

@@ -15,6 +15,7 @@ import {
 } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 
+import { useCurrencyFormatOverride } from './currencyFormatContext';
 import { useAmountPrecision } from './useAmountPrecision';
 import { useFeatureFlag } from './useFeatureFlag';
 import { useSyncedPref } from './useSyncedPref';
@@ -125,9 +126,12 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
     'currencySpaceBetweenAmountAndSymbol',
   );
 
+  const override = useCurrencyFormatOverride();
   const activeCurrency = useMemo(() => {
-    return getCurrency(defaultCurrencyCodePref || '');
-  }, [defaultCurrencyCodePref]);
+    return getCurrency(
+      override?.currencyCode ?? (defaultCurrencyCodePref || ''),
+    );
+  }, [override?.currencyCode, defaultCurrencyCodePref]);
   const precision = storedPrecision ?? recordedPrecision;
 
   const numberFormatConfig = useMemo(
@@ -188,7 +192,9 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
         } else {
           displayDecimalPlaces =
             storedPrecision ??
-            (encoding ? recordedPrecision : activeCurrency.decimalPlaces);
+            (encoding || override
+              ? recordedPrecision
+              : activeCurrency.decimalPlaces);
         }
       }
 
@@ -230,6 +236,7 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
       activeCurrency,
       showCurrencySymbol,
       encoding,
+      override,
       recordedPrecision,
       precision,
       storedPrecision,
@@ -253,7 +260,7 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
     (value: IntegerAmount) => {
       const amount = toAmount(value);
       const decimalPlaces =
-        storedPrecision !== undefined || encoding
+        storedPrecision !== undefined || encoding || override
           ? precision
           : hideFractionPref === 'true'
             ? 0
@@ -271,6 +278,7 @@ export function useFormat(storedPrecision?: number): UseFormatResult {
       precision,
       storedPrecision,
       encoding,
+      override,
       hideFractionPref,
       activeCurrency.decimalPlaces,
       numberFormatConfig.format,

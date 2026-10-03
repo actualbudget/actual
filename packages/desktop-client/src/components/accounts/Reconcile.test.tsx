@@ -5,6 +5,7 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { accountQueries } from '#accounts';
 import { useSheetValue } from '#hooks/useSheetValue';
 import {
   configureTestAppStore,
@@ -48,6 +49,30 @@ describe('ReconcilingMessage math & UI', () => {
 
     expect(useSheetValue).toHaveBeenCalledWith(
       bindings.accountBalanceCleared('account-1'),
+    );
+  });
+
+  test('reads the native cleared balance of a foreign account', () => {
+    vi.mocked(useSheetValue).mockReturnValue(5000);
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(accountQueries.list().queryKey, [
+      { ...generateAccount('Euro'), id: 'account-1', currency: 'EUR' },
+    ]);
+
+    render(
+      <TestProviders queryClient={queryClient}>
+        <ReconcilingMessage
+          accountId="account-1"
+          targetBalance={5000}
+          onDone={vi.fn()}
+          onExit={vi.fn()}
+          onCreateTransaction={vi.fn()}
+        />
+      </TestProviders>,
+    );
+
+    expect(useSheetValue).toHaveBeenLastCalledWith(
+      bindings.accountNativeBalanceCleared('account-1'),
     );
   });
 

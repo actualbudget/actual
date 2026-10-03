@@ -14,6 +14,7 @@ import type {
 } from '#types/models';
 
 import { exportQueryToCSV, exportToCSV } from './export/export-to-csv';
+import { postForeignEntry } from './foreign-entry';
 import { parseFile } from './import/parse-file';
 import type { ParseFileOptions } from './import/parse-file';
 import { mergeTransactions } from './merge';
@@ -32,6 +33,7 @@ export type TransactionHandlers = {
   'transactions-merge': typeof mergeTransactions;
   'get-earliest-transaction': typeof getEarliestTransaction;
   'get-latest-transaction': typeof getLatestTransaction;
+  'transactions/post-foreign-entry': typeof postForeignEntry;
 };
 
 async function handleBatchUpdateTransactions({
@@ -160,6 +162,8 @@ app.method(
   'transactions-batch-update',
   mutator(undoable(handleBatchUpdateTransactions)),
 );
+// Undo is recorded around the final writes only, inside the handler.
+app.method('transactions/post-foreign-entry', mutator(postForeignEntry));
 app.method('transactions-merge', mutator(undoable(mergeTransactions)));
 
 app.method('transaction-add', mutator(addTransaction));

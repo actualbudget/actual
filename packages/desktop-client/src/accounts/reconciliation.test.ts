@@ -1,3 +1,5 @@
+import type { Query } from '@actual-app/core/shared/query';
+
 import { aqlQuery } from '#queries/aqlQuery';
 import * as bindings from '#spreadsheet/bindings';
 
@@ -40,5 +42,44 @@ describe('finishReconciliation', () => {
 
     expect(lock).not.toHaveBeenCalled();
     expect(didReconcile).toBe(false);
+  });
+
+  describe('with accounts in other currencies', () => {
+    const currencies: Record<string, string | null> = {
+      jpy: 'JPY',
+      usd: null,
+    };
+
+    beforeEach(() => {
+      vi.mocked(aqlQuery).mockImplementation(async (query: Query) => {
+        const state = query.serialize();
+        if (state.table === 'accounts') {
+          const id = (state.filterExpressions[0] as { id: string }).id;
+          return { data: [{ currency: currencies[id] }], dependencies: [] };
+        }
+        // Cleared base sum -1000 (USD cents), native sum -1500 (yen).
+        const sum = JSON.stringify(state.selectExpressions);
+        return {
+          data: sum.includes('transaction_amount') ? -1500 : -1000,
+          dependencies: [],
+        };
+      });
+    });
+
+    test('compares a foreign account target with its native cleared balance', async () => {
+      const lock = vi.fn(async () => undefined);
+      await finishReconciliation('jpy', -1500, lock);
+      expect(lock).toHaveBeenCalled();
+
+      lock.mockClear();
+      await finishReconciliation('jpy', -1000, lock);
+      expect(lock).not.toHaveBeenCalled();
+    });
+
+    test('keeps base accounts on the base cleared balance', async () => {
+      const lock = vi.fn(async () => undefined);
+      await finishReconciliation('usd', -1000, lock);
+      expect(lock).toHaveBeenCalled();
+    });
   });
 });

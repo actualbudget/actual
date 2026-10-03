@@ -14,6 +14,7 @@ import { validForTransfer } from '@actual-app/core/shared/transfer';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import { SelectedItemsButton } from '#components/table';
+import { useAccounts } from '#hooks/useAccounts';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
@@ -71,6 +72,14 @@ export function SelectedTransactionsButton({
   const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
   const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
+  const { data: accounts = [] } = useAccounts();
+  // Foreign amounts are frozen until foreign edits and splits are supported.
+  const hasForeign = selectedIds.some(id => {
+    const trans = getTransaction(id);
+    return (
+      trans && accounts.find(account => account.id === trans.account)?.currency
+    );
+  });
 
   const scheduleIds = useMemo(() => {
     return selectedIds
@@ -183,9 +192,10 @@ export function SelectedTransactionsButton({
     return (
       areAllSameDateAndAccount &&
       areNoSplitTransactions &&
-      areNoReconciledTransactions
+      areNoReconciledTransactions &&
+      !hasForeign
     );
-  }, [selectedIds, types, getTransaction]);
+  }, [selectedIds, types, getTransaction, hasForeign]);
 
   const canUnsplitTransactions = useMemo(() => {
     if (selectedIds.length === 0 || types.preview) {
@@ -200,8 +210,10 @@ export function SelectedTransactionsButton({
     const areAllSplitTransactions = transactions.every(
       tx => tx && (tx.is_parent || tx.is_child),
     );
-    return areNoReconciledTransactions && areAllSplitTransactions;
-  }, [selectedIds, types, getTransaction]);
+    return (
+      areNoReconciledTransactions && areAllSplitTransactions && !hasForeign
+    );
+  }, [selectedIds, types, getTransaction, hasForeign]);
 
   function onViewSchedule() {
     const firstId = selectedIds[0];
@@ -266,18 +278,20 @@ export function SelectedTransactionsButton({
   useHotkeys(
     's',
     () =>
-      !types.trans || linked ? onViewSchedule() : onLinkSchedule(selectedIds),
+      !types.trans || linked
+        ? onViewSchedule()
+        : !hasForeign && onLinkSchedule(selectedIds),
     {
       scopes: ['app'],
     },
-    [onLinkSchedule, onViewSchedule, linked, selectedIds],
+    [onLinkSchedule, onViewSchedule, linked, selectedIds, hasForeign],
   );
   // edit amount (only if we're not in a merge context)
   useHotkeys(
     'm',
-    () => !canMerge && onEdit('amount', selectedIds),
+    () => !canMerge && !hasForeign && onEdit('amount', selectedIds),
     hotKeyOptions,
-    [onEdit, selectedIds],
+    [onEdit, selectedIds, hasForeign],
   );
   // merge
   useHotkeys(
@@ -346,11 +360,16 @@ export function SelectedTransactionsButton({
                     } as const,
                   ]
                 : [
-                    {
-                      name: 'link-schedule',
-                      text: t('Link schedule'),
-                      key: 'S',
-                    } as const,
+                    // Schedules for other currencies arrive later.
+                    ...(hasForeign
+                      ? []
+                      : [
+                          {
+                            name: 'link-schedule',
+                            text: t('Link schedule'),
+                            key: 'S',
+                          } as const,
+                        ]),
                     {
                       name: 'create-rule',
                       text: t('Create rule'),
@@ -405,7 +424,9 @@ export function SelectedTransactionsButton({
               { name: 'payee', text: t('Payee'), key: 'P' } as const,
               { name: 'notes', text: t('Notes'), key: 'N' } as const,
               { name: 'category', text: t('Category'), key: 'C' } as const,
-              { name: 'amount', text: t('Amount'), key: 'M' } as const,
+              ...(hasForeign
+                ? []
+                : [{ name: 'amount', text: t('Amount'), key: 'M' } as const]),
               { name: 'cleared', text: t('Cleared'), key: 'L' } as const,
             ]),
       ]}

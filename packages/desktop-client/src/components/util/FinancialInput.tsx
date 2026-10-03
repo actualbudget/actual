@@ -8,6 +8,7 @@ import { styles } from '@actual-app/components/styles';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import { css, cx } from '@emotion/css';
 
+import { useCurrencyFormatOverride } from '#hooks/currencyFormatContext';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useFormat } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
@@ -45,7 +46,8 @@ export function FinancialInput({
 }: FinancialInputProps) {
   const precision = useAmountPrecision();
   const [encoding] = useSyncedPref('amountEncoding');
-  const format = useFormat(encoding ? precision : undefined);
+  const override = useCurrencyFormatOverride();
+  const format = useFormat(encoding || override ? precision : undefined);
   const parse = (text: string) =>
     text.trim() === '' ? 0 : format.fromEdit(text);
   const privacyMode = usePrivacyMode();
