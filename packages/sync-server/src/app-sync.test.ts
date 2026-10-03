@@ -12,6 +12,7 @@ import request from 'supertest';
 
 import { getAccountDb } from './account-db';
 import { handlers as app } from './app-sync';
+import { getGroupDb } from './sync-simple';
 import { getPathForUserFile, isValidFileId } from './util/paths';
 
 const ADMIN_ROLE = 'ADMIN';
@@ -1582,6 +1583,78 @@ describe('/sync', () => {
     syncRequest.messages = [
       create(MessageEnvelopeSchema, {
         timestamp: `${new Date(farFutureMillis).toISOString()}-0000-0000000000000000`,
+        isEncrypted: false,
+        content: new Uint8Array(),
+      }),
+    ];
+
+    const res = await sendSyncRequest(syncRequest);
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.text).toEqual('clock-drift');
+  });
+
+  it('does not reject a far-future timestamp for a message the server already has', async () => {
+    const fileId = crypto.randomBytes(16).toString('hex');
+    const groupId = 'group-id';
+    const keyId = 'key-id';
+    const syncVersion = 2;
+    const encryptMeta = JSON.stringify({ keyId });
+
+    addMockFile(fileId, groupId, keyId, encryptMeta, syncVersion);
+
+    const farFutureMillis = Date.now() + 2 * 24 * 60 * 60 * 1000; // 2 days
+    const futureTimestamp = `${new Date(farFutureMillis).toISOString()}-0000-0000000000000000`;
+
+    const db = getGroupDb(groupId);
+    db.mutate(
+      "INSERT INTO messages_binary (timestamp, is_encrypted, content) VALUES (?, ?, CAST('' AS BLOB))",
+      [futureTimestamp, 0],
+    );
+    db.close();
+
+    const syncRequest = createMinimalSyncRequest(fileId, groupId, keyId);
+    syncRequest.messages = [
+      create(MessageEnvelopeSchema, {
+        timestamp: futureTimestamp,
+        isEncrypted: false,
+        content: new Uint8Array(),
+      }),
+    ];
+
+    const res = await sendSyncRequest(syncRequest);
+
+    expect(res.statusCode).toEqual(200);
+  });
+
+  it('still rejects a new far-future message even when resending an already-stored one', async () => {
+    const fileId = crypto.randomBytes(16).toString('hex');
+    const groupId = 'group-id';
+    const keyId = 'key-id';
+    const syncVersion = 2;
+    const encryptMeta = JSON.stringify({ keyId });
+
+    addMockFile(fileId, groupId, keyId, encryptMeta, syncVersion);
+
+    const storedFutureTimestamp = `${new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()}-0000-0000000000000000`;
+    const newFutureTimestamp = `${new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()}-0000-0000000000000000`;
+
+    const db = getGroupDb(groupId);
+    db.mutate(
+      "INSERT INTO messages_binary (timestamp, is_encrypted, content) VALUES (?, ?, CAST('' AS BLOB))",
+      [storedFutureTimestamp, 0],
+    );
+    db.close();
+
+    const syncRequest = createMinimalSyncRequest(fileId, groupId, keyId);
+    syncRequest.messages = [
+      create(MessageEnvelopeSchema, {
+        timestamp: storedFutureTimestamp,
+        isEncrypted: false,
+        content: new Uint8Array(),
+      }),
+      create(MessageEnvelopeSchema, {
+        timestamp: newFutureTimestamp,
         isEncrypted: false,
         content: new Uint8Array(),
       }),

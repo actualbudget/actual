@@ -27,7 +27,7 @@ function isTimestampTooFarInFuture(timestamp) {
   return !parsed || parsed.millis() - Date.now() >= MAX_FUTURE_DRIFT_MS;
 }
 
-function getGroupDb(groupId) {
+export function getGroupDb(groupId) {
   const path = getPathForGroupFile(groupId);
   const needsInit = !existsSync(path);
 
@@ -47,20 +47,21 @@ function addMessages(db, messages) {
 
     if (messages.length > 0) {
       for (const msg of messages) {
-        if (isTimestampTooFarInFuture(msg.timestamp)) {
-          throw createClockDriftError(
-            'Rejecting sync message with timestamp too far in the future: ' +
-              msg.timestamp,
-          );
-        }
-
         const info = db.mutate(
           `INSERT OR IGNORE INTO messages_binary (timestamp, is_encrypted, content)
              VALUES (?, ?, ?)`,
           [msg.timestamp, msg.isEncrypted ? 1 : 0, Buffer.from(msg.content)],
         );
 
+        // Check new messages for invalid timestamps
         if (info.changes > 0) {
+          if (isTimestampTooFarInFuture(msg.timestamp)) {
+            throw createClockDriftError(
+              'Rejecting sync message with timestamp too far in the future: ' +
+                msg.timestamp,
+            );
+          }
+
           trie = merkle.insert(trie, Timestamp.parse(msg.timestamp));
         }
       }
