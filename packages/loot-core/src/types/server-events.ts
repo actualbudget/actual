@@ -1,5 +1,5 @@
 import type { Backup } from '#server/budgetfiles/backups';
-import type { UndoState } from '#server/undo';
+import type { UndoAvailability, UndoState } from '#server/undo';
 
 type SyncSubtype =
   | 'out-of-sync'
@@ -122,5 +122,6 @@ export type ServerEvents = {
   'start-load': StartLoadEvent;
   'sync-event': SyncEvent;
   'undo-event': UndoState;
+  'undo-availability-changed': UndoAvailability;
   'api-fetch-redirected': ApiFetchRedirectedEvent;
 };
