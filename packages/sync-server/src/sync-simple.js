@@ -11,7 +11,23 @@ import { openDatabase } from './db';
 import messagesSql from './sql/messages.sql?raw';
 import { getPathForGroupFile } from './util/paths';
 
-function getGroupDb(groupId) {
+// A client with a badly drifted clock can send a timestamp far in the
+// future, which would otherwise get baked into the shared merkle trie
+// forever and break sync for every device in the group.
+const MAX_FUTURE_DRIFT_MS = 24 * 60 * 60 * 1000; // 1 day
+
+export const CLOCK_DRIFT_ERROR_CODE = 'clock-drift';
+export const INVALID_TIMESTAMP_ERROR_CODE = 'invalid-timestamp';
+
+function createSyncError(code, message) {
+  return Object.assign(new Error(message), { code });
+}
+
+function isTimestampTooFarInFuture(parsed) {
+  return parsed.millis() - Date.now() >= MAX_FUTURE_DRIFT_MS;
+}
+
+export function getGroupDb(groupId) {
   const path = getPathForGroupFile(groupId);
   const needsInit = !existsSync(path);
 
@@ -37,8 +53,26 @@ function addMessages(db, messages) {
           [msg.timestamp, msg.isEncrypted ? 1 : 0, Buffer.from(msg.content)],
         );
 
+        // Check new messages for invalid timestamps
         if (info.changes > 0) {
-          trie = merkle.insert(trie, Timestamp.parse(msg.timestamp));
+          const parsed = Timestamp.parse(msg.timestamp);
+
+          if (!parsed) {
+            throw createSyncError(
+              INVALID_TIMESTAMP_ERROR_CODE,
+              'Rejecting sync message with invalid timestamp: ' + msg.timestamp,
+            );
+          }
+
+          if (isTimestampTooFarInFuture(parsed)) {
+            throw createSyncError(
+              CLOCK_DRIFT_ERROR_CODE,
+              'Rejecting sync message with timestamp too far in the future: ' +
+                msg.timestamp,
+            );
+          }
+
+          trie = merkle.insert(trie, parsed);
         }
       }
     }
@@ -70,25 +104,27 @@ function getMerkle(db) {
 
 export function sync(messages, since, groupId) {
   const db = getGroupDb(groupId);
-  const newMessages = db.all(
-    `SELECT * FROM messages_binary
-         WHERE timestamp > ?
-         ORDER BY timestamp`,
-    [since],
-  );
+  try {
+    const newMessages = db.all(
+      `SELECT * FROM messages_binary
+           WHERE timestamp > ?
+           ORDER BY timestamp`,
+      [since],
+    );
 
-  const trie = addMessages(db, messages);
+    const trie = addMessages(db, messages);
 
-  db.close();
-
-  return {
-    trie,
-    newMessages: newMessages.map(msg =>
-      create(MessageEnvelopeSchema, {
-        timestamp: msg.timestamp,
-        isEncrypted: msg.is_encrypted === 1,
-        content: msg.content,
-      }),
-    ),
-  };
+    return {
+      trie,
+      newMessages: newMessages.map(msg =>
+        create(MessageEnvelopeSchema, {
+          timestamp: msg.timestamp,
+          isEncrypted: msg.is_encrypted === 1,
+          content: msg.content,
+        }),
+      ),
+    };
+  } finally {
+    db.close();
+  }
 }
