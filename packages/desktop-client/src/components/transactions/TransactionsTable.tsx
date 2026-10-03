@@ -109,6 +109,11 @@ import type {
   TableNavigator,
   TableProps,
 } from '#components/table';
+import {
+  BudgetCurrencyFormat,
+  useCurrencyFormatOverride,
+} from '#hooks/currencyFormatContext';
+import { useAccount } from '#hooks/useAccount';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import {
   SchedulesProvider,
@@ -142,6 +147,7 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { getPayeesById } from '#payees';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
+import { incompatibleAccountIds } from '#util/account-encoding';
 import { getStatusLabel } from '#util/schedule';
 import {
   calculateFutureTransactionInfo,
@@ -637,6 +643,18 @@ type NavigateToTransferAccount = (
   transactionId?: TransactionEntity['id'],
 ) => void;
 
+/**
+ * Existing foreign amounts are frozen until foreign edits are supported; new
+ * rows can only be entered in the account's own native register.
+ */
+function isForeignAmountFrozen(
+  id: TransactionEntity['id'],
+  account: AccountEntity | undefined,
+  isNativeRegister: boolean,
+) {
+  return !!account?.currency && (!isTemporaryId(id) || !isNativeRegister);
+}
+
 type PayeeCellProps = {
   id: TransactionEntity['id'];
   payee?: PayeeEntity;
@@ -683,7 +701,14 @@ function PayeeCell({
 
   const transferAccount = transferAccountsByTransaction[transaction.id];
 
-  const displayPayee = useDisplayPayee({ transaction });
+  // A new foreign entry keeps a new payee's name; the posting handler creates
+  // the payee only if the entry is saved.
+  const defersPayeeCreation =
+    useCurrencyFormatOverride() != null && isTemporaryId(id);
+  const resolvedPayee = useDisplayPayee({ transaction });
+  const displayPayee = transaction.payee?.startsWith('new:')
+    ? transaction.payee.slice('new:'.length)
+    : resolvedPayee;
 
   return transaction.is_parent ? (
     <Cell
@@ -801,7 +826,12 @@ function PayeeCell({
       onUpdate={async value => {
         onUpdate('payee', value);
 
-        if (value && value.startsWith('new:') && !isCreatingPayee.current) {
+        if (
+          value &&
+          value.startsWith('new:') &&
+          !defersPayeeCreation &&
+          !isCreatingPayee.current
+        ) {
           isCreatingPayee.current = true;
           const id = await onCreatePayee(value.slice('new:'.length));
           onUpdate('payee', id ?? undefined);
@@ -1299,12 +1329,14 @@ const Transaction = memo(function Transaction({
       newTransaction.reconciled = false;
     }
 
-    // Don't save a temporary value (a new payee) which will be
-    // filled in with a real id later
+    // Don't save a temporary value (a new payee) which will be filled in
+    // with a real id later. A new foreign entry keeps the name in its draft
+    // instead, and the posting handler creates the payee.
     if (
       name === 'payee' &&
       value &&
-      (value as TransactionEntity['payee'])?.startsWith('new:')
+      (value as TransactionEntity['payee'])?.startsWith('new:') &&
+      !(isNativeRegister && isTemporaryId(id))
     ) {
       setTransaction(newTransaction);
     } else {
@@ -1403,6 +1435,14 @@ const Transaction = memo(function Transaction({
   const account = accounts && accountId && getAccountsById(accounts)[accountId];
 
   const isChild = transaction.is_child;
+  const rowAccount = account || undefined;
+  const isForeignRow = !!rowAccount?.currency;
+  const isNativeRegister = useCurrencyFormatOverride() != null;
+  const amountFrozen = isForeignAmountFrozen(id, rowAccount, isNativeRegister);
+  const frozenAmountTitle = isNativeRegister
+    ? t('Editing foreign amounts is not available yet')
+    : t('Edit this amount in its account');
+  const hiddenAccountIds = incompatibleAccountIds(accounts, [rowAccount]);
   const transferAcct =
     isTemporaryId(id) && payee?.transfer_acct
       ? getAccountsById(accounts)[payee.transfer_acct]
@@ -1757,6 +1797,7 @@ const Transaction = memo(function Transaction({
             }) => (
               <AccountAutocomplete
                 includeClosedAccounts={false}
+                hiddenAccounts={hiddenAccountIds}
                 value={accountId}
                 shouldSaveFromKey={shouldSaveFromKey}
                 clearOnBlur={false}
@@ -2003,20 +2044,26 @@ const Transaction = memo(function Transaction({
                   monthUtils.monthFromDate(transaction.date),
                 )}
               >
-                <CategoryAutocomplete
-                  categoryGroups={categoryGroups}
-                  value={categoryId ?? null}
-                  focused
-                  clearOnBlur={false}
-                  showSplitOption={
-                    !isChild && !isParent && allowSplitTransaction
-                  }
-                  shouldSaveFromKey={shouldSaveFromKey}
-                  inputProps={{ onBlur, onKeyDown, style: inputStyle }}
-                  onUpdate={onUpdate}
-                  onSelect={onSave}
-                  showHiddenCategories={showHiddenCategories}
-                />
+                {/* Category balances are budget amounts, even in a foreign register. */}
+                <BudgetCurrencyFormat>
+                  <CategoryAutocomplete
+                    categoryGroups={categoryGroups}
+                    value={categoryId ?? null}
+                    focused
+                    clearOnBlur={false}
+                    showSplitOption={
+                      !isChild &&
+                      !isParent &&
+                      allowSplitTransaction &&
+                      !isForeignRow
+                    }
+                    shouldSaveFromKey={shouldSaveFromKey}
+                    inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+                    onUpdate={onUpdate}
+                    onSelect={onSave}
+                    showHiddenCategories={showHiddenCategories}
+                  />
+                </BudgetCurrencyFormat>
               </SheetNameProvider>
             )}
           </CustomCell>
@@ -2029,7 +2076,7 @@ const Transaction = memo(function Transaction({
             type="input"
             width={amountColumnWidths.amount}
             name="debit"
-            exposed={focusedField === 'debit'}
+            exposed={focusedField === 'debit' && !amountFrozen}
             focused={focusedField === 'debit'}
             value={
               debit === '' && credit === '' ? amountFormatter.format(0) : debit
@@ -2047,8 +2094,8 @@ const Transaction = memo(function Transaction({
             }
             valueStyle={valueStyle}
             textAlign="right"
-            title={debit}
-            onExpose={name => !isPreview && onEdit(id, name)}
+            title={amountFrozen ? frozenAmountTitle : debit}
+            onExpose={name => !isPreview && !amountFrozen && onEdit(id, name)}
             style={{
               ...(isParent && { fontStyle: 'italic' }),
               ...styles.tnum,
@@ -2075,7 +2122,7 @@ const Transaction = memo(function Transaction({
             type="input"
             width={amountColumnWidths.amount}
             name="credit"
-            exposed={focusedField === 'credit'}
+            exposed={focusedField === 'credit' && !amountFrozen}
             focused={focusedField === 'credit'}
             value={credit}
             formatter={value =>
@@ -2091,8 +2138,8 @@ const Transaction = memo(function Transaction({
             }
             valueStyle={valueStyle}
             textAlign="right"
-            title={credit}
-            onExpose={name => !isPreview && onEdit(id, name)}
+            title={amountFrozen ? frozenAmountTitle : credit}
+            onExpose={name => !isPreview && !amountFrozen && onEdit(id, name)}
             style={{
               ...(isParent && { fontStyle: 'italic' }),
               ...styles.tnum,
@@ -2549,7 +2596,9 @@ function NewTransaction({
 }: NewTransactionProps) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
-  const isFuture = isFutureTransaction(transactions[0]);
+  // Schedules for accounts in other currencies arrive later.
+  const isForeignAccount = !!useAccount(transactions[0].account)?.currency;
+  const isFuture = isFutureTransaction(transactions[0]) && !isForeignAccount;
 
   const childTransactions = transactions.filter(
     t => t.parent_id === transactions[0].id,
@@ -3404,6 +3453,7 @@ export const TransactionTable = forwardRef(
       }
     }, [hasPrevSplitsExpanded]);
 
+    const isNativeRegister = useCurrencyFormatOverride() != null;
     const newNavigator = useTableNavigator(
       newTransactions ?? [],
       getFieldsNewTransaction,
@@ -3623,8 +3673,12 @@ export const TransactionTable = forwardRef(
         ...(hasSplitChildren ? [] : ['cancel', 'schedule', 'add']),
       ];
 
+      // Foreign-account drafts cannot become schedules.
+      const canSchedule = (row: TransactionEntity) =>
+        isFutureTransaction(row) &&
+        !props.accounts.find(account => account.id === row.account)?.currency;
       const resolved = getFields(item, fields).filter(
-        f => f !== 'schedule' || (item ? isFutureTransaction(item) : false),
+        f => f !== 'schedule' || (item ? canSchedule(item) : false),
       );
 
       const isLastSplitChild =
@@ -3634,7 +3688,7 @@ export const TransactionTable = forwardRef(
       }
 
       const parent = rows.find(row => row.id === item.parent_id);
-      const showSchedule = isFutureTransaction(parent ?? item);
+      const showSchedule = canSchedule(parent ?? item);
       return [
         ...resolved,
         'cancel',
@@ -3670,6 +3724,16 @@ export const TransactionTable = forwardRef(
         // You can't focus the select/delete button of temporary
         // transactions
         fields = fields.slice(1);
+      }
+      if (
+        item &&
+        isForeignAmountFrozen(
+          item.id,
+          props.accounts.find(account => account.id === item.account),
+          isNativeRegister,
+        )
+      ) {
+        fields = fields.filter(f => f !== 'debit' && f !== 'credit');
       }
 
       return fields;
@@ -3817,7 +3881,9 @@ export const TransactionTable = forwardRef(
           : transaction;
 
         if (isTemporaryId(transaction.id)) {
-          if (onApplyRulesProp) {
+          // Native drafts never reach the base-oriented rule engine; the
+          // foreign entry handler runs rules on the completed pair.
+          if (onApplyRulesProp && !isNativeRegister) {
             // Remember fields the user explicitly emptied so later rule runs
             // (triggered by edits to other fields) can't re-fill them either.
             // `transaction` is the row that was actually edited (a split
@@ -3849,7 +3915,7 @@ export const TransactionTable = forwardRef(
           onSaveProp(groupedTransaction);
         }
       },
-      [latestState, onSaveProp, onApplyRulesProp],
+      [latestState, onSaveProp, onApplyRulesProp, isNativeRegister],
     );
 
     const onDelete = useCallback(

@@ -16,6 +16,10 @@ export type Spreadsheets = {
     [key: `account-group-balance-${string}`]: number;
     balanceCleared: number;
     balanceUncleared: number;
+    // Account-native sums for foreign-currency accounts
+    nativeBalance: number;
+    nativeBalanceCleared: number;
+    nativeBalanceUncleared: number;
     lastReconciled: string | null;
   };
   category: {

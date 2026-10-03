@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import {
   generateAccount,
@@ -39,6 +40,7 @@ import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AuthProvider } from '#auth/AuthProvider';
+import { CurrencyFormatProvider } from '#hooks/currencyFormatContext';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { SelectedProviderWithItems } from '#hooks/useSelected';
 import { SplitsExpandedProvider } from '#hooks/useSplitsExpanded';
@@ -73,7 +75,7 @@ vi.mock('../../hooks/useFeatureFlag', () => ({
 
 const accounts = [generateAccount('Bank of America')];
 vi.mock('../../hooks/useAccounts', () => ({
-  useAccounts: () => accounts,
+  useAccounts: () => ({ data: accounts }),
 }));
 
 const payees: PayeeEntity[] = [
@@ -162,6 +164,8 @@ function generateTransactions(
 }
 
 type LiveTransactionTableProps = {
+  /** Wraps the table, e.g. in a foreign account's currency format. */
+  wrap?: (table: ReactNode) => ReactNode;
   transactions: TransactionEntity[];
   payees: PayeeEntity[];
   accounts: AccountEntity[];
@@ -234,22 +238,24 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
               fetchAllIds={() => Promise.resolve(transactions.map(t => t.id))}
             >
               <SplitsExpandedProvider>
-                <TransactionTable
-                  {...props}
-                  transactions={transactions}
-                  loadMoreTransactions={vi.fn()}
-                  // @ts-expect-error TODO: fix me
-                  commonPayees={[]}
-                  payees={payees}
-                  addNotification={console.log}
-                  onSave={onSave}
-                  onSplit={onSplit}
-                  onAdd={onAdd}
-                  onAddSplit={onAddSplit}
-                  onCreatePayee={onCreatePayee}
-                  showSelection
-                  allowSplitTransaction
-                />
+                {(props.wrap ?? (table => table))(
+                  <TransactionTable
+                    {...props}
+                    transactions={transactions}
+                    loadMoreTransactions={vi.fn()}
+                    // @ts-expect-error TODO: fix me
+                    commonPayees={[]}
+                    payees={payees}
+                    addNotification={console.log}
+                    onSave={onSave}
+                    onSplit={onSplit}
+                    onAdd={onAdd}
+                    onAddSplit={onAddSplit}
+                    onCreatePayee={onCreatePayee}
+                    showSelection
+                    allowSplitTransaction
+                  />,
+                )}
               </SplitsExpandedProvider>
             </SelectedProviderWithItems>
           </SchedulesProvider>
@@ -2046,6 +2052,142 @@ describe('Transactions', () => {
       });
       expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
     });
+  });
+});
+
+function titleOf(field: Element) {
+  return (
+    field.getAttribute('title') ??
+    field.querySelector('[title]')?.getAttribute('title') ??
+    ''
+  );
+}
+
+describe('foreign-currency rows', () => {
+  const yen: AccountEntity = {
+    ...generateAccount('Yen wallet'),
+    currency: 'JPY',
+    currency_precision: 0,
+  };
+  const foreignTransaction = (): TransactionEntity => ({
+    id: 'foreign-1',
+    account: yen.id,
+    amount: -1500,
+    transaction_amount: -1500,
+    date: '2026-03-10',
+    payee: 'bob-id',
+    cleared: false,
+  });
+
+  beforeEach(() => {
+    initBasicServer();
+  });
+
+  it('keeps foreign amounts read-only in mixed views', async () => {
+    const { container } = renderTransactions({
+      accounts: [...accounts, yen],
+      transactions: [foreignTransaction()],
+      currentAccountId: null,
+    });
+    const debit = queryField(container, 'debit', '', 0);
+    expect(titleOf(debit)).toBe('Edit this amount in its account');
+    await userEvent.click(debit.querySelector('div')!);
+    expect(debit.querySelector('input')).toBeNull();
+  });
+
+  it('freezes existing amounts and hides split in the native register', async () => {
+    const { container } = renderTransactions({
+      accounts: [...accounts, yen],
+      transactions: [foreignTransaction()],
+      currentAccountId: yen.id,
+      wrap: table => (
+        <CurrencyFormatProvider currencyCode="JPY" precision={0}>
+          {table}
+        </CurrencyFormatProvider>
+      ),
+    });
+    const debit = queryField(container, 'debit', '', 0);
+    expect(titleOf(debit)).toBe('Editing foreign amounts is not available yet');
+    await userEvent.click(debit.querySelector('div')!);
+    expect(debit.querySelector('input')).toBeNull();
+
+    await editField(container, 'category', 0);
+    await waitForAutocomplete();
+    expect(screen.queryByTestId('split-transaction-button')).toBeNull();
+  });
+
+  it('skips frozen amounts during keyboard navigation', async () => {
+    const { container } = renderTransactions({
+      accounts: [...accounts, yen],
+      transactions: [foreignTransaction()],
+      currentAccountId: yen.id,
+      wrap: table => (
+        <CurrencyFormatProvider currencyCode="JPY" precision={0}>
+          {table}
+        </CurrencyFormatProvider>
+      ),
+    });
+    const input = await editField(container, 'category', 0);
+    await userEvent.type(input, '{Tab}');
+    for (const name of ['debit', 'credit']) {
+      expect(
+        queryField(container, name, '', 0).querySelector('input'),
+      ).toBeNull();
+    }
+  });
+
+  it('keeps a new payee typed last in the foreign draft without creating it', async () => {
+    const { container, getTransactions, updateProps } = renderTransactions({
+      accounts: [...accounts, yen],
+      currentAccountId: yen.id,
+      wrap: table => (
+        <CurrencyFormatProvider currencyCode="JPY" precision={0}>
+          {table}
+        </CurrencyFormatProvider>
+      ),
+    });
+    updateProps({ isAdding: true });
+
+    const debit = await editNewField(container, 'debit');
+    await userEvent.clear(debit);
+    await userEvent.type(debit, '1500');
+    const payee = await editNewField(container, 'payee');
+    await userEvent.type(payee, 'Ramen Shop');
+    await waitForAutocomplete();
+    await userEvent.keyboard('{Enter}');
+
+    await userEvent.click(
+      container.querySelector('[data-testid="add-button"]')!,
+    );
+    expect(getTransactions()[0]).toMatchObject({
+      account: yen.id,
+      payee: 'new:Ramen Shop',
+    });
+  });
+
+  it('offers only accounts with the same recorded encoding', async () => {
+    const otherYen: AccountEntity = {
+      ...generateAccount('Second yen'),
+      currency: 'JPY',
+      currency_precision: 0,
+    };
+    // The autocomplete lists accounts from the mocked useAccounts.
+    accounts.push(yen, otherYen);
+    onTestFinished(() => {
+      accounts.splice(accounts.indexOf(yen), 2);
+    });
+    const { container } = renderTransactions({
+      accounts: [...accounts],
+      transactions: [foreignTransaction()],
+      currentAccountId: null,
+    });
+    await editField(container, 'account', 0);
+    await waitForAutocomplete();
+    const options = [
+      ...document.querySelectorAll('[data-testid$="-account-item"]'),
+    ].map(item => item.textContent);
+    expect(options.join(' ')).toContain('Second yen');
+    expect(options.join(' ')).not.toContain('Bank of America');
   });
 });
 

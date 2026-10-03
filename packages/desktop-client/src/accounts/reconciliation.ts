@@ -68,12 +68,17 @@ export async function unlockTransaction(
   await send('transactions-batch-update', { updated: diff.updated });
 }
 
+/** Cleared balance in the account's own units (native for foreign accounts). */
 export async function getClearedBalance(accountId: AccountEntity['id']) {
+  const { data: accounts } = await aqlQuery(
+    q('accounts').filter({ id: accountId }).select('currency'),
+  );
+  const field = accounts?.[0]?.currency ? 'transaction_amount' : 'amount';
   const { data } = await aqlQuery(
     q('transactions')
       .filter({ cleared: true, account: accountId })
       .options({ splits: 'none' })
-      .calculate({ $sum: '$amount' }),
+      .calculate({ $sum: `$${field}` }),
   );
 
   return data ?? 0;
