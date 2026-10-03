@@ -1,9 +1,16 @@
-import { render, screen } from '@testing-library/react';
+import { sendCatch } from '@actual-app/core/platform/client/connection';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
 import { TestProviders } from '#mocks';
 
 import { GoCardlessExternalMsgModal } from './GoCardlessExternalMsgModal';
+
+vi.mock('@actual-app/core/platform/client/connection', () => ({
+  send: vi.fn(),
+  sendCatch: vi.fn(),
+}));
 
 vi.mock('#hooks/useGlobalPref', () => ({
   useGlobalPref: () => [null],
@@ -25,6 +32,10 @@ describe('GoCardlessExternalMsgModal - Country Auto-selection', () => {
 
   const originalIntl = global.Intl;
   const originalNavigator = global.navigator;
+
+  beforeEach(() => {
+    vi.mocked(sendCatch).mockResolvedValue({ data: [], error: undefined });
+  });
 
   afterEach(() => {
     global.Intl = originalIntl;
@@ -134,5 +145,167 @@ describe('GoCardlessExternalMsgModal - Country Auto-selection', () => {
     const countryInput = screen.getByPlaceholderText('(please select)');
     // Should select France from timezone, not Germany from locale
     expect(countryInput).toHaveValue('France');
+  });
+});
+
+describe('GoCardlessExternalMsgModal - Bank list errors', () => {
+  const mockProps = {
+    onMoveExternal: vi.fn(),
+    onSuccess: vi.fn(),
+    onClose: vi.fn(),
+  };
+
+  const originalIntl = global.Intl;
+  const originalNavigator = global.navigator;
+
+  beforeEach(() => {
+    // Pre-select a country so the modal actually fetches the bank list.
+    global.Intl = {
+      ...originalIntl,
+      DateTimeFormat: vi.fn(() => ({
+        resolvedOptions: () => ({ timeZone: 'Europe/Berlin' }),
+      })) as unknown as typeof Intl.DateTimeFormat,
+    } as typeof Intl;
+
+    Object.defineProperty(global, 'navigator', {
+      value: { language: 'en' },
+      writable: true,
+    });
+  });
+
+  afterEach(() => {
+    global.Intl = originalIntl;
+    Object.defineProperty(global, 'navigator', {
+      value: originalNavigator,
+      writable: true,
+    });
+    vi.clearAllMocks();
+  });
+
+  function renderModal() {
+    render(
+      <TestProviders>
+        <GoCardlessExternalMsgModal {...mockProps} />
+      </TestProviders>,
+    );
+  }
+
+  it('shows the reason GoCardless rejected the request', async () => {
+    vi.mocked(sendCatch).mockResolvedValue({
+      data: {
+        error_code: 'INTERNAL_ERROR',
+        error_type: 'IP address access denied',
+        error_details: {
+          status: 403,
+          summary: 'IP address access denied',
+          detail:
+            "Your IP 203.0.113.7 isn't whitelisted to perform this action",
+        },
+      },
+      error: undefined,
+    });
+
+    renderModal();
+
+    expect(
+      await screen.findByText(
+        /IP address access denied: Your IP 203\.0\.113\.7 isn't whitelisted to perform this action/,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/access credentials might be misconfigured/),
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the rate limit GoCardless reported', async () => {
+    vi.mocked(sendCatch).mockResolvedValue({
+      data: {
+        error_code: 'INTERNAL_ERROR',
+        error_type:
+          'Daily request limit set by the Institution has been exceeded',
+        error_details: {
+          status: 429,
+          summary: 'Rate limit exceeded',
+          detail: 'The rate limit for this resource is 4/day',
+        },
+      },
+      error: undefined,
+    });
+
+    renderModal();
+
+    expect(
+      await screen.findByText(
+        /Rate limit exceeded: The rate limit for this resource is 4\/day/,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('falls back to the generic message when the failure carries no reason', async () => {
+    vi.mocked(sendCatch).mockResolvedValue({
+      data: undefined,
+      error: { type: 'ServerError', code: 'network-failure' },
+    });
+
+    renderModal();
+
+    expect(
+      await screen.findByText(/access credentials might be misconfigured/),
+    ).toBeInTheDocument();
+  });
+
+  it('ignores the response of a request the user has already superseded', async () => {
+    type BankListResponse = Awaited<ReturnType<typeof sendCatch>>;
+
+    const resolvers: Array<(response: BankListResponse) => void> = [];
+    vi.mocked(sendCatch).mockImplementation(
+      () =>
+        new Promise<BankListResponse>(resolve => {
+          resolvers.push(resolve);
+        }),
+    );
+
+    renderModal();
+
+    // Germany is pre-selected, so its bank list is already in flight. Switch to
+    // France while that first request is still pending.
+    const countryInput = screen.getByPlaceholderText('(please select)');
+    await userEvent.clear(countryInput);
+    await userEvent.type(countryInput, 'France{Enter}');
+
+    await waitFor(() => expect(resolvers).toHaveLength(2));
+
+    // The newest request (France) lands first...
+    await act(async () => {
+      resolvers[1]({
+        data: [{ id: 'BANK_FR', name: 'French bank' }],
+        error: undefined,
+      });
+    });
+
+    // ...and the superseded German request fails afterwards.
+    await act(async () => {
+      resolvers[0]({
+        data: {
+          error_code: 'INTERNAL_ERROR',
+          error_type: 'IP address access denied',
+          error_details: {
+            status: 403,
+            summary: 'IP address access denied',
+            detail:
+              "Your IP 203.0.113.7 isn't whitelisted to perform this action",
+          },
+        },
+        error: undefined,
+      });
+    });
+
+    expect(
+      screen.queryByText(/IP address access denied/),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Failed loading available banks/),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('Choose your bank:')).toBeInTheDocument();
   });
 });
