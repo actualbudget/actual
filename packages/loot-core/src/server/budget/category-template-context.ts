@@ -27,8 +27,24 @@ import {
   getSheetValue,
   isTrackingBudget,
 } from './actions';
-import { runSchedule } from './schedule-template';
+import { runSchedule, runScheduleForecast } from './schedule-template';
 import { getActiveSchedules } from './statements';
+
+// Test-settable module-level switch: selects the 60-month-forecast
+// smoothing algorithm (runScheduleForecast) instead of today's
+// payMonthOf/sinking heuristic (runSchedule) for schedule-type templates.
+// This is a mutable exported object read at call time, not a build-time
+// constant — no bundler can tree-shake the disabled branch, so both code
+// paths (and their AQL imports) still ship regardless of this flag's
+// value. Defaulted on for this branch/PR so reviewers exercise the new
+// algorithm directly; not yet a per-category setting.
+//
+// Exported as a mutable object, not a bare const, so tests can flip it
+// per-`describe`/`it` block and exercise both dispatch paths through the
+// same integration surface, rather than only reaching runSchedule and
+// runScheduleForecast directly (schedule-template.test.ts) or having to
+// module-mock this file to test the gate itself.
+export const scheduleForecastConfig = { enabled: true };
 
 export class CategoryTemplateContext {
   /*----------------------------------------------------------------------------
@@ -209,21 +225,37 @@ export class CategoryTemplateContext {
         case 'schedule': {
           if (!scheduleFlag) {
             const budgeted = this.fromLastMonth + toBudget;
-            const ret = await runSchedule(
-              t,
-              this.month,
-              budgeted,
-              remainder,
-              this.fromLastMonth,
-              toBudget,
-              [],
-              this.category,
-              this.currency,
-            );
+            let ret:
+              | Awaited<ReturnType<typeof runSchedule>>
+              | Awaited<ReturnType<typeof runScheduleForecast>>;
+            if (scheduleForecastConfig.enabled) {
+              ret = await runScheduleForecast(
+                t,
+                this.month,
+                budgeted,
+                this.fromLastMonth,
+                toBudget,
+                [],
+                this.category,
+                this.currency,
+              );
+            } else {
+              ret = await runSchedule(
+                t,
+                this.month,
+                budgeted,
+                remainder,
+                this.fromLastMonth,
+                toBudget,
+                [],
+                this.category,
+                this.currency,
+              );
+            }
             // Schedules assume that its to budget value is the whole thing so this
             // needs to remove the previous funds so they aren't double counted
             newBudget = ret.to_budget - toBudget;
-            remainder = ret.remainder;
+            remainder = 'remainder' in ret ? ret.remainder : remainder;
             schedulePerTemplate = ret.perScheduleMonthly;
             scheduleFlag = true;
           }
