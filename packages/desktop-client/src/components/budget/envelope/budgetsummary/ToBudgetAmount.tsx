@@ -13,14 +13,15 @@ import {
   useEnvelopeSheetName,
   useEnvelopeSheetValue,
 } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { useToBudgetMode } from '#components/budget/envelope/useToBudgetMode';
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
-import { envelopeBudget } from '#spreadsheet/bindings';
 
 import { TotalsList } from './TotalsList';
 
 type ToBudgetAmountProps = {
+  month: string;
   prevMonthName: string;
   style?: CSSProperties;
   amountStyle?: CSSProperties;
@@ -30,6 +31,7 @@ type ToBudgetAmountProps = {
 };
 
 export function ToBudgetAmount({
+  month,
   prevMonthName,
   style,
   amountStyle,
@@ -38,9 +40,10 @@ export function ToBudgetAmount({
   onContextMenu,
 }: ToBudgetAmountProps) {
   const { t } = useTranslation();
-  const sheetName = useEnvelopeSheetName(envelopeBudget.toBudget);
+  const { toBudgetBinding } = useToBudgetMode(month);
+  const sheetName = useEnvelopeSheetName(toBudgetBinding);
   const sheetValue = useEnvelopeSheetValue({
-    name: envelopeBudget.toBudget,
+    name: toBudgetBinding,
     value: 0,
   });
   const format = useFormat();
@@ -61,6 +64,7 @@ export function ToBudgetAmount({
         <Tooltip
           content={
             <TotalsList
+              month={month}
               prevMonthName={prevMonthName}
               style={{
                 padding: 7,
