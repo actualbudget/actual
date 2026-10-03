@@ -81,6 +81,35 @@ function renderError(
   );
 }
 
+const SLOW_LINKING_THRESHOLD_MS = 1000 * 60 * 10;
+
+export function SlowLinkingNotice() {
+  const [isSlow, setIsSlow] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(
+      () => setIsSlow(true),
+      SLOW_LINKING_THRESHOLD_MS,
+    );
+    return () => clearTimeout(timeout);
+  }, []);
+
+  if (!isSlow) {
+    return null;
+  }
+
+  return (
+    <Warning style={{ marginTop: 10 }}>
+      <Trans>
+        Linking this account is taking longer than expected. You can keep this
+        page open with hopes that eventually it will work, but it's quite likely
+        that something has gone wrong downstream in GoCardless and thus linking
+        this account at this time is not possible.
+      </Trans>
+    </Warning>
+  );
+}
+
 type GoCardlessExternalMsgModalProps = Extract<
   ModalType,
   { name: 'gocardless-external-msg' }
@@ -302,17 +331,20 @@ export function GoCardlessExternalMsgModal({
                 </View>
 
                 {waiting === 'browser' && (
-                  <Link
-                    variant="text"
-                    onClick={onJump}
-                    style={{ marginTop: 10 }}
-                  >
-                    (
-                    <Trans>
-                      Account linking not opening in a new tab? Click here
-                    </Trans>
-                    )
-                  </Link>
+                  <>
+                    <Link
+                      variant="text"
+                      onClick={onJump}
+                      style={{ marginTop: 10 }}
+                    >
+                      (
+                      <Trans>
+                        Account linking not opening in a new tab? Click here
+                      </Trans>
+                      )
+                    </Link>
+                    <SlowLinkingNotice />
+                  </>
                 )}
               </View>
             ) : success ? (
