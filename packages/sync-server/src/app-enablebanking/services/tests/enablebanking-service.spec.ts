@@ -463,6 +463,51 @@ describe('enableBankingService', () => {
       expect(result).toHaveLength(3);
     });
 
+    it('keeps unseen transactions when a continuation key repeats', async () => {
+      mockFetchResponse({
+        transactions: [mockCreditTransaction],
+        continuation_key: 'stuck-key',
+      });
+      mockFetchResponse({
+        transactions: [mockDebitTransaction],
+        continuation_key: 'stuck-key',
+      });
+
+      const result = await enableBankingService.getAllTransactions(
+        'uid',
+        '2026-01-01',
+        '2026-03-25',
+      );
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(result).toEqual([mockCreditTransaction, mockDebitTransaction]);
+    });
+
+    it('does not return an identical repeated page without transaction IDs', async () => {
+      const transactionWithoutIds = {
+        ...mockCreditTransaction,
+        entry_reference: undefined,
+        transaction_id: undefined,
+      };
+      mockFetchResponse({
+        transactions: [transactionWithoutIds],
+        continuation_key: 'stuck-key',
+      });
+      mockFetchResponse({
+        transactions: [transactionWithoutIds],
+        continuation_key: 'stuck-key',
+      });
+
+      const result = await enableBankingService.getAllTransactions(
+        'uid',
+        '2026-01-01',
+        '2026-03-25',
+      );
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(result).toEqual([transactionWithoutIds]);
+    });
+
     it('handles single page response', async () => {
       mockFetchResponse({
         transactions: [mockCreditTransaction, mockDebitTransaction],

@@ -451,6 +451,34 @@ export const enableBankingService = {
         result.continuation_key &&
         result.continuation_key === continuationKey
       ) {
+        const seenTransactionIds = new Set(
+          allTransactions.flatMap(transaction =>
+            [transaction.entry_reference, transaction.transaction_id].filter(
+              (id): id is string => Boolean(id),
+            ),
+          ),
+        );
+        const seenTransactions = new Set(
+          allTransactions.map(transaction => JSON.stringify(transaction)),
+        );
+        allTransactions.push(
+          ...result.transactions.filter(transaction => {
+            const ids = [
+              transaction.entry_reference,
+              transaction.transaction_id,
+            ].filter((id): id is string => Boolean(id));
+            const serialized = JSON.stringify(transaction);
+            if (
+              ids.some(id => seenTransactionIds.has(id)) ||
+              seenTransactions.has(serialized)
+            ) {
+              return false;
+            }
+            ids.forEach(id => seenTransactionIds.add(id));
+            seenTransactions.add(serialized);
+            return true;
+          }),
+        );
         break;
       }
 
