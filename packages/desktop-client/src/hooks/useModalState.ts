@@ -1,12 +1,12 @@
 import { useCallback } from 'react';
 
 import { popModal } from '#modals/modalsSlice';
-import type { Modal } from '#modals/modalsSlice';
+import type { ModalInstance } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
 
 type ModalState = {
   onClose: () => void;
-  modalStack: Modal[];
+  modalStack: ModalInstance[];
   activeModal?: string;
   isActive: (name: string) => boolean;
   isHidden: boolean;

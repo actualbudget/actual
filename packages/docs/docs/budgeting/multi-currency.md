@@ -79,3 +79,13 @@ The account balance is then €1,050.00: the 2,000.00 starting balance minus the
 <img width="860" alt="BNP Paribas with a balance of €1,050.00, a 950.00 rent payment to Résidences Saint-Martin SARL, and a 2,000.00 starting balance" src="/img/budgeting/multi-currency-eur-register@2x.png" />
 
 A saved amount in the euro or peso account cannot be changed, split, or scheduled.
+
+## On a phone
+
+A narrow window uses the phone layout. The BBVA México account below uses the same five-month history as the desktop register. Its balance is 250 pesos, with the monthly 800 peso remittances and 150 peso gifts grouped by date. The **+** button adds a payment and opens **Convert to budget currency**.
+
+<img width="390" alt="Phone view of BBVA México with a 250 peso balance and remittances and gifts grouped by month from June through October" src="/img/budgeting/family-bbva-mobile-history.png" />
+
+The payment detail below returns to the separate BNP Paribas rent-entry checkpoint. Open the rent payment. The amount is -€950.00, with -$1,045.00 under it. The screen says: "Editing foreign amounts is not available yet."
+
+<img width="390" alt="Phone transaction for Résidences Saint-Martin SARL showing -€950.00 and -$1,045.00, with editing unavailable" src="/img/budgeting/multi-currency-mobile-payment@2x.png" />

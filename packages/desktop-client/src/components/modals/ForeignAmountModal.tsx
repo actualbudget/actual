@@ -29,7 +29,9 @@ import { CurrencyFormatProvider } from '#hooks/currencyFormatContext';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { removeModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type ForeignAmountModalProps = Extract<
   ModalType,
@@ -79,6 +81,7 @@ export function ForeignAmountModal({
   onPosted,
 }: ForeignAmountModalProps) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const basePrecision = useAmountPrecision();
   const baseFormat = useFormat(basePrecision);
   const [draft, setDraft] = useState(transaction);
@@ -194,7 +197,7 @@ export function ForeignAmountModal({
 
   const shown = preview();
 
-  async function confirm(close: () => void) {
+  async function confirm() {
     const payload =
       shown.kind === 'base' || shown.kind === 'default'
         ? { baseAmount: shown.baseAmount }
@@ -218,7 +221,8 @@ export function ForeignAmountModal({
       });
       switch (result.status) {
         case 'ok':
-          close();
+          // Close only this dialog: another modal may have opened above it.
+          dispatch(removeModal({ name: 'foreign-amount' }));
           onPosted();
           return;
         case 'base-changed':
@@ -256,23 +260,35 @@ export function ForeignAmountModal({
         default:
           setMessage(t('Rate unavailable. Enter a base amount or rate.'));
       }
+    } catch {
+      // The server refused the entry; nothing was written and the draft
+      // stays open for correction.
+      setMessage(t('This transaction could not be saved.'));
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <Modal name="foreign-amount" containerProps={{ style: { width: 420 } }}>
+    <Modal
+      name="foreign-amount"
+      containerProps={{ style: { width: 420 } }}
+      // A posting in flight cannot be cancelled or dismissed.
+      isDismissable={!busy}
+      isKeyboardDismissDisabled={busy}
+    >
       {({ state }) => (
         <>
           <ModalHeader
             title={t('Convert to budget currency')}
-            rightContent={<ModalCloseButton onPress={() => state.close()} />}
+            rightContent={
+              busy ? null : <ModalCloseButton onPress={() => state.close()} />
+            }
           />
           <Form
             onSubmit={event => {
               event.preventDefault();
-              void confirm(() => state.close());
+              void confirm();
             }}
           >
             <View style={{ gap: 10 }}>
@@ -366,7 +382,7 @@ export function ForeignAmountModal({
               {message && <FormError>{message}</FormError>}
             </View>
             <ModalButtons>
-              <Button onPress={() => state.close()}>
+              <Button isDisabled={busy} onPress={() => state.close()}>
                 <Trans>Cancel</Trans>
               </Button>
               <Button
