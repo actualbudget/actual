@@ -28,6 +28,7 @@ import {
   setSyncingMode,
   stopFullSync,
 } from '#server/sync';
+import { deriveAllCoupledCells } from '#server/sync/coupled-cells';
 import * as syncMigrations from '#server/sync/migrate';
 import { replayPendingMessages } from '#server/sync/replay';
 import * as rules from '#server/transactions/transaction-rules';
@@ -672,6 +673,9 @@ async function _loadBudget(id: Budget['id']): Promise<{
     // messages stay pending
     captureException(e);
   }
+  // Rows written by an older client or a crash mid-load are made coherent
+  // before the spreadsheet reads them.
+  db.transaction(deriveAllCoupledCells);
 
   await db.loadClock();
 
