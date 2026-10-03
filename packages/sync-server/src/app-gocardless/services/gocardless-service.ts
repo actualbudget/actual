@@ -313,12 +313,19 @@ export const goCardlessService = {
       institution.supported_features?.includes(
         'separate_continuous_history_consent',
       ) ?? false;
+    const consentReconfirmation =
+      institution.supported_features?.includes('reconfirmation_of_consent') ??
+      false;
+    const accessValidForDays = consentReconfirmation
+      ? (institution.max_access_valid_for_days_reconfirmation ??
+        institution.max_access_valid_for_days)
+      : institution.max_access_valid_for_days;
 
     const body = {
       redirectUrl: host + '/gocardless/link',
       institutionId,
       referenceId: uuidv4(),
-      accessValidForDays: institution.max_access_valid_for_days,
+      accessValidForDays,
       maxHistoricalDays: separateContinuousHistoryConsent
         ? 90
         : institution.transaction_total_days,
@@ -326,6 +333,7 @@ export const goCardlessService = {
       ssn: null,
       redirectImmediate: false,
       accountSelection,
+      ...(consentReconfirmation ? { reconfirmation: true } : {}),
     };
 
     console.log('GoCardless requisition request:', {
@@ -334,6 +342,7 @@ export const goCardlessService = {
       maxHistoricalDays: body.maxHistoricalDays,
       transactionTotalDays: institution.transaction_total_days,
       separateContinuousHistoryConsent,
+      consentReconfirmation,
       accountSelection,
       supportedFeatures: institution.supported_features,
     });
@@ -524,6 +533,7 @@ export const client = {
     ssn,
     redirectImmediate,
     accountSelection,
+    reconfirmation,
   }: {
     redirectUrl: string;
     institutionId: GoCardlessInstitutionId;
@@ -534,6 +544,7 @@ export const client = {
     ssn: string | null;
     redirectImmediate: boolean;
     accountSelection: boolean;
+    reconfirmation?: boolean;
   }): Promise<Requisition> =>
     await getGocardlessClient().initSession({
       redirectUrl,
@@ -545,6 +556,7 @@ export const client = {
       ssn,
       redirectImmediate,
       accountSelection,
+      reconfirmation,
     }),
   generateToken: async (): Promise<TokenResponse> =>
     await getGocardlessClient().generateToken(),

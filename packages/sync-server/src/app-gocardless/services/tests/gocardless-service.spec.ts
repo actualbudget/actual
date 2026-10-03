@@ -19,7 +19,10 @@ import type {
   GoCardlessInstitutionId,
   GoCardlessRequisitionId,
 } from '#app-gocardless/gocardless-node.types';
-import { GoCardlessApiError } from '#app-gocardless/services/gocardless-api';
+import {
+  GoCardlessApi,
+  GoCardlessApiError,
+} from '#app-gocardless/services/gocardless-api';
 import {
   client,
   goCardlessService,
@@ -41,6 +44,14 @@ import {
   mockRequisitionWithExampleAccounts,
   mockTransactions,
 } from './fixtures';
+
+vi.mock('#services/secrets-service', () => ({
+  SecretName: {
+    gocardless_secretId: 'gocardless_secretId',
+    gocardless_secretKey: 'gocardless_secretKey',
+  },
+  secretsService: { get: () => 'test-secret' },
+}));
 
 describe('goCardlessService', () => {
   const accountId = mockAccountMetaData.id;
@@ -291,6 +302,69 @@ describe('goCardlessService', () => {
       expect(createRequisitionSpy).toHaveBeenCalledWith(
         expect.objectContaining({ maxHistoricalDays: 90 }),
       );
+    });
+
+    it('requests a reconfirmation agreement when the institution supports it', async () => {
+      setTokenSpy.mockResolvedValue(undefined);
+      getInstitutionSpy.mockResolvedValue({
+        ...mockInstitution,
+        supported_features: ['reconfirmation_of_consent'],
+        max_access_valid_for_days_reconfirmation: '730',
+      });
+      createRequisitionSpy.mockResolvedValue(mockCreateRequisition);
+
+      await goCardlessService.createRequisition(params);
+
+      expect(createRequisitionSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          accessValidForDays: '730',
+          reconfirmation: true,
+        }),
+      );
+    });
+
+    it('keeps the default agreement when the institution does not advertise reconfirmation', async () => {
+      setTokenSpy.mockResolvedValue(undefined);
+      getInstitutionSpy.mockResolvedValue({
+        ...mockInstitution,
+        max_access_valid_for_days_reconfirmation: '730',
+      });
+      createRequisitionSpy.mockResolvedValue(mockCreateRequisition);
+
+      await goCardlessService.createRequisition(params);
+
+      expect(createRequisitionSpy).toHaveBeenCalledWith(
+        expect.not.objectContaining({ reconfirmation: true }),
+      );
+      expect(createRequisitionSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ accessValidForDays: '90' }),
+      );
+    });
+  });
+
+  describe('#initSession', () => {
+    it('forwards reconfirmation to the GoCardless API client', async () => {
+      const apiSpy = vi
+        .spyOn(GoCardlessApi.prototype, 'initSession')
+        .mockResolvedValue(mockCreateRequisition);
+
+      await client.initSession({
+        redirectUrl: 'https://exemple.com/gocardless/link',
+        institutionId: 'some-institution-id' as GoCardlessInstitutionId,
+        referenceId: null,
+        accessValidForDays: 90,
+        maxHistoricalDays: 89,
+        userLanguage: 'en',
+        ssn: null,
+        redirectImmediate: false,
+        accountSelection: false,
+        reconfirmation: true,
+      });
+
+      expect(apiSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ reconfirmation: true }),
+      );
+      apiSpy.mockRestore();
     });
   });
 

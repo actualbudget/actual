@@ -239,7 +239,8 @@ export type InstitutionFeature =
   | 'pending_transactions'
   | 'access_scopes'
   | 'submit_payment'
-  | 'separate_continuous_history_consent';
+  | 'separate_continuous_history_consent'
+  | 'reconfirmation_of_consent';
 
 /**
  * Information about the Institution
@@ -280,6 +281,13 @@ export type Institution = {
    * renewal
    */
   max_access_valid_for_days: string;
+
+  /**
+   * The total number of days that a requisition can stay valid when the
+   * agreement opts into consent reconfirmation. Only present when the
+   * institution lists reconfirmation_of_consent in supported_features.
+   */
+  max_access_valid_for_days_reconfirmation?: string;
 
   supported_payments?: object;
 
