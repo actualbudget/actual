@@ -1,7 +1,7 @@
 import { fetch } from '#platform/server/fetch';
 
 import { PostError } from './errors';
-import { del, patch, post, postBinary } from './post';
+import { del, patch, post, postBinary, redactSensitive } from './post';
 
 vi.unmock('#server/post');
 vi.mock('#platform/server/fetch', () => ({
@@ -133,5 +133,52 @@ describe('patch', () => {
     expect(error).toBeInstanceOf(PostError);
     expect((error as PostError).reason).toBe('network-failure');
     expect((error as PostError).cause).toBe(underlying);
+  });
+});
+
+describe('redactSensitive', () => {
+  it('replaces values stored under sensitive keys', () => {
+    expect(
+      redactSensitive({ password: 'hunter2', code: '123456', keep: 'me' }),
+    ).toEqual({
+      password: '<redacted>',
+      code: '<redacted>',
+      keep: 'me',
+    });
+  });
+
+  it('redacts nested values', () => {
+    // How the OpenID client secret actually arrives.
+    expect(
+      redactSensitive({ openId: { issuer: 'https://x', client_secret: 's3' } }),
+    ).toEqual({
+      openId: { issuer: 'https://x', client_secret: '<redacted>' },
+    });
+  });
+
+  it('matches keys case-insensitively', () => {
+    expect(redactSensitive({ mfaToken: 'abc', Password: 'p' })).toEqual({
+      mfaToken: '<redacted>',
+      Password: '<redacted>',
+    });
+  });
+
+  it('walks arrays', () => {
+    expect(redactSensitive([{ token: 't' }, { safe: 1 }])).toEqual([
+      { token: '<redacted>' },
+      { safe: 1 },
+    ]);
+  });
+
+  it('passes through values that are not objects', () => {
+    expect(redactSensitive('plain')).toBe('plain');
+    expect(redactSensitive(7)).toBe(7);
+    expect(redactSensitive(null)).toBe(null);
+    expect(redactSensitive(undefined)).toBe(undefined);
+  });
+
+  it('leaves unrelated payloads untouched', () => {
+    const payload = { name: 'Groceries', amount: -1234, tags: ['food'] };
+    expect(redactSensitive(payload)).toEqual(payload);
   });
 });
