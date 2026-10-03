@@ -239,6 +239,29 @@ test.describe('Reports', () => {
       await expect(splitRow.getByRole('button')).toHaveText('Category');
     });
 
+    test('warns about missing scoped tags without transaction filters', async () => {
+      await page.evaluate(() => {
+        sessionStorage.setItem('url', window.location.pathname);
+        sessionStorage.setItem(
+          'report',
+          JSON.stringify({
+            groupBy: 'Tag',
+            tagScope: { mode: 'selected', tagIds: ['deleted-tag-id'] },
+            conditions: [],
+          }),
+        );
+      });
+      await page.reload();
+
+      const warning = page.getByText(/non-existing filter or tag/);
+      await expect(warning).toBeVisible();
+
+      const splitRow = page.getByText('Split:', { exact: true }).locator('..');
+      await splitRow.getByRole('button', { name: 'Tag', exact: true }).click();
+      await page.getByRole('button', { name: 'Category', exact: true }).click();
+      await expect(warning).not.toBeVisible();
+    });
+
     test('Switches to Data Table and checks the visuals', async () => {
       await customReportPage.selectMode('time');
       await customReportPage.selectViz('Data Table');

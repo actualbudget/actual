@@ -962,7 +962,7 @@ function CustomReportInner({
               defaultItems={defaultItems}
             />
           )}
-          {conditions && conditions.length > 0 && (
+          {(conditions.length > 0 || hasWarning) && (
             <View
               style={{
                 marginBottom: 10,
@@ -972,39 +972,41 @@ function CustomReportInner({
                 flexShrink: 0,
               }}
             >
-              <View
-                style={{
-                  flexShrink: 0,
-                  flexDirection: 'row',
-                  alignItems: 'flex-start',
-                  justifyContent: 'flex-start',
-                }}
-              >
-                <AppliedFilters
-                  conditions={conditions}
-                  onUpdate={(oldFilter, newFilter) => {
-                    setSessionReport(
-                      'conditions',
-                      conditions.map(f => (f === oldFilter ? newFilter : f)),
-                    );
-                    onReportChange({ type: 'modify' });
-                    onUpdateFilter(oldFilter, newFilter);
+              {conditions.length > 0 && (
+                <View
+                  style={{
+                    flexShrink: 0,
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
+                    justifyContent: 'flex-start',
                   }}
-                  onDelete={deletedFilter => {
-                    setSessionReport(
-                      'conditions',
-                      conditions.filter(f => f !== deletedFilter),
-                    );
-                    onDeleteFilter(deletedFilter);
-                    onReportChange({ type: 'modify' });
-                  }}
-                  conditionsOp={conditionsOp}
-                  onConditionsOpChange={co => {
-                    onConditionsOpChange(co);
-                    onReportChange({ type: 'modify' });
-                  }}
-                />
-              </View>
+                >
+                  <AppliedFilters
+                    conditions={conditions}
+                    onUpdate={(oldFilter, newFilter) => {
+                      setSessionReport(
+                        'conditions',
+                        conditions.map(f => (f === oldFilter ? newFilter : f)),
+                      );
+                      onReportChange({ type: 'modify' });
+                      onUpdateFilter(oldFilter, newFilter);
+                    }}
+                    onDelete={deletedFilter => {
+                      setSessionReport(
+                        'conditions',
+                        conditions.filter(f => f !== deletedFilter),
+                      );
+                      onDeleteFilter(deletedFilter);
+                      onReportChange({ type: 'modify' });
+                    }}
+                    conditionsOp={conditionsOp}
+                    onConditionsOpChange={co => {
+                      onConditionsOpChange(co);
+                      onReportChange({ type: 'modify' });
+                    }}
+                  />
+                </View>
+              )}
 
               {hasWarning && (
                 <Warning style={{ paddingTop: 5, paddingBottom: 5 }}>
