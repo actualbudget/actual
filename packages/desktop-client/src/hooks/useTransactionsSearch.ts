@@ -13,6 +13,8 @@ type UseTransactionsSearchProps = {
   resetQuery: () => void;
   dateFormat: string;
   delayMs?: number;
+  /** A foreign account's register searches native amounts at its precision. */
+  amountField?: 'amount' | 'transaction_amount';
 };
 type UseTransactionsSearchResult = {
   isSearching: boolean;
@@ -24,6 +26,7 @@ export function useTransactionsSearch({
   resetQuery,
   dateFormat,
   delayMs = 150,
+  amountField = 'amount',
 }: UseTransactionsSearchProps): UseTransactionsSearchResult {
   const precision = useAmountPrecision();
   const [isSearching, setIsSearching] = useState(false);
@@ -50,6 +53,7 @@ export function useTransactionsSearch({
               dateFormat,
               currencySymbol,
               precision,
+              amountField,
             ),
           );
           setIsSearching(true);
@@ -60,6 +64,7 @@ export function useTransactionsSearch({
       dateFormat,
       delayMs,
       precision,
+      amountField,
       resetQueryRef,
       updateQueryRef,
     ],

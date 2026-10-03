@@ -23,7 +23,6 @@ import {
   openAccountCloseModal,
   pushModal,
 } from '#modals/modalsSlice';
-import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch, useSelector } from '#redux';
 
 import { AccountTransactions } from './AccountTransactions';
@@ -145,21 +144,6 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   const [, setSearchParams] = useSearchParams();
 
   const onReconcile = useCallback(() => {
-    // Mobile running balances stay in base units until native mobile
-    // display lands, so foreign accounts are reconciled on desktop.
-    if (account.currency) {
-      dispatch(
-        addNotification({
-          notification: {
-            type: 'message',
-            message: t(
-              'Reconcile accounts in other currencies on desktop for now.',
-            ),
-          },
-        }),
-      );
-      return;
-    }
     dispatch(
       pushModal({
         modal: {
@@ -184,7 +168,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
         },
       }),
     );
-  }, [account.id, account.currency, dispatch, setSearchParams, t]);
+  }, [account.id, dispatch, setSearchParams]);
 
   const onClick = useCallback(() => {
     dispatch(
