@@ -61,6 +61,10 @@ export async function createScheduleList(
   // of rejecting it as past. It may still be unpaid, and money carried into
   // current_month has to cover it.
   keepPastDue = false,
+  // Keep a completed schedule instead of dropping it. It posts nothing
+  // further, but a payment that completed it this month still has to be
+  // covered by this month's budget.
+  keepCompleted = false,
 ) {
   const t: Array<ScheduleTemplateTarget> = [];
   const errors: string[] = [];
@@ -255,14 +259,14 @@ export async function createScheduleList(
           }
           t[t.length - 1].target = -monthlyTarget;
         }
-      } else {
+      } else if (!keepCompleted) {
         errors.push(
           `Schedule ${displayName} is not active during the month in question.`,
         );
       }
     }
   }
-  return { t: t.filter(c => c.completed === 0), errors };
+  return { t: t.filter(c => c.completed === 0 || keepCompleted), errors };
 }
 
 const FORECAST_MONTHS = 60;
@@ -336,10 +340,14 @@ export async function buildMonthlyOutflow(
   // carried-over balance still holds money for occurrences due between now
   // and the window that haven't posted yet. Count those against month 0 so
   // that money isn't treated as free. Occurrences missed before the real
-  // current month are ignored, so a long-stale next_date can't pile up.
+  // current month are ignored, so a long-stale next_date can't pile up. A
+  // completed schedule has nothing left to post.
   const pendingEntries = isBudgetingAhead
     ? smoothEntries.filter(
-        entry => entry.storedNextDate && entry.storedNextDate < windowStart,
+        entry =>
+          !entry.completed &&
+          entry.storedNextDate &&
+          entry.storedNextDate < windowStart,
       )
     : [];
   // next_date only advances once its date has passed, so a payment made
@@ -416,6 +424,9 @@ export async function buildMonthlyOutflow(
 
   let dueByToday = 0;
   for (const entry of smoothEntries) {
+    // A completed schedule posts nothing further. What it already posted
+    // this month is in spentByToday below, like any other spending.
+    if (entry.completed) continue;
     const occurrences = getOccurrencesBetween(
       entry.dateConditions,
       windowStart,
@@ -734,13 +745,21 @@ export async function runScheduleForecast(
     category,
     currency,
     true,
+    true,
   );
   errors = errors.concat(t.errors);
 
-  // Past-due schedules only matter to the forecast, which reserves the ones
-  // still unpaid out of the carried-over balance.
-  const fullEntries = t.t.filter(c => c.template.full && !c.isPastDue);
-  const smoothEntries = t.t.filter(c => !c.template.full);
+  // Past-due and completed schedules only matter to the forecast: it
+  // reserves the past-due ones still unpaid out of the carried-over
+  // balance, and a schedule that completed this month still has its
+  // payment in this month's spending.
+  const fullEntries = t.t.filter(
+    c => c.template.full && !c.isPastDue && !c.completed,
+  );
+  // A completed full-flag schedule has nothing left to budget in full, but
+  // its payment this month still has to be covered, so it rides the
+  // forecast like a completed smooth one.
+  const smoothEntries = t.t.filter(c => !c.template.full || c.completed);
 
   const perScheduleMonthly = new Map<ScheduleTemplate, number>();
   // Full-flag schedules keep today's exact runSchedule behavior: they're
@@ -783,9 +802,12 @@ export async function runScheduleForecast(
   // lump-sum as if it were a monthly amount, and would also understate
   // every schedule's share relative to the 60-month total outflow, which
   // is a different, larger quantity entirely).
-  // A past-due schedule has no monthly equivalent going forward, so it only
-  // shares when nothing else in the category is left to take the amount.
-  const upcomingEntries = smoothEntries.filter(c => !c.isPastDue);
+  // A past-due or completed schedule has no monthly equivalent going
+  // forward, so it only shares when nothing else in the category is left
+  // to take the amount.
+  const upcomingEntries = smoothEntries.filter(
+    c => !c.isPastDue && !c.completed,
+  );
   const splitEntries =
     upcomingEntries.length > 0 ? upcomingEntries : smoothEntries;
   const totalMonthlyWeight = splitEntries.reduce(

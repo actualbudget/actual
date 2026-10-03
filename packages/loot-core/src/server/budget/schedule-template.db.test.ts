@@ -1,6 +1,6 @@
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
-import { createSchedule } from '#server/schedules/app';
+import { createSchedule, updateSchedule } from '#server/schedules/app';
 import { loadRules } from '#server/transactions/transaction-rules';
 import type { Currency } from '#shared/currencies';
 import * as monthUtils from '#shared/months';
@@ -140,7 +140,7 @@ async function setUpOneTimeBills() {
     name: 'Other bills',
     cat_group: group,
   });
-  return { category, otherCategoryId, payBill, templates };
+  return { category, otherCategoryId, payBill, templates, scheduleIds };
 }
 
 describe('runScheduleForecast against a real database', () => {
@@ -247,6 +247,81 @@ describe('runScheduleForecast against a real database', () => {
       '2026-11',
       15334,
       15334,
+      0,
+      [],
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(3666);
+  });
+
+  it('covers a one-time bill that posted and completed this month', async () => {
+    // Oct 3: Bill A posted on Oct 1 and the schedule service marked it
+    // completed. $75 came into October, so October still owes the $25
+    // the payment overspent.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-03');
+    const { category, payBill, templates, scheduleIds } =
+      await setUpOneTimeBills();
+    await payBill('Bill A', '2026-10-01', -10000);
+    await updateSchedule({
+      schedule: { id: scheduleIds['Bill A'], completed: true },
+    });
+
+    const result = await runScheduleForecast(
+      [templates[0]],
+      '2026-10',
+      7500,
+      7500,
+      0,
+      [],
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(2500);
+  });
+
+  it('covers a completed full-flag bill that posted this month', async () => {
+    // Same as above, but the template carries the full flag.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-03');
+    const { category, payBill, templates, scheduleIds } =
+      await setUpOneTimeBills();
+    await payBill('Bill A', '2026-10-01', -10000);
+    await updateSchedule({
+      schedule: { id: scheduleIds['Bill A'], completed: true },
+    });
+
+    const result = await runScheduleForecast(
+      [{ ...templates[0], full: true }],
+      '2026-10',
+      7500,
+      7500,
+      0,
+      [],
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(2500);
+  });
+
+  it('reserves nothing for a completed schedule when budgeting ahead', async () => {
+    // Oct 3, budgeting November. Bill A completed, its payment already in
+    // the carry-in. Only Bill B is left to cover.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-03');
+    const { category, payBill, templates, scheduleIds } =
+      await setUpOneTimeBills();
+    await payBill('Bill A', '2026-10-01', -10000);
+    await updateSchedule({
+      schedule: { id: scheduleIds['Bill A'], completed: true },
+    });
+
+    const result = await runScheduleForecast(
+      templates,
+      '2026-11',
+      5334,
+      5334,
       0,
       [],
       category,
