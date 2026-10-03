@@ -17,14 +17,14 @@ import { getPathForGroupFile } from './util/paths';
 const MAX_FUTURE_DRIFT_MS = 24 * 60 * 60 * 1000; // 1 day
 
 export const CLOCK_DRIFT_ERROR_CODE = 'clock-drift';
+export const INVALID_TIMESTAMP_ERROR_CODE = 'invalid-timestamp';
 
-function createClockDriftError(message) {
-  return Object.assign(new Error(message), { code: CLOCK_DRIFT_ERROR_CODE });
+function createSyncError(code, message) {
+  return Object.assign(new Error(message), { code });
 }
 
-function isTimestampTooFarInFuture(timestamp) {
-  const parsed = Timestamp.parse(timestamp);
-  return !parsed || parsed.millis() - Date.now() >= MAX_FUTURE_DRIFT_MS;
+function isTimestampTooFarInFuture(parsed) {
+  return parsed.millis() - Date.now() >= MAX_FUTURE_DRIFT_MS;
 }
 
 export function getGroupDb(groupId) {
@@ -55,14 +55,24 @@ function addMessages(db, messages) {
 
         // Check new messages for invalid timestamps
         if (info.changes > 0) {
-          if (isTimestampTooFarInFuture(msg.timestamp)) {
-            throw createClockDriftError(
+          const parsed = Timestamp.parse(msg.timestamp);
+
+          if (!parsed) {
+            throw createSyncError(
+              INVALID_TIMESTAMP_ERROR_CODE,
+              'Rejecting sync message with invalid timestamp: ' + msg.timestamp,
+            );
+          }
+
+          if (isTimestampTooFarInFuture(parsed)) {
+            throw createSyncError(
+              CLOCK_DRIFT_ERROR_CODE,
               'Rejecting sync message with timestamp too far in the future: ' +
                 msg.timestamp,
             );
           }
 
-          trie = merkle.insert(trie, Timestamp.parse(msg.timestamp));
+          trie = merkle.insert(trie, parsed);
         }
       }
     }

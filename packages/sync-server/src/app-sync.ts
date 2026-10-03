@@ -196,6 +196,10 @@ app.post('/sync', async (req, res): Promise<void> => {
       res.status(400).send('clock-drift');
       return;
     }
+    if (e.code === simpleSync.INVALID_TIMESTAMP_ERROR_CODE) {
+      res.status(400).send('invalid-timestamp');
+      return;
+    }
     throw e;
   }
 

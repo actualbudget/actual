@@ -1594,6 +1594,30 @@ describe('/sync', () => {
     expect(res.text).toEqual('clock-drift');
   });
 
+  it('returns 400 if a message timestamp is invalid', async () => {
+    const fileId = crypto.randomBytes(16).toString('hex');
+    const groupId = 'group-id';
+    const keyId = 'key-id';
+    const syncVersion = 2;
+    const encryptMeta = JSON.stringify({ keyId });
+
+    addMockFile(fileId, groupId, keyId, encryptMeta, syncVersion);
+
+    const syncRequest = createMinimalSyncRequest(fileId, groupId, keyId);
+    syncRequest.messages = [
+      create(MessageEnvelopeSchema, {
+        timestamp: 'invalid-timestamp-0000-0000000000000000',
+        isEncrypted: false,
+        content: new Uint8Array(),
+      }),
+    ];
+
+    const res = await sendSyncRequest(syncRequest);
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.text).toEqual('invalid-timestamp');
+  });
+
   it('does not reject a far-future timestamp for a message the server already has', async () => {
     const fileId = crypto.randomBytes(16).toString('hex');
     const groupId = 'group-id';
