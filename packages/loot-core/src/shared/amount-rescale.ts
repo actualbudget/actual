@@ -20,7 +20,8 @@ function safeAmount(amount: bigint): number {
   return result;
 }
 
-function roundEven(numerator: bigint, denominator: bigint): bigint {
+/** Rounds a rational value half to even. */
+export function roundEven(numerator: bigint, denominator: bigint): bigint {
   const quotient = numerator / denominator;
   const remainder = numerator % denominator;
   const distance = (remainder < 0n ? -remainder : remainder) * 2n;
