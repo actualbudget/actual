@@ -120,15 +120,17 @@ export function calculateDateRangeBoundMonths(
   };
 }
 
+// `until-today` carries explicit dates like the live/static modes, so it is
+// not one of the preset ranges.
 type PresetTimeRangeMode = Exclude<
   TimeFrame['mode'],
-  'sliding-window' | 'static'
+  'sliding-window' | 'static' | 'until-today'
 >;
 
 function isPresetTimeRangeMode(
   mode: TimeFrame['mode'],
 ): mode is PresetTimeRangeMode {
-  return !['sliding-window', 'static'].includes(mode);
+  return !['sliding-window', 'static', 'until-today'].includes(mode);
 }
 
 type QueryManagerProps = {
@@ -534,6 +536,7 @@ function QueryItem({
   const isPresetTimeRange = isPresetTimeRangeMode(timeRangeMode);
   const timeRangeLabels = {
     'sliding-window': t('Live'),
+    'until-today': t('Until today'),
     static: t('Static'),
     full: t('All time'),
     lastMonth: t('Last month'),
