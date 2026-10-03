@@ -12,7 +12,10 @@ export type TransactionEntity = {
   parent_id?: TransactionEntity['id'];
   account: AccountEntity['id'];
   category?: CategoryEntity['id'];
+  /** Budget-base integer. */
   amount: IntegerAmount;
+  /** Account-native integer, present only for foreign-currency accounts. */
+  transaction_amount?: IntegerAmount | null;
   payee?: PayeeEntity['id'] | null;
   notes?: string;
   date: string;

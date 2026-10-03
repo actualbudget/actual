@@ -8,6 +8,8 @@ import {
 } from '#shared/transactions';
 import type { TransactionEntity } from '#types/models';
 
+import { isForeignAccount } from './foreign-guard';
+
 import { batchUpdateTransactions } from '.';
 
 export async function mergeTransactions(
@@ -22,6 +24,22 @@ export async function mergeTransactions(
     );
   }
   const [a, b] = await mapAndValidateTransactions(txIds[0], txIds[1]);
+  if (
+    (await isForeignAccount(a.account)) ||
+    (await isForeignAccount(b.account))
+  ) {
+    // Only identical pairs without split children can merge until an
+    // explicit correction workflow exists.
+    if (
+      a.account !== b.account ||
+      a.amount !== b.amount ||
+      a.transaction_amount !== b.transaction_amount ||
+      a.is_parent ||
+      b.is_parent
+    ) {
+      throw new Error('multicurrency-merge-unavailable');
+    }
+  }
   const aTransferId = a.transfer_id;
   const bTransferId = b.transfer_id;
 

@@ -104,6 +104,19 @@ function execSplitActions(actions: Action[], transaction, amountPrecision = 2) {
   return recalculateSplit(groupTransaction(newTransactions));
 }
 
+/**
+ * Foreign-currency transactions keep a frozen base/native pair, so rule
+ * actions that set an amount or split by amount do not apply to them yet.
+ */
+export function withoutAmountActions(actions: Action[]): Action[] {
+  return actions.filter(
+    action =>
+      !(action.op === 'set' && action.field === 'amount') &&
+      action.op !== 'set-split-amount' &&
+      !action.options?.splitIndex,
+  );
+}
+
 export function execActions(
   actions: Action[],
   transaction,
@@ -177,9 +190,13 @@ export class Rule {
     });
   }
 
-  execActions<T>(object: T, amountPrecision = 2): Partial<T> {
+  execActions<T>(
+    object: T,
+    amountPrecision = 2,
+    { skipAmountActions = false }: { skipAmountActions?: boolean } = {},
+  ): Partial<T> {
     const result = execActions(
-      this.actions,
+      skipAmountActions ? withoutAmountActions(this.actions) : this.actions,
       {
         ...object,
       },

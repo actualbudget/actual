@@ -12,6 +12,7 @@ import { resetFormulaPreferencesCache } from '#server/formulas/bootstrap';
 import { mutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
+import { assertBaseCurrencyChangeAllowed } from '#server/util/currency';
 import {
   parseAmountEncoding,
   reviewedAmountEncoding,
@@ -59,6 +60,7 @@ async function preflight({
 }: {
   currencyCode: string;
 }): Promise<Preflight> {
+  await assertBaseCurrencyChangeAllowed(currencyCode);
   const metadata = prefs.getPrefs();
   if (!metadata?.id) throw new Error('amount-encoding-budget-not-open');
   const source = parseAmountEncoding(metadata.amountEncoding);
@@ -90,6 +92,7 @@ async function transition({
   currencyCode: string;
   sourceToken: string;
 }) {
+  await assertBaseCurrencyChangeAllowed(currencyCode);
   if (sourceToken() !== expectedSourceToken) {
     return { error: 'amount-encoding-stale', retryable: false };
   }

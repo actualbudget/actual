@@ -7,6 +7,7 @@ import { batchMessages } from '#server/sync';
 import type { Diff } from '#shared/util';
 import type { PayeeEntity, TransactionEntity } from '#types/models';
 
+import { preflightTransactionWrites } from './foreign-guard';
 import * as rules from './transaction-rules';
 import * as transfer from './transfer';
 
@@ -49,6 +50,9 @@ export async function batchUpdateTransactions({
   detectOrphanPayees?: boolean;
   runTransfers?: boolean;
 }) {
+  // Reject the whole batch before any write or side effect.
+  await preflightTransactionWrites({ added, updated });
+
   // Track the ids of each type of transaction change (see below for why)
   let addedIds = [];
   const updatedIds = updated ? updated.map(u => u.id) : [];
