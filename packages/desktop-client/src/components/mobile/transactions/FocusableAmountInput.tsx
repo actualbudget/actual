@@ -218,8 +218,8 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   useEffect(() => {
     if (sign) {
       setIsNegative(sign === '-');
-    } else if (value > 0 || (zeroSign !== '-' && value === 0)) {
-      setIsNegative(false);
+    } else {
+      setIsNegative(value < 0 || (value === 0 && zeroSign === '-'));
     }
   }, [sign, value, zeroSign]);
 
