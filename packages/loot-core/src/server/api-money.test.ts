@@ -293,14 +293,11 @@ describe('API Money amounts', () => {
       id: 'single',
       fields: { amount: { amount: -250, currencyCode: 'KWD' } },
     });
-    // The existing update handler does not await its batch write.
-    await vi.waitFor(() =>
-      expect(
-        db.firstSync<{ amount: number }>(
-          "SELECT amount FROM transactions WHERE id = 'single'",
-        )?.amount,
-      ).toBe(-250),
-    );
+    expect(
+      db.firstSync<{ amount: number }>(
+        "SELECT amount FROM transactions WHERE id = 'single'",
+      )?.amount,
+    ).toBe(-250);
     await expect(
       handlers['api/transaction-update']({
         id: 'single',
@@ -337,5 +334,148 @@ describe('API Money amounts', () => {
         amount: { amount: 7000, currencyCode: 'JPY' },
       }),
     ).rejects.toThrow('currency-mismatch');
+  });
+});
+
+describe('API foreign pairs', () => {
+  beforeEach(async () => {
+    await setBudgetCurrency('USD', 2);
+    // Handlers refuse foreign currencies until foreign posting ships.
+    await db.insertAccount({ id: 'jpy', name: 'Yen', currency: 'JPY' });
+  });
+
+  it('reads base and native amounts in their own currencies', async () => {
+    await db.insertTransaction({
+      id: 'f',
+      account: 'jpy',
+      date: '2026-03-01',
+      amount: -1000,
+      transaction_amount: -1500,
+    });
+    const [raw] = await handlers['api/transactions-get']({ accountId: 'jpy' });
+    expect(raw).toMatchObject({ amount: -1000, transaction_amount: -1500 });
+    expect(raw).not.toHaveProperty('amount_pair');
+    const [money] = await handlers['api/transactions-get']({
+      accountId: 'jpy',
+      options: { amountFormat: 'money' },
+    });
+    expect(money).toMatchObject({
+      amount: { amount: -1000, currencyCode: 'USD' },
+      transaction_amount: { amount: -1500, currencyCode: 'JPY' },
+    });
+    await expect(
+      handlers['api/account-balance']({
+        id: 'jpy',
+        options: { amountFormat: 'money' },
+      }),
+    ).resolves.toEqual({ amount: -1500, currencyCode: 'JPY' });
+  });
+
+  it('accepts pairs with each field in its own currency', async () => {
+    await handlers['api/transactions-add']({
+      accountId: 'jpy',
+      transactions: [
+        {
+          date: '2026-03-02',
+          amount: { amount: -2000, currencyCode: 'USD' },
+          transaction_amount: { amount: -3000, currencyCode: 'JPY' },
+        },
+      ],
+    });
+    expect(
+      db.firstSync(
+        "SELECT amount, transaction_amount, amount_pair FROM transactions WHERE acct = 'jpy'",
+      ),
+    ).toEqual({
+      amount: -2000,
+      transaction_amount: -3000,
+      amount_pair: '-2000:-3000',
+    });
+    await expect(
+      handlers['api/transactions-add']({
+        accountId: 'jpy',
+        transactions: [
+          {
+            date: '2026-03-03',
+            amount: { amount: -2000, currencyCode: 'JPY' },
+            transaction_amount: -3000,
+          },
+        ],
+      }),
+    ).rejects.toThrow('currency-mismatch');
+    await expect(
+      handlers['api/transactions-add']({
+        accountId: 'jpy',
+        transactions: [
+          {
+            date: '2026-03-03',
+            amount: -2000,
+            transaction_amount: { amount: -3000, currencyCode: 'USD' },
+          },
+        ],
+      }),
+    ).rejects.toThrow('currency-mismatch');
+    await expect(
+      handlers['api/transactions-add']({
+        accountId: 'jpy',
+        transactions: [{ date: '2026-03-03', amount: -2000 }],
+      }),
+    ).rejects.toThrow('foreign-pair-required');
+    await expect(
+      handlers['api/transactions-add']({
+        accountId: 'jpy',
+        transactions: [
+          {
+            date: '2026-03-03',
+            amount: -2000,
+            transaction_amount: -3000,
+            amount_pair: '1:1',
+          } as never,
+        ],
+      }),
+    ).rejects.toThrow('amount-pair-internal');
+  });
+
+  it('keeps the unchanged pair side when updating one value', async () => {
+    await db.insertTransaction({
+      id: 'f',
+      account: 'jpy',
+      date: '2026-03-01',
+      amount: -1000,
+      transaction_amount: -1500,
+    });
+    await handlers['api/transaction-update']({
+      id: 'f',
+      fields: { amount: -1100, transaction_amount: -1500 },
+    });
+    expect(
+      db.firstSync(
+        "SELECT amount, transaction_amount, amount_pair FROM transactions WHERE id = 'f'",
+      ),
+    ).toEqual({
+      amount: -1100,
+      transaction_amount: -1500,
+      amount_pair: '-1100:-1500',
+    });
+  });
+
+  it('propagates guard rejections from transaction updates', async () => {
+    await db.insertAccount({ id: 'base', name: 'Checking' });
+    await db.insertTransaction({
+      id: 'f',
+      account: 'jpy',
+      date: '2026-03-01',
+      amount: -1000,
+      transaction_amount: -1500,
+    });
+    await expect(
+      handlers['api/transaction-update']({
+        id: 'f',
+        fields: { account: 'base' },
+      }),
+    ).rejects.toThrow('account-move-currency-mismatch');
+    expect(
+      db.firstSync("SELECT acct FROM transactions WHERE id = 'f'"),
+    ).toEqual({ acct: 'jpy' });
   });
 });

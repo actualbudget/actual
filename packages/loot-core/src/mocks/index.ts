@@ -25,6 +25,7 @@ export function generateAccount(
     closed: 0,
     account_group_id: null,
     currency: null,
+    currency_precision: null,
     ...emptySyncFields(),
   };
 

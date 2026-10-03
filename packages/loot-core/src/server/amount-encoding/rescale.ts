@@ -1,5 +1,6 @@
 import * as sqlite from '#platform/server/sqlite';
 import type { Database, SqlParam } from '#platform/server/sqlite';
+import { parseAmountPair } from '#server/sync/coupled-cells';
 import { rescaleAmount, rescaleAmountGroup } from '#shared/amount-rescale';
 
 type JsonValue = string | number | boolean | null | JsonValue[] | JsonObject;
@@ -12,6 +13,7 @@ type Transaction = {
   parent_id: string | null;
   transferred_id: string | null;
   tombstone: number;
+  amount_pair: string | null;
 };
 
 const numericColumns: Record<string, string[]> = {
@@ -52,7 +54,7 @@ export function rescaleBudget(
 
     const rows: Transaction[] = sqlite.runQuery(
       database,
-      'SELECT id, amount, isParent, isChild, parent_id, transferred_id, tombstone FROM transactions ORDER BY id',
+      'SELECT id, amount, isParent, isChild, parent_id, transferred_id, tombstone, amount_pair FROM transactions ORDER BY id',
       [],
       true,
     );
@@ -135,7 +137,20 @@ export function rescaleBudget(
       }
     }
     for (const row of rows) {
-      update('transactions', row.id, 'amount', amounts.get(row.id) ?? null);
+      const amount = amounts.get(row.id) ?? null;
+      update('transactions', row.id, 'amount', amount);
+      // The pair authority keeps native units and takes the new base value,
+      // so later coupled-cell derivation cannot undo the rescale.
+      // Malformed authority cells stay ignored rather than rewritten.
+      const pair = parseAmountPair(row.amount_pair);
+      if (pair && amount !== null) {
+        update(
+          'transactions',
+          row.id,
+          'amount_pair',
+          `${amount}:${pair.transaction_amount}`,
+        );
+      }
     }
 
     for (const [table, columns] of Object.entries(numericColumns)) {

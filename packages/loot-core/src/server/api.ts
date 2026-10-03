@@ -28,6 +28,7 @@ import type {
 import type { ServerHandlers } from '#types/server-handlers';
 
 import type { SyncResponse } from './accounts/app';
+import { assertClosureAllowed } from './accounts/app';
 import { addTransactions } from './accounts/sync';
 import {
   accountGroupModel,
@@ -58,6 +59,7 @@ import * as prefs from './prefs';
 import { getScheduleDates } from './schedules/occurrences';
 import * as sheet from './sheet';
 import { batchMessages, setSyncingMode } from './sync';
+import { completePairPatch } from './transactions/foreign-guard';
 import {
   getAccountCurrency,
   getDefaultCurrencyCode,
@@ -474,35 +476,68 @@ function amountFormatIsMoney(format: AmountFormat | undefined): boolean {
   throw APIError(`Invalid amountFormat: ${String(format)}`);
 }
 
-function decodeAmountInputs<
-  T extends {
-    amount?: AmountInput;
-    subtransactions?: Array<{ amount?: AmountInput }>;
-  },
->(transaction: T, currencyCode: string) {
+type AmountCurrencies = { base: string; native: string };
+
+/** `amount` is budget-base; `transaction_amount` is account-native. */
+async function amountCurrencies(accountId: string): Promise<AmountCurrencies> {
   return {
-    ...transaction,
-    ...(transaction.amount !== undefined && {
-      amount: fromAmountInput(transaction.amount, currencyCode),
+    base: await getDefaultCurrencyCode(),
+    native: (await getAccountCurrency(accountId)).currencyCode,
+  };
+}
+
+type AmountFields = {
+  amount?: AmountInput;
+  transaction_amount?: AmountInput | null;
+};
+
+function decodeAmountFields<T extends AmountFields>(
+  row: T,
+  currencies: AmountCurrencies,
+) {
+  if ('amount_pair' in row) {
+    throw APIError('amount-pair-internal');
+  }
+  return {
+    ...row,
+    ...(row.amount !== undefined && {
+      amount: fromAmountInput(row.amount, currencies.base),
     }),
-    ...(transaction.subtransactions && {
-      subtransactions: transaction.subtransactions.map(sub => ({
-        ...sub,
-        ...(sub.amount !== undefined && {
-          amount: fromAmountInput(sub.amount, currencyCode),
-        }),
-      })),
+    ...(row.transaction_amount != null && {
+      transaction_amount: fromAmountInput(
+        row.transaction_amount,
+        currencies.native,
+      ),
     }),
   };
 }
 
-function encodeTransactionMoney(transaction, currencyCode: string) {
+function decodeAmountInputs<
+  T extends AmountFields & { subtransactions?: AmountFields[] },
+>(transaction: T, currencies: AmountCurrencies) {
   return {
-    ...transaction,
-    amount: toMoney(transaction.amount, currencyCode),
+    ...decodeAmountFields(transaction, currencies),
     ...(transaction.subtransactions && {
       subtransactions: transaction.subtransactions.map(sub =>
-        encodeTransactionMoney(sub, currencyCode),
+        decodeAmountFields(sub, currencies),
+      ),
+    }),
+  };
+}
+
+function encodeTransactionMoney(transaction, currencies: AmountCurrencies) {
+  return {
+    ...transaction,
+    amount: toMoney(transaction.amount, currencies.base),
+    ...(transaction.transaction_amount != null && {
+      transaction_amount: toMoney(
+        transaction.transaction_amount,
+        currencies.native,
+      ),
+    }),
+    ...(transaction.subtransactions && {
+      subtransactions: transaction.subtransactions.map(sub =>
+        encodeTransactionMoney(sub, currencies),
       ),
     }),
   };
@@ -675,10 +710,10 @@ handlers['api/transactions-import'] = withMutation(async function ({
   opts,
 }) {
   checkFileOpen();
-  const { currencyCode } = await getAccountCurrency(accountId);
+  const currencies = await amountCurrencies(accountId);
   return handlers['transactions-import']({
     accountId,
-    transactions: transactions.map(t => decodeAmountInputs(t, currencyCode)),
+    transactions: transactions.map(t => decodeAmountInputs(t, currencies)),
     isPreview,
     opts,
   });
@@ -691,10 +726,10 @@ handlers['api/transactions-add'] = withMutation(async function ({
   learnCategories = false,
 }) {
   checkFileOpen();
-  const { currencyCode } = await getAccountCurrency(accountId);
+  const currencies = await amountCurrencies(accountId);
   await addTransactions(
     accountId,
-    transactions.map(t => decodeAmountInputs(t, currencyCode)),
+    transactions.map(t => decodeAmountInputs(t, currencies)),
     {
       runTransfers,
       learnCategories,
@@ -716,11 +751,11 @@ handlers['api/transactions-get'] = async function ({
   // Queued Money reads cannot interleave with an encoding transition.
   return runMutator(async () => {
     const data = await readTransactions();
-    const codes = new Map<string, string>();
+    const currencies = new Map<string, AmountCurrencies>();
     for (const id of new Set<string>(data.map(t => t.account))) {
-      codes.set(id, (await getAccountCurrency(id)).currencyCode);
+      currencies.set(id, await amountCurrencies(id));
     }
-    return data.map(t => encodeTransactionMoney(t, codes.get(t.account)));
+    return data.map(t => encodeTransactionMoney(t, currencies.get(t.account)));
   });
 
   async function readTransactions() {
@@ -755,12 +790,23 @@ handlers['api/transaction-update'] = withMutation(async function ({
     return [];
   }
 
-  const { currencyCode } = await getAccountCurrency(fields.account ?? existing.account);
-  const decoded = decodeAmountInputs(fields, currencyCode);
-  // `fields` is partial; updateTransaction replaces a split child wholesale
+  const decoded = decodeAmountInputs(
+    fields,
+    await amountCurrencies(fields.account ?? existing.account),
+  );
+  // `fields` is partial; updateTransaction replaces a split child wholesale.
   // @ts-expect-error decodeAmountInputs retains Money in its generic split type.
-  const { diff } = updateTransaction(transactions, { ...existing, ...decoded });
-  return (await handlers['transactions-batch-update'](diff))['updated'];
+  const { data: edited, diff } = updateTransaction(transactions, {
+    ...existing,
+    ...decoded,
+  });
+  // Diffing drops an unchanged pair companion; keep both sides together.
+  const editedById = new Map(edited.map(t => [t.id, t]));
+  diff.updated = diff.updated.map(patch =>
+    completePairPatch(patch, editedById.get(patch.id)),
+  );
+  // Await so guard rejections reach the caller and writes finish first.
+  return (await handlers['transactions-batch-update'](diff)).updated;
 });
 
 handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
@@ -775,7 +821,7 @@ handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
   }
 
   const { diff } = deleteTransaction(transactions, id);
-  return handlers['transactions-batch-update'](diff)['deleted'];
+  return (await handlers['transactions-batch-update'](diff)).deleted;
 });
 
 handlers['api/transactions-merge'] = withMutation(async function ({ ids }) {
@@ -836,6 +882,10 @@ handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
     }
   }
   const { currency, ...rest } = fields;
+  if (fields.closed === true) {
+    // Closing through the generic update keeps the closure preflight.
+    await assertClosureAllowed(id);
+  }
   const resolvedCurrency = await resolveAccountCurrencyInput(currency, id);
   return db.updateAccount({
     id,
