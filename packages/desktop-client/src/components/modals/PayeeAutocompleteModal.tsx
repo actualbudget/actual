@@ -27,6 +27,7 @@ export function PayeeAutocompleteModal({
   onSelect,
   showNoneOption,
   onClose,
+  deferNewPayee = false,
 }: PayeeAutocompleteModalProps) {
   const { t } = useTranslation();
   const { data: payees = [] } = usePayees();
@@ -80,6 +81,7 @@ export function PayeeAutocompleteModal({
                 focused
                 embedded
                 closeOnBlur={false}
+                clearOnBlur={!deferNewPayee}
                 onClose={() => state.close()}
                 onManagePayees={onManagePayees}
                 showManagePayees={!isNarrowWidth}

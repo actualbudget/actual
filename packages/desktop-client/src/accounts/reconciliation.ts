@@ -97,6 +97,28 @@ export async function finishReconciliation(
   }
 }
 
+/**
+ * A foreign account's adjustment is a new foreign entry: its native
+ * difference is posted through the conversion dialog.
+ */
+export function foreignReconciliationDraft(
+  accountId: AccountEntity['id'],
+  diff: number,
+) {
+  const [{ amount, ...draft }] = realizeTempTransactions([
+    {
+      id: 'temp',
+      account: accountId,
+      cleared: true,
+      reconciled: false,
+      amount: diff,
+      date: currentDay(),
+      notes: t('Reconciliation balance adjustment'),
+    },
+  ]);
+  return { ...draft, transaction_amount: amount };
+}
+
 export async function createReconciliationTransaction(
   accountId: AccountEntity['id'],
   diff: number,

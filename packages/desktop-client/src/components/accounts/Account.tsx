@@ -17,13 +17,11 @@ import { listen, send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
 import type { UndoState } from '@actual-app/core/server/undo';
 import { getCurrency } from '@actual-app/core/shared/currencies';
-import { currentDay } from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
 import {
   makeAsNonChildTransactions,
   makeChild,
-  realizeTempTransactions,
   ungroupTransaction,
   ungroupTransactions,
 } from '@actual-app/core/shared/transactions';
@@ -99,6 +97,7 @@ import type { PagedQuery } from '#queries/pagedQuery';
 import { useDispatch, useSelector } from '#redux';
 import type { AppDispatch } from '#redux/store';
 import { updateNewTransactions } from '#transactions/transactionsSlice';
+import { postForeignEntry } from '#util/post-foreign-entry';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
@@ -1255,34 +1254,15 @@ class AccountInternal extends PureComponent<
     }
 
     // A foreign adjustment is a new foreign entry: the native difference
-    // goes through the conversion dialog and the atomic posting handler.
+    // uses the atomic posting handler and asks only for missing conversions.
     const foreign = this.getForeignAccount();
     if (foreign?.currency && foreign.currency_precision != null) {
-      const [draft] = realizeTempTransactions([
-        {
-          id: 'temp',
-          account: accountId,
-          cleared: true,
-          reconciled: false,
-          amount: diff,
-          date: currentDay(),
-          notes: t('Reconciliation balance adjustment'),
-        },
-      ]);
-      const { amount, ...rest } = draft;
-      this.props.dispatch(
-        pushModal({
-          modal: {
-            name: 'foreign-amount',
-            options: {
-              transaction: { ...rest, transaction_amount: amount },
-              currencyCode: foreign.currency,
-              nativePrecision: foreign.currency_precision,
-              onPosted: () => void this.refetchTransactions(),
-            },
-          },
-        }),
-      );
+      await postForeignEntry(this.props.dispatch, {
+        transaction: reconciliation.foreignReconciliationDraft(accountId, diff),
+        currencyCode: foreign.currency,
+        nativePrecision: foreign.currency_precision,
+        onPosted: () => void this.refetchTransactions(),
+      });
       return;
     }
 

@@ -441,7 +441,9 @@ export function Modals() {
       }
     })
     .map((modal, idx) => (
-      <Fragment key={`${modalStack[idx].name}-${idx}`}>{modal}</Fragment>
+      <Fragment key={modalStack[idx].id ?? `${modalStack[idx].name}-${idx}`}>
+        {modal}
+      </Fragment>
     ));
 
   // fragment needed per TS types
