@@ -32,6 +32,7 @@ import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import { MobilePageHeader, Page } from '#components/Page';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
+import { AccountCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useAccounts } from '#hooks/useAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
@@ -203,22 +204,32 @@ function AccountListItem({
               {account.name}
             </TextOneLine>
           </View>
-          <CellValue binding={getBalanceQuery(account.id)} type="financial">
-            {props => (
-              <CellValueText<'account', 'balance'>
-                {...props}
-                style={{
-                  fontSize: 16,
-                  ...makeAmountFullStyle(props.value, {
-                    positiveColor: theme.numberPositive,
-                    negativeColor: theme.numberNegative,
-                    zeroColor: theme.numberNeutral,
-                  }),
-                }}
-                data-testid="account-balance"
-              />
-            )}
-          </CellValue>
+          {/* A foreign account shows its native balance in its currency. */}
+          <AccountCurrencyFormat account={account}>
+            <CellValue<'account', 'balance' | 'nativeBalance'>
+              binding={
+                account.currency
+                  ? bindings.accountNativeBalance(account.id)
+                  : getBalanceQuery(account.id)
+              }
+              type="financial"
+            >
+              {props => (
+                <CellValueText<'account', 'balance' | 'nativeBalance'>
+                  {...props}
+                  style={{
+                    fontSize: 16,
+                    ...makeAmountFullStyle(props.value, {
+                      positiveColor: theme.numberPositive,
+                      negativeColor: theme.numberNegative,
+                      zeroColor: theme.numberNeutral,
+                    }),
+                  }}
+                  data-testid="account-balance"
+                />
+              )}
+            </CellValue>
+          </AccountCurrencyFormat>
         </Button>
       )}
     </ListBoxItem>

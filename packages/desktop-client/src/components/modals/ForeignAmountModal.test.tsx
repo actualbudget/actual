@@ -6,6 +6,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { createTestAppStore, TestProviders } from '#mocks';
+import { pushModal } from '#modals/modalsSlice';
 import { mergeSyncedPrefs } from '#prefs/prefsSlice';
 
 import { ForeignAmountModal } from './ForeignAmountModal';
@@ -64,7 +65,7 @@ function setup(resolution: Resolution, post = vi.fn()) {
       </MemoryRouter>
     </TestProviders>,
   );
-  return { post, onPosted };
+  return { post, onPosted, store };
 }
 
 async function field(name: string) {
@@ -362,6 +363,66 @@ describe('ForeignAmountModal', () => {
       await screen.findByText('Enter a valid base amount or rate.'),
     ).toBeInTheDocument();
     expect(post).not.toHaveBeenCalled();
+  });
+
+  it('cannot be cancelled or dismissed while posting', async () => {
+    let finish: (value: { status: 'ok'; id: string }) => void = () => undefined;
+    const { onPosted } = setup(
+      standing,
+      vi.fn(() => new Promise(done => (finish = done))),
+    );
+    await screen.findByText(/at 1 USD = 150 JPY/);
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Close' })).toBeNull();
+    finish({ status: 'ok', id: 'draft' });
+    await waitFor(() => expect(onPosted).toHaveBeenCalled());
+  });
+
+  it('closes only itself, keeping a modal opened above it', async () => {
+    const { store } = setup(
+      standing,
+      vi.fn(async () => ({ status: 'ok', id: 'draft' })),
+    );
+    store.dispatch(
+      pushModal({
+        modal: {
+          name: 'foreign-amount',
+          options: {
+            transaction: draft,
+            currencyCode: 'JPY',
+            nativePrecision: 0,
+            onPosted: vi.fn(),
+          },
+        },
+      }),
+    );
+    store.dispatch(pushModal({ modal: { name: 'goal-templates' } }));
+    await screen.findByText(/at 1 USD = 150 JPY/);
+    // The dialog below the top modal is inactive; skip the pointer check.
+    await userEvent
+      .setup({ pointerEventsCheck: 0 })
+      .click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(store.getState().modals.modalStack.map(m => m.name)).toEqual([
+        'goal-templates',
+      ]),
+    );
+  });
+
+  it('explains a refused posting and stays open', async () => {
+    setup(
+      standing,
+      vi.fn(async () => {
+        throw new Error('multicurrency-transfer-unavailable');
+      }),
+    );
+    await screen.findByText(/at 1 USD = 150 JPY/);
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(
+      await screen.findByText('This transaction could not be saved.'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
   });
 
   it('writes nothing when cancelled', async () => {

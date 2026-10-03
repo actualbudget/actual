@@ -26,6 +26,7 @@ import type {
   TransactionFilterEntity,
 } from '@actual-app/core/types/models';
 
+import { toForeignDraft } from '#accounts/registerView';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { TableHandleRef } from '#components/table';
 import { isValidBoundaryDrop } from '#hooks/useDragDrop';
@@ -202,21 +203,8 @@ export function TransactionList({
         account.currency_precision != null &&
         parent?.account === account.id
       ) {
-        const {
-          amount,
-          _baseAmount: _base,
-          subtransactions: _subtransactions,
-          ...rest
-        } = parent;
-        const draft = {
-          ...rest,
-          transaction_amount: amount,
-          // A new payee is created with the posting, never before it.
-          ...(rest.payee?.startsWith('new:') && {
-            payee: null,
-            payee_name: rest.payee.slice('new:'.length),
-          }),
-        };
+        const draft = toForeignDraft(parent);
+        const amount = draft.transaction_amount;
         if (amount === 0) {
           // Zero converts to zero; anything else (such as a rule changing
           // the date) is resolved in the conversion dialog.

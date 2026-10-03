@@ -70,13 +70,16 @@ type TransactionListWithBalancesProps = {
     | Binding<SheetNames, 'uncategorized-balance'>
     | Binding<'category', 'balance'>
     | Binding<'account', 'balance'>
+    | Binding<'account', 'nativeBalance'>
     | Binding<'account', 'accounts-balance'>;
   balanceCleared?:
     | Binding<'category', 'balanceCleared'>
-    | Binding<'account', 'balanceCleared'>;
+    | Binding<'account', 'balanceCleared'>
+    | Binding<'account', 'nativeBalanceCleared'>;
   balanceUncleared?:
     | Binding<'category', 'balanceUncleared'>
-    | Binding<'account', 'balanceUncleared'>;
+    | Binding<'account', 'balanceUncleared'>
+    | Binding<'account', 'nativeBalanceUncleared'>;
   showRunningBalances?: boolean;
   runningBalances?: Map<TransactionEntity['id'], IntegerAmount>;
   searchPlaceholder: string;
@@ -235,8 +238,8 @@ function BalanceWithCleared({
 }: BalanceWithClearedProps) {
   const { t } = useTranslation();
   const unclearedAmount = useSheetValue<
-    'account' | 'category',
-    'balanceUncleared'
+    'account',
+    'balanceUncleared' | 'nativeBalanceUncleared'
   >(balanceUncleared);
   const showCleared = !!unclearedAmount || alwaysShowCleared;
 

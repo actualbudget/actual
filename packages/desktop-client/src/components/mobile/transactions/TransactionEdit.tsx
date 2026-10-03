@@ -73,6 +73,7 @@ import {
   parseISO,
 } from 'date-fns';
 
+import { toForeignDraft } from '#accounts/registerView';
 import { NoteInsertHashButton } from '#components/autocomplete/NoteInsertHashButton';
 import { NoteTagAutocomplete } from '#components/autocomplete/NoteTagAutocomplete';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
@@ -93,10 +94,16 @@ import {
   shouldApplyRuleChange,
   trackClearedField,
 } from '#components/transactions/table/utils';
+import type { ClearedFieldsByTransaction } from '#components/transactions/table/utils';
+import {
+  AccountCurrencyFormat,
+  BudgetCurrencyFormat,
+} from '#hooks/currencyFormatContext';
 import { useAccounts } from '#hooks/useAccounts';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
 import { useNavigate } from '#hooks/useNavigate';
@@ -114,6 +121,7 @@ import { locationService } from '#payees/location';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch, useSelector } from '#redux';
 import { setLastTransaction } from '#transactions/transactionsSlice';
+import { incompatibleAccountIds } from '#util/account-encoding';
 import { getStatusLabel } from '#util/schedule';
 import {
   calculateFutureTransactionInfo,
@@ -251,6 +259,7 @@ export function Status({
 type FooterProps = {
   transactions: TransactionEntity[];
   isAdding: boolean;
+  isSaving: boolean;
   onAdd: () => void;
   onSave: () => void;
   onSchedule: () => void;
@@ -268,6 +277,7 @@ type FooterProps = {
 function Footer({
   transactions,
   isAdding,
+  isSaving,
   onAdd,
   onSave,
   onSchedule,
@@ -391,7 +401,7 @@ function Footer({
         <Button
           variant="primary"
           style={{ height: styles.mobileMinHeight }}
-          isDisabled={!!editingField}
+          isDisabled={!!editingField || isSaving}
           onPress={onAdd}
         >
           <SvgAdd width={17} height={17} />
@@ -408,7 +418,7 @@ function Footer({
         <Button
           variant="primary"
           style={{ height: styles.mobileMinHeight }}
-          isDisabled={!!editingField}
+          isDisabled={!!editingField || isSaving}
           onPress={onSave}
         >
           <SvgPencilWriteAlternate width={16} height={16} />
@@ -627,6 +637,37 @@ const ChildTransactionEdit = forwardRef<
 
 ChildTransactionEdit.displayName = 'ChildTransactionEdit';
 
+/** An existing foreign amount: native in its currency, base beneath. */
+function FrozenForeignAmount({
+  transaction,
+}: {
+  transaction: TransactionEntity;
+}) {
+  const format = useFormat();
+  return (
+    <View style={{ alignItems: 'center', gap: 4, paddingTop: 8 }}>
+      <Text style={{ fontSize: 30, ...styles.tnum }}>
+        {format(transaction.transaction_amount ?? 0, 'financial')}
+      </Text>
+      <BudgetCurrencyFormat>
+        <BaseAmountText amount={transaction.amount} />
+      </BudgetCurrencyFormat>
+      <Text style={{ color: theme.pageTextSubdued, fontSize: 13 }}>
+        <Trans>Editing foreign amounts is not available yet</Trans>
+      </Text>
+    </View>
+  );
+}
+
+function BaseAmountText({ amount }: { amount: number }) {
+  const format = useFormat();
+  return (
+    <Text style={{ color: theme.pageTextSubdued, ...styles.tnum }}>
+      {format(amount, 'financial')}
+    </Text>
+  );
+}
+
 type TransactionEditInnerProps = {
   isAdding: boolean;
   accounts: AccountEntity[];
@@ -634,7 +675,10 @@ type TransactionEditInnerProps = {
   payees: PayeeEntity[];
   dateFormat: string;
   transactions: TransactionEntity[];
-  onSave: (transactions: TransactionEntity[]) => void;
+  /** A save is in flight; saving again is refused. */
+  isSaving: boolean;
+  /** Resolves true when the editor may close. */
+  onSave: (transactions: TransactionEntity[]) => Promise<boolean>;
   onUpdate: <Field extends keyof TransactionEntity>(
     transaction: TransactionEntity,
     field: Field,
@@ -653,6 +697,7 @@ type TransactionEditInnerProps = {
 const TransactionEditInner = memo<TransactionEditInnerProps>(
   function TransactionEditInner({
     isAdding,
+    isSaving,
     accounts,
     categories,
     payees,
@@ -725,6 +770,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       [payeesById],
     );
 
+    const storedParent = unserializedTransactions[0];
+    const isForeignTransaction = !!getAccount(storedParent)?.currency;
+    // Existing foreign amounts are frozen until foreign edits are supported.
+    const isAmountFrozen = isForeignTransaction && !isAdding;
+
     const getTransferAccount = useCallback(
       (trans: TransactionEntity) => {
         const payee = trans ? getPayee(trans) : null;
@@ -765,8 +815,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           );
         }
 
-        onSave(transactionsToSave);
-        void navigate(-1);
+        void onSave(transactionsToSave).then(canClose => {
+          if (canClose) {
+            void navigate(-1);
+          }
+        });
       };
 
       if (unserializedTransactions.some(t => t.reconciled)) {
@@ -1028,6 +1081,15 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   modal: {
                     name: 'account-autocomplete',
                     options: {
+                      // A saved transaction keeps its recorded encoding, and a
+                      // split draft cannot become foreign (splits arrive with
+                      // foreign edits).
+                      hiddenAccounts: editorHiddenAccounts({
+                        isAdding,
+                        accounts,
+                        account: getAccount(unserializedTransaction),
+                        hasSplits: childTransactions.length > 0,
+                      }),
                       onSelect: accountId => {
                         void onUpdateInner(transactionToEdit, name, accountId);
                       },
@@ -1046,6 +1108,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     name: 'payee-autocomplete',
                     options: {
                       showNoneOption: !!transactionToEdit.payee,
+                      // A new foreign entry creates a typed payee when it posts.
+                      deferNewPayee: isAdding && isForeignTransaction,
                       onSelect: payeeId => {
                         void onUpdateInner(transactionToEdit, name, payeeId);
                       },
@@ -1101,6 +1165,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         transactions,
         unserializedTransactions,
         showHiddenCategories,
+        isAdding,
+        getAccount,
+        childTransactions.length,
+        accounts,
+        isForeignTransaction,
       ],
     );
 
@@ -1206,12 +1275,15 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const account = getAccount(transaction);
     const isOffBudget = account ? !!account.offbudget : false;
-    const title = getPrettyPayee({
-      t,
-      transaction,
-      payee: getPayee(transaction),
-      transferAccount: getTransferAccount(transaction),
-    });
+    // A new foreign entry shows a typed payee that is created when it posts.
+    const title = transaction.payee?.startsWith('new:')
+      ? transaction.payee.slice('new:'.length)
+      : getPrettyPayee({
+          t,
+          transaction,
+          payee: getPayee(transaction),
+          transferAccount: getTransferAccount(transaction),
+        });
 
     const [referenceDate] = useState(() => new Date());
     const transactionDate = parseDate(
@@ -1241,6 +1313,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           <Footer
             transactions={transactions}
             isAdding={isAdding}
+            isSaving={isSaving}
             onAdd={onSaveInner}
             onSave={onSaveInner}
             onSchedule={onSchedule}
@@ -1248,7 +1321,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             onAddSplit={onAddSplit}
             onEmptySplitFound={onEmptySplitFound}
             editingField={editingField}
-            isFuture={isFuture}
+            // Schedules for accounts in other currencies arrive later.
+            isFuture={isFuture && !isForeignTransaction}
             onEditField={onEditFieldInner}
           />
         }
@@ -1264,22 +1338,26 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             }}
           >
             <FieldLabel title={t('Amount')} flush style={{ marginBottom: 0 }} />
-            <AmountInput
-              value={transaction.amount}
-              negate
-              disabled={
-                !!editingField &&
-                editingField !== getFieldName(transaction.id, 'amount')
-              }
-              autoFocus={isAdding}
-              disableNativeAutoFocusOnIOS
-              onFocus={() => {
-                onRequestActiveEdit(getFieldName(transaction.id, 'amount'));
-              }}
-              onBlur={() => onClearActiveEdit()}
-              onChange={onTotalAmountUpdate}
-              variant="large"
-            />
+            {isAmountFrozen ? (
+              <FrozenForeignAmount transaction={storedParent} />
+            ) : (
+              <AmountInput
+                value={transaction.amount}
+                negate
+                disabled={
+                  !!editingField &&
+                  editingField !== getFieldName(transaction.id, 'amount')
+                }
+                autoFocus={isAdding}
+                disableNativeAutoFocusOnIOS
+                onFocus={() => {
+                  onRequestActiveEdit(getFieldName(transaction.id, 'amount'));
+                }}
+                onBlur={() => onClearActiveEdit()}
+                onChange={onTotalAmountUpdate}
+                variant="large"
+              />
+            )}
           </View>
 
           <View>
@@ -1446,38 +1524,40 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             />
           ))}
 
-          {transaction.amount !== 0 && childTransactions.length === 0 && (
-            <View style={{ alignItems: 'center' }}>
-              <Button
-                variant="bare"
-                isDisabled={!!editingField}
-                style={{
-                  height: 40,
-                  borderWidth: 0,
-                  marginLeft: styles.mobileEditingPadding,
-                  marginRight: styles.mobileEditingPadding,
-                  marginTop: 10,
-                  backgroundColor: 'transparent',
-                }}
-                onPress={() => onSplit(transaction.id)}
-              >
-                <SvgSplit
-                  width={17}
-                  height={17}
-                  style={{ color: theme.formLabelText }}
-                />
-                <Text
+          {transaction.amount !== 0 &&
+            childTransactions.length === 0 &&
+            !isForeignTransaction && (
+              <View style={{ alignItems: 'center' }}>
+                <Button
+                  variant="bare"
+                  isDisabled={!!editingField}
                   style={{
-                    marginLeft: 5,
-                    userSelect: 'none',
-                    color: theme.formLabelText,
+                    height: 40,
+                    borderWidth: 0,
+                    marginLeft: styles.mobileEditingPadding,
+                    marginRight: styles.mobileEditingPadding,
+                    marginTop: 10,
+                    backgroundColor: 'transparent',
                   }}
+                  onPress={() => onSplit(transaction.id)}
                 >
-                  <Trans>Split</Trans>
-                </Text>
-              </Button>
-            </View>
-          )}
+                  <SvgSplit
+                    width={17}
+                    height={17}
+                    style={{ color: theme.formLabelText }}
+                  />
+                  <Text
+                    style={{
+                      marginLeft: 5,
+                      userSelect: 'none',
+                      color: theme.formLabelText,
+                    }}
+                  >
+                    <Trans>Split</Trans>
+                  </Text>
+                </Button>
+              </View>
+            )}
 
           <View>
             <FieldLabel title={t('Account')} />
@@ -1606,6 +1686,212 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
   },
 );
 
+/** An existing foreign transaction's patch never carries its stored pair. */
+export function editableForeignPatch(change: Partial<TransactionEntity>) {
+  const {
+    amount: _amount,
+    transaction_amount: _transactionAmount,
+    ...editable
+  } = change;
+  return editable;
+}
+
+/**
+ * Accounts the editor's account picker hides: a saved transaction keeps its
+ * recorded encoding, and a split draft cannot become foreign (splits arrive
+ * with foreign edits).
+ */
+export function editorHiddenAccounts({
+  isAdding,
+  accounts,
+  account,
+  hasSplits,
+}: {
+  isAdding: boolean;
+  accounts: AccountEntity[];
+  account: AccountEntity | undefined;
+  hasSplits: boolean;
+}) {
+  if (!isAdding) {
+    return incompatibleAccountIds(accounts, [account]);
+  }
+  return hasSplits
+    ? accounts.filter(other => other.currency).map(other => other.id)
+    : [];
+}
+
+/**
+ * Fields a rule preview may apply: never a field edited (by the user or a
+ * newer preview) after it started, nor an account the draft cannot move to.
+ */
+export function rulePreviewFields({
+  transaction,
+  diff,
+  updatedField,
+  startedAt,
+  fieldEditedAt,
+  clearedFields,
+  isAccountAllowed = () => true,
+}: {
+  transaction: TransactionEntity;
+  diff: Partial<TransactionEntity>;
+  updatedField: keyof TransactionEntity;
+  startedAt: number;
+  fieldEditedAt: ReadonlyMap<string, number>;
+  clearedFields?: ClearedFieldsByTransaction;
+  isAccountAllowed?: (accountId: AccountEntity['id'] | null) => boolean;
+}) {
+  const clearedOnThisRow = getClearedFieldNames(clearedFields, transaction.id);
+  const ruleFields = new Set<keyof TransactionEntity>();
+  const ruled = { ...transaction };
+  Object.keys(diff).forEach(key => {
+    const field = key as keyof TransactionEntity;
+    if ((fieldEditedAt.get(field) ?? 0) > startedAt) {
+      return;
+    }
+    if (field === 'account' && !isAccountAllowed(diff.account ?? null)) {
+      return;
+    }
+    // Apply rule changes to "empty" fields and append/prepend notes rules
+    // (see shouldApplyRuleChange).
+    // Or update all fields if the payee changes (assists location-based entry by
+    // applying rules to prefill category, notes, etc. based on the selected payee)
+    // except fields the user explicitly cleared, which must stay empty.
+    if (
+      !clearedOnThisRow.includes(field) &&
+      (updatedField === 'payee' ||
+        shouldApplyRuleChange(
+          field,
+          Reflect.get(transaction, field),
+          diff[field],
+        ))
+    ) {
+      (ruled as Record<string, unknown>)[field] = diff[field];
+      ruleFields.add(field);
+    }
+  });
+
+  if ((fieldEditedAt.get('subtransactions') ?? 0) > startedAt) {
+    return { ruleFields, ruled };
+  }
+  const subtransactions = propagateRuleChangeToSubtransactions(
+    ruled,
+    diff.subtransactions,
+    updatedField,
+    clearedFields,
+  );
+  if (subtransactions) {
+    ruled.subtransactions = subtransactions;
+    ruleFields.add('subtransactions');
+  } else if (
+    diff.subtransactions &&
+    (updatedField === 'payee' ||
+      shouldApplyRuleChange(
+        'subtransactions',
+        transaction.subtransactions,
+        diff.subtransactions,
+      ))
+  ) {
+    // First time a split rule converts this row into a parent.
+    ruled.subtransactions = diff.subtransactions;
+    ruleFields.add('subtransactions');
+  }
+  return { ruleFields, ruled };
+}
+
+/**
+ * Merges only the changed fields onto the latest state, since updates can be
+ * in flight at the same time (e.g. an amount blur racing a nearby payee
+ * press).
+ */
+function mergeTransactionFields(
+  prevTransactions: TransactionEntity[],
+  source: TransactionEntity,
+  fields: ReadonlySet<keyof TransactionEntity>,
+) {
+  const latestTransaction = prevTransactions.find(t => t.id === source.id);
+  if (!latestTransaction) {
+    // The transaction was deleted while this update was in flight.
+    return prevTransactions;
+  }
+  const merged = { ...latestTransaction };
+  for (const field of fields) {
+    (merged as Record<string, unknown>)[field] = source[field];
+  }
+
+  // When editing a split parent without a fresh subtransactions payload
+  // from rules, re-attach the latest children so updateTransaction keeps
+  // the existing split structure.
+  if (
+    !merged.subtransactions &&
+    (merged.is_parent || latestTransaction.is_parent)
+  ) {
+    const children = prevTransactions.filter(
+      t => t.is_child && t.parent_id === merged.id,
+    );
+    merged.subtransactions = children;
+    merged.is_parent = true;
+
+    const updated = updateTransaction(prevTransactions, merged).data;
+    // updateTransaction → makeChild clears child.error; restore any that
+    // were already on the flat list so split-error UI stays correct.
+    const childErrors = new Map(
+      children.filter(c => c.error != null).map(c => [c.id, c.error!] as const),
+    );
+    if (childErrors.size === 0) {
+      return updated;
+    }
+    return updated.map(t => {
+      const error = childErrors.get(t.id);
+      return error !== undefined ? { ...t, error } : t;
+    });
+  }
+
+  return updateTransaction(prevTransactions, merged).data;
+}
+
+/** Amounts are entered in the precision of the transaction's account. */
+function precisionOf(
+  accountsById: Record<string, AccountEntity>,
+  budgetPrecision: number,
+  accountId: AccountEntity['id'] | null | undefined,
+) {
+  const account = accountId ? accountsById[accountId] : undefined;
+  return account?.currency && account.currency_precision != null
+    ? account.currency_precision
+    : budgetPrecision;
+}
+
+function encodingOf(
+  accountsById: Record<string, AccountEntity>,
+  budgetPrecision: number,
+  accountId: AccountEntity['id'] | null | undefined,
+) {
+  const currency = (accountId && accountsById[accountId]?.currency) || '';
+  return `${currency}:${precisionOf(accountsById, budgetPrecision, accountId)}`;
+}
+
+/**
+ * Re-encodes an amount for another precision when the value is exactly
+ * representable there and within the amount limits; otherwise null.
+ */
+export function reencodeAmount(
+  amount: number,
+  fromPrecision: number,
+  toPrecision: number,
+) {
+  const reencoded = amountToInteger(
+    integerToAmount(amount, fromPrecision),
+    toPrecision,
+  );
+  return Number.isSafeInteger(reencoded) &&
+    Math.abs(reencoded) <= MAX_SAFE_NUMBER &&
+    amountToInteger(integerToAmount(reencoded, toPrecision), fromPrecision) ===
+      amount
+    ? reencoded
+    : null;
+}
+
 function isTemporary(transaction: TransactionEntity) {
   return transaction.id.indexOf('temp') === 0;
 }
@@ -1645,6 +1931,8 @@ function TransactionEditUnconnected({
   const isDeleted = useRef(false);
   const [learnCategories = 'true'] = useSyncedPref('learn-categories');
   const isLearnCategoriesEnabled = String(learnCategories) === 'true';
+  const isDraftInitialized = useRef(false);
+  const accountsById = useMemo(() => groupById(accounts), [accounts]);
 
   const searchParamCategory = useMemo(
     () => categories.find(c => c.name === searchParams.get('category'))?.id,
@@ -1714,10 +2002,22 @@ function TransactionEditUnconnected({
   }, [isLocationGranted]);
 
   useEffect(() => {
-    if (isAdding.current) {
+    // Create the new draft once, after accounts load; later account or
+    // preference refreshes must not reset the user's edits.
+    const isReady =
+      accounts.length > 0 &&
+      (!searchParams.get('category') || categories.length > 0) &&
+      (!searchParams.get('payee') || payees.length > 0);
+    if (isAdding.current && !isDraftInitialized.current && isReady) {
+      isDraftInitialized.current = true;
+      const initialAccount =
+        searchParamAccount ||
+        locationState?.accountId ||
+        lastTransaction?.account ||
+        null;
       const requestedAmount = amountToInteger(
         parseFloat(searchParams.get('amount') || '') || 0,
-        precision,
+        precisionOf(accountsById, precision, initialAccount),
       );
       setTransactions([
         {
@@ -1730,11 +2030,7 @@ function TransactionEditUnconnected({
             return lastTransaction?.date || monthUtils.currentDay();
           })(),
           payee: searchParamPayee,
-          account:
-            searchParamAccount ||
-            locationState?.accountId ||
-            lastTransaction?.account ||
-            null,
+          account: initialAccount,
           category: searchParamCategory || locationState?.categoryId || null,
           amount:
             Number.isSafeInteger(requestedAmount) &&
@@ -1755,6 +2051,10 @@ function TransactionEditUnconnected({
     searchParamPayee,
     searchParams,
     precision,
+    accountsById,
+    accounts.length,
+    categories.length,
+    payees.length,
   ]);
 
   // Fields the user explicitly emptied while entering the new transaction,
@@ -1763,149 +2063,146 @@ function TransactionEditUnconnected({
   // re-fill these (e.g. a cleared pre-assigned category must stay cleared).
   const clearedFields = useRef(new Map<TransactionEntity['id'], Set<string>>());
 
+  // Each user edit gets a generation; rule previews skip fields edited after
+  // they started.
+  const editGeneration = useRef(0);
+  const fieldEditGeneration = useRef(new Map<string, number>());
+
   const onUpdate = useCallback(
     async (
       serializedTransaction: TransactionEntity,
       updatedField: keyof TransactionEntity,
     ) => {
+      const previous = transactionsRef.current.find(
+        t => t.id === serializedTransaction.id,
+      );
+      // The editor serialized this amount at the previous account's precision.
       const transaction = deserializeTransaction(
         serializedTransaction,
         null,
         dateFormat,
+        precisionOf(
+          accountsById,
+          precision,
+          previous?.account ?? serializedTransaction.account,
+        ),
+      );
+      const changedFields = new Set<keyof TransactionEntity>([updatedField]);
+
+      if (
+        updatedField === 'account' &&
+        previous &&
+        isTemporary(transaction) &&
+        encodingOf(accountsById, precision, previous.account) !==
+          encodingOf(accountsById, precision, transaction.account)
+      ) {
+        // A new draft keeps the typed number when the target currency can
+        // represent it exactly.
+        const reencoded = reencodeAmount(
+          transaction.amount,
+          precisionOf(accountsById, precision, previous.account),
+          precisionOf(accountsById, precision, transaction.account),
+        );
+        if (reencoded == null) {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: t(
+                  "This amount has more decimal places than the selected account's currency allows, or is too large.",
+                ),
+              },
+            }),
+          );
+          return;
+        }
+        transaction.amount = reencoded;
+        changedFields.add('amount');
+      }
+
+      if (isTemporary(transaction)) {
+        trackClearedField(clearedFields.current, transaction, updatedField);
+      }
+
+      const generation = ++editGeneration.current;
+      for (const field of changedFields) {
+        fieldEditGeneration.current.set(field, generation);
+      }
+      const startEncoding = encodingOf(
+        accountsById,
         precision,
+        transaction.account,
+      );
+      // Group a split before the update below changes the latest state.
+      const transactionForRules = transactionForRulesFromList(
+        transactionsRef.current,
+        transaction,
+      );
+
+      // Apply the user's edit now so a slower rule preview cannot overwrite it.
+      setTransactions(prevTransactions =>
+        mergeTransactionFields(prevTransactions, transaction, changedFields),
       );
 
       // Run the rules to auto-fill in any data. Right now we only do
-      // this on new transactions because that's how desktop works.
-      const newTransaction = { ...transaction };
-      const changedFields = new Set<keyof TransactionEntity>([updatedField]);
-      if (isTemporary(newTransaction)) {
-        trackClearedField(clearedFields.current, newTransaction, updatedField);
-        const clearedOnThisRow = getClearedFieldNames(
-          clearedFields.current,
-          newTransaction.id,
-        );
-
-        // Mobile keeps splits as a flat parent+children list. Group them
-        // before rules-run so an already-applied split rule sees existing
-        // children (same as desktop). Otherwise re-running the rule creates
-        // new child ids and later parent edits (notes/account) fail (#9189).
-        const transactionForRules = transactionForRulesFromList(
-          transactionsRef.current,
-          newTransaction,
-        );
-
+      // this on new transactions because that's how desktop works. A
+      // foreign draft is ruled on its completed pair when it posts.
+      const account = transaction.account
+        ? accountsById[transaction.account]
+        : undefined;
+      if (isTemporary(transaction) && !account?.currency) {
         const afterRules = await send('rules-run', {
           transaction: transactionForRules,
         });
         const diff = getChangedValues(transactionForRules, afterRules);
-
-        if (diff) {
-          Object.keys(diff).forEach(key => {
-            const field = key as keyof TransactionEntity;
-            // Apply rule changes to "empty" fields and append/prepend notes rules
-            // (see shouldApplyRuleChange).
-            // Or update all fields if the payee changes (assists location-based entry by
-            // applying rules to prefill category, notes, etc. based on the selected payee)
-            // — except fields the user explicitly cleared, which must stay empty.
-            if (
-              !clearedOnThisRow.includes(field) &&
-              (updatedField === 'payee' ||
-                shouldApplyRuleChange(
-                  field,
-                  Reflect.get(transactionForRules, field),
-                  diff[field],
-                ))
-            ) {
-              (newTransaction as Record<string, unknown>)[field] = diff[field];
-              changedFields.add(field);
-            }
-          });
-
-          const parentForPropagate: TransactionEntity = {
-            ...transactionForRules,
-            ...newTransaction,
-          };
-          const subtransactions = propagateRuleChangeToSubtransactions(
-            parentForPropagate,
-            diff.subtransactions,
+        const latest = transactionsRef.current.find(
+          t => t.id === transaction.id,
+        );
+        // A preview is stale once the draft's encoding or payee moved on.
+        if (
+          diff &&
+          latest &&
+          latest.payee === transaction.payee &&
+          encodingOf(accountsById, precision, latest.account) === startEncoding
+        ) {
+          const { ruleFields, ruled } = rulePreviewFields({
+            transaction: transactionForRules,
+            diff,
             updatedField,
-            clearedFields.current,
-          );
-          if (subtransactions) {
-            newTransaction.subtransactions = subtransactions;
-            changedFields.add('subtransactions');
-          } else if (
-            diff.subtransactions &&
-            (updatedField === 'payee' ||
-              shouldApplyRuleChange(
-                'subtransactions',
-                transactionForRules.subtransactions,
-                diff.subtransactions,
-              ))
-          ) {
-            // First time a split rule converts this row into a parent.
-            newTransaction.subtransactions = diff.subtransactions;
-            changedFields.add('subtransactions');
+            startedAt: generation,
+            fieldEditedAt: fieldEditGeneration.current,
+            clearedFields: clearedFields.current,
+            // The amount was entered for this encoding, so a rule cannot
+            // move the draft to an account with another one.
+            isAccountAllowed: accountId =>
+              encodingOf(accountsById, precision, accountId) === startEncoding,
+          });
+          // Older previews never replace fields this one set.
+          for (const field of ruleFields) {
+            fieldEditGeneration.current.set(
+              field,
+              Math.max(fieldEditGeneration.current.get(field) ?? 0, generation),
+            );
+          }
+
+          if (ruleFields.size > 0) {
+            setTransactions(prevTransactions =>
+              mergeTransactionFields(prevTransactions, ruled, ruleFields),
+            );
           }
         }
       }
 
-      // Updates can be in flight at the same time (e.g. an amount blur
-      // racing a nearby payee press), so merge only the changed fields onto
-      // the latest state rather than replacing the whole transaction.
-      setTransactions(prevTransactions => {
-        const latestTransaction = prevTransactions.find(
-          t => t.id === newTransaction.id,
-        );
-        if (!latestTransaction) {
-          // The transaction was deleted while this update was in flight.
-          return prevTransactions;
-        }
-        const merged = { ...latestTransaction };
-        for (const field of changedFields) {
-          (merged as Record<string, unknown>)[field] = newTransaction[field];
-        }
-
-        // When editing a split parent without a fresh subtransactions payload
-        // from rules, re-attach the latest children so updateTransaction keeps
-        // the existing split structure.
-        if (
-          !merged.subtransactions &&
-          (merged.is_parent || latestTransaction.is_parent)
-        ) {
-          const children = prevTransactions.filter(
-            t => t.is_child && t.parent_id === merged.id,
-          );
-          merged.subtransactions = children;
-          merged.is_parent = true;
-
-          const updated = updateTransaction(prevTransactions, merged).data;
-          // updateTransaction → makeChild clears child.error; restore any that
-          // were already on the flat list so split-error UI stays correct.
-          const childErrors = new Map(
-            children
-              .filter(c => c.error != null)
-              .map(c => [c.id, c.error!] as const),
-          );
-          if (childErrors.size === 0) {
-            return updated;
-          }
-          return updated.map(t => {
-            const error = childErrors.get(t.id);
-            return error !== undefined ? { ...t, error } : t;
-          });
-        }
-
-        return updateTransaction(prevTransactions, merged).data;
-      });
-
       if (updatedField === 'payee') {
         setShouldShowSaveLocation(false);
 
-        if (newTransaction.payee && isLocationGranted) {
+        if (
+          transaction.payee &&
+          !transaction.payee.startsWith('new:') &&
+          isLocationGranted
+        ) {
           const payeeLocations = await locationService.getPayeeLocations(
-            newTransaction.payee,
+            transaction.payee,
           );
           if (payeeLocations.length === 0) {
             setShouldShowSaveLocation(true);
@@ -1925,34 +2222,122 @@ function TransactionEditUnconnected({
         }
       }
     },
-    [dateFormat, isLocationGranted, precision],
+    [dateFormat, isLocationGranted, accountsById, dispatch, t, precision],
   );
 
-  const onSave = useCallback(
-    async (newTransactions: TransactionEntity[]) => {
+  const [shouldCloseWhenModalsClear, setShouldCloseWhenModalsClear] =
+    useState(false);
+
+  /** Saves the edit; resolves true when the editor may close. */
+  const saveTransactions = useCallback(
+    async (newTransactions: TransactionEntity[]): Promise<boolean> => {
       if (isDeleted.current) {
-        return;
+        return true;
       }
 
-      const changes = diffItems(fetchedTransactions || [], newTransactions);
+      const [parent] = newTransactions;
+      const parentAccount = parent?.account
+        ? accountsById[parent.account]
+        : undefined;
+      const onPosted = () => {
+        dispatch(setLastTransaction({ transaction: parent }));
+        // Leave once any other open dialog is closed; navigating clears them.
+        setShouldCloseWhenModalsClear(true);
+      };
+
+      // A new foreign entry posts atomically through the conversion dialog.
+      if (
+        isAdding.current &&
+        parentAccount?.currency &&
+        parentAccount.currency_precision != null
+      ) {
+        const draft = toForeignDraft(parent);
+        const amount = draft.transaction_amount;
+        if (amount === 0) {
+          const result = await send('transactions/post-foreign-entry', {
+            transaction: draft,
+          });
+          if (result.status === 'ok') {
+            dispatch(setLastTransaction({ transaction: parent }));
+            return true;
+          }
+        }
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'foreign-amount',
+              options: {
+                transaction: draft,
+                currencyCode: parentAccount.currency,
+                nativePrecision: parentAccount.currency_precision,
+                onPosted,
+              },
+            },
+          }),
+        );
+        return false;
+      }
+
+      // A draft that kept a deferred new payee after moving to a base
+      // account creates it now, once per name, and keeps the id in the draft
+      // so a retry reuses it.
+      const createdPayees = new Map<string, string>();
+      for (const trans of newTransactions) {
+        const name = trans.payee?.startsWith('new:')
+          ? trans.payee.slice('new:'.length)
+          : null;
+        if (name != null && !createdPayees.has(name)) {
+          createdPayees.set(name, await send('payee-create', { name }));
+        }
+      }
+      const withPayee = (trans: TransactionEntity) => {
+        const name = trans.payee?.startsWith('new:')
+          ? trans.payee.slice('new:'.length)
+          : null;
+        return name != null
+          ? { ...trans, payee: createdPayees.get(name) ?? null }
+          : trans;
+      };
+      const resolvedTransactions = newTransactions.map(withPayee);
+      if (createdPayees.size > 0) {
+        setTransactions(prev => prev.map(withPayee));
+      }
+      const changes = diffItems(
+        fetchedTransactions || [],
+        resolvedTransactions,
+      );
+      // Existing foreign amounts are frozen; their patches never carry the
+      // stored pair.
+      const updated = changes.updated.map(change => {
+        const stored = fetchedTransactions.find(t => t.id === change.id);
+        if (!stored?.account || !accountsById[stored.account]?.currency) {
+          return change;
+        }
+        return editableForeignPatch(change);
+      });
       if (
         changes.added.length > 0 ||
-        changes.updated.length > 0 ||
+        updated.length > 0 ||
         changes.deleted.length
       ) {
-        const _remoteUpdates = await send('transactions-batch-update', {
-          added: changes.added,
-          deleted: changes.deleted,
-          updated: changes.updated,
-          learnCategories: isLearnCategoriesEnabled,
-        });
-
-        // if (onTransactionsChange) {
-        //   onTransactionsChange({
-        //     ...changes,
-        //     updated: changes.updated.concat(remoteUpdates),
-        //   });
-        // }
+        try {
+          await send('transactions-batch-update', {
+            added: changes.added,
+            deleted: changes.deleted,
+            updated,
+            learnCategories: isLearnCategoriesEnabled,
+          });
+        } catch {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: t('This transaction could not be saved.'),
+              },
+            }),
+          );
+          return false;
+        }
       }
 
       if (isAdding.current) {
@@ -1960,9 +2345,50 @@ function TransactionEditUnconnected({
         // about
         dispatch(setLastTransaction({ transaction: newTransactions[0] }));
       }
+      return true;
     },
-    [dispatch, fetchedTransactions, isLearnCategoriesEnabled],
+    [dispatch, fetchedTransactions, accountsById, t, isLearnCategoriesEnabled],
   );
+
+  // The save guard lives here so it survives the editor remounting (for
+  // example when the account's currency format changes mid-save).
+  const isSavingRef = useRef(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const onSave = useCallback(
+    async (newTransactions: TransactionEntity[]) => {
+      // One save at a time: a second tap must not post a second copy.
+      if (isSavingRef.current) {
+        return false;
+      }
+      isSavingRef.current = true;
+      setIsSaving(true);
+      try {
+        return await saveTransactions(newTransactions);
+      } catch {
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: t('This transaction could not be saved.'),
+            },
+          }),
+        );
+        return false;
+      } finally {
+        isSavingRef.current = false;
+        setIsSaving(false);
+      }
+    },
+    [saveTransactions, dispatch, t],
+  );
+
+  const openModalCount = useSelector(state => state.modals.modalStack.length);
+  useEffect(() => {
+    if (shouldCloseWhenModalsClear && openModalCount === 0) {
+      setShouldCloseWhenModalsClear(false);
+      void navigate(-1);
+    }
+  }, [shouldCloseWhenModalsClear, openModalCount, navigate]);
 
   const onDelete = useCallback(
     async (id: TransactionEntity['id']) => {
@@ -2153,24 +2579,34 @@ function TransactionEditUnconnected({
         backgroundColor: theme.pageBackground,
       }}
     >
-      <TransactionEditInner
-        transactions={transactions}
-        isAdding={isAdding.current}
-        categories={categories}
-        accounts={accounts}
-        payees={payees}
-        dateFormat={dateFormat}
-        onUpdate={onUpdate}
-        onSave={onSave}
-        onDelete={onDelete}
-        onSplit={onSplit}
-        onAddSplit={onAddSplit}
-        shouldShowSaveLocation={shouldShowSaveLocation}
-        onSaveLocation={onSaveLocation}
-        onSelectNearestPayee={onSelectNearestPayee}
-        nearestPayee={isLocationGranted ? nearestPayee : null}
-        onRequestLocation={shouldPromptLocation ? requestPermission : undefined}
-      />
+      {/* Amounts display in the selected account's currency. */}
+      <AccountCurrencyFormat
+        account={accounts.find(
+          account => account.id === transactions[0].account,
+        )}
+      >
+        <TransactionEditInner
+          transactions={transactions}
+          isSaving={isSaving}
+          isAdding={isAdding.current}
+          categories={categories}
+          accounts={accounts}
+          payees={payees}
+          dateFormat={dateFormat}
+          onUpdate={onUpdate}
+          onSave={onSave}
+          onDelete={onDelete}
+          onSplit={onSplit}
+          onAddSplit={onAddSplit}
+          shouldShowSaveLocation={shouldShowSaveLocation}
+          onSaveLocation={onSaveLocation}
+          onSelectNearestPayee={onSelectNearestPayee}
+          nearestPayee={isLocationGranted ? nearestPayee : null}
+          onRequestLocation={
+            shouldPromptLocation ? requestPermission : undefined
+          }
+        />
+      </AccountCurrencyFormat>
     </View>
   );
 }

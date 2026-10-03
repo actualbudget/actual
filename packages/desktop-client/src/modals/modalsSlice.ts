@@ -19,7 +19,7 @@ import type {
 } from '@actual-app/core/types/models';
 import type { CleanupTemplate } from '@actual-app/core/types/models/cleanup-templates';
 import type { Template } from '@actual-app/core/types/models/templates';
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, nanoid } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { accountQueries } from '#accounts';
@@ -320,6 +320,11 @@ export type Modal =
         onSelect: (payeeId: string | null) => void;
         showNoneOption?: boolean;
         onClose?: () => void;
+        /**
+         * Returns a typed new payee as `new:<name>` instead of creating it,
+         * for entries that create the payee only when they post.
+         */
+        deferNewPayee?: boolean;
       };
     }
   | {
@@ -745,8 +750,11 @@ export const openAccountCloseModal = createAppAsyncThunk(
   },
 );
 
+/** A stack entry; the id keeps its rendered dialog stable as others close. */
+export type ModalInstance = Modal & { id?: string };
+
 type ModalsState = {
-  modalStack: Modal[];
+  modalStack: ModalInstance[];
   isHidden: boolean;
 };
 
@@ -771,19 +779,27 @@ const modalsSlice = createSlice({
   name: sliceName,
   initialState,
   reducers: {
-    pushModal(state, action: PayloadAction<PushModalPayload>) {
-      const modal = action.payload.modal;
-      // special case: don't show the keyboard shortcuts modal if there's already a modal open
-      if (
-        modal.name.endsWith('keyboard-shortcuts') &&
-        (state.modalStack.length > 0 ||
-          window.document.querySelector(
-            'div[data-testid="filters-menu-tooltip"]',
-          ) !== null)
-      ) {
-        return state;
-      }
-      state.modalStack = [...state.modalStack, modal];
+    pushModal: {
+      prepare: (payload: PushModalPayload) => ({
+        payload: { ...payload, id: nanoid() },
+      }),
+      reducer: (
+        state,
+        action: PayloadAction<PushModalPayload & { id: string }>,
+      ) => {
+        const modal = { ...action.payload.modal, id: action.payload.id };
+        // special case: don't show the keyboard shortcuts modal if there's already a modal open
+        if (
+          modal.name.endsWith('keyboard-shortcuts') &&
+          (state.modalStack.length > 0 ||
+            window.document.querySelector(
+              'div[data-testid="filters-menu-tooltip"]',
+            ) !== null)
+        ) {
+          return state;
+        }
+        state.modalStack = [...state.modalStack, modal];
+      },
     },
     replaceModal(state, action: PayloadAction<ReplaceModalPayload>) {
       const modal = action.payload.modal;
@@ -794,6 +810,15 @@ const modalsSlice = createSlice({
     },
     closeModal(state) {
       state.modalStack = [];
+    },
+    /** Removes only the topmost modal with this name, keeping any above it. */
+    removeModal(state, action: PayloadAction<{ name: Modal['name'] }>) {
+      const idx = state.modalStack
+        .map(m => m.name)
+        .lastIndexOf(action.payload.name);
+      if (idx >= 0) {
+        state.modalStack.splice(idx, 1);
+      }
     },
     collapseModals(state, action: PayloadAction<CollapseModalPayload>) {
       const idx = state.modalStack.findIndex(
@@ -819,5 +844,11 @@ export const actions = {
   openAccountCloseModal,
 };
 
-export const { pushModal, closeModal, collapseModals, popModal, replaceModal } =
-  actions;
+export const {
+  pushModal,
+  closeModal,
+  collapseModals,
+  popModal,
+  replaceModal,
+  removeModal,
+} = actions;
