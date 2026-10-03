@@ -43,6 +43,7 @@ export async function exportToCSV(
 
   const transactionsForExport = transactions.map(
     ({
+      id,
       account,
       date,
       payee,
@@ -60,6 +61,7 @@ export async function exportToCSV(
       Amount: amount == null ? 0 : integerToAmount(amount),
       Cleared: cleared,
       Reconciled: reconciled,
+      'Transaction ID': id,
     }),
   );
 
@@ -135,6 +137,7 @@ export async function exportQueryToCSV(query) {
           : trans.Cleared === true
             ? 'Cleared'
             : 'Not cleared',
+      'Transaction ID': trans.Id,
     };
   });
 
