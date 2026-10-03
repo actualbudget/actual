@@ -123,15 +123,24 @@ async function setUpOneTimeBills() {
       directive: 'template',
     } as const);
   }
-  const payBill = (name: string, date: string, amount: number) =>
+  const payBill = (
+    name: string,
+    date: string,
+    amount: number,
+    fromCategory: string = categoryId,
+  ) =>
     db.insertTransaction({
       account,
       amount,
       date,
-      category: categoryId,
+      category: fromCategory,
       schedule: scheduleIds[name],
     });
-  return { category, payBill, templates };
+  const otherCategoryId = await db.insertCategory({
+    name: 'Other bills',
+    cat_group: group,
+  });
+  return { category, otherCategoryId, payBill, templates };
 }
 
 describe('runScheduleForecast against a real database', () => {
@@ -215,6 +224,29 @@ describe('runScheduleForecast against a real database', () => {
       '2026-11',
       5334,
       5334,
+      0,
+      [],
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(3666);
+  });
+
+  it('still reserves a one-time bill when its only payment sits in another category', async () => {
+    // Same schedule linked from two categories. The payment booked in the
+    // other category didn't come out of this one's balance, so this
+    // category still has to cover Bill A.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-09-22');
+    const { category, otherCategoryId, payBill, templates } =
+      await setUpOneTimeBills();
+    await payBill('Bill A', '2026-10-01', -10000, otherCategoryId);
+
+    const result = await runScheduleForecast(
+      templates,
+      '2026-11',
+      15334,
+      15334,
       0,
       [],
       category,

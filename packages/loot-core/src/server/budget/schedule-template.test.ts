@@ -880,10 +880,11 @@ describe('buildMonthlyOutflow relative to today', () => {
   function queryKind(query: ReturnType<typeof q>): QueryKind {
     const filters: ReadonlyArray<Record<string, unknown>> =
       query.serialize().filterExpressions;
-    if (filters.some(f => 'schedule' in f && f.schedule === null)) {
-      return 'unlinked';
+    const scheduleFilter = filters.find(f => 'schedule' in f);
+    if (scheduleFilter) {
+      return scheduleFilter.schedule === null ? 'unlinked' : 'linked';
     }
-    return filters.some(f => 'category' in f) ? 'posted' : 'linked';
+    return 'posted';
   }
 
   type MockTransaction = {

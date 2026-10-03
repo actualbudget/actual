@@ -345,19 +345,22 @@ export async function buildMonthlyOutflow(
   // next_date only advances once its date has passed, so a payment made
   // early leaves it in place. A linked payment already in the carried-over
   // balance (dated before the budget month) settles its nearest pending
-  // occurrence.
+  // occurrence. Only this category's payments count: one booked elsewhere
+  // didn't come out of this balance, and the same schedule can be linked
+  // from more than one category.
   let linkedBeforeWindow: PostedTransaction[] = [];
   if (pendingEntries.length > 0) {
     ({ data: linkedBeforeWindow } = await aqlQuery(
       q('transactions')
         .filter({
+          category: category.id,
           schedule: { $oneof: pendingEntries.map(entry => entry.scheduleId) },
+          'account.offbudget': false,
           date: [
             { $gte: `${monthUtils.subMonths(currentMonthStart, 1)}-01` },
             { $lt: windowStart },
           ],
         })
-        .options({ splits: 'none' })
         .select(['date', 'schedule']),
     ));
   }
