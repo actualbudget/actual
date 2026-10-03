@@ -13,6 +13,52 @@ export async function getDefaultCurrencyCode(): Promise<string> {
   return row?.value ?? '';
 }
 
+/**
+ * Set when the first explicit account currency is stored and never cleared,
+ * so frozen base integers keep their currency through deletion and undo.
+ */
+export const BASE_CURRENCY_LOCK = 'multicurrencyBaseCurrency';
+
+export async function getBaseCurrencyLock(): Promise<string | null> {
+  const row = await db.first<{ value: string }>(
+    'SELECT value FROM preferences WHERE id = ?',
+    [BASE_CURRENCY_LOCK],
+  );
+  return row?.value ?? null;
+}
+
+export async function assertBaseCurrencyChangeAllowed(
+  code: string,
+): Promise<void> {
+  const lock = await getBaseCurrencyLock();
+  if (lock !== null && code !== lock) {
+    throw new Error('base-currency-locked');
+  }
+}
+
+/**
+ * Fields to store with an account currency: the recorded native precision
+ * and, for the first explicit currency, the permanent base-currency lock in
+ * the same message batch.
+ */
+export async function accountCurrencyFields(
+  currency: string | null,
+): Promise<{ currency: string | null; currency_precision: number | null }> {
+  if (currency === null) {
+    return { currency: null, currency_precision: null };
+  }
+  if ((await getBaseCurrencyLock()) === null) {
+    await db.update('preferences', {
+      id: BASE_CURRENCY_LOCK,
+      value: await getDefaultCurrencyCode(),
+    });
+  }
+  return {
+    currency,
+    currency_precision: reviewedAmountEncoding(currency).precision,
+  };
+}
+
 export async function initializeImportedAmountEncoding(
   currencyCode: string,
 ): Promise<number> {
@@ -56,16 +102,24 @@ export type AccountCurrency = { currencyCode: string; precision: number };
 export async function getAccountCurrency(
   accountId: string,
 ): Promise<AccountCurrency> {
-  const account = await db.first<{ currency: string | null }>(
-    'SELECT currency FROM accounts WHERE id = ?',
-    [accountId],
-  );
+  const account = await db.first<{
+    currency: string | null;
+    currency_precision: number | null;
+  }>('SELECT currency, currency_precision FROM accounts WHERE id = ?', [
+    accountId,
+  ]);
   if (!account) {
     throw new Error('account-not-found');
   }
   if (account.currency) {
-    // Explicit account currencies become storable with foreign posting.
-    throw new Error('account-currency-foreign-unavailable');
+    // The recorded precision, never today's currency table.
+    if (account.currency_precision == null) {
+      throw new Error('account-currency-precision-missing');
+    }
+    return {
+      currencyCode: account.currency,
+      precision: account.currency_precision,
+    };
   }
   return {
     currencyCode: await getDefaultCurrencyCode(),
@@ -81,20 +135,21 @@ export async function resolveAccountCurrencyInput(
   currency: unknown,
   accountId?: string,
 ): Promise<string | null | undefined> {
-  if (currency === undefined || currency === null) {
-    return currency === undefined ? undefined : null;
+  if (currency === undefined) {
+    return undefined;
   }
-  // The budget currency always means inheritance, including the legacy ''.
-  const isBudgetCurrency = currency === (await getDefaultCurrencyCode());
-  if (
-    !isBudgetCurrency &&
-    (typeof currency !== 'string' ||
+  // NULL and the budget currency (including the legacy '') mean inheritance.
+  let value: string | null = null;
+  if (currency !== null && currency !== (await getDefaultCurrencyCode())) {
+    if (
+      typeof currency !== 'string' ||
       !/^[A-Z]{3}$/.test(currency) ||
-      !isReviewedCurrency(currency))
-  ) {
-    throw new Error('account-currency-invalid');
+      !isReviewedCurrency(currency)
+    ) {
+      throw new Error('account-currency-invalid');
+    }
+    value = currency;
   }
-  const value = isBudgetCurrency ? null : currency;
 
   if (accountId) {
     const account = await db.first<{ currency: string | null }>(
@@ -104,8 +159,9 @@ export async function resolveAccountCurrencyInput(
     if (!account) {
       throw new Error('account-not-found');
     }
+    // Tombstoned rows count: undo can restore them under the old currency.
     const hasTransactions = await db.first(
-      'SELECT 1 FROM transactions WHERE acct = ? AND tombstone = 0 LIMIT 1',
+      'SELECT 1 FROM transactions WHERE acct = ? LIMIT 1',
       [accountId],
     );
     if ((account.currency ?? null) !== value && hasTransactions) {

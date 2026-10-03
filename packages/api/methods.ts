@@ -204,7 +204,9 @@ export function setBudgetCarryover(
 }
 
 /**
- * Amounts are account-native integers or Money in the account currency.
+ * `amount` is a budget-base integer or Money in the budget currency.
+ * Foreign-currency accounts also require `transaction_amount`, an
+ * account-native integer or Money in the account currency.
  * Raw integers are accepted during dual support; raw-integer support will
  * be removed 12 months after Money support ships.
  */
@@ -225,7 +227,9 @@ export function addTransactions(
 }
 
 /**
- * Amounts are account-native integers or Money in the account currency.
+ * `amount` is a budget-base integer or Money in the budget currency.
+ * Foreign-currency accounts also require `transaction_amount`, an
+ * account-native integer or Money in the account currency.
  * Raw integers are accepted during dual support; raw-integer support will
  * be removed 12 months after Money support ships.
  */
@@ -246,8 +250,9 @@ export function importTransactions(
 }
 
 /**
- * Amounts are account-native integers. Pass `{ amountFormat: 'money' }` to
- * receive Money values in the account currency.
+ * `amount` is a budget-base integer and `transaction_amount` an account-native
+ * integer (foreign-currency accounts only). Pass `{ amountFormat: 'money' }`
+ * to receive Money in the budget and account currency respectively.
  * Raw integers are the default during dual support; raw-integer responses
  * will be removed 12 months after Money support ships.
  */
@@ -284,7 +289,8 @@ export function getTransactions(
 }
 
 /**
- * `amount` is an account-native integer or Money in the account currency.
+ * `amount` is a budget-base integer or Money in the budget currency;
+ * `transaction_amount` is account-native. Foreign pairs change together.
  * Raw integers are accepted during dual support; raw-integer support will
  * be removed 12 months after Money support ships.
  */

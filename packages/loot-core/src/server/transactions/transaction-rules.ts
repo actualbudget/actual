@@ -1,5 +1,7 @@
 // @ts-strict-ignore
 
+import { v4 as uuidv4 } from 'uuid';
+
 import { logger } from '#platform/server/log';
 import { aqlQuery, schemaConfig } from '#server/aql';
 import * as db from '#server/db';
@@ -23,6 +25,7 @@ import {
   rankRules,
   Rule,
   RuleIndexer,
+  withoutAmountActions,
 } from '#server/rules';
 import {
   collectFormulasFromActions,
@@ -40,6 +43,7 @@ import {
 } from '#shared/months';
 import { q } from '#shared/query';
 import { getApproxNumberThreshold, sortNumbers } from '#shared/rules';
+import { extractScheduleConds } from '#shared/schedules';
 import { extractTagsForFilter, makeTagAqlRegex } from '#shared/tags';
 import { ungroupTransaction } from '#shared/transactions';
 import { fastSetMerge, partitionByField } from '#shared/util';
@@ -48,6 +52,8 @@ import type {
   RuleEntity,
   TransactionEntity,
 } from '#types/models';
+
+import { isForeignAccount, preflightTransactionWrites } from './foreign-guard';
 
 import { batchUpdateTransactions } from '.';
 
@@ -222,15 +228,39 @@ export function getRules() {
   return [...allRules.values()];
 }
 
+// A schedule's account comes from its rule's account condition, so rule
+// writers must not retarget a schedule to a foreign account either.
+async function rejectForeignScheduleRule(rule: {
+  id?: string;
+  conditions?: Array<{ field?: string; value?: unknown }>;
+  actions?: Array<{ op?: string }>;
+}) {
+  if (!rule.conditions) return;
+  const linked =
+    rule.actions?.some(action => action.op === 'link-schedule') ||
+    (rule.id &&
+      (await db.first('SELECT id FROM schedules WHERE rule = ?', [rule.id])));
+  const account = extractScheduleConds(rule.conditions).account?.value;
+  if (
+    linked &&
+    typeof account === 'string' &&
+    (await isForeignAccount(account))
+  ) {
+    throw new Error('multicurrency-schedule-unavailable');
+  }
+}
+
 export async function insertRule(
   rule: Omit<RuleEntity, 'id'> & { id?: string },
 ) {
   rule = ruleModel.validate(rule);
+  await rejectForeignScheduleRule(rule);
   return db.insertWithUUID('rules', ruleModel.fromJS(rule));
 }
 
 export async function updateRule(rule) {
   rule = ruleModel.validate(rule, { update: true });
+  await rejectForeignScheduleRule(rule);
   return db.update('rules', ruleModel.fromJS(rule));
 }
 
@@ -325,6 +355,7 @@ export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
   amountPrecision = getRecordedAmountPrecision(),
+  stagePayee?: StagePayee,
 ) {
   await ensureFormulaPreferencesLoaded();
 
@@ -362,6 +393,7 @@ export async function runRules(
     accountsMap,
     { includeBalance: false },
   );
+  const isForeign = accountsMap.get(trans.account)?.currency != null;
   let lastCategoryIdForGroup: string | null = finalTrans.category ?? null;
 
   // The running balance is a query over every earlier transaction in
@@ -406,9 +438,11 @@ export async function runRules(
       if (rules[i].id === scheduleRuleID) {
         // bypass condition checking to run the rule even if the transaction date falls outside of the schedule's date range.
         await ensureBalanceFor(rules[i]);
-        const changes = rules[i].execActions(finalTrans, amountPrecision);
+        const changes = rules[i].execActions(finalTrans, amountPrecision, {
+          skipAmountActions: isForeign,
+        });
         finalTrans = Object.assign({}, finalTrans, changes);
-        await resolvePayeeNameForRules(finalTrans);
+        await resolvePayeeNameForRules(finalTrans, stagePayee);
         lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
           finalTrans,
           lastCategoryIdForGroup,
@@ -423,10 +457,12 @@ export async function runRules(
           finalTrans = Object.assign(
             {},
             finalTrans,
-            rules[i].execActions(finalTrans, amountPrecision),
+            rules[i].execActions(finalTrans, amountPrecision, {
+              skipAmountActions: isForeign,
+            }),
           );
         }
-        await resolvePayeeNameForRules(finalTrans);
+        await resolvePayeeNameForRules(finalTrans, stagePayee);
         lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
           finalTrans,
           lastCategoryIdForGroup,
@@ -439,10 +475,12 @@ export async function runRules(
         finalTrans = Object.assign(
           {},
           finalTrans,
-          rules[i].execActions(finalTrans, amountPrecision),
+          rules[i].execActions(finalTrans, amountPrecision, {
+            skipAmountActions: isForeign,
+          }),
         );
       }
-      await resolvePayeeNameForRules(finalTrans);
+      await resolvePayeeNameForRules(finalTrans, stagePayee);
       lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
         finalTrans,
         lastCategoryIdForGroup,
@@ -450,7 +488,7 @@ export async function runRules(
     }
   }
 
-  const result = await finalizeTransactionForRules(finalTrans);
+  const result = await finalizeTransactionForRules(finalTrans, stagePayee);
   for (const field of missingNullableFields) {
     if (result[field] === null) {
       delete result[field];
@@ -819,15 +857,39 @@ export async function applyActions(
 
   const amountPrecision = getRecordedAmountPrecision();
   const updated = transactionsForRules.flatMap(trans => {
+    const isForeign = accountsMap.get(trans.account)?.currency != null;
     return ungroupTransaction(
-      execActions(parsedActions, trans, amountPrecision),
+      execActions(
+        isForeign ? withoutAmountActions(parsedActions) : parsedActions,
+        trans,
+        amountPrecision,
+      ),
     );
   });
 
+  // Payees named by actions are staged and created only after the whole
+  // request validates.
+  const stagedPayees = new Map<string, { id: string; name: string }>();
+  const stagePayee: StagePayee = async name => {
+    const key = name.toLowerCase();
+    const staged = stagedPayees.get(key) ?? { id: uuidv4(), name };
+    stagedPayees.set(key, staged);
+    return staged.id;
+  };
   const finalized: TransactionEntity[] = [];
   for (const trans of updated) {
-    finalized.push(await finalizeTransactionForRules(trans));
+    finalized.push(await finalizeTransactionForRules(trans, stagePayee));
   }
+
+  await preflightTransactionWrites({ updated: finalized });
+  const usedPayeeIds = new Set(finalized.map(trans => trans.payee));
+  await batchMessages(async () => {
+    for (const payee of stagedPayees.values()) {
+      if (usedPayeeIds.has(payee.id)) {
+        await insertPayee(payee);
+      }
+    }
+  });
 
   return batchUpdateTransactions({ updated: finalized });
 }
@@ -1212,8 +1274,12 @@ export async function prepareTransactionForRules(
   return r;
 }
 
+/** Lets importers defer payee creation until the whole request validates. */
+export type StagePayee = (name: string) => Promise<string>;
+
 async function resolvePayeeNameForRules(
   trans: TransactionEntity | TransactionForRules,
+  stagePayee?: StagePayee,
 ): Promise<void> {
   if (!('payee_name' in trans) || trans.payee !== 'new') {
     return;
@@ -1221,9 +1287,11 @@ async function resolvePayeeNameForRules(
 
   if (trans.payee_name) {
     let payee_id = (await getPayeeByName(trans.payee_name))?.id;
-    payee_id ??= await insertPayee({
-      name: trans.payee_name,
-    });
+    payee_id ??= stagePayee
+      ? await stagePayee(trans.payee_name)
+      : await insertPayee({
+          name: trans.payee_name,
+        });
 
     trans.payee = payee_id;
   } else {
@@ -1262,9 +1330,10 @@ async function refreshCategoryGroupIfChanged(
 
 export async function finalizeTransactionForRules(
   trans: TransactionEntity | TransactionForRules,
+  stagePayee?: StagePayee,
 ): Promise<TransactionEntity> {
   if ('payee_name' in trans) {
-    await resolvePayeeNameForRules(trans);
+    await resolvePayeeNameForRules(trans, stagePayee);
     delete trans.payee_name;
   }
 

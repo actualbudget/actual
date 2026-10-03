@@ -762,6 +762,21 @@ export async function batchMessages(func: () => Promise<void>): Promise<void> {
   }
 }
 
+/** Latest value queued in the current batch for a cell, if any. */
+export function getBatchedValue(
+  dataset: string,
+  row: string,
+  column: string,
+): { value: Message['value'] } | null {
+  for (let i = _BATCHED.length - 1; i >= 0; i--) {
+    const msg = _BATCHED[i];
+    if (msg.dataset === dataset && msg.row === row && msg.column === column) {
+      return { value: msg.value };
+    }
+  }
+  return null;
+}
+
 export async function sendMessages(messages: Message[]) {
   if (IS_BATCHING) {
     _BATCHED = _BATCHED.concat(messages);

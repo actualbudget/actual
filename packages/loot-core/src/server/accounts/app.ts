@@ -18,8 +18,10 @@ import { del, get, post } from '#server/post';
 import { getPrefs } from '#server/prefs';
 import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
+import { isForeignAccount } from '#server/transactions/foreign-guard';
 import { undoable, withUndo } from '#server/undo';
 import {
+  accountCurrencyFields,
   getRecordedAmountPrecision,
   resolveAccountCurrencyInput,
 } from '#server/util/currency';
@@ -110,12 +112,15 @@ async function updateAccount({
     >
   >) {
   const resolvedCurrency = await resolveAccountCurrencyInput(currency, id);
-  await db.update('accounts', {
-    id,
-    ...(name !== undefined && { name }),
-    ...(last_reconciled && { last_reconciled }),
-    ...(account_group_id !== undefined && { account_group_id }),
-    ...(resolvedCurrency !== undefined && { currency: resolvedCurrency }),
+  await batchMessages(async () => {
+    await db.update('accounts', {
+      id,
+      ...(name !== undefined && { name }),
+      ...(last_reconciled && { last_reconciled }),
+      ...(account_group_id !== undefined && { account_group_id }),
+      ...(resolvedCurrency !== undefined &&
+        (await accountCurrencyFields(resolvedCurrency))),
+    });
   });
   return {};
 }
@@ -146,6 +151,7 @@ async function getAccounts(): Promise<AccountEntity[]> {
         bank_sync_status: dbAccount.bank_sync_status ?? null,
         account_group_id: dbAccount.account_group_id ?? null,
         currency: dbAccount.currency ?? null,
+        currency_precision: dbAccount.currency_precision ?? null,
       }) satisfies AccountEntity,
   );
 }
@@ -157,16 +163,19 @@ async function getAccountBalance({
   id: string;
   cutoff: string | Date;
 }) {
+  // Foreign accounts report native units; base totals use amount.
+  const column = (await isForeignAccount(id)) ? 'transaction_amount' : 'amount';
   const result = await db.first<{ balance: number }>(
-    'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0 AND date <= ?',
+    `SELECT sum(${column}) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0 AND date <= ?`,
     [id, db.toDateRepr(dayFromDate(cutoff))],
   );
   return result?.balance ? result.balance : 0;
 }
 
 async function getAccountProperties({ id }: { id: AccountEntity['id'] }) {
+  const column = (await isForeignAccount(id)) ? 'transaction_amount' : 'amount';
   const balanceResult = await db.first<{ balance: number }>(
-    'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
+    `SELECT sum(${column}) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0`,
     [id],
   );
   const countResult = await db.first<{ count: number }>(
@@ -191,6 +200,10 @@ async function linkGoCardlessAccount({
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
 }) {
+  // Foreign bank sync completes pairs in a later stage.
+  if (upgradingId && (await isForeignAccount(upgradingId))) {
+    throw new PostError('multicurrency-import-unavailable');
+  }
   let id;
   const bank = await link.findOrCreateBank(account.institution, requisitionId);
 
@@ -258,6 +271,10 @@ async function linkSimpleFinAccount({
 }: LinkAccountBaseParams & {
   externalAccount: SyncServerSimpleFinAccount;
 }) {
+  // Foreign bank sync completes pairs in a later stage.
+  if (upgradingId && (await isForeignAccount(upgradingId))) {
+    throw new PostError('multicurrency-import-unavailable');
+  }
   let id;
 
   const institution = {
@@ -336,6 +353,10 @@ async function linkPluggyAiAccount({
 }: LinkAccountBaseParams & {
   externalAccount: SyncServerPluggyAiAccount;
 }) {
+  // Foreign bank sync completes pairs in a later stage.
+  if (upgradingId && (await isForeignAccount(upgradingId))) {
+    throw new PostError('multicurrency-import-unavailable');
+  }
   let id;
   const fileId = getPrefs()?.cloudFileId;
 
@@ -415,6 +436,10 @@ async function linkAkahuAccount({
 }: LinkAccountBaseParams & {
   externalAccount: SyncServerAkahuAccount;
 }) {
+  // Foreign bank sync completes pairs in a later stage.
+  if (upgradingId && (await isForeignAccount(upgradingId))) {
+    throw new PostError('multicurrency-import-unavailable');
+  }
   let id;
 
   const institution = {
@@ -489,6 +514,10 @@ async function linkEnableBankingAccount({
 }: LinkAccountBaseParams & {
   externalAccount: SyncServerEnableBankingAccount;
 }) {
+  // Foreign bank sync completes pairs in a later stage.
+  if (upgradingId && (await isForeignAccount(upgradingId))) {
+    throw new PostError('multicurrency-import-unavailable');
+  }
   let id: string | undefined;
 
   const institution = {
@@ -624,6 +653,22 @@ async function createAccount({
   return id;
 }
 
+/** Closing with a balance writes a transfer, unsupported for foreign accounts. */
+export async function assertClosureAllowed(
+  id: AccountEntity['id'],
+  transferAccountId?: AccountEntity['id'],
+) {
+  const { balance } = await getAccountProperties({ id });
+  if (
+    balance !== 0 &&
+    ((await isForeignAccount(id)) ||
+      (transferAccountId != null &&
+        (await isForeignAccount(transferAccountId))))
+  ) {
+    throw new Error('multicurrency-transfer-unavailable');
+  }
+}
+
 async function closeAccount({
   id,
   transferAccountId,
@@ -635,6 +680,12 @@ async function closeAccount({
   categoryId?: CategoryEntity['id'] | undefined;
   forced?: boolean | undefined;
 }) {
+  // Preflight unsupported foreign closure transfers before any side effect,
+  // including unlinking.
+  if (!forced) {
+    await assertClosureAllowed(id, transferAccountId);
+  }
+
   // Unlink the account if it's linked. This makes sure to remove it from
   // bank-sync providers. (This should not be undo-able, as it mutates the
   // remote server and the user will have to link the account again)
@@ -682,20 +733,23 @@ async function closeAccount({
         // because another client could easily add new data that
         // should be marked as deleted.
 
-        rows.forEach(row => {
-          if (row.transfer_id) {
-            void db.updateTransaction({
-              id: row.transfer_id,
-              payee: null,
-              transfer_id: null,
-            });
-          }
+        // Awaited so guarded writes finish inside this batch and undo scope.
+        await Promise.all(
+          rows.map(async row => {
+            if (row.transfer_id) {
+              await db.updateTransaction({
+                id: row.transfer_id,
+                payee: null,
+                transfer_id: null,
+              });
+            }
 
-          void db.deleteTransaction({ id: row.id });
-        });
+            await db.deleteTransaction({ id: row.id });
+          }),
+        );
 
-        void db.deleteAccount({ id });
-        void db.deleteTransferPayee({ id: transferPayee.id });
+        await db.deleteAccount({ id });
+        await db.deleteTransferPayee({ id: transferPayee.id });
       });
     } else {
       if (balance !== 0 && transferAccountId == null) {
@@ -1513,6 +1567,17 @@ async function accountsBankSync({
   const fileId = getPrefs()?.cloudFileId;
 
   for (const acct of accounts) {
+    if (acct.currency) {
+      // Foreign bank sync completes pairs in a later stage; reject without
+      // touching the account's sync state.
+      errors.push(
+        handleSyncError(
+          new PostError('multicurrency-import-unavailable'),
+          acct,
+        ),
+      );
+      continue;
+    }
     if (acct.bankId && acct.account_id) {
       try {
         logger.group('Bank Sync operation for account:', acct.name);
@@ -1566,7 +1631,9 @@ async function simpleFinBatchSync({
 }): Promise<
   Array<{ accountId: AccountEntity['id']; res: SyncResponseWithErrors }>
 > {
-  const accounts = db.runQuery<db.DbAccount & { bankId: db.DbBank['bank_id'] }>(
+  const allAccounts = db.runQuery<
+    db.DbAccount & { bankId: db.DbBank['bank_id'] }
+  >(
     `SELECT a.*, b.bank_id as bankId FROM accounts a
          LEFT JOIN banks b ON a.bank = b.id
          WHERE
@@ -1578,6 +1645,10 @@ async function simpleFinBatchSync({
     ids.length ? ids : [],
     true,
   );
+  // Foreign bank sync completes pairs in a later stage; reject those
+  // accounts without contacting the provider or writing sync state.
+  const foreignAccounts = allAccounts.filter(a => a.currency);
+  const accounts = allAccounts.filter(a => !a.currency);
 
   const retVal: Array<{
     accountId: AccountEntity['id'];
@@ -1587,7 +1658,20 @@ async function simpleFinBatchSync({
       matchedTransactions: Array<TransactionEntity['id']>;
       updatedAccounts: Array<AccountEntity['id']>;
     };
-  }> = [];
+  }> = foreignAccounts.map(account => ({
+    accountId: account.id,
+    res: {
+      errors: [
+        handleSyncError(
+          new PostError('multicurrency-import-unavailable'),
+          account,
+        ),
+      ],
+      newTransactions: [],
+      matchedTransactions: [],
+      updatedAccounts: [],
+    },
+  }));
 
   logger.group('Bank Sync operation for all SimpleFin accounts');
   try {

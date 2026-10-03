@@ -13,6 +13,10 @@ import { post } from '#server/post';
 import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
 import { batchUpdateTransactions } from '#server/transactions';
+import {
+  isForeignAccount,
+  preflightTransactionWrites,
+} from '#server/transactions/foreign-guard';
 import { runRules } from '#server/transactions/transaction-rules';
 import { getRecordedAmountPrecision } from '#server/util/currency';
 import {
@@ -658,6 +662,10 @@ export async function reconcileTransactions(
   }: ReconcileTransactionsOptions = {},
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
+  // File import and bank sync complete foreign pairs in a later stage.
+  if (await isForeignAccount(acctId)) {
+    throw new Error('multicurrency-import-unavailable');
+  }
 
   const updated = [];
   const added = [];
@@ -797,6 +805,8 @@ export async function reconcileTransactions(
   });
 
   if (!isPreview) {
+    // Validate the whole request before creating payees or transactions.
+    await preflightTransactionWrites({ added, updated });
     await createNewPayees(payeesToCreate, [...added, ...updated]);
     await batchUpdateTransactions({ added, updated });
   }
@@ -890,7 +900,12 @@ export async function matchTransactions(
     subtransactions,
   } of normalized) {
     // Run the rules
-    const trans = await runRules(originalTrans, accountsMap, amountPrecision);
+    const trans = await runRules(
+      originalTrans,
+      accountsMap,
+      amountPrecision,
+      name => resolvePayee({ payee: null }, name, payeesToCreate),
+    );
 
     let match = null;
     let fuzzyDataset = null;
@@ -1070,8 +1085,10 @@ export async function addTransactions(
   const accountsMap = new Map(accounts.map(account => [account.id, account]));
 
   for (const { trans: originalTrans, subtransactions } of normalized) {
-    // Run the rules
-    const trans = await runRules(originalTrans, accountsMap);
+    // Run the rules; payees they name are staged, not created yet.
+    const trans = await runRules(originalTrans, accountsMap, undefined, name =>
+      resolvePayee({ payee: null }, name, payeesToCreate),
+    );
 
     const finalTransaction = {
       id: uuidv4(),
@@ -1092,6 +1109,8 @@ export async function addTransactions(
     }
   }
 
+  // Validate the whole request before creating payees or transactions.
+  await preflightTransactionWrites({ added });
   await createNewPayees(payeesToCreate, added);
 
   // Assign decreasing sort_order values to preserve import file order.
@@ -1165,6 +1184,10 @@ async function processBankSyncDownload(
   customStartingBalance?: number,
   customStartingDate?: string,
 ) {
+  // Reject before starting-balance payees or any other side effect.
+  if (await isForeignAccount(id)) {
+    throw new Error('multicurrency-import-unavailable');
+  }
   const amountPrecision = getRecordedAmountPrecision();
   // If syncing an account from sync source it must not use strictIdChecking. This allows
   // the fuzzy search to match transactions where the import IDs are different. It is a known quirk
