@@ -1,7 +1,9 @@
 import { enUS } from 'date-fns/locale';
 import i18next from 'i18next';
 
-import { getRecurringDescription } from '#util/schedule';
+import * as monthUtils from '@actual-app/core/shared/months';
+
+import { getRecurringDescription, getSkipScheduleText } from '#util/schedule';
 
 // getRecurringDescription uses the full English sentence as the translation
 // key, so with no resources i18next echoes the key back with interpolation
@@ -11,6 +13,18 @@ void i18next.init({
   interpolation: {
     escapeValue: false,
   },
+});
+
+describe('getSkipScheduleText', () => {
+  it('uses the current-date wording for due and missed schedules', () => {
+    const today = monthUtils.currentDay();
+    const pastDate = monthUtils.addDays(today, -1);
+    const futureDate = monthUtils.addDays(today, 1);
+
+    expect(getSkipScheduleText(pastDate)).toBe('Skip this scheduled date');
+    expect(getSkipScheduleText(today)).toBe('Skip this scheduled date');
+    expect(getSkipScheduleText(futureDate)).toBe('Skip next scheduled date');
+  });
 });
 
 describe('getRecurringDescription', () => {

@@ -18,6 +18,7 @@ import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import { getSkipScheduleText } from '#util/schedule';
 
 type SelectedTransactionsButtonProps = {
   getTransaction: (id: string) => TransactionEntity | undefined;
@@ -318,7 +319,7 @@ export function SelectedTransactionsButton({
               canBeSkipped &&
                 ({
                   name: 'skip',
-                  text: t('Skip next scheduled date'),
+                  text: getSkipScheduleText(selectedSchedules[0]?.next_date),
                 } as const),
               canBeCompleted &&
                 ({ name: 'complete', text: t('Mark as completed') } as const),
