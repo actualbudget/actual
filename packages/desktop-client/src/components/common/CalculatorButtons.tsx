@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { ReactNode, RefObject } from 'react';
 
 import { Button } from '@actual-app/components/button';
@@ -226,6 +226,7 @@ export function CalculatorButtons({
         </CalculatorButton>
         <CalculatorButton
           onInteractionStart={onInteractionStart}
+          repeatOnHold
           onPress={() => {
             backspace();
           }}
@@ -267,12 +268,35 @@ function CalculatorButton({
   onInteractionStart,
   children,
   size = 20,
+  repeatOnHold = false,
 }: {
   onPress: () => void;
   onInteractionStart?: () => void;
   children: ReactNode;
   size?: number;
+  repeatOnHold?: boolean;
 }) {
+  const repeatTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasRepeated = useRef(false);
+
+  const stopRepeating = useCallback(() => {
+    if (repeatTimer.current !== null) {
+      clearTimeout(repeatTimer.current);
+      repeatTimer.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!repeatOnHold) {
+      return;
+    }
+    window.addEventListener('blur', stopRepeating);
+    return () => {
+      stopRepeating();
+      window.removeEventListener('blur', stopRepeating);
+    };
+  }, [repeatOnHold, stopRepeating]);
+
   return (
     <Button
       variant="normal"
@@ -283,7 +307,31 @@ function CalculatorButton({
           navigator.vibrate(3);
         }
       }}
-      onPress={onPress}
+      onPressStart={e => {
+        stopRepeating();
+        hasRepeated.current = false;
+        if (
+          !repeatOnHold ||
+          e.pointerType === 'keyboard' ||
+          e.pointerType === 'virtual'
+        ) {
+          return;
+        }
+
+        const repeat = () => {
+          hasRepeated.current = true;
+          onPress();
+          repeatTimer.current = setTimeout(repeat, 100);
+        };
+        repeatTimer.current = setTimeout(repeat, 400);
+      }}
+      onPressEnd={stopRepeating}
+      onPress={() => {
+        if (!hasRepeated.current) {
+          onPress();
+        }
+      }}
+      onContextMenu={repeatOnHold ? e => e.preventDefault() : undefined}
       style={{
         background: theme.pillBackground,
         border: 0,
