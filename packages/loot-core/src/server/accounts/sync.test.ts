@@ -1222,6 +1222,6 @@ describe('SimpleFin batch sync', () => {
       'SELECT * FROM accounts WHERE id = ?',
       [acctId],
     );
-    expect(account!.bank_sync_status).toBe('failed');
+    expect(account!.bank_sync_status).toBe('not-configured');
   });
 });

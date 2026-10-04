@@ -15,6 +15,7 @@ import { Link } from '#components/common/Link';
 import { authorizeBank as authorizeEnableBanking } from '#enablebanking';
 import { authorizeBank as authorizeGoCardless } from '#gocardless';
 import { useAccounts } from '#hooks/useAccounts';
+import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useFailedAccounts } from '#hooks/useFailedAccounts';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -100,6 +101,7 @@ function useErrorMessage() {
 export function AccountSyncCheck() {
   const { data: accounts = [] } = useAccounts();
   const failedAccounts = useFailedAccounts();
+  const { isAdmin } = useCurrentAccess();
   const dispatch = useDispatch();
   const { id } = useParams();
   const [open, setOpen] = useState(false);
@@ -221,7 +223,7 @@ export function AccountSyncCheck() {
                 <Trans>Reauthorize</Trans>
               </Button>
             </>
-          ) : isGoCardlessNotConfigured ? (
+          ) : isGoCardlessNotConfigured && isAdmin ? (
             <>
               <Button onPress={() => unlink(account)}>
                 <Trans>Unlink</Trans>
