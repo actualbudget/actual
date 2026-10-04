@@ -1,70 +1,44 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgCheveronDown } from '@actual-app/components/icons/v1';
+import { SvgPencil1 } from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
-import { isElectron } from '@actual-app/core/shared/environment';
+import { View } from '@actual-app/components/view';
+import { css, cx } from '@emotion/css';
 
-import { closeBudget } from '#budgetfiles/budgetfilesSlice';
-import { useContextMenu } from '#hooks/useContextMenu';
 import { useMetadataPref } from '#hooks/useMetadataPref';
-import { useNavigate } from '#hooks/useNavigate';
-import { pushModal } from '#modals/modalsSlice';
-import { useDispatch } from '#redux';
 
 export function SidebarBudgetName() {
   const { t } = useTranslation();
   const [budgetName, setBudgetNamePref] = useMetadataPref('budgetName');
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const { handleContextMenu } = useContextMenu({
-    triggerRef,
-    items: [
-      {
-        name: 'rename',
-        text: t('Rename budget'),
-        onClick: () => setIsEditing(true),
-      },
-      {
-        name: 'settings',
-        text: t('Settings'),
-        onClick: () => void navigate('/settings'),
-      },
-      isElectron() && {
-        name: 'loadBackup',
-        text: t('Load Backup…'),
-        onClick: () =>
-          dispatch(pushModal({ modal: { name: 'load-backup', options: {} } })),
-      },
-      {
-        name: 'close',
-        text: t('Switch file'),
-        onClick: () => void dispatch(closeBudget()),
-      },
-    ],
-  });
 
   if (isEditing) {
     return (
       <InitialFocus>
         <Input
+          aria-label={t('Budget name')}
           size="medium"
-          style={{ fontWeight: 600 }}
+          style={{
+            fontWeight: 600,
+            paddingBlock: 0,
+            paddingInline: spacing.xs,
+            marginBlock: -1,
+          }}
           defaultValue={budgetName}
           onEnter={newBudgetName => {
             if (newBudgetName.trim() !== '') {
               setBudgetNamePref(newBudgetName);
-              setIsEditing(false);
             }
+            setIsEditing(false);
           }}
+          onEscape={() => setIsEditing(false)}
           onBlur={() => setIsEditing(false)}
         />
       </InitialFocus>
@@ -72,28 +46,52 @@ export function SidebarBudgetName() {
   }
 
   return (
-    <Button
-      ref={triggerRef}
-      data-testid="budget-name"
-      variant="bare"
+    <View
       style={{
-        color: theme.sidebarHeaderText,
-        backgroundColor: 'transparent',
-        fontSize: 13,
-        fontWeight: 600,
+        flexDirection: 'row',
+        alignItems: 'center',
         gap: spacing.xs,
-        padding: 0,
-        justifyContent: 'flex-start',
-        maxWidth: '100%',
+        minWidth: 0,
+        '& .hover-visible': {
+          opacity: 0,
+        },
+        '&:hover .hover-visible, & .hover-visible[data-focus-visible]': {
+          opacity: 1,
+        },
       }}
-      onClick={handleContextMenu}
     >
-      <Text style={styles.ellipsisText}>{budgetName || t('Unnamed')}</Text>
-      <SvgCheveronDown
-        width={11}
-        height={11}
-        style={{ flexShrink: 0, color: theme.sidebarTextSubdued }}
-      />
-    </Button>
+      <Text
+        data-testid="budget-name"
+        style={{
+          color: theme.sidebarHeaderText,
+          fontSize: 13,
+          fontWeight: 600,
+          ...styles.ellipsisText,
+        }}
+      >
+        {budgetName || t('Unnamed')}
+      </Text>
+      <Button
+        variant="bare"
+        className={cx(
+          'hover-visible',
+          css({
+            backgroundColor: 'transparent',
+            '&[data-hovered], &[data-focus-visible]': {
+              backgroundColor: theme.sidebarControlBackground,
+            },
+          }),
+        )}
+        aria-label={t('Rename budget')}
+        style={{ padding: spacing.xxs, flexShrink: 0 }}
+        onPress={() => setIsEditing(true)}
+      >
+        <SvgPencil1
+          width={11}
+          height={11}
+          style={{ color: theme.sidebarTextSubdued }}
+        />
+      </Button>
+    </View>
   );
 }
