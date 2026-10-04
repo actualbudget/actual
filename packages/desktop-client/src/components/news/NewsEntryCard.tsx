@@ -60,7 +60,11 @@ export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
               : theme.pillBackgroundSelected,
           }}
         >
-          {isRelease ? t('Release') : t('Post')}
+          {isRelease ? (
+            <Trans>Release</Trans>
+          ) : (
+            <Trans context="news">Post</Trans>
+          )}
         </Text>
         <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, flex: 1 }}>
           {getDisplayTitle(entry)}
