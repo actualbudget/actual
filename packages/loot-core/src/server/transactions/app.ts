@@ -3,7 +3,10 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { mutator } from '#server/mutators';
 import { undoable } from '#server/undo';
-import { getRecordedAmountPrecision } from '#server/util/currency';
+import {
+  getAccountCurrency,
+  getRecordedAmountPrecision,
+} from '#server/util/currency';
 import { q, Query } from '#shared/query';
 import type { QueryState } from '#shared/query';
 import type {
@@ -102,13 +105,18 @@ async function moveTransaction({
 async function parseTransactionsFile({
   filepath,
   options,
+  accountId,
 }: {
   filepath: string;
   options: ParseFileOptions;
+  /** Amounts are parsed at this account's recorded precision. */
+  accountId?: AccountEntity['id'];
 }) {
   return parseFile(filepath, {
     ...options,
-    amountPrecision: getRecordedAmountPrecision(),
+    amountPrecision: accountId
+      ? (await getAccountCurrency(accountId)).precision
+      : getRecordedAmountPrecision(),
   });
 }
 
