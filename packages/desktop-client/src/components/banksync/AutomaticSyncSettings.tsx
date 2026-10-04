@@ -102,8 +102,9 @@ export function AutomaticSyncSettings() {
         >
           <Trans>
             Download new transactions from your linked accounts in the
-            background. This only happens while Actual is open, and is skipped
-            if another device has already synced within the chosen interval.
+            background while Actual is open. A sync runs when any account
+            hasn't synced within the chosen interval, including syncs from
+            other devices.
           </Trans>
         </Paragraph>
       </View>
