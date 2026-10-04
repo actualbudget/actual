@@ -7,7 +7,7 @@ import { batchMessages } from '#server/sync';
 import type { Diff } from '#shared/util';
 import type { PayeeEntity, TransactionEntity } from '#types/models';
 
-import { preflightTransactionWrites } from './foreign-guard';
+import { preflightTransactionWrites, queuedAccount } from './foreign-guard';
 import * as rules from './transaction-rules';
 import * as transfer from './transfer';
 
@@ -101,9 +101,11 @@ export async function batchUpdateTransactions({
     if (added) {
       addedIds = await Promise.all(
         added.map(async t => {
+          // An account linked in the same batch is not stored yet.
           clearDisallowedCategory(
             t,
-            accounts.find(acct => acct.id === t.account),
+            accounts.find(acct => acct.id === t.account) ??
+              queuedAccount(t.account),
           );
           return db.insertTransaction(t);
         }),

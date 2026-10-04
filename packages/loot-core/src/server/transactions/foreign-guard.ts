@@ -66,6 +66,42 @@ export async function isForeignAccount(id: string): Promise<boolean> {
   return (await accountContext(id))?.foreign ?? false;
 }
 
+/** An account inserted earlier in the current batch and not stored yet. */
+export function queuedAccount(id: string): db.DbAccount | null {
+  const name = getBatchedValue('accounts', id, 'name');
+  if (!name) {
+    return null;
+  }
+  const value = (column: string) =>
+    getBatchedValue('accounts', id, column)?.value;
+  const currency = value('currency');
+  const precision = value('currency_precision');
+  return {
+    id,
+    name: String(name.value),
+    offbudget: value('offbudget') === 1 ? 1 : 0,
+    closed: 0,
+    tombstone: 0,
+    sort_order: 0,
+    currency: typeof currency === 'string' ? currency : null,
+    currency_precision: typeof precision === 'number' ? precision : null,
+  };
+}
+
+/** A foreign account's recorded currency, including one queued in a batch. */
+export async function foreignAccountCurrency(
+  id: string,
+): Promise<{ currencyCode: string; precision: number } | null> {
+  const context = await accountContext(id);
+  if (!context?.foreign || context.currency === null) {
+    return null;
+  }
+  if (context.precision === null) {
+    throw new Error('account-currency-precision-missing');
+  }
+  return { currencyCode: context.currency, precision: context.precision };
+}
+
 /** Transactions store raw payee ids; merges redirect them through mappings. */
 async function transferTarget(payeeId: string): Promise<string | null> {
   const payee = await db.first<Pick<db.DbPayee, 'transfer_acct'>>(

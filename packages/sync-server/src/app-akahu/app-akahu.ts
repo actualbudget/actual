@@ -250,6 +250,7 @@ app.post(
         data: {
           balances,
           startingBalance: currentBalance,
+          startingBalanceCurrency: account.balance.currency ?? null,
           transactions: {
             all: allSorted,
             booked: bookedSorted,

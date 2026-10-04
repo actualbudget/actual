@@ -23,6 +23,7 @@ describe('IntegrationBank', () => {
         name: 'account-example-one (XXX 4321) PLN',
         official_name: 'Savings Account for Individuals (Retail)',
         type: 'checking',
+        currency: 'PLN',
       });
     });
 
@@ -39,6 +40,7 @@ describe('IntegrationBank', () => {
         name: 'account-example-one PLN',
         official_name: 'Savings Account for Individuals (Retail)',
         type: 'checking',
+        currency: 'PLN',
       });
     });
   });
