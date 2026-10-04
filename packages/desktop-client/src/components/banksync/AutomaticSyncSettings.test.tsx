@@ -100,6 +100,17 @@ describe('AutomaticSyncSettings', () => {
     expect(setPref).toHaveBeenCalledWith('45');
   });
 
+  it('keeps the stored interval when the number is cleared and blurred', async () => {
+    mockInterval('30');
+    render(settings());
+
+    await userEvent.clear(numberField());
+    await userEvent.tab();
+
+    expect(setPref).not.toHaveBeenCalled();
+    expect(numberField()).toHaveValue(30);
+  });
+
   it('clamps a completed number below the floor', async () => {
     mockInterval('30');
     render(settings());

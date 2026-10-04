@@ -80,7 +80,13 @@ export function AutomaticSyncSettings() {
   }
 
   function commitDraft(value: string) {
-    onChangeCustom(parseInt(value, 10), customParts.unit);
+    const parsed = Number(value);
+    if (value.trim() === '' || !Number.isFinite(parsed)) {
+      setDraft(null);
+      return;
+    }
+
+    onChangeCustom(parsed, customParts.unit);
   }
 
   return (
