@@ -45,28 +45,50 @@ export function applyRulesToTransaction(
     }
   });
 
-  // When a rule updates a parent transaction, push the edited field's rule
-  // value down to the subtransactions — but never into a row where the user
-  // explicitly cleared that field, and not at all if they cleared it on the
-  // parent itself.
-  if (
-    transaction.is_parent &&
-    diff.subtransactions !== undefined &&
-    updatedFieldName !== null &&
-    !isFieldClearedByUser(clearedFields, transaction.id, updatedFieldName)
-  ) {
-    newTransaction.subtransactions = diff.subtransactions.map((st, idx) => {
-      const base = newTransaction.subtransactions?.[idx] ?? st;
-      if (isFieldClearedByUser(clearedFields, base.id, updatedFieldName)) {
-        return base;
-      }
-      const ruleValue = Reflect.get(st, updatedFieldName);
-      if (ruleValue == null) {
-        return base;
-      }
-      return { ...base, [updatedFieldName]: ruleValue };
-    });
+  const subtransactions = propagateRuleChangeToSubtransactions(
+    newTransaction,
+    diff.subtransactions,
+    updatedFieldName,
+    clearedFields,
+  );
+  if (subtransactions) {
+    newTransaction.subtransactions = subtransactions;
   }
 
   return newTransaction;
+}
+
+/**
+ * When a rule updates a parent transaction, pushes the edited field's rule
+ * value down to its subtransactions — but never into a row where the user
+ * explicitly cleared that field, and not at all if they cleared it on the
+ * parent itself. Returns the updated subtransactions, or null when there is
+ * nothing to propagate.
+ */
+export function propagateRuleChangeToSubtransactions(
+  parent: TransactionEntity,
+  ruleSubtransactions: TransactionEntity[] | undefined,
+  updatedFieldName: string | null,
+  clearedFields?: ClearedFieldsByTransaction,
+): TransactionEntity[] | null {
+  if (
+    !parent.is_parent ||
+    ruleSubtransactions === undefined ||
+    updatedFieldName === null ||
+    isFieldClearedByUser(clearedFields, parent.id, updatedFieldName)
+  ) {
+    return null;
+  }
+
+  return ruleSubtransactions.map((st, idx) => {
+    const base = parent.subtransactions?.[idx] ?? st;
+    if (isFieldClearedByUser(clearedFields, base.id, updatedFieldName)) {
+      return base;
+    }
+    const ruleValue = Reflect.get(st, updatedFieldName);
+    if (ruleValue == null) {
+      return base;
+    }
+    return { ...base, [updatedFieldName]: ruleValue };
+  });
 }

@@ -81,9 +81,9 @@ import {
 } from '#components/mobile/MobileForms';
 import { getPrettyPayee } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
+import { propagateRuleChangeToSubtransactions } from '#components/transactions/applyRulesToTransaction';
 import {
   getClearedFieldNames,
-  isFieldClearedByUser,
   shouldApplyRuleChange,
   trackClearedField,
 } from '#components/transactions/table/utils';
@@ -1769,40 +1769,14 @@ function TransactionEditUnconnected({
             }
           });
 
-          // When a rule updates a parent transaction, push the edited field's
-          // rule value down to the subtransactions — but never into a row
-          // where the user explicitly cleared that field, and not at all if
-          // they cleared it on the parent itself.
-          if (
-            newTransaction.is_parent &&
-            diff.subtransactions !== undefined &&
-            updatedField !== null &&
-            !isFieldClearedByUser(
-              clearedFields.current,
-              newTransaction.id,
-              updatedField,
-            )
-          ) {
-            newTransaction.subtransactions = diff.subtransactions.map(
-              (st, idx) => {
-                const base = newTransaction.subtransactions?.[idx] || st;
-                if (
-                  isFieldClearedByUser(
-                    clearedFields.current,
-                    base.id,
-                    updatedField,
-                  )
-                ) {
-                  return base;
-                }
-                return {
-                  ...base,
-                  ...(st[updatedField] != null && {
-                    [updatedField]: st[updatedField],
-                  }),
-                };
-              },
-            );
+          const subtransactions = propagateRuleChangeToSubtransactions(
+            newTransaction,
+            diff.subtransactions,
+            updatedField,
+            clearedFields.current,
+          );
+          if (subtransactions) {
+            newTransaction.subtransactions = subtransactions;
             changedFields.add('subtransactions');
           }
         }
