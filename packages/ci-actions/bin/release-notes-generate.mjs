@@ -130,11 +130,25 @@ await group('Prepare branch', async () => {
   });
 });
 
+// Only notes present on the release branch belong in this release. The notes
+// branch is created from master, so on a hotfix the directory also holds
+// master's pending notes for changes that are not part of the release; those
+// must be neither compiled nor deleted (deleting them here would propagate to
+// master when this PR merges, silently dropping them from the next release).
+const { stdout: releaseNotesList } = await exec(
+  `git ls-tree -r --name-only origin/${releaseBranch} -- upcoming-release-notes`,
+);
+const releaseNoteFiles = releaseNotesList
+  .split('\n')
+  .filter(Boolean)
+  .map(path => path.replace(/^upcoming-release-notes\//, ''));
+
 const { notesByCategory, files } = await parseReleaseNotes(
   'upcoming-release-notes',
   owner,
   repo,
   `origin/${baseBranch}`,
+  releaseNoteFiles,
 );
 const categorizedNotes = formatNotes(notesByCategory);
 
@@ -160,6 +174,7 @@ description: New release of Actual.
 date: ${releaseDate}T10:00
 slug: release-${version}
 tags: [announcement, release]
+in_app_notification: true
 hide_table_of_contents: false
 authors: ${author}
 ---
@@ -256,9 +271,20 @@ await group('Format generated files', async () => {
   });
 });
 
+// The in-app notifications feed is generated from the blog and committed. This
+// job pushes with GITHUB_TOKEN, which doesn't trigger the PR workflows that
+// normally regenerate it (autofix.ci), so it has to be part of this commit.
+const newsFeedPath = 'packages/desktop-client/src/data/news.json';
+await group('Generate news feed', async () => {
+  await exec(
+    'node --import=extensionless/register --experimental-strip-types packages/ci-actions/bin/generate-news-feed.ts',
+    { stdio: 'inherit' },
+  );
+});
+
 await group('Commit and push', async () => {
   await exec(
-    'git add upcoming-release-notes packages/docs/blog packages/docs/docs/releases.md',
+    `git add upcoming-release-notes packages/docs/blog packages/docs/docs/releases.md ${newsFeedPath}`,
     { stdio: 'inherit' },
   );
 

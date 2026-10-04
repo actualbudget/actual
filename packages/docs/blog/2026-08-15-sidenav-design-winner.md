@@ -4,6 +4,7 @@ description: The votes are in. Congratulations to matt-fidd, winner of the siden
 date: 2026-08-15T10:00
 slug: sidenav-design-winner
 tags: [announcement]
+in_app_notification: true
 hide_table_of_contents: false
 authors: MatissJanis
 ---

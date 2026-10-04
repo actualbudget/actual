@@ -16,6 +16,7 @@ import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
 import { useNavigate } from '#hooks/useNavigate';
+import { useNewsNotification } from '#hooks/useNewsNotification';
 import { ScrollProvider } from '#hooks/useScrollListener';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch, useSelector } from '#redux';
@@ -31,6 +32,7 @@ import { GlobalKeys } from './GlobalKeys';
 import { MobileBankSyncAccountEditPage } from './mobile/banksync/MobileBankSyncAccountEditPage';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
+import { NotificationsPage } from './news/NotificationsPage';
 import { Notifications } from './Notifications';
 import { MobilePageHeaderProvider, MobilePageHeaderSlot } from './Page';
 import { Reports } from './reports';
@@ -105,6 +107,8 @@ export function FinancesApp() {
   );
 
   const multiuserEnabled = useMultiuserEnabled();
+
+  useNewsNotification();
 
   const init = useEffectEvent(() => {
     // Wait a little bit to make sure the sync button will get the
@@ -363,6 +367,10 @@ export function FinancesApp() {
                       }
                     />
                     <Route path="/tags" element={<ManageTagsPage />} />
+                    <Route
+                      path="/notifications"
+                      element={<NotificationsPage />}
+                    />
                     <Route path="/settings" element={<Settings />} />
 
                     <Route
@@ -463,6 +471,7 @@ export function FinancesApp() {
                   <Route path="/budget" element={<MobileNavTabs />} />
                   <Route path="/accounts" element={<MobileNavTabs />} />
                   <Route path="/settings" element={<MobileNavTabs />} />
+                  <Route path="/notifications" element={<MobileNavTabs />} />
                   <Route path="/reports" element={<MobileNavTabs />} />
                   <Route
                     path="/reports/:dashboardId"

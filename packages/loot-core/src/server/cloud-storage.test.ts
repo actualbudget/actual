@@ -1,8 +1,12 @@
-const { mockedFetch, mockedGetItem, mockedRemoveItem } = vi.hoisted(() => ({
-  mockedFetch: vi.fn(),
-  mockedGetItem: vi.fn(),
-  mockedRemoveItem: vi.fn(),
-}));
+import type { Mock } from 'vitest';
+
+const { mockedFetch, mockedGetItem, mockedRemoveItem } = vi.hoisted(
+  (): { mockedFetch: Mock; mockedGetItem: Mock; mockedRemoveItem: Mock } => ({
+    mockedFetch: vi.fn(),
+    mockedGetItem: vi.fn(),
+    mockedRemoveItem: vi.fn(),
+  }),
+);
 
 vi.unmock('#server/post');
 vi.unmock('./post');

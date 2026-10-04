@@ -14,6 +14,7 @@ import type { SyncedPrefs } from '#types/prefs';
 import { app as accountsApp } from './app';
 import {
   addTransactions,
+  compareFuzzyMatchCandidates,
   reconcileTransactions,
   simpleFinBatchSync,
 } from './sync';
@@ -636,6 +637,222 @@ describe('Account sync', () => {
         t => t.imported_id === 'ca1589b2-7bc3-4587-a157-476170b383a7',
       ).amount,
     ).toBe(-1239);
+  });
+
+  describe('compareFuzzyMatchCandidates', () => {
+    const transDate = '2024-04-05';
+    const alreadyImported = {
+      date: db.toDateRepr('2024-04-05'),
+      imported_id: 'existing-import-id',
+    };
+    const notYetImported = {
+      date: db.toDateRepr('2024-04-05'),
+      imported_id: null,
+    };
+
+    test(
+      'breaks a same-distance tie by preferring the unlinked candidate, ' +
+        'regardless of which candidate is passed in first',
+      () => {
+        // Feed the comparator the already-imported candidate first -- the
+        // pre-fix comparator (`aDistance - bDistance`, which never returns 0
+        // for equal distances) would have kept it first. The sort must
+        // still put the unlinked candidate ahead of it either way.
+        expect(
+          [alreadyImported, notYetImported].sort((a, b) =>
+            compareFuzzyMatchCandidates(transDate, a, b),
+          ),
+        ).toEqual([notYetImported, alreadyImported]);
+
+        expect(
+          [notYetImported, alreadyImported].sort((a, b) =>
+            compareFuzzyMatchCandidates(transDate, a, b),
+          ),
+        ).toEqual([notYetImported, alreadyImported]);
+      },
+    );
+
+    test('prefers the closer date over imported_id status', () => {
+      const fartherButUnlinked = {
+        date: db.toDateRepr('2024-04-08'),
+        imported_id: null,
+      };
+
+      expect(
+        [fartherButUnlinked, alreadyImported].sort((a, b) =>
+          compareFuzzyMatchCandidates(transDate, a, b),
+        ),
+      ).toEqual([alreadyImported, fartherButUnlinked]);
+    });
+  });
+
+  test(
+    'given two equally-dated candidates, an unlinked one is preferred over ' +
+      'one that already has its own imported_id',
+    async () => {
+      const { id } = await prepareDatabase();
+
+      // Both candidates are tied on date-distance to the incoming
+      // transaction, so which one wins depends on the comparator's
+      // imported_id tie-break, verified directly (independent of DB read
+      // order) in the compareFuzzyMatchCandidates tests above. This test
+      // covers the same scenario end-to-end through reconcileTransactions.
+      await db.insertTransaction({
+        id: 'already-imported',
+        account: id,
+        amount: -1239,
+        date: '2024-04-05',
+        imported_id: 'existing-import-id',
+      });
+      await db.insertTransaction({
+        id: 'not-yet-imported',
+        account: id,
+        amount: -1239,
+        date: '2024-04-05',
+      });
+
+      // Neither candidate's date matches the incoming transaction's date
+      // any more closely than the other, so the two are tied on distance --
+      // the tie should be broken in favor of the row that isn't already
+      // linked to some other bank transaction.
+      await reconcileTransactions(
+        id,
+        [
+          {
+            date: '2024-04-05',
+            amount: -1239,
+            payee_name: 'Acme Inc.',
+            imported_id: 'new-import-id',
+          },
+        ],
+        { strictIdChecking: false },
+      );
+
+      const transactions = await getAllTransactions();
+      expect(transactions.length).toBe(2);
+
+      const alreadyImported = transactions.find(
+        t => t.id === 'already-imported',
+      );
+      expect(alreadyImported.imported_id).toBe('existing-import-id');
+
+      const notYetImported = transactions.find(
+        t => t.id === 'not-yet-imported',
+      );
+      expect(notYetImported.imported_id).toBe('new-import-id');
+    },
+  );
+  test('bank sync does not fuzzy-match children of an exactly matched split', async () => {
+    const { id } = await prepareDatabase();
+
+    await db.insertTransaction({
+      id: 'split-parent',
+      account: id,
+      amount: -1000,
+      date: '2024-04-05',
+      imported_id: 'parent-provider-id',
+      is_parent: true,
+    });
+    await db.insertTransaction({
+      id: 'split-child-1',
+      account: id,
+      amount: -299,
+      date: '2024-04-05',
+      is_child: true,
+      parent_id: 'split-parent',
+    });
+    await db.insertTransaction({
+      id: 'split-child-2',
+      account: id,
+      amount: -701,
+      date: '2024-04-05',
+      is_child: true,
+      parent_id: 'split-parent',
+    });
+
+    const result = await reconcileTransactions(
+      id,
+      [
+        {
+          transactionId: 'new-provider-id',
+          transactionAmount: { amount: '-2.99' },
+          date: '2024-04-07',
+          payeeName: 'New merchant',
+          booked: true,
+        },
+        {
+          transactionId: 'parent-provider-id',
+          transactionAmount: { amount: '-10.00' },
+          date: '2024-04-05',
+          payeeName: 'Split merchant',
+          booked: true,
+        },
+      ],
+      { isBankSyncAccount: true, strictIdChecking: false },
+    );
+
+    expect(result.added).toHaveLength(1);
+
+    const transactions = await getAllTransactions();
+    expect(
+      transactions.find(transaction => transaction.id === 'split-child-1')
+        .imported_id,
+    ).toBeNull();
+    expect(
+      transactions.find(
+        transaction => transaction.imported_id === 'new-provider-id',
+      ),
+    ).toMatchObject({ amount: -299, parent_id: null });
+  });
+
+  test('bank sync can fuzzy-match children of an unmatched split', async () => {
+    const { id } = await prepareDatabase();
+
+    await db.insertTransaction({
+      id: 'split-parent',
+      account: id,
+      amount: -1000,
+      date: '2024-04-05',
+      is_parent: true,
+    });
+    await db.insertTransaction({
+      id: 'split-child-1',
+      account: id,
+      amount: -299,
+      date: '2024-04-05',
+      is_child: true,
+      parent_id: 'split-parent',
+    });
+    await db.insertTransaction({
+      id: 'split-child-2',
+      account: id,
+      amount: -701,
+      date: '2024-04-05',
+      is_child: true,
+      parent_id: 'split-parent',
+    });
+
+    const result = await reconcileTransactions(
+      id,
+      [
+        {
+          transactionId: 'child-provider-id',
+          transactionAmount: { amount: '-2.99' },
+          date: '2024-04-07',
+          payeeName: 'Child merchant',
+          booked: true,
+        },
+      ],
+      { isBankSyncAccount: true, strictIdChecking: false },
+    );
+
+    expect(result.added).toHaveLength(0);
+
+    const transactions = await getAllTransactions();
+    expect(
+      transactions.find(transaction => transaction.id === 'split-child-1')
+        .imported_id,
+    ).toBe('child-provider-id');
   });
 
   test(
