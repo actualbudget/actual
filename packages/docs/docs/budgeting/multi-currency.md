@@ -89,3 +89,15 @@ A narrow window uses the phone layout. The BBVA México account below uses the s
 The payment detail below returns to the separate BNP Paribas rent-entry checkpoint. Open the rent payment. The amount is -€950.00, with -$1,045.00 under it. The screen says: "Editing foreign amounts is not available yet."
 
 <img width="390" alt="Phone transaction for Résidences Saint-Martin SARL showing -€950.00 and -$1,045.00, with editing unavailable" src="/img/budgeting/multi-currency-mobile-payment@2x.png" />
+
+## Import a file
+
+Open the BNP Paribas account and click **Import**. Choose a CSV, QIF, OFX, QFX, or CAMT file whose amounts are already in euros. Leave **Multiply amount** off. That option scales the numbers in the file, and this account reads them as euros.
+
+The preview shows -€950.00 for the October 31 rent, with -$1,045.00 under it. That dollar amount is the saved rate for that date. Press **Import**.
+
+<img width="860" alt="Import preview of a 950 euro rent payment to Résidences Saint-Martin SARL, with -$1,045.00 under the euro amount" src="/img/budgeting/multi-currency-import@2x.png" />
+
+If a date in the file has no saved rate, the dialog says: "No exchange rate is saved for 2026-10-30. Enter a rate, used from 2026-10-30 until you save another rate." The rate defaults to dollars per 1 euro, with a swap button for the reciprocal direction. **Save rate** stores a standing rate from that date. The preview can then convert the rows.
+
+<img width="860" alt="Import dialog asking for a euro rate from 2026-10-30, with two 950 euro rent rows" src="/img/budgeting/multi-currency-import-rate@2x.png" />

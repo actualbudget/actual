@@ -1,5 +1,6 @@
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
+import { app as exchangeRatesApp } from '#server/exchange-rates/app';
 import type { ServerHandlers } from '#types/server-handlers';
 
 import { app as accountsApp } from './accounts/app';
@@ -341,6 +342,49 @@ describe('API foreign pairs', () => {
   beforeEach(async () => {
     await setBudgetCurrency('USD', 2);
     await db.insertAccount({ id: 'jpy', name: 'Yen', currency: 'JPY' });
+  });
+
+  it('imports native Money and converts it at the saved rate', async () => {
+    handlers['transactions-import'] =
+      accountsApp.handlers['transactions-import'];
+    for (const flag of ['currency', 'multicurrency']) {
+      await db.update('preferences', { id: `flags.${flag}`, value: 'true' });
+    }
+    const save = exchangeRatesApp.handlers['exchange-rates/save'];
+    const result = await handlers['api/transactions-import']({
+      accountId: 'jpy',
+      transactions: [
+        {
+          account: 'jpy',
+          date: '2026-03-01',
+          transaction_amount: { amount: -1500, currencyCode: 'JPY' },
+        },
+      ],
+    });
+    expect(result.errors).toEqual([
+      { message: 'rate-unavailable: 2026-03-01' },
+    ]);
+    await save({
+      quoteCurrency: 'JPY',
+      rate: '150',
+      kind: 'standing',
+      date: '2000-01-01',
+    });
+    await handlers['api/transactions-import']({
+      accountId: 'jpy',
+      transactions: [
+        {
+          account: 'jpy',
+          date: '2026-03-01',
+          transaction_amount: { amount: -1500, currencyCode: 'JPY' },
+        },
+      ],
+    });
+    expect(
+      db.firstSync(
+        "SELECT amount, transaction_amount FROM transactions WHERE acct = 'jpy'",
+      ),
+    ).toEqual({ amount: -1000, transaction_amount: -1500 });
   });
 
   it('reads base and native amounts in their own currencies', async () => {
