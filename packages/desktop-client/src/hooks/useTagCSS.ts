@@ -18,11 +18,12 @@ export function useTagCSS(opts?: { ellipsis?: boolean }) {
       options: { color?: string | null; compact?: boolean } = {},
     ) => {
       const tagObj = tags.find(t => t.tag === tag);
-      const [color, backgroundColor, backgroundColorHovered] = getTagCSSColors(
-        theme,
-        // fallback strategy: options color > tag color > default color > theme color (undefined)
-        options.color ?? tagObj?.color,
-      );
+      const { color, backgroundColor, backgroundColorHovered, isCustomColor } =
+        getTagCSSColors(
+          theme,
+          // fallback strategy: options color > tag color > default color > theme color (undefined)
+          options.color ?? tagObj?.color,
+        );
 
       return css({
         ...(opts?.ellipsis
@@ -39,7 +40,8 @@ export function useTagCSS(opts?: { ellipsis?: boolean }) {
         borderRadius: 16,
         userSelect: 'none',
         backgroundColor,
-        color,
+        // !important is used to override the hover text color in button.tsx used to style the tag button
+        color: isCustomColor ? `${color} !important` : color,
         cursor: 'pointer',
         '&[data-hovered]': {
           backgroundColor: backgroundColorHovered,
@@ -53,13 +55,45 @@ export function useTagCSS(opts?: { ellipsis?: boolean }) {
   );
 }
 
+type TagColors = {
+  color: string;
+  backgroundColor: string;
+  backgroundColorHovered: string;
+  isHidden: boolean;
+};
+
+/**
+ * Returns a getter for a tag's raw pill colours, for callers that need to
+ * build styles around the pill rather than use the pill class itself.
+ */
+export function useTagColors() {
+  const { data: tags = [] } = useTags();
+  const [theme] = useTheme();
+
+  return (tag: string): TagColors => {
+    const tagObj = tags.find(t => t.tag === tag);
+    const { color, backgroundColor, backgroundColorHovered } = getTagCSSColors(
+      theme,
+      tagObj?.color,
+    );
+
+    return {
+      color,
+      backgroundColor,
+      backgroundColorHovered,
+      isHidden: Boolean(tagObj?.hidden),
+    };
+  };
+}
+
 function getTagCSSColors(theme: Theme, color?: string | null) {
   if (!color) {
-    return [
-      themeStyle.noteTagText,
-      themeStyle.noteTagBackground,
-      themeStyle.noteTagBackgroundHover,
-    ];
+    return {
+      color: themeStyle.noteTagText,
+      backgroundColor: themeStyle.noteTagBackground,
+      backgroundColorHovered: themeStyle.noteTagBackgroundHover,
+      isCustomColor: false,
+    };
   }
 
   // see: https://www.w3.org/TR/AERT/#color-contrast
@@ -69,13 +103,18 @@ function getTagCSSColors(theme: Theme, color?: string | null) {
   const brightnessDiff = (r * 299 + g * 587 + b * 114) / 1000;
 
   if (brightnessDiff >= 125) {
-    // !important is used to override the hover text color in button.tsx used to style the tag button
-    return [
-      'black !important',
-      color,
-      `color-mix(in srgb, ${color} 80%, black)`,
-    ];
+    return {
+      color: 'black',
+      backgroundColor: color,
+      backgroundColorHovered: `color-mix(in srgb, ${color} 80%, black)`,
+      isCustomColor: true,
+    };
   }
 
-  return ['white !important', color, `color-mix(in srgb, ${color} 70%, white)`];
+  return {
+    color: 'white',
+    backgroundColor: color,
+    backgroundColorHovered: `color-mix(in srgb, ${color} 70%, white)`,
+    isCustomColor: true,
+  };
 }
