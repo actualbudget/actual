@@ -102,8 +102,6 @@ describe('isAutomaticSyncDue', () => {
   });
 
   it('is due when one account is overdue even if another just synced', () => {
-    // A manual sync of a single account used to postpone every account until
-    // the next interval.
     expect(
       isAutomaticSyncDue({
         ...base,
@@ -166,8 +164,6 @@ describe('isAutomaticSyncDue', () => {
   });
 
   it('uses the oldest synced account as the reference point', () => {
-    // Previously the most recent sync was used, so the recently-synced account
-    // below would have suppressed the sync the stale one needs.
     expect(
       isAutomaticSyncDue({
         ...base,

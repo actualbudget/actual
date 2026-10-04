@@ -46,9 +46,7 @@ type IsAutomaticSyncDueArgs = {
  * Decides whether an automatic bank sync should run right now.
  *
  * The *oldest* successful sync across linked accounts is the reference point,
- * so a single account being refreshed does not hold back the others. Using the
- * most recent one instead meant manually syncing one account postponed every
- * account until the next interval.
+ * so a single account being refreshed does not hold back the others.
  *
  * A sync covers every linked account rather than just the overdue ones, because
  * the underlying sync mutation takes one account or all of them and refuses to
