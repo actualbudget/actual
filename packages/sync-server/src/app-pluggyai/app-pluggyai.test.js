@@ -39,6 +39,7 @@ describe('Pluggy transaction balances', () => {
       .send({ accountId: 'account-1', startDate: '2026-07-01' });
 
     expect(res.body.data.startingBalance).toBe(expected);
+    expect(res.body.data.startingBalanceCurrency).toBe('USD');
     expect(res.body.data.balances[0].balanceAmount.amount).toBe(expected);
   });
 

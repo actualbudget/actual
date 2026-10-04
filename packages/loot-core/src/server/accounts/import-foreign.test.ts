@@ -114,6 +114,49 @@ describe('importing into foreign accounts', () => {
     expect(rows()).toEqual([]);
   });
 
+  it('reports which preview rows need a rate at their final dates', async () => {
+    await exchangeRatesApp.handlers['exchange-rates/save']({
+      quoteCurrency: 'JPY',
+      rate: '150',
+      kind: 'standing',
+      date: '2026-03-01',
+    });
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'imported_payee', value: 'Moved' }],
+      actions: [{ op: 'set', field: 'date', value: '2026-02-20' }],
+    });
+    // The import dialog tags its rows with trx_id.
+    const moved = {
+      date: '2026-03-10',
+      transaction_amount: -1500,
+      payee_name: 'Moved',
+      trx_id: 'moved',
+    };
+    const kept = {
+      date: '2026-03-10',
+      transaction_amount: -3000,
+      payee_name: 'Kept',
+      trx_id: 'kept',
+    };
+    const result = await importTransactions({
+      accountId: 'jpy',
+      isPreview: true,
+      transactions: [moved, kept],
+    });
+    expect(result.errors).toEqual([
+      { message: 'rate-unavailable: 2026-02-20' },
+    ]);
+    expect(result.missingRates).toEqual([
+      {
+        transaction: expect.objectContaining({ trx_id: 'moved' }),
+        date: '2026-02-20',
+      },
+    ]);
+    expect(rows()).toEqual([]);
+  });
+
   it('rejects base-only rows and splits for foreign accounts', async () => {
     for (const transactions of [
       [{ date: '2026-03-01', amount: -1000 }],

@@ -31,6 +31,7 @@ export type EnableBankingTransaction = {
   value_date?: string;
   transaction_date?: string;
   remittance_information?: string[];
+  balance_after_transaction?: { currency: string; amount: string };
 };
 
 type EnableBankingBalance = {
@@ -76,6 +77,10 @@ type BankSyncTransaction = EnableBankingTransaction & {
   notes?: string;
   remittanceInformationUnstructured?: string;
   booked: boolean;
+  balanceAfterTransaction?: {
+    balanceType: string;
+    balanceAmount: { currency: string; amount: string };
+  };
 };
 
 type BankSyncBalance = {
@@ -330,6 +335,13 @@ export function normalizeTransaction(
     notes: remittanceInformationUnstructured,
     remittanceInformationUnstructured,
     booked: tx.status !== 'PDNG',
+    // Shared shape, so an opening balance can come from the oldest row.
+    ...(tx.balance_after_transaction && {
+      balanceAfterTransaction: {
+        balanceType: 'interimBooked',
+        balanceAmount: { ...tx.balance_after_transaction },
+      },
+    }),
   };
 }
 

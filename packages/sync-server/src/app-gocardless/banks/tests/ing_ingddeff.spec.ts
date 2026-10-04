@@ -44,6 +44,7 @@ describe('IngIngddeff', () => {
 
     it('returns normalized account data returned to Frontend', () => {
       expect(IngIngddeff.normalizeAccount(accountRaw)).toEqual({
+        currency: 'EUR',
         account_id: 'a787ba27-02ee-4fd6-be86-73831adc5498',
         iban: 'DE02500105170137075030',
         institution: {
