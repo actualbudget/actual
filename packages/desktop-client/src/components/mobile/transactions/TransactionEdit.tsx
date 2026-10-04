@@ -81,7 +81,12 @@ import {
 } from '#components/mobile/MobileForms';
 import { getPrettyPayee } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
-import { shouldApplyRuleChange } from '#components/transactions/table/utils';
+import { propagateRuleChangeToSubtransactions } from '#components/transactions/applyRulesToTransaction';
+import {
+  getClearedFieldNames,
+  shouldApplyRuleChange,
+  trackClearedField,
+} from '#components/transactions/table/utils';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -1709,6 +1714,12 @@ function TransactionEditUnconnected({
     searchParams,
   ]);
 
+  // Fields the user explicitly emptied while entering the new transaction,
+  // tracked per transaction row so a clear on one split row doesn't affect
+  // its siblings. Rules re-run on every field commit, and they may not
+  // re-fill these (e.g. a cleared pre-assigned category must stay cleared).
+  const clearedFields = useRef(new Map<TransactionEntity['id'], Set<string>>());
+
   const onUpdate = useCallback(
     async (
       serializedTransaction: TransactionEntity,
@@ -1725,6 +1736,12 @@ function TransactionEditUnconnected({
       const newTransaction = { ...transaction };
       const changedFields = new Set<keyof TransactionEntity>([updatedField]);
       if (isTemporary(newTransaction)) {
+        trackClearedField(clearedFields.current, newTransaction, updatedField);
+        const clearedOnThisRow = getClearedFieldNames(
+          clearedFields.current,
+          newTransaction.id,
+        );
+
         const afterRules = await send('rules-run', {
           transaction: newTransaction,
         });
@@ -1737,29 +1754,29 @@ function TransactionEditUnconnected({
             // (see shouldApplyRuleChange).
             // Or update all fields if the payee changes (assists location-based entry by
             // applying rules to prefill category, notes, etc. based on the selected payee)
+            // — except fields the user explicitly cleared, which must stay empty.
             if (
-              updatedField === 'payee' ||
-              shouldApplyRuleChange(field, newTransaction[field], diff[field])
+              !clearedOnThisRow.includes(field) &&
+              (updatedField === 'payee' ||
+                shouldApplyRuleChange(
+                  field,
+                  newTransaction[field],
+                  diff[field],
+                ))
             ) {
               (newTransaction as Record<string, unknown>)[field] = diff[field];
               changedFields.add(field);
             }
           });
 
-          // When a rule updates a parent transaction, overwrite all changes to the current field in subtransactions.
-          if (
-            newTransaction.is_parent &&
-            diff.subtransactions !== undefined &&
-            updatedField !== null
-          ) {
-            newTransaction.subtransactions = diff.subtransactions.map(
-              (st, idx) => ({
-                ...(newTransaction.subtransactions?.[idx] || st),
-                ...(st[updatedField] != null && {
-                  [updatedField]: st[updatedField],
-                }),
-              }),
-            );
+          const subtransactions = propagateRuleChangeToSubtransactions(
+            newTransaction,
+            diff.subtransactions,
+            updatedField,
+            clearedFields.current,
+          );
+          if (subtransactions) {
+            newTransaction.subtransactions = subtransactions;
             changedFields.add('subtransactions');
           }
         }
