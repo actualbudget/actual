@@ -156,13 +156,14 @@ import {
 import type { TransactionTableColumnId } from './table/columns';
 import {
   deserializeTransaction,
-  isEmptyRuleTarget,
   isLastChild,
   makeTemporaryTransactions,
   selectAscDesc,
   serializeTransaction,
+  trackClearedField,
 } from './table/utils';
 import type {
+  ClearedFieldsByTransaction,
   SerializedTransaction,
   TransactionEditFunction,
   TransactionUpdateFunction,
@@ -2613,7 +2614,7 @@ type TransactionTableInnerProps = {
   onApplyRules: (
     transaction: TransactionEntity,
     field: string,
-    clearedFieldNames?: readonly string[],
+    clearedFields?: ClearedFieldsByTransaction,
   ) => Promise<TransactionEntity>;
   onSplit: (id: TransactionEntity['id']) => void;
   onAddSplit: (id: TransactionEntity['id']) => void;
@@ -3024,7 +3025,7 @@ export type TransactionTableProps = {
   onApplyRules: (
     transaction: TransactionEntity,
     field: string | null,
-    clearedFieldNames?: readonly string[],
+    clearedFields?: ClearedFieldsByTransaction,
   ) => Promise<TransactionEntity>;
   onSplit: (id: TransactionEntity['id']) => TransactionEntity['id'];
   onAddSplit: (id: TransactionEntity['id']) => TransactionEntity['id'];
@@ -3291,11 +3292,14 @@ export const TransactionTable = forwardRef(
     const afterSaveFunc = useRef<null | (() => void)>(null);
     const [_, forceRerender] = useState({});
     const selectedItems = useSelectedItems();
-    // Fields the user explicitly emptied while entering the new transaction.
-    // Rules re-run on every field commit, and they may not re-fill these (e.g.
-    // a cleared pre-assigned category must stay cleared until the row is
-    // added or reset).
-    const clearedFieldNames = useRef(new Set<string>());
+    // Fields the user explicitly emptied while entering the new transaction,
+    // tracked per row id so a clear on one split row doesn't affect its
+    // siblings. Rules re-run on every field commit, and they may not re-fill
+    // these (e.g. a cleared pre-assigned category must stay cleared until the
+    // row is added or reset).
+    const clearedFields = useRef(
+      new Map<TransactionEntity['id'], Set<string>>(),
+    );
 
     latestState.current = {
       newTransactions: newTransactions ?? [],
@@ -3307,7 +3311,7 @@ export const TransactionTable = forwardRef(
     // Derive new transactions from the `isAdding` prop
     if (prevIsAdding !== props.isAdding) {
       if (!prevIsAdding && props.isAdding) {
-        clearedFieldNames.current.clear();
+        clearedFields.current.clear();
         setNewTransactions(
           makeTemporaryTransactions(
             props.currentAccountId,
@@ -3338,7 +3342,7 @@ export const TransactionTable = forwardRef(
         } else {
           const lastDate =
             transactions.length > 0 ? transactions[0].date : null;
-          clearedFieldNames.current.clear();
+          clearedFields.current.clear();
           setNewTransactions(
             makeTemporaryTransactions(
               props.currentAccountId,
@@ -3391,7 +3395,7 @@ export const TransactionTable = forwardRef(
                 }),
               );
               // Reset form like onAddTemporary does
-              clearedFieldNames.current.clear();
+              clearedFields.current.clear();
               setNewTransactions(
                 makeTemporaryTransactions(
                   props.currentAccountId,
@@ -3660,18 +3664,20 @@ export const TransactionTable = forwardRef(
           if (onApplyRulesProp) {
             // Remember fields the user explicitly emptied so later rule runs
             // (triggered by edits to other fields) can't re-fill them either.
+            // `transaction` is the row that was actually edited (a split
+            // child or the parent), so track the clear against its own id.
             if (updatedFieldName !== null) {
-              if (isEmptyRuleTarget(groupedTransaction[updatedFieldName])) {
-                clearedFieldNames.current.add(updatedFieldName);
-              } else {
-                clearedFieldNames.current.delete(updatedFieldName);
-              }
+              trackClearedField(
+                clearedFields.current,
+                transaction,
+                updatedFieldName,
+              );
             }
 
             groupedTransaction = await onApplyRulesProp(
               groupedTransaction,
               updatedFieldName,
-              [...clearedFieldNames.current],
+              clearedFields.current,
             );
           }
 
@@ -3962,7 +3968,7 @@ export const TransactionTable = forwardRef(
     );
 
     function onCloseAddTransaction() {
-      clearedFieldNames.current.clear();
+      clearedFields.current.clear();
       setNewTransactions(
         makeTemporaryTransactions(
           props.currentAccountId,

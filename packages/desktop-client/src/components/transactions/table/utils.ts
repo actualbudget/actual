@@ -176,6 +176,51 @@ export function shouldApplyRuleChange(
   return !alreadyApplied;
 }
 
+// Which fields the user explicitly emptied, tracked per transaction row so
+// that clearing a field on one split row doesn't stop rules from filling the
+// same field on its siblings.
+export type ClearedFieldsByTransaction = ReadonlyMap<
+  TransactionEntity['id'],
+  ReadonlySet<string>
+>;
+
+// Records whether the user's edit left `fieldName` empty on this row. An empty
+// value marks the field as explicitly cleared; a real value removes the mark.
+export function trackClearedField(
+  clearedFields: Map<TransactionEntity['id'], Set<string>>,
+  transaction: TransactionEntity,
+  fieldName: string,
+) {
+  if (isEmptyRuleTarget(Reflect.get(transaction, fieldName))) {
+    const fields = clearedFields.get(transaction.id) ?? new Set<string>();
+    fields.add(fieldName);
+    clearedFields.set(transaction.id, fields);
+  } else {
+    clearedFields.get(transaction.id)?.delete(fieldName);
+  }
+}
+
+export function getClearedFieldNames(
+  clearedFields: ClearedFieldsByTransaction | undefined,
+  transactionId: TransactionEntity['id'] | undefined,
+): readonly string[] {
+  if (clearedFields == null || transactionId == null) {
+    return [];
+  }
+  return [...(clearedFields.get(transactionId) ?? [])];
+}
+
+export function isFieldClearedByUser(
+  clearedFields: ClearedFieldsByTransaction | undefined,
+  transactionId: TransactionEntity['id'] | undefined,
+  fieldName: string,
+) {
+  return (
+    transactionId != null &&
+    (clearedFields?.get(transactionId)?.has(fieldName) ?? false)
+  );
+}
+
 export function makeTemporaryTransactions(
   currentAccountId: AccountEntity['id'] | null | undefined,
   currentCategoryId: CategoryEntity['id'] | null | undefined,

@@ -15,7 +15,7 @@ import {
   splitTransaction,
   updateTransaction,
 } from '@actual-app/core/shared/transactions';
-import { applyChanges, getChangedValues } from '@actual-app/core/shared/util';
+import { applyChanges } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -36,7 +36,8 @@ import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
-import { isEmptyRuleTarget, shouldApplyRuleChange } from './table/utils';
+import { applyRulesToTransaction } from './applyRulesToTransaction';
+import type { ClearedFieldsByTransaction } from './table/utils';
 import { TransactionTable } from './TransactionsTable';
 import type { TransactionTableProps } from './TransactionsTable';
 // When data changes, there are two ways to update the UI:
@@ -265,7 +266,7 @@ export function TransactionList({
     async (
       transaction: TransactionEntity,
       updatedFieldName: string | null = null,
-      clearedFieldNames: readonly string[] = [],
+      clearedFields?: ClearedFieldsByTransaction,
     ) => {
       const afterRules = await send('rules-run', { transaction });
 
@@ -282,44 +283,12 @@ export function TransactionList({
         );
       }
 
-      const diff = getChangedValues(transaction, afterRules);
-
-      const newTransaction: TransactionEntity = { ...transaction };
-      if (diff) {
-        Object.keys(diff).forEach(field => {
-          if (
-            shouldApplyRuleChange(
-              field,
-              newTransaction[field],
-              diff[field],
-              clearedFieldNames,
-            )
-          ) {
-            newTransaction[field] = diff[field];
-          }
-        });
-
-        // When a rule updates a parent transaction, overwrite all changes to
-        // the current field in subtransactions — unless the user just cleared
-        // that field on the parent, in which case the rule's value must not
-        // leak into the children either.
-        if (
-          transaction.is_parent &&
-          diff.subtransactions !== undefined &&
-          updatedFieldName !== null &&
-          !isEmptyRuleTarget(newTransaction[updatedFieldName])
-        ) {
-          newTransaction.subtransactions = diff.subtransactions.map(
-            (st, idx) => ({
-              ...(newTransaction.subtransactions?.[idx] || st),
-              ...(st[updatedFieldName] != null && {
-                [updatedFieldName]: st[updatedFieldName],
-              }),
-            }),
-          );
-        }
-      }
-      return newTransaction;
+      return applyRulesToTransaction(
+        transaction,
+        afterRules,
+        updatedFieldName,
+        clearedFields,
+      );
     },
     [dispatch],
   );

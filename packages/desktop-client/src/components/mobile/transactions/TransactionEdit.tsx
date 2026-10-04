@@ -82,8 +82,10 @@ import {
 import { getPrettyPayee } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import {
-  isEmptyRuleTarget,
+  getClearedFieldNames,
+  isFieldClearedByUser,
   shouldApplyRuleChange,
+  trackClearedField,
 } from '#components/transactions/table/utils';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
@@ -1712,10 +1714,11 @@ function TransactionEditUnconnected({
     searchParams,
   ]);
 
-  // Fields the user explicitly emptied while entering the new transaction.
-  // Rules re-run on every field commit, and they may not re-fill these (e.g.
-  // a cleared pre-assigned category must stay cleared).
-  const clearedFieldNames = useRef(new Set<string>());
+  // Fields the user explicitly emptied while entering the new transaction,
+  // tracked per transaction row so a clear on one split row doesn't affect
+  // its siblings. Rules re-run on every field commit, and they may not
+  // re-fill these (e.g. a cleared pre-assigned category must stay cleared).
+  const clearedFields = useRef(new Map<TransactionEntity['id'], Set<string>>());
 
   const onUpdate = useCallback(
     async (
@@ -1733,11 +1736,11 @@ function TransactionEditUnconnected({
       const newTransaction = { ...transaction };
       const changedFields = new Set<keyof TransactionEntity>([updatedField]);
       if (isTemporary(newTransaction)) {
-        if (isEmptyRuleTarget(newTransaction[updatedField])) {
-          clearedFieldNames.current.add(updatedField);
-        } else {
-          clearedFieldNames.current.delete(updatedField);
-        }
+        trackClearedField(clearedFields.current, newTransaction, updatedField);
+        const clearedOnThisRow = getClearedFieldNames(
+          clearedFields.current,
+          newTransaction.id,
+        );
 
         const afterRules = await send('rules-run', {
           transaction: newTransaction,
@@ -1753,7 +1756,7 @@ function TransactionEditUnconnected({
             // applying rules to prefill category, notes, etc. based on the selected payee)
             // — except fields the user explicitly cleared, which must stay empty.
             if (
-              !clearedFieldNames.current.has(field) &&
+              !clearedOnThisRow.includes(field) &&
               (updatedField === 'payee' ||
                 shouldApplyRuleChange(
                   field,
@@ -1766,23 +1769,39 @@ function TransactionEditUnconnected({
             }
           });
 
-          // When a rule updates a parent transaction, overwrite all changes to
-          // the current field in subtransactions — unless the user just
-          // cleared that field on the parent, in which case the rule's value
-          // must not leak into the children either.
+          // When a rule updates a parent transaction, push the edited field's
+          // rule value down to the subtransactions — but never into a row
+          // where the user explicitly cleared that field, and not at all if
+          // they cleared it on the parent itself.
           if (
             newTransaction.is_parent &&
             diff.subtransactions !== undefined &&
             updatedField !== null &&
-            !isEmptyRuleTarget(newTransaction[updatedField])
+            !isFieldClearedByUser(
+              clearedFields.current,
+              newTransaction.id,
+              updatedField,
+            )
           ) {
             newTransaction.subtransactions = diff.subtransactions.map(
-              (st, idx) => ({
-                ...(newTransaction.subtransactions?.[idx] || st),
-                ...(st[updatedField] != null && {
-                  [updatedField]: st[updatedField],
-                }),
-              }),
+              (st, idx) => {
+                const base = newTransaction.subtransactions?.[idx] || st;
+                if (
+                  isFieldClearedByUser(
+                    clearedFields.current,
+                    base.id,
+                    updatedField,
+                  )
+                ) {
+                  return base;
+                }
+                return {
+                  ...base,
+                  ...(st[updatedField] != null && {
+                    [updatedField]: st[updatedField],
+                  }),
+                };
+              },
             );
             changedFields.add('subtransactions');
           }
