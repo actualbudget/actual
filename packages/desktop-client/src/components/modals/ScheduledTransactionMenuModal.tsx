@@ -1,34 +1,34 @@
-import React, { useMemo } from 'react';
-import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import React, { useMemo } from "react";
+import type { ComponentPropsWithoutRef, CSSProperties } from "react";
+import { Trans, useTranslation } from "react-i18next";
 
-import { Menu } from '@actual-app/components/menu';
-import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
-import { format } from '@actual-app/core/shared/months';
-import { q } from '@actual-app/core/shared/query';
+import { Menu } from "@actual-app/components/menu";
+import { styles } from "@actual-app/components/styles";
+import { Text } from "@actual-app/components/text";
+import { theme } from "@actual-app/components/theme";
+import { View } from "@actual-app/components/view";
+import { format } from "@actual-app/core/shared/months";
+import { q } from "@actual-app/core/shared/query";
 import {
   extractScheduleConds,
   scheduleIsRecurring,
-} from '@actual-app/core/shared/schedules';
+} from "@actual-app/core/shared/schedules";
 
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '#components/common/Modal';
-import { useLocale } from '#hooks/useLocale';
-import { useSchedules } from '#hooks/useSchedules';
-import type { Modal as ModalType } from '#modals/modalsSlice';
-import { getSkipScheduleText } from '#util/schedule';
+} from "#components/common/Modal";
+import { useLocale } from "#hooks/useLocale";
+import { useSchedules } from "#hooks/useSchedules";
+import type { Modal as ModalType } from "#modals/modalsSlice";
+import { getSkipScheduleText } from "#util/schedule";
 
 type ScheduledTransactionMenuModalProps = Extract<
   ModalType,
-  { name: 'scheduled-transaction-menu' }
->['options'];
+  { name: "scheduled-transaction-menu" }
+>["options"];
 
 export function ScheduledTransactionMenuModal({
   transactionId,
@@ -43,9 +43,9 @@ export function ScheduledTransactionMenuModal({
     borderRadius: 0,
     borderTop: `1px solid ${theme.pillBorder}`,
   };
-  const scheduleId = transactionId?.split('/')?.[1];
+  const scheduleId = transactionId?.split("/")?.[1];
   const schedulesQuery = useMemo(
-    () => q('schedules').filter({ id: scheduleId }).select('*'),
+    () => q("schedules").filter({ id: scheduleId }).select("*"),
     [scheduleId],
   );
   const { isLoading: isSchedulesLoading, schedules } = useSchedules({
@@ -67,13 +67,13 @@ export function ScheduledTransactionMenuModal({
       {({ state }) => (
         <>
           <ModalHeader
-            title={<ModalTitle title={schedule?.name || ''} shrinkOnOverflow />}
+            title={<ModalTitle title={schedule?.name || ""} shrinkOnOverflow />}
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
-              justifyContent: 'center',
-              alignItems: 'center',
+              justifyContent: "center",
+              alignItems: "center",
               marginBottom: 20,
             }}
           >
@@ -81,11 +81,12 @@ export function ScheduledTransactionMenuModal({
               <Trans>Scheduled date</Trans>
             </Text>
             <Text style={{ fontSize: 17, fontWeight: 700 }}>
-              {format(schedule?.next_date || '', 'MMMM dd, yyyy', locale)}
+              {format(schedule?.next_date || "", "MMMM dd, yyyy", locale)}
             </Text>
           </View>
           <ScheduledTransactionMenu
             transactionId={transactionId}
+            nextDate={schedule?.next_date}
             onPost={onPost}
             onSkip={onSkip}
             onComplete={onComplete}
@@ -101,9 +102,10 @@ export function ScheduledTransactionMenuModal({
 
 type ScheduledTransactionMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
-  'onMenuSelect' | 'items'
+  "onMenuSelect" | "items"
 > & {
   transactionId: string;
+  nextDate?: string | null;
   onSkip: (transactionId: string) => void;
   onPost: (transactionId: string, today?: boolean) => void;
   onComplete: (transactionId: string) => void;
@@ -111,6 +113,7 @@ type ScheduledTransactionMenuProps = Omit<
 
 function ScheduledTransactionMenu({
   transactionId,
+  nextDate,
   onSkip,
   onPost,
   onComplete,
@@ -126,18 +129,18 @@ function ScheduledTransactionMenu({
   return (
     <Menu
       {...props}
-      onMenuSelect={name => {
+      onMenuSelect={(name) => {
         switch (name) {
-          case 'post':
+          case "post":
             onPost?.(transactionId);
             break;
-          case 'post-today':
+          case "post-today":
             onPost?.(transactionId, true);
             break;
-          case 'skip':
+          case "skip":
             onSkip?.(transactionId);
             break;
-          case 'complete':
+          case "complete":
             onComplete?.(transactionId);
             break;
           default:
@@ -145,13 +148,13 @@ function ScheduledTransactionMenu({
         }
       }}
       items={[
-        { name: 'post', text: t('Post transaction') },
-        { name: 'post-today', text: t('Post transaction today') },
+        { name: "post", text: t("Post transaction") },
+        { name: "post-today", text: t("Post transaction today") },
         ...(canBeSkipped
-          ? [{ name: 'skip', text: getSkipScheduleText(schedule?.next_date) }]
+          ? [{ name: "skip", text: getSkipScheduleText(nextDate) }]
           : []),
         ...(canBeCompleted
-          ? [{ name: 'complete', text: t('Mark as completed') }]
+          ? [{ name: "complete", text: t("Mark as completed") }]
           : []),
       ]}
     />
