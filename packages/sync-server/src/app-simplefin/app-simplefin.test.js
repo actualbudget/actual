@@ -310,6 +310,7 @@ describe('app-simplefin', () => {
         });
 
         expect(res.body.data.startingBalance).toBe(balance);
+        expect(res.body.data.startingBalanceCurrency).toBe('USD');
         expect(res.body.data.transactions.all).toEqual([]);
       },
     );

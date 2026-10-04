@@ -110,15 +110,6 @@ export const AccountRow = memo(
               <Trans>Edit</Trans>
             </Button>
           </Cell>
-        ) : account.currency ? (
-          // Bank sync for accounts in other currencies arrives later.
-          <Cell
-            name="link"
-            plain
-            style={{ paddingRight: '10px', color: theme.pageTextSubdued }}
-          >
-            <Trans>Not available in other currencies</Trans>
-          </Cell>
         ) : (
           <Cell name="link" plain style={{ paddingRight: '10px' }}>
             <Button onPress={() => onAction(account, 'link')}>

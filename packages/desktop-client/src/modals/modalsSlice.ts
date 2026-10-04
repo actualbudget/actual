@@ -585,6 +585,14 @@ export type Modal =
       };
     }
   | {
+      name: 'add-exchange-rate';
+      options: {
+        accountId: AccountEntity['id'];
+        currencyCode: string;
+        dates: string[];
+      };
+    }
+  | {
       name: 'foreign-amount';
       options: {
         /** New foreign draft with its native amount in transaction_amount. */

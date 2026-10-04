@@ -51,6 +51,7 @@ describe('Akahu decimal wire amounts', () => {
       .send({ accountId: 'account-1', startDate: '2026-01-01' });
 
     expect(res.body.data.startingBalance).toBe('12.345');
+    expect(res.body.data.startingBalanceCurrency).toBe('NZD');
     expect(
       res.body.data.balances.map(
         (balance: { balanceAmount: { amount: string } }) =>

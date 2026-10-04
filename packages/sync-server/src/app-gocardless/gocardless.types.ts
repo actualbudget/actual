@@ -38,6 +38,11 @@ export type NormalizedAccountDetails = {
   iban: string | null;
 
   /**
+   * ISO 4217 currency of the account, when the bank reports one
+   */
+  currency: string | null;
+
+  /**
    * Name displayed on the UI of Actual app
    */
   name: string;
