@@ -1,6 +1,5 @@
 import { Timestamp } from '@actual-app/crdt';
 
-import * as asyncStorage from '#platform/server/asyncStorage';
 import { app as accountsApp } from '#server/accounts/app';
 import { addTransactions, reconcileTransactions } from '#server/accounts/sync';
 import { rescaleBudget } from '#server/amount-encoding/rescale';
@@ -365,20 +364,7 @@ describe('request preflight', () => {
     );
   });
 
-  it('rejects bank sync and base-only file rows for foreign accounts', async () => {
-    await expect(
-      reconcileTransactions(
-        'jpy',
-        [
-          {
-            date: '2026-03-01',
-            transaction_amount: -1500,
-            payee_name: 'Import payee',
-          },
-        ],
-        { isBankSyncAccount: true },
-      ),
-    ).rejects.toThrow('multicurrency-import-unavailable');
+  it('rejects base-only file rows for foreign accounts', async () => {
     // A lone amount is ambiguous for a foreign account.
     await expect(
       reconcileTransactions('jpy', [
@@ -960,28 +946,6 @@ describe('inspection round 1 regressions', () => {
     ).toHaveLength(1);
   });
 
-  it('rejects foreign bank sync without writing sync state', async () => {
-    db.runQuery(
-      "UPDATE accounts SET account_id = 'remote', bank = 'bank1', bank_sync_status = 'ok' WHERE id = 'jpy'",
-    );
-    db.runQuery(
-      "INSERT INTO banks (id, bank_id, name) VALUES ('bank1', 'b', 'Bank')",
-    );
-    vi.mocked(asyncStorage.multiGet).mockResolvedValue({});
-    const result = await accountsApp.handlers['accounts-bank-sync']({
-      ids: ['jpy'],
-    });
-    expect(result.errors).toEqual([
-      expect.objectContaining({
-        accountId: 'jpy',
-        message: 'multicurrency-import-unavailable',
-      }),
-    ]);
-    expect(
-      db.firstSync("SELECT bank_sync_status FROM accounts WHERE id = 'jpy'"),
-    ).toEqual({ bank_sync_status: 'ok' });
-  });
-
   it('rejects rule writes that retarget a schedule to a foreign account', async () => {
     await expect(
       insertRule({
@@ -1101,7 +1065,7 @@ describe('inspection round 2 regressions', () => {
     ).toEqual({ closed: 0 });
   });
 
-  it('rejects linking a foreign account before any bank write', async () => {
+  it('rejects linking a mismatched currency before any bank write', async () => {
     const banksBefore = rows('SELECT id FROM banks');
     await expect(
       accountsApp.handlers['simplefin-accounts-link']({
@@ -1112,10 +1076,11 @@ describe('inspection round 2 regressions', () => {
           orgDomain: 'bank.example',
           orgId: 'org',
           balance: 0,
+          currency: 'USD',
         } as never,
         upgradingId: 'jpy',
       }),
-    ).rejects.toThrow('multicurrency-import-unavailable');
+    ).rejects.toThrow('bank-account-currency-mismatch');
     expect(rows('SELECT id FROM banks')).toEqual(banksBefore);
     expect(
       db.firstSync("SELECT account_id FROM accounts WHERE id = 'jpy'"),

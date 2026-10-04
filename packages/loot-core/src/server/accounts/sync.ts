@@ -15,14 +15,12 @@ import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
 import { batchUpdateTransactions } from '#server/transactions';
 import {
-  isForeignAccount,
+  foreignAccountCurrency,
   preflightTransactionWrites,
+  queuedAccount,
 } from '#server/transactions/foreign-guard';
 import { runRules } from '#server/transactions/transaction-rules';
-import {
-  getAccountCurrency,
-  getRecordedAmountPrecision,
-} from '#server/util/currency';
+import { getRecordedAmountPrecision } from '#server/util/currency';
 import {
   defaultMappings,
   mappingsFromString,
@@ -78,7 +76,10 @@ function getAccountBalance(account) {
   }
 }
 
-async function updateAccountBalance(id: AccountEntity['id'], balance: number) {
+async function updateAccountBalance(
+  id: AccountEntity['id'],
+  balance: number | null,
+) {
   await db.update('accounts', { id, balance_current: balance });
 }
 
@@ -178,6 +179,7 @@ async function downloadGoCardlessTransactions(
       transactions: { all },
       balances,
       startingBalance,
+      startingBalanceCurrency,
     } = res;
 
     logger.log('Response:', res);
@@ -186,6 +188,7 @@ async function downloadGoCardlessTransactions(
       transactions: all,
       accountBalance: balances,
       startingBalance,
+      startingBalanceCurrency,
     };
   } else {
     logger.log('Response:', res);
@@ -248,6 +251,7 @@ async function downloadSimpleFinTransactions(
         transactions: data?.transactions?.all,
         accountBalance: data?.balances,
         startingBalance: data?.startingBalance,
+        startingBalanceCurrency: data?.startingBalanceCurrency,
       };
 
       if (error) {
@@ -280,6 +284,7 @@ async function downloadSimpleFinTransactions(
       transactions: res.transactions.all,
       accountBalance: res.balances,
       startingBalance: res.startingBalance,
+      startingBalanceCurrency: res.startingBalanceCurrency,
     };
   }
 
@@ -322,6 +327,7 @@ async function downloadPluggyAiTransactions(
     transactions: singleRes.transactions.all,
     accountBalance: singleRes.balances,
     startingBalance: singleRes.startingBalance,
+    startingBalanceCurrency: singleRes.startingBalanceCurrency,
   };
 
   logger.log('Response:', retVal);
@@ -361,6 +367,7 @@ async function downloadAkahuTransactions(
     transactions: singleRes.transactions.all,
     accountBalance: singleRes.balances,
     startingBalance: singleRes.startingBalance,
+    startingBalanceCurrency: singleRes.startingBalanceCurrency,
   };
 
   logger.log('Response:', retVal);
@@ -398,12 +405,14 @@ async function downloadEnableBankingTransactions(
     transactions: { all },
     balances,
     startingBalance,
+    startingBalanceCurrency,
   } = res;
 
   return {
     transactions: all,
     accountBalance: balances,
     startingBalance,
+    startingBalanceCurrency,
   };
 }
 
@@ -525,6 +534,7 @@ async function normalizeBankSyncTransactions(
   transactions,
   acctId,
   amountPrecision: number,
+  isForeign: boolean,
 ) {
   const payeesToCreate = new Map();
 
@@ -591,10 +601,15 @@ async function normalizeBankSyncTransactions(
     trans.account = acctId;
     trans.payee = await resolvePayee(trans, payeeName, payeesToCreate);
 
+    const encodedAmount = encodeBankAmount(trans.amount, amountPrecision);
     normalized.push({
       payee_name: payeeName,
       trans: {
-        amount: encodeBankAmount(trans.amount, amountPrecision),
+        // A foreign account's provider amounts are native; the base is
+        // completed after rules.
+        ...(isForeign
+          ? { transaction_amount: encodedAmount }
+          : { amount: encodedAmount }),
         payee: trans.payee,
         account: trans.account,
         date,
@@ -645,6 +660,8 @@ export type ReconcileTransactionsResult = {
   updated: string[];
   /** Base amounts resolved for new rows of a foreign account (preview). */
   previewBases?: Array<{ transaction: TransactionEntity; baseAmount: number }>;
+  /** Preview rows of a foreign account with no rate for their final date. */
+  missingRates?: Array<{ transaction: TransactionEntity; date: string }>;
   updatedPreview: Array<{
     transaction: TransactionEntity;
     existing?: TransactionEntity;
@@ -668,14 +685,9 @@ export async function reconcileTransactions(
   }: ReconcileTransactionsOptions = {},
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
-  const foreign = (await isForeignAccount(acctId))
-    ? await getAccountCurrency(acctId)
-    : null;
-  if (foreign) {
-    // Bank sync completes foreign pairs in a later stage (MC-3.5).
-    if (isBankSyncAccount) {
-      throw new Error('multicurrency-import-unavailable');
-    }
+  const foreign = await foreignAccountCurrency(acctId);
+  // Bank sync rows are provider records, encoded natively when normalized.
+  if (foreign && !isBankSyncAccount) {
     validateForeignImportRows(transactions);
   }
 
@@ -816,6 +828,7 @@ export async function reconcileTransactions(
   // A foreign row without a supplied base gets one from the rate for its
   // final date; any missing rate fails the whole request before writes.
   const previewBases: ReconcileTransactionsResult['previewBases'] = [];
+  const missingRates: ReconcileTransactionsResult['missingRates'] = [];
   if (foreign) {
     const missingDates = new Set<string>();
     for (const trans of added) {
@@ -828,12 +841,14 @@ export async function reconcileTransactions(
       });
       if (pair.status !== 'ok') {
         missingDates.add(trans.date);
+        missingRates.push({ transaction: trans, date: trans.date });
         continue;
       }
       trans.amount = pair.baseAmount;
       previewBases.push({ transaction: trans, baseAmount: pair.baseAmount });
     }
-    if (missingDates.size > 0) {
+    // A preview reports which rows need a rate (dates after rules).
+    if (missingDates.size > 0 && !isPreview) {
       throw new TransactionError(
         `rate-unavailable: ${[...missingDates].sort().join(', ')}`,
       );
@@ -866,7 +881,7 @@ export async function reconcileTransactions(
     added: added.map(trans => trans.id),
     updated: updated.map(trans => trans.id),
     updatedPreview,
-    ...(foreign && { previewBases }),
+    ...(foreign && { previewBases, missingRates }),
   };
 }
 
@@ -943,7 +958,8 @@ export async function matchTransactions(
     ? await normalizeBankSyncTransactions(
         transactions,
         acctId,
-        amountPrecision ?? getRecordedAmountPrecision(),
+        foreign?.precision ?? amountPrecision ?? getRecordedAmountPrecision(),
+        foreign !== null,
       )
     : await normalizeTransactions(transactions, acctId, {
         payeeNameNormalization,
@@ -952,6 +968,12 @@ export async function matchTransactions(
   // The first pass runs the rules, and preps data for fuzzy matching
   const accounts: db.DbAccount[] = await db.getAccounts();
   const accountsMap = new Map(accounts.map(account => [account.id, account]));
+  // An account linked in this batch is not stored yet; rules still need its
+  // name, budget status and currency.
+  const queued = accountsMap.has(acctId) ? null : queuedAccount(acctId);
+  if (queued) {
+    accountsMap.set(acctId, queued);
+  }
 
   const transactionsStep1 = [];
   for (const {
@@ -1254,17 +1276,36 @@ export function encodeStartingBalance(
   return result;
 }
 
-async function processBankSyncDownload(
+/** Dates listed by a `rate-unavailable` failure, or null for other errors. */
+export function rateUnavailableDates(err: unknown): string[] | null {
+  const prefix = 'rate-unavailable: ';
+  if (!(err instanceof TransactionError) || !err.message.startsWith(prefix)) {
+    return null;
+  }
+  return err.message.slice(prefix.length).split(', ');
+}
+
+export async function processBankSyncDownload(
   download,
   id,
   acctRow,
   initialSync = false,
   customStartingBalance?: number,
   customStartingDate?: string,
+  /** Set when the caller already holds the mutator and an open batch. */
+  { inMutator = false }: { inMutator?: boolean } = {},
 ) {
-  // Reject before starting-balance payees or any other side effect.
-  if (await isForeignAccount(id)) {
-    throw new Error('multicurrency-import-unavailable');
+  const foreign = await foreignAccountCurrency(id);
+  if (foreign) {
+    return processForeignBankSyncDownload(
+      download,
+      id,
+      acctRow,
+      foreign,
+      customStartingBalance,
+      customStartingDate,
+      inMutator,
+    );
   }
   const amountPrecision = getRecordedAmountPrecision();
   // If syncing an account from sync source it must not use strictIdChecking. This allows
@@ -1347,9 +1388,9 @@ async function processBankSyncDownload(
       startingBalanceDate = monthUtils.currentDay();
     }
 
-    const payee = await getStartingBalancePayee();
-
     return runMutator(async () => {
+      // Created under the mutator so it never joins a foreign sync's batch.
+      const payee = await getStartingBalancePayee();
       const initialId = await db.insertTransaction({
         account: id,
         amount: balanceToUse,
@@ -1400,6 +1441,345 @@ async function processBankSyncDownload(
   });
 }
 
+async function readSyncPreference(
+  id: AccountEntity['id'],
+  name: string,
+  defaultValue: 'true' | 'false',
+) {
+  const data = await aqlQuery(
+    q('preferences')
+      .filter({ id: `${name}-${id}` })
+      .select('value'),
+  );
+  return String(data?.data?.[0]?.value ?? defaultValue) === 'true';
+}
+
+/**
+ * A foreign account's download is written in one batch: provider rows in
+ * another currency are skipped, amounts are native at the account's
+ * precision, and a missing rate or starting balance writes nothing.
+ */
+async function processForeignBankSyncDownload(
+  download,
+  id: AccountEntity['id'],
+  acctRow,
+  foreign: { currencyCode: string; precision: number },
+  customStartingBalance?: number,
+  customStartingDate?: string,
+  inMutator = false,
+) {
+  const { currencyCode, precision } = foreign;
+  const useStrictIdChecking = !acctRow.account_sync_source;
+  const importTransactions = await readSyncPreference(
+    id,
+    'sync-import-transactions',
+    'true',
+  );
+  const updateDates = await readSyncPreference(
+    id,
+    'sync-update-dates',
+    'false',
+  );
+
+  const downloaded = download.transactions ?? [];
+  const transactions = downloaded
+    .filter(trans => {
+      const currency = trans.transactionAmount?.currency;
+      return !currency || currency === currencyCode;
+    })
+    .map(trans => ({ ...trans, account: id }));
+  const currencyMismatches = downloaded.length - transactions.length;
+  // Opening-balance arithmetic uses the rows that will be imported.
+  const importPending = await readSyncPreference(
+    id,
+    'sync-import-pending',
+    'true',
+  );
+  const importable = importPending
+    ? transactions
+    : transactions.filter(trans => Boolean(trans.booked));
+  const currentBalance = providerCurrentBalance(
+    download,
+    acctRow,
+    currencyCode,
+  );
+
+  const run = inMutator
+    ? (func: () => Promise<void>) => func()
+    : (func: () => Promise<void>) => runMutator(func);
+  let result: ReconcileTransactionsResult;
+  await run(() =>
+    batchMessages(async () => {
+      // Decided under the mutator: an earlier link or sync may have written
+      // the opening balance since the download.
+      const initialSync = (await getAccountOldestTransaction(id)) == null;
+      if (!initialSync) {
+        result = await reconcileTransactions(
+          id,
+          importTransactions ? transactions : [],
+          {
+            isBankSyncAccount: true,
+            strictIdChecking: useStrictIdChecking,
+            updateDates,
+          },
+        );
+        if (download.startingBalance != null || download.accountBalance) {
+          // A balance in another currency is never cached.
+          await updateAccountBalance(
+            id,
+            currentBalance !== null
+              ? encodeBankAmount(currentBalance, precision)
+              : null,
+          );
+        }
+        return;
+      }
+
+      const balance = foreignStartingBalance(
+        download,
+        acctRow,
+        importable,
+        foreign,
+        customStartingBalance,
+      );
+      const startingBalanceDate =
+        customStartingDate ??
+        oldestRow(importable)?.date ??
+        monthUtils.currentDay();
+
+      const missingDates = new Set<string>();
+      let initialId = null;
+      const pair = await computeEntryPair({
+        quoteCurrency: currencyCode,
+        nativePrecision: precision,
+        date: startingBalanceDate,
+        nativeAmount: balance,
+      });
+      if (pair.status === 'ok') {
+        const payee = await getStartingBalancePayee();
+        initialId = await db.insertTransaction({
+          account: id,
+          amount: pair.baseAmount,
+          transaction_amount: pair.nativeAmount,
+          category: acctRow.offbudget === 0 ? payee.category : null,
+          payee: payee.id,
+          date: startingBalanceDate,
+          cleared: true,
+          starting_balance_flag: true,
+        });
+      } else {
+        missingDates.add(startingBalanceDate);
+      }
+
+      let reconciled: ReconcileTransactionsResult = {
+        added: [],
+        updated: [],
+        updatedPreview: [],
+      };
+      try {
+        reconciled = await reconcileTransactions(id, transactions, {
+          isBankSyncAccount: true,
+          strictIdChecking: useStrictIdChecking,
+          updateDates,
+        });
+      } catch (err) {
+        const dates = rateUnavailableDates(err);
+        if (!dates) throw err;
+        dates.forEach(date => missingDates.add(date));
+      }
+      if (missingDates.size > 0) {
+        throw new TransactionError(
+          `rate-unavailable: ${[...missingDates].sort().join(', ')}`,
+        );
+      }
+      result = { ...reconciled, added: [initialId, ...reconciled.added] };
+    }),
+  );
+  return { ...result, currencyMismatches };
+}
+
+// ponytail: fixed preference order across providers' balance types; make it
+// per provider if a bank reports several usable balances in one currency.
+const BALANCE_TYPE_PREFERENCE = [
+  'CLAV',
+  'closingBooked',
+  'expected',
+  'interimBooked',
+  'interimAvailable',
+  'forwardAvailable',
+];
+
+/**
+ * The provider's current balance in the account currency: the reported
+ * balance when labelled with that currency (GoCardless reports an opening
+ * balance there instead), or a listed balance in it.
+ */
+function providerCurrentBalance(
+  download,
+  acctRow,
+  currencyCode: string,
+): string | null {
+  if (
+    acctRow.account_sync_source !== 'goCardless' &&
+    download.startingBalance != null &&
+    download.startingBalanceCurrency === currencyCode
+  ) {
+    return download.startingBalance;
+  }
+  const balances: Array<{
+    balanceType?: string;
+    balanceAmount?: { amount?: string; currency?: string | null };
+  }> = download.accountBalance ?? [];
+  const matching = balances
+    .filter(
+      balance =>
+        balance.balanceAmount?.amount != null &&
+        balance.balanceAmount.currency === currencyCode,
+    )
+    .sort(
+      (a, b) =>
+        rank(BALANCE_TYPE_PREFERENCE.indexOf(a.balanceType ?? '')) -
+        rank(BALANCE_TYPE_PREFERENCE.indexOf(b.balanceType ?? '')),
+    );
+  if (matching.length > 0) {
+    return matching[0].balanceAmount.amount;
+  }
+  return null;
+}
+
+/**
+ * The earliest provider row by date. Providers differ in order (Enable
+ * Banking keeps page order), so the position in the list is not used; on a
+ * tie the later row in the list is taken, matching newest-first providers.
+ */
+function oldestRow(rows) {
+  return rows.reduce(
+    (oldest, row) =>
+      oldest === undefined || (row.date ?? '') <= (oldest.date ?? '')
+        ? row
+        : oldest,
+    undefined,
+  );
+}
+
+function rank(index: number) {
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+}
+
+/**
+ * The first sync's native starting balance: the dialog's value, a provider
+ * balance in the account currency, or the oldest imported transaction's
+ * balance-after value in the account currency.
+ */
+function foreignStartingBalance(
+  download,
+  acctRow,
+  importable,
+  { currencyCode, precision }: { currencyCode: string; precision: number },
+  customStartingBalance?: number,
+): number {
+  if (customStartingBalance !== undefined) {
+    return customStartingBalance;
+  }
+  // GoCardless reports the opening balance itself when its balances agree.
+  if (
+    acctRow.account_sync_source === 'goCardless' &&
+    download.startingBalance != null &&
+    download.startingBalanceCurrency === currencyCode
+  ) {
+    return encodeBankAmount(download.startingBalance, precision);
+  }
+  // Otherwise the imported rows are subtracted from the current balance.
+  const current = providerCurrentBalance(download, acctRow, currencyCode);
+  if (current !== null) {
+    return encodeStartingBalance(current, importable, precision);
+  }
+  const oldest = oldestRow(importable);
+  const after = oldest?.balanceAfterTransaction?.balanceAmount;
+  if (after?.amount != null && after.currency === currencyCode) {
+    return encodeStartingBalance(after.amount, [oldest], precision);
+  }
+  throw new TransactionError('balance-unavailable');
+}
+
+/** Downloads an account's provider data; the account may not be stored yet. */
+export async function downloadBankSyncAccount(
+  syncSource: AccountEntity['account_sync_source'],
+  {
+    userId,
+    userKey,
+    id,
+    acctId,
+    bankId,
+    customStartingDate,
+    fileId,
+  }: {
+    userId: string | undefined;
+    userKey: string | undefined;
+    id: AccountEntity['id'];
+    acctId: string;
+    bankId: string | undefined;
+    customStartingDate?: string;
+    fileId?: string;
+  },
+) {
+  const syncStartDate =
+    customStartingDate ?? (await getAccountSyncStartDate(id));
+  const oldestTransaction = await getAccountOldestTransaction(id);
+  const newAccount = oldestTransaction == null;
+
+  let download;
+  if (syncSource === 'simpleFin') {
+    download = await downloadSimpleFinTransactions(
+      acctId,
+      syncStartDate,
+      fileId,
+    );
+  } else if (syncSource === 'pluggyai') {
+    download = await downloadPluggyAiTransactions(
+      acctId,
+      syncStartDate,
+      fileId,
+    );
+  } else if (syncSource === 'akahu') {
+    download = await downloadAkahuTransactions(acctId, syncStartDate);
+  } else if (syncSource === 'goCardless') {
+    download = await downloadGoCardlessTransactions(
+      userId,
+      userKey,
+      acctId,
+      bankId,
+      syncStartDate,
+      newAccount,
+    );
+  } else if (syncSource === 'enableBanking') {
+    // A stored account names its bank row; a new link only has the bank id.
+    const acctRow = await db.first<Pick<db.DbAccount, 'bank'>>(
+      'SELECT bank FROM accounts WHERE id = ?',
+      [id],
+    );
+    const bankRow = acctRow?.bank
+      ? await db.first<Pick<db.DbBank, 'name'>>(
+          'SELECT name FROM banks WHERE id = ?',
+          [acctRow.bank],
+        )
+      : bankId
+        ? await db.first<Pick<db.DbBank, 'name'>>(
+            'SELECT name FROM banks WHERE bank_id = ? AND tombstone = 0',
+            [bankId],
+          )
+        : null;
+    download = await downloadEnableBankingTransactions(
+      acctId,
+      syncStartDate,
+      bankRow?.name,
+    );
+  } else {
+    throw new Error(`Unrecognized bank-sync provider: ${String(syncSource)}`);
+  }
+  return { download, newAccount };
+}
+
 export async function syncAccount(
   userId: string | undefined,
   userKey: string | undefined,
@@ -1411,48 +1791,10 @@ export async function syncAccount(
   fileId?: string,
 ) {
   const acctRow = await db.select('accounts', id);
-
-  const syncStartDate =
-    customStartingDate ?? (await getAccountSyncStartDate(id));
-  const oldestTransaction = await getAccountOldestTransaction(id);
-  const newAccount = oldestTransaction == null;
-
-  let download;
-  if (acctRow.account_sync_source === 'simpleFin') {
-    download = await downloadSimpleFinTransactions(
-      acctId,
-      syncStartDate,
-      fileId,
-    );
-  } else if (acctRow.account_sync_source === 'pluggyai') {
-    download = await downloadPluggyAiTransactions(
-      acctId,
-      syncStartDate,
-      fileId,
-    );
-  } else if (acctRow.account_sync_source === 'akahu') {
-    download = await downloadAkahuTransactions(acctId, syncStartDate);
-  } else if (acctRow.account_sync_source === 'goCardless') {
-    download = await downloadGoCardlessTransactions(
-      userId,
-      userKey,
-      acctId,
-      bankId,
-      syncStartDate,
-      newAccount,
-    );
-  } else if (acctRow.account_sync_source === 'enableBanking') {
-    const bankRow = await db.select('banks', acctRow.bank);
-    download = await downloadEnableBankingTransactions(
-      acctId,
-      syncStartDate,
-      bankRow?.name,
-    );
-  } else {
-    throw new Error(
-      `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,
-    );
-  }
+  const { download, newAccount } = await downloadBankSyncAccount(
+    acctRow.account_sync_source,
+    { userId, userKey, id, acctId, bankId, customStartingDate, fileId },
+  );
 
   return processBankSyncDownload(
     download,
@@ -1545,6 +1887,8 @@ export async function simpleFinBatchSync(
           res: {
             error_type: err?.category || 'INTERNAL_ERROR',
             error_code: err?.code || 'INTERNAL_ERROR',
+            // Typed failures (a missing rate or balance) keep their details.
+            ...(err instanceof TransactionError && { error: err }),
           },
         })),
     );

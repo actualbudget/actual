@@ -232,6 +232,44 @@ describe('Enable Banking Express routes', () => {
       expect(res.body.data.accounts[0].balance).toBe('1000.00');
     });
 
+    it("shows a balance only in the account's currency", async () => {
+      mockFetchResponse({
+        session_id: 'session-123',
+        accounts: [
+          { uid: 'yen', name: 'Yen', currency: 'JPY' },
+          { uid: 'mixed', name: 'Mixed', currency: 'SEK' },
+        ],
+        aspsp: { name: 'TestBank' },
+      });
+      mockFetchResponse({
+        balances: [
+          {
+            balance_amount: { currency: 'USD', amount: '20.00' },
+            balance_type: 'CLAV',
+          },
+          {
+            balance_amount: { currency: 'JPY', amount: '10000' },
+            balance_type: 'ITAV',
+          },
+        ],
+      });
+      mockFetchResponse({
+        balances: [
+          {
+            balance_amount: { currency: 'USD', amount: '20.00' },
+            balance_type: 'CLAV',
+          },
+        ],
+      });
+
+      const res = await request(app)
+        .post('/complete-auth')
+        .send({ code: 'auth-code' });
+
+      expect(res.body.data.accounts[0].balance).toBe('10000');
+      expect(res.body.data.accounts[1].balance).toBeNull();
+    });
+
     it('handles balance fetch failure gracefully per account', async () => {
       // Mock createSession response with 2 accounts
       mockFetchResponse({
@@ -446,6 +484,7 @@ describe('Enable Banking Express routes', () => {
       expect(data.balances[0].balanceAmount.amount).toBe('1234.56');
 
       expect(data.startingBalance).toBe('1234.56');
+      expect(data.startingBalanceCurrency).toBe('EUR');
     });
 
     it('handles pagination via continuation_key', async () => {

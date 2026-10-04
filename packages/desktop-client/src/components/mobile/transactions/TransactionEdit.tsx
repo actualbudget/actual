@@ -121,7 +121,7 @@ import { locationService } from '#payees/location';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch, useSelector } from '#redux';
 import { setLastTransaction } from '#transactions/transactionsSlice';
-import { incompatibleAccountIds } from '#util/account-encoding';
+import { incompatibleAccountIds, reencodeAmount } from '#util/account-encoding';
 import { getStatusLabel } from '#util/schedule';
 import {
   calculateFutureTransactionInfo,
@@ -1869,27 +1869,6 @@ function encodingOf(
 ) {
   const currency = (accountId && accountsById[accountId]?.currency) || '';
   return `${currency}:${precisionOf(accountsById, budgetPrecision, accountId)}`;
-}
-
-/**
- * Re-encodes an amount for another precision when the value is exactly
- * representable there and within the amount limits; otherwise null.
- */
-export function reencodeAmount(
-  amount: number,
-  fromPrecision: number,
-  toPrecision: number,
-) {
-  const reencoded = amountToInteger(
-    integerToAmount(amount, fromPrecision),
-    toPrecision,
-  );
-  return Number.isSafeInteger(reencoded) &&
-    Math.abs(reencoded) <= MAX_SAFE_NUMBER &&
-    amountToInteger(integerToAmount(reencoded, toPrecision), fromPrecision) ===
-      amount
-    ? reencoded
-    : null;
 }
 
 function isTemporary(transaction: TransactionEntity) {

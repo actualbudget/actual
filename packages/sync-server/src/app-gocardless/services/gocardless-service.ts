@@ -3,6 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { BankFactory } from '#app-gocardless/bank-factory';
 import type { IBank } from '#app-gocardless/banks/bank.interface';
+import IntegrationBank, {
+  SORTED_BALANCE_TYPE_LIST,
+} from '#app-gocardless/banks/integration-bank';
 import {
   AccessDeniedError,
   AccountNotLinkedToRequisition,
@@ -206,6 +209,8 @@ export const goCardlessService = {
     balances: Balance[];
     institutionId: GoCardlessInstitutionId;
     startingBalance: string;
+    /** Currency of startingBalance, or null when the balances disagree. */
+    startingBalanceCurrency: string | null;
     transactions: {
       booked: Transaction[];
       pending: Transaction[];
@@ -233,8 +238,32 @@ export const goCardlessService = {
 
     const bank: IBank = BankFactory(institution_id);
 
+    // When every balance is in one currency, transactions in another
+    // currency cannot be subtracted from it.
+    const balanceCurrencies = new Set(
+      accountBalance.balances.map(balance => balance.balanceAmount?.currency),
+    );
+    const balanceCurrency =
+      balanceCurrencies.size === 1 ? ([...balanceCurrencies][0] ?? null) : null;
+    // The result's currency is only known for the default calculation from a
+    // listed balance; bank-specific calculations (for example from
+    // balance-after values) and the zero fallback stay unlabelled.
+    const startingBalanceCurrency =
+      bank.calculateStartingBalance ===
+        IntegrationBank.calculateStartingBalance &&
+      accountBalance.balances.some(balance =>
+        SORTED_BALANCE_TYPE_LIST.includes(balance.balanceType),
+      )
+        ? balanceCurrency
+        : null;
     const startingBalance = bank.calculateStartingBalance(
-      transactions.booked,
+      balanceCurrency
+        ? transactions.booked.filter(
+            transaction =>
+              !transaction.transactionAmount?.currency ||
+              transaction.transactionAmount.currency === balanceCurrency,
+          )
+        : transactions.booked,
       accountBalance.balances,
     );
 
@@ -242,6 +271,7 @@ export const goCardlessService = {
       balances: accountBalance.balances,
       institutionId: institution_id,
       startingBalance,
+      startingBalanceCurrency,
       transactions,
     };
   },

@@ -68,6 +68,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
         name: 'Sichteinlagen (XXX 6789) EUR',
         official_name: 'Sichteinlagen',
         type: 'checking',
+        currency: 'EUR',
       });
     });
   });

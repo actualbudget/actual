@@ -138,6 +138,20 @@ describe('normalizeTransaction', () => {
     },
   );
 
+  it('keeps the balance after a transaction in the shared shape', () => {
+    const result = normalizeTransaction({
+      ...mockDebitTransaction,
+      balance_after_transaction: { currency: 'JPY', amount: '6000' },
+    });
+    expect(result.balanceAfterTransaction).toEqual({
+      balanceType: 'interimBooked',
+      balanceAmount: { currency: 'JPY', amount: '6000' },
+    });
+    expect(
+      normalizeTransaction(mockDebitTransaction).balanceAfterTransaction,
+    ).toBeUndefined();
+  });
+
   it('should mark PDNG transactions as not booked', () => {
     const result = normalizeTransaction(mockPendingTransaction);
     expect(result.booked).toBe(false);

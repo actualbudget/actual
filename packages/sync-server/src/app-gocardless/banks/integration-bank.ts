@@ -9,7 +9,7 @@ import { formatPayeeName } from '#util/payee-name';
 
 import type { IBank } from './bank.interface';
 
-const SORTED_BALANCE_TYPE_LIST = [
+export const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
   'expected',
   'forwardAvailable',
@@ -37,6 +37,7 @@ export default {
         .join(' '),
       official_name: account.product ?? `integration-${account.institution_id}`,
       type: 'checking',
+      currency: account.currency ?? null,
     };
   },
 

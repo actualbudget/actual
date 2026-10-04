@@ -20,6 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { sync } from '#app/appSlice';
 import { useAccounts } from '#hooks/useAccounts';
+import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { payeeQueries } from '#payees';
 import { useDispatch, useStore } from '#redux';
@@ -274,6 +275,7 @@ export function useImportPreviewTransactionsMutation() {
         errors = [],
         updatedPreview,
         previewBases = [],
+        missingRates = [],
       } = await send('transactions-import', {
         accountId,
         transactions,
@@ -304,7 +306,17 @@ export function useImportPreviewTransactionsMutation() {
           );
         });
 
-      return { updatedPreview, previewBases, missingRateDates };
+      return {
+        updatedPreview,
+        previewBases,
+        missingRateDates,
+        // Rows needing a rate, keyed by the dialog's row id, at their final
+        // dates after rules.
+        missingRates: missingRates.map(({ transaction, date }) => ({
+          trxId: 'trx_id' in transaction ? String(transaction.trx_id) : null,
+          date,
+        })),
+      };
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -475,7 +487,7 @@ export function useLinkAccountMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountPayload) => {
-      await send('gocardless-accounts-link', {
+      return send('gocardless-accounts-link', {
         requisitionId,
         account,
         upgradingId,
@@ -516,7 +528,7 @@ export function useLinkAccountSimpleFinMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountSimpleFinPayload) => {
-      await send('simplefin-accounts-link', {
+      return send('simplefin-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
@@ -558,7 +570,7 @@ export function useLinkAccountPluggyAiMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountPluggyAiPayload) => {
-      await send('pluggyai-accounts-link', {
+      return send('pluggyai-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
@@ -600,7 +612,7 @@ export function useLinkAccountAkahuMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountAkahuPayload) => {
-      await send('akahu-accounts-link', {
+      return send('akahu-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
@@ -640,7 +652,7 @@ export function useLinkAccountEnableBankingMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountEnableBankingPayload) => {
-      await send('enablebanking-accounts-link', {
+      return send('enablebanking-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
@@ -828,7 +840,16 @@ function handleSyncResponse(
   if (error) {
     // We only want to mark the account as having problem if it
     // was a real syncing error.
-    if ('type' in error && error.type === 'SyncError') {
+    if ('type' in error && error.type === 'rate-unavailable') {
+      dispatch(
+        markAccountFailed({
+          id: accountId,
+          errorType: 'RATE_UNAVAILABLE',
+          errorCode: 'RATE_UNAVAILABLE',
+          rate: { currencyCode: error.currency, dates: error.dates },
+        }),
+      );
+    } else if ('type' in error && error.type === 'SyncError') {
       dispatch(
         markAccountFailed({
           id: accountId,
@@ -843,7 +864,33 @@ function handleSyncResponse(
 
   // Dispatch errors (if any)
   errors.forEach(error => {
-    if ('type' in error && error.type === 'SyncError') {
+    if ('type' in error && error.type === 'rate-unavailable') {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: error.message,
+            button: {
+              title: t('Add exchange rate'),
+              action: () => {
+                dispatch(
+                  pushModal({
+                    modal: {
+                      name: 'add-exchange-rate',
+                      options: {
+                        accountId,
+                        currencyCode: error.currency,
+                        dates: error.dates,
+                      },
+                    },
+                  }),
+                );
+              },
+            },
+          },
+        }),
+      );
+    } else if ('type' in error && error.type === 'SyncError') {
       dispatch(
         addNotification({
           notification: {
@@ -864,6 +911,20 @@ function handleSyncResponse(
       );
     }
   });
+
+  if (res.currencyMismatches) {
+    dispatch(
+      addNotification({
+        notification: {
+          type: 'warning',
+          message: t(
+            '{{count}} downloaded transactions were in another currency and were skipped.',
+            { count: res.currencyMismatches },
+          ),
+        },
+      }),
+    );
+  }
 
   resNewTransactions.push(...newTransactions);
   resMatchedTransactions.push(...matchedTransactions);

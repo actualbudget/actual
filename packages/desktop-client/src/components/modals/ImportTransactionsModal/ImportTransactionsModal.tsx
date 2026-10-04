@@ -245,7 +245,10 @@ function ImportTransactionsModalBody({
   const [loadingState, setLoadingState] = useState<
     null | 'parsing' | 'importing'
   >('parsing');
-  const [missingRateDates, setMissingRateDates] = useState<string[]>([]);
+  // Rows needing a rate; a null row id (a rejected import) always blocks.
+  const [missingRates, setMissingRates] = useState<
+    Array<{ trxId: string | null; date: string }>
+  >([]);
   // Saving a missing rate re-runs the preview.
   const [rateVersion, setRateVersion] = useState(0);
   const previewRequestId = useRef(0);
@@ -839,7 +842,9 @@ function ImportTransactionsModalBody({
           // settings so the user can supply what was missing.
           if (typeof result === 'object') {
             setLoadingState(null);
-            setMissingRateDates([...result.missingRateDates]);
+            setMissingRates(
+              result.missingRateDates.map(date => ({ trxId: null, date })),
+            );
             return;
           }
           const didChange = result;
@@ -901,12 +906,17 @@ function ImportTransactionsModalBody({
           updatedPreview: previewTrx,
           previewBases,
           missingRateDates: missingDates,
+          missingRates: rowRates,
         }) => {
           // A newer preview (after an option change) replaces this one.
           if (requestId !== previewRequestId.current) {
             return;
           }
-          setMissingRateDates(missingDates);
+          setMissingRates(
+            rowRates.length > 0
+              ? rowRates
+              : missingDates.map(date => ({ trxId: null, date })),
+          );
           const matchedUpdateMap = previewTrx.reduce((map, entry) => {
             // @ts-expect-error - entry.transaction might not have trx_id property
             map[entry.transaction.trx_id] = entry;
@@ -996,22 +1006,18 @@ function ImportTransactionsModalBody({
   ]);
 
   // Only rows selected for import need a rate.
-  const selectedDates = new Set(
+  const selectedIds = new Set(
     transactions
       .filter(trans => trans.selected && !trans.isMatchedTransaction)
-      .map(trans => {
-        const mapped =
-          fieldMappings && !isOfxFile(filetype) && !isCamtFile(filetype)
-            ? applyFieldMappings(trans, fieldMappings)
-            : trans;
-        return isOfxFile(filetype) || isCamtFile(filetype)
-          ? (mapped.date ?? null)
-          : parseDate(mapped.date, parseDateFormat);
-      }),
+      .map(trans => trans.trx_id),
   );
-  const blockingRateDates = missingRateDates.filter(date =>
-    selectedDates.has(date),
-  );
+  const blockingRateDates = [
+    ...new Set(
+      missingRates
+        .filter(({ trxId }) => trxId === null || selectedIds.has(trxId))
+        .map(({ date }) => date),
+    ),
+  ].sort();
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
     { name: t('Date'), width: 200 },

@@ -225,9 +225,14 @@ app.post(
           throw new Error('Invalid Pluggy transaction amount');
         }
 
+        // amountInAccountCurrency is in the account's currency; otherwise
+        // the amount is in the transaction's own currency.
         newTrans.transactionAmount = {
           amount: String(amountInCurrency),
-          currency: trans.currencyCode,
+          currency:
+            trans.amountInAccountCurrency != null
+              ? account.currencyCode
+              : trans.currencyCode,
         };
 
         newTrans.transactionId = trans.id;
@@ -259,6 +264,7 @@ app.post(
         data: {
           balances,
           startingBalance,
+          startingBalanceCurrency: account.currencyCode ?? null,
           transactions: {
             all: allSorted,
             booked: bookedSorted,

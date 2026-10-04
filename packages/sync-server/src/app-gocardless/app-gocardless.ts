@@ -250,6 +250,7 @@ app.post(
           balances,
           institutionId,
           startingBalance,
+          startingBalanceCurrency,
           transactions: { booked, pending, all },
         } = await goCardlessService.getTransactionsWithBalance(
           requisitionId,
@@ -264,6 +265,7 @@ app.post(
             balances,
             institutionId,
             startingBalance,
+            startingBalanceCurrency,
             transactions: {
               booked,
               pending,

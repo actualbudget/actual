@@ -16,6 +16,7 @@ import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountGroupsModal } from './modals/AccountGroupsModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AccountReconcileModal } from './modals/AccountReconcileModal';
+import { AddExchangeRateModal } from './modals/AddExchangeRateModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
 import { AllAccountsMenuModal } from './modals/AllAccountsMenuModal';
 import { AmountEncodingModal } from './modals/AmountEncodingModal';
@@ -161,6 +162,9 @@ export function Modals() {
 
         case 'foreign-amount':
           return <ForeignAmountModal key={key} {...modal.options} />;
+
+        case 'add-exchange-rate':
+          return <AddExchangeRateModal key={key} {...modal.options} />;
 
         case 'confirm-transaction-edit':
           return <ConfirmTransactionEditModal key={key} {...modal.options} />;
