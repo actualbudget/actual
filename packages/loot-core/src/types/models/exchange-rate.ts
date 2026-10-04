@@ -15,3 +15,10 @@ export type ExchangeRateEntity = {
 
 /** `dated` is a manual fallback for one calendar day. `fetched` is a provider observation. */
 export type ExchangeRateKind = 'dated' | 'fetched';
+
+/** One operation's own rate for a currency and day; never saved as a daily rate. */
+export type OperationRate = {
+  date: string;
+  quoteCurrency: string;
+  rate: string;
+};

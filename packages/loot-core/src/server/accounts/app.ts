@@ -12,7 +12,11 @@ import {
   PostError,
   TransactionError,
 } from '#server/errors';
-import { computeEntryPair } from '#server/exchange-rates/app';
+import {
+  computeEntryPair,
+  parseOperationRates,
+} from '#server/exchange-rates/app';
+import type { OperationRate } from '#server/exchange-rates/app';
 import { app as mainApp } from '#server/main-app';
 import { mutator } from '#server/mutators';
 import { del, get, post } from '#server/post';
@@ -23,6 +27,7 @@ import { isForeignAccount } from '#server/transactions/foreign-guard';
 import { undoable, withUndo } from '#server/undo';
 import {
   accountCurrencyFields,
+  getDefaultCurrencyCode,
   getRecordedAmountPrecision,
   resolveAccountCurrencyInput,
 } from '#server/util/currency';
@@ -59,6 +64,13 @@ type LinkAccountBaseParams = {
   startingDate?: string;
   startingBalance?: number;
 };
+
+/** Validated operation rates of a foreign request; empty for none. */
+async function requestRates(value: unknown) {
+  return value === undefined
+    ? undefined
+    : parseOperationRates(value, await getDefaultCurrencyCode());
+}
 
 export type AccountHandlers = {
   'account-update': typeof updateAccount;
@@ -1818,11 +1830,14 @@ async function importTransactions({
   transactions,
   isPreview,
   opts,
+  operationRates,
 }: {
   accountId: AccountEntity['id'];
   transactions: ImportTransactionEntity[];
   isPreview: boolean;
   opts?: ImportTransactionsOpts;
+  /** Rates this import needs, by currency and day; never saved. */
+  operationRates?: OperationRate[];
 }): Promise<ImportTransactionsResult> {
   if (typeof accountId !== 'string') {
     throw APIError('transactions-import: accountId must be an id');
@@ -1846,6 +1861,7 @@ async function importTransactions({
         defaultCleared: opts?.defaultCleared,
         reimportDeleted: opts?.reimportDeleted,
         payeeNameNormalization,
+        operationRates: await requestRates(operationRates),
       },
     );
     return {
@@ -1853,6 +1869,9 @@ async function importTransactions({
       added: reconciled.added,
       updated: reconciled.updated,
       updatedPreview: reconciled.updatedPreview,
+      ...(reconciled.previewBases && {
+        previewBases: reconciled.previewBases,
+      }),
     };
   } catch (err) {
     if (err instanceof TransactionError) {

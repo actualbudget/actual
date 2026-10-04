@@ -681,6 +681,21 @@ describe('entry capture', () => {
       kind: 'dated',
     });
   });
+  it('uses an operation rate for its own currency and day only', async () => {
+    const operationRates = [
+      { quoteCurrency: 'JPY', date: '2026-03-10', rate: '125' },
+      { quoteCurrency: 'EUR', date: '2026-03-10', rate: '0.9' },
+    ];
+    expect(await capture({ ...entry, operationRates })).toMatchObject({
+      status: 'ok',
+      baseAmount: -1200,
+      rate: { rate: '125', kind: 'explicit' },
+    });
+    expect(
+      await capture({ ...entry, date: '2026-03-11', operationRates }),
+    ).toEqual({ status: 'rate-unavailable' });
+    expect(liveRows()).toEqual([]);
+  });
   it('resolves through the daily policy or reports the rate unavailable', async () => {
     expect(await capture(entry)).toEqual({ status: 'rate-unavailable' });
     await insertRate({

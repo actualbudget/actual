@@ -21,7 +21,11 @@ import {
   utcEndOfDay,
   utcMidnight,
 } from '#shared/exchange-rate';
-import type { ExchangeRateEntity, ExchangeRateKind } from '#types/models';
+import type {
+  ExchangeRateEntity,
+  ExchangeRateKind,
+  OperationRate,
+} from '#types/models';
 
 export type ExchangeRatesHandlers = {
   'exchange-rates/save': typeof saveRate;
@@ -331,10 +335,51 @@ async function resolveRateHandler({
   });
 }
 
+export type { OperationRate };
+
+/**
+ * Validates an operation's rate list: valid days, canonical decimal rates,
+ * reviewed non-base currencies and no conflicting duplicate keys.
+ */
+export function parseOperationRates(
+  value: unknown,
+  baseCurrency: string,
+): OperationRate[] {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) {
+    throw new Error('operation-rates-invalid');
+  }
+  const seen = new Map<string, string>();
+  return value.map(item => {
+    if (!item || typeof item !== 'object') {
+      throw new Error('operation-rates-invalid');
+    }
+    const quoteCurrency = validateQuote(item.quoteCurrency, baseCurrency);
+    const date = validateDate(item.date);
+    const rate = parseRate(item.rate);
+    const key = `${quoteCurrency}|${date}`;
+    if (seen.has(key) && seen.get(key) !== rate) {
+      throw new Error('operation-rates-conflict');
+    }
+    seen.set(key, rate);
+    return { date, quoteCurrency, rate };
+  });
+}
+
+export function findOperationRate(
+  operationRates: OperationRate[] | undefined,
+  quoteCurrency: string,
+  date: string,
+): string | undefined {
+  return operationRates?.find(
+    item => item.quoteCurrency === quoteCurrency && item.date === date,
+  )?.rate;
+}
+
 /**
  * Computes a foreign entry's final pair without writing anything: a supplied
- * base amount, then the operation's own rate, then the daily policy. The
- * operation's rate is never saved as a daily rate.
+ * base amount, then the operation's rate for this currency and day, then the
+ * daily policy. The operation's own rate is never saved as a daily rate.
  */
 export async function computeEntryPair({
   quoteCurrency,
@@ -343,6 +388,7 @@ export async function computeEntryPair({
   nativeAmount,
   baseAmount,
   rate,
+  operationRates,
 }: {
   quoteCurrency: string;
   nativePrecision: number;
@@ -350,6 +396,7 @@ export async function computeEntryPair({
   nativeAmount: number;
   baseAmount?: number;
   rate?: string | number;
+  operationRates?: OperationRate[];
 }): Promise<
   | {
       status: 'ok';
@@ -375,7 +422,9 @@ export async function computeEntryPair({
   if (baseAmount !== undefined && !Number.isSafeInteger(baseAmount)) {
     throw new Error('amount-invalid');
   }
-  const suppliedRate = rate !== undefined ? parseRate(rate) : undefined;
+  const supplied =
+    rate ?? findOperationRate(operationRates, quoteCurrency, date);
+  const suppliedRate = supplied !== undefined ? parseRate(supplied) : undefined;
 
   let finalBase: number;
   let resolution: Extract<RateResolution, { status: 'resolved' }> | undefined =
