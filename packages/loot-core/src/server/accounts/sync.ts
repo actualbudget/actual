@@ -8,6 +8,7 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { TRANSACTION_SORT_INCREMENT } from '#server/db/sort';
 import { TransactionError } from '#server/errors';
+import { computeEntryPair } from '#server/exchange-rates/app';
 import { runMutator } from '#server/mutators';
 import { post } from '#server/post';
 import { getServer } from '#server/server-config';
@@ -18,7 +19,10 @@ import {
   preflightTransactionWrites,
 } from '#server/transactions/foreign-guard';
 import { runRules } from '#server/transactions/transaction-rules';
-import { getRecordedAmountPrecision } from '#server/util/currency';
+import {
+  getAccountCurrency,
+  getRecordedAmountPrecision,
+} from '#server/util/currency';
 import {
   defaultMappings,
   mappingsFromString,
@@ -626,6 +630,8 @@ export type MatchTransactionsOptions = {
   reimportDeleted?: boolean;
   payeeNameNormalization?: PayeeNameNormalization;
   amountPrecision?: number;
+  /** The import account's currency when it is a foreign account. */
+  foreign?: { currencyCode: string; precision: number } | null;
 };
 
 export type ReconcileTransactionsOptions = MatchTransactionsOptions & {
@@ -637,6 +643,8 @@ export type ReconcileTransactionsOptions = MatchTransactionsOptions & {
 export type ReconcileTransactionsResult = {
   added: string[];
   updated: string[];
+  /** Base amounts resolved for new rows of a foreign account (preview). */
+  previewBases?: Array<{ transaction: TransactionEntity; baseAmount: number }>;
   updatedPreview: Array<{
     transaction: TransactionEntity;
     existing?: TransactionEntity;
@@ -660,9 +668,15 @@ export async function reconcileTransactions(
   }: ReconcileTransactionsOptions = {},
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
-  // File import and bank sync complete foreign pairs in a later stage.
-  if (await isForeignAccount(acctId)) {
-    throw new Error('multicurrency-import-unavailable');
+  const foreign = (await isForeignAccount(acctId))
+    ? await getAccountCurrency(acctId)
+    : null;
+  if (foreign) {
+    // Bank sync completes foreign pairs in a later stage (MC-3.5).
+    if (isBankSyncAccount) {
+      throw new Error('multicurrency-import-unavailable');
+    }
+    validateForeignImportRows(transactions);
   }
 
   const updated = [];
@@ -681,6 +695,7 @@ export async function reconcileTransactions(
     reimportDeleted,
     payeeNameNormalization,
     amountPrecision,
+    foreign,
   });
 
   // Finally, generate & commit the changes
@@ -738,10 +753,12 @@ export async function reconcileTransactions(
           existingPayeeMap.set(existing.payee, payee?.name);
         }
         existing.payee_name = existingPayeeMap.get(existing.payee);
-        existing.amount = integerToAmount(
-          existing.amount,
-          getRecordedAmountPrecision(),
-        );
+        // The preview shows a foreign account's matched rows in its own units,
+        // as the stored native integer (the dialog formats integers at the
+        // account's precision).
+        existing.amount = foreign
+          ? (existing.transaction_amount ?? 0)
+          : integerToAmount(existing.amount, getRecordedAmountPrecision());
         updatedPreview.push({ transaction: trans, existing });
       } else {
         updatedPreview.push({ transaction: trans, ignored: true });
@@ -796,6 +813,33 @@ export async function reconcileTransactions(
     }
   }
 
+  // A foreign row without a supplied base gets one from the rate for its
+  // final date; any missing rate fails the whole request before writes.
+  const previewBases: ReconcileTransactionsResult['previewBases'] = [];
+  if (foreign) {
+    const missingDates = new Set<string>();
+    for (const trans of added) {
+      if (trans.amount != null) continue;
+      const pair = await computeEntryPair({
+        quoteCurrency: foreign.currencyCode,
+        nativePrecision: foreign.precision,
+        date: trans.date,
+        nativeAmount: trans.transaction_amount,
+      });
+      if (pair.status !== 'ok') {
+        missingDates.add(trans.date);
+        continue;
+      }
+      trans.amount = pair.baseAmount;
+      previewBases.push({ transaction: trans, baseAmount: pair.baseAmount });
+    }
+    if (missingDates.size > 0) {
+      throw new TransactionError(
+        `rate-unavailable: ${[...missingDates].sort().join(', ')}`,
+      );
+    }
+  }
+
   // Maintain the sort order of the server
   const now = Date.now();
   added.forEach((t, index) => {
@@ -822,7 +866,24 @@ export async function reconcileTransactions(
     added: added.map(trans => trans.id),
     updated: updated.map(trans => trans.id),
     updatedPreview,
+    ...(foreign && { previewBases }),
   };
+}
+
+/**
+ * A foreign account's import rows carry native amounts in
+ * `transaction_amount`; a supplied `amount` is the base, kept as given.
+ */
+function validateForeignImportRows(transactions: TransactionEntity[]) {
+  for (const trans of transactions) {
+    if (trans.subtransactions?.length || trans.is_parent || trans.is_child) {
+      throw new TransactionError('foreign-split-unavailable');
+    }
+    if (!Number.isSafeInteger(trans.transaction_amount)) {
+      // A lone amount is ambiguous: base or native.
+      throw new TransactionError('foreign-pair-required');
+    }
+  }
 }
 
 // Ranks fuzzy-match candidates by distance from transaction date, nearest first.
@@ -861,6 +922,7 @@ export async function matchTransactions(
     reimportDeleted: reimportDeletedOverride,
     payeeNameNormalization,
     amountPrecision,
+    foreign = null,
   }: MatchTransactionsOptions = {},
 ) {
   logger.log('Performing transaction reconciliation matching');
@@ -905,6 +967,22 @@ export async function matchTransactions(
       name => resolvePayee({ payee: null }, name, payeesToCreate),
     );
 
+    // Foreign rows match in their final account (rules may move them within
+    // the same encoding) on native amounts.
+    const matchAccount = foreign ? trans.account || acctId : acctId;
+    if (foreign && matchAccount !== acctId) {
+      const moved = accountsMap.get(matchAccount);
+      if (
+        moved?.currency !== foreign.currencyCode ||
+        moved?.currency_precision !== foreign.precision
+      ) {
+        throw new TransactionError('rule-account-incompatible');
+      }
+    }
+    const matchAmountColumn = foreign ? 'transaction_amount' : 'amount';
+    const matchAmount =
+      (foreign ? trans.transaction_amount : trans.amount) || 0;
+
     let match = null;
     let fuzzyDataset = null;
 
@@ -917,7 +995,7 @@ export async function matchTransactions(
         : 'v_transactions_internal';
       match = await db.first<db.DbTransaction>(
         `SELECT * FROM ${table} WHERE imported_id = ? AND account = ?`,
-        [trans.imported_id, acctId],
+        [trans.imported_id, matchAccount],
       );
 
       if (match) {
@@ -955,21 +1033,22 @@ export async function matchTransactions(
             | 'reconciled'
             | 'cleared'
             | 'amount'
+            | 'transaction_amount'
           >
         >(
-          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
+          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount, transaction_amount
           FROM v_transactions
           WHERE
             -- If both ids are set, and we didn't match earlier then skip dedup
             (imported_id IS NULL OR ? IS NULL)
-            AND date >= ? AND date <= ? AND amount = ?
+            AND date >= ? AND date <= ? AND ${matchAmountColumn} = ?
             AND account = ?`,
           [
             trans.imported_id || null,
             sevenDaysBefore,
             sevenDaysAfter,
-            trans.amount || 0,
-            acctId,
+            matchAmount,
+            matchAccount,
           ],
         );
       } else {
@@ -988,12 +1067,13 @@ export async function matchTransactions(
             | 'reconciled'
             | 'cleared'
             | 'amount'
+            | 'transaction_amount'
           >
         >(
-          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
+          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount, transaction_amount
           FROM v_transactions
-          WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
-          [sevenDaysBefore, sevenDaysAfter, trans.amount || 0, acctId],
+          WHERE date >= ? AND date <= ? AND ${matchAmountColumn} = ? AND account = ?`,
+          [sevenDaysBefore, sevenDaysAfter, matchAmount, matchAccount],
         );
       }
 

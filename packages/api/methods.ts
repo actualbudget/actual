@@ -229,7 +229,11 @@ export function addTransactions(
 /**
  * `amount` is a budget-base integer or Money in the budget currency.
  * Foreign-currency accounts also require `transaction_amount`, an
- * account-native integer or Money in the account currency.
+ * account-native integer or Money in the account currency. For those
+ * accounts `amount` may be omitted: it is converted at the saved rate for
+ * each transaction's date, and the import fails listing any dates without a
+ * rate. A supplied `amount` is kept as given. Split transactions cannot be
+ * imported into foreign-currency accounts yet.
  * Raw integers are accepted during dual support; raw-integer support will
  * be removed 12 months after Money support ships.
  */

@@ -15,6 +15,7 @@ import type {
 } from '@actual-app/core/types/models';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
+import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import { sync } from '#app/appSlice';
@@ -222,11 +223,41 @@ export function useMoveAccountMutation() {
   });
 }
 
+/** Import rows; a foreign account's rows may omit the base `amount`. */
+export type ImportRow = Omit<TransactionEntity, 'amount'> & { amount?: number };
+
 type ImportPreviewTransactionsPayload = {
   accountId: string;
-  transactions: TransactionEntity[];
+  transactions: ImportRow[];
   reimportDeleted?: boolean;
 };
+
+/** Explains import errors that name a reason code. */
+function importErrorMessage(message: string) {
+  if (message.startsWith('rate-unavailable')) {
+    const dates = message.slice('rate-unavailable:'.length).trim();
+    return t(
+      'No exchange rate is saved for {{dates}}. Add a rate for this currency, then import again.',
+      { dates },
+    );
+  }
+  switch (message) {
+    case 'foreign-pair-required':
+      return t(
+        'Amounts for this account must be in its own currency. Nothing was imported.',
+      );
+    case 'foreign-split-unavailable':
+      return t(
+        'Split transactions cannot be imported into accounts in other currencies yet.',
+      );
+    case 'rule-account-incompatible':
+      return t(
+        'A rule would move a transaction to an account in another currency, so nothing was imported.',
+      );
+    default:
+      return message;
+  }
+}
 
 export function useImportPreviewTransactionsMutation() {
   const queryClient = useQueryClient();
@@ -239,28 +270,41 @@ export function useImportPreviewTransactionsMutation() {
       transactions,
       reimportDeleted,
     }: ImportPreviewTransactionsPayload) => {
-      const { errors = [], updatedPreview } = await send(
-        'transactions-import',
-        {
-          accountId,
-          transactions,
-          isPreview: true,
-          opts: reimportDeleted !== undefined ? { reimportDeleted } : undefined,
-        },
-      );
-
-      errors.forEach(error => {
-        dispatch(
-          addNotification({
-            notification: {
-              type: 'error',
-              message: error.message,
-            },
-          }),
-        );
+      const {
+        errors = [],
+        updatedPreview,
+        previewBases = [],
+      } = await send('transactions-import', {
+        accountId,
+        transactions,
+        isPreview: true,
+        opts: reimportDeleted !== undefined ? { reimportDeleted } : undefined,
       });
 
-      return updatedPreview;
+      // Missing rates are resolved in the import dialog itself.
+      const missingRateDates = errors
+        .filter(error => error.message.startsWith('rate-unavailable'))
+        .flatMap(error =>
+          error.message
+            .slice('rate-unavailable:'.length)
+            .split(',')
+            .map(date => date.trim())
+            .filter(Boolean),
+        );
+      errors
+        .filter(error => !error.message.startsWith('rate-unavailable'))
+        .forEach(error => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: importErrorMessage(error.message),
+              },
+            }),
+          );
+        });
+
+      return { updatedPreview, previewBases, missingRateDates };
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -278,7 +322,7 @@ export function useImportPreviewTransactionsMutation() {
 
 type ImportTransactionsPayload = {
   accountId: string;
-  transactions: TransactionEntity[];
+  transactions: ImportRow[];
   reconcile: boolean;
   reimportDeleted?: boolean;
 };
@@ -295,7 +339,11 @@ export function useImportTransactionsMutation() {
       reconcile,
       reimportDeleted,
     }: ImportTransactionsPayload) => {
-      if (!reconcile) {
+      // Rows in another currency are converted by the import path.
+      const isForeign = transactions.some(
+        trans => trans.transaction_amount != null,
+      );
+      if (!reconcile && !isForeign) {
         await send('api/transactions-add', {
           accountId,
           transactions,
@@ -315,12 +363,26 @@ export function useImportTransactionsMutation() {
         opts: reimportDeleted !== undefined ? { reimportDeleted } : undefined,
       });
 
+      // A rejected import wrote nothing; missing rates go back to the dialog.
+      const missingRateDates = errors
+        .filter(error => error.message.startsWith('rate-unavailable'))
+        .flatMap(error =>
+          error.message
+            .slice('rate-unavailable:'.length)
+            .split(',')
+            .map(date => date.trim())
+            .filter(Boolean),
+        );
+      if (missingRateDates.length > 0) {
+        return { rejected: true, missingRateDates } as const;
+      }
+
       errors.forEach(error => {
         dispatch(
           addNotification({
             notification: {
               type: 'error',
-              message: error.message,
+              message: importErrorMessage(error.message),
             },
           }),
         );
@@ -339,6 +401,9 @@ export function useImportTransactionsMutation() {
         }),
       );
 
+      if (errors.length > 0) {
+        return { rejected: true, missingRateDates: [] } as const;
+      }
       return added.length > 0 || updated.length > 0;
     },
     onSuccess: () => invalidateQueries(queryClient),

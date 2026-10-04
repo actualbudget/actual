@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { SvgDownAndRightArrow } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
@@ -12,6 +13,7 @@ import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { Checkbox } from '#components/forms';
 import { Field, Row } from '#components/table';
+import { BudgetCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useFormat } from '#hooks/useFormat';
 
 import { ParsedDate } from './ParsedDate';
@@ -308,8 +310,25 @@ export function Transaction({
           }
         >
           {amount == null ? '' : format(amount, 'financial')}
+          {rawTransaction.base_amount != null && (
+            // A foreign account's row also shows its converted base amount.
+            <BudgetCurrencyFormat>
+              <BaseAmount amount={rawTransaction.base_amount} />
+            </BudgetCurrencyFormat>
+          )}
         </Field>
       )}
     </Row>
+  );
+}
+
+function BaseAmount({ amount }: { amount: number }) {
+  const format = useFormat();
+  return (
+    <Text
+      style={{ display: 'block', fontSize: 11, color: theme.pageTextSubdued }}
+    >
+      {format(amount, 'financial')}
+    </Text>
   );
 }
