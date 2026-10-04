@@ -113,6 +113,7 @@
     "#app/*": "./src/app/*.ts",
     "#budget/*": "./src/budget/*.ts",
     "#budgetfiles/*": "./src/budgetfiles/*.ts",
+    "#commandbar/*": "./src/commandbar/*.ts",
     "#modals/*": "./src/modals/*.ts",
     "#news/*": "./src/news/*.ts",
     "#notifications/*": "./src/notifications/*.ts",
