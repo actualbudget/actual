@@ -31,7 +31,6 @@ type NewsEntryCardProps = {
 };
 
 export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
-  const { t } = useTranslation();
   const locale = useLocale();
   // The date format chosen in Settings, as used everywhere else in the app.
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
