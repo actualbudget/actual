@@ -1,22 +1,22 @@
-import { useMemo } from "react";
-import type { RefObject } from "react";
-import { useTranslation } from "react-i18next";
+import { useMemo } from 'react';
+import type { RefObject } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { q } from "@actual-app/core/shared/query";
+import { q } from '@actual-app/core/shared/query';
 import {
   extractScheduleConds,
   scheduleIsRecurring,
-} from "@actual-app/core/shared/schedules";
-import { isPreviewId } from "@actual-app/core/shared/transactions";
-import type { TransactionEntity } from "@actual-app/core/types/models";
+} from '@actual-app/core/shared/schedules';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import type { ContextMenuItem } from "#contextmenu/types";
-import { useContextMenu } from "#hooks/useContextMenu";
-import { useSchedules } from "#hooks/useSchedules";
-import { useSelectedItems } from "#hooks/useSelected";
-import { pushModal } from "#modals/modalsSlice";
-import { useDispatch } from "#redux";
-import { getSkipScheduleText } from "#util/schedule";
+import type { ContextMenuItem } from '#contextmenu/types';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { useSchedules } from '#hooks/useSchedules';
+import { useSelectedItems } from '#hooks/useSelected';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
+import { getSkipScheduleText } from '#util/schedule';
 
 type TransactionRowContextMenuProps = {
   rowRef: RefObject<HTMLElement | null>;
@@ -28,8 +28,8 @@ type TransactionRowContextMenuProps = {
   onUnlinkSchedule: (ids: string[]) => void;
   onCreateRule: (ids: string[]) => void;
   onScheduleAction: (
-    name: "skip" | "post-transaction" | "post-transaction-today" | "complete",
-    ids: TransactionEntity["id"][],
+    name: 'skip' | 'post-transaction' | 'post-transaction-today' | 'complete',
+    ids: TransactionEntity['id'][],
   ) => void;
   onMakeAsNonSplitTransactions: (ids: string[]) => void;
 };
@@ -60,17 +60,17 @@ export function useTransactionRowContextActions({
 
   const scheduleIds = useMemo(() => {
     return selectedIds
-      .filter((id) => isPreviewId(id))
-      .map((id) => id.split("/")[1]);
+      .filter(id => isPreviewId(id))
+      .map(id => id.split('/')[1]);
   }, [selectedIds]);
 
   const scheduleQuery = useMemo(() => {
     if (scheduleIds.length === 0) {
       return undefined;
     }
-    return q("schedules")
+    return q('schedules')
       .filter({ id: { $oneof: scheduleIds } })
-      .select("*");
+      .select('*');
   }, [scheduleIds]);
 
   const { schedules: selectedSchedules } = useSchedules({
@@ -80,21 +80,21 @@ export function useTransactionRowContextActions({
   const types = useMemo(() => {
     const items = selectedIds;
     return {
-      preview: !!items.find((id) => isPreviewId(id)),
-      trans: !!items.find((id) => !isPreviewId(id)),
+      preview: !!items.find(id => isPreviewId(id)),
+      trans: !!items.find(id => !isPreviewId(id)),
     };
   }, [selectedIds]);
 
   const ambiguousDuplication = useMemo(() => {
-    const transactions = selectedIds.map((id) => getTransaction(id));
+    const transactions = selectedIds.map(id => getTransaction(id));
 
-    return transactions.some((tx) => tx && tx.is_child);
+    return transactions.some(tx => tx && tx.is_child);
   }, [selectedIds, getTransaction]);
 
   const linked = useMemo(() => {
     return (
       !types.preview &&
-      selectedIds.every((id) => {
+      selectedIds.every(id => {
         const t = getTransaction(id);
         return t && t.schedule;
       })
@@ -102,7 +102,7 @@ export function useTransactionRowContextActions({
   }, [types.preview, selectedIds, getTransaction]);
 
   const canBeSkipped = useMemo(() => {
-    const recurringSchedules = selectedSchedules.filter((s) => {
+    const recurringSchedules = selectedSchedules.filter(s => {
       const { date: dateCond } = extractScheduleConds(s._conditions);
       return scheduleIsRecurring(dateCond);
     });
@@ -111,7 +111,7 @@ export function useTransactionRowContextActions({
   }, [selectedSchedules]);
 
   const canBeCompleted = useMemo(() => {
-    const singleSchedules = selectedSchedules.filter((s) => {
+    const singleSchedules = selectedSchedules.filter(s => {
       const { date: dateCond } = extractScheduleConds(s._conditions);
       return !scheduleIsRecurring(dateCond);
     });
@@ -124,13 +124,13 @@ export function useTransactionRowContextActions({
       return false;
     }
 
-    const transactions = selectedIds.map((id) => getTransaction(id));
+    const transactions = selectedIds.map(id => getTransaction(id));
 
     const areNoReconciledTransactions = transactions.every(
-      (tx) => tx && !tx.reconciled,
+      tx => tx && !tx.reconciled,
     );
     const areAllSplitTransactions = transactions.every(
-      (tx) => tx && (tx.is_parent || tx.is_child),
+      tx => tx && (tx.is_parent || tx.is_child),
     );
     return areNoReconciledTransactions && areAllSplitTransactions;
   }, [selectedIds, types, getTransaction]);
@@ -139,7 +139,7 @@ export function useTransactionRowContextActions({
     const firstId = selectedIds[0];
     let scheduleId;
     if (isPreviewId(firstId)) {
-      const parts = firstId.split("/");
+      const parts = firstId.split('/');
       scheduleId = parts[1];
     } else {
       const trans = getTransaction(firstId);
@@ -149,7 +149,7 @@ export function useTransactionRowContextActions({
     if (scheduleId) {
       dispatch(
         pushModal({
-          modal: { name: "schedule-edit", options: { id: scheduleId } },
+          modal: { name: 'schedule-edit', options: { id: scheduleId } },
         }),
       );
     }
@@ -157,74 +157,74 @@ export function useTransactionRowContextActions({
 
   const scheduleActions: ContextMenuItem[] = [
     {
-      name: "view-schedule",
-      text: t("View Schedule"),
+      name: 'view-schedule',
+      text: t('View Schedule'),
       onClick: onViewSchedule,
       hidden: selectedIds.length !== 1,
     },
     {
-      name: "post-transaction",
-      text: t("Post transaction"),
-      onClick: () => onScheduleAction("post-transaction", selectedIds),
+      name: 'post-transaction',
+      text: t('Post transaction'),
+      onClick: () => onScheduleAction('post-transaction', selectedIds),
     },
     {
-      name: "post-transaction-today",
-      text: t("Post transaction today"),
-      onClick: () => onScheduleAction("post-transaction-today", selectedIds),
+      name: 'post-transaction-today',
+      text: t('Post transaction today'),
+      onClick: () => onScheduleAction('post-transaction-today', selectedIds),
     },
     {
-      name: "skip",
-      text: getSkipScheduleText(selectedSchedules.map((s) => s?.next_date)),
-      onClick: () => onScheduleAction("skip", selectedIds),
+      name: 'skip',
+      text: getSkipScheduleText(selectedSchedules.map(s => s?.next_date)),
+      onClick: () => onScheduleAction('skip', selectedIds),
       hidden: !canBeSkipped,
     },
     {
-      name: "complete",
-      text: t("Mark as completed"),
-      onClick: () => onScheduleAction("complete", selectedIds),
+      name: 'complete',
+      text: t('Mark as completed'),
+      onClick: () => onScheduleAction('complete', selectedIds),
       hidden: !canBeCompleted,
     },
   ];
 
   const transactionActions: ContextMenuItem[] = [
     {
-      name: "duplicate",
-      text: t("Duplicate"),
+      name: 'duplicate',
+      text: t('Duplicate'),
       onClick: () => onDuplicate(selectedIds),
       hidden: ambiguousDuplication,
     },
     {
-      name: "delete",
-      text: t("Delete"),
+      name: 'delete',
+      text: t('Delete'),
       onClick: () => onDelete(selectedIds),
     },
     {
-      name: "view-schedule",
-      text: t("View Schedule"),
+      name: 'view-schedule',
+      text: t('View Schedule'),
       onClick: onViewSchedule,
       hidden: !(selectedIds.length === 1 && linked),
     },
     {
-      name: "unlink-schedule",
-      text: t("Unlink schedule"),
+      name: 'unlink-schedule',
+      text: t('Unlink schedule'),
       onClick: () => onUnlinkSchedule(selectedIds),
       hidden: !linked,
     },
     {
-      name: "link-schedule",
-      text: t("Link schedule"),
+      name: 'link-schedule',
+      text: t('Link schedule'),
       onClick: () => onLinkSchedule(selectedIds),
       hidden: linked,
     },
     {
-      name: "create-rule",
-      text: t("Create rule"),
+      name: 'create-rule',
+      text: t('Create rule'),
       onClick: () => onCreateRule(selectedIds),
       hidden: linked,
     },
     {
-      name: "unsplit-transactions",
-      text: t("Unsplit {{count}} transactions", {
+      name: 'unsplit-transactions',
+      text: t('Unsplit {{count}} transactions', {
         count: selectedIds.length,
       }),
       onClick: () => onMakeAsNonSplitTransactions(selectedIds),
