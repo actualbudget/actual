@@ -15,9 +15,7 @@ const setPref = vi.fn();
 
 /** Stands in for the synced pref, which can also change from another device. */
 function mockInterval(value: string | undefined) {
-  vi.mocked(useSyncedPref).mockReturnValue([value, setPref] as ReturnType<
-    typeof useSyncedPref
-  >);
+  vi.mocked(useSyncedPref).mockReturnValue([value, setPref]);
 }
 
 // A fresh element each time: React can skip re-rendering when handed a
