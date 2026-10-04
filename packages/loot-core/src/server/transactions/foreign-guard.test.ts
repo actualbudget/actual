@@ -365,12 +365,26 @@ describe('request preflight', () => {
     );
   });
 
-  it('rejects file import and bank sync into foreign accounts', async () => {
+  it('rejects bank sync and base-only file rows for foreign accounts', async () => {
+    await expect(
+      reconcileTransactions(
+        'jpy',
+        [
+          {
+            date: '2026-03-01',
+            transaction_amount: -1500,
+            payee_name: 'Import payee',
+          },
+        ],
+        { isBankSyncAccount: true },
+      ),
+    ).rejects.toThrow('multicurrency-import-unavailable');
+    // A lone amount is ambiguous for a foreign account.
     await expect(
       reconcileTransactions('jpy', [
         { date: '2026-03-01', amount: -1000, payee_name: 'Import payee' },
       ]),
-    ).rejects.toThrow('multicurrency-import-unavailable');
+    ).rejects.toThrow('foreign-pair-required');
     expect(rows("SELECT id FROM payees WHERE name = 'Import payee'")).toEqual(
       [],
     );

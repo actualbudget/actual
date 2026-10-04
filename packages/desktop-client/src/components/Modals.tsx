@@ -112,7 +112,8 @@ export function Modals() {
   const modals = modalStack
     .map((modal, idx) => {
       const { name } = modal;
-      const key = `${name}-${idx}`;
+      // A stable id keeps a dialog mounted when one below it closes.
+      const key = modal.id ?? `${name}-${idx}`;
       switch (name) {
         case 'goal-templates':
           return budgetId ? <GoalTemplateModal key={key} /> : null;

@@ -140,6 +140,8 @@ export type ImportTransaction = {
   notes?: string;
   category?: string;
   date?: string;
+  /** For a foreign account: the base amount the preview resolved. */
+  base_amount?: number;
 } & Record<string, string | number | boolean>;
 
 type ImportCategory = {

@@ -1843,6 +1843,9 @@ async function importTransactions({
       added: reconciled.added,
       updated: reconciled.updated,
       updatedPreview: reconciled.updatedPreview,
+      ...(reconciled.previewBases && {
+        previewBases: reconciled.previewBases,
+      }),
     };
   } catch (err) {
     if (err instanceof TransactionError) {

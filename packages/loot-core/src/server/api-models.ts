@@ -51,11 +51,14 @@ export type AmountInput = number | Money;
 /**
  * `amount` is the budget-base integer (or Money in the budget currency);
  * `transaction_amount` is the account-native integer (or Money in the
- * account currency) and is required for foreign-currency accounts.
+ * account currency) and is required for foreign-currency accounts. For
+ * those accounts `amount` may be omitted: it is then converted at the saved
+ * rate for the transaction's date, and the import fails listing any dates
+ * without a rate.
  */
 export type APIImportTransactionInput = Omit<
   ImportTransactionEntity,
-  'amount' | 'subtransactions'
+  'amount' | 'transaction_amount' | 'subtransactions'
 > & {
   amount?: AmountInput;
   transaction_amount?: AmountInput | null;
