@@ -21,6 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { sync } from '#app/appSlice';
 import { useAccounts } from '#hooks/useAccounts';
+import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { payeeQueries } from '#payees';
 import { useDispatch, useStore } from '#redux';
@@ -278,6 +279,7 @@ export function useImportPreviewTransactionsMutation() {
         errors = [],
         updatedPreview,
         previewBases = [],
+        missingRates = [],
       } = await send('transactions-import', {
         accountId,
         transactions,
@@ -309,7 +311,17 @@ export function useImportPreviewTransactionsMutation() {
           );
         });
 
-      return { updatedPreview, previewBases, missingRateDates };
+      return {
+        updatedPreview,
+        previewBases,
+        missingRateDates,
+        // Rows needing a rate, keyed by the dialog's row id, at their final
+        // dates after rules.
+        missingRates: missingRates.map(({ transaction, date }) => ({
+          trxId: 'trx_id' in transaction ? String(transaction.trx_id) : null,
+          date,
+        })),
+      };
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
@@ -463,6 +475,8 @@ type LinkAccountBasePayload = {
   offBudget?: boolean;
   startingDate?: string;
   startingBalance?: number;
+  /** Rates this link attempt needs; never saved as daily rates. */
+  operationRates?: OperationRate[];
 };
 
 type LinkAccountPayload = LinkAccountBasePayload & {
@@ -483,14 +497,16 @@ export function useLinkAccountMutation() {
       offBudget,
       startingDate,
       startingBalance,
+      operationRates,
     }: LinkAccountPayload) => {
-      await send('gocardless-accounts-link', {
+      return send('gocardless-accounts-link', {
         requisitionId,
         account,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
+        operationRates,
       });
     },
     onSuccess: () => {
@@ -524,13 +540,15 @@ export function useLinkAccountSimpleFinMutation() {
       offBudget,
       startingDate,
       startingBalance,
+      operationRates,
     }: LinkAccountSimpleFinPayload) => {
-      await send('simplefin-accounts-link', {
+      return send('simplefin-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
+        operationRates,
       });
     },
     onSuccess: () => {
@@ -566,13 +584,15 @@ export function useLinkAccountPluggyAiMutation() {
       offBudget,
       startingDate,
       startingBalance,
+      operationRates,
     }: LinkAccountPluggyAiPayload) => {
-      await send('pluggyai-accounts-link', {
+      return send('pluggyai-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
+        operationRates,
       });
     },
     onSuccess: () => {
@@ -608,13 +628,15 @@ export function useLinkAccountAkahuMutation() {
       offBudget,
       startingDate,
       startingBalance,
+      operationRates,
     }: LinkAccountAkahuPayload) => {
-      await send('akahu-accounts-link', {
+      return send('akahu-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
+        operationRates,
       });
     },
     onSuccess: () => {
@@ -648,13 +670,15 @@ export function useLinkAccountEnableBankingMutation() {
       offBudget,
       startingDate,
       startingBalance,
+      operationRates,
     }: LinkAccountEnableBankingPayload) => {
-      await send('enablebanking-accounts-link', {
+      return send('enablebanking-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
+        operationRates,
       });
     },
     onSuccess: () => {
@@ -676,6 +700,8 @@ export function useLinkAccountEnableBankingMutation() {
 
 type SyncAccountsPayload = {
   id?: AccountEntity['id'] | undefined;
+  /** Rates one account's retried sync needs; never saved as daily rates. */
+  operationRates?: OperationRate[];
 };
 
 export function useSyncAccountsMutation() {
@@ -687,7 +713,7 @@ export function useSyncAccountsMutation() {
   const store = useStore();
 
   return useMutation({
-    mutationFn: async ({ id }: SyncAccountsPayload) => {
+    mutationFn: async ({ id, operationRates }: SyncAccountsPayload) => {
       const {
         account: { accountsSyncing = [] },
       } = store.getState();
@@ -731,11 +757,14 @@ export function useSyncAccountsMutation() {
 
       dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
 
-      const simpleFinAccounts = accounts.filter(
-        a =>
-          a.account_sync_source === 'simpleFin' &&
-          accountIdsToSync.includes(a.id),
-      );
+      // A retry with its own rates syncs that one account directly.
+      const simpleFinAccounts = operationRates
+        ? []
+        : accounts.filter(
+            a =>
+              a.account_sync_source === 'simpleFin' &&
+              accountIdsToSync.includes(a.id),
+          );
 
       let isSyncSuccess = false;
       const newTransactions: Array<TransactionEntity['id']> = [];
@@ -776,6 +805,7 @@ export function useSyncAccountsMutation() {
         // Perform sync operation
         const res = await send('accounts-bank-sync', {
           ids: [accountId],
+          ...(operationRates && { operationRates }),
         });
 
         const success = handleSyncResponse(
@@ -837,7 +867,16 @@ function handleSyncResponse(
   if (error) {
     // We only want to mark the account as having problem if it
     // was a real syncing error.
-    if ('type' in error && error.type === 'SyncError') {
+    if ('type' in error && error.type === 'rate-unavailable') {
+      dispatch(
+        markAccountFailed({
+          id: accountId,
+          errorType: 'RATE_UNAVAILABLE',
+          errorCode: 'RATE_UNAVAILABLE',
+          rate: { currencyCode: error.currency, dates: error.dates },
+        }),
+      );
+    } else if ('type' in error && error.type === 'SyncError') {
       dispatch(
         markAccountFailed({
           id: accountId,
@@ -852,7 +891,33 @@ function handleSyncResponse(
 
   // Dispatch errors (if any)
   errors.forEach(error => {
-    if ('type' in error && error.type === 'SyncError') {
+    if ('type' in error && error.type === 'rate-unavailable') {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: error.message,
+            button: {
+              title: t('Add exchange rate'),
+              action: () => {
+                dispatch(
+                  pushModal({
+                    modal: {
+                      name: 'add-exchange-rate',
+                      options: {
+                        accountId,
+                        currencyCode: error.currency,
+                        dates: error.dates,
+                      },
+                    },
+                  }),
+                );
+              },
+            },
+          },
+        }),
+      );
+    } else if ('type' in error && error.type === 'SyncError') {
       dispatch(
         addNotification({
           notification: {
@@ -874,6 +939,20 @@ function handleSyncResponse(
     }
   });
 
+  if (res.currencyMismatches) {
+    dispatch(
+      addNotification({
+        notification: {
+          type: 'warning',
+          message: t(
+            '{{count}} downloaded transactions were in another currency and were skipped.',
+            { count: res.currencyMismatches },
+          ),
+        },
+      }),
+    );
+  }
+
   resNewTransactions.push(...newTransactions);
   resMatchedTransactions.push(...matchedTransactions);
   resUpdatedAccounts.push(...updatedAccounts);
@@ -885,6 +964,7 @@ function handleSyncResponse(
 
 type SyncAndDownloadPayload = {
   id?: AccountEntity['id'];
+  operationRates?: OperationRate[];
 };
 
 export function useSyncAndDownloadMutation() {
@@ -895,7 +975,7 @@ export function useSyncAndDownloadMutation() {
   const syncAccounts = useSyncAccountsMutation();
 
   return useMutation({
-    mutationFn: async ({ id }: SyncAndDownloadPayload) => {
+    mutationFn: async ({ id, operationRates }: SyncAndDownloadPayload) => {
       // It is *critical* that we sync first because of transaction
       // reconciliation. We want to get all transactions that other
       // clients have already made, so that imported transactions can be
@@ -906,7 +986,10 @@ export function useSyncAndDownloadMutation() {
         return { error: syncState.error };
       }
 
-      const hasDownloaded = await syncAccounts.mutateAsync({ id });
+      const hasDownloaded = await syncAccounts.mutateAsync({
+        id,
+        operationRates,
+      });
 
       if (hasDownloaded) {
         // Sync again afterwards if new transactions were created

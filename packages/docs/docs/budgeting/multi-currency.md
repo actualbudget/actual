@@ -101,3 +101,21 @@ The preview shows -€950.00 for the October 31 rent, with -$1,045.00 under it, 
 If a date in the file has no rate, the dialog says: "No exchange rate is available for 2026-10-30. Enter a rate to use for these days in this operation only." The rate field takes dollars per 1 euro, with a swap button for the reverse. **Use rate** converts those rows for this import. Actual does not save it as a fallback, so a later import on that day asks again.
 
 <img width="860" alt="Import dialog asking for a euro rate for 2026-10-30 in this import only, with two 950 euro rent rows" src="/img/budgeting/multi-currency-import-rate@2x.png" />
+
+## Link a bank account
+
+With **Currency support** and **Multiple currencies** enabled, GoCardless, SimpleFIN, Pluggy.ai, Akahu and Enable Banking use the currency reported for each bank account. The link dialog formats the reported balance in that currency.
+
+Choose a new on-budget or off-budget account in the link dialog to create it in the bank account's currency automatically. For example, linking a euro account creates an account in EUR, and linking a peso account creates one in MXN. Actual also records the currency's decimal precision, so a JPY account uses whole yen and a KWD account uses three decimal places. Imported transactions retain their native amounts alongside their booked value in the budget currency.
+
+To link an existing account, its currency must match. A bank account in euros can be linked to BNP Paribas, and a bank account in pesos can be linked to BBVA México. The list offers compatible accounts only; Actual also checks the currency when saving the link. Later syncs do not change an existing account's currency.
+
+If the provider does not report a usable currency, Actual offers the budget-currency account flow instead of guessing a foreign currency. An unsupported foreign currency cannot create a new foreign account. With Multiple currencies turned off, bank linking keeps the existing budget-currency behavior.
+
+If the first link needs a missing exchange rate or starting balance, Actual asks for it before creating the account or importing any transactions. A rate entered there converts that link only.
+
+If the bank does not report a balance in that currency, the link dialog says: "The bank did not report a balance in this account's currency. Enter the balance on the starting date, then try again."
+
+Downloaded transactions in some other currency are left out. Actual reports the count: "downloaded transactions were in another currency and were skipped."
+
+If a download needs a rate that is not saved, Actual says: "An exchange rate is needed before these transactions can be added." **Add exchange rate** opens the same form as import, naming each day without a rate. The rate field takes budget-currency units per 1 account-currency unit. **Use rate** downloads again with that rate for those days. Actual does not save it as a fallback.

@@ -284,7 +284,12 @@ bankSync.post(
           notes: trans.descriptionRaw || trans.description,
           transactionAmount: {
             amount: String(amountInCurrency),
-            currency: trans.currencyCode,
+            // amountInAccountCurrency is in the account's currency; otherwise
+            // the amount is in the transaction's own currency.
+            currency:
+              trans.amountInAccountCurrency != null
+                ? account.currencyCode
+                : trans.currencyCode,
           },
           transactionId: trans.id,
           sortOrder: transactionDate.getTime(),
@@ -318,6 +323,7 @@ bankSync.post(
         data: {
           balances,
           startingBalance,
+          startingBalanceCurrency: account.currencyCode ?? null,
           transactions: {
             all: allSorted,
             booked: bookedSorted,

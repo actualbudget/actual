@@ -108,12 +108,20 @@ async function buildSessionResult(
         );
       }
 
+      // The displayed balance must be in the account's own currency.
+      const candidates = normalized.currency
+        ? balances.filter(b => b.balanceAmount.currency === normalized.currency)
+        : balances;
       const preferredBalance =
-        balances.find(b => b.balanceType === 'CLAV') ?? balances[0];
+        candidates.find(b => b.balanceType === 'CLAV') ?? candidates[0];
 
       return {
         ...normalized,
-        balance: preferredBalance ? preferredBalance.balanceAmount.amount : '0',
+        balance: preferredBalance
+          ? preferredBalance.balanceAmount.amount
+          : balances.length > 0
+            ? null
+            : '0',
         balances,
       };
     }),
@@ -607,10 +615,13 @@ bankSync.post(
 
       // Keep a missing bank balance distinct from a reported zero balance.
       let startingBalance: string | null = null;
+      let startingBalanceCurrency: string | null = null;
       if (balances.length > 0) {
         const preferredBalance =
           balances.find(b => b.balanceType === 'CLAV') ?? balances[0];
         startingBalance = preferredBalance.balanceAmount.amount;
+        startingBalanceCurrency =
+          preferredBalance.balanceAmount.currency ?? null;
       }
 
       // Fetch all paginated transactions
@@ -659,6 +670,7 @@ bankSync.post(
           },
           balances,
           startingBalance,
+          startingBalanceCurrency,
         },
       });
     } catch (error) {

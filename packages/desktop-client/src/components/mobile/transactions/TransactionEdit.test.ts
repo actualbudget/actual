@@ -4,11 +4,12 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 
+import { reencodeAmount } from '#util/account-encoding';
+
 import {
   deserializeTransaction,
   editableForeignPatch,
   editorHiddenAccounts,
-  reencodeAmount,
   rulePreviewFields,
   serializeTransaction,
 } from './TransactionEdit';

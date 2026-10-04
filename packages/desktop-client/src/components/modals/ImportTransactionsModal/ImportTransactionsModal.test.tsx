@@ -43,6 +43,7 @@ vi.mock('#accounts', () => ({
         updatedPreview: [],
         previewBases: [],
         missingRateDates: [],
+        missingRates: [],
       }),
     ),
     mutateAsync: vi.fn().mockResolvedValue({ added: [], updated: [] }),

@@ -57,7 +57,7 @@ type BankSyncTransaction = {
   date: string;
   payeeName?: string;
   notes: string;
-  transactionAmount: { amount: string; currency: string };
+  transactionAmount: { amount: string; currency: string | null };
   transactionId: string;
   bookingDate?: string;
   valueDate?: string;
@@ -338,6 +338,10 @@ function getAccountResponse(
     throw new Error('Invalid SimpleFIN balance');
   }
   const startingBalance = account.balance;
+  // A custom (non-ISO) currency is reported as unknown.
+  const accountCurrency = /^[A-Z]{3}$/.test(account.currency ?? '')
+    ? account.currency
+    : null;
   const date = getDate(new Date(account['balance-date'] * 1000));
 
   const balances = [
@@ -398,7 +402,8 @@ function getAccountResponse(
       date: getDate(transactionDate),
       payeeName: trans.payee,
       notes: trans.description,
-      transactionAmount: { amount: trans.amount, currency: 'USD' },
+      // SimpleFIN transaction amounts are in the account's currency.
+      transactionAmount: { amount: trans.amount, currency: accountCurrency },
       transactionId: trans.id,
     };
     newTrans.valueDate = newTrans.bookingDate;
@@ -429,6 +434,7 @@ function getAccountResponse(
   return {
     balances,
     startingBalance,
+    startingBalanceCurrency: accountCurrency,
     transactions: {
       all: allSorted,
       booked: bookedSorted,

@@ -17,6 +17,8 @@ export type BankSyncResponse = {
   balances: BankSyncBalance[];
   // Decimal major units, or null when the provider cannot report a balance.
   startingBalance: string | null;
+  /** Currency of startingBalance, or null when unknown or mixed. */
+  startingBalanceCurrency?: string | null;
   error_type: string;
   error_code: string;
 };
