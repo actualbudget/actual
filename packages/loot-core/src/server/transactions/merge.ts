@@ -8,7 +8,7 @@ import {
 } from '#shared/transactions';
 import type { TransactionEntity } from '#types/models';
 
-import { isForeignAccount } from './foreign-guard';
+import { isExchangeRow, isForeignAccount } from './foreign-guard';
 
 import { batchUpdateTransactions } from '.';
 
@@ -24,6 +24,11 @@ export async function mergeTransactions(
     );
   }
   const [a, b] = await mapAndValidateTransactions(txIds[0], txIds[1]);
+  // Merging would relink an exchange leg generically; checked before any
+  // link is cleared.
+  if ((await isExchangeRow(a.id)) || (await isExchangeRow(b.id))) {
+    throw new Error('multicurrency-merge-unavailable');
+  }
   if (
     (await isForeignAccount(a.account)) ||
     (await isForeignAccount(b.account))

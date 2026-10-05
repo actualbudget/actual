@@ -92,6 +92,18 @@ A remittance from BBVA México works the same way. 8000.00 pesos posts as $400.0
 
 A schedule stays in the currency of the account it was created for. To use an account in another currency, create a new schedule. The form says: "To use an account in another currency, create a new schedule."
 
+## Move euros between accounts
+
+Create **Crédit Agricole** with a starting balance of 3,000.00. That is $3,300.00 at the saved rate. Open Crédit Agricole and click **Add New**. In the payee field, choose **Make transfer**, then **BNP Paribas**. Enter a payment of 500.00. **Add** opens **Convert to budget currency**.
+
+The dialog shows -€500.00, then -$550.00 at 1 USD = 0.909091 EUR (standing, manual, 2026-10-31). Leave **Base amount** and the rate empty. Click **Save**.
+
+Crédit Agricole is then €2,500.00. BNP Paribas receives a 500.00 deposit from Crédit Agricole. With the 2,000.00 starting balance and no other payments, the BNP Paribas balance is €2,500.00. **All accounts** does not change, because the dollars move with the euros.
+
+<img width="860" alt="BNP Paribas at €2,500.00 after a 500.00 deposit from Crédit Agricole, with the 2,000.00 starting balance" src="/img/budgeting/multi-currency-transfer@2x.png" />
+
+The transfer list also includes Checking and BBVA México. A transfer to an account in another currency does not save. The dialog says: "This transaction could not be saved."
+
 ## On a phone
 
 A narrow window uses the phone layout. The BBVA México account below uses the same five-month history as the desktop register. Its balance is 250 pesos, with the monthly 800 peso remittances and 150 peso gifts grouped by date. The **+** button adds a payment and opens **Convert to budget currency**.

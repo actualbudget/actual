@@ -14,6 +14,7 @@ type AccountContext = {
 };
 
 type ExistingRow = {
+  id: string;
   acct: string;
   description: string | null;
   transferred_id: string | null;
@@ -23,6 +24,26 @@ type ExistingRow = {
   isChild: number;
   parent_id: string | null;
   schedule: string | null;
+  category: string | null;
+  date: number;
+  tombstone: number;
+};
+
+/**
+ * Writes trusted to skip transfer relationship rules: `validatedTransfer`
+ * for writers that validated the whole transfer request first (the exchange
+ * handler, and foreign entry writing both legs of a same-encoding transfer),
+ * and `transferCleanup` for forced account deletion unlinking counterparts
+ * of rows it deletes in the same batch.
+ */
+export type TransactionWriteOptions = {
+  validatedTransfer?: boolean;
+  transferCleanup?: boolean;
+  /**
+   * False when a batch writes links without the transfer hooks, so payees
+   * must already agree with the links in the request's final state.
+   */
+  runTransfers?: boolean;
 };
 
 type TransactionWrite = {
@@ -32,6 +53,8 @@ type TransactionWrite = {
   transaction_amount?: unknown;
   payee?: string | null;
   transfer_id?: string | null;
+  date?: string;
+  category?: string | null;
   amount_pair?: unknown;
   schedule?: string | null;
   tombstone?: boolean | number;
@@ -155,22 +178,315 @@ async function transferTarget(payeeId: string): Promise<string | null> {
   return payee?.transfer_acct ?? null;
 }
 
+function storedRow(id: string) {
+  return db.first<ExistingRow>(
+    `SELECT id, acct, description, transferred_id, amount, transaction_amount,
+       isParent, isChild, parent_id, schedule, category, date, tombstone
+       FROM transactions WHERE id = ?`,
+    [id],
+  );
+}
+
+const ROW_COLUMNS = [
+  'acct',
+  'description',
+  'transferred_id',
+  'amount',
+  'transaction_amount',
+  'isParent',
+  'isChild',
+  'parent_id',
+  'schedule',
+  'category',
+  'date',
+  'tombstone',
+] as const;
+
+/**
+ * A counterpart row as the current batch will leave it: transfer hooks write
+ * one leg and then link the other inside a single batch.
+ */
+async function effectiveRow(id: string): Promise<ExistingRow | null> {
+  const stored = await storedRow(id);
+  const queued = ROW_COLUMNS.flatMap(column => {
+    const value = getBatchedValue('transactions', id, column);
+    return value ? [[column, value.value] as const] : [];
+  });
+  if (!stored && queued.length === 0) return null;
+  const row: Record<string, unknown> = {
+    id,
+    acct: null,
+    description: null,
+    transferred_id: null,
+    amount: 0,
+    transaction_amount: null,
+    isParent: 0,
+    isChild: 0,
+    parent_id: null,
+    schedule: null,
+    category: null,
+    date: 0,
+    tombstone: 0,
+    ...stored,
+  };
+  for (const [column, value] of queued) {
+    row[column] = value;
+  }
+  return row as ExistingRow;
+}
+
+function encodingOf(account: AccountContext | null) {
+  return account?.foreign
+    ? { currency: account.currency, precision: account.precision }
+    : { currency: null, precision: null };
+}
+
+/** A stored row linked to a live counterpart in another encoding. */
+async function isExchangeLeg(row: ExistingRow): Promise<boolean> {
+  if (!row.transferred_id) return false;
+  const counterpart = await effectiveRow(row.transferred_id);
+  if (!counterpart || counterpart.tombstone) return false;
+  return !sameEncoding(
+    encodingOf(await accountContext(row.acct)),
+    encodingOf(await accountContext(counterpart.acct)),
+  );
+}
+
+/** A split family holding an exchange leg, so its fee rows are frozen too. */
+export async function isExchangeFamily(
+  parentId: string | null,
+): Promise<boolean> {
+  if (!parentId) return false;
+  const children = await db.all<ExistingRow>(
+    `SELECT id, acct, description, transferred_id, amount, transaction_amount,
+       isParent, isChild, parent_id, schedule, category, date, tombstone
+       FROM transactions WHERE parent_id = ? AND tombstone = 0`,
+    [parentId],
+  );
+  for (const child of children) {
+    if (await isExchangeLeg(child)) return true;
+  }
+  return false;
+}
+
+/** True when a stored row is an exchange leg or in an exchange fee family. */
+export async function isExchangeRow(id: string): Promise<boolean> {
+  const row = await storedRow(id);
+  if (!row) return false;
+  return (
+    (await isExchangeLeg(row)) ||
+    (await isExchangeFamily(
+      row.isParent ? row.id : row.isChild ? row.parent_id : null,
+    ))
+  );
+}
+
+/**
+ * Transfer relationship rules for rows touching a foreign account. Exchange
+ * transfers are created only by the exchange handler and stay frozen apart
+ * from metadata; same-encoding transfers work like base transfers, with
+ * links checked for conservation and ownership.
+ */
+async function validateForeignTransfer(
+  row: TransactionWrite,
+  existing: ExistingRow | null,
+  accountId: string,
+  account: AccountContext,
+  proposed: Map<string | undefined, TransactionWrite>,
+  options: TransactionWriteOptions,
+) {
+  const payeeChanged =
+    existing !== null &&
+    row.payee !== undefined &&
+    row.payee !== (existing.description ?? null);
+  const payeeId = row.payee !== undefined ? row.payee : existing?.description;
+  // Resolved before the trusted return too, which keeps the write order of
+  // concurrent batched inserts stable.
+  const targetAccount = payeeId ? await transferTarget(payeeId) : null;
+  if (options.validatedTransfer) return;
+
+  // Every row of a stored exchange (legs, fee children and parents, in base
+  // or foreign accounts) shares one valuation and is frozen until MC-5.
+  if (existing && (await isExchangeRow(existing.id))) {
+    const changes = (value: unknown, stored: unknown) =>
+      value !== undefined && value !== stored;
+    if (
+      changes(row.account, existing.acct) ||
+      changes(row.amount, existing.amount) ||
+      changes(row.transaction_amount, existing.transaction_amount) ||
+      (row.date !== undefined &&
+        row.date.replaceAll('-', '') !== String(existing.date)) ||
+      // A leg is never relinked to another transfer payee.
+      (payeeChanged && targetAccount !== null)
+    ) {
+      throw new Error('exchange-transfer-edit-unavailable');
+    }
+    if (
+      row.category !== undefined &&
+      row.category !== null &&
+      row.category !== existing.category &&
+      !(await exchangeCategoryAllowed(existing))
+    ) {
+      throw new Error('exchange-transfer-edit-unavailable');
+    }
+  }
+
+  const target = targetAccount ? await accountContext(targetAccount) : null;
+  const counterpartId =
+    row.transfer_id !== undefined ? row.transfer_id : existing?.transferred_id;
+  const counterpartStored = counterpartId
+    ? await effectiveRow(counterpartId)
+    : null;
+  const counterpartProposed = counterpartId
+    ? proposed.get(counterpartId)
+    : undefined;
+  const counterpartAccountId =
+    counterpartProposed?.account ?? counterpartStored?.acct ?? null;
+  const counterpartAccount = counterpartAccountId
+    ? await accountContext(counterpartAccountId)
+    : null;
+
+  // The stored relationship counts too: a write may be clearing it.
+  const storedCounterpart =
+    existing?.transferred_id && existing.transferred_id !== counterpartId
+      ? await effectiveRow(existing.transferred_id)
+      : null;
+  const storedCounterpartAccount = storedCounterpart
+    ? await accountContext(storedCounterpart.acct)
+    : null;
+
+  // Base-to-base transfers keep their existing behavior.
+  if (
+    !account.foreign &&
+    !target?.foreign &&
+    !counterpartAccount?.foreign &&
+    !storedCounterpartAccount?.foreign
+  ) {
+    return;
+  }
+
+  const own = encodingOf(account);
+  const crossTarget = target !== null && !sameEncoding(own, encodingOf(target));
+  const crossCounterpart =
+    counterpartAccount !== null &&
+    !sameEncoding(own, encodingOf(counterpartAccount));
+
+  // Exchanges need two amounts and a valuation: only the exchange handler
+  // creates them.
+  if (crossTarget && (!existing || payeeChanged)) {
+    throw new Error('multicurrency-transfer-unavailable');
+  }
+
+  const transferIdChanged =
+    row.transfer_id !== undefined &&
+    (row.transfer_id ?? null) !== (existing?.transferred_id ?? null);
+  if (transferIdChanged && row.transfer_id == null) {
+    if (!existing || !(await isExchangeLeg(existing))) return;
+    if (options.transferCleanup) return;
+    // A link is cleared only once the relationship is broken in stored
+    // state, as removeTransfer does after a deletion or payee change.
+    const previous = existing.transferred_id
+      ? await effectiveRow(existing.transferred_id)
+      : null;
+    const broken =
+      existing.tombstone === 1 ||
+      !existing.description ||
+      (await transferTarget(existing.description)) === null ||
+      !previous ||
+      previous.tombstone === 1 ||
+      !previous.description ||
+      (await transferTarget(previous.description)) !== existing.acct;
+    if (!broken) {
+      throw new Error('exchange-transfer-edit-unavailable');
+    }
+    return;
+  }
+
+  // A supplied link, changed or not, is checked for conservation and
+  // ownership; an unchanged exchange link was checked by the freeze above.
+  if (row.transfer_id == null) return;
+  if (!transferIdChanged && existing && (await isExchangeLeg(existing))) {
+    return;
+  }
+  if (crossCounterpart || crossTarget) {
+    throw new Error('multicurrency-transfer-unavailable');
+  }
+  if (!counterpartAccountId) {
+    throw new Error('transfer-counterpart-invalid');
+  }
+  const counterpartPayee =
+    counterpartProposed?.payee !== undefined
+      ? counterpartProposed.payee
+      : counterpartStored?.description;
+  const counterpartLink =
+    counterpartProposed?.transfer_id !== undefined
+      ? counterpartProposed.transfer_id
+      : counterpartStored?.transferred_id;
+  if (
+    targetAccount !== counterpartAccountId ||
+    !counterpartPayee ||
+    (await transferTarget(counterpartPayee)) !== accountId ||
+    (counterpartLink != null && counterpartLink !== row.id)
+  ) {
+    throw new Error('transfer-counterpart-invalid');
+  }
+  const amount = row.amount !== undefined ? row.amount : existing?.amount;
+  const native =
+    row.transaction_amount !== undefined
+      ? row.transaction_amount
+      : existing?.transaction_amount;
+  const counterpartAmount =
+    counterpartProposed?.amount !== undefined
+      ? counterpartProposed.amount
+      : counterpartStored?.amount;
+  const counterpartNative =
+    counterpartProposed?.transaction_amount !== undefined
+      ? counterpartProposed.transaction_amount
+      : counterpartStored?.transaction_amount;
+  if (
+    typeof amount !== 'number' ||
+    typeof native !== 'number' ||
+    counterpartAmount !== -amount ||
+    counterpartNative !== -native
+  ) {
+    throw new Error('transfer-amount-mismatch');
+  }
+}
+
+async function isOffBudget(accountId: string) {
+  return (
+    (
+      await db.first<Pick<db.DbAccount, 'offbudget'>>(
+        'SELECT offbudget FROM accounts WHERE id = ?',
+        [accountId],
+      )
+    )?.offbudget === 1
+  );
+}
+
+/**
+ * Categories an exchange row may carry, as for transfers: parents none, an
+ * on/off-budget transfer leg only on its on-budget side, a fee child only in
+ * an on-budget account.
+ */
+async function exchangeCategoryAllowed(row: ExistingRow): Promise<boolean> {
+  if (row.isParent || (await isOffBudget(row.acct))) return false;
+  if (!row.transferred_id) return true;
+  const counterpart = await effectiveRow(row.transferred_id);
+  return !!counterpart && (await isOffBudget(counterpart.acct));
+}
+
 /** Returns the authority pair to write alongside the row, if any. */
 export async function validateTransactionWrite(
   row: TransactionWrite,
   proposed: Map<string | undefined, TransactionWrite> = new Map(),
+  options: TransactionWriteOptions = {},
 ): Promise<{ pair?: string }> {
   if ('amount_pair' in row) {
     throw new Error('amount-pair-internal');
   }
-  const existing = row.id
-    ? await db.first<ExistingRow>(
-        `SELECT acct, description, transferred_id, amount, transaction_amount,
-           isParent, isChild, parent_id, schedule
-           FROM transactions WHERE id = ?`,
-        [row.id],
-      )
-    : null;
+  // A row queued earlier in the current batch is existing state too.
+  const existing = row.id ? await effectiveRow(row.id) : null;
   // An insert reusing an existing id updates that row through sync, and an
   // update of a missing id inserts it, so the stored row decides.
   const isUpdate = existing !== null;
@@ -210,34 +526,33 @@ export async function validateTransactionWrite(
     }
   }
 
-  const payeeId = row.payee !== undefined ? row.payee : existing?.description;
-  const targetAccount = payeeId ? await transferTarget(payeeId) : null;
-  if (targetAccount) {
-    const target = await accountContext(targetAccount);
-    if (account.foreign || target?.foreign) {
-      throw new Error('multicurrency-transfer-unavailable');
-    }
-  }
-  // A counterpart link is part of the transfer relationship too.
-  const counterpartId =
-    row.transfer_id !== undefined ? row.transfer_id : existing?.transferred_id;
-  if (counterpartId) {
-    // The counterpart may be another row proposed in the same request.
-    const counterpartAccount =
-      proposed.get(counterpartId)?.account ??
-      (
-        await db.first<{ acct: string }>(
-          'SELECT acct FROM transactions WHERE id = ?',
-          [counterpartId],
-        )
-      )?.acct;
-    if (
-      account.foreign ||
-      (counterpartAccount &&
-        (await accountContext(counterpartAccount))?.foreign)
-    ) {
-      throw new Error('multicurrency-transfer-unavailable');
-    }
+  await validateForeignTransfer(
+    row,
+    existing,
+    accountId,
+    account,
+    proposed,
+    options,
+  );
+
+  // A fee family of an exchange keeps its structure, base accounts included.
+  const changesFamily = existing
+    ? (row.is_parent !== undefined &&
+        !!row.is_parent !== !!existing.isParent) ||
+      (row.is_child !== undefined && !!row.is_child !== !!existing.isChild) ||
+      (row.parent_id !== undefined &&
+        (row.parent_id ?? null) !== (existing.parent_id ?? null))
+    : !!row.is_parent || !!row.is_child || !!row.parent_id;
+  if (
+    changesFamily &&
+    !options.validatedTransfer &&
+    ((existing &&
+      (await isExchangeFamily(
+        existing.isParent ? existing.id : existing.parent_id,
+      ))) ||
+      (await isExchangeFamily(row.parent_id ?? null)))
+  ) {
+    throw new Error('foreign-split-unavailable');
   }
 
   if (!account.foreign) {
@@ -249,14 +564,8 @@ export async function validateTransactionWrite(
 
   // Foreign splits arrive with foreign edits (MC-5): no family may be
   // created or restructured, while metadata edits of a family stay allowed.
-  const changesFamily = existing
-    ? (row.is_parent !== undefined &&
-        !!row.is_parent !== !!existing.isParent) ||
-      (row.is_child !== undefined && !!row.is_child !== !!existing.isChild) ||
-      (row.parent_id !== undefined &&
-        (row.parent_id ?? null) !== (existing.parent_id ?? null))
-    : !!row.is_parent || !!row.is_child || !!row.parent_id;
-  if (changesFamily) {
+  // The exchange handler writes its validated fee families.
+  if (changesFamily && !options.validatedTransfer) {
     throw new Error('foreign-split-unavailable');
   }
   const setsAmount =
@@ -284,15 +593,18 @@ export async function validateTransactionWrite(
 }
 
 /** Validates a whole request before any of its writes or side effects. */
-export async function preflightTransactionWrites({
-  added = [],
-  updated = [],
-  deleted = [],
-}: {
-  added?: TransactionWrite[];
-  updated?: TransactionWrite[];
-  deleted?: Array<{ id: string }>;
-}) {
+export async function preflightTransactionWrites(
+  {
+    added = [],
+    updated = [],
+    deleted = [],
+  }: {
+    added?: TransactionWrite[];
+    updated?: TransactionWrite[];
+    deleted?: Array<{ id: string }>;
+  },
+  options: TransactionWriteOptions = {},
+) {
   // Deleting part of a foreign split family restructures it (MC-5); a whole
   // family (its parent, which removes the children) may be deleted.
   // Tombstoning through an update (API, rule actions) deletes too.
@@ -312,7 +624,8 @@ export async function preflightTransactionWrites({
     if (
       child?.parent_id &&
       !deletedIds.has(child.parent_id) &&
-      (await isForeignAccount(child.acct))
+      ((await isForeignAccount(child.acct)) ||
+        (await isExchangeFamily(child.parent_id)))
     ) {
       throw new Error('foreign-split-unavailable');
     }
@@ -336,18 +649,83 @@ export async function preflightTransactionWrites({
     ]),
   );
   for (const row of updated) {
-    if (!addedById.has(row.id) && row.account !== undefined) {
+    if (!addedById.has(row.id)) {
       proposed.set(row.id, row);
     }
   }
   for (const row of proposed.values()) {
     if (addedById.has(row.id)) {
-      await validateTransactionWrite(row, proposed);
+      await validateTransactionWrite(row, proposed, options);
     }
   }
   for (const row of updated) {
     if (!addedById.has(row.id)) {
-      await validateTransactionWrite(row, proposed);
+      await validateTransactionWrite(row, proposed, options);
+    }
+  }
+
+  // A transfer link touching a foreign account must be reciprocal, and its
+  // counterpart must survive, in the request's final state. The per-row
+  // guard cannot require this because addTransfer writes the two links one
+  // after the other.
+  const isRemoved = (
+    id: string,
+    write: TransactionWrite | undefined,
+    stored: ExistingRow | null,
+  ) =>
+    deletedIds.has(id) ||
+    !!write?.tombstone ||
+    (write?.tombstone === undefined && stored?.tombstone === 1) ||
+    (!!stored?.parent_id && deletedIds.has(stored.parent_id));
+  for (const row of proposed.values()) {
+    if (row.id === undefined) continue;
+    const stored = await storedRow(row.id);
+    const link =
+      row.transfer_id !== undefined ? row.transfer_id : stored?.transferred_id;
+    if (link == null || isRemoved(row.id, row, stored)) continue;
+    // Only links this request sets, or rows whose payee or account it
+    // changes without the hooks to follow up, are checked.
+    const setsLink = row.transfer_id != null;
+    const changesEnds =
+      options.runTransfers === false &&
+      (row.payee !== undefined || row.account !== undefined);
+    if (!setsLink && !changesEnds) continue;
+
+    const counterpart = proposed.get(link);
+    const counterpartStored = await storedRow(link);
+    const accountId = row.account ?? stored?.acct;
+    const counterpartAccountId =
+      counterpart?.account ?? counterpartStored?.acct;
+    if (
+      !(accountId && (await isForeignAccount(accountId))) &&
+      !(counterpartAccountId && (await isForeignAccount(counterpartAccountId)))
+    ) {
+      continue;
+    }
+    const counterpartLink =
+      counterpart?.transfer_id !== undefined
+        ? counterpart.transfer_id
+        : counterpartStored?.transferred_id;
+    if (
+      counterpartLink !== row.id ||
+      isRemoved(link, counterpart, counterpartStored)
+    ) {
+      throw new Error('transfer-counterpart-invalid');
+    }
+    if (options.runTransfers === false) {
+      const payee = row.payee !== undefined ? row.payee : stored?.description;
+      const counterpartPayee =
+        counterpart?.payee !== undefined
+          ? counterpart.payee
+          : counterpartStored?.description;
+      if (
+        !payee ||
+        !counterpartPayee ||
+        (await transferTarget(payee)) !== counterpartAccountId ||
+        (await transferTarget(counterpartPayee)) !== accountId
+      ) {
+        throw new Error('transfer-counterpart-invalid');
+      }
     }
   }
 }

@@ -10,6 +10,7 @@ import { app as exchangeRatesApp } from '#server/exchange-rates/app';
 import { getNormalizedSchedules } from '#server/forecast/forecast-schedules';
 import * as prefs from '#server/prefs';
 import { app as rulesApp } from '#server/rules/app';
+import { app as transactionsApp } from '#server/transactions/app';
 import {
   insertRule,
   loadRules,
@@ -237,6 +238,50 @@ describe('posting foreign schedules', () => {
       q('schedules').filter({ id }).select(['next_date']),
     );
     expect(data[0].next_date).toBe('2016-12-30');
+  });
+
+  it('hands back the ruled draft when the final date has no rate', async () => {
+    await insertRule({
+      stage: 'pre',
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'date', value: '2016-12-30' }],
+      actions: [
+        { op: 'set', field: 'date', value: '2016-12-31' },
+        { op: 'set', field: 'notes', value: 'moved' },
+      ],
+    });
+    const send = vi.spyOn(connection, 'send');
+    const id = await dueYenSchedule();
+    await advanceSchedulesService(true);
+    // The notification names the date that needs a rate.
+    expect(send).toHaveBeenCalledWith('schedules-rate-unavailable', {
+      schedules: [{ name: null, date: '2016-12-31', currency: 'JPY' }],
+    });
+
+    const result = await app.handlers['schedule/post-transaction']({ id });
+    if (result?.type !== 'rate-unavailable') throw new Error('posted');
+    expect(result.transaction).toMatchObject({
+      date: '2016-12-31',
+      notes: 'moved',
+      transaction_amount: -1500,
+      schedule: id,
+    });
+    // Completing it keeps the rule results without running rules again.
+    await expect(
+      transactionsApp.handlers['transactions/post-foreign-entry']({
+        transaction: result.transaction,
+        baseAmount: -1000,
+        rulesApplied: true,
+      }),
+    ).resolves.toMatchObject({ status: 'ok' });
+    const { data } = await aqlQuery(
+      q('transactions')
+        .filter({ schedule: id })
+        .select(['date', 'amount', 'notes']),
+    );
+    expect(data).toMatchObject([
+      { date: '2016-12-31', amount: -1000, notes: 'moved' },
+    ]);
   });
 
   it('returns the draft for manual posting without a rate', async () => {

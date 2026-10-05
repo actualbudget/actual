@@ -421,7 +421,7 @@ describe('ForeignAmountModal', () => {
       standing,
       vi.fn(() => new Promise(done => (finish = done))),
     );
-    await screen.findByText(/at 1 USD = 150 JPY/);
+    await screen.findByText(/at 1 JPY = 0.006666666666667 USD/);
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
     expect(screen.queryByRole('button', { name: 'Close' })).toBeNull();
@@ -448,7 +448,7 @@ describe('ForeignAmountModal', () => {
       }),
     );
     store.dispatch(pushModal({ modal: { name: 'goal-templates' } }));
-    await screen.findByText(/at 1 USD = 150 JPY/);
+    await screen.findByText(/at 1 JPY = 0.006666666666667 USD/);
     // The dialog below the top modal is inactive; skip the pointer check.
     await userEvent
       .setup({ pointerEventsCheck: 0 })
@@ -467,7 +467,7 @@ describe('ForeignAmountModal', () => {
         throw new Error('multicurrency-transfer-unavailable');
       }),
     );
-    await screen.findByText(/at 1 USD = 150 JPY/);
+    await screen.findByText(/at 1 JPY = 0.006666666666667 USD/);
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(
       await screen.findByText('This transaction could not be saved.'),

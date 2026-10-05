@@ -89,6 +89,7 @@ export function ForeignAmountModal({
   transaction,
   currencyCode,
   nativePrecision,
+  rulesApplied,
   onPosted,
 }: ForeignAmountModalProps) {
   const { t } = useTranslation();
@@ -264,6 +265,7 @@ export function ForeignAmountModal({
         ...payload,
         replaceRate,
         saveStanding: persistStanding,
+        rulesApplied,
       });
       switch (result.status) {
         case 'ok':
