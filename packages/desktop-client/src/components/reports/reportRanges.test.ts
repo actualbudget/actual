@@ -142,6 +142,28 @@ describe('calculateSpendingReportTimeRange', () => {
     expect(compareTo).toBe('2016-10'); // gap of 3 preserved
   });
 
+  it('defaults a missing compareTo to the month before compare', () => {
+    const [compare, compareTo] = calculateSpendingReportTimeRange({
+      compare: '2016-01',
+      isLive: true,
+      mode: 'single-month',
+    });
+
+    expect(compare).toBe('2017-01');
+    expect(compareTo).toBe('2016-12');
+  });
+
+  it('defaults a missing compareTo for static single month reports', () => {
+    const [compare, compareTo] = calculateSpendingReportTimeRange({
+      compare: '2016-01',
+      isLive: false,
+      mode: 'single-month',
+    });
+
+    expect(compare).toBe('2016-01');
+    expect(compareTo).toBe('2015-12');
+  });
+
   it('preserves the saved compare months for static single month reports', () => {
     const [compare, compareTo] = calculateSpendingReportTimeRange({
       compare: '2016-12',

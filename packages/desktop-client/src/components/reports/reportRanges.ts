@@ -367,10 +367,15 @@ export function calculateSpendingReportTimeRange({
   // Live single-month reports slide like every other live report: the saved
   // months give the gap between the two series, and the range is re-anchored
   // so the newest month is the current one. Static reports keep them as-is.
+  //
+  // A report saved with `compare` but no `compareTo` compares against the
+  // preceding month. Without that default the missing end falls back to the
+  // month before now, widening the comparison to the distance between the two.
   const [start, end] = calculateTimeRange(
     {
       start: compare,
-      end: compareTo,
+      end:
+        compareTo ?? (compare ? monthUtils.subMonths(compare, 1) : undefined),
       mode: (isLive ?? true) ? 'sliding-window' : 'static',
     },
     {
