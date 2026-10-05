@@ -17,6 +17,7 @@ import {
 } from '#components/budget/goals/editor/fieldLayout';
 import { Link } from '#components/common/Link';
 import { FormField, FormLabel } from '#components/forms';
+import { useAccounts } from '#hooks/useAccounts';
 
 type ScheduleAutomationProps = {
   schedules: readonly ScheduleEntity[];
@@ -32,14 +33,22 @@ export const ScheduleAutomation = ({
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const fieldFlex = isNarrowWidth ? STACKED_FIELD_FLEX : 1;
+  const { data: accounts = [] } = useAccounts();
+  const foreignAccountIds = new Set(
+    accounts.filter(account => account.currency).map(account => account.id),
+  );
   // Match the filter applied to the Select options below — completed and
   // tombstoned schedules aren't selectable, so a category whose only
   // schedules are completed should fall through to the "no schedules" state
-  // instead of showing an empty picker.
+  // instead of showing an empty picker. Schedules in other currencies have
+  // no budget-currency amount for templates yet.
   const selectableSchedules = schedules
     .filter(
       (s): s is typeof s & { name: string } =>
-        !!s.name && !s.completed && !s.tombstone,
+        !!s.name &&
+        !s.completed &&
+        !s.tombstone &&
+        !foreignAccountIds.has(s._account),
     )
     .sort((a, b) =>
       a.name.trim().localeCompare(b.name.trim(), undefined, {

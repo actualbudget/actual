@@ -425,7 +425,7 @@ describe('request preflight', () => {
 });
 
 describe('workflows awaiting later stages', () => {
-  it('rejects foreign schedules', async () => {
+  it("keeps a schedule's encoding", async () => {
     const conditions = (account: string) => [
       { op: 'is', field: 'account', value: account },
       {
@@ -444,18 +444,29 @@ describe('workflows awaiting later stages', () => {
       },
       { op: 'is', field: 'amount', value: -1000 },
     ];
+    const yen = await createSchedule({
+      conditions: conditions('jpy') as never,
+    });
+    // Same encoding: allowed.
+    await updateSchedule({
+      schedule: { id: yen },
+      conditions: conditions('jpy2') as never,
+    });
     await expect(
-      createSchedule({ conditions: conditions('jpy') as never }),
-    ).rejects.toThrow('multicurrency-schedule-unavailable');
-    const id = await createSchedule({
+      updateSchedule({
+        schedule: { id: yen },
+        conditions: conditions('kwd') as never,
+      }),
+    ).rejects.toThrow('schedule-account-encoding-change');
+    const base = await createSchedule({
       conditions: conditions('base') as never,
     });
     await expect(
       updateSchedule({
-        schedule: { id },
+        schedule: { id: base },
         conditions: conditions('jpy') as never,
       }),
-    ).rejects.toThrow('multicurrency-schedule-unavailable');
+    ).rejects.toThrow('schedule-account-encoding-change');
   });
 
   it('does not apply amount rule actions to foreign transactions', async () => {
@@ -946,15 +957,7 @@ describe('inspection round 1 regressions', () => {
     ).toHaveLength(1);
   });
 
-  it('rejects rule writes that retarget a schedule to a foreign account', async () => {
-    await expect(
-      insertRule({
-        stage: null,
-        conditionsOp: 'and',
-        conditions: [{ op: 'is', field: 'account', value: 'jpy' }],
-        actions: [{ op: 'link-schedule', value: 'sched' }],
-      } as never),
-    ).rejects.toThrow('multicurrency-schedule-unavailable');
+  it('checks schedule encodings and splits at the rule boundary', async () => {
     const scheduleId = await createSchedule({
       conditions: [
         { op: 'is', field: 'account', value: 'base' },
@@ -983,7 +986,24 @@ describe('inspection round 1 regressions', () => {
         id: schedule?.rule,
         conditions: [{ op: 'is', field: 'account', value: 'jpy' }],
       }),
-    ).rejects.toThrow('multicurrency-schedule-unavailable');
+    ).rejects.toThrow('schedule-account-encoding-change');
+    // Foreign schedules cannot create splits until foreign splits exist.
+    await expect(
+      insertRule({
+        stage: null,
+        conditionsOp: 'and',
+        conditions: [{ op: 'is', field: 'account', value: 'jpy' }],
+        actions: [
+          { op: 'link-schedule', value: 'sched' },
+          {
+            op: 'set',
+            field: 'notes',
+            value: 'child',
+            options: { splitIndex: 1 },
+          },
+        ],
+      } as never),
+    ).rejects.toThrow('foreign-split-unavailable');
   });
 });
 
@@ -1139,10 +1159,10 @@ describe('inspection round 2 regressions', () => {
     });
   });
 
-  it('uses the effective schedule account in schedule and rule guards', async () => {
-    const conditions = [
+  it('uses the effective schedule account for encodings', async () => {
+    const conditions = (account: string) => [
       { op: 'isNot', field: 'account', value: 'base' },
-      { op: 'is', field: 'account', value: 'jpy' },
+      { op: 'is', field: 'account', value: account },
       {
         op: 'isapprox',
         field: 'date',
@@ -1158,17 +1178,13 @@ describe('inspection round 2 regressions', () => {
         },
       },
     ];
+    const id = await createSchedule({ conditions: conditions('jpy') as never });
     await expect(
-      createSchedule({ conditions: conditions as never }),
-    ).rejects.toThrow('multicurrency-schedule-unavailable');
-    await expect(
-      insertRule({
-        stage: null,
-        conditionsOp: 'and',
-        conditions: conditions.slice(0, 2),
-        actions: [{ op: 'link-schedule', value: 'sched' }],
-      } as never),
-    ).rejects.toThrow('multicurrency-schedule-unavailable');
+      updateSchedule({
+        schedule: { id },
+        conditions: conditions('base2') as never,
+      }),
+    ).rejects.toThrow('schedule-account-encoding-change');
   });
 });
 
@@ -1239,26 +1255,60 @@ describe('foreign workflows awaiting later stages', () => {
     });
   });
 
-  it('rejects linking foreign transactions to schedules', async () => {
+  it('links transactions only to schedules in their encoding', async () => {
+    const scheduleFor = (account: string | null) =>
+      createSchedule({
+        conditions: [
+          ...(account ? [{ op: 'is', field: 'account', value: account }] : []),
+          {
+            op: 'isapprox',
+            field: 'date',
+            value: {
+              start: '2026-03-01',
+              frequency: 'monthly',
+              patterns: [],
+              skipWeekend: false,
+              weekendSolveMode: 'after',
+              endMode: 'never',
+              endOccurrences: 1,
+              endDate: '2026-03-01',
+            },
+          },
+        ] as never,
+      });
+    const yen = await scheduleFor('jpy');
+    const base = await scheduleFor('base');
+    const anywhere = await scheduleFor(null);
     await db.insertTransaction({
       id: 'f',
-      account: 'jpy',
+      account: 'jpy2',
       date: '2026-03-01',
       ...pair,
     });
+    await db.insertTransaction({
+      id: 'b',
+      account: 'base',
+      date: '2026-03-01',
+      amount: -1000,
+    });
+    await db.updateTransaction({ id: 'f', schedule: yen });
+    await db.updateTransaction({ id: 'f', schedule: anywhere });
     await expect(
-      db.updateTransaction({ id: 'f', schedule: 'sched' }),
-    ).rejects.toThrow('multicurrency-schedule-unavailable');
+      db.updateTransaction({ id: 'f', schedule: base }),
+    ).rejects.toThrow('schedule-currency-mismatch');
+    await expect(
+      db.updateTransaction({ id: 'b', schedule: yen }),
+    ).rejects.toThrow('schedule-currency-mismatch');
     await expect(
       db.insertTransaction({
         id: 'g',
-        account: 'jpy',
+        account: 'kwd',
         date: '2026-03-01',
-        ...pair,
-        schedule: 'sched',
+        amount: -1000,
+        transaction_amount: -1500,
+        schedule: yen,
       }),
-    ).rejects.toThrow('multicurrency-schedule-unavailable');
-    await db.updateTransaction({ id: 'f', schedule: null });
+    ).rejects.toThrow('schedule-currency-mismatch');
   });
 });
 

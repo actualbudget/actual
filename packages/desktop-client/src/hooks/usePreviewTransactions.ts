@@ -6,16 +6,24 @@ import { computeSchedulePreviewTransactions } from '@actual-app/core/shared/sche
 import { ungroupTransactions } from '@actual-app/core/shared/transactions';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
+  AccountEntity,
   ScheduleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
 
+import { useAccounts } from './useAccounts';
 import { useCachedSchedules } from './useCachedSchedules';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
 
 type UsePreviewTransactionsProps = {
   filter?: (schedule: ScheduleEntity) => boolean;
+  /**
+   * The foreign account whose own register shows its schedules natively.
+   * Other views are in the budget currency and leave out foreign schedules
+   * until they are posted.
+   */
+  foreignAccountId?: AccountEntity['id'];
   options?: {
     /**
      * Whether to calculate running balances.
@@ -55,10 +63,35 @@ export function comparePreviewTransactions(
   return a.amount - b.amount;
 }
 
+/**
+ * Schedules a view previews: foreign schedules only in their own account's
+ * register, since other views are in the budget currency.
+ */
+export function previewScheduleFilter(
+  accounts: ReadonlyArray<Pick<AccountEntity, 'id' | 'currency'>>,
+  foreignAccountId: AccountEntity['id'] | undefined,
+  filter?: (schedule: ScheduleEntity) => boolean,
+) {
+  const foreignAccountIds = new Set(
+    accounts.filter(account => account.currency).map(account => account.id),
+  );
+  // A foreign register shows only its own schedules: transfers to it from
+  // other accounts would carry amounts in another currency.
+  const foreignRegister =
+    foreignAccountId !== undefined && foreignAccountIds.has(foreignAccountId);
+  return (schedule: ScheduleEntity) =>
+    (foreignRegister
+      ? schedule._account === foreignAccountId
+      : !foreignAccountIds.has(schedule._account)) &&
+    (filter ? filter(schedule) : true);
+}
+
 export function usePreviewTransactions({
   filter,
+  foreignAccountId,
   options,
 }: UsePreviewTransactionsProps = {}): UsePreviewTransactionsResult {
+  const { data: accounts = [] } = useAccounts();
   const [previewTransactions, setPreviewTransactions] = useState<
     TransactionEntity[]
   >([]);
@@ -82,9 +115,17 @@ export function usePreviewTransactions({
       schedules,
       statuses,
       upcomingLength,
-      filter,
+      previewScheduleFilter(accounts, foreignAccountId, filter),
     );
-  }, [filter, isSchedulesLoading, schedules, statuses, upcomingLength]);
+  }, [
+    accounts,
+    filter,
+    foreignAccountId,
+    isSchedulesLoading,
+    schedules,
+    statuses,
+    upcomingLength,
+  ]);
 
   useEffect(() => {
     let isUnmounted = false;
@@ -99,10 +140,18 @@ export function usePreviewTransactions({
 
     setIsLoading(true);
 
+    // A foreign schedule's preview has no base amount yet: rules see its
+    // native amount only, and ordinary amount conditions do not match.
+    const foreignAccountIds = new Set(
+      accounts.filter(account => account.currency).map(account => account.id),
+    );
     Promise.all(
       scheduleTransactions.map(transaction =>
         // Kick off an async rules application
-        send('rules-run', { transaction }),
+        send('rules-run', {
+          transaction,
+          amountIsNative: foreignAccountIds.has(transaction.account),
+        }),
       ),
     )
       .then(newTrans => {
@@ -144,7 +193,7 @@ export function usePreviewTransactions({
     return () => {
       isUnmounted = true;
     };
-  }, [scheduleTransactions, schedules, statuses, upcomingLength]);
+  }, [scheduleTransactions, schedules, statuses, upcomingLength, accounts]);
 
   const runningBalances = useMemo(() => {
     if (!options?.calculateRunningBalances) {

@@ -28,12 +28,18 @@ export async function postForeignEntry({
   baseAmount,
   rate,
   expectedBaseAmount,
+  rulesBeforeBase = false,
 }: {
   transaction: ForeignDraft;
   baseAmount?: number;
   rate?: string | number;
   /** Base shown to the user for a supplied rate; a mismatch asks again. */
   expectedBaseAmount?: number;
+  /**
+   * Run rules on the native draft, as imports do, then complete the pair at
+   * the final date. Base-amount conditions then never match.
+   */
+  rulesBeforeBase?: boolean;
 }): Promise<
   | { status: 'ok'; id: string }
   | Exclude<Awaited<ReturnType<typeof computeEntryPair>>, { status: 'ok' }>
@@ -52,21 +58,30 @@ export async function postForeignEntry({
     throw new Error('foreign-split-unavailable');
   }
   const account = await getAccountCurrency(transaction.account);
-  const pair = await computeEntryPair({
-    quoteCurrency: account.currencyCode,
-    nativePrecision: account.precision,
-    date: transaction.date,
-    nativeAmount: transaction.transaction_amount,
-    baseAmount,
-    rate,
-  });
-  if (pair.status !== 'ok') return pair;
-  if (
-    rate !== undefined &&
-    expectedBaseAmount !== undefined &&
-    pair.baseAmount !== expectedBaseAmount
-  ) {
-    return { status: 'base-changed', baseAmount: pair.baseAmount };
+  const pairAt = (date: string) =>
+    computeEntryPair({
+      quoteCurrency: account.currencyCode,
+      nativePrecision: account.precision,
+      date,
+      nativeAmount: transaction.transaction_amount,
+      baseAmount,
+      rate,
+    });
+  let pair: Extract<
+    Awaited<ReturnType<typeof pairAt>>,
+    { status: 'ok' }
+  > | null = null;
+  if (!rulesBeforeBase) {
+    const entryPair = await pairAt(transaction.date);
+    if (entryPair.status !== 'ok') return entryPair;
+    if (
+      rate !== undefined &&
+      expectedBaseAmount !== undefined &&
+      entryPair.baseAmount !== expectedBaseAmount
+    ) {
+      return { status: 'base-changed', baseAmount: entryPair.baseAmount };
+    }
+    pair = entryPair;
   }
 
   // Payees named during entry or by rules are staged and created only
@@ -90,8 +105,8 @@ export async function postForeignEntry({
       // A staged payee is not in the database yet; rules still see its name.
       ...(payeeName?.trim() && { payee_name: payeeName.trim() }),
       id: fields.id || uuidv4(),
-      amount: pair.baseAmount,
-      transaction_amount: pair.nativeAmount,
+      transaction_amount: transaction.transaction_amount,
+      ...(pair && { amount: pair.baseAmount }),
     },
     null,
     undefined,
@@ -108,7 +123,11 @@ export async function postForeignEntry({
       return { status: 'rule-account-incompatible' };
     }
   }
-  if (ruled.date !== transaction.date) {
+  if (!pair) {
+    const finalPair = await pairAt(ruled.date);
+    if (finalPair.status !== 'ok') return finalPair;
+    pair = finalPair;
+  } else if (ruled.date !== transaction.date) {
     return { status: 'rule-date-changed', date: ruled.date };
   }
 

@@ -112,10 +112,22 @@ export function normalizeSchedule(
 
 export async function getNormalizedSchedules() {
   const rawSchedules = await getSchedules();
+  // The forecast is in the budget currency; foreign schedules are native
+  // and have no base estimate yet.
+  const foreignAccountIds = new Set(
+    (
+      await db.all<Pick<db.DbAccount, 'id'>>(
+        'SELECT id FROM accounts WHERE currency IS NOT NULL',
+      )
+    ).map(account => account.id),
+  );
 
   return rawSchedules.flatMap(schedule => {
     const normalizedSchedule = normalizeSchedule(schedule);
-    return normalizedSchedule ? [normalizedSchedule] : [];
+    return normalizedSchedule &&
+      !foreignAccountIds.has(normalizedSchedule._account)
+      ? [normalizedSchedule]
+      : [];
   });
 }
 

@@ -12,10 +12,12 @@ import { q } from '@actual-app/core/shared/query';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { Search } from '#components/common/Search';
+import { useAccounts } from '#hooks/useAccounts';
 import { useSchedules } from '#hooks/useSchedules';
 import { pushModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import { linkableSchedules } from '#util/account-encoding';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 
@@ -40,9 +42,16 @@ export function ScheduleLink({
   );
   const {
     isLoading: isSchedulesLoading,
-    schedules,
+    schedules: allSchedules,
     statuses,
   } = useSchedules({ query: schedulesQuery });
+  const { data: accounts = [] } = useAccounts();
+  // Only schedules in the transactions' encoding can be linked.
+  const schedules = linkableSchedules(
+    allSchedules,
+    accounts,
+    (ids ?? []).map(id => getTransaction(id)?.account),
+  );
 
   const searchInput = useRef<HTMLInputElement | null>(null);
 

@@ -434,24 +434,6 @@ export function useTransactionBatchActions() {
         .select('*')
         .options({ splits: 'grouped' }),
     );
-    // Schedules for accounts in other currencies arrive later.
-    if (
-      (transactions as TransactionEntity[]).some(
-        trans => accounts.find(acct => acct.id === trans.account)?.currency,
-      )
-    ) {
-      dispatch(
-        addNotification({
-          notification: {
-            type: 'error',
-            message: t(
-              'Transactions in other currencies cannot be linked to schedules yet.',
-            ),
-          },
-        }),
-      );
-      return;
-    }
 
     dispatch(
       pushModal({

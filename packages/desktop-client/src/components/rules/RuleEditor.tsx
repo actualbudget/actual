@@ -55,6 +55,8 @@ import {
 } from '#components/util/betweenRange';
 import { DisplayId } from '#components/util/DisplayId';
 import { GenericInput } from '#components/util/GenericInput';
+import { AccountCurrencyFormat } from '#hooks/currencyFormatContext';
+import { useAccounts } from '#hooks/useAccounts';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
@@ -64,6 +66,7 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
 import { disableUndo, enableUndo } from '#undo';
+import { otherEncodingAccountIds } from '#util/account-encoding';
 import { friendlyOp, getAllocationMethods, mapField } from '#util/rule';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
@@ -303,6 +306,8 @@ function ConditionEditor({
   condition,
   editorStyle,
   isSchedule,
+  amountAccount,
+  hiddenAccounts,
   onChange,
   onDelete,
   onAdd,
@@ -378,7 +383,16 @@ function ConditionEditor({
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
         numberFormatType="currency"
+        hiddenAccounts={field === 'account' ? hiddenAccounts : undefined}
       />
+    );
+  }
+  // A foreign schedule's amount conditions are native.
+  if (type === 'number') {
+    valueEditor = (
+      <AccountCurrencyFormat account={amountAccount}>
+        {valueEditor}
+      </AccountCurrencyFormat>
     );
   }
 
@@ -429,10 +443,15 @@ function formatAmount(amount, format) {
   }
 }
 
+function ScheduleAmount({ amount }) {
+  const format = useFormat();
+  return <FinancialText>{formatAmount(amount, format)}</FinancialText>;
+}
+
 function ScheduleDescription({ id }) {
   const { isNarrowWidth } = useResponsive();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const format = useFormat();
+  const { data: accounts = [] } = useAccounts();
   const scheduleQuery = useMemo(
     () => q('schedules').filter({ id }).select('*'),
     [id],
@@ -482,9 +501,11 @@ function ScheduleDescription({ id }) {
         <Text style={{ flexShrink: 0 }}>
           <Text> — </Text>
           <Trans>Amount:</Trans>{' '}
-          <FinancialText>
-            {formatAmount(schedule._amount, format)}
-          </FinancialText>
+          <AccountCurrencyFormat
+            account={accounts.find(account => account.id === schedule._account)}
+          >
+            <ScheduleAmount amount={schedule._amount} />
+          </AccountCurrencyFormat>
         </Text>
 
         <Text style={{ flexShrink: 0 }}>
@@ -892,6 +913,8 @@ function ConditionsList({
   conditions,
   editorStyle,
   isSchedule,
+  amountAccount = undefined,
+  hiddenAccounts = undefined,
   onChangeConditions,
 }) {
   function addCondition(index) {
@@ -1050,6 +1073,8 @@ function ConditionsList({
               ops={ops}
               condition={cond}
               isSchedule={isSchedule}
+              amountAccount={amountAccount}
+              hiddenAccounts={hiddenAccounts}
               onChange={(name, value) => {
                 updateCondition(cond, name, value);
               }}
@@ -1142,6 +1167,32 @@ export function RuleEditor({
     getActions(actionSplits),
   );
 
+  // A schedule's own rule keeps its amounts in the schedule account's
+  // encoding, which an existing schedule keeps. Other rules linking a
+  // schedule compare base amounts.
+  const { data: accounts = [] } = useAccounts();
+  const [ownsSchedule, setOwnsSchedule] = useState(false);
+  const ruleId = 'id' in defaultRule ? defaultRule.id : undefined;
+  useEffect(() => {
+    if (!ruleId) return;
+    void aqlQuery(q('schedules').filter({ rule: ruleId }).select('id')).then(
+      ({ data }) => setOwnsSchedule(data.length > 0),
+    );
+  }, [ruleId]);
+  const accountOf = (
+    conds: Array<{ field?: string; op?: string; value?: unknown }>,
+  ) =>
+    accounts.find(
+      account =>
+        account.id ===
+        conds.find(cond => cond.field === 'account' && cond.op === 'is')?.value,
+    );
+  const scheduleAccount = ownsSchedule ? accountOf(conditions) : undefined;
+  const amountAccount = scheduleAccount?.currency ? scheduleAccount : undefined;
+  const otherEncodingAccounts = ownsSchedule
+    ? otherEncodingAccountIds(accounts, accountOf(defaultRule.conditions))
+    : [];
+
   useEffect(() => {
     // Disable undo while this modal is open
     disableUndo();
@@ -1161,15 +1212,31 @@ export function RuleEditor({
     async function run() {
       const { filters } = await send('make-filters-from-conditions', {
         conditions: conditions.map(unparse),
+        amountField: amountAccount ? 'transaction_amount' : 'amount',
       });
 
       if (filters.length > 0) {
         const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
         const parentOnlyCondition =
           actionSplits.length > 1 ? { is_child: false } : {};
+        // A schedule with an account only matches its own encoding,
+        // whatever the conditions' operator.
+        const encodingCondition = scheduleAccount
+          ? {
+              'account.currency': scheduleAccount.currency ?? null,
+              ...(scheduleAccount.currency && {
+                'account.currency_precision':
+                  scheduleAccount.currency_precision,
+              }),
+            }
+          : {};
         const { data: transactions } = await aqlQuery(
           q('transactions')
-            .filter({ [conditionsOpKey]: filters, ...parentOnlyCondition })
+            .filter({
+              [conditionsOpKey]: filters,
+              ...parentOnlyCondition,
+              ...encodingCondition,
+            })
             .select('*'),
         );
         setTransactions(transactions);
@@ -1178,7 +1245,7 @@ export function RuleEditor({
       }
     }
     void run();
-  }, [actionSplits, conditions, conditionsOp]);
+  }, [actionSplits, conditions, conditionsOp, amountAccount, scheduleAccount]);
 
   const selectedInst = useSelected('transactions', transactions, []);
 
@@ -1404,7 +1471,8 @@ export function RuleEditor({
   }
 
   // Enable editing existing split rules even if the feature has since been disabled.
-  const showSplitButton = actionSplits.length > 0;
+  // Foreign schedules cannot create splits until foreign splits exist.
+  const showSplitButton = actionSplits.length > 0 && !amountAccount;
 
   return (
     <View style={style}>
@@ -1480,8 +1548,17 @@ export function RuleEditor({
               conditions={conditions}
               editorStyle={styles.editorPill}
               isSchedule={isSchedule}
+              amountAccount={amountAccount}
+              hiddenAccounts={otherEncodingAccounts}
               onChangeConditions={conds => setConditions(conds)}
             />
+            {otherEncodingAccounts.length > 0 && (
+              <Text style={{ fontSize: 12, color: theme.pageTextLight }}>
+                <Trans>
+                  To use an account in another currency, create a new schedule.
+                </Trans>
+              </Text>
+            )}
           </View>
 
           <Text style={{ marginBottom: 15 }}>
