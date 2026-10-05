@@ -131,6 +131,7 @@ export function TransactionListItem({
     is_parent: isParent,
     is_child: isChild,
     notes,
+    tracking_number: trackingNumber,
     forceUpcoming,
     schedule: scheduleId,
   } = transaction;
@@ -291,6 +292,20 @@ export function TransactionListItem({
                     {prettyCategory || t('Uncategorized')}
                   </TextOneLine>
                 </View>
+              )}
+              {trackingNumber && (
+                <TextOneLine
+                  style={{
+                    fontSize: 11,
+                    marginTop: 4,
+                    fontWeight: '400',
+                    color: theme.tableText,
+                    textAlign: 'left',
+                    opacity: 0.85,
+                  }}
+                >
+                  {trackingNumber}
+                </TextOneLine>
               )}
               {displayedNotes && (
                 <TextOneLine

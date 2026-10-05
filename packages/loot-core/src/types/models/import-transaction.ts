@@ -32,6 +32,9 @@ export type ImportTransactionEntity = {
   /** Any additional notes for the transaction */
   notes?: string;
 
+  /** A free-form reference such as a check number */
+  tracking_number?: string;
+
   /** A unique id usually given by the bank, if importing.
    * Use this to avoid duplicate transactions */
   imported_id?: string;
@@ -52,5 +55,6 @@ export type ImportTransactionEntity = {
     amount: number;
     category?: string;
     notes?: string;
+    tracking_number?: string;
   }>;
 };

@@ -210,7 +210,12 @@ export function useTransactionBatchActions() {
     };
 
     const pushEditField = () => {
-      if (name !== 'date' && name !== 'amount' && name !== 'notes') {
+      if (
+        name !== 'date' &&
+        name !== 'amount' &&
+        name !== 'notes' &&
+        name !== 'tracking_number'
+      ) {
         return;
       }
 

@@ -49,6 +49,16 @@ describe('rules', () => {
       expect(validOps).toContain('hasAnyTag');
     });
 
+    it('should only include text match operations for tracking_number field', () => {
+      expect(getValidOps('tracking_number')).toEqual([
+        'is',
+        'contains',
+        'matches',
+        'isNot',
+        'doesNotContain',
+      ]);
+    });
+
     it('should include oneOf and notOneOf for payee field', () => {
       const validOps = getValidOps('payee');
       expect(validOps).toContain('oneOf');

@@ -265,6 +265,20 @@ export function EditFieldModal({
       );
       break;
 
+    case 'tracking_number':
+      label = t('Number');
+      editor = ({ close }) => (
+        <Input
+          autoFocus
+          onEnter={value => {
+            onSelect(value.trim());
+            close();
+          }}
+          style={inputStyle}
+        />
+      );
+      break;
+
     case 'amount':
       label = t('Amount');
       editor = ({ close }) => (

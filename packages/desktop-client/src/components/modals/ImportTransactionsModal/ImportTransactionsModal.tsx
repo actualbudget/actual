@@ -50,6 +50,7 @@ import {
   applyFieldMappings,
   dateFormats,
   filterByStartDate,
+  findTrackingNumberField,
   isDateFormat,
   parseAmountFields,
   parseCategoryFields,
@@ -114,6 +115,10 @@ function getInitialMappings(transactions) {
     return entry ? entry[0] : null;
   }
 
+  const trackingNumberField = findTrackingNumberField(
+    fields.map(([name]) => name),
+  );
+
   const dateField = key(
     fields.find(([name]) => name.toLowerCase().includes('date')) ||
       fields.find(([, value]) => String(value)?.match(/^\d+[-/]\d+[-/]\d+$/)),
@@ -121,7 +126,10 @@ function getInitialMappings(transactions) {
 
   const amountField = key(
     fields.find(([name]) => name.toLowerCase().includes('amount')) ||
-      fields.find(([, value]) => String(value)?.match(/^-?[.,\d]+$/)),
+      fields.find(
+        ([name, value]) =>
+          name !== trackingNumberField && String(value)?.match(/^-?[.,\d]+$/),
+      ),
   );
 
   const categoryField = key(
@@ -132,7 +140,10 @@ function getInitialMappings(transactions) {
     fields.find(([name]) => name.toLowerCase().includes('payee')) ||
       fields.find(
         ([name]) =>
-          name !== dateField && name !== amountField && name !== categoryField,
+          name !== dateField &&
+          name !== amountField &&
+          name !== categoryField &&
+          name !== trackingNumberField,
       ),
   );
 
@@ -143,7 +154,8 @@ function getInitialMappings(transactions) {
           name !== dateField &&
           name !== amountField &&
           name !== categoryField &&
-          name !== payeeField,
+          name !== payeeField &&
+          name !== trackingNumberField,
       ),
   );
 
@@ -153,7 +165,8 @@ function getInitialMappings(transactions) {
         name !== dateField &&
         name !== amountField &&
         name !== payeeField &&
-        name !== notesField,
+        name !== notesField &&
+        name !== trackingNumberField,
     ),
   );
 
@@ -162,6 +175,7 @@ function getInitialMappings(transactions) {
     amount: amountField,
     payee: payeeField,
     notes: notesField,
+    tracking_number: trackingNumberField,
     inOut: inOutField,
     category: categoryField,
   };
@@ -712,6 +726,7 @@ export function ImportTransactionsModal({
         amount: amountToInteger(amount),
         cleared: clearOnImport,
         notes: importNotes ? finalTransaction.notes : null,
+        tracking_number: finalTransaction.tracking_number || null,
       });
     }
 
@@ -899,6 +914,7 @@ export function ImportTransactionsModal({
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
     { name: t('Date'), width: 200 },
+    { name: t('Number'), width: 100 },
     { name: t('Payee'), width: 'flex' },
     { name: t('Notes'), width: 'flex' },
     { name: t('Category'), width: 'flex' },
@@ -971,7 +987,7 @@ export function ImportTransactionsModal({
                     !trans.isMatchedTransaction ||
                     (trans.isMatchedTransaction && reconcile),
                 )}
-                fields={['payee', 'category', 'amount']}
+                fields={['tracking_number', 'payee', 'category', 'amount']}
                 style={{ backgroundColor: theme.tableHeaderBackground }}
                 getItemKey={index => String(index)}
                 renderEmpty={() => {
@@ -996,6 +1012,7 @@ export function ImportTransactionsModal({
                       showParsed={filetype === 'csv' || filetype === 'qif'}
                       parseDateFormat={parseDateFormat}
                       dateFormat={dateFormat}
+                      showTrackingNumber={true}
                       fieldMappings={fieldMappings}
                       splitMode={splitMode}
                       inOutMode={inOutMode}

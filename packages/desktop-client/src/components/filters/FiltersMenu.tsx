@@ -71,6 +71,7 @@ const filterFields = [
   'account',
   'payee',
   'notes',
+  'tracking_number',
   'category',
   'amount',
   'cleared',

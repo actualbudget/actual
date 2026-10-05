@@ -227,6 +227,7 @@ export async function importTransactions(
               : getCategory(transaction.categoryId),
             date: transaction.date,
             notes: transaction.memo || null,
+            tracking_number: transaction.checkNumber?.trim() || null,
             cleared:
               transaction.cleared === 'Cleared' ||
               transaction.cleared === 'Reconciled',
