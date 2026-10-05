@@ -1,5 +1,5 @@
 import express from 'express';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 
 import { sha256String } from '#util/hash';
 import {
@@ -97,6 +97,25 @@ app.post('/status', async (req, res) => {
     },
   });
 });
+
+const ensureConfigured = (
+  _req: Request,
+  res: Response,
+  next: express.NextFunction,
+) => {
+  if (!goCardlessService.isConfigured()) {
+    res.send({
+      status: 'ok',
+      data: {
+        error_type: 'GOCARDLESS_NOT_CONFIGURED',
+        error_code: 'GOCARDLESS_NOT_CONFIGURED',
+        reason: 'GoCardless credentials are missing',
+      },
+    });
+    return;
+  }
+  next();
+};
 
 app.post(
   '/create-web-token',
@@ -210,6 +229,7 @@ app.post(
 
 app.post(
   '/transactions',
+  ensureConfigured,
   handleError(async (req, res) => {
     const {
       requisitionId: rawRequisitionId,
