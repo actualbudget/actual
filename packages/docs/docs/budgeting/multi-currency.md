@@ -76,7 +76,21 @@ The account balance is then €1,050.00: the 2,000.00 starting balance minus the
 
 <img width="860" alt="BNP Paribas with a balance of €1,050.00, a 950.00 rent payment to Résidences Saint-Martin SARL, and a 2,000.00 starting balance" src="/img/budgeting/multi-currency-eur-register@2x.png" />
 
-A saved amount in the euro or peso account cannot be changed, split, or scheduled.
+A saved amount in the euro or peso account cannot be changed or split.
+
+## Schedule a payment
+
+Open **Schedules** and click **Add new schedule**. Name it **Paris rent**. Choose the payee **Résidences Saint-Martin SARL** and the account **BNP Paribas**. The amount is then in euros. Enter 950.00. The field shows -€950.00. Set the date to repeat every month.
+
+<img width="694" alt="Schedule for Résidences Saint-Martin SARL in BNP Paribas, with an amount of -€950.00 repeating every month on the 31st" src="/img/budgeting/multi-currency-schedule@2x.png" />
+
+On the scheduled date, Actual posts the payment and converts it with the saved rate for that date. 950.00 euros becomes $1,045.00 at 1 USD = 0.909091 EUR.
+
+If that date has no saved rate, the payment stays unposted. Actual says that some scheduled transactions were not posted because no exchange rate is saved, and it names the schedule, its currency, and the date. Post the schedule from the Schedules page. That opens **Convert to budget currency**. Enter a rate or a base amount, then save. Nothing is posted until then.
+
+A remittance from BBVA México works the same way. 8000.00 pesos posts as $400.00 at 1 USD = 20 MXN.
+
+A schedule stays in the currency of the account it was created for. To use an account in another currency, create a new schedule. The form says: "To use an account in another currency, create a new schedule."
 
 ## On a phone
 

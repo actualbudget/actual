@@ -392,6 +392,11 @@ export function SelectLinkedAccountsModal({
   const [unlinkedIds, setUnlinkedIds] = useState<ReadonlySet<string>>(
     new Set(),
   );
+  // Local accounts that existed when a new-account link was sent, by provider
+  // account, so the account that link created can be found afterwards.
+  const [newLinkBaselines, setNewLinkBaselines] = useState<
+    Record<string, ReadonlySet<string>>
+  >({});
 
   const linkAccount = useLinkAccountMutation();
   const unlinkAccount = useUnlinkAccountMutation();
@@ -486,8 +491,32 @@ export function SelectLinkedAccountsModal({
   }
 
   async function onNext() {
-    const chosenLocalAccountIds = Object.values(chosenAccounts);
     const completed = { ...completedLinks };
+    const baselines = { ...newLinkBaselines };
+    // A new-account link that created its account (even if its first sync
+    // failed) now targets that account, so a retry never creates another.
+    const chosen = { ...chosenAccounts };
+    for (const [externalId, localId] of Object.entries(chosen)) {
+      const baseline = baselines[externalId];
+      const created =
+        baseline &&
+        isNewAccountOption(
+          localId,
+          addOnBudgetAccountOption.id,
+          addOffBudgetAccountOption.id,
+        ) &&
+        allAccounts.find(
+          acc => acc.account_id === externalId && !baseline.has(acc.id),
+        );
+      if (created) {
+        chosen[externalId] = created.id;
+        if (completed[externalId] === localId) {
+          completed[externalId] = created.id;
+        }
+      }
+    }
+    setChosenAccounts(chosen);
+    const chosenLocalAccountIds = Object.values(chosen);
 
     // Unlink accounts that were previously linked, but the user
     // chose to remove the bank-sync
@@ -495,15 +524,19 @@ export function SelectLinkedAccountsModal({
       .filter(acc => acc.account_id && !unlinkedIds.has(acc.id))
       .filter(acc => !chosenLocalAccountIds.includes(acc.id));
     toUnlink.forEach(acc => unlinkAccount.mutate({ id: acc.id }));
-    if (toUnlink.length > 0) {
-      setUnlinkedIds(new Set([...unlinkedIds, ...toUnlink.map(acc => acc.id)]));
+    const unlinked = new Set([...unlinkedIds, ...toUnlink.map(acc => acc.id)]);
+    // A link to an account unlinked since is no longer made.
+    for (const [externalId, localId] of Object.entries(completed)) {
+      if (unlinked.has(localId)) {
+        delete completed[externalId];
+      }
     }
 
     // Foreign links write nothing until they can complete, so their results
     // are awaited; links already made to the same destination are skipped.
     const foreignLinks: Array<[string, string, Promise<LinkAccountResult>]> =
       [];
-    Object.entries(chosenAccounts).forEach(
+    Object.entries(chosen).forEach(
       ([chosenExternalAccountId, chosenLocalAccountId]) => {
         if (completed[chosenExternalAccountId] === chosenLocalAccountId) {
           return;
@@ -528,12 +561,25 @@ export function SelectLinkedAccountsModal({
               )
             : undefined,
         );
+        if (
+          isNewAccountOption(
+            chosenLocalAccountId,
+            addOnBudgetAccountOption.id,
+            addOffBudgetAccountOption.id,
+          )
+        ) {
+          baselines[chosenExternalAccountId] = new Set(
+            allAccounts.map(acc => acc.id),
+          );
+        }
         const result = linkExternalAccount(
           externalAccountIndex,
           chosenLocalAccountId,
           startingDate,
           startingBalance,
         );
+        // Linking again makes an unlinked account linked.
+        unlinked.delete(chosenLocalAccountId);
         const isForeign =
           destinationFormat(
             propsWithSortedExternalAccounts.externalAccounts[
@@ -549,8 +595,20 @@ export function SelectLinkedAccountsModal({
           ]);
         } else {
           completed[chosenExternalAccountId] = chosenLocalAccountId;
-          // Errors are reported by the mutation.
-          result.catch(() => null);
+          // Errors are reported by the mutation; a failed link is no longer
+          // treated as made, so a retry sends it again.
+          result.catch(() => {
+            if (completed[chosenExternalAccountId] === chosenLocalAccountId) {
+              delete completed[chosenExternalAccountId];
+            }
+            setCompletedLinks(previous => {
+              if (previous[chosenExternalAccountId] !== chosenLocalAccountId) {
+                return previous;
+              }
+              const { [chosenExternalAccountId]: _failed, ...rest } = previous;
+              return rest;
+            });
+          });
         }
       },
     );
@@ -574,6 +632,8 @@ export function SelectLinkedAccountsModal({
     }
     setIsLinking(false);
     setCompletedLinks(completed);
+    setUnlinkedIds(unlinked);
+    setNewLinkBaselines(baselines);
     if (currencyMismatches > 0) {
       dispatch(
         addNotification({

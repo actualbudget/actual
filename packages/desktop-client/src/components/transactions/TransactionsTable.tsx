@@ -113,7 +113,6 @@ import {
   BudgetCurrencyFormat,
   useCurrencyFormatOverride,
 } from '#hooks/currencyFormatContext';
-import { useAccount } from '#hooks/useAccount';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import {
   SchedulesProvider,
@@ -2596,9 +2595,7 @@ function NewTransaction({
 }: NewTransactionProps) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
-  // Schedules for accounts in other currencies arrive later.
-  const isForeignAccount = !!useAccount(transactions[0].account)?.currency;
-  const isFuture = isFutureTransaction(transactions[0]) && !isForeignAccount;
+  const isFuture = isFutureTransaction(transactions[0]);
 
   const childTransactions = transactions.filter(
     t => t.parent_id === transactions[0].id,

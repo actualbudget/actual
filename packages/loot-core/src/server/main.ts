@@ -63,8 +63,9 @@ handlers['redo'] = mutator(function () {
 handlers['make-filters-from-conditions'] = async function ({
   conditions,
   applySpecialCases,
+  amountField,
 }) {
-  return rules.conditionsToAQL(conditions, { applySpecialCases });
+  return rules.conditionsToAQL(conditions, { applySpecialCases, amountField });
 };
 
 handlers['query'] = async function (query) {

@@ -1512,7 +1512,13 @@ async function processForeignBankSyncDownload(
     batchMessages(async () => {
       // Decided under the mutator: an earlier link or sync may have written
       // the opening balance since the download.
-      const initialSync = (await getAccountOldestTransaction(id)) == null;
+      // Any stored row counts, including a future-dated opening balance.
+      const initialSync =
+        (
+          await aqlQuery(
+            q('transactions').filter({ account: id }).select('id').limit(1),
+          )
+        ).data.length === 0;
       if (!initialSync) {
         result = await reconcileTransactions(
           id,
@@ -1694,12 +1700,40 @@ function foreignStartingBalance(
   if (current !== null) {
     return encodeStartingBalance(current, importable, precision);
   }
-  const oldest = oldestRow(importable);
+  const oldest = earliestByBalance(importable, currencyCode, precision);
   const after = oldest?.balanceAfterTransaction?.balanceAmount;
   if (after?.amount != null && after.currency === currencyCode) {
     return encodeStartingBalance(after.amount, [oldest], precision);
   }
   throw new TransactionError('balance-unavailable');
+}
+
+/**
+ * The first row of the earliest day, by balance-after continuity: providers
+ * differ in order, so within a day the first row is the one whose balance
+ * before it is no other same-day row's balance after. Ambiguous days yield
+ * nothing rather than a guess.
+ */
+function earliestByBalance(rows, currencyCode: string, precision: number) {
+  const first = oldestRow(rows);
+  if (!first) return undefined;
+  const sameDay = rows.filter(row => row.date === first.date);
+  if (sameDay.length === 1) return first;
+  const after = row => {
+    const balance = row.balanceAfterTransaction?.balanceAmount;
+    return balance?.amount != null && balance.currency === currencyCode
+      ? encodeBankAmount(balance.amount, precision)
+      : null;
+  };
+  if (sameDay.some(row => after(row) === null)) return undefined;
+  const afters = new Set(sameDay.map(after));
+  const starts = sameDay.filter(
+    row =>
+      !afters.has(
+        after(row) - encodeBankAmount(row.transactionAmount.amount, precision),
+      ),
+  );
+  return starts.length === 1 ? starts[0] : undefined;
 }
 
 /** Downloads an account's provider data; the account may not be stored yet. */

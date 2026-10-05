@@ -1322,8 +1322,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             onAddSplit={onAddSplit}
             onEmptySplitFound={onEmptySplitFound}
             editingField={editingField}
-            // Schedules for accounts in other currencies arrive later.
-            isFuture={isFuture && !isForeignTransaction}
+            isFuture={isFuture}
             onEditField={onEditFieldInner}
           />
         }

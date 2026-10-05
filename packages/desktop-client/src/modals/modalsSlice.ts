@@ -325,6 +325,8 @@ export type Modal =
          * for entries that create the payee only when they post.
          */
         deferNewPayee?: boolean;
+        /** Offer no transfer payees, for entries that cannot transfer. */
+        hideTransferPayees?: boolean;
       };
     }
   | {
