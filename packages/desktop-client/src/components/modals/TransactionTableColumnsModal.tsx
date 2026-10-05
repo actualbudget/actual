@@ -6,6 +6,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -174,7 +175,7 @@ export function TransactionTableColumnsModal({
                   style={{
                     display: 'block',
                     color: theme.pageTextSubdued,
-                    marginTop: 2,
+                    marginTop: spacing.xxs,
                   }}
                 >
                   <Trans>

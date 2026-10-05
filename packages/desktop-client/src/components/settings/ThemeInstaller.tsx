@@ -10,6 +10,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme as themeStyle } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { Link } from '#components/common/Link';
@@ -222,7 +223,7 @@ export function ThemeInstaller({
           size="small"
           style={{
             color: themeStyle.errorText,
-            marginBottom: 12,
+            marginBottom: spacing.md,
           }}
         >
           <Trans>
@@ -450,7 +451,7 @@ export function ThemeInstaller({
           size="small"
           style={{
             color: themeStyle.errorText,
-            marginBottom: 12,
+            marginBottom: spacing.md,
           }}
         >
           {error}

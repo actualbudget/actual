@@ -8,6 +8,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { currentDay, subDays } from '@actual-app/core/shared/months';
@@ -984,7 +985,7 @@ function StartingOptionsFields({
           <Text
             size="medium"
             style={{
-              marginBottom: 4,
+              marginBottom: spacing.xs,
               color: theme.pageTextSubdued,
             }}
           >
@@ -1006,7 +1007,7 @@ function StartingOptionsFields({
           <Text
             size="medium"
             style={{
-              marginBottom: 4,
+              marginBottom: spacing.xs,
               color: theme.pageTextSubdued,
             }}
           >

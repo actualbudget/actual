@@ -10,6 +10,7 @@ import {
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { FinancialText } from '#components/FinancialText';
@@ -657,7 +658,7 @@ export function MonteCarloRunDetailTable({
                     style={{
                       borderBottom: `1px solid ${theme.tableBorder}`,
                       padding: '10px 12px 12px 46px',
-                      gap: 4,
+                      gap: spacing.xs,
                     }}
                   >
                     <Text size="medium" style={{ color: theme.pageText }}>
@@ -691,7 +692,7 @@ export function MonteCarloRunDetailTable({
                       )}
                     </Button>
                     {showsWorking && (
-                      <View style={{ gap: 4, marginTop: 6 }}>
+                      <View style={{ gap: spacing.xs, marginTop: 6 }}>
                         {row.ruleExplanation != null && (
                           <Text size="medium" style={{ color: theme.pageText }}>
                             <PrivacyFilter>

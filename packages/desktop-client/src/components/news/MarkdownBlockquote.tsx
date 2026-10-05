@@ -9,6 +9,7 @@ import {
 } from '@actual-app/components/icons/v1';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { Alert } from '#components/alerts';
@@ -96,7 +97,7 @@ export function MarkdownBlockquote({
 
   return (
     <Alert {...admonitionStyles[marker.type]} style={{ margin: '10px 0' }}>
-      <View style={{ gap: 4 }}>
+      <View style={{ gap: spacing.xs }}>
         <Text
           size="small"
           style={{

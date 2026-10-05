@@ -127,10 +127,10 @@ export const componentSizeControl: Record<
   Record<BreakpointGroup, ComponentSizeControlValues>
 > = {
   small: {
-    narrow: { paddingY: 3, paddingX: 8, minHeight: 24 },
-    small: { paddingY: 3, paddingX: 8, minHeight: 24 },
-    medium: { paddingY: 3, paddingX: 8, minHeight: 24 },
-    wide: { paddingY: 3, paddingX: 8, minHeight: 24 },
+    narrow: { paddingY: 3, paddingX: spacing.sm, minHeight: 24 },
+    small: { paddingY: 3, paddingX: spacing.sm, minHeight: 24 },
+    medium: { paddingY: 3, paddingX: spacing.sm, minHeight: 24 },
+    wide: { paddingY: 3, paddingX: spacing.sm, minHeight: 24 },
   },
   medium: {
     narrow: { paddingY: 5, paddingX: 10 },
@@ -139,16 +139,16 @@ export const componentSizeControl: Record<
     wide: { paddingY: 5, paddingX: 10 },
   },
   large: {
-    narrow: { paddingY: 8, paddingX: 12, minHeight: 36 },
-    small: { paddingY: 6, paddingX: 12, minHeight: 32 },
-    medium: { paddingY: 6, paddingX: 12, minHeight: 32 },
-    wide: { paddingY: 6, paddingX: 12, minHeight: 32 },
+    narrow: { paddingY: spacing.sm, paddingX: spacing.md, minHeight: 36 },
+    small: { paddingY: 6, paddingX: spacing.md, minHeight: 32 },
+    medium: { paddingY: 6, paddingX: spacing.md, minHeight: 32 },
+    wide: { paddingY: 6, paddingX: spacing.md, minHeight: 32 },
   },
   'extra-large': {
     narrow: { paddingY: 10, paddingX: 14, minHeight: 40 },
-    small: { paddingY: 8, paddingX: 12, minHeight: 36 },
-    medium: { paddingY: 8, paddingX: 12, minHeight: 36 },
-    wide: { paddingY: 8, paddingX: 12, minHeight: 36 },
+    small: { paddingY: spacing.sm, paddingX: spacing.md, minHeight: 36 },
+    medium: { paddingY: spacing.sm, paddingX: spacing.md, minHeight: 36 },
+    wide: { paddingY: spacing.sm, paddingX: spacing.md, minHeight: 36 },
   },
 };
 

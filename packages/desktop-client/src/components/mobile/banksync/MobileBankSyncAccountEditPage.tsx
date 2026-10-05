@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { useUnlinkAccountMutation } from '#accounts';
@@ -126,7 +127,7 @@ export function MobileBankSyncAccountEditPage() {
             overflow: 'auto',
           }}
         >
-          <View style={{ padding: 16 }}>
+          <View style={{ padding: spacing.lg }}>
             <Text size="large" style={{ marginBottom: 10 }}>
               <Trans>Field mapping</Trans>
             </Text>
