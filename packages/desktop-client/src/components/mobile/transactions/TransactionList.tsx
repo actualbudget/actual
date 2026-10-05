@@ -384,12 +384,6 @@ function SelectedTransactionsFloatingActionBar({
       return [a, b];
     }, [selectedTransactionsArray, transactions]);
 
-  const hasForeignSelection = transactions.some(
-    trans =>
-      selectedTransactions.has(trans.id) &&
-      !!accountsById[trans.account]?.currency,
-  );
-
   const canBeTransfer = useMemo(() => {
     if (!twoTransactions) {
       return false;
@@ -409,19 +403,12 @@ function SelectedTransactionsFloatingActionBar({
       name: 'duplicate',
       text: t('Duplicate'),
     },
-    // Schedules for other currencies arrive later.
-    ...(allTransactionsAreLinked || !hasForeignSelection
-      ? [
-          {
-            name: allTransactionsAreLinked
-              ? 'unlink-schedule'
-              : 'link-schedule',
-            text: allTransactionsAreLinked
-              ? t('Unlink schedule')
-              : t('Link schedule'),
-          },
-        ]
-      : []),
+    {
+      name: allTransactionsAreLinked ? 'unlink-schedule' : 'link-schedule',
+      text: allTransactionsAreLinked
+        ? t('Unlink schedule')
+        : t('Link schedule'),
+    },
     {
       name: 'delete',
       text: t('Delete'),

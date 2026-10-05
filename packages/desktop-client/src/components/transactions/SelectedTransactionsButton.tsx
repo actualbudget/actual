@@ -278,13 +278,11 @@ export function SelectedTransactionsButton({
   useHotkeys(
     's',
     () =>
-      !types.trans || linked
-        ? onViewSchedule()
-        : !hasForeign && onLinkSchedule(selectedIds),
+      !types.trans || linked ? onViewSchedule() : onLinkSchedule(selectedIds),
     {
       scopes: ['app'],
     },
-    [onLinkSchedule, onViewSchedule, linked, selectedIds, hasForeign],
+    [onLinkSchedule, onViewSchedule, linked, selectedIds],
   );
   // edit amount (only if we're not in a merge context)
   useHotkeys(
@@ -360,16 +358,11 @@ export function SelectedTransactionsButton({
                     } as const,
                   ]
                 : [
-                    // Schedules for other currencies arrive later.
-                    ...(hasForeign
-                      ? []
-                      : [
-                          {
-                            name: 'link-schedule',
-                            text: t('Link schedule'),
-                            key: 'S',
-                          } as const,
-                        ]),
+                    {
+                      name: 'link-schedule',
+                      text: t('Link schedule'),
+                      key: 'S',
+                    } as const,
                     {
                       name: 'create-rule',
                       text: t('Create rule'),

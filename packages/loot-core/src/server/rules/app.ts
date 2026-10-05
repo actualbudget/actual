@@ -186,8 +186,20 @@ async function getRules() {
 
 async function runRules({
   transaction,
+  amountIsNative = false,
 }: {
   transaction: TransactionEntity;
+  /**
+   * The amount is a foreign account's native amount with no base yet (a
+   * schedule preview): rules see it only as `transaction_amount`, so base
+   * amount conditions do not match it.
+   */
+  amountIsNative?: boolean;
 }): Promise<TransactionEntity> {
-  return rules.runRules(transaction);
+  if (!amountIsNative) {
+    return rules.runRules(transaction);
+  }
+  const { amount, ...rest } = transaction;
+  const ruled = await rules.runRules({ ...rest, transaction_amount: amount });
+  return { ...ruled, amount: ruled.transaction_amount ?? amount };
 }
