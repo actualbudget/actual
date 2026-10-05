@@ -496,7 +496,7 @@ describe('enableBankingService', () => {
         continuation_key: 'stuck-key',
       });
       mockFetchResponse({
-        transactions: [mockDebitTransaction],
+        transactions: [mockCreditTransaction],
         continuation_key: 'stuck-key',
       });
 
@@ -507,7 +507,7 @@ describe('enableBankingService', () => {
       );
 
       expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(result).toHaveLength(2);
+      expect(result).toEqual([mockCreditTransaction]);
     });
   });
 
