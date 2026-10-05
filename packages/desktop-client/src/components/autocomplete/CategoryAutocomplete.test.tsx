@@ -151,6 +151,15 @@ describe('CategoryAutocomplete create option', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('ignores surrounding whitespace when matching an existing category', async () => {
+    const { container } = renderAutocomplete({ showCreateOption: true });
+    await type(container, ' Groceries ');
+
+    expect(
+      screen.queryByTestId('create-category-button'),
+    ).not.toBeInTheDocument();
+  });
+
   it('offers nothing to create before anything is typed', async () => {
     const { container } = renderAutocomplete({ showCreateOption: true });
     const input = container.querySelector('input')!;

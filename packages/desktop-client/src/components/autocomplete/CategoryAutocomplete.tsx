@@ -363,13 +363,14 @@ export function CategoryAutocomplete({
       return filterCategorySuggestions(items, value);
     }
 
+    const trimmedValue = value.trim();
     const createItem = items.find(item => item.id === 'new');
     const filtered = filterCategorySuggestions(
       items.filter(item => item.id !== 'new'),
-      value,
+      trimmedValue,
     );
 
-    if (!createItem || !value) {
+    if (!createItem || !trimmedValue) {
       return filtered;
     }
 
@@ -377,7 +378,7 @@ export function CategoryAutocomplete({
     const hasExactMatch = filtered.some(
       item =>
         item.id !== 'split' &&
-        getNormalisedString(item.name) === getNormalisedString(value),
+        getNormalisedString(item.name) === getNormalisedString(trimmedValue),
     );
 
     return hasExactMatch ? filtered : [...filtered, createItem];
