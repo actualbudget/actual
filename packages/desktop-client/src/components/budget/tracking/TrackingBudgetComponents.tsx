@@ -507,6 +507,7 @@ export const CategoryMonth = memo(function CategoryMonth({
 });
 
 export { BudgetSummary } from './budgetsummary/BudgetSummary';
+export { SingleMonthBudgetSummary } from './budgetsummary/SingleMonthBudgetSummary';
 
 export const ExpenseGroupMonth = GroupMonth;
 export const ExpenseCategoryMonth = CategoryMonth;

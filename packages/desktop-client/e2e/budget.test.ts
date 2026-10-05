@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import type { BudgetPage } from './page-models/budget-page';
 import { ConfigurationPage } from './page-models/configuration-page';
+import { Navigation } from './page-models/navigation';
 
 test.describe('Budget', () => {
   let page: Page;
@@ -148,5 +149,79 @@ test.describe('Budget scroll position', () => {
 
     const scrollTopAfterReturningFromSpent = await budgetPage.getScrollTop();
     expect(scrollTopAfterReturningFromSpent).toBe(scrollTopBeforeViewingSpent);
+  });
+});
+
+test.describe('Redesigned budget page', () => {
+  let page: Page;
+  let budgetPage: BudgetPage;
+
+  test.beforeEach(async ({ browser }) => {
+    page = await browser.newPage();
+    const configurationPage = new ConfigurationPage(page);
+    const navigation = new Navigation(page);
+
+    await page.goto('/');
+    await configurationPage.createTestFile();
+
+    const settingsPage = await navigation.goToSettingsPage();
+    await settingsPage.enableExperimentalFeature('Redesigned budget page');
+    budgetPage = await navigation.goToBudgetPage();
+  });
+
+  test.afterEach(async () => {
+    await page?.close();
+  });
+
+  test('navigates between months from the toolbar', async () => {
+    const initialMonth = await budgetPage.getSelectedMonth();
+
+    const nextMonth = await budgetPage.goToNextMonth();
+    expect(nextMonth).not.toEqual(initialMonth);
+
+    await page.getByRole('button', { name: 'Today' }).click();
+    await expect(budgetPage.selectedMonthButton).toHaveAttribute(
+      'data-month',
+      initialMonth,
+    );
+  });
+
+  test('changes the number of months shown from the toolbar', async () => {
+    const monthCountSelector = page.getByRole('group', {
+      name: 'Choose the number of months shown at a time',
+    });
+    const totalBudgeted =
+      budgetPage.budgetTableTotals.getByTestId(/total-budgeted$/);
+
+    await expect(totalBudgeted).toHaveCount(1);
+
+    await monthCountSelector.getByRole('button', { name: '2' }).click();
+
+    await expect(totalBudgeted).toHaveCount(2);
+    await expect(budgetPage.selectedMonthButton).toContainText('–');
+  });
+
+  test('collapses the month summary into a single row', async () => {
+    const selectedMonth = await budgetPage.getSelectedMonth();
+    const summary = page.locator(
+      `[data-testid="budget-summary"][data-month="${selectedMonth}"]`,
+    );
+
+    await expect(summary.getByText('Available funds')).toBeVisible();
+    await expect(summary.getByText('Budget actions')).toBeVisible();
+    await expect(summary.getByText(/^of .+ budgeted$/)).toBeVisible();
+
+    await summary.hover();
+    await summary
+      .getByRole('button', { name: 'Collapse month summary' })
+      .click();
+
+    await expect(summary.getByText('Available funds')).toBeHidden();
+    await expect(summary.getByText('To Budget:')).toBeVisible();
+    await expect(summary.getByTestId('month-status-badge')).toHaveText('Now');
+
+    await summary.getByRole('button', { name: 'Expand month summary' }).click();
+
+    await expect(summary.getByText('Available funds')).toBeVisible();
   });
 });

@@ -24,6 +24,7 @@ type ToBudgetAmountProps = {
   prevMonthName: string;
   style?: CSSProperties;
   amountStyle?: CSSProperties;
+  labelStyle?: CSSProperties;
   onClick: () => void;
   onContextMenu?: MouseEventHandler;
   isTotalsListTooltipDisabled?: boolean;
@@ -33,6 +34,7 @@ export function ToBudgetAmount({
   prevMonthName,
   style,
   amountStyle,
+  labelStyle,
   onClick,
   isTotalsListTooltipDisabled = false,
   onContextMenu,
@@ -56,7 +58,9 @@ export function ToBudgetAmount({
 
   return (
     <View style={{ alignItems: 'center', ...style }}>
-      <Block>{isNegative ? t('Overbudgeted:') : t('To Budget:')}</Block>
+      <Block style={labelStyle}>
+        {isNegative ? t('Overbudgeted:') : t('To Budget:')}
+      </Block>
       <View>
         <Tooltip
           content={

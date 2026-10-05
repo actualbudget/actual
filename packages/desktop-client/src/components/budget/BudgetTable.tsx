@@ -13,6 +13,7 @@ import type {
 import type { DropPosition } from '#components/sort';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 
@@ -27,6 +28,8 @@ import {
   getScrollbarWidth,
   separateGroups,
 } from './util';
+
+import { useBudgetComponents } from '.';
 
 type BudgetTableProps = {
   type: string;
@@ -86,6 +89,13 @@ export function BudgetTable(props: BudgetTableProps) {
   );
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
+  const isBudgetPageRedesignEnabled = useFeatureFlag('budgetPageRedesign');
+  const [isSummaryCollapsed] = useLocalPref('budget.summaryCollapsed');
+  const { SingleMonthSummaryComponent } = useBudgetComponents();
+  // With a single month the expanded summary spreads across the whole table
+  // instead of sitting above the month column
+  const isSingleMonthSummaryShown =
+    isBudgetPageRedesignEnabled && numMonths === 1 && !isSummaryCollapsed;
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
@@ -261,27 +271,39 @@ export function BudgetTable(props: BudgetTableProps) {
         }),
       }}
     >
-      <View
-        style={{
-          flexDirection: 'row',
-          overflow: 'hidden',
-          flexShrink: 0,
-          // This is necessary to align with the table because the
-          // table has this padding to allow the shadow to show
-          paddingLeft: 5,
-          paddingRight: 5 + getScrollbarWidth(),
-        }}
-      >
-        <View style={{ width: 200 + 100 * categoryExpandedState }} />
-        <MonthsProvider
-          startMonth={prewarmStartMonth}
-          numMonths={numMonths}
-          monthBounds={monthBounds}
-          type={type}
+      {isSingleMonthSummaryShown ? (
+        <View
+          style={{
+            flexShrink: 0,
+            paddingLeft: 5,
+            paddingRight: 5 + getScrollbarWidth(),
+          }}
         >
-          <BudgetSummaries />
-        </MonthsProvider>
-      </View>
+          <SingleMonthSummaryComponent month={prewarmStartMonth} />
+        </View>
+      ) : (
+        <View
+          style={{
+            flexDirection: 'row',
+            overflow: 'hidden',
+            flexShrink: 0,
+            // This is necessary to align with the table because the
+            // table has this padding to allow the shadow to show
+            paddingLeft: 5,
+            paddingRight: 5 + getScrollbarWidth(),
+          }}
+        >
+          <View style={{ width: 200 + 100 * categoryExpandedState }} />
+          <MonthsProvider
+            startMonth={prewarmStartMonth}
+            numMonths={numMonths}
+            monthBounds={monthBounds}
+            type={type}
+          >
+            <BudgetSummaries />
+          </MonthsProvider>
+        </View>
+      )}
 
       <MonthsProvider
         startMonth={startMonth}

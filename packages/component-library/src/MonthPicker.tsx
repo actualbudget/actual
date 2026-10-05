@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
 import { Button } from '#Button';
 import { Popover } from '#Popover';
@@ -19,15 +20,27 @@ export type MonthPickerLabels = {
   next: string;
 };
 
+type MonthPickerTriggerProps = Omit<
+  ComponentProps<typeof Button>,
+  'children' | 'id' | 'onPress' | 'ref' | 'style'
+> & {
+  [dataAttribute: `data-${string}`]: string | undefined;
+};
+
 type MonthPickerProps = {
   value: string;
+  /** Last month of the highlighted range, when `value` starts a range. */
+  rangeEnd?: string;
   minDate?: string;
   maxDate?: string;
   locale: string;
   placeholder?: string;
+  /** Replaces the formatted month as the trigger's content. */
+  label?: ReactNode;
   labels: MonthPickerLabels;
   id?: string;
   style?: CSSProperties;
+  triggerProps?: MonthPickerTriggerProps;
   onChange: (month: string) => void;
 };
 
@@ -37,16 +50,20 @@ const NO_MAX = '9999-12';
 
 export function MonthPicker({
   value,
+  rangeEnd,
   minDate,
   maxDate,
   locale,
   placeholder,
+  label,
   labels,
   id,
   style,
+  triggerProps,
   onChange,
 }: MonthPickerProps) {
   const month = value ? getMonth(value) : '';
+  const lastMonth = rangeEnd ? getMonth(rangeEnd) : month;
   const min = minDate ? getMonth(minDate) : NO_MIN;
   const max = maxDate ? getMonth(maxDate) : NO_MAX;
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -60,7 +77,7 @@ export function MonthPicker({
     setIsOpen(true);
   }
 
-  const label = month
+  const formattedMonth = month
     ? formatDate(month, locale, { month: 'short', year: 'numeric' })
     : (placeholder ?? '');
 
@@ -70,10 +87,11 @@ export function MonthPicker({
         id={id}
         ref={triggerRef}
         data-testid="month-picker-trigger"
+        {...triggerProps}
         onPress={() => (isOpen ? setIsOpen(false) : openPopover())}
         style={{ justifyContent: 'flex-start', ...style }}
       >
-        {label}
+        {label ?? formattedMonth}
       </Button>
 
       <Popover
@@ -95,7 +113,7 @@ export function MonthPicker({
           <MonthGrid
             year={viewYear}
             rangeStart={month}
-            rangeEnd={month}
+            rangeEnd={lastMonth}
             minMonth={min}
             maxMonth={max}
             locale={locale}

@@ -20,6 +20,7 @@ type ToBudgetProps = {
   prevMonthName: string;
   style?: CSSProperties;
   amountStyle?: CSSProperties;
+  labelStyle?: CSSProperties;
   isCollapsed?: boolean;
 };
 export function ToBudget({
@@ -28,6 +29,7 @@ export function ToBudget({
   onBudgetAction,
   style,
   amountStyle,
+  labelStyle,
   isCollapsed = false,
 }: ToBudgetProps) {
   const [menuStep, _setMenuStep] = useState<string>('actions');
@@ -83,6 +85,7 @@ export function ToBudget({
           prevMonthName={prevMonthName}
           style={style}
           amountStyle={amountStyle}
+          labelStyle={labelStyle}
           isTotalsListTooltipDisabled={!isCollapsed || menuOpen}
           onContextMenu={handleContextMenu}
         />

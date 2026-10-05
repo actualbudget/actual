@@ -283,6 +283,7 @@ export type CategoryGroupMonthProps = {
 
 export type BudgetComponents = {
   SummaryComponent: ComponentType<BudgetSummaryProps>;
+  SingleMonthSummaryComponent: ComponentType<BudgetSummaryProps>;
   ExpenseCategoryComponent: ComponentType<CategoryMonthProps>;
   ExpenseGroupComponent: ComponentType<CategoryGroupMonthProps>;
   IncomeCategoryComponent: ComponentType<CategoryMonthProps>;
@@ -303,6 +304,7 @@ function useTrackingBudgetComponents(): BudgetComponents {
   return useMemo(
     () => ({
       SummaryComponent: trackingBudget.BudgetSummary,
+      SingleMonthSummaryComponent: trackingBudget.SingleMonthBudgetSummary,
       ExpenseCategoryComponent: trackingBudget.ExpenseCategoryMonth,
       ExpenseGroupComponent: trackingBudget.ExpenseGroupMonth,
       IncomeCategoryComponent: trackingBudget.IncomeCategoryMonth,
@@ -318,6 +320,7 @@ function useEnvelopeBudgetComponents(): BudgetComponents {
   return useMemo(
     () => ({
       SummaryComponent: envelopeBudget.BudgetSummary,
+      SingleMonthSummaryComponent: envelopeBudget.SingleMonthBudgetSummary,
       ExpenseCategoryComponent: envelopeBudget.ExpenseCategoryMonth,
       ExpenseGroupComponent: envelopeBudget.ExpenseGroupMonth,
       IncomeCategoryComponent: envelopeBudget.IncomeCategoryMonth,

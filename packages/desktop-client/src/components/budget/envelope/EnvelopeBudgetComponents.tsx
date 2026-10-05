@@ -682,3 +682,4 @@ export function IncomeCategoryMonth({
 }
 
 export { BudgetSummary } from './budgetsummary/BudgetSummary';
+export { SingleMonthBudgetSummary } from './budgetsummary/SingleMonthBudgetSummary';

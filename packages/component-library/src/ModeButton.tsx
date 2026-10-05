@@ -10,6 +10,7 @@ type ModeButtonProps = {
   selected: boolean;
   children: ReactNode;
   style?: CSSProperties;
+  'aria-pressed'?: boolean;
   onSelect: () => void;
 };
 
@@ -17,11 +18,13 @@ export function ModeButton({
   selected,
   children,
   style,
+  'aria-pressed': ariaPressed,
   onSelect,
 }: ModeButtonProps) {
   return (
     <Button
       variant="bare"
+      aria-pressed={ariaPressed}
       className={css({
         padding: '5px 10px',
         backgroundColor: theme.menuBackground,

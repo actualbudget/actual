@@ -25,6 +25,7 @@ import { css } from '@emotion/css';
 
 import { sync } from '#app/appSlice';
 import { SharedArrayBufferWarning } from '#components/SharedArrayBufferWarning';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useNavigate } from '#hooks/useNavigate';
@@ -252,6 +253,12 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
 
 function BudgetTitlebar() {
   const [maxMonths, setMaxMonthsPref] = useGlobalPref('maxMonths');
+  const isBudgetPageRedesignEnabled = useFeatureFlag('budgetPageRedesign');
+
+  // The redesigned budget page has its own month count selector
+  if (isBudgetPageRedesignEnabled) {
+    return null;
+  }
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>

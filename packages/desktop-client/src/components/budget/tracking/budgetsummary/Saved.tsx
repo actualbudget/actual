@@ -20,8 +20,15 @@ import { trackingBudget } from '#spreadsheet/bindings';
 type SavedProps = {
   projected: boolean;
   style?: CSSProperties;
+  labelStyle?: CSSProperties;
+  amountStyle?: CSSProperties;
 };
-export function Saved({ projected, style }: SavedProps) {
+export function Saved({
+  projected,
+  style,
+  labelStyle,
+  amountStyle,
+}: SavedProps) {
   const { t } = useTranslation();
   const budgetedSaved =
     useTrackingSheetValue(trackingBudget.totalBudgetedSaved) || 0;
@@ -34,11 +41,11 @@ export function Saved({ projected, style }: SavedProps) {
   return (
     <View style={{ alignItems: 'center', fontSize: 14, ...style }}>
       {projected ? (
-        <Text style={{ color: theme.pageTextLight }}>
+        <Text style={{ color: theme.pageTextLight, ...labelStyle }}>
           <Trans>Projected savings:</Trans>
         </Text>
       ) : (
-        <View style={{ color: theme.pageTextLight }}>
+        <View style={{ color: theme.pageTextLight, ...labelStyle }}>
           {isNegative ? t('Overspent:') : t('Saved:')}
         </View>
       )}
@@ -78,6 +85,7 @@ export function Saved({ projected, style }: SavedProps) {
               : isNegative
                 ? theme.budgetNumberNegative
                 : theme.templateNumberFunded,
+            ...amountStyle,
           })}
         >
           <PrivacyFilter>

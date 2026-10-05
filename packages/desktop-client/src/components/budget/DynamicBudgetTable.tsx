@@ -15,6 +15,7 @@ import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { BudgetPageHeader } from './BudgetPageHeader';
 import { BudgetTable } from './BudgetTable';
+import { BudgetToolbar } from './BudgetToolbar';
 
 function getNumPossibleMonths(width: number, categoryWidth: number) {
   const estimatedTableWidth = width - categoryWidth;
@@ -54,6 +55,7 @@ const DynamicBudgetTable = ({
   const { setDisplayMax } = useBudgetMonthCount();
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const isBudgetPageRedesignEnabled = useFeatureFlag('budgetPageRedesign');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
   const numPossible = getNumPossibleMonths(
@@ -61,7 +63,10 @@ const DynamicBudgetTable = ({
     200 + 100 * categoryExpandedState,
   );
   const numMonths = Math.min(numPossible, maxMonths);
-  const maxWidth = 200 + 100 * categoryExpandedState + 500 * numMonths;
+  // The redesigned page lets the month columns fill the available width
+  const maxWidth = isBudgetPageRedesignEnabled
+    ? undefined
+    : 200 + 100 * categoryExpandedState + 500 * numMonths;
 
   useEffect(() => {
     setDisplayMax(numPossible);
@@ -149,12 +154,22 @@ const DynamicBudgetTable = ({
     >
       <View style={{ width: '100%', maxWidth }}>
         <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-          <BudgetPageHeader
-            startMonth={prewarmStartMonth}
-            numMonths={numMonths}
-            monthBounds={monthBounds}
-            onMonthSelect={_onMonthSelect}
-          />
+          {isBudgetPageRedesignEnabled ? (
+            <BudgetToolbar
+              startMonth={prewarmStartMonth}
+              numMonths={numMonths}
+              maxSelectableMonthCount={numPossible}
+              monthBounds={monthBounds}
+              onMonthSelect={_onMonthSelect}
+            />
+          ) : (
+            <BudgetPageHeader
+              startMonth={prewarmStartMonth}
+              numMonths={numMonths}
+              monthBounds={monthBounds}
+              onMonthSelect={_onMonthSelect}
+            />
+          )}
           <BudgetTable
             type={type}
             prewarmStartMonth={prewarmStartMonth}
