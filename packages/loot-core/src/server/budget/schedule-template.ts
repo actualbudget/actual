@@ -342,8 +342,18 @@ export async function runSchedule(
     (c.target_frequency === 'daily' && c.target_interval <= 31) ||
     isTrackingBudget();
 
-  const isSubMonthly = c =>
-    c.target_frequency === 'weekly' || c.target_frequency === 'daily';
+  // A schedule only behaves "sub-monthly" when it recurs more often than
+  // monthly — the same weekly/daily caps `isPayMonthOf` uses. A "repeat every
+  // 360 days" schedule is daily in shape but yearly in effect: letting it
+  // count here wrongly switches the category to the steady-accrual shortcut,
+  // which ignores both the deadline and what has already been saved (#6644).
+  function isSubMonthly(schedule: ScheduleTemplateTarget) {
+    return (
+      (schedule.target_frequency === 'weekly' &&
+        schedule.target_interval <= 4) ||
+      (schedule.target_frequency === 'daily' && schedule.target_interval <= 31)
+    );
+  }
 
   const t_payMonthOf = t.t.filter(isPayMonthOf);
   const t_sinking = t.t

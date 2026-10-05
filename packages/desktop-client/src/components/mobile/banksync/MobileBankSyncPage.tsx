@@ -7,6 +7,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
+import { AutomaticSyncSettings } from '#components/banksync/AutomaticSyncSettings';
 import {
   getGroupedBankSyncEntries,
   getSyncSourceReadable,
@@ -47,6 +48,8 @@ export function MobileBankSyncPage() {
     () => groupBankSyncAccounts(openAccounts),
     [openAccounts],
   );
+
+  const hasLinkedAccounts = openAccounts.some(account => !!account.bank);
 
   const filteredGroupedAccounts = useMemo(() => {
     if (!filter) return groupedAccounts;
@@ -108,6 +111,11 @@ export function MobileBankSyncPage() {
           onToggleCollapse={() => setProvidersCollapsed(!providersCollapsed)}
         />
       </View>
+      {hasLinkedAccounts && (
+        <View style={{ padding: '0 15px 15px', flexShrink: 0 }}>
+          <AutomaticSyncSettings />
+        </View>
+      )}
       {openAccounts.length > 0 && (
         <View
           style={{
