@@ -324,6 +324,31 @@ test.describe('Accounts', () => {
       await importCsv(true);
     });
 
+    test('preserves QIF categories in preview and imported transactions', async () => {
+      const fileChooserPromise = page.waitForEvent('filechooser');
+      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles(join(__dirname, 'data/qif-categories.qif'));
+
+      const dialog = page.getByRole('dialog');
+      await expect(dialog.getByText('Food', { exact: true })).toBeVisible();
+      await expect(dialog.getByText('Income', { exact: true })).toBeVisible();
+
+      await dialog
+        .getByRole('button', { name: 'Import 2 transactions' })
+        .click();
+
+      const expense = accountPage.transactionTableRow.filter({
+        hasText: 'QIF Cafe',
+      });
+      const income = accountPage.transactionTableRow.filter({
+        hasText: 'QIF Salary',
+      });
+      await expect(expense.getByTestId('category')).toHaveText('Food');
+      await expect(income.getByTestId('category')).toHaveText('Income');
+    });
+
     test('import csv file twice', async () => {
       await importCsv(false);
 

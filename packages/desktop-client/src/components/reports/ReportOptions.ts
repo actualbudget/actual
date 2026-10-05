@@ -19,6 +19,7 @@ export const defaultReport: CustomReportEntity = {
   dateRange: 'Last 6 months',
   mode: 'total',
   groupBy: 'Category',
+  tagScope: { mode: 'all' },
   interval: 'Monthly',
   balanceType: 'Payment',
   sortBy: 'desc',
@@ -298,9 +299,34 @@ export const ReportOptions = {
   >(intervalOptions.map(item => [item.key, item.range])),
 };
 
+// Only Daily and Weekly labels spell out a day and a month, so they are the
+// only intervals whose ordering a date-format preference can disagree with.
+// Monthly ("MMM ''yy") and Yearly ("yyyy") are unambiguous either way.
+const dayLevelIntervals = new Set(['Daily', 'Weekly']);
+
+/**
+ * The display format for an interval's labels, following the user's date
+ * format preference.
+ *
+ * @param interval one of the `intervalOptions` keys.
+ * @param dateFormat the `dateFormat` synced pref, e.g. 'MM/dd/yyyy'.
+ * @returns a date-fns format string, or '' for an unrecognised interval.
+ */
+export function getIntervalFormat(
+  interval: string,
+  dateFormat?: string,
+): string {
+  if (!dayLevelIntervals.has(interval)) {
+    return ReportOptions.intervalFormat.get(interval) ?? '';
+  }
+  // The preference is used exactly as it is set, including a four-digit year.
+  // This does make the tick labels wider than the format they replaced.
+  return dateFormat || 'yyyy-MM-dd';
+}
+
 export type QueryDataEntity = {
   date: string;
-  category: string;
+  category: string | null;
   categoryHidden: boolean;
   categoryGroup: string;
   categoryGroupHidden: boolean;
@@ -308,6 +334,8 @@ export type QueryDataEntity = {
   accountOffBudget: boolean;
   payee: string;
   transferAccount: string;
+  notes?: string | null;
+  tagBucketId?: string;
   amount: number;
 };
 
@@ -318,6 +346,7 @@ export type UncategorizedEntity = Pick<
   'id' | 'name' | 'hidden'
 > & {
   uncategorized_id?: UncategorizedId;
+  bucketTagNames?: string[];
 };
 
 const uncategorizedCategory: UncategorizedEntity = {
@@ -390,10 +419,15 @@ export const groupBySelections = (
   accounts: UncategorizedEntity[],
 ): [
   UncategorizedEntity[],
-  'category' | 'categoryGroup' | 'payee' | 'account',
+  'category' | 'categoryGroup' | 'payee' | 'account' | 'tagBucketId',
 ] => {
   let groupByList: UncategorizedEntity[];
-  let groupByLabel: 'category' | 'categoryGroup' | 'payee' | 'account';
+  let groupByLabel:
+    | 'category'
+    | 'categoryGroup'
+    | 'payee'
+    | 'account'
+    | 'tagBucketId';
   switch (groupBy) {
     case 'Category':
       groupByList = categoryList;
@@ -435,6 +469,10 @@ export const groupBySelections = (
         return { id: account.id, name: account.name, hidden: false };
       });
       groupByLabel = 'account';
+      break;
+    case 'Tag':
+      groupByList = [];
+      groupByLabel = 'tagBucketId';
       break;
     case 'Interval':
       groupByList = categoryList;

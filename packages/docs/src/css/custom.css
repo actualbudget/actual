@@ -72,17 +72,43 @@ h1 {
   padding-left: 0;
 }
 
+/* Static sub-headers inside categories (links without href): muted,
+   small, letter-spaced labels. */
 .menu__list-item-collapsible > .menu__link:not([href]) {
   pointer-events: none;
   user-select: none;
   text-transform: uppercase;
-  font-size: 0.8em;
+  font-size: 0.72em;
+  font-weight: var(--ifm-font-weight-semibold);
+  letter-spacing: 0.08em;
+  color: var(--ifm-color-emphasis-600);
   padding-top: 16px;
   padding-bottom: 3px;
 }
 
 .menu__list-item-collapsible:has(> .menu__link:not([href])):hover {
   background: initial;
+}
+
+/* Collapsible top-level section headers: heavier than the items they
+   contain, separated by a divider line above each section. */
+.section-header {
+  margin-top: 10px;
+  padding-top: 6px;
+}
+
+.section-header > .menu__list-item-collapsible > .menu__link {
+  text-transform: uppercase;
+  font-size: 0.85em;
+  font-weight: var(--ifm-font-weight-bold);
+  letter-spacing: 0.05em;
+  color: var(--ifm-color-emphasis-800);
+}
+
+.section-header
+  > .menu__list-item-collapsible
+  > .menu__link--sublist-caret::after {
+  opacity: 0.6;
 }
 
 img {

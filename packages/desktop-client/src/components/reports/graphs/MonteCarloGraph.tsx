@@ -21,10 +21,9 @@ import {
   VIEW_DATA_KEYS,
 } from '#components/reports/graphs/MonteCarloGraphTooltip';
 import { computePadding } from '#components/reports/graphs/util/computePadding';
-import { MAX_FORMATTABLE_AMOUNT } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
+import { useMonteCarloTickFormatter } from '#components/reports/graphs/util/useMonteCarloTickFormatter';
 import type { MonteCarloPercentileBand } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { useFormat } from '#hooks/useFormat';
-import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 type MonteCarloGraphProps = {
   style?: CSSProperties;
@@ -46,8 +45,8 @@ export function MonteCarloGraph({
   compact = false,
   showTooltip = true,
 }: MonteCarloGraphProps) {
-  const privacyMode = usePrivacyMode();
   const format = useFormat();
+  const tickFormatter = useMonteCarloTickFormatter();
   const animationProps = useRechartsAnimation({ animationDuration: 1000 });
 
   const data: FanChartDataPoint[] = percentileBands.map(band => ({
@@ -65,19 +64,6 @@ export function MonteCarloGraph({
     p90: band.p90,
     worstRun: worstRunPath?.[band.year],
   }));
-
-  const tickFormatter = (tick: number) => {
-    if (privacyMode) {
-      return '...';
-    }
-    // Recharts can synthesize ticks above the (already clamped) data
-    // maximum; keep them within what the formatter accepts
-    const safeTick = Math.min(
-      Math.max(Math.round(tick), -MAX_FORMATTABLE_AMOUNT),
-      MAX_FORMATTABLE_AMOUNT,
-    );
-    return `${format(safeTick, 'financial-no-decimals')}`;
-  };
 
   return (
     <Container

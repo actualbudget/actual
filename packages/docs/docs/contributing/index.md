@@ -32,6 +32,7 @@ Here are some initial guidelines for how contributions will be treated:
 - @MatissJanis
 - @matt-fidd
 - @MikesGlitch
+- @tim-smart
 - @youngcw
 
 ### Alumni

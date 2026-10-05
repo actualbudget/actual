@@ -8,6 +8,10 @@ There is an option to "Display a notification when updates are available" here.
 
 ![Image of Settings top pf page](/img/using-actual/actual-settings.webp)
 
+### Notifications
+
+The option **Show in-app notifications (release notes and announcements)** controls whether Actual shows you news from the project inside the app: the notification bell in the top bar, the Notifications page, and the message that appears after an update. It is on by default and applies to the device you change it on. See [Notifications](../notifications.md) for the full guide.
+
 ### Themes
 
 Themes change the user interface colors. Pick from the built-in **Light**, **Dark**, **Midnight**, or **Auto** themes, or install a community-built theme from the catalog. See [Custom Themes](../custom-themes.md) for the full guide.
