@@ -134,7 +134,7 @@ export function BudgetToolbar({
           'data-testid': 'selected-budget-month',
           'data-month': startMonth,
         }}
-        style={{ minWidth: 0, fontSize: 16, fontWeight: 600 }}
+        style={{ minWidth: 0, marginLeft: 6, fontSize: 16, fontWeight: 600 }}
         onChange={onMonthSelect}
       />
       <View style={{ flex: 1 }} />
