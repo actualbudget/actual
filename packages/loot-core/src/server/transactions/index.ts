@@ -60,8 +60,23 @@ export async function batchUpdateTransactions({
   detectOrphanPayees?: boolean;
   runTransfers?: boolean;
 }) {
-  // Reject the whole batch before any write or side effect.
-  await preflightTransactionWrites({ added, updated, deleted });
+  // A tombstoning update is a deletion, so it gets the same child and
+  // transfer cleanup.
+  const tombstoned = updated?.filter(update => update.tombstone) ?? [];
+  if (tombstoned.length > 0) {
+    updated = updated.filter(update => !update.tombstone);
+    deleted = [...(deleted ?? []), ...tombstoned.map(({ id }) => ({ id }))];
+  }
+
+  // Reject the whole batch before any write or side effect, including the
+  // counterparts its new foreign transfers will get.
+  await preflightTransactionWrites(
+    { added, updated, deleted },
+    { runTransfers },
+  );
+  if (runTransfers) {
+    await transfer.preflightNewForeignTransfers(added ?? [], updated ?? []);
+  }
 
   // Track the ids of each type of transaction change (see below for why)
   let addedIds = [];
@@ -107,7 +122,8 @@ export async function batchUpdateTransactions({
             accounts.find(acct => acct.id === t.account) ??
               queuedAccount(t.account),
           );
-          return db.insertTransaction(t);
+          // Preflight validated the whole request, transfer links included.
+          return db.insertTransaction(t, { validatedTransfer: true });
         }),
       );
     }
@@ -135,7 +151,7 @@ export async function batchUpdateTransactions({
             );
           }
 
-          await db.updateTransaction(t);
+          await db.updateTransaction(t, { validatedTransfer: true });
         }),
       );
     }
@@ -160,7 +176,13 @@ export async function batchUpdateTransactions({
       .filter((transaction): transaction is TransactionEntity =>
         Boolean(transaction),
       );
-  const allAdded = pickTransactions(addedIds);
+  // Inside an enclosing batch (bank sync) new rows are still queued, so
+  // their transfers are built from the rows as written.
+  const allAdded = addedIds
+    .map((id, index) => changedById.get(id) ?? { ...added[index], id })
+    .filter((transaction): transaction is TransactionEntity =>
+      Boolean(transaction),
+    );
   const allUpdated = pickTransactions(updatedIds);
   const allDeleted = pickTransactions(deletedIds);
 
