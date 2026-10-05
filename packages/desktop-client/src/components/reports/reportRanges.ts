@@ -355,15 +355,18 @@ export function calculateSpendingReportTimeRange({
   isLive?: boolean;
   mode?: 'budget' | 'average' | 'single-month';
 }): [string, string] {
+  // These modes chart a single month against its own budget or average, so a
+  // live report is always the current month. The saved months are ignored
+  // rather than used as a window width: `compareTo` is stale here (the "to"
+  // select is disabled in these modes) and would skew the offset.
   if (['budget', 'average'].includes(mode) && isLive) {
-    const month = compare ?? monthUtils.currentMonth();
+    const month = monthUtils.currentMonth();
     return [month, month];
   }
 
-  if (mode === 'single-month' && isLive && compare) {
-    return [compare, compareTo ?? monthUtils.subMonths(compare, 1)];
-  }
-
+  // Live single-month reports slide like every other live report: the saved
+  // months give the gap between the two series, and the range is re-anchored
+  // so the newest month is the current one. Static reports keep them as-is.
   const [start, end] = calculateTimeRange(
     {
       start: compare,
