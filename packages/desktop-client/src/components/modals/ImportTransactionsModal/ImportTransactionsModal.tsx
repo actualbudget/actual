@@ -350,7 +350,6 @@ export function ImportTransactionsModal({
         }
 
         const category_id = parseCategoryFields(trans, categories);
-        trans.category = category_id;
 
         const {
           inflow: _inflow,
@@ -365,6 +364,7 @@ export function ImportTransactionsModal({
         } = trans;
         previewTransactions.push({
           ...finalTransaction,
+          category: category_id,
           date,
           amount: amountToInteger(amount),
           cleared: clearOnImport,
@@ -681,7 +681,6 @@ export function ImportTransactionsModal({
       }
 
       const category_id = parseCategoryFields(trans, categories);
-      trans.category = category_id;
 
       const {
         inflow: _inflow,
@@ -708,6 +707,7 @@ export function ImportTransactionsModal({
 
       finalTransactions.push({
         ...finalTransaction,
+        category: category_id,
         date,
         amount: amountToInteger(amount),
         cleared: clearOnImport,
