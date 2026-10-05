@@ -15,6 +15,7 @@ import * as prefs from '#server/prefs';
 import { Rule } from '#server/rules';
 import { addSyncListener, batchMessages } from '#server/sync';
 import { postForeignEntry } from '#server/transactions/foreign-entry';
+import type { ForeignDraft } from '#server/transactions/foreign-entry';
 import { foreignAccountCurrency } from '#server/transactions/foreign-guard';
 import {
   getRules,
@@ -621,16 +622,8 @@ export type PostScheduleResult =
   | { type: 'posted' }
   | {
       type: 'rate-unavailable';
-      /** The draft to complete with a rate or base amount. */
-      transaction: {
-        id: string;
-        payee: string | null;
-        account: string;
-        transaction_amount: number;
-        date: string;
-        schedule: string;
-        cleared: false;
-      };
+      /** The draft, with its rule results, to complete with a rate. */
+      transaction: ForeignDraft;
       currency: string;
       precision: number;
     };
@@ -678,7 +671,8 @@ async function postTransactionForSchedule({
     if (result.status === 'rate-unavailable') {
       return {
         type: 'rate-unavailable',
-        transaction: draft,
+        // The ruled draft, at the date that needs a rate.
+        transaction: 'transaction' in result ? result.transaction : draft,
         currency: foreign.currencyCode,
         precision: foreign.precision,
       };

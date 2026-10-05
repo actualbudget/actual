@@ -606,6 +606,8 @@ export type Modal =
         };
         currencyCode: string;
         nativePrecision: number;
+        /** A schedule draft that already ran its rules. */
+        rulesApplied?: boolean;
         onPosted: () => void;
       };
     }

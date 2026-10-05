@@ -668,11 +668,15 @@ async function closeAccount({
         await Promise.all(
           rows.map(async row => {
             if (row.transfer_id) {
-              await db.updateTransaction({
-                id: row.transfer_id,
-                payee: null,
-                transfer_id: null,
-              });
+              // Its counterpart is deleted in this same batch.
+              await db.updateTransaction(
+                {
+                  id: row.transfer_id,
+                  payee: null,
+                  transfer_id: null,
+                },
+                { transferCleanup: true },
+              );
             }
 
             await db.deleteTransaction({ id: row.id });

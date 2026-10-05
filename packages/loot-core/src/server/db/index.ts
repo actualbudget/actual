@@ -30,6 +30,7 @@ import {
 } from '#server/models';
 import { batchMessages, sendMessages } from '#server/sync';
 import { validateTransactionWrite } from '#server/transactions/foreign-guard';
+import type { TransactionWriteOptions } from '#server/transactions/foreign-guard';
 import { accountCurrencyFields } from '#server/util/currency';
 import * as monthUtils from '#shared/months';
 import { groupById } from '#shared/util';
@@ -930,11 +931,16 @@ export async function getTransactions(accountId: DbTransaction['acct']) {
 
 export async function insertTransaction(
   transaction,
+  options?: TransactionWriteOptions,
 ): Promise<TransactionEntity['id']> {
   let id: TransactionEntity['id'];
   // One batch: the row and its authority cell commit together.
   await batchMessages(async () => {
-    const { pair } = await validateTransactionWrite(transaction);
+    const { pair } = await validateTransactionWrite(
+      transaction,
+      undefined,
+      options,
+    );
     id = await insertWithSchema('transactions', transaction);
     if (pair) {
       // amount_pair is internal and not in the AQL schema.
@@ -944,9 +950,16 @@ export async function insertTransaction(
   return id;
 }
 
-export async function updateTransaction(transaction) {
+export async function updateTransaction(
+  transaction,
+  options?: TransactionWriteOptions,
+) {
   await batchMessages(async () => {
-    const { pair } = await validateTransactionWrite(transaction);
+    const { pair } = await validateTransactionWrite(
+      transaction,
+      undefined,
+      options,
+    );
     await updateWithSchema('transactions', transaction);
     if (pair) {
       await update('transactions', { id: transaction.id, amount_pair: pair });

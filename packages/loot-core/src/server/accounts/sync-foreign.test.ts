@@ -607,6 +607,45 @@ describe('syncing foreign bank accounts', () => {
     expect(remoteAccount().balance_current).toBeNull();
   });
 
+  it('writes both legs of a transfer a rule assigns during sync', async () => {
+    const account = await linkedYenAccount();
+    await db.insertAccount({ id: 'cash', name: 'Yen cash', currency: 'JPY' });
+    const cashPayee = await db.insertPayee({ name: '', transfer_acct: 'cash' });
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'imported_payee', value: 'Payee c' }],
+      actions: [{ op: 'set', field: 'payee', value: cashPayee }],
+    });
+    mockDownload(
+      [
+        row('c', '2026-03-06', '-700', 'JPY'),
+        row('a', '2026-03-05', '-1500', 'JPY'),
+      ],
+      '7800',
+      'JPY',
+    );
+    const result = await app.handlers['accounts-bank-sync']({
+      ids: [account.id],
+    });
+    expect(result.errors).toEqual([]);
+    const source = db.firstSync<{
+      id: string;
+      amount: number;
+      transferred_id: string;
+    }>(
+      'SELECT id, amount, transferred_id FROM transactions WHERE acct = ? AND description = ? AND tombstone = 0',
+      [account.id, cashPayee],
+    );
+    expect(source?.transferred_id).toBeTruthy();
+    expect(transactions('cash')).toEqual([
+      expect.objectContaining({
+        amount: -(source?.amount ?? 0),
+        transaction_amount: 700,
+      }),
+    ]);
+  });
+
   it('writes one opening balance when the first rows are future-dated', async () => {
     await saveRate('JPY', '150', '2026-03-01');
     mockDownload([row('a', '2026-03-11', '-1500', 'JPY')], '10000', 'JPY');
