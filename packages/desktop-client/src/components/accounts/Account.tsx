@@ -67,6 +67,7 @@ import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { usePayees } from '#hooks/usePayees';
+import { postScheduleTransaction } from '#hooks/usePostScheduleTransaction';
 import { getSchedulesQuery } from '#hooks/useSchedules';
 import { SelectedProviderWithItems } from '#hooks/useSelected';
 import type { Actions } from '#hooks/useSelected';
@@ -1719,13 +1720,13 @@ class AccountInternal extends PureComponent<
     switch (name) {
       case 'post-transaction':
         for (const id of scheduleIds) {
-          await send('schedule/post-transaction', { id });
+          await postScheduleTransaction(this.props.dispatch, id);
         }
         void this.refetchTransactions();
         break;
       case 'post-transaction-today':
         for (const id of scheduleIds) {
-          await send('schedule/post-transaction', { id, today: true });
+          await postScheduleTransaction(this.props.dispatch, id, true);
         }
         void this.refetchTransactions();
         break;

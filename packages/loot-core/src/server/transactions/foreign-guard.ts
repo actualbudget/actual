@@ -22,6 +22,7 @@ type ExistingRow = {
   isParent: number;
   isChild: number;
   parent_id: string | null;
+  schedule: string | null;
 };
 
 type TransactionWrite = {
@@ -102,6 +103,47 @@ export async function foreignAccountCurrency(
   return { currencyCode: context.currency, precision: context.precision };
 }
 
+/** An account's recorded encoding: currency (null for base) and precision. */
+export async function accountEncoding(
+  id: string | null | undefined,
+): Promise<{ currency: string | null; precision: number | null }> {
+  const context = id ? await accountContext(id) : null;
+  return context?.foreign
+    ? { currency: context.currency, precision: context.precision }
+    : { currency: null, precision: null };
+}
+
+export function sameEncoding(
+  a: { currency: string | null; precision: number | null },
+  b: { currency: string | null; precision: number | null },
+) {
+  return a.currency === b.currency && a.precision === b.precision;
+}
+
+/** A rule's schedule account condition (as in `extractScheduleConds`). */
+export function scheduleConditionAccount(
+  conditions: Array<{ op?: string; field?: string; value?: unknown }>,
+): string | null {
+  const account =
+    conditions.find(cond => cond.op === 'is' && cond.field === 'account') ??
+    conditions.find(cond => cond.op === 'is' && cond.field === 'acct');
+  return typeof account?.value === 'string' ? account.value : null;
+}
+
+/** The account a schedule's owning rule names, if any. */
+export async function scheduleAccountId(
+  scheduleId: string,
+): Promise<string | null> {
+  const row = await db.first<{ conditions: string | null }>(
+    `SELECT r.conditions FROM schedules s JOIN rules r ON r.id = s.rule
+       WHERE s.id = ?`,
+    [scheduleId],
+  );
+  return row?.conditions
+    ? scheduleConditionAccount(JSON.parse(row.conditions))
+    : null;
+}
+
 /** Transactions store raw payee ids; merges redirect them through mappings. */
 async function transferTarget(payeeId: string): Promise<string | null> {
   const payee = await db.first<Pick<db.DbPayee, 'transfer_acct'>>(
@@ -124,7 +166,7 @@ export async function validateTransactionWrite(
   const existing = row.id
     ? await db.first<ExistingRow>(
         `SELECT acct, description, transferred_id, amount, transaction_amount,
-           isParent, isChild, parent_id
+           isParent, isChild, parent_id, schedule
            FROM transactions WHERE id = ?`,
         [row.id],
       )
@@ -147,6 +189,24 @@ export async function validateTransactionWrite(
       (previous?.precision ?? null) !== account.precision
     ) {
       throw new Error('account-move-currency-mismatch');
+    }
+  }
+
+  // A schedule's amounts are in its account's encoding (none: base), so a
+  // transaction only marks occurrences of a schedule in its own encoding.
+  // The effective link is checked, including one kept from the stored row.
+  const scheduleId =
+    row.schedule !== undefined ? row.schedule : (existing?.schedule ?? null);
+  if (scheduleId != null) {
+    const scheduleAccount = await scheduleAccountId(scheduleId);
+    if (
+      scheduleAccount !== null &&
+      !sameEncoding(await accountEncoding(scheduleAccount), {
+        currency: account.foreign ? account.currency : null,
+        precision: account.foreign ? account.precision : null,
+      })
+    ) {
+      throw new Error('schedule-currency-mismatch');
     }
   }
 
@@ -199,12 +259,6 @@ export async function validateTransactionWrite(
   if (changesFamily) {
     throw new Error('foreign-split-unavailable');
   }
-  // Foreign schedules arrive in MC-3.5; an occurrence must not be marked
-  // paid by a transaction in another currency.
-  if (row.schedule != null) {
-    throw new Error('multicurrency-schedule-unavailable');
-  }
-
   const setsAmount =
     row.amount !== undefined || row.transaction_amount !== undefined;
   if (isUpdate && !setsAmount) return {};

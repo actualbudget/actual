@@ -31,6 +31,7 @@ import { useAccountPreviewTransactions } from '#hooks/useAccountPreviewTransacti
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useNavigate } from '#hooks/useNavigate';
+import { postScheduleTransaction } from '#hooks/usePostScheduleTransaction';
 import { getSchedulesQuery } from '#hooks/useSchedules';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -213,15 +214,14 @@ function TransactionListWithPreviews({
                 transactionId: transaction.id,
                 onPost: async (transactionId, today = false) => {
                   const parts = transactionId.split('/');
-                  await send('schedule/post-transaction', {
-                    id: parts[1],
-                    today,
-                  });
+                  // Close the menu first: posting may open the conversion
+                  // dialog for a foreign schedule without a rate.
                   dispatch(
                     collapseModals({
                       rootModalName: 'scheduled-transaction-menu',
                     }),
                   );
+                  await postScheduleTransaction(dispatch, parts[1], today);
                 },
                 onSkip: async transactionId => {
                   const parts = transactionId.split('/');

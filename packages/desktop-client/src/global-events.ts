@@ -49,6 +49,35 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     );
   });
 
+  // Foreign schedule occurrences wait for a rate instead of posting.
+  const unlistenSchedulesRateUnavailable = listen(
+    'schedules-rate-unavailable',
+    ({ schedules }) => {
+      store.dispatch(
+        addNotification({
+          notification: {
+            type: 'warning',
+            sticky: true,
+            message: t(
+              'Some scheduled transactions were not posted because no exchange rate is saved: {{schedules}}. Post them from the schedules page to enter a rate.',
+              {
+                schedules: schedules
+                  .map(({ name, date, currency }) =>
+                    t('{{name}} ({{currency}}, {{date}})', {
+                      name: name ?? t('Unnamed schedule'),
+                      currency,
+                      date,
+                    }),
+                  )
+                  .join(', '),
+              },
+            ),
+          },
+        }),
+      );
+    },
+  );
+
   const unlistenSync = syncEvents.listenForSyncEvent(store, queryClient);
 
   const unlistenUndo = listen('undo-event', undoState => {
@@ -199,6 +228,7 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     unlistenServerError();
     unlistenOrphanedPayees();
     unlistenSchedulesOffline();
+    unlistenSchedulesRateUnavailable();
     unlistenSync();
     unlistenUndo();
     unlistenFallbackWriteError();

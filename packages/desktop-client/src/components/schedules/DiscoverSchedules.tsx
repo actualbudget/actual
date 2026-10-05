@@ -15,6 +15,8 @@ import type { DiscoverScheduleEntity } from '@actual-app/core/types/models';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { Field, Row, SelectCell, Table, TableHeader } from '#components/table';
 import { DisplayId } from '#components/util/DisplayId';
+import { AccountCurrencyFormat } from '#hooks/currencyFormatContext';
+import { useAccounts } from '#hooks/useAccounts';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocale } from '#hooks/useLocale';
 import {
@@ -44,6 +46,7 @@ function DiscoverSchedulesTable({
   const dispatchSelected = useSelectedDispatch();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
+  const { data: accounts = [] } = useAccounts();
 
   function renderItem({ item }: { item: DiscoverScheduleEntity }) {
     const selected = selectedItems.has(item.id);
@@ -101,7 +104,11 @@ function DiscoverSchedulesTable({
         <Field width="auto" title={recurDescription} style={{ flex: 1.5 }}>
           {recurDescription}
         </Field>
-        <ScheduleAmountCell amount={item.amount} op={amountOp} />
+        <AccountCurrencyFormat
+          account={accounts.find(account => account.id === item.account)}
+        >
+          <ScheduleAmountCell amount={item.amount} op={amountOp} />
+        </AccountCurrencyFormat>
       </Row>
     );
   }
@@ -154,6 +161,7 @@ export function DiscoverSchedules() {
   const schedules = data || [];
 
   const [creating, setCreating] = useState(false);
+  const { data: accounts = [] } = useAccounts();
 
   const selectedInst = useSelected<DiscoverScheduleEntity>(
     'discover-schedules',
@@ -171,9 +179,14 @@ export function DiscoverSchedules() {
           schedule: {},
         });
 
-        // Now query for matching transactions and link them automatically
+        // Now query for matching transactions and link them automatically;
+        // a foreign schedule's amounts are native.
         const { filters } = await send('make-filters-from-conditions', {
           conditions: schedule._conditions,
+          amountField: accounts.find(account => account.id === schedule.account)
+            ?.currency
+            ? 'transaction_amount'
+            : 'amount',
         });
 
         if (filters.length > 0) {

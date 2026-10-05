@@ -2194,6 +2194,37 @@ describe('CategoryTemplateContext', () => {
       ).rejects.toThrow(/Schedule Internet does not exist/);
     });
 
+    it('throws when a schedule template uses a schedule in another currency', async () => {
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue([
+        { name: 'Yen Schedule', id: 's1' },
+      ] as Awaited<ReturnType<typeof statements.getActiveSchedules>>);
+      vi.mocked(db.getAccounts).mockResolvedValueOnce([
+        { id: 'yen', currency: 'JPY' },
+      ] as Awaited<ReturnType<typeof db.getAccounts>>);
+      vi.mocked(getRuleForSchedule).mockResolvedValueOnce(
+        new Rule({
+          id: 'r1',
+          stage: 'pre',
+          conditionsOp: 'and',
+          conditions: [
+            { op: 'is', field: 'account', value: 'yen', type: 'id' },
+          ],
+          actions: [],
+        }),
+      );
+      const templates: Template[] = [
+        {
+          type: 'schedule',
+          name: 'Yen Schedule',
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      await expect(
+        CategoryTemplateContext.init(templates, category, '2024-01', 0),
+      ).rejects.toThrow(/Yen Schedule is in another currency/);
+    });
+
     it('throws when schedule and by templates have mismatched priorities', async () => {
       vi.mocked(statements.getActiveSchedules).mockResolvedValue([
         { name: 'Rent', id: 's1' },

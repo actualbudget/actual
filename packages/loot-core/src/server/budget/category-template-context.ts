@@ -1,8 +1,10 @@
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
+import { getRuleForSchedule } from '#server/schedules/app';
 import { getRecordedAmountPrecision } from '#server/util/currency';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
+import { extractScheduleConds } from '#shared/schedules';
 import { amountToInteger, integerToAmount } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 import type {
@@ -497,6 +499,31 @@ export class CategoryTemplateContext {
           throw new Error('Schedule template has no scheduleId or name');
         }
       });
+    // A foreign schedule's amount is native and has no base estimate yet.
+    const scheduleTemplates = templates.filter(t => t.type === 'schedule');
+    const foreignAccounts = new Set(
+      scheduleTemplates.length > 0
+        ? ((await db.getAccounts()) ?? [])
+            .filter(a => a.currency)
+            .map(a => a.id)
+        : [],
+    );
+    if (foreignAccounts.size > 0) {
+      for (const t of scheduleTemplates) {
+        const schedule = activeSchedules.find(s =>
+          t.scheduleId
+            ? s.id === t.scheduleId
+            : s.name?.trim() === t.name?.trim(),
+        );
+        const rule = await getRuleForSchedule(schedule?.id ?? null);
+        const { account } = extractScheduleConds(rule.serialize().conditions);
+        if (foreignAccounts.has(account?.value)) {
+          throw new Error(
+            `Schedule ${t.name ?? schedule?.name ?? ''} is in another currency; schedules in other currencies are not supported in templates yet.`,
+          );
+        }
+      }
+    }
     //find lowest priority
     const lowestPriority = Math.min(
       ...templates

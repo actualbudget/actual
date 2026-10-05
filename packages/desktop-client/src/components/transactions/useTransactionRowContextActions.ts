@@ -223,14 +223,7 @@ export function useTransactionRowContextActions({
       name: 'link-schedule',
       text: t('Link schedule'),
       onClick: () => onLinkSchedule(selectedIds),
-      // Schedules for other currencies arrive later.
-      hidden:
-        linked ||
-        selectedIds.some(
-          id =>
-            accounts.find(account => account.id === getTransaction(id)?.account)
-              ?.currency,
-        ),
+      hidden: linked,
     },
     {
       name: 'create-rule',

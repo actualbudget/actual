@@ -30,11 +30,18 @@ import { SelectedItemsButton } from '#components/table';
 import { SimpleTransactionsTable } from '#components/transactions/SimpleTransactionsTable';
 import { AmountInput, BetweenAmountInput } from '#components/util/AmountInput';
 import { GenericInput } from '#components/util/GenericInput';
+import { AccountCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useAccounts } from '#hooks/useAccounts';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocale } from '#hooks/useLocale';
 import { SelectedProvider } from '#hooks/useSelected';
 import type { Actions } from '#hooks/useSelected';
+import {
+  encodingKey,
+  otherEncodingAccountIds,
+  reencodeScheduleAmount,
+} from '#util/account-encoding';
 
 export type ScheduleFormFields = {
   payee: null | string;
@@ -123,6 +130,36 @@ export function ScheduleEditForm({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { isNarrowWidth } = useResponsive();
   const { data: accounts = [] } = useAccounts();
+  const budgetPrecision = useAmountPrecision();
+  const accountById = (id: string | null | undefined) =>
+    id ? accounts.find(account => account.id === id) : undefined;
+  const fieldAccount = accountById(fields.account);
+  const precisionOf = (id: string | null | undefined) =>
+    accountById(id)?.currency_precision ?? budgetPrecision;
+
+  // A schedule's amounts are stored in its account's encoding, which an
+  // existing schedule keeps; other currencies need a new schedule.
+  const otherEncodingAccounts =
+    !adding && schedule?.id
+      ? otherEncodingAccountIds(accounts, accountById(schedule._account))
+      : [];
+
+  function onAccountChange(id: string | null) {
+    const from = precisionOf(fields.account);
+    const to = precisionOf(id);
+    if (from !== to && fields.amount != null) {
+      // A typed amount keeps its value in the new encoding, or is cleared.
+      // An inexact value is cleared in the shape its operator needs.
+      dispatch({
+        type: 'set-field',
+        field: 'amount',
+        value:
+          reencodeScheduleAmount(fields.amount, from, to) ??
+          (typeof fields.amount === 'number' ? 0 : { num1: 0, num2: 0 }),
+      });
+    }
+    dispatch({ type: 'set-field', field: 'account', value: id });
+  }
 
   return (
     <>
@@ -158,6 +195,7 @@ export function ScheduleEditForm({
             <GenericInput
               type="id"
               field="payee"
+              hideTransferPayees={!!fieldAccount?.currency}
               value={fields.payee || ''}
               onChange={id =>
                 dispatch({ type: 'set-field', field: 'payee', value: id })
@@ -174,15 +212,17 @@ export function ScheduleEditForm({
             <GenericInput
               type="id"
               field="account"
-              // Schedules for accounts in other currencies arrive later.
-              hiddenAccounts={accounts
-                .filter(account => account.currency)
-                .map(account => account.id)}
               value={fields.account || ''}
-              onChange={id =>
-                dispatch({ type: 'set-field', field: 'account', value: id })
-              }
+              hiddenAccounts={otherEncodingAccounts}
+              onChange={id => onAccountChange(id)}
             />
+            {otherEncodingAccounts.length > 0 && (
+              <Text style={{ fontSize: 12, color: theme.pageTextLight }}>
+                <Trans>
+                  To use an account in another currency, create a new schedule.
+                </Trans>
+              </Text>
+            )}
           </FormField>
 
           <FormField style={{ flex: 1, gridColumn: '1 / -1' }}>
@@ -221,32 +261,36 @@ export function ScheduleEditForm({
                 }
               />
             </SpaceBetween>
-            {fields.amountOp === 'isbetween' ? (
-              <BetweenAmountInput
-                // @ts-expect-error fix me
-                defaultValue={fields.amount}
-                onChange={value =>
-                  dispatch({
-                    type: 'set-field',
-                    field: 'amount',
-                    value,
-                  })
-                }
-              />
-            ) : (
-              <AmountInput
-                id="amount-field"
-                // @ts-expect-error fix me
-                value={fields.amount}
-                onUpdate={value =>
-                  dispatch({
-                    type: 'set-field',
-                    field: 'amount',
-                    value,
-                  })
-                }
-              />
-            )}
+            <AccountCurrencyFormat account={fieldAccount}>
+              {fields.amountOp === 'isbetween' ? (
+                <BetweenAmountInput
+                  // Remount when the encoding changes; the input is uncontrolled.
+                  key={encodingKey(fieldAccount)}
+                  // @ts-expect-error fix me
+                  defaultValue={fields.amount}
+                  onChange={value =>
+                    dispatch({
+                      type: 'set-field',
+                      field: 'amount',
+                      value,
+                    })
+                  }
+                />
+              ) : (
+                <AmountInput
+                  id="amount-field"
+                  // @ts-expect-error fix me
+                  value={fields.amount}
+                  onUpdate={value =>
+                    dispatch({
+                      type: 'set-field',
+                      field: 'amount',
+                      value,
+                    })
+                  }
+                />
+              )}
+            </AccountCurrencyFormat>
           </FormField>
         </SpaceBetween>
 

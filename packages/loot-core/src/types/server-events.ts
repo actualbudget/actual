@@ -102,6 +102,10 @@ type ImportProgressEvent = {
 
 type PrefsUpdatedEvent = undefined;
 type SchedulesOfflineEvent = undefined;
+/** Foreign schedule occurrences left unposted for want of a rate. */
+type SchedulesRateUnavailableEvent = {
+  schedules: Array<{ name: string | null; date: string; currency: string }>;
+};
 type ServerErrorEvent = undefined;
 type ShowBudgetsEvent = undefined;
 type StartImportEvent = { budgetName: string };
@@ -119,6 +123,7 @@ export type ServerEvents = {
   'orphaned-payees': OrphanedPayeesEvent;
   'prefs-updated': PrefsUpdatedEvent;
   'schedules-offline': SchedulesOfflineEvent;
+  'schedules-rate-unavailable': SchedulesRateUnavailableEvent;
   'server-error': ServerErrorEvent;
   'show-budgets': ShowBudgetsEvent;
   'start-import': StartImportEvent;

@@ -12,6 +12,7 @@ import { mergeSyncedPrefs } from '#prefs/prefsSlice';
 import { SelectLinkedAccountsModal } from './SelectLinkedAccountsModal';
 
 const linkSimpleFin = vi.fn();
+const unlinkAccount = vi.hoisted(() => vi.fn());
 const narrow = vi.hoisted(() => ({ value: true }));
 const startingBalanceRows = vi.hoisted(() => ({
   value: [] as Array<{
@@ -65,7 +66,7 @@ vi.mock('#accounts', () => {
     useLinkAccountPluggyAiMutation: mutation,
     useLinkAccountAkahuMutation: mutation,
     useLinkAccountEnableBankingMutation: mutation,
-    useUnlinkAccountMutation: mutation,
+    useUnlinkAccountMutation: () => ({ mutate: unlinkAccount }),
   };
 });
 
@@ -135,6 +136,7 @@ function renderModal(
 
 beforeEach(() => {
   linkSimpleFin.mockReset();
+  unlinkAccount.mockReset();
   vi.mocked(closeModal).mockClear();
   narrow.value = true;
   startingBalanceRows.value = [];
@@ -274,4 +276,121 @@ it('retries only the links that wrote nothing', async () => {
   expect(
     linkSimpleFin.mock.calls.map(([{ upgradingId }]) => upgradingId),
   ).toEqual(['yen-a', 'yen-b', 'yen-b']);
+});
+
+it('sends a failed base link again on retry', async () => {
+  const save = vi.fn(async (): Promise<{ status: 'saved'; id: string }> => ({
+    status: 'saved',
+    id: 'rate',
+  }));
+  initServer({ 'exchange-rates/save': save });
+  localAccounts.value = [
+    yenAccount({ id: 'yen-a', name: 'Yen A', account_id: 'remote-a' }),
+    yenAccount({
+      id: 'usd-b',
+      name: 'Dollars B',
+      account_id: 'remote-b',
+      currency: null,
+      currency_precision: null,
+    }),
+  ];
+  let calls = 0;
+  linkSimpleFin.mockImplementation(async ({ upgradingId }) => {
+    calls += 1;
+    if (upgradingId === 'usd-b') {
+      if (calls <= 2) throw new Error('network');
+      return { type: 'ok', currencyMismatches: 0 };
+    }
+    return calls <= 2
+      ? { type: 'rate-unavailable', currency: 'JPY', dates: ['2026-03-05'] }
+      : { type: 'ok', currencyMismatches: 0 };
+  });
+  renderModal(
+    [
+      { ...externalAccount, account_id: 'remote-a', name: 'Remote A' },
+      {
+        ...externalAccount,
+        account_id: 'remote-b',
+        name: 'Remote B',
+        currency: 'USD',
+      },
+    ],
+    undefined,
+  );
+
+  fireEvent.click(screen.getByRole('button', { name: 'Link accounts' }));
+  await screen.findByText(/No exchange rate is saved/);
+  fireEvent.change(screen.getByPlaceholderText('Rate'), {
+    target: { value: '150' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Save rate' }));
+
+  await waitFor(() => expect(closeModal).toHaveBeenCalled());
+  expect(
+    linkSimpleFin.mock.calls
+      .map(([{ upgradingId }]) => String(upgradingId))
+      .sort((a, b) => a.localeCompare(b)),
+  ).toEqual(['usd-b', 'usd-b', 'yen-a', 'yen-a']);
+});
+
+it('keeps an account created by an earlier attempt on retry', async () => {
+  initServer({
+    'exchange-rates/save': async () => ({ status: 'saved', id: 'rate' }),
+  });
+  localAccounts.value = [];
+  let yenCalls = 0;
+  linkSimpleFin.mockImplementation(async ({ externalAccount }) => {
+    if (externalAccount.account_id === 'remote-b') {
+      // The base link creates its account, as the server does.
+      localAccounts.value = [
+        yenAccount({
+          id: 'created-b',
+          account_id: 'remote-b',
+          currency: null,
+          currency_precision: null,
+        }),
+      ];
+      return { type: 'ok', currencyMismatches: 0 };
+    }
+    yenCalls += 1;
+    return yenCalls === 1
+      ? { type: 'rate-unavailable', currency: 'JPY', dates: ['2026-03-05'] }
+      : { type: 'ok', currencyMismatches: 0 };
+  });
+  renderModal(
+    [
+      { ...externalAccount, account_id: 'remote-a', name: 'Remote A' },
+      {
+        ...externalAccount,
+        account_id: 'remote-b',
+        name: 'Remote B',
+        currency: 'USD',
+      },
+    ],
+    undefined,
+  );
+  for (const name of ['Remote A', 'Remote B']) {
+    fireEvent.click(screen.getAllByRole('button', { name: 'Link account' })[0]);
+    fireEvent.click((await screen.findAllByText('Create new account')).at(-1)!);
+    await waitFor(() =>
+      expect(
+        screen.queryAllByRole('button', { name: 'Link account' }),
+      ).toHaveLength(name === 'Remote A' ? 1 : 0),
+    );
+  }
+
+  fireEvent.click(screen.getByRole('button', { name: 'Link accounts' }));
+  await screen.findByText(/No exchange rate is saved/);
+  fireEvent.change(screen.getByPlaceholderText('Rate'), {
+    target: { value: '150' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Save rate' }));
+
+  await waitFor(() => expect(closeModal).toHaveBeenCalled());
+  expect(unlinkAccount).not.toHaveBeenCalled();
+  expect(
+    linkSimpleFin.mock.calls
+      .map(([call]) => String(call.externalAccount.account_id))
+      .sort((a, b) => a.localeCompare(b)),
+  ).toEqual(['remote-a', 'remote-a', 'remote-b']);
 });
