@@ -157,7 +157,7 @@ Control values for Button/Input (paddingY / paddingX / min-height, px):
 | large       | 8 / 12 / 36  | 6 / 12 / 32 | 6 / 12 / 32 | 6 / 12 / 32 |
 | extra-large | 10 / 14 / 40 | 8 / 12 / 36 | 8 / 12 / 36 | 8 / 12 / 36 |
 
-`size="medium"` reproduces today's default control look exactly (5px/10px padding, 13px text, no min-height) and, on controls, inherits line-height like the default; the other sizes apply their scale line-height. `Text` always applies its size's line-height, while the omitted prop forces no line-height at all. `extra-large` narrow hits the 40px mobile touch target.
+`size="medium"` reproduces today's default control look exactly (5px/10px padding, 13px text, no min-height) and, on controls, inherits line-height like the default; the other sizes apply their scale line-height. `Text` always applies its size's line-height, while the omitted prop forces no line-height at all. `extra-large` narrow hits the 40px mobile touch target. The touch-target guarantee applies to touch-primary controls: at narrow, use `large` or `extra-large` for controls the user taps; `small` stays the compact 24px desktop-density choice at every breakpoint and is not meant for touch-primary controls.
 
 ### Named Rules
 
