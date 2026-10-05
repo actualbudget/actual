@@ -79,10 +79,10 @@ export function TransactionTableColumnListItem({
       </Text>
       {isLocked ? (
         <Text
+          size="small"
           style={{
             color: theme.pageTextSubdued,
             fontStyle: 'italic',
-            fontSize: 12,
           }}
         >
           <Trans>Always shown</Trans>
