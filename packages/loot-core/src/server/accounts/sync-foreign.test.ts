@@ -469,6 +469,33 @@ describe('linking foreign bank accounts (inspection round 2)', () => {
     expect(rows.reduce((sum, t) => sum + t.transaction_amount, 0)).toBe(90);
   });
 
+  it('finds the first same-day row by balance continuity', async () => {
+    await saveRate('JPY', '150', '2026-01-01');
+    // Ascending order within one day, no provider balance.
+    mockDownload(
+      [
+        {
+          ...row('a', '2026-03-01', '100', 'JPY'),
+          balanceAfterTransaction: {
+            balanceAmount: { amount: '100', currency: 'JPY' },
+          },
+        },
+        {
+          ...row('b', '2026-03-01', '-10', 'JPY'),
+          balanceAfterTransaction: {
+            balanceAmount: { amount: '90', currency: 'JPY' },
+          },
+        },
+      ],
+      undefined,
+      null,
+    );
+
+    await link({ externalAccount: providerAccount('JPY') });
+    const rows = transactions(remoteAccount().id);
+    expect(rows.reduce((sum, t) => sum + t.transaction_amount, 0)).toBe(90);
+  });
+
   it("keeps a base account's opening balance when a foreign account in the batch fails", async () => {
     await saveRate('JPY', '150', '2026-03-01');
     await db.insertAccount({
@@ -578,6 +605,19 @@ describe('syncing foreign bank accounts', () => {
     mockDownload([], '50.00', 'USD');
     await app.handlers['accounts-bank-sync']({ ids: [account.id] });
     expect(remoteAccount().balance_current).toBeNull();
+  });
+
+  it('writes one opening balance when the first rows are future-dated', async () => {
+    await saveRate('JPY', '150', '2026-03-01');
+    mockDownload([row('a', '2026-03-11', '-1500', 'JPY')], '10000', 'JPY');
+    await link({ externalAccount: providerAccount('JPY') });
+    const account = remoteAccount();
+    expect(transactions(account.id)).toHaveLength(2);
+
+    await app.handlers['accounts-bank-sync']({ ids: [account.id] });
+    expect(
+      transactions(account.id).filter(t => t.starting_balance_flag),
+    ).toHaveLength(1);
   });
 
   it('fails only the affected account in a batch sync', async () => {

@@ -43,7 +43,6 @@ import {
 } from '#shared/months';
 import { q } from '#shared/query';
 import { getApproxNumberThreshold, sortNumbers } from '#shared/rules';
-import { extractScheduleConds } from '#shared/schedules';
 import { extractTagsForFilter, makeTagAqlRegex } from '#shared/tags';
 import { ungroupTransaction } from '#shared/transactions';
 import { fastSetMerge, partitionByField } from '#shared/util';
@@ -53,7 +52,12 @@ import type {
   TransactionEntity,
 } from '#types/models';
 
-import { isForeignAccount, preflightTransactionWrites } from './foreign-guard';
+import {
+  accountEncoding,
+  preflightTransactionWrites,
+  sameEncoding,
+  scheduleConditionAccount,
+} from './foreign-guard';
 
 import { batchUpdateTransactions } from '.';
 
@@ -228,25 +232,127 @@ export function getRules() {
   return [...allRules.values()];
 }
 
-// A schedule's account comes from its rule's account condition, so rule
-// writers must not retarget a schedule to a foreign account either.
-async function rejectForeignScheduleRule(rule: {
+/**
+ * A schedule's amounts are stored in its account's encoding (none: base).
+ * Callers send whole condition lists, so a retained amount cannot be told
+ * from a new one: a schedule's encoding never changes. Foreign schedules
+ * cannot create splits until foreign splits exist.
+ */
+async function validateScheduleRule(rule: {
   id?: string;
-  conditions?: Array<{ field?: string; value?: unknown }>;
-  actions?: Array<{ op?: string }>;
+  conditions?: Array<{ op?: string; field?: string; value?: unknown }>;
+  actions?: Array<{
+    op?: string;
+    field?: string;
+    value?: unknown;
+    options?: { splitIndex?: number };
+  }>;
 }) {
-  if (!rule.conditions) return;
-  const linked =
-    rule.actions?.some(action => action.op === 'link-schedule') ||
-    (rule.id &&
-      (await db.first('SELECT id FROM schedules WHERE rule = ?', [rule.id])));
-  const account = extractScheduleConds(rule.conditions).account?.value;
+  const stored = rule.id
+    ? await db.first<{ conditions: string | null; actions: string | null }>(
+        'SELECT conditions, actions FROM rules WHERE id = ?',
+        [rule.id],
+      )
+    : null;
+  const ownsSchedule =
+    rule.id != null &&
+    (await db.first('SELECT id FROM schedules WHERE rule = ?', [rule.id])) !=
+      null;
+  const actions =
+    rule.actions ?? (stored?.actions ? JSON.parse(stored.actions) : []);
+  if (!ownsSchedule && !actions.some(action => action.op === 'link-schedule')) {
+    return;
+  }
+  const conditions =
+    rule.conditions ??
+    (stored?.conditions ? JSON.parse(stored.conditions) : []);
+  const encoding = await accountEncoding(scheduleConditionAccount(conditions));
+
+  if (ownsSchedule && rule.conditions && stored?.conditions) {
+    const previous = await accountEncoding(
+      scheduleConditionAccount(JSON.parse(stored.conditions)),
+    );
+    if (!sameEncoding(previous, encoding)) {
+      throw new Error('schedule-account-encoding-change');
+    }
+    // A schedule gaining an account must not strand linked transactions in
+    // another encoding (an accountless schedule may link any).
+    const accountId = scheduleConditionAccount(conditions);
+    if (accountId) {
+      const linked = await db.all<{ acct: string }>(
+        `SELECT DISTINCT t.acct FROM transactions t
+           JOIN schedules s ON s.id = t.schedule
+           WHERE s.rule = ? AND t.tombstone = 0`,
+        [rule.id],
+      );
+      for (const { acct } of linked) {
+        if (!sameEncoding(await accountEncoding(acct), encoding)) {
+          throw new Error('schedule-currency-mismatch');
+        }
+      }
+    }
+  }
+
+  // Amount conditions must have the shape their operator needs.
+  const amount = conditions.find(cond => cond.field === 'amount');
+  const value = amount?.value as
+    | number
+    | { num1?: unknown; num2?: unknown }
+    | null
+    | undefined;
   if (
-    linked &&
-    typeof account === 'string' &&
-    (await isForeignAccount(account))
+    amount &&
+    (amount.op === 'isbetween'
+      ? typeof value !== 'object' ||
+        value === null ||
+        !Number.isSafeInteger(value.num1) ||
+        !Number.isSafeInteger(value.num2)
+      : (amount.op === 'is' || amount.op === 'isapprox') &&
+        !Number.isSafeInteger(value))
   ) {
-    throw new Error('multicurrency-schedule-unavailable');
+    throw new Error('schedule-amount-invalid');
+  }
+
+  // Foreign transfers arrive with MC-4: no schedule may transfer from or to
+  // a foreign account.
+  const payeeIds = [
+    ...conditions
+      .filter(
+        cond =>
+          cond.op === 'is' &&
+          (cond.field === 'payee' || cond.field === 'description'),
+      )
+      .map(cond => cond.value),
+    ...actions
+      .filter(
+        action =>
+          action.op === 'set' &&
+          (action.field === 'payee' || action.field === 'description'),
+      )
+      .map(action => action.value),
+  ].filter((id): id is string => typeof id === 'string');
+  for (const id of payeeIds) {
+    const payee = await db.first<{ transfer_acct: string | null }>(
+      'SELECT transfer_acct FROM payees WHERE id = ?',
+      [id],
+    );
+    if (
+      payee?.transfer_acct &&
+      (encoding.currency !== null ||
+        (await accountEncoding(payee.transfer_acct)).currency !== null)
+    ) {
+      throw new Error('multicurrency-transfer-unavailable');
+    }
+  }
+  if (
+    encoding.currency !== null &&
+    // Actions with a split index create split children.
+    actions.some(
+      action =>
+        action.op === 'set-split-amount' || !!action.options?.splitIndex,
+    )
+  ) {
+    throw new Error('foreign-split-unavailable');
   }
 }
 
@@ -254,13 +360,13 @@ export async function insertRule(
   rule: Omit<RuleEntity, 'id'> & { id?: string },
 ) {
   rule = ruleModel.validate(rule);
-  await rejectForeignScheduleRule(rule);
+  await validateScheduleRule(rule);
   return db.insertWithUUID('rules', ruleModel.fromJS(rule));
 }
 
 export async function updateRule(rule) {
   rule = ruleModel.validate(rule, { update: true });
-  await rejectForeignScheduleRule(rule);
+  await validateScheduleRule(rule);
   return db.update('rules', ruleModel.fromJS(rule));
 }
 
@@ -330,6 +436,36 @@ export async function getRuleIdFromScheduleId(
   );
 
   return row?.rule || null;
+}
+
+/**
+ * The transaction a schedule's own rule evaluates, or null when it must not
+ * run. A schedule with an account only matches transactions in that
+ * account's encoding, whatever its condition operators (`or` included); a
+ * foreign schedule's amount conditions compare native amounts. Ordinary
+ * rules and accountless schedules read the base amount.
+ */
+function scheduleConditionView(
+  rule: Rule,
+  trans,
+  accountsMap: Map<string, db.DbAccount>,
+  scheduleRuleIds: string[],
+) {
+  if (!scheduleRuleIds.includes(rule.id)) return trans;
+  const accountId = scheduleConditionAccount(rule.conditions);
+  const scheduleAccount = accountId ? accountsMap.get(accountId) : null;
+  if (!scheduleAccount) return trans;
+  const account = accountsMap.get(trans.account);
+  if (
+    (account?.currency ?? null) !== (scheduleAccount.currency ?? null) ||
+    (account?.currency_precision ?? null) !==
+      (scheduleAccount.currency_precision ?? null)
+  ) {
+    return null;
+  }
+  return scheduleAccount.currency == null
+    ? trans
+    : { ...trans, amount: trans.transaction_amount };
 }
 
 export async function getAllRuleIdsFromSchedules(
@@ -470,7 +606,13 @@ export async function runRules(
       }
     } else {
       // if there is no scheduleRuleID then just run all rules.
-      if (rules[i].evalConditions(finalTrans)) {
+      const view = scheduleConditionView(
+        rules[i],
+        finalTrans,
+        accountsMap,
+        RuleIdsLinkedToSchedules,
+      );
+      if (view && rules[i].evalConditions(view)) {
         await ensureBalanceFor(rules[i]);
         finalTrans = Object.assign(
           {},
@@ -532,7 +674,16 @@ function conditionSpecialCases(cond: Condition | null): Condition | null {
 // This does the inverse: finds all the transactions matching a rule
 export function conditionsToAQL(
   conditions,
-  { recurDateBounds = 100, applySpecialCases = true } = {},
+  {
+    recurDateBounds = 100,
+    applySpecialCases = true,
+    // A foreign schedule's amount conditions compare native amounts.
+    amountField = 'amount',
+  }: {
+    recurDateBounds?: number;
+    applySpecialCases?: boolean;
+    amountField?: 'amount' | 'transaction_amount';
+  } = {},
 ) {
   const errors = [];
 
@@ -582,6 +733,8 @@ export function conditionsToAQL(
       }
     } else if (field === 'category_group') {
       field = 'category.group';
+    } else if (field === 'amount') {
+      field = amountField;
     }
 
     const apply = (field, aqlOp, value) => {
@@ -590,18 +743,21 @@ export function conditionsToAQL(
           if (options.outflow) {
             return {
               $and: [
-                { amount: { $lt: 0 } },
+                { [amountField]: { $lt: 0 } },
                 { [field]: { $transform: '$neg', [aqlOp]: value } },
               ],
             };
           } else if (options.inflow) {
             return {
-              $and: [{ amount: { $gt: 0 } }, { [field]: { [aqlOp]: value } }],
+              $and: [
+                { [amountField]: { $gt: 0 } },
+                { [field]: { [aqlOp]: value } },
+              ],
             };
           }
         }
 
-        return { amount: { [aqlOp]: value } };
+        return { [amountField]: { [aqlOp]: value } };
       } else if (type === 'string') {
         return {
           [field]: {

@@ -38,8 +38,11 @@ export async function createSingleTimeScheduleFromTransaction(
 
   const actions: RuleActionEntity[] = [];
 
-  if (transaction.amount != null) {
-    conditions.push({ op: 'is', field: 'amount', value: transaction.amount });
+  // A foreign account's schedule is native: stored rows carry it in
+  // transaction_amount, register drafts in amount.
+  const amount = transaction.transaction_amount ?? transaction.amount;
+  if (amount != null) {
+    conditions.push({ op: 'is', field: 'amount', value: amount });
   }
   if (transaction.payee != null && transaction.payee !== '') {
     conditions.push({ op: 'is', field: 'payee', value: transaction.payee });
