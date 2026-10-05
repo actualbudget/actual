@@ -3475,17 +3475,34 @@ export const TransactionTable = forwardRef(
     }
 
     function getFieldsNewTransaction(item?: TransactionEntity) {
+      const rows = newTransactions ?? [];
+      // Action buttons render under the split lines, after the last child.
+      const hasSplitChildren =
+        item?.is_parent === true && rows.some(row => row.parent_id === item.id);
       const fields = [
         'select',
         ...getFocusableFields(),
-        'cancel',
-        'schedule',
-        'add',
+        ...(hasSplitChildren ? [] : ['cancel', 'schedule', 'add']),
       ];
 
-      return getFields(item, fields).filter(
+      const resolved = getFields(item, fields).filter(
         f => f !== 'schedule' || (item ? isFutureTransaction(item) : false),
       );
+
+      const isLastSplitChild =
+        item?.is_child === true && rows[rows.length - 1]?.id === item.id;
+      if (!isLastSplitChild || !item) {
+        return resolved;
+      }
+
+      const parent = rows.find(row => row.id === item.parent_id);
+      const showSchedule = isFutureTransaction(parent ?? item);
+      return [
+        ...resolved,
+        'cancel',
+        ...(showSchedule ? ['schedule'] : []),
+        'add',
+      ];
     }
 
     function getFieldsTableTransaction(item?: TransactionEntity) {
@@ -3773,24 +3790,19 @@ export const TransactionTable = forwardRef(
         if (isTemporaryId(id)) {
           const { newNavigator } = latestState.current;
           const newTrans = latestState.current.newTransactions;
-          const { data, diff } = splitTransaction(
+          const { data } = splitTransaction(
             newTrans,
             id,
             makeEmptySplitSubtransactions,
           );
           setNewTransactions(data);
 
-          // Jump next to "debit" field if it is empty
-          // Otherwise jump to the same field as before, but downwards
-          // to the added split transaction
-          if (newTrans[0].amount === null) {
-            newNavigator.onEdit(newTrans[0].id, 'debit');
-          } else {
-            newNavigator.onEdit(
-              diff.added[0].id,
-              latestState.current.newNavigator.focusedField,
-            );
-          }
+          // Stay on the parent amount field when split is first enabled
+          // so the user can enter the parent amount before the split lines.
+          newNavigator.onEdit(
+            newTrans[0].id,
+            newTrans[0].amount > 0 ? 'credit' : 'debit',
+          );
         } else {
           const trans = latestState.current.transactions.find(t => t.id === id);
           const newId = onSplitProp(id);
