@@ -43,6 +43,11 @@ import * as queries from '#queries';
 import { useDispatch } from '#redux';
 import * as bindings from '#spreadsheet/bindings';
 
+// Mirrors the default page size of `useTransactions` so the
+// "keep loading while the visible list is too short" effect below
+// can tell when a page has been fully consumed.
+const TRANSACTIONS_PAGE_SIZE = 50;
+
 export function AccountTransactions({
   account,
 }: {
@@ -83,16 +88,27 @@ function TransactionListWithPreviews({
     : parsedReconcileAmount;
   const isReconciling = reconcileAmount != null;
 
+  const hideReconciledTransactions =
+    hideReconciled === 'true' && !isReconciling;
+
   const baseTransactionsQuery = useCallback(() => {
     let query = queries
       .transactions(account.id)
       .options({ splits: 'all' })
       .select('*');
-    if (hideReconciled === 'true' && !isReconciling) {
+    if (
+      hideReconciledTransactions &&
+      // Running balances have to be calculated over the reconciled
+      // transactions as well: leaving them out of the query makes every
+      // balance of the displayed list wrong, because the starting balance
+      // still contains their amounts. They are hidden while rendering
+      // instead (see `transactionsToDisplay` below).
+      showRunningBalances !== 'true'
+    ) {
       query = query.filter({ reconciled: { $eq: false } });
     }
     return query;
-  }, [account.id, hideReconciled, isReconciling]);
+  }, [account.id, hideReconciledTransactions, showRunningBalances]);
   const [transactionsQuery, setTransactionsQuery] = useState<Query>(
     baseTransactionsQuery(),
   );
@@ -137,10 +153,12 @@ function TransactionListWithPreviews({
     runningBalances,
     isPending: isTransactionsLoading,
     isFetchingNextPage: isLoadingMoreTransactions,
+    hasNextPage: hasMoreTransactions,
     fetchNextPage: fetchMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
     options: {
+      pageSize: TRANSACTIONS_PAGE_SIZE,
       calculateRunningBalances: shouldCalculateRunningBalances
         ? calculateRunningBalancesTopDown
         : shouldCalculateRunningBalances,
@@ -302,8 +320,39 @@ function TransactionListWithPreviews({
 
   const transactionsToDisplay = !isSearching
     ? // Do not render child transactions in the list, unless searching
-      previewTransactionsToDisplay.concat(transactions.filter(t => !t.is_child))
+      previewTransactionsToDisplay.concat(
+        transactions.filter(
+          t => !t.is_child && !(hideReconciledTransactions && t.reconciled),
+        ),
+      )
     : transactions;
+
+  // When reconciled transactions are kept in the query (needed for correct
+  // running balances) a page can be made up mostly of reconciled
+  // transactions, leaving too few visible rows to scroll for more. Keep
+  // loading while the visible list is shorter than a page and more data exists.
+  useEffect(() => {
+    if (
+      hideReconciledTransactions &&
+      showRunningBalances === 'true' &&
+      !isSearching &&
+      hasMoreTransactions &&
+      !isLoadingMoreTransactions &&
+      !isTransactionsLoading &&
+      transactionsToDisplay.length < TRANSACTIONS_PAGE_SIZE
+    ) {
+      void fetchMoreTransactions();
+    }
+  }, [
+    hideReconciledTransactions,
+    showRunningBalances,
+    isSearching,
+    hasMoreTransactions,
+    isLoadingMoreTransactions,
+    isTransactionsLoading,
+    transactionsToDisplay.length,
+    fetchMoreTransactions,
+  ]);
 
   return (
     <>

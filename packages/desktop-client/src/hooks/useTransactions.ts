@@ -242,13 +242,12 @@ export function calculateRunningBalancesTopDown(
         return acc;
       }
 
-      if (index === arr.length - 1) {
-        // This is the last transaction in the list,
-        // so we set the running balance to the amount of the transaction
-        acc.set(transaction.id, transaction.amount);
-        return acc;
-      }
-
+      // Every other transaction (including the last one in the list) is
+      // derived from the previous transaction's running balance. The last
+      // entry used to be special-cased to its own amount, which is only
+      // correct when the list happens to contain every transaction of the
+      // account; for filtered or partially loaded lists it produced wrong
+      // balances for the oldest loaded transaction.
       const previousTransaction = arr[index - 1];
       const previousRunningBalance = acc.get(previousTransaction.id) ?? 0;
       const previousAmount = previousTransaction.amount ?? 0;
