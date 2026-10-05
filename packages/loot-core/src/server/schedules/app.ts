@@ -868,6 +868,8 @@ app.events.on('sync', ({ type }) => {
         if (type === 'success') {
           await prefs.savePrefs({ lastScheduleRun: runDay });
         }
+      }).catch(error => {
+        logger.error('Failed to run schedule service after sync', error);
       });
     }
   }
