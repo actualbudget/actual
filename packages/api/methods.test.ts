@@ -954,6 +954,45 @@ describe('API CRUD operations', () => {
     expect(transactions).toHaveLength(1);
   });
 
+  // apis: updateTransaction, deleteTransaction
+  test('Transactions: update and delete finish before resolving', async () => {
+    const fromId = await api.createAccount({ name: 'from-account' }, 0);
+    const toId = await api.createAccount({ name: 'to-account' }, 0);
+    await api.addTransactions(fromId, [
+      { date: '2023-11-03', amount: -100 },
+      { date: '2023-11-04', amount: -200 },
+    ]);
+    const [first, second] = await api.getTransactions(
+      fromId,
+      '2023-11-01',
+      '2023-11-30',
+    );
+    const transferPayee = (await api.getPayees()).find(
+      payee => payee.transfer_acct === toId,
+    );
+    if (!transferPayee) {
+      throw new Error('transfer payee not found');
+    }
+
+    await api.updateTransaction(first.id, { payee: transferPayee.id });
+    await api.updateTransaction(second.id, { payee: transferPayee.id });
+
+    const updated = await api.getTransactions(
+      fromId,
+      '2023-11-01',
+      '2023-11-30',
+    );
+    expect(updated.every(t => t.transfer_id != null)).toBe(true);
+    expect(
+      await api.getTransactions(toId, '2023-11-01', '2023-11-30'),
+    ).toHaveLength(2);
+
+    await api.deleteTransaction(first.id);
+    expect(
+      await api.getTransactions(toId, '2023-11-01', '2023-11-30'),
+    ).toHaveLength(1);
+  });
+
   // apis: mergeTransactions
   test('Transactions: successfully merge two transactions', async () => {
     const accountId = await api.createAccount({ name: 'test-account' }, 0);
