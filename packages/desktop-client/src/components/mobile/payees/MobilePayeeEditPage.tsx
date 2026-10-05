@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useParams } from 'react-router';
+import { useLocation, useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
@@ -23,7 +23,10 @@ export function MobilePayeeEditPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const dispatch = useDispatch();
+  // Carries the payees list filter so it survives the round trip.
+  const payeesListPath = `/payees${location.search}`;
   const { showUndoNotification } = useUndo();
   const { data: payees = [] } = usePayees();
 
@@ -42,10 +45,10 @@ export function MobilePayeeEditPage() {
         setIsLoading(false);
       } else {
         // Payee not found, navigate back to payees list
-        void navigate('/payees');
+        void navigate(payeesListPath);
       }
     }
-  }, [id, payees, navigate]);
+  }, [id, payees, navigate, payeesListPath]);
 
   const handleCancel = useCallback(() => {
     void navigate(-1);
@@ -66,7 +69,7 @@ export function MobilePayeeEditPage() {
           newName: editedPayeeName.trim(),
         }),
       });
-      void navigate('/payees');
+      void navigate(payeesListPath);
     } catch (error) {
       console.error('Failed to update payee:', error);
       dispatch(
@@ -78,7 +81,15 @@ export function MobilePayeeEditPage() {
         }),
       );
     }
-  }, [payee, editedPayeeName, dispatch, showUndoNotification, t, navigate]);
+  }, [
+    payee,
+    editedPayeeName,
+    dispatch,
+    showUndoNotification,
+    t,
+    navigate,
+    payeesListPath,
+  ]);
 
   // Show loading state while fetching payee
   if (isLoading) {

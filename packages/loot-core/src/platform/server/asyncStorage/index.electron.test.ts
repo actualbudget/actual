@@ -72,6 +72,258 @@ describe('electron asyncStorage', () => {
     ).toEqual([]);
   });
 
+  it('falls back to writing in place when the rename crosses filesystems', async () => {
+    // Sandboxed installs (e.g. the Microsoft Store package) virtualise the
+    // app data folder, so the temp-file rename fails with EXDEV.
+    const crossDeviceError = Object.assign(
+      new Error('EXDEV: cross-device link not permitted'),
+      { code: 'EXDEV' },
+    );
+    const renameSpy = vi
+      .spyOn(fs.promises, 'rename')
+      .mockRejectedValue(crossDeviceError);
+
+    try {
+      asyncStorage.init();
+      await asyncStorage.setItem('language', 'en');
+      await asyncStorage.setItem('theme', 'dark');
+
+      expect(renameSpy).toHaveBeenCalled();
+      expect(JSON.parse(fs.readFileSync(storePath(), 'utf8'))).toEqual({
+        language: 'en',
+        theme: 'dark',
+      });
+      expect(
+        fs.readdirSync(dataDir).filter(name => name.endsWith('.tmp')),
+      ).toEqual([]);
+    } finally {
+      renameSpy.mockRestore();
+    }
+  });
+
+  it('writes the new store to the recovery copy ahead of the in-place write', async () => {
+    const renameSpy = vi
+      .spyOn(fs.promises, 'rename')
+      .mockRejectedValue(Object.assign(new Error('EXDEV'), { code: 'EXDEV' }));
+
+    try {
+      asyncStorage.init();
+      await asyncStorage.setItem('language', 'en');
+      await asyncStorage.setItem('theme', 'dark');
+
+      // The copy holds the complete latest store, not the previous one.
+      const expected = { language: 'en', theme: 'dark' };
+      expect(JSON.parse(fs.readFileSync(`${storePath()}.bak`, 'utf8'))).toEqual(
+        expected,
+      );
+      expect(JSON.parse(fs.readFileSync(storePath(), 'utf8'))).toEqual(
+        expected,
+      );
+    } finally {
+      renameSpy.mockRestore();
+    }
+  });
+
+  it('removes a stale recovery copy once an atomic write succeeds', async () => {
+    fs.writeFileSync(`${storePath()}.bak`, JSON.stringify({ language: 'fr' }));
+
+    asyncStorage.init();
+    await asyncStorage.setItem('language', 'en');
+
+    expect(fs.existsSync(`${storePath()}.bak`)).toBe(false);
+    // The stale copy never leaked into the active store.
+    expect(JSON.parse(fs.readFileSync(storePath(), 'utf8'))).toEqual({
+      language: 'en',
+    });
+  });
+
+  it('recovers from the backup copy when the store file is malformed', async () => {
+    fs.writeFileSync(`${storePath()}.bak`, JSON.stringify({ language: 'en' }));
+    // Simulates an in-place write interrupted part-way through.
+    fs.writeFileSync(storePath(), '{"language": "en", "the');
+
+    asyncStorage.init();
+
+    expect(await asyncStorage.getItem('language')).toBe('en');
+    // The damaged file is still preserved for inspection.
+    expect(fs.existsSync(`${storePath()}.corrupt`)).toBe(true);
+  });
+
+  it('repairs the damaged store file after recovering', async () => {
+    fs.writeFileSync(`${storePath()}.bak`, JSON.stringify({ language: 'en' }));
+    fs.writeFileSync(storePath(), '{"language": "en", "the');
+
+    asyncStorage.init();
+    // Any queued write (including the repair) completes before this resolves.
+    await asyncStorage.setItem('theme', 'dark');
+
+    expect(JSON.parse(fs.readFileSync(storePath(), 'utf8'))).toEqual({
+      language: 'en',
+      theme: 'dark',
+    });
+  });
+
+  it('survives the repair write failing after a recovery', async () => {
+    fs.writeFileSync(`${storePath()}.bak`, JSON.stringify({ language: 'en' }));
+    fs.writeFileSync(storePath(), '{"language": "en", "the');
+    const renameSpy = vi
+      .spyOn(fs.promises, 'rename')
+      .mockRejectedValue(Object.assign(new Error('EXDEV'), { code: 'EXDEV' }));
+    // The write-ahead copy can't be written, so the repair is refused.
+    const realWriteFile = fs.promises.writeFile;
+    const writeSpy = vi
+      .spyOn(fs.promises, 'writeFile')
+      .mockImplementation((target, ...rest) => {
+        if (target === `${storePath()}.bak`) {
+          return Promise.reject(
+            Object.assign(new Error('ENOSPC'), { code: 'ENOSPC' }),
+          );
+        }
+        return realWriteFile(target, ...rest);
+      });
+
+    // Observe rejections nobody handled: the repair write is fire-and-forget,
+    // so a leak here would only ever show up as a process-level warning.
+    const unhandledRejections: unknown[] = [];
+    const onUnhandledRejection = (reason: unknown) => {
+      unhandledRejections.push(reason);
+    };
+    process.on('unhandledRejection', onUnhandledRejection);
+
+    try {
+      asyncStorage.init();
+      // The repair write does real filesystem work before it reaches the
+      // failing recovery-copy write, so wait for that call rather than a
+      // fixed number of ticks, then let the rejection propagate.
+      await vi.waitFor(() => {
+        expect(writeSpy).toHaveBeenCalledWith(
+          `${storePath()}.bak`,
+          expect.anything(),
+          'utf8',
+        );
+      });
+      await new Promise(resolve => setImmediate(resolve));
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(unhandledRejections).toEqual([]);
+      // The recovered store is still the live one in memory.
+      expect(await asyncStorage.getItem('language')).toBe('en');
+    } finally {
+      process.off('unhandledRejection', onUnhandledRejection);
+      writeSpy.mockRestore();
+      renameSpy.mockRestore();
+    }
+  });
+
+  it('ignores a malformed backup copy and falls back to defaults', async () => {
+    fs.writeFileSync(`${storePath()}.bak`, 'also broken');
+    fs.writeFileSync(storePath(), 'broken');
+
+    asyncStorage.init();
+
+    expect(await asyncStorage.getItem('language')).toBeUndefined();
+  });
+
+  it('keeps the recovery copy intact when the in-place write itself fails', async () => {
+    const renameSpy = vi
+      .spyOn(fs.promises, 'rename')
+      .mockRejectedValue(Object.assign(new Error('EXDEV'), { code: 'EXDEV' }));
+
+    try {
+      asyncStorage.init();
+      await asyncStorage.setItem('language', 'en');
+
+      // Make only the in-place overwrite of the store fail (the temp file and
+      // the recovery copy are written first and must still succeed).
+      const realWriteFile = fs.promises.writeFile;
+      const writeSpy = vi
+        .spyOn(fs.promises, 'writeFile')
+        .mockImplementation((target, ...rest) => {
+          if (target === storePath()) {
+            return Promise.reject(
+              Object.assign(new Error('EIO'), { code: 'EIO' }),
+            );
+          }
+          return realWriteFile(target, ...rest);
+        });
+
+      try {
+        await expect(asyncStorage.setItem('theme', 'dark')).rejects.toThrow(
+          'EIO',
+        );
+      } finally {
+        writeSpy.mockRestore();
+      }
+
+      // The recovery copy already holds the complete new state, so nothing is
+      // lost even though the active file was never updated.
+      expect(JSON.parse(fs.readFileSync(`${storePath()}.bak`, 'utf8'))).toEqual(
+        { language: 'en', theme: 'dark' },
+      );
+      expect(JSON.parse(fs.readFileSync(storePath(), 'utf8'))).toEqual({
+        language: 'en',
+      });
+    } finally {
+      renameSpy.mockRestore();
+    }
+  });
+
+  it('leaves the active file untouched when the recovery copy cannot be written', async () => {
+    const renameSpy = vi
+      .spyOn(fs.promises, 'rename')
+      .mockRejectedValue(Object.assign(new Error('EXDEV'), { code: 'EXDEV' }));
+
+    try {
+      asyncStorage.init();
+      await asyncStorage.setItem('language', 'en');
+      const before = fs.readFileSync(storePath(), 'utf8');
+
+      // Make only the recovery-copy write fail.
+      const realWriteFile = fs.promises.writeFile;
+      const writeSpy = vi
+        .spyOn(fs.promises, 'writeFile')
+        .mockImplementation((target, ...rest) => {
+          if (target === `${storePath()}.bak`) {
+            return Promise.reject(
+              Object.assign(new Error('ENOSPC'), { code: 'ENOSPC' }),
+            );
+          }
+          return realWriteFile(target, ...rest);
+        });
+
+      try {
+        await expect(asyncStorage.setItem('theme', 'dark')).rejects.toThrow(
+          'ENOSPC',
+        );
+      } finally {
+        writeSpy.mockRestore();
+      }
+
+      // The save was refused, so the store on disk is exactly as it was.
+      expect(fs.readFileSync(storePath(), 'utf8')).toBe(before);
+    } finally {
+      renameSpy.mockRestore();
+    }
+  });
+
+  it('still rejects when the rename fails for another reason', async () => {
+    const renameSpy = vi
+      .spyOn(fs.promises, 'rename')
+      .mockRejectedValue(
+        Object.assign(new Error('EACCES'), { code: 'EACCES' }),
+      );
+
+    try {
+      asyncStorage.init();
+      await expect(asyncStorage.setItem('language', 'en')).rejects.toThrow(
+        'EACCES',
+      );
+      expect(fs.existsSync(storePath())).toBe(false);
+    } finally {
+      renameSpy.mockRestore();
+    }
+  });
+
   it('starts empty without a backup when no store file exists', () => {
     asyncStorage.init();
 
