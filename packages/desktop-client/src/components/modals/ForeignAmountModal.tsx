@@ -78,6 +78,7 @@ export function ForeignAmountModal({
   transaction,
   currencyCode,
   nativePrecision,
+  rulesApplied,
   onPosted,
 }: ForeignAmountModalProps) {
   const { t } = useTranslation();
@@ -218,6 +219,7 @@ export function ForeignAmountModal({
       const result = await send('transactions/post-foreign-entry', {
         transaction: draft,
         ...payload,
+        rulesApplied,
       });
       switch (result.status) {
         case 'ok':

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import * as db from '#server/db';
+import type { TransactionEntity } from '#types/models';
 
 import * as transfer from './transfer';
 
@@ -72,4 +73,43 @@ describe('Transfer', () => {
       ),
     ).toBeFalsy();
   });
+});
+
+test('native amounts must cancel for transfers between foreign accounts', () => {
+  const from = {
+    id: 'a',
+    account: 'yen',
+    amount: -100,
+    transaction_amount: -150,
+    transfer_id: null,
+  } as TransactionEntity;
+  const to = (native: number) =>
+    ({
+      id: 'b',
+      account: 'yen2',
+      amount: 100,
+      transaction_amount: native,
+      transfer_id: null,
+    }) as TransactionEntity;
+  expect(transfer.validForTransfer(from, to(160))).toBe(false);
+  expect(transfer.validForTransfer(from, to(150))).toBe(true);
+});
+
+test('allows matching budget amounts across different account currencies', () => {
+  const from = { id: 'a', account: 'usd', amount: -100, date: '2026-03-10' };
+  const to = {
+    id: 'b',
+    account: 'jpy',
+    amount: 100,
+    transaction_amount: 150,
+    date: '2026-03-11',
+  };
+
+  expect(transfer.validForTransfer(from, to, true)).toBe(true);
+  expect(transfer.validForTransfer(from, { ...to, amount: 101 }, true)).toBe(
+    false,
+  );
+  expect(transfer.validForTransfer(from, { ...to, is_child: true }, true)).toBe(
+    false,
+  );
 });

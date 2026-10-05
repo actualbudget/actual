@@ -556,7 +556,7 @@ export function useTransactionBatchActions() {
       );
       const [fromTrans, toTrans] = transactions;
 
-      if (transactions.length === 2 && validForTransfer(fromTrans, toTrans)) {
+      if (transactions.length === 2) {
         const fromPayee = payees.find(
           p => p.transfer_acct === fromTrans.account,
         );
@@ -568,19 +568,28 @@ export function useTransactionBatchActions() {
         // between an on-budget and an off-budget account represents money
         // entering/leaving the budget, so the category must be preserved.
         // This matches the server-side logic in clearCategory (transfer.ts).
-        const { data: accounts } = await aqlQuery(
-          q('accounts')
-            .filter({ id: { $oneof: [fromTrans.account, toTrans.account] } })
-            .select(['id', 'offbudget']),
-        );
-        const fromAccount = accounts.find(
-          (a: { id: string; offbudget?: boolean }) =>
-            a.id === fromTrans.account,
-        );
-        const toAccount = accounts.find(
-          (a: { id: string; offbudget?: boolean }) => a.id === toTrans.account,
-        );
-        const clearCategory = fromAccount?.offbudget === toAccount?.offbudget;
+        const {
+          data: accounts,
+        }: { data: Pick<AccountEntity, 'id' | 'offbudget' | 'currency'>[] } =
+          await aqlQuery(
+            q('accounts')
+              .filter({ id: { $oneof: [fromTrans.account, toTrans.account] } })
+              .select(['id', 'offbudget', 'currency']),
+          );
+        const fromAccount = accounts.find(a => a.id === fromTrans.account);
+        const toAccount = accounts.find(a => a.id === toTrans.account);
+        if (
+          !fromAccount ||
+          !toAccount ||
+          !validForTransfer(
+            fromTrans,
+            toTrans,
+            fromAccount.currency !== toAccount.currency,
+          )
+        ) {
+          return;
+        }
+        const clearCategory = fromAccount.offbudget === toAccount.offbudget;
 
         const changes = {
           updated: [

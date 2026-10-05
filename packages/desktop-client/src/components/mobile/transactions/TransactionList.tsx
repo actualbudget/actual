@@ -396,8 +396,13 @@ function SelectedTransactionsFloatingActionBar({
       return false;
     }
     const [fromTrans, toTrans] = twoTransactions;
-    return validForTransfer(fromTrans, toTrans);
-  }, [twoTransactions]);
+    return validForTransfer(
+      fromTrans,
+      toTrans,
+      (accountsById[fromTrans.account]?.currency ?? null) !==
+        (accountsById[toTrans.account]?.currency ?? null),
+    );
+  }, [twoTransactions, accountsById]);
 
   const canMerge = useMemo(() => {
     return Boolean(

@@ -141,8 +141,16 @@ export function SelectedTransactionsButton({
       return false;
     }
     const [fromTrans, toTrans] = twoTransactions;
-    return validForTransfer(fromTrans, toTrans);
-  }, [twoTransactions]);
+    const fromAccount = accounts.find(
+      account => account.id === fromTrans.account,
+    );
+    const toAccount = accounts.find(account => account.id === toTrans.account);
+    return validForTransfer(
+      fromTrans,
+      toTrans,
+      (fromAccount?.currency ?? null) !== (toAccount?.currency ?? null),
+    );
+  }, [twoTransactions, accounts]);
 
   const canMerge = useMemo(() => {
     return Boolean(

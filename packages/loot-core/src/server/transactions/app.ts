@@ -16,6 +16,7 @@ import type {
   TransactionEntity,
 } from '#types/models';
 
+import { postExchangeTransfer } from './exchange-transfer';
 import { exportQueryToCSV, exportToCSV } from './export/export-to-csv';
 import { postForeignEntry } from './foreign-entry';
 import { parseFile } from './import/parse-file';
@@ -37,6 +38,7 @@ export type TransactionHandlers = {
   'get-earliest-transaction': typeof getEarliestTransaction;
   'get-latest-transaction': typeof getLatestTransaction;
   'transactions/post-foreign-entry': typeof postForeignEntry;
+  'transactions/post-exchange-transfer': typeof postExchangeTransfer;
 };
 
 async function handleBatchUpdateTransactions({
@@ -172,6 +174,10 @@ app.method(
 );
 // Undo is recorded around the final writes only, inside the handler.
 app.method('transactions/post-foreign-entry', mutator(postForeignEntry));
+app.method(
+  'transactions/post-exchange-transfer',
+  mutator(postExchangeTransfer),
+);
 app.method('transactions-merge', mutator(undoable(mergeTransactions)));
 
 app.method('transaction-add', mutator(addTransaction));

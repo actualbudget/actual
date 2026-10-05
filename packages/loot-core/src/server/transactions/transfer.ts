@@ -1,6 +1,14 @@
 // @ts-strict-ignore
-import * as db from '#server/db';
+import { v4 as uuidv4 } from 'uuid';
 
+import * as db from '#server/db';
+import type { TransactionEntity } from '#types/models';
+
+import {
+  isExchangeRow,
+  isForeignAccount,
+  preflightTransactionWrites,
+} from './foreign-guard';
 import { runRules } from './transaction-rules';
 
 async function getPayee(acct) {
@@ -44,6 +52,105 @@ async function clearCategory(transaction, transferAcct) {
   return false;
 }
 
+/**
+ * The counterpart leg a transfer gets, with the results of rules run on it,
+ * not yet written. Rules may name payees through `stagePayee`.
+ */
+export async function transferCounterpart(
+  transaction,
+  transferredAccount,
+  stagePayee?: (name: string) => Promise<string>,
+) {
+  const { id: fromPayee } = await db.first<Pick<db.DbPayee, 'id'>>(
+    'SELECT id FROM payees WHERE transfer_acct = ?',
+    [transaction.account],
+  );
+
+  const transferTransaction = {
+    account: transferredAccount,
+    amount: -transaction.amount,
+    // A same-encoding foreign transfer keeps native amounts on both legs.
+    ...(transaction.transaction_amount != null && {
+      transaction_amount: -transaction.transaction_amount,
+    }),
+    payee: fromPayee,
+    date: transaction.date,
+    transfer_id: transaction.id,
+    notes: transaction.notes || null,
+    schedule: transaction.schedule,
+    cleared: false,
+  };
+  const { notes, cleared, schedule } = await runRules(
+    transferTransaction,
+    undefined,
+    undefined,
+    stagePayee,
+  );
+  const matchedSchedule = schedule ?? transaction.schedule;
+  return {
+    row: { ...transferTransaction, notes, cleared, schedule: matchedSchedule },
+    schedule: matchedSchedule,
+  };
+}
+
+/**
+ * Validates the transfers a batch will create in foreign accounts, with the
+ * counterparts their hooks will write, before anything is written: a failed
+ * counterpart must not leave its source behind. Scheduled transfers in other
+ * currencies arrive with MC-4.3.
+ */
+export async function preflightNewForeignTransfers(
+  added: Array<Partial<TransactionEntity>>,
+  updated: Array<Partial<TransactionEntity>>,
+) {
+  const sources: Array<Partial<TransactionEntity>> = [];
+  const updates: Array<Partial<TransactionEntity>> = [];
+  const counterparts: Array<Partial<TransactionEntity>> = [];
+  const consider = async (
+    transaction: Partial<TransactionEntity>,
+    patch?: Partial<TransactionEntity>,
+  ) => {
+    if (transaction.is_parent || transaction.transfer_id) return;
+    const target = await getTransferredAccount(transaction);
+    if (!target || target === transaction.account) return;
+    if (
+      !(await isForeignAccount(transaction.account)) &&
+      !(await isForeignAccount(target))
+    ) {
+      return;
+    }
+    const built = await transferCounterpart(transaction, target, async () =>
+      uuidv4(),
+    );
+    if (transaction.schedule || built.schedule) {
+      throw new Error('multicurrency-transfer-unavailable');
+    }
+    const id = uuidv4();
+    counterparts.push({ ...built.row, id });
+    if (patch) {
+      updates.push({ ...patch, transfer_id: id });
+    } else {
+      sources.push({ ...transaction, transfer_id: id });
+    }
+  };
+  for (const transaction of added) {
+    await consider(transaction);
+  }
+  for (const patch of updated) {
+    if (patch.payee === undefined || !patch.id) continue;
+    const stored = await db.getTransaction(patch.id);
+    if (stored) {
+      await consider({ ...stored, ...patch }, patch);
+    }
+  }
+  if (counterparts.length > 0) {
+    await preflightTransactionWrites({
+      added: [...sources, ...counterparts],
+      updated: updates,
+    });
+  }
+}
+
 export async function addTransfer(transaction, transferredAccount) {
   if (transaction.is_parent) {
     // For split transactions, we should create transfers using child transactions.
@@ -53,30 +160,12 @@ export async function addTransfer(transaction, transferredAccount) {
     return null;
   }
 
-  const { id: fromPayee } = await db.first<Pick<db.DbPayee, 'id'>>(
-    'SELECT id FROM payees WHERE transfer_acct = ?',
-    [transaction.account],
+  const { row, schedule: matchedSchedule } = await transferCounterpart(
+    transaction,
+    transferredAccount,
   );
 
-  const transferTransaction = {
-    account: transferredAccount,
-    amount: -transaction.amount,
-    payee: fromPayee,
-    date: transaction.date,
-    transfer_id: transaction.id,
-    notes: transaction.notes || null,
-    schedule: transaction.schedule,
-    cleared: false,
-  };
-  const { notes, cleared, schedule } = await runRules(transferTransaction);
-  const matchedSchedule = schedule ?? transaction.schedule;
-
-  const id = await db.insertTransaction({
-    ...transferTransaction,
-    notes,
-    cleared,
-    schedule: matchedSchedule,
-  });
+  const id = await db.insertTransaction(row);
 
   await db.updateTransaction({
     id: transaction.id,
@@ -118,6 +207,16 @@ export async function removeTransfer(transaction) {
 }
 
 export async function updateTransfer(transaction, transferredAccount) {
+  // An exchange's legs share one valuation and are frozen until MC-5; a
+  // schedule belongs to one account's encoding. Only notes follow.
+  if (await isExchangeRow(transaction.id)) {
+    await db.updateTransaction({
+      id: transaction.transfer_id,
+      notes: transaction.notes,
+    });
+    return;
+  }
+
   const payee = await getPayee(transaction.account);
 
   await db.updateTransaction({
@@ -128,6 +227,9 @@ export async function updateTransfer(transaction, transferredAccount) {
     payee: payee.id,
     notes: transaction.notes,
     amount: -transaction.amount,
+    ...(transaction.transaction_amount != null && {
+      transaction_amount: -transaction.transaction_amount,
+    }),
     schedule: transaction.schedule,
   });
 

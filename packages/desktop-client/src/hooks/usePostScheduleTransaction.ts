@@ -25,6 +25,8 @@ export async function postScheduleTransaction(
             transaction: result.transaction,
             currencyCode: result.currency,
             nativePrecision: result.precision,
+            // The draft already carries its rule results.
+            rulesApplied: true,
             onPosted: () => null,
           },
         },
