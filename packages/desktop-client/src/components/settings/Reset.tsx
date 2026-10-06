@@ -38,7 +38,6 @@ export function ResetCache() {
 export function ResetSync() {
   const { t } = useTranslation();
   const [groupId] = useMetadataPref('groupId');
-  const isEnabled = !!groupId;
   const dispatch = useDispatch();
 
   const [resetting, setResetting] = useState(false);
@@ -49,18 +48,18 @@ export function ResetSync() {
     setResetting(false);
   }
 
+  if (!groupId) {
+    return null;
+  }
+
   return (
     <SettingsRow
       title={t('Sync')}
       description={t(
-        'Resetting sync removes all local data used to track changes for syncing and creates a fresh sync ID on the server. This file will have to be downloaded again on other devices to use the new sync ID. Use this if there is a problem with syncing and you want to start fresh. It is only available when syncing is enabled.',
+        'Resetting sync removes all local data used to track changes for syncing and creates a fresh sync ID on the server. This file will have to be downloaded again on other devices to use the new sync ID. Use this if there is a problem with syncing and you want to start fresh.',
       )}
       control={
-        <ButtonWithLoading
-          isLoading={resetting}
-          isDisabled={!isEnabled}
-          onPress={onResetSync}
-        >
+        <ButtonWithLoading isLoading={resetting} onPress={onResetSync}>
           <Trans>Reset sync</Trans>
         </ButtonWithLoading>
       }

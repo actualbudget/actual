@@ -171,6 +171,7 @@ export function ExperimentalFeatures() {
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const showGoalTemplatesUI = goalTemplatesEnabled || goalTemplatesUIEnabled;
+  const isUsingServer = useSyncServerStatus() !== 'no-server';
 
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
@@ -253,18 +254,22 @@ export function ExperimentalFeatures() {
       >
         <Trans>Monte Carlo Analysis Report</Trans>
       </FeatureToggle>
-      <FeatureToggle
-        flag="enableBanking"
-        feedbackLink="https://github.com/actualbudget/actual/issues/7799"
-      >
-        <Trans>Enable Banking sync (EU banks)</Trans>
-      </FeatureToggle>
-      <FeatureToggle
-        flag="akahuBankSync"
-        feedbackLink="https://github.com/actualbudget/actual/issues/8020"
-      >
-        <Trans>Akahu Bank Sync (NZ banks)</Trans>
-      </FeatureToggle>
+      {isUsingServer && (
+        <FeatureToggle
+          flag="enableBanking"
+          feedbackLink="https://github.com/actualbudget/actual/issues/7799"
+        >
+          <Trans>Enable Banking sync (EU banks)</Trans>
+        </FeatureToggle>
+      )}
+      {isUsingServer && (
+        <FeatureToggle
+          flag="akahuBankSync"
+          feedbackLink="https://github.com/actualbudget/actual/issues/8020"
+        >
+          <Trans>Akahu Bank Sync (NZ banks)</Trans>
+        </FeatureToggle>
+      )}
       {showServerPrefs && (
         <ServerFeatureToggle
           prefName="flags.plugins"
