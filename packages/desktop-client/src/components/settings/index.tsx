@@ -43,7 +43,6 @@ import { SettingsGroup } from './SettingsGroup';
 import { SettingsNav } from './SettingsNav';
 import { SettingsRow } from './SettingsRow';
 import { ThemeSettings } from './Themes';
-import { Setting } from './UI';
 
 function About() {
   const { t } = useTranslation();
@@ -141,43 +140,30 @@ function About() {
   );
 }
 
-function IDName({ children }: { children: ReactNode }) {
-  return <Text style={{ fontWeight: 500 }}>{children}</Text>;
-}
-
 function AdvancedAbout() {
   const [budgetId] = useMetadataPref('id');
   const [groupId] = useMetadataPref('groupId');
   const { t } = useTranslation();
+  const idStyle = { userSelect: 'text', wordBreak: 'break-all' } as const;
 
   return (
-    <Setting>
-      <Text>
-        <Trans>
-          <strong>IDs</strong> are the names Actual uses to identify your budget
-          internally. There are several different IDs associated with your
-          budget. The Budget ID is used to identify your budget file. The Sync
-          ID is used to access the budget on the server.
-        </Trans>
-      </Text>
-      <Text>
-        <Trans>
-          <IDName>Budget ID:</IDName> {{ budgetId }}
-        </Trans>
-      </Text>
-      <Text style={{ color: theme.pageText }}>
-        <Trans>
-          <IDName>Sync ID:</IDName> {{ syncId: groupId || t('(none)') }}
-        </Trans>
-      </Text>
-      {/* low priority todo: eliminate some or all of these, or decide when/if to show them */}
-      {/* <Text>
-        <IDName>Cloud File ID:</IDName> {prefs.cloudFileId || t('(none)')}
-      </Text>
-      <Text>
-        <IDName>User ID:</IDName> {prefs.userId || t('(none)')}
-      </Text> */}
-    </Setting>
+    <SettingsGroup
+      title={t('Budget file')}
+      description={t(
+        'IDs are the names Actual uses to identify your budget internally.',
+      )}
+    >
+      <SettingsRow
+        title={t('Budget ID')}
+        description={t('Identifies the budget file.')}
+        control={<Text style={idStyle}>{budgetId}</Text>}
+      />
+      <SettingsRow
+        title={t('Sync ID')}
+        description={t('Used to access the budget on the server.')}
+        control={<Text style={idStyle}>{groupId || t('(none)')}</Text>}
+      />
+    </SettingsGroup>
   );
 }
 
@@ -303,9 +289,11 @@ export function AdvancedSettings() {
   return (
     <SettingsSections title={t('Advanced')}>
       <AdvancedAbout />
-      <ResetCache />
-      <ResetSync />
-      <RepairTransactions />
+      <SettingsGroup title={t('Troubleshooting')}>
+        <ResetCache />
+        <ResetSync />
+        <RepairTransactions />
+      </SettingsGroup>
     </SettingsSections>
   );
 }
