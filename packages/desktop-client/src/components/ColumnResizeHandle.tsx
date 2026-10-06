@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type {
   KeyboardEvent as ReactKeyboardEvent,
   MouseEvent as ReactMouseEvent,
@@ -14,11 +14,49 @@ const KEYBOARD_RESIZE_STEP = 10;
 
 type ColumnResizeHandleProps = {
   columnName: string;
+  /** The column's visible header text, for the handle's accessible name. */
+  label?: string;
 };
 
-export function ColumnResizeHandle({ columnName }: ColumnResizeHandleProps) {
+type Measurement = { width: number; rowWidth: number };
+
+// The column's rendered width, and the row's as the most it could grow to.
+// Measured rather than read from the context because a flex column has no
+// pixel width there, and a focusable separator must report a value.
+function useColumnMeasurement() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [measurement, setMeasurement] = useState<Measurement | null>(null);
+
+  useLayoutEffect(() => {
+    const column = ref.current?.parentElement;
+    const row = column?.parentElement;
+    if (!column || !row) return;
+    const measure = () => {
+      const width = Math.round(column.getBoundingClientRect().width);
+      const rowWidth = Math.round(row.getBoundingClientRect().width);
+      setMeasurement(prev =>
+        prev?.width === width && prev.rowWidth === rowWidth
+          ? prev
+          : { width, rowWidth },
+      );
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(column);
+    observer.observe(row);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, measurement };
+}
+
+export function ColumnResizeHandle({
+  columnName,
+  label,
+}: ColumnResizeHandleProps) {
   const context = useColumnWidthsContext();
   const { t } = useTranslation();
+  const { ref, measurement } = useColumnMeasurement();
 
   // Holds the teardown for the document-level drag listeners. The unmount
   // effect below calls it if the component disappears mid-drag. The effect
@@ -81,16 +119,22 @@ export function ColumnResizeHandle({ columnName }: ColumnResizeHandleProps) {
     context.onResetWidth(columnName);
   };
 
-  const width = context.widths[columnName];
+  const minWidth = context.getMinWidth(columnName);
 
   return (
     <div
+      ref={ref}
       role="separator"
       aria-orientation="vertical"
-      aria-label={t('Resize column')}
-      aria-valuenow={typeof width === 'number' ? Math.round(width) : undefined}
-      aria-valuemin={
-        typeof width === 'number' ? context.getMinWidth(columnName) : undefined
+      aria-label={
+        label
+          ? t('Resize {{column}} column', { column: label })
+          : t('Resize column')
+      }
+      aria-valuenow={measurement?.width}
+      aria-valuemin={minWidth}
+      aria-valuemax={
+        measurement ? Math.max(minWidth, measurement.rowWidth) : undefined
       }
       tabIndex={0}
       data-testid={`resize-handle-${columnName}`}

@@ -37,10 +37,10 @@ function makeContext(): ColumnWidthsContextValue {
   };
 }
 
-function renderHandle(columnName = 'date') {
+function renderHandle(columnName = 'date', label?: string) {
   const utils = render(
     <div data-column={columnName}>
-      <ColumnResizeHandle columnName={columnName} />
+      <ColumnResizeHandle columnName={columnName} label={label} />
     </div>,
   );
   return {
@@ -60,14 +60,32 @@ describe('ColumnResizeHandle', () => {
   });
 
   it('renders an accessible resize handle', () => {
-    const { handle } = renderHandle();
+    const { handle } = renderHandle('date', 'Date');
     expect(handle).toHaveAttribute('data-resize-handle');
     expect(handle).toHaveAttribute('role', 'separator');
     expect(handle).toHaveAttribute('aria-orientation', 'vertical');
-    expect(handle).toHaveAttribute('aria-label');
+    expect(handle).toHaveAttribute('aria-label', 'Resize Date column');
     expect(handle).toHaveAttribute('tabindex', '0');
-    expect(handle).toHaveAttribute('aria-valuenow', '110');
     expect(handle.style.cursor).toBe('col-resize');
+  });
+
+  it('reports the measured width, so flex columns have a value too', () => {
+    const row = document.createElement('div');
+    row.getBoundingClientRect = () => ({ width: 900 }) as DOMRect;
+    document.body.appendChild(row);
+    const column = document.createElement('div');
+    column.getBoundingClientRect = () => ({ width: 240.4 }) as DOMRect;
+    row.appendChild(column);
+
+    const { getByTestId } = render(<ColumnResizeHandle columnName="payee" />, {
+      container: column,
+    });
+    const handle = getByTestId('resize-handle-payee');
+
+    expect(handle).toHaveAttribute('aria-valuenow', '240');
+    expect(handle).toHaveAttribute('aria-valuemin', '50');
+    expect(handle).toHaveAttribute('aria-valuemax', '900');
+    row.remove();
   });
 
   it('starts a drag on pointerdown and tracks it on the document', () => {

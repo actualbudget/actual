@@ -369,7 +369,10 @@ export function Cell({
     >
       {conditionalPrivacyFilter}
       {isHeader && resizable && hasResizeContext && (
-        <ColumnResizeHandle columnName={effectiveColumnName} />
+        <ColumnResizeHandle
+          columnName={effectiveColumnName}
+          label={typeof value === 'string' ? value : undefined}
+        />
       )}
     </View>
   );
