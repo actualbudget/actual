@@ -55,10 +55,13 @@ export async function batchUpdateTransactions({
   learnCategories = false,
   detectOrphanPayees = true,
   runTransfers = true,
+  exchangeReplacements,
 }: Partial<Diff<TransactionEntity>> & {
   learnCategories?: boolean;
   detectOrphanPayees?: boolean;
   runTransfers?: boolean;
+  /** Exchange legs whose amount an import replaces. */
+  exchangeReplacements?: ReadonlySet<string>;
 }) {
   // A tombstoning update is a deletion, so it gets the same child and
   // transfer cleanup.
@@ -87,7 +90,7 @@ export async function batchUpdateTransactions({
   // counterparts its new foreign transfers will get.
   await preflightTransactionWrites(
     { added, updated, deleted },
-    { runTransfers },
+    { runTransfers, exchangeReplacements },
   );
   if (runTransfers) {
     await transfer.preflightNewForeignTransfers(added ?? [], updated ?? []);
@@ -166,7 +169,10 @@ export async function batchUpdateTransactions({
             );
           }
 
-          await db.updateTransaction(t, { validatedTransfer: true });
+          await db.updateTransaction(t, {
+            validatedTransfer: true,
+            exchangeReplacements,
+          });
         }),
       );
     }
