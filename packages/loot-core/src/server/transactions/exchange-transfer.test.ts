@@ -812,7 +812,7 @@ describe('exchange guard regressions (inspection round 1)', () => {
     expect(row('a')?.description).toBe(transferPayee('jpy2'));
   });
 
-  it('rejects scheduled transfers from foreign entry until MC-4.3', async () => {
+  it('posts scheduled same-encoding transfers from foreign entry', async () => {
     await saveRate('JPY', '150');
     await expect(
       postEntry({
@@ -825,8 +825,8 @@ describe('exchange guard regressions (inspection round 1)', () => {
           transaction_amount: -1500,
         },
       }),
-    ).rejects.toThrow('multicurrency-transfer-unavailable');
-    expect(rows()).toEqual([]);
+    ).resolves.toEqual({ status: 'ok', id: 'scheduled' });
+    expect(rows('jpy2')).toMatchObject([{ transaction_amount: 1500 }]);
   });
 
   it('reports overflowing conversions as invalid amounts', async () => {
@@ -965,7 +965,7 @@ describe('exchange guard regressions (inspection round 2)', () => {
     });
   });
 
-  it('rejects new scheduled foreign transfers before writing', async () => {
+  it('writes new scheduled same-encoding transfers with both legs', async () => {
     const schedule = await createSchedule({
       conditions: [
         { op: 'is', field: 'account', value: 'jpy' },
@@ -987,8 +987,10 @@ describe('exchange guard regressions (inspection round 2)', () => {
           },
         ],
       }),
-    ).rejects.toThrow('multicurrency-transfer-unavailable');
-    expect(rows()).toEqual([]);
+    ).resolves.toBeTruthy();
+    expect(rows('jpy2')).toMatchObject([
+      { amount: 1000, transaction_amount: 1500 },
+    ]);
   });
 
   it('validates counterparts of rows an update inserts', async () => {
@@ -1056,6 +1058,28 @@ describe('exchange guard regressions (inspection round 2)', () => {
       }),
     ).rejects.toThrow();
     expect(rows()).toEqual([]);
+  });
+
+  it('gives an added row updated in the same batch one counterpart', async () => {
+    await batch({
+      added: [
+        {
+          id: 'sent',
+          account: 'jpy',
+          date: '2026-03-09',
+          amount: -1000,
+          transaction_amount: -1500,
+          payee: transferPayee('jpy2'),
+        },
+      ],
+      updated: [{ id: 'sent', date }],
+    });
+    const [counterpart] = rows('jpy2');
+    expect(rows('jpy2')).toHaveLength(1);
+    expect(counterpart).toMatchObject({ transaction_amount: 1500 });
+    expect(rows('jpy')).toMatchObject([
+      { id: 'sent', transferred_id: counterpart.id },
+    ]);
   });
 
   it('validates counterparts before writing their source', async () => {

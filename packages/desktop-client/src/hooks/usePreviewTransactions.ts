@@ -11,6 +11,8 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 
+import { encodingKey } from '#util/account-encoding';
+
 import { useAccounts } from './useAccounts';
 import { useCachedSchedules } from './useCachedSchedules';
 import { useSyncedPref } from './useSyncedPref';
@@ -64,26 +66,36 @@ export function comparePreviewTransactions(
 }
 
 /**
- * Schedules a view previews: foreign schedules only in their own account's
- * register, since other views are in the budget currency.
+ * Schedules a view previews: foreign schedules only in registers of their
+ * own encoding, since other views are in the budget currency.
  */
 export function previewScheduleFilter(
-  accounts: ReadonlyArray<Pick<AccountEntity, 'id' | 'currency'>>,
+  accounts: ReadonlyArray<
+    Pick<AccountEntity, 'id' | 'currency' | 'currency_precision'>
+  >,
   foreignAccountId: AccountEntity['id'] | undefined,
   filter?: (schedule: ScheduleEntity) => boolean,
 ) {
-  const foreignAccountIds = new Set(
-    accounts.filter(account => account.currency).map(account => account.id),
-  );
-  // A foreign register shows only its own schedules: transfers to it from
-  // other accounts would carry amounts in another currency.
-  const foreignRegister =
-    foreignAccountId !== undefined && foreignAccountIds.has(foreignAccountId);
-  return (schedule: ScheduleEntity) =>
-    (foreignRegister
-      ? schedule._account === foreignAccountId
-      : !foreignAccountIds.has(schedule._account)) &&
-    (filter ? filter(schedule) : true);
+  const accountsById = new Map(accounts.map(account => [account.id, account]));
+  const register =
+    foreignAccountId !== undefined
+      ? accountsById.get(foreignAccountId)
+      : undefined;
+  // A foreign register shows schedules of accounts in its own encoding,
+  // such as transfers from another account in the same currency; others
+  // carry amounts in another currency. Exchange schedules preview only in
+  // their own account until posted.
+  const foreignRegister = !!register?.currency;
+  return (schedule: ScheduleEntity) => {
+    const scheduleAccount = accountsById.get(schedule._account);
+    return (
+      (foreignRegister
+        ? schedule._account === foreignAccountId ||
+          (!!scheduleAccount &&
+            encodingKey(scheduleAccount) === encodingKey(register))
+        : !scheduleAccount?.currency) && (filter ? filter(schedule) : true)
+    );
+  };
 }
 
 export function usePreviewTransactions({
@@ -151,6 +163,7 @@ export function usePreviewTransactions({
         send('rules-run', {
           transaction,
           amountIsNative: foreignAccountIds.has(transaction.account),
+          preview: true,
         }),
       ),
     )

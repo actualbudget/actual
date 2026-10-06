@@ -202,18 +202,11 @@ export async function postForeignEntry({
       })
     | null = null;
   if (transferAccount && transferAccount !== final.account) {
-    // Scheduled transfers in other currencies arrive with MC-4.3.
-    if (final.schedule) {
-      throw new Error('multicurrency-transfer-unavailable');
-    }
     // The counterpart keeps only rule notes, cleared and schedule, so payees
     // its rules name are never created.
     const built = await transferCounterpart(final, transferAccount, async () =>
       uuidv4(),
     );
-    if (built.schedule) {
-      throw new Error('multicurrency-transfer-unavailable');
-    }
     counterpart = { ...built.row, id: uuidv4() };
     final.transfer_id = counterpart.id;
     const sides = await db.all<Pick<db.DbAccount, 'offbudget'>>(

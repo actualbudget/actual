@@ -195,7 +195,6 @@ export function ScheduleEditForm({
             <GenericInput
               type="id"
               field="payee"
-              hideTransferPayees={!!fieldAccount?.currency}
               value={fields.payee || ''}
               onChange={id =>
                 dispatch({ type: 'set-field', field: 'payee', value: id })

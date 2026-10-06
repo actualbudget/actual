@@ -86,7 +86,7 @@ Open **Schedules** and click **Add new schedule**. Name it **Paris rent**. Choos
 
 On the scheduled date, Actual posts the payment and converts it with the saved rate for that date. 950.00 euros becomes $1,045.00 at 1 USD = 0.909091 EUR.
 
-If that date has no saved rate, the payment stays unposted. Actual says that some scheduled transactions were not posted because no exchange rate is saved, and it names the schedule, its currency, and the date. Post the schedule from the Schedules page. That opens **Convert to budget currency**. Enter a rate or a base amount, then save. Nothing is posted until then.
+If that date has no saved rate, the payment stays unposted. Actual says that some scheduled transactions were not posted, then gives the schedule name, the date, and that no saved rate exists for that currency. Post the schedule from the Schedules page to enter a rate or the amounts. For this rent, that opens **Convert to budget currency**. Enter a rate or a base amount, then save. Nothing is posted until then.
 
 A remittance from BBVA México works the same way. 8000.00 pesos posts as $400.00 at 1 USD = 20 MXN.
 
@@ -118,7 +118,15 @@ A fee is optional. Choose EUR or USD next to **Fee**. The fee has to be smaller 
 
 A payment of 100.00 from BNP Paribas to BBVA México uses the same row. Both accounts are in currencies other than the dollar, so saved endpoint rates supply the dollar valuation. There is no editable budget-value field; saving requires a valid saved valuation. The estimate is 2,200.00 pesos received and 110.00 dollars. The rate field shows 1 EUR = 21.9999978 MXN. Actual says: "The amount received is estimated from the saved rate 22."
 
-The schedule form does not list transfer payees for an account in euros or pesos. Enter a transfer between currencies from the account register.
+## Schedule a transfer
+
+The payee list on a new schedule includes transfers. Open **Schedules** and click **Add new schedule**. Name it **Fund BNP Paribas**. In the payee field, under **Transfer To/From**, choose **Checking**. Choose the account **BNP Paribas**. The amount is in euros. Switch it to a deposit and enter 1,000.00. The field shows +€1,000.00. The date repeats every month on the 31st.
+
+<img width="694" alt="Schedule Fund BNP Paribas, a monthly deposit of +€1,000.00 from Checking into BNP Paribas" src="/img/budgeting/multi-currency-schedule-exchange@2x.png" />
+
+On 10/31/2026, Actual posts both sides at the saved rate. BNP Paribas receives €1,000.00 and is €3,000.00. Checking sends $1,100.00 and is $1,400.00. **All accounts** stays $4,950.00.
+
+If that date has no saved rate, the transfer stays unposted. Post it from the Schedules page. The dialog is **Post scheduled transfer**, with the same amount, rate, and fee fields as a transfer in the register. Nothing is posted until you click **Add transfer**.
 
 ## On a phone
 
