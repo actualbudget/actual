@@ -97,19 +97,28 @@ export function withUndo<T>(
     CURSOR++;
   }
   const markerCursor = CURSOR;
-
-  return withMutatorContext(
-    { undoListening: true, undoTag: context.undoTag },
-    func,
-  ).catch(err => {
-    // A failed mutation that recorded nothing keeps undo and redo as they
-    // were, including after a storage failure.
+  // A mutation that recorded nothing, failed or not, keeps undo and redo as
+  // they were, including after a storage failure.
+  const restoreIfUnchanged = () => {
     if (CURSOR === markerCursor && MESSAGE_HISTORY[CURSOR] === marker) {
       MESSAGE_HISTORY = previousHistory;
       CURSOR = previousCursor;
     }
-    throw err;
-  });
+  };
+
+  return withMutatorContext(
+    { undoListening: true, undoTag: context.undoTag },
+    func,
+  ).then(
+    result => {
+      restoreIfUnchanged();
+      return result;
+    },
+    err => {
+      restoreIfUnchanged();
+      throw err;
+    },
+  );
 }
 
 export function undoable<T extends HandlerFunctions>(
