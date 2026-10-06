@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { SettingsRow } from './SettingsRow';
 
@@ -11,10 +11,16 @@ export function Backups() {
   return (
     <SettingsRow
       title={t('Backups')}
-      description={t(
-        "Backups are taken every {{BACKUP_FREQUENCY_MINS}} minutes and stored in Actual's data directory. Actual keeps a maximum of {{MAX_BACKUPS}} backups at any time.",
-        { BACKUP_FREQUENCY_MINS, MAX_BACKUPS },
-      )}
+      description={
+        <Trans>
+          Backups are taken every {{ BACKUP_FREQUENCY_MINS }} minutes and stored
+          in{' '}
+          <span>
+            <span>Actual's data directory</span>
+          </span>
+          . Actual retains a maximum of {{ MAX_BACKUPS }} backups at any time.
+        </Trans>
+      }
     />
   );
 }

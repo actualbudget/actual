@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { theme } from '@actual-app/components/theme';
@@ -51,9 +51,12 @@ export function FormatSettings() {
   return (
     <SettingsGroup
       title={t('Formatting')}
-      description={t(
-        'Formatting does not affect how budget data is stored and can be changed at any time.',
-      )}
+      description={
+        <Trans>
+          <span>Formatting</span> does not affect how budget data is stored, and
+          can be changed at any time.
+        </Trans>
+      }
     >
       <SettingsRow
         title={t('Number format')}

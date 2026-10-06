@@ -131,9 +131,15 @@ export function RepairTransactions() {
   return (
     <SettingsRow
       title={t('Split transactions and transfers')}
-      description={t(
-        'Repairing transactions can fix bugs with split transactions or transfers, such as blank payees on splits or incorrect account balances. Try this if resetting the budget cache does not help.',
-      )}
+      description={
+        <Trans>
+          If you are experiencing bugs relating to split transactions or
+          transfers and the "Reset budget cache" button above does not help,
+          this tool may fix them. Some examples of bugs include seeing blank
+          payees on splits or incorrect account balances. This tool does six
+          things:
+        </Trans>
+      }
       control={
         <ButtonWithLoading isLoading={loading} onPress={onFix}>
           <Trans>Repair transactions</Trans>
@@ -147,22 +153,33 @@ export function RepairTransactions() {
         <ul style={{ margin: `${spacing.sm}px 0 0`, paddingLeft: '1.5em' }}>
           <Trans>
             <li>
-              Fully deletes split transactions that were only partly deleted,
-              which can leave balances wrong when filtering.
+              Ensures that deleted split transactions are fully deleted. In
+              previous versions of the app, certain split transactions may
+              appear deleted but not all of them are actually deleted. This
+              causes the transactions list to look correct, but certain balances
+              may be incorrect when filtering.
             </li>
             <li>
-              Copies the payee and cleared flag from a split's parent
-              transaction where appropriate. The payee is only set if the split
-              has none.
+              Sync the payee and cleared flag of a split transaction to the main
+              or "parent" transaction, if appropriate. The payee will only be
+              set if it currently doesn't have one.
             </li>
             <li>
-              Checks that the child transactions add up to the total. Any that
-              do not are listed below so you can fix the amounts.
+              Checks that the sum of all child transactions adds up to the total
+              amount. If not, these will be flagged below to allow you to easily
+              locate and fix the amounts.
             </li>
-            <li>Removes split errors from transactions that are not splits.</li>
-            <li>Removes the category from budget transfers that have one.</li>
             <li>
-              Removes the category from parent transactions that have one.
+              Checks for any non-split transactions with erroneous split errors
+              and removes the errors if found.
+            </li>
+            <li>
+              Check if you have any budget transfers that erroneously contain a
+              category, and remove the category.
+            </li>
+            <li>
+              Checks for any parent transactions with a category and removes the
+              category if found.
             </li>
           </Trans>
         </ul>

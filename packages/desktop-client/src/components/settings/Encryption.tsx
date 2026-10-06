@@ -79,8 +79,10 @@ export function EncryptionSettings() {
       {!encryptKeyId && missingCryptoAPI && (
         <Text style={noteStyle}>
           <Trans>
-            End-to-end encryption needs an HTTPS connection to your server. It
-            is also unavailable if your browser is too old to work with Actual.
+            <span>End-to-end encryption</span> is not available when making an
+            unencrypted connection to a remote server. You'll need to enable
+            HTTPS on your server to use end-to-end encryption. This problem may
+            also occur if your browser is too old to work with Actual.
           </Trans>{' '}
           <Link
             variant="external"
