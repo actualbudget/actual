@@ -46,7 +46,7 @@ export function ImportAccountModal({
   const isMismatch =
     !!matched && !!startedFrom && matched.id !== startedFrom.id;
 
-  const [accountId, setAccountId] = useState(matched?.id ?? '');
+  const [accountId, setAccountId] = useState(matchedAccountId ?? '');
 
   function startImport(targetAccountId: string) {
     dispatch(
