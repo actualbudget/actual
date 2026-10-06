@@ -102,7 +102,23 @@ Crédit Agricole is then €2,500.00. BNP Paribas receives a 500.00 deposit from
 
 <img width="860" alt="BNP Paribas at €2,500.00 after a 500.00 deposit from Crédit Agricole, with the 2,000.00 starting balance" src="/img/budgeting/multi-currency-transfer@2x.png" />
 
-The transfer list also includes Checking and BBVA México. A transfer to an account in another currency does not save. The dialog says: "This transaction could not be saved."
+Choosing Checking or BBVA México from a euro account uses the exchange fields below, not **Convert to budget currency**.
+
+## Transfer between currencies
+
+Open **BNP Paribas** and click **Add New**. In the payee field, choose **Make transfer**, then **Checking**. Enter a deposit of 1,000.00.
+
+The row shows the other side under the transaction. **Sent from Checking** is 1,100.00 USD. **Rate** is 1 USD = 0.909091 EUR, the saved rate. **Fee** is empty. Actual says: "The amount sent is estimated from the saved rate 0.909091." Click **Add transfer**.
+
+<img width="860" alt="A 1,000.00 euro deposit into BNP Paribas from Checking, estimated as 1,100.00 dollars at 1 USD = 0.909091 EUR" src="/img/budgeting/multi-currency-exchange@2x.png" />
+
+BNP Paribas is then €3,000.00. The deposit row shows Checking, then $1,100.00. Checking is $1,400.00. **All accounts** stays $4,950.00.
+
+A fee is optional. Choose EUR or USD next to **Fee**. The fee has to be smaller than the amount transferred, or Actual says: "The fee must be smaller than the amount transferred."
+
+A payment of 100.00 from BNP Paribas to BBVA México uses the same row. Both accounts are in currencies other than the dollar, so saved endpoint rates supply the dollar valuation. There is no editable budget-value field; saving requires a valid saved valuation. The estimate is 2,200.00 pesos received and 110.00 dollars. The rate field shows 1 EUR = 21.9999978 MXN. Actual says: "The amount received is estimated from the saved rate 22."
+
+The schedule form does not list transfer payees for an account in euros or pesos. Enter a transfer between currencies from the account register.
 
 ## On a phone
 
