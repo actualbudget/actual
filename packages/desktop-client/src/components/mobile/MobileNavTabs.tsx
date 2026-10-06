@@ -125,13 +125,13 @@ export function MobileNavTabs() {
     },
     {
       name: t('Payees'),
-      path: '/payees',
+      path: '/settings/payees',
       style: navTabStyle,
       Icon: SvgStoreFront,
     },
     {
       name: t('Rules'),
-      path: '/rules',
+      path: '/settings/rules',
       style: navTabStyle,
       Icon: SvgTuning,
     },
@@ -139,7 +139,7 @@ export function MobileNavTabs() {
       ? [
           {
             name: t('Bank Sync'),
-            path: '/bank-sync',
+            path: '/settings/bank-sync',
             style: navTabStyle,
             Icon: SvgCreditCard,
           },
