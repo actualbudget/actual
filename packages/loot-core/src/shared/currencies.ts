@@ -67,6 +67,7 @@ export const currencies: Currency[] = [
   { code: 'THB', name: 'Thai Baht', symbol: '฿', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'TRY', name: 'Turkish Lira', symbol: '₺', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'TWD', name: 'New Taiwan Dollar', symbol: 'NT$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'TZS', name: 'Tanzanian Shilling', symbol: 'TSh', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'UAH', name: 'Ukrainian Hryvnia', symbol: '₴', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'USD', name: 'US Dollar', symbol: '$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'UYU', name: 'Uruguayan Peso', symbol: '$U', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },

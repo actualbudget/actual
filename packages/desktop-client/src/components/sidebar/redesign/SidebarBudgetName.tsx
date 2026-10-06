@@ -56,7 +56,8 @@ export function SidebarBudgetName() {
     return (
       <InitialFocus>
         <Input
-          style={{ fontSize: 13, fontWeight: 600 }}
+          size="medium"
+          style={{ fontWeight: 600 }}
           defaultValue={budgetName}
           onEnter={newBudgetName => {
             if (newBudgetName.trim() !== '') {
