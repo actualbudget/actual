@@ -21,7 +21,7 @@ import { envelopeBudget } from '#spreadsheet/bindings';
  * @param format - The format function from useFormat hook
  * @param invert - If true, shows '-' for positive and '+' for negative
  */
-function makeSignedFormatter(
+export function makeSignedFormatter(
   format: ReturnType<typeof useFormat>,
   invert = false,
 ) {

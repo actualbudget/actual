@@ -1,17 +1,16 @@
 import React from 'react';
-import type { ComponentProps } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
-import type { CellValue } from '#components/spreadsheet/CellValue';
 import { useSheetValue } from '#hooks/useSheetValue';
+import type { Binding } from '#spreadsheet';
 
 import { fraction } from './fraction';
 import { PieProgress } from './PieProgress';
 
 type IncomeProgressProps = {
-  current: ComponentProps<typeof CellValue>['binding'];
-  target: ComponentProps<typeof CellValue>['binding'];
+  current: Binding<'tracking-budget', 'total-income'>;
+  target: Binding<'tracking-budget', 'total-budget-income'>;
 };
 export function IncomeProgress({ current, target }: IncomeProgressProps) {
   let totalIncome = useSheetValue(current) || 0;

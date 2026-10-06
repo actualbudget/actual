@@ -3,6 +3,7 @@ import type { ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
+import type { MenuItem } from '@actual-app/components/menu';
 
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
@@ -16,6 +17,9 @@ type BudgetMonthMenuProps = Omit<
   onCheckTemplates: () => void;
   onApplyBudgetTemplates: () => void;
   onOverwriteWithBudgetTemplates: () => void;
+  /** When given, the menu also offers to show or hide the summary details. */
+  isSummaryCollapsed?: boolean;
+  onToggleSummaryCollapse?: () => void;
 };
 
 export function BudgetMonthMenu({
@@ -25,10 +29,24 @@ export function BudgetMonthMenu({
   onCheckTemplates,
   onApplyBudgetTemplates,
   onOverwriteWithBudgetTemplates,
+  isSummaryCollapsed = false,
+  onToggleSummaryCollapse,
   ...props
 }: BudgetMonthMenuProps) {
   const { t } = useTranslation();
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const summaryDetailsItems: MenuItem[] = onToggleSummaryCollapse
+    ? [
+        Menu.line,
+        {
+          name: 'toggle-summary-details',
+          text: isSummaryCollapsed
+            ? t('Show summary details')
+            : t('Hide summary details'),
+        },
+      ]
+    : [];
+
   return (
     <Menu
       {...props}
@@ -57,6 +75,9 @@ export function BudgetMonthMenu({
             break;
           case 'overwrite-goal-template':
             onOverwriteWithBudgetTemplates();
+            break;
+          case 'toggle-summary-details':
+            onToggleSummaryCollapse?.();
             break;
           default:
             throw new Error(`Unrecognized menu option: ${name}`);
@@ -93,6 +114,7 @@ export function BudgetMonthMenu({
               },
             ]
           : []),
+        ...summaryDetailsItems,
       ]}
     />
   );

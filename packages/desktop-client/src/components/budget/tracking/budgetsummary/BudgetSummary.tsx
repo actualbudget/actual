@@ -14,8 +14,7 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 
-import { CollapsedBudgetSummaryCard } from '#components/budget/CollapsedBudgetSummaryCard';
-import { MonthStatusBadge } from '#components/budget/MonthStatusBadge';
+import { CompactBudgetSummaryCard } from '#components/budget/CompactBudgetSummaryCard';
 import { useTrackingBudget } from '#components/budget/tracking/TrackingBudgetContext';
 import { NotesButton } from '#components/NotesButton';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
@@ -26,6 +25,7 @@ import { BudgetMonthMenuButton } from './BudgetMonthMenuButton';
 import { ExpenseTotal } from './ExpenseTotal';
 import { IncomeTotal } from './IncomeTotal';
 import { Saved } from './Saved';
+import { TotalsDetails } from './TotalsDetails';
 
 type BudgetSummaryProps = {
   month: string;
@@ -44,12 +44,18 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     ? SvgArrowButtonDown1
     : SvgArrowButtonUp1;
 
-  if (isBudgetPageRedesignEnabled && collapsed) {
+  if (isBudgetPageRedesignEnabled) {
     return (
-      <CollapsedBudgetSummaryCard
+      <CompactBudgetSummaryCard
         month={month}
         currentMonth={currentMonth}
-        monthMenuButton={<BudgetMonthMenuButton month={month} />}
+        monthMenuButton={
+          <BudgetMonthMenuButton
+            month={month}
+            isSummaryCollapsed={collapsed}
+            onToggleSummaryCollapse={onToggleSummaryCollapse}
+          />
+        }
         renderPrimaryFigure={({ isLabelHidden }) => (
           <Saved
             projected={month >= currentMonth}
@@ -62,7 +68,8 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
             amountStyle={{ fontSize: 16 }}
           />
         )}
-        onToggleSummaryCollapse={onToggleSummaryCollapse}
+        isExpanded={!collapsed}
+        renderDetails={() => <TotalsDetails />}
       />
     );
   }
@@ -137,13 +144,6 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
             })}
           >
             {monthUtils.format(month, 'MMMM', locale)}
-            {isBudgetPageRedesignEnabled && (
-              <MonthStatusBadge
-                month={month}
-                currentMonth={currentMonth}
-                style={{ marginLeft: 8, verticalAlign: 'middle' }}
-              />
-            )}
           </div>
 
           <View

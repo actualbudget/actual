@@ -199,6 +199,21 @@ test.describe('Redesigned budget page', () => {
 
     await expect(totalBudgeted).toHaveCount(2);
     await expect(budgetPage.selectedMonthButton).toContainText('–');
+
+    // With several months the expanded card shows its totals under the header
+    const selectedMonth = await budgetPage.getSelectedMonth();
+    const summary = page.locator(
+      `[data-testid="budget-summary"][data-month="${selectedMonth}"]`,
+    );
+    await expect(summary.getByText('Available funds')).toBeVisible();
+
+    await summary.getByRole('button', { name: 'Menu' }).click();
+    await page.getByText('Hide summary details').click();
+    await expect(summary.getByText('Available funds')).toBeHidden();
+
+    await summary.getByRole('button', { name: 'Menu' }).click();
+    await page.getByText('Show summary details').click();
+    await expect(summary.getByText('Available funds')).toBeVisible();
   });
 
   test('collapses the month summary into a single row', async () => {
@@ -211,16 +226,15 @@ test.describe('Redesigned budget page', () => {
     await expect(summary.getByText('Budget actions')).toBeVisible();
     await expect(summary.getByText(/^of .+ budgeted$/)).toBeVisible();
 
-    await summary.hover();
-    await summary
-      .getByRole('button', { name: 'Collapse month summary' })
-      .click();
+    await summary.getByRole('button', { name: 'Choose an action' }).click();
+    await page.getByText('Hide summary details').click();
 
     await expect(summary.getByText('Available funds')).toBeHidden();
     await expect(summary.getByText('To Budget:')).toBeVisible();
     await expect(summary.getByTestId('month-status-badge')).toHaveText('Now');
 
-    await summary.getByRole('button', { name: 'Expand month summary' }).click();
+    await summary.getByRole('button', { name: 'Menu' }).click();
+    await page.getByText('Show summary details').click();
 
     await expect(summary.getByText('Available funds')).toBeVisible();
   });

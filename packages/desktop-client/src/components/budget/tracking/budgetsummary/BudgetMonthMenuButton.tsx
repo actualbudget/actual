@@ -21,11 +21,15 @@ type BudgetMonthMenuButtonProps = {
   month: string;
   /** Shows a labelled button instead of the default dots icon. */
   label?: ReactNode;
+  isSummaryCollapsed?: boolean;
+  onToggleSummaryCollapse?: () => void;
 };
 
 export function BudgetMonthMenuButton({
   month,
   label,
+  isSummaryCollapsed,
+  onToggleSummaryCollapse,
 }: BudgetMonthMenuButtonProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -73,6 +77,14 @@ export function BudgetMonthMenuButton({
         onOpenChange={onMenuClose}
       >
         <BudgetMonthMenu
+          isSummaryCollapsed={isSummaryCollapsed}
+          onToggleSummaryCollapse={
+            onToggleSummaryCollapse &&
+            (() => {
+              onToggleSummaryCollapse();
+              onMenuClose();
+            })
+          }
           onCopyLastMonthBudget={() => {
             onBudgetAction(month, 'copy-last');
             onMenuClose();
