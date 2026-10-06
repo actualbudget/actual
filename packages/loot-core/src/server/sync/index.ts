@@ -30,7 +30,7 @@ import { isMissingSchemaError } from '#shared/errors';
 import { getIn, setIn } from '#shared/util';
 import type { MetadataPrefs } from '#types/prefs';
 
-import { deriveCoupledCells } from './coupled-cells';
+import { deriveCoupledCells, withTransferCounterparts } from './coupled-cells';
 import * as encoder from './encoder';
 import { PENDING_MESSAGES_TABLE_SQL } from './messages-pending';
 import { rebuildMerkleHash } from './repair';
@@ -476,6 +476,21 @@ async function _applyMessages(messages: Message[], isReceived = false) {
       }
       idsPerTable[msg.dataset].push(msg.row);
     });
+
+    // A transfer counterpart's derived values can change with its leg, so
+    // it is tracked with the batch (coupled-cells).
+    if (idsPerTable.transactions) {
+      idsPerTable.transactions = withTransferCounterparts(
+        idsPerTable.transactions,
+        messages.flatMap(msg =>
+          msg.dataset === 'transactions' &&
+          msg.column === 'transferred_id' &&
+          typeof msg.value === 'string'
+            ? [msg.value]
+            : [],
+        ),
+      );
+    }
 
     oldData = fetchData(idsPerTable);
 

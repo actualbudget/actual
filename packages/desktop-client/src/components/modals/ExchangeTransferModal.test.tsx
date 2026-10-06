@@ -105,3 +105,19 @@ it('posts the occurrence with its schedule and ruled category', async () => {
   );
   await waitFor(() => expect(store.getState().modals.modalStack).toEqual([]));
 });
+
+it('requires the other amount when a fee is entered', async () => {
+  const { post } = setup();
+  await userEvent.type(await screen.findByLabelText('Exchange rate'), '0.0066');
+  await userEvent.type(screen.getByLabelText('Fee'), '50');
+  await userEvent.click(screen.getByTestId('exchange-add-button'));
+  expect(
+    screen.getByText('Enter the amount received in Checking.'),
+  ).toBeTruthy();
+  expect(post).not.toHaveBeenCalled();
+
+  // Without the fee, the rate alone completes the occurrence.
+  await userEvent.clear(screen.getByLabelText('Fee'));
+  await userEvent.click(screen.getByTestId('exchange-add-button'));
+  await waitFor(() => expect(post).toHaveBeenCalled());
+});
