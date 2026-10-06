@@ -153,6 +153,7 @@ import {
   isTransactionTableColumnAvailableInChildRows,
   isTransactionTableColumnDisplayOnly,
   TRANSACTION_TABLE_COLUMN_IDS,
+  TRANSACTION_TABLE_WIDTHS_ID,
   useTransactionTableColumnLabels,
 } from './table/columns';
 import type { TransactionTableColumnId } from './table/columns';
@@ -2943,7 +2944,7 @@ function TransactionTableInner({
 
   return (
     <ColumnWidthsProvider
-      tableId="transactions"
+      tableId={TRANSACTION_TABLE_WIDTHS_ID}
       defaultWidths={defaultColumnWidths}
       minWidths={TRANSACTION_TABLE_COLUMN_MIN_WIDTHS}
     >

@@ -463,5 +463,25 @@ test.describe('Transactions', () => {
         .poll(() => accountPage.getColumnWidth('date'))
         .toBeLessThan(initialWidth + 20);
     });
+
+    test('resets every column width from the columns modal', async () => {
+      const initialWidth = await accountPage.getColumnWidth('date');
+
+      await accountPage.resizeColumn('date', 100);
+      await expect
+        .poll(() => accountPage.getColumnWidth('date'))
+        .toBeGreaterThan(initialWidth + 90);
+
+      const modal = await accountPage.openTransactionColumnsModal();
+      await modal
+        .getByRole('button', { name: 'Reset to default', exact: true })
+        .click();
+      await modal.getByRole('button', { name: 'Save', exact: true }).click();
+      await expect(modal).not.toBeVisible();
+
+      await expect
+        .poll(() => accountPage.getColumnWidth('date'))
+        .toBeLessThan(initialWidth + 20);
+    });
   });
 });
