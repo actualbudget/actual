@@ -81,8 +81,8 @@
   --color-sidebarControlBackground: var(--color-sidebarItemBackgroundHover);
   --color-sidebarBrand: var(--color-sidebarItemAccentSelected);
 
-  --color-settingsNavBackground: var(--color-pillBackground);
-  --color-settingsNavBorder: var(--color-pillBorderDark);
+  --color-settingsCardBackground: var(--color-tableBackground);
+  --color-settingsCardBorder: var(--color-tableBorder);
   --color-settingsNavItemText: var(--color-pageText);
   --color-settingsNavItemBackgroundHover: color-mix(
     in srgb,
