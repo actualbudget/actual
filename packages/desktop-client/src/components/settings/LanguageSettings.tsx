@@ -44,8 +44,10 @@ export function LanguageSettings() {
         description={
           isEnabled ? (
             <Trans>
-              Translations are written by the community and may be incomplete or
-              inaccurate. Suggest corrections on{' '}
+              <span>Language</span> is the display language of all text. Please
+              note that no warranty is provided for the accuracy or completeness
+              of non-English translations. If you encounter a translation error,
+              feel free to make a suggestion on{' '}
               <Link
                 variant="external"
                 to={
@@ -60,15 +62,16 @@ export function LanguageSettings() {
             </Trans>
           ) : (
             <Trans>
-              No translation files are installed.{' '}
+              <span>Language</span> support is not available. Please follow the
+              instructions{' '}
               <Link
                 variant="external"
                 to="https://actualbudget.org/docs/install/build-from-source#translations"
                 linkColor="purple"
               >
-                Add the missing translation files
+                here
               </Link>{' '}
-              to choose a language.
+              to add missing translation files.
             </Trans>
           )
         }

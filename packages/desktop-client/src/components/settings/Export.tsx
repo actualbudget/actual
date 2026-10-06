@@ -50,16 +50,18 @@ export function ExportBudget() {
       description={
         <>
           <Trans>
-            Download your data as a zip file containing <code>db.sqlite</code>{' '}
-            and <code>metadata.json</code>. To import it into another Actual
-            instance, close any open file, choose "Import file", then "Actual".
+            <span>Export</span> your data as a zip file containing{' '}
+            <code>db.sqlite</code> and <code>metadata.json</code> files. It can
+            be imported into another Actual instance by closing an open file (if
+            any), then clicking the "Import file" button, then choosing
+            "Actual."
           </Trans>
           {encryptKeyId ? (
             <>
               {' '}
               <Trans>
-                The exported file is not encrypted, even though encryption is
-                enabled.
+                Even though encryption is enabled, the exported zip file will
+                not have any encryption.
               </Trans>
             </>
           ) : null}

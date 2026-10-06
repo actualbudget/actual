@@ -194,7 +194,11 @@ export function ThemeSettings() {
     return (
       <SettingsGroup
         title={t('Themes')}
-        description={t('Themes change the user interface colors.')}
+        description={
+          <Trans>
+            <span>Themes</span> change the user interface colors.
+          </Trans>
+        }
       >
         <View style={{ padding: spacing.lg }}>
           <ThemeInstaller
@@ -215,7 +219,11 @@ export function ThemeSettings() {
   return (
     <SettingsGroup
       title={t('Themes')}
-      description={t('Themes change the user interface colors.')}
+      description={
+        <Trans>
+          <span>Themes</span> change the user interface colors.
+        </Trans>
+      }
     >
       <SettingsRow
         title={t('Theme')}
@@ -279,10 +287,7 @@ export function ThemeSettings() {
       )}
       {hasCustomCssOverride && (
         <SettingsRow
-          title={t('Custom CSS')}
-          description={t(
-            'A custom CSS override is applied on top of the theme.',
-          )}
+          title={t('Custom CSS is active')}
           control={
             <Button
               aria-label={t('Custom CSS override active — click to edit')}

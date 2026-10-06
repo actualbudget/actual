@@ -60,9 +60,12 @@ function About() {
   return (
     <SettingsGroup
       title={t('About')}
-      description={t(
-        'Actual is a super fast, privacy-focused app for managing your finances.',
-      )}
+      description={
+        <Trans>
+          <span>Actual</span> is a super fast privacy-focused app for managing
+          your finances.
+        </Trans>
+      }
     >
       <SettingsRow
         title={t('Client version')}
