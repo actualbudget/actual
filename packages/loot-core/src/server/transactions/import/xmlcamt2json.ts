@@ -85,7 +85,7 @@ function getNotesFromTxDtls(TxDtls: TxDtls): string | null {
 }
 
 function getTrackingNumberFromTxDtls(TxDtls: TxDtls): string | null {
-  return TxDtls?.Refs?.ChqNb || null;
+  return TxDtls?.Refs?.ChqNb?.trim() || null;
 }
 
 function convertToNumberOrNull(value: string): number | null {

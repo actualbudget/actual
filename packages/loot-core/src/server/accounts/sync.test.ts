@@ -1117,7 +1117,7 @@ describe('SimpleFin batch sync', () => {
       date: 'date',
       payee: 'payeeName',
       notes: 'notes',
-      number: 'checkNumber',
+      tracking_number: 'checkNumber',
     };
     await db.insertWithSchema('preferences', {
       id: `custom-sync-mappings-${acctId}`,
