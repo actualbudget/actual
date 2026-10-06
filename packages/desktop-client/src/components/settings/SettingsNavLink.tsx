@@ -32,7 +32,7 @@ export function SettingsNavLink({ title, Icon, to }: SettingsNavLinkProps) {
           paddingInline: spacing.lg,
           textDecoration: 'none',
           color: theme.settingsNavItemText,
-          '& + &': { borderTop: `1px solid ${theme.settingsNavBorder}` },
+          '& + &': { borderTop: `1px solid ${theme.settingsCardBorder}` },
         })}
       >
         <Icon width={16} height={16} style={{ flexShrink: 0 }} />

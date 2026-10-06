@@ -18,12 +18,12 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
     <View
       className={css([
         {
-          backgroundColor: theme.pillBackground,
+          backgroundColor: theme.settingsCardBackground,
           alignSelf: 'flex-start',
           alignItems: 'flex-start',
           padding: 15,
-          borderRadius: 4,
-          border: '1px solid ' + theme.pillBorderDark,
+          borderRadius: 6,
+          border: '1px solid ' + theme.settingsCardBorder,
           width: '100%',
         },
         style,

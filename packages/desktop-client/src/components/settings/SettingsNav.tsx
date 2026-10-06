@@ -12,7 +12,7 @@ import {
 } from '@actual-app/components/icons/v1';
 import { SvgSettingsSliderAlternate } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
-import { radius, spacing } from '@actual-app/components/tokens';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
@@ -35,9 +35,9 @@ export function SettingsNav() {
         isNarrowWidth
           ? {
               flexShrink: 0,
-              backgroundColor: theme.settingsNavBackground,
-              border: `1px solid ${theme.settingsNavBorder}`,
-              borderRadius: radius.sm,
+              backgroundColor: theme.settingsCardBackground,
+              border: `1px solid ${theme.settingsCardBorder}`,
+              borderRadius: 6,
             }
           : { width: 180, flexShrink: 0, gap: spacing.xxs }
       }
