@@ -100,22 +100,22 @@ export class Navigation {
   }
 
   async goToRulesPage() {
-    await this.goToSettingsPage();
-    await this.page.getByRole('link', { name: 'Rules' }).click();
+    const settingsPage = await this.goToSettingsPage();
+    await settingsPage.goToSection('Rules');
 
     return new RulesPage(this.page);
   }
 
   async goToPayeesPage() {
-    await this.goToSettingsPage();
-    await this.page.getByRole('link', { name: 'Payees' }).click();
+    const settingsPage = await this.goToSettingsPage();
+    await settingsPage.goToSection('Payees');
 
     return new PayeesPage(this.page);
   }
 
   async goToBankSyncPage() {
-    await this.goToSettingsPage();
-    await this.page.getByRole('link', { name: 'Bank Sync' }).click();
+    const settingsPage = await this.goToSettingsPage();
+    await settingsPage.goToSection('Bank Sync');
 
     return new BankSyncPage(this.page);
   }

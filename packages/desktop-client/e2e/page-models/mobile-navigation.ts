@@ -12,24 +12,14 @@ import { MobileSchedulesPage } from './mobile-schedules-page';
 import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
 import { SettingsPage } from './settings-page';
 
-const NAVBAR_ROWS = 3;
-const NAV_LINKS_HIDDEN_BY_DEFAULT = [
-  'Reports',
-  'Schedules',
-  'Payees',
-  'Rules',
-  'Bank Sync',
-  'Settings',
-];
+const NAVBAR_ROWS = 2;
+const NAV_LINKS_HIDDEN_BY_DEFAULT = ['Reports', 'Schedules', 'Settings'];
 const ROUTES_BY_PAGE = {
   Budget: '/budget',
   Accounts: '/accounts',
   Transaction: '/transactions/new',
   Reports: '/reports',
   Schedules: '/schedules',
-  Payees: '/settings/payees',
-  Rules: '/settings/rules',
-  'Bank Sync': '/settings/bank-sync',
   Settings: '/settings',
 };
 
@@ -43,9 +33,9 @@ export class MobileNavigation {
   constructor(page: Page) {
     this.page = page;
     this.heading = page.getByRole('heading');
-    this.navbar = page.getByRole('navigation');
+    this.navbar = page.locator('[data-navbar-state]');
     this.mainContentSelector = '[role=main]';
-    this.navbarSelector = '[role=navigation]';
+    this.navbarSelector = '[data-navbar-state]';
   }
 
   async dragNavbarUp() {
@@ -179,10 +169,12 @@ export class MobileNavigation {
   }
 
   async goToPayeesPage() {
-    return await this.navigateToPage(
-      'Payees',
-      () => new MobilePayeesPage(this.page),
-    );
+    const settingsPage = await this.goToSettingsPage();
+    await settingsPage.goToSection('Payees');
+
+    const payeesPage = new MobilePayeesPage(this.page);
+    await payeesPage.waitFor();
+    return payeesPage;
   }
 
   async goToSchedulesPage() {
@@ -193,17 +185,21 @@ export class MobileNavigation {
   }
 
   async goToRulesPage() {
-    return await this.navigateToPage(
-      'Rules',
-      () => new MobileRulesPage(this.page),
-    );
+    const settingsPage = await this.goToSettingsPage();
+    await settingsPage.goToSection('Rules');
+
+    const rulesPage = new MobileRulesPage(this.page);
+    await rulesPage.waitFor();
+    return rulesPage;
   }
 
   async goToBankSyncPage() {
-    return await this.navigateToPage(
-      'Bank Sync',
-      () => new MobileBankSyncPage(this.page),
-    );
+    const settingsPage = await this.goToSettingsPage();
+    await settingsPage.goToSection('Bank Sync');
+
+    const bankSyncPage = new MobileBankSyncPage(this.page);
+    await bankSyncPage.waitFor();
+    return bankSyncPage;
   }
 
   async goToSettingsPage() {

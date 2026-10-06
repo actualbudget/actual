@@ -58,6 +58,7 @@ test.describe('Settings', () => {
         { timeout: 1000 },
       );
     }).toPass({ timeout: 15000 });
+    await settingsPage.goToSection('Appearance');
     await page.getByRole('button', { name: 'Light', exact: true }).click();
     await page
       .getByRole('button', { name: 'Custom theme', exact: true })
