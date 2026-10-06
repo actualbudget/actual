@@ -443,6 +443,50 @@ describe('posting exchange transfers', () => {
     expect(snapshot().payees).toBe(payees);
   });
 
+  it('keeps entered metadata on the initiating leg', async () => {
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'account', value: 'jpy' }],
+      actions: [{ op: 'set', field: 'notes', value: 'from rule' }],
+    });
+    for (const destinationFee of [undefined, 300]) {
+      const result = await post({
+        date,
+        sourceAccount: 'usd',
+        destinationAccount: 'jpy',
+        sourceAmount: 10000,
+        destinationAmount: 15000,
+        destinationFee,
+        notes: 'entered',
+        cleared: true,
+        initiatingAccount: 'jpy',
+      });
+      if (result.status !== 'ok') throw new Error('failed');
+      for (const r of rows('jpy').filter(r => r.notes !== null)) {
+        expect(r).toMatchObject({ notes: 'entered', cleared: 1 });
+      }
+      expect(row(result.destinationId)).toMatchObject({
+        notes: 'entered',
+        cleared: 1,
+      });
+      expect(row(result.sourceId)).toMatchObject({ cleared: 0 });
+      await batch({
+        deleted: [{ id: result.sourceId }, { id: result.destinationId }],
+      });
+    }
+    await expect(
+      post({
+        date,
+        sourceAccount: 'usd',
+        destinationAccount: 'jpy',
+        sourceAmount: 10000,
+        destinationAmount: 15000,
+        initiatingAccount: 'kwd',
+      }),
+    ).rejects.toThrow('account-not-found');
+  });
+
   it('records one undo step and keeps redo after a rejected post', async () => {
     const result = await post({
       date,
@@ -944,6 +988,73 @@ describe('exchange guard regressions (inspection round 2)', () => {
         ],
       }),
     ).rejects.toThrow('multicurrency-transfer-unavailable');
+    expect(rows()).toEqual([]);
+  });
+
+  it('validates counterparts of rows an update inserts', async () => {
+    const schedule = await createSchedule({
+      conditions: [
+        { op: 'is', field: 'account', value: 'kwd' },
+        { op: 'isapprox', field: 'date', value: date },
+        { op: 'isapprox', field: 'amount', value: -1500 },
+      ],
+    });
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'account', value: 'jpy2' }],
+      actions: [{ op: 'link-schedule', value: schedule }],
+    });
+    await expect(
+      batch({
+        updated: [
+          {
+            id: 'inserted',
+            account: 'jpy',
+            date,
+            amount: -1000,
+            transaction_amount: -1500,
+            payee: transferPayee('jpy2'),
+          },
+        ],
+      }),
+    ).rejects.toThrow();
+    expect(rows()).toEqual([]);
+  });
+
+  it('validates added rows with their same-batch updates applied', async () => {
+    const schedule = await createSchedule({
+      conditions: [
+        { op: 'is', field: 'account', value: 'kwd' },
+        { op: 'isapprox', field: 'date', value: date },
+        { op: 'isapprox', field: 'amount', value: -1500 },
+      ],
+    });
+    // The rule matches only the final date.
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'is', field: 'account', value: 'jpy2' },
+        { op: 'is', field: 'date', value: date },
+      ],
+      actions: [{ op: 'link-schedule', value: schedule }],
+    });
+    await expect(
+      batch({
+        added: [
+          {
+            id: 'sent',
+            account: 'jpy',
+            date: '2026-03-09',
+            amount: -1000,
+            transaction_amount: -1500,
+            payee: transferPayee('jpy2'),
+          },
+        ],
+        updated: [{ id: 'sent', date }],
+      }),
+    ).rejects.toThrow();
     expect(rows()).toEqual([]);
   });
 

@@ -34,6 +34,11 @@ export type ExchangeTransferInput = {
   feeCategory?: string | null;
   notes?: string | null;
   cleared?: boolean;
+  /**
+   * The account the user entered the transfer in (source by default). Its
+   * leg keeps the entered notes and cleared status; rules run on the other.
+   */
+  initiatingAccount?: string;
 };
 
 type Row = {
@@ -220,20 +225,24 @@ export async function postExchangeTransfer(
   const destinationLegId = uuidv4();
   const shared = { date: input.date };
 
-  const sourceLeg: Row = {
+  if (
+    input.initiatingAccount !== undefined &&
+    input.initiatingAccount !== sourceAccount.id &&
+    input.initiatingAccount !== destinationAccount.id
+  ) {
+    throw new Error('account-not-found');
+  }
+  const fromDestination = input.initiatingAccount === destinationAccount.id;
+
+  const sourceDraft = {
     ...shared,
     id: sourceLegId,
     account: sourceAccount.id,
     payee: await transferPayee(destinationAccount.id),
     transfer_id: destinationLegId,
     category: legCategory(sourceAccount),
-    notes: input.notes ?? null,
-    cleared: input.cleared ?? false,
     ...sourcePair(-value, -legs.principal, -1),
   };
-
-  // Like addTransfer, the destination leg keeps only rule notes and cleared;
-  // payees its rules name are never created.
   const destinationDraft = {
     ...shared,
     id: destinationLegId,
@@ -241,20 +250,32 @@ export async function postExchangeTransfer(
     payee: await transferPayee(sourceAccount.id),
     transfer_id: sourceLegId,
     category: legCategory(destinationAccount),
-    notes: input.notes ?? null,
-    cleared: false,
     ...destinationPair(value, legs.gross, 1),
   };
-  const ruled = await runRules(
-    destinationDraft,
-    undefined,
-    undefined,
-    async () => uuidv4(),
+
+  // The entered leg keeps what the user typed. Like addTransfer, the other
+  // leg keeps only rule notes and cleared; payees its rules name are never
+  // created.
+  const entered = {
+    notes: input.notes ?? null,
+    cleared: input.cleared ?? false,
+  };
+  const otherDraft = {
+    ...(fromDestination ? sourceDraft : destinationDraft),
+    notes: input.notes ?? null,
+    cleared: false,
+  };
+  const ruled = await runRules(otherDraft, undefined, undefined, async () =>
+    uuidv4(),
   );
+  const other = { notes: ruled.notes ?? null, cleared: !!ruled.cleared };
+  const sourceLeg: Row = {
+    ...sourceDraft,
+    ...(fromDestination ? other : entered),
+  };
   const destinationLeg: Row = {
     ...destinationDraft,
-    notes: ruled.notes ?? null,
-    cleared: !!ruled.cleared,
+    ...(fromDestination ? entered : other),
   };
 
   const rows: Row[] = [];
@@ -267,7 +288,7 @@ export async function postExchangeTransfer(
         account: sourceAccount.id,
         payee: null,
         category: null,
-        notes: input.notes ?? null,
+        notes: sourceLeg.notes,
         cleared: sourceLeg.cleared,
         is_parent: true,
         ...sourcePair(

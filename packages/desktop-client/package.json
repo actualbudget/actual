@@ -100,6 +100,7 @@
     "#hooks/useCachedSchedules": "./src/hooks/useCachedSchedules.tsx",
     "#hooks/useDisplayPayee": "./src/hooks/useDisplayPayee.tsx",
     "#hooks/useDragDrop": "./src/hooks/useDragDrop.tsx",
+    "#hooks/useExchangeCounterparts": "./src/hooks/useExchangeCounterparts.tsx",
     "#hooks/useProperFocus": "./src/hooks/useProperFocus.tsx",
     "#hooks/useScrollListener": "./src/hooks/useScrollListener.tsx",
     "#hooks/useSelected": "./src/hooks/useSelected.tsx",

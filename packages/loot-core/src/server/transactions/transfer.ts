@@ -2,12 +2,14 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import * as db from '#server/db';
+import { findBatchedRow } from '#server/sync';
 import type { TransactionEntity } from '#types/models';
 
 import {
   isExchangeRow,
   isForeignAccount,
   preflightTransactionWrites,
+  queuedAccount,
 } from './foreign-guard';
 import { runRules } from './transaction-rules';
 
@@ -29,13 +31,27 @@ async function getTransferredAccount(transaction) {
   return null;
 }
 
+/** An account's offbudget flag, including an account queued in a batch. */
+async function offBudgetOf(id: string) {
+  const stored = await db.first<Pick<db.DbAccount, 'offbudget'>>(
+    'SELECT offbudget FROM accounts WHERE id = ?',
+    [id],
+  );
+  return (stored ?? queuedAccount(id))?.offbudget ?? 0;
+}
+
+/** An account's transfer payee, including one queued in a batch. */
+async function transferPayeeId(account: string) {
+  const stored = await db.first<Pick<db.DbPayee, 'id'>>(
+    'SELECT id FROM payees WHERE transfer_acct = ?',
+    [account],
+  );
+  return stored?.id ?? findBatchedRow('payees', 'transfer_acct', account);
+}
+
 async function clearCategory(transaction, transferAcct) {
-  const { offbudget: fromOffBudget } = await db.first<
-    Pick<db.DbAccount, 'offbudget'>
-  >('SELECT offbudget FROM accounts WHERE id = ?', [transaction.account]);
-  const { offbudget: toOffBudget } = await db.first<
-    Pick<db.DbAccount, 'offbudget'>
-  >('SELECT offbudget FROM accounts WHERE id = ?', [transferAcct]);
+  const fromOffBudget = await offBudgetOf(transaction.account);
+  const toOffBudget = await offBudgetOf(transferAcct);
 
   // If the transfer is between two on budget or two off budget accounts,
   // we should clear the category, because the category is not relevant
@@ -61,10 +77,7 @@ export async function transferCounterpart(
   transferredAccount,
   stagePayee?: (name: string) => Promise<string>,
 ) {
-  const { id: fromPayee } = await db.first<Pick<db.DbPayee, 'id'>>(
-    'SELECT id FROM payees WHERE transfer_acct = ?',
-    [transaction.account],
-  );
+  const fromPayee = await transferPayeeId(transaction.account);
 
   const transferTransaction = {
     account: transferredAccount,
@@ -133,15 +146,24 @@ export async function preflightNewForeignTransfers(
       sources.push({ ...transaction, transfer_id: id });
     }
   };
-  for (const transaction of added) {
+  // Updates to rows added in the same batch apply before their hooks run, so
+  // those rows are judged in their final state.
+  const addedIds = new Set(added.map(row => row.id));
+  const finalAdded = added.map(row =>
+    updated
+      .filter(patch => patch.id === row.id)
+      .reduce((merged, patch) => ({ ...merged, ...patch }), row),
+  );
+  for (const transaction of finalAdded) {
     await consider(transaction);
   }
   for (const patch of updated) {
-    if (patch.payee === undefined || !patch.id) continue;
-    const stored = await db.getTransaction(patch.id);
-    if (stored) {
-      await consider({ ...stored, ...patch }, patch);
+    if (patch.payee === undefined || !patch.id || addedIds.has(patch.id)) {
+      continue;
     }
+    const stored = await db.getTransaction(patch.id);
+    // An update of a row that is not stored inserts it.
+    await (stored ? consider({ ...stored, ...patch }, patch) : consider(patch));
   }
   if (counterparts.length > 0) {
     await preflightTransactionWrites({

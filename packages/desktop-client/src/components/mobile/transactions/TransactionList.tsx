@@ -43,6 +43,10 @@ import { FloatingActionBar } from '#components/mobile/FloatingActionBar';
 import { useAccounts } from '#hooks/useAccounts';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCategoriesById } from '#hooks/useCategories';
+import {
+  ExchangeCounterpartsProvider,
+  useExchangeCounterparts,
+} from '#hooks/useExchangeCounterparts';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
@@ -108,6 +112,8 @@ export function TransactionList({
 }: TransactionListProps) {
   const locale = useLocale();
   const { t } = useTranslation();
+  const { data: allAccounts = [] } = useAccounts();
+  const counterparts = useExchangeCounterparts(transactions, allAccounts);
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
     const sections: {
@@ -162,119 +168,128 @@ export function TransactionList({
   );
 
   return (
-    <View style={{ flex: 1 }}>
-      {isLoading && (
-        <Loading
-          style={{ flex: 'none', paddingBottom: 8 }}
-          aria-label={t('Loading transactions...')}
-        />
-      )}
+    <ExchangeCounterpartsProvider value={counterparts}>
       <View style={{ flex: 1 }}>
-        <Virtualizer
-          layout={ListLayout}
-          layoutOptions={{
-            estimatedRowHeight: ROW_HEIGHT,
-            padding: 0,
-          }}
-        >
-          <ListBox
-            aria-label={t('Transaction list')}
-            selectionMode={
-              selectedTransactions.size > 0 ? 'multiple' : 'single'
-            }
-            style={{ flex: 1, overflow: 'auto' }}
-            selectedKeys={selectedTransactions}
-            dependencies={[
-              selectedTransactions,
-              locale,
-              onTransactionPress,
-              runningBalances,
-              showRunningBalances,
-              isReconciling,
-              onToggleTransactionCleared,
-              t,
-            ]}
-            renderEmptyState={() =>
-              !isLoading && (
-                <View
-                  style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: theme.mobilePageBackground,
-                  }}
-                >
-                  <Text size="large">
-                    <Trans>No transactions</Trans>
-                  </Text>
-                </View>
-              )
-            }
-            items={sections}
+        {isLoading && (
+          <Loading
+            style={{ flex: 'none', paddingBottom: 8 }}
+            aria-label={t('Loading transactions...')}
+          />
+        )}
+        <View style={{ flex: 1 }}>
+          <Virtualizer
+            layout={ListLayout}
+            layoutOptions={{
+              estimatedRowHeight: ROW_HEIGHT,
+              padding: 0,
+            }}
           >
-            {section => (
-              <ListBoxSection>
-                <Header
-                  style={{
-                    ...styles.smallText,
-                    backgroundColor: theme.pageBackground,
-                    color: theme.tableHeaderText,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    paddingBottom: 4,
-                    paddingTop: 4,
-                    position: 'sticky',
-                    top: '0',
-                    width: '100%',
-                    zIndex: 10,
-                  }}
-                >
-                  {monthUtils.format(section.date, 'MMMM dd, yyyy', locale)}
-                </Header>
-                <Collection
-                  items={section.transactions.filter(
-                    t => !isPreviewId(t.id) || !t.is_child,
-                  )}
-                >
-                  {transaction => (
-                    <ListBoxItem textValue={transaction.id} value={transaction}>
-                      {itemProps => (
-                        <TransactionListItem
-                          {...itemProps}
-                          showRunningBalance={showRunningBalances}
-                          runningBalance={runningBalances?.get(transaction.id)}
-                          transaction={transaction}
-                          isReconciling={isReconciling}
-                          onPress={trans => onTransactionPress(trans)}
-                          onLongPress={trans => onTransactionPress(trans, true)}
-                          onToggleCleared={onToggleTransactionCleared}
-                        />
-                      )}
-                    </ListBoxItem>
-                  )}
-                </Collection>
-              </ListBoxSection>
-            )}
-          </ListBox>
-        </Virtualizer>
+            <ListBox
+              aria-label={t('Transaction list')}
+              selectionMode={
+                selectedTransactions.size > 0 ? 'multiple' : 'single'
+              }
+              style={{ flex: 1, overflow: 'auto' }}
+              selectedKeys={selectedTransactions}
+              dependencies={[
+                selectedTransactions,
+                locale,
+                onTransactionPress,
+                runningBalances,
+                showRunningBalances,
+                isReconciling,
+                onToggleTransactionCleared,
+                t,
+              ]}
+              renderEmptyState={() =>
+                !isLoading && (
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: theme.mobilePageBackground,
+                    }}
+                  >
+                    <Text size="large">
+                      <Trans>No transactions</Trans>
+                    </Text>
+                  </View>
+                )
+              }
+              items={sections}
+            >
+              {section => (
+                <ListBoxSection>
+                  <Header
+                    style={{
+                      ...styles.smallText,
+                      backgroundColor: theme.pageBackground,
+                      color: theme.tableHeaderText,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      paddingBottom: 4,
+                      paddingTop: 4,
+                      position: 'sticky',
+                      top: '0',
+                      width: '100%',
+                      zIndex: 10,
+                    }}
+                  >
+                    {monthUtils.format(section.date, 'MMMM dd, yyyy', locale)}
+                  </Header>
+                  <Collection
+                    items={section.transactions.filter(
+                      t => !isPreviewId(t.id) || !t.is_child,
+                    )}
+                  >
+                    {transaction => (
+                      <ListBoxItem
+                        textValue={transaction.id}
+                        value={transaction}
+                      >
+                        {itemProps => (
+                          <TransactionListItem
+                            {...itemProps}
+                            showRunningBalance={showRunningBalances}
+                            runningBalance={runningBalances?.get(
+                              transaction.id,
+                            )}
+                            transaction={transaction}
+                            isReconciling={isReconciling}
+                            onPress={trans => onTransactionPress(trans)}
+                            onLongPress={trans =>
+                              onTransactionPress(trans, true)
+                            }
+                            onToggleCleared={onToggleTransactionCleared}
+                          />
+                        )}
+                      </ListBoxItem>
+                    )}
+                  </Collection>
+                </ListBoxSection>
+              )}
+            </ListBox>
+          </Virtualizer>
+        </View>
+
+        {isLoadingMore && (
+          <Loading
+            aria-label={t('Loading more transactions...')}
+            style={{
+              // Same height as transaction list item
+              height: ROW_HEIGHT,
+            }}
+          />
+        )}
+
+        {selectedTransactions.size > 0 && (
+          <SelectedTransactionsFloatingActionBar
+            transactions={transactions}
+            showMakeTransfer={showMakeTransfer}
+          />
+        )}
       </View>
-
-      {isLoadingMore && (
-        <Loading
-          aria-label={t('Loading more transactions...')}
-          style={{
-            // Same height as transaction list item
-            height: ROW_HEIGHT,
-          }}
-        />
-      )}
-
-      {selectedTransactions.size > 0 && (
-        <SelectedTransactionsFloatingActionBar
-          transactions={transactions}
-          showMakeTransfer={showMakeTransfer}
-        />
-      )}
-    </View>
+    </ExchangeCounterpartsProvider>
   );
 }
 

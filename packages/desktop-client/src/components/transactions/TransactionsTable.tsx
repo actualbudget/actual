@@ -113,6 +113,7 @@ import {
   BudgetCurrencyFormat,
   useCurrencyFormatOverride,
 } from '#hooks/currencyFormatContext';
+import { useAccounts } from '#hooks/useAccounts';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import {
   SchedulesProvider,
@@ -130,6 +131,11 @@ import type {
   OnDragChangeCallback,
   OnDropCallback,
 } from '#hooks/useDragDrop';
+import {
+  ExchangeCounterpartLabel,
+  ExchangeCounterpartsProvider,
+  useExchangeCounterparts,
+} from '#hooks/useExchangeCounterparts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { usePrevious } from '#hooks/usePrevious';
@@ -146,7 +152,9 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { getPayeesById } from '#payees';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
-import { incompatibleAccountIds } from '#util/account-encoding';
+import { encodingKey, incompatibleAccountIds } from '#util/account-encoding';
+import { exchangeOtherAccount } from '#util/exchange-entry';
+import type { ExchangeRequest } from '#util/exchange-entry';
 import { getStatusLabel } from '#util/schedule';
 import {
   calculateFutureTransactionInfo,
@@ -154,6 +162,8 @@ import {
   isFutureTransaction,
 } from '#util/schedule-actions';
 
+import { ExchangePanel } from './ExchangePanel';
+import type { ExchangePostResult } from './ExchangePanel';
 import {
   isTransactionTableColumnAvailableInChildRows,
   isTransactionTableColumnDisplayOnly,
@@ -700,6 +710,23 @@ function PayeeCell({
 
   const transferAccount = transferAccountsByTransaction[transaction.id];
 
+  // Only a new, unsplit transaction can become an exchange transfer (through
+  // the inline exchange panel); other rows offer transfers within their own
+  // currency.
+  // The accounts prop leaves out the row's own account, so encodings come
+  // from the full list.
+  const { data: allAccounts = [] } = useAccounts();
+  const rowAccount = allAccounts.find(acct => acct.id === transaction.account);
+  const selectablePayees =
+    isTemporaryId(id) && !transaction.is_child
+      ? payees
+      : payees.filter(p => {
+          const target = p.transfer_acct
+            ? allAccounts.find(acct => acct.id === p.transfer_acct)
+            : null;
+          return !target || encodingKey(target) === encodingKey(rowAccount);
+        });
+
   // A new foreign entry keeps a new payee's name; the posting handler creates
   // the payee only if the entry is saved.
   const defersPayeeCreation =
@@ -810,6 +837,7 @@ function PayeeCell({
               displayPayee
             )}
           </Text>
+          <ExchangeCounterpartLabel transactionId={transaction.id} />
         </View>
       </CellButton>
     </Cell>
@@ -895,6 +923,7 @@ function PayeeCell({
               ) : (
                 payeeName
               )}
+              <ExchangeCounterpartLabel transactionId={transaction.id} />
             </div>
           </>
         );
@@ -909,7 +938,7 @@ function PayeeCell({
         inputStyle,
       }) => (
         <PayeeAutocomplete
-          payees={payees}
+          payees={selectablePayees}
           accounts={accounts}
           value={payee?.id ?? null}
           shouldSaveFromKey={shouldSaveFromKey}
@@ -2535,6 +2564,10 @@ type NewTransactionProps = {
   onSchedule: () => void;
   onAdd: () => void;
   onAddAndClose: () => void;
+  /** Posts an exchange transfer entered in a single-account register. */
+  onAddExchange?: (request: ExchangeRequest) => Promise<ExchangePostResult>;
+  /** Increments to move focus into the exchange panel. */
+  exchangeFocusToken?: number;
   onAddSplit: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onClose: () => void;
@@ -2583,6 +2616,8 @@ function NewTransaction({
   onSchedule,
   onAdd,
   onAddAndClose,
+  onAddExchange,
+  exchangeFocusToken,
   onAddSplit,
   onDistributeRemainder,
   onManagePayees,
@@ -2594,6 +2629,15 @@ function NewTransaction({
   showHiddenCategories,
 }: NewTransactionProps) {
   const error = transactions[0].error;
+  // A transfer to an account in another currency is entered with its other
+  // side in the inline exchange panel.
+  const exchangeOther =
+    onAddExchange && !transactions[0].is_parent
+      ? exchangeOtherAccount(transactions[0], payees, accounts)
+      : null;
+  const registerAccount = accounts.find(
+    acct => acct.id === transactions[0].account,
+  );
   const isDeposit = transactions[0].amount > 0;
   const isFuture = isFutureTransaction(transactions[0]);
 
@@ -2667,6 +2711,15 @@ function NewTransaction({
           showHiddenCategories={showHiddenCategories}
         />
       ))}
+      {exchangeOther && registerAccount && onAddExchange && (
+        <ExchangePanel
+          transaction={transactions[0]}
+          register={registerAccount}
+          other={exchangeOther}
+          onPost={onAddExchange}
+          focusToken={exchangeFocusToken}
+        />
+      )}
       <View
         style={{
           flexDirection: 'row',
@@ -2684,7 +2737,7 @@ function NewTransaction({
         >
           <Trans>Cancel</Trans>
         </Button>
-        {isFuture && (
+        {isFuture && !exchangeOther && (
           <Button
             style={{ marginRight: 10, padding: '4px 10px' }}
             onPress={onSchedule}
@@ -2694,7 +2747,7 @@ function NewTransaction({
             <Trans>Schedule</Trans>
           </Button>
         )}
-        {error ? (
+        {exchangeOther ? null : error ? (
           <TransactionError
             error={error}
             isDeposit={isDeposit}
@@ -2790,6 +2843,10 @@ type TransactionTableInnerProps = {
   onScheduleTemporary: (id?: TransactionEntity['id']) => void;
   onAddTemporary: (id?: TransactionEntity['id']) => void;
   onAddAndCloseTemporary: () => void;
+  onAddExchangeTemporary?: (
+    request: ExchangeRequest,
+  ) => Promise<ExchangePostResult>;
+  exchangeFocusToken?: number;
   onDistributeRemainder: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onManagePayees: (id?: PayeeEntity['id']) => void;
@@ -3081,6 +3138,8 @@ function TransactionTableInner({
               onSchedule={props.onScheduleTemporary}
               onAdd={props.onAddTemporary}
               onAddAndClose={props.onAddAndCloseTemporary}
+              onAddExchange={props.onAddExchangeTemporary}
+              exchangeFocusToken={props.exchangeFocusToken}
               onAddSplit={props.onAddSplit}
               onToggleSplit={props.onToggleSplit}
               onSplit={props.onSplit}
@@ -3181,6 +3240,8 @@ export type TransactionTableProps = {
   onAddSplit: (id: TransactionEntity['id']) => TransactionEntity['id'];
   onCloseAddTransaction: () => void;
   onAdd: (transactions: TransactionEntity[]) => void;
+  /** Posts an exchange transfer; given only in single-account registers. */
+  onAddExchange?: (request: ExchangeRequest) => Promise<ExchangePostResult>;
   onCreatePayee: (name: string) => Promise<null | PayeeEntity['id']>;
   style?: CSSProperties;
   onNavigateToTransferAccount: NavigateToTransferAccount;
@@ -3227,6 +3288,8 @@ export const TransactionTable = forwardRef(
     const [newTransactions, setNewTransactions] = useState<TransactionEntity[]>(
       [],
     );
+    // Enter on an exchange draft moves focus into its panel.
+    const [exchangeFocusToken, setExchangeFocusToken] = useState(0);
 
     // The ordered list of columns to render. The show* flags control which
     // of the account/category/balance/cleared columns are available in the
@@ -3519,6 +3582,14 @@ export const TransactionTable = forwardRef(
           }),
         );
         newNavigator.onEdit('temp', 'account');
+      } else if (
+        props.onAddExchange &&
+        newTransactions?.[0] &&
+        !newTransactions[0].is_parent &&
+        exchangeOtherAccount(newTransactions[0], props.payees, props.accounts)
+      ) {
+        // The exchange panel posts the transfer; the draft stays until then.
+        setExchangeFocusToken(token => token + 1);
       } else {
         const transactions = latestState.current.newTransactions;
 
@@ -3674,8 +3745,16 @@ export const TransactionTable = forwardRef(
       const canSchedule = (row: TransactionEntity) =>
         isFutureTransaction(row) &&
         !props.accounts.find(account => account.id === row.account)?.currency;
+      // An exchange draft's own buttons live in its panel.
+      const isExchange =
+        !!props.onAddExchange &&
+        !!item &&
+        !item.is_parent &&
+        !!exchangeOtherAccount(item, props.payees, props.accounts);
       const resolved = getFields(item, fields).filter(
-        f => f !== 'schedule' || (item ? canSchedule(item) : false),
+        f =>
+          !(isExchange && (f === 'add' || f === 'schedule')) &&
+          (f !== 'schedule' || (item ? canSchedule(item) : false)),
       );
 
       const isLastSplitChild =
@@ -3851,6 +3930,23 @@ export const TransactionTable = forwardRef(
         forceRerender({});
       });
     };
+
+    const onAddExchangeTemporary = props.onAddExchange
+      ? async (request: ExchangeRequest) => {
+          const result = await props.onAddExchange!(request);
+          if (result.status === 'ok') {
+            setNewTransactions(
+              makeTemporaryTransactions(
+                props.currentAccountId,
+                props.currentCategoryId,
+                request.date,
+              ),
+            );
+            newNavigator.onEdit('temp', 'date');
+          }
+          return result;
+        }
+      : undefined;
 
     const {
       onSave: onSaveProp,
@@ -4207,55 +4303,63 @@ export const TransactionTable = forwardRef(
     );
 
     const allSchedulesQuery = useMemo(() => q('schedules').select('*'), []);
+    const exchangeCounterparts = useExchangeCounterparts(
+      props.transactions,
+      props.accounts,
+    );
 
     return (
-      <DisplayPayeeProvider transactions={displayPayeeTransactions}>
-        <SchedulesProvider query={allSchedulesQuery}>
-          <TransactionTableInner
-            tableRef={mergedRef}
-            listContainerRef={listContainerRef}
-            {...props}
-            columns={visibleColumns}
-            transactions={transactionsWithExpandedSplits}
-            transactionMap={transactionMap}
-            transactionsByParent={transactionsByParent}
-            transferAccountsByTransaction={transferAccountsByTransaction}
-            selectedItems={selectedItems}
-            isExpanded={splitsExpanded.isExpanded}
-            onSave={onSave}
-            onDelete={onDelete}
-            onBatchDelete={onBatchDelete}
-            onBatchDuplicate={onBatchDuplicate}
-            onBatchLinkSchedule={onBatchLinkSchedule}
-            onBatchUnlinkSchedule={onBatchUnlinkSchedule}
-            onCreateRule={onCreateRule}
-            onScheduleAction={onScheduleAction}
-            onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
-            onSplit={onSplit}
-            onCheckNewEnter={onCheckNewEnter}
-            onCheckEnter={onCheckEnter}
-            onScheduleTemporary={onScheduleTemporary}
-            onAddTemporary={onAddTemporary}
-            onAddAndCloseTemporary={onAddAndCloseTemporary}
-            onAddSplit={onAddSplit}
-            onDistributeRemainder={onDistributeRemainder}
-            onCloseAddTransaction={onCloseAddTransaction}
-            onToggleSplit={onToggleSplit}
-            newTransactions={newTransactions ?? []}
-            tableNavigator={tableNavigator}
-            newNavigator={newNavigator}
-            showSelection={props.showSelection}
-            allowSplitTransaction={props.allowSplitTransaction}
-            showHiddenCategories={showHiddenCategories}
-            canDrag={canDrag}
-            draggedId={draggedId}
-            draggedParentId={draggedParentId}
-            draggedDate={draggedDate}
-            onDragChange={onDragChange}
-            onDrop={onDrop}
-          />
-        </SchedulesProvider>
-      </DisplayPayeeProvider>
+      <ExchangeCounterpartsProvider value={exchangeCounterparts}>
+        <DisplayPayeeProvider transactions={displayPayeeTransactions}>
+          <SchedulesProvider query={allSchedulesQuery}>
+            <TransactionTableInner
+              tableRef={mergedRef}
+              listContainerRef={listContainerRef}
+              {...props}
+              columns={visibleColumns}
+              transactions={transactionsWithExpandedSplits}
+              transactionMap={transactionMap}
+              transactionsByParent={transactionsByParent}
+              transferAccountsByTransaction={transferAccountsByTransaction}
+              selectedItems={selectedItems}
+              isExpanded={splitsExpanded.isExpanded}
+              onSave={onSave}
+              onDelete={onDelete}
+              onBatchDelete={onBatchDelete}
+              onBatchDuplicate={onBatchDuplicate}
+              onBatchLinkSchedule={onBatchLinkSchedule}
+              onBatchUnlinkSchedule={onBatchUnlinkSchedule}
+              onCreateRule={onCreateRule}
+              onScheduleAction={onScheduleAction}
+              onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
+              onSplit={onSplit}
+              onCheckNewEnter={onCheckNewEnter}
+              onCheckEnter={onCheckEnter}
+              onScheduleTemporary={onScheduleTemporary}
+              onAddTemporary={onAddTemporary}
+              onAddAndCloseTemporary={onAddAndCloseTemporary}
+              onAddExchangeTemporary={onAddExchangeTemporary}
+              exchangeFocusToken={exchangeFocusToken}
+              onAddSplit={onAddSplit}
+              onDistributeRemainder={onDistributeRemainder}
+              onCloseAddTransaction={onCloseAddTransaction}
+              onToggleSplit={onToggleSplit}
+              newTransactions={newTransactions ?? []}
+              tableNavigator={tableNavigator}
+              newNavigator={newNavigator}
+              showSelection={props.showSelection}
+              allowSplitTransaction={props.allowSplitTransaction}
+              showHiddenCategories={showHiddenCategories}
+              canDrag={canDrag}
+              draggedId={draggedId}
+              draggedParentId={draggedParentId}
+              draggedDate={draggedDate}
+              onDragChange={onDragChange}
+              onDrop={onDrop}
+            />
+          </SchedulesProvider>
+        </DisplayPayeeProvider>
+      </ExchangeCounterpartsProvider>
     );
   },
 );

@@ -175,7 +175,10 @@ async function transferTarget(payeeId: string): Promise<string | null> {
          (SELECT targetId FROM payee_mapping WHERE id = ?), ?)`,
     [payeeId, payeeId],
   );
-  return payee?.transfer_acct ?? null;
+  if (payee) return payee.transfer_acct ?? null;
+  // A transfer payee created earlier in the current batch is still queued.
+  const queued = getBatchedValue('payees', payeeId, 'transfer_acct');
+  return typeof queued?.value === 'string' ? queued.value : null;
 }
 
 function storedRow(id: string) {

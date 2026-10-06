@@ -103,6 +103,7 @@ import { useAccounts } from '#hooks/useAccounts';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import type { ExchangePostResult } from '#hooks/useExchangeEntry';
 import { useFormat } from '#hooks/useFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
@@ -122,6 +123,8 @@ import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch, useSelector } from '#redux';
 import { setLastTransaction } from '#transactions/transactionsSlice';
 import { incompatibleAccountIds, reencodeAmount } from '#util/account-encoding';
+import { exchangeOtherAccount } from '#util/exchange-entry';
+import type { ExchangeRequest } from '#util/exchange-entry';
 import { getStatusLabel } from '#util/schedule';
 import {
   calculateFutureTransactionInfo,
@@ -130,6 +133,8 @@ import {
 } from '#util/schedule-actions';
 
 import { AmountInput } from './AmountInput';
+import { ExchangeFields } from './ExchangeFields';
+import type { ExchangeFieldsHandle } from './ExchangeFields';
 import { SplitAmountInput } from './SplitAmountInput';
 
 function getFieldName(transactionId: TransactionEntity['id'], field: string) {
@@ -772,6 +777,32 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const storedParent = unserializedTransactions[0];
     const isForeignTransaction = !!getAccount(storedParent)?.currency;
+    // A new transfer to an account in another currency is entered with its
+    // other side in the exchange fields and posted as one transfer.
+    const registerAccount = getAccount(storedParent);
+    const exchangeOther =
+      isAdding && storedParent && !storedParent.is_parent
+        ? exchangeOtherAccount(storedParent, payees, accounts)
+        : null;
+    const exchangeRef = useRef<ExchangeFieldsHandle>(null);
+    const postExchange = async (
+      request: ExchangeRequest,
+    ): Promise<ExchangePostResult> => {
+      try {
+        const result = await send(
+          'transactions/post-exchange-transfer',
+          request,
+        );
+        return result.status === 'ok'
+          ? { status: 'ok' }
+          : { status: 'rate-unavailable', currencies: result.currencies };
+      } catch (err) {
+        return {
+          status: 'error',
+          error: err instanceof Error ? err.message : String(err),
+        };
+      }
+    };
     // Existing foreign amounts are frozen until foreign edits are supported.
     const isAmountFrozen = isForeignTransaction && !isAdding;
 
@@ -808,6 +839,14 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const onSaveInner = useCallback(async () => {
       const onConfirmSave = () => {
+        if (exchangeOther) {
+          void exchangeRef.current?.post().then(saved => {
+            if (saved) {
+              void navigate(-1);
+            }
+          });
+          return;
+        }
         let transactionsToSave = unserializedTransactions;
         if (isAdding) {
           transactionsToSave = realizeTempTransactions(
@@ -871,7 +910,14 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           onConfirmSave();
         }
       }
-    }, [isAdding, dispatch, navigate, onSave, unserializedTransactions]);
+    }, [
+      isAdding,
+      dispatch,
+      navigate,
+      onSave,
+      unserializedTransactions,
+      exchangeOther,
+    ]);
 
     const onSchedule = useCallback(async () => {
       const [unserializedTransaction] = unserializedTransactions;
@@ -1110,6 +1156,15 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       showNoneOption: !!transactionToEdit.payee,
                       // A new foreign entry creates a typed payee when it posts.
                       deferNewPayee: isAdding && isForeignTransaction,
+                      // Only a new, unsplit transaction can become an
+                      // exchange transfer; others transfer within their own
+                      // currency.
+                      ...((!isAdding || transactionToEdit.is_child) && {
+                        excludeTransferAccounts: incompatibleAccountIds(
+                          accounts,
+                          [getAccount(transactionToEdit)],
+                        ),
+                      }),
                       onSelect: payeeId => {
                         void onUpdateInner(transactionToEdit, name, payeeId);
                       },
@@ -1459,6 +1514,16 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               }
             />
           </View>
+
+          {exchangeOther && registerAccount && (
+            <ExchangeFields
+              ref={exchangeRef}
+              transaction={storedParent}
+              register={registerAccount}
+              other={exchangeOther}
+              onPost={postExchange}
+            />
+          )}
 
           {!transaction.is_parent && (
             <View>
