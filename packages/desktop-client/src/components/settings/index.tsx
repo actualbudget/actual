@@ -6,13 +6,13 @@ import { Navigate, Outlet } from 'react-router';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { spacing, tokens } from '@actual-app/components/tokens';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { listen } from '@actual-app/core/platform/client/connection';
 import { isElectron } from '@actual-app/core/shared/environment';
-import { css } from '@emotion/css';
 
 import { getLatestAppVersion } from '#app/appSlice';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
@@ -39,11 +39,14 @@ import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { SettingsBackButton } from './SettingsBackButton';
+import { SettingsGroup } from './SettingsGroup';
 import { SettingsNav } from './SettingsNav';
+import { SettingsRow } from './SettingsRow';
 import { ThemeSettings } from './Themes';
 import { Setting } from './UI';
 
 function About() {
+  const { t } = useTranslation();
   const version = useServerVersion();
   const versionInfo = useSelector(state => state.app.versionInfo);
   const [notifyWhenUpdateIsAvailable, setNotifyWhenUpdateIsAvailablePref] =
@@ -55,98 +58,86 @@ function About() {
   const isNewsFeedEnabled = Boolean(showNewsFeed);
 
   return (
-    <Setting>
-      <Text>
-        <Trans>
-          <strong>Actual</strong> is a super fast privacy-focused app for
-          managing your finances.
-        </Trans>
-      </Text>
-      <View
-        style={{
-          flexDirection: 'column',
-          gap: 10,
-        }}
-        className={css({
-          [`@media (min-width: ${tokens.breakpoint_small})`]: {
-            display: 'grid',
-            gridTemplateRows: '1fr 1fr',
-            gridTemplateColumns: '50% 50%',
-            columnGap: '2em',
-            gridAutoFlow: 'column',
-          },
-        })}
-        data-vrt-mask
-      >
-        <Text>
-          <Trans>
-            Client version: {{ version: `v${window.Actual?.ACTUAL_VERSION}` }}
-          </Trans>
-        </Text>
-        <Text>
-          <Trans>Server version: {{ version }}</Trans>
-        </Text>
-
-        {notifyWhenUpdateIsAvailable && versionInfo?.isOutdated ? (
-          <Link
-            variant="external"
-            to="https://actualbudget.org/docs/releases"
-            linkColor="purple"
-          >
-            <Trans>New version available: {versionInfo.latestVersion}</Trans>
-          </Link>
-        ) : (
-          <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
-            {notifyWhenUpdateIsAvailable ? (
-              <Trans>You're up to date!</Trans>
-            ) : null}
+    <SettingsGroup
+      title={t('About')}
+      description={t(
+        'Actual is a super fast, privacy-focused app for managing your finances.',
+      )}
+    >
+      <SettingsRow
+        title={t('Client version')}
+        control={
+          <Text data-vrt-mask style={styles.tnum}>
+            {`v${window.Actual?.ACTUAL_VERSION}`}
           </Text>
-        )}
-        <Text>
-          <Link
-            variant="external"
-            to="https://actualbudget.org/docs/releases"
-            linkColor="purple"
-          >
-            <Trans>Release Notes</Trans>
-          </Link>
-          {isNewsFeedEnabled && (
-            <>
-              {' · '}
+        }
+      />
+      <SettingsRow
+        title={t('Server version')}
+        control={
+          <Text data-vrt-mask style={styles.tnum}>
+            {version}
+          </Text>
+        }
+      />
+      <SettingsRow
+        title={t('Updates')}
+        description={
+          notifyWhenUpdateIsAvailable &&
+          (versionInfo?.isOutdated ? (
+            <Trans>New version available: {versionInfo.latestVersion}</Trans>
+          ) : (
+            <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
+              <Trans>You're up to date!</Trans>
+            </Text>
+          ))
+        }
+        control={
+          <View style={{ flexDirection: 'row', gap: spacing.md }}>
+            <Link
+              variant="external"
+              to="https://actualbudget.org/docs/releases"
+              linkColor="purple"
+            >
+              <Trans>Release Notes</Trans>
+            </Link>
+            {isNewsFeedEnabled && (
               <Link variant="internal" to="/notifications">
                 <Trans>Notifications</Trans>
               </Link>
-            </>
-          )}
-        </Text>
-      </View>
-      <View style={{ gap: 5 }}>
-        <Text style={{ display: 'flex' }}>
+            )}
+          </View>
+        }
+      />
+      <SettingsRow
+        htmlFor="settings-notifyWhenUpdateIsAvailable"
+        title={t('Update notifications')}
+        description={t('Display a notification when updates are available.')}
+        control={
           <Checkbox
             id="settings-notifyWhenUpdateIsAvailable"
             checked={notifyWhenUpdateIsAvailable}
             onChange={e =>
               setNotifyWhenUpdateIsAvailablePref(e.currentTarget.checked)
             }
+            style={{ marginRight: 0 }}
           />
-          <label htmlFor="settings-notifyWhenUpdateIsAvailable">
-            <Trans>Display a notification when updates are available</Trans>
-          </label>
-        </Text>
-        <Text style={{ display: 'flex' }}>
+        }
+      />
+      <SettingsRow
+        htmlFor="settings-showNewsFeed"
+        title={t('In-app notifications')}
+        description={t('Show release notes and announcements in the app.')}
+        control={
           <Checkbox
             id="settings-showNewsFeed"
             checked={showNewsFeed}
             onChange={e => setShowNewsFeedPref(e.currentTarget.checked)}
+            style={{ marginRight: 0 }}
           />
-          <label htmlFor="settings-showNewsFeed">
-            <Trans>
-              Show in-app notifications (release notes and announcements)
-            </Trans>
-          </label>
-        </Text>
-      </View>
-    </Setting>
+        }
+      />
+    </SettingsGroup>
   );
 }
 
@@ -204,9 +195,9 @@ function SettingsSections({ title, children }: SettingsSectionsProps) {
       style={{
         marginTop: isNarrowWidth ? 10 : 0,
         flexShrink: 0,
-        maxWidth: 530,
+        maxWidth: 640,
         width: '100%',
-        gap: 30,
+        gap: spacing.xl,
         paddingBottom: MOBILE_NAV_HEIGHT,
       }}
     >
@@ -291,11 +282,17 @@ export function GeneralSettings() {
       <FormatSettings />
       {isCurrencyExperimentalEnabled && <CurrencySettings />}
       <LanguageSettings />
-      <AuthSettings />
-      <EncryptionSettings />
-      <BudgetTypeSettings />
-      {isElectron() && <Backups />}
-      <ExportBudget />
+      <SettingsGroup title={t('Budget')}>
+        <BudgetTypeSettings />
+      </SettingsGroup>
+      <SettingsGroup title={t('Security')}>
+        <AuthSettings />
+        <EncryptionSettings />
+      </SettingsGroup>
+      <SettingsGroup title={t('Data')}>
+        {isElectron() && <Backups />}
+        <ExportBudget />
+      </SettingsGroup>
     </SettingsSections>
   );
 }

@@ -1,7 +1,8 @@
 import React from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
@@ -11,130 +12,90 @@ import { useMetadataPref } from '#hooks/useMetadataPref';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
-import { Setting } from './UI';
+import { SettingsRow } from './SettingsRow';
 
 export function EncryptionSettings() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const serverURL = useServerURL();
   const [encryptKeyId] = useMetadataPref('encryptKeyId');
 
   const missingCryptoAPI = !(window.crypto && crypto.subtle);
+  const isAvailable = !missingCryptoAPI && Boolean(serverURL);
 
-  function onChangeKey() {
+  function onCreateKey() {
     dispatch(
       pushModal({
-        modal: { name: 'create-encryption-key', options: { recreate: true } },
+        modal: {
+          name: 'create-encryption-key',
+          options: encryptKeyId ? { recreate: true } : {},
+        },
       }),
     );
   }
 
-  return encryptKeyId ? (
-    <Setting
-      primaryAction={
-        <Button onPress={onChangeKey}>
-          <Trans>Generate new key</Trans>
-        </Button>
+  const noteStyle = {
+    ...styles.smallText,
+    lineHeight: 1.5,
+    color: theme.settingsCardTextSubdued,
+  };
+
+  return (
+    <SettingsRow
+      title={t('End-to-end encryption')}
+      description={
+        <>
+          <Trans>
+            Enable this to encrypt your budget data with a key that only you
+            have before it is sent to the server. Local data stays unencrypted,
+            so you can re-encrypt it if you forget your password. Bank sync
+            operations and secrets stored on the server are not covered.
+          </Trans>{' '}
+          <Link
+            variant="external"
+            to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
+            linkColor="purple"
+          >
+            <Trans>Learn more</Trans>
+          </Link>
+        </>
+      }
+      control={
+        encryptKeyId ? (
+          <Button onPress={onCreateKey}>
+            <Trans>Generate new key</Trans>
+          </Button>
+        ) : (
+          <Button isDisabled={!isAvailable} onPress={onCreateKey}>
+            <Trans>Enable encryption</Trans>
+          </Button>
+        )
       }
     >
-      <Text>
-        <Text style={{ color: theme.noticeTextLight, fontWeight: 600 }}>
-          <Trans>End-to-end Encryption is turned on.</Trans>
-        </Text>{' '}
-        <Trans>
-          Your budget data is encrypted with a key that only you have before
-          sending it out to the cloud. Local data remains unencrypted so if you
-          forget your password you can re-encrypt it. Note: bank sync operations
-          and secrets stored on the server are not covered by end-to-end
-          encryption.
-        </Trans>{' '}
-        <Link
-          variant="external"
-          to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-          linkColor="purple"
-        >
-          <Trans>Learn more</Trans>
-        </Link>
-      </Text>
-    </Setting>
-  ) : missingCryptoAPI ? (
-    <Setting
-      primaryAction={
-        <Button isDisabled>
-          <Trans>Enable encryption</Trans>
-        </Button>
-      }
-    >
-      <Text>
-        <Trans>
-          <strong>End-to-end encryption</strong> is not available when making an
-          unencrypted connection to a remote server. You'll need to enable HTTPS
-          on your server to use end-to-end encryption. This problem may also
-          occur if your browser is too old to work with Actual.
-        </Trans>{' '}
-        <Link
-          variant="external"
-          to="https://actualbudget.org/docs/config/https"
-          linkColor="purple"
-        >
-          <Trans>Learn more</Trans>
-        </Link>
-      </Text>
-    </Setting>
-  ) : serverURL ? (
-    <Setting
-      primaryAction={
-        <Button
-          onPress={() =>
-            dispatch(
-              pushModal({
-                modal: { name: 'create-encryption-key', options: {} },
-              }),
-            )
-          }
-        >
-          <Trans>Enable encryption</Trans>
-        </Button>
-      }
-    >
-      <Text>
-        <Trans>
-          <strong>End-to-end encryption</strong> is not enabled. Any data on the
-          server is still protected by the server password, but it's not
-          end-to-end encrypted which means the server owners have the ability to
-          read it. If you want, you can use an additional password to encrypt
-          your data on the server.
-        </Trans>{' '}
-        <Link
-          variant="external"
-          to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-          linkColor="purple"
-        >
-          <Trans>Learn more</Trans>
-        </Link>
-      </Text>
-    </Setting>
-  ) : (
-    <Setting
-      primaryAction={
-        <Button isDisabled>
-          <Trans>Enable encryption</Trans>
-        </Button>
-      }
-    >
-      <Text>
-        <Trans>
-          <strong>End-to-end encryption</strong> is not available when running
-          without a server. Budget files are always kept unencrypted locally,
-          and encryption is only applied when sending data to a server.
-        </Trans>{' '}
-        <Link
-          variant="external"
-          to="https://actualbudget.org/docs/getting-started/sync/#end-to-end-encryption"
-          linkColor="purple"
-        >
-          <Trans>Learn more</Trans>
-        </Link>
-      </Text>
-    </Setting>
+      {!encryptKeyId && missingCryptoAPI && (
+        <Text style={noteStyle}>
+          <Trans>
+            End-to-end encryption needs an HTTPS connection to your server. It
+            is also unavailable if your browser is too old to work with Actual.
+          </Trans>{' '}
+          <Link
+            variant="external"
+            to="https://actualbudget.org/docs/config/https"
+            linkColor="purple"
+          >
+            <Trans>Learn more</Trans>
+          </Link>
+        </Text>
+      )}
+      {!encryptKeyId && !missingCryptoAPI && !serverURL && (
+        <Text style={noteStyle}>
+          <Trans>
+            End-to-end encryption is not available when running without a
+            server, because encryption is only applied when sending data to a
+            server.
+          </Trans>
+        </Text>
+      )}
+    </SettingsRow>
   );
 }
