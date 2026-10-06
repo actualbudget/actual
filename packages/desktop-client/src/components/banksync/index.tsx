@@ -1,17 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
-import { Page } from '#components/Page';
-import { useIsSettingsSubPage } from '#components/settings/SettingsSubPageContext';
 import { useAccounts } from '#hooks/useAccounts';
-import { useGlobalPref } from '#hooks/useGlobalPref';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -27,12 +23,9 @@ import { BuiltInProviders } from './BuiltInProviders';
 import { useBuiltInBankSyncProviders } from './useBuiltInBankSyncProviders';
 
 export function BankSync() {
-  const isSettingsSubPage = useIsSettingsSubPage();
   const { t } = useTranslation();
-  const [floatingSidebar] = useGlobalPref('floatingSidebar');
   const { data: accounts = [] } = useAccounts();
   const dispatch = useDispatch();
-  const { isNarrowWidth } = useResponsive();
   const syncSourceReadable = useMemo(() => getSyncSourceReadable(t), [t]);
   const { providers, syncServerStatus, permissionWarning } =
     useBuiltInBankSyncProviders();
@@ -89,58 +82,46 @@ export function BankSync() {
   }, []);
 
   return (
-    <Page
-      header={isSettingsSubPage ? null : t('Bank Sync')}
-      padding={isSettingsSubPage ? 0 : undefined}
-      style={{
-        minHeight: 'initial',
-        marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
-        paddingBottom: MOBILE_NAV_HEIGHT,
-      }}
-    >
-      <View style={{ marginTop: '1em', gap: 24 }}>
-        <BuiltInProviders
-          providers={providers}
-          syncServerStatus={syncServerStatus}
-          permissionWarning={permissionWarning}
-        />
+    <View style={{ flexShrink: 0, gap: 24, paddingBottom: MOBILE_NAV_HEIGHT }}>
+      <BuiltInProviders
+        providers={providers}
+        syncServerStatus={syncServerStatus}
+        permissionWarning={permissionWarning}
+      />
 
-        {hasLinkedAccounts && <AutomaticSyncSettings />}
+      {hasLinkedAccounts && <AutomaticSyncSettings />}
 
-        {openAccounts.length === 0 && (
-          <Text style={{ fontSize: '1.1rem' }}>
-            <Trans>
-              No accounts yet. Once a provider is set up, use{' '}
-              <strong>Link bank account</strong> to connect your bank and create
-              your accounts automatically. You can also add accounts manually
-              and connect them here later.
-            </Trans>
-          </Text>
-        )}
+      {openAccounts.length === 0 && (
+        <Text style={{ fontSize: '1.1rem' }}>
+          <Trans>
+            No accounts yet. Once a provider is set up, use{' '}
+            <strong>Link bank account</strong> to connect your bank and create
+            your accounts automatically. You can also add accounts manually and
+            connect them here later.
+          </Trans>
+        </Text>
+      )}
 
-        {groupedAccountEntries.map(([syncProvider, accounts]) => {
-          return (
-            <View key={syncProvider} style={{ minHeight: 'initial' }}>
-              {groupedAccountEntries.length > 1 && (
-                <Text
-                  style={{ fontWeight: 500, fontSize: 20, margin: '.5em 0' }}
-                >
-                  {syncSourceReadable[syncProvider]}
-                </Text>
-              )}
-              <View style={styles.tableContainer}>
-                <AccountsHeader unlinked={syncProvider === 'unlinked'} />
-                <AccountsList
-                  accounts={accounts}
-                  hoveredAccount={hoveredAccount}
-                  onHover={onHover}
-                  onAction={onAction}
-                />
-              </View>
+      {groupedAccountEntries.map(([syncProvider, accounts]) => {
+        return (
+          <View key={syncProvider} style={{ minHeight: 'initial' }}>
+            {groupedAccountEntries.length > 1 && (
+              <Text style={{ fontWeight: 500, fontSize: 20, margin: '.5em 0' }}>
+                {syncSourceReadable[syncProvider]}
+              </Text>
+            )}
+            <View style={styles.tableContainer}>
+              <AccountsHeader unlinked={syncProvider === 'unlinked'} />
+              <AccountsList
+                accounts={accounts}
+                hoveredAccount={hoveredAccount}
+                onHover={onHover}
+                onAction={onAction}
+              />
             </View>
-          );
-        })}
-      </View>
-    </Page>
+          </View>
+        );
+      })}
+    </View>
   );
 }

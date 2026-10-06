@@ -1,10 +1,8 @@
-import React from 'react';
 import type { ReactNode } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import type { FeatureFlag, ServerPrefs } from '@actual-app/core/types/prefs';
 
@@ -14,7 +12,6 @@ import { Link } from '#components/common/Link';
 import { Checkbox } from '#components/forms';
 import { useLoginMethod, useMultiuserEnabled } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
-import { useLocalPref } from '#hooks/useLocalPref';
 import { useServerPref } from '#hooks/useServerPref';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
@@ -149,45 +146,6 @@ function ServerFeatureToggle({
         )}
       </View>
     </label>
-  );
-}
-
-/**
- * Lives on the Advanced page. Turning this on reveals the Experimental entry
- * in the settings navigation, which is where the feature flags themselves are.
- */
-export function ExperimentalSettingsToggle() {
-  const { t } = useTranslation();
-  const [showExperimental = false, setShowExperimental] = useLocalPref(
-    'settings.showExperimental',
-  );
-
-  return (
-    <Setting
-      primaryAction={
-        <Toggle
-          id="settings-showExperimental"
-          isOn={showExperimental}
-          onToggle={setShowExperimental}
-          aria-label={t('Show experimental features')}
-        />
-      }
-    >
-      <Text>
-        <Trans>
-          <strong>Experimental features.</strong> These features are not fully
-          tested and may not work as expected. THEY MAY CAUSE IRRECOVERABLE DATA
-          LOSS. They may do nothing at all. Only enable them if you know what
-          you are doing.
-        </Trans>
-      </Text>
-      <Text>
-        <Trans>
-          Turning this on adds an Experimental section to these settings, where
-          each feature can be enabled on its own.
-        </Trans>
-      </Text>
-    </Setting>
   );
 }
 

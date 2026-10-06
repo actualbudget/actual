@@ -1,6 +1,6 @@
 ---
 category: Enhancements
-authors: [StephenBrown2]
+authors: [StephenBrown2, matt-fidd]
 ---
 
-Settings replaces the "More" menu in the sidebar and now has its own navigation: General, Payees, Rules, Bank Sync, Tags, and Advanced. Experimental features move to their own section, shown once you turn them on under Advanced
+Move payees, rules, bank sync and tags from the sidebar into the settings page, which now has its own navigation
