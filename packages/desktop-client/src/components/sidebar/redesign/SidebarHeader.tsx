@@ -58,8 +58,8 @@ export function SidebarHeader({ children }: SidebarHeaderProps) {
             },
           })}
           style={{
-            padding: spacing.xxs,
-            margin: -spacing.xxs,
+            padding: spacing.xs,
+            margin: -spacing.xs,
             flexShrink: 0,
           }}
           onPress={() => void dispatch(closeBudget())}
