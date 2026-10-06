@@ -3,4 +3,4 @@ category: Enhancements
 authors: [sreetamdas]
 ---
 
-Add drag handles that resize the columns in the transaction table, with keyboard support and double-click reset
+Add drag handles that resize the columns in the transaction table, with keyboard support and double-click reset. Widths are saved per device, and "Reset to default" in the columns menu restores them
