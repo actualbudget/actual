@@ -583,9 +583,7 @@ const ChildTransactionEdit = forwardRef<
                 getFieldName(transaction.id, 'tracking_number'),
               )
             }
-            onUpdate={value =>
-              onUpdate(transaction, 'tracking_number', value)
-            }
+            onUpdate={value => onUpdate(transaction, 'tracking_number', value)}
           />
         </View>
 
@@ -1581,7 +1579,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                 onUpdateInner(
                   transaction,
                   'tracking_number',
-                  event.target.value
+                  event.target.value,
                 )
               }
             />

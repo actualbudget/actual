@@ -1012,7 +1012,7 @@ export function ImportTransactionsModal({
                       showParsed={filetype === 'csv' || filetype === 'qif'}
                       parseDateFormat={parseDateFormat}
                       dateFormat={dateFormat}
-                      showTrackingNumber={true}
+                      showTrackingNumber
                       fieldMappings={fieldMappings}
                       splitMode={splitMode}
                       inOutMode={inOutMode}
