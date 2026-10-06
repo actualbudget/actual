@@ -266,9 +266,8 @@ function EmptyMessage({ onAddAccount }: { onAddAccount: () => void }) {
       </Text>
       <Button
         variant="primary"
+        size="extra-large"
         style={{
-          padding: '12px 20px',
-          fontSize: 15,
           minHeight: styles.mobileMinHeight,
           marginTop: 10,
         }}
