@@ -27,6 +27,9 @@ type FeatureToggleProps = {
   children: ReactNode;
   feedbackLink?: string;
   note?: ReactNode;
+  isSubFeature?: boolean;
+  subFeatures?: ReactNode;
+  onDisable?: () => void;
 };
 
 function FeatureToggle({
@@ -36,6 +39,9 @@ function FeatureToggle({
   error,
   children,
   note,
+  isSubFeature = false,
+  subFeatures,
+  onDisable,
 }: FeatureToggleProps) {
   const enabled = useFeatureFlag(flagName);
   const [_, setFlagPref] = useSyncedPref(`flags.${flagName}`);
@@ -45,6 +51,7 @@ function FeatureToggle({
     <SettingsRow
       htmlFor={id}
       title={children}
+      isNested={isSubFeature}
       description={
         (note || (disableToggle && error)) && (
           <FeatureDetails note={note} error={disableToggle ? error : null} />
@@ -57,13 +64,18 @@ function FeatureToggle({
             checked={enabled}
             onChange={() => {
               setFlagPref(String(!enabled));
+              if (enabled) {
+                onDisable?.();
+              }
             }}
             disabled={disableToggle}
             style={{ marginRight: 0 }}
           />
         </FeatureControl>
       }
-    />
+    >
+      {subFeatures}
+    </SettingsRow>
   );
 }
 
@@ -169,8 +181,9 @@ function ServerFeatureToggle({
 export function ExperimentalFeatures() {
   const { t } = useTranslation();
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
-  const showGoalTemplatesUI = goalTemplatesEnabled || goalTemplatesUIEnabled;
+  const [, setGoalTemplatesUIPref] = useSyncedPref(
+    'flags.goalTemplatesUIEnabled',
+  );
   const isUsingServer = useSyncServerStatus() !== 'no-server';
 
   const showServerPrefs =
@@ -183,17 +196,23 @@ export function ExperimentalFeatures() {
         'These features are not fully tested and may not work as expected. THEY MAY CAUSE IRRECOVERABLE DATA LOSS. They may do nothing at all. Only enable them if you know what you are doing.',
       )}
     >
-      <FeatureToggle flag="goalTemplatesEnabled">
+      <FeatureToggle
+        flag="goalTemplatesEnabled"
+        onDisable={() => setGoalTemplatesUIPref('false')}
+        subFeatures={
+          goalTemplatesEnabled && (
+            <FeatureToggle
+              flag="goalTemplatesUIEnabled"
+              feedbackLink="https://github.com/actualbudget/actual/issues/7692"
+              isSubFeature
+            >
+              <Trans>Budget automations UI</Trans>
+            </FeatureToggle>
+          )
+        }
+      >
         <Trans>Goal templates</Trans>
       </FeatureToggle>
-      {showGoalTemplatesUI && (
-        <FeatureToggle
-          flag="goalTemplatesUIEnabled"
-          feedbackLink="https://github.com/actualbudget/actual/issues/7692"
-        >
-          <Trans>Subfeature: Budget automations UI</Trans>
-        </FeatureToggle>
-      )}
       <FeatureToggle
         flag="actionTemplating"
         feedbackLink="https://github.com/actualbudget/actual/issues/3606"

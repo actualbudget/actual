@@ -11,6 +11,7 @@ type SettingsRowProps = {
   description?: ReactNode;
   control?: ReactNode;
   htmlFor?: string;
+  isNested?: boolean;
   children?: ReactNode;
 };
 
@@ -19,6 +20,7 @@ export function SettingsRow({
   description,
   control,
   htmlFor,
+  isNested = false,
   children,
 }: SettingsRowProps) {
   const titleStyle = { ...styles.smallText, fontWeight: 500 };
@@ -28,7 +30,9 @@ export function SettingsRow({
       style={{
         flexShrink: 0,
         gap: spacing.md,
-        padding: `${spacing.md}px ${spacing.lg}px`,
+        padding: isNested
+          ? `0 0 0 ${spacing.lg}px`
+          : `${spacing.md}px ${spacing.lg}px`,
       }}
     >
       <View
