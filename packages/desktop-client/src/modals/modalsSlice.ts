@@ -343,6 +343,8 @@ export type Modal =
         deferNewPayee?: boolean;
         /** Offer no transfer payees, for entries that cannot transfer. */
         hideTransferPayees?: boolean;
+        /** Offer no transfers to these accounts (another currency). */
+        excludeTransferAccounts?: string[];
       };
     }
   | {
