@@ -81,6 +81,22 @@
   --color-sidebarControlBackground: var(--color-sidebarItemBackgroundHover);
   --color-sidebarBrand: var(--color-sidebarItemAccentSelected);
 
+  --color-settingsNavBackground: var(--color-pillBackground);
+  --color-settingsNavBorder: var(--color-pillBorderDark);
+  --color-settingsNavItemText: var(--color-pageText);
+  --color-settingsNavItemBackgroundHover: color-mix(
+    in srgb,
+    var(--color-settingsNavItemText) 8%,
+    transparent
+  );
+  --color-settingsNavItemAccentSelected: var(--palette-purple500);
+  --color-settingsNavItemTextSelected: var(--palette-purple600);
+  --color-settingsNavItemBackgroundSelected: color-mix(
+    in srgb,
+    var(--color-settingsNavItemAccentSelected) 10%,
+    transparent
+  );
+
   --color-menuBackground: var(--palette-white);
   --color-menuItemBackground: var(--palette-navy50);
   --color-menuItemBackgroundHover: var(--palette-navy100);

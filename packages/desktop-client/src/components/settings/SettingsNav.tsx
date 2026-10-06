@@ -35,8 +35,8 @@ export function SettingsNav() {
         isNarrowWidth
           ? {
               flexShrink: 0,
-              backgroundColor: theme.pillBackground,
-              border: `1px solid ${theme.pillBorderDark}`,
+              backgroundColor: theme.settingsNavBackground,
+              border: `1px solid ${theme.settingsNavBorder}`,
               borderRadius: radius.sm,
             }
           : { width: 180, flexShrink: 0, gap: spacing.xxs }
