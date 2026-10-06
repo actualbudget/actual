@@ -379,6 +379,8 @@ test.describe('Transactions', () => {
       await modal.getByText('Apply to all transaction tables').click();
       await modal.getByRole('button', { name: 'Save', exact: true }).click();
       await expect(modal).not.toBeVisible();
+      await expect(header).not.toContainText('Notes');
+
       // Another account follows the shared layout
       accountPage = await navigation.goToAccountPage('Bank of America');
       await expect(header).not.toContainText('Notes');
