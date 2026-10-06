@@ -36,6 +36,7 @@ import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCachedSchedules } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
 import { useDisplayPayee } from '#hooks/useDisplayPayee';
+import { ExchangeCounterpartLabel } from '#hooks/useExchangeCounterparts';
 import { useFormat } from '#hooks/useFormat';
 import { usePayee } from '#hooks/usePayee';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
@@ -233,6 +234,7 @@ export function TransactionListItem({
                 >
                   {displayPayee || t('(No payee)')}
                 </TextOneLine>
+                <ExchangeCounterpartLabel transactionId={transaction.id} />
               </View>
               {isPreview ? (
                 <Status status={previewStatus} isSplit={isParent || isChild} />
