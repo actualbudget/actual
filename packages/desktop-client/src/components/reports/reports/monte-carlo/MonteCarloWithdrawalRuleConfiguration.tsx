@@ -314,7 +314,7 @@ export function MonteCarloWithdrawalRuleConfiguration({
       )}
 
       {rule.type !== 'none' && (
-        <Text style={{ color: theme.pageText, fontSize: 13 }}>
+        <Text size="medium" style={{ color: theme.pageText }}>
           {rule.type === 'guardrails'
             ? t(
                 'A deliberate spending-phase change is not counted as drift. The rule adjusts your planned spending year by year, independently in every scenario, and only looks at the pots you can currently access - locked pots count from the moment they unlock.',

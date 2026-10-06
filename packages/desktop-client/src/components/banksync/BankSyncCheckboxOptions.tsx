@@ -132,8 +132,8 @@ function CheckboxOptionWithHelp({
       </SpaceBetween>
       {showHelp && (
         <Text
+          size="medium"
           style={{
-            fontSize: 13,
             color: theme.pageTextSubdued,
           }}
         >
