@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Outlet } from 'react-router';
+import { Navigate, Outlet } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -19,7 +19,7 @@ import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { Link } from '#components/common/Link';
 import { Checkbox, FormField, FormLabel } from '#components/forms';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
-import { Page } from '#components/Page';
+import { MobilePageHeader, Page } from '#components/Page';
 import { useServerVersion } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
@@ -38,9 +38,10 @@ import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
+import { SettingsBackButton } from './SettingsBackButton';
 import { SettingsNav } from './SettingsNav';
 import { ThemeSettings } from './Themes';
-import { AdvancedToggle, Setting } from './UI';
+import { Setting } from './UI';
 
 function About() {
   const version = useServerVersion();
@@ -190,13 +191,14 @@ function AdvancedAbout() {
 }
 
 type SettingsSectionsProps = {
+  title: string;
   children: ReactNode;
 };
 
-function SettingsSections({ children }: SettingsSectionsProps) {
+function SettingsSections({ title, children }: SettingsSectionsProps) {
   const { isNarrowWidth } = useResponsive();
 
-  return (
+  const sections = (
     <View
       data-testid="settings"
       style={{
@@ -211,48 +213,43 @@ function SettingsSections({ children }: SettingsSectionsProps) {
       {children}
     </View>
   );
-}
 
-function AdvancedSections() {
+  if (!isNarrowWidth) {
+    return sections;
+  }
+
   return (
-    <>
-      <AdvancedAbout />
-      <ResetCache />
-      <ResetSync />
-      <RepairTransactions />
-    </>
+    <Page
+      header={
+        <MobilePageHeader title={title} leftContent={<SettingsBackButton />} />
+      }
+    >
+      {sections}
+    </Page>
   );
 }
 
-export function GeneralSettings() {
+export function SettingsIndex() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
-  const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
-
-  const generalSections = (
-    <>
-      <About />
-      <ThemeSettings />
-      <FormatSettings />
-      {isCurrencyExperimentalEnabled && <CurrencySettings />}
-      <LanguageSettings />
-      <AuthSettings />
-      <EncryptionSettings />
-      <BudgetTypeSettings />
-      {isElectron() && <Backups />}
-      <ExportBudget />
-    </>
-  );
 
   if (!isNarrowWidth) {
-    return <SettingsSections>{generalSections}</SettingsSections>;
+    return <Navigate to="/settings/general" replace />;
   }
 
   return (
     <Page header={t('Settings')}>
-      <SettingsSections>
+      <View
+        data-testid="settings"
+        style={{
+          marginTop: 10,
+          flexShrink: 0,
+          gap: 30,
+          paddingBottom: MOBILE_NAV_HEIGHT,
+        }}
+      >
         <View
           style={{
             gap: 10,
@@ -277,27 +274,50 @@ export function GeneralSettings() {
             <Trans>Switch file</Trans>
           </Button>
         </View>
-        {generalSections}
-        <AdvancedToggle>
-          <AdvancedSections />
-          <ExperimentalFeatures />
-        </AdvancedToggle>
-      </SettingsSections>
+        <SettingsNav />
+      </View>
     </Page>
   );
 }
 
-export function AdvancedSettings() {
+export function GeneralSettings() {
+  const { t } = useTranslation();
+  const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
+
   return (
-    <SettingsSections>
-      <AdvancedSections />
+    <SettingsSections title={t('General')}>
+      <About />
+      <ThemeSettings />
+      <FormatSettings />
+      {isCurrencyExperimentalEnabled && <CurrencySettings />}
+      <LanguageSettings />
+      <AuthSettings />
+      <EncryptionSettings />
+      <BudgetTypeSettings />
+      {isElectron() && <Backups />}
+      <ExportBudget />
+    </SettingsSections>
+  );
+}
+
+export function AdvancedSettings() {
+  const { t } = useTranslation();
+
+  return (
+    <SettingsSections title={t('Advanced')}>
+      <AdvancedAbout />
+      <ResetCache />
+      <ResetSync />
+      <RepairTransactions />
     </SettingsSections>
   );
 }
 
 export function ExperimentalSettings() {
+  const { t } = useTranslation();
+
   return (
-    <SettingsSections>
+    <SettingsSections title={t('Experimental')}>
       <ExperimentalFeatures />
     </SettingsSections>
   );

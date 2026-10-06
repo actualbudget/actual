@@ -1,6 +1,8 @@
 import type { ComponentType, SVGProps } from 'react';
 import { NavLink } from 'react-router';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgCheveronRight } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { radius, spacing } from '@actual-app/components/tokens';
@@ -12,19 +14,41 @@ type SettingsNavLinkProps = {
     | ComponentType<SVGProps<SVGElement>>
     | ComponentType<SVGProps<SVGSVGElement>>;
   to: string;
-  end?: boolean;
 };
 
-export function SettingsNavLink({
-  title,
-  Icon,
-  to,
-  end,
-}: SettingsNavLinkProps) {
+export function SettingsNavLink({ title, Icon, to }: SettingsNavLinkProps) {
+  const { isNarrowWidth } = useResponsive();
+
+  if (isNarrowWidth) {
+    return (
+      <NavLink
+        to={to}
+        className={css({
+          ...styles.mediumText,
+          display: 'flex',
+          alignItems: 'center',
+          gap: spacing.md,
+          minHeight: styles.mobileMinHeight,
+          paddingInline: spacing.lg,
+          textDecoration: 'none',
+          color: theme.pageText,
+          '& + &': { borderTop: `1px solid ${theme.pillBorderDark}` },
+        })}
+      >
+        <Icon width={16} height={16} style={{ flexShrink: 0 }} />
+        <span style={{ flex: 1 }}>{title}</span>
+        <SvgCheveronRight
+          width={20}
+          height={20}
+          style={{ flexShrink: 0, opacity: 0.5 }}
+        />
+      </NavLink>
+    );
+  }
+
   return (
     <NavLink
       to={to}
-      end={end}
       className={({ isActive }) =>
         css({
           ...styles.smallText,

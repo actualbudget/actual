@@ -44,6 +44,7 @@ import {
   ExperimentalSettings,
   GeneralSettings,
   Settings,
+  SettingsIndex,
 } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { ManageTagsPage } from './tags/ManageTagsPage';
@@ -347,7 +348,8 @@ export function FinancesApp() {
                       element={<NotificationsPage />}
                     />
                     <Route path="/settings" element={<Settings />}>
-                      <Route index element={<GeneralSettings />} />
+                      <Route index element={<SettingsIndex />} />
+                      <Route path="general" element={<GeneralSettings />} />
                       <Route
                         path="payees"
                         element={
@@ -382,21 +384,10 @@ export function FinancesApp() {
                           </ErrorBoundary>
                         }
                       />
-                      <Route
-                        path="advanced"
-                        element={
-                          <NarrowNotSupported redirectTo="/settings">
-                            <AdvancedSettings />
-                          </NarrowNotSupported>
-                        }
-                      />
+                      <Route path="advanced" element={<AdvancedSettings />} />
                       <Route
                         path="experimental"
-                        element={
-                          <NarrowNotSupported redirectTo="/settings">
-                            <ExperimentalSettings />
-                          </NarrowNotSupported>
-                        }
+                        element={<ExperimentalSettings />}
                       />
                     </Route>
 
@@ -497,19 +488,13 @@ export function FinancesApp() {
                 <Routes>
                   <Route path="/budget" element={<MobileNavTabs />} />
                   <Route path="/accounts" element={<MobileNavTabs />} />
-                  <Route path="/settings" element={<MobileNavTabs />} />
+                  <Route path="/settings/*" element={<MobileNavTabs />} />
                   <Route path="/notifications" element={<MobileNavTabs />} />
                   <Route path="/reports" element={<MobileNavTabs />} />
                   <Route
                     path="/reports/:dashboardId"
                     element={<MobileNavTabs />}
                   />
-                  <Route
-                    path="/settings/bank-sync"
-                    element={<MobileNavTabs />}
-                  />
-                  <Route path="/settings/rules" element={<MobileNavTabs />} />
-                  <Route path="/settings/payees" element={<MobileNavTabs />} />
                   <Route path="/schedules" element={<MobileNavTabs />} />
                   <Route path="*" element={null} />
                 </Routes>
