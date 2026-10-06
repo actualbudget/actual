@@ -5,14 +5,12 @@ import { Button } from '@actual-app/components/button';
 import { SvgCode } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
-import { Text } from '@actual-app/components/text';
 import { theme as themeStyle } from '@actual-app/components/theme';
-import { tokens } from '@actual-app/components/tokens';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { DarkTheme, Theme } from '@actual-app/core/types/prefs';
 import { css } from '@emotion/css';
 
-import { useSidebar } from '#components/sidebar/SidebarProvider';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import {
   darkThemeOptions,
@@ -26,8 +24,9 @@ import {
 } from '#style/customThemes';
 import type { InstalledTheme } from '#style/customThemes';
 
+import { SettingsGroup } from './SettingsGroup';
+import { SettingsRow } from './SettingsRow';
 import { ThemeInstaller } from './ThemeInstaller';
-import { Column, Setting } from './UI';
 
 const INSTALL_NEW_VALUE = '__install_new__';
 const INSTALL_CUSTOM_LIGHT = '__install_custom_light__';
@@ -41,7 +40,6 @@ type InstallerState = {
 
 export function ThemeSettings() {
   const { t } = useTranslation();
-  const sidebar = useSidebar();
   const [theme, switchTheme] = useTheme();
   const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();
   const [showInstaller, setShowInstaller] = useState<InstallerState>(null);
@@ -192,123 +190,111 @@ export function ThemeSettings() {
     );
   }, [theme]);
 
-  return (
-    <Setting
-      primaryAction={
-        <View
-          style={{
-            flexDirection: 'column',
-            gap: '1em',
-            width: '100%',
-          }}
-        >
-          {!showInstaller && (
-            <View
-              style={{
-                flexDirection: 'column',
-                gap: '1em',
-                width: '100%',
-                [`@media (min-width: ${
-                  sidebar.floating
-                    ? tokens.breakpoint_small
-                    : tokens.breakpoint_medium
-                })`]: {
-                  flexDirection: 'row',
-                },
-              }}
-            >
-              <Column title={t('Theme')}>
-                <Select<string>
-                  onChange={handleThemeChange}
-                  value={getCurrentValue()}
-                  options={buildOptions()}
-                  className={css({
-                    '&[data-hovered]': {
-                      backgroundColor: themeStyle.buttonNormalBackgroundHover,
-                    },
-                    maxWidth: '100%',
-                  })}
-                />
-              </Column>
-              {theme === 'auto' && (
-                <>
-                  <Column title={t('Light theme')}>
-                    <Select<string>
-                      onChange={handleLightThemeChange}
-                      value={
-                        installedCustomLightTheme
-                          ? `custom-light:${installedCustomLightTheme.id}`
-                          : 'light'
-                      }
-                      options={buildLightOptions()}
-                      className={css({
-                        '&[data-hovered]': {
-                          backgroundColor:
-                            themeStyle.buttonNormalBackgroundHover,
-                        },
-                        maxWidth: '100%',
-                      })}
-                    />
-                  </Column>
-                  <Column title={t('Dark theme')}>
-                    <Select<string>
-                      onChange={handleDarkThemeChange}
-                      value={
-                        installedCustomDarkTheme
-                          ? `custom-dark:${installedCustomDarkTheme.id}`
-                          : darkTheme
-                      }
-                      options={buildDarkOptions()}
-                      className={css({
-                        '&[data-hovered]': {
-                          backgroundColor:
-                            themeStyle.buttonNormalBackgroundHover,
-                        },
-                        maxWidth: '100%',
-                      })}
-                    />
-                  </Column>
-                </>
-              )}
-            </View>
-          )}
+  if (showInstaller) {
+    return (
+      <SettingsGroup
+        title={t('Themes')}
+        description={t('Themes change the user interface colors.')}
+      >
+        <View style={{ padding: spacing.lg }}>
+          <ThemeInstaller
+            onInstall={handleInstall}
+            onClose={handleInstallerClose}
+            installedTheme={
+              showInstaller.slot === 'dark'
+                ? installedCustomDarkTheme
+                : installedCustomLightTheme
+            }
+            mode={showInstaller.catalogMode}
+          />
+        </View>
+      </SettingsGroup>
+    );
+  }
 
-          {!showInstaller && hasCustomCssOverride && (
+  return (
+    <SettingsGroup
+      title={t('Themes')}
+      description={t('Themes change the user interface colors.')}
+    >
+      <SettingsRow
+        title={t('Theme')}
+        control={
+          <Select<string>
+            onChange={handleThemeChange}
+            value={getCurrentValue()}
+            options={buildOptions()}
+            className={css({
+              '&[data-hovered]': {
+                backgroundColor: themeStyle.buttonNormalBackgroundHover,
+              },
+              maxWidth: '100%',
+            })}
+          />
+        }
+      />
+      {theme === 'auto' && (
+        <SettingsRow
+          title={t('Light theme')}
+          control={
+            <Select<string>
+              onChange={handleLightThemeChange}
+              value={
+                installedCustomLightTheme
+                  ? `custom-light:${installedCustomLightTheme.id}`
+                  : 'light'
+              }
+              options={buildLightOptions()}
+              className={css({
+                '&[data-hovered]': {
+                  backgroundColor: themeStyle.buttonNormalBackgroundHover,
+                },
+                maxWidth: '100%',
+              })}
+            />
+          }
+        />
+      )}
+      {theme === 'auto' && (
+        <SettingsRow
+          title={t('Dark theme')}
+          control={
+            <Select<string>
+              onChange={handleDarkThemeChange}
+              value={
+                installedCustomDarkTheme
+                  ? `custom-dark:${installedCustomDarkTheme.id}`
+                  : darkTheme
+              }
+              options={buildDarkOptions()}
+              className={css({
+                '&[data-hovered]': {
+                  backgroundColor: themeStyle.buttonNormalBackgroundHover,
+                },
+                maxWidth: '100%',
+              })}
+            />
+          }
+        />
+      )}
+      {hasCustomCssOverride && (
+        <SettingsRow
+          title={t('Custom CSS')}
+          description={t(
+            'A custom CSS override is applied on top of the theme.',
+          )}
+          control={
             <Button
-              variant="bare"
               aria-label={t('Custom CSS override active — click to edit')}
               onPress={handleEditOverride}
-              style={{
-                alignSelf: 'flex-start',
-                color: themeStyle.pageTextPositive,
-                gap: 6,
-              }}
+              style={{ gap: spacing.xs }}
             >
-              <Trans>Custom CSS is active</Trans>
+              <Trans>Edit</Trans>
               <SvgCode style={{ width: 14, height: 14 }} />
             </Button>
-          )}
-
-          {showInstaller && (
-            <ThemeInstaller
-              onInstall={handleInstall}
-              onClose={handleInstallerClose}
-              installedTheme={
-                showInstaller.slot === 'dark'
-                  ? installedCustomDarkTheme
-                  : installedCustomLightTheme
-              }
-              mode={showInstaller.catalogMode}
-            />
-          )}
-        </View>
-      }
-    >
-      <Text>
-        <Trans>
-          <strong>Themes</strong> change the user interface colors.
-        </Trans>
-      </Text>
-    </Setting>
+          }
+        />
+      )}
+    </SettingsGroup>
   );
 }
