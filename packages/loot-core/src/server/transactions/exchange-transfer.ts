@@ -39,6 +39,11 @@ export type ExchangeTransferInput = {
    * leg keeps the entered notes and cleared status; rules run on the other.
    */
   initiatingAccount?: string;
+  /**
+   * The schedule whose occurrence this posts, linked from the initiating
+   * account's top-level row (its fee parent when it has a fee).
+   */
+  schedule?: string;
 };
 
 type Row = {
@@ -55,6 +60,7 @@ type Row = {
   is_parent?: boolean;
   is_child?: boolean;
   parent_id?: string;
+  schedule?: string;
 };
 
 function checked(value: number, sign: 1 | -1) {
@@ -278,6 +284,9 @@ export async function postExchangeTransfer(
     ...(fromDestination ? entered : other),
   };
 
+  const fromSource = !fromDestination;
+  const link = (initiating: boolean) =>
+    initiating && input.schedule ? { schedule: input.schedule } : {};
   const rows: Row[] = [];
   if (legs.sourceFee > 0) {
     const parentId = uuidv4();
@@ -291,6 +300,7 @@ export async function postExchangeTransfer(
         notes: sourceLeg.notes,
         cleared: sourceLeg.cleared,
         is_parent: true,
+        ...link(fromSource),
         ...sourcePair(
           -(value + sourceFeeBase),
           -(legs.principal + legs.sourceFee),
@@ -312,7 +322,7 @@ export async function postExchangeTransfer(
       },
     );
   } else {
-    rows.push(sourceLeg);
+    rows.push({ ...sourceLeg, ...link(fromSource) });
   }
   if (legs.destinationFee > 0) {
     const parentId = uuidv4();
@@ -326,6 +336,7 @@ export async function postExchangeTransfer(
         notes: destinationLeg.notes,
         cleared: destinationLeg.cleared,
         is_parent: true,
+        ...link(fromDestination),
         ...destinationPair(value - destinationFeeBase, legs.net, 1),
       },
       { ...destinationLeg, is_child: true, parent_id: parentId },
@@ -343,7 +354,7 @@ export async function postExchangeTransfer(
       },
     );
   } else {
-    rows.push(destinationLeg);
+    rows.push({ ...destinationLeg, ...link(fromDestination) });
   }
 
   // Everything is validated before undo is recorded; only inserts follow.

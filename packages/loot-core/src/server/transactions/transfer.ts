@@ -109,8 +109,7 @@ export async function transferCounterpart(
 /**
  * Validates the transfers a batch will create in foreign accounts, with the
  * counterparts their hooks will write, before anything is written: a failed
- * counterpart must not leave its source behind. Scheduled transfers in other
- * currencies arrive with MC-4.3.
+ * counterpart must not leave its source behind.
  */
 export async function preflightNewForeignTransfers(
   added: Array<Partial<TransactionEntity>>,
@@ -135,9 +134,6 @@ export async function preflightNewForeignTransfers(
     const built = await transferCounterpart(transaction, target, async () =>
       uuidv4(),
     );
-    if (transaction.schedule || built.schedule) {
-      throw new Error('multicurrency-transfer-unavailable');
-    }
     const id = uuidv4();
     counterparts.push({ ...built.row, id });
     if (patch) {
@@ -146,19 +142,12 @@ export async function preflightNewForeignTransfers(
       sources.push({ ...transaction, transfer_id: id });
     }
   };
-  // Updates to rows added in the same batch apply before their hooks run, so
-  // those rows are judged in their final state.
-  const addedIds = new Set(added.map(row => row.id));
-  const finalAdded = added.map(row =>
-    updated
-      .filter(patch => patch.id === row.id)
-      .reduce((merged, patch) => ({ ...merged, ...patch }), row),
-  );
-  for (const transaction of finalAdded) {
+  // The caller has folded same-batch updates into their added rows.
+  for (const transaction of added) {
     await consider(transaction);
   }
   for (const patch of updated) {
-    if (patch.payee === undefined || !patch.id || addedIds.has(patch.id)) {
+    if (patch.payee === undefined || !patch.id) {
       continue;
     }
     const stored = await db.getTransaction(patch.id);

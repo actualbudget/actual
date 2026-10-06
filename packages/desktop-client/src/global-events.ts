@@ -49,7 +49,8 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     );
   });
 
-  // Foreign schedule occurrences wait for a rate instead of posting.
+  // Foreign and exchange schedule occurrences wait for a rate, or for
+  // amounts when an exchange estimate rounds to zero, instead of posting.
   const unlistenSchedulesRateUnavailable = listen(
     'schedules-rate-unavailable',
     ({ schedules }) => {
@@ -59,15 +60,20 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
             type: 'warning',
             sticky: true,
             message: t(
-              'Some scheduled transactions were not posted because no exchange rate is saved: {{schedules}}. Post them from the schedules page to enter a rate.',
+              'Some scheduled transactions were not posted: {{schedules}}. Post them from the schedules page to enter a rate or the amounts.',
               {
                 schedules: schedules
-                  .map(({ name, date, currency }) =>
-                    t('{{name}} ({{currency}}, {{date}})', {
-                      name: name ?? t('Unnamed schedule'),
-                      currency,
-                      date,
-                    }),
+                  .map(({ name, date, currency, estimateUnusable }) =>
+                    estimateUnusable
+                      ? t(
+                          '{{name}} ({{date}}, the estimated amount rounds to zero; enter the amounts)',
+                          { name: name ?? t('Unnamed schedule'), date },
+                        )
+                      : t('{{name}} ({{date}}, no saved {{currency}} rate)', {
+                          name: name ?? t('Unnamed schedule'),
+                          currency,
+                          date,
+                        }),
                   )
                   .join(', '),
               },
