@@ -20,7 +20,7 @@ import { Link } from '#components/common/Link';
 import { Checkbox, FormField, FormLabel } from '#components/forms';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';
-import { useServerVersion } from '#components/ServerContext';
+import { useServerURL, useServerVersion } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMetadataPref } from '#hooks/useMetadataPref';
@@ -46,6 +46,7 @@ import { ThemeSettings } from './Themes';
 
 function About() {
   const { t } = useTranslation();
+  const serverURL = useServerURL();
   const version = useServerVersion();
   const versionInfo = useSelector(state => state.app.versionInfo);
   const [notifyWhenUpdateIsAvailable, setNotifyWhenUpdateIsAvailablePref] =
@@ -71,14 +72,16 @@ function About() {
           </Text>
         }
       />
-      <SettingsRow
-        title={t('Server version')}
-        control={
-          <Text data-vrt-mask style={styles.tnum}>
-            {version}
-          </Text>
-        }
-      />
+      {serverURL && (
+        <SettingsRow
+          title={t('Server version')}
+          control={
+            <Text data-vrt-mask style={styles.tnum}>
+              {version}
+            </Text>
+          }
+        />
+      )}
       <SettingsRow
         title={t('Updates')}
         description={
@@ -158,11 +161,13 @@ function AdvancedAbout() {
         description={t('Identifies the budget file.')}
         control={<Text style={idStyle}>{budgetId}</Text>}
       />
-      <SettingsRow
-        title={t('Sync ID')}
-        description={t('Used to access the budget on the server.')}
-        control={<Text style={idStyle}>{groupId || t('(none)')}</Text>}
-      />
+      {groupId && (
+        <SettingsRow
+          title={t('Sync ID')}
+          description={t('Used to access the budget on the server.')}
+          control={<Text style={idStyle}>{groupId}</Text>}
+        />
+      )}
     </SettingsGroup>
   );
 }
@@ -260,6 +265,7 @@ export function SettingsIndex() {
 export function GeneralSettings() {
   const { t } = useTranslation();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
+  const serverURL = useServerURL();
 
   return (
     <SettingsSections title={t('General')}>
@@ -271,10 +277,12 @@ export function GeneralSettings() {
       <SettingsGroup title={t('Budget')}>
         <BudgetTypeSettings />
       </SettingsGroup>
-      <SettingsGroup title={t('Security')}>
-        <AuthSettings />
-        <EncryptionSettings />
-      </SettingsGroup>
+      {serverURL && (
+        <SettingsGroup title={t('Security')}>
+          <AuthSettings />
+          <EncryptionSettings />
+        </SettingsGroup>
+      )}
       <SettingsGroup title={t('Data')}>
         {isElectron() && <Backups />}
         <ExportBudget />

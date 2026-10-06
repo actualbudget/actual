@@ -19,9 +19,13 @@ export function EncryptionSettings() {
   const dispatch = useDispatch();
   const serverURL = useServerURL();
   const [encryptKeyId] = useMetadataPref('encryptKeyId');
+  const [groupId] = useMetadataPref('groupId');
 
   const missingCryptoAPI = !(window.crypto && crypto.subtle);
-  const isAvailable = !missingCryptoAPI && Boolean(serverURL);
+
+  if (!serverURL || !groupId) {
+    return null;
+  }
 
   function onCreateKey() {
     dispatch(
@@ -66,7 +70,7 @@ export function EncryptionSettings() {
             <Trans>Generate new key</Trans>
           </Button>
         ) : (
-          <Button isDisabled={!isAvailable} onPress={onCreateKey}>
+          <Button isDisabled={missingCryptoAPI} onPress={onCreateKey}>
             <Trans>Enable encryption</Trans>
           </Button>
         )
@@ -85,15 +89,6 @@ export function EncryptionSettings() {
           >
             <Trans>Learn more</Trans>
           </Link>
-        </Text>
-      )}
-      {!encryptKeyId && !missingCryptoAPI && !serverURL && (
-        <Text style={noteStyle}>
-          <Trans>
-            End-to-end encryption is not available when running without a
-            server, because encryption is only applied when sending data to a
-            server.
-          </Trans>
         </Text>
       )}
     </SettingsRow>
