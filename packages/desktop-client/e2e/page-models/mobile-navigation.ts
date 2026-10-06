@@ -27,9 +27,9 @@ const ROUTES_BY_PAGE = {
   Transaction: '/transactions/new',
   Reports: '/reports',
   Schedules: '/schedules',
-  Payees: '/payees',
-  Rules: '/rules',
-  'Bank Sync': '/bank-sync',
+  Payees: '/settings/payees',
+  Rules: '/settings/rules',
+  'Bank Sync': '/settings/bank-sync',
   Settings: '/settings',
 };
 

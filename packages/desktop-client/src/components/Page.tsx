@@ -6,6 +6,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 const HEADER_HEIGHT = 50;
@@ -211,6 +212,14 @@ export function Page({ header, style, padding, children, footer }: PageProps) {
     <View
       style={{
         ...styles.page,
+        // `styles.page` reserves room for the titlebar above the header. With
+        // no header (e.g. nested inside the settings layout, which draws its
+        // own) that space is just a gap, so the content sits lower than its
+        // siblings'.
+        ...(header == null && {
+          paddingTop: 0,
+          [`@media (min-width: ${tokens.breakpoint_small})`]: { paddingTop: 0 },
+        }),
         flex: 1,
         backgroundColor: theme.pageBackground,
         ...style,

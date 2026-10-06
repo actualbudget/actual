@@ -84,6 +84,7 @@
     "#components/reports/util": "./src/components/reports/util.ts",
     "#components/schedules": "./src/components/schedules/index.tsx",
     "#components/schedules/schedule-edit-utils": "./src/components/schedules/schedule-edit-utils.ts",
+    "#components/settings/SettingsSubPageContext": "./src/components/settings/SettingsSubPageContext.ts",
     "#components/select/getFirstDayOfWeek": "./src/components/select/getFirstDayOfWeek.ts",
     "#components/transactions/applyRulesToTransaction": "./src/components/transactions/applyRulesToTransaction.ts",
     "#components/transactions/table/columns": "./src/components/transactions/table/columns.ts",

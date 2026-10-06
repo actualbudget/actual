@@ -117,6 +117,7 @@ export type LocalPrefs = Partial<{
    * back-to-back sync attempts.
    */
   'bankSync.lastAutomaticRun': number;
+  'settings.showExperimental': boolean;
 }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;

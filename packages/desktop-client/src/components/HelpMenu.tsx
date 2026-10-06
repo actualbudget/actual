@@ -24,9 +24,9 @@ const getPageDocs = (page: string) => {
       return 'https://actualbudget.org/docs/reports/';
     case '/schedules':
       return 'https://actualbudget.org/docs/schedules';
-    case '/payees':
+    case '/settings/payees':
       return 'https://actualbudget.org/docs/transactions/payees';
-    case '/rules':
+    case '/settings/rules':
       return 'https://actualbudget.org/docs/budgeting/rules';
     case '/settings':
       return 'https://actualbudget.org/docs/settings';

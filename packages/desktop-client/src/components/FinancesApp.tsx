@@ -39,7 +39,12 @@ import { MobilePageHeaderProvider, MobilePageHeaderSlot } from './Page';
 import { Reports } from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { useMultiuserEnabled } from './ServerContext';
-import { Settings } from './settings';
+import {
+  AdvancedSettings,
+  ExperimentalSettings,
+  Settings,
+  SettingsIndex,
+} from './settings';
 import { FloatableSidebar } from './sidebar';
 import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
@@ -298,17 +303,25 @@ export function FinancesApp() {
                       }
                     />
 
+                    {/* Payees, rules, bank sync and tags moved under /settings.
+                        These keep old links and bookmarks working. */}
                     <Route
                       path="/payees"
-                      element={
-                        <ErrorBoundary
-                          FallbackComponent={FeatureErrorFallback}
-                          resetKeys={[location.pathname]}
-                        >
-                          <NarrowAlternate name="Payees" />
-                        </ErrorBoundary>
-                      }
+                      element={<Navigate to="/settings/payees" replace />}
                     />
+                    <Route
+                      path="/rules"
+                      element={<Navigate to="/settings/rules" replace />}
+                    />
+                    <Route
+                      path="/bank-sync"
+                      element={<Navigate to="/settings/bank-sync" replace />}
+                    />
+                    <Route
+                      path="/tags"
+                      element={<Navigate to="/settings/tags" replace />}
+                    />
+
                     <Route
                       path="/payees/:id"
                       element={
@@ -319,17 +332,6 @@ export function FinancesApp() {
                           <WideNotSupported>
                             <NarrowAlternate name="PayeeEdit" />
                           </WideNotSupported>
-                        </ErrorBoundary>
-                      }
-                    />
-                    <Route
-                      path="/rules"
-                      element={
-                        <ErrorBoundary
-                          FallbackComponent={FeatureErrorFallback}
-                          resetKeys={[location.pathname]}
-                        >
-                          <NarrowAlternate name="Rules" />
                         </ErrorBoundary>
                       }
                     />
@@ -345,35 +347,64 @@ export function FinancesApp() {
                       }
                     />
                     <Route
-                      path="/bank-sync"
-                      element={
-                        <ErrorBoundary
-                          FallbackComponent={FeatureErrorFallback}
-                          resetKeys={[location.pathname]}
-                        >
-                          <NarrowAlternate name="BankSync" />
-                        </ErrorBoundary>
-                      }
-                    />
-                    <Route
                       path="/bank-sync/account/:accountId/edit"
                       element={
                         <ErrorBoundary
                           FallbackComponent={FeatureErrorFallback}
                           resetKeys={[location.pathname]}
                         >
-                          <WideNotSupported redirectTo="/bank-sync">
+                          <WideNotSupported redirectTo="/settings/bank-sync">
                             <MobileBankSyncAccountEditPage />
                           </WideNotSupported>
                         </ErrorBoundary>
                       }
                     />
-                    <Route path="/tags" element={<ManageTagsPage />} />
+                    <Route path="/settings" element={<Settings />}>
+                      <Route index element={<SettingsIndex />} />
+                      <Route path="advanced" element={<AdvancedSettings />} />
+                      <Route
+                        path="experimental"
+                        element={<ExperimentalSettings />}
+                      />
+                      <Route
+                        path="payees"
+                        element={
+                          <ErrorBoundary
+                            FallbackComponent={FeatureErrorFallback}
+                            resetKeys={[location.pathname]}
+                          >
+                            <NarrowAlternate name="Payees" />
+                          </ErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="rules"
+                        element={
+                          <ErrorBoundary
+                            FallbackComponent={FeatureErrorFallback}
+                            resetKeys={[location.pathname]}
+                          >
+                            <NarrowAlternate name="Rules" />
+                          </ErrorBoundary>
+                        }
+                      />
+                      <Route
+                        path="bank-sync"
+                        element={
+                          <ErrorBoundary
+                            FallbackComponent={FeatureErrorFallback}
+                            resetKeys={[location.pathname]}
+                          >
+                            <NarrowAlternate name="BankSync" />
+                          </ErrorBoundary>
+                        }
+                      />
+                      <Route path="tags" element={<ManageTagsPage />} />
+                    </Route>
                     <Route
                       path="/notifications"
                       element={<NotificationsPage />}
                     />
-                    <Route path="/settings" element={<Settings />} />
 
                     <Route
                       path="/gocardless/link"
@@ -479,9 +510,12 @@ export function FinancesApp() {
                     path="/reports/:dashboardId"
                     element={<MobileNavTabs />}
                   />
-                  <Route path="/bank-sync" element={<MobileNavTabs />} />
-                  <Route path="/rules" element={<MobileNavTabs />} />
-                  <Route path="/payees" element={<MobileNavTabs />} />
+                  <Route
+                    path="/settings/bank-sync"
+                    element={<MobileNavTabs />}
+                  />
+                  <Route path="/settings/rules" element={<MobileNavTabs />} />
+                  <Route path="/settings/payees" element={<MobileNavTabs />} />
                   <Route path="/schedules" element={<MobileNavTabs />} />
                   <Route path="*" element={null} />
                 </Routes>
