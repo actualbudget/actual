@@ -422,6 +422,33 @@ test.describe('Transactions', () => {
         .toBeGreaterThan(initialWidth);
     });
 
+    test('leaves every column in place when a handle is clicked without dragging', async () => {
+      const header = page.getByTestId('transaction-table-header');
+      const handle = accountPage.getColumnResizeHandle('date');
+      await expect(handle).toBeAttached();
+      const before = await header
+        .locator('[data-column]')
+        .evaluateAll(columns =>
+          columns.map(column => column.getBoundingClientRect().x),
+        );
+      const selectBefore = await header.getByTestId('select').boundingBox();
+
+      await handle.click();
+
+      await expect
+        .poll(() =>
+          header
+            .locator('[data-column]')
+            .evaluateAll(columns =>
+              columns.map(column => column.getBoundingClientRect().x),
+            ),
+        )
+        .toEqual(before);
+      expect(await header.getByTestId('select').boundingBox()).toEqual(
+        selectBefore,
+      );
+    });
+
     test('resets a column width on double click', async () => {
       const initialWidth = await accountPage.getColumnWidth('date');
 

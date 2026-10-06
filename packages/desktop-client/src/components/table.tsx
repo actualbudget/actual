@@ -92,16 +92,18 @@ type FieldProps = ComponentProps<typeof View> & {
 
 // A column governed by the column-widths context uses either a fixed pixel
 // width (via the container's --col-* custom property, which stays in sync
-// during drags) or flexes to fill the remaining space
+// during drags) or flexes to fill the remaining space. Columns the context
+// has no width for keep their own width, even during a drag: they have no
+// CSS variable to follow.
 function getWidthStyle(
   width: CSSProperties['width'] | undefined,
   ctxWidth: number | 'flex' | undefined,
   columnName: string | undefined,
   isResizing: boolean,
 ): CSSProperties {
-  // During a resize every named column is pinned to its CSS variable so
-  // the cascade can drive widths directly.
-  if (columnName != null && (ctxWidth !== undefined || isResizing)) {
+  if (columnName != null && ctxWidth !== undefined) {
+    // During a resize every governed column is pinned to its CSS variable
+    // so the cascade can drive widths directly.
     if (!isResizing && ctxWidth === 'flex') {
       // Flex columns have a minimum width so a very wide neighbor cannot
       // collapse them
@@ -117,7 +119,8 @@ function getWidthStyle(
 
 // Resolves the effective column name, the width style, and whether the
 // column is governed by a column-widths provider (in which case the field
-// also needs position/attributes for the resize handle)
+// also needs position/attributes for the resize handle). A column is
+// governed only when the provider has a width for it.
 function useColumnWidthStyle(
   width: CSSProperties['width'] | undefined,
   name: string | undefined,
@@ -137,7 +140,7 @@ function useColumnWidthStyle(
       !!columnWidthsCtx?.isResizing,
     ),
     effectiveColumnName,
-    hasResizeContext: !!(columnWidthsCtx && effectiveColumnName),
+    hasResizeContext: ctxWidth !== undefined,
   };
 }
 
