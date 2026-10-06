@@ -54,6 +54,31 @@ type StructuredTransaction = {
   category?: string | null;
 };
 
+/**
+ * Decode raw CSV file bytes into a string. A user-provided encoding always
+ * wins; otherwise the byte order mark selects UTF-16 LE/BE and everything
+ * else decodes as UTF-8. Files in other encodings can be selected manually
+ * in the import dialog.
+ */
+function decodeCsvBytes(bytes: Uint8Array, encoding = 'auto'): string {
+  if (encoding !== 'auto') {
+    // Per the WHATWG encoding spec, the iso-8859-1 label resolves to the
+    // windows-1252 decoder; no browser provides a true ISO-8859-1 decoder,
+    // and windows-1252 gives better results for legacy CSV content anyway.
+    return new TextDecoder(encoding).decode(bytes);
+  }
+
+  if (bytes[0] === 0xff && bytes[1] === 0xfe) {
+    return new TextDecoder('utf-16le').decode(bytes);
+  }
+
+  if (bytes[0] === 0xfe && bytes[1] === 0xff) {
+    return new TextDecoder('utf-16be').decode(bytes);
+  }
+
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
 // CSV files return raw data that are not guaranteed to be StructuredTransactions
 type CsvTransaction = Record<string, string> | string[];
 
@@ -73,6 +98,7 @@ export type ParseFileOptions = {
   skipStartLines?: number;
   skipEndLines?: number;
   importNotes?: boolean;
+  encoding?: string;
 };
 
 export async function parseFile(
@@ -112,7 +138,18 @@ async function parseCSV(
   options: ParseFileOptions,
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
-  let contents = await fs.readFile(filepath);
+  const bytes = await fs.readFile(filepath, 'binary');
+
+  let contents: string;
+  try {
+    contents = decodeCsvBytes(bytes, options.encoding);
+  } catch (err) {
+    errors.push({
+      message: 'Failed parsing: ' + err.message,
+      internal: err.message,
+    });
+    return { errors, transactions: [] };
+  }
 
   const skipStart = Math.max(0, options.skipStartLines || 0);
   const skipEnd = Math.max(0, options.skipEndLines || 0);

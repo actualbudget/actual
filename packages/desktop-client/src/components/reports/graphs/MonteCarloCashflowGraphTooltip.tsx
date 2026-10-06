@@ -85,6 +85,15 @@ export function MonteCarloCashflowGraphTooltip({
           {t('The pots had already run out - this spending went unfunded.')}
         </div>
       )}
+      {point.unspentIncome > 0 && (
+        <div style={{ marginBottom: 10, maxWidth: 220 }}>
+          <FinancialText as="span">
+            {t('Unspent income: {{amount}} - it leaves the plan.', {
+              amount: format(point.unspentIncome, 'financial'),
+            })}
+          </FinancialText>
+        </div>
+      )}
       <div style={{ lineHeight: 1.5 }}>
         {sections.map(group => (
           <View key={group.key}>

@@ -1,8 +1,10 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import {
@@ -23,6 +25,7 @@ type PayeeAutocompleteModalProps = Extract<
 
 export function PayeeAutocompleteModal({
   onSelect,
+  showNoneOption,
   onClose,
 }: PayeeAutocompleteModalProps) {
   const { t } = useTranslation();
@@ -69,20 +72,37 @@ export function PayeeAutocompleteModal({
               }
             />
           )}
-          <PayeeAutocomplete
-            payees={payees}
-            accounts={accounts}
-            focused
-            embedded
-            closeOnBlur={false}
-            onClose={() => state.close()}
-            onManagePayees={onManagePayees}
-            showManagePayees={!isNarrowWidth}
-            showMakeTransfer={!isNarrowWidth}
-            {...defaultAutocompleteProps}
-            onSelect={onSelect}
-            value={null}
-          />
+          <View>
+            <View style={{ flex: 1 }}>
+              <PayeeAutocomplete
+                payees={payees}
+                accounts={accounts}
+                focused
+                embedded
+                closeOnBlur={false}
+                onClose={() => state.close()}
+                onManagePayees={onManagePayees}
+                showManagePayees={!isNarrowWidth}
+                showMakeTransfer={!isNarrowWidth}
+                {...defaultAutocompleteProps}
+                onSelect={onSelect}
+                value={null}
+              />
+            </View>
+            {showNoneOption && (
+              <View style={{ flexShrink: 0, padding: 5 }}>
+                <Button
+                  variant="menu"
+                  onPress={() => {
+                    onSelect(null);
+                    state.close();
+                  }}
+                >
+                  <Trans>No payee</Trans>
+                </Button>
+              </View>
+            )}
+          </View>
         </>
       )}
     </Modal>
