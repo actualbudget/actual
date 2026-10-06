@@ -2,7 +2,6 @@ import React from 'react';
 import type { ReactNode } from 'react';
 
 import type { CSSProperties } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
@@ -42,30 +41,3 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
     </View>
   );
 };
-
-export function Column({
-  title,
-  children,
-  style,
-}: {
-  title: string;
-  children: ReactNode;
-  style?: CSSProperties;
-}) {
-  return (
-    <View
-      style={{
-        alignItems: 'flex-start',
-        flexGrow: 1,
-        gap: '0.5em',
-        width: '100%',
-        ...style,
-      }}
-    >
-      <Text style={{ fontWeight: 500 }}>{title}</Text>
-      <View style={{ alignItems: 'flex-start', gap: '1em', width: '100%' }}>
-        {children}
-      </View>
-    </View>
-  );
-}
