@@ -44,6 +44,11 @@ export type TransactionWriteOptions = {
    * must already agree with the links in the request's final state.
    */
   runTransfers?: boolean;
+  /**
+   * Legs of fee-free scheduled exchanges whose amount an import replaces
+   * (`replaceExchangeTotal`); only their amounts may change.
+   */
+  exchangeReplacements?: ReadonlySet<string>;
 };
 
 type TransactionWrite = {
@@ -309,14 +314,17 @@ async function validateForeignTransfer(
   if (options.validatedTransfer) return;
 
   // Every row of a stored exchange (legs, fee children and parents, in base
-  // or foreign accounts) shares one valuation and is frozen until MC-5.
+  // or foreign accounts) shares one valuation and is frozen until MC-5,
+  // apart from the amount of a leg an import replaces.
   if (existing && (await isExchangeRow(existing.id))) {
     const changes = (value: unknown, stored: unknown) =>
       value !== undefined && value !== stored;
+    const replacing = await allowedReplacement(row, existing, options);
     if (
       changes(row.account, existing.acct) ||
-      changes(row.amount, existing.amount) ||
-      changes(row.transaction_amount, existing.transaction_amount) ||
+      (!replacing && changes(row.amount, existing.amount)) ||
+      (!replacing &&
+        changes(row.transaction_amount, existing.transaction_amount)) ||
       (row.date !== undefined &&
         row.date.replaceAll('-', '') !== String(existing.date)) ||
       // A leg is never relinked to another transfer payee.
@@ -571,6 +579,19 @@ export async function validateTransactionWrite(
   if (changesFamily && !options.validatedTransfer) {
     throw new Error('foreign-split-unavailable');
   }
+  // A foreign leg's base may be derived from its exchange (coupled-cells),
+  // so unlinking it records its current pair as its own from then on.
+  if (
+    existing?.transferred_id &&
+    row.transfer_id === null &&
+    row.amount === undefined &&
+    row.transaction_amount === undefined &&
+    existing.transaction_amount !== null
+  ) {
+    return {
+      pair: amountPair(existing.amount, existing.transaction_amount),
+    };
+  }
   const setsAmount =
     row.amount !== undefined || row.transaction_amount !== undefined;
   if (isUpdate && !setsAmount) return {};
@@ -581,9 +602,11 @@ export async function validateTransactionWrite(
   ) {
     throw new Error('foreign-pair-required');
   }
-  // Stored foreign pairs are frozen until foreign edits (MC-5).
+  // Stored foreign pairs are frozen until foreign edits (MC-5), apart from
+  // a leg an import replaces.
   if (
     existing &&
+    !(await allowedReplacement(row, existing, options)) &&
     ((row.amount !== undefined && row.amount !== existing.amount) ||
       (row.transaction_amount !== undefined &&
         row.transaction_amount !== existing.transaction_amount))
@@ -752,4 +775,180 @@ export function completePairPatch<
     amount: full.amount,
     transaction_amount: full.transaction_amount,
   };
+}
+
+type ReplacementLeg = {
+  id: string;
+  acct: string;
+  amount: number;
+  transaction_amount: number | null;
+  transferred_id: string | null;
+  isParent: number;
+  isChild: number;
+  schedule: string | null;
+  reconciled: number;
+  tombstone: number;
+};
+
+function replacementLeg(id: string) {
+  return db.first<ReplacementLeg>(
+    `SELECT id, acct, amount, transaction_amount, transferred_id, isParent,
+       isChild, schedule, reconciled, tombstone
+       FROM transactions WHERE id = ?`,
+    [id],
+  );
+}
+
+/**
+ * A leg of a fee-free scheduled exchange, whose amount imports may replace:
+ * reciprocal top-level legs in two encodings, one linked to a schedule.
+ */
+async function replaceableExchange(legId: string) {
+  const leg = await replacementLeg(legId);
+  if (
+    !leg ||
+    leg.tombstone ||
+    leg.isParent ||
+    leg.isChild ||
+    !leg.transferred_id
+  ) {
+    return null;
+  }
+  const other = await replacementLeg(leg.transferred_id);
+  if (
+    !other ||
+    other.tombstone ||
+    other.isParent ||
+    other.isChild ||
+    other.transferred_id !== leg.id ||
+    (leg.schedule === null && other.schedule === null)
+  ) {
+    return null;
+  }
+  const own = await accountEncoding(leg.acct);
+  const otherEncoding = await accountEncoding(other.acct);
+  if (sameEncoding(own, otherEncoding)) return null;
+  return {
+    leg,
+    other,
+    foreign: own.currency !== null,
+    otherForeign: otherEncoding.currency !== null,
+  };
+}
+
+/** True for a leg imports may replace (criterion: fee-free and scheduled). */
+export async function isReplaceableExchangeLeg(id: string) {
+  return (await replaceableExchange(id)) !== null;
+}
+
+/**
+ * The write replacing the amount of a fee-free scheduled exchange's leg with
+ * an imported native amount. Only that leg is written: between two foreign
+ * accounts it keeps its base, and with one account in the budget currency
+ * the foreign leg's base is derived from the budget leg on every device
+ * (coupled-cells), so concurrent replacements of opposite legs both survive.
+ * Null when the leg or the resulting exchange would be invalid; reconciled
+ * when the exchange has a reconciled leg.
+ */
+export async function replaceExchangeTotal(
+  legId: string,
+  native: number,
+): Promise<
+  | {
+      status: 'ok';
+      write: { id: string; amount: number; transaction_amount?: number };
+    }
+  | { status: 'reconciled' }
+  | null
+> {
+  const exchange = await replaceableExchange(legId);
+  if (!exchange) return null;
+  const { leg, other, foreign, otherForeign } = exchange;
+  const current = foreign ? leg.transaction_amount : leg.amount;
+  const otherNative = otherForeign ? other.transaction_amount : other.amount;
+  if (
+    current === null ||
+    otherNative === null ||
+    !Number.isSafeInteger(native) ||
+    native === 0 ||
+    Math.sign(native) !== Math.sign(current) ||
+    Math.sign(otherNative) !== -Math.sign(native)
+  ) {
+    return null;
+  }
+  // The legs' bases cancel after the write, with the valuation keeping the
+  // direction of the native amounts (zero allowed between foreign accounts).
+  const base = foreign ? leg.amount : native;
+  const otherBase = otherForeign && !foreign ? -base : other.amount;
+  if (
+    !Number.isSafeInteger(base) ||
+    otherBase !== -base ||
+    (base !== 0 && Math.sign(base) !== Math.sign(native))
+  ) {
+    return null;
+  }
+  if (leg.reconciled || other.reconciled) return { status: 'reconciled' };
+  return {
+    status: 'ok',
+    write: foreign
+      ? { id: leg.id, amount: base, transaction_amount: native }
+      : { id: leg.id, amount: native },
+  };
+}
+
+/** Whether a scoped write matches the replacement its leg allows. */
+async function allowedReplacement(
+  row: TransactionWrite,
+  existing: ExistingRow,
+  options: TransactionWriteOptions,
+) {
+  if (!options.exchangeReplacements?.has(existing.id)) return false;
+  const foreign = (await accountEncoding(existing.acct)).currency !== null;
+  const native = foreign
+    ? (row.transaction_amount ?? existing.transaction_amount)
+    : (row.amount ?? existing.amount);
+  if (typeof native !== 'number') return false;
+  const replacement = await replaceExchangeTotal(existing.id, native);
+  return (
+    replacement?.status === 'ok' &&
+    (row.amount ?? existing.amount) === replacement.write.amount &&
+    (!foreign ||
+      (row.transaction_amount ?? existing.transaction_amount) ===
+        replacement.write.transaction_amount)
+  );
+}
+
+/** True when any row of a transaction's exchange family is reconciled. */
+export async function exchangeFamilyReconciled(id: string) {
+  const ids = new Set([id]);
+  // Rows, their parents and children, and the counterparts of each.
+  for (let step = 0; step < 3; step++) {
+    const known = [...ids];
+    const marks = known.map(() => '?').join(', ');
+    for (const relative of await db.all<{
+      id: string;
+      parent_id: string | null;
+      transferred_id: string | null;
+    }>(
+      `SELECT id, parent_id, transferred_id FROM transactions
+         WHERE tombstone = 0 AND (id IN (${marks}) OR parent_id IN (${marks}))`,
+      [...known, ...known],
+    )) {
+      for (const value of [
+        relative.id,
+        relative.parent_id,
+        relative.transferred_id,
+      ]) {
+        if (value) ids.add(value);
+      }
+    }
+  }
+  const all = [...ids];
+  return (
+    (await db.first(
+      `SELECT 1 FROM transactions WHERE tombstone = 0 AND reconciled = 1
+         AND id IN (${all.map(() => '?').join(', ')})`,
+      all,
+    )) != null
+  );
 }
