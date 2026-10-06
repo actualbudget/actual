@@ -28,6 +28,8 @@ type ExchangePanelProps = {
   register: AccountEntity;
   other: AccountEntity;
   onPost: (request: ExchangeRequest) => Promise<ExchangePostResult>;
+  /** A fee requires the other amount (scheduled completion). */
+  feeNeedsOtherAmount?: boolean;
   /** Increments to focus the first input. */
   focusToken?: number;
 };
@@ -60,6 +62,7 @@ function ExchangePanelInner({
   other,
   onPost,
   focusToken = 0,
+  feeNeedsOtherAmount,
 }: ExchangePanelProps) {
   const { t } = useTranslation();
   const firstInput = useRef<HTMLInputElement>(null);
@@ -102,7 +105,12 @@ function ExchangePanelInner({
     estimateMessage,
     busy,
     post: postEntry,
-  } = useExchangeEntry({ transaction, register, other });
+  } = useExchangeEntry({
+    transaction,
+    register,
+    other,
+    feeNeedsOtherAmount,
+  });
   const post = () => postEntry(onPost);
 
   return (

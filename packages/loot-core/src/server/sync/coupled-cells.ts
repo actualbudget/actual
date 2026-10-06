@@ -101,6 +101,67 @@ function deriveRows(
   return changedAny;
 }
 
+// A fee-free exchange leg in a foreign account whose counterpart is a
+// fee-free leg in a budget-currency account takes its base from that leg,
+// so an import replacing either leg (replaceExchangeTotal) writes only its
+// own row and both legs still cancel after any merge order.
+const EXCHANGE_BASE_FROM = `
+  FROM transactions c JOIN accounts a ON a.id = c.acct
+  WHERE c.id = transactions.transferred_id
+    AND c.transferred_id = transactions.id
+    AND c.tombstone = 0 AND c.isParent = 0 AND c.isChild = 0
+    AND a.currency IS NULL`;
+const EXCHANGE_BASE_SQL = `
+  UPDATE transactions
+  SET amount = -(SELECT c.amount ${EXCHANGE_BASE_FROM})
+  WHERE tombstone = 0 AND isParent = 0 AND isChild = 0
+    AND transferred_id IS NOT NULL
+    AND (SELECT currency FROM accounts WHERE id = transactions.acct) IS NOT NULL
+    AND EXISTS (SELECT 1 ${EXCHANGE_BASE_FROM})
+    AND amount IS NOT -(SELECT c.amount ${EXCHANGE_BASE_FROM})`;
+
+function deriveExchangeBases(ids?: string[]): boolean {
+  if (!ids) {
+    return Number(db.runQuery(EXCHANGE_BASE_SQL).changes) > 0;
+  }
+  let changed = false;
+  for (let i = 0; i < ids.length; i += 500) {
+    const chunk = ids.slice(i, i + 500);
+    const result = db.runQuery(
+      `${EXCHANGE_BASE_SQL} AND id IN (${chunk.map(() => '?').join(', ')})`,
+      chunk,
+    );
+    changed = Number(result.changes) > 0 || changed;
+  }
+  return changed;
+}
+
+/**
+ * Transaction ids with their transfer counterparts, including links an
+ * apply batch sets, so rows whose values derive from a counterpart are
+ * tracked with it.
+ */
+export function withTransferCounterparts(
+  ids: string[],
+  linked: string[] = [],
+): string[] {
+  const all = new Set([...ids, ...linked]);
+  const unique = [...new Set(ids)];
+  for (let i = 0; i < unique.length; i += 500) {
+    const chunk = unique.slice(i, i + 500);
+    const marks = chunk.map(() => '?').join(', ');
+    for (const row of db.runQuery<{ id: string | null }>(
+      `SELECT transferred_id AS id FROM transactions WHERE id IN (${marks})
+       UNION SELECT id FROM transactions WHERE transferred_id IN (${marks})`,
+      [...chunk, ...chunk],
+      true,
+    )) {
+      if (row.id) all.add(row.id);
+    }
+  }
+  return [...all];
+}
+
 /** Recompute dependent columns for the rows touched by an apply batch. */
 export function deriveCoupledCells(idsPerTable: Record<string, string[]>) {
   for (const [table, ids] of Object.entries(idsPerTable)) {
@@ -124,6 +185,10 @@ export function deriveCoupledCells(idsPerTable: Record<string, string[]>) {
       }
       deriveRows(table, coupled, rows);
     }
+  }
+  const transactions = idsPerTable.transactions ?? [];
+  if (transactions.length > 0) {
+    deriveExchangeBases(withTransferCounterparts(transactions));
   }
 }
 
@@ -157,6 +222,9 @@ export function deriveAllCoupledCells(): Set<string> {
         ),
       );
       if (changed) changedTables.add(table);
+      if (table === 'transactions' && deriveExchangeBases()) {
+        changedTables.add(table);
+      }
     } catch (e) {
       // The table or column may not exist before its migration runs.
       if (!isMissingSchemaError(e)) throw e;

@@ -74,6 +74,7 @@ export function useExchangeEntry({
   transaction,
   register,
   other,
+  feeNeedsOtherAmount = false,
 }: {
   transaction: Pick<
     TransactionEntity,
@@ -81,6 +82,12 @@ export function useExchangeEntry({
   >;
   register: AccountEntity;
   other: AccountEntity;
+  /**
+   * With a fee, the other amount must be typed, not derived from a rate: a
+   * scheduled occurrence completed with a fee then holds entered amounts,
+   * which imports never replace (MC-4.4).
+   */
+  feeNeedsOtherAmount?: boolean;
 }) {
   const { t } = useTranslation();
   const budgetPrecision = useAmountPrecision();
@@ -233,15 +240,17 @@ export function useExchangeEntry({
       ? t('Enter a valid rate.')
       : feeInvalid
         ? t('Enter a valid fee.')
-        : baseInvalid
-          ? t('Enter a valid value in {{base}}.', {
-              base: defaultCurrency || '',
-            })
-          : bothForeign && baseValue == null
-            ? t('Enter the value in {{base}}.', {
+        : feeNeedsOtherAmount && (entryBase.fee ?? 0) > 0 && typedOther == null
+          ? errorMessages['other-amount-required']
+          : baseInvalid
+            ? t('Enter a valid value in {{base}}.', {
                 base: defaultCurrency || '',
               })
-            : null;
+            : bothForeign && baseValue == null
+              ? t('Enter the value in {{base}}.', {
+                  base: defaultCurrency || '',
+                })
+              : null;
 
   /** Posts the entry; resolves true once the transfer is saved. */
   async function post(

@@ -8,7 +8,11 @@ import {
 } from '#shared/transactions';
 import type { TransactionEntity } from '#types/models';
 
-import { isExchangeRow, isForeignAccount } from './foreign-guard';
+import {
+  isExchangeRow,
+  isForeignAccount,
+  replaceExchangeTotal,
+} from './foreign-guard';
 
 import { batchUpdateTransactions } from '.';
 
@@ -25,9 +29,12 @@ export async function mergeTransactions(
   }
   const [a, b] = await mapAndValidateTransactions(txIds[0], txIds[1]);
   // Merging would relink an exchange leg generically; checked before any
-  // link is cleared.
-  if ((await isExchangeRow(a.id)) || (await isExchangeRow(b.id))) {
-    throw new Error('multicurrency-merge-unavailable');
+  // link is cleared. Only an imported row confirming a scheduled exchange's
+  // amount merges into one.
+  if (await isExchangeRow(a.id)) return confirmScheduledExchange(a, b);
+  if (await isExchangeRow(b.id)) return confirmScheduledExchange(b, a);
+  if (a.amount !== b.amount) {
+    throw new Error('Cannot merge transactions with different amounts');
   }
   if (
     (await isForeignAccount(a.account)) ||
@@ -113,6 +120,47 @@ async function mergeTransfers(
   );
   await setTransfers([aTransfer.id, bTransfer.id], null);
   return mergeTransactionsNoTransfer(aTransfer, bTransfer);
+}
+
+/**
+ * Replaces a fee-free scheduled exchange leg's amount with an imported
+ * row's, keeps the import's identity on the leg, and deletes the row.
+ */
+async function confirmScheduledExchange(
+  leg: TransactionEntity,
+  imported: TransactionEntity,
+): Promise<TransactionEntity['id']> {
+  if (
+    imported.transfer_id ||
+    imported.is_parent ||
+    imported.is_child ||
+    imported.reconciled
+  ) {
+    throw new Error('multicurrency-merge-unavailable');
+  }
+  const native = (await isForeignAccount(leg.account))
+    ? imported.transaction_amount
+    : imported.amount;
+  const replacement =
+    native == null ? null : await replaceExchangeTotal(leg.id, native);
+  if (replacement?.status !== 'ok') {
+    throw new Error('multicurrency-merge-unavailable');
+  }
+  await batchUpdateTransactions({
+    updated: [
+      {
+        ...replacement.write,
+        // The merged row is the bank's record, so its identity wins.
+        imported_id: imported.imported_id ?? leg.imported_id,
+        imported_payee: imported.imported_payee ?? leg.imported_payee,
+        cleared: !!(leg.cleared || imported.cleared),
+        raw_synced_data: imported.raw_synced_data ?? leg.raw_synced_data,
+      },
+    ],
+    deleted: [{ id: imported.id }],
+    exchangeReplacements: new Set([leg.id]),
+  });
+  return leg.id;
 }
 
 async function mapAndValidateTransactions(

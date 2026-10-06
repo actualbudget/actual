@@ -15,9 +15,13 @@ import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
 import { batchUpdateTransactions } from '#server/transactions';
 import {
+  exchangeFamilyReconciled,
   foreignAccountCurrency,
+  isExchangeRow,
+  isReplaceableExchangeLeg,
   preflightTransactionWrites,
   queuedAccount,
+  replaceExchangeTotal,
 } from '#server/transactions/foreign-guard';
 import { runRules } from '#server/transactions/transaction-rules';
 import { getRecordedAmountPrecision } from '#server/util/currency';
@@ -43,6 +47,7 @@ import type {
   TransactionEntity,
 } from '#types/models';
 
+import { findScheduledExchange } from './exchange-import';
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
 
@@ -694,6 +699,8 @@ export async function reconcileTransactions(
   const updated = [];
   const added = [];
   const updatedPreview = [];
+  // Scheduled exchange legs whose amount the import replaces.
+  const exchangeReplacements = new Set<string>();
   const existingPayeeMap = new Map<string, string>();
 
   const {
@@ -711,7 +718,9 @@ export async function reconcileTransactions(
   });
 
   // Finally, generate & commit the changes
-  for (const { trans, subtransactions, match } of transactionsStep3) {
+  for (const step of transactionsStep3) {
+    const { trans, subtransactions } = step;
+    let { match } = step;
     // A skipped transaction still takes part in the matching above, so the
     // other transactions match the same way as in the import preview. It is
     // not imported or merged.
@@ -719,12 +728,37 @@ export async function reconcileTransactions(
       continue;
     }
 
+    // Exchange rows (legs and fee rows) keep their date, payee, category and
+    // notes whichever pass matched them, and a family with a reconciled row
+    // is left alone. A different amount on a fee-free scheduled exchange's
+    // leg replaces its estimate; one it cannot take leaves the row unmatched.
+    const exchangeRow =
+      match && !trans.forceAddTransaction && !match.reconciled
+        ? await isExchangeRow(match.id)
+        : false;
+    // A reconciled family is left alone before any replacement is tried.
+    if (exchangeRow && (await exchangeFamilyReconciled(match.id))) {
+      updatedPreview.push({ transaction: trans, ignored: true });
+      continue;
+    }
+    let replacement = null;
+    if (exchangeRow) {
+      const native = foreign ? trans.transaction_amount : trans.amount;
+      const stored = foreign ? match.transaction_amount : match.amount;
+      if (native != null && native !== stored) {
+        replacement = await replaceExchangeTotal(match.id, native);
+        if (!replacement && (await isReplaceableExchangeLeg(match.id))) {
+          match = null;
+        }
+      }
+    }
     if (match && !trans.forceAddTransaction) {
       // Skip updating already reconciled (locked) transactions
       if (match.reconciled) {
         updatedPreview.push({ transaction: trans, ignored: true });
         continue;
       }
+      const keepsDate = exchangeRow;
 
       // TODO: change the above sql query to use aql
       const existing = {
@@ -735,17 +769,29 @@ export async function reconcileTransactions(
 
       // Update the transaction
       const updates = {
+        ...(replacement?.status === 'ok' && {
+          amount: replacement.write.amount,
+          ...(replacement.write.transaction_amount !== undefined && {
+            transaction_amount: replacement.write.transaction_amount,
+          }),
+        }),
         imported_id: trans.imported_id || null,
-        payee: existing.payee || trans.payee || null,
-        category: existing.category || trans.category || null,
+        payee: exchangeRow
+          ? existing.payee
+          : existing.payee || trans.payee || null,
+        category: exchangeRow
+          ? existing.category
+          : existing.category || trans.category || null,
         imported_payee: trans.imported_payee || null,
-        notes: existing.notes || trans.notes || null,
+        notes: exchangeRow
+          ? existing.notes
+          : existing.notes || trans.notes || null,
         cleared: existing.cleared || trans.cleared || false,
         raw_synced_data:
           existing.raw_synced_data ?? trans.raw_synced_data ?? null,
       };
 
-      if (updateDates && trans.date) {
+      if (updateDates && trans.date && !keepsDate) {
         updates['date'] = trans.date;
       }
 
@@ -760,6 +806,9 @@ export async function reconcileTransactions(
 
       if (hasFieldsChanged(existing, updates, fieldsToMarkUpdated)) {
         updated.push({ id: existing.id, ...updates });
+        if (replacement?.status === 'ok') {
+          exchangeReplacements.add(existing.id);
+        }
         if (!existingPayeeMap.has(existing.payee)) {
           const payee = await db.getPayee(existing.payee);
           existingPayeeMap.set(existing.payee, payee?.name);
@@ -778,7 +827,7 @@ export async function reconcileTransactions(
 
       const clearedUpdated = existing.cleared !== updates.cleared;
       const dateUpdated =
-        updateDates && trans.date && existing.date !== trans.date;
+        updateDates && trans.date && !keepsDate && existing.date !== trans.date;
 
       if (existing.is_parent && (clearedUpdated || dateUpdated)) {
         const children = await db.all<Pick<db.DbViewTransaction, 'id'>>(
@@ -863,9 +912,12 @@ export async function reconcileTransactions(
 
   if (!isPreview) {
     // Validate the whole request before creating payees or transactions.
-    await preflightTransactionWrites({ added, updated });
+    await preflightTransactionWrites(
+      { added, updated },
+      { exchangeReplacements },
+    );
     await createNewPayees(payeesToCreate, [...added, ...updated]);
-    await batchUpdateTransactions({ added, updated });
+    await batchUpdateTransactions({ added, updated, exchangeReplacements });
   }
 
   logger.log('Debug data for the operations:', {
@@ -1114,6 +1166,8 @@ export async function matchTransactions(
       subtransactions: trans.subtransactions || subtransactions,
       match,
       fuzzyDataset,
+      matchAccount,
+      matchAmount,
     });
   }
 
@@ -1144,7 +1198,7 @@ export async function matchTransactions(
   // matching: it just find the first transaction that hasn't been
   // matched yet. Remember the dataset only contains transactions
   // around the same date with the same amount.
-  const transactionsStep3 = transactionsStep2.map(data => {
+  const transactionsStep3Ordinary = transactionsStep2.map(data => {
     if (!data.match && data.fuzzyDataset) {
       const match = data.fuzzyDataset.find(
         row =>
@@ -1157,6 +1211,34 @@ export async function matchTransactions(
     }
     return data;
   });
+
+  // A row still unmatched may confirm the estimate of a scheduled exchange
+  // (replaced in reconcileTransactions). Its whole family is reserved.
+  const transactionsStep3 = [];
+  for (const data of transactionsStep3Ordinary) {
+    const found =
+      !data.match && !data.trans.tombstone
+        ? await findScheduledExchange({
+            account: data.matchAccount,
+            date: data.trans.date,
+            native: data.matchAmount,
+            schedule: data.trans.schedule,
+            payee: data.trans.payee,
+            reserved: hasMatched,
+          })
+        : null;
+    if (found) {
+      hasMatched.add(found.legId);
+      hasMatched.add(found.otherId);
+      const match = await db.first<db.DbViewTransaction>(
+        'SELECT * FROM v_transactions WHERE id = ?',
+        [found.legId],
+      );
+      transactionsStep3.push({ ...data, match });
+    } else {
+      transactionsStep3.push(data);
+    }
+  }
 
   return {
     payeesToCreate,
