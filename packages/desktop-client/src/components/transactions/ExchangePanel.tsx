@@ -21,7 +21,10 @@ import type { ExchangeRequest } from '#util/exchange-entry';
 export type { ExchangePostResult };
 
 type ExchangePanelProps = {
-  transaction: TransactionEntity;
+  transaction: Pick<
+    TransactionEntity,
+    'amount' | 'date' | 'notes' | 'cleared' | 'category'
+  >;
   register: AccountEntity;
   other: AccountEntity;
   onPost: (request: ExchangeRequest) => Promise<ExchangePostResult>;

@@ -172,7 +172,7 @@ describe('ExchangePanel', () => {
     render(
       <TestProviders store={store}>
         <ExchangePanel
-          transaction={{ ...payment, account: 'jpy', amount: 15000 }}
+          transaction={{ ...payment, amount: 15000 }}
           register={jpy}
           other={usd}
           onPost={onPost}
@@ -201,7 +201,7 @@ describe('ExchangePanel', () => {
       <TestProviders store={store}>
         <CurrencyFormatProvider currencyCode="JPY" precision={0}>
           <ExchangePanel
-            transaction={{ ...payment, account: 'jpy', amount: 15000 }}
+            transaction={{ ...payment, amount: 15000 }}
             register={jpy}
             other={usd}
             onPost={onPost}
@@ -319,7 +319,7 @@ describe('ExchangePanel inputs (inspection round 1)', () => {
   it('posts the panel category from an off-budget register', async () => {
     const onPost = renderPanel(
       {
-        transaction: { ...payment, account: 'usdOff', amount: 10000 },
+        transaction: { ...payment, amount: 10000 },
         register: usdOff,
         other: usd,
       },
@@ -333,10 +333,34 @@ describe('ExchangePanel inputs (inspection round 1)', () => {
     );
   });
 
+  it('follows a category rules set after the panel opens', async () => {
+    const store = setup(null);
+    const onPost = vi.fn(async (): Promise<ExchangePostResult> => ({
+      status: 'ok',
+    }));
+    const panel = (category?: string) => (
+      <TestProviders store={store}>
+        <ExchangePanel
+          transaction={{ ...payment, amount: 10000, category }}
+          register={usdOff}
+          other={usd}
+          onPost={onPost}
+        />
+      </TestProviders>
+    );
+    const { rerender } = render(panel());
+    rerender(panel('saving'));
+    await userEvent.type(screen.getByLabelText('Amount sent'), '100');
+    await userEvent.click(screen.getByTestId('exchange-add-button'));
+    expect(onPost).toHaveBeenCalledWith(
+      expect.objectContaining({ category: 'saving' }),
+    );
+  });
+
   it('estimates and posts the budget value between two foreign accounts', async () => {
     const onPost = renderPanel(
       {
-        transaction: { ...payment, account: 'jpy', amount: -15000 },
+        transaction: { ...payment, amount: -15000 },
         register: jpy,
         other: kwd,
       },
@@ -359,7 +383,7 @@ describe('ExchangePanel inputs (inspection round 1)', () => {
   it('requires the budget value when no rate resolves', async () => {
     const onPost = renderPanel(
       {
-        transaction: { ...payment, account: 'jpy', amount: -15000 },
+        transaction: { ...payment, amount: -15000 },
         register: jpy,
         other: kwd,
       },

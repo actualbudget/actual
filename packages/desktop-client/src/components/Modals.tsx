@@ -49,6 +49,7 @@ import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMenuModal';
+import { ExchangeTransferModal } from './modals/ExchangeTransferModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { ForeignAmountModal } from './modals/ForeignAmountModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
@@ -162,6 +163,9 @@ export function Modals() {
 
         case 'foreign-amount':
           return <ForeignAmountModal key={key} {...modal.options} />;
+
+        case 'exchange-transfer':
+          return <ExchangeTransferModal key={key} {...modal.options} />;
 
         case 'add-exchange-rate':
           return <AddExchangeRateModal key={key} {...modal.options} />;

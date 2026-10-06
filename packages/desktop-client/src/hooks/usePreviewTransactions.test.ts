@@ -38,8 +38,10 @@ describe('comparePreviewTransactions', () => {
 
 describe('previewScheduleFilter', () => {
   const accounts = [
-    { id: 'usd', currency: null },
-    { id: 'jpy', currency: 'JPY' },
+    { id: 'usd', currency: null, currency_precision: null },
+    { id: 'jpy', currency: 'JPY', currency_precision: 0 },
+    { id: 'jpy2', currency: 'JPY', currency_precision: 0 },
+    { id: 'kwd', currency: 'KWD', currency_precision: 3 },
   ];
   const schedule = (account: string | null) =>
     ({ _account: account }) as ScheduleEntity;
@@ -58,9 +60,13 @@ describe('previewScheduleFilter', () => {
     expect(filter(schedule('jpy'))).toBe(false);
   });
 
-  test('a foreign register shows only its own schedules', () => {
+  test('a foreign register shows schedules in its own encoding', () => {
     const filter = previewScheduleFilter(accounts, 'jpy');
     expect(filter(schedule('jpy'))).toBe(true);
+    // A transfer from another yen account is in yen; one from a dinar
+    // account (an exchange) previews only there until posted.
+    expect(filter(schedule('jpy2'))).toBe(true);
+    expect(filter(schedule('kwd'))).toBe(false);
     // A base schedule transferring to the yen account is in dollars.
     expect(filter(schedule('usd'))).toBe(false);
     expect(filter(schedule(null))).toBe(false);

@@ -68,6 +68,21 @@ export async function batchUpdateTransactions({
     deleted = [...(deleted ?? []), ...tombstoned.map(({ id }) => ({ id }))];
   }
 
+  // An update to a row added in the same batch is part of that row, so the
+  // row is written and gets its transfer hook once, in its final state.
+  if (added?.length && updated?.length) {
+    const addedIds = new Set(added.map(row => row.id));
+    added = added.map(row =>
+      updated
+        .filter(patch => patch.id === row.id)
+        .reduce<TransactionEntity>(
+          (merged, patch) => ({ ...merged, ...patch }),
+          row,
+        ),
+    );
+    updated = updated.filter(patch => !addedIds.has(patch.id));
+  }
+
   // Reject the whole batch before any write or side effect, including the
   // counterparts its new foreign transfers will get.
   await preflightTransactionWrites(

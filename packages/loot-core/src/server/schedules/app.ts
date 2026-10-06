@@ -43,7 +43,10 @@ import type {
   RuleConditionEntity,
   ScheduleEntity,
 } from '#types/models';
+import type { SchedulesRateUnavailableEvent } from '#types/server-events';
 
+import { exchangeTarget, postScheduledExchange } from './exchange-schedule';
+import type { ScheduledExchangeUnavailable } from './exchange-schedule';
 import { findSchedules } from './find-schedules';
 
 // Utilities
@@ -626,7 +629,8 @@ export type PostScheduleResult =
       transaction: ForeignDraft;
       currency: string;
       precision: number;
-    };
+    }
+  | ScheduledExchangeUnavailable;
 
 async function postTransactionForSchedule({
   id,
@@ -650,6 +654,19 @@ async function postTransactionForSchedule({
     schedule: schedule.id,
     cleared: false as const,
   };
+
+  // A transfer to another encoding posts both legs with an estimate.
+  const other = await exchangeTarget(schedule._account, schedule._payee);
+  if (other) {
+    return postScheduledExchange({
+      schedule: schedule.id,
+      account: schedule._account,
+      other,
+      payee: schedule._payee,
+      date,
+      amount: scheduledAmount,
+    });
+  }
 
   // A foreign schedule's amount is native. Rules run on it as on imported
   // rows, and the base comes from the saved rate for the final date; nothing
@@ -766,11 +783,7 @@ export async function advanceSchedulesService(syncSuccess) {
   );
 
   const failedToPost = [];
-  const rateUnavailable: Array<{
-    name: string | null;
-    date: string;
-    currency: string;
-  }> = [];
+  const rateUnavailable: SchedulesRateUnavailableEvent['schedules'] = [];
   let didPost = false;
 
   const { data: upcomingLength } = await aqlQuery(
@@ -851,6 +864,17 @@ export async function advanceSchedulesService(syncSuccess) {
               name: currentSchedule.name ?? null,
               date: posted.transaction.date,
               currency: posted.currency,
+            });
+            break;
+          }
+          if (posted?.type === 'exchange-unavailable') {
+            rateUnavailable.push({
+              name: currentSchedule.name ?? null,
+              date: posted.date,
+              currency: posted.currencies.join(', '),
+              ...(posted.reason === 'estimate-unusable' && {
+                estimateUnusable: true,
+              }),
             });
             break;
           }

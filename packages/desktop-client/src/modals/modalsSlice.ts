@@ -597,6 +597,23 @@ export type Modal =
       };
     }
   | {
+      name: 'exchange-transfer';
+      options: {
+        /** A scheduled exchange occurrence that has no estimate. */
+        occurrence: {
+          schedule: string;
+          account: string;
+          other: string;
+          date: string;
+          /** In the schedule account's encoding, signed. */
+          amount: number;
+          notes: string | null;
+          cleared: boolean;
+          category: string | null;
+        };
+      };
+    }
+  | {
       name: 'foreign-amount';
       options: {
         /** New foreign draft with its native amount in transaction_amount. */

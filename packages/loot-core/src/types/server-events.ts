@@ -103,8 +103,15 @@ type ImportProgressEvent = {
 type PrefsUpdatedEvent = undefined;
 type SchedulesOfflineEvent = undefined;
 /** Foreign schedule occurrences left unposted for want of a rate. */
-type SchedulesRateUnavailableEvent = {
-  schedules: Array<{ name: string | null; date: string; currency: string }>;
+export type SchedulesRateUnavailableEvent = {
+  schedules: Array<{
+    name: string | null;
+    date: string;
+    /** Currencies without a rate, comma separated. */
+    currency: string;
+    /** An exchange whose estimate rounds to zero, with every rate saved. */
+    estimateUnusable?: boolean;
+  }>;
 };
 type ServerErrorEvent = undefined;
 type ShowBudgetsEvent = undefined;

@@ -99,12 +99,14 @@ export function useExchangeEntry({
   const [baseInput, setBaseInput] = useState('');
   // The principal's category belongs to its on-budget leg. In an on-budget
   // register that is the draft row, whose own category control is the only
-  // one; an off-budget register has none, so the panel asks for it.
+  // one; an off-budget register has none, so the panel asks for it. Until
+  // the user picks one, it follows the draft's category, which rules may
+  // set after the panel opens.
   const draftOwnsCategory = !register.offbudget;
-  const [panelCategory, setCategory] = useState('');
+  const [chosenCategory, setCategory] = useState<string | null>(null);
   const category = draftOwnsCategory
     ? (transaction.category ?? '')
-    : panelCategory;
+    : (chosenCategory ?? transaction.category ?? '');
   const inFlight = useRef(false);
   const [feeCategory, setFeeCategory] = useState('');
   const [message, setMessage] = useState<string | null>(null);

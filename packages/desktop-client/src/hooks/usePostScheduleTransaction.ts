@@ -8,7 +8,8 @@ import type { AppDispatch } from '#redux/store';
 /**
  * Posts a schedule's occurrence. A foreign schedule without a saved rate
  * opens the conversion dialog with the draft, so the user can enter a rate
- * or base amount; nothing is posted until then.
+ * or base amount; an exchange schedule without an estimate opens the
+ * exchange dialog. Nothing is posted until then.
  */
 export async function postScheduleTransaction(
   dispatch: AppDispatch,
@@ -16,7 +17,27 @@ export async function postScheduleTransaction(
   today?: boolean,
 ) {
   const result = await send('schedule/post-transaction', { id, today });
-  if (result?.type === 'rate-unavailable') {
+  if (result?.type === 'exchange-unavailable') {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'exchange-transfer',
+          options: {
+            occurrence: {
+              schedule: result.schedule,
+              account: result.account,
+              other: result.other,
+              date: result.date,
+              amount: result.amount,
+              notes: result.notes,
+              cleared: result.cleared,
+              category: result.category,
+            },
+          },
+        },
+      }),
+    );
+  } else if (result?.type === 'rate-unavailable') {
     dispatch(
       pushModal({
         modal: {
