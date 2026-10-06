@@ -1,20 +1,22 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+
 import { Page } from '#components/Page';
-import { useIsSettingsSubPage } from '#components/settings/SettingsSubPageContext';
 
 import { ManageTags } from './ManageTags';
 
 export const ManageTagsPage = () => {
-  const isSettingsSubPage = useIsSettingsSubPage();
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
+
+  if (!isNarrowWidth) {
+    return <ManageTags />;
+  }
 
   return (
-    <Page
-      header={isSettingsSubPage ? null : t('Tags')}
-      padding={isSettingsSubPage ? 0 : undefined}
-    >
+    <Page header={t('Tags')}>
       <ManageTags />
     </Page>
   );

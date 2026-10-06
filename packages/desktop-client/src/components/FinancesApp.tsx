@@ -42,8 +42,8 @@ import { useMultiuserEnabled } from './ServerContext';
 import {
   AdvancedSettings,
   ExperimentalSettings,
+  GeneralSettings,
   Settings,
-  SettingsIndex,
 } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { ManageTagsPage } from './tags/ManageTagsPage';
@@ -303,25 +303,6 @@ export function FinancesApp() {
                       }
                     />
 
-                    {/* Payees, rules, bank sync and tags moved under /settings.
-                        These keep old links and bookmarks working. */}
-                    <Route
-                      path="/payees"
-                      element={<Navigate to="/settings/payees" replace />}
-                    />
-                    <Route
-                      path="/rules"
-                      element={<Navigate to="/settings/rules" replace />}
-                    />
-                    <Route
-                      path="/bank-sync"
-                      element={<Navigate to="/settings/bank-sync" replace />}
-                    />
-                    <Route
-                      path="/tags"
-                      element={<Navigate to="/settings/tags" replace />}
-                    />
-
                     <Route
                       path="/payees/:id"
                       element={
@@ -329,7 +310,7 @@ export function FinancesApp() {
                           FallbackComponent={FeatureErrorFallback}
                           resetKeys={[location.pathname]}
                         >
-                          <WideNotSupported>
+                          <WideNotSupported redirectTo="/settings/payees">
                             <NarrowAlternate name="PayeeEdit" />
                           </WideNotSupported>
                         </ErrorBoundary>
@@ -342,7 +323,9 @@ export function FinancesApp() {
                           FallbackComponent={FeatureErrorFallback}
                           resetKeys={[location.pathname]}
                         >
-                          <NarrowAlternate name="RuleEdit" />
+                          <WideNotSupported redirectTo="/settings/rules">
+                            <NarrowAlternate name="RuleEdit" />
+                          </WideNotSupported>
                         </ErrorBoundary>
                       }
                     />
@@ -359,13 +342,12 @@ export function FinancesApp() {
                         </ErrorBoundary>
                       }
                     />
+                    <Route
+                      path="/notifications"
+                      element={<NotificationsPage />}
+                    />
                     <Route path="/settings" element={<Settings />}>
-                      <Route index element={<SettingsIndex />} />
-                      <Route path="advanced" element={<AdvancedSettings />} />
-                      <Route
-                        path="experimental"
-                        element={<ExperimentalSettings />}
-                      />
+                      <Route index element={<GeneralSettings />} />
                       <Route
                         path="payees"
                         element={
@@ -377,6 +359,7 @@ export function FinancesApp() {
                           </ErrorBoundary>
                         }
                       />
+                      <Route path="tags" element={<ManageTagsPage />} />
                       <Route
                         path="rules"
                         element={
@@ -399,12 +382,23 @@ export function FinancesApp() {
                           </ErrorBoundary>
                         }
                       />
-                      <Route path="tags" element={<ManageTagsPage />} />
+                      <Route
+                        path="advanced"
+                        element={
+                          <NarrowNotSupported redirectTo="/settings">
+                            <AdvancedSettings />
+                          </NarrowNotSupported>
+                        }
+                      />
+                      <Route
+                        path="experimental"
+                        element={
+                          <NarrowNotSupported redirectTo="/settings">
+                            <ExperimentalSettings />
+                          </NarrowNotSupported>
+                        }
+                      />
                     </Route>
-                    <Route
-                      path="/notifications"
-                      element={<NotificationsPage />}
-                    />
 
                     <Route
                       path="/gocardless/link"

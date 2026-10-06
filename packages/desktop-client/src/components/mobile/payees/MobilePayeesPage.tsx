@@ -76,7 +76,7 @@ export function MobilePayeesPage() {
             id: payee.id,
           });
           const ruleIds = associatedRules.map(rule => rule.id).join(',');
-          void navigate(`/rules?visible-rules=${ruleIds}`);
+          void navigate(`/settings/rules?visible-rules=${ruleIds}`);
           return;
         } catch (error) {
           console.error('Failed to fetch payee rules:', error);

@@ -532,7 +532,7 @@ function SelectedTransactionsFloatingActionBar({
                               void navigate(`/categories/${String(value)}`);
                               break;
                             case 'payee':
-                              void navigate(`/payees`);
+                              void navigate('/settings/payees');
                               break;
                             default:
                               break;

@@ -37,7 +37,6 @@ export { SvgBadge } from './Badge';
 export { SvgBatteryFull } from './BatteryFull';
 export { SvgBatteryHalf } from './BatteryHalf';
 export { SvgBatteryLow } from './BatteryLow';
-export { SvgBeaker } from './Beaker';
 export { SvgBeverage } from './Beverage';
 export { SvgBlock } from './Block';
 export { SvgBluetooth } from './Bluetooth';
