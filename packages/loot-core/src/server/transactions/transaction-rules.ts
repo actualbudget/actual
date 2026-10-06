@@ -43,6 +43,7 @@ import {
 } from '#shared/months';
 import { q } from '#shared/query';
 import { getApproxNumberThreshold, sortNumbers } from '#shared/rules';
+import { extractScheduleConds, getScheduledAmount } from '#shared/schedules';
 import { extractTagsForFilter, makeTagAqlRegex } from '#shared/tags';
 import { ungroupTransaction } from '#shared/transactions';
 import { fastSetMerge, partitionByField } from '#shared/util';
@@ -293,8 +294,9 @@ async function validateScheduleRule(rule: {
     }
   }
 
-  // Amount conditions must have the shape their operator needs.
-  const amount = conditions.find(cond => cond.field === 'amount');
+  // The posting amount condition, as posting finds it, must have the shape
+  // its operator needs.
+  const amount = extractScheduleConds(conditions).amount;
   const value = amount?.value as
     | number
     | { num1?: unknown; num2?: unknown }
@@ -313,44 +315,77 @@ async function validateScheduleRule(rule: {
     throw new Error('schedule-amount-invalid');
   }
 
-  // Foreign transfers arrive with MC-4: no schedule may transfer from or to
-  // a foreign account.
-  const payeeIds = [
-    ...conditions
-      .filter(
-        cond =>
-          cond.op === 'is' &&
-          (cond.field === 'payee' || cond.field === 'description'),
-      )
-      .map(cond => cond.value),
-    ...actions
-      .filter(
-        action =>
-          action.op === 'set' &&
-          (action.field === 'payee' || action.field === 'description'),
-      )
-      .map(action => action.value),
-  ].filter((id): id is string => typeof id === 'string');
-  for (const id of payeeIds) {
+  // A transfer to another encoding is an exchange: it must be the payee
+  // condition, so the schedule's endpoints are fixed, and its leg can be
+  // neither split nor given another payee.
+  const transferEncoding = async (id: unknown) => {
+    if (typeof id !== 'string') return null;
     const payee = await db.first<{ transfer_acct: string | null }>(
       'SELECT transfer_acct FROM payees WHERE id = ?',
       [id],
     );
-    if (
-      payee?.transfer_acct &&
-      (encoding.currency !== null ||
-        (await accountEncoding(payee.transfer_acct)).currency !== null)
-    ) {
+    return payee?.transfer_acct
+      ? await accountEncoding(payee.transfer_acct)
+      : null;
+  };
+  const crossesEncoding = async (id: unknown) => {
+    const target = await transferEncoding(id);
+    return target !== null && !sameEncoding(target, encoding);
+  };
+  const payeeActions = actions.filter(
+    action =>
+      action.op === 'set' &&
+      (action.field === 'payee' || action.field === 'description'),
+  );
+  for (const action of payeeActions) {
+    if (await crossesEncoding(action.value)) {
       throw new Error('multicurrency-transfer-unavailable');
+    }
+  }
+  const payeeCondition = conditions.find(
+    cond =>
+      cond.op === 'is' &&
+      (cond.field === 'payee' || cond.field === 'description'),
+  );
+  const splits = actions.some(
+    action => action.op === 'set-split-amount' || !!action.options?.splitIndex,
+  );
+  if (payeeCondition && (await crossesEncoding(payeeCondition.value))) {
+    if (payeeActions.length > 0) {
+      throw new Error('multicurrency-transfer-unavailable');
+    }
+    if (splits) {
+      throw new Error('foreign-split-unavailable');
+    }
+    // An exchange posts a nonzero amount, judged as posting computes it. Only
+    // the rule that owns or creates the schedule defines that amount; other
+    // rules linking it only match transactions.
+    const linked = actions
+      .filter(action => action.op === 'link-schedule')
+      .map(action => action.value);
+    const createsSchedule =
+      linked.length > 0 &&
+      (await db.first(
+        `SELECT id FROM schedules WHERE id IN (${linked.map(() => '?').join(', ')})`,
+        linked,
+      )) == null;
+    const scheduled =
+      typeof value === 'number'
+        ? value
+        : value
+          ? getScheduledAmount({
+              num1: Number(value.num1),
+              num2: Number(value.num2),
+            })
+          : 0;
+    if ((ownsSchedule || createsSchedule) && scheduled === 0) {
+      throw new Error('schedule-amount-invalid');
     }
   }
   if (
     encoding.currency !== null &&
     // Actions with a split index create split children.
-    actions.some(
-      action =>
-        action.op === 'set-split-amount' || !!action.options?.splitIndex,
-    )
+    splits
   ) {
     throw new Error('foreign-split-unavailable');
   }

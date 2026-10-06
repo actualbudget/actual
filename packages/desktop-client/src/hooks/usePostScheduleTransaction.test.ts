@@ -52,3 +52,32 @@ it('opens nothing when the occurrence posts', async () => {
   await postScheduleTransaction(store.dispatch, 'dollars', true);
   expect(store.getState().modals.modalStack).toEqual([]);
 });
+
+it('opens the exchange dialog for an exchange without an estimate', async () => {
+  const occurrence = {
+    schedule: 'rent',
+    account: 'usd',
+    other: 'jpy',
+    date: '2026-03-08',
+    amount: -10000,
+    notes: null,
+    cleared: false,
+    category: null,
+  };
+  initServer({
+    'schedule/post-transaction': async () => ({
+      type: 'exchange-unavailable' as const,
+      reason: 'rate-unavailable' as const,
+      currencies: ['JPY'],
+      ...occurrence,
+    }),
+  });
+  const store = createTestAppStore();
+  await postScheduleTransaction(store.dispatch, 'rent');
+  expect(store.getState().modals.modalStack).toEqual([
+    expect.objectContaining({
+      name: 'exchange-transfer',
+      options: { occurrence },
+    }),
+  ]);
+});

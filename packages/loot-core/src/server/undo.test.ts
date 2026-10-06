@@ -34,3 +34,20 @@ it('keeps undo and redo after a mutation that fails without recording', async ()
   await redo();
   expect(payeeLive('payee')).toBe(true);
 });
+
+it('keeps undo and redo after a mutation that writes nothing', async () => {
+  await runMutator(() =>
+    withUndo(async () => {
+      await db.insertPayee({ id: 'payee', name: 'Payee' });
+    }),
+  );
+  await undo();
+
+  // A scheduled exchange without a rate returns a result and writes nothing.
+  await expect(
+    runMutator(() => withUndo(async () => 'exchange-unavailable')),
+  ).resolves.toBe('exchange-unavailable');
+
+  await redo();
+  expect(payeeLive('payee')).toBe(true);
+});

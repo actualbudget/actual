@@ -233,6 +233,10 @@ function inverseTransferForAccount({
     ...standaloneTransaction,
     inversed: true,
     amount: -transaction.amount,
+    // A same-encoding foreign transfer's native amount flips with it.
+    ...(transaction.transaction_amount != null && {
+      transaction_amount: -transaction.transaction_amount,
+    }),
     payee: getPayeeByTransferAccount(transaction.account)?.id || '',
     account: accountId || '',
     ...(previewStatus != null && { category: previewStatus }),
