@@ -36,9 +36,11 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
+import type { ExchangeRequest } from '#util/exchange-entry';
 import { postForeignEntry } from '#util/post-foreign-entry';
 
 import { applyRulesToTransaction } from './applyRulesToTransaction';
+import type { ExchangePostResult } from './ExchangePanel';
 import type { ClearedFieldsByTransaction } from './table/utils';
 import { TransactionTable } from './TransactionsTable';
 import type { TransactionTableProps } from './TransactionsTable';
@@ -218,6 +220,25 @@ export function TransactionList({
     },
     [account, dispatch, isLearnCategoriesEnabled, onRefetch],
   );
+
+  // Exchange transfers post atomically from the register's inline panel.
+  const onAddExchange = async (
+    request: ExchangeRequest,
+  ): Promise<ExchangePostResult> => {
+    try {
+      const result = await send('transactions/post-exchange-transfer', request);
+      if (result.status === 'ok') {
+        onRefetch();
+        return { status: 'ok' };
+      }
+      return { status: 'rate-unavailable', currencies: result.currencies };
+    } catch (err) {
+      return {
+        status: 'error',
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
+  };
 
   const onSave = useCallback(
     async (transaction: TransactionEntity) => {
@@ -553,6 +574,7 @@ export function TransactionList({
         onSplit={onSplit}
         onCloseAddTransaction={onCloseAddTransaction}
         onAdd={onAdd}
+        onAddExchange={account ? onAddExchange : undefined}
         onAddSplit={onAddSplit}
         onManagePayees={onManagePayees}
         onCreatePayee={onCreatePayee}
