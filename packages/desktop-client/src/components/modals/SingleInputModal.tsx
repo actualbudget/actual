@@ -88,6 +88,7 @@ export function SingleInputModal({
               <Button
                 type="submit"
                 variant="primary"
+                size="large"
                 style={{
                   height: styles.mobileMinHeight,
                   marginLeft: styles.mobileEditingPadding,

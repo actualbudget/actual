@@ -56,6 +56,7 @@ export function ConfirmDeleteModal({
               <InitialFocus>
                 <Button
                   variant="primary"
+                  size="large"
                   style={narrowButtonStyle}
                   onPress={() => {
                     onConfirm();

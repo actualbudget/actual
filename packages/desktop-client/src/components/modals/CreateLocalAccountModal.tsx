@@ -231,6 +231,7 @@ export function CreateLocalAccountModal() {
                 <Button
                   type="submit"
                   variant="primary"
+                  size="large"
                   style={{ marginLeft: 10 }}
                 >
                   <Trans>Create</Trans>

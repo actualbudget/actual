@@ -198,6 +198,7 @@ export function TransactionTableColumnsModal({
               </Button>
               <Button
                 variant="primary"
+                size="large"
                 onPress={() => {
                   onSave(columns, applyToAll);
                   state.close();
