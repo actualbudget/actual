@@ -280,7 +280,7 @@ export function Cell({
   const { widthStyle, effectiveColumnName, hasResizeContext } =
     useColumnWidthStyle(width, name, columnName);
   const cellStyle: CSSProperties = {
-    ...(hasResizeContext && { position: 'relative' }),
+    position: 'relative',
     textAlign: textAlign || 'left',
     justifyContent: 'center',
     borderTopWidth: 1,
