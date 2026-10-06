@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { FeatureFlag, ServerPrefs } from '@actual-app/core/types/prefs';
 
@@ -16,7 +17,8 @@ import { useServerPref } from '#hooks/useServerPref';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
-import { Setting } from './UI';
+import { SettingsGroup } from './SettingsGroup';
+import { SettingsRow } from './SettingsRow';
 
 type FeatureToggleProps = {
   flag: FeatureFlag;
@@ -37,42 +39,69 @@ function FeatureToggle({
 }: FeatureToggleProps) {
   const enabled = useFeatureFlag(flagName);
   const [_, setFlagPref] = useSyncedPref(`flags.${flagName}`);
+  const id = `settings-flag-${flagName}`;
 
   return (
-    <label style={{ display: 'flex' }}>
-      <Checkbox
-        checked={enabled}
-        onChange={() => {
-          setFlagPref(String(!enabled));
-        }}
-        disabled={disableToggle}
-      />
-      <View
-        style={{ color: disableToggle ? theme.pageTextSubdued : 'inherit' }}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-          {children}
-          {feedbackLink && (
-            <Link variant="external" to={feedbackLink}>
-              <Trans>(give feedback)</Trans>
-            </Link>
-          )}
-        </View>
-
-        {disableToggle && (
-          <Text
-            style={{
-              color: theme.errorText,
-              fontWeight: 500,
+    <SettingsRow
+      htmlFor={id}
+      title={children}
+      description={
+        (note || (disableToggle && error)) && (
+          <FeatureDetails note={note} error={disableToggle ? error : null} />
+        )
+      }
+      control={
+        <FeatureControl feedbackLink={feedbackLink}>
+          <Checkbox
+            id={id}
+            checked={enabled}
+            onChange={() => {
+              setFlagPref(String(!enabled));
             }}
-          >
-            {error}
-          </Text>
-        )}
+            disabled={disableToggle}
+            style={{ marginRight: 0 }}
+          />
+        </FeatureControl>
+      }
+    />
+  );
+}
 
-        {note && <Text style={{ color: theme.warningText }}>{note}</Text>}
-      </View>
-    </label>
+type FeatureDetailsProps = {
+  note?: ReactNode;
+  error?: ReactNode;
+};
+
+function FeatureDetails({ note, error }: FeatureDetailsProps) {
+  return (
+    <>
+      {error && (
+        <Text style={{ color: theme.errorText, fontWeight: 500 }}>
+          {error}{' '}
+        </Text>
+      )}
+      {note && <Text style={{ color: theme.warningText }}>{note}</Text>}
+    </>
+  );
+}
+
+type FeatureControlProps = {
+  feedbackLink?: string;
+  children: ReactNode;
+};
+
+function FeatureControl({ feedbackLink, children }: FeatureControlProps) {
+  return (
+    <View
+      style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
+    >
+      {feedbackLink && (
+        <Link variant="external" to={feedbackLink} linkColor="purple">
+          <Trans>Give feedback</Trans>
+        </Link>
+      )}
+      {children}
+    </View>
   );
 }
 
@@ -113,43 +142,32 @@ function ServerFeatureToggle({
     return null;
   }
 
-  return (
-    <label style={{ display: 'flex' }}>
-      <Checkbox
-        checked={enabled === 'true'}
-        onChange={() => {
-          setEnabled(enabled === 'true' ? 'false' : 'true');
-        }}
-        disabled={disableToggle}
-      />
-      <View
-        style={{ color: disableToggle ? theme.pageTextSubdued : 'inherit' }}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-          {children}
-          {feedbackLink && (
-            <Link variant="external" to={feedbackLink}>
-              <Trans>(give feedback)</Trans>
-            </Link>
-          )}
-        </View>
+  const id = `settings-flag-${prefName}`;
 
-        {disableToggle && (
-          <Text
-            style={{
-              color: theme.errorText,
-              fontWeight: 500,
+  return (
+    <SettingsRow
+      htmlFor={id}
+      title={children}
+      description={disableToggle && error && <FeatureDetails error={error} />}
+      control={
+        <FeatureControl feedbackLink={feedbackLink}>
+          <Checkbox
+            id={id}
+            checked={enabled === 'true'}
+            onChange={() => {
+              setEnabled(enabled === 'true' ? 'false' : 'true');
             }}
-          >
-            {error}
-          </Text>
-        )}
-      </View>
-    </label>
+            disabled={disableToggle}
+            style={{ marginRight: 0 }}
+          />
+        </FeatureControl>
+      }
+    />
   );
 }
 
 export function ExperimentalFeatures() {
+  const { t } = useTranslation();
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const showGoalTemplatesUI = goalTemplatesEnabled || goalTemplatesUIEnabled;
@@ -158,114 +176,104 @@ export function ExperimentalFeatures() {
     localStorage.getItem('devEnableServerPrefs') === 'true';
 
   return (
-    <Setting
-      primaryAction={
-        <View style={{ gap: '1em' }}>
-          <FeatureToggle flag="goalTemplatesEnabled">
-            <Trans>Goal templates</Trans>
-          </FeatureToggle>
-          {showGoalTemplatesUI && (
-            <View style={{ paddingLeft: 22 }}>
-              <FeatureToggle
-                flag="goalTemplatesUIEnabled"
-                feedbackLink="https://github.com/actualbudget/actual/issues/7692"
-              >
-                <Trans>Subfeature: Budget automations UI</Trans>
-              </FeatureToggle>
-            </View>
-          )}
-          <FeatureToggle
-            flag="actionTemplating"
-            feedbackLink="https://github.com/actualbudget/actual/issues/3606"
-            note={
-              <Trans>
-                Deprecated: this feature will be removed in a future release.
-                Use Excel formula mode (Rule formulae) instead.
-              </Trans>
-            }
-          >
-            <Trans>Rule action templating</Trans>
-          </FeatureToggle>
-          <FeatureToggle
-            flag="formulaMode"
-            feedbackLink="https://github.com/actualbudget/actual/issues/5949"
-          >
-            <Trans>Excel formula mode (Formula cards & Rule formulas)</Trans>
-          </FeatureToggle>
-          <FeatureToggle
-            flag="currency"
-            feedbackLink="https://github.com/actualbudget/actual/issues/5191"
-          >
-            <Trans>Currency support</Trans>
-          </FeatureToggle>
-          <FeatureToggle
-            flag="mobileCalculator"
-            feedbackLink="https://github.com/actualbudget/actual/issues/8255"
-          >
-            <Trans>Mobile calculator</Trans>
-          </FeatureToggle>
-          <FeatureToggle
-            flag="newSidebarUI"
-            feedbackLink="https://github.com/actualbudget/actual/issues/9007"
-          >
-            <Trans>Redesigned sidebar</Trans>
-          </FeatureToggle>
-          <FeatureToggle
-            flag="sankeyReport"
-            feedbackLink="https://github.com/actualbudget/actual/issues/1919"
-          >
-            <Trans>Sankey report</Trans>
-          </FeatureToggle>
-          <FeatureToggle
-            flag="balanceForecastReport"
-            feedbackLink="https://github.com/actualbudget/actual/issues/7669"
-          >
-            <Trans>Balance Forecast Report</Trans>
-          </FeatureToggle>
-          <FeatureToggle
-            flag="budgetAnalysisReport"
-            feedbackLink="https://github.com/actualbudget/actual/pull/6742"
-          >
-            <Trans>Budget Analysis Report</Trans>
-          </FeatureToggle>
-          <FeatureToggle
-            flag="monteCarloReport"
-            feedbackLink="https://github.com/actualbudget/actual/issues/8571"
-          >
-            <Trans>Monte Carlo Analysis Report</Trans>
-          </FeatureToggle>
-          <FeatureToggle
-            flag="enableBanking"
-            feedbackLink="https://github.com/actualbudget/actual/issues/7799"
-          >
-            <Trans>Enable Banking sync (EU banks)</Trans>
-          </FeatureToggle>
-          <FeatureToggle
-            flag="akahuBankSync"
-            feedbackLink="https://github.com/actualbudget/actual/issues/8020"
-          >
-            <Trans>Akahu Bank Sync (NZ banks)</Trans>
-          </FeatureToggle>
-          {showServerPrefs && (
-            <ServerFeatureToggle
-              prefName="flags.plugins"
-              disableToggle
-              feedbackLink="https://github.com/actualbudget/actual/issues/5950"
-            >
-              <Trans>Client-Side plugins (soon)</Trans>
-            </ServerFeatureToggle>
-          )}
-        </View>
-      }
+    <SettingsGroup
+      title={t('Experimental features')}
+      description={t(
+        'These features are not fully tested and may not work as expected. THEY MAY CAUSE IRRECOVERABLE DATA LOSS. They may do nothing at all. Only enable them if you know what you are doing.',
+      )}
     >
-      <Text>
-        <Trans>
-          <strong>Experimental features.</strong> These features are not fully
-          tested and may not work as expected. THEY MAY CAUSE IRRECOVERABLE DATA
-          LOSS. They may do nothing at all. Only enable them if you know what
-          you are doing.
-        </Trans>
-      </Text>
-    </Setting>
+      <FeatureToggle flag="goalTemplatesEnabled">
+        <Trans>Goal templates</Trans>
+      </FeatureToggle>
+      {showGoalTemplatesUI && (
+        <FeatureToggle
+          flag="goalTemplatesUIEnabled"
+          feedbackLink="https://github.com/actualbudget/actual/issues/7692"
+        >
+          <Trans>Subfeature: Budget automations UI</Trans>
+        </FeatureToggle>
+      )}
+      <FeatureToggle
+        flag="actionTemplating"
+        feedbackLink="https://github.com/actualbudget/actual/issues/3606"
+        note={
+          <Trans>
+            Deprecated: this feature will be removed in a future release. Use
+            Excel formula mode (Rule formulae) instead.
+          </Trans>
+        }
+      >
+        <Trans>Rule action templating</Trans>
+      </FeatureToggle>
+      <FeatureToggle
+        flag="formulaMode"
+        feedbackLink="https://github.com/actualbudget/actual/issues/5949"
+      >
+        <Trans>Excel formula mode (Formula cards & Rule formulas)</Trans>
+      </FeatureToggle>
+      <FeatureToggle
+        flag="currency"
+        feedbackLink="https://github.com/actualbudget/actual/issues/5191"
+      >
+        <Trans>Currency support</Trans>
+      </FeatureToggle>
+      <FeatureToggle
+        flag="mobileCalculator"
+        feedbackLink="https://github.com/actualbudget/actual/issues/8255"
+      >
+        <Trans>Mobile calculator</Trans>
+      </FeatureToggle>
+      <FeatureToggle
+        flag="newSidebarUI"
+        feedbackLink="https://github.com/actualbudget/actual/issues/9007"
+      >
+        <Trans>Redesigned sidebar</Trans>
+      </FeatureToggle>
+      <FeatureToggle
+        flag="sankeyReport"
+        feedbackLink="https://github.com/actualbudget/actual/issues/1919"
+      >
+        <Trans>Sankey report</Trans>
+      </FeatureToggle>
+      <FeatureToggle
+        flag="balanceForecastReport"
+        feedbackLink="https://github.com/actualbudget/actual/issues/7669"
+      >
+        <Trans>Balance Forecast Report</Trans>
+      </FeatureToggle>
+      <FeatureToggle
+        flag="budgetAnalysisReport"
+        feedbackLink="https://github.com/actualbudget/actual/pull/6742"
+      >
+        <Trans>Budget Analysis Report</Trans>
+      </FeatureToggle>
+      <FeatureToggle
+        flag="monteCarloReport"
+        feedbackLink="https://github.com/actualbudget/actual/issues/8571"
+      >
+        <Trans>Monte Carlo Analysis Report</Trans>
+      </FeatureToggle>
+      <FeatureToggle
+        flag="enableBanking"
+        feedbackLink="https://github.com/actualbudget/actual/issues/7799"
+      >
+        <Trans>Enable Banking sync (EU banks)</Trans>
+      </FeatureToggle>
+      <FeatureToggle
+        flag="akahuBankSync"
+        feedbackLink="https://github.com/actualbudget/actual/issues/8020"
+      >
+        <Trans>Akahu Bank Sync (NZ banks)</Trans>
+      </FeatureToggle>
+      {showServerPrefs && (
+        <ServerFeatureToggle
+          prefName="flags.plugins"
+          disableToggle
+          feedbackLink="https://github.com/actualbudget/actual/issues/5950"
+        >
+          <Trans>Client-Side plugins (soon)</Trans>
+        </ServerFeatureToggle>
+      )}
+    </SettingsGroup>
   );
 }
