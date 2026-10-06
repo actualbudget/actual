@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgCog,
   SvgLibrary,
@@ -9,7 +10,8 @@ import {
   SvgUserGroup,
 } from '@actual-app/components/icons/v1';
 import { SvgSettingsSliderAlternate } from '@actual-app/components/icons/v2';
-import { spacing } from '@actual-app/components/tokens';
+import { theme } from '@actual-app/components/theme';
+import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
@@ -19,6 +21,7 @@ import { SettingsNavLink } from './SettingsNavLink';
 
 export function SettingsNav() {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const syncServerStatus = useSyncServerStatus();
   const isTestEnv = useIsTestEnv();
   const isUsingServer = syncServerStatus !== 'no-server' || isTestEnv;
@@ -27,15 +30,30 @@ export function SettingsNav() {
     <View
       role="navigation"
       aria-label={t('Settings')}
-      style={{ width: 180, flexShrink: 0, gap: spacing.xxs }}
+      style={
+        isNarrowWidth
+          ? {
+              flexShrink: 0,
+              backgroundColor: theme.pillBackground,
+              border: `1px solid ${theme.pillBorderDark}`,
+              borderRadius: radius.sm,
+            }
+          : { width: 180, flexShrink: 0, gap: spacing.xxs }
+      }
     >
-      <SettingsNavLink title={t('General')} Icon={SvgCog} to="/settings" end />
+      <SettingsNavLink
+        title={t('General')}
+        Icon={SvgCog}
+        to="/settings/general"
+      />
       <SettingsNavLink
         title={t('Payees')}
         Icon={SvgUserGroup}
         to="/settings/payees"
       />
-      <SettingsNavLink title={t('Tags')} Icon={SvgTag} to="/settings/tags" />
+      {!isNarrowWidth && (
+        <SettingsNavLink title={t('Tags')} Icon={SvgTag} to="/settings/tags" />
+      )}
       <SettingsNavLink
         title={t('Rules')}
         Icon={SvgTuning}
