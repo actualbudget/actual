@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -19,10 +18,17 @@ import { useMetadataPref } from '#hooks/useMetadataPref';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
-export function SidebarBudgetName() {
+type SidebarBudgetNameProps = {
+  isEditing: boolean;
+  onEditingChange: (isEditing: boolean) => void;
+};
+
+export function SidebarBudgetName({
+  isEditing,
+  onEditingChange,
+}: SidebarBudgetNameProps) {
   const { t } = useTranslation();
   const [budgetName, setBudgetNamePref] = useMetadataPref('budgetName');
-  const [isEditing, setIsEditing] = useState(false);
   const dispatch = useDispatch();
 
   const iconButtonClassName = cx(
@@ -35,97 +41,101 @@ export function SidebarBudgetName() {
     }),
   );
 
-  if (isEditing) {
-    return (
-      <InitialFocus>
-        <Input
-          aria-label={t('Budget name')}
-          size="medium"
-          style={{
-            fontWeight: 600,
-            paddingBlock: 0,
-            paddingInline: spacing.xs,
-            marginBlock: -1,
-          }}
-          defaultValue={budgetName}
-          onEnter={newBudgetName => {
-            if (newBudgetName.trim() !== '') {
-              setBudgetNamePref(newBudgetName);
-            }
-            setIsEditing(false);
-          }}
-          onEscape={() => setIsEditing(false)}
-          onBlur={() => setIsEditing(false)}
-        />
-      </InitialFocus>
-    );
+  function saveBudgetName(newBudgetName: string) {
+    if (newBudgetName.trim() !== '' && newBudgetName !== budgetName) {
+      setBudgetNamePref(newBudgetName);
+    }
+    onEditingChange(false);
   }
 
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs,
-        minWidth: 0,
-        '& .hover-visible': {
-          opacity: 0,
-        },
-        '&:hover .hover-visible, & .hover-visible[data-focus-visible]': {
-          opacity: 1,
-        },
-      }}
-    >
-      <Text
-        data-testid="budget-name"
+    <>
+      <View
         style={{
-          color: theme.sidebarHeaderText,
-          fontSize: 13,
-          fontWeight: 600,
-          ...styles.ellipsisText,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: spacing.xs,
+          minWidth: 0,
+          visibility: isEditing ? 'hidden' : undefined,
+          '& .hover-visible': {
+            opacity: 0,
+          },
+          '&:hover .hover-visible, & .hover-visible[data-focus-visible]': {
+            opacity: 1,
+          },
         }}
       >
-        {budgetName || t('Unnamed')}
-      </Text>
-      <Button
-        variant="bare"
-        className={iconButtonClassName}
-        aria-label={t('Rename budget')}
-        style={{ padding: spacing.xxs, flexShrink: 0 }}
-        onPress={() => setIsEditing(true)}
-      >
-        <SvgPencil1
-          width={11}
-          height={11}
-          style={{ color: theme.sidebarTextSubdued }}
-        />
-      </Button>
-      {isElectron() && (
-        <Tooltip
-          content={t('Load Backup…')}
-          placement="bottom start"
-          style={styles.tooltip}
-          triggerProps={{ delay: 500 }}
+        <Text
+          data-testid="budget-name"
+          style={{
+            color: theme.sidebarHeaderText,
+            fontSize: 13,
+            fontWeight: 600,
+            ...styles.ellipsisText,
+          }}
         >
-          <Button
-            variant="bare"
-            className={iconButtonClassName}
-            aria-label={t('Load Backup…')}
-            style={{ padding: spacing.xxs, flexShrink: 0 }}
-            onPress={() =>
-              dispatch(
-                pushModal({ modal: { name: 'load-backup', options: {} } }),
-              )
-            }
+          {budgetName || t('Unnamed')}
+        </Text>
+        <Button
+          variant="bare"
+          className={iconButtonClassName}
+          aria-label={t('Rename budget')}
+          style={{ padding: spacing.xxs, flexShrink: 0 }}
+          onPress={() => onEditingChange(true)}
+        >
+          <SvgPencil1
+            width={11}
+            height={11}
+            style={{ color: theme.sidebarTextSubdued }}
+          />
+        </Button>
+        {isElectron() && (
+          <Tooltip
+            content={t('Load Backup…')}
+            placement="bottom start"
+            style={styles.tooltip}
+            triggerProps={{ delay: 500 }}
           >
-            <SvgTime
-              width={11}
-              height={11}
-              style={{ color: theme.sidebarTextSubdued }}
-            />
-          </Button>
-        </Tooltip>
+            <Button
+              variant="bare"
+              className={iconButtonClassName}
+              aria-label={t('Load Backup…')}
+              style={{ padding: spacing.xxs, flexShrink: 0 }}
+              onPress={() =>
+                dispatch(
+                  pushModal({ modal: { name: 'load-backup', options: {} } }),
+                )
+              }
+            >
+              <SvgTime
+                width={11}
+                height={11}
+                style={{ color: theme.sidebarTextSubdued }}
+              />
+            </Button>
+          </Tooltip>
+        )}
+      </View>
+      {isEditing && (
+        <InitialFocus>
+          <Input
+            aria-label={t('Budget name')}
+            size="medium"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: 0,
+              width: '100%',
+              transform: 'translateY(-50%)',
+              fontWeight: 600,
+            }}
+            defaultValue={budgetName}
+            onEnter={saveBudgetName}
+            onUpdate={saveBudgetName}
+            onEscape={() => onEditingChange(false)}
+          />
+        </InitialFocus>
       )}
-    </View>
+    </>
   );
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -26,6 +27,7 @@ type SidebarHeaderProps = {
 export function SidebarHeader({ children }: SidebarHeaderProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const [isEditingName, setIsEditingName] = useState(false);
 
   return (
     <View
@@ -71,11 +73,16 @@ export function SidebarHeader({ children }: SidebarHeaderProps) {
           />
         </Button>
       </Tooltip>
-      <View style={{ minWidth: 0, flex: 1 }}>
-        <SidebarBudgetName />
-        <SyncStatusLine />
+      <View style={{ position: 'relative', minWidth: 0, flex: 1 }}>
+        <SidebarBudgetName
+          isEditing={isEditingName}
+          onEditingChange={setIsEditingName}
+        />
+        <View style={{ visibility: isEditingName ? 'hidden' : undefined }}>
+          <SyncStatusLine />
+        </View>
       </View>
-      {children}
+      {!isEditingName && children}
     </View>
   );
 }
