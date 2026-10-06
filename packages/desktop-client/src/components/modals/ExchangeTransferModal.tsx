@@ -102,6 +102,7 @@ export function ExchangeTransferModal({
                 register={register}
                 other={other}
                 onPost={onPost}
+                feeNeedsOtherAmount
               />
             </View>
           ) : (

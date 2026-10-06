@@ -126,7 +126,19 @@ The payee list on a new schedule includes transfers. Open **Schedules** and clic
 
 On 10/31/2026, Actual posts both sides at the saved rate. BNP Paribas receives €1,000.00 and is €3,000.00. Checking sends $1,100.00 and is $1,400.00. **All accounts** stays $4,950.00.
 
-If that date has no saved rate, the transfer stays unposted. Post it from the Schedules page. The dialog is **Post scheduled transfer**, with the same amount, rate, and fee fields as a transfer in the register. Nothing is posted until you click **Add transfer**.
+If that date has no saved rate, the transfer stays unposted. Post it from the Schedules page. The dialog is **Post scheduled transfer**, with the same amount, rate, and fee fields as a transfer in the register. Nothing is posted until you click **Add transfer**. If you enter a fee there, type the other amount as well. Actual asks for the amount received or the amount sent, and it does not estimate that side once a fee is set.
+
+## Import onto a scheduled transfer
+
+A file can update that transfer instead of adding a second one. With **Fund BNP Paribas** already posted, open BNP Paribas and click **Import**. Choose a CSV for 10/31/2026 whose amount is 980.00 euros. Leave **Merge with existing transactions** on. The file date has to fall within a week of the transfer, and the amount has to be close to the schedule. This schedule is approximately €1,000.00, and a file amount within 7.5% of that matches.
+
+The preview shows €980.00 from the file and the existing €1,000.00 under it.
+
+<img width="800" alt="Import preview matching a 980.00 euro file row to the existing 1,000.00 euro transfer from Checking" src="/img/budgeting/multi-currency-import-exchange@2x.png" />
+
+**Import** replaces the estimate. The deposit is then 980.00, and the row still shows $1,100.00 from Checking. BNP Paribas is €2,980.00. Checking stays $1,400.00. **All accounts** stays $4,950.00.
+
+A transfer posted with a fee is left as entered. A reconciled transfer is left alone. A bank download that matches the transfer updates it the same way.
 
 ## On a phone
 
