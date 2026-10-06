@@ -97,7 +97,6 @@ export function ReconcilingBanner({
         </View>
         <Button
           variant="primary"
-          size="extra-large"
           isDisabled={isUpdating}
           style={{ height: styles.mobileMinHeight }}
           onPress={() => runAction(onDone)}
@@ -138,7 +137,6 @@ export function ReconcilingBanner({
           }}
         >
           <Button
-            size="large"
             isDisabled={isUpdating}
             style={{ flex: 1, minHeight: styles.mobileMinHeight }}
             onPress={() => runAction(() => onCreateTransaction(targetDiff))}
@@ -147,7 +145,6 @@ export function ReconcilingBanner({
           </Button>
           <Button
             variant="primary"
-            size="extra-large"
             isDisabled={isUpdating}
             style={{ flex: 1, minHeight: styles.mobileMinHeight }}
             onPress={() => runAction(onDone)}
