@@ -2,7 +2,6 @@ import type { Locator, Page } from '@playwright/test';
 
 type SettingsSection =
   | 'General'
-  | 'Appearance'
   | 'Payees'
   | 'Rules'
   | 'Bank Sync'

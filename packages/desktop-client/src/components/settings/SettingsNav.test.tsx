@@ -37,7 +37,6 @@ describe('SettingsNav', () => {
 
     expect(hrefs).toEqual([
       '/settings/general',
-      '/settings/appearance',
       '/settings/payees',
       '/settings/tags',
       '/settings/rules',

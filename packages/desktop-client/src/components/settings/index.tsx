@@ -282,29 +282,20 @@ export function SettingsIndex() {
 
 export function GeneralSettings() {
   const { t } = useTranslation();
+  const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
 
   return (
     <SettingsSections title={t('General')}>
       <About />
+      <ThemeSettings />
+      <FormatSettings />
+      {isCurrencyExperimentalEnabled && <CurrencySettings />}
+      <LanguageSettings />
       <AuthSettings />
       <EncryptionSettings />
       <BudgetTypeSettings />
       {isElectron() && <Backups />}
       <ExportBudget />
-    </SettingsSections>
-  );
-}
-
-export function AppearanceSettings() {
-  const { t } = useTranslation();
-  const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
-
-  return (
-    <SettingsSections title={t('Appearance')}>
-      <ThemeSettings />
-      <FormatSettings />
-      {isCurrencyExperimentalEnabled && <CurrencySettings />}
-      <LanguageSettings />
     </SettingsSections>
   );
 }

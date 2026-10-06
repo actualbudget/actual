@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgCog,
-  SvgColorPalette,
   SvgLibrary,
   SvgPylon,
   SvgTag,
@@ -46,11 +45,6 @@ export function SettingsNav() {
         title={t('General')}
         Icon={SvgCog}
         to="/settings/general"
-      />
-      <SettingsNavLink
-        title={t('Appearance')}
-        Icon={SvgColorPalette}
-        to="/settings/appearance"
       />
       <SettingsNavLink
         title={t('Payees')}
