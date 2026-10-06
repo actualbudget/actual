@@ -1,7 +1,9 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -10,7 +12,7 @@ import type { ReactNode, RefObject } from 'react';
 
 import { css } from '@emotion/css';
 
-import { useSyncedPref } from './useSyncedPref';
+import { useLocalPref } from './useLocalPref';
 
 // The default floor a column can never shrink below, in px. Individual
 // columns can override this with the provider's `minWidths` map.
@@ -37,23 +39,30 @@ const resizeHandleStyles = css`
   }
 `;
 
-function parseWidthsPref(
-  pref: string | undefined,
-): Record<string, number> | undefined {
-  if (pref == null || pref === '') return undefined;
-  try {
-    const parsed: unknown = JSON.parse(pref);
-    if (
-      typeof parsed !== 'object' ||
-      parsed === null ||
-      Array.isArray(parsed)
-    ) {
-      return undefined;
-    }
-    return parsed as Record<string, number>;
-  } catch {
+/**
+ * The saved column widths for a table. Widths are a local pref rather than a
+ * synced one: they are pixel values that only make sense for the screen they
+ * were set on, so each device keeps its own.
+ */
+export function useColumnWidthsPref(tableId: string) {
+  return useLocalPref(`column-widths-${tableId}`);
+}
+
+// Keep only finite numbers. Names are not checked against the table's
+// columns: the column set differs between views (the account column only
+// exists in the all-accounts view), and a width saved in one view must
+// survive a visit to another.
+function parseSavedWidths(value: unknown): Record<string, number> | undefined {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     return undefined;
   }
+  const widths: Record<string, number> = {};
+  for (const [name, width] of Object.entries(value)) {
+    if (typeof width === 'number' && Number.isFinite(width)) {
+      widths[name] = width;
+    }
+  }
+  return widths;
 }
 
 function buildWidths(
@@ -64,13 +73,8 @@ function buildWidths(
   const initial: Record<string, number | 'flex'> = { ...defaultWidths };
   if (savedWidths) {
     for (const [name, width] of Object.entries(savedWidths)) {
-      // Ignore unknown columns and values that render invalid CSS
-      // (NaN, Infinity, strings, and more) and enforce the column's floor
-      if (
-        name in defaultWidths &&
-        typeof width === 'number' &&
-        Number.isFinite(width)
-      ) {
+      // Ignore columns this table does not render and enforce the floor
+      if (name in defaultWidths) {
         initial[name] = Math.max(minWidths?.[name] ?? MIN_COLUMN_WIDTH, width);
       }
     }
@@ -163,6 +167,7 @@ export function useColumnWidthsContext() {
 
 type ColumnWidthsProviderProps = {
   tableId: string;
+  /** Every resizable column, by name. Other columns keep their own width. */
   defaultWidths: Record<string, number | 'flex'>;
   /** Per-column shrink floors, in px. Falls back to MIN_COLUMN_WIDTH. */
   minWidths?: Record<string, number>;
@@ -175,17 +180,11 @@ export function ColumnWidthsProvider({
   minWidths,
   children,
 }: ColumnWidthsProviderProps) {
-  // Synced prefs are strings, and the widths map is JSON-encoded. Parsing
-  // is memoized because the rehydrate effect below depends on its
+  // Parsing is memoized because the rehydrate effect below depends on its
   // identity — a fresh object every render re-runs the effect, and
   // setWidths, on every render.
-  const [savedWidthsPref, setSavedWidthsPref] = useSyncedPref(
-    `column-widths-${tableId}`,
-  );
-  const savedWidths = useMemo(
-    () => parseWidthsPref(savedWidthsPref),
-    [savedWidthsPref],
-  );
+  const [savedPref, setSavedPref] = useColumnWidthsPref(tableId);
+  const savedWidths = useMemo(() => parseSavedWidths(savedPref), [savedPref]);
 
   const [widths, setWidths] = useState<Record<string, number | 'flex'>>(() =>
     buildWidths(defaultWidths, savedWidths, minWidths),
@@ -195,21 +194,58 @@ export function ColumnWidthsProvider({
   // variables directly without a React update per pointermove.
   const [isResizing, setIsResizing] = useState(false);
 
-  // The widths re-hydrate when the pref changes, for example when the
-  // user switches budgets or resizes a column from another device.
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<DragState | null>(null);
+  // Set when the widths should have re-hydrated during a drag.
+  const rehydratePendingRef = useRef(false);
+
+  // The handlers below are stable, so the context value only changes when
+  // the widths do and every Cell is not re-rendered with the table. They
+  // read the current props and state through this ref instead.
+  const latestRef = useRef({
+    defaultWidths,
+    minWidths,
+    savedWidths,
+    setSavedPref,
+    widths,
+  });
+  useLayoutEffect(() => {
+    latestRef.current = {
+      defaultWidths,
+      minWidths,
+      savedWidths,
+      setSavedPref,
+      widths,
+    };
+  });
+
+  // The widths re-hydrate when the defaults or the saved widths change, for
+  // example when the user switches budgets or new transactions change the
+  // measured amount widths. A drag pins the columns' CSS variables itself, so
+  // re-hydrating under it would snap the columns back; it waits for the drag
+  // to end instead.
   useEffect(() => {
+    if (dragRef.current) {
+      rehydratePendingRef.current = true;
+      return;
+    }
     setWidths(buildWidths(defaultWidths, savedWidths, minWidths));
   }, [defaultWidths, savedWidths, minWidths]);
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const dragRef = useRef<DragState | null>(null);
+  const rehydrate = useCallback(() => {
+    const { defaultWidths, savedWidths, minWidths } = latestRef.current;
+    setWidths(buildWidths(defaultWidths, savedWidths, minWidths));
+  }, []);
 
-  const setContainerRef = (el: HTMLDivElement | null) => {
+  const setContainerRef = useCallback((el: HTMLDivElement | null) => {
     containerRef.current = el;
-  };
+  }, []);
 
-  const getMinWidth = (name: string): number =>
-    minWidths?.[name] ?? MIN_COLUMN_WIDTH;
+  const getMinWidth = useCallback(
+    (name: string): number =>
+      latestRef.current.minWidths?.[name] ?? MIN_COLUMN_WIDTH,
+    [],
+  );
 
   // The width to start a resize from is the live CSS variable, or the
   // rendered width, or the fallback. The CSS variable wins when a drag is
@@ -217,7 +253,7 @@ export function ColumnWidthsProvider({
   // variable, so their real rendered width is measured from the DOM
   // rather than assuming a constant (which would make the column jump as
   // soon as it is grabbed).
-  const getColumnWidth = (name: string): number => {
+  const getColumnWidth = useCallback((name: string): number => {
     const el = containerRef.current;
     if (el) {
       const val = el.style.getPropertyValue(`--col-${name}-width`);
@@ -227,106 +263,123 @@ export function ColumnWidthsProvider({
       const measured = column?.getBoundingClientRect().width;
       if (measured != null && measured > 0) return measured;
     }
-    const w = widths[name];
+    const w = latestRef.current.widths[name];
     return typeof w === 'number' ? w : FALLBACK_COLUMN_WIDTH;
-  };
+  }, []);
 
-  // The columns in visual order. Read from the DOM so it matches whatever
-  // column set/order the table is currently rendering.
-  const getColumnOrder = (): string[] => {
+  // The resizable columns in visual order. Read from the DOM so it matches
+  // whatever column set/order the table is currently rendering. Columns the
+  // provider has no width for (the selection checkbox, the cleared column)
+  // are skipped: they keep their own fixed width, and a drag must neither
+  // take width from them nor turn them into flex columns when it ends.
+  const getColumnOrder = useCallback((): string[] => {
     const el = containerRef.current;
+    const { defaultWidths } = latestRef.current;
     const order: string[] = [];
     if (el) {
       const seen = new Set<string>();
       el.querySelectorAll<HTMLElement>('[data-column]').forEach(node => {
         const name = node.getAttribute('data-column');
-        if (name && !seen.has(name)) {
+        if (name && name in defaultWidths && !seen.has(name)) {
           seen.add(name);
           order.push(name);
         }
       });
     }
     return order;
-  };
+  }, []);
+
+  const persist = useCallback((next: Record<string, number>) => {
+    // Recorded straight away so a second write before the next render
+    // (e.g. a held-down arrow key) merges with this one, not a stale copy
+    latestRef.current.savedWidths = next;
+    latestRef.current.setSavedPref(next);
+  }, []);
 
   // The single write path for fixed pixel widths. Takes multiple columns
   // so a coupled resize updates them together.
-  const applyWidths = (entries: Array<[string, number]>, persist: boolean) => {
-    const el = containerRef.current;
-    const stateUpdate: Record<string, number> = {};
-    for (const [name, width] of entries) {
-      const clamped = Math.max(getMinWidth(name), width);
-      el?.style.setProperty(`--col-${name}-width`, `${clamped}px`);
-      stateUpdate[name] = clamped;
-    }
-    setWidths(prev => ({ ...prev, ...stateUpdate }));
-    if (persist) {
-      setSavedWidthsPref(
-        JSON.stringify({ ...(savedWidths || {}), ...stateUpdate }),
-      );
-    }
-  };
-
-  const applyWidth = (columnName: string, width: number, persist: boolean) => {
-    applyWidths([[columnName, width]], persist);
-  };
+  const applyWidths = useCallback(
+    (entries: Array<[string, number]>, shouldPersist: boolean) => {
+      const el = containerRef.current;
+      const stateUpdate: Record<string, number> = {};
+      for (const [name, width] of entries) {
+        const clamped = Math.max(getMinWidth(name), width);
+        el?.style.setProperty(`--col-${name}-width`, `${clamped}px`);
+        stateUpdate[name] = clamped;
+      }
+      setWidths(prev => ({ ...prev, ...stateUpdate }));
+      if (shouldPersist) {
+        persist({ ...latestRef.current.savedWidths, ...stateUpdate });
+      }
+    },
+    [getMinWidth, persist],
+  );
 
   // Restore / set each column to an explicit state, including back to
   // `flex`. Used at the end of a drag so columns that were only pinned for
   // the duration go back to sharing the leftover width.
-  const applyStates = (entries: Array<[string, number | 'flex']>) => {
-    const el = containerRef.current;
-    const stateUpdate: Record<string, number | 'flex'> = {};
-    for (const [name, value] of entries) {
-      if (value === 'flex') {
-        el?.style.removeProperty(`--col-${name}-width`);
-        stateUpdate[name] = 'flex';
-      } else {
-        const clamped = Math.max(getMinWidth(name), value);
-        el?.style.setProperty(`--col-${name}-width`, `${clamped}px`);
-        stateUpdate[name] = clamped;
+  const applyStates = useCallback(
+    (entries: Array<[string, number | 'flex']>) => {
+      const el = containerRef.current;
+      const stateUpdate: Record<string, number | 'flex'> = {};
+      for (const [name, value] of entries) {
+        if (value === 'flex') {
+          el?.style.removeProperty(`--col-${name}-width`);
+          stateUpdate[name] = 'flex';
+        } else {
+          const clamped = Math.max(getMinWidth(name), value);
+          el?.style.setProperty(`--col-${name}-width`, `${clamped}px`);
+          stateUpdate[name] = clamped;
+        }
       }
-    }
-    setWidths(prev => ({ ...prev, ...stateUpdate }));
-  };
+      setWidths(prev => ({ ...prev, ...stateUpdate }));
+    },
+    [getMinWidth],
+  );
 
-  const setColumnWidth = (columnName: string, width: number) => {
-    applyWidth(columnName, width, true);
-  };
+  const setColumnWidth = useCallback(
+    (columnName: string, width: number) => {
+      applyWidths([[columnName, width]], true);
+    },
+    [applyWidths],
+  );
 
-  const onResizeStart = (columnName: string, startX: number) => {
-    const order = getColumnOrder();
-    const index = order.indexOf(columnName);
-    const startWidths: Record<string, number> = {};
-    const floors: Record<string, number> = {};
-    const previous: Record<string, number | 'flex'> = {};
-    for (const name of order) {
-      startWidths[name] = getColumnWidth(name);
-      floors[name] = getMinWidth(name);
-      previous[name] = widths[name];
-    }
-    dragRef.current = {
-      order,
-      index,
-      startX,
-      startWidths,
-      floors,
-      previous,
-      current: { ...startWidths },
-      moved: false,
-    };
-    if (index === -1) return;
+  const onResizeStart = useCallback(
+    (columnName: string, startX: number) => {
+      const order = getColumnOrder();
+      const index = order.indexOf(columnName);
+      const startWidths: Record<string, number> = {};
+      const floors: Record<string, number> = {};
+      const previous: Record<string, number | 'flex'> = {};
+      for (const name of order) {
+        startWidths[name] = getColumnWidth(name);
+        floors[name] = getMinWidth(name);
+        previous[name] = latestRef.current.widths[name];
+      }
+      dragRef.current = {
+        order,
+        index,
+        startX,
+        startWidths,
+        floors,
+        previous,
+        current: { ...startWidths },
+        moved: false,
+      };
+      if (index === -1) return;
 
-    // Pin every column at its current width for the duration of the drag.
-    // Nothing visibly moves until the pointer actually moves.
-    setIsResizing(true);
-    const el = containerRef.current;
-    for (const name of order) {
-      el?.style.setProperty(`--col-${name}-width`, `${startWidths[name]}px`);
-    }
-  };
+      // Pin every column at its current width for the duration of the drag.
+      // Nothing visibly moves until the pointer actually moves.
+      setIsResizing(true);
+      const el = containerRef.current;
+      for (const name of order) {
+        el?.style.setProperty(`--col-${name}-width`, `${startWidths[name]}px`);
+      }
+    },
+    [getColumnOrder, getColumnWidth, getMinWidth],
+  );
 
-  const onResize = (_columnName: string, currentX: number) => {
+  const onResize = useCallback((_columnName: string, currentX: number) => {
     const drag = dragRef.current;
     if (!drag || drag.index === -1) return;
     if (currentX !== drag.startX) {
@@ -345,94 +398,134 @@ export function ColumnWidthsProvider({
       drag.current[name] = width;
       el?.style.setProperty(`--col-${name}-width`, `${width}px`);
     }
-  };
+  }, []);
 
-  const onResizeEnd = () => {
+  const onResizeEnd = useCallback(() => {
     const drag = dragRef.current;
     if (!drag) return;
     dragRef.current = null;
     setIsResizing(false);
-    if (drag.index === -1) return;
+    const rehydratePending = rehydratePendingRef.current;
+    rehydratePendingRef.current = false;
 
     const changed: Array<[string, number]> = [];
     const restore: Array<[string, number | 'flex']> = [];
-    for (const name of drag.order) {
-      if (drag.current[name] !== drag.startWidths[name]) {
-        changed.push([name, drag.current[name]]);
-      } else {
-        restore.push([name, drag.previous[name] ?? 'flex']);
+    if (drag.index !== -1) {
+      for (const name of drag.order) {
+        if (drag.current[name] !== drag.startWidths[name]) {
+          changed.push([name, drag.current[name]]);
+        } else {
+          restore.push([name, drag.previous[name] ?? 'flex']);
+        }
       }
     }
     // A click without movement leaves `changed` empty, so nothing is
     // resized or persisted.
     if (restore.length > 0) applyStates(restore);
-    if (changed.length > 0) applyWidths(changed, true);
-  };
-
-  const resizeColumnBy = (columnName: string, delta: number) => {
-    const order = getColumnOrder();
-    const index = order.indexOf(columnName);
-    if (index === -1) return;
-    const startWidths: Record<string, number> = {};
-    const floors: Record<string, number> = {};
-    for (const name of order) {
-      startWidths[name] = getColumnWidth(name);
-      floors[name] = getMinWidth(name);
+    if (changed.length > 0) {
+      // Persisting changes the saved widths, which re-hydrates anyway
+      applyWidths(changed, true);
+    } else if (rehydratePending) {
+      rehydrate();
     }
-    const targets = distributeResize(order, index, startWidths, floors, delta);
-    const entries = order
-      .filter(
-        name => targets[name] != null && targets[name] !== startWidths[name],
-      )
-      .map(name => [name, targets[name]] as [string, number]);
-    if (entries.length > 0) applyWidths(entries, true);
-  };
+  }, [applyStates, applyWidths, rehydrate]);
 
-  const onResetWidth = (columnName: string) => {
-    const defaultVal = defaultWidths[columnName];
-    // Deleting the override (rather than storing the default) lets future
-    // changes to the default widths apply to columns that were never
-    // explicitly resized
-    const updated = { ...(savedWidths || {}) };
-    delete updated[columnName];
-    setSavedWidthsPref(JSON.stringify(updated));
+  const resizeColumnBy = useCallback(
+    (columnName: string, delta: number) => {
+      const order = getColumnOrder();
+      const index = order.indexOf(columnName);
+      if (index === -1) return;
+      const startWidths: Record<string, number> = {};
+      const floors: Record<string, number> = {};
+      for (const name of order) {
+        startWidths[name] = getColumnWidth(name);
+        floors[name] = getMinWidth(name);
+      }
+      const targets = distributeResize(
+        order,
+        index,
+        startWidths,
+        floors,
+        delta,
+      );
+      const entries = order
+        .filter(
+          name => targets[name] != null && targets[name] !== startWidths[name],
+        )
+        .map(name => [name, targets[name]] as [string, number]);
+      if (entries.length > 0) applyWidths(entries, true);
+    },
+    [getColumnOrder, getColumnWidth, getMinWidth, applyWidths],
+  );
 
-    if (defaultVal === 'flex') {
-      containerRef.current?.style.removeProperty(`--col-${columnName}-width`);
-      setWidths(prev => ({ ...prev, [columnName]: 'flex' }));
-    } else if (typeof defaultVal === 'number') {
-      applyWidth(columnName, defaultVal, false);
-    }
-  };
+  const onResetWidth = useCallback(
+    (columnName: string) => {
+      const defaultVal = latestRef.current.defaultWidths[columnName];
+      // Deleting the override (rather than storing the default) lets future
+      // changes to the default widths apply to columns that were never
+      // explicitly resized
+      const updated = { ...latestRef.current.savedWidths };
+      delete updated[columnName];
+      persist(updated);
 
-  const value = {
-    widths,
-    isResizing,
-    containerRef,
-    setContainerRef,
-    getColumnWidth,
-    getMinWidth,
-    setColumnWidth,
-    resizeColumnBy,
-    onResizeStart,
-    onResize,
-    onResizeEnd,
-    onResetWidth,
-  };
+      if (defaultVal === 'flex') {
+        containerRef.current?.style.removeProperty(`--col-${columnName}-width`);
+        setWidths(prev => ({ ...prev, [columnName]: 'flex' }));
+      } else if (typeof defaultVal === 'number') {
+        applyWidths([[columnName, defaultVal]], false);
+      }
+    },
+    [persist, applyWidths],
+  );
+
+  const value = useMemo(
+    () => ({
+      widths,
+      isResizing,
+      containerRef,
+      setContainerRef,
+      getColumnWidth,
+      getMinWidth,
+      setColumnWidth,
+      resizeColumnBy,
+      onResizeStart,
+      onResize,
+      onResizeEnd,
+      onResetWidth,
+    }),
+    [
+      widths,
+      isResizing,
+      setContainerRef,
+      getColumnWidth,
+      getMinWidth,
+      setColumnWidth,
+      resizeColumnBy,
+      onResizeStart,
+      onResize,
+      onResizeEnd,
+      onResetWidth,
+    ],
+  );
+
+  const containerStyle = useMemo(
+    () => ({
+      display: 'contents',
+      ...Object.fromEntries(
+        Object.entries(widths)
+          .filter(([, w]) => typeof w === 'number')
+          .map(([name, w]) => [`--col-${name}-width`, `${w}px`]),
+      ),
+    }),
+    [widths],
+  );
 
   return (
     <ColumnWidthsContext.Provider value={value}>
       <div
         ref={setContainerRef}
         className={resizeHandleStyles}
-        style={{
-          display: 'contents',
-          ...Object.fromEntries(
-            Object.entries(widths)
-              .filter(([, w]) => typeof w === 'number')
-              .map(([name, w]) => [`--col-${name}-width`, `${w}px`]),
-          ),
-        }}
+        style={containerStyle}
       >
         {children}
       </div>

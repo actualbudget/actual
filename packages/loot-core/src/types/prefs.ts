@@ -41,7 +41,6 @@ export type SyncedPrefs = Partial<
     | `hide-reconciled-${string}`
     | 'transaction-table-columns'
     | `transaction-table-columns-${string}`
-    | `column-widths-${string}`
     | `show-group-${string}`
     | 'sync-transfer-date'
     // TODO: pull from src/components/modals/ImportTransactions.js
@@ -109,6 +108,8 @@ export type LocalPrefs = Partial<{
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
   'mobile.bankSyncProvidersCollapsed': boolean;
+  // Pixel widths only fit the screen they were set on, so they are not synced
+  [key: `column-widths-${string}`]: Record<string, number>;
 }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;
