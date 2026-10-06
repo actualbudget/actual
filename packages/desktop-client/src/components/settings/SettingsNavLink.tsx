@@ -31,8 +31,8 @@ export function SettingsNavLink({ title, Icon, to }: SettingsNavLinkProps) {
           minHeight: styles.mobileMinHeight,
           paddingInline: spacing.lg,
           textDecoration: 'none',
-          color: theme.pageText,
-          '& + &': { borderTop: `1px solid ${theme.pillBorderDark}` },
+          color: theme.settingsNavItemText,
+          '& + &': { borderTop: `1px solid ${theme.settingsNavBorder}` },
         })}
       >
         <Icon width={16} height={16} style={{ flexShrink: 0 }} />
@@ -59,14 +59,16 @@ export function SettingsNavLink({ title, Icon, to }: SettingsNavLinkProps) {
           borderRadius: radius.sm,
           textDecoration: 'none',
           fontWeight: isActive ? 600 : 500,
-          color: isActive ? theme.pillTextSelected : theme.pageText,
+          color: isActive
+            ? theme.settingsNavItemTextSelected
+            : theme.settingsNavItemText,
           backgroundColor: isActive
-            ? theme.pillBackgroundSelected
+            ? theme.settingsNavItemBackgroundSelected
             : 'transparent',
           ':hover': {
             backgroundColor: isActive
-              ? theme.pillBackgroundSelected
-              : theme.tableRowBackgroundHover,
+              ? theme.settingsNavItemBackgroundSelected
+              : theme.settingsNavItemBackgroundHover,
           },
         })
       }
