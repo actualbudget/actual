@@ -15,7 +15,9 @@ import { Link } from '#components/common/Link';
 import { authorizeBank as authorizeEnableBanking } from '#enablebanking';
 import { authorizeBank as authorizeGoCardless } from '#gocardless';
 import { useAccounts } from '#hooks/useAccounts';
+import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useFailedAccounts } from '#hooks/useFailedAccounts';
+import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
 function useErrorMessage() {
@@ -46,6 +48,11 @@ function useErrorMessage() {
 
       case 'RATE_LIMIT_EXCEEDED':
         return t('Rate limit exceeded for this item. Please try again later.');
+
+      case 'GOCARDLESS_NOT_CONFIGURED':
+        return t(
+          'Your GoCardless credentials are missing. Please re-enter them to restore bank sync.',
+        );
 
       case 'TIMED_OUT':
         return t('The request timed out. Please try again later.');
@@ -94,6 +101,7 @@ function useErrorMessage() {
 export function AccountSyncCheck() {
   const { data: accounts = [] } = useAccounts();
   const failedAccounts = useFailedAccounts();
+  const { isAdmin } = useCurrentAccess();
   const dispatch = useDispatch();
   const { id } = useParams();
   const [open, setOpen] = useState(false);
@@ -127,6 +135,22 @@ export function AccountSyncCheck() {
     [unlinkAccount],
   );
 
+  const onConfigureGoCardless = useCallback(() => {
+    setOpen(false);
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'gocardless-init',
+          options: {
+            onSuccess: () => {
+              // credentials updated
+            },
+          },
+        },
+      }),
+    );
+  }, [dispatch]);
+
   if (!id) {
     return null;
   }
@@ -144,6 +168,7 @@ export function AccountSyncCheck() {
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
     (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
+  const isGoCardlessNotConfigured = type === 'GOCARDLESS_NOT_CONFIGURED';
 
   return (
     <View>
@@ -196,6 +221,20 @@ export function AccountSyncCheck() {
                 style={{ marginLeft: 5 }}
               >
                 <Trans>Reauthorize</Trans>
+              </Button>
+            </>
+          ) : isGoCardlessNotConfigured && isAdmin ? (
+            <>
+              <Button onPress={() => unlink(account)}>
+                <Trans>Unlink</Trans>
+              </Button>
+              <Button
+                variant="primary"
+                autoFocus
+                onPress={onConfigureGoCardless}
+                style={{ marginLeft: 5 }}
+              >
+                <Trans>Configure</Trans>
               </Button>
             </>
           ) : (

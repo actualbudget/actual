@@ -329,7 +329,8 @@ export type Modal =
   | {
       name: 'payee-autocomplete';
       options: {
-        onSelect: (payeeId: string) => void;
+        onSelect: (payeeId: string | null) => void;
+        showNoneOption?: boolean;
         onClose?: () => void;
       };
     }
