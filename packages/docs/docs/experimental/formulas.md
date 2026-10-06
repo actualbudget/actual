@@ -347,7 +347,7 @@ Rule formulas evaluate with named variables from the transaction context, includ
 - `reconciled` — Whether transaction is reconciled (`TRUE` or `FALSE`)
 
 :::caution
-Rule formulas used to work in cents, so they had to divide by 100. Formulas you saved back then are not updated for you, and they now produce a result 100 times too small. Open each one and remove the `/ 100`: a formula that read `=amount / 100 * 1.05` becomes `=amount * 1.05`. The same goes for uses of the `INTEGER_TO_AMOUNT` and `AMOUNT_TO_INTEGER` functions, your formula ouputs may be off by a factor of 100 for each use. Evaluate your personal formulas as likely you no longer need to use these functions.
+Rule formulas used to work in cents, so they had to divide by 100. Formulas you saved back then are not updated for you, and they now produce a result 100 times too small. Open each one and remove the `/ 100`: a formula that read `=amount / 100 * 1.05` becomes `=amount * 1.05`. The same goes for uses of the `INTEGER_TO_AMOUNT` and `AMOUNT_TO_INTEGER` functions, your formula outputs may be off by a factor of 100 for each use. Evaluate your personal formulas as likely you no longer need to use these functions.
 :::
 
 ### Available functions
