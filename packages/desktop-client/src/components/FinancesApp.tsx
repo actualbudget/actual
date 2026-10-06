@@ -41,6 +41,7 @@ import { NarrowAlternate, WideComponent } from './responsive';
 import { useMultiuserEnabled } from './ServerContext';
 import {
   AdvancedSettings,
+  AppearanceSettings,
   ExperimentalSettings,
   GeneralSettings,
   Settings,
@@ -350,6 +351,10 @@ export function FinancesApp() {
                     <Route path="/settings" element={<Settings />}>
                       <Route index element={<SettingsIndex />} />
                       <Route path="general" element={<GeneralSettings />} />
+                      <Route
+                        path="appearance"
+                        element={<AppearanceSettings />}
+                      />
                       <Route
                         path="payees"
                         element={
