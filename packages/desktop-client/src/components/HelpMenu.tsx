@@ -36,7 +36,6 @@ const getPageDocs = (page: string) => {
       return 'https://actualbudget.org/docs/experimental';
     case '/settings':
     case '/settings/general':
-    case '/settings/appearance':
     case '/settings/advanced':
       return 'https://actualbudget.org/docs/settings';
     case '/notifications':
