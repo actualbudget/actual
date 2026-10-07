@@ -104,6 +104,12 @@ test.describe('Budget', () => {
     await page
       .getByRole('button', { name: 'Include future assignments', exact: true })
       .click();
+    await expect(
+      page.getByRole('button', {
+        name: 'Use default monthly calculation',
+        exact: true,
+      }),
+    ).toBeVisible();
     budgetPage = await navigation.goToBudgetPage();
 
     await expect(summary.getByText('For next month')).toHaveCount(0);
@@ -146,6 +152,12 @@ test.describe('Budget', () => {
         exact: true,
       })
       .click();
+    await expect(
+      page.getByRole('button', {
+        name: 'Include future assignments',
+        exact: true,
+      }),
+    ).toBeVisible();
     await navigation.goToBudgetPage();
     await expect(summary.getByText('For next month')).toBeVisible();
     await expect(summary.getByText('Budgeted in future months')).toHaveCount(0);
