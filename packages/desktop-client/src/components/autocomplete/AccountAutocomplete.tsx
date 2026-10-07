@@ -36,6 +36,7 @@ type AccountListProps = {
   renderAccountItem?: (
     props: ComponentPropsWithoutRef<typeof AccountItem>,
   ) => ReactElement<typeof AccountItem>;
+  otherCurrencyAccounts?: AccountEntity['id'][];
 };
 
 function AccountList({
@@ -45,11 +46,12 @@ function AccountList({
   embedded,
   renderAccountItemGroupHeader = defaultRenderAccountItemGroupHeader,
   renderAccountItem = defaultRenderAccountItem,
+  otherCurrencyAccounts,
 }: AccountListProps) {
   const { t } = useTranslation();
   // Split by onbudget, offbudget, closed and add their indeces relative
   // to the full list. This is needed to highlight the correct item.
-  const { onBudgetAccounts, offBudgetAccounts, closedAccounts } =
+  const { onBudgetAccounts, offBudgetAccounts, otherAccounts, closedAccounts } =
     useMemo(() => {
       return items.reduce(
         (acc, item, index) => {
@@ -58,6 +60,8 @@ function AccountList({
               ...item,
               highlightedIndex: index,
             });
+          } else if (otherCurrencyAccounts?.includes(item.id)) {
+            acc.otherAccounts.push({ ...item, highlightedIndex: index });
           } else if (item.offbudget) {
             acc.offBudgetAccounts.push({
               ...item,
@@ -78,12 +82,15 @@ function AccountList({
           offBudgetAccounts: [] as (AccountAutocompleteItem & {
             highlightedIndex: number;
           })[],
+          otherAccounts: [] as (AccountAutocompleteItem & {
+            highlightedIndex: number;
+          })[],
           closedAccounts: [] as (AccountAutocompleteItem & {
             highlightedIndex: number;
           })[],
         },
       );
-    }, [items]);
+    }, [items, otherCurrencyAccounts]);
 
   return (
     <View>
@@ -126,6 +133,22 @@ function AccountList({
           </Fragment>
         ))}
 
+        {otherAccounts.length > 0 && (
+          <Fragment key="Other currencies">
+            {renderAccountItemGroupHeader({ title: t('Other currencies') })}
+          </Fragment>
+        )}
+        {otherAccounts.map(item => (
+          <Fragment key={item.id}>
+            {renderAccountItem({
+              ...(getItemProps ? getItemProps({ item }) : {}),
+              item,
+              highlighted: highlightedIndex === item.highlightedIndex,
+              embedded,
+            })}
+          </Fragment>
+        ))}
+
         {closedAccounts.length > 0 && (
           <Fragment key="Closed accounts">
             {renderAccountItemGroupHeader({ title: t('Closed accounts') })}
@@ -152,6 +175,11 @@ type AccountAutocompleteProps = ComponentProps<
   embedded?: boolean;
   includeClosedAccounts?: boolean;
   hiddenAccounts?: AccountEntity['id'][];
+  /**
+   * Accounts in another currency, listed last under their own heading
+   * (picking one moves the transaction through its move dialog).
+   */
+  otherCurrencyAccounts?: AccountEntity['id'][];
   renderAccountItemGroupHeader?: (
     props: ComponentPropsWithoutRef<typeof ItemHeader>,
   ) => ReactElement<typeof ItemHeader>;
@@ -168,6 +196,7 @@ export function AccountAutocomplete({
   renderAccountItem,
   closeOnBlur,
   hiddenAccounts,
+  otherCurrencyAccounts,
   inputProps,
   ...props
 }: AccountAutocompleteProps) {
@@ -187,6 +216,8 @@ export function AccountAutocomplete({
     .sort(
       (a, b) =>
         a.closed - b.closed ||
+        Number(!!otherCurrencyAccounts?.includes(a.id)) -
+          Number(!!otherCurrencyAccounts?.includes(b.id)) ||
         a.offbudget - b.offbudget ||
         a.sort_order - b.sort_order,
     );
@@ -210,6 +241,7 @@ export function AccountAutocomplete({
           embedded={embedded}
           renderAccountItemGroupHeader={renderAccountItemGroupHeader}
           renderAccountItem={renderAccountItem}
+          otherCurrencyAccounts={otherCurrencyAccounts}
         />
       )}
       {...props}

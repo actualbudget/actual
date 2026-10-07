@@ -24,6 +24,7 @@ export function AccountAutocompleteModal({
   onSelect,
   includeClosedAccounts,
   hiddenAccounts,
+  otherCurrencyAccounts,
   onClose,
 }: AccountAutocompleteModalProps) {
   const { t } = useTranslation();
@@ -85,6 +86,7 @@ export function AccountAutocompleteModal({
                 onSelect={onSelect}
                 includeClosedAccounts={includeClosedAccounts}
                 hiddenAccounts={hiddenAccounts}
+                otherCurrencyAccounts={otherCurrencyAccounts}
                 value={null}
               />
             </View>

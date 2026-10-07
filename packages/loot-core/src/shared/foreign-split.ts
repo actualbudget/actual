@@ -1,3 +1,5 @@
+import { nativeToBaseFraction } from './exchange-rate';
+
 /**
  * Integer shares of a total from exact fractions `numerator / denominator`
  * that sum to it: each share is floored, and the remainder goes one unit at
@@ -60,4 +62,54 @@ export function allocateProportionally(
     })),
     sum,
   );
+}
+
+/**
+ * The base amounts of a foreign split's children: shares of the parent's
+ * base in proportion to their native amounts, or, for a zero native total,
+ * each child's value at `zeroTotal.rate` with any confirmed parent base
+ * shared by size (equally when every child is zero). Remainders follow the
+ * shared rounding contract, so the save and its preview agree exactly.
+ */
+export function foreignSplitBases(
+  parentBase: number,
+  children: ReadonlyArray<{ id: string; native: number }>,
+  zeroTotal?: { rate: string; nativePrecision: number; basePrecision: number },
+): Array<{ id: string; amount: number }> {
+  const total = children.reduce((sum, child) => sum + BigInt(child.native), 0n);
+  if (total !== 0n) {
+    return allocateProportionally(
+      parentBase,
+      children.map(child => ({ id: child.id, weight: child.native })),
+    );
+  }
+  if (!zeroTotal) throw new Error('rate-unavailable');
+  const fractions = children.map(child => ({
+    id: child.id,
+    ...nativeToBaseFraction(
+      child.native,
+      zeroTotal.nativePrecision,
+      zeroTotal.basePrecision,
+      zeroTotal.rate,
+    ),
+  }));
+  const atRate = allocateByFraction(
+    0,
+    fractions.map(part => ({ id: part.id, numerator: part.numerator })),
+    fractions[0].denominator,
+  );
+  const sizes = children.map(child => Math.abs(child.native));
+  const allZero = sizes.every(size => size === 0);
+  const residual = allocateProportionally(
+    parentBase,
+    children.map((child, index) => ({
+      id: child.id,
+      weight: allZero ? 1 : sizes[index],
+    })),
+  );
+  return atRate.map((part, index) => {
+    const amount = part.amount + residual[index].amount;
+    if (!Number.isSafeInteger(amount)) throw new Error('amount-out-of-range');
+    return { id: part.id, amount };
+  });
 }

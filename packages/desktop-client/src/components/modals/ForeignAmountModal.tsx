@@ -19,6 +19,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '#components/common/Modal';
+import { BudgetNotice } from '#components/transactions/BudgetNotice';
 import {
   RateField,
   rateInDirection,
@@ -27,6 +28,7 @@ import {
 import type { RateDirection } from '#components/transactions/RateField';
 import { CurrencyFormatProvider } from '#hooks/currencyFormatContext';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
+import { useEditEffects } from '#hooks/useEditEffects';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { removeModal } from '#modals/modalsSlice';
@@ -37,6 +39,7 @@ import {
   foreignEditErrorMessage,
   staleEditMessage,
 } from '#util/foreign-edit';
+import type { RowSnapshot } from '#util/foreign-edit';
 
 type ForeignAmountModalProps = Extract<
   ModalType,
@@ -255,6 +258,60 @@ export function ForeignAmountModal({
 
   const shown = preview();
 
+  // The budget notice for an edit, from the amounts shown.
+  const shownBase =
+    shown.kind === 'base' || shown.kind === 'rate' || shown.kind === 'default'
+      ? shown.baseAmount
+      : null;
+  const posting = (
+    row: RowSnapshot,
+    amount: number,
+    transferAccount: string | null,
+  ) => ({
+    account: row.account,
+    category: row.category,
+    date: row.date,
+    amount,
+    transferAccount,
+  });
+  const effects = useEditEffects(
+    !edit || shownBase == null
+      ? null
+      : edit.kind === 'entry'
+        ? [
+            {
+              before: posting(edit.expected, edit.expected.amount, null),
+              after: posting(edit.expected, shownBase, null),
+            },
+          ]
+        : [
+            {
+              before: posting(
+                edit.expected.leg,
+                edit.expected.leg.amount,
+                edit.expected.counterpart.account,
+              ),
+              after: posting(
+                edit.expected.leg,
+                shownBase,
+                edit.expected.counterpart.account,
+              ),
+            },
+            {
+              before: posting(
+                edit.expected.counterpart,
+                edit.expected.counterpart.amount,
+                edit.expected.leg.account,
+              ),
+              after: posting(
+                edit.expected.counterpart,
+                -shownBase,
+                edit.expected.leg.account,
+              ),
+            },
+          ],
+  );
+
   async function confirm() {
     if (shown.kind === 'kept') {
       dispatch(removeModal({ name: 'foreign-amount' }));
@@ -287,7 +344,17 @@ export function ForeignAmountModal({
       );
       return;
     }
-    if (edit && !(await confirmReconciledEdit(dispatch, edit.reconciled))) {
+    if (
+      edit &&
+      !(await confirmReconciledEdit(
+        dispatch,
+        edit.reconciled,
+        // Only the other account's leg reconciled: the linked-transfer text.
+        edit.kind === 'transfer' && !edit.expected.leg.reconciled
+          ? 'batchEditWithReconciledTransfer'
+          : 'editReconciled',
+      ))
+    ) {
       return;
     }
     setBusy(true);
@@ -515,6 +582,7 @@ export function ForeignAmountModal({
                   amount shown.
                 </Trans>
               </Text>
+              <BudgetNotice effects={effects} />
               {message && <FormError>{message}</FormError>}
             </View>
             <ModalButtons>
@@ -524,7 +592,12 @@ export function ForeignAmountModal({
               <Button
                 type="submit"
                 variant="primary"
-                isDisabled={busy || stale || shown.kind === 'loading'}
+                isDisabled={
+                  busy ||
+                  stale ||
+                  shown.kind === 'loading' ||
+                  effects.status === 'loading'
+                }
                 style={{ marginLeft: 10 }}
               >
                 <Trans>Save</Trans>

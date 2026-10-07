@@ -546,6 +546,54 @@ describe('reading an exchange family for editing', () => {
     });
   });
 
+  it('returns postings and makes a later category change stale', async () => {
+    const { sourceId, destinationId } = await exchange();
+    const family = await getFamily({ id: destinationId });
+    if (family.status !== 'ok') throw new Error('unavailable');
+    expect(family.postings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: sourceId,
+          account: 'usd',
+          amount: -10000,
+          isParent: false,
+          transferAccount: 'jpy',
+        }),
+      ]),
+    );
+    await db.updateTransaction({ id: destinationId, reconciled: true });
+    expect(
+      await editExchange({
+        id: destinationId,
+        expected: family.expected,
+        sourceAmount: 10000,
+        destinationAmount: 14000,
+      }),
+    ).toEqual({ status: 'stale' });
+  });
+
+  it('previews a fee being added without writing', async () => {
+    const { sourceId, destinationId } = await exchange();
+    const before = rows();
+    const preview = await editExchange({
+      id: destinationId,
+      expected: familyExpected(),
+      sourceAmount: 10000,
+      destinationAmount: 14700,
+      destinationFee: 300,
+      preview: true,
+    });
+    expect(rows()).toEqual(before);
+    if (preview.status !== 'preview') throw new Error('no preview');
+    expect(preview.postings).toHaveLength(4);
+    expect(preview.postings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: sourceId, transferAccount: 'jpy' }),
+        expect.objectContaining({ account: 'jpy', isParent: true }),
+      ]),
+    );
+  });
+
   it('reports broken families and other rows as unavailable', async () => {
     const { destinationId } = await exchange();
     db.runQuery('UPDATE transactions SET transferred_id = NULL WHERE id = ?', [
